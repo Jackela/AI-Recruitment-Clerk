@@ -1,0 +1,28 @@
+# 架构约束文档
+version: 1.0
+
+# 语言与框架
+language: "TypeScript_5.x+"
+backend_framework: "NestJS_11"
+frontend_framework: "Angular_18"
+project_manager: "Nx_Monorepo"
+
+# 架构模式
+architecture_pattern: "Event-Driven_Microservices"
+communication_bus: "NATS_JetStream"
+
+# 部署目标
+deployment_target: "Docker_Container"
+orchestration: "Kubernetes_via_Helm"
+
+# 禁止使用的模式
+forbidden_patterns:
+  - "Singleton"
+  - "Global_Variables"
+  - "Direct_cross-service_DB_calls"
+
+# 许可证约束
+allowed_licenses:
+  - "MIT"
+  - "Apache-2.0"
+  - "ISC"

@@ -1,0 +1,26 @@
+# 成功度量与关键绩效指标
+version: 1.0
+
+# 功能性指标
+accuracy_metrics:
+  - name: "resume_parsing_accuracy"
+    description: "对于标准简历，关键字段（姓名、公司、职位）的提取准确率"
+    threshold: ">= 0.95"
+  - name: "jd_skill_extraction_accuracy"
+    description: "对于标准JD，硬技能的提取准确率"
+    threshold: ">= 0.85"
+
+# 非功能性指标
+performance_metrics:
+  - name: "p95_api_latency_ms"
+    description: "API Gateway 主要端点的95百分位延迟"
+    target: "<= 500"
+  - name: "resume_processing_time_seconds"
+    description: "单份简历端到端的平均处理时间"
+    target: "<= 30"
+
+# 成本指标
+cost_metrics:
+  - name: "cost_per_1000_resumes_usd"
+    description: "处理每千份简历的预估云服务与API成本"
+    budget: "<= 10.0"

@@ -1,0 +1,16 @@
+%% 系统边界与上下文图
+graph TD
+    subgraph "AI Recruitment Clerk System (System Boundary)"
+        A[API Gateway]
+        B[NATS JetStream]
+        C[Microservices]
+    end
+
+    U[User via SPA] -- HTTPS/JSON --> A
+    A -- Events --> B
+    B -- Events --> C
+    C -- R/W --> DB[(MongoDB)]
+    C -- API Call --> LLM[External: Vision LLM API]
+
+    style U fill:#90CAF9
+    style LLM fill:#FFAB91
