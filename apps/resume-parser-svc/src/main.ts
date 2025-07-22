@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 /**
  * This is not a production server yet!
  * This is only a minimal backend to get started.
@@ -19,3 +20,20 @@ async function bootstrap() {
 }
 
 bootstrap();
+=======
+import { NestFactory } from '@nestjs/core';
+import { Logger } from '@nestjs/common';
+import { AppModule } from './app/app.module';
+
+async function bootstrap() {
+  const logger = new Logger('Bootstrap');
+  const app = await NestFactory.create(AppModule);
+
+  const port = process.env.PORT || 3002;
+  await app.listen(port);
+  
+  logger.log(`Resume Parser Service is running on: http://localhost:${port}`);
+}
+
+bootstrap();
+>>>>>>> Stashed changes

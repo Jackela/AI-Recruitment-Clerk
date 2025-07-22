@@ -1,0 +1,27 @@
+{
+  "name": "@ai-recruitment-clerk/shared-dtos",
+  "version": "1.0.0",
+  "description": "Shared DTOs and event interfaces for AI Recruitment Clerk microservices",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest"
+  },
+  "keywords": [
+    "dtos",
+    "events",
+    "typescript",
+    "microservices"
+  ],
+  "author": "AI Recruitment Clerk Team",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "~5.8.2"
+  },
+  "dependencies": {
+    "class-validator": "^0.14.2",
+    "class-transformer": "^0.5.1"
+  }
+}
