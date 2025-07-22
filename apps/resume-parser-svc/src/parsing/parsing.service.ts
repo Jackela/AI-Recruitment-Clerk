@@ -16,8 +16,43 @@ export class ParsingService {
   ) {}
 
   async handleResumeSubmitted(event: any): Promise<void> {
-    // TODO: Implement core event handling logic for job.resume.submitted
-    throw new Error('ParsingService.handleResumeSubmitted not implemented');
+    const { jobId, resumeId, originalFilename, tempGridFsUrl } = event || {};
+    if (!jobId || !resumeId || !originalFilename || !tempGridFsUrl) {
+      throw new Error('Invalid ResumeSubmittedEvent');
+    }
+
+    const start = Date.now();
+
+    try {
+      const pdfBuffer = await this.gridFsService.downloadFile(tempGridFsUrl);
+      const rawLlmOutput = await this.visionLlmService.parseResumePdf(
+        pdfBuffer,
+        originalFilename,
+      );
+      const resumeDto = await this.fieldMapperService.normalizeToResumeDto(
+        rawLlmOutput,
+      );
+
+      const payload = {
+        jobId,
+        resumeId,
+        resumeDto,
+        timestamp: new Date().toISOString(),
+        processingTimeMs: Date.now() - start,
+      };
+
+      await this.natsClient.publishAnalysisResumeParsed(payload);
+    } catch (error) {
+      await this.natsClient.publishJobResumeFailed({
+        jobId,
+        resumeId,
+        originalFilename,
+        error: (error as Error).message,
+        retryCount: 0,
+        timestamp: new Date().toISOString(),
+      });
+      throw error;
+    }
   }
 
   async processResumeFile(jobId: string, resumeId: string, gridFsUrl: string, filename: string): Promise<any> {

@@ -1,22 +1,14 @@
 import { Module } from '@nestjs/common';
-<<<<<<< Updated upstream
+import { AppService } from './app.service';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { JdEventsController } from './jd-events.controller';
-
-@Module({
-  imports: [],
-  controllers: [AppController, JdEventsController],
-  providers: [AppService],
-})
-export class AppModule {}
-=======
-import { AppService } from './app.service';
 import { ExtractionService } from '../extraction/extraction.service';
 import { LlmService } from '../llm/llm.service';
 import { NatsClient } from '../nats/nats.client';
 
 @Module({
+  imports: [],
+  controllers: [AppController, JdEventsController],
   providers: [
     AppService,
     ExtractionService,
@@ -30,4 +22,3 @@ import { NatsClient } from '../nats/nats.client';
   ],
 })
 export class AppModule {}
->>>>>>> Stashed changes

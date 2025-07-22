@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
-import { ResumeSubmittedEvent } from '../../../../specs/data_models';
+import { ResumeSubmittedEvent } from '../../../../libs/shared-dtos/src';
 
 @Controller()
 export class ResumeEventsController {
