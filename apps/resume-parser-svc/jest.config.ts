@@ -7,8 +7,4 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/apps/resume-parser-svc',
-<<<<<<< Updated upstream
 };
-=======
-};
->>>>>>> Stashed changes

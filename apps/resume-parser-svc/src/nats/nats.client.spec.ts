@@ -317,18 +317,6 @@ describe('NatsClient - Resume Events', () => {
           .rejects.toThrow('NatsClient.subscribe not implemented');
       });
 
-      it('should process resume submitted events through handler', async () => {
-        // Arrange
-        const subject = 'job.resume.submitted';
-        const mockHandler = jest.fn().mockResolvedValue(undefined);
-
-        // When implemented, handler should be called with received messages
-        expect(mockHandler).toBeInstanceOf(Function);
-
-        // Act & Assert
-        await expect(client.subscribe(subject, mockHandler))
-          .rejects.toThrow('NatsClient.subscribe not implemented');
-      });
 
       it('should handle resume event processing errors gracefully', async () => {
         // Arrange
