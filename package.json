@@ -1,0 +1,8 @@
+{
+  "name": "ai-recruitment-clerk",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "audit": "nx audit"
+  }
+}
