@@ -1,0 +1,12 @@
+{
+  "name": "ai-recruitment-clerk",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "nx": "^21.3.2",
+    "prettier": "^3.6.2"
+  }
+}

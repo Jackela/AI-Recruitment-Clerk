@@ -1,0 +1,6 @@
+{
+  "npmScope": "ai-recruitment-clerk",
+  "affected": {
+    "defaultBase": "main"
+  }
+}
