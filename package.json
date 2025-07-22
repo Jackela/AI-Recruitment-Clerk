@@ -2,13 +2,11 @@
   "name": "ai-recruitment-clerk",
   "version": "1.0.0",
   "private": true,
-
   "description": "",
   "main": "index.js",
   "type": "module",
   "author": "",
   "license": "ISC",
-
   "scripts": {
     "format": "prettier --write \"{apps,libs}/**/*.{ts,html,scss,js,json,md}\"",
     "prepare": "husky install",
@@ -16,10 +14,41 @@
     "lint": "nx run-many --target=lint --all",
     "audit": "nx audit"
   },
-
   "devDependencies": {
-    "nx": "^21.3.2",
+    "@nestjs/schematics": "^11.0.0",
+    "@nestjs/testing": "^11.0.0",
+    "@nx/jest": "21.3.2",
+    "@nx/js": "21.3.2",
+    "@nx/nest": "^21.3.2",
+    "@nx/node": "21.3.2",
+    "@nx/web": "21.3.2",
+    "@nx/webpack": "21.3.2",
+    "@swc-node/register": "~1.9.1",
+    "@swc/core": "~1.5.7",
+    "@swc/helpers": "~0.5.11",
+    "@types/jest": "^30.0.0",
+    "@types/node": "~18.16.9",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
+    "husky": "^9.1.7",
+    "jest": "^30.0.2",
+    "jest-environment-node": "^30.0.2",
+    "nx": "21.3.2",
     "prettier": "^3.6.2",
-    "husky": "^9.1.7"
+    "supertest": "^7.1.3",
+    "ts-jest": "^29.4.0",
+    "ts-node": "10.9.1",
+    "tslib": "^2.3.0",
+    "typescript": "~5.8.2",
+    "webpack-cli": "^5.1.4"
+  },
+  "nx": {},
+  "dependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/platform-express": "^11.0.0",
+    "axios": "^1.6.0",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.8.0"
   }
 }
