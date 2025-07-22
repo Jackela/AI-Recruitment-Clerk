@@ -9,6 +9,18 @@
     "nx": "^21.3.2",
     "prettier": "^3.6.2"
   "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky install"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "husky": "^9.1.7"
   "private": true,
   "scripts": {
     "audit": "nx audit"
