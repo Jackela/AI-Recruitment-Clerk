@@ -1,11 +1,10 @@
 export default {
-  displayName: 'jd-extractor-svc',
+  displayName: 'report-generator-svc',
   preset: '../../jest.preset.cjs',
   testEnvironment: 'node',
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/apps/jd-extractor-svc',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  coverageDirectory: '../../coverage/apps/report-generator-svc',
 };
