@@ -1,28 +1,25 @@
 {
   "name": "ai-recruitment-clerk",
+  "version": "1.0.0",
   "private": true,
-  "version": "1.0.0",
-  "scripts": {
-    "format": "prettier --write ."
-  },
-  "devDependencies": {
-    "nx": "^21.3.2",
-    "prettier": "^3.6.2"
-  "version": "1.0.0",
+
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky install"
-  },
-  "keywords": [],
+  "type": "module",
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
-  "devDependencies": {
-    "husky": "^9.1.7"
-  "private": true,
+
   "scripts": {
+    "format": "prettier --write \"{apps,libs}/**/*.{ts,html,scss,js,json,md}\"",
+    "prepare": "husky install",
+    "test": "nx run-many --target=test --all",
+    "lint": "nx run-many --target=lint --all",
     "audit": "nx audit"
+  },
+
+  "devDependencies": {
+    "nx": "^21.3.2",
+    "prettier": "^3.6.2",
+    "husky": "^9.1.7"
   }
 }
