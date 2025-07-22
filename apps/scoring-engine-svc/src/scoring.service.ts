@@ -49,6 +49,63 @@ export class ScoringEngineService {
   }
 
   protected _calculateMatchScore(jdDto: JdDTO, resumeDto: ResumeDTO): ScoreDTO {
-    throw new Error('Not implemented');
+    const jdSkills = new Set(
+      jdDto.requiredSkills.map((s) => s.name.toLowerCase()),
+    );
+    const resumeSkills = new Set(
+      resumeDto.skills.map((s) => s.toLowerCase()),
+    );
+    const matchedSkills = [...jdSkills].filter((s) => resumeSkills.has(s));
+    const skillScoreValue =
+      jdSkills.size > 0 ? matchedSkills.length / jdSkills.size : 0;
+
+    const totalYears = resumeDto.workExperience.reduce((acc, w) => {
+      const start = new Date(w.startDate);
+      const end = w.endDate === 'present' ? new Date() : new Date(w.endDate);
+      const months = (end.getFullYear() - start.getFullYear()) * 12 +
+        (end.getMonth() - start.getMonth());
+      return acc + months;
+    }, 0) / 12;
+
+    let experienceScoreValue = 0;
+    if (totalYears >= jdDto.experienceYears.min) {
+      experienceScoreValue = 1;
+    } else if (jdDto.experienceYears.min > 0) {
+      experienceScoreValue = totalYears / jdDto.experienceYears.min;
+    }
+
+    const degreeMap: Record<string, number> = {
+      any: 0,
+      bachelor: 1,
+      master: 2,
+      phd: 3,
+    };
+    const highest = resumeDto.education.reduce((acc, e) => {
+      const level = degreeMap[e.degree.toLowerCase()] ?? 0;
+      return Math.max(acc, level);
+    }, 0);
+    const educationScoreValue =
+      highest >= degreeMap[jdDto.educationLevel] ? 1 : 0;
+
+    const overallScore = Math.round(
+      (skillScoreValue * 0.5 + experienceScoreValue * 0.3 + educationScoreValue * 0.2) *
+        100,
+    );
+
+    return {
+      overallScore,
+      skillScore: {
+        score: skillScoreValue,
+        details: `${matchedSkills.length} of ${jdSkills.size} skills matched.`,
+      },
+      experienceScore: {
+        score: experienceScoreValue,
+        details: '',
+      },
+      educationScore: {
+        score: educationScoreValue,
+        details: '',
+      },
+    };
   }
 }
