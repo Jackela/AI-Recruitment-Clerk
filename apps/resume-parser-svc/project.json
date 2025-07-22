@@ -3,6 +3,10 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/resume-parser-svc/src",
   "projectType": "application",
+<<<<<<< Updated upstream
+=======
+  "tags": [],
+>>>>>>> Stashed changes
   "targets": {
     "build": {
       "executor": "nx:run-commands",
@@ -39,6 +43,11 @@
         "passWithNoTests": true
       }
     }
+<<<<<<< Updated upstream
   },
   "tags": []
 }
+=======
+  }
+}
+>>>>>>> Stashed changes
