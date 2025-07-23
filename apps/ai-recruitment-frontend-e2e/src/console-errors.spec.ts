@@ -40,10 +40,10 @@ test.describe('Console Error Detection', () => {
     console.log('📍 Response status:', response?.status());
     
     console.log('📍 Waiting for network to settle...');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     console.log('📍 Waiting for potential JavaScript execution...');
-    await page.waitForTimeout(10000);
+    await page.waitForFunction(() => document.readyState === 'complete', { timeout: 10000 });
     
     console.log('📍 === CONSOLE MESSAGE SUMMARY ===');
     console.log('Total messages captured:', allMessages.length);
@@ -117,7 +117,7 @@ test.describe('Console Error Detection', () => {
     });
     
     await page.goto('http://localhost:4202/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(5000);
     
     console.log('📍 === RESOURCE LOADING SUMMARY ===');

@@ -29,7 +29,7 @@
   </div>
 
   <!-- Jobs List -->
-  <div *ngIf="!(loading$ | async)" class="jobs-grid">
+  <div *ngIf="(loading$ | async) === false" class="jobs-grid">
     <div 
       *ngFor="let job of jobs$ | async; trackBy: trackByJobId" 
       class="job-card card">
