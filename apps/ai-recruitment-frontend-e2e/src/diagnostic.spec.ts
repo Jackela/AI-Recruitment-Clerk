@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Application Diagnostics', () => {
   test('capture page content and HTML structure', async ({ page }) => {
     console.log('Navigating to application...');
-    await page.goto('/');
+    await page.goto('http://localhost:4202/');
     
     console.log('Waiting for network to settle...');
     await page.waitForLoadState('networkidle');
@@ -63,7 +63,7 @@ test.describe('Application Diagnostics', () => {
   });
 
   test('check if Angular development server is responding', async ({ page }) => {
-    const response = await page.goto('/');
+    const response = await page.goto('http://localhost:4202/');
     console.log('Response status:', response?.status());
     console.log('Response headers:', await response?.allHeaders());
     
@@ -76,7 +76,7 @@ test.describe('Application Diagnostics', () => {
   });
 
   test('manually check for Angular bootstrap', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('http://localhost:4202/');
     await page.waitForLoadState('networkidle');
     
     // Wait for Angular to potentially bootstrap

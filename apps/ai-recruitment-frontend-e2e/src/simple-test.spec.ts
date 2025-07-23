@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Simple Angular App Test', () => {
   test('check if arc-root exists and app loads with longer timeout', async ({ page }) => {
     console.log('Navigating to application...');
-    await page.goto('/');
+    await page.goto('http://localhost:4202/');
     
     console.log('Waiting for network to settle...');
     await page.waitForLoadState('networkidle');
@@ -58,7 +58,7 @@ test.describe('Simple Angular App Test', () => {
   test('direct navigation to specific routes', async ({ page }) => {
     // Test jobs list page
     console.log('Testing /jobs route...');
-    await page.goto('/jobs');
+    await page.goto('http://localhost:4202/jobs');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(5000);
     
@@ -67,7 +67,7 @@ test.describe('Simple Angular App Test', () => {
     
     // Test create job page
     console.log('Testing /jobs/create route...');
-    await page.goto('/jobs/create');
+    await page.goto('http://localhost:4202/jobs/create');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(5000);
     

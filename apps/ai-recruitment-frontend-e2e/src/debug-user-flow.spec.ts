@@ -69,7 +69,7 @@ test.describe('Debug User Flow - Step by Step', () => {
       });
     });
 
-    await page.goto('/');
+    await page.goto('http://localhost:4202/');
   });
 
   test('Step 1: Application loads and shows dashboard', async ({ page }) => {
@@ -86,7 +86,7 @@ test.describe('Debug User Flow - Step by Step', () => {
     console.log('Testing navigation to job creation...');
     
     // Navigate to job creation page
-    await page.goto('/jobs/create');
+    await page.goto('http://localhost:4202/jobs/create');
     await page.waitForLoadState('networkidle');
     
     // Check for job creation form
@@ -104,7 +104,7 @@ test.describe('Debug User Flow - Step by Step', () => {
   test('Step 3: Can fill and submit job creation form', async ({ page }) => {
     console.log('Testing job creation form submission...');
     
-    await page.goto('/jobs/create');
+    await page.goto('http://localhost:4202/jobs/create');
     await page.waitForLoadState('networkidle');
     
     // Fill form using correct selectors
@@ -134,7 +134,7 @@ test.describe('Debug User Flow - Step by Step', () => {
     
     try {
       // Try to navigate directly to a job details page
-      await page.goto(`/jobs/${mockJobResponse.jobId}`);
+      await page.goto(`http://localhost:4202/jobs/${mockJobResponse.jobId}`);
       
       // Use a shorter timeout and handle failure gracefully
       await page.waitForLoadState('networkidle', { timeout: 15000 });
@@ -179,7 +179,7 @@ test.describe('Debug User Flow - Step by Step', () => {
       console.log('⚠️ Failed to load job details page:', error.message);
       
       // Check if we can at least navigate to the jobs list
-      await page.goto('/jobs');
+      await page.goto('http://localhost:4202/jobs');
       await page.waitForLoadState('networkidle', { timeout: 10000 });
       
       const jobsPageContent = await page.textContent('body');

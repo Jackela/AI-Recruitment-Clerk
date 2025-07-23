@@ -25,7 +25,7 @@ test.describe('Deep Console Debug', () => {
     });
 
     console.log('Starting page navigation...');
-    await page.goto('/');
+    await page.goto('http://localhost:4202/');
     
     console.log('Waiting for network to settle...');
     await page.waitForLoadState('networkidle');
@@ -51,7 +51,7 @@ test.describe('Deep Console Debug', () => {
     }
 
     // Check if main.js is actually being loaded
-    const response = await page.goto('/');
+    const response = await page.goto('http://localhost:4202/');
     const responseText = await response?.text();
     console.log('Response includes main.js:', responseText?.includes('main.js') || false);
     console.log('Response includes polyfills.js:', responseText?.includes('polyfills.js') || false);

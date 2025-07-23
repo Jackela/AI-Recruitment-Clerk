@@ -1,2 +1,4 @@
+#!/usr/bin/env sh
+
 npx nx affected --target=lint
 npx nx format:check
