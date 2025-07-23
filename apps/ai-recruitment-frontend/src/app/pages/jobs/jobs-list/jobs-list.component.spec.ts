@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { StoreModule } from '@ngrx/store';
+// import { StoreModule } from '@ngrx/store'; // Removed unused import
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { DebugElement } from '@angular/core';
+// import { DebugElement } from '@angular/core'; // Removed unused import
 import { By } from '@angular/platform-browser';
 import { RouterLinkWithHref } from '@angular/router';
 import { JobsListComponent } from './jobs-list.component';
@@ -45,8 +45,8 @@ describe('JobsListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [JobsListComponent],
       imports: [
+        JobsListComponent,
         RouterTestingModule.withRoutes([
           { path: 'jobs/create', component: JobsListComponent },
           { path: 'jobs/:id', component: JobsListComponent }

@@ -3,7 +3,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { Router } from '@angular/router';
-import { DebugElement } from '@angular/core';
+// import { DebugElement } from '@angular/core'; // Removed unused import
 import { By } from '@angular/platform-browser';
 import { CreateJobComponent } from './create-job.component';
 import { AppState } from '../../../store/app.state';
@@ -27,8 +27,8 @@ describe('CreateJobComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [CreateJobComponent],
       imports: [
+        CreateJobComponent,
         ReactiveFormsModule,
         RouterTestingModule.withRoutes([
           { path: 'jobs', component: CreateJobComponent }
@@ -329,7 +329,7 @@ describe('CreateJobComponent', () => {
     });
 
     it('should mark form as touched on invalid submission', () => {
-      jest.spyOn(component as any, 'markFormGroupTouched');
+      jest.spyOn(component as typeof component & { markFormGroupTouched: () => void }, 'markFormGroupTouched');
       component.createJobForm.patchValue({
         jobTitle: '',
         jdText: ''

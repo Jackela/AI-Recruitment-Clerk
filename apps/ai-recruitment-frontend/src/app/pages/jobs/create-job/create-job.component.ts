@@ -1,15 +1,16 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
 import { AppState } from '../../../store/app.state';
 import * as JobActions from '../../../store/jobs/job.actions';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'arc-create-job',
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './create-job.component.html',
   styleUrl: './create-job.component.scss'
 })
@@ -19,12 +20,12 @@ export class CreateJobComponent implements OnInit, OnDestroy {
   error$: Observable<string | null>;
 
   private destroy$ = new Subject<void>();
+  
+  private fb = inject(FormBuilder);
+  private store = inject(Store<AppState>);
+  private router = inject(Router);
 
-  constructor(
-    private fb: FormBuilder,
-    private store: Store<AppState>,
-    private router: Router
-  ) {
+  constructor() {
     this.createJobForm = this.fb.group({
       jobTitle: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       jdText: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(5000)]]

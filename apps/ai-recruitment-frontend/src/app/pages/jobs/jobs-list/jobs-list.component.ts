@@ -1,14 +1,16 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { AppState } from '../../../store/app.state';
 import { JobListItem } from '../../../store/jobs/job.model';
 import * as JobActions from '../../../store/jobs/job.actions';
 
 @Component({
   selector: 'arc-jobs-list',
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, RouterModule],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss'
 })
@@ -18,8 +20,10 @@ export class JobsListComponent implements OnInit, OnDestroy {
   error$: Observable<string | null>;
 
   private destroy$ = new Subject<void>();
+  
+  private store = inject(Store<AppState>);
 
-  constructor(private store: Store<AppState>) {
+  constructor() {
     this.jobs$ = this.store.select(state => state.jobs.jobs);
     this.loading$ = this.store.select(state => state.jobs.loading);
     this.error$ = this.store.select(state => state.jobs.error);

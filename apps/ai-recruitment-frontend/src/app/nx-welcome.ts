@@ -2,7 +2,7 @@ import { Component, ViewEncapsulation } from '@angular/core';
 
 @Component({
   selector: 'arc-nx-welcome',
-  standalone: false,
+  standalone: true,
   template: `
     <!--
      * * * * * * * * * * * * * * * * * * * * * * * * * * * *

@@ -10,10 +10,10 @@ test.describe('Simple Angular App Test', () => {
     await page.goto('http://localhost:4202/');
     
     console.log('Waiting for network to settle...');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     
     console.log('Waiting 10 seconds for Angular to bootstrap...');
-    await page.waitForTimeout(10000);
+    await page.waitForFunction(() => document.readyState === 'complete', { timeout: 10000 });
     
     // Check if arc-root exists
     const arcRootCount = await page.locator('arc-root').count();
@@ -59,7 +59,7 @@ test.describe('Simple Angular App Test', () => {
     // Test jobs list page
     console.log('Testing /jobs route...');
     await page.goto('http://localhost:4202/jobs');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(5000);
     
     const jobsPageContent = await page.content();
@@ -68,7 +68,7 @@ test.describe('Simple Angular App Test', () => {
     // Test create job page
     console.log('Testing /jobs/create route...');
     await page.goto('http://localhost:4202/jobs/create');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(5000);
     
     const createPageContent = await page.content();

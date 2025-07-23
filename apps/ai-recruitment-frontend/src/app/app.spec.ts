@@ -15,6 +15,7 @@ describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
+        App,
         RouterTestingModule.withRoutes([]),
         HttpClientTestingModule,
         StoreModule.forRoot({
@@ -24,7 +25,6 @@ describe('App', () => {
         }),
         EffectsModule.forRoot([JobEffects, ResumeEffects, ReportEffects])
       ],
-      declarations: [App],
     }).compileComponents();
   });
 

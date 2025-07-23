@@ -61,10 +61,24 @@ export class ResumeDetailDto {
     status: 'pending' | 'parsing' | 'scoring' | 'completed' | 'failed',
     createdAt: Date,
     candidateName?: string,
-    contactInfo?: any,
+    contactInfo?: {
+      name: string | null;
+      email: string | null;
+      phone: string | null;
+    },
     skills?: string[],
-    workExperience?: any[],
-    education?: any[],
+    workExperience?: {
+      company: string;
+      position: string;
+      startDate: string;
+      endDate: string;
+      summary: string;
+    }[],
+    education?: {
+      school: string;
+      degree: string;
+      major: string | null;
+    }[],
     matchScore?: number,
     reportId?: string
   ) {
