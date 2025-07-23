@@ -1,0 +1,5 @@
+# Page snapshot
+
+```yaml
+- text: "[{\"id\":\"test-job-1\",\"title\":\"æµ‹è¯•å²—ä½\x8d1\",\"status\":\"completed\",\"createdAt\":\"2025-07-23T00:00:00.000Z\",\"resumeCount\":5},{\"id\":\"test-job-2\",\"title\":\"æµ‹è¯•å²—ä½\x8d2\",\"status\":\"processing\",\"createdAt\":\"2025-07-22T00:00:00.000Z\",\"resumeCount\":2}]"
+```

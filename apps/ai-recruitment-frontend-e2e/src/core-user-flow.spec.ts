@@ -51,14 +51,14 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
 
   test('Complete user journey: Create job → Navigate to reports (Frontend-Only)', async ({ page }) => {
     // Step 1: User opens the application and sees the main dashboard
-    await page.goto('/');
+    await page.goto('http://localhost:4202/');
     await page.waitForLoadState('networkidle');
     await expect(page.locator('h1')).toBeVisible();
     
     // Step 2: User creates a new job position (FR-1: 岗位管理)
     await test.step('Create new job position', async () => {
       // Navigate to job creation page
-      await page.goto('/jobs/create');
+      await page.goto('http://localhost:4202/jobs/create');
       await page.waitForLoadState('networkidle');
 
       // Wait for job creation form to appear
@@ -97,7 +97,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     // Step 3: Navigate to jobs list and verify UI structure (Frontend validation)
     await test.step('Verify jobs list page structure', async () => {
       // Go to jobs list page
-      await page.goto('/jobs');
+      await page.goto('http://localhost:4202/jobs');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(1000);
 
@@ -130,7 +130,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     // Step 4: Test navigation to reports page (FR-3: 报告与展示)
     await test.step('Navigate to reports page', async () => {
       // Navigate to reports page
-      await page.goto('/reports');
+      await page.goto('http://localhost:4202/reports');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(1000);
       
@@ -151,17 +151,17 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     // Step 5: Test navigation between pages works correctly
     await test.step('Verify navigation flow works', async () => {
       // Test navigation from reports back to jobs
-      await page.goto('/jobs');
+      await page.goto('http://localhost:4202/jobs');
       await page.waitForLoadState('networkidle');
       await expect(page.locator('h2.page-title')).toContainText('岗位管理');
       
       // Test navigation to create job
-      await page.goto('/jobs/create');
+      await page.goto('http://localhost:4202/jobs/create');
       await page.waitForLoadState('networkidle');
       await expect(page.locator('form')).toBeVisible();
       
       // Test navigation back to home
-      await page.goto('/');
+      await page.goto('http://localhost:4202/');
       await page.waitForLoadState('networkidle');
       
       // Should redirect to jobs
@@ -173,7 +173,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
 
   test('Quick smoke test - Navigation and core components load', async ({ page }) => {
     // Start from home page
-    await page.goto('/');
+    await page.goto('http://localhost:4202/');
     await page.waitForLoadState('networkidle');
     
     // Verify main dashboard loads
@@ -190,7 +190,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
 
   test('Job creation form accessibility and validation', async ({ page }) => {
     // Navigate to job creation
-    await page.goto('/jobs/create');
+    await page.goto('http://localhost:4202/jobs/create');
     
     // Check for form accessibility
     const form = page.locator('form').first();
@@ -220,7 +220,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
   });
 
   test('Resume upload file validation', async ({ page }) => {
-    await page.goto(`/jobs/${mockJobResponse.jobId}`);
+    await page.goto(`http://localhost:4202/jobs/${mockJobResponse.jobId}`);
     
     // Try to upload an invalid file type
     const fileInput = page.locator('input[type="file"]');

@@ -66,7 +66,7 @@ test.describe('Angular App with Mock API', () => {
 
   test('Angular app should load with mocked APIs', async ({ page }) => {
     console.log('📍 Navigating to application with mocked APIs...');
-    await page.goto('/');
+    await page.goto('http://localhost:4202/');
     
     console.log('📍 Waiting for network to settle...');
     await page.waitForLoadState('networkidle');
@@ -134,7 +134,7 @@ test.describe('Angular App with Mock API', () => {
     // Increase timeout for this test
     test.setTimeout(45000);
     
-    await page.goto('/jobs/create');
+    await page.goto('http://localhost:4202/jobs/create');
     await page.waitForLoadState('networkidle');
     
     // Wait for Angular to bootstrap and render

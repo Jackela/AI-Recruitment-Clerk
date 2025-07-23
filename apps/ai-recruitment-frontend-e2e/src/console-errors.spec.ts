@@ -36,7 +36,7 @@ test.describe('Console Error Detection', () => {
     });
 
     console.log('📍 Starting page navigation...');
-    const response = await page.goto('/');
+    const response = await page.goto('http://localhost:4202/');
     console.log('📍 Response status:', response?.status());
     
     console.log('📍 Waiting for network to settle...');
@@ -116,7 +116,7 @@ test.describe('Console Error Detection', () => {
       }
     });
     
-    await page.goto('/');
+    await page.goto('http://localhost:4202/');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(5000);
     

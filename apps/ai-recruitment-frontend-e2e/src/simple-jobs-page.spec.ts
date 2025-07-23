@@ -24,7 +24,7 @@ test.describe('Simple Jobs Page Test', () => {
       console.log('🚫 Page error:', error.message);
     });
     
-    await page.goto('/jobs');
+    await page.goto('http://localhost:4202/jobs');
     await page.waitForLoadState('networkidle');
     
     // Give time for Angular to render
@@ -84,7 +84,7 @@ test.describe('Simple Jobs Page Test', () => {
   test('create job page works correctly', async ({ page }) => {
     console.log('🔍 Testing create job page...');
     
-    await page.goto('/jobs/create');
+    await page.goto('http://localhost:4202/jobs/create');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
     

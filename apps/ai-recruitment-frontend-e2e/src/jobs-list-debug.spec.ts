@@ -6,8 +6,15 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Jobs List Component Debug', () => {
   test.beforeEach(async ({ page }) => {
+    // Ensure we have a proper base URL
+    const baseURL = 'http://localhost:4202';
+    
+    // Set base URL if not already set
+    if (!page.url() || page.url() === 'about:blank') {
+      await page.goto(baseURL);
+    }
     // Mock the jobs API with simple test data
-    await page.route('**/jobs', async (route) => {
+    await page.route('**/api/jobs', async (route) => {
       if (route.request().method() === 'GET') {
         await route.fulfill({
           status: 200,
@@ -36,7 +43,7 @@ test.describe('Jobs List Component Debug', () => {
   test('Check jobs list page structure and content', async ({ page }) => {
     console.log('🔍 Testing jobs list page structure...');
     
-    await page.goto('/jobs');
+    await page.goto('http://localhost:4202/jobs');
     await page.waitForLoadState('networkidle');
     
     // Wait for potential async loading
@@ -45,7 +52,9 @@ test.describe('Jobs List Component Debug', () => {
     // Check page structure
     console.log('=== PAGE STRUCTURE ===');
     
-    const pageTitle = await page.textContent('h1, h2, .page-title');
+    // Use safer approach to check for page title elements
+    const pageTitleElement = page.locator('h1, h2, .page-title').first();
+    const pageTitle = await pageTitleElement.isVisible() ? await pageTitleElement.textContent() : 'No title found';
     console.log('Page title:', pageTitle);
     
     const hasJobsContainer = await page.locator('.jobs-list-container').count();
@@ -97,18 +106,18 @@ test.describe('Jobs List Component Debug', () => {
     // Listen for network requests
     const apiCalls: string[] = [];
     page.on('request', request => {
-      if (request.url().includes('/jobs')) {
+      if (request.url().includes('/api/jobs')) {
         apiCalls.push(`${request.method()} ${request.url()}`);
       }
     });
     
     page.on('response', response => {
-      if (response.url().includes('/jobs')) {
+      if (response.url().includes('/api/jobs')) {
         console.log(`📡 API Response: ${response.status()} ${response.url()}`);
       }
     });
     
-    await page.goto('/jobs');
+    await page.goto('http://localhost:4202/jobs');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
     

@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Basic Application Health', () => {
   test('application loads successfully', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('http://localhost:4202/');
 
     // Wait for the page to load
     await page.waitForLoadState('networkidle');
@@ -33,7 +33,7 @@ test.describe('Basic Application Health', () => {
       }
     });
 
-    await page.goto('/');
+    await page.goto('http://localhost:4202/');
     await page.waitForLoadState('networkidle');
 
     // Filter out non-critical errors (like 404s for favicon, etc.)
@@ -48,13 +48,13 @@ test.describe('Basic Application Health', () => {
   });
 
   test('basic navigation works', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('http://localhost:4202/');
     
     // Verify main page loads
     await expect(page.locator('text=AI 招聘助理')).toBeVisible();
     
     // Test navigation to jobs page
-    await page.goto('/jobs');
+    await page.goto('http://localhost:4202/jobs');
     await page.waitForLoadState('networkidle');
     await expect(page.locator('nav a').filter({ hasText: '岗位管理' })).toBeVisible();
     
@@ -68,7 +68,7 @@ test.describe('Basic Application Health', () => {
   });
 
   test('responsive design check', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('http://localhost:4202/');
     
     // Test mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });

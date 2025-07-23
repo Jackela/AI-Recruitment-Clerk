@@ -12,13 +12,13 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Error Scenarios and Form Validation', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('http://localhost:4202/');
   });
 
   test('Job creation with invalid data shows proper validation errors', async ({ page }) => {
     await test.step('Navigate to job creation form', async () => {
       // Navigate directly to job creation page
-      await page.goto('/jobs/create');
+      await page.goto('http://localhost:4202/jobs/create');
       
       // Wait for form to be visible
       await expect(page.locator('form')).toBeVisible();
@@ -102,7 +102,7 @@ test.describe('Error Scenarios and Form Validation', () => {
     });
 
     await test.step('Submit valid job and handle network error', async () => {
-      await page.goto('/jobs/create');
+      await page.goto('http://localhost:4202/jobs/create');
       
       // Wait for form to be ready
       await expect(page.locator('form')).toBeVisible();
@@ -147,7 +147,7 @@ test.describe('Error Scenarios and Form Validation', () => {
     });
 
     await test.step('Handle server error response', async () => {
-      await page.goto('/jobs/create');
+      await page.goto('http://localhost:4202/jobs/create');
       
       // Wait for form to be ready
       await expect(page.locator('form')).toBeVisible();
@@ -179,7 +179,7 @@ test.describe('Error Scenarios and Form Validation', () => {
     const mockJobId = 'test-job-upload-errors';
     
     await test.step('Navigate to file upload page', async () => {
-      await page.goto(`/jobs/${mockJobId}`);
+      await page.goto(`http://localhost:4202/jobs/${mockJobId}`);
     });
 
     await test.step('Upload file with invalid type', async () => {
@@ -294,7 +294,7 @@ test.describe('Error Scenarios and Form Validation', () => {
         }
       });
 
-      await page.goto('/');
+      await page.goto('http://localhost:4202/');
 
       // Wait for timeout to be triggered
       await page.waitForTimeout(1000);
@@ -333,7 +333,7 @@ test.describe('Error Scenarios and Form Validation', () => {
         }
       });
 
-      await page.goto('/');
+      await page.goto('http://localhost:4202/');
 
       // Look for access denied or permission error
       try {
@@ -347,7 +347,7 @@ test.describe('Error Scenarios and Form Validation', () => {
   });
 
   test('Form state preservation after validation errors', async ({ page }) => {
-    await page.goto('/jobs/create');
+    await page.goto('http://localhost:4202/jobs/create');
 
     await test.step('Fill form partially and trigger validation error', async () => {
       // Wait for form to be ready
@@ -419,7 +419,7 @@ test.describe('Error Scenarios and Form Validation', () => {
       }
     });
 
-    await page.goto('/jobs/create');
+    await page.goto('http://localhost:4202/jobs/create');
 
     await test.step('Trigger error and verify error message display', async () => {
       // Wait for form to be ready
