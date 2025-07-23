@@ -1,15 +1,46 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { CreateJobDto } from './dto/create-job.dto';
 import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
 import { MulterFile } from './types/multer.types';
+import { JobListDto, JobDetailDto } from './dto/job-response.dto';
+import { ResumeListItemDto, ResumeDetailDto } from './dto/resume-response.dto';
+import { AnalysisReportDto, ReportsListDto } from './dto/report-response.dto';
+import { InMemoryStorageService } from './storage/in-memory-storage.service';
 
 @Injectable()
 export class JobsService {
+  constructor(private readonly storageService: InMemoryStorageService) {
+    // Initialize with mock data for development
+    this.storageService.seedMockData();
+  }
+
   async createJob(dto: CreateJobDto): Promise<{ jobId: string }> {
     const jobId = randomUUID();
-    // Here we would publish the event to NATS
+    const job = new JobDetailDto(
+      jobId,
+      dto.jobTitle,
+      dto.jdText,
+      'processing',
+      new Date(),
+      0
+    );
+    
+    this.storageService.createJob(job);
+    
+    // Here we would publish the event to NATS for actual processing
     Logger.log(`Published job.jd.submitted for ${jobId}`);
+    
+    // Simulate JD processing completion after 2 seconds
+    setTimeout(() => {
+      const existingJob = this.storageService.getJob(jobId);
+      if (existingJob) {
+        existingJob.status = 'completed';
+        this.storageService.createJob(existingJob);
+        Logger.log(`Job ${jobId} processing completed`);
+      }
+    }, 2000);
+    
     return { jobId };
   }
 
@@ -18,15 +49,179 @@ export class JobsService {
       return new ResumeUploadResponseDto(jobId, 0);
     }
 
+    const job = this.storageService.getJob(jobId);
+    if (!job) {
+      throw new NotFoundException(`Job with ID ${jobId} not found`);
+    }
+
     // Process each uploaded resume file
-    files.forEach((file) => {
+    files.forEach((file, index) => {
       const resumeId = randomUUID();
-      const tempGridFsUrl = `gridfs://temp/${resumeId}`;
+      const resume = new ResumeDetailDto(
+        resumeId,
+        jobId,
+        file.originalname,
+        'pending',
+        new Date(),
+        this.extractCandidateName(file.originalname)
+      );
+      
+      this.storageService.createResume(resume);
       
       // Here we would publish the NATS event for each resume
       Logger.log(`Published resume.submitted for jobId: ${jobId}, resumeId: ${resumeId}, filename: ${file.originalname}`);
+      
+      // Simulate resume processing after a delay
+      setTimeout(() => {
+        this.simulateResumeProcessing(resumeId, jobId, file.originalname);
+      }, (index + 1) * 3000); // Stagger processing
     });
 
     return new ResumeUploadResponseDto(jobId, files.length);
+  }
+
+  // GET methods for frontend
+  getAllJobs(): JobListDto[] {
+    return this.storageService.getAllJobs().map(job => 
+      new JobListDto(job.id, job.title, job.status, job.createdAt, job.resumeCount)
+    );
+  }
+
+  getJobById(jobId: string): JobDetailDto {
+    const job = this.storageService.getJob(jobId);
+    if (!job) {
+      throw new NotFoundException(`Job with ID ${jobId} not found`);
+    }
+    return job;
+  }
+
+  getResumesByJobId(jobId: string): ResumeListItemDto[] {
+    const job = this.storageService.getJob(jobId);
+    if (!job) {
+      throw new NotFoundException(`Job with ID ${jobId} not found`);
+    }
+    
+    return this.storageService.getResumesByJobId(jobId).map(resume => 
+      new ResumeListItemDto(
+        resume.id,
+        resume.jobId,
+        resume.originalFilename,
+        resume.status,
+        resume.createdAt,
+        resume.matchScore,
+        resume.candidateName
+      )
+    );
+  }
+
+  getResumeById(resumeId: string): ResumeDetailDto {
+    const resume = this.storageService.getResume(resumeId);
+    if (!resume) {
+      throw new NotFoundException(`Resume with ID ${resumeId} not found`);
+    }
+    return resume;
+  }
+
+  getReportsByJobId(jobId: string): ReportsListDto {
+    const job = this.storageService.getJob(jobId);
+    if (!job) {
+      throw new NotFoundException(`Job with ID ${jobId} not found`);
+    }
+    
+    const reports = this.storageService.getReportsByJobId(jobId);
+    return new ReportsListDto(
+      jobId,
+      reports.map(report => ({
+        id: report.id,
+        candidateName: report.candidateName,
+        matchScore: report.matchScore,
+        oneSentenceSummary: report.oneSentenceSummary,
+        status: 'completed' as const,
+        generatedAt: report.generatedAt
+      }))
+    );
+  }
+
+  getReportById(reportId: string): AnalysisReportDto {
+    const report = this.storageService.getReport(reportId);
+    if (!report) {
+      throw new NotFoundException(`Report with ID ${reportId} not found`);
+    }
+    return report;
+  }
+
+  // Helper methods
+  private extractCandidateName(filename: string): string {
+    // Simple name extraction from filename
+    const nameMatch = filename.match(/^([^_]+)/);
+    return nameMatch ? nameMatch[1] : 'Unknown';
+  }
+
+  private simulateResumeProcessing(resumeId: string, jobId: string, filename: string): void {
+    const candidateName = this.extractCandidateName(filename);
+    
+    // Simulate parsing completion
+    const resume = this.storageService.getResume(resumeId);
+    if (!resume) return;
+    
+    // Update resume with parsed data (mock)
+    resume.status = 'scoring';
+    resume.contactInfo = {
+      name: candidateName,
+      email: `${candidateName.toLowerCase()}@email.com`,
+      phone: '1380013800' + Math.floor(Math.random() * 10)
+    };
+    resume.skills = ['Python', 'JavaScript', 'React', 'Node.js'];
+    resume.workExperience = [{
+      company: 'Tech Company',
+      position: 'Software Developer',
+      startDate: '2022-01-01',
+      endDate: 'present',
+      summary: 'Developed web applications'
+    }];
+    resume.education = [{
+      school: 'University',
+      degree: 'Bachelor',
+      major: 'Computer Science'
+    }];
+    
+    this.storageService.createResume(resume);
+    
+    // Generate analysis report after scoring
+    setTimeout(() => {
+      const reportId = randomUUID();
+      const matchScore = Math.floor(Math.random() * 40) + 60; // 60-100
+      
+      const report = new AnalysisReportDto(
+        reportId,
+        resumeId,
+        jobId,
+        candidateName,
+        matchScore,
+        `${candidateName} is a ${matchScore > 80 ? 'highly qualified' : 'suitable'} candidate with relevant experience.`,
+        [
+          'Strong technical skills',
+          'Relevant work experience',
+          'Good educational background'
+        ],
+        [
+          'Could benefit from more leadership experience',
+          'Some advanced skills not demonstrated'
+        ],
+        matchScore < 70 ? ['Limited experience in required technologies'] : [],
+        [
+          'Tell me about your most challenging project?',
+          'How do you handle tight deadlines?',
+          'What are your career goals?'
+        ]
+      );
+      
+      this.storageService.createReport(report);
+      
+      resume.status = 'completed';
+      this.storageService.createResume(resume);
+      
+      Logger.log(`Resume processing completed for ${candidateName} (${resumeId})`);
+    }, 2000);
   }
 }

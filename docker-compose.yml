@@ -1,0 +1,204 @@
+# AI Recruitment Clerk - Docker Compose Configuration
+# Complete system orchestration for microservices-based recruitment platform
+
+services:
+  # Infrastructure Services
+  mongodb:
+    image: mongo:7.0-jammy
+    container_name: ai-recruitment-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: ai-recruitment
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - ai-recruitment-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  nats:
+    image: nats:2.10-alpine
+    container_name: ai-recruitment-nats
+    restart: unless-stopped
+    ports:
+      - "4222:4222"
+      - "6222:6222"
+      - "8222:8222"
+    networks:
+      - ai-recruitment-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8222/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Backend Microservices
+  app-gateway:
+    build:
+      context: .
+      dockerfile: apps/app-gateway/Dockerfile
+    container_name: ai-recruitment-gateway
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      NATS_URL: nats://nats:4222
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017/ai-recruitment?authSource=admin
+    ports:
+      - "3000:3000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    networks:
+      - ai-recruitment-network
+    volumes:
+      - uploads_data:/app/uploads
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  jd-extractor-svc:
+    build:
+      context: .
+      dockerfile: apps/jd-extractor-svc/Dockerfile
+    container_name: ai-recruitment-jd-extractor
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NATS_URL: nats://nats:4222
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-your_gemini_api_key_here}
+    depends_on:
+      nats:
+        condition: service_healthy
+    networks:
+      - ai-recruitment-network
+    healthcheck:
+      test: ["CMD", "pgrep", "node"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  resume-parser-svc:
+    build:
+      context: .
+      dockerfile: apps/resume-parser-svc/Dockerfile
+    container_name: ai-recruitment-resume-parser
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NATS_URL: nats://nats:4222
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017/ai-recruitment?authSource=admin
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-your_gemini_api_key_here}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    networks:
+      - ai-recruitment-network
+    healthcheck:
+      test: ["CMD", "pgrep", "node"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  scoring-engine-svc:
+    build:
+      context: .
+      dockerfile: apps/scoring-engine-svc/Dockerfile
+    container_name: ai-recruitment-scoring-engine
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NATS_URL: nats://nats:4222
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017/ai-recruitment?authSource=admin
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-your_gemini_api_key_here}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    networks:
+      - ai-recruitment-network
+    healthcheck:
+      test: ["CMD", "pgrep", "node"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  report-generator-svc:
+    build:
+      context: .
+      dockerfile: apps/report-generator-svc/Dockerfile
+    container_name: ai-recruitment-report-generator
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NATS_URL: nats://nats:4222
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017/ai-recruitment?authSource=admin
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-your_gemini_api_key_here}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    networks:
+      - ai-recruitment-network
+    healthcheck:
+      test: ["CMD", "pgrep", "node"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Frontend Application
+  ai-recruitment-frontend:
+    build:
+      context: .
+      dockerfile: apps/ai-recruitment-frontend/Dockerfile
+    container_name: ai-recruitment-frontend
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+    depends_on:
+      app-gateway:
+        condition: service_healthy
+    networks:
+      - ai-recruitment-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+# Networks
+networks:
+  ai-recruitment-network:
+    driver: bridge
+    name: ai-recruitment-network
+
+# Volumes
+volumes:
+  mongodb_data:
+    name: ai-recruitment-mongodb-data
+  uploads_data:
+    name: ai-recruitment-uploads-data

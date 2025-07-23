@@ -1,0 +1,54 @@
+# AI Recruitment Clerk - Simple Docker Compose Configuration
+# Minimal setup for core functionality testing
+
+services:
+  # Infrastructure Services
+  mongodb:
+    image: mongo:7.0-jammy
+    container_name: ai-recruitment-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: ai-recruitment
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - ai-recruitment-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  nats:
+    image: nats:2.10-alpine
+    container_name: ai-recruitment-nats
+    restart: unless-stopped
+    ports:
+      - "4222:4222"
+      - "6222:6222"
+      - "8222:8222"
+    networks:
+      - ai-recruitment-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8222/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+# Networks
+networks:
+  ai-recruitment-network:
+    driver: bridge
+    name: ai-recruitment-network
+
+# Volumes
+volumes:
+  mongodb_data:
+    name: ai-recruitment-mongodb-data

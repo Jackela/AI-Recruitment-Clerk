@@ -1,0 +1,153 @@
+.create-job-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.create-job-form {
+  .card-header {
+    h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+  }
+}
+
+.form-group {
+  position: relative;
+}
+
+.form-text {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-top: 0.5rem;
+  line-height: 1.4;
+}
+
+.requirements-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.875rem;
+  
+  li {
+    margin-bottom: 0.25rem;
+    line-height: 1.4;
+  }
+}
+
+.character-count {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.5rem;
+  font-size: 0.75rem;
+  color: #6c757d;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.form-actions {
+  padding-top: 1.5rem;
+  border-top: 1px solid #ecf0f1;
+  text-align: right;
+}
+
+.invalid-feedback {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: #e74c3c;
+}
+
+.alert {
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  
+  &.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #721c24;
+  cursor: pointer;
+  padding: 0;
+  
+  &:hover {
+    color: #000;
+  }
+}
+
+.text-danger {
+  color: #e74c3c !important;
+}
+
+/* Form validation styles */
+.form-control {
+  &.is-invalid {
+    border-color: #e74c3c;
+    
+    &:focus {
+      border-color: #e74c3c;
+      box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
+    }
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .create-job-container {
+    padding: 0 1rem;
+  }
+  
+  .form-actions {
+    text-align: center;
+    
+    .btn {
+      width: 100%;
+      margin-bottom: 0.5rem;
+      
+      &.mr-3 {
+        margin-right: 0 !important;
+      }
+    }
+  }
+  
+  .page-header .d-flex {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .character-count {
+    position: static;
+    text-align: right;
+    background-color: transparent;
+    padding: 0;
+    margin-top: 0.5rem;
+  }
+}
