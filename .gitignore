@@ -137,7 +137,79 @@ dist
 
 
 
+# Nx cache and workspace data
 .nx/cache
 .nx/workspace-data
-.cursor/rules/nx-rules.mdc
-.github/instructions/nx.instructions.md
+.nx/installation
+
+# Angular cache
+.angular
+
+# Docker volumes and data
+docker-data/
+docker-volumes/
+
+# Test results and reports
+test-results/
+test-results.json
+playwright-report/
+coverage/
+junit-report.xml
+
+# Build artifacts
+dist/
+build/
+out/
+
+# IDE and editor files
+.cursor/
+.github/instructions/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Project graph
+project-graph.json
+
+# Local environment files
+.env.local
+.env.*.local
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Log files
+*.log.*
+logs/
+
+# Backup files
+*.bak
+*.backup
+
+# Local development certificates
+*.pem
+*.key
+*.crt
+
+# Docker override files
+docker-compose.override.yml
+docker-compose.local.yml
+
+# Personal notes and docs (optional)
+NOTES.md
+TODO.md
+SCRATCH.md
