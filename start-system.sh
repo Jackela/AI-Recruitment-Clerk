@@ -29,7 +29,7 @@ echo ""
 echo "Step 3: Setting up environment variables..."
 if [ ! -f .env ]; then
     echo "Creating .env from template..."
-    cp docker-compose.env .env
+    cp .env.example .env
     echo ""
     echo "IMPORTANT: Please edit .env file and set your GEMINI_API_KEY"
     echo "Press Enter to continue after setting the API key..."
