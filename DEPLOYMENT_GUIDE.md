@@ -30,7 +30,7 @@ The AI Recruitment Clerk consists of:
 ### Step 1: Environment Setup
 ```bash
 # Copy environment template
-cp docker-compose.env .env
+cp .env.example .env
 
 # Edit .env file and set your API keys
 # IMPORTANT: Set GEMINI_API_KEY to your actual API key
