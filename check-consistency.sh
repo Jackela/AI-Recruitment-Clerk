@@ -89,10 +89,10 @@ fi
 # 检查环境配置
 echo ""
 echo "🔧 检查环境配置..."
-if [ -f "docker-compose.env" ]; then
-    echo "✅ docker-compose.env 模板存在"
+if [ -f ".env.example" ]; then
+    echo "✅ .env.example 模板存在"
 else
-    echo "❌ docker-compose.env 模板缺失"
+    echo "❌ .env.example 模板缺失"
 fi
 
 if [ -f ".env" ]; then

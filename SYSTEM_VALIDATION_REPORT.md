@@ -71,7 +71,7 @@
 - **run-e2e-tests.sh** (Linux/macOS) - 1781 字节，可执行权限
 
 #### ✅ 配置文件
-- **docker-compose.env** - 环境变量模板存在
+- **.env.example** - 环境变量模板存在
 - **.env** - 测试环境配置已创建
 - **scripts/mongo-init.js** - 数据库初始化脚本存在
 
