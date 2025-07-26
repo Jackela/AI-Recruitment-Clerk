@@ -74,10 +74,9 @@ web_modules/
 
 # dotenv environment variable files
 .env
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
 .env.local
+.env.*.local
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -172,10 +171,6 @@ out/
 
 # Project graph
 project-graph.json
-
-# Local environment files
-.env.local
-.env.*.local
 
 # OS generated files
 .DS_Store
