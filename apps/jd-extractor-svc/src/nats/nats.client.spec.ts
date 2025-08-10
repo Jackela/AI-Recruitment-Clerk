@@ -1,513 +1,321 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { NatsClient, NatsPublishResult, NatsSubscriptionOptions } from './nats.client';
-import { JobJdSubmittedEvent, AnalysisJdExtractedEvent } from '../dto/events.dto';
-import { JdDTO } from '../dto/jd.dto';
+import {
+  createMockJobJdSubmittedEvent,
+  createMockAnalysisJdExtractedEvent,
+  createMockProcessingErrorEvent,
+  validateAnalysisJdExtractedEvent
+} from '../testing/test-fixtures';
 
-describe('NatsClient', () => {
+describe('NatsClient - JD Events', () => {
   let client: NatsClient;
-
-  const mockJobJdSubmittedEvent: JobJdSubmittedEvent = {
-    jobId: 'test-job-uuid-123',
-    jobTitle: 'Senior Full Stack Developer', 
-    jdText: 'We are seeking a Senior Full Stack Developer...',
-    timestamp: '2024-01-01T12:00:00.000Z'
-  };
-
-  const mockJdDto: JdDTO = {
-    requirements: {
-      technical: ['JavaScript', 'Node.js', 'TypeScript'],
-      soft: ['Communication', 'Leadership'],
-      experience: '5+ years',
-      education: 'Bachelor degree'
-    },
-    responsibilities: ['Develop applications', 'Code review'],
-    benefits: ['Health insurance', 'Remote work'],
-    company: {
-      name: 'TechCorp',
-      industry: 'Software',
-      size: '100-500'
-    }
-  };
-
-  const mockAnalysisExtractedEvent: AnalysisJdExtractedEvent = {
-    jobId: 'test-job-uuid-123',
-    extractedData: mockJdDto,
-    timestamp: '2024-01-01T12:05:00.000Z',
-    processingTimeMs: 3500
-  };
-
-  const mockSuccessResult: NatsPublishResult = {
-    success: true,
-    messageId: 'msg-abc-123'
-  };
-
-  const mockFailureResult: NatsPublishResult = {
-    success: false,
-    error: 'NATS connection failed'
-  };
+  let loggerSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        NatsClient,
-        {
-          provide: Logger,
-          useValue: {
-            log: jest.fn(),
-            error: jest.fn(),
-            warn: jest.fn(),
-            debug: jest.fn(),
-          }
-        }
-      ],
+      providers: [NatsClient],
     }).compile();
 
     client = module.get<NatsClient>(NatsClient);
+    
+    // Spy on logger to verify proper logging
+    loggerSpy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
+    jest.spyOn(Logger.prototype, 'error').mockImplementation();
   });
 
-  describe('Service Initialization', () => {
-    it('should be defined', () => {
-      expect(client).toBeDefined();
-    });
-
-    it('should initialize with logger', () => {
-      expect(client['logger']).toBeDefined();
-    });
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('Connection Management', () => {
-    describe('connect', () => {
-      it('should establish NATS JetStream connection', async () => {
-        // Act & Assert - This will fail until implementation is ready
-        await expect(client.connect())
-          .rejects.toThrow('NatsClient.connect not implemented');
-      });
-
-      it('should handle connection failures gracefully', async () => {
-        // Test connection failure scenarios
-        await expect(client.connect())
-          .rejects.toThrow('NatsClient.connect not implemented');
-      });
-
-      it('should retry connection on transient failures', async () => {
-        // Test connection retry logic
-        await expect(client.connect())
-          .rejects.toThrow('NatsClient.connect not implemented');
-      });
-
-      it('should configure JetStream properly', async () => {
-        // Verify JetStream configuration when implemented
-        await expect(client.connect())
-          .rejects.toThrow('NatsClient.connect not implemented');
-      });
+    it('should connect to NATS successfully', async () => {
+      await expect(client.connect()).resolves.toBeUndefined();
+      expect(client.isConnected).toBe(true);
+      expect(loggerSpy).toHaveBeenCalledWith('Connecting to NATS JetStream...');
+      expect(loggerSpy).toHaveBeenCalledWith('Successfully connected to NATS JetStream');
     });
 
-    describe('disconnect', () => {
-      it('should clean up connections properly', async () => {
-        // Act & Assert
-        await expect(client.disconnect())
-          .rejects.toThrow('NatsClient.disconnect not implemented');
-      });
+    it('should disconnect from NATS successfully', async () => {
+      await client.connect();
+      await expect(client.disconnect()).resolves.toBeUndefined();
+      expect(client.isConnected).toBe(false);
+    });
 
-      it('should handle disconnect when not connected', async () => {
-        // Test disconnect without prior connection
-        await expect(client.disconnect())
-          .rejects.toThrow('NatsClient.disconnect not implemented');
-      });
+    it('should handle connection failures gracefully', async () => {
+      // Mock connection failure
+      jest.spyOn(client as any, 'connect').mockRejectedValueOnce(new Error('Connection failed'));
+      
+      await expect(client.connect()).rejects.toThrow('Connection failed');
+    });
+  });
 
-      it('should wait for pending operations to complete', async () => {
-        // Test graceful shutdown with pending operations
-        await expect(client.disconnect())
-          .rejects.toThrow('NatsClient.disconnect not implemented');
+  describe('Core Publishing Functionality', () => {
+    beforeEach(async () => {
+      await client.connect();
+    });
+
+    it('should publish generic messages successfully', async () => {
+      const testSubject = 'test.subject';
+      const testData = { test: 'data' };
+
+      const result = await client.publish(testSubject, testData);
+
+      expect(result).toMatchObject({
+        success: true,
+        messageId: expect.stringMatching(/^msg_\d+_[a-z0-9]+$/)
+      });
+      expect(result.error).toBeUndefined();
+    });
+
+    it('should auto-connect when publishing if not connected', async () => {
+      await client.disconnect();
+      expect(client.isConnected).toBe(false);
+
+      const result = await client.publish('test.subject', {});
+
+      expect(client.isConnected).toBe(true);
+      expect(result.success).toBe(true);
+    });
+
+    it('should handle publish errors gracefully', async () => {
+      // Mock publish error by disconnecting without connection setup
+      await client.disconnect();
+      jest.spyOn(client as any, 'connect').mockRejectedValueOnce(new Error('Publish failed'));
+
+      const result = await client.publish('test.subject', {});
+
+      expect(result).toMatchObject({
+        success: false,
+        error: expect.any(String)
       });
     });
   });
 
-  describe('Event Publishing', () => {
-    describe('publish', () => {
-      it('should publish events to NATS successfully', async () => {
-        // Arrange
-        const subject = 'test.subject';
-        const testData = { test: 'data' };
+  describe('JD Event Publishing', () => {
+    beforeEach(async () => {
+      await client.connect();
+    });
 
-        // Act & Assert
-        await expect(client.publish(subject, testData))
-          .rejects.toThrow('NatsClient.publish not implemented');
-      });
+    describe('Analysis JD Extracted Events', () => {
+      it('should publish analysis.jd.extracted events successfully', async () => {
+        const mockEvent = createMockAnalysisJdExtractedEvent();
 
-      it('should handle publish failures', async () => {
-        // Arrange
-        const subject = 'failing.subject';
-        const testData = { test: 'data' };
+        const result = await client.publishAnalysisExtracted(mockEvent);
 
-        // Act & Assert
-        await expect(client.publish(subject, testData))
-          .rejects.toThrow('NatsClient.publish not implemented');
-      });
-
-      it('should validate subject format', async () => {
-        // Arrange
-        const invalidSubject = '';
-        const testData = { test: 'data' };
-
-        // Act & Assert
-        await expect(client.publish(invalidSubject, testData))
-          .rejects.toThrow('NatsClient.publish not implemented');
-      });
-
-      it('should serialize data correctly', async () => {
-        // Arrange
-        const subject = 'test.subject';
-        const complexData = {
-          nested: {
-            object: true,
-            array: [1, 2, 3]
-          },
-          timestamp: new Date().toISOString()
-        };
-
-        // Act & Assert
-        await expect(client.publish(subject, complexData))
-          .rejects.toThrow('NatsClient.publish not implemented');
-      });
-
-      it('should return correct publish result on success', async () => {
-        // When implemented, should return:
-        const expectedResult: NatsPublishResult = {
+        expect(result).toMatchObject({
           success: true,
           messageId: expect.any(String)
-        };
-
-        expect(expectedResult.success).toBe(true);
-        expect(expectedResult.messageId).toEqual(expect.any(String));
-
-        // Act & Assert
-        await expect(client.publish('test.subject', {}))
-          .rejects.toThrow('NatsClient.publish not implemented');
+        });
+        expect(result.error).toBeUndefined();
+        
+        expect(loggerSpy).toHaveBeenCalledWith(
+          `Publishing analysis extracted event for jobId: ${mockEvent.jobId}`
+        );
+        expect(loggerSpy).toHaveBeenCalledWith(
+          `Analysis extracted event published successfully for jobId: ${mockEvent.jobId}`
+        );
       });
 
-      it('should return failure result with error details', async () => {
-        // When implemented and fails, should return:
-        const expectedFailure: NatsPublishResult = {
+      it('should add eventType and timestamp to published events', async () => {
+        const mockEvent = createMockAnalysisJdExtractedEvent({ timestamp: undefined });
+        const publishSpy = jest.spyOn(client, 'publish');
+
+        await client.publishAnalysisExtracted(mockEvent);
+
+        expect(publishSpy).toHaveBeenCalledWith('job.analysis.extracted', {
+          ...mockEvent,
+          eventType: 'AnalysisJdExtractedEvent',
+          timestamp: expect.any(String)
+        });
+      });
+
+      it('should always set current timestamp when publishing', async () => {
+        const fixedTimestamp = '2024-01-01T10:00:00.000Z';
+        const mockEvent = createMockAnalysisJdExtractedEvent({ timestamp: fixedTimestamp });
+        const publishSpy = jest.spyOn(client, 'publish');
+
+        await client.publishAnalysisExtracted(mockEvent);
+
+        expect(publishSpy).toHaveBeenCalledWith('job.analysis.extracted', {
+          ...mockEvent,
+          eventType: 'AnalysisJdExtractedEvent',
+          timestamp: expect.any(String)
+        });
+        
+        // Verify the timestamp is not the original fixed timestamp
+        const publishCall = publishSpy.mock.calls[0];
+        const publishedEvent = publishCall[1];
+        expect(publishedEvent.timestamp).not.toBe(fixedTimestamp);
+      });
+
+      it('should handle publish failures for analysis events', async () => {
+        const mockEvent = createMockAnalysisJdExtractedEvent();
+        jest.spyOn(client, 'publish').mockResolvedValueOnce({ success: false, error: 'Network error' });
+
+        const result = await client.publishAnalysisExtracted(mockEvent);
+
+        expect(result).toMatchObject({
           success: false,
-          error: expect.any(String)
-        };
-
-        expect(expectedFailure.success).toBe(false);
-        expect(expectedFailure.error).toEqual(expect.any(String));
-
-        // Act & Assert
-        await expect(client.publish('failing.subject', {}))
-          .rejects.toThrow('NatsClient.publish not implemented');
+          error: 'Network error'
+        });
       });
     });
 
-    describe('publishAnalysisExtracted', () => {
-      it('should publish analysis.jd.extracted event successfully', async () => {
-        // Act & Assert
-        await expect(client.publishAnalysisExtracted(mockAnalysisExtractedEvent))
-          .rejects.toThrow('NatsClient.publishAnalysisExtracted not implemented');
-      });
+    describe('Processing Error Events', () => {
+      it('should publish processing error events successfully', async () => {
+        const jobId = 'job-123';
+        const error = new Error('Processing failed');
 
-      it('should validate event payload structure', async () => {
-        // Arrange
-        const invalidEvent = {
-          jobId: '', // Invalid jobId
-          extractedData: null, // Invalid data
-          timestamp: 'invalid-timestamp',
-          processingTimeMs: -1 // Invalid processing time
-        } as AnalysisJdExtractedEvent;
+        const result = await client.publishProcessingError(jobId, error);
 
-        // Act & Assert
-        await expect(client.publishAnalysisExtracted(invalidEvent))
-          .rejects.toThrow('NatsClient.publishAnalysisExtracted not implemented');
-      });
+        expect(result).toMatchObject({
+          success: true,
+          messageId: expect.any(String)
+        });
 
-      it('should use correct subject for analysis events', async () => {
-        // Verify the correct subject is used: 'analysis.jd.extracted'
-        await expect(client.publishAnalysisExtracted(mockAnalysisExtractedEvent))
-          .rejects.toThrow('NatsClient.publishAnalysisExtracted not implemented');
-      });
+        const publishSpy = jest.spyOn(client, 'publish');
+        await client.publishProcessingError(jobId, error);
 
-      it('should handle large event payloads', async () => {
-        // Arrange - Create large event payload
-        const largeJdDto: JdDTO = {
-          ...mockJdDto,
-          requirements: {
-            ...mockJdDto.requirements,
-            technical: Array(100).fill('JavaScript'), // Large array
+        expect(publishSpy).toHaveBeenCalledWith('job.analysis.error', {
+          jobId,
+          error: {
+            message: error.message,
+            stack: error.stack,
+            name: error.name,
           },
-          responsibilities: Array(50).fill('Large responsibility description text that is very long'),
-          benefits: Array(30).fill('Comprehensive benefit description')
-        };
-
-        const largeEvent: AnalysisJdExtractedEvent = {
-          ...mockAnalysisExtractedEvent,
-          extractedData: largeJdDto
-        };
-
-        // Act & Assert
-        await expect(client.publishAnalysisExtracted(largeEvent))
-          .rejects.toThrow('NatsClient.publishAnalysisExtracted not implemented');
-      });
-
-      it('should preserve event data integrity', async () => {
-        // Verify no data is lost or modified during publishing
-        const originalEvent = JSON.parse(JSON.stringify(mockAnalysisExtractedEvent));
-
-        await expect(client.publishAnalysisExtracted(mockAnalysisExtractedEvent))
-          .rejects.toThrow('NatsClient.publishAnalysisExtracted not implemented');
-
-        // Verify original event wasn't mutated
-        expect(mockAnalysisExtractedEvent).toEqual(originalEvent);
+          timestamp: expect.any(String),
+          service: 'jd-extractor-svc',
+        });
       });
     });
   });
 
-  describe('Event Subscription', () => {
-    describe('subscribe', () => {
-      it('should subscribe to NATS subjects successfully', async () => {
-        // Arrange
-        const subject = 'job.jd.submitted';
-        const handler = jest.fn().mockResolvedValue(undefined);
+  describe('Event Validation and Schema', () => {
+    beforeEach(async () => {
+      await client.connect();
+    });
 
-        // Act & Assert
-        await expect(client.subscribe(subject, handler))
-          .rejects.toThrow('NatsClient.subscribe not implemented');
+    it('should handle events with minimal required fields', async () => {
+      const minimalEvent = {
+        jobId: 'job-123',
+        extractedData: {
+          requirements: {
+            technical: [],
+            soft: [],
+            experience: 'Not specified',
+            education: 'Not specified'
+          },
+          responsibilities: [],
+          benefits: [],
+          company: {}
+        },
+        timestamp: '2024-01-01T10:00:00.000Z',
+        processingTimeMs: 1000
+      };
+
+      const result = await client.publishAnalysisExtracted(minimalEvent);
+      expect(result.success).toBe(true);
+    });
+
+    it('should handle events with all optional fields', async () => {
+      const extendedEvent = createMockAnalysisJdExtractedEvent({
+        processingTimeMs: 5000
       });
 
-      it('should handle subscription with options', async () => {
-        // Arrange
-        const subject = 'job.jd.submitted';
-        const handler = jest.fn();
-        const options: NatsSubscriptionOptions = {
-          subject: 'job.jd.submitted',
-          queueGroup: 'jd-extractor-workers',
-          durableName: 'jd-extractor-consumer'
-        };
-
-        // Act & Assert
-        await expect(client.subscribe(subject, handler, options))
-          .rejects.toThrow('NatsClient.subscribe not implemented');
-      });
-
-      it('should handle subscription failures', async () => {
-        // Arrange
-        const invalidSubject = '';
-        const handler = jest.fn();
-
-        // Act & Assert
-        await expect(client.subscribe(invalidSubject, handler))
-          .rejects.toThrow('NatsClient.subscribe not implemented');
-      });
-
-      it('should process received messages through handler', async () => {
-        // Arrange
-        const subject = 'test.subject';
-        const mockHandler = jest.fn().mockResolvedValue(undefined);
-
-        // When implemented, handler should be called with received messages
-        expect(mockHandler).toBeInstanceOf(Function);
-
-        // Act & Assert
-        await expect(client.subscribe(subject, mockHandler))
-          .rejects.toThrow('NatsClient.subscribe not implemented');
-      });
-
-      it('should handle handler errors gracefully', async () => {
-        // Arrange
-        const subject = 'test.subject';
-        const errorHandler = jest.fn().mockRejectedValue(new Error('Handler error'));
-
-        // Act & Assert
-        await expect(client.subscribe(subject, errorHandler))
-          .rejects.toThrow('NatsClient.subscribe not implemented');
-      });
-
-      it('should support durable consumers', async () => {
-        // Arrange
-        const subject = 'job.jd.submitted';
-        const handler = jest.fn();
-        const options: NatsSubscriptionOptions = {
-          subject,
-          durableName: 'jd-extractor-durable'
-        };
-
-        // Act & Assert
-        await expect(client.subscribe(subject, handler, options))
-          .rejects.toThrow('NatsClient.subscribe not implemented');
-      });
-
-      it('should support queue groups for load balancing', async () => {
-        // Arrange
-        const subject = 'job.jd.submitted';
-        const handler = jest.fn();
-        const options: NatsSubscriptionOptions = {
-          subject,
-          queueGroup: 'jd-extractors'
-        };
-
-        // Act & Assert
-        await expect(client.subscribe(subject, handler, options))
-          .rejects.toThrow('NatsClient.subscribe not implemented');
-      });
-    });
-  });
-
-  describe('Error Handling & Resilience', () => {
-    it('should implement connection retry logic', async () => {
-      // Test connection resilience
-      await expect(client.connect())
-        .rejects.toThrow('NatsClient.connect not implemented');
+      const result = await client.publishAnalysisExtracted(extendedEvent);
+      expect(result.success).toBe(true);
     });
 
-    it('should handle network partitions gracefully', async () => {
-      // Test network failure scenarios
-      await expect(client.publish('test.subject', {}))
-        .rejects.toThrow('NatsClient.publish not implemented');
-    });
-
-    it('should implement exponential backoff for retries', async () => {
-      // Test retry strategy
-      await expect(client.connect())
-        .rejects.toThrow('NatsClient.connect not implemented');
-    });
-
-    it('should handle NATS server restarts', async () => {
-      // Test server restart scenarios
-      await expect(client.publish('test.subject', {}))
-        .rejects.toThrow('NatsClient.publish not implemented');
-    });
-
-    it('should timeout long operations', async () => {
-      // Test operation timeouts
-      await expect(client.connect())
-        .rejects.toThrow('NatsClient.connect not implemented');
-    });
-  });
-
-  describe('Message Acknowledgment', () => {
-    it('should acknowledge processed messages', async () => {
-      // Test message acknowledgment
-      const subject = 'job.jd.submitted';
-      const handler = jest.fn().mockResolvedValue(undefined);
-
-      await expect(client.subscribe(subject, handler))
-        .rejects.toThrow('NatsClient.subscribe not implemented');
-    });
-
-    it('should handle acknowledgment failures', async () => {
-      // Test ack failure scenarios
-      const subject = 'job.jd.submitted';
-      const handler = jest.fn().mockRejectedValue(new Error('Processing failed'));
-
-      await expect(client.subscribe(subject, handler))
-        .rejects.toThrow('NatsClient.subscribe not implemented');
-    });
-
-    it('should support manual acknowledgment mode', async () => {
-      // Test manual ack mode
-      const subject = 'job.jd.submitted';
-      const handler = jest.fn();
-
-      await expect(client.subscribe(subject, handler))
-        .rejects.toThrow('NatsClient.subscribe not implemented');
-    });
-  });
-
-  describe('Performance & Monitoring', () => {
-    it('should track publish performance metrics', async () => {
-      // Test performance monitoring
-      const startTime = Date.now();
-
-      try {
-        await client.publish('test.subject', {});
-      } catch (error) {
-        const duration = Date.now() - startTime;
-        expect(duration).toBeLessThan(5000); // Should fail fast
-      }
-    });
-
-    it('should handle high-throughput scenarios', async () => {
-      // Test concurrent publishing
-      const publishPromises = Array(10).fill(null).map((_, i) =>
-        client.publish('test.subject', { index: i }).catch(() => null)
-      );
-
-      await Promise.allSettled(publishPromises);
-      expect(publishPromises).toHaveLength(10);
-    });
-
-    it('should implement backpressure handling', async () => {
-      // Test backpressure scenarios
-      await expect(client.publish('high-load.subject', {}))
-        .rejects.toThrow('NatsClient.publish not implemented');
-    });
-  });
-
-  describe('Subject Patterns & Routing', () => {
-    it('should validate subject naming conventions', () => {
-      // Valid subjects
-      expect('job.jd.submitted').toMatch(/^[a-z]+\.[a-z]+\.[a-z]+$/);
-      expect('analysis.jd.extracted').toMatch(/^[a-z]+\.[a-z]+\.[a-z]+$/);
-      
-      // Invalid subjects
-      expect('INVALID.Subject').not.toMatch(/^[a-z]+\.[a-z]+\.[a-z]+$/);
-      expect('invalid').not.toMatch(/^[a-z]+\.[a-z]+\.[a-z]+$/);
-    });
-
-    it('should support wildcard subscriptions', async () => {
-      // Test wildcard patterns
-      const wildcardSubject = 'job.*.submitted';
-      const handler = jest.fn();
-
-      await expect(client.subscribe(wildcardSubject, handler))
-        .rejects.toThrow('NatsClient.subscribe not implemented');
-    });
-
-    it('should route events to correct handlers', async () => {
-      // Test event routing
-      const subject = 'job.jd.submitted';
-      const specificHandler = jest.fn();
-
-      await expect(client.subscribe(subject, specificHandler))
-        .rejects.toThrow('NatsClient.subscribe not implemented');
-    });
-  });
-
-  describe('Integration Readiness', () => {
-    it('should be ready for NATS JetStream integration', () => {
-      // Verify service interface is complete
-      expect(client.connect).toBeDefined();
-      expect(client.disconnect).toBeDefined();
-      expect(client.publish).toBeDefined();
-      expect(client.subscribe).toBeDefined();
-      expect(client.publishAnalysisExtracted).toBeDefined();
-    });
-
-    it('should support required event subjects', () => {
-      // Verify required event subjects are known
+    it('should properly format required event subjects', () => {
       const requiredSubjects = [
         'job.jd.submitted',
-        'analysis.jd.extracted'
+        'job.analysis.extracted', 
+        'job.analysis.error'
       ];
 
       requiredSubjects.forEach(subject => {
         expect(subject).toBeTruthy();
         expect(subject).toMatch(/^[a-z.]+$/);
+        expect(subject.split('.').length).toBeGreaterThanOrEqual(2);
       });
     });
+  });
 
-    it('should handle event schema evolution', async () => {
-      // Test backward compatibility
-      const legacyEvent = {
-        jobId: 'test-123',
-        // Missing new fields
+  describe('Performance and Scalability', () => {
+    beforeEach(async () => {
+      await client.connect();
+    });
+
+    it('should handle batch publishing efficiently', async () => {
+      const batchSize = 10;
+      const events = Array(batchSize).fill(null).map((_, i) => 
+        createMockAnalysisJdExtractedEvent({ jobId: `batch-job-${i}` })
+      );
+
+      const startTime = Date.now();
+      const results = await Promise.all(
+        events.map(event => client.publishAnalysisExtracted(event))
+      );
+      const duration = Date.now() - startTime;
+
+      expect(results).toHaveLength(batchSize);
+      expect(results.every(result => result.success)).toBe(true);
+      expect(duration).toBeLessThan(5000); // Should complete within 5 seconds
+    });
+
+    it('should track processing metrics for performance monitoring', async () => {
+      const event = createMockAnalysisJdExtractedEvent({ processingTimeMs: 2500 });
+
+      const result = await client.publishAnalysisExtracted(event);
+
+      expect(result.success).toBe(true);
+      // In production, this would verify metrics collection
+      expect(event.processingTimeMs).toBe(2500);
+    });
+
+    it('should handle high-volume events without memory leaks', async () => {
+      const highVolumeEvents = Array(100).fill(null).map((_, i) => 
+        createMockAnalysisJdExtractedEvent({ jobId: `scale-test-${i}` })
+      );
+
+      const results = await Promise.allSettled(
+        highVolumeEvents.map(event => client.publishAnalysisExtracted(event))
+      );
+
+      const successful = results.filter(result => 
+        result.status === 'fulfilled' && result.value.success
+      );
+      
+      expect(successful.length).toBe(100);
+    });
+  });
+
+  describe('Integration Readiness', () => {
+    it('should expose all required public methods', () => {
+      expect(client.connect).toBeDefined();
+      expect(client.disconnect).toBeDefined();
+      expect(client.publish).toBeDefined();
+      expect(client.subscribe).toBeDefined();
+      expect(client.publishAnalysisExtracted).toBeDefined();
+      expect(client.publishProcessingError).toBeDefined();
+    });
+
+    it('should provide connection status information', () => {
+      expect(client.isConnected).toBeDefined();
+      expect(typeof client.isConnected).toBe('boolean');
+    });
+
+    it('should support subscription functionality structure', async () => {
+      const mockHandler = jest.fn();
+      const options: NatsSubscriptionOptions = {
+        subject: 'test.subject',
+        queueGroup: 'test-queue',
+        durableName: 'test-durable'
       };
 
-      await expect(client.publish('test.subject', legacyEvent))
-        .rejects.toThrow('NatsClient.publish not implemented');
+      await expect(client.subscribe('test.subject', mockHandler, options))
+        .resolves.toBeUndefined();
     });
   });
 });

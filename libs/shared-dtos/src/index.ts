@@ -5,5 +5,12 @@ export * from './models/resume.dto';
 export * from './events/resume-events.dto';
 export * from './events/job-events.dto';
 
+// Authentication & Authorization
+export * from './auth/user.dto';
+export * from './auth/permissions.dto';
+
+// Encryption
+export * from './encryption/encryption.service';
+
 // Validation (when implemented)
 // export * from './validation/dto-validators';
