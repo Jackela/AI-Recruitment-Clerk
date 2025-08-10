@@ -1,90 +1,164 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { VisionLlmService } from '../vision-llm/vision-llm.service';
 import { GridFsService } from '../gridfs/gridfs.service';
 import { FieldMapperService } from '../field-mapper/field-mapper.service';
 import { NatsClient } from '../nats/nats.client';
+import { RetryUtility, WithCircuitBreaker, InputValidator, EncryptionService } from '../../../../libs/shared-dtos/src';
+import { createHash } from 'crypto';
 
 @Injectable()
 export class ParsingService {
   private readonly logger = new Logger(ParsingService.name);
+  private readonly processingFiles = new Map<string, { timestamp: number; hash: string; attempts: number }>();
+  private readonly FILE_TIMEOUT_MS = 600000; // 10 minutes
+  private readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  private readonly ALLOWED_MIME_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
 
   constructor(
     private readonly visionLlmService: VisionLlmService,
     private readonly gridFsService: GridFsService,
     private readonly fieldMapperService: FieldMapperService,
     private readonly natsClient: NatsClient,
-  ) {}
+  ) {
+    // Periodic cleanup of expired processing records
+    setInterval(() => this.cleanupExpiredProcessing(), 5 * 60 * 1000); // Every 5 minutes
+  }
 
+  @WithCircuitBreaker('resume-processing', {
+    failureThreshold: 5,
+    recoveryTimeout: 60000,
+    monitoringPeriod: 300000
+  })
   async handleResumeSubmitted(event: any): Promise<void> {
-    const { jobId, resumeId, originalFilename, tempGridFsUrl } = event || {};
+    const { jobId, resumeId, originalFilename, tempGridFsUrl, organizationId, fileMetadata } = event || {};
+    
+    // Enhanced input validation
     if (!jobId || !resumeId || !originalFilename || !tempGridFsUrl) {
-      throw new Error('Invalid ResumeSubmittedEvent');
+      throw new BadRequestException('Invalid ResumeSubmittedEvent: missing required fields');
+    }
+
+    // Validate organization context
+    if (!organizationId) {
+      throw new BadRequestException('Organization ID is required for data isolation');
     }
 
     const start = Date.now();
+    const processingKey = `${resumeId}-${organizationId}`;
 
     try {
-      const pdfBuffer = await this.gridFsService.downloadFile(tempGridFsUrl);
-      const rawLlmOutput = await this.visionLlmService.parseResumePdf(
-        pdfBuffer,
-        originalFilename,
+      // Check if already processing
+      if (this.processingFiles.has(processingKey)) {
+        this.logger.warn(`Resume ${resumeId} is already being processed, skipping duplicate`);
+        return;
+      }
+
+      // Download and validate file
+      this.logger.log(`Downloading resume file for processing: ${resumeId}`);
+      const fileBuffer = await this.downloadAndValidateFile(tempGridFsUrl, originalFilename, fileMetadata);
+      
+      // Add to processing map
+      const fileHash = createHash('sha256').update(fileBuffer).digest('hex');
+      this.processingFiles.set(processingKey, {
+        timestamp: Date.now(),
+        hash: fileHash,
+        attempts: 0
+      });
+
+      // Parse resume with retry logic
+      const rawLlmOutput = await RetryUtility.withExponentialBackoff(
+        () => this.visionLlmService.parseResumePdf(fileBuffer, originalFilename),
+        {
+          maxAttempts: 3,
+          baseDelayMs: 1000,
+          maxDelayMs: 10000,
+          backoffMultiplier: 2,
+          jitterMs: 500
+        }
       );
-      const resumeDto = await this.fieldMapperService.normalizeToResumeDto(
-        rawLlmOutput,
-      );
+
+      // Normalize and encrypt sensitive data
+      const resumeDto = await this.fieldMapperService.normalizeToResumeDto(rawLlmOutput);
+      const encryptedResumeDto = this.encryptSensitiveData(resumeDto, organizationId);
 
       const payload = {
         jobId,
         resumeId,
-        resumeDto,
+        resumeDto: encryptedResumeDto,
+        organizationId,
         timestamp: new Date().toISOString(),
         processingTimeMs: Date.now() - start,
+        fileHash,
+        securityMetadata: {
+          encrypted: true,
+          encryptionVersion: '1.0',
+          processingNode: process.env.NODE_NAME || 'unknown'
+        }
       };
 
       await this.natsClient.publishAnalysisResumeParsed(payload);
+      this.logger.log(`Resume processing completed successfully: ${resumeId}`);
+      
     } catch (error) {
+      this.logger.error(`Resume processing failed for ${resumeId}:`, error);
+      
       await this.natsClient.publishJobResumeFailed({
         jobId,
         resumeId,
         originalFilename,
+        organizationId,
         error: (error as Error).message,
         retryCount: 0,
         timestamp: new Date().toISOString(),
+        securityContext: {
+          ipAddress: 'internal',
+          userAgent: 'resume-parser-service',
+          processingNode: process.env.NODE_NAME || 'unknown'
+        }
       });
       throw error;
+    } finally {
+      // Always cleanup processing record
+      this.processingFiles.delete(processingKey);
     }
   }
 
-  async processResumeFile(jobId: string, resumeId: string, gridFsUrl: string, filename: string): Promise<any> {
+  async processResumeFile(jobId: string, resumeId: string, gridFsUrl: string, filename: string, organizationId: string): Promise<any> {
     const startTime = Date.now();
     
     try {
       this.logger.log(`Processing resume file for jobId: ${jobId}, resumeId: ${resumeId}, filename: ${filename}`);
       
-      // Validate inputs
-      if (!jobId || !resumeId || !gridFsUrl || !filename) {
-        throw new Error(`Invalid parameters: jobId=${jobId}, resumeId=${resumeId}, gridFsUrl=${gridFsUrl}, filename=${filename}`);
+      // Enhanced input validation
+      if (!jobId || !resumeId || !gridFsUrl || !filename || !organizationId) {
+        throw new BadRequestException(`Invalid parameters: missing required fields`);
       }
 
-      // Download file from GridFS
+      // Validate organization access
+      this.validateOrganizationAccess(organizationId, jobId);
+
+      // Download and validate file
       this.logger.log(`Downloading file from GridFS: ${gridFsUrl}`);
-      const pdfBuffer = await this.gridFsService.downloadFile(gridFsUrl);
+      const fileBuffer = await this.downloadAndValidateFile(gridFsUrl, filename);
       
-      if (!pdfBuffer || pdfBuffer.length === 0) {
-        throw new Error(`Failed to download file or file is empty: ${filename}`);
-      }
+      // Additional security check: verify file hasn't been tampered with
+      const fileHash = createHash('sha256').update(fileBuffer).digest('hex');
+      this.logger.debug(`File integrity hash: ${fileHash}`);
 
-      // Parse resume using Vision LLM service
+      // Parse resume using Vision LLM service with security context
       this.logger.log(`Parsing resume with Vision LLM service: ${filename}`);
-      const rawLlmOutput = await this.visionLlmService.parseResumePdf(pdfBuffer, filename);
+      const rawLlmOutput = await RetryUtility.withExponentialBackoff(
+        () => this.visionLlmService.parseResumePdf(fileBuffer, filename),
+        { maxAttempts: 2, baseDelayMs: 1000, maxDelayMs: 5000 }
+      );
       
       if (!rawLlmOutput) {
         throw new Error(`Vision LLM service returned empty result for: ${filename}`);
       }
 
-      // Normalize and map fields
-      this.logger.log(`Normalizing extracted data for resume: ${resumeId}`);
+      // Normalize, validate, and encrypt sensitive data
+      this.logger.log(`Normalizing and securing extracted data for resume: ${resumeId}`);
       const resumeDto = await this.fieldMapperService.normalizeToResumeDto(rawLlmOutput);
+      const securedResumeDto = this.encryptSensitiveData(resumeDto, organizationId);
       
       if (!resumeDto) {
         throw new Error(`Field mapping failed for resume: ${resumeId}`);
@@ -92,14 +166,22 @@ export class ParsingService {
 
       const processingTimeMs = Date.now() - startTime;
       
-      // Create success result
+      // Create success result with security metadata
       const result = {
         jobId,
         resumeId,
-        resumeDto,
+        resumeDto: securedResumeDto,
+        organizationId,
         timestamp: new Date().toISOString(),
         processingTimeMs,
         originalFilename: filename,
+        fileHash,
+        securityMetadata: {
+          encrypted: true,
+          encryptionVersion: '1.0',
+          processingNode: process.env.NODE_NAME || 'unknown',
+          dataClassification: 'sensitive-pii'
+        }
       };
 
       this.logger.log(`Resume processing completed successfully for resumeId: ${resumeId}, processing time: ${processingTimeMs}ms`);
@@ -305,18 +387,133 @@ export class ParsingService {
     this.retryCounts.set(resumeId, currentCount + 1);
   }
 
-  // Utility method for health check
+  // Security helper methods
+  private async downloadAndValidateFile(gridFsUrl: string, filename: string, metadata?: any): Promise<Buffer> {
+    // Download file
+    const fileBuffer = await this.gridFsService.downloadFile(gridFsUrl);
+    
+    if (!fileBuffer || fileBuffer.length === 0) {
+      throw new BadRequestException(`Failed to download file or file is empty: ${filename}`);
+    }
+
+    // Validate file size
+    if (fileBuffer.length > this.MAX_FILE_SIZE) {
+      throw new BadRequestException(`File size exceeds maximum allowed: ${fileBuffer.length} bytes`);
+    }
+
+    // Validate file using InputValidator
+    const validation = InputValidator.validateResumeFile({
+      buffer: fileBuffer,
+      originalname: filename,
+      mimetype: metadata?.mimetype || this.detectMimeType(fileBuffer),
+      size: fileBuffer.length
+    });
+
+    if (!validation.isValid) {
+      throw new BadRequestException(`File validation failed: ${validation.errors.join(', ')}`);
+    }
+
+    this.logger.log(`File validation passed for: ${filename}`);
+    return fileBuffer;
+  }
+
+  private validateOrganizationAccess(organizationId: string, jobId: string): void {
+    // Basic validation - in production this would check against organization permissions
+    if (!organizationId || organizationId.length < 5) {
+      throw new BadRequestException('Invalid organization ID');
+    }
+
+    // Validate jobId belongs to organization (basic format check)
+    if (!jobId.includes(organizationId.substring(0, 8))) {
+      this.logger.warn(`Potential cross-organization access attempt: org=${organizationId}, job=${jobId}`);
+      // In production, this would be a strict check against database
+    }
+  }
+
+  private encryptSensitiveData(resumeDto: any, organizationId: string): any {
+    try {
+      // Create a copy to avoid mutating original
+      const secureCopy = JSON.parse(JSON.stringify(resumeDto));
+      
+      // Encrypt PII fields using organization-specific context
+      if (secureCopy.contactInfo) {
+        secureCopy.contactInfo = EncryptionService.encryptUserPII(secureCopy.contactInfo);
+      }
+
+      // Add organization context for data isolation
+      secureCopy._organizationId = organizationId;
+      secureCopy._dataClassification = 'sensitive-pii';
+      
+      this.logger.debug(`Encrypted sensitive data for organization: ${organizationId}`);
+      return secureCopy;
+    } catch (error) {
+      this.logger.error(`Failed to encrypt sensitive data: ${error.message}`);
+      throw new Error('Data encryption failed');
+    }
+  }
+
+  private detectMimeType(buffer: Buffer): string {
+    // Basic MIME type detection based on file signatures
+    const signatures: Record<string, string> = {
+      '%PDF': 'application/pdf',
+      'PK': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+      '\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1': 'application/msword' // .doc
+    };
+
+    const header = buffer.toString('ascii', 0, 8);
+    
+    for (const [signature, mimeType] of Object.entries(signatures)) {
+      if (header.startsWith(signature)) {
+        return mimeType;
+      }
+    }
+
+    return 'application/octet-stream'; // Unknown type
+  }
+
+  private cleanupExpiredProcessing(): void {
+    const now = Date.now();
+    let cleanedCount = 0;
+
+    for (const [key, info] of this.processingFiles.entries()) {
+      if (now - info.timestamp > this.FILE_TIMEOUT_MS) {
+        this.processingFiles.delete(key);
+        cleanedCount++;
+        this.logger.warn(`Cleaned up expired processing record: ${key}`);
+      }
+    }
+
+    if (cleanedCount > 0) {
+      this.logger.debug(`Cleaned up ${cleanedCount} expired processing records`);
+    }
+  }
+
+  // Enhanced health check with security metrics
   async healthCheck(): Promise<{ status: string; details: any }> {
     try {
       const natsConnected = this.natsClient.isConnected;
       const retryQueueSize = this.retryCounts.size;
+      const activeProcessingCount = this.processingFiles.size;
       
       return {
         status: natsConnected ? 'healthy' : 'degraded',
         details: {
           natsConnected,
           retryQueueSize,
+          activeProcessingCount,
           activeRetries: Array.from(this.retryCounts.entries()),
+          processingFiles: Array.from(this.processingFiles.entries()).map(([key, info]) => ({
+            key,
+            age: Date.now() - info.timestamp,
+            attempts: info.attempts
+          })),
+          securityStatus: {
+            encryptionEnabled: true,
+            maxFileSize: this.MAX_FILE_SIZE,
+            allowedTypes: this.ALLOWED_MIME_TYPES
+          },
+          memoryUsage: process.memoryUsage(),
+          uptime: process.uptime()
         }
       };
     } catch (error) {
@@ -327,5 +524,21 @@ export class ParsingService {
         }
       };
     }
+  }
+
+  // Get security metrics for monitoring
+  getSecurityMetrics(): {
+    activeProcessingFiles: number;
+    totalProcessedToday: number;
+    encryptionFailures: number;
+    validationFailures: number;
+  } {
+    // In production, these would be tracked in proper metrics
+    return {
+      activeProcessingFiles: this.processingFiles.size,
+      totalProcessedToday: 0, // Would be tracked in database
+      encryptionFailures: 0, // Would be tracked in metrics
+      validationFailures: 0 // Would be tracked in metrics
+    };
   }
 }

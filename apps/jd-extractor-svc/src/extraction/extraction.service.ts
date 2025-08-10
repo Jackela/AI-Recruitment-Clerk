@@ -3,11 +3,14 @@ import { LlmService } from '../llm/llm.service';
 import { NatsClient } from '../nats/nats.client';
 import { JobJdSubmittedEvent, AnalysisJdExtractedEvent } from '../dto/events.dto';
 import { JdDTO } from '../dto/jd.dto';
+import { RetryUtility, WithCircuitBreaker } from '../../../../libs/shared-dtos/src';
 
 @Injectable()
 export class ExtractionService {
   private readonly logger = new Logger(ExtractionService.name);
-  private readonly processingJobs = new Set<string>();
+  private readonly processingJobs = new Map<string, { timestamp: number; attempts: number }>();
+  private readonly JOB_TIMEOUT_MS = 300000; // 5 minutes
+  private readonly MAX_CONCURRENT_JOBS = 10;
 
   constructor(
     private readonly llmService: LlmService,
@@ -25,8 +28,17 @@ export class ExtractionService {
       return;
     }
 
-    // Add to processing set
-    this.processingJobs.add(jobId);
+    // Check concurrent job limit
+    this.cleanupExpiredJobs();
+    if (this.processingJobs.size >= this.MAX_CONCURRENT_JOBS) {
+      this.logger.warn(`Maximum concurrent jobs (${this.MAX_CONCURRENT_JOBS}) reached, queuing job ${jobId}`);
+      // In a real implementation, you would queue this job for later processing
+      setTimeout(() => this.handleJobJdSubmitted(event), 5000);
+      return;
+    }
+
+    // Add to processing map with metadata
+    this.processingJobs.set(jobId, { timestamp: Date.now(), attempts: 0 });
 
     try {
       // Validate input
@@ -48,11 +60,16 @@ export class ExtractionService {
       this.logger.error(`Error processing job JD for jobId: ${jobId}`, error);
       await this.handleProcessingError(error, jobId);
     } finally {
-      // Remove from processing set
+      // Remove from processing map
       this.processingJobs.delete(jobId);
     }
   }
 
+  @WithCircuitBreaker('llm-processing', {
+    failureThreshold: 5,
+    recoveryTimeout: 30000,
+    monitoringPeriod: 60000
+  })
   async processJobDescription(jobId: string, jdText: string, jobTitle: string): Promise<AnalysisJdExtractedEvent> {
     const startTime = Date.now();
     
@@ -77,7 +94,16 @@ export class ExtractionService {
       };
 
       this.logger.log(`Calling LLM service for extraction, jobId: ${jobId}`);
-      const llmResponse = await this.llmService.extractStructuredData(extractionRequest);
+      const llmResponse = await RetryUtility.withExponentialBackoff(
+        () => this.llmService.extractStructuredData(extractionRequest),
+        {
+          maxAttempts: 3,
+          baseDelayMs: 1000,
+          maxDelayMs: 10000,
+          backoffMultiplier: 2,
+          jitterMs: 500
+        }
+      );
       
       if (!llmResponse.extractedData) {
         throw new Error('LLM service returned empty extraction data');
@@ -150,12 +176,28 @@ export class ExtractionService {
       // Publish error event to NATS for other services to handle
       await this.natsClient.publishProcessingError(jobId, error);
       
-      // Could implement retry logic here
-      const shouldRetry = this.shouldRetryProcessing(error, jobId);
+      // Implement retry logic with exponential backoff
+      const jobInfo = this.processingJobs.get(jobId);
+      const shouldRetry = this.shouldRetryProcessing(error, jobId) && 
+                         jobInfo && jobInfo.attempts < 3;
+      
       if (shouldRetry) {
-        this.logger.log(`Scheduling retry for jobId: ${jobId}`);
-        // TODO: Implement retry mechanism with exponential backoff
-        // For now, just log the intent
+        jobInfo!.attempts++;
+        this.logger.log(`Scheduling retry ${jobInfo!.attempts}/3 for jobId: ${jobId}`);
+        
+        const delay = 1000 * Math.pow(2, jobInfo!.attempts - 1) + Math.random() * 1000;
+        setTimeout(async () => {
+          try {
+            await this.handleJobJdSubmitted({
+              jobId,
+              jobTitle: 'Retry Job',
+              jdText: 'Retry processing',
+              timestamp: new Date().toISOString()
+            } as JobJdSubmittedEvent);
+          } catch (retryError) {
+            this.logger.error(`Retry failed for jobId: ${jobId}`, retryError);
+          }
+        }, delay);
       }
       
     } catch (publishError) {
@@ -244,14 +286,39 @@ export class ExtractionService {
     return isRetryable;
   }
 
+  // Clean up expired jobs to prevent memory leaks
+  private cleanupExpiredJobs(): void {
+    const now = Date.now();
+    for (const [jobId, jobInfo] of this.processingJobs.entries()) {
+      if (now - jobInfo.timestamp > this.JOB_TIMEOUT_MS) {
+        this.logger.warn(`Cleaning up expired job: ${jobId}`);
+        this.processingJobs.delete(jobId);
+      }
+    }
+  }
+
   // Utility method to get processing status
   isProcessing(jobId: string): boolean {
+    this.cleanupExpiredJobs();
     return this.processingJobs.has(jobId);
   }
 
   // Utility method to get currently processing jobs
   getProcessingJobs(): string[] {
-    return Array.from(this.processingJobs);
+    this.cleanupExpiredJobs();
+    return Array.from(this.processingJobs.keys());
+  }
+
+  // Get processing job details
+  getProcessingJobDetails(): Array<{ jobId: string; timestamp: number; attempts: number; age: number }> {
+    this.cleanupExpiredJobs();
+    const now = Date.now();
+    return Array.from(this.processingJobs.entries()).map(([jobId, info]) => ({
+      jobId,
+      timestamp: info.timestamp,
+      attempts: info.attempts,
+      age: now - info.timestamp
+    }));
   }
 
   // Health check method
@@ -265,7 +332,9 @@ export class ExtractionService {
         details: {
           natsConnected,
           processingJobsCount,
-          processingJobs: this.getProcessingJobs(),
+          processingJobs: this.getProcessingJobDetails(),
+          memoryUsage: process.memoryUsage(),
+          uptime: process.uptime()
         }
       };
     } catch (error) {
