@@ -1,28 +1,21 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
-import { Public } from '../auth/decorators/public.decorator';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Public()
   @Get()
   getData() {
     return this.appService.getData();
   }
 
-  @Public()
   @Get('health')
-  getHealth() {
+  healthCheck() {
     return {
       status: 'ok',
+      service: 'report-generator-svc',
       timestamp: new Date().toISOString(),
-      service: 'app-gateway',
-      features: {
-        authentication: 'enabled',
-        authorization: 'enabled'
-      }
     };
   }
 }

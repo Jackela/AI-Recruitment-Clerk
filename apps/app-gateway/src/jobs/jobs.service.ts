@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { CreateJobDto } from './dto/create-job.dto';
 import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
@@ -7,6 +7,7 @@ import { JobListDto, JobDetailDto } from './dto/job-response.dto';
 import { ResumeListItemDto, ResumeDetailDto } from './dto/resume-response.dto';
 import { AnalysisReportDto, ReportsListDto } from './dto/report-response.dto';
 import { InMemoryStorageService } from './storage/in-memory-storage.service';
+import { UserDto, UserRole } from '../../../../libs/shared-dtos/src';
 
 @Injectable()
 export class JobsService {
@@ -15,7 +16,25 @@ export class JobsService {
     this.storageService.seedMockData();
   }
 
-  async createJob(dto: CreateJobDto): Promise<{ jobId: string }> {
+  private hasAccessToResource(user: UserDto, resourceOrganizationId?: string): boolean {
+    // Admins have access to all resources
+    if (user.role === UserRole.ADMIN) {
+      return true;
+    }
+    
+    // Other users can only access resources in their organization
+    return user.organizationId === resourceOrganizationId;
+  }
+
+  private filterByOrganization<T extends { organizationId?: string }>(user: UserDto, items: T[]): T[] {
+    if (user.role === UserRole.ADMIN) {
+      return items; // Admins see everything
+    }
+    
+    return items.filter(item => item.organizationId === user.organizationId);
+  }
+
+  async createJob(dto: CreateJobDto, user: UserDto): Promise<{ jobId: string }> {
     const jobId = randomUUID();
     const job = new JobDetailDto(
       jobId,
@@ -26,10 +45,14 @@ export class JobsService {
       0
     );
     
+    // Add organization context to job
+    (job as any).organizationId = user.organizationId;
+    (job as any).createdBy = user.id;
+    
     this.storageService.createJob(job);
     
     // Here we would publish the event to NATS for actual processing
-    Logger.log(`Published job.jd.submitted for ${jobId}`);
+    Logger.log(`Published job.jd.submitted for ${jobId} by user ${user.id}`);
     
     // Simulate JD processing completion after 2 seconds
     setTimeout(() => {
@@ -44,7 +67,7 @@ export class JobsService {
     return { jobId };
   }
 
-  uploadResumes(jobId: string, files: MulterFile[]): ResumeUploadResponseDto {
+  uploadResumes(jobId: string, files: MulterFile[], user: UserDto): ResumeUploadResponseDto {
     if (!files || files.length === 0) {
       return new ResumeUploadResponseDto(jobId, 0);
     }
@@ -52,6 +75,11 @@ export class JobsService {
     const job = this.storageService.getJob(jobId);
     if (!job) {
       throw new NotFoundException(`Job with ID ${jobId} not found`);
+    }
+
+    // Check if user has access to this job
+    if (!this.hasAccessToResource(user, (job as any).organizationId)) {
+      throw new ForbiddenException('Access denied to this job');
     }
 
     // Process each uploaded resume file
