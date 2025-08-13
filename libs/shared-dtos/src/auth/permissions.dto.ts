@@ -21,6 +21,7 @@ export enum Permission {
   READ_USER = 'read_user',
   UPDATE_USER = 'update_user',
   DELETE_USER = 'delete_user',
+  MANAGE_USER = 'manage_user',
   
   // Organization Management
   READ_ORGANIZATION = 'read_organization',
@@ -29,7 +30,11 @@ export enum Permission {
   // System Administration
   SYSTEM_CONFIG = 'system_config',
   VIEW_LOGS = 'view_logs',
-  MANAGE_INTEGRATIONS = 'manage_integrations'
+  MANAGE_INTEGRATIONS = 'manage_integrations',
+  
+  // Analytics & Metrics
+  TRACK_METRICS = 'track_metrics',
+  VIEW_ANALYTICS = 'view_analytics'
 }
 
 export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
@@ -51,8 +56,11 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.CREATE_USER,
     Permission.READ_USER,
     Permission.UPDATE_USER,
+    Permission.MANAGE_USER,
     Permission.READ_ORGANIZATION,
-    Permission.UPDATE_ORGANIZATION
+    Permission.UPDATE_ORGANIZATION,
+    Permission.TRACK_METRICS,
+    Permission.VIEW_ANALYTICS
   ],
   [UserRole.RECRUITER]: [
     // Job and resume management
@@ -64,7 +72,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.READ_ANALYSIS,
     Permission.GENERATE_REPORT,
     Permission.READ_USER,
-    Permission.READ_ORGANIZATION
+    Permission.READ_ORGANIZATION,
+    Permission.VIEW_ANALYTICS
   ],
   [UserRole.VIEWER]: [
     // Read-only access
@@ -72,7 +81,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.READ_RESUME,
     Permission.READ_ANALYSIS,
     Permission.READ_USER,
-    Permission.READ_ORGANIZATION
+    Permission.READ_ORGANIZATION,
+    Permission.VIEW_ANALYTICS
   ]
 };
 

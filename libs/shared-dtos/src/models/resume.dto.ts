@@ -7,6 +7,7 @@ export interface ResumeDTO {
     email: string | null;
     phone: string | null;
   };
+  summary?: string;
   skills: string[];
   workExperience: {
     company: string;
@@ -20,4 +21,6 @@ export interface ResumeDTO {
     degree: string;
     major: string | null;
   }[];
+  certifications?: string[];
+  languages?: string[];
 }

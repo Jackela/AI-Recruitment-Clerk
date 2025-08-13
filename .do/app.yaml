@@ -1,0 +1,158 @@
+# DigitalOcean App Platform配置
+# 适合需要更多控制和扩展性的部署
+
+name: ai-recruitment-clerk
+region: nyc
+
+# 数据库配置
+databases:
+  - name: ai-recruitment-db
+    engine: PG
+    version: "15"
+    size: basic-xs
+    num_nodes: 1
+
+# 服务配置
+services:
+  # 主API网关
+  - name: app-gateway
+    source_dir: /
+    dockerfile_path: apps/app-gateway/Dockerfile
+    github:
+      repo: your-username/AI-Recruitment-Clerk
+      branch: main
+      deploy_on_push: true
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    http_port: 3000
+    health_check:
+      http_path: /api/health
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: DATABASE_URL
+        value: ${ai-recruitment-db.DATABASE_URL}
+      - key: JWT_SECRET
+        value: "generate-64-char-secret"
+        type: SECRET
+      - key: JWT_REFRESH_SECRET
+        value: "generate-64-char-refresh-secret"
+        type: SECRET
+      - key: ENCRYPTION_KEY
+        value: "generate-32-char-encryption-key"
+        type: SECRET
+      - key: GEMINI_API_KEY
+        value: "your-gemini-api-key"
+        type: SECRET
+
+  # 简历解析服务
+  - name: resume-parser-svc
+    source_dir: /
+    dockerfile_path: apps/resume-parser-svc/Dockerfile
+    github:
+      repo: your-username/AI-Recruitment-Clerk
+      branch: main
+      deploy_on_push: true
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    internal_ports:
+      - 3003
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: ${ai-recruitment-db.DATABASE_URL}
+      - key: GEMINI_API_KEY
+        value: "your-gemini-api-key"
+        type: SECRET
+
+  # 职位分析服务
+  - name: jd-extractor-svc
+    source_dir: /
+    dockerfile_path: apps/jd-extractor-svc/Dockerfile
+    github:
+      repo: your-username/AI-Recruitment-Clerk
+      branch: main
+      deploy_on_push: true
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    internal_ports:
+      - 3002
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: GEMINI_API_KEY
+        value: "your-gemini-api-key"
+        type: SECRET
+
+  # 评分引擎服务
+  - name: scoring-engine-svc
+    source_dir: /
+    dockerfile_path: apps/scoring-engine-svc/Dockerfile
+    github:
+      repo: your-username/AI-Recruitment-Clerk
+      branch: main
+      deploy_on_push: true
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    internal_ports:
+      - 3004
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: ${ai-recruitment-db.DATABASE_URL}
+
+  # 报告生成服务
+  - name: report-generator-svc
+    source_dir: /
+    dockerfile_path: apps/report-generator-svc/Dockerfile
+    github:
+      repo: your-username/AI-Recruitment-Clerk
+      branch: main
+      deploy_on_push: true
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    internal_ports:
+      - 3005
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: ${ai-recruitment-db.DATABASE_URL}
+
+# 静态网站 (前端)
+static_sites:
+  - name: ai-recruitment-frontend
+    source_dir: /
+    github:
+      repo: your-username/AI-Recruitment-Clerk
+      branch: main
+      deploy_on_push: true
+    build_command: cd apps/ai-recruitment-frontend && npm install && npm run build
+    output_dir: dist/apps/ai-recruitment-frontend/browser
+    index_document: index.html
+    error_document: index.html
+    envs:
+      - key: API_BASE_URL
+        value: ${app-gateway.PUBLIC_URL}
+
+# 工作进程 (后台任务)
+workers:
+  - name: background-processor
+    source_dir: /
+    dockerfile_path: apps/app-gateway/Dockerfile
+    github:
+      repo: your-username/AI-Recruitment-Clerk
+      branch: main
+      deploy_on_push: true
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    run_command: "npm run worker"
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: ${ai-recruitment-db.DATABASE_URL}

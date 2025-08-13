@@ -1,0 +1,113 @@
+# AI Recruitment Clerk 告警规则
+groups:
+  - name: ai-recruitment.rules
+    rules:
+      # 服务可用性告警
+      - alert: ServiceDown
+        expr: up == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "服务 {{ $labels.job }} 已下线"
+          description: "服务 {{ $labels.job }} 在实例 {{ $labels.instance }} 上已停止响应超过30秒"
+
+      # 高内存使用率告警
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 2m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "内存使用率过高 ({{ $value }}%)"
+          description: "系统内存使用率已超过85%，当前使用率: {{ $value }}%"
+
+      # 高CPU使用率告警
+      - alert: HighCpuUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 80
+        for: 3m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "CPU使用率过高 ({{ $value }}%)"
+          description: "CPU使用率已持续3分钟超过80%，当前使用率: {{ $value }}%"
+
+      # 磁盘空间不足告警
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 15
+        for: 1m
+        labels:
+          severity: critical
+          service: system
+        annotations:
+          summary: "磁盘空间不足 ({{ $value }}%剩余)"
+          description: "磁盘 {{ $labels.mountpoint }} 可用空间少于15%，当前剩余: {{ $value }}%"
+
+      # MongoDB连接告警
+      - alert: MongoDBDown
+        expr: mongodb_up == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "MongoDB数据库不可用"
+          description: "MongoDB数据库连接失败，服务可能中断"
+
+      # NATS连接告警
+      - alert: NATSDown
+        expr: nats_up == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: messaging
+        annotations:
+          summary: "NATS消息系统不可用"
+          description: "NATS消息系统连接失败，事件处理可能中断"
+
+      # 高错误率告警
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) * 100 > 5
+        for: 2m
+        labels:
+          severity: warning
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "服务 {{ $labels.job }} 错误率过高"
+          description: "服务 {{ $labels.job }} 的HTTP 5xx错误率在过去5分钟内超过5%"
+
+      # 响应时间过长告警
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 3m
+        labels:
+          severity: warning
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "服务 {{ $labels.job }} 响应时间过长"
+          description: "服务 {{ $labels.job }} 的95%响应时间超过2秒，当前值: {{ $value }}秒"
+
+      # 连接池耗尽告警
+      - alert: DatabaseConnectionPoolHigh
+        expr: mongodb_connections_current / mongodb_connections_available * 100 > 80
+        for: 1m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "数据库连接池使用率过高"
+          description: "MongoDB连接池使用率超过80%，当前使用率: {{ $value }}%"
+
+      # JetStream消息积压告警
+      - alert: NATSMessageBacklog
+        expr: nats_jetstream_stream_messages > 1000
+        for: 2m
+        labels:
+          severity: warning
+          service: messaging
+        annotations:
+          summary: "NATS消息积压严重"
+          description: "JetStream中有{{ $value }}条消息未处理，可能存在消费延迟"

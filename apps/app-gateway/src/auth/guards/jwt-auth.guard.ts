@@ -1,4 +1,4 @@
-import { Injectable, ExecutionContext, UnauthorizedException, Logger, TooManyRequestsException } from '@nestjs/common';
+import { Injectable, ExecutionContext, UnauthorizedException, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
@@ -26,7 +26,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const clientId = this.getClientIdentifier(request);
     if (!this.checkRateLimit(clientId, request.path)) {
       this.logger.warn(`Rate limit exceeded for client: ${clientId} on path: ${request.path}`);
-      throw new TooManyRequestsException('Too many requests. Please try again later.');
+      throw new HttpException('Too many requests. Please try again later.', HttpStatus.TOO_MANY_REQUESTS);
     }
 
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [

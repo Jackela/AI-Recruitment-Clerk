@@ -1,90 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FieldMapperService } from './field-mapper.service';
-import { FieldMappingResult } from '../dto/resume-parsing.dto';
+import { SkillsTaxonomy } from '../../../../libs/shared-dtos/src/skills/skills-taxonomy';
+import { DateParser } from './date-parser';
+import { ExperienceCalculator } from './experience-calculator';
+import { ResumeDTO } from '../../../../libs/shared-dtos/src';
 
 describe('FieldMapperService', () => {
   let service: FieldMapperService;
-
-  // Mock raw LLM output with various formats and edge cases
-  const mockRawLlmOutput = {
-    personalInfo: {
-      fullName: 'John Doe',
-      emailAddress: 'john.doe@email.com',
-      phoneNumber: '+1234567890',
-      location: '123 Main St, San Francisco, CA 94105'
-    },
-    technicalSkills: ['Python', 'JavaScript', 'Machine Learning', 'AWS', 'Docker'],
-    softSkills: ['Leadership', 'Communication', 'Problem Solving'],
-    workHistory: [
-      {
-        companyName: 'TechCorp Solutions',
-        jobTitle: 'Senior Software Engineer',
-        startDate: '2020-01',
-        endDate: '2023-12',
-        jobDescription: 'Led development team for ML applications, implemented microservices',
-        technologies: ['Python', 'Docker', 'AWS']
-      },
-      {
-        companyName: 'StartupXYZ',
-        jobTitle: 'Full Stack Developer',
-        startDate: '2018-06',
-        endDate: '2019-12',
-        jobDescription: 'Developed web applications using React and Node.js',
-        technologies: ['JavaScript', 'React', 'Node.js']
-      }
-    ],
-    educationBackground: [
-      {
-        institutionName: 'Stanford University',
-        degreeType: 'Master of Science',
-        studyField: 'Computer Science',
-        graduationDate: '2018-05'
-      },
-      {
-        institutionName: 'UC Berkeley',
-        degreeType: 'Bachelor of Science',
-        studyField: 'Computer Engineering',
-        graduationDate: '2016-05'
-      }
-    ]
-  };
-
-  const expectedNormalizedResumeDto = {
-    contactInfo: {
-      name: 'John Doe',
-      email: 'john.doe@email.com',
-      phone: '+1234567890'
-    },
-    skills: ['Python', 'JavaScript', 'Machine Learning', 'AWS', 'Docker', 'Leadership', 'Communication', 'Problem Solving'],
-    workExperience: [
-      {
-        company: 'TechCorp Solutions',
-        position: 'Senior Software Engineer',
-        startDate: '2020-01-01',
-        endDate: '2023-12-31',
-        summary: 'Led development team for ML applications, implemented microservices'
-      },
-      {
-        company: 'StartupXYZ',
-        position: 'Full Stack Developer',
-        startDate: '2018-06-01',
-        endDate: '2019-12-31',
-        summary: 'Developed web applications using React and Node.js'
-      }
-    ],
-    education: [
-      {
-        school: 'Stanford University',
-        degree: 'Master of Science',
-        major: 'Computer Science'
-      },
-      {
-        school: 'UC Berkeley',
-        degree: 'Bachelor of Science',
-        major: 'Computer Engineering'
-      }
-    ]
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -94,659 +16,706 @@ describe('FieldMapperService', () => {
     service = module.get<FieldMapperService>(FieldMapperService);
   });
 
-  describe('Service Initialization', () => {
-    it('should be defined', () => {
-      expect(service).toBeDefined();
-    });
+  it('should be defined', () => {
+    expect(service).toBeDefined();
   });
 
   describe('normalizeToResumeDto', () => {
-    it('should normalize raw LLM output to ResumeDTO format', async () => {
-      // Act & Assert
-      await expect(service.normalizeToResumeDto(mockRawLlmOutput))
-        .rejects.toThrow('FieldMapperService.normalizeToResumeDto not implemented');
-
-      // Verify expected structure
-      expect(expectedNormalizedResumeDto.contactInfo.name).toBe('John Doe');
-      expect(expectedNormalizedResumeDto.contactInfo.email).toBe('john.doe@email.com');
-      expect(expectedNormalizedResumeDto.skills).toHaveLength(8);
-      expect(expectedNormalizedResumeDto.workExperience).toHaveLength(2);
-      expect(expectedNormalizedResumeDto.education).toHaveLength(2);
-    });
-
-    it('should handle missing contact information', async () => {
-      // Arrange
-      const rawOutputWithMissingContact = {
-        ...mockRawLlmOutput,
-        personalInfo: {
-          fullName: 'Jane Smith'
-          // Missing email and phone
-        }
+    it('should normalize valid raw LLM output', async () => {
+      const rawInput = {
+        contactInfo: {
+          name: 'John Doe',
+          email: 'john.doe@example.com',
+          phone: '+1-555-123-4567'
+        },
+        skills: ['JavaScript', 'Python', 'React', 'Node.js'],
+        workExperience: [
+          {
+            company: 'Tech Corp',
+            position: 'Software Engineer',
+            startDate: '2020-01',
+            endDate: 'present',
+            summary: 'Developed web applications using React and Node.js'
+          }
+        ],
+        education: [
+          {
+            school: 'University of Technology',
+            degree: 'Bachelor of Science',
+            major: 'Computer Science'
+          }
+        ]
       };
 
-      // Act & Assert
-      await expect(service.normalizeToResumeDto(rawOutputWithMissingContact))
-        .rejects.toThrow('FieldMapperService.normalizeToResumeDto not implemented');
+      const result = await service.normalizeToResumeDto(rawInput);
+
+      expect(result.contactInfo.name).toBe('John Doe');
+      expect(result.contactInfo.email).toBe('john.doe@example.com');
+      expect(result.skills).toContain('JavaScript');
+      expect(result.skills).toContain('Python');
+      expect(result.skills).toContain('React');
+      expect(result.skills).toContain('Node.js');
+      expect(result.workExperience).toHaveLength(1);
+      expect(result.workExperience[0].company).toBe('Tech Corp');
+      expect(result.workExperience[0].endDate).toBe('present');
+      expect(result.education).toHaveLength(1);
+      expect(result.education[0].degree).toBe('Bachelor of Science');
     });
 
-    it('should handle empty work experience', async () => {
-      // Arrange
-      const rawOutputWithoutWork = {
-        ...mockRawLlmOutput,
-        workHistory: []
-      };
+    it('should handle missing or invalid input gracefully', async () => {
+      const result = await service.normalizeToResumeDto({});
 
-      // Act & Assert
-      await expect(service.normalizeToResumeDto(rawOutputWithoutWork))
-        .rejects.toThrow('FieldMapperService.normalizeToResumeDto not implemented');
+      expect(result.contactInfo).toEqual({ name: null, email: null, phone: null });
+      expect(result.skills).toEqual([]);
+      expect(result.workExperience).toEqual([]);
+      expect(result.education).toEqual([]);
     });
 
-    it('should handle empty education', async () => {
-      // Arrange
-      const rawOutputWithoutEducation = {
-        ...mockRawLlmOutput,
-        educationBackground: []
-      };
-
-      // Act & Assert
-      await expect(service.normalizeToResumeDto(rawOutputWithoutEducation))
-        .rejects.toThrow('FieldMapperService.normalizeToResumeDto not implemented');
-    });
-
-    it('should handle malformed LLM output', async () => {
-      // Arrange
-      const malformedOutput = {
-        randomField: 'unexpected data',
-        partialInfo: 'incomplete'
-      };
-
-      // Act & Assert
-      await expect(service.normalizeToResumeDto(malformedOutput))
-        .rejects.toThrow('FieldMapperService.normalizeToResumeDto not implemented');
-    });
-
-    it('should normalize various name formats', async () => {
-      // Test different name formats
-      const nameVariations = [
-        { input: { fullName: 'John Doe' }, expected: 'John Doe' },
-        { input: { firstName: 'John', lastName: 'Doe' }, expected: 'John Doe' },
-        { input: { name: 'Dr. John Doe, PhD' }, expected: 'Dr. John Doe, PhD' }
-      ];
-
-      for (const variation of nameVariations) {
-        const rawWithNameVariation = {
-          ...mockRawLlmOutput,
-          personalInfo: variation.input
-        };
-
-        await expect(service.normalizeToResumeDto(rawWithNameVariation))
-          .rejects.toThrow('FieldMapperService.normalizeToResumeDto not implemented');
-      }
+    it('should throw error for invalid input', async () => {
+      await expect(service.normalizeToResumeDto(null)).rejects.toThrow();
+      await expect(service.normalizeToResumeDto('invalid')).rejects.toThrow();
     });
   });
 
   describe('normalizeWithValidation', () => {
-    it('should normalize and validate resume data', async () => {
-      // Act & Assert
-      await expect(service.normalizeWithValidation(mockRawLlmOutput))
-        .rejects.toThrow('FieldMapperService.normalizeWithValidation not implemented');
-
-      // Verify expected result structure
-      const expectedResult: FieldMappingResult = {
-        resumeDto: expect.any(Object),
-        validationErrors: expect.any(Array),
-        mappingConfidence: expect.any(Number)
-      };
-
-      expect(expectedResult.validationErrors).toEqual(expect.any(Array));
-      expect(expectedResult.mappingConfidence).toEqual(expect.any(Number));
-    });
-
-    it('should identify validation errors in malformed data', async () => {
-      // Arrange
-      const invalidData = {
-        personalInfo: {
-          fullName: '', // Empty name
-          emailAddress: 'invalid-email' // Invalid email format
-        },
-        workHistory: [
+    it('should return validation result with confidence score', async () => {
+      const rawInput = {
+        contactInfo: { name: 'Jane Smith', email: 'jane@example.com' },
+        skills: ['JavaScript', 'React'],
+        workExperience: [
           {
-            companyName: 'Test Corp',
-            startDate: 'invalid-date', // Invalid date format
+            company: 'StartupXYZ',
+            position: 'Frontend Developer',
+            startDate: '2021-03',
             endDate: '2023-12'
           }
-        ]
-      };
-
-      // Act & Assert
-      await expect(service.normalizeWithValidation(invalidData))
-        .rejects.toThrow('FieldMapperService.normalizeWithValidation not implemented');
-    });
-
-    it('should calculate mapping confidence scores', async () => {
-      // Test confidence scoring based on data completeness
-      await expect(service.normalizeWithValidation(mockRawLlmOutput))
-        .rejects.toThrow('FieldMapperService.normalizeWithValidation not implemented');
-    });
-
-    it('should handle partially complete data with lower confidence', async () => {
-      // Arrange
-      const partialData = {
-        personalInfo: {
-          fullName: 'John Doe'
-          // Missing email, phone
-        },
-        technicalSkills: ['Python']
-        // Missing work experience, education
-      };
-
-      // Act & Assert
-      await expect(service.normalizeWithValidation(partialData))
-        .rejects.toThrow('FieldMapperService.normalizeWithValidation not implemented');
-    });
-  });
-
-  describe('validateResumeData', () => {
-    it('should validate complete ResumeDTO structure', async () => {
-      // Act & Assert
-      await expect(service.validateResumeData(expectedNormalizedResumeDto))
-        .rejects.toThrow('FieldMapperService.validateResumeData not implemented');
-    });
-
-    it('should identify missing required fields', async () => {
-      // Arrange
-      const incompleteResumeDto = {
-        contactInfo: {
-          name: 'John Doe'
-          // Missing email, phone set to null
-        },
-        skills: [],
-        workExperience: [],
+        ],
         education: []
       };
 
-      // Act & Assert
-      await expect(service.validateResumeData(incompleteResumeDto))
-        .rejects.toThrow('FieldMapperService.validateResumeData not implemented');
+      const result = await service.normalizeWithValidation(rawInput);
+
+      expect(result.resumeDto).toBeDefined();
+      expect(result.validationErrors).toBeDefined();
+      expect(result.mappingConfidence).toBeGreaterThan(0);
+      expect(result.mappingConfidence).toBeLessThanOrEqual(1);
     });
 
-    it('should validate email format in contact info', async () => {
-      // Arrange
-      const invalidEmailResumeDto = {
-        ...expectedNormalizedResumeDto,
-        contactInfo: {
-          ...expectedNormalizedResumeDto.contactInfo,
-          email: 'invalid-email-format'
-        }
-      };
-
-      // Act & Assert
-      await expect(service.validateResumeData(invalidEmailResumeDto))
-        .rejects.toThrow('FieldMapperService.validateResumeData not implemented');
-    });
-
-    it('should validate phone number format', async () => {
-      // Arrange
-      const invalidPhoneResumeDto = {
-        ...expectedNormalizedResumeDto,
-        contactInfo: {
-          ...expectedNormalizedResumeDto.contactInfo,
-          phone: 'invalid-phone'
-        }
-      };
-
-      // Act & Assert
-      await expect(service.validateResumeData(invalidPhoneResumeDto))
-        .rejects.toThrow('FieldMapperService.validateResumeData not implemented');
-    });
-
-    it('should validate date formats in work experience', async () => {
-      // Arrange
-      const invalidDatesResumeDto = {
-        ...expectedNormalizedResumeDto,
+    it('should identify validation errors', async () => {
+      const rawInput = {
+        contactInfo: { email: 'invalid-email' },
+        skills: [],
         workExperience: [
           {
-            company: 'Test Corp',
-            position: 'Developer',
-            startDate: 'invalid-start-date',
-            endDate: 'invalid-end-date',
-            summary: 'Test role'
+            company: '',
+            position: 'Developer'
           }
-        ]
+        ],
+        education: []
       };
 
-      // Act & Assert
-      await expect(service.validateResumeData(invalidDatesResumeDto))
-        .rejects.toThrow('FieldMapperService.validateResumeData not implemented');
+      const result = await service.normalizeWithValidation(rawInput);
+
+      expect(result.validationErrors.length).toBeGreaterThan(0);
+      expect(result.validationErrors.some(err => err.includes('name is missing'))).toBe(true);
+      expect(result.validationErrors.some(err => err.includes('Email format is invalid'))).toBe(true);
+      expect(result.validationErrors.some(err => err.includes('No skills found'))).toBe(true);
+      expect(result.mappingConfidence).toBeLessThan(0.8);
     });
   });
 
   describe('mapContactInfo', () => {
-    it('should map various contact info formats', async () => {
-      // Arrange
-      const rawContactInfo = {
-        fullName: 'John Doe',
-        emailAddress: 'john.doe@email.com',
-        phoneNumber: '+1234567890',
-        address: '123 Main St, SF, CA'
+    it('should normalize valid contact info', async () => {
+      const rawContact = {
+        name: '  John   Doe  ',
+        email: '  JOHN.DOE@EXAMPLE.COM  ',
+        phone: '(555) 123-4567'
       };
 
-      // Act & Assert
-      await expect(service.mapContactInfo(rawContactInfo))
-        .rejects.toThrow('FieldMapperService.mapContactInfo not implemented');
+      const result = await service.mapContactInfo(rawContact);
+
+      expect(result.name).toBe('John Doe');
+      expect(result.email).toBe('john.doe@example.com');
+      expect(result.phone).toBe('(555) 123-4567');
     });
 
-    it('should handle missing contact fields gracefully', async () => {
-      // Arrange
-      const partialContactInfo = {
-        fullName: 'Jane Smith'
-        // Missing email and phone
+    it('should handle invalid contact data', async () => {
+      const rawContact = {
+        name: 'X', // Too short
+        email: 'invalid-email',
+        phone: '123' // Too short
       };
 
-      // Act & Assert
-      await expect(service.mapContactInfo(partialContactInfo))
-        .rejects.toThrow('FieldMapperService.mapContactInfo not implemented');
+      const result = await service.mapContactInfo(rawContact);
+
+      expect(result.name).toBeNull();
+      expect(result.email).toBeNull();
+      expect(result.phone).toBeNull();
     });
 
-    it('should normalize phone number formats', async () => {
-      // Test various phone formats
-      const phoneFormats = [
-        '+1 (234) 567-8900',
-        '234-567-8900',
-        '(234) 567-8900',
-        '234.567.8900',
-        '+1234567890'
-      ];
+    it('should handle missing contact data', async () => {
+      const result = await service.mapContactInfo(null);
 
-      for (const phone of phoneFormats) {
-        const contactInfo = {
-          fullName: 'Test User',
-          phoneNumber: phone
-        };
-
-        await expect(service.mapContactInfo(contactInfo))
-          .rejects.toThrow('FieldMapperService.mapContactInfo not implemented');
-      }
-    });
-
-    it('should validate email addresses', async () => {
-      // Test email validation
-      const emailTests = [
-        { email: 'valid@email.com', valid: true },
-        { email: 'invalid-email', valid: false },
-        { email: 'test@', valid: false },
-        { email: '@domain.com', valid: false }
-      ];
-
-      for (const test of emailTests) {
-        const contactInfo = {
-          fullName: 'Test User',
-          emailAddress: test.email
-        };
-
-        await expect(service.mapContactInfo(contactInfo))
-          .rejects.toThrow('FieldMapperService.mapContactInfo not implemented');
-      }
+      expect(result.name).toBeNull();
+      expect(result.email).toBeNull();
+      expect(result.phone).toBeNull();
     });
   });
 
   describe('mapWorkExperience', () => {
-    it('should map work experience from various formats', async () => {
-      // Act & Assert
-      await expect(service.mapWorkExperience(mockRawLlmOutput.workHistory))
-        .rejects.toThrow('FieldMapperService.mapWorkExperience not implemented');
-    });
-
-    it('should handle missing work experience gracefully', async () => {
-      // Act & Assert
-      await expect(service.mapWorkExperience([]))
-        .rejects.toThrow('FieldMapperService.mapWorkExperience not implemented');
-    });
-
-    it('should normalize company names consistently', async () => {
-      // Arrange
-      const workExperienceVariations = [
-        { companyName: 'Google Inc.', expected: 'Google Inc.' },
-        { companyName: 'google inc', expected: 'Google Inc.' },
-        { companyName: 'GOOGLE INC', expected: 'Google Inc.' }
-      ];
-
-      for (const variation of workExperienceVariations) {
-        const workHistory = [{
-          companyName: variation.companyName,
-          jobTitle: 'Software Engineer',
-          startDate: '2020-01',
-          endDate: '2023-12'
-        }];
-
-        await expect(service.mapWorkExperience(workHistory))
-          .rejects.toThrow('FieldMapperService.mapWorkExperience not implemented');
-      }
-    });
-
-    it('should handle current employment with "present" end date', async () => {
-      // Arrange
-      const currentJobHistory = [
+    it('should map and sort work experience by date', async () => {
+      const rawExperience = [
         {
-          companyName: 'Current Corp',
-          jobTitle: 'Senior Developer',
-          startDate: '2022-01',
+          company: 'Company A',
+          position: 'Junior Dev',
+          startDate: '2019-01',
+          endDate: '2021-01'
+        },
+        {
+          company: 'Company B',
+          position: 'Senior Dev',
+          startDate: '2021-02',
           endDate: 'present'
         }
       ];
 
-      // Act & Assert
-      await expect(service.mapWorkExperience(currentJobHistory))
-        .rejects.toThrow('FieldMapperService.mapWorkExperience not implemented');
+      const result = await service.mapWorkExperience(rawExperience);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].company).toBe('Company B'); // More recent first
+      expect(result[1].company).toBe('Company A');
     });
 
-    it('should consolidate job descriptions and summaries', async () => {
-      // Arrange
-      const detailedWorkHistory = [
+    it('should filter out incomplete experience entries', async () => {
+      const rawExperience = [
         {
-          companyName: 'TechCorp',
-          jobTitle: 'Developer',
-          startDate: '2020-01',
-          endDate: '2023-12',
-          jobDescription: 'Developed applications.',
-          responsibilities: ['Code development', 'Testing', 'Deployment'],
-          achievements: ['Improved performance by 50%', 'Led team of 5']
+          company: 'Company A',
+          position: 'Developer'
+        },
+        {
+          company: '', // Missing company
+          position: 'Developer'
+        },
+        {
+          position: 'Developer' // Missing company
         }
       ];
 
-      // Act & Assert
-      await expect(service.mapWorkExperience(detailedWorkHistory))
-        .rejects.toThrow('FieldMapperService.mapWorkExperience not implemented');
+      const result = await service.mapWorkExperience(rawExperience);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].company).toBe('Company A');
+    });
+
+    it('should handle non-array input', async () => {
+      const result = await service.mapWorkExperience('not an array' as any);
+      expect(result).toEqual([]);
     });
   });
 
   describe('mapEducation', () => {
-    it('should map education from various formats', async () => {
-      // Act & Assert
-      await expect(service.mapEducation(mockRawLlmOutput.educationBackground))
-        .rejects.toThrow('FieldMapperService.mapEducation not implemented');
-    });
-
-    it('should handle missing education gracefully', async () => {
-      // Act & Assert
-      await expect(service.mapEducation([]))
-        .rejects.toThrow('FieldMapperService.mapEducation not implemented');
-    });
-
-    it('should normalize degree types consistently', async () => {
-      // Arrange
-      const degreeVariations = [
-        { input: 'Bachelor of Science', expected: 'Bachelor of Science' },
-        { input: 'BS', expected: 'Bachelor of Science' },
-        { input: 'B.S.', expected: 'Bachelor of Science' },
-        { input: 'Masters', expected: 'Master of Science' },
-        { input: 'MS', expected: 'Master of Science' },
-        { input: 'PhD', expected: 'Doctor of Philosophy' }
-      ];
-
-      for (const variation of degreeVariations) {
-        const education = [{
-          institutionName: 'Test University',
-          degreeType: variation.input,
-          studyField: 'Computer Science'
-        }];
-
-        await expect(service.mapEducation(education))
-          .rejects.toThrow('FieldMapperService.mapEducation not implemented');
-      }
-    });
-
-    it('should handle incomplete education entries', async () => {
-      // Arrange
-      const incompleteEducation = [
+    it('should map education data', async () => {
+      const rawEducation = [
         {
-          institutionName: 'University ABC'
-          // Missing degree and field
+          school: 'MIT',
+          degree: 'BS',
+          major: 'Computer Science'
+        },
+        {
+          institution: 'Stanford', // Alternative field name
+          degree: 'Masters',
+          field: 'Machine Learning' // Alternative field name
         }
       ];
 
-      // Act & Assert
-      await expect(service.mapEducation(incompleteEducation))
-        .rejects.toThrow('FieldMapperService.mapEducation not implemented');
+      const result = await service.mapEducation(rawEducation);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].school).toBe('MIT');
+      expect(result[0].degree).toBe('Bachelor of Science'); // Normalized
+      expect(result[1].school).toBe('Stanford');
+      expect(result[1].major).toBe('Machine Learning');
+    });
+
+    it('should filter out incomplete education entries', async () => {
+      const rawEducation = [
+        {
+          school: 'MIT',
+          degree: 'BS'
+        },
+        {
+          school: '', // Missing school
+          degree: 'MS'
+        },
+        {
+          school: 'Stanford'
+          // Missing degree
+        }
+      ];
+
+      const result = await service.mapEducation(rawEducation);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].school).toBe('MIT');
     });
   });
 
   describe('normalizeSkills', () => {
-    it('should combine and normalize technical and soft skills', async () => {
-      // Arrange
-      const mixedSkills = [
-        'Python', 'python', 'PYTHON',  // Duplicates in different cases
-        'JavaScript', 'JS',             // Aliases
-        'Leadership', 'Team Leadership', // Similar skills
-        'Machine Learning', 'ML'        // Abbreviations
-      ];
+    it('should normalize and deduplicate skills', async () => {
+      const rawSkills = ['JavaScript', 'js', 'React', 'reactjs', 'Python', 'python'];
 
-      // Act & Assert
-      await expect(service.normalizeSkills(mixedSkills))
-        .rejects.toThrow('FieldMapperService.normalizeSkills not implemented');
+      const result = await service.normalizeSkills(rawSkills);
+
+      expect(result).toContain('JavaScript');
+      expect(result).toContain('React');
+      expect(result).toContain('Python');
+      expect(result.length).toBeLessThan(rawSkills.length); // Should deduplicate
     });
 
-    it('should remove duplicate skills', async () => {
-      // Arrange
-      const duplicateSkills = [
-        'Python', 'Python', 'python',
-        'JavaScript', 'Javascript', 'JS'
-      ];
+    it('should handle string input by splitting', async () => {
+      const rawSkills = 'JavaScript, Python, React, Node.js';
 
-      // Act & Assert
-      await expect(service.normalizeSkills(duplicateSkills))
-        .rejects.toThrow('FieldMapperService.normalizeSkills not implemented');
+      const result = await service.normalizeSkills(rawSkills as any);
+
+      expect(Array.isArray(result)).toBe(true);
+      expect(result.length).toBeGreaterThan(0);
     });
 
-    it('should handle empty or null skills array', async () => {
-      // Test empty array
-      await expect(service.normalizeSkills([]))
-        .rejects.toThrow('FieldMapperService.normalizeSkills not implemented');
+    it('should limit skills to reasonable number', async () => {
+      const rawSkills = Array.from({ length: 100 }, (_, i) => `Skill${i}`);
 
-      // Test array with empty strings
-      await expect(service.normalizeSkills(['', '  ', 'Python', '']))
-        .rejects.toThrow('FieldMapperService.normalizeSkills not implemented');
+      const result = await service.normalizeSkills(rawSkills);
+
+      expect(result.length).toBeLessThanOrEqual(50);
     });
 
-    it('should categorize technical vs soft skills', async () => {
-      // Arrange
-      const mixedSkills = [
-        'Python', 'Leadership', 'AWS', 'Communication',
-        'Docker', 'Problem Solving', 'React', 'Teamwork'
+    it('should handle non-array input', async () => {
+      const result = await service.normalizeSkills(123 as any);
+      expect(result).toEqual([]);
+    });
+
+    it('should filter out empty and overly long skills', async () => {
+      const rawSkills = [
+        'JavaScript',
+        '',
+        '   ',
+        'A'.repeat(150), // Too long
+        'Python'
       ];
 
-      // Act & Assert
-      await expect(service.normalizeSkills(mixedSkills))
-        .rejects.toThrow('FieldMapperService.normalizeSkills not implemented');
+      const result = await service.normalizeSkills(rawSkills);
+
+      expect(result).toContain('JavaScript');
+      expect(result).toContain('Python');
+      expect(result.length).toBe(2);
     });
   });
 
   describe('normalizeDates', () => {
-    it('should normalize various date formats to ISO 8601', async () => {
-      // Test various input formats
-      const dateFormats = [
-        { input: '2020-01', expected: '2020-01-01' },
-        { input: '01/2020', expected: '2020-01-01' },
-        { input: 'Jan 2020', expected: '2020-01-01' },
-        { input: 'January 2020', expected: '2020-01-01' },
-        { input: '2020-01-15', expected: '2020-01-15' },
-        { input: 'present', expected: 'present' },
-        { input: 'current', expected: 'present' }
-      ];
-
-      for (const format of dateFormats) {
-        await expect(service.normalizeDates(format.input))
-          .rejects.toThrow('FieldMapperService.normalizeDates not implemented');
-      }
+    it('should normalize various date formats', async () => {
+      expect(await service.normalizeDates('2023-01-15')).toBe('2023-01-15');
+      expect(await service.normalizeDates('01/15/2023')).toBe('2023-01-15');
+      expect(await service.normalizeDates('January 2023')).toBe('2023-01-01');
+      expect(await service.normalizeDates('present')).toBe('present');
+      expect(await service.normalizeDates('current')).toBe('present');
     });
 
-    it('should handle invalid date formats gracefully', async () => {
-      // Test invalid dates
-      const invalidDates = [
-        'invalid-date',
-        '13/2020',  // Invalid month
-        '2020-13',  // Invalid month
-        '',
-        null
-      ];
-
-      for (const invalidDate of invalidDates) {
-        await expect(service.normalizeDates(invalidDate))
-          .rejects.toThrow('FieldMapperService.normalizeDates not implemented');
-      }
-    });
-
-    it('should preserve "present" for current positions', async () => {
-      // Test "present" handling
-      const presentVariations = ['present', 'current', 'now', 'ongoing'];
-
-      for (const present of presentVariations) {
-        await expect(service.normalizeDates(present))
-          .rejects.toThrow('FieldMapperService.normalizeDates not implemented');
-      }
-    });
-
-    it('should handle partial dates consistently', async () => {
-      // Test year-only and month-year formats
-      const partialDates = [
-        { input: '2020', expected: '2020-01-01' },
-        { input: '12/2020', expected: '2020-12-01' }
-      ];
-
-      for (const date of partialDates) {
-        await expect(service.normalizeDates(date.input))
-          .rejects.toThrow('FieldMapperService.normalizeDates not implemented');
-      }
+    it('should handle invalid dates', async () => {
+      expect(await service.normalizeDates('')).toBe('');
+      expect(await service.normalizeDates('invalid-date')).toBe('');
+      expect(await service.normalizeDates(null as any)).toBe('');
     });
   });
 
-  describe('Error Handling & Edge Cases', () => {
-    it('should handle null or undefined input gracefully', async () => {
-      // Test null inputs
-      await expect(service.normalizeToResumeDto(null))
-        .rejects.toThrow('FieldMapperService.normalizeToResumeDto not implemented');
-
-      await expect(service.normalizeToResumeDto(undefined))
-        .rejects.toThrow('FieldMapperService.normalizeToResumeDto not implemented');
-    });
-
-    it('should handle deeply nested malformed data', async () => {
-      // Test complex malformed structures
-      const malformedData = {
-        personalInfo: {
-          nested: {
-            deeply: {
-              buried: {
-                name: 'Test Name'
-              }
-            }
-          }
+  describe('calculateExperience', () => {
+    it('should calculate experience from work history', async () => {
+      const workExperience: ResumeDTO['workExperience'] = [
+        {
+          company: 'Company A',
+          position: 'Junior Developer',
+          startDate: '2020-01-01',
+          endDate: '2022-01-01',
+          summary: 'Worked with JavaScript and React'
+        },
+        {
+          company: 'Company B',
+          position: 'Senior Developer',
+          startDate: '2022-02-01',
+          endDate: 'present',
+          summary: 'Leading development team'
         }
-      };
+      ];
 
-      await expect(service.normalizeToResumeDto(malformedData))
-        .rejects.toThrow('FieldMapperService.normalizeToResumeDto not implemented');
+      const result = await service.calculateExperience(workExperience, ['JavaScript', 'React']);
+
+      expect(result.totalYears).toBeGreaterThan(0);
+      expect(result.seniorityLevel).toBeDefined();
+      expect(result.confidenceScore).toBeGreaterThan(0);
     });
 
-    it('should handle circular references in input data', async () => {
-      // Test circular reference handling
-      const circularData: any = { personalInfo: {} };
-      circularData.personalInfo.self = circularData;
+    it('should handle empty work experience', async () => {
+      const result = await service.calculateExperience([]);
 
-      await expect(service.normalizeToResumeDto(circularData))
-        .rejects.toThrow('FieldMapperService.normalizeToResumeDto not implemented');
-    });
-
-    it('should handle extremely large input data efficiently', async () => {
-      // Test performance with large data
-      const largeData = {
-        personalInfo: { fullName: 'Test User' },
-        technicalSkills: Array(1000).fill('Python'),
-        workHistory: Array(100).fill({
-          companyName: 'Test Corp',
-          jobTitle: 'Developer',
-          startDate: '2020-01',
-          endDate: '2023-12'
-        })
-      };
-
-      await expect(service.normalizeToResumeDto(largeData))
-        .rejects.toThrow('FieldMapperService.normalizeToResumeDto not implemented');
+      expect(result.totalYears).toBe(0);
+      expect(result.seniorityLevel).toBe('Entry');
+      expect(result.confidenceScore).toBe(0);
     });
   });
 
-  describe('Performance & Optimization', () => {
-    it('should process field mapping within acceptable time limits', async () => {
-      // Performance test
-      const startTime = Date.now();
+  describe('extractDates', () => {
+    it('should extract date ranges from text', async () => {
+      const text = 'Worked at Company A from 2020-01 to 2022-12 and then at Company B from 2023-01 to present.';
 
-      try {
-        await service.normalizeToResumeDto(mockRawLlmOutput);
-      } catch (error) {
-        // Expected to fail - implementation not ready
-        const duration = Date.now() - startTime;
-        expect(duration).toBeLessThan(1000); // Should fail fast
+      const result = await service.extractDates(text);
+
+      expect(Array.isArray(result)).toBe(true);
+      if (result.length > 0) {
+        expect(result[0]).toHaveProperty('startDate');
+        expect(result[0]).toHaveProperty('endDate');
+        expect(result[0]).toHaveProperty('confidence');
       }
     });
 
-    it('should handle concurrent mapping operations', async () => {
-      // Test concurrent processing
-      const mappingPromises = Array(5).fill(null).map(() =>
-        service.normalizeToResumeDto(mockRawLlmOutput).catch(() => null)
-      );
-
-      await Promise.allSettled(mappingPromises);
-      expect(mappingPromises).toHaveLength(5);
-    });
-
-    it('should optimize memory usage for large datasets', async () => {
-      // Test memory efficiency
-      await expect(service.normalizeToResumeDto(mockRawLlmOutput))
-        .rejects.toThrow('FieldMapperService.normalizeToResumeDto not implemented');
+    it('should handle empty or invalid text', async () => {
+      expect(await service.extractDates('')).toEqual([]);
+      expect(await service.extractDates(null as any)).toEqual([]);
     });
   });
 
-  describe('Integration Readiness', () => {
-    it('should be ready for resume parsing pipeline integration', () => {
-      // Verify service interface is complete
-      expect(service.normalizeToResumeDto).toBeDefined();
-      expect(service.normalizeWithValidation).toBeDefined();
-      expect(service.validateResumeData).toBeDefined();
-      expect(service.mapContactInfo).toBeDefined();
-      expect(service.mapWorkExperience).toBeDefined();
-      expect(service.mapEducation).toBeDefined();
-      expect(service.normalizeSkills).toBeDefined();
-      expect(service.normalizeDates).toBeDefined();
-    });
-
-    it('should support required ResumeDTO structure', async () => {
-      // Test ResumeDTO structure compliance
-      expect(expectedNormalizedResumeDto).toMatchObject({
+  describe('validateResumeData', () => {
+    it('should pass validation for complete resume data', async () => {
+      const validResume: ResumeDTO = {
         contactInfo: {
-          name: expect.any(String),
-          email: expect.any(String),
-          phone: expect.any(String)
-        },
-        skills: expect.any(Array),
-        workExperience: expect.any(Array),
-        education: expect.any(Array)
-      });
-    });
-
-    it('should handle various LLM output formats consistently', async () => {
-      // Test different LLM output structures
-      const alternativeFormat = {
-        contact: {
           name: 'John Doe',
-          email: 'john@email.com'
+          email: 'john@example.com',
+          phone: '+1-555-123-4567'
         },
-        skills_list: ['Python', 'Java'],
-        job_history: [],
-        education_info: []
+        skills: ['JavaScript', 'Python'],
+        workExperience: [
+          {
+            company: 'Tech Corp',
+            position: 'Developer',
+            startDate: '2020-01-01',
+            endDate: '2023-01-01',
+            summary: 'Software development'
+          }
+        ],
+        education: [
+          {
+            school: 'University',
+            degree: 'Bachelor of Science',
+            major: 'Computer Science'
+          }
+        ]
       };
 
-      await expect(service.normalizeToResumeDto(alternativeFormat))
-        .rejects.toThrow('FieldMapperService.normalizeToResumeDto not implemented');
+      const errors = await service.validateResumeData(validResume);
+
+      expect(errors).toHaveLength(0);
+    });
+
+    it('should identify missing required fields', async () => {
+      const incompleteResume: ResumeDTO = {
+        contactInfo: {
+          name: null,
+          email: 'invalid-email',
+          phone: null
+        },
+        skills: [],
+        workExperience: [
+          {
+            company: '',
+            position: '',
+            startDate: '',
+            endDate: '',
+            summary: ''
+          }
+        ],
+        education: []
+      };
+
+      const errors = await service.validateResumeData(incompleteResume);
+
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors.some(err => err.includes('name is missing'))).toBe(true);
+      expect(errors.some(err => err.includes('Email format is invalid'))).toBe(true);
+      expect(errors.some(err => err.includes('No skills found'))).toBe(true);
+    });
+
+    it('should validate date formats', async () => {
+      const resumeWithInvalidDates: ResumeDTO = {
+        contactInfo: {
+          name: 'John Doe',
+          email: 'john@example.com',
+          phone: null
+        },
+        skills: ['JavaScript'],
+        workExperience: [
+          {
+            company: 'Tech Corp',
+            position: 'Developer',
+            startDate: 'invalid-date',
+            endDate: 'another-invalid-date',
+            summary: 'Software development'
+          }
+        ],
+        education: []
+      };
+
+      const errors = await service.validateResumeData(resumeWithInvalidDates);
+
+      expect(errors.some(err => err.includes('Invalid start date format'))).toBe(true);
+      expect(errors.some(err => err.includes('Invalid end date format'))).toBe(true);
+    });
+  });
+});
+
+describe('SkillsTaxonomy', () => {
+  describe('normalizeSkill', () => {
+    it('should normalize known skills', () => {
+      expect(SkillsTaxonomy.normalizeSkill('javascript')).toBe('JavaScript');
+      expect(SkillsTaxonomy.normalizeSkill('JS')).toBe('JavaScript');
+      expect(SkillsTaxonomy.normalizeSkill('reactjs')).toBe('React');
+      expect(SkillsTaxonomy.normalizeSkill('nodejs')).toBe('Node.js');
+    });
+
+    it('should handle unknown skills', () => {
+      const unknownSkill = 'UnknownFramework';
+      const normalized = SkillsTaxonomy.normalizeSkill(unknownSkill);
+      expect(normalized).toBe(unknownSkill);
+    });
+
+    it('should perform fuzzy matching', () => {
+      const fuzzyMatch = SkillsTaxonomy.fuzzyMatchSkill('Javasript'); // Typo
+      expect(fuzzyMatch).toBe('JavaScript');
+    });
+
+    it('should handle empty or invalid input', () => {
+      expect(SkillsTaxonomy.normalizeSkill('')).toBe('');
+      expect(SkillsTaxonomy.normalizeSkill(null as any)).toBe('');
+      expect(SkillsTaxonomy.normalizeSkill(undefined as any)).toBe('');
+    });
+  });
+
+  describe('getSkillInfo', () => {
+    it('should return skill information', () => {
+      const skillInfo = SkillsTaxonomy.getSkillInfo('JavaScript');
+      expect(skillInfo).toBeDefined();
+      expect(skillInfo?.category).toBe('Programming Languages');
+      expect(skillInfo?.weight).toBeGreaterThan(0);
+    });
+
+    it('should return null for unknown skills', () => {
+      const skillInfo = SkillsTaxonomy.getSkillInfo('UnknownSkill');
+      expect(skillInfo).toBeNull();
+    });
+  });
+
+  describe('calculateSkillScore', () => {
+    it('should calculate skill scores', () => {
+      const skills = ['JavaScript', 'Python', 'React', 'Node.js'];
+      const score = SkillsTaxonomy.calculateSkillScore(skills);
+      expect(score).toBeGreaterThan(0);
+      expect(score).toBeLessThanOrEqual(100);
+    });
+
+    it('should return 0 for empty skills', () => {
+      expect(SkillsTaxonomy.calculateSkillScore([])).toBe(0);
+      expect(SkillsTaxonomy.calculateSkillScore(null as any)).toBe(0);
+    });
+  });
+
+  describe('groupSkillsByCategory', () => {
+    it('should group skills by category', () => {
+      const skills = ['JavaScript', 'Python', 'React', 'PostgreSQL'];
+      const grouped = SkillsTaxonomy.groupSkillsByCategory(skills);
+      
+      expect(grouped['Programming Languages']).toBeDefined();
+      expect(grouped['Frameworks & Libraries']).toBeDefined();
+      expect(grouped['Databases']).toBeDefined();
+    });
+  });
+
+  describe('getRelatedSkills', () => {
+    it('should return related skills', () => {
+      const related = SkillsTaxonomy.getRelatedSkills('JavaScript');
+      expect(Array.isArray(related)).toBe(true);
+      expect(related.length).toBeGreaterThan(0);
+    });
+  });
+});
+
+describe('DateParser', () => {
+  describe('parseDate', () => {
+    it('should parse various date formats', () => {
+      const isoDate = DateParser.parseDate('2023-01-15');
+      expect(isoDate.date).toBeInstanceOf(Date);
+      expect(isoDate.confidence).toBeGreaterThan(0.9);
+
+      const usDate = DateParser.parseDate('01/15/2023');
+      expect(usDate.date).toBeInstanceOf(Date);
+
+      const monthYear = DateParser.parseDate('January 2023');
+      expect(monthYear.date).toBeInstanceOf(Date);
+
+      const present = DateParser.parseDate('present');
+      expect(present.isPresent).toBe(true);
+    });
+
+    it('should handle invalid dates', () => {
+      const invalid = DateParser.parseDate('invalid-date');
+      expect(invalid.date).toBeNull();
+      expect(invalid.confidence).toBe(0);
+    });
+
+    it('should handle empty or null input', () => {
+      const empty = DateParser.parseDate('');
+      expect(empty.date).toBeNull();
+      expect(empty.confidence).toBe(0);
+
+      const nullInput = DateParser.parseDate(null as any);
+      expect(nullInput.date).toBeNull();
+      expect(nullInput.confidence).toBe(0);
+    });
+  });
+
+  describe('normalizeToISO', () => {
+    it('should normalize dates to ISO format', () => {
+      expect(DateParser.normalizeToISO('01/15/2023')).toBe('2023-01-15');
+      expect(DateParser.normalizeToISO('present')).toBe('present');
+      expect(DateParser.normalizeToISO('January 2023')).toBe('2023-01-01');
+    });
+
+    it('should handle invalid dates', () => {
+      expect(DateParser.normalizeToISO('invalid-date')).toBe('');
+      expect(DateParser.normalizeToISO('')).toBe('');
+    });
+  });
+
+  describe('calculateDuration', () => {
+    it('should calculate duration between dates', () => {
+      const startDate = DateParser.parseDate('2020-01-01');
+      const endDate = DateParser.parseDate('2023-01-01');
+      
+      const duration = DateParser.calculateDuration(startDate, endDate);
+      
+      expect(duration.years).toBe(3);
+      expect(duration.months).toBe(0);
+      expect(duration.totalMonths).toBe(36);
+    });
+
+    it('should handle present end date', () => {
+      const startDate = DateParser.parseDate('2020-01-01');
+      const endDate = DateParser.parseDate('present');
+      
+      const duration = DateParser.calculateDuration(startDate, endDate);
+      
+      expect(duration.totalMonths).toBeGreaterThan(0);
+    });
+  });
+
+  describe('isReasonableDate', () => {
+    it('should validate reasonable dates', () => {
+      const validDate = DateParser.parseDate('2020-01-01');
+      expect(DateParser.isReasonableDate(validDate)).toBe(true);
+
+      const presentDate = DateParser.parseDate('present');
+      expect(DateParser.isReasonableDate(presentDate)).toBe(true);
+
+      const oldDate = DateParser.parseDate('1940-01-01');
+      expect(DateParser.isReasonableDate(oldDate)).toBe(false);
+
+      const futureDate = DateParser.parseDate('2030-01-01');
+      expect(DateParser.isReasonableDate(futureDate)).toBe(false);
+    });
+  });
+});
+
+describe('ExperienceCalculator', () => {
+  describe('analyzeExperience', () => {
+    it('should analyze work experience', () => {
+      const workExperience: ResumeDTO['workExperience'] = [
+        {
+          company: 'Tech Corp',
+          position: 'Senior Software Engineer',
+          startDate: '2020-01-01',
+          endDate: '2023-01-01',
+          summary: 'Led development of web applications using React and Node.js'
+        },
+        {
+          company: 'StartupXYZ',
+          position: 'Full Stack Developer',
+          startDate: '2018-06-01',
+          endDate: '2019-12-01',
+          summary: 'Developed and maintained web applications'
+        }
+      ];
+
+      const analysis = ExperienceCalculator.analyzeExperience(workExperience, ['React', 'Node.js']);
+
+      expect(analysis.totalExperienceYears).toBeGreaterThan(0);
+      expect(analysis.seniorityLevel).toBeDefined();
+      expect(['Entry', 'Mid', 'Senior', 'Expert']).toContain(analysis.seniorityLevel);
+      expect(analysis.confidenceScore).toBeGreaterThan(0);
+      expect(analysis.experienceDetails.totalPositions).toBe(2);
+    });
+
+    it('should handle empty experience', () => {
+      const analysis = ExperienceCalculator.analyzeExperience([]);
+
+      expect(analysis.totalExperienceYears).toBe(0);
+      expect(analysis.seniorityLevel).toBe('Entry');
+      expect(analysis.experienceDetails.totalPositions).toBe(0);
+    });
+
+    it('should detect overlapping positions', () => {
+      const overlappingExperience: ResumeDTO['workExperience'] = [
+        {
+          company: 'Company A',
+          position: 'Developer',
+          startDate: '2020-01-01',
+          endDate: '2021-06-01',
+          summary: 'Full-time role'
+        },
+        {
+          company: 'Company B',
+          position: 'Consultant',
+          startDate: '2021-03-01', // Overlaps with Company A
+          endDate: '2021-12-01',
+          summary: 'Part-time consulting'
+        }
+      ];
+
+      const analysis = ExperienceCalculator.analyzeExperience(overlappingExperience);
+
+      expect(analysis.overlappingPositions.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('getExperienceSummary', () => {
+    it('should generate experience summary', () => {
+      const analysis = ExperienceCalculator.analyzeExperience([
+        {
+          company: 'Tech Corp',
+          position: 'Senior Developer',
+          startDate: '2020-01-01',
+          endDate: 'present',
+          summary: 'Software development'
+        }
+      ]);
+
+      const summary = ExperienceCalculator.getExperienceSummary(analysis);
+
+      expect(summary).toContain('years total experience');
+      expect(summary).toContain('level');
+      expect(typeof summary).toBe('string');
+    });
+
+    it('should handle no experience', () => {
+      const analysis = ExperienceCalculator.analyzeExperience([]);
+      const summary = ExperienceCalculator.getExperienceSummary(analysis);
+
+      expect(summary).toBe('No work experience found');
     });
   });
 });

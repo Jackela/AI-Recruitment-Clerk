@@ -7,11 +7,19 @@ import { JobListDto, JobDetailDto } from './dto/job-response.dto';
 import { ResumeListItemDto, ResumeDetailDto } from './dto/resume-response.dto';
 import { AnalysisReportDto, ReportsListDto } from './dto/report-response.dto';
 import { InMemoryStorageService } from './storage/in-memory-storage.service';
-import { UserDto, UserRole } from '../../../../libs/shared-dtos/src';
+import { UserDto, UserRole, JobJdSubmittedEvent, ResumeSubmittedEvent } from '../../../../libs/shared-dtos/src';
+import { NatsClient } from '../nats/nats.client';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class JobsService {
-  constructor(private readonly storageService: InMemoryStorageService) {
+  private readonly logger = new Logger(JobsService.name);
+
+  constructor(
+    private readonly storageService: InMemoryStorageService,
+    private readonly natsClient: NatsClient,
+    private readonly cacheService: CacheService,
+  ) {
     // Initialize with mock data for development
     this.storageService.seedMockData();
   }
@@ -51,16 +59,36 @@ export class JobsService {
     
     this.storageService.createJob(job);
     
-    // Here we would publish the event to NATS for actual processing
-    Logger.log(`Published job.jd.submitted for ${jobId} by user ${user.id}`);
+    // Publish the event to NATS for actual processing
+    const jobJdSubmittedEvent: JobJdSubmittedEvent = {
+      jobId,
+      jobTitle: dto.jobTitle,
+      jdText: dto.jdText,
+      timestamp: new Date().toISOString(),
+    };
     
-    // Simulate JD processing completion after 2 seconds
+    try {
+      const result = await this.natsClient.publishJobJdSubmitted(jobJdSubmittedEvent);
+      if (result.success) {
+        this.logger.log(`Published job.jd.submitted event for ${jobId} by user ${user.id}. MessageId: ${result.messageId}`);
+      } else {
+        this.logger.error(`Failed to publish job.jd.submitted event for ${jobId}: ${result.error}`);
+        // Log error but keep job as processing for retry
+        this.logger.error(`Failed to publish event for job ${jobId}, keeping status as processing for retry`);
+      }
+    } catch (error) {
+      this.logger.error(`Error publishing job.jd.submitted event for ${jobId}:`, error);
+      // Log error but keep job as processing for retry
+      this.logger.error(`Error processing job ${jobId}, keeping status as processing for retry`);
+    }
+    
+    // Keep the simulation for now to maintain existing behavior until real processing is implemented
     setTimeout(() => {
       const existingJob = this.storageService.getJob(jobId);
-      if (existingJob) {
+      if (existingJob && existingJob.status === 'processing') {
         existingJob.status = 'completed';
         this.storageService.createJob(existingJob);
-        Logger.log(`Job ${jobId} processing completed`);
+        this.logger.log(`Job ${jobId} processing completed (simulated)`);
       }
     }, 2000);
     
@@ -83,7 +111,7 @@ export class JobsService {
     }
 
     // Process each uploaded resume file
-    files.forEach((file, index) => {
+    files.forEach(async (file, index) => {
       const resumeId = randomUUID();
       const resume = new ResumeDetailDto(
         resumeId,
@@ -96,10 +124,31 @@ export class JobsService {
       
       this.storageService.createResume(resume);
       
-      // Here we would publish the NATS event for each resume
-      Logger.log(`Published resume.submitted for jobId: ${jobId}, resumeId: ${resumeId}, filename: ${file.originalname}`);
+      // Publish the NATS event for each resume
+      const resumeSubmittedEvent: ResumeSubmittedEvent = {
+        jobId,
+        resumeId,
+        originalFilename: file.originalname,
+        tempGridFsUrl: `/temp/uploads/${resumeId}`, // Temporary URL for internal service access
+      };
       
-      // Simulate resume processing after a delay
+      try {
+        const result = await this.natsClient.publishResumeSubmitted(resumeSubmittedEvent);
+        if (result.success) {
+          this.logger.log(`Published resume.submitted event for jobId: ${jobId}, resumeId: ${resumeId}, filename: ${file.originalname}. MessageId: ${result.messageId}`);
+        } else {
+          this.logger.error(`Failed to publish resume.submitted event for resumeId: ${resumeId}: ${result.error}`);
+          // Update resume status to failed if event publishing failed
+          resume.status = 'failed';
+          this.storageService.createResume(resume);
+        }
+      } catch (error) {
+        this.logger.error(`Error publishing resume.submitted event for resumeId: ${resumeId}:`, error);
+        resume.status = 'failed';
+        this.storageService.createResume(resume);
+      }
+      
+      // Keep the simulation for now to maintain existing behavior until real processing is implemented
       setTimeout(() => {
         this.simulateResumeProcessing(resumeId, jobId, file.originalname);
       }, (index + 1) * 3000); // Stagger processing
@@ -109,73 +158,121 @@ export class JobsService {
   }
 
   // GET methods for frontend
-  getAllJobs(): JobListDto[] {
-    return this.storageService.getAllJobs().map(job => 
-      new JobListDto(job.id, job.title, job.status, job.createdAt, job.resumeCount)
-    );
-  }
-
-  getJobById(jobId: string): JobDetailDto {
-    const job = this.storageService.getJob(jobId);
-    if (!job) {
-      throw new NotFoundException(`Job with ID ${jobId} not found`);
-    }
-    return job;
-  }
-
-  getResumesByJobId(jobId: string): ResumeListItemDto[] {
-    const job = this.storageService.getJob(jobId);
-    if (!job) {
-      throw new NotFoundException(`Job with ID ${jobId} not found`);
-    }
+  async getAllJobs(): Promise<JobListDto[]> {
+    const cacheKey = this.cacheService.generateKey('jobs', 'list');
     
-    return this.storageService.getResumesByJobId(jobId).map(resume => 
-      new ResumeListItemDto(
-        resume.id,
-        resume.jobId,
-        resume.originalFilename,
-        resume.status,
-        resume.createdAt,
-        resume.matchScore,
-        resume.candidateName
-      )
+    return this.cacheService.wrap(
+      cacheKey,
+      async () => {
+        return this.storageService.getAllJobs().map(job => 
+          new JobListDto(job.id, job.title, job.status, job.createdAt, job.resumeCount)
+        );
+      },
+      { ttl: 120000 } // 2分钟缓存(120000毫秒)，职位列表更新不频繁
     );
   }
 
-  getResumeById(resumeId: string): ResumeDetailDto {
-    const resume = this.storageService.getResume(resumeId);
-    if (!resume) {
-      throw new NotFoundException(`Resume with ID ${resumeId} not found`);
-    }
-    return resume;
-  }
-
-  getReportsByJobId(jobId: string): ReportsListDto {
-    const job = this.storageService.getJob(jobId);
-    if (!job) {
-      throw new NotFoundException(`Job with ID ${jobId} not found`);
-    }
+  async getJobById(jobId: string): Promise<JobDetailDto> {
+    const cacheKey = this.cacheService.generateKey('jobs', 'detail', jobId);
     
-    const reports = this.storageService.getReportsByJobId(jobId);
-    return new ReportsListDto(
-      jobId,
-      reports.map(report => ({
-        id: report.id,
-        candidateName: report.candidateName,
-        matchScore: report.matchScore,
-        oneSentenceSummary: report.oneSentenceSummary,
-        status: 'completed' as const,
-        generatedAt: report.generatedAt
-      }))
+    return this.cacheService.wrap(
+      cacheKey,
+      async () => {
+        const job = this.storageService.getJob(jobId);
+        if (!job) {
+          throw new NotFoundException(`Job with ID ${jobId} not found`);
+        }
+        return job;
+      },
+      { ttl: 180000 } // 3分钟缓存(180000毫秒)，职位详情相对稳定
     );
   }
 
-  getReportById(reportId: string): AnalysisReportDto {
-    const report = this.storageService.getReport(reportId);
-    if (!report) {
-      throw new NotFoundException(`Report with ID ${reportId} not found`);
-    }
-    return report;
+  async getResumesByJobId(jobId: string): Promise<ResumeListItemDto[]> {
+    const cacheKey = this.cacheService.generateKey('resumes', 'job', jobId);
+    
+    return this.cacheService.wrap(
+      cacheKey,
+      async () => {
+        const job = this.storageService.getJob(jobId);
+        if (!job) {
+          throw new NotFoundException(`Job with ID ${jobId} not found`);
+        }
+        
+        return this.storageService.getResumesByJobId(jobId).map(resume => 
+          new ResumeListItemDto(
+            resume.id,
+            resume.jobId,
+            resume.originalFilename,
+            resume.status,
+            resume.createdAt,
+            resume.matchScore,
+            resume.candidateName
+          )
+        );
+      },
+      { ttl: 60000 } // 1分钟缓存(60000毫秒)，简历状态变化较频繁
+    );
+  }
+
+  async getResumeById(resumeId: string): Promise<ResumeDetailDto> {
+    const cacheKey = this.cacheService.generateKey('resumes', 'detail', resumeId);
+    
+    return this.cacheService.wrap(
+      cacheKey,
+      async () => {
+        const resume = this.storageService.getResume(resumeId);
+        if (!resume) {
+          throw new NotFoundException(`Resume with ID ${resumeId} not found`);
+        }
+        return resume;
+      },
+      { ttl: 300000 } // 5分钟缓存(300000毫秒)，简历详情相对稳定
+    );
+  }
+
+  async getReportsByJobId(jobId: string): Promise<ReportsListDto> {
+    const cacheKey = this.cacheService.generateKey('reports', 'job', jobId);
+    
+    return this.cacheService.wrap(
+      cacheKey,
+      async () => {
+        const job = this.storageService.getJob(jobId);
+        if (!job) {
+          throw new NotFoundException(`Job with ID ${jobId} not found`);
+        }
+        
+        const reports = this.storageService.getReportsByJobId(jobId);
+        return new ReportsListDto(
+          jobId,
+          reports.map(report => ({
+            id: report.id,
+            candidateName: report.candidateName,
+            matchScore: report.matchScore,
+            oneSentenceSummary: report.oneSentenceSummary,
+            status: 'completed' as const,
+            generatedAt: report.generatedAt
+          }))
+        );
+      },
+      { ttl: 240000 } // 4分钟缓存(240000毫秒)，报告列表更新不频繁
+    );
+  }
+
+  async getReportById(reportId: string): Promise<AnalysisReportDto> {
+    const cacheKey = this.cacheService.generateKey('reports', 'detail', reportId);
+    
+    return this.cacheService.wrap(
+      cacheKey,
+      async () => {
+        const report = this.storageService.getReport(reportId);
+        if (!report) {
+          throw new NotFoundException(`Report with ID ${reportId} not found`);
+        }
+        return report;
+      },
+      { ttl: 600000 } // 10分钟缓存(600000毫秒)，报告内容完成后基本不变
+    );
   }
 
   // Helper methods

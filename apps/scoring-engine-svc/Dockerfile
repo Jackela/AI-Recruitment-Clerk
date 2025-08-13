@@ -1,5 +1,5 @@
 # Multi-stage build for scoring-engine-svc
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -9,20 +9,20 @@ COPY package.json package-lock.json ./
 COPY nx.json tsconfig.base.json ./
 
 # Install dependencies
-RUN npm ci --legacy-peer-deps && npm cache clean --force
+RUN npm ci --legacy-peer-deps && npm cache clean --force --legacy-peer-deps && npm cache clean --force
 
 # Copy source code
 COPY apps/scoring-engine-svc ./apps/scoring-engine-svc
 COPY libs ./libs
 
 # Install dev dependencies for build
-RUN npm ci
+RUN npm ci --legacy-peer-deps && npm cache clean --force
 
 # Build the application
 RUN npx nx build scoring-engine-svc --prod
 
 # Production stage
-FROM node:18-alpine AS production
+FROM node:20-alpine AS production
 
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init

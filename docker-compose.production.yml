@@ -1,46 +1,22 @@
 # AI Recruitment Clerk - Production Docker Compose Configuration
-# Secure production deployment with secrets management
-
-version: '3.8'
-
-# Define secrets for secure credential management
-secrets:
-  mongodb_root_password:
-    external: true
-    name: mongodb_root_password
-  mongodb_app_password:
-    external: true  
-    name: mongodb_app_password
-  jwt_secret:
-    external: true
-    name: jwt_secret
-  jwt_refresh_secret:
-    external: true
-    name: jwt_refresh_secret
-  encryption_master_key:
-    external: true
-    name: encryption_master_key
-  gemini_api_key:
-    external: true
-    name: gemini_api_key
+# Secure production orchestration with proper secrets management
 
 services:
   # Infrastructure Services
   mongodb:
     image: mongo:7.0-jammy
-    container_name: ai-recruitment-mongodb-prod
+    container_name: ai-recruitment-mongodb
     restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongodb_root_password
-      MONGO_INITDB_DATABASE: ai-recruitment
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGODB_DATABASE:-ai-recruitment}
     ports:
-      - "27017:27017"
-    secrets:
-      - mongodb_root_password
+      - "127.0.0.1:27017:27017"  # Bind to localhost only
     volumes:
       - mongodb_data:/data/db
-      - ./secrets/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./config/mongod.conf:/etc/mongod.conf:ro
     networks:
       - ai-recruitment-network
     healthcheck:
@@ -49,73 +25,169 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    # Security hardening
     security_opt:
       - no-new-privileges:true
     read_only: true
     tmpfs:
       - /tmp
-      - /var/tmp
 
-  nats:
-    image: nats:2.10-alpine
-    container_name: ai-recruitment-nats-prod
+  redis:
+    image: redis:7-alpine
+    container_name: ai-recruitment-redis
     restart: unless-stopped
-    command: 
-      - "--jetstream"
-      - "--cluster_name=ai-recruitment"
-      - "--max_mem=512MB"
-      - "--max_file=2GB"
+    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes --save 900 1
     ports:
-      - "4222:4222"
-      - "6222:6222"  
-      - "8222:8222"
+      - "127.0.0.1:6379:6379"  # Bind to localhost only
+    volumes:
+      - redis_data:/data
     networks:
       - ai-recruitment-network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8222/healthz"]
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 3s
+      retries: 5
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  nats:
+    image: nats:2.10-alpine
+    container_name: ai-recruitment-nats
+    restart: unless-stopped
+    command: 
+      - "--jetstream"
+      - "--auth=${NATS_AUTH_TOKEN}"
+    ports:
+      - "127.0.0.1:4222:4222"  # Client connections
+      - "127.0.0.1:6222:6222"  # Cluster connections
+      - "127.0.0.1:8222:8222"  # HTTP management
+    volumes:
+      - nats_data:/data
+    networks:
+      - ai-recruitment-network
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "4222"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
-    # Security hardening
     security_opt:
       - no-new-privileges:true
-    read_only: true
-    tmpfs:
-      - /tmp
 
   # Backend Microservices
   app-gateway:
     build:
       context: .
-      dockerfile: apps/app-gateway/Dockerfile.production
-    container_name: ai-recruitment-gateway-prod
+      dockerfile: apps/app-gateway/Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: ai-recruitment-gateway
     restart: unless-stopped
     environment:
+      # Application Configuration
       PORT: 3000
       NODE_ENV: production
+      
+      # Database Configuration
+      MONGODB_URL: mongodb://${MONGODB_ROOT_USER:-admin}:${MONGODB_ROOT_PASSWORD}@mongodb:27017/${MONGODB_DATABASE:-ai-recruitment}?authSource=admin
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      
+      # Message Queue Configuration
       NATS_URL: nats://nats:4222
-      MONGODB_URL: mongodb://ai-recruitment-app:${MONGODB_APP_PASSWORD}@mongodb:27017/ai-recruitment?authSource=ai-recruitment
-      JWT_SECRET_FILE: /run/secrets/jwt_secret
-      JWT_REFRESH_SECRET_FILE: /run/secrets/jwt_refresh_secret
-      ENCRYPTION_MASTER_KEY_FILE: /run/secrets/encryption_master_key
-      GEMINI_API_KEY_FILE: /run/secrets/gemini_api_key
-      # Security settings
-      ENABLE_HELMET: "true"
-      ENABLE_CSRF: "true"
-      RATE_LIMIT_WINDOW_MS: 900000
-      RATE_LIMIT_MAX_REQUESTS: 100
-      # Logging
-      LOG_LEVEL: info
-      LOG_FORMAT: json
+      NATS_AUTH_TOKEN: ${NATS_AUTH_TOKEN}
+      
+      # Security Configuration
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      BCRYPT_SALT_ROUNDS: ${BCRYPT_SALT_ROUNDS:-12}
+      
+      # API Configuration
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      
+      # Security Features
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-900000}
+      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-100}
+      SESSION_SECRET: ${SESSION_SECRET}
+      CSRF_SECRET: ${CSRF_SECRET}
+      
+      # Monitoring
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
+      ENABLE_REQUEST_LOGGING: ${ENABLE_REQUEST_LOGGING:-false}
     ports:
-      - "3000:3000"
-    secrets:
-      - jwt_secret
-      - jwt_refresh_secret
-      - encryption_master_key
-      - gemini_api_key
+      - "${GATEWAY_PORT:-3000}:3000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    networks:
+      - ai-recruitment-network
+    volumes:
+      - uploads_data:/app/uploads:rw
+      - logs_data:/app/logs:rw
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    user: "1000:1000"
+
+  jd-extractor-svc:
+    build:
+      context: .
+      dockerfile: apps/jd-extractor-svc/Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: ai-recruitment-jd-extractor
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NATS_URL: nats://nats:4222
+      NATS_AUTH_TOKEN: ${NATS_AUTH_TOKEN}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
+    depends_on:
+      nats:
+        condition: service_healthy
+    networks:
+      - ai-recruitment-network
+    volumes:
+      - logs_data:/app/logs:rw
+    healthcheck:
+      test: ["CMD", "pgrep", "node"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    user: "1000:1000"
+
+  resume-parser-svc:
+    build:
+      context: .
+      dockerfile: apps/resume-parser-svc/Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: ai-recruitment-resume-parser
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NATS_URL: nats://nats:4222
+      NATS_AUTH_TOKEN: ${NATS_AUTH_TOKEN}
+      MONGODB_URL: mongodb://${MONGODB_ROOT_USER:-admin}:${MONGODB_ROOT_PASSWORD}@mongodb:27017/${MONGODB_DATABASE:-ai-recruitment}?authSource=admin
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
     depends_on:
       mongodb:
         condition: service_healthy
@@ -124,102 +196,33 @@ services:
     networks:
       - ai-recruitment-network
     volumes:
-      - uploads_data:/app/uploads
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    # Security hardening
-    security_opt:
-      - no-new-privileges:true
-    read_only: true
-    tmpfs:
-      - /tmp
-      - /app/uploads
-
-  jd-extractor-svc:
-    build:
-      context: .
-      dockerfile: apps/jd-extractor-svc/Dockerfile.production
-    container_name: ai-recruitment-jd-extractor-prod
-    restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      NATS_URL: nats://nats:4222
-      GEMINI_API_KEY_FILE: /run/secrets/gemini_api_key
-      LOG_LEVEL: info
-    secrets:
-      - gemini_api_key
-    depends_on:
-      nats:
-        condition: service_healthy
-    networks:
-      - ai-recruitment-network
+      - logs_data:/app/logs:rw
     healthcheck:
       test: ["CMD", "pgrep", "node"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
-    # Security hardening
     security_opt:
       - no-new-privileges:true
-    read_only: true
-    tmpfs:
-      - /tmp
-
-  resume-parser-svc:
-    build:
-      context: .
-      dockerfile: apps/resume-parser-svc/Dockerfile.production
-    container_name: ai-recruitment-resume-parser-prod
-    restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      NATS_URL: nats://nats:4222
-      MONGODB_URL: mongodb://ai-recruitment-app:${MONGODB_APP_PASSWORD}@mongodb:27017/ai-recruitment?authSource=ai-recruitment
-      GEMINI_API_KEY_FILE: /run/secrets/gemini_api_key
-      ENCRYPTION_MASTER_KEY_FILE: /run/secrets/encryption_master_key
-      LOG_LEVEL: info
-    secrets:
-      - gemini_api_key
-      - encryption_master_key
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      nats:
-        condition: service_healthy
-    networks:
-      - ai-recruitment-network
-    healthcheck:
-      test: ["CMD", "pgrep", "node"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    # Security hardening
-    security_opt:
-      - no-new-privileges:true
-    read_only: true
-    tmpfs:
-      - /tmp
+    user: "1000:1000"
 
   scoring-engine-svc:
     build:
       context: .
-      dockerfile: apps/scoring-engine-svc/Dockerfile.production
-    container_name: ai-recruitment-scoring-engine-prod
+      dockerfile: apps/scoring-engine-svc/Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: ai-recruitment-scoring-engine
     restart: unless-stopped
     environment:
       NODE_ENV: production
       NATS_URL: nats://nats:4222
-      MONGODB_URL: mongodb://ai-recruitment-app:${MONGODB_APP_PASSWORD}@mongodb:27017/ai-recruitment?authSource=ai-recruitment
-      GEMINI_API_KEY_FILE: /run/secrets/gemini_api_key
-      LOG_LEVEL: info
-    secrets:
-      - gemini_api_key
+      NATS_AUTH_TOKEN: ${NATS_AUTH_TOKEN}
+      MONGODB_URL: mongodb://${MONGODB_ROOT_USER:-admin}:${MONGODB_ROOT_PASSWORD}@mongodb:27017/${MONGODB_DATABASE:-ai-recruitment}?authSource=admin
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
     depends_on:
       mongodb:
         condition: service_healthy
@@ -227,33 +230,34 @@ services:
         condition: service_healthy
     networks:
       - ai-recruitment-network
+    volumes:
+      - logs_data:/app/logs:rw
     healthcheck:
       test: ["CMD", "pgrep", "node"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
-    # Security hardening
     security_opt:
       - no-new-privileges:true
-    read_only: true
-    tmpfs:
-      - /tmp
+    user: "1000:1000"
 
   report-generator-svc:
     build:
       context: .
-      dockerfile: apps/report-generator-svc/Dockerfile.production
-    container_name: ai-recruitment-report-generator-prod
+      dockerfile: apps/report-generator-svc/Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: ai-recruitment-report-generator
     restart: unless-stopped
     environment:
       NODE_ENV: production
       NATS_URL: nats://nats:4222
-      MONGODB_URL: mongodb://ai-recruitment-app:${MONGODB_APP_PASSWORD}@mongodb:27017/ai-recruitment?authSource=ai-recruitment
-      GEMINI_API_KEY_FILE: /run/secrets/gemini_api_key
-      LOG_LEVEL: info
-    secrets:
-      - gemini_api_key
+      NATS_AUTH_TOKEN: ${NATS_AUTH_TOKEN}
+      MONGODB_URL: mongodb://${MONGODB_ROOT_USER:-admin}:${MONGODB_ROOT_PASSWORD}@mongodb:27017/${MONGODB_DATABASE:-ai-recruitment}?authSource=admin
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
     depends_on:
       mongodb:
         condition: service_healthy
@@ -261,32 +265,29 @@ services:
         condition: service_healthy
     networks:
       - ai-recruitment-network
+    volumes:
+      - logs_data:/app/logs:rw
     healthcheck:
       test: ["CMD", "pgrep", "node"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
-    # Security hardening
     security_opt:
       - no-new-privileges:true
-    read_only: true
-    tmpfs:
-      - /tmp
+    user: "1000:1000"
 
-  # Frontend Application with production optimizations
+  # Frontend Application
   ai-recruitment-frontend:
     build:
       context: .
-      dockerfile: apps/ai-recruitment-frontend/Dockerfile.production
+      dockerfile: apps/ai-recruitment-frontend/Dockerfile
       args:
-        - BUILD_ENV=production
-    container_name: ai-recruitment-frontend-prod
+        NODE_ENV: production
+    container_name: ai-recruitment-frontend
     restart: unless-stopped
-    environment:
-      NODE_ENV: production
     ports:
-      - "4200:80"
+      - "${FRONTEND_PORT:-4200}:80"
     depends_on:
       app-gateway:
         condition: service_healthy
@@ -298,40 +299,36 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
-    # Security hardening
     security_opt:
       - no-new-privileges:true
     read_only: true
     tmpfs:
-      - /tmp
       - /var/cache/nginx
       - /var/run
 
-# Networks with enhanced security
+# Networks
 networks:
   ai-recruitment-network:
     driver: bridge
-    name: ai-recruitment-production-network
+    name: ai-recruitment-network
+    internal: false
     driver_opts:
-      com.docker.network.bridge.enable_icc: "false"
-      com.docker.network.bridge.enable_ip_masquerade: "true"
-    ipam:
-      config:
-        - subnet: 172.20.0.0/24
+      com.docker.network.bridge.name: "ai-recruit-br0"
 
-# Volumes with proper mounting
+# Volumes
 volumes:
   mongodb_data:
-    name: ai-recruitment-mongodb-production-data
+    name: ai-recruitment-mongodb-data
     driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /var/lib/ai-recruitment/mongodb
+  redis_data:
+    name: ai-recruitment-redis-data
+    driver: local
+  nats_data:
+    name: ai-recruitment-nats-data
+    driver: local
   uploads_data:
-    name: ai-recruitment-uploads-production-data
+    name: ai-recruitment-uploads-data
     driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /var/lib/ai-recruitment/uploads
+  logs_data:
+    name: ai-recruitment-logs-data
+    driver: local

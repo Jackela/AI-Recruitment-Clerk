@@ -84,9 +84,20 @@ export class AuthService {
       return null;
     }
 
-    // Remove password from returned user object
-    const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword as UserDto;
+    // Remove password from returned user object while preserving the name getter
+    const userDto: UserDto = {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      get name() { return `${this.firstName} ${this.lastName}`; },
+      role: user.role,
+      organizationId: user.organizationId,
+      status: user.status,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    };
+    return userDto;
   }
 
   async validateJwtPayload(payload: JwtPayload, token?: string): Promise<UserDto> {
@@ -119,8 +130,20 @@ export class AuthService {
       throw new UnauthorizedException('Organization mismatch');
     }
 
-    const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword as UserDto;
+    // Remove password from returned user object while preserving the name getter
+    const userDto: UserDto = {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      get name() { return `${this.firstName} ${this.lastName}`; },
+      role: user.role,
+      organizationId: user.organizationId,
+      status: user.status,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    };
+    return userDto;
   }
 
   async refreshToken(refreshToken: string): Promise<AuthResponseDto> {

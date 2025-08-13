@@ -8,24 +8,7 @@ export interface JobJdSubmittedEvent {
   timestamp: string;
 }
 
-/**
- * @description Job Description DTO
- */
-export interface JdDTO {
-  requirements: {
-    technical: string[];
-    soft: string[];
-    experience: string;
-    education: string;
-  };
-  responsibilities: string[];
-  benefits: string[];
-  company: {
-    name?: string;
-    industry?: string;
-    size?: string;
-  };
-}
+import { JdDTO } from '../dto/jd.dto';
 
 /**
  * @description NATS 事件: analysis.jd.extracted

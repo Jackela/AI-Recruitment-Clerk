@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { LlmService } from './llm.service';
-import { JdDTO, LlmExtractionRequest, LlmExtractionResponse } from '../dto/jd.dto';
+import { JdDTO, LlmExtractionRequest, LlmExtractionResponse } from '../../../../libs/shared-dtos/src';
 import {
   createMockExtractedJdDTO,
   createMockMinimalJdDTO,
