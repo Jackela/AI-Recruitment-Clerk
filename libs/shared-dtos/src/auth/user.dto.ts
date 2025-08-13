@@ -62,6 +62,11 @@ export class UserDto {
   status: UserStatus;
   createdAt: Date;
   updatedAt: Date;
+  
+  // Computed property
+  get name(): string {
+    return `${this.firstName} ${this.lastName}`;
+  }
 }
 
 export class JwtPayload {
@@ -71,6 +76,8 @@ export class JwtPayload {
   organizationId?: string;
   iat?: number;
   exp?: number;
+  aud?: string; // audience
+  iss?: string; // issuer
 }
 
 export class AuthResponseDto {
@@ -84,4 +91,62 @@ export class RefreshTokenDto {
   @IsString()
   @IsNotEmpty()
   refreshToken: string;
+}
+
+export class UpdateUserDto {
+  @IsString()
+  @IsOptional()
+  firstName?: string;
+
+  @IsString()
+  @IsOptional()
+  lastName?: string;
+
+  @IsEmail()
+  @IsOptional()
+  email?: string;
+
+  @IsEnum(UserRole)
+  @IsOptional()
+  role?: UserRole;
+
+  @IsEnum(UserStatus)
+  @IsOptional()
+  status?: UserStatus;
+
+  @IsString()
+  @IsOptional()
+  organizationId?: string;
+}
+
+export class UserPreferencesDto {
+  @IsString()
+  @IsOptional()
+  language?: string;
+
+  @IsString()
+  @IsOptional()
+  timezone?: string;
+
+  @IsString()
+  @IsOptional()
+  theme?: string;
+
+  @IsOptional()
+  notifications?: {
+    email?: boolean;
+    browser?: boolean;
+    mobile?: boolean;
+  };
+}
+
+export class UserActivityDto {
+  id: string;
+  userId: string;
+  action: string;
+  resource?: string;
+  metadata?: Record<string, any>;
+  ipAddress?: string;
+  userAgent?: string;
+  timestamp: Date;
 }

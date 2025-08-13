@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException, ConflictException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserService } from './user.service';
-import { CreateUserDto, LoginDto, UserRole, UserStatus } from '@ai-recruitment-clerk/shared-dtos';
+import { CreateUserDto, LoginDto, UserRole, UserStatus } from '../../../../libs/shared-dtos/src';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -35,11 +35,19 @@ describe('AuthService', () => {
     verify: jest.fn()
   };
 
+  const mockUserService = {
+    findByEmail: jest.fn(),
+    create: jest.fn(),
+    findById: jest.fn(),
+    updateLastActivity: jest.fn().mockResolvedValue(undefined),
+    updatePassword: jest.fn().mockResolvedValue(undefined)
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
-        UserService,
+        { provide: UserService, useValue: mockUserService },
         { provide: JwtService, useValue: mockJwtService },
         { provide: ConfigService, useValue: mockConfigService }
       ],
@@ -52,6 +60,12 @@ describe('AuthService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    // Reset specific mocks
+    mockUserService.findByEmail.mockReset();
+    mockUserService.create.mockReset();
+    mockUserService.findById.mockReset();
+    mockUserService.updateLastActivity.mockReset();
+    mockUserService.updatePassword.mockReset();
   });
 
   describe('register', () => {
@@ -65,12 +79,13 @@ describe('AuthService', () => {
         organizationId: 'org-001'
       };
 
-      jest.spyOn(userService, 'findByEmail').mockResolvedValue(null);
-      jest.spyOn(userService, 'create').mockResolvedValue({
+      mockUserService.findByEmail.mockResolvedValue(null);
+      mockUserService.create.mockResolvedValue({
         id: 'user-1',
         email: createUserDto.email,
         firstName: createUserDto.firstName,
         lastName: createUserDto.lastName,
+        get name() { return `${this.firstName} ${this.lastName}`; },
         role: createUserDto.role,
         organizationId: createUserDto.organizationId,
         status: UserStatus.ACTIVE,
@@ -96,11 +111,12 @@ describe('AuthService', () => {
         role: UserRole.RECRUITER
       };
 
-      jest.spyOn(userService, 'findByEmail').mockResolvedValue({
+      mockUserService.findByEmail.mockResolvedValue({
         id: 'existing-user',
         email: createUserDto.email,
         firstName: createUserDto.firstName,
         lastName: createUserDto.lastName,
+        get name() { return `${this.firstName} ${this.lastName}`; },
         role: createUserDto.role,
         status: UserStatus.ACTIVE,
         createdAt: new Date(),
@@ -124,6 +140,7 @@ describe('AuthService', () => {
         email: loginDto.email,
         firstName: 'Test',
         lastName: 'User',
+        get name() { return `${this.firstName} ${this.lastName}`; },
         role: UserRole.RECRUITER,
         status: UserStatus.ACTIVE,
         createdAt: new Date(),
@@ -161,14 +178,16 @@ describe('AuthService', () => {
         email,
         firstName: 'Test',
         lastName: 'User',
+        get name() { return `${this.firstName} ${this.lastName}`; },
         role: UserRole.RECRUITER,
+        organizationId: 'org-001',
         status: UserStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date(),
-        password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewflcAAaZMhV1S6m' // hashed 'admin123'
+        password: '$2b$12$KTvBL3XuNPpy4zJ9eSlUgOlyTu8IqB96KPkLEvJm1bOnp2pnm3.sq' // hashed 'admin123'
       };
 
-      jest.spyOn(userService, 'findByEmail').mockResolvedValue(mockUserWithPassword);
+      mockUserService.findByEmail.mockResolvedValue(mockUserWithPassword);
 
       // Test with the password that matches the hash
       const result = await service.validateUser(email, 'admin123');
@@ -187,14 +206,16 @@ describe('AuthService', () => {
         email,
         firstName: 'Test',
         lastName: 'User',
+        get name() { return `${this.firstName} ${this.lastName}`; },
         role: UserRole.RECRUITER,
+        organizationId: 'org-001',
         status: UserStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date(),
-        password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewflcAAaZMhV1S6m'
+        password: '$2b$12$KTvBL3XuNPpy4zJ9eSlUgOlyTu8IqB96KPkLEvJm1bOnp2pnm3.sq' // hashed 'admin123'
       };
 
-      jest.spyOn(userService, 'findByEmail').mockResolvedValue(mockUserWithPassword);
+      mockUserService.findByEmail.mockResolvedValue(mockUserWithPassword);
 
       const result = await service.validateUser(email, password);
 
@@ -202,7 +223,7 @@ describe('AuthService', () => {
     });
 
     it('should return null for non-existent user', async () => {
-      jest.spyOn(userService, 'findByEmail').mockResolvedValue(null);
+      mockUserService.findByEmail.mockResolvedValue(null);
 
       const result = await service.validateUser('nonexistent@example.com', 'password');
 
@@ -212,14 +233,16 @@ describe('AuthService', () => {
 
   describe('refreshToken', () => {
     it('should generate new tokens with valid refresh token', async () => {
-      const refreshToken = 'valid-refresh-token';
-      const mockPayload = { sub: 'user-1', email: 'test@example.com' };
+      const refreshToken = 'header.payload.signature'; // Valid JWT format
+      const mockPayload = { sub: 'user-1', email: 'test@example.com', exp: Math.floor(Date.now() / 1000) + 3600 };
       const mockUser = {
         id: 'user-1',
         email: 'test@example.com',
         firstName: 'Test',
         lastName: 'User',
+        get name() { return `${this.firstName} ${this.lastName}`; },
         role: UserRole.RECRUITER,
+        organizationId: 'org-001',
         status: UserStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -227,7 +250,7 @@ describe('AuthService', () => {
       };
 
       mockJwtService.verify.mockReturnValue(mockPayload);
-      jest.spyOn(userService, 'findById').mockResolvedValue(mockUser);
+      mockUserService.findById.mockResolvedValue(mockUser);
 
       const result = await service.refreshToken(refreshToken);
 

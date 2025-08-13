@@ -24,15 +24,23 @@ AI Recruitment Clerk is an **event-driven microservices system** that automates 
 
 ## 📚 Documentation Navigation
 
+### Core Documentation Suite
 | Document Type | File Path | Description |
 |---------------|-----------|-------------|
-| **🔖 Project Overview** | [`PROJECT_OVERVIEW.md`](./docs/en-US/PROJECT_OVERVIEW.md) | **Complete project architecture, tech stack, development status** |
-| 📈 Development Status | [`DEVELOPMENT_STATUS.md`](./docs/en-US/DEVELOPMENT_STATUS.md) | Development progress and milestones |
-| 🏗 System Architecture | [`ARCHITECTURE_SUMMARY.md`](./docs/en-US/ARCHITECTURE_SUMMARY.md) | Technical architecture deep dive |
-| 👨‍💻 Developer Guide | [`DEVELOPER_GUIDE.md`](./docs/en-US/DEVELOPER_GUIDE.md) | Development environment and standards |
+| **📋 Product Requirements (PRD)** | [`docs/PRD.md`](./docs/PRD.md) | **Complete product requirements and business objectives** |
+| **🏗️ High-Level Design (HLD)** | [`docs/HLD.md`](./docs/HLD.md) | **System architecture and design specifications** |
+| **📖 Operations Runbook** | [`docs/RUNBOOK.md`](./docs/RUNBOOK.md) | **Production operations and incident response** |
+| **⚙️ Technical Architecture** | [`docs/TECHNICAL_ARCHITECTURE.md`](./docs/TECHNICAL_ARCHITECTURE.md) | **Detailed technical implementation and performance** |
+
+### Legacy Documentation
+| Document Type | File Path | Description |
+|---------------|-----------|-------------|
+| 🔖 Project Overview | [`docs/en-US/PROJECT_OVERVIEW.md`](./docs/en-US/PROJECT_OVERVIEW.md) | Historical project documentation |
+| 📈 Development Status | [`docs/en-US/DEVELOPMENT_STATUS.md`](./docs/en-US/DEVELOPMENT_STATUS.md) | Development progress tracking |
+| 👨‍💻 Developer Guide | [`DEVELOPER_GUIDE.md`](./DEVELOPER_GUIDE.md) | Development environment setup |
 | 📋 Project Mission | [`specs/PROJECT_MISSION.md`](./specs/PROJECT_MISSION.md) | Project goals and core mission |
-| 🏗 System Context | [`specs/SYSTEM_CONTEXT.mermaid`](./specs/SYSTEM_CONTEXT.mermaid) | System boundary and context diagram |
-| 🛡 API Specification | [`specs/api_spec.openapi.yml`](./specs/api_spec.openapi.yml) | RESTful API interface definitions |
+| 🏗 System Context | [`specs/SYSTEM_CONTEXT.mermaid`](./specs/SYSTEM_CONTEXT.mermaid) | System boundary diagram |
+| 🛡 API Specification | [`specs/api_spec.openapi.yml`](./specs/api_spec.openapi.yml) | RESTful API definitions |
 
 ## 🏗 System Architecture
 

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { JdDTO, LlmExtractionRequest, LlmExtractionResponse } from '../dto/jd.dto';
+import { JdDTO, LlmExtractionRequest, LlmExtractionResponse } from '../../../../libs/shared-dtos/src';
 
 @Injectable()
 export class LlmService {

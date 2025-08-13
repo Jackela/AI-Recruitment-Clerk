@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UploadedFiles, UseInterceptors, UseGuards, Request } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiParam } from '@nestjs/swagger';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
@@ -18,11 +19,18 @@ interface AuthenticatedRequest extends Request {
   user: UserDto;
 }
 
+@ApiTags('jobs')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller()
 export class JobsController {
   constructor(private readonly jobsService: JobsService) {}
 
+  @ApiOperation({ summary: '创建新职位', description: '创建一个新的职位招聘信息，需要CREATE_JOB权限' })
+  @ApiResponse({ status: 202, description: '职位创建请求已接受，正在处理中', type: JobDetailDto })
+  @ApiResponse({ status: 401, description: '未授权访问' })
+  @ApiResponse({ status: 403, description: '权限不足' })
+  @ApiResponse({ status: 400, description: '请求参数错误' })
   @Permissions(Permission.CREATE_JOB)
   @Post('jobs')
   @HttpCode(HttpStatus.ACCEPTED)
@@ -45,37 +53,37 @@ export class JobsController {
   // GET endpoints for frontend
   @Permissions(Permission.READ_JOB)
   @Get('jobs')
-  getAllJobs(@Request() req: AuthenticatedRequest): JobListDto[] {
-    return this.jobsService.getAllJobs(req.user);
+  getAllJobs(@Request() req: AuthenticatedRequest): Promise<JobListDto[]> {
+    return this.jobsService.getAllJobs();
   }
 
   @Permissions(Permission.READ_JOB)
   @Get('jobs/:jobId')
-  getJobById(@Request() req: AuthenticatedRequest, @Param('jobId') jobId: string): JobDetailDto {
-    return this.jobsService.getJobById(jobId, req.user);
+  getJobById(@Request() req: AuthenticatedRequest, @Param('jobId') jobId: string): Promise<JobDetailDto> {
+    return this.jobsService.getJobById(jobId);
   }
 
   @Permissions(Permission.READ_RESUME)
   @Get('jobs/:jobId/resumes')
-  getResumesByJobId(@Request() req: AuthenticatedRequest, @Param('jobId') jobId: string): ResumeListItemDto[] {
-    return this.jobsService.getResumesByJobId(jobId, req.user);
+  getResumesByJobId(@Request() req: AuthenticatedRequest, @Param('jobId') jobId: string): Promise<ResumeListItemDto[]> {
+    return this.jobsService.getResumesByJobId(jobId);
   }
 
   @Permissions(Permission.GENERATE_REPORT)
   @Get('jobs/:jobId/reports')
-  getReportsByJobId(@Request() req: AuthenticatedRequest, @Param('jobId') jobId: string): ReportsListDto {
-    return this.jobsService.getReportsByJobId(jobId, req.user);
+  getReportsByJobId(@Request() req: AuthenticatedRequest, @Param('jobId') jobId: string): Promise<ReportsListDto> {
+    return this.jobsService.getReportsByJobId(jobId);
   }
 
   @Permissions(Permission.READ_RESUME)
   @Get('resumes/:resumeId')
-  getResumeById(@Request() req: AuthenticatedRequest, @Param('resumeId') resumeId: string): ResumeDetailDto {
-    return this.jobsService.getResumeById(resumeId, req.user);
+  getResumeById(@Request() req: AuthenticatedRequest, @Param('resumeId') resumeId: string): Promise<ResumeDetailDto> {
+    return this.jobsService.getResumeById(resumeId);
   }
 
   @Permissions(Permission.READ_ANALYSIS)
   @Get('reports/:reportId')
-  getReportById(@Request() req: AuthenticatedRequest, @Param('reportId') reportId: string): AnalysisReportDto {
-    return this.jobsService.getReportById(reportId, req.user);
+  getReportById(@Request() req: AuthenticatedRequest, @Param('reportId') reportId: string): Promise<AnalysisReportDto> {
+    return this.jobsService.getReportById(reportId);
   }
 }

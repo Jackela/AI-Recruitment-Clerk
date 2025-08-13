@@ -47,8 +47,8 @@ export class RetryUtility {
         // Don't retry on last attempt or if error is not retriable
         if (attempt === config.maxAttempts || !config.retryIf!(error)) {
           this.logger.error(
-            `Operation failed after ${attempt} attempts: ${error.message}`,
-            error.stack
+            `Operation failed after ${attempt} attempts: ${error instanceof Error ? error.message : String(error)}`,
+            error instanceof Error ? error.stack : undefined
           );
           throw error;
         }
@@ -63,7 +63,7 @@ export class RetryUtility {
         const totalDelay = exponentialDelay + jitter;
 
         this.logger.warn(
-          `Operation failed (attempt ${attempt}), retrying in ${totalDelay.toFixed(0)}ms: ${error.message}`
+          `Operation failed (attempt ${attempt}), retrying in ${totalDelay.toFixed(0)}ms: ${error instanceof Error ? error.message : String(error)}`
         );
 
         await this.delay(totalDelay);
@@ -145,7 +145,7 @@ export class CircuitBreaker {
     if (this.state === 'OPEN') {
       if (Date.now() - this.lastFailureTime > this.options.recoveryTimeout) {
         this.state = 'HALF_OPEN';
-        this.logger.log(`Circuit breaker ${this.name} moving to HALF_OPEN state`);
+        // Circuit breaker moving to HALF_OPEN state
       } else {
         throw new Error(`Circuit breaker ${this.name} is OPEN`);
       }
@@ -156,7 +156,7 @@ export class CircuitBreaker {
       
       if (this.state === 'HALF_OPEN') {
         this.reset();
-        this.logger.log(`Circuit breaker ${this.name} moving to CLOSED state`);
+        // Circuit breaker moving to CLOSED state
       }
       
       return result;
@@ -172,9 +172,7 @@ export class CircuitBreaker {
 
     if (this.failures >= this.options.failureThreshold) {
       this.state = 'OPEN';
-      this.logger.warn(
-        `Circuit breaker ${this.name} opened after ${this.failures} failures`
-      );
+      // Circuit breaker opened after failures
     }
   }
 

@@ -166,15 +166,14 @@ scrape_configs:
         target_label: service
         replacement: 'web-server'
 
-# Remote write configuration for long-term storage
-remote_write:
-  - url: "http://remote-storage:9201/write"
-    queue_config:
-      max_samples_per_send: 1000
-      max_shards: 200
-      capacity: 2500
+# Remote storage configurations disabled - no external storage configured
+# remote_write:
+#   - url: "http://remote-storage:9201/write"
+#     queue_config:
+#       max_samples_per_send: 1000
+#       max_shards: 200
+#       capacity: 2500
 
-# Remote read configuration
-remote_read:
-  - url: "http://remote-storage:9201/read"
-    read_recent: true
+# remote_read:
+#   - url: "http://remote-storage:9201/read"
+#     read_recent: true

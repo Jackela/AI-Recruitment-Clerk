@@ -1,0 +1,99 @@
+# Production-Scale Load Testing Configuration
+# AI Recruitment Clerk - Performance Validation for Production Readiness
+
+services:
+  # K6 High-Scale Load Testing
+  k6-production:
+    image: grafana/k6:0.52.0
+    container_name: ai-recruitment-k6-production
+    volumes:
+      - ./performance/scripts:/scripts:ro
+      - ./performance/results:/results
+    environment:
+      - K6_OUT=influxdb=http://influxdb:8086/k6
+      - K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
+      - K6_PROMETHEUS_RW_TREND_STATS=p(95),p(99),min,max
+    networks:
+      - ai-recruitment-network
+      - performance-network
+    profiles:
+      - production-testing
+
+  # JMeter for Complex Scenarios
+  jmeter:
+    image: justb4/jmeter:5.6.3
+    container_name: ai-recruitment-jmeter
+    volumes:
+      - ./performance/jmeter:/opt/apache-jmeter-5.6.3/test-plans:ro
+      - ./performance/results:/results
+    networks:
+      - ai-recruitment-network
+    profiles:
+      - production-testing
+
+  # Artillery for Gradual Load Testing
+  artillery-production:
+    image: artilleryio/artillery:2.0.13
+    container_name: ai-recruitment-artillery-production
+    volumes:
+      - ./performance/artillery:/artillery:ro
+      - ./performance/results:/results
+    networks:
+      - ai-recruitment-network
+    profiles:
+      - production-testing
+    
+  # Stress Testing Database
+  mongodb-stress:
+    image: mongo:7.0-jammy
+    container_name: ai-recruitment-mongodb-stress
+    command: >
+      mongosh --eval "
+        for(let i = 0; i < 10000; i++) {
+          db.stress_test.insertOne({
+            _id: 'stress_' + i,
+            data: new Array(1000).join('x'),
+            timestamp: new Date(),
+            index: i
+          });
+        }
+        print('Stress test data inserted');
+      "
+    networks:
+      - ai-recruitment-network
+    profiles:
+      - stress-testing
+
+  # Performance Metrics Collector
+  performance-collector:
+    build:
+      context: .
+      dockerfile: performance/Dockerfile.collector
+    container_name: ai-recruitment-performance-collector
+    volumes:
+      - ./performance/results:/results
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - MONITOR_CONTAINERS=ai-recruitment-gateway,ai-recruitment-mongodb,ai-recruitment-nats
+      - COLLECT_INTERVAL=5
+      - METRICS_OUTPUT=/results/system-metrics.json
+    networks:
+      - ai-recruitment-network
+      - monitoring-network
+    profiles:
+      - monitoring
+
+networks:
+  ai-recruitment-network:
+    external: true
+    name: ai-recruitment-network
+  performance-network:
+    external: true
+    name: ai-recruitment-performance
+  monitoring-network:
+    external: true
+    name: ai-recruitment-monitoring
+
+volumes:
+  performance_results:
+    name: ai-recruitment-performance-results

@@ -1,0 +1,69 @@
+# Filebeat配置 - Docker容器日志收集
+filebeat.inputs:
+  # Docker容器日志
+  - type: container
+    enabled: true
+    paths:
+      - '/var/lib/docker/containers/*/*.log'
+    processors:
+      - add_docker_metadata:
+          host: "unix:///var/run/docker.sock"
+      - decode_json_fields:
+          fields: ["message"]
+          target: "json"
+          overwrite_keys: true
+
+  # 应用程序日志文件
+  - type: log
+    enabled: true
+    paths:
+      - '/app/logs/*.log'
+    fields:
+      service: ai-recruitment
+      environment: production
+    fields_under_root: true
+    multiline.pattern: '^\d{4}-\d{2}-\d{2}'
+    multiline.negate: true
+    multiline.match: after
+
+# 处理器配置
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+  
+  - add_labels:
+      labels:
+        service: ai-recruitment-clerk
+        environment: production
+  
+  # 字段重命名和清理
+  - rename:
+      fields:
+        - from: "container.name"
+          to: "service_name"
+        - from: "container.image.name"
+          to: "image"
+  
+  # 删除不需要的字段
+  - drop_fields:
+      fields: ["agent", "ecs", "input", "log.file.path"]
+
+# 输出到Logstash
+output.logstash:
+  hosts: ["logstash:5044"]
+  template.enabled: true
+  template.pattern: "ai-recruitment-*"
+  
+# 输出到Elasticsearch (可选)
+# output.elasticsearch:
+#   hosts: ["elasticsearch:9200"]
+#   index: "ai-recruitment-logs-%{+yyyy.MM.dd}"
+
+# 日志级别
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644

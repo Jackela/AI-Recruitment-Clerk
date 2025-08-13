@@ -1,5 +1,5 @@
 # Multi-stage build for Angular frontend
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -21,8 +21,8 @@ RUN npx nx build ai-recruitment-frontend --prod
 # Production stage with Nginx
 FROM nginx:alpine AS production
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Install dumb-init and curl for proper signal handling and health checks
+RUN apk add --no-cache dumb-init curl
 
 # Copy built application to nginx html directory
 COPY --from=builder /app/dist/apps/ai-recruitment-frontend/browser /usr/share/nginx/html
@@ -60,8 +60,23 @@ server {
     gzip on;
     gzip_vary on;
     gzip_min_length 1024;
-    gzip_proxied expired no-cache no-store private must-revalidate auth;
-    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/javascript;
+    gzip_proxied expired no-cache no-store private auth;
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/javascript application/json;
+    gzip_comp_level 6;
+
+    # Browser caching
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header X-Content-Type-Options nosniff;
+    }
+
+    # Prevent access to sensitive files
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
 }
 EOF
 
@@ -70,7 +85,7 @@ EXPOSE 80
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
+  CMD curl -f http://localhost:80/ || exit 1
 
 # Start nginx
 ENTRYPOINT ["dumb-init", "--"]

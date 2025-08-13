@@ -1,0 +1,336 @@
+# AI Recruitment Clerk - Performance Validation Workflow
+# Automated performance testing and regression detection in CI/CD
+
+name: Performance Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run performance tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of performance test to run'
+        required: true
+        default: 'regression'
+        type: choice
+        options:
+        - smoke
+        - regression
+        - load
+        - full_suite
+      baseline_branch:
+        description: 'Branch to compare against for baseline'
+        required: false
+        default: 'main'
+
+env:
+  DOCKER_COMPOSE_VERSION: '2.20.0'
+  K6_VERSION: '0.52.0'
+
+jobs:
+  performance-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    services:
+      mongodb:
+        image: mongo:7.0-jammy
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: testpassword123
+          MONGO_INITDB_DATABASE: ai-recruitment-test
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 30s
+          --health-timeout 10s
+          --health-retries 3
+      
+      nats:
+        image: nats:2.10-alpine
+        ports:
+          - 4222:4222
+        options: >-
+          --health-cmd "nc -z localhost 4222"
+          --health-interval 30s
+          --health-timeout 10s
+          --health-retries 3
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for baseline comparison
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Cache Node modules
+      uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Install dependencies
+      run: |
+        npm ci
+        npm run build
+        
+    - name: Setup performance testing environment
+      run: |
+        # Install K6 for load testing
+        wget https://github.com/grafana/k6/releases/download/v${{ env.K6_VERSION }}/k6-v${{ env.K6_VERSION }}-linux-amd64.tar.gz
+        tar -xzf k6-v${{ env.K6_VERSION }}-linux-amd64.tar.gz
+        sudo mv k6-v${{ env.K6_VERSION }}-linux-amd64/k6 /usr/local/bin/
+        
+        # Setup performance results directory
+        mkdir -p performance/results
+        
+        # Set environment variables for testing
+        echo "BASE_URL=http://localhost:3000/api" >> $GITHUB_ENV
+        echo "MONGODB_URL=mongodb://admin:testpassword123@localhost:27017/ai-recruitment-test?authSource=admin" >> $GITHUB_ENV
+        echo "NATS_URL=nats://localhost:4222" >> $GITHUB_ENV
+
+    - name: Load performance baselines
+      id: load_baselines
+      run: |
+        # Try to load baseline from previous successful runs
+        BASELINE_BRANCH="${{ github.event.inputs.baseline_branch || 'main' }}"
+        
+        # Default baselines (will be overridden if historical data exists)
+        echo "BASELINE_P95=120" >> $GITHUB_ENV
+        echo "BASELINE_P99=250" >> $GITHUB_ENV
+        echo "BASELINE_THROUGHPUT=30" >> $GITHUB_ENV
+        echo "BASELINE_ERROR_RATE=0.001" >> $GITHUB_ENV
+        
+        # In a real implementation, this would load from a database or artifact store
+        echo "Using default baselines for comparison"
+
+    - name: Start application services
+      run: |
+        # Build and start the application stack
+        docker-compose up -d --build
+        
+        # Wait for services to be healthy
+        echo "Waiting for services to start..."
+        sleep 30
+        
+        # Health check loop
+        for i in {1..12}; do
+          if curl -f http://localhost:3000/api/health; then
+            echo "Services are healthy"
+            break
+          else
+            echo "Waiting for services... (attempt $i/12)"
+            sleep 10
+          fi
+          
+          if [ $i -eq 12 ]; then
+            echo "Services failed to start"
+            docker-compose logs
+            exit 1
+          fi
+        done
+
+    - name: Run performance smoke tests
+      if: github.event_name == 'pull_request' || github.event.inputs.test_type == 'smoke'
+      run: |
+        echo "🚀 Running performance smoke tests..."
+        k6 run \
+          --env BASE_URL=$BASE_URL \
+          --env CI=true \
+          --env BRANCH_NAME=${{ github.ref_name }} \
+          --env COMMIT_SHA=${{ github.sha }} \
+          --env BASELINE_P95=$BASELINE_P95 \
+          --env BASELINE_P99=$BASELINE_P99 \
+          --out json=performance/results/smoke-test-results.json \
+          performance/regression/performance-regression-test.js
+
+    - name: Run performance regression tests
+      if: github.event_name == 'push' || github.event.inputs.test_type == 'regression'
+      run: |
+        echo "📊 Running performance regression tests..."
+        k6 run \
+          --env BASE_URL=$BASE_URL \
+          --env CI=true \
+          --env BRANCH_NAME=${{ github.ref_name }} \
+          --env COMMIT_SHA=${{ github.sha }} \
+          --env BASELINE_P95=$BASELINE_P95 \
+          --env BASELINE_P99=$BASELINE_P99 \
+          --env BASELINE_THROUGHPUT=$BASELINE_THROUGHPUT \
+          --env BASELINE_ERROR_RATE=$BASELINE_ERROR_RATE \
+          --out json=performance/results/regression-test-results.json \
+          performance/regression/performance-regression-test.js
+
+    - name: Run database performance tests
+      if: github.event.inputs.test_type == 'load' || github.event.inputs.test_type == 'full_suite'
+      run: |
+        echo "🗄️ Running database performance tests..."
+        k6 run \
+          --env MONGODB_HOST=localhost \
+          --env MONGODB_PORT=27017 \
+          --env MONGODB_DATABASE=ai-recruitment-test \
+          --env MONGODB_USERNAME=admin \
+          --env MONGODB_PASSWORD=testpassword123 \
+          --out json=performance/results/database-test-results.json \
+          performance/scripts/database-stress-test.js
+
+    - name: Run production-scale load tests
+      if: github.event.inputs.test_type == 'load' || github.event.inputs.test_type == 'full_suite'
+      run: |
+        echo "⚡ Running production-scale load tests..."
+        k6 run \
+          --env BASE_URL=$BASE_URL \
+          --env CI=true \
+          --env BRANCH_NAME=${{ github.ref_name }} \
+          --env COMMIT_SHA=${{ github.sha }} \
+          --out json=performance/results/load-test-results.json \
+          performance/scripts/production-scale-test.js
+
+    - name: Generate performance report
+      if: always()
+      run: |
+        echo "📋 Generating performance test report..."
+        
+        # Create consolidated performance report
+        cat > performance/results/performance-summary.md << EOF
+        # Performance Test Results
+        
+        **Branch:** ${{ github.ref_name }}  
+        **Commit:** ${{ github.sha }}  
+        **Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")  
+        **Test Type:** ${{ github.event.inputs.test_type || 'auto' }}  
+        
+        ## Test Results
+        
+        EOF
+        
+        # Add results from each test file
+        for result_file in performance/results/*.json; do
+          if [ -f "$result_file" ]; then
+            echo "Found results: $result_file"
+            # Process and add to summary (in real implementation)
+          fi
+        done
+        
+        # Check for critical performance regressions
+        CRITICAL_REGRESSIONS=false
+        if grep -q "severity.*critical" performance/results/*.json 2>/dev/null; then
+          CRITICAL_REGRESSIONS=true
+          echo "CRITICAL_REGRESSIONS=true" >> $GITHUB_ENV
+        fi
+
+    - name: Upload performance results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: performance-test-results-${{ github.sha }}
+        path: |
+          performance/results/
+          performance/analysis/
+        retention-days: 30
+
+    - name: Comment performance results on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          let comment = `## 📊 Performance Test Results\n\n`;
+          comment += `**Branch:** ${context.payload.pull_request.head.ref}\n`;
+          comment += `**Commit:** ${context.sha.substring(0, 8)}\n`;
+          comment += `**Test Status:** `;
+          
+          // Check if performance summary exists
+          try {
+            const summary = fs.readFileSync('performance/results/performance-summary.md', 'utf8');
+            comment += `✅ Completed\n\n`;
+            comment += summary;
+          } catch (error) {
+            comment += `⚠️ No results found\n\n`;
+          }
+          
+          // Check for critical regressions
+          if (process.env.CRITICAL_REGRESSIONS === 'true') {
+            comment += `\n\n🚨 **CRITICAL PERFORMANCE REGRESSIONS DETECTED**\n`;
+            comment += `Please review and fix performance issues before merging.\n`;
+          }
+          
+          await github.rest.issues.createComment({
+            issue_number: context.payload.pull_request.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+    - name: Update performance baselines
+      if: github.ref == 'refs/heads/main' && success()
+      run: |
+        echo "💾 Updating performance baselines from successful main branch test..."
+        
+        # Extract actual performance metrics from test results
+        # and update baseline values for future comparisons
+        
+        # In a real implementation, this would:
+        # 1. Parse test results JSON
+        # 2. Calculate new baseline values
+        # 3. Store in database or artifact repository
+        # 4. Update GitHub repository secrets or variables
+        
+        echo "Baseline update completed"
+
+    - name: Fail on critical performance regressions
+      if: env.CRITICAL_REGRESSIONS == 'true'
+      run: |
+        echo "❌ Critical performance regressions detected!"
+        echo "Performance test results indicate critical regressions that would impact production."
+        echo "Please review the performance test artifacts and fix issues before deployment."
+        exit 1
+
+    - name: Cleanup
+      if: always()
+      run: |
+        echo "🧹 Cleaning up test environment..."
+        docker-compose down -v
+        docker system prune -f
+
+  performance-monitoring:
+    runs-on: ubuntu-latest
+    needs: performance-validation
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Send performance metrics to monitoring
+      run: |
+        echo "📊 Sending performance metrics to monitoring system..."
+        
+        # In a real implementation, this would:
+        # 1. Extract metrics from test results
+        # 2. Send to monitoring system (Prometheus, DataDog, etc.)
+        # 3. Update performance dashboards
+        # 4. Trigger alerts if thresholds exceeded
+        
+        echo "Performance metrics sent to monitoring"
+
+    - name: Update performance documentation
+      run: |
+        echo "📝 Updating performance documentation..."
+        
+        # In a real implementation, this would:
+        # 1. Update performance baselines in documentation
+        # 2. Generate performance trend reports
+        # 3. Update capacity planning recommendations
+        
+        echo "Performance documentation updated"

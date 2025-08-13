@@ -1,0 +1,21 @@
+{
+  "name": "ai-recruitment-performance-collector",
+  "version": "1.0.0",
+  "description": "Performance metrics collector for AI Recruitment Clerk load testing",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "dockerode": "^4.0.2",
+    "node-cron": "^3.0.3",
+    "winston": "^3.10.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "AI Recruitment Performance Team",
+  "license": "MIT"
+}

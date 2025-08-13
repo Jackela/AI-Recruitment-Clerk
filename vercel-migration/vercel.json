@@ -1,0 +1,47 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 10,
+      "memory": 1024
+    }
+  },
+  
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PUT, DELETE, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
+        { "key": "Cache-Control", "value": "s-maxage=1, stale-while-revalidate" }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-XSS-Protection", "value": "1; mode=block" }
+      ]
+    }
+  ],
+  
+  "rewrites": [
+    {
+      "source": "/dashboard/:path*",
+      "destination": "/dashboard/:path*"
+    }
+  ],
+  
+  "env": {
+    "MONGODB_ATLAS_URI": "@mongodb-atlas-uri",
+    "GEMINI_API_KEY": "@gemini-api-key",
+    "NEXTAUTH_SECRET": "@nextauth-secret",
+    "VERCEL_ANALYTICS_ID": "@vercel-analytics-id"
+  }
+}

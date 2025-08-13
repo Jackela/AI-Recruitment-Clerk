@@ -1,0 +1,123 @@
+# Render服务配置文件
+# 定义所有微服务的部署配置
+
+services:
+  # 数据库服务 (PostgreSQL - Render托管)
+  - type: pserv
+    name: ai-recruitment-db
+    plan: free
+    databaseName: ai_recruitment
+    user: ai_user
+
+  # Redis缓存服务
+  - type: redis
+    name: ai-recruitment-redis
+    plan: free
+    maxmemoryPolicy: allkeys-lru
+
+  # 主API网关
+  - type: web
+    name: ai-recruitment-gateway
+    runtime: docker
+    dockerfilePath: ./apps/app-gateway/Dockerfile
+    plan: free
+    region: oregon
+    branch: main
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ai-recruitment-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: ai-recruitment-redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: ENCRYPTION_KEY
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false # 手动设置
+
+  # 简历解析微服务
+  - type: web
+    name: resume-parser-svc
+    runtime: docker
+    dockerfilePath: ./apps/resume-parser-svc/Dockerfile
+    plan: free
+    region: oregon
+    branch: main
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ai-recruitment-db
+          property: connectionString
+      - key: GEMINI_API_KEY
+        sync: false
+
+  # 职位分析微服务
+  - type: web
+    name: jd-extractor-svc
+    runtime: docker
+    dockerfilePath: ./apps/jd-extractor-svc/Dockerfile
+    plan: free
+    region: oregon
+    branch: main
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GEMINI_API_KEY
+        sync: false
+
+  # 评分引擎微服务
+  - type: web
+    name: scoring-engine-svc
+    runtime: docker
+    dockerfilePath: ./apps/scoring-engine-svc/Dockerfile
+    plan: free
+    region: oregon
+    branch: main
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ai-recruitment-db
+          property: connectionString
+
+  # 报告生成微服务
+  - type: web
+    name: report-generator-svc
+    runtime: docker
+    dockerfilePath: ./apps/report-generator-svc/Dockerfile
+    plan: free
+    region: oregon
+    branch: main
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ai-recruitment-db
+          property: connectionString
+
+  # 前端静态网站
+  - type: static
+    name: ai-recruitment-frontend
+    buildCommand: cd apps/ai-recruitment-frontend && npm install && npm run build
+    staticPublishPath: dist/apps/ai-recruitment-frontend/browser
+    pullRequestPreviewsEnabled: false
+    branch: main
+    envVars:
+      - key: API_BASE_URL
+        value: https://ai-recruitment-gateway.onrender.com

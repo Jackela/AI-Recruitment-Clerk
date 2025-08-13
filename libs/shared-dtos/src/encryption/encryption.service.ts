@@ -32,7 +32,7 @@ export class EncryptionService {
   private static deriveKey(salt: Buffer): Buffer {
     return crypto.pbkdf2Sync(
       this.masterKey,
-      salt,
+      salt as any, // Type assertion for Node.js 20 compatibility
       100000, // iterations
       this.config.keyLength,
       'sha256'
@@ -56,9 +56,9 @@ export class EncryptionService {
     // Derive key from master key and salt
     const key = this.deriveKey(salt);
     
-    // Create cipher
-    const cipher = crypto.createCipherGCM(this.config.algorithm, key, iv);
-    cipher.setAAD(Buffer.from('ai-recruitment-clerk')); // Additional authenticated data
+    // Create cipher with Node.js 20 compatible approach
+    const cipher = crypto.createCipheriv(this.config.algorithm as any, key as any, iv as any) as crypto.CipherGCM;
+    cipher.setAAD(Buffer.from('ai-recruitment-clerk') as any); // Additional authenticated data
     
     // Encrypt the data
     let encrypted = cipher.update(plaintext, 'utf8', 'hex');
@@ -94,10 +94,10 @@ export class EncryptionService {
       // Derive the same key used for encryption
       const key = this.deriveKey(salt);
       
-      // Create decipher
-      const decipher = crypto.createDecipherGCM(this.config.algorithm, key, iv);
-      decipher.setAAD(Buffer.from('ai-recruitment-clerk')); // Same AAD as encryption
-      decipher.setAuthTag(tag);
+      // Create decipher with Node.js 20 compatible approach
+      const decipher = crypto.createDecipheriv(this.config.algorithm as any, key as any, iv as any) as crypto.DecipherGCM;
+      decipher.setAAD(Buffer.from('ai-recruitment-clerk') as any); // Same AAD as encryption
+      decipher.setAuthTag(tag as any);
       
       // Decrypt the data
       let decrypted = decipher.update(encryptedData.encryptedData, 'hex', 'utf8');
@@ -225,7 +225,7 @@ export class EncryptionService {
       errors.push('Encryption key must be at least 32 characters long.');
     }
 
-    if (!crypto.constants || !crypto.constants.SSL_OP_NO_TLSV1) {
+    if (!crypto.constants || !crypto.constants.SSL_OP_NO_TLSv1) {
       errors.push('Node.js crypto module not properly configured.');
     }
 

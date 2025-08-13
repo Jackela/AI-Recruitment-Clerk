@@ -26,35 +26,38 @@ export class UserService {
         password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewflcAAaZMhV1S6m', // password: admin123
         firstName: 'System',
         lastName: 'Administrator',
+        get name() { return `${this.firstName} ${this.lastName}`; },
         role: UserRole.ADMIN,
         status: UserStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date()
-      },
+      } as UserEntity,
       {
         id: 'hr-001',
         email: 'hr@ai-recruitment.com',
         password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewflcAAaZMhV1S6m', // password: admin123
         firstName: 'HR',
         lastName: 'Manager',
+        get name() { return `${this.firstName} ${this.lastName}`; },
         role: UserRole.HR_MANAGER,
         organizationId: 'org-001',
         status: UserStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date()
-      },
+      } as UserEntity,
       {
         id: 'recruiter-001',
         email: 'recruiter@ai-recruitment.com',
         password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewflcAAaZMhV1S6m', // password: admin123
         firstName: 'Jane',
         lastName: 'Recruiter',
+        get name() { return `${this.firstName} ${this.lastName}`; },
         role: UserRole.RECRUITER,
         organizationId: 'org-001',
         status: UserStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date()
-      }
+      } as UserEntity
     ];
 
     defaultUsers.forEach(user => {
@@ -73,6 +76,7 @@ export class UserService {
       password: createUserDto.password,
       firstName: createUserDto.firstName,
       lastName: createUserDto.lastName,
+      get name() { return `${this.firstName} ${this.lastName}`; },
       role: createUserDto.role,
       organizationId: createUserDto.organizationId,
       status: createUserDto.status || UserStatus.ACTIVE,
@@ -135,6 +139,7 @@ export class UserService {
     const updatedUser = {
       ...user,
       ...updates,
+      get name() { return `${this.firstName} ${this.lastName}`; },
       updatedAt: new Date()
     };
 

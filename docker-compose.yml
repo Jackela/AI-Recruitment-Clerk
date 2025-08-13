@@ -9,7 +9,7 @@ services:
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD:-devpassword123}
       MONGO_INITDB_DATABASE: ai-recruitment
     ports:
       - "27017:27017"
@@ -29,6 +29,8 @@ services:
     image: nats:2.10-alpine
     container_name: ai-recruitment-nats
     restart: unless-stopped
+    command: 
+      - "--jetstream"
     ports:
       - "4222:4222"
       - "6222:6222"
@@ -36,7 +38,7 @@ services:
     networks:
       - ai-recruitment-network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8222/healthz"]
+      test: ["CMD", "nc", "-z", "localhost", "4222"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -53,7 +55,7 @@ services:
       PORT: 3000
       NODE_ENV: production
       NATS_URL: nats://nats:4222
-      MONGODB_URL: mongodb://admin:password123@mongodb:27017/ai-recruitment?authSource=admin
+      MONGODB_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD:-devpassword123}@mongodb:27017/ai-recruitment?authSource=admin
     ports:
       - "3000:3000"
     depends_on:
@@ -103,7 +105,7 @@ services:
     environment:
       NODE_ENV: production
       NATS_URL: nats://nats:4222
-      MONGODB_URL: mongodb://admin:password123@mongodb:27017/ai-recruitment?authSource=admin
+      MONGODB_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD:-devpassword123}@mongodb:27017/ai-recruitment?authSource=admin
       GEMINI_API_KEY: ${GEMINI_API_KEY:-your_gemini_api_key_here}
     depends_on:
       mongodb:
@@ -128,7 +130,7 @@ services:
     environment:
       NODE_ENV: production
       NATS_URL: nats://nats:4222
-      MONGODB_URL: mongodb://admin:password123@mongodb:27017/ai-recruitment?authSource=admin
+      MONGODB_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD:-devpassword123}@mongodb:27017/ai-recruitment?authSource=admin
       GEMINI_API_KEY: ${GEMINI_API_KEY:-your_gemini_api_key_here}
     depends_on:
       mongodb:
@@ -153,7 +155,7 @@ services:
     environment:
       NODE_ENV: production
       NATS_URL: nats://nats:4222
-      MONGODB_URL: mongodb://admin:password123@mongodb:27017/ai-recruitment?authSource=admin
+      MONGODB_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD:-devpassword123}@mongodb:27017/ai-recruitment?authSource=admin
       GEMINI_API_KEY: ${GEMINI_API_KEY:-your_gemini_api_key_here}
     depends_on:
       mongodb:

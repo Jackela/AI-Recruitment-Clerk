@@ -24,15 +24,23 @@ AI Recruitment Clerk 是一个**事件驱动的微服务系统**，旨在通过A
 
 ## 📚 文档导航
 
+### 核心文档套件
 | 文档类型 | 文件路径 | 描述 |
 |----------|----------|------|
-| **🔖 项目概览** | [`PROJECT_OVERVIEW.zh-CN.md`](./docs/zh-CN/PROJECT_OVERVIEW.zh-CN.md) | **完整项目架构、技术栈、开发状态** |
-| 📋 开发状态 | [`DEVELOPMENT_STATUS.zh-CN.md`](./docs/zh-CN/DEVELOPMENT_STATUS.zh-CN.md) | 开发进度与里程碑 |
-| 🏗 系统架构 | [`ARCHITECTURE_SUMMARY.zh-CN.md`](./docs/zh-CN/ARCHITECTURE_SUMMARY.zh-CN.md) | 技术架构详解 |
-| 👨‍💻 开发指南 | [`DEVELOPER_GUIDE.zh-CN.md`](./docs/zh-CN/DEVELOPER_GUIDE.zh-CN.md) | 开发环境与规范 |
+| **📋 产品需求文档 (PRD)** | [`docs/PRD.md`](./docs/PRD.md) | **完整产品需求和商业目标** |
+| **🏗️ 高阶设计文档 (HLD)** | [`docs/HLD.md`](./docs/HLD.md) | **系统架构和设计规范** |
+| **📖 运维手册** | [`docs/RUNBOOK.md`](./docs/RUNBOOK.md) | **生产环境运维和故障响应** |
+| **⚙️ 技术架构文档** | [`docs/TECHNICAL_ARCHITECTURE.md`](./docs/TECHNICAL_ARCHITECTURE.md) | **详细技术实现和性能分析** |
+
+### 传统文档
+| 文档类型 | 文件路径 | 描述 |
+|----------|----------|------|
+| 🔖 项目概览 | [`docs/zh-CN/PROJECT_OVERVIEW.zh-CN.md`](./docs/zh-CN/PROJECT_OVERVIEW.zh-CN.md) | 历史项目文档 |
+| 📋 开发状态 | [`docs/zh-CN/DEVELOPMENT_STATUS.zh-CN.md`](./docs/zh-CN/DEVELOPMENT_STATUS.zh-CN.md) | 开发进度跟踪 |
+| 👨‍💻 开发指南 | [`DEVELOPER_GUIDE.md`](./DEVELOPER_GUIDE.md) | 开发环境设置 |
 | 📋 项目使命 | [`specs/PROJECT_MISSION.md`](./specs/PROJECT_MISSION.md) | 项目目标与核心使命 |
-| 🏗 系统上下文 | [`specs/SYSTEM_CONTEXT.mermaid`](./specs/SYSTEM_CONTEXT.mermaid) | 系统边界与上下文图 |
-| 🛡 API规范 | [`specs/api_spec.openapi.yml`](./specs/api_spec.openapi.yml) | RESTful API接口定义 |
+| 🏗 系统上下文 | [`specs/SYSTEM_CONTEXT.mermaid`](./specs/SYSTEM_CONTEXT.mermaid) | 系统边界图 |
+| 🛡 API规范 | [`specs/api_spec.openapi.yml`](./specs/api_spec.openapi.yml) | RESTful API定义 |
 
 ## 🏗 系统架构
 

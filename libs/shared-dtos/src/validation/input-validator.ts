@@ -411,7 +411,7 @@ export class InputValidator {
   }
 
   private static generateFileHash(buffer: Buffer): string {
-    return createHash('sha256').update(buffer).digest('hex');
+    return createHash('sha256').update(buffer as any).digest('hex');
   }
 
   private static formatBytes(bytes: number): string {

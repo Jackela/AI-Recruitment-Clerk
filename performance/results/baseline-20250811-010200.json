@@ -1,0 +1,14 @@
+{
+  "timestamp": "2025-08-10T15:02:00.384Z",
+  "test_type": "baseline",
+  "results": {
+    "health_check": {
+      "average_ms": 101,
+      "samples": [101,71,84,70,72,70,86,88,76,77]
+    },
+    "api_docs": {
+      "average_ms": 77,
+      "samples": [77,82,81,98,98]
+    }
+  }
+}

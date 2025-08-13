@@ -84,7 +84,7 @@ export class NatsClient {
   async subscribe(
     subject: string, 
     handler: (event: any) => Promise<void>,
-    options?: NatsSubscriptionOptions
+    options?: { durableName?: string; queueGroup?: string }
   ): Promise<void> {
     try {
       this.logger.log(`Subscribing to subject: ${subject}`);

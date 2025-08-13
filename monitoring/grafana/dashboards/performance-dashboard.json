@@ -1,0 +1,401 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "AI Recruitment Clerk - Performance Dashboard",
+    "description": "Production-grade performance monitoring for AI Recruitment Clerk platform",
+    "tags": ["ai-recruitment", "performance", "production"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "🎯 SLA Compliance Overview",
+        "type": "stat",
+        "gridPos": { "h": 6, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "Request Rate",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "P95 Response Time",
+            "refId": "B"
+          },
+          {
+            "expr": "rate(http_requests_total{status=~\"5..\"}[5m]) / rate(http_requests_total[5m])",
+            "legendFormat": "Error Rate",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 0.8 },
+                { "color": "red", "value": 0.95 }
+              ]
+            }
+          }
+        },
+        "options": {
+          "colorMode": "background",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "horizontal"
+        }
+      },
+      {
+        "id": 2,
+        "title": "📊 API Response Times (SLA: 95% < 200ms)",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"ai-recruitment-gateway\"}[5m])) * 1000",
+            "legendFormat": "P50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"ai-recruitment-gateway\"}[5m])) * 1000",
+            "legendFormat": "P95 (SLA)",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job=\"ai-recruitment-gateway\"}[5m])) * 1000",
+            "legendFormat": "P99",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Response Time (ms)",
+            "min": 0,
+            "max": 1000
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 200,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "query": { "queryType": "", "refId": "B" },
+              "reducer": { "type": "last", "params": [] },
+              "evaluator": { "params": [200], "type": "gt" }
+            }
+          ],
+          "executionErrorState": "alerting",
+          "for": "2m",
+          "frequency": "30s",
+          "handler": 1,
+          "name": "API Response Time SLA Breach",
+          "noDataState": "no_data",
+          "notifications": []
+        }
+      },
+      {
+        "id": 3,
+        "title": "🔥 Request Throughput (Target: >100 req/s)",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"ai-recruitment-gateway\"}[5m])",
+            "legendFormat": "Request Rate",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"ai-recruitment-gateway\", status=~\"2..\"}[5m])",
+            "legendFormat": "Success Rate",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Requests/sec",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 100,
+            "colorMode": "critical",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "❌ Error Rate Analysis (SLA: <0.1%)",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 14 },
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{status=~\"4..\"}[5m]) * 100",
+            "legendFormat": "4xx Client Errors",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_requests_total{status=~\"5..\"}[5m]) * 100",
+            "legendFormat": "5xx Server Errors",
+            "refId": "B"
+          },
+          {
+            "expr": "(rate(http_requests_total{status=~\"[45]..\"}[5m]) / rate(http_requests_total[5m])) * 100",
+            "legendFormat": "Total Error Rate",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Error Rate (%)",
+            "min": 0,
+            "max": 5
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 0.1,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "🗄️ Database Performance",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 14 },
+        "targets": [
+          {
+            "expr": "mongodb_op_latencies_histogram{type=\"command\"}",
+            "legendFormat": "Command Latency",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(mongodb_opcounters_total[5m])",
+            "legendFormat": "{{type}} Operations/sec",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Latency (ms) / Ops/sec",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "💾 Memory Usage by Service",
+        "type": "graph",
+        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 14 },
+        "targets": [
+          {
+            "expr": "container_memory_usage_bytes{container_label_com_docker_compose_service=~\"app-gateway|resume-parser-svc|scoring-engine-svc|report-generator-svc|jd-extractor-svc\"} / 1024 / 1024",
+            "legendFormat": "{{container_label_com_docker_compose_service}}",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Memory (MB)",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 2048,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "🔄 File Processing Performance",
+        "type": "graph",
+        "gridPos": { "h": 6, "w": 12, "x": 0, "y": 22 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(file_processing_duration_seconds_bucket[5m])) * 1000",
+            "legendFormat": "P95 Processing Time",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(files_processed_total[5m])",
+            "legendFormat": "Processing Rate",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Time (ms) / Rate",
+            "min": 0
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 30000,
+            "colorMode": "critical",
+            "op": "gt"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "🌐 NATS Message Queue Performance",
+        "type": "graph",
+        "gridPos": { "h": 6, "w": 12, "x": 12, "y": 22 },
+        "targets": [
+          {
+            "expr": "rate(nats_varz_in_msgs[5m])",
+            "legendFormat": "Messages In/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(nats_varz_out_msgs[5m])",
+            "legendFormat": "Messages Out/sec",
+            "refId": "B"
+          },
+          {
+            "expr": "nats_varz_slow_consumers",
+            "legendFormat": "Slow Consumers",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Messages/sec",
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "⚡ Service Health Status",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 24, "x": 0, "y": 28 },
+        "targets": [
+          {
+            "expr": "up{job=\"ai-recruitment-gateway\"}",
+            "legendFormat": "Gateway",
+            "refId": "A"
+          },
+          {
+            "expr": "up{job=\"resume-parser-svc\"}",
+            "legendFormat": "Resume Parser",
+            "refId": "B"
+          },
+          {
+            "expr": "up{job=\"scoring-engine-svc\"}",
+            "legendFormat": "Scoring Engine",
+            "refId": "C"
+          },
+          {
+            "expr": "up{job=\"report-generator-svc\"}",
+            "legendFormat": "Report Generator",
+            "refId": "D"
+          },
+          {
+            "expr": "up{job=\"jd-extractor-svc\"}",
+            "legendFormat": "JD Extractor",
+            "refId": "E"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {
+                "options": {
+                  "0": { "text": "DOWN", "color": "red" },
+                  "1": { "text": "UP", "color": "green" }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "green", "value": 1 }
+              ]
+            }
+          }
+        },
+        "options": {
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "center",
+          "orientation": "horizontal"
+        }
+      },
+      {
+        "id": 10,
+        "title": "📈 Load Testing Results Integration",
+        "type": "table",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 32 },
+        "targets": [
+          {
+            "expr": "k6_http_req_duration{percentile=\"95\"}",
+            "legendFormat": "K6 P95 Response Time",
+            "refId": "A",
+            "format": "table"
+          },
+          {
+            "expr": "k6_http_reqs",
+            "legendFormat": "K6 Total Requests",
+            "refId": "B",
+            "format": "table"
+          },
+          {
+            "expr": "k6_http_req_failed",
+            "legendFormat": "K6 Failed Requests",
+            "refId": "C",
+            "format": "table"
+          }
+        ],
+        "options": {
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": true,
+              "displayName": "Time"
+            }
+          ]
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto",
+              "displayMode": "auto"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "overwrite": true,
+  "inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "value": "prometheus"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 27,
+  "version": 1
+}

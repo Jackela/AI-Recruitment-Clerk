@@ -1,0 +1,19 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "deploy": {
+    "restartPolicyType": "never",
+    "numReplicas": 1
+  },
+  "environments": {
+    "production": {
+      "variables": {
+        "NODE_ENV": "production",
+        "PORT": "${{ RAILWAY_STATIC_PORT }}",
+        "MONGODB_URL": "${{ MONGODB_URL }}",
+        "REDIS_URL": "${{ REDIS_URL }}",
+        "JWT_SECRET": "${{ JWT_SECRET }}",
+        "GEMINI_API_KEY": "${{ GEMINI_API_KEY }}"
+      }
+    }
+  }
+}

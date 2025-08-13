@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { LlmService } from '../llm/llm.service';
 import { NatsClient } from '../nats/nats.client';
 import { JobJdSubmittedEvent, AnalysisJdExtractedEvent } from '../dto/events.dto';
-import { JdDTO } from '../dto/jd.dto';
+import { JdDTO } from '../../../../libs/shared-dtos/src';
 import { RetryUtility, WithCircuitBreaker } from '../../../../libs/shared-dtos/src';
 
 @Injectable()

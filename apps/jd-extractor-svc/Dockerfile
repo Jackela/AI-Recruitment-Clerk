@@ -1,5 +1,5 @@
 # Multi-stage build for jd-extractor-svc
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -16,13 +16,13 @@ COPY apps/jd-extractor-svc ./apps/jd-extractor-svc
 COPY libs ./libs
 
 # Install dev dependencies for build
-RUN npm ci
+RUN npm ci --legacy-peer-deps && npm cache clean --force
 
 # Build the application
 RUN npx nx build jd-extractor-svc --prod
 
 # Production stage
-FROM node:18-alpine AS production
+FROM node:20-alpine AS production
 
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init

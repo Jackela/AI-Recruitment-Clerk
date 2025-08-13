@@ -1,0 +1,36 @@
+# Performance Metrics Collector
+# Collects system metrics during load testing
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install system monitoring tools
+RUN apk add --no-cache \
+    docker-cli \
+    curl \
+    jq
+
+# Copy package configuration
+COPY performance/collector/package.json ./
+RUN npm install --production
+
+# Copy collector application
+COPY performance/collector ./
+
+# Create results directory
+RUN mkdir -p /results
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV METRICS_OUTPUT=/results/system-metrics.json
+ENV COLLECT_INTERVAL=5
+
+# Create non-root user
+RUN addgroup -g 1001 -S collector && \
+    adduser -S collector -u 1001 -G collector
+
+USER collector
+
+EXPOSE 3001
+
+CMD ["node", "index.js"]
