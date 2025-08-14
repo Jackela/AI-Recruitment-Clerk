@@ -112,17 +112,29 @@ export interface ConsentRecord {
   purpose: string;
   status: string;
   consentDate: Date;
+  dataCategories: string[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface UserConsentProfile {
   userId: string;
   consentRecords: ConsentRecord[];
   lastConsentUpdate: Date;
+  consentVersion?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  hasValidConsent: (purpose: any) => boolean;
+  getGrantedPurposes: () => string[];
+  needsConsentRenewal: () => boolean;
 }
 
 export interface CaptureConsentDto {
   userId: string;
   consents: any[];
+  ipAddress?: string;
+  userAgent?: string;
+  consentVersion?: string;
 }
 
 export interface WithdrawConsentDto {
@@ -153,6 +165,9 @@ export interface DataExportPackage {
   data: any;
   format: string;
   downloadUrl?: string;
+  dataCategories: any;
+  createdAt: Date;
+  metadata?: any;
 }
 
 export interface ProcessRightsRequestDto {
@@ -175,6 +190,9 @@ export interface DataSubjectRightsRequest {
   requestType: DataSubjectRightType;
   status: string;
   createdAt: Date;
+  identityVerificationStatus: IdentityVerificationStatus;
+  requestDate: Date;
+  updatedAt: Date;
 }
 
 export enum RequestStatus {
@@ -187,7 +205,8 @@ export enum RequestStatus {
 export enum DataExportFormat {
   JSON = 'json',
   CSV = 'csv',
-  PDF = 'pdf'
+  PDF = 'pdf',
+  XML = 'xml'
 }
 
 export enum IdentityVerificationStatus {

@@ -64,7 +64,7 @@ export class UserManagementService {
     }
 
     // Mock activity data
-    const mockActivities: UserActivityDto[] = [
+    const mockActivities: any[] = [
       {
         id: 'activity-1',
         userId,

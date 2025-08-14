@@ -286,6 +286,33 @@ export class FeedbackCodeService {
     }
   }
 
+  // 标记反馈码已使用
+  async markFeedbackCodeAsUsed(markUsedDto: MarkFeedbackCodeUsedDto): Promise<FeedbackCodeDto> {
+    try {
+      const updated = await this.feedbackCodeModel.findOneAndUpdate(
+        { code: markUsedDto.code, isUsed: false },
+        { 
+          isUsed: true,
+          usedAt: new Date(),
+          alipayAccount: markUsedDto.alipayAccount,
+          questionnaireData: markUsedDto.questionnaireData,
+          qualityScore: markUsedDto.questionnaireData ? this.assessFeedbackQuality(markUsedDto.questionnaireData) : undefined
+        },
+        { new: true }
+      );
+
+      if (!updated) {
+        throw new Error(`反馈码不存在或已被使用: ${markUsedDto.code}`);
+      }
+
+      this.logger.log(`反馈码已标记使用: ${markUsedDto.code}`);
+      return this.toDto(updated);
+    } catch (error) {
+      this.logger.error(`标记反馈码失败: ${markUsedDto.code}`, error);
+      throw error;
+    }
+  }
+
   // 数据清理：删除过期的未使用反馈码
   async cleanupExpiredCodes(daysOld: number = 30): Promise<number> {
     try {
