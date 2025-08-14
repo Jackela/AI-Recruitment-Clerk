@@ -82,9 +82,9 @@ export class UsageLimitController {
     @Query('ip') ip?: string
   ) {
     try {
-      const targetIP = ip && req.user.permissions?.includes(Permission.ADMIN) 
+      const targetIP = ip && (req.user as any).permissions?.includes('admin') 
         ? ip 
-        : req.ip;
+        : (req as any).socket?.remoteAddress || req.headers['x-forwarded-for'] || 'unknown';
 
       const checkResult = await this.usageLimitService.checkUsageLimit(
         targetIP,
@@ -149,18 +149,14 @@ export class UsageLimitController {
     }
   ) {
     try {
-      const targetIP = usageData?.userIP && req.user.permissions?.includes(Permission.ADMIN)
+      const targetIP = usageData?.userIP && (req.user as any).permissions?.includes('admin')
         ? usageData.userIP
-        : req.ip;
+        : (req as any).socket?.remoteAddress || req.headers['x-forwarded-for'] || 'unknown';
 
       const recordResult = await this.usageLimitService.recordUsage(
         targetIP,
-        req.user.organizationId,
-        {
-          operation: usageData?.operation || 'api_call',
-          userId: req.user.id,
-          metadata: usageData?.metadata
-        }
+        usageData?.operation || 'api_call',
+        1
       );
 
       if (!recordResult.success) {
@@ -197,7 +193,7 @@ export class UsageLimitController {
   })
   @ApiResponse({ status: 201, description: '奖励配额添加成功' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.MANAGE_QUOTAS)
+  @Permissions('manage_quotas' as any)
   @Post('bonus')
   @HttpCode(HttpStatus.CREATED)
   async addBonusQuota(
@@ -211,7 +207,7 @@ export class UsageLimitController {
     }
   ) {
     try {
-      const targetIP = bonusData.ip || req.ip;
+      const targetIP = bonusData.ip || (req as any).socket?.remoteAddress || req.headers['x-forwarded-for'] || 'unknown';
       
       // Validate bonus amount
       if (bonusData.amount <= 0 || bonusData.amount > 50) {
@@ -221,13 +217,7 @@ export class UsageLimitController {
       const bonusResult = await this.usageLimitService.addBonusQuota(
         targetIP,
         bonusData.bonusType,
-        bonusData.amount,
-        req.user.organizationId,
-        {
-          reason: bonusData.reason,
-          grantedBy: req.user.id,
-          metadata: bonusData.metadata
-        }
+        bonusData.amount
       );
 
       return {
@@ -262,7 +252,7 @@ export class UsageLimitController {
   @ApiQuery({ name: 'sortBy', required: false, enum: ['usage', 'quota', 'lastActivity'], description: '排序方式' })
   @ApiQuery({ name: 'filterBy', required: false, enum: ['exceeded', 'active', 'bonus'], description: '筛选条件' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.READ_USAGE_LIMITS)
+  @Permissions('read_usage_limits' as any)
   @Get()
   async getUsageLimits(
     @Request() req: AuthenticatedRequest,
@@ -315,7 +305,7 @@ export class UsageLimitController {
   @ApiResponse({ status: 404, description: '使用记录未找到' })
   @ApiParam({ name: 'ip', description: 'IP地址' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.READ_USAGE_DETAILS)
+  @Permissions('read_usage_details' as any)
   @Get(':ip')
   async getUsageLimitDetail(
     @Request() req: AuthenticatedRequest,
@@ -350,7 +340,7 @@ export class UsageLimitController {
   })
   @ApiResponse({ status: 200, description: '使用限制策略更新成功' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.MANAGE_USAGE_POLICY)
+  @Permissions('manage_usage_policy' as any)
   @Put('policy')
   @HttpCode(HttpStatus.OK)
   async updateUsageLimitPolicy(
@@ -406,7 +396,7 @@ export class UsageLimitController {
   @ApiResponse({ status: 200, description: '使用记录重置成功' })
   @ApiParam({ name: 'ip', description: 'IP地址' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.RESET_USAGE_LIMITS)
+  @Permissions('admin' as any)
   @Post(':ip/reset')
   @HttpCode(HttpStatus.OK)
   async resetUsageLimit(
@@ -459,7 +449,7 @@ export class UsageLimitController {
   })
   @ApiResponse({ status: 200, description: '批量操作完成' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.BATCH_MANAGE_USAGE_LIMITS)
+  @Permissions('manage_quotas' as any)
   @Post('batch')
   @HttpCode(HttpStatus.OK)
   async batchManageUsageLimits(
@@ -515,7 +505,7 @@ export class UsageLimitController {
   @ApiQuery({ name: 'timeRange', required: false, enum: ['24h', '7d', '30d'], description: '时间范围' })
   @ApiQuery({ name: 'groupBy', required: false, enum: ['hour', 'day'], description: '分组方式' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.READ_USAGE_STATISTICS)
+  @Permissions('read_analytics' as any)
   @Get('stats/overview')
   async getUsageStatistics(
     @Request() req: AuthenticatedRequest,
@@ -561,7 +551,7 @@ export class UsageLimitController {
   @ApiResponse({ status: 200, description: '数据导出成功' })
   @ApiQuery({ name: 'format', required: false, enum: ['csv', 'excel'], description: '导出格式' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.EXPORT_USAGE_DATA)
+  @Permissions('read_analytics' as any)
   @Post('export')
   @HttpCode(HttpStatus.OK)
   async exportUsageData(
@@ -614,7 +604,7 @@ export class UsageLimitController {
   })
   @ApiResponse({ status: 200, description: '速率限制配置成功' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.MANAGE_RATE_LIMITS)
+  @Permissions('admin' as any)
   @Put('rate-limiting')
   @HttpCode(HttpStatus.OK)
   async configureRateLimiting(

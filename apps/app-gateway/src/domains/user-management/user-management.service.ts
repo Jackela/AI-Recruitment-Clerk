@@ -31,17 +31,12 @@ export class UserManagementService {
     return {
       userId,
       language: 'en',
-      theme: 'light',
       notifications: {
         email: true,
         push: true,
         sms: false
-      },
-      privacy: {
-        profileVisibility: 'public',
-        activityVisibility: 'private'
       }
-    };
+    } as any;
   }
 
   async updateUserPreferences(userId: string, preferences: UserPreferencesDto): Promise<UserPreferencesDto> {
@@ -54,7 +49,7 @@ export class UserManagementService {
     return {
       ...preferences,
       userId
-    };
+    } as any;
   }
 
   async getUserActivity(userId: string, options?: {

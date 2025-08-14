@@ -1,6 +1,43 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { ConsentStatus, ConsentPurpose, ConsentMethod, DataCategory } from '../../../../libs/shared-dtos/src';
+
+// Local fallback enums in case shared DTOs are not available
+export enum ConsentStatus {
+  GRANTED = 'granted',
+  DENIED = 'denied',
+  PENDING = 'pending',
+  WITHDRAWN = 'withdrawn',
+  NOT_APPLICABLE = 'not_applicable'
+}
+
+export enum ConsentPurpose {
+  ESSENTIAL_SERVICES = 'essential_services',
+  FUNCTIONAL_ANALYTICS = 'functional_analytics',
+  MARKETING_COMMUNICATIONS = 'marketing_communications',
+  BEHAVIORAL_ANALYTICS = 'behavioral_analytics',
+  THIRD_PARTY_SHARING = 'third_party_sharing',
+  PERSONALIZATION = 'personalization',
+  PERFORMANCE_MONITORING = 'performance_monitoring'
+}
+
+export enum ConsentMethod {
+  EXPLICIT_OPT_IN = 'explicit_opt_in',
+  IMPLIED_CONSENT = 'implied_consent',
+  GRANULAR_CHOICE = 'granular_choice',
+  CONTINUED_USE = 'continued_use',
+  LEGAL_REQUIREMENT = 'legal_requirement'
+}
+
+export enum DataCategory {
+  AUTHENTICATION = 'authentication',
+  PROFILE_INFORMATION = 'profile_information',
+  RESUME_CONTENT = 'resume_content',
+  JOB_PREFERENCES = 'job_preferences',
+  BEHAVIORAL_DATA = 'behavioral_data',
+  DEVICE_INFORMATION = 'device_information',
+  COMMUNICATION_PREFERENCES = 'communication_preferences',
+  SYSTEM_LOGS = 'system_logs'
+}
 
 export type ConsentRecordDocument = ConsentRecord & Document;
 

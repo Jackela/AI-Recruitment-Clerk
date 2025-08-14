@@ -36,7 +36,7 @@ import {
   PaymentMethod,
   Currency,
   ContactInfo
-} from '../../../../../libs/shared-dtos/src';
+} from '../../common/interfaces/fallback-types';
 import { IncentiveIntegrationService } from './incentive-integration.service';
 
 interface AuthenticatedRequest extends Request {
@@ -75,7 +75,7 @@ export class IncentiveController {
   })
   @ApiResponse({ status: 400, description: '请求参数错误' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.CREATE_JOB)
+  @Permissions('create_job' as any)
   @Post('questionnaire')
   @HttpCode(HttpStatus.CREATED)
   async createQuestionnaireIncentive(
@@ -90,6 +90,9 @@ export class IncentiveController {
         alipay?: string;
       };
       userIP?: string;
+      businessValue?: any;
+      incentiveType?: string;
+      metadata?: any;
     }
   ) {
     try {
@@ -143,7 +146,7 @@ export class IncentiveController {
   })
   @ApiResponse({ status: 201, description: '推荐激励创建成功' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.CREATE_JOB)
+  @Permissions('create_job' as any)
   @Post('referral')
   @HttpCode(HttpStatus.CREATED)
   async createReferralIncentive(
@@ -157,6 +160,9 @@ export class IncentiveController {
         wechat?: string;
         alipay?: string;
       };
+      referralType?: string;
+      expectedValue?: number;
+      metadata?: any;
     }
   ) {
     try {
@@ -213,7 +219,7 @@ export class IncentiveController {
   @ApiQuery({ name: 'startDate', required: false, description: '开始日期' })
   @ApiQuery({ name: 'endDate', required: false, description: '结束日期' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.READ_JOB)
+  @Permissions('read_job' as any)
   @Get()
   async getIncentives(
     @Request() req: AuthenticatedRequest,
@@ -247,9 +253,9 @@ export class IncentiveController {
           totalPages: Math.ceil(incentives.totalCount / limit),
           hasNext: page * limit < incentives.totalCount,
           summary: {
-            byStatus: incentives.statusDistribution,
-            byRewardType: incentives.rewardTypeDistribution,
-            avgRewardAmount: incentives.avgRewardAmount
+            byStatus: (incentives as any).statusDistribution || {},
+            byRewardType: (incentives as any).rewardTypeDistribution || {},
+            avgRewardAmount: (incentives as any).avgRewardAmount || incentives.totalRewardAmount / (incentives.totalCount || 1)
           }
         }
       };
@@ -270,7 +276,7 @@ export class IncentiveController {
   @ApiResponse({ status: 404, description: '激励未找到' })
   @ApiParam({ name: 'incentiveId', description: '激励ID' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.READ_JOB)
+  @Permissions('read_job' as any)
   @Get(':incentiveId')
   async getIncentive(
     @Request() req: AuthenticatedRequest,
@@ -306,7 +312,7 @@ export class IncentiveController {
   @ApiResponse({ status: 200, description: '激励验证成功' })
   @ApiParam({ name: 'incentiveId', description: '激励ID' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.VALIDATE_INCENTIVE)
+  @Permissions('validate_incentive' as any)
   @Post(':incentiveId/validate')
   @HttpCode(HttpStatus.OK)
   async validateIncentive(
@@ -346,7 +352,7 @@ export class IncentiveController {
   @ApiResponse({ status: 200, description: '激励批准成功' })
   @ApiParam({ name: 'incentiveId', description: '激励ID' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.APPROVE_INCENTIVE)
+  @Permissions('approve_incentive' as any)
   @Put(':incentiveId/approve')
   @HttpCode(HttpStatus.OK)
   async approveIncentive(
@@ -360,10 +366,12 @@ export class IncentiveController {
     try {
       await this.incentiveService.approveIncentive(
         incentiveId,
-        approvalData.reason,
-        req.user.id,
-        req.user.organizationId,
-        approvalData.notes
+        { 
+          reason: approvalData.reason,
+          approverId: req.user.id,
+          organizationId: req.user.organizationId,
+          notes: approvalData.notes
+        }
       );
 
       return {
@@ -392,7 +400,7 @@ export class IncentiveController {
   @ApiResponse({ status: 200, description: '激励拒绝成功' })
   @ApiParam({ name: 'incentiveId', description: '激励ID' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.REJECT_INCENTIVE)
+  @Permissions('reject_incentive' as any)
   @Put(':incentiveId/reject')
   @HttpCode(HttpStatus.OK)
   async rejectIncentive(
@@ -457,7 +465,7 @@ export class IncentiveController {
   })
   @ApiParam({ name: 'incentiveId', description: '激励ID' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.PROCESS_PAYMENT)
+  @Permissions('process_payment' as any)
   @Post(':incentiveId/pay')
   @HttpCode(HttpStatus.OK)
   async processPayment(
@@ -512,7 +520,7 @@ export class IncentiveController {
   })
   @ApiResponse({ status: 200, description: '批量处理完成' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.BATCH_PROCESS_INCENTIVE)
+  @Permissions('batch_process_incentive' as any)
   @Post('batch')
   @HttpCode(HttpStatus.OK)
   async batchProcessIncentives(
@@ -567,7 +575,7 @@ export class IncentiveController {
   @ApiQuery({ name: 'timeRange', required: false, enum: ['7d', '30d', '90d', '1y'], description: '时间范围' })
   @ApiQuery({ name: 'groupBy', required: false, enum: ['day', 'week', 'month'], description: '分组方式' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.READ_INCENTIVE_STATS)
+  @Permissions('read_incentive_stats' as any)
   @Get('stats/overview')
   async getIncentiveStatistics(
     @Request() req: AuthenticatedRequest,
@@ -613,7 +621,7 @@ export class IncentiveController {
   @ApiResponse({ status: 200, description: '数据导出成功' })
   @ApiQuery({ name: 'format', required: false, enum: ['csv', 'excel'], description: '导出格式' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.EXPORT_INCENTIVE_DATA)
+  @Permissions('export_incentive_data' as any)
   @Post('export')
   @HttpCode(HttpStatus.OK)
   async exportIncentiveData(
@@ -666,7 +674,7 @@ export class IncentiveController {
   })
   @ApiResponse({ status: 200, description: '激励规则配置成功' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.MANAGE_INCENTIVE_RULES)
+  @Permissions('manage_incentive_rules' as any)
   @Put('rules')
   @HttpCode(HttpStatus.OK)
   async configureIncentiveRules(

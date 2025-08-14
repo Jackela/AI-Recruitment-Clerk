@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Redis } from 'ioredis';
+import Redis, { RedisOptions } from 'ioredis';
 import { UserProfile } from '../schemas/user-profile.schema';
 
 export interface SecurityEvent {
@@ -46,14 +46,14 @@ export class SecurityMonitorService {
   }
 
   private initializeRedis() {
-    this.redis = new Redis({
+    const redisOptions: RedisOptions = {
       host: this.configService.get<string>('REDIS_HOST') || 'localhost',
       port: parseInt(this.configService.get<string>('REDIS_PORT') || '6379'),
       password: this.configService.get<string>('REDIS_PASSWORD'),
-      retryDelayOnFailover: 100,
       maxRetriesPerRequest: 3,
       lazyConnect: true,
-    });
+    };
+    this.redis = new Redis(redisOptions);
 
     this.redis.on('error', (error) => {
       this.logger.error('Redis connection error in security monitor:', error);

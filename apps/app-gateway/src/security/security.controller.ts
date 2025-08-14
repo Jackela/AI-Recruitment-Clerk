@@ -15,15 +15,7 @@ import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery } from '@ne
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { SecurityMonitorService, SecurityEvent, SecurityMetrics } from './security-monitor.service';
 import { EnhancedRateLimitMiddleware } from '../middleware/enhanced-rate-limit.middleware';
-
-interface AuthenticatedRequest extends Request {
-  user: {
-    sub: string;
-    email: string;
-    role?: string;
-    [key: string]: any;
-  };
-}
+import { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
 @ApiTags('Security Monitoring')
 @Controller('security')
@@ -254,8 +246,8 @@ export class SecurityController {
       await this.securityMonitorService.recordSecurityEvent({
         type: 'SUSPICIOUS_ACTIVITY',
         severity: 'LOW',
-        ip: req.ip || 'unknown',
-        userAgent: req.get('User-Agent') || 'unknown',
+        ip: req.ip || req.socket?.remoteAddress || 'unknown',
+        userAgent: req.headers['user-agent'] || 'unknown',
         userId: req.user.sub,
         details: {
           action: 'ip_unlock',
@@ -329,8 +321,8 @@ export class SecurityController {
       const eventId = await this.securityMonitorService.recordSecurityEvent({
         type: 'SUSPICIOUS_ACTIVITY',
         severity: 'HIGH',
-        ip: req.ip || 'test-ip',
-        userAgent: req.get('User-Agent') || 'test-agent',
+        ip: req.ip || req.socket?.remoteAddress || 'test-ip',
+        userAgent: req.headers['user-agent'] || 'test-agent',
         userId: req.user.sub,
         details: {
           action: 'security_alert_test',

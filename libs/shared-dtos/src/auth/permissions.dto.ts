@@ -34,7 +34,12 @@ export enum Permission {
   
   // Analytics & Metrics
   TRACK_METRICS = 'track_metrics',
-  VIEW_ANALYTICS = 'view_analytics'
+  VIEW_ANALYTICS = 'view_analytics',
+  
+  // Incentive Management
+  VALIDATE_INCENTIVE = 'validate_incentive',
+  APPROVE_INCENTIVE = 'approve_incentive',
+  REJECT_INCENTIVE = 'reject_incentive'
 }
 
 export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {

@@ -55,13 +55,7 @@ export class MfaService {
         throw new UnauthorizedException('Invalid password');
       }
 
-      const mfaSettings: MfaSettings = user.mfaSettings || {
-        enabled: false,
-        methods: [],
-        backupCodes: [],
-        trustedDevices: [],
-        failedAttempts: 0
-      };
+      const mfaSettings: MfaSettings = this.normalizeMfaSettings(user.mfaSettings);
 
       let qrCode: string | undefined;
       let secretKey: string | undefined;
@@ -130,6 +124,31 @@ export class MfaService {
     }
   }
 
+  private normalizeMfaSettings(rawSettings: any): MfaSettings {
+    if (!rawSettings) {
+      return {
+        enabled: false,
+        methods: [] as MfaMethod[],
+        backupCodes: [],
+        trustedDevices: [],
+        failedAttempts: 0
+      };
+    }
+
+    return {
+      ...rawSettings,
+      methods: (rawSettings.methods || []).map((method: string) => {
+        // Convert string to MfaMethod enum
+        switch (method) {
+          case 'sms': return MfaMethod.SMS;
+          case 'email': return MfaMethod.EMAIL;
+          case 'totp': return MfaMethod.TOTP;
+          default: return method as MfaMethod;
+        }
+      })
+    };
+  }
+
   async verifyMfa(userId: string, verifyMfaDto: VerifyMfaDto, deviceFingerprint?: string): Promise<{ success: boolean; deviceTrusted?: boolean }> {
     try {
       const user = await this.userModel.findById(userId);
@@ -137,7 +156,7 @@ export class MfaService {
         throw new UnauthorizedException('MFA not enabled');
       }
 
-      const mfaSettings = user.mfaSettings;
+      const mfaSettings = this.normalizeMfaSettings(user.mfaSettings);
 
       // Check if account is locked
       if (mfaSettings.lockedUntil && new Date() < mfaSettings.lockedUntil) {
@@ -248,13 +267,7 @@ export class MfaService {
       throw new UnauthorizedException('User not found');
     }
 
-    const mfaSettings = user.mfaSettings || {
-      enabled: false,
-      methods: [],
-      backupCodes: [],
-      trustedDevices: [],
-      failedAttempts: 0
-    };
+    const mfaSettings = this.normalizeMfaSettings(user.mfaSettings);
 
     return {
       enabled: mfaSettings.enabled,
