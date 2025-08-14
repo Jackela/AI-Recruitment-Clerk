@@ -5,7 +5,7 @@ import { Model } from 'mongoose';
 import * as speakeasy from 'speakeasy';
 import * as QRCode from 'qrcode';
 import * as crypto from 'crypto';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { MfaMethod, EnableMfaDto, VerifyMfaDto, DisableMfaDto, GenerateBackupCodesDto, MfaStatusDto, MfaSetupResponseDto } from '../dto/mfa.dto';
 import { UserProfile } from '../../schemas/user-profile.schema';
 import { EmailService } from './email.service';

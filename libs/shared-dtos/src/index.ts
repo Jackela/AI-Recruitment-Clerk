@@ -87,4 +87,4 @@ export * from './contracts/analytics.contracts';
 // Privacy & GDPR Compliance
 export * from './privacy/consent.dto';
 export * from './privacy/data-subject-rights.dto';
-export * from './privacy/privacy-infrastructure.dto';
+export * from './privacy/privacy-simple.dto';

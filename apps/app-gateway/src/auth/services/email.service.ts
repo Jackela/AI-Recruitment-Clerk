@@ -24,13 +24,13 @@ export class EmailService {
 
     if (!smtpConfig.host || !smtpConfig.auth.user || !smtpConfig.auth.pass) {
       this.logger.warn('SMTP configuration incomplete. Email MFA will not work properly.');
-      this.transporter = nodemailer.createTransporter({
+      this.transporter = nodemailer.createTransport({
         jsonTransport: true
       });
       return;
     }
 
-    this.transporter = nodemailer.createTransporter(smtpConfig);
+    this.transporter = nodemailer.createTransport(smtpConfig);
 
     // Verify connection configuration
     this.transporter.verify((error, success) => {
