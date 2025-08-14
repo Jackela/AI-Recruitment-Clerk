@@ -50,7 +50,7 @@ export class SecurityMonitorService {
     const disableRedis = this.configService.get('DISABLE_REDIS', 'false') === 'true';
     const useRedis = this.configService.get('USE_REDIS_CACHE', 'true') === 'true';
     
-    if (disableRedis || !useRedis || process.env.NODE_ENV === 'development') {
+    if (disableRedis || !useRedis) {
       this.logger.log('🔒 Redis已禁用，安全监控将使用内存存储');
       this.redis = null;
       return;

@@ -14,8 +14,8 @@ export const cacheConfig: CacheModuleAsyncOptions = {
     const useRedis = configService.get('USE_REDIS_CACHE', 'true') === 'true';
     const disableRedis = configService.get('DISABLE_REDIS', 'false') === 'true';
     
-    // 如果没有Redis URL、Redis被禁用、或在开发环境中，直接使用内存缓存
-    if (!redisUrl || !useRedis || disableRedis || process.env.NODE_ENV === 'development') {
+    // 如果没有Redis URL或Redis被禁用，直接使用内存缓存
+    if (!redisUrl || !useRedis || disableRedis) {
       console.log('🧠 初始化内存缓存配置 - Redis缓存已禁用或未配置');
       return {
         ttl: configService.get('CACHE_TTL', 300) * 1000,
