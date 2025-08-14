@@ -9,9 +9,9 @@
       "variables": {
         "NODE_ENV": "production",
         "PORT": "${{ RAILWAY_STATIC_PORT }}",
-        "MONGODB_URL": "${{ MONGODB_URL }}",
-        "MONGODB_URI": "${{ MONGODB_URL }}",
-        "REDIS_URL": "${{ REDIS_URL }}",
+        "MONGODB_URL": "${{ MongoDB.MONGO_URL }}",
+        "MONGODB_URI": "${{ MongoDB.MONGO_URL }}",
+        "REDIS_URL": "${{ Redis.REDIS_URL }}",
         "JWT_SECRET": "${{ JWT_SECRET }}",
         "JWT_EXPIRES_IN": "1h",
         "GEMINI_API_KEY": "${{ GEMINI_API_KEY }}",
