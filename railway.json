@@ -15,6 +15,7 @@
         "JWT_SECRET": "${{ JWT_SECRET }}",
         "GEMINI_API_KEY": "${{ GEMINI_API_KEY }}",
         "NATS_URL": "nats://localhost:4222",
+        "USE_REDIS_CACHE": "true",
         "ENABLE_COMPRESSION": "true"
       }
     }

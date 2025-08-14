@@ -79,12 +79,12 @@ import { CrossServiceValidator } from './validators/cross-service.validator';
     // Common services
     HealthCheckService,
     CrossServiceValidator,
-    ServiceIntegrationInterceptor,
+    // ServiceIntegrationInterceptor, // 暂时禁用，有依赖注入问题
   ],
   exports: [
     HealthCheckService,
     CrossServiceValidator,
-    ServiceIntegrationInterceptor,
+    // ServiceIntegrationInterceptor, // 暂时禁用，有依赖注入问题
     CacheModule,
   ],
 })

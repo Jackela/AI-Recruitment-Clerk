@@ -19,13 +19,13 @@ export class AnalyticsEvent {
   @Prop({ index: true })
   userId?: string;
 
-  @Prop({ required: true, enum: Object.values(EventType), index: true })
+  @Prop({ type: String, required: true, enum: Object.values(EventType), index: true })
   eventType: EventType;
 
-  @Prop({ required: true, enum: Object.values(EventCategory), index: true })
+  @Prop({ type: String, required: true, enum: Object.values(EventCategory), index: true })
   eventCategory: EventCategory;
 
-  @Prop({ required: true, enum: Object.values(EventStatus), index: true })
+  @Prop({ type: String, required: true, enum: Object.values(EventStatus), index: true })
   status: EventStatus;
 
   @Prop({ type: Object, required: true })
@@ -54,7 +54,7 @@ export class AnalyticsEvent {
     longitude?: number;
   };
 
-  @Prop({ enum: Object.values(ConsentStatus), default: ConsentStatus.GRANTED })
+  @Prop({ type: String, enum: Object.values(ConsentStatus), default: ConsentStatus.GRANTED })
   consentStatus: ConsentStatus;
 
   @Prop({ default: false })

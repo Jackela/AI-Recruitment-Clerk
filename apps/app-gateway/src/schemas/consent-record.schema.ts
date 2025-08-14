@@ -58,6 +58,7 @@ export class ConsentRecord {
   userId: string;
 
   @Prop({ 
+    type: String,
     enum: Object.values(ConsentPurpose), 
     required: true,
     index: true 
@@ -65,6 +66,7 @@ export class ConsentRecord {
   purpose: ConsentPurpose;
 
   @Prop({ 
+    type: String,
     enum: Object.values(ConsentStatus), 
     required: true,
     index: true 
@@ -72,6 +74,7 @@ export class ConsentRecord {
   status: ConsentStatus;
 
   @Prop({ 
+    type: String,
     enum: Object.values(ConsentMethod),
     required: false 
   })
@@ -235,6 +238,7 @@ export class ConsentAuditLog {
   action: string; // 'grant', 'withdraw', 'renew', 'expire'
 
   @Prop({ 
+    type: String,
     enum: Object.values(ConsentPurpose), 
     required: true,
     index: true 
@@ -242,12 +246,14 @@ export class ConsentAuditLog {
   purpose: ConsentPurpose;
 
   @Prop({ 
+    type: String,
     enum: Object.values(ConsentStatus), 
     required: true 
   })
   previousStatus: ConsentStatus;
 
   @Prop({ 
+    type: String,
     enum: Object.values(ConsentStatus), 
     required: true 
   })
