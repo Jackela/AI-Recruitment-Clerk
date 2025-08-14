@@ -13,6 +13,7 @@
         "MONGODB_URI": "${{ MONGODB_URL }}",
         "REDIS_URL": "${{ REDIS_URL }}",
         "JWT_SECRET": "${{ JWT_SECRET }}",
+        "JWT_EXPIRES_IN": "1h",
         "GEMINI_API_KEY": "${{ GEMINI_API_KEY }}",
         "NATS_URL": "nats://localhost:4222",
         "USE_REDIS_CACHE": "true",
