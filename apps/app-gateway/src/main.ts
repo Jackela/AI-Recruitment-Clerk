@@ -25,7 +25,9 @@ async function bootstrap() {
   
   // Enable CORS for frontend integration
   app.enableCors({
-    origin: ['http://localhost:4200', 'http://localhost:4202'],
+    origin: process.env.NODE_ENV === 'production' 
+      ? ['https://ai-recruitment-clerk-production.up.railway.app', 'http://localhost:4200'] 
+      : ['http://localhost:4200', 'http://localhost:4202'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
@@ -89,6 +91,7 @@ async function bootstrap() {
     .addBearerAuth()
     .addServer('http://localhost:3000', '开发环境')
     .addServer('http://app-gateway:3000', 'Docker环境')
+    .addServer('https://ai-recruitment-clerk-production.up.railway.app', 'Railway生产环境')
     .build();
   
   const document = SwaggerModule.createDocument(app, config);
