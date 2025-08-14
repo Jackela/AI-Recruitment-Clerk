@@ -51,7 +51,7 @@ import { EnhancedRateLimitMiddleware } from '../middleware/enhanced-rate-limit.m
     AppCacheModule,
     MongooseModule.forRootAsync({
       useFactory: () => ({
-        uri: process.env.MONGODB_URL || 'mongodb://admin:devpassword123@localhost:27017/ai-recruitment?authSource=admin',
+        uri: process.env.MONGODB_URL || process.env.MONGODB_URI || 'mongodb://admin:devpassword123@localhost:27017/ai-recruitment?authSource=admin',
         // 连接池优化配置
         maxPoolSize: 20,        // 最大连接数
         minPoolSize: 5,         // 最小连接数

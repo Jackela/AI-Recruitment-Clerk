@@ -10,9 +10,12 @@
         "NODE_ENV": "production",
         "PORT": "${{ RAILWAY_STATIC_PORT }}",
         "MONGODB_URL": "${{ MONGODB_URL }}",
+        "MONGODB_URI": "${{ MONGODB_URL }}",
         "REDIS_URL": "${{ REDIS_URL }}",
         "JWT_SECRET": "${{ JWT_SECRET }}",
-        "GEMINI_API_KEY": "${{ GEMINI_API_KEY }}"
+        "GEMINI_API_KEY": "${{ GEMINI_API_KEY }}",
+        "NATS_URL": "nats://localhost:4222",
+        "ENABLE_COMPRESSION": "true"
       }
     }
   }
