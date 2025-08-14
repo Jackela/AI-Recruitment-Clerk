@@ -26,6 +26,7 @@ export class DataSubjectRightsRequest {
   userId: string;
 
   @Prop({ 
+    type: String,
     enum: Object.values(DataSubjectRightType), 
     required: true,
     index: true 
@@ -33,6 +34,7 @@ export class DataSubjectRightsRequest {
   requestType: DataSubjectRightType;
 
   @Prop({ 
+    type: String,
     enum: Object.values(RequestStatus), 
     required: true,
     index: true,
@@ -41,6 +43,7 @@ export class DataSubjectRightsRequest {
   status: RequestStatus;
 
   @Prop({ 
+    type: String,
     enum: Object.values(IdentityVerificationStatus), 
     required: true,
     default: IdentityVerificationStatus.PENDING
@@ -76,6 +79,7 @@ export class DataSubjectRightsRequest {
   specificDataCategories?: string[]; // For access/portability requests
 
   @Prop({ 
+    type: String,
     enum: Object.values(DataExportFormat),
     required: false 
   })
@@ -184,12 +188,14 @@ export class RightsRequestActivity {
   notes?: string;
 
   @Prop({ 
+    type: String,
     enum: Object.values(RequestStatus),
     required: false 
   })
   previousStatus?: RequestStatus;
 
   @Prop({ 
+    type: String,
     enum: Object.values(RequestStatus),
     required: false 
   })
@@ -231,6 +237,7 @@ export class DataExportPackage {
   userId: string;
 
   @Prop({ 
+    type: String,
     enum: Object.values(DataExportFormat), 
     required: true 
   })
@@ -320,6 +327,7 @@ export class IdentityVerification {
   verificationType: string; // 'email', 'phone', 'document', 'security_questions'
 
   @Prop({ 
+    type: String,
     enum: Object.values(IdentityVerificationStatus),
     required: true,
     default: IdentityVerificationStatus.PENDING

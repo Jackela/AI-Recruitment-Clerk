@@ -24,6 +24,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { Permissions } from './decorators/permissions.decorator';
+import { Public } from './decorators/public.decorator';
 
 interface AuthenticatedRequest extends Request {
   user: UserDto;
@@ -36,12 +37,14 @@ export class AuthController {
     private readonly userService: UserService
   ) {}
 
+  @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() createUserDto: CreateUserDto): Promise<AuthResponseDto> {
     return this.authService.register(createUserDto);
   }
 
+  @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -49,6 +52,7 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   async refreshToken(@Body() refreshTokenDto: RefreshTokenDto): Promise<AuthResponseDto> {
@@ -103,6 +107,7 @@ export class AuthController {
     return this.userService.getStats();
   }
 
+  @Public()
   @Get('health')
   async healthCheck(): Promise<{ status: string; timestamp: string }> {
     return {

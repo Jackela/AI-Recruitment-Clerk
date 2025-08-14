@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: ai-recruitment-mongodb-dev
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: devpassword123
+      MONGO_INITDB_DATABASE: ai-recruitment
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongodb-init:/docker-entrypoint-initdb.d
+    networks:
+      - ai-recruitment-dev
+
+  redis:
+    image: redis:7-alpine
+    container_name: ai-recruitment-redis-dev
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - ai-recruitment-dev
+
+volumes:
+  mongodb_data:
+
+networks:
+  ai-recruitment-dev:
+    driver: bridge

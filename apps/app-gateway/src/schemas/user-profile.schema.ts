@@ -29,13 +29,13 @@ export class UserProfile {
   @Prop({ type: Object })
   preferences?: UserPreferences;
 
-  @Prop({ enum: Object.values(ConsentStatus), default: ConsentStatus.PENDING })
+  @Prop({ type: String, enum: Object.values(ConsentStatus), default: ConsentStatus.PENDING })
   dataProcessingConsent: ConsentStatus;
 
-  @Prop({ enum: Object.values(ConsentStatus), default: ConsentStatus.PENDING })
+  @Prop({ type: String, enum: Object.values(ConsentStatus), default: ConsentStatus.PENDING })
   marketingConsent: ConsentStatus;
 
-  @Prop({ enum: Object.values(ConsentStatus), default: ConsentStatus.PENDING })
+  @Prop({ type: String, enum: Object.values(ConsentStatus), default: ConsentStatus.PENDING })
   analyticsConsent: ConsentStatus;
 
   @Prop({ default: true })

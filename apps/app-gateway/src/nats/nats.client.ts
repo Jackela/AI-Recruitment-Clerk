@@ -18,7 +18,11 @@ export class NatsClient implements OnModuleInit, OnModuleDestroy {
   private readonly reconnectTimeWait = 2000;
 
   async onModuleInit() {
-    await this.connect();
+    try {
+      await this.connect();
+    } catch (error) {
+      this.logger.warn('NATS JetStream is not available, application will continue without messaging capabilities');
+    }
   }
 
   async onModuleDestroy() {
@@ -63,7 +67,9 @@ export class NatsClient implements OnModuleInit, OnModuleDestroy {
       this.logger.log('Successfully connected to NATS JetStream');
     } catch (error) {
       this.logger.error('Failed to connect to NATS JetStream', error);
-      throw error;
+      // Don't throw error to prevent application crash
+      this.connection = null;
+      this.jetstream = null;
     }
   }
 
