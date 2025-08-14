@@ -6,20 +6,39 @@ import { Injectable, OnModuleDestroy } from '@nestjs/common';
  */
 @Injectable()
 export class RedisClient implements OnModuleDestroy {
-  private redis: Redis;
+  private redis: Redis | null = null;
   private isConnected = false;
+  private useInMemoryStore = false;
+  private memoryStore = new Map<string, { value: string; expireAt?: number }>();
 
   constructor() {
-    this.redis = new Redis({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      db: parseInt(process.env.REDIS_DB || '0'),
-      retryDelayOnFailover: 100,
-      enableReadyCheck: true,
-      maxRetriesPerRequest: 3,
-      lazyConnect: true,
-      keepAlive: 30000,
-    });
+    // 配置开关：仅当明确启用并且存在连接信息时才连接Redis
+    const disableRedis = process.env.DISABLE_REDIS === 'true';
+    const useRedis = process.env.USE_REDIS_CACHE === 'true';
+    const redisUrl = process.env.REDIS_URL;
+    const redisHost = process.env.REDIS_HOST;
+
+    if (disableRedis || !useRedis || (!redisUrl && !redisHost)) {
+      // 降级为内存存储，避免 ioredis 连接到 127.0.0.1:6379
+      this.useInMemoryStore = true;
+      this.redis = null;
+      this.isConnected = true; // 就绪（内存实现）
+      return;
+    }
+
+    if (redisUrl) {
+      this.redis = new Redis(redisUrl);
+    } else {
+      this.redis = new Redis({
+        host: redisHost!,
+        port: parseInt(process.env.REDIS_PORT || '6379'),
+        password: process.env.REDIS_PASSWORD,
+        db: parseInt(process.env.REDIS_DB || '0'),
+        maxRetriesPerRequest: 3,
+        lazyConnect: true,
+        connectTimeout: 10000,
+      });
+    }
 
     this.setupEventHandlers();
   }
@@ -34,6 +53,9 @@ export class RedisClient implements OnModuleDestroy {
    * 获取Redis实例
    */
   getClient(): Redis {
+    if (!this.redis) {
+      throw new Error('Redis client is not available in in-memory mode');
+    }
     return this.redis;
   }
 
@@ -48,7 +70,11 @@ export class RedisClient implements OnModuleDestroy {
    * 手动连接Redis
    */
   async connect(): Promise<void> {
-    if (!this.isConnected) {
+    if (this.useInMemoryStore) {
+      this.isConnected = true;
+      return;
+    }
+    if (!this.isConnected && this.redis) {
       await this.redis.connect();
     }
   }
@@ -58,10 +84,15 @@ export class RedisClient implements OnModuleDestroy {
    */
   async set(key: string, value: string, ttl?: number): Promise<void> {
     await this.ensureConnection();
+    if (this.useInMemoryStore) {
+      const expireAt = ttl ? Date.now() + ttl * 1000 : undefined;
+      this.memoryStore.set(key, { value, expireAt });
+      return;
+    }
     if (ttl) {
-      await this.redis.setex(key, ttl, value);
+      await this.redis!.setex(key, ttl, value);
     } else {
-      await this.redis.set(key, value);
+      await this.redis!.set(key, value);
     }
   }
 
@@ -70,7 +101,16 @@ export class RedisClient implements OnModuleDestroy {
    */
   async get(key: string): Promise<string | null> {
     await this.ensureConnection();
-    return this.redis.get(key);
+    if (this.useInMemoryStore) {
+      const entry = this.memoryStore.get(key);
+      if (!entry) return null;
+      if (entry.expireAt && Date.now() > entry.expireAt) {
+        this.memoryStore.delete(key);
+        return null;
+      }
+      return entry.value;
+    }
+    return this.redis!.get(key);
   }
 
   /**
@@ -78,7 +118,11 @@ export class RedisClient implements OnModuleDestroy {
    */
   async del(key: string): Promise<number> {
     await this.ensureConnection();
-    return this.redis.del(key);
+    if (this.useInMemoryStore) {
+      const existed = this.memoryStore.delete(key);
+      return existed ? 1 : 0;
+    }
+    return this.redis!.del(key);
   }
 
   /**
@@ -86,7 +130,11 @@ export class RedisClient implements OnModuleDestroy {
    */
   async exists(key: string): Promise<boolean> {
     await this.ensureConnection();
-    const result = await this.redis.exists(key);
+    if (this.useInMemoryStore) {
+      const val = await this.get(key);
+      return val !== null;
+    }
+    const result = await this.redis!.exists(key);
     return result === 1;
   }
 
@@ -95,7 +143,14 @@ export class RedisClient implements OnModuleDestroy {
    */
   async expire(key: string, seconds: number): Promise<boolean> {
     await this.ensureConnection();
-    const result = await this.redis.expire(key, seconds);
+    if (this.useInMemoryStore) {
+      const entry = this.memoryStore.get(key);
+      if (!entry) return false;
+      entry.expireAt = Date.now() + seconds * 1000;
+      this.memoryStore.set(key, entry);
+      return true;
+    }
+    const result = await this.redis!.expire(key, seconds);
     return result === 1;
   }
 
@@ -104,7 +159,13 @@ export class RedisClient implements OnModuleDestroy {
    */
   async ttl(key: string): Promise<number> {
     await this.ensureConnection();
-    return this.redis.ttl(key);
+    if (this.useInMemoryStore) {
+      const entry = this.memoryStore.get(key);
+      if (!entry || !entry.expireAt) return -1;
+      const remainingMs = entry.expireAt - Date.now();
+      return remainingMs > 0 ? Math.ceil(remainingMs / 1000) : -2;
+    }
+    return this.redis!.ttl(key);
   }
 
   /**
@@ -112,7 +173,13 @@ export class RedisClient implements OnModuleDestroy {
    */
   async incr(key: string): Promise<number> {
     await this.ensureConnection();
-    return this.redis.incr(key);
+    if (this.useInMemoryStore) {
+      const current = parseInt((await this.get(key)) || '0', 10);
+      const next = current + 1;
+      await this.set(key, String(next));
+      return next;
+    }
+    return this.redis!.incr(key);
   }
 
   /**
@@ -120,7 +187,13 @@ export class RedisClient implements OnModuleDestroy {
    */
   async decr(key: string): Promise<number> {
     await this.ensureConnection();
-    return this.redis.decr(key);
+    if (this.useInMemoryStore) {
+      const current = parseInt((await this.get(key)) || '0', 10);
+      const next = current - 1;
+      await this.set(key, String(next));
+      return next;
+    }
+    return this.redis!.decr(key);
   }
 
   /**
@@ -128,8 +201,14 @@ export class RedisClient implements OnModuleDestroy {
    */
   async mset(keyValues: Record<string, string>): Promise<void> {
     await this.ensureConnection();
+    if (this.useInMemoryStore) {
+      for (const [k, v] of Object.entries(keyValues)) {
+        await this.set(k, v);
+      }
+      return;
+    }
     const args = Object.entries(keyValues).flat();
-    await this.redis.mset(...args);
+    await this.redis!.mset(...args);
   }
 
   /**
@@ -137,7 +216,14 @@ export class RedisClient implements OnModuleDestroy {
    */
   async mget(keys: string[]): Promise<Array<string | null>> {
     await this.ensureConnection();
-    return this.redis.mget(...keys);
+    if (this.useInMemoryStore) {
+      const results: Array<string | null> = [];
+      for (const k of keys) {
+        results.push(await this.get(k));
+      }
+      return results;
+    }
+    return this.redis!.mget(...keys);
   }
 
   /**
@@ -145,7 +231,15 @@ export class RedisClient implements OnModuleDestroy {
    */
   async hset(key: string, field: string, value: string): Promise<number> {
     await this.ensureConnection();
-    return this.redis.hset(key, field, value);
+    if (this.useInMemoryStore) {
+      const existing = (await this.get(key)) || '{}';
+      const obj = JSON.parse(existing);
+      const isNew = obj[field] === undefined ? 1 : 0;
+      obj[field] = value;
+      await this.set(key, JSON.stringify(obj));
+      return isNew;
+    }
+    return this.redis!.hset(key, field, value);
   }
 
   /**
@@ -153,7 +247,12 @@ export class RedisClient implements OnModuleDestroy {
    */
   async hget(key: string, field: string): Promise<string | null> {
     await this.ensureConnection();
-    return this.redis.hget(key, field);
+    if (this.useInMemoryStore) {
+      const existing = (await this.get(key)) || '{}';
+      const obj = JSON.parse(existing);
+      return obj[field] ?? null;
+    }
+    return this.redis!.hget(key, field);
   }
 
   /**
@@ -161,7 +260,11 @@ export class RedisClient implements OnModuleDestroy {
    */
   async hgetall(key: string): Promise<Record<string, string>> {
     await this.ensureConnection();
-    return this.redis.hgetall(key);
+    if (this.useInMemoryStore) {
+      const existing = (await this.get(key)) || '{}';
+      return JSON.parse(existing);
+    }
+    return this.redis!.hgetall(key);
   }
 
   /**
@@ -169,7 +272,15 @@ export class RedisClient implements OnModuleDestroy {
    */
   async hdel(key: string, field: string): Promise<number> {
     await this.ensureConnection();
-    return this.redis.hdel(key, field);
+    if (this.useInMemoryStore) {
+      const existing = (await this.get(key)) || '{}';
+      const obj = JSON.parse(existing);
+      const existed = Object.prototype.hasOwnProperty.call(obj, field) ? 1 : 0;
+      delete obj[field];
+      await this.set(key, JSON.stringify(obj));
+      return existed;
+    }
+    return this.redis!.hdel(key, field);
   }
 
   /**
@@ -177,7 +288,20 @@ export class RedisClient implements OnModuleDestroy {
    */
   async keys(pattern: string): Promise<string[]> {
     await this.ensureConnection();
-    return this.redis.keys(pattern);
+    if (this.useInMemoryStore) {
+      const regex = new RegExp('^' + pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$');
+      const now = Date.now();
+      const keys: string[] = [];
+      for (const [k, v] of this.memoryStore.entries()) {
+        if (v.expireAt && now > v.expireAt) {
+          this.memoryStore.delete(k);
+          continue;
+        }
+        if (regex.test(k)) keys.push(k);
+      }
+      return keys;
+    }
+    return this.redis!.keys(pattern);
   }
 
   /**
@@ -185,7 +309,11 @@ export class RedisClient implements OnModuleDestroy {
    */
   async eval(script: string, keys: string[], args: string[]): Promise<any> {
     await this.ensureConnection();
-    return this.redis.eval(script, keys.length, ...keys, ...args);
+    if (this.useInMemoryStore) {
+      // Not implemented for in-memory mode
+      return null;
+    }
+    return this.redis!.eval(script, keys.length, ...keys, ...args);
   }
 
   private async ensureConnection(): Promise<void> {
@@ -195,6 +323,7 @@ export class RedisClient implements OnModuleDestroy {
   }
 
   private setupEventHandlers(): void {
+    if (!this.redis) return;
     this.redis.on('connect', () => {
       console.log('Redis connection established');
     });

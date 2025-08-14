@@ -34,22 +34,53 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
   }
 
   private initializeRedis() {
-    const redisOptions: RedisOptions = {
-      host: this.configService.get<string>('REDIS_HOST') || 'localhost',
-      port: parseInt(this.configService.get<string>('REDIS_PORT') || '6379'),
-      password: this.configService.get<string>('REDIS_PASSWORD'),
-      maxRetriesPerRequest: 3,
-      lazyConnect: true,
-    };
-    this.redis = new Redis(redisOptions);
+    // 检查Redis配置
+    const disableRedis = this.configService.get('DISABLE_REDIS', 'false') === 'true';
+    const useRedis = this.configService.get('USE_REDIS_CACHE', 'true') === 'true';
+    const redisUrl = this.configService.get<string>('REDIS_URL');
+    const redisHost = this.configService.get<string>('REDIS_HOST');
+    
+    // 如果Redis被禁用或未配置，跳过Redis初始化
+    if (disableRedis || !useRedis || (!redisUrl && !redisHost)) {
+      this.logger.log('🔒 Redis已禁用或未配置，限流使用内存存储');
+      this.redis = null;
+      return;
+    }
+    
+    try {
+      // 优先使用完整的 REDIS_URL；仅当没有 URL 但提供了 Host/Port 时才使用分离配置
+      if (redisUrl) {
+        this.redis = new Redis(redisUrl, {
+          maxRetriesPerRequest: 3,
+          lazyConnect: true,
+          enableOfflineQueue: false,
+          connectTimeout: 10000,
+        });
+      } else {
+        const redisOptions: RedisOptions = {
+          host: redisHost!,
+          port: parseInt(this.configService.get<string>('REDIS_PORT') || '6379'),
+          password: this.configService.get<string>('REDIS_PASSWORD'),
+          maxRetriesPerRequest: 3,
+          lazyConnect: true,
+          enableOfflineQueue: false,
+          connectTimeout: 10000,
+        };
+        this.redis = new Redis(redisOptions);
+      }
 
-    this.redis.on('error', (error) => {
-      this.logger.error('Redis connection error:', error);
-    });
+      this.redis.on('error', (error) => {
+        this.logger.warn('Redis连接错误，限流降级到内存存储:', error.message);
+        this.redis = null;
+      });
 
-    this.redis.on('connect', () => {
-      this.logger.log('Redis connected for rate limiting');
-    });
+      this.redis.on('connect', () => {
+        this.logger.log('✅ Redis连接成功，限流使用Redis存储');
+      });
+    } catch (error) {
+      this.logger.warn('Redis初始化失败，限流降级到内存存储:', error.message);
+      this.redis = null;
+    }
   }
 
   private initializeLimits() {
@@ -84,6 +115,10 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
   }
 
   async use(req: Request, res: Response, next: NextFunction) {
+    // 若Redis不可用，直接放行（生产环境不阻塞请求）
+    if (!this.redis) {
+      return next();
+    }
     const clientInfo = this.extractClientInfo(req);
     const operationType = this.determineOperationType(req);
     const limits = this.operationLimits[operationType] || this.operationLimits.default;
@@ -181,6 +216,9 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
   }
 
   private async checkRateLimit(clientInfo: any, operationType: string, limits: { window: number; limit: number }) {
+    if (!this.redis) {
+      return { allowed: true, remaining: limits.limit, retryAfter: 0, resetTime: Date.now() + limits.window, currentCount: 0 };
+    }
     const key = `rate_limit:${operationType}:${clientInfo.fingerprint}`;
     const now = Date.now();
     const windowStart = now - limits.window;
@@ -217,6 +255,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
   }
 
   private async isIpLocked(ip: string): Promise<boolean> {
+    if (!this.redis) return false;
     const key = `security_lock:${ip}`;
     const lockInfo = await this.redis.get(key);
     
@@ -237,12 +276,14 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
   }
 
   private async getLockInfo(ip: string) {
+    if (!this.redis) return null;
     const key = `security_lock:${ip}`;
     const lockInfo = await this.redis.get(key);
     return lockInfo ? JSON.parse(lockInfo) : null;
   }
 
   private async recordFailedAttempt(ip: string) {
+    if (!this.redis) return;
     const key = `security_record:${ip}`;
     const now = Date.now();
     
@@ -287,6 +328,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
   }
 
   private async recordRequest(clientInfo: any, operationType: string) {
+    if (!this.redis) return;
     // Record successful request for analytics
     const key = `analytics:requests:${operationType}:${new Date().toISOString().split('T')[0]}`;
     await this.redis.incr(key);

@@ -14,14 +14,47 @@ export class RateLimitMiddleware implements NestMiddleware {
   private redis: Redis;
 
   constructor() {
-    this.redis = new Redis({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      password: process.env.REDIS_PASSWORD,
-    });
+    // 检查是否禁用Redis或使用Redis URL
+    const disableRedis = process.env.DISABLE_REDIS === 'true';
+    const useRedis = process.env.USE_REDIS_CACHE !== 'false';
+    const redisUrl = process.env.REDIS_URL;
+    
+    if (disableRedis || !useRedis || (!redisUrl && !process.env.REDIS_HOST)) {
+      console.log('🔒 Redis已禁用或未配置，限流使用内存存储');
+      this.redis = null;
+      return;
+    }
+    
+    try {
+      // 优先使用完整的 REDIS_URL；仅当没有 URL 但提供了 Host/Port 时才使用分离配置
+      if (redisUrl) {
+        this.redis = new Redis(redisUrl, {
+          maxRetriesPerRequest: 3,
+          lazyConnect: true,
+          connectTimeout: 10000,
+        });
+      } else {
+        this.redis = new Redis({
+          host: process.env.REDIS_HOST!,
+          port: parseInt(process.env.REDIS_PORT || '6379'),
+          password: process.env.REDIS_PASSWORD,
+          maxRetriesPerRequest: 3,
+          lazyConnect: true,
+          connectTimeout: 10000,
+        });
+      }
+    } catch (error) {
+      console.warn('Redis初始化失败，限流降级到内存存储:', error.message);
+      this.redis = null;
+    }
   }
 
   async use(req: Request, res: Response, next: NextFunction) {
+    // 如果Redis不可用，跳过限流检查
+    if (!this.redis) {
+      return next();
+    }
+    
     const ip = this.getClientIP(req);
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     const key = `rate_limit:${ip}:${today}`;
@@ -96,6 +129,11 @@ export class RateLimitMiddleware implements NestMiddleware {
     newLimit: number;
     remaining: number;
   }> {
+    // 如果Redis不可用，返回默认值
+    if (!this.redis) {
+      return { success: true, newLimit: 10, remaining: 10 };
+    }
+    
     const today = new Date().toISOString().split('T')[0];
     const key = `rate_limit:${ip}:${today}`;
 
@@ -128,6 +166,9 @@ export class RateLimitMiddleware implements NestMiddleware {
     newLimit: number;
     remaining: number;
   }> {
+    if (!this.redis) {
+      return { success: true, newLimit: 10, remaining: 10 };
+    }
     const today = new Date().toISOString().split('T')[0];
     const key = `rate_limit:${ip}:${today}`;
     const paymentKey = `payment:${paymentId}:${ip}:${today}`;
