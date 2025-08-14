@@ -90,8 +90,38 @@ const server = http.createServer((req, res) => {
   }
 });
 
+// 全局错误处理
+process.on('uncaughtException', (error) => {
+  console.error('❌ 未捕获的异常:', error);
+  console.error('📍 Stack trace:', error.stack);
+  // 记录错误但不退出进程，让Railway的重启策略处理
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ 未处理的Promise拒绝:', reason);
+  console.error('📍 Promise:', promise);
+});
+
+// 优雅退出处理
+process.on('SIGTERM', () => {
+  console.log('🔄 收到SIGTERM信号，准备优雅退出...');
+  server.close(() => {
+    console.log('✅ 服务器已优雅关闭');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('🔄 收到SIGINT信号，准备优雅退出...');
+  server.close(() => {
+    console.log('✅ 服务器已优雅关闭');
+    process.exit(0);
+  });
+});
+
 server.listen(PORT, "0.0.0.0", () => {
   console.log("🚀 AI招聘助手启动成功！");
   console.log("📱 端口:", PORT);
   console.log("⏰ 启动时间:", new Date().toLocaleString("zh-CN"));
+  console.log("🔄 重启策略: 已配置为失败时自动重启");
 });
