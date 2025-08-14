@@ -70,7 +70,7 @@ export class PrivacyComplianceController {
     captureConsentDto.ipAddress = req.ip || req.connection.remoteAddress;
     captureConsentDto.userAgent = req.headers['user-agent'];
     
-    return await this.privacyService.captureConsent(captureConsentDto);
+    return await this.privacyService.captureConsent(captureConsentDto) as any;
   }
 
   @Put('consent/withdraw')
@@ -141,7 +141,7 @@ export class PrivacyComplianceController {
     createRequestDto.ipAddress = req.ip || req.connection.remoteAddress;
     createRequestDto.userAgent = req.headers['user-agent'];
     
-    return await this.privacyService.createRightsRequest(createRequestDto);
+    return await this.privacyService.createRightsRequest(createRequestDto) as any;
   }
 
   @Get('data-export/:userId')
@@ -172,7 +172,7 @@ export class PrivacyComplianceController {
     return await this.privacyService.processDataAccessRequest(
       userId, 
       format || DataExportFormat.JSON
-    );
+    ) as any;
   }
 
   @Delete('user-data/:userId')
