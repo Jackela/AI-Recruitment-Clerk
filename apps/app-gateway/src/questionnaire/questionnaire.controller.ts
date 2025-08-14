@@ -1,7 +1,7 @@
 import { Controller, Post, Get, Body, Req, HttpException, HttpStatus } from '@nestjs/common';
 import { Request } from 'express';
-// import { QuestionnaireService } from './questionnaire-integration.service';
 import { RateLimitMiddleware } from '../middleware/rate-limit.middleware';
+import { QuestionnaireIntegrationService } from '../domains/questionnaire/questionnaire-integration.service';
 
 interface QuestionnaireSubmission {
   // 基础用户信息
@@ -55,7 +55,7 @@ interface QuestionnaireSubmission {
 @Controller('questionnaire')
 export class QuestionnaireController {
   constructor(
-    private readonly questionnaireService: QuestionnaireService,
+    private readonly questionnaireService: QuestionnaireIntegrationService,
     private readonly rateLimitMiddleware: RateLimitMiddleware,
   ) {}
 

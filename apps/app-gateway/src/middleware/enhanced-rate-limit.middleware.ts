@@ -1,7 +1,7 @@
 import { Injectable, NestMiddleware, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response, NextFunction } from 'express';
-import { Redis } from 'ioredis';
+import Redis, { RedisOptions } from 'ioredis';
 
 interface SecurityRateLimitRecord {
   requests: number;
@@ -34,14 +34,14 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
   }
 
   private initializeRedis() {
-    this.redis = new Redis({
+    const redisOptions: RedisOptions = {
       host: this.configService.get<string>('REDIS_HOST') || 'localhost',
       port: parseInt(this.configService.get<string>('REDIS_PORT') || '6379'),
       password: this.configService.get<string>('REDIS_PASSWORD'),
-      retryDelayOnFailover: 100,
       maxRetriesPerRequest: 3,
       lazyConnect: true,
-    });
+    };
+    this.redis = new Redis(redisOptions);
 
     this.redis.on('error', (error) => {
       this.logger.error('Redis connection error:', error);

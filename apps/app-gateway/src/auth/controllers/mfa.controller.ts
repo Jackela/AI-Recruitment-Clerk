@@ -13,6 +13,7 @@ import {
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { MfaService } from '../services/mfa.service';
+import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import {
   EnableMfaDto,
   VerifyMfaDto,
@@ -23,15 +24,6 @@ import {
   MfaSetupResponseDto,
   MfaMethod
 } from '../dto/mfa.dto';
-
-interface AuthenticatedRequest extends Request {
-  user: {
-    sub: string;
-    email: string;
-    [key: string]: any;
-  };
-  fingerprint?: string;
-}
 
 @ApiTags('Multi-Factor Authentication')
 @Controller('auth/mfa')
@@ -207,7 +199,7 @@ export class MfaController {
     const userAgent = req.headers['user-agent'] || '';
     const acceptLanguage = req.headers['accept-language'] || '';
     const acceptEncoding = req.headers['accept-encoding'] || '';
-    const ip = req.ip || req.connection?.remoteAddress || '';
+    const ip = req.ip || req.socket?.remoteAddress || '';
 
     // Simple fingerprinting - in production, you might want a more sophisticated approach
     const fingerprint = Buffer.from(`${userAgent}:${acceptLanguage}:${acceptEncoding}:${ip}`)

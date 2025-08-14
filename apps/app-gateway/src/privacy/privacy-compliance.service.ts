@@ -1,9 +1,8 @@
 import { Injectable, Logger, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { ConsentStatus, DataCategory } from '../schemas/consent-record.schema';
 import { 
-  ConsentStatus,
-  ConsentPurpose,
   ConsentRecord,
   UserConsentProfile,
   CaptureConsentDto,
@@ -16,8 +15,10 @@ import {
   ProcessRightsRequestDto,
   RequestStatus,
   DataExportFormat,
-  IdentityVerificationStatus
-} from '../../../../libs/shared-dtos/src';
+  IdentityVerificationStatus,
+  UserPreferencesDto,
+  ConsentPurpose
+} from '../common/interfaces/fallback-types';
 import { UserProfile, UserProfileDocument } from '../schemas/user-profile.schema';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -177,24 +178,24 @@ export class PrivacyComplianceService {
           {
             purpose: ConsentPurpose.ESSENTIAL_SERVICES,
             status: userProfile.dataProcessingConsent,
-            grantedAt: userProfile.createdAt,
+            grantedAt: (userProfile as any).createdAt || new Date(),
             canWithdraw: false // Essential services cannot be withdrawn
           },
           {
             purpose: ConsentPurpose.MARKETING_COMMUNICATIONS,
             status: userProfile.marketingConsent,
-            grantedAt: userProfile.createdAt,
+            grantedAt: (userProfile as any).createdAt || new Date(),
             canWithdraw: true
           },
           {
             purpose: ConsentPurpose.BEHAVIORAL_ANALYTICS,
             status: userProfile.analyticsConsent,
-            grantedAt: userProfile.createdAt,
+            grantedAt: (userProfile as any).createdAt || new Date(),
             canWithdraw: true
           }
         ],
         needsRenewal: this.checkConsentRenewalNeeded(userProfile),
-        lastUpdated: userProfile.updatedAt
+        lastUpdated: (userProfile as any).updatedAt || new Date()
       };
 
       return consentStatus;
@@ -362,7 +363,7 @@ export class PrivacyComplianceService {
   private checkConsentRenewalNeeded(userProfile: UserProfileDocument): boolean {
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-    return userProfile.updatedAt < oneYearAgo;
+    return ((userProfile as any).updatedAt || new Date()) < oneYearAgo;
   }
 
   private async cascadeConsentWithdrawal(userId: string, purpose: ConsentPurpose): Promise<void> {
@@ -403,7 +404,7 @@ export class PrivacyComplianceService {
           email: profile.email,
           displayName: profile.displayName,
           preferences: profile.preferences,
-          createdAt: profile.createdAt
+          createdAt: (profile as any).createdAt || new Date()
         },
         sources: ['app-gateway'],
         legalBasis: 'Contract performance',

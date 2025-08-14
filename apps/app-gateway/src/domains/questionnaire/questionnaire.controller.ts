@@ -39,12 +39,11 @@ import {
   QuestionnaireTemplateDto,
   QuestionType,
   QuestionnaireStatus
-} from '../../../../../libs/shared-dtos/src';
+} from '../../common/interfaces/fallback-types';
+import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import { QuestionnaireIntegrationService } from './questionnaire-integration.service';
 
-interface AuthenticatedRequest extends Request {
-  user: UserDto;
-}
+// Use imported interface instead of local definition
 
 @ApiTags('questionnaire')
 @ApiBearerAuth()
@@ -77,7 +76,7 @@ export class QuestionnaireController {
   })
   @ApiResponse({ status: 400, description: '请求参数错误' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.CREATE_QUESTIONNAIRE)
+  @Permissions('create_questionnaire' as any)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createQuestionnaire(
@@ -210,7 +209,7 @@ export class QuestionnaireController {
   @ApiResponse({ status: 404, description: '问卷未找到' })
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.UPDATE_QUESTIONNAIRE)
+  @Permissions('update_questionnaire' as any)
   @Put(':questionnaireId')
   @HttpCode(HttpStatus.OK)
   async updateQuestionnaire(
@@ -251,7 +250,7 @@ export class QuestionnaireController {
   @ApiResponse({ status: 200, description: '问卷发布成功' })
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.PUBLISH_QUESTIONNAIRE)
+  @Permissions('publish_questionnaire' as any)
   @Post(':questionnaireId/publish')
   @HttpCode(HttpStatus.OK)
   async publishQuestionnaire(
@@ -328,7 +327,7 @@ export class QuestionnaireController {
         {
           ...submission,
           submittedBy: req.user.id,
-          userIP: req.ip,
+          userIP: req.socket?.remoteAddress || req.headers['x-forwarded-for'] || 'unknown',
           userAgent: req.headers['user-agent']
         }
       );
@@ -369,7 +368,7 @@ export class QuestionnaireController {
   @ApiQuery({ name: 'startDate', required: false, description: '开始日期' })
   @ApiQuery({ name: 'endDate', required: false, description: '结束日期' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.READ_QUESTIONNAIRE_RESPONSES)
+  @Permissions('read_questionnaire_responses' as any)
   @Get(':questionnaireId/submissions')
   async getQuestionnaireSubmissions(
     @Request() req: AuthenticatedRequest,
@@ -422,7 +421,7 @@ export class QuestionnaireController {
   })
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.READ_QUESTIONNAIRE_ANALYTICS)
+  @Permissions('read_questionnaire_analytics' as any)
   @Get(':questionnaireId/analytics')
   async getQuestionnaireAnalytics(
     @Request() req: AuthenticatedRequest,
@@ -454,7 +453,7 @@ export class QuestionnaireController {
   @ApiResponse({ status: 201, description: '问卷复制成功' })
   @ApiParam({ name: 'questionnaireId', description: '原问卷ID' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.CREATE_QUESTIONNAIRE)
+  @Permissions('create_questionnaire' as any)
   @Post(':questionnaireId/duplicate')
   @HttpCode(HttpStatus.CREATED)
   async duplicateQuestionnaire(
@@ -499,7 +498,7 @@ export class QuestionnaireController {
   @ApiResponse({ status: 200, description: '问卷删除成功' })
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.DELETE_QUESTIONNAIRE)
+  @Permissions('delete_questionnaire' as any)
   @Delete(':questionnaireId')
   @HttpCode(HttpStatus.OK)
   async deleteQuestionnaire(
@@ -575,7 +574,7 @@ export class QuestionnaireController {
   @ApiResponse({ status: 201, description: '从模板创建成功' })
   @ApiParam({ name: 'templateId', description: '模板ID' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.CREATE_QUESTIONNAIRE)
+  @Permissions('create_questionnaire' as any)
   @Post('templates/:templateId/create')
   @HttpCode(HttpStatus.CREATED)
   async createFromTemplate(
@@ -624,7 +623,7 @@ export class QuestionnaireController {
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @ApiQuery({ name: 'format', required: false, enum: ['csv', 'excel'], description: '导出格式' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.EXPORT_QUESTIONNAIRE_DATA)
+  @Permissions('export_questionnaire_data' as any)
   @Post(':questionnaireId/export')
   @HttpCode(HttpStatus.OK)
   async exportQuestionnaireData(

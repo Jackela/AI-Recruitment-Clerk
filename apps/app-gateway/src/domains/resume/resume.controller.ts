@@ -43,12 +43,11 @@ import {
   ResumeStatusUpdateDto,
   ResumeSearchDto,
   ResumeSkillsAnalysisDto
-} from '../../../../../libs/shared-dtos/src';
+} from '../../common/interfaces/fallback-types';
+import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import { ResumeService } from './resume.service';
 
-interface AuthenticatedRequest extends Request {
-  user: UserDto;
-}
+// Use imported interface instead of local definition
 
 @ApiTags('resume-processing')
 @ApiBearerAuth()
@@ -95,7 +94,7 @@ export class ResumeController {
         ],
         errorHttpStatusCode: HttpStatus.BAD_REQUEST
       })
-    ) file: Express.Multer.File,
+    ) file: any,
     @Body() uploadData: ResumeUploadDto
   ) {
     try {
@@ -299,7 +298,7 @@ export class ResumeController {
   })
   @ApiResponse({ status: 200, description: '批量处理成功' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.PROCESS_RESUME)
+  @Permissions('process_resume' as any)
   @Post('batch')
   @HttpCode(HttpStatus.OK)
   async batchProcessResumes(
@@ -345,7 +344,7 @@ export class ResumeController {
   @ApiQuery({ name: 'page', required: false, description: '页码' })
   @ApiQuery({ name: 'limit', required: false, description: '每页数量' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.SEARCH_RESUME)
+  @Permissions('search_resume' as any)
   @Post('search')
   @HttpCode(HttpStatus.OK)
   async searchResumes(
@@ -390,7 +389,7 @@ export class ResumeController {
   @ApiResponse({ status: 200, description: '重新处理已启动' })
   @ApiParam({ name: 'resumeId', description: '简历ID' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.PROCESS_RESUME)
+  @Permissions('process_resume' as any)
   @Post(':resumeId/reprocess')
   @HttpCode(HttpStatus.OK)
   async reprocessResume(
@@ -435,7 +434,7 @@ export class ResumeController {
   @ApiResponse({ status: 200, description: '简历删除成功' })
   @ApiParam({ name: 'resumeId', description: '简历ID' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.DELETE_RESUME)
+  @Permissions('delete_resume' as any)
   @Delete(':resumeId')
   @HttpCode(HttpStatus.OK)
   async deleteResume(
@@ -476,7 +475,7 @@ export class ResumeController {
   })
   @ApiResponse({ status: 200, description: '统计信息获取成功' })
   @UseGuards(RolesGuard)
-  @Permissions(Permission.READ_ANALYTICS)
+  @Permissions('read_analytics' as any)
   @Get('stats/processing')
   async getProcessingStats(@Request() req: AuthenticatedRequest) {
     try {

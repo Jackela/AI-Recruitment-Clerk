@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { ConsentStatus, UserPreferencesDto as UserPreferences } from '../../../../libs/shared-dtos/src';
+import { UserPreferencesDto as UserPreferences } from '../common/interfaces/fallback-types';
+import { ConsentStatus } from './consent-record.schema';
 
 export type UserProfileDocument = UserProfile & Document;
 
