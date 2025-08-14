@@ -31,6 +31,7 @@ export class RateLimitMiddleware implements NestMiddleware {
         this.redis = new Redis(redisUrl, {
           maxRetriesPerRequest: 3,
           lazyConnect: true,
+          enableOfflineQueue: false,
           connectTimeout: 10000,
         });
       } else {

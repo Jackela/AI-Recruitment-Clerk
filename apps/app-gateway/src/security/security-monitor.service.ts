@@ -66,7 +66,12 @@ export class SecurityMonitorService {
     try {
       // 优先使用完整的 REDIS_URL；仅当没有 URL 但提供了 Host/Port 时才使用分离配置
       if (redisUrl) {
-        this.redis = new Redis(redisUrl);
+        this.redis = new Redis(redisUrl, {
+          lazyConnect: true,
+          maxRetriesPerRequest: 3,
+          enableOfflineQueue: false,
+          connectTimeout: 10000,
+        });
       } else {
         const redisOptions: RedisOptions = {
           host: redisHost!,

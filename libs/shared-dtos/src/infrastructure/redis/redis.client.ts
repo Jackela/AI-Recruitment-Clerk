@@ -27,7 +27,23 @@ export class RedisClient implements OnModuleDestroy {
     }
 
     if (redisUrl) {
-      this.redis = new Redis(redisUrl);
+      const urlWithFamily = (() => {
+        try {
+          const u = new URL(redisUrl);
+          if (u.hostname.endsWith('.railway.internal') && !u.searchParams.has('family')) {
+            u.searchParams.set('family', '0');
+          }
+          return u.toString();
+        } catch {
+          return redisUrl;
+        }
+      })();
+      this.redis = new Redis(urlWithFamily, {
+        lazyConnect: true,
+        maxRetriesPerRequest: 3,
+        enableOfflineQueue: false,
+        connectTimeout: 10000,
+      });
     } else {
       this.redis = new Redis({
         host: redisHost!,

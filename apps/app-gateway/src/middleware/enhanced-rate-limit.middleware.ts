@@ -50,7 +50,18 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
     try {
       // 优先使用完整的 REDIS_URL；仅当没有 URL 但提供了 Host/Port 时才使用分离配置
       if (redisUrl) {
-        this.redis = new Redis(redisUrl, {
+        const urlWithFamily = (() => {
+          try {
+            const u = new URL(redisUrl);
+            if (u.hostname.endsWith('.railway.internal') && !u.searchParams.has('family')) {
+              u.searchParams.set('family', '0');
+            }
+            return u.toString();
+          } catch {
+            return redisUrl;
+          }
+        })();
+        this.redis = new Redis(urlWithFamily, {
           maxRetriesPerRequest: 3,
           lazyConnect: true,
           enableOfflineQueue: false,
