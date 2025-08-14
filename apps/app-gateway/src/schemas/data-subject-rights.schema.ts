@@ -22,7 +22,7 @@ export class DataSubjectRightsRequest {
   @Prop({ required: true, unique: true, index: true })
   id: string;
 
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   userId: string;
 
   @Prop({ 
@@ -53,13 +53,13 @@ export class DataSubjectRightsRequest {
   @Prop({ required: false })
   description?: string;
 
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   requestDate: Date;
 
   @Prop({ required: false })
   completionDate?: Date;
 
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   dueDate: Date; // 30 days from request per GDPR
 
   @Prop({ required: false })
@@ -175,10 +175,10 @@ export type RightsRequestActivityDocument = RightsRequestActivity & Document;
   versionKey: false
 })
 export class RightsRequestActivity {
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   requestId: string;
 
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   action: string; // 'created', 'status_changed', 'verified', 'processed', etc.
 
   @Prop({ required: false })
@@ -204,7 +204,7 @@ export class RightsRequestActivity {
   @Prop({ type: Object, default: {} })
   metadata?: Record<string, any>;
 
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   timestamp: Date;
 
   @Prop({ default: Date.now })
@@ -233,7 +233,7 @@ export class DataExportPackage {
   @Prop({ required: true, unique: true, index: true })
   requestId: string;
 
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   userId: string;
 
   @Prop({ 
@@ -263,7 +263,7 @@ export class DataExportPackage {
   @Prop({ required: true })
   downloadUrl: string;
 
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   urlExpiry: Date;
 
   @Prop({ required: true })
@@ -317,7 +317,7 @@ export class IdentityVerification {
   @Prop({ required: true, unique: true, index: true })
   id: string;
 
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   requestId: string;
 
   @Prop({ required: true })
@@ -340,7 +340,7 @@ export class IdentityVerification {
   @Prop({ required: false })
   verificationCode?: string; // For email/SMS verification
 
-  @Prop({ required: false, index: true })
+  @Prop({ required: false })
   verificationExpiry?: Date;
 
   @Prop({ required: false })

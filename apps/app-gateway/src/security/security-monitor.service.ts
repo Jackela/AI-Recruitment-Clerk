@@ -46,17 +46,29 @@ export class SecurityMonitorService {
   }
 
   private initializeRedis() {
+    // 检查是否禁用Redis
+    const disableRedis = this.configService.get('DISABLE_REDIS', 'false') === 'true';
+    const useRedis = this.configService.get('USE_REDIS_CACHE', 'true') === 'true';
+    
+    if (disableRedis || !useRedis || process.env.NODE_ENV === 'development') {
+      this.logger.log('🔒 Redis已禁用，安全监控将使用内存存储');
+      this.redis = null;
+      return;
+    }
+    
     const redisOptions: RedisOptions = {
       host: this.configService.get<string>('REDIS_HOST') || 'localhost',
       port: parseInt(this.configService.get<string>('REDIS_PORT') || '6379'),
       password: this.configService.get<string>('REDIS_PASSWORD'),
       maxRetriesPerRequest: 3,
       lazyConnect: true,
+      enableOfflineQueue: false,
     };
     this.redis = new Redis(redisOptions);
 
     this.redis.on('error', (error) => {
-      this.logger.error('Redis connection error in security monitor:', error);
+      this.logger.warn('Redis连接错误，降级到内存存储:', error.message);
+      this.redis = null;
     });
   }
 
@@ -71,14 +83,16 @@ export class SecurityMonitorService {
     };
 
     try {
-      // Store in Redis for fast access
-      const eventKey = `security_events:${eventId}`;
-      await this.redis.setex(eventKey, 86400 * 30, JSON.stringify(securityEvent)); // 30 days
+      // Store in Redis for fast access (if available)
+      if (this.redis) {
+        const eventKey = `security_events:${eventId}`;
+        await this.redis.setex(eventKey, 86400 * 30, JSON.stringify(securityEvent)); // 30 days
 
-      // Add to sorted set for time-based queries
-      const timeSeriesKey = 'security_events:timeline';
-      await this.redis.zadd(timeSeriesKey, Date.now(), eventId);
-      await this.redis.expire(timeSeriesKey, 86400 * 30);
+        // Add to sorted set for time-based queries
+        const timeSeriesKey = 'security_events:timeline';
+        await this.redis.zadd(timeSeriesKey, Date.now(), eventId);
+        await this.redis.expire(timeSeriesKey, 86400 * 30);
+      }
 
       // Update metrics
       await this.updateSecurityMetrics(securityEvent);

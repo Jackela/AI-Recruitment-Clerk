@@ -13,19 +13,19 @@ export class AnalyticsEvent {
   @Prop({ required: true, unique: true, index: true })
   eventId: string;
 
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   sessionId: string;
 
-  @Prop({ index: true })
+  @Prop()
   userId?: string;
 
-  @Prop({ type: String, required: true, enum: Object.values(EventType), index: true })
+  @Prop({ type: String, required: true, enum: Object.values(EventType) })
   eventType: EventType;
 
-  @Prop({ type: String, required: true, enum: Object.values(EventCategory), index: true })
+  @Prop({ type: String, required: true, enum: Object.values(EventCategory) })
   eventCategory: EventCategory;
 
-  @Prop({ type: String, required: true, enum: Object.values(EventStatus), index: true })
+  @Prop({ type: String, required: true, enum: Object.values(EventStatus) })
   status: EventStatus;
 
   @Prop({ type: Object, required: true })
@@ -60,10 +60,10 @@ export class AnalyticsEvent {
   @Prop({ default: false })
   isSystemSession: boolean;
 
-  @Prop({ index: true })
+  @Prop()
   processedAt?: Date;
 
-  @Prop({ index: true })
+  @Prop()
   retentionExpiry?: Date;
 
   @Prop({ default: false })

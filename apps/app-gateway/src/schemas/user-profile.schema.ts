@@ -11,7 +11,7 @@ export type UserProfileDocument = UserProfile & Document;
   versionKey: false
 })
 export class UserProfile {
-  @Prop({ required: true, unique: true, index: true })
+  @Prop({ required: true, unique: true })
   userId: string;
 
   @Prop({ required: true })

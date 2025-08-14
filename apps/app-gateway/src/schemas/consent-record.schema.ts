@@ -54,7 +54,7 @@ export class ConsentRecord {
   @Prop({ required: true, unique: true, index: true })
   id: string;
 
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   userId: string;
 
   @Prop({ 
@@ -89,7 +89,7 @@ export class ConsentRecord {
   @Prop({ required: false })
   legalBasis?: string; // GDPR Article 6 legal basis
 
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   consentDate: Date;
 
   @Prop({ required: false })
@@ -170,7 +170,7 @@ export class CookieConsent {
   @Prop({ required: true, default: false })
   marketing: boolean;
 
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   consentDate: Date;
 
   @Prop({ required: false })
@@ -231,10 +231,10 @@ export class ConsentAuditLog {
   @Prop({ required: true, unique: true, index: true })
   id: string;
 
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   userId: string;
 
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   action: string; // 'grant', 'withdraw', 'renew', 'expire'
 
   @Prop({ 
@@ -271,7 +271,7 @@ export class ConsentAuditLog {
   @Prop({ type: Object, default: {} })
   metadata?: Record<string, any>;
 
-  @Prop({ required: true, index: true })
+  @Prop({ required: true })
   timestamp: Date;
 
   @Prop({ default: Date.now })

@@ -36,10 +36,8 @@ export class GuestUsage extends Document {
 
 export const GuestUsageSchema = SchemaFactory.createForClass(GuestUsage);
 
-// Add indexes for optimization
-GuestUsageSchema.index({ deviceId: 1 });
+// Add indexes for optimization (deviceId already has unique index from @Prop)
 GuestUsageSchema.index({ feedbackCode: 1 });
-GuestUsageSchema.index({ createdAt: 1 });
 
 // Add TTL index to automatically cleanup old records (30 days)
 GuestUsageSchema.index(
