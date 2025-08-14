@@ -10,8 +10,6 @@
       "variables": {
         "NODE_ENV": "production",
         "PORT": "${{ RAILWAY_STATIC_PORT }}",
-        "MONGODB_URL": "${{ MONGO_URL }}",
-        "MONGODB_URI": "${{ MONGO_URL }}",
         "REDIS_URL": "${{ REDIS_URL }}",
         "JWT_SECRET": "${{ JWT_SECRET }}",
         "JWT_EXPIRES_IN": "1h",

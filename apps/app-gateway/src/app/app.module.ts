@@ -54,13 +54,16 @@ import { EnhancedRateLimitMiddleware } from '../middleware/enhanced-rate-limit.m
         // 调试环境变量
         console.log('🔍 MongoDB连接调试信息:');
         console.log('- NODE_ENV:', process.env.NODE_ENV);
-        console.log('- MONGODB_URL存在:', !!process.env.MONGODB_URL);
-        console.log('- MONGODB_URI存在:', !!process.env.MONGODB_URI);
-        if (process.env.MONGODB_URL) {
-          console.log('- MONGODB_URL (masked):', process.env.MONGODB_URL.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
+        console.log('- MONGO_URL存在:', !!process.env.MONGO_URL);
+        if (process.env.MONGO_URL) {
+          console.log('- MONGO_URL (masked):', process.env.MONGO_URL.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
         }
         
-        const mongoUri = process.env.MONGODB_URL || process.env.MONGODB_URI || process.env.MONGO_URL || 'mongodb://admin:devpassword123@localhost:27017/ai-recruitment?authSource=admin';
+        const mongoUri = process.env.MONGO_URL;
+        
+        if (!mongoUri) {
+          throw new Error('MONGO_URL environment variable is required for database connection');
+        }
         console.log('- 最终使用的URI (masked):', mongoUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
         
         return {
