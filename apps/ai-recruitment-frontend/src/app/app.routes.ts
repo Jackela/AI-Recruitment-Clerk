@@ -3,8 +3,7 @@ import { Route } from '@angular/router';
 export const appRoutes: Route[] = [
   {
     path: '',
-    redirectTo: '/jobs',
-    pathMatch: 'full'
+    loadComponent: () => import('./pages/resume/upload-resume.component').then(m => m.UploadResumeComponent)
   },
   {
     path: 'jobs',

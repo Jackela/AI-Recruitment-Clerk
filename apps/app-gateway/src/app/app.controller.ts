@@ -17,7 +17,18 @@ export class AppController {
   ) {}
 
   @Public()
-  @Get()
+  @Get('/')
+  getWelcome() {
+    return {
+      message: 'Welcome to the AI Recruitment Clerk API Gateway!',
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      documentation: '/api/docs'
+    };
+  }
+
+  @Public()
+  @Get('status')
   getData() {
     return this.appService.getData();
   }

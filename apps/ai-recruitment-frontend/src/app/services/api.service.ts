@@ -9,7 +9,9 @@ import { AnalysisReport, ReportsList } from '../store/reports/report.model';
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = 'http://localhost:3000'; // App Gateway URL
+  // Use relative base URL so Nginx (container) and local dev both proxy to gateway
+  // In container, /api is proxied to app-gateway:3000/api; locally, gateway listens on :3000/api
+  private baseUrl = '/api';
 
   constructor(private http: HttpClient) {}
 

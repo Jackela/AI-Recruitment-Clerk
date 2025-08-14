@@ -41,6 +41,97 @@ async function bootstrap() {
   
   // 获取底层Express实例进行性能优化
   const server = app.getHttpAdapter().getInstance();
+  // 根路径提供可立即交互的最小化上传页（无依赖前端构建）
+  server.get('/', (_req: any, res: any) => {
+    const html = `<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Recruitment Clerk</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;max-width:860px;margin:40px auto;padding:0 16px;color:#111}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+    .card{border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin:12px 0}
+    .muted{color:#6b7280}
+    button{background:#111;color:#fff;border:none;padding:10px 16px;border-radius:8px;cursor:pointer}
+    input,textarea{width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    pre{background:#0b1020;color:#c7d2fe;border-radius:8px;padding:12px;overflow:auto}
+    .ok{color:#16a34a}
+    .warn{color:#ef4444}
+  </style>
+  <script>
+    function uuid(){return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16))}
+    const deviceId = localStorage.getItem('device_id') || (localStorage.setItem('device_id', uuid()), localStorage.getItem('device_id'))
+    async function uploadResume(ev){
+      ev.preventDefault();
+      const form = ev.target.closest('form');
+      const file = form.resume.files[0];
+      if(!file){ alert('请选择简历文件(.pdf/.doc/.docx)'); return }
+      const fd = new FormData();
+      fd.append('resume', file);
+      fd.append('candidateName', form.candidateName.value || '');
+      fd.append('candidateEmail', form.candidateEmail.value || '');
+      fd.append('notes', form.notes.value || '');
+      const out = document.getElementById('out');
+      out.textContent = '上传中...';
+      const resp = await fetch('/api/guest/resume/analyze', { method:'POST', headers:{'X-Device-ID': deviceId}, body: fd });
+      const json = await resp.json();
+      out.textContent = JSON.stringify(json, null, 2);
+      if(json?.data?.analysisId){ document.getElementById('analysisId').textContent = json.data.analysisId }
+    }
+    async function getDemo(){
+      const out = document.getElementById('out');
+      out.textContent = '获取示例分析...';
+      const resp = await fetch('/api/guest/resume/demo-analysis', { headers:{'X-Device-ID': deviceId} });
+      const json = await resp.json();
+      out.textContent = JSON.stringify(json, null, 2);
+    }
+    async function poll(){
+      const id = document.getElementById('analysisId').textContent.trim();
+      if(!id){ alert('请先上传简历获取 analysisId'); return }
+      const out = document.getElementById('out');
+      out.textContent = '查询中...';
+      const resp = await fetch('/api/guest/resume/analysis/' + encodeURIComponent(id), { headers:{'X-Device-ID': deviceId} });
+      const json = await resp.json();
+      out.textContent = JSON.stringify(json, null, 2);
+    }
+  </script>
+  <meta name="robots" content="noindex" />
+  </head>
+<body>
+  <header>
+    <h2>AI Recruitment Clerk</h2>
+    <small class="muted">设备ID: <code id="dev">${'${deviceId}'}</code></small>
+  </header>
+  <section class="card">
+    <h3>上传简历（游客可用）</h3>
+    <form onsubmit="uploadResume(event)">
+      <div class="row">
+        <div><label>候选人姓名<input name="candidateName" placeholder="可选" /></label></div>
+        <div><label>候选人邮箱<input name="candidateEmail" placeholder="可选" /></label></div>
+      </div>
+      <label>备注<textarea name="notes" rows="2" placeholder="可选"></textarea></label>
+      <div style="margin:8px 0">
+        <input type="file" name="resume" accept=".pdf,.doc,.docx" />
+      </div>
+      <button type="submit">上传并分析</button>
+      <button type="button" style="margin-left:8px;background:#374151" onclick="getDemo()">查看示例分析</button>
+    </form>
+  </section>
+  <section class="card">
+    <div>analysisId: <code id="analysisId"></code> <button onclick="poll()">查询进度/结果</button></div>
+    <pre id="out" class="muted">Ready.</pre>
+  </section>
+  <section class="card">
+    <div>API 文档：<a href="/api/docs">/api/docs</a></div>
+    <div class="muted">健康检查：<a href="/api/health">/api/health</a></div>
+  </section>
+</body>
+</html>`;
+    res.type('html').status(200).send(html);
+  });
   
   // Express性能优化配置
   server.set('trust proxy', 1); // 信任代理（用于负载均衡）

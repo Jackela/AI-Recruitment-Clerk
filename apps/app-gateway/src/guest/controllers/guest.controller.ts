@@ -28,7 +28,7 @@ import {
 } from '../dto/guest.dto';
 
 @ApiTags('Guest Services')
-@Controller('api/guest')
+@Controller('guest')
 @UseGuards(GuestGuard)
 @ApiHeader({
   name: 'X-Device-ID',

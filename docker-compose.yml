@@ -55,7 +55,14 @@ services:
       PORT: 3000
       NODE_ENV: production
       NATS_URL: nats://nats:4222
+      JWT_SECRET: ${JWT_SECRET}
+      # Ensure app reads correct env key used by code (MONGO_URL)
+      MONGO_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD:-devpassword123}@mongodb:27017/ai-recruitment?authSource=admin
+      # Keep legacy key for other services if any script reads it
       MONGODB_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD:-devpassword123}@mongodb:27017/ai-recruitment?authSource=admin
+      # Disable Redis usage in gateway to avoid DNS/connection attempts
+      DISABLE_REDIS: "true"
+      USE_REDIS_CACHE: "false"
     ports:
       - "3000:3000"
     depends_on:

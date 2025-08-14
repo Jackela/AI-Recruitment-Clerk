@@ -6,6 +6,7 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import * as crypto from 'crypto';
 
 export interface CacheOptions {
   ttl?: number;
@@ -176,9 +177,15 @@ export class CacheService {
    * 职位查询缓存键
    */
   getJobQueryKey(query: any): string {
-    const queryStr = JSON.stringify(query);
-    const hash = Buffer.from(queryStr).toString('base64').substring(0, 10);
-    return this.generateKey('jobs', 'query', hash);
+    // 确保对象属性顺序一致，避免因属性顺序不同导致JSON字符串不同
+    const orderedQuery = {};
+    Object.keys(query).sort().forEach(key => {
+      orderedQuery[key] = query[key];
+    });
+
+    const queryStr = JSON.stringify(orderedQuery);
+    const hash = crypto.createHash('sha256').update(queryStr).digest('hex');
+    return this.generateKey('db', 'jobs', 'findall', hash);
   }
 
   /**

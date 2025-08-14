@@ -26,7 +26,7 @@ interface PaymentExportDto {
   status?: 'pending' | 'paid' | 'rejected';
 }
 
-@Controller('api/admin/marketing')
+@Controller('admin/marketing')
 @UseGuards(JwtAuthGuard) // 确保只有管理员可以访问
 export class MarketingAdminController {
   private readonly logger = new Logger(MarketingAdminController.name);

@@ -59,12 +59,9 @@ export class JobRepository {
     limit?: number;
     skip?: number;
   } = {}): Promise<JobDocument[]> {
-    // 生成基于查询参数的缓存键
+    // 生成基于查询参数的缓存键（稳定序列化 + SHA256，避免 Base64 截断冲突）
     const { status, company, employmentType, limit = 100, skip = 0 } = options;
-    const queryHash = Buffer.from(JSON.stringify({ status, company, employmentType, limit, skip }))
-      .toString('base64')
-      .substring(0, 12);
-    const cacheKey = this.cacheService.generateKey('db', 'jobs', 'findAll', queryHash);
+    const cacheKey = this.cacheService.getJobQueryKey({ status, company, employmentType, limit, skip });
     
     return this.cacheService.wrap(
       cacheKey,

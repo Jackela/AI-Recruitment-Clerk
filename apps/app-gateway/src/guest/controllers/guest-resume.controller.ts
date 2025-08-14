@@ -28,6 +28,7 @@ import {
   ApiUnauthorizedResponse,
   ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
+import { Public } from '../../auth/decorators/public.decorator';
 import { GuestGuard, RequestWithDeviceId } from '../guards/guest.guard';
 import { OptionalJwtAuthGuard } from '../guards/optional-jwt-auth.guard';
 import { GuestUsageService } from '../services/guest-usage.service';
@@ -39,7 +40,8 @@ interface GuestResumeUploadDto {
 }
 
 @ApiTags('Guest Resume Processing')
-@Controller('api/guest')
+@Public()
+@Controller('guest')
 @ApiHeader({
   name: 'X-Device-ID',
   description: 'Unique device identifier for guest access',

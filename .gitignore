@@ -164,6 +164,12 @@ dist/
 build/
 out/
 
+# Disallow compiled JS inside src (TypeScript sources only)
+apps/**/src/**/*.js
+libs/**/src/**/*.js
+apps/**/src/**/*.js.map
+libs/**/src/**/*.js.map
+
 # IDE and editor files
 .cursor/
 .github/instructions/

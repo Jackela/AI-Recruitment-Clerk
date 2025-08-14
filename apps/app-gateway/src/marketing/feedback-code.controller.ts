@@ -15,7 +15,7 @@ import { Request } from 'express';
 import { FeedbackCodeService } from './feedback-code.service';
 import { CreateFeedbackCodeDto, MarkFeedbackCodeUsedDto } from '@app/shared-dtos';
 
-@Controller('api/marketing/feedback-codes')
+@Controller('marketing/feedback-codes')
 export class FeedbackCodeController {
   private readonly logger = new Logger(FeedbackCodeController.name);
 
