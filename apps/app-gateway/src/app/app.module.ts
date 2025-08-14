@@ -60,7 +60,7 @@ import { EnhancedRateLimitMiddleware } from '../middleware/enhanced-rate-limit.m
           console.log('- MONGODB_URL (masked):', process.env.MONGODB_URL.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
         }
         
-        const mongoUri = process.env.MONGODB_URL || process.env.MONGODB_URI || 'mongodb://admin:devpassword123@localhost:27017/ai-recruitment?authSource=admin';
+        const mongoUri = process.env.MONGODB_URL || process.env.MONGODB_URI || process.env.MONGO_URL || 'mongodb://admin:devpassword123@localhost:27017/ai-recruitment?authSource=admin';
         console.log('- 最终使用的URI (masked):', mongoUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
         
         return {
