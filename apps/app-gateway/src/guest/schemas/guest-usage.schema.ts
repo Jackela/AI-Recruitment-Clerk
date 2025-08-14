@@ -8,7 +8,7 @@ export type GuestUsageDocument = HydratedDocument<GuestUsage>;
   collection: 'guest_usages'
 })
 export class GuestUsage extends Document {
-  @Prop({ required: true, unique: true, index: true })
+  @Prop({ required: true, unique: true })
   deviceId: string;
 
   @Prop({ required: true, default: 0, min: 0 })

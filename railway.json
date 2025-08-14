@@ -2,7 +2,8 @@
   "$schema": "https://railway.app/railway.schema.json",
   "deploy": {
     "restartPolicyType": "on_failure",
-    "numReplicas": 1
+    "numReplicas": 1,
+    "watchPatterns": ["**/*"]
   },
   "environments": {
     "production": {

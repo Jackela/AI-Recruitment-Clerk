@@ -155,7 +155,7 @@ export type CookieConsentDocument = CookieConsent & Document;
   versionKey: false
 })
 export class CookieConsent {
-  @Prop({ required: true, unique: true, index: true })
+  @Prop({ required: true, unique: true })
   deviceId: string;
 
   @Prop({ required: true, default: true })
