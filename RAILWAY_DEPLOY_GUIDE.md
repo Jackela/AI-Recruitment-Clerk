@@ -30,7 +30,7 @@ git push origin main
 #### 🔧 必填配置
 ```env
 NODE_ENV=production
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/ai-recruitment?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/ai-recruitment?retryWrites=true&w=majority
 JWT_SECRET=your_32_character_secret_key_here
 GEMINI_API_KEY=your_gemini_api_key_here
 ```

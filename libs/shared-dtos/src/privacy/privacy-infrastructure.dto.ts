@@ -65,7 +65,7 @@ export class DataProcessingRecord {
 
   @IsString()
   @IsNotEmpty()
-  dataController: string; // Organization name
+  dataController!: string; // Organization name
 
   @IsString()
   @IsNotEmpty()
@@ -77,7 +77,7 @@ export class DataProcessingRecord {
 
   @IsArray()
   @IsString({ each: true })
-  categoriesOfDataSubjects: string[]; // e.g., "job applicants", "employees", "users"
+  categoriesOfDataSubjects!: string[]; // e.g., "job applicants", "employees", "users"
 
   @IsArray()
   @IsString({ each: true })
@@ -432,7 +432,7 @@ export class DataBreachRecord {
   @IsOptional()
   rootCause?: {
     category: 'human_error' | 'system_failure' | 'malicious_attack' | 'third_party' | 'other';
-    description!: string;
+    description: string;
     contributingFactors: string[];
   };
 
