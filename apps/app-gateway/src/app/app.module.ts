@@ -50,31 +50,45 @@ import { EnhancedRateLimitMiddleware } from '../middleware/enhanced-rate-limit.m
     }),
     AppCacheModule,
     MongooseModule.forRootAsync({
-      useFactory: () => ({
-        uri: process.env.MONGODB_URL || process.env.MONGODB_URI || 'mongodb://admin:devpassword123@localhost:27017/ai-recruitment?authSource=admin',
-        // 连接池优化配置
-        maxPoolSize: 20,        // 最大连接数
-        minPoolSize: 5,         // 最小连接数
-        maxIdleTimeMS: 30000,   // 连接空闲30秒后关闭
-        serverSelectionTimeoutMS: 5000, // 服务器选择超时5秒
-        socketTimeoutMS: 30000, // Socket超时30秒
-        connectTimeoutMS: 10000, // 连接超时10秒
+      useFactory: () => {
+        // 调试环境变量
+        console.log('🔍 MongoDB连接调试信息:');
+        console.log('- NODE_ENV:', process.env.NODE_ENV);
+        console.log('- MONGODB_URL存在:', !!process.env.MONGODB_URL);
+        console.log('- MONGODB_URI存在:', !!process.env.MONGODB_URI);
+        if (process.env.MONGODB_URL) {
+          console.log('- MONGODB_URL (masked):', process.env.MONGODB_URL.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
+        }
         
-        // 健康检查配置  
-        heartbeatFrequencyMS: 10000, // 心跳检查间隔10秒
+        const mongoUri = process.env.MONGODB_URL || process.env.MONGODB_URI || 'mongodb://admin:devpassword123@localhost:27017/ai-recruitment?authSource=admin';
+        console.log('- 最终使用的URI (masked):', mongoUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
         
-        // 写入关注和读取偏好
-        writeConcern: {
-          w: 1,                 // 等待主节点确认
-          j: true,              // 等待写入日志
-          wtimeoutMS: 5000      // 写入超时5秒
-        },
-        readPreference: 'primary', // 从主节点读取，确保数据一致性
-        
-        // 重试配置
-        retryWrites: true,      // 启用写入重试
-        retryReads: true        // 启用读取重试
-      }),
+        return {
+          uri: mongoUri,
+          // 连接池优化配置
+          maxPoolSize: 20,        // 最大连接数
+          minPoolSize: 5,         // 最小连接数
+          maxIdleTimeMS: 30000,   // 连接空闲30秒后关闭
+          serverSelectionTimeoutMS: 5000, // 服务器选择超时5秒
+          socketTimeoutMS: 30000, // Socket超时30秒
+          connectTimeoutMS: 10000, // 连接超时10秒
+          
+          // 健康检查配置  
+          heartbeatFrequencyMS: 10000, // 心跳检查间隔10秒
+          
+          // 写入关注和读取偏好
+          writeConcern: {
+            w: 1,                 // 等待主节点确认
+            j: true,              // 等待写入日志
+            wtimeoutMS: 5000      // 写入超时5秒
+          },
+          readPreference: 'primary', // 从主节点读取，确保数据一致性
+          
+          // 重试配置
+          retryWrites: true,      // 启用写入重试
+          retryReads: true        // 启用读取重试
+        };
+      },
     }),
     AuthModule,
     GuestModule,
