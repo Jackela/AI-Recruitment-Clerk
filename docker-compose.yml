@@ -9,7 +9,7 @@ services:
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD:-devpassword123}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD:?MONGODB_ROOT_PASSWORD must be set}
       MONGO_INITDB_DATABASE: ai-recruitment
     ports:
       - "27017:27017"
@@ -31,10 +31,13 @@ services:
     restart: unless-stopped
     command: 
       - "--jetstream"
+      - "--store_dir=/data"
     ports:
       - "4222:4222"
       - "6222:6222"
       - "8222:8222"
+    volumes:
+      - nats_data:/data
     networks:
       - ai-recruitment-network
     healthcheck:
@@ -55,11 +58,13 @@ services:
       PORT: 3000
       NODE_ENV: production
       NATS_URL: nats://nats:4222
-      JWT_SECRET: ${JWT_SECRET:-development_secret_key_change_in_production}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET must be set}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY must be set}
       # Ensure app reads correct env key used by code (MONGO_URL)
-      MONGO_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD:-devpassword123}@mongodb:27017/ai-recruitment?authSource=admin
+      MONGO_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD}@mongodb:27017/ai-recruitment?authSource=admin
       # Keep legacy key for other services if any script reads it
-      MONGODB_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD:-devpassword123}@mongodb:27017/ai-recruitment?authSource=admin
+      MONGODB_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD}@mongodb:27017/ai-recruitment?authSource=admin
       # Disable Redis usage in gateway to avoid DNS/connection attempts
       DISABLE_REDIS: "true"
       USE_REDIS_CACHE: "false"
@@ -90,7 +95,7 @@ services:
     environment:
       NODE_ENV: production
       NATS_URL: nats://nats:4222
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-your_gemini_api_key_here}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:?GEMINI_API_KEY must be set}
     depends_on:
       nats:
         condition: service_healthy
@@ -112,8 +117,8 @@ services:
     environment:
       NODE_ENV: production
       NATS_URL: nats://nats:4222
-      MONGODB_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD:-devpassword123}@mongodb:27017/ai-recruitment?authSource=admin
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-your_gemini_api_key_here}
+      MONGODB_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD}@mongodb:27017/ai-recruitment?authSource=admin
+      GEMINI_API_KEY: ${GEMINI_API_KEY:?GEMINI_API_KEY must be set}
     depends_on:
       mongodb:
         condition: service_healthy
@@ -137,8 +142,8 @@ services:
     environment:
       NODE_ENV: production
       NATS_URL: nats://nats:4222
-      MONGODB_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD:-devpassword123}@mongodb:27017/ai-recruitment?authSource=admin
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-your_gemini_api_key_here}
+      MONGODB_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD}@mongodb:27017/ai-recruitment?authSource=admin
+      GEMINI_API_KEY: ${GEMINI_API_KEY:?GEMINI_API_KEY must be set}
     depends_on:
       mongodb:
         condition: service_healthy
@@ -162,8 +167,8 @@ services:
     environment:
       NODE_ENV: production
       NATS_URL: nats://nats:4222
-      MONGODB_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD:-devpassword123}@mongodb:27017/ai-recruitment?authSource=admin
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-your_gemini_api_key_here}
+      MONGODB_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD}@mongodb:27017/ai-recruitment?authSource=admin
+      GEMINI_API_KEY: ${GEMINI_API_KEY:?GEMINI_API_KEY must be set}
     depends_on:
       mongodb:
         condition: service_healthy
@@ -193,7 +198,7 @@ services:
     networks:
       - ai-recruitment-network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -211,3 +216,7 @@ volumes:
     name: ai-recruitment-mongodb-data
   uploads_data:
     name: ai-recruitment-uploads-data
+  nats_data:
+    name: ai-recruitment-nats-data
+  nats_logs:
+    name: ai-recruitment-nats-logs

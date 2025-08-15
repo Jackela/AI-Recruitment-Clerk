@@ -29,6 +29,9 @@
     "test:integration:performance": "cd apps/app-gateway && npx jest --config=test/jest-integration.config.js test/performance/",
     "test:integration:all": "npm run test:integration:api && npm run test:integration:e2e && npm run test:integration:performance",
     "test:unit": "nx run-many --target=test --all --parallel=false",
+    "test:unit:clean": "bash scripts/test-cleanup.sh && npm run test:unit",
+    "test:clean": "bash scripts/test-cleanup.sh",
+    "test:handles": "DETECT_HANDLES=true npm run test:unit",
     "build:check": "nx run-many --target=build --all --parallel=false"
   },
   "devDependencies": {
@@ -80,6 +83,7 @@
     "jest-html-reporters": "^3.1.7",
     "jest-junit": "^16.0.0",
     "jest-preset-angular": "~14.6.0",
+    "js-yaml": "^4.1.0",
     "mongodb-memory-server": "^10.2.0",
     "msw": "^2.10.4",
     "multer": "^2.0.2",

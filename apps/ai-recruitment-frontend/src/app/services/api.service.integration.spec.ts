@@ -533,7 +533,7 @@ describe('ApiService Integration Tests', () => {
         }
       });
 
-      const req = httpMock.expectOne(`${baseUrl}/reports/restricted-report`);
+      const req = httpMock.expectOne(`/api/reports/restricted-report`);
       req.flush('Access forbidden', { status: 403, statusText: 'Forbidden' });
     });
   });

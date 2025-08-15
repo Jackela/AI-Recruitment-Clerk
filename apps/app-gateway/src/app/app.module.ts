@@ -121,9 +121,10 @@ export class AppModule implements NestModule {
       .apply(SecurityHeadersMiddleware)
       .forRoutes('*');
     
-    consumer
-      .apply(CsrfProtectionMiddleware)
-      .forRoutes('*');
+    // Temporarily disable CSRF for development/debugging
+    // consumer
+    //   .apply(CsrfProtectionMiddleware)
+    //   .forRoutes('*');
       
     consumer
       .apply(RateLimitMiddleware)

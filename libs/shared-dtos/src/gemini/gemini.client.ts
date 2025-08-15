@@ -37,8 +37,10 @@ export class GeminiClient {
   };
 
   constructor(private readonly config: GeminiConfig) {
-    if (!config.apiKey || config.apiKey === 'your_gemini_api_key_here') {
-      throw new GeminiConfigurationError('GEMINI_API_KEY environment variable is required');
+    if (!config.apiKey || config.apiKey === 'your_gemini_api_key_here' || config.apiKey === 'your_actual_gemini_api_key_here') {
+      this.logger.warn('⚠️ Gemini API密钥未配置，AI功能将使用降级模式');
+      // 不抛出错误，允许系统继续运行但使用降级模式
+      return;
     }
 
     this.genAI = new GoogleGenerativeAI(config.apiKey);
@@ -92,7 +94,27 @@ export class GeminiClient {
     this.rateLimit.requestsThisMinute++;
   }
 
+  private isConfigured(): boolean {
+    return this.genAI && this.model && this.config.apiKey && 
+           this.config.apiKey !== 'your_gemini_api_key_here' && 
+           this.config.apiKey !== 'your_actual_gemini_api_key_here';
+  }
+
+  private getMockResponse(prompt: string): string {
+    this.logger.debug('使用模拟响应模式');
+    return `[AI模拟响应] 基于提示生成的模拟内容。请配置真实的GEMINI_API_KEY以获得AI功能。`;
+  }
+
   async generateText(prompt: string, retries = 3): Promise<GeminiResponse<string>> {
+    // 如果未配置，返回模拟响应
+    if (!this.isConfigured()) {
+      return {
+        data: this.getMockResponse(prompt),
+        processingTimeMs: 10,
+        confidence: 0.0,
+      };
+    }
+
     this.checkRateLimit();
 
     const startTime = Date.now();
@@ -296,6 +318,10 @@ Important guidelines:
 
   async healthCheck(): Promise<boolean> {
     try {
+      if (!this.isConfigured()) {
+        this.logger.warn('Gemini API未配置，健康检查返回降级状态');
+        return false;
+      }
       const response = await this.generateText('Respond with "OK" to confirm API connectivity.', 1);
       return response.data.toLowerCase().includes('ok');
     } catch {

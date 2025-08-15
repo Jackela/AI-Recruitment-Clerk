@@ -18,10 +18,21 @@ export class NatsClient implements OnModuleInit, OnModuleDestroy {
   private readonly reconnectTimeWait = 2000;
 
   async onModuleInit() {
+    // 检查是否配置了NATS URL
+    const natsUrl = process.env.NATS_URL;
+    const natsOptional = process.env.NATS_OPTIONAL === 'true';
+    
+    if (!natsUrl && natsOptional) {
+      this.logger.warn('NATS_URL未配置且NATS_OPTIONAL=true，跳过NATS连接');
+      return;
+    }
+    
     try {
       await this.connect();
     } catch (error) {
       this.logger.warn('NATS JetStream is not available, application will continue without messaging capabilities');
+      this.logger.debug(`NATS connection error: ${error.message}`);
+      // Don't throw error, let the application continue
     }
   }
 
@@ -128,7 +139,11 @@ export class NatsClient implements OnModuleInit, OnModuleDestroy {
   async publish(subject: string, payload: unknown): Promise<NatsPublishResult> {
     try {
       if (!this.jetstream) {
-        await this.connect();
+        this.logger.warn(`NATS not available, skipping message publication to subject: ${subject}`);
+        return {
+          success: false,
+          error: 'NATS connection not available'
+        };
       }
 
       this.logger.log(`Publishing message to subject: ${subject}`);

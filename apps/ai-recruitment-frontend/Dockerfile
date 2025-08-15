@@ -35,6 +35,13 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
+    # Health check endpoint
+    location /health {
+        access_log off;
+        return 200 "healthy\n";
+        add_header Content-Type text/plain;
+    }
+
     # Handle Angular routing
     location / {
         try_files $uri $uri/ /index.html;
@@ -83,9 +90,9 @@ EOF
 # Expose port
 EXPOSE 80
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:80/ || exit 1
+# Health check using dedicated endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:80/health || (echo "Frontend health check failed" && exit 1)
 
 # Start nginx
 ENTRYPOINT ["dumb-init", "--"]
