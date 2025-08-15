@@ -20,6 +20,7 @@ import { CsrfProtectionMiddleware } from '../middleware/csrf-protection.middlewa
 import { SecurityHeadersMiddleware } from '../middleware/security-headers.middleware';
 import { RateLimitMiddleware } from '../middleware/rate-limit.middleware';
 import { EnhancedRateLimitMiddleware } from '../middleware/enhanced-rate-limit.middleware';
+import { ProductionSecurityValidator } from '../common/security/production-security-validator';
 
 @Module({
   imports: [
@@ -105,6 +106,7 @@ import { EnhancedRateLimitMiddleware } from '../middleware/enhanced-rate-limit.m
   controllers: [AppController, SystemController],
   providers: [
     AppService,
+    ProductionSecurityValidator,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

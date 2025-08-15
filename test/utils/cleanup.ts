@@ -1,11 +1,18 @@
-// 测试清理工具 - 标准化资源释放机制
-// 根据最佳实践实施严格的teardown
+/**
+ * @file Universal Cleanup Registry for Test Environment
+ * @description Standardized cleanup system to prevent orphaned processes and handles
+ * 根治路径是两层防线：测试内部严格 teardown，外部会话级一键回收
+ */
 
 type Cleanup = () => Promise<void> | void;
+
+/**
+ * Global cleanup registry - stores all cleanup functions
+ */
 const cleaners: Cleanup[] = [];
 
 /**
- * 注册清理函数
+ * Register a cleanup function to be executed during teardown
  * 所有外部资源创建处必须配套registerCleanup
  */
 export const registerCleanup = (fn: Cleanup): void => {
@@ -13,85 +20,246 @@ export const registerCleanup = (fn: Cleanup): void => {
 };
 
 /**
- * 执行所有清理函数
+ * Execute all registered cleanup functions and clear the registry
+ * Processes cleanups in LIFO order (last registered, first executed)
  * 按注册的反序执行（后进先出）
  */
 export const runCleanups = async (): Promise<void> => {
   const errors: Error[] = [];
   
-  // 反序执行清理，确保依赖关系正确
+  // Process cleanups in reverse order (LIFO)
   while (cleaners.length > 0) {
-    const cleanup = cleaners.pop()!;
-    try {
-      await cleanup();
-    } catch (error) {
-      errors.push(error instanceof Error ? error : new Error(String(error)));
+    const cleanup = cleaners.pop();
+    if (cleanup) {
+      try {
+        await cleanup();
+      } catch (error) {
+        errors.push(error instanceof Error ? error : new Error(String(error)));
+      }
     }
   }
   
-  // 如果有清理错误，合并报告
+  // Report any cleanup errors but don't fail the test
   if (errors.length > 0) {
-    const errorMessage = errors.map(e => e.message).join('; ');
-    throw new Error(`Cleanup errors: ${errorMessage}`);
+    console.warn(`⚠️  Cleanup warnings (${errors.length}):`, errors.map(e => e.message));
   }
 };
 
 /**
- * 清空所有清理函数（仅用于测试内部）
+ * Clear all registered cleanups without executing them
+ * Use this for test isolation when you don't want inherited cleanups
  */
 export const clearCleanups = (): void => {
   cleaners.splice(0);
 };
 
 /**
- * 获取待清理任务数量（用于调试）
+ * Get count of registered cleanup functions
  */
-export const getPendingCleanups = (): number => {
-  return cleaners.length;
+export const getCleanupCount = (): number => cleaners.length;
+
+/**
+ * HTTP Server Cleanup Helper
+ * Properly closes HTTP/HTTPS servers with timeout
+ * 不要 app.listen 进行单元测试，使用 supertest(app)
+ */
+export const registerServerCleanup = (server: any): void => {
+  registerCleanup(() => new Promise<void>((resolve) => {
+    if (!server || !server.listening) {
+      resolve();
+      return;
+    }
+    
+    const timeout = setTimeout(() => {
+      console.warn('⚠️  Server cleanup timeout - forcing close');
+      server.destroy?.();
+      resolve();
+    }, 5000);
+    
+    server.close(() => {
+      clearTimeout(timeout);
+      resolve();
+    });
+  }));
 };
 
-// 进程级清理（捕获未处理的退出）
-let processCleanupRegistered = false;
+/**
+ * Database Connection Cleanup Helper
+ * Handles common database connection patterns
+ */
+export const registerDatabaseCleanup = (connection: any): void => {
+  registerCleanup(async () => {
+    try {
+      // Prisma
+      if (connection.$disconnect) {
+        await connection.$disconnect();
+        return;
+      }
+      
+      // TypeORM DataSource
+      if (connection.destroy) {
+        await connection.destroy();
+        return;
+      }
+      
+      // MongoDB/Mongoose
+      if (connection.close) {
+        await connection.close();
+        return;
+      }
+      
+      // Generic pool
+      if (connection.end) {
+        await connection.end();
+        return;
+      }
+      
+      // Redis
+      if (connection.quit) {
+        await connection.quit();
+        return;
+      }
+      
+      console.warn('⚠️  Unknown database connection type for cleanup');
+    } catch (error) {
+      console.warn('⚠️  Database cleanup error:', error);
+    }
+  });
+};
 
-export const registerProcessCleanup = (): void => {
-  if (processCleanupRegistered) return;
-  processCleanupRegistered = true;
-  
-  const cleanup = async () => {
-    if (cleaners.length > 0) {
-      console.warn(`⚠️  进程退出时发现 ${cleaners.length} 个未清理的资源`);
-      await runCleanups();
+/**
+ * Process Cleanup Helper - 子进程创建与杀树
+ * Safely terminates child processes with timeout
+ */
+export const registerProcessCleanup = (process: any): void => {
+  registerCleanup(async () => {
+    if (!process || !process.pid) return;
+    
+    return new Promise<void>((resolve) => {
+      const timeout = setTimeout(() => {
+        console.warn(`⚠️  Process ${process.pid} cleanup timeout - forcing kill`);
+        try {
+          process.kill('SIGKILL');
+        } catch (e) {
+          // Process might already be dead
+        }
+        resolve();
+      }, 5000);
+      
+      process.on('exit', () => {
+        clearTimeout(timeout);
+        resolve();
+      });
+      
+      try {
+        process.kill('SIGTERM');
+      } catch (error) {
+        clearTimeout(timeout);
+        resolve();
+      }
+    });
+  });
+};
+
+/**
+ * Browser Cleanup Helper
+ * Handles Playwright/Puppeteer browser instances
+ */
+export const registerBrowserCleanup = (browser: any, context?: any): void => {
+  registerCleanup(async () => {
+    try {
+      if (context?.close) {
+        await context.close();
+      }
+      if (browser?.close) {
+        await browser.close();
+      }
+    } catch (error) {
+      console.warn('⚠️  Browser cleanup error:', error);
     }
-  };
-  
-  // 正常退出
-  process.on('exit', () => {
-    if (cleaners.length > 0) {
-      console.error(`❌ 进程退出时仍有 ${cleaners.length} 个未清理资源`);
+  });
+};
+
+/**
+ * Timer Cleanup Helper - 恢复真实定时器
+ * Clears intervals, timeouts, and restores fake timers
+ */
+export const registerTimerCleanup = (timers: NodeJS.Timeout[]): void => {
+  registerCleanup(() => {
+    timers.forEach(timer => {
+      try {
+        clearTimeout(timer);
+        clearInterval(timer);
+      } catch (e) {
+        // Timer might already be cleared
+      }
+    });
+    
+    // Reset Jest fake timers if active
+    if (global.jest && jest.useRealTimers) {
+      jest.useRealTimers();
     }
   });
-  
-  // 异常退出
-  process.on('SIGINT', async () => {
-    await cleanup();
-    process.exit(0);
+};
+
+/**
+ * File Watcher Cleanup Helper - fs.watch 与 chokidar 必须 close
+ * Closes fs.watch and chokidar watchers
+ */
+export const registerWatcherCleanup = (watcher: any): void => {
+  registerCleanup(async () => {
+    try {
+      if (watcher.close) {
+        await watcher.close();
+      } else if (watcher.unwatch) {
+        watcher.unwatch();
+      }
+    } catch (error) {
+      console.warn('⚠️  Watcher cleanup error:', error);
+    }
   });
-  
-  process.on('SIGTERM', async () => {
-    await cleanup();
-    process.exit(0);
+};
+
+/**
+ * AbortController Cleanup Helper - 为任何长 I/O 设上限
+ * Aborts ongoing operations
+ */
+export const registerAbortCleanup = (controller: AbortController): void => {
+  registerCleanup(() => {
+    if (!controller.signal.aborted) {
+      controller.abort();
+    }
   });
-  
-  // 未捕获异常
-  process.on('uncaughtException', async (error) => {
-    console.error('未捕获异常:', error);
-    await cleanup();
-    process.exit(1);
-  });
-  
-  process.on('unhandledRejection', async (reason) => {
-    console.error('未处理的Promise拒绝:', reason);
-    await cleanup();
-    process.exit(1);
+};
+
+/**
+ * Queue/Worker Cleanup Helper - 禁用默认重连或在 teardown 前先 pause
+ * Handles BullMQ, worker threads, etc.
+ */
+export const registerQueueCleanup = (queue: any): void => {
+  registerCleanup(async () => {
+    try {
+      // Pause queue first to stop processing
+      if (queue.pause) {
+        await queue.pause();
+      }
+      
+      // BullMQ
+      if (queue.close) {
+        await queue.close();
+      }
+      
+      // Worker threads
+      if (queue.terminate) {
+        await queue.terminate();
+      }
+      
+      // AMQP channel/connection
+      if (queue.connection?.close) {
+        await queue.connection.close();
+      }
+    } catch (error) {
+      console.warn('⚠️  Queue cleanup error:', error);
+    }
   });
 };

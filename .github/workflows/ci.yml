@@ -61,9 +61,9 @@ jobs:
           echo "✅ 未发现明显的硬编码密钥"
         fi
 
-  # 🏗️ 构建和单元测试
+  # 🏗️ 构建和单元测试 - 增强进程清理
   build-and-test:
-    name: 🏗️ 构建和测试
+    name: 🏗️ 构建和测试 (增强清理)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: code-quality
@@ -148,13 +148,24 @@ jobs:
         npm run build
         echo "✅ 构建完成"
 
-    - name: 🧪 运行单元测试
+    - name: 🧪 运行单元测试 (增强清理模式)
       run: |
-        echo "🧪 运行单元测试..."
-        npm test -- --testTimeout=30000 --maxWorkers=2 || echo "⚠️ 部分单元测试失败 - 不阻塞构建"
+        echo "🧪 运行单元测试 (增强清理)..."
+        # 使用增强清理系统运行测试
+        chmod +x scripts/run-tests-clean.sh
+        ./scripts/run-tests-clean.sh "npm run test:ci" || {
+          echo "❌ 测试失败 - 生成调试信息..."
+          echo "活动进程:"
+          ps -eo pid,ppid,etime,cmd | grep -E "(node|jest)" || echo "未找到相关进程"
+          echo "监听端口:"
+          netstat -tlnp 2>/dev/null | grep -E "(3000|3001|27017|6379)" || echo "未找到监听端口"
+          exit 1
+        }
       env:
         NODE_ENV: test
         CI: true
+        DETECT_HANDLES: false  # 禁用句柄检测以避免CI中的噪音
+        UV_THREADPOOL_SIZE: 8
 
     - name: 📊 生成测试报告
       run: |

@@ -1,5 +1,8 @@
-// 全局teardown - 检测遗留句柄和进程
-import { killPortProcesses } from './utils/process-cleanup';
+/**
+ * @file Global Test Teardown - Enhanced Handle Detection
+ * @description Detects orphaned handles and processes to ensure clean test exits
+ * 全局teardown - 遗留句柄直接当失败，检测与红线
+ */
 
 const COMMON_TEST_PORTS = [3000, 3001, 4200, 4222, 6222, 8222, 27017, 6379];
 

@@ -239,22 +239,75 @@ export class HealthCheckService implements OnModuleInit {
       },
     });
 
-    // Redis cache health check
+    // Redis cache health check - 真实检查
     this.registerHealthCheck({
       name: 'redis',
       healthCheck: async () => {
         try {
-          // Mock Redis health check
-          const healthy = Math.random() > 0.03; // 97% success rate
-          return {
-            healthy,
-            metadata: {
-              memoryUsage: Math.random() * 100,
-              connectedClients: Math.floor(Math.random() * 50),
+          // 如果没有Redis URL或被禁用，返回内存缓存模式
+          const redisUrl = process.env.REDIS_URL;
+          const useRedis = process.env.USE_REDIS_CACHE !== 'false';
+          const disableRedis = process.env.DISABLE_REDIS === 'true';
+          
+          if (!useRedis || disableRedis || !redisUrl) {
+            return {
+              healthy: true,
+              metadata: {
+                mode: 'memory-cache',
+                redis_enabled: false,
+                reason: !redisUrl ? 'no_url' : 'disabled'
+              }
+            };
+          }
+          
+          // 检查Redis URL格式
+          if (!redisUrl.startsWith('redis://') && !redisUrl.startsWith('rediss://')) {
+            return {
+              healthy: false,
+              metadata: {
+                mode: 'memory-cache',
+                error: 'invalid_redis_url',
+                url_format: 'invalid'
+              }
+            };
+          }
+          
+          // 尝试连接Redis
+          const { createClient } = await import('redis');
+          const client = createClient({ 
+            url: redisUrl,
+            socket: {
+              connectTimeout: 5000
             },
+            commandsQueueMaxLength: 100
+          });
+          
+          // 设置错误处理器防止未处理的错误
+          client.on('error', () => {});
+          
+          await client.connect();
+          const pong = await client.ping();
+          const info = await client.info('memory');
+          await client.disconnect();
+          
+          return {
+            healthy: pong === 'PONG',
+            metadata: {
+              mode: 'redis',
+              ping: pong,
+              connected: true,
+              server_info: 'available'
+            }
           };
         } catch (error) {
-          return { healthy: false };
+          return { 
+            healthy: false,
+            metadata: {
+              mode: 'memory-cache-fallback',
+              error: error.message,
+              fallback_active: true
+            }
+          };
         }
       },
     });

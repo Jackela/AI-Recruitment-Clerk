@@ -7,6 +7,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app/app.module';
+import { ProductionSecurityValidator } from './common/security/production-security-validator';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -22,6 +23,23 @@ async function bootstrap() {
   
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
+  
+  // 🔒 Security Validation at Startup
+  const securityValidator = app.get(ProductionSecurityValidator);
+  const securityResult = securityValidator.validateSecurityConfiguration();
+  
+  if (process.env.NODE_ENV === 'production' && !securityResult.isValid) {
+    Logger.error('🚨 SECURITY VALIDATION FAILED - Application cannot start');
+    Logger.error('Security issues found:', securityResult.issues);
+    Logger.error(`Security score: ${securityResult.score}/100`);
+    process.exit(1);
+  } else if (securityResult.issues.length > 0) {
+    Logger.warn('⚠️ Security validation completed with warnings');
+    securityResult.issues.forEach(issue => Logger.warn(`   • ${issue}`));
+    Logger.warn(`Security score: ${securityResult.score}/100`);
+  } else {
+    Logger.log(`✅ Security validation passed - Score: ${securityResult.score}/100`);
+  }
   
   // Enable CORS for frontend integration
   app.enableCors({

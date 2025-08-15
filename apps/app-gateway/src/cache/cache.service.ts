@@ -37,66 +37,134 @@ export class CacheService {
   };
 
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {
+    // 设置错误处理器防止未处理的错误
+    this.setupErrorHandling();
+    
     // 每30秒记录一次缓存指标
     setInterval(() => this.logMetrics(), 30000);
   }
 
   /**
-   * 获取缓存值 - 带指标收集
+   * 设置缓存错误处理
+   */
+  private setupErrorHandling(): void {
+    try {
+      // 如果是Redis缓存，设置错误处理器
+      if (this.cacheManager.store && (this.cacheManager.store as any).client) {
+        const redisClient = (this.cacheManager.store as any).client;
+        
+        redisClient.on('error', (err: Error) => {
+          this.logger.warn(`Redis连接错误: ${err.message}`);
+          this.metrics.errors++;
+        });
+        
+        redisClient.on('connect', () => {
+          this.logger.log('✅ Redis连接已建立');
+        });
+        
+        redisClient.on('ready', () => {
+          this.logger.log('✅ Redis连接就绪');
+        });
+        
+        redisClient.on('reconnecting', () => {
+          this.logger.log('🔄 Redis正在重连...');
+        });
+        
+        redisClient.on('end', () => {
+          this.logger.warn('⚠️ Redis连接已断开');
+        });
+      }
+    } catch (error) {
+      this.logger.warn('缓存错误处理器设置失败:', error.message);
+    }
+  }
+
+  /**
+   * 获取缓存值 - 带指标收集和错误处理
    */
   async get<T>(key: string): Promise<T | null> {
     try {
-      const result = await this.cacheManager.get<T>(key);
+      const result = await Promise.race([
+        this.cacheManager.get<T>(key),
+        new Promise<null>((_, reject) => {
+          setTimeout(() => reject(new Error('Cache get timeout')), 5000);
+        })
+      ]);
+      
       if (result !== null && result !== undefined) {
         this.metrics.hits++;
-        console.log(`🎯 Cache HIT [${key}]`);
+        this.logger.debug(`🎯 Cache HIT [${key}]`);
       } else {
         this.metrics.misses++;
-        console.log(`❌ Cache MISS [${key}]`);
+        this.logger.debug(`❌ Cache MISS [${key}]`);
       }
       this.updateTotalOperations();
       return result;
     } catch (error) {
       this.metrics.errors++;
-      this.logger.error(`缓存获取失败 [${key}]:`, error);
+      this.logger.warn(`缓存获取失败 [${key}]: ${error.message}`);
       return null;
     }
   }
 
   /**
-   * 设置缓存值 - 带指标收集
+   * 设置缓存值 - 带指标收集和错误处理
    */
   async set<T>(key: string, value: T, options?: CacheOptions): Promise<void> {
     try {
       const ttl = options?.ttl;
-      await this.cacheManager.set(key, value, ttl);
+      await Promise.race([
+        this.cacheManager.set(key, value, ttl),
+        new Promise<void>((_, reject) => {
+          setTimeout(() => reject(new Error('Cache set timeout')), 5000);
+        })
+      ]);
+      
       this.metrics.sets++;
-      console.log(`💾 Cache SET [${key}]: TTL=${ttl}ms`);
+      this.logger.debug(`💾 Cache SET [${key}]: TTL=${ttl}ms`);
     } catch (error) {
       this.metrics.errors++;
-      this.logger.error(`缓存设置失败 [${key}]:`, error);
+      this.logger.warn(`缓存设置失败 [${key}]: ${error.message}`);
+      // 缓存设置失败不应该阻塞业务流程
     }
   }
 
   /**
-   * 删除缓存
+   * 删除缓存 - 增强错误处理
    */
   async del(key: string): Promise<void> {
     try {
-      await this.cacheManager.del(key);
+      await Promise.race([
+        this.cacheManager.del(key),
+        new Promise<void>((_, reject) => {
+          setTimeout(() => reject(new Error('Cache del timeout')), 5000);
+        })
+      ]);
+      
+      this.metrics.dels++;
+      this.logger.debug(`🗑️ Cache DEL [${key}]`);
     } catch (error) {
-      console.error(`缓存删除失败 [${key}]:`, error);
+      this.metrics.errors++;
+      this.logger.warn(`缓存删除失败 [${key}]: ${error.message}`);
     }
   }
 
   /**
-   * 重置所有缓存
+   * 重置所有缓存 - 增强错误处理
    */
   async reset(): Promise<void> {
     try {
-      await this.cacheManager.reset();
+      await Promise.race([
+        this.cacheManager.reset(),
+        new Promise<void>((_, reject) => {
+          setTimeout(() => reject(new Error('Cache reset timeout')), 10000);
+        })
+      ]);
+      
+      this.logger.log('🔄 缓存已重置');
     } catch (error) {
-      console.error('缓存重置失败:', error);
+      this.metrics.errors++;
+      this.logger.error(`缓存重置失败: ${error.message}`);
     }
   }
 
@@ -110,31 +178,38 @@ export class CacheService {
   ): Promise<T> {
     const startTime = Date.now();
     try {
-      console.log(`🔍 Cache wrap operation for key: ${key}`);
+      this.logger.debug(`🔍 Cache wrap operation for key: ${key}`);
       
       // 先检查缓存
       const cached = await this.get<T>(key);
       if (cached !== null && cached !== undefined) {
         const duration = Date.now() - startTime;
-        console.log(`⚡ Cache wrap HIT [${key}] in ${duration}ms`);
+        this.logger.debug(`⚡ Cache wrap HIT [${key}] in ${duration}ms`);
         return cached;
       }
       
       // 缓存未命中，执行函数并缓存结果
-      console.log(`🏭 Cache wrap MISS [${key}] - executing function`);
+      this.logger.debug(`🏭 Cache wrap MISS [${key}] - executing function`);
       const result = await fn();
       
-      // 存储到缓存
-      await this.set(key, result, options);
+      // 存储到缓存（异步，不阻塞返回）
+      this.set(key, result, options).catch(err => {
+        this.logger.warn(`缓存存储失败 [${key}]: ${err.message}`);
+      });
       
       const duration = Date.now() - startTime;
-      console.log(`✅ Cache wrap completed [${key}] in ${duration}ms`);
+      this.logger.debug(`✅ Cache wrap completed [${key}] in ${duration}ms`);
       return result;
     } catch (error) {
       this.metrics.errors++;
-      console.error(`❌ Cache wrapper failed for key [${key}]:`, error);
+      this.logger.warn(`❌ Cache wrapper failed for key [${key}]: ${error.message}`);
       // 如果缓存失败，直接执行原函数
-      return await fn();
+      try {
+        return await fn();
+      } catch (fnError) {
+        this.logger.error(`原函数执行也失败 [${key}]: ${fnError.message}`);
+        throw fnError;
+      }
     }
   }
 
@@ -148,7 +223,7 @@ export class CacheService {
       .map(part => String(part).toLowerCase().trim());
     
     const key = `${prefix}:${cleanParts.join(':')}`;
-    console.log(`Generated cache key: ${key}`);
+    this.logger.debug(`Generated cache key: ${key}`);
     return key;
   }
 
@@ -203,7 +278,9 @@ export class CacheService {
    */
   private logMetrics(): void {
     this.updateTotalOperations();
-    this.logger.log(`📊 Cache Metrics: Hits: ${this.metrics.hits}, Misses: ${this.metrics.misses}, Hit Rate: ${this.metrics.hitRate.toFixed(2)}%, Sets: ${this.metrics.sets}, Errors: ${this.metrics.errors}`);
+    if (this.metrics.totalOperations > 0) {
+      this.logger.log(`📊 Cache Metrics: Hits: ${this.metrics.hits}, Misses: ${this.metrics.misses}, Hit Rate: ${this.metrics.hitRate.toFixed(2)}%, Sets: ${this.metrics.sets}, Errors: ${this.metrics.errors}`);
+    }
   }
 
   /**
@@ -231,31 +308,58 @@ export class CacheService {
   }
 
   /**
-   * 缓存健康检查
+   * 缓存健康检查 - 增强版
    */
   async healthCheck(): Promise<{
     status: string;
     connected: boolean;
+    type: string;
     metrics: CacheMetrics;
+    details?: string;
   }> {
+    const testKey = 'health-check-' + Date.now();
+    let cacheType = 'memory';
+    
     try {
-      // 测试缓存连接
-      const testKey = 'health-check-' + Date.now();
-      await this.cacheManager.set(testKey, 'ok', 1000);
-      const testValue = await this.cacheManager.get(testKey);
-      await this.cacheManager.del(testKey);
+      // 检测缓存类型
+      if (this.cacheManager.store && (this.cacheManager.store as any).client) {
+        cacheType = 'redis';
+      }
+      
+      // 测试缓存连接（带超时）
+      await Promise.race([
+        Promise.all([
+          this.cacheManager.set(testKey, 'ok', 1000),
+          this.cacheManager.get(testKey).then(value => {
+            if (value !== 'ok') throw new Error('Value mismatch');
+          }),
+          this.cacheManager.del(testKey)
+        ]),
+        new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Health check timeout')), 5000);
+        })
+      ]);
       
       return {
-        status: testValue === 'ok' ? 'healthy' : 'degraded',
+        status: 'healthy',
         connected: true,
+        type: cacheType,
         metrics: this.getMetrics()
       };
     } catch (error) {
-      this.logger.error('Cache health check failed:', error);
+      this.logger.warn(`Cache health check failed: ${error.message}`);
+      
+      // 尝试清理测试键
+      try {
+        await this.cacheManager.del(testKey);
+      } catch {}
+      
       return {
         status: 'unhealthy',
         connected: false,
-        metrics: this.getMetrics()
+        type: cacheType,
+        metrics: this.getMetrics(),
+        details: error.message
       };
     }
   }

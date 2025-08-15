@@ -1,8 +1,10 @@
-// Jest 全局设置 - 实施标准化清理机制
-import { runCleanups, clearCleanups, registerProcessCleanup } from './test/utils/cleanup';
+/**
+ * @file Global Jest Setup - Enhanced with Process Cleanup
+ * @description Implements comprehensive cleanup strategy to prevent orphaned handles
+ * 实施标准化清理机制：测试内部严格 teardown，外部会话级一键回收
+ */
 
-// 注册进程级清理
-registerProcessCleanup();
+import { runCleanups, clearCleanups } from './test/utils/cleanup';
 
 // 每个测试用例后清理
 afterEach(async () => {

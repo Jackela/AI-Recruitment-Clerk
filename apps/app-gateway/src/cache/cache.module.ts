@@ -8,6 +8,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CacheService } from './cache.service';
 import { CacheWarmupService } from './cache-warmup.service';
+import { RedisConnectionService } from './redis-connection.service';
 import { cacheConfig } from './cache.config';
 import { Job, JobSchema } from '../schemas/job.schema';
 import { JobRepository } from '../repositories/job.repository';
@@ -22,8 +23,9 @@ import { JobRepository } from '../repositories/job.repository';
   providers: [
     CacheService, 
     CacheWarmupService,
+    RedisConnectionService,
     JobRepository,
   ],
-  exports: [CacheService, CacheWarmupService, CacheModule],
+  exports: [CacheService, CacheWarmupService, RedisConnectionService, CacheModule],
 })
 export class AppCacheModule {}
