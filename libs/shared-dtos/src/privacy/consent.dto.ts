@@ -49,17 +49,17 @@ export enum DataCategory {
 export class ConsentRecord {
   @IsString()
   @IsNotEmpty()
-  id: string;
+  id!: string;
 
   @IsString()
   @IsNotEmpty()
-  userId: string;
+  userId!: string;
 
   @IsEnum(ConsentPurpose)
-  purpose: ConsentPurpose;
+  purpose!: ConsentPurpose;
 
   @IsEnum(ConsentStatus)
-  status: ConsentStatus;
+  status!: ConsentStatus;
 
   @IsEnum(ConsentMethod)
   @IsOptional()
@@ -67,14 +67,14 @@ export class ConsentRecord {
 
   @IsArray()
   @IsEnum(DataCategory, { each: true })
-  dataCategories: DataCategory[];
+  dataCategories!: DataCategory[];
 
   @IsString()
   @IsOptional()
   legalBasis?: string; // GDPR Article 6 basis
 
   @IsDateString()
-  consentDate: Date;
+  consentDate!: Date;
 
   @IsDateString()
   @IsOptional()
@@ -103,8 +103,8 @@ export class ConsentRecord {
   @IsOptional()
   metadata?: Record<string, any>;
 
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt!: Date;
+  updatedAt!: Date;
 }
 
 /**
@@ -113,22 +113,22 @@ export class ConsentRecord {
 export class CookieConsentRecord {
   @IsString()
   @IsNotEmpty()
-  deviceId: string;
+  deviceId!: string;
 
   @IsBoolean()
-  essential: boolean; // Always true, cannot be denied
+  essential!: boolean; // Always true, cannot be denied
 
   @IsBoolean()
-  functional: boolean;
+  functional!: boolean;
 
   @IsBoolean()
-  analytics: boolean;
+  analytics!: boolean;
 
   @IsBoolean()
-  marketing: boolean;
+  marketing!: boolean;
 
   @IsDateString()
-  consentDate: Date;
+  consentDate!: Date;
 
   @IsDateString()
   @IsOptional()
@@ -138,8 +138,8 @@ export class CookieConsentRecord {
   @IsOptional()
   consentVersion?: string;
 
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt!: Date;
+  updatedAt!: Date;
 }
 
 /**
@@ -148,12 +148,12 @@ export class CookieConsentRecord {
 export class UserConsentProfile {
   @IsString()
   @IsNotEmpty()
-  userId: string;
+  userId!: string;
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ConsentRecord)
-  consentRecords: ConsentRecord[];
+  consentRecords!: ConsentRecord[];
 
   @ValidateNested()
   @Type(() => CookieConsentRecord)
@@ -165,14 +165,14 @@ export class UserConsentProfile {
   preferredLanguage?: string;
 
   @IsDateString()
-  lastConsentUpdate: Date;
+  lastConsentUpdate!: Date;
 
   @IsString()
   @IsOptional()
   consentVersion?: string; // Version of consent framework
 
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt!: Date;
+  updatedAt!: Date;
 
   /**
    * Check if user has valid consent for a specific purpose
@@ -218,16 +218,16 @@ export class UserConsentProfile {
 export class CookieConsentDto {
   @IsString()
   @IsNotEmpty()
-  deviceId: string;
+  deviceId!: string;
 
   @IsBoolean()
-  functional: boolean;
+  functional!: boolean;
 
   @IsBoolean()
-  analytics: boolean;
+  analytics!: boolean;
 
   @IsBoolean()
-  marketing: boolean;
+  marketing!: boolean;
 }
 
 /**
@@ -236,12 +236,12 @@ export class CookieConsentDto {
 export class CaptureConsentDto {
   @IsString()
   @IsNotEmpty()
-  userId: string;
+  userId!: string;
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ConsentGrantDto)
-  consents: ConsentGrantDto[];
+  consents!: ConsentGrantDto[];
 
   @IsOptional()
   @ValidateNested()
@@ -263,10 +263,10 @@ export class CaptureConsentDto {
 
 export class ConsentGrantDto {
   @IsEnum(ConsentPurpose)
-  purpose: ConsentPurpose;
+  purpose!: ConsentPurpose;
 
   @IsBoolean()
-  granted: boolean;
+  granted!: boolean;
 
   @IsEnum(ConsentMethod)
   @IsOptional()
@@ -288,10 +288,10 @@ export class ConsentGrantDto {
 export class WithdrawConsentDto {
   @IsString()
   @IsNotEmpty()
-  userId: string;
+  userId!: string;
 
   @IsEnum(ConsentPurpose)
-  purpose: ConsentPurpose;
+  purpose!: ConsentPurpose;
 
   @IsString()
   @IsOptional()
@@ -303,10 +303,10 @@ export class WithdrawConsentDto {
  */
 export class ConsentStatusDto {
   @IsString()
-  userId: string;
+  userId!: string;
 
   @IsArray()
-  purposes: {
+  purposes!: {
     purpose: ConsentPurpose;
     status: ConsentStatus;
     grantedAt?: Date;
@@ -324,10 +324,10 @@ export class ConsentStatusDto {
   };
 
   @IsBoolean()
-  needsRenewal: boolean;
+  needsRenewal!: boolean;
 
   @IsDateString()
-  lastUpdated: Date;
+  lastUpdated!: Date;
 }
 
 /**
@@ -335,29 +335,29 @@ export class ConsentStatusDto {
  */
 export class ProcessingPurposeInfo {
   @IsEnum(ConsentPurpose)
-  purpose: ConsentPurpose;
+  purpose!: ConsentPurpose;
 
   @IsString()
   @IsNotEmpty()
-  displayName: string;
+  displayName!: string;
 
   @IsString()
   @IsNotEmpty()
-  description: string;
+  description!: string;
 
   @IsString()
   @IsNotEmpty()
-  legalBasis: string; // GDPR Article 6 basis
+  legalBasis!: string; // GDPR Article 6 basis
 
   @IsArray()
   @IsEnum(DataCategory, { each: true })
-  dataCategories: DataCategory[];
+  dataCategories!: DataCategory[];
 
   @IsBoolean()
-  isRequired: boolean; // Cannot be denied
+  isRequired!: boolean; // Cannot be denied
 
   @IsBoolean()
-  isOptOut: boolean; // Can be withdrawn
+  isOptOut!: boolean; // Can be withdrawn
 
   @IsOptional()
   retentionPeriod?: string; // e.g., "2 years", "until withdrawal"
@@ -376,13 +376,13 @@ export class ConsentManagementConfig {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ProcessingPurposeInfo)
-  purposes: ProcessingPurposeInfo[];
+  purposes!: ProcessingPurposeInfo[];
 
   @IsString()
-  consentVersion: string;
+  consentVersion!: string;
 
   @IsString()
-  privacyPolicyUrl: string;
+  privacyPolicyUrl!: string;
 
   @IsString()
   @IsOptional()
@@ -410,24 +410,24 @@ export class ConsentManagementConfig {
 export class ConsentAuditLog {
   @IsString()
   @IsNotEmpty()
-  id: string;
+  id!: string;
 
   @IsString()
   @IsNotEmpty()
-  userId: string;
+  userId!: string;
 
   @IsString()
   @IsNotEmpty()
-  action: string; // 'grant', 'withdraw', 'renew', 'expire'
+  action!: string; // 'grant', 'withdraw', 'renew', 'expire'
 
   @IsEnum(ConsentPurpose)
-  purpose: ConsentPurpose;
+  purpose!: ConsentPurpose;
 
   @IsEnum(ConsentStatus)
-  previousStatus: ConsentStatus;
+  previousStatus!: ConsentStatus;
 
   @IsEnum(ConsentStatus)
-  newStatus: ConsentStatus;
+  newStatus!: ConsentStatus;
 
   @IsString()
   @IsOptional()
@@ -445,7 +445,7 @@ export class ConsentAuditLog {
   metadata?: Record<string, any>;
 
   @IsDateString()
-  timestamp: Date;
+  timestamp!: Date;
 }
 
 /**
@@ -454,13 +454,13 @@ export class ConsentAuditLog {
 export class BulkConsentUpdateDto {
   @IsArray()
   @IsString({ each: true })
-  userIds: string[];
+  userIds!: string[];
 
   @IsEnum(ConsentPurpose)
-  purpose: ConsentPurpose;
+  purpose!: ConsentPurpose;
 
   @IsEnum(ConsentStatus)
-  status: ConsentStatus;
+  status!: ConsentStatus;
 
   @IsString()
   @IsOptional()
@@ -477,18 +477,18 @@ export class BulkConsentUpdateDto {
 export class ConsentRenewalNotification {
   @IsString()
   @IsNotEmpty()
-  userId: string;
+  userId!: string;
 
   @IsArray()
   @IsEnum(ConsentPurpose, { each: true })
-  expiredPurposes: ConsentPurpose[];
+  expiredPurposes!: ConsentPurpose[];
 
   @IsDateString()
-  expiryDate: Date;
+  expiryDate!: Date;
 
   @IsDateString()
-  reminderSentAt: Date;
+  reminderSentAt!: Date;
 
   @IsBoolean()
-  isUrgent: boolean; // Less than 7 days to expire
+  isUrgent!: boolean; // Less than 7 days to expire
 }

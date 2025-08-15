@@ -53,7 +53,7 @@ export enum BreachStatus {
  */
 export class DataProcessingRecord {
   @IsUUID()
-  id: string;
+  id!: string;
 
   @IsString()
   @IsNotEmpty()
@@ -136,17 +136,17 @@ export class DataProcessingRecord {
   reviewedBy?: string;
 
   createdAt!: Date;
-  updatedAt: Date;
+  updatedAt!: Date;
 }
 
 export class ThirdPartyTransfer {
   @IsString()
   @IsNotEmpty()
-  recipient: string;
+  recipient!: string;
 
   @IsString()
   @IsNotEmpty()
-  country: string;
+  country!: string;
 
   @IsString()
   @IsOptional()
@@ -170,7 +170,7 @@ export class ThirdPartyTransfer {
 export class SecurityMeasure {
   @IsString()
   @IsNotEmpty()
-  measure: string;
+  measure!: string;
 
   @IsString()
   @IsOptional()
@@ -190,7 +190,7 @@ export class SecurityMeasure {
  */
 export class DataRetentionPolicy {
   @IsUUID()
-  id: string;
+  id!: string;
 
   @IsString()
   @IsNotEmpty()
@@ -198,14 +198,14 @@ export class DataRetentionPolicy {
 
   @IsString()
   @IsNotEmpty()
-  dataCategory: string;
+  dataCategory!: string;
 
   @IsString()
   @IsOptional()
   description?: string;
 
   @IsNumber()
-  retentionPeriodDays: number;
+  retentionPeriodDays!: number;
 
   @IsString()
   @IsOptional()
@@ -216,10 +216,10 @@ export class DataRetentionPolicy {
   defaultAction?: DataRetentionStatus; // What happens when retention expires
 
   @IsBoolean()
-  allowUserDeletion: boolean;
+  allowUserDeletion!: boolean;
 
   @IsBoolean()
-  hasLegalHoldExemption: boolean;
+  hasLegalHoldExemption!: boolean;
 
   @IsArray()
   @IsString({ each: true })
@@ -235,10 +235,10 @@ export class DataRetentionPolicy {
   };
 
   @IsBoolean()
-  isActive: boolean;
+  isActive!: boolean;
 
   createdAt!: Date;
-  updatedAt: Date;
+  updatedAt!: Date;
 }
 
 /**
@@ -246,27 +246,27 @@ export class DataRetentionPolicy {
  */
 export class DataRetentionRecord {
   @IsUUID()
-  id: string;
+  id!: string;
 
   @IsString()
   @IsNotEmpty()
-  dataIdentifier: string; // User ID, document ID, etc.
+  dataIdentifier!: string; // User ID, document ID, etc.
 
   @IsString()
   @IsNotEmpty()
-  dataCategory: string;
+  dataCategory!: string;
 
   @IsUUID()
-  retentionPolicyId: string;
+  retentionPolicyId!: string;
 
   @IsDateString()
-  dataCreated: Date;
+  dataCreated!: Date;
 
   @IsDateString()
-  retentionExpiry: Date;
+  retentionExpiry!: Date;
 
   @IsEnum(DataRetentionStatus)
-  status: DataRetentionStatus;
+  status!: DataRetentionStatus;
 
   @IsDateString()
   @IsOptional()
@@ -285,7 +285,7 @@ export class DataRetentionRecord {
   notes?: string;
 
   createdAt!: Date;
-  updatedAt: Date;
+  updatedAt!: Date;
 }
 
 /**
@@ -293,7 +293,7 @@ export class DataRetentionRecord {
  */
 export class PrivacyImpactAssessment {
   @IsUUID()
-  id: string;
+  id!: string;
 
   @IsString()
   @IsNotEmpty()
@@ -305,23 +305,23 @@ export class PrivacyImpactAssessment {
 
   @IsString()
   @IsNotEmpty()
-  projectOwner: string;
+  projectOwner!: string;
 
   @IsString()
   @IsNotEmpty()
-  dataController: string;
+  dataController!: string;
 
   @IsArray()
   @IsString({ each: true })
-  processingPurposes: string[];
+  processingPurposes!: string[];
 
   @IsArray()
   @IsString({ each: true })
-  dataCategories: string[];
+  dataCategories!: string[];
 
   @IsArray()
   @IsString({ each: true })
-  dataSubjects: string[];
+  dataSubjects!: string[];
 
   @IsOptional()
   riskAssessment?: {
@@ -340,7 +340,7 @@ export class PrivacyImpactAssessment {
   };
 
   @IsEnum(['draft', 'under_review', 'approved', 'rejected', 'requires_revision'])
-  status: string;
+  status!: string;
 
   @IsString()
   @IsOptional()
@@ -355,29 +355,29 @@ export class PrivacyImpactAssessment {
   nextReviewDate?: Date;
 
   createdAt!: Date;
-  updatedAt: Date;
+  updatedAt!: Date;
 }
 
 export class RiskAssessment {
   @IsString()
   @IsNotEmpty()
-  riskDescription: string;
+  riskDescription!: string;
 
   @IsEnum(['low', 'medium', 'high', 'very_high'])
-  likelihood: string;
+  likelihood!: string;
 
   @IsEnum(['low', 'medium', 'high', 'very_high'])
-  impact: string;
+  impact!: string;
 
   @IsEnum(['low', 'medium', 'high', 'very_high'])
-  overallRisk: string;
+  overallRisk!: string;
 
   @IsArray()
   @IsString({ each: true })
-  mitigations: string[];
+  mitigations!: string[];
 
   @IsEnum(['low', 'medium', 'high', 'very_high'])
-  residualRisk: string;
+  residualRisk!: string;
 }
 
 /**
@@ -385,27 +385,27 @@ export class RiskAssessment {
  */
 export class DataBreachRecord {
   @IsUUID()
-  id: string;
+  id!: string;
 
   @IsString()
   @IsNotEmpty()
-  title: string;
+  title!: string;
 
   @IsString()
   @IsNotEmpty()
   description!: string;
 
   @IsEnum(BreachType)
-  breachType: BreachType;
+  breachType!: BreachType;
 
   @IsEnum(BreachSeverity)
-  severity: BreachSeverity;
+  severity!: BreachSeverity;
 
   @IsEnum(BreachStatus)
-  status: BreachStatus;
+  status!: BreachStatus;
 
   @IsDateString()
-  discoveryDate: Date;
+  discoveryDate!: Date;
 
   @IsDateString()
   @IsOptional()
@@ -470,15 +470,15 @@ export class DataBreachRecord {
   investigatedBy?: string;
 
   createdAt!: Date;
-  updatedAt: Date;
+  updatedAt!: Date;
 }
 
 export class BreachNotification {
   @IsEnum(['supervisory_authority', 'data_subjects', 'internal', 'third_party'])
-  type: string;
+  type!: string;
 
   @IsDateString()
-  sentDate: Date;
+  sentDate!: Date;
 
   @IsString()
   @IsOptional()
@@ -502,34 +502,34 @@ export class BreachNotification {
  */
 export class CrossBorderTransfer {
   @IsUUID()
-  id: string;
+  id!: string;
 
   @IsString()
   @IsNotEmpty()
-  transferName: string;
+  transferName!: string;
 
   @IsString()
   @IsNotEmpty()
-  dataExporter: string; // EU entity
+  dataExporter!: string; // EU entity
 
   @IsString()
   @IsNotEmpty()
-  dataImporter: string; // Non-EU entity
+  dataImporter!: string; // Non-EU entity
 
   @IsString()
   @IsNotEmpty()
-  destinationCountry: string;
+  destinationCountry!: string;
 
   @IsArray()
   @IsString({ each: true })
-  dataCategories: string[];
+  dataCategories!: string[];
 
   @IsArray()
   @IsString({ each: true })
-  purposesOfTransfer: string[];
+  purposesOfTransfer!: string[];
 
   @IsEnum(['adequacy_decision', 'standard_contractual_clauses', 'binding_corporate_rules', 'consent', 'contract_necessity', 'derogation'])
-  legalMechanism: string;
+  legalMechanism!: string;
 
   @IsString()
   @IsOptional()
@@ -556,10 +556,10 @@ export class CrossBorderTransfer {
   };
 
   @IsBoolean()
-  isActive: boolean;
+  isActive!: boolean;
 
   createdAt!: Date;
-  updatedAt: Date;
+  updatedAt!: Date;
 }
 
 /**
@@ -567,7 +567,7 @@ export class CrossBorderTransfer {
  */
 export class PrivacyComplianceCheck {
   @IsUUID()
-  id: string;
+  id!: string;
 
   @IsString()
   @IsNotEmpty()

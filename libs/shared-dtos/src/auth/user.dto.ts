@@ -16,22 +16,22 @@ export enum UserStatus {
 export class CreateUserDto {
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  email!: string;
 
   @IsString()
   @MinLength(8)
-  password: string;
+  password!: string;
 
   @IsString()
   @IsNotEmpty()
-  firstName: string;
+  firstName!: string;
 
   @IsString()
   @IsNotEmpty()
-  lastName: string;
+  lastName!: string;
 
   @IsEnum(UserRole)
-  role: UserRole;
+  role!: UserRole;
 
   @IsString()
   @IsOptional()
@@ -45,23 +45,23 @@ export class CreateUserDto {
 export class LoginDto {
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  email!: string;
 
   @IsString()
   @IsNotEmpty()
-  password: string;
+  password!: string;
 }
 
 export class UserDto {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: UserRole;
+  id!: string;
+  email!: string;
+  firstName!: string;
+  lastName!: string;
+  role!: UserRole;
   organizationId?: string;
-  status: UserStatus;
-  createdAt: Date;
-  updatedAt: Date;
+  status!: UserStatus;
+  createdAt!: Date;
+  updatedAt!: Date;
   
   // Computed property
   get name(): string {
@@ -70,9 +70,9 @@ export class UserDto {
 }
 
 export class JwtPayload {
-  sub: string; // user id
-  email: string;
-  role: UserRole;
+  sub!: string; // user id
+  email!: string;
+  role!: UserRole;
   organizationId?: string;
   iat?: number;
   exp?: number;
@@ -81,16 +81,16 @@ export class JwtPayload {
 }
 
 export class AuthResponseDto {
-  accessToken: string;
-  refreshToken: string;
-  user: UserDto;
-  expiresIn: number;
+  accessToken!: string;
+  refreshToken!: string;
+  user!: UserDto;
+  expiresIn!: number;
 }
 
 export class RefreshTokenDto {
   @IsString()
   @IsNotEmpty()
-  refreshToken: string;
+  refreshToken!: string;
 }
 
 export class UpdateUserDto {
@@ -141,12 +141,12 @@ export class UserPreferencesDto {
 }
 
 export class UserActivityDto {
-  id: string;
-  userId: string;
-  action: string;
+  id!: string;
+  userId!: string;
+  action!: string;
   resource?: string;
   metadata?: Record<string, any>;
   ipAddress?: string;
   userAgent?: string;
-  timestamp: Date;
+  timestamp!: Date;
 }

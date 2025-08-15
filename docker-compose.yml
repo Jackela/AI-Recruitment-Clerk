@@ -55,7 +55,7 @@ services:
       PORT: 3000
       NODE_ENV: production
       NATS_URL: nats://nats:4222
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-development_secret_key_change_in_production}
       # Ensure app reads correct env key used by code (MONGO_URL)
       MONGO_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD:-devpassword123}@mongodb:27017/ai-recruitment?authSource=admin
       # Keep legacy key for other services if any script reads it
