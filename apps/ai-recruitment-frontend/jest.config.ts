@@ -1,6 +1,7 @@
 export default {
   displayName: 'ai-recruitment-frontend',
   preset: '../../jest.preset.cjs',
+  testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   coverageDirectory: '../../coverage/apps/ai-recruitment-frontend',
   transform: {
