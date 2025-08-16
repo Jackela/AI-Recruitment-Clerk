@@ -30,8 +30,8 @@ export class RateLimitMiddleware implements NestMiddleware {
       if (redisUrl) {
         this.redis = new Redis(redisUrl, {
           maxRetriesPerRequest: 3,
-          lazyConnect: true,
-          enableOfflineQueue: false,
+          lazyConnect: false,
+          enableOfflineQueue: true,
           connectTimeout: 10000,
         });
       } else {
@@ -40,7 +40,8 @@ export class RateLimitMiddleware implements NestMiddleware {
           port: parseInt(process.env.REDIS_PORT || '6379'),
           password: process.env.REDIS_PASSWORD,
           maxRetriesPerRequest: 3,
-          lazyConnect: true,
+          lazyConnect: false,
+          enableOfflineQueue: true,
           connectTimeout: 10000,
         });
       }

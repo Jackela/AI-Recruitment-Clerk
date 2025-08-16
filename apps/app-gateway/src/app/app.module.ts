@@ -132,12 +132,14 @@ export class AppModule implements NestModule {
     //   .apply(CsrfProtectionMiddleware)
     //   .forRoutes('*');
       
+    // 基础限流只应用于游客端点
     consumer
       .apply(RateLimitMiddleware)
-      .forRoutes('*');
+      .forRoutes('/api/guest/*');
       
+    // 增强限流应用于认证相关端点
     consumer
       .apply(EnhancedRateLimitMiddleware)
-      .forRoutes('*');
+      .forRoutes('/api/auth/*', '/api/guest/*');
   }
 }
