@@ -51,21 +51,22 @@ import { ProductionSecurityValidator } from '../common/security/production-secur
       })
     }),
     AppCacheModule,
-    MongooseModule.forRootAsync({
-      useFactory: () => {
-        // 调试环境变量
-        console.log('🔍 MongoDB连接调试信息:');
-        console.log('- NODE_ENV:', process.env.NODE_ENV);
-        console.log('- MONGO_URL存在:', !!process.env.MONGO_URL);
-        if (process.env.MONGO_URL) {
-          console.log('- MONGO_URL (masked):', process.env.MONGO_URL.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
-        }
-        
-        const mongoUri = process.env.MONGO_URL;
-        
-        if (!mongoUri) {
-          throw new Error('MONGO_URL environment variable is required for database connection');
-        }
+    ...(process.env.SKIP_MONGO_CONNECTION !== 'true' ? [
+      MongooseModule.forRootAsync({
+        useFactory: () => {
+          // 调试环境变量
+          console.log('🔍 MongoDB连接调试信息:');
+          console.log('- NODE_ENV:', process.env.NODE_ENV);
+          console.log('- MONGO_URL存在:', !!process.env.MONGO_URL);
+          if (process.env.MONGO_URL) {
+            console.log('- MONGO_URL (masked):', process.env.MONGO_URL.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
+          }
+          
+          const mongoUri = process.env.MONGO_URL;
+          
+          if (!mongoUri) {
+            throw new Error('MONGO_URL environment variable is required for database connection');
+          }
         console.log('- 最终使用的URI (masked):', mongoUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
         
         return {
@@ -94,7 +95,8 @@ import { ProductionSecurityValidator } from '../common/security/production-secur
           retryReads: true        // 启用读取重试
         };
       },
-    }),
+    })
+    ] : []),
     AuthModule,
     GuestModule,
     JobsModule,

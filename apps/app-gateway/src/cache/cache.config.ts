@@ -52,6 +52,7 @@ export const cacheConfig: CacheModuleAsyncOptions = {
     logger.log('🔍 Redis配置调试信息:');
     logger.log(`- NODE_ENV: ${isProduction ? 'production' : 'development'}`);
     logger.log(`- REDIS_URL存在: ${!!redisUrl}`);
+    logger.log(`- REDIS_URL内容: ${redisUrl ? redisUrl.replace(/\/\/[^:]+:[^@]+@/, '//***:***@') : 'not set'}`);
     logger.log(`- REDIS_PRIVATE_URL存在: ${!!redisPrivateUrl}`);
     logger.log(`- REDISHOST: ${redisHost || 'not set'}`);
     logger.log(`- REDISPORT: ${redisPort || 'not set'}`);
@@ -125,9 +126,16 @@ export const cacheConfig: CacheModuleAsyncOptions = {
       // 动态导入Redis store
       const { redisStore } = await import('cache-manager-redis-yet');
       
+      // 如果是Railway内网地址，添加family=0参数
+      let connectionUrl = finalRedisUrl;
+      if (finalRedisUrl.includes('railway.internal')) {
+        logger.log('🔧 检测到Railway内网地址，添加family=0参数');
+        connectionUrl = finalRedisUrl + (finalRedisUrl.includes('?') ? '&' : '?') + 'family=0';
+      }
+
       const redisConfig = {
         store: redisStore,
-        url: finalRedisUrl,
+        url: connectionUrl,
         ttl: cacheTtl * 1000,
         max: cacheMaxItems,
         isGlobal: true,

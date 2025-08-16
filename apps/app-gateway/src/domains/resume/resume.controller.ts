@@ -16,6 +16,7 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
+  FileValidator,
   BadRequestException,
   NotFoundException,
   ForbiddenException
@@ -46,6 +47,34 @@ import {
 } from '../../common/interfaces/fallback-types';
 import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import { ResumeService } from './resume.service';
+
+class ResumeFileValidator extends FileValidator {
+  constructor() {
+    super({});
+  }
+
+  buildErrorMessage(): string {
+    return 'Invalid file type. Only PDF, DOC, and DOCX files are allowed.';
+  }
+
+  isValid(file?: any): boolean {
+    if (!file) return false;
+    
+    // Check both MIME type and file extension
+    const allowedMimeTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    
+    const allowedExtensions = /\.(pdf|doc|docx)$/i;
+    
+    const mimeTypeValid = allowedMimeTypes.includes(file.mimetype);
+    const extensionValid = allowedExtensions.test(file.originalname);
+    
+    return mimeTypeValid && extensionValid;
+  }
+}
 
 // Use imported interface instead of local definition
 
@@ -90,7 +119,7 @@ export class ResumeController {
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }), // 10MB limit
-          new FileTypeValidator({ fileType: /\.(pdf|doc|docx)$/i })
+          new ResumeFileValidator()
         ],
         errorHttpStatusCode: HttpStatus.BAD_REQUEST
       })

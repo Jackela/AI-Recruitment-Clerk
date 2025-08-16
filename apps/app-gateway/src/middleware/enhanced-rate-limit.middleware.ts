@@ -63,8 +63,8 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
         })();
         this.redis = new Redis(urlWithFamily, {
           maxRetriesPerRequest: 3,
-          lazyConnect: true,
-          enableOfflineQueue: false,
+          lazyConnect: false,  // 改为立即连接
+          enableOfflineQueue: true,  // 启用离线队列
           connectTimeout: 10000,
         });
       } else {
@@ -75,8 +75,8 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
           })()),
           password: this.configService.get<string>('REDIS_PASSWORD'),
           maxRetriesPerRequest: 3,
-          lazyConnect: true,
-          enableOfflineQueue: false,
+          lazyConnect: false,  // 改为立即连接
+          enableOfflineQueue: true,  // 启用离线队列
           connectTimeout: 10000,
         };
         this.redis = new Redis(redisOptions);
@@ -269,23 +269,34 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
 
   private async isIpLocked(ip: string): Promise<boolean> {
     if (!this.redis) return false;
-    const key = `security_lock:${ip}`;
-    const lockInfo = await this.redis.get(key);
     
-    if (!lockInfo) {
-      return false;
-    }
-
-    const { lockedUntil } = JSON.parse(lockInfo);
-    const now = Date.now();
+    try {
+      // 确保Redis连接正常
+      if (this.redis.status !== 'ready') {
+        await this.redis.connect();
+      }
+      
+      const key = `security_lock:${ip}`;
+      const lockInfo = await this.redis.get(key);
     
-    if (now > lockedUntil) {
-      // Lock expired, remove it
-      await this.redis.del(key);
-      return false;
-    }
+      if (!lockInfo) {
+        return false;
+      }
 
-    return true;
+      const { lockedUntil } = JSON.parse(lockInfo);
+      const now = Date.now();
+      
+      if (now > lockedUntil) {
+        // Lock expired, remove it
+        await this.redis.del(key);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      this.logger.warn(`Redis错误，跳过IP锁定检查 ${ip}:`, error.message);
+      return false; // 发生错误时不阻止请求
+    }
   }
 
   private async getLockInfo(ip: string) {
@@ -297,10 +308,17 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
 
   private async recordFailedAttempt(ip: string) {
     if (!this.redis) return;
-    const key = `security_record:${ip}`;
-    const now = Date.now();
     
-    const recordStr = await this.redis.get(key);
+    try {
+      // 确保Redis连接正常
+      if (this.redis.status !== 'ready') {
+        await this.redis.connect();
+      }
+      
+      const key = `security_record:${ip}`;
+      const now = Date.now();
+      
+      const recordStr = await this.redis.get(key);
     let record: SecurityRateLimitRecord;
     
     if (recordStr) {
@@ -336,8 +354,11 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
       }
     }
 
-    // Store updated record with expiry
-    await this.redis.setex(key, 86400, JSON.stringify(record)); // 24 hours
+      // Store updated record with expiry
+      await this.redis.setex(key, 86400, JSON.stringify(record)); // 24 hours
+    } catch (error) {
+      this.logger.warn(`Redis错误，无法记录失败尝试 ${ip}:`, error.message);
+    }
   }
 
   private async recordRequest(clientInfo: any, operationType: string) {

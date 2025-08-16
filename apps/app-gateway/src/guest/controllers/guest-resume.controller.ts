@@ -15,6 +15,7 @@ import {
   Req,
   Logger,
   HttpException,
+  FileValidator,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -37,6 +38,34 @@ interface GuestResumeUploadDto {
   candidateName?: string;
   candidateEmail?: string;
   notes?: string;
+}
+
+class ResumeFileValidator extends FileValidator {
+  constructor() {
+    super({});
+  }
+
+  buildErrorMessage(): string {
+    return 'Invalid file type. Only PDF, DOC, and DOCX files are allowed.';
+  }
+
+  isValid(file?: any): boolean {
+    if (!file) return false;
+    
+    // Check both MIME type and file extension
+    const allowedMimeTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    
+    const allowedExtensions = /\.(pdf|doc|docx)$/i;
+    
+    const mimeTypeValid = allowedMimeTypes.includes(file.mimetype);
+    const extensionValid = allowedExtensions.test(file.originalname);
+    
+    return mimeTypeValid && extensionValid;
+  }
 }
 
 @ApiTags('Guest Resume Processing')
@@ -98,7 +127,7 @@ export class GuestResumeController {
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB limit for guests
-          new FileTypeValidator({ fileType: /\.(pdf|doc|docx)$/i }),
+          new ResumeFileValidator(),
         ],
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       })
