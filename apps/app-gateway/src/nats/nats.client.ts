@@ -22,15 +22,10 @@ export class NatsClient implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     this.logger.log('🔌 [NatsClient] Initializing...');
-    // 检查是否配置了NATS URL
-<<<<<<< Updated upstream
-    const natsUrl = process.env.NATS_URL;
-    this.logger.log(`- NATS_URL from env: ${natsUrl ? natsUrl.replace(/\/\/[^:]+:[^@]+@/, '//***:***@') : 'not set'}`);
-    const natsOptional = process.env.NATS_OPTIONAL === 'true';
-=======
+    // 检查是否配置了NATS URL - 使用ConfigService而非直接访问process.env
     const natsUrl = this.configService.get<string>('NATS_URL');
+    this.logger.log(`- NATS_URL from config: ${natsUrl ? natsUrl.replace(/\/\/[^:]+:[^@]+@/, '//***:***@') : 'not set'}`);
     const natsOptional = this.configService.get<string>('NATS_OPTIONAL') === 'true';
->>>>>>> Stashed changes
     
     if (!natsUrl && natsOptional) {
       this.logger.warn('NATS_URL未配置且NATS_OPTIONAL=true，跳过NATS连接');
@@ -55,7 +50,14 @@ export class NatsClient implements OnModuleInit, OnModuleDestroy {
     try {
       this.logger.log('Connecting to NATS JetStream...');
       
-      const natsUrl = this.configService.get<string>('NATS_URL', 'nats://localhost:4222');
+      let natsUrl = this.configService.get<string>('NATS_URL', 'nats://localhost:4222');
+      
+      // Railway可能提供不带协议前缀的URL，需要自动添加
+      if (natsUrl && !natsUrl.startsWith('nats://') && !natsUrl.startsWith('nats:')) {
+        natsUrl = `nats://${natsUrl}`;
+        this.logger.log(`🔧 Fixed NATS URL format: ${natsUrl}`);
+      }
+      
       this.logger.log(`Connecting to NATS at: ${natsUrl}`);
       
       this.connection = await connect({
