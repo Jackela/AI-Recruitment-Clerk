@@ -251,7 +251,11 @@ export class ProductionSecurityValidator {
     // For hex strings (encryption keys), use different entropy logic
     if (/^[a-f0-9]+$/i.test(value)) {
       // Hex strings should have good distribution of hex characters
+<<<<<<< Updated upstream
       const charCounts: { [key: string]: number } = {};
+=======
+      const charCounts: Record<string, number> = {};
+>>>>>>> Stashed changes
       
       for (const char of lowerValue) {
         charCounts[char] = (charCounts[char] || 0) + 1;
@@ -259,7 +263,7 @@ export class ProductionSecurityValidator {
       
       // Check if any character appears too frequently (more than 25% of length)
       const maxFrequency = length * 0.25;
-      return !Object.values(charCounts).some(count => count > maxFrequency);
+      return !Object.values(charCounts).some((count: number) => count > maxFrequency);
     }
     
     // For non-hex strings, use character diversity check

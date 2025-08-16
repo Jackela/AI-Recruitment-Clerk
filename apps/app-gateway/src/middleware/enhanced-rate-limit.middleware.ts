@@ -38,7 +38,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
     const disableRedis = this.configService.get('DISABLE_REDIS', 'false') === 'true';
     const useRedis = this.configService.get('USE_REDIS_CACHE', 'true') === 'true';
     const redisUrl = this.configService.get<string>('REDIS_URL');
-    const redisHost = this.configService.get<string>('REDIS_HOST');
+    const redisHost = this.configService.get<string>('REDISHOST') || this.configService.get<string>('REDIS_HOST');
     
     // 如果Redis被禁用或未配置，跳过Redis初始化
     if (disableRedis || !useRedis || (!redisUrl && !redisHost)) {
@@ -70,7 +70,9 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
       } else {
         const redisOptions: RedisOptions = {
           host: redisHost!,
-          port: parseInt(this.configService.get<string>('REDIS_PORT') || '6379'),
+          port: parseInt(this.configService.get<string>('REDISPORT') || this.configService.get<string>('REDIS_PORT') || (() => {
+            throw new Error('Redis configuration incomplete: REDISHOST found but REDISPORT/REDIS_PORT is missing');
+          })()),
           password: this.configService.get<string>('REDIS_PASSWORD'),
           maxRetriesPerRequest: 3,
           lazyConnect: true,

@@ -1,4 +1,5 @@
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { connect, NatsConnection, JetStreamClient, PubAck, StringCodec, RetentionPolicy, DiscardPolicy } from 'nats';
 import { JobJdSubmittedEvent, ResumeSubmittedEvent } from '../../../../libs/shared-dtos/src';
 
@@ -17,12 +18,19 @@ export class NatsClient implements OnModuleInit, OnModuleDestroy {
   private readonly maxReconnectAttempts = 10;
   private readonly reconnectTimeWait = 2000;
 
+  constructor(private readonly configService: ConfigService) {}
+
   async onModuleInit() {
     this.logger.log('🔌 [NatsClient] Initializing...');
     // 检查是否配置了NATS URL
+<<<<<<< Updated upstream
     const natsUrl = process.env.NATS_URL;
     this.logger.log(`- NATS_URL from env: ${natsUrl ? natsUrl.replace(/\/\/[^:]+:[^@]+@/, '//***:***@') : 'not set'}`);
     const natsOptional = process.env.NATS_OPTIONAL === 'true';
+=======
+    const natsUrl = this.configService.get<string>('NATS_URL');
+    const natsOptional = this.configService.get<string>('NATS_OPTIONAL') === 'true';
+>>>>>>> Stashed changes
     
     if (!natsUrl && natsOptional) {
       this.logger.warn('NATS_URL未配置且NATS_OPTIONAL=true，跳过NATS连接');
@@ -47,7 +55,7 @@ export class NatsClient implements OnModuleInit, OnModuleDestroy {
     try {
       this.logger.log('Connecting to NATS JetStream...');
       
-      const natsUrl = process.env.NATS_URL || 'nats://localhost:4222';
+      const natsUrl = this.configService.get<string>('NATS_URL', 'nats://localhost:4222');
       this.logger.log(`Connecting to NATS at: ${natsUrl}`);
       
       this.connection = await connect({
@@ -66,8 +74,8 @@ export class NatsClient implements OnModuleInit, OnModuleDestroy {
         noRandomize: false,     // 启用服务器随机化以实现负载均衡
         
         // 调试和监控
-        debug: process.env.NODE_ENV === 'development',
-        verbose: process.env.NODE_ENV === 'development',
+        debug: this.configService.get<string>('NODE_ENV') === 'development',
+        verbose: this.configService.get<string>('NODE_ENV') === 'development',
       });
       
       this.jetstream = this.connection.jetstream();

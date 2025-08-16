@@ -38,7 +38,10 @@ export const cacheConfig: CacheModuleAsyncOptions = {
   isGlobal: true,
   imports: [ConfigModule],
   useFactory: async (configService: ConfigService) => {
+    // Check for Redis configuration - Railway provides REDISHOST/REDISPORT (no underscore)
     const redisUrl = configService.get('REDIS_URL');
+    const redisHost = configService.get('REDISHOST') || configService.get('REDIS_HOST');
+    const redisPort = configService.get('REDISPORT') || configService.get('REDIS_PORT');
     const useRedis = configService.get('USE_REDIS_CACHE', 'true') === 'true';
     const disableRedis = configService.get('DISABLE_REDIS', 'false') === 'true';
     const isProduction = configService.get('NODE_ENV') === 'production';
@@ -61,21 +64,31 @@ export const cacheConfig: CacheModuleAsyncOptions = {
       return memoryConfig;
     }
     
-    // 如果没有Redis URL
-    if (!redisUrl || redisUrl === 'redis://localhost:6379' && isProduction) {
-      logger.warn('⚠️ 生产环境未配置Redis URL，使用内存缓存');
+    // Build Redis URL from available configuration with fail-fast validation
+    let finalRedisUrl = redisUrl;
+    if (!finalRedisUrl && redisHost) {
+      if (!redisPort) {
+        throw new Error('Redis configuration incomplete: REDISHOST found but REDISPORT is missing. Please check environment variables.');
+      }
+      finalRedisUrl = `redis://${redisHost}:${redisPort}`;
+      logger.log(`🔗 Constructed Redis URL from REDISHOST/REDISPORT: ${finalRedisUrl}`);
+    }
+    
+    // 如果没有Redis配置
+    if (!finalRedisUrl || (finalRedisUrl === 'redis://localhost:6379' && isProduction)) {
+      logger.warn('⚠️ 生产环境未配置Redis，使用内存缓存');
       return memoryConfig;
     }
     
     // 检查Redis URL格式
-    if (!redisUrl.startsWith('redis://') && !redisUrl.startsWith('rediss://')) {
+    if (!finalRedisUrl.startsWith('redis://') && !finalRedisUrl.startsWith('rediss://')) {
       logger.error('❌ Redis URL格式无效，使用内存缓存');
       return memoryConfig;
     }
     
     // 在生产环境中进行连接测试
     if (isProduction) {
-      const isRedisAvailable = await testRedisConnection(redisUrl);
+      const isRedisAvailable = await testRedisConnection(finalRedisUrl);
       if (!isRedisAvailable) {
         logger.warn('⚠️ Redis连接不可用，降级到内存缓存');
         return memoryConfig;
@@ -83,14 +96,14 @@ export const cacheConfig: CacheModuleAsyncOptions = {
     }
     
     try {
-      logger.log(`🔗 正在初始化Redis缓存 - 目标: ${redisUrl.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')}`);
+      logger.log(`🔗 正在初始化Redis缓存 - 目标: ${finalRedisUrl.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')}`);
       
       // 动态导入Redis store
       const { redisStore } = await import('cache-manager-redis-yet');
       
       const redisConfig = {
         store: redisStore,
-        url: redisUrl,
+        url: finalRedisUrl,
         ttl: cacheTtl * 1000,
         max: cacheMaxItems,
         isGlobal: true,

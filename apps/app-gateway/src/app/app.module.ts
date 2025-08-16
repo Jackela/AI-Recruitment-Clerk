@@ -107,6 +107,7 @@ import { ProductionSecurityValidator } from '../common/security/production-secur
   controllers: [AppController, SystemController],
   providers: [
     AppService,
+    NatsClient,
     ProductionSecurityValidator,
     {
       provide: APP_GUARD,

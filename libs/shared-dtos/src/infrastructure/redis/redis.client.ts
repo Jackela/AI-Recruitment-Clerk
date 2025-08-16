@@ -16,7 +16,7 @@ export class RedisClient implements OnModuleDestroy {
     const disableRedis = process.env.DISABLE_REDIS === 'true';
     const useRedis = process.env.USE_REDIS_CACHE === 'true';
     const redisUrl = process.env.REDIS_URL;
-    const redisHost = process.env.REDIS_HOST;
+    const redisHost = process.env.REDISHOST || process.env.REDIS_HOST;
 
     if (disableRedis || !useRedis || (!redisUrl && !redisHost)) {
       // 降级为内存存储，避免 ioredis 连接到 127.0.0.1:6379
@@ -47,7 +47,9 @@ export class RedisClient implements OnModuleDestroy {
     } else {
       this.redis = new Redis({
         host: redisHost!,
-        port: parseInt(process.env.REDIS_PORT || '6379'),
+        port: parseInt(process.env.REDISPORT || process.env.REDIS_PORT || (() => {
+          throw new Error('Redis configuration incomplete: REDISHOST found but REDISPORT/REDIS_PORT is missing');
+        })()),
         password: process.env.REDIS_PASSWORD,
         db: parseInt(process.env.REDIS_DB || '0'),
         maxRetriesPerRequest: 3,
