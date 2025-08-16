@@ -40,11 +40,24 @@ export const cacheConfig: CacheModuleAsyncOptions = {
   useFactory: async (configService: ConfigService) => {
     // Check for Redis configuration - Railway provides REDISHOST/REDISPORT (no underscore)
     const redisUrl = configService.get('REDIS_URL');
+    const redisPrivateUrl = configService.get('REDIS_PRIVATE_URL');
     const redisHost = configService.get('REDISHOST') || configService.get('REDIS_HOST');
     const redisPort = configService.get('REDISPORT') || configService.get('REDIS_PORT');
+    const redisPassword = configService.get('REDIS_PASSWORD');
     const useRedis = configService.get('USE_REDIS_CACHE', 'true') === 'true';
     const disableRedis = configService.get('DISABLE_REDIS', 'false') === 'true';
     const isProduction = configService.get('NODE_ENV') === 'production';
+    
+    // 调试Redis配置信息
+    logger.log('🔍 Redis配置调试信息:');
+    logger.log(`- NODE_ENV: ${isProduction ? 'production' : 'development'}`);
+    logger.log(`- REDIS_URL存在: ${!!redisUrl}`);
+    logger.log(`- REDIS_PRIVATE_URL存在: ${!!redisPrivateUrl}`);
+    logger.log(`- REDISHOST: ${redisHost || 'not set'}`);
+    logger.log(`- REDISPORT: ${redisPort || 'not set'}`);
+    logger.log(`- REDIS_PASSWORD存在: ${!!redisPassword}`);
+    logger.log(`- USE_REDIS_CACHE: ${useRedis}`);
+    logger.log(`- DISABLE_REDIS: ${disableRedis}`);
     
     // 基础内存缓存配置 - 安全的类型转换
     const cacheTtl = Math.max(0, parseInt(configService.get('CACHE_TTL', '300')) || 300);
@@ -65,13 +78,24 @@ export const cacheConfig: CacheModuleAsyncOptions = {
     }
     
     // Build Redis URL from available configuration with fail-fast validation
-    let finalRedisUrl = redisUrl;
+    // Priority: REDIS_PRIVATE_URL > REDIS_URL > constructed from REDISHOST/REDISPORT
+    let finalRedisUrl = redisPrivateUrl || redisUrl;
+    
     if (!finalRedisUrl && redisHost) {
       if (!redisPort) {
         throw new Error('Redis configuration incomplete: REDISHOST found but REDISPORT is missing. Please check environment variables.');
       }
-      finalRedisUrl = `redis://${redisHost}:${redisPort}`;
-      logger.log(`🔗 Constructed Redis URL from REDISHOST/REDISPORT: ${finalRedisUrl}`);
+      // 如果有密码，构建带认证的URL
+      if (redisPassword) {
+        finalRedisUrl = `redis://:${redisPassword}@${redisHost}:${redisPort}`;
+      } else {
+        finalRedisUrl = `redis://${redisHost}:${redisPort}`;
+      }
+      logger.log(`🔗 Constructed Redis URL from REDISHOST/REDISPORT`);
+    }
+    
+    if (finalRedisUrl) {
+      logger.log(`🎯 最终使用的Redis URL来源: ${redisPrivateUrl ? 'REDIS_PRIVATE_URL' : redisUrl ? 'REDIS_URL' : 'REDISHOST/REDISPORT'}`);
     }
     
     // 如果没有Redis配置
