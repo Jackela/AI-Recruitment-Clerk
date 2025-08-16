@@ -18,8 +18,10 @@ export class NatsClient implements OnModuleInit, OnModuleDestroy {
   private readonly reconnectTimeWait = 2000;
 
   async onModuleInit() {
+    this.logger.log('🔌 [NatsClient] Initializing...');
     // 检查是否配置了NATS URL
     const natsUrl = process.env.NATS_URL;
+    this.logger.log(`- NATS_URL from env: ${natsUrl ? natsUrl.replace(/\/\/[^:]+:[^@]+@/, '//***:***@') : 'not set'}`);
     const natsOptional = process.env.NATS_OPTIONAL === 'true';
     
     if (!natsUrl && natsOptional) {
@@ -29,9 +31,10 @@ export class NatsClient implements OnModuleInit, OnModuleDestroy {
     
     try {
       await this.connect();
+      this.logger.log('✅ [NatsClient] Initialization complete.');
     } catch (error) {
+      this.logger.error('❌ [NatsClient] Failed to connect during initialization.', error.stack);
       this.logger.warn('NATS JetStream is not available, application will continue without messaging capabilities');
-      this.logger.debug(`NATS connection error: ${error.message}`);
       // Don't throw error, let the application continue
     }
   }

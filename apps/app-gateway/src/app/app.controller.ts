@@ -97,6 +97,8 @@ export class AppController {
           const dbHealth = await this.jobRepository.healthCheck();
           const natsHealth = this.natsClient.isConnected;
           
+          console.log(`[HealthCheck] DB status: ${dbHealth.status}, NATS status: ${natsHealth ? 'connected' : 'disconnected'}`);
+
           return {
             status: (dbHealth.status === 'healthy' && natsHealth) ? 'ok' : 'degraded',
             timestamp: new Date().toISOString(),
