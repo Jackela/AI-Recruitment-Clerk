@@ -25,8 +25,9 @@ import { ProductionSecurityValidator } from '../common/security/production-secur
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: ['.env', '.env.local', '.env.production']
+      isGlobal: true, // Make config accessible to all modules
+      envFilePath: ['.env', '.env.local', '.env.production'],
+      cache: true, // Improve performance by caching variables
     }),
     ThrottlerModule.forRootAsync({
       useFactory: () => ({

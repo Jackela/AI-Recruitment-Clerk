@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
-import { map, catchError, switchMap, withLatestFrom } from 'rxjs/operators';
+import { map, catchError, switchMap, withLatestFrom, filter, delay } from 'rxjs/operators';
 import { GuestApiService } from '../../services/guest/guest-api.service';
 import { GuestState } from './guest.state';
 import * as GuestActions from './guest.actions';
+import { selectGuestState } from './guest.selectors';
 
 @Injectable()
 export class GuestEffects {
@@ -53,9 +54,7 @@ export class GuestEffects {
         this.guestApiService.checkUsage().pipe(
           map(response => {
             if (response.canUse) {
-              // Get updated usage status after successful increment
-              this.store.dispatch(GuestActions.loadUsageStatus());
-              return GuestActions.incrementUsageSuccess({ remainingCount: 4 }); // Placeholder
+              return GuestActions.incrementUsageSuccess();
             } else {
               return GuestActions.setLimited({ 
                 isLimited: true, 
@@ -77,6 +76,14 @@ export class GuestEffects {
           })
         )
       )
+    )
+  );
+
+  // Refresh usage status after successful increment
+  incrementUsageSuccess$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GuestActions.incrementUsageSuccess),
+      map(() => GuestActions.loadUsageStatus())
     )
   );
 
@@ -158,19 +165,23 @@ export class GuestEffects {
       ofType(GuestActions.loadAnalysisResults),
       switchMap(({ analysisId }) =>
         this.guestApiService.getAnalysisResults(analysisId).pipe(
-          map(analysisResults => {
-            // If still processing, schedule another check
-            if (analysisResults.data.status === 'processing') {
-              setTimeout(() => {
-                this.store.dispatch(GuestActions.loadAnalysisResults({ analysisId }));
-              }, 10000); // Check again in 10 seconds
-            }
-            return GuestActions.loadAnalysisResultsSuccess({ analysisResults });
-          }),
+          map(analysisResults => GuestActions.loadAnalysisResultsSuccess({ analysisResults })),
           catchError(error => of(GuestActions.loadAnalysisResultsFailure({ 
             error: error.message || 'Failed to load analysis results' 
           })))
         )
+      )
+    )
+  );
+
+  // Re-poll for analysis results if still processing
+  pollAnalysisResults$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GuestActions.loadAnalysisResultsSuccess),
+      filter(({ analysisResults }) => analysisResults.data.status === 'processing'),
+      delay(10000), // Check again in 10 seconds
+      map(({ analysisResults }) =>
+        GuestActions.loadAnalysisResults({ analysisId: analysisResults.data.analysisId })
       )
     )
   );
@@ -215,7 +226,7 @@ export class GuestEffects {
   handleUsageLimitExceeded$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GuestActions.setLimited),
-      withLatestFrom(this.store.select(state => state.guest)),
+      withLatestFrom(this.store.select(selectGuestState)),
       switchMap(([action, state]) => {
         if (action.isLimited && !state.feedbackCode) {
           // Show limit modal if no feedback code exists

@@ -73,15 +73,19 @@ export const guestReducer = createReducer(
     error: null,
   })),
 
-  on(GuestActions.incrementUsageSuccess, (state, { remainingCount }) => ({
-    ...state,
-    usageCount: state.usageCount + 1,
-    remainingCount,
-    isLimited: remainingCount <= 0,
-    isLoading: false,
-    error: null,
-    lastUpdated: new Date().toISOString(),
-  })),
+  on(GuestActions.incrementUsageSuccess, (state) => {
+    const newUsageCount = state.usageCount + 1;
+    const newRemainingCount = state.maxUsage - newUsageCount;
+    return {
+      ...state,
+      usageCount: newUsageCount,
+      remainingCount: newRemainingCount,
+      isLimited: newRemainingCount <= 0,
+      isLoading: false,
+      error: null,
+      lastUpdated: new Date().toISOString(),
+    };
+  }),
 
   on(GuestActions.incrementUsageFailure, (state, { error }) => ({
     ...state,

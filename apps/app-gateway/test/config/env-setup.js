@@ -1,7 +1,7 @@
 // Environment setup for integration tests
 process.env.NODE_ENV = 'test';
 process.env.LOG_LEVEL = 'error'; // Reduce logging during tests
-process.env.MONGODB_URL = process.env.MONGODB_TEST_URL || 'mongodb://localhost:27017/ai-recruitment-test';
+process.env.MONGO_URL = process.env.MONGODB_TEST_URL || 'mongodb://localhost:27017/ai-recruitment-test';
 
 // Test-specific configuration
 process.env.JWT_SECRET = 'integration-test-jwt-secret-key';
@@ -31,5 +31,5 @@ process.env.PERFORMANCE_TEST_TIMEOUT = '60000';
 process.env.LOAD_TEST_CONCURRENCY = '10';
 
 console.log('🔧 Test environment variables configured');
-console.log(`📊 Test database: ${process.env.MONGODB_URL}`);
+console.log(`📊 Test database: ${process.env.MONGO_URL}`);
 console.log(`🚀 Node environment: ${process.env.NODE_ENV}`);
