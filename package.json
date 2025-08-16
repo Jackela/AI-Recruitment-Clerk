@@ -6,6 +6,9 @@
   "main": "index.js",
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "build": "nx build app-gateway",
     "start": "node dist/apps/app-gateway/main.js",
