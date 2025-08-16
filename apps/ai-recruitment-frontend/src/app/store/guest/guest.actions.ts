@@ -42,8 +42,7 @@ export const loadGuestDetailsFailure = createAction(
 export const incrementUsage = createAction('[Guest] Increment Usage');
 
 export const incrementUsageSuccess = createAction(
-  '[Guest] Increment Usage Success',
-  props<{ remainingCount: number }>()
+  '[Guest] Increment Usage Success'
 );
 
 export const incrementUsageFailure = createAction(

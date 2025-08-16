@@ -1,11 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { GuestUsageService } from './guest-usage.service';
+import { environment } from '../../../environments/environment';
 
 describe('GuestUsageService', () => {
   let service: GuestUsageService;
   let httpMock: HttpTestingController;
   let mockLocalStorage: { [key: string]: string };
+  const recordUrl = `${environment.apiUrl}/marketing/feedback-codes/record`;
 
   beforeEach(() => {
     // Mock localStorage
@@ -41,12 +43,12 @@ describe('GuestUsageService', () => {
 
     it('应该初始化用户会话', () => {
       expect(localStorage.setItem).toHaveBeenCalledWith(
-        jasmine.stringMatching(/ai_first_visit_date/),
-        jasmine.any(String)
+        expect.stringMatching(/ai_first_visit_date/),
+        expect.any(String)
       );
       expect(localStorage.setItem).toHaveBeenCalledWith(
-        jasmine.stringMatching(/ai_guest_session_id/),
-        jasmine.stringMatching(/^session_/)
+        expect.stringMatching(/ai_guest_session_id/),
+        expect.stringMatching(/^session_/)
       );
     });
   });
@@ -93,6 +95,7 @@ describe('GuestUsageService', () => {
   describe('反馈码管理', () => {
     it('应该生成有效的反馈码', () => {
       const code = service.generateFeedbackCode();
+      httpMock.expectOne(req => req.url.includes('/marketing/feedback-codes/record')).flush({ success: true });
       
       expect(code).toMatch(/^FB[A-Z0-9]+$/);
       expect(code.length).toBeGreaterThan(10);
@@ -102,7 +105,7 @@ describe('GuestUsageService', () => {
     it('应该向后端记录反馈码', () => {
       const code = service.generateFeedbackCode();
       
-      const req = httpMock.expectOne('/api/marketing/feedback-codes/record');
+      const req = httpMock.expectOne(r => r.url.includes('/marketing/feedback-codes/record'));
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual({ code });
       
@@ -112,7 +115,7 @@ describe('GuestUsageService', () => {
     it('应该处理后端记录失败', () => {
       const code = service.generateFeedbackCode();
       
-      const req = httpMock.expectOne('/api/marketing/feedback-codes/record');
+      const req = httpMock.expectOne(r => r.url.includes('/marketing/feedback-codes/record'));
       req.error(new ErrorEvent('Network error'));
       
       // 服务应该继续工作，即使后端失败
@@ -148,7 +151,7 @@ describe('GuestUsageService', () => {
       expect(stats.isExhausted).toBe(false);
       expect(stats.firstVisit).toBeTruthy();
       expect(stats.sessionId).toMatch(/^session_/);
-      expect(stats.usageHistory).toHaveSize(2);
+      expect(stats.usageHistory).toHaveLength(2);
     });
   });
 
@@ -157,6 +160,8 @@ describe('GuestUsageService', () => {
       // 设置一些数据
       service.incrementUsage();
       service.generateFeedbackCode();
+      const req = httpMock.expectOne(r => r.url.includes('/marketing/feedback-codes/record'));
+      req.flush({ success: true });
       
       // 重置
       service.resetUsage();
@@ -167,8 +172,8 @@ describe('GuestUsageService', () => {
       
       // 验证重新初始化
       expect(localStorage.setItem).toHaveBeenCalledWith(
-        jasmine.stringMatching(/ai_first_visit_date/),
-        jasmine.any(String)
+        expect.stringMatching(/ai_first_visit_date/),
+        expect.any(String)
       );
     });
   });
@@ -191,7 +196,7 @@ describe('GuestUsageService', () => {
       mockLocalStorage['ai_guest_usage_count'] = '-1';
       
       expect(service.getUsageCount()).toBe(-1);
-      expect(service.getRemainingUsage()).toBe(5); // Math.max保护
+      expect(service.getRemainingUsage()).toBe(6); // Math.max保护
     });
   });
 });

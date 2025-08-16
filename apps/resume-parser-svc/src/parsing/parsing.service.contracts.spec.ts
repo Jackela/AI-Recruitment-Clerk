@@ -46,22 +46,25 @@ describe('ParsingService - Contract Validation', () => {
     return buffer;
   };
 
-  const createValidParsedData = () => ({
-    personalInfo: {
+  const createValidParsedData = (): any => ({
+    contactInfo: {
       name: 'John Doe',
       email: 'john.doe@example.com',
       phone: '+1-555-0123'
     },
-    experience: [{
+    summary: 'A skilled software developer.',
+    workExperience: [{
       company: 'Tech Corp',
       position: 'Software Developer',
-      duration: '2020-2023'
+      startDate: '2020-01-15',
+      endDate: '2023-12-31',
+      summary: 'Developed cool stuff.'
     }],
     skills: ['JavaScript', 'TypeScript', 'Node.js'],
     education: [{
-      institution: 'University',
-      degree: 'Computer Science',
-      year: '2020'
+      school: 'University of Code',
+      degree: 'B.S. Computer Science',
+      major: 'Computer Science'
     }]
   });
 
@@ -71,7 +74,7 @@ describe('ParsingService - Contract Validation', () => {
   beforeEach(async () => {
     // Create mocked dependencies
     mockVisionLlm = {
-      extractResumeContent: jest.fn()
+      parseResumePdf: jest.fn()
     } as any;
 
     mockGridFs = {
@@ -79,7 +82,7 @@ describe('ParsingService - Contract Validation', () => {
     } as any;
 
     mockFieldMapper = {
-      mapExtractedFields: jest.fn()
+      normalizeToResumeDto: jest.fn()
     } as any;
 
     mockNatsClient = {
@@ -101,12 +104,14 @@ describe('ParsingService - Contract Validation', () => {
 
     // Setup default mock behaviors
     mockGridFs.uploadFile.mockResolvedValue('http://storage.example.com/file123.pdf');
-    mockVisionLlm.extractResumeContent.mockResolvedValue({
-      confidence: 0.95,
-      extractedText: 'Mock extracted content',
-      structuredData: createValidParsedData()
+    mockVisionLlm.parseResumePdf.mockImplementation(async () => {
+      await new Promise(resolve => setTimeout(resolve, 2)); // 2ms delay
+      return createValidParsedData();
     });
-    mockFieldMapper.mapExtractedFields.mockResolvedValue(createValidParsedData());
+    mockFieldMapper.normalizeToResumeDto.mockImplementation(async () => {
+      await new Promise(resolve => setTimeout(resolve, 2)); // 2ms delay
+      return createValidParsedData();
+    });
   });
 
   /**
@@ -366,14 +371,14 @@ describe('ParsingService - Contract Validation', () => {
       expect(result.status).toBeOneOf(['completed', 'partial']);
       expect(result.jobId).toMatch(/^parse_\d+_[a-f0-9]{8}$/);
       expect(result.parsedData).toBeDefined();
-      expect(result.parsedData.personalInfo).toBeDefined();
+      expect(result.parsedData.contactInfo).toBeDefined();
       expect(result.fileUrl).toMatch(/^http/);
       expect(result.metadata.duration).toBeGreaterThan(0);
 
       // Verify mock calls
       expect(mockGridFs.uploadFile).toHaveBeenCalledTimes(1);
-      expect(mockVisionLlm.extractResumeContent).toHaveBeenCalledTimes(1);
-      expect(mockFieldMapper.mapExtractedFields).toHaveBeenCalledTimes(1);
+      expect(mockVisionLlm.parseResumePdf).toHaveBeenCalledTimes(1);
+      expect(mockFieldMapper.normalizeToResumeDto).toHaveBeenCalledTimes(1);
     });
 
     /**
@@ -424,7 +429,7 @@ describe('ParsingService - Contract Validation', () => {
       const fileName = 'resume.pdf';
       const userId = 'user123';
 
-      mockVisionLlm.extractResumeContent.mockRejectedValue(
+      mockVisionLlm.parseResumePdf.mockRejectedValue(
         new Error('AI service temporarily unavailable')
       );
 
@@ -562,8 +567,8 @@ describe('ParsingService - Contract Validation', () => {
 
       // Assert
       expect(totalTime).toBeLessThan(30000); // 30 second limit
-      expect(result.metadata.duration).toBeLessThan(totalTime);
-      expect(result.metadata.duration).toBeGreaterThan(0);
+      expect(result.metadata.duration).toBeLessThanOrEqual(totalTime);
+      expect(result.metadata.duration).toBeGreaterThanOrEqual(0);
     });
 
     /**

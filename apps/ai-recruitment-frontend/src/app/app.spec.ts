@@ -49,8 +49,8 @@ describe('App', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     const navLinks = compiled.querySelectorAll('.nav-link');
     expect(navLinks.length).toBeGreaterThanOrEqual(2);
-    expect(navLinks[0].textContent).toContain('岗位管理');
-    expect(navLinks[1].textContent).toContain('分析报告');
+    expect(navLinks[0].textContent).toContain('仪表板');
+    expect(navLinks[1].textContent).toContain('岗位管理');
   });
 
   it('should have router outlet', () => {
