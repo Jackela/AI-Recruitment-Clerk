@@ -9,7 +9,7 @@ describe('JobRepository Integration', () => {
   let repository: JobRepository;
   let module: TestingModule;
 
-  const testMongoUri = process.env.MONGODB_TEST_URL || process.env.MONGODB_URL || 'mongodb://admin:password123@localhost:27017/ai-recruitment-test?authSource=admin';
+  const testMongoUri = process.env.MONGODB_TEST_URL || process.env.MONGO_URL || 'mongodb://admin:password123@localhost:27017/ai-recruitment-test?authSource=admin';
 
   beforeAll(async () => {
     module = await Test.createTestingModule({

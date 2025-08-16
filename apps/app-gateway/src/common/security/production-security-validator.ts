@@ -145,8 +145,7 @@ export class ProductionSecurityValidator {
     const issues: string[] = [];
     let penalty = 0;
 
-    const mongoUrl = this.configService.get<string>('MONGODB_URL') || 
-                     this.configService.get<string>('MONGO_URL');
+    const mongoUrl = this.configService.get<string>('MONGO_URL');
 
     if (!mongoUrl) {
       issues.push('Database connection URL is not configured');

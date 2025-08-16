@@ -100,7 +100,7 @@ describe('🚀 Production Readiness Validation Tests', () => {
       const requiredEnvVars = [
         'NODE_ENV',
         'PORT',
-        'MONGODB_URL',
+        'MONGO_URL',
         'JWT_SECRET',
         'RESUME_PARSER_URL',
         'JD_EXTRACTOR_URL',

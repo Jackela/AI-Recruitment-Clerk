@@ -10,6 +10,12 @@ import { AppModule } from './app/app.module';
 import { ProductionSecurityValidator } from './common/security/production-security-validator';
 
 async function bootstrap() {
+  // Enhanced startup logging
+  Logger.log('🚀 [bootstrap] Starting AI Recruitment Clerk Gateway...');
+  Logger.log(`- Node environment: ${process.env.NODE_ENV || 'not set'}`);
+  Logger.log(`- Port: ${process.env.PORT || 3000}`);
+  Logger.log(`- API Prefix: ${process.env.API_PREFIX || 'api'}`);
+
   const app = await NestFactory.create(AppModule, {
     // 应用级性能优化配置
     logger: process.env.NODE_ENV === 'production' 
