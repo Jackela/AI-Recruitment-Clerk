@@ -24,7 +24,7 @@ describe('Security Integration Tests', () => {
           isGlobal: true,
           load: [
             () => ({
-              MONGODB_URL: uri,
+              MONGO_URL: uri,
               JWT_SECRET: 'test-jwt-secret-with-sufficient-length-for-security-testing',
               CSRF_SECRET: 'test-csrf-secret-for-security-testing',
               NODE_ENV: 'test',
