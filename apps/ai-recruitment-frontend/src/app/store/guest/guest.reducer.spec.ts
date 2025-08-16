@@ -100,12 +100,13 @@ describe('Guest Reducer', () => {
       state = {
         ...initialGuestState,
         usageCount: 2,
+        maxUsage: 5,
         remainingCount: 3,
       };
     });
 
     it('should increment usage count on success', () => {
-      const action = GuestActions.incrementUsageSuccess({ remainingCount: 2 });
+      const action = GuestActions.incrementUsageSuccess();
       const result = guestReducer(state, action);
 
       expect(result.usageCount).toBe(3);
@@ -115,12 +116,14 @@ describe('Guest Reducer', () => {
       expect(result.lastUpdated).toBeTruthy();
     });
 
-    it('should set limited when remaining count is zero', () => {
-      const action = GuestActions.incrementUsageSuccess({ remainingCount: 0 });
+    it('should set limited when usage count reaches max', () => {
+      state.usageCount = 4;
+      const action = GuestActions.incrementUsageSuccess();
       const result = guestReducer(state, action);
 
       expect(result.isLimited).toBe(true);
       expect(result.remainingCount).toBe(0);
+      expect(result.usageCount).toBe(5);
     });
   });
 

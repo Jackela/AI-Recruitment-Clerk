@@ -252,7 +252,7 @@ export class ProductionSecurityValidator {
     // For hex strings (encryption keys), use different entropy logic
     if (/^[a-f0-9]+$/i.test(value)) {
       // Hex strings should have good distribution of hex characters
-      const charCounts = {};
+      const charCounts: { [key: string]: number } = {};
       
       for (const char of lowerValue) {
         charCounts[char] = (charCounts[char] || 0) + 1;

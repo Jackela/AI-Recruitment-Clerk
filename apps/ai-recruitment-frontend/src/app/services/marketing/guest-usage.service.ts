@@ -16,7 +16,7 @@ export class GuestUsageService {
   };
   
   private readonly MAX_GUEST_USAGE = 5;
-  private readonly API_BASE_URL = `${environment.apiUrl}/api/marketing/feedback-codes`;
+  private readonly API_BASE_URL = `${environment.apiUrl}/marketing/feedback-codes`;
 
   constructor(private http: HttpClient) {
     this.initializeSession();
@@ -38,7 +38,7 @@ export class GuestUsageService {
   }
 
   getUsageCount(): number {
-    return parseInt(localStorage.getItem(this.STORAGE_KEYS.USAGE_COUNT) || '0');
+    return parseInt(localStorage.getItem(this.STORAGE_KEYS.USAGE_COUNT) || '0') || 0;
   }
 
   incrementUsage(): void {

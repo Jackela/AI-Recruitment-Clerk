@@ -8,7 +8,7 @@ import { AnalysisReport, ReportsList } from '../store/reports/report.model';
 describe('ApiService Integration Tests', () => {
   let service: ApiService;
   let httpMock: HttpTestingController;
-  const baseUrl = 'http://localhost:3000';
+  const baseUrl = '/api';
 
   beforeEach(() => {
     TestBed.configureTestingModule({
