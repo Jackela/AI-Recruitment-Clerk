@@ -44,7 +44,8 @@ export * from './contracts/dbc.decorators';
 // Domain Models - User Management & Questionnaire
 export * from './domains/user-management.dto';
 export * from './domains/questionnaire.dto';
-export { QuestionnaireDomainService, QuestionnaireSubmissionResult, IPSubmissionCheckResult, IQuestionnaireRepository, IQuestionnaireTemplateService } from './domains/questionnaire.service';
+export { QuestionnaireDomainService, QuestionnaireSubmissionResult, IPSubmissionCheckResult } from './domains/questionnaire.service';
+export type { IQuestionnaireRepository, IQuestionnaireTemplateService } from './domains/questionnaire.service';
 export * from './domains/questionnaire.rules';
 export * from './contracts/questionnaire.contracts';
 
@@ -61,26 +62,29 @@ export {
   UsageRecordResult,
   UsageStatistics,
   BonusType,
-  UsageLimitData,
   UsageLimitCreatedEvent,
   UsageLimitExceededEvent,
   BonusQuotaAddedEvent,
   DailyUsageResetEvent,
   UsageRecordedEvent as UsageLimitUsageRecordedEvent
 } from './domains/usage-limit.dto';
-export { UsageLimitDomainService, UsageLimitResult, UsageTrackingResult, UsageStatsResult, IUsageLimitRepository } from './domains/usage-limit.service';
+export { UsageLimitDomainService, UsageLimitResult, UsageTrackingResult, UsageStatsResult } from './domains/usage-limit.service';
+export type { IUsageLimitRepository } from './domains/usage-limit.service';
 export * from './domains/usage-limit.rules';
 export * from './contracts/usage-limit.contracts';
 
 // Domain Models - Incentives
 export * from './domains/incentive.dto';
-export { IncentiveDomainService, IncentiveCreationResult, IncentiveValidationResult, IncentiveApprovalResult, PaymentProcessingResult, IIncentiveRepository, IPaymentGateway } from './domains/incentive.service';
+export { IncentiveDomainService, IncentiveCreationResult, IncentiveValidationResult, IncentiveApprovalResult, PaymentProcessingResult } from './domains/incentive.service';
+export type { IIncentiveRepository, IPaymentGateway } from './domains/incentive.service';
 export * from './domains/incentive.rules';
 export * from './contracts/incentive.contracts';
 
 // Domain Models - Analytics  
-export { AnalyticsEvent, AnalyticsEventId, UserSession as AnalyticsUserSession, EventStatus, EventType, EventCategory, ConsentStatus, MetricUnit, AnalyticsEventSummary, AnalyticsEventData, DeviceInfo, GeoLocation } from './domains/analytics.dto';
-export { AnalyticsDomainService, EventCreationResult, BatchProcessingResult, PrivacyComplianceResult, DataRetentionReportResult, SessionAnalyticsResult, EventProcessingMetricsResult, DataPrivacyMetricsResult, ReportingAccessResult, IAnalyticsRepository, IDomainEventBus, IAuditLogger, IPrivacyService, ISessionTracker } from './domains/analytics.service';
+export { AnalyticsEvent, AnalyticsEventId, UserSession as AnalyticsUserSession, EventStatus, EventType, EventCategory, ConsentStatus, MetricUnit, AnalyticsEventSummary, DeviceInfo, GeoLocation } from './domains/analytics.dto';
+export type { AnalyticsEventData } from './domains/analytics.dto';
+export { AnalyticsDomainService, EventCreationResult, BatchProcessingResult, PrivacyComplianceResult, DataRetentionReportResult, SessionAnalyticsResult, EventProcessingMetricsResult, DataPrivacyMetricsResult, ReportingAccessResult } from './domains/analytics.service';
+export type { IAnalyticsRepository, IDomainEventBus, IAuditLogger, IPrivacyService, ISessionTracker } from './domains/analytics.service';
 export * from './domains/analytics.rules';
 export * from './contracts/analytics.contracts';
 

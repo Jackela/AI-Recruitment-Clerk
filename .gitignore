@@ -274,6 +274,9 @@ api_docs_cache/
 # Gemini AI API responses cache (development)
 ai_responses_cache/
 
+
+
+
 # Claude Flow generated files
 .claude/settings.local.json
 .mcp.json

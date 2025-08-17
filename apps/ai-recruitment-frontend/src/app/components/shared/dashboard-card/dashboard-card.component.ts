@@ -1,7 +1,10 @@
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-dashboard-card',
+  standalone: true,
+  imports: [CommonModule],
   template: `
     <div class="dashboard-card" [class]="variant">
       <div class="card-icon" *ngIf="icon">

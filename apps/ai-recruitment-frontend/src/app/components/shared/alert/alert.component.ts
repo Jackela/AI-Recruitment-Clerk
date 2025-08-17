@@ -1,9 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 export type AlertType = 'success' | 'info' | 'warning' | 'danger';
 
 @Component({
   selector: 'app-alert',
+  standalone: true,
+  imports: [CommonModule],
   template: `
     <div 
       class="alert" 

@@ -88,6 +88,11 @@ async function bootstrap() {
   <script>
     function uuid(){return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16))}
     const deviceId = localStorage.getItem('device_id') || (localStorage.setItem('device_id', uuid()), localStorage.getItem('device_id'))
+    
+    // 页面加载后显示设备ID
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('dev').textContent = deviceId;
+    });
     async function uploadResume(ev){
       ev.preventDefault();
       const form = ev.target.closest('form');
@@ -127,7 +132,7 @@ async function bootstrap() {
 <body>
   <header>
     <h2>AI Recruitment Clerk</h2>
-    <small class="muted">设备ID: <code id="dev">${'${deviceId}'}</code></small>
+    <small class="muted">设备ID: <code id="dev"></code></small>
   </header>
   <section class="card">
     <h3>上传简历（游客可用）</h3>

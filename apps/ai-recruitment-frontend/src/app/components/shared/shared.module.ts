@@ -6,23 +6,32 @@ import { RouterModule } from '@angular/router';
 import { LoadingComponent } from './loading/loading.component';
 import { AlertComponent } from './alert/alert.component';
 import { DashboardCardComponent } from './dashboard-card/dashboard-card.component';
+import { BentoGridComponent } from './bento-grid/bento-grid.component';
+import { BentoCardComponent } from './bento-grid/bento-card.component';
 
-const COMPONENTS = [
+const MODULE_COMPONENTS: any[] = [
+];
+
+const STANDALONE_COMPONENTS = [
   LoadingComponent,
   AlertComponent,
   DashboardCardComponent,
+  BentoGridComponent,
+  BentoCardComponent,
 ];
 
 @NgModule({
   declarations: [
-    ...COMPONENTS
+    ...MODULE_COMPONENTS
   ],
   imports: [
     CommonModule,
     RouterModule,
+    ...STANDALONE_COMPONENTS,
   ],
   exports: [
-    ...COMPONENTS,
+    ...MODULE_COMPONENTS,
+    ...STANDALONE_COMPONENTS,
     CommonModule,
     RouterModule,
   ]

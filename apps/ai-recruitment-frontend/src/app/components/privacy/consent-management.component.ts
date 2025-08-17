@@ -1,9 +1,10 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { 
   ConsentPurpose, 
-  ConsentStatus, 
+  ConsentStatus as PrivacyConsentStatus, 
   ConsentMethod,
   DataCategory,
   CaptureConsentDto,
@@ -20,6 +21,8 @@ import { ToastService } from '../../services/toast.service';
  */
 @Component({
   selector: 'app-consent-management',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './consent-management.component.html',
   styleUrls: ['./consent-management.component.scss']
 })
@@ -54,7 +57,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
       displayName: 'Functional Analytics',
       description: 'Basic usage statistics to improve platform performance and user experience. No personal identification.',
       legalBasis: 'Legitimate interests (GDPR Article 6(1)(f))',
-      dataCategories: ['behavioral_data', 'system_logs'],
+      dataCategories: [DataCategory.BEHAVIORAL_DATA, DataCategory.SYSTEM_LOGS],
       isRequired: false,
       isOptOut: true,
       retentionPeriod: '2 years from collection',
@@ -65,7 +68,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
       displayName: 'Enhanced Analytics',
       description: 'Detailed behavioral analysis to personalize your experience and provide better job recommendations.',
       legalBasis: 'Consent (GDPR Article 6(1)(a))',
-      dataCategories: ['behavioral_data', 'job_preferences', 'device_information'],
+      dataCategories: [DataCategory.BEHAVIORAL_DATA, DataCategory.JOB_PREFERENCES, DataCategory.DEVICE_INFORMATION],
       isRequired: false,
       isOptOut: true,
       retentionPeriod: '2 years from collection',
@@ -76,7 +79,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
       displayName: 'Marketing Communications',
       description: 'Email newsletters, job alerts, and promotional communications about new features.',
       legalBasis: 'Consent (GDPR Article 6(1)(a))',
-      dataCategories: ['communication_preferences', 'profile_information'],
+      dataCategories: [DataCategory.COMMUNICATION_PREFERENCES, DataCategory.PROFILE_INFORMATION],
       isRequired: false,
       isOptOut: true,
       retentionPeriod: 'Until consent withdrawn or 3 years of inactivity',
@@ -87,7 +90,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
       displayName: 'Third-Party Integrations',
       description: 'Sharing resume data with external AI services for enhanced analysis and job matching.',
       legalBasis: 'Consent (GDPR Article 6(1)(a))',
-      dataCategories: ['resume_content', 'job_preferences'],
+      dataCategories: [DataCategory.RESUME_CONTENT, DataCategory.JOB_PREFERENCES],
       isRequired: false,
       isOptOut: true,
       retentionPeriod: 'As long as third-party processing continues',
@@ -172,7 +175,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
       const consentGroup = this.consentsArray.at(index) as FormGroup;
       if (consentGroup) {
         consentGroup.patchValue({
-          granted: purposeStatus.status === ConsentStatus.GRANTED
+          granted: purposeStatus.status === PrivacyConsentStatus.GRANTED
         });
       }
     });
@@ -301,10 +304,10 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
     return '';
   }
 
-  getCurrentConsentStatus(purpose: ConsentPurpose): ConsentStatus | undefined {
+  getCurrentConsentStatus(purpose: ConsentPurpose): PrivacyConsentStatus | undefined {
     if (!this.currentConsentStatus) return undefined;
     const purposeStatus = this.currentConsentStatus.purposes.find(p => p.purpose === purpose);
-    return purposeStatus?.status;
+    return purposeStatus?.status as PrivacyConsentStatus;
   }
 
   getConsentDate(purpose: ConsentPurpose): Date | undefined {

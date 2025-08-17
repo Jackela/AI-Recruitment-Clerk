@@ -317,8 +317,9 @@ export class GuestResumeController {
         throw new HttpException('Invalid analysis ID', HttpStatus.BAD_REQUEST);
       }
 
-      // For demo purposes, we'll return mock data
-      // In production, this would fetch from your analysis service
+      // 🚧 演示版本 - 返回模拟数据
+      // 生产版本将集成真实的AI简历解析服务
+      // TODO: 集成 ResumeParserService 进行真实文件解析
       const mockResults = {
         analysisId,
         status: 'completed',

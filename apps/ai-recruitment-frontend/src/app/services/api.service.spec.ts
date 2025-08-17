@@ -26,10 +26,10 @@ describe('ApiService', () => {
   });
 });
 
-describe.skip('ApiService (original tests', () => {
+describe('ApiService (HTTP Integration Tests)', () => {
   let service: ApiService;
   let httpMock: HttpTestingController;
-  const baseUrl = 'http://localhost:3000';
+  const baseUrl = '/api';
 
   beforeEach(() => {
     TestBed.configureTestingModule({
