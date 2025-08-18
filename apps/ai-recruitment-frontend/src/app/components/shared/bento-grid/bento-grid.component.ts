@@ -1,5 +1,7 @@
-import { Component, Input, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AccessibleCardDirective } from '../../../directives/accessibility/accessible-card.directive';
+import { AccessibilityService } from '../../../services/accessibility/accessibility.service';
 
 export interface BentoGridItem {
   id: string;
@@ -27,7 +29,7 @@ export interface BentoGridItem {
 @Component({
   selector: 'app-bento-grid',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AccessibleCardDirective],
   template: `
     <div 
       class="bento-grid" 
@@ -38,13 +40,25 @@ export interface BentoGridItem {
         *ngFor="let item of items; trackBy: trackByItemId"
         class="bento-item"
         [class]="getItemClasses(item)"
+        arcAccessibleCard
+        [cardTitle]="item.title"
+        [cardDescription]="item.subtitle"
+        [cardValue]="item.value"
+        [cardType]="'dashboard-card'"
+        [cardState]="getCardState(item)"
+        [cardClickable]="item.clickable || false"
+        [cardShortcuts]="getCardShortcuts(item)"
+        [cardInstructions]="getCardInstructions(item)"
         [attr.role]="'gridcell'"
         [attr.aria-label]="getItemAriaLabel(item)"
         [attr.tabindex]="item.clickable ? '0' : null"
         [attr.aria-describedby]="item.subtitle ? 'desc-' + item.id : null"
+        [attr.aria-live]="item.value !== undefined ? 'polite' : null"
         (click)="onItemClick(item)"
         (keydown.enter)="onItemClick(item)"
-        (keydown.space)="onItemClick(item)">
+        (keydown.space)="onItemClick(item)"
+        (focus)="onItemFocus(item)"
+        (blur)="onItemBlur(item)">
         
         <!-- Default Card Layout -->
         <ng-container *ngIf="!item.customTemplate">
@@ -568,6 +582,8 @@ export interface BentoGridItem {
 export class BentoGridComponent implements OnInit, AfterViewInit {
   @ViewChild('gridElement', { static: false }) gridElement!: ElementRef;
   
+  private accessibilityService = inject(AccessibilityService);
+  
   @Input() items: BentoGridItem[] = [];
   @Input() gridSize: 'compact' | 'default' | 'wide' = 'default';
   @Input() ariaLabel: string = 'Dashboard grid';
@@ -633,6 +649,12 @@ export class BentoGridComponent implements OnInit, AfterViewInit {
   onItemClick(item: BentoGridItem): void {
     if (item.clickable && this.onItemClickHandler) {
       this.onItemClickHandler(item);
+      
+      // Announce click action
+      this.accessibilityService.announce(
+        `Activated ${item.title}${item.subtitle ? ': ' + item.subtitle : ''}`,
+        'polite'
+      );
     }
   }
 
@@ -640,7 +662,70 @@ export class BentoGridComponent implements OnInit, AfterViewInit {
     event.stopPropagation();
     if (item.action?.onClick) {
       item.action.onClick();
+      
+      // Announce action
+      this.accessibilityService.announce(
+        `${item.action.text} action completed`,
+        'polite'
+      );
     }
+  }
+
+  onItemFocus(item: BentoGridItem): void {
+    // Announce focus for complex items
+    if (item.trend || item.badge) {
+      let announcement = `Focused on ${item.title}`;
+      
+      if (item.value) {
+        announcement += `, current value ${item.value}`;
+      }
+      
+      if (item.trend) {
+        announcement += `, trend ${item.trend.type} ${item.trend.value}`;
+      }
+      
+      if (item.badge) {
+        announcement += `, status ${item.badge}`;
+      }
+      
+      this.accessibilityService.announce(announcement, 'polite');
+    }
+  }
+
+  onItemBlur(item: BentoGridItem): void {
+    // Optional: Handle blur events if needed
+  }
+
+  getCardState(item: BentoGridItem): string {
+    if (item.badge) return item.badge;
+    if (item.trend?.type) return item.trend.type;
+    return 'normal';
+  }
+
+  getCardShortcuts(item: BentoGridItem): string[] {
+    const shortcuts: string[] = [];
+    
+    if (item.clickable) {
+      shortcuts.push('Enter or Space to activate');
+    }
+    
+    if (item.action) {
+      shortcuts.push(`${item.action.text} available`);
+    }
+    
+    return shortcuts;
+  }
+
+  getCardInstructions(item: BentoGridItem): string {
+    if (item.clickable && item.action) {
+      return `Card is clickable. Press Enter or Space to activate. ${item.action.text} action is available.`;
+    } else if (item.clickable) {
+      return 'Card is clickable. Press Enter or Space to activate.';
+    } else if (item.action) {
+      return `${item.action.text} action is available.`;
+    }
+    
+    return '';
   }
 
   private setupIntersectionObserver(): void {

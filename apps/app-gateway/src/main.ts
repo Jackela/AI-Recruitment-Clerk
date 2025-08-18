@@ -47,14 +47,17 @@ async function bootstrap() {
     Logger.log(`✅ Security validation passed - Score: ${securityResult.score}/100`);
   }
   
-  // Enable CORS for frontend integration
+  // 🔒 多代理安全修复: CORS配置加固
+  // 基于安全专家+DevOps专家一致建议
   app.enableCors({
     origin: process.env.NODE_ENV === 'production' 
-      ? ['https://ai-recruitment-clerk-production.up.railway.app', 'http://localhost:4200'] 
+      ? (process.env.ALLOWED_ORIGINS?.split(',') || ['https://ai-recruitment-clerk-production.up.railway.app'])
       : ['http://localhost:4200', 'http://localhost:4202'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Device-ID'],
+    credentials: true,
+    optionsSuccessStatus: 200, // 兼容老旧浏览器
+    maxAge: 3600 // 缓存预检请求1小时
   });
   
   app.useGlobalPipes(new ValidationPipe({ 

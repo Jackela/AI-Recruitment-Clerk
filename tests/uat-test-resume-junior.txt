@@ -1,0 +1,72 @@
+ALEX CHEN
+Junior Frontend Developer
+alex.chen@email.com | (555) 456-7890 | GitHub: github.com/alexchen
+
+OBJECTIVE
+Recent Computer Science graduate seeking an entry-level Frontend Developer position to apply academic knowledge and internship experience in building modern web applications. Eager to contribute to a dynamic team while continuing to learn and grow professionally.
+
+EDUCATION
+Bachelor of Science in Computer Science
+Tech University | May 2023
+GPA: 3.6/4.0
+Relevant Coursework: Web Development, Data Structures, Software Engineering, User Interface Design
+
+TECHNICAL SKILLS
+• Programming Languages: JavaScript, HTML5, CSS3, Python, Java
+• Frontend Technologies: React, Bootstrap, jQuery
+• Development Tools: Git, GitHub, VS Code, Chrome DevTools
+• Design Tools: Figma, Adobe Photoshop
+• Databases: MySQL, MongoDB (basic)
+• Operating Systems: Windows, macOS, Linux
+
+EXPERIENCE
+
+Frontend Development Intern | StartupTech | Summer 2022
+• Assisted in developing responsive web components using React and CSS
+• Fixed bugs and improved user interface based on user feedback
+• Participated in daily standups and agile development process
+• Learned about version control and collaborative development practices
+• Contributed to documentation and testing procedures
+
+Web Development Teaching Assistant | Tech University | 2022-2023
+• Helped students with HTML, CSS, and JavaScript assignments
+• Conducted weekly lab sessions for Introduction to Web Development course
+• Graded assignments and provided constructive feedback
+• Assisted professor with course materials and demonstration setups
+
+PROJECTS
+
+Personal Portfolio Website | React, CSS Grid, Netlify
+• Designed and developed responsive portfolio showcasing academic and personal projects
+• Implemented smooth animations and modern UI design principles
+• Integrated contact form with email functionality
+• Deployed using Netlify with continuous deployment from GitHub
+
+Student Grade Tracker | React, Local Storage
+• Built web application for students to track grades and calculate GPA
+• Implemented data persistence using browser local storage
+• Created responsive design that works on mobile and desktop
+• Added data export functionality to CSV format
+
+Restaurant Website | HTML, CSS, JavaScript
+• Developed mock restaurant website with menu display and reservation form
+• Implemented image gallery with lightbox functionality
+• Created responsive design following mobile-first approach
+• Added form validation and interactive menu filtering
+
+CERTIFICATIONS & COURSES
+• FreeCodeCamp Responsive Web Design Certification (2022)
+• JavaScript Algorithms and Data Structures Certification (2023)
+• Coursera: React Fundamentals Course (2023)
+
+ACTIVITIES
+• Member of University Web Development Club
+• Volunteer web developer for campus organizations
+• Participated in 2023 Campus Hackathon (3rd place)
+• Regular attendee of local JavaScript meetups
+
+ADDITIONAL INFORMATION
+• Fluent in English and Mandarin Chinese
+• Strong problem-solving and analytical thinking skills
+• Quick learner with ability to adapt to new technologies
+• Team player with excellent communication skills

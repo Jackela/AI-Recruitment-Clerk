@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { DeviceIdService } from './device-id.service';
+import { DetailedAnalysisResult } from '../../interfaces/detailed-analysis.interface';
 
 export interface GuestUsageResponse {
   canUse: boolean;
@@ -165,6 +166,16 @@ export class GuestApiService {
   getDemoAnalysis(): Observable<AnalysisResultsResponse> {
     return this.http.get<AnalysisResultsResponse>(
       `${this.baseUrl}/resume/demo-analysis`,
+      { headers: this.getGuestHeaders() }
+    );
+  }
+
+  /**
+   * Get detailed analysis results for the results page
+   */
+  getDetailedResults(sessionId: string): Observable<DetailedAnalysisResult> {
+    return this.http.get<DetailedAnalysisResult>(
+      `${this.baseUrl}/resume/detailed-results/${sessionId}`,
       { headers: this.getGuestHeaders() }
     );
   }

@@ -24,7 +24,7 @@ export class EncryptionService {
     saltLength: 32 // 256 bits
   };
 
-  private static readonly masterKey = process.env.ENCRYPTION_MASTER_KEY || 'default-key-change-in-production-please-use-32-bytes-key';
+  private static readonly masterKey = process.env['ENCRYPTION_MASTER_KEY'] || 'default-key-change-in-production-please-use-32-bytes-key';
 
   /**
    * Derives an encryption key from the master key and salt using PBKDF2
@@ -105,7 +105,7 @@ export class EncryptionService {
       
       return decrypted;
     } catch (error) {
-      throw new Error(`Decryption failed: ${error.message}`);
+      throw new Error(`Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -162,7 +162,7 @@ export class EncryptionService {
               (result as any)[field] = decryptedValue;
             }
           } catch (error) {
-            console.error(`Failed to decrypt field ${String(field)}:`, error.message);
+            console.error(`Failed to decrypt field ${String(field)}:`, error instanceof Error ? error.message : 'Unknown error');
             (result as any)[field] = '[DECRYPTION_FAILED]';
           }
         }

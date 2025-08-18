@@ -26,54 +26,77 @@ interface ActivityItem {
   standalone: true,
   imports: [CommonModule, RouterModule, SharedModule],
   template: `
-    <div class="dashboard-container">
+    <div class="dashboard-container" role="main" aria-labelledby="dashboard-title">
       <!-- Welcome Header -->
-      <div class="welcome-section">
-        <h1 class="welcome-title">欢迎使用 AI 招聘助理</h1>
-        <p class="welcome-subtitle">智能简历筛选，提升招聘效率</p>
-      </div>
+      <header class="welcome-section" role="banner">
+        <h1 id="dashboard-title" class="welcome-title">
+          <span class="sr-only">Dashboard - </span>
+          欢迎使用 AI 招聘助理
+        </h1>
+        <p class="welcome-subtitle" role="doc-subtitle">智能简历筛选，提升招聘效率</p>
+      </header>
 
       <!-- Stats Cards -->
-      <div class="stats-grid" *ngIf="stats$ | async as stats">
-        <app-dashboard-card
-          title="职位数量"
-          [value]="stats.totalJobs.toString()"
-          subtitle="当前活跃职位"
-          icon="jobs"
-          variant="primary">
-        </app-dashboard-card>
+      <section class="stats-section" aria-labelledby="stats-heading">
+        <h2 id="stats-heading" class="sr-only">System Statistics</h2>
+        <div class="stats-grid" 
+             role="group" 
+             aria-label="Dashboard statistics cards"
+             *ngIf="stats$ | async as stats">
+          <app-dashboard-card
+            title="职位数量"
+            [value]="stats.totalJobs.toString()"
+            subtitle="当前活跃职位"
+            icon="jobs"
+            variant="primary"
+            role="article"
+            [attr.aria-label]="'Jobs statistics: ' + stats.totalJobs + ' active positions'">
+          </app-dashboard-card>
 
-        <app-dashboard-card
-          title="简历总数"
-          [value]="stats.totalResumes.toString()"
-          subtitle="已上传简历"
-          icon="resumes"
-          variant="success">
-        </app-dashboard-card>
+          <app-dashboard-card
+            title="简历总数"
+            [value]="stats.totalResumes.toString()"
+            subtitle="已上传简历"
+            icon="resumes"
+            variant="success"
+            role="article"
+            [attr.aria-label]="'Resume statistics: ' + stats.totalResumes + ' uploaded resumes'">
+          </app-dashboard-card>
 
-        <app-dashboard-card
-          title="分析报告"
-          [value]="stats.totalReports.toString()"
-          subtitle="已生成报告"
-          icon="reports"
-          variant="info">
-        </app-dashboard-card>
+          <app-dashboard-card
+            title="分析报告"
+            [value]="stats.totalReports.toString()"
+            subtitle="已生成报告"
+            icon="reports"
+            variant="info"
+            role="article"
+            [attr.aria-label]="'Reports statistics: ' + stats.totalReports + ' generated reports'">
+          </app-dashboard-card>
 
-        <app-dashboard-card
-          title="匹配结果"
-          [value]="stats.activeMatches.toString()"
-          subtitle="待处理匹配"
-          icon="matches"
-          variant="warning">
-        </app-dashboard-card>
-      </div>
+          <app-dashboard-card
+            title="匹配结果"
+            [value]="stats.activeMatches.toString()"
+            subtitle="待处理匹配"
+            icon="matches"
+            variant="warning"
+            role="article"
+            [attr.aria-label]="'Matches statistics: ' + stats.activeMatches + ' pending matches'">
+          </app-dashboard-card>
+        </div>
+      </section>
 
       <!-- Quick Actions -->
-      <div class="quick-actions-section">
-        <h2 class="section-title">快速操作</h2>
-        <div class="actions-grid">
-          <a routerLink="/jobs/create" class="action-card">
-            <div class="action-icon">
+      <section class="quick-actions-section" aria-labelledby="actions-heading">
+        <h2 id="actions-heading" class="section-title">快速操作</h2>
+        <nav class="actions-grid" 
+             role="navigation" 
+             aria-label="Quick action navigation">
+          <a routerLink="/jobs/create" 
+             class="action-card"
+             role="button"
+             aria-label="Create new job position - Add new recruitment position and start screening"
+             title="创建新职位 - 添加新的招聘职位并开始筛选">
+            <div class="action-icon" aria-hidden="true">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="8" x2="12" y2="16"></line>
@@ -86,8 +109,12 @@ interface ActivityItem {
             </div>
           </a>
 
-          <a routerLink="/jobs" class="action-card">
-            <div class="action-icon">
+          <a routerLink="/jobs" 
+             class="action-card"
+             role="button"
+             aria-label="Manage positions - View and manage existing positions"
+             title="管理职位 - 查看和管理现有职位">
+            <div class="action-icon" aria-hidden="true">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
                 <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
@@ -99,8 +126,12 @@ interface ActivityItem {
             </div>
           </a>
 
-          <a routerLink="/reports" class="action-card">
-            <div class="action-icon">
+          <a routerLink="/reports" 
+             class="action-card"
+             role="button"
+             aria-label="View reports - View analysis reports and matching results"
+             title="查看报告 - 查看分析报告和匹配结果">
+            <div class="action-icon" aria-hidden="true">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <line x1="18" y1="20" x2="18" y2="10"></line>
                 <line x1="12" y1="20" x2="12" y2="4"></line>
@@ -112,8 +143,8 @@ interface ActivityItem {
               <p class="action-description">查看分析报告和匹配结果</p>
             </div>
           </a>
-        </div>
-      </div>
+        </nav>
+      </section>
 
       <!-- Recent Activity -->
       <div class="recent-activity-section" *ngIf="stats$ | async as stats">

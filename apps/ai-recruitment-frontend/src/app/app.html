@@ -1,17 +1,185 @@
-<div class="app-container">
-  <header class="app-header">
+<!-- Skip Navigation Links -->
+<div arcSkipNavigation></div>
+
+<!-- ARIA Live Regions -->
+<arc-aria-live></arc-aria-live>
+
+<div class="app-container" role="application" aria-label="AI Recruitment Assistant">
+  <!-- Header with Navigation -->
+  <header class="app-header" role="banner">
     <div class="header-content">
-      <h1 class="app-title">AI 招聘助理</h1>
-      <nav class="app-navigation">
-        <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">仪表板</a>
-        <a routerLink="/jobs" routerLinkActive="active" class="nav-link">岗位管理</a>
-        <a routerLink="/reports" routerLinkActive="active" class="nav-link">分析报告</a>
-        <a routerLink="/resume" routerLinkActive="active" class="nav-link">上传简历</a>
+      <h1 class="app-title" id="app-title">
+        <span class="sr-only">AI Recruitment Assistant Application</span>
+        AI 招聘助理
+      </h1>
+      
+      <!-- Main Navigation -->
+      <nav class="app-navigation nav-menu" 
+           role="navigation" 
+           aria-label="Main navigation"
+           aria-labelledby="nav-heading">
+        <h2 id="nav-heading" class="sr-only">Main Navigation</h2>
+        
+        <a routerLink="/dashboard" 
+           routerLinkActive="active" 
+           class="nav-link" 
+           role="menuitem"
+           aria-label="Dashboard - View system overview and statistics"
+           title="查看系统概览和统计信息 (Alt+1)"
+           [attr.aria-current]="'page'">
+          <span class="nav-icon" aria-hidden="true">📊</span>
+          <span class="nav-text">仪表板</span>
+          <span class="sr-only">- Alt+1</span>
+        </a>
+        
+        <a routerLink="/analysis" 
+           routerLinkActive="active" 
+           class="nav-link"
+           role="menuitem"
+           aria-label="Smart Analysis - Upload and analyze resumes"
+           title="上传和分析简历 (Alt+2)">
+          <span class="nav-icon" aria-hidden="true">🧠</span>
+          <span class="nav-text">智能分析</span>
+          <span class="sr-only">- Alt+2</span>
+        </a>
+        
+        <a routerLink="/results" 
+           routerLinkActive="active" 
+           class="nav-link"
+           role="menuitem"
+           aria-label="Analysis Results - View analysis results and reports"
+           title="查看分析结果 (Alt+3)">
+          <span class="nav-icon" aria-hidden="true">📈</span>
+          <span class="nav-text">分析结果</span>
+          <span class="sr-only">- Alt+3</span>
+        </a>
       </nav>
+      
+      <!-- Quick Actions -->
+      <div class="header-actions quick-actions" 
+           role="group" 
+           aria-label="Quick actions and settings">
+        <button class="help-btn" 
+                type="button"
+                aria-label="Show keyboard shortcuts help (Alt+H)"
+                title="显示快捷键帮助 (Alt+H)"
+                (click)="showKeyboardHelp()">
+          <span aria-hidden="true">❓</span>
+          <span class="sr-only">Help</span>
+        </button>
+        
+        <button class="settings-btn" 
+                type="button"
+                aria-label="Open accessibility and system settings"
+                title="系统设置"
+                aria-haspopup="menu"
+                [attr.aria-expanded]="settingsMenuOpen()"
+                (click)="toggleSettingsMenu()">
+          <span aria-hidden="true">⚙️</span>
+          <span class="sr-only">Settings</span>
+        </button>
+        
+        <!-- Accessibility Settings Menu -->
+        <div class="settings-menu" 
+             role="menu"
+             aria-label="Accessibility settings"
+             [attr.aria-hidden]="!settingsMenuOpen()"
+             [class.open]="settingsMenuOpen()">
+          <button role="menuitem" 
+                  type="button"
+                  (click)="toggleHighContrast()"
+                  [attr.aria-checked]="highContrastEnabled()">
+            <span aria-hidden="true">🎨</span>
+            Toggle High Contrast
+          </button>
+          <button role="menuitem" 
+                  type="button"
+                  (click)="toggleReducedMotion()"
+                  [attr.aria-checked]="reducedMotionEnabled">
+            <span aria-hidden="true">🎭</span>
+            Reduce Motion
+          </button>
+          <button role="menuitem" 
+                  type="button"
+                  (click)="increaseFontSize()">
+            <span aria-hidden="true">🔤</span>
+            Increase Font Size
+          </button>
+        </div>
+      </div>
     </div>
   </header>
   
-  <main class="app-main">
+  <!-- Main Content Area -->
+  <main class="app-main" 
+        id="main-content" 
+        role="main" 
+        aria-labelledby="app-title"
+        [attr.aria-live]="'polite'">
+    
+    <!-- Loading Indicator -->
+    <div class="loading-indicator" 
+         role="status" 
+         aria-live="polite"
+         [attr.aria-hidden]="!isLoading"
+         *ngIf="isLoading">
+      <span class="sr-only">Loading page content...</span>
+      <div class="spinner" aria-hidden="true"></div>
+    </div>
+    
+    <!-- Page Content -->
     <router-outlet></router-outlet>
   </main>
+  
+  <!-- Global UX Components -->
+  <arc-guide-overlay 
+    role="dialog"
+    aria-label="Application guide overlay"
+    [attr.aria-hidden]="!guideOverlayVisible">
+  </arc-guide-overlay>
+  
+  <arc-status-notifications 
+    role="log"
+    aria-live="polite"
+    aria-label="Status notifications">
+  </arc-status-notifications>
+  
+  <!-- Keyboard Help Modal -->
+  <div class="keyboard-help-modal" 
+       role="dialog"
+       aria-labelledby="keyboard-help-title"
+       aria-describedby="keyboard-help-description"
+       [attr.aria-hidden]="!keyboardHelpVisible"
+       [class.visible]="keyboardHelpVisible">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="keyboard-help-title">Keyboard Shortcuts</h2>
+        <button type="button" 
+                class="close-btn"
+                aria-label="Close keyboard help"
+                (click)="hideKeyboardHelp()">
+          <span aria-hidden="true">✕</span>
+        </button>
+      </div>
+      <div id="keyboard-help-description" class="modal-body">
+        <div class="shortcut-section">
+          <h3>Navigation</h3>
+          <ul role="list">
+            <li><kbd>Alt + 1</kbd> - Go to Dashboard</li>
+            <li><kbd>Alt + 2</kbd> - Go to Analysis</li>
+            <li><kbd>Alt + 3</kbd> - Go to Results</li>
+            <li><kbd>Alt + H</kbd> - Show this help</li>
+          </ul>
+        </div>
+        <div class="shortcut-section">
+          <h3>Actions</h3>
+          <ul role="list">
+            <li><kbd>Ctrl + Shift + R</kbd> - Refresh data</li>
+            <li><kbd>Ctrl + N</kbd> - New analysis</li>
+            <li><kbd>Escape</kbd> - Close modals</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

@@ -3,11 +3,11 @@ import { Route } from '@angular/router';
 export const appRoutes: Route[] = [
   {
     path: '',
-    loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
+    loadComponent: () => import('./pages/dashboard/enhanced-dashboard.component').then(m => m.EnhancedDashboardComponent)
   },
   {
     path: 'dashboard',
-    loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent)
+    loadComponent: () => import('./pages/dashboard/enhanced-dashboard.component').then(m => m.EnhancedDashboardComponent)
   },
   {
     path: 'jobs',
@@ -20,6 +20,14 @@ export const appRoutes: Route[] = [
   {
     path: 'resume',
     loadComponent: () => import('./pages/resume/upload-resume.component').then(m => m.UploadResumeComponent)
+  },
+  {
+    path: 'analysis',
+    loadComponent: () => import('./pages/analysis/unified-analysis.component').then(m => m.UnifiedAnalysisComponent)
+  },
+  {
+    path: 'results/:sessionId',
+    loadComponent: () => import('./pages/results/detailed-results.component').then(m => m.DetailedResultsComponent)
   },
   {
     path: '**',

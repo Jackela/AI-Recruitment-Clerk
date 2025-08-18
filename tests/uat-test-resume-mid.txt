@@ -1,0 +1,58 @@
+SARAH JOHNSON
+Frontend Developer
+sarah.johnson@email.com | (555) 987-6543 | Portfolio: sarahjohnson.dev
+
+SUMMARY
+Mid-level Frontend Developer with 4 years of experience creating engaging user interfaces using React and modern web technologies. Strong background in responsive design, accessibility, and performance optimization. Passionate about creating intuitive user experiences and writing clean, maintainable code.
+
+SKILLS
+• Languages: JavaScript, TypeScript, HTML5, CSS3
+• Frameworks: React, Next.js, styled-components
+• State Management: Redux, Context API, Zustand
+• Testing: Jest, React Testing Library, Cypress
+• Tools: Git, Webpack, npm/yarn, Figma
+• Cloud: Vercel, Netlify, Firebase
+• Databases: Firebase Firestore, Supabase
+
+EXPERIENCE
+
+Frontend Developer | WebDev Studios | 2022 - Present
+• Develop and maintain client websites using React and Next.js
+• Collaborate with design team to implement responsive, accessible interfaces
+• Optimized website performance achieving 90+ Lighthouse scores
+• Built custom React components and maintained component documentation
+• Participated in code reviews and mentored intern developers
+
+Junior Frontend Developer | Creative Agency | 2020 - 2022
+• Created interactive web experiences for marketing campaigns
+• Worked with WordPress and custom PHP solutions
+• Implemented mobile-first responsive designs
+• Collaborated with backend developers on API integration
+• Maintained legacy jQuery applications and migrated to modern frameworks
+
+Web Development Intern | Local Marketing Firm | 2019 - 2020
+• Assisted in building company websites using HTML, CSS, and JavaScript
+• Updated and maintained existing client websites
+• Learned modern development workflows and version control
+• Participated in client meetings and project planning sessions
+
+EDUCATION
+Bachelor of Arts in Web Design & Development
+State University | 2020
+Relevant Coursework: Database Systems, UI/UX Design, Computer Graphics
+
+PROJECTS
+Recipe Sharing App | React, Firebase, Material-UI
+• Built full-stack recipe sharing platform with user authentication
+• Implemented search functionality and favorite recipes feature
+• Used Firebase for real-time data synchronization
+
+Weather Dashboard | React, OpenWeather API
+• Created responsive weather application with location-based forecasts
+• Implemented data visualization using Chart.js
+• Added offline functionality using service workers
+
+ADDITIONAL INFORMATION
+• Volunteer web developer for local non-profit organization
+• Active contributor to frontend development community forums
+• Enjoys attending tech meetups and staying current with industry trends

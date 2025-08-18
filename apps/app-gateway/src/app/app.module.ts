@@ -13,6 +13,7 @@ import { NatsClient } from '../nats/nats.client';
 import { AppCacheModule } from '../cache/cache.module';
 import { DomainsModule } from '../domains/domains.module';
 import { CommonModule, IntegrationModule } from '../common/common.module';
+import { WebSocketModule } from '../websocket/websocket.module';
 import { SystemController } from '../system/system.controller';
 import { PrivacyComplianceModule } from '../privacy/privacy-compliance.module';
 import { SecurityModule } from '../security/security.module';
@@ -103,6 +104,7 @@ import { ProductionSecurityValidator } from '../common/security/production-secur
     DomainsModule,
     CommonModule,
     IntegrationModule,
+    WebSocketModule,
     PrivacyComplianceModule,
     SecurityModule
   ],

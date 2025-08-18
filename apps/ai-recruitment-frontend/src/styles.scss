@@ -1,4 +1,8 @@
 /* Global styles */
+
+// Import mobile and accessibility styles first
+@import './styles/mobile.scss';
+@import './styles/accessibility.scss';
 * {
   box-sizing: border-box;
 }

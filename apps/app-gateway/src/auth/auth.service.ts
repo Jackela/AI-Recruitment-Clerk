@@ -5,6 +5,7 @@ import { LoginDto, CreateUserDto, AuthResponseDto, JwtPayload, UserDto, RetryUti
 import * as bcrypt from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
+import { RedisTokenBlacklistService } from '../../../../security/redis-token-blacklist.service';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +19,8 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly tokenBlacklistService: RedisTokenBlacklistService
   ) {
     // Start periodic cleanup of expired blacklisted tokens
     setInterval(() => this.cleanupBlacklistedTokens(), this.TOKEN_BLACKLIST_CLEANUP_INTERVAL);
@@ -101,9 +103,14 @@ export class AuthService {
   }
 
   async validateJwtPayload(payload: JwtPayload, token?: string): Promise<UserDto> {
-    // Check if token is blacklisted
-    if (token && this.isTokenBlacklisted(token)) {
+    // Check if token is blacklisted using Redis-based service
+    if (token && await this.tokenBlacklistService.isTokenBlacklisted(token)) {
       throw new UnauthorizedException('Token has been revoked');
+    }
+
+    // Check if all user tokens are blacklisted (security breach response)
+    if (payload.sub && await this.tokenBlacklistService.isUserBlacklisted(payload.sub)) {
+      throw new UnauthorizedException('All user tokens have been revoked');
     }
 
     // Enhanced payload validation
@@ -153,8 +160,8 @@ export class AuthService {
         throw new UnauthorizedException('Invalid refresh token format');
       }
 
-      // Check if refresh token is blacklisted
-      if (this.isTokenBlacklisted(refreshToken)) {
+      // Check if refresh token is blacklisted using Redis-based service
+      if (await this.tokenBlacklistService.isTokenBlacklisted(refreshToken)) {
         throw new UnauthorizedException('Refresh token has been revoked');
       }
 
@@ -167,8 +174,8 @@ export class AuthService {
         throw new UnauthorizedException('User not found or inactive');
       }
 
-      // Blacklist the old refresh token to prevent reuse
-      this.blacklistToken(refreshToken, payload.exp);
+      // Blacklist the old refresh token to prevent reuse using Redis service
+      await this.tokenBlacklistService.blacklistToken(refreshToken, payload.sub, payload.exp, 'token_refresh');
 
       return this.generateAuthResponse(user);
     } catch (error) {
@@ -214,12 +221,12 @@ export class AuthService {
 
   async logout(userId: string, accessToken?: string, refreshToken?: string): Promise<void> {
     try {
-      // Blacklist tokens if provided
+      // Blacklist tokens using Redis-based service
       if (accessToken) {
         try {
           const payload = this.jwtService.decode(accessToken) as any;
           if (payload && payload.exp) {
-            this.blacklistToken(accessToken, payload.exp);
+            await this.tokenBlacklistService.blacklistToken(accessToken, userId, payload.exp, 'logout');
           }
         } catch (error) {
           this.logger.warn(`Failed to decode access token for blacklisting: ${error.message}`);
@@ -230,7 +237,7 @@ export class AuthService {
         try {
           const payload = this.jwtService.decode(refreshToken) as any;
           if (payload && payload.exp) {
-            this.blacklistToken(refreshToken, payload.exp);
+            await this.tokenBlacklistService.blacklistToken(refreshToken, userId, payload.exp, 'logout');
           }
         } catch (error) {
           this.logger.warn(`Failed to decode refresh token for blacklisting: ${error.message}`);
@@ -357,11 +364,32 @@ export class AuthService {
     }
   }
 
-  // Health check and monitoring
+  /**
+   * Emergency security response: Blacklist all tokens for a user
+   * Use this when a security breach is detected
+   */
+  async emergencyRevokeAllUserTokens(userId: string, reason: string = 'security_breach'): Promise<void> {
+    try {
+      const blacklistedCount = await this.tokenBlacklistService.blacklistAllUserTokens(userId, reason);
+      await this.userService.updateSecurityFlag(userId, 'tokens_revoked', true);
+      
+      this.logger.warn(`🚨 Emergency token revocation for user ${userId}: ${reason}`);
+      this.logger.log(`Blacklisted ${blacklistedCount} tokens for user ${userId}`);
+      
+    } catch (error) {
+      this.logger.error(`Emergency token revocation failed for user ${userId}: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Get comprehensive security metrics
+   */
   async getSecurityMetrics(): Promise<{
     blacklistedTokensCount: number;
     failedLoginAttemptsCount: number;
     lockedAccountsCount: number;
+    tokenBlacklistMetrics: any;
   }> {
     const now = Date.now();
     const lockedAccountsCount = Array.from(this.failedLoginAttempts.values())
@@ -370,10 +398,38 @@ export class AuthService {
         (now - attempts.lastAttempt) < this.LOCKOUT_DURATION
       ).length;
 
+    const tokenMetrics = this.tokenBlacklistService.getMetrics();
+
     return {
       blacklistedTokensCount: this.blacklistedTokens.size,
       failedLoginAttemptsCount: this.failedLoginAttempts.size,
-      lockedAccountsCount
+      lockedAccountsCount,
+      tokenBlacklistMetrics: tokenMetrics
+    };
+  }
+
+  /**
+   * Health check for authentication service
+   */
+  async authHealthCheck(): Promise<{
+    status: string;
+    authService: string;
+    tokenBlacklist: any;
+    memoryUsage: {
+      blacklistedTokens: number;
+      failedAttempts: number;
+    };
+  }> {
+    const tokenBlacklistHealth = await this.tokenBlacklistService.healthCheck();
+    
+    return {
+      status: 'healthy',
+      authService: 'operational',
+      tokenBlacklist: tokenBlacklistHealth,
+      memoryUsage: {
+        blacklistedTokens: this.blacklistedTokens.size,
+        failedAttempts: this.failedLoginAttempts.size
+      }
     };
   }
 }

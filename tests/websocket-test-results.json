@@ -1,0 +1,664 @@
+{
+  "config": {
+    "configFile": "E:\\Code\\AI-Recruitment-Clerk\\playwright.dashboard.config.ts",
+    "rootDir": "E:/Code/AI-Recruitment-Clerk/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "E:/Code/AI-Recruitment-Clerk/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "E:/Code/AI-Recruitment-Clerk/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.54.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "websocket-realtime-test.spec.ts",
+      "file": "websocket-realtime-test.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "WebSocket实时进度更新功能",
+          "file": "websocket-realtime-test.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "应该显示实时进度追踪器",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 16942,
+                      "error": {
+                        "message": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n",
+                        "stack": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n\n    at E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts:30:56",
+                        "location": {
+                          "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                          "column": 56,
+                          "line": 30
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 28 |\u001b[39m     \n \u001b[90m 29 |\u001b[39m     \u001b[90m// 验证进度追踪器出现\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 30 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'app-progress-tracker'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 31 |\u001b[39m     \n \u001b[90m 32 |\u001b[39m     \u001b[90m// 验证连接状态指示器\u001b[39m\n \u001b[90m 33 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'.connection-status'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                            "column": 56,
+                            "line": 30
+                          },
+                          "message": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n\n\n  28 |     \n  29 |     // 验证进度追踪器出现\n> 30 |     await expect(page.locator('app-progress-tracker')).toBeVisible({ timeout: 10000 });\n     |                                                        ^\n  31 |     \n  32 |     // 验证连接状态指示器\n  33 |     await expect(page.locator('.connection-status')).toBeVisible();\n    at E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts:30:56"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-17T03:31:56.923Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-应该显示实时进度追踪器-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-应该显示实时进度追踪器-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-应该显示实时进度追踪器-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                        "column": 56,
+                        "line": 30
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4e09dca64bc1a28332e2-20efcaf5dea8160cbb43",
+              "file": "websocket-realtime-test.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "应该响应WebSocket连接状态变化",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 11559,
+                      "error": {
+                        "message": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n",
+                        "stack": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n\n    at E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts:73:56",
+                        "location": {
+                          "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                          "column": 56,
+                          "line": 73
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 71 |\u001b[39m\n \u001b[90m 72 |\u001b[39m     \u001b[90m// 等待进度追踪器出现\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 73 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'app-progress-tracker'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 74 |\u001b[39m     \n \u001b[90m 75 |\u001b[39m     \u001b[90m// 检查连接状态\u001b[39m\n \u001b[90m 76 |\u001b[39m     \u001b[36mconst\u001b[39m connectionStatus \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'.status-text'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                            "column": 56,
+                            "line": 73
+                          },
+                          "message": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n\n\n  71 |\n  72 |     // 等待进度追踪器出现\n> 73 |     await expect(page.locator('app-progress-tracker')).toBeVisible({ timeout: 10000 });\n     |                                                        ^\n  74 |     \n  75 |     // 检查连接状态\n  76 |     const connectionStatus = page.locator('.status-text');\n    at E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts:73:56"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-17T03:32:14.932Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-We-298fa-时进度更新功能-应该响应WebSocket连接状态变化-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-We-298fa-时进度更新功能-应该响应WebSocket连接状态变化-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-We-298fa-时进度更新功能-应该响应WebSocket连接状态变化-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                        "column": 56,
+                        "line": 73
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4e09dca64bc1a28332e2-9e2599c30637538a464a",
+              "file": "websocket-realtime-test.spec.ts",
+              "line": 45,
+              "column": 7
+            },
+            {
+              "title": "应该模拟完整的分析进度流程",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 11441,
+                      "error": {
+                        "message": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n",
+                        "stack": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n\n    at E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts:98:56",
+                        "location": {
+                          "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                          "column": 56,
+                          "line": 98
+                        },
+                        "snippet": "\u001b[0m \u001b[90m  96 |\u001b[39m\n \u001b[90m  97 |\u001b[39m     \u001b[90m// 等待进度追踪器显示\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m  98 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'app-progress-tracker'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m  99 |\u001b[39m\n \u001b[90m 100 |\u001b[39m     \u001b[90m// 验证初始状态\u001b[39m\n \u001b[90m 101 |\u001b[39m     \u001b[36mconst\u001b[39m progressPercentage \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'.progress-percentage'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                            "column": 56,
+                            "line": 98
+                          },
+                          "message": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n\n\n   96 |\n   97 |     // 等待进度追踪器显示\n>  98 |     await expect(page.locator('app-progress-tracker')).toBeVisible({ timeout: 10000 });\n      |                                                        ^\n   99 |\n  100 |     // 验证初始状态\n  101 |     const progressPercentage = page.locator('.progress-percentage');\n    at E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts:98:56"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-17T03:32:27.582Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-应该模拟完整的分析进度流程-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-应该模拟完整的分析进度流程-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-应该模拟完整的分析进度流程-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                        "column": 56,
+                        "line": 98
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4e09dca64bc1a28332e2-a0a71820fa88d6e299aa",
+              "file": "websocket-realtime-test.spec.ts",
+              "line": 86,
+              "column": 7
+            },
+            {
+              "title": "应该显示实时消息日志",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 11500,
+                      "error": {
+                        "message": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n",
+                        "stack": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n\n    at E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts:128:56",
+                        "location": {
+                          "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                          "column": 56,
+                          "line": 128
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 126 |\u001b[39m\n \u001b[90m 127 |\u001b[39m     \u001b[90m// 等待进度追踪器显示\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 128 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'app-progress-tracker'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 129 |\u001b[39m\n \u001b[90m 130 |\u001b[39m     \u001b[90m// 验证消息日志容器\u001b[39m\n \u001b[90m 131 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'.message-log'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                            "column": 56,
+                            "line": 128
+                          },
+                          "message": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n\n\n  126 |\n  127 |     // 等待进度追踪器显示\n> 128 |     await expect(page.locator('app-progress-tracker')).toBeVisible({ timeout: 10000 });\n      |                                                        ^\n  129 |\n  130 |     // 验证消息日志容器\n  131 |     await expect(page.locator('.message-log')).toBeVisible();\n    at E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts:128:56"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-17T03:32:40.108Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-应该显示实时消息日志-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-应该显示实时消息日志-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-应该显示实时消息日志-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                        "column": 56,
+                        "line": 128
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4e09dca64bc1a28332e2-c2b0142dd8f0014b967e",
+              "file": "websocket-realtime-test.spec.ts",
+              "line": 116,
+              "column": 7
+            },
+            {
+              "title": "应该支持响应式布局",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 11579,
+                      "error": {
+                        "message": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n",
+                        "stack": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n\n    at E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts:153:56",
+                        "location": {
+                          "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                          "column": 56,
+                          "line": 153
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 151 |\u001b[39m\n \u001b[90m 152 |\u001b[39m     \u001b[90m// 等待进度追踪器显示\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 153 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'app-progress-tracker'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 154 |\u001b[39m\n \u001b[90m 155 |\u001b[39m     \u001b[90m// 验证进度追踪器在移动端依然可见和可用\u001b[39m\n \u001b[90m 156 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'.progress-tracker'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                            "column": 56,
+                            "line": 153
+                          },
+                          "message": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n\n\n  151 |\n  152 |     // 等待进度追踪器显示\n> 153 |     await expect(page.locator('app-progress-tracker')).toBeVisible({ timeout: 10000 });\n      |                                                        ^\n  154 |\n  155 |     // 验证进度追踪器在移动端依然可见和可用\n  156 |     await expect(page.locator('.progress-tracker')).toBeVisible();\n    at E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts:153:56"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-17T03:32:52.782Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-应该支持响应式布局-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-应该支持响应式布局-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-应该支持响应式布局-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                        "column": 56,
+                        "line": 153
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4e09dca64bc1a28332e2-cf957895892b4b6ddbea",
+              "file": "websocket-realtime-test.spec.ts",
+              "line": 138,
+              "column": 7
+            },
+            {
+              "title": "应该处理错误状态",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 31489,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                            "column": 16,
+                            "line": 167
+                          },
+                          "message": "Error: page.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button[type=\"submit\"]')\u001b[22m\n\u001b[2m    - locator resolved to <button disabled type=\"submit\" class=\"primary-btn\" _ngcontent-ng-c1188418659=\"\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    58 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not enabled\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n\n  165 |   test('应该处理错误状态', async ({ page }) => {\n  166 |     // 尝试不选择文件直接提交\n> 167 |     await page.click('button[type=\"submit\"]');\n      |                ^\n  168 |\n  169 |     // 验证错误消息显示\n  170 |     await expect(page.locator('.error-section')).toBeVisible({ timeout: 5000 });\n    at E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts:167:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-17T03:33:05.501Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-应该处理错误状态-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-应该处理错误状态-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-应该处理错误状态-chromium\\error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4e09dca64bc1a28332e2-513eab5d1de1f85174c5",
+              "file": "websocket-realtime-test.spec.ts",
+              "line": 165,
+              "column": 7
+            },
+            {
+              "title": "应该显示结果完成状态",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 11445,
+                      "error": {
+                        "message": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n",
+                        "stack": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n\n    at E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts:189:56",
+                        "location": {
+                          "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                          "column": 56,
+                          "line": 189
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 187 |\u001b[39m\n \u001b[90m 188 |\u001b[39m     \u001b[90m// 等待进度追踪器显示\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 189 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'app-progress-tracker'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 190 |\u001b[39m\n \u001b[90m 191 |\u001b[39m     \u001b[90m// 这里我们主要验证UI结构，实际的WebSocket消息需要后端支持\u001b[39m\n \u001b[90m 192 |\u001b[39m     \u001b[90m// 验证进度追踪器的基本功能正常\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                            "column": 56,
+                            "line": 189
+                          },
+                          "message": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n\n\n  187 |\n  188 |     // 等待进度追踪器显示\n> 189 |     await expect(page.locator('app-progress-tracker')).toBeVisible({ timeout: 10000 });\n      |                                                        ^\n  190 |\n  191 |     // 这里我们主要验证UI结构，实际的WebSocket消息需要后端支持\n  192 |     // 验证进度追踪器的基本功能正常\n    at E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts:189:56"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-17T03:33:38.073Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-应该显示结果完成状态-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-应该显示结果完成状态-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-应该显示结果完成状态-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                        "column": 56,
+                        "line": 189
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4e09dca64bc1a28332e2-bb40e6205cffe94c680f",
+              "file": "websocket-realtime-test.spec.ts",
+              "line": 177,
+              "column": 7
+            },
+            {
+              "title": "WebSocket功能集成完整性检查",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 11418,
+                      "error": {
+                        "message": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n",
+                        "stack": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n\n    at E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts:226:56",
+                        "location": {
+                          "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                          "column": 56,
+                          "line": 226
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 224 |\u001b[39m\n \u001b[90m 225 |\u001b[39m     \u001b[90m// 全面验证进度追踪器的所有组件\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 226 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'app-progress-tracker'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                                        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 227 |\u001b[39m     \n \u001b[90m 228 |\u001b[39m     \u001b[90m// 验证连接状态部分\u001b[39m\n \u001b[90m 229 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'.connection-status'\u001b[39m))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                            "column": 56,
+                            "line": 226
+                          },
+                          "message": "Error: \u001b[31mTimed out 10000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('app-progress-tracker')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for locator('app-progress-tracker')\u001b[22m\n\n\n  224 |\n  225 |     // 全面验证进度追踪器的所有组件\n> 226 |     await expect(page.locator('app-progress-tracker')).toBeVisible({ timeout: 10000 });\n      |                                                        ^\n  227 |     \n  228 |     // 验证连接状态部分\n  229 |     await expect(page.locator('.connection-status')).toBeVisible();\n    at E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts:226:56"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-08-17T03:33:50.636Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-WebSocket功能集成完整性检查-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-WebSocket功能集成完整性检查-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "E:\\Code\\AI-Recruitment-Clerk\\test-results\\websocket-realtime-test-WebSocket实时进度更新功能-WebSocket功能集成完整性检查-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "E:\\Code\\AI-Recruitment-Clerk\\tests\\websocket-realtime-test.spec.ts",
+                        "column": 56,
+                        "line": 226
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4e09dca64bc1a28332e2-a283ec3fd0aeb4def453",
+              "file": "websocket-realtime-test.spec.ts",
+              "line": 203,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-08-17T03:31:56.029Z",
+    "duration": 126400.533,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 8,
+    "flaky": 0
+  }
+}

@@ -1,0 +1,220 @@
+import { Injectable, OnDestroy } from '@angular/core';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
+import { io, Socket } from 'socket.io-client';
+
+export interface WebSocketMessage {
+  type: 'progress' | 'step_change' | 'completed' | 'error' | 'status_update';
+  sessionId: string;
+  data: any;
+  timestamp: Date;
+}
+
+export interface ProgressUpdate {
+  progress: number;
+  currentStep: string;
+  message?: string;
+  estimatedTimeRemaining?: number;
+}
+
+export interface CompletionData {
+  analysisId: string;
+  result: any;
+  processingTime: number;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class WebSocketService implements OnDestroy {
+  private socket: Socket | null = null;
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 5;
+  private reconnectInterval = 5000;
+  private connectionStatus$ = new BehaviorSubject<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
+  private messages$ = new Subject<WebSocketMessage>();
+  private destroy$ = new Subject<void>();
+
+  constructor() {}
+
+  /**
+   * 连接到WebSocket服务器
+   */
+  connect(sessionId: string): Observable<WebSocketMessage> {
+    this.disconnect(); // 确保没有现有连接
+    
+    this.connectionStatus$.next('connecting');
+    
+    try {
+      this.socket = io(this.getSocketUrl(), {
+        query: { sessionId },
+        transports: ['websocket', 'polling'],
+        timeout: 20000,
+        reconnection: true,
+        reconnectionAttempts: this.maxReconnectAttempts,
+        reconnectionDelay: this.reconnectInterval,
+      });
+      
+      this.setupSocketHandlers(sessionId);
+    } catch (error) {
+      console.error('Socket.IO connection failed:', error);
+      this.connectionStatus$.next('error');
+    }
+    
+    return this.messages$.asObservable().pipe(
+      filter(msg => msg.sessionId === sessionId),
+      takeUntil(this.destroy$)
+    );
+  }
+
+  /**
+   * 监听特定类型的消息
+   */
+  onMessage(type: WebSocketMessage['type'], sessionId: string): Observable<WebSocketMessage> {
+    return this.messages$.asObservable().pipe(
+      filter(msg => msg.type === type && msg.sessionId === sessionId),
+      takeUntil(this.destroy$)
+    );
+  }
+
+  /**
+   * 监听进度更新
+   */
+  onProgress(sessionId: string): Observable<ProgressUpdate> {
+    return this.onMessage('progress', sessionId).pipe(
+      filter(msg => msg.data),
+      takeUntil(this.destroy$)
+    ) as Observable<any>;
+  }
+
+  /**
+   * 监听完成事件
+   */
+  onCompletion(sessionId: string): Observable<CompletionData> {
+    return this.onMessage('completed', sessionId).pipe(
+      filter(msg => msg.data),
+      takeUntil(this.destroy$)
+    ) as Observable<any>;
+  }
+
+  /**
+   * 监听错误事件
+   */
+  onError(sessionId: string): Observable<{error: string; code?: string}> {
+    return this.onMessage('error', sessionId).pipe(
+      filter(msg => msg.data),
+      takeUntil(this.destroy$)
+    ) as Observable<any>;
+  }
+
+  /**
+   * 获取连接状态
+   */
+  getConnectionStatus(): Observable<'connecting' | 'connected' | 'disconnected' | 'error'> {
+    return this.connectionStatus$.asObservable();
+  }
+
+  /**
+   * 发送消息到服务器
+   */
+  sendMessage(event: string, data: any): void {
+    if (this.socket && this.socket.connected) {
+      this.socket.emit(event, data);
+    } else {
+      console.warn('Socket.IO is not connected');
+    }
+  }
+
+  /**
+   * 断开连接
+   */
+  disconnect(): void {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+    }
+    this.connectionStatus$.next('disconnected');
+    this.reconnectAttempts = 0;
+  }
+
+  /**
+   * 设置Socket事件处理器
+   */
+  private setupSocketHandlers(sessionId: string): void {
+    if (!this.socket) return;
+
+    this.socket.on('connect', () => {
+      console.log('Socket.IO connected');
+      this.connectionStatus$.next('connected');
+      this.reconnectAttempts = 0;
+      
+      // 订阅会话更新
+      this.socket?.emit('subscribe_session', { sessionId });
+    });
+
+    this.socket.on('message', (message: WebSocketMessage) => {
+      try {
+        message.timestamp = new Date(message.timestamp);
+        this.messages$.next(message);
+      } catch (error) {
+        console.error('Failed to parse Socket.IO message:', error);
+      }
+    });
+
+    this.socket.on('disconnect', (reason) => {
+      console.log('Socket.IO disconnected:', reason);
+      this.connectionStatus$.next('disconnected');
+    });
+
+    this.socket.on('connect_error', (error) => {
+      console.error('Socket.IO connection error:', error);
+      this.connectionStatus$.next('error');
+    });
+
+    this.socket.on('reconnect', (attemptNumber) => {
+      console.log('Socket.IO reconnected after', attemptNumber, 'attempts');
+      this.connectionStatus$.next('connected');
+    });
+
+    this.socket.on('reconnect_error', (error) => {
+      console.error('Socket.IO reconnection error:', error);
+      this.connectionStatus$.next('error');
+    });
+  }
+
+  /**
+   * 处理重连逻辑
+   */
+  private handleReconnect(sessionId?: string): void {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.error('Max reconnection attempts reached');
+      return;
+    }
+
+    this.reconnectAttempts++;
+    console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+    
+    setTimeout(() => {
+      if (sessionId) {
+        this.connect(sessionId);
+      }
+    }, this.reconnectInterval * this.reconnectAttempts);
+  }
+
+  /**
+   * 获取Socket.IO URL
+   */
+  private getSocketUrl(): string {
+    const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
+    const host = window.location.hostname;
+    const port = window.location.hostname === 'localhost' ? ':3000' : '';
+    
+    return `${protocol}//${host}${port}/ws`;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.disconnect();
+  }
+}

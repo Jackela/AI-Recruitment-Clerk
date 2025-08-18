@@ -6,6 +6,12 @@ import { CreateUserDto, UserDto, UserRole, UserStatus } from '../../../../libs/s
 interface UserEntity extends UserDto {
   password: string;
   lastActivity?: Date;
+  securityFlags?: {
+    tokens_revoked?: boolean;
+    account_locked?: boolean;
+    password_reset_required?: boolean;
+    two_factor_enabled?: boolean;
+  };
 }
 
 @Injectable()
@@ -163,6 +169,73 @@ export class UserService {
     }
     
     return users;
+  }
+
+  /**
+   * Update security flag for user (used for token revocation, account locking, etc.)
+   */
+  async updateSecurityFlag(
+    userId: string, 
+    flag: 'tokens_revoked' | 'account_locked' | 'password_reset_required' | 'two_factor_enabled', 
+    value: boolean
+  ): Promise<void> {
+    const user = this.users.get(userId);
+    if (!user) {
+      throw new NotFoundException(`User ${userId} not found`);
+    }
+
+    // Initialize security flags if they don't exist
+    if (!user.securityFlags) {
+      user.securityFlags = {};
+    }
+
+    // Update the specific security flag
+    user.securityFlags[flag] = value;
+    user.updatedAt = new Date();
+
+    // Special handling for account_locked flag
+    if (flag === 'account_locked' && value) {
+      user.status = UserStatus.SUSPENDED;
+    } else if (flag === 'account_locked' && !value && user.status === UserStatus.SUSPENDED) {
+      user.status = UserStatus.ACTIVE;
+    }
+
+    // Update the user in the store
+    this.users.set(userId, user);
+
+    console.log(`Security flag '${flag}' set to ${value} for user ${userId}`);
+  }
+
+  /**
+   * Get security flags for user
+   */
+  async getSecurityFlags(userId: string): Promise<UserEntity['securityFlags'] | null> {
+    const user = this.users.get(userId);
+    return user?.securityFlags || null;
+  }
+
+  /**
+   * Check if user has specific security flag
+   */
+  async hasSecurityFlag(userId: string, flag: keyof UserEntity['securityFlags']): Promise<boolean> {
+    const user = this.users.get(userId);
+    return user?.securityFlags?.[flag] || false;
+  }
+
+  /**
+   * Clear all security flags for user
+   */
+  async clearSecurityFlags(userId: string): Promise<void> {
+    const user = this.users.get(userId);
+    if (!user) {
+      throw new NotFoundException(`User ${userId} not found`);
+    }
+
+    user.securityFlags = {};
+    user.updatedAt = new Date();
+    this.users.set(userId, user);
+
+    console.log(`All security flags cleared for user ${userId}`);
   }
 
   // Health check for service
