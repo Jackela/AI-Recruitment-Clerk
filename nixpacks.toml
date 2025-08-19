@@ -1,26 +1,23 @@
 [phases.setup]
-nixPkgs = ['nodejs_20', 'npm-10_x']
+nixPkgs = ['nodejs_20']
 
 [phases.install]
-cmd = 'npm ci --omit=dev --legacy-peer-deps 2>/dev/null || npm install --legacy-peer-deps --production'
+cmd = 'npm install --legacy-peer-deps --production'
 
 [phases.build]
-cmd = 'npm run build 2>/dev/null || echo "Build failed, using simple server fallback"'
+cmd = 'npm run build || echo "Build failed, using simple server fallback"'
 
 [start]
-cmd = 'npm start 2>/dev/null || node simple-server.js'
+cmd = 'npm start || node simple-server.js'
 
 [variables]
 NODE_ENV = 'production'
-NPM_CONFIG_PRODUCTION = 'true'
 NPM_CONFIG_LEGACY_PEER_DEPS = 'true'
 HUSKY = '0'
 NPM_CONFIG_CACHE = '/tmp/.npm'
 NPM_CONFIG_PROGRESS = 'false'
 NPM_CONFIG_LOGLEVEL = 'warn'
-# Railway性能优化
 NPM_CONFIG_FUND = 'false'
 NPM_CONFIG_AUDIT = 'false'
 CI = 'true'
-# 内存限制优化
 NODE_OPTIONS = '--max-old-space-size=1024'
