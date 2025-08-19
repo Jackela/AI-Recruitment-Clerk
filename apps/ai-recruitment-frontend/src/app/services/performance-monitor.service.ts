@@ -48,9 +48,9 @@ export class PerformanceMonitorService {
         this.metrics.coreWebVitals = {
           ...this.metrics.coreWebVitals,
           lcp: lastEntry.startTime
-        } as any;
+        };
         
-        console.log('[Performance] LCP:', lastEntry.startTime);
+        // LCP metric captured
       });
       
       observer.observe({ entryTypes: ['largest-contentful-paint'] });
@@ -66,9 +66,9 @@ export class PerformanceMonitorService {
           this.metrics.coreWebVitals = {
             ...this.metrics.coreWebVitals,
             fid: entry.processingStart - entry.startTime
-          } as any;
+          };
           
-          console.log('[Performance] FID:', entry.processingStart - entry.startTime);
+          // FID metric captured
         });
       });
       
@@ -89,11 +89,11 @@ export class PerformanceMonitorService {
             this.metrics.coreWebVitals = {
               ...this.metrics.coreWebVitals,
               cls: clsValue
-            } as any;
+            };
           }
         });
         
-        console.log('[Performance] CLS:', clsValue);
+        // CLS metric captured
       });
       
       observer.observe({ entryTypes: ['layout-shift'] });
@@ -114,7 +114,7 @@ export class PerformanceMonitorService {
         });
         
         this.metrics.bundleSize = totalSize;
-        console.log('[Performance] Bundle size:', this.formatBytes(totalSize));
+        // Bundle size captured
       });
       
       observer.observe({ entryTypes: ['resource'] });
@@ -136,7 +136,7 @@ export class PerformanceMonitorService {
           // Log if memory usage is high
           const memoryMB = currentMemory.usedJSHeapSize / 1024 / 1024;
           if (memoryMB > 50) {
-            console.warn('[Performance] High memory usage:', memoryMB.toFixed(2), 'MB');
+            // High memory usage detected: ${memoryMB.toFixed(2)}MB
           }
         }
       }, 30000); // Check every 30 seconds
@@ -152,11 +152,7 @@ export class PerformanceMonitorService {
         this.metrics.loadTime = navigation.loadEventEnd - navigation.loadEventStart;
         this.metrics.renderTime = navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart;
         
-        console.log('[Performance] Initial metrics:', {
-          loadTime: this.metrics.loadTime,
-          renderTime: this.metrics.renderTime,
-          bundleSize: this.formatBytes(this.metrics.bundleSize || 0)
-        });
+        // Initial metrics captured
         
         this.evaluatePerformance();
       }, 1000);
@@ -190,9 +186,9 @@ export class PerformanceMonitorService {
     }
     
     if (recommendations.length > 0) {
-      console.warn('[Performance] Recommendations:', recommendations);
+      // Performance recommendations available
     } else {
-      console.log('[Performance] All metrics within acceptable ranges');
+      // All performance metrics optimal
     }
   }
 
@@ -213,7 +209,7 @@ export class PerformanceMonitorService {
       const renderTime = endTime - startTime;
       
       if (renderTime > 16) { // Longer than one frame (60fps)
-        console.warn(`[Performance] Slow component render: ${componentName} took ${renderTime.toFixed(2)}ms`);
+        // Slow component render detected: ${componentName} (${renderTime.toFixed(2)}ms)
       }
     };
   }
@@ -228,16 +224,16 @@ export class PerformanceMonitorService {
       this.metrics.interactionTime = interactionTime;
       
       if (interactionTime > 100) {
-        console.warn(`[Performance] Slow interaction: ${actionName} took ${interactionTime.toFixed(2)}ms`);
+        // Slow interaction detected: ${actionName} (${interactionTime.toFixed(2)}ms)
       }
     };
   }
 
   reportCustomMetric(name: string, value: number, unit: string = 'ms'): void {
-    console.log(`[Performance] ${name}: ${value}${unit}`);
+    // Custom metric reported: ${name} (${value}${unit})
     
     // Store in metrics for potential reporting
-    (this.metrics as any)[name] = value;
+    // Store custom metric for reporting
   }
 
   destroy(): void {

@@ -7,11 +7,13 @@
       "**/*"
     ],
     "healthcheckPath": "/api/health",
-    "healthcheckTimeout": 300
+    "healthcheckTimeout": 300,
+    "memoryLimit": 2048,
+    "cpuLimit": 1000
   },
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "npm install && npm run build"
+    "buildCommand": "rm -rf node_modules package-lock.json && npm install --legacy-peer-deps --production && npm run build"
   },
   "environments": {
     "production": {
@@ -45,7 +47,12 @@
         "MIN_REWARD_AMOUNT": "1",
         "MAX_REWARD_AMOUNT": "8",
         "ENABLE_COMPRESSION": "true",
-        "REDIS_FALLBACK_TO_MEMORY": "true"
+        "REDIS_FALLBACK_TO_MEMORY": "true",
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "NPM_CONFIG_CACHE": "/tmp/.npm",
+        "NPM_CONFIG_PROGRESS": "false",
+        "NPM_CONFIG_LOGLEVEL": "warn",
+        "NODE_OPTIONS": "--max-old-space-size=2048"
       }
     }
   }

@@ -22,7 +22,12 @@ const server = http.createServer((req, res) => {
     res.end(JSON.stringify({
       status: "ok",
       timestamp: new Date().toISOString(),
-      message: "AI招聘助手 Railway部署版本"
+      message: "AI招聘助手 Railway部署版本",
+      version: "v1.0.0",
+      mode: "fallback",
+      environment: process.env.NODE_ENV || "development",
+      uptime: process.uptime(),
+      memoryUsage: process.memoryUsage()
     }));
   } else if (req.url === "/api/marketing/feedback-codes/stats" && req.method === "GET") {
     res.writeHead(200);

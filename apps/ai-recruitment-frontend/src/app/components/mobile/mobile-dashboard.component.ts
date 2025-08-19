@@ -1003,35 +1003,66 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
         navigator.vibrate([50, 50, 50]);
       }
       
-      // In real app, refresh data here
-      console.log('Dashboard refreshed');
+      // TODO: Refresh dashboard data
     }, 2000);
   }
 
-  onHeaderAction(action: any) {
-    console.log('Header action:', action);
+  onHeaderAction(action: { id: string; label: string; icon: string; badge?: number }) {
     // Handle header actions (notifications, etc.)
+    switch (action.id) {
+      case 'notifications':
+        // Handle notifications
+        break;
+      default:
+        // Handle other actions
+        break;
+    }
   }
 
   onCardClick(card: DashboardCard) {
     if (card.route) {
-      console.log('Navigate to:', card.route);
       // Router navigation handled by routerLink
+      // Optional: Analytics tracking here
     }
   }
 
   onCardSwipe(event: SwipeEvent) {
-    console.log('Card swipe action:', event);
-    // Handle swipe actions
+    // Handle swipe actions based on event.action
+    switch (event.action.id) {
+      case 'view':
+        // Handle view action
+        break;
+      case 'process':
+        // Handle process action
+        break;
+      case 'review':
+        // Handle review action
+        break;
+      case 'shortlist':
+        // Handle shortlist action
+        break;
+      default:
+        // Handle other actions
+        break;
+    }
   }
 
-  onActivityClick(activity: any) {
-    console.log('Activity clicked:', activity);
-    // Navigate to activity details
+  onActivityClick(activity: { id: string; title: string; subtitle: string; timeAgo: string; type: string; icon: string }) {
+    // Navigate to activity details based on activity type
+    switch (activity.type) {
+      case 'success':
+      case 'info':
+      case 'warning':
+        // Navigate to specific activity detail page
+        break;
+      default:
+        // Handle unknown activity types
+        break;
+    }
   }
 
   onFabClick() {
-    console.log('FAB clicked - navigate to upload');
     // Navigate to upload page
+    // This could use Router.navigate() for programmatic navigation
   }
 }

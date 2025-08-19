@@ -1,280 +1,139 @@
-# AI Recruitment Clerk - Documentation Index
+# 📚 Documentation Index | 文档索引
 
-> **Complete Documentation Hub for the AI-Powered Resume Screening System**
+> **AI Recruitment Clerk - Complete Documentation Guide**  
+> **AI 招聘助理 - 完整文档指南**
 
-[![Documentation](https://img.shields.io/badge/Documentation-Complete-brightgreen)](.) [![API Coverage](https://img.shields.io/badge/API%20Coverage-100%25-blue)](./API_DOCUMENTATION.md) [![User Guide](https://img.shields.io/badge/User%20Guide-Detailed-orange)](./USER_GUIDE.md)
+## 🌐 Language Selection | 语言选择
 
-## 📚 Documentation Navigation
+| Language | Version | Status |
+|----------|---------|--------|
+| **English** | [README.md](./README.md) | ✅ Complete |
+| **中文** | [README.zh-CN.md](./README.zh-CN.md) | ✅ 完整 |
 
-### 🎯 For End Users
-| Document | Description | Audience | Last Updated |
-|----------|-------------|----------|--------------|
-| **[🚀 Quick Start Guide](../README.md#quick-start)** | Get up and running in 5 minutes | All Users | Jan 15, 2024 |
-| **[📖 Complete User Guide](./USER_GUIDE.md)** | Step-by-step tutorials and best practices | HR Teams, Recruiters | Jan 15, 2024 |
-| **[❓ FAQ & Troubleshooting](./USER_GUIDE.md#troubleshooting-common-issues)** | Common issues and solutions | End Users | Jan 15, 2024 |
+## 📖 Core Documentation | 核心文档
 
-### 🔧 For Developers & Integrators
-| Document | Description | Audience | Last Updated |
-|----------|-------------|----------|--------------|
-| **[🔌 API Documentation](./API_DOCUMENTATION.md)** | Complete REST API reference with examples | Developers, Integrators | Jan 15, 2024 |
-| **[👨‍💻 Developer Reference](./DEVELOPER_REFERENCE.md)** | Technical architecture and implementation guide | Backend Developers | Jan 15, 2024 |
-| **[🏗 Architecture Summary](../ARCHITECTURE_SUMMARY.md)** | System design and technical decisions | Solution Architects | Jan 15, 2024 |
+### English Documentation
+| Document Type | File Path | Description |
+|---------------|-----------|-------------|
+| 🏠 **Main README** | [README.md](./README.md) | Project overview and quick start |
+| 🔖 **Project Overview** | [docs/en-US/PROJECT_OVERVIEW.md](./docs/en-US/PROJECT_OVERVIEW.md) | Complete architecture and development status |
+| 📈 **Development Status** | [docs/en-US/DEVELOPMENT_STATUS.md](./docs/en-US/DEVELOPMENT_STATUS.md) | Progress tracking and milestones |
+| 🏗 **Architecture Summary** | [ARCHITECTURE_SUMMARY.md](./ARCHITECTURE_SUMMARY.md) | Technical architecture deep dive |
+| 👨‍💻 **Developer Guide** | [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) | Development environment and standards |
 
-### 📋 For Project Management
-| Document | Description | Audience | Last Updated |
-|----------|-------------|----------|--------------|
-| **[📊 Project Overview](../docs/en-US/PROJECT_OVERVIEW.md)** | High-level project summary and status | Stakeholders, PMs | Jan 15, 2024 |
-| **[📈 Development Status](../docs/en-US/DEVELOPMENT_STATUS.md)** | Current progress and milestones | Project Teams | Jan 15, 2024 |
-| **[🚀 Deployment Guide](../DEPLOYMENT_GUIDE.md)** | Production deployment instructions | DevOps, SysAdmins | Jan 15, 2024 |
+### 中文文档
+| 文档类型 | 文件路径 | 描述 |
+|----------|----------|------|
+| 🏠 **主要说明** | [README.zh-CN.md](./README.zh-CN.md) | 项目概述和快速开始 |
+| 🔖 **项目概览** | [docs/zh-CN/PROJECT_OVERVIEW.zh-CN.md](./docs/zh-CN/PROJECT_OVERVIEW.zh-CN.md) | 完整架构和开发状态 |
+| 📈 **开发状态** | [docs/zh-CN/DEVELOPMENT_STATUS.zh-CN.md](./docs/zh-CN/DEVELOPMENT_STATUS.zh-CN.md) | 进度跟踪和里程碑 |
+| 🏗 **架构总结** | [ARCHITECTURE_SUMMARY.md](./ARCHITECTURE_SUMMARY.md) | 技术架构深入解析 |
+| 👨‍💻 **开发指南** | [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) | 开发环境和规范 |
 
-### 📑 For Business Stakeholders
-| Document | Description | Audience | Last Updated |
-|----------|-------------|----------|--------------|
-| **[🎯 Business Requirements](../documents/商业需求文档%20(Business%20Requirements%20Document,%20BRD).md)** | Business objectives and requirements | Business Analysts | Jan 15, 2024 |
-| **[📋 Product Requirements](../documents/产品需求文档%20(PRD)_%20AI%20招聘助理.md)** | Detailed product specifications | Product Managers | Jan 15, 2024 |
-| **[⚠️ Risk Register](../documents/风险登记册%20(Risk%20Register)_%20AI%20招聘助理.md)** | Project risks and mitigation strategies | Risk Managers | Jan 15, 2024 |
+## 📋 Specifications & Requirements | 规格说明与需求
 
----
+| Document | Path | Language | Description |
+|----------|------|----------|-------------|
+| Project Mission | [specs/PROJECT_MISSION.md](./specs/PROJECT_MISSION.md) | 中文 | Core mission and objectives |
+| System Context | [specs/SYSTEM_CONTEXT.mermaid](./specs/SYSTEM_CONTEXT.mermaid) | Diagram | System boundary diagram |
+| API Specification | [specs/api_spec.openapi.yml](./specs/api_spec.openapi.yml) | YAML | RESTful API definitions |
+| Data Models | [specs/data_models.ts](./specs/data_models.ts) | TypeScript | Data model migration reference |
 
-## 🎭 Documentation by User Persona
+## 🏢 Business Documentation | 商业文档
 
-### 👥 HR Manager / Recruiter
-**Your Journey**: From recruitment pain points to AI-powered efficiency
+| Document Type | File Path | Language | Description |
+|---------------|-----------|----------|-------------|
+| Business Requirements | [documents/商业需求文档 (BRD).md](./documents/商业需求文档%20(Business%20Requirements%20Document,%20BRD).md) | 中文 | Business requirements analysis |
+| High-Level Design | [documents/概要设计文档 (HLD).md](./documents/概要设计文档%20(High-Level%20Design,%20HLD)_%20AI%20招聘助理.md) | 中文 | System architecture design |
+| Low-Level Design | [documents/详细设计文档 (LLD).md](./documents/详细设计文档%20(Low-Level%20Design,%20LLD)_%20AI%20招聘助理.md) | 中文 | Detailed technical implementation |
 
-**Start Here**:
-1. **[📖 User Guide](./USER_GUIDE.md)** - Learn the complete system
-2. **[🚀 Quick Start](../README.md#quick-start)** - Try it in 5 minutes
-3. **[💡 Best Practices](./USER_GUIDE.md#best-practices)** - Optimize your workflow
+## 🛠 Technical Documentation | 技术文档
 
-**Key Sections**:
-- [Understanding Match Scores](./USER_GUIDE.md#understanding-match-scores)
-- [Bulk Resume Processing](./USER_GUIDE.md#bulk-resume-processing)
-- [Advanced Filtering](./USER_GUIDE.md#advanced-filtering-and-search)
+### Shared Libraries | 共享库
+| Component | Path | Description |
+|-----------|------|-------------|
+| Shared DTOs | [libs/shared-dtos/](./libs/shared-dtos/) | Unified data models and events |
+| Package Config | [libs/shared-dtos/package.json](./libs/shared-dtos/package.json) | Library configuration |
 
-### 👨‍💻 Software Developer
-**Your Journey**: From API integration to custom implementations
+### Service Documentation | 服务文档
+| Service | Test Coverage | Status | Key Files |
+|---------|---------------|--------|-----------|
+| **Resume Parser** ⭐ | **240+ tests** | TDD Ready | [apps/resume-parser-svc/](./apps/resume-parser-svc/) |
+| **JD Extractor** | Architecture Complete | Planning | [apps/jd-extractor-svc/](./apps/jd-extractor-svc/) |
+| **Scoring Engine** | Architecture Complete | Planning | [apps/scoring-engine-svc/](./apps/scoring-engine-svc/) |
+| **API Gateway** | Basic Implementation | Active | [apps/app-gateway/](./apps/app-gateway/) |
 
-**Start Here**:
-1. **[🔌 API Documentation](./API_DOCUMENTATION.md)** - Complete API reference
-2. **[👨‍💻 Developer Reference](./DEVELOPER_REFERENCE.md)** - Technical deep dive
-3. **[🏗 Architecture](../ARCHITECTURE_SUMMARY.md)** - System design
+## 🧪 Testing Documentation | 测试文档
 
-**Key Sections**:
-- [Authentication & Authorization](./API_DOCUMENTATION.md#authentication)
-- [Event System](./DEVELOPER_REFERENCE.md#event-system)
-- [Testing Framework](./DEVELOPER_REFERENCE.md#testing-framework)
+### Resume Parser Service Test Suite ⭐
+| Test File | Test Count | Focus Area |
+|-----------|------------|-----------|
+| [parsing.service.spec.ts](./apps/resume-parser-svc/src/parsing/parsing.service.spec.ts) | 35 | Core business flow, **Test 4** |
+| [vision-llm.service.spec.ts](./apps/resume-parser-svc/src/vision-llm/vision-llm.service.spec.ts) | 46 | Vision LLM integration |
+| [gridfs.service.spec.ts](./apps/resume-parser-svc/src/gridfs/gridfs.service.spec.ts) | 58 | File storage operations |
+| [field-mapper.service.spec.ts](./apps/resume-parser-svc/src/field-mapper/field-mapper.service.spec.ts) | 46 | Data normalization |
+| [nats.client.spec.ts](./apps/resume-parser-svc/src/nats/nats.client.spec.ts) | 55 | Event messaging |
 
-### 🏗 Solution Architect
-**Your Journey**: From system understanding to strategic decisions
+**Total Test Coverage**: **240+ comprehensive unit tests**
 
-**Start Here**:
-1. **[🏗 Architecture Summary](../ARCHITECTURE_SUMMARY.md)** - Complete system design
-2. **[📊 Performance Targets](../README.md#performance-targets)** - SLA requirements
-3. **[🔒 Security Implementation](./DEVELOPER_REFERENCE.md#security-implementation)** - Security architecture
+## 🎯 Key Features & Highlights | 重点功能与亮点
 
-**Key Sections**:
-- [Technology Stack Decisions](../ARCHITECTURE_SUMMARY.md#technology-stack)
-- [Scalability Design](./DEVELOPER_REFERENCE.md#performance-optimization)
-- [Integration Patterns](./API_DOCUMENTATION.md#event-system)
+### Test 4: Event Payload Verification 🎯
+- **Primary Focus**: `analysis.resume.parsed` event structure validation
+- **Location**: `apps/resume-parser-svc/src/parsing/parsing.service.spec.ts:368-406`
+- **Purpose**: Ensure correct jobId, resumeId, and structured resumeDto in published events
 
-### 🚀 DevOps Engineer
-**Your Journey**: From development to production deployment
+### TDD Methodology Success ✅
+- **Red-Green-Refactor** cycle implementation
+- Complete mock strategies with `jest.mock()` and `jest.spyOn()`
+- Expected failure patterns for unimplemented methods
+- High test coverage (>95% target for Resume Parser Service)
 
-**Start Here**:
-1. **[🚀 Deployment Guide](../DEPLOYMENT_GUIDE.md)** - Production setup
-2. **[🐳 Docker Configuration](./DEVELOPER_REFERENCE.md#docker-configuration)** - Containerization
-3. **[📊 Monitoring](./DEVELOPER_REFERENCE.md#monitoring--observability)** - Observability setup
+## 🔄 Development Workflow | 开发工作流程
 
-**Key Sections**:
-- [CI/CD Pipeline](./DEVELOPER_REFERENCE.md#cicd-pipeline)
-- [Health Checks](./DEVELOPER_REFERENCE.md#health-checks)
-- [Performance Tuning](./DEVELOPER_REFERENCE.md#performance-optimization)
+### Current Phase: Phase 2 Implementation
+1. **Completed** ✅: Architecture design and comprehensive testing
+2. **In Progress** 🔄: Resume Parser Service business logic implementation
+3. **Next Steps** 📋: Other services testing and integration
 
-### 📊 Product Manager
-**Your Journey**: From vision to measurable outcomes
+### Quick Commands | 常用命令
 
-**Start Here**:
-1. **[📊 Project Overview](../docs/en-US/PROJECT_OVERVIEW.md)** - Product vision
-2. **[📈 Development Status](../docs/en-US/DEVELOPMENT_STATUS.md)** - Current progress
-3. **[📋 Success Metrics](../specs/SUCCESS_KPIS.yml)** - KPI tracking
-
-**Key Sections**:
-- [Feature Roadmap](../docs/en-US/DEVELOPMENT_STATUS.md)
-- [User Feedback Integration](./USER_GUIDE.md#support-and-resources)
-- [Performance Analytics](../README.md#performance-targets)
-
----
-
-## 🔍 Quick Reference Guides
-
-### ⚡ API Quick Reference
-```http
-# Authentication
-POST /auth/login
-Authorization: Bearer <token>
-
-# Core Operations
-POST /api/v1/jobs                    # Create job
-POST /api/v1/jobs/{id}/resumes       # Upload resumes
-GET  /api/v1/jobs/{id}/analytics     # Get results
-GET  /api/v1/jobs/{id}/resumes/{id}  # Get candidate details
-```
-
-### 🚀 Deployment Quick Reference
 ```bash
-# Development
-npm install && npm run dev:all
+# Install dependencies | 安装依赖
+pnpm install
 
-# Production Docker
-docker-compose up -d
+# Run all tests | 运行所有测试
+pnpm exec nx run-many --target=test --all
 
-# Health Check
-curl http://localhost:3000/health
+# Build all services | 构建所有服务
+pnpm exec nx run-many --target=build --all
 
-# View Logs
-docker-compose logs -f app-gateway
+# Start specific service | 启动特定服务
+pnpm exec nx serve resume-parser-svc
 ```
 
-### 🧪 Testing Quick Reference
-```bash
-# Unit Tests
-npx nx run-many --target=test --all
+## 📊 Project Status Dashboard | 项目状态面板
 
-# E2E Tests  
-npx nx run ai-recruitment-frontend-e2e:e2e
+| Metric | Value | Status |
+|--------|-------|--------|
+| **Architecture Design** | 100% | ✅ Complete |
+| **Resume Parser Tests** | 240+ tests | ✅ Complete |
+| **Shared Libraries** | DTO Migration | ✅ Complete |
+| **Business Logic** | Implementation | 🔄 In Progress |
+| **Integration Testing** | Planning | 📋 Pending |
 
-# Load Testing
-artillery run load-test.yml
+## 🤝 Contributing | 贡献指南
 
-# Coverage Report
-npx nx run-many --target=test --all --coverage
-```
-
----
-
-## 📊 System Capabilities Matrix
-
-### ✅ Current Features (v1.0.0)
-| Feature | Status | Documentation |
-|---------|--------|---------------|
-| **PDF Resume Parsing** | ✅ Production Ready | [API Docs](./API_DOCUMENTATION.md#resume-management) |
-| **Job Description Analysis** | ✅ Production Ready | [User Guide](./USER_GUIDE.md#creating-and-managing-jobs) |
-| **AI-Powered Matching** | ✅ Production Ready | [Algorithm Details](./DEVELOPER_REFERENCE.md#scoring-engine-service) |
-| **Bulk Processing** | ✅ Production Ready | [Tutorial](./USER_GUIDE.md#bulk-resume-processing) |
-| **Real-time Processing** | ✅ Production Ready | [Event System](./DEVELOPER_REFERENCE.md#event-system) |
-| **Detailed Reports** | ✅ Production Ready | [API Reference](./API_DOCUMENTATION.md#reports--analytics) |
-| **REST API** | ✅ Production Ready | [Complete API Docs](./API_DOCUMENTATION.md) |
-| **Docker Deployment** | ✅ Production Ready | [Deployment Guide](../DEPLOYMENT_GUIDE.md) |
-| **Comprehensive Testing** | ✅ 503/503 Tests Pass | [Testing Framework](./DEVELOPER_REFERENCE.md#testing-framework) |
-
-### 🔮 Planned Features (v2.0.0)
-| Feature | Status | Planning Docs |
-|---------|--------|---------------|
-| **Multi-language Support** | 📋 Planned | Product Roadmap |
-| **Video Interview Analysis** | 📋 Planned | Technical Specs |
-| **Advanced Analytics Dashboard** | 📋 Planned | UI/UX Designs |
-| **ATS Integrations** | 📋 Planned | Integration Specs |
-| **Mobile Application** | 📋 Planned | Mobile Strategy |
+1. Follow TDD methodology | 遵循TDD方法论
+2. Maintain >90% test coverage | 保持>90%测试覆盖率
+3. Use TypeScript strict mode | 使用TypeScript严格模式
+4. Follow NestJS best practices | 遵循NestJS最佳实践
+5. Update documentation | 更新文档
 
 ---
 
-## 🎯 Documentation Quality Metrics
+**Documentation Status**: ✅ Complete Bilingual Coverage  
+**Last Updated**: 2025-07-22  
+**Next Review**: 2025-07-25
 
-### ✅ Completeness Checklist
-- ✅ **API Coverage**: 100% of endpoints documented
-- ✅ **User Workflows**: All major user journeys covered
-- ✅ **Code Examples**: Working examples for all APIs
-- ✅ **Error Scenarios**: Common errors and solutions
-- ✅ **Performance Guidance**: Optimization recommendations
-- ✅ **Security Guidelines**: Security best practices
-- ✅ **Deployment Instructions**: Production-ready deployment
-- ✅ **Testing Procedures**: Comprehensive testing guide
-
-### 📊 Documentation Statistics
-- **Total Documents**: 15+
-- **API Endpoints Documented**: 12
-- **Code Examples**: 50+
-- **Diagrams & Visuals**: 10+
-- **Tutorial Steps**: 100+
-- **Troubleshooting Scenarios**: 20+
-
----
-
-## 🔄 Maintenance & Updates
-
-### 📅 Documentation Lifecycle
-
-#### Regular Updates (Every Sprint)
-- API changes and new endpoints
-- Feature additions and modifications
-- Bug fixes and workarounds
-- Performance improvements
-
-#### Major Updates (Every Release)
-- Architecture changes
-- New deployment options
-- Security updates
-- Integration guides
-
-#### Annual Reviews
-- Complete documentation audit
-- User feedback integration
-- Technology stack updates
-- Best practices evolution
-
-### 🤝 Contributing to Documentation
-
-#### For Internal Team
-1. **Update docs** with every feature PR
-2. **Review documentation** in code reviews
-3. **Test examples** to ensure accuracy
-4. **Gather user feedback** from support tickets
-
-#### Documentation Standards
-- **Clarity**: Write for your target audience
-- **Accuracy**: Keep examples current and tested
-- **Completeness**: Cover happy path and edge cases  
-- **Consistency**: Use established patterns and terminology
-
----
-
-## 📞 Getting Help
-
-### 📚 Self-Service Resources
-1. **Search this documentation** for your specific use case
-2. **Check the troubleshooting section** in the User Guide
-3. **Review API examples** in the API Documentation
-4. **Browse GitHub issues** for similar problems
-
-### 🆘 Support Channels
-- **Technical Issues**: [GitHub Issues](https://github.com/ai-recruitment-clerk/issues)
-- **Feature Requests**: [Product Feedback](mailto:feedback@ai-recruitment-clerk.com)
-- **General Questions**: [Support Email](mailto:support@ai-recruitment-clerk.com)
-- **Emergency Support**: [24/7 Hotline](tel:+1-555-AI-HELP)
-
-### 💡 Community Resources
-- **Developer Community**: [Discord Server](https://discord.gg/ai-recruitment)
-- **Best Practices**: [Community Wiki](https://wiki.ai-recruitment-clerk.com)
-- **Video Tutorials**: [YouTube Channel](https://youtube.com/ai-recruitment-clerk)
-- **Webinars**: [Monthly Training Sessions](https://training.ai-recruitment-clerk.com)
-
----
-
-## 🎉 Conclusion
-
-This documentation hub provides comprehensive coverage of the AI Recruitment Clerk system, from basic usage to advanced technical implementation. Whether you're a recruiter looking to optimize your workflow or a developer building integrations, you'll find the guidance you need here.
-
-### 🚀 Next Steps
-1. **Choose your path** based on your role and needs
-2. **Start with the Quick Start guide** to get immediate value
-3. **Dive deeper** with role-specific documentation
-4. **Contribute feedback** to help us improve
-
-**The AI Recruitment Clerk team is committed to maintaining world-class documentation that empowers users and developers to achieve their goals efficiently.**
-
----
-
-**Last Updated**: January 15, 2024  
-**Documentation Version**: 1.0.0  
-**System Version**: 1.0.0  
-**Maintained By**: AI Recruitment Clerk Documentation Team
+> 💡 **Quick Navigation**: Use Ctrl+F to search for specific topics or file paths in this index.

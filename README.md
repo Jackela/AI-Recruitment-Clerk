@@ -32,15 +32,15 @@ AI Recruitment Clerk is an **event-driven microservices system** that automates 
 | **📖 Operations Runbook** | [`docs/RUNBOOK.md`](./docs/RUNBOOK.md) | **Production operations and incident response** |
 | **⚙️ Technical Architecture** | [`docs/TECHNICAL_ARCHITECTURE.md`](./docs/TECHNICAL_ARCHITECTURE.md) | **Detailed technical implementation and performance** |
 
-### Legacy Documentation
+### Additional Documentation
 | Document Type | File Path | Description |
 |---------------|-----------|-------------|
-| 🔖 Project Overview | [`docs/en-US/PROJECT_OVERVIEW.md`](./docs/en-US/PROJECT_OVERVIEW.md) | Historical project documentation |
-| 📈 Development Status | [`docs/en-US/DEVELOPMENT_STATUS.md`](./docs/en-US/DEVELOPMENT_STATUS.md) | Development progress tracking |
-| 👨‍💻 Developer Guide | [`DEVELOPER_GUIDE.md`](./DEVELOPER_GUIDE.md) | Development environment setup |
 | 📋 Project Mission | [`specs/PROJECT_MISSION.md`](./specs/PROJECT_MISSION.md) | Project goals and core mission |
 | 🏗 System Context | [`specs/SYSTEM_CONTEXT.mermaid`](./specs/SYSTEM_CONTEXT.mermaid) | System boundary diagram |
 | 🛡 API Specification | [`specs/api_spec.openapi.yml`](./specs/api_spec.openapi.yml) | RESTful API definitions |
+| 👨‍💻 Developer Guide | [`docs/DEVELOPER_GUIDE.md`](./docs/DEVELOPER_GUIDE.md) | Development environment setup |
+| 🔖 Project Documentation | [`docs/PROJECT_OVERVIEW.md`](./docs/PROJECT_OVERVIEW.md) | Comprehensive project documentation |
+| 📚 Documentation Index | [`docs/DOCUMENTATION_INDEX.md`](./docs/DOCUMENTATION_INDEX.md) | Complete documentation navigation |
 
 ## 🏗 System Architecture
 
@@ -262,7 +262,7 @@ run-e2e-tests.bat     # Windows
 ## 📖 Deployment Documentation
 
 - [**🚀 Deployment Guide**](./DEPLOYMENT_GUIDE.md) - Complete deployment instructions
-- [**📊 System Integration Report**](./SYSTEM_INTEGRATION_REPORT.md) - Technical implementation details
+- [**📚 Documentation Hub**](./docs/DOCUMENTATION_INDEX.md) - Comprehensive documentation navigation
 
 ## 🎉 System Integration Status
 

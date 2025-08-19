@@ -1,6 +1,9 @@
 # Multi-stage build for Angular frontend
 FROM node:20-alpine AS builder
 
+# Install build dependencies
+RUN apk add --no-cache python3 make g++
+
 # Set working directory
 WORKDIR /app
 
@@ -9,14 +12,16 @@ COPY package.json package-lock.json ./
 COPY nx.json tsconfig.base.json ./
 
 # Install dependencies with legacy peer deps handling
-RUN npm ci --legacy-peer-deps && npm cache clean --force
+RUN npm ci --legacy-peer-deps --only=production && \
+    npm ci --legacy-peer-deps && \
+    npm cache clean --force
 
 # Copy source code
 COPY apps/ai-recruitment-frontend ./apps/ai-recruitment-frontend
 COPY libs ./libs
 
-# Build the Angular application
-RUN npx nx build ai-recruitment-frontend --prod
+# Build the Angular application with optimization
+RUN npx nx build ai-recruitment-frontend --configuration=production --optimization=true --aot=true --build-optimizer=true
 
 # Production stage with Nginx
 FROM nginx:alpine AS production

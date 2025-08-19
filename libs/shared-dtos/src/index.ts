@@ -92,3 +92,11 @@ export * from './contracts/analytics.contracts';
 export * from './privacy/consent.dto';
 export * from './privacy/data-subject-rights.dto';
 export * from './privacy/privacy-simple.dto';
+export * from './privacy/privacy-infrastructure.dto';
+
+// Common Patterns - 通用模式
+export * from './common/base-service.pattern';
+export * from './common/nats-client.pattern';
+export * from './common/validation.patterns';
+export * from './common/mobile-component.patterns';
+export * from './common/error-handling.patterns';

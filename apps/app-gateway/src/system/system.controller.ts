@@ -44,14 +44,34 @@ export class SystemController {
   @Get('health')
   async getSystemHealth(): Promise<{ success: boolean; data: any }> {
     try {
+      const startTime = process.uptime();
+      const memoryUsage = process.memoryUsage();
+      
       return {
         success: true,
         data: {
           status: 'healthy',
           timestamp: new Date().toISOString(),
-          services: [],
-          uptime: 0,
-          version: '1.0.0'
+          services: [
+            {
+              name: 'app-gateway',
+              status: 'healthy',
+              uptime: Math.floor(startTime),
+              memory: {
+                rss: Math.round(memoryUsage.rss / 1024 / 1024),
+                heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024),
+                heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024)
+              }
+            }
+          ],
+          uptime: Math.floor(startTime),
+          version: '1.0.0',
+          environment: process.env.NODE_ENV || 'development',
+          memory: {
+            rss: `${Math.round(memoryUsage.rss / 1024 / 1024)}MB`,
+            heapUsed: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`,
+            heapTotal: `${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`
+          }
         },
       };
     } catch (error) {
@@ -91,10 +111,10 @@ export class SystemController {
           status: 'operational',
           version: '1.0.0',
           environment: process.env.NODE_ENV || 'development',
-          uptime: 0,
+          uptime: Math.floor(process.uptime()),
           services: {
-            total: 0,
-            healthy: 0,
+            total: 1,
+            healthy: 1,
             degraded: 0,
             unhealthy: 0
           },
