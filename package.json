@@ -12,7 +12,7 @@
   },
   "scripts": {
     "build": "npx nx build app-gateway --prod",
-    "start": "node dist/apps/app-gateway/main.js || node enhanced-server.js || node simple-server.js",
+    "start": "echo 'Testing enhanced server directly...' && node enhanced-server.js || node simple-server.js",
     "start:prod": "NODE_ENV=production node dist/apps/app-gateway/main.js || node enhanced-server.js || node simple-server.js", 
     "start:simple": "node simple-server.js",
     "postinstall": "echo 'Skipping build in postinstall'",
