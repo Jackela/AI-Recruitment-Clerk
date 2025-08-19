@@ -5,7 +5,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { JobsModule } from '../jobs/jobs.module';
+import { JobsModule } from '../jobs/jobs.module';\nimport { SimpleJobsController } from '../jobs/simple-jobs.controller';
 import { AuthModule } from '../auth/auth.module';
 import { GuestModule } from '../guest/guest.module';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -108,7 +108,7 @@ import { ProductionSecurityValidator } from '../common/security/production-secur
     PrivacyComplianceModule,
     SecurityModule
   ],
-  controllers: [AppController, SystemController],
+  controllers: [AppController, SystemController, SimpleJobsController],
   providers: [
     AppService,
     NatsClient,

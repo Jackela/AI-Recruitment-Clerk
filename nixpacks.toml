@@ -8,7 +8,7 @@ cmd = 'npm install --legacy-peer-deps --production'
 cmd = 'npm run build || echo "Build failed, using simple server fallback"'
 
 [start]
-cmd = 'node enhanced-server.js || node simple-server.js'
+cmd = 'node hybrid-server.js || node enhanced-server.js || node simple-server.js'
 
 [variables]
 NODE_ENV = 'production'
