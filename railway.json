@@ -13,7 +13,7 @@
   },
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "npm install --legacy-peer-deps && npx nx build app-gateway --prod && npx nx build ai-recruitment-frontend --configuration=production || echo 'Build failed, fallback ready'"
+    "buildCommand": "npm install --legacy-peer-deps && npx nx build app-gateway --prod"
   },
   "environments": {
     "production": {

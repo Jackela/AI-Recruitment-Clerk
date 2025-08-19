@@ -11,9 +11,9 @@
     "npm": ">=10.0.0"
   },
   "scripts": {
-    "build": "npx nx build app-gateway --prod && npx nx build ai-recruitment-frontend --configuration=production",
-    "start": "cd dist/apps/app-gateway && npm install --production && cd ../../.. && node dist/apps/app-gateway/main.js || node simple-server.js",
-    "start:prod": "NODE_ENV=production cd dist/apps/app-gateway && npm install --production && cd ../../.. && node dist/apps/app-gateway/main.js || node simple-server.js", 
+    "build": "npx nx build app-gateway --prod",
+    "start": "node dist/apps/app-gateway/main.js || node simple-server.js",
+    "start:prod": "NODE_ENV=production node dist/apps/app-gateway/main.js || node simple-server.js", 
     "start:simple": "node simple-server.js",
     "postinstall": "echo 'Skipping build in postinstall'",
     "format": "prettier --write \"{apps,libs}/**/*.{ts,html,scss,js,json,md}\"",
