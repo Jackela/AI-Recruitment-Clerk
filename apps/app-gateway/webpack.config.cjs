@@ -16,14 +16,7 @@ module.exports = {
     'mysql': 'mysql',
     'ioredis': 'ioredis',
     'redis': 'redis',
-    'level': 'level',
-    '@angular/core': '@angular/core',
-    '@angular/common': '@angular/common',
-    '@angular/platform-browser': '@angular/platform-browser',
-    '@angular/platform-browser-dynamic': '@angular/platform-browser-dynamic',
-    '@angular/router': '@angular/router',
-    '@angular/forms': '@angular/forms',
-    '@angular/compiler': '@angular/compiler'
+    'level': 'level'
   },
   plugins: [
     new NxAppWebpackPlugin({
