@@ -314,7 +314,7 @@ export class FeedbackCodeService {
   }
 
   // 数据清理：删除过期的未使用反馈码
-  async cleanupExpiredCodes(daysOld: number = 30): Promise<number> {
+  async cleanupExpiredCodes(daysOld = 30): Promise<number> {
     try {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - daysOld);

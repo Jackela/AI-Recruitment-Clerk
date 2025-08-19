@@ -328,8 +328,8 @@ export class UsageLimitContracts {
    */
   static performanceContract<T>(
     operation: () => T,
-    maxExecutionTimeMs: number = 100,
-    operationName: string = 'Operation'
+    maxExecutionTimeMs = 100,
+    operationName = 'Operation'
   ): T {
     const startTime = Date.now();
     

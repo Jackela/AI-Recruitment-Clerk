@@ -274,7 +274,7 @@ export class SecretsManagerService implements OnModuleInit {
   /**
    * 生成安全的随机密钥
    */
-  generateSecureKey(length: number = 32): string {
+  generateSecureKey(length = 32): string {
     return crypto.randomBytes(length).toString('base64').slice(0, length);
   }
 

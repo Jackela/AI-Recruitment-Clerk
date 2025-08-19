@@ -10,7 +10,7 @@ import {
   Min,
   IsDateString
 } from 'class-validator';
-import { EventType, MetricUnit, ReportType, DataScope } from '../../../../../../libs/shared-dtos/src';
+import { EventType, MetricUnit, ReportType, DataScope } from '@app/shared-dtos';
 
 /**
  * 用户交互事件追踪DTO

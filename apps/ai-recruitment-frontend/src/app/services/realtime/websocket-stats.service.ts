@@ -226,7 +226,7 @@ export class WebSocketStatsService {
     
     // Update relevant stats
     const currentStats = this.stats$.value;
-    let updatedStats = { ...currentStats };
+    const updatedStats = { ...currentStats };
     
     switch (event.type) {
       case 'started':

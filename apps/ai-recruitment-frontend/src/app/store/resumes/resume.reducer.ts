@@ -1,5 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
-import { ResumeState, initialResumeState } from './resume.state';
+import { initialResumeState } from './resume.state';
 import * as ResumeActions from './resume.actions';
 
 export const resumeReducer = createReducer(

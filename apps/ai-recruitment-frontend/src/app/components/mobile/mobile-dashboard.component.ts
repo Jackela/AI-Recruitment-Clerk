@@ -1,10 +1,10 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Subject, takeUntil, Observable, of } from 'rxjs';
+import { Subject } from 'rxjs';
 import { MobileNavigationComponent, MobileNavItem } from './mobile-navigation.component';
 import { MobileSwipeComponent, SwipeAction, SwipeEvent } from './mobile-swipe.component';
-import { TouchGestureService, GestureEvent } from '../../services/mobile/touch-gesture.service';
+import { TouchGestureService } from '../../services/mobile/touch-gesture.service';
 
 export interface DashboardCard {
   id: string;

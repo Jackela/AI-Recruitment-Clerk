@@ -11,7 +11,7 @@ export interface IGuestUsage {
 export class GuestUsageEntity implements IGuestUsage {
   constructor(
     public deviceId: string,
-    public usageCount: number = 0,
+    public usageCount = 0,
     public feedbackCode?: string,
     public feedbackCodeStatus?: 'generated' | 'redeemed',
     public lastUsed: Date = new Date(),

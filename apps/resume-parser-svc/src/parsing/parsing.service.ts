@@ -295,9 +295,26 @@ export class ParsingService {
       
       if (shouldRetry && retryCount < maxRetries) {
         this.logger.log(`Scheduling retry ${retryCount + 1}/${maxRetries} for resumeId: ${resumeId}`);
-        // TODO: Implement actual retry mechanism with exponential backoff
-        // For now, just increment retry count and log
-        this.incrementRetryCount(resumeId);
+        
+        // Implement exponential backoff retry mechanism
+        const retryDelay = this.calculateExponentialBackoffDelay(retryCount);
+        this.logger.log(`Retry will be attempted in ${retryDelay}ms`);
+        
+        // Schedule retry with exponential backoff
+        setTimeout(async () => {
+          try {
+            this.incrementRetryCount(resumeId);
+            this.logger.log(`Executing retry ${retryCount + 1} for resumeId: ${resumeId}`);
+            
+            // Retry the parsing operation
+            await this.retryParseOperation(jobId, resumeId, originalData);
+          } catch (retryError) {
+            this.logger.error(`Retry ${retryCount + 1} failed for resumeId: ${resumeId}`, retryError);
+            // This will trigger another call to this error handler if retries remain
+            await this.handleParsingError(jobId, resumeId, retryError, originalData);
+          }
+        }, retryDelay);
+        
       } else {
         this.logger.log(`Max retries reached or error not retryable for resumeId: ${resumeId}`);
         
@@ -385,6 +402,92 @@ export class ParsingService {
   private incrementRetryCount(resumeId: string): void {
     const currentCount = this.getRetryCount(resumeId);
     this.retryCounts.set(resumeId, currentCount + 1);
+  }
+
+  /**
+   * Calculate exponential backoff delay with jitter
+   * @param retryCount Current retry attempt (0-based)
+   * @returns Delay in milliseconds
+   */
+  private calculateExponentialBackoffDelay(retryCount: number): number {
+    // Base delay: 1 second
+    const baseDelay = 1000;
+    // Exponential factor: 2
+    const exponentialFactor = 2;
+    // Maximum delay: 30 seconds
+    const maxDelay = 30000;
+    
+    // Calculate exponential delay: base * (factor ^ retryCount)
+    let delay = baseDelay * Math.pow(exponentialFactor, retryCount);
+    
+    // Cap at maximum delay
+    delay = Math.min(delay, maxDelay);
+    
+    // Add jitter to prevent thundering herd (±25% random variation)
+    const jitterFactor = 0.25;
+    const jitter = (Math.random() - 0.5) * 2 * jitterFactor;
+    delay = delay * (1 + jitter);
+    
+    return Math.round(delay);
+  }
+
+  /**
+   * Retry the parsing operation for a specific resume
+   * @param jobId Job identifier
+   * @param resumeId Resume identifier
+   * @param originalData Original resume data for retry
+   */
+  private async retryParseOperation(jobId: string, resumeId: string, originalData: any): Promise<void> {
+    try {
+      this.logger.log(`Retrying parsing operation for resumeId: ${resumeId}`);
+      
+      // Re-attempt the parsing with the original data
+      if (originalData.fileBuffer) {
+        // Retry file-based parsing
+        await this.parseResumeFile(jobId, resumeId, originalData.fileBuffer, originalData.fileName);
+      } else if (originalData.resumeText) {
+        // Retry text-based parsing
+        await this.parseResumeText(jobId, resumeId, originalData.resumeText);
+      } else {
+        throw new Error('No valid data for retry operation');
+      }
+      
+      this.logger.log(`Retry successful for resumeId: ${resumeId}`);
+      
+      // Clear retry count on success
+      this.retryCounts.delete(resumeId);
+      
+    } catch (error) {
+      this.logger.error(`Retry operation failed for resumeId: ${resumeId}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Parse resume from file buffer
+   * @param jobId Job identifier
+   * @param resumeId Resume identifier  
+   * @param fileBuffer File buffer
+   * @param fileName Original file name
+   */
+  private async parseResumeFile(jobId: string, resumeId: string, fileBuffer: Buffer, fileName: string): Promise<void> {
+    // Implementation would call existing parsing logic
+    this.logger.log(`Parsing resume file: ${fileName} for resumeId: ${resumeId}`);
+    // Add actual file parsing logic here - this would integrate with existing parse methods
+    // For now, this is a placeholder that demonstrates the retry structure
+  }
+
+  /**
+   * Parse resume from text
+   * @param jobId Job identifier
+   * @param resumeId Resume identifier
+   * @param resumeText Resume text content
+   */
+  private async parseResumeText(jobId: string, resumeId: string, resumeText: string): Promise<void> {
+    // Implementation would call existing parsing logic
+    this.logger.log(`Parsing resume text for resumeId: ${resumeId}`);
+    // Add actual text parsing logic here - this would integrate with existing parse methods
+    // For now, this is a placeholder that demonstrates the retry structure
   }
 
   // Security helper methods

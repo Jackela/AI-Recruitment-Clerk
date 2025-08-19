@@ -126,8 +126,8 @@ export class QuestionnaireController {
   @Get()
   async getQuestionnaires(
     @Request() req: AuthenticatedRequest,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 20,
+    @Query('page') page = 1,
+    @Query('limit') limit = 20,
     @Query('status') status?: QuestionnaireStatus,
     @Query('search') search?: string
   ) {
@@ -373,8 +373,8 @@ export class QuestionnaireController {
   async getQuestionnaireSubmissions(
     @Request() req: AuthenticatedRequest,
     @Param('questionnaireId') questionnaireId: string,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 20,
+    @Query('page') page = 1,
+    @Query('limit') limit = 20,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string
   ) {

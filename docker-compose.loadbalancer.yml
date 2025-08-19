@@ -1,0 +1,422 @@
+# AI Recruitment Clerk - Load Balancer Configuration
+# High Availability and Load Balancing Setup
+
+services:
+  # HAProxy Load Balancer
+  haproxy:
+    image: haproxy:2.8-alpine
+    container_name: ai-recruitment-haproxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8404:8404"  # Stats page
+    volumes:
+      - ./config/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./ssl/:/etc/ssl/certs/:ro
+      - ./config/haproxy-start.sh:/usr/local/bin/haproxy-start.sh:ro
+    environment:
+      - STATS_USERNAME=admin
+      - STATS_PASSWORD=${HAPROXY_STATS_PASSWORD:-admin123}
+    networks:
+      - ai-recruitment-network
+      - frontend-network
+    depends_on:
+      - app-gateway-1
+      - app-gateway-2
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "80"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    command: /usr/local/bin/haproxy-start.sh
+
+  # Primary API Gateway Instance
+  app-gateway-1:
+    build:
+      context: .
+      dockerfile: apps/app-gateway/Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: ai-recruitment-gateway-1
+    restart: unless-stopped
+    environment:
+      # Application Configuration
+      PORT: 3000
+      NODE_ENV: production
+      INSTANCE_ID: gateway-1
+      
+      # Database Configuration
+      MONGODB_URL: mongodb://${MONGODB_ROOT_USER:-admin}:${MONGODB_ROOT_PASSWORD}@mongodb-primary:27017/${MONGODB_DATABASE:-ai-recruitment}?authSource=admin
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis-cluster:6379
+      
+      # Message Queue Configuration
+      NATS_URL: nats://nats-cluster:4222
+      NATS_AUTH_TOKEN: ${NATS_AUTH_TOKEN}
+      
+      # Security Configuration
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      
+      # API Configuration
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      
+      # Load Balancer Health Check
+      HEALTH_CHECK_ENDPOINT: /health
+      
+      # Monitoring
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
+      ENABLE_METRICS: true
+      METRICS_PORT: 9090
+    ports:
+      - "3001:3000"
+      - "9091:9090"  # Metrics
+    depends_on:
+      mongodb-primary:
+        condition: service_healthy
+      redis-cluster:
+        condition: service_healthy
+      nats-cluster:
+        condition: service_healthy
+    networks:
+      - ai-recruitment-network
+    volumes:
+      - uploads_data:/app/uploads:rw
+      - logs_data_1:/app/logs:rw
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+
+  # Secondary API Gateway Instance
+  app-gateway-2:
+    build:
+      context: .
+      dockerfile: apps/app-gateway/Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: ai-recruitment-gateway-2
+    restart: unless-stopped
+    environment:
+      # Application Configuration
+      PORT: 3000
+      NODE_ENV: production
+      INSTANCE_ID: gateway-2
+      
+      # Database Configuration
+      MONGODB_URL: mongodb://${MONGODB_ROOT_USER:-admin}:${MONGODB_ROOT_PASSWORD}@mongodb-primary:27017/${MONGODB_DATABASE:-ai-recruitment}?authSource=admin
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis-cluster:6379
+      
+      # Message Queue Configuration
+      NATS_URL: nats://nats-cluster:4222
+      NATS_AUTH_TOKEN: ${NATS_AUTH_TOKEN}
+      
+      # Security Configuration
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      
+      # API Configuration
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      
+      # Load Balancer Health Check
+      HEALTH_CHECK_ENDPOINT: /health
+      
+      # Monitoring
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
+      ENABLE_METRICS: true
+      METRICS_PORT: 9090
+    ports:
+      - "3002:3000"
+      - "9092:9090"  # Metrics
+    depends_on:
+      mongodb-primary:
+        condition: service_healthy
+      redis-cluster:
+        condition: service_healthy
+      nats-cluster:
+        condition: service_healthy
+    networks:
+      - ai-recruitment-network
+    volumes:
+      - uploads_data:/app/uploads:rw
+      - logs_data_2:/app/logs:rw
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+
+  # MongoDB Primary with Replica Set
+  mongodb-primary:
+    image: mongo:7.0-jammy
+    container_name: ai-recruitment-mongodb-primary
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGODB_DATABASE:-ai-recruitment}
+      MONGO_REPLICA_SET_NAME: ai-recruitment-rs
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_primary_data:/data/db
+      - ./config/mongod-primary.conf:/etc/mongod.conf:ro
+      - ./scripts/mongo-replica-init.js:/docker-entrypoint-initdb.d/mongo-replica-init.js:ro
+    networks:
+      - ai-recruitment-network
+    command: mongod --config /etc/mongod.conf --replSet ai-recruitment-rs
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # MongoDB Secondary (Read Replica)
+  mongodb-secondary:
+    image: mongo:7.0-jammy
+    container_name: ai-recruitment-mongodb-secondary
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD}
+      MONGO_REPLICA_SET_NAME: ai-recruitment-rs
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_secondary_data:/data/db
+      - ./config/mongod-secondary.conf:/etc/mongod.conf:ro
+    networks:
+      - ai-recruitment-network
+    command: mongod --config /etc/mongod.conf --replSet ai-recruitment-rs
+    depends_on:
+      - mongodb-primary
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis Cluster
+  redis-cluster:
+    image: redis:7-alpine
+    container_name: ai-recruitment-redis-cluster
+    restart: unless-stopped
+    command: >
+      redis-server 
+      --requirepass ${REDIS_PASSWORD}
+      --appendonly yes 
+      --save 900 1
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --tcp-keepalive 60
+      --timeout 300
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_cluster_data:/data
+    networks:
+      - ai-recruitment-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+
+  # NATS Cluster
+  nats-cluster:
+    image: nats:2.10-alpine
+    container_name: ai-recruitment-nats-cluster
+    restart: unless-stopped
+    command: 
+      - "--jetstream"
+      - "--auth=${NATS_AUTH_TOKEN}"
+      - "--cluster_name=ai-recruitment-cluster"
+      - "--max_payload=1048576"
+      - "--max_connections=1000"
+    ports:
+      - "4222:4222"
+      - "6222:6222"
+      - "8222:8222"
+    volumes:
+      - nats_cluster_data:/data
+    networks:
+      - ai-recruitment-network
+    healthcheck:
+      test: ["CMD", "nats", "server", "check", "--server=nats://localhost:4222"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Frontend Load Balancing (Multiple Instances)
+  frontend-1:
+    build:
+      context: .
+      dockerfile: apps/ai-recruitment-frontend/Dockerfile
+      args:
+        NODE_ENV: production
+        API_GATEWAY_URL: http://haproxy
+    container_name: ai-recruitment-frontend-1
+    restart: unless-stopped
+    ports:
+      - "4201:80"
+    depends_on:
+      haproxy:
+        condition: service_healthy
+    networks:
+      - frontend-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  frontend-2:
+    build:
+      context: .
+      dockerfile: apps/ai-recruitment-frontend/Dockerfile
+      args:
+        NODE_ENV: production
+        API_GATEWAY_URL: http://haproxy
+    container_name: ai-recruitment-frontend-2
+    restart: unless-stopped
+    ports:
+      - "4202:80"
+    depends_on:
+      haproxy:
+        condition: service_healthy
+    networks:
+      - frontend-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Microservices (Load Balanced)
+  jd-extractor-svc-1:
+    build:
+      context: .
+      dockerfile: apps/jd-extractor-svc/Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: ai-recruitment-jd-extractor-1
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NATS_URL: nats://nats-cluster:4222
+      NATS_AUTH_TOKEN: ${NATS_AUTH_TOKEN}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      INSTANCE_ID: jd-extractor-1
+    depends_on:
+      nats-cluster:
+        condition: service_healthy
+    networks:
+      - ai-recruitment-network
+
+  jd-extractor-svc-2:
+    build:
+      context: .
+      dockerfile: apps/jd-extractor-svc/Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: ai-recruitment-jd-extractor-2
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NATS_URL: nats://nats-cluster:4222
+      NATS_AUTH_TOKEN: ${NATS_AUTH_TOKEN}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      INSTANCE_ID: jd-extractor-2
+    depends_on:
+      nats-cluster:
+        condition: service_healthy
+    networks:
+      - ai-recruitment-network
+
+  # KeepAlived for High Availability (VIP Management)
+  keepalived:
+    image: osixia/keepalived:2.0.20
+    container_name: ai-recruitment-keepalived
+    restart: unless-stopped
+    environment:
+      KEEPALIVED_INTERFACE: eth0
+      KEEPALIVED_VIRTUAL_IPS: 172.20.0.100
+      KEEPALIVED_UNICAST_PEERS: "#PYTHON2BASH:['172.20.0.10', '172.20.0.11']"
+      KEEPALIVED_PRIORITY: 100
+      KEEPALIVED_PASSWORD: ${KEEPALIVED_PASSWORD:-keepalived123}
+    volumes:
+      - ./config/keepalived.conf:/container/service/keepalived/assets/keepalived.conf:ro
+    networks:
+      ai-recruitment-network:
+        ipv4_address: 172.20.0.10
+    cap_add:
+      - NET_ADMIN
+      - NET_BROADCAST
+      - NET_RAW
+    depends_on:
+      - haproxy
+
+# Networks
+networks:
+  ai-recruitment-network:
+    driver: bridge
+    name: ai-recruitment-network
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/24
+          gateway: 172.20.0.1
+  frontend-network:
+    driver: bridge
+    name: ai-recruitment-frontend-network
+
+# Volumes
+volumes:
+  mongodb_primary_data:
+    name: ai-recruitment-mongodb-primary-data
+    driver: local
+  mongodb_secondary_data:
+    name: ai-recruitment-mongodb-secondary-data
+    driver: local
+  redis_cluster_data:
+    name: ai-recruitment-redis-cluster-data
+    driver: local
+  nats_cluster_data:
+    name: ai-recruitment-nats-cluster-data
+    driver: local
+  uploads_data:
+    name: ai-recruitment-uploads-data-shared
+    driver: local
+  logs_data_1:
+    name: ai-recruitment-logs-data-1
+    driver: local
+  logs_data_2:
+    name: ai-recruitment-logs-data-2
+    driver: local

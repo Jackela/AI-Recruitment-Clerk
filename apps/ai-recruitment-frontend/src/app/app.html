@@ -4,13 +4,13 @@
 <!-- ARIA Live Regions -->
 <arc-aria-live></arc-aria-live>
 
-<div class="app-container" role="application" aria-label="AI Recruitment Assistant">
+<div class="app-container" role="application" [attr.aria-label]="config.APP_INFO.description">
   <!-- Header with Navigation -->
   <header class="app-header" role="banner">
     <div class="header-content">
       <h1 class="app-title" id="app-title">
-        <span class="sr-only">AI Recruitment Assistant Application</span>
-        AI 招聘助理
+        <span class="sr-only">{{ config.APP_INFO.description }}</span>
+        {{ config.APP_INFO.name }}
       </h1>
       
       <!-- Main Navigation -->
@@ -24,11 +24,11 @@
            routerLinkActive="active" 
            class="nav-link" 
            role="menuitem"
-           aria-label="Dashboard - View system overview and statistics"
-           title="查看系统概览和统计信息 (Alt+1)"
+           [attr.aria-label]="getText('APP.pages.dashboard.subtitle')"
+           [attr.title]="getText('APP.pages.dashboard.subtitle') + ' (Alt+1)'"
            [attr.aria-current]="'page'">
           <span class="nav-icon" aria-hidden="true">📊</span>
-          <span class="nav-text">仪表板</span>
+          <span class="nav-text">{{ getText('APP.navigation.dashboard') }}</span>
           <span class="sr-only">- Alt+1</span>
         </a>
         
@@ -36,10 +36,10 @@
            routerLinkActive="active" 
            class="nav-link"
            role="menuitem"
-           aria-label="Smart Analysis - Upload and analyze resumes"
-           title="上传和分析简历 (Alt+2)">
+           [attr.aria-label]="getText('APP.pages.analysis.subtitle')"
+           [attr.title]="getText('APP.pages.analysis.subtitle') + ' (Alt+2)'">
           <span class="nav-icon" aria-hidden="true">🧠</span>
-          <span class="nav-text">智能分析</span>
+          <span class="nav-text">{{ getText('APP.navigation.analysis') }}</span>
           <span class="sr-only">- Alt+2</span>
         </a>
         
@@ -47,10 +47,10 @@
            routerLinkActive="active" 
            class="nav-link"
            role="menuitem"
-           aria-label="Analysis Results - View analysis results and reports"
-           title="查看分析结果 (Alt+3)">
+           [attr.aria-label]="getText('APP.pages.results.subtitle')"
+           [attr.title]="getText('APP.pages.results.subtitle') + ' (Alt+3)'">
           <span class="nav-icon" aria-hidden="true">📈</span>
-          <span class="nav-text">分析结果</span>
+          <span class="nav-text">{{ getText('APP.navigation.results') }}</span>
           <span class="sr-only">- Alt+3</span>
         </a>
       </nav>
@@ -61,28 +61,28 @@
            aria-label="Quick actions and settings">
         <button class="help-btn" 
                 type="button"
-                aria-label="Show keyboard shortcuts help (Alt+H)"
-                title="显示快捷键帮助 (Alt+H)"
+                [attr.aria-label]="getText('ACCESSIBILITY.shortcuts.help')"
+                [attr.title]="getText('APP.navigation.help') + ' (Alt+H)'"
                 (click)="showKeyboardHelp()">
           <span aria-hidden="true">❓</span>
-          <span class="sr-only">Help</span>
+          <span class="sr-only">{{ getText('APP.navigation.help') }}</span>
         </button>
         
         <button class="settings-btn" 
                 type="button"
-                aria-label="Open accessibility and system settings"
-                title="系统设置"
+                [attr.aria-label]="getText('ACCESSIBILITY.aria.settings')"
+                [attr.title]="getText('APP.navigation.settings')"
                 aria-haspopup="menu"
                 [attr.aria-expanded]="settingsMenuOpen()"
                 (click)="toggleSettingsMenu()">
           <span aria-hidden="true">⚙️</span>
-          <span class="sr-only">Settings</span>
+          <span class="sr-only">{{ getText('APP.navigation.settings') }}</span>
         </button>
         
         <!-- Accessibility Settings Menu -->
         <div class="settings-menu" 
              role="menu"
-             aria-label="Accessibility settings"
+             [attr.aria-label]="getText('ACCESSIBILITY.aria.settings')"
              [attr.aria-hidden]="!settingsMenuOpen()"
              [class.open]="settingsMenuOpen()">
           <button role="menuitem" 
@@ -90,20 +90,20 @@
                   (click)="toggleHighContrast()"
                   [attr.aria-checked]="highContrastEnabled()">
             <span aria-hidden="true">🎨</span>
-            Toggle High Contrast
+            {{ getText('ACCESSIBILITY.toggleHighContrast') }}
           </button>
           <button role="menuitem" 
                   type="button"
                   (click)="toggleReducedMotion()"
-                  [attr.aria-checked]="reducedMotionEnabled">
+                  [attr.aria-checked]="reducedMotionEnabled()">
             <span aria-hidden="true">🎭</span>
-            Reduce Motion
+            {{ getText('ACCESSIBILITY.reduceMotion') }}
           </button>
           <button role="menuitem" 
                   type="button"
                   (click)="increaseFontSize()">
             <span aria-hidden="true">🔤</span>
-            Increase Font Size
+            {{ getText('ACCESSIBILITY.increaseFontSize') }}
           </button>
         </div>
       </div>
@@ -121,9 +121,9 @@
     <div class="loading-indicator" 
          role="status" 
          aria-live="polite"
-         [attr.aria-hidden]="!isLoading"
+         [attr.aria-hidden]="!isLoading()"
          *ngIf="isLoading">
-      <span class="sr-only">Loading page content...</span>
+      <span class="sr-only">{{ getText('ACCESSIBILITY.screenReader.loading') }}</span>
       <div class="spinner" aria-hidden="true"></div>
     </div>
     
@@ -134,14 +134,14 @@
   <!-- Global UX Components -->
   <arc-guide-overlay 
     role="dialog"
-    aria-label="Application guide overlay"
-    [attr.aria-hidden]="!guideOverlayVisible">
+    [attr.aria-label]="getText('ACCESSIBILITY.aria.guideOverlay')"
+    [attr.aria-hidden]="!guideOverlayVisible()">
   </arc-guide-overlay>
   
   <arc-status-notifications 
     role="log"
     aria-live="polite"
-    aria-label="Status notifications">
+    [attr.aria-label]="getText('ACCESSIBILITY.aria.notifications')">
   </arc-status-notifications>
   
   <!-- Keyboard Help Modal -->
@@ -149,34 +149,34 @@
        role="dialog"
        aria-labelledby="keyboard-help-title"
        aria-describedby="keyboard-help-description"
-       [attr.aria-hidden]="!keyboardHelpVisible"
-       [class.visible]="keyboardHelpVisible">
+       [attr.aria-hidden]="!keyboardHelpVisible()"
+       [class.visible]="keyboardHelpVisible()">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 id="keyboard-help-title">Keyboard Shortcuts</h2>
+        <h2 id="keyboard-help-title">{{ getText('ACCESSIBILITY.keyboardShortcuts') }}</h2>
         <button type="button" 
                 class="close-btn"
-                aria-label="Close keyboard help"
+                [attr.aria-label]="getText('COMMON.close')"
                 (click)="hideKeyboardHelp()">
           <span aria-hidden="true">✕</span>
         </button>
       </div>
       <div id="keyboard-help-description" class="modal-body">
         <div class="shortcut-section">
-          <h3>Navigation</h3>
+          <h3>{{ getText('ACCESSIBILITY.navigation') }}</h3>
           <ul role="list">
-            <li><kbd>Alt + 1</kbd> - Go to Dashboard</li>
-            <li><kbd>Alt + 2</kbd> - Go to Analysis</li>
-            <li><kbd>Alt + 3</kbd> - Go to Results</li>
-            <li><kbd>Alt + H</kbd> - Show this help</li>
+            <li><kbd>Alt + 1</kbd> - {{ getText('APP.navigation.dashboard') }}</li>
+            <li><kbd>Alt + 2</kbd> - {{ getText('APP.navigation.analysis') }}</li>
+            <li><kbd>Alt + 3</kbd> - {{ getText('APP.navigation.results') }}</li>
+            <li><kbd>Alt + H</kbd> - {{ getText('APP.navigation.help') }}</li>
           </ul>
         </div>
         <div class="shortcut-section">
-          <h3>Actions</h3>
+          <h3>{{ getText('ACCESSIBILITY.actions') }}</h3>
           <ul role="list">
-            <li><kbd>Ctrl + Shift + R</kbd> - Refresh data</li>
-            <li><kbd>Ctrl + N</kbd> - New analysis</li>
-            <li><kbd>Escape</kbd> - Close modals</li>
+            <li><kbd>Ctrl + Shift + R</kbd> - {{ getText('COMMON.refresh') }}</li>
+            <li><kbd>Ctrl + N</kbd> - {{ getText('APP.navigation.analysis') }}</li>
+            <li><kbd>Escape</kbd> - {{ getText('COMMON.close') }}</li>
           </ul>
         </div>
       </div>

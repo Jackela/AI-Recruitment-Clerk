@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
-import { of, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { GuestLimitModalComponent } from './guest-limit-modal.component';
 import { GuestState, initialGuestState } from '../../store/guest/guest.state';

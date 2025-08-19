@@ -13,7 +13,7 @@ import { AnalysisReportDto, ReportsListDto } from './dto/report-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
-import { Permission, UserDto } from '../../../../libs/shared-dtos/src';
+import { Permission, UserDto } from '@app/shared-dtos';
 
 interface AuthenticatedRequest extends Request {
   user: UserDto;

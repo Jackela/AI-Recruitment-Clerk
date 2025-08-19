@@ -141,7 +141,7 @@ export class RateLimitMiddleware implements NestMiddleware {
 
     try {
       const recordStr = await this.redis.get(key);
-      let record: UsageRecord = recordStr 
+      const record: UsageRecord = recordStr 
         ? JSON.parse(recordStr)
         : { count: 0, questionnaires: 0, payments: 0, lastReset: today };
 
@@ -183,7 +183,7 @@ export class RateLimitMiddleware implements NestMiddleware {
       }
 
       const recordStr = await this.redis.get(key);
-      let record: UsageRecord = recordStr 
+      const record: UsageRecord = recordStr 
         ? JSON.parse(recordStr)
         : { count: 0, questionnaires: 0, payments: 0, lastReset: today };
 

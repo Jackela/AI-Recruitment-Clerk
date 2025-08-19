@@ -179,8 +179,8 @@ export interface SwipeEvent {
 })
 export class MobileSwipeComponent implements OnInit, OnDestroy {
   @Input() actions: SwipeAction[] = [];
-  @Input() swipeThreshold: number = 80;
-  @Input() disabled: boolean = false;
+  @Input() swipeThreshold = 80;
+  @Input() disabled = false;
   @Input() item: any;
 
   @Output() swipeAction = new EventEmitter<SwipeEvent>();
@@ -191,15 +191,15 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
   @ViewChild('content') content!: ElementRef<HTMLElement>;
   @ViewChild('actionsContainer') actionsContainer!: ElementRef<HTMLElement>;
 
-  translateX: number = 0;
-  isSwiping: boolean = false;
-  actionsVisible: boolean = false;
+  translateX = 0;
+  isSwiping = false;
+  actionsVisible = false;
   
-  private startX: number = 0;
-  private currentX: number = 0;
-  private isDragging: boolean = false;
-  private maxSwipeDistance: number = 0;
-  private isMouseEvent: boolean = false;
+  private startX = 0;
+  private currentX = 0;
+  private isDragging = false;
+  private maxSwipeDistance = 0;
+  private isMouseEvent = false;
 
   ngOnInit() {
     this.calculateMaxSwipeDistance();

@@ -62,7 +62,7 @@ expect.extend({
 (global as any).testUtils = {
   generateTestEmail: (prefix: string) => `${prefix}-${Date.now()}@test.com`,
   generateTestUserId: () => `test-user-${Date.now()}`,
-  createMockFile: (size: number = 1024) => Buffer.alloc(size, 'test-file-content'),
+  createMockFile: (size = 1024) => Buffer.alloc(size, 'test-file-content'),
   
   // Performance testing utilities
   measurePerformance: async (operation: () => Promise<any>) => {

@@ -491,7 +491,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
     return stats;
   }
 
-  async unlockIp(ip: string, reason: string = 'manual_unlock') {
+  async unlockIp(ip: string, reason = 'manual_unlock') {
     const key = `security_lock:${ip}`;
     const deleted = await this.redis.del(key);
     

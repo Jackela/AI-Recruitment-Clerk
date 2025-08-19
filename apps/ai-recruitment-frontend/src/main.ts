@@ -1,6 +1,6 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { importProvidersFrom } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { importProvidersFrom, isDevMode } from '@angular/core';
+import { RouterModule, PreloadAllModules } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { StoreModule } from '@ngrx/store';
@@ -11,6 +11,7 @@ import { provideBrowserGlobalErrorListeners } from '@angular/core';
 
 import { App } from './app/app';
 import { appRoutes } from './app/app.routes';
+import { SmartPreloadingStrategy } from './app/services/smart-preloading.strategy';
 
 // Reducers
 import { jobReducer } from './app/store/jobs/job.reducer';
@@ -25,25 +26,50 @@ import { ReportEffects } from './app/store/reports/report.effects';
 bootstrapApplication(App, {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    SmartPreloadingStrategy,
     importProvidersFrom(
       HttpClientModule,
       ReactiveFormsModule,
-      RouterModule.forRoot(appRoutes),
+      RouterModule.forRoot(appRoutes, {
+        preloadingStrategy: SmartPreloadingStrategy,
+        enableTracing: false, // Disable in production
+        scrollPositionRestoration: 'enabled',
+        paramsInheritanceStrategy: 'emptyOnly',
+        onSameUrlNavigation: 'reload',
+        urlUpdateStrategy: 'deferred'
+      }),
       StoreModule.forRoot({
         jobs: jobReducer,
         resumes: resumeReducer,
         reports: reportReducer,
         router: routerReducer
+      }, {
+        runtimeChecks: {
+          strictStateImmutability: isDevMode(),
+          strictActionImmutability: isDevMode(),
+          strictStateSerializability: isDevMode(),
+          strictActionSerializability: isDevMode()
+        },
+        metaReducers: [],
+        initialState: {}
       }),
       EffectsModule.forRoot([
         JobEffects,
         ResumeEffects,
         ReportEffects
       ]),
-      StoreRouterConnectingModule.forRoot(),
+      StoreRouterConnectingModule.forRoot({
+        serializer: 'minimal'
+      }),
       StoreDevtoolsModule.instrument({
         maxAge: 25,
-        logOnly: false,
+        logOnly: !isDevMode(),
+        connectInZone: true,
+        features: {
+          pause: false,
+          lock: false,
+          persist: true
+        }
       })
     )
   ]

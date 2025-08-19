@@ -384,14 +384,14 @@ class BatchPaymentValidationResult {
 }
 exports.BatchPaymentValidationResult = BatchPaymentValidationResult;
 // 枚举定义
-var IncentiveRiskLevel;
+let IncentiveRiskLevel;
 (function (IncentiveRiskLevel) {
     IncentiveRiskLevel["LOW"] = "low";
     IncentiveRiskLevel["MEDIUM"] = "medium";
     IncentiveRiskLevel["HIGH"] = "high";
     IncentiveRiskLevel["CRITICAL"] = "critical";
 })(IncentiveRiskLevel || (exports.IncentiveRiskLevel = IncentiveRiskLevel = {}));
-var ProcessingPriority;
+let ProcessingPriority;
 (function (ProcessingPriority) {
     ProcessingPriority["LOW"] = "low";
     ProcessingPriority["MEDIUM"] = "medium";

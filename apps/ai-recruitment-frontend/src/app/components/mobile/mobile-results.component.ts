@@ -966,10 +966,10 @@ export interface ResultsFilter {
   `]
 })
 export class MobileResultsComponent implements OnInit, OnDestroy {
-  @Input() title: string = 'Candidates';
-  @Input() subtitle: string = '';
+  @Input() title = 'Candidates';
+  @Input() subtitle = '';
   @Input() candidates: CandidateResult[] = [];
-  @Input() isLoading: boolean = false;
+  @Input() isLoading = false;
 
   @Output() candidateSelected = new EventEmitter<CandidateResult>();
   @Output() candidateAction = new EventEmitter<{action: string, candidate: CandidateResult}>();

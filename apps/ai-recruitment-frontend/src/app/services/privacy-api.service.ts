@@ -1,18 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
-import { 
-  CaptureConsentDto,
-  WithdrawConsentDto,
-  ConsentStatusDto,
-  CreateRightsRequestDto,
-  DataSubjectRightsRequest,
-  DataExportPackage,
-  ProcessRightsRequestDto,
-  RightsRequestStatusDto,
-  DataExportFormat,
-  UserConsentProfile
-} from '../../../../../libs/shared-dtos/src';
+import { CaptureConsentDto, WithdrawConsentDto, ConsentStatusDto, CreateRightsRequestDto, DataSubjectRightsRequest, DataExportPackage, ProcessRightsRequestDto, RightsRequestStatusDto, DataExportFormat, UserConsentProfile } from '@app/shared-dtos';
 import { environment } from '../../environments/environment';
 
 /**

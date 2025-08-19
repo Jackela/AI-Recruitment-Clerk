@@ -2,16 +2,7 @@ import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angu
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import { 
-  ConsentPurpose, 
-  ConsentStatus as PrivacyConsentStatus, 
-  ConsentMethod,
-  DataCategory,
-  CaptureConsentDto,
-  ConsentStatusDto,
-  ConsentGrantDto,
-  ProcessingPurposeInfo
-} from '../../../../../../libs/shared-dtos/src';
+import { ConsentPurpose, ConsentStatus, ConsentMethod, DataCategory, CaptureConsentDto, ConsentStatusDto, ConsentGrantDto, ProcessingPurposeInfo } from '@app/shared-dtos';
 import { PrivacyApiService } from '../../services/privacy-api.service';
 import { ToastService } from '../../services/toast.service';
 
@@ -29,7 +20,7 @@ import { ToastService } from '../../services/toast.service';
 export class ConsentManagementComponent implements OnInit, OnDestroy {
   @Input() userId?: string;
   @Input() mode: 'initial' | 'update' | 'review' = 'initial';
-  @Input() showAllPurposes: boolean = true;
+  @Input() showAllPurposes = true;
   @Output() consentCaptured = new EventEmitter<ConsentStatusDto>();
   @Output() consentUpdated = new EventEmitter<ConsentStatusDto>();
 

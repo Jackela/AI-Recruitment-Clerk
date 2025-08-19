@@ -159,7 +159,7 @@ class UsageQuota extends value_object_1.ValueObject {
 }
 exports.UsageQuota = UsageQuota;
 // 辅助类型
-var SessionStatus;
+let SessionStatus;
 (function (SessionStatus) {
     SessionStatus["ACTIVE"] = "active";
     SessionStatus["EXPIRED"] = "expired";

@@ -7,7 +7,7 @@ import { JobListDto, JobDetailDto } from './dto/job-response.dto';
 import { ResumeListItemDto, ResumeDetailDto } from './dto/resume-response.dto';
 import { AnalysisReportDto, ReportsListDto } from './dto/report-response.dto';
 import { InMemoryStorageService } from './storage/in-memory-storage.service';
-import { UserDto, UserRole, JobJdSubmittedEvent, ResumeSubmittedEvent } from '../../../../libs/shared-dtos/src';
+import { UserDto, UserRole, JobJdSubmittedEvent, ResumeSubmittedEvent } from '@app/shared-dtos';
 import { NatsClient } from '../nats/nats.client';
 import { CacheService } from '../cache/cache.service';
 

@@ -25,17 +25,7 @@ import {
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
-import { 
-  UserDto, 
-  Permission, 
-  UserRole,
-  UserStatus,
-  CreateUserDto,
-  UpdateUserDto,
-  UserPreferencesDto,
-  UserActivityDto,
-  AuthenticatedRequest
-} from '../../../../../libs/shared-dtos/src';
+import { UserDto, Permission, UserRole, UserStatus, CreateUserDto, UpdateUserDto, UserPreferencesDto, UserActivityDto, AuthenticatedRequest } from '@app/shared-dtos';
 import { UserManagementService } from './user-management.service';
 
 interface UserProfileResponse extends UserDto {
@@ -191,8 +181,8 @@ export class UserManagementController {
   @Get('activity')
   async getUserActivity(
     @Request() req: AuthenticatedRequest,
-    @Query('limit') limit: number = 50,
-    @Query('offset') offset: number = 0,
+    @Query('limit') limit = 50,
+    @Query('offset') offset = 0,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string
   ) {
@@ -279,8 +269,8 @@ export class UserManagementController {
   @Get('organization/users')
   async getOrganizationUsers(
     @Request() req: AuthenticatedRequest,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 20,
+    @Query('page') page = 1,
+    @Query('limit') limit = 20,
     @Query('role') role?: UserRole,
     @Query('status') status?: string
   ) {

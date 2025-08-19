@@ -2,7 +2,7 @@
   "name": "AI Recruitment Clerk",
   "short_name": "ARC Mobile",
   "description": "Mobile recruiting assistant for on-the-go talent acquisition",
-  "theme_color": "#3498db",
+  "theme_color": "#3b82f6",
   "background_color": "#ffffff",
   "display": "standalone",
   "orientation": "portrait-primary",

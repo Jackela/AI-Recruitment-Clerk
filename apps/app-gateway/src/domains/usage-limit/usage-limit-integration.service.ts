@@ -30,7 +30,7 @@ export class UsageLimitIntegrationService {
   /**
    * 记录使用 - EMERGENCY IMPLEMENTATION
    */
-  async recordUsage(userId: string, resourceType: string, amount: number = 1): Promise<any> {
+  async recordUsage(userId: string, resourceType: string, amount = 1): Promise<any> {
     try {
       this.logger.log('Recording usage', { userId, resourceType, amount });
       return {

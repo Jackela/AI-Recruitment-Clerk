@@ -1,6 +1,4 @@
 import { ComponentFixture } from '@angular/core/testing';
-import { DebugElement } from '@angular/core';
-import { By } from '@angular/platform-browser';
 
 export interface AccessibilityTestResult {
   element: HTMLElement;

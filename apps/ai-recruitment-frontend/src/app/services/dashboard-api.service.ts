@@ -80,7 +80,7 @@ export class DashboardApiService {
   /**
    * Get recent activity feed
    */
-  getRecentActivity(limit: number = 10): Observable<ActivityItem[]> {
+  getRecentActivity(limit = 10): Observable<ActivityItem[]> {
     return this.http.get<ActivityItem[]>(`${this.baseUrl}/dashboard/activity?limit=${limit}`);
   }
 

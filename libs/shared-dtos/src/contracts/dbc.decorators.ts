@@ -437,7 +437,7 @@ export namespace ContractValidators {
    * 
    * @since 1.0.0
    */
-  export function isValidProcessingTime(processingTime: number, maxTime: number = 30000): boolean {
+  export function isValidProcessingTime(processingTime: number, maxTime = 30000): boolean {
     return typeof processingTime === 'number' && 
            processingTime > 0 && 
            processingTime <= maxTime;

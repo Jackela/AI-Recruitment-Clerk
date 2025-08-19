@@ -422,7 +422,7 @@ class IncentiveSummary extends value_object_1.ValueObject {
 }
 exports.IncentiveSummary = IncentiveSummary;
 // 枚举定义
-var IncentiveStatus;
+let IncentiveStatus;
 (function (IncentiveStatus) {
     IncentiveStatus["PENDING_VALIDATION"] = "pending_validation";
     IncentiveStatus["APPROVED"] = "approved";
@@ -430,30 +430,30 @@ var IncentiveStatus;
     IncentiveStatus["PAID"] = "paid";
     IncentiveStatus["EXPIRED"] = "expired";
 })(IncentiveStatus || (exports.IncentiveStatus = IncentiveStatus = {}));
-var VerificationStatus;
+let VerificationStatus;
 (function (VerificationStatus) {
     VerificationStatus["PENDING"] = "pending";
     VerificationStatus["VERIFIED"] = "verified";
     VerificationStatus["FAILED"] = "failed";
 })(VerificationStatus || (exports.VerificationStatus = VerificationStatus = {}));
-var Currency;
+let Currency;
 (function (Currency) {
     Currency["CNY"] = "CNY";
     Currency["USD"] = "USD";
 })(Currency || (exports.Currency = Currency = {}));
-var RewardType;
+let RewardType;
 (function (RewardType) {
     RewardType["QUESTIONNAIRE_COMPLETION"] = "questionnaire_completion";
     RewardType["REFERRAL"] = "referral";
     RewardType["PROMOTION"] = "promotion";
 })(RewardType || (exports.RewardType = RewardType = {}));
-var TriggerType;
+let TriggerType;
 (function (TriggerType) {
     TriggerType["QUESTIONNAIRE_COMPLETION"] = "questionnaire_completion";
     TriggerType["REFERRAL"] = "referral";
     TriggerType["SYSTEM_PROMOTION"] = "system_promotion";
 })(TriggerType || (exports.TriggerType = TriggerType = {}));
-var PaymentMethod;
+let PaymentMethod;
 (function (PaymentMethod) {
     PaymentMethod["WECHAT_PAY"] = "wechat_pay";
     PaymentMethod["ALIPAY"] = "alipay";

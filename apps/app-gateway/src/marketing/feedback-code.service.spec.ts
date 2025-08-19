@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { FeedbackCodeService, FeedbackCodeDocument } from './feedback-code.service';
-import { CreateFeedbackCodeDto, MarkFeedbackCodeUsedDto } from '../../../../libs/shared-dtos/src';
+import { CreateFeedbackCodeDto, MarkFeedbackCodeUsedDto } from '@app/shared-dtos';
 
 describe('FeedbackCodeService', () => {
   let service: FeedbackCodeService;

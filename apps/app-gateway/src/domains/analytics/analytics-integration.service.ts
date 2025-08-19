@@ -1,19 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { 
-  AnalyticsDomainService,
-  EventType,
-  EventStatus,
-  MetricUnit,
-  ReportType,
-  DataScope,
-  IDomainEventBus,
-  IAuditLogger,
-  IPrivacyService,
-  ISessionTracker,
-  ConsentStatus
-} from '../../../../../libs/shared-dtos/src';
-import { UserSession as AnalyticsUserSession } from '../../../../../libs/shared-dtos/src/domains/analytics.dto';
-import { UserSession as DomainUserSession } from '../../../../../libs/shared-dtos/src/domains/user-management.dto';
+import { AnalyticsDomainService, EventType, EventStatus, MetricUnit, ReportType, DataScope, IDomainEventBus, IAuditLogger, IPrivacyService, ISessionTracker, ConsentStatus } from '@app/shared-dtos';
+import { UserSession } from '@app/shared-dtos';
+import { UserSession } from '@app/shared-dtos';
 import { AnalyticsEventRepository } from './analytics-event.repository';
 import { NatsClient } from '../../nats/nats.client';
 import { Cache } from 'cache-manager';
@@ -398,7 +386,7 @@ export class AnalyticsIntegrationService {
   /**
    * 获取仪表板数据 - EMERGENCY IMPLEMENTATION
    */
-  async getDashboard(organizationId: string, timeRange: string = '7d', metrics?: string[]) {
+  async getDashboard(organizationId: string, timeRange = '7d', metrics?: string[]) {
     try {
       // Minimal implementation - return basic dashboard structure
       return {

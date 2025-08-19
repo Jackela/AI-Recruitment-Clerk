@@ -28,11 +28,7 @@ import {
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
-import { 
-  Permission, 
-  UserDto, 
-  AnalyticsEvent
-} from '../../../../../libs/shared-dtos/src';
+import { Permission, UserDto, AnalyticsEvent } from '@app/shared-dtos';
 import { AnalyticsIntegrationService } from './analytics-integration.service';
 
 interface AuthenticatedRequest extends ExpressRequest {
@@ -228,7 +224,7 @@ export class AnalyticsController {
   @Get('dashboard')
   async getDashboard(
     @Request() req: AuthenticatedRequest,
-    @Query('timeRange') timeRange: string = '7d',
+    @Query('timeRange') timeRange = '7d',
     @Query('metrics') metrics?: string
   ) {
     try {
@@ -312,7 +308,7 @@ export class AnalyticsController {
     @Query('module') module?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @Query('granularity') granularity: string = 'day'
+    @Query('granularity') granularity = 'day'
   ) {
     try {
       const statistics = await this.analyticsService.getUsageStatistics(
@@ -421,8 +417,8 @@ export class AnalyticsController {
   @Get('reports')
   async getReports(
     @Request() req: AuthenticatedRequest,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 20,
+    @Query('page') page = 1,
+    @Query('limit') limit = 20,
     @Query('status') status?: string,
     @Query('reportType') reportType?: string
   ) {

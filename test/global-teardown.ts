@@ -6,6 +6,39 @@
 
 const COMMON_TEST_PORTS = [3000, 3001, 4200, 4222, 6222, 8222, 27017, 6379];
 
+/**
+ * 杀掉占用指定端口的进程
+ */
+async function killPortProcesses(ports: number[]): Promise<void> {
+  const { execSync } = require('child_process');
+  
+  for (const port of ports) {
+    try {
+      if (process.platform === 'win32') {
+        // Windows: 查找并杀掉占用端口的进程
+        const result = execSync(`netstat -ano | findstr :${port}`, { encoding: 'utf8', stdio: 'pipe' });
+        if (result) {
+          const lines = result.split('\n').filter(line => line.trim());
+          for (const line of lines) {
+            const parts = line.trim().split(/\s+/);
+            const pid = parts[parts.length - 1];
+            if (pid && !isNaN(Number(pid))) {
+              try {
+                execSync(`taskkill /F /PID ${pid}`, { stdio: 'ignore' });
+              } catch {}
+            }
+          }
+        }
+      } else {
+        // Unix/Linux/macOS: 使用 lsof
+        execSync(`lsof -ti:${port} | xargs kill -9`, { stdio: 'ignore' });
+      }
+    } catch {
+      // 端口未被占用或清理失败，继续下一个端口
+    }
+  }
+}
+
 export default async (): Promise<void> => {
   console.log('🧹 执行全局清理检查...');
   

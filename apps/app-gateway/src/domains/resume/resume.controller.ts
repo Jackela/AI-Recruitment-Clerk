@@ -379,8 +379,8 @@ export class ResumeController {
   async searchResumes(
     @Request() req: AuthenticatedRequest,
     @Body() searchCriteria: ResumeSearchDto,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 20
+    @Query('page') page = 1,
+    @Query('limit') limit = 20
   ) {
     try {
       const searchResults = await this.resumeService.searchResumes(

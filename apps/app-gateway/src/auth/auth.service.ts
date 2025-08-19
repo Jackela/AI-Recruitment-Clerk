@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, ConflictException, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user.service';
-import { LoginDto, CreateUserDto, AuthResponseDto, JwtPayload, UserDto, RetryUtility, WithCircuitBreaker } from '../../../../libs/shared-dtos/src';
+import { LoginDto, CreateUserDto, AuthResponseDto, JwtPayload, UserDto, RetryUtility, WithCircuitBreaker } from '@app/shared-dtos';
 import * as bcrypt from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
@@ -368,7 +368,7 @@ export class AuthService {
    * Emergency security response: Blacklist all tokens for a user
    * Use this when a security breach is detected
    */
-  async emergencyRevokeAllUserTokens(userId: string, reason: string = 'security_breach'): Promise<void> {
+  async emergencyRevokeAllUserTokens(userId: string, reason = 'security_breach'): Promise<void> {
     try {
       const blacklistedCount = await this.tokenBlacklistService.blacklistAllUserTokens(userId, reason);
       await this.userService.updateSecurityFlag(userId, 'tokens_revoked', true);

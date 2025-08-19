@@ -4,7 +4,7 @@ import { JobsController } from './jobs.controller';
 import { InMemoryStorageService } from './storage/in-memory-storage.service';
 import { NatsClient } from '../nats/nats.client';
 import { CreateJobDto } from './dto/create-job.dto';
-import { UserDto, UserRole } from '../../../../libs/shared-dtos/src';
+import { UserDto, UserRole } from '@app/shared-dtos';
 
 describe('Jobs Integration Tests', () => {
   let controller: JobsController;

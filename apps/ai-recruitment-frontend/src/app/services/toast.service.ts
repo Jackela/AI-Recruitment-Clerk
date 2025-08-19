@@ -14,19 +14,19 @@ export class ToastService {
 
   constructor() {}
 
-  success(message: string, duration: number = 3000): void {
+  success(message: string, duration = 3000): void {
     this.show({ message, type: 'success', duration });
   }
 
-  error(message: string, duration: number = 5000): void {
+  error(message: string, duration = 5000): void {
     this.show({ message, type: 'error', duration });
   }
 
-  warning(message: string, duration: number = 4000): void {
+  warning(message: string, duration = 4000): void {
     this.show({ message, type: 'warning', duration });
   }
 
-  info(message: string, duration: number = 3000): void {
+  info(message: string, duration = 3000): void {
     this.show({ message, type: 'info', duration });
   }
 

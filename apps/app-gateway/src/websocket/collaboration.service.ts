@@ -251,7 +251,7 @@ export class CollaborationService {
   /**
    * Cleanup inactive rooms
    */
-  async cleanupInactiveRooms(maxInactiveMinutes: number = 60): Promise<void> {
+  async cleanupInactiveRooms(maxInactiveMinutes = 60): Promise<void> {
     const cutoff = new Date(Date.now() - maxInactiveMinutes * 60 * 1000);
     const roomsToDelete: string[] = [];
 

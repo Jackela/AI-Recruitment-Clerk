@@ -134,11 +134,11 @@ import { GuestUsageService } from '../../services/marketing/guest-usage.service'
   styleUrls: ['./campaign.component.scss']
 })
 export class CampaignComponent implements OnInit {
-  remainingUsage: number = 0;
-  usageCount: number = 0;
-  isUsageExhausted: boolean = false;
-  feedbackCode: string = '';
-  codeCopied: boolean = false;
+  remainingUsage = 0;
+  usageCount = 0;
+  isUsageExhausted = false;
+  feedbackCode = '';
+  codeCopied = false;
   questionnaireUrl = 'https://wj.qq.com/s2/14781436/';  // 待替换为实际问卷链接
   
   constructor(

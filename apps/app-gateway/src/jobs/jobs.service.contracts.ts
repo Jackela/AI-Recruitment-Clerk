@@ -8,13 +8,7 @@
 
 import { Injectable, Logger, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { 
-  ContractViolationError, 
-  Requires, 
-  Ensures, 
-  Invariant,
-  ContractValidators 
-} from '../../../../libs/shared-dtos/src/contracts/dbc.decorators';
+import { ContractViolationError, Requires, Ensures, Invariant, ContractValidators } from '@app/shared-dtos';
 import { CreateJobDto } from './dto/create-job.dto';
 import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
 import { MulterFile } from './types/multer.types';
@@ -22,7 +16,7 @@ import { JobListDto, JobDetailDto } from './dto/job-response.dto';
 import { ResumeListItemDto, ResumeDetailDto } from './dto/resume-response.dto';
 import { AnalysisReportDto, ReportsListDto } from './dto/report-response.dto';
 import { InMemoryStorageService } from './storage/in-memory-storage.service';
-import { UserDto, UserRole, JobJdSubmittedEvent, ResumeSubmittedEvent } from '../../../../libs/shared-dtos/src';
+import { UserDto, UserRole, JobJdSubmittedEvent, ResumeSubmittedEvent } from '@app/shared-dtos';
 import { NatsClient } from '../nats/nats.client';
 import { CacheService } from '../cache/cache.service';
 

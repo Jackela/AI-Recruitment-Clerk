@@ -480,7 +480,7 @@ class ReportingPermissionsResult {
 }
 exports.ReportingPermissionsResult = ReportingPermissionsResult;
 // 枚举定义
-var ReportType;
+let ReportType;
 (function (ReportType) {
     ReportType["USER_BEHAVIOR"] = "user_behavior";
     ReportType["SYSTEM_PERFORMANCE"] = "system_performance";
@@ -488,7 +488,7 @@ var ReportType;
     ReportType["ERROR_ANALYSIS"] = "error_analysis";
     ReportType["CONVERSION_FUNNEL"] = "conversion_funnel";
 })(ReportType || (exports.ReportType = ReportType = {}));
-var DataScope;
+let DataScope;
 (function (DataScope) {
     DataScope["FULL_ACCESS"] = "full_access";
     DataScope["ANONYMIZED_ONLY"] = "anonymized_only";

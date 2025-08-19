@@ -6,6 +6,10 @@ module.exports = (config, context) => {
     optimization: {
       splitChunks: {
         chunks: 'all',
+        maxInitialRequests: 20,
+        maxAsyncRequests: 30,
+        minSize: 20000,
+        maxSize: 244000,
         cacheGroups: {
           // Separate vendor bundle for Angular core
           angular: {
@@ -13,7 +17,8 @@ module.exports = (config, context) => {
             name: 'angular-vendor',
             chunks: 'all',
             priority: 30,
-            enforce: true
+            enforce: true,
+            minSize: 0
           },
           // Separate NgRx bundle 
           ngrx: {
@@ -21,6 +26,15 @@ module.exports = (config, context) => {
             name: 'ngrx-vendor',
             chunks: 'all',
             priority: 25,
+            enforce: true,
+            minSize: 0
+          },
+          // RxJS bundle
+          rxjs: {
+            test: /[\\/]node_modules[\\/]rxjs[\\/]/,
+            name: 'rxjs-vendor',
+            chunks: 'all',
+            priority: 24,
             enforce: true
           },
           // Other vendor libraries
@@ -29,7 +43,8 @@ module.exports = (config, context) => {
             name: 'vendors',
             chunks: 'all',
             priority: 20,
-            enforce: true
+            enforce: true,
+            maxSize: 200000
           },
           // Common shared modules
           common: {
@@ -37,7 +52,8 @@ module.exports = (config, context) => {
             chunks: 'all',
             minChunks: 2,
             priority: 10,
-            reuseExistingChunk: true
+            reuseExistingChunk: true,
+            maxSize: 100000
           }
         }
       },
@@ -46,7 +62,11 @@ module.exports = (config, context) => {
       chunkIds: 'deterministic',
       // Remove unused exports (tree shaking)
       usedExports: true,
-      sideEffects: false
+      sideEffects: false,
+      // Minification
+      minimize: true,
+      // Code concatenation 
+      concatenateModules: true
     },
     resolve: {
       alias: {

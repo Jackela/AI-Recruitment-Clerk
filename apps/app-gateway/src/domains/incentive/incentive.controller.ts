@@ -223,8 +223,8 @@ export class IncentiveController {
   @Get()
   async getIncentives(
     @Request() req: AuthenticatedRequest,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 20,
+    @Query('page') page = 1,
+    @Query('limit') limit = 20,
     @Query('status') status?: IncentiveStatus,
     @Query('rewardType') rewardType?: RewardType,
     @Query('startDate') startDate?: string,
@@ -579,8 +579,8 @@ export class IncentiveController {
   @Get('stats/overview')
   async getIncentiveStatistics(
     @Request() req: AuthenticatedRequest,
-    @Query('timeRange') timeRange: string = '30d',
-    @Query('groupBy') groupBy: string = 'day'
+    @Query('timeRange') timeRange = '30d',
+    @Query('groupBy') groupBy = 'day'
   ) {
     try {
       const statistics = await this.incentiveService.getIncentiveStatistics(

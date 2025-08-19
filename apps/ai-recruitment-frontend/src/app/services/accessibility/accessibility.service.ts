@@ -80,7 +80,7 @@ export class AccessibilityService {
   /**
    * Announce message to screen readers
    */
-  announce(message: string, priority: 'polite' | 'assertive' = 'polite', duration: number = 5000): string {
+  announce(message: string, priority: 'polite' | 'assertive' = 'polite', duration = 5000): string {
     const id = `msg-${++this.messageIdCounter}`;
     const ariaMessage: AriaLiveMessage = {
       id,
@@ -249,7 +249,7 @@ export class AccessibilityService {
   /**
    * Get accessible color variant
    */
-  getAccessibleColor(baseColor: string, background: string = '#ffffff'): string {
+  getAccessibleColor(baseColor: string, background = '#ffffff'): string {
     const contrast = this.checkColorContrast(baseColor, background);
     
     if (contrast.valid) {
@@ -341,21 +341,24 @@ export class AccessibilityService {
    * Initialize accessibility settings
    */
   private initializeAccessibilitySettings(): void {
-    // Detect user preferences from media queries
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      this.setReducedMotion(true);
-    }
-    
-    if (window.matchMedia('(prefers-contrast: high)').matches) {
-      this.setHighContrast(true);
-    }
+    // Check if window.matchMedia is available (not in test environment)
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      // Detect user preferences from media queries
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        this.setReducedMotion(true);
+      }
+      
+      if (window.matchMedia('(prefers-contrast: high)').matches) {
+        this.setHighContrast(true);
+      }
 
-    // Listen for preference changes
-    window.matchMedia('(prefers-reduced-motion: reduce)')
-      .addEventListener('change', (e) => this.setReducedMotion(e.matches));
-    
-    window.matchMedia('(prefers-contrast: high)')
-      .addEventListener('change', (e) => this.setHighContrast(e.matches));
+      // Listen for preference changes
+      window.matchMedia('(prefers-reduced-motion: reduce)')
+        .addEventListener('change', (e) => this.setReducedMotion(e.matches));
+      
+      window.matchMedia('(prefers-contrast: high)')
+        .addEventListener('change', (e) => this.setHighContrast(e.matches));
+    }
   }
 
   /**

@@ -76,7 +76,7 @@ export class UsageCacheService {
   /**
    * 获取IP总配额（基础 + 奖励）
    */
-  async getTotalQuota(ip: string, baseQuota: number = 5): Promise<{
+  async getTotalQuota(ip: string, baseQuota = 5): Promise<{
     base: number;
     questionnaire: number;
     payment: number;
@@ -103,7 +103,7 @@ export class UsageCacheService {
   /**
    * 获取IP使用状态
    */
-  async getUsageStatus(ip: string, baseQuota: number = 5): Promise<{
+  async getUsageStatus(ip: string, baseQuota = 5): Promise<{
     used: number;
     quota: {
       base: number;
@@ -151,7 +151,7 @@ export class UsageCacheService {
   /**
    * 检查IP是否可以使用
    */
-  async canUse(ip: string, baseQuota: number = 5): Promise<boolean> {
+  async canUse(ip: string, baseQuota = 5): Promise<boolean> {
     const status = await this.getUsageStatus(ip, baseQuota);
     return status.canUse;
   }

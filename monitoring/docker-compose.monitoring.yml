@@ -1,0 +1,296 @@
+# Monitoring Stack Docker Compose
+# Comprehensive monitoring infrastructure for AI Recruitment System
+
+version: '3.8'
+
+services:
+  # Prometheus - Metrics Collection
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: ai-recruitment-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/config/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - ai-recruitment-monitoring
+    depends_on:
+      - node-exporter
+      - cadvisor
+
+  # Grafana - Visualization Dashboard
+  grafana:
+    image: grafana/grafana:10.1.0
+    container_name: ai-recruitment-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin123}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_INSTALL_PLUGINS: grafana-piechart-panel,grafana-clock-panel,grafana-simple-json-datasource
+      GF_FEATURE_TOGGLES_ENABLE: tempoSearch,tempoBackendSearch
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./monitoring/config/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/config/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    networks:
+      - ai-recruitment-monitoring
+    depends_on:
+      - prometheus
+
+  # AlertManager - Alert Management
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: ai-recruitment-alertmanager
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./monitoring/config/alertmanager.yml:/etc/alertmanager/config.yml:ro
+      - alertmanager_data:/alertmanager
+    networks:
+      - ai-recruitment-monitoring
+
+  # Jaeger - Distributed Tracing
+  jaeger:
+    image: jaegertracing/all-in-one:1.49
+    container_name: ai-recruitment-jaeger
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+      COLLECTOR_ZIPKIN_HOST_PORT: ":9411"
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14250:14250"  # gRPC
+      - "14268:14268"  # HTTP
+      - "9411:9411"    # Zipkin
+    volumes:
+      - jaeger_data:/tmp
+    networks:
+      - ai-recruitment-monitoring
+
+  # Node Exporter - System Metrics
+  node-exporter:
+    image: prom/node-exporter:v1.6.1
+    container_name: ai-recruitment-node-exporter
+    restart: unless-stopped
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    networks:
+      - ai-recruitment-monitoring
+
+  # cAdvisor - Container Metrics
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: ai-recruitment-cadvisor
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/kmsg
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk:/dev/disk:ro
+    networks:
+      - ai-recruitment-monitoring
+
+  # Redis Exporter - Redis Metrics
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.53.0
+    container_name: ai-recruitment-redis-exporter
+    restart: unless-stopped
+    environment:
+      REDIS_ADDR: ${REDIS_URL:-redis://redis:6379}
+    ports:
+      - "9121:9121"
+    networks:
+      - ai-recruitment-monitoring
+    depends_on:
+      - redis
+
+  # MongoDB Exporter - Database Metrics
+  mongodb-exporter:
+    image: percona/mongodb_exporter:0.39.0
+    container_name: ai-recruitment-mongodb-exporter
+    restart: unless-stopped
+    environment:
+      MONGODB_URI: ${MONGODB_URL:-mongodb://admin:password@mongodb:27017/admin}
+    ports:
+      - "9216:9216"
+    networks:
+      - ai-recruitment-monitoring
+    depends_on:
+      - mongodb
+
+  # Loki - Log Aggregation
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: ai-recruitment-loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/config/loki.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/tmp/loki
+    networks:
+      - ai-recruitment-monitoring
+    command: -config.file=/etc/loki/local-config.yaml
+
+  # Promtail - Log Collection
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: ai-recruitment-promtail
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/config/promtail.yml:/etc/promtail/config.yml:ro
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    networks:
+      - ai-recruitment-monitoring
+    depends_on:
+      - loki
+    command: -config.file=/etc/promtail/config.yml
+
+  # Tempo - Distributed Tracing Storage
+  tempo:
+    image: grafana/tempo:2.2.0
+    container_name: ai-recruitment-tempo
+    restart: unless-stopped
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./monitoring/config/tempo.yml:/etc/tempo.yaml:ro
+      - tempo_data:/tmp/tempo
+    ports:
+      - "3200:3200"   # tempo
+      - "4317:4317"   # otlp grpc
+      - "4318:4318"   # otlp http
+    networks:
+      - ai-recruitment-monitoring
+
+  # VictoriaMetrics - High-performance metrics storage
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:v1.93.0
+    container_name: ai-recruitment-victoriametrics
+    restart: unless-stopped
+    ports:
+      - "8428:8428"
+    volumes:
+      - victoriametrics_data:/victoria-metrics-data
+    command:
+      - "--storageDataPath=/victoria-metrics-data"
+      - "--httpListenAddr=:8428"
+      - "--retentionPeriod=3d"
+    networks:
+      - ai-recruitment-monitoring
+
+  # Uptime Kuma - Uptime Monitoring
+  uptime-kuma:
+    image: louislam/uptime-kuma:1.23.8
+    container_name: ai-recruitment-uptime-kuma
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - uptime_kuma_data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - ai-recruitment-monitoring
+
+  # BlackBox Exporter - Endpoint Monitoring
+  blackbox-exporter:
+    image: prom/blackbox-exporter:v0.24.0
+    container_name: ai-recruitment-blackbox-exporter
+    restart: unless-stopped
+    ports:
+      - "9115:9115"
+    volumes:
+      - ./monitoring/config/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+    networks:
+      - ai-recruitment-monitoring
+
+# Infrastructure services (if not already running)
+  redis:
+    image: redis:7.2-alpine
+    container_name: ai-recruitment-monitoring-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"  # Different port to avoid conflicts
+    volumes:
+      - redis_monitoring_data:/data
+    networks:
+      - ai-recruitment-monitoring
+    profiles: ["infrastructure"]
+
+  mongodb:
+    image: mongo:7.0-jammy
+    container_name: ai-recruitment-monitoring-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD:-password}
+    ports:
+      - "27018:27017"  # Different port to avoid conflicts
+    volumes:
+      - mongodb_monitoring_data:/data/db
+    networks:
+      - ai-recruitment-monitoring
+    profiles: ["infrastructure"]
+
+networks:
+  ai-recruitment-monitoring:
+    driver: bridge
+    name: ai-recruitment-monitoring
+  ai-recruitment-network:
+    external: true
+    name: ai-recruitment-network
+
+volumes:
+  prometheus_data:
+    name: ai-recruitment-prometheus-data
+  grafana_data:
+    name: ai-recruitment-grafana-data
+  alertmanager_data:
+    name: ai-recruitment-alertmanager-data
+  jaeger_data:
+    name: ai-recruitment-jaeger-data
+  loki_data:
+    name: ai-recruitment-loki-data
+  tempo_data:
+    name: ai-recruitment-tempo-data
+  victoriametrics_data:
+    name: ai-recruitment-victoriametrics-data
+  uptime_kuma_data:
+    name: ai-recruitment-uptime-kuma-data
+  redis_monitoring_data:
+    name: ai-recruitment-redis-monitoring-data
+  mongodb_monitoring_data:
+    name: ai-recruitment-mongodb-monitoring-data

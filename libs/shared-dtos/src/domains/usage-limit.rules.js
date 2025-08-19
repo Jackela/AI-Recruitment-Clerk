@@ -217,13 +217,13 @@ class RiskScore {
     }
 }
 exports.RiskScore = RiskScore;
-var ViolationType;
+let ViolationType;
 (function (ViolationType) {
     ViolationType["QUOTA_EXCEEDED"] = "quota_exceeded";
     ViolationType["HIGH_USAGE_WARNING"] = "high_usage_warning";
     ViolationType["RATE_LIMIT_APPROACHED"] = "rate_limit_approached";
 })(ViolationType || (exports.ViolationType = ViolationType = {}));
-var RecommendedAction;
+let RecommendedAction;
 (function (RecommendedAction) {
     RecommendedAction["CONTINUE_NORMAL"] = "continue_normal";
     RecommendedAction["WARN_USER"] = "warn_user";

@@ -38,6 +38,7 @@
     "build:check": "nx run-many --target=build --all --parallel=false"
   },
   "devDependencies": {
+    "@types/multer": "^2.0.0",
     "@angular-devkit/core": "~20.1.0",
     "@angular-devkit/schematics": "~20.1.0",
     "@angular/build": "~20.1.0",
@@ -110,7 +111,6 @@
     "@angular/forms": "~20.1.0",
     "@angular/platform-browser": "~20.1.0",
     "@angular/platform-browser-dynamic": "~20.1.0",
-    "@angular/pwa": "^20.1.6",
     "@angular/router": "~20.1.0",
     "@google/generative-ai": "^0.24.1",
     "@nestjs/cache-manager": "^2.3.0",
@@ -132,7 +132,6 @@
     "@ngrx/store-devtools": "^19.2.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/ioredis": "^4.28.10",
-    "@types/multer": "^2.0.0",
     "@types/node-fetch": "^2.6.13",
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
@@ -159,6 +158,12 @@
     "speakeasy": "^2.0.0",
     "twilio": "^5.8.0",
     "uuid": "^11.1.0",
-    "zone.js": "~0.15.0"
+    "zone.js": "~0.15.0",
+    "helmet": "^8.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "compression": "^1.7.5",
+    "mongodb": "^6.12.0"
   }
 }

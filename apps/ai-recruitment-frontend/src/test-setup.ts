@@ -4,3 +4,96 @@ setupZoneTestEnv({
   errorOnUnknownElements: true,
   errorOnUnknownProperties: true,
 });
+
+// Mock window.matchMedia for accessibility tests
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(), // deprecated
+    removeListener: jest.fn(), // deprecated
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
+
+// Mock window.ResizeObserver for responsive tests
+global.ResizeObserver = class ResizeObserver {
+  constructor(callback: ResizeObserverCallback) {}
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
+// Mock IntersectionObserver for lazy loading tests
+global.IntersectionObserver = class IntersectionObserver {
+  constructor(callback: IntersectionObserverCallback) {}
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+
+// Mock window.showDirectoryPicker for file system access
+Object.defineProperty(window, 'showDirectoryPicker', {
+  writable: true,
+  value: jest.fn().mockRejectedValue(new DOMException('Not implemented', 'NotSupportedError')),
+});
+
+// Mock window.alert for legacy alert dialogs
+Object.defineProperty(window, 'alert', {
+  writable: true,
+  value: jest.fn(),
+});
+
+// Global Jest/Jasmine compatibility bridge
+(global as any).jasmine = {
+  createSpyObj: (name: string, methods: string[], props?: any) => {
+    const spy: any = {};
+    methods.forEach(method => {
+      const jestSpy = jest.fn();
+      // Add Jasmine-style chaining methods
+      jestSpy.and = {
+        returnValue: (value: any) => jestSpy.mockReturnValue(value),
+        returnValues: (...values: any[]) => jestSpy.mockReturnValueOnce(...values),
+        callFake: (fn: any) => jestSpy.mockImplementation(fn),
+        callThrough: () => jestSpy.mockImplementation(),
+        stub: () => jestSpy.mockImplementation(() => {}),
+        throwError: (error: any) => jestSpy.mockImplementation(() => { throw error; })
+      };
+      spy[method] = jestSpy;
+    });
+    if (props) {
+      Object.assign(spy, props);
+    }
+    return spy;
+  },
+  createSpy: (name?: string) => {
+    const jestSpy = jest.fn();
+    jestSpy.and = {
+      returnValue: (value: any) => jestSpy.mockReturnValue(value),
+      returnValues: (...values: any[]) => jestSpy.mockReturnValueOnce(...values),
+      callFake: (fn: any) => jestSpy.mockImplementation(fn),
+      callThrough: () => jestSpy.mockImplementation(),
+      stub: () => jestSpy.mockImplementation(() => {}),
+      throwError: (error: any) => jestSpy.mockImplementation(() => { throw error; })
+    };
+    return jestSpy;
+  }
+};
+
+// Global spyOn function for Jasmine compatibility
+(global as any).spyOn = (object: any, method: string) => {
+  const jestSpy = jest.spyOn(object, method);
+  jestSpy.and = {
+    returnValue: (value: any) => jestSpy.mockReturnValue(value),
+    returnValues: (...values: any[]) => jestSpy.mockReturnValueOnce(...values),
+    callFake: (fn: any) => jestSpy.mockImplementation(fn),
+    callThrough: () => jestSpy.mockImplementation(),
+    stub: () => jestSpy.mockImplementation(() => {}),
+    throwError: (error: any) => jestSpy.mockImplementation(() => { throw error; })
+  };
+  return jestSpy;
+};

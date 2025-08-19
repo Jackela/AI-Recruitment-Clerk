@@ -1,11 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { 
-  DataSubjectRightType, 
-  RequestStatus, 
-  IdentityVerificationStatus,
-  DataExportFormat 
-} from '../../../../libs/shared-dtos/src';
+import { DataSubjectRightType, RequestStatus, IdentityVerificationStatus, DataExportFormat } from '@app/shared-dtos';
 
 export type DataSubjectRightsRequestDocument = DataSubjectRightsRequest & Document;
 

@@ -146,7 +146,7 @@ function Invariant(condition, message) {
  * @namespace ContractValidators
  * @since 1.0.0
  */
-var ContractValidators;
+let ContractValidators;
 (function (ContractValidators) {
     /**
      * Validates email format
@@ -446,7 +446,7 @@ var ContractValidators;
  * @namespace ContractTestUtils
  * @since 1.0.0
  */
-var ContractTestUtils;
+let ContractTestUtils;
 (function (ContractTestUtils) {
     /**
      * Expects a function to throw specific contract violation

@@ -1,7 +1,9 @@
-import { Component, Input, OnInit, ViewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ElementRef, AfterViewInit, inject, ChangeDetectionStrategy, OnDestroy, TrackByFunction } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AccessibleCardDirective } from '../../../directives/accessibility/accessible-card.directive';
 import { AccessibilityService } from '../../../services/accessibility/accessibility.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 export interface BentoGridItem {
   id: string;
@@ -30,6 +32,7 @@ export interface BentoGridItem {
   selector: 'app-bento-grid',
   standalone: true,
   imports: [CommonModule, AccessibleCardDirective],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div 
       class="bento-grid" 
@@ -579,27 +582,40 @@ export interface BentoGridItem {
     }
   `]
 })
-export class BentoGridComponent implements OnInit, AfterViewInit {
+export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('gridElement', { static: false }) gridElement!: ElementRef;
   
   private accessibilityService = inject(AccessibilityService);
+  private destroy$ = new Subject<void>();
+  private intersectionObserver?: IntersectionObserver;
   
   @Input() items: BentoGridItem[] = [];
   @Input() gridSize: 'compact' | 'default' | 'wide' = 'default';
-  @Input() ariaLabel: string = 'Dashboard grid';
+  @Input() ariaLabel = 'Dashboard grid';
   @Input() onItemClickHandler?: (item: BentoGridItem) => void;
+
+  // Optimized trackBy function
+  readonly trackByItemId: TrackByFunction<BentoGridItem> = (index: number, item: BentoGridItem): string => {
+    return item.id;
+  };
 
   ngOnInit() {
     // Initialize any necessary data
   }
 
   ngAfterViewInit() {
-    // Setup intersection observer for animations
+    // Setup intersection observer for animations with debouncing
     this.setupIntersectionObserver();
   }
 
-  trackByItemId(index: number, item: BentoGridItem): string {
-    return item.id;
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    
+    // Cleanup intersection observer
+    if (this.intersectionObserver) {
+      this.intersectionObserver.disconnect();
+    }
   }
 
   getItemClasses(item: BentoGridItem): string {
@@ -731,12 +747,25 @@ export class BentoGridComponent implements OnInit, AfterViewInit {
   private setupIntersectionObserver(): void {
     if (typeof IntersectionObserver === 'undefined') return;
 
-    const observer = new IntersectionObserver(
+    // Use requestIdleCallback for better performance
+    const scheduleAnimation = (callback: () => void) => {
+      if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(callback, { timeout: 100 });
+      } else {
+        setTimeout(callback, 0);
+      }
+    };
+
+    this.intersectionObserver = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-in');
-          }
+        scheduleAnimation(() => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('animate-in');
+              // Unobserve after animation starts for performance
+              this.intersectionObserver?.unobserve(entry.target);
+            }
+          });
         });
       },
       {
@@ -745,8 +774,10 @@ export class BentoGridComponent implements OnInit, AfterViewInit {
       }
     );
 
-    // Observe all bento items
-    const items = this.gridElement?.nativeElement?.querySelectorAll('.bento-item');
-    items?.forEach((item: Element) => observer.observe(item));
+    // Use RAF to avoid blocking main thread
+    requestAnimationFrame(() => {
+      const items = this.gridElement?.nativeElement?.querySelectorAll('.bento-item');
+      items?.forEach((item: Element) => this.intersectionObserver?.observe(item));
+    });
   }
 }

@@ -68,10 +68,10 @@ export class MarketingAdminController {
 
   @Get('pending-payments')
   async getPendingPayments(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '20',
-    @Query('sortBy') sortBy: string = 'usedAt',
-    @Query('sortOrder') sortOrder: string = 'desc'
+    @Query('page') page = '1',
+    @Query('limit') limit = '20',
+    @Query('sortBy') sortBy = 'usedAt',
+    @Query('sortOrder') sortOrder = 'desc'
   ) {
     try {
       const pendingPayments = await this.feedbackCodeService.getPendingPayments();
@@ -199,7 +199,7 @@ export class MarketingAdminController {
   }
 
   @Get('analytics/trends')
-  async getAnalyticsTrends(@Query('days') days: string = '30') {
+  async getAnalyticsTrends(@Query('days') days = '30') {
     try {
       const daysNum = parseInt(days);
       
@@ -235,7 +235,7 @@ export class MarketingAdminController {
 
   @Post('maintenance/cleanup')
   @HttpCode(HttpStatus.OK)
-  async performMaintenance(@Body('days') days: number = 30) {
+  async performMaintenance(@Body('days') days = 30) {
     try {
       const deletedCount = await this.feedbackCodeService.cleanupExpiredCodes(days);
       

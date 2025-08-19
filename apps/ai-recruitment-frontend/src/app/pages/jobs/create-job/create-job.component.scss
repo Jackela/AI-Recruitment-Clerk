@@ -1,19 +1,22 @@
+// 导入设计系统令牌（使用现代 @use 语法）
+@use '../../../../styles/design-system/tokens.scss';
+
 .create-job-container {
   max-width: 800px;
   margin: 0 auto;
 }
 
 .page-header {
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #ecf0f1;
+  margin-bottom: var(--space-8);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-primary);
 }
 
 .page-title {
   margin: 0;
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: #2c3e50;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
 }
 
 .create-job-form {
@@ -21,8 +24,8 @@
     h3 {
       margin: 0;
       font-size: 1.25rem;
-      font-weight: 600;
-      color: #2c3e50;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
     }
   }
 }
@@ -32,8 +35,8 @@
 }
 
 .form-text {
-  font-size: 0.875rem;
-  color: #6c757d;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
   margin-top: 0.5rem;
   line-height: 1.4;
 }
@@ -51,10 +54,10 @@
 
 .character-count {
   position: absolute;
-  right: 0.75rem;
-  bottom: 0.5rem;
-  font-size: 0.75rem;
-  color: #6c757d;
+  right: var(--space-3);
+  bottom: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
   background-color: rgba(255, 255, 255, 0.9);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
@@ -62,58 +65,58 @@
 }
 
 .form-actions {
-  padding-top: 1.5rem;
-  border-top: 1px solid #ecf0f1;
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border-secondary);
   text-align: right;
 }
 
 .invalid-feedback {
   display: block;
   width: 100%;
-  margin-top: 0.25rem;
-  font-size: 0.875rem;
-  color: #e74c3c;
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-danger-500);
 }
 
 .alert {
-  padding: 1rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
   
   &.alert-danger {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+    background-color: var(--color-danger-100);
+    color: var(--color-danger-800);
+    border: 1px solid var(--color-danger-200);
   }
 }
 
 .btn-close {
   background: none;
   border: none;
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
   line-height: 1;
-  color: #721c24;
+  color: var(--color-danger-800);
   cursor: pointer;
   padding: 0;
   
   &:hover {
-    color: #000;
+    color: var(--color-text-primary);
   }
 }
 
 .text-danger {
-  color: #e74c3c !important;
+  color: var(--color-danger-500) !important;
 }
 
 /* Form validation styles */
 .form-control {
   &.is-invalid {
-    border-color: #e74c3c;
+    border-color: var(--color-danger-500);
     
     &:focus {
-      border-color: #e74c3c;
-      box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
+      border-color: var(--color-danger-500);
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
     }
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { connect, NatsConnection, JetStreamClient, PubAck, StringCodec, RetentionPolicy, DiscardPolicy } from 'nats';
-import { JobJdSubmittedEvent, ResumeSubmittedEvent } from '../../../../libs/shared-dtos/src';
+import { JobJdSubmittedEvent, ResumeSubmittedEvent } from '@app/shared-dtos';
 
 export interface NatsPublishResult {
   success: boolean;
@@ -68,16 +68,27 @@ export class NatsClient implements OnModuleInit, OnModuleDestroy {
         timeout: 5000, // 5秒连接超时（减少等待时间）
         
         // 性能优化配置
-        maxPingOut: 2,          // 最大未响应ping数（修正属性名）
+        maxPingOut: 2,          // 最大未响应ping数
         pingInterval: 30000,    // 30秒ping间隔
         reconnect: true,        // 启用自动重连
         
-        // 连接池优化
+        // 高吞吐量优化配置
         noRandomize: false,     // 启用服务器随机化以实现负载均衡
+        
+        // 消息队列性能优化
+        inboxPrefix: 'INBOX',   // 收件箱前缀优化
+        noEcho: false,          // 允许回显以确保消息确认
+        
+        // 缓冲区和批处理优化
+        pedantic: false,        // 关闭严格模式以提升性能
+        verbose: false,         // 生产环境关闭详细日志
+        
+        // 连接性能调优
+        waitOnFirstConnect: true,  // 等待首次连接成功
+        ignoreClusterUpdates: false, // 允许集群更新以获得最佳路由
         
         // 调试和监控
         debug: this.configService.get<string>('NODE_ENV') === 'development',
-        verbose: this.configService.get<string>('NODE_ENV') === 'development',
       });
       
       this.jetstream = this.connection.jetstream();
@@ -168,6 +179,10 @@ export class NatsClient implements OnModuleInit, OnModuleDestroy {
         {
           msgID: this.generateMessageId(),
           timeout: 3000,     // 3秒发布超时（减少等待时间）
+          // 性能优化选项
+          expect: {
+            lastSequence: undefined, // 不强制序列检查以提升性能
+          },
         }
       );
 

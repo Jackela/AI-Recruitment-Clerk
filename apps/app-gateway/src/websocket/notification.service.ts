@@ -132,8 +132,8 @@ export class NotificationService {
    */
   async getUserNotifications(
     userId: string, 
-    unreadOnly: boolean = false,
-    limit: number = 50
+    unreadOnly = false,
+    limit = 50
   ): Promise<NotificationData[]> {
     let notifications = this.userNotifications.get(userId) || [];
 

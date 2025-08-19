@@ -1,11 +1,11 @@
 "use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+const __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    let c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    else for (let i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __metadata = (this && this.__metadata) || function (k, v) {
+const __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -16,7 +16,7 @@ const class_transformer_1 = require("class-transformer");
  * GDPR Consent Management DTOs
  * Implements comprehensive consent tracking and management for GDPR compliance
  */
-var ConsentStatus;
+let ConsentStatus;
 (function (ConsentStatus) {
     ConsentStatus["GRANTED"] = "granted";
     ConsentStatus["DENIED"] = "denied";
@@ -24,7 +24,7 @@ var ConsentStatus;
     ConsentStatus["WITHDRAWN"] = "withdrawn";
     ConsentStatus["NOT_APPLICABLE"] = "not_applicable";
 })(ConsentStatus || (exports.ConsentStatus = ConsentStatus = {}));
-var ConsentPurpose;
+let ConsentPurpose;
 (function (ConsentPurpose) {
     ConsentPurpose["ESSENTIAL_SERVICES"] = "essential_services";
     ConsentPurpose["FUNCTIONAL_ANALYTICS"] = "functional_analytics";
@@ -34,7 +34,7 @@ var ConsentPurpose;
     ConsentPurpose["PERSONALIZATION"] = "personalization";
     ConsentPurpose["PERFORMANCE_MONITORING"] = "performance_monitoring"; // Legitimate interest
 })(ConsentPurpose || (exports.ConsentPurpose = ConsentPurpose = {}));
-var ConsentMethod;
+let ConsentMethod;
 (function (ConsentMethod) {
     ConsentMethod["EXPLICIT_OPT_IN"] = "explicit_opt_in";
     ConsentMethod["IMPLIED_CONSENT"] = "implied_consent";
@@ -42,7 +42,7 @@ var ConsentMethod;
     ConsentMethod["CONTINUED_USE"] = "continued_use";
     ConsentMethod["LEGAL_REQUIREMENT"] = "legal_requirement"; // Regulatory obligation
 })(ConsentMethod || (exports.ConsentMethod = ConsentMethod = {}));
-var DataCategory;
+let DataCategory;
 (function (DataCategory) {
     DataCategory["AUTHENTICATION"] = "authentication";
     DataCategory["PROFILE_INFORMATION"] = "profile_information";

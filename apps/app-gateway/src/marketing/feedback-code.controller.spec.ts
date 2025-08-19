@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { FeedbackCodeController } from './feedback-code.controller';
 import { FeedbackCodeService } from './feedback-code.service';
-import { CreateFeedbackCodeDto, MarkFeedbackCodeUsedDto } from '../../../../libs/shared-dtos/src';
+import { CreateFeedbackCodeDto, MarkFeedbackCodeUsedDto } from '@app/shared-dtos';
 
 describe('FeedbackCodeController', () => {
   let controller: FeedbackCodeController;

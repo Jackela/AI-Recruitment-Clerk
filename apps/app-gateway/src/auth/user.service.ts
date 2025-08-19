@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto, UserDto, UserRole, UserStatus } from '../../../../libs/shared-dtos/src';
+import { CreateUserDto, UserDto, UserRole, UserStatus } from '@app/shared-dtos';
 
 // In a real implementation, this would connect to MongoDB
 // For now, we'll use a simple in-memory store with some mock users

@@ -5,7 +5,7 @@ exports.hasPermission = hasPermission;
 exports.hasAnyPermission = hasAnyPermission;
 exports.hasAllPermissions = hasAllPermissions;
 const user_dto_1 = require("./user.dto");
-var Permission;
+let Permission;
 (function (Permission) {
     // Job Management
     Permission["CREATE_JOB"] = "create_job";

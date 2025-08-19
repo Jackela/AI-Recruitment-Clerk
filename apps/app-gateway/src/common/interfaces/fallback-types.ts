@@ -50,12 +50,12 @@ export enum Permission {
 }
 
 export class UserDto {
-  id: string = '';
-  email: string = '';
+  id = '';
+  email = '';
   firstName?: string;
   lastName?: string;
-  role: string = '';
-  status: string = '';
+  role = '';
+  status = '';
   organizationId?: string;
   permissions: Permission[] = [];
   createdAt: Date = new Date();
@@ -264,13 +264,13 @@ export enum QuestionnaireStatus {
 }
 
 export class QuestionnaireDto {
-  id: string = '';
-  title: string = '';
+  id = '';
+  title = '';
   description?: string;
   status: QuestionnaireStatus = QuestionnaireStatus.DRAFT;
   questions: any[] = [];
-  createdBy: string = '';
-  organizationId: string = '';
+  createdBy = '';
+  organizationId = '';
   createdAt: Date = new Date();
   updatedAt: Date = new Date();
 }
@@ -297,45 +297,45 @@ export interface QuestionnaireSubmissionDto {
 }
 
 export class QuestionnaireResponseDto {
-  id: string = '';
-  questionnaireId: string = '';
+  id = '';
+  questionnaireId = '';
   answers: any[] = [];
-  submittedBy: string = '';
+  submittedBy = '';
   submittedAt: Date = new Date();
   metadata?: any;
 }
 
 export class QuestionnaireAnalyticsDto {
-  questionnaireId: string = '';
-  totalSubmissions: number = 0;
-  averageCompletionTime: number = 0;
-  responseRate: number = 0;
+  questionnaireId = '';
+  totalSubmissions = 0;
+  averageCompletionTime = 0;
+  responseRate = 0;
   analytics: any = {};
 }
 
 export class QuestionnaireTemplateDto {
-  id: string = '';
-  name: string = '';
+  id = '';
+  name = '';
   template: any = {};
-  category: string = '';
+  category = '';
 }
 
 // Resume DTOs for fallback
 export class ResumeDto {
-  id: string = '';
-  fileName: string = '';
-  uploadedBy: string = '';
-  status: string = 'uploaded';
+  id = '';
+  fileName = '';
+  uploadedBy = '';
+  status = 'uploaded';
   createdAt: Date = new Date();
   updatedAt: Date = new Date();
 }
 
 export class ResumeAnalysisDto {
-  resumeId: string = '';
+  resumeId = '';
   skills: string[] = [];
   experience: any[] = [];
   education: any[] = [];
-  score: number = 0;
+  score = 0;
 }
 
 export interface ResumeUploadDto {
@@ -364,8 +364,8 @@ export interface ResumeSearchDto {
 }
 
 export class ResumeSkillsAnalysisDto {
-  resumeId: string = '';
+  resumeId = '';
   extractedSkills: string[] = [];
   requiredSkills: string[] = [];
-  matchScore: number = 0;
+  matchScore = 0;
 }

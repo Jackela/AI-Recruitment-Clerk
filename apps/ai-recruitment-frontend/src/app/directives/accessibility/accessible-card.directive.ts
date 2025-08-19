@@ -14,7 +14,7 @@ export class AccessibleCardDirective implements OnInit, OnDestroy {
   @Input() cardValue?: string | number;
   @Input() cardType?: string;
   @Input() cardState?: string;
-  @Input() cardClickable: boolean = false;
+  @Input() cardClickable = false;
   @Input() cardShortcuts?: string[];
   @Input() cardInstructions?: string;
 

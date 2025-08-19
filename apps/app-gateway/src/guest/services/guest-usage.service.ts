@@ -221,7 +221,7 @@ export class GuestUsageService {
   /**
    * Clean up old guest records (called by cron job)
    */
-  async cleanupOldRecords(daysOld: number = 30): Promise<number> {
+  async cleanupOldRecords(daysOld = 30): Promise<number> {
     try {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - daysOld);

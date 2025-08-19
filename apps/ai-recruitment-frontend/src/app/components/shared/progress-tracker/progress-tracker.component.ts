@@ -380,9 +380,9 @@ export interface ProgressStep {
   `]
 })
 export class ProgressTrackerComponent implements OnInit, OnDestroy {
-  @Input() sessionId: string = '';
+  @Input() sessionId = '';
   @Input() steps: ProgressStep[] = [];
-  @Input() showMessageLog: boolean = true;
+  @Input() showMessageLog = true;
 
   connectionStatus$ = new BehaviorSubject<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
   isConnected$ = new BehaviorSubject<boolean>(false);

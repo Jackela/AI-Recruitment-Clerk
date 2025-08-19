@@ -528,9 +528,9 @@ export interface MobileNavItem {
   `]
 })
 export class MobileNavigationComponent implements OnInit, OnDestroy {
-  @Input() pageTitle: string = '';
-  @Input() pageSubtitle: string = '';
-  @Input() showBackButton: boolean = false;
+  @Input() pageTitle = '';
+  @Input() pageSubtitle = '';
+  @Input() showBackButton = false;
   @Input() navItems: MobileNavItem[] = [];
   @Input() menuItems: MobileNavItem[] = [];
   @Input() headerActions: any[] = [];
@@ -540,9 +540,9 @@ export class MobileNavigationComponent implements OnInit, OnDestroy {
   @Output() actionClick = new EventEmitter<any>();
   @Output() menuActionClick = new EventEmitter<any>();
 
-  currentRoute: string = '';
-  isMenuOpen: boolean = false;
-  isScrolled: boolean = false;
+  currentRoute = '';
+  isMenuOpen = false;
+  isScrolled = false;
   private destroy$ = new Subject<void>();
 
   constructor(private router: Router) {}

@@ -80,7 +80,7 @@ export class TouchGestureService {
     gestureEvents$: Subject<GestureEvent>,
     destroy$: Subject<void>
   ): void {
-    let touchState = {
+    const touchState = {
       touches: new Map<number, TouchPoint>(),
       startTime: 0,
       lastTap: 0,

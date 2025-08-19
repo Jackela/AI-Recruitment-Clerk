@@ -433,7 +433,7 @@ class QuestionnaireValidationResult {
 }
 exports.QuestionnaireValidationResult = QuestionnaireValidationResult;
 // 枚举类型
-var QuestionnaireStatus;
+let QuestionnaireStatus;
 (function (QuestionnaireStatus) {
     QuestionnaireStatus["SUBMITTED"] = "submitted";
     QuestionnaireStatus["PROCESSED"] = "processed";

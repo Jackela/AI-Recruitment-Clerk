@@ -502,7 +502,7 @@ class AnalyticsEventSummary extends value_object_1.ValueObject {
 }
 exports.AnalyticsEventSummary = AnalyticsEventSummary;
 // 枚举定义
-var EventType;
+let EventType;
 (function (EventType) {
     EventType["USER_INTERACTION"] = "user_interaction";
     EventType["PAGE_VIEW"] = "page_view";
@@ -513,14 +513,14 @@ var EventType;
     EventType["BUSINESS_METRIC"] = "business_metric";
     EventType["CONVERSION_EVENT"] = "conversion_event";
 })(EventType || (exports.EventType = EventType = {}));
-var EventCategory;
+let EventCategory;
 (function (EventCategory) {
     EventCategory["USER_BEHAVIOR"] = "user_behavior";
     EventCategory["SYSTEM"] = "system";
     EventCategory["BUSINESS"] = "business";
     EventCategory["OTHER"] = "other";
 })(EventCategory || (exports.EventCategory = EventCategory = {}));
-var EventStatus;
+let EventStatus;
 (function (EventStatus) {
     EventStatus["PENDING_PROCESSING"] = "pending_processing";
     EventStatus["PROCESSED"] = "processed";
@@ -528,14 +528,14 @@ var EventStatus;
     EventStatus["EXPIRED"] = "expired";
     EventStatus["ERROR"] = "error";
 })(EventStatus || (exports.EventStatus = EventStatus = {}));
-var ConsentStatus;
+let ConsentStatus;
 (function (ConsentStatus) {
     ConsentStatus["GRANTED"] = "granted";
     ConsentStatus["DENIED"] = "denied";
     ConsentStatus["PENDING"] = "pending";
     ConsentStatus["NOT_APPLICABLE"] = "not_applicable";
 })(ConsentStatus || (exports.ConsentStatus = ConsentStatus = {}));
-var MetricUnit;
+let MetricUnit;
 (function (MetricUnit) {
     MetricUnit["COUNT"] = "count";
     MetricUnit["PERCENTAGE"] = "percentage";

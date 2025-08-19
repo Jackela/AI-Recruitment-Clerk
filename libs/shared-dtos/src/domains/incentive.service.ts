@@ -550,7 +550,7 @@ export class IncentiveDomainService {
    */
   async getPendingIncentives(
     status?: IncentiveStatus,
-    limit: number = 50
+    limit = 50
   ): Promise<PendingIncentivesResult> {
     try {
       const incentives = await this.repository.findPendingIncentives(status, limit);

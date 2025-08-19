@@ -611,13 +611,13 @@ export interface UploadFile {
   `]
 })
 export class MobileUploadComponent implements OnInit, OnDestroy {
-  @Input() title: string = 'Upload Documents';
-  @Input() subtitle: string = 'Select or drag files to upload';
-  @Input() multiple: boolean = true;
-  @Input() maxSizeMB: number = 10;
+  @Input() title = 'Upload Documents';
+  @Input() subtitle = 'Select or drag files to upload';
+  @Input() multiple = true;
+  @Input() maxSizeMB = 10;
   @Input() allowedTypes: string[] = ['PDF', 'DOC', 'DOCX', 'JPG', 'PNG'];
-  @Input() disabled: boolean = false;
-  @Input() autoUpload: boolean = false;
+  @Input() disabled = false;
+  @Input() autoUpload = false;
 
   @Output() filesAdded = new EventEmitter<UploadFile[]>();
   @Output() fileRemoved = new EventEmitter<UploadFile>();
@@ -630,7 +630,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
   @ViewChild('cameraInput') cameraInput!: ElementRef<HTMLInputElement>;
 
   files: UploadFile[] = [];
-  isDragOver: boolean = false;
+  isDragOver = false;
   private destroy$ = new Subject<void>();
 
   get acceptedMimeTypes(): string {

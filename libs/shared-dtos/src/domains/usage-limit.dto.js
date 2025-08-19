@@ -317,7 +317,7 @@ class UsageStatistics extends value_object_1.ValueObject {
 }
 exports.UsageStatistics = UsageStatistics;
 // 枚举和类型
-var BonusType;
+let BonusType;
 (function (BonusType) {
     BonusType["QUESTIONNAIRE"] = "questionnaire";
     BonusType["PAYMENT"] = "payment";

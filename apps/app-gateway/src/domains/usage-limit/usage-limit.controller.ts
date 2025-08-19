@@ -29,13 +29,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import {
-  UserDto,
-  Permission,
-  BonusType,
-  UsageStatistics,
-  UsageLimitPolicy
-} from '../../../../../libs/shared-dtos/src';
+import { UserDto, Permission, BonusType, UsageStatistics, UsageLimitPolicy } from '@app/shared-dtos';
 import { UsageLimitIntegrationService } from './usage-limit-integration.service';
 
 interface AuthenticatedRequest extends Request {
@@ -256,9 +250,9 @@ export class UsageLimitController {
   @Get()
   async getUsageLimits(
     @Request() req: AuthenticatedRequest,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 20,
-    @Query('sortBy') sortBy: string = 'lastActivity',
+    @Query('page') page = 1,
+    @Query('limit') limit = 20,
+    @Query('sortBy') sortBy = 'lastActivity',
     @Query('filterBy') filterBy?: string
   ) {
     try {
@@ -509,8 +503,8 @@ export class UsageLimitController {
   @Get('stats/overview')
   async getUsageStatistics(
     @Request() req: AuthenticatedRequest,
-    @Query('timeRange') timeRange: string = '7d',
-    @Query('groupBy') groupBy: string = 'day'
+    @Query('timeRange') timeRange = '7d',
+    @Query('groupBy') groupBy = 'day'
   ) {
     try {
       const statistics = await this.usageLimitService.getUsageStatistics(
