@@ -11,16 +11,16 @@ export const APP_CONFIG = {
     description: 'AI Recruitment Assistant Application',
   },
 
-  // API 配置
+  // API 配置 - 生产环境使用相对路径
   API: {
-    baseUrl: process.env['API_BASE_URL'] || 'http://localhost:8080',
+    baseUrl: process.env['API_BASE_URL'] || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'),
     timeout: 30000,
     retryAttempts: 3,
   },
 
-  // WebSocket 配置
+  // WebSocket 配置 - 生产环境使用相对路径
   WEBSOCKET: {
-    url: process.env['WS_URL'] || 'ws://localhost:8080',
+    url: process.env['WS_URL'] || (typeof window !== 'undefined' ? `ws://${window.location.host}` : 'ws://localhost:3000'),
     reconnectInterval: 3000,
     maxRetries: 5,
   },

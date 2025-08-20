@@ -1,5 +1,9 @@
 export const environment = {
   production: true,
   apiUrl: '/api',
-  frontendUrl: ''
+  frontendUrl: '',
+  // ⚡ Production API configuration
+  wsUrl: '/ws', 
+  enableMockData: false,
+  apiTimeout: 30000
 };

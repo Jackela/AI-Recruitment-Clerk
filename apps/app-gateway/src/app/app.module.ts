@@ -53,8 +53,7 @@ import { ProductionSecurityValidator } from '../common/security/production-secur
       })
     }),
     AppCacheModule,
-    ...(process.env.SKIP_MONGO_CONNECTION !== 'true' ? [
-      MongooseModule.forRootAsync({
+    MongooseModule.forRootAsync({
         useFactory: () => {
           // 调试环境变量
           console.log('🔍 MongoDB连接调试信息:');
@@ -67,6 +66,8 @@ import { ProductionSecurityValidator } from '../common/security/production-secur
           const mongoUri = process.env.MONGO_URL;
           
           if (!mongoUri) {
+            console.warn('⚠️ MONGO_URL not configured - database features will be limited');
+            console.warn('📋 Please add MongoDB service in Railway and set MONGO_URL environment variable');
             throw new Error('MONGO_URL environment variable is required for database connection');
           }
         console.log('- 最终使用的URI (masked):', mongoUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
@@ -97,8 +98,7 @@ import { ProductionSecurityValidator } from '../common/security/production-secur
           retryReads: true        // 启用读取重试
         };
       },
-    })
-    ] : []),
+    }),
     AuthModule,
     GuestModule,
     JobsModule,

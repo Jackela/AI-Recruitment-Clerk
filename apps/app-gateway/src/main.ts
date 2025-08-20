@@ -10,11 +10,34 @@ import { AppModule } from './app/app.module';
 import { ProductionSecurityValidator } from './common/security/production-security-validator';
 
 async function bootstrap() {
+  // ⚡ Fail Fast Validation - Check critical environment variables
+  Logger.log('🔍 [FAIL-FAST] Validating critical environment variables...');
+  
+  const requiredVars = ['MONGO_URL'];
+  const missingVars = requiredVars.filter(varName => !process.env[varName]);
+  
+  if (missingVars.length > 0) {
+    Logger.error('🚨 [FAIL-FAST] Missing required environment variables:');
+    missingVars.forEach(varName => {
+      Logger.error(`   ❌ ${varName} is not set`);
+    });
+    Logger.error('💡 [SETUP] Please configure the following in Railway:');
+    Logger.error('   1. Add MongoDB database service');
+    Logger.error('   2. Add Redis cache service');
+    Logger.error('   3. Environment variables will be auto-configured');
+    Logger.error('🔗 [GUIDE] See RAILWAY_SETUP.md for detailed instructions');
+    process.exit(1);
+  }
+  
+  Logger.log('✅ [FAIL-FAST] All critical environment variables validated');
+
   // Enhanced startup logging
   Logger.log('🚀 [bootstrap] Starting AI Recruitment Clerk Gateway...');
   Logger.log(`- Node environment: ${process.env.NODE_ENV || 'not set'}`);
   Logger.log(`- Port: ${process.env.PORT || 3000}`);
   Logger.log(`- API Prefix: ${process.env.API_PREFIX || 'api'}`);
+  Logger.log(`- MongoDB: ${process.env.MONGO_URL ? '✅ Configured' : '❌ Not set'}`);
+  Logger.log(`- Redis: ${process.env.REDIS_URL ? '✅ Configured' : '⚠️ Optional'}`);
 
   const app = await NestFactory.create(AppModule, {
     // 应用级性能优化配置
