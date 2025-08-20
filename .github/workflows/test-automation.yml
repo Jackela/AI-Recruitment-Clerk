@@ -111,7 +111,7 @@ jobs:
           cache: 'npm'
 
       - name: 📦 安装依赖 (仅生产)
-        run: npm ci --production --legacy-peer-deps || npm install --production --legacy-peer-deps
+        run: npm ci --omit=dev --ignore-scripts --legacy-peer-deps || npm install --omit=dev --ignore-scripts --legacy-peer-deps
 
       - name: 📁 准备报告目录
         run: mkdir -p test-reports
