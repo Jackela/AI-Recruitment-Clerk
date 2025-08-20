@@ -2,10 +2,10 @@
 nixPkgs = ['nodejs_20']
 
 [phases.install]
-cmd = 'npm install --legacy-peer-deps --production'
+cmd = 'npm ci --legacy-peer-deps'
 
 [phases.build]
-cmd = 'npx nx build app-gateway --prod'
+cmd = 'npm run build'
 
 [start]
 cmd = 'node dist/apps/app-gateway/main.js'
