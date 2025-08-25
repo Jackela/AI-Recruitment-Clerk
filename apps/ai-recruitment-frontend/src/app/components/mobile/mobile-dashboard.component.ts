@@ -935,7 +935,9 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
   @ViewChild('dashboardContainer', { read: ElementRef }) dashboardContainer!: ElementRef;
   @ViewChild('quickActionsContainer', { read: ElementRef }) quickActionsContainer!: ElementRef;
 
-  constructor(private touchGesture: TouchGestureService) {}
+  constructor(private readonly touchGesture: TouchGestureService) {
+    // TouchGesture service will be used for future gesture implementations
+  }
 
   ngOnInit() {
     this.setupPullToRefresh();
@@ -973,7 +975,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
       }
     };
 
-    const handleTouchEnd = (e: TouchEvent) => {
+    const handleTouchEnd = (_e: TouchEvent) => {
       if (!isScrollAtTop) return;
       
       const deltaY = currentY - startY;

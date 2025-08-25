@@ -105,7 +105,7 @@ export class AnalyticsController {
       return {
         success: false,
         error: 'Failed to track event',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -155,7 +155,7 @@ export class AnalyticsController {
       return {
         success: false,
         error: 'Failed to record performance metric',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -204,7 +204,7 @@ export class AnalyticsController {
       return {
         success: false,
         error: 'Failed to record business metric',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -243,7 +243,7 @@ export class AnalyticsController {
       return {
         success: false,
         error: 'Failed to retrieve dashboard data',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -286,7 +286,7 @@ export class AnalyticsController {
       return {
         success: false,
         error: 'Failed to retrieve user behavior analysis',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -329,7 +329,7 @@ export class AnalyticsController {
       return {
         success: false,
         error: 'Failed to retrieve usage statistics',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -398,7 +398,7 @@ export class AnalyticsController {
       return {
         success: false,
         error: 'Failed to generate report',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -448,7 +448,7 @@ export class AnalyticsController {
       return {
         success: false,
         error: 'Failed to retrieve reports',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -482,7 +482,7 @@ export class AnalyticsController {
       return {
         success: false,
         error: 'Failed to retrieve report',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -526,7 +526,7 @@ export class AnalyticsController {
       return {
         success: false,
         error: 'Failed to delete report',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -560,7 +560,7 @@ export class AnalyticsController {
       return {
         success: false,
         error: 'Failed to retrieve realtime data',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -600,7 +600,7 @@ export class AnalyticsController {
       return {
         success: false,
         error: 'Failed to configure data retention',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -654,7 +654,7 @@ export class AnalyticsController {
       return {
         success: false,
         error: 'Failed to export analytics data',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -686,7 +686,7 @@ export class AnalyticsController {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         service: 'analytics-reporting',
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }

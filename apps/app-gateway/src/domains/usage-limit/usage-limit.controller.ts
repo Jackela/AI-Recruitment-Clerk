@@ -103,7 +103,7 @@ export class UsageLimitController {
       return {
         success: false,
         error: 'Failed to check usage limit',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -176,7 +176,7 @@ export class UsageLimitController {
       return {
         success: false,
         error: 'Failed to record usage',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -231,7 +231,7 @@ export class UsageLimitController {
       return {
         success: false,
         error: 'Failed to add bonus quota',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -286,7 +286,7 @@ export class UsageLimitController {
       return {
         success: false,
         error: 'Failed to retrieve usage limits',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -323,7 +323,7 @@ export class UsageLimitController {
       return {
         success: false,
         error: 'Failed to retrieve usage limit detail',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -378,7 +378,7 @@ export class UsageLimitController {
       return {
         success: false,
         error: 'Failed to update usage limit policy',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -432,7 +432,7 @@ export class UsageLimitController {
       return {
         success: false,
         error: 'Failed to reset usage limit',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -486,7 +486,7 @@ export class UsageLimitController {
       return {
         success: false,
         error: 'Batch operation failed',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -533,7 +533,7 @@ export class UsageLimitController {
       return {
         success: false,
         error: 'Failed to retrieve usage statistics',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -587,7 +587,7 @@ export class UsageLimitController {
       return {
         success: false,
         error: 'Failed to export usage data',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -634,7 +634,7 @@ export class UsageLimitController {
       return {
         success: false,
         error: 'Failed to configure rate limiting',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -670,7 +670,7 @@ export class UsageLimitController {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         service: 'usage-limits',
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }

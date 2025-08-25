@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { ProgressFeedbackService } from './feedback/progress-feedback.service';
+import { Observable, BehaviorSubject } from 'rxjs';
 
 export interface ToastMessage {
   message: string;
@@ -10,9 +12,10 @@ export interface ToastMessage {
   providedIn: 'root'
 })
 export class ToastService {
-  private toasts: ToastMessage[] = [];
+  private toasts$ = new BehaviorSubject<ToastMessage[]>([]);
+  private activeToastIds: string[] = [];
 
-  constructor() {}
+  constructor(private progressFeedback: ProgressFeedbackService) {}
 
   success(message: string, duration = 3000): void {
     this.show({ message, type: 'success', duration });
@@ -31,13 +34,24 @@ export class ToastService {
   }
 
   private show(toast: ToastMessage): void {
-    this.toasts.push(toast);
+    // Update local toast array for backward compatibility
+    const currentToasts = this.toasts$.value;
+    this.toasts$.next([...currentToasts, toast]);
     
-    // 简单的控制台输出实现，实际项目中会有UI组件
-    const prefix = toast.type.toUpperCase();
-    console.log(`[${prefix}] ${toast.message}`);
+    // Use ProgressFeedbackService for actual UI notification
+    const title = this.getTitle(toast.type);
+    const notificationId = this.progressFeedback.showNotification(
+      title,
+      toast.message,
+      toast.type,
+      toast.duration || 5000,
+      undefined,
+      false
+    );
     
-    // 自动移除toast
+    this.activeToastIds.push(notificationId);
+    
+    // Auto-remove from local array after duration
     if (toast.duration && toast.duration > 0) {
       setTimeout(() => {
         this.remove(toast);
@@ -45,18 +59,43 @@ export class ToastService {
     }
   }
 
+  private getTitle(type: 'success' | 'error' | 'warning' | 'info'): string {
+    switch (type) {
+      case 'success':
+        return '成功';
+      case 'error':
+        return '错误';
+      case 'warning':
+        return '警告';
+      case 'info':
+        return '信息';
+      default:
+        return '通知';
+    }
+  }
+
   private remove(toast: ToastMessage): void {
-    const index = this.toasts.indexOf(toast);
+    const currentToasts = this.toasts$.value;
+    const index = currentToasts.indexOf(toast);
     if (index > -1) {
-      this.toasts.splice(index, 1);
+      const newToasts = [...currentToasts];
+      newToasts.splice(index, 1);
+      this.toasts$.next(newToasts);
     }
   }
 
   getToasts(): ToastMessage[] {
-    return this.toasts;
+    return this.toasts$.value;
+  }
+
+  getToasts$(): Observable<ToastMessage[]> {
+    return this.toasts$.asObservable();
   }
 
   clear(): void {
-    this.toasts = [];
+    this.toasts$.next([]);
+    // Clear all notifications from ProgressFeedbackService
+    this.progressFeedback.clearAllNotifications();
+    this.activeToastIds = [];
   }
 }

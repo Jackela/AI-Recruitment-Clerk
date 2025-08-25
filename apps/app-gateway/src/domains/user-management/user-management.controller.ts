@@ -97,7 +97,7 @@ export class UserManagementController {
       return {
         success: false,
         error: 'Failed to retrieve user profile',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -133,7 +133,7 @@ export class UserManagementController {
       return {
         success: false,
         error: 'Failed to update user profile',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -164,7 +164,7 @@ export class UserManagementController {
       return {
         success: false,
         error: 'Failed to update user preferences',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -210,7 +210,7 @@ export class UserManagementController {
       return {
         success: false,
         error: 'Failed to retrieve user activity',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -252,7 +252,7 @@ export class UserManagementController {
       return {
         success: false,
         error: 'Failed to delete user account',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -302,7 +302,7 @@ export class UserManagementController {
       return {
         success: false,
         error: 'Failed to retrieve organization users',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -348,7 +348,7 @@ export class UserManagementController {
       return {
         success: false,
         error: 'Failed to update user status',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -374,7 +374,7 @@ export class UserManagementController {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         service: 'user-management',
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }

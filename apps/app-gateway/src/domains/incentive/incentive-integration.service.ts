@@ -222,7 +222,7 @@ export class IncentiveIntegrationService {
       this.logger.error('Error processing payment', error);
       return {
         success: false,
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -357,7 +357,7 @@ export class IncentiveIntegrationService {
         paymentProcessor: 'unknown',
         ruleEngine: 'unknown',
         eventProcessing: 'unknown',
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }

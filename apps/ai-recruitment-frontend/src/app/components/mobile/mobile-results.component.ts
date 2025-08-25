@@ -1,9 +1,10 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
 import { MobileSwipeComponent, SwipeAction, SwipeEvent } from './mobile-swipe.component';
-import { TouchGestureService, GestureEvent } from '../../services/mobile/touch-gesture.service';
+import { TouchGestureService } from '../../services/mobile/touch-gesture.service';
 
 export interface CandidateResult {
   id: string;
@@ -40,7 +41,7 @@ export interface ResultsFilter {
 @Component({
   selector: 'app-mobile-results',
   standalone: true,
-  imports: [CommonModule, RouterModule, MobileSwipeComponent],
+  imports: [CommonModule, RouterModule, FormsModule, MobileSwipeComponent],
   template: `
     <div class="mobile-results-container">
       <!-- Results Header -->
@@ -1013,7 +1014,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
   ];
 
   // Swipe actions
-  getSwipeActions(candidate: CandidateResult): SwipeAction[] {
+  getSwipeActions(_candidate: CandidateResult): SwipeAction[] {
     return [
       {
         id: 'view',
@@ -1061,7 +1062,9 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     }
   ];
 
-  constructor(private touchGesture: TouchGestureService) {}
+  constructor(private readonly touchGesture: TouchGestureService) {
+    // TouchGesture service will be used for future gesture implementations
+  }
 
   ngOnInit() {
     this.applyFilters();
@@ -1266,7 +1269,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     this.selectedCandidate = null;
   }
 
-  trackByCandidate(index: number, candidate: CandidateResult): string {
+  trackByCandidate(_index: number, candidate: CandidateResult): string {
     return candidate.id;
   }
 }

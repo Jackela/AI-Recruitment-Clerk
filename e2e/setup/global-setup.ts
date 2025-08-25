@@ -125,7 +125,7 @@ async function verifyServiceHealth(): Promise<void> {
         throw new Error(`Health check failed with status ${response.status}`);
       }
     } catch (error) {
-      console.warn(`⚠️ ${name} health check failed:`, error.message);
+      console.warn(`⚠️ ${name} health check failed:`, error instanceof Error ? error.message : String(error));
       // Don't throw here, some services might not have health endpoints yet
     }
   }

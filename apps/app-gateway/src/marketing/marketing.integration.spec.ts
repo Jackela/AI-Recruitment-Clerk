@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import * as request from 'supertest';
+import request from 'supertest';
 import { MarketingModule } from './marketing.module';
 import { FeedbackCodeService } from './feedback-code.service';
 import { CreateFeedbackCodeDto, MarkFeedbackCodeUsedDto } from '@app/shared-dtos';

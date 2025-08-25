@@ -42,7 +42,7 @@ export class MfaController {
     try {
       return await this.mfaService.getMfaStatus(req.user.sub);
     } catch (error) {
-      this.logger.error(`Failed to get MFA status for user ${req.user.sub}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to get MFA status for user ${req.user.sub}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw new HttpException('Failed to retrieve MFA status', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -60,12 +60,12 @@ export class MfaController {
       this.logger.log(`Enabling ${enableMfaDto.method} MFA for user ${req.user.sub}`);
       return await this.mfaService.enableMfa(req.user.sub, enableMfaDto);
     } catch (error) {
-      this.logger.error(`Failed to enable MFA for user ${req.user.sub}: ${error.message}`, error.stack);
-      if (error.message.includes('Invalid password')) {
+      this.logger.error(`Failed to enable MFA for user ${req.user.sub}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      if (error instanceof Error && error.message.includes('Invalid password')) {
         throw new HttpException('Invalid password', HttpStatus.UNAUTHORIZED);
       }
-      if (error.message.includes('required')) {
-        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      if (error instanceof Error && error.message.includes('required')) {
+        throw new HttpException(error instanceof Error ? error.message : String(error), HttpStatus.BAD_REQUEST);
       }
       throw new HttpException('Failed to enable MFA', HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -90,9 +90,9 @@ export class MfaController {
         message: result.success ? 'MFA verification successful' : 'MFA verification failed'
       };
     } catch (error) {
-      this.logger.error(`MFA verification failed for user ${req.user.sub}: ${error.message}`, error.stack);
-      if (error.message.includes('locked') || error.message.includes('Invalid MFA token')) {
-        throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+      this.logger.error(`MFA verification failed for user ${req.user.sub}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      if (error instanceof Error && (error.message.includes('locked') || error.message.includes('Invalid MFA token'))) {
+        throw new HttpException(error instanceof Error ? error.message : String(error), HttpStatus.UNAUTHORIZED);
       }
       throw new HttpException('MFA verification failed', HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -114,9 +114,9 @@ export class MfaController {
         message: 'MFA has been disabled successfully'
       };
     } catch (error) {
-      this.logger.error(`Failed to disable MFA for user ${req.user.sub}: ${error.message}`, error.stack);
-      if (error.message.includes('Invalid')) {
-        throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+      this.logger.error(`Failed to disable MFA for user ${req.user.sub}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      if (error instanceof Error && error.message.includes('Invalid')) {
+        throw new HttpException(error instanceof Error ? error.message : String(error), HttpStatus.UNAUTHORIZED);
       }
       throw new HttpException('Failed to disable MFA', HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -139,9 +139,9 @@ export class MfaController {
         message: 'New backup codes generated successfully. Store them securely!'
       };
     } catch (error) {
-      this.logger.error(`Failed to generate backup codes for user ${req.user.sub}: ${error.message}`, error.stack);
-      if (error.message.includes('Invalid')) {
-        throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+      this.logger.error(`Failed to generate backup codes for user ${req.user.sub}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      if (error instanceof Error && error.message.includes('Invalid')) {
+        throw new HttpException(error instanceof Error ? error.message : String(error), HttpStatus.UNAUTHORIZED);
       }
       throw new HttpException('Failed to generate backup codes', HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -168,9 +168,9 @@ export class MfaController {
       this.logger.log(`MFA token sent via ${body.method} for user ${req.user.sub}`);
       return result;
     } catch (error) {
-      this.logger.error(`Failed to send MFA token for user ${req.user.sub}: ${error.message}`, error.stack);
-      if (error.message.includes('not enabled') || error.message.includes('Invalid MFA method')) {
-        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      this.logger.error(`Failed to send MFA token for user ${req.user.sub}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      if (error instanceof Error && (error.message.includes('not enabled') || error.message.includes('Invalid MFA method'))) {
+        throw new HttpException(error instanceof Error ? error.message : String(error), HttpStatus.BAD_REQUEST);
       }
       throw new HttpException('Failed to send MFA token', HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -189,7 +189,7 @@ export class MfaController {
         message: 'All trusted devices have been removed. You will be prompted for MFA on all devices.'
       };
     } catch (error) {
-      this.logger.error(`Failed to remove trusted devices for user ${req.user.sub}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to remove trusted devices for user ${req.user.sub}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw new HttpException('Failed to remove trusted devices', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

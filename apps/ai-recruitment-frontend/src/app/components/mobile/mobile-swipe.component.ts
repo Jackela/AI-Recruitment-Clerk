@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ElementRef, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ElementRef, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface SwipeAction {
@@ -232,7 +232,7 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
     this.updateSwipe(touch.clientX);
   }
 
-  onTouchEnd(event: TouchEvent) {
+  onTouchEnd(_event: TouchEvent) {
     if (this.disabled) return;
     
     this.endSwipe();
@@ -253,7 +253,7 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
     event.preventDefault();
   }
 
-  onMouseUp(event: MouseEvent) {
+  onMouseUp(_event: MouseEvent) {
     if (this.disabled || !this.isMouseEvent) return;
     
     this.endSwipe();

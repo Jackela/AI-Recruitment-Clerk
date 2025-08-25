@@ -1,28 +1,39 @@
 # Claude Code Configuration - AI Recruitment Clerk
 
-## 🚨 CRITICAL: CONCURRENT EXECUTION & FILE MANAGEMENT
+## 🚨 CRITICAL PROJECT RULES
 
-**ABSOLUTE RULES**:
-1. ALL operations MUST be concurrent/parallel in a single message
-2. **NEVER save working files, text/mds and tests to the root folder**
-3. ALWAYS organize files in appropriate subdirectories
+### RULE 1: STRICT FAIL-FAST ARCHITECTURE
+- **NO FALLBACK MECHANISMS**: Applications must start correctly or fail immediately
+- **NO GRACEFUL DEGRADATION**: Fix root causes, not symptoms
+- **NO BACKUP SERVERS**: simple-server.js, enhanced-server.js, hybrid-server.js are FORBIDDEN
+- **IMMEDIATE FAILURE REQUIRED**: Any startup failure must surface the real problem
 
-### ⚡ GOLDEN RULE: "1 MESSAGE = ALL RELATED OPERATIONS"
+### RULE 2: ESM MODULE SYSTEM ONLY
+- **ALL PROJECTS**: Must use `"type": "module"` in package.json
+- **ALL TSCONFIG**: Must use `"module": "ES2022"` and `"target": "ES2022"`
+- **NO COMMONJS**: CommonJS imports/exports are strictly prohibited
+- **ANGULAR/NESTJS COMPATIBILITY**: Must maintain ESM compatibility across all services
 
-**MANDATORY PATTERNS:**
+### RULE 3: TYPESCRIPT STRICT MODE ENFORCED
+- **NO 'ANY' TYPES**: All variables must have explicit types
+- **STRICT MODE**: All tsconfig files must have `"strict": true`
+- **ERROR ON UNUSED**: `"noUnusedLocals": true, "noUnusedParameters": true`
+- **COMPILATION MUST SUCCEED**: Zero tolerance for TypeScript errors
+
+### RULE 4: CONCURRENT EXECUTION PATTERNS
+- **BATCH ALL OPERATIONS**: Never split related operations across multiple messages
 - **TodoWrite**: ALWAYS batch ALL todos in ONE call (5-10+ todos minimum)
 - **File operations**: ALWAYS batch ALL reads/writes/edits in ONE message
 - **Bash commands**: ALWAYS batch ALL terminal operations in ONE message
 
-### 📁 File Organization Rules
-
-**NEVER save to root folder. Use these directories:**
-- `/src` - Source code files
-- `/tests` - Test files
-- `/docs` - Documentation and markdown files
-- `/config` - Configuration files
-- `/scripts` - Utility scripts
-- `/examples` - Example code
+### RULE 5: FILE ORGANIZATION HIERARCHY
+- **NO ROOT CLUTTER**: Never save working files to project root
+- **STRICT DIRECTORIES**: 
+  - `/src` - Source code files only
+  - `/tests` - Test files only
+  - `/docs` - Documentation only
+  - `/config` - Configuration only
+  - `/scripts` - Utility scripts only
 
 ## Project Overview
 
@@ -52,13 +63,34 @@ AI Recruitment Clerk - 智能简历筛选和分析系统，使用Angular + NestJ
 - **Message Queue**: NATS JetStream
 - **Deployment**: Docker, Railway
 
-## Code Style & Best Practices
+## RULE 6: CODE QUALITY STANDARDS
 
-- **Modular Design**: Files under 500 lines
-- **Environment Safety**: Never hardcode secrets
-- **Test-First**: Write tests before implementation
-- **Clean Architecture**: Separate concerns
-- **Bento Grid UI**: Modern card-based interface design
+- **MODULAR DESIGN**: Files under 500 lines maximum
+- **ENVIRONMENT SAFETY**: Never hardcode secrets or credentials
+- **TEST-FIRST DEVELOPMENT**: Write tests before implementation
+- **CLEAN ARCHITECTURE**: Strict separation of concerns
+- **BENTO GRID UI**: Consistent modern card-based interface design
+
+## RULE 7: DEPLOYMENT & PRODUCTION STANDARDS
+
+- **RAILWAY OPTIMIZATION**: Build must succeed or deployment fails
+- **HEALTH CHECKS**: `/api/health` endpoint must be reliable
+- **NO MOCKING IN PRODUCTION**: Remove all mock data and services
+- **ENVIRONMENT VALIDATION**: All required environment variables must be validated
+
+## RULE 8: ERROR HANDLING PHILOSOPHY
+
+- **SURFACE REAL PROBLEMS**: Never mask underlying issues
+- **LOG WITH CONTEXT**: All errors must include actionable debugging information
+- **FAIL LOUDLY**: Prefer obvious failures over silent degradation
+- **NO SWALLOWING EXCEPTIONS**: Every error must be handled or propagated
+
+### ⚡ ENFORCEMENT PRIORITY
+1. **FAIL-FAST** > graceful degradation
+2. **ESM MODULES** > CommonJS compatibility
+3. **TYPE SAFETY** > runtime flexibility  
+4. **ROOT CAUSE FIXES** > temporary workarounds
+5. **IMMEDIATE FEEDBACK** > delayed error discovery
 
 # important-instruction-reminders
 Do what has been asked; nothing more, nothing less.

@@ -119,7 +119,7 @@ export class MfaService {
         message: `${enableMfaDto.method.toUpperCase()} MFA has been enabled successfully`
       };
     } catch (error) {
-      this.logger.error(`Failed to enable MFA for user ${userId}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to enable MFA for user ${userId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -218,7 +218,7 @@ export class MfaService {
       this.logger.log(`MFA verification successful for user ${userId}`);
       return { success: true, deviceTrusted: false };
     } catch (error) {
-      this.logger.error(`MFA verification failed for user ${userId}: ${error.message}`, error.stack);
+      this.logger.error(`MFA verification failed for user ${userId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -256,7 +256,7 @@ export class MfaService {
       this.logger.log(`MFA disabled for user ${userId}`);
       return { success: true };
     } catch (error) {
-      this.logger.error(`Failed to disable MFA for user ${userId}: ${error.message}`, error.stack);
+      this.logger.error(`Failed to disable MFA for user ${userId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -386,7 +386,7 @@ export class MfaService {
         message: `Verification code sent via ${method.toUpperCase()}`
       };
     } catch (error) {
-      this.logger.error(`Failed to send MFA token: ${error.message}`, error.stack);
+      this.logger.error(`Failed to send MFA token: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw new BadRequestException(`Failed to send verification code via ${method.toUpperCase()}`);
     }
   }

@@ -242,7 +242,7 @@ export class ResumeService {
       this.logger.error('Error getting health status', error);
       return {
         overall: 'unhealthy',
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }

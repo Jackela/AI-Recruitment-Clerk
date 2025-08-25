@@ -84,7 +84,7 @@ export class SecurityController {
         }
       };
     } catch (error) {
-      this.logger.error(`Failed to get security events: ${error.message}`, error.stack);
+      this.logger.error(`Failed to get security events: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw new HttpException('Failed to retrieve security events', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -115,7 +115,7 @@ export class SecurityController {
         }
       };
     } catch (error) {
-      this.logger.error(`Failed to get security metrics: ${error.message}`, error.stack);
+      this.logger.error(`Failed to get security metrics: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw new HttpException('Failed to retrieve security metrics', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -153,7 +153,7 @@ export class SecurityController {
         message: 'Security event resolved successfully'
       };
     } catch (error) {
-      this.logger.error(`Failed to resolve security event: ${error.message}`, error.stack);
+      this.logger.error(`Failed to resolve security event: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       if (error instanceof HttpException) {
         throw error;
       }
@@ -187,7 +187,7 @@ export class SecurityController {
         }
       };
     } catch (error) {
-      this.logger.error(`Failed to get rate limit stats: ${error.message}`, error.stack);
+      this.logger.error(`Failed to get rate limit stats: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw new HttpException('Failed to retrieve rate limit statistics', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -213,7 +213,7 @@ export class SecurityController {
         }
       };
     } catch (error) {
-      this.logger.error(`Failed to get locked IPs: ${error.message}`, error.stack);
+      this.logger.error(`Failed to get locked IPs: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw new HttpException('Failed to retrieve locked IPs', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -262,7 +262,7 @@ export class SecurityController {
         message: `IP address ${body.ip} unlocked successfully`
       };
     } catch (error) {
-      this.logger.error(`Failed to unlock IP: ${error.message}`, error.stack);
+      this.logger.error(`Failed to unlock IP: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       if (error instanceof HttpException) {
         throw error;
       }
@@ -293,11 +293,11 @@ export class SecurityController {
         }
       };
     } catch (error) {
-      this.logger.error(`Security health check failed: ${error.message}`, error.stack);
+      this.logger.error(`Security health check failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       return {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         services: {
           securityMonitor: false,
           rateLimiting: false,
@@ -339,7 +339,7 @@ export class SecurityController {
         eventId
       };
     } catch (error) {
-      this.logger.error(`Failed to send test alert: ${error.message}`, error.stack);
+      this.logger.error(`Failed to send test alert: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw new HttpException('Failed to send test alert', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

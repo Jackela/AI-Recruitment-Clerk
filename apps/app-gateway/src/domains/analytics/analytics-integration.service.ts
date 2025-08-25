@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AnalyticsDomainService, EventType, EventStatus, MetricUnit, ReportType, DataScope, IDomainEventBus, IAuditLogger, IPrivacyService, ISessionTracker, ConsentStatus } from '@app/shared-dtos';
 import { UserSession } from '@app/shared-dtos';
-import { UserSession } from '@app/shared-dtos';
 import { AnalyticsEventRepository } from './analytics-event.repository';
 import { NatsClient } from '../../nats/nats.client';
 import { Cache } from 'cache-manager';
@@ -608,7 +607,7 @@ export class AnalyticsIntegrationService {
         reportGeneration: 'unhealthy',
         realtimeData: 'unhealthy',
         dataRetention: 'unhealthy',
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -626,7 +625,7 @@ export class AnalyticsIntegrationService {
           lastActivity: new Date()
         }, 30 * 60 * 1000); // 30分钟过期
       },
-      getSession: async (sessionId: string): Promise<AnalyticsUserSession | null> => {
+      getSession: async (sessionId: string): Promise<UserSession | null> => {
         const cacheKey = `session:${sessionId}`;
         const sessionData = await this.cacheManager.get(cacheKey) as any;
         
@@ -634,9 +633,12 @@ export class AnalyticsIntegrationService {
           return null;
         }
 
-        return AnalyticsUserSession.create(
-          sessionData.sessionId
-        );
+        return {
+          sessionId: sessionData.sessionId,
+          userId: sessionData.userId,
+          startTime: sessionData.startTime,
+          lastActivity: sessionData.lastActivity
+        } as UserSession;
       },
       endSession: async (sessionId: string) => {
         const cacheKey = `session:${sessionId}`;

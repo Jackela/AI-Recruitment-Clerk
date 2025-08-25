@@ -2,6 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { io, Socket } from 'socket.io-client';
+import { ToastService } from './toast.service';
 
 export interface WebSocketMessage {
   type: 'progress' | 'step_change' | 'completed' | 'error' | 'status_update';
@@ -27,6 +28,8 @@ export interface CompletionData {
   providedIn: 'root'
 })
 export class WebSocketService implements OnDestroy {
+  constructor(private toastService: ToastService) {}
+
   private socket: Socket | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
@@ -57,7 +60,7 @@ export class WebSocketService implements OnDestroy {
       
       this.setupSocketHandlers(sessionId);
     } catch (error) {
-      console.error('Socket.IO connection failed:', error);
+      this.toastService.error('网络连接失败，请检查您的网络');
       this.connectionStatus$.next('error');
     }
     
@@ -121,7 +124,7 @@ export class WebSocketService implements OnDestroy {
     if (this.socket && this.socket.connected) {
       this.socket.emit(event, data);
     } else {
-      console.warn('Socket.IO is not connected');
+      // Socket not connected, skip sending
     }
   }
 
@@ -144,7 +147,7 @@ export class WebSocketService implements OnDestroy {
     if (!this.socket) return;
 
     this.socket.on('connect', () => {
-      console.log('Socket.IO connected');
+      // Socket connected
       this.connectionStatus$.next('connected');
       this.reconnectAttempts = 0;
       
@@ -157,27 +160,27 @@ export class WebSocketService implements OnDestroy {
         message.timestamp = new Date(message.timestamp);
         this.messages$.next(message);
       } catch (error) {
-        console.error('Failed to parse Socket.IO message:', error);
+        // Silent fail - message parsing error
       }
     });
 
     this.socket.on('disconnect', (reason) => {
-      console.log('Socket.IO disconnected:', reason);
+      // Socket disconnected
       this.connectionStatus$.next('disconnected');
     });
 
     this.socket.on('connect_error', (error) => {
-      console.error('Socket.IO connection error:', error);
+      // Connection error
       this.connectionStatus$.next('error');
     });
 
     this.socket.on('reconnect', (attemptNumber) => {
-      console.log('Socket.IO reconnected after', attemptNumber, 'attempts');
+      this.toastService.success('网络连接已恢复');
       this.connectionStatus$.next('connected');
     });
 
     this.socket.on('reconnect_error', (error) => {
-      console.error('Socket.IO reconnection error:', error);
+      // Reconnection error
       this.connectionStatus$.next('error');
     });
   }
@@ -187,12 +190,12 @@ export class WebSocketService implements OnDestroy {
    */
   private handleReconnect(sessionId?: string): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('Max reconnection attempts reached');
+      this.toastService.error('网络连接失败，请刷新页面重试');
       return;
     }
 
     this.reconnectAttempts++;
-    console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+    // Attempting to reconnect
     
     setTimeout(() => {
       if (sessionId) {

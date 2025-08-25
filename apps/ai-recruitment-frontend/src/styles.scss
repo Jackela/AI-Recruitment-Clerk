@@ -18,6 +18,23 @@
   --critical-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+// Dark mode support - Will be overridden by ThemeService
+[data-theme="dark"] {
+  // Dark mode will be applied via CSS custom properties by ThemeService
+  // Fallback dark mode colors
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-bg-primary: #0f172a;
+  --color-bg-secondary: #1e293b;
+  --color-border-primary: #334155;
+  --color-border-secondary: #475569;
+  
+  // Dark mode shadows
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
 // ===== 全局重置与基础样式 =====
 *,
 *::before,

@@ -105,7 +105,8 @@ export class AriaLiveComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Subscribe to accessibility service live messages (test-compatible)
-    if (typeof jest === 'undefined') {
+    const isTestEnvironment = typeof (window as any).__karma__ !== 'undefined';
+    if (!isTestEnvironment) {
       // Production environment: use effect for reactive updates
       try {
         effect(() => {

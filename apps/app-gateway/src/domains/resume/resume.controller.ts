@@ -154,7 +154,7 @@ export class ResumeController {
       return {
         success: false,
         error: 'Failed to upload resume',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -201,7 +201,7 @@ export class ResumeController {
       return {
         success: false,
         error: 'Failed to retrieve resume',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -242,7 +242,7 @@ export class ResumeController {
       return {
         success: false,
         error: 'Failed to retrieve resume analysis',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -276,7 +276,7 @@ export class ResumeController {
       return {
         success: false,
         error: 'Failed to retrieve skills analysis',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -316,7 +316,7 @@ export class ResumeController {
       return {
         success: false,
         error: 'Failed to update resume status',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -360,7 +360,7 @@ export class ResumeController {
       return {
         success: false,
         error: 'Batch processing failed',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -406,7 +406,7 @@ export class ResumeController {
       return {
         success: false,
         error: 'Search failed',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -451,7 +451,7 @@ export class ResumeController {
       return {
         success: false,
         error: 'Failed to start reprocessing',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -493,7 +493,7 @@ export class ResumeController {
       return {
         success: false,
         error: 'Failed to delete resume',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -527,7 +527,7 @@ export class ResumeController {
       return {
         success: false,
         error: 'Failed to retrieve processing stats',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -558,7 +558,7 @@ export class ResumeController {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         service: 'resume-processing',
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }

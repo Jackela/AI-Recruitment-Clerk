@@ -1,7 +1,7 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { importProvidersFrom, isDevMode } from '@angular/core';
+import { importProvidersFrom, isDevMode, ErrorHandler } from '@angular/core';
 import { RouterModule, PreloadAllModules } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
@@ -12,6 +12,8 @@ import { provideBrowserGlobalErrorListeners } from '@angular/core';
 import { App } from './app/app';
 import { appRoutes } from './app/app.routes';
 import { SmartPreloadingStrategy } from './app/services/smart-preloading.strategy';
+import { HttpErrorInterceptor } from './app/interceptors/http-error.interceptor';
+import { GlobalErrorHandler } from './app/components/shared/error-boundary/error-boundary.component';
 
 // Reducers
 import { jobReducer } from './app/store/jobs/job.reducer';
@@ -27,6 +29,15 @@ bootstrapApplication(App, {
   providers: [
     provideBrowserGlobalErrorListeners(),
     SmartPreloadingStrategy,
+    {
+      provide: ErrorHandler,
+      useClass: GlobalErrorHandler
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: HttpErrorInterceptor,
+      multi: true
+    },
     importProvidersFrom(
       HttpClientModule,
       ReactiveFormsModule,

@@ -105,7 +105,7 @@ export class QuestionnaireController {
       return {
         success: false,
         error: 'Failed to create questionnaire',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -157,7 +157,7 @@ export class QuestionnaireController {
       return {
         success: false,
         error: 'Failed to retrieve questionnaires',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -196,7 +196,7 @@ export class QuestionnaireController {
       return {
         success: false,
         error: 'Failed to retrieve questionnaire',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -238,7 +238,7 @@ export class QuestionnaireController {
       return {
         success: false,
         error: 'Failed to update questionnaire',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -285,7 +285,7 @@ export class QuestionnaireController {
       return {
         success: false,
         error: 'Failed to publish questionnaire',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -348,7 +348,7 @@ export class QuestionnaireController {
       return {
         success: false,
         error: 'Failed to submit questionnaire',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -405,7 +405,7 @@ export class QuestionnaireController {
       return {
         success: false,
         error: 'Failed to retrieve submissions',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -441,7 +441,7 @@ export class QuestionnaireController {
       return {
         success: false,
         error: 'Failed to retrieve analytics',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -486,7 +486,7 @@ export class QuestionnaireController {
       return {
         success: false,
         error: 'Failed to duplicate questionnaire',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -528,7 +528,7 @@ export class QuestionnaireController {
       return {
         success: false,
         error: 'Failed to delete questionnaire',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -562,7 +562,7 @@ export class QuestionnaireController {
       return {
         success: false,
         error: 'Failed to retrieve templates',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -610,7 +610,7 @@ export class QuestionnaireController {
       return {
         success: false,
         error: 'Failed to create questionnaire from template',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -658,7 +658,7 @@ export class QuestionnaireController {
       return {
         success: false,
         error: 'Failed to export data',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -688,7 +688,7 @@ export class QuestionnaireController {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         service: 'questionnaire-management',
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }

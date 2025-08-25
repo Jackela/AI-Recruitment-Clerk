@@ -5,6 +5,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { GuestState } from '../../store/guest/guest.state';
 import * as GuestActions from '../../store/guest/guest.actions';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-feedback-code-modal',
@@ -167,7 +168,10 @@ export class FeedbackCodeModalComponent implements OnInit {
   copied = false;
   redemptionCode = '';
 
-  constructor(private store: Store<{ guest: GuestState }>) {
+  constructor(
+    private store: Store<{ guest: GuestState }>,
+    private toastService: ToastService
+  ) {
     this.showModal$ = this.store.select(state => state.guest.showFeedbackModal);
     this.guestState$ = this.store.select(state => state.guest);
     this.isLoading$ = this.store.select(state => state.guest.isLoading);
@@ -212,13 +216,12 @@ export class FeedbackCodeModalComponent implements OnInit {
         this.copied = false;
       }, 2000);
     } catch (err) {
-      console.error('Failed to copy feedback code:', err);
+      this.toastService.error('复制失败，请手动选择复制');
     }
   }
 
   trackSurveyClick(): void {
     // Track survey click for analytics
-    console.log('Survey link clicked');
     this.store.dispatch(GuestActions.updateLastActivity());
   }
 

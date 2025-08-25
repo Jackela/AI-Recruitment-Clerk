@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { GuestApiService } from '../../services/guest/guest-api.service';
 import { WebSocketService } from '../../services/websocket.service';
+import { ToastService } from '../../services/toast.service';
 import { ProgressTrackerComponent } from '../../components/shared/progress-tracker/progress-tracker.component';
 
 @Component({
@@ -440,7 +441,7 @@ export class UploadResumeComponent implements OnDestroy {
     // 导航到详细结果页面
     const sessionId = this.analysisId();
     if (sessionId) {
-      console.log('Navigate to results page with sessionId:', sessionId);
+      // Navigation to results page with sessionId
       // TODO: 实现导航逻辑
     }
   }

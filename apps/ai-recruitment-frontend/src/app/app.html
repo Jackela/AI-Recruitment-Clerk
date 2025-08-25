@@ -59,6 +59,12 @@
       <div class="header-actions quick-actions" 
            role="group" 
            aria-label="Quick actions and settings">
+        <!-- Language Selector -->
+        <arc-language-selector></arc-language-selector>
+        
+        <!-- Theme Toggle -->
+        <arc-theme-toggle></arc-theme-toggle>
+        
         <button class="help-btn" 
                 type="button"
                 [attr.aria-label]="getText('ACCESSIBILITY.shortcuts.help')"
@@ -176,6 +182,7 @@
           <ul role="list">
             <li><kbd>Ctrl + Shift + R</kbd> - {{ getText('COMMON.refresh') }}</li>
             <li><kbd>Ctrl + N</kbd> - {{ getText('APP.navigation.analysis') }}</li>
+            <li><kbd>Alt + T</kbd> - 切换主题</li>
             <li><kbd>Escape</kbd> - {{ getText('COMMON.close') }}</li>
           </ul>
         </div>

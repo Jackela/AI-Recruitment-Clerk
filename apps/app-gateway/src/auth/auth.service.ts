@@ -179,7 +179,7 @@ export class AuthService {
 
       return this.generateAuthResponse(user);
     } catch (error) {
-      this.logger.warn(`Refresh token validation failed: ${error.message}`);
+      this.logger.warn(`Refresh token validation failed: ${error instanceof Error ? error.message : String(error)}`);
       throw new UnauthorizedException('Invalid refresh token');
     }
   }
@@ -229,7 +229,7 @@ export class AuthService {
             await this.tokenBlacklistService.blacklistToken(accessToken, userId, payload.exp, 'logout');
           }
         } catch (error) {
-          this.logger.warn(`Failed to decode access token for blacklisting: ${error.message}`);
+          this.logger.warn(`Failed to decode access token for blacklisting: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -240,14 +240,14 @@ export class AuthService {
             await this.tokenBlacklistService.blacklistToken(refreshToken, userId, payload.exp, 'logout');
           }
         } catch (error) {
-          this.logger.warn(`Failed to decode refresh token for blacklisting: ${error.message}`);
+          this.logger.warn(`Failed to decode refresh token for blacklisting: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
       await this.userService.updateLastActivity(userId);
       this.logger.log(`User logged out successfully: ${userId}`);
     } catch (error) {
-      this.logger.error(`Logout failed for user ${userId}: ${error.message}`);
+      this.logger.error(`Logout failed for user ${userId}: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }
@@ -377,7 +377,7 @@ export class AuthService {
       this.logger.log(`Blacklisted ${blacklistedCount} tokens for user ${userId}`);
       
     } catch (error) {
-      this.logger.error(`Emergency token revocation failed for user ${userId}: ${error.message}`);
+      this.logger.error(`Emergency token revocation failed for user ${userId}: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }

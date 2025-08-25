@@ -45,7 +45,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const request = context.switchToHttp().getRequest<Request>();
     
     if (err) {
-      this.logger.warn(`Authentication error on ${request.path}: ${err.message}`);
+      this.logger.warn(`Authentication error on ${request.path}: ${err instanceof Error ? err.message : String(err)}`);
       
       // Enhanced error messages based on error type
       if (err.name === 'TokenExpiredError') {

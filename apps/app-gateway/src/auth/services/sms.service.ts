@@ -120,7 +120,7 @@ export class SmsService {
       };
     } catch (error) {
       this.logger.error(`Failed to get delivery status for ${messageSid}:`, error);
-      return { status: 'error', message: error.message };
+      return { status: 'error', message: error instanceof Error ? error.message : String(error) };
     }
   }
 
@@ -161,7 +161,7 @@ export class SmsService {
     } catch (error) {
       return { 
         success: false, 
-        message: `Twilio connection failed: ${error.message}` 
+        message: `Twilio connection failed: ${error instanceof Error ? error.message : String(error)}` 
       };
     }
   }

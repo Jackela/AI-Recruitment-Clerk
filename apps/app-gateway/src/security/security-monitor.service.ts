@@ -98,7 +98,7 @@ export class SecurityMonitorService {
       });
       
     } catch (error) {
-      this.logger.warn('Redis初始化失败，降级到内存存储:', error.message);
+      this.logger.warn('Redis初始化失败，降级到内存存储:', error instanceof Error ? error.message : String(error));
       this.redis = null;
     }
   }
@@ -141,7 +141,7 @@ export class SecurityMonitorService {
 
       return eventId;
     } catch (error) {
-      this.logger.error(`Failed to record security event: ${error.message}`, error.stack);
+      this.logger.error(`Failed to record security event: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       throw error;
     }
   }
@@ -214,7 +214,7 @@ export class SecurityMonitorService {
         total
       };
     } catch (error) {
-      this.logger.error(`Failed to get security events: ${error.message}`, error.stack);
+      this.logger.error(`Failed to get security events: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       return { events: [], total: 0 };
     }
   }
@@ -309,7 +309,7 @@ export class SecurityMonitorService {
 
       return metrics;
     } catch (error) {
-      this.logger.error(`Failed to get security metrics: ${error.message}`, error.stack);
+      this.logger.error(`Failed to get security metrics: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       return {
         totalEvents: 0,
         criticalEvents: 0,
@@ -346,7 +346,7 @@ export class SecurityMonitorService {
       this.logger.log(`Security event ${eventId} resolved by ${resolvedBy}`);
       return true;
     } catch (error) {
-      this.logger.error(`Failed to resolve security event: ${error.message}`, error.stack);
+      this.logger.error(`Failed to resolve security event: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
       return false;
     }
   }
@@ -401,7 +401,7 @@ export class SecurityMonitorService {
       await this.redis.expire('security_alerts:timeline', 86400 * 7);
       
     } catch (error) {
-      this.logger.error(`Failed to trigger security alert: ${error.message}`, error.stack);
+      this.logger.error(`Failed to trigger security alert: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
     }
   }
 

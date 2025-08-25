@@ -1,4 +1,0 @@
-#!/usr/bin/env sh
-
-echo "🔍 Running pre-commit checks..."
-echo "✅ Pre-commit checks completed - Husky WSL issue resolved!"

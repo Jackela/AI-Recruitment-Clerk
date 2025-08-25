@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { WebSocketService, ProgressUpdate } from '../../../services/websocket.service';
+import { ToastService } from '../../../services/toast.service';
 
 export interface ProgressStep {
   id: string;
@@ -394,11 +395,14 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private messages: any[] = [];
 
-  constructor(private webSocketService: WebSocketService) {}
+  constructor(
+    private webSocketService: WebSocketService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
     if (!this.sessionId) {
-      console.error('ProgressTracker: sessionId is required');
+      this.toastService.error('会话ID缺失，无法跟踪进度');
       return;
     }
 

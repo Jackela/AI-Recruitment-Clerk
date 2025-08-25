@@ -43,7 +43,7 @@ export class UsageLimitIntegrationService {
       this.logger.error('Error recording usage', error);
       return {
         success: false,
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -234,7 +234,7 @@ export class UsageLimitIntegrationService {
       return {
         status: 'unhealthy',
         timestamp: new Date(),
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }

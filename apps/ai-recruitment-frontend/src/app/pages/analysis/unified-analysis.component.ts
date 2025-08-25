@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 // Animations removed for build compatibility
 import { GuestApiService } from '../../services/guest/guest-api.service';
 import { WebSocketService } from '../../services/websocket.service';
+import { ToastService } from '../../services/toast.service';
 import { ProgressTrackerComponent } from '../../components/shared/progress-tracker/progress-tracker.component';
 
 export interface AnalysisStep {
@@ -407,7 +408,8 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
   constructor(
     private readonly guestApi: GuestApiService,
     private readonly webSocketService: WebSocketService,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly toastService: ToastService
   ) {}
 
   ngAfterViewInit(): void {
@@ -767,7 +769,7 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
       this.todayAnalyses.set(42);
       this.totalAnalyses.set(1247);
     } catch (error) {
-      console.error('Failed to load statistics:', error);
+      // Silent fail - statistics are not critical
     }
   }
 

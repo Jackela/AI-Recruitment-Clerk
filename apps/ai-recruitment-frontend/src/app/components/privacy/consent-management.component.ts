@@ -166,7 +166,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
       const consentGroup = this.consentsArray.at(index) as FormGroup;
       if (consentGroup) {
         consentGroup.patchValue({
-          granted: purposeStatus.status === PrivacyConsentStatus.GRANTED
+          granted: purposeStatus.status === ConsentStatus.GRANTED
         });
       }
     });
@@ -295,10 +295,10 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
     return '';
   }
 
-  getCurrentConsentStatus(purpose: ConsentPurpose): PrivacyConsentStatus | undefined {
+  getCurrentConsentStatus(purpose: ConsentPurpose): ConsentStatus | undefined {
     if (!this.currentConsentStatus) return undefined;
     const purposeStatus = this.currentConsentStatus.purposes.find(p => p.purpose === purpose);
-    return purposeStatus?.status as PrivacyConsentStatus;
+    return purposeStatus?.status as ConsentStatus;
   }
 
   getConsentDate(purpose: ConsentPurpose): Date | undefined {

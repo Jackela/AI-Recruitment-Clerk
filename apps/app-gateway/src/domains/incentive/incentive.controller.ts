@@ -135,7 +135,7 @@ export class IncentiveController {
       return {
         success: false,
         error: 'Failed to create questionnaire incentive',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -202,7 +202,7 @@ export class IncentiveController {
       return {
         success: false,
         error: 'Failed to create referral incentive',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -263,7 +263,7 @@ export class IncentiveController {
       return {
         success: false,
         error: 'Failed to retrieve incentives',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -300,7 +300,7 @@ export class IncentiveController {
       return {
         success: false,
         error: 'Failed to retrieve incentive',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -340,7 +340,7 @@ export class IncentiveController {
       return {
         success: false,
         error: 'Failed to validate incentive',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -388,7 +388,7 @@ export class IncentiveController {
       return {
         success: false,
         error: 'Failed to approve incentive',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -434,7 +434,7 @@ export class IncentiveController {
       return {
         success: false,
         error: 'Failed to reject incentive',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -509,7 +509,7 @@ export class IncentiveController {
       return {
         success: false,
         error: 'Failed to process payment',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -562,7 +562,7 @@ export class IncentiveController {
       return {
         success: false,
         error: 'Batch processing failed',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -609,7 +609,7 @@ export class IncentiveController {
       return {
         success: false,
         error: 'Failed to retrieve incentive statistics',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -663,7 +663,7 @@ export class IncentiveController {
       return {
         success: false,
         error: 'Failed to export incentive data',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -721,7 +721,7 @@ export class IncentiveController {
       return {
         success: false,
         error: 'Failed to configure incentive rules',
-        message: error.message
+        message: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -752,7 +752,7 @@ export class IncentiveController {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         service: 'incentive-system',
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }

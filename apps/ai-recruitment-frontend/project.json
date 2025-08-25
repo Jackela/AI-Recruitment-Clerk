@@ -60,10 +60,7 @@
           },
           "sourceMap": false,
           "namedChunks": false,
-          "aot": true,
           "extractLicenses": true,
-          "vendorChunk": false,
-          "buildOptimizer": true,
           "subresourceIntegrity": true
         },
         "development": {

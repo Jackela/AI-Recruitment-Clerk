@@ -1,14 +1,18 @@
-import { Component, OnInit, OnDestroy, inject, signal, effect, Injector } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, effect, Injector, runInInjectionContext } from '@angular/core';
 import { RouterOutlet, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { GuideOverlayComponent } from './components/shared/guide-overlay/guide-overlay.component';
 import { StatusNotificationsComponent } from './components/shared/status-notifications/status-notifications.component';
 import { AriaLiveComponent } from './components/shared/aria-live/aria-live.component';
-import { NavigationGuideService } from './services/navigation/navigation-guide.service';
+import { ThemeToggleComponent } from './components/shared/theme-toggle/theme-toggle.component';
+import { LanguageSelectorComponent } from './components/shared/language-selector/language-selector.component';
+// import { NavigationGuideService } from './services/navigation/navigation-guide.service';
 import { ProgressFeedbackService } from './services/feedback/progress-feedback.service';
 import { KeyboardNavigationService } from './services/keyboard/keyboard-navigation.service';
 import { WebSocketStatsService } from './services/realtime/websocket-stats.service';
 import { AccessibilityService } from './services/accessibility/accessibility.service';
+import { ThemeService } from './services/theme/theme.service';
+import { I18nService } from './services/i18n/i18n.service';
 import { SkipNavigationDirective } from './directives/accessibility/skip-navigation.directive';
 import { APP_CONFIG } from '../config/app.config';
 import { getText } from '../config/i18n.config';
@@ -23,6 +27,8 @@ import { getText } from '../config/i18n.config';
     GuideOverlayComponent, 
     StatusNotificationsComponent,
     AriaLiveComponent,
+    ThemeToggleComponent,
+    LanguageSelectorComponent,
     SkipNavigationDirective
   ],
   templateUrl: './app.html',
@@ -33,11 +39,14 @@ export class App implements OnInit, OnDestroy {
   protected readonly getText = getText;
   protected settingsMenuOpen = signal(false);
 
-  private navigationGuide = inject(NavigationGuideService);
+  // Navigation guide service (preserved for future use)
+  // private navigationGuide = inject(NavigationGuideService);
   private progressFeedback = inject(ProgressFeedbackService);
   private keyboardNav = inject(KeyboardNavigationService);
   private websocketStats = inject(WebSocketStatsService);
   private accessibilityService = inject(AccessibilityService);
+  private themeService = inject(ThemeService);
+  private i18nService = inject(I18nService);
   private injector = inject(Injector);
   
   keyboardHelpVisible = signal(false);
@@ -50,6 +59,9 @@ export class App implements OnInit, OnDestroy {
   currentFontSize = signal<'normal' | 'large' | 'larger'>('normal');
 
   ngOnInit(): void {
+    // Initialize theme service (will auto-apply saved theme)
+    // Theme service initializes automatically in constructor
+    
     // Initialize UX services
     this.initializeUXServices();
     
@@ -145,6 +157,14 @@ export class App implements OnInit, OnDestroy {
       description: 'Close modals and menus',
       action: () => this.closeModalsAndMenus()
     });
+    
+    // Theme shortcuts
+    this.accessibilityService.registerShortcut({
+      key: 't',
+      altKey: true,
+      description: 'Toggle theme',
+      action: () => this.themeService.toggleTheme()
+    });
   }
 
   private showWelcomeMessage(): void {
@@ -181,11 +201,14 @@ export class App implements OnInit, OnDestroy {
 
   // Accessibility Methods  
   private initializeAccessibility(): void {
-    // Subscribe to accessibility state changes (avoid effect in tests)
-    if (typeof jest === 'undefined') {
+    // Subscribe to accessibility state changes
+    // Check if we're in a test environment by looking for window.__karma__
+    const isTestEnvironment = typeof (window as any).__karma__ !== 'undefined';
+    
+    if (!isTestEnvironment) {
       // Only use effect in non-test environment
       try {
-        this.injector?.runInInjectionContext?.(() => {
+        runInInjectionContext(this.injector, () => {
           effect(() => {
             const state = this.accessibilityService.accessibilityState();
             this.highContrastEnabled.set(state.highContrast);
