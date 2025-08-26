@@ -43,12 +43,19 @@ export async function clearTestDatabase(): Promise<void> {
     throw new Error('MongoDB Memory Server is not running');
   }
 
-  const collections = await mongod.instanceInfo?.instance?.db?.collections();
+  const uri = mongod.getUri();
+  const client = new (await import('mongodb')).MongoClient(uri);
+  await client.connect();
+  const db = client.db();
+  const collections = await db.collections();
+  
   if (collections) {
     for (const collection of collections) {
       await collection.deleteMany({});
     }
   }
+  
+  await client.close();
 }
 
 /**
@@ -116,9 +123,11 @@ export async function insertTestData(collectionName: string, data: any[]): Promi
     throw new Error('MongoDB Memory Server is not running');
   }
   
-  const db = mongod.instanceInfo?.instance?.db;
-  if (db) {
-    const collection = db.collection(collectionName);
-    await collection.insertMany(data);
-  }
+  const uri = mongod.getUri();
+  const client = new (await import('mongodb')).MongoClient(uri);
+  await client.connect();
+  const db = client.db();
+  const collection = db.collection(collectionName);
+  await collection.insertMany(data);
+  await client.close();
 }

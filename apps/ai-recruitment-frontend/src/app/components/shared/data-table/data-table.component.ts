@@ -399,7 +399,7 @@ export class DataTableComponent implements OnInit {
     this.onSearch();
   }
 
-  onSort(column: string) {
+  handleSort(column: string) {
     if (this.sortColumn() === column) {
       // Toggle direction
       if (this.sortDirection() === 'asc') {
