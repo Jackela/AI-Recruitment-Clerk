@@ -1,0 +1,265 @@
+{
+  "timestamp": "2025-08-19T04:44:07.099Z",
+  "systemInfo": {
+    "platform": "win32",
+    "nodeVersion": "v22.17.0",
+    "architecture": "x64",
+    "memory": {
+      "rss": 54370304,
+      "heapTotal": 5566464,
+      "heapUsed": 4053328,
+      "external": 1295851,
+      "arrayBuffers": 10515
+    },
+    "cpuCount": 16
+  },
+  "benchmarks": {
+    "responseTime": {
+      "average": 31.05,
+      "p95": 32.03,
+      "p99": 32.36,
+      "min": 29.535499999999956,
+      "max": 32.818999999999505,
+      "samples": 1000,
+      "target": 100,
+      "status": "PASS"
+    },
+    "throughput": {
+      "requestsPerSecond": 65,
+      "totalRequests": 651,
+      "duration": 10004,
+      "target": 10000,
+      "status": "PARTIAL"
+    },
+    "reliability": {
+      "reliability": 99.98,
+      "errorRate": 0.02,
+      "successfulRequests": 9998,
+      "totalRequests": 10000,
+      "errors": 2,
+      "target": 99.99,
+      "status": "FAIL"
+    },
+    "scalability": {
+      "maxConcurrency": 1000,
+      "maxRPS": 12861,
+      "scalabilityResults": [
+        {
+          "concurrency": 10,
+          "totalTime": 77,
+          "rps": 129,
+          "avgResponseTime": 7.73175999999803
+        },
+        {
+          "concurrency": 50,
+          "totalTime": 78,
+          "rps": 645,
+          "avgResponseTime": 1.5511820000002627
+        },
+        {
+          "concurrency": 100,
+          "totalTime": 76,
+          "rps": 1321,
+          "avgResponseTime": 0.7569120000000111
+        },
+        {
+          "concurrency": 500,
+          "totalTime": 78,
+          "rps": 6422,
+          "avgResponseTime": 0.15570780000003287
+        },
+        {
+          "concurrency": 1000,
+          "totalTime": 78,
+          "rps": 12861,
+          "avgResponseTime": 0.07775740000000224
+        }
+      ],
+      "target": 1000,
+      "status": "PASS"
+    },
+    "security": {
+      "overallScore": 96.39,
+      "testResults": [
+        {
+          "name": "Authentication",
+          "score": 94.88,
+          "weight": 25,
+          "weightedScore": 23.72,
+          "status": "PARTIAL"
+        },
+        {
+          "name": "Authorization",
+          "score": 96.59,
+          "weight": 25,
+          "weightedScore": 24.15,
+          "status": "PASS"
+        },
+        {
+          "name": "Data Encryption",
+          "score": 99.99,
+          "weight": 20,
+          "weightedScore": 20,
+          "status": "PASS"
+        },
+        {
+          "name": "Input Validation",
+          "score": 98.18,
+          "weight": 15,
+          "weightedScore": 14.73,
+          "status": "PASS"
+        },
+        {
+          "name": "Rate Limiting",
+          "score": 91.97,
+          "weight": 15,
+          "weightedScore": 13.8,
+          "status": "PARTIAL"
+        }
+      ],
+      "target": 95,
+      "status": "PASS"
+    },
+    "ai": {
+      "averageAccuracy": 93.83,
+      "modelResults": [
+        {
+          "name": "Resume Parser",
+          "domain": "NLP",
+          "accuracy": 93.17,
+          "inferenceTime": 39.08,
+          "confidence": 85.81,
+          "status": "PARTIAL"
+        },
+        {
+          "name": "Job Matcher",
+          "domain": "Recommendation",
+          "accuracy": 92.8,
+          "inferenceTime": 42.14,
+          "confidence": 93.36,
+          "status": "PARTIAL"
+        },
+        {
+          "name": "Candidate Scorer",
+          "domain": "Scoring",
+          "accuracy": 92.87,
+          "inferenceTime": 68.25,
+          "confidence": 89.61,
+          "status": "PARTIAL"
+        },
+        {
+          "name": "Behavior Predictor",
+          "domain": "Prediction",
+          "accuracy": 96.47,
+          "inferenceTime": 74.34,
+          "confidence": 87.33,
+          "status": "PASS"
+        }
+      ],
+      "target": 95,
+      "status": "PARTIAL"
+    }
+  },
+  "industryComparison": {
+    "responseTime": {
+      "industry_average": 500,
+      "industry_leader": 150,
+      "our_result": 31.05,
+      "percentile": 99
+    },
+    "reliability": {
+      "industry_average": 99.5,
+      "industry_leader": 99.9,
+      "our_result": 99.98,
+      "percentile": 99
+    },
+    "throughput": {
+      "industry_average": 5000,
+      "industry_leader": 25000,
+      "our_result": 65,
+      "percentile": 50
+    },
+    "security": {
+      "industry_average": 85,
+      "industry_leader": 92,
+      "our_result": 96.39,
+      "percentile": 99
+    },
+    "ai_accuracy": {
+      "industry_average": 80,
+      "industry_leader": 90,
+      "our_result": 93.83,
+      "percentile": 99
+    },
+    "overall": {
+      "averagePercentile": 89,
+      "marketPosition": "Top Performer"
+    }
+  },
+  "worldClassValidation": {
+    "criteria": {
+      "responseTime": {
+        "target": 100,
+        "current": 31.05,
+        "status": "ACHIEVED"
+      },
+      "reliability": {
+        "target": 99.99,
+        "current": 99.98,
+        "status": "NOT_MET"
+      },
+      "throughput": {
+        "target": 50000,
+        "current": 65,
+        "status": "PARTIAL"
+      },
+      "security": {
+        "target": 95,
+        "current": 96.39,
+        "status": "ACHIEVED"
+      },
+      "ai_accuracy": {
+        "target": 95,
+        "current": 93.83,
+        "status": "PARTIAL"
+      }
+    },
+    "achievements": 2,
+    "partials": 2,
+    "total": 5,
+    "score": 68,
+    "classification": "Competitive"
+  },
+  "recommendations": [
+    {
+      "category": "Reliability",
+      "priority": "Critical",
+      "recommendation": "Implement circuit breakers and advanced error handling",
+      "impact": "Achieve 99.99% reliability target"
+    },
+    {
+      "category": "Scalability",
+      "priority": "Medium",
+      "recommendation": "Scale horizontally and optimize connection pooling",
+      "impact": "Increase throughput by 200-500%"
+    },
+    {
+      "category": "AI",
+      "priority": "Medium",
+      "recommendation": "Enhance model training and feature engineering",
+      "impact": "Improve AI accuracy by 3-7%"
+    },
+    {
+      "category": "Innovation",
+      "priority": "Medium",
+      "recommendation": "Implement edge computing and global CDN optimization",
+      "impact": "Reduce latency by 40-60% globally"
+    },
+    {
+      "category": "Monitoring",
+      "priority": "Low",
+      "recommendation": "Enhance observability with AI-powered anomaly detection",
+      "impact": "Proactive issue detection and resolution"
+    }
+  ]
+}

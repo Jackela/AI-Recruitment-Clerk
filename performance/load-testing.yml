@@ -1,0 +1,57 @@
+# K6负载测试配置 - AI Recruitment系统性能测试
+services:
+  # K6负载测试工具
+  k6:
+    image: grafana/k6:0.52.0
+    container_name: ai-recruitment-k6
+    volumes:
+      - ./performance/scripts:/scripts:ro
+      - ./performance/results:/results
+    environment:
+      - K6_OUT=influxdb=http://influxdb:8086/k6
+    networks:
+      - ai-recruitment-network
+      - performance-network
+    profiles:
+      - performance
+
+  # InfluxDB时间序列数据库 (存储性能测试结果)
+  influxdb:
+    image: influxdb:2.7
+    container_name: ai-recruitment-influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=password123
+      - DOCKER_INFLUXDB_INIT_ORG=ai-recruitment
+      - DOCKER_INFLUXDB_INIT_BUCKET=k6
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=ai-recruitment-token-12345
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    networks:
+      - performance-network
+    profiles:
+      - performance
+
+  # Artillery.js性能测试 (替代方案)
+  artillery:
+    image: artilleryio/artillery:2.0.13
+    container_name: ai-recruitment-artillery
+    volumes:
+      - ./performance/artillery:/artillery:ro
+      - ./performance/results:/results
+    networks:
+      - ai-recruitment-network
+    profiles:
+      - performance
+
+networks:
+  performance-network:
+    driver: bridge
+    name: ai-recruitment-performance
+
+volumes:
+  influxdb_data:
+    name: ai-recruitment-influxdb-data
