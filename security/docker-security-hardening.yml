@@ -1,0 +1,358 @@
+# ==========================================
+# AI Recruitment Clerk - Security Hardened Docker Compose
+# Production-ready configuration with enhanced security measures
+# ==========================================
+
+version: '3.8'
+
+services:
+  # Infrastructure Services with Security Hardening
+  mongodb:
+    image: mongo:7.0-jammy
+    container_name: ai-recruitment-mongodb-secure
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME_FILE: /run/secrets/mongodb_root_user
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongodb_root_password
+      MONGO_INITDB_DATABASE: ${MONGODB_DATABASE:-ai-recruitment}
+    ports:
+      - "127.0.0.1:27017:27017"  # Localhost only binding
+    volumes:
+      - mongodb_data:/data/db
+      - ./security/mongo-security.conf:/etc/mongod.conf:ro
+      - ./security/mongo-init-secure.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - ai-recruitment-secure-network
+    secrets:
+      - mongodb_root_user
+      - mongodb_root_password
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    security_opt:
+      - no-new-privileges:true
+      - apparmor:docker-default
+    read_only: true
+    tmpfs:
+      - /tmp:size=100M,noexec,nosuid,nodev
+    user: "999:999"  # mongodb user
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+
+  redis:
+    image: redis:7-alpine
+    container_name: ai-recruitment-redis-secure
+    restart: unless-stopped
+    command: >
+      redis-server 
+      --requirepass $$(cat /run/secrets/redis_password)
+      --appendonly yes 
+      --save 900 1
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --timeout 300
+      --tcp-keepalive 60
+      --disable-thp yes
+      --protected-mode yes
+      --bind 0.0.0.0
+      --port 6379
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ai-recruitment-secure-network
+    secrets:
+      - redis_password
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "$$(cat /run/secrets/redis_password)", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    security_opt:
+      - no-new-privileges:true
+      - apparmor:docker-default
+    read_only: true
+    tmpfs:
+      - /tmp:size=50M,noexec,nosuid,nodev
+    user: "999:999"  # redis user
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETGID
+      - SETUID
+
+  nats:
+    image: nats:2.10-alpine
+    container_name: ai-recruitment-nats-secure
+    restart: unless-stopped
+    command: 
+      - "--jetstream"
+      - "--auth=$$(cat /run/secrets/nats_auth_token)"
+      - "--max_payload=1048576"  # 1MB max payload
+      - "--max_connections=1000"
+      - "--max_control_line=512"
+      - "--write_deadline=10s"
+    ports:
+      - "127.0.0.1:4222:4222"
+      - "127.0.0.1:6222:6222"
+      - "127.0.0.1:8222:8222"
+    volumes:
+      - nats_data:/data
+    networks:
+      - ai-recruitment-secure-network
+    secrets:
+      - nats_auth_token
+    healthcheck:
+      test: ["CMD", "nats", "server", "check", "--server=nats://localhost:4222"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+      - apparmor:docker-default
+    read_only: true
+    tmpfs:
+      - /tmp:size=50M,noexec,nosuid,nodev
+    user: "1000:1000"
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+
+  # Backend Services with Enhanced Security
+  app-gateway:
+    build:
+      context: .
+      dockerfile: apps/app-gateway/Dockerfile.secure
+      args:
+        NODE_ENV: production
+        BUILD_DATE: ${BUILD_DATE}
+        VCS_REF: ${VCS_REF}
+    container_name: ai-recruitment-gateway-secure
+    restart: unless-stopped
+    environment:
+      # Application Configuration
+      PORT: 3000
+      NODE_ENV: production
+      
+      # Security Configuration
+      JWT_SECRET_FILE: /run/secrets/jwt_secret
+      JWT_REFRESH_SECRET_FILE: /run/secrets/jwt_refresh_secret
+      ENCRYPTION_KEY_FILE: /run/secrets/encryption_key
+      BCRYPT_SALT_ROUNDS: 14
+      
+      # Database Configuration
+      MONGODB_URL: mongodb://admin:$$(cat /run/secrets/mongodb_root_password)@mongodb:27017/${MONGODB_DATABASE:-ai-recruitment}?authSource=admin
+      REDIS_URL: redis://:$$(cat /run/secrets/redis_password)@redis:6379
+      
+      # Message Queue Configuration  
+      NATS_URL: nats://nats:4222
+      NATS_AUTH_TOKEN_FILE: /run/secrets/nats_auth_token
+      
+      # External API Configuration
+      GEMINI_API_KEY_FILE: /run/secrets/gemini_api_key
+      
+      # Security Features
+      RATE_LIMIT_WINDOW_MS: 900000
+      RATE_LIMIT_MAX_REQUESTS: 50
+      SESSION_SECRET_FILE: /run/secrets/session_secret
+      CSRF_SECRET_FILE: /run/secrets/csrf_secret
+      
+      # Security Headers and CORS
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://your-production-domain.com}
+      CORS_CREDENTIALS: true
+      ENABLE_HELMET: true
+      ENABLE_CSRF: true
+      
+      # Monitoring and Logging
+      LOG_LEVEL: warn
+      LOG_FORMAT: json
+      ENABLE_REQUEST_LOGGING: false
+      ENABLE_AUDIT_LOGGING: true
+      ENABLE_SECURITY_MONITORING: true
+    ports:
+      - "127.0.0.1:${GATEWAY_PORT:-3000}:3000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy  
+      nats:
+        condition: service_healthy
+    networks:
+      - ai-recruitment-secure-network
+    secrets:
+      - jwt_secret
+      - jwt_refresh_secret
+      - encryption_key
+      - mongodb_root_password
+      - redis_password
+      - nats_auth_token
+      - session_secret
+      - csrf_secret
+      - gemini_api_key
+    volumes:
+      - uploads_data:/app/uploads:rw,Z
+      - logs_data:/app/logs:rw,Z
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    security_opt:
+      - no-new-privileges:true
+      - apparmor:docker-default
+    user: "1000:1000"
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    ulimits:
+      nofile:
+        soft: 1024
+        hard: 2048
+      nproc:
+        soft: 64
+        hard: 128
+
+  # Frontend with Security Hardening
+  ai-recruitment-frontend:
+    build:
+      context: .
+      dockerfile: apps/ai-recruitment-frontend/Dockerfile.secure
+      args:
+        NODE_ENV: production
+        BUILD_DATE: ${BUILD_DATE}
+        VCS_REF: ${VCS_REF}
+    container_name: ai-recruitment-frontend-secure
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-4200}:80"
+    depends_on:
+      app-gateway:
+        condition: service_healthy
+    networks:
+      - ai-recruitment-secure-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    security_opt:
+      - no-new-privileges:true
+      - apparmor:docker-default
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:size=50M,noexec,nosuid,nodev
+      - /var/run:size=10M,noexec,nosuid,nodev
+      - /tmp:size=10M,noexec,nosuid,nodev
+    user: "101:101"  # nginx user
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+      - NET_BIND_SERVICE
+
+# Secure Network Configuration
+networks:
+  ai-recruitment-secure-network:
+    driver: bridge
+    name: ai-recruitment-secure-network
+    internal: false
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/24
+          gateway: 172.20.0.1
+    driver_opts:
+      com.docker.network.bridge.name: "ai-recruit-sec-br0"
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.driver.mtu: "1500"
+
+# Secure Volume Configuration
+volumes:
+  mongodb_data:
+    name: ai-recruitment-mongodb-data-secure
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/lib/ai-recruitment/mongodb
+  redis_data:
+    name: ai-recruitment-redis-data-secure  
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/lib/ai-recruitment/redis
+  nats_data:
+    name: ai-recruitment-nats-data-secure
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/lib/ai-recruitment/nats
+  uploads_data:
+    name: ai-recruitment-uploads-data-secure
+    driver: local
+    driver_opts:
+      type: none
+      o: bind  
+      device: /var/lib/ai-recruitment/uploads
+  logs_data:
+    name: ai-recruitment-logs-data-secure
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/lib/ai-recruitment/logs
+
+# Docker Secrets Configuration (Production)
+secrets:
+  mongodb_root_user:
+    external: true
+    name: ai-recruitment-mongodb-user-v1
+  mongodb_root_password:
+    external: true  
+    name: ai-recruitment-mongodb-password-v1
+  redis_password:
+    external: true
+    name: ai-recruitment-redis-password-v1
+  nats_auth_token:
+    external: true
+    name: ai-recruitment-nats-token-v1
+  jwt_secret:
+    external: true
+    name: ai-recruitment-jwt-secret-v1
+  jwt_refresh_secret:
+    external: true
+    name: ai-recruitment-jwt-refresh-secret-v1
+  encryption_key:
+    external: true
+    name: ai-recruitment-encryption-key-v1
+  session_secret:
+    external: true
+    name: ai-recruitment-session-secret-v1
+  csrf_secret:
+    external: true
+    name: ai-recruitment-csrf-secret-v1
+  gemini_api_key:
+    external: true
+    name: ai-recruitment-gemini-api-key-v1
