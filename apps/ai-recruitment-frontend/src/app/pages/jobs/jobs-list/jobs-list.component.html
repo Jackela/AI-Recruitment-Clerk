@@ -1,0 +1,84 @@
+<div class="jobs-list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="page-title">岗位管理</h2>
+      <div class="header-actions">
+        <button 
+          type="button" 
+          class="btn btn-secondary mr-2" 
+          (click)="onRefresh()" 
+          [disabled]="loading$ | async">
+          <span *ngIf="loading$ | async" class="spinner"></span>
+          刷新
+        </button>
+        <a routerLink="/jobs/create" class="btn btn-primary">创建新岗位</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error$ | async as error" class="alert alert-danger mb-3">
+    {{ error }}
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading$ | async" class="text-center">
+    <div class="spinner"></div>
+    加载中...
+  </div>
+
+  <!-- Jobs List -->
+  <div *ngIf="(loading$ | async) === false" class="jobs-grid">
+    <div 
+      *ngFor="let job of jobs$ | async; trackBy: trackByJobId" 
+      class="job-card card">
+      <div class="card-body">
+        <div class="job-header">
+          <h3 class="job-title">{{ job.title }}</h3>
+          <span 
+            class="job-status" 
+            [class.status-processing]="job.status === 'processing'"
+            [class.status-completed]="job.status === 'completed'">
+            {{ job.status === 'processing' ? '处理中' : '已完成' }}
+          </span>
+        </div>
+        
+        <div class="job-meta">
+          <span class="resume-count">
+            <strong>{{ job.resumeCount }}</strong> 份简历
+          </span>
+          <span class="created-date">
+            {{ job.createdAt | date:'yyyy-MM-dd HH:mm' }}
+          </span>
+        </div>
+        
+        <!-- Actions according to PRD requirements -->
+        <div class="job-actions mt-3">
+          <!-- FR-2: Resume Processing - Upload resumes for this job -->
+          <button class="btn btn-outline-primary btn-sm mr-2" 
+                  title="为此岗位上传简历">
+            上传简历
+          </button>
+          
+          <!-- FR-3: Reporting & Display - View analysis results for this job -->
+          <button class="btn btn-outline-secondary btn-sm" 
+                  [routerLink]="['/reports']" 
+                  [queryParams]="{jobId: job.id}"
+                  title="查看此岗位的分析报告">
+            查看报告
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="(jobs$ | async)?.length === 0" class="empty-state card">
+      <div class="card-body text-center">
+        <h3>暂无岗位</h3>
+        <p class="text-muted">您还没有创建任何岗位。点击上方按钮创建您的第一个岗位吧！</p>
+        <a routerLink="/jobs/create" class="btn btn-primary">创建新岗位</a>
+      </div>
+    </div>
+  </div>
+</div>

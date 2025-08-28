@@ -1,0 +1,49 @@
+// Responsive design and mobile optimizations
+@media (max-width: 768px) {
+  .consent-management {
+    padding: 1rem;
+    margin: 1rem;
+
+    .consent-header h2 {
+      font-size: 1.5rem;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .purposes-list .purpose-item .purpose-header {
+      flex-direction: column;
+      gap: 1rem;
+
+      .current-status {
+        align-items: flex-start;
+      }
+    }
+
+    .gdpr-rights-info .rights-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .consent-footer .footer-links {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-actions .btn {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .consent-management {
+    .purposes-list .purpose-item .purpose-header .purpose-toggle {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .legal-confirmations .confirmation-item .checkbox-label .label-text {
+      font-size: 0.9rem;
+    }
+  }
+}

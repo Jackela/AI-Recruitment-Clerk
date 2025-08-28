@@ -1,0 +1,425 @@
+/**
+ * 应用组件样式 - 基于设计系统
+ * 使用设计令牌，移除硬编码值
+ */
+
+// 导入设计系统令牌（使用现代 @use 语法）
+@use '../styles/design-system/tokens.scss';
+
+// ===== 应用程序根组件样式 =====
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+// ===== 特定于应用组件的样式 =====
+.app-container {
+  // 使用CSS Grid布局代替Flexbox，更精确的控制
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+  
+  // 响应式网格调整
+  @media (max-width: 768px) {
+    grid-template-rows: auto auto 1fr;
+  }
+}
+
+.app-header {
+  // 使用设计令牌而不是硬编码值
+  background-color: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border-primary);
+  box-shadow: var(--shadow-sm);
+  
+  // Sticky定位配置
+  position: sticky;
+  top: 0;
+  z-index: var(--z-index-sticky);
+  
+  // 支持暗色主题
+  @media (prefers-color-scheme: dark) {
+    background-color: var(--color-bg-secondary);
+  }
+}
+
+// ===== 头部内容布局 =====
+.header-content {
+  // 容器约束和间距
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-6);
+  
+  // 现代Flexbox布局
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  
+  // 响应式布局调整
+  @media (max-width: 1024px) {
+    padding: var(--space-3) var(--space-5);
+    gap: var(--space-5);
+  }
+  
+  @media (max-width: 768px) {
+    padding: var(--space-3) var(--space-4);
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+  
+  @media (max-width: 640px) {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-3);
+  }
+}
+
+// ===== 应用标题样式 =====
+.app-title {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+  
+  // 渐进式字体大小
+  @media (max-width: 768px) {
+    font-size: var(--font-size-lg);
+  }
+  
+  @media (max-width: 480px) {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+  }
+  
+  // 支持字体大小缩放
+  [data-font-size="large"] & {
+    font-size: var(--font-size-2xl);
+    
+    @media (max-width: 768px) {
+      font-size: var(--font-size-xl);
+    }
+  }
+  
+  [data-font-size="larger"] & {
+    font-size: var(--font-size-3xl);
+    
+    @media (max-width: 768px) {
+      font-size: var(--font-size-2xl);
+    }
+  }
+}
+
+// ===== 导航样式 =====
+.app-navigation {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  
+  // 响应式导航布局
+  @media (max-width: 768px) {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    margin-top: var(--space-2);
+    gap: var(--space-1);
+  }
+}
+
+.nav-link {
+  // 基础外观
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2-5) var(--space-4);
+  border-radius: var(--radius-md);
+  
+  // 文本样式
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+  
+  // 交互效果
+  transition: var(--transition-base);
+  position: relative;
+  
+  // 悬停状态
+  &:hover {
+    color: var(--color-primary-600);
+    background-color: var(--color-primary-50);
+    transform: translateY(-1px);
+  }
+  
+  // 聚焦状态
+  &:focus-visible {
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--color-primary-100);
+  }
+  
+  // 激活状态
+  &.active,
+  &[aria-current="page"] {
+    color: var(--color-primary-600);
+    background-color: var(--color-primary-100);
+    font-weight: var(--font-weight-semibold);
+    
+    // 激活指示器
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 2px;
+      background-color: var(--color-primary-500);
+      border-radius: var(--radius-full);
+    }
+  }
+  
+  // 图标样式
+  .nav-icon {
+    font-size: var(--font-size-lg);
+    flex-shrink: 0;
+  }
+  
+  // 响应式调整
+  @media (max-width: 640px) {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+    gap: var(--space-1-5);
+  }
+  
+  @media (max-width: 480px) {
+    padding: var(--space-2);
+    
+    .nav-text {
+      display: none;
+    }
+    
+    .nav-icon {
+      font-size: var(--font-size-xl);
+    }
+  }
+}
+
+// ===== 头部操作区域 =====
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  position: relative;
+}
+
+// ===== 操作按钮样式 =====
+.help-btn,
+.settings-btn {
+  // 基础样式
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2);
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  transition: var(--transition-base);
+  
+  // 悬停效果
+  &:hover {
+    color: var(--color-text-primary);
+    background-color: var(--color-secondary-100);
+    transform: scale(1.05);
+  }
+  
+  // 聚焦状态
+  &:focus-visible {
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
+    background-color: var(--color-secondary-50);
+  }
+  
+  // 激活状态
+  &:active {
+    transform: scale(0.98);
+    background-color: var(--color-secondary-200);
+  }
+}
+
+// ===== 设置菜单样式 =====
+.settings-menu {
+  // 定位
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: var(--z-index-dropdown);
+  
+  // 外观
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  min-width: 220px;
+  
+  // 内容布局
+  padding: var(--space-3);
+  
+  // 动画状态
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px) scale(0.95);
+  transition: var(--transition-base);
+  
+  // 显示状态
+  &.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+  }
+  
+  // 菜单项样式
+  button {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    padding: var(--space-3);
+    border: none;
+    background: transparent;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    text-align: left;
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: var(--transition-base);
+    
+    &:hover {
+      background-color: var(--color-secondary-50);
+      color: var(--color-primary-600);
+    }
+    
+    &:focus-visible {
+      outline: 2px solid var(--color-primary-500);
+      outline-offset: 1px;
+    }
+    
+    // 选中状态指示
+    &[aria-checked="true"] {
+      background-color: var(--color-primary-50);
+      color: var(--color-primary-700);
+      
+      &::after {
+        content: '✓';
+        margin-left: auto;
+        font-weight: var(--font-weight-bold);
+        color: var(--color-primary-500);
+      }
+    }
+  }
+}
+
+// ===== 主内容区域 =====
+.app-main {
+  // 布局
+  padding: var(--space-8) var(--space-6);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  
+  // 响应式间距
+  @media (max-width: 1024px) {
+    padding: var(--space-6) var(--space-5);
+  }
+  
+  @media (max-width: 768px) {
+    padding: var(--space-5) var(--space-4);
+  }
+  
+  @media (max-width: 640px) {
+    padding: var(--space-4) var(--space-3);
+  }
+}
+
+// ===== 加载指示器 =====
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-12);
+  color: var(--color-text-secondary);
+  text-align: center;
+  
+  .spinner {
+    // 已在设计系统中定义
+  }
+}
+
+// ===== 可访问性增强 =====
+// 高对比度模式
+[data-theme="high-contrast"] {
+  .nav-link {
+    &:hover {
+      background-color: var(--color-warning-100);
+      color: var(--color-neutral-900);
+    }
+    
+    &.active {
+      background-color: var(--color-primary-200);
+      color: var(--color-neutral-900);
+    }
+  }
+  
+  .help-btn,
+  .settings-btn {
+    &:hover {
+      background-color: var(--color-warning-100);
+      color: var(--color-neutral-900);
+    }
+  }
+}
+
+// 减少动画偏好
+@media (prefers-reduced-motion: reduce) {
+  .nav-link,
+  .help-btn,
+  .settings-btn,
+  .settings-menu {
+    transition: none;
+  }
+  
+  .nav-link:hover,
+  .help-btn:hover,
+  .settings-btn:hover {
+    transform: none;
+  }
+}
+
+// ===== 打印样式 =====
+@media print {
+  .header-actions,
+  .settings-menu {
+    display: none !important;
+  }
+  
+  .app-header {
+    position: static;
+    box-shadow: none;
+    border-bottom: 2px solid var(--color-neutral-900);
+  }
+  
+  .app-navigation {
+    display: none;
+  }
+  
+  .app-main {
+    padding: var(--space-4) 0;
+    max-width: none;
+  }
+}

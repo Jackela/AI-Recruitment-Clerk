@@ -1,0 +1,211 @@
+<div class="predictive-autocomplete" [class.disabled]="disabled">
+  <!-- Input Field -->
+  <div class="input-container">
+    <input
+      #input
+      type="text"
+      class="autocomplete-input"
+      [value]="value"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+      [required]="required"
+      [attr.aria-expanded]="isOpen"
+      [attr.aria-haspopup]="true"
+      [attr.aria-activedescendant]="highlightedIndex >= 0 ? 'suggestion-' + highlightedIndex : null"
+      autocomplete="off"
+      role="combobox"
+      (input)="onInputChange($event)"
+      (focus)="onInputFocus()"
+      (blur)="onInputBlur()">
+
+    <!-- Loading Indicator -->
+    <div class="loading-indicator" *ngIf="isLoading">
+      <svg class="spinner" viewBox="0 0 24 24">
+        <circle class="path" cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+      </svg>
+    </div>
+
+    <!-- Clear Button -->
+    <button 
+      *ngIf="value && !disabled"
+      class="clear-button"
+      type="button"
+      (click)="value = ''; onChange(''); inputChange.emit('')"
+      [attr.aria-label]="'Clear input'">
+      <svg viewBox="0 0 24 24">
+        <path fill="currentColor" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Suggestions Dropdown -->
+  <div 
+    #dropdown
+    class="suggestions-dropdown"
+    [class.open]="isOpen"
+    [@dropdownSlide]="isOpen ? 'open' : 'closed'"
+    role="listbox"
+    [attr.aria-label]="'Suggestions for ' + config.context">
+
+    <!-- No Results -->
+    <div *ngIf="(suggestions | async)?.length === 0 && !isLoading" class="no-results">
+      <svg viewBox="0 0 24 24" class="no-results-icon">
+        <path fill="currentColor" d="M15.5,14H20.5L22,15.5V20.5L20.5,22H15.5L14,20.5V15.5L15.5,14M16,16V20H20V16H16M10.09,15.59L11.5,17L8.5,20L7.09,18.59L10.09,15.59M5.89,10.41L4.5,9L7.5,6L8.91,7.41L5.89,10.41M2,14V10H6V14H2M9,3V1H15V3H9M12,5A1,1 0 0,1 13,6A1,1 0 0,1 12,7A1,1 0 0,1 11,6A1,1 0 0,1 12,5Z"/>
+      </svg>
+      <span>No suggestions found</span>
+      <button 
+        *ngIf="config.allowCustom && value.trim()"
+        class="btn btn-sm btn-primary"
+        (click)="selectCustomValue(value)">
+        Use "{{ value }}"
+      </button>
+    </div>
+
+    <!-- Grouped Suggestions -->
+    <div *ngIf="config.groupByCategory; else flatSuggestions" class="suggestions-grouped">
+      <div 
+        *ngFor="let group of (groupedSuggestions | async) | keyvalue; trackBy: trackByGroup"
+        class="suggestion-group"
+        [@suggestionEnter]>
+        
+        <div class="group-header" *ngIf="group.key !== 'all'">
+          <svg class="group-icon" viewBox="0 0 24 24">
+            <path fill="currentColor" [attr.d]="getGroupIconPath(group.key)"/>
+          </svg>
+          <span class="group-title">{{ group.key | titlecase }}</span>
+          <span class="group-count">({{ group.value.length }})</span>
+        </div>
+
+        <div 
+          *ngFor="let suggestion of group.value; let i = index; trackBy: trackBySuggestion"
+          class="suggestion-item"
+          [class.highlighted]="highlightedIndex === getGlobalIndex(group.key, i)"
+          [attr.data-index]="getGlobalIndex(group.key, i)"
+          [attr.id]="'suggestion-' + getGlobalIndex(group.key, i)"
+          role="option"
+          [attr.aria-selected]="highlightedIndex === getGlobalIndex(group.key, i)"
+          (click)="selectSuggestion(suggestion)"
+          (mouseenter)="highlightedIndex = getGlobalIndex(group.key, i)"
+          [@highlight]="highlightedIndex === getGlobalIndex(group.key, i) ? 'highlighted' : 'default'">
+          
+          <div class="suggestion-content">
+            <div class="suggestion-main">
+              <svg *ngIf="suggestion.icon" class="suggestion-icon" viewBox="0 0 24 24">
+                <path fill="currentColor" [attr.d]="getIconPath(suggestion.icon)"/>
+              </svg>
+              
+              <div class="suggestion-text">
+                <span class="suggestion-label" [innerHTML]="highlightText(suggestion.label, value)"></span>
+                <span *ngIf="suggestion.description" class="suggestion-description">
+                  {{ suggestion.description }}
+                </span>
+              </div>
+            </div>
+
+            <div class="suggestion-meta">
+              <span 
+                *ngIf="config.showConfidence" 
+                class="confidence-badge"
+                [class.high-confidence]="suggestion.confidence > 0.8"
+                [class.medium-confidence]="suggestion.confidence > 0.6"
+                [class.low-confidence]="suggestion.confidence <= 0.6">
+                {{ formatConfidence(suggestion.confidence) }}
+              </span>
+
+              <span *ngIf="suggestion.metadata?.frequency" class="frequency-badge">
+                {{ suggestion.metadata.frequency }}x
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flat Suggestions -->
+    <ng-template #flatSuggestions>
+      <div class="suggestions-flat" [@suggestionEnter]>
+        <div 
+          *ngFor="let suggestion of (suggestions | async); let i = index; trackBy: trackBySuggestion"
+          class="suggestion-item"
+          [class.highlighted]="highlightedIndex === i"
+          [attr.data-index]="i"
+          [attr.id]="'suggestion-' + i"
+          role="option"
+          [attr.aria-selected]="highlightedIndex === i"
+          (click)="selectSuggestion(suggestion)"
+          (mouseenter)="highlightedIndex = i"
+          [@highlight]="highlightedIndex === i ? 'highlighted' : 'default'">
+          
+          <div class="suggestion-content">
+            <div class="suggestion-main">
+              <svg *ngIf="suggestion.icon" class="suggestion-icon" viewBox="0 0 24 24">
+                <path fill="currentColor" [attr.d]="getIconPath(suggestion.icon)"/>
+              </svg>
+              
+              <div class="suggestion-text">
+                <span class="suggestion-label" [innerHTML]="highlightText(suggestion.label, value)"></span>
+                <span *ngIf="suggestion.description" class="suggestion-description">
+                  {{ suggestion.description }}
+                </span>
+              </div>
+            </div>
+
+            <div class="suggestion-meta">
+              <span 
+                *ngIf="config.showConfidence" 
+                class="confidence-badge"
+                [class.high-confidence]="suggestion.confidence > 0.8"
+                [class.medium-confidence]="suggestion.confidence > 0.6"
+                [class.low-confidence]="suggestion.confidence <= 0.6">
+                {{ formatConfidence(suggestion.confidence) }}
+              </span>
+
+              <span *ngIf="suggestion.metadata?.frequency" class="frequency-badge">
+                {{ suggestion.metadata.frequency }}x
+              </span>
+
+              <svg *ngIf="suggestion.category" class="category-icon" viewBox="0 0 24 24">
+                <path fill="currentColor" [attr.d]="getIconPath(getCategoryIcon(suggestion.category))"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- Custom Value Option -->
+    <div 
+      *ngIf="config.allowCustom && value.trim() && (suggestions | async)?.length === 0"
+      class="custom-option">
+      <button 
+        class="custom-button"
+        (click)="selectCustomValue(value)">
+        <svg viewBox="0 0 24 24" class="custom-icon">
+          <path fill="currentColor" d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+        </svg>
+        <span>Add "{{ value }}"</span>
+      </button>
+    </div>
+
+    <!-- Keyboard Hints -->
+    <div class="keyboard-hints" *ngIf="isOpen">
+      <div class="hint-item">
+        <kbd>↑↓</kbd> Navigate
+      </div>
+      <div class="hint-item">
+        <kbd>Enter</kbd> Select
+      </div>
+      <div class="hint-item">
+        <kbd>Esc</kbd> Close
+      </div>
+    </div>
+  </div>
+
+  <!-- Learning Indicator -->
+  <div class="learning-indicator" *ngIf="config.enableLearning">
+    <svg viewBox="0 0 24 24" class="learning-icon">
+      <path fill="currentColor" d="M9,2V8H7V2H9M13,2V8H11V2H13M17,2V8H15V2H17M19,9A2,2 0 0,1 21,11V20A2,2 0 0,1 19,22H5A2,2 0 0,1 3,20V11A2,2 0 0,1 5,9H19M19,11H5V20H19V11Z"/>
+    </svg>
+    <span>Learning from your selections</span>
+  </div>
+</div>

@@ -1,0 +1,255 @@
+// Form controls and interactive elements - Design Token Integration
+// 导入设计系统令牌（使用现代 @use 语法）
+@use '../../../styles/design-system/tokens.scss';
+.purposes-section {
+  margin-bottom: var(--space-8);
+
+  h3 {
+    color: var(--color-text-primary);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--space-2);
+  }
+
+  .section-description {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-6);
+    line-height: 1.6;
+  }
+}
+
+.purposes-list .purpose-item {
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border-primary);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-4);
+  transition: all 0.3s ease;
+  overflow: hidden;
+
+  &.required {
+    border-color: var(--color-primary-500);
+    background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-primary-25) 100%);
+  }
+
+  &.granted {
+    border-color: #28a745;
+    background: linear-gradient(135deg, #f8fff8 0%, #f0fff4 100%);
+  }
+
+  &.denied {
+    border-color: #dc3545;
+    background: linear-gradient(135deg, #fff8f8 0%, #fff5f5 100%);
+  }
+
+  .purpose-header {
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    .purpose-toggle {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      flex: 1;
+
+      .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 60px; height: 30px;
+        cursor: pointer;
+
+        input {
+          opacity: 0;
+          width: 0; height: 0;
+
+          &:checked + .toggle-slider {
+            background-color: #28a745;
+            &:before { transform: translateX(30px); }
+          }
+
+          &:disabled + .toggle-slider {
+            background-color: #6c757d;
+            cursor: not-allowed;
+          }
+        }
+
+        .toggle-slider {
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background-color: #ccc;
+          transition: 0.3s;
+          border-radius: 30px;
+
+          &:before {
+            position: absolute;
+            content: "";
+            height: 24px; width: 24px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          }
+        }
+      }
+
+      .purpose-title {
+        flex: 1;
+
+        h4 {
+          color: var(--color-text-primary);
+          font-size: 1.2rem;
+          font-weight: var(--font-weight-semibold);
+          margin: 0 0 0.5rem 0;
+        }
+
+        .purpose-badge {
+          display: inline-block;
+          padding: 0.25rem 0.75rem;
+          border-radius: 20px;
+          font-size: 0.8rem;
+          font-weight: var(--font-weight-semibold);
+          text-transform: uppercase;
+
+          &.required {
+            background: var(--color-primary-500);
+            color: white;
+          }
+
+          &.optional {
+            background: var(--color-text-secondary);
+            color: white;
+          }
+        }
+      }
+    }
+
+    .current-status {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.25rem;
+
+      .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: var(--font-weight-semibold);
+
+        &.granted {
+          background: var(--color-success-100);
+          color: var(--color-success-800);
+        }
+
+        &.denied {
+          background: var(--color-danger-100);
+          color: var(--color-danger-800);
+        }
+
+        &.withdrawn {
+          background: var(--color-warning-100);
+          color: var(--color-warning-700);
+        }
+
+        &.pending {
+          background: var(--color-info-100);
+          color: var(--color-info-700);
+        }
+      }
+
+      .consent-date {
+        color: var(--color-text-secondary);
+        font-size: 0.75rem;
+      }
+    }
+  }
+}
+
+.legal-confirmations {
+  margin-bottom: var(--space-8);
+  background: var(--color-bg-secondary);
+  padding: 1.5rem;
+  border-radius: var(--radius-xl);
+  border: 2px solid var(--color-border-primary);
+
+  h3 {
+    color: var(--color-text-primary);
+    font-size: 1.3rem;
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--space-4);
+  }
+
+  .confirmation-item {
+    margin-bottom: var(--space-4);
+
+    &:last-child { margin-bottom: 0; }
+
+    .checkbox-label {
+      display: flex;
+      align-items: flex-start;
+      cursor: pointer;
+      position: relative;
+      padding-left: 2rem;
+      line-height: 1.6;
+
+      input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0; width: 0;
+
+        &:checked ~ .checkmark {
+          background-color: var(--color-primary-500);
+          border-color: var(--color-primary-500);
+          &:after { display: block; }
+        }
+      }
+
+      .checkmark {
+        position: absolute;
+        left: 0; top: 0.125rem;
+        height: 20px; width: 20px;
+        background-color: var(--color-bg-primary);
+        border: 2px solid var(--color-border-primary);
+        border-radius: 4px;
+        transition: all 0.3s ease;
+
+        &:after {
+          content: "";
+          position: absolute;
+          display: none;
+          left: 6px; top: 2px;
+          width: 6px; height: 10px;
+          border: solid white;
+          border-width: 0 2px 2px 0;
+          transform: rotate(45deg);
+        }
+      }
+
+      .label-text {
+        color: var(--color-text-primary);
+
+        a {
+          color: var(--color-primary-500);
+          text-decoration: none;
+          font-weight: var(--font-weight-medium);
+          &:hover { text-decoration: underline; }
+        }
+
+        .required-indicator {
+          color: var(--color-danger-500);
+          font-weight: var(--font-weight-bold);
+          margin-left: 0.25rem;
+        }
+      }
+    }
+
+    .field-error {
+      color: var(--color-danger-500);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      padding-left: 2rem;
+    }
+  }
+}

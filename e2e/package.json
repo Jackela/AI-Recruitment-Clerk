@@ -1,0 +1,49 @@
+{
+  "name": "ai-recruitment-clerk-e2e",
+  "version": "1.0.0",
+  "description": "End-to-end testing suite for AI Recruitment Clerk",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:phase1": "jest --testPathPattern=phase1",
+    "test:phase2": "jest --testPathPattern=phase2",
+    "test:user-registration": "jest --testPathPattern=user-registration",
+    "test:questionnaire": "jest --testPathPattern=questionnaire",
+    "test:resume": "jest --testPathPattern=resume",
+    "test:analytics": "jest --testPathPattern=analytics",
+    "test:reports": "jest --testPathPattern=report-generation",
+    "test:phase3": "jest --testPathPattern=phase3",
+    "test:phase4": "jest --testPathPattern=phase4",
+    "test:phase5": "jest --testPathPattern=phase5",
+    "test:infrastructure": "jest --testPathPatterns=infrastructure",
+    "test:auth": "jest --testPathPattern=authentication",
+    "test:business": "jest --testPathPattern=business",
+    "env:up": "docker-compose -f docker-compose.e2e.yml up -d",
+    "env:down": "docker-compose -f docker-compose.e2e.yml down -v",
+    "env:logs": "docker-compose -f docker-compose.e2e.yml logs -f",
+    "env:build": "docker-compose -f docker-compose.e2e.yml build",
+    "env:clean": "docker-compose -f docker-compose.e2e.yml down -v --rmi all",
+    "setup": "npm run env:build && npm run env:up",
+    "cleanup": "npm run env:down"
+  },
+  "keywords": ["e2e", "testing", "ai-recruitment", "integration"],
+  "author": "AI Recruitment Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "@types/node-fetch": "^2.6.0",
+    "jest": "^29.5.0",
+    "jest-html-reporters": "^3.1.0",
+    "jest-junit": "^16.0.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "ioredis": "^5.3.0",
+    "mongodb": "^6.0.0",
+    "node-fetch": "^2.7.0"
+  }
+}

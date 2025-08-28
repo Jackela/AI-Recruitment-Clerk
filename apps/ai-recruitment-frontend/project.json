@@ -1,0 +1,149 @@
+{
+  "name": "ai-recruitment-frontend",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "arc",
+  "sourceRoot": "apps/ai-recruitment-frontend/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/ai-recruitment-frontend",
+        "browser": "apps/ai-recruitment-frontend/src/main.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "apps/ai-recruitment-frontend/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/ai-recruitment-frontend/public"
+          }
+        ],
+        "styles": ["apps/ai-recruitment-frontend/src/styles.scss"]
+      },
+      "configurations": {
+        "webkit-test": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "2mb",
+              "maximumError": "3mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "50kb",
+              "maximumError": "100kb"
+            }
+          ],
+          "outputHashing": "all",
+          "optimization": {
+            "scripts": true,
+            "styles": {
+              "minify": true,
+              "inlineCritical": true
+            },
+            "fonts": true
+          },
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "subresourceIntegrity": true
+        },
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "400kb",
+              "maximumError": "500kb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "6kb",
+              "maximumError": "10kb"
+            },
+            {
+              "type": "bundle",
+              "name": "angular-vendor",
+              "maximumWarning": "300kb",
+              "maximumError": "400kb"
+            },
+            {
+              "type": "bundle", 
+              "name": "ngrx-vendor",
+              "maximumWarning": "150kb",
+              "maximumError": "200kb"
+            }
+          ],
+          "outputHashing": "all",
+          "optimization": {
+            "scripts": true,
+            "styles": {
+              "minify": true,
+              "inlineCritical": true
+            },
+            "fonts": true
+          },
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "subresourceIntegrity": true
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@angular/build:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "ai-recruitment-frontend:build:production"
+        },
+        "development": {
+          "buildTarget": "ai-recruitment-frontend:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular/build:extract-i18n",
+      "options": {
+        "buildTarget": "ai-recruitment-frontend:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/ai-recruitment-frontend/jest.config.ts"
+      }
+    },
+    "serve-static": {
+      "continuous": true,
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "ai-recruitment-frontend:build:webkit-test",
+        "port": 4200,
+        "staticFilePath": "dist/apps/ai-recruitment-frontend/browser",
+        "spa": true
+      },
+      "configurations": {
+        "webkit-test": {
+          "buildTarget": "ai-recruitment-frontend:build:webkit-test",
+          "port": 4204,
+          "staticFilePath": "dist/apps/ai-recruitment-frontend/browser",
+          "spa": true
+        }
+      }
+    }
+  }
+}

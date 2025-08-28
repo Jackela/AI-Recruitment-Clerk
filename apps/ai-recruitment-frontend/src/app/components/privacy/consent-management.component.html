@@ -1,0 +1,282 @@
+<!-- GDPR Consent Management Interface -->
+<div class="consent-management" [class.loading]="isLoading">
+  
+  <!-- Header -->
+  <div class="consent-header">
+    <h2>
+      <i class="fas fa-shield-alt"></i>
+      Privacy & Consent Preferences
+    </h2>
+    <p class="subtitle">
+      We respect your privacy and are committed to protecting your personal data. 
+      Please review and configure your consent preferences below.
+    </p>
+    
+    <!-- Renewal Notice -->
+    <div *ngIf="needsRenewal()" class="alert alert-warning">
+      <i class="fas fa-exclamation-triangle"></i>
+      <strong>Consent Renewal Required:</strong>
+      Your consent preferences need to be renewed to continue using our services.
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Processing your privacy preferences...</p>
+  </div>
+
+  <!-- Consent Form -->
+  <form [formGroup]="consentForm" (ngSubmit)="onSubmit()" class="consent-form">
+    
+    <!-- Processing Purposes -->
+    <div class="purposes-section">
+      <h3>Data Processing Purposes</h3>
+      <p class="section-description">
+        We process your personal data for the following purposes. Please review each purpose 
+        and provide your consent where required.
+      </p>
+
+      <div formArrayName="consents" class="purposes-list">
+        <div 
+          *ngFor="let consentGroup of consentsArray.controls; let i = index" 
+          [formGroupName]="i"
+          class="purpose-item"
+          [class.required]="isPurposeRequired(i)"
+          [class.granted]="consentGroup.get('granted')?.value"
+          [class.denied]="!consentGroup.get('granted')?.value"
+        >
+          
+          <!-- Purpose Header -->
+          <div class="purpose-header">
+            <div class="purpose-toggle">
+              <label class="toggle-switch">
+                <input 
+                  type="checkbox"
+                  formControlName="granted"
+                  [disabled]="isPurposeRequired(i)"
+                  [id]="'consent-' + getPurposeInfo(i).purpose"
+                >
+                <span class="toggle-slider"></span>
+              </label>
+              
+              <div class="purpose-title">
+                <h4>{{ getPurposeInfo(i).displayName }}</h4>
+                <span class="purpose-badge" [class]="getPurposeInfo(i).isRequired ? 'required' : 'optional'">
+                  {{ getPurposeInfo(i).isRequired ? 'Required' : 'Optional' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Current Status (for update mode) -->
+            <div *ngIf="mode === 'update'" class="current-status">
+              <span 
+                class="status-badge"
+                [class]="getCurrentConsentStatus(getPurposeInfo(i).purpose)"
+              >
+                {{ getCurrentConsentStatus(getPurposeInfo(i).purpose) | titlecase }}
+              </span>
+              <small *ngIf="getConsentDate(getPurposeInfo(i).purpose)" class="consent-date">
+                Since {{ getConsentDate(getPurposeInfo(i).purpose) | date:'mediumDate' }}
+              </small>
+            </div>
+          </div>
+
+          <!-- Purpose Details -->
+          <div class="purpose-details">
+            <p class="purpose-description">
+              {{ getPurposeInfo(i).description }}
+            </p>
+
+            <!-- Legal Basis -->
+            <div class="legal-info">
+              <div class="legal-basis">
+                <strong>Legal Basis:</strong> {{ getPurposeInfo(i).legalBasis }}
+              </div>
+              
+              <!-- Data Categories -->
+              <div class="data-categories">
+                <strong>Data Categories:</strong>
+                <span class="categories-list">
+                  {{ getPurposeInfo(i).dataCategories.join(', ') | titlecase }}
+                </span>
+              </div>
+
+              <!-- Retention Period -->
+              <div class="retention-period">
+                <strong>Retention:</strong> {{ getPurposeInfo(i).retentionPeriod }}
+              </div>
+
+              <!-- Third Parties -->
+              <div *ngIf="getPurposeInfo(i).thirdParties?.length" class="third-parties">
+                <strong>Third Parties:</strong>
+                <span class="third-parties-list">
+                  {{ getPurposeInfo(i).thirdParties!.join(', ') }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Withdrawal Option -->
+            <div 
+              *ngIf="mode === 'update' && canWithdrawPurpose(i) && getCurrentConsentStatus(getPurposeInfo(i).purpose) === 'granted'"
+              class="withdrawal-option"
+            >
+              <button 
+                type="button"
+                class="btn btn-outline-danger btn-sm"
+                (click)="withdrawConsent(getPurposeInfo(i).purpose)"
+                [disabled]="isLoading"
+              >
+                <i class="fas fa-times"></i>
+                Withdraw Consent
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Legal Confirmations -->
+    <div class="legal-confirmations">
+      <h3>Legal Confirmations</h3>
+      
+      <div class="confirmation-item">
+        <label class="checkbox-label">
+          <input 
+            type="checkbox"
+            formControlName="privacyPolicyAccepted"
+            id="privacy-policy-accepted"
+          >
+          <span class="checkmark"></span>
+          <span class="label-text">
+            I have read and agree to the 
+            <a href="/privacy-policy" target="_blank">Privacy Policy</a> 
+            and understand how my data will be processed.
+            <span class="required-indicator">*</span>
+          </span>
+        </label>
+        <div 
+          *ngIf="isFieldInvalid('privacyPolicyAccepted')" 
+          class="field-error"
+        >
+          {{ getFieldError('privacyPolicyAccepted') }}
+        </div>
+      </div>
+
+      <div class="confirmation-item">
+        <label class="checkbox-label">
+          <input 
+            type="checkbox"
+            formControlName="ageConfirmation"
+            id="age-confirmation"
+          >
+          <span class="checkmark"></span>
+          <span class="label-text">
+            I confirm that I am at least 16 years old (or the minimum age of digital consent in my country).
+            <span class="required-indicator">*</span>
+          </span>
+        </label>
+        <div 
+          *ngIf="isFieldInvalid('ageConfirmation')" 
+          class="field-error"
+        >
+          {{ getFieldError('ageConfirmation') }}
+        </div>
+      </div>
+    </div>
+
+    <!-- GDPR Rights Information -->
+    <div class="gdpr-rights-info">
+      <h3>Your Privacy Rights</h3>
+      <p>Under GDPR, you have the following rights regarding your personal data:</p>
+      
+      <div class="rights-grid">
+        <div class="right-item">
+          <i class="fas fa-eye"></i>
+          <h4>Right to Access</h4>
+          <p>Request a copy of your personal data</p>
+        </div>
+        
+        <div class="right-item">
+          <i class="fas fa-edit"></i>
+          <h4>Right to Rectification</h4>
+          <p>Correct inaccurate or incomplete data</p>
+        </div>
+        
+        <div class="right-item">
+          <i class="fas fa-trash"></i>
+          <h4>Right to Erasure</h4>
+          <p>Request deletion of your data (right to be forgotten)</p>
+        </div>
+        
+        <div class="right-item">
+          <i class="fas fa-download"></i>
+          <h4>Right to Portability</h4>
+          <p>Receive your data in a machine-readable format</p>
+        </div>
+        
+        <div class="right-item">
+          <i class="fas fa-ban"></i>
+          <h4>Right to Object</h4>
+          <p>Object to certain types of processing</p>
+        </div>
+        
+        <div class="right-item">
+          <i class="fas fa-pause"></i>
+          <h4>Right to Restrict</h4>
+          <p>Limit how we process your data</p>
+        </div>
+      </div>
+
+      <div class="rights-contact">
+        <p>
+          To exercise any of these rights, please contact our Data Protection Officer at 
+          <a href="mailto:dpo@ai-recruitment-clerk.com">dpo@ai-recruitment-clerk.com</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button 
+        type="submit"
+        class="btn btn-primary btn-lg"
+        [disabled]="consentForm.invalid || isLoading"
+      >
+        <i class="fas fa-save"></i>
+        <span *ngIf="mode === 'initial'">Save Consent Preferences</span>
+        <span *ngIf="mode === 'update'">Update Preferences</span>
+        <span *ngIf="mode === 'review'">Confirm Preferences</span>
+      </button>
+      
+      <div class="form-help">
+        <small class="text-muted">
+          <i class="fas fa-info-circle"></i>
+          You can change these preferences at any time in your account settings.
+          Required preferences cannot be disabled as they are necessary for the service to function.
+        </small>
+      </div>
+    </div>
+
+  </form>
+
+  <!-- Footer Information -->
+  <div class="consent-footer">
+    <div class="footer-links">
+      <a href="/privacy-policy" target="_blank">Privacy Policy</a>
+      <a href="/terms-of-service" target="_blank">Terms of Service</a>
+      <a href="/cookie-policy" target="_blank">Cookie Policy</a>
+      <a href="/contact" target="_blank">Contact Us</a>
+    </div>
+    
+    <div class="compliance-info">
+      <p>
+        <i class="fas fa-shield-alt"></i>
+        This platform is GDPR compliant and follows international privacy best practices.
+        Your data is processed securely and only for the purposes you have consented to.
+      </p>
+    </div>
+  </div>
+
+</div>

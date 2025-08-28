@@ -1,0 +1,102 @@
+<div class="create-job-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="d-flex align-items-center">
+      <button 
+        type="button" 
+        class="btn btn-secondary mr-3" 
+        (click)="onCancel()"
+        [disabled]="creating$ | async">
+        ← 返回
+      </button>
+      <h2 class="page-title">创建新岗位</h2>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error$ | async as error" class="alert alert-danger mb-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <span>{{ error }}</span>
+      <button type="button" class="btn-close" (click)="onClearError()">×</button>
+    </div>
+  </div>
+
+  <!-- Create Job Form -->
+  <div class="create-job-form card">
+    <div class="card-header">
+      <h3>岗位信息</h3>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="createJobForm" (ngSubmit)="onSubmit()" novalidate>
+        <!-- Job Title -->
+        <div class="form-group">
+          <label for="jobTitle" class="form-label">
+            岗位名称 <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            id="jobTitle"
+            class="form-control"
+            formControlName="jobTitle"
+            [class.is-invalid]="getFieldError('jobTitle')"
+            placeholder="请输入岗位名称，如：高级Python开发工程师"
+            maxlength="100" />
+          <div *ngIf="getFieldError('jobTitle')" class="invalid-feedback">
+            {{ getFieldError('jobTitle') }}
+          </div>
+          <div class="form-text">
+            建议使用清晰、具体的岗位名称，如“高级Java开发工程师”、“产品经理”等。
+          </div>
+        </div>
+
+        <!-- Job Description -->
+        <div class="form-group">
+          <label for="jdText" class="form-label">
+            岗位描述 (JD) <span class="text-danger">*</span>
+          </label>
+          <textarea
+            id="jdText"
+            class="form-control"
+            formControlName="jdText"
+            [class.is-invalid]="getFieldError('jdText')"
+            placeholder="请输入详细的岗位描述，包括职责、要求、技能等..."
+            rows="12"
+            maxlength="5000"></textarea>
+          <div *ngIf="getFieldError('jdText')" class="invalid-feedback">
+            {{ getFieldError('jdText') }}
+          </div>
+          <div class="form-text">
+            <div class="mb-2">请包含以下关键信息以提高匹配准确性：</div>
+            <ul class="requirements-list">
+              <li><strong>技能要求</strong>：编程语言、框架、工具等</li>
+              <li><strong>工作经验</strong>：年限要求、相关经验</li>
+              <li><strong>学历要求</strong>：最低学历、专业要求</li>
+              <li><strong>其他要求</strong>：软技能、特殊要求等</li>
+            </ul>
+          </div>
+          <div class="character-count">
+            {{ jdText?.value?.length || 0 }} / 5000 字符
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button 
+            type="button" 
+            class="btn btn-secondary mr-3" 
+            (click)="onCancel()"
+            [disabled]="creating$ | async">
+            取消
+          </button>
+          <button 
+            type="submit" 
+            class="btn btn-primary" 
+            [disabled]="!createJobForm.valid || (creating$ | async)">
+            <span *ngIf="creating$ | async" class="spinner"></span>
+            {{ (creating$ | async) ? '创建中...' : '创建岗位' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

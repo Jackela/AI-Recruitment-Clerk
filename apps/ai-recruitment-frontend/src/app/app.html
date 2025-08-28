@@ -1,0 +1,192 @@
+<!-- Skip Navigation Links -->
+<div arcSkipNavigation></div>
+
+<!-- ARIA Live Regions -->
+<arc-aria-live></arc-aria-live>
+
+<div class="app-container" role="application" [attr.aria-label]="config.APP_INFO.description">
+  <!-- Header with Navigation -->
+  <header class="app-header" role="banner">
+    <div class="header-content">
+      <h1 class="app-title" id="app-title">
+        <span class="sr-only">{{ config.APP_INFO.description }}</span>
+        {{ config.APP_INFO.name }}
+      </h1>
+      
+      <!-- Main Navigation -->
+      <nav class="app-navigation nav-menu" 
+           role="navigation" 
+           aria-label="Main navigation"
+           aria-labelledby="nav-heading">
+        <h2 id="nav-heading" class="sr-only">Main Navigation</h2>
+        
+        <a routerLink="/dashboard" 
+           routerLinkActive="active" 
+           class="nav-link" 
+           role="menuitem"
+           [attr.aria-label]="getText('APP.pages.dashboard.subtitle')"
+           [attr.title]="getText('APP.pages.dashboard.subtitle') + ' (Alt+1)'"
+           [attr.aria-current]="'page'">
+          <span class="nav-icon" aria-hidden="true">📊</span>
+          <span class="nav-text">{{ getText('APP.navigation.dashboard') }}</span>
+          <span class="sr-only">- Alt+1</span>
+        </a>
+        
+        <a routerLink="/analysis" 
+           routerLinkActive="active" 
+           class="nav-link"
+           role="menuitem"
+           [attr.aria-label]="getText('APP.pages.analysis.subtitle')"
+           [attr.title]="getText('APP.pages.analysis.subtitle') + ' (Alt+2)'">
+          <span class="nav-icon" aria-hidden="true">🧠</span>
+          <span class="nav-text">{{ getText('APP.navigation.analysis') }}</span>
+          <span class="sr-only">- Alt+2</span>
+        </a>
+        
+        <a routerLink="/results" 
+           routerLinkActive="active" 
+           class="nav-link"
+           role="menuitem"
+           [attr.aria-label]="getText('APP.pages.results.subtitle')"
+           [attr.title]="getText('APP.pages.results.subtitle') + ' (Alt+3)'">
+          <span class="nav-icon" aria-hidden="true">📈</span>
+          <span class="nav-text">{{ getText('APP.navigation.results') }}</span>
+          <span class="sr-only">- Alt+3</span>
+        </a>
+      </nav>
+      
+      <!-- Quick Actions -->
+      <div class="header-actions quick-actions" 
+           role="group" 
+           aria-label="Quick actions and settings">
+        <!-- Language Selector -->
+        <arc-language-selector></arc-language-selector>
+        
+        <!-- Theme Toggle -->
+        <arc-theme-toggle></arc-theme-toggle>
+        
+        <button class="help-btn" 
+                type="button"
+                [attr.aria-label]="getText('ACCESSIBILITY.shortcuts.help')"
+                [attr.title]="getText('APP.navigation.help') + ' (Alt+H)'"
+                (click)="showKeyboardHelp()">
+          <span aria-hidden="true">❓</span>
+          <span class="sr-only">{{ getText('APP.navigation.help') }}</span>
+        </button>
+        
+        <button class="settings-btn" 
+                type="button"
+                [attr.aria-label]="getText('ACCESSIBILITY.aria.settings')"
+                [attr.title]="getText('APP.navigation.settings')"
+                aria-haspopup="menu"
+                [attr.aria-expanded]="settingsMenuOpen()"
+                (click)="toggleSettingsMenu()">
+          <span aria-hidden="true">⚙️</span>
+          <span class="sr-only">{{ getText('APP.navigation.settings') }}</span>
+        </button>
+        
+        <!-- Accessibility Settings Menu -->
+        <div class="settings-menu" 
+             role="menu"
+             [attr.aria-label]="getText('ACCESSIBILITY.aria.settings')"
+             [attr.aria-hidden]="!settingsMenuOpen()"
+             [class.open]="settingsMenuOpen()">
+          <button role="menuitem" 
+                  type="button"
+                  (click)="toggleHighContrast()"
+                  [attr.aria-checked]="highContrastEnabled()">
+            <span aria-hidden="true">🎨</span>
+            {{ getText('ACCESSIBILITY.toggleHighContrast') }}
+          </button>
+          <button role="menuitem" 
+                  type="button"
+                  (click)="toggleReducedMotion()"
+                  [attr.aria-checked]="reducedMotionEnabled()">
+            <span aria-hidden="true">🎭</span>
+            {{ getText('ACCESSIBILITY.reduceMotion') }}
+          </button>
+          <button role="menuitem" 
+                  type="button"
+                  (click)="increaseFontSize()">
+            <span aria-hidden="true">🔤</span>
+            {{ getText('ACCESSIBILITY.increaseFontSize') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Main Content Area -->
+  <main class="app-main" 
+        id="main-content" 
+        role="main" 
+        aria-labelledby="app-title"
+        [attr.aria-live]="'polite'">
+    
+    <!-- Loading Indicator -->
+    <div class="loading-indicator" 
+         role="status" 
+         aria-live="polite"
+         [attr.aria-hidden]="!isLoading()"
+         *ngIf="isLoading">
+      <span class="sr-only">{{ getText('ACCESSIBILITY.screenReader.loading') }}</span>
+      <div class="spinner" aria-hidden="true"></div>
+    </div>
+    
+    <!-- Page Content -->
+    <router-outlet></router-outlet>
+  </main>
+  
+  <!-- Global UX Components -->
+  <arc-guide-overlay 
+    role="dialog"
+    [attr.aria-label]="getText('ACCESSIBILITY.aria.guideOverlay')"
+    [attr.aria-hidden]="!guideOverlayVisible()">
+  </arc-guide-overlay>
+  
+  <arc-status-notifications 
+    role="log"
+    aria-live="polite"
+    [attr.aria-label]="getText('ACCESSIBILITY.aria.notifications')">
+  </arc-status-notifications>
+  
+  <!-- Keyboard Help Modal -->
+  <div class="keyboard-help-modal" 
+       role="dialog"
+       aria-labelledby="keyboard-help-title"
+       aria-describedby="keyboard-help-description"
+       [attr.aria-hidden]="!keyboardHelpVisible()"
+       [class.visible]="keyboardHelpVisible()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="keyboard-help-title">{{ getText('ACCESSIBILITY.keyboardShortcuts') }}</h2>
+        <button type="button" 
+                class="close-btn"
+                [attr.aria-label]="getText('COMMON.close')"
+                (click)="hideKeyboardHelp()">
+          <span aria-hidden="true">✕</span>
+        </button>
+      </div>
+      <div id="keyboard-help-description" class="modal-body">
+        <div class="shortcut-section">
+          <h3>{{ getText('ACCESSIBILITY.navigation') }}</h3>
+          <ul role="list">
+            <li><kbd>Alt + 1</kbd> - {{ getText('APP.navigation.dashboard') }}</li>
+            <li><kbd>Alt + 2</kbd> - {{ getText('APP.navigation.analysis') }}</li>
+            <li><kbd>Alt + 3</kbd> - {{ getText('APP.navigation.results') }}</li>
+            <li><kbd>Alt + H</kbd> - {{ getText('APP.navigation.help') }}</li>
+          </ul>
+        </div>
+        <div class="shortcut-section">
+          <h3>{{ getText('ACCESSIBILITY.actions') }}</h3>
+          <ul role="list">
+            <li><kbd>Ctrl + Shift + R</kbd> - {{ getText('COMMON.refresh') }}</li>
+            <li><kbd>Ctrl + N</kbd> - {{ getText('APP.navigation.analysis') }}</li>
+            <li><kbd>Alt + T</kbd> - 切换主题</li>
+            <li><kbd>Escape</kbd> - {{ getText('COMMON.close') }}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
