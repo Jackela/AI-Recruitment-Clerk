@@ -1,0 +1,60 @@
+# Railway ignore file
+# Files and directories to exclude from Railway deployment
+
+# Development files
+.git/
+.gitignore
+.env.local
+.env.development
+.env.test
+
+# Node modules (will be installed during build)
+node_modules/
+
+# Build artifacts that will be regenerated
+dist/
+.nx/cache/
+.angular/
+
+# Test files
+**/*.spec.ts
+**/*.test.ts
+**/test/
+e2e/
+coverage/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Development scripts
+scripts/dev/
+scripts/local/
+
+# Linting and formatting
+.eslintcache
+.prettierignore
+
+# Husky
+.husky/

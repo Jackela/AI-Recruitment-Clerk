@@ -1,0 +1,69 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "services": {
+    "app-gateway": {
+      "name": "ai-recruitment-app-gateway",
+      "source": {
+        "type": "repo",
+        "repo": "your-repo/ai-recruitment-clerk",
+        "branch": "main"
+      },
+      "build": {
+        "builder": "NIXPACKS",
+        "buildCommand": "bash scripts/railway-build.sh"
+      },
+      "deploy": {
+        "startCommand": "bash scripts/railway-startup.sh",
+        "restartPolicyType": "on_failure",
+        "numReplicas": 1,
+        "healthcheckPath": "/api/health",
+        "healthcheckTimeout": 300,
+        "memoryLimit": 2048,
+        "cpuLimit": 1000
+      },
+      "environment": {
+        "NODE_ENV": "production",
+        "PORT": "${{ RAILWAY_STATIC_PORT }}",
+        "FRONTEND_URL": "${{ RAILWAY_STATIC_URL }}",
+        "API_BASE_URL": "${{ RAILWAY_STATIC_URL }}/api",
+        "NODE_OPTIONS": "--max-old-space-size=2048"
+      }
+    },
+    "mongodb": {
+      "name": "ai-recruitment-mongodb",
+      "image": "mongo:7.0",
+      "deploy": {
+        "memoryLimit": 1024,
+        "cpuLimit": 500
+      },
+      "environment": {
+        "MONGO_INITDB_ROOT_USERNAME": "${{ MONGO_USERNAME }}",
+        "MONGO_INITDB_ROOT_PASSWORD": "${{ MONGO_PASSWORD }}",
+        "MONGO_INITDB_DATABASE": "ai-recruitment-clerk"
+      },
+      "volumes": [
+        {
+          "mountPath": "/data/db",
+          "size": "5GB"
+        }
+      ]
+    },
+    "redis": {
+      "name": "ai-recruitment-redis",
+      "image": "redis:7.2-alpine",
+      "deploy": {
+        "memoryLimit": 512,
+        "cpuLimit": 250
+      },
+      "environment": {
+        "REDIS_PASSWORD": "${{ REDIS_PASSWORD }}"
+      },
+      "command": ["redis-server", "--requirepass", "${{ REDIS_PASSWORD }}"]
+    }
+  },
+  "networks": {
+    "internal": {
+      "services": ["app-gateway", "mongodb", "redis"]
+    }
+  }
+}

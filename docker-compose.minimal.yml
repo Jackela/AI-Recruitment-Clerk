@@ -1,0 +1,85 @@
+# Minimal configuration for quick testing
+services:
+  # Only essential infrastructure services
+  mongodb:
+    image: mongo:7.0-jammy
+    container_name: ai-recruitment-mongodb-minimal
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: devpassword123
+      MONGO_INITDB_DATABASE: ai-recruitment
+    ports:
+      - "27019:27017"  # Use different port to avoid conflict
+    volumes:
+      - mongodb_data_minimal:/data/db
+    networks:
+      - ai-recruitment-minimal-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  nats:
+    image: nats:2.10-alpine
+    container_name: ai-recruitment-nats-minimal
+    restart: unless-stopped
+    command: 
+      - "--jetstream"
+    ports:
+      - "4224:4222"  # Use different port to avoid conflict
+      - "8224:8222"
+    networks:
+      - ai-recruitment-minimal-network
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "4222"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # Backend Gateway only
+  app-gateway:
+    build:
+      context: .
+      dockerfile: apps/app-gateway/Dockerfile
+    container_name: ai-recruitment-gateway-minimal
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      NODE_ENV: development
+      NATS_URL: nats://nats:4222
+      JWT_SECRET: development_secret_key_change_in_production
+      MONGO_URL: mongodb://admin:devpassword123@mongodb:27017/ai-recruitment?authSource=admin
+      MONGODB_URL: mongodb://admin:devpassword123@mongodb:27017/ai-recruitment?authSource=admin
+      DISABLE_REDIS: "true"
+      USE_REDIS_CACHE: "false"
+      GEMINI_API_KEY: demo_key
+    ports:
+      - "3002:3000"  # Use different port to avoid conflict
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    networks:
+      - ai-recruitment-minimal-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+
+# Networks
+networks:
+  ai-recruitment-minimal-network:
+    driver: bridge
+    name: ai-recruitment-minimal-network
+
+# Volumes
+volumes:
+  mongodb_data_minimal:
+    name: ai-recruitment-mongodb-data-minimal

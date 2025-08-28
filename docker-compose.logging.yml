@@ -1,0 +1,120 @@
+# AI Recruitment Clerk - ELK日志聚合系统
+# Elasticsearch + Logstash + Kibana + Filebeat
+
+services:
+  # Elasticsearch 日志存储
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: ai-recruitment-elasticsearch
+    restart: unless-stopped
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+      # - ./monitoring/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+    networks:
+      - logging-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Kibana 日志可视化
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.0
+    container_name: ai-recruitment-kibana
+    restart: unless-stopped
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - SERVER_NAME=kibana
+      - SERVER_HOST=0.0.0.0
+    volumes:
+      - kibana_data:/usr/share/kibana/data
+      # - ./monitoring/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+    networks:
+      - logging-network
+    depends_on:
+      - elasticsearch
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Logstash 日志处理
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.15.0
+    container_name: ai-recruitment-logstash
+    restart: unless-stopped
+    ports:
+      - "5044:5044"
+      - "9600:9600"
+    environment:
+      - "LS_JAVA_OPTS=-Xmx1g -Xms1g"
+    volumes:
+      - logstash_data:/usr/share/logstash/data
+      - ./monitoring/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      # - ./monitoring/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      # - ./monitoring/logstash/patterns:/usr/share/logstash/patterns:ro
+    networks:
+      - logging-network
+    depends_on:
+      - elasticsearch
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9600/_node/stats || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Filebeat 日志收集
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.15.0
+    container_name: ai-recruitment-filebeat
+    restart: unless-stopped
+    user: root
+    volumes:
+      - ./monitoring/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - filebeat_data:/usr/share/filebeat/data
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - LOGSTASH_HOSTS=logstash:5044
+    networks:
+      - logging-network
+      - ai-recruitment-network
+    depends_on:
+      - logstash
+
+# 网络配置
+networks:
+  ai-recruitment-network:
+    external: true
+    name: ai-recruitment-network
+  logging-network:
+    driver: bridge
+    name: ai-recruitment-logging
+
+# 数据卷
+volumes:
+  elasticsearch_data:
+    name: ai-recruitment-elasticsearch-data
+  kibana_data:
+    name: ai-recruitment-kibana-data
+  logstash_data:
+    name: ai-recruitment-logstash-data
+  filebeat_data:
+    name: ai-recruitment-filebeat-data

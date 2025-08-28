@@ -1,0 +1,59 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "deploy": {
+    "restartPolicyType": "on_failure",
+    "numReplicas": 1,
+    "watchPatterns": [
+      "**/*"
+    ],
+    "healthcheckPath": "/api/health",
+    "healthcheckTimeout": 300,
+    "memoryLimit": 2048,
+    "cpuLimit": 1000
+  },
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "npm install --legacy-peer-deps && npm run build"
+  },
+  "environments": {
+    "production": {
+      "variables": {
+        "NODE_ENV": "production",
+        "PORT": "${{ RAILWAY_STATIC_PORT }}",
+        "FRONTEND_URL": "${{ RAILWAY_STATIC_URL }}",
+        "API_BASE_URL": "${{ RAILWAY_STATIC_URL }}/api",
+        "JWT_SECRET": "${{ JWT_SECRET }}",
+        "JWT_REFRESH_SECRET": "${{ JWT_REFRESH_SECRET }}",
+        "ENCRYPTION_KEY": "${{ ENCRYPTION_KEY }}",
+        "JWT_EXPIRES_IN": "15m",
+        "JWT_REFRESH_EXPIRES_IN": "7d",
+        "JWT_EXPIRES_IN_SECONDS": "900",
+        "JWT_AUDIENCE": "ai-recruitment-clerk",
+        "JWT_ISSUER": "ai-recruitment-clerk-auth",
+        "GEMINI_API_KEY": "${{ GEMINI_API_KEY }}",
+        "MONGODB_URI": "${{ MONGODB_URI }}",
+        "DATABASE_NAME": "ai-recruitment-clerk",
+        "REDIS_URL": "${{ REDIS_URL }}",
+        "USE_REDIS_CACHE": "true",
+        "DISABLE_REDIS": "false",
+        "REDIS_CONNECTION_TIMEOUT": "10000",
+        "REDIS_COMMAND_TIMEOUT": "5000",
+        "CACHE_TTL": "300",
+        "CACHE_MAX_ITEMS": "1000",
+        "NATS_URL": "${{ NATS_URL }}",
+        "NATS_OPTIONAL": "true",
+        "FREE_USAGE_LIMIT": "5",
+        "FEEDBACK_CODE_EXPIRY_DAYS": "30",
+        "MIN_REWARD_AMOUNT": "1",
+        "MAX_REWARD_AMOUNT": "8",
+        "ENABLE_COMPRESSION": "true",
+        "REDIS_FALLBACK_TO_MEMORY": "true",
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "NPM_CONFIG_CACHE": "/tmp/.npm",
+        "NPM_CONFIG_PROGRESS": "false",
+        "NPM_CONFIG_LOGLEVEL": "warn",
+        "NODE_OPTIONS": "--max-old-space-size=2048"
+      }
+    }
+  }
+}
