@@ -74,10 +74,13 @@ web_modules/
 
 # dotenv environment variable files
 .env
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
 .env.local
+.env.*.local
+
+# Keep sample environment files
+!.env.example
+!.env.template
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -134,3 +137,167 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+
+
+# Nx cache and workspace data
+.nx/cache
+.nx/workspace-data
+.nx/installation
+
+# Angular cache
+.angular
+
+# Docker volumes and data
+docker-data/
+docker-volumes/
+
+# Test results and reports
+test-results/
+test-results.json
+playwright-report/
+coverage/
+junit-report.xml
+
+# Build artifacts
+dist/
+build/
+out/
+
+# Disallow compiled JS inside src (TypeScript sources only)
+apps/**/src/**/*.js
+libs/**/src/**/*.js
+apps/**/src/**/*.js.map
+libs/**/src/**/*.js.map
+
+# IDE and editor files
+.cursor/
+.github/instructions/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Project graph
+project-graph.json
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Log files
+*.log.*
+logs/
+
+# Backup files
+*.bak
+*.backup
+
+# Local development certificates
+*.pem
+*.key
+*.crt
+
+# Docker override files (keep docker-compose.dev.yml for development)
+docker-compose.override.yml
+docker-compose.local.yml
+docker-compose.*.local.yml
+
+# MongoDB local data directory (if using local mongod)
+data/
+
+# NATS JetStream local data (if running locally)
+jetstream/
+nats-data/
+
+# Redis dump files
+*.rdb
+dump.rdb
+
+# Development verification files
+DEVELOPMENT_VERIFICATION_PLAN.md
+
+# Personal notes and docs (optional)
+NOTES.md
+TODO.md
+SCRATCH.md
+PERSONAL_*.md
+
+# Project-specific ignores
+# AI/ML model files and caches
+*.pickle
+*.pkl
+*.joblib
+*.h5
+*.pb
+model_cache/
+ml_models/
+
+# Resume and document uploads (development)
+uploads/test_*
+uploads/temp_*
+temp_uploads/
+
+# Generated reports and exports (development)
+reports/test_*
+exports/temp_*
+
+# Database seeds and test data (keep production seeds)
+seeds/test_*
+test_data/
+mock_data/
+
+# Performance and monitoring data
+performance_logs/
+metrics/
+profiling/
+
+# Security scan results
+security_reports/
+vulnerability_scans/
+
+# API documentation cache
+api_docs_cache/
+
+# Gemini AI API responses cache (development)
+ai_responses_cache/
+
+
+
+
+# Claude Flow generated files
+.claude/settings.local.json
+.mcp.json
+claude-flow.config.json
+.swarm/
+.hive-mind/
+memory/claude-flow-data.json
+memory/sessions/*
+!memory/sessions/README.md
+memory/agents/*
+!memory/agents/README.md
+coordination/memory_bank/*
+coordination/subtasks/*
+coordination/orchestration/*
+*.db
+*.db-journal
+*.db-wal
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+claude-flow
+claude-flow.bat
+claude-flow.ps1
+hive-mind-prompt-*.txt
