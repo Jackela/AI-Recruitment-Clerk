@@ -1,0 +1,282 @@
+# AI Recruitment Clerk - Performance Alerting Rules
+# Production SLA monitoring and alerting configuration
+
+groups:
+  - name: performance_sla_alerts
+    interval: 30s
+    rules:
+      # API Response Time SLA Violations
+      - alert: APIResponseTimeSLABreach
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="ai-recruitment-gateway"}[5m])) * 1000 > 200
+        for: 2m
+        labels:
+          severity: critical
+          service: api-gateway
+          sla: response_time
+        annotations:
+          summary: "API Response Time SLA Breach (P95 > 200ms)"
+          description: "95th percentile response time is {{ $value }}ms, exceeding SLA threshold of 200ms for more than 2 minutes"
+          runbook_url: "https://docs.ai-recruitment.com/runbooks/api-performance"
+          impact: "High - User experience degraded, potential customer impact"
+          
+      - alert: APIResponseTimeP99Critical
+        expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job="ai-recruitment-gateway"}[5m])) * 1000 > 500
+        for: 1m
+        labels:
+          severity: critical
+          service: api-gateway
+          sla: response_time_p99
+        annotations:
+          summary: "API Response Time P99 Critical (> 500ms)"
+          description: "99th percentile response time is {{ $value }}ms, exceeding critical threshold"
+          
+      # Error Rate SLA Violations
+      - alert: ErrorRateSLABreach
+        expr: rate(http_requests_total{status=~"[45].."}[5m]) / rate(http_requests_total[5m]) * 100 > 0.1
+        for: 1m
+        labels:
+          severity: critical
+          service: api-gateway
+          sla: error_rate
+        annotations:
+          summary: "Error Rate SLA Breach (> 0.1%)"
+          description: "Error rate is {{ $value | printf \"%.3f\" }}%, exceeding SLA threshold of 0.1%"
+          impact: "Critical - Service reliability compromised"
+          
+      # Throughput SLA Violations
+      - alert: ThroughputBelowSLA
+        expr: rate(http_requests_total{job="ai-recruitment-gateway"}[5m]) < 100
+        for: 5m
+        labels:
+          severity: warning
+          service: api-gateway
+          sla: throughput
+        annotations:
+          summary: "Throughput Below SLA (< 100 req/s)"
+          description: "Request rate is {{ $value | printf \"%.1f\" }} req/s, below SLA target of 100 req/s"
+          
+      # Database Performance Alerts
+      - alert: DatabaseQueryLatencyHigh
+        expr: histogram_quantile(0.95, rate(mongodb_op_latencies_histogram{type="command"}[5m])) > 100
+        for: 3m
+        labels:
+          severity: warning
+          service: mongodb
+          sla: db_performance
+        annotations:
+          summary: "Database Query Latency High (P95 > 100ms)"
+          description: "MongoDB command latency P95 is {{ $value }}ms"
+          
+      - alert: DatabaseConnectionsHigh
+        expr: mongodb_connections{state="current"} / mongodb_connections{state="available"} * 100 > 80
+        for: 2m
+        labels:
+          severity: warning
+          service: mongodb
+        annotations:
+          summary: "Database Connection Pool Utilization High (> 80%)"
+          description: "MongoDB connection utilization is {{ $value | printf \"%.1f\" }}%"
+
+  - name: resource_alerts
+    interval: 30s
+    rules:
+      # Memory Usage Alerts
+      - alert: ServiceMemoryUsageHigh
+        expr: container_memory_usage_bytes{container_label_com_docker_compose_service=~"app-gateway|resume-parser-svc|scoring-engine-svc|report-generator-svc|jd-extractor-svc"} / 1024 / 1024 > 2048
+        for: 5m
+        labels:
+          severity: warning
+          service: "{{ $labels.container_label_com_docker_compose_service }}"
+        annotations:
+          summary: "Service Memory Usage High (> 2GB)"
+          description: "{{ $labels.container_label_com_docker_compose_service }} is using {{ $value | printf \"%.0f\" }}MB of memory"
+          
+      # CPU Usage Alerts
+      - alert: ServiceCPUUsageHigh
+        expr: rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=~"app-gateway|resume-parser-svc|scoring-engine-svc|report-generator-svc|jd-extractor-svc"}[5m]) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+          service: "{{ $labels.container_label_com_docker_compose_service }}"
+        annotations:
+          summary: "Service CPU Usage High (> 80%)"
+          description: "{{ $labels.container_label_com_docker_compose_service }} CPU usage is {{ $value | printf \"%.1f\" }}%"
+          
+      # Disk Space Alerts
+      - alert: DiskSpaceUsageHigh
+        expr: (1 - node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"}) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk Space Usage High (> 85%)"
+          description: "Disk usage on {{ $labels.mountpoint }} is {{ $value | printf \"%.1f\" }}%"
+
+  - name: file_processing_alerts
+    interval: 60s
+    rules:
+      # File Processing Performance
+      - alert: FileProcessingTimeSLABreach
+        expr: histogram_quantile(0.95, rate(file_processing_duration_seconds_bucket[5m])) > 30
+        for: 3m
+        labels:
+          severity: warning
+          service: resume-parser
+          sla: file_processing
+        annotations:
+          summary: "File Processing Time SLA Breach (P95 > 30s)"
+          description: "File processing P95 time is {{ $value }}s, exceeding SLA of 30s"
+          
+      - alert: FileProcessingQueueBackup
+        expr: file_processing_queue_size > 100
+        for: 2m
+        labels:
+          severity: warning
+          service: file-processing
+        annotations:
+          summary: "File Processing Queue Backup (> 100 files)"
+          description: "File processing queue has {{ $value }} files pending"
+          
+      - alert: FileProcessingFailureRateHigh
+        expr: rate(file_processing_failures_total[5m]) / rate(file_processing_total[5m]) * 100 > 5
+        for: 2m
+        labels:
+          severity: critical
+          service: file-processing
+        annotations:
+          summary: "File Processing Failure Rate High (> 5%)"
+          description: "File processing failure rate is {{ $value | printf \"%.2f\" }}%"
+
+  - name: message_queue_alerts
+    interval: 30s
+    rules:
+      # NATS Performance Alerts
+      - alert: NATSSlowConsumers
+        expr: nats_varz_slow_consumers > 0
+        for: 1m
+        labels:
+          severity: warning
+          service: nats
+        annotations:
+          summary: "NATS Slow Consumers Detected"
+          description: "NATS has {{ $value }} slow consumers"
+          
+      - alert: NATSMessageBacklog
+        expr: nats_varz_pending_size > 10000000  # 10MB
+        for: 2m
+        labels:
+          severity: warning
+          service: nats
+        annotations:
+          summary: "NATS Message Backlog High (> 10MB)"
+          description: "NATS pending message size is {{ $value | humanize }}B"
+
+  - name: service_availability_alerts
+    interval: 30s
+    rules:
+      # Service Down Alerts
+      - alert: ServiceDown
+        expr: up{job=~"ai-recruitment-gateway|resume-parser-svc|scoring-engine-svc|report-generator-svc|jd-extractor-svc"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "Service Down"
+          description: "{{ $labels.job }} has been down for more than 1 minute"
+          impact: "Critical - Service unavailable"
+          
+      - alert: ServiceHealthCheckFailing
+        expr: probe_success{job="blackbox"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service Health Check Failing"
+          description: "Health check for {{ $labels.instance }} is failing"
+
+  - name: performance_degradation_alerts
+    interval: 30s
+    rules:
+      # Performance Degradation Detection
+      - alert: PerformanceDegradation
+        expr: |
+          (
+            histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="ai-recruitment-gateway"}[5m])) 
+            / 
+            histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="ai-recruitment-gateway"}[1h] offset 1d))
+          ) > 1.5
+        for: 5m
+        labels:
+          severity: warning
+          service: api-gateway
+        annotations:
+          summary: "Performance Degradation Detected (50% slower than yesterday)"
+          description: "Current P95 response time is 50% higher than yesterday's average"
+          
+      - alert: ErrorRateIncrease
+        expr: |
+          (
+            rate(http_requests_total{status=~"[45].."}[5m]) / rate(http_requests_total[5m])
+            /
+            (rate(http_requests_total{status=~"[45].."}[1h] offset 1d) / rate(http_requests_total[1h] offset 1d))
+          ) > 2
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Error Rate Doubled Compared to Yesterday"
+          description: "Current error rate is more than double yesterday's rate"
+
+  - name: capacity_planning_alerts
+    interval: 300s  # 5 minutes
+    rules:
+      # Capacity Planning Alerts
+      - alert: CapacityPlanningWarning
+        expr: predict_linear(rate(http_requests_total{job="ai-recruitment-gateway"}[1h])[4h:], 24*3600) > 500
+        for: 10m
+        labels:
+          severity: info
+          category: capacity_planning
+        annotations:
+          summary: "Traffic Growth Trend - Capacity Planning Required"
+          description: "Predicted request rate in 24h: {{ $value | printf \"%.0f\" }} req/s"
+          action: "Review infrastructure scaling requirements"
+          
+      - alert: DatabaseConnectionPoolWarning
+        expr: predict_linear(mongodb_connections{state="current"}[2h], 12*3600) > mongodb_connections{state="available"} * 0.8
+        for: 15m
+        labels:
+          severity: info
+          category: capacity_planning
+        annotations:
+          summary: "Database Connection Pool Capacity Warning"
+          description: "Predicted connection usage in 12h will exceed 80% of pool capacity"
+
+  - name: sla_compliance_reports
+    interval: 3600s  # 1 hour
+    rules:
+      # SLA Compliance Reporting
+      - record: sla:api_response_time_compliance_hourly
+        expr: |
+          (
+            count(rate(http_request_duration_seconds_bucket{le="0.2", job="ai-recruitment-gateway"}[1h]))
+            /
+            count(rate(http_request_duration_seconds_bucket{job="ai-recruitment-gateway"}[1h]))
+          ) * 100
+          
+      - record: sla:error_rate_compliance_hourly
+        expr: |
+          (1 - (
+            sum(rate(http_requests_total{status=~"[45]..", job="ai-recruitment-gateway"}[1h]))
+            /
+            sum(rate(http_requests_total{job="ai-recruitment-gateway"}[1h]))
+          )) * 100
+          
+      - record: sla:throughput_compliance_hourly
+        expr: |
+          (
+            sum(rate(http_requests_total{job="ai-recruitment-gateway"}[1h]) > 100)
+            /
+            count(rate(http_requests_total{job="ai-recruitment-gateway"}[1h]))
+          ) * 100
