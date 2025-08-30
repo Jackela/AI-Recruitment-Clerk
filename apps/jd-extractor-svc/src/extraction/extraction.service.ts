@@ -1,9 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { LlmService } from '../llm/llm.service';
-import { NatsClient } from '../nats/nats.client';
+import { LlmService } from './llm.service';
+import { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
 import { JobJdSubmittedEvent, AnalysisJdExtractedEvent } from '../dto/events.dto';
-import { JdDTO } from '../../../../libs/shared-dtos/src';
-import { RetryUtility, WithCircuitBreaker } from '../../../../libs/shared-dtos/src';
+import { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
+import { 
+  RetryUtility, 
+  WithCircuitBreaker,
+  JDExtractorException,
+  ErrorCorrelationManager
+} from '@ai-recruitment-clerk/infrastructure-shared';
 
 @Injectable()
 export class ExtractionService {
@@ -14,7 +19,7 @@ export class ExtractionService {
 
   constructor(
     private readonly llmService: LlmService,
-    private readonly natsClient: NatsClient,
+    private readonly natsService: JdExtractorNatsService,
   ) {}
 
   async handleJobJdSubmitted(event: JobJdSubmittedEvent): Promise<void> {
@@ -41,9 +46,21 @@ export class ExtractionService {
     this.processingJobs.set(jobId, { timestamp: Date.now(), attempts: 0 });
 
     try {
-      // Validate input
+      // Validate input with correlation context
+      const correlationContext = ErrorCorrelationManager.getContext();
+      
       if (!jobId || !jdText || !jobTitle) {
-        throw new Error(`Invalid event data: jobId=${jobId}, jdText length=${jdText?.length}, jobTitle=${jobTitle}`);
+        throw new JDExtractorException(
+          'INVALID_EVENT_DATA',
+          {
+            provided: { 
+              jobId: !!jobId, 
+              jdText: jdText?.length || 0, 
+              jobTitle: !!jobTitle 
+            },
+            correlationId: correlationContext?.traceId
+          }
+        );
       }
 
       this.logger.log(`Starting job description processing for jobId: ${jobId}`);
@@ -76,15 +93,34 @@ export class ExtractionService {
     try {
       this.logger.log(`Processing job description for jobId: ${jobId}, title: ${jobTitle}`);
       
-      // Validate inputs
+      // Validate inputs with correlation context
+      const correlationContext = ErrorCorrelationManager.getContext();
+      
       if (!jobId || !jdText || !jobTitle) {
-        throw new Error(`Invalid parameters: jobId=${jobId}, jdText length=${jdText?.length}, jobTitle=${jobTitle}`);
+        throw new JDExtractorException(
+          'INVALID_PARAMETERS',
+          {
+            provided: {
+              jobId: !!jobId,
+              jdText: jdText?.length || 0,
+              jobTitle: !!jobTitle
+            },
+            correlationId: correlationContext?.traceId
+          }
+        );
       }
 
       // Sanitize and validate JD text
       const sanitizedJdText = this.sanitizeJdText(jdText);
       if (sanitizedJdText.length < 50) {
-        throw new Error(`Job description too short: ${sanitizedJdText.length} characters`);
+        throw new JDExtractorException(
+          'JD_TOO_SHORT',
+          {
+            actualLength: sanitizedJdText.length,
+            minimumRequired: 50,
+            jobId
+          }
+        );
       }
 
       // Use LLM service to extract structured data
@@ -106,7 +142,14 @@ export class ExtractionService {
       );
       
       if (!llmResponse.extractedData) {
-        throw new Error('LLM service returned empty extraction data');
+        throw new JDExtractorException(
+          'LLM_EMPTY_RESULT',
+          {
+            jobId,
+            jobTitle,
+            correlationId: correlationContext?.traceId
+          }
+        );
       }
 
       const processingTimeMs = Date.now() - startTime;
@@ -135,7 +178,16 @@ export class ExtractionService {
       
       // Validate the result before publishing
       if (!result.jobId || !result.extractedData || !result.timestamp) {
-        throw new Error('Invalid analysis result: missing required fields');
+        throw new JDExtractorException(
+          'INVALID_ANALYSIS_RESULT',
+          {
+            provided: {
+              jobId: !!result.jobId,
+              extractedData: !!result.extractedData,
+              timestamp: !!result.timestamp
+            }
+          }
+        );
       }
 
       // Validate extracted data structure
@@ -143,11 +195,24 @@ export class ExtractionService {
         this.logger.warn(`Analysis result validation failed for jobId: ${result.jobId}, publishing anyway`);
       }
 
-      // Publish through NATS client
-      const publishResult = await this.natsClient.publishAnalysisExtracted(result);
+      // Publish through shared NATS service
+      const publishResult = await this.natsService.publishAnalysisJdExtracted({
+        jobId: result.jobId,
+        extractedData: result.extractedData,
+        processingTimeMs: result.processingTimeMs,
+        confidence: 0.85, // Default confidence for LLM extraction
+        extractionMethod: 'llm-structured',
+      });
       
       if (!publishResult.success) {
-        throw new Error(`Failed to publish analysis result: ${publishResult.error}`);
+        throw new JDExtractorException(
+          'PUBLISH_FAILED',
+          {
+            jobId: result.jobId,
+            error: publishResult.error,
+            messageId: publishResult.messageId
+          }
+        );
       }
       
       this.logger.log(`Analysis result published successfully for jobId: ${result.jobId}, messageId: ${publishResult.messageId}`);
@@ -173,11 +238,14 @@ export class ExtractionService {
         }
       });
 
-      // Publish error event to NATS for other services to handle
-      await this.natsClient.publishProcessingError(jobId, error);
-      
       // Implement retry logic with exponential backoff
       const jobInfo = this.processingJobs.get(jobId);
+      
+      // Publish error event to NATS for other services to handle
+      await this.natsService.publishProcessingError(jobId, error, {
+        stage: 'llm-extraction',
+        retryAttempt: jobInfo?.attempts || 1,
+      });
       const shouldRetry = this.shouldRetryProcessing(error, jobId) && 
                          jobInfo && jobInfo.attempts < 3;
       
@@ -208,7 +276,13 @@ export class ExtractionService {
 
   private sanitizeJdText(jdText: string): string {
     if (!jdText || typeof jdText !== 'string') {
-      throw new Error('Job description text is invalid');
+      throw new JDExtractorException(
+        'INVALID_JD_TEXT',
+        {
+          provided: typeof jdText,
+          expected: 'string'
+        }
+      );
     }
 
     // Basic sanitization
@@ -324,13 +398,14 @@ export class ExtractionService {
   // Health check method
   async healthCheck(): Promise<{ status: string; details: any }> {
     try {
-      const natsConnected = this.natsClient.isConnected;
+      const natsHealth = await this.natsService.getHealthStatus();
       const processingJobsCount = this.processingJobs.size;
       
       return {
-        status: natsConnected ? 'healthy' : 'degraded',
+        status: natsHealth.connected ? 'healthy' : 'degraded',
         details: {
-          natsConnected,
+          natsConnected: natsHealth.connected,
+          natsConnectionInfo: natsHealth,
           processingJobsCount,
           processingJobs: this.getProcessingJobDetails(),
           memoryUsage: process.memoryUsage(),

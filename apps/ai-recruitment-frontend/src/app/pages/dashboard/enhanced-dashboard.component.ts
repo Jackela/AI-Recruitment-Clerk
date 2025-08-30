@@ -10,6 +10,30 @@ import { GuestApiService } from '../../services/guest/guest-api.service';
 import { WebSocketStatsService, RealtimeStats } from '../../services/realtime/websocket-stats.service';
 import { ProgressFeedbackService } from '../../services/feedback/progress-feedback.service';
 
+interface SystemMetrics {
+  cpuUsage: number;
+  memoryUsage: number;
+  diskUsage: number;
+  networkTraffic: number;
+  timestamp: Date;
+}
+
+interface GuestStats {
+  totalGuests: number;
+  activeGuests: number;
+  pendingFeedbackCodes: number;
+  redeemedFeedbackCodes: number;
+}
+
+interface Activity {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  timestamp: Date;
+  status: string;
+}
+
 @Component({
   selector: 'app-enhanced-dashboard',
   standalone: true,
@@ -511,7 +535,7 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
     };
   }
 
-  private createSystemHealth(stats: RealtimeStats, metrics: any): SystemHealth {
+  private createSystemHealth(stats: RealtimeStats, metrics: SystemMetrics): SystemHealth {
     const getServiceStatus = (metric: number, thresholds: {warning: number, error: number}) => {
       if (metric > thresholds.error) return 'error';
       if (metric > thresholds.warning) return 'warning';
@@ -538,7 +562,7 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
     };
   }
 
-  private createBentoItems(stats: DashboardStats, health: SystemHealth, guestStats: any): BentoGridItem[] {
+  private createBentoItems(stats: DashboardStats, health: SystemHealth, guestStats: GuestStats): BentoGridItem[] {
     return [
       {
         id: 'total-jobs',
@@ -646,7 +670,7 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
     `;
   }
   
-  private getRecentActivityContent(activities: any[]): string {
+  private getRecentActivityContent(activities: Activity[]): string {
     if (activities.length === 0) {
       return '<div class="no-activity">暂无最近活动</div>';
     }

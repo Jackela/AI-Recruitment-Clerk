@@ -1,6 +1,59 @@
 import { createAction, props } from '@ngrx/store';
 import { GuestUsageResponse, GuestStatusResponse, FeedbackCodeResponse } from '../../services/guest/guest-api.service';
 
+export interface AnalysisData {
+  id: string;
+  candidateName?: string;
+  candidateEmail?: string;
+  uploadedAt: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  progress?: number;
+  results?: unknown;
+  metadata?: {
+    fileSize?: number;
+    fileType?: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface AnalysisResults {
+  analysisId: string;
+  score: number;
+  status: 'completed' | 'failed';
+  summary: string;
+  skills: string[];
+  experience: {
+    totalYears: number;
+    positions: Array<{
+      title: string;
+      company: string;
+      duration: string;
+    }>;
+  };
+  strengths: string[];
+  recommendations: string[];
+  generatedAt: string;
+}
+
+export interface DemoAnalysisResults {
+  demoId: string;
+  candidateName: string;
+  score: number;
+  summary: string;
+  skills: string[];
+  experience: {
+    totalYears: number;
+    positions: Array<{
+      title: string;
+      company: string;
+      duration: string;
+    }>;
+  };
+  strengths: string[];
+  recommendations: string[];
+  isDemo: true;
+}
+
 // Device and initialization actions
 export const initializeGuest = createAction(
   '[Guest] Initialize Guest Mode',
@@ -101,7 +154,7 @@ export const uploadResume = createAction(
 
 export const uploadResumeSuccess = createAction(
   '[Guest] Upload Resume Success',
-  props<{ analysisData: any }>()
+  props<{ analysisData: AnalysisData }>()
 );
 
 export const uploadResumeFailure = createAction(
@@ -116,7 +169,7 @@ export const loadAnalysisResults = createAction(
 
 export const loadAnalysisResultsSuccess = createAction(
   '[Guest] Load Analysis Results Success',
-  props<{ analysisResults: any }>()
+  props<{ analysisResults: AnalysisResults }>()
 );
 
 export const loadAnalysisResultsFailure = createAction(
@@ -128,7 +181,7 @@ export const loadDemoAnalysis = createAction('[Guest] Load Demo Analysis');
 
 export const loadDemoAnalysisSuccess = createAction(
   '[Guest] Load Demo Analysis Success',
-  props<{ demoResults: any }>()
+  props<{ demoResults: DemoAnalysisResults }>()
 );
 
 export const loadDemoAnalysisFailure = createAction(

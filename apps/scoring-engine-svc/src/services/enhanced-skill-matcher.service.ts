@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GeminiClient, GeminiResponse } from '../../../../libs/shared-dtos/src/gemini/gemini.client';
-import { SkillsTaxonomy } from '../../../../libs/shared-dtos/src/skills/skills-taxonomy';
+import { GeminiClient, GeminiResponse } from '@ai-recruitment-clerk/ai-services-shared';
+import { SkillsTaxonomy } from '@ai-recruitment-clerk/candidate-scoring-domain';
 
 export interface SkillMatchResult {
   skill: string;

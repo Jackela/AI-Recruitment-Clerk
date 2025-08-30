@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ResumeDTO } from '../../../../libs/shared-dtos/src/models/resume.dto';
+import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
 export interface ConfidenceMetrics {
   dataQuality: {
@@ -62,6 +62,52 @@ export interface ScoreReliabilityReport {
   };
 }
 
+export interface ProcessingMetrics {
+  aiResponseTimes: number[];
+  fallbackUsed: boolean[];
+  errorRates: number[];
+}
+
+export interface DataQualityFactors {
+  completeness: number;
+  consistency: number;
+  recency: number;
+  detail: number;
+}
+
+export interface AnalysisReliabilityFactors {
+  algorithmConfidence: number;
+  aiResponseQuality: number;
+  evidenceStrength: number;
+  crossValidation: number;
+}
+
+export interface DataQualityAssessment {
+  score: number;
+  factors: DataQualityFactors;
+  issues: string[];
+}
+
+export interface AnalysisReliabilityAssessment {
+  score: number;
+  factors: AnalysisReliabilityFactors;
+  uncertainties: string[];
+}
+
+export interface ScoreVarianceAssessment {
+  skillsVariance: number;
+  experienceVariance: number;
+  culturalFitVariance: number;
+  overallVariance: number;
+  stabilityScore: number;
+}
+
+export interface QualityIndicators {
+  dataQualityGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+  analysisDepthGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+  reliabilityGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+}
+
 export interface ComponentScores {
   skills: {
     score: number;
@@ -90,11 +136,7 @@ export class ScoringConfidenceService {
   generateConfidenceReport(
     componentScores: ComponentScores,
     resume: ResumeDTO,
-    processingMetrics: {
-      aiResponseTimes: number[];
-      fallbackUsed: boolean[];
-      errorRates: number[];
-    }
+    processingMetrics: ProcessingMetrics
   ): ScoreReliabilityReport {
     const startTime = Date.now();
 
@@ -164,7 +206,7 @@ export class ScoringConfidenceService {
   /**
    * Assess data quality factors
    */
-  private assessDataQuality(resume: ResumeDTO) {
+  private assessDataQuality(resume: ResumeDTO): DataQualityAssessment {
     // Completeness assessment
     const completeness = this.assessCompleteness(resume);
     
@@ -295,7 +337,7 @@ export class ScoringConfidenceService {
     return totalItems > 0 ? Math.min(100, score / totalItems) : 0;
   }
 
-  private identifyDataQualityIssues(factors: any, resume: ResumeDTO): string[] {
+  private identifyDataQualityIssues(factors: DataQualityFactors, resume: ResumeDTO): string[] {
     const issues: string[] = [];
     
     if (factors.completeness < 70) {
@@ -387,8 +429,8 @@ export class ScoringConfidenceService {
    */
   private assessAnalysisReliability(
     componentScores: ComponentScores,
-    processingMetrics: any
-  ) {
+    processingMetrics: ProcessingMetrics
+  ): AnalysisReliabilityAssessment {
     // Algorithm confidence based on component confidences
     const algorithmConfidence = Math.round(
       (componentScores.skills.confidence * 0.4 +
@@ -432,7 +474,7 @@ export class ScoringConfidenceService {
     };
   }
 
-  private assessAIResponseQuality(processingMetrics: any): number {
+  private assessAIResponseQuality(processingMetrics: ProcessingMetrics): number {
     let quality = 90; // Base quality score
     
     // Penalize for slow response times
@@ -471,7 +513,7 @@ export class ScoringConfidenceService {
     return Math.round(consistency);
   }
 
-  private identifyAnalysisUncertainties(factors: any, processingMetrics: any): string[] {
+  private identifyAnalysisUncertainties(factors: AnalysisReliabilityFactors, processingMetrics: ProcessingMetrics): string[] {
     const uncertainties: string[] = [];
     
     if (factors.algorithmConfidence < 70) {
@@ -502,7 +544,7 @@ export class ScoringConfidenceService {
   /**
    * Calculate score variance and stability
    */
-  private calculateScoreVariance(componentScores: ComponentScores) {
+  private calculateScoreVariance(componentScores: ComponentScores): ScoreVarianceAssessment {
     // For a more comprehensive analysis, we would need multiple scoring runs
     // For now, we estimate variance based on confidence levels
     
@@ -531,9 +573,9 @@ export class ScoringConfidenceService {
    * Calculate recommendation certainty
    */
   private calculateRecommendationCertainty(
-    dataQuality: any,
-    analysisReliability: any,
-    scoreVariance: any
+    dataQuality: DataQualityAssessment,
+    analysisReliability: AnalysisReliabilityAssessment,
+    scoreVariance: ScoreVarianceAssessment
   ) {
     const scoringConsistency = scoreVariance.stabilityScore;
     const dataCompleteness = dataQuality.score;
@@ -562,7 +604,7 @@ export class ScoringConfidenceService {
     };
   }
 
-  private identifyRiskFactors(dataQuality: any, analysisReliability: any, scoreVariance: any): string[] {
+  private identifyRiskFactors(dataQuality: DataQualityAssessment, analysisReliability: AnalysisReliabilityAssessment, scoreVariance: ScoreVarianceAssessment): string[] {
     const risks: string[] = [];
     
     if (dataQuality.score < 60) {
@@ -624,7 +666,7 @@ export class ScoringConfidenceService {
   /**
    * Generate quality indicator grades
    */
-  private generateQualityIndicators(confidenceMetrics: ConfidenceMetrics) {
+  private generateQualityIndicators(confidenceMetrics: ConfidenceMetrics): QualityIndicators {
     const dataQualityGrade = this.scoreToGrade(confidenceMetrics.dataQuality.score);
     const analysisDepthGrade = this.scoreToGrade(confidenceMetrics.analysisReliability.score);
     const reliabilityGrade = this.scoreToGrade(confidenceMetrics.scoreVariance.stabilityScore);
@@ -649,7 +691,7 @@ export class ScoringConfidenceService {
    */
   private generateConfidenceRecommendations(
     confidenceMetrics: ConfidenceMetrics,
-    qualityIndicators: any
+    qualityIndicators: QualityIndicators
   ) {
     const overallConfidence = this.calculateOverallConfidence(confidenceMetrics);
     

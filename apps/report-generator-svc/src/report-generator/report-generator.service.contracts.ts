@@ -13,7 +13,7 @@ import {
   Ensures, 
   Invariant,
   ContractValidators 
-} from '../../../../libs/shared-dtos/src/contracts/dbc.decorators';
+} from '@ai-recruitment-clerk/infrastructure-shared';
 import { LlmService } from './llm.service';
 import { GridFsService, ReportFileMetadata } from './gridfs.service';
 import { ReportRepository, ReportCreateData } from './report.repository';

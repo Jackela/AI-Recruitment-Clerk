@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GeminiClient } from '../../../../libs/shared-dtos/src/gemini/gemini.client';
-import { ResumeDTO } from '../../../../libs/shared-dtos/src/models/resume.dto';
+import { GeminiClient } from '@ai-recruitment-clerk/ai-services-shared';
+import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import { JobRequirements } from './experience-analyzer.service';
 
 interface CulturalRecommendations {
   strengths: string[];
@@ -75,17 +76,19 @@ export interface CompanyProfile {
   };
 }
 
+export interface AlignmentScores {
+  companySizeAlignment: number;
+  workStyleAlignment: number;
+  leadershipAlignment: number;
+  innovationAlignment: number;
+  communicationAlignment: number;
+}
+
 export interface CulturalFitScore {
   overallScore: number;
   indicators: CulturalFitIndicators;
   softSkills: SoftSkillsAssessment;
-  alignmentScores: {
-    companySizeAlignment: number;
-    workStyleAlignment: number;
-    leadershipAlignment: number;
-    innovationAlignment: number;
-    communicationAlignment: number;
-  };
+  alignmentScores: AlignmentScores;
   confidence: number;
   recommendations: {
     strengths: string[];
@@ -106,7 +109,7 @@ export class CulturalFitAnalyzerService {
   async analyzeCulturalFit(
     resume: ResumeDTO,
     companyProfile: CompanyProfile,
-    jobRequirements: any
+    jobRequirements: JobRequirements
   ): Promise<CulturalFitScore> {
     const startTime = Date.now();
 
@@ -278,7 +281,7 @@ export class CulturalFitAnalyzerService {
    */
   private async assessSoftSkills(
     resume: ResumeDTO,
-    jobRequirements: any
+    jobRequirements: JobRequirements
   ): Promise<SoftSkillsAssessment> {
     const experienceText = resume.workExperience.map(exp => 
       `${exp.position} at ${exp.company}: ${exp.summary}`
@@ -422,7 +425,7 @@ export class CulturalFitAnalyzerService {
     return alignmentMatrix[candidatePreference]?.[companySize] || 50;
   }
 
-  private calculateWorkStyleAlignment(workStyle: any, culture: any): number {
+  private calculateWorkStyleAlignment(workStyle: CulturalFitIndicators['workStyle'], culture: CompanyProfile['culture']): number {
     let score = 70; // Base score
 
     // Remote readiness vs work style
@@ -437,7 +440,7 @@ export class CulturalFitAnalyzerService {
     return Math.min(100, Math.max(0, score));
   }
 
-  private calculateLeadershipAlignment(leadership: any, managementLayers: number): number {
+  private calculateLeadershipAlignment(leadership: CulturalFitIndicators['leadershipPotential'], managementLayers: number): number {
     let score = leadership.score;
 
     // Adjust based on management structure
@@ -459,7 +462,7 @@ export class CulturalFitAnalyzerService {
     return Math.min(100, (innovationScore / required) * 100);
   }
 
-  private calculateCommunicationAlignment(communication: any, collaborationStyle: string): number {
+  private calculateCommunicationAlignment(communication: CulturalFitIndicators['communicationSkills'], collaborationStyle: string): number {
     let score = (communication.writtenCommunication + communication.verbalCommunication) / 2;
 
     // Adjust for collaboration style
@@ -476,7 +479,7 @@ export class CulturalFitAnalyzerService {
     indicators: CulturalFitIndicators,
     softSkills: SoftSkillsAssessment,
     companyProfile: CompanyProfile,
-    alignmentScores: any
+    alignmentScores: AlignmentScores
   ) {
     try {
       const prompt = `
@@ -530,7 +533,7 @@ export class CulturalFitAnalyzerService {
   /**
    * Calculate overall cultural fit score
    */
-  private calculateOverallCulturalFitScore(alignmentScores: any, softSkills: SoftSkillsAssessment): number {
+  private calculateOverallCulturalFitScore(alignmentScores: AlignmentScores, softSkills: SoftSkillsAssessment): number {
     // Weight the different components
     const alignmentWeight = 0.6;
     const softSkillsWeight = 0.4;

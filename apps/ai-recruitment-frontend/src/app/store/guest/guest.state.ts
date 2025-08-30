@@ -1,3 +1,5 @@
+import { AnalysisResults } from './guest.actions';
+
 export interface GuestState {
   // Device and authentication
   deviceId: string | null;
@@ -30,7 +32,7 @@ export interface GuestState {
       analysisId: string;
       status: 'processing' | 'completed' | 'failed';
       progress: number;
-      results?: any;
+      results?: AnalysisResults;
       completedAt?: string;
     };
   };

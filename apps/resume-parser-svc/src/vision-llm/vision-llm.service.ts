@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { VisionLlmRequest, VisionLlmResponse } from '../dto/resume-parsing.dto';
-import { ResumeDTO, GeminiClient, GeminiConfig, PromptTemplates, PromptBuilder } from '../../../../libs/shared-dtos/src';
+import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import { GeminiClient, GeminiConfig, PromptTemplates, PromptBuilder } from '@ai-recruitment-clerk/ai-services-shared';
+import { SecureConfigValidator } from '@ai-recruitment-clerk/infrastructure-shared';
 import * as pdfParse from 'pdf-parse-fork';
 
 @Injectable()
@@ -9,8 +11,11 @@ export class VisionLlmService {
   private readonly geminiClient: GeminiClient;
 
   constructor() {
+    // 🔒 SECURITY: Validate configuration before service initialization
+    SecureConfigValidator.validateServiceConfig('VisionLlmService', ['GEMINI_API_KEY']);
+    
     const config: GeminiConfig = {
-      apiKey: process.env.GEMINI_API_KEY || 'your_gemini_api_key_here',
+      apiKey: SecureConfigValidator.requireEnv('GEMINI_API_KEY'),
       model: 'gemini-1.5-pro', // Using Pro model for vision capabilities
       temperature: 0.1, // Very low temperature for consistent extraction
     };

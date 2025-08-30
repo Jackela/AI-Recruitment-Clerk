@@ -7,7 +7,9 @@ import { JobListDto, JobDetailDto } from './dto/job-response.dto';
 import { ResumeListItemDto, ResumeDetailDto } from './dto/resume-response.dto';
 import { AnalysisReportDto, ReportsListDto } from './dto/report-response.dto';
 import { InMemoryStorageService } from './storage/in-memory-storage.service';
-import { UserDto, UserRole, JobJdSubmittedEvent, ResumeSubmittedEvent } from '@app/shared-dtos';
+import { UserDto, UserRole } from '@ai-recruitment-clerk/user-management-domain';
+import { JobJdSubmittedEvent } from '@ai-recruitment-clerk/job-management-domain';
+import { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
 import { NatsClient } from '../nats/nats.client';
 import { CacheService } from '../cache/cache.service';
 

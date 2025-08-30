@@ -3,6 +3,10 @@ import { LlmService } from './llm.service';
 import { GridFsService, ReportFileMetadata } from './gridfs.service';
 import { ReportRepository, ReportCreateData } from './report.repository';
 import { ScoreBreakdown, MatchingSkill, ReportRecommendation } from '../schemas/report.schema';
+import { 
+  ReportGeneratorException,
+  ErrorCorrelationManager 
+} from '@ai-recruitment-clerk/infrastructure-shared';
 
 export interface JobData {
   jobId: string;
@@ -156,9 +160,21 @@ export class ReportGeneratorService {
     try {
       this.logger.log(`Processing match scored event for jobId: ${event.jobId}, resumeId: ${event.resumeId}`);
 
-      // Validate event data
+      // Validate event data with correlation context
+      const correlationContext = ErrorCorrelationManager.getContext();
+      
       if (!event.scoreDto || !event.jobId || !event.resumeId) {
-        throw new Error('Invalid match scored event: missing required fields');
+        throw new ReportGeneratorException(
+          'INVALID_EVENT_DATA',
+          {
+            provided: { 
+              scoreDto: !!event.scoreDto, 
+              jobId: !!event.jobId, 
+              resumeId: !!event.resumeId 
+            },
+            correlationId: correlationContext?.traceId
+          }
+        );
       }
 
       // Convert scoring data to report format
@@ -244,9 +260,21 @@ export class ReportGeneratorService {
     try {
       this.logger.log(`Generating ${request.reportType} report for job ${request.jobId} with ${request.resumeIds.length} resumes`);
 
-      // Validate request
+      // Validate request with correlation
+      const correlationContext = ErrorCorrelationManager.getContext();
+      
       if (!request.jobId || !request.resumeIds || request.resumeIds.length === 0) {
-        throw new Error('Invalid report generation request: missing job ID or resume IDs');
+        throw new ReportGeneratorException(
+          'INVALID_REPORT_REQUEST',
+          {
+            provided: {
+              jobId: !!request.jobId,
+              resumeIds: request.resumeIds || [],
+              resumeCount: request.resumeIds?.length || 0
+            },
+            correlationId: correlationContext?.traceId
+          }
+        );
       }
 
       // Collect data for report generation
@@ -324,7 +352,14 @@ export class ReportGeneratorService {
       const validCandidates = candidateData.filter(candidate => candidate !== null);
 
       if (validCandidates.length < 2) {
-        throw new Error('At least 2 candidates are required for comparison');
+        throw new ReportGeneratorException(
+          'INSUFFICIENT_CANDIDATES',
+          {
+            provided: validCandidates.length,
+            required: 2,
+            jobId: jobId
+          }
+        );
       }
 
       return await this.llmService.generateCandidateComparison(validCandidates);
@@ -350,7 +385,13 @@ export class ReportGeneratorService {
       // Fetch candidate and job data
       const report = await this.reportRepo.findReport({ jobId, resumeId });
       if (!report) {
-        throw new Error('No report found for the specified job and resume');
+        throw new ReportGeneratorException(
+          'REPORT_NOT_FOUND',
+          {
+            jobId: jobId,
+            resumeId: resumeId
+          }
+        );
       }
 
       // Format data for interview guide generation

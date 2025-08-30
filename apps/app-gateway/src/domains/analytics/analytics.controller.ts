@@ -28,7 +28,8 @@ import {
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
-import { Permission, UserDto, AnalyticsEvent } from '@app/shared-dtos';
+import { Permission, UserDto } from '@ai-recruitment-clerk/user-management-domain';
+import { AnalyticsEvent } from '@ai-recruitment-clerk/infrastructure-shared';
 import { AnalyticsIntegrationService } from './analytics-integration.service';
 
 interface AuthenticatedRequest extends ExpressRequest {

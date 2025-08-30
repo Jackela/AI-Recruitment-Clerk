@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GeminiClient } from '../../../../libs/shared-dtos/src/gemini/gemini.client';
-import { ResumeDTO } from '../../../../libs/shared-dtos/src/models/resume.dto';
+import { GeminiClient } from '@ai-recruitment-clerk/ai-services-shared';
+import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
 interface AIExperienceAnalysis {
   relevantYears: number;
@@ -56,17 +56,19 @@ export interface ExperienceAnalysis {
   };
 }
 
+export interface WeightingFactors {
+  recencyWeight: number;
+  relevanceWeight: number;
+  leadershipBonus: number;
+  progressionBonus: number;
+  industryPenalty: number;
+}
+
 export interface ExperienceScore {
   overallScore: number;
   analysis: ExperienceAnalysis;
   confidence: number;
-  weightingFactors: {
-    recencyWeight: number;
-    relevanceWeight: number;
-    leadershipBonus: number;
-    progressionBonus: number;
-    industryPenalty: number;
-  };
+  weightingFactors: WeightingFactors;
   breakdown: {
     baseExperienceScore: number;
     relevanceAdjustment: number;
@@ -438,7 +440,7 @@ export class ExperienceAnalyzerService {
   private calculateExperienceScore(
     analysis: ExperienceAnalysis,
     jobRequirements: JobRequirements,
-    weightingFactors: any
+    weightingFactors: WeightingFactors
   ) {
     // Base experience score (0-100)
     const experienceRatio = analysis.totalYears / Math.max(jobRequirements.experienceYears.min, 1);

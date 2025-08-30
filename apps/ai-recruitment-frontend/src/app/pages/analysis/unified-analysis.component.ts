@@ -19,6 +19,33 @@ export type { AnalysisResult } from './components/analysis-results.component';
 export type { FileUploadData } from './components/resume-file-upload.component';
 export type { UsageStatistics } from './components/statistics-panel.component';
 
+// Internal interfaces
+interface AnalysisCompletionEvent {
+  result?: {
+    score?: number;
+    summary?: string;
+    details?: {
+      skills?: string[];
+      experience?: string;
+      education?: string;
+      recommendations?: string[];
+    };
+    reportUrl?: string;
+  };
+}
+
+interface AnalysisErrorEvent {
+  error?: {
+    message?: string;
+  };
+  message?: string;
+}
+
+interface StepChangeEvent {
+  step?: string;
+  currentStep?: string;
+}
+
 @Component({
   selector: 'arc-unified-analysis',
   standalone: true,
@@ -160,11 +187,11 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     this.handleStepChange({ step: stepName });
   }
 
-  onAnalysisCompleted(completion: any): void {
+  onAnalysisCompleted(completion: AnalysisCompletionEvent): void {
     this.handleAnalysisCompletion(completion);
   }
 
-  onAnalysisError(error: any): void {
+  onAnalysisError(error: AnalysisErrorEvent): void {
     this.handleAnalysisError(error);
   }
 
@@ -296,7 +323,7 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     this.analysisSteps.set(updatedSteps);
   }
 
-  private handleStepChange(stepData: any): void {
+  private handleStepChange(stepData: StepChangeEvent): void {
     const stepName = stepData.step || stepData.currentStep;
     if (stepName) {
       // Mark previous steps as completed and current as active
@@ -329,7 +356,7 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     this.analysisSteps.set(updatedSteps);
   }
 
-  private handleAnalysisCompletion(completion: any): void {
+  private handleAnalysisCompletion(completion: AnalysisCompletionEvent): void {
     // Mark all steps as completed
     const steps = this.analysisSteps();
     const completedSteps = steps.map(step => ({
@@ -357,7 +384,7 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     this.currentState.set('completed');
   }
 
-  private handleAnalysisError(error: any): void {
+  private handleAnalysisError(error: AnalysisErrorEvent): void {
     const errorMsg = error?.error?.message || error?.message || '分析过程中发生未知错误';
     this.errorMessage.set(errorMsg);
     this.currentState.set('error');

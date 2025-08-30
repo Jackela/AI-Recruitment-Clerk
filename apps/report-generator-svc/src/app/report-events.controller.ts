@@ -1,183 +1,21 @@
-import { Controller, Injectable, Logger } from '@nestjs/common';
+import { Controller, Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ReportGeneratorService, MatchScoredEvent } from '../report-generator/report-generator.service';
+import { 
+  ReportGeneratorNatsService,
+  ReportGenerationRequestedEvent,
+  ReportGeneratedEvent,
+  ReportGenerationFailedEvent
+} from '../services/report-generator-nats.service';
 
-// NATS-related interfaces and types
-export interface NatsPublishResult {
-  success: boolean;
-  messageId?: string;
-  error?: string;
-}
-
-export interface NatsSubscriptionOptions {
-  subject?: string;
-  queueGroup?: string;
-  durableName?: string;
-}
-
-// Report-related event interfaces
-export interface ReportGenerationRequestedEvent {
-  jobId: string;
-  resumeId: string;
-  reportType: 'match-analysis' | 'candidate-summary' | 'full-report';
-  requestedBy?: string;
-  timestamp: string;
-}
-
-export interface ReportGeneratedEvent {
-  jobId: string;
-  resumeId: string;
-  reportId: string;
-  reportType: string;
-  gridFsId: string;
-  timestamp: string;
-  processingTimeMs: number;
-}
-
-export interface ReportGenerationFailedEvent {
-  jobId: string;
-  resumeId: string;
-  reportType: string;
-  error: string;
-  retryCount: number;
-  timestamp: string;
-}
-
-@Injectable()
-export class NatsClient {
-  private readonly logger = new Logger(NatsClient.name);
-  private connected = false;
-  private connection: any = null;
-
-  async connect(): Promise<void> {
-    try {
-      this.logger.log('Connecting to NATS JetStream...');
-      
-      // Mock connection - in production would use actual NATS client
-      this.connected = true;
-      this.logger.log('Successfully connected to NATS JetStream');
-    } catch (error) {
-      this.logger.error('Failed to connect to NATS', error);
-      throw error;
-    }
-  }
-
-  async disconnect(): Promise<void> {
-    try {
-      this.logger.log('Disconnecting from NATS...');
-      this.connected = false;
-      this.logger.log('Disconnected from NATS');
-    } catch (error) {
-      this.logger.error('Error during NATS disconnect', error);
-      throw error;
-    }
-  }
-
-  async publish(subject: string, data: any): Promise<NatsPublishResult> {
-    try {
-      this.logger.log(`Publishing message to subject: ${subject}`);
-      
-      if (!this.connected) {
-        await this.connect();
-      }
-      
-      const messageId = this.generateMessageId();
-      this.logger.log(`Message published successfully. MessageId: ${messageId}`);
-      
-      return {
-        success: true,
-        messageId,
-      };
-    } catch (error) {
-      this.logger.error(`Failed to publish message to ${subject}`, error);
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-  }
-
-  async subscribe(
-    subject: string, 
-    handler: (event: any) => Promise<void>,
-    options?: NatsSubscriptionOptions
-  ): Promise<void> {
-    try {
-      this.logger.log(`Subscribing to subject: ${subject}`);
-      
-      if (!this.connected) {
-        await this.connect();
-      }
-      
-      this.logger.log(`Successfully subscribed to ${subject}`);
-    } catch (error) {
-      this.logger.error(`Failed to subscribe to ${subject}`, error);
-      throw error;
-    }
-  }
-
-  async publishReportGenerated(event: ReportGeneratedEvent): Promise<NatsPublishResult> {
-    const subject = 'report.generated';
-    
-    try {
-      const result = await this.publish(subject, {
-        ...event,
-        eventType: 'ReportGeneratedEvent',
-      });
-      
-      if (result.success) {
-        this.logger.log(`Report generated event published successfully for reportId: ${event.reportId}`);
-      }
-      
-      return result;
-    } catch (error) {
-      this.logger.error(`Error publishing report generated event`, error);
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-  }
-
-  async publishReportGenerationFailed(event: ReportGenerationFailedEvent): Promise<NatsPublishResult> {
-    const subject = 'report.generation.failed';
-    
-    try {
-      const result = await this.publish(subject, {
-        ...event,
-        eventType: 'ReportGenerationFailedEvent',
-      });
-      
-      if (result.success) {
-        this.logger.log(`Report generation failed event published for jobId: ${event.jobId}, resumeId: ${event.resumeId}`);
-      }
-      
-      return result;
-    } catch (error) {
-      this.logger.error(`Error publishing report generation failed event`, error);
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-  }
-
-  private generateMessageId(): string {
-    return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  get isConnected(): boolean {
-    return this.connected;
-  }
-}
 
 @Controller()
 @Injectable()
-export class ReportEventsController {
+export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(ReportEventsController.name);
-  private readonly natsClient = new NatsClient();
   private readonly processingReports = new Set<string>();
 
   constructor(
+    private readonly natsService: ReportGeneratorNatsService,
     private readonly reportGeneratorService: ReportGeneratorService,
   ) {}
 
@@ -185,10 +23,7 @@ export class ReportEventsController {
     try {
       this.logger.log('Initializing Report Events Controller...');
       
-      // Connect to NATS
-      await this.natsClient.connect();
-      
-      // Subscribe to relevant events
+      // Subscribe to relevant events using shared NATS service
       await this.subscribeToEvents();
       
       this.logger.log('Report Events Controller initialized successfully');
@@ -201,7 +36,7 @@ export class ReportEventsController {
   async onModuleDestroy(): Promise<void> {
     try {
       this.logger.log('Shutting down Report Events Controller...');
-      await this.natsClient.disconnect();
+      // Shared NATS service handles disconnection automatically
       this.logger.log('Report Events Controller shut down successfully');
     } catch (error) {
       this.logger.error('Error during Report Events Controller shutdown', error);
@@ -209,21 +44,13 @@ export class ReportEventsController {
   }
 
   private async subscribeToEvents(): Promise<void> {
-    // Subscribe to match.scored events (from scoring-engine-svc)
-    await this.natsClient.subscribe(
-      'match.scored',
-      this.handleMatchScored.bind(this),
-      { queueGroup: 'report-generator' }
-    );
+    // Subscribe to match.scored events using shared NATS service
+    await this.natsService.subscribeToMatchScored(this.handleMatchScored.bind(this));
 
-    // Subscribe to report generation requests
-    await this.natsClient.subscribe(
-      'report.generation.requested',
-      this.handleReportGenerationRequested.bind(this),
-      { queueGroup: 'report-generator' }
-    );
+    // Subscribe to report generation requests using shared NATS service
+    await this.natsService.subscribeToReportGenerationRequested(this.handleReportGenerationRequested.bind(this));
 
-    this.logger.log('Successfully subscribed to all report events');
+    this.logger.log('Successfully subscribed to all report events using shared NATS service');
   }
 
   async handleMatchScored(event: MatchScoredEvent): Promise<void> {
@@ -264,7 +91,7 @@ export class ReportEventsController {
         processingTimeMs,
       };
 
-      await this.natsClient.publishReportGenerated(reportGeneratedEvent);
+      await this.natsService.publishReportGenerated(reportGeneratedEvent);
 
       this.logger.log(`Successfully processed match.scored event and generated report for ${reportKey}`);
       
@@ -327,7 +154,7 @@ export class ReportEventsController {
         processingTimeMs,
       };
 
-      await this.natsClient.publishReportGenerated(reportGeneratedEvent);
+      await this.natsService.publishReportGenerated(reportGeneratedEvent);
 
       this.logger.log(`Successfully generated ${reportType} report for ${jobId}_${resumeId}`);
       
@@ -355,7 +182,7 @@ export class ReportEventsController {
         timestamp: new Date().toISOString(),
       };
 
-      await this.natsClient.publishReportGenerationFailed(failedEvent);
+      await this.natsService.publishReportGenerationFailed(failedEvent);
       
     } catch (publishError) {
       this.logger.error(`Failed to publish report generation failed event`, publishError);
@@ -399,7 +226,8 @@ export class ReportEventsController {
   // Health check endpoint
   async healthCheck(): Promise<{ status: string; details: any }> {
     try {
-      const natsConnected = this.natsClient.isConnected;
+      const healthCheck = await this.natsService.healthCheck();
+      const natsConnected = healthCheck.status === 'healthy';
       const processingReportsCount = this.processingReports.size;
       
       return {
@@ -408,6 +236,7 @@ export class ReportEventsController {
           natsConnected,
           processingReportsCount,
           processingReports: Array.from(this.processingReports),
+          natsDetails: healthCheck.details
         }
       };
     } catch (error) {

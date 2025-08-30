@@ -190,15 +190,18 @@ export interface BentoCardData {
     }
     
     .card-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(52, 152, 219, 0.1);
-      color: #3498db;
+      background: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-50));
+      border: 1px solid var(--color-primary-200);
+      color: var(--color-primary-800);
       flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s var(--ease-out);
     }
     
     .header-text {
@@ -207,18 +210,22 @@ export interface BentoCardData {
     }
     
     .card-title {
-      font-size: 1rem;
-      font-weight: 600;
-      margin: 0 0 0.25rem 0;
-      line-height: 1.4;
-      color: inherit;
+      font-family: var(--font-family-fantasy-heading);
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-fantasy-large);
+      margin: 0 0 var(--space-1) 0;
+      line-height: var(--line-height-tight);
+      color: var(--color-text-fantasy);
+      letter-spacing: -0.01em;
     }
     
     .card-subtitle {
-      font-size: 0.875rem;
+      font-family: var(--font-family-body);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-fantasy-small);
       margin: 0;
-      opacity: 0.8;
-      line-height: 1.4;
+      color: var(--color-text-secondary);
+      line-height: var(--line-height-normal);
     }
     
     .card-badge {
@@ -231,45 +238,56 @@ export interface BentoCardData {
       flex-shrink: 0;
       
       &.badge-active {
-        background: rgba(34, 197, 94, 0.1);
-        color: #22c55e;
+        background: var(--color-success-100);
+        color: var(--color-success-700);
+        border: 1px solid var(--color-success-200);
       }
       
       &.badge-inactive {
-        background: rgba(107, 114, 128, 0.1);
-        color: #6b7280;
+        background: var(--color-neutral-100);
+        color: var(--color-neutral-700);
+        border: 1px solid var(--color-neutral-200);
       }
       
       &.badge-warning {
-        background: rgba(245, 158, 11, 0.1);
-        color: #f59e0b;
+        background: var(--color-warning-100);
+        color: var(--color-warning-700);
+        border: 1px solid var(--color-warning-200);
       }
       
       &.badge-error {
-        background: rgba(239, 68, 68, 0.1);
-        color: #ef4444;
+        background: var(--color-error-100);
+        color: var(--color-error-700);
+        border: 1px solid var(--color-error-200);
       }
       
       &.badge-success {
-        background: rgba(34, 197, 94, 0.1);
-        color: #22c55e;
+        background: var(--color-success-100);
+        color: var(--color-success-700);
+        border: 1px solid var(--color-success-200);
       }
       
       &.badge-default {
-        background: rgba(107, 114, 128, 0.1);
-        color: #6b7280;
+        background: var(--color-moonlight-100);
+        color: var(--color-moonlight-700);
+        border: 1px solid var(--color-moonlight-200);
       }
     }
     
     .card-value-section {
-      margin: 0.5rem 0;
+      margin: var(--space-2) 0;
     }
     
     .card-value {
-      font-size: 2.25rem;
-      font-weight: 800;
-      line-height: 1;
-      color: inherit;
+      font-family: var(--font-family-fantasy-heading);
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      line-height: var(--line-height-tight);
+      color: var(--color-primary-800);
+      background: linear-gradient(135deg, var(--color-primary-800), var(--color-royal-700));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
     .card-progress {
@@ -280,17 +298,31 @@ export interface BentoCardData {
     
     .progress-bar {
       width: 100%;
-      height: 8px;
-      background: rgba(0, 0, 0, 0.1);
-      border-radius: 4px;
+      height: 10px;
+      background: var(--color-neutral-200);
+      border-radius: var(--radius-lg);
       overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
     }
     
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, #3b82f6, #1d4ed8);
-      border-radius: 4px;
-      transition: width 0.3s ease;
+      background: linear-gradient(90deg, var(--color-primary-600), var(--color-royal-600));
+      border-radius: var(--radius-lg);
+      transition: width var(--transition-base);
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 50%;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent);
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      }
     }
     
     .progress-text {
@@ -351,15 +383,27 @@ export interface BentoCardData {
       font-weight: 500;
       
       &.trend-up {
-        color: #10b981;
+        color: var(--color-success-600);
+        background: var(--color-success-50);
+        border: 1px solid var(--color-success-200);
+        border-radius: var(--radius-md);
+        padding: var(--space-1) var(--space-2);
       }
       
       &.trend-down {
-        color: #ef4444;
+        color: var(--color-error-600);
+        background: var(--color-error-50);
+        border: 1px solid var(--color-error-200);
+        border-radius: var(--radius-md);
+        padding: var(--space-1) var(--space-2);
       }
       
       &.trend-neutral {
-        color: #6b7280;
+        color: var(--color-neutral-600);
+        background: var(--color-neutral-50);
+        border: 1px solid var(--color-neutral-200);
+        border-radius: var(--radius-md);
+        padding: var(--space-1) var(--space-2);
       }
     }
     
@@ -373,31 +417,47 @@ export interface BentoCardData {
     .card-action-btn {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.8);
-      color: inherit;
-      font-size: 0.875rem;
-      font-weight: 500;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      border: 1px solid var(--color-border-primary);
+      border-radius: var(--radius-lg);
+      background: var(--color-bg-primary);
+      color: var(--color-text-primary);
+      font-family: var(--font-family-body);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: var(--transition-base);
+      box-shadow: var(--shadow-xs);
       
       &:hover {
-        background: rgba(255, 255, 255, 0.9);
-        border-color: rgba(0, 0, 0, 0.2);
-        transform: translateY(-1px);
+        background: var(--color-bg-secondary);
+        border-color: var(--color-primary-300);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        color: var(--color-primary-700);
+      }
+      
+      &:active {
+        transform: translateY(0);
+        box-shadow: var(--shadow-xs);
       }
       
       &.primary {
-        background: rgba(59, 130, 246, 0.1);
-        border-color: rgba(59, 130, 246, 0.3);
-        color: #3b82f6;
+        background: linear-gradient(135deg, var(--color-primary-600), var(--color-royal-600));
+        border-color: var(--color-primary-500);
+        color: white;
+        font-weight: var(--font-weight-semibold);
         
         &:hover {
-          background: rgba(59, 130, 246, 0.2);
-          border-color: rgba(59, 130, 246, 0.5);
+          background: linear-gradient(135deg, var(--color-primary-700), var(--color-royal-700));
+          border-color: var(--color-primary-600);
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-lg);
+        }
+        
+        &:active {
+          background: linear-gradient(135deg, var(--color-primary-800), var(--color-royal-800));
         }
       }
     }
@@ -440,7 +500,7 @@ export interface BentoCardData {
 })
 export class BentoCardComponent {
   @Input() data!: BentoCardData;
-  @Output() actionClick = new EventEmitter<any>();
+  @Output() actionClick = new EventEmitter<BentoCardData['actions']>();
 
   getCardClasses(): string {
     const classes = ['bento-card'];
@@ -476,7 +536,7 @@ export class BentoCardComponent {
     return `Progress: ${percentage}% (${this.data.progress.value} of ${this.data.progress.max})`;
   }
 
-  getMetricAriaLabel(metric: any): string {
+  getMetricAriaLabel(metric: BentoCardData['metrics'][0]): string {
     let label = `${metric.label}: ${this.formatValue(metric.value)}`;
     if (metric.trend) {
       const direction = metric.trend.type === 'up' ? 'increased' : 
@@ -486,24 +546,24 @@ export class BentoCardComponent {
     return label;
   }
 
-  getTrendAriaLabel(trend: any): string {
+  getTrendAriaLabel(trend: NonNullable<NonNullable<BentoCardData['metrics']>[0]['trend']>): string {
     const direction = trend.type === 'up' ? 'increased' : 
                      trend.type === 'down' ? 'decreased' : 'unchanged';
     return `Trend: ${direction} by ${trend.value}`;
   }
 
-  onActionClick(action: any): void {
+  onActionClick(action: NonNullable<BentoCardData['actions']>[0]): void {
     this.actionClick.emit(action);
     if (action.onClick) {
       action.onClick();
     }
   }
 
-  trackByMetricLabel(_index: number, metric: any): string {
+  trackByMetricLabel(_index: number, metric: NonNullable<BentoCardData['metrics']>[0]): string {
     return metric.label;
   }
 
-  trackByActionLabel(_index: number, action: any): string {
+  trackByActionLabel(_index: number, action: NonNullable<BentoCardData['actions']>[0]): string {
     return action.label;
   }
 }

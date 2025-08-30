@@ -1,7 +1,13 @@
 import { Controller, Logger, OnModuleInit } from '@nestjs/common';
-import { EventPattern, Payload } from '@nestjs/microservices';
-import { AnalysisJdExtractedEvent, AnalysisResumeParsedEvent, ResumeDTO, JdDTO as ExtractedJdDTO } from '../../../../libs/shared-dtos/src';
-import { NatsClient } from '../nats/nats.client';
+import { EventPattern } from '@nestjs/microservices';
+import { AnalysisJdExtractedEvent, JdDTO as ExtractedJdDTO } from '@ai-recruitment-clerk/job-management-domain';
+import { AnalysisResumeParsedEvent, ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import { 
+  ScoringEngineException,
+  ScoringEngineErrorCode,
+  ErrorCorrelationManager
+} from '@ai-recruitment-clerk/infrastructure-shared';
+import { ScoringEngineNatsService } from '../services/scoring-engine-nats.service';
 import { ScoringEngineService, JdDTO } from '../scoring.service';
 
 @Controller()
@@ -9,25 +15,36 @@ export class ScoringEventsController implements OnModuleInit {
   private readonly logger = new Logger(ScoringEventsController.name);
 
   constructor(
-    private readonly natsClient: NatsClient,
+    private readonly natsService: ScoringEngineNatsService,
     private readonly scoringEngine: ScoringEngineService
   ) {}
 
   async onModuleInit() {
-    // Subscribe to analysis events
-    await this.natsClient.subscribe('analysis.jd.extracted', this.handleJdExtracted.bind(this), {
-      durableName: 'scoring-engine-jd-extracted',
-    });
-    
-    await this.natsClient.subscribe('analysis.resume.parsed', this.handleResumeParsed.bind(this), {
-      durableName: 'scoring-engine-resume-parsed',
-    });
+    // Subscribe to analysis events using the shared NATS service
+    await this.natsService.subscribeToJdExtracted(this.handleJdExtracted.bind(this));
+    await this.natsService.subscribeToResumeParsed(this.handleResumeParsed.bind(this));
   }
 
   @EventPattern('analysis.jd.extracted')
   async handleJdExtracted(payload: AnalysisJdExtractedEvent): Promise<void> {
     try {
       this.logger.log(`[SCORING-ENGINE] Processing analysis.jd.extracted event for jobId: ${payload.jobId}`);
+      
+      // Validate payload with correlation context
+      const correlationContext = ErrorCorrelationManager.getContext();
+      
+      if (!payload.jobId || !payload.extractedData) {
+        throw new ScoringEngineException(
+          ScoringEngineErrorCode.INSUFFICIENT_DATA,
+          {
+            provided: {
+              jobId: !!payload.jobId,
+              extractedData: !!payload.extractedData
+            },
+            correlationId: correlationContext?.traceId
+          }
+        );
+      }
       
       // Convert extracted JD to scoring engine JD format
       const scoringJdDto = this.convertToScoringJdDTO(payload.extractedData);
@@ -42,6 +59,7 @@ export class ScoringEventsController implements OnModuleInit {
       
     } catch (error) {
       this.logger.error(`[SCORING-ENGINE] Error processing analysis.jd.extracted for jobId: ${payload.jobId}:`, error);
+      throw error; // Let global exception filter handle it
     }
   }
 
@@ -49,6 +67,23 @@ export class ScoringEventsController implements OnModuleInit {
   async handleResumeParsed(payload: AnalysisResumeParsedEvent): Promise<void> {
     try {
       this.logger.log(`[SCORING-ENGINE] Processing analysis.resume.parsed event for resumeId: ${payload.resumeId}`);
+      
+      // Validate payload with correlation context
+      const correlationContext = ErrorCorrelationManager.getContext();
+      
+      if (!payload.jobId || !payload.resumeId || !payload.resumeDto) {
+        throw new ScoringEngineException(
+          ScoringEngineErrorCode.INSUFFICIENT_DATA,
+          {
+            provided: {
+              jobId: !!payload.jobId,
+              resumeId: !!payload.resumeId,
+              resumeDto: !!payload.resumeDto
+            },
+            correlationId: correlationContext?.traceId
+          }
+        );
+      }
       
       // Use the enhanced scoring engine service to handle resume parsed event
       await this.scoringEngine.handleResumeParsedEvent({
@@ -62,8 +97,12 @@ export class ScoringEventsController implements OnModuleInit {
     } catch (error) {
       this.logger.error(`[SCORING-ENGINE] Error processing analysis.resume.parsed for resumeId: ${payload.resumeId}:`, error);
       
-      // Publish error event
-      await this.natsClient.publishScoringError(payload.jobId, payload.resumeId, error as Error);
+      // Publish error event using the shared NATS service
+      await this.natsService.publishScoringError(payload.jobId, payload.resumeId, error as Error, {
+        stage: 'resume-scoring',
+        retryAttempt: 1,
+      });
+      throw error; // Let global exception filter handle it
     }
   }
 

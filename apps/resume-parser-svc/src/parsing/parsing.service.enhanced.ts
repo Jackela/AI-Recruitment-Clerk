@@ -10,7 +10,7 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { VisionLlmService } from '../vision-llm/vision-llm.service';
 import { GridFsService } from '../gridfs/gridfs.service';
 import { FieldMapperService } from '../field-mapper/field-mapper.service';
-import { NatsClient } from '../nats/nats.client';
+import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
 import { 
   RetryUtility, 
   WithCircuitBreaker, 
@@ -21,7 +21,7 @@ import {
   Invariant,
   ContractValidators,
   ContractViolationError
-} from '../../../../libs/shared-dtos/src';
+} from '@ai-recruitment-clerk/infrastructure-shared';
 import { createHash } from 'crypto';
 
 /**
@@ -98,7 +98,7 @@ export class ParsingService {
     private readonly visionLlmService: VisionLlmService,
     private readonly gridFsService: GridFsService,
     private readonly fieldMapperService: FieldMapperService,
-    private readonly natsClient: NatsClient,
+    private readonly natsService: ResumeParserNatsService,
   ) {
     // Periodic cleanup of expired processing records
     setInterval(() => this.cleanupExpiredProcessing(), 5 * 60 * 1000); // Every 5 minutes

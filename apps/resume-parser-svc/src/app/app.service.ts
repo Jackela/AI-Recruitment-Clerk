@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
 import { GridFsService } from '../gridfs/gridfs.service';
-import { NatsClient } from '../nats/nats.client';
+import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
 import { ParsingService } from '../parsing/parsing.service';
 
 @Injectable()
@@ -10,7 +10,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
 
   constructor(
     private readonly gridFsService: GridFsService,
-    private readonly natsClient: NatsClient,
+    private readonly natsService: ResumeParserNatsService,
     private readonly parsingService: ParsingService,
   ) {}
 
@@ -63,12 +63,12 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
 
   private async setupEventSubscriptions(): Promise<void> {
     try {
-      // Subscribe to resume processing events
-      await this.natsClient.subscribeToSubject('resume.parse.request', async (data) => {
+      // Subscribe to resume processing events through shared NATS service
+      await this.natsService.subscribe('resume.parse.request', async (data) => {
         await this.parsingService.handleParseRequest(data);
       });
 
-      await this.natsClient.subscribeToSubject('resume.retry.request', async (data) => {
+      await this.natsService.subscribe('resume.retry.request', async (data) => {
         await this.parsingService.handleRetryRequest(data);
       });
 

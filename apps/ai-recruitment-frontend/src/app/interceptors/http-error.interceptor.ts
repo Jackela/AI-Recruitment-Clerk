@@ -1,54 +1,67 @@
 import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, retry } from 'rxjs/operators';
+import { catchError, retry, timeout } from 'rxjs/operators';
 import { ToastService } from '../services/toast.service';
 import { Router } from '@angular/router';
+import { ErrorCorrelationService } from '../services/error/error-correlation.service';
+import { APP_CONFIG } from '../../config/app.config';
 
 @Injectable()
 export class HttpErrorInterceptor implements HttpInterceptor {
   constructor(
     private toastService: ToastService,
-    private router: Router
+    private router: Router,
+    private errorCorrelation: ErrorCorrelationService
   ) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return next.handle(request).pipe(
-      // Retry failed requests once (except for POST/PUT/DELETE)
+    // Add correlation headers to outgoing requests
+    const correlatedRequest = request.clone({
+      setHeaders: {
+        ...Object.fromEntries(
+          this.errorCorrelation.getCorrelationHeaders().keys().map(
+            key => [key, this.errorCorrelation.getCorrelationHeaders().get(key)!]
+          )
+        )
+      }
+    });
+
+    return next.handle(correlatedRequest).pipe(
+      // Add timeout
+      timeout(APP_CONFIG.API.timeout),
+      
+      // Retry failed requests with exponential backoff
       retry({
-        count: request.method === 'GET' ? 1 : 0,
-        delay: 1000
+        count: this.getRetryCount(request.method),
+        delay: (error, retryIndex) => {
+          const delay = APP_CONFIG.ERROR_HANDLING.retryConfig.initialDelay * 
+                       Math.pow(APP_CONFIG.ERROR_HANDLING.retryConfig.backoffMultiplier, retryIndex - 1);
+          return new Promise(resolve => setTimeout(resolve, delay));
+        }
       }),
+      
       catchError((error: HttpErrorResponse) => {
-        let errorMessage = '发生了一个错误';
-        let userMessage = '';
+        // Create structured error with correlation
+        const structuredError = this.errorCorrelation.createStructuredError(
+          error,
+          'network',
+          this.getErrorSeverity(error.status),
+          `HTTP ${request.method} to ${request.url}`
+        );
 
-        if (error.error instanceof ErrorEvent) {
-          // Client-side error
-          errorMessage = `客户端错误: ${error.error.message}`;
-          userMessage = '网络连接出现问题，请检查您的网络连接';
-        } else {
-          // Server-side error
-          errorMessage = `服务器错误 ${error.status}: ${error.message}`;
-          userMessage = this.getErrorMessage(error.status, error);
-        }
+        // Enhanced error logging with correlation
+        this.logError(request, error, structuredError);
 
-        // Log error for debugging (only in development mode)
-        if (!this.isProduction()) {
-          console.error('HTTP Error:', {
-            url: request.url,
-            method: request.method,
-            status: error.status,
-            message: errorMessage,
-            error: error
-          });
-        }
+        // Report error to backend (async)
+        this.errorCorrelation.reportError(structuredError).catch(() => {});
 
-        // Show user-friendly error message
-        this.showErrorNotification(error.status, userMessage, error);
+        // Show user-friendly notification
+        const userMessage = this.getErrorMessage(error.status, error);
+        this.showErrorNotification(error.status, userMessage, error, structuredError);
 
         // Handle specific error codes
-        this.handleSpecificErrors(error.status);
+        this.handleSpecificErrors(error.status, structuredError);
 
         return throwError(() => error);
       })
@@ -92,59 +105,171 @@ export class HttpErrorInterceptor implements HttpInterceptor {
     }
   }
 
-  private showErrorNotification(status: number, message: string, error: HttpErrorResponse): void {
-    // Don't show notifications for cancelled requests
-    if (error.status === 0 && error.error instanceof ProgressEvent) {
+  private showErrorNotification(
+    status: number, 
+    message: string, 
+    error: HttpErrorResponse,
+    structuredError: any
+  ): void {
+    // Don't show notifications for cancelled requests or aborted requests
+    if (error.status === 0 && (error.error instanceof ProgressEvent || error.name === 'TimeoutError')) {
       return;
     }
 
+    // Don't spam notifications for the same error
+    if (!this.shouldShowNotification(structuredError)) {
+      return;
+    }
+
+    // Enhanced message with correlation ID in development
+    const enhancedMessage = this.isDevelopment() ? 
+      `${message} (ID: ${structuredError.correlationId.slice(-8)})` : 
+      message;
+
     // Show appropriate notification based on severity
+    const duration = this.getNotificationDuration(status);
+    
     if (status >= 500) {
-      // Server errors - show as error with longer duration
-      this.toastService.error(message, 8000);
+      this.toastService.error(enhancedMessage, duration);
     } else if (status === 401 || status === 403) {
-      // Auth errors - show as warning
-      this.toastService.warning(message, 6000);
+      this.toastService.warning(enhancedMessage, duration);
     } else if (status === 404) {
-      // Not found - show as info
-      this.toastService.info(message, 5000);
+      this.toastService.info(enhancedMessage, duration);
     } else if (status > 0) {
-      // Other client errors - show as warning
-      this.toastService.warning(message, 5000);
+      this.toastService.warning(enhancedMessage, duration);
     } else {
-      // Network errors - show as error
-      this.toastService.error(message, 10000);
+      this.toastService.error(enhancedMessage, duration);
     }
   }
 
-  private handleSpecificErrors(status: number): void {
+  private handleSpecificErrors(status: number, structuredError: any): void {
     switch (status) {
       case 401:
-        // Unauthorized - redirect to login
-        // Only redirect if not already on login page
+        // Unauthorized - redirect to login with correlation context
         if (!this.router.url.includes('/login') && !this.router.url.includes('/auth')) {
           sessionStorage.setItem('redirectUrl', this.router.url);
-          this.router.navigate(['/login']);
+          sessionStorage.setItem('authErrorCorrelationId', structuredError.correlationId);
+          this.router.navigate(['/login'], {
+            queryParams: { reason: 'session_expired' }
+          });
         }
         break;
       case 403:
-        // Forbidden - could redirect to unauthorized page
-        // this.router.navigate(['/unauthorized']);
+        // Forbidden - log security event
+        console.warn('Access forbidden:', {
+          correlationId: structuredError.correlationId,
+          url: this.router.url,
+          timestamp: new Date().toISOString()
+        });
+        break;
+      case 429:
+        // Rate limited - implement exponential backoff
+        this.handleRateLimit(structuredError);
         break;
       case 503:
       case 502:
-        // Service unavailable - could redirect to maintenance page
-        // this.router.navigate(['/maintenance']);
+        // Service unavailable - check for maintenance mode
+        this.checkMaintenanceMode(structuredError);
         break;
     }
   }
 
-  private isProduction(): boolean {
-    // Check if running in production mode
-    // You can also use environment variables here
-    return window.location.hostname !== 'localhost' && 
-           !window.location.hostname.startsWith('127.') &&
-           !window.location.hostname.startsWith('192.');
+  private getRetryCount(method: string): number {
+    // Don't retry unsafe methods
+    const unsafeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
+    return unsafeMethods.includes(method.toUpperCase()) ? 0 : APP_CONFIG.ERROR_HANDLING.retryConfig.maxRetries;
+  }
+
+  private getErrorSeverity(status: number): 'low' | 'medium' | 'high' | 'critical' {
+    if (status >= 500) return 'high';
+    if (status === 401 || status === 403) return 'medium';
+    if (status === 429) return 'medium';
+    if (status >= 400) return 'low';
+    return 'medium';
+  }
+
+  private logError(
+    request: HttpRequest<any>, 
+    error: HttpErrorResponse, 
+    structuredError: any
+  ): void {
+    if (!this.isDevelopment()) return;
+
+    console.group(`🚨 HTTP Error ${error.status} - ${structuredError.correlationId}`);
+    console.error('Request:', {
+      method: request.method,
+      url: request.url,
+      headers: Object.fromEntries(
+        request.headers.keys().map(key => [key, request.headers.get(key)])
+      )
+    });
+    console.error('Response:', {
+      status: error.status,
+      statusText: error.statusText,
+      message: error.message,
+      error: error.error
+    });
+    console.error('Structured Error:', structuredError);
+    console.groupEnd();
+  }
+
+  private shouldShowNotification(structuredError: any): boolean {
+    // Prevent notification spam for same error within 5 seconds
+    const lastNotificationKey = `last_notification_${structuredError.errorCode}`;
+    const lastTime = parseInt(sessionStorage.getItem(lastNotificationKey) || '0');
+    const now = Date.now();
+    
+    if (now - lastTime < 5000) {
+      return false;
+    }
+
+    sessionStorage.setItem(lastNotificationKey, now.toString());
+    return true;
+  }
+
+  private getNotificationDuration(status: number): number {
+    const durations = APP_CONFIG.UI.notificationDuration;
+    if (status >= 500) return durations.error;
+    if (status === 401 || status === 403) return durations.warning;
+    if (status === 404) return durations.info;
+    return durations.warning;
+  }
+
+  private handleRateLimit(structuredError: any): void {
+    // Store rate limit event for exponential backoff
+    const rateLimitKey = 'rate_limit_backoff';
+    const backoffTime = Math.min(30000, Math.pow(2, this.getRateLimitAttempts()) * 1000);
+    
+    sessionStorage.setItem(rateLimitKey, (Date.now() + backoffTime).toString());
+    this.incrementRateLimitAttempts();
+
+    console.warn('Rate limited, backing off for:', backoffTime + 'ms', structuredError);
+  }
+
+  private checkMaintenanceMode(structuredError: any): void {
+    // Check if this might be a maintenance mode
+    const maintenanceIndicators = ['maintenance', 'scheduled', 'downtime'];
+    const errorMessage = structuredError.message.toLowerCase();
+    
+    if (maintenanceIndicators.some(indicator => errorMessage.includes(indicator))) {
+      console.info('Possible maintenance mode detected:', structuredError);
+      // Could redirect to maintenance page or show special message
+    }
+  }
+
+  private getRateLimitAttempts(): number {
+    return parseInt(sessionStorage.getItem('rate_limit_attempts') || '0');
+  }
+
+  private incrementRateLimitAttempts(): void {
+    const current = this.getRateLimitAttempts();
+    sessionStorage.setItem('rate_limit_attempts', (current + 1).toString());
+  }
+
+  private isDevelopment(): boolean {
+    return window.location.hostname === 'localhost' || 
+           window.location.hostname.startsWith('127.') ||
+           window.location.hostname.startsWith('192.');
   }
 }
 

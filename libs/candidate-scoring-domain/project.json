@@ -1,0 +1,35 @@
+{
+  "name": "candidate-scoring-domain",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/candidate-scoring-domain/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/candidate-scoring-domain",
+        "tsConfig": "libs/candidate-scoring-domain/tsconfig.json",
+        "packageJson": "libs/candidate-scoring-domain/package.json",
+        "main": "libs/candidate-scoring-domain/src/index.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/candidate-scoring-domain/**/*.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": ["domain:candidate-scoring", "scope:domain", "type:lib"]
+}

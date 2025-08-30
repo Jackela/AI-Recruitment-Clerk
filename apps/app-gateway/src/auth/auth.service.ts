@@ -1,7 +1,8 @@
 import { Injectable, UnauthorizedException, ConflictException, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user.service';
-import { LoginDto, CreateUserDto, AuthResponseDto, JwtPayload, UserDto, RetryUtility, WithCircuitBreaker } from '@app/shared-dtos';
+import { LoginDto, CreateUserDto, AuthResponseDto, JwtPayload, UserDto } from '@ai-recruitment-clerk/user-management-domain';
+import { RetryUtility, WithCircuitBreaker } from '@ai-recruitment-clerk/infrastructure-shared';
 import * as bcrypt from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';

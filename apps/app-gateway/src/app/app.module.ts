@@ -1,7 +1,7 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -23,6 +23,8 @@ import { SecurityHeadersMiddleware } from '../middleware/security-headers.middle
 import { RateLimitMiddleware } from '../middleware/rate-limit.middleware';
 import { EnhancedRateLimitMiddleware } from '../middleware/enhanced-rate-limit.middleware';
 import { ProductionSecurityValidator } from '../common/security/production-security-validator';
+import { AppGatewayGlobalExceptionFilter } from '../common/filters/global-exception.filter';
+import { ErrorInterceptorFactory } from '@ai-recruitment-clerk/infrastructure-shared';
 
 @Module({
   imports: [
@@ -121,6 +123,41 @@ import { ProductionSecurityValidator } from '../common/security/production-secur
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    // Enhanced Error Handling System
+    {
+      provide: APP_FILTER,
+      useClass: AppGatewayGlobalExceptionFilter,
+    },
+    // Error Handling Interceptors
+    {
+      provide: APP_INTERCEPTOR,
+      useFactory: () => ErrorInterceptorFactory.createCorrelationInterceptor('app-gateway'),
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useFactory: () => ErrorInterceptorFactory.createLoggingInterceptor('app-gateway'),
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useFactory: () => ErrorInterceptorFactory.createPerformanceInterceptor(
+        'app-gateway',
+        {
+          warnThreshold: 2000,  // 2 seconds warning for API gateway
+          errorThreshold: 5000  // 5 seconds error threshold
+        }
+      ),
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useFactory: () => ErrorInterceptorFactory.createRecoveryInterceptor(
+        'app-gateway',
+        {
+          enableCircuitBreaker: true,
+          failureThreshold: 3,
+          recoveryTimeout: 30000 // 30 seconds
+        }
+      ),
     }
   ],
 })

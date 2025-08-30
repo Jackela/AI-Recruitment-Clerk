@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExperienceAnalyzerService, JobRequirements } from './experience-analyzer.service';
-import { GeminiClient } from '../../../../libs/shared-dtos/src/gemini/gemini.client';
-import { ResumeDTO } from '../../../../libs/shared-dtos/src/models/resume.dto';
+import { GeminiClient } from '@ai-recruitment-clerk/ai-services-shared';
+import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
 describe('ExperienceAnalyzerService', () => {
   let service: ExperienceAnalyzerService;

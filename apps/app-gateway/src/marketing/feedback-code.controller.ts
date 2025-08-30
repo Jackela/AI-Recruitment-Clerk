@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { FeedbackCodeService } from './feedback-code.service';
-import { CreateFeedbackCodeDto, MarkFeedbackCodeUsedDto } from '@app/shared-dtos';
+import { CreateFeedbackCodeDto, MarkFeedbackCodeUsedDto } from '@ai-recruitment-clerk/marketing-domain';
 
 @Controller('marketing/feedback-codes')
 export class FeedbackCodeController {

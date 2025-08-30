@@ -3,155 +3,215 @@
  * 移除硬编码的CSS值，建立可维护的设计系统
  */
 
-// ===== 颜色系统 =====
+// ===== 颜色系统 - Fantasy Narrative Dashboard =====
 :root {
-  // 主色调
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-200: #bfdbfe;
-  --color-primary-300: #93c5fd;
-  --color-primary-400: #60a5fa;
-  --color-primary-500: #3b82f6;  // 主要品牌色
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
-  --color-primary-800: #1e40af;
-  --color-primary-900: #1e3a8a;
+  // 主色调 - Midnight Blue (深邃智慧)
+  --color-primary-50: #e8eaf6;
+  --color-primary-100: #c5cae9;
+  --color-primary-200: #9fa8da;
+  --color-primary-300: #7986cb;
+  --color-primary-400: #5c6bc0;
+  --color-primary-500: #3f51b5;  // 基础品牌色
+  --color-primary-600: #3949ab;
+  --color-primary-700: #303f9f;
+  --color-primary-800: #283593;
+  --color-primary-900: #1a237e;  // Fantasy primary - Midnight Blue
 
-  // 次要色调
-  --color-secondary-50: #f8fafc;
-  --color-secondary-100: #f1f5f9;
-  --color-secondary-200: #e2e8f0;
-  --color-secondary-300: #cbd5e1;
-  --color-secondary-400: #94a3b8;
-  --color-secondary-500: #64748b;
-  --color-secondary-600: #475569;
-  --color-secondary-700: #334155;
-  --color-secondary-800: #1e293b;
-  --color-secondary-900: #0f172a;
+  // 次要色调 - Storm Gray (中性专业)
+  --color-secondary-50: #eceff1;
+  --color-secondary-100: #cfd8dc;
+  --color-secondary-200: #b0bec5;
+  --color-secondary-300: #90a4ae;
+  --color-secondary-400: #78909c;
+  --color-secondary-500: #607d8b;
+  --color-secondary-600: #546e7a;
+  --color-secondary-700: #455a64;
+  --color-secondary-800: #37474f;  // Fantasy secondary - Storm Gray
+  --color-secondary-900: #263238;
 
-  // 功能色彩
-  --color-success-50: #f0fdf4;
-  --color-success-100: #dcfce7;
-  --color-success-500: #22c55e;
-  --color-success-600: #16a34a;
-  --color-success-700: #15803d;
+  // Royal Purple (高贵魔法)
+  --color-royal-50: #f3e5f5;
+  --color-royal-100: #e1bee7;
+  --color-royal-200: #ce93d8;
+  --color-royal-300: #ba68c8;
+  --color-royal-400: #ab47bc;
+  --color-royal-500: #9c27b0;
+  --color-royal-600: #8e24aa;
+  --color-royal-700: #7b1fa2;
+  --color-royal-800: #6a1b9a;
+  --color-royal-900: #4a148c;  // Fantasy royal - Royal Purple
 
-  --color-warning-50: #fffbeb;
-  --color-warning-100: #fef3c7;
-  --color-warning-500: #f59e0b;
-  --color-warning-600: #d97706;
-  --color-warning-700: #b45309;
+  // 功能色彩 - 重新定义为Fantasy主题
+  --color-success-50: #f1f8e9;
+  --color-success-100: #dcedc8;
+  --color-success-200: #c5e1a5;
+  --color-success-300: #aed581;
+  --color-success-400: #9ccc65;
+  --color-success-500: #8bc34a;
+  --color-success-600: #7cb342;
+  --color-success-700: #689f38;  // Fantasy success - Sage Green
+  --color-success-800: #558b2f;
+  --color-success-900: #33691e;
 
-  --color-error-50: #fef2f2;
-  --color-error-100: #fee2e2;
-  --color-error-500: #ef4444;
-  --color-error-600: #dc2626;
-  --color-error-700: #b91c1c;
+  --color-warning-50: #fff8e1;
+  --color-warning-100: #ffecb3;
+  --color-warning-200: #ffe082;
+  --color-warning-300: #ffd54f;
+  --color-warning-400: #ffca28;
+  --color-warning-500: #ffc107;
+  --color-warning-600: #ffb300;  // Fantasy warning - Ancient Gold
+  --color-warning-700: #ffa000;
+  --color-warning-800: #ff8f00;
+  --color-warning-900: #f57f17;
 
-  --color-info-50: #f0f9ff;
-  --color-info-100: #e0f2fe;
-  --color-info-500: #06b6d4;
-  --color-info-600: #0891b2;
-  --color-info-700: #0e7490;
+  --color-error-50: #ffebee;
+  --color-error-100: #ffcdd2;
+  --color-error-200: #ef9a9a;
+  --color-error-300: #e57373;
+  --color-error-400: #ef5350;
+  --color-error-500: #f44336;
+  --color-error-600: #e53935;
+  --color-error-700: #d32f2f;  // Fantasy error - Dragon Fire
+  --color-error-800: #c62828;
+  --color-error-900: #b71c1c;
 
-  // 特定用途颜色
-  --color-slate-50: #f8fafc;
-  --color-slate-100: #f1f5f9;
-  --color-slate-200: #e2e8f0;
-  --color-slate-300: #cbd5e1;
-  --color-slate-400: #94a3b8;
-  --color-slate-500: #64748b;
-  --color-slate-600: #475569;
-  --color-slate-700: #334155;
-  --color-slate-800: #1e293b;
-  --color-slate-900: #0f172a;
-  
-  // 扩展的成功颜色
-  --color-success-200: #bbf7d0;
-  --color-success-300: #86efac;
-  --color-success-400: #4ade80;
-  --color-success-800: #166534;
-  --color-success-900: #14532d;
+  --color-info-50: #e1f5fe;
+  --color-info-100: #b3e5fc;
+  --color-info-200: #81d4fa;
+  --color-info-300: #4fc3f7;
+  --color-info-400: #29b6f6;
+  --color-info-500: #03a9f4;
+  --color-info-600: #039be5;
+  --color-info-700: #0288d1;
+  --color-info-800: #0277bd;  // Fantasy info - Frost Blue
+  --color-info-900: #01579b;
 
-  // 扩展的危险/错误颜色  
-  --color-danger-50: #fef2f2;
-  --color-danger-100: #fee2e2;
-  --color-danger-200: #fecaca;
-  --color-danger-300: #fca5a5;
-  --color-danger-400: #f87171;
-  --color-danger-500: #ef4444;
-  --color-danger-600: #dc2626;
-  --color-danger-700: #b91c1c;
-  --color-danger-800: #991b1b;
-  --color-danger-900: #7f1d1d;
+  // Emerald Green (成长繁荣)
+  --color-emerald-50: #e8f5e8;
+  --color-emerald-100: #c8e6c9;
+  --color-emerald-200: #a5d6a7;
+  --color-emerald-300: #81c784;
+  --color-emerald-400: #66bb6a;
+  --color-emerald-500: #4caf50;
+  --color-emerald-600: #43a047;
+  --color-emerald-700: #388e3c;
+  --color-emerald-800: #2e7d32;
+  --color-emerald-900: #1b5e20;  // Fantasy emerald - Growth Success
 
-  // 中性色彩
+  // Ember Orange (能量注意)
+  --color-ember-50: #fff3e0;
+  --color-ember-100: #ffe0b2;
+  --color-ember-200: #ffcc80;
+  --color-ember-300: #ffb74d;
+  --color-ember-400: #ffa726;
+  --color-ember-500: #ff9800;
+  --color-ember-600: #fb8c00;
+  --color-ember-700: #f57c00;
+  --color-ember-800: #ef6c00;
+  --color-ember-900: #e65100;  // Fantasy ember - Energy Attention
+
+  // Shadow Gray (文本元素) - 替代中性色
   --color-neutral-50: #fafafa;
   --color-neutral-100: #f5f5f5;
-  --color-neutral-200: #e5e5e5;
-  --color-neutral-300: #d4d4d4;
-  --color-neutral-400: #a3a3a3;
-  --color-neutral-500: #737373;
-  --color-neutral-600: #525252;
-  --color-neutral-700: #404040;
-  --color-neutral-800: #262626;
-  --color-neutral-900: #171717;
+  --color-neutral-200: #eeeeee;
+  --color-neutral-300: #e0e0e0;
+  --color-neutral-400: #bdbdbd;
+  --color-neutral-500: #9e9e9e;
+  --color-neutral-600: #757575;
+  --color-neutral-700: #616161;
+  --color-neutral-800: #424242;  // Fantasy shadow - Text Elements
+  --color-neutral-900: #212121;
 
-  // 语义颜色映射
+  // Moonlight Silver (精致优雅) - 替代slate
+  --color-moonlight-50: #fafafa;
+  --color-moonlight-100: #f5f5f5;
+  --color-moonlight-200: #eeeeee;
+  --color-moonlight-300: #e0e0e0;
+  --color-moonlight-400: #bdbdbd;
+  --color-moonlight-500: #9e9e9e;
+  --color-moonlight-600: #757575;
+  --color-moonlight-700: #616161;
+  --color-moonlight-800: #424242;
+  --color-moonlight-900: #90a4ae;  // Fantasy moonlight - Refined Elegance
+
+  // 扩展的功能色彩 (保持与新的fantasy主题一致)
+  --color-danger-50: var(--color-error-50);
+  --color-danger-100: var(--color-error-100);
+  --color-danger-200: var(--color-error-200);
+  --color-danger-300: var(--color-error-300);
+  --color-danger-400: var(--color-error-400);
+  --color-danger-500: var(--color-error-500);
+  --color-danger-600: var(--color-error-600);
+  --color-danger-700: var(--color-error-700);
+  --color-danger-800: var(--color-error-800);
+  --color-danger-900: var(--color-error-900);
+
+  // 语义颜色映射 - Fantasy Theme
   --color-text-primary: var(--color-neutral-900);
-  --color-text-secondary: var(--color-neutral-600);
-  --color-text-tertiary: var(--color-neutral-500);
+  --color-text-secondary: var(--color-neutral-700);
+  --color-text-tertiary: var(--color-neutral-600);
   --color-text-disabled: var(--color-neutral-400);
+  --color-text-fantasy: var(--color-primary-800);  // For fantasy narrative elements
   
   --color-bg-primary: var(--color-neutral-50);
   --color-bg-secondary: var(--color-neutral-100);
   --color-bg-tertiary: var(--color-neutral-200);
+  --color-bg-fantasy: linear-gradient(135deg, var(--color-primary-900), var(--color-royal-900));  // Fantasy gradient
   
   --color-border-primary: var(--color-neutral-300);
   --color-border-secondary: var(--color-neutral-200);
+  --color-border-fantasy: var(--color-primary-700);
 }
 
-// 高对比度主题
+// 高对比度主题 - Fantasy Enhanced
 [data-theme="high-contrast"] {
-  --color-primary-500: #0066cc;
-  --color-text-primary: #000000;
-  --color-text-secondary: #333333;
+  --color-primary-500: var(--color-primary-700);
+  --color-text-primary: var(--color-neutral-900);
+  --color-text-secondary: var(--color-neutral-700);
   --color-bg-primary: #ffffff;
-  --color-border-primary: #000000;
+  --color-border-primary: var(--color-neutral-900);
 }
 
-// 暗色主题
+// 暗色主题 - Fantasy Dark Realm
 [data-theme="dark"] {
   --color-text-primary: var(--color-neutral-100);
   --color-text-secondary: var(--color-neutral-400);
   --color-text-tertiary: var(--color-neutral-500);
+  --color-text-fantasy: var(--color-primary-300);
   
   --color-bg-primary: var(--color-neutral-900);
   --color-bg-secondary: var(--color-neutral-800);
   --color-bg-tertiary: var(--color-neutral-700);
+  --color-bg-fantasy: linear-gradient(135deg, var(--color-neutral-900), var(--color-primary-900));
   
   --color-border-primary: var(--color-neutral-700);
   --color-border-secondary: var(--color-neutral-800);
+  --color-border-fantasy: var(--color-primary-600);
 }
 
-// ===== 字体系统 =====
+// ===== 字体系统 - Fantasy Typography =====
 :root {
-  // 字体家族
-  --font-family-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-family-serif: Georgia, Cambria, 'Times New Roman', serif;
+  // Fantasy 字体家族
+  --font-family-fantasy-heading: 'Cinzel', 'Times New Roman', serif;  // Elegant classical serif for headings
+  --font-family-fantasy-accent: 'Cinzel Decorative', 'Cinzel', serif;  // Ornate serif for special elements
+  --font-family-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;  // Modern readable body
+  
+  // 传统字体家族 (保留向后兼容性)
+  --font-family-sans: var(--font-family-body);
+  --font-family-serif: var(--font-family-fantasy-heading);
   --font-family-mono: 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', monospace;
   --font-family-chinese: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
 
-  // 字体大小尺度 (基于 1.25 比例)
-  --font-size-xs: 0.75rem;    // 12px
-  --font-size-sm: 0.875rem;   // 14px
-  --font-size-base: 1rem;     // 16px
-  --font-size-lg: 1.125rem;   // 18px
-  --font-size-xl: 1.25rem;    // 20px
-  --font-size-2xl: 1.5rem;    // 24px
-  --font-size-3xl: 1.875rem;  // 30px
-  --font-size-4xl: 2.25rem;   // 36px
-  --font-size-5xl: 3rem;      // 48px
+  // Fantasy 字体大小尺度 - 优化的黄金比例 (1.618)
+  --font-size-xs: 0.75rem;     // 12px - Caption
+  --font-size-sm: 0.875rem;    // 14px - Small Text  
+  --font-size-base: 1rem;      // 16px - Body Text
+  --font-size-lg: 1.25rem;     // 20px - Large Text
+  --font-size-xl: 1.75rem;     // 28px - Subsection (H3)
+  --font-size-2xl: 2.5rem;     // 40px - Section Header (H2)
+  --font-size-3xl: 3.5rem;     // 56px - Hero Title (H1)
+  --font-size-4xl: 4.5rem;     // 72px - Display
+  --font-size-5xl: 6rem;       // 96px - Hero Display
 
   // 行高
   --line-height-tight: 1.25;
@@ -159,13 +219,22 @@
   --line-height-relaxed: 1.625;
   --line-height-loose: 2;
 
-  // 字重
+  // Fantasy 字重系统 - 针对不同字体优化
   --font-weight-light: 300;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
   --font-weight-extrabold: 800;
+  
+  // Fantasy 语义字重映射
+  --font-weight-fantasy-caption: var(--font-weight-normal);    // 12px Caption - Inter Regular
+  --font-weight-fantasy-small: var(--font-weight-normal);      // 14px Small - Inter Regular  
+  --font-weight-fantasy-body: var(--font-weight-normal);       // 16px Body - Inter Regular
+  --font-weight-fantasy-large: var(--font-weight-medium);      // 20px Large - Inter Medium
+  --font-weight-fantasy-h3: var(--font-weight-medium);         // 28px H3 - Cinzel Medium
+  --font-weight-fantasy-h2: var(--font-weight-semibold);       // 40px H2 - Cinzel SemiBold
+  --font-weight-fantasy-h1: var(--font-weight-bold);           // 56px H1 - Cinzel Bold
 }
 
 // 字体大小变体

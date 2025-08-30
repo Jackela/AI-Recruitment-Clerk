@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { EventType, EventStatus, EventCategory, ConsentStatus } from '@app/shared-dtos';
+import { EventType, EventStatus, EventCategory, ConsentStatus } from '@ai-recruitment-clerk/infrastructure-shared';
 
 export type AnalyticsEventDocument = AnalyticsEvent & Document;
 

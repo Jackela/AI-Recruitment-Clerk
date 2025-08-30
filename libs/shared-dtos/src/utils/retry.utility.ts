@@ -6,7 +6,7 @@ export interface RetryOptions {
   maxDelayMs: number;
   backoffMultiplier: number;
   jitterMs: number;
-  retryIf?: (error: any) => boolean;
+  retryIf?: (error: Error | unknown) => boolean;
 }
 
 export interface CircuitBreakerOptions {
@@ -35,7 +35,7 @@ export class RetryUtility {
       ...options
     };
 
-    let lastError: any;
+    let lastError: Error | unknown;
     
     for (let attempt = 1; attempt <= config.maxAttempts; attempt++) {
       try {
@@ -76,14 +76,21 @@ export class RetryUtility {
   /**
    * Determines if an error is retriable based on common patterns
    */
-  private static isRetriableError(error: any): boolean {
+  private static isRetriableError(error: Error | unknown): boolean {
+    // Type guard to check if error has specific properties
+    const hasProperty = (obj: unknown, prop: string): obj is Record<string, unknown> => {
+      return obj !== null && typeof obj === 'object' && prop in obj;
+    };
+
     // Network errors
-    if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
+    if (hasProperty(error, 'code') && (
+      error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT'
+    )) {
       return true;
     }
 
     // HTTP errors that are typically retriable
-    if (error.status && (
+    if (hasProperty(error, 'status') && typeof error.status === 'number' && (
       error.status === 408 || // Request Timeout
       error.status === 429 || // Too Many Requests
       error.status === 502 || // Bad Gateway
@@ -94,7 +101,7 @@ export class RetryUtility {
     }
 
     // Database connection errors
-    if (error.message && (
+    if (hasProperty(error, 'message') && typeof error.message === 'string' && (
       error.message.includes('connection') ||
       error.message.includes('timeout') ||
       error.message.includes('ENOTFOUND')
@@ -103,7 +110,8 @@ export class RetryUtility {
     }
 
     // External API errors
-    if (error.name === 'GoogleGenerativeAIError' && error.status >= 500) {
+    if (hasProperty(error, 'name') && error.name === 'GoogleGenerativeAIError' && 
+        hasProperty(error, 'status') && typeof error.status === 'number' && error.status >= 500) {
       return true;
     }
 
@@ -194,10 +202,10 @@ export class CircuitBreaker {
  * Decorator for automatic retry with circuit breaker
  */
 export function Retry(options: Partial<RetryOptions> = {}) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (_target: unknown, _propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       return RetryUtility.withExponentialBackoff(
         () => originalMethod.apply(this, args),
         options
@@ -219,11 +227,11 @@ export function WithCircuitBreaker(
     monitoringPeriod: 60000
   }
 ) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (target: { constructor: { name: string } }, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
     const circuitBreaker = CircuitBreaker.getInstance(`${target.constructor.name}.${propertyKey}.${name}`, options);
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       return circuitBreaker.execute(() => originalMethod.apply(this, args));
     };
 

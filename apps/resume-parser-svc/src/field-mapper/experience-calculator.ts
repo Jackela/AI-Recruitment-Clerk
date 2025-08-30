@@ -3,7 +3,7 @@
  */
 
 import { DateParser, DateRange } from './date-parser';
-import { ResumeDTO } from '../../../../libs/shared-dtos/src';
+import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
 export interface ExperienceAnalysis {
   totalExperienceMonths: number;

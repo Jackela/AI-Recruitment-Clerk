@@ -39,6 +39,54 @@ export interface ResumeAnalysisResponse {
   };
 }
 
+export interface PersonalInfo {
+  name: string;
+  email?: string;
+  phone?: string;
+  location?: string;
+  linkedin?: string;
+  github?: string;
+}
+
+export interface Skill {
+  name: string;
+  proficiency: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  category: string;
+  yearsOfExperience?: number;
+}
+
+export interface Experience {
+  totalYears: number;
+  positions: Array<{
+    title: string;
+    company: string;
+    location?: string;
+    startDate: string;
+    endDate?: string;
+    duration: string;
+    description?: string;
+    technologies?: string[];
+  }>;
+}
+
+export interface Education {
+  degree: string;
+  institution: string;
+  location?: string;
+  graduationYear?: number;
+  gpa?: number;
+  honors?: string[];
+  relevantCoursework?: string[];
+}
+
+export interface AnalysisSummary {
+  overallScore: number;
+  strengths: string[];
+  recommendations: string[];
+  keyHighlights: string[];
+  improvementAreas: string[];
+}
+
 export interface AnalysisResultsResponse {
   success: boolean;
   data: {
@@ -46,11 +94,11 @@ export interface AnalysisResultsResponse {
     status: 'processing' | 'completed' | 'failed';
     progress: number;
     results?: {
-      personalInfo: any;
-      skills: any[];
-      experience: any;
-      education: any[];
-      summary: any;
+      personalInfo: PersonalInfo;
+      skills: Skill[];
+      experience: Experience;
+      education: Education[];
+      summary: AnalysisSummary;
     };
     completedAt?: string;
   };

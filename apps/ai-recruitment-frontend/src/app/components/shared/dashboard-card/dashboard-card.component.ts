@@ -62,52 +62,83 @@ import { CommonModule } from '@angular/common';
   `,
   styles: [`
     .dashboard-card {
-      background: white;
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      transition: all 0.2s ease;
-      border: 1px solid rgba(0, 0, 0, 0.05);
+      background: var(--color-bg-primary);
+      border-radius: var(--radius-2xl);
+      padding: var(--space-6);
+      box-shadow: var(--shadow-lg);
+      transition: all var(--transition-base);
+      border: 1px solid var(--color-border-secondary);
+      position: relative;
+      overflow: hidden;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--color-primary-300), transparent);
+        opacity: 0;
+        transition: opacity var(--transition-base);
+      }
       
       &:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-2xl);
+        border-color: var(--color-primary-300);
+        
+        &::before {
+          opacity: 1;
+        }
+      }
+      
+      &:active {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       }
       
       &.primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--color-primary-600), var(--color-royal-600));
         color: white;
+        border-color: var(--color-primary-500);
         
         .card-icon {
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.15);
+          border: 1px solid rgba(255, 255, 255, 0.2);
         }
       }
       
       &.success {
-        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        background: linear-gradient(135deg, var(--color-success-600), var(--color-emerald-600));
         color: white;
+        border-color: var(--color-success-500);
         
         .card-icon {
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.15);
+          border: 1px solid rgba(255, 255, 255, 0.2);
         }
       }
       
       &.warning {
-        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        background: linear-gradient(135deg, var(--color-warning-600), var(--color-ember-600));
         color: white;
+        border-color: var(--color-warning-500);
         
         .card-icon {
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.15);
+          border: 1px solid rgba(255, 255, 255, 0.2);
         }
       }
       
       &.info {
-        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-        color: #2c3e50;
+        background: linear-gradient(135deg, var(--color-info-100), var(--color-moonlight-100));
+        color: var(--color-text-fantasy);
+        border-color: var(--color-info-200);
         
         .card-icon {
-          background: rgba(52, 152, 219, 0.1);
-          color: #3498db;
+          background: linear-gradient(135deg, var(--color-info-100), var(--color-info-50));
+          color: var(--color-info-700);
+          border: 1px solid var(--color-info-200);
         }
       }
     }
@@ -115,61 +146,97 @@ import { CommonModule } from '@angular/common';
     .card-icon {
       width: 48px;
       height: 48px;
-      border-radius: 12px;
+      border-radius: var(--radius-xl);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(52, 152, 219, 0.1);
-      color: #3498db;
-      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-50));
+      color: var(--color-primary-800);
+      margin-bottom: var(--space-4);
+      border: 1px solid var(--color-primary-200);
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition-base);
+      
+      .dashboard-card:hover & {
+        transform: scale(1.05);
+        box-shadow: var(--shadow-md);
+      }
     }
     
     .card-content {
-      margin-bottom: 1rem;
+      margin-bottom: var(--space-4);
     }
     
     .card-value {
-      font-size: 2rem;
-      font-weight: 700;
-      line-height: 1;
-      margin-bottom: 0.25rem;
+      font-family: var(--font-family-fantasy-heading);
+      font-size: var(--font-size-3xl);
+      font-weight: var(--font-weight-fantasy-h1);
+      line-height: var(--line-height-tight);
+      margin-bottom: var(--space-1);
+      background: linear-gradient(135deg, var(--color-primary-800), var(--color-royal-700));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.02em;
     }
     
     .card-title {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-      opacity: 0.9;
+      font-family: var(--font-family-fantasy-heading);
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-fantasy-large);
+      margin-bottom: var(--space-1);
+      color: var(--color-text-fantasy);
+      opacity: 0.95;
+      letter-spacing: -0.01em;
     }
     
     .card-subtitle {
-      font-size: 0.875rem;
-      opacity: 0.7;
-      line-height: 1.4;
+      font-family: var(--font-family-body);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      opacity: 0.8;
+      line-height: var(--line-height-normal);
+      color: var(--color-text-secondary);
     }
     
     .card-trend {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: var(--space-2);
     }
     
     .trend-indicator {
       display: flex;
       align-items: center;
-      gap: 0.25rem;
-      font-size: 0.875rem;
-      font-weight: 500;
+      gap: var(--space-1);
+      font-family: var(--font-family-body);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-lg);
+      transition: all var(--transition-base);
       
       &.trend-up {
-        color: #10b981;
+        color: var(--color-success-700);
+        background: linear-gradient(135deg, var(--color-success-50), var(--color-emerald-50));
+        border: 1px solid var(--color-success-200);
+        
+        svg {
+          filter: drop-shadow(0 1px 2px rgba(16, 185, 129, 0.2));
+        }
       }
       
       &.trend-down {
-        color: #ef4444;
+        color: var(--color-error-700);
+        background: linear-gradient(135deg, var(--color-error-50), var(--color-error-100));
+        border: 1px solid var(--color-error-200);
+        
+        svg {
+          filter: drop-shadow(0 1px 2px rgba(239, 68, 68, 0.2));
+        }
       }
     }
-  `]
+    \n    /* Responsive design */\n    @media (max-width: 768px) {\n      .dashboard-card {\n        padding: var(--space-4);\n        \n        &:hover {\n          transform: translateY(-2px);\n        }\n      }\n      \n      .card-icon {\n        width: 40px;\n        height: 40px;\n        margin-bottom: var(--space-3);\n      }\n      \n      .card-value {\n        font-size: var(--font-size-2xl);\n      }\n      \n      .card-title {\n        font-size: var(--font-size-sm);\n      }\n      \n      .card-subtitle {\n        font-size: var(--font-size-xs);\n      }\n      \n      .trend-indicator {\n        font-size: var(--font-size-xs);\n        padding: var(--space-0-5) var(--space-1-5);\n      }\n    }\n    \n    @media (max-width: 480px) {\n      .dashboard-card {\n        padding: var(--space-3);\n      }\n      \n      .card-icon {\n        width: 36px;\n        height: 36px;\n      }\n      \n      .card-value {\n        font-size: var(--font-size-xl);\n      }\n    }\n  `]
 })
 export class DashboardCardComponent {
   @Input() title = '';

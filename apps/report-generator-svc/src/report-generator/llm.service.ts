@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GeminiClient, GeminiConfig } from '../../../../libs/shared-dtos/src';
+import { GeminiClient, GeminiConfig } from '@ai-recruitment-clerk/ai-services-shared';
+import { SecureConfigValidator } from '@ai-recruitment-clerk/infrastructure-shared';
 
 interface ReportEvent {
   jobId: string;
@@ -36,8 +37,11 @@ export class LlmService {
   private readonly geminiClient: GeminiClient;
 
   constructor() {
+    // 🔒 SECURITY: Validate configuration before service initialization
+    SecureConfigValidator.validateServiceConfig('ReportGeneratorLlmService', ['GEMINI_API_KEY']);
+    
     const config: GeminiConfig = {
-      apiKey: process.env.GEMINI_API_KEY || 'your_gemini_api_key_here',
+      apiKey: SecureConfigValidator.requireEnv('GEMINI_API_KEY'),
       model: 'gemini-1.5-flash',
       temperature: 0.4, // Balanced creativity for report writing
       maxOutputTokens: 16384, // Allow longer reports

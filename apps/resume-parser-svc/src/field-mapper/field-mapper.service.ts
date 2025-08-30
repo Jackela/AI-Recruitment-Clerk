@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { FieldMappingResult } from '../dto/resume-parsing.dto';
-import { ResumeDTO } from '../../../../libs/shared-dtos/src';
-import { SkillsTaxonomy } from '../../../../libs/shared-dtos/src/skills/skills-taxonomy';
+import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import { SkillsTaxonomy } from '@ai-recruitment-clerk/candidate-scoring-domain';
 import { DateParser } from './date-parser';
 import { ExperienceCalculator } from './experience-calculator';
 

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserService } from '../../auth/user.service';
-import { UserDto, UpdateUserDto, UserPreferencesDto, UserActivityDto, UserStatus } from '@app/shared-dtos';
+import { UserDto, UpdateUserDto, UserPreferencesDto, UserActivityDto, UserStatus } from '@ai-recruitment-clerk/user-management-domain';
 
 interface UserActivityResponse {
   activities: UserActivityDto[];

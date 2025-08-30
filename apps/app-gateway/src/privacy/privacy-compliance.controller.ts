@@ -17,7 +17,7 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PrivacyComplianceService } from './privacy-compliance.service';
-import { CaptureConsentDto, WithdrawConsentDto, ConsentStatusDto, CreateRightsRequestDto, DataSubjectRightsRequest, DataExportPackage, ProcessRightsRequestDto, DataExportFormat, DataSubjectRightType, UserConsentProfile } from '@app/shared-dtos';
+import { CaptureConsentDto, WithdrawConsentDto, ConsentStatusDto, CreateRightsRequestDto, DataSubjectRightsRequest, DataExportPackage, ProcessRightsRequestDto, DataExportFormat, DataSubjectRightType, UserConsentProfile } from '@ai-recruitment-clerk/infrastructure-shared';
 
 /**
  * GDPR Privacy Compliance Controller

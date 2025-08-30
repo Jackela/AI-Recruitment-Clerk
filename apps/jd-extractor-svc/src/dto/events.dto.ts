@@ -1,4 +1,4 @@
-import { JdDTO } from '../../../../libs/shared-dtos/src';
+import { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
 
 export interface JobJdSubmittedEvent {
   jobId: string;

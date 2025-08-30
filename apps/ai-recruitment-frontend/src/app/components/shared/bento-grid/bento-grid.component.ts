@@ -1,8 +1,9 @@
-import { Component, Input, OnInit, ViewChild, ElementRef, AfterViewInit, inject, ChangeDetectionStrategy, OnDestroy, TrackByFunction } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ElementRef, AfterViewInit, inject, ChangeDetectionStrategy, OnDestroy, TrackByFunction, HostListener, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AccessibleCardDirective } from '../../../directives/accessibility/accessible-card.directive';
 import { AccessibilityService } from '../../../services/accessibility/accessibility.service';
-import { Subject } from 'rxjs';
+import { Subject, fromEvent } from 'rxjs';
+import { debounceTime, takeUntil } from 'rxjs/operators';
 // import { takeUntil } from 'rxjs/operators'; // Reserved for future use
 
 export interface BentoGridItem {
@@ -25,7 +26,7 @@ export interface BentoGridItem {
     text: string;
     onClick: () => void;
   };
-  customTemplate?: any;
+  customTemplate?: TemplateRef<unknown>;
 }
 
 @Component({
@@ -37,8 +38,10 @@ export interface BentoGridItem {
     <div 
       class="bento-grid" 
       [class]="'bento-grid-' + gridSize"
+      [style.grid-template-columns]="dynamicColumns"
       [attr.role]="'grid'"
-      [attr.aria-label]="ariaLabel">
+      [attr.aria-label]="ariaLabel"
+      #gridContainer>
       <div 
         *ngFor="let item of items; trackBy: trackByItemId"
         class="bento-item"
@@ -192,10 +195,13 @@ export interface BentoGridItem {
       gap: 1rem;
       width: 100%;
       padding: 0;
+      transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: grid-template-columns;
       
-      /* Default Grid - 4 columns */
+      /* Default Grid with dynamic columns */
       &.bento-grid-default {
-        grid-template-columns: repeat(4, 1fr);
+        /* Dynamic columns set via [style.grid-template-columns] */
+        /* Fallback responsive behavior */
         
         @media (max-width: 1200px) {
           grid-template-columns: repeat(3, 1fr);
@@ -210,9 +216,8 @@ export interface BentoGridItem {
         }
       }
       
-      /* Compact Grid - 6 columns */
+      /* Compact Grid with dynamic columns */
       &.bento-grid-compact {
-        grid-template-columns: repeat(6, 1fr);
         gap: 0.75rem;
         
         @media (max-width: 1200px) {
@@ -228,9 +233,8 @@ export interface BentoGridItem {
         }
       }
       
-      /* Wide Grid - 3 columns */
+      /* Wide Grid with dynamic columns */
       &.bento-grid-wide {
-        grid-template-columns: repeat(3, 1fr);
         gap: 1.5rem;
         
         @media (max-width: 768px) {
@@ -242,18 +246,52 @@ export interface BentoGridItem {
           grid-template-columns: 1fr;
         }
       }
+      
+      /* Enhanced overflow protection */
+      .bento-item {
+        min-width: 0;
+        overflow: hidden;
+        contain: layout style;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        
+        .bento-content {
+          min-width: 0;
+        }
+        
+        .bento-title,
+        .bento-subtitle,
+        .bento-text {
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          hyphens: auto;
+        }
+      }
     }
     
     .bento-item {
-      background: white;
-      border-radius: 16px;
-      padding: 1.5rem;
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: var(--color-bg-primary);
+      border-radius: var(--radius-2xl);
+      padding: var(--space-6);
+      border: 1px solid var(--color-border-secondary);
+      transition: all var(--duration-300) var(--ease-out);
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(8px);
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--color-primary-200), transparent);
+        opacity: 0;
+        transition: opacity var(--duration-300) var(--ease-out);
+      }
       
       /* Size Variants */
       &.size-small {
@@ -307,93 +345,148 @@ export interface BentoGridItem {
         }
       }
       
-      /* Variant Colors */
+      /* Mobile single column override for dynamic grid */
+      &.mobile-single-column {
+        grid-column: span 1 !important;
+        grid-row: span 1 !important;
+        min-height: 160px;
+        
+        .bento-value {
+          font-size: 1.75rem !important;
+        }
+        
+        .bento-title {
+          font-size: 1rem !important;
+        }
+      }
+      
+      /* Fantasy Variant Colors */
       &.variant-default {
-        background: white;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        background: var(--color-bg-primary);
+        box-shadow: var(--shadow-md);
+        border-color: var(--color-border-primary);
         
         &:hover {
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-          transform: translateY(-2px);
+          box-shadow: var(--shadow-lg);
+          transform: translateY(-3px);
+          border-color: var(--color-primary-300);
+          
+          &::before {
+            opacity: 1;
+          }
         }
       }
       
       &.variant-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--color-primary-900), var(--color-royal-800));
         color: white;
-        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.25);
+        box-shadow: 0 8px 32px rgba(26, 35, 126, 0.3);
+        border-color: var(--color-primary-700);
         
         .bento-icon {
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.15);
+          color: white;
+          border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .bento-title {
           color: white;
         }
         
         &:hover {
-          box-shadow: 0 8px 30px rgba(102, 126, 234, 0.35);
+          box-shadow: 0 16px 48px rgba(26, 35, 126, 0.4);
           transform: translateY(-4px);
+        }
+        
+        &::before {
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
         }
       }
       
       &.variant-success {
-        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        background: linear-gradient(135deg, var(--color-emerald-800), var(--color-success-700));
         color: white;
-        box-shadow: 0 4px 20px rgba(79, 172, 254, 0.25);
+        box-shadow: 0 8px 32px rgba(27, 94, 32, 0.3);
+        border-color: var(--color-success-600);
         
         .bento-icon {
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.15);
+          color: white;
+          border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .bento-title {
           color: white;
         }
         
         &:hover {
-          box-shadow: 0 8px 30px rgba(79, 172, 254, 0.35);
+          box-shadow: 0 16px 48px rgba(27, 94, 32, 0.4);
           transform: translateY(-4px);
         }
       }
       
       &.variant-warning {
-        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        background: linear-gradient(135deg, var(--color-warning-600), var(--color-ember-700));
         color: white;
-        box-shadow: 0 4px 20px rgba(250, 112, 154, 0.25);
+        box-shadow: 0 8px 32px rgba(255, 179, 0, 0.3);
+        border-color: var(--color-warning-500);
         
         .bento-icon {
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.15);
+          color: white;
+          border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .bento-title {
           color: white;
         }
         
         &:hover {
-          box-shadow: 0 8px 30px rgba(250, 112, 154, 0.35);
+          box-shadow: 0 16px 48px rgba(255, 179, 0, 0.4);
           transform: translateY(-4px);
         }
       }
       
       &.variant-info {
-        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-        color: #2c3e50;
-        box-shadow: 0 4px 20px rgba(168, 237, 234, 0.25);
+        background: linear-gradient(135deg, var(--color-info-600), var(--color-primary-600));
+        color: white;
+        box-shadow: 0 8px 32px rgba(2, 119, 189, 0.3);
+        border-color: var(--color-info-500);
         
         .bento-icon {
-          background: rgba(52, 152, 219, 0.1);
-          color: #3498db;
+          background: rgba(255, 255, 255, 0.15);
+          color: white;
+          border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .bento-title {
+          color: white;
         }
         
         &:hover {
-          box-shadow: 0 8px 30px rgba(168, 237, 234, 0.35);
+          box-shadow: 0 16px 48px rgba(2, 119, 189, 0.4);
           transform: translateY(-4px);
         }
       }
       
       &.variant-error {
-        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        background: linear-gradient(135deg, var(--color-error-700), var(--color-danger-600));
         color: white;
-        box-shadow: 0 4px 20px rgba(255, 107, 107, 0.25);
+        box-shadow: 0 8px 32px rgba(211, 47, 47, 0.3);
+        border-color: var(--color-error-600);
         
         .bento-icon {
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.15);
+          color: white;
+          border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .bento-title {
           color: white;
         }
         
         &:hover {
-          box-shadow: 0 8px 30px rgba(255, 107, 107, 0.35);
+          box-shadow: 0 16px 48px rgba(211, 47, 47, 0.4);
           transform: translateY(-4px);
         }
       }
@@ -403,12 +496,18 @@ export interface BentoGridItem {
         cursor: pointer;
         
         &:focus {
-          outline: 2px solid #3498db;
-          outline-offset: 2px;
+          outline: 2px solid var(--color-primary-500);
+          outline-offset: 3px;
+          border-color: var(--color-primary-400);
+        }
+        
+        &:focus-visible {
+          box-shadow: var(--shadow-lg), 0 0 0 4px rgba(26, 35, 126, 0.15);
         }
         
         &:active {
           transform: translateY(1px);
+          box-shadow: var(--shadow-sm);
         }
       }
     }
@@ -417,105 +516,129 @@ export interface BentoGridItem {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 1rem;
+      margin-bottom: var(--spacing-4, 1rem);
     }
     
     .bento-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
+      width: var(--space-12);
+      height: var(--space-12);
+      border-radius: var(--radius-xl);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(52, 152, 219, 0.1);
-      color: #3498db;
+      background: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-50));
+      border: 1px solid var(--color-primary-200);
+      color: var(--color-primary-800);
       flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition-base);
+      
+      &:hover {
+        background: linear-gradient(135deg, var(--color-primary-200), var(--color-primary-100));
+        transform: scale(1.05);
+      }
     }
     
     .bento-badge {
-      background: rgba(52, 152, 219, 0.1);
-      color: #3498db;
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
+      background: var(--color-primary-100);
+      border: 1px solid var(--color-primary-200);
+      color: var(--color-primary-800);
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-xl);
+      font-family: var(--font-family-body);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-semibold);
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      box-shadow: var(--shadow-xs);
     }
     
     .bento-content {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: var(--spacing-2, 0.5rem);
     }
     
     .bento-value {
-      font-size: 2.5rem;
-      font-weight: 800;
-      line-height: 1;
-      margin-bottom: 0.25rem;
+      font-family: var(--font-family-fantasy-heading);
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      line-height: var(--line-height-tight);
+      margin-bottom: var(--space-1);
+      color: var(--color-primary-800);
+      background: linear-gradient(135deg, var(--color-primary-800), var(--color-royal-700));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       
       .size-small & {
-        font-size: 1.75rem;
+        font-size: var(--font-size-xl);
       }
       
       .size-feature & {
-        font-size: 3.5rem;
+        font-size: var(--font-size-3xl);
       }
     }
     
     .bento-title {
-      font-size: 1.125rem;
-      font-weight: 600;
+      font-family: var(--font-family-fantasy-heading);
+      font-size: var(--font-size-lg);
+      font-weight: var(--font-weight-fantasy-large);
       margin: 0;
-      line-height: 1.4;
+      line-height: var(--line-height-tight);
+      color: var(--color-text-fantasy);
+      letter-spacing: -0.01em;
       
       .size-small & {
-        font-size: 1rem;
+        font-size: var(--font-size-base);
       }
       
       .size-feature & {
-        font-size: 1.5rem;
+        font-size: var(--font-size-xl);
+        font-weight: var(--font-weight-fantasy-h3);
       }
     }
     
     .bento-subtitle {
-      font-size: 0.875rem;
-      opacity: 0.8;
+      font-family: var(--font-family-body);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-fantasy-small);
+      color: var(--color-text-secondary);
       margin: 0;
-      line-height: 1.5;
+      line-height: var(--line-height-normal);
       
       .size-feature & {
-        font-size: 1rem;
+        font-size: var(--font-size-base);
       }
     }
     
     .bento-text {
-      font-size: 0.875rem;
-      line-height: 1.6;
-      opacity: 0.9;
+      font-family: var(--font-family-body);
+      font-size: var(--font-size-sm);
+      line-height: var(--line-height-relaxed);
+      color: var(--color-text-tertiary);
     }
     
     .bento-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 1rem;
-      gap: 1rem;
+      margin-top: var(--spacing-4, 1rem);
+      gap: var(--spacing-4, 1rem);
     }
     
     .bento-trend {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: var(--spacing-2, 0.5rem);
       font-size: 0.875rem;
     }
     
     .trend-indicator {
       display: flex;
       align-items: center;
-      gap: 0.25rem;
+      gap: var(--spacing-1, 0.25rem);
       font-weight: 600;
       
       &.trend-up {
@@ -540,8 +663,8 @@ export interface BentoGridItem {
       background: rgba(255, 255, 255, 0.2);
       border: 1px solid rgba(255, 255, 255, 0.3);
       color: inherit;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
+      padding: var(--spacing-2, 0.5rem) var(--spacing-4, 1rem);
+      border-radius: var(--border-radius-md, 8px);
       font-size: 0.875rem;
       font-weight: 500;
       cursor: pointer;
@@ -553,12 +676,12 @@ export interface BentoGridItem {
       }
       
       .variant-default & {
-        background: #f8f9fa;
-        border-color: #e9ecef;
-        color: #495057;
+        background: var(--color-background, #f8f9fa);
+        border-color: var(--color-border, #e9ecef);
+        color: var(--color-text, #495057);
         
         &:hover {
-          background: #e9ecef;
+          background: var(--color-border, #e9ecef);
         }
       }
     }
@@ -567,7 +690,7 @@ export interface BentoGridItem {
     .bento-value,
     .bento-title,
     .bento-subtitle {
-      animation: fadeInUp 0.5s ease-out;
+      animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     @keyframes fadeInUp {
@@ -580,44 +703,48 @@ export interface BentoGridItem {
         transform: translateY(0);
       }
     }
+    
+    /* Performance optimizations for dynamic grids */
+    @media (prefers-reduced-motion: reduce) {
+      .bento-grid,
+      .bento-item {
+        transition: none;
+      }
+      
+      .bento-value,
+      .bento-title,
+      .bento-subtitle {
+        animation: none;
+      }
+    }
   `]
 })
 export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('gridElement', { static: false }) gridElement!: ElementRef;
+  @ViewChild('gridContainer', { static: false }) gridContainer!: ElementRef;
   
   private accessibilityService = inject(AccessibilityService);
   private destroy$ = new Subject<void>();
   private intersectionObserver?: IntersectionObserver;
+  private resizeObserver?: ResizeObserver;
   
   @Input() items: BentoGridItem[] = [];
   @Input() gridSize: 'compact' | 'default' | 'wide' = 'default';
   @Input() ariaLabel = 'Dashboard grid';
   @Input() onItemClickHandler?: (item: BentoGridItem) => void;
+  @Input() autoResize = true; // Enable/disable automatic grid resizing
+  @Input() minColumnWidth = 250; // Minimum width for grid items
+  @Input() maxColumns?: number; // Override maximum columns
+  
+  // Dynamic grid state
+  private _currentColumns = 4;
+  dynamicColumns = 'repeat(4, 1fr)';
 
   // Optimized trackBy function
   readonly trackByItemId: TrackByFunction<BentoGridItem> = (_index: number, item: BentoGridItem): string => {
     return item.id;
   };
-
-  ngOnInit() {
-    // Initialize any necessary data
-  }
-
-  ngAfterViewInit() {
-    // Setup intersection observer for animations with debouncing
-    this.setupIntersectionObserver();
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-    
-    // Cleanup intersection observer
-    if (this.intersectionObserver) {
-      this.intersectionObserver.disconnect();
-    }
-  }
-
+  
+  // Enhanced grid item classes with overflow protection
   getItemClasses(item: BentoGridItem): string {
     const classes = [
       `size-${item.size || 'medium'}`,
@@ -628,8 +755,52 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
       classes.push('clickable');
     }
     
+    // Add responsive classes based on current grid columns
+    if (this._currentColumns <= 2 && (item.size === 'large' || item.size === 'wide' || item.size === 'feature')) {
+      classes.push('mobile-single-column');
+    }
+    
     return classes.join(' ');
   }
+
+  ngOnInit() {
+    // Initialize grid calculations
+    this.calculateOptimalGridColumns();
+  }
+
+  ngAfterViewInit() {
+    // Setup intersection observer for animations with debouncing
+    this.setupIntersectionObserver();
+    
+    // Setup grid auto-sizing if enabled
+    if (this.autoResize) {
+      this.setupGridResizing();
+    }
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    
+    // Cleanup observers
+    if (this.intersectionObserver) {
+      this.intersectionObserver.disconnect();
+    }
+    
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
+  }
+  
+  // Handle window resize events
+  @HostListener('window:resize', ['$event'])
+  onWindowResize(_event: Event): void {
+    if (this.autoResize) {
+      this.debouncedCalculateColumns();
+    }
+  }
+
+  // Remove the old getItemClasses method as it's been replaced above
 
   getItemAriaLabel(item: BentoGridItem): string {
     let label = item.title;
@@ -776,8 +947,128 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Use RAF to avoid blocking main thread
     requestAnimationFrame(() => {
-      const items = this.gridElement?.nativeElement?.querySelectorAll('.bento-item');
+      const items = this.gridContainer?.nativeElement?.querySelectorAll('.bento-item');
       items?.forEach((item: Element) => this.intersectionObserver?.observe(item));
     });
+  }
+  
+  // Grid sizing logic
+  private setupGridResizing(): void {
+    if (!this.gridContainer || !('ResizeObserver' in window)) return;
+
+    this.resizeObserver = new ResizeObserver((entries) => {
+      entries.forEach(() => {
+        this.debouncedCalculateColumns();
+      });
+    });
+
+    this.resizeObserver.observe(this.gridContainer.nativeElement);
+  }
+  
+  private debouncedCalculateColumns = this.debounce(() => {
+    this.calculateOptimalGridColumns();
+  }, 150);
+  
+  private calculateOptimalGridColumns(): void {
+    if (!this.gridContainer) {
+      // Set initial values based on grid size
+      this.setInitialColumns();
+      return;
+    }
+
+    const containerWidth = this.gridContainer.nativeElement.offsetWidth;
+    if (containerWidth === 0) return; // Container not visible yet
+    
+    // Calculate based on minimum column width
+    const baseColumns = Math.floor(containerWidth / this.minColumnWidth);
+    
+    // Apply size-specific constraints
+    const maxColumns = this.getMaxColumnsForSize();
+    const minColumns = this.getMinColumnsForSize();
+    
+    // Ensure we stay within bounds
+    let calculatedColumns = Math.min(baseColumns, maxColumns);
+    calculatedColumns = Math.max(calculatedColumns, minColumns);
+    
+    // Check for content overflow
+    if (this.wouldCauseContentOverflow(calculatedColumns)) {
+      calculatedColumns = Math.max(calculatedColumns - 1, minColumns);
+    }
+    
+    // Only update if changed
+    if (calculatedColumns !== this._currentColumns) {
+      this._currentColumns = calculatedColumns;
+      this.updateDynamicColumns();
+    }
+  }
+  
+  private setInitialColumns(): void {
+    const maxColumns = this.getMaxColumnsForSize();
+    this._currentColumns = Math.min(4, maxColumns);
+    this.updateDynamicColumns();
+  }
+  
+  private getMaxColumnsForSize(): number {
+    if (this.maxColumns) return this.maxColumns;
+    
+    // Default maximum columns based on grid size
+    switch (this.gridSize) {
+      case 'compact': return 6;
+      case 'default': return 4;
+      case 'wide': return 3;
+      default: return 4;
+    }
+  }
+  
+  private getMinColumnsForSize(): number {
+    // Always ensure at least 1 column
+    return 1;
+  }
+  
+  private wouldCauseContentOverflow(columns: number): boolean {
+    if (!this.gridContainer || columns <= 1) return false;
+    
+    const containerWidth = this.gridContainer.nativeElement.offsetWidth;
+    const availableWidth = containerWidth / columns;
+    
+    // Check if available width is too small for content
+    const minimumViableWidth = this.gridSize === 'compact' ? 200 : 280;
+    
+    return availableWidth < minimumViableWidth;
+  }
+  
+  private updateDynamicColumns(): void {
+    // Update CSS grid template
+    this.dynamicColumns = `repeat(${this._currentColumns}, 1fr)`;
+    
+    // Force change detection if needed
+    if (this.gridContainer) {
+      this.gridContainer.nativeElement.style.gridTemplateColumns = this.dynamicColumns;
+    }
+  }
+  
+  // Utility function for debouncing
+  private debounce<T extends (...args: any[]) => any>(func: T, wait: number): T {
+    let timeout: NodeJS.Timeout | null = null;
+    
+    return ((...args: any[]) => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      
+      timeout = setTimeout(() => {
+        func.apply(this, args);
+      }, wait);
+    }) as T;
+  }
+  
+  // Public API for manual grid recalculation
+  public recalculateGrid(): void {
+    this.calculateOptimalGridColumns();
+  }
+  
+  // Getter for current column count (for debugging/testing)
+  public get currentColumns(): number {
+    return this._currentColumns;
   }
 }

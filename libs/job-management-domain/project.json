@@ -1,0 +1,35 @@
+{
+  "name": "job-management-domain",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/job-management-domain/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/job-management-domain",
+        "tsConfig": "libs/job-management-domain/tsconfig.json",
+        "packageJson": "libs/job-management-domain/package.json",
+        "main": "libs/job-management-domain/src/index.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/job-management-domain/**/*.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": ["domain:job-management", "scope:domain", "type:lib"]
+}

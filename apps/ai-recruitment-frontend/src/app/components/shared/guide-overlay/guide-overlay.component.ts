@@ -5,6 +5,21 @@ import { NavigationGuideService } from '../../../services/navigation/navigation-
 import { Subject } from 'rxjs';
 // import { takeUntil } from 'rxjs/operators'; // Reserved for future use
 
+interface Viewport {
+  width: number;
+  height: number;
+}
+
+interface Position {
+  top: string;
+  left: string;
+}
+
+interface HighlightPosition extends Position {
+  width: string;
+  height: string;
+}
+
 @Component({
   selector: 'arc-guide-overlay',
   standalone: true,
@@ -171,7 +186,7 @@ export class GuideOverlayComponent implements OnInit, OnDestroy {
     });
   }
 
-  private updateTooltipPosition(rect: DOMRect, viewport: any, position: string): void {
+  private updateTooltipPosition(rect: DOMRect, viewport: Viewport, position: string): void {
     const tooltipWidth = 320;
     const tooltipHeight = 200;
     const gap = 16;
@@ -249,11 +264,11 @@ export class GuideOverlayComponent implements OnInit, OnDestroy {
     return classes.join(' ');
   }
 
-  getTooltipPosition(): any {
+  getTooltipPosition(): Position {
     return this.tooltipPosition();
   }
 
-  getHighlightPosition(): any {
+  getHighlightPosition(): HighlightPosition {
     return this.highlightPosition();
   }
 }

@@ -1,0 +1,35 @@
+{
+  "name": "infrastructure-shared",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/infrastructure-shared/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/infrastructure-shared",
+        "tsConfig": "libs/infrastructure-shared/tsconfig.json",
+        "packageJson": "libs/infrastructure-shared/package.json",
+        "main": "libs/infrastructure-shared/src/index.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/infrastructure-shared/**/*.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": ["scope:shared", "type:lib", "layer:infrastructure"]
+}

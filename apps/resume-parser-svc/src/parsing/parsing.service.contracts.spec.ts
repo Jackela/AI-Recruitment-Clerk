@@ -16,7 +16,7 @@ import { NatsClient } from '../nats/nats.client';
 import { 
   ContractViolationError, 
   ContractTestUtils 
-} from '../../../../libs/shared-dtos/src';
+} from '@ai-recruitment-clerk/infrastructure-shared';
 
 /**
  * Test suite for ParsingService with comprehensive DBC contract validation

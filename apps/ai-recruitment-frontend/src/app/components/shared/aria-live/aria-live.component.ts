@@ -3,6 +3,13 @@ import { CommonModule } from '@angular/common';
 import { AccessibilityService } from '../../../services/accessibility/accessibility.service';
 import { Subscription } from 'rxjs';
 
+export interface LiveMessage {
+  id: string;
+  message: string;
+  priority: 'polite' | 'assertive';
+  timestamp: number;
+}
+
 @Component({
   selector: 'arc-aria-live',
   standalone: true,
@@ -98,8 +105,8 @@ export class AriaLiveComponent implements OnInit, OnDestroy {
   private accessibilityService = inject(AccessibilityService);
   private subscription: Subscription = new Subscription();
 
-  politeMessages: any[] = [];
-  assertiveMessages: any[] = [];
+  politeMessages: LiveMessage[] = [];
+  assertiveMessages: LiveMessage[] = [];
   currentStatus = '';
   currentAlert = '';
 
@@ -126,8 +133,8 @@ export class AriaLiveComponent implements OnInit, OnDestroy {
     const state = this.accessibilityService.accessibilityState();
     const messages = state.liveMessages;
     
-    this.politeMessages = messages.filter((msg: any) => msg.priority === 'polite');
-    this.assertiveMessages = messages.filter((msg: any) => msg.priority === 'assertive');
+    this.politeMessages = messages.filter((msg: LiveMessage) => msg.priority === 'polite');
+    this.assertiveMessages = messages.filter((msg: LiveMessage) => msg.priority === 'assertive');
     
     // Update status and alert regions
     const latestPolite = this.politeMessages[this.politeMessages.length - 1];
@@ -150,7 +157,7 @@ export class AriaLiveComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  trackByMessageId(_index: number, message: any): string {
+  trackByMessageId(_index: number, message: LiveMessage): string {
     return message.id;
   }
 }

@@ -32,7 +32,8 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@app/shared-dtos": ["libs/shared-dtos/src/index.ts"]
+      "@app/shared-dtos": ["libs/shared-dtos/src/index.ts"],
+      "@app/shared-nats-client": ["libs/shared-nats-client/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -13,10 +13,10 @@ import {
   Ensures, 
   Invariant,
   ContractValidators 
-} from '../../../libs/shared-dtos/src/contracts/dbc.decorators';
-import { ResumeDTO } from '../../../libs/shared-dtos/src/models/resume.dto';
+} from '@ai-recruitment-clerk/infrastructure-shared';
+import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 import { NatsClient } from './nats/nats.client';
-import { GeminiClient, GeminiConfig } from '../../../libs/shared-dtos/src/gemini/gemini.client';
+import { GeminiClient, GeminiConfig, SecureConfigValidator } from '@ai-recruitment-clerk/ai-services-shared';
 import { EnhancedSkillMatcherService, JobSkillRequirement, EnhancedSkillScore } from './services/enhanced-skill-matcher.service';
 import { ExperienceAnalyzerService, JobRequirements, ExperienceScore } from './services/experience-analyzer.service';
 import { CulturalFitAnalyzerService, CulturalFitScore } from './services/cultural-fit-analyzer.service';
@@ -44,7 +44,17 @@ export interface ScoreComponent {
   details: string;
   confidence?: number;
   evidenceStrength?: number;
-  breakdown?: any;
+  breakdown?: Record<string, unknown> | {
+    exactMatches?: number;
+    semanticMatches?: number;
+    fuzzyMatches?: number;
+  } | {
+    baseExperienceScore?: number;
+    relevanceAdjustment?: number;
+    seniorityBonus?: number;
+    industryPenalty?: number;
+    finalScore?: number;
+  };
 }
 
 export interface ScoreDTO {
@@ -93,8 +103,11 @@ export class ScoringEngineServiceContracts {
     private readonly culturalFitAnalyzer: CulturalFitAnalyzerService,
     private readonly confidenceService: ScoringConfidenceService
   ) {
+    // 🔒 SECURITY: Validate configuration before service initialization
+    SecureConfigValidator.validateServiceConfig('ScoringEngineServiceContracts', ['GEMINI_API_KEY']);
+    
     const geminiConfig: GeminiConfig = {
-      apiKey: process.env.GEMINI_API_KEY || 'your_gemini_api_key_here',
+      apiKey: SecureConfigValidator.requireEnv('GEMINI_API_KEY'),
       model: 'gemini-1.5-flash',
       temperature: 0.3,
       maxOutputTokens: 8192
@@ -446,9 +459,9 @@ export class ScoringEngineServiceContracts {
     return Math.round(diffYears * 10) / 10; // Round to 1 decimal place
   }
 
-  private getBasicEducationScore(education: any, requiredLevel: string): number {
+  private getBasicEducationScore(education: ResumeDTO['education'], requiredLevel: string): number {
     const educationHierarchy = { 'phd': 4, 'master': 3, 'bachelor': 2, 'any': 1 };
-    const candidateLevel = educationHierarchy[education?.degree?.toLowerCase() as keyof typeof educationHierarchy] || 1;
+    const candidateLevel = educationHierarchy[education[0]?.degree?.toLowerCase() as keyof typeof educationHierarchy] || 1;
     const requiredLevelNum = educationHierarchy[requiredLevel];
     
     return candidateLevel >= requiredLevelNum ? 85 : Math.max(50, 85 - (requiredLevelNum - candidateLevel) * 15);

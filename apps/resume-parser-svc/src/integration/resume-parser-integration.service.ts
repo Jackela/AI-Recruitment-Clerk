@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { VisionLlmService } from '../vision-llm/vision-llm.service';
 import { FieldMapperService } from '../field-mapper/field-mapper.service';
 import { FieldMappingResult, VisionLlmResponse } from '../dto/resume-parsing.dto';
-import { ResumeDTO } from '../../../../libs/shared-dtos/src';
+import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
 export interface ResumeParsingResult {
   resumeDto: ResumeDTO;

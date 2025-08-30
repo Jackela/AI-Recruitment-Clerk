@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserService } from './user.service';
-import { LoginDto, CreateUserDto, AuthResponseDto, RefreshTokenDto, UserDto, Permission, UserRole } from '@app/shared-dtos';
+import { LoginDto, CreateUserDto, AuthResponseDto, RefreshTokenDto, UserDto, Permission, UserRole } from '@ai-recruitment-clerk/user-management-domain';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { RolesGuard } from './guards/roles.guard';

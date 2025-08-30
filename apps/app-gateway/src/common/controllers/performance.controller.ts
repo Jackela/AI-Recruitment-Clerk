@@ -8,7 +8,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@ne
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
-import { Permission } from '@app/shared-dtos';
+import { Permission } from '@ai-recruitment-clerk/user-management-domain';
 import { PerformanceMonitoringInterceptor } from '../interceptors/performance-monitoring.interceptor';
 import { CacheService } from '../../cache/cache.service';
 import { CacheOptimizationService } from '../../cache/cache-optimization.service';

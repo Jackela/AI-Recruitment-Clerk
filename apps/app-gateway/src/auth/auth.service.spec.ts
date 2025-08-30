@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException, ConflictException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserService } from './user.service';
-import { CreateUserDto, LoginDto, UserRole, UserStatus } from '@app/shared-dtos';
+import { CreateUserDto, LoginDto, UserRole, UserStatus } from '@ai-recruitment-clerk/user-management-domain';
 
 describe('AuthService', () => {
   let service: AuthService;

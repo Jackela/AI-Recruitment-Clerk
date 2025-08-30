@@ -1,0 +1,35 @@
+{
+  "name": "usage-management-domain",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/usage-management-domain/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/usage-management-domain",
+        "tsConfig": "libs/usage-management-domain/tsconfig.json",
+        "packageJson": "libs/usage-management-domain/package.json",
+        "main": "libs/usage-management-domain/src/index.ts"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/usage-management-domain/**/*.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": ["domain:usage-management", "scope:domain", "type:lib"]
+}

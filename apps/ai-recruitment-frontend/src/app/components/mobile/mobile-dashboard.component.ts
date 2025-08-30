@@ -199,54 +199,77 @@ export interface QuickAction {
   `,
   styles: [`
     .mobile-dashboard-content {
-      padding: 72px 16px 80px;
+      padding: calc(var(--spacing-16, 4rem) + var(--spacing-2, 0.5rem)) var(--spacing-4, 1rem) var(--spacing-20, 5rem);
       min-height: 100vh;
-      background: #f8f9fa;
+      background: var(--color-background, #f8f9fa);
     }
 
     .pull-refresh-indicator {
       position: fixed;
-      top: 56px;
+      top: calc(var(--spacing-14, 3.5rem) + var(--spacing-2, 0.5rem));
       left: 50%;
       transform: translateX(-50%) translateY(-100%);
-      background: white;
-      border-radius: 20px;
-      padding: 12px 20px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      background: var(--color-surface, white);
+      border-radius: var(--border-radius-xl, 20px);
+      padding: var(--spacing-3, 0.75rem) var(--spacing-5, 1.25rem);
+      box-shadow: var(--shadow-lg, 0 4px 12px rgba(0, 0, 0, 0.15));
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: var(--spacing-2, 0.5rem);
       z-index: 500;
-      transition: transform 0.3s ease;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
 
       &.visible {
         transform: translateX(-50%) translateY(10px);
       }
+      
+      &.loading {
+        pointer-events: none;
+        
+        .refresh-spinner {
+          animation-duration: 0.8s; // Slower, more pleasant animation
+        }
+      }
+      
+      // Enhanced mobile safe area support
+      @supports (top: env(safe-area-inset-top)) {
+        top: calc(56px + env(safe-area-inset-top));
+      }
 
       .refresh-spinner {
-        width: 16px;
-        height: 16px;
-        border: 2px solid #e9ecef;
-        border-top: 2px solid #3498db;
+        width: var(--spacing-4, 1rem);
+        height: var(--spacing-4, 1rem);
+        border: 2px solid var(--color-border, #e9ecef);
+        border-top: 2px solid var(--color-primary, #3498db);
         border-radius: 50%;
         animation: spin 1s linear infinite;
+        will-change: transform;
+        
+        // Respect reduced motion preferences
+        @media (prefers-reduced-motion: reduce) {
+          animation-duration: 2s;
+        }
       }
 
       .refresh-text {
         font-size: 12px;
         color: #6c757d;
         font-weight: 500;
+        user-select: none;
+        pointer-events: none;
       }
     }
 
     .quick-actions-bar {
-      margin-bottom: 24px;
+      margin-bottom: var(--spacing-6, 1.5rem);
 
       .quick-actions-scroll {
         display: flex;
-        gap: 12px;
+        gap: var(--spacing-3, 0.75rem);
         overflow-x: auto;
-        padding: 4px 0 8px;
+        padding: var(--spacing-1, 0.25rem) 0 var(--spacing-2, 0.5rem);
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
         -ms-overflow-style: none;
@@ -259,18 +282,18 @@ export interface QuickAction {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 8px;
-          padding: 12px;
+          gap: var(--spacing-2, 0.5rem);
+          padding: var(--spacing-3, 0.75rem);
           border: none;
-          border-radius: 12px;
-          background: white;
-          color: #495057;
+          border-radius: var(--border-radius-lg, 12px);
+          background: var(--color-surface, white);
+          color: var(--color-text, #495057);
           text-decoration: none;
           cursor: pointer;
           transition: all 0.2s ease;
-          min-width: 72px;
+          min-width: calc(var(--spacing-16, 4rem) + var(--spacing-2, 0.5rem));
           flex-shrink: 0;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+          box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.06));
 
           &:active {
             transform: scale(0.96);
@@ -279,8 +302,8 @@ export interface QuickAction {
 
           .action-icon {
             position: relative;
-            width: 40px;
-            height: 40px;
+            width: var(--spacing-10, 2.5rem);
+            height: var(--spacing-10, 2.5rem);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -288,15 +311,15 @@ export interface QuickAction {
 
             .action-badge {
               position: absolute;
-              top: -4px;
-              right: -4px;
-              background: #e74c3c;
+              top: calc(-1 * var(--spacing-1, 0.25rem));
+              right: calc(-1 * var(--spacing-1, 0.25rem));
+              background: var(--color-error, #e74c3c);
               color: white;
-              font-size: 10px;
+              font-size: 0.625rem;
               font-weight: 600;
-              padding: 2px 6px;
-              border-radius: 10px;
-              min-width: 16px;
+              padding: var(--spacing-1, 0.25rem) var(--spacing-2, 0.5rem);
+              border-radius: var(--border-radius-full, 10px);
+              min-width: var(--spacing-4, 1rem);
               text-align: center;
             }
           }
@@ -347,26 +370,26 @@ export interface QuickAction {
     }
 
     .stats-overview {
-      margin-bottom: 24px;
+      margin-bottom: var(--spacing-6, 1.5rem);
 
       .stats-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+        gap: var(--spacing-3, 0.75rem);
 
         .stat-card {
-          background: white;
-          border-radius: 12px;
-          padding: 16px;
+          background: var(--color-surface, white);
+          border-radius: var(--border-radius-lg, 12px);
+          padding: var(--spacing-4, 1rem);
           display: flex;
           align-items: center;
-          gap: 12px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+          gap: var(--spacing-3, 0.75rem);
+          box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.06));
 
           .stat-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
+            width: var(--spacing-9, 2.25rem);
+            height: var(--spacing-9, 2.25rem);
+            border-radius: var(--border-radius-md, 8px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -394,14 +417,14 @@ export interface QuickAction {
             .stat-change {
               display: flex;
               align-items: center;
-              gap: 4px;
-              margin-top: 4px;
+              gap: var(--spacing-1, 0.25rem);
+              margin-top: var(--spacing-1, 0.25rem);
 
               .change-indicator {
-                font-size: 11px;
+                font-size: 0.6875rem;
                 font-weight: 600;
-                padding: 2px 4px;
-                border-radius: 4px;
+                padding: var(--spacing-1, 0.25rem) var(--spacing-1, 0.25rem);
+                border-radius: var(--border-radius-sm, 4px);
 
                 &.change-increase {
                   background: rgba(40, 167, 69, 0.1);
@@ -445,20 +468,20 @@ export interface QuickAction {
     }
 
     .dashboard-cards {
-      margin-bottom: 24px;
+      margin-bottom: var(--spacing-6, 1.5rem);
 
       .cards-container {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: var(--spacing-3, 0.75rem);
 
         .dashboard-card {
-          background: white;
-          border-radius: 12px;
-          padding: 16px;
+          background: var(--color-surface, white);
+          border-radius: var(--border-radius-lg, 12px);
+          padding: var(--spacing-4, 1rem);
           cursor: pointer;
           transition: all 0.2s ease;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+          box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.06));
           text-decoration: none;
           color: inherit;
           position: relative;
@@ -473,22 +496,22 @@ export interface QuickAction {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 12px;
+            margin-bottom: var(--spacing-3, 0.75rem);
 
             .card-icon {
-              width: 40px;
-              height: 40px;
-              border-radius: 8px;
+              width: var(--spacing-10, 2.5rem);
+              height: var(--spacing-10, 2.5rem);
+              border-radius: var(--border-radius-md, 8px);
               display: flex;
               align-items: center;
               justify-content: center;
-              background: #f8f9fa;
-              color: #6c757d;
+              background: var(--color-background, #f8f9fa);
+              color: var(--color-text-secondary, #6c757d);
             }
 
             .card-priority {
-              width: 8px;
-              height: 8px;
+              width: var(--spacing-2, 0.5rem);
+              height: var(--spacing-2, 0.5rem);
               border-radius: 50%;
 
               &.priority--high {
@@ -532,13 +555,13 @@ export interface QuickAction {
             .card-change {
               display: flex;
               align-items: center;
-              gap: 6px;
+              gap: var(--spacing-2, 0.5rem);
 
               .change-indicator {
-                font-size: 12px;
+                font-size: 0.75rem;
                 font-weight: 600;
-                padding: 2px 6px;
-                border-radius: 4px;
+                padding: var(--spacing-1, 0.25rem) var(--spacing-2, 0.5rem);
+                border-radius: var(--border-radius-sm, 4px);
 
                 &.change-increase {
                   background: rgba(40, 167, 69, 0.1);
@@ -595,10 +618,10 @@ export interface QuickAction {
 
     .recent-activity {
       .activity-list {
-        background: white;
-        border-radius: 12px;
+        background: var(--color-surface, white);
+        border-radius: var(--border-radius-lg, 12px);
         overflow: hidden;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+        box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.06));
 
         .activity-item {
           display: flex;
@@ -928,9 +951,10 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
     icon: 'M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z'
   };
 
-  // State
+  // Enhanced state management for pull-to-refresh
   isPullRefreshVisible = false;
   isRefreshing = false;
+  private refreshCooldown = false; // Prevent rapid refresh attempts
 
   @ViewChild('dashboardContainer', { read: ElementRef }) dashboardContainer!: ElementRef;
   @ViewChild('quickActionsContainer', { read: ElementRef }) quickActionsContainer!: ElementRef;
@@ -952,63 +976,154 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
 
   private setupPullToRefresh() {
     let startY = 0;
+    let startX = 0;
     let currentY = 0;
+    let currentX = 0;
     let isScrollAtTop = true;
+    let isPulling = false;
+    let touchIdentifier: number | null = null;
 
     const handleTouchStart = (e: TouchEvent) => {
-      startY = e.touches[0].clientY;
+      // Only handle single touch
+      if (e.touches.length !== 1) return;
+      
+      const touch = e.touches[0];
+      touchIdentifier = touch.identifier;
+      startY = touch.clientY;
+      startX = touch.clientX;
+      currentY = startY;
+      currentX = startX;
       isScrollAtTop = window.scrollY === 0;
+      isPulling = false;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!isScrollAtTop) return;
+      if (!isScrollAtTop || touchIdentifier === null) return;
       
-      currentY = e.touches[0].clientY;
-      const deltaY = currentY - startY;
-      
-      if (deltaY > 0 && deltaY < 100) {
-        this.isPullRefreshVisible = true;
-      } else if (deltaY >= 100) {
-        this.isPullRefreshVisible = true;
-        // Haptic feedback if available
-        if ('vibrate' in navigator) {
-          navigator.vibrate(50);
+      // Find the correct touch by identifier
+      let targetTouch: Touch | null = null;
+      for (let i = 0; i < e.touches.length; i++) {
+        if (e.touches[i].identifier === touchIdentifier) {
+          targetTouch = e.touches[i];
+          break;
         }
       }
-    };
-
-    const handleTouchEnd = (_e: TouchEvent) => {
-      if (!isScrollAtTop) return;
       
+      if (!targetTouch) return;
+      
+      currentY = targetTouch.clientY;
+      currentX = targetTouch.clientX;
       const deltaY = currentY - startY;
+      const deltaX = Math.abs(currentX - startX);
       
-      if (deltaY >= 100) {
-        this.triggerRefresh();
-      } else {
+      // Enhanced gesture detection
+      const isVerticalPull = deltaY > 0;
+      const isHorizontalScroll = deltaX > 30;
+      const isPrimaryVertical = Math.abs(deltaY) > deltaX * 1.5;
+      
+      // Only handle clear downward vertical gestures
+      if (isVerticalPull && !isHorizontalScroll && isPrimaryVertical) {
+        isPulling = true;
+        
+        if (deltaY > 20 && deltaY < 100) {
+          this.isPullRefreshVisible = true;
+        } else if (deltaY >= 100) {
+          this.isPullRefreshVisible = true;
+          
+          // Haptic feedback for strong pull
+          if ('vibrate' in navigator) {
+            navigator.vibrate(50);
+          }
+          
+          // Only prevent default for confirmed pull-to-refresh gestures
+          if (deltaY > deltaX * 2) {
+            e.preventDefault();
+          }
+        }
+      } else if (isHorizontalScroll || !isPrimaryVertical) {
+        // Reset pull state for horizontal or diagonal gestures
         this.isPullRefreshVisible = false;
+        isPulling = false;
       }
     };
 
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (!isScrollAtTop || touchIdentifier === null) {
+        this.resetPullState();
+        return;
+      }
+      
+      // Check if our tracked touch ended
+      let touchEnded = true;
+      for (let i = 0; i < e.touches.length; i++) {
+        if (e.touches[i].identifier === touchIdentifier) {
+          touchEnded = false;
+          break;
+        }
+      }
+      
+      if (touchEnded) {
+        const deltaY = currentY - startY;
+        const deltaX = Math.abs(currentX - startX);
+        
+        // Only trigger refresh for clear vertical pulls
+        if (isPulling && deltaY >= 100 && deltaX < 50) {
+          this.triggerRefresh();
+        } else {
+          this.resetPullState();
+        }
+        
+        touchIdentifier = null;
+      }
+    };
+
+    const handleTouchCancel = (_e: TouchEvent) => {
+      this.resetPullState();
+      touchIdentifier = null;
+    };
+
+    // Use passive listeners where possible, non-passive only for touchmove when needed
     document.addEventListener('touchstart', handleTouchStart, { passive: true });
-    document.addEventListener('touchmove', handleTouchMove, { passive: true });
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
     document.addEventListener('touchend', handleTouchEnd, { passive: true });
+    document.addEventListener('touchcancel', handleTouchCancel, { passive: true });
+    
+    // Cleanup function for proper event listener removal
+    this.destroy$.subscribe(() => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+      document.removeEventListener('touchcancel', handleTouchCancel);
+    });
+  }
+  
+  private resetPullState(): void {
+    this.isPullRefreshVisible = false;
   }
 
   private triggerRefresh() {
+    if (this.isRefreshing) return; // Prevent multiple simultaneous refreshes
+    
     this.isRefreshing = true;
     
-    // Simulate refresh delay
+    // Enhanced haptic feedback sequence
+    if ('vibrate' in navigator) {
+      navigator.vibrate([30, 30, 30]); // Shorter, more subtle feedback
+    }
+    
+    // Simulate refresh with realistic timing
     setTimeout(() => {
       this.isRefreshing = false;
-      this.isPullRefreshVisible = false;
+      this.resetPullState();
       
-      // Haptic feedback
+      // Success haptic feedback
       if ('vibrate' in navigator) {
-        navigator.vibrate([50, 50, 50]);
+        navigator.vibrate([20, 20, 20, 20]); // Success pattern
       }
       
       // TODO: Refresh dashboard data
-    }, 2000);
+      // TODO: Show success notification
+    }, 1500); // Reduced from 2000ms for better UX
   }
 
   onHeaderAction(action: { id: string; label: string; icon: string; badge?: number }) {

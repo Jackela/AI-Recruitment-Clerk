@@ -12,14 +12,15 @@ import {
   effect
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TemplateRef } from '@angular/core';
 import { Subject, fromEvent, animationFrameScheduler } from 'rxjs';
 import { takeUntil, throttleTime, distinctUntilChanged } from 'rxjs/operators';
 // import { debounceTime } from 'rxjs/operators'; // Reserved for future use
 
-export interface VirtualScrollConfig {
+export interface VirtualScrollConfig<T = unknown> {
   itemHeight: number;
   bufferSize?: number;
-  trackBy?: (index: number, item: any) => any;
+  trackBy?: (index: number, item: T) => unknown;
   enableSmoothScroll?: boolean;
   enableInfiniteScroll?: boolean;
   infiniteScrollThreshold?: number;
@@ -236,13 +237,13 @@ interface ScrollState {
     }
   `]
 })
-export class VirtualScrollComponent implements OnInit, OnDestroy {
+export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
   @ViewChild('scrollContainer', { static: true }) scrollContainer!: ElementRef<HTMLDivElement>;
   
-  @Input() items: any[] = [];
-  @Input() itemTemplate: any;
+  @Input() items: T[] = [];
+  @Input() itemTemplate!: TemplateRef<unknown>;
   @Input() containerHeight = 600;
-  @Input() config: VirtualScrollConfig = {
+  @Input() config: VirtualScrollConfig<T> = {
     itemHeight: 50,
     bufferSize: 5,
     enableSmoothScroll: false,
@@ -259,7 +260,7 @@ export class VirtualScrollComponent implements OnInit, OnDestroy {
   
   // State
   private destroy$ = new Subject<void>();
-  private itemHeightCache = new Map<any, number>();
+  private itemHeightCache = new Map<T, number>();
   
   scrollState = signal<ScrollState>({
     scrollTop: 0,
@@ -403,14 +404,14 @@ export class VirtualScrollComponent implements OnInit, OnDestroy {
     // Handled by scroll listener
   }
   
-  trackByFn(index: number, item: any): any {
+  trackByFn(index: number, item: T): unknown {
     if (this.config.trackBy) {
       return this.config.trackBy(this.startIndex() + index, item);
     }
-    return item.id || index;
+    return (item as Record<string, unknown>)?.id || index;
   }
   
-  getItemHeight(item: any, _index: number): number {
+  getItemHeight(item: T, _index: number): number {
     if (!this.config.enableDynamicHeight) {
       return this.config.itemHeight;
     }
@@ -450,7 +451,7 @@ export class VirtualScrollComponent implements OnInit, OnDestroy {
     });
   }
   
-  scrollToItem(item: any, behavior: ScrollBehavior = 'auto'): void {
+  scrollToItem(item: T, behavior: ScrollBehavior = 'auto'): void {
     const index = this.items.indexOf(item);
     if (index !== -1) {
       this.scrollToIndex(index, behavior);

@@ -4,10 +4,14 @@ import { filter, takeUntil } from 'rxjs/operators';
 import { io, Socket } from 'socket.io-client';
 import { ToastService } from './toast.service';
 
+export interface WebSocketMessageData {
+  [key: string]: unknown;
+}
+
 export interface WebSocketMessage {
   type: 'progress' | 'step_change' | 'completed' | 'error' | 'status_update';
   sessionId: string;
-  data: any;
+  data: WebSocketMessageData;
   timestamp: Date;
 }
 
@@ -18,10 +22,33 @@ export interface ProgressUpdate {
   estimatedTimeRemaining?: number;
 }
 
+export interface AnalysisResult {
+  analysisId: string;
+  score: number;
+  summary: string;
+  skills: string[];
+  experience: {
+    totalYears: number;
+    positions: Array<{
+      title: string;
+      company: string;
+      duration: string;
+    }>;
+  };
+  strengths: string[];
+  recommendations: string[];
+  generatedAt: string;
+}
+
 export interface CompletionData {
   analysisId: string;
-  result: any;
+  result: AnalysisResult;
   processingTime: number;
+}
+
+export interface ErrorData {
+  error: string;
+  code?: string;
 }
 
 @Injectable({
@@ -85,7 +112,7 @@ export class WebSocketService implements OnDestroy {
     return this.onMessage('progress', sessionId).pipe(
       filter(msg => msg.data),
       takeUntil(this.destroy$)
-    ) as Observable<any>;
+    ) as Observable<ProgressUpdate>;
   }
 
   /**
@@ -95,17 +122,17 @@ export class WebSocketService implements OnDestroy {
     return this.onMessage('completed', sessionId).pipe(
       filter(msg => msg.data),
       takeUntil(this.destroy$)
-    ) as Observable<any>;
+    ) as Observable<CompletionData>;
   }
 
   /**
    * 监听错误事件
    */
-  onError(sessionId: string): Observable<{error: string; code?: string}> {
+  onError(sessionId: string): Observable<ErrorData> {
     return this.onMessage('error', sessionId).pipe(
       filter(msg => msg.data),
       takeUntil(this.destroy$)
-    ) as Observable<any>;
+    ) as Observable<ErrorData>;
   }
 
   /**
@@ -118,7 +145,7 @@ export class WebSocketService implements OnDestroy {
   /**
    * 发送消息到服务器
    */
-  sendMessage(event: string, data: any): void {
+  sendMessage(event: string, data: WebSocketMessageData): void {
     if (this.socket && this.socket.connected) {
       this.socket.emit(event, data);
     } else {

@@ -1,20 +1,17 @@
 import { Controller, Logger, OnModuleInit } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
-import { ResumeSubmittedEvent, ResumeDTO } from '../../../../libs/shared-dtos/src';
-import { NatsClient } from '../nats/nats.client';
+import { ResumeSubmittedEvent, ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
 
 @Controller()
 export class ResumeEventsController implements OnModuleInit {
   private readonly logger = new Logger(ResumeEventsController.name);
 
-  constructor(private readonly natsClient: NatsClient) {}
+  constructor(private readonly natsService: ResumeParserNatsService) {}
 
   async onModuleInit() {
-    // Subscribe to job.resume.submitted events
-    await this.natsClient.subscribe('job.resume.submitted', this.handleResumeSubmitted.bind(this), {
-      subject: 'job.resume.submitted',
-      durableName: 'resume-parser-job-resume-submitted',
-    });
+    // Subscribe to job.resume.submitted events using the shared NATS service
+    await this.natsService.subscribeToResumeSubmissions(this.handleResumeSubmitted.bind(this));
   }
 
   @EventPattern('job.resume.submitted')
@@ -29,12 +26,14 @@ export class ResumeEventsController implements OnModuleInit {
       
       const processingTimeMs = Date.now() - startTime;
       
-      // Publish analysis.resume.parsed event
-      await this.natsClient.publishAnalysisResumeParsed({
+      // Publish analysis.resume.parsed event using the shared NATS service
+      await this.natsService.publishAnalysisResumeParsed({
         jobId: payload.jobId,
         resumeId: payload.resumeId,
         resumeDto,
         processingTimeMs,
+        confidence: 0.85, // Default confidence for mock parsing
+        parsingMethod: 'mock-ai-vision',
       });
       
       this.logger.log(`[RESUME-PARSER-SVC] Successfully processed and published analysis.resume.parsed for resumeId: ${payload.resumeId} in ${processingTimeMs}ms`);
@@ -42,8 +41,12 @@ export class ResumeEventsController implements OnModuleInit {
     } catch (error) {
       this.logger.error(`[RESUME-PARSER-SVC] Error processing job.resume.submitted for resumeId: ${payload.resumeId}:`, error);
       
-      // Publish error event
-      await this.natsClient.publishProcessingError(payload.jobId, payload.resumeId, error as Error);
+      // Publish error event using the shared NATS service
+      await this.natsService.publishProcessingError(payload.jobId, payload.resumeId, error as Error, {
+        stage: 'resume-parsing',
+        inputSize: payload.originalFilename?.length,
+        retryAttempt: 1,
+      });
     }
   }
 

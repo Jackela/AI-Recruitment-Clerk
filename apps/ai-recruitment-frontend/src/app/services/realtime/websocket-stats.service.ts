@@ -19,7 +19,11 @@ export interface AnalysisEvent {
   progress?: number;
   stage?: string;
   timestamp: Date;
-  metadata?: any;
+  metadata?: {
+    fileSize?: number;
+    fileType?: string;
+    [key: string]: unknown;
+  };
 }
 
 export interface SystemMetrics {
@@ -28,6 +32,19 @@ export interface SystemMetrics {
   diskUsage: number;
   networkTraffic: number;
   timestamp: Date;
+}
+
+interface WebSocketMessage {
+  type: 'stats' | 'event' | 'metrics' | 'error' | 'subscribe' | 'refresh';
+  payload?: unknown;
+  topics?: string[];
+  target?: string;
+}
+
+interface WebSocketErrorPayload {
+  message?: string;
+  code?: string | number;
+  details?: unknown;
 }
 
 @Injectable({
@@ -83,7 +100,7 @@ export class WebSocketStatsService {
 
   // Mock data for development
   private mockMode = false;
-  private mockInterval: any;
+  private mockInterval: NodeJS.Timeout | null = null;
 
   constructor() {
     // Sync BehaviorSubjects with signals
@@ -189,7 +206,7 @@ export class WebSocketStatsService {
     this.lastError.set('连接错误');
   }
 
-  private handleMessage(data: any): void {
+  private handleMessage(data: WebSocketMessage): void {
     switch (data.type) {
       case 'stats':
         this.updateStats(data.payload);
@@ -208,7 +225,7 @@ export class WebSocketStatsService {
     }
   }
 
-  private updateStats(payload: any): void {
+  private updateStats(payload: Partial<RealtimeStats>): void {
     const newStats: RealtimeStats = {
       ...payload,
       lastUpdated: new Date()
@@ -216,7 +233,7 @@ export class WebSocketStatsService {
     this.stats$.next(newStats);
   }
 
-  private handleAnalysisEvent(payload: any): void {
+  private handleAnalysisEvent(payload: Omit<AnalysisEvent, 'timestamp'> & { timestamp: string | Date }): void {
     const event: AnalysisEvent = {
       ...payload,
       timestamp: new Date(payload.timestamp)
@@ -243,7 +260,7 @@ export class WebSocketStatsService {
     this.stats$.next(updatedStats);
   }
 
-  private updateMetrics(payload: any): void {
+  private updateMetrics(payload: Omit<SystemMetrics, 'timestamp'>): void {
     const metrics: SystemMetrics = {
       ...payload,
       timestamp: new Date()
@@ -251,7 +268,7 @@ export class WebSocketStatsService {
     this.metrics$.next(metrics);
   }
 
-  private handleServerError(payload: any): void {
+  private handleServerError(payload: WebSocketErrorPayload): void {
     console.error('Server error:', payload);
     this.lastError.set(payload.message || '服务器错误');
   }
@@ -272,7 +289,7 @@ export class WebSocketStatsService {
     }, delay);
   }
 
-  private send(data: any): void {
+  private send(data: WebSocketMessage): void {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(data));
     }

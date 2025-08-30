@@ -5,7 +5,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import request from 'supertest';
 import { MarketingModule } from './marketing.module';
 import { FeedbackCodeService } from './feedback-code.service';
-import { CreateFeedbackCodeDto, MarkFeedbackCodeUsedDto } from '@app/shared-dtos';
+import { CreateFeedbackCodeDto, MarkFeedbackCodeUsedDto } from '@ai-recruitment-clerk/marketing-domain';
 
 describe('Marketing Integration Tests', () => {
   let app: INestApplication;

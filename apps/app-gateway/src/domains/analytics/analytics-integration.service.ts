@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { AnalyticsDomainService, EventType, EventStatus, MetricUnit, ReportType, DataScope, IDomainEventBus, IAuditLogger, IPrivacyService, ISessionTracker, ConsentStatus } from '@app/shared-dtos';
-import { UserSession } from '@app/shared-dtos';
+import { AnalyticsDomainService, EventType, EventStatus, MetricUnit, ReportType, DataScope, IDomainEventBus, IAuditLogger, IPrivacyService, ISessionTracker, ConsentStatus, UserSession } from '@ai-recruitment-clerk/infrastructure-shared';
 import { AnalyticsEventRepository } from './analytics-event.repository';
 import { NatsClient } from '../../nats/nats.client';
 import { Cache } from 'cache-manager';

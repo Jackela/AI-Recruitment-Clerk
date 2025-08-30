@@ -1,5 +1,29 @@
 import { Injectable } from '@angular/core';
 
+interface MemoryInfo {
+  usedJSHeapSize: number;
+  totalJSHeapSize: number;
+  jsHeapSizeLimit: number;
+}
+
+interface PerformanceWithMemory extends Performance {
+  memory: MemoryInfo;
+}
+
+interface FirstInputEntry extends PerformanceEntry {
+  processingStart: number;
+  hadRecentInput?: boolean;
+}
+
+interface LayoutShiftEntry extends PerformanceEntry {
+  value: number;
+  hadRecentInput: boolean;
+}
+
+interface ResourceEntry extends PerformanceEntry {
+  transferSize: number;
+}
+
 interface PerformanceMetrics {
   bundleSize: number;
   loadTime: number;
@@ -61,8 +85,8 @@ export class PerformanceMonitorService {
   private observeFID(): void {
     if ('PerformanceObserver' in window) {
       const observer = new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        entries.forEach((entry: any) => {
+        const entries = list.getEntries() as FirstInputEntry[];
+        entries.forEach((entry) => {
           this.metrics.coreWebVitals = {
             ...this.metrics.coreWebVitals,
             fid: entry.processingStart - entry.startTime
@@ -82,8 +106,8 @@ export class PerformanceMonitorService {
       let clsValue = 0;
       
       const observer = new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        entries.forEach((entry: any) => {
+        const entries = list.getEntries() as LayoutShiftEntry[];
+        entries.forEach((entry) => {
           if (!entry.hadRecentInput) {
             clsValue += entry.value;
             this.metrics.coreWebVitals = {
@@ -104,10 +128,10 @@ export class PerformanceMonitorService {
   private observeResources(): void {
     if ('PerformanceObserver' in window) {
       const observer = new PerformanceObserver((list) => {
-        const entries = list.getEntries();
+        const entries = list.getEntries() as ResourceEntry[];
         let totalSize = 0;
         
-        entries.forEach((entry: any) => {
+        entries.forEach((entry) => {
           if (entry.transferSize) {
             totalSize += entry.transferSize;
           }
@@ -124,13 +148,13 @@ export class PerformanceMonitorService {
 
   private observeMemory(): void {
     if ('memory' in performance) {
-      const memory = (performance as any).memory;
+      const memory = (performance as PerformanceWithMemory).memory;
       this.metrics.memoryUsage = memory.usedJSHeapSize;
       
       // Monitor memory periodically
       setInterval(() => {
         if ('memory' in performance) {
-          const currentMemory = (performance as any).memory;
+          const currentMemory = (performance as PerformanceWithMemory).memory;
           this.metrics.memoryUsage = currentMemory.usedJSHeapSize;
           
           // Log if memory usage is high

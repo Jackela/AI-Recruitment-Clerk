@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EnhancedSkillMatcherService, JobSkillRequirement } from './enhanced-skill-matcher.service';
-import { GeminiClient } from '../../../../libs/shared-dtos/src/gemini/gemini.client';
+import { GeminiClient } from '@ai-recruitment-clerk/ai-services-shared';
 
 describe('EnhancedSkillMatcherService', () => {
   let service: EnhancedSkillMatcherService;

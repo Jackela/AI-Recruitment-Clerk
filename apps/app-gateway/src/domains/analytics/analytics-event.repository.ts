@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { AnalyticsEvent, IAnalyticsRepository, EventStatus } from '@app/shared-dtos';
+import { IAnalyticsRepository, EventStatus, AnalyticsEventEntity } from '@ai-recruitment-clerk/infrastructure-shared';
 import { AnalyticsEvent, AnalyticsEventDocument } from '../../schemas/analytics-event.schema';
 
 /**

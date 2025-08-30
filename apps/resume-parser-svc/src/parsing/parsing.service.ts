@@ -1,9 +1,16 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { VisionLlmService } from '../vision-llm/vision-llm.service';
 import { GridFsService } from '../gridfs/gridfs.service';
 import { FieldMapperService } from '../field-mapper/field-mapper.service';
-import { NatsClient } from '../nats/nats.client';
-import { RetryUtility, WithCircuitBreaker, InputValidator, EncryptionService } from '../../../../libs/shared-dtos/src';
+import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
+import { 
+  RetryUtility, 
+  WithCircuitBreaker, 
+  InputValidator, 
+  EncryptionService,
+  ResumeParserException,
+  ErrorCorrelationManager
+} from '@ai-recruitment-clerk/infrastructure-shared';
 import { createHash } from 'crypto';
 
 @Injectable()
@@ -18,7 +25,7 @@ export class ParsingService {
     private readonly visionLlmService: VisionLlmService,
     private readonly gridFsService: GridFsService,
     private readonly fieldMapperService: FieldMapperService,
-    private readonly natsClient: NatsClient,
+    private readonly natsService: ResumeParserNatsService,
   ) {
     // Periodic cleanup of expired processing records
     setInterval(() => this.cleanupExpiredProcessing(), 5 * 60 * 1000); // Every 5 minutes
@@ -32,14 +39,25 @@ export class ParsingService {
   async handleResumeSubmitted(event: any): Promise<void> {
     const { jobId, resumeId, originalFilename, tempGridFsUrl, organizationId, fileMetadata } = event || {};
     
-    // Enhanced input validation
+    // Enhanced input validation with correlation
+    const correlationContext = ErrorCorrelationManager.getContext();
+    
     if (!jobId || !resumeId || !originalFilename || !tempGridFsUrl) {
-      throw new BadRequestException('Invalid ResumeSubmittedEvent: missing required fields');
+      throw new ResumeParserException(
+        'INVALID_EVENT_DATA',
+        {
+          provided: { jobId: !!jobId, resumeId: !!resumeId, originalFilename: !!originalFilename, tempGridFsUrl: !!tempGridFsUrl },
+          correlationId: correlationContext?.traceId
+        }
+      );
     }
 
     // Validate organization context
     if (!organizationId) {
-      throw new BadRequestException('Organization ID is required for data isolation');
+      throw new ResumeParserException(
+        'ORGANIZATION_ID_REQUIRED',
+        { correlationId: correlationContext?.traceId }
+      );
     }
 
     const start = Date.now();
@@ -95,25 +113,25 @@ export class ParsingService {
         }
       };
 
-      await this.natsClient.publishAnalysisResumeParsed(payload);
+      await this.natsService.publishAnalysisResumeParsed({
+        jobId: payload.jobId,
+        resumeId: payload.resumeId,
+        resumeDto: payload.resumeDto,
+        processingTimeMs: payload.processingTimeMs,
+        confidence: 0.85, // Default confidence for enhanced processing
+        parsingMethod: 'ai-vision-enhanced',
+      });
       this.logger.log(`Resume processing completed successfully: ${resumeId}`);
       
     } catch (error) {
       this.logger.error(`Resume processing failed for ${resumeId}:`, error);
       
-      await this.natsClient.publishJobResumeFailed({
+      await this.natsService.publishJobResumeFailed({
         jobId,
         resumeId,
-        originalFilename,
-        organizationId,
-        error: (error as Error).message,
-        retryCount: 0,
-        timestamp: new Date().toISOString(),
-        securityContext: {
-          ipAddress: 'internal',
-          userAgent: 'resume-parser-service',
-          processingNode: process.env.NODE_NAME || 'unknown'
-        }
+        error: error as Error,
+        stage: 'resume-processing',
+        retryAttempt: 0,
       });
       throw error;
     } finally {
@@ -130,7 +148,18 @@ export class ParsingService {
       
       // Enhanced input validation
       if (!jobId || !resumeId || !gridFsUrl || !filename || !organizationId) {
-        throw new BadRequestException(`Invalid parameters: missing required fields`);
+        throw new ResumeParserException(
+          'INVALID_PARAMETERS',
+          {
+            provided: {
+              jobId: !!jobId,
+              resumeId: !!resumeId, 
+              gridFsUrl: !!gridFsUrl,
+              filename: !!filename,
+              organizationId: !!organizationId
+            }
+          }
+        );
       }
 
       // Validate organization access
@@ -152,7 +181,10 @@ export class ParsingService {
       );
       
       if (!rawLlmOutput) {
-        throw new Error(`Vision LLM service returned empty result for: ${filename}`);
+        throw new ResumeParserException(
+          'VISION_LLM_EMPTY_RESULT',
+          { filename, resumeId }
+        );
       }
 
       // Normalize, validate, and encrypt sensitive data
@@ -161,7 +193,10 @@ export class ParsingService {
       const securedResumeDto = this.encryptSensitiveData(resumeDto, organizationId);
       
       if (!resumeDto) {
-        throw new Error(`Field mapping failed for resume: ${resumeId}`);
+        throw new ResumeParserException(
+          'FIELD_MAPPING_FAILED',
+          { resumeId, filename }
+        );
       }
 
       const processingTimeMs = Date.now() - startTime;
@@ -217,8 +252,15 @@ export class ParsingService {
         processingTimeMs: result.processingTimeMs || 0,
       };
 
-      // Publish through NATS client
-      const publishResult = await this.natsClient.publishAnalysisResumeParsed(event);
+      // Publish through shared NATS service
+      const publishResult = await this.natsService.publishAnalysisResumeParsed({
+        jobId: event.jobId,
+        resumeId: event.resumeId,
+        resumeDto: event.resumeDto,
+        processingTimeMs: event.processingTimeMs || 0,
+        confidence: 0.85, // Default confidence
+        parsingMethod: 'standard-parsing',
+      });
       
       if (!publishResult.success) {
         throw new Error(`Failed to publish success event: ${publishResult.error}`);
@@ -255,8 +297,14 @@ export class ParsingService {
         },
       };
 
-      // Publish through NATS client
-      const publishResult = await this.natsClient.publishJobResumeFailed(event);
+      // Publish through shared NATS service
+      const publishResult = await this.natsService.publishJobResumeFailed({
+        jobId: event.jobId,
+        resumeId: event.resumeId,
+        error: new Error(event.error),
+        stage: 'parsing-failure',
+        retryAttempt: event.retryCount || 0,
+      });
       
       if (!publishResult.success) {
         this.logger.error(`Failed to publish failure event for resumeId: ${resumeId}: ${publishResult.error}`);
@@ -323,7 +371,10 @@ export class ParsingService {
       }
 
       // Publish internal error event for monitoring
-      await this.natsClient.publishProcessingError(jobId, resumeId, error);
+      await this.natsService.publishProcessingError(jobId, resumeId, error, {
+        stage: 'error-handling',
+        retryAttempt: retryCount,
+      });
       
     } catch (handlingError) {
       this.logger.error(`Failed to handle processing error for resumeId: ${resumeId}`, handlingError);
@@ -449,7 +500,10 @@ export class ParsingService {
         // Retry text-based parsing
         await this.parseResumeText(jobId, resumeId, originalData.resumeText);
       } else {
-        throw new Error('No valid data for retry operation');
+        throw new ResumeParserException(
+          'RETRY_DATA_UNAVAILABLE',
+          { resumeId, retryCount: this.processingFiles.get(`${resumeId}-retry`)?.attempts || 0 }
+        );
       }
       
       this.logger.log(`Retry successful for resumeId: ${resumeId}`);
@@ -496,12 +550,22 @@ export class ParsingService {
     const fileBuffer = await this.gridFsService.downloadFile(gridFsUrl);
     
     if (!fileBuffer || fileBuffer.length === 0) {
-      throw new BadRequestException(`Failed to download file or file is empty: ${filename}`);
+      throw new ResumeParserException(
+        'FILE_DOWNLOAD_FAILED',
+        { filename, gridFsUrl }
+      );
     }
 
     // Validate file size
     if (fileBuffer.length > this.MAX_FILE_SIZE) {
-      throw new BadRequestException(`File size exceeds maximum allowed: ${fileBuffer.length} bytes`);
+      throw new ResumeParserException(
+        'FILE_SIZE_EXCEEDED',
+        { 
+          filename, 
+          actualSize: fileBuffer.length, 
+          maxAllowed: this.MAX_FILE_SIZE 
+        }
+      );
     }
 
     // Validate file using InputValidator
@@ -513,7 +577,14 @@ export class ParsingService {
     });
 
     if (!validation.isValid) {
-      throw new BadRequestException(`File validation failed: ${validation.errors.join(', ')}`);
+      throw new ResumeParserException(
+        'FILE_VALIDATION_FAILED',
+        { 
+          filename, 
+          validationErrors: validation.errors,
+          actualMimeType: metadata?.mimeType || 'unknown'
+        }
+      );
     }
 
     this.logger.log(`File validation passed for: ${filename}`);
@@ -523,7 +594,13 @@ export class ParsingService {
   private validateOrganizationAccess(organizationId: string, jobId: string): void {
     // Basic validation - in production this would check against organization permissions
     if (!organizationId || organizationId.length < 5) {
-      throw new BadRequestException('Invalid organization ID');
+      throw new ResumeParserException(
+        'INVALID_ORGANIZATION_ID',
+        { 
+          providedId: organizationId,
+          minLength: 5 
+        }
+      );
     }
 
     // Validate jobId belongs to organization (basic format check)
@@ -551,7 +628,13 @@ export class ParsingService {
       return secureCopy;
     } catch (error) {
       this.logger.error(`Failed to encrypt sensitive data: ${error.message}`);
-      throw new Error('Data encryption failed');
+      throw new ResumeParserException(
+        'DATA_ENCRYPTION_FAILED',
+        { 
+          organizationId,
+          originalError: error.message 
+        }
+      );
     }
   }
 
@@ -594,14 +677,15 @@ export class ParsingService {
   // Enhanced health check with security metrics
   async healthCheck(): Promise<{ status: string; details: any }> {
     try {
-      const natsConnected = this.natsClient.isConnected;
+      const natsHealth = await this.natsService.getHealthStatus();
       const retryQueueSize = this.retryCounts.size;
       const activeProcessingCount = this.processingFiles.size;
       
       return {
-        status: natsConnected ? 'healthy' : 'degraded',
+        status: natsHealth.connected ? 'healthy' : 'degraded',
         details: {
-          natsConnected,
+          natsConnected: natsHealth.connected,
+          natsConnectionInfo: natsHealth,
           retryQueueSize,
           activeProcessingCount,
           activeRetries: Array.from(this.retryCounts.entries()),

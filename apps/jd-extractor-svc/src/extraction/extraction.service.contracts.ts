@@ -13,12 +13,12 @@ import {
   Ensures, 
   Invariant,
   ContractValidators 
-} from '../../../../libs/shared-dtos/src/contracts/dbc.decorators';
+} from '@ai-recruitment-clerk/infrastructure-shared';
 import { LlmService } from '../llm/llm.service';
 import { NatsClient } from '../nats/nats.client';
 import { JobJdSubmittedEvent, AnalysisJdExtractedEvent } from '../dto/events.dto';
-import { JdDTO } from '../../../../libs/shared-dtos/src';
-import { RetryUtility, WithCircuitBreaker } from '../../../../libs/shared-dtos/src';
+import { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
+import { RetryUtility, WithCircuitBreaker } from '@ai-recruitment-clerk/infrastructure-shared';
 
 export interface ExtractionRequest {
   jobTitle: string;

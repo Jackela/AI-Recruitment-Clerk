@@ -8,13 +8,13 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
-import { ContractViolationError, ContractTestUtils } from '@app/shared-dtos';
+import { ContractViolationError, ContractTestUtils } from '@ai-recruitment-clerk/infrastructure-shared';
 import { JobsServiceContracts } from './jobs.service.contracts';
 import { InMemoryStorageService } from './storage/in-memory-storage.service';
 import { NatsClient } from '../nats/nats.client';
 import { CacheService } from '../cache/cache.service';
 import { CreateJobDto } from './dto/create-job.dto';
-import { UserDto, UserRole, UserStatus } from '@app/shared-dtos';
+import { UserDto, UserRole, UserStatus } from '@ai-recruitment-clerk/user-management-domain';
 import { MulterFile } from './types/multer.types';
 
 describe('JobsServiceContracts', () => {

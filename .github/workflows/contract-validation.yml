@@ -1,0 +1,137 @@
+name: API Contract Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'apps/ai-recruitment-frontend/src/app/store/**/*.ts'
+      - 'apps/app-gateway/src/jobs/dto/**/*.ts'
+      - 'libs/api-contracts/**/*.ts'
+      - 'libs/*/src/**/*.ts'
+      - 'tools/contract-validation/**/*'
+
+jobs:
+  validate-contracts:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [20.x]
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: TypeScript compilation check
+      run: npm run typecheck
+      
+    - name: Run contract validation
+      run: npm run validate:contracts:ci
+      
+    - name: Test API contracts library
+      run: cd libs/api-contracts && npm test
+      
+    - name: Build with contract validation
+      run: npm run build:with-contracts
+      
+    - name: Upload contract validation results
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: contract-validation-results
+        path: |
+          contract-validation-*.log
+          contract-validation-report.json
+        retention-days: 30
+
+  frontend-backend-consistency:
+    runs-on: ubuntu-latest
+    needs: validate-contracts
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Check frontend model consistency
+      run: |
+        echo "🔍 Checking for contract drift between frontend and backend..."
+        
+        # Check if frontend models match backend DTOs
+        FRONTEND_JOB_FIELDS=$(grep -o '\w\+:' apps/ai-recruitment-frontend/src/app/store/jobs/job.model.ts | sort)
+        BACKEND_JOB_FIELDS=$(grep -o '\w\+:' apps/app-gateway/src/jobs/dto/job-response.dto.ts | sort)
+        
+        echo "Frontend Job Fields: $FRONTEND_JOB_FIELDS"
+        echo "Backend Job Fields: $BACKEND_JOB_FIELDS"
+        
+        if [ "$FRONTEND_JOB_FIELDS" != "$BACKEND_JOB_FIELDS" ]; then
+          echo "⚠️  Warning: Frontend and backend job models have different fields"
+          echo "This may indicate contract drift that should be reviewed"
+        else
+          echo "✅ Frontend and backend job models appear consistent"
+        fi
+        
+    - name: Check status enum consistency
+      run: |
+        echo "🔄 Checking status enum consistency..."
+        
+        # Extract status values from frontend and backend
+        if grep -q "status.*'draft'" apps/ai-recruitment-frontend/src/app/store/jobs/job.model.ts; then
+          echo "✅ Frontend defines comprehensive status enum"
+        fi
+        
+        if grep -q "status.*'processing'" apps/app-gateway/src/jobs/dto/job-response.dto.ts; then
+          echo "✅ Backend defines status enum"
+        fi
+        
+        echo "📋 Manual review recommended to ensure status enums are synchronized"
+
+  security-check:
+    runs-on: ubuntu-latest
+    needs: validate-contracts
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Check for hardcoded contracts
+      run: |
+        echo "🔒 Checking for potential security issues in contracts..."
+        
+        # Check for any hardcoded sensitive data in contracts
+        if grep -r "password\|secret\|key\|token" libs/api-contracts/src/ --include="*.ts"; then
+          echo "❌ Found potential sensitive data in API contracts!"
+          exit 1
+        else
+          echo "✅ No sensitive data found in API contracts"
+        fi
+        
+    - name: Validate contract export security
+      run: |
+        echo "🛡️  Validating contract exports don't expose internals..."
+        
+        # Check that contracts only export interfaces/types, not implementation details
+        if grep -r "class.*{" libs/api-contracts/src/ --include="*.ts"; then
+          echo "⚠️  Warning: Found class definitions in contracts (prefer interfaces)"
+        else
+          echo "✅ Contracts properly use interfaces over classes"
+        fi

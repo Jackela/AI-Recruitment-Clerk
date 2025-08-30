@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { ResumeDTO } from '../../../libs/shared-dtos/src/models/resume.dto';
-import { NatsClient } from './nats/nats.client';
-import { GeminiClient, GeminiConfig } from '../../../libs/shared-dtos/src/gemini/gemini.client';
+import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import { ScoringEngineNatsService } from './services/scoring-engine-nats.service';
+import { 
+  SecureConfigValidator,
+  ScoringEngineException,
+  ScoringEngineErrorCode,
+  ErrorCorrelationManager
+} from '@ai-recruitment-clerk/infrastructure-shared';
+import { GeminiClient, GeminiConfig } from '@ai-recruitment-clerk/ai-services-shared';
 import { EnhancedSkillMatcherService, JobSkillRequirement, EnhancedSkillScore } from './services/enhanced-skill-matcher.service';
 import { ExperienceAnalyzerService, JobRequirements, ExperienceScore } from './services/experience-analyzer.service';
 import { CulturalFitAnalyzerService, CulturalFitScore } from './services/cultural-fit-analyzer.service';
@@ -30,7 +36,17 @@ export interface ScoreComponent {
   details: string;
   confidence?: number;
   evidenceStrength?: number;
-  breakdown?: any;
+  breakdown?: Record<string, unknown> | {
+    exactMatches?: number;
+    semanticMatches?: number;
+    fuzzyMatches?: number;
+  } | {
+    baseExperienceScore?: number;
+    relevanceAdjustment?: number;
+    seniorityBonus?: number;
+    industryPenalty?: number;
+    finalScore?: number;
+  };
 }
 
 export interface ScoreDTO {
@@ -58,15 +74,18 @@ export class ScoringEngineService {
   private readonly geminiClient: GeminiClient;
 
   constructor(
-    private readonly natsClient: NatsClient,
+    private readonly natsService: ScoringEngineNatsService,
     private readonly enhancedSkillMatcher: EnhancedSkillMatcherService,
     private readonly experienceAnalyzer: ExperienceAnalyzerService,
     private readonly culturalFitAnalyzer: CulturalFitAnalyzerService,
     private readonly confidenceService: ScoringConfidenceService
   ) {
-    // Initialize Gemini client with environment configuration
+    // 🔒 SECURITY: Validate configuration before service initialization
+    SecureConfigValidator.validateServiceConfig('ScoringEngineService', ['GEMINI_API_KEY']);
+    
+    // Initialize Gemini client with validated environment configuration
     const geminiConfig: GeminiConfig = {
-      apiKey: process.env.GEMINI_API_KEY || 'your_gemini_api_key_here',
+      apiKey: SecureConfigValidator.requireEnv('GEMINI_API_KEY'),
       model: 'gemini-1.5-flash',
       temperature: 0.3,
       maxOutputTokens: 8192
@@ -88,19 +107,28 @@ export class ScoringEngineService {
     try {
       const jdDto = this.jdCache.get(event.jobId);
       if (!jdDto) {
-        throw new Error('JD not found');
+        const correlationContext = ErrorCorrelationManager.getContext();
+        throw new ScoringEngineException(
+          ScoringEngineErrorCode.INSUFFICIENT_DATA,
+          {
+            jobId: event.jobId,
+            cacheSize: this.jdCache.size,
+            availableJobIds: Array.from(this.jdCache.keys()),
+            correlationId: correlationContext?.traceId
+          }
+        );
       }
       
       const score = await this._calculateEnhancedMatchScore(jdDto, event.resumeDto);
       
-      await this.natsClient.emit('analysis.match.scored', {
+      await this.natsService.emit('analysis.match.scored', {
         jobId: event.jobId,
         resumeId: event.resumeId,
         scoreDto: score,
       });
       
       // Publish enhanced performance metrics
-      await this.natsClient.publishScoringCompleted({
+      await this.natsService.publishScoringCompleted({
         jobId: event.jobId,
         resumeId: event.resumeId,
         matchScore: score.overallScore,
@@ -119,18 +147,43 @@ export class ScoringEngineService {
       });
       
     } catch (error) {
-      console.error('Error in enhanced scoring:', error);
-      await this.natsClient.publishScoringError(event.jobId, event.resumeId, error);
+      const correlationContext = ErrorCorrelationManager.getContext();
+      
+      // Convert to ScoringEngineException if not already
+      const scoringError = error instanceof ScoringEngineException 
+        ? error 
+        : new ScoringEngineException(
+            ScoringEngineErrorCode.SCORING_ALGORITHM_FAILED,
+            {
+              originalError: error instanceof Error ? error.message : String(error),
+              jobId: event.jobId,
+              resumeId: event.resumeId,
+              correlationId: correlationContext?.traceId
+            }
+          );
+      
+      await this.natsService.publishScoringError(event.jobId, event.resumeId, scoringError);
       
       // Fallback to basic scoring
       const jdDto = this.jdCache.get(event.jobId);
       if (jdDto) {
         const basicScore = this._calculateMatchScore(jdDto, event.resumeDto);
-        await this.natsClient.emit('analysis.match.scored', {
+        await this.natsService.emit('analysis.match.scored', {
           jobId: event.jobId,
           resumeId: event.resumeId,
           scoreDto: basicScore,
         });
+      } else {
+        // If no JD found in cache, throw the error instead of failing silently
+        throw new ScoringEngineException(
+          ScoringEngineErrorCode.INSUFFICIENT_DATA,
+          {
+            jobId: event.jobId,
+            resumeId: event.resumeId,
+            originalError: scoringError.message,
+            correlationId: correlationContext?.traceId
+          }
+        );
       }
     }
   }
@@ -271,9 +324,30 @@ export class ScoringEngineService {
       };
       
     } catch (error) {
-      console.error('Enhanced scoring failed, falling back to basic scoring:', error);
+      const correlationContext = ErrorCorrelationManager.getContext();
+      
+      // Convert to ScoringEngineException with detailed context
+      const scoringError = error instanceof ScoringEngineException 
+        ? error 
+        : new ScoringEngineException(
+            ScoringEngineErrorCode.MODEL_PREDICTION_FAILED,
+            {
+              originalError: error instanceof Error ? error.message : String(error),
+              processingTimeMs: Date.now() - startTime,
+              fallbackTriggered: true,
+              correlationId: correlationContext?.traceId
+            }
+          );
+      
       processingMetrics.fallbackUsed.push(true);
       processingMetrics.errorRates.push(1);
+      
+      // Log enhanced error details for debugging
+      console.error('[SCORING-ENGINE] Enhanced scoring failed, falling back to basic scoring:', {
+        error: scoringError.message,
+        correlationId: correlationContext?.traceId,
+        processingTime: Date.now() - startTime
+      });
       
       // Fallback to basic scoring with error information
       const basicScore = this._calculateMatchScore(jdDto, resumeDto);

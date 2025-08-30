@@ -1,16 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { LlmService } from './llm.service';
-import { JdDTO, LlmExtractionRequest, LlmExtractionResponse } from '../../../../libs/shared-dtos/src';
+import { LlmService } from '../extraction/llm.service';
+import { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
 import {
   createMockExtractedJdDTO,
-  createMockMinimalJdDTO,
   createMockLlmExtractionRequest,
-  createMockLlmExtractionResponse,
-  createLongJdText,
-  createShortJdText,
-  createMalformedJdText,
-  validateExtractedJdDTO,
-  validateLlmExtractionResponse
+  createLongJdText
 } from '../testing/test-fixtures';
 
 describe('LlmService', () => {
@@ -72,11 +66,19 @@ describe('LlmService', () => {
   };
 
   beforeEach(async () => {
+    // Mock environment variables for testing
+    process.env.GEMINI_API_KEY = 'test-api-key-for-integration-testing';
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [LlmService],
     }).compile();
 
     service = module.get<LlmService>(LlmService);
+  });
+
+  afterEach(() => {
+    // Clean up environment variables
+    delete process.env.GEMINI_API_KEY;
   });
 
   describe('Service Initialization', () => {
@@ -251,7 +253,7 @@ describe('LlmService', () => {
         responsibilities: [],
         benefits: [],
         company: {}
-      } as JdDTO;
+      } as unknown as JdDTO;
 
       // Act
       const result = await service.validateExtractedData(invalidJdDto);
@@ -270,7 +272,7 @@ describe('LlmService', () => {
           education: ''
         },
         // Missing responsibilities, benefits, company
-      } as JdDTO;
+      } as unknown as JdDTO;
 
       // Act
       const result = await service.validateExtractedData(incompleteJdDto);

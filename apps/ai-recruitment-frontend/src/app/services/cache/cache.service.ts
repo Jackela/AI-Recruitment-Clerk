@@ -11,7 +11,7 @@ export interface CacheConfig {
   encrypt?: boolean;
 }
 
-export interface CacheEntry<T = any> {
+export interface CacheEntry<T = unknown> {
   key: string;
   value: T;
   timestamp: number;
@@ -35,7 +35,7 @@ export interface CacheStats {
 })
 export class CacheService {
   private memoryCache = new Map<string, CacheEntry>();
-  private pendingRequests = new Map<string, Observable<any>>();
+  private pendingRequests = new Map<string, Observable<unknown>>();
   private cacheStats: CacheStats = {
     hits: 0,
     misses: 0,
@@ -446,7 +446,7 @@ export class CacheService {
   
   // Utility methods
   
-  private estimateSize(value: any): number {
+  private estimateSize(value: unknown): number {
     try {
       return JSON.stringify(value).length * 2; // Rough estimate in bytes
     } catch {

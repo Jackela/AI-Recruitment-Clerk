@@ -1,7 +1,8 @@
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { connect, NatsConnection, JetStreamClient, PubAck, StringCodec, RetentionPolicy, DiscardPolicy } from 'nats';
-import { JobJdSubmittedEvent, ResumeSubmittedEvent } from '@app/shared-dtos';
+import { JobJdSubmittedEvent } from '@ai-recruitment-clerk/job-management-domain';
+import { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
 
 export interface NatsPublishResult {
   success: boolean;

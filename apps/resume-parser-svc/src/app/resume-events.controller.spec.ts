@@ -1,6 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { ResumeEventsController } from './resume-events.controller';
-import { ResumeSubmittedEvent } from '../../../../libs/shared-dtos/src';
+import { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
 
 describe('ResumeEventsController', () => {
   let controller: ResumeEventsController;

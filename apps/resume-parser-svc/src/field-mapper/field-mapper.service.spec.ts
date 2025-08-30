@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FieldMapperService } from './field-mapper.service';
-import { SkillsTaxonomy } from '../../../../libs/shared-dtos/src/skills/skills-taxonomy';
+import { SkillsTaxonomy } from '@ai-recruitment-clerk/candidate-scoring-domain';
 import { DateParser } from './date-parser';
 import { ExperienceCalculator } from './experience-calculator';
-import { ResumeDTO } from '../../../../libs/shared-dtos/src';
+import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
 describe('FieldMapperService', () => {
   let service: FieldMapperService;

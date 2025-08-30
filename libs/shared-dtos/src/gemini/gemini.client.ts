@@ -8,6 +8,7 @@ import {
   GeminiParsingError, 
   GeminiConfigurationError 
 } from '../errors/gemini-errors';
+import { SecureConfigValidator } from '../config/secure-config.validator';
 
 export interface GeminiConfig {
   apiKey: string;
@@ -18,7 +19,7 @@ export interface GeminiConfig {
   topK?: number;
 }
 
-export interface GeminiResponse<T = any> {
+export interface GeminiResponse<T = unknown> {
   data: T;
   tokensUsed?: number;
   processingTimeMs: number;
@@ -37,40 +38,57 @@ export class GeminiClient {
   };
 
   constructor(private readonly config: GeminiConfig) {
-    if (!config.apiKey || config.apiKey === 'your_gemini_api_key_here' || config.apiKey === 'your_actual_gemini_api_key_here') {
-      this.logger.warn('⚠️ Gemini API密钥未配置，AI功能将使用降级模式');
-      // 不抛出错误，允许系统继续运行但使用降级模式
-      return;
+    // 🔒 SECURITY: Strict fail-fast validation - no fallback mechanisms allowed
+    if (!config.apiKey) {
+      const error = '🔒 SECURITY: GeminiConfig.apiKey is required and cannot be empty';
+      this.logger.error(error);
+      throw new GeminiConfigurationError(error);
     }
 
-    this.genAI = new GoogleGenerativeAI(config.apiKey);
-    this.model = this.genAI.getGenerativeModel({
-      model: config.model || 'gemini-1.5-flash',
-      generationConfig: {
-        temperature: config.temperature || 0.3,
-        topK: config.topK || 40,
-        topP: config.topP || 0.95,
-        maxOutputTokens: config.maxOutputTokens || 8192,
-      },
-      safetySettings: [
-        {
-          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    // Validate against insecure fallback patterns
+    if (SecureConfigValidator.isInsecureFallbackValue(config.apiKey)) {
+      const error = `🔒 SECURITY: GeminiConfig.apiKey contains insecure fallback value: ${config.apiKey}`;
+      this.logger.error(error);
+      throw new GeminiConfigurationError(error);
+    }
+
+    // Initialize Gemini client with validated configuration
+    try {
+      this.genAI = new GoogleGenerativeAI(config.apiKey);
+      this.model = this.genAI.getGenerativeModel({
+        model: config.model || 'gemini-1.5-flash',
+        generationConfig: {
+          temperature: config.temperature || 0.3,
+          topK: config.topK || 40,
+          topP: config.topP || 0.95,
+          maxOutputTokens: config.maxOutputTokens || 8192,
         },
-        {
-          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-      ],
-    });
+        safetySettings: [
+          {
+            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          },
+        ],
+      });
+      
+      this.logger.log('✅ GeminiClient initialized successfully with secure configuration');
+    } catch (error) {
+      const errorMessage = `🔒 SECURITY: Failed to initialize GeminiClient: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      this.logger.error(errorMessage);
+      throw new GeminiConfigurationError(errorMessage, error as Error);
+    }
   }
 
   private checkRateLimit(): void {
@@ -94,27 +112,8 @@ export class GeminiClient {
     this.rateLimit.requestsThisMinute++;
   }
 
-  private isConfigured(): boolean {
-    return Boolean(this.genAI && this.model && this.config.apiKey && 
-           this.config.apiKey !== 'your_gemini_api_key_here' && 
-           this.config.apiKey !== 'your_actual_gemini_api_key_here');
-  }
-
-  private getMockResponse(prompt: string): string {
-    this.logger.debug('使用模拟响应模式');
-    return `[AI模拟响应] 基于提示生成的模拟内容。请配置真实的GEMINI_API_KEY以获得AI功能。`;
-  }
 
   async generateText(prompt: string, retries = 3): Promise<GeminiResponse<string>> {
-    // 如果未配置，返回模拟响应
-    if (!this.isConfigured()) {
-      return {
-        data: this.getMockResponse(prompt),
-        processingTimeMs: 10,
-        confidence: 0.0,
-      };
-    }
-
     this.checkRateLimit();
 
     const startTime = Date.now();
@@ -150,7 +149,9 @@ export class GeminiClient {
             throw new GeminiRateLimitError(errorMessage);
           }
           
-          if (errorMessage?.includes('timeout') || (error as any).code === 'TIMEOUT') {
+          const hasTimeoutCode = typeof error === 'object' && error !== null && 
+            'code' in error && error.code === 'TIMEOUT';
+          if (errorMessage?.includes('timeout') || hasTimeoutCode) {
             throw new GeminiTimeoutError(errorMessage);
           }
           
@@ -158,7 +159,9 @@ export class GeminiClient {
             throw new GeminiValidationError(errorMessage);
           }
           
-          throw new GeminiApiError(errorMessage || 'Unknown Gemini API error', (error as any).status, error as Error);
+          const statusCode = typeof error === 'object' && error !== null && 
+            'status' in error && typeof error.status === 'number' ? error.status : undefined;
+          throw new GeminiApiError(errorMessage || 'Unknown Gemini API error', statusCode, error as Error);
         }
 
         // Exponential backoff
@@ -325,13 +328,10 @@ Important guidelines:
 
   async healthCheck(): Promise<boolean> {
     try {
-      if (!this.isConfigured()) {
-        this.logger.warn('Gemini API未配置，健康检查返回降级状态');
-        return false;
-      }
       const response = await this.generateText('Respond with "OK" to confirm API connectivity.', 1);
       return response.data.toLowerCase().includes('ok');
-    } catch {
+    } catch (error) {
+      this.logger.error(`GeminiClient health check failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       return false;
     }
   }

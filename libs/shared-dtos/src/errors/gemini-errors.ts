@@ -26,7 +26,7 @@ export class GeminiRateLimitError extends GeminiApiError {
 export class GeminiValidationError extends GeminiApiError {
   constructor(
     message: string,
-    public readonly validationDetails?: any
+    public readonly validationDetails?: unknown
   ) {
     super(message, 400);
     this.name = 'GeminiValidationError';
@@ -51,8 +51,8 @@ export class GeminiParsingError extends GeminiApiError {
 }
 
 export class GeminiConfigurationError extends GeminiApiError {
-  constructor(message: string) {
-    super(message, 500);
+  constructor(message: string, originalError?: Error) {
+    super(message, 500, originalError);
     this.name = 'GeminiConfigurationError';
   }
 }

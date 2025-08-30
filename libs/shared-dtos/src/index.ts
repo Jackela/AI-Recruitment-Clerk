@@ -20,8 +20,14 @@ export * from './encryption/encryption.service';
 // Utilities
 export * from './utils/retry.utility';
 
+// Database Performance Monitoring
+export * from './database/performance-monitor';
+
 // Validation
 export * from './validation/input-validator';
+
+// Security Configuration
+export * from './config/secure-config.validator';
 
 // NATS Configuration
 export * from './nats/nats.config';
@@ -35,8 +41,15 @@ export * from './skills/skills-taxonomy';
 // Prompt Templates
 export * from './prompts/prompt-templates';
 
-// Error Handling
+// Error Handling - Enhanced System
 export * from './errors/gemini-errors';
+export * from './errors/error-correlation';
+export * from './errors/enhanced-error-types';
+export * from './errors/domain-errors';
+export * from './errors/error-response-formatter';
+export * from './errors/structured-logging';
+export * from './errors/global-exception.filter';
+export * from './errors/error-interceptors';
 
 // Design by Contract
 export * from './contracts/dbc.decorators';

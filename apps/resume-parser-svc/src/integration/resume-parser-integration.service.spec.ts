@@ -3,7 +3,7 @@ import { ResumeParserIntegrationService, ResumeParsingOptions } from './resume-p
 import { VisionLlmService } from '../vision-llm/vision-llm.service';
 import { FieldMapperService } from '../field-mapper/field-mapper.service';
 import { VisionLlmResponse, FieldMappingResult } from '../dto/resume-parsing.dto';
-import { ResumeDTO } from '../../../../libs/shared-dtos/src';
+import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
 describe('ResumeParserIntegrationService', () => {
   let service: ResumeParserIntegrationService;

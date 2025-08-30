@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { FeedbackCodeDto, CreateFeedbackCodeDto, MarkFeedbackCodeUsedDto, MarketingStatsDto } from '@app/shared-dtos';
+import { FeedbackCodeDto, CreateFeedbackCodeDto, MarkFeedbackCodeUsedDto, MarketingStatsDto } from '@ai-recruitment-clerk/marketing-domain';
 
 export interface FeedbackCodeDocument {
   _id?: string;

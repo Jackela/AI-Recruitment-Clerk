@@ -1,6 +1,8 @@
-import { Component, Input, Output, EventEmitter, OnInit, signal, computed } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { fromEvent, Subject } from 'rxjs';
+import { debounceTime, takeUntil } from 'rxjs/operators';
 
 export interface TableColumn {
   key: string;
@@ -10,7 +12,11 @@ export interface TableColumn {
   width?: string;
   align?: 'left' | 'center' | 'right';
   type?: 'text' | 'number' | 'date' | 'boolean' | 'custom';
-  customTemplate?: any;
+  customTemplate?: unknown; // Template reference - can be any template type
+  // Mobile responsiveness features
+  priority?: 'high' | 'medium' | 'low'; // Column priority for mobile display
+  mobileLabel?: string; // Shorter label for mobile
+  truncateLength?: number; // Character limit for text truncation
 }
 
 export interface TableOptions {
@@ -88,7 +94,7 @@ export interface PageEvent {
       </div>
 
       <!-- Table -->
-      <div class="table-wrapper">
+      <div class="table-wrapper" #tableWrapper [class.has-horizontal-scroll]="hasHorizontalScroll">
         <table class="data-table" 
                [class.striped]="options.striped"
                [class.bordered]="options.bordered"
@@ -108,9 +114,10 @@ export interface PageEvent {
                 [style.width]="column.width"
                 [style.text-align]="column.align || 'left'"
                 [class.sortable]="column.sortable"
+                [class]="getColumnClasses(column)"
                 (click)="column.sortable ? onSort.emit({column: column.key, direction: getNextSortDirection(column.key)}) : null">
                 <div class="th-content">
-                  <span>{{ column.label }}</span>
+                  <span>{{ getColumnLabel(column) }}</span>
                   <div class="sort-indicator" *ngIf="column.sortable">
                     <svg 
                       class="sort-icon"
@@ -137,7 +144,9 @@ export interface PageEvent {
               </td>
               <td 
                 *ngFor="let column of columns"
-                [style.text-align]="column.align || 'left'">
+                [style.text-align]="column.align || 'left'"
+                [class]="getColumnClasses(column)"
+                [title]="shouldShowTooltip(row, column) ? getCellValue(row, column.key) : null">
                 <span [ngSwitch]="column.type">
                   <span *ngSwitchCase="'boolean'">
                     <span class="badge" [class.badge-success]="getCellValue(row, column.key)" 
@@ -152,7 +161,7 @@ export interface PageEvent {
                     {{ getCellValue(row, column.key) | number:'1.0-2' }}
                   </span>
                   <span *ngSwitchDefault>
-                    {{ getCellValue(row, column.key) }}
+                    {{ getTruncatedValue(row, column) }}
                   </span>
                 </span>
               </td>
@@ -285,18 +294,22 @@ export interface PageEvent {
   `,
   styleUrls: ['./data-table.component.scss']
 })
-export class DataTableComponent implements OnInit {
+export class DataTableComponent<T = Record<string, unknown>> implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('tableWrapper', { static: false }) tableWrapper!: ElementRef<HTMLDivElement>;
+  
+  private destroy$ = new Subject<void>();
+  private resizeObserver?: ResizeObserver;
   @Input() columns: TableColumn[] = [];
-  @Input() data: any[] = [];
+  @Input() data: T[] = [];
   @Input() options: TableOptions = {};
   @Input() showActions = false;
 
   @Output() onSort = new EventEmitter<SortEvent>();
   @Output() onPageChange = new EventEmitter<PageEvent>();
-  @Output() onSelectionChange = new EventEmitter<any[]>();
-  @Output() onView = new EventEmitter<any>();
-  @Output() onEdit = new EventEmitter<any>();
-  @Output() onDelete = new EventEmitter<any>();
+  @Output() onSelectionChange = new EventEmitter<T[]>();
+  @Output() onView = new EventEmitter<T>();
+  @Output() onEdit = new EventEmitter<T>();
+  @Output() onDelete = new EventEmitter<T>();
   @Output() onExport = new EventEmitter<void>();
 
   // State
@@ -305,7 +318,8 @@ export class DataTableComponent implements OnInit {
   currentPage = signal(0);
   sortColumn = signal<string | null>(null);
   sortDirection = signal<'asc' | 'desc' | null>(null);
-  selectedRows = signal<any[]>([]);
+  selectedRows = signal<T[]>([]);
+  hasHorizontalScroll = false; // Track horizontal scroll state
 
   // Computed values
   filteredData = computed(() => {
@@ -377,14 +391,34 @@ export class DataTableComponent implements OnInit {
     };
 
     this.pageSize = this.options.pageSize || 10;
+    
+    // Set default column priorities if not specified
+    this.columns = this.columns.map(col => ({
+      ...col,
+      priority: col.priority || 'medium'
+    }));
+  }
+  
+  ngAfterViewInit() {
+    this.setupScrollDetection();
+    this.setupResizeObserver();
+  }
+  
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
   }
 
-  getCellValue(row: any, key: string): any {
+  getCellValue(row: T, key: string): unknown {
     const keys = key.split('.');
-    let value = row;
+    let value: unknown = row;
     
     for (const k of keys) {
-      value = value?.[k];
+      value = (value as Record<string, unknown>)?.[k];
     }
     
     return value;
@@ -472,7 +506,7 @@ export class DataTableComponent implements OnInit {
     return pages;
   }
 
-  isSelected(row: any): boolean {
+  isSelected(row: T): boolean {
     return this.selectedRows().includes(row);
   }
 
@@ -486,7 +520,7 @@ export class DataTableComponent implements OnInit {
     return pageData.some(row => this.isSelected(row)) && !this.isAllSelected();
   }
 
-  toggleSelect(row: any) {
+  toggleSelect(row: T) {
     const selected = [...this.selectedRows()];
     const index = selected.indexOf(row);
     
@@ -537,7 +571,7 @@ export class DataTableComponent implements OnInit {
     this.downloadCSV(csv, 'data-export.csv');
   }
 
-  private convertToCSV(data: any[]): string {
+  private convertToCSV(data: T[]): string {
     if (data.length === 0) return '';
     
     // Headers
@@ -585,6 +619,93 @@ export class DataTableComponent implements OnInit {
       return null;
     } else {
       return 'asc';
+    }
+  }
+  
+  // Mobile responsiveness methods
+  getColumnClasses(column: TableColumn): string {
+    const classes: string[] = [];
+    
+    if (column.priority) {
+      classes.push(`priority-${column.priority}`);
+    }
+    
+    // Add responsive column classes
+    if (column.priority === 'high') {
+      classes.push('column-primary');
+    } else if (column.priority === 'medium') {
+      classes.push('column-secondary');
+    } else {
+      classes.push('column-secondary');
+    }
+    
+    return classes.join(' ');
+  }
+  
+  getColumnLabel(column: TableColumn): string {
+    // Use mobile label on small screens if available
+    if (window.innerWidth <= 768 && column.mobileLabel) {
+      return column.mobileLabel;
+    }
+    return column.label;
+  }
+  
+  getTruncatedValue(row: T, column: TableColumn): string {
+    const value = this.getCellValue(row, column.key);
+    const text = String(value || '');
+    
+    if (column.truncateLength && text.length > column.truncateLength) {
+      return text.substring(0, column.truncateLength) + '...';
+    }
+    
+    return text;
+  }
+  
+  shouldShowTooltip(row: T, column: TableColumn): boolean {
+    if (!column.truncateLength) return false;
+    
+    const value = this.getCellValue(row, column.key);
+    const text = String(value || '');
+    
+    return text.length > column.truncateLength;
+  }
+  
+  // Horizontal scroll detection
+  private hasHorizontalScroll = false;
+  
+  private setupScrollDetection(): void {
+    if (!this.tableWrapper) return;
+    
+    const scrollElement = this.tableWrapper.nativeElement;
+    
+    fromEvent(scrollElement, 'scroll')
+      .pipe(
+        debounceTime(50),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        this.updateScrollIndicator();
+      });
+  }
+  
+  private setupResizeObserver(): void {
+    if (!this.tableWrapper || !('ResizeObserver' in window)) return;
+    
+    this.resizeObserver = new ResizeObserver(() => {
+      this.updateScrollIndicator();
+    });
+    
+    this.resizeObserver.observe(this.tableWrapper.nativeElement);
+  }
+  
+  private updateScrollIndicator(): void {
+    if (!this.tableWrapper) return;
+    
+    const element = this.tableWrapper.nativeElement;
+    const table = element.querySelector('.data-table') as HTMLElement;
+    
+    if (table) {
+      this.hasHorizontalScroll = table.scrollWidth > element.clientWidth;
     }
   }
 }

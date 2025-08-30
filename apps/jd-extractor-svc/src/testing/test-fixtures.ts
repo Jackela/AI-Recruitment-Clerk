@@ -4,7 +4,7 @@
  */
 
 import { JobJdSubmittedEvent, AnalysisJdExtractedEvent } from '../dto/events.dto';
-import { JdDTO, LlmExtractionRequest, LlmExtractionResponse } from '../../../../libs/shared-dtos/src';
+import { JdDTO, LlmExtractionRequest, LlmExtractionResponse } from '@ai-recruitment-clerk/job-management-domain';
 import { NatsPublishResult } from '../nats/nats.client';
 
 /**

@@ -25,7 +25,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
-import { UserDto, Permission, AuthenticatedRequest } from '@app/shared-dtos';
+import { UserDto, Permission, AuthenticatedRequest } from '@ai-recruitment-clerk/user-management-domain';
 
 @ApiTags('system')
 @ApiBearerAuth()

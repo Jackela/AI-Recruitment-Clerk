@@ -38,7 +38,10 @@
     "test:unit:clean": "bash scripts/test-cleanup.sh && npm run test:unit",
     "test:clean": "bash scripts/test-cleanup.sh",
     "test:handles": "DETECT_HANDLES=true npm run test:unit",
-    "build:check": "nx run-many --target=build --all --parallel=false"
+    "build:check": "nx run-many --target=build --all --parallel=false",
+    "validate:contracts": "node tools/contract-validation/validate-contracts.js",
+    "validate:contracts:ci": "npm run validate:contracts",
+    "build:with-contracts": "npm run validate:contracts && npm run build"
   },
   "devDependencies": {
     "@angular-devkit/core": "~20.1.0",

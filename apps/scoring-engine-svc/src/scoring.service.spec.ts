@@ -5,7 +5,7 @@ import { EnhancedSkillMatcherService } from './services/enhanced-skill-matcher.s
 import { ExperienceAnalyzerService } from './services/experience-analyzer.service';
 import { CulturalFitAnalyzerService } from './services/cultural-fit-analyzer.service';
 import { ScoringConfidenceService } from './services/scoring-confidence.service';
-import { ResumeDTO } from '../../../libs/shared-dtos/src/models/resume.dto';
+import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
 describe('ScoringEngineService', () => {
   let service: ScoringEngineService;

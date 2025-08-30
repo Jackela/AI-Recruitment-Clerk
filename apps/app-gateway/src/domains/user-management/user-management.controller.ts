@@ -25,7 +25,7 @@ import {
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
-import { UserDto, Permission, UserRole, UserStatus, CreateUserDto, UpdateUserDto, UserPreferencesDto, UserActivityDto, AuthenticatedRequest } from '@app/shared-dtos';
+import { UserDto, Permission, UserRole, UserStatus, CreateUserDto, UpdateUserDto, UserPreferencesDto, UserActivityDto, AuthenticatedRequest } from '@ai-recruitment-clerk/user-management-domain';
 import { UserManagementService } from './user-management.service';
 
 interface UserProfileResponse extends UserDto {

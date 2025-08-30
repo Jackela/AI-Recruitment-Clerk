@@ -6,6 +6,39 @@ import { takeUntil } from 'rxjs/operators';
 import { WebSocketService, ProgressUpdate } from '../../../services/websocket.service';
 import { ToastService } from '../../../services/toast.service';
 
+export interface ProgressMessage {
+  type: 'info' | 'success' | 'error' | 'progress';
+  message: string;
+  timestamp: Date;
+}
+
+export interface WebSocketProgressMessage {
+  type: string;
+  data?: {
+    message?: string;
+    currentStep?: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface StepChangeData {
+  currentStep: string;
+  message?: string;
+  progress?: number;
+}
+
+export interface ProgressCompletionData {
+  progress?: number;
+  message?: string;
+  finalStep?: string;
+}
+
+export interface ProgressErrorData {
+  error?: string;
+  message?: string;
+  code?: string | number;
+}
+
 export interface ProgressStep {
   id: string;
   label: string;
@@ -391,10 +424,10 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
   overallProgress$ = new BehaviorSubject<number>(0);
   currentStep$ = new BehaviorSubject<string>('');
   estimatedTimeRemaining$ = new BehaviorSubject<number | null>(null);
-  recentMessages$ = new BehaviorSubject<any[]>([]);
+  recentMessages$ = new BehaviorSubject<ProgressMessage[]>([]);
 
   private destroy$ = new Subject<void>();
-  private messages: any[] = [];
+  private messages: ProgressMessage[] = [];
 
   constructor(
     private webSocketService: WebSocketService,
@@ -467,12 +500,18 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
       });
   }
 
-  private handleWebSocketMessage(message: any): void {
+  private handleWebSocketMessage(message: WebSocketProgressMessage): void {
     this.addMessage(message.type, message.data?.message || '状态更新');
     
     switch (message.type) {
       case 'step_change':
-        this.handleStepChange(message.data);
+        if (message.data?.currentStep) {
+          this.handleStepChange({
+            currentStep: message.data.currentStep,
+            message: message.data.message,
+            progress: typeof message.data.progress === 'number' ? message.data.progress : undefined
+          });
+        }
         break;
       case 'status_update':
         this.addMessage('info', message.data?.message || '状态更新');
@@ -493,7 +532,7 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
     this.addMessage('progress', `${progress.currentStep}: ${progress.progress}%`);
   }
 
-  private handleStepChange(data: any): void {
+  private handleStepChange(data: StepChangeData): void {
     const stepName = data.currentStep;
     this.currentStep$.next(stepName);
     
@@ -502,14 +541,14 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
     this.addMessage('info', data.message || `开始 ${stepName}`);
   }
 
-  private handleCompletion(_completion: any): void {
+  private handleCompletion(_completion: ProgressCompletionData): void {
     this.overallProgress$.next(100);
     this.currentStep$.next('分析完成');
     this.markAllStepsCompleted();
     this.addMessage('success', '分析已完成');
   }
 
-  private handleError(error: any): void {
+  private handleError(error: ProgressErrorData): void {
     this.addMessage('error', error.error || '处理过程中发生错误');
     this.markCurrentStepAsError();
   }
@@ -550,8 +589,8 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
     }
   }
 
-  private addMessage(type: string, message: string): void {
-    const newMessage = {
+  private addMessage(type: ProgressMessage['type'], message: string): void {
+    const newMessage: ProgressMessage = {
       type,
       message,
       timestamp: new Date(),
@@ -598,7 +637,7 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
     return step.id;
   }
 
-  trackByMessage(index: number, message: any): string {
+  trackByMessage(index: number, message: ProgressMessage): string {
     return `${message.timestamp.getTime()}_${index}`;
   }
 }
