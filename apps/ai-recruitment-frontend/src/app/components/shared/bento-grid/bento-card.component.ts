@@ -536,7 +536,7 @@ export class BentoCardComponent {
     return `Progress: ${percentage}% (${this.data.progress.value} of ${this.data.progress.max})`;
   }
 
-  getMetricAriaLabel(metric: BentoCardData['metrics'][0]): string {
+  getMetricAriaLabel(metric: NonNullable<BentoCardData['metrics']>[0]): string {
     let label = `${metric.label}: ${this.formatValue(metric.value)}`;
     if (metric.trend) {
       const direction = metric.trend.type === 'up' ? 'increased' : 
@@ -553,7 +553,7 @@ export class BentoCardComponent {
   }
 
   onActionClick(action: NonNullable<BentoCardData['actions']>[0]): void {
-    this.actionClick.emit(action);
+    this.actionClick.emit([action]);
     if (action.onClick) {
       action.onClick();
     }

@@ -14,7 +14,7 @@ async function globalTeardown() {
     const { cleanup } = await import('./cleanup-ports.mjs');
     await cleanup();
   } catch (error) {
-    console.warn('⚠️ Port cleanup failed:', error.message);
+    console.warn('⚠️ Port cleanup failed:', (error as Error).message);
   }
 }
 

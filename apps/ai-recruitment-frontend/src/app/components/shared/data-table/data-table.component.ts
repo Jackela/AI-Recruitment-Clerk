@@ -319,7 +319,7 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
   sortColumn = signal<string | null>(null);
   sortDirection = signal<'asc' | 'desc' | null>(null);
   selectedRows = signal<T[]>([]);
-  hasHorizontalScroll = false; // Track horizontal scroll state
+  // Track horizontal scroll state (moved to private property below)
 
   // Computed values
   filteredData = computed(() => {

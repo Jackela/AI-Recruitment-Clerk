@@ -70,7 +70,7 @@ export async function stableNavigation(
       
     } catch (error) {
       lastError = error as Error;
-      console.log(`⚠️ Navigation attempt ${attempt} failed: ${error.message} [${browserName}]`);
+      console.log(`⚠️ Navigation attempt ${attempt} failed: ${(error as Error).message} [${browserName}]`);
       
       if (attempt < maxRetries) {
         const delay = config.retryDelay * attempt; // Exponential backoff
@@ -106,7 +106,7 @@ export async function stableElementCheck(
       return true;
       
     } catch (error) {
-      console.log(`⚠️ Element check attempt ${attempt} failed: ${error.message} [${browserName}]`);
+      console.log(`⚠️ Element check attempt ${attempt} failed: ${(error as Error).message} [${browserName}]`);
       
       if (attempt < maxRetries) {
         const delay = config.retryDelay;
@@ -143,7 +143,7 @@ export async function stableEvaluate<T>(
       
     } catch (error) {
       lastError = error as Error;
-      console.log(`⚠️ JavaScript evaluation attempt ${attempt} failed: ${error.message} [${browserName}]`);
+      console.log(`⚠️ JavaScript evaluation attempt ${attempt} failed: ${(error as Error).message} [${browserName}]`);
       
       if (attempt < maxRetries) {
         await page.waitForTimeout(config.retryDelay);
@@ -187,7 +187,7 @@ export async function checkConnectionHealth(
     }
     
   } catch (error) {
-    console.log(`❌ Connection health check failed: ${error.message} [${browserName}]`);
+    console.log(`❌ Connection health check failed: ${(error as Error).message} [${browserName}]`);
     return false;
   }
 }
@@ -211,7 +211,7 @@ export async function measurePerformance(
     success = true;
     
   } catch (error) {
-    console.log(`📊 Performance measurement failed: ${error.message} [${browserName}]`);
+    console.log(`📊 Performance measurement failed: ${(error as Error).message} [${browserName}]`);
   } finally {
     const duration = Date.now() - startTime;
     console.log(`📊 Performance measurement complete: ${operationName} took ${duration}ms [${browserName}]`);
