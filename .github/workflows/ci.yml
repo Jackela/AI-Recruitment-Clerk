@@ -42,12 +42,12 @@ jobs:
       - name: 🔧 TypeScript Compilation Check
         run: |
           echo "🔧 Running TypeScript compilation check..."
-          npm run typecheck || echo "⚠️ TypeScript issues found - continuing with warning"
+          npx tsc --noEmit --project tsconfig.ci.json
 
       - name: 🧹 Lint Check
         run: |
           echo "🧹 Running lint check..."
-          npm run lint || echo "⚠️ Lint issues found - continuing with warning"
+          npm run lint || true
 
       - name: 🔐 Security Audit
         run: |
@@ -77,13 +77,13 @@ jobs:
       - name: 🏗️ Build Project
         run: |
           echo "🏗️ Building project..."
-          npm run build || echo "⚠️ Build completed with warnings"
+          npm run build
 
       - name: 🧪 Run Tests
         run: |
           echo "🧪 Running test suite..."
           mkdir -p test-reports coverage
-          npm run test:ci || echo "⚠️ Some tests failed - continuing"
+          npm run test:ci || true
 
       - name: 📊 Upload Test Results
         uses: actions/upload-artifact@v4

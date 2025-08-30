@@ -88,8 +88,8 @@ export class NatsClientService implements OnModuleInit, OnModuleDestroy {
       // Close all active subscriptions
       for (const [subject, subscription] of this.activeSubscriptions) {
         try {
-          if (subscription && typeof subscription.unsubscribe === 'function') {
-            await subscription.unsubscribe();
+          if (subscription && typeof subscription.stop === 'function') {
+            await subscription.stop();
           }
         } catch (error) {
           this.logger.warn(`Warning during subscription cleanup for ${subject}:`, error);
