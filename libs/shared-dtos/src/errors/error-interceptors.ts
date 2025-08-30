@@ -56,22 +56,26 @@ export class ErrorCorrelationInterceptor implements NestInterceptor {
     response.setHeader('X-Span-ID', correlationContext.spanId);
 
     // Execute within correlation context
-    return ErrorCorrelationManager.withContext(correlationContext, async () => {
-      return next.handle().pipe(
-        tap(() => {
-          // Request completed successfully
-          this.logger.debug(`Request completed: ${correlationContext.traceId}`);
-        }),
-        catchError((error) => {
-          // Ensure error has correlation context
-          if (error instanceof EnhancedAppException) {
-            error.withCorrelation(correlationContext);
-          }
-          
-          return throwError(() => error);
-        })
-      );
-    }) as Observable<any>;
+    ErrorCorrelationManager.setContext(correlationContext);
+    
+    return next.handle().pipe(
+      tap(() => {
+        // Request completed successfully
+        this.logger.debug(`Request completed: ${correlationContext.traceId}`);
+      }),
+      catchError((error) => {
+        // Ensure error has correlation context
+        if (error instanceof EnhancedAppException) {
+          error.withCorrelation(correlationContext);
+        }
+        
+        return throwError(() => error);
+      }),
+      finalize(() => {
+        // Clean up correlation context
+        ErrorCorrelationManager.clearContext();
+      })
+    );
   }
 
   /**

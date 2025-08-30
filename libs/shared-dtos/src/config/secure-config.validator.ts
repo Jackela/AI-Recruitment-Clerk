@@ -90,7 +90,7 @@ export class SecureConfigValidator {
   /**
    * Detects insecure fallback values that should never be used in production
    */
-  private static isInsecureFallbackValue(value: string): boolean {
+  static isInsecureFallbackValue(value: string): boolean {
     const insecurePatterns = [
       'your_',
       '_api_key_here',

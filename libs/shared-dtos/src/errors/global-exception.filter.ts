@@ -406,7 +406,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
       property: error.property,
       value: error.value,
       constraints: error.constraints,
-      children: error.children?.length > 0 ? 
+      children: error.children && error.children.length > 0 ? 
         this.formatValidationErrors(error.children) : undefined,
     }));
   }

@@ -81,7 +81,7 @@ export class RedisClient implements OnModuleDestroy {
    * 检查连接状态
    */
   isRedisConnected(): boolean {
-    return this.isConnected && this.redis.status === 'ready';
+    return this.isConnected && this.redis !== null && this.redis.status === 'ready';
   }
 
   /**

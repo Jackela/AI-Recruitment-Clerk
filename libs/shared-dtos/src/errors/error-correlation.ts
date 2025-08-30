@@ -48,7 +48,7 @@ export class ErrorCorrelationManager {
   private static readonly PARENT_SPAN_HEADER_NAME = 'x-parent-span-id';
   
   // Thread-local storage for correlation context (using AsyncLocalStorage in production)
-  private static currentContext: ErrorCorrelationContext | null = null;
+  private static currentContext: ErrorCorrelationContext | undefined = undefined;
   private static contextStack: ErrorCorrelationContext[] = [];
 
   /**
@@ -150,15 +150,15 @@ export class ErrorCorrelationManager {
   /**
    * Get current correlation context
    */
-  static getContext(): ErrorCorrelationContext | null {
-    return this.currentContext;
+  static getContext(): ErrorCorrelationContext | undefined {
+    return this.currentContext || undefined;
   }
 
   /**
    * Clear current context and restore previous
    */
   static clearContext(): void {
-    this.currentContext = this.contextStack.pop() || null;
+    this.currentContext = this.contextStack.pop() || undefined;
   }
 
   /**
