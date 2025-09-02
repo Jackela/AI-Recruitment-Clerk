@@ -11,7 +11,7 @@
     "npm": ">=10.0.0"
   },
   "scripts": {
-    "build": "npx nx build app-gateway --prod",
+    "build": "NODE_OPTIONS='--max-old-space-size=2048' npx nx build app-gateway --prod --parallel=1",
     "start": "node dist/apps/app-gateway/main.js",
     "start:prod": "NODE_ENV=production node dist/apps/app-gateway/main.js",
     "postinstall": "echo 'Skipping build in postinstall'",
