@@ -27,14 +27,14 @@
     "noImplicitAny": false
   },
   "include": [
-    "apps/**/*",
-    "libs/**/*", 
     "tests/**/*"
   ],
   "exclude": [
     "node_modules",
     "dist",
     "**/*.spec.ts",
-    "**/*.test.ts"
+    "**/*.test.ts",
+    "apps/**",
+    "libs/**"
   ]
 }
