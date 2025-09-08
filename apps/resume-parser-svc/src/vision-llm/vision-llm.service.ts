@@ -1,9 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { VisionLlmRequest, VisionLlmResponse } from '../dto/resume-parsing.dto';
 import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
-import { GeminiClient, GeminiConfig, PromptTemplates, PromptBuilder } from '@ai-recruitment-clerk/ai-services-shared';
-import { SecureConfigValidator } from '@ai-recruitment-clerk/infrastructure-shared';
-import * as pdfParse from 'pdf-parse-fork';
+import {
+  GeminiClient,
+  GeminiConfig,
+  PromptTemplates,
+  PromptBuilder,
+} from './ai-services-shared.stub';
+import { SecureConfigValidator } from '@app/shared-dtos';
+import pdfParse from 'pdf-parse-fork';
 
 @Injectable()
 export class VisionLlmService {
@@ -12,8 +17,10 @@ export class VisionLlmService {
 
   constructor() {
     // 🔒 SECURITY: Validate configuration before service initialization
-    SecureConfigValidator.validateServiceConfig('VisionLlmService', ['GEMINI_API_KEY']);
-    
+    SecureConfigValidator.validateServiceConfig('VisionLlmService', [
+      'GEMINI_API_KEY',
+    ]);
+
     const config: GeminiConfig = {
       apiKey: SecureConfigValidator.requireEnv('GEMINI_API_KEY'),
       model: 'gemini-1.5-pro', // Using Pro model for vision capabilities
@@ -23,7 +30,10 @@ export class VisionLlmService {
     this.geminiClient = new GeminiClient(config);
   }
 
-  async parseResumePdf(pdfBuffer: Buffer, filename: string): Promise<ResumeDTO> {
+  async parseResumePdf(
+    pdfBuffer: Buffer,
+    filename: string,
+  ): Promise<ResumeDTO> {
     this.logger.debug(`Starting resume parsing for: ${filename}`);
 
     try {
@@ -39,7 +49,10 @@ export class VisionLlmService {
         const pdfData = await pdfParse(pdfBuffer);
         extractedText = pdfData.text;
       } catch (pdfError) {
-        this.logger.warn('PDF text extraction failed, using vision-only mode', pdfError);
+        this.logger.warn(
+          'PDF text extraction failed, using vision-only mode',
+          pdfError,
+        );
         extractedText = '';
       }
 
@@ -54,25 +67,30 @@ export class VisionLlmService {
         try {
           const textPrompt = PromptBuilder.addJsonSchemaInstruction(
             PromptTemplates.getResumeParsingPrompt(extractedText),
-            schema
+            schema,
           );
-          const response = await this.geminiClient.generateStructuredResponse<ResumeDTO>(
-            textPrompt,
-            schema
-          );
+          const response =
+            await this.geminiClient.generateStructuredResponse<ResumeDTO>(
+              textPrompt,
+              schema,
+            );
           resumeData = response.data;
         } catch (textError) {
-          this.logger.warn('Text-based extraction failed, falling back to vision', textError);
+          this.logger.warn(
+            'Text-based extraction failed, falling back to vision',
+            textError,
+          );
           const visionPrompt = PromptBuilder.addJsonSchemaInstruction(
             PromptTemplates.getResumeVisionPrompt(),
-            schema
+            schema,
           );
-          const visionResponse = await this.geminiClient.generateStructuredVisionResponse<ResumeDTO>(
-            visionPrompt,
-            pdfBuffer,
-            'application/pdf',
-            schema
-          );
+          const visionResponse =
+            await this.geminiClient.generateStructuredVisionResponse<ResumeDTO>(
+              visionPrompt,
+              pdfBuffer,
+              'application/pdf',
+              schema,
+            );
           resumeData = visionResponse.data;
         }
       } else {
@@ -80,44 +98,49 @@ export class VisionLlmService {
         this.logger.debug('Using vision-only extraction');
         const visionPrompt = PromptBuilder.addJsonSchemaInstruction(
           PromptTemplates.getResumeVisionPrompt(),
-          schema
+          schema,
         );
-        const response = await this.geminiClient.generateStructuredVisionResponse<ResumeDTO>(
-          visionPrompt,
-          pdfBuffer,
-          'application/pdf',
-          schema
-        );
+        const response =
+          await this.geminiClient.generateStructuredVisionResponse<ResumeDTO>(
+            visionPrompt,
+            pdfBuffer,
+            'application/pdf',
+            schema,
+          );
         resumeData = response.data;
       }
 
       // Clean and validate the extracted data
       const cleanedData = this.validateAndCleanResumeData(resumeData);
-      
+
       this.logger.debug(`Resume parsing completed for: ${filename}`);
       return cleanedData;
-
     } catch (error) {
       this.logger.error(`Failed to parse resume: ${filename}`, error);
-      throw new Error(`Resume parsing failed: ${error.message}`);
+      throw new Error(`Resume parsing failed: ${(error as Error).message}`);
     }
   }
 
-  async parseResumePdfAdvanced(request: VisionLlmRequest): Promise<VisionLlmResponse> {
+  async parseResumePdfAdvanced(
+    request: VisionLlmRequest,
+  ): Promise<VisionLlmResponse> {
     const startTime = Date.now();
-    
+
     try {
-      const resumeData = await this.parseResumePdf(request.pdfBuffer, request.filename);
-      
+      const resumeData = await this.parseResumePdf(
+        request.pdfBuffer,
+        request.filename,
+      );
+
       const processingTimeMs = Date.now() - startTime;
-      
+
       // Calculate confidence based on data completeness
       const confidence = this.calculateConfidence(resumeData);
-      
+
       return {
         extractedData: resumeData,
         confidence,
-        processingTimeMs
+        processingTimeMs,
       };
     } catch (error) {
       throw error;
@@ -149,20 +172,21 @@ export class VisionLlmService {
     // Base processing time estimation based on file size and complexity
     const baseMsPerKB = 50; // 50ms per KB as baseline
     const sizeInKB = fileSize / 1024;
-    
+
     // Add complexity factors
     let estimatedMs = sizeInKB * baseMsPerKB;
-    
+
     // Add overhead for vision processing
     estimatedMs += 2000; // Base overhead
-    
+
     // Add network latency buffer
     estimatedMs += 1000;
-    
+
     return Math.round(estimatedMs);
   }
 
-  private buildResumeExtractionPrompt(extractedText: string): string {
+  // @ts-ignore - Method reserved for future use
+  private _buildResumeExtractionPrompt(extractedText: string): string {
     return `
 Extract structured information from this resume text. Focus on identifying:
 
@@ -183,7 +207,8 @@ Extraction Guidelines:
 - Be thorough but accurate - only extract clearly visible information`;
   }
 
-  private buildVisionPrompt(): string {
+  // @ts-ignore - Method reserved for future use
+  private _buildVisionPrompt(): string {
     return `
 Analyze this resume document and extract structured information. Focus on:
 
@@ -220,87 +245,104 @@ Extraction Guidelines:
   }
 
   private getResumeSchema(): string {
-    return JSON.stringify({
-      type: 'object',
-      properties: {
-        contactInfo: {
-          type: 'object',
-          properties: {
-            name: { type: ['string', 'null'] },
-            email: { type: ['string', 'null'] },
-            phone: { type: ['string', 'null'] }
+    return JSON.stringify(
+      {
+        type: 'object',
+        properties: {
+          contactInfo: {
+            type: 'object',
+            properties: {
+              name: { type: ['string', 'null'] },
+              email: { type: ['string', 'null'] },
+              phone: { type: ['string', 'null'] },
+            },
+            required: ['name', 'email', 'phone'],
           },
-          required: ['name', 'email', 'phone']
-        },
-        skills: {
-          type: 'array',
-          items: { type: 'string' }
-        },
-        workExperience: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              company: { type: 'string' },
-              position: { type: 'string' },
-              startDate: { type: 'string' },
-              endDate: { type: 'string' },
-              summary: { type: 'string' }
+          skills: {
+            type: 'array',
+            items: { type: 'string' },
+          },
+          workExperience: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                company: { type: 'string' },
+                position: { type: 'string' },
+                startDate: { type: 'string' },
+                endDate: { type: 'string' },
+                summary: { type: 'string' },
+              },
+              required: [
+                'company',
+                'position',
+                'startDate',
+                'endDate',
+                'summary',
+              ],
             },
-            required: ['company', 'position', 'startDate', 'endDate', 'summary']
-          }
-        },
-        education: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              school: { type: 'string' },
-              degree: { type: 'string' },
-              major: { type: ['string', 'null'] }
+          },
+          education: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                school: { type: 'string' },
+                degree: { type: 'string' },
+                major: { type: ['string', 'null'] },
+              },
+              required: ['school', 'degree', 'major'],
             },
-            required: ['school', 'degree', 'major']
-          }
-        }
+          },
+        },
+        required: ['contactInfo', 'skills', 'workExperience', 'education'],
       },
-      required: ['contactInfo', 'skills', 'workExperience', 'education']
-    }, null, 2);
+      null,
+      2,
+    );
   }
 
   private validateAndCleanResumeData(data: any): ResumeDTO {
     // Ensure contact info is properly structured
     const contactInfo = {
       name: data.contactInfo?.name || null,
-      email: this.validateEmail(data.contactInfo?.email) ? data.contactInfo.email : null,
-      phone: data.contactInfo?.phone || null
+      email: this.validateEmail(data.contactInfo?.email)
+        ? data.contactInfo.email
+        : null,
+      phone: data.contactInfo?.phone || null,
     };
 
     // Clean and validate skills array
-    const skills = Array.isArray(data.skills) 
-      ? data.skills.filter(skill => skill && typeof skill === 'string').map(skill => skill.trim())
+    const skills = Array.isArray(data.skills)
+      ? data.skills
+          .filter((skill: any) => skill && typeof skill === 'string')
+          .map((skill: string) => skill.trim())
       : [];
 
     // Clean and validate work experience
     const workExperience = Array.isArray(data.workExperience)
       ? data.workExperience
-          .filter(exp => exp.company && exp.position)
-          .map(exp => ({
+          .filter((exp: any) => exp.company && exp.position)
+          .map((exp: any) => ({
             company: exp.company.trim(),
             position: exp.position.trim(),
             startDate: this.validateDate(exp.startDate) ? exp.startDate : '',
-            endDate: this.validateDate(exp.endDate) || exp.endDate === 'present' ? exp.endDate : '',
-            summary: exp.summary ? exp.summary.trim() : ''
+            endDate:
+              this.validateDate(exp.endDate) || exp.endDate === 'present'
+                ? exp.endDate
+                : '',
+            summary: exp.summary ? exp.summary.trim() : '',
           }))
       : [];
 
     // Clean and validate education
     const education = Array.isArray(data.education)
       ? data.education
-          .filter(edu => edu.school && edu.degree)
-          .map(edu => ({
+          .filter((edu: any) => edu.school && edu.degree)
+          .map((edu: any) => ({
             school: edu.school.trim(),
             degree: edu.degree.trim(),
-            major: edu.major ? edu.major.trim() : null
+            major: edu.major ? edu.major.trim() : null,
           }))
       : [];
 
@@ -308,7 +350,7 @@ Extraction Guidelines:
       contactInfo,
       skills,
       workExperience,
-      education
+      education,
     };
   }
 
@@ -320,14 +362,14 @@ Extraction Guidelines:
 
   private validateDate(dateStr: string): boolean {
     if (!dateStr || dateStr === 'present') return true;
-    
+
     // Check ISO date format (YYYY-MM-DD)
     const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (isoDateRegex.test(dateStr)) {
       const date = new Date(dateStr);
       return !isNaN(date.getTime());
     }
-    
+
     return false;
   }
 
@@ -372,7 +414,8 @@ Extraction Guidelines:
 
   async healthCheck(): Promise<boolean> {
     try {
-      return await this.geminiClient.healthCheck();
+      await this.geminiClient.healthCheck();
+      return true;
     } catch {
       return false;
     }

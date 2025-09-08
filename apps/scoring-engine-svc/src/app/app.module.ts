@@ -12,12 +12,8 @@ import { ExperienceAnalyzerService } from '../services/experience-analyzer.servi
 import { CulturalFitAnalyzerService } from '../services/cultural-fit-analyzer.service';
 import { ScoringConfidenceService } from '../services/scoring-confidence.service';
 import { GeminiClient } from '@ai-recruitment-clerk/ai-services-shared';
-import { 
-  SecureConfigValidator,
-  StandardizedGlobalExceptionFilter,
-  ExceptionFilterConfigHelper,
-  ErrorInterceptorFactory
-} from '@ai-recruitment-clerk/infrastructure-shared';
+import { StandardizedGlobalExceptionFilter, ExceptionFilterConfigHelper, ErrorInterceptorFactory } from '@ai-recruitment-clerk/infrastructure-shared';
+import { SecureConfigValidator } from '@app/shared-dtos';
 
 @Module({
   imports: [
@@ -41,8 +37,10 @@ import {
       provide: GeminiClient,
       useFactory: () => {
         // 🔒 SECURITY: Validate configuration before client creation
-        SecureConfigValidator.validateServiceConfig('GeminiClient', ['GEMINI_API_KEY']);
-        
+        SecureConfigValidator.validateServiceConfig('GeminiClient', [
+          'GEMINI_API_KEY',
+        ]);
+
         return new GeminiClient({
           apiKey: SecureConfigValidator.requireEnv('GEMINI_API_KEY'),
           model: 'gemini-1.5-flash',
@@ -54,30 +52,36 @@ import {
     // Enhanced Error Handling System
     {
       provide: APP_FILTER,
-      useFactory: () => new StandardizedGlobalExceptionFilter({
-        serviceName: 'scoring-engine-svc',
-        ...ExceptionFilterConfigHelper.forProcessingService()
-      }),
+      useFactory: () =>
+        new StandardizedGlobalExceptionFilter({
+          serviceName: 'scoring-engine-svc',
+          ...ExceptionFilterConfigHelper.forProcessingService(),
+        }),
     },
     // Error Handling Interceptors
     {
       provide: APP_INTERCEPTOR,
-      useFactory: () => ErrorInterceptorFactory.createCorrelationInterceptor('scoring-engine-svc'),
+      useFactory: () =>
+        ErrorInterceptorFactory.createCorrelationInterceptor(
+          'scoring-engine-svc',
+        ),
     },
     {
       provide: APP_INTERCEPTOR,
-      useFactory: () => ErrorInterceptorFactory.createLoggingInterceptor('scoring-engine-svc'),
+      useFactory: () =>
+        ErrorInterceptorFactory.createLoggingInterceptor('scoring-engine-svc'),
     },
     {
       provide: APP_INTERCEPTOR,
-      useFactory: () => ErrorInterceptorFactory.createPerformanceInterceptor(
-        'scoring-engine-svc',
-        {
-          warnThreshold: 5000,  // 5 seconds - scoring can take time with AI analysis
-          errorThreshold: 30000 // 30 seconds - hard limit for scoring process
-        }
-      ),
-    }
+      useFactory: () =>
+        ErrorInterceptorFactory.createPerformanceInterceptor(
+          'scoring-engine-svc',
+          {
+            warnThreshold: 5000, // 5 seconds - scoring can take time with AI analysis
+            errorThreshold: 30000, // 30 seconds - hard limit for scoring process
+          },
+        ),
+    },
   ],
 })
 export class AppModule {}

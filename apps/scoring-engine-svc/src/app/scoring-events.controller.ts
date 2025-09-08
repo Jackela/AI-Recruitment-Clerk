@@ -1,12 +1,14 @@
 import { Controller, Logger, OnModuleInit } from '@nestjs/common';
 import { EventPattern } from '@nestjs/microservices';
-import { AnalysisJdExtractedEvent, JdDTO as ExtractedJdDTO } from '@ai-recruitment-clerk/job-management-domain';
-import { AnalysisResumeParsedEvent, ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
-import { 
-  ScoringEngineException,
-  ScoringEngineErrorCode,
-  ErrorCorrelationManager
-} from '@ai-recruitment-clerk/infrastructure-shared';
+import {
+  AnalysisJdExtractedEvent,
+  JdDTO as ExtractedJdDTO,
+} from '@ai-recruitment-clerk/job-management-domain';
+import {
+  AnalysisResumeParsedEvent,
+  ResumeDTO,
+} from '@ai-recruitment-clerk/resume-processing-domain';
+import { ScoringEngineException, ScoringEngineErrorCode, ErrorCorrelationManager } from '@app/shared-dtos';
 import { ScoringEngineNatsService } from '../services/scoring-engine-nats.service';
 import { ScoringEngineService, JdDTO } from '../scoring.service';
 
@@ -16,49 +18,59 @@ export class ScoringEventsController implements OnModuleInit {
 
   constructor(
     private readonly natsService: ScoringEngineNatsService,
-    private readonly scoringEngine: ScoringEngineService
+    private readonly scoringEngine: ScoringEngineService,
   ) {}
 
   async onModuleInit() {
     // Subscribe to analysis events using the shared NATS service
-    await this.natsService.subscribeToJdExtracted(this.handleJdExtracted.bind(this));
-    await this.natsService.subscribeToResumeParsed(this.handleResumeParsed.bind(this));
+    await this.natsService.subscribeToJdExtracted(
+      this.handleJdExtracted.bind(this),
+    );
+    await this.natsService.subscribeToResumeParsed(
+      this.handleResumeParsed.bind(this),
+    );
   }
 
   @EventPattern('analysis.jd.extracted')
   async handleJdExtracted(payload: AnalysisJdExtractedEvent): Promise<void> {
     try {
-      this.logger.log(`[SCORING-ENGINE] Processing analysis.jd.extracted event for jobId: ${payload.jobId}`);
-      
+      this.logger.log(
+        `[SCORING-ENGINE] Processing analysis.jd.extracted event for jobId: ${payload.jobId}`,
+      );
+
       // Validate payload with correlation context
       const correlationContext = ErrorCorrelationManager.getContext();
-      
+
       if (!payload.jobId || !payload.extractedData) {
         throw new ScoringEngineException(
           ScoringEngineErrorCode.INSUFFICIENT_DATA,
           {
             provided: {
               jobId: !!payload.jobId,
-              extractedData: !!payload.extractedData
+              extractedData: !!payload.extractedData,
             },
-            correlationId: correlationContext?.traceId
-          }
+            correlationId: correlationContext?.traceId,
+          },
         );
       }
-      
+
       // Convert extracted JD to scoring engine JD format
       const scoringJdDto = this.convertToScoringJdDTO(payload.extractedData);
-      
+
       // Use the scoring engine service to handle JD extracted event
       this.scoringEngine.handleJdExtractedEvent({
         jobId: payload.jobId,
-        jdDto: scoringJdDto
+        jdDto: scoringJdDto,
       });
-      
-      this.logger.log(`[SCORING-ENGINE] Successfully processed JD data for jobId: ${payload.jobId}`);
-      
+
+      this.logger.log(
+        `[SCORING-ENGINE] Successfully processed JD data for jobId: ${payload.jobId}`,
+      );
     } catch (error) {
-      this.logger.error(`[SCORING-ENGINE] Error processing analysis.jd.extracted for jobId: ${payload.jobId}:`, error);
+      this.logger.error(
+        `[SCORING-ENGINE] Error processing analysis.jd.extracted for jobId: ${payload.jobId}:`,
+        error,
+      );
       throw error; // Let global exception filter handle it
     }
   }
@@ -66,11 +78,13 @@ export class ScoringEventsController implements OnModuleInit {
   @EventPattern('analysis.resume.parsed')
   async handleResumeParsed(payload: AnalysisResumeParsedEvent): Promise<void> {
     try {
-      this.logger.log(`[SCORING-ENGINE] Processing analysis.resume.parsed event for resumeId: ${payload.resumeId}`);
-      
+      this.logger.log(
+        `[SCORING-ENGINE] Processing analysis.resume.parsed event for resumeId: ${payload.resumeId}`,
+      );
+
       // Validate payload with correlation context
       const correlationContext = ErrorCorrelationManager.getContext();
-      
+
       if (!payload.jobId || !payload.resumeId || !payload.resumeDto) {
         throw new ScoringEngineException(
           ScoringEngineErrorCode.INSUFFICIENT_DATA,
@@ -78,30 +92,39 @@ export class ScoringEventsController implements OnModuleInit {
             provided: {
               jobId: !!payload.jobId,
               resumeId: !!payload.resumeId,
-              resumeDto: !!payload.resumeDto
+              resumeDto: !!payload.resumeDto,
             },
-            correlationId: correlationContext?.traceId
-          }
+            correlationId: correlationContext?.traceId,
+          },
         );
       }
-      
+
       // Use the enhanced scoring engine service to handle resume parsed event
       await this.scoringEngine.handleResumeParsedEvent({
         jobId: payload.jobId,
         resumeId: payload.resumeId,
-        resumeDto: payload.resumeDto as ResumeDTO
+        resumeDto: payload.resumeDto as ResumeDTO,
       });
-      
-      this.logger.log(`[SCORING-ENGINE] Successfully processed enhanced scoring for resumeId: ${payload.resumeId}`);
-      
+
+      this.logger.log(
+        `[SCORING-ENGINE] Successfully processed enhanced scoring for resumeId: ${payload.resumeId}`,
+      );
     } catch (error) {
-      this.logger.error(`[SCORING-ENGINE] Error processing analysis.resume.parsed for resumeId: ${payload.resumeId}:`, error);
-      
+      this.logger.error(
+        `[SCORING-ENGINE] Error processing analysis.resume.parsed for resumeId: ${payload.resumeId}:`,
+        error,
+      );
+
       // Publish error event using the shared NATS service
-      await this.natsService.publishScoringError(payload.jobId, payload.resumeId, error as Error, {
-        stage: 'resume-scoring',
-        retryAttempt: 1,
-      });
+      await this.natsService.publishScoringError(
+        payload.jobId,
+        payload.resumeId,
+        error as Error,
+        {
+          stage: 'resume-scoring',
+          retryAttempt: 1,
+        },
+      );
       throw error; // Let global exception filter handle it
     }
   }
@@ -111,16 +134,23 @@ export class ScoringEventsController implements OnModuleInit {
    */
   private convertToScoringJdDTO(extractedData: ExtractedJdDTO): JdDTO {
     return {
-      requiredSkills: extractedData.requirements?.technical?.map(skill => ({
-        name: skill,
-        weight: 1.0,
-        required: true,
-        category: 'technical'
-      })) || [],
-      experienceYears: this.parseExperienceYears(extractedData.requirements?.experience || ''),
-      educationLevel: this.parseEducationLevel(extractedData.requirements?.education || ''),
+      requiredSkills:
+        extractedData.requirements?.technical?.map((skill) => ({
+          name: skill,
+          weight: 1.0,
+          required: true,
+          category: 'technical',
+        })) || [],
+      experienceYears: this.parseExperienceYears(
+        extractedData.requirements?.experience || '',
+      ),
+      educationLevel: this.parseEducationLevel(
+        extractedData.requirements?.education || '',
+      ),
       softSkills: extractedData.requirements?.soft || [],
-      seniority: this.parseSeniority(extractedData.requirements?.experience || ''),
+      seniority: this.parseSeniority(
+        extractedData.requirements?.experience || '',
+      ),
       industryContext: extractedData.company?.industry,
       companyProfile: {
         size: this.parseCompanySize(extractedData.company?.size || 'medium'),
@@ -129,18 +159,21 @@ export class ScoringEventsController implements OnModuleInit {
           workStyle: 'hybrid' as const,
           decisionMaking: 'collaborative' as const,
           innovation: 'high' as const,
-          growthStage: 'growth' as const
+          growthStage: 'growth' as const,
         },
         teamStructure: {
           teamSize: 10,
           managementLayers: 2,
-          collaborationStyle: 'cross-functional' as const
-        }
-      }
+          collaborationStyle: 'cross-functional' as const,
+        },
+      },
     };
   }
 
-  private parseExperienceYears(experience: string): { min: number; max: number } {
+  private parseExperienceYears(experience: string): {
+    min: number;
+    max: number;
+  } {
     // Extract numbers from experience string like "3-5 years", "5+ years", etc.
     const matches = experience.match(/(\d+)[-+\s]*(\d*)/);
     if (matches) {
@@ -151,20 +184,32 @@ export class ScoringEventsController implements OnModuleInit {
     return { min: 0, max: 10 }; // Default
   }
 
-  private parseEducationLevel(education: string): 'bachelor' | 'master' | 'phd' | 'any' {
+  private parseEducationLevel(
+    education: string,
+  ): 'bachelor' | 'master' | 'phd' | 'any' {
     const lowerEducation = education.toLowerCase();
-    if (lowerEducation.includes('phd') || lowerEducation.includes('doctorate')) return 'phd';
+    if (lowerEducation.includes('phd') || lowerEducation.includes('doctorate'))
+      return 'phd';
     if (lowerEducation.includes('master')) return 'master';
     if (lowerEducation.includes('bachelor')) return 'bachelor';
     return 'any';
   }
 
-  private parseSeniority(experience: string): 'junior' | 'mid' | 'senior' | 'lead' | 'executive' {
+  private parseSeniority(
+    experience: string,
+  ): 'junior' | 'mid' | 'senior' | 'lead' | 'executive' {
     const lowerExp = experience.toLowerCase();
-    if (lowerExp.includes('lead') || lowerExp.includes('principal')) return 'lead';
-    if (lowerExp.includes('senior') || lowerExp.includes('7+') || lowerExp.includes('8+')) return 'senior';
-    if (lowerExp.includes('junior') || lowerExp.includes('entry')) return 'junior';
-    
+    if (lowerExp.includes('lead') || lowerExp.includes('principal'))
+      return 'lead';
+    if (
+      lowerExp.includes('senior') ||
+      lowerExp.includes('7+') ||
+      lowerExp.includes('8+')
+    )
+      return 'senior';
+    if (lowerExp.includes('junior') || lowerExp.includes('entry'))
+      return 'junior';
+
     // Parse years
     const matches = experience.match(/(\d+)/);
     if (matches) {
@@ -173,15 +218,16 @@ export class ScoringEventsController implements OnModuleInit {
       if (years >= 3) return 'mid';
       return 'junior';
     }
-    
+
     return 'mid'; // Default
   }
 
   private parseCompanySize(size: string): 'startup' | 'scaleup' | 'enterprise' {
     const lowerSize = size.toLowerCase();
-    if (lowerSize.includes('startup') || lowerSize.includes('small')) return 'startup';
-    if (lowerSize.includes('enterprise') || lowerSize.includes('large')) return 'enterprise';
+    if (lowerSize.includes('startup') || lowerSize.includes('small'))
+      return 'startup';
+    if (lowerSize.includes('enterprise') || lowerSize.includes('large'))
+      return 'enterprise';
     return 'scaleup'; // Default for medium
   }
-
 }
