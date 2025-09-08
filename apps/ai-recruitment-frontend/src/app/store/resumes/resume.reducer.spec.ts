@@ -1,7 +1,11 @@
 import { resumeReducer } from './resume.reducer';
 import { initialResumeState, ResumeState } from './resume.state';
 import * as ResumeActions from './resume.actions';
-import { ResumeDetail, ResumeListItem, ResumeUploadResponse } from './resume.model';
+import {
+  ResumeDetail,
+  ResumeListItem,
+  ResumeUploadResponse,
+} from './resume.model';
 
 describe('Resume Reducer', () => {
   const mockResumeListItems: ResumeListItem[] = [
@@ -11,16 +15,16 @@ describe('Resume Reducer', () => {
       fileName: 'resume1.pdf',
       status: 'processed',
       uploadedAt: new Date('2024-01-01'),
-      score: 85
+      score: 85,
     },
     {
       id: 'resume2',
       jobId: 'job1',
-      fileName: 'resume2.pdf', 
+      fileName: 'resume2.pdf',
       status: 'processing',
       uploadedAt: new Date('2024-01-02'),
-      score: null
-    }
+      score: null,
+    },
   ];
 
   const mockResume: ResumeDetail = {
@@ -34,14 +38,14 @@ describe('Resume Reducer', () => {
       name: 'John Doe',
       email: 'john@example.com',
       skills: ['JavaScript', 'TypeScript'],
-      experience: '3 years'
-    }
+      experience: '3 years',
+    },
   };
 
   const mockUploadResponse: ResumeUploadResponse = {
     jobId: 'job1',
     uploadedCount: 2,
-    processedIds: ['resume1', 'resume2']
+    processedIds: ['resume1', 'resume2'],
   };
 
   describe('Initial State', () => {
@@ -71,9 +75,11 @@ describe('Resume Reducer', () => {
     it('should handle loadResumesByJobSuccess', () => {
       const loadingState: ResumeState = {
         ...initialResumeState,
-        loading: true
+        loading: true,
       };
-      const action = ResumeActions.loadResumesByJobSuccess({ resumes: mockResumeListItems });
+      const action = ResumeActions.loadResumesByJobSuccess({
+        resumes: mockResumeListItems,
+      });
       const state = resumeReducer(loadingState, action);
 
       expect(state.resumes).toEqual(mockResumeListItems);
@@ -84,7 +90,7 @@ describe('Resume Reducer', () => {
     it('should handle loadResumesByJobFailure', () => {
       const loadingState: ResumeState = {
         ...initialResumeState,
-        loading: true
+        loading: true,
       };
       const error = 'Failed to load resumes';
       const action = ResumeActions.loadResumesByJobFailure({ error });
@@ -107,7 +113,7 @@ describe('Resume Reducer', () => {
     it('should handle loadResumeSuccess', () => {
       const loadingState: ResumeState = {
         ...initialResumeState,
-        loading: true
+        loading: true,
       };
       const action = ResumeActions.loadResumeSuccess({ resume: mockResume });
       const state = resumeReducer(loadingState, action);
@@ -120,7 +126,7 @@ describe('Resume Reducer', () => {
     it('should handle loadResumeFailure', () => {
       const loadingState: ResumeState = {
         ...initialResumeState,
-        loading: true
+        loading: true,
       };
       const error = 'Failed to load resume';
       const action = ResumeActions.loadResumeFailure({ error });
@@ -133,7 +139,9 @@ describe('Resume Reducer', () => {
 
   describe('Upload Resume Actions', () => {
     it('should handle uploadResumes', () => {
-      const files = [new File(['content'], 'resume1.pdf', { type: 'application/pdf' })];
+      const files = [
+        new File(['content'], 'resume1.pdf', { type: 'application/pdf' }),
+      ];
       const action = ResumeActions.uploadResumes({ jobId: 'job1', files });
       const state = resumeReducer(initialResumeState, action);
 
@@ -144,9 +152,11 @@ describe('Resume Reducer', () => {
     it('should handle uploadResumesSuccess', () => {
       const uploadingState: ResumeState = {
         ...initialResumeState,
-        uploading: true
+        uploading: true,
       };
-      const action = ResumeActions.uploadResumesSuccess({ response: mockUploadResponse });
+      const action = ResumeActions.uploadResumesSuccess({
+        response: mockUploadResponse,
+      });
       const state = resumeReducer(uploadingState, action);
 
       expect(state.uploading).toBe(false);
@@ -156,7 +166,7 @@ describe('Resume Reducer', () => {
     it('should handle uploadResumesFailure', () => {
       const uploadingState: ResumeState = {
         ...initialResumeState,
-        uploading: true
+        uploading: true,
       };
       const error = 'Failed to upload resumes';
       const action = ResumeActions.uploadResumesFailure({ error });
@@ -171,7 +181,7 @@ describe('Resume Reducer', () => {
     it('should handle clearSelectedResume', () => {
       const stateWithSelectedResume: ResumeState = {
         ...initialResumeState,
-        selectedResume: mockResume
+        selectedResume: mockResume,
       };
       const action = ResumeActions.clearSelectedResume();
       const state = resumeReducer(stateWithSelectedResume, action);
@@ -182,7 +192,7 @@ describe('Resume Reducer', () => {
     it('should handle clearResumeError', () => {
       const stateWithError: ResumeState = {
         ...initialResumeState,
-        error: 'Some error'
+        error: 'Some error',
       };
       const action = ResumeActions.clearResumeError();
       const state = resumeReducer(stateWithError, action);
@@ -205,7 +215,7 @@ describe('Resume Reducer', () => {
       const stateWithData: ResumeState = {
         ...initialResumeState,
         resumes: mockResumeListItems,
-        selectedResume: mockResume
+        selectedResume: mockResume,
       };
       const action = ResumeActions.loadResumesByJob({ jobId: 'job1' });
       const newState = resumeReducer(stateWithData, action);

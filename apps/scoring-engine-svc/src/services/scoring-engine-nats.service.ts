@@ -23,10 +23,12 @@ export class ScoringEngineNatsService extends NatsClientService {
     };
   }): Promise<NatsPublishResult> {
     const subject = 'analysis.scoring.completed';
-    
+
     try {
-      this.logger.log(`Publishing enhanced scoring completed event for resumeId: ${event.resumeId}`);
-      
+      this.logger.log(
+        `Publishing enhanced scoring completed event for resumeId: ${event.resumeId}`,
+      );
+
       const enhancedEvent = {
         jobId: event.jobId,
         resumeId: event.resumeId,
@@ -39,15 +41,23 @@ export class ScoringEngineNatsService extends NatsClientService {
         performance: {
           totalProcessingTime: event.processingTimeMs,
           aiAnalysisTime: event.enhancedMetrics?.aiAnalysisTime || 0,
-          efficiency: event.enhancedMetrics?.aiAnalysisTime 
-            ? Math.round((event.enhancedMetrics.aiAnalysisTime / event.processingTimeMs) * 100)
+          efficiency: event.enhancedMetrics?.aiAnalysisTime
+            ? Math.round(
+                (event.enhancedMetrics.aiAnalysisTime /
+                  event.processingTimeMs) *
+                  100,
+              )
             : 0,
-          fallbackRate: event.enhancedMetrics?.fallbacksUsed || 0
+          fallbackRate: event.enhancedMetrics?.fallbacksUsed || 0,
         },
         quality: {
           confidenceLevel: event.enhancedMetrics?.confidenceLevel || 'medium',
-          componentsProcessed: event.enhancedMetrics?.componentsProcessed || ['skills', 'experience', 'education']
-        }
+          componentsProcessed: event.enhancedMetrics?.componentsProcessed || [
+            'skills',
+            'experience',
+            'education',
+          ],
+        },
       };
 
       const result = await this.publish(subject, enhancedEvent, {
@@ -58,19 +68,27 @@ export class ScoringEngineNatsService extends NatsClientService {
           'event-type': 'AnalysisScoringCompletedEvent',
           'resume-id': event.resumeId,
           'job-id': event.jobId,
-          'score': event.matchScore.toString(),
+          score: event.matchScore.toString(),
         },
       });
-      
+
       if (result.success) {
-        this.logger.log(`Enhanced scoring completed event published successfully for resumeId: ${event.resumeId} with confidence: ${event.enhancedMetrics?.confidenceLevel || 'medium'}, messageId: ${result.messageId}`);
+        this.logger.log(
+          `Enhanced scoring completed event published successfully for resumeId: ${event.resumeId} with confidence: ${event.enhancedMetrics?.confidenceLevel || 'medium'}, messageId: ${result.messageId}`,
+        );
       } else {
-        this.logger.error(`Failed to publish enhanced scoring completed event for resumeId: ${event.resumeId}`, result.error);
+        this.logger.error(
+          `Failed to publish enhanced scoring completed event for resumeId: ${event.resumeId}`,
+          result.error,
+        );
       }
-      
+
       return result;
     } catch (error) {
-      this.logger.error(`Error publishing enhanced scoring completed event for resumeId: ${event.resumeId}`, error);
+      this.logger.error(
+        `Error publishing enhanced scoring completed event for resumeId: ${event.resumeId}`,
+        error,
+      );
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -90,13 +108,15 @@ export class ScoringEngineNatsService extends NatsClientService {
       retryAttempt?: number;
       processingTimeMs?: number;
       inputData?: Record<string, unknown>;
-    }
+    },
   ): Promise<NatsPublishResult> {
     const subject = 'analysis.scoring.failed';
-    
+
     try {
-      this.logger.log(`Publishing scoring error event for resumeId: ${resumeId}`);
-      
+      this.logger.log(
+        `Publishing scoring error event for resumeId: ${resumeId}`,
+      );
+
       const errorEvent = {
         jobId,
         resumeId,
@@ -124,19 +144,30 @@ export class ScoringEngineNatsService extends NatsClientService {
           'error-stage': context?.stage || 'unknown',
         },
       });
-      
+
       if (result.success) {
-        this.logger.log(`Scoring error event published successfully for resumeId: ${resumeId}, messageId: ${result.messageId}`);
+        this.logger.log(
+          `Scoring error event published successfully for resumeId: ${resumeId}, messageId: ${result.messageId}`,
+        );
       } else {
-        this.logger.error(`Failed to publish scoring error event for resumeId: ${resumeId}`, result.error);
+        this.logger.error(
+          `Failed to publish scoring error event for resumeId: ${resumeId}`,
+          result.error,
+        );
       }
-      
+
       return result;
     } catch (publishError) {
-      this.logger.error(`Error publishing scoring error event for resumeId: ${resumeId}`, publishError);
+      this.logger.error(
+        `Error publishing scoring error event for resumeId: ${resumeId}`,
+        publishError,
+      );
       return {
         success: false,
-        error: publishError instanceof Error ? publishError.message : 'Unknown error',
+        error:
+          publishError instanceof Error
+            ? publishError.message
+            : 'Unknown error',
       };
     }
   }
@@ -145,14 +176,16 @@ export class ScoringEngineNatsService extends NatsClientService {
    * Subscribe to analysis.jd.extracted events
    */
   async subscribeToJdExtracted(
-    handler: (event: AnalysisJdExtractedEvent) => Promise<void>
+    handler: (event: AnalysisJdExtractedEvent) => Promise<void>,
   ): Promise<void> {
     const subject = 'analysis.jd.extracted';
     const durableName = 'scoring-engine-jd-extracted';
-    
+
     try {
-      this.logger.log(`Setting up subscription to ${subject} with durable name: ${durableName}`);
-      
+      this.logger.log(
+        `Setting up subscription to ${subject} with durable name: ${durableName}`,
+      );
+
       await this.subscribe(subject, handler, {
         durableName,
         queueGroup: 'scoring-engine-group',
@@ -160,7 +193,7 @@ export class ScoringEngineNatsService extends NatsClientService {
         ackWait: 30000, // 30 seconds
         deliverPolicy: 'new',
       });
-      
+
       this.logger.log(`Successfully subscribed to ${subject}`);
     } catch (error) {
       this.logger.error(`Failed to subscribe to ${subject}`, error);
@@ -172,14 +205,16 @@ export class ScoringEngineNatsService extends NatsClientService {
    * Subscribe to analysis.resume.parsed events
    */
   async subscribeToResumeParsed(
-    handler: (event: AnalysisResumeParsedEvent) => Promise<void>
+    handler: (event: AnalysisResumeParsedEvent) => Promise<void>,
   ): Promise<void> {
     const subject = 'analysis.resume.parsed';
     const durableName = 'scoring-engine-resume-parsed';
-    
+
     try {
-      this.logger.log(`Setting up subscription to ${subject} with durable name: ${durableName}`);
-      
+      this.logger.log(
+        `Setting up subscription to ${subject} with durable name: ${durableName}`,
+      );
+
       await this.subscribe(subject, handler, {
         durableName,
         queueGroup: 'scoring-engine-group',
@@ -187,7 +222,7 @@ export class ScoringEngineNatsService extends NatsClientService {
         ackWait: 30000, // 30 seconds
         deliverPolicy: 'new',
       });
-      
+
       this.logger.log(`Successfully subscribed to ${subject}`);
     } catch (error) {
       this.logger.error(`Failed to subscribe to ${subject}`, error);
@@ -206,13 +241,15 @@ export class ScoringEngineNatsService extends NatsClientService {
       stage?: string;
       retryAttempt?: number;
       processingTimeMs?: number;
-    }
+    },
   ): Promise<NatsPublishResult> {
     const subject = 'scoring.processing.error';
-    
+
     try {
-      this.logger.log(`Publishing processing error event for resumeId: ${resumeId}`);
-      
+      this.logger.log(
+        `Publishing processing error event for resumeId: ${resumeId}`,
+      );
+
       const errorEvent = {
         jobId,
         resumeId,
@@ -240,19 +277,30 @@ export class ScoringEngineNatsService extends NatsClientService {
           'error-stage': context?.stage || 'unknown',
         },
       });
-      
+
       if (result.success) {
-        this.logger.log(`Processing error event published successfully for resumeId: ${resumeId}, messageId: ${result.messageId}`);
+        this.logger.log(
+          `Processing error event published successfully for resumeId: ${resumeId}, messageId: ${result.messageId}`,
+        );
       } else {
-        this.logger.error(`Failed to publish processing error event for resumeId: ${resumeId}`, result.error);
+        this.logger.error(
+          `Failed to publish processing error event for resumeId: ${resumeId}`,
+          result.error,
+        );
       }
-      
+
       return result;
     } catch (publishError) {
-      this.logger.error(`Error publishing processing error event for resumeId: ${resumeId}`, publishError);
+      this.logger.error(
+        `Error publishing processing error event for resumeId: ${resumeId}`,
+        publishError,
+      );
       return {
         success: false,
-        error: publishError instanceof Error ? publishError.message : 'Unknown error',
+        error:
+          publishError instanceof Error
+            ? publishError.message
+            : 'Unknown error',
       };
     }
   }
@@ -260,7 +308,10 @@ export class ScoringEngineNatsService extends NatsClientService {
   /**
    * Generate scoring-specific message ID
    */
-  private generateScoringMessageId(resumeId: string, eventType: string): string {
+  private generateScoringMessageId(
+    resumeId: string,
+    eventType: string,
+  ): string {
     const timestamp = Date.now();
     const random = Math.random().toString(36).substr(2, 9);
     return `scoring-${eventType}-${resumeId}-${timestamp}-${random}`;
@@ -278,7 +329,7 @@ export class ScoringEngineNatsService extends NatsClientService {
     messagesReceived: number;
   }> {
     const baseHealth = await this.getHealthStatus();
-    
+
     return {
       ...baseHealth,
       service: 'scoring-engine-svc',

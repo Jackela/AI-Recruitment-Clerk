@@ -8,7 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 
 /**
  * 📋 COMPREHENSIVE API INTEGRATION TEST SUITE
- * 
+ *
  * This E2E test suite validates the complete API ecosystem including:
  * - Cross-service communication and integration
  * - End-to-end workflows and business processes
@@ -39,21 +39,21 @@ describe('🚀 Comprehensive API Integration Tests', () => {
     email: 'integration.admin@test.com',
     password: 'IntegrationTest123!',
     name: 'Integration Test Admin',
-    role: 'admin'
+    role: 'admin',
   };
 
   const testUser = {
     email: 'integration.user@test.com',
     password: 'IntegrationTest123!',
     name: 'Integration Test User',
-    role: 'user'
+    role: 'user',
   };
 
   const testHrManager = {
     email: 'integration.hr@test.com',
     password: 'IntegrationTest123!',
     name: 'Integration Test HR Manager',
-    role: 'hr_manager'
+    role: 'hr_manager',
   };
 
   beforeAll(async () => {
@@ -61,15 +61,11 @@ describe('🚀 Comprehensive API Integration Tests', () => {
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
-          envFilePath: '.env.test'
+          envFilePath: '.env.test',
         }),
         MongooseModule.forRoot(
-          process.env.MONGODB_TEST_URL || 
-          'mongodb://localhost:27017/ai-recruitment-integration-test',
-          {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-          }
+          process.env.MONGODB_TEST_URL ||
+            'mongodb://localhost:27017/ai-recruitment-integration-test',
         ),
         AppModule,
       ],
@@ -97,9 +93,10 @@ describe('🚀 Comprehensive API Integration Tests', () => {
       .send({
         ...testAdmin,
         organizationName: 'Integration Test Organization',
-        organizationDescription: 'Test organization for API integration testing'
+        organizationDescription:
+          'Test organization for API integration testing',
       });
-    
+
     testOrganizationId = orgResponse.body.data.organizationId;
 
     // Create admin token
@@ -107,9 +104,9 @@ describe('🚀 Comprehensive API Integration Tests', () => {
       .post('/auth/login')
       .send({
         email: testAdmin.email,
-        password: testAdmin.password
+        password: testAdmin.password,
       });
-    
+
     adminToken = adminLoginResponse.body.data.accessToken;
 
     // Create HR manager
@@ -117,7 +114,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
       .post('/auth/register')
       .send({
         ...testHrManager,
-        organizationId: testOrganizationId
+        organizationId: testOrganizationId,
       });
 
     // Create HR manager token
@@ -125,9 +122,9 @@ describe('🚀 Comprehensive API Integration Tests', () => {
       .post('/auth/login')
       .send({
         email: testHrManager.email,
-        password: testHrManager.password
+        password: testHrManager.password,
       });
-    
+
     hrManagerToken = hrLoginResponse.body.data.accessToken;
 
     // Create regular user
@@ -135,9 +132,9 @@ describe('🚀 Comprehensive API Integration Tests', () => {
       .post('/auth/register')
       .send({
         ...testUser,
-        organizationId: testOrganizationId
+        organizationId: testOrganizationId,
       });
-    
+
     testUserId = userResponse.body.data.userId;
 
     // Create user token
@@ -145,9 +142,9 @@ describe('🚀 Comprehensive API Integration Tests', () => {
       .post('/auth/login')
       .send({
         email: testUser.email,
-        password: testUser.password
+        password: testUser.password,
       });
-    
+
     userToken = userLoginResponse.body.data.accessToken;
   }
 
@@ -166,8 +163,8 @@ describe('🚀 Comprehensive API Integration Tests', () => {
         profile: {
           phone: '+1234567890',
           department: 'Engineering',
-          position: 'Junior Developer'
-        }
+          position: 'Junior Developer',
+        },
       };
 
       // Step 1: Register user
@@ -206,7 +203,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
 
       expect(orgUsersResponse.status).toBe(200);
       const userExists = orgUsersResponse.body.data.users.some(
-        (u: any) => u.userId === newUserId
+        (u: any) => u.userId === newUserId,
       );
       expect(userExists).toBe(true);
     });
@@ -251,7 +248,11 @@ describe('🚀 Comprehensive API Integration Tests', () => {
       const resumeUploadResponse = await request(app.getHttpServer())
         .post('/resumes/upload')
         .set('Authorization', `Bearer ${userToken}`)
-        .attach('resume', Buffer.from('Mock PDF Resume Content for Integration Testing'), 'integration-test-resume.pdf')
+        .attach(
+          'resume',
+          Buffer.from('Mock PDF Resume Content for Integration Testing'),
+          'integration-test-resume.pdf',
+        )
         .field('candidateName', 'Integration Test Candidate')
         .field('candidateEmail', 'candidate@integration-test.com')
         .field('candidatePhone', '+1234567890')
@@ -260,7 +261,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
       expect(resumeUploadResponse.status).toBe(201);
       expect(resumeUploadResponse.body.success).toBe(true);
       expect(resumeUploadResponse.body.data).toHaveProperty('resumeId');
-      
+
       testResumeId = resumeUploadResponse.body.data.resumeId;
 
       // Step 2: Wait for processing and verify status
@@ -271,7 +272,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
       expect(resumeDetailsResponse.status).toBe(200);
       expect(resumeDetailsResponse.body.data.resumeId).toBe(testResumeId);
       expect(['processing', 'completed', 'pending']).toContain(
-        resumeDetailsResponse.body.data.status
+        resumeDetailsResponse.body.data.status,
       );
 
       // Step 3: Get resume analysis
@@ -291,7 +292,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
         .send({
           status: 'approved',
           reason: 'Integration test approval',
-          reviewNotes: 'Resume approved for testing purposes'
+          reviewNotes: 'Resume approved for testing purposes',
         });
 
       expect(statusUpdateResponse.status).toBe(200);
@@ -304,7 +305,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
         .send({
           skills: ['JavaScript', 'React'],
           experience: { min: 1, max: 10 },
-          education: 'Bachelor'
+          education: 'Bachelor',
         });
 
       expect(searchResponse.status).toBe(200);
@@ -318,7 +319,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
         .send({
           resumeIds: [testResumeId],
           operation: 'reprocess',
-          priority: 'high'
+          priority: 'high',
         });
 
       expect(batchProcessResponse.status).toBe(202);
@@ -330,7 +331,11 @@ describe('🚀 Comprehensive API Integration Tests', () => {
       const invalidUploadResponse = await request(app.getHttpServer())
         .post('/resumes/upload')
         .set('Authorization', `Bearer ${userToken}`)
-        .attach('resume', Buffer.from('Invalid file content'), 'invalid-file.txt')
+        .attach(
+          'resume',
+          Buffer.from('Invalid file content'),
+          'invalid-file.txt',
+        )
         .field('candidateName', 'Test Candidate')
         .field('candidateEmail', 'invalid@test.com');
 
@@ -351,22 +356,24 @@ describe('🚀 Comprehensive API Integration Tests', () => {
       // Step 1: Create questionnaire template
       const questionnaireData = {
         title: 'Integration Test Questionnaire',
-        description: 'Comprehensive integration test questionnaire for API validation',
+        description:
+          'Comprehensive integration test questionnaire for API validation',
         questions: [
           {
             type: 'multiple_choice',
             question: 'What is your primary programming language?',
             options: ['JavaScript', 'Python', 'Java', 'C#', 'Go'],
             required: true,
-            weight: 2
+            weight: 2,
           },
           {
             type: 'text',
-            question: 'Describe your experience with microservices architecture',
+            question:
+              'Describe your experience with microservices architecture',
             required: true,
             minLength: 50,
             maxLength: 500,
-            weight: 3
+            weight: 3,
           },
           {
             type: 'rating',
@@ -374,15 +381,15 @@ describe('🚀 Comprehensive API Integration Tests', () => {
             required: true,
             min: 1,
             max: 10,
-            weight: 2
+            weight: 2,
           },
           {
             type: 'multiple_select',
             question: 'Which testing frameworks have you used?',
             options: ['Jest', 'Mocha', 'Cypress', 'Selenium', 'Playwright'],
             required: false,
-            weight: 1
-          }
+            weight: 1,
+          },
         ],
         settings: {
           allowAnonymous: false,
@@ -390,13 +397,13 @@ describe('🚀 Comprehensive API Integration Tests', () => {
           timeLimit: 1800, // 30 minutes
           maxAttempts: 2,
           shuffleQuestions: true,
-          showProgressBar: true
+          showProgressBar: true,
         },
         scoring: {
           passingScore: 70,
           weightedScoring: true,
-          showScoreToUser: true
-        }
+          showScoreToUser: true,
+        },
       };
 
       const createResponse = await request(app.getHttpServer())
@@ -407,7 +414,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
       expect(createResponse.status).toBe(201);
       expect(createResponse.body.success).toBe(true);
       expect(createResponse.body.data).toHaveProperty('questionnaireId');
-      
+
       testQuestionnaireId = createResponse.body.data.questionnaireId;
 
       // Step 2: Publish questionnaire
@@ -418,7 +425,9 @@ describe('🚀 Comprehensive API Integration Tests', () => {
           publishDate: new Date().toISOString(),
           notifyUsers: true,
           targetAudience: ['all_users'],
-          expirationDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          expirationDate: new Date(
+            Date.now() + 7 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
         });
 
       expect(publishResponse.status).toBe(200);
@@ -431,28 +440,29 @@ describe('🚀 Comprehensive API Integration Tests', () => {
         responses: [
           {
             questionIndex: 0,
-            answer: 'JavaScript'
+            answer: 'JavaScript',
           },
           {
             questionIndex: 1,
-            answer: 'I have extensive experience with microservices architecture, having worked on distributed systems for over 3 years. I understand service decomposition, API gateways, and inter-service communication patterns.'
+            answer:
+              'I have extensive experience with microservices architecture, having worked on distributed systems for over 3 years. I understand service decomposition, API gateways, and inter-service communication patterns.',
           },
           {
             questionIndex: 2,
-            answer: 8
+            answer: 8,
           },
           {
             questionIndex: 3,
-            answer: ['Jest', 'Cypress', 'Playwright']
-          }
+            answer: ['Jest', 'Cypress', 'Playwright'],
+          },
         ],
         startTime: new Date(Date.now() - 600000).toISOString(), // Started 10 minutes ago
         completionTime: 600, // 10 minutes in seconds
         metadata: {
           userAgent: 'Integration Test Agent',
           timezone: 'UTC',
-          language: 'en'
-        }
+          language: 'en',
+        },
       };
 
       const submitResponse = await request(app.getHttpServer())
@@ -485,8 +495,8 @@ describe('🚀 Comprehensive API Integration Tests', () => {
           includeMetadata: true,
           dateRange: {
             startDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-            endDate: new Date().toISOString()
-          }
+            endDate: new Date().toISOString(),
+          },
         });
 
       expect(exportResponse.status).toBe(200);
@@ -502,7 +512,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
         .send({
           responses: [],
           startTime: new Date().toISOString(),
-          completionTime: 60
+          completionTime: 60,
         });
 
       expect(unpublishedSubmission.status).toBe(404);
@@ -514,7 +524,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
         .send({
           responses: [{ questionIndex: 0, answer: 'Python' }],
           startTime: new Date().toISOString(),
-          completionTime: 30
+          completionTime: 30,
         });
 
       // Should handle based on questionnaire settings
@@ -540,8 +550,8 @@ describe('🚀 Comprehensive API Integration Tests', () => {
           metadata: {
             source: 'integration_test',
             userType: 'new_user',
-            organizationId: testOrganizationId
-          }
+            organizationId: testOrganizationId,
+          },
         });
 
       expect(registrationEvent.status).toBe(201);
@@ -560,8 +570,8 @@ describe('🚀 Comprehensive API Integration Tests', () => {
           metadata: {
             resumeId: testResumeId,
             fileSize: 1024000,
-            processingTime: 2500
-          }
+            processingTime: 2500,
+          },
         });
 
       expect(resumeEvent.status).toBe(201);
@@ -579,8 +589,8 @@ describe('🚀 Comprehensive API Integration Tests', () => {
           metadata: {
             questionnaireId: testQuestionnaireId,
             qualityScore: 85,
-            completionTime: 600
-          }
+            completionTime: 600,
+          },
         });
 
       expect(questionnaireEvent.status).toBe(201);
@@ -603,8 +613,8 @@ describe('🚀 Comprehensive API Integration Tests', () => {
             endpoint: 'integration_workflow',
             method: 'POST',
             httpStatus: 200,
-            userCount: 1
-          }
+            userCount: 1,
+          },
         });
 
       expect(performanceMetric.status).toBe(201);
@@ -622,9 +632,9 @@ describe('🚀 Comprehensive API Integration Tests', () => {
           dimensions: {
             workflowType: 'full_integration',
             userType: 'new_user',
-            timeRange: 'daily'
+            timeRange: 'daily',
           },
-          tags: ['integration', 'completion', 'success']
+          tags: ['integration', 'completion', 'success'],
         });
 
       expect(businessMetric.status).toBe(201);
@@ -636,20 +646,20 @@ describe('🚀 Comprehensive API Integration Tests', () => {
         format: 'json',
         dateRange: {
           startDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-          endDate: new Date().toISOString()
+          endDate: new Date().toISOString(),
         },
         sections: [
           'user_activity',
           'resume_processing',
           'questionnaire_analytics',
           'performance_metrics',
-          'business_metrics'
+          'business_metrics',
         ],
         filters: {
           organizationId: testOrganizationId,
           includeDetails: true,
-          aggregationLevel: 'detailed'
-        }
+          aggregationLevel: 'detailed',
+        },
       };
 
       const reportResponse = await request(app.getHttpServer())
@@ -660,7 +670,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
       expect(reportResponse.status).toBe(201);
       expect(reportResponse.body.data).toHaveProperty('reportId');
       expect(reportResponse.body.data.reportType).toBe('comprehensive');
-      
+
       testReportId = reportResponse.body.data.reportId;
     });
   });
@@ -675,13 +685,13 @@ describe('🚀 Comprehensive API Integration Tests', () => {
         contactInfo: {
           email: testUser.email,
           phone: '+1234567890',
-          wechat: 'integration-test-wechat'
+          wechat: 'integration-test-wechat',
         },
         metadata: {
           source: 'integration_test',
           campaign: 'user_engagement',
-          referrer: 'direct'
-        }
+          referrer: 'direct',
+        },
       };
 
       const createIncentiveResponse = await request(app.getHttpServer())
@@ -711,12 +721,15 @@ describe('🚀 Comprehensive API Integration Tests', () => {
         .send({
           reason: 'High quality questionnaire completion - Integration Test',
           notes: 'Approved for integration testing validation',
-          approvedAmount: createIncentiveResponse.body.data.rewardAmount
+          approvedAmount: createIncentiveResponse.body.data.rewardAmount,
         });
 
       expect(approveResponse.status).toBe(200);
       expect(approveResponse.body.data).toHaveProperty('approvedAt');
-      expect(approveResponse.body.data).toHaveProperty('approvalStatus', 'approved');
+      expect(approveResponse.body.data).toHaveProperty(
+        'approvalStatus',
+        'approved',
+      );
 
       // Get incentive statistics
       const statsResponse = await request(app.getHttpServer())
@@ -752,8 +765,8 @@ describe('🚀 Comprehensive API Integration Tests', () => {
             metadata: {
               resumeId: testResumeId,
               fileSize: 1024000,
-              processingTime: 2500
-            }
+              processingTime: 2500,
+            },
           });
 
         expect(usageResponse.status).toBe(201);
@@ -768,7 +781,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
 
       expect(updatedUsageResponse.status).toBe(200);
       expect(updatedUsageResponse.body.data.currentUsage).toBeGreaterThan(
-        initialUsageResponse.body.data.currentUsage
+        initialUsageResponse.body.data.currentUsage,
       );
 
       // Admin adds bonus quota
@@ -780,7 +793,9 @@ describe('🚀 Comprehensive API Integration Tests', () => {
           bonusType: 'questionnaire',
           amount: 10,
           reason: 'Integration test bonus quota',
-          expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+          expirationDate: new Date(
+            Date.now() + 30 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
         });
 
       expect(bonusResponse.status).toBe(201);
@@ -789,26 +804,26 @@ describe('🚀 Comprehensive API Integration Tests', () => {
 
     it('should handle rate limiting correctly', async () => {
       const requests = [];
-      
+
       // Make multiple rapid requests to trigger rate limiting
       for (let i = 0; i < 15; i++) {
         requests.push(
           request(app.getHttpServer())
             .get('/system/status')
-            .set('Authorization', `Bearer ${userToken}`)
+            .set('Authorization', `Bearer ${userToken}`),
         );
       }
 
       const responses = await Promise.all(requests);
-      const rateLimitedResponses = responses.filter(r => r.status === 429);
-      const successfulResponses = responses.filter(r => r.status === 200);
+      const rateLimitedResponses = responses.filter((r) => r.status === 429);
+      const successfulResponses = responses.filter((r) => r.status === 200);
 
       // Should have some rate limited responses
       expect(rateLimitedResponses.length).toBeGreaterThan(0);
       expect(successfulResponses.length).toBeGreaterThan(0);
-      
+
       // Rate limited responses should include proper headers
-      rateLimitedResponses.forEach(response => {
+      rateLimitedResponses.forEach((response) => {
         expect(response.headers).toHaveProperty('x-ratelimit-limit');
         expect(response.headers).toHaveProperty('x-ratelimit-remaining');
         expect(response.headers).toHaveProperty('x-ratelimit-reset');
@@ -818,8 +833,9 @@ describe('🚀 Comprehensive API Integration Tests', () => {
 
   describe('🔧 System Integration and Cross-Service Validation', () => {
     it('should validate system health across all services', async () => {
-      const healthResponse = await request(app.getHttpServer())
-        .get('/system/health');
+      const healthResponse = await request(app.getHttpServer()).get(
+        '/system/health',
+      );
 
       expect(healthResponse.status).toBe(200);
       expect(healthResponse.body.data).toHaveProperty('overall');
@@ -843,28 +859,28 @@ describe('🚀 Comprehensive API Integration Tests', () => {
           organizationId: testOrganizationId,
           email: testUser.email,
           resumeId: testResumeId,
-          questionnaireId: testQuestionnaireId
+          questionnaireId: testQuestionnaireId,
         },
         rules: [
           {
             field: 'userId',
             service: 'user-service',
             endpoint: 'validate-user',
-            required: true
+            required: true,
           },
           {
             field: 'organizationId',
             service: 'user-service',
             endpoint: 'validate-organization',
-            required: true
+            required: true,
           },
           {
             field: 'resumeId',
             service: 'resume-parser-svc',
             endpoint: 'validate-resume',
-            required: false
-          }
-        ]
+            required: false,
+          },
+        ],
       };
 
       const validationResponse = await request(app.getHttpServer())
@@ -875,7 +891,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
       expect(validationResponse.status).toBe(200);
       expect(validationResponse.body.data).toHaveProperty('valid');
       expect(validationResponse.body.data).toHaveProperty('validationTime');
-      
+
       if (!validationResponse.body.data.valid) {
         expect(validationResponse.body.data).toHaveProperty('errors');
         expect(Array.isArray(validationResponse.body.data.errors)).toBe(true);
@@ -904,7 +920,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
       const integrationTestRequest = {
         testSuite: 'integration-api-validation',
         services: ['user-service', 'resume-parser-svc', 'app-gateway'],
-        skipLongRunningTests: true
+        skipLongRunningTests: true,
       };
 
       const integrationResponse = await request(app.getHttpServer())
@@ -937,7 +953,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
         .post('/auth/login')
         .send({
           email: "admin'; DROP TABLE users; --",
-          password: 'password'
+          password: 'password',
         });
 
       expect(sqlInjectionResponse.status).toBe(400);
@@ -948,17 +964,17 @@ describe('🚀 Comprehensive API Integration Tests', () => {
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           name: '<script>alert("xss")</script>',
-          bio: '<iframe src="javascript:alert(\'xss\')"></iframe>'
+          bio: '<iframe src="javascript:alert(\'xss\')"></iframe>',
         });
 
       expect([400, 200]).toContain(xssResponse.status);
-      
+
       if (xssResponse.status === 200) {
         // If accepted, ensure XSS is sanitized
         const profileResponse = await request(app.getHttpServer())
           .get('/users/profile')
           .set('Authorization', `Bearer ${userToken}`);
-        
+
         expect(profileResponse.body.data.name).not.toContain('<script>');
       }
 
@@ -971,7 +987,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
           eventType: 'test',
           category: 'test',
           action: 'test',
-          metadata: { data: largePayload }
+          metadata: { data: largePayload },
         });
 
       expect([413, 400]).toContain(largePayloadResponse.status);
@@ -984,7 +1000,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
         .send({
           email: 'not-an-email',
           password: 'ValidPassword123!',
-          name: 'Test User'
+          name: 'Test User',
         });
 
       expect(invalidEmailResponse.status).toBe(400);
@@ -996,7 +1012,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
         .send({
           email: 'test@example.com',
           password: '123',
-          name: 'Test User'
+          name: 'Test User',
         });
 
       expect(weakPasswordResponse.status).toBe(400);
@@ -1014,24 +1030,26 @@ describe('🚀 Comprehensive API Integration Tests', () => {
             .set('Authorization', `Bearer ${userToken}`)
             .send({
               name: `Concurrent Test User ${i}`,
-              bio: `Updated in concurrent test ${i}`
-            })
+              bio: `Updated in concurrent test ${i}`,
+            }),
         );
       }
 
       const responses = await Promise.all(concurrentRequests);
-      const successfulRequests = responses.filter(r => r.status === 200);
-      
+      const successfulRequests = responses.filter((r) => r.status === 200);
+
       // At least some requests should succeed
       expect(successfulRequests.length).toBeGreaterThan(0);
-      
+
       // Verify final state is consistent
       const finalProfileResponse = await request(app.getHttpServer())
         .get('/users/profile')
         .set('Authorization', `Bearer ${userToken}`);
 
       expect(finalProfileResponse.status).toBe(200);
-      expect(finalProfileResponse.body.data.name).toMatch(/^Concurrent Test User \d+$/);
+      expect(finalProfileResponse.body.data.name).toMatch(
+        /^Concurrent Test User \d+$/,
+      );
     });
   });
 
@@ -1046,22 +1064,22 @@ describe('🚀 Comprehensive API Integration Tests', () => {
         performanceRequests.push(
           request(app.getHttpServer())
             .get('/analytics/dashboard?timeRange=24h')
-            .set('Authorization', `Bearer ${adminToken}`)
+            .set('Authorization', `Bearer ${adminToken}`),
         );
       }
 
       const responses = await Promise.all(performanceRequests);
       const totalTime = Date.now() - startTime;
-      
-      const successfulResponses = responses.filter(r => r.status === 200);
+
+      const successfulResponses = responses.filter((r) => r.status === 200);
       const averageResponseTime = totalTime / loadTestCount;
 
       // Performance assertions
       expect(successfulResponses.length).toBe(loadTestCount);
       expect(averageResponseTime).toBeLessThan(2000); // Average < 2 seconds
-      
+
       // Each individual request should complete in reasonable time
-      responses.forEach(response => {
+      responses.forEach((response) => {
         expect(response.status).toBe(200);
       });
     });
@@ -1069,7 +1087,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
     it('should handle memory usage efficiently', async () => {
       // Generate large dataset operations
       const largeDataRequests = [];
-      
+
       for (let i = 0; i < 5; i++) {
         largeDataRequests.push(
           request(app.getHttpServer())
@@ -1078,17 +1096,19 @@ describe('🚀 Comprehensive API Integration Tests', () => {
             .send({
               dataTypes: ['events', 'metrics', 'reports'],
               dateRange: {
-                startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-                endDate: new Date().toISOString()
+                startDate: new Date(
+                  Date.now() - 7 * 24 * 60 * 60 * 1000,
+                ).toISOString(),
+                endDate: new Date().toISOString(),
               },
-              includeMetadata: true
-            })
+              includeMetadata: true,
+            }),
         );
       }
 
       const responses = await Promise.all(largeDataRequests);
-      
-      responses.forEach(response => {
+
+      responses.forEach((response) => {
         expect([200, 202]).toContain(response.status);
         if (response.body.data) {
           expect(response.body.data).toHaveProperty('exportId');
@@ -1110,7 +1130,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
         systemHealthChecks: true,
         reportGeneration: testReportId !== undefined,
         securityValidation: true,
-        performanceValidation: true
+        performanceValidation: true,
       };
 
       // Verify all workflow components completed successfully
@@ -1120,13 +1140,18 @@ describe('🚀 Comprehensive API Integration Tests', () => {
       });
 
       // Final system health check
-      const finalHealthResponse = await request(app.getHttpServer())
-        .get('/system/status');
+      const finalHealthResponse = await request(app.getHttpServer()).get(
+        '/system/status',
+      );
 
       expect(finalHealthResponse.status).toBe(200);
-      expect(['operational', 'degraded']).toContain(finalHealthResponse.body.data.status);
+      expect(['operational', 'degraded']).toContain(
+        finalHealthResponse.body.data.status,
+      );
 
-      console.log('🎉 COMPREHENSIVE INTEGRATION TEST SUITE COMPLETED SUCCESSFULLY');
+      console.log(
+        '🎉 COMPREHENSIVE INTEGRATION TEST SUITE COMPLETED SUCCESSFULLY',
+      );
       console.log('📊 Workflow Summary:', workflowResults);
     });
   });

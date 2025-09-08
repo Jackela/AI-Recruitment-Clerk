@@ -1,10 +1,17 @@
-import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnApplicationBootstrap,
+  OnApplicationShutdown,
+} from '@nestjs/common';
 import { GridFsService } from '../gridfs/gridfs.service';
 import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
 import { ParsingService } from '../parsing/parsing.service';
 
 @Injectable()
-export class AppService implements OnApplicationBootstrap, OnApplicationShutdown {
+export class AppService
+  implements OnApplicationBootstrap, OnApplicationShutdown
+{
   private readonly logger = new Logger(AppService.name);
   private isInitialized = false;
 
@@ -14,32 +21,36 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
     private readonly parsingService: ParsingService,
   ) {}
 
-  getData(): { message: string } {
-    return { 
+  getData(): { message: string; status?: string } {
+    return {
       message: 'Resume Parser Service API',
-      status: this.isInitialized ? 'ready' : 'initializing'
+      status: this.isInitialized ? 'ready' : 'initializing',
     };
   }
 
   async onApplicationBootstrap(): Promise<void> {
     this.logger.log('Resume Parser Service starting...');
-    
+
     try {
       // Initialize GridFS connections (already handled by GridFsService.onModuleInit)
-      this.logger.log('GridFS service initialized');
-      
+      if (this.gridFsService && typeof (this.gridFsService as any).healthCheck === 'function') {
+        const gridFsHealth = await (this.gridFsService as any).healthCheck();
+        this.logger.log(`GridFS service initialized: ${gridFsHealth.status}`);
+      } else {
+        this.logger.log('GridFS service initialized (healthCheck unavailable in this environment)');
+      }
+
       // Initialize NATS subscriptions (already handled by NatsClient.onModuleInit)
       this.logger.log('NATS client initialized');
-      
+
       // Set up event subscriptions for resume processing
       await this.setupEventSubscriptions();
-      
+
       // Initialize parsing service
       await this.initializeParsingService();
-      
+
       this.isInitialized = true;
       this.logger.log('Resume Parser Service startup completed successfully');
-      
     } catch (error) {
       this.logger.error('Failed to initialize Resume Parser Service:', error);
       throw error;
@@ -48,14 +59,13 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
 
   async onApplicationShutdown(): Promise<void> {
     this.logger.log('Resume Parser Service shutting down...');
-    
+
     try {
       // Clean up event subscriptions
       await this.cleanupEventSubscriptions();
-      
+
       // GridFS and NATS cleanup handled by their respective onModuleDestroy
       this.logger.log('All connections cleaned up successfully');
-      
     } catch (error) {
       this.logger.error('Error during shutdown:', error);
     }
@@ -64,13 +74,17 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
   private async setupEventSubscriptions(): Promise<void> {
     try {
       // Subscribe to resume processing events through shared NATS service
-      await this.natsService.subscribe('resume.parse.request', async (data) => {
-        await this.parsingService.handleParseRequest(data);
-      });
-
-      await this.natsService.subscribe('resume.retry.request', async (data) => {
-        await this.parsingService.handleRetryRequest(data);
-      });
+      // Using ResumeParserNatsService to handle resume submitted events
+      if (this.natsService && typeof (this.natsService as any).subscribeToResumeSubmissions === 'function') {
+        await (this.natsService as any).subscribeToResumeSubmissions(async (event: any) => {
+          // Handle resume submission through parsing service
+          if (this.parsingService && event) {
+            await this.parsingService.handleResumeSubmitted(event);
+          }
+        });
+      } else {
+        this.logger.log('NATS subscription skipped (subscribeToResumeSubmissions unavailable)');
+      }
 
       this.logger.log('Event subscriptions set up successfully');
     } catch (error) {

@@ -27,17 +27,18 @@ export interface StructuredError {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ErrorCorrelationService {
-  private readonly currentContext = new BehaviorSubject<ErrorCorrelationContext>(this.generateContext());
+  private readonly currentContext =
+    new BehaviorSubject<ErrorCorrelationContext>(this.generateContext());
   private readonly errorHistory: StructuredError[] = [];
   private readonly maxHistorySize = 50;
 
   constructor() {
     // Generate new context on page navigation
     this.setupNavigationListener();
-    
+
     // Initialize session context
     this.initializeSession();
   }
@@ -66,7 +67,7 @@ export class ErrorCorrelationService {
       'X-Span-ID': context.spanId,
       'X-Session-ID': context.sessionId,
       'X-User-Agent': context.userAgent,
-      'X-Frontend-Version': this.getFrontendVersion()
+      'X-Frontend-Version': this.getFrontendVersion(),
     });
   }
 
@@ -74,14 +75,14 @@ export class ErrorCorrelationService {
    * Create structured error with correlation
    */
   createStructuredError(
-    error: Error | any, 
+    error: Error | any,
     category: StructuredError['category'] = 'runtime',
     severity: StructuredError['severity'] = 'medium',
-    userAction?: string
+    userAction?: string,
   ): StructuredError {
     const context = this.getContext();
     const errorCode = this.generateErrorCode(error, category);
-    
+
     const structuredError: StructuredError = {
       correlationId: context.traceId,
       errorCode,
@@ -92,12 +93,12 @@ export class ErrorCorrelationService {
       stack: error?.stack,
       metadata: this.extractMetadata(error),
       userAction,
-      recoverable: this.isRecoverable(error, category)
+      recoverable: this.isRecoverable(error, category),
     };
 
     // Add to history
     this.addToHistory(structuredError);
-    
+
     return structuredError;
   }
 
@@ -121,8 +122,8 @@ export class ErrorCorrelationService {
           ...error,
           frontendVersion: this.getFrontendVersion(),
           browserInfo: this.getBrowserInfo(),
-          performanceMetrics: this.getPerformanceMetrics()
-        })
+          performanceMetrics: this.getPerformanceMetrics(),
+        }),
       });
     } catch (reportingError) {
       // Fallback: store locally for later retry
@@ -159,7 +160,7 @@ export class ErrorCorrelationService {
     const now = Date.now();
     const timeWindow = 60 * 60 * 1000; // 1 hour
     const recentErrors = this.errorHistory.filter(
-      e => now - e.context.timestamp.getTime() < timeWindow
+      (e) => now - e.context.timestamp.getTime() < timeWindow,
     );
 
     return {
@@ -167,9 +168,10 @@ export class ErrorCorrelationService {
       bySeverity: this.groupBy(this.errorHistory, 'severity'),
       byCategory: this.groupBy(this.errorHistory, 'category'),
       errorRate: recentErrors.length,
-      lastErrorTime: this.errorHistory.length > 0 ? 
-        this.errorHistory[this.errorHistory.length - 1].context.timestamp : 
-        undefined
+      lastErrorTime:
+        this.errorHistory.length > 0
+          ? this.errorHistory[this.errorHistory.length - 1].context.timestamp
+          : undefined,
     };
   }
 
@@ -182,7 +184,7 @@ export class ErrorCorrelationService {
       timestamp: new Date(),
       userAgent: navigator.userAgent,
       url: window.location.href,
-      referrer: document.referrer || undefined
+      referrer: document.referrer || undefined,
     };
   }
 
@@ -197,12 +199,12 @@ export class ErrorCorrelationService {
       this.currentContext.next(newContext);
     };
 
-    history.pushState = function(...args) {
+    history.pushState = function (...args) {
       originalPushState.apply(history, args);
       updateContext();
     };
 
-    history.replaceState = function(...args) {
+    history.replaceState = function (...args) {
       originalReplaceState.apply(history, args);
       updateContext();
     };
@@ -226,8 +228,8 @@ export class ErrorCorrelationService {
 
   private generateUUID(): string {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      const r = (Math.random() * 16) | 0;
+      const v = c === 'x' ? r : (r & 0x3) | 0x8;
       return v.toString(16);
     });
   }
@@ -269,42 +271,44 @@ export class ErrorCorrelationService {
 
   private extractMetadata(error: any): Record<string, any> {
     const metadata: Record<string, any> = {};
-    
+
     if (error?.status) metadata.httpStatus = error.status;
     if (error?.url) metadata.requestUrl = error.url;
     if (error?.name) metadata.errorName = error.name;
     if (error?.code) metadata.errorCode = error.code;
-    
+
     return metadata;
   }
 
   private isRecoverable(error: any, category: string): boolean {
     // Network errors are usually recoverable
     if (category === 'network') return true;
-    
+
     // HTTP errors - most are recoverable except 4xx client errors
     if (error?.status) {
-      return error.status >= 500 || error.status === 408 || error.status === 429;
+      return (
+        error.status >= 500 || error.status === 408 || error.status === 429
+      );
     }
-    
+
     // Runtime errors - depends on type
     if (category === 'runtime') {
       const nonRecoverablePatterns = [
         /out of memory/i,
         /maximum call stack/i,
-        /cannot read prop.*undefined/i
+        /cannot read prop.*undefined/i,
       ];
-      return !nonRecoverablePatterns.some(pattern => 
-        pattern.test(this.extractErrorMessage(error))
+      return !nonRecoverablePatterns.some((pattern) =>
+        pattern.test(this.extractErrorMessage(error)),
       );
     }
-    
+
     return false;
   }
 
   private addToHistory(error: StructuredError): void {
     this.errorHistory.push(error);
-    
+
     // Keep only recent errors
     if (this.errorHistory.length > this.maxHistorySize) {
       this.errorHistory.shift();
@@ -312,12 +316,18 @@ export class ErrorCorrelationService {
 
     // Store in session storage
     try {
-      sessionStorage.setItem('error-correlation-history', JSON.stringify(this.errorHistory));
+      sessionStorage.setItem(
+        'error-correlation-history',
+        JSON.stringify(this.errorHistory),
+      );
     } catch (e) {
       // Storage full, clear old errors
       this.errorHistory.splice(0, 10);
       try {
-        sessionStorage.setItem('error-correlation-history', JSON.stringify(this.errorHistory));
+        sessionStorage.setItem(
+          'error-correlation-history',
+          JSON.stringify(this.errorHistory),
+        );
       } catch (e) {
         // Still can't store, disable storage
       }
@@ -328,10 +338,11 @@ export class ErrorCorrelationService {
     // Don't report duplicate errors within short time window
     const duplicateWindow = 30 * 1000; // 30 seconds
     const now = Date.now();
-    
-    const recentDuplicate = this.errorHistory.find(e => 
-      e.errorCode === error.errorCode &&
-      now - e.context.timestamp.getTime() < duplicateWindow
+
+    const recentDuplicate = this.errorHistory.find(
+      (e) =>
+        e.errorCode === error.errorCode &&
+        now - e.context.timestamp.getTime() < duplicateWindow,
     );
 
     if (recentDuplicate) return false;
@@ -347,12 +358,12 @@ export class ErrorCorrelationService {
     try {
       const pending = JSON.parse(stored);
       pending.push(error);
-      
+
       // Keep only last 10 pending reports
       if (pending.length > 10) {
         pending.splice(0, pending.length - 10);
       }
-      
+
       localStorage.setItem('pending-error-reports', JSON.stringify(pending));
     } catch (e) {
       // Failed to store
@@ -371,52 +382,68 @@ export class ErrorCorrelationService {
       cookieEnabled: navigator.cookieEnabled,
       onLine: navigator.onLine,
       screenResolution: `${screen.width}x${screen.height}`,
-      viewportSize: `${window.innerWidth}x${window.innerHeight}`
+      viewportSize: `${window.innerWidth}x${window.innerHeight}`,
     };
   }
 
   private getPerformanceMetrics(): Record<string, any> {
     if (!window.performance) return {};
 
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+    const navigation = performance.getEntriesByType(
+      'navigation',
+    )[0] as PerformanceNavigationTiming;
     if (!navigation) return {};
 
     return {
-      domContentLoaded: Math.round(navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart),
-      loadComplete: Math.round(navigation.loadEventEnd - navigation.loadEventStart),
+      domContentLoaded: Math.round(
+        navigation.domContentLoadedEventEnd -
+          navigation.domContentLoadedEventStart,
+      ),
+      loadComplete: Math.round(
+        navigation.loadEventEnd - navigation.loadEventStart,
+      ),
       firstPaint: this.getFirstPaintTime(),
-      memoryUsage: this.getMemoryUsage()
+      memoryUsage: this.getMemoryUsage(),
     };
   }
 
   private getFirstPaintTime(): number | undefined {
     const paintEntries = performance.getEntriesByType('paint');
-    const firstPaint = paintEntries.find(entry => entry.name === 'first-paint');
+    const firstPaint = paintEntries.find(
+      (entry) => entry.name === 'first-paint',
+    );
     return firstPaint ? Math.round(firstPaint.startTime) : undefined;
   }
 
   private getMemoryUsage(): any {
-    return (window as any).performance?.memory ? {
-      usedJSHeapSize: (window as any).performance.memory.usedJSHeapSize,
-      totalJSHeapSize: (window as any).performance.memory.totalJSHeapSize,
-      jsHeapSizeLimit: (window as any).performance.memory.jsHeapSizeLimit
-    } : undefined;
+    return (window as any).performance?.memory
+      ? {
+          usedJSHeapSize: (window as any).performance.memory.usedJSHeapSize,
+          totalJSHeapSize: (window as any).performance.memory.totalJSHeapSize,
+          jsHeapSizeLimit: (window as any).performance.memory.jsHeapSizeLimit,
+        }
+      : undefined;
   }
 
   private groupBy<T extends Record<string, any>>(
-    array: T[], 
-    key: keyof T
+    array: T[],
+    key: keyof T,
   ): Record<string, number> {
-    return array.reduce((acc, item) => {
-      const value = String(item[key]);
-      acc[value] = (acc[value] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    return array.reduce(
+      (acc, item) => {
+        const value = String(item[key]);
+        acc[value] = (acc[value] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
   }
 
   private isDevelopment(): boolean {
-    return window.location.hostname === 'localhost' || 
-           window.location.hostname.startsWith('127.') ||
-           window.location.hostname.startsWith('192.');
+    return (
+      window.location.hostname === 'localhost' ||
+      window.location.hostname.startsWith('127.') ||
+      window.location.hostname.startsWith('192.')
+    );
   }
 }

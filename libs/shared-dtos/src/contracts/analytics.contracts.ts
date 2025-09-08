@@ -724,7 +724,7 @@ export function monitorAnalyticsPerformance(maxTimeMs: number) {
       return AnalyticsContracts.performanceContract(
         () => method.apply(this, args),
         maxTimeMs,
-        `${target.constructor.name}.${propertyName}`
+        `${_target?.constructor?.name || 'Unknown'}.${propertyName}`
       );
     };
   };

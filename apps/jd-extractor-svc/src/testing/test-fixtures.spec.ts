@@ -20,7 +20,7 @@ describe('Test Fixtures', () => {
   describe('Mock Factory Functions', () => {
     it('should create valid JobJdSubmittedEvent', () => {
       const mockEvent = createMockJobJdSubmittedEvent();
-      
+
       expect(mockEvent.jobId).toBeDefined();
       expect(mockEvent.jobTitle).toBeDefined();
       expect(mockEvent.jdText).toBeDefined();
@@ -30,7 +30,7 @@ describe('Test Fixtures', () => {
 
     it('should create valid AnalysisJdExtractedEvent', () => {
       const mockEvent = createMockAnalysisJdExtractedEvent();
-      
+
       expect(mockEvent.jobId).toBeDefined();
       expect(mockEvent.extractedData).toBeDefined();
       expect(mockEvent.timestamp).toBeDefined();
@@ -40,7 +40,7 @@ describe('Test Fixtures', () => {
 
     it('should create valid ExtractedJdDTO', () => {
       const mockDto = createMockExtractedJdDTO();
-      
+
       expect(mockDto.requirements).toBeDefined();
       expect(Array.isArray(mockDto.requirements.technical)).toBe(true);
       expect(Array.isArray(mockDto.requirements.soft)).toBe(true);
@@ -50,7 +50,7 @@ describe('Test Fixtures', () => {
 
     it('should create valid LlmExtractionRequest', () => {
       const mockRequest = createMockLlmExtractionRequest();
-      
+
       expect(mockRequest.jobTitle).toBeDefined();
       expect(mockRequest.jdText).toBeDefined();
       expect(isValidLlmExtractionRequest(mockRequest)).toBe(true);
@@ -58,7 +58,7 @@ describe('Test Fixtures', () => {
 
     it('should create valid LlmExtractionResponse', () => {
       const mockResponse = createMockLlmExtractionResponse();
-      
+
       expect(mockResponse.extractedData).toBeDefined();
       expect(mockResponse.confidence).toBeGreaterThanOrEqual(0);
       expect(mockResponse.confidence).toBeLessThanOrEqual(1);
@@ -68,7 +68,7 @@ describe('Test Fixtures', () => {
 
     it('should create valid NATS success result', () => {
       const mockResult = createMockNatsSuccessResult();
-      
+
       expect(mockResult.success).toBe(true);
       expect(mockResult.messageId).toBeDefined();
       expect(isValidNatsPublishResult(mockResult)).toBe(true);
@@ -76,7 +76,7 @@ describe('Test Fixtures', () => {
 
     it('should create valid NATS failure result', () => {
       const mockResult = createMockNatsFailureResult();
-      
+
       expect(mockResult.success).toBe(false);
       expect(mockResult.error).toBeDefined();
       expect(isValidNatsPublishResult(mockResult)).toBe(true);
@@ -87,7 +87,7 @@ describe('Test Fixtures', () => {
     it('should allow overriding mock event properties', () => {
       const customJobId = 'custom-job-123';
       const mockEvent = createMockJobJdSubmittedEvent({ jobId: customJobId });
-      
+
       expect(mockEvent.jobId).toBe(customJobId);
     });
 
@@ -98,10 +98,10 @@ describe('Test Fixtures', () => {
           technical: customSkills,
           soft: ['leadership'],
           experience: 'Mid-level',
-          education: 'Bachelor\'s degree'
-        }
+          education: "Bachelor's degree",
+        },
       });
-      
+
       expect(mockDto.requirements.technical).toEqual(customSkills);
     });
   });
@@ -109,13 +109,13 @@ describe('Test Fixtures', () => {
   describe('Validation Functions', () => {
     it('should validate JobJdSubmittedEvent using Jest helpers', () => {
       const mockEvent = createMockJobJdSubmittedEvent();
-      
+
       expect(() => validateJobJdSubmittedEvent(mockEvent)).not.toThrow();
     });
 
     it('should validate AnalysisJdExtractedEvent using Jest helpers', () => {
       const mockEvent = createMockAnalysisJdExtractedEvent();
-      
+
       expect(() => validateAnalysisJdExtractedEvent(mockEvent)).not.toThrow();
     });
   });
@@ -124,7 +124,7 @@ describe('Test Fixtures', () => {
     it('should correctly identify valid events', () => {
       const validEvent = createMockJobJdSubmittedEvent();
       const invalidEvent = { jobId: 'test' }; // Missing required fields
-      
+
       expect(isValidJobJdSubmittedEvent(validEvent)).toBe(true);
       expect(isValidJobJdSubmittedEvent(invalidEvent)).toBe(false);
     });
@@ -132,7 +132,7 @@ describe('Test Fixtures', () => {
     it('should correctly identify valid DTOs', () => {
       const validDto = createMockExtractedJdDTO();
       const invalidDto = { requirements: {} }; // Missing required structure
-      
+
       expect(isValidExtractedJdDTO(validDto)).toBe(true);
       expect(isValidExtractedJdDTO(invalidDto)).toBe(false);
     });

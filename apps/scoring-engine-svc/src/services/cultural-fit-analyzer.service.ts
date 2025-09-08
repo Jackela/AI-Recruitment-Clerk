@@ -29,14 +29,23 @@ export interface CulturalFitIndicators {
   };
   leadershipPotential: {
     score: number; // 0-100
-    style: 'directive' | 'collaborative' | 'servant' | 'transformational' | 'situational';
+    style:
+      | 'directive'
+      | 'collaborative'
+      | 'servant'
+      | 'transformational'
+      | 'situational';
     mentorshipEvidence: string[];
     teamBuildingEvidence: string[];
   };
   innovationMindset: {
     score: number; // 0-100
     creativityIndicators: string[];
-    problemSolvingApproach: 'analytical' | 'creative' | 'systematic' | 'intuitive';
+    problemSolvingApproach:
+      | 'analytical'
+      | 'creative'
+      | 'systematic'
+      | 'intuitive';
   };
   professionalMaturity: {
     score: number; // 0-100
@@ -109,33 +118,46 @@ export class CulturalFitAnalyzerService {
   async analyzeCulturalFit(
     resume: ResumeDTO,
     companyProfile: CompanyProfile,
-    jobRequirements: JobRequirements
+    jobRequirements: JobRequirements,
   ): Promise<CulturalFitScore> {
     const startTime = Date.now();
 
     try {
       // Analyze cultural fit indicators
-      const indicators = await this.analyzeCulturalIndicators(resume, companyProfile);
-      
+      const indicators = await this.analyzeCulturalIndicators(
+        resume,
+        companyProfile,
+      );
+
       // Assess soft skills
       const softSkills = await this.assessSoftSkills(resume, jobRequirements);
-      
+
       // Calculate alignment scores
-      const alignmentScores = this.calculateAlignmentScores(indicators, companyProfile);
-      
+      const alignmentScores = this.calculateAlignmentScores(
+        indicators,
+        companyProfile,
+      );
+
       // Generate recommendations
       const recommendations = await this.generateRecommendations(
         indicators,
         softSkills,
         companyProfile,
-        alignmentScores
+        alignmentScores,
       );
-      
+
       // Calculate overall score
-      const overallScore = this.calculateOverallCulturalFitScore(alignmentScores, softSkills);
-      
+      const overallScore = this.calculateOverallCulturalFitScore(
+        alignmentScores,
+        softSkills,
+      );
+
       // Calculate confidence
-      const confidence = this.calculateCulturalFitConfidence(indicators, softSkills, resume);
+      const confidence = this.calculateCulturalFitConfidence(
+        indicators,
+        softSkills,
+        resume,
+      );
 
       const processingTime = Date.now() - startTime;
       this.logger.log(`Cultural fit analysis completed in ${processingTime}ms`);
@@ -146,9 +168,8 @@ export class CulturalFitAnalyzerService {
         softSkills,
         alignmentScores,
         confidence,
-        recommendations
+        recommendations,
       };
-
     } catch (error) {
       this.logger.error('Error in cultural fit analysis', error);
       return this.fallbackCulturalFitAnalysis(resume, companyProfile);
@@ -160,11 +181,14 @@ export class CulturalFitAnalyzerService {
    */
   private async analyzeCulturalIndicators(
     resume: ResumeDTO,
-    companyProfile: CompanyProfile
+    companyProfile: CompanyProfile,
   ): Promise<CulturalFitIndicators> {
-    const experienceText = resume.workExperience.map(exp => 
-      `${exp.position} at ${exp.company} (${exp.startDate} to ${exp.endDate}): ${exp.summary}`
-    ).join('\n\n');
+    const experienceText = resume.workExperience
+      .map(
+        (exp) =>
+          `${exp.position} at ${exp.company} (${exp.startDate} to ${exp.endDate}): ${exp.summary}`,
+      )
+      .join('\n\n');
 
     const prompt = `
       Analyze this professional background for cultural fit indicators:
@@ -266,12 +290,15 @@ export class CulturalFitAnalyzerService {
             "accountability": "number",
             "continuousLearning": "number"
           }
-        }`
+        }`,
       );
 
       return response.data as CulturalFitIndicators;
     } catch (error) {
-      this.logger.warn('AI cultural indicators analysis failed, using fallback', error);
+      this.logger.warn(
+        'AI cultural indicators analysis failed, using fallback',
+        error,
+      );
       return this.fallbackCulturalIndicators(resume);
     }
   }
@@ -281,11 +308,11 @@ export class CulturalFitAnalyzerService {
    */
   private async assessSoftSkills(
     resume: ResumeDTO,
-    jobRequirements: JobRequirements
+    jobRequirements: JobRequirements,
   ): Promise<SoftSkillsAssessment> {
-    const experienceText = resume.workExperience.map(exp => 
-      `${exp.position} at ${exp.company}: ${exp.summary}`
-    ).join('\n');
+    const experienceText = resume.workExperience
+      .map((exp) => `${exp.position} at ${exp.company}: ${exp.summary}`)
+      .join('\n');
 
     const prompt = `
       Assess soft skills based on this professional background:
@@ -297,7 +324,7 @@ export class CulturalFitAnalyzerService {
       ${resume.skills.join(', ')}
       
       EDUCATION:
-      ${resume.education.map(edu => `${edu.degree} in ${edu.major || 'N/A'} from ${edu.school}`).join(', ')}
+      ${resume.education.map((edu) => `${edu.degree} in ${edu.major || 'N/A'} from ${edu.school}`).join(', ')}
       
       Rate the following soft skills (0-100) based on evidence in the background:
       
@@ -357,12 +384,15 @@ export class CulturalFitAnalyzerService {
             "criticalThinking": ["array of evidence strings"],
             "emotionalIntelligence": ["array of evidence strings"]
           }
-        }`
+        }`,
       );
 
       return response.data as SoftSkillsAssessment;
     } catch (error) {
-      this.logger.warn('AI soft skills assessment failed, using fallback', error);
+      this.logger.warn(
+        'AI soft skills assessment failed, using fallback',
+        error,
+      );
       return this.fallbackSoftSkillsAssessment(resume);
     }
   }
@@ -372,36 +402,36 @@ export class CulturalFitAnalyzerService {
    */
   private calculateAlignmentScores(
     indicators: CulturalFitIndicators,
-    companyProfile: CompanyProfile
+    companyProfile: CompanyProfile,
   ) {
     // Company size alignment
     const companySizeAlignment = this.calculateCompanySizeAlignment(
       indicators.companySize.preference,
-      companyProfile.size
+      companyProfile.size,
     );
 
     // Work style alignment
     const workStyleAlignment = this.calculateWorkStyleAlignment(
       indicators.workStyle,
-      companyProfile.culture
+      companyProfile.culture,
     );
 
     // Leadership alignment
     const leadershipAlignment = this.calculateLeadershipAlignment(
       indicators.leadershipPotential,
-      companyProfile.teamStructure.managementLayers
+      companyProfile.teamStructure.managementLayers,
     );
 
     // Innovation alignment
     const innovationAlignment = this.calculateInnovationAlignment(
       indicators.innovationMindset.score,
-      companyProfile.culture.innovation
+      companyProfile.culture.innovation,
     );
 
     // Communication alignment
     const communicationAlignment = this.calculateCommunicationAlignment(
       indicators.communicationSkills,
-      companyProfile.teamStructure.collaborationStyle
+      companyProfile.teamStructure.collaborationStyle,
     );
 
     return {
@@ -409,65 +439,101 @@ export class CulturalFitAnalyzerService {
       workStyleAlignment,
       leadershipAlignment,
       innovationAlignment,
-      communicationAlignment
+      communicationAlignment,
     };
   }
 
-  private calculateCompanySizeAlignment(candidatePreference: string, companySize: string): number {
+  private calculateCompanySizeAlignment(
+    candidatePreference: string,
+    companySize: string,
+  ): number {
     const alignmentMatrix = {
       startup: { startup: 100, scaleup: 70, enterprise: 30 },
       scaleup: { startup: 70, scaleup: 100, enterprise: 80 },
       enterprise: { startup: 40, scaleup: 80, enterprise: 100 },
       mixed: { startup: 85, scaleup: 90, enterprise: 85 },
-      unknown: { startup: 60, scaleup: 60, enterprise: 60 }
+      unknown: { startup: 60, scaleup: 60, enterprise: 60 },
     };
 
     return alignmentMatrix[candidatePreference]?.[companySize] || 50;
   }
 
-  private calculateWorkStyleAlignment(workStyle: CulturalFitIndicators['workStyle'], culture: CompanyProfile['culture']): number {
+  private calculateWorkStyleAlignment(
+    workStyle: CulturalFitIndicators['workStyle'],
+    culture: CompanyProfile['culture'],
+  ): number {
     let score = 70; // Base score
 
     // Remote readiness vs work style
-    if (culture.workStyle === 'remote' && workStyle.remoteReadiness > 80) score += 20;
-    if (culture.workStyle === 'on-site' && workStyle.remoteReadiness < 40) score += 10;
+    if (culture.workStyle === 'remote' && workStyle.remoteReadiness > 80)
+      score += 20;
+    if (culture.workStyle === 'on-site' && workStyle.remoteReadiness < 40)
+      score += 10;
     if (culture.workStyle === 'hybrid') score += 10; // Neutral for hybrid
 
     // Collaboration style alignment
-    if (culture.decisionMaking === 'collaborative' && workStyle.collaborationStyle === 'collaborative') score += 15;
-    if (culture.decisionMaking === 'autonomous' && workStyle.collaborationStyle === 'independent') score += 15;
+    if (
+      culture.decisionMaking === 'collaborative' &&
+      workStyle.collaborationStyle === 'collaborative'
+    )
+      score += 15;
+    if (
+      culture.decisionMaking === 'autonomous' &&
+      workStyle.collaborationStyle === 'independent'
+    )
+      score += 15;
 
     return Math.min(100, Math.max(0, score));
   }
 
-  private calculateLeadershipAlignment(leadership: CulturalFitIndicators['leadershipPotential'], managementLayers: number): number {
+  private calculateLeadershipAlignment(
+    leadership: CulturalFitIndicators['leadershipPotential'],
+    managementLayers: number,
+  ): number {
     let score = leadership.score;
 
     // Adjust based on management structure
     if (managementLayers > 3 && leadership.style === 'directive') score += 10;
-    if (managementLayers <= 2 && leadership.style === 'collaborative') score += 15;
+    if (managementLayers <= 2 && leadership.style === 'collaborative')
+      score += 15;
     if (managementLayers === 1 && leadership.style === 'servant') score += 10;
 
     return Math.min(100, Math.max(0, score));
   }
 
-  private calculateInnovationAlignment(innovationScore: number, companyInnovation: string): number {
+  private calculateInnovationAlignment(
+    innovationScore: number,
+    companyInnovation: string,
+  ): number {
     const innovationRequirements = {
       high: 80,
       medium: 60,
-      low: 40
+      low: 40,
     };
 
     const required = innovationRequirements[companyInnovation] || 60;
     return Math.min(100, (innovationScore / required) * 100);
   }
 
-  private calculateCommunicationAlignment(communication: CulturalFitIndicators['communicationSkills'], collaborationStyle: string): number {
-    let score = (communication.writtenCommunication + communication.verbalCommunication) / 2;
+  private calculateCommunicationAlignment(
+    communication: CulturalFitIndicators['communicationSkills'],
+    collaborationStyle: string,
+  ): number {
+    let score =
+      (communication.writtenCommunication + communication.verbalCommunication) /
+      2;
 
     // Adjust for collaboration style
-    if (collaborationStyle === 'cross-functional' && communication.presentationSkills > 70) score += 10;
-    if (collaborationStyle === 'matrix' && communication.verbalCommunication > 80) score += 10;
+    if (
+      collaborationStyle === 'cross-functional' &&
+      communication.presentationSkills > 70
+    )
+      score += 10;
+    if (
+      collaborationStyle === 'matrix' &&
+      communication.verbalCommunication > 80
+    )
+      score += 10;
 
     return Math.min(100, score);
   }
@@ -479,7 +545,7 @@ export class CulturalFitAnalyzerService {
     indicators: CulturalFitIndicators,
     softSkills: SoftSkillsAssessment,
     companyProfile: CompanyProfile,
-    alignmentScores: AlignmentScores
+    alignmentScores: AlignmentScores,
   ) {
     try {
       const prompt = `
@@ -516,16 +582,19 @@ export class CulturalFitAnalyzerService {
           "strengths": ["array of strength strings"],
           "concerns": ["array of concern strings"],
           "developmentAreas": ["array of development area strings"]
-        }`
+        }`,
       );
 
       return response.data as CulturalRecommendations;
     } catch (error) {
-      this.logger.warn('Failed to generate recommendations, using fallback', error);
+      this.logger.warn(
+        'Failed to generate recommendations, using fallback',
+        error,
+      );
       return {
         strengths: ['Strong technical background', 'Professional experience'],
         concerns: ['Limited cultural fit data'],
-        developmentAreas: ['Communication skills', 'Leadership development']
+        developmentAreas: ['Communication skills', 'Leadership development'],
       };
     }
   }
@@ -533,14 +602,20 @@ export class CulturalFitAnalyzerService {
   /**
    * Calculate overall cultural fit score
    */
-  private calculateOverallCulturalFitScore(alignmentScores: AlignmentScores, softSkills: SoftSkillsAssessment): number {
+  private calculateOverallCulturalFitScore(
+    alignmentScores: AlignmentScores,
+    softSkills: SoftSkillsAssessment,
+  ): number {
     // Weight the different components
     const alignmentWeight = 0.6;
     const softSkillsWeight = 0.4;
 
     // Calculate average alignment score
-    const avgAlignmentScore = (Object.values(alignmentScores) as number[]).reduce((sum: number, score: number) => sum + score, 0) / 
-      Object.keys(alignmentScores).length;
+    const avgAlignmentScore =
+      (Object.values(alignmentScores) as number[]).reduce(
+        (sum: number, score: number) => sum + score,
+        0,
+      ) / Object.keys(alignmentScores).length;
 
     // Calculate average soft skills score
     const softSkillValues = [
@@ -551,12 +626,16 @@ export class CulturalFitAnalyzerService {
       softSkills.leadership,
       softSkills.timeManagement,
       softSkills.criticalThinking,
-      softSkills.emotionalIntelligence
+      softSkills.emotionalIntelligence,
     ];
-    const avgSoftSkillsScore = softSkillValues.reduce((sum, score) => sum + score, 0) / softSkillValues.length;
+    const avgSoftSkillsScore =
+      softSkillValues.reduce((sum, score) => sum + score, 0) /
+      softSkillValues.length;
 
     // Calculate weighted overall score
-    const overallScore = (avgAlignmentScore * alignmentWeight) + (avgSoftSkillsScore * softSkillsWeight);
+    const overallScore =
+      avgAlignmentScore * alignmentWeight +
+      avgSoftSkillsScore * softSkillsWeight;
 
     return Math.round(overallScore);
   }
@@ -567,16 +646,16 @@ export class CulturalFitAnalyzerService {
   private calculateCulturalFitConfidence(
     indicators: CulturalFitIndicators,
     softSkills: SoftSkillsAssessment,
-    resume: ResumeDTO
+    resume: ResumeDTO,
   ): number {
     let confidence = 0.8; // Base confidence
 
     // Reduce confidence for limited work experience
     if (resume.workExperience.length < 2) confidence -= 0.15;
-    
+
     // Reduce confidence for missing job descriptions
-    const emptyDescriptions = resume.workExperience.filter(exp => 
-      !exp.summary || exp.summary.trim().length < 20
+    const emptyDescriptions = resume.workExperience.filter(
+      (exp) => !exp.summary || exp.summary.trim().length < 20,
     ).length;
     confidence -= (emptyDescriptions / resume.workExperience.length) * 0.2;
 
@@ -595,7 +674,7 @@ export class CulturalFitAnalyzerService {
    */
   private fallbackCulturalFitAnalysis(
     resume: ResumeDTO,
-    companyProfile: CompanyProfile
+    companyProfile: CompanyProfile,
   ): CulturalFitScore {
     const indicators = this.fallbackCulturalIndicators(resume);
     const softSkills = this.fallbackSoftSkillsAssessment(resume);
@@ -604,7 +683,7 @@ export class CulturalFitAnalyzerService {
       workStyleAlignment: 60,
       leadershipAlignment: 60,
       innovationAlignment: 60,
-      communicationAlignment: 60
+      communicationAlignment: 60,
     };
 
     return {
@@ -616,8 +695,8 @@ export class CulturalFitAnalyzerService {
       recommendations: {
         strengths: ['Professional background'],
         concerns: ['Limited analysis data'],
-        developmentAreas: ['Communication', 'Leadership']
-      }
+        developmentAreas: ['Communication', 'Leadership'],
+      },
     };
   }
 
@@ -629,44 +708,46 @@ export class CulturalFitAnalyzerService {
       companySize: {
         preference: 'mixed',
         confidence: 50,
-        evidence: ['Limited data for analysis']
+        evidence: ['Limited data for analysis'],
       },
       workStyle: {
         remoteReadiness: 70,
         collaborationStyle: 'hybrid',
         adaptabilityScore: 60,
-        evidence: ['General assessment based on modern work trends']
+        evidence: ['General assessment based on modern work trends'],
       },
       communicationSkills: {
         writtenCommunication: 60,
         verbalCommunication: 60,
         presentationSkills: 60,
-        evidence: ['Resume presentation quality']
+        evidence: ['Resume presentation quality'],
       },
       leadershipPotential: {
         score: 50,
         style: 'collaborative',
         mentorshipEvidence: [],
-        teamBuildingEvidence: []
+        teamBuildingEvidence: [],
       },
       innovationMindset: {
         score: 60,
         creativityIndicators: [],
-        problemSolvingApproach: 'analytical'
+        problemSolvingApproach: 'analytical',
       },
       professionalMaturity: {
         score: 70,
         reliabilityIndicators: ['Work history consistency'],
         accountability: 70,
-        continuousLearning: 60
-      }
+        continuousLearning: 60,
+      },
     };
   }
 
   /**
    * Fallback soft skills assessment
    */
-  private fallbackSoftSkillsAssessment(resume: ResumeDTO): SoftSkillsAssessment {
+  private fallbackSoftSkillsAssessment(
+    resume: ResumeDTO,
+  ): SoftSkillsAssessment {
     return {
       technicalCommunication: 60,
       problemSolving: 60,
@@ -684,8 +765,8 @@ export class CulturalFitAnalyzerService {
         leadership: ['Job titles'],
         timeManagement: ['Work history'],
         criticalThinking: ['Technical expertise'],
-        emotionalIntelligence: ['Professional presentation']
-      }
+        emotionalIntelligence: ['Professional presentation'],
+      },
     };
   }
 }

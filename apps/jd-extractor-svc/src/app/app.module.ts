@@ -8,10 +8,10 @@ import { ExtractionService } from '../extraction/extraction.service';
 import { LlmService } from '../extraction/llm.service';
 import { NatsClientModule } from '@app/shared-nats-client';
 import { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
-import { 
+import {
   StandardizedGlobalExceptionFilter,
   ExceptionFilterConfigHelper,
-  ErrorInterceptorFactory 
+  ErrorInterceptorFactory,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 
 @Module({
@@ -32,35 +32,37 @@ import {
     // Enhanced Error Handling System
     {
       provide: APP_FILTER,
-      useFactory: () => new StandardizedGlobalExceptionFilter({
-        serviceName: 'jd-extractor-svc',
-        ...ExceptionFilterConfigHelper.forProcessingService()
-      }),
+      useFactory: () =>
+        new StandardizedGlobalExceptionFilter({
+          serviceName: 'jd-extractor-svc',
+          ...ExceptionFilterConfigHelper.forProcessingService(),
+        }),
     },
     // Error Handling Interceptors
     {
       provide: APP_INTERCEPTOR,
-      useFactory: () => ErrorInterceptorFactory.createCorrelationInterceptor('jd-extractor-svc'),
+      useFactory: () =>
+        ErrorInterceptorFactory.createCorrelationInterceptor(
+          'jd-extractor-svc',
+        ),
     },
     {
       provide: APP_INTERCEPTOR,
-      useFactory: () => ErrorInterceptorFactory.createLoggingInterceptor('jd-extractor-svc'),
+      useFactory: () =>
+        ErrorInterceptorFactory.createLoggingInterceptor('jd-extractor-svc'),
     },
     {
       provide: APP_INTERCEPTOR,
-      useFactory: () => ErrorInterceptorFactory.createPerformanceInterceptor(
-        'jd-extractor-svc',
-        {
-          warnThreshold: 5000,  // 5 seconds - JD extraction can take time
-          errorThreshold: 30000 // 30 seconds - hard limit for JD extraction
-        }
-      ),
-    }
+      useFactory: () =>
+        ErrorInterceptorFactory.createPerformanceInterceptor(
+          'jd-extractor-svc',
+          {
+            warnThreshold: 5000, // 5 seconds - JD extraction can take time
+            errorThreshold: 30000, // 30 seconds - hard limit for JD extraction
+          },
+        ),
+    },
   ],
-  exports: [
-    ExtractionService,
-    LlmService,
-    JdExtractorNatsService,
-  ],
+  exports: [ExtractionService, LlmService, JdExtractorNatsService],
 })
 export class AppModule {}

@@ -43,7 +43,9 @@ describe('GuestEffects', () => {
     });
 
     effects = TestBed.inject(GuestEffects);
-    guestApiService = TestBed.inject(GuestApiService) as jest.Mocked<GuestApiService>;
+    guestApiService = TestBed.inject(
+      GuestApiService,
+    ) as jest.Mocked<GuestApiService>;
     store = TestBed.inject(Store) as MockStore<GuestState>;
     jest.spyOn(store, 'dispatch');
 
@@ -68,7 +70,9 @@ describe('GuestEffects', () => {
         guestApiService.checkUsage.mockReturnValue(response);
 
         const expected = '--b';
-        expectObservable(effects.incrementUsage$).toBe(expected, { b: completion });
+        expectObservable(effects.incrementUsage$).toBe(expected, {
+          b: completion,
+        });
       });
     });
   });
@@ -79,7 +83,9 @@ describe('GuestEffects', () => {
         const action = GuestActions.incrementUsageSuccess();
         const completion = GuestActions.loadUsageStatus();
         actions$ = hot('-a', { a: action });
-        expectObservable(effects.incrementUsageSuccess$).toBe('-b', { b: completion });
+        expectObservable(effects.incrementUsageSuccess$).toBe('-b', {
+          b: completion,
+        });
       });
     });
   });
@@ -88,20 +94,32 @@ describe('GuestEffects', () => {
     it('should dispatch success action and side effects', () => {
       testScheduler.run(({ hot, cold, expectObservable }) => {
         const redeemResponse = { success: true, message: 'Code redeemed' };
-        const action = GuestActions.redeemFeedbackCode({ feedbackCode: 'fb-test-123' });
-        const completion = GuestActions.redeemFeedbackCodeSuccess({ message: 'Code redeemed' });
+        const action = GuestActions.redeemFeedbackCode({
+          feedbackCode: 'fb-test-123',
+        });
+        const completion = GuestActions.redeemFeedbackCodeSuccess({
+          message: 'Code redeemed',
+        });
 
         actions$ = hot('-a', { a: action });
-        guestApiService.redeemFeedbackCode.mockReturnValue(cold('-a|', { a: redeemResponse }));
+        guestApiService.redeemFeedbackCode.mockReturnValue(
+          cold('-a|', { a: redeemResponse }),
+        );
 
         const effect$ = effects.redeemFeedbackCode$.pipe(
           tap(() => {
-            expect(store.dispatch).toHaveBeenCalledWith(GuestActions.hideFeedbackModal());
-            expect(store.dispatch).toHaveBeenCalledWith(GuestActions.hideLimitModal());
-            expect(store.dispatch).toHaveBeenCalledWith(GuestActions.loadUsageStatus());
-          })
+            expect(store.dispatch).toHaveBeenCalledWith(
+              GuestActions.hideFeedbackModal(),
+            );
+            expect(store.dispatch).toHaveBeenCalledWith(
+              GuestActions.hideLimitModal(),
+            );
+            expect(store.dispatch).toHaveBeenCalledWith(
+              GuestActions.loadUsageStatus(),
+            );
+          }),
         );
-        
+
         expectObservable(effect$).toBe('--b', { b: completion });
       });
     });
@@ -110,22 +128,32 @@ describe('GuestEffects', () => {
   describe('uploadResume$', () => {
     it('should dispatch failure and side effect on 429 error', () => {
       testScheduler.run(({ hot, cold, expectObservable }) => {
-        const mockFile = new File(['content'], 'test.pdf', { type: 'application/pdf' });
+        const mockFile = new File(['content'], 'test.pdf', {
+          type: 'application/pdf',
+        });
         const action = GuestActions.uploadResume({ file: mockFile });
-        const error = { status: 429, error: { message: 'Usage limit exceeded' } };
-        const completion = GuestActions.uploadResumeFailure({ error: 'Usage limit exceeded' });
+        const error = {
+          status: 429,
+          error: { message: 'Usage limit exceeded' },
+        };
+        const completion = GuestActions.uploadResumeFailure({
+          error: 'Usage limit exceeded',
+        });
 
         actions$ = hot('-a', { a: action });
         guestApiService.analyzeResume.mockReturnValue(cold('-#|', {}, error));
 
         const effect$ = effects.uploadResume$.pipe(
-            tap({
-                error: () => {
-                    expect(store.dispatch).toHaveBeenCalledWith(
-                        GuestActions.setLimited({ isLimited: true, message: 'Usage limit exceeded' })
-                    );
-                }
-            })
+          tap({
+            error: () => {
+              expect(store.dispatch).toHaveBeenCalledWith(
+                GuestActions.setLimited({
+                  isLimited: true,
+                  message: 'Usage limit exceeded',
+                }),
+              );
+            },
+          }),
         );
         expectObservable(effect$).toBe('--b', { b: completion });
       });
@@ -133,26 +161,38 @@ describe('GuestEffects', () => {
   });
 
   describe('pollAnalysisResults$', () => {
-      it('should schedule next check for processing status', () => {
-        testScheduler.run(({ hot, expectObservable }) => {
-            const analysisResults = { data: { analysisId: 'analysis-123', status: 'processing' as const }};
-            const action = GuestActions.loadAnalysisResultsSuccess({ analysisResults });
-            const completion = GuestActions.loadAnalysisResults({ analysisId: 'analysis-123' });
+    it('should schedule next check for processing status', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const analysisResults = {
+          data: { analysisId: 'analysis-123', status: 'processing' as const },
+        };
+        const action = GuestActions.loadAnalysisResultsSuccess({
+          analysisResults,
+        });
+        const completion = GuestActions.loadAnalysisResults({
+          analysisId: 'analysis-123',
+        });
 
-            actions$ = hot('a', { a: action });
-            const expected = '10s b';
-            expectObservable(effects.pollAnalysisResults$).toBe(expected, { b: completion });
+        actions$ = hot('a', { a: action });
+        const expected = '10s b';
+        expectObservable(effects.pollAnalysisResults$).toBe(expected, {
+          b: completion,
         });
       });
+    });
 
-      it('should not schedule next check for completed status', () => {
-        testScheduler.run(({ hot, expectObservable }) => {
-            const analysisResults = { data: { analysisId: 'analysis-123', status: 'completed' as const }};
-            const action = GuestActions.loadAnalysisResultsSuccess({ analysisResults });
-            actions$ = hot('-a', { a: action });
-            expectObservable(effects.pollAnalysisResults$).toBe('');
+    it('should not schedule next check for completed status', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const analysisResults = {
+          data: { analysisId: 'analysis-123', status: 'completed' as const },
+        };
+        const action = GuestActions.loadAnalysisResultsSuccess({
+          analysisResults,
         });
+        actions$ = hot('-a', { a: action });
+        expectObservable(effects.pollAnalysisResults$).toBe('');
       });
+    });
   });
 
   describe('handleUsageLimitExceeded$', () => {
@@ -175,7 +215,9 @@ describe('GuestEffects', () => {
         const action = GuestActions.setLimited({ isLimited: true });
         actions$ = hot('--a', { a: action });
 
-        store.overrideSelector(selectGuestState, { feedbackCode: 'fb-test-123' } as any);
+        store.overrideSelector(selectGuestState, {
+          feedbackCode: 'fb-test-123',
+        } as any);
 
         const expected = '--b';
         expectObservable(effects.handleUsageLimitExceeded$).toBe(expected, {

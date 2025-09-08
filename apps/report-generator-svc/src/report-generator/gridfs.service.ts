@@ -42,7 +42,8 @@ export class GridFsService {
   private gridFSBucket: GridFSBucket;
 
   constructor(
-    @InjectConnection('report-generator') private readonly connection: Connection,
+    @InjectConnection('report-generator')
+    private readonly connection: Connection,
   ) {
     // Initialize GridFS bucket for storing report files
     this.gridFSBucket = new GridFSBucket(this.connection.db, {
@@ -54,13 +55,16 @@ export class GridFsService {
   async saveReport(
     content: string,
     filename: string,
-    metadata: ReportFileMetadata
+    metadata: ReportFileMetadata,
   ): Promise<string> {
     try {
       this.logger.debug(`Saving report file: ${filename}`);
 
       // Generate content hash for integrity verification
-      const contentHash = crypto.createHash('sha256').update(content).digest('hex');
+      const contentHash = crypto
+        .createHash('sha256')
+        .update(content)
+        .digest('hex');
       const fileSize = Buffer.byteLength(content, 'utf8');
 
       // Enhanced metadata with file information
@@ -77,27 +81,30 @@ export class GridFsService {
         read() {
           this.push(contentBuffer);
           this.push(null);
-        }
+        },
       });
 
       // Create GridFS upload stream
-      const uploadStream: GridFSBucketWriteStream = this.gridFSBucket.openUploadStream(filename, {
-        metadata: enhancedMetadata,
-      });
+      const uploadStream: GridFSBucketWriteStream =
+        this.gridFSBucket.openUploadStream(filename, {
+          metadata: enhancedMetadata,
+        });
 
       return new Promise((resolve, reject) => {
         uploadStream.on('error', (error) => {
           this.logger.error('GridFS upload failed', {
             error: error.message,
             filename,
-            metadata: enhancedMetadata
+            metadata: enhancedMetadata,
           });
           reject(new Error(`Failed to save report file: ${error.message}`));
         });
 
         uploadStream.on('finish', () => {
           const fileId = uploadStream.id.toString();
-          this.logger.debug(`Successfully saved report file: ${filename} with ID: ${fileId}`);
+          this.logger.debug(
+            `Successfully saved report file: ${filename} with ID: ${fileId}`,
+          );
           resolve(fileId);
         });
 
@@ -108,7 +115,7 @@ export class GridFsService {
       this.logger.error('Error in saveReport', {
         error: error.message,
         filename,
-        metadata
+        metadata,
       });
       throw new Error(`Failed to save report: ${error.message}`);
     }
@@ -117,13 +124,18 @@ export class GridFsService {
   async saveReportBuffer(
     buffer: Buffer,
     filename: string,
-    metadata: ReportFileMetadata
+    metadata: ReportFileMetadata,
   ): Promise<string> {
     try {
-      this.logger.debug(`Saving report buffer: ${filename}, size: ${buffer.length} bytes`);
+      this.logger.debug(
+        `Saving report buffer: ${filename}, size: ${buffer.length} bytes`,
+      );
 
       // Generate content hash for integrity verification
-      const contentHash = crypto.createHash('sha256').update(buffer).digest('hex');
+      const contentHash = crypto
+        .createHash('sha256')
+        .update(buffer)
+        .digest('hex');
 
       // Enhanced metadata with file information
       const enhancedMetadata: ReportFileMetadata = {
@@ -138,27 +150,30 @@ export class GridFsService {
         read() {
           this.push(buffer);
           this.push(null);
-        }
+        },
       });
 
       // Create GridFS upload stream
-      const uploadStream: GridFSBucketWriteStream = this.gridFSBucket.openUploadStream(filename, {
-        metadata: enhancedMetadata,
-      });
+      const uploadStream: GridFSBucketWriteStream =
+        this.gridFSBucket.openUploadStream(filename, {
+          metadata: enhancedMetadata,
+        });
 
       return new Promise((resolve, reject) => {
         uploadStream.on('error', (error) => {
           this.logger.error('GridFS buffer upload failed', {
             error: error.message,
             filename,
-            bufferSize: buffer.length
+            bufferSize: buffer.length,
           });
           reject(new Error(`Failed to save report buffer: ${error.message}`));
         });
 
         uploadStream.on('finish', () => {
           const fileId = uploadStream.id.toString();
-          this.logger.debug(`Successfully saved report buffer: ${filename} with ID: ${fileId}`);
+          this.logger.debug(
+            `Successfully saved report buffer: ${filename} with ID: ${fileId}`,
+          );
           resolve(fileId);
         });
 
@@ -169,7 +184,7 @@ export class GridFsService {
       this.logger.error('Error in saveReportBuffer', {
         error: error.message,
         filename,
-        bufferSize: buffer?.length
+        bufferSize: buffer?.length,
       });
       throw new Error(`Failed to save report buffer: ${error.message}`);
     }
@@ -192,21 +207,23 @@ export class GridFsService {
         downloadStream.on('error', (error) => {
           this.logger.error('GridFS download failed', {
             error: error.message,
-            fileId
+            fileId,
           });
           reject(new Error(`Failed to retrieve report: ${error.message}`));
         });
 
         downloadStream.on('end', () => {
           const fileBuffer = Buffer.concat(chunks);
-          this.logger.debug(`Successfully retrieved report file: ${fileId}, size: ${fileBuffer.length} bytes`);
+          this.logger.debug(
+            `Successfully retrieved report file: ${fileId}, size: ${fileBuffer.length} bytes`,
+          );
           resolve(fileBuffer);
         });
       });
     } catch (error) {
       this.logger.error('Error in getReport', {
         error: error.message,
-        fileId
+        fileId,
       });
       throw new Error(`Failed to get report: ${error.message}`);
     }
@@ -223,7 +240,7 @@ export class GridFsService {
       downloadStream.on('error', (error) => {
         this.logger.error('GridFS stream error', {
           error: error.message,
-          fileId
+          fileId,
         });
       });
 
@@ -231,7 +248,7 @@ export class GridFsService {
     } catch (error) {
       this.logger.error('Error in getReportStream', {
         error: error.message,
-        fileId
+        fileId,
       });
       throw new Error(`Failed to create report stream: ${error.message}`);
     }
@@ -253,13 +270,15 @@ export class GridFsService {
     } catch (error) {
       this.logger.error('Error in getReportMetadata', {
         error: error.message,
-        fileId
+        fileId,
       });
       throw new Error(`Failed to get report metadata: ${error.message}`);
     }
   }
 
-  async findReportFiles(query: ReportFileQuery = {}): Promise<SavedReportFile[]> {
+  async findReportFiles(
+    query: ReportFileQuery = {},
+  ): Promise<SavedReportFile[]> {
     try {
       this.logger.debug('Finding report files', { query });
 
@@ -296,7 +315,7 @@ export class GridFsService {
         .sort({ uploadDate: -1 })
         .toArray();
 
-      return files.map(file => ({
+      return files.map((file) => ({
         fileId: file._id.toString(),
         filename: file.filename,
         contentHash: file.metadata?.contentHash || '',
@@ -307,7 +326,7 @@ export class GridFsService {
     } catch (error) {
       this.logger.error('Error in findReportFiles', {
         error: error.message,
-        query
+        query,
       });
       throw new Error(`Failed to find report files: ${error.message}`);
     }
@@ -327,13 +346,13 @@ export class GridFsService {
       }
 
       await this.gridFSBucket.delete(objectId);
-      
+
       this.logger.debug(`Successfully deleted report file: ${fileId}`);
       return true;
     } catch (error) {
       this.logger.error('Error in deleteReport', {
         error: error.message,
-        fileId
+        fileId,
       });
       throw new Error(`Failed to delete report: ${error.message}`);
     }
@@ -354,14 +373,17 @@ export class GridFsService {
       }
 
       // Verify content hash
-      const actualHash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
+      const actualHash = crypto
+        .createHash('sha256')
+        .update(fileBuffer)
+        .digest('hex');
       const isValid = actualHash === metadata.contentHash;
 
       if (!isValid) {
         this.logger.error('Report file integrity check failed', {
           fileId,
           expectedHash: metadata.contentHash,
-          actualHash
+          actualHash,
         });
       } else {
         this.logger.debug(`Report file integrity verified: ${fileId}`);
@@ -371,7 +393,7 @@ export class GridFsService {
     } catch (error) {
       this.logger.error('Error in verifyReportIntegrity', {
         error: error.message,
-        fileId
+        fileId,
       });
       return false;
     }
@@ -394,7 +416,7 @@ export class GridFsService {
       };
 
       // Group by report type
-      files.forEach(file => {
+      files.forEach((file) => {
         const reportType = file.metadata?.reportType || 'unknown';
         if (!stats.sizeByType[reportType]) {
           stats.sizeByType[reportType] = { count: 0, size: 0 };
@@ -406,7 +428,7 @@ export class GridFsService {
       return stats;
     } catch (error) {
       this.logger.error('Error in getStorageStats', {
-        error: error.message
+        error: error.message,
       });
       throw new Error(`Failed to get storage stats: ${error.message}`);
     }
@@ -427,7 +449,7 @@ export class GridFsService {
     reportType: string,
     jobId: string,
     resumeId: string,
-    extension: string
+    extension: string,
   ): string {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     return `${reportType}-${jobId}-${resumeId}-${timestamp}.${extension}`;

@@ -7,7 +7,7 @@ import * as jwt from 'jsonwebtoken';
 
 /**
  * 🔐 AUTHENTICATION & AUTHORIZATION SECURITY TESTS
- * 
+ *
  * Comprehensive security validation for authentication and authorization systems:
  * - JWT token security and validation
  * - Session management and security
@@ -32,21 +32,21 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
     email: 'security.admin@test.com',
     password: 'SecurePassword123!@#',
     name: 'Security Test Admin',
-    role: 'admin'
+    role: 'admin',
   };
 
   const testUser = {
     email: 'security.user@test.com',
     password: 'SecurePassword123!@#',
     name: 'Security Test User',
-    role: 'user'
+    role: 'user',
   };
 
   const testHrManager = {
     email: 'security.hr@test.com',
     password: 'SecurePassword123!@#',
     name: 'Security Test HR Manager',
-    role: 'hr_manager'
+    role: 'hr_manager',
   };
 
   beforeAll(async () => {
@@ -70,19 +70,19 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
       .post('/auth/register')
       .send({
         ...testAdmin,
-        organizationName: 'Security Test Organization'
+        organizationName: 'Security Test Organization',
       });
-    
+
     testOrganizationId = orgResponse.body.data.organizationId;
-    
+
     // Create admin token
     const adminLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
         email: testAdmin.email,
-        password: testAdmin.password
+        password: testAdmin.password,
       });
-    
+
     adminToken = adminLoginResponse.body.data.accessToken;
 
     // Create test user
@@ -90,18 +90,18 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
       .post('/auth/register')
       .send({
         ...testUser,
-        organizationId: testOrganizationId
+        organizationId: testOrganizationId,
       });
-    
+
     testUserId = userResponse.body.data.userId;
-    
+
     const userLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
         email: testUser.email,
-        password: testUser.password
+        password: testUser.password,
       });
-    
+
     userToken = userLoginResponse.body.data.accessToken;
 
     // Create HR manager
@@ -109,16 +109,16 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
       .post('/auth/register')
       .send({
         ...testHrManager,
-        organizationId: testOrganizationId
+        organizationId: testOrganizationId,
       });
-    
+
     const hrLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
         email: testHrManager.email,
-        password: testHrManager.password
+        password: testHrManager.password,
       });
-    
+
     hrToken = hrLoginResponse.body.data.accessToken;
   }
 
@@ -138,12 +138,15 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
 
     it('should reject expired JWT tokens', async () => {
       // Create expired token
-      const payload = { 
-        userId: testUserId, 
+      const payload = {
+        userId: testUserId,
         email: testUser.email,
-        exp: Math.floor(Date.now() / 1000) - 3600 // Expired 1 hour ago
+        exp: Math.floor(Date.now() / 1000) - 3600, // Expired 1 hour ago
       };
-      const expiredToken = jwt.sign(payload, process.env.JWT_SECRET || 'test-secret');
+      const expiredToken = jwt.sign(
+        payload,
+        process.env.JWT_SECRET || 'test-secret',
+      );
 
       const response = await request(app.getHttpServer())
         .get('/users/profile')
@@ -160,7 +163,7 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
         'not-a-token',
         '',
         'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.invalid',
-        'valid-looking.but-not-jwt.token'
+        'valid-looking.but-not-jwt.token',
       ];
 
       for (const token of malformedTokens) {
@@ -179,11 +182,14 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
       const manipulatedPayload = {
         ...decoded,
         role: 'admin', // Escalate privileges
-        userId: 'different-user-id'
+        userId: 'different-user-id',
       };
 
       // Sign with correct secret but manipulated payload
-      const manipulatedToken = jwt.sign(manipulatedPayload, process.env.JWT_SECRET || 'test-secret');
+      const manipulatedToken = jwt.sign(
+        manipulatedPayload,
+        process.env.JWT_SECRET || 'test-secret',
+      );
 
       const response = await request(app.getHttpServer())
         .get('/users/organization/users') // Admin-only endpoint
@@ -198,9 +204,12 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
       const shortLivedPayload = {
         userId: testUserId,
         email: testUser.email,
-        exp: Math.floor(Date.now() / 1000) + 1 // Expires in 1 second
+        exp: Math.floor(Date.now() / 1000) + 1, // Expires in 1 second
       };
-      const shortLivedToken = jwt.sign(shortLivedPayload, process.env.JWT_SECRET || 'test-secret');
+      const shortLivedToken = jwt.sign(
+        shortLivedPayload,
+        process.env.JWT_SECRET || 'test-secret',
+      );
 
       // Should work initially
       const immediateResponse = await request(app.getHttpServer())
@@ -210,7 +219,7 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
       expect(immediateResponse.status).toBe(200);
 
       // Wait for expiration
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Should be rejected after expiration
       const expiredResponse = await request(app.getHttpServer())
@@ -233,7 +242,7 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
 
       for (const endpoint of adminOnlyEndpoints) {
         let response;
-        
+
         if (endpoint.method === 'GET') {
           response = await request(app.getHttpServer())
             .get(endpoint.path)
@@ -256,7 +265,9 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
 
         expect(response.status).toBe(403);
         expect(response.body.success).toBe(false);
-        console.log(`✅ ${endpoint.method} ${endpoint.path}: Access denied for user role`);
+        console.log(
+          `✅ ${endpoint.method} ${endpoint.path}: Access denied for user role`,
+        );
       }
     });
 
@@ -292,7 +303,7 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
         .send({
           name: 'User',
           role: 'admin', // This should be ignored
-          permissions: ['admin_access']
+          permissions: ['admin_access'],
         });
 
       // Profile update might succeed but role shouldn't change
@@ -311,9 +322,12 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
         userId: testUserId,
         email: testUser.email,
         role: 'admin', // False role claim
-        exp: Math.floor(Date.now() / 1000) + 3600
+        exp: Math.floor(Date.now() / 1000) + 3600,
       };
-      const fakeRoleToken = jwt.sign(rolePayload, process.env.JWT_SECRET || 'test-secret');
+      const fakeRoleToken = jwt.sign(
+        rolePayload,
+        process.env.JWT_SECRET || 'test-secret',
+      );
 
       // System should validate actual user role from database
       const response = await request(app.getHttpServer())
@@ -331,43 +345,43 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
         .post('/auth/login')
         .send({
           email: testUser.email,
-          password: testUser.password
+          password: testUser.password,
         });
 
       const login2Response = await request(app.getHttpServer())
         .post('/auth/login')
         .send({
           email: testUser.email,
-          password: testUser.password
+          password: testUser.password,
         });
 
-      expect(login1Response.body.data.accessToken).not.toBe(login2Response.body.data.accessToken);
+      expect(login1Response.body.data.accessToken).not.toBe(
+        login2Response.body.data.accessToken,
+      );
     });
 
     it('should handle concurrent session management', async () => {
       const concurrentLogins = [];
-      
+
       for (let i = 0; i < 5; i++) {
         concurrentLogins.push(
-          request(app.getHttpServer())
-            .post('/auth/login')
-            .send({
-              email: testUser.email,
-              password: testUser.password
-            })
+          request(app.getHttpServer()).post('/auth/login').send({
+            email: testUser.email,
+            password: testUser.password,
+          }),
         );
       }
 
       const results = await Promise.all(concurrentLogins);
-      
+
       // All logins should succeed
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.status).toBe(200);
         expect(result.body.data).toHaveProperty('accessToken');
       });
 
       // All tokens should be different
-      const tokens = results.map(r => r.body.data.accessToken);
+      const tokens = results.map((r) => r.body.data.accessToken);
       const uniqueTokens = new Set(tokens);
       expect(uniqueTokens.size).toBe(tokens.length);
     });
@@ -378,7 +392,7 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
         .post('/auth/login')
         .send({
           email: testUser.email,
-          password: testUser.password
+          password: testUser.password,
         });
 
       const token = loginResponse.body.data.accessToken;
@@ -414,12 +428,11 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
         '/resumes/upload',
         '/analytics/events',
         '/questionnaire',
-        '/incentives'
+        '/incentives',
       ];
 
       for (const endpoint of protectedEndpoints) {
-        const response = await request(app.getHttpServer())
-          .get(endpoint);
+        const response = await request(app.getHttpServer()).get(endpoint);
 
         expect(response.status).toBe(401);
         expect(response.body.success).toBe(false);
@@ -431,7 +444,7 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
         'Bearer admin-token\r\nX-Admin: true',
         'Bearer token\nAuthorization: Bearer admin-token',
         'Bearer token; admin=true',
-        'Bearer token\x00admin-token'
+        'Bearer token\x00admin-token',
       ];
 
       for (const header of maliciousHeaders) {
@@ -449,20 +462,20 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
         { headers: { 'X-Admin-Override': 'true' } },
         { headers: { 'X-Forwarded-User': testUser.email } },
         { headers: { 'X-User-Id': testUserId } },
-        { headers: { 'Authorization': 'Basic YWRtaW46cGFzc3dvcmQ=' } }, // Basic auth
-        { query: { 'admin': 'true' } },
-        { query: { 'token': adminToken } }
+        { headers: { Authorization: 'Basic YWRtaW46cGFzc3dvcmQ=' } }, // Basic auth
+        { query: { admin: 'true' } },
+        { query: { token: adminToken } },
       ];
 
       for (const attempt of bypassAttempts) {
         let requestBuilder = request(app.getHttpServer()).get('/users/profile');
-        
+
         if (attempt.headers) {
           Object.entries(attempt.headers).forEach(([key, value]) => {
             requestBuilder = requestBuilder.set(key, value);
           });
         }
-        
+
         if (attempt.query) {
           requestBuilder = requestBuilder.query(attempt.query);
         }
@@ -486,7 +499,7 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
         '12345678',
         'Password', // Missing special char and number
         'password!', // Missing uppercase and number
-        'PASSWORD123!' // Missing lowercase
+        'PASSWORD123!', // Missing lowercase
       ];
 
       for (const weakPassword of weakPasswords) {
@@ -496,7 +509,7 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
             email: `weak${Date.now()}@test.com`,
             password: weakPassword,
             name: 'Test User',
-            organizationId: testOrganizationId
+            organizationId: testOrganizationId,
           });
 
         expect(response.status).toBe(400);
@@ -506,23 +519,21 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
 
     it('should prevent password brute force attacks', async () => {
       const bruteForceAttempts = [];
-      
+
       // Attempt multiple failed logins rapidly
       for (let i = 0; i < 10; i++) {
         bruteForceAttempts.push(
-          request(app.getHttpServer())
-            .post('/auth/login')
-            .send({
-              email: testUser.email,
-              password: 'wrong-password'
-            })
+          request(app.getHttpServer()).post('/auth/login').send({
+            email: testUser.email,
+            password: 'wrong-password',
+          }),
         );
       }
 
       const results = await Promise.all(bruteForceAttempts);
-      
+
       // All should fail with 401
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.status).toBe(401);
       });
 
@@ -531,7 +542,7 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
         .post('/auth/login')
         .send({
           email: testUser.email,
-          password: testUser.password // Correct password
+          password: testUser.password, // Correct password
         });
 
       // Might be temporarily locked
@@ -543,7 +554,7 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
       const resetRequest = await request(app.getHttpServer())
         .post('/auth/forgot-password')
         .send({
-          email: testUser.email
+          email: testUser.email,
         });
 
       // Should accept request without revealing user existence
@@ -553,11 +564,11 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
       const invalidResetRequest = await request(app.getHttpServer())
         .post('/auth/forgot-password')
         .send({
-          email: 'nonexistent@test.com'
+          email: 'nonexistent@test.com',
         });
 
       expect([200, 202]).toContain(invalidResetRequest.status);
-      
+
       // Response should be similar for valid and invalid emails
       expect(resetRequest.status).toBe(invalidResetRequest.status);
     });
@@ -570,7 +581,7 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
         .post('/auth/login')
         .send({
           email: testUser.email,
-          password: testUser.password
+          password: testUser.password,
         });
 
       expect(loginResponse.status).toBe(200);
@@ -580,7 +591,7 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
         .post('/auth/login')
         .send({
           email: testUser.email,
-          password: 'wrong-password'
+          password: 'wrong-password',
         });
 
       expect(failedLoginResponse.status).toBe(401);
@@ -603,20 +614,18 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
     it('should monitor suspicious authentication patterns', async () => {
       // Multiple rapid login attempts from same IP
       const rapidAttempts = [];
-      
+
       for (let i = 0; i < 5; i++) {
         rapidAttempts.push(
-          request(app.getHttpServer())
-            .post('/auth/login')
-            .send({
-              email: testUser.email,
-              password: testUser.password
-            })
+          request(app.getHttpServer()).post('/auth/login').send({
+            email: testUser.email,
+            password: testUser.password,
+          }),
         );
       }
 
       await Promise.all(rapidAttempts);
-      
+
       // Should trigger monitoring alerts (implementation dependent)
       // All should succeed but might trigger rate limiting
       expect(true).toBe(true); // Placeholder for actual monitoring validation
@@ -630,7 +639,7 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
         .post('/auth/mfa/enable')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
-          method: 'totp' // Time-based One-Time Password
+          method: 'totp', // Time-based One-Time Password
         });
 
       // Should provide setup instructions without exposing secrets
@@ -648,12 +657,12 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           email: 'new-email@test.com', // Email change is sensitive
-          name: 'Updated Name'
+          name: 'Updated Name',
         });
 
       // Might require MFA verification
       expect([200, 401, 403]).toContain(sensitiveResponse.status);
-      
+
       if (sensitiveResponse.status === 403) {
         expect(sensitiveResponse.body.error).toContain('MFA');
       }
@@ -664,23 +673,30 @@ describe('🔐 Authentication & Authorization Security Tests', () => {
     it('should validate comprehensive authentication security', async () => {
       console.log('\\n🔐 AUTHENTICATION & AUTHORIZATION SECURITY TEST SUMMARY');
       console.log('========================================================');
-      
+
       const securityChecks = {
-        jwtTokenSecurity: '✅ JWT signature validation, expiration, tampering prevention',
-        rbacEnforcement: '✅ Role-based access control, privilege escalation prevention',
-        sessionSecurity: '✅ Session fixation prevention, concurrent session handling',
-        bypassPrevention: '✅ Authentication bypass attempt detection and blocking',
-        passwordSecurity: '✅ Strong password enforcement, brute force protection',
+        jwtTokenSecurity:
+          '✅ JWT signature validation, expiration, tampering prevention',
+        rbacEnforcement:
+          '✅ Role-based access control, privilege escalation prevention',
+        sessionSecurity:
+          '✅ Session fixation prevention, concurrent session handling',
+        bypassPrevention:
+          '✅ Authentication bypass attempt detection and blocking',
+        passwordSecurity:
+          '✅ Strong password enforcement, brute force protection',
         auditLogging: '✅ Security event logging and monitoring',
-        mfaSupport: '✅ Multi-factor authentication capability'
+        mfaSupport: '✅ Multi-factor authentication capability',
       };
 
       Object.entries(securityChecks).forEach(([check, status]) => {
         console.log(`   ${check}: ${status}`);
       });
 
-      console.log('\\n🎉 Authentication & Authorization Security Validation Completed');
-      
+      console.log(
+        '\\n🎉 Authentication & Authorization Security Validation Completed',
+      );
+
       // All security checks should pass
       expect(Object.keys(securityChecks).length).toBeGreaterThan(0);
     });

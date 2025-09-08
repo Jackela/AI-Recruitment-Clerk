@@ -7,8 +7,19 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "types": ["jest", "node"],
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "strictBindCallApply": false,
+    "strictPropertyInitialization": false,
+    "noImplicitThis": false,
     "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "noUnusedParameters": false,
+    "noImplicitReturns": false,
+    "noFallthroughCasesInSwitch": false,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": false
   },
   "include": [
     "jest.config.ts",

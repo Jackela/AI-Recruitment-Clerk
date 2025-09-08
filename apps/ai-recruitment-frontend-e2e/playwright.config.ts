@@ -1,8 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 
 // Support both development (with dev server) and production (containerized) testing
-const baseURL = process.env['PLAYWRIGHT_BASE_URL'] || process.env['BASE_URL'] || 'http://localhost:4202';
-const isContainerizedTesting = process.env['PLAYWRIGHT_BASE_URL'] === 'http://localhost:4200';
+const baseURL =
+  process.env['PLAYWRIGHT_BASE_URL'] ||
+  process.env['BASE_URL'] ||
+  'http://localhost:4202';
+const isContainerizedTesting =
+  process.env['PLAYWRIGHT_BASE_URL'] === 'http://localhost:4200';
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -11,7 +15,7 @@ export default defineConfig({
   testDir: './src',
   timeout: 30000,
   expect: {
-    timeout: 5000
+    timeout: 5000,
   },
   // Fix: Reduce parallelism to prevent Firefox connection issues under load
   fullyParallel: false,
@@ -34,35 +38,38 @@ export default defineConfig({
     ignoreHTTPSErrors: true,
     // Add retry mechanism for failed connections
     extraHTTPHeaders: {
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.5'
-    }
+      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.5',
+    },
   },
   // Only start webServer if not testing against containerized system
-  ...(isContainerizedTesting ? {} : {
-    webServer: {
-      command: 'npx nx run ai-recruitment-frontend:serve --port 4202 --host 0.0.0.0',
-      url: 'http://localhost:4202',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120 * 1000,
-      // Fix: Increase startup timeout for better stability
-      stderr: 'pipe',
-      stdout: 'pipe'
-    }
-  }),
+  ...(isContainerizedTesting
+    ? {}
+    : {
+        webServer: {
+          command:
+            'npx nx run ai-recruitment-frontend:serve --port 4202 --host 0.0.0.0',
+          url: 'http://localhost:4202',
+          reuseExistingServer: !process.env.CI,
+          timeout: 120 * 1000,
+          // Fix: Increase startup timeout for better stability
+          stderr: 'pipe',
+          stdout: 'pipe',
+        },
+      }),
   projects: [
     {
       name: 'chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         // Add connection retry for stability
         navigationTimeout: 45000,
-        actionTimeout: 15000
+        actionTimeout: 15000,
       },
     },
     {
       name: 'firefox',
-      use: { 
+      use: {
         ...devices['Desktop Firefox'],
         // Fix: Firefox-specific configuration for connection stability
         navigationTimeout: 60000, // Longer timeout for Firefox
@@ -85,22 +92,22 @@ export default defineConfig({
             // Reduce memory usage
             'browser.cache.disk.enable': false,
             'browser.cache.memory.enable': true,
-            'browser.cache.memory.capacity': 16384
+            'browser.cache.memory.capacity': 16384,
           },
           // Use headless mode for better stability
-          headless: !process.env.FIREFOX_HEADED
-        }
+          headless: !process.env.FIREFOX_HEADED,
+        },
       },
     },
     // WebKit: Uses separate configuration due to dev server incompatibility
     // WebKit tests pass 100% with static builds but fail with Playwright's webServer
     // Root cause: Angular dev server crashes when WebKit connects through Playwright
     // Solution: Use scripts/run-webkit-tests.mjs or playwright-webkit-static.config.ts
-    // 
+    //
     // Uncomment below to test WebKit with dev server (will fail):
     // {
     //   name: 'webkit',
-    //   use: { 
+    //   use: {
     //     ...devices['Desktop Safari'],
     //     navigationTimeout: 45000,
     //     actionTimeout: 15000,

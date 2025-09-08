@@ -1,5 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
+import {
+  HttpInterceptor,
+  HttpRequest,
+  HttpHandler,
+  HttpEvent,
+  HttpErrorResponse,
+} from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, retry, timeout } from 'rxjs/operators';
 import { ToastService } from '../services/toast.service';
@@ -12,42 +18,53 @@ export class HttpErrorInterceptor implements HttpInterceptor {
   constructor(
     private toastService: ToastService,
     private router: Router,
-    private errorCorrelation: ErrorCorrelationService
+    private errorCorrelation: ErrorCorrelationService,
   ) {}
 
-  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  intercept(
+    request: HttpRequest<any>,
+    next: HttpHandler,
+  ): Observable<HttpEvent<any>> {
     // Add correlation headers to outgoing requests
     const correlatedRequest = request.clone({
       setHeaders: {
         ...Object.fromEntries(
-          this.errorCorrelation.getCorrelationHeaders().keys().map(
-            key => [key, this.errorCorrelation.getCorrelationHeaders().get(key)!]
-          )
-        )
-      }
+          this.errorCorrelation
+            .getCorrelationHeaders()
+            .keys()
+            .map((key) => [
+              key,
+              this.errorCorrelation.getCorrelationHeaders().get(key)!,
+            ]),
+        ),
+      },
     });
 
     return next.handle(correlatedRequest).pipe(
       // Add timeout
       timeout(APP_CONFIG.API.timeout),
-      
+
       // Retry failed requests with exponential backoff
       retry({
         count: this.getRetryCount(request.method),
         delay: (error, retryIndex) => {
-          const delay = APP_CONFIG.ERROR_HANDLING.retryConfig.initialDelay * 
-                       Math.pow(APP_CONFIG.ERROR_HANDLING.retryConfig.backoffMultiplier, retryIndex - 1);
-          return new Promise(resolve => setTimeout(resolve, delay));
-        }
+          const delay =
+            APP_CONFIG.ERROR_HANDLING.retryConfig.initialDelay *
+            Math.pow(
+              APP_CONFIG.ERROR_HANDLING.retryConfig.backoffMultiplier,
+              retryIndex - 1,
+            );
+          return new Promise((resolve) => setTimeout(resolve, delay));
+        },
       }),
-      
+
       catchError((error: HttpErrorResponse) => {
         // Create structured error with correlation
         const structuredError = this.errorCorrelation.createStructuredError(
           error,
           'network',
           this.getErrorSeverity(error.status),
-          `HTTP ${request.method} to ${request.url}`
+          `HTTP ${request.method} to ${request.url}`,
         );
 
         // Enhanced error logging with correlation
@@ -58,13 +75,18 @@ export class HttpErrorInterceptor implements HttpInterceptor {
 
         // Show user-friendly notification
         const userMessage = this.getErrorMessage(error.status, error);
-        this.showErrorNotification(error.status, userMessage, error, structuredError);
+        this.showErrorNotification(
+          error.status,
+          userMessage,
+          error,
+          structuredError,
+        );
 
         // Handle specific error codes
         this.handleSpecificErrors(error.status, structuredError);
 
         return throwError(() => error);
-      })
+      }),
     );
   }
 
@@ -106,13 +128,16 @@ export class HttpErrorInterceptor implements HttpInterceptor {
   }
 
   private showErrorNotification(
-    status: number, 
-    message: string, 
+    status: number,
+    message: string,
     error: HttpErrorResponse,
-    structuredError: any
+    structuredError: any,
   ): void {
     // Don't show notifications for cancelled requests or aborted requests
-    if (error.status === 0 && (error.error instanceof ProgressEvent || error.name === 'TimeoutError')) {
+    if (
+      error.status === 0 &&
+      (error.error instanceof ProgressEvent || error.name === 'TimeoutError')
+    ) {
       return;
     }
 
@@ -122,13 +147,13 @@ export class HttpErrorInterceptor implements HttpInterceptor {
     }
 
     // Enhanced message with correlation ID in development
-    const enhancedMessage = this.isDevelopment() ? 
-      `${message} (ID: ${structuredError.correlationId.slice(-8)})` : 
-      message;
+    const enhancedMessage = this.isDevelopment()
+      ? `${message} (ID: ${structuredError.correlationId.slice(-8)})`
+      : message;
 
     // Show appropriate notification based on severity
     const duration = this.getNotificationDuration(status);
-    
+
     if (status >= 500) {
       this.toastService.error(enhancedMessage, duration);
     } else if (status === 401 || status === 403) {
@@ -146,11 +171,17 @@ export class HttpErrorInterceptor implements HttpInterceptor {
     switch (status) {
       case 401:
         // Unauthorized - redirect to login with correlation context
-        if (!this.router.url.includes('/login') && !this.router.url.includes('/auth')) {
+        if (
+          !this.router.url.includes('/login') &&
+          !this.router.url.includes('/auth')
+        ) {
           sessionStorage.setItem('redirectUrl', this.router.url);
-          sessionStorage.setItem('authErrorCorrelationId', structuredError.correlationId);
+          sessionStorage.setItem(
+            'authErrorCorrelationId',
+            structuredError.correlationId,
+          );
           this.router.navigate(['/login'], {
-            queryParams: { reason: 'session_expired' }
+            queryParams: { reason: 'session_expired' },
           });
         }
         break;
@@ -159,7 +190,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
         console.warn('Access forbidden:', {
           correlationId: structuredError.correlationId,
           url: this.router.url,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         break;
       case 429:
@@ -177,10 +208,14 @@ export class HttpErrorInterceptor implements HttpInterceptor {
   private getRetryCount(method: string): number {
     // Don't retry unsafe methods
     const unsafeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
-    return unsafeMethods.includes(method.toUpperCase()) ? 0 : APP_CONFIG.ERROR_HANDLING.retryConfig.maxRetries;
+    return unsafeMethods.includes(method.toUpperCase())
+      ? 0
+      : APP_CONFIG.ERROR_HANDLING.retryConfig.maxRetries;
   }
 
-  private getErrorSeverity(status: number): 'low' | 'medium' | 'high' | 'critical' {
+  private getErrorSeverity(
+    status: number,
+  ): 'low' | 'medium' | 'high' | 'critical' {
     if (status >= 500) return 'high';
     if (status === 401 || status === 403) return 'medium';
     if (status === 429) return 'medium';
@@ -189,25 +224,27 @@ export class HttpErrorInterceptor implements HttpInterceptor {
   }
 
   private logError(
-    request: HttpRequest<any>, 
-    error: HttpErrorResponse, 
-    structuredError: any
+    request: HttpRequest<any>,
+    error: HttpErrorResponse,
+    structuredError: any,
   ): void {
     if (!this.isDevelopment()) return;
 
-    console.group(`🚨 HTTP Error ${error.status} - ${structuredError.correlationId}`);
+    console.group(
+      `🚨 HTTP Error ${error.status} - ${structuredError.correlationId}`,
+    );
     console.error('Request:', {
       method: request.method,
       url: request.url,
       headers: Object.fromEntries(
-        request.headers.keys().map(key => [key, request.headers.get(key)])
-      )
+        request.headers.keys().map((key) => [key, request.headers.get(key)]),
+      ),
     });
     console.error('Response:', {
       status: error.status,
       statusText: error.statusText,
       message: error.message,
-      error: error.error
+      error: error.error,
     });
     console.error('Structured Error:', structuredError);
     console.groupEnd();
@@ -216,9 +253,11 @@ export class HttpErrorInterceptor implements HttpInterceptor {
   private shouldShowNotification(structuredError: any): boolean {
     // Prevent notification spam for same error within 5 seconds
     const lastNotificationKey = `last_notification_${structuredError.errorCode}`;
-    const lastTime = parseInt(sessionStorage.getItem(lastNotificationKey) || '0');
+    const lastTime = parseInt(
+      sessionStorage.getItem(lastNotificationKey) || '0',
+    );
     const now = Date.now();
-    
+
     if (now - lastTime < 5000) {
       return false;
     }
@@ -238,20 +277,31 @@ export class HttpErrorInterceptor implements HttpInterceptor {
   private handleRateLimit(structuredError: any): void {
     // Store rate limit event for exponential backoff
     const rateLimitKey = 'rate_limit_backoff';
-    const backoffTime = Math.min(30000, Math.pow(2, this.getRateLimitAttempts()) * 1000);
-    
+    const backoffTime = Math.min(
+      30000,
+      Math.pow(2, this.getRateLimitAttempts()) * 1000,
+    );
+
     sessionStorage.setItem(rateLimitKey, (Date.now() + backoffTime).toString());
     this.incrementRateLimitAttempts();
 
-    console.warn('Rate limited, backing off for:', backoffTime + 'ms', structuredError);
+    console.warn(
+      'Rate limited, backing off for:',
+      backoffTime + 'ms',
+      structuredError,
+    );
   }
 
   private checkMaintenanceMode(structuredError: any): void {
     // Check if this might be a maintenance mode
     const maintenanceIndicators = ['maintenance', 'scheduled', 'downtime'];
     const errorMessage = structuredError.message.toLowerCase();
-    
-    if (maintenanceIndicators.some(indicator => errorMessage.includes(indicator))) {
+
+    if (
+      maintenanceIndicators.some((indicator) =>
+        errorMessage.includes(indicator),
+      )
+    ) {
       console.info('Possible maintenance mode detected:', structuredError);
       // Could redirect to maintenance page or show special message
     }
@@ -267,9 +317,11 @@ export class HttpErrorInterceptor implements HttpInterceptor {
   }
 
   private isDevelopment(): boolean {
-    return window.location.hostname === 'localhost' || 
-           window.location.hostname.startsWith('127.') ||
-           window.location.hostname.startsWith('192.');
+    return (
+      window.location.hostname === 'localhost' ||
+      window.location.hostname.startsWith('127.') ||
+      window.location.hostname.startsWith('192.')
+    );
   }
 }
 
@@ -278,6 +330,6 @@ export function provideHttpErrorInterceptor() {
   return {
     provide: 'HTTP_INTERCEPTORS',
     useClass: HttpErrorInterceptor,
-    multi: true
+    multi: true,
   };
 }

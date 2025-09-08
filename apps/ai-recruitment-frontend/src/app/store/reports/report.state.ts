@@ -13,5 +13,5 @@ export const initialReportState: ReportState = {
   selectedReport: null,
   loading: false,
   error: null,
-  currentJobId: null
+  currentJobId: null,
 };

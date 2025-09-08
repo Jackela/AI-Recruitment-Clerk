@@ -19,7 +19,7 @@
 }
 
 // Dark mode support - Will be overridden by ThemeService
-[data-theme="dark"] {
+[data-theme='dark'] {
   // Dark mode will be applied via CSS custom properties by ThemeService
   // Fallback dark mode colors
   --color-text-primary: #f1f5f9;
@@ -28,7 +28,7 @@
   --color-bg-secondary: #1e293b;
   --color-border-primary: #334155;
   --color-border-secondary: #475569;
-  
+
   // Dark mode shadows
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
@@ -45,7 +45,7 @@
 html {
   font-size: 16px; // 基准字体大小
   scroll-behavior: smooth;
-  
+
   @media (prefers-reduced-motion: reduce) {
     scroll-behavior: auto;
   }
@@ -60,13 +60,13 @@ body {
   color: var(--color-text-primary);
   background-color: var(--color-bg-primary);
   font-weight: var(--font-weight-normal);
-  
+
   // Performance-optimized text rendering
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeSpeed; // Changed from optimizeLegibility for better performance
   font-display: swap; // Ensures font swapping for better FCP
-  
+
   // Performance optimizations
   transform: translateZ(0); // Enable hardware acceleration
   backface-visibility: hidden; // Reduce repaints
@@ -97,7 +97,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-6);
-  
+
   @media (max-width: 768px) {
     padding: var(--space-3) var(--space-4);
     flex-wrap: wrap;
@@ -110,7 +110,7 @@ body {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
-  
+
   @media (max-width: 640px) {
     font-size: var(--font-size-lg);
   }
@@ -120,7 +120,7 @@ body {
   display: flex;
   gap: var(--space-1);
   align-items: center;
-  
+
   @media (max-width: 768px) {
     order: 3;
     width: 100%;
@@ -152,7 +152,7 @@ body {
   }
 
   &.active,
-  &[aria-current="page"] {
+  &[aria-current='page'] {
     color: var(--color-primary-600);
     background-color: var(--color-primary-100);
     font-weight: var(--font-weight-semibold);
@@ -165,7 +165,7 @@ body {
   @media (max-width: 480px) {
     padding: var(--space-2) var(--space-3);
     font-size: var(--font-size-sm);
-    
+
     .nav-text {
       display: none;
     }
@@ -183,11 +183,11 @@ body {
 .settings-btn {
   @extend .btn;
   @extend .btn--ghost;
-  
+
   padding: var(--space-2);
   border-radius: var(--radius-md);
   font-size: var(--font-size-lg);
-  
+
   &:hover {
     background-color: var(--color-secondary-100);
   }
@@ -250,7 +250,7 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
-  
+
   @media (max-width: 768px) {
     padding: var(--space-4);
   }
@@ -263,7 +263,7 @@ body {
   justify-content: center;
   padding: var(--space-8);
   color: var(--color-text-secondary);
-  
+
   .spinner {
     margin-right: var(--space-3);
   }
@@ -319,7 +319,7 @@ body {
   .close-btn {
     @extend .btn;
     @extend .btn--ghost;
-    
+
     padding: var(--space-1);
     border-radius: var(--radius-md);
     font-size: var(--font-size-lg);
@@ -354,7 +354,7 @@ body {
       align-items: center;
       padding: var(--space-2) 0;
       color: var(--color-text-secondary);
-      
+
       kbd {
         background-color: var(--color-secondary-100);
         color: var(--color-text-primary);
@@ -413,7 +413,7 @@ body {
 ::-webkit-scrollbar-thumb {
   background-color: var(--color-secondary-300);
   border-radius: var(--radius-full);
-  
+
   &:hover {
     background-color: var(--color-secondary-400);
   }

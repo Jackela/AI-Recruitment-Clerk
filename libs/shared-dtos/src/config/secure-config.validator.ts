@@ -143,8 +143,12 @@ export class SecureConfigValidator {
 /**
  * Decorator for secure environment variable injection
  */
-export function RequireEnv(varName: string) {
-  return function (target: any, propertyKey: string | symbol | undefined, parameterIndex: number) {
+export function RequireEnv(_varName: string) {
+  return function (
+    _target: any,
+    _propertyKey: string | symbol | undefined,
+    _parameterIndex: number,
+  ) {
     // This would be implemented with a proper DI container in a full solution
     // For now, services should use SecureConfigValidator.requireEnv() directly
   };

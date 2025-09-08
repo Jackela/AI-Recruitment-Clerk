@@ -2,7 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, from } from 'rxjs';
 import { catchError, retry, delay } from 'rxjs/operators';
-import { ErrorCorrelationService, StructuredError } from './error-correlation.service';
+import {
+  ErrorCorrelationService,
+  StructuredError,
+} from './error-correlation.service';
 import { APP_CONFIG } from '../../config/app.config';
 
 export interface ErrorReport {
@@ -24,7 +27,7 @@ export interface ErrorReportSubmission {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ErrorReportingService {
   private readonly pendingReports: ErrorReportSubmission[] = [];
@@ -33,14 +36,14 @@ export class ErrorReportingService {
 
   constructor(
     private http: HttpClient,
-    private errorCorrelation: ErrorCorrelationService
+    private errorCorrelation: ErrorCorrelationService,
   ) {
     // Initialize pending reports from storage
     this.loadPendingReports();
-    
+
     // Process pending reports on startup
     this.processPendingReports();
-    
+
     // Set up periodic retry of failed reports
     setInterval(() => this.processPendingReports(), 60000); // Every minute
   }
@@ -53,7 +56,7 @@ export class ErrorReportingService {
     userFeedback?: string,
     reproductionSteps?: string[],
     expectedBehavior?: string,
-    actualBehavior?: string
+    actualBehavior?: string,
   ): Observable<{ reportId: string; submitted: boolean }> {
     const report: ErrorReport = {
       errors,
@@ -63,17 +66,17 @@ export class ErrorReportingService {
       actualBehavior,
       browserInfo: this.getBrowserInfo(),
       systemInfo: this.getSystemInfo(),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     const reportId = this.generateReportId();
-    
+
     // Add to pending queue
     const submission: ErrorReportSubmission = {
       reportId,
       submittedAt: new Date(),
       status: 'pending',
-      retryCount: 0
+      retryCount: 0,
     };
 
     this.pendingReports.push(submission);
@@ -84,10 +87,10 @@ export class ErrorReportingService {
 
     // Attempt immediate submission
     return this.submitReport(reportId, report).pipe(
-      catchError(error => {
+      catchError((error) => {
         console.warn('Failed to submit error report immediately:', error);
         return of({ reportId, submitted: false });
-      })
+      }),
     );
   }
 
@@ -100,23 +103,31 @@ export class ErrorReportingService {
     userGuidance: string;
   } {
     const errorCount = errors.length;
-    const categories = [...new Set(errors.map(e => e.category))];
-    const severities = [...new Set(errors.map(e => e.severity))];
+    const categories = [...new Set(errors.map((e) => e.category))];
+    const severities = [...new Set(errors.map((e) => e.severity))];
     const highestSeverity = this.getHighestSeverity(severities);
 
     // Generate user-friendly summary
-    const summary = this.generateUserFriendlySummary(errorCount, categories, highestSeverity);
+    const summary = this.generateUserFriendlySummary(
+      errorCount,
+      categories,
+      highestSeverity,
+    );
 
     // Generate technical details
     const technicalDetails = this.generateTechnicalSummary(errors);
 
     // Generate user guidance
-    const userGuidance = this.generateUserGuidance(categories, highestSeverity, errors);
+    const userGuidance = this.generateUserGuidance(
+      categories,
+      highestSeverity,
+      errors,
+    );
 
     return {
       summary,
       technicalDetails,
-      userGuidance
+      userGuidance,
     };
   }
 
@@ -134,38 +145,38 @@ export class ErrorReportingService {
         key: 'ui_issue',
         label: '界面问题',
         description: '按钮无响应、页面显示异常、布局错乱等',
-        icon: '🖥️'
+        icon: '🖥️',
       },
       {
         key: 'functionality_issue',
         label: '功能问题',
         description: '功能无法正常使用、操作失败等',
-        icon: '⚙️'
+        icon: '⚙️',
       },
       {
         key: 'performance_issue',
         label: '性能问题',
         description: '页面加载慢、操作卡顿等',
-        icon: '🐌'
+        icon: '🐌',
       },
       {
         key: 'data_issue',
         label: '数据问题',
         description: '数据显示错误、丢失、同步问题等',
-        icon: '📊'
+        icon: '📊',
       },
       {
         key: 'accessibility_issue',
         label: '可访问性问题',
         description: '键盘导航、屏幕阅读器支持等',
-        icon: '♿'
+        icon: '♿',
       },
       {
         key: 'other',
         label: '其他问题',
         description: '不属于以上类别的问题',
-        icon: '❓'
-      }
+        icon: '❓',
+      },
     ];
   }
 
@@ -173,7 +184,7 @@ export class ErrorReportingService {
    * Get error report status
    */
   getReportStatus(reportId: string): ErrorReportSubmission | null {
-    return this.pendingReports.find(r => r.reportId === reportId) || null;
+    return this.pendingReports.find((r) => r.reportId === reportId) || null;
   }
 
   /**
@@ -192,30 +203,41 @@ export class ErrorReportingService {
     localStorage.removeItem('error_report_data');
   }
 
-  private submitReport(reportId: string, report: ErrorReport): Observable<{ reportId: string; submitted: boolean }> {
+  private submitReport(
+    reportId: string,
+    report: ErrorReport,
+  ): Observable<{ reportId: string; submitted: boolean }> {
     const headers = this.errorCorrelation.getCorrelationHeaders();
-    
-    return this.http.post<any>('/api/errors/user-reports', {
-      reportId,
-      ...report
-    }, { headers }).pipe(
-      retry({
-        count: this.maxRetryAttempts,
-        delay: this.retryDelay
-      }),
-      catchError(error => {
-        console.error('Failed to submit error report:', error);
-        throw error;
-      })
-    );
+
+    return this.http
+      .post<any>(
+        '/api/errors/user-reports',
+        {
+          reportId,
+          ...report,
+        },
+        { headers },
+      )
+      .pipe(
+        retry({
+          count: this.maxRetryAttempts,
+          delay: this.retryDelay,
+        }),
+        catchError((error) => {
+          console.error('Failed to submit error report:', error);
+          throw error;
+        }),
+      );
   }
 
   private processPendingReports(): void {
-    const pendingReports = this.pendingReports.filter(r => 
-      r.status === 'pending' || (r.status === 'failed' && r.retryCount < this.maxRetryAttempts)
+    const pendingReports = this.pendingReports.filter(
+      (r) =>
+        r.status === 'pending' ||
+        (r.status === 'failed' && r.retryCount < this.maxRetryAttempts),
     );
 
-    pendingReports.forEach(submission => {
+    pendingReports.forEach((submission) => {
       const report = this.getStoredReport(submission.reportId);
       if (!report) return;
 
@@ -223,14 +245,21 @@ export class ErrorReportingService {
         next: () => {
           submission.status = 'submitted';
           this.savePendingReports();
-          console.log('Error report submitted successfully:', submission.reportId);
+          console.log(
+            'Error report submitted successfully:',
+            submission.reportId,
+          );
         },
         error: (error) => {
           submission.status = 'failed';
           submission.retryCount++;
           this.savePendingReports();
-          console.error('Failed to submit error report:', submission.reportId, error);
-        }
+          console.error(
+            'Failed to submit error report:',
+            submission.reportId,
+            error,
+          );
+        },
       });
     });
   }
@@ -275,7 +304,10 @@ export class ErrorReportingService {
 
   private savePendingReports(): void {
     try {
-      localStorage.setItem('pending_error_reports', JSON.stringify(this.pendingReports));
+      localStorage.setItem(
+        'pending_error_reports',
+        JSON.stringify(this.pendingReports),
+      );
     } catch (e) {
       console.warn('Failed to save pending reports:', e);
     }
@@ -292,11 +324,13 @@ export class ErrorReportingService {
       maxTouchPoints: navigator.maxTouchPoints,
       hardwareConcurrency: navigator.hardwareConcurrency,
       deviceMemory: (navigator as any).deviceMemory,
-      connection: (navigator as any).connection ? {
-        effectiveType: (navigator as any).connection.effectiveType,
-        downlink: (navigator as any).connection.downlink,
-        rtt: (navigator as any).connection.rtt
-      } : undefined
+      connection: (navigator as any).connection
+        ? {
+            effectiveType: (navigator as any).connection.effectiveType,
+            downlink: (navigator as any).connection.downlink,
+            rtt: (navigator as any).connection.rtt,
+          }
+        : undefined,
     };
   }
 
@@ -314,31 +348,31 @@ export class ErrorReportingService {
       webWorkers: typeof Worker !== 'undefined',
       serviceWorkers: 'serviceWorker' in navigator,
       geolocation: 'geolocation' in navigator,
-      notifications: 'Notification' in window
+      notifications: 'Notification' in window,
     };
   }
 
   private generateUserFriendlySummary(
-    errorCount: number, 
-    categories: string[], 
-    highestSeverity: string
+    errorCount: number,
+    categories: string[],
+    highestSeverity: string,
   ): string {
     const categoryNames = {
       network: '网络连接',
       validation: '数据验证',
       runtime: '程序运行',
       security: '安全',
-      business: '业务逻辑'
+      business: '业务逻辑',
     };
 
     const severityNames = {
       low: '轻微',
       medium: '中等',
       high: '严重',
-      critical: '致命'
+      critical: '致命',
     };
 
-    const categoryStr = categories.map(c => categoryNames[c] || c).join('、');
+    const categoryStr = categories.map((c) => categoryNames[c] || c).join('、');
     const severityStr = severityNames[highestSeverity] || highestSeverity;
 
     if (errorCount === 1) {
@@ -349,17 +383,20 @@ export class ErrorReportingService {
   }
 
   private generateTechnicalSummary(errors: StructuredError[]): string {
-    const details = errors.map(error => 
-      `• ${error.errorCode}: ${error.message} (${error.severity}/${error.category})`
-    ).join('\n');
+    const details = errors
+      .map(
+        (error) =>
+          `• ${error.errorCode}: ${error.message} (${error.severity}/${error.category})`,
+      )
+      .join('\n');
 
     return `技术详情:\n${details}`;
   }
 
   private generateUserGuidance(
-    categories: string[], 
-    highestSeverity: string, 
-    errors: StructuredError[]
+    categories: string[],
+    highestSeverity: string,
+    errors: StructuredError[],
   ): string {
     const guidance: string[] = [];
 
@@ -387,20 +424,20 @@ export class ErrorReportingService {
     }
 
     // Check for recoverable errors
-    const recoverableErrors = errors.filter(e => e.recoverable);
+    const recoverableErrors = errors.filter((e) => e.recoverable);
     if (recoverableErrors.length > 0) {
       guidance.push('• 部分错误可以自动恢复，请稍等片刻');
     }
 
-    return guidance.length > 0 ? 
-      `建议的解决方案:\n${guidance.join('\n')}` : 
-      '请联系技术支持获取帮助。';
+    return guidance.length > 0
+      ? `建议的解决方案:\n${guidance.join('\n')}`
+      : '请联系技术支持获取帮助。';
   }
 
   private getHighestSeverity(severities: string[]): string {
     const order = ['low', 'medium', 'high', 'critical'];
-    return severities.reduce((highest, current) => 
-      order.indexOf(current) > order.indexOf(highest) ? current : highest
+    return severities.reduce((highest, current) =>
+      order.indexOf(current) > order.indexOf(highest) ? current : highest,
     );
   }
 

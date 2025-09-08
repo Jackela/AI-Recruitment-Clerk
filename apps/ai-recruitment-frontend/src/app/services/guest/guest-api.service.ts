@@ -105,14 +105,14 @@ export interface AnalysisResultsResponse {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class GuestApiService {
   private readonly baseUrl = '/api/guest';
 
   constructor(
     private http: HttpClient,
-    private deviceIdService: DeviceIdService
+    private deviceIdService: DeviceIdService,
   ) {}
 
   /**
@@ -120,7 +120,7 @@ export class GuestApiService {
    */
   private getGuestHeaders(): HttpHeaders {
     return new HttpHeaders({
-      'X-Device-ID': this.deviceIdService.getDeviceId()
+      'X-Device-ID': this.deviceIdService.getDeviceId(),
     });
   }
 
@@ -129,7 +129,7 @@ export class GuestApiService {
    */
   getUsageStatus(): Observable<GuestUsageResponse> {
     return this.http.get<GuestUsageResponse>(`${this.baseUrl}/status`, {
-      headers: this.getGuestHeaders()
+      headers: this.getGuestHeaders(),
     });
   }
 
@@ -138,7 +138,7 @@ export class GuestApiService {
    */
   getGuestDetails(): Observable<GuestStatusResponse> {
     return this.http.get<GuestStatusResponse>(`${this.baseUrl}/details`, {
-      headers: this.getGuestHeaders()
+      headers: this.getGuestHeaders(),
     });
   }
 
@@ -147,31 +147,33 @@ export class GuestApiService {
    */
   generateFeedbackCode(): Observable<FeedbackCodeResponse> {
     return this.http.post<FeedbackCodeResponse>(
-      `${this.baseUrl}/feedback-code`, 
+      `${this.baseUrl}/feedback-code`,
       {},
-      { headers: this.getGuestHeaders() }
+      { headers: this.getGuestHeaders() },
     );
   }
 
   /**
    * Redeem feedback code
    */
-  redeemFeedbackCode(feedbackCode: string): Observable<{success: boolean; message: string}> {
-    return this.http.post<{success: boolean; message: string}>(
+  redeemFeedbackCode(
+    feedbackCode: string,
+  ): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
       `${this.baseUrl}/redeem`,
       { feedbackCode },
-      { headers: this.getGuestHeaders() }
+      { headers: this.getGuestHeaders() },
     );
   }
 
   /**
    * Check if guest can use service (and increment usage)
    */
-  checkUsage(): Observable<{canUse: boolean; message: string}> {
-    return this.http.post<{canUse: boolean; message: string}>(
+  checkUsage(): Observable<{ canUse: boolean; message: string }> {
+    return this.http.post<{ canUse: boolean; message: string }>(
       `${this.baseUrl}/check-usage`,
       {},
-      { headers: this.getGuestHeaders() }
+      { headers: this.getGuestHeaders() },
     );
   }
 
@@ -179,14 +181,14 @@ export class GuestApiService {
    * Upload and analyze resume (guest mode)
    */
   analyzeResume(
-    file: File, 
-    candidateName?: string, 
-    candidateEmail?: string, 
-    notes?: string
+    file: File,
+    candidateName?: string,
+    candidateEmail?: string,
+    notes?: string,
   ): Observable<ResumeAnalysisResponse> {
     const formData = new FormData();
     formData.append('resume', file);
-    
+
     if (candidateName) formData.append('candidateName', candidateName);
     if (candidateEmail) formData.append('candidateEmail', candidateEmail);
     if (notes) formData.append('notes', notes);
@@ -194,7 +196,7 @@ export class GuestApiService {
     return this.http.post<ResumeAnalysisResponse>(
       `${this.baseUrl}/resume/analyze`,
       formData,
-      { headers: this.getGuestHeaders() }
+      { headers: this.getGuestHeaders() },
     );
   }
 
@@ -204,7 +206,7 @@ export class GuestApiService {
   getAnalysisResults(analysisId: string): Observable<AnalysisResultsResponse> {
     return this.http.get<AnalysisResultsResponse>(
       `${this.baseUrl}/resume/analysis/${analysisId}`,
-      { headers: this.getGuestHeaders() }
+      { headers: this.getGuestHeaders() },
     );
   }
 
@@ -214,7 +216,7 @@ export class GuestApiService {
   getDemoAnalysis(): Observable<AnalysisResultsResponse> {
     return this.http.get<AnalysisResultsResponse>(
       `${this.baseUrl}/resume/demo-analysis`,
-      { headers: this.getGuestHeaders() }
+      { headers: this.getGuestHeaders() },
     );
   }
 
@@ -224,7 +226,7 @@ export class GuestApiService {
   getDetailedResults(sessionId: string): Observable<DetailedAnalysisResult> {
     return this.http.get<DetailedAnalysisResult>(
       `${this.baseUrl}/resume/detailed-results/${sessionId}`,
-      { headers: this.getGuestHeaders() }
+      { headers: this.getGuestHeaders() },
     );
   }
 

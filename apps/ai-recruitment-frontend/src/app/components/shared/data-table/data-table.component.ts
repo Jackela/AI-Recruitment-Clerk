@@ -1,4 +1,16 @@
-import { Component, Input, Output, EventEmitter, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef, signal, computed } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  AfterViewInit,
+  OnDestroy,
+  ViewChild,
+  ElementRef,
+  signal,
+  computed,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { fromEvent, Subject } from 'rxjs';
@@ -51,25 +63,45 @@ export interface PageEvent {
   template: `
     <div class="data-table-container" [class.loading]="options.loading">
       <!-- Toolbar -->
-      <div class="table-toolbar" *ngIf="options.showFilter || options.showExport">
+      <div
+        class="table-toolbar"
+        *ngIf="options.showFilter || options.showExport"
+      >
         <div class="toolbar-left">
           <div class="search-box" *ngIf="options.showFilter">
-            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              class="search-icon"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <circle cx="11" cy="11" r="8"></circle>
               <path d="m21 21-4.35-4.35"></path>
             </svg>
-            <input 
-              type="text" 
+            <input
+              type="text"
               class="search-input"
               [(ngModel)]="searchTerm"
               (ngModelChange)="onSearch()"
-              placeholder="搜索...">
-            <button 
-              *ngIf="searchTerm" 
+              placeholder="搜索..."
+            />
+            <button
+              *ngIf="searchTerm"
               (click)="clearSearch()"
               class="clear-btn"
-              type="button">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              type="button"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
@@ -78,12 +110,20 @@ export interface PageEvent {
         </div>
 
         <div class="toolbar-right">
-          <button 
-            *ngIf="options.showExport" 
+          <button
+            *ngIf="options.showExport"
             (click)="exportData()"
             class="export-btn"
-            type="button">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            type="button"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="7,10 12,15 17,10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -94,38 +134,76 @@ export interface PageEvent {
       </div>
 
       <!-- Table -->
-      <div class="table-wrapper" #tableWrapper [class.has-horizontal-scroll]="hasHorizontalScroll">
-        <table class="data-table" 
-               [class.striped]="options.striped"
-               [class.bordered]="options.bordered"
-               [class.hoverable]="options.hoverable">
+      <div
+        class="table-wrapper"
+        #tableWrapper
+        [class.has-horizontal-scroll]="hasHorizontalScroll"
+      >
+        <table
+          class="data-table"
+          [class.striped]="options.striped"
+          [class.bordered]="options.bordered"
+          [class.hoverable]="options.hoverable"
+        >
           <thead>
             <tr>
               <th *ngIf="options.selectable" class="checkbox-column">
-                <input 
+                <input
                   *ngIf="options.multiSelect"
                   type="checkbox"
                   [checked]="isAllSelected()"
                   [indeterminate]="isSomeSelected()"
-                  (change)="toggleSelectAll()">
+                  (change)="toggleSelectAll()"
+                />
               </th>
-              <th 
+              <th
                 *ngFor="let column of columns"
                 [style.width]="column.width"
                 [style.text-align]="column.align || 'left'"
                 [class.sortable]="column.sortable"
                 [class]="getColumnClasses(column)"
-                (click)="column.sortable ? onSort.emit({column: column.key, direction: getNextSortDirection(column.key)}) : null">
+                (click)="
+                  column.sortable
+                    ? onSort.emit({
+                        column: column.key,
+                        direction: getNextSortDirection(column.key),
+                      })
+                    : null
+                "
+              >
                 <div class="th-content">
                   <span>{{ getColumnLabel(column) }}</span>
                   <div class="sort-indicator" *ngIf="column.sortable">
-                    <svg 
+                    <svg
                       class="sort-icon"
-                      [class.active-asc]="sortColumn() === column.key && sortDirection() === 'asc'"
-                      [class.active-desc]="sortColumn() === column.key && sortDirection() === 'desc'"
-                      width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="m7 15 5 5 5-5" *ngIf="sortColumn() !== column.key || sortDirection() === 'desc'"></path>
-                      <path d="m7 9 5-5 5 5" *ngIf="sortColumn() === column.key && sortDirection() === 'asc'"></path>
+                      [class.active-asc]="
+                        sortColumn() === column.key && sortDirection() === 'asc'
+                      "
+                      [class.active-desc]="
+                        sortColumn() === column.key &&
+                        sortDirection() === 'desc'
+                      "
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        d="m7 15 5 5 5-5"
+                        *ngIf="
+                          sortColumn() !== column.key ||
+                          sortDirection() === 'desc'
+                        "
+                      ></path>
+                      <path
+                        d="m7 9 5-5 5 5"
+                        *ngIf="
+                          sortColumn() === column.key &&
+                          sortDirection() === 'asc'
+                        "
+                      ></path>
                     </svg>
                   </div>
                 </div>
@@ -134,31 +212,44 @@ export interface PageEvent {
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let row of paginatedData(); let i = index"
-                [class.selected]="isSelected(row)">
+            <tr
+              *ngFor="let row of paginatedData(); let i = index"
+              [class.selected]="isSelected(row)"
+            >
               <td *ngIf="options.selectable" class="checkbox-column">
-                <input 
+                <input
                   type="checkbox"
                   [checked]="isSelected(row)"
-                  (change)="toggleSelect(row)">
+                  (change)="toggleSelect(row)"
+                />
               </td>
-              <td 
+              <td
                 *ngFor="let column of columns"
                 [style.text-align]="column.align || 'left'"
                 [class]="getColumnClasses(column)"
-                [title]="shouldShowTooltip(row, column) ? getCellValue(row, column.key) : null">
+                [title]="
+                  shouldShowTooltip(row, column)
+                    ? getCellValue(row, column.key)
+                    : null
+                "
+              >
                 <span [ngSwitch]="column.type">
                   <span *ngSwitchCase="'boolean'">
-                    <span class="badge" [class.badge-success]="getCellValue(row, column.key)" 
-                                       [class.badge-danger]="!getCellValue(row, column.key)">
+                    <span
+                      class="badge"
+                      [class.badge-success]="getCellValue(row, column.key)"
+                      [class.badge-danger]="!getCellValue(row, column.key)"
+                    >
                       {{ getCellValue(row, column.key) ? '是' : '否' }}
                     </span>
                   </span>
                   <span *ngSwitchCase="'date'">
-                    {{ getCellValue(row, column.key) | date:'yyyy-MM-dd HH:mm' }}
+                    {{
+                      getCellValue(row, column.key) | date: 'yyyy-MM-dd HH:mm'
+                    }}
                   </span>
                   <span *ngSwitchCase="'number'">
-                    {{ getCellValue(row, column.key) | number:'1.0-2' }}
+                    {{ getCellValue(row, column.key) | number: '1.0-2' }}
                   </span>
                   <span *ngSwitchDefault>
                     {{ getTruncatedValue(row, column) }}
@@ -167,34 +258,66 @@ export interface PageEvent {
               </td>
               <td *ngIf="showActions" class="actions-column">
                 <div class="action-buttons">
-                  <button 
+                  <button
                     (click)="onView.emit(row)"
                     class="action-btn view-btn"
                     title="查看"
-                    type="button">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    type="button"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                      ></path>
                       <circle cx="12" cy="12" r="3"></circle>
                     </svg>
                   </button>
-                  <button 
+                  <button
                     (click)="onEdit.emit(row)"
                     class="action-btn edit-btn"
                     title="编辑"
-                    type="button">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    type="button"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                      ></path>
+                      <path
+                        d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                      ></path>
                     </svg>
                   </button>
-                  <button 
+                  <button
                     (click)="onDelete.emit(row)"
                     class="action-btn delete-btn"
                     title="删除"
-                    type="button">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    type="button"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
                       <polyline points="3,6 5,6 21,6"></polyline>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <path
+                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                      ></path>
                     </svg>
                   </button>
                 </div>
@@ -204,8 +327,18 @@ export interface PageEvent {
         </table>
 
         <!-- Empty State -->
-        <div class="empty-state" *ngIf="paginatedData().length === 0 && !options.loading">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <div
+          class="empty-state"
+          *ngIf="paginatedData().length === 0 && !options.loading"
+        >
+          <svg
+            width="64"
+            height="64"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <path d="M3 3h18v18H3z"></path>
             <path d="M3 9h18"></path>
             <path d="M9 3v18"></path>
@@ -221,69 +354,107 @@ export interface PageEvent {
       </div>
 
       <!-- Pagination -->
-      <div class="table-pagination" *ngIf="options.showPagination && totalPages() > 1">
+      <div
+        class="table-pagination"
+        *ngIf="options.showPagination && totalPages() > 1"
+      >
         <div class="pagination-info">
-          显示 {{ startIndex() + 1 }} - {{ endIndex() }} 条，共 {{ totalItems() }} 条
+          显示 {{ startIndex() + 1 }} - {{ endIndex() }} 条，共
+          {{ totalItems() }} 条
         </div>
 
         <div class="pagination-controls">
-          <select 
+          <select
             [(ngModel)]="pageSize"
             (ngModelChange)="onPageSizeChange()"
-            class="page-size-select">
+            class="page-size-select"
+          >
             <option *ngFor="let size of options.pageSizeOptions" [value]="size">
               {{ size }} 条/页
             </option>
           </select>
 
-          <button 
+          <button
             (click)="goToPage(0)"
             [disabled]="currentPage() === 0"
             class="page-btn"
-            type="button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            type="button"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <polyline points="11,17 6,12 11,7"></polyline>
               <polyline points="18,17 13,12 18,7"></polyline>
             </svg>
           </button>
 
-          <button 
+          <button
             (click)="previousPage()"
             [disabled]="currentPage() === 0"
             class="page-btn"
-            type="button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            type="button"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <polyline points="15,18 9,12 15,6"></polyline>
             </svg>
           </button>
 
           <span class="page-numbers">
-            <button 
+            <button
               *ngFor="let page of getPageNumbers()"
               (click)="goToPage(page)"
               [class.active]="currentPage() === page"
               class="page-number"
-              type="button">
+              type="button"
+            >
               {{ page + 1 }}
             </button>
           </span>
 
-          <button 
+          <button
             (click)="nextPage()"
             [disabled]="currentPage() === totalPages() - 1"
             class="page-btn"
-            type="button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            type="button"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <polyline points="9,18 15,12 9,6"></polyline>
             </svg>
           </button>
 
-          <button 
+          <button
             (click)="goToPage(totalPages() - 1)"
             [disabled]="currentPage() === totalPages() - 1"
             class="page-btn"
-            type="button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            type="button"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <polyline points="13,17 18,12 13,7"></polyline>
               <polyline points="6,17 11,12 6,7"></polyline>
             </svg>
@@ -292,11 +463,14 @@ export interface PageEvent {
       </div>
     </div>
   `,
-  styleUrls: ['./data-table.component.scss']
+  styleUrls: ['./data-table.component.scss'],
 })
-export class DataTableComponent<T = Record<string, unknown>> implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('tableWrapper', { static: false }) tableWrapper!: ElementRef<HTMLDivElement>;
-  
+export class DataTableComponent<T = Record<string, unknown>>
+  implements OnInit, AfterViewInit, OnDestroy
+{
+  @ViewChild('tableWrapper', { static: false })
+  tableWrapper!: ElementRef<HTMLDivElement>;
+
   private destroy$ = new Subject<void>();
   private resizeObserver?: ResizeObserver;
   @Input() columns: TableColumn[] = [];
@@ -328,8 +502,8 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
     // Apply search filter
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(row => {
-        return this.columns.some(col => {
+      filtered = filtered.filter((row) => {
+        return this.columns.some((col) => {
           if (col.filterable !== false) {
             const value = this.getCellValue(row, col.key);
             return value?.toString().toLowerCase().includes(term);
@@ -343,15 +517,15 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
     if (this.sortColumn() && this.sortDirection()) {
       const col = this.sortColumn()!;
       const dir = this.sortDirection()!;
-      
+
       filtered.sort((a, b) => {
         const aVal = this.getCellValue(a, col);
         const bVal = this.getCellValue(b, col);
-        
+
         if (aVal === bVal) return 0;
         if (aVal === null || aVal === undefined) return 1;
         if (bVal === null || bVal === undefined) return -1;
-        
+
         const comparison = aVal < bVal ? -1 : 1;
         return dir === 'asc' ? comparison : -comparison;
       });
@@ -362,7 +536,7 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
 
   totalItems = computed(() => this.filteredData().length);
   totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize));
-  
+
   paginatedData = computed(() => {
     const start = this.currentPage() * this.pageSize;
     const end = start + this.pageSize;
@@ -370,7 +544,9 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
   });
 
   startIndex = computed(() => this.currentPage() * this.pageSize);
-  endIndex = computed(() => Math.min(this.startIndex() + this.pageSize, this.totalItems()));
+  endIndex = computed(() =>
+    Math.min(this.startIndex() + this.pageSize, this.totalItems()),
+  );
 
   ngOnInit() {
     // Set default options
@@ -387,27 +563,27 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
       hoverable: true,
       loading: false,
       emptyMessage: '暂无数据',
-      ...this.options
+      ...this.options,
     };
 
     this.pageSize = this.options.pageSize || 10;
-    
+
     // Set default column priorities if not specified
-    this.columns = this.columns.map(col => ({
+    this.columns = this.columns.map((col) => ({
       ...col,
-      priority: col.priority || 'medium'
+      priority: col.priority || 'medium',
     }));
   }
-  
+
   ngAfterViewInit() {
     this.setupScrollDetection();
     this.setupResizeObserver();
   }
-  
+
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    
+
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
     }
@@ -416,11 +592,11 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
   getCellValue(row: T, key: string): unknown {
     const keys = key.split('.');
     let value: unknown = row;
-    
+
     for (const k of keys) {
       value = (value as Record<string, unknown>)?.[k];
     }
-    
+
     return value;
   }
 
@@ -451,20 +627,20 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
 
     this.onSort.emit({
       column: this.sortColumn()!,
-      direction: this.sortDirection()
+      direction: this.sortDirection(),
     });
   }
 
   previousPage() {
     if (this.currentPage() > 0) {
-      this.currentPage.update(p => p - 1);
+      this.currentPage.update((p) => p - 1);
       this.emitPageChange();
     }
   }
 
   nextPage() {
     if (this.currentPage() < this.totalPages() - 1) {
-      this.currentPage.update(p => p + 1);
+      this.currentPage.update((p) => p + 1);
       this.emitPageChange();
     }
   }
@@ -482,7 +658,7 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
   emitPageChange() {
     this.onPageChange.emit({
       pageIndex: this.currentPage(),
-      pageSize: this.pageSize
+      pageSize: this.pageSize,
     });
   }
 
@@ -490,19 +666,19 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
     const total = this.totalPages();
     const current = this.currentPage();
     const pages: number[] = [];
-    
+
     const maxVisible = 5;
     let start = Math.max(0, current - Math.floor(maxVisible / 2));
     let end = Math.min(total, start + maxVisible);
-    
+
     if (end - start < maxVisible) {
       start = Math.max(0, end - maxVisible);
     }
-    
+
     for (let i = start; i < end; i++) {
       pages.push(i);
     }
-    
+
     return pages;
   }
 
@@ -512,18 +688,20 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
 
   isAllSelected(): boolean {
     const pageData = this.paginatedData();
-    return pageData.length > 0 && pageData.every(row => this.isSelected(row));
+    return pageData.length > 0 && pageData.every((row) => this.isSelected(row));
   }
 
   isSomeSelected(): boolean {
     const pageData = this.paginatedData();
-    return pageData.some(row => this.isSelected(row)) && !this.isAllSelected();
+    return (
+      pageData.some((row) => this.isSelected(row)) && !this.isAllSelected()
+    );
   }
 
   toggleSelect(row: T) {
     const selected = [...this.selectedRows()];
     const index = selected.indexOf(row);
-    
+
     if (index > -1) {
       selected.splice(index, 1);
     } else {
@@ -534,7 +712,7 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
         selected.push(row);
       }
     }
-    
+
     this.selectedRows.set(selected);
     this.onSelectionChange.emit(selected);
   }
@@ -542,10 +720,10 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
   toggleSelectAll() {
     const pageData = this.paginatedData();
     const selected = [...this.selectedRows()];
-    
+
     if (this.isAllSelected()) {
       // Deselect all on current page
-      pageData.forEach(row => {
+      pageData.forEach((row) => {
         const index = selected.indexOf(row);
         if (index > -1) {
           selected.splice(index, 1);
@@ -553,13 +731,13 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
       });
     } else {
       // Select all on current page
-      pageData.forEach(row => {
+      pageData.forEach((row) => {
         if (!selected.includes(row)) {
           selected.push(row);
         }
       });
     }
-    
+
     this.selectedRows.set(selected);
     this.onSelectionChange.emit(selected);
   }
@@ -573,21 +751,23 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
 
   private convertToCSV(data: T[]): string {
     if (data.length === 0) return '';
-    
+
     // Headers
-    const headers = this.columns.map(col => col.label);
+    const headers = this.columns.map((col) => col.label);
     const csvHeaders = headers.join(',');
-    
+
     // Rows
-    const csvRows = data.map(row => {
-      return this.columns.map(col => {
-        const value = this.getCellValue(row, col.key);
-        // Escape commas and quotes
-        const escaped = String(value || '').replace(/"/g, '""');
-        return `"${escaped}"`;
-      }).join(',');
+    const csvRows = data.map((row) => {
+      return this.columns
+        .map((col) => {
+          const value = this.getCellValue(row, col.key);
+          // Escape commas and quotes
+          const escaped = String(value || '').replace(/"/g, '""');
+          return `"${escaped}"`;
+        })
+        .join(',');
     });
-    
+
     return [csvHeaders, ...csvRows].join('\n');
   }
 
@@ -595,11 +775,11 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
-    
+
     link.setAttribute('href', url);
     link.setAttribute('download', filename);
     link.style.visibility = 'hidden';
-    
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -608,11 +788,11 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
   getNextSortDirection(column: string): 'asc' | 'desc' | null {
     const currentColumn = this.sortColumn();
     const currentDirection = this.sortDirection();
-    
+
     if (currentColumn !== column) {
       return 'asc';
     }
-    
+
     if (currentDirection === 'asc') {
       return 'desc';
     } else if (currentDirection === 'desc') {
@@ -621,15 +801,15 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
       return 'asc';
     }
   }
-  
+
   // Mobile responsiveness methods
   getColumnClasses(column: TableColumn): string {
     const classes: string[] = [];
-    
+
     if (column.priority) {
       classes.push(`priority-${column.priority}`);
     }
-    
+
     // Add responsive column classes
     if (column.priority === 'high') {
       classes.push('column-primary');
@@ -638,10 +818,10 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
     } else {
       classes.push('column-secondary');
     }
-    
+
     return classes.join(' ');
   }
-  
+
   getColumnLabel(column: TableColumn): string {
     // Use mobile label on small screens if available
     if (window.innerWidth <= 768 && column.mobileLabel) {
@@ -649,61 +829,58 @@ export class DataTableComponent<T = Record<string, unknown>> implements OnInit, 
     }
     return column.label;
   }
-  
+
   getTruncatedValue(row: T, column: TableColumn): string {
     const value = this.getCellValue(row, column.key);
     const text = String(value || '');
-    
+
     if (column.truncateLength && text.length > column.truncateLength) {
       return text.substring(0, column.truncateLength) + '...';
     }
-    
+
     return text;
   }
-  
+
   shouldShowTooltip(row: T, column: TableColumn): boolean {
     if (!column.truncateLength) return false;
-    
+
     const value = this.getCellValue(row, column.key);
     const text = String(value || '');
-    
+
     return text.length > column.truncateLength;
   }
-  
+
   // Horizontal scroll detection
   private hasHorizontalScroll = false;
-  
+
   private setupScrollDetection(): void {
     if (!this.tableWrapper) return;
-    
+
     const scrollElement = this.tableWrapper.nativeElement;
-    
+
     fromEvent(scrollElement, 'scroll')
-      .pipe(
-        debounceTime(50),
-        takeUntil(this.destroy$)
-      )
+      .pipe(debounceTime(50), takeUntil(this.destroy$))
       .subscribe(() => {
         this.updateScrollIndicator();
       });
   }
-  
+
   private setupResizeObserver(): void {
     if (!this.tableWrapper || !('ResizeObserver' in window)) return;
-    
+
     this.resizeObserver = new ResizeObserver(() => {
       this.updateScrollIndicator();
     });
-    
+
     this.resizeObserver.observe(this.tableWrapper.nativeElement);
   }
-  
+
   private updateScrollIndicator(): void {
     if (!this.tableWrapper) return;
-    
+
     const element = this.tableWrapper.nativeElement;
     const table = element.querySelector('.data-table') as HTMLElement;
-    
+
     if (table) {
       this.hasHorizontalScroll = table.scrollWidth > element.clientWidth;
     }

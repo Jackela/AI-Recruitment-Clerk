@@ -1,4 +1,12 @@
-import { Controller, Post, Get, Body, Req, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Req,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { RateLimitMiddleware } from '../middleware/rate-limit.middleware';
 import { QuestionnaireIntegrationService } from '../domains/questionnaire/questionnaire-integration.service';
@@ -11,7 +19,7 @@ interface QuestionnaireSubmission {
     companySize: '1-10' | '11-50' | '51-200' | '201-1000' | '1000+';
     location: string;
   };
-  
+
   // 使用体验反馈
   userExperience: {
     overallSatisfaction: 1 | 2 | 3 | 4 | 5;
@@ -22,7 +30,7 @@ interface QuestionnaireSubmission {
     mainPainPoint: string;
     improvementSuggestion: string;
   };
-  
+
   // 商业价值评估
   businessValue: {
     currentScreeningMethod: 'manual' | 'ats' | 'other_ai' | 'mixed';
@@ -32,7 +40,7 @@ interface QuestionnaireSubmission {
     willingnessToPayMonthly: number; // 元/月
     recommendLikelihood: 1 | 2 | 3 | 4 | 5; // NPS分数
   };
-  
+
   // 功能需求
   featureNeeds: {
     batchProcessing: boolean;
@@ -42,7 +50,7 @@ interface QuestionnaireSubmission {
     teamCollaboration: boolean;
     priorityFeature: string;
   };
-  
+
   // 可选信息
   optional: {
     email?: string;
@@ -76,16 +84,16 @@ export class QuestionnaireController {
                 { value: 'hr', label: 'HR专员/经理' },
                 { value: 'recruiter', label: '招聘专家/猎头' },
                 { value: 'job_seeker', label: '求职者' },
-                { value: 'other', label: '其他' }
+                { value: 'other', label: '其他' },
               ],
-              required: true
+              required: true,
             },
             {
               id: 'industry',
               type: 'text',
               question: '您所在的行业是？',
               placeholder: '如：互联网、金融、制造业等',
-              required: true
+              required: true,
             },
             {
               id: 'company_size',
@@ -96,18 +104,18 @@ export class QuestionnaireController {
                 { value: '11-50', label: '11-50人' },
                 { value: '51-200', label: '51-200人' },
                 { value: '201-1000', label: '201-1000人' },
-                { value: '1000+', label: '1000人以上' }
+                { value: '1000+', label: '1000人以上' },
               ],
-              required: true
+              required: true,
             },
             {
               id: 'location',
               type: 'text',
               question: '工作所在城市？',
               placeholder: '如：北京、上海、深圳等',
-              required: true
-            }
-          ]
+              required: true,
+            },
+          ],
         },
         {
           id: 'user_experience',
@@ -120,7 +128,7 @@ export class QuestionnaireController {
               question: '整体满意度？',
               scale: 5,
               labels: { 1: '很不满意', 5: '非常满意' },
-              required: true
+              required: true,
             },
             {
               id: 'accuracy_rating',
@@ -128,7 +136,7 @@ export class QuestionnaireController {
               question: 'AI匹配结果的准确性？',
               scale: 5,
               labels: { 1: '很不准确', 5: '非常准确' },
-              required: true
+              required: true,
             },
             {
               id: 'speed_rating',
@@ -136,7 +144,7 @@ export class QuestionnaireController {
               question: '处理速度满意度？',
               scale: 5,
               labels: { 1: '太慢了', 5: '很快' },
-              required: true
+              required: true,
             },
             {
               id: 'ui_rating',
@@ -144,27 +152,27 @@ export class QuestionnaireController {
               question: '界面易用性？',
               scale: 5,
               labels: { 1: '很难用', 5: '很好用' },
-              required: true
+              required: true,
             },
             {
               id: 'most_useful_feature',
               type: 'text',
               question: '您觉得最有用的功能是什么？',
-              required: true
+              required: true,
             },
             {
               id: 'main_pain_point',
               type: 'text',
               question: '使用中遇到的最大问题是什么？',
-              required: false
+              required: false,
             },
             {
               id: 'improvement_suggestion',
               type: 'textarea',
               question: '您希望我们如何改进？',
-              required: false
-            }
-          ]
+              required: false,
+            },
+          ],
         },
         {
           id: 'business_value',
@@ -179,23 +187,23 @@ export class QuestionnaireController {
                 { value: 'manual', label: '完全人工筛选' },
                 { value: 'ats', label: '传统ATS系统' },
                 { value: 'other_ai', label: '其他AI工具' },
-                { value: 'mixed', label: '混合使用多种方式' }
+                { value: 'mixed', label: '混合使用多种方式' },
               ],
-              required: true
+              required: true,
             },
             {
               id: 'time_spent_per_resume',
               type: 'number',
               question: '平均每份简历您需要花多少分钟？',
               unit: '分钟',
-              required: true
+              required: true,
             },
             {
               id: 'resumes_per_week',
               type: 'number',
               question: '每周大概需要筛选多少份简历？',
               unit: '份',
-              required: true
+              required: true,
             },
             {
               id: 'time_saving_percentage',
@@ -203,14 +211,14 @@ export class QuestionnaireController {
               question: '使用我们的工具大概能节省多少时间？',
               unit: '%',
               max: 100,
-              required: true
+              required: true,
             },
             {
               id: 'willingness_to_pay_monthly',
               type: 'number',
               question: '如果这个工具收费，您愿意每月支付多少？',
               unit: '元',
-              required: true
+              required: true,
             },
             {
               id: 'recommend_likelihood',
@@ -218,9 +226,9 @@ export class QuestionnaireController {
               question: '您会向同事推荐这个工具吗？',
               scale: 5,
               labels: { 1: '绝对不会', 5: '强烈推荐' },
-              required: true
-            }
-          ]
+              required: true,
+            },
+          ],
         },
         {
           id: 'feature_needs',
@@ -236,17 +244,17 @@ export class QuestionnaireController {
                 { value: 'api_integration', label: 'API集成到现有系统' },
                 { value: 'custom_reports', label: '自定义报告模板' },
                 { value: 'multi_language', label: '多语言支持' },
-                { value: 'team_collaboration', label: '团队协作功能' }
+                { value: 'team_collaboration', label: '团队协作功能' },
               ],
-              required: true
+              required: true,
             },
             {
               id: 'priority_feature',
               type: 'text',
               question: '上述功能中，您最优先需要的是？',
-              required: true
-            }
-          ]
+              required: true,
+            },
+          ],
         },
         {
           id: 'optional',
@@ -257,33 +265,33 @@ export class QuestionnaireController {
               id: 'email',
               type: 'email',
               question: '邮箱地址（可选，用于产品更新通知）',
-              required: false
+              required: false,
             },
             {
               id: 'allow_follow_up',
               type: 'boolean',
               question: '是否允许我们就您的反馈进行后续沟通？',
-              required: false
+              required: false,
             },
             {
               id: 'participate_in_beta',
               type: 'boolean',
               question: '是否有兴趣参与我们的新功能内测？',
-              required: false
+              required: false,
             },
             {
               id: 'additional_feedback',
               type: 'textarea',
               question: '其他想说的话',
               placeholder: '任何其他建议、想法或反馈',
-              required: false
-            }
-          ]
-        }
+              required: false,
+            },
+          ],
+        },
       ],
       estimatedTime: '3-5分钟',
       reward: '完成问卷可获得5次额外免费使用机会',
-      privacy: '您的回答将严格保密，仅用于产品改进'
+      privacy: '您的回答将严格保密，仅用于产品改进',
     };
   }
 
@@ -294,23 +302,30 @@ export class QuestionnaireController {
   ) {
     try {
       const clientIP = this.getClientIP(request);
-      
+
       // 检查是否已经提交过问卷
-      const hasSubmitted = await this.questionnaireService.hasSubmittedToday(clientIP);
+      const hasSubmitted =
+        await this.questionnaireService.hasSubmittedToday(clientIP);
       if (hasSubmitted) {
-        throw new HttpException({
-          message: '您今天已经提交过问卷了',
-          code: 'ALREADY_SUBMITTED_TODAY'
-        }, HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          {
+            message: '您今天已经提交过问卷了',
+            code: 'ALREADY_SUBMITTED_TODAY',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       // 验证提交数据
       const validationResult = this.validateSubmission(submission);
       if (!validationResult.isValid) {
-        throw new HttpException({
-          message: '问卷填写不完整',
-          errors: validationResult.errors
-        }, HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          {
+            message: '问卷填写不完整',
+            errors: validationResult.errors,
+          },
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       // 保存问卷响应
@@ -320,16 +335,19 @@ export class QuestionnaireController {
           ip: clientIP,
           userAgent: request.headers['user-agent'],
           timestamp: new Date(),
-          source: 'web'
-        }
+          source: 'web',
+        },
       });
 
       // 增加IP使用额度
-      const usageResult = await this.rateLimitMiddleware.completeQuestionnaire(clientIP);
-      
+      const usageResult =
+        await this.rateLimitMiddleware.completeQuestionnaire(clientIP);
+
       if (!usageResult.success) {
         // 即使额度增加失败，问卷也已保存，记录错误但不影响用户
-        console.error('Failed to increase usage limit after questionnaire completion');
+        console.error(
+          'Failed to increase usage limit after questionnaire completion',
+        );
       }
 
       // 记录完成事件
@@ -339,8 +357,8 @@ export class QuestionnaireController {
         data: {
           questionnaireId,
           newLimit: usageResult.newLimit,
-          remaining: usageResult.remaining
-        }
+          remaining: usageResult.remaining,
+        },
       });
 
       return {
@@ -349,26 +367,28 @@ export class QuestionnaireController {
         questionnaireId,
         newUsageLimit: {
           total: usageResult.newLimit,
-          remaining: usageResult.remaining
+          remaining: usageResult.remaining,
         },
         nextSteps: [
           '您现在可以继续使用AI简历匹配功能',
           '我们会根据您的反馈持续改进产品',
-          '如有问题，欢迎联系我们'
-        ]
+          '如有问题，欢迎联系我们',
+        ],
       };
-
     } catch (error) {
       console.error('Questionnaire submission error:', error);
-      
+
       if (error instanceof HttpException) {
         throw error;
       }
 
-      throw new HttpException({
-        message: '提交失败，请稍后重试',
-        code: 'SUBMISSION_FAILED'
-      }, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        {
+          message: '提交失败，请稍后重试',
+          code: 'SUBMISSION_FAILED',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -376,14 +396,14 @@ export class QuestionnaireController {
   async getQuestionnaireStats(@Req() request: Request) {
     // 简单的管理接口，实际应该加权限验证
     const clientIP = this.getClientIP(request);
-    
+
     // 基础统计数据
     const stats = await this.questionnaireService.getBasicStats();
-    
+
     return {
       ...stats,
       requestIP: clientIP, // 用于调试
-      message: '这是公开的统计数据，详细数据需要管理权限'
+      message: '这是公开的统计数据，详细数据需要管理权限',
     };
   }
 
@@ -399,20 +419,35 @@ export class QuestionnaireController {
     if (!submission.userProfile?.companySize) errors.push('公司规模不能为空');
     if (!submission.userProfile?.location) errors.push('工作城市不能为空');
 
-    if (!submission.userExperience?.overallSatisfaction) errors.push('整体满意度评分不能为空');
-    if (!submission.userExperience?.accuracyRating) errors.push('准确性评分不能为空');
-    if (!submission.userExperience?.speedRating) errors.push('速度评分不能为空');
-    if (!submission.userExperience?.uiRating) errors.push('界面易用性评分不能为空');
-    if (!submission.userExperience?.mostUsefulFeature) errors.push('最有用功能不能为空');
+    if (!submission.userExperience?.overallSatisfaction)
+      errors.push('整体满意度评分不能为空');
+    if (!submission.userExperience?.accuracyRating)
+      errors.push('准确性评分不能为空');
+    if (!submission.userExperience?.speedRating)
+      errors.push('速度评分不能为空');
+    if (!submission.userExperience?.uiRating)
+      errors.push('界面易用性评分不能为空');
+    if (!submission.userExperience?.mostUsefulFeature)
+      errors.push('最有用功能不能为空');
 
-    if (!submission.businessValue?.currentScreeningMethod) errors.push('当前筛选方式不能为空');
-    if (!submission.businessValue?.timeSpentPerResume) errors.push('每份简历耗时不能为空');
-    if (!submission.businessValue?.resumesPerWeek) errors.push('每周简历数量不能为空');
-    if (submission.businessValue?.timeSavingPercentage === undefined) errors.push('时间节省比例不能为空');
-    if (!submission.businessValue?.willingnessToPayMonthly && submission.businessValue?.willingnessToPayMonthly !== 0) errors.push('付费意愿不能为空');
-    if (!submission.businessValue?.recommendLikelihood) errors.push('推荐可能性评分不能为空');
+    if (!submission.businessValue?.currentScreeningMethod)
+      errors.push('当前筛选方式不能为空');
+    if (!submission.businessValue?.timeSpentPerResume)
+      errors.push('每份简历耗时不能为空');
+    if (!submission.businessValue?.resumesPerWeek)
+      errors.push('每周简历数量不能为空');
+    if (submission.businessValue?.timeSavingPercentage === undefined)
+      errors.push('时间节省比例不能为空');
+    if (
+      !submission.businessValue?.willingnessToPayMonthly &&
+      submission.businessValue?.willingnessToPayMonthly !== 0
+    )
+      errors.push('付费意愿不能为空');
+    if (!submission.businessValue?.recommendLikelihood)
+      errors.push('推荐可能性评分不能为空');
 
-    if (!submission.featureNeeds?.priorityFeature) errors.push('优先功能需求不能为空');
+    if (!submission.featureNeeds?.priorityFeature)
+      errors.push('优先功能需求不能为空');
 
     // 数值范围验证
     const ratings = [
@@ -420,7 +455,7 @@ export class QuestionnaireController {
       submission.userExperience?.accuracyRating,
       submission.userExperience?.speedRating,
       submission.userExperience?.uiRating,
-      submission.businessValue?.recommendLikelihood
+      submission.businessValue?.recommendLikelihood,
     ];
 
     ratings.forEach((rating, index) => {
@@ -429,22 +464,27 @@ export class QuestionnaireController {
       }
     });
 
-    if (submission.businessValue?.timeSavingPercentage && 
-        (submission.businessValue.timeSavingPercentage < 0 || submission.businessValue.timeSavingPercentage > 100)) {
+    if (
+      submission.businessValue?.timeSavingPercentage &&
+      (submission.businessValue.timeSavingPercentage < 0 ||
+        submission.businessValue.timeSavingPercentage > 100)
+    ) {
       errors.push('时间节省比例必须在0-100之间');
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
   private getClientIP(req: Request): string {
-    return (req.headers['x-forwarded-for'] as string)?.split(',')[0] 
-      || req.headers['x-real-ip'] as string
-      || req.connection.remoteAddress
-      || req.ip
-      || 'unknown';
+    return (
+      (req.headers['x-forwarded-for'] as string)?.split(',')[0] ||
+      (req.headers['x-real-ip'] as string) ||
+      req.connection.remoteAddress ||
+      req.ip ||
+      'unknown'
+    );
   }
 }

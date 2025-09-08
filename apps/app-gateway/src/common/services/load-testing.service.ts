@@ -12,14 +12,14 @@ import { firstValueFrom } from 'rxjs';
 export interface LoadTestConfig {
   targetUrl: string;
   concurrency: number;
-  duration: number;      // 测试持续时间 (秒)
+  duration: number; // 测试持续时间 (秒)
   requestsPerSecond: number;
   endpoints: {
     path: string;
     method: 'GET' | 'POST' | 'PUT' | 'DELETE';
     headers?: Record<string, string>;
     body?: any;
-    weight: number;       // 权重 (百分比)
+    weight: number; // 权重 (百分比)
   }[];
 }
 
@@ -35,14 +35,14 @@ export interface LoadTestResult {
     errorRate: number;
     throughput: number;
   };
-  
+
   percentiles: {
     p50: number;
     p90: number;
     p95: number;
     p99: number;
   };
-  
+
   endpoints: {
     [path: string]: {
       requests: number;
@@ -51,13 +51,13 @@ export interface LoadTestResult {
       statusCodes: Record<number, number>;
     };
   };
-  
+
   errors: {
     type: string;
     count: number;
     message: string;
   }[];
-  
+
   performance: {
     cpuUsage: NodeJS.CpuUsage;
     memoryUsage: NodeJS.MemoryUsage;
@@ -70,7 +70,7 @@ export interface LoadTestResult {
 @Injectable()
 export class LoadTestingService {
   private readonly logger = new Logger(LoadTestingService.name);
-  
+
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
@@ -81,18 +81,20 @@ export class LoadTestingService {
    * 执行负载测试
    */
   async executeLoadTest(config: LoadTestConfig): Promise<LoadTestResult> {
-    this.logger.log(`🚀 Starting load test: ${config.concurrency} concurrent users, ${config.duration}s duration`);
-    
+    this.logger.log(
+      `🚀 Starting load test: ${config.concurrency} concurrent users, ${config.duration}s duration`,
+    );
+
     const startTime = Date.now();
     const startCpuUsage = process.cpuUsage();
     const startMemoryUsage = process.memoryUsage();
-    
+
     const results: any[] = [];
     const errors: any[] = [];
     const endpointStats: Record<string, any> = {};
-    
+
     // 初始化端点统计
-    config.endpoints.forEach(endpoint => {
+    config.endpoints.forEach((endpoint) => {
       endpointStats[endpoint.path] = {
         requests: 0,
         totalTime: 0,
@@ -103,7 +105,7 @@ export class LoadTestingService {
 
     // 创建并发请求
     const workers = Array.from({ length: config.concurrency }, (_, index) =>
-      this.createWorker(index, config, results, errors, endpointStats)
+      this.createWorker(index, config, results, errors, endpointStats),
     );
 
     // 等待所有worker完成
@@ -125,14 +127,16 @@ export class LoadTestingService {
         endCpuUsage,
         startMemoryUsage,
         endMemoryUsage,
-      }
+      },
     );
 
     // 保存测试结果
     await this.saveTestResults(config, loadTestResult);
 
-    this.logger.log(`✅ Load test completed: ${loadTestResult.summary.requestsPerSecond.toFixed(2)} RPS`);
-    
+    this.logger.log(
+      `✅ Load test completed: ${loadTestResult.summary.requestsPerSecond.toFixed(2)} RPS`,
+    );
+
     return loadTestResult;
   }
 
@@ -144,20 +148,21 @@ export class LoadTestingService {
     config: LoadTestConfig,
     results: any[],
     errors: any[],
-    endpointStats: Record<string, any>
+    endpointStats: Record<string, any>,
   ): Promise<void> {
-    const endTime = Date.now() + (config.duration * 1000);
-    const requestInterval = 1000 / (config.requestsPerSecond / config.concurrency);
+    const endTime = Date.now() + config.duration * 1000;
+    const requestInterval =
+      1000 / (config.requestsPerSecond / config.concurrency);
 
     while (Date.now() < endTime) {
       try {
         const endpoint = this.selectRandomEndpoint(config.endpoints);
         const requestStart = Date.now();
-        
+
         const response = await this.makeRequest(config.targetUrl, endpoint);
-        
+
         const responseTime = Date.now() - requestStart;
-        
+
         // 记录结果
         results.push({
           workerId,
@@ -171,7 +176,8 @@ export class LoadTestingService {
         const stats = endpointStats[endpoint.path];
         stats.requests++;
         stats.totalTime += responseTime;
-        stats.statusCodes[response.status] = (stats.statusCodes[response.status] || 0) + 1;
+        stats.statusCodes[response.status] =
+          (stats.statusCodes[response.status] || 0) + 1;
 
         if (response.status >= 400) {
           stats.errors++;
@@ -179,7 +185,6 @@ export class LoadTestingService {
 
         // 控制请求频率
         await this.sleep(requestInterval);
-
       } catch (error) {
         errors.push({
           workerId,
@@ -217,14 +222,14 @@ export class LoadTestingService {
   private selectRandomEndpoint(endpoints: any[]): any {
     const totalWeight = endpoints.reduce((sum, ep) => sum + ep.weight, 0);
     let random = Math.random() * totalWeight;
-    
+
     for (const endpoint of endpoints) {
       random -= endpoint.weight;
       if (random <= 0) {
         return endpoint;
       }
     }
-    
+
     return endpoints[0]; // 默认返回第一个
   }
 
@@ -235,16 +240,19 @@ export class LoadTestingService {
     results: any[],
     errors: any[],
     endpointStats: Record<string, any>,
-    performance: any
+    performance: any,
   ): LoadTestResult {
     const duration = (performance.endTime - performance.startTime) / 1000;
     const totalRequests = results.length;
-    const successfulRequests = results.filter(r => r.statusCode < 400).length;
+    const successfulRequests = results.filter((r) => r.statusCode < 400).length;
     const failedRequests = totalRequests - successfulRequests;
-    
-    const responseTimes = results.map(r => r.responseTime).sort((a, b) => a - b);
-    const averageResponseTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
-    
+
+    const responseTimes = results
+      .map((r) => r.responseTime)
+      .sort((a, b) => a - b);
+    const averageResponseTime =
+      responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
+
     // 计算百分位数
     const percentiles = {
       p50: this.calculatePercentile(responseTimes, 0.5),
@@ -259,7 +267,8 @@ export class LoadTestingService {
       processedEndpointStats[path] = {
         requests: stats.requests,
         averageTime: stats.requests > 0 ? stats.totalTime / stats.requests : 0,
-        errorRate: stats.requests > 0 ? (stats.errors / stats.requests) * 100 : 0,
+        errorRate:
+          stats.requests > 0 ? (stats.errors / stats.requests) * 100 : 0,
         statusCodes: stats.statusCodes,
       };
     });
@@ -295,9 +304,12 @@ export class LoadTestingService {
   /**
    * 计算百分位数
    */
-  private calculatePercentile(sortedArray: number[], percentile: number): number {
+  private calculatePercentile(
+    sortedArray: number[],
+    percentile: number,
+  ): number {
     if (sortedArray.length === 0) return 0;
-    
+
     const index = Math.ceil(sortedArray.length * percentile) - 1;
     return sortedArray[Math.max(0, index)];
   }
@@ -307,8 +319,8 @@ export class LoadTestingService {
    */
   private summarizeErrors(errors: any[]): any[] {
     const errorMap = new Map<string, { count: number; message: string }>();
-    
-    errors.forEach(error => {
+
+    errors.forEach((error) => {
       const key = error.type;
       if (errorMap.has(key)) {
         errorMap.get(key)!.count++;
@@ -327,11 +339,18 @@ export class LoadTestingService {
   /**
    * 保存测试结果
    */
-  private async saveTestResults(config: LoadTestConfig, result: LoadTestResult): Promise<void> {
+  private async saveTestResults(
+    config: LoadTestConfig,
+    result: LoadTestResult,
+  ): Promise<void> {
     try {
       const testId = `load_test_${Date.now()}`;
-      const resultKey = this.cacheService.generateKey('load_test', 'results', testId);
-      
+      const resultKey = this.cacheService.generateKey(
+        'load_test',
+        'results',
+        testId,
+      );
+
       const testRecord = {
         id: testId,
         config,
@@ -341,9 +360,8 @@ export class LoadTestingService {
 
       // 保存到缓存 (24小时)
       await this.cacheService.set(resultKey, testRecord, { ttl: 86400000 });
-      
+
       this.logger.log(`💾 Load test results saved: ${testId}`);
-      
     } catch (error) {
       this.logger.error('Failed to save load test results:', error);
     }
@@ -353,8 +371,9 @@ export class LoadTestingService {
    * 获取预定义的测试配置
    */
   getDefaultConfigs(): Record<string, LoadTestConfig> {
-    const baseUrl = this.configService.get<string>('BASE_URL') || 'http://localhost:3000';
-    
+    const baseUrl =
+      this.configService.get<string>('BASE_URL') || 'http://localhost:3000';
+
     return {
       light: {
         targetUrl: baseUrl,
@@ -365,10 +384,14 @@ export class LoadTestingService {
           { path: '/api/health', method: 'GET', weight: 30 },
           { path: '/api/jobs', method: 'GET', weight: 40 },
           { path: '/api/performance/stats', method: 'GET', weight: 20 },
-          { path: '/api/guest/resume/demo-analysis', method: 'GET', weight: 10 },
+          {
+            path: '/api/guest/resume/demo-analysis',
+            method: 'GET',
+            weight: 10,
+          },
         ],
       },
-      
+
       moderate: {
         targetUrl: baseUrl,
         concurrency: 50,
@@ -378,7 +401,11 @@ export class LoadTestingService {
           { path: '/api/health', method: 'GET', weight: 20 },
           { path: '/api/jobs', method: 'GET', weight: 30 },
           { path: '/api/performance/stats', method: 'GET', weight: 25 },
-          { path: '/api/guest/resume/demo-analysis', method: 'GET', weight: 15 },
+          {
+            path: '/api/guest/resume/demo-analysis',
+            method: 'GET',
+            weight: 15,
+          },
           { path: '/api/performance/cache', method: 'GET', weight: 10 },
         ],
       },
@@ -392,7 +419,11 @@ export class LoadTestingService {
           { path: '/api/health', method: 'GET', weight: 15 },
           { path: '/api/jobs', method: 'GET', weight: 25 },
           { path: '/api/performance/stats', method: 'GET', weight: 20 },
-          { path: '/api/guest/resume/demo-analysis', method: 'GET', weight: 20 },
+          {
+            path: '/api/guest/resume/demo-analysis',
+            method: 'GET',
+            weight: 20,
+          },
           { path: '/api/performance/cache', method: 'GET', weight: 10 },
           { path: '/api/performance/database', method: 'GET', weight: 10 },
         ],
@@ -407,7 +438,11 @@ export class LoadTestingService {
           { path: '/api/health', method: 'GET', weight: 10 },
           { path: '/api/jobs', method: 'GET', weight: 30 },
           { path: '/api/performance/stats', method: 'GET', weight: 25 },
-          { path: '/api/guest/resume/demo-analysis', method: 'GET', weight: 20 },
+          {
+            path: '/api/guest/resume/demo-analysis',
+            method: 'GET',
+            weight: 20,
+          },
           { path: '/api/performance/cache', method: 'GET', weight: 10 },
           { path: '/api/performance/database', method: 'GET', weight: 5 },
         ],
@@ -418,7 +453,7 @@ export class LoadTestingService {
   /**
    * 生成性能基准报告
    */
-  async generateBenchmarkReport(testType: string = 'moderate'): Promise<{
+  async generateBenchmarkReport(testType = 'moderate'): Promise<{
     testConfig: LoadTestConfig;
     result: LoadTestResult;
     analysis: {
@@ -429,7 +464,7 @@ export class LoadTestingService {
   }> {
     const configs = this.getDefaultConfigs();
     const config = configs[testType];
-    
+
     if (!config) {
       throw new Error(`Unknown test type: ${testType}`);
     }
@@ -454,7 +489,7 @@ export class LoadTestingService {
   } {
     const bottlenecks: string[] = [];
     const recommendations: string[] = [];
-    
+
     let performanceScore = 100;
 
     // 分析响应时间
@@ -520,19 +555,19 @@ export class LoadTestingService {
    * 工具方法：延迟
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
    * 获取历史测试结果
    */
-  async getTestHistory(limit: number = 10): Promise<any[]> {
+  async getTestHistory(limit = 10): Promise<any[]> {
     try {
       // 这里应该从持久化存储中获取历史记录
       // 现在从缓存中获取最近的结果
       const historyKey = this.cacheService.generateKey('load_test', 'history');
-      const history = await this.cacheService.get<any[]>(historyKey) || [];
-      
+      const history = (await this.cacheService.get<any[]>(historyKey)) || [];
+
       return history.slice(-limit);
     } catch (error) {
       this.logger.error('Failed to get test history:', error);

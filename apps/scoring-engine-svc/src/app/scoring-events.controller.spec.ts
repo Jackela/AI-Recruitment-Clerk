@@ -19,12 +19,16 @@ describe('ScoringEventsController', () => {
     const payload: AnalysisJdExtractedEvent = {
       jobId: 'job1',
       extractedData: {
-        requiredSkills: [],
-        experienceYears: { min: 0, max: 0 },
-        educationLevel: 'any',
-        softSkills: [],
-        seniority: 'junior',
-      },
+        requirements: {
+          technical: [],
+          soft: [],
+          experience: '',
+          education: '',
+        },
+        responsibilities: [],
+        benefits: [],
+        company: {},
+      } as any,
       timestamp: new Date().toISOString(),
       processingTimeMs: 1,
     };

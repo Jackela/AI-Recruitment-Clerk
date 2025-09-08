@@ -6,7 +6,7 @@ import { Twilio } from 'twilio';
 export class SmsService {
   private readonly logger = new Logger(SmsService.name);
   private twilioClient: Twilio | null = null;
-  private fromPhone: string;
+  private fromPhone!: string;
 
   constructor(private configService: ConfigService) {
     this.initializeTwilio();
@@ -18,7 +18,9 @@ export class SmsService {
     this.fromPhone = this.configService.get<string>('TWILIO_FROM_PHONE') || '';
 
     if (!accountSid || !authToken || !this.fromPhone) {
-      this.logger.warn('Twilio configuration incomplete. SMS MFA will not work properly. SMS will be logged instead.');
+      this.logger.warn(
+        'Twilio configuration incomplete. SMS MFA will not work properly. SMS will be logged instead.',
+      );
       return;
     }
 
@@ -39,7 +41,7 @@ export class SmsService {
     if (!this.twilioClient) {
       // In development or when Twilio is not configured, log the SMS instead
       this.logger.warn(`SMS would be sent to ${phoneNumber}: ${message}`);
-      
+
       // For development, you could also use a test service or webhook
       if (this.configService.get<string>('NODE_ENV') === 'development') {
         await this.simulateSmsDelivery(phoneNumber, message);
@@ -51,35 +53,50 @@ export class SmsService {
       const result = await this.twilioClient.messages.create({
         body: message,
         from: this.fromPhone,
-        to: phoneNumber
+        to: phoneNumber,
       });
 
-      this.logger.log(`SMS sent successfully to ${phoneNumber}, SID: ${result.sid}`);
+      this.logger.log(
+        `SMS sent successfully to ${phoneNumber}, SID: ${result.sid}`,
+      );
     } catch (error) {
       this.logger.error(`Failed to send SMS to ${phoneNumber}:`, error);
-      
+
       // Check for specific Twilio errors
-      if (error.code === 21211) {
-        throw new Error('Invalid phone number');
-      } else if (error.code === 21608) {
-        throw new Error('Phone number is not verified for trial account');
-      } else if (error.code === 20003) {
-        throw new Error('Authentication failed - check Twilio credentials');
+      if (error && typeof error === 'object' && 'code' in error) {
+        if (error.code === 21211) {
+          throw new Error('Invalid phone number');
+        } else if (error.code === 21608) {
+          throw new Error('Phone number is not verified for trial account');
+        } else if (error.code === 20003) {
+          throw new Error('Authentication failed - check Twilio credentials');
+        }
       }
-      
+
       throw new Error('Failed to send SMS verification code');
     }
   }
 
-  async sendSecurityAlert(phoneNumber: string, event: string, details: any): Promise<void> {
-    const issuer = this.configService.get<string>('MFA_ISSUER_NAME') || 'AI-Recruitment-Clerk';
+  async sendSecurityAlert(
+    phoneNumber: string,
+    event: string,
+    details: any,
+  ): Promise<void> {
+    const issuer =
+      this.configService.get<string>('MFA_ISSUER_NAME') ||
+      'AI-Recruitment-Clerk';
     const message = `${issuer} Security Alert: ${event}. Time: ${details.timestamp}. If this was not you, contact support immediately.`;
-    
+
     try {
       await this.sendSms(phoneNumber, message);
-      this.logger.log(`Security alert SMS sent to ${phoneNumber} for event: ${event}`);
+      this.logger.log(
+        `Security alert SMS sent to ${phoneNumber} for event: ${event}`,
+      );
     } catch (error) {
-      this.logger.error(`Failed to send security alert SMS to ${phoneNumber}:`, error);
+      this.logger.error(
+        `Failed to send security alert SMS to ${phoneNumber}:`,
+        error,
+      );
     }
   }
 
@@ -89,18 +106,18 @@ export class SmsService {
     return phoneRegex.test(phoneNumber);
   }
 
-  private async simulateSmsDelivery(phoneNumber: string, message: string): Promise<void> {
+  private async simulateSmsDelivery(
+    phoneNumber: string,
+    message: string,
+  ): Promise<void> {
     // Simulate SMS delivery delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Log the SMS in a more visible way for development
-    console.log('\n' + '='.repeat(50));
-    console.log('📱 SMS SIMULATION (Development Mode)');
-    console.log('='.repeat(50));
-    console.log(`To: ${phoneNumber}`);
-    console.log(`Message: ${message}`);
-    console.log(`Timestamp: ${new Date().toISOString()}`);
-    console.log('='.repeat(50) + '\n');
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // SMS simulation for development mode
+    this.logger.log('📱 SMS SIMULATION (Development Mode)');
+    this.logger.log(`To: ${phoneNumber}`);
+    this.logger.log(`Message: ${message}`);
+    this.logger.log(`Timestamp: ${new Date().toISOString()}`);
   }
 
   async getDeliveryStatus(messageSid: string): Promise<any> {
@@ -116,21 +133,34 @@ export class SmsService {
         errorMessage: message.errorMessage,
         dateCreated: message.dateCreated,
         dateSent: message.dateSent,
-        dateUpdated: message.dateUpdated
+        dateUpdated: message.dateUpdated,
       };
     } catch (error) {
-      this.logger.error(`Failed to get delivery status for ${messageSid}:`, error);
-      return { status: 'error', message: error instanceof Error ? error.message : String(error) };
+      this.logger.error(
+        `Failed to get delivery status for ${messageSid}:`,
+        error,
+      );
+      return {
+        status: 'error',
+        message: error instanceof Error ? error.message : String(error),
+      };
     }
   }
 
-  validatePhoneNumber(phoneNumber: string): { isValid: boolean; formatted?: string; error?: string } {
+  validatePhoneNumber(phoneNumber: string): {
+    isValid: boolean;
+    formatted?: string;
+    error?: string;
+  } {
     // Remove all non-digit characters except +
     const cleaned = phoneNumber.replace(/[^\d+]/g, '');
-    
+
     // Check if it starts with +
     if (!cleaned.startsWith('+')) {
-      return { isValid: false, error: 'Phone number must start with country code (+)' };
+      return {
+        isValid: false,
+        error: 'Phone number must start with country code (+)',
+      };
     }
 
     // Check minimum and maximum length
@@ -153,15 +183,19 @@ export class SmsService {
 
     try {
       // Fetch account info to test connection
-      const account = await this.twilioClient.api.accounts(this.configService.get<string>('TWILIO_ACCOUNT_SID')).fetch();
-      return { 
-        success: true, 
-        message: `Connected to Twilio account: ${account.friendlyName}` 
+      const accountSid = this.configService.get<string>('TWILIO_ACCOUNT_SID');
+      if (!accountSid) {
+        return { success: false, message: 'TWILIO_ACCOUNT_SID not configured' };
+      }
+      const account = await this.twilioClient.api.accounts(accountSid).fetch();
+      return {
+        success: true,
+        message: `Connected to Twilio account: ${account.friendlyName}`,
       };
     } catch (error) {
-      return { 
-        success: false, 
-        message: `Twilio connection failed: ${error instanceof Error ? error.message : String(error)}` 
+      return {
+        success: false,
+        message: `Twilio connection failed: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
   }

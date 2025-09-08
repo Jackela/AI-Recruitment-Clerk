@@ -1,6 +1,6 @@
 // Candidate Scoring Domain Layer
-export * from './aggregates/index.js';
-export * from './value-objects/index.js';
-export * from './domain-services/index.js';
-export * from './domain-events/index.js';
-export * from './entities/index.js';
+export * from './aggregates';
+export * from './value-objects';
+export * from './domain-services';
+export * from './domain-events';
+export * from './entities';

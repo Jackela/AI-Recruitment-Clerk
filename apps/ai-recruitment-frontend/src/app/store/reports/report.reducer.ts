@@ -10,58 +10,58 @@ export const reportReducer = createReducer(
     ...state,
     loading: true,
     error: null,
-    currentJobId: jobId
+    currentJobId: jobId,
   })),
 
   on(ReportActions.loadReportsByJobSuccess, (state, { reportsList }) => ({
     ...state,
     reports: reportsList.reports,
     loading: false,
-    error: null
+    error: null,
   })),
 
   on(ReportActions.loadReportsByJobFailure, (state, { error }) => ({
     ...state,
     loading: false,
-    error
+    error,
   })),
 
   // Load Single Report
   on(ReportActions.loadReport, (state) => ({
     ...state,
     loading: true,
-    error: null
+    error: null,
   })),
 
   on(ReportActions.loadReportSuccess, (state, { report }) => ({
     ...state,
     selectedReport: report,
     loading: false,
-    error: null
+    error: null,
   })),
 
   on(ReportActions.loadReportFailure, (state, { error }) => ({
     ...state,
     loading: false,
-    error
+    error,
   })),
 
   // Clear Selected Report
   on(ReportActions.clearSelectedReport, (state) => ({
     ...state,
-    selectedReport: null
+    selectedReport: null,
   })),
 
   // Clear Reports
   on(ReportActions.clearReports, (state) => ({
     ...state,
     reports: [],
-    currentJobId: null
+    currentJobId: null,
   })),
 
   // Clear Error
   on(ReportActions.clearReportError, (state) => ({
     ...state,
-    error: null
-  }))
+    error: null,
+  })),
 );

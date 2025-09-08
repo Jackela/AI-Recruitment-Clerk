@@ -11,21 +11,21 @@ describe('Report Reducer', () => {
       jobTitle: '软件工程师',
       status: 'completed',
       createdAt: new Date('2024-01-01'),
-      resumeCount: 5
+      resumeCount: 5,
     },
     {
       id: 'report2',
-      jobId: 'job2', 
+      jobId: 'job2',
       jobTitle: '产品经理',
       status: 'processing',
       createdAt: new Date('2024-01-02'),
-      resumeCount: 3
-    }
+      resumeCount: 3,
+    },
   ];
 
   const mockReportsList: ReportsList = {
     jobId: 'job1',
-    reports: mockReportListItems
+    reports: mockReportListItems,
   };
 
   const mockReport: AnalysisReport = {
@@ -38,8 +38,8 @@ describe('Report Reducer', () => {
     analysisData: {
       totalCandidates: 5,
       averageScore: 85,
-      topCandidates: []
-    }
+      topCandidates: [],
+    },
   };
 
   describe('Initial State', () => {
@@ -68,9 +68,11 @@ describe('Report Reducer', () => {
     it('should handle loadReportsByJobSuccess', () => {
       const loadingState: ReportState = {
         ...initialReportState,
-        loading: true
+        loading: true,
       };
-      const action = ReportActions.loadReportsByJobSuccess({ reportsList: mockReportsList });
+      const action = ReportActions.loadReportsByJobSuccess({
+        reportsList: mockReportsList,
+      });
       const state = reportReducer(loadingState, action);
 
       expect(state.reports).toEqual(mockReportListItems);
@@ -81,7 +83,7 @@ describe('Report Reducer', () => {
     it('should handle loadReportsByJobFailure', () => {
       const loadingState: ReportState = {
         ...initialReportState,
-        loading: true
+        loading: true,
       };
       const error = 'Failed to load reports';
       const action = ReportActions.loadReportsByJobFailure({ error });
@@ -104,7 +106,7 @@ describe('Report Reducer', () => {
     it('should handle loadReportSuccess', () => {
       const loadingState: ReportState = {
         ...initialReportState,
-        loading: true
+        loading: true,
       };
       const action = ReportActions.loadReportSuccess({ report: mockReport });
       const state = reportReducer(loadingState, action);
@@ -117,7 +119,7 @@ describe('Report Reducer', () => {
     it('should handle loadReportFailure', () => {
       const loadingState: ReportState = {
         ...initialReportState,
-        loading: true
+        loading: true,
       };
       const error = 'Failed to load report';
       const action = ReportActions.loadReportFailure({ error });
@@ -132,7 +134,7 @@ describe('Report Reducer', () => {
     it('should handle clearSelectedReport', () => {
       const stateWithSelectedReport: ReportState = {
         ...initialReportState,
-        selectedReport: mockReport
+        selectedReport: mockReport,
       };
       const action = ReportActions.clearSelectedReport();
       const state = reportReducer(stateWithSelectedReport, action);
@@ -143,7 +145,7 @@ describe('Report Reducer', () => {
     it('should handle clearReportError', () => {
       const stateWithError: ReportState = {
         ...initialReportState,
-        error: 'Some error'
+        error: 'Some error',
       };
       const action = ReportActions.clearReportError();
       const state = reportReducer(stateWithError, action);
@@ -166,7 +168,7 @@ describe('Report Reducer', () => {
       const stateWithData: ReportState = {
         ...initialReportState,
         reports: mockReportListItems,
-        selectedReport: mockReport
+        selectedReport: mockReport,
       };
       const action = ReportActions.loadReportsByJob({ jobId: 'job1' });
       const newState = reportReducer(stateWithData, action);

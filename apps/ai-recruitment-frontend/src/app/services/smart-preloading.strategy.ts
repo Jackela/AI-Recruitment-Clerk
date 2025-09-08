@@ -4,7 +4,7 @@ import { Observable, of, timer } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SmartPreloadingStrategy implements PreloadingStrategy {
   private preloadedModules = new Set<string>();
@@ -12,7 +12,7 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
   private userEngagement = {
     isIdle: false,
     interactionCount: 0,
-    lastInteraction: Date.now()
+    lastInteraction: Date.now(),
   };
 
   constructor() {
@@ -22,7 +22,7 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
 
   preload(route: Route, load: () => Observable<any>): Observable<any> {
     const routePath = route.path || 'unknown';
-    
+
     // Skip if already preloaded
     if (this.preloadedModules.has(routePath)) {
       return of(null);
@@ -35,19 +35,19 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
 
     // Determine delay based on priority and network condition
     const delay = this.calculateDelay(route);
-    
+
     return timer(delay).pipe(
       mergeMap(() => {
         console.log(`[SmartPreloading] Preloading route: ${routePath}`);
         this.preloadedModules.add(routePath);
         return load();
-      })
+      }),
     );
   }
 
   private shouldPreload(route: Route): boolean {
     const data = route.data || {};
-    
+
     // Don't preload if explicitly disabled
     if (data['preload'] === false) {
       return false;
@@ -80,9 +80,9 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
   private calculateDelay(route: Route): number {
     const data = route.data || {};
     const priority = data['priority'] || 'medium';
-    
+
     let baseDelay = 1000;
-    
+
     switch (priority) {
       case 'high':
         baseDelay = 500;
@@ -110,20 +110,27 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
 
   private detectNetworkCondition(): void {
     // Use Navigator.connection API if available
-    const connection = (navigator as any).connection || 
-                      (navigator as any).mozConnection || 
-                      (navigator as any).webkitConnection;
+    const connection =
+      (navigator as any).connection ||
+      (navigator as any).mozConnection ||
+      (navigator as any).webkitConnection;
 
     if (connection) {
       // Consider effective connection type
       const effectiveType = connection.effectiveType;
-      this.networkCondition = ['slow-2g', '2g', '3g'].includes(effectiveType) ? 'slow' : 'fast';
-      
+      this.networkCondition = ['slow-2g', '2g', '3g'].includes(effectiveType)
+        ? 'slow'
+        : 'fast';
+
       // Listen for changes
       connection.addEventListener('change', () => {
         const newType = connection.effectiveType;
-        this.networkCondition = ['slow-2g', '2g', '3g'].includes(newType) ? 'slow' : 'fast';
-        console.log(`[SmartPreloading] Network condition changed to: ${this.networkCondition}`);
+        this.networkCondition = ['slow-2g', '2g', '3g'].includes(newType)
+          ? 'slow'
+          : 'fast';
+        console.log(
+          `[SmartPreloading] Network condition changed to: ${this.networkCondition}`,
+        );
       });
     } else {
       // Fallback: measure a small resource load time
@@ -134,30 +141,33 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
   private measureNetworkSpeed(): void {
     const startTime = performance.now();
     const testImage = new Image();
-    
+
     testImage.onload = () => {
       const loadTime = performance.now() - startTime;
       this.networkCondition = loadTime > 1000 ? 'slow' : 'fast';
-      console.log(`[SmartPreloading] Network speed test: ${loadTime}ms - ${this.networkCondition}`);
+      console.log(
+        `[SmartPreloading] Network speed test: ${loadTime}ms - ${this.networkCondition}`,
+      );
     };
-    
+
     testImage.onerror = () => {
       this.networkCondition = 'slow'; // Assume slow on error
     };
-    
+
     // Use a small image for testing
-    testImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    testImage.src =
+      'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
   }
 
   private trackUserEngagement(): void {
     let idleTimer: any;
-    
+
     const resetIdleTimer = () => {
       clearTimeout(idleTimer);
       this.userEngagement.isIdle = false;
       this.userEngagement.lastInteraction = Date.now();
       this.userEngagement.interactionCount++;
-      
+
       // Consider user idle after 3 seconds of no interaction
       idleTimer = setTimeout(() => {
         this.userEngagement.isIdle = true;
@@ -165,9 +175,16 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
     };
 
     // Track various user interactions
-    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
-    
-    events.forEach(event => {
+    const events = [
+      'mousedown',
+      'mousemove',
+      'keypress',
+      'scroll',
+      'touchstart',
+      'click',
+    ];
+
+    events.forEach((event) => {
       document.addEventListener(event, resetIdleTimer, { passive: true });
     });
 

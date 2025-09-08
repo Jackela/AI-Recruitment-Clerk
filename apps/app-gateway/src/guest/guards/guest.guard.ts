@@ -20,7 +20,10 @@ export interface RequestWithDeviceId extends Request {
 @Injectable()
 export class GuestGuard implements CanActivate {
   private readonly logger = new Logger(GuestGuard.name);
-  private readonly rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+  private readonly rateLimitMap = new Map<
+    string,
+    { count: number; resetTime: number }
+  >();
   private readonly RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
   private readonly RATE_LIMIT_MAX_REQUESTS = 30; // 30 requests per minute for guests
 
@@ -36,7 +39,7 @@ export class GuestGuard implements CanActivate {
     if (!deviceId) {
       this.logger.warn('Guest access attempt without X-Device-ID header');
       throw new UnauthorizedException(
-        'Device ID is required for guest access. Please include X-Device-ID header.'
+        'Device ID is required for guest access. Please include X-Device-ID header.',
       );
     }
 
@@ -51,7 +54,7 @@ export class GuestGuard implements CanActivate {
       this.logger.warn(`Rate limit exceeded for guest device: ${deviceId}`);
       throw new HttpException(
         'Too many requests from this device. Please try again later.',
-        HttpStatus.TOO_MANY_REQUESTS
+        HttpStatus.TOO_MANY_REQUESTS,
       );
     }
 
@@ -59,7 +62,9 @@ export class GuestGuard implements CanActivate {
     request.deviceId = deviceId;
     request.isGuest = true;
 
-    this.logger.debug(`Guest access granted for device: ${this.maskDeviceId(deviceId)}`);
+    this.logger.debug(
+      `Guest access granted for device: ${this.maskDeviceId(deviceId)}`,
+    );
     return true;
   }
 
@@ -70,19 +75,21 @@ export class GuestGuard implements CanActivate {
 
   private isValidDeviceId(deviceId: string): boolean {
     // Device ID should be a UUID or similar format
-    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    
+    const uuidPattern =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
     // Check for valid UUID first
     if (uuidPattern.test(deviceId)) {
       return true;
     }
-    
+
     // Check for incomplete UUID pattern and reject it
-    const incompleteUuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}(-[0-9a-f]{0,11})?$/i;
+    const incompleteUuidPattern =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}(-[0-9a-f]{0,11})?$/i;
     if (incompleteUuidPattern.test(deviceId)) {
       return false;
     }
-    
+
     // Allow custom format 8-128 chars (alphanumeric, underscore, hyphen)
     const customIdPattern = /^[a-zA-Z0-9_-]{8,128}$/;
     return customIdPattern.test(deviceId);
@@ -129,7 +136,9 @@ export class GuestGuard implements CanActivate {
   private maskDeviceId(deviceId: string): string {
     // Mask device ID for logging privacy
     if (deviceId.length <= 8) return '***';
-    return deviceId.substring(0, 4) + '***' + deviceId.substring(deviceId.length - 4);
+    return (
+      deviceId.substring(0, 4) + '***' + deviceId.substring(deviceId.length - 4)
+    );
   }
 
   private cleanupRateLimits(): void {
@@ -144,7 +153,9 @@ export class GuestGuard implements CanActivate {
     }
 
     if (cleanedCount > 0) {
-      this.logger.debug(`Cleaned up ${cleanedCount} expired guest rate limit records`);
+      this.logger.debug(
+        `Cleaned up ${cleanedCount} expired guest rate limit records`,
+      );
     }
   }
 

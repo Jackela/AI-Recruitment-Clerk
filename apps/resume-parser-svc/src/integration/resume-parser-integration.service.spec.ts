@@ -1,8 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ResumeParserIntegrationService, ResumeParsingOptions } from './resume-parser-integration.service';
+import {
+  ResumeParserIntegrationService,
+  ResumeParsingOptions,
+} from './resume-parser-integration.service';
 import { VisionLlmService } from '../vision-llm/vision-llm.service';
 import { FieldMapperService } from '../field-mapper/field-mapper.service';
-import { VisionLlmResponse, FieldMappingResult } from '../dto/resume-parsing.dto';
+import {
+  VisionLlmResponse,
+  FieldMappingResult,
+} from '../dto/resume-parsing.dto';
 import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
 describe('ResumeParserIntegrationService', () => {
@@ -14,7 +20,7 @@ describe('ResumeParserIntegrationService', () => {
     contactInfo: {
       name: 'John Doe',
       email: 'john.doe@example.com',
-      phone: '+1-555-123-4567'
+      phone: '+1-555-123-4567',
     },
     skills: ['JavaScript', 'Python', 'React', 'Node.js'],
     workExperience: [
@@ -23,28 +29,28 @@ describe('ResumeParserIntegrationService', () => {
         position: 'Senior Software Engineer',
         startDate: '2020-01-01',
         endDate: 'present',
-        summary: 'Led development of web applications'
-      }
+        summary: 'Led development of web applications',
+      },
     ],
     education: [
       {
         school: 'MIT',
         degree: 'Bachelor of Science',
-        major: 'Computer Science'
-      }
-    ]
+        major: 'Computer Science',
+      },
+    ],
   };
 
   const mockVisionResult: VisionLlmResponse = {
     extractedData: mockResumeDTO,
     confidence: 0.95,
-    processingTimeMs: 3000
+    processingTimeMs: 3000,
   };
 
   const mockMappingResult: FieldMappingResult = {
     resumeDto: mockResumeDTO,
     validationErrors: [],
-    mappingConfidence: 0.92
+    mappingConfidence: 0.92,
   };
 
   const mockPdfBuffer = Buffer.from('mock-pdf-data');
@@ -52,14 +58,14 @@ describe('ResumeParserIntegrationService', () => {
   beforeEach(async () => {
     const mockVisionLlmService = {
       parseResumePdfAdvanced: jest.fn(),
-      healthCheck: jest.fn()
+      healthCheck: jest.fn(),
     };
 
     const mockFieldMapperService = {
       normalizeWithValidation: jest.fn(),
       normalizeToResumeDto: jest.fn(),
       calculateExperience: jest.fn(),
-      normalizeSkills: jest.fn()
+      normalizeSkills: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -67,16 +73,18 @@ describe('ResumeParserIntegrationService', () => {
         ResumeParserIntegrationService,
         {
           provide: VisionLlmService,
-          useValue: mockVisionLlmService
+          useValue: mockVisionLlmService,
         },
         {
           provide: FieldMapperService,
-          useValue: mockFieldMapperService
-        }
+          useValue: mockFieldMapperService,
+        },
       ],
     }).compile();
 
-    service = module.get<ResumeParserIntegrationService>(ResumeParserIntegrationService);
+    service = module.get<ResumeParserIntegrationService>(
+      ResumeParserIntegrationService,
+    );
     visionLlmService = module.get(VisionLlmService);
     fieldMapperService = module.get(FieldMapperService);
   });
@@ -88,17 +96,24 @@ describe('ResumeParserIntegrationService', () => {
   describe('parseResume', () => {
     it('should complete full parsing pipeline successfully', async () => {
       // Arrange
-      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(mockVisionResult);
-      fieldMapperService.normalizeWithValidation.mockResolvedValue(mockMappingResult);
+      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(
+        mockVisionResult,
+      );
+      fieldMapperService.normalizeWithValidation.mockResolvedValue(
+        mockMappingResult,
+      );
       fieldMapperService.calculateExperience.mockResolvedValue({
         totalYears: 5,
         relevantYears: 4,
         seniorityLevel: 'Senior',
-        confidenceScore: 0.9
+        confidenceScore: 0.9,
       });
 
       // Act
-      const result = await service.parseResume(mockPdfBuffer, 'test-resume.pdf');
+      const result = await service.parseResume(
+        mockPdfBuffer,
+        'test-resume.pdf',
+      );
 
       // Assert
       expect(result).toBeDefined();
@@ -108,10 +123,12 @@ describe('ResumeParserIntegrationService', () => {
       expect(result.processingTimeMs).toBeGreaterThan(0);
       expect(result.qualityMetrics).toBeDefined();
       expect(result.qualityMetrics.dataCompleteness).toBeGreaterThan(0);
-      
+
       // Verify service calls
       expect(visionLlmService.parseResumePdfAdvanced).toHaveBeenCalledTimes(1);
-      expect(fieldMapperService.normalizeWithValidation).toHaveBeenCalledTimes(1);
+      expect(fieldMapperService.normalizeWithValidation).toHaveBeenCalledTimes(
+        1,
+      );
       expect(fieldMapperService.calculateExperience).toHaveBeenCalledTimes(1);
     });
 
@@ -120,10 +137,15 @@ describe('ResumeParserIntegrationService', () => {
       visionLlmService.parseResumePdfAdvanced
         .mockRejectedValueOnce(new Error('Network error'))
         .mockResolvedValue(mockVisionResult);
-      fieldMapperService.normalizeWithValidation.mockResolvedValue(mockMappingResult);
+      fieldMapperService.normalizeWithValidation.mockResolvedValue(
+        mockMappingResult,
+      );
 
       // Act
-      const result = await service.parseResume(mockPdfBuffer, 'test-resume.pdf');
+      const result = await service.parseResume(
+        mockPdfBuffer,
+        'test-resume.pdf',
+      );
 
       // Assert
       expect(result).toBeDefined();
@@ -133,45 +155,68 @@ describe('ResumeParserIntegrationService', () => {
 
     it('should return error result when all retries fail', async () => {
       // Arrange
-      visionLlmService.parseResumePdfAdvanced.mockRejectedValue(new Error('Persistent failure'));
+      visionLlmService.parseResumePdfAdvanced.mockRejectedValue(
+        new Error('Persistent failure'),
+      );
 
       // Act
-      const result = await service.parseResume(mockPdfBuffer, 'test-resume.pdf');
+      const result = await service.parseResume(
+        mockPdfBuffer,
+        'test-resume.pdf',
+      );
 
       // Assert
       expect(result.totalConfidence).toBe(0);
-      expect(result.validationErrors).toContain(expect.stringContaining('Processing failed'));
+      expect(result.validationErrors).toContainEqual(
+        expect.stringContaining('Processing failed'),
+      );
       expect(result.resumeDto.contactInfo.name).toBeNull();
     });
 
     it('should respect processing options', async () => {
       // Arrange
-      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(mockVisionResult);
+      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(
+        mockVisionResult,
+      );
       fieldMapperService.normalizeToResumeDto.mockResolvedValue(mockResumeDTO);
 
       const options: ResumeParsingOptions = {
         enableValidation: false,
         enableExperienceCalculation: false,
         targetSkills: ['JavaScript', 'Python'],
-        qualityThreshold: 0.8
+        qualityThreshold: 0.8,
       };
 
       // Act
-      const result = await service.parseResume(mockPdfBuffer, 'test-resume.pdf', options);
+      // Test the parsing - result is not used as we're testing the calls
+      await service.parseResume(
+        mockPdfBuffer,
+        'test-resume.pdf',
+        options,
+      );
 
       // Assert
-      expect(fieldMapperService.normalizeToResumeDto).toHaveBeenCalledWith(mockVisionResult.extractedData);
+      expect(fieldMapperService.normalizeToResumeDto).toHaveBeenCalledWith(
+        mockVisionResult.extractedData,
+      );
       expect(fieldMapperService.normalizeWithValidation).not.toHaveBeenCalled();
       expect(fieldMapperService.calculateExperience).not.toHaveBeenCalled();
     });
 
     it('should calculate quality metrics correctly', async () => {
       // Arrange
-      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(mockVisionResult);
-      fieldMapperService.normalizeWithValidation.mockResolvedValue(mockMappingResult);
+      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(
+        mockVisionResult,
+      );
+      fieldMapperService.normalizeWithValidation.mockResolvedValue(
+        mockMappingResult,
+      );
 
       // Act
-      const result = await service.parseResume(mockPdfBuffer, 'test-resume.pdf');
+      const result = await service.parseResume(
+        mockPdfBuffer,
+        'test-resume.pdf',
+      );
 
       // Assert
       expect(result.qualityMetrics.dataCompleteness).toBeGreaterThan(0.8); // Complete data
@@ -185,17 +230,24 @@ describe('ResumeParserIntegrationService', () => {
       const mappingResultWithErrors: FieldMappingResult = {
         resumeDto: {
           ...mockResumeDTO,
-          contactInfo: { ...mockResumeDTO.contactInfo, email: null }
+          contactInfo: { ...mockResumeDTO.contactInfo, email: null },
         },
         validationErrors: ['Email is missing', 'Phone format invalid'],
-        mappingConfidence: 0.6
+        mappingConfidence: 0.6,
       };
 
-      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(mockVisionResult);
-      fieldMapperService.normalizeWithValidation.mockResolvedValue(mappingResultWithErrors);
+      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(
+        mockVisionResult,
+      );
+      fieldMapperService.normalizeWithValidation.mockResolvedValue(
+        mappingResultWithErrors,
+      );
 
       // Act
-      const result = await service.parseResume(mockPdfBuffer, 'test-resume.pdf');
+      const result = await service.parseResume(
+        mockPdfBuffer,
+        'test-resume.pdf',
+      );
 
       // Assert
       expect(result.validationErrors).toHaveLength(2);
@@ -205,11 +257,15 @@ describe('ResumeParserIntegrationService', () => {
 
     it('should use target skills in extraction prompt', async () => {
       // Arrange
-      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(mockVisionResult);
-      fieldMapperService.normalizeWithValidation.mockResolvedValue(mockMappingResult);
+      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(
+        mockVisionResult,
+      );
+      fieldMapperService.normalizeWithValidation.mockResolvedValue(
+        mockMappingResult,
+      );
 
       const options: ResumeParsingOptions = {
-        targetSkills: ['React', 'Node.js', 'TypeScript']
+        targetSkills: ['React', 'Node.js', 'TypeScript'],
       };
 
       // Act
@@ -217,22 +273,26 @@ describe('ResumeParserIntegrationService', () => {
 
       // Assert
       const callArgs = visionLlmService.parseResumePdfAdvanced.mock.calls[0][0];
-      expect(callArgs.options.extractionPrompt).toContain('React');
-      expect(callArgs.options.extractionPrompt).toContain('Node.js');
-      expect(callArgs.options.extractionPrompt).toContain('TypeScript');
+      expect(callArgs.options?.extractionPrompt).toContain('React');
+      expect(callArgs.options?.extractionPrompt).toContain('Node.js');
+      expect(callArgs.options?.extractionPrompt).toContain('TypeScript');
     });
   });
 
   describe('parseResumesBatch', () => {
     it('should process multiple resumes in batch', async () => {
       // Arrange
-      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(mockVisionResult);
-      fieldMapperService.normalizeWithValidation.mockResolvedValue(mockMappingResult);
+      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(
+        mockVisionResult,
+      );
+      fieldMapperService.normalizeWithValidation.mockResolvedValue(
+        mockMappingResult,
+      );
 
       const resumes = [
         { pdfBuffer: mockPdfBuffer, filename: 'resume1.pdf' },
         { pdfBuffer: mockPdfBuffer, filename: 'resume2.pdf' },
-        { pdfBuffer: mockPdfBuffer, filename: 'resume3.pdf' }
+        { pdfBuffer: mockPdfBuffer, filename: 'resume3.pdf' },
       ];
 
       // Act
@@ -240,7 +300,9 @@ describe('ResumeParserIntegrationService', () => {
 
       // Assert
       expect(results).toHaveLength(3);
-      expect(results.every(r => r.result && r.result.totalConfidence > 0)).toBe(true);
+      expect(
+        results.every((r) => r.result && r.result.totalConfidence > 0),
+      ).toBe(true);
       expect(visionLlmService.parseResumePdfAdvanced).toHaveBeenCalledTimes(3);
     });
 
@@ -250,13 +312,15 @@ describe('ResumeParserIntegrationService', () => {
         .mockResolvedValueOnce(mockVisionResult)
         .mockRejectedValueOnce(new Error('Processing failed'))
         .mockResolvedValueOnce(mockVisionResult);
-      
-      fieldMapperService.normalizeWithValidation.mockResolvedValue(mockMappingResult);
+
+      fieldMapperService.normalizeWithValidation.mockResolvedValue(
+        mockMappingResult,
+      );
 
       const resumes = [
         { pdfBuffer: mockPdfBuffer, filename: 'resume1.pdf' },
         { pdfBuffer: mockPdfBuffer, filename: 'resume2.pdf' },
-        { pdfBuffer: mockPdfBuffer, filename: 'resume3.pdf' }
+        { pdfBuffer: mockPdfBuffer, filename: 'resume3.pdf' },
       ];
 
       // Act
@@ -274,7 +338,10 @@ describe('ResumeParserIntegrationService', () => {
     it('should return healthy status when all components work', async () => {
       // Arrange
       visionLlmService.healthCheck.mockResolvedValue(true);
-      fieldMapperService.normalizeSkills.mockResolvedValue(['JavaScript', 'Python']);
+      fieldMapperService.normalizeSkills.mockResolvedValue([
+        'JavaScript',
+        'Python',
+      ]);
 
       // Act
       const health = await service.healthCheck();
@@ -290,7 +357,10 @@ describe('ResumeParserIntegrationService', () => {
     it('should return degraded status when some components fail', async () => {
       // Arrange
       visionLlmService.healthCheck.mockResolvedValue(false);
-      fieldMapperService.normalizeSkills.mockResolvedValue(['JavaScript', 'Python']);
+      fieldMapperService.normalizeSkills.mockResolvedValue([
+        'JavaScript',
+        'Python',
+      ]);
 
       // Act
       const health = await service.healthCheck();
@@ -305,7 +375,9 @@ describe('ResumeParserIntegrationService', () => {
     it('should return unhealthy status when most components fail', async () => {
       // Arrange
       visionLlmService.healthCheck.mockRejectedValue(new Error('Service down'));
-      fieldMapperService.normalizeSkills.mockRejectedValue(new Error('Service error'));
+      fieldMapperService.normalizeSkills.mockRejectedValue(
+        new Error('Service error'),
+      );
 
       // Act
       const health = await service.healthCheck();
@@ -336,37 +408,54 @@ describe('ResumeParserIntegrationService', () => {
   describe('error handling', () => {
     it('should handle mapping service failures gracefully', async () => {
       // Arrange
-      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(mockVisionResult);
-      fieldMapperService.normalizeWithValidation.mockRejectedValue(new Error('Mapping failed'));
+      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(
+        mockVisionResult,
+      );
+      fieldMapperService.normalizeWithValidation.mockRejectedValue(
+        new Error('Mapping failed'),
+      );
 
       // Act
-      const result = await service.parseResume(mockPdfBuffer, 'test-resume.pdf');
+      const result = await service.parseResume(
+        mockPdfBuffer,
+        'test-resume.pdf',
+      );
 
       // Assert
       expect(result.totalConfidence).toBe(0);
-      expect(result.validationErrors).toContain(expect.stringContaining('Processing failed'));
+      expect(result.validationErrors).toContainEqual(
+        expect.stringContaining('Processing failed'),
+      );
     });
 
     it('should handle low confidence results appropriately', async () => {
       // Arrange
       const lowConfidenceVisionResult: VisionLlmResponse = {
         ...mockVisionResult,
-        confidence: 0.3
+        confidence: 0.3,
       };
-      
+
       const lowConfidenceMappingResult: FieldMappingResult = {
         ...mockMappingResult,
         mappingConfidence: 0.4,
-        validationErrors: ['Multiple validation errors']
+        validationErrors: ['Multiple validation errors'],
       };
 
-      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(lowConfidenceVisionResult);
-      fieldMapperService.normalizeWithValidation.mockResolvedValue(lowConfidenceMappingResult);
+      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(
+        lowConfidenceVisionResult,
+      );
+      fieldMapperService.normalizeWithValidation.mockResolvedValue(
+        lowConfidenceMappingResult,
+      );
 
       // Act
-      const result = await service.parseResume(mockPdfBuffer, 'test-resume.pdf', {
-        qualityThreshold: 0.7
-      });
+      const result = await service.parseResume(
+        mockPdfBuffer,
+        'test-resume.pdf',
+        {
+          qualityThreshold: 0.7,
+        },
+      );
 
       // Assert
       expect(result.totalConfidence).toBeLessThan(0.7);
@@ -377,18 +466,21 @@ describe('ResumeParserIntegrationService', () => {
     it('should timeout on extremely long processing', async () => {
       // Arrange
       visionLlmService.parseResumePdfAdvanced.mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve(mockVisionResult), 5000))
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve(mockVisionResult), 5000),
+          ),
       );
 
       const options: ResumeParsingOptions = {
-        maxProcessingTime: 1000 // 1 second
+        maxProcessingTime: 1000, // 1 second
       };
 
       // Act & Assert
       // Note: This test would need actual timeout implementation in the service
       // For now, we just verify the option is accepted
       await expect(
-        service.parseResume(mockPdfBuffer, 'test-resume.pdf', options)
+        service.parseResume(mockPdfBuffer, 'test-resume.pdf', options),
       ).resolves.toBeDefined();
     });
   });
@@ -400,7 +492,7 @@ describe('ResumeParserIntegrationService', () => {
         contactInfo: {
           name: 'John Doe',
           email: null, // Missing
-          phone: null  // Missing
+          phone: null, // Missing
         },
         skills: [], // Empty
         workExperience: [
@@ -409,23 +501,30 @@ describe('ResumeParserIntegrationService', () => {
             position: 'Developer',
             startDate: '2020-01-01',
             endDate: 'present',
-            summary: 'Work summary'
-          }
+            summary: 'Work summary',
+          },
         ],
-        education: [] // Empty
+        education: [], // Empty
       };
 
       const incompleteMapping: FieldMappingResult = {
         resumeDto: incompleteResumeDTO,
         validationErrors: [],
-        mappingConfidence: 0.8
+        mappingConfidence: 0.8,
       };
 
-      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(mockVisionResult);
-      fieldMapperService.normalizeWithValidation.mockResolvedValue(incompleteMapping);
+      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(
+        mockVisionResult,
+      );
+      fieldMapperService.normalizeWithValidation.mockResolvedValue(
+        incompleteMapping,
+      );
 
       // Act
-      const result = await service.parseResume(mockPdfBuffer, 'incomplete-resume.pdf');
+      const result = await service.parseResume(
+        mockPdfBuffer,
+        'incomplete-resume.pdf',
+      );
 
       // Assert
       expect(result.qualityMetrics.dataCompleteness).toBeLessThan(0.6); // Low completeness
@@ -437,14 +536,21 @@ describe('ResumeParserIntegrationService', () => {
       const mappingWithErrors: FieldMappingResult = {
         resumeDto: mockResumeDTO,
         validationErrors: ['Error 1', 'Error 2', 'Error 3'], // 3 errors
-        mappingConfidence: 0.7
+        mappingConfidence: 0.7,
       };
 
-      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(mockVisionResult);
-      fieldMapperService.normalizeWithValidation.mockResolvedValue(mappingWithErrors);
+      visionLlmService.parseResumePdfAdvanced.mockResolvedValue(
+        mockVisionResult,
+      );
+      fieldMapperService.normalizeWithValidation.mockResolvedValue(
+        mappingWithErrors,
+      );
 
       // Act
-      const result = await service.parseResume(mockPdfBuffer, 'error-resume.pdf');
+      const result = await service.parseResume(
+        mockPdfBuffer,
+        'error-resume.pdf',
+      );
 
       // Assert
       expect(result.qualityMetrics.accuracyScore).toBeLessThan(0.8); // 3 errors * 0.1 = 0.3 penalty

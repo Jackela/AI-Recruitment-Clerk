@@ -13,7 +13,7 @@ import * as JobSelectors from '../../../store/jobs/job.selectors';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './jobs-list.component.html',
-  styleUrl: './jobs-list.component.scss'
+  styleUrl: './jobs-list.component.scss',
 })
 export class JobsListComponent implements OnInit, OnDestroy {
   // Using memoized selectors for better performance
@@ -24,7 +24,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
   activeJobs$: Observable<JobListItem[]>;
 
   private destroy$ = new Subject<void>();
-  
+
   private store = inject(Store<AppState>);
 
   constructor() {

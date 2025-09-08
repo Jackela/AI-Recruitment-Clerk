@@ -6,71 +6,83 @@ export type JobDocument = Job & Document;
 @Schema()
 export class JobRequirement {
   @Prop({ required: true })
-  skill: string;
+  skill: string = '';
 
-  @Prop({ type: String, enum: ['required', 'preferred', 'nice-to-have'], default: 'required' })
-  level: string;
+  @Prop({
+    type: String,
+    enum: ['required', 'preferred', 'nice-to-have'],
+    default: 'required',
+  })
+  level: string = 'required';
 
   @Prop({ type: Number, min: 1, max: 10, default: 5 })
-  importance: number;
+  importance: number = 5;
 }
 
-@Schema({ 
+@Schema({
   timestamps: true,
-  collection: 'jobs'
+  collection: 'jobs',
 })
 export class Job {
   @Prop({ required: true, trim: true })
-  title: string;
+  title: string = '';
 
   @Prop({ required: true })
-  description: string;
+  description: string = '';
 
   @Prop({ type: [JobRequirement], default: [] })
-  requirements: JobRequirement[];
+  requirements: JobRequirement[] = [];
 
   @Prop({ type: [String], default: [] })
-  skills: string[];
+  skills: string[] = [];
 
   @Prop({ required: true, trim: true })
-  company: string;
+  company: string = '';
 
   @Prop({ trim: true })
-  location: string;
+  location: string = '';
 
-  @Prop({ type: String, enum: ['full-time', 'part-time', 'contract', 'temporary', 'internship'], default: 'full-time' })
-  employmentType: string;
+  @Prop({
+    type: String,
+    enum: ['full-time', 'part-time', 'contract', 'temporary', 'internship'],
+    default: 'full-time',
+  })
+  employmentType: string = 'full-time';
 
   @Prop({ type: Number, min: 0 })
-  salaryMin: number;
+  salaryMin: number = 0;
 
   @Prop({ type: Number, min: 0 })
-  salaryMax: number;
+  salaryMax: number = 0;
 
   @Prop({ type: String })
-  salaryCurrency: string;
+  salaryCurrency: string = 'USD';
 
-  @Prop({ type: String, enum: ['active', 'paused', 'closed', 'draft'], default: 'active' })
-  status: string;
+  @Prop({
+    type: String,
+    enum: ['active', 'paused', 'closed', 'draft'],
+    default: 'active',
+  })
+  status: string = 'active';
 
   // Analysis metadata
   @Prop({ type: Number, min: 0, max: 1, default: 0 })
-  jdExtractionConfidence: number;
+  jdExtractionConfidence: number = 0;
 
   @Prop({ type: [String], default: [] })
-  extractedKeywords: string[];
+  extractedKeywords: string[] = [];
 
   @Prop({ type: Date })
-  jdProcessedAt: Date;
+  jdProcessedAt: Date = new Date();
 
   @Prop({ type: String })
-  createdBy: string; // User ID reference
+  createdBy: string = ''; // User ID reference
 
   @Prop({ type: Date, default: Date.now })
-  createdAt: Date;
+  createdAt: Date = new Date();
 
   @Prop({ type: Date, default: Date.now })
-  updatedAt: Date;
+  updatedAt: Date = new Date();
 }
 
 export const JobSchema = SchemaFactory.createForClass(Job);

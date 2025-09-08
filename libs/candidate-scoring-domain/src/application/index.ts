@@ -1,5 +1,5 @@
 // Candidate Scoring Application Layer
-export * from './commands/index.js';
-export * from './queries/index.js';
-export * from './handlers/index.js';
-export * from './dtos/index.js';
+export * from './commands';
+export * from './queries';
+export * from './handlers';
+export * from './dtos';

@@ -1,5 +1,9 @@
 import { createAction, props } from '@ngrx/store';
-import { GuestUsageResponse, GuestStatusResponse, FeedbackCodeResponse } from '../../services/guest/guest-api.service';
+import {
+  GuestUsageResponse,
+  GuestStatusResponse,
+  FeedbackCodeResponse,
+} from '../../services/guest/guest-api.service';
 
 export interface AnalysisData {
   id: string;
@@ -57,12 +61,12 @@ export interface DemoAnalysisResults {
 // Device and initialization actions
 export const initializeGuest = createAction(
   '[Guest] Initialize Guest Mode',
-  props<{ deviceId: string }>()
+  props<{ deviceId: string }>(),
 );
 
 export const setGuestMode = createAction(
   '[Guest] Set Guest Mode',
-  props<{ isGuestMode: boolean }>()
+  props<{ isGuestMode: boolean }>(),
 );
 
 // Usage status actions
@@ -70,12 +74,12 @@ export const loadUsageStatus = createAction('[Guest] Load Usage Status');
 
 export const loadUsageStatusSuccess = createAction(
   '[Guest] Load Usage Status Success',
-  props<{ usageStatus: GuestUsageResponse }>()
+  props<{ usageStatus: GuestUsageResponse }>(),
 );
 
 export const loadUsageStatusFailure = createAction(
   '[Guest] Load Usage Status Failure',
-  props<{ error: string }>()
+  props<{ error: string }>(),
 );
 
 // Guest details actions
@@ -83,30 +87,30 @@ export const loadGuestDetails = createAction('[Guest] Load Guest Details');
 
 export const loadGuestDetailsSuccess = createAction(
   '[Guest] Load Guest Details Success',
-  props<{ guestDetails: GuestStatusResponse }>()
+  props<{ guestDetails: GuestStatusResponse }>(),
 );
 
 export const loadGuestDetailsFailure = createAction(
   '[Guest] Load Guest Details Failure',
-  props<{ error: string }>()
+  props<{ error: string }>(),
 );
 
 // Usage increment actions
 export const incrementUsage = createAction('[Guest] Increment Usage');
 
 export const incrementUsageSuccess = createAction(
-  '[Guest] Increment Usage Success'
+  '[Guest] Increment Usage Success',
 );
 
 export const incrementUsageFailure = createAction(
   '[Guest] Increment Usage Failure',
-  props<{ error: string }>()
+  props<{ error: string }>(),
 );
 
 // Usage limit actions
 export const setLimited = createAction(
   '[Guest] Set Limited',
-  props<{ isLimited: boolean; message?: string }>()
+  props<{ isLimited: boolean; message?: string }>(),
 );
 
 export const showLimitModal = createAction('[Guest] Show Limit Modal');
@@ -114,31 +118,33 @@ export const showLimitModal = createAction('[Guest] Show Limit Modal');
 export const hideLimitModal = createAction('[Guest] Hide Limit Modal');
 
 // Feedback code actions
-export const generateFeedbackCode = createAction('[Guest] Generate Feedback Code');
+export const generateFeedbackCode = createAction(
+  '[Guest] Generate Feedback Code',
+);
 
 export const generateFeedbackCodeSuccess = createAction(
   '[Guest] Generate Feedback Code Success',
-  props<{ feedbackResponse: FeedbackCodeResponse }>()
+  props<{ feedbackResponse: FeedbackCodeResponse }>(),
 );
 
 export const generateFeedbackCodeFailure = createAction(
   '[Guest] Generate Feedback Code Failure',
-  props<{ error: string }>()
+  props<{ error: string }>(),
 );
 
 export const redeemFeedbackCode = createAction(
   '[Guest] Redeem Feedback Code',
-  props<{ feedbackCode: string }>()
+  props<{ feedbackCode: string }>(),
 );
 
 export const redeemFeedbackCodeSuccess = createAction(
   '[Guest] Redeem Feedback Code Success',
-  props<{ message: string }>()
+  props<{ message: string }>(),
 );
 
 export const redeemFeedbackCodeFailure = createAction(
   '[Guest] Redeem Feedback Code Failure',
-  props<{ error: string }>()
+  props<{ error: string }>(),
 );
 
 // Feedback modal actions
@@ -149,54 +155,63 @@ export const hideFeedbackModal = createAction('[Guest] Hide Feedback Modal');
 // Resume analysis actions
 export const uploadResume = createAction(
   '[Guest] Upload Resume',
-  props<{ file: File; candidateName?: string; candidateEmail?: string; notes?: string }>()
+  props<{
+    file: File;
+    candidateName?: string;
+    candidateEmail?: string;
+    notes?: string;
+  }>(),
 );
 
 export const uploadResumeSuccess = createAction(
   '[Guest] Upload Resume Success',
-  props<{ analysisData: AnalysisData }>()
+  props<{ analysisData: AnalysisData }>(),
 );
 
 export const uploadResumeFailure = createAction(
   '[Guest] Upload Resume Failure',
-  props<{ error: string }>()
+  props<{ error: string }>(),
 );
 
 export const loadAnalysisResults = createAction(
   '[Guest] Load Analysis Results',
-  props<{ analysisId: string }>()
+  props<{ analysisId: string }>(),
 );
 
 export const loadAnalysisResultsSuccess = createAction(
   '[Guest] Load Analysis Results Success',
-  props<{ analysisResults: AnalysisResults }>()
+  props<{ analysisResults: AnalysisResults }>(),
 );
 
 export const loadAnalysisResultsFailure = createAction(
   '[Guest] Load Analysis Results Failure',
-  props<{ error: string }>()
+  props<{ error: string }>(),
 );
 
 export const loadDemoAnalysis = createAction('[Guest] Load Demo Analysis');
 
 export const loadDemoAnalysisSuccess = createAction(
   '[Guest] Load Demo Analysis Success',
-  props<{ demoResults: DemoAnalysisResults }>()
+  props<{ demoResults: DemoAnalysisResults }>(),
 );
 
 export const loadDemoAnalysisFailure = createAction(
   '[Guest] Load Demo Analysis Failure',
-  props<{ error: string }>()
+  props<{ error: string }>(),
 );
 
 // Analysis UI actions
-export const showAnalysisResults = createAction('[Guest] Show Analysis Results');
+export const showAnalysisResults = createAction(
+  '[Guest] Show Analysis Results',
+);
 
-export const hideAnalysisResults = createAction('[Guest] Hide Analysis Results');
+export const hideAnalysisResults = createAction(
+  '[Guest] Hide Analysis Results',
+);
 
 export const updateAnalysisProgress = createAction(
   '[Guest] Update Analysis Progress',
-  props<{ analysisId: string; progress: number; status?: string }>()
+  props<{ analysisId: string; progress: number; status?: string }>(),
 );
 
 // Data management actions
@@ -211,11 +226,11 @@ export const clearError = createAction('[Guest] Clear Error');
 
 export const setError = createAction(
   '[Guest] Set Error',
-  props<{ error: string }>()
+  props<{ error: string }>(),
 );
 
 // Loading actions
 export const setLoading = createAction(
   '[Guest] Set Loading',
-  props<{ isLoading: boolean }>()
+  props<{ isLoading: boolean }>(),
 );

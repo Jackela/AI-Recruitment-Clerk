@@ -33,7 +33,9 @@ export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
     } catch (error) {
       // If JWT validation fails, allow the request to continue
       // The guest guard or service will handle guest-specific logic
-      this.logger.debug('JWT validation failed, proceeding without authentication');
+      this.logger.debug(
+        'JWT validation failed, proceeding without authentication',
+      );
       return true;
     }
   }

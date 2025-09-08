@@ -1,12 +1,25 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Job, JobListItem, CreateJobRequest, CreateJobResponse } from '../store/jobs/job.model';
-import { ResumeListItem, ResumeDetail, ResumeUploadResponse } from '../store/resumes/resume.model';
+import {
+  Job,
+  JobListItem,
+  CreateJobRequest,
+  CreateJobResponse,
+} from '../store/jobs/job.model';
+import {
+  ResumeListItem,
+  ResumeDetail,
+  ResumeUploadResponse,
+} from '../store/resumes/resume.model';
 import { AnalysisReport, ReportsList } from '../store/reports/report.model';
+import {
+  GapAnalysisRequest,
+  GapAnalysisResult,
+} from '../interfaces/gap-analysis.interface';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ApiService {
   // Use relative base URL so Nginx (container) and local dev both proxy to gateway
@@ -30,22 +43,27 @@ export class ApiService {
 
   // Resume API endpoints
   getResumesByJobId(jobId: string): Observable<ResumeListItem[]> {
-    return this.http.get<ResumeListItem[]>(`${this.baseUrl}/jobs/${jobId}/resumes`);
+    return this.http.get<ResumeListItem[]>(
+      `${this.baseUrl}/jobs/${jobId}/resumes`,
+    );
   }
 
   getResumeById(resumeId: string): Observable<ResumeDetail> {
     return this.http.get<ResumeDetail>(`${this.baseUrl}/resumes/${resumeId}`);
   }
 
-  uploadResumes(jobId: string, files: File[]): Observable<ResumeUploadResponse> {
+  uploadResumes(
+    jobId: string,
+    files: File[],
+  ): Observable<ResumeUploadResponse> {
     const formData = new FormData();
-    files.forEach(file => {
+    files.forEach((file) => {
       formData.append('resumes', file, file.name);
     });
-    
+
     return this.http.post<ResumeUploadResponse>(
       `${this.baseUrl}/jobs/${jobId}/resumes`,
-      formData
+      formData,
     );
   }
 
@@ -56,5 +74,14 @@ export class ApiService {
 
   getReportById(reportId: string): Observable<AnalysisReport> {
     return this.http.get<AnalysisReport>(`${this.baseUrl}/reports/${reportId}`);
+  }
+
+  // Coach/GAP Analysis
+  submitGapAnalysis(req: GapAnalysisRequest): Observable<GapAnalysisResult> {
+    // Route through API gateway if available; otherwise proxy path should map to scoring service
+    return this.http.post<GapAnalysisResult>(
+      `${this.baseUrl}/scoring/gap-analysis`,
+      req,
+    );
   }
 }

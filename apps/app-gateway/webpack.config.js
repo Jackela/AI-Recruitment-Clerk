@@ -8,12 +8,27 @@ export default {
   experiments: {
     outputModule: true,
   },
+  mode: 'production',
+  target: 'node20',
   output: {
     path: join(__dirname, '../../dist/apps/app-gateway'),
+    filename: 'main.mjs',
     module: true,
     chunkFormat: 'module',
     library: {
       type: 'module'
+    },
+    environment: {
+      module: true,
+      dynamicImport: true,
+      const: true,
+      arrowFunction: true
+    }
+  },
+  resolve: {
+    extensionAlias: {
+      '.js': ['.ts', '.js'],
+      '.mjs': ['.mts', '.mjs']
     }
   },
   externals: {
@@ -36,9 +51,11 @@ export default {
       main: './src/main.ts',
       tsConfig: './tsconfig.app.json',
       assets: ['./src/assets'],
-      optimization: true,
+      optimization: false,
       outputHashing: 'none',
       generatePackageJson: true,
+      typeCheck: false,
+      outputModule: true
     }),
   ],
 };

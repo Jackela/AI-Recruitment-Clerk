@@ -4,4 +4,9 @@
  */
 
 export { APP_CONFIG, type AppConfig } from './app.config';
-export { I18N_TEXTS, type I18nTexts, getText, getTextWithParams } from './i18n.config';
+export {
+  I18N_TEXTS,
+  type I18nTexts,
+  getText,
+  getTextWithParams,
+} from './i18n.config';

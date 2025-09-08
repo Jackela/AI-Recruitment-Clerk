@@ -17,10 +17,10 @@ import { PWAService } from '../../services/mobile/pwa.service';
 
 /**
  * Mobile UI Module
- * 
+ *
  * Provides comprehensive mobile-first components and services for the AI Recruitment Clerk.
  * Includes PWA capabilities, touch interactions, and mobile-optimized UX patterns.
- * 
+ *
  * Features:
  * - Mobile-first navigation with bottom tabs and hamburger menu
  * - Touch gesture recognition and swipe interactions
@@ -40,7 +40,7 @@ import { PWAService } from '../../services/mobile/pwa.service';
     MobileSwipeComponent,
     MobileDashboardComponent,
     MobileResultsComponent,
-    MobilePerformanceComponent
+    MobilePerformanceComponent,
   ],
   exports: [
     // Export all mobile components for use in other modules
@@ -49,13 +49,13 @@ import { PWAService } from '../../services/mobile/pwa.service';
     MobileSwipeComponent,
     MobileDashboardComponent,
     MobileResultsComponent,
-    MobilePerformanceComponent
+    MobilePerformanceComponent,
   ],
   providers: [
     // Mobile-specific services
     TouchGestureService,
-    PWAService
-  ]
+    PWAService,
+  ],
 })
 export class MobileModule {
   /**
@@ -64,10 +64,7 @@ export class MobileModule {
   static forRoot() {
     return {
       ngModule: MobileModule,
-      providers: [
-        TouchGestureService,
-        PWAService
-      ]
+      providers: [TouchGestureService, PWAService],
     };
   }
 }

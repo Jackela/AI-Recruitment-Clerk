@@ -28,10 +28,10 @@ import { CrossServiceValidator } from './validators/cross-service.validator';
       max: 1000, // Maximum number of items in cache
       isGlobal: true,
     }),
-    
+
     // Schedule configuration for health checks and cleanup
     ScheduleModule.forRoot(),
-    
+
     // Rate limiting configuration
     ThrottlerModule.forRoot([
       {
@@ -57,25 +57,25 @@ import { CrossServiceValidator } from './validators/cross-service.validator';
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter,
     },
-    
+
     // Global response transformation interceptor
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseTransformInterceptor,
     },
-    
+
     // Global validation pipe
     {
       provide: APP_PIPE,
       useFactory: () => new CustomValidationPipe(),
     },
-    
+
     // Global rate limiting guard
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
-    
+
     // Common services
     HealthCheckService,
     CrossServiceValidator,
@@ -110,29 +110,35 @@ export class CommonModule {}
         enableFallback: true,
         services: {
           'resume-parser-svc': {
-            baseUrl: process.env.RESUME_PARSER_URL || 'http://resume-parser-svc:3000',
+            baseUrl:
+              process.env.RESUME_PARSER_URL || 'http://resume-parser-svc:3000',
             timeout: 45000,
             retries: 2,
           },
           'jd-extractor-svc': {
-            baseUrl: process.env.JD_EXTRACTOR_URL || 'http://jd-extractor-svc:3000',
+            baseUrl:
+              process.env.JD_EXTRACTOR_URL || 'http://jd-extractor-svc:3000',
             timeout: 30000,
             retries: 3,
           },
           'scoring-engine-svc': {
-            baseUrl: process.env.SCORING_ENGINE_URL || 'http://scoring-engine-svc:3000',
+            baseUrl:
+              process.env.SCORING_ENGINE_URL ||
+              'http://scoring-engine-svc:3000',
             timeout: 20000,
             retries: 2,
           },
           'report-generator-svc': {
-            baseUrl: process.env.REPORT_GENERATOR_URL || 'http://report-generator-svc:3000',
+            baseUrl:
+              process.env.REPORT_GENERATOR_URL ||
+              'http://report-generator-svc:3000',
             timeout: 60000,
             retries: 1,
           },
         },
       },
     },
-    
+
     // Cross-service validation configuration
     {
       provide: 'VALIDATION_CONFIG',
@@ -145,7 +151,7 @@ export class CommonModule {}
         validationCacheTTL: 300,
       },
     },
-    
+
     // Health check configuration
     {
       provide: 'HEALTH_CHECK_CONFIG',

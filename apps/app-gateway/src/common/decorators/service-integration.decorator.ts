@@ -14,7 +14,7 @@ export function ServiceIntegration(options?: {
   cacheTTL?: number;
 }) {
   return applyDecorators(
-    UseInterceptors(new ServiceIntegrationInterceptor(options))
+    UseInterceptors(new ServiceIntegrationInterceptor(options)),
   );
 }
 
@@ -23,10 +23,12 @@ export function ServiceIntegration(options?: {
  */
 export function CrossServiceValidation(services: string[]) {
   return applyDecorators(
-    UseInterceptors(new ServiceIntegrationInterceptor({
-      requiredServices: services,
-      validateServices: true,
-    }))
+    UseInterceptors(
+      new ServiceIntegrationInterceptor({
+        requiredServices: services,
+        validateServices: true,
+      }),
+    ),
   );
 }
 
@@ -39,8 +41,10 @@ export function CircuitBreaker(options: {
   resetTimeout?: number;
 }) {
   return applyDecorators(
-    UseInterceptors(new ServiceIntegrationInterceptor({
-      circuitBreaker: options,
-    }))
+    UseInterceptors(
+      new ServiceIntegrationInterceptor({
+        circuitBreaker: options,
+      }),
+    ),
   );
 }

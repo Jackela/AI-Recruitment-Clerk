@@ -1,4 +1,4 @@
-import { Controller, Logger, OnModuleInit } from '@nestjs/common';
+import { Controller, Logger, OnModuleInit, Optional, Inject } from '@nestjs/common';
 import { EventPattern } from '@nestjs/microservices';
 import {
   AnalysisJdExtractedEvent,
@@ -17,12 +17,13 @@ export class ScoringEventsController implements OnModuleInit {
   private readonly logger = new Logger(ScoringEventsController.name);
 
   constructor(
-    private readonly natsService: ScoringEngineNatsService,
-    private readonly scoringEngine: ScoringEngineService,
+    @Optional() private readonly natsService?: any,
+    @Optional() private readonly scoringEngine?: ScoringEngineService,
   ) {}
 
   async onModuleInit() {
     // Subscribe to analysis events using the shared NATS service
+    if (!this.natsService) return;
     await this.natsService.subscribeToJdExtracted(
       this.handleJdExtracted.bind(this),
     );
@@ -58,7 +59,7 @@ export class ScoringEventsController implements OnModuleInit {
       const scoringJdDto = this.convertToScoringJdDTO(payload.extractedData);
 
       // Use the scoring engine service to handle JD extracted event
-      this.scoringEngine.handleJdExtractedEvent({
+      this.scoringEngine?.handleJdExtractedEvent({
         jobId: payload.jobId,
         jdDto: scoringJdDto,
       });
@@ -100,7 +101,7 @@ export class ScoringEventsController implements OnModuleInit {
       }
 
       // Use the enhanced scoring engine service to handle resume parsed event
-      await this.scoringEngine.handleResumeParsedEvent({
+      await this.scoringEngine?.handleResumeParsedEvent({
         jobId: payload.jobId,
         resumeId: payload.resumeId,
         resumeDto: payload.resumeDto as ResumeDTO,
@@ -116,7 +117,7 @@ export class ScoringEventsController implements OnModuleInit {
       );
 
       // Publish error event using the shared NATS service
-      await this.natsService.publishScoringError(
+      await this.natsService?.publishScoringError(
         payload.jobId,
         payload.resumeId,
         error as Error,

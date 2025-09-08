@@ -5,7 +5,7 @@
   box-shadow: var(--shadow-2xl);
   border: 1px solid var(--color-border-secondary);
   position: relative;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -13,7 +13,12 @@
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, var(--color-primary-300), transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-primary-300),
+      transparent
+    );
     opacity: 0.6;
   }
 
@@ -33,7 +38,7 @@
   gap: var(--space-4);
   flex-wrap: wrap;
   position: relative;
-  
+
   &::after {
     content: '';
     position: absolute;
@@ -41,7 +46,11 @@
     left: var(--space-8);
     width: 80px;
     height: 2px;
-    background: linear-gradient(90deg, var(--color-primary-600), var(--color-royal-600));
+    background: linear-gradient(
+      90deg,
+      var(--color-primary-600),
+      var(--color-royal-600)
+    );
     border-radius: var(--radius-full);
   }
 
@@ -89,7 +98,7 @@
     background: var(--color-bg-primary);
     color: var(--color-text-primary);
     box-shadow: var(--shadow-xs);
-    
+
     &::placeholder {
       color: var(--color-text-tertiary);
       font-style: italic;
@@ -98,14 +107,16 @@
     &:focus {
       outline: none;
       border-color: var(--color-primary-500);
-      box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1), var(--shadow-md);
+      box-shadow:
+        0 0 0 3px rgba(26, 35, 126, 0.1),
+        var(--shadow-md);
       background: var(--color-bg-primary);
-      
+
       + .search-icon {
         color: var(--color-primary-600);
       }
     }
-    
+
     &:hover:not(:focus) {
       border-color: var(--color-primary-300);
       box-shadow: var(--shadow-sm);
@@ -143,7 +154,11 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-5);
-  background: linear-gradient(135deg, var(--color-primary-600), var(--color-royal-600));
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-600),
+    var(--color-royal-600)
+  );
   border: 1px solid var(--color-primary-500);
   border-radius: var(--radius-lg);
   font-family: var(--font-family-body);
@@ -155,7 +170,7 @@
   box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -168,17 +183,21 @@
   }
 
   &:hover {
-    background: linear-gradient(135deg, var(--color-primary-700), var(--color-royal-700));
+    background: linear-gradient(
+      135deg,
+      var(--color-primary-700),
+      var(--color-royal-700)
+    );
     border-color: var(--color-primary-600);
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
   }
-  
+
   &:active {
     transform: translateY(0);
     box-shadow: var(--shadow-sm);
   }
-  
+
   svg {
     position: relative;
     z-index: 1;
@@ -190,7 +209,7 @@
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   background: var(--color-bg-primary);
-  
+
   // Enhanced mobile scrolling
   @media (max-width: 768px) {
     border-radius: var(--radius-xl);
@@ -201,16 +220,16 @@
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  
+
   // Mobile-responsive table behavior
   @media (max-width: 768px) {
     min-width: 100%; // Remove fixed 640px width
-    
+
     // Hide non-essential columns on mobile
     .column-secondary {
       display: none;
     }
-    
+
     // Essential columns with text truncation
     .column-primary {
       max-width: 120px;
@@ -218,7 +237,7 @@
       text-overflow: ellipsis;
       white-space: nowrap;
       position: relative;
-      
+
       // Truncation indicator
       &.text-truncated::after {
         content: '...';
@@ -228,7 +247,7 @@
         padding-left: 4px;
       }
     }
-    
+
     // Compact mobile layout
     .column-compact {
       max-width: 80px;
@@ -237,10 +256,14 @@
   }
 
   thead {
-    background: linear-gradient(135deg, var(--color-bg-secondary), var(--color-bg-tertiary));
+    background: linear-gradient(
+      135deg,
+      var(--color-bg-secondary),
+      var(--color-bg-tertiary)
+    );
     border-bottom: 2px solid var(--color-border-fantasy);
     position: relative;
-    
+
     &::after {
       content: '';
       position: absolute;
@@ -248,7 +271,12 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg, var(--color-primary-600), var(--color-royal-600), var(--color-primary-600));
+      background: linear-gradient(
+        90deg,
+        var(--color-primary-600),
+        var(--color-royal-600),
+        var(--color-primary-600)
+      );
     }
 
     th {
@@ -260,8 +288,12 @@
       color: var(--color-text-fantasy);
       white-space: nowrap;
       position: relative;
-      background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.03));
-      
+      background: linear-gradient(
+        135deg,
+        transparent,
+        rgba(255, 255, 255, 0.03)
+      );
+
       &:not(:last-child)::after {
         content: '';
         position: absolute;
@@ -278,7 +310,11 @@
         transition: all var(--transition-base);
 
         &:hover {
-          background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-25));
+          background: linear-gradient(
+            135deg,
+            var(--color-primary-50),
+            var(--color-primary-25)
+          );
           color: var(--color-primary-800);
           transform: translateY(-1px);
         }
@@ -303,7 +339,7 @@
       border-bottom: 1px solid var(--color-border-secondary);
       transition: all var(--transition-base);
       position: relative;
-      
+
       &::before {
         content: '';
         position: absolute;
@@ -312,15 +348,23 @@
         transform: translateY(-50%);
         width: 3px;
         height: 0;
-        background: linear-gradient(180deg, var(--color-primary-600), var(--color-royal-600));
+        background: linear-gradient(
+          180deg,
+          var(--color-primary-600),
+          var(--color-royal-600)
+        );
         border-radius: var(--radius-full);
         transition: height var(--transition-base);
       }
 
       &.selected {
-        background: linear-gradient(135deg, rgba(26, 35, 126, 0.08), rgba(74, 20, 140, 0.05));
+        background: linear-gradient(
+          135deg,
+          rgba(26, 35, 126, 0.08),
+          rgba(74, 20, 140, 0.05)
+        );
         border-color: var(--color-primary-300);
-        
+
         &::before {
           height: 60%;
         }
@@ -346,21 +390,30 @@
   }
 
   &.striped tbody tr:nth-child(even) {
-    background: linear-gradient(135deg, var(--color-bg-secondary), rgba(255, 255, 255, 0.3));
+    background: linear-gradient(
+      135deg,
+      var(--color-bg-secondary),
+      rgba(255, 255, 255, 0.3)
+    );
   }
 
   &.bordered {
     border: 1px solid var(--color-border-secondary);
 
-    th, td {
+    th,
+    td {
       border: 1px solid var(--color-border-secondary);
     }
   }
 
   &.hoverable tbody tr:hover:not(.selected) {
-    background: linear-gradient(135deg, var(--color-primary-25), var(--color-royal-25));
+    background: linear-gradient(
+      135deg,
+      var(--color-primary-25),
+      var(--color-royal-25)
+    );
     transform: translateX(4px);
-    
+
     &::before {
       height: 40%;
     }
@@ -390,16 +443,16 @@
       transform: scale(1.1);
       filter: drop-shadow(0 2px 4px rgba(26, 35, 126, 0.2));
     }
-    
+
     &.active-asc {
       animation: sortBounce 0.3s ease-out;
     }
-    
+
     &.active-desc {
       animation: sortBounce 0.3s ease-out reverse;
     }
   }
-  
+
   .sortable:hover & .sort-indicator {
     opacity: 1;
   }
@@ -416,7 +469,7 @@
   letter-spacing: 0.05em;
   border: 1px solid transparent;
   position: relative;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -430,14 +483,22 @@
   }
 
   &.badge-success {
-    background: linear-gradient(135deg, var(--color-success-100), var(--color-emerald-100));
+    background: linear-gradient(
+      135deg,
+      var(--color-success-100),
+      var(--color-emerald-100)
+    );
     color: var(--color-success-800);
     border-color: var(--color-success-200);
     box-shadow: var(--shadow-xs);
   }
 
   &.badge-danger {
-    background: linear-gradient(135deg, var(--color-error-100), var(--color-error-150));
+    background: linear-gradient(
+      135deg,
+      var(--color-error-100),
+      var(--color-error-150)
+    );
     color: var(--color-error-800);
     border-color: var(--color-error-200);
     box-shadow: var(--shadow-xs);
@@ -465,7 +526,7 @@
   height: 32px;
   position: relative;
   overflow: hidden;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -478,7 +539,7 @@
     transition: all var(--transition-base);
     z-index: 0;
   }
-  
+
   svg {
     position: relative;
     z-index: 1;
@@ -490,12 +551,12 @@
     border-color: var(--color-primary-300);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
-    
+
     &::before {
       width: 100%;
       height: 100%;
     }
-    
+
     svg {
       transform: scale(1.1);
     }
@@ -504,7 +565,7 @@
   &.view-btn:hover {
     color: var(--color-info-700);
     border-color: var(--color-info-400);
-    
+
     &::before {
       background: var(--color-info-50);
     }
@@ -513,7 +574,7 @@
   &.edit-btn:hover {
     color: var(--color-warning-700);
     border-color: var(--color-warning-400);
-    
+
     &::before {
       background: var(--color-warning-50);
     }
@@ -522,12 +583,12 @@
   &.delete-btn:hover {
     color: var(--color-error-700);
     border-color: var(--color-error-400);
-    
+
     &::before {
       background: var(--color-error-50);
     }
   }
-  
+
   &:active {
     transform: translateY(0);
     box-shadow: var(--shadow-sm);
@@ -539,11 +600,11 @@
   text-align: center;
   color: var(--color-text-secondary);
   position: relative;
-  
+
   @media (max-width: 768px) {
     padding: var(--space-12) var(--space-4);
   }
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -552,7 +613,11 @@
     transform: translate(-50%, -50%);
     width: 200px;
     height: 200px;
-    background: radial-gradient(circle, var(--color-primary-25), transparent 70%);
+    background: radial-gradient(
+      circle,
+      var(--color-primary-25),
+      transparent 70%
+    );
     border-radius: 50%;
     opacity: 0.3;
     z-index: 0;
@@ -616,10 +681,10 @@
 }
 
 // Dark mode specific adjustments
-:host-context([data-theme="dark"]) {
+:host-context([data-theme='dark']) {
   .loading-overlay {
     background: rgba(15, 23, 42, 0.95);
-    
+
     .spinner {
       border-color: var(--color-neutral-700);
       border-top-color: var(--color-primary-400);
@@ -638,7 +703,7 @@
   flex-wrap: wrap;
   gap: var(--space-4);
   position: relative;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -646,7 +711,11 @@
     left: var(--space-8);
     width: 60px;
     height: 2px;
-    background: linear-gradient(90deg, var(--color-primary-500), var(--color-royal-500));
+    background: linear-gradient(
+      90deg,
+      var(--color-primary-500),
+      var(--color-royal-500)
+    );
     border-radius: var(--radius-full);
   }
 
@@ -681,9 +750,11 @@
   &:focus {
     outline: none;
     border-color: var(--color-primary-500);
-    box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1), var(--shadow-md);
+    box-shadow:
+      0 0 0 3px rgba(26, 35, 126, 0.1),
+      var(--shadow-md);
   }
-  
+
   &:hover {
     border-color: var(--color-primary-300);
     box-shadow: var(--shadow-sm);
@@ -719,7 +790,7 @@
     background: var(--color-bg-tertiary);
     color: var(--color-text-tertiary);
   }
-  
+
   &:active:not(:disabled) {
     transform: translateY(0);
     box-shadow: var(--shadow-xs);
@@ -758,14 +829,18 @@
   }
 
   &.active {
-    background: linear-gradient(135deg, var(--color-primary-600), var(--color-royal-600));
+    background: linear-gradient(
+      135deg,
+      var(--color-primary-600),
+      var(--color-royal-600)
+    );
     border-color: var(--color-primary-500);
     color: white;
     font-weight: var(--font-weight-semibold);
     transform: translateY(-1px);
     box-shadow: var(--shadow-lg);
     position: relative;
-    
+
     &::before {
       content: '';
       position: absolute;
@@ -773,11 +848,15 @@
       left: 0;
       right: 0;
       height: 50%;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent);
+      background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.2),
+        transparent
+      );
       border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     }
   }
-  
+
   &:active:not(.active) {
     transform: translateY(0);
     box-shadow: var(--shadow-xs);
@@ -814,7 +893,7 @@
     .toolbar-right {
       width: 100%;
     }
-    
+
     &::after {
       left: var(--space-4);
       width: 60px;
@@ -834,12 +913,12 @@
     .pagination-controls {
       justify-content: center;
     }
-    
+
     .pagination-info {
       text-align: center;
       order: 2;
     }
-    
+
     &::before {
       left: var(--space-4);
       width: 40px;
@@ -849,33 +928,38 @@
   .data-table {
     font-size: var(--font-size-xs);
 
-    th, td {
+    th,
+    td {
       padding: var(--space-2);
-      
+
       // Priority-based responsive behavior
       &.priority-low {
         display: none;
       }
-      
+
       &.priority-medium {
         max-width: 100px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      
+
       &.priority-high {
         min-width: 80px;
       }
     }
-    
+
     // Mobile-optimized header
     thead {
       th {
         position: sticky;
         top: 0;
         z-index: 10;
-        background: linear-gradient(135deg, var(--color-bg-secondary), var(--color-bg-tertiary));
+        background: linear-gradient(
+          135deg,
+          var(--color-bg-secondary),
+          var(--color-bg-tertiary)
+        );
         font-size: var(--font-size-xs);
         padding: var(--space-2) var(--space-3);
       }
@@ -886,22 +970,22 @@
     flex-direction: row;
     gap: var(--space-0-5);
     justify-content: center;
-    
+
     .action-btn {
       padding: var(--space-1);
       min-width: 28px;
       height: 28px;
-      
+
       &:hover {
         transform: translateY(-1px);
       }
     }
   }
-  
+
   // Horizontal scroll indicator with fantasy styling
   .table-wrapper {
     position: relative;
-    
+
     &::after {
       content: '';
       position: absolute;
@@ -914,7 +998,7 @@
       opacity: 0;
       transition: opacity var(--transition-base);
     }
-    
+
     &.has-horizontal-scroll::after {
       opacity: 1;
     }

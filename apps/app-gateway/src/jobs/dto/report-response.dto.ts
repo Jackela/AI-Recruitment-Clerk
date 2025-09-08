@@ -22,7 +22,7 @@ export class AnalysisReportDto {
     potentialGaps: string[],
     redFlags: string[],
     suggestedInterviewQuestions: string[],
-    generatedAt: Date = new Date()
+    generatedAt: Date = new Date(),
   ) {
     this.id = id;
     this.resumeId = resumeId;
@@ -58,7 +58,7 @@ export class ReportsListDto {
       oneSentenceSummary: string;
       status: 'completed' | 'processing' | 'failed';
       generatedAt: Date;
-    }[]
+    }[],
   ) {
     this.jobId = jobId;
     this.reports = reports.sort((a, b) => b.matchScore - a.matchScore); // Sort by match score descending

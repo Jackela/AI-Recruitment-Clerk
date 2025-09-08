@@ -1,5 +1,10 @@
 import * as JobActions from './job.actions';
-import { Job, JobListItem, CreateJobRequest, CreateJobResponse } from './job.model';
+import {
+  Job,
+  JobListItem,
+  CreateJobRequest,
+  CreateJobResponse,
+} from './job.model';
 
 describe('Job Actions', () => {
   const mockJobListItem: JobListItem = {
@@ -7,7 +12,7 @@ describe('Job Actions', () => {
     title: '软件工程师',
     status: 'completed',
     createdAt: new Date('2024-01-01'),
-    resumeCount: 5
+    resumeCount: 5,
   };
 
   const mockJob: Job = {
@@ -16,16 +21,16 @@ describe('Job Actions', () => {
     jdText: '招聘软件工程师...',
     status: 'completed',
     createdAt: new Date('2024-01-01'),
-    resumeCount: 5
+    resumeCount: 5,
   };
 
   const mockCreateJobRequest: CreateJobRequest = {
     jobTitle: '新岗位',
-    jdText: '这是一个新岗位的描述'
+    jdText: '这是一个新岗位的描述',
   };
 
   const mockCreateJobResponse: CreateJobResponse = {
-    jobId: 'new-job-id'
+    jobId: 'new-job-id',
   };
 
   describe('Load Jobs Actions', () => {
@@ -79,7 +84,9 @@ describe('Job Actions', () => {
     });
 
     it('should create createJobSuccess action', () => {
-      const action = JobActions.createJobSuccess({ response: mockCreateJobResponse });
+      const action = JobActions.createJobSuccess({
+        response: mockCreateJobResponse,
+      });
       expect(action.type).toBe('[Job] Create Job Success');
       expect(action.response).toEqual(mockCreateJobResponse);
     });

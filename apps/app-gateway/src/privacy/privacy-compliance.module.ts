@@ -11,11 +11,11 @@ import { UserProfile, UserProfileSchema } from '../schemas/user-profile.schema';
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: UserProfile.name, schema: UserProfileSchema }
-    ])
+      { name: UserProfile.name, schema: UserProfileSchema },
+    ]),
   ],
   controllers: [PrivacyComplianceController],
   providers: [PrivacyComplianceService],
-  exports: [PrivacyComplianceService]
+  exports: [PrivacyComplianceService],
 })
 export class PrivacyComplianceModule {}

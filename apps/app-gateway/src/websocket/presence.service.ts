@@ -43,10 +43,10 @@ export class PresenceService {
    * Update user online status
    */
   async updateUserStatus(
-    userId: string, 
+    userId: string,
     status: 'online' | 'away' | 'offline',
     sessionId?: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
   ): Promise<void> {
     this.logger.debug(`Updating status for user ${userId}: ${status}`);
 
@@ -57,10 +57,11 @@ export class PresenceService {
       userId,
       status,
       lastSeen: now,
-      sessionId: sessionId || currentPresence?.sessionId || `session_${Date.now()}`,
+      sessionId:
+        sessionId || currentPresence?.sessionId || `session_${Date.now()}`,
       location: currentPresence?.location,
       device: currentPresence?.device,
-      metadata: { ...currentPresence?.metadata, ...metadata }
+      metadata: { ...currentPresence?.metadata, ...metadata },
     };
 
     this.userPresence.set(userId, presence);
@@ -68,7 +69,7 @@ export class PresenceService {
     // Track session mapping
     if (sessionId) {
       this.sessionToUser.set(sessionId, userId);
-      
+
       if (!this.userSessions.has(userId)) {
         this.userSessions.set(userId, new Set());
       }
@@ -85,10 +86,10 @@ export class PresenceService {
    * Track user session
    */
   async trackUserSession(
-    userId: string, 
-    sessionId: string, 
+    userId: string,
+    sessionId: string,
     device?: DeviceInfo,
-    location?: string
+    location?: string,
   ): Promise<void> {
     this.logger.debug(`Tracking session ${sessionId} for user ${userId}`);
 
@@ -102,7 +103,7 @@ export class PresenceService {
       sessionId,
       location,
       device,
-      metadata: currentPresence?.metadata || {}
+      metadata: currentPresence?.metadata || {},
     };
 
     this.userPresence.set(userId, presence);
@@ -123,7 +124,7 @@ export class PresenceService {
     // For room-based presence, we'd need to track room memberships
     // For now, return all online users as a simplified implementation
     const onlineUsers: PresenceInfo[] = [];
-    
+
     for (const presence of this.userPresence.values()) {
       if (presence.status === 'online') {
         onlineUsers.push(presence);
@@ -162,7 +163,7 @@ export class PresenceService {
    */
   async getOnlineUsers(): Promise<PresenceInfo[]> {
     const onlineUsers: PresenceInfo[] = [];
-    
+
     for (const presence of this.userPresence.values()) {
       if (presence.status === 'online') {
         onlineUsers.push(presence);
@@ -176,13 +177,15 @@ export class PresenceService {
    * Track user activity
    */
   async trackActivity(activity: UserActivity): Promise<void> {
-    this.logger.debug(`Tracking activity for user ${activity.userId}: ${activity.action}`);
+    this.logger.debug(
+      `Tracking activity for user ${activity.userId}: ${activity.action}`,
+    );
 
     const presence = this.userPresence.get(activity.userId);
     if (presence) {
       presence.lastSeen = activity.timestamp;
       presence.location = activity.location || presence.location;
-      
+
       // Update status to online if user is active
       if (presence.status === 'away') {
         presence.status = 'online';
@@ -213,7 +216,9 @@ export class PresenceService {
    * Set user as offline and cleanup session
    */
   async setUserOffline(userId: string, sessionId?: string): Promise<void> {
-    this.logger.debug(`Setting user ${userId} offline${sessionId ? ` (session: ${sessionId})` : ''}`);
+    this.logger.debug(
+      `Setting user ${userId} offline${sessionId ? ` (session: ${sessionId})` : ''}`,
+    );
 
     const presence = this.userPresence.get(userId);
     if (presence) {
@@ -245,7 +250,7 @@ export class PresenceService {
    */
   async getUserCountByStatus(): Promise<Record<string, number>> {
     const counts = { online: 0, away: 0, offline: 0 };
-    
+
     for (const presence of this.userPresence.values()) {
       counts[presence.status]++;
     }
@@ -305,9 +310,12 @@ export class PresenceService {
    */
   private setupPeriodicCleanup(): void {
     // Cleanup every 5 minutes
-    setInterval(() => {
-      this.cleanupStalePresence();
-    }, 5 * 60 * 1000);
+    setInterval(
+      () => {
+        this.cleanupStalePresence();
+      },
+      5 * 60 * 1000,
+    );
   }
 
   /**
@@ -329,7 +337,9 @@ export class PresenceService {
     }
 
     if (usersToCleanup.length > 0) {
-      this.logger.log(`Cleaned up ${usersToCleanup.length} stale presence records`);
+      this.logger.log(
+        `Cleaned up ${usersToCleanup.length} stale presence records`,
+      );
     }
   }
 
@@ -351,7 +361,7 @@ export class PresenceService {
       onlineUsers: counts.online,
       awayUsers: counts.away,
       offlineUsers: counts.offline,
-      activeSessions
+      activeSessions,
     };
   }
 }

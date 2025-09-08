@@ -4,7 +4,14 @@
  */
 
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
-import { connect, NatsConnection, JetStreamManager, JetStreamClient } from 'nats';
+import {
+  connect,
+  NatsConnection,
+  JetStreamManager,
+  JetStreamClient,
+  RetentionPolicy,
+  headers as natsHeaders,
+} from 'nats';
 
 export interface NatsConfig {
   servers: string[];
@@ -79,14 +86,20 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
     }
 
     try {
-      const headers = pattern.headers || {};
-      headers['source'] = this.config.serviceName;
-      headers['timestamp'] = new Date().toISOString();
+      const hdrs = natsHeaders();
+      // set provided headers first
+      const provided = pattern.headers || {};
+      for (const [k, v] of Object.entries(provided)) {
+        hdrs.set(k, v);
+      }
+      // add standard headers
+      hdrs.set('source', this.config.serviceName);
+      hdrs.set('timestamp', new Date().toISOString());
 
       await this.jetstream.publish(
         pattern.subject,
         JSON.stringify(pattern.data),
-        { headers }
+        { headers: hdrs }
       );
 
       this.logger.debug(`Published message to ${pattern.subject}`);
@@ -200,7 +213,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
       await this.jsm.streams.add({
         name: streamName,
         subjects: subjects,
-        retention: 'limits',
+        retention: RetentionPolicy.Limits,
         max_msgs: 10000,
         max_bytes: 100 * 1024 * 1024, // 100MB
       });

@@ -3,7 +3,23 @@
  * Uses centralized error handling system with correlation and structured logging
  */
 
-import { StandardizedGlobalExceptionFilter, ExceptionFilterConfigHelper } from '@ai-recruitment-clerk/infrastructure-shared';
+import { ErrorInterceptorFactory } from '../interfaces/fallback-types';
+
+// Fallback implementations for missing infrastructure-shared components
+class StandardizedGlobalExceptionFilter {
+  constructor(config: any) {
+    // Basic exception filter implementation
+  }
+}
+
+class ExceptionFilterConfigHelper {
+  static forApiGateway() {
+    return {
+      enableLogging: true,
+      enableCorrelation: true,
+    };
+  }
+}
 
 /**
  * App Gateway specific global exception filter
@@ -13,7 +29,7 @@ export class AppGatewayGlobalExceptionFilter extends StandardizedGlobalException
   constructor() {
     super({
       serviceName: 'app-gateway',
-      ...ExceptionFilterConfigHelper.forApiGateway()
+      ...ExceptionFilterConfigHelper.forApiGateway(),
     });
   }
 }

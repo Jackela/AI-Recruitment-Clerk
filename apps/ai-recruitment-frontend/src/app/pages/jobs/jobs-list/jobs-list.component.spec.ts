@@ -23,15 +23,15 @@ describe('JobsListComponent', () => {
       title: '软件工程师',
       status: 'completed',
       createdAt: new Date('2024-01-01'),
-      resumeCount: 5
+      resumeCount: 5,
     },
     {
       id: '2',
       title: '产品经理',
       status: 'processing',
       createdAt: new Date('2024-01-02'),
-      resumeCount: 2
-    }
+      resumeCount: 2,
+    },
   ];
 
   const initialState: Partial<AppState> = {
@@ -39,8 +39,8 @@ describe('JobsListComponent', () => {
       ...initialJobState,
       jobs: mockJobs,
       loading: false,
-      error: null
-    }
+      error: null,
+    },
   };
 
   beforeEach(async () => {
@@ -49,12 +49,10 @@ describe('JobsListComponent', () => {
         JobsListComponent,
         RouterTestingModule.withRoutes([
           { path: 'jobs/create', component: JobsListComponent },
-          { path: 'jobs/:id', component: JobsListComponent }
-        ])
+          { path: 'jobs/:id', component: JobsListComponent },
+        ]),
       ],
-      providers: [
-        provideMockStore({ initialState })
-      ]
+      providers: [provideMockStore({ initialState })],
     }).compileComponents();
 
     fixture = TestBed.createComponent(JobsListComponent);
@@ -91,7 +89,9 @@ describe('JobsListComponent', () => {
     });
 
     it('should render create new job button', () => {
-      const createButton = fixture.debugElement.query(By.css('a[routerLink="/jobs/create"]'));
+      const createButton = fixture.debugElement.query(
+        By.css('a[routerLink="/jobs/create"]'),
+      );
       expect(createButton).toBeTruthy();
       expect(createButton.nativeElement.textContent.trim()).toBe('创建新岗位');
     });
@@ -120,7 +120,9 @@ describe('JobsListComponent', () => {
     });
 
     it('should render resume counts', () => {
-      const resumeCounts = fixture.debugElement.queryAll(By.css('.resume-count'));
+      const resumeCounts = fixture.debugElement.queryAll(
+        By.css('.resume-count'),
+      );
       expect(resumeCounts[0].nativeElement.textContent.trim()).toContain('5');
       expect(resumeCounts[1].nativeElement.textContent.trim()).toContain('2');
     });
@@ -133,8 +135,8 @@ describe('JobsListComponent', () => {
           ...initialJobState,
           jobs: [],
           loading: true,
-          error: null
-        }
+          error: null,
+        },
       } as AppState);
       fixture.detectChanges();
     });
@@ -164,8 +166,8 @@ describe('JobsListComponent', () => {
           ...initialJobState,
           jobs: [],
           loading: false,
-          error: errorMessage
-        }
+          error: errorMessage,
+        },
       } as AppState);
       fixture.detectChanges();
     });
@@ -184,8 +186,8 @@ describe('JobsListComponent', () => {
           ...initialJobState,
           jobs: [],
           loading: false,
-          error: null
-        }
+          error: null,
+        },
       } as AppState);
       fixture.detectChanges();
     });
@@ -196,12 +198,16 @@ describe('JobsListComponent', () => {
     });
 
     it('should display empty state message', () => {
-      const emptyStateTitle = fixture.debugElement.query(By.css('.empty-state h3'));
+      const emptyStateTitle = fixture.debugElement.query(
+        By.css('.empty-state h3'),
+      );
       expect(emptyStateTitle.nativeElement.textContent.trim()).toBe('暂无岗位');
     });
 
     it('should show create job button in empty state', () => {
-      const createButton = fixture.debugElement.query(By.css('.empty-state a[routerLink="/jobs/create"]'));
+      const createButton = fixture.debugElement.query(
+        By.css('.empty-state a[routerLink="/jobs/create"]'),
+      );
       expect(createButton).toBeTruthy();
     });
   });
@@ -214,7 +220,7 @@ describe('JobsListComponent', () => {
     it('should dispatch loadJobs action when refresh button is clicked', () => {
       const refreshButton = fixture.debugElement.query(By.css('button'));
       refreshButton.nativeElement.click();
-      
+
       expect(dispatchSpy).toHaveBeenCalledWith(JobActions.loadJobs());
     });
 
@@ -222,7 +228,7 @@ describe('JobsListComponent', () => {
       jest.spyOn(component, 'onRefresh');
       const refreshButton = fixture.debugElement.query(By.css('button'));
       refreshButton.nativeElement.click();
-      
+
       expect(component.onRefresh).toHaveBeenCalled();
     });
 
@@ -233,19 +239,21 @@ describe('JobsListComponent', () => {
           ...initialJobState,
           jobs: mockJobs,
           loading: false,
-          error: null
-        }
+          error: null,
+        },
       } as AppState);
       fixture.detectChanges();
-      
+
       // First check if job cards exist at all
       const allJobCards = fixture.debugElement.queryAll(By.css('.job-card'));
       expect(allJobCards.length).toBe(2);
-      
+
       // Check that RouterLink directives exist in the template
-      const routerLinkElements = fixture.debugElement.queryAll(By.directive(RouterLinkWithHref));
+      const routerLinkElements = fixture.debugElement.queryAll(
+        By.directive(RouterLinkWithHref),
+      );
       expect(routerLinkElements.length).toBeGreaterThanOrEqual(2); // At least job cards + create button
-      
+
       // Basic verification that job cards can be clicked
       expect(allJobCards[0].nativeElement.tagName.toLowerCase()).toBe('div');
       expect(allJobCards[1].nativeElement.tagName.toLowerCase()).toBe('div');
@@ -278,9 +286,9 @@ describe('JobsListComponent', () => {
     it('should complete destroy subject on ngOnDestroy', () => {
       jest.spyOn(component['destroy$'], 'next');
       jest.spyOn(component['destroy$'], 'complete');
-      
+
       component.ngOnDestroy();
-      
+
       expect(component['destroy$'].next).toHaveBeenCalled();
       expect(component['destroy$'].complete).toHaveBeenCalled();
     });
@@ -294,18 +302,20 @@ describe('JobsListComponent', () => {
           ...initialJobState,
           jobs: mockJobs,
           loading: false,
-          error: null
-        }
+          error: null,
+        },
       } as AppState);
       fixture.detectChanges();
-      
+
       const jobsGrid = fixture.debugElement.query(By.css('.jobs-grid'));
       expect(jobsGrid).toBeTruthy();
     });
 
     it('should render properly on mobile viewports', () => {
       // This would be better tested with actual viewport changes in e2e tests
-      const headerActions = fixture.debugElement.query(By.css('.header-actions'));
+      const headerActions = fixture.debugElement.query(
+        By.css('.header-actions'),
+      );
       expect(headerActions).toBeTruthy();
     });
   });

@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 export interface ServiceHealth {
@@ -40,10 +36,10 @@ export class HealthCheckService implements OnModuleInit {
 
   async onModuleInit() {
     this.logger.log('Initializing health check service');
-    
+
     // Register default health checks
     this.registerDefaultHealthChecks();
-    
+
     // Perform initial health checks
     await this.performAllHealthChecks();
   }
@@ -55,14 +51,14 @@ export class HealthCheckService implements OnModuleInit {
       enabled: true,
       ...config,
     });
-    
+
     this.logger.debug(`Registered health check for ${config.name}`);
   }
 
   async getSystemHealth(): Promise<SystemHealth> {
     const services = Array.from(this.serviceHealths.values());
     const overall = this.calculateOverallHealth(services);
-    
+
     return {
       overall,
       services,
@@ -77,10 +73,12 @@ export class HealthCheckService implements OnModuleInit {
   }
 
   async checkServiceHealth(serviceName: string): Promise<ServiceHealth> {
-    const config = this.healthCheckConfigs.find(c => c.name === serviceName);
-    
+    const config = this.healthCheckConfigs.find((c) => c.name === serviceName);
+
     if (!config) {
-      throw new Error(`Health check configuration not found for ${serviceName}`);
+      throw new Error(
+        `Health check configuration not found for ${serviceName}`,
+      );
     }
 
     return await this.performHealthCheck(config);
@@ -96,10 +94,10 @@ export class HealthCheckService implements OnModuleInit {
   }
 
   private async performAllHealthChecks(): Promise<void> {
-    const enabledConfigs = this.healthCheckConfigs.filter(c => c.enabled);
-    
-    const healthCheckPromises = enabledConfigs.map(config =>
-      this.performHealthCheck(config).catch(error => {
+    const enabledConfigs = this.healthCheckConfigs.filter((c) => c.enabled);
+
+    const healthCheckPromises = enabledConfigs.map((config) =>
+      this.performHealthCheck(config).catch((error) => {
         this.logger.error(`Health check failed for ${config.name}:`, error);
         return {
           name: config.name,
@@ -107,22 +105,24 @@ export class HealthCheckService implements OnModuleInit {
           lastCheck: new Date(),
           error: error.message,
         };
-      })
+      }),
     );
 
     const results = await Promise.all(healthCheckPromises);
-    
-    results.forEach(result => {
+
+    results.forEach((result) => {
       this.serviceHealths.set(result.name, result);
     });
   }
 
-  private async performHealthCheck(config: HealthCheckConfig): Promise<ServiceHealth> {
+  private async performHealthCheck(
+    config: HealthCheckConfig,
+  ): Promise<ServiceHealth> {
     const startTime = Date.now();
-    
+
     try {
       let result: { healthy: boolean; metadata?: any };
-      
+
       if (config.healthCheck) {
         // Custom health check function
         result = await Promise.race([
@@ -137,7 +137,7 @@ export class HealthCheckService implements OnModuleInit {
       }
 
       const responseTime = Date.now() - startTime;
-      
+
       return {
         name: config.name,
         status: result.healthy ? 'healthy' : 'unhealthy',
@@ -147,7 +147,7 @@ export class HealthCheckService implements OnModuleInit {
       };
     } catch (error) {
       const responseTime = Date.now() - startTime;
-      
+
       return {
         name: config.name,
         status: 'unhealthy',
@@ -160,16 +160,16 @@ export class HealthCheckService implements OnModuleInit {
 
   private async performHttpHealthCheck(
     url: string,
-    timeout: number
+    timeout: number,
   ): Promise<{ healthy: boolean; metadata?: any }> {
     try {
       // Mock HTTP health check - replace with actual HTTP client
       // const response = await fetch(url, { timeout });
       // const healthy = response.ok;
-      
+
       // Mock implementation
       const healthy = Math.random() > 0.1; // 90% success rate
-      
+
       return {
         healthy,
         metadata: {
@@ -196,14 +196,20 @@ export class HealthCheckService implements OnModuleInit {
     });
   }
 
-  private calculateOverallHealth(services: ServiceHealth[]): 'healthy' | 'degraded' | 'unhealthy' {
+  private calculateOverallHealth(
+    services: ServiceHealth[],
+  ): 'healthy' | 'degraded' | 'unhealthy' {
     if (services.length === 0) {
       return 'healthy';
     }
 
-    const healthyCount = services.filter(s => s.status === 'healthy').length;
-    const degradedCount = services.filter(s => s.status === 'degraded').length;
-    const unhealthyCount = services.filter(s => s.status === 'unhealthy').length;
+    const healthyCount = services.filter((s) => s.status === 'healthy').length;
+    const degradedCount = services.filter(
+      (s) => s.status === 'degraded',
+    ).length;
+    const unhealthyCount = services.filter(
+      (s) => s.status === 'unhealthy',
+    ).length;
 
     // If more than 50% are unhealthy, system is unhealthy
     if (unhealthyCount > services.length * 0.5) {
@@ -248,65 +254,73 @@ export class HealthCheckService implements OnModuleInit {
           const redisUrl = process.env.REDIS_URL;
           const useRedis = process.env.USE_REDIS_CACHE !== 'false';
           const disableRedis = process.env.DISABLE_REDIS === 'true';
-          
+
           if (!useRedis || disableRedis || !redisUrl) {
             return {
               healthy: true,
               metadata: {
                 mode: 'memory-cache',
                 redis_enabled: false,
-                reason: !redisUrl ? 'no_url' : 'disabled'
-              }
+                reason: !redisUrl ? 'no_url' : 'disabled',
+              },
             };
           }
-          
+
           // 检查Redis URL格式
-          if (!redisUrl.startsWith('redis://') && !redisUrl.startsWith('rediss://')) {
+          if (
+            !redisUrl.startsWith('redis://') &&
+            !redisUrl.startsWith('rediss://')
+          ) {
             return {
               healthy: false,
               metadata: {
                 mode: 'memory-cache',
                 error: 'invalid_redis_url',
-                url_format: 'invalid'
-              }
+                url_format: 'invalid',
+              },
             };
           }
-          
+
           // 尝试连接Redis
           const { createClient } = await import('redis');
-          const client = createClient({ 
+          const client = createClient({
             url: redisUrl,
             socket: {
-              connectTimeout: 5000
+              connectTimeout: 5000,
             },
-            commandsQueueMaxLength: 100
+            commandsQueueMaxLength: 100,
           });
-          
+
           // 设置错误处理器防止未处理的错误
-          client.on('error', () => {});
-          
+          client.on('error', (error) => {
+            this.logger.debug(
+              'Redis connection error during health check:',
+              error,
+            );
+          });
+
           await client.connect();
           const pong = await client.ping();
           const info = await client.info('memory');
           await client.disconnect();
-          
+
           return {
             healthy: pong === 'PONG',
             metadata: {
               mode: 'redis',
               ping: pong,
               connected: true,
-              server_info: 'available'
-            }
+              server_info: 'available',
+            },
           };
         } catch (error) {
-          return { 
+          return {
             healthy: false,
             metadata: {
               mode: 'memory-cache-fallback',
               error: error.message,
-              fallback_active: true
-            }
+              fallback_active: true,
+            },
           };
         }
       },
@@ -340,7 +354,7 @@ export class HealthCheckService implements OnModuleInit {
       'report-generator-svc',
     ];
 
-    externalServices.forEach(service => {
+    externalServices.forEach((service) => {
       this.registerHealthCheck({
         name: service,
         url: `http://${service}:3000/health`,

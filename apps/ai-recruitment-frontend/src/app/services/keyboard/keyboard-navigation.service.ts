@@ -18,24 +18,27 @@ export interface NavigationState {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class KeyboardNavigationService {
   // State management
   private _shortcuts = new Map<string, KeyboardShortcut>(); // Reserved for keyboard shortcuts implementation
   private globalShortcuts: KeyboardShortcut[] = [];
   private contextShortcuts = new Map<string, KeyboardShortcut[]>();
-  
+
   // Navigation state
   private navigationState = signal<NavigationState>({
-    currentPage: ''
+    currentPage: '',
   });
-  
+
   // Help overlay
   showKeyboardHelp = signal(false);
-  
+
   // Events
-  private shortcutTriggered$ = new Subject<{shortcut: KeyboardShortcut; event: KeyboardEvent}>();
+  private shortcutTriggered$ = new Subject<{
+    shortcut: KeyboardShortcut;
+    event: KeyboardEvent;
+  }>();
 
   constructor() {
     this.initializeGlobalShortcuts();
@@ -48,69 +51,69 @@ export class KeyboardNavigationService {
       key: 'h',
       altKey: true,
       description: '显示/隐藏快捷键帮助',
-      action: () => this._toggleKeyboardHelp()
+      action: () => this._toggleKeyboardHelp(),
     });
 
     this.registerGlobalShortcut({
       key: '1',
       altKey: true,
       description: '跳转到首页',
-      action: () => this.navigateToPage('/')
+      action: () => this.navigateToPage('/'),
     });
 
     this.registerGlobalShortcut({
       key: '2',
       altKey: true,
       description: '跳转到分析页面',
-      action: () => this.navigateToPage('/analysis')
+      action: () => this.navigateToPage('/analysis'),
     });
 
     this.registerGlobalShortcut({
       key: '3',
       altKey: true,
       description: '跳转到结果页面',
-      action: () => this.navigateToPage('/results')
+      action: () => this.navigateToPage('/results'),
     });
 
     this.registerGlobalShortcut({
       key: 'Escape',
       description: '关闭弹窗/返回',
-      action: () => this._handleEscape()
+      action: () => this._handleEscape(),
     });
 
     this.registerGlobalShortcut({
       key: 'u',
       ctrlKey: true,
       description: '上传文件',
-      action: () => this._triggerFileUpload()
+      action: () => this._triggerFileUpload(),
     });
 
     this.registerGlobalShortcut({
       key: 's',
       ctrlKey: true,
       description: '开始分析',
-      action: () => this._startAnalysis()
+      action: () => this._startAnalysis(),
     });
 
     this.registerGlobalShortcut({
       key: 'e',
       ctrlKey: true,
       description: '导出结果',
-      action: () => this._exportResults()
+      action: () => this._exportResults(),
     });
 
     // Focus management
     this.registerGlobalShortcut({
       key: 'Tab',
       description: '下一个焦点元素',
-      action: () => this._focusNext()
+      action: () => this._focusNext(),
     });
 
     this.registerGlobalShortcut({
       key: 'Tab',
       shiftKey: true,
       description: '上一个焦点元素',
-      action: () => this._focusPrevious()
+      action: () => this._focusPrevious(),
     });
   }
 
@@ -132,10 +135,10 @@ export class KeyboardNavigationService {
     }
 
     // Check shortcuts without storing key
-    
+
     // Check global shortcuts first
-    const globalShortcut = this.globalShortcuts.find(s => 
-      this.matchesShortcut(s, event)
+    const globalShortcut = this.globalShortcuts.find((s) =>
+      this.matchesShortcut(s, event),
     );
 
     if (globalShortcut) {
@@ -148,9 +151,9 @@ export class KeyboardNavigationService {
     // Check context-specific shortcuts
     const currentContext = this.getCurrentContext();
     const contextShortcuts = this.contextShortcuts.get(currentContext) || [];
-    
-    const contextShortcut = contextShortcuts.find(s => 
-      this.matchesShortcut(s, event)
+
+    const contextShortcut = contextShortcuts.find((s) =>
+      this.matchesShortcut(s, event),
     );
 
     if (contextShortcut) {
@@ -165,14 +168,14 @@ export class KeyboardNavigationService {
     if (target) {
       // Add focus indicator for keyboard navigation
       target.classList.add('keyboard-focused');
-      
+
       // Remove indicator on mouse interaction
       const removeIndicator = () => {
         target.classList.remove('keyboard-focused');
         target.removeEventListener('mousedown', removeIndicator);
         target.removeEventListener('mouseup', removeIndicator);
       };
-      
+
       target.addEventListener('mousedown', removeIndicator);
       target.addEventListener('mouseup', removeIndicator);
     }
@@ -184,12 +187,16 @@ export class KeyboardNavigationService {
 
     const inputElements = ['INPUT', 'TEXTAREA', 'SELECT'];
     const isInput = inputElements.includes(activeElement.tagName);
-    const isContentEditable = activeElement.getAttribute('contenteditable') === 'true';
-    
+    const isContentEditable =
+      activeElement.getAttribute('contenteditable') === 'true';
+
     return isInput || isContentEditable;
   }
 
-  private matchesShortcut(shortcut: KeyboardShortcut, event: KeyboardEvent): boolean {
+  private matchesShortcut(
+    shortcut: KeyboardShortcut,
+    event: KeyboardEvent,
+  ): boolean {
     return (
       shortcut.key.toLowerCase() === event.key.toLowerCase() &&
       !!shortcut.ctrlKey === event.ctrlKey &&
@@ -231,23 +238,29 @@ export class KeyboardNavigationService {
     if (context) {
       const shortcuts = this.contextShortcuts.get(context);
       if (shortcuts) {
-        const index = shortcuts.findIndex(s => this.createShortcutKey({
-          key: s.key,
-          ctrlKey: s.ctrlKey,
-          altKey: s.altKey,
-          shiftKey: s.shiftKey
-        } as KeyboardEvent) === key);
+        const index = shortcuts.findIndex(
+          (s) =>
+            this.createShortcutKey({
+              key: s.key,
+              ctrlKey: s.ctrlKey,
+              altKey: s.altKey,
+              shiftKey: s.shiftKey,
+            } as KeyboardEvent) === key,
+        );
         if (index > -1) {
           shortcuts.splice(index, 1);
         }
       }
     } else {
-      const index = this.globalShortcuts.findIndex(s => this.createShortcutKey({
-        key: s.key,
-        ctrlKey: s.ctrlKey,
-        altKey: s.altKey,
-        shiftKey: s.shiftKey
-      } as KeyboardEvent) === key);
+      const index = this.globalShortcuts.findIndex(
+        (s) =>
+          this.createShortcutKey({
+            key: s.key,
+            ctrlKey: s.ctrlKey,
+            altKey: s.altKey,
+            shiftKey: s.shiftKey,
+          } as KeyboardEvent) === key,
+      );
       if (index > -1) {
         this.globalShortcuts.splice(index, 1);
       }
@@ -260,9 +273,9 @@ export class KeyboardNavigationService {
     this.navigationState.set({
       currentPage: path,
       previousPage: currentState.currentPage,
-      preservedState: this.preserveCurrentState()
+      preservedState: this.preserveCurrentState(),
     });
-    
+
     // Use Angular Router if available
     if ((window as any).ngRouter) {
       (window as any).ngRouter.navigate([path]);
@@ -277,37 +290,39 @@ export class KeyboardNavigationService {
       scrollTop: window.scrollY,
       scrollLeft: window.scrollX,
       formData: this.extractFormData(),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 
   private extractFormData(): Record<string, any> {
     const formData: Record<string, any> = {};
     const inputs = document.querySelectorAll('input, textarea, select');
-    
+
     inputs.forEach((input: any) => {
       if (input.name || input.id) {
         const key = input.name || input.id;
         formData[key] = input.value;
       }
     });
-    
+
     return formData;
   }
 
-  // Reserved for future state restoration functionality  
+  // Reserved for future state restoration functionality
   // @ts-expect-error Reserved for future state restoration
   private _restoreState(state: any): void {
     if (!state) return;
-    
+
     // Restore scroll position
     setTimeout(() => {
       window.scrollTo(state.scrollLeft || 0, state.scrollTop || 0);
     }, 100);
-    
+
     // Restore form data
     Object.entries(state.formData || {}).forEach(([key, value]) => {
-      const element = document.querySelector(`[name="${key}"], #${key}`) as HTMLInputElement;
+      const element = document.querySelector(
+        `[name="${key}"], #${key}`,
+      ) as HTMLInputElement;
       if (element) {
         element.value = value as string;
       }
@@ -323,9 +338,13 @@ export class KeyboardNavigationService {
     }
 
     // Check for open modals or overlays
-    const modal = document.querySelector('.modal, .overlay, .guide-overlay-container');
+    const modal = document.querySelector(
+      '.modal, .overlay, .guide-overlay-container',
+    );
     if (modal) {
-      const closeButton = modal.querySelector('.close, .cancel, [aria-label*="关闭"]') as HTMLElement;
+      const closeButton = modal.querySelector(
+        '.close, .cancel, [aria-label*="关闭"]',
+      ) as HTMLElement;
       if (closeButton) {
         closeButton.click();
         return;
@@ -340,21 +359,27 @@ export class KeyboardNavigationService {
   }
 
   private _triggerFileUpload(): void {
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const fileInput = document.querySelector(
+      'input[type="file"]',
+    ) as HTMLInputElement;
     if (fileInput) {
       fileInput.click();
     }
   }
 
   private _startAnalysis(): void {
-    const startButton = document.querySelector('.start-analysis-btn, [class*="start"], [class*="analyze"]') as HTMLElement;
+    const startButton = document.querySelector(
+      '.start-analysis-btn, [class*="start"], [class*="analyze"]',
+    ) as HTMLElement;
     if (startButton && !startButton.hasAttribute('disabled')) {
       startButton.click();
     }
   }
 
   private _exportResults(): void {
-    const exportButton = document.querySelector('.export-btn, [class*="export"]') as HTMLElement;
+    const exportButton = document.querySelector(
+      '.export-btn, [class*="export"]',
+    ) as HTMLElement;
     if (exportButton) {
       exportButton.click();
     }
@@ -362,21 +387,26 @@ export class KeyboardNavigationService {
 
   private _focusNext(): void {
     const focusableElements = this.getFocusableElements();
-    const currentIndex = Array.from(focusableElements).indexOf(document.activeElement as HTMLElement);
+    const currentIndex = Array.from(focusableElements).indexOf(
+      document.activeElement as HTMLElement,
+    );
     const nextIndex = (currentIndex + 1) % focusableElements.length;
     (focusableElements[nextIndex] as HTMLElement).focus();
   }
 
   private _focusPrevious(): void {
     const focusableElements = this.getFocusableElements();
-    const currentIndex = Array.from(focusableElements).indexOf(document.activeElement as HTMLElement);
-    const prevIndex = currentIndex === 0 ? focusableElements.length - 1 : currentIndex - 1;
+    const currentIndex = Array.from(focusableElements).indexOf(
+      document.activeElement as HTMLElement,
+    );
+    const prevIndex =
+      currentIndex === 0 ? focusableElements.length - 1 : currentIndex - 1;
     (focusableElements[prevIndex] as HTMLElement).focus();
   }
 
   private getFocusableElements(): NodeListOf<Element> {
     return document.querySelectorAll(
-      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
     );
   }
 
@@ -385,7 +415,10 @@ export class KeyboardNavigationService {
   }
 
   // Help system
-  getAllShortcuts(): { global: KeyboardShortcut[]; contexts: Record<string, KeyboardShortcut[]> } {
+  getAllShortcuts(): {
+    global: KeyboardShortcut[];
+    contexts: Record<string, KeyboardShortcut[]>;
+  } {
     const contexts: Record<string, KeyboardShortcut[]> = {};
     this.contextShortcuts.forEach((shortcuts, context) => {
       contexts[context] = shortcuts;
@@ -393,7 +426,7 @@ export class KeyboardNavigationService {
 
     return {
       global: this.globalShortcuts,
-      contexts
+      contexts,
     };
   }
 
@@ -426,9 +459,9 @@ export class KeyboardNavigationService {
     announcement.style.height = '1px';
     announcement.style.overflow = 'hidden';
     announcement.textContent = message;
-    
+
     document.body.appendChild(announcement);
-    
+
     setTimeout(() => {
       document.body.removeChild(announcement);
     }, 1000);

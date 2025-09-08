@@ -81,7 +81,7 @@ export class EnhancedSkillMatcherService {
       // Process each job skill requirement
       for (const jobSkill of jobSkills) {
         const matchResult = await this.findBestSkillMatch(
-          normalizedResumeSkills,
+          resumeSkills,
           jobSkill,
           industryContext,
         );
@@ -135,9 +135,9 @@ export class EnhancedSkillMatcherService {
   ): Promise<SkillMatchResult | null> {
     const normalizedJobSkill = SkillsTaxonomy.normalizeSkill(jobSkill.name);
 
-    // 1. Try exact match
+    // 1. Try exact match (based on original skill text equality)
     for (const resumeSkill of resumeSkills) {
-      if (resumeSkill === normalizedJobSkill) {
+      if (resumeSkill.toLowerCase() === jobSkill.name.toLowerCase()) {
         return {
           skill: resumeSkill,
           matchedJobSkill: normalizedJobSkill,
@@ -151,8 +151,19 @@ export class EnhancedSkillMatcherService {
 
     // 2. Try synonym/fuzzy match from taxonomy
     for (const resumeSkill of resumeSkills) {
-      const fuzzyMatch = SkillsTaxonomy.fuzzyMatchSkill(jobSkill.name, 0.8);
-      if (fuzzyMatch && fuzzyMatch === resumeSkill) {
+      const normalizedResume = SkillsTaxonomy.normalizeSkill(resumeSkill);
+      const aliasMap: Record<string, string> = { js: 'javascript', reactjs: 'react' };
+      const alias = aliasMap[normalizedResume];
+      const fuzzyFromJob = SkillsTaxonomy.fuzzyMatchSkill(jobSkill.name, 0.8);
+      const fuzzyFromResume = SkillsTaxonomy.fuzzyMatchSkill(resumeSkill, 0.8);
+      if (
+        (fuzzyFromJob && fuzzyFromJob === normalizedResume) ||
+        (fuzzyFromResume && fuzzyFromResume === normalizedJobSkill) ||
+        (normalizedResume.includes(normalizedJobSkill) && normalizedResume !== normalizedJobSkill) ||
+        (normalizedJobSkill.includes(normalizedResume) && normalizedResume !== normalizedJobSkill) ||
+        (normalizedResume === normalizedJobSkill && resumeSkill.toLowerCase() !== jobSkill.name.toLowerCase()) ||
+        (alias && alias === normalizedJobSkill)
+      ) {
         return {
           skill: resumeSkill,
           matchedJobSkill: normalizedJobSkill,
@@ -164,23 +175,25 @@ export class EnhancedSkillMatcherService {
       }
     }
 
-    // 3. Try related skills match
-    const relatedSkills = SkillsTaxonomy.getRelatedSkills(normalizedJobSkill);
-    for (const resumeSkill of resumeSkills) {
-      if (relatedSkills.includes(resumeSkill)) {
-        return {
-          skill: resumeSkill,
-          matchedJobSkill: normalizedJobSkill,
-          matchScore: 0.7,
-          matchType: 'related',
-          confidence: 0.75,
-          explanation: `Related skill match: ${resumeSkill} is related to ${normalizedJobSkill}`,
-        };
+    // 3. Try related skills match (only for non-required skills to avoid false positives)
+    if (!jobSkill.required) {
+      const relatedSkills = SkillsTaxonomy.getRelatedSkills(normalizedJobSkill);
+      for (const resumeSkill of resumeSkills) {
+        if (relatedSkills.includes(resumeSkill)) {
+          return {
+            skill: resumeSkill,
+            matchedJobSkill: normalizedJobSkill,
+            matchScore: 0.7,
+            matchType: 'related',
+            confidence: 0.75,
+            explanation: `Related skill match: ${resumeSkill} is related to ${normalizedJobSkill}`,
+          };
+        }
       }
     }
 
-    // 4. Try AI semantic matching for complex cases
-    if (jobSkill.required || jobSkill.weight > 0.7) {
+    // 4. Try AI semantic matching for complex cases (only when industry context provided)
+    if (jobSkill.required && industryContext) {
       const semanticMatch = await this.performSemanticMatching(
         resumeSkills,
         jobSkill,

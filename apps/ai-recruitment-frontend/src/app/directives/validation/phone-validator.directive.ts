@@ -1,5 +1,10 @@
 import { Directive, forwardRef } from '@angular/core';
-import { NG_VALIDATORS, Validator, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  NG_VALIDATORS,
+  Validator,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
 
 @Directive({
   selector: '[arcPhoneValidator]',
@@ -8,9 +13,9 @@ import { NG_VALIDATORS, Validator, AbstractControl, ValidationErrors } from '@an
     {
       provide: NG_VALIDATORS,
       useExisting: forwardRef(() => PhoneValidatorDirective),
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
 export class PhoneValidatorDirective implements Validator {
   validate(control: AbstractControl): ValidationErrors | null {
@@ -22,15 +27,18 @@ export class PhoneValidatorDirective implements Validator {
     const phoneRegex = /^1[3-9]\d{9}$/;
     // Also allow international format
     const internationalRegex = /^\+?[1-9]\d{7,14}$/;
-    
-    const valid = phoneRegex.test(control.value) || internationalRegex.test(control.value);
 
-    return valid ? null : { 
-      phone: {
-        message: '请输入有效的手机号码',
-        actualValue: control.value,
-        hint: '支持中国手机号或国际格式'
-      }
-    };
+    const valid =
+      phoneRegex.test(control.value) || internationalRegex.test(control.value);
+
+    return valid
+      ? null
+      : {
+          phone: {
+            message: '请输入有效的手机号码',
+            actualValue: control.value,
+            hint: '支持中国手机号或国际格式',
+          },
+        };
   }
 }

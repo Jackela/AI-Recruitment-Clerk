@@ -20,5 +20,5 @@ export const VALIDATION_DIRECTIVES = [
   RequiredValidatorDirective,
   PatternValidatorDirective,
   MinLengthValidatorDirective,
-  ValidationFeedbackComponent
+  ValidationFeedbackComponent,
 ] as const;

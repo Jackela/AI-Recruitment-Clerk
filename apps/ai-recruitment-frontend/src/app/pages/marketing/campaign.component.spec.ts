@@ -1,4 +1,9 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
@@ -22,15 +27,15 @@ describe('CampaignComponent', () => {
     } as any;
 
     mockRouter = {
-      navigate: jest.fn()
+      navigate: jest.fn(),
     } as any;
 
     await TestBed.configureTestingModule({
       imports: [CampaignComponent],
       providers: [
         { provide: GuestUsageService, useValue: mockGuestUsageService },
-        { provide: Router, useValue: mockRouter }
-      ]
+        { provide: Router, useValue: mockRouter },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CampaignComponent);
@@ -48,8 +53,10 @@ describe('CampaignComponent', () => {
         usageCount: 2,
         isExhausted: false,
       };
-      (mockGuestUsageService.getGuestStats as jest.Mock).mockReturnValue(mockStats);
-      
+      (mockGuestUsageService.getGuestStats as jest.Mock).mockReturnValue(
+        mockStats,
+      );
+
       component.ngOnInit();
       tick();
 
@@ -60,9 +67,15 @@ describe('CampaignComponent', () => {
 
     it('使用耗尽时应该生成反馈码', fakeAsync(() => {
       const mockStats = { isExhausted: true };
-      (mockGuestUsageService.getGuestStats as jest.Mock).mockReturnValue(mockStats);
-      (mockGuestUsageService.getFeedbackCode as jest.Mock).mockReturnValue(null);
-      (mockGuestUsageService.generateFeedbackCode as jest.Mock).mockReturnValue('FB123456789');
+      (mockGuestUsageService.getGuestStats as jest.Mock).mockReturnValue(
+        mockStats,
+      );
+      (mockGuestUsageService.getFeedbackCode as jest.Mock).mockReturnValue(
+        null,
+      );
+      (mockGuestUsageService.generateFeedbackCode as jest.Mock).mockReturnValue(
+        'FB123456789',
+      );
 
       component.ngOnInit();
       tick();
@@ -92,7 +105,9 @@ describe('CampaignComponent', () => {
         usageCount: 2,
         isExhausted: false,
       };
-      (mockGuestUsageService.getGuestStats as jest.Mock).mockReturnValue(mockStats);
+      (mockGuestUsageService.getGuestStats as jest.Mock).mockReturnValue(
+        mockStats,
+      );
       component.ngOnInit();
       tick();
       fixture.detectChanges();
@@ -126,8 +141,12 @@ describe('CampaignComponent', () => {
       const mockStats = {
         isExhausted: true,
       };
-      (mockGuestUsageService.getGuestStats as jest.Mock).mockReturnValue(mockStats);
-      (mockGuestUsageService.getFeedbackCode as jest.Mock).mockReturnValue('FB123456789');
+      (mockGuestUsageService.getGuestStats as jest.Mock).mockReturnValue(
+        mockStats,
+      );
+      (mockGuestUsageService.getFeedbackCode as jest.Mock).mockReturnValue(
+        'FB123456789',
+      );
       component.ngOnInit();
       tick();
       fixture.detectChanges();
@@ -144,8 +163,12 @@ describe('CampaignComponent', () => {
     });
 
     it('应该显示问卷链接', () => {
-      const questionnaireBtn = fixture.debugElement.query(By.css('.questionnaire-btn'));
-      expect(questionnaireBtn.nativeElement.getAttribute('href')).toContain('wj.qq.com');
+      const questionnaireBtn = fixture.debugElement.query(
+        By.css('.questionnaire-btn'),
+      );
+      expect(questionnaireBtn.nativeElement.getAttribute('href')).toContain(
+        'wj.qq.com',
+      );
     });
   });
 
@@ -158,11 +181,11 @@ describe('CampaignComponent', () => {
 
     it('应该支持现代浏览器的clipboard API', async () => {
       const mockClipboard = {
-        writeText: jest.fn().mockReturnValue(Promise.resolve())
+        writeText: jest.fn().mockReturnValue(Promise.resolve()),
       };
       Object.defineProperty(navigator, 'clipboard', {
         value: mockClipboard,
-        writable: true
+        writable: true,
       });
 
       await component.copyFeedbackCode();
@@ -175,7 +198,6 @@ describe('CampaignComponent', () => {
         expect(component.codeCopied).toBe(false);
       }, 2100);
     });
-
   });
 
   describe('统计功能', () => {
@@ -187,22 +209,24 @@ describe('CampaignComponent', () => {
         remainingUsage: 2,
         isExhausted: false,
         maxUsage: 5,
-        usageHistory: []
+        usageHistory: [],
       };
-      (mockGuestUsageService.getGuestStats as jest.Mock).mockReturnValue(mockStats);
-      
+      (mockGuestUsageService.getGuestStats as jest.Mock).mockReturnValue(
+        mockStats,
+      );
+
       jest.spyOn(window, 'alert');
-      
+
       component.showGuestStats();
 
       expect(window.alert).toHaveBeenCalledWith(
-        expect.stringContaining('已使用：3/5 次')
+        expect.stringContaining('已使用：3/5 次'),
       );
       expect(window.alert).toHaveBeenCalledWith(
-        expect.stringContaining('首次访问：2023-01-01T10:00:00Z')
+        expect.stringContaining('首次访问：2023-01-01T10:00:00Z'),
       );
       expect(window.alert).toHaveBeenCalledWith(
-        expect.stringContaining('会话ID：session_123')
+        expect.stringContaining('会话ID：session_123'),
       );
     });
   });
@@ -218,8 +242,8 @@ describe('CampaignComponent', () => {
         '用户点击问卷链接',
         expect.objectContaining({
           feedbackCode: 'FB123456789',
-          timestamp: expect.any(String)
-        })
+          timestamp: expect.any(String),
+        }),
       );
     });
   });
@@ -235,7 +259,9 @@ describe('CampaignComponent', () => {
 
       fixture.detectChanges();
 
-      const container = fixture.debugElement.query(By.css('.campaign-container'));
+      const container = fixture.debugElement.query(
+        By.css('.campaign-container'),
+      );
       expect(container).toBeTruthy();
     });
   });
@@ -249,15 +275,19 @@ describe('CampaignComponent', () => {
         maxUsage: 5,
         firstVisit: '',
         sessionId: '',
-        usageHistory: []
+        usageHistory: [],
       });
 
       expect(() => component.ngOnInit()).not.toThrow();
     });
 
     it('应该处理未定义的反馈码', () => {
-      (mockGuestUsageService.getFeedbackCode as jest.Mock).mockReturnValue(null);
-      (mockGuestUsageService.generateFeedbackCode as jest.Mock).mockReturnValue('');
+      (mockGuestUsageService.getFeedbackCode as jest.Mock).mockReturnValue(
+        null,
+      );
+      (mockGuestUsageService.generateFeedbackCode as jest.Mock).mockReturnValue(
+        '',
+      );
 
       component.isUsageExhausted = true;
       component.ngOnInit();
@@ -269,7 +299,7 @@ describe('CampaignComponent', () => {
   describe('性能测试', () => {
     it('组件初始化应该在合理时间内完成', () => {
       const startTime = performance.now();
-      
+
       const mockStats = {
         remainingUsage: 3,
         usageCount: 2,
@@ -277,13 +307,15 @@ describe('CampaignComponent', () => {
         maxUsage: 5,
         firstVisit: '2023-01-01',
         sessionId: 'session_123',
-        usageHistory: []
+        usageHistory: [],
       };
-      (mockGuestUsageService.getGuestStats as jest.Mock).mockReturnValue(mockStats);
-      
+      (mockGuestUsageService.getGuestStats as jest.Mock).mockReturnValue(
+        mockStats,
+      );
+
       component.ngOnInit();
       fixture.detectChanges();
-      
+
       const endTime = performance.now();
       expect(endTime - startTime).toBeLessThan(100); // 应该在100ms内完成
     });

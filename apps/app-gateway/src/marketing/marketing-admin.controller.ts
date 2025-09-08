@@ -1,15 +1,15 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Body, 
-  Param, 
-  Query, 
-  HttpCode, 
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  HttpCode,
   HttpStatus,
   UseGuards,
   Logger,
-  BadRequestException 
+  BadRequestException,
 } from '@nestjs/common';
 import { FeedbackCodeService } from './feedback-code.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -37,7 +37,7 @@ export class MarketingAdminController {
   async getDashboardStats() {
     try {
       const stats = await this.feedbackCodeService.getMarketingStats();
-      
+
       // 计算额外的管理员统计信息
       const dashboardData = {
         overview: {
@@ -45,18 +45,22 @@ export class MarketingAdminController {
           usedCodes: stats.usedCodes,
           pendingPayments: stats.pendingPayments,
           totalPaid: stats.totalPaid,
-          averageQualityScore: Number(stats.averageQualityScore.toFixed(2))
+          averageQualityScore: Number(stats.averageQualityScore.toFixed(2)),
         },
         conversion: {
-          usageRate: Number(((stats.usedCodes / stats.totalCodes) * 100).toFixed(1)),
-          qualityRate: Number(((stats.pendingPayments / stats.usedCodes) * 100).toFixed(1))
+          usageRate: Number(
+            ((stats.usedCodes / stats.totalCodes) * 100).toFixed(1),
+          ),
+          qualityRate: Number(
+            ((stats.pendingPayments / stats.usedCodes) * 100).toFixed(1),
+          ),
         },
         financial: {
           pendingAmount: stats.pendingPayments * 3,
-          averageReward: 3.00,
-          costPerUser: Number((stats.totalPaid / stats.usedCodes).toFixed(2))
+          averageReward: 3.0,
+          costPerUser: Number((stats.totalPaid / stats.usedCodes).toFixed(2)),
         },
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       };
 
       return dashboardData;
@@ -71,38 +75,39 @@ export class MarketingAdminController {
     @Query('page') page = '1',
     @Query('limit') limit = '20',
     @Query('sortBy') sortBy = 'usedAt',
-    @Query('sortOrder') sortOrder = 'desc'
+    @Query('sortOrder') sortOrder = 'desc',
   ) {
     try {
-      const pendingPayments = await this.feedbackCodeService.getPendingPayments();
-      
+      const pendingPayments =
+        await this.feedbackCodeService.getPendingPayments();
+
       // 简单的分页和排序
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
       const skip = (pageNum - 1) * limitNum;
-      
+
       // 排序
       const sorted = pendingPayments.sort((a, b) => {
         const aValue = a[sortBy as keyof typeof a];
         const bValue = b[sortBy as keyof typeof b];
-        
+
         if (sortOrder === 'desc') {
           return aValue > bValue ? -1 : 1;
         } else {
           return aValue < bValue ? -1 : 1;
         }
       });
-      
+
       const paginatedData = sorted.slice(skip, skip + limitNum);
-      
+
       return {
         data: paginatedData,
         pagination: {
           page: pageNum,
           limit: limitNum,
           total: pendingPayments.length,
-          totalPages: Math.ceil(pendingPayments.length / limitNum)
-        }
+          totalPages: Math.ceil(pendingPayments.length / limitNum),
+        },
       };
     } catch (error) {
       this.logger.error('获取待支付列表失败', error);
@@ -123,19 +128,22 @@ export class MarketingAdminController {
       }
 
       const status = batchDto.action === 'approve' ? 'paid' : 'rejected';
-      const modifiedCount = await this.feedbackCodeService.batchUpdatePaymentStatus(
-        batchDto.codes,
-        status,
-        batchDto.reason
-      );
+      const modifiedCount =
+        await this.feedbackCodeService.batchUpdatePaymentStatus(
+          batchDto.codes,
+          status,
+          batchDto.reason,
+        );
 
-      this.logger.log(`批量处理支付: ${batchDto.action}, 影响条数: ${modifiedCount}`);
+      this.logger.log(
+        `批量处理支付: ${batchDto.action}, 影响条数: ${modifiedCount}`,
+      );
 
       return {
         success: true,
         processedCount: modifiedCount,
         action: batchDto.action,
-        codes: batchDto.codes
+        codes: batchDto.codes,
       };
     } catch (error) {
       this.logger.error('批量处理支付失败', error);
@@ -148,7 +156,7 @@ export class MarketingAdminController {
   async processSinglePayment(
     @Param('code') code: string,
     @Param('action') action: string,
-    @Body('reason') reason?: string
+    @Body('reason') reason?: string,
   ) {
     try {
       if (!['approve', 'reject'].includes(action)) {
@@ -156,14 +164,18 @@ export class MarketingAdminController {
       }
 
       const status = action === 'approve' ? 'paid' : 'rejected';
-      const result = await this.feedbackCodeService.updatePaymentStatus(code, status, reason);
+      const result = await this.feedbackCodeService.updatePaymentStatus(
+        code,
+        status,
+        reason,
+      );
 
       this.logger.log(`单个处理支付: ${code} -> ${action}`);
 
       return {
         success: true,
         data: result,
-        action: action
+        action: action,
       };
     } catch (error) {
       this.logger.error(`处理单个支付失败: ${code}`, error);
@@ -177,20 +189,20 @@ export class MarketingAdminController {
       // 这里可以根据条件导出支付数据
       // 实际实现中可能需要生成Excel文件
       const stats = await this.feedbackCodeService.getMarketingStats();
-      
+
       const exportData = {
         exportTime: new Date().toISOString(),
         criteria: exportDto,
         summary: {
           totalRecords: stats.usedCodes,
           pendingAmount: stats.pendingPayments * 3,
-          paidAmount: stats.totalPaid
+          paidAmount: stats.totalPaid,
         },
-        downloadUrl: `/api/admin/marketing/download/payments-${Date.now()}.xlsx`
+        downloadUrl: `/api/admin/marketing/download/payments-${Date.now()}.xlsx`,
       };
 
       this.logger.log('生成支付数据导出');
-      
+
       return exportData;
     } catch (error) {
       this.logger.error('导出支付数据失败', error);
@@ -202,7 +214,7 @@ export class MarketingAdminController {
   async getAnalyticsTrends(@Query('days') days = '30') {
     try {
       const daysNum = parseInt(days);
-      
+
       // 模拟趋势数据（实际实现中需要从数据库聚合）
       const trendsData = {
         period: `${daysNum}天`,
@@ -212,18 +224,18 @@ export class MarketingAdminController {
           score2: 8,
           score3: 15,
           score4: 25,
-          score5: 47
+          score5: 47,
         },
         paymentFlow: {
           pending: 12,
           approved: 85,
-          rejected: 3
+          rejected: 3,
         },
         userBehavior: {
           averageCompletionTime: '8分钟',
           dropoffRate: '15%',
-          satisfactionScore: 4.2
-        }
+          satisfactionScore: 4.2,
+        },
       };
 
       return trendsData;
@@ -237,14 +249,15 @@ export class MarketingAdminController {
   @HttpCode(HttpStatus.OK)
   async performMaintenance(@Body('days') days = 30) {
     try {
-      const deletedCount = await this.feedbackCodeService.cleanupExpiredCodes(days);
-      
+      const deletedCount =
+        await this.feedbackCodeService.cleanupExpiredCodes(days);
+
       this.logger.log(`维护清理完成，删除 ${deletedCount} 条过期记录`);
-      
+
       return {
         success: true,
         deletedCount: deletedCount,
-        cleanupDate: new Date().toISOString()
+        cleanupDate: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error('维护清理失败', error);
@@ -255,7 +268,7 @@ export class MarketingAdminController {
   @Get('audit/logs')
   async getAuditLogs(
     @Query('page') page: string,
-    @Query('limit') limit: string
+    @Query('limit') limit: string,
   ) {
     const pageNum = page || '1';
     const limitNum = limit || '50';
@@ -268,8 +281,8 @@ export class MarketingAdminController {
           feedbackCode: 'FB123456',
           userId: 'admin',
           timestamp: new Date().toISOString(),
-          details: { amount: 3, reason: '高质量反馈' }
-        }
+          details: { amount: 3, reason: '高质量反馈' },
+        },
         // 更多日志...
       ];
 
@@ -278,8 +291,8 @@ export class MarketingAdminController {
         pagination: {
           page: parseInt(pageNum),
           limit: parseInt(limitNum),
-          total: auditLogs.length
-        }
+          total: auditLogs.length,
+        },
       };
     } catch (error) {
       this.logger.error('获取审计日志失败', error);

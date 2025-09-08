@@ -31,15 +31,18 @@ export interface ServiceIntegrationOptions {
 @Injectable()
 export class ServiceIntegrationInterceptor implements NestInterceptor {
   private readonly logger = new Logger(ServiceIntegrationInterceptor.name);
-  private circuitBreakerStates = new Map<string, {
-    failures: number;
-    isOpen: boolean;
-    lastFailure: number;
-  }>();
+  private circuitBreakerStates = new Map<
+    string,
+    {
+      failures: number;
+      isOpen: boolean;
+      lastFailure: number;
+    }
+  >();
 
   constructor(
     private readonly options: ServiceIntegrationOptions = {},
-    @Inject('CACHE_MANAGER') private readonly cacheManager?: Cache
+    @Inject('CACHE_MANAGER') private readonly cacheManager?: Cache,
   ) {}
 
   async intercept(
@@ -55,7 +58,7 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
     // Check circuit breaker
     if (this.options.circuitBreaker && this.isCircuitBreakerOpen(operationId)) {
       throw new ServiceUnavailableException(
-        'Service temporarily unavailable due to repeated failures'
+        'Service temporarily unavailable due to repeated failures',
       );
     }
 
@@ -96,7 +99,7 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
       catchError((error) => {
         this.logger.error(
           `Service integration error in ${operationId}: ${error.message}`,
-          error.stack
+          error.stack,
         );
 
         // Update circuit breaker on failure
@@ -107,9 +110,10 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
         // Handle specific error types
         if (error.name === 'TimeoutError') {
           return throwError(
-            () => new RequestTimeoutException(
-              `Service operation ${operationId} timed out after ${timeoutMs}ms`
-            )
+            () =>
+              new RequestTimeoutException(
+                `Service operation ${operationId} timed out after ${timeoutMs}ms`,
+              ),
           );
         }
 
@@ -119,7 +123,7 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
         }
 
         return throwError(() => error);
-      })
+      }),
     );
   }
 
@@ -145,17 +149,19 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
         // This is a placeholder - implement actual service health checks
         return { service, healthy: true };
       } catch (error) {
-        this.logger.warn(`Service ${service} is not available: ${error.message}`);
+        this.logger.warn(
+          `Service ${service} is not available: ${error.message}`,
+        );
         return { service, healthy: false };
       }
     });
 
     const results = await Promise.all(validationPromises);
-    const unhealthyServices = results.filter(r => !r.healthy);
+    const unhealthyServices = results.filter((r) => !r.healthy);
 
     if (unhealthyServices.length > 0) {
       throw new ServiceUnavailableException(
-        `Required services unavailable: ${unhealthyServices.map(s => s.service).join(', ')}`
+        `Required services unavailable: ${unhealthyServices.map((s) => s.service).join(', ')}`,
       );
     }
   }
@@ -165,7 +171,7 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
     if (!state || !this.options.circuitBreaker) return false;
 
     const { threshold = 5, resetTimeout = 60000 } = this.options.circuitBreaker;
-    
+
     if (!state.isOpen) {
       return state.failures >= threshold;
     }
@@ -191,7 +197,7 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
 
     state.failures++;
     state.lastFailure = Date.now();
-    
+
     const { threshold = 5 } = this.options.circuitBreaker;
     if (state.failures >= threshold) {
       state.isOpen = true;
@@ -212,7 +218,7 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
 
   private handleFallback(operationId: string, error: any): Observable<any> {
     this.logger.warn(`Using fallback for ${operationId}`);
-    
+
     // Return a default fallback response
     return of({
       success: false,

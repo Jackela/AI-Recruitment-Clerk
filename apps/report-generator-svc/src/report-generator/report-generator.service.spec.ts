@@ -1,5 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ReportGeneratorService, MatchScoredEvent } from './report-generator.service';
+import {
+  ReportGeneratorService,
+  MatchScoredEvent,
+} from './report-generator.service';
 import { LlmService } from './llm.service';
 import { GridFsService } from './gridfs.service';
 import { ReportRepository } from './report.repository';
@@ -20,9 +23,15 @@ describe('ReportGeneratorService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ReportGeneratorService,
-        { provide: LlmService, useValue: { generateReportMarkdown: jest.fn() } },
+        {
+          provide: LlmService,
+          useValue: { generateReportMarkdown: jest.fn() },
+        },
         { provide: GridFsService, useValue: { saveReport: jest.fn() } },
-        { provide: ReportRepository, useValue: { updateResumeRecord: jest.fn() } },
+        {
+          provide: ReportRepository,
+          useValue: { updateResumeRecord: jest.fn() },
+        },
       ],
     }).compile();
 

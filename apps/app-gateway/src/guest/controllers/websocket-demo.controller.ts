@@ -8,14 +8,18 @@ export class WebSocketDemoController {
   constructor(private readonly webSocketGateway: WebSocketGateway) {}
 
   @Post('demo-progress')
-  async simulateProgress(@Body() body: { sessionId: string }): Promise<{ message: string }> {
+  async simulateProgress(
+    @Body() body: { sessionId: string },
+  ): Promise<{ message: string }> {
     const { sessionId } = body;
-    
+
     if (!sessionId) {
       throw new Error('SessionId is required');
     }
 
-    this.logger.log(`Starting demo progress simulation for session: ${sessionId}`);
+    this.logger.log(
+      `Starting demo progress simulation for session: ${sessionId}`,
+    );
 
     // 模拟分析进度
     this.simulateAnalysisProgress(sessionId);
@@ -34,16 +38,20 @@ export class WebSocketDemoController {
     ];
 
     // 发送开始通知
-    this.webSocketGateway.sendStepChange(sessionId, '开始分析', '正在初始化分析流程...');
+    this.webSocketGateway.sendStepChange(
+      sessionId,
+      '开始分析',
+      '正在初始化分析流程...',
+    );
 
     for (const stepData of steps) {
       await this.delay(stepData.delay);
-      
+
       // 发送步骤变更
       this.webSocketGateway.sendStepChange(
-        sessionId, 
-        stepData.step, 
-        `正在执行: ${stepData.step}...`
+        sessionId,
+        stepData.step,
+        `正在执行: ${stepData.step}...`,
       );
 
       // 发送进度更新
@@ -55,7 +63,9 @@ export class WebSocketDemoController {
         estimatedTimeRemaining: this.calculateETA(stepData.progress),
       });
 
-      this.logger.log(`Session ${sessionId}: ${stepData.step} - ${stepData.progress}%`);
+      this.logger.log(
+        `Session ${sessionId}: ${stepData.step} - ${stepData.progress}%`,
+      );
     }
 
     // 发送完成通知
@@ -74,9 +84,9 @@ export class WebSocketDemoController {
           recommendations: [
             '技术栈匹配度高，适合前端开发岗位',
             '建议进行技术面试验证实际能力',
-            '可以考虑安排项目经验分享环节'
-          ]
-        }
+            '可以考虑安排项目经验分享环节',
+          ],
+        },
       },
       processingTime: 15000,
     });
@@ -85,7 +95,7 @@ export class WebSocketDemoController {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private calculateETA(currentProgress: number): number {
@@ -96,9 +106,11 @@ export class WebSocketDemoController {
   }
 
   @Post('demo-error')
-  async simulateError(@Body() body: { sessionId: string }): Promise<{ message: string }> {
+  async simulateError(
+    @Body() body: { sessionId: string },
+  ): Promise<{ message: string }> {
     const { sessionId } = body;
-    
+
     if (!sessionId) {
       throw new Error('SessionId is required');
     }
@@ -117,9 +129,9 @@ export class WebSocketDemoController {
 
     setTimeout(() => {
       this.webSocketGateway.sendError(
-        sessionId, 
-        '文件格式不支持或文件已损坏，请检查文件完整性', 
-        'INVALID_FILE_FORMAT'
+        sessionId,
+        '文件格式不支持或文件已损坏，请检查文件完整性',
+        'INVALID_FILE_FORMAT',
       );
     }, 3000);
 

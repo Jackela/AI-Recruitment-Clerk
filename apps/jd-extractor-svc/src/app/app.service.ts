@@ -1,40 +1,43 @@
-import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnApplicationBootstrap,
+  OnApplicationShutdown,
+} from '@nestjs/common';
 
 @Injectable()
-export class AppService implements OnApplicationBootstrap, OnApplicationShutdown {
+export class AppService
+  implements OnApplicationBootstrap, OnApplicationShutdown
+{
   private readonly logger = new Logger(AppService.name);
   private isInitialized = false;
   private subscriptions: Map<string, any> = new Map();
 
   getData() {
-    return { 
-      message: 'JD Extractor Service API',
-      status: this.isInitialized ? 'ready' : 'initializing'
-    };
+    return { message: 'Hello API' };
   }
 
   async onApplicationBootstrap(): Promise<void> {
     this.logger.log('JD Extractor Service starting...');
-    
+
     try {
       // Initialize NATS connections and event subscriptions
       await this.initializeNATSConnections();
-      
+
       // Set up event subscriptions for job description extraction
       await this.setupEventSubscriptions();
-      
+
       // Initialize LLM service connections
       await this.initializeLLMConnections();
-      
+
       // Initialize extraction service
       await this.initializeExtractionService();
-      
+
       // Validate all components are working
       await this.validateServiceHealth();
-      
+
       this.isInitialized = true;
       this.logger.log('JD Extractor Service startup completed successfully');
-      
     } catch (error) {
       this.logger.error('Failed to initialize JD Extractor Service:', error);
       throw error;
@@ -43,19 +46,18 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
 
   async onApplicationShutdown(): Promise<void> {
     this.logger.log('JD Extractor Service shutting down...');
-    
+
     try {
       // Clean up event subscriptions
       await this.cleanupEventSubscriptions();
-      
+
       // Clean up NATS connections
       await this.cleanupNATSConnections();
-      
+
       // Clean up LLM service connections
       await this.cleanupLLMConnections();
-      
+
       this.logger.log('All connections cleaned up successfully');
-      
     } catch (error) {
       this.logger.error('Error during shutdown:', error);
     }
@@ -78,13 +80,21 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
       const extractionSubject = 'jd.extract.request';
       const analysisSubject = 'jd.analyze.request';
       const validateSubject = 'jd.validate.request';
-      
+
       // Set up subscription handlers
-      this.subscriptions.set(extractionSubject, await this.subscribeToExtraction());
+      this.subscriptions.set(
+        extractionSubject,
+        await this.subscribeToExtraction(),
+      );
       this.subscriptions.set(analysisSubject, await this.subscribeToAnalysis());
-      this.subscriptions.set(validateSubject, await this.subscribeToValidation());
-      
-      this.logger.log(`Event subscriptions set up for: ${Array.from(this.subscriptions.keys()).join(', ')}`);
+      this.subscriptions.set(
+        validateSubject,
+        await this.subscribeToValidation(),
+      );
+
+      this.logger.log(
+        `Event subscriptions set up for: ${Array.from(this.subscriptions.keys()).join(', ')}`,
+      );
     } catch (error) {
       this.logger.error('Failed to setup event subscriptions:', error);
       throw error;
@@ -128,7 +138,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
       handler: async (data: any) => {
         this.logger.log('Processing JD extraction request');
         // Process extraction request
-      }
+      },
     };
   }
 
@@ -139,7 +149,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
       handler: async (data: any) => {
         this.logger.log('Processing JD analysis request');
         // Process analysis request
-      }
+      },
     };
   }
 
@@ -150,7 +160,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
       handler: async (data: any) => {
         this.logger.log('Processing JD validation request');
         // Process validation request
-      }
+      },
     };
   }
 

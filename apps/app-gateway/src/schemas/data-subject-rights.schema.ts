@@ -1,8 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { DataSubjectRightType, RequestStatus, IdentityVerificationStatus, DataExportFormat } from '@ai-recruitment-clerk/infrastructure-shared';
+import {
+  DataSubjectRightType,
+  RequestStatus,
+  IdentityVerificationStatus,
+  DataExportFormat,
+} from '../common/interfaces/fallback-types';
 
-export type DataSubjectRightsRequestDocument = DataSubjectRightsRequest & Document;
+export type DataSubjectRightsRequestDocument = DataSubjectRightsRequest &
+  Document;
 
 /**
  * Data Subject Rights Request Schema
@@ -11,150 +17,160 @@ export type DataSubjectRightsRequestDocument = DataSubjectRightsRequest & Docume
 @Schema({
   collection: 'data_subject_rights_requests',
   timestamps: true,
-  versionKey: false
+  versionKey: false,
 })
 export class DataSubjectRightsRequest {
   @Prop({ required: true, unique: true, index: true })
-  id: string;
+  id: string = '';
 
   @Prop({ required: true })
-  userId: string;
+  userId: string = '';
 
-  @Prop({ 
+  @Prop({
     type: String,
-    enum: Object.values(DataSubjectRightType), 
-    required: true,
-    index: true 
-  })
-  requestType: DataSubjectRightType;
-
-  @Prop({ 
-    type: String,
-    enum: Object.values(RequestStatus), 
+    enum: Object.values(DataSubjectRightType),
     required: true,
     index: true,
-    default: RequestStatus.PENDING
   })
-  status: RequestStatus;
+  requestType: DataSubjectRightType = DataSubjectRightType.ACCESS;
 
-  @Prop({ 
+  @Prop({
     type: String,
-    enum: Object.values(IdentityVerificationStatus), 
+    enum: Object.values(RequestStatus),
     required: true,
-    default: IdentityVerificationStatus.PENDING
+    index: true,
+    default: RequestStatus.PENDING,
   })
-  identityVerificationStatus: IdentityVerificationStatus;
+  status: RequestStatus = RequestStatus.PENDING;
+
+  @Prop({
+    type: String,
+    enum: Object.values(IdentityVerificationStatus),
+    required: true,
+    default: IdentityVerificationStatus.PENDING,
+  })
+  identityVerificationStatus: IdentityVerificationStatus =
+    IdentityVerificationStatus.PENDING;
 
   @Prop({ required: false })
-  description?: string;
+  description?: string = undefined;
 
   @Prop({ required: true })
-  requestDate: Date;
+  requestDate: Date = new Date();
 
   @Prop({ required: false })
-  completionDate?: Date;
+  completionDate?: Date = undefined;
 
   @Prop({ required: true })
-  dueDate: Date; // 30 days from request per GDPR
+  dueDate: Date = new Date(); // 30 days from request per GDPR
 
   @Prop({ required: false })
-  processorNotes?: string;
+  processorNotes?: string = undefined;
 
   @Prop({ type: Object, default: {} })
-  metadata?: Record<string, any>;
+  metadata?: Record<string, any> = {};
 
   @Prop({ required: false })
-  ipAddress?: string;
+  ipAddress?: string = undefined;
 
   @Prop({ required: false })
-  userAgent?: string;
+  userAgent?: string = undefined;
 
   // Request-specific fields
   @Prop({ type: [String], required: false })
-  specificDataCategories?: string[]; // For access/portability requests
+  specificDataCategories?: string[] = undefined; // For access/portability requests
 
-  @Prop({ 
+  @Prop({
     type: String,
     enum: Object.values(DataExportFormat),
-    required: false 
+    required: false,
   })
-  preferredFormat?: DataExportFormat; // For access/portability requests
+  preferredFormat?: DataExportFormat = undefined; // For access/portability requests
 
   @Prop({ required: false })
-  includeThirdPartyData?: boolean; // For access requests
+  includeThirdPartyData?: boolean = undefined; // For access requests
 
   @Prop({ required: false })
-  includeProcessingHistory?: boolean; // For access requests
+  includeProcessingHistory?: boolean = undefined; // For access requests
 
   // Rectification request fields
   @Prop({ type: Object, required: false })
-  correctionData?: any; // Field corrections for rectification
+  correctionData?: any = undefined; // Field corrections for rectification
 
   // Erasure request fields
   @Prop({ required: false })
-  erasureGround?: string; // Legal ground for erasure
+  erasureGround?: string = undefined; // Legal ground for erasure
 
   @Prop({ required: false })
-  retainForLegalReasons?: boolean;
+  retainForLegalReasons?: boolean = undefined;
 
   @Prop({ required: false })
-  legalRetentionReason?: string;
+  legalRetentionReason?: string = undefined;
 
   // Objection request fields
   @Prop({ type: [String], required: false })
-  processingPurposes?: string[]; // Purposes being objected to
+  processingPurposes?: string[] = undefined; // Purposes being objected to
 
   @Prop({ required: false })
-  objectionReason?: string;
+  objectionReason?: string = undefined;
 
   // Processing results
   @Prop({ required: false })
-  downloadUrl?: string; // For data export requests
+  downloadUrl?: string = undefined; // For data export requests
 
   @Prop({ required: false })
-  downloadExpiry?: Date;
+  downloadExpiry?: Date = undefined;
 
   @Prop({ required: false })
-  exportFileSize?: number; // In bytes
+  exportFileSize?: number = undefined; // In bytes
 
   @Prop({ required: false })
-  rejectionReason?: string;
+  rejectionReason?: string = undefined;
 
   @Prop({ default: Date.now })
-  createdAt: Date;
+  createdAt: Date = new Date();
 
   @Prop({ default: Date.now })
-  updatedAt: Date;
+  updatedAt: Date = new Date();
 }
 
-export const DataSubjectRightsRequestSchema = SchemaFactory.createForClass(DataSubjectRightsRequest);
+export const DataSubjectRightsRequestSchema = SchemaFactory.createForClass(
+  DataSubjectRightsRequest,
+);
 
 // Create indexes for efficient querying
 DataSubjectRightsRequestSchema.index({ userId: 1, requestType: 1 });
 DataSubjectRightsRequestSchema.index({ status: 1, dueDate: 1 });
 DataSubjectRightsRequestSchema.index({ requestDate: -1 });
-DataSubjectRightsRequestSchema.index({ dueDate: 1 }, { 
-  partialFilterExpression: { 
-    status: { $in: [RequestStatus.PENDING, RequestStatus.IN_PROGRESS] } 
-  }
-});
+DataSubjectRightsRequestSchema.index(
+  { dueDate: 1 },
+  {
+    partialFilterExpression: {
+      status: { $in: [RequestStatus.PENDING, RequestStatus.IN_PROGRESS] },
+    },
+  },
+);
 
 // Pre-save middleware to update timestamps and calculate due dates
-DataSubjectRightsRequestSchema.pre('save', function(next) {
+DataSubjectRightsRequestSchema.pre('save', function (next) {
   this.updatedAt = new Date();
-  
+
   // Set due date to 30 days from request date if not set
   if (this.isNew && !this.dueDate) {
     const dueDate = new Date(this.requestDate);
     dueDate.setDate(dueDate.getDate() + 30);
     this.dueDate = dueDate;
   }
-  
+
   // Set completion date when status changes to completed
-  if (this.isModified('status') && this.status === RequestStatus.COMPLETED && !this.completionDate) {
+  if (
+    this.isModified('status') &&
+    this.status === RequestStatus.COMPLETED &&
+    !this.completionDate
+  ) {
     this.completionDate = new Date();
   }
-  
+
   next();
 });
 
@@ -167,46 +183,48 @@ export type RightsRequestActivityDocument = RightsRequestActivity & Document;
 @Schema({
   collection: 'rights_request_activities',
   timestamps: true,
-  versionKey: false
+  versionKey: false,
 })
 export class RightsRequestActivity {
   @Prop({ required: true })
-  requestId: string;
+  requestId: string = '';
 
   @Prop({ required: true })
-  action: string; // 'created', 'status_changed', 'verified', 'processed', etc.
+  action: string = ''; // 'created', 'status_changed', 'verified', 'processed', etc.
 
   @Prop({ required: false })
-  performedBy?: string; // User ID or 'system'
+  performedBy?: string = undefined; // User ID or 'system'
 
   @Prop({ required: false })
-  notes?: string;
+  notes?: string = undefined;
 
-  @Prop({ 
+  @Prop({
     type: String,
     enum: Object.values(RequestStatus),
-    required: false 
+    required: false,
   })
-  previousStatus?: RequestStatus;
+  previousStatus?: RequestStatus = undefined;
 
-  @Prop({ 
+  @Prop({
     type: String,
     enum: Object.values(RequestStatus),
-    required: false 
+    required: false,
   })
-  newStatus?: RequestStatus;
+  newStatus?: RequestStatus = undefined;
 
   @Prop({ type: Object, default: {} })
-  metadata?: Record<string, any>;
+  metadata?: Record<string, any> = {};
 
   @Prop({ required: true })
-  timestamp: Date;
+  timestamp: Date = new Date();
 
   @Prop({ default: Date.now })
-  createdAt: Date;
+  createdAt: Date = new Date();
 }
 
-export const RightsRequestActivitySchema = SchemaFactory.createForClass(RightsRequestActivity);
+export const RightsRequestActivitySchema = SchemaFactory.createForClass(
+  RightsRequestActivity,
+);
 
 // Create indexes
 RightsRequestActivitySchema.index({ requestId: 1, timestamp: -1 });
@@ -222,21 +240,21 @@ export type DataExportPackageDocument = DataExportPackage & Document;
 @Schema({
   collection: 'data_export_packages',
   timestamps: true,
-  versionKey: false
+  versionKey: false,
 })
 export class DataExportPackage {
   @Prop({ required: true, unique: true, index: true })
-  requestId: string;
+  requestId: string = '';
 
   @Prop({ required: true })
-  userId: string;
+  userId: string = '';
 
-  @Prop({ 
+  @Prop({
     type: String,
-    enum: Object.values(DataExportFormat), 
-    required: true 
+    enum: Object.values(DataExportFormat),
+    required: true,
   })
-  format: DataExportFormat;
+  format: DataExportFormat = DataExportFormat.JSON;
 
   @Prop({ type: Object, required: true })
   packageManifest: {
@@ -253,37 +271,45 @@ export class DataExportPackage {
     privacyPolicyVersion: string;
     retentionPolicies: Record<string, string>;
     thirdPartyProcessors: string[];
+  } = {
+    dataCategories: [],
+    exportDate: new Date(),
+    dataController: '',
+    privacyPolicyVersion: '',
+    retentionPolicies: {},
+    thirdPartyProcessors: [],
   };
 
   @Prop({ required: true })
-  downloadUrl: string;
+  downloadUrl: string = '';
 
   @Prop({ required: true })
-  urlExpiry: Date;
+  urlExpiry: Date = new Date();
 
   @Prop({ required: true })
-  fileSizeBytes: number;
+  fileSizeBytes: number = 0;
 
   @Prop({ required: false })
-  checksumMD5?: string; // File integrity verification
+  checksumMD5?: string = undefined; // File integrity verification
 
   @Prop({ required: false })
-  encryptionKey?: string; // If file is encrypted
+  encryptionKey?: string = undefined; // If file is encrypted
 
   @Prop({ required: false, default: 0 })
-  downloadCount: number;
+  downloadCount: number = 0;
 
   @Prop({ required: false })
-  lastDownloadAt?: Date;
+  lastDownloadAt?: Date = undefined;
 
   @Prop({ default: Date.now })
-  createdAt: Date;
+  createdAt: Date = new Date();
 
   @Prop({ default: Date.now })
-  updatedAt: Date;
+  updatedAt: Date = new Date();
 }
 
-export const DataExportPackageSchema = SchemaFactory.createForClass(DataExportPackage);
+export const DataExportPackageSchema =
+  SchemaFactory.createForClass(DataExportPackage);
 
 // Create indexes
 DataExportPackageSchema.index({ requestId: 1 }, { unique: true });
@@ -292,7 +318,7 @@ DataExportPackageSchema.index({ urlExpiry: 1 });
 DataExportPackageSchema.index({ createdAt: -1 });
 
 // Pre-save middleware to update timestamps
-DataExportPackageSchema.pre('save', function(next) {
+DataExportPackageSchema.pre('save', function (next) {
   this.updatedAt = new Date();
   next();
 });
@@ -306,61 +332,62 @@ export type IdentityVerificationDocument = IdentityVerification & Document;
 @Schema({
   collection: 'identity_verifications',
   timestamps: true,
-  versionKey: false
+  versionKey: false,
 })
 export class IdentityVerification {
   @Prop({ required: true, unique: true, index: true })
-  id: string;
+  id: string = '';
 
   @Prop({ required: true })
-  requestId: string;
+  requestId: string = '';
 
   @Prop({ required: true })
-  userId: string;
+  userId: string = '';
 
   @Prop({ required: true })
-  verificationType: string; // 'email', 'phone', 'document', 'security_questions'
+  verificationType: string = ''; // 'email', 'phone', 'document', 'security_questions'
 
-  @Prop({ 
+  @Prop({
     type: String,
     enum: Object.values(IdentityVerificationStatus),
     required: true,
-    default: IdentityVerificationStatus.PENDING
+    default: IdentityVerificationStatus.PENDING,
   })
-  status: IdentityVerificationStatus;
+  status: IdentityVerificationStatus = IdentityVerificationStatus.PENDING;
 
   @Prop({ type: Object, default: {} })
-  verificationData?: any; // Method-specific verification data
+  verificationData?: any = {}; // Method-specific verification data
 
   @Prop({ required: false })
-  verificationCode?: string; // For email/SMS verification
+  verificationCode?: string = undefined; // For email/SMS verification
 
   @Prop({ required: false })
-  verificationExpiry?: Date;
+  verificationExpiry?: Date = undefined;
 
   @Prop({ required: false })
-  verificationAttempts?: number;
+  verificationAttempts?: number = undefined;
 
   @Prop({ required: false })
-  maxAttempts?: number;
+  maxAttempts?: number = undefined;
 
   @Prop({ required: false })
-  verifiedAt?: Date;
+  verifiedAt?: Date = undefined;
 
   @Prop({ required: false })
-  failureReason?: string;
+  failureReason?: string = undefined;
 
   @Prop({ type: Object, default: {} })
-  metadata?: Record<string, any>;
+  metadata?: Record<string, any> = {};
 
   @Prop({ default: Date.now })
-  createdAt: Date;
+  createdAt: Date = new Date();
 
   @Prop({ default: Date.now })
-  updatedAt: Date;
+  updatedAt: Date = new Date();
 }
 
-export const IdentityVerificationSchema = SchemaFactory.createForClass(IdentityVerification);
+export const IdentityVerificationSchema =
+  SchemaFactory.createForClass(IdentityVerification);
 
 // Create indexes
 IdentityVerificationSchema.index({ requestId: 1 });
@@ -369,20 +396,24 @@ IdentityVerificationSchema.index({ verificationExpiry: 1 }, { sparse: true });
 IdentityVerificationSchema.index({ status: 1, createdAt: -1 });
 
 // Pre-save middleware
-IdentityVerificationSchema.pre('save', function(next) {
+IdentityVerificationSchema.pre('save', function (next) {
   this.updatedAt = new Date();
-  
+
   // Set verification expiry if not provided (24 hours for codes)
   if (this.isNew && this.verificationCode && !this.verificationExpiry) {
     const expiry = new Date();
     expiry.setHours(expiry.getHours() + 24);
     this.verificationExpiry = expiry;
   }
-  
+
   // Set verified timestamp when status changes to verified
-  if (this.isModified('status') && this.status === IdentityVerificationStatus.VERIFIED && !this.verifiedAt) {
+  if (
+    this.isModified('status') &&
+    this.status === IdentityVerificationStatus.VERIFIED &&
+    !this.verifiedAt
+  ) {
     this.verifiedAt = new Date();
   }
-  
+
   next();
 });

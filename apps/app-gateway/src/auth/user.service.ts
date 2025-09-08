@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto, UserDto, UserRole, UserStatus } from '@ai-recruitment-clerk/user-management-domain';
+import {
+  CreateUserDto,
+  UserDto,
+  UserRole,
+  UserStatus,
+} from '@ai-recruitment-clerk/user-management-domain';
 
 // In a real implementation, this would connect to MongoDB
 // For now, we'll use a simple in-memory store with some mock users
@@ -29,65 +34,94 @@ export class UserService {
       {
         id: 'admin-001',
         email: 'admin@ai-recruitment.com',
-        password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewflcAAaZMhV1S6m', // password: admin123
+        password:
+          '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewflcAAaZMhV1S6m', // password: admin123
         firstName: 'System',
         lastName: 'Administrator',
-        get name() { return `${this.firstName} ${this.lastName}`; },
+        get name() {
+          return `${this.firstName} ${this.lastName}`;
+        },
         role: UserRole.ADMIN,
         status: UserStatus.ACTIVE,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       } as UserEntity,
       {
         id: 'hr-001',
         email: 'hr@ai-recruitment.com',
-        password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewflcAAaZMhV1S6m', // password: admin123
+        password:
+          '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewflcAAaZMhV1S6m', // password: admin123
         firstName: 'HR',
         lastName: 'Manager',
-        get name() { return `${this.firstName} ${this.lastName}`; },
+        get name() {
+          return `${this.firstName} ${this.lastName}`;
+        },
         role: UserRole.HR_MANAGER,
         organizationId: 'org-001',
         status: UserStatus.ACTIVE,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       } as UserEntity,
       {
         id: 'recruiter-001',
         email: 'recruiter@ai-recruitment.com',
-        password: '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewflcAAaZMhV1S6m', // password: admin123
+        password:
+          '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewflcAAaZMhV1S6m', // password: admin123
         firstName: 'Jane',
         lastName: 'Recruiter',
-        get name() { return `${this.firstName} ${this.lastName}`; },
+        get name() {
+          return `${this.firstName} ${this.lastName}`;
+        },
         role: UserRole.RECRUITER,
         organizationId: 'org-001',
         status: UserStatus.ACTIVE,
         createdAt: new Date(),
-        updatedAt: new Date()
-      } as UserEntity
+        updatedAt: new Date(),
+      } as UserEntity,
     ];
 
-    defaultUsers.forEach(user => {
+    defaultUsers.forEach((user) => {
       this.users.set(user.id, user);
       this.emailToIdMap.set(user.email, user.id);
     });
   }
 
-  async create(createUserDto: CreateUserDto & { password: string }): Promise<UserEntity> {
+  async create(
+    createUserDto: CreateUserDto & { password: string },
+  ): Promise<UserEntity> {
     const id = `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const now = new Date();
+
+    // Derive names when only a single name is provided
+    let firstName = createUserDto.firstName;
+    let lastName = createUserDto.lastName;
+    if ((!firstName || !lastName) && (createUserDto as any).name) {
+      const parts = String((createUserDto as any).name).trim().split(/\s+/);
+      firstName = firstName || parts[0] || '';
+      lastName = lastName || parts.slice(1).join(' ') || '';
+    }
+    // Fallback from email
+    if (!firstName && !lastName) {
+      const base = createUserDto.email.split('@')[0];
+      firstName = base;
+      lastName = '';
+    }
 
     const user: UserEntity = {
       id,
       email: createUserDto.email,
       password: createUserDto.password,
-      firstName: createUserDto.firstName,
-      lastName: createUserDto.lastName,
-      get name() { return `${this.firstName} ${this.lastName}`; },
-      role: createUserDto.role,
-      organizationId: createUserDto.organizationId,
+      firstName,
+      lastName,
+      get name() {
+        return `${this.firstName} ${this.lastName}`;
+      },
+      role: createUserDto.role || UserRole.USER,
+      organizationId:
+        createUserDto.organizationId || `org-${Math.random().toString(36).substr(2, 8)}`,
       status: createUserDto.status || UserStatus.ACTIVE,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     };
 
     this.users.set(id, user);
@@ -107,7 +141,7 @@ export class UserService {
 
   async findByOrganizationId(organizationId: string): Promise<UserEntity[]> {
     return Array.from(this.users.values()).filter(
-      user => user.organizationId === organizationId
+      (user) => user.organizationId === organizationId,
     );
   }
 
@@ -130,7 +164,10 @@ export class UserService {
     }
   }
 
-  async updateUser(id: string, updates: Partial<Omit<UserDto, 'id' | 'createdAt'>>): Promise<UserEntity> {
+  async updateUser(
+    id: string,
+    updates: Partial<Omit<UserDto, 'id' | 'createdAt'>>,
+  ): Promise<UserEntity> {
     const user = this.users.get(id);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -145,8 +182,10 @@ export class UserService {
     const updatedUser = {
       ...user,
       ...updates,
-      get name() { return `${this.firstName} ${this.lastName}`; },
-      updatedAt: new Date()
+      get name(): string {
+        return `${this.firstName} ${this.lastName}`;
+      },
+      updatedAt: new Date(),
     };
 
     this.users.set(id, updatedUser);
@@ -163,11 +202,11 @@ export class UserService {
 
   async listUsers(organizationId?: string): Promise<UserEntity[]> {
     const users = Array.from(this.users.values());
-    
+
     if (organizationId) {
-      return users.filter(user => user.organizationId === organizationId);
+      return users.filter((user) => user.organizationId === organizationId);
     }
-    
+
     return users;
   }
 
@@ -175,9 +214,13 @@ export class UserService {
    * Update security flag for user (used for token revocation, account locking, etc.)
    */
   async updateSecurityFlag(
-    userId: string, 
-    flag: 'tokens_revoked' | 'account_locked' | 'password_reset_required' | 'two_factor_enabled', 
-    value: boolean
+    userId: string,
+    flag:
+      | 'tokens_revoked'
+      | 'account_locked'
+      | 'password_reset_required'
+      | 'two_factor_enabled',
+    value: boolean,
   ): Promise<void> {
     const user = this.users.get(userId);
     if (!user) {
@@ -196,20 +239,26 @@ export class UserService {
     // Special handling for account_locked flag
     if (flag === 'account_locked' && value) {
       user.status = UserStatus.SUSPENDED;
-    } else if (flag === 'account_locked' && !value && user.status === UserStatus.SUSPENDED) {
+    } else if (
+      flag === 'account_locked' &&
+      !value &&
+      user.status === UserStatus.SUSPENDED
+    ) {
       user.status = UserStatus.ACTIVE;
     }
 
     // Update the user in the store
     this.users.set(userId, user);
 
-    console.log(`Security flag '${flag}' set to ${value} for user ${userId}`);
+    // Security flag updated successfully
   }
 
   /**
    * Get security flags for user
    */
-  async getSecurityFlags(userId: string): Promise<UserEntity['securityFlags'] | null> {
+  async getSecurityFlags(
+    userId: string,
+  ): Promise<UserEntity['securityFlags'] | null> {
     const user = this.users.get(userId);
     return user?.securityFlags || null;
   }
@@ -217,7 +266,10 @@ export class UserService {
   /**
    * Check if user has specific security flag
    */
-  async hasSecurityFlag(userId: string, flag: keyof UserEntity['securityFlags']): Promise<boolean> {
+  async hasSecurityFlag(
+    userId: string,
+    flag: keyof UserEntity['securityFlags'],
+  ): Promise<boolean> {
     const user = this.users.get(userId);
     return user?.securityFlags?.[flag] || false;
   }
@@ -235,19 +287,27 @@ export class UserService {
     user.updatedAt = new Date();
     this.users.set(userId, user);
 
-    console.log(`All security flags cleared for user ${userId}`);
+    // All security flags cleared successfully
   }
 
   // Health check for service
-  async getStats(): Promise<{ totalUsers: number; activeUsers: number; organizations: string[] }> {
+  async getStats(): Promise<{
+    totalUsers: number;
+    activeUsers: number;
+    organizations: string[];
+  }> {
     const users = Array.from(this.users.values());
-    const activeUsers = users.filter(user => user.status === UserStatus.ACTIVE);
-    const organizations = [...new Set(users.map(user => user.organizationId).filter(Boolean))];
+    const activeUsers = users.filter(
+      (user) => user.status === UserStatus.ACTIVE,
+    );
+    const organizations = [
+      ...new Set(users.map((user) => user.organizationId).filter(Boolean)),
+    ] as string[];
 
     return {
       totalUsers: users.length,
       activeUsers: activeUsers.length,
-      organizations
+      organizations,
     };
   }
 }

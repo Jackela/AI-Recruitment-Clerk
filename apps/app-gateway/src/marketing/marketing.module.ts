@@ -8,18 +8,11 @@ import { MarketingAdminController } from './marketing-admin.controller';
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: 'FeedbackCode', schema: FeedbackCodeSchema }
-    ])
+      { name: 'FeedbackCode', schema: FeedbackCodeSchema },
+    ]),
   ],
-  controllers: [
-    FeedbackCodeController,
-    MarketingAdminController
-  ],
-  providers: [
-    FeedbackCodeService
-  ],
-  exports: [
-    FeedbackCodeService
-  ]
+  controllers: [FeedbackCodeController, MarketingAdminController],
+  providers: [FeedbackCodeService],
+  exports: [FeedbackCodeService],
 })
 export class MarketingModule {}

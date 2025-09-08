@@ -25,7 +25,8 @@ describe('Security Integration Tests', () => {
           load: [
             () => ({
               MONGO_URL: uri,
-              JWT_SECRET: 'test-jwt-secret-with-sufficient-length-for-security-testing',
+              JWT_SECRET:
+                'test-jwt-secret-with-sufficient-length-for-security-testing',
               CSRF_SECRET: 'test-csrf-secret-for-security-testing',
               NODE_ENV: 'test',
             }),
@@ -37,7 +38,7 @@ describe('Security Integration Tests', () => {
 
     app = moduleFixture.createNestApplication();
     mongoConnection = moduleFixture.get<Connection>(getConnectionToken());
-    
+
     await app.init();
   });
 
@@ -66,8 +67,12 @@ describe('Security Integration Tests', () => {
       expect(response.headers['x-content-type-options']).toBe('nosniff');
       expect(response.headers['x-frame-options']).toBe('DENY');
       expect(response.headers['x-xss-protection']).toBe('1; mode=block');
-      expect(response.headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
-      expect(response.headers['content-security-policy']).toContain("default-src 'self'");
+      expect(response.headers['referrer-policy']).toBe(
+        'strict-origin-when-cross-origin',
+      );
+      expect(response.headers['content-security-policy']).toContain(
+        "default-src 'self'",
+      );
       expect(response.headers['x-powered-by']).toBeUndefined();
     });
 
@@ -95,8 +100,11 @@ describe('Security Integration Tests', () => {
     it('should reject POST requests without CSRF token for session-based auth', async () => {
       // First create a user and login to get session-based auth
       // This test assumes session-based endpoints exist
-      const testData = { email: 'test@example.com', password: 'TestPassword123!' };
-      
+      const testData = {
+        email: 'test@example.com',
+        password: 'TestPassword123!',
+      };
+
       const response = await request(app.getHttpServer())
         .post('/auth/register')
         .send(testData)
@@ -123,7 +131,7 @@ describe('Security Integration Tests', () => {
         .send({
           email: 'test@example.com',
           password: 'TestPassword123!',
-          name: 'Test User'
+          name: 'Test User',
         })
         .expect((res) => {
           // Should not be rejected for CSRF reasons
@@ -134,49 +142,56 @@ describe('Security Integration Tests', () => {
 
   describe('Rate Limiting', () => {
     it('should enforce rate limits on authentication endpoints', async () => {
-      const loginData = { email: 'test@example.com', password: 'wrongpassword' };
+      const loginData = {
+        email: 'test@example.com',
+        password: 'wrongpassword',
+      };
 
       // Make multiple failed login attempts
       const promises = Array.from({ length: 10 }, () =>
-        request(app.getHttpServer())
-          .post('/auth/login')
-          .send(loginData)
+        request(app.getHttpServer()).post('/auth/login').send(loginData),
       );
 
       const responses = await Promise.all(promises);
-      
+
       // Should start returning 429 after several attempts
-      const rateLimitedResponses = responses.filter(res => res.status === 429);
+      const rateLimitedResponses = responses.filter(
+        (res) => res.status === 429,
+      );
       expect(rateLimitedResponses.length).toBeGreaterThan(0);
 
       // Check rate limit headers
       const rateLimitedResponse = rateLimitedResponses[0];
       expect(rateLimitedResponse.headers['x-ratelimit-limit']).toBeDefined();
-      expect(rateLimitedResponse.headers['x-ratelimit-remaining']).toBeDefined();
+      expect(
+        rateLimitedResponse.headers['x-ratelimit-remaining'],
+      ).toBeDefined();
       expect(rateLimitedResponse.headers['retry-after']).toBeDefined();
     });
 
     it('should have different rate limits for different operations', async () => {
       // Test API endpoint rate limits
       const apiPromises = Array.from({ length: 20 }, () =>
-        request(app.getHttpServer()).get('/api/health')
+        request(app.getHttpServer()).get('/api/health'),
       );
 
       const apiResponses = await Promise.all(apiPromises);
-      const apiRateLimited = apiResponses.filter(res => res.status === 429);
+      const apiRateLimited = apiResponses.filter((res) => res.status === 429);
 
       // Test auth endpoint rate limits
       const authPromises = Array.from({ length: 10 }, () =>
         request(app.getHttpServer())
           .post('/auth/login')
-          .send({ email: 'test@example.com', password: 'wrong' })
+          .send({ email: 'test@example.com', password: 'wrong' }),
       );
 
       const authResponses = await Promise.all(authPromises);
-      const authRateLimited = authResponses.filter(res => res.status === 429);
+      const authRateLimited = authResponses.filter((res) => res.status === 429);
 
       // Auth endpoints should have stricter limits than API endpoints
-      expect(authRateLimited.length).toBeGreaterThanOrEqual(apiRateLimited.length);
+      expect(authRateLimited.length).toBeGreaterThanOrEqual(
+        apiRateLimited.length,
+      );
     });
   });
 
@@ -192,7 +207,7 @@ describe('Security Integration Tests', () => {
       const xssPayload = {
         name: '<script>alert("xss")</script>',
         email: 'test@example.com',
-        password: 'TestPassword123!'
+        password: 'TestPassword123!',
       };
 
       const response = await request(app.getHttpServer())
@@ -209,7 +224,7 @@ describe('Security Integration Tests', () => {
     it('should reject SQL injection attempts', async () => {
       const sqlInjectionPayload = {
         email: "test@example.com'; DROP TABLE users; --",
-        password: 'TestPassword123!'
+        password: 'TestPassword123!',
       };
 
       await request(app.getHttpServer())
@@ -223,11 +238,11 @@ describe('Security Integration Tests', () => {
 
     it('should enforce strong password requirements', async () => {
       const weakPasswords = [
-        'password',        // Too common
-        '123456',         // Too simple
-        'abc',            // Too short
-        'PASSWORD123',    // No special chars
-        'password123!'    // No uppercase
+        'password', // Too common
+        '123456', // Too simple
+        'abc', // Too short
+        'PASSWORD123', // No special chars
+        'password123!', // No uppercase
       ];
 
       for (const weakPassword of weakPasswords) {
@@ -236,7 +251,7 @@ describe('Security Integration Tests', () => {
           .send({
             email: 'test@example.com',
             password: weakPassword,
-            name: 'Test User'
+            name: 'Test User',
           })
           .expect((res) => {
             expect(res.status).toBe(400);
@@ -253,7 +268,9 @@ describe('Security Integration Tests', () => {
         .send({ email: 'nonexistent@example.com', password: 'password123' })
         .expect((res) => {
           // Should not reveal whether user exists or not
-          expect(res.body.message).not.toMatch(/user (not found|does not exist)/i);
+          expect(res.body.message).not.toMatch(
+            /user (not found|does not exist)/i,
+          );
           expect(res.body.message).not.toContain('email');
         });
     });
@@ -263,7 +280,7 @@ describe('Security Integration Tests', () => {
       const registerData = {
         email: 'test@example.com',
         password: 'TestPassword123!',
-        name: 'Test User'
+        name: 'Test User',
       };
 
       await request(app.getHttpServer())
@@ -279,10 +296,12 @@ describe('Security Integration Tests', () => {
       // Check for secure cookie settings
       const cookies = loginResponse.headers['set-cookie'];
       if (cookies) {
-        const sessionCookie = cookies.find((cookie: string) => 
-          cookie.includes('connect.sid') || cookie.includes('session')
+        const cookieArr = Array.isArray(cookies) ? cookies : [cookies];
+        const sessionCookie = cookieArr.find(
+          (cookie: string) =>
+            cookie.includes('connect.sid') || cookie.includes('session'),
         );
-        
+
         if (sessionCookie) {
           expect(sessionCookie).toMatch(/HttpOnly/i);
           expect(sessionCookie).toMatch(/Secure/i);
@@ -296,7 +315,7 @@ describe('Security Integration Tests', () => {
       const userData = {
         email: 'test@example.com',
         password: 'TestPassword123!',
-        name: 'Test User'
+        name: 'Test User',
       };
 
       await request(app.getHttpServer())
@@ -330,7 +349,7 @@ describe('Security Integration Tests', () => {
       const maliciousFiles = [
         { filename: 'malicious.exe', mimetype: 'application/x-executable' },
         { filename: 'script.js', mimetype: 'application/javascript' },
-        { filename: 'virus.bat', mimetype: 'application/x-bat' }
+        { filename: 'virus.bat', mimetype: 'application/x-bat' },
       ];
 
       for (const file of maliciousFiles) {
@@ -400,8 +419,7 @@ describe('Security Integration Tests', () => {
     it('should enforce HTTPS in production', async () => {
       // This would need to be tested with HTTPS setup
       // For now, ensure that security headers are set for HTTPS enforcement
-      const response = await request(app.getHttpServer())
-        .get('/api/health');
+      const response = await request(app.getHttpServer()).get('/api/health');
 
       // In production, HSTS should be enabled
       if (process.env.NODE_ENV === 'production') {
@@ -427,7 +445,7 @@ describe('Security Integration Tests', () => {
       const protectedEndpoints = [
         { method: 'get', path: '/auth/profile' },
         { method: 'post', path: '/jobs/create' },
-        { method: 'get', path: '/security/events' }
+        { method: 'get', path: '/security/events' },
       ];
 
       for (const endpoint of protectedEndpoints) {
@@ -442,7 +460,7 @@ describe('Security Integration Tests', () => {
         'invalid.jwt.token',
         'Bearer invalid-token',
         'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.invalid',
-        ''
+        '',
       ];
 
       for (const token of invalidTokens) {

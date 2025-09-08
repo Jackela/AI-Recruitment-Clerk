@@ -5,7 +5,7 @@ import * as nodemailer from 'nodemailer';
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private transporter: nodemailer.Transporter;
+  private transporter!: nodemailer.Transporter;
 
   constructor(private configService: ConfigService) {
     this.initializeTransporter();
@@ -23,9 +23,11 @@ export class EmailService {
     };
 
     if (!smtpConfig.host || !smtpConfig.auth.user || !smtpConfig.auth.pass) {
-      this.logger.warn('SMTP configuration incomplete. Email MFA will not work properly.');
+      this.logger.warn(
+        'SMTP configuration incomplete. Email MFA will not work properly.',
+      );
       this.transporter = nodemailer.createTransport({
-        jsonTransport: true
+        jsonTransport: true,
       });
       return;
     }
@@ -42,24 +44,33 @@ export class EmailService {
     });
   }
 
-  async sendMfaToken(email: string, token: string, issuer: string): Promise<void> {
-    const fromEmail = this.configService.get<string>('SMTP_FROM') || 'noreply@ai-recruitment-clerk.com';
-    
+  async sendMfaToken(
+    email: string,
+    token: string,
+    issuer: string,
+  ): Promise<void> {
+    const fromEmail =
+      this.configService.get<string>('SMTP_FROM') ||
+      'noreply@ai-recruitment-clerk.com';
+
     const mailOptions = {
       from: `${issuer} Security <${fromEmail}>`,
       to: email,
       subject: `${issuer} - Verification Code`,
       html: this.generateMfaEmailTemplate(token, issuer),
-      text: `Your ${issuer} verification code is: ${token}. This code expires in 5 minutes. If you did not request this code, please ignore this email.`
+      text: `Your ${issuer} verification code is: ${token}. This code expires in 5 minutes. If you did not request this code, please ignore this email.`,
     };
 
     try {
       const result = await this.transporter.sendMail(mailOptions);
       this.logger.log(`MFA email sent successfully to ${email}`);
-      
+
       // Log JSON result if using test transporter
       if (this.configService.get<string>('NODE_ENV') !== 'production') {
-        this.logger.debug('Email preview:', nodemailer.getTestMessageUrl(result));
+        this.logger.debug(
+          'Email preview:',
+          nodemailer.getTestMessageUrl(result),
+        );
       }
     } catch (error) {
       this.logger.error(`Failed to send MFA email to ${email}:`, error);
@@ -67,16 +78,24 @@ export class EmailService {
     }
   }
 
-  async sendAccountSecurityAlert(email: string, event: string, details: any): Promise<void> {
-    const fromEmail = this.configService.get<string>('SMTP_FROM') || 'noreply@ai-recruitment-clerk.com';
-    const issuer = this.configService.get<string>('MFA_ISSUER_NAME') || 'AI-Recruitment-Clerk';
-    
+  async sendAccountSecurityAlert(
+    email: string,
+    event: string,
+    details: any,
+  ): Promise<void> {
+    const fromEmail =
+      this.configService.get<string>('SMTP_FROM') ||
+      'noreply@ai-recruitment-clerk.com';
+    const issuer =
+      this.configService.get<string>('MFA_ISSUER_NAME') ||
+      'AI-Recruitment-Clerk';
+
     const mailOptions = {
       from: `${issuer} Security <${fromEmail}>`,
       to: email,
       subject: `${issuer} - Security Alert: ${event}`,
       html: this.generateSecurityAlertTemplate(event, details, issuer),
-      text: `Security Alert: ${event}\n\nTime: ${details.timestamp}\nIP Address: ${details.ipAddress}\nUser Agent: ${details.userAgent}\n\nIf this was not you, please contact support immediately.`
+      text: `Security Alert: ${event}\n\nTime: ${details.timestamp}\nIP Address: ${details.ipAddress}\nUser Agent: ${details.userAgent}\n\nIf this was not you, please contact support immediately.`,
     };
 
     try {
@@ -137,7 +156,11 @@ export class EmailService {
     `;
   }
 
-  private generateSecurityAlertTemplate(event: string, details: any, issuer: string): string {
+  private generateSecurityAlertTemplate(
+    event: string,
+    details: any,
+    issuer: string,
+  ): string {
     return `
     <!DOCTYPE html>
     <html>

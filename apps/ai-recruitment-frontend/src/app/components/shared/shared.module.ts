@@ -9,8 +9,7 @@ import { DashboardCardComponent } from './dashboard-card/dashboard-card.componen
 import { BentoGridComponent } from './bento-grid/bento-grid.component';
 import { BentoCardComponent } from './bento-grid/bento-card.component';
 
-const MODULE_COMPONENTS: any[] = [
-];
+const MODULE_COMPONENTS: any[] = [];
 
 const STANDALONE_COMPONENTS = [
   LoadingComponent,
@@ -21,19 +20,13 @@ const STANDALONE_COMPONENTS = [
 ];
 
 @NgModule({
-  declarations: [
-    ...MODULE_COMPONENTS
-  ],
-  imports: [
-    CommonModule,
-    RouterModule,
-    ...STANDALONE_COMPONENTS,
-  ],
+  declarations: [...MODULE_COMPONENTS],
+  imports: [CommonModule, RouterModule, ...STANDALONE_COMPONENTS],
   exports: [
     ...MODULE_COMPONENTS,
     ...STANDALONE_COMPONENTS,
     CommonModule,
     RouterModule,
-  ]
+  ],
 })
-export class SharedModule { }
+export class SharedModule {}

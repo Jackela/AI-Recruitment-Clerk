@@ -23,7 +23,6 @@ import {
 } from '../common/error-handling.patterns';
 import { 
   EnhancedAppException, 
-  ExtendedErrorType,
   CombinedErrorType 
 } from './enhanced-error-types';
 import { 
@@ -172,7 +171,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
       return enhanced
         .withCorrelation(correlationContext)
         .withTraceId(exception.errorDetails.traceId || correlationContext.traceId)
-        .withUserId(exception.errorDetails.userId || correlationContext.userId)
+        .withUserId(exception.errorDetails.userId ?? correlationContext.userId ?? '')
         .withSeverity(exception.errorDetails.severity);
     }
 
@@ -336,7 +335,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
    */
   private trackErrorMetrics(
     error: EnhancedAppException,
-    correlationContext: ErrorCorrelationContext
+    _correlationContext: ErrorCorrelationContext
   ): void {
     // This would integrate with your metrics system
     // Example: Prometheus, DataDog, CloudWatch, etc.
@@ -348,8 +347,8 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
       businessImpact: error.enhancedDetails.businessImpact,
       userImpact: error.enhancedDetails.userImpact,
       serviceName: this.config.serviceName,
-      operationName: correlationContext.operationName,
-      executionTime: correlationContext.executionTime || 0,
+      operationName: _correlationContext.operationName,
+      executionTime: _correlationContext.executionTime || 0,
       timestamp: Date.now()
     };
 
@@ -360,7 +359,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
   /**
    * Send metrics to monitoring system (placeholder)
    */
-  private sendMetrics(metrics: Record<string, any>): void {
+  private sendMetrics(_metrics: Record<string, any>): void {
     // Implementation would depend on your monitoring infrastructure
     if (process.env.METRICS_ENABLED === 'true') {
       // Example: Send to monitoring system

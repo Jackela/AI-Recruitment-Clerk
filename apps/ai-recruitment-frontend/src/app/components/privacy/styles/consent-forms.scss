@@ -28,7 +28,11 @@
 
   &.required {
     border-color: var(--color-primary-500);
-    background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-primary-25) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--color-primary-50) 0%,
+      var(--color-primary-25) 100%
+    );
   }
 
   &.granted {
@@ -56,16 +60,20 @@
       .toggle-switch {
         position: relative;
         display: inline-block;
-        width: 60px; height: 30px;
+        width: 60px;
+        height: 30px;
         cursor: pointer;
 
         input {
           opacity: 0;
-          width: 0; height: 0;
+          width: 0;
+          height: 0;
 
           &:checked + .toggle-slider {
             background-color: #28a745;
-            &:before { transform: translateX(30px); }
+            &:before {
+              transform: translateX(30px);
+            }
           }
 
           &:disabled + .toggle-slider {
@@ -76,16 +84,21 @@
 
         .toggle-slider {
           position: absolute;
-          top: 0; left: 0; right: 0; bottom: 0;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
           background-color: #ccc;
           transition: 0.3s;
           border-radius: 30px;
 
           &:before {
             position: absolute;
-            content: "";
-            height: 24px; width: 24px;
-            left: 3px; bottom: 3px;
+            content: '';
+            height: 24px;
+            width: 24px;
+            left: 3px;
+            bottom: 3px;
             background-color: white;
             transition: 0.3s;
             border-radius: 50%;
@@ -183,7 +196,9 @@
   .confirmation-item {
     margin-bottom: var(--space-4);
 
-    &:last-child { margin-bottom: 0; }
+    &:last-child {
+      margin-bottom: 0;
+    }
 
     .checkbox-label {
       display: flex;
@@ -193,34 +208,41 @@
       padding-left: 2rem;
       line-height: 1.6;
 
-      input[type="checkbox"] {
+      input[type='checkbox'] {
         position: absolute;
         opacity: 0;
         cursor: pointer;
-        height: 0; width: 0;
+        height: 0;
+        width: 0;
 
         &:checked ~ .checkmark {
           background-color: var(--color-primary-500);
           border-color: var(--color-primary-500);
-          &:after { display: block; }
+          &:after {
+            display: block;
+          }
         }
       }
 
       .checkmark {
         position: absolute;
-        left: 0; top: 0.125rem;
-        height: 20px; width: 20px;
+        left: 0;
+        top: 0.125rem;
+        height: 20px;
+        width: 20px;
         background-color: var(--color-bg-primary);
         border: 2px solid var(--color-border-primary);
         border-radius: 4px;
         transition: all 0.3s ease;
 
         &:after {
-          content: "";
+          content: '';
           position: absolute;
           display: none;
-          left: 6px; top: 2px;
-          width: 6px; height: 10px;
+          left: 6px;
+          top: 2px;
+          width: 6px;
+          height: 10px;
           border: solid white;
           border-width: 0 2px 2px 0;
           transform: rotate(45deg);
@@ -234,7 +256,9 @@
           color: var(--color-primary-500);
           text-decoration: none;
           font-weight: var(--font-weight-medium);
-          &:hover { text-decoration: underline; }
+          &:hover {
+            text-decoration: underline;
+          }
         }
 
         .required-indicator {

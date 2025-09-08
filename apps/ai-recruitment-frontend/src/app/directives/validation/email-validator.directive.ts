@@ -1,5 +1,10 @@
 import { Directive, forwardRef } from '@angular/core';
-import { NG_VALIDATORS, Validator, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  NG_VALIDATORS,
+  Validator,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
 
 @Directive({
   selector: '[arcEmailValidator]',
@@ -8,9 +13,9 @@ import { NG_VALIDATORS, Validator, AbstractControl, ValidationErrors } from '@an
     {
       provide: NG_VALIDATORS,
       useExisting: forwardRef(() => EmailValidatorDirective),
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
 export class EmailValidatorDirective implements Validator {
   validate(control: AbstractControl): ValidationErrors | null {
@@ -21,11 +26,13 @@ export class EmailValidatorDirective implements Validator {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const valid = emailRegex.test(control.value);
 
-    return valid ? null : { 
-      email: {
-        message: '请输入有效的邮箱地址',
-        actualValue: control.value
-      }
-    };
+    return valid
+      ? null
+      : {
+          email: {
+            message: '请输入有效的邮箱地址',
+            actualValue: control.value,
+          },
+        };
   }
 }

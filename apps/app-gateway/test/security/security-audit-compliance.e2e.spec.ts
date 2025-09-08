@@ -6,7 +6,7 @@ import * as crypto from 'crypto';
 
 /**
  * 🛡️ SECURITY AUDIT & COMPLIANCE TESTS
- * 
+ *
  * Comprehensive security audit and compliance validation:
  * - OWASP Top 10 vulnerability scanning
  * - Security headers validation
@@ -29,14 +29,14 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
     email: 'security.audit.admin@test.com',
     password: 'SecurePassword123!@#',
     name: 'Security Audit Admin',
-    role: 'admin'
+    role: 'admin',
   };
 
   const testUser = {
     email: 'security.audit.user@test.com',
     password: 'SecurePassword123!@#',
     name: 'Security Audit User',
-    role: 'user'
+    role: 'user',
   };
 
   beforeAll(async () => {
@@ -59,18 +59,18 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
       .post('/auth/register')
       .send({
         ...testAdmin,
-        organizationName: 'Security Audit Test Organization'
+        organizationName: 'Security Audit Test Organization',
       });
-    
+
     testOrganizationId = orgResponse.body.data.organizationId;
-    
+
     const adminLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
         email: testAdmin.email,
-        password: testAdmin.password
+        password: testAdmin.password,
       });
-    
+
     adminToken = adminLoginResponse.body.data.accessToken;
 
     // Create test user
@@ -78,18 +78,18 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
       .post('/auth/register')
       .send({
         ...testUser,
-        organizationId: testOrganizationId
+        organizationId: testOrganizationId,
       });
-    
+
     testUserId = userResponse.body.data.userId;
-    
+
     const userLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
         email: testUser.email,
-        password: testUser.password
+        password: testUser.password,
       });
-    
+
     userToken = userLoginResponse.body.data.accessToken;
   }
 
@@ -98,29 +98,33 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
       const vulnerabilityTests = [
         {
           name: 'Vertical privilege escalation',
-          test: () => request(app.getHttpServer())
-            .get('/users/organization/users')
-            .set('Authorization', `Bearer ${userToken}`)
+          test: () =>
+            request(app.getHttpServer())
+              .get('/users/organization/users')
+              .set('Authorization', `Bearer ${userToken}`),
         },
         {
           name: 'Horizontal privilege escalation',
-          test: () => request(app.getHttpServer())
-            .get('/users/other-user-id/profile')
-            .set('Authorization', `Bearer ${userToken}`)
+          test: () =>
+            request(app.getHttpServer())
+              .get('/users/other-user-id/profile')
+              .set('Authorization', `Bearer ${userToken}`),
         },
         {
           name: 'Direct object reference',
-          test: () => request(app.getHttpServer())
-            .delete(`/users/${testUserId}`)
-            .set('Authorization', `Bearer ${userToken}`)
+          test: () =>
+            request(app.getHttpServer())
+              .delete(`/users/${testUserId}`)
+              .set('Authorization', `Bearer ${userToken}`),
         },
         {
           name: 'Method tampering',
-          test: () => request(app.getHttpServer())
-            .put('/users/organization/settings')
-            .set('Authorization', `Bearer ${userToken}`)
-            .send({ maxUsers: 999999 })
-        }
+          test: () =>
+            request(app.getHttpServer())
+              .put('/users/organization/settings')
+              .set('Authorization', `Bearer ${userToken}`)
+              .send({ maxUsers: 999999 }),
+        },
       ];
 
       for (const vuln of vulnerabilityTests) {
@@ -137,14 +141,14 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
           name: 'MD5 hash detection',
           payload: crypto.createHash('md5').update('test').digest('hex'),
           endpoint: '/users/profile',
-          field: 'customField'
+          field: 'customField',
         },
         {
           name: 'Base64 encoded secrets',
           payload: Buffer.from('secretkey123').toString('base64'),
           endpoint: '/users/profile',
-          field: 'apiToken'
-        }
+          field: 'apiToken',
+        },
       ];
 
       for (const test of weakCryptoTests) {
@@ -158,8 +162,9 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
       }
 
       // Verify HTTPS enforcement
-      const httpResponse = await request(app.getHttpServer())
-        .get('/system/health');
+      const httpResponse = await request(app.getHttpServer()).get(
+        '/system/health',
+      );
 
       // Should include security headers indicating HTTPS usage
       expect(httpResponse.headers).toHaveProperty('x-content-type-options');
@@ -174,7 +179,7 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
         { type: 'LDAP', payload: '*)(uid=*)' },
         { type: 'XPath', payload: "' or 1=1 or ''='" },
         { type: 'Template', payload: '${7*7}' },
-        { type: 'Expression', payload: '#{7*7}' }
+        { type: 'Expression', payload: '#{7*7}' },
       ];
 
       for (const injection of injectionPayloads) {
@@ -184,17 +189,19 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
           .send({
             skills: injection.payload,
             experience: { min: 0, max: injection.payload },
-            location: injection.payload
+            location: injection.payload,
           });
 
         expect([200, 400, 422]).toContain(searchResponse.status);
-        
+
         if (searchResponse.status === 200) {
           expect(searchResponse.body.data.resumes).toBeDefined();
           expect(Array.isArray(searchResponse.body.data.resumes)).toBe(true);
         }
-        
-        console.log(`✅ A03:2021 - ${injection.type} injection: Properly handled`);
+
+        console.log(
+          `✅ A03:2021 - ${injection.type} injection: Properly handled`,
+        );
       }
     });
 
@@ -206,18 +213,18 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
           test: async () => {
             const validEmail = testUser.email;
             const invalidEmail = 'nonexistent@test.com';
-            
+
             const validResponse = await request(app.getHttpServer())
               .post('/auth/forgot-password')
               .send({ email: validEmail });
-            
+
             const invalidResponse = await request(app.getHttpServer())
               .post('/auth/forgot-password')
               .send({ email: invalidEmail });
-            
+
             // Responses should be similar (no user enumeration)
             return validResponse.status === invalidResponse.status;
-          }
+          },
         },
         {
           name: 'Excessive data exposure',
@@ -225,7 +232,7 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
             const response = await request(app.getHttpServer())
               .get('/users/profile')
               .set('Authorization', `Bearer ${userToken}`);
-            
+
             if (response.status === 200) {
               const profile = response.body.data;
               // Should not expose sensitive internal data
@@ -234,34 +241,32 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
               expect(profile).not.toHaveProperty('systemFlags');
             }
             return true;
-          }
+          },
         },
         {
           name: 'Race condition in user registration',
           test: async () => {
             const duplicateRegistrations = [];
             const testEmail = `race.condition.${Date.now()}@test.com`;
-            
+
             for (let i = 0; i < 5; i++) {
               duplicateRegistrations.push(
-                request(app.getHttpServer())
-                  .post('/auth/register')
-                  .send({
-                    email: testEmail,
-                    password: 'Password123!',
-                    name: 'Race Test User',
-                    organizationId: testOrganizationId
-                  })
+                request(app.getHttpServer()).post('/auth/register').send({
+                  email: testEmail,
+                  password: 'Password123!',
+                  name: 'Race Test User',
+                  organizationId: testOrganizationId,
+                }),
               );
             }
-            
+
             const results = await Promise.all(duplicateRegistrations);
-            const successCount = results.filter(r => r.status === 201).length;
-            
+            const successCount = results.filter((r) => r.status === 201).length;
+
             // Should only allow one successful registration
             return successCount <= 1;
-          }
-        }
+          },
+        },
       ];
 
       for (const test of designFlawTests) {
@@ -276,27 +281,30 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
         '/system/health',
         '/users/profile',
         '/auth/login',
-        '/resumes/upload'
+        '/resumes/upload',
       ];
 
       for (const endpoint of endpoints) {
         const response = await request(app.getHttpServer())
           .get(endpoint)
-          .set('Authorization', endpoint === '/users/profile' ? `Bearer ${userToken}` : undefined);
+          .set(
+            'Authorization',
+            endpoint === '/users/profile' ? `Bearer ${userToken}` : undefined,
+          );
 
         const headers = response.headers;
 
         // Security headers validation
         const securityHeaders = [
           'x-content-type-options',
-          'x-frame-options', 
+          'x-frame-options',
           'x-xss-protection',
           'strict-transport-security',
-          'content-security-policy'
+          'content-security-policy',
         ];
 
         let headerScore = 0;
-        securityHeaders.forEach(header => {
+        securityHeaders.forEach((header) => {
           if (headers[header]) headerScore++;
         });
 
@@ -307,7 +315,9 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
         expect(headers['server']).not.toMatch(/express|nginx|apache/i);
         expect(headers['x-powered-by']).toBeUndefined();
 
-        console.log(`✅ A05:2021 - Security headers for ${endpoint}: ${headerScore}/${securityHeaders.length} present`);
+        console.log(
+          `✅ A05:2021 - Security headers for ${endpoint}: ${headerScore}/${securityHeaders.length} present`,
+        );
       }
     });
 
@@ -320,25 +330,27 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
         '/config',
         '/.env',
         '/webpack.config.js',
-        '/tsconfig.json'
+        '/tsconfig.json',
       ];
 
       for (const path of versionDisclosureTests) {
-        const response = await request(app.getHttpServer())
-          .get(path);
+        const response = await request(app.getHttpServer()).get(path);
 
         // Should not expose configuration files
         expect([404, 403, 401]).toContain(response.status);
       }
 
       // Check system information endpoint
-      const systemResponse = await request(app.getHttpServer())
-        .get('/system/health');
+      const systemResponse = await request(app.getHttpServer()).get(
+        '/system/health',
+      );
 
       if (systemResponse.status === 200) {
         const systemInfo = systemResponse.body;
         // Should not expose detailed version information
-        expect(JSON.stringify(systemInfo)).not.toMatch(/node_modules|package\.json|version/i);
+        expect(JSON.stringify(systemInfo)).not.toMatch(
+          /node_modules|package\.json|version/i,
+        );
       }
 
       console.log('✅ A06:2021 - Component version disclosure: Protected');
@@ -349,18 +361,16 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
       const bruteForceAttempts = [];
       for (let i = 0; i < 15; i++) {
         bruteForceAttempts.push(
-          request(app.getHttpServer())
-            .post('/auth/login')
-            .send({
-              email: testUser.email,
-              password: 'wrong-password'
-            })
+          request(app.getHttpServer()).post('/auth/login').send({
+            email: testUser.email,
+            password: 'wrong-password',
+          }),
         );
       }
 
       const results = await Promise.all(bruteForceAttempts);
-      const rateLimitedCount = results.filter(r => r.status === 429).length;
-      
+      const rateLimitedCount = results.filter((r) => r.status === 429).length;
+
       // Should implement rate limiting for failed attempts
       expect(rateLimitedCount).toBeGreaterThan(0);
 
@@ -375,10 +385,14 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
 
       // Should generate unique session tokens
       if (login1.status === 200 && login2.status === 200) {
-        expect(login1.body.data.accessToken).not.toBe(login2.body.data.accessToken);
+        expect(login1.body.data.accessToken).not.toBe(
+          login2.body.data.accessToken,
+        );
       }
 
-      console.log('✅ A07:2021 - Authentication security: Brute force protection and session management validated');
+      console.log(
+        '✅ A07:2021 - Authentication security: Brute force protection and session management validated',
+      );
     });
 
     it('should prevent A08:2021 - Software and Data Integrity Failures', async () => {
@@ -387,7 +401,7 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
         { name: 'script.js', content: 'alert("xss")' },
         { name: 'shell.php', content: '<?php system($_GET["cmd"]); ?>' },
         { name: 'binary.exe', content: 'MZ\x90\x00\x03' },
-        { name: 'zip-bomb.zip', content: 'PK\x03\x04' }
+        { name: 'zip-bomb.zip', content: 'PK\x03\x04' },
       ];
 
       for (const file of maliciousFiles) {
@@ -413,30 +427,42 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
         expect(profileResponse.body).toHaveProperty('data');
       }
 
-      console.log('✅ A08:2021 - Software and data integrity: File upload and API integrity validated');
+      console.log(
+        '✅ A08:2021 - Software and data integrity: File upload and API integrity validated',
+      );
     });
 
     it('should prevent A09:2021 - Security Logging and Monitoring Failures', async () => {
       // Test security events are logged (conceptually)
       const securityEvents = [
-        { name: 'Failed login', action: () => 
-          request(app.getHttpServer())
-            .post('/auth/login')
-            .send({ email: testUser.email, password: 'wrong-password' })
+        {
+          name: 'Failed login',
+          action: () =>
+            request(app.getHttpServer())
+              .post('/auth/login')
+              .send({ email: testUser.email, password: 'wrong-password' }),
         },
-        { name: 'Unauthorized access attempt', action: () =>
-          request(app.getHttpServer())
-            .get('/users/organization/users')
-            .set('Authorization', `Bearer ${userToken}`)
+        {
+          name: 'Unauthorized access attempt',
+          action: () =>
+            request(app.getHttpServer())
+              .get('/users/organization/users')
+              .set('Authorization', `Bearer ${userToken}`),
         },
-        { name: 'Suspicious file upload', action: () =>
-          request(app.getHttpServer())
-            .post('/resumes/upload')
-            .set('Authorization', `Bearer ${userToken}`)
-            .attach('resume', Buffer.from('malicious content'), '../../../etc/passwd')
-            .field('candidateName', 'Malicious User')
-            .field('candidateEmail', 'malicious@attacker.com')
-        }
+        {
+          name: 'Suspicious file upload',
+          action: () =>
+            request(app.getHttpServer())
+              .post('/resumes/upload')
+              .set('Authorization', `Bearer ${userToken}`)
+              .attach(
+                'resume',
+                Buffer.from('malicious content'),
+                '../../../etc/passwd',
+              )
+              .field('candidateName', 'Malicious User')
+              .field('candidateEmail', 'malicious@attacker.com'),
+        },
       ];
 
       for (const event of securityEvents) {
@@ -455,7 +481,9 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
         expect(monitoringResponse.body).toHaveProperty('data');
       }
 
-      console.log('✅ A09:2021 - Security logging and monitoring: Events processed without system failure');
+      console.log(
+        '✅ A09:2021 - Security logging and monitoring: Events processed without system failure',
+      );
     });
 
     it('should prevent A10:2021 - Server-Side Request Forgery (SSRF)', async () => {
@@ -465,7 +493,7 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
         'http://169.254.169.254/metadata',
         'file:///etc/passwd',
         'ftp://internal.server.com/',
-        'http://internal.service:3000/secrets'
+        'http://internal.service:3000/secrets',
       ];
 
       // Test URL validation in various endpoints
@@ -476,12 +504,12 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
             .put('/users/profile')
             .set('Authorization', `Bearer ${userToken}`)
             .send({ website: payload }),
-          
+
           // Analytics callback URL
           request(app.getHttpServer())
             .post('/analytics/webhook')
             .set('Authorization', `Bearer ${adminToken}`)
-            .send({ callbackUrl: payload, events: ['user.login'] })
+            .send({ callbackUrl: payload, events: ['user.login'] }),
         ];
 
         for (const test of tests) {
@@ -497,35 +525,34 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
 
   describe('🔒 Security Headers Validation', () => {
     it('should implement comprehensive security headers', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/system/health');
+      const response = await request(app.getHttpServer()).get('/system/health');
 
       const headers = response.headers;
       const securityHeaders = {
         'x-content-type-options': {
           expected: 'nosniff',
-          description: 'Prevents MIME type sniffing'
+          description: 'Prevents MIME type sniffing',
         },
         'x-frame-options': {
           expected: /^(DENY|SAMEORIGIN)$/,
-          description: 'Prevents clickjacking attacks'
+          description: 'Prevents clickjacking attacks',
         },
         'x-xss-protection': {
           expected: '1; mode=block',
-          description: 'Enables XSS protection'
+          description: 'Enables XSS protection',
         },
         'strict-transport-security': {
           expected: /^max-age=\d+/,
-          description: 'Enforces HTTPS connections'
+          description: 'Enforces HTTPS connections',
         },
         'content-security-policy': {
           expected: /.+/,
-          description: 'Controls resource loading'
+          description: 'Controls resource loading',
         },
         'referrer-policy': {
           expected: /^(no-referrer|strict-origin-when-cross-origin)$/,
-          description: 'Controls referrer information'
-        }
+          description: 'Controls referrer information',
+        },
       };
 
       console.log('\n🔒 SECURITY HEADERS VALIDATION');
@@ -536,10 +563,11 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
         const value = headers[header];
         if (value) {
           implementedHeaders++;
-          const isValid = typeof config.expected === 'string' 
-            ? value === config.expected 
-            : config.expected.test(value);
-          
+          const isValid =
+            typeof config.expected === 'string'
+              ? value === config.expected
+              : config.expected.test(value);
+
           console.log(`   ${header}: ${value} ${isValid ? '✅' : '⚠️'}`);
           console.log(`      ${config.description}`);
         } else {
@@ -548,22 +576,25 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
         }
       });
 
-      console.log(`\nHeaders implemented: ${implementedHeaders}/${Object.keys(securityHeaders).length}`);
-      
+      console.log(
+        `\nHeaders implemented: ${implementedHeaders}/${Object.keys(securityHeaders).length}`,
+      );
+
       // Should implement at least 50% of security headers
-      expect(implementedHeaders).toBeGreaterThanOrEqual(Math.ceil(Object.keys(securityHeaders).length / 2));
+      expect(implementedHeaders).toBeGreaterThanOrEqual(
+        Math.ceil(Object.keys(securityHeaders).length / 2),
+      );
     });
 
     it('should not expose sensitive server information', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/system/health');
+      const response = await request(app.getHttpServer()).get('/system/health');
 
       const headers = response.headers;
-      
+
       // Should not expose server technology
       expect(headers['server']).not.toMatch(/nginx|apache|express/i);
       expect(headers['x-powered-by']).toBeUndefined();
-      
+
       // Should not expose version information
       const responseBody = JSON.stringify(response.body);
       expect(responseBody).not.toMatch(/version|v\d+\.\d+/i);
@@ -579,13 +610,13 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
         { path: '/users/profile', method: 'PUT', shouldWork: true },
         { path: '/users/profile', method: 'DELETE', shouldWork: false },
         { path: '/auth/login', method: 'POST', shouldWork: true },
-        { path: '/auth/login', method: 'GET', shouldWork: false }
+        { path: '/auth/login', method: 'GET', shouldWork: false },
       ];
 
       for (const endpoint of endpoints) {
         let response;
         const token = endpoint.path.includes('/users/') ? userToken : undefined;
-        
+
         switch (endpoint.method) {
           case 'GET':
             response = await request(app.getHttpServer())
@@ -618,7 +649,9 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
         }
       }
 
-      console.log('✅ HTTP method security: Proper method restrictions implemented');
+      console.log(
+        '✅ HTTP method security: Proper method restrictions implemented',
+      );
     });
 
     it('should validate content type restrictions', async () => {
@@ -627,7 +660,7 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
         'application/xml',
         'text/html',
         'multipart/form-data', // For non-file endpoints
-        'application/x-www-form-urlencoded'
+        'application/x-www-form-urlencoded',
       ];
 
       for (const contentType of invalidContentTypes) {
@@ -640,46 +673,47 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
         expect([400, 415, 422]).toContain(response.status);
       }
 
-      console.log('✅ Content type validation: Invalid content types properly rejected');
+      console.log(
+        '✅ Content type validation: Invalid content types properly rejected',
+      );
     });
 
     it('should implement proper error handling without information disclosure', async () => {
       const errorScenarios = [
         {
           name: 'Invalid JSON',
-          test: () => request(app.getHttpServer())
-            .post('/auth/login')
-            .set('Content-Type', 'application/json')
-            .send('{"invalid": json}')
+          test: () =>
+            request(app.getHttpServer())
+              .post('/auth/login')
+              .set('Content-Type', 'application/json')
+              .send('{"invalid": json}'),
         },
         {
           name: 'Missing required fields',
-          test: () => request(app.getHttpServer())
-            .post('/auth/login')
-            .send({})
+          test: () => request(app.getHttpServer()).post('/auth/login').send({}),
         },
         {
           name: 'Invalid endpoint',
-          test: () => request(app.getHttpServer())
-            .get('/nonexistent/endpoint')
+          test: () => request(app.getHttpServer()).get('/nonexistent/endpoint'),
         },
         {
           name: 'Database error simulation',
-          test: () => request(app.getHttpServer())
-            .get('/users/profile')
-            .set('Authorization', `Bearer ${userToken}`)
-            .query({ invalidParam: 'x'.repeat(10000) })
-        }
+          test: () =>
+            request(app.getHttpServer())
+              .get('/users/profile')
+              .set('Authorization', `Bearer ${userToken}`)
+              .query({ invalidParam: 'x'.repeat(10000) }),
+        },
       ];
 
       for (const scenario of errorScenarios) {
         const response = await scenario.test();
-        
+
         expect([400, 401, 404, 422, 500]).toContain(response.status);
-        
+
         if (response.body.error) {
           const errorMessage = JSON.stringify(response.body);
-          
+
           // Should not expose sensitive information
           expect(errorMessage).not.toContain('stack trace');
           expect(errorMessage).not.toContain('MongoError');
@@ -687,8 +721,10 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
           expect(errorMessage).not.toContain('password');
           expect(errorMessage).not.toMatch(/\/[a-z]+\/[a-z]+\.js:\d+/); // File paths
         }
-        
-        console.log(`✅ Error handling - ${scenario.name}: Safe error response`);
+
+        console.log(
+          `✅ Error handling - ${scenario.name}: Safe error response`,
+        );
       }
     });
   });
@@ -704,9 +740,9 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
             email: `crypto.test.${i}@test.com`,
             password: 'SamePassword123!',
             name: `Crypto Test User ${i}`,
-            organizationId: testOrganizationId
+            organizationId: testOrganizationId,
           });
-        
+
         if (response.status === 201) {
           users.push(response.body.data.userId);
         }
@@ -722,9 +758,9 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
           .post('/auth/login')
           .send({
             email: testUser.email,
-            password: testUser.password
+            password: testUser.password,
           });
-        
+
         if (loginResponse.status === 200) {
           tokens.push(loginResponse.body.data.accessToken);
         }
@@ -734,12 +770,14 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
       const uniqueTokens = new Set(tokens);
       expect(uniqueTokens.size).toBe(tokens.length);
 
-      console.log('✅ Cryptographic security: Password hashing and token generation validated');
+      console.log(
+        '✅ Cryptographic security: Password hashing and token generation validated',
+      );
     });
 
     it('should validate random number generation security', async () => {
       const randomIds = [];
-      
+
       // Generate multiple random identifiers
       for (let i = 0; i < 10; i++) {
         const response = await request(app.getHttpServer())
@@ -748,13 +786,15 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
           .send({
             title: `Random Test ${i}`,
             description: 'Test questionnaire for randomness validation',
-            questions: [{
-              type: 'text',
-              question: 'Test question',
-              required: true
-            }]
+            questions: [
+              {
+                type: 'text',
+                question: 'Test question',
+                required: true,
+              },
+            ],
           });
-        
+
         if (response.status === 201) {
           randomIds.push(response.body.data.questionnaireId);
         }
@@ -768,14 +808,16 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
       const sortedIds = randomIds.sort();
       let isIncremental = true;
       for (let i = 1; i < sortedIds.length; i++) {
-        if (parseInt(sortedIds[i]) !== parseInt(sortedIds[i-1]) + 1) {
+        if (parseInt(sortedIds[i]) !== parseInt(sortedIds[i - 1]) + 1) {
           isIncremental = false;
           break;
         }
       }
       expect(isIncremental).toBe(false);
 
-      console.log('✅ Random number generation: Cryptographically secure randomness validated');
+      console.log(
+        '✅ Random number generation: Cryptographically secure randomness validated',
+      );
     });
   });
 
@@ -794,7 +836,7 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           confirmEmail: testUser.email,
-          reason: 'GDPR compliance test'
+          reason: 'GDPR compliance test',
         });
 
       expect([200, 202, 404, 501]).toContain(deletionResponse.status);
@@ -806,14 +848,16 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
 
       if (profileResponse.status === 200) {
         const profile = profileResponse.body.data;
-        
+
         // Should not expose internal system data
         expect(profile).not.toHaveProperty('internalNotes');
         expect(profile).not.toHaveProperty('systemFlags');
         expect(profile).not.toHaveProperty('passwordHash');
       }
 
-      console.log('✅ GDPR-like compliance: Data subject rights and data minimization validated');
+      console.log(
+        '✅ GDPR-like compliance: Data subject rights and data minimization validated',
+      );
     });
 
     it('should validate audit trail and logging compliance', async () => {
@@ -821,27 +865,30 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
       const auditableOperations = [
         {
           name: 'Profile update',
-          operation: () => request(app.getHttpServer())
-            .put('/users/profile')
-            .set('Authorization', `Bearer ${userToken}`)
-            .send({ name: 'Audit Test Update' })
+          operation: () =>
+            request(app.getHttpServer())
+              .put('/users/profile')
+              .set('Authorization', `Bearer ${userToken}`)
+              .send({ name: 'Audit Test Update' }),
         },
         {
           name: 'Password change',
-          operation: () => request(app.getHttpServer())
-            .put('/users/change-password')
-            .set('Authorization', `Bearer ${userToken}`)
-            .send({
-              currentPassword: testUser.password,
-              newPassword: 'NewSecurePassword123!'
-            })
+          operation: () =>
+            request(app.getHttpServer())
+              .put('/users/change-password')
+              .set('Authorization', `Bearer ${userToken}`)
+              .send({
+                currentPassword: testUser.password,
+                newPassword: 'NewSecurePassword123!',
+              }),
         },
         {
           name: 'Data export request',
-          operation: () => request(app.getHttpServer())
-            .post('/users/export-data')
-            .set('Authorization', `Bearer ${userToken}`)
-        }
+          operation: () =>
+            request(app.getHttpServer())
+              .post('/users/export-data')
+              .set('Authorization', `Bearer ${userToken}`),
+        },
       ];
 
       for (const op of auditableOperations) {
@@ -859,7 +906,9 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
         expect(Array.isArray(auditResponse.body.data.activities)).toBe(true);
       }
 
-      console.log('✅ Audit trail compliance: Sensitive operations logged appropriately');
+      console.log(
+        '✅ Audit trail compliance: Sensitive operations logged appropriately',
+      );
     });
 
     it('should validate data retention and archival compliance', async () => {
@@ -872,7 +921,7 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
           userDataRetentionDays: 2555, // ~7 years
           logRetentionDays: 365,
           enableAutoArchival: true,
-          enableAutoCleanup: true
+          enableAutoCleanup: true,
         });
 
       expect([200, 201, 404]).toContain(retentionConfigResponse.status);
@@ -883,7 +932,9 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
         expect(config.enableAutoCleanup).toBe(true);
       }
 
-      console.log('✅ Data retention compliance: Retention policies configurable and reasonable');
+      console.log(
+        '✅ Data retention compliance: Retention policies configurable and reasonable',
+      );
     });
   });
 
@@ -899,7 +950,7 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
               .set('Authorization', `Bearer ${userToken}`);
             return Date.now() - start;
           },
-          threshold: 2000 // 2 seconds
+          threshold: 2000, // 2 seconds
         },
         {
           name: 'Input validation overhead',
@@ -911,29 +962,30 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
               .send({
                 name: 'Performance Test User',
                 bio: 'A'.repeat(1000), // Large but valid input
-                location: 'Test City'
+                location: 'Test City',
               });
             return Date.now() - start;
           },
-          threshold: 3000 // 3 seconds
+          threshold: 3000, // 3 seconds
         },
         {
           name: 'Rate limiting response time',
           operation: async () => {
             const start = Date.now();
-            await request(app.getHttpServer())
-              .get('/system/health');
+            await request(app.getHttpServer()).get('/system/health');
             return Date.now() - start;
           },
-          threshold: 1000 // 1 second
-        }
+          threshold: 1000, // 1 second
+        },
       ];
 
       for (const test of performanceTests) {
         const executionTime = await test.operation();
         expect(executionTime).toBeLessThan(test.threshold);
-        
-        console.log(`✅ Performance impact - ${test.name}: ${executionTime}ms (threshold: ${test.threshold}ms)`);
+
+        console.log(
+          `✅ Performance impact - ${test.name}: ${executionTime}ms (threshold: ${test.threshold}ms)`,
+        );
       }
     });
   });
@@ -942,14 +994,19 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
     it('should provide comprehensive security audit summary', async () => {
       console.log('\n🛡️ SECURITY AUDIT & COMPLIANCE TEST SUMMARY');
       console.log('===============================================');
-      
+
       const securityValidations = {
-        owaspTop10Compliance: '✅ OWASP Top 10 vulnerability prevention validated',
-        securityHeadersImplementation: '✅ Security headers implemented and validated',
-        apiSecurityBestPractices: '✅ API security best practices compliance verified',
+        owaspTop10Compliance:
+          '✅ OWASP Top 10 vulnerability prevention validated',
+        securityHeadersImplementation:
+          '✅ Security headers implemented and validated',
+        apiSecurityBestPractices:
+          '✅ API security best practices compliance verified',
         cryptographicSecurity: '✅ Cryptographic implementations validated',
-        complianceStandards: '✅ GDPR-like compliance and audit trail validation',
-        performanceImpactAssessment: '✅ Security measures performance impact assessed'
+        complianceStandards:
+          '✅ GDPR-like compliance and audit trail validation',
+        performanceImpactAssessment:
+          '✅ Security measures performance impact assessed',
       };
 
       Object.entries(securityValidations).forEach(([check, status]) => {
@@ -957,11 +1014,13 @@ describe('🛡️ Security Audit & Compliance Tests', () => {
       });
 
       console.log('\n🎉 Security Audit & Compliance Validation Completed');
-      
+
       // Generate security score
-      const securityScore = Object.keys(securityValidations).length * 100 / Object.keys(securityValidations).length;
+      const securityScore =
+        (Object.keys(securityValidations).length * 100) /
+        Object.keys(securityValidations).length;
       console.log(`📊 Overall Security Score: ${securityScore}%`);
-      
+
       expect(Object.keys(securityValidations).length).toBeGreaterThan(0);
     });
   });

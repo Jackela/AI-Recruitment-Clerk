@@ -11,18 +11,16 @@ import { GuestUsage, GuestUsageSchema } from './schemas/guest-usage.schema';
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: GuestUsage.name, schema: GuestUsageSchema }
+      { name: GuestUsage.name, schema: GuestUsageSchema },
     ]),
     forwardRef(() => WebSocketModule),
   ],
-  controllers: [GuestController, GuestResumeController, WebSocketDemoController],
-  providers: [
-    GuestUsageService,
-    GuestGuard
+  controllers: [
+    GuestController,
+    GuestResumeController,
+    WebSocketDemoController,
   ],
-  exports: [
-    GuestUsageService,
-    GuestGuard
-  ]
+  providers: [GuestUsageService, GuestGuard],
+  exports: [GuestUsageService, GuestGuard],
 })
 export class GuestModule {}

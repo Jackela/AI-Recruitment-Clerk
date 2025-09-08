@@ -52,14 +52,16 @@ export interface ErrorData {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WebSocketService implements OnDestroy {
   private socket: Socket | null = null;
   // private reconnectAttempts = 0; // Reserved for reconnection logic
   private maxReconnectAttempts = 5;
   private reconnectInterval = 5000;
-  private connectionStatus$ = new BehaviorSubject<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
+  private connectionStatus$ = new BehaviorSubject<
+    'connecting' | 'connected' | 'disconnected' | 'error'
+  >('disconnected');
   private messages$ = new Subject<WebSocketMessage>();
   private destroy$ = new Subject<void>();
 
@@ -70,9 +72,9 @@ export class WebSocketService implements OnDestroy {
    */
   connect(sessionId: string): Observable<WebSocketMessage> {
     this.disconnect(); // 确保没有现有连接
-    
+
     this.connectionStatus$.next('connecting');
-    
+
     try {
       this.socket = io(this.getSocketUrl(), {
         query: { sessionId },
@@ -82,26 +84,29 @@ export class WebSocketService implements OnDestroy {
         reconnectionAttempts: this.maxReconnectAttempts,
         reconnectionDelay: this.reconnectInterval,
       });
-      
+
       this.setupSocketHandlers(sessionId);
     } catch (error) {
       this.toastService.error('网络连接失败，请检查您的网络');
       this.connectionStatus$.next('error');
     }
-    
+
     return this.messages$.asObservable().pipe(
-      filter(msg => msg.sessionId === sessionId),
-      takeUntil(this.destroy$)
+      filter((msg) => msg.sessionId === sessionId),
+      takeUntil(this.destroy$),
     );
   }
 
   /**
    * 监听特定类型的消息
    */
-  onMessage(type: WebSocketMessage['type'], sessionId: string): Observable<WebSocketMessage> {
+  onMessage(
+    type: WebSocketMessage['type'],
+    sessionId: string,
+  ): Observable<WebSocketMessage> {
     return this.messages$.asObservable().pipe(
-      filter(msg => msg.type === type && msg.sessionId === sessionId),
-      takeUntil(this.destroy$)
+      filter((msg) => msg.type === type && msg.sessionId === sessionId),
+      takeUntil(this.destroy$),
     );
   }
 
@@ -110,8 +115,8 @@ export class WebSocketService implements OnDestroy {
    */
   onProgress(sessionId: string): Observable<ProgressUpdate> {
     return this.onMessage('progress', sessionId).pipe(
-      filter(msg => msg.data),
-      takeUntil(this.destroy$)
+      filter((msg) => msg.data),
+      takeUntil(this.destroy$),
     ) as Observable<ProgressUpdate>;
   }
 
@@ -120,8 +125,8 @@ export class WebSocketService implements OnDestroy {
    */
   onCompletion(sessionId: string): Observable<CompletionData> {
     return this.onMessage('completed', sessionId).pipe(
-      filter(msg => msg.data),
-      takeUntil(this.destroy$)
+      filter((msg) => msg.data),
+      takeUntil(this.destroy$),
     ) as Observable<CompletionData>;
   }
 
@@ -130,15 +135,17 @@ export class WebSocketService implements OnDestroy {
    */
   onError(sessionId: string): Observable<ErrorData> {
     return this.onMessage('error', sessionId).pipe(
-      filter(msg => msg.data),
-      takeUntil(this.destroy$)
+      filter((msg) => msg.data),
+      takeUntil(this.destroy$),
     ) as Observable<ErrorData>;
   }
 
   /**
    * 获取连接状态
    */
-  getConnectionStatus(): Observable<'connecting' | 'connected' | 'disconnected' | 'error'> {
+  getConnectionStatus(): Observable<
+    'connecting' | 'connected' | 'disconnected' | 'error'
+  > {
     return this.connectionStatus$.asObservable();
   }
 
@@ -175,7 +182,7 @@ export class WebSocketService implements OnDestroy {
       // Socket connected
       this.connectionStatus$.next('connected');
       // this.reconnectAttempts = 0; // Property commented out
-      
+
       // 订阅会话更新
       this.socket?.emit('subscribe_session', { sessionId });
     });
@@ -210,7 +217,6 @@ export class WebSocketService implements OnDestroy {
     });
   }
 
-
   /**
    * 获取Socket.IO URL
    */
@@ -218,7 +224,7 @@ export class WebSocketService implements OnDestroy {
     const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
     const host = window.location.hostname;
     const port = window.location.hostname === 'localhost' ? ':3000' : '';
-    
+
     return `${protocol}//${host}${port}/ws`;
   }
 

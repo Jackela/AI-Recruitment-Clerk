@@ -41,41 +41,83 @@ export interface BentoCardData {
           <div class="card-icon" *ngIf="data.icon" [attr.aria-hidden]="'true'">
             <ng-container [ngSwitch]="data.icon">
               <!-- Stats Icons -->
-              <svg *ngSwitchCase="'stats'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <svg
+                *ngSwitchCase="'stats'"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
                 <line x1="18" y1="20" x2="18" y2="10"></line>
                 <line x1="12" y1="20" x2="12" y2="4"></line>
                 <line x1="6" y1="20" x2="6" y2="14"></line>
               </svg>
-              
+
               <!-- Users Icon -->
-              <svg *ngSwitchCase="'users'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <svg
+                *ngSwitchCase="'users'"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
               </svg>
-              
+
               <!-- Trend Up Icon -->
-              <svg *ngSwitchCase="'trend-up'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <svg
+                *ngSwitchCase="'trend-up'"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
                 <polyline points="17 6 23 6 23 12"></polyline>
               </svg>
-              
+
               <!-- Clock Icon -->
-              <svg *ngSwitchCase="'clock'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <svg
+                *ngSwitchCase="'clock'"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
                 <circle cx="12" cy="12" r="10"></circle>
                 <polyline points="12,6 12,12 16,14"></polyline>
               </svg>
-              
+
               <!-- Target Icon -->
-              <svg *ngSwitchCase="'target'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <svg
+                *ngSwitchCase="'target'"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
                 <circle cx="12" cy="12" r="10"></circle>
                 <circle cx="12" cy="12" r="6"></circle>
                 <circle cx="12" cy="12" r="2"></circle>
               </svg>
-              
+
               <!-- Default Dashboard Icon -->
-              <svg *ngSwitchDefault width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <svg
+                *ngSwitchDefault
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
                 <rect x="3" y="3" width="7" height="7"></rect>
                 <rect x="14" y="3" width="7" height="7"></rect>
                 <rect x="14" y="14" width="7" height="7"></rect>
@@ -83,59 +125,102 @@ export interface BentoCardData {
               </svg>
             </ng-container>
           </div>
-          
+
           <div class="header-text" *ngIf="data.title">
             <h3 class="card-title">{{ data.title }}</h3>
-            <p class="card-subtitle" *ngIf="data.subtitle">{{ data.subtitle }}</p>
+            <p class="card-subtitle" *ngIf="data.subtitle">
+              {{ data.subtitle }}
+            </p>
           </div>
         </div>
-        
-        <div class="card-badge" *ngIf="data.badge" [class]="'badge-' + (data.status || 'default')">
+
+        <div
+          class="card-badge"
+          *ngIf="data.badge"
+          [class]="'badge-' + (data.status || 'default')"
+        >
           {{ data.badge }}
         </div>
       </div>
-      
+
       <!-- Value Display -->
       <div class="card-value-section" *ngIf="data.value !== undefined">
         <div class="card-value" [attr.aria-live]="'polite'">
           {{ formatValue(data.value) }}
         </div>
       </div>
-      
+
       <!-- Progress Bar -->
-      <div class="card-progress" *ngIf="data.progress" [attr.aria-label]="getProgressLabel()">
+      <div
+        class="card-progress"
+        *ngIf="data.progress"
+        [attr.aria-label]="getProgressLabel()"
+      >
         <div class="progress-bar">
-          <div class="progress-fill" [style.width.%]="getProgressPercentage()"></div>
+          <div
+            class="progress-fill"
+            [style.width.%]="getProgressPercentage()"
+          ></div>
         </div>
         <div class="progress-text">
-          <span class="progress-value">{{ data.progress.value }} / {{ data.progress.max }}</span>
-          <span class="progress-label" *ngIf="data.progress.label">{{ data.progress.label }}</span>
+          <span class="progress-value"
+            >{{ data.progress.value }} / {{ data.progress.max }}</span
+          >
+          <span class="progress-label" *ngIf="data.progress.label">{{
+            data.progress.label
+          }}</span>
         </div>
       </div>
-      
+
       <!-- Metrics List -->
       <div class="card-metrics" *ngIf="data.metrics && data.metrics.length > 0">
-        <div 
-          class="metric-item" 
+        <div
+          class="metric-item"
           *ngFor="let metric of data.metrics; trackBy: trackByMetricLabel"
-          [attr.aria-label]="getMetricAriaLabel(metric)">
+          [attr.aria-label]="getMetricAriaLabel(metric)"
+        >
           <div class="metric-label">{{ metric.label }}</div>
           <div class="metric-value-container">
             <span class="metric-value">{{ formatValue(metric.value) }}</span>
-            <span 
-              class="metric-trend" 
+            <span
+              class="metric-trend"
               *ngIf="metric.trend"
               [class]="'trend-' + metric.trend.type"
-              [attr.aria-label]="getTrendAriaLabel(metric.trend)">
-              <svg *ngIf="metric.trend.type === 'up'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+              [attr.aria-label]="getTrendAriaLabel(metric.trend)"
+            >
+              <svg
+                *ngIf="metric.trend.type === 'up'"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
                 <polyline points="17 6 23 6 23 12"></polyline>
               </svg>
-              <svg *ngIf="metric.trend.type === 'down'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+              <svg
+                *ngIf="metric.trend.type === 'down'"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
                 <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
                 <polyline points="17 18 23 18 23 12"></polyline>
               </svg>
-              <svg *ngIf="metric.trend.type === 'neutral'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+              <svg
+                *ngIf="metric.trend.type === 'neutral'"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
               {{ metric.trend.value }}
@@ -143,22 +228,40 @@ export interface BentoCardData {
           </div>
         </div>
       </div>
-      
+
       <!-- Actions -->
       <div class="card-actions" *ngIf="data.actions && data.actions.length > 0">
-        <button 
+        <button
           *ngFor="let action of data.actions; trackBy: trackByActionLabel"
           class="card-action-btn"
           [class.primary]="action.primary"
           (click)="onActionClick(action)"
-          [attr.aria-label]="action.label">
-          <svg *ngIf="action.icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+          [attr.aria-label]="action.label"
+        >
+          <svg
+            *ngIf="action.icon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
             <ng-container [ngSwitch]="action.icon">
               <path *ngSwitchCase="'plus'" d="M12 5v14m-7-7h14"></path>
-              <path *ngSwitchCase="'eye'" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <path
+                *ngSwitchCase="'eye'"
+                d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+              ></path>
               <circle *ngSwitchCase="'eye'" cx="12" cy="12" r="3"></circle>
-              <path *ngSwitchCase="'edit'" d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-              <path *ngSwitchCase="'download'" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path>
+              <path
+                *ngSwitchCase="'edit'"
+                d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+              ></path>
+              <path
+                *ngSwitchCase="'download'"
+                d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"
+              ></path>
               <path *ngSwitchDefault d="M9 5l7 7-7 7"></path>
             </ng-container>
           </svg>
@@ -167,336 +270,366 @@ export interface BentoCardData {
       </div>
     </div>
   `,
-  styles: [`
-    .bento-card {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 1rem;
-    }
-    
-    .header-left {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      flex: 1;
-    }
-    
-    .card-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, var(--color-primary-100), var(--color-primary-50));
-      border: 1px solid var(--color-primary-200);
-      color: var(--color-primary-800);
-      flex-shrink: 0;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.3s var(--ease-out);
-    }
-    
-    .header-text {
-      flex: 1;
-      min-width: 0; /* Prevent text overflow */
-    }
-    
-    .card-title {
-      font-family: var(--font-family-fantasy-heading);
-      font-size: var(--font-size-lg);
-      font-weight: var(--font-weight-fantasy-large);
-      margin: 0 0 var(--space-1) 0;
-      line-height: var(--line-height-tight);
-      color: var(--color-text-fantasy);
-      letter-spacing: -0.01em;
-    }
-    
-    .card-subtitle {
-      font-family: var(--font-family-body);
-      font-size: var(--font-size-sm);
-      font-weight: var(--font-weight-fantasy-small);
-      margin: 0;
-      color: var(--color-text-secondary);
-      line-height: var(--line-height-normal);
-    }
-    
-    .card-badge {
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      flex-shrink: 0;
-      
-      &.badge-active {
-        background: var(--color-success-100);
-        color: var(--color-success-700);
-        border: 1px solid var(--color-success-200);
-      }
-      
-      &.badge-inactive {
-        background: var(--color-neutral-100);
-        color: var(--color-neutral-700);
-        border: 1px solid var(--color-neutral-200);
-      }
-      
-      &.badge-warning {
-        background: var(--color-warning-100);
-        color: var(--color-warning-700);
-        border: 1px solid var(--color-warning-200);
-      }
-      
-      &.badge-error {
-        background: var(--color-error-100);
-        color: var(--color-error-700);
-        border: 1px solid var(--color-error-200);
-      }
-      
-      &.badge-success {
-        background: var(--color-success-100);
-        color: var(--color-success-700);
-        border: 1px solid var(--color-success-200);
-      }
-      
-      &.badge-default {
-        background: var(--color-moonlight-100);
-        color: var(--color-moonlight-700);
-        border: 1px solid var(--color-moonlight-200);
-      }
-    }
-    
-    .card-value-section {
-      margin: var(--space-2) 0;
-    }
-    
-    .card-value {
-      font-family: var(--font-family-fantasy-heading);
-      font-size: var(--font-size-2xl);
-      font-weight: var(--font-weight-bold);
-      line-height: var(--line-height-tight);
-      color: var(--color-primary-800);
-      background: linear-gradient(135deg, var(--color-primary-800), var(--color-royal-700));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    
-    .card-progress {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    
-    .progress-bar {
-      width: 100%;
-      height: 10px;
-      background: var(--color-neutral-200);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
-    }
-    
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--color-primary-600), var(--color-royal-600));
-      border-radius: var(--radius-lg);
-      transition: width var(--transition-base);
-      box-shadow: var(--shadow-sm);
-      position: relative;
-      
-      &::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 50%;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent);
-        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-      }
-    }
-    
-    .progress-text {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.875rem;
-    }
-    
-    .progress-value {
-      font-weight: 600;
-    }
-    
-    .progress-label {
-      opacity: 0.8;
-    }
-    
-    .card-metrics {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    
-    .metric-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-      
-      &:last-child {
-        border-bottom: none;
-      }
-    }
-    
-    .metric-label {
-      font-size: 0.875rem;
-      opacity: 0.8;
-      flex: 1;
-    }
-    
-    .metric-value-container {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .metric-value {
-      font-weight: 600;
-      font-size: 0.875rem;
-    }
-    
-    .metric-trend {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      font-size: 0.75rem;
-      font-weight: 500;
-      
-      &.trend-up {
-        color: var(--color-success-600);
-        background: var(--color-success-50);
-        border: 1px solid var(--color-success-200);
-        border-radius: var(--radius-md);
-        padding: var(--space-1) var(--space-2);
-      }
-      
-      &.trend-down {
-        color: var(--color-error-600);
-        background: var(--color-error-50);
-        border: 1px solid var(--color-error-200);
-        border-radius: var(--radius-md);
-        padding: var(--space-1) var(--space-2);
-      }
-      
-      &.trend-neutral {
-        color: var(--color-neutral-600);
-        background: var(--color-neutral-50);
-        border: 1px solid var(--color-neutral-200);
-        border-radius: var(--radius-md);
-        padding: var(--space-1) var(--space-2);
-      }
-    }
-    
-    .card-actions {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: auto;
-      flex-wrap: wrap;
-    }
-    
-    .card-action-btn {
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      padding: var(--space-2) var(--space-4);
-      border: 1px solid var(--color-border-primary);
-      border-radius: var(--radius-lg);
-      background: var(--color-bg-primary);
-      color: var(--color-text-primary);
-      font-family: var(--font-family-body);
-      font-size: var(--font-size-sm);
-      font-weight: var(--font-weight-medium);
-      cursor: pointer;
-      transition: var(--transition-base);
-      box-shadow: var(--shadow-xs);
-      
-      &:hover {
-        background: var(--color-bg-secondary);
-        border-color: var(--color-primary-300);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-        color: var(--color-primary-700);
-      }
-      
-      &:active {
-        transform: translateY(0);
-        box-shadow: var(--shadow-xs);
-      }
-      
-      &.primary {
-        background: linear-gradient(135deg, var(--color-primary-600), var(--color-royal-600));
-        border-color: var(--color-primary-500);
-        color: white;
-        font-weight: var(--font-weight-semibold);
-        
-        &:hover {
-          background: linear-gradient(135deg, var(--color-primary-700), var(--color-royal-700));
-          border-color: var(--color-primary-600);
-          transform: translateY(-2px);
-          box-shadow: var(--shadow-lg);
-        }
-        
-        &:active {
-          background: linear-gradient(135deg, var(--color-primary-800), var(--color-royal-800));
-        }
-      }
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 640px) {
-      .card-header {
+  styles: [
+    `
+      .bento-card {
+        height: 100%;
+        display: flex;
         flex-direction: column;
+        gap: 1rem;
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .header-left {
+        display: flex;
         align-items: flex-start;
         gap: 0.75rem;
+        flex: 1;
       }
-      
-      .card-value {
-        font-size: 1.875rem;
-      }
-      
-      .card-actions {
-        flex-direction: column;
-      }
-      
-      .card-action-btn {
+
+      .card-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
         justify-content: center;
+        background: linear-gradient(
+          135deg,
+          var(--color-primary-100),
+          var(--color-primary-50)
+        );
+        border: 1px solid var(--color-primary-200);
+        color: var(--color-primary-800);
+        flex-shrink: 0;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s var(--ease-out);
       }
-    }
-    
-    /* Animation for value changes */
-    .card-value {
-      animation: valueUpdate 0.5s ease-out;
-    }
-    
-    @keyframes valueUpdate {
-      0% {
-        transform: scale(1.05);
+
+      .header-text {
+        flex: 1;
+        min-width: 0; /* Prevent text overflow */
       }
-      100% {
-        transform: scale(1);
+
+      .card-title {
+        font-family: var(--font-family-fantasy-heading);
+        font-size: var(--font-size-lg);
+        font-weight: var(--font-weight-fantasy-large);
+        margin: 0 0 var(--space-1) 0;
+        line-height: var(--line-height-tight);
+        color: var(--color-text-fantasy);
+        letter-spacing: -0.01em;
       }
-    }
-  `]
+
+      .card-subtitle {
+        font-family: var(--font-family-body);
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-fantasy-small);
+        margin: 0;
+        color: var(--color-text-secondary);
+        line-height: var(--line-height-normal);
+      }
+
+      .card-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        flex-shrink: 0;
+
+        &.badge-active {
+          background: var(--color-success-100);
+          color: var(--color-success-700);
+          border: 1px solid var(--color-success-200);
+        }
+
+        &.badge-inactive {
+          background: var(--color-neutral-100);
+          color: var(--color-neutral-700);
+          border: 1px solid var(--color-neutral-200);
+        }
+
+        &.badge-warning {
+          background: var(--color-warning-100);
+          color: var(--color-warning-700);
+          border: 1px solid var(--color-warning-200);
+        }
+
+        &.badge-error {
+          background: var(--color-error-100);
+          color: var(--color-error-700);
+          border: 1px solid var(--color-error-200);
+        }
+
+        &.badge-success {
+          background: var(--color-success-100);
+          color: var(--color-success-700);
+          border: 1px solid var(--color-success-200);
+        }
+
+        &.badge-default {
+          background: var(--color-moonlight-100);
+          color: var(--color-moonlight-700);
+          border: 1px solid var(--color-moonlight-200);
+        }
+      }
+
+      .card-value-section {
+        margin: var(--space-2) 0;
+      }
+
+      .card-value {
+        font-family: var(--font-family-fantasy-heading);
+        font-size: var(--font-size-2xl);
+        font-weight: var(--font-weight-bold);
+        line-height: var(--line-height-tight);
+        color: var(--color-primary-800);
+        background: linear-gradient(
+          135deg,
+          var(--color-primary-800),
+          var(--color-royal-700)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .card-progress {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 10px;
+        background: var(--color-neutral-200);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          var(--color-primary-600),
+          var(--color-royal-600)
+        );
+        border-radius: var(--radius-lg);
+        transition: width var(--transition-base);
+        box-shadow: var(--shadow-sm);
+        position: relative;
+
+        &::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 50%;
+          background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.3),
+            transparent
+          );
+          border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+      }
+
+      .progress-text {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.875rem;
+      }
+
+      .progress-value {
+        font-weight: 600;
+      }
+
+      .progress-label {
+        opacity: 0.8;
+      }
+
+      .card-metrics {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .metric-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+        &:last-child {
+          border-bottom: none;
+        }
+      }
+
+      .metric-label {
+        font-size: 0.875rem;
+        opacity: 0.8;
+        flex: 1;
+      }
+
+      .metric-value-container {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .metric-value {
+        font-weight: 600;
+        font-size: 0.875rem;
+      }
+
+      .metric-trend {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+
+        &.trend-up {
+          color: var(--color-success-600);
+          background: var(--color-success-50);
+          border: 1px solid var(--color-success-200);
+          border-radius: var(--radius-md);
+          padding: var(--space-1) var(--space-2);
+        }
+
+        &.trend-down {
+          color: var(--color-error-600);
+          background: var(--color-error-50);
+          border: 1px solid var(--color-error-200);
+          border-radius: var(--radius-md);
+          padding: var(--space-1) var(--space-2);
+        }
+
+        &.trend-neutral {
+          color: var(--color-neutral-600);
+          background: var(--color-neutral-50);
+          border: 1px solid var(--color-neutral-200);
+          border-radius: var(--radius-md);
+          padding: var(--space-1) var(--space-2);
+        }
+      }
+
+      .card-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: auto;
+        flex-wrap: wrap;
+      }
+
+      .card-action-btn {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-2) var(--space-4);
+        border: 1px solid var(--color-border-primary);
+        border-radius: var(--radius-lg);
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+        font-family: var(--font-family-body);
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-medium);
+        cursor: pointer;
+        transition: var(--transition-base);
+        box-shadow: var(--shadow-xs);
+
+        &:hover {
+          background: var(--color-bg-secondary);
+          border-color: var(--color-primary-300);
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-md);
+          color: var(--color-primary-700);
+        }
+
+        &:active {
+          transform: translateY(0);
+          box-shadow: var(--shadow-xs);
+        }
+
+        &.primary {
+          background: linear-gradient(
+            135deg,
+            var(--color-primary-600),
+            var(--color-royal-600)
+          );
+          border-color: var(--color-primary-500);
+          color: white;
+          font-weight: var(--font-weight-semibold);
+
+          &:hover {
+            background: linear-gradient(
+              135deg,
+              var(--color-primary-700),
+              var(--color-royal-700)
+            );
+            border-color: var(--color-primary-600);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+          }
+
+          &:active {
+            background: linear-gradient(
+              135deg,
+              var(--color-primary-800),
+              var(--color-royal-800)
+            );
+          }
+        }
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 640px) {
+        .card-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.75rem;
+        }
+
+        .card-value {
+          font-size: 1.875rem;
+        }
+
+        .card-actions {
+          flex-direction: column;
+        }
+
+        .card-action-btn {
+          justify-content: center;
+        }
+      }
+
+      /* Animation for value changes */
+      .card-value {
+        animation: valueUpdate 0.5s ease-out;
+      }
+
+      @keyframes valueUpdate {
+        0% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+    `,
+  ],
 })
 export class BentoCardComponent {
   @Input() data!: BentoCardData;
@@ -504,11 +637,11 @@ export class BentoCardComponent {
 
   getCardClasses(): string {
     const classes = ['bento-card'];
-    
+
     if (this.data.status) {
       classes.push(`status-${this.data.status}`);
     }
-    
+
     return classes.join(' ');
   }
 
@@ -527,7 +660,10 @@ export class BentoCardComponent {
 
   getProgressPercentage(): number {
     if (!this.data.progress) return 0;
-    return Math.min((this.data.progress.value / this.data.progress.max) * 100, 100);
+    return Math.min(
+      (this.data.progress.value / this.data.progress.max) * 100,
+      100,
+    );
   }
 
   getProgressLabel(): string {
@@ -539,16 +675,26 @@ export class BentoCardComponent {
   getMetricAriaLabel(metric: NonNullable<BentoCardData['metrics']>[0]): string {
     let label = `${metric.label}: ${this.formatValue(metric.value)}`;
     if (metric.trend) {
-      const direction = metric.trend.type === 'up' ? 'increased' : 
-                       metric.trend.type === 'down' ? 'decreased' : 'unchanged';
+      const direction =
+        metric.trend.type === 'up'
+          ? 'increased'
+          : metric.trend.type === 'down'
+            ? 'decreased'
+            : 'unchanged';
       label += `, ${direction} by ${metric.trend.value}`;
     }
     return label;
   }
 
-  getTrendAriaLabel(trend: NonNullable<NonNullable<BentoCardData['metrics']>[0]['trend']>): string {
-    const direction = trend.type === 'up' ? 'increased' : 
-                     trend.type === 'down' ? 'decreased' : 'unchanged';
+  getTrendAriaLabel(
+    trend: NonNullable<NonNullable<BentoCardData['metrics']>[0]['trend']>,
+  ): string {
+    const direction =
+      trend.type === 'up'
+        ? 'increased'
+        : trend.type === 'down'
+          ? 'decreased'
+          : 'unchanged';
     return `Trend: ${direction} by ${trend.value}`;
   }
 
@@ -559,11 +705,17 @@ export class BentoCardComponent {
     }
   }
 
-  trackByMetricLabel(_index: number, metric: NonNullable<BentoCardData['metrics']>[0]): string {
+  trackByMetricLabel(
+    _index: number,
+    metric: NonNullable<BentoCardData['metrics']>[0],
+  ): string {
     return metric.label;
   }
 
-  trackByActionLabel(_index: number, action: NonNullable<BentoCardData['actions']>[0]): string {
+  trackByActionLabel(
+    _index: number,
+    action: NonNullable<BentoCardData['actions']>[0],
+  ): string {
     return action.label;
   }
 }

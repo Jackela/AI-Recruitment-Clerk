@@ -4,7 +4,7 @@ import { UserManagementController } from './user-management.controller';
 import { UserManagementService } from './user-management.service';
 import { UserManagementIntegrationService } from './user-management-integration.service';
 import { UserManagementRepository } from './user-management.repository';
-import { UserProfile, UserProfileSchema } from '../../schemas/user-profile.schema';
+import { User, UserSchema } from '../../schemas/user.schema';
 import { AppCacheModule } from '../../cache/cache.module';
 import { AuthModule } from '../../auth/auth.module';
 
@@ -16,20 +16,18 @@ import { AuthModule } from '../../auth/auth.module';
   imports: [
     AppCacheModule,
     AuthModule, // Import AuthModule to access UserService
-    MongooseModule.forFeature([
-      { name: UserProfile.name, schema: UserProfileSchema }
-    ])
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   controllers: [UserManagementController],
   providers: [
     UserManagementService, // Add the service that's used by the controller
     UserManagementIntegrationService,
-    UserManagementRepository
+    UserManagementRepository,
   ],
   exports: [
     UserManagementService, // Export the service
     UserManagementIntegrationService,
-    UserManagementRepository
-  ]
+    UserManagementRepository,
+  ],
 })
 export class UserManagementModule {}

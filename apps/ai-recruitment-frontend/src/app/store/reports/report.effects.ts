@@ -12,20 +12,26 @@ export class ReportEffects {
 
   constructor(
     private actions$: Actions,
-    private apiService: ApiService
+    private apiService: ApiService,
   ) {
     this.loadReportsByJob$ = createEffect(() =>
       this.actions$.pipe(
         ofType(ReportActions.loadReportsByJob),
         mergeMap(({ jobId }) =>
           this.apiService.getReportsByJobId(jobId).pipe(
-            map((reportsList) => ReportActions.loadReportsByJobSuccess({ reportsList })),
+            map((reportsList) =>
+              ReportActions.loadReportsByJobSuccess({ reportsList }),
+            ),
             catchError((error) =>
-              of(ReportActions.loadReportsByJobFailure({ error: error.message || 'Failed to load reports' }))
-            )
-          )
-        )
-      )
+              of(
+                ReportActions.loadReportsByJobFailure({
+                  error: error.message || 'Failed to load reports',
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
 
     this.loadReport$ = createEffect(() =>
@@ -35,11 +41,15 @@ export class ReportEffects {
           this.apiService.getReportById(reportId).pipe(
             map((report) => ReportActions.loadReportSuccess({ report })),
             catchError((error) =>
-              of(ReportActions.loadReportFailure({ error: error.message || 'Failed to load report' }))
-            )
-          )
-        )
-      )
+              of(
+                ReportActions.loadReportFailure({
+                  error: error.message || 'Failed to load report',
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

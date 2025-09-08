@@ -15,66 +15,83 @@ import { AppService } from './app.service';
 import { Report, ReportSchema } from '../schemas/report.schema';
 import { NatsClientModule } from '@app/shared-nats-client';
 import { ReportGeneratorNatsService } from '../services/report-generator-nats.service';
-import { 
+import {
   StandardizedGlobalExceptionFilter,
   ExceptionFilterConfigHelper,
-  ErrorInterceptorFactory 
+  ErrorInterceptorFactory,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env', '.env.local', '.env.production']
+      envFilePath: ['.env', '.env.local', '.env.production'],
     }),
     NatsClientModule.forRoot({
       serviceName: 'report-generator-svc',
     }),
-    MongooseModule.forRoot(process.env.MONGODB_URL || 'mongodb://admin:password123@localhost:27017/ai-recruitment?authSource=admin', {
-      connectionName: 'report-generator'
-    }),
-    MongooseModule.forFeature([
-      { name: Report.name, schema: ReportSchema }
-    ], 'report-generator')
+    MongooseModule.forRoot(
+      process.env.MONGODB_URL ||
+        'mongodb://admin:password123@localhost:27017/ai-recruitment?authSource=admin',
+      {
+        connectionName: 'report-generator',
+      },
+    ),
+    MongooseModule.forFeature(
+      [{ name: Report.name, schema: ReportSchema }],
+      'report-generator',
+    ),
   ],
   controllers: [AppController, ReportEventsController, ReportsController],
   providers: [
-    AppService, 
-    ReportGeneratorService, 
+    AppService,
+    ReportGeneratorService,
     ReportGeneratorNatsService,
-    LlmService, 
-    GridFsService, 
+    LlmService,
+    GridFsService,
     ReportRepository,
     ReportTemplatesService,
     PerformanceMonitorService,
     // Enhanced Error Handling System
     {
       provide: APP_FILTER,
-      useFactory: () => new StandardizedGlobalExceptionFilter({
-        serviceName: 'report-generator-svc',
-        ...ExceptionFilterConfigHelper.forProcessingService()
-      }),
+      useFactory: () =>
+        new StandardizedGlobalExceptionFilter({
+          serviceName: 'report-generator-svc',
+          ...ExceptionFilterConfigHelper.forProcessingService(),
+        }),
     },
     // Error Handling Interceptors
     {
       provide: APP_INTERCEPTOR,
-      useFactory: () => ErrorInterceptorFactory.createCorrelationInterceptor('report-generator-svc'),
+      useFactory: () =>
+        ErrorInterceptorFactory.createCorrelationInterceptor(
+          'report-generator-svc',
+        ),
     },
     {
       provide: APP_INTERCEPTOR,
-      useFactory: () => ErrorInterceptorFactory.createLoggingInterceptor('report-generator-svc'),
+      useFactory: () =>
+        ErrorInterceptorFactory.createLoggingInterceptor(
+          'report-generator-svc',
+        ),
     },
     {
       provide: APP_INTERCEPTOR,
-      useFactory: () => ErrorInterceptorFactory.createPerformanceInterceptor(
-        'report-generator-svc',
-        {
-          warnThreshold: 10000, // 10 seconds - report generation can take time
-          errorThreshold: 60000 // 60 seconds - hard limit for report generation
-        }
-      ),
-    }
+      useFactory: () =>
+        ErrorInterceptorFactory.createPerformanceInterceptor(
+          'report-generator-svc',
+          {
+            warnThreshold: 10000, // 10 seconds - report generation can take time
+            errorThreshold: 60000, // 60 seconds - hard limit for report generation
+          },
+        ),
+    },
   ],
-  exports: [ReportGeneratorService, ReportTemplatesService, PerformanceMonitorService],
+  exports: [
+    ReportGeneratorService,
+    ReportTemplatesService,
+    PerformanceMonitorService,
+  ],
 })
 export class AppModule {}

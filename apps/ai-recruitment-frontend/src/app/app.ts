@@ -1,4 +1,13 @@
-import { Component, OnInit, OnDestroy, inject, signal, effect, Injector, runInInjectionContext } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  inject,
+  signal,
+  effect,
+  Injector,
+  runInInjectionContext,
+} from '@angular/core';
 import { RouterOutlet, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { GuideOverlayComponent } from './components/shared/guide-overlay/guide-overlay.component';
@@ -6,13 +15,11 @@ import { StatusNotificationsComponent } from './components/shared/status-notific
 import { AriaLiveComponent } from './components/shared/aria-live/aria-live.component';
 import { ThemeToggleComponent } from './components/shared/theme-toggle/theme-toggle.component';
 import { LanguageSelectorComponent } from './components/shared/language-selector/language-selector.component';
-// import { NavigationGuideService } from './services/navigation/navigation-guide.service';
 import { ProgressFeedbackService } from './services/feedback/progress-feedback.service';
 import { KeyboardNavigationService } from './services/keyboard/keyboard-navigation.service';
 import { WebSocketStatsService } from './services/realtime/websocket-stats.service';
 import { AccessibilityService } from './services/accessibility/accessibility.service';
 import { ThemeService } from './services/theme/theme.service';
-// import { I18nService } from './services/i18n/i18n.service'; // Reserved for future i18n implementation
 import { SkipNavigationDirective } from './directives/accessibility/skip-navigation.directive';
 import { APP_CONFIG } from '../config/app.config';
 import { getText } from '../config/i18n.config';
@@ -22,14 +29,14 @@ import { getText } from '../config/i18n.config';
   standalone: true,
   imports: [
     CommonModule,
-    RouterOutlet, 
-    RouterLink, 
-    GuideOverlayComponent, 
+    RouterOutlet,
+    RouterLink,
+    GuideOverlayComponent,
     StatusNotificationsComponent,
     AriaLiveComponent,
     ThemeToggleComponent,
     LanguageSelectorComponent,
-    SkipNavigationDirective
+    SkipNavigationDirective,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -48,11 +55,11 @@ export class App implements OnInit, OnDestroy {
   private themeService = inject(ThemeService);
   // private i18nService = inject(I18nService); // Reserved for future i18n implementation
   private injector = inject(Injector);
-  
+
   keyboardHelpVisible = signal(false);
   isLoading = signal(false);
   guideOverlayVisible = signal(false);
-  
+
   // Accessibility preferences
   highContrastEnabled = signal(false);
   reducedMotionEnabled = signal(false);
@@ -61,16 +68,16 @@ export class App implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Initialize theme service (will auto-apply saved theme)
     // Theme service initializes automatically in constructor
-    
+
     // Initialize UX services
     this.initializeUXServices();
-    
+
     // Setup global keyboard shortcuts
     this.setupKeyboardShortcuts();
-    
+
     // Initialize accessibility features
     this.initializeAccessibility();
-    
+
     // Show welcome notification for first-time users
     this.showWelcomeMessage();
   }
@@ -83,12 +90,12 @@ export class App implements OnInit, OnDestroy {
 
   private initializeUXServices(): void {
     // Start real-time statistics
-    this.websocketStats.subscribeToStats().subscribe(stats => {
+    this.websocketStats.subscribeToStats().subscribe((stats) => {
       // Update global stats
       if (stats.errorRate > 10) {
         this.progressFeedback.showWarning(
           '系统警告',
-          '当前系统错误率较高，可能影响分析速度'
+          '当前系统错误率较高，可能影响分析速度',
         );
       }
     });
@@ -99,7 +106,7 @@ export class App implements OnInit, OnDestroy {
     if (!this.websocketStats.isConnected()) {
       this.progressFeedback.showInfo(
         '连接状态',
-        '正在使用离线模式，统计数据可能不是最新的'
+        '正在使用离线模式，统计数据可能不是最新的',
       );
     }
   }
@@ -110,21 +117,21 @@ export class App implements OnInit, OnDestroy {
       key: '1',
       altKey: true,
       description: getText('ACCESSIBILITY.shortcuts.dashboard'),
-      action: () => this.navigateTo('/dashboard')
+      action: () => this.navigateTo('/dashboard'),
     });
 
     this.accessibilityService.registerShortcut({
       key: '2',
       altKey: true,
       description: getText('ACCESSIBILITY.shortcuts.analysis'),
-      action: () => this.navigateTo('/analysis')
+      action: () => this.navigateTo('/analysis'),
     });
 
     this.accessibilityService.registerShortcut({
       key: '3',
       altKey: true,
       description: getText('ACCESSIBILITY.shortcuts.results'),
-      action: () => this.navigateTo('/results')
+      action: () => this.navigateTo('/results'),
     });
 
     // Help shortcut
@@ -132,7 +139,7 @@ export class App implements OnInit, OnDestroy {
       key: 'h',
       altKey: true,
       description: 'Show keyboard help',
-      action: () => this.showKeyboardHelp()
+      action: () => this.showKeyboardHelp(),
     });
 
     // App-specific shortcuts
@@ -141,44 +148,44 @@ export class App implements OnInit, OnDestroy {
       ctrlKey: true,
       shiftKey: true,
       description: 'Refresh data',
-      action: () => this.refreshData()
+      action: () => this.refreshData(),
     });
 
     this.accessibilityService.registerShortcut({
       key: 'n',
       ctrlKey: true,
       description: 'New analysis',
-      action: () => this.navigateToAnalysis()
+      action: () => this.navigateToAnalysis(),
     });
 
     // Modal shortcuts
     this.accessibilityService.registerShortcut({
       key: 'Escape',
       description: 'Close modals and menus',
-      action: () => this.closeModalsAndMenus()
+      action: () => this.closeModalsAndMenus(),
     });
-    
+
     // Theme shortcuts
     this.accessibilityService.registerShortcut({
       key: 't',
       altKey: true,
       description: 'Toggle theme',
-      action: () => this.themeService.toggleTheme()
+      action: () => this.themeService.toggleTheme(),
     });
   }
 
   private showWelcomeMessage(): void {
     // Check if first visit
     const isFirstVisit = !localStorage.getItem('app_visited');
-    
+
     if (isFirstVisit) {
       localStorage.setItem('app_visited', 'true');
-      
+
       setTimeout(() => {
         this.progressFeedback.showSuccess(
           getText('APP.welcome.title'),
           getText('APP.welcome.message'),
-          APP_CONFIG.UI.TIMING.WELCOME_DELAY
+          APP_CONFIG.UI.TIMING.WELCOME_DELAY,
         );
       }, APP_CONFIG.UI.TIMING.INITIAL_DELAY);
     }
@@ -187,7 +194,7 @@ export class App implements OnInit, OnDestroy {
   private refreshData(): void {
     this.progressFeedback.startLoading('refresh', '正在刷新数据...');
     this.websocketStats.refreshStats();
-    
+
     setTimeout(() => {
       this.progressFeedback.stopLoading('refresh');
       this.progressFeedback.showSuccess('刷新完成', '数据已更新');
@@ -199,12 +206,12 @@ export class App implements OnInit, OnDestroy {
     window.location.href = '/analysis';
   }
 
-  // Accessibility Methods  
+  // Accessibility Methods
   private initializeAccessibility(): void {
     // Subscribe to accessibility state changes
     // Check if we're in a test environment by looking for window.__karma__
     const isTestEnvironment = typeof (window as any).__karma__ !== 'undefined';
-    
+
     if (!isTestEnvironment) {
       // Only use effect in non-test environment
       try {
@@ -229,7 +236,7 @@ export class App implements OnInit, OnDestroy {
     setTimeout(() => {
       this.accessibilityService.announce(
         'AI Recruitment Assistant application loaded and ready for use',
-        'polite'
+        'polite',
       );
     }, 1000);
   }
@@ -244,8 +251,11 @@ export class App implements OnInit, OnDestroy {
 
   showKeyboardHelp(): void {
     this.keyboardHelpVisible.set(true);
-    this.accessibilityService.announce('Keyboard shortcuts help opened', 'polite');
-    
+    this.accessibilityService.announce(
+      'Keyboard shortcuts help opened',
+      'polite',
+    );
+
     // Set focus trap on modal
     setTimeout(() => {
       const modal = document.querySelector('.keyboard-help-modal');
@@ -258,25 +268,36 @@ export class App implements OnInit, OnDestroy {
   hideKeyboardHelp(): void {
     this.keyboardHelpVisible.set(false);
     this.accessibilityService.releaseFocusTrap();
-    this.accessibilityService.announce('Keyboard shortcuts help closed', 'polite');
+    this.accessibilityService.announce(
+      'Keyboard shortcuts help closed',
+      'polite',
+    );
   }
 
   toggleSettingsMenu(): void {
     const isOpen = !this.settingsMenuOpen();
     this.settingsMenuOpen.set(isOpen);
-    
+
     if (isOpen) {
-      this.accessibilityService.announce('Accessibility settings menu opened', 'polite');
-      
+      this.accessibilityService.announce(
+        'Accessibility settings menu opened',
+        'polite',
+      );
+
       // Focus first menu item
       setTimeout(() => {
-        const firstMenuItem = document.querySelector('.settings-menu [role="menuitem"]') as HTMLElement;
+        const firstMenuItem = document.querySelector(
+          '.settings-menu [role="menuitem"]',
+        ) as HTMLElement;
         if (firstMenuItem) {
           this.accessibilityService.setFocus(firstMenuItem);
         }
       }, 100);
     } else {
-      this.accessibilityService.announce('Accessibility settings menu closed', 'polite');
+      this.accessibilityService.announce(
+        'Accessibility settings menu closed',
+        'polite',
+      );
     }
   }
 
@@ -294,9 +315,13 @@ export class App implements OnInit, OnDestroy {
 
   increaseFontSize(): void {
     const currentSize = this.currentFontSize();
-    const nextSize = currentSize === 'normal' ? 'large' : 
-                    currentSize === 'large' ? 'larger' : 'normal';
-    
+    const nextSize =
+      currentSize === 'normal'
+        ? 'large'
+        : currentSize === 'large'
+          ? 'larger'
+          : 'normal';
+
     this.accessibilityService.setFontSize(nextSize);
     this.settingsMenuOpen.set(false);
   }
@@ -304,14 +329,14 @@ export class App implements OnInit, OnDestroy {
   private navigateTo(route: string): void {
     // Close any open modals first
     this.closeModalsAndMenus();
-    
+
     // Navigate to route
     window.location.href = route;
-    
+
     // Announce navigation
     this.accessibilityService.announce(
       `Navigating to ${route.replace('/', '')} page`,
-      'assertive'
+      'assertive',
     );
   }
 
@@ -319,7 +344,7 @@ export class App implements OnInit, OnDestroy {
     this.keyboardHelpVisible.set(false);
     this.settingsMenuOpen.set(false);
     this.guideOverlayVisible.set(false);
-    
+
     // Release any focus traps
     this.accessibilityService.releaseFocusTrap();
   }

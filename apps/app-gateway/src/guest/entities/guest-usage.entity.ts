@@ -16,7 +16,7 @@ export class GuestUsageEntity implements IGuestUsage {
     public feedbackCodeStatus?: 'generated' | 'redeemed',
     public lastUsed: Date = new Date(),
     public createdAt: Date = new Date(),
-    public updatedAt: Date = new Date()
+    public updatedAt: Date = new Date(),
   ) {}
 
   static fromDocument(doc: any): GuestUsageEntity {
@@ -27,34 +27,36 @@ export class GuestUsageEntity implements IGuestUsage {
       doc.feedbackCodeStatus,
       doc.lastUsed,
       doc.createdAt,
-      doc.updatedAt
+      doc.updatedAt,
     );
   }
 
   canUseService(): boolean {
     const MAX_FREE_USAGE = 5;
-    
+
     if (this.usageCount < MAX_FREE_USAGE) {
       return true;
     }
-    
+
     return this.feedbackCodeStatus === 'redeemed';
   }
 
   needsFeedbackCode(): boolean {
     const MAX_FREE_USAGE = 5;
-    return this.usageCount >= MAX_FREE_USAGE && 
-           this.feedbackCodeStatus !== 'redeemed';
+    return (
+      this.usageCount >= MAX_FREE_USAGE &&
+      this.feedbackCodeStatus !== 'redeemed'
+    );
   }
 
   getRemainingCount(): number {
     const MAX_FREE_USAGE = 5;
-    
+
     if (this.feedbackCodeStatus === 'redeemed') {
       // After redeeming feedback code, reset to new cycle
       return MAX_FREE_USAGE - (this.usageCount % MAX_FREE_USAGE);
     }
-    
+
     return Math.max(0, MAX_FREE_USAGE - this.usageCount);
   }
 }

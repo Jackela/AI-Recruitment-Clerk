@@ -9,40 +9,40 @@ export const resumeReducer = createReducer(
   on(ResumeActions.loadResumesByJob, (state) => ({
     ...state,
     loading: true,
-    error: null
+    error: null,
   })),
 
   on(ResumeActions.loadResumesByJobSuccess, (state, { resumes }) => ({
     ...state,
     resumes,
     loading: false,
-    error: null
+    error: null,
   })),
 
   on(ResumeActions.loadResumesByJobFailure, (state, { error }) => ({
     ...state,
     loading: false,
-    error
+    error,
   })),
 
   // Load Single Resume
   on(ResumeActions.loadResume, (state) => ({
     ...state,
     loading: true,
-    error: null
+    error: null,
   })),
 
   on(ResumeActions.loadResumeSuccess, (state, { resume }) => ({
     ...state,
     selectedResume: resume,
     loading: false,
-    error: null
+    error: null,
   })),
 
   on(ResumeActions.loadResumeFailure, (state, { error }) => ({
     ...state,
     loading: false,
-    error
+    error,
   })),
 
   // Upload Resumes
@@ -50,43 +50,43 @@ export const resumeReducer = createReducer(
     ...state,
     uploading: true,
     uploadProgress: 0,
-    error: null
+    error: null,
   })),
 
   on(ResumeActions.uploadResumesProgress, (state, { progress }) => ({
     ...state,
-    uploadProgress: progress
+    uploadProgress: progress,
   })),
 
   on(ResumeActions.uploadResumesSuccess, (state, { response: _ }) => ({
     ...state,
     uploading: false,
     uploadProgress: 100,
-    error: null
+    error: null,
   })),
 
   on(ResumeActions.uploadResumesFailure, (state, { error }) => ({
     ...state,
     uploading: false,
     uploadProgress: 0,
-    error
+    error,
   })),
 
   // Clear Selected Resume
   on(ResumeActions.clearSelectedResume, (state) => ({
     ...state,
-    selectedResume: null
+    selectedResume: null,
   })),
 
   // Clear Resumes
   on(ResumeActions.clearResumes, (state) => ({
     ...state,
-    resumes: []
+    resumes: [],
   })),
 
   // Clear Error
   on(ResumeActions.clearResumeError, (state) => ({
     ...state,
-    error: null
-  }))
+    error: null,
+  })),
 );

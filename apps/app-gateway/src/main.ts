@@ -12,13 +12,13 @@ import { ProductionSecurityValidator } from './common/security/production-securi
 async function bootstrap() {
   // ⚡ Fail Fast Validation - Check critical environment variables
   Logger.log('🔍 [FAIL-FAST] Validating critical environment variables...');
-  
+
   const requiredVars = ['MONGO_URL'];
-  const missingVars = requiredVars.filter(varName => !process.env[varName]);
-  
+  const missingVars = requiredVars.filter((varName) => !process.env[varName]);
+
   if (missingVars.length > 0) {
     Logger.error('🚨 [FAIL-FAST] Missing required environment variables:');
-    missingVars.forEach(varName => {
+    missingVars.forEach((varName) => {
       Logger.error(`   ❌ ${varName} is not set`);
     });
     Logger.error('💡 [SETUP] Please configure the following in Railway:');
@@ -28,7 +28,7 @@ async function bootstrap() {
     Logger.error('🔗 [GUIDE] See RAILWAY_SETUP.md for detailed instructions');
     process.exit(1);
   }
-  
+
   Logger.log('✅ [FAIL-FAST] All critical environment variables validated');
 
   // Enhanced startup logging
@@ -36,27 +36,32 @@ async function bootstrap() {
   Logger.log(`- Node environment: ${process.env.NODE_ENV || 'not set'}`);
   Logger.log(`- Port: ${process.env.PORT || 3000}`);
   Logger.log(`- API Prefix: ${process.env.API_PREFIX || 'api'}`);
-  Logger.log(`- MongoDB: ${process.env.MONGO_URL ? '✅ Configured' : '❌ Not set'}`);
-  Logger.log(`- Redis: ${process.env.REDIS_URL ? '✅ Configured' : '⚠️ Optional'}`);
+  Logger.log(
+    `- MongoDB: ${process.env.MONGO_URL ? '✅ Configured' : '❌ Not set'}`,
+  );
+  Logger.log(
+    `- Redis: ${process.env.REDIS_URL ? '✅ Configured' : '⚠️ Optional'}`,
+  );
 
   const app = await NestFactory.create(AppModule, {
     // 应用级性能优化配置
-    logger: process.env.NODE_ENV === 'production' 
-      ? ['error', 'warn', 'log'] 
-      : ['error', 'warn', 'log', 'debug', 'verbose'],
-    
+    logger:
+      process.env.NODE_ENV === 'production'
+        ? ['error', 'warn', 'log']
+        : ['error', 'warn', 'log', 'debug', 'verbose'],
+
     // 缓冲区和超时设置
     bodyParser: true,
     cors: false, // 我们稍后会自定义CORS配置
   });
-  
+
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
-  
+
   // 🔒 Security Validation at Startup
   const securityValidator = app.get(ProductionSecurityValidator);
   const securityResult = securityValidator.validateSecurityConfiguration();
-  
+
   if (process.env.NODE_ENV === 'production' && !securityResult.isValid) {
     Logger.error('🚨 SECURITY VALIDATION FAILED - Application cannot start');
     Logger.error('Security issues found:', securityResult.issues);
@@ -64,31 +69,38 @@ async function bootstrap() {
     process.exit(1);
   } else if (securityResult.issues.length > 0) {
     Logger.warn('⚠️ Security validation completed with warnings');
-    securityResult.issues.forEach(issue => Logger.warn(`   • ${issue}`));
+    securityResult.issues.forEach((issue) => Logger.warn(`   • ${issue}`));
     Logger.warn(`Security score: ${securityResult.score}/100`);
   } else {
-    Logger.log(`✅ Security validation passed - Score: ${securityResult.score}/100`);
+    Logger.log(
+      `✅ Security validation passed - Score: ${securityResult.score}/100`,
+    );
   }
-  
+
   // 🔒 多代理安全修复: CORS配置加固
   // 基于安全专家+DevOps专家一致建议
   app.enableCors({
-    origin: process.env.NODE_ENV === 'production' 
-      ? (process.env.ALLOWED_ORIGINS?.split(',') || ['https://ai-recruitment-clerk-production.up.railway.app'])
-      : ['http://localhost:4200', 'http://localhost:4202'],
+    origin:
+      process.env.NODE_ENV === 'production'
+        ? process.env.ALLOWED_ORIGINS?.split(',') || [
+            'https://ai-recruitment-clerk-production.up.railway.app',
+          ]
+        : ['http://localhost:4200', 'http://localhost:4202'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Device-ID'],
     credentials: true,
     optionsSuccessStatus: 200, // 兼容老旧浏览器
-    maxAge: 3600 // 缓存预检请求1小时
+    maxAge: 3600, // 缓存预检请求1小时
   });
-  
-  app.useGlobalPipes(new ValidationPipe({ 
-    whitelist: true,
-    transform: true,
-    disableErrorMessages: process.env.NODE_ENV === 'production', // 生产环境隐藏详细错误
-  }));
-  
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      disableErrorMessages: process.env.NODE_ENV === 'production', // 生产环境隐藏详细错误
+    }),
+  );
+
   // 获取底层Express实例进行性能优化
   const server = app.getHttpAdapter().getInstance();
   // 根路径提供可立即交互的最小化上传页（无依赖前端构建）
@@ -187,43 +199,45 @@ async function bootstrap() {
 </html>`;
     res.type('html').status(200).send(html);
   });
-  
+
   // Express性能优化配置
   server.set('trust proxy', 1); // 信任代理（用于负载均衡）
   server.disable('x-powered-by'); // 隐藏Express标识
-  
+
   // 请求大小和超时限制
   server.use((req: any, res: any, next: any) => {
     // 设置超时时间（30秒）
     req.setTimeout(30000, () => {
-      res.status(408).json({ 
+      res.status(408).json({
         error: 'Request timeout',
-        message: 'Request took too long to process' 
+        message: 'Request took too long to process',
       });
     });
-    
+
     // 连接超时
     req.connection.setTimeout(60000);
-    
+
     next();
   });
-  
+
   // 压缩响应（如果需要）
   if (process.env.ENABLE_COMPRESSION === 'true') {
     const compression = require('compression');
-    server.use(compression({
-      level: 6,           // 压缩级别（1-9，6为平衡）
-      threshold: 1024,    // 只压缩大于1KB的响应
-      filter: (req: any, res: any) => {
-        // 不压缩已经压缩的内容
-        if (req.headers['x-no-compression']) {
-          return false;
-        }
-        return compression.filter(req, res);
-      }
-    }));
+    server.use(
+      compression({
+        level: 6, // 压缩级别（1-9，6为平衡）
+        threshold: 1024, // 只压缩大于1KB的响应
+        filter: (req: any, res: any) => {
+          // 不压缩已经压缩的内容
+          if (req.headers['x-no-compression']) {
+            return false;
+          }
+          return compression.filter(req, res);
+        },
+      }),
+    );
   }
-  
+
   // Swagger API Documentation
   const config = new DocumentBuilder()
     .setTitle('AI Recruitment Clerk API')
@@ -237,9 +251,12 @@ async function bootstrap() {
     .addBearerAuth()
     .addServer('http://localhost:3000', '开发环境')
     .addServer('http://app-gateway:3000', 'Docker环境')
-    .addServer('https://ai-recruitment-clerk-production.up.railway.app', 'Railway生产环境')
+    .addServer(
+      'https://ai-recruitment-clerk-production.up.railway.app',
+      'Railway生产环境',
+    )
     .build();
-  
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document, {
     swaggerOptions: {
@@ -248,7 +265,7 @@ async function bootstrap() {
       operationsSorter: 'alpha',
     },
   });
-  
+
   const port = process.env.PORT || 3000;
   await app.listen(port);
   Logger.log(

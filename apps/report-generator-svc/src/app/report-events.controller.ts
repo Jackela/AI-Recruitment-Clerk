@@ -1,12 +1,20 @@
-import { Controller, Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { ReportGeneratorService, MatchScoredEvent } from '../report-generator/report-generator.service';
-import { 
+import {
+  Controller,
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
+import {
+  ReportGeneratorService,
+  MatchScoredEvent,
+} from '../report-generator/report-generator.service';
+import {
   ReportGeneratorNatsService,
   ReportGenerationRequestedEvent,
   ReportGeneratedEvent,
-  ReportGenerationFailedEvent
+  ReportGenerationFailedEvent,
 } from '../services/report-generator-nats.service';
-
 
 @Controller()
 @Injectable()
@@ -22,10 +30,10 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
   async onModuleInit(): Promise<void> {
     try {
       this.logger.log('Initializing Report Events Controller...');
-      
+
       // Subscribe to relevant events using shared NATS service
       await this.subscribeToEvents();
-      
+
       this.logger.log('Report Events Controller initialized successfully');
     } catch (error) {
       this.logger.error('Failed to initialize Report Events Controller', error);
@@ -39,30 +47,43 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
       // Shared NATS service handles disconnection automatically
       this.logger.log('Report Events Controller shut down successfully');
     } catch (error) {
-      this.logger.error('Error during Report Events Controller shutdown', error);
+      this.logger.error(
+        'Error during Report Events Controller shutdown',
+        error,
+      );
     }
   }
 
   private async subscribeToEvents(): Promise<void> {
     // Subscribe to match.scored events using shared NATS service
-    await this.natsService.subscribeToMatchScored(this.handleMatchScored.bind(this));
+    await this.natsService.subscribeToMatchScored(
+      this.handleMatchScored.bind(this),
+    );
 
     // Subscribe to report generation requests using shared NATS service
-    await this.natsService.subscribeToReportGenerationRequested(this.handleReportGenerationRequested.bind(this));
+    await this.natsService.subscribeToReportGenerationRequested(
+      this.handleReportGenerationRequested.bind(this),
+    );
 
-    this.logger.log('Successfully subscribed to all report events using shared NATS service');
+    this.logger.log(
+      'Successfully subscribed to all report events using shared NATS service',
+    );
   }
 
   async handleMatchScored(event: MatchScoredEvent): Promise<void> {
     const { jobId, resumeId } = event;
     const reportKey = `${jobId}_${resumeId}`;
-    
+
     try {
-      this.logger.log(`Received match.scored event for jobId: ${jobId}, resumeId: ${resumeId}`);
+      this.logger.log(
+        `Received match.scored event for jobId: ${jobId}, resumeId: ${resumeId}`,
+      );
 
       // Check if we're already processing this report
       if (this.processingReports.has(reportKey)) {
-        this.logger.warn(`Report ${reportKey} is already being processed, skipping duplicate event`);
+        this.logger.warn(
+          `Report ${reportKey} is already being processed, skipping duplicate event`,
+        );
         return;
       }
 
@@ -70,7 +91,9 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
 
       // Validate event data
       if (!jobId || !resumeId || !event.scoreDto) {
-        throw new Error(`Invalid match scored event: jobId=${jobId}, resumeId=${resumeId}`);
+        throw new Error(
+          `Invalid match scored event: jobId=${jobId}, resumeId=${resumeId}`,
+        );
       }
 
       const startTime = Date.now();
@@ -93,26 +116,41 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
 
       await this.natsService.publishReportGenerated(reportGeneratedEvent);
 
-      this.logger.log(`Successfully processed match.scored event and generated report for ${reportKey}`);
-      
+      this.logger.log(
+        `Successfully processed match.scored event and generated report for ${reportKey}`,
+      );
     } catch (error) {
-      this.logger.error(`Error processing match.scored event for ${reportKey}`, error);
-      await this.handleReportGenerationError(error, jobId, resumeId, 'match-analysis');
+      this.logger.error(
+        `Error processing match.scored event for ${reportKey}`,
+        error,
+      );
+      await this.handleReportGenerationError(
+        error,
+        jobId,
+        resumeId,
+        'match-analysis',
+      );
     } finally {
       this.processingReports.delete(reportKey);
     }
   }
 
-  async handleReportGenerationRequested(event: ReportGenerationRequestedEvent): Promise<void> {
+  async handleReportGenerationRequested(
+    event: ReportGenerationRequestedEvent,
+  ): Promise<void> {
     const { jobId, resumeId, reportType } = event;
     const reportKey = `${jobId}_${resumeId}_${reportType}`;
-    
+
     try {
-      this.logger.log(`Received report generation request for jobId: ${jobId}, resumeId: ${resumeId}, type: ${reportType}`);
+      this.logger.log(
+        `Received report generation request for jobId: ${jobId}, resumeId: ${resumeId}, type: ${reportType}`,
+      );
 
       // Check if we're already processing this report
       if (this.processingReports.has(reportKey)) {
-        this.logger.warn(`Report ${reportKey} is already being processed, skipping duplicate request`);
+        this.logger.warn(
+          `Report ${reportKey} is already being processed, skipping duplicate request`,
+        );
         return;
       }
 
@@ -120,7 +158,9 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
 
       // Validate request
       if (!jobId || !resumeId || !reportType) {
-        throw new Error(`Invalid report generation request: jobId=${jobId}, resumeId=${resumeId}, type=${reportType}`);
+        throw new Error(
+          `Invalid report generation request: jobId=${jobId}, resumeId=${resumeId}, type=${reportType}`,
+        );
       }
 
       const startTime = Date.now();
@@ -156,21 +196,27 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
 
       await this.natsService.publishReportGenerated(reportGeneratedEvent);
 
-      this.logger.log(`Successfully generated ${reportType} report for ${jobId}_${resumeId}`);
-      
+      this.logger.log(
+        `Successfully generated ${reportType} report for ${jobId}_${resumeId}`,
+      );
     } catch (error) {
       this.logger.error(`Error generating report for ${reportKey}`, error);
-      await this.handleReportGenerationError(error, jobId, resumeId, reportType);
+      await this.handleReportGenerationError(
+        error,
+        jobId,
+        resumeId,
+        reportType,
+      );
     } finally {
       this.processingReports.delete(reportKey);
     }
   }
 
   private async handleReportGenerationError(
-    error: Error, 
-    jobId: string, 
-    resumeId: string, 
-    reportType: string
+    error: Error,
+    jobId: string,
+    resumeId: string,
+    reportType: string,
   ): Promise<void> {
     try {
       const failedEvent: ReportGenerationFailedEvent = {
@@ -183,39 +229,56 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
       };
 
       await this.natsService.publishReportGenerationFailed(failedEvent);
-      
     } catch (publishError) {
-      this.logger.error(`Failed to publish report generation failed event`, publishError);
+      this.logger.error(
+        `Failed to publish report generation failed event`,
+        publishError,
+      );
     }
   }
 
-  private async generateMatchAnalysisReport(jobId: string, resumeId: string): Promise<string> {
+  private async generateMatchAnalysisReport(
+    jobId: string,
+    resumeId: string,
+  ): Promise<string> {
     // Mock implementation - would call actual report generation logic
-    this.logger.log(`Generating match analysis report for jobId: ${jobId}, resumeId: ${resumeId}`);
-    
+    this.logger.log(
+      `Generating match analysis report for jobId: ${jobId}, resumeId: ${resumeId}`,
+    );
+
     // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     return this.generateReportId(jobId, resumeId);
   }
 
-  private async generateCandidateSummaryReport(jobId: string, resumeId: string): Promise<string> {
+  private async generateCandidateSummaryReport(
+    jobId: string,
+    resumeId: string,
+  ): Promise<string> {
     // Mock implementation - would call actual report generation logic
-    this.logger.log(`Generating candidate summary report for jobId: ${jobId}, resumeId: ${resumeId}`);
-    
+    this.logger.log(
+      `Generating candidate summary report for jobId: ${jobId}, resumeId: ${resumeId}`,
+    );
+
     // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 150));
-    
+    await new Promise((resolve) => setTimeout(resolve, 150));
+
     return this.generateReportId(jobId, resumeId);
   }
 
-  private async generateFullReport(jobId: string, resumeId: string): Promise<string> {
+  private async generateFullReport(
+    jobId: string,
+    resumeId: string,
+  ): Promise<string> {
     // Mock implementation - would call actual report generation logic
-    this.logger.log(`Generating full report for jobId: ${jobId}, resumeId: ${resumeId}`);
-    
+    this.logger.log(
+      `Generating full report for jobId: ${jobId}, resumeId: ${resumeId}`,
+    );
+
     // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
     return this.generateReportId(jobId, resumeId);
   }
 
@@ -229,22 +292,22 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
       const healthCheck = await this.natsService.healthCheck();
       const natsConnected = healthCheck.status === 'healthy';
       const processingReportsCount = this.processingReports.size;
-      
+
       return {
         status: natsConnected ? 'healthy' : 'degraded',
         details: {
           natsConnected,
           processingReportsCount,
           processingReports: Array.from(this.processingReports),
-          natsDetails: healthCheck.details
-        }
+          natsDetails: healthCheck.details,
+        },
       };
     } catch (error) {
       return {
         status: 'unhealthy',
         details: {
-          error: error.message
-        }
+          error: error.message,
+        },
       };
     }
   }

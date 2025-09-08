@@ -12,13 +12,17 @@ export class FileValidationPipe implements PipeTransform {
     files.forEach((file, index) => {
       // Check file type (only PDF allowed)
       if (file.mimetype !== 'application/pdf') {
-        throw new BadRequestException(`File ${index + 1}: Only PDF files are allowed`);
+        throw new BadRequestException(
+          `File ${index + 1}: Only PDF files are allowed`,
+        );
       }
 
       // Check file size (max 10MB per file)
       const maxSize = 10 * 1024 * 1024; // 10MB
       if (file.size > maxSize) {
-        throw new BadRequestException(`File ${index + 1}: File size cannot exceed 10MB`);
+        throw new BadRequestException(
+          `File ${index + 1}: File size cannot exceed 10MB`,
+        );
       }
 
       // Check filename

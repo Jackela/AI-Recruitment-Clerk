@@ -13,9 +13,15 @@ import { GuestUsageService } from '../../services/marketing/guest-usage.service'
       <div class="campaign-header">
         <div class="header-content">
           <h1 class="main-title">🎉 免费体验AI招聘助手</h1>
-          <p class="subtitle">体验完成后填写反馈问卷，立得<span class="highlight">3元支付宝红包</span></p>
+          <p class="subtitle">
+            体验完成后填写反馈问卷，立得<span class="highlight"
+              >3元支付宝红包</span
+            >
+          </p>
           <div class="reward-badge">
-            <span class="badge-text">💰 已有<strong>200+</strong>用户成功收款</span>
+            <span class="badge-text"
+              >💰 已有<strong>200+</strong>用户成功收款</span
+            >
           </div>
         </div>
       </div>
@@ -47,11 +53,15 @@ import { GuestUsageService } from '../../services/marketing/guest-usage.service'
         <div *ngIf="!isUsageExhausted" class="usage-status">
           <div class="usage-counter">
             <h3>🔥 开始您的免费体验</h3>
-            <p class="usage-info">您还有 <strong class="remaining-count">{{remainingUsage}}</strong> 次免费体验机会</p>
+            <p class="usage-info">
+              您还有
+              <strong class="remaining-count">{{ remainingUsage }}</strong>
+              次免费体验机会
+            </p>
             <div class="progress-bar">
-              <div class="progress-fill" [style.width.%]="(usageProgress)"></div>
+              <div class="progress-fill" [style.width.%]="usageProgress"></div>
             </div>
-            <p class="progress-text">已使用: {{usageCount}}/5 次</p>
+            <p class="progress-text">已使用: {{ usageCount }}/5 次</p>
           </div>
           <button class="start-btn" (click)="startExperience()">
             <span class="btn-icon">🚀</span>
@@ -68,7 +78,7 @@ import { GuestUsageService } from '../../services/marketing/guest-usage.service'
                 <div class="step-content">
                   <h4>复制您的专属反馈码</h4>
                   <div class="feedback-code-container">
-                    <code class="feedback-code">{{feedbackCode}}</code>
+                    <code class="feedback-code">{{ feedbackCode }}</code>
                     <button class="copy-btn" (click)="copyFeedbackCode()">
                       <span *ngIf="!codeCopied">📋 复制</span>
                       <span *ngIf="codeCopied">✅ 已复制</span>
@@ -76,7 +86,7 @@ import { GuestUsageService } from '../../services/marketing/guest-usage.service'
                   </div>
                 </div>
               </div>
-              
+
               <div class="step">
                 <span class="step-number">2</span>
                 <div class="step-content">
@@ -84,7 +94,7 @@ import { GuestUsageService } from '../../services/marketing/guest-usage.service'
                   <p>点击下方按钮，在问卷中粘贴您的反馈码</p>
                 </div>
               </div>
-              
+
               <div class="step">
                 <span class="step-number">3</span>
                 <div class="step-content">
@@ -93,10 +103,10 @@ import { GuestUsageService } from '../../services/marketing/guest-usage.service'
                 </div>
               </div>
             </div>
-            
-            <a 
-              [href]="questionnaireUrl" 
-              class="questionnaire-btn" 
+
+            <a
+              [href]="questionnaireUrl"
+              class="questionnaire-btn"
               target="_blank"
               (click)="trackQuestionnaireClick()"
             >
@@ -131,7 +141,7 @@ import { GuestUsageService } from '../../services/marketing/guest-usage.service'
       </div>
     </div>
   `,
-  styleUrls: ['./campaign.component.scss']
+  styleUrls: ['./campaign.component.scss'],
 })
 export class CampaignComponent implements OnInit {
   remainingUsage = 0;
@@ -139,11 +149,11 @@ export class CampaignComponent implements OnInit {
   isUsageExhausted = false;
   feedbackCode = '';
   codeCopied = false;
-  questionnaireUrl = 'https://wj.qq.com/s2/14781436/';  // 待替换为实际问卷链接
-  
+  questionnaireUrl = 'https://wj.qq.com/s2/14781436/'; // 待替换为实际问卷链接
+
   constructor(
     private guestUsageService: GuestUsageService,
-    public router: Router
+    public router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -153,10 +163,10 @@ export class CampaignComponent implements OnInit {
   private async initializeComponent(): Promise<void> {
     // 首先自动检查用户状态
     await this.guestUsageService.autoCheckUserStatus();
-    
+
     // 然后更新UI状态
     this.updateUsageStatus();
-    
+
     // 监听用户状态刷新事件
     this.listenForStatusUpdates();
   }
@@ -165,12 +175,12 @@ export class CampaignComponent implements OnInit {
     window.addEventListener('userStatusRefreshed', (event: any) => {
       // 用户权限已刷新，更新UI
       this.updateUsageStatus();
-      
+
       // 显示成功消息
       if (event.detail?.message) {
         // 这里可以集成toast服务显示消息
         console.log('🎉 ' + event.detail.message);
-        
+
         // 可选：显示用户友好的提示
         this.showRefreshNotification(event.detail.message);
       }
@@ -195,9 +205,9 @@ export class CampaignComponent implements OnInit {
       max-width: 300px;
     `;
     notification.textContent = message;
-    
+
     document.body.appendChild(notification);
-    
+
     // 3秒后自动消失
     setTimeout(() => {
       if (notification.parentNode) {
@@ -211,10 +221,11 @@ export class CampaignComponent implements OnInit {
     this.remainingUsage = stats.remainingUsage;
     this.usageCount = stats.usageCount;
     this.isUsageExhausted = stats.isExhausted;
-    
+
     if (this.isUsageExhausted) {
-      this.feedbackCode = this.guestUsageService.getFeedbackCode() || 
-                         this.guestUsageService.generateFeedbackCode();
+      this.feedbackCode =
+        this.guestUsageService.getFeedbackCode() ||
+        this.guestUsageService.generateFeedbackCode();
     }
   }
 
@@ -232,7 +243,7 @@ export class CampaignComponent implements OnInit {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(this.feedbackCode).then(() => {
         this.codeCopied = true;
-        setTimeout(() => this.codeCopied = false, 2000);
+        setTimeout(() => (this.codeCopied = false), 2000);
       });
     } else {
       // 兼容旧浏览器
@@ -243,7 +254,7 @@ export class CampaignComponent implements OnInit {
       document.execCommand('copy');
       document.body.removeChild(textArea);
       this.codeCopied = true;
-      setTimeout(() => this.codeCopied = false, 2000);
+      setTimeout(() => (this.codeCopied = false), 2000);
     }
   }
 
@@ -251,12 +262,14 @@ export class CampaignComponent implements OnInit {
     // 记录问卷点击事件，用于后续数据分析
     console.log('用户点击问卷链接', {
       feedbackCode: this.feedbackCode,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
   showGuestStats(): void {
     const stats = this.guestUsageService.getGuestStats();
-    alert(`您的使用统计：\n已使用：${stats.usageCount}/5 次\n首次访问：${stats.firstVisit}\n会话ID：${stats.sessionId}`);
+    alert(
+      `您的使用统计：\n已使用：${stats.usageCount}/5 次\n首次访问：${stats.firstVisit}\n会话ID：${stats.sessionId}`,
+    );
   }
 }

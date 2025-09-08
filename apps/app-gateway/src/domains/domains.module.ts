@@ -17,7 +17,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     QuestionnaireModule,
     UsageLimitModule,
     IncentiveModule,
-    AnalyticsModule
+    AnalyticsModule,
   ],
   exports: [
     // 导出所有领域模块供其他模块使用
@@ -25,7 +25,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     QuestionnaireModule,
     UsageLimitModule,
     IncentiveModule,
-    AnalyticsModule
-  ]
+    AnalyticsModule,
+  ],
 })
 export class DomainsModule {}

@@ -99,7 +99,14 @@ interface Vote {
 
 interface ActivityFeedItem {
   id: string;
-  type: 'user_join' | 'user_leave' | 'document_edit' | 'comment' | 'vote' | 'decision' | 'status_change';
+  type:
+    | 'user_join'
+    | 'user_leave'
+    | 'document_edit'
+    | 'comment'
+    | 'vote'
+    | 'decision'
+    | 'status_change';
   userId: string;
   userName: string;
   action: string;
@@ -126,18 +133,21 @@ export class WebSocketGateway
   private clientUsers = new Map<string, UserPresence>(); // clientId -> user info
   private activeRooms = new Map<string, Set<string>>(); // roomId -> Set<clientId>
   private documentSessions = new Map<string, Set<string>>(); // documentId -> Set<clientId>
-  private collaborationRooms = new Map<string, {
-    participants: Map<string, UserPresence>;
-    messages: CollaborationMessage[];
-    lastActivity: Date;
-  }>();
+  private collaborationRooms = new Map<
+    string,
+    {
+      participants: Map<string, UserPresence>;
+      messages: CollaborationMessage[];
+      lastActivity: Date;
+    }
+  >();
 
   constructor(
     private readonly guestUsageService: GuestUsageService,
     private readonly collaborationService: CollaborationService,
     private readonly presenceService: PresenceService,
     private readonly notificationService: NotificationService,
-    private readonly cacheService: CacheService
+    private readonly cacheService: CacheService,
   ) {}
 
   afterInit(server: Server) {
@@ -147,16 +157,19 @@ export class WebSocketGateway
   handleConnection(client: Socket, ...args: any[]) {
     const sessionId = client.handshake.query.sessionId as string;
     this.logger.log(`Client connected: ${client.id}, SessionId: ${sessionId}`);
-    
+
     if (sessionId) {
       this.clientSessions.set(client.id, sessionId);
       client.join(`session_${sessionId}`);
-      
+
       // 发送连接确认
       client.emit('connected', {
         type: 'status_update',
         sessionId,
-        data: { status: 'connected', message: 'WebSocket connected successfully' },
+        data: {
+          status: 'connected',
+          message: 'WebSocket connected successfully',
+        },
         timestamp: new Date(),
       });
     }
@@ -164,8 +177,10 @@ export class WebSocketGateway
 
   handleDisconnect(client: Socket) {
     const sessionId = this.clientSessions.get(client.id);
-    this.logger.log(`Client disconnected: ${client.id}, SessionId: ${sessionId}`);
-    
+    this.logger.log(
+      `Client disconnected: ${client.id}, SessionId: ${sessionId}`,
+    );
+
     if (sessionId) {
       client.leave(`session_${sessionId}`);
       this.clientSessions.delete(client.id);
@@ -239,10 +254,10 @@ export class WebSocketGateway
   ): void {
     const { sessionId } = data;
     this.logger.log(`Client ${client.id} subscribing to session ${sessionId}`);
-    
+
     this.clientSessions.set(client.id, sessionId);
     client.join(`session_${sessionId}`);
-    
+
     // 发送当前状态（如果有的话）
     this.sendCurrentStatus(sessionId, client);
   }
@@ -253,8 +268,10 @@ export class WebSocketGateway
     @ConnectedSocket() client: Socket,
   ): void {
     const { sessionId } = data;
-    this.logger.log(`Client ${client.id} unsubscribing from session ${sessionId}`);
-    
+    this.logger.log(
+      `Client ${client.id} unsubscribing from session ${sessionId}`,
+    );
+
     client.leave(`session_${sessionId}`);
     this.clientSessions.delete(client.id);
   }
@@ -262,17 +279,26 @@ export class WebSocketGateway
   /**
    * 发送当前状态给新连接的客户端
    */
-  private async sendCurrentStatus(sessionId: string, client: Socket): Promise<void> {
+  private async sendCurrentStatus(
+    sessionId: string,
+    client: Socket,
+  ): Promise<void> {
     try {
       // 这里可以查询当前会话状态并发送给客户端
       client.emit('message', {
         type: 'status_update',
         sessionId,
-        data: { status: 'monitoring', message: 'Monitoring session progress...' },
+        data: {
+          status: 'monitoring',
+          message: 'Monitoring session progress...',
+        },
         timestamp: new Date(),
       });
     } catch (error) {
-      this.logger.error(`Failed to send current status for session ${sessionId}:`, error);
+      this.logger.error(
+        `Failed to send current status for session ${sessionId}:`,
+        error,
+      );
     }
   }
 

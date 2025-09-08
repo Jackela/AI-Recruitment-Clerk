@@ -1,14 +1,4 @@
-import { Request } from 'express';
+export * from '@ai-recruitment-clerk/user-management-domain';
 
-export interface AuthenticatedRequest extends Request {
-  user: {
-    sub: string;
-    email: string;
-    id?: string;
-    organizationId?: string;
-    permissions?: string[];
-    [key: string]: any;
-  };
-  fingerprint?: string;
-  // ip is already available on Express Request, no need to redeclare
-}
+// Re-export for backward compatibility
+export { AuthenticatedRequest } from '@ai-recruitment-clerk/user-management-domain';

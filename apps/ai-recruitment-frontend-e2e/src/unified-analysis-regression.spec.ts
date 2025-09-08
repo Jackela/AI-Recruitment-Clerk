@@ -2,11 +2,11 @@ import { test, expect } from '@playwright/test';
 
 /**
  * Unified Analysis Component Refactoring Regression Tests
- * 
+ *
  * This test suite validates that the refactored unified-analysis component
  * maintains all functionality after decomposition into smaller components:
  * - ResumeFileUploadComponent
- * - AnalysisProgressComponent  
+ * - AnalysisProgressComponent
  * - AnalysisResultsComponent
  * - AnalysisErrorComponent
  * - StatisticsPanelComponent
@@ -14,22 +14,27 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('Unified Analysis Component - Refactoring Regression Tests', () => {
-  
   test.beforeEach(async ({ page }) => {
     // Mock all API endpoints to prevent network errors
     await page.route('**/api/**', async (route) => {
       // Mock successful responses for API calls
-      if (route.request().method() === 'POST' && route.request().url().includes('analyze')) {
+      if (
+        route.request().method() === 'POST' &&
+        route.request().url().includes('analyze')
+      ) {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
           body: JSON.stringify({
             analysisId: 'test-analysis-123',
             status: 'processing',
-            message: 'Analysis started successfully'
-          })
+            message: 'Analysis started successfully',
+          }),
         });
-      } else if (route.request().method() === 'GET' && route.request().url().includes('demo')) {
+      } else if (
+        route.request().method() === 'GET' &&
+        route.request().url().includes('demo')
+      ) {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
@@ -45,16 +50,16 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
               recommendations: [
                 '技术栈匹配度高，适合前端开发岗位',
                 '建议进行技术面试验证实际能力',
-                '可以考虑安排项目经验分享环节'
-              ]
-            }
-          })
+                '可以考虑安排项目经验分享环节',
+              ],
+            },
+          }),
         });
       } else {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ success: true })
+          body: JSON.stringify({ success: true }),
         });
       }
     });
@@ -64,37 +69,58 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
       await route.fulfill({
         status: 200,
         contentType: 'text/plain',
-        body: 'ok'
+        body: 'ok',
       });
     });
   });
 
-  test('Component structure validation - All child components should be present', async ({ page }) => {
+  test('Component structure validation - All child components should be present', async ({
+    page,
+  }) => {
     await page.goto('http://localhost:4202/analysis');
     await page.waitForTimeout(3000);
 
     // Test will verify component structure exists even if app doesn't fully load
     const bodyContent = await page.textContent('body').catch(() => '');
-    
+
     // Basic structure validation
     if (bodyContent && bodyContent.length > 100) {
       console.log('✅ Page loaded with content');
-      
+
       // Check for key elements that should exist in the refactored component
-      const uploadSection = await page.locator('arc-resume-file-upload').count();
-      const progressSection = await page.locator('arc-analysis-progress').count(); 
+      const uploadSection = await page
+        .locator('arc-resume-file-upload')
+        .count();
+      const progressSection = await page
+        .locator('arc-analysis-progress')
+        .count();
       const resultsSection = await page.locator('arc-analysis-results').count();
       const errorSection = await page.locator('arc-analysis-error').count();
       const statsSection = await page.locator('arc-statistics-panel').count();
-      
-      console.log(`Upload Component: ${uploadSection > 0 ? '✅ Found' : '❌ Missing'}`);
-      console.log(`Progress Component: ${progressSection > 0 ? '✅ Found' : '❌ Missing'}`);
-      console.log(`Results Component: ${resultsSection > 0 ? '✅ Found' : '❌ Missing'}`);
-      console.log(`Error Component: ${errorSection > 0 ? '✅ Found' : '❌ Missing'}`);
-      console.log(`Statistics Component: ${statsSection > 0 ? '✅ Found' : '❌ Missing'}`);
-      
+
+      console.log(
+        `Upload Component: ${uploadSection > 0 ? '✅ Found' : '❌ Missing'}`,
+      );
+      console.log(
+        `Progress Component: ${progressSection > 0 ? '✅ Found' : '❌ Missing'}`,
+      );
+      console.log(
+        `Results Component: ${resultsSection > 0 ? '✅ Found' : '❌ Missing'}`,
+      );
+      console.log(
+        `Error Component: ${errorSection > 0 ? '✅ Found' : '❌ Missing'}`,
+      );
+      console.log(
+        `Statistics Component: ${statsSection > 0 ? '✅ Found' : '❌ Missing'}`,
+      );
+
       // At least some components should be present
-      const totalComponents = uploadSection + progressSection + resultsSection + errorSection + statsSection;
+      const totalComponents =
+        uploadSection +
+        progressSection +
+        resultsSection +
+        errorSection +
+        statsSection;
       expect(totalComponents).toBeGreaterThan(0);
     } else {
       console.log('ℹ️ Page structure validation requires server to be running');
@@ -108,20 +134,29 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
 
     // Check for file upload elements
     const fileInputs = await page.locator('input[type="file"]').count();
-    const uploadZone = await page.locator('.upload-zone, .drop-zone, .file-upload').count();
-    const uploadButton = await page.locator('button').filter({ hasText: /上传|Upload|提交|Submit/i }).count();
-    
+    const uploadZone = await page
+      .locator('.upload-zone, .drop-zone, .file-upload')
+      .count();
+    const uploadButton = await page
+      .locator('button')
+      .filter({ hasText: /上传|Upload|提交|Submit/i })
+      .count();
+
     if (fileInputs > 0 || uploadZone > 0 || uploadButton > 0) {
       console.log('✅ File upload interface elements found');
-      console.log(`File inputs: ${fileInputs}, Upload zones: ${uploadZone}, Upload buttons: ${uploadButton}`);
-      
+      console.log(
+        `File inputs: ${fileInputs}, Upload zones: ${uploadZone}, Upload buttons: ${uploadButton}`,
+      );
+
       // Test file upload UI interaction if elements exist
       if (fileInputs > 0) {
         const fileInput = page.locator('input[type="file"]').first();
         await expect(fileInput).toBeVisible();
       }
     } else {
-      console.log('ℹ️ File upload elements not found - may require server connection');
+      console.log(
+        'ℹ️ File upload elements not found - may require server connection',
+      );
     }
   });
 
@@ -130,26 +165,36 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
     await page.waitForTimeout(2000);
 
     // Test form validation by trying to submit without required fields
-    const submitButtons = await page.locator('button[type="submit"], button').filter({ 
-      hasText: /提交|Submit|开始|Start|分析|Analyze/i 
-    }).count();
+    const submitButtons = await page
+      .locator('button[type="submit"], button')
+      .filter({
+        hasText: /提交|Submit|开始|Start|分析|Analyze/i,
+      })
+      .count();
 
     if (submitButtons > 0) {
       console.log('✅ Submit buttons found');
-      
+
       // Try clicking submit without filling required fields
-      const submitButton = page.locator('button').filter({ hasText: /提交|Submit/i }).first();
-      
-      if (await submitButton.count() > 0) {
+      const submitButton = page
+        .locator('button')
+        .filter({ hasText: /提交|Submit/i })
+        .first();
+
+      if ((await submitButton.count()) > 0) {
         await submitButton.click();
         await page.waitForTimeout(1000);
-        
+
         // Look for validation messages
-        const errorMessages = await page.locator('.error, .invalid, .alert-danger, [class*="error"]').count();
+        const errorMessages = await page
+          .locator('.error, .invalid, .alert-danger, [class*="error"]')
+          .count();
         console.log(`Validation error messages found: ${errorMessages}`);
       }
     } else {
-      console.log('ℹ️ Submit buttons not found - form may require server connection');
+      console.log(
+        'ℹ️ Submit buttons not found - form may require server connection',
+      );
     }
   });
 
@@ -158,9 +203,15 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
     await page.waitForTimeout(2000);
 
     // Look for progress-related elements
-    const progressBars = await page.locator('.progress, .progress-bar, [role="progressbar"]').count();
-    const progressSteps = await page.locator('.step, .progress-step, .analysis-step').count();
-    const progressText = await page.locator('text=/进度|Progress|分析中|Processing|步骤|Step/i').count();
+    const progressBars = await page
+      .locator('.progress, .progress-bar, [role="progressbar"]')
+      .count();
+    const progressSteps = await page
+      .locator('.step, .progress-step, .analysis-step')
+      .count();
+    const progressText = await page
+      .locator('text=/进度|Progress|分析中|Processing|步骤|Step/i')
+      .count();
 
     console.log(`Progress bars: ${progressBars}`);
     console.log(`Progress steps: ${progressSteps}`);
@@ -178,9 +229,15 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
     await page.waitForTimeout(2000);
 
     // Look for results-related elements
-    const scoreElements = await page.locator('.score, [class*="score"]').count();
-    const resultCards = await page.locator('.result-card, .analysis-result, .card').count();
-    const resultText = await page.locator('text=/结果|Result|分数|Score|分析|Analysis/i').count();
+    const scoreElements = await page
+      .locator('.score, [class*="score"]')
+      .count();
+    const resultCards = await page
+      .locator('.result-card, .analysis-result, .card')
+      .count();
+    const resultText = await page
+      .locator('text=/结果|Result|分数|Score|分析|Analysis/i')
+      .count();
 
     console.log(`Score elements: ${scoreElements}`);
     console.log(`Result cards: ${resultCards}`);
@@ -198,9 +255,15 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
     await page.waitForTimeout(2000);
 
     // Look for statistics-related elements
-    const statElements = await page.locator('.stat, .statistics, .metric').count();
-    const numberElements = await page.locator('[class*="number"], [class*="count"]').count();
-    const statText = await page.locator('text=/统计|Statistics|总计|Total|平均|Average/i').count();
+    const statElements = await page
+      .locator('.stat, .statistics, .metric')
+      .count();
+    const numberElements = await page
+      .locator('[class*="number"], [class*="count"]')
+      .count();
+    const statText = await page
+      .locator('text=/统计|Statistics|总计|Total|平均|Average/i')
+      .count();
 
     console.log(`Statistics elements: ${statElements}`);
     console.log(`Number elements: ${numberElements}`);
@@ -215,14 +278,21 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
 
   test('Error handling component validation', async ({ page }) => {
     await page.goto('http://localhost:4202/analysis');
-    
+
     // Trigger an error by trying invalid actions
     await page.waitForTimeout(2000);
 
     // Look for error handling elements
-    const errorElements = await page.locator('.error, .alert-error, .alert-danger').count();
-    const errorText = await page.locator('text=/错误|Error|失败|Failed|出错/i').count();
-    const retryButtons = await page.locator('button').filter({ hasText: /重试|Retry|再试/i }).count();
+    const errorElements = await page
+      .locator('.error, .alert-error, .alert-danger')
+      .count();
+    const errorText = await page
+      .locator('text=/错误|Error|失败|Failed|出错/i')
+      .count();
+    const retryButtons = await page
+      .locator('button')
+      .filter({ hasText: /重试|Retry|再试/i })
+      .count();
 
     console.log(`Error elements: ${errorElements}`);
     console.log(`Error text elements: ${errorText}`);
@@ -244,18 +314,23 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
       { width: 320, height: 568, name: 'Mobile Portrait' },
       { width: 768, height: 1024, name: 'Tablet Portrait' },
       { width: 1024, height: 768, name: 'Tablet Landscape' },
-      { width: 1920, height: 1080, name: 'Desktop' }
+      { width: 1920, height: 1080, name: 'Desktop' },
     ];
 
     for (const viewport of viewports) {
-      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await page.setViewportSize({
+        width: viewport.width,
+        height: viewport.height,
+      });
       await page.waitForTimeout(1000);
-      
+
       // Check if content is still visible and properly arranged
       const bodyContent = await page.textContent('body').catch(() => '');
       const hasVisibleContent = bodyContent && bodyContent.length > 50;
-      
-      console.log(`${viewport.name} (${viewport.width}x${viewport.height}): ${hasVisibleContent ? '✅ Content visible' : '❌ Content not visible'}`);
+
+      console.log(
+        `${viewport.name} (${viewport.width}x${viewport.height}): ${hasVisibleContent ? '✅ Content visible' : '❌ Content not visible'}`,
+      );
     }
   });
 
@@ -287,28 +362,29 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
 
   test('Performance validation - Component loading times', async ({ page }) => {
     const startTime = Date.now();
-    
+
     await page.goto('http://localhost:4202/analysis');
     await page.waitForTimeout(3000);
-    
+
     const loadTime = Date.now() - startTime;
     console.log(`Page load time: ${loadTime}ms`);
-    
+
     // Validate that refactored components don't significantly impact performance
-    if (loadTime < 10000) { // 10 seconds timeout
+    if (loadTime < 10000) {
+      // 10 seconds timeout
       console.log('✅ Page loaded within acceptable time');
     } else {
       console.log('⚠️ Page load time exceeds expected threshold');
     }
-    
+
     // Check for any JavaScript errors that might impact performance
     const jsErrors: any[] = [];
-    page.on('console', msg => {
+    page.on('console', (msg) => {
       if (msg.type() === 'error') {
         jsErrors.push(msg.text());
       }
     });
-    
+
     if (jsErrors.length === 0) {
       console.log('✅ No JavaScript console errors detected');
     } else {
@@ -324,13 +400,17 @@ test.describe('Component Integration Tests', () => {
 
     // Test that parent component properly orchestrates child components
     // This would typically involve testing @Input() and @Output() interactions
-    
+
     // Look for evidence of component communication
-    const interactiveElements = await page.locator('button, input, select').count();
+    const interactiveElements = await page
+      .locator('button, input, select')
+      .count();
     console.log(`Interactive elements found: ${interactiveElements}`);
-    
+
     if (interactiveElements > 0) {
-      console.log('✅ Interactive elements present for component communication testing');
+      console.log(
+        '✅ Interactive elements present for component communication testing',
+      );
     } else {
       console.log('ℹ️ Limited interactive elements found');
     }
@@ -342,10 +422,14 @@ test.describe('Component Integration Tests', () => {
 
     // Verify that component state is properly managed
     // Check for signals, observables, or other state management indicators
-    
-    const stateIndicators = await page.locator('[class*="state"], [class*="status"], .active, .pending, .completed').count();
+
+    const stateIndicators = await page
+      .locator(
+        '[class*="state"], [class*="status"], .active, .pending, .completed',
+      )
+      .count();
     console.log(`State management indicators: ${stateIndicators}`);
-    
+
     if (stateIndicators > 0) {
       console.log('✅ State management elements detected');
     } else {

@@ -16,16 +16,19 @@ import { JobRepository } from '../repositories/job.repository';
 @Module({
   imports: [
     CacheModule.registerAsync(cacheConfig),
-    MongooseModule.forFeature([
-      { name: Job.name, schema: JobSchema }
-    ]),
+    MongooseModule.forFeature([{ name: Job.name, schema: JobSchema }]),
   ],
   providers: [
-    CacheService, 
+    CacheService,
     CacheWarmupService,
     RedisConnectionService,
     JobRepository,
   ],
-  exports: [CacheService, CacheWarmupService, RedisConnectionService, CacheModule],
+  exports: [
+    CacheService,
+    CacheWarmupService,
+    RedisConnectionService,
+    CacheModule,
+  ],
 })
 export class AppCacheModule {}

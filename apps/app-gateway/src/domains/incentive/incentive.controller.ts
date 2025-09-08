@@ -13,7 +13,7 @@ import {
   HttpStatus,
   NotFoundException,
   BadRequestException,
-  ForbiddenException
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -22,7 +22,7 @@ import {
   ApiBearerAuth,
   ApiParam,
   ApiQuery,
-  ApiBody
+  ApiBody,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
@@ -35,7 +35,7 @@ import {
   TriggerType,
   PaymentMethod,
   Currency,
-  ContactInfo
+  ContactInfo,
 } from '../../common/interfaces/fallback-types';
 import { IncentiveIntegrationService } from './incentive-integration.service';
 
@@ -52,7 +52,7 @@ export class IncentiveController {
 
   @ApiOperation({
     summary: '创建问卷完成激励',
-    description: '基于问卷完成情况和质量评分创建激励奖励'
+    description: '基于问卷完成情况和质量评分创建激励奖励',
   })
   @ApiResponse({
     status: 201,
@@ -67,11 +67,11 @@ export class IncentiveController {
             rewardAmount: { type: 'number' },
             currency: { type: 'string' },
             status: { type: 'string' },
-            canBePaid: { type: 'boolean' }
-          }
-        }
-      }
-    }
+            canBePaid: { type: 'boolean' },
+          },
+        },
+      },
+    },
   })
   @ApiResponse({ status: 400, description: '请求参数错误' })
   @UseGuards(RolesGuard)
@@ -80,7 +80,8 @@ export class IncentiveController {
   @HttpCode(HttpStatus.CREATED)
   async createQuestionnaireIncentive(
     @Request() req: AuthenticatedRequest,
-    @Body() incentiveData: {
+    @Body()
+    incentiveData: {
       questionnaireId: string;
       qualityScore: number;
       contactInfo: {
@@ -93,21 +94,26 @@ export class IncentiveController {
       businessValue?: any;
       incentiveType?: string;
       metadata?: any;
-    }
+    },
   ) {
     try {
-      const userIP = incentiveData.userIP || req.headers['x-forwarded-for'] || 'unknown';
+      const userIP =
+        incentiveData.userIP || req.headers['x-forwarded-for'] || 'unknown';
       const contactInfo = new ContactInfo(incentiveData.contactInfo);
-      
-      const incentive = await this.incentiveService.createQuestionnaireIncentive(
-        userIP,
-        incentiveData.questionnaireId,
-        incentiveData.qualityScore,
-        contactInfo,
-        incentiveData.businessValue || {},
-        incentiveData.incentiveType || 'questionnaire',
-        { organizationId: req.user.organizationId, ...incentiveData.metadata }
-      );
+
+      const incentive =
+        await this.incentiveService.createQuestionnaireIncentive(
+          userIP,
+          incentiveData.questionnaireId,
+          incentiveData.qualityScore,
+          contactInfo,
+          incentiveData.businessValue || {},
+          incentiveData.incentiveType || 'questionnaire',
+          {
+            organizationId: req.user.organizationId,
+            ...incentiveData.metadata,
+          },
+        );
 
       const summary = {
         id: incentive.id,
@@ -116,9 +122,9 @@ export class IncentiveController {
         createdAt: incentive.createdAt,
         rewardAmount: 0,
         rewardCurrency: 'USD',
-        canBePaid: false
+        canBePaid: false,
       };
-      
+
       return {
         success: true,
         message: 'Questionnaire incentive created successfully',
@@ -128,21 +134,21 @@ export class IncentiveController {
           currency: summary.rewardCurrency,
           status: summary.status,
           canBePaid: summary.canBePaid,
-          createdAt: summary.createdAt
-        }
+          createdAt: summary.createdAt,
+        },
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to create questionnaire incentive',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '创建推荐激励',
-    description: '为成功推荐新用户的推荐人创建激励奖励'
+    description: '为成功推荐新用户的推荐人创建激励奖励',
   })
   @ApiResponse({ status: 201, description: '推荐激励创建成功' })
   @UseGuards(RolesGuard)
@@ -151,7 +157,8 @@ export class IncentiveController {
   @HttpCode(HttpStatus.CREATED)
   async createReferralIncentive(
     @Request() req: AuthenticatedRequest,
-    @Body() referralData: {
+    @Body()
+    referralData: {
       referrerIP: string;
       referredIP: string;
       contactInfo: {
@@ -163,18 +170,18 @@ export class IncentiveController {
       referralType?: string;
       expectedValue?: number;
       metadata?: any;
-    }
+    },
   ) {
     try {
       const contactInfo = new ContactInfo(referralData.contactInfo);
-      
+
       const incentive = await this.incentiveService.createReferralIncentive(
         referralData.referrerIP,
         referralData.referredIP,
         contactInfo,
         referralData.referralType || 'general',
         referralData.expectedValue || 0,
-        { organizationId: req.user.organizationId, ...referralData.metadata }
+        { organizationId: req.user.organizationId, ...referralData.metadata },
       );
 
       const summary = {
@@ -184,9 +191,9 @@ export class IncentiveController {
         createdAt: incentive.createdAt,
         rewardAmount: incentive.expectedValue || 0,
         rewardCurrency: 'USD',
-        canBePaid: false
+        canBePaid: false,
       };
-      
+
       return {
         success: true,
         message: 'Referral incentive created successfully',
@@ -195,27 +202,37 @@ export class IncentiveController {
           rewardAmount: summary.rewardAmount,
           currency: summary.rewardCurrency,
           status: summary.status,
-          canBePaid: summary.canBePaid
-        }
+          canBePaid: summary.canBePaid,
+        },
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to create referral incentive',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '获取激励列表',
-    description: '获取组织的激励记录列表，支持分页和筛选'
+    description: '获取组织的激励记录列表，支持分页和筛选',
   })
   @ApiResponse({ status: 200, description: '激励列表获取成功' })
   @ApiQuery({ name: 'page', required: false, description: '页码' })
   @ApiQuery({ name: 'limit', required: false, description: '每页数量' })
-  @ApiQuery({ name: 'status', required: false, enum: IncentiveStatus, description: '状态筛选' })
-  @ApiQuery({ name: 'rewardType', required: false, enum: RewardType, description: '奖励类型筛选' })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: IncentiveStatus,
+    description: '状态筛选',
+  })
+  @ApiQuery({
+    name: 'rewardType',
+    required: false,
+    enum: RewardType,
+    description: '奖励类型筛选',
+  })
   @ApiQuery({ name: 'startDate', required: false, description: '开始日期' })
   @ApiQuery({ name: 'endDate', required: false, description: '结束日期' })
   @UseGuards(RolesGuard)
@@ -228,7 +245,7 @@ export class IncentiveController {
     @Query('status') status?: IncentiveStatus,
     @Query('rewardType') rewardType?: RewardType,
     @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string
+    @Query('endDate') endDate?: string,
   ) {
     try {
       const incentives = await this.incentiveService.getIncentives(
@@ -239,8 +256,8 @@ export class IncentiveController {
           startDate: startDate ? new Date(startDate) : undefined,
           endDate: endDate ? new Date(endDate) : undefined,
           limit: Math.min(limit, 100),
-          offset: (Math.max(page, 1) - 1) * Math.min(limit, 100)
-        }
+          offset: (Math.max(page, 1) - 1) * Math.min(limit, 100),
+        },
       );
 
       return {
@@ -255,22 +272,24 @@ export class IncentiveController {
           summary: {
             byStatus: (incentives as any).statusDistribution || {},
             byRewardType: (incentives as any).rewardTypeDistribution || {},
-            avgRewardAmount: (incentives as any).avgRewardAmount || incentives.totalRewardAmount / (incentives.totalCount || 1)
-          }
-        }
+            avgRewardAmount:
+              (incentives as any).avgRewardAmount ||
+              incentives.totalRewardAmount / (incentives.totalCount || 1),
+          },
+        },
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to retrieve incentives',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '获取激励详情',
-    description: '获取指定激励的详细信息，包括所有相关数据'
+    description: '获取指定激励的详细信息，包括所有相关数据',
   })
   @ApiResponse({ status: 200, description: '激励详情获取成功' })
   @ApiResponse({ status: 404, description: '激励未找到' })
@@ -280,12 +299,12 @@ export class IncentiveController {
   @Get(':incentiveId')
   async getIncentive(
     @Request() req: AuthenticatedRequest,
-    @Param('incentiveId') incentiveId: string
+    @Param('incentiveId') incentiveId: string,
   ) {
     try {
       const incentive = await this.incentiveService.getIncentive(
         incentiveId,
-        req.user.organizationId
+        req.user.organizationId,
       );
 
       if (!incentive) {
@@ -294,20 +313,20 @@ export class IncentiveController {
 
       return {
         success: true,
-        data: incentive
+        data: incentive,
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to retrieve incentive',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '验证激励资格',
-    description: '验证指定激励的资格和状态，检查是否符合支付条件'
+    description: '验证指定激励的资格和状态，检查是否符合支付条件',
   })
   @ApiResponse({ status: 200, description: '激励验证成功' })
   @ApiParam({ name: 'incentiveId', description: '激励ID' })
@@ -317,12 +336,12 @@ export class IncentiveController {
   @HttpCode(HttpStatus.OK)
   async validateIncentive(
     @Request() req: AuthenticatedRequest,
-    @Param('incentiveId') incentiveId: string
+    @Param('incentiveId') incentiveId: string,
   ) {
     try {
       const validationResult = await this.incentiveService.validateIncentive(
         incentiveId,
-        req.user.organizationId
+        req.user.organizationId,
       );
 
       return {
@@ -333,21 +352,21 @@ export class IncentiveController {
           errors: validationResult.errors,
           canProceedToPayment: validationResult.canProceedToPayment,
           validatedAt: new Date().toISOString(),
-          validatedBy: req.user.id
-        }
+          validatedBy: req.user.id,
+        },
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to validate incentive',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '批准激励',
-    description: '管理员批准激励进行支付处理'
+    description: '管理员批准激励进行支付处理',
   })
   @ApiResponse({ status: 200, description: '激励批准成功' })
   @ApiParam({ name: 'incentiveId', description: '激励ID' })
@@ -358,21 +377,19 @@ export class IncentiveController {
   async approveIncentive(
     @Request() req: AuthenticatedRequest,
     @Param('incentiveId') incentiveId: string,
-    @Body() approvalData: {
+    @Body()
+    approvalData: {
       reason: string;
       notes?: string;
-    }
+    },
   ) {
     try {
-      await this.incentiveService.approveIncentive(
-        incentiveId,
-        { 
-          reason: approvalData.reason,
-          approverId: req.user.id,
-          organizationId: req.user.organizationId,
-          notes: approvalData.notes
-        }
-      );
+      await this.incentiveService.approveIncentive(incentiveId, {
+        reason: approvalData.reason,
+        approverId: req.user.id,
+        organizationId: req.user.organizationId,
+        notes: approvalData.notes,
+      });
 
       return {
         success: true,
@@ -381,21 +398,21 @@ export class IncentiveController {
           incentiveId,
           approvedAt: new Date().toISOString(),
           approvedBy: req.user.id,
-          reason: approvalData.reason
-        }
+          reason: approvalData.reason,
+        },
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to approve incentive',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '拒绝激励',
-    description: '管理员拒绝激励支付申请'
+    description: '管理员拒绝激励支付申请',
   })
   @ApiResponse({ status: 200, description: '激励拒绝成功' })
   @ApiParam({ name: 'incentiveId', description: '激励ID' })
@@ -406,10 +423,11 @@ export class IncentiveController {
   async rejectIncentive(
     @Request() req: AuthenticatedRequest,
     @Param('incentiveId') incentiveId: string,
-    @Body() rejectionData: {
+    @Body()
+    rejectionData: {
       reason: string;
       notes?: string;
-    }
+    },
   ) {
     try {
       await this.incentiveService.rejectIncentive(
@@ -417,7 +435,7 @@ export class IncentiveController {
         rejectionData.reason,
         req.user.id,
         req.user.organizationId,
-        rejectionData.notes
+        rejectionData.notes,
       );
 
       return {
@@ -427,21 +445,21 @@ export class IncentiveController {
           incentiveId,
           rejectedAt: new Date().toISOString(),
           rejectedBy: req.user.id,
-          reason: rejectionData.reason
-        }
+          reason: rejectionData.reason,
+        },
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to reject incentive',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '执行激励支付',
-    description: '对已批准的激励执行实际支付操作'
+    description: '对已批准的激励执行实际支付操作',
   })
   @ApiResponse({
     status: 200,
@@ -457,11 +475,11 @@ export class IncentiveController {
             amount: { type: 'number' },
             currency: { type: 'string' },
             paymentMethod: { type: 'string' },
-            paidAt: { type: 'string' }
-          }
-        }
-      }
-    }
+            paidAt: { type: 'string' },
+          },
+        },
+      },
+    },
   })
   @ApiParam({ name: 'incentiveId', description: '激励ID' })
   @UseGuards(RolesGuard)
@@ -471,11 +489,12 @@ export class IncentiveController {
   async processPayment(
     @Request() req: AuthenticatedRequest,
     @Param('incentiveId') incentiveId: string,
-    @Body() paymentData: {
+    @Body()
+    paymentData: {
       paymentMethod: PaymentMethod;
       transactionRef?: string;
       notes?: string;
-    }
+    },
   ) {
     try {
       const paymentResult = await this.incentiveService.processPayment(
@@ -485,38 +504,40 @@ export class IncentiveController {
         req.user.organizationId,
         {
           transactionRef: paymentData.transactionRef,
-          notes: paymentData.notes
-        }
+          notes: paymentData.notes,
+        },
       );
 
       return {
         success: paymentResult.success,
-        message: paymentResult.success 
+        message: paymentResult.success
           ? 'Payment processed successfully'
           : 'Payment processing failed',
-        data: paymentResult.success ? {
-          incentiveId,
-          transactionId: paymentResult.transactionId,
-          amount: paymentResult.amount,
-          currency: paymentResult.currency,
-          paymentMethod: paymentData.paymentMethod,
-          paidAt: new Date().toISOString(),
-          processedBy: req.user.id
-        } : undefined,
-        error: paymentResult.success ? undefined : paymentResult.error
+        data: paymentResult.success
+          ? {
+              incentiveId,
+              transactionId: paymentResult.transactionId,
+              amount: paymentResult.amount,
+              currency: paymentResult.currency,
+              paymentMethod: paymentData.paymentMethod,
+              paidAt: new Date().toISOString(),
+              processedBy: req.user.id,
+            }
+          : undefined,
+        error: paymentResult.success ? undefined : paymentResult.error,
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to process payment',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '批量处理激励',
-    description: '批量操作多个激励（批准、拒绝、支付等）'
+    description: '批量操作多个激励（批准、拒绝、支付等）',
   })
   @ApiResponse({ status: 200, description: '批量处理完成' })
   @UseGuards(RolesGuard)
@@ -525,13 +546,14 @@ export class IncentiveController {
   @HttpCode(HttpStatus.OK)
   async batchProcessIncentives(
     @Request() req: AuthenticatedRequest,
-    @Body() batchRequest: {
+    @Body()
+    batchRequest: {
       incentiveIds: string[];
       action: 'approve' | 'reject' | 'pay';
       reason: string;
       paymentMethod?: PaymentMethod;
       notes?: string;
-    }
+    },
   ) {
     try {
       const batchResult = await this.incentiveService.batchProcessIncentives(
@@ -542,8 +564,8 @@ export class IncentiveController {
         {
           reason: batchRequest.reason,
           paymentMethod: batchRequest.paymentMethod,
-          notes: batchRequest.notes
-        }
+          notes: batchRequest.notes,
+        },
       );
 
       return {
@@ -555,38 +577,48 @@ export class IncentiveController {
           failed: batchResult.failed,
           results: batchResult.results,
           action: batchRequest.action,
-          processedBy: req.user.id
-        }
+          processedBy: req.user.id,
+        },
       };
     } catch (error) {
       return {
         success: false,
         error: 'Batch processing failed',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '获取激励统计数据',
-    description: '获取组织的激励系统统计数据和分析报告'
+    description: '获取组织的激励系统统计数据和分析报告',
   })
   @ApiResponse({ status: 200, description: '统计数据获取成功' })
-  @ApiQuery({ name: 'timeRange', required: false, enum: ['7d', '30d', '90d', '1y'], description: '时间范围' })
-  @ApiQuery({ name: 'groupBy', required: false, enum: ['day', 'week', 'month'], description: '分组方式' })
+  @ApiQuery({
+    name: 'timeRange',
+    required: false,
+    enum: ['7d', '30d', '90d', '1y'],
+    description: '时间范围',
+  })
+  @ApiQuery({
+    name: 'groupBy',
+    required: false,
+    enum: ['day', 'week', 'month'],
+    description: '分组方式',
+  })
   @UseGuards(RolesGuard)
   @Permissions('read_incentive_stats' as any)
   @Get('stats/overview')
   async getIncentiveStatistics(
     @Request() req: AuthenticatedRequest,
     @Query('timeRange') timeRange = '30d',
-    @Query('groupBy') groupBy = 'day'
+    @Query('groupBy') groupBy = 'day',
   ) {
     try {
       const statistics = await this.incentiveService.getIncentiveStatistics(
         req.user.organizationId,
         timeRange,
-        groupBy
+        groupBy,
       );
 
       return {
@@ -596,30 +628,35 @@ export class IncentiveController {
             totalIncentives: statistics.totalIncentives,
             totalRewardAmount: statistics.totalRewardAmount,
             avgRewardAmount: statistics.avgRewardAmount,
-            conversionRate: statistics.conversionRate
+            conversionRate: statistics.conversionRate,
           },
           statusDistribution: statistics.statusDistribution,
           rewardTypeDistribution: statistics.rewardTypeDistribution,
           paymentMethodDistribution: statistics.paymentMethodDistribution,
           trends: statistics.trends,
-          topPerformers: statistics.topPerformers
-        }
+          topPerformers: statistics.topPerformers,
+        },
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to retrieve incentive statistics',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '导出激励数据',
-    description: '导出激励数据为CSV或Excel格式'
+    description: '导出激励数据为CSV或Excel格式',
   })
   @ApiResponse({ status: 200, description: '数据导出成功' })
-  @ApiQuery({ name: 'format', required: false, enum: ['csv', 'excel'], description: '导出格式' })
+  @ApiQuery({
+    name: 'format',
+    required: false,
+    enum: ['csv', 'excel'],
+    description: '导出格式',
+  })
   @UseGuards(RolesGuard)
   @Permissions('export_incentive_data' as any)
   @Post('export')
@@ -627,12 +664,13 @@ export class IncentiveController {
   async exportIncentiveData(
     @Request() req: AuthenticatedRequest,
     @Query('format') format: 'csv' | 'excel' = 'csv',
-    @Body() exportRequest: {
+    @Body()
+    exportRequest: {
       dateRange?: { startDate: string; endDate: string };
       status?: IncentiveStatus[];
       rewardTypes?: RewardType[];
       includeContactInfo?: boolean;
-    }
+    },
   ) {
     try {
       const exportResult = await this.incentiveService.exportIncentiveData(
@@ -641,11 +679,13 @@ export class IncentiveController {
           ...exportRequest,
           format,
           requestedBy: req.user.id,
-          dateRange: exportRequest.dateRange ? {
-            startDate: new Date(exportRequest.dateRange.startDate),
-            endDate: new Date(exportRequest.dateRange.endDate)
-          } : undefined
-        }
+          dateRange: exportRequest.dateRange
+            ? {
+                startDate: new Date(exportRequest.dateRange.startDate),
+                endDate: new Date(exportRequest.dateRange.endDate),
+              }
+            : undefined,
+        },
       );
 
       return {
@@ -656,21 +696,21 @@ export class IncentiveController {
           format: format,
           estimatedTime: exportResult.estimatedTime,
           downloadUrl: exportResult.downloadUrl,
-          expiresAt: exportResult.expiresAt
-        }
+          expiresAt: exportResult.expiresAt,
+        },
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to export incentive data',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '配置激励规则',
-    description: '配置组织的激励奖励规则和阈值'
+    description: '配置组织的激励奖励规则和阈值',
   })
   @ApiResponse({ status: 200, description: '激励规则配置成功' })
   @UseGuards(RolesGuard)
@@ -679,7 +719,8 @@ export class IncentiveController {
   @HttpCode(HttpStatus.OK)
   async configureIncentiveRules(
     @Request() req: AuthenticatedRequest,
-    @Body() rulesConfig: {
+    @Body()
+    rulesConfig: {
       questionnaireRules: {
         minQualityScore: number;
         rewardTiers: Array<{
@@ -698,13 +739,13 @@ export class IncentiveController {
         autoApprovalThreshold: number;
       };
       enabled: boolean;
-    }
+    },
   ) {
     try {
       const config = await this.incentiveService.configureIncentiveRules(
         req.user.organizationId,
         rulesConfig,
-        req.user.id
+        req.user.id,
       );
 
       return {
@@ -714,21 +755,21 @@ export class IncentiveController {
           configId: config.configId,
           rules: config.rules,
           updatedBy: req.user.id,
-          updatedAt: config.updatedAt
-        }
+          updatedAt: config.updatedAt,
+        },
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to configure incentive rules',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '服务健康检查',
-    description: '检查激励系统服务的健康状态'
+    description: '检查激励系统服务的健康状态',
   })
   @ApiResponse({ status: 200, description: '服务状态' })
   @Get('health')
@@ -744,15 +785,15 @@ export class IncentiveController {
           database: health.database,
           paymentProcessor: health.paymentProcessor,
           ruleEngine: health.ruleEngine,
-          eventProcessing: health.eventProcessing
-        }
+          eventProcessing: health.eventProcessing,
+        },
       };
     } catch (error) {
       return {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         service: 'incentive-system',
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }

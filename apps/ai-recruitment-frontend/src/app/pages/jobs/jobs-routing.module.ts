@@ -7,16 +7,16 @@ import { CreateJobComponent } from './create-job/create-job.component';
 const routes: Routes = [
   {
     path: '',
-    component: JobsListComponent
+    component: JobsListComponent,
   },
   {
     path: 'create',
-    component: CreateJobComponent
-  }
+    component: CreateJobComponent,
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class JobsRoutingModule { }
+export class JobsRoutingModule {}

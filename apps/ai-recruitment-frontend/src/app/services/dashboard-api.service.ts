@@ -23,7 +23,13 @@ export interface DashboardStats {
 
 export interface ActivityItem {
   id: string;
-  type: 'job-created' | 'resume-uploaded' | 'report-generated' | 'match-found' | 'analysis-completed' | 'analysis-active';
+  type:
+    | 'job-created'
+    | 'resume-uploaded'
+    | 'report-generated'
+    | 'match-found'
+    | 'analysis-completed'
+    | 'analysis-active';
   title: string;
   description: string;
   timestamp: Date;
@@ -56,7 +62,7 @@ export interface SystemHealth {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DashboardApiService {
   private readonly baseUrl = '/api';
@@ -81,7 +87,9 @@ export class DashboardApiService {
    * Get recent activity feed
    */
   getRecentActivity(limit = 10): Observable<ActivityItem[]> {
-    return this.http.get<ActivityItem[]>(`${this.baseUrl}/dashboard/activity?limit=${limit}`);
+    return this.http.get<ActivityItem[]>(
+      `${this.baseUrl}/dashboard/activity?limit=${limit}`,
+    );
   }
 
   /**

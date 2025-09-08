@@ -12,13 +12,13 @@ describe('Report Actions', () => {
     summary: {
       overallScore: 85,
       totalCandidates: 5,
-      qualifiedCount: 4
-    }
+      qualifiedCount: 4,
+    },
   };
 
   const mockReportsList: ReportsList = {
     jobId: 'job1',
-    reports: [mockReportListItem]
+    reports: [mockReportListItem],
   };
 
   const mockReport: AnalysisReport = {
@@ -31,7 +31,7 @@ describe('Report Actions', () => {
     summary: {
       overallScore: 85,
       totalCandidates: 5,
-      qualifiedCount: 4
+      qualifiedCount: 4,
     },
     analysisData: {
       totalCandidates: 5,
@@ -41,10 +41,10 @@ describe('Report Actions', () => {
           id: 'candidate1',
           name: 'John Doe',
           score: 92,
-          skills: ['JavaScript', 'TypeScript']
-        }
-      ]
-    }
+          skills: ['JavaScript', 'TypeScript'],
+        },
+      ],
+    },
   };
 
   describe('Load Reports By Job Actions', () => {
@@ -56,7 +56,9 @@ describe('Report Actions', () => {
     });
 
     it('should create loadReportsByJobSuccess action', () => {
-      const action = ReportActions.loadReportsByJobSuccess({ reportsList: mockReportsList });
+      const action = ReportActions.loadReportsByJobSuccess({
+        reportsList: mockReportsList,
+      });
       expect(action.type).toBe('[Report] Load Reports By Job Success');
       expect(action.reportsList).toEqual(mockReportsList);
     });
@@ -111,30 +113,34 @@ describe('Report Actions', () => {
   describe('Action Type Consistency', () => {
     it('should have consistent action types for load operations', () => {
       const loadAction = ReportActions.loadReportsByJob({ jobId: 'test' });
-      const successAction = ReportActions.loadReportsByJobSuccess({ 
-        reportsList: { jobId: 'test', reports: [] } 
+      const successAction = ReportActions.loadReportsByJobSuccess({
+        reportsList: { jobId: 'test', reports: [] },
       });
-      const failureAction = ReportActions.loadReportsByJobFailure({ error: 'test error' });
+      const failureAction = ReportActions.loadReportsByJobFailure({
+        error: 'test error',
+      });
 
       expect(loadAction.type).toContain('[Report]');
       expect(successAction.type).toContain('[Report]');
       expect(failureAction.type).toContain('[Report]');
-      
+
       expect(successAction.type).toContain('Success');
       expect(failureAction.type).toContain('Failure');
     });
 
     it('should have consistent action types for single report operations', () => {
       const loadAction = ReportActions.loadReport({ reportId: 'test' });
-      const successAction = ReportActions.loadReportSuccess({ 
-        report: mockReport 
+      const successAction = ReportActions.loadReportSuccess({
+        report: mockReport,
       });
-      const failureAction = ReportActions.loadReportFailure({ error: 'test error' });
+      const failureAction = ReportActions.loadReportFailure({
+        error: 'test error',
+      });
 
       expect(loadAction.type).toContain('[Report]');
       expect(successAction.type).toContain('[Report]');
       expect(failureAction.type).toContain('[Report]');
-      
+
       expect(successAction.type).toContain('Success');
       expect(failureAction.type).toContain('Failure');
     });
@@ -175,41 +181,49 @@ describe('Report Actions', () => {
               id: 'candidate1',
               name: 'John Doe',
               score: 92,
-              skills: ['JavaScript', 'TypeScript', 'Angular', 'Node.js']
+              skills: ['JavaScript', 'TypeScript', 'Angular', 'Node.js'],
             },
             {
-              id: 'candidate2', 
+              id: 'candidate2',
               name: 'Jane Smith',
               score: 88,
-              skills: ['Python', 'Django', 'React', 'PostgreSQL']
-            }
-          ]
-        }
+              skills: ['Python', 'Django', 'React', 'PostgreSQL'],
+            },
+          ],
+        },
       };
 
       const action = ReportActions.loadReportSuccess({ report: complexReport });
       expect(action.report).toEqual(complexReport);
       expect(action.report.analysisData.topCandidates).toHaveLength(2);
-      expect(action.report.analysisData.topCandidates[0].skills).toHaveLength(4);
+      expect(action.report.analysisData.topCandidates[0].skills).toHaveLength(
+        4,
+      );
     });
   });
 
   describe('Error Handling Actions', () => {
     it('should handle network error messages', () => {
       const networkError = 'Network timeout: Unable to connect to server';
-      const action = ReportActions.loadReportsByJobFailure({ error: networkError });
+      const action = ReportActions.loadReportsByJobFailure({
+        error: networkError,
+      });
       expect(action.error).toBe(networkError);
     });
 
     it('should handle validation error messages', () => {
       const validationError = 'Invalid job ID format: must be UUID';
-      const action = ReportActions.loadReportFailure({ error: validationError });
+      const action = ReportActions.loadReportFailure({
+        error: validationError,
+      });
       expect(action.error).toBe(validationError);
     });
 
     it('should handle server error messages', () => {
       const serverError = 'Internal server error: Database connection failed';
-      const action = ReportActions.loadReportsByJobFailure({ error: serverError });
+      const action = ReportActions.loadReportsByJobFailure({
+        error: serverError,
+      });
       expect(action.error).toBe(serverError);
     });
   });
@@ -219,11 +233,11 @@ describe('Report Actions', () => {
       expect(typeof ReportActions.loadReportsByJob).toBe('function');
       expect(typeof ReportActions.loadReportsByJobSuccess).toBe('function');
       expect(typeof ReportActions.loadReportsByJobFailure).toBe('function');
-      
+
       expect(typeof ReportActions.loadReport).toBe('function');
       expect(typeof ReportActions.loadReportSuccess).toBe('function');
       expect(typeof ReportActions.loadReportFailure).toBe('function');
-      
+
       expect(typeof ReportActions.clearSelectedReport).toBe('function');
       expect(typeof ReportActions.clearReports).toBe('function');
       expect(typeof ReportActions.clearReportError).toBe('function');
@@ -239,10 +253,10 @@ describe('Report Actions', () => {
         ReportActions.loadReportFailure({ error: 'test error' }),
         ReportActions.clearSelectedReport(),
         ReportActions.clearReports(),
-        ReportActions.clearReportError()
+        ReportActions.clearReportError(),
       ];
 
-      actions.forEach(action => {
+      actions.forEach((action) => {
         expect(action).toHaveProperty('type');
         expect(typeof action.type).toBe('string');
         expect(action.type.length).toBeGreaterThan(0);

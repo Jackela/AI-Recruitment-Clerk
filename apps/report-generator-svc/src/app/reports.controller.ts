@@ -1,22 +1,29 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
+import {
+  Controller,
+  Get,
+  Post,
   Delete,
-  Param, 
-  Query, 
-  Body, 
-  Res, 
-  BadRequestException, 
+  Param,
+  Query,
+  Body,
+  Res,
+  BadRequestException,
   NotFoundException,
   InternalServerErrorException,
   Logger,
   UseGuards,
-  HttpStatus
+  HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { ReportGeneratorService, ReportGenerationRequest } from '../report-generator/report-generator.service';
-import { ReportRepository, ReportQuery, ReportListOptions } from '../report-generator/report.repository';
+import {
+  ReportGeneratorService,
+  ReportGenerationRequest,
+} from '../report-generator/report-generator.service';
+import {
+  ReportRepository,
+  ReportQuery,
+  ReportListOptions,
+} from '../report-generator/report.repository';
 import { GridFsService } from '../report-generator/gridfs.service';
 import { ReportTemplatesService } from '../report-generator/report-templates.service';
 
@@ -87,11 +94,19 @@ export class ReportsController {
   @Post('generate')
   async generateReport(@Body() request: ReportGenerationRequestDto) {
     try {
-      this.logger.log(`Generating ${request.reportType} report for job ${request.jobId}`);
+      this.logger.log(
+        `Generating ${request.reportType} report for job ${request.jobId}`,
+      );
 
       // Validate request
-      if (!request.jobId || !request.resumeIds || request.resumeIds.length === 0) {
-        throw new BadRequestException('Job ID and at least one resume ID are required');
+      if (
+        !request.jobId ||
+        !request.resumeIds ||
+        request.resumeIds.length === 0
+      ) {
+        throw new BadRequestException(
+          'Job ID and at least one resume ID are required',
+        );
       }
 
       if (!request.outputFormats || request.outputFormats.length === 0) {
@@ -106,46 +121,59 @@ export class ReportsController {
         options: request.options,
       };
 
-      const result = await this.reportGeneratorService.generateReport(generationRequest);
+      const result =
+        await this.reportGeneratorService.generateReport(generationRequest);
 
       return {
         success: true,
         data: result,
         message: `${request.reportType} report generated successfully`,
       };
-
     } catch (error) {
       this.logger.error('Failed to generate report', {
         error: error.message,
         request: {
           jobId: request.jobId,
           resumeCount: request.resumeIds?.length,
-          reportType: request.reportType
-        }
+          reportType: request.reportType,
+        },
       });
 
       if (error instanceof BadRequestException) {
         throw error;
       }
 
-      throw new InternalServerErrorException(`Report generation failed: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Report generation failed: ${error.message}`,
+      );
     }
   }
 
   @Post('compare-candidates')
-  async generateCandidateComparison(@Body() request: CandidateComparisonRequestDto) {
+  async generateCandidateComparison(
+    @Body() request: CandidateComparisonRequestDto,
+  ) {
     try {
-      this.logger.log(`Generating candidate comparison for job ${request.jobId} with ${request.resumeIds.length} candidates`);
+      this.logger.log(
+        `Generating candidate comparison for job ${request.jobId} with ${request.resumeIds.length} candidates`,
+      );
 
-      if (!request.jobId || !request.resumeIds || request.resumeIds.length < 2) {
-        throw new BadRequestException('Job ID and at least 2 resume IDs are required for comparison');
+      if (
+        !request.jobId ||
+        !request.resumeIds ||
+        request.resumeIds.length < 2
+      ) {
+        throw new BadRequestException(
+          'Job ID and at least 2 resume IDs are required for comparison',
+        );
       }
 
-      const comparisonReport = await this.reportGeneratorService.generateCandidateComparison(
-        request.jobId,
-        request.resumeIds,
-        { requestedBy: request.requestedBy }
-      );
+      const comparisonReport =
+        await this.reportGeneratorService.generateCandidateComparison(
+          request.jobId,
+          request.resumeIds,
+          { requestedBy: request.requestedBy },
+        );
 
       return {
         success: true,
@@ -156,36 +184,40 @@ export class ReportsController {
         },
         message: 'Candidate comparison report generated successfully',
       };
-
     } catch (error) {
       this.logger.error('Failed to generate candidate comparison', {
         error: error.message,
         jobId: request.jobId,
-        candidateCount: request.resumeIds?.length
+        candidateCount: request.resumeIds?.length,
       });
 
       if (error instanceof BadRequestException) {
         throw error;
       }
 
-      throw new InternalServerErrorException(`Candidate comparison generation failed: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Candidate comparison generation failed: ${error.message}`,
+      );
     }
   }
 
   @Post('interview-guide')
   async generateInterviewGuide(@Body() request: InterviewGuideRequestDto) {
     try {
-      this.logger.log(`Generating interview guide for job ${request.jobId}, resume ${request.resumeId}`);
+      this.logger.log(
+        `Generating interview guide for job ${request.jobId}, resume ${request.resumeId}`,
+      );
 
       if (!request.jobId || !request.resumeId) {
         throw new BadRequestException('Job ID and resume ID are required');
       }
 
-      const interviewGuide = await this.reportGeneratorService.generateInterviewGuide(
-        request.jobId,
-        request.resumeId,
-        { requestedBy: request.requestedBy }
-      );
+      const interviewGuide =
+        await this.reportGeneratorService.generateInterviewGuide(
+          request.jobId,
+          request.resumeId,
+          { requestedBy: request.requestedBy },
+        );
 
       return {
         success: true,
@@ -196,19 +228,20 @@ export class ReportsController {
         },
         message: 'Interview guide generated successfully',
       };
-
     } catch (error) {
       this.logger.error('Failed to generate interview guide', {
         error: error.message,
         jobId: request.jobId,
-        resumeId: request.resumeId
+        resumeId: request.resumeId,
       });
 
       if (error instanceof BadRequestException) {
         throw error;
       }
 
-      throw new InternalServerErrorException(`Interview guide generation failed: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Interview guide generation failed: ${error.message}`,
+      );
     }
   }
 
@@ -251,14 +284,15 @@ export class ReportsController {
         data: result,
         message: 'Reports retrieved successfully',
       };
-
     } catch (error) {
       this.logger.error('Failed to retrieve reports', {
         error: error.message,
-        query: queryDto
+        query: queryDto,
       });
 
-      throw new InternalServerErrorException(`Failed to retrieve reports: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Failed to retrieve reports: ${error.message}`,
+      );
     }
   }
 
@@ -278,18 +312,19 @@ export class ReportsController {
         data: report,
         message: 'Report retrieved successfully',
       };
-
     } catch (error) {
       this.logger.error('Failed to retrieve report', {
         error: error.message,
-        reportId
+        reportId,
       });
 
       if (error instanceof NotFoundException) {
         throw error;
       }
 
-      throw new InternalServerErrorException(`Failed to retrieve report: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Failed to retrieve report: ${error.message}`,
+      );
     }
   }
 
@@ -297,14 +332,14 @@ export class ReportsController {
   async downloadReportFile(
     @Param('fileId') fileId: string,
     @Query('format') format: string,
-    @Res() response: Response
+    @Res() response: Response,
   ) {
     try {
       this.logger.debug(`Downloading report file: ${fileId}`);
 
       // Get file metadata first
       const metadata = await this.gridFsService.getReportMetadata(fileId);
-      
+
       if (!metadata) {
         throw new NotFoundException(`Report file not found: ${fileId}`);
       }
@@ -317,17 +352,16 @@ export class ReportsController {
         'Content-Type': metadata.mimeType,
         'Content-Disposition': `attachment; filename="${fileId}"`,
         'Cache-Control': 'private, no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
+        Pragma: 'no-cache',
+        Expires: '0',
       });
 
       // Stream the file
       fileStream.pipe(response);
-
     } catch (error) {
       this.logger.error('Failed to download report file', {
         error: error.message,
-        fileId
+        fileId,
       });
 
       if (error instanceof NotFoundException) {
@@ -359,25 +393,26 @@ export class ReportsController {
         success: true,
         message: 'Report deleted successfully',
       };
-
     } catch (error) {
       this.logger.error('Failed to delete report', {
         error: error.message,
-        reportId
+        reportId,
       });
 
       if (error instanceof NotFoundException) {
         throw error;
       }
 
-      throw new InternalServerErrorException(`Failed to delete report: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Failed to delete report: ${error.message}`,
+      );
     }
   }
 
   @Get('job/:jobId')
   async getReportsByJob(
     @Param('jobId') jobId: string,
-    @Query() queryDto: Omit<ReportQueryDto, 'jobId'>
+    @Query() queryDto: Omit<ReportQueryDto, 'jobId'>,
   ) {
     try {
       this.logger.debug(`Retrieving reports for job: ${jobId}`);
@@ -390,28 +425,32 @@ export class ReportsController {
         includeFailedReports: queryDto.includeFailedReports || false,
       };
 
-      const result = await this.reportRepository.findReportsByJobId(jobId, options);
+      const result = await this.reportRepository.findReportsByJobId(
+        jobId,
+        options,
+      );
 
       return {
         success: true,
         data: result,
         message: `Reports for job ${jobId} retrieved successfully`,
       };
-
     } catch (error) {
       this.logger.error('Failed to retrieve reports by job', {
         error: error.message,
-        jobId
+        jobId,
       });
 
-      throw new InternalServerErrorException(`Failed to retrieve reports for job: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Failed to retrieve reports for job: ${error.message}`,
+      );
     }
   }
 
   @Get('resume/:resumeId')
   async getReportsByResume(
     @Param('resumeId') resumeId: string,
-    @Query() queryDto: Omit<ReportQueryDto, 'resumeId'>
+    @Query() queryDto: Omit<ReportQueryDto, 'resumeId'>,
   ) {
     try {
       this.logger.debug(`Retrieving reports for resume: ${resumeId}`);
@@ -424,21 +463,25 @@ export class ReportsController {
         includeFailedReports: queryDto.includeFailedReports || false,
       };
 
-      const result = await this.reportRepository.findReportsByResumeId(resumeId, options);
+      const result = await this.reportRepository.findReportsByResumeId(
+        resumeId,
+        options,
+      );
 
       return {
         success: true,
         data: result,
         message: `Reports for resume ${resumeId} retrieved successfully`,
       };
-
     } catch (error) {
       this.logger.error('Failed to retrieve reports by resume', {
         error: error.message,
-        resumeId
+        resumeId,
       });
 
-      throw new InternalServerErrorException(`Failed to retrieve reports for resume: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Failed to retrieve reports for resume: ${error.message}`,
+      );
     }
   }
 
@@ -469,14 +512,15 @@ export class ReportsController {
         data: analytics,
         message: 'Report analytics retrieved successfully',
       };
-
     } catch (error) {
       this.logger.error('Failed to retrieve report analytics', {
         error: error.message,
-        query: queryDto
+        query: queryDto,
       });
 
-      throw new InternalServerErrorException(`Failed to retrieve report analytics: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Failed to retrieve report analytics: ${error.message}`,
+      );
     }
   }
 
@@ -492,13 +536,14 @@ export class ReportsController {
         data: stats,
         message: 'Storage statistics retrieved successfully',
       };
-
     } catch (error) {
       this.logger.error('Failed to retrieve storage stats', {
-        error: error.message
+        error: error.message,
       });
 
-      throw new InternalServerErrorException(`Failed to retrieve storage statistics: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Failed to retrieve storage statistics: ${error.message}`,
+      );
     }
   }
 
@@ -512,11 +557,12 @@ export class ReportsController {
         data: health,
         message: `Report generator service is ${health.status}`,
       };
-
     } catch (error) {
       this.logger.error('Health check failed', { error: error.message });
 
-      throw new InternalServerErrorException(`Health check failed: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Health check failed: ${error.message}`,
+      );
     }
   }
 }

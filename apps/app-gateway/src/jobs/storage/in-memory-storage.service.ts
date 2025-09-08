@@ -20,15 +20,16 @@ export class InMemoryStorageService {
 
   getAllJobs(): JobDetailDto[] {
     return Array.from(this.jobs.values()).sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
     );
   }
 
   updateJobResumeCount(jobId: string): void {
     const job = this.jobs.get(jobId);
     if (job) {
-      const resumeCount = Array.from(this.resumes.values())
-        .filter(resume => resume.jobId === jobId).length;
+      const resumeCount = Array.from(this.resumes.values()).filter(
+        (resume) => resume.jobId === jobId,
+      ).length;
       job.resumeCount = resumeCount;
     }
   }
@@ -45,11 +46,15 @@ export class InMemoryStorageService {
 
   getResumesByJobId(jobId: string): ResumeDetailDto[] {
     return Array.from(this.resumes.values())
-      .filter(resume => resume.jobId === jobId)
+      .filter((resume) => resume.jobId === jobId)
       .sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
   }
 
-  updateResumeWithReport(resumeId: string, matchScore: number, reportId: string): void {
+  updateResumeWithReport(
+    resumeId: string,
+    matchScore: number,
+    reportId: string,
+  ): void {
     const resume = this.resumes.get(resumeId);
     if (resume) {
       resume.matchScore = matchScore;
@@ -71,7 +76,7 @@ export class InMemoryStorageService {
 
   getReportsByJobId(jobId: string): AnalysisReportDto[] {
     return Array.from(this.reports.values())
-      .filter(report => report.jobId === jobId)
+      .filter((report) => report.jobId === jobId)
       .sort((a, b) => b.matchScore - a.matchScore);
   }
 
@@ -84,7 +89,7 @@ export class InMemoryStorageService {
       '我们正在寻找一位经验丰富的Python工程师...',
       'completed',
       new Date('2024-01-15'),
-      2
+      2,
     );
     this.createJob(sampleJob);
 
@@ -104,18 +109,18 @@ export class InMemoryStorageService {
           position: 'Python开发工程师',
           startDate: '2022-03-01',
           endDate: 'present',
-          summary: '负责后端API开发和数据库设计'
-        }
+          summary: '负责后端API开发和数据库设计',
+        },
       ],
       [
         {
           school: '北京大学',
           degree: '学士',
-          major: '计算机科学与技术'
-        }
+          major: '计算机科学与技术',
+        },
       ],
       85,
-      'report-1'
+      'report-1',
     );
 
     const resume2 = new ResumeDetailDto(
@@ -133,18 +138,18 @@ export class InMemoryStorageService {
           position: 'Web开发实习生',
           startDate: '2023-06-01',
           endDate: '2023-12-31',
-          summary: '参与Web应用开发和维护'
-        }
+          summary: '参与Web应用开发和维护',
+        },
       ],
       [
         {
           school: '清华大学',
           degree: '学士',
-          major: '软件工程'
-        }
+          major: '软件工程',
+        },
       ],
       72,
-      'report-2'
+      'report-2',
     );
 
     this.createResume(resume1);
@@ -162,18 +167,15 @@ export class InMemoryStorageService {
         '具有扎实的Python开发经验',
         '掌握主流Web框架Django和FastAPI',
         '有数据库设计和优化经验',
-        '目前仍在相关岗位工作，经验连续'
+        '目前仍在相关岗位工作，经验连续',
       ],
-      [
-        '缺少大型项目架构经验的具体描述',
-        '未明确展示团队协作和领导能力'
-      ],
+      ['缺少大型项目架构经验的具体描述', '未明确展示团队协作和领导能力'],
       [],
       [
         '请详细介绍您在当前公司负责的最复杂的项目架构？',
         '您如何处理高并发场景下的性能优化？',
-        '描述一次您带领团队解决技术难题的经历。'
-      ]
+        '描述一次您带领团队解决技术难题的经历。',
+      ],
     );
 
     const report2 = new AnalysisReportDto(
@@ -186,21 +188,19 @@ export class InMemoryStorageService {
       [
         'Python基础扎实，掌握Flask框架',
         '有数据库操作经验',
-        '学历背景优秀，学习能力强'
+        '学历背景优秀，学习能力强',
       ],
       [
         '工作经验较少，仅有实习经历',
         '缺少大型项目开发经验',
-        '高级框架使用经验不足'
+        '高级框架使用经验不足',
       ],
-      [
-        '工作经验相对较少，需要更多培养时间'
-      ],
+      ['工作经验相对较少，需要更多培养时间'],
       [
         '请介绍您在实习期间遇到的最大技术挑战？',
         '您如何快速学习新技术栈？',
-        '对于高级Python开发工程师这个岗位，您认为自己还需要在哪些方面提升？'
-      ]
+        '对于高级Python开发工程师这个岗位，您认为自己还需要在哪些方面提升？',
+      ],
     );
 
     this.createReport(report1);

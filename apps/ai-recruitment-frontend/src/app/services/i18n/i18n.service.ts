@@ -25,12 +25,12 @@ export interface LanguageConfig {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class I18nService {
   private readonly STORAGE_KEY = 'app-language-preference';
   private readonly DEFAULT_LANGUAGE: Language = 'zh-CN';
-  
+
   // Language configurations
   private readonly languages: Record<Language, LanguageConfig> = {
     'zh-CN': {
@@ -43,8 +43,8 @@ export class I18nService {
       numberFormat: {
         decimal: '.',
         thousands: ',',
-        currency: '¥'
-      }
+        currency: '¥',
+      },
     },
     'en-US': {
       code: 'en-US',
@@ -56,8 +56,8 @@ export class I18nService {
       numberFormat: {
         decimal: '.',
         thousands: ',',
-        currency: '$'
-      }
+        currency: '$',
+      },
     },
     'zh-TW': {
       code: 'zh-TW',
@@ -69,8 +69,8 @@ export class I18nService {
       numberFormat: {
         decimal: '.',
         thousands: ',',
-        currency: 'NT$'
-      }
+        currency: 'NT$',
+      },
     },
     'ja-JP': {
       code: 'ja-JP',
@@ -82,8 +82,8 @@ export class I18nService {
       numberFormat: {
         decimal: '.',
         thousands: ',',
-        currency: '¥'
-      }
+        currency: '¥',
+      },
     },
     'ko-KR': {
       code: 'ko-KR',
@@ -95,84 +95,85 @@ export class I18nService {
       numberFormat: {
         decimal: '.',
         thousands: ',',
-        currency: '₩'
-      }
-    }
+        currency: '₩',
+      },
+    },
   };
-  
+
   // Reactive state
   currentLanguage = signal<Language>(this.DEFAULT_LANGUAGE);
   isLoading = signal(false);
   private translations = new BehaviorSubject<TranslationStrings>({});
-  
+
   // Translation cache
   private translationCache = new Map<Language, TranslationStrings>();
-  
+
   constructor(
     private http: HttpClient,
-    private toastService: ToastService
+    private toastService: ToastService,
   ) {
     this.initializeLanguage();
-    
+
     // Apply language changes reactively
     effect(() => {
       const lang = this.currentLanguage();
       this.applyLanguage(lang);
     });
   }
-  
+
   private initializeLanguage(): void {
     // Get saved preference or detect from browser
     const savedLanguage = this.getSavedLanguage();
     const detectedLanguage = savedLanguage || this.detectBrowserLanguage();
-    
+
     this.currentLanguage.set(detectedLanguage);
     this.loadTranslations(detectedLanguage);
   }
-  
+
   private getSavedLanguage(): Language | null {
     const saved = localStorage.getItem(this.STORAGE_KEY) as Language;
     return saved && this.languages[saved] ? saved : null;
   }
-  
+
   private detectBrowserLanguage(): Language {
     const browserLang = navigator.language || navigator.languages[0];
-    
+
     // Try exact match first
     if (this.languages[browserLang as Language]) {
       return browserLang as Language;
     }
-    
+
     // Try language code without region
     const langCode = browserLang.split('-')[0];
-    const matchingLang = Object.keys(this.languages).find(
-      key => key.startsWith(langCode)
+    const matchingLang = Object.keys(this.languages).find((key) =>
+      key.startsWith(langCode),
     ) as Language;
-    
+
     return matchingLang || this.DEFAULT_LANGUAGE;
   }
-  
+
   private loadTranslations(language: Language): void {
     // Check cache first
     if (this.translationCache.has(language)) {
       this.translations.next(this.translationCache.get(language)!);
       return;
     }
-    
+
     this.isLoading.set(true);
-    
+
     // Load translation file
-    this.http.get<TranslationStrings>(`/assets/i18n/${language}.json`)
+    this.http
+      .get<TranslationStrings>(`/assets/i18n/${language}.json`)
       .pipe(
-        tap(translations => {
+        tap((translations) => {
           this.translationCache.set(language, translations);
           this.translations.next(translations);
         }),
-        catchError(error => {
+        catchError((error) => {
           console.error(`Failed to load translations for ${language}:`, error);
           // Fallback to embedded translations
           return of(this.getFallbackTranslations(language));
-        })
+        }),
       )
       .subscribe({
         next: (_translations) => {
@@ -181,36 +182,38 @@ export class I18nService {
         error: () => {
           this.isLoading.set(false);
           this.toastService.error('无法加载语言包');
-        }
+        },
       });
   }
-  
+
   private applyLanguage(language: Language): void {
     const config = this.languages[language];
-    
+
     // Set HTML lang attribute
     document.documentElement.lang = language;
-    
+
     // Set text direction
     document.documentElement.dir = config.direction;
-    
+
     // Apply language-specific styles
     document.documentElement.setAttribute('data-language', language);
-    
+
     // Update meta tags
     this.updateMetaTags(language);
   }
-  
+
   private updateMetaTags(language: Language): void {
     // Update content language meta tag
-    let metaLang = document.querySelector('meta[http-equiv="content-language"]');
+    let metaLang = document.querySelector(
+      'meta[http-equiv="content-language"]',
+    );
     if (!metaLang) {
       metaLang = document.createElement('meta');
       metaLang.setAttribute('http-equiv', 'content-language');
       document.head.appendChild(metaLang);
     }
     metaLang.setAttribute('content', language);
-    
+
     // Update og:locale meta tag
     let metaOgLocale = document.querySelector('meta[property="og:locale"]');
     if (!metaOgLocale) {
@@ -220,124 +223,131 @@ export class I18nService {
     }
     metaOgLocale.setAttribute('content', language.replace('-', '_'));
   }
-  
+
   // Public API
-  
+
   setLanguage(language: Language): void {
     if (!this.languages[language]) {
       console.error(`Unsupported language: ${language}`);
       return;
     }
-    
+
     this.currentLanguage.set(language);
     localStorage.setItem(this.STORAGE_KEY, language);
     this.loadTranslations(language);
-    
+
     const config = this.languages[language];
     this.toastService.success(`语言已切换到${config.nativeName}`);
   }
-  
+
   getAvailableLanguages(): LanguageConfig[] {
     return Object.values(this.languages);
   }
-  
+
   getCurrentLanguageConfig(): LanguageConfig {
     return this.languages[this.currentLanguage()];
   }
-  
+
   translate(key: string, params?: Record<string, any>): string {
     const translations = this.translations.value;
     const keys = key.split('.');
     let value: any = translations;
-    
+
     for (const k of keys) {
       value = value?.[k];
       if (value === undefined) break;
     }
-    
+
     if (typeof value !== 'string') {
       console.warn(`Translation not found for key: ${key}`);
       return key;
     }
-    
+
     // Replace parameters
     if (params) {
       Object.entries(params).forEach(([param, val]) => {
         value = value.replace(new RegExp(`{{${param}}}`, 'g'), String(val));
       });
     }
-    
+
     return value;
   }
-  
+
   // Shorthand
   t(key: string, params?: Record<string, any>): string {
     return this.translate(key, params);
   }
-  
+
   // Format methods
-  
+
   formatDate(date: Date | string, _format?: string): string {
     const config = this.getCurrentLanguageConfig();
     const dateObj = typeof date === 'string' ? new Date(date) : date;
-    
+
     // Use Intl.DateTimeFormat for proper localization
     return new Intl.DateTimeFormat(config.code, {
-      dateStyle: 'medium'
+      dateStyle: 'medium',
     }).format(dateObj);
   }
-  
+
   formatTime(date: Date | string): string {
     const config = this.getCurrentLanguageConfig();
     const dateObj = typeof date === 'string' ? new Date(date) : date;
-    
+
     return new Intl.DateTimeFormat(config.code, {
-      timeStyle: 'medium'
+      timeStyle: 'medium',
     }).format(dateObj);
   }
-  
+
   formatDateTime(date: Date | string): string {
     const config = this.getCurrentLanguageConfig();
     const dateObj = typeof date === 'string' ? new Date(date) : date;
-    
+
     return new Intl.DateTimeFormat(config.code, {
       dateStyle: 'medium',
-      timeStyle: 'short'
+      timeStyle: 'short',
     }).format(dateObj);
   }
-  
+
   formatNumber(value: number, decimals?: number): string {
     const config = this.getCurrentLanguageConfig();
-    
+
     return new Intl.NumberFormat(config.code, {
       minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals
+      maximumFractionDigits: decimals,
     }).format(value);
   }
-  
+
   formatCurrency(value: number): string {
     const config = this.getCurrentLanguageConfig();
-    
+
     return new Intl.NumberFormat(config.code, {
       style: 'currency',
-      currency: config.code === 'zh-CN' ? 'CNY' :
-               config.code === 'en-US' ? 'USD' :
-               config.code === 'zh-TW' ? 'TWD' :
-               config.code === 'ja-JP' ? 'JPY' :
-               config.code === 'ko-KR' ? 'KRW' : 'USD'
+      currency:
+        config.code === 'zh-CN'
+          ? 'CNY'
+          : config.code === 'en-US'
+            ? 'USD'
+            : config.code === 'zh-TW'
+              ? 'TWD'
+              : config.code === 'ja-JP'
+                ? 'JPY'
+                : config.code === 'ko-KR'
+                  ? 'KRW'
+                  : 'USD',
     }).format(value);
   }
-  
+
   formatPercent(value: number, decimals = 0): string {
     const config = this.getCurrentLanguageConfig();
-    
+
     return new Intl.NumberFormat(config.code, {
       style: 'percent',
       minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals
+      maximumFractionDigits: decimals,
     }).format(value / 100);
   }
-  
+
   // Fallback translations (embedded for offline support)
   private getFallbackTranslations(language: Language): TranslationStrings {
     const fallbacks: Record<Language, TranslationStrings> = {
@@ -361,12 +371,12 @@ export class I18nService {
           submit: '提交',
           reset: '重置',
           yes: '是',
-          no: '否'
+          no: '否',
         },
         app: {
           title: 'AI智能招聘助手',
           description: '智能简历筛选和分析系统',
-          welcome: '欢迎使用AI智能招聘助手'
+          welcome: '欢迎使用AI智能招聘助手',
         },
         navigation: {
           dashboard: '控制台',
@@ -375,7 +385,7 @@ export class I18nService {
           settings: '设置',
           help: '帮助',
           profile: '个人资料',
-          logout: '退出'
+          logout: '退出',
         },
         messages: {
           success: '操作成功',
@@ -384,8 +394,8 @@ export class I18nService {
           info: '提示',
           confirmDelete: '确定要删除吗？',
           noData: '暂无数据',
-          networkError: '网络错误，请稍后重试'
-        }
+          networkError: '网络错误，请稍后重试',
+        },
       },
       'en-US': {
         common: {
@@ -407,12 +417,12 @@ export class I18nService {
           submit: 'Submit',
           reset: 'Reset',
           yes: 'Yes',
-          no: 'No'
+          no: 'No',
         },
         app: {
           title: 'AI Recruitment Assistant',
           description: 'Intelligent Resume Screening and Analysis System',
-          welcome: 'Welcome to AI Recruitment Assistant'
+          welcome: 'Welcome to AI Recruitment Assistant',
         },
         navigation: {
           dashboard: 'Dashboard',
@@ -421,7 +431,7 @@ export class I18nService {
           settings: 'Settings',
           help: 'Help',
           profile: 'Profile',
-          logout: 'Logout'
+          logout: 'Logout',
         },
         messages: {
           success: 'Operation successful',
@@ -430,8 +440,8 @@ export class I18nService {
           info: 'Info',
           confirmDelete: 'Are you sure you want to delete?',
           noData: 'No data available',
-          networkError: 'Network error, please try again later'
-        }
+          networkError: 'Network error, please try again later',
+        },
       },
       'zh-TW': {
         common: {
@@ -453,12 +463,12 @@ export class I18nService {
           submit: '提交',
           reset: '重設',
           yes: '是',
-          no: '否'
+          no: '否',
         },
         app: {
           title: 'AI智慧招募助手',
           description: '智慧履歷篩選和分析系統',
-          welcome: '歡迎使用AI智慧招募助手'
+          welcome: '歡迎使用AI智慧招募助手',
         },
         navigation: {
           dashboard: '控制台',
@@ -467,7 +477,7 @@ export class I18nService {
           settings: '設定',
           help: '說明',
           profile: '個人資料',
-          logout: '登出'
+          logout: '登出',
         },
         messages: {
           success: '操作成功',
@@ -476,8 +486,8 @@ export class I18nService {
           info: '提示',
           confirmDelete: '確定要刪除嗎？',
           noData: '暫無資料',
-          networkError: '網路錯誤，請稍後重試'
-        }
+          networkError: '網路錯誤，請稍後重試',
+        },
       },
       'ja-JP': {
         common: {
@@ -499,12 +509,12 @@ export class I18nService {
           submit: '送信',
           reset: 'リセット',
           yes: 'はい',
-          no: 'いいえ'
+          no: 'いいえ',
         },
         app: {
           title: 'AI採用アシスタント',
           description: 'インテリジェント履歴書スクリーニングおよび分析システム',
-          welcome: 'AI採用アシスタントへようこそ'
+          welcome: 'AI採用アシスタントへようこそ',
         },
         navigation: {
           dashboard: 'ダッシュボード',
@@ -513,7 +523,7 @@ export class I18nService {
           settings: '設定',
           help: 'ヘルプ',
           profile: 'プロフィール',
-          logout: 'ログアウト'
+          logout: 'ログアウト',
         },
         messages: {
           success: '操作成功',
@@ -522,8 +532,8 @@ export class I18nService {
           info: '情報',
           confirmDelete: '削除してもよろしいですか？',
           noData: 'データがありません',
-          networkError: 'ネットワークエラー、後でもう一度お試しください'
-        }
+          networkError: 'ネットワークエラー、後でもう一度お試しください',
+        },
       },
       'ko-KR': {
         common: {
@@ -545,12 +555,12 @@ export class I18nService {
           submit: '제출',
           reset: '재설정',
           yes: '예',
-          no: '아니오'
+          no: '아니오',
         },
         app: {
           title: 'AI 채용 도우미',
           description: '지능형 이력서 심사 및 분석 시스템',
-          welcome: 'AI 채용 도우미에 오신 것을 환영합니다'
+          welcome: 'AI 채용 도우미에 오신 것을 환영합니다',
         },
         navigation: {
           dashboard: '대시보드',
@@ -559,7 +569,7 @@ export class I18nService {
           settings: '설정',
           help: '도움말',
           profile: '프로필',
-          logout: '로그아웃'
+          logout: '로그아웃',
         },
         messages: {
           success: '작업 성공',
@@ -568,11 +578,11 @@ export class I18nService {
           info: '정보',
           confirmDelete: '삭제하시겠습니까?',
           noData: '데이터 없음',
-          networkError: '네트워크 오류, 나중에 다시 시도하세요'
-        }
-      }
+          networkError: '네트워크 오류, 나중에 다시 시도하세요',
+        },
+      },
     };
-    
+
     return fallbacks[language] || fallbacks[this.DEFAULT_LANGUAGE];
   }
 }

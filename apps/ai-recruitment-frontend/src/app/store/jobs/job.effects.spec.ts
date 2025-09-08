@@ -6,7 +6,12 @@ import { Action } from '@ngrx/store';
 import { JobEffects } from './job.effects';
 import { ApiService } from '../../services/api.service';
 import * as JobActions from './job.actions';
-import { Job, JobListItem, CreateJobRequest, CreateJobResponse } from './job.model';
+import {
+  Job,
+  JobListItem,
+  CreateJobRequest,
+  CreateJobResponse,
+} from './job.model';
 
 describe('JobEffects', () => {
   let actions$: Observable<Action>;
@@ -20,8 +25,8 @@ describe('JobEffects', () => {
       title: '软件工程师',
       status: 'completed',
       createdAt: new Date('2024-01-01'),
-      resumeCount: 5
-    }
+      resumeCount: 5,
+    },
   ];
 
   const mockJob: Job = {
@@ -30,26 +35,26 @@ describe('JobEffects', () => {
     jdText: '招聘软件工程师...',
     status: 'completed',
     createdAt: new Date('2024-01-01'),
-    resumeCount: 5
+    resumeCount: 5,
   };
 
   const mockCreateJobRequest: CreateJobRequest = {
     jobTitle: '新岗位',
-    jdText: '新岗位描述'
+    jdText: '新岗位描述',
   };
 
   const mockCreateJobResponse: CreateJobResponse = {
-    jobId: 'new-job-id'
+    jobId: 'new-job-id',
   };
 
   beforeEach(() => {
     const apiServiceSpy = {
       getAllJobs: jest.fn(),
       getJobById: jest.fn(),
-      createJob: jest.fn()
+      createJob: jest.fn(),
     };
     const routerSpy = {
-      navigate: jest.fn()
+      navigate: jest.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -57,8 +62,8 @@ describe('JobEffects', () => {
         JobEffects,
         provideMockActions(() => actions$),
         { provide: ApiService, useValue: apiServiceSpy },
-        { provide: Router, useValue: routerSpy }
-      ]
+        { provide: Router, useValue: routerSpy },
+      ],
     });
 
     effects = TestBed.inject(JobEffects);
@@ -69,11 +74,13 @@ describe('JobEffects', () => {
   describe('loadJobs$', () => {
     it('should return loadJobsSuccess action on successful API call', (done) => {
       apiService.getAllJobs.mockReturnValue(of(mockJobListItems));
-      
+
       actions$ = of(JobActions.loadJobs());
-      
-      effects.loadJobs$.subscribe(action => {
-        expect(action).toEqual(JobActions.loadJobsSuccess({ jobs: mockJobListItems }));
+
+      effects.loadJobs$.subscribe((action) => {
+        expect(action).toEqual(
+          JobActions.loadJobsSuccess({ jobs: mockJobListItems }),
+        );
         expect(apiService.getAllJobs).toHaveBeenCalled();
         done();
       });
@@ -82,13 +89,15 @@ describe('JobEffects', () => {
     it('should return loadJobsFailure action on API error', (done) => {
       const error = new Error('Network error');
       apiService.getAllJobs.mockReturnValue(throwError(() => error));
-      
+
       actions$ = of(JobActions.loadJobs());
-      
-      effects.loadJobs$.subscribe(action => {
-        expect(action).toEqual(JobActions.loadJobsFailure({ 
-          error: 'Network error' 
-        }));
+
+      effects.loadJobs$.subscribe((action) => {
+        expect(action).toEqual(
+          JobActions.loadJobsFailure({
+            error: 'Network error',
+          }),
+        );
         done();
       });
     });
@@ -96,13 +105,15 @@ describe('JobEffects', () => {
     it('should handle API error with custom message', (done) => {
       const error = { message: 'Custom error message' };
       apiService.getAllJobs.mockReturnValue(throwError(() => error));
-      
+
       actions$ = of(JobActions.loadJobs());
-      
-      effects.loadJobs$.subscribe(action => {
-        expect(action).toEqual(JobActions.loadJobsFailure({ 
-          error: 'Custom error message' 
-        }));
+
+      effects.loadJobs$.subscribe((action) => {
+        expect(action).toEqual(
+          JobActions.loadJobsFailure({
+            error: 'Custom error message',
+          }),
+        );
         done();
       });
     });
@@ -111,10 +122,10 @@ describe('JobEffects', () => {
   describe('loadJob$', () => {
     it('should return loadJobSuccess action on successful API call', (done) => {
       apiService.getJobById.mockReturnValue(of(mockJob));
-      
+
       actions$ = of(JobActions.loadJob({ jobId: '1' }));
-      
-      effects.loadJob$.subscribe(action => {
+
+      effects.loadJob$.subscribe((action) => {
         expect(action).toEqual(JobActions.loadJobSuccess({ job: mockJob }));
         expect(apiService.getJobById).toHaveBeenCalledWith('1');
         done();
@@ -124,13 +135,15 @@ describe('JobEffects', () => {
     it('should return loadJobFailure action on API error', (done) => {
       const error = new Error('Job not found');
       apiService.getJobById.mockReturnValue(throwError(() => error));
-      
+
       actions$ = of(JobActions.loadJob({ jobId: 'nonexistent' }));
-      
-      effects.loadJob$.subscribe(action => {
-        expect(action).toEqual(JobActions.loadJobFailure({ 
-          error: 'Job not found' 
-        }));
+
+      effects.loadJob$.subscribe((action) => {
+        expect(action).toEqual(
+          JobActions.loadJobFailure({
+            error: 'Job not found',
+          }),
+        );
         done();
       });
     });
@@ -139,13 +152,15 @@ describe('JobEffects', () => {
   describe('createJob$', () => {
     it('should return createJobSuccess action on successful API call', (done) => {
       apiService.createJob.mockReturnValue(of(mockCreateJobResponse));
-      
+
       actions$ = of(JobActions.createJob({ request: mockCreateJobRequest }));
-      
-      effects.createJob$.subscribe(action => {
-        expect(action).toEqual(JobActions.createJobSuccess({ 
-          response: mockCreateJobResponse 
-        }));
+
+      effects.createJob$.subscribe((action) => {
+        expect(action).toEqual(
+          JobActions.createJobSuccess({
+            response: mockCreateJobResponse,
+          }),
+        );
         expect(apiService.createJob).toHaveBeenCalledWith(mockCreateJobRequest);
         done();
       });
@@ -154,13 +169,15 @@ describe('JobEffects', () => {
     it('should return createJobFailure action on API error', (done) => {
       const error = new Error('Validation failed');
       apiService.createJob.mockReturnValue(throwError(() => error));
-      
+
       actions$ = of(JobActions.createJob({ request: mockCreateJobRequest }));
-      
-      effects.createJob$.subscribe(action => {
-        expect(action).toEqual(JobActions.createJobFailure({ 
-          error: 'Validation failed' 
-        }));
+
+      effects.createJob$.subscribe((action) => {
+        expect(action).toEqual(
+          JobActions.createJobFailure({
+            error: 'Validation failed',
+          }),
+        );
         done();
       });
     });
@@ -168,12 +185,14 @@ describe('JobEffects', () => {
 
   describe('createJobSuccess$', () => {
     it('should navigate to job details and trigger loadJobs action', (done) => {
-      actions$ = of(JobActions.createJobSuccess({ response: mockCreateJobResponse }));
-      
+      actions$ = of(
+        JobActions.createJobSuccess({ response: mockCreateJobResponse }),
+      );
+
       const results: Action[] = [];
-      effects.createJobSuccess$.subscribe(action => {
+      effects.createJobSuccess$.subscribe((action) => {
         results.push(action);
-        
+
         if (results.length === 1) {
           expect(router.navigate).toHaveBeenCalledWith(['/jobs', 'new-job-id']);
           expect(action).toEqual(JobActions.loadJobs());
@@ -183,11 +202,18 @@ describe('JobEffects', () => {
     });
 
     it('should handle navigation with different job id', (done) => {
-      const differentResponse: CreateJobResponse = { jobId: 'different-job-id' };
-      actions$ = of(JobActions.createJobSuccess({ response: differentResponse }));
-      
-      effects.createJobSuccess$.subscribe(action => {
-        expect(router.navigate).toHaveBeenCalledWith(['/jobs', 'different-job-id']);
+      const differentResponse: CreateJobResponse = {
+        jobId: 'different-job-id',
+      };
+      actions$ = of(
+        JobActions.createJobSuccess({ response: differentResponse }),
+      );
+
+      effects.createJobSuccess$.subscribe((action) => {
+        expect(router.navigate).toHaveBeenCalledWith([
+          '/jobs',
+          'different-job-id',
+        ]);
         expect(action).toEqual(JobActions.loadJobs());
         done();
       });
@@ -197,10 +223,10 @@ describe('JobEffects', () => {
   describe('Effect Integration', () => {
     it('should chain loadJobs and loadJobsSuccess effects', (done) => {
       apiService.getAllJobs.mockReturnValue(of(mockJobListItems));
-      
+
       actions$ = of(JobActions.loadJobs());
-      
-      effects.loadJobs$.subscribe(successAction => {
+
+      effects.loadJobs$.subscribe((successAction) => {
         expect(successAction.type).toBe('[Job] Load Jobs Success');
         expect(apiService.getAllJobs).toHaveBeenCalled();
         done();
@@ -209,16 +235,16 @@ describe('JobEffects', () => {
 
     it('should handle multiple effect calls in sequence', (done) => {
       apiService.createJob.mockReturnValue(of(mockCreateJobResponse));
-      
+
       actions$ = of(JobActions.createJob({ request: mockCreateJobRequest }));
-      
+
       // First verify createJob effect produces createJobSuccess action
-      effects.createJob$.subscribe(successAction => {
+      effects.createJob$.subscribe((successAction) => {
         expect(successAction.type).toBe('[Job] Create Job Success');
-        
+
         // Then verify createJobSuccess effect produces loadJobs action
         actions$ = of(successAction);
-        effects.createJobSuccess$.subscribe(loadAction => {
+        effects.createJobSuccess$.subscribe((loadAction) => {
           expect(loadAction.type).toBe('[Job] Load Jobs');
           expect(router.navigate).toHaveBeenCalledWith(['/jobs', 'new-job-id']);
           done();

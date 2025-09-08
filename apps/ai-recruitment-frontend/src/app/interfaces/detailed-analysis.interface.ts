@@ -47,5 +47,5 @@ export interface RadarChartData {
 
 export interface SkillTagStyle {
   'background-color': string;
-  'color': string;
+  color: string;
 }

@@ -1,8 +1,39 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { IAnalyticsRepository, EventStatus, AnalyticsEventEntity } from '@ai-recruitment-clerk/infrastructure-shared';
-import { AnalyticsEvent, AnalyticsEventDocument } from '../../schemas/analytics-event.schema';
+// Fallback interfaces and types
+interface IAnalyticsRepository {
+  save(event: AnalyticsEventEntity): Promise<void>;
+  findById(id: string): Promise<AnalyticsEventEntity | null>;
+  findBySessionId(sessionId: string): Promise<AnalyticsEventEntity[]>;
+  findByUserId(userId: string): Promise<AnalyticsEventEntity[]>;
+  updateStatus(id: string, status: EventStatus): Promise<void>;
+  delete(id: string): Promise<void>;
+}
+
+enum EventStatus {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  EXPIRED = 'expired',
+  ANONYMIZED = 'anonymized',
+}
+
+interface AnalyticsEventEntity {
+  id: string;
+  sessionId: string;
+  userId?: string;
+  eventType: string;
+  eventData: any;
+  timestamp: Date;
+  status: EventStatus;
+  retentionExpiry?: Date;
+}
+import {
+  AnalyticsEvent,
+  AnalyticsEventDocument,
+} from '../../schemas/analytics-event.schema';
 
 /**
  * Analytics事件仓储实现
@@ -11,18 +42,18 @@ import { AnalyticsEvent, AnalyticsEventDocument } from '../../schemas/analytics-
 @Injectable()
 export class AnalyticsEventRepository implements IAnalyticsRepository {
   constructor(
-    @InjectModel(AnalyticsEvent.name) 
-    private readonly analyticsEventModel: Model<AnalyticsEventDocument>
+    @InjectModel(AnalyticsEvent.name)
+    private readonly analyticsEventModel: Model<AnalyticsEventDocument>,
   ) {}
 
   async save(event: AnalyticsEventEntity): Promise<void> {
     try {
       const eventData = this.mapToDocument(event);
-      
+
       await this.analyticsEventModel.findOneAndUpdate(
         { eventId: eventData.eventId },
         eventData,
-        { upsert: true, new: true }
+        { upsert: true, new: true },
       );
     } catch (error) {
       console.error('Error saving analytics event:', error);
@@ -32,11 +63,59 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
 
   async findById(id: string): Promise<AnalyticsEventEntity | null> {
     try {
-      const document = await this.analyticsEventModel.findOne({ eventId: id }).exec();
+      const document = await this.analyticsEventModel
+        .findOne({ eventId: id })
+        .exec();
       return document ? this.mapToEntity(document) : null;
     } catch (error) {
       console.error('Error finding analytics event by id:', error);
       throw new Error('Failed to find analytics event');
+    }
+  }
+
+  async findBySessionId(sessionId: string): Promise<AnalyticsEventEntity[]> {
+    try {
+      const documents = await this.analyticsEventModel
+        .find({ sessionId })
+        .sort({ timestamp: -1 })
+        .exec();
+      return documents.map((doc) => this.mapToEntity(doc));
+    } catch (error) {
+      console.error('Error finding analytics events by sessionId:', error);
+      throw new Error('Failed to find analytics events by sessionId');
+    }
+  }
+
+  async findByUserId(userId: string): Promise<AnalyticsEventEntity[]> {
+    try {
+      const documents = await this.analyticsEventModel
+        .find({ userId })
+        .sort({ timestamp: -1 })
+        .exec();
+      return documents.map((doc) => this.mapToEntity(doc));
+    } catch (error) {
+      console.error('Error finding analytics events by userId:', error);
+      throw new Error('Failed to find analytics events by userId');
+    }
+  }
+
+  async updateStatus(id: string, status: EventStatus): Promise<void> {
+    try {
+      await this.analyticsEventModel
+        .updateOne({ eventId: id }, { $set: { status } })
+        .exec();
+    } catch (error) {
+      console.error('Error updating analytics event status:', error);
+      throw new Error('Failed to update analytics event status');
+    }
+  }
+
+  async delete(id: string): Promise<void> {
+    try {
+      await this.analyticsEventModel.deleteOne({ eventId: id }).exec();
+    } catch (error) {
+      console.error('Error deleting analytics event:', error);
+      throw new Error('Failed to delete analytics event');
     }
   }
 
@@ -45,8 +124,8 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
       const documents = await this.analyticsEventModel
         .find({ eventId: { $in: ids } })
         .exec();
-      
-      return documents.map(doc => this.mapToEntity(doc));
+
+      return documents.map((doc) => this.mapToEntity(doc));
     } catch (error) {
       console.error('Error finding analytics events by ids:', error);
       throw new Error('Failed to find analytics events');
@@ -54,37 +133,43 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
   }
 
   async findBySession(
-    sessionId: string, 
-    timeRange?: { startDate: Date; endDate: Date }
+    sessionId: string,
+    timeRange?: { startDate: Date; endDate: Date },
   ): Promise<AnalyticsEventEntity[]> {
     try {
       let query = this.analyticsEventModel.find({ sessionId });
 
       if (timeRange) {
-        query = query.where('timestamp').gte(timeRange.startDate.getTime()).lte(timeRange.endDate.getTime());
+        query = query
+          .where('timestamp')
+          .gte(timeRange.startDate.getTime())
+          .lte(timeRange.endDate.getTime());
       }
 
       const documents = await query.sort({ timestamp: -1 }).exec();
-      return documents.map(doc => this.mapToEntity(doc));
+      return documents.map((doc) => this.mapToEntity(doc));
     } catch (error) {
       console.error('Error finding analytics events by session:', error);
       throw new Error('Failed to find session analytics events');
     }
   }
 
-  async findByDateRange(startDate: Date, endDate: Date): Promise<AnalyticsEventEntity[]> {
+  async findByDateRange(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<AnalyticsEventEntity[]> {
     try {
       const documents = await this.analyticsEventModel
         .find({
           timestamp: {
             $gte: startDate,
-            $lte: endDate
-          }
+            $lte: endDate,
+          },
         })
         .sort({ timestamp: -1 })
         .exec();
 
-      return documents.map(doc => this.mapToEntity(doc));
+      return documents.map((doc) => this.mapToEntity(doc));
     } catch (error) {
       console.error('Error finding analytics events by date range:', error);
       throw new Error('Failed to find analytics events by date range');
@@ -93,7 +178,9 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
 
   async countSessionEvents(sessionId: string): Promise<number> {
     try {
-      return await this.analyticsEventModel.countDocuments({ sessionId }).exec();
+      return await this.analyticsEventModel
+        .countDocuments({ sessionId })
+        .exec();
     } catch (error) {
       console.error('Error counting session events:', error);
       throw new Error('Failed to count session events');
@@ -109,8 +196,8 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
         .deleteMany({
           $or: [
             { status: EventStatus.EXPIRED },
-            { retentionExpiry: { $lt: cutoffDate } }
-          ]
+            { retentionExpiry: { $lt: cutoffDate } },
+          ],
         })
         .exec();
 
@@ -131,7 +218,7 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
           {
             timestamp: { $lt: cutoffDate },
             status: { $ne: EventStatus.ANONYMIZED },
-            isAnonymized: false
+            isAnonymized: false,
           },
           {
             $set: {
@@ -139,11 +226,11 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
               isAnonymized: true,
               userId: undefined,
               'deviceInfo.userAgent': undefined,
-              'geoLocation': undefined,
+              geoLocation: undefined,
               'context.userAgent': undefined,
-              'context.referrer': undefined
-            }
-          }
+              'context.referrer': undefined,
+            },
+          },
         )
         .exec();
 
@@ -156,50 +243,33 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
 
   private mapToDocument(event: AnalyticsEventEntity): any {
     return {
-      eventId: event.getId().getValue(),
-      sessionId: event.getSessionId(),
-      userId: event.getUserId(),
-      eventType: event.getEventType(),
-      status: event.getStatus(),
-      timestamp: new Date(event.getTimestamp()),
-      retentionExpiry: event.getRetentionExpiry(),
-      // 这里需要根据实际的domain entity结构进行映射
-      eventData: {}, // 需要从domain entity获取事件数据
-      context: {}, // 需要从domain entity获取上下文
-      eventCategory: 'user_behavior', // 默认值，需要从domain entity获取
-      consentStatus: 'granted', // 默认值，需要从domain entity获取
-      isSystemSession: false, // 默认值，需要从domain entity获取
-      isAnonymized: event.getStatus() === EventStatus.ANONYMIZED
+      eventId: event.id,
+      sessionId: event.sessionId,
+      userId: event.userId,
+      eventType: event.eventType,
+      status: event.status,
+      timestamp: new Date(event.timestamp),
+      retentionExpiry: event.retentionExpiry,
+      // Map-through fields present on the entity
+      eventData: event.eventData ?? {},
+      context: {},
+      eventCategory: 'user_behavior',
+      consentStatus: 'granted',
+      isSystemSession: false,
+      isAnonymized: event.status === EventStatus.ANONYMIZED,
     };
   }
 
   private mapToEntity(document: AnalyticsEventDocument): AnalyticsEventEntity {
-    // 这里需要根据实际的domain entity构造方法进行映射
-    return AnalyticsEventEntity.restore({
+    return {
       id: document.eventId,
-      session: {
-        sessionId: document.sessionId,
-        userId: document.userId,
-        deviceInfo: document.deviceInfo,
-        geoLocation: document.geoLocation,
-        consentStatus: document.consentStatus,
-        isSystemSession: document.isSystemSession
-      },
-      eventData: {
-        eventType: document.eventType,
-        eventCategory: document.eventCategory,
-        payload: document.eventData,
-        sensitiveDataMask: document.sensitiveDataMask || []
-      },
-      timestamp: {
-        timestamp: document.timestamp,
-        timezone: 'UTC'
-      },
-      context: document.context || {},
-      status: document.status,
-      createdAt: (document as any).createdAt?.toISOString() || document.timestamp.toISOString(),
-      processedAt: document.processedAt?.toISOString(),
-      retentionExpiry: document.retentionExpiry?.toISOString()
-    });
+      sessionId: document.sessionId,
+      userId: document.userId,
+      eventType: document.eventType,
+      eventData: document.eventData,
+      timestamp: document.timestamp,
+      status: document.status as EventStatus,
+      retentionExpiry: document.retentionExpiry,
+    };
   }
 }

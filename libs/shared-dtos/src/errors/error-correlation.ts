@@ -3,7 +3,7 @@
  * Provides request tracing and context propagation across microservices
  */
 
-import { randomBytes, randomUUID } from 'crypto';
+import { randomBytes } from 'crypto';
 
 /**
  * Error correlation context interface
@@ -278,7 +278,7 @@ export class ErrorCorrelationManager {
     missingFields: string[];
   } {
     const requiredFields = ['requestId', 'traceId', 'spanId', 'serviceName', 'operationName', 'timestamp'];
-    const missingFields = requiredFields.filter(field => !context[field]);
+    const missingFields = requiredFields.filter((field) => !(context as any)[field]);
     
     return {
       isValid: missingFields.length === 0,
@@ -291,7 +291,7 @@ export class ErrorCorrelationManager {
  * Correlation context decorator for methods
  */
 export function WithCorrelation(serviceName: string, operationName: string) {
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function (_target: any, _propertyName: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {

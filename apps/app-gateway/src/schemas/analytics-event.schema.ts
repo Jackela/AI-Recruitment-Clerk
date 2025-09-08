@@ -1,41 +1,46 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { EventType, EventStatus, EventCategory, ConsentStatus } from '@ai-recruitment-clerk/infrastructure-shared';
+import {
+  EventType,
+  EventStatus,
+  EventCategory,
+  ConsentStatus,
+} from '../common/interfaces/fallback-types';
 
 export type AnalyticsEventDocument = AnalyticsEvent & Document;
 
 @Schema({
   collection: 'analytics_events',
   timestamps: true,
-  versionKey: false
+  versionKey: false,
 })
 export class AnalyticsEvent {
   @Prop({ required: true, unique: true, index: true })
-  eventId: string;
+  eventId: string = '';
 
   @Prop({ required: true })
-  sessionId: string;
+  sessionId: string = '';
 
   @Prop()
-  userId?: string;
+  userId?: string = undefined;
 
   @Prop({ type: String, required: true, enum: Object.values(EventType) })
-  eventType: EventType;
+  eventType: EventType = EventType.USER_ACTION;
 
   @Prop({ type: String, required: true, enum: Object.values(EventCategory) })
-  eventCategory: EventCategory;
+  eventCategory: EventCategory = EventCategory.SYSTEM;
 
   @Prop({ type: String, required: true, enum: Object.values(EventStatus) })
-  status: EventStatus;
+  status: EventStatus = EventStatus.PENDING;
 
   @Prop({ type: Object, required: true })
-  eventData: any;
+  eventData: any = {};
 
   @Prop({ type: Object })
-  context?: any;
+  context?: any = undefined;
 
   @Prop({ required: true })
-  timestamp: Date;
+  timestamp: Date = new Date();
 
   @Prop({ type: Object })
   deviceInfo?: {
@@ -43,7 +48,7 @@ export class AnalyticsEvent {
     screenResolution: string;
     language: string;
     timezone: string;
-  };
+  } = undefined;
 
   @Prop({ type: Object })
   geoLocation?: {
@@ -52,31 +57,36 @@ export class AnalyticsEvent {
     city: string;
     latitude?: number;
     longitude?: number;
-  };
+  } = undefined;
 
-  @Prop({ type: String, enum: Object.values(ConsentStatus), default: ConsentStatus.GRANTED })
-  consentStatus: ConsentStatus;
-
-  @Prop({ default: false })
-  isSystemSession: boolean;
-
-  @Prop()
-  processedAt?: Date;
-
-  @Prop()
-  retentionExpiry?: Date;
+  @Prop({
+    type: String,
+    enum: Object.values(ConsentStatus),
+    default: ConsentStatus.GRANTED,
+  })
+  consentStatus: ConsentStatus = ConsentStatus.GRANTED;
 
   @Prop({ default: false })
-  isAnonymized: boolean;
+  isSystemSession: boolean = false;
+
+  @Prop()
+  processedAt?: Date = undefined;
+
+  @Prop()
+  retentionExpiry?: Date = undefined;
+
+  @Prop({ default: false })
+  isAnonymized: boolean = false;
 
   @Prop({ type: [String] })
-  sensitiveDataMask?: string[];
+  sensitiveDataMask?: string[] = undefined;
 
   @Prop({ type: Object })
-  metadata?: Record<string, any>;
+  metadata?: Record<string, any> = undefined;
 }
 
-export const AnalyticsEventSchema = SchemaFactory.createForClass(AnalyticsEvent);
+export const AnalyticsEventSchema =
+  SchemaFactory.createForClass(AnalyticsEvent);
 
 // 创建复合索引提升查询性能
 AnalyticsEventSchema.index({ sessionId: 1, timestamp: -1 });

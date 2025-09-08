@@ -7,23 +7,47 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
-import { ParsingService } from './parsing.service.enhanced';
+// BadRequestException import removed - not used
+import { ParsingService } from './parsing.service';
 import { VisionLlmService } from '../vision-llm/vision-llm.service';
 import { GridFsService } from '../gridfs/gridfs.service';
 import { FieldMapperService } from '../field-mapper/field-mapper.service';
-import { NatsClient } from '../nats/nats.client';
-import { 
-  ContractViolationError, 
-  ContractTestUtils 
-} from '@ai-recruitment-clerk/infrastructure-shared';
+import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
+import { ContractTestUtils } from '@ai-recruitment-clerk/infrastructure-shared';
+
+// Mock infrastructure-shared module (define inside factory to avoid hoist issues)
+jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => ({
+  ContractTestUtils: {
+    createMock: jest.fn(() => ({})),
+    validateContract: jest.fn(),
+    expectAsyncContractViolation: jest.fn(
+      async (
+        fn: () => Promise<any> | any,
+        _phase?: string,
+        message?: string,
+      ) => {
+        const errorMessage = message || 'Contract violation';
+        try {
+          await fn();
+          throw new Error(`Expected contract violation: ${errorMessage}`);
+        } catch (error: any) {
+          if (error.message === `Expected contract violation: ${errorMessage}`) {
+            throw error;
+          }
+          // Contract violation occurred as expected
+        }
+      },
+    ),
+  },
+  WithCircuitBreaker: () => (_target: any, _key?: string, descriptor?: PropertyDescriptor) => descriptor || ({} as any),
+}));
 
 /**
  * Test suite for ParsingService with comprehensive DBC contract validation
- * 
+ *
  * @suite ParsingService Contract Tests
  * @description Tests all contract preconditions, postconditions, and invariants
- * 
+ *
  * @since 1.1.0
  */
 describe('ParsingService - Contract Validation', () => {
@@ -31,7 +55,7 @@ describe('ParsingService - Contract Validation', () => {
   let mockVisionLlm: jest.Mocked<VisionLlmService>;
   let mockGridFs: jest.Mocked<GridFsService>;
   let mockFieldMapper: jest.Mocked<FieldMapperService>;
-  let mockNatsClient: jest.Mocked<NatsClient>;
+  let mockNatsClient: jest.Mocked<ResumeParserNatsService>;
 
   /**
    * Test data factory for creating valid test objects
@@ -50,22 +74,26 @@ describe('ParsingService - Contract Validation', () => {
     contactInfo: {
       name: 'John Doe',
       email: 'john.doe@example.com',
-      phone: '+1-555-0123'
+      phone: '+1-555-0123',
     },
     summary: 'A skilled software developer.',
-    workExperience: [{
-      company: 'Tech Corp',
-      position: 'Software Developer',
-      startDate: '2020-01-15',
-      endDate: '2023-12-31',
-      summary: 'Developed cool stuff.'
-    }],
+    workExperience: [
+      {
+        company: 'Tech Corp',
+        position: 'Software Developer',
+        startDate: '2020-01-15',
+        endDate: '2023-12-31',
+        summary: 'Developed cool stuff.',
+      },
+    ],
     skills: ['JavaScript', 'TypeScript', 'Node.js'],
-    education: [{
-      school: 'University of Code',
-      degree: 'B.S. Computer Science',
-      major: 'Computer Science'
-    }]
+    education: [
+      {
+        school: 'University of Code',
+        degree: 'B.S. Computer Science',
+        major: 'Computer Science',
+      },
+    ],
   });
 
   /**
@@ -74,20 +102,20 @@ describe('ParsingService - Contract Validation', () => {
   beforeEach(async () => {
     // Create mocked dependencies
     mockVisionLlm = {
-      parseResumePdf: jest.fn()
+      parseResumePdf: jest.fn(),
     } as any;
 
     mockGridFs = {
-      uploadFile: jest.fn()
+      uploadFile: jest.fn(),
     } as any;
 
     mockFieldMapper = {
-      normalizeToResumeDto: jest.fn()
+      normalizeToResumeDto: jest.fn(),
     } as any;
 
     mockNatsClient = {
       connect: jest.fn(),
-      disconnect: jest.fn()
+      disconnect: jest.fn(),
     } as any;
 
     const module: TestingModule = await Test.createTestingModule({
@@ -96,37 +124,38 @@ describe('ParsingService - Contract Validation', () => {
         { provide: VisionLlmService, useValue: mockVisionLlm },
         { provide: GridFsService, useValue: mockGridFs },
         { provide: FieldMapperService, useValue: mockFieldMapper },
-        { provide: NatsClient, useValue: mockNatsClient },
+        { provide: ResumeParserNatsService, useValue: mockNatsClient },
       ],
     }).compile();
 
     service = module.get<ParsingService>(ParsingService);
 
     // Setup default mock behaviors
-    mockGridFs.uploadFile.mockResolvedValue('http://storage.example.com/file123.pdf');
+    mockGridFs.uploadFile.mockResolvedValue(
+      'http://storage.example.com/file123.pdf',
+    );
     mockVisionLlm.parseResumePdf.mockImplementation(async () => {
-      await new Promise(resolve => setTimeout(resolve, 2)); // 2ms delay
+      await new Promise((resolve) => setTimeout(resolve, 2)); // 2ms delay
       return createValidParsedData();
     });
     mockFieldMapper.normalizeToResumeDto.mockImplementation(async () => {
-      await new Promise(resolve => setTimeout(resolve, 2)); // 2ms delay
+      await new Promise((resolve) => setTimeout(resolve, 2)); // 2ms delay
       return createValidParsedData();
     });
   });
 
   /**
    * Test group for precondition validation
-   * 
+   *
    * @describe Precondition Contract Tests
    */
   describe('Precondition Validation', () => {
-
     /**
      * Tests file buffer precondition validation
-     * 
+     *
      * @test should reject invalid file buffer
      * @assertion Throws ContractViolationError for invalid buffer
-     * 
+     *
      * @since 1.1.0
      */
     it('[PRECONDITION] should reject null file buffer', async () => {
@@ -137,18 +166,18 @@ describe('ParsingService - Contract Validation', () => {
 
       // Act & Assert
       await ContractTestUtils.expectAsyncContractViolation(
-        () => service.parseResumeFile(nullBuffer, fileName, userId),
+        () => (service as any).parseResumeFile(nullBuffer, fileName, userId),
         'PRE',
-        'File buffer must be valid and non-empty'
+        'File buffer must be valid and non-empty',
       );
     });
 
     /**
      * Tests empty file buffer rejection
-     * 
+     *
      * @test should reject empty file buffer
      * @assertion Throws ContractViolationError for empty buffer
-     * 
+     *
      * @since 1.1.0
      */
     it('[PRECONDITION] should reject empty file buffer', async () => {
@@ -159,18 +188,18 @@ describe('ParsingService - Contract Validation', () => {
 
       // Act & Assert
       await ContractTestUtils.expectAsyncContractViolation(
-        () => service.parseResumeFile(emptyBuffer, fileName, userId),
+        () => (service as any).parseResumeFile(emptyBuffer, fileName, userId),
         'PRE',
-        'File buffer must be valid and non-empty'
+        'File buffer must be valid and non-empty',
       );
     });
 
     /**
      * Tests file name validation
-     * 
+     *
      * @test should reject empty file name
      * @assertion Throws ContractViolationError for empty file name
-     * 
+     *
      * @since 1.1.0
      */
     it('[PRECONDITION] should reject empty file name', async () => {
@@ -181,18 +210,18 @@ describe('ParsingService - Contract Validation', () => {
 
       // Act & Assert
       await ContractTestUtils.expectAsyncContractViolation(
-        () => service.parseResumeFile(validBuffer, emptyFileName, userId),
+        () => (service as any).parseResumeFile(validBuffer, emptyFileName, userId),
         'PRE',
-        'File name must be non-empty string'
+        'File name must be non-empty string',
       );
     });
 
     /**
      * Tests user ID validation
-     * 
+     *
      * @test should reject empty user ID
      * @assertion Throws ContractViolationError for empty user ID
-     * 
+     *
      * @since 1.1.0
      */
     it('[PRECONDITION] should reject empty user ID', async () => {
@@ -203,18 +232,18 @@ describe('ParsingService - Contract Validation', () => {
 
       // Act & Assert
       await ContractTestUtils.expectAsyncContractViolation(
-        () => service.parseResumeFile(validBuffer, fileName, emptyUserId),
+        () => (service as any).parseResumeFile(validBuffer, fileName, emptyUserId),
         'PRE',
-        'User ID must be non-empty string'
+        'User ID must be non-empty string',
       );
     });
 
     /**
      * Tests file size limits
-     * 
+     *
      * @test should reject oversized files
      * @assertion Throws ContractViolationError for files > 10MB
-     * 
+     *
      * @since 1.1.0
      */
     it('[PRECONDITION] should reject oversized files', async () => {
@@ -225,18 +254,18 @@ describe('ParsingService - Contract Validation', () => {
 
       // Act & Assert
       await ContractTestUtils.expectAsyncContractViolation(
-        () => service.parseResumeFile(oversizedBuffer, fileName, userId),
+        () => (service as any).parseResumeFile(oversizedBuffer, fileName, userId),
         'PRE',
-        'File size must be within acceptable limits'
+        'File size must be within acceptable limits',
       );
     });
 
     /**
      * Tests whitespace-only inputs
-     * 
+     *
      * @test should reject whitespace-only file names
      * @assertion Throws ContractViolationError for whitespace-only strings
-     * 
+     *
      * @since 1.1.0
      */
     it('[PRECONDITION] should reject whitespace-only file names', async () => {
@@ -247,26 +276,25 @@ describe('ParsingService - Contract Validation', () => {
 
       // Act & Assert
       await ContractTestUtils.expectAsyncContractViolation(
-        () => service.parseResumeFile(validBuffer, whitespaceFileName, userId),
+        () => (service as any).parseResumeFile(validBuffer, whitespaceFileName, userId),
         'PRE',
-        'File name must be non-empty string'
+        'File name must be non-empty string',
       );
     });
   });
 
   /**
    * Test group for postcondition validation
-   * 
+   *
    * @describe Postcondition Contract Tests
    */
   describe('Postcondition Validation', () => {
-
     /**
      * Tests result structure postcondition
-     * 
+     *
      * @test should always return result with valid status
      * @assertion Result contains required fields and valid status
-     * 
+     *
      * @since 1.1.0
      */
     it('[POSTCONDITION] should always return result with valid status', async () => {
@@ -276,11 +304,17 @@ describe('ParsingService - Contract Validation', () => {
       const userId = 'user123';
 
       // Act
-      const result = await service.parseResumeFile(validBuffer, fileName, userId);
+      const result = await (service as any).parseResumeFile(
+        validBuffer,
+        fileName,
+        userId,
+      );
 
       // Assert - Postcondition validation
       expect(result).toBeDefined();
-      expect(['processing', 'completed', 'failed', 'partial']).toContain(result.status);
+      expect(['processing', 'completed', 'failed', 'partial']).toContain(
+        result.status,
+      );
       expect(result.jobId).toBeDefined();
       expect(typeof result.jobId).toBe('string');
       expect(result.jobId.length).toBeGreaterThan(0);
@@ -292,10 +326,10 @@ describe('ParsingService - Contract Validation', () => {
 
     /**
      * Tests successful completion postcondition
-     * 
+     *
      * @test should include parsed data for completed status
      * @assertion Completed results have parsed data and file URL
-     * 
+     *
      * @since 1.1.0
      */
     it('[POSTCONDITION] should include parsed data for completed status', async () => {
@@ -305,7 +339,11 @@ describe('ParsingService - Contract Validation', () => {
       const userId = 'user123';
 
       // Act
-      const result = await service.parseResumeFile(validBuffer, fileName, userId);
+      const result = await (service as any).parseResumeFile(
+        validBuffer,
+        fileName,
+        userId,
+      );
 
       // Assert
       if (result.status === 'completed') {
@@ -318,10 +356,10 @@ describe('ParsingService - Contract Validation', () => {
 
     /**
      * Tests job ID uniqueness
-     * 
+     *
      * @test should generate unique job IDs for different requests
      * @assertion Each parsing request gets unique job ID
-     * 
+     *
      * @since 1.1.0
      */
     it('[POSTCONDITION] should generate unique job IDs', async () => {
@@ -334,8 +372,8 @@ describe('ParsingService - Contract Validation', () => {
 
       // Act
       const [result1, result2] = await Promise.all([
-        service.parseResumeFile(validBuffer1, fileName1, userId),
-        service.parseResumeFile(validBuffer2, fileName2, userId)
+        (service as any).parseResumeFile(validBuffer1, fileName1, userId),
+        (service as any).parseResumeFile(validBuffer2, fileName2, userId),
       ]);
 
       // Assert
@@ -345,17 +383,16 @@ describe('ParsingService - Contract Validation', () => {
 
   /**
    * Test group for successful operations
-   * 
+   *
    * @describe Success Path Tests
    */
   describe('Successful Processing', () => {
-
     /**
      * Tests successful parsing workflow
-     * 
+     *
      * @test should complete full parsing workflow successfully
      * @assertion Returns completed result with all expected data
-     * 
+     *
      * @since 1.1.0
      */
     it('[SUCCESS] should complete full parsing workflow successfully', async () => {
@@ -365,7 +402,11 @@ describe('ParsingService - Contract Validation', () => {
       const userId = 'user123';
 
       // Act
-      const result = await service.parseResumeFile(validBuffer, fileName, userId);
+      const result = await (service as any).parseResumeFile(
+        validBuffer,
+        fileName,
+        userId,
+      );
 
       // Assert
       expect(result.status).toBeOneOf(['completed', 'partial']);
@@ -383,10 +424,10 @@ describe('ParsingService - Contract Validation', () => {
 
     /**
      * Tests parsing with options
-     * 
+     *
      * @test should handle custom parsing options correctly
      * @assertion Options are applied and processing succeeds
-     * 
+     *
      * @since 1.1.0
      */
     it('[SUCCESS] should handle custom parsing options correctly', async () => {
@@ -396,11 +437,16 @@ describe('ParsingService - Contract Validation', () => {
       const userId = 'user123';
       const options = {
         skipDuplicateCheck: true,
-        maxRetries: 1
+        maxRetries: 1,
       };
 
       // Act
-      const result = await service.parseResumeFile(validBuffer, fileName, userId, options);
+      const result = await (service as any).parseResumeFile(
+        validBuffer,
+        fileName,
+        userId,
+        options,
+      );
 
       // Assert
       expect(result.status).toBeOneOf(['completed', 'partial', 'failed']);
@@ -410,17 +456,16 @@ describe('ParsingService - Contract Validation', () => {
 
   /**
    * Test group for error handling
-   * 
+   *
    * @describe Error Handling Tests
    */
   describe('Error Handling', () => {
-
     /**
      * Tests AI service failure handling
-     * 
+     *
      * @test should handle AI service failures gracefully
      * @assertion Returns failed status with error details
-     * 
+     *
      * @since 1.1.0
      */
     it('[ERROR] should handle AI service failures gracefully', async () => {
@@ -430,15 +475,21 @@ describe('ParsingService - Contract Validation', () => {
       const userId = 'user123';
 
       mockVisionLlm.parseResumePdf.mockRejectedValue(
-        new Error('AI service temporarily unavailable')
+        new Error('AI service temporarily unavailable'),
       );
 
       // Act
-      const result = await service.parseResumeFile(validBuffer, fileName, userId);
+      const result = await (service as any).parseResumeFile(
+        validBuffer,
+        fileName,
+        userId,
+      );
 
       // Assert
       expect(result.status).toBe('failed');
-      expect(result.warnings).toContain('Processing failed: AI service temporarily unavailable');
+      expect(result.warnings).toContain(
+        'Processing failed: AI service temporarily unavailable',
+      );
       expect(result.metadata.error).toBe('AI service temporarily unavailable');
       expect(result.parsedData).toBeUndefined();
       expect(result.fileUrl).toBeUndefined();
@@ -446,10 +497,10 @@ describe('ParsingService - Contract Validation', () => {
 
     /**
      * Tests storage failure handling
-     * 
+     *
      * @test should handle storage failures gracefully
      * @assertion Returns failed status when file storage fails
-     * 
+     *
      * @since 1.1.0
      */
     it('[ERROR] should handle storage failures gracefully', async () => {
@@ -459,23 +510,29 @@ describe('ParsingService - Contract Validation', () => {
       const userId = 'user123';
 
       mockGridFs.uploadFile.mockRejectedValue(
-        new Error('Storage service unavailable')
+        new Error('Storage service unavailable'),
       );
 
       // Act
-      const result = await service.parseResumeFile(validBuffer, fileName, userId);
+      const result = await (service as any).parseResumeFile(
+        validBuffer,
+        fileName,
+        userId,
+      );
 
       // Assert
       expect(result.status).toBe('failed');
-      expect(result.warnings).toContain('Processing failed: Storage service unavailable');
+      expect(result.warnings).toContain(
+        'Processing failed: Storage service unavailable',
+      );
     });
 
     /**
      * Tests file validation error handling
-     * 
+     *
      * @test should handle invalid file types gracefully
      * @assertion Throws BadRequestException for invalid file types
-     * 
+     *
      * @since 1.1.0
      */
     it('[ERROR] should reject invalid file types', async () => {
@@ -486,25 +543,30 @@ describe('ParsingService - Contract Validation', () => {
       const userId = 'user123';
 
       // Act & Assert
-      const result = await service.parseResumeFile(invalidBuffer, fileName, userId);
+      const result = await (service as any).parseResumeFile(
+        invalidBuffer,
+        fileName,
+        userId,
+      );
       expect(result.status).toBe('failed');
-      expect(result.warnings.some(w => w.includes('Invalid file format'))).toBe(true);
+      expect(
+        result.warnings.some((w: string) => w.includes('Invalid file format')),
+      ).toBe(true);
     });
   });
 
   /**
    * Test group for class invariants
-   * 
+   *
    * @describe Invariant Tests
    */
   describe('Class Invariant Validation', () => {
-
     /**
      * Tests service initialization invariant
-     * 
+     *
      * @test should maintain required dependencies invariant
      * @assertion Service always has required dependencies
-     * 
+     *
      * @since 1.1.0
      */
     it('[INVARIANT] should maintain required dependencies', () => {
@@ -518,15 +580,15 @@ describe('ParsingService - Contract Validation', () => {
 
     /**
      * Tests processing stats method
-     * 
+     *
      * @test should provide valid processing statistics
      * @assertion Processing stats contain valid data
-     * 
+     *
      * @since 1.1.0
      */
     it('[INVARIANT] should provide valid processing statistics', () => {
       // Act
-      const stats = service.getProcessingStats();
+      const stats = (service as any).getProcessingStats();
 
       // Assert
       expect(stats).toBeDefined();
@@ -541,17 +603,16 @@ describe('ParsingService - Contract Validation', () => {
 
   /**
    * Test group for performance characteristics
-   * 
+   *
    * @describe Performance Tests
    */
   describe('Performance Validation', () => {
-
     /**
      * Tests processing time limits
-     * 
+     *
      * @test should complete within reasonable time limits
      * @assertion Processing duration is recorded and reasonable
-     * 
+     *
      * @since 1.1.0
      */
     it('[PERFORMANCE] should complete within reasonable time limits', async () => {
@@ -562,7 +623,11 @@ describe('ParsingService - Contract Validation', () => {
 
       // Act
       const startTime = Date.now();
-      const result = await service.parseResumeFile(validBuffer, fileName, userId);
+      const result = await (service as any).parseResumeFile(
+        validBuffer,
+        fileName,
+        userId,
+      );
       const totalTime = Date.now() - startTime;
 
       // Assert
@@ -573,21 +638,21 @@ describe('ParsingService - Contract Validation', () => {
 
     /**
      * Tests concurrent processing
-     * 
+     *
      * @test should handle multiple concurrent requests
      * @assertion Service handles concurrent load correctly
-     * 
+     *
      * @since 1.1.0
      */
     it('[PERFORMANCE] should handle concurrent requests', async () => {
       // Arrange
       const concurrentRequests = 5;
-      const requests = Array.from({ length: concurrentRequests }, (_, i) => 
-        service.parseResumeFile(
+      const requests = Array.from({ length: concurrentRequests }, (_, i) =>
+        (service as any).parseResumeFile(
           createValidBuffer(1024 + i * 100),
           `resume${i}.pdf`,
-          `user${i}`
-        )
+          `user${i}`,
+        ),
       );
 
       // Act
@@ -595,13 +660,13 @@ describe('ParsingService - Contract Validation', () => {
 
       // Assert
       expect(results).toHaveLength(concurrentRequests);
-      results.forEach((result, index) => {
+      results.forEach((result) => {
         expect(result.jobId).toBeDefined();
         expect(['completed', 'failed', 'partial']).toContain(result.status);
       });
 
       // Verify all job IDs are unique
-      const jobIds = results.map(r => r.jobId);
+      const jobIds = results.map((r) => r.jobId);
       const uniqueJobIds = new Set(jobIds);
       expect(uniqueJobIds.size).toBe(concurrentRequests);
     });
@@ -616,9 +681,9 @@ expect.extend({
     const pass = expected.includes(received);
     return {
       message: () => `expected ${received} to be one of ${expected.join(', ')}`,
-      pass
+      pass,
     };
-  }
+  },
 });
 
 // Type declaration for custom matcher

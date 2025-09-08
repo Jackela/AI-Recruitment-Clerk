@@ -13,5 +13,5 @@ export const initialJobState: JobState = {
   selectedJob: null,
   loading: false,
   error: null,
-  creating: false
+  creating: false,
 };

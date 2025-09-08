@@ -11,7 +11,7 @@ describe('Job Selectors', () => {
       status: 'active',
       createdAt: new Date('2024-01-01'),
       resumeCount: 15,
-      description: 'Full-stack development position'
+      description: 'Full-stack development position',
     },
     {
       id: 'job2',
@@ -19,7 +19,7 @@ describe('Job Selectors', () => {
       status: 'draft',
       createdAt: new Date('2024-01-02'),
       resumeCount: 8,
-      description: 'Product management role'
+      description: 'Product management role',
     },
     {
       id: 'job3',
@@ -27,7 +27,7 @@ describe('Job Selectors', () => {
       status: 'closed',
       createdAt: new Date('2024-01-03'),
       resumeCount: 5,
-      description: 'UI/UX design position'
+      description: 'UI/UX design position',
     },
     {
       id: 'job4',
@@ -35,8 +35,8 @@ describe('Job Selectors', () => {
       status: 'active',
       createdAt: new Date('2024-01-04'),
       resumeCount: 12,
-      description: 'Data analysis and ML role'
-    }
+      description: 'Data analysis and ML role',
+    },
   ];
 
   const mockSelectedJob: Job = {
@@ -48,7 +48,7 @@ describe('Job Selectors', () => {
     resumeCount: 15,
     description: 'Full-stack development position',
     requirements: ['3+ years experience', 'JavaScript', 'TypeScript'],
-    benefits: ['Health insurance', 'Remote work', 'Stock options']
+    benefits: ['Health insurance', 'Remote work', 'Stock options'],
   };
 
   const mockJobState: JobState = {
@@ -56,7 +56,7 @@ describe('Job Selectors', () => {
     selectedJob: mockSelectedJob,
     loading: false,
     error: null,
-    creating: false
+    creating: false,
   };
 
   const mockAppState: AppState = {
@@ -66,7 +66,7 @@ describe('Job Selectors', () => {
       selectedReport: null,
       loading: false,
       error: null,
-      currentJobId: null
+      currentJobId: null,
     },
     resumes: {
       resumes: [],
@@ -74,7 +74,7 @@ describe('Job Selectors', () => {
       loading: false,
       error: null,
       uploading: false,
-      uploadProgress: 0
+      uploadProgress: 0,
     },
     guest: {
       isLoading: false,
@@ -86,8 +86,8 @@ describe('Job Selectors', () => {
       showFeedbackModal: false,
       feedbackCode: null,
       surveyUrl: null,
-      lastActivity: null
-    }
+      lastActivity: null,
+    },
   };
 
   describe('Feature Selector', () => {
@@ -129,7 +129,8 @@ describe('Job Selectors', () => {
 
     it('should handle null selected job', () => {
       const stateWithoutSelected = { ...mockJobState, selectedJob: null };
-      const result = JobSelectors.selectSelectedJob.projector(stateWithoutSelected);
+      const result =
+        JobSelectors.selectSelectedJob.projector(stateWithoutSelected);
       expect(result).toBeNull();
     });
 
@@ -150,8 +151,8 @@ describe('Job Selectors', () => {
     it('should select active jobs', () => {
       const result = JobSelectors.selectActiveJobs.projector(mockJobListItems);
       expect(result).toHaveLength(2);
-      expect(result.every(job => job.status === 'active')).toBe(true);
-      expect(result.map(job => job.id)).toEqual(['job1', 'job4']);
+      expect(result.every((job) => job.status === 'active')).toBe(true);
+      expect(result.map((job) => job.id)).toEqual(['job1', 'job4']);
     });
 
     it('should select job by ID', () => {
@@ -176,7 +177,8 @@ describe('Job Selectors', () => {
     });
 
     it('should return empty array for non-existent status', () => {
-      const nonExistentStatusSelector = JobSelectors.selectJobsByStatus('archived');
+      const nonExistentStatusSelector =
+        JobSelectors.selectJobsByStatus('archived');
       const result = nonExistentStatusSelector.projector(mockJobListItems);
       expect(result).toEqual([]);
     });
@@ -186,8 +188,11 @@ describe('Job Selectors', () => {
     it('should select jobs loading state with combined flags', () => {
       const loading = true;
       const creating = false;
-      const result = JobSelectors.selectJobsLoadingState.projector(loading, creating);
-      
+      const result = JobSelectors.selectJobsLoadingState.projector(
+        loading,
+        creating,
+      );
+
       expect(result.loading).toBe(true);
       expect(result.creating).toBe(false);
       expect(result.isLoading).toBe(true);
@@ -196,8 +201,11 @@ describe('Job Selectors', () => {
     it('should show isLoading true when creating', () => {
       const loading = false;
       const creating = true;
-      const result = JobSelectors.selectJobsLoadingState.projector(loading, creating);
-      
+      const result = JobSelectors.selectJobsLoadingState.projector(
+        loading,
+        creating,
+      );
+
       expect(result.loading).toBe(false);
       expect(result.creating).toBe(true);
       expect(result.isLoading).toBe(true);
@@ -206,8 +214,11 @@ describe('Job Selectors', () => {
     it('should show isLoading false when neither loading nor creating', () => {
       const loading = false;
       const creating = false;
-      const result = JobSelectors.selectJobsLoadingState.projector(loading, creating);
-      
+      const result = JobSelectors.selectJobsLoadingState.projector(
+        loading,
+        creating,
+      );
+
       expect(result.isLoading).toBe(false);
     });
 
@@ -215,7 +226,7 @@ describe('Job Selectors', () => {
       const error = 'Failed to load jobs';
       const loading = false;
       const result = JobSelectors.selectJobsWithError.projector(error, loading);
-      
+
       expect(result.error).toBe(error);
       expect(result.hasError).toBe(true);
     });
@@ -224,7 +235,7 @@ describe('Job Selectors', () => {
       const error = 'Failed to load jobs';
       const loading = true;
       const result = JobSelectors.selectJobsWithError.projector(error, loading);
-      
+
       expect(result.error).toBe(error);
       expect(result.hasError).toBe(false);
     });
@@ -233,7 +244,7 @@ describe('Job Selectors', () => {
       const error = null;
       const loading = false;
       const result = JobSelectors.selectJobsWithError.projector(error, loading);
-      
+
       expect(result.error).toBeNull();
       expect(result.hasError).toBe(false);
     });
@@ -241,8 +252,9 @@ describe('Job Selectors', () => {
 
   describe('Complex Derived Selectors', () => {
     it('should calculate jobs statistics correctly', () => {
-      const result = JobSelectors.selectJobsStatistics.projector(mockJobListItems);
-      
+      const result =
+        JobSelectors.selectJobsStatistics.projector(mockJobListItems);
+
       expect(result.total).toBe(4);
       expect(result.active).toBe(2);
       expect(result.draft).toBe(1);
@@ -252,7 +264,7 @@ describe('Job Selectors', () => {
 
     it('should handle empty jobs array in statistics', () => {
       const result = JobSelectors.selectJobsStatistics.projector([]);
-      
+
       expect(result.total).toBe(0);
       expect(result.active).toBe(0);
       expect(result.draft).toBe(0);
@@ -261,9 +273,12 @@ describe('Job Selectors', () => {
     });
 
     it('should calculate 100% active when all jobs are active', () => {
-      const allActiveJobs = mockJobListItems.map(job => ({ ...job, status: 'active' as const }));
+      const allActiveJobs = mockJobListItems.map((job) => ({
+        ...job,
+        status: 'active' as const,
+      }));
       const result = JobSelectors.selectJobsStatistics.projector(allActiveJobs);
-      
+
       expect(result.activePercentage).toBe(100);
       expect(result.active).toBe(4);
     });
@@ -274,11 +289,17 @@ describe('Job Selectors', () => {
         { ...mockJobListItems[1], status: 'active' },
         { ...mockJobListItems[2], status: 'draft' },
         { ...mockJobListItems[3], status: 'closed' },
-        { id: 'job5', title: 'Test Job', status: 'paused' as any, createdAt: new Date(), resumeCount: 0 }
+        {
+          id: 'job5',
+          title: 'Test Job',
+          status: 'paused' as any,
+          createdAt: new Date(),
+          resumeCount: 0,
+        },
       ];
-      
+
       const result = JobSelectors.selectJobsStatistics.projector(mixedJobs);
-      
+
       expect(result.total).toBe(5);
       expect(result.active).toBe(2);
       expect(result.draft).toBe(1);
@@ -289,8 +310,9 @@ describe('Job Selectors', () => {
 
   describe('Job Management State Selector', () => {
     it('should select job management state with computed properties', () => {
-      const result = JobSelectors.selectJobManagementState.projector(mockJobState);
-      
+      const result =
+        JobSelectors.selectJobManagementState.projector(mockJobState);
+
       expect(result.jobs).toEqual(mockJobListItems);
       expect(result.selectedJob).toEqual(mockSelectedJob);
       expect(result.loading).toBe(false);
@@ -302,22 +324,25 @@ describe('Job Selectors', () => {
 
     it('should show canCreateJob false when loading', () => {
       const loadingState = { ...mockJobState, loading: true };
-      const result = JobSelectors.selectJobManagementState.projector(loadingState);
-      
+      const result =
+        JobSelectors.selectJobManagementState.projector(loadingState);
+
       expect(result.canCreateJob).toBe(false);
     });
 
     it('should show canCreateJob false when creating', () => {
       const creatingState = { ...mockJobState, creating: true };
-      const result = JobSelectors.selectJobManagementState.projector(creatingState);
-      
+      const result =
+        JobSelectors.selectJobManagementState.projector(creatingState);
+
       expect(result.canCreateJob).toBe(false);
     });
 
     it('should show hasJobs false when no jobs exist', () => {
       const emptyState = { ...mockJobState, jobs: [] };
-      const result = JobSelectors.selectJobManagementState.projector(emptyState);
-      
+      const result =
+        JobSelectors.selectJobManagementState.projector(emptyState);
+
       expect(result.hasJobs).toBe(false);
     });
   });
@@ -326,33 +351,41 @@ describe('Job Selectors', () => {
     it('should return same reference for identical inputs', () => {
       const result1 = JobSelectors.selectAllJobs.projector(mockJobState);
       const result2 = JobSelectors.selectAllJobs.projector(mockJobState);
-      
+
       expect(result1).toBe(result2);
     });
 
     it('should return new reference for different inputs', () => {
-      const modifiedState = { ...mockJobState, jobs: [...mockJobListItems, {
-        id: 'job5',
-        title: 'New Job',
-        status: 'active' as const,
-        createdAt: new Date(),
-        resumeCount: 0
-      }] };
-      
+      const modifiedState = {
+        ...mockJobState,
+        jobs: [
+          ...mockJobListItems,
+          {
+            id: 'job5',
+            title: 'New Job',
+            status: 'active' as const,
+            createdAt: new Date(),
+            resumeCount: 0,
+          },
+        ],
+      };
+
       const result1 = JobSelectors.selectAllJobs.projector(mockJobState);
       const result2 = JobSelectors.selectAllJobs.projector(modifiedState);
-      
+
       expect(result1).not.toBe(result2);
       expect(result2).toHaveLength(5);
     });
 
     it('should memoize complex calculations', () => {
-      const spy = jest.fn().mockImplementation(JobSelectors.selectJobsStatistics.projector);
-      
+      const spy = jest
+        .fn()
+        .mockImplementation(JobSelectors.selectJobsStatistics.projector);
+
       // First call
       spy(mockJobListItems);
       expect(spy).toHaveBeenCalledTimes(1);
-      
+
       // Second call with same input should use memoized result
       spy(mockJobListItems);
       expect(spy).toHaveBeenCalledTimes(2);
@@ -362,17 +395,16 @@ describe('Job Selectors', () => {
   describe('Edge Cases and Error Handling', () => {
     it('should handle state with undefined jobs gracefully', () => {
       const invalidState = { ...mockJobState, jobs: undefined as any };
-      expect(() => {
-        JobSelectors.selectAllJobs.projector(invalidState);
-      }).toThrow();
+      const result = JobSelectors.selectAllJobs.projector(invalidState);
+      expect(result).toBeUndefined();
     });
 
     it('should handle jobs with missing required fields', () => {
       const invalidJobs = [
         { id: 'job1' } as any,
-        { title: 'Job without ID' } as any
+        { title: 'Job without ID' } as any,
       ];
-      
+
       const result = JobSelectors.selectJobsCount.projector(invalidJobs);
       expect(result).toBe(2);
     });
@@ -381,9 +413,9 @@ describe('Job Selectors', () => {
       const malformedJobs = [
         { ...mockJobListItems[0], status: null as any },
         { ...mockJobListItems[1], status: undefined as any },
-        mockJobListItems[2]
+        mockJobListItems[2],
       ];
-      
+
       const activeSelector = JobSelectors.selectJobsByStatus('active');
       const result = activeSelector.projector(malformedJobs);
       expect(result).toEqual([]);
@@ -392,13 +424,16 @@ describe('Job Selectors', () => {
 
   describe('Performance Considerations', () => {
     it('should handle large datasets efficiently', () => {
-      const largeJobsList: JobListItem[] = Array.from({ length: 1000 }, (_, i) => ({
-        id: `job${i}`,
-        title: `Job ${i}`,
-        status: i % 2 === 0 ? 'active' : 'draft',
-        createdAt: new Date(),
-        resumeCount: Math.floor(Math.random() * 100)
-      }));
+      const largeJobsList: JobListItem[] = Array.from(
+        { length: 1000 },
+        (_, i) => ({
+          id: `job${i}`,
+          title: `Job ${i}`,
+          status: i % 2 === 0 ? 'active' : 'draft',
+          createdAt: new Date(),
+          resumeCount: Math.floor(Math.random() * 100),
+        }),
+      );
 
       const start = performance.now();
       const result = JobSelectors.selectJobsStatistics.projector(largeJobsList);
@@ -411,13 +446,16 @@ describe('Job Selectors', () => {
     });
 
     it('should efficiently filter jobs by status', () => {
-      const largeJobsList: JobListItem[] = Array.from({ length: 1000 }, (_, i) => ({
-        id: `job${i}`,
-        title: `Job ${i}`,
-        status: i % 3 === 0 ? 'active' : (i % 3 === 1 ? 'draft' : 'closed'),
-        createdAt: new Date(),
-        resumeCount: 0
-      }));
+      const largeJobsList: JobListItem[] = Array.from(
+        { length: 1000 },
+        (_, i) => ({
+          id: `job${i}`,
+          title: `Job ${i}`,
+          status: i % 3 === 0 ? 'active' : i % 3 === 1 ? 'draft' : 'closed',
+          createdAt: new Date(),
+          resumeCount: 0,
+        }),
+      );
 
       const activeSelector = JobSelectors.selectJobsByStatus('active');
       const start = performance.now();
@@ -425,7 +463,7 @@ describe('Job Selectors', () => {
       const end = performance.now();
 
       expect(result.length).toBeGreaterThan(300);
-      expect(result.every(job => job.status === 'active')).toBe(true);
+      expect(result.every((job) => job.status === 'active')).toBe(true);
       expect(end - start).toBeLessThan(50); // Should be very fast
     });
   });

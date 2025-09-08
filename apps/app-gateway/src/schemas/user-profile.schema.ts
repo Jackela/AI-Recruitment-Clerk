@@ -8,44 +8,56 @@ export type UserProfileDocument = UserProfile & Document;
 @Schema({
   collection: 'user_profiles',
   timestamps: true,
-  versionKey: false
+  versionKey: false,
 })
 export class UserProfile {
   @Prop({ required: true, unique: true })
-  userId: string;
+  userId: string = '';
 
   @Prop({ required: true })
-  email: string;
+  email: string = '';
 
   @Prop({ required: true })
-  hashedPassword: string;
+  hashedPassword: string = '';
 
   @Prop()
-  displayName?: string;
+  displayName?: string = undefined;
 
   @Prop()
-  avatar?: string;
+  avatar?: string = undefined;
 
   @Prop({ type: Object })
-  preferences?: UserPreferences;
+  preferences?: UserPreferences = undefined;
 
-  @Prop({ type: String, enum: Object.values(ConsentStatus), default: ConsentStatus.PENDING })
-  dataProcessingConsent: ConsentStatus;
+  @Prop({
+    type: String,
+    enum: Object.values(ConsentStatus),
+    default: ConsentStatus.PENDING,
+  })
+  dataProcessingConsent: ConsentStatus = ConsentStatus.PENDING;
 
-  @Prop({ type: String, enum: Object.values(ConsentStatus), default: ConsentStatus.PENDING })
-  marketingConsent: ConsentStatus;
+  @Prop({
+    type: String,
+    enum: Object.values(ConsentStatus),
+    default: ConsentStatus.PENDING,
+  })
+  marketingConsent: ConsentStatus = ConsentStatus.PENDING;
 
-  @Prop({ type: String, enum: Object.values(ConsentStatus), default: ConsentStatus.PENDING })
-  analyticsConsent: ConsentStatus;
+  @Prop({
+    type: String,
+    enum: Object.values(ConsentStatus),
+    default: ConsentStatus.PENDING,
+  })
+  analyticsConsent: ConsentStatus = ConsentStatus.PENDING;
 
   @Prop({ default: true })
-  isActive: boolean;
+  isActive: boolean = true;
 
   @Prop()
-  lastLoginAt?: Date;
+  lastLoginAt?: Date = undefined;
 
   @Prop()
-  emailVerifiedAt?: Date;
+  emailVerifiedAt?: Date = undefined;
 
   @Prop({ type: Object })
   sessionInfo?: {
@@ -56,10 +68,10 @@ export class UserProfile {
       ipAddress: string;
       location?: string;
     };
-  };
+  } = undefined;
 
   @Prop({ type: [String], default: [] })
-  tags: string[];
+  tags: string[] = [];
 
   @Prop({ type: Object })
   mfaSettings?: {
@@ -73,10 +85,10 @@ export class UserProfile {
     lastUsedAt?: Date;
     failedAttempts: number;
     lockedUntil?: Date;
-  };
+  } = undefined;
 
   @Prop({ type: Object })
-  metadata?: Record<string, any>;
+  metadata?: Record<string, any> = undefined;
 }
 
 export const UserProfileSchema = SchemaFactory.createForClass(UserProfile);

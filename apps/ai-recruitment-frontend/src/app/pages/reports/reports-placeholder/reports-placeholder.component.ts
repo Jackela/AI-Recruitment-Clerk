@@ -8,7 +8,6 @@ import { Component } from '@angular/core';
       <h2>报告功能开发中...</h2>
       <p>该功能正在开发中，敬请期待！</p>
     </div>
-  `
+  `,
 })
-export class ReportsPlaceholderComponent {
-}
+export class ReportsPlaceholderComponent {}

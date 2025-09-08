@@ -5,7 +5,7 @@ import { AppModule } from '../../src/app/app.module';
 
 /**
  * 🔗 CROSS-SERVICE VALIDATION E2E TESTS
- * 
+ *
  * Tests the integration between different microservices and validates
  * data consistency, communication patterns, and service dependencies.
  */
@@ -40,18 +40,18 @@ describe('🔗 Cross-Service Validation Integration', () => {
         password: 'CrossService123!',
         name: 'Cross Service Admin',
         organizationName: 'Cross Service Test Org',
-        role: 'admin'
+        role: 'admin',
       });
-    
+
     testOrganizationId = orgResponse.body.data.organizationId;
-    
+
     const adminLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
         email: 'crossservice.admin@test.com',
-        password: 'CrossService123!'
+        password: 'CrossService123!',
       });
-    
+
     adminToken = adminLoginResponse.body.data.accessToken;
 
     const userResponse = await request(app.getHttpServer())
@@ -61,18 +61,18 @@ describe('🔗 Cross-Service Validation Integration', () => {
         password: 'CrossService123!',
         name: 'Cross Service User',
         organizationId: testOrganizationId,
-        role: 'user'
+        role: 'user',
       });
-    
+
     testUserId = userResponse.body.data.userId;
-    
+
     const userLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
         email: 'crossservice.user@test.com',
-        password: 'CrossService123!'
+        password: 'CrossService123!',
       });
-    
+
     userToken = userLoginResponse.body.data.accessToken;
   }
 
@@ -84,7 +84,11 @@ describe('🔗 Cross-Service Validation Integration', () => {
       const resumeUpload = await request(app.getHttpServer())
         .post('/resumes/upload')
         .set('Authorization', `Bearer ${userToken}`)
-        .attach('resume', Buffer.from('Test Resume PDF Content'), 'test-resume.pdf')
+        .attach(
+          'resume',
+          Buffer.from('Test Resume PDF Content'),
+          'test-resume.pdf',
+        )
         .field('candidateName', 'John Cross Service')
         .field('candidateEmail', 'john@crossservice.com');
 
@@ -99,22 +103,22 @@ describe('🔗 Cross-Service Validation Integration', () => {
           data: {
             resumeId: testResumeId,
             userId: testUserId,
-            organizationId: testOrganizationId
+            organizationId: testOrganizationId,
           },
           rules: [
             {
               field: 'resumeId',
               service: 'resume-parser-svc',
               endpoint: 'validate-resume',
-              required: true
+              required: true,
             },
             {
               field: 'userId',
               service: 'user-service',
               endpoint: 'validate-user',
-              required: true
-            }
-          ]
+              required: true,
+            },
+          ],
         });
 
       expect(resumeValidation.status).toBe(200);
@@ -155,7 +159,7 @@ describe('🔗 Cross-Service Validation Integration', () => {
           description: 'Test job for cross-service validation',
           requirements: 'JavaScript, Node.js, Testing',
           location: 'Remote',
-          salary: { min: 80000, max: 120000, currency: 'USD' }
+          salary: { min: 80000, max: 120000, currency: 'USD' },
         });
 
       expect([201, 200]).toContain(jobCreation.status);
@@ -169,16 +173,16 @@ describe('🔗 Cross-Service Validation Integration', () => {
           .send({
             data: {
               jobId: testJobId,
-              organizationId: testOrganizationId
+              organizationId: testOrganizationId,
             },
             rules: [
               {
                 field: 'jobId',
                 service: 'jd-extractor-svc',
                 endpoint: 'validate-job',
-                required: true
-              }
-            ]
+                required: true,
+              },
+            ],
           });
 
         expect(jobValidation.status).toBe(200);
@@ -197,33 +201,33 @@ describe('🔗 Cross-Service Validation Integration', () => {
             resumeId: 'test-resume-id',
             jobId: 'test-job-id',
             userId: testUserId,
-            organizationId: testOrganizationId
+            organizationId: testOrganizationId,
           },
           rules: [
             {
               field: 'resumeId',
               service: 'resume-parser-svc',
               endpoint: 'validate-resume',
-              required: false // May not exist yet
+              required: false, // May not exist yet
             },
             {
               field: 'jobId',
               service: 'jd-extractor-svc',
               endpoint: 'validate-job',
-              required: false // May not exist yet
+              required: false, // May not exist yet
             },
             {
               field: 'userId',
               service: 'user-service',
               endpoint: 'validate-user',
-              required: true
-            }
+              required: true,
+            },
           ],
           options: {
             parallel: true,
             failFast: false,
-            timeout: 10000
-          }
+            timeout: 10000,
+          },
         });
 
       expect(scoringValidation.status).toBe(200);
@@ -242,28 +246,30 @@ describe('🔗 Cross-Service Validation Integration', () => {
             organizationId: testOrganizationId,
             reportType: 'comprehensive',
             dateRange: {
-              startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-              endDate: new Date().toISOString()
-            }
+              startDate: new Date(
+                Date.now() - 7 * 24 * 60 * 60 * 1000,
+              ).toISOString(),
+              endDate: new Date().toISOString(),
+            },
           },
           rules: [
             {
               field: 'organizationId',
               service: 'user-service',
               endpoint: 'validate-organization',
-              required: true
+              required: true,
             },
             {
               field: 'reportType',
               service: 'report-generator-svc',
               endpoint: 'validate-report-type',
-              required: true
-            }
+              required: true,
+            },
           ],
           options: {
             parallel: false,
-            timeout: 15000
-          }
+            timeout: 15000,
+          },
         });
 
       expect(reportValidation.status).toBe(200);
@@ -274,8 +280,9 @@ describe('🔗 Cross-Service Validation Integration', () => {
   describe('🔄 Service Communication Patterns', () => {
     it('should test request-response patterns', async () => {
       // Test synchronous communication
-      const syncResponse = await request(app.getHttpServer())
-        .get('/system/health');
+      const syncResponse = await request(app.getHttpServer()).get(
+        '/system/health',
+      );
 
       expect(syncResponse.status).toBe(200);
       expect(syncResponse.body.data).toHaveProperty('services');
@@ -286,13 +293,15 @@ describe('🔗 Cross-Service Validation Integration', () => {
         'resume-parser-svc',
         'jd-extractor-svc',
         'scoring-engine-svc',
-        'report-generator-svc'
+        'report-generator-svc',
       ];
 
-      expectedServices.forEach(serviceName => {
+      expectedServices.forEach((serviceName) => {
         const service = services.find((s: any) => s.name === serviceName);
         if (service) {
-          expect(['healthy', 'degraded', 'unhealthy']).toContain(service.status);
+          expect(['healthy', 'degraded', 'unhealthy']).toContain(
+            service.status,
+          );
         }
       });
     });
@@ -307,14 +316,16 @@ describe('🔗 Cross-Service Validation Integration', () => {
           format: 'json',
           dateRange: {
             startDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-            endDate: new Date().toISOString()
-          }
+            endDate: new Date().toISOString(),
+          },
         });
 
       expect(asyncRequest.status).toBe(201);
       expect(asyncRequest.body.data).toHaveProperty('reportId');
       expect(asyncRequest.body.data).toHaveProperty('status');
-      expect(['processing', 'queued', 'pending']).toContain(asyncRequest.body.data.status);
+      expect(['processing', 'queued', 'pending']).toContain(
+        asyncRequest.body.data.status,
+      );
     });
 
     it('should handle service timeouts and retries', async () => {
@@ -325,7 +336,7 @@ describe('🔗 Cross-Service Validation Integration', () => {
         .send({
           testSuite: 'timeout-handling',
           services: ['resume-parser-svc'],
-          skipLongRunningTests: false
+          skipLongRunningTests: false,
         });
 
       expect(timeoutTest.status).toBe(200);
@@ -343,7 +354,7 @@ describe('🔗 Cross-Service Validation Integration', () => {
           data: {
             userId: testUserId,
             organizationId: testOrganizationId,
-            email: 'crossservice.user@test.com'
+            email: 'crossservice.user@test.com',
           },
           rules: [
             {
@@ -353,7 +364,7 @@ describe('🔗 Cross-Service Validation Integration', () => {
               required: true,
               validate: async (value: string) => {
                 return value.length > 0;
-              }
+              },
             },
             {
               field: 'organizationId',
@@ -362,16 +373,18 @@ describe('🔗 Cross-Service Validation Integration', () => {
               required: true,
               transform: (value: string) => {
                 return value.toLowerCase();
-              }
-            }
-          ]
+              },
+            },
+          ],
         });
 
       expect(userConsistency.status).toBe(200);
       expect(userConsistency.body.data.valid).toBe(true);
 
       if (userConsistency.body.data.transformedData) {
-        expect(userConsistency.body.data.transformedData).toHaveProperty('organizationId');
+        expect(userConsistency.body.data.transformedData).toHaveProperty(
+          'organizationId',
+        );
       }
     });
 
@@ -383,23 +396,23 @@ describe('🔗 Cross-Service Validation Integration', () => {
         .send({
           data: {
             userId: 'non-existent-user-id',
-            organizationId: testOrganizationId
+            organizationId: testOrganizationId,
           },
           rules: [
             {
               field: 'userId',
               service: 'user-service',
               endpoint: 'validate-user',
-              required: true
-            }
+              required: true,
+            },
           ],
           options: {
-            failFast: true
-          }
+            failFast: true,
+          },
         });
 
       expect(inconsistentData.status).toBe(200);
-      
+
       if (!inconsistentData.body.data.valid) {
         expect(inconsistentData.body.data).toHaveProperty('errors');
         expect(Array.isArray(inconsistentData.body.data.errors)).toBe(true);
@@ -417,16 +430,16 @@ describe('🔗 Cross-Service Validation Integration', () => {
           data: {
             serviceToken: adminToken,
             requestingService: 'app-gateway',
-            targetService: 'resume-parser-svc'
+            targetService: 'resume-parser-svc',
           },
           rules: [
             {
               field: 'serviceToken',
               service: 'auth-service',
               endpoint: 'validate-service-token',
-              required: true
-            }
-          ]
+              required: true,
+            },
+          ],
         });
 
       expect(authValidation.status).toBe(200);
@@ -440,20 +453,23 @@ describe('🔗 Cross-Service Validation Integration', () => {
         .send({
           data: {
             operation: 'admin-only-operation',
-            userId: testUserId
+            userId: testUserId,
           },
           rules: [
             {
               field: 'operation',
               service: 'user-service',
               endpoint: 'check-admin-permission',
-              required: true
-            }
-          ]
+              required: true,
+            },
+          ],
         });
 
       // User should not have admin permissions
-      if (unauthorizedRequest.status === 200 && !unauthorizedRequest.body.data.valid) {
+      if (
+        unauthorizedRequest.status === 200 &&
+        !unauthorizedRequest.body.data.valid
+      ) {
         expect(unauthorizedRequest.body.data.errors).toBeDefined();
       } else {
         // May be 403 forbidden
@@ -473,25 +489,25 @@ describe('🔗 Cross-Service Validation Integration', () => {
         .send({
           data: {
             userId: testUserId,
-            organizationId: testOrganizationId
+            organizationId: testOrganizationId,
           },
           rules: [
             {
               field: 'userId',
               service: 'user-service',
               endpoint: 'validate-user',
-              required: true
+              required: true,
             },
             {
               field: 'organizationId',
               service: 'user-service',
               endpoint: 'validate-organization',
-              required: true
-            }
+              required: true,
+            },
           ],
           options: {
-            parallel: true
-          }
+            parallel: true,
+          },
         });
 
       const performanceEnd = Date.now();
@@ -515,29 +531,29 @@ describe('🔗 Cross-Service Validation Integration', () => {
             .send({
               data: {
                 userId: testUserId,
-                requestId: `concurrent-${i}`
+                requestId: `concurrent-${i}`,
               },
               rules: [
                 {
                   field: 'userId',
                   service: 'user-service',
                   endpoint: 'validate-user',
-                  required: true
-                }
-              ]
-            })
+                  required: true,
+                },
+              ],
+            }),
         );
       }
 
       const responses = await Promise.all(concurrentRequests);
-      
+
       responses.forEach((response, index) => {
         expect(response.status).toBe(200);
         expect(response.body.data).toHaveProperty('validationTime');
         console.log(`Request ${index}: ${response.body.data.validationTime}ms`);
       });
 
-      const successfulRequests = responses.filter(r => r.status === 200);
+      const successfulRequests = responses.filter((r) => r.status === 200);
       expect(successfulRequests.length).toBe(requestCount);
     });
   });
@@ -545,11 +561,12 @@ describe('🔗 Cross-Service Validation Integration', () => {
   describe('🔄 Circuit Breaker and Resilience', () => {
     it('should handle service failures with circuit breaker', async () => {
       // Test circuit breaker behavior
-      const circuitBreakerTest = await request(app.getHttpServer())
-        .get('/system/health');
+      const circuitBreakerTest = await request(app.getHttpServer()).get(
+        '/system/health',
+      );
 
       expect(circuitBreakerTest.status).toBe(200);
-      
+
       // Check if any services are in circuit breaker state
       const services = circuitBreakerTest.body.data.services;
       services.forEach((service: any) => {
@@ -568,24 +585,24 @@ describe('🔗 Cross-Service Validation Integration', () => {
         .send({
           data: {
             userId: testUserId,
-            fallbackEnabled: true
+            fallbackEnabled: true,
           },
           rules: [
             {
               field: 'userId',
               service: 'unavailable-service',
               endpoint: 'validate-user',
-              required: false
-            }
+              required: false,
+            },
           ],
           options: {
             enableFallback: true,
-            timeout: 5000
-          }
+            timeout: 5000,
+          },
         });
 
       expect(fallbackTest.status).toBe(200);
-      
+
       // Should complete even if service is unavailable
       expect(fallbackTest.body.data).toHaveProperty('validationTime');
     });
@@ -601,12 +618,17 @@ describe('🔗 Cross-Service Validation Integration', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           testSuite: 'cross-service-validation',
-          services: ['user-service', 'resume-parser-svc', 'jd-extractor-svc', 'scoring-engine-svc'],
-          skipLongRunningTests: true
+          services: [
+            'user-service',
+            'resume-parser-svc',
+            'jd-extractor-svc',
+            'scoring-engine-svc',
+          ],
+          skipLongRunningTests: true,
         });
 
       expect(finalValidation.status).toBe(200);
-      
+
       const results = finalValidation.body.data;
       console.log(`✅ Total Tests: ${results.totalTests}`);
       console.log(`✅ Passed: ${results.passed}`);

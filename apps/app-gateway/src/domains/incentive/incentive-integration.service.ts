@@ -14,14 +14,14 @@ export class IncentiveIntegrationService {
     contactInfo: any,
     businessValue: any,
     incentiveType: string,
-    metadata?: any
+    metadata?: any,
   ) {
     try {
       this.logger.log('Creating questionnaire incentive', {
         userIP,
         questionnaireId,
         qualityScore,
-        incentiveType
+        incentiveType,
       });
 
       return {
@@ -35,7 +35,7 @@ export class IncentiveIntegrationService {
         incentiveType,
         status: 'pending',
         createdAt: new Date(),
-        metadata
+        metadata,
       };
     } catch (error) {
       this.logger.error('Error creating questionnaire incentive', error);
@@ -52,14 +52,14 @@ export class IncentiveIntegrationService {
     contactInfo: any,
     referralType: string,
     expectedValue: number,
-    metadata?: any
+    metadata?: any,
   ) {
     try {
       this.logger.log('Creating referral incentive', {
         referrerIP,
         referredIP,
         referralType,
-        expectedValue
+        expectedValue,
       });
 
       return {
@@ -72,7 +72,7 @@ export class IncentiveIntegrationService {
         expectedValue,
         status: 'pending',
         createdAt: new Date(),
-        metadata
+        metadata,
       };
     } catch (error) {
       this.logger.error('Error creating referral incentive', error);
@@ -92,7 +92,7 @@ export class IncentiveIntegrationService {
       endDate?: Date;
       limit?: number;
       offset?: number;
-    }
+    },
   ) {
     try {
       return {
@@ -102,7 +102,7 @@ export class IncentiveIntegrationService {
         totalCount: 0,
         totalRewardAmount: 0,
         organizationId,
-        options
+        options,
       };
     } catch (error) {
       this.logger.error('Error getting incentives', error);
@@ -119,7 +119,7 @@ export class IncentiveIntegrationService {
         incentiveId,
         organizationId,
         status: 'not_found',
-        data: null
+        data: null,
       };
     } catch (error) {
       this.logger.error('Error getting incentive', error);
@@ -140,7 +140,7 @@ export class IncentiveIntegrationService {
         validatedAt: new Date(),
         message: 'Incentive validation successful',
         errors: [],
-        canProceedToPayment: true
+        canProceedToPayment: true,
       };
     } catch (error) {
       this.logger.error('Error validating incentive', error);
@@ -160,7 +160,7 @@ export class IncentiveIntegrationService {
         approvedBy: approvalData.approverId,
         reason: approvalData.reason,
         notes: approvalData.notes,
-        organizationId: approvalData.organizationId
+        organizationId: approvalData.organizationId,
       };
     } catch (error) {
       this.logger.error('Error approving incentive', error);
@@ -176,10 +176,14 @@ export class IncentiveIntegrationService {
     reason: string,
     rejectedBy: string,
     organizationId: string,
-    notes?: string
+    notes?: string,
   ) {
     try {
-      this.logger.log('Rejecting incentive', { incentiveId, reason, rejectedBy });
+      this.logger.log('Rejecting incentive', {
+        incentiveId,
+        reason,
+        rejectedBy,
+      });
       return {
         incentiveId,
         status: 'rejected',
@@ -187,7 +191,7 @@ export class IncentiveIntegrationService {
         rejectedBy,
         reason,
         notes,
-        organizationId
+        organizationId,
       };
     } catch (error) {
       this.logger.error('Error rejecting incentive', error);
@@ -203,10 +207,14 @@ export class IncentiveIntegrationService {
     paymentMethod: string,
     processedBy: string,
     organizationId: string,
-    options?: any
+    options?: any,
   ) {
     try {
-      this.logger.log('Processing payment', { incentiveId, paymentMethod, processedBy });
+      this.logger.log('Processing payment', {
+        incentiveId,
+        paymentMethod,
+        processedBy,
+      });
       return {
         success: true,
         transactionId: `txn_${Date.now()}`,
@@ -216,13 +224,13 @@ export class IncentiveIntegrationService {
         processedBy,
         organizationId,
         processedAt: new Date(),
-        ...options
+        ...options,
       };
     } catch (error) {
       this.logger.error('Error processing payment', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -235,29 +243,29 @@ export class IncentiveIntegrationService {
     action: string,
     processedBy: string,
     organizationId: string,
-    options?: any
+    options?: any,
   ) {
     try {
-      this.logger.log('Batch processing incentives', { 
-        count: incentiveIds.length, 
-        action, 
-        processedBy 
+      this.logger.log('Batch processing incentives', {
+        count: incentiveIds.length,
+        action,
+        processedBy,
       });
-      
+
       return {
         totalProcessed: incentiveIds.length,
         successful: incentiveIds.length,
         failed: 0,
-        results: incentiveIds.map(id => ({
+        results: incentiveIds.map((id) => ({
           incentiveId: id,
           success: true,
           action,
-          processedAt: new Date()
+          processedAt: new Date(),
         })),
         action,
         processedBy,
         organizationId,
-        ...options
+        ...options,
       };
     } catch (error) {
       this.logger.error('Error batch processing incentives', error);
@@ -271,7 +279,7 @@ export class IncentiveIntegrationService {
   async getIncentiveStatistics(
     organizationId: string,
     timeRange: string,
-    groupBy: string
+    groupBy: string,
   ) {
     try {
       return {
@@ -286,7 +294,7 @@ export class IncentiveIntegrationService {
         topPerformers: [],
         organizationId,
         timeRange,
-        groupBy
+        groupBy,
       };
     } catch (error) {
       this.logger.error('Error getting incentive statistics', error);
@@ -306,7 +314,7 @@ export class IncentiveIntegrationService {
         downloadUrl: `/downloads/export_${Date.now()}.${exportOptions.format || 'csv'}`,
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
         organizationId,
-        exportOptions
+        exportOptions,
       };
     } catch (error) {
       this.logger.error('Error exporting incentive data', error);
@@ -320,7 +328,7 @@ export class IncentiveIntegrationService {
   async configureIncentiveRules(
     organizationId: string,
     rulesConfig: any,
-    configuredBy: string
+    configuredBy: string,
   ) {
     try {
       return {
@@ -328,7 +336,7 @@ export class IncentiveIntegrationService {
         rules: rulesConfig,
         organizationId,
         configuredBy,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
     } catch (error) {
       this.logger.error('Error configuring incentive rules', error);
@@ -347,7 +355,7 @@ export class IncentiveIntegrationService {
         paymentProcessor: 'healthy',
         ruleEngine: 'healthy',
         eventProcessing: 'healthy',
-        checkedAt: new Date()
+        checkedAt: new Date(),
       };
     } catch (error) {
       this.logger.error('Error getting health status', error);
@@ -357,7 +365,7 @@ export class IncentiveIntegrationService {
         paymentProcessor: 'unknown',
         ruleEngine: 'unknown',
         eventProcessing: 'unknown',
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }

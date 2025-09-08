@@ -13,7 +13,7 @@ export class AppController {
     private readonly jobRepository: JobRepository,
     private readonly natsClient: NatsClient,
     private readonly cacheService: CacheService,
-    private readonly cacheWarmupService: CacheWarmupService
+    private readonly cacheWarmupService: CacheWarmupService,
   ) {}
 
   @Public()
@@ -23,7 +23,7 @@ export class AppController {
       message: 'Welcome to the AI Recruitment Clerk API Gateway!',
       status: 'ok',
       timestamp: new Date().toISOString(),
-      documentation: '/api/docs'
+      documentation: '/api/docs',
     };
   }
 
@@ -50,8 +50,8 @@ export class AppController {
           status: 'error',
           connected: false,
           metrics: this.cacheService.getMetrics(),
-          error: error.message
-        }
+          error: error instanceof Error ? error.message : String(error),
+        },
       };
     }
   }
@@ -66,87 +66,93 @@ export class AppController {
         // 直接返回基本健康检查
         const dbHealth = await this.jobRepository.healthCheck();
         const natsHealth = this.natsClient.isConnected;
-        
+
         return {
-          status: (dbHealth.status === 'healthy' && natsHealth) ? 'ok' : 'degraded',
+          status:
+            dbHealth.status === 'healthy' && natsHealth ? 'ok' : 'degraded',
           timestamp: new Date().toISOString(),
           service: 'app-gateway',
           database: {
             status: dbHealth.status,
-            jobCount: dbHealth.count
+            jobCount: dbHealth.count,
           },
           messaging: {
             status: natsHealth ? 'connected' : 'disconnected',
-            provider: 'NATS JetStream'
+            provider: 'NATS JetStream',
           },
           features: {
             authentication: 'enabled',
             authorization: 'enabled',
-            cache: 'disabled - service injection failed'
-          }
+            cache: 'disabled - service injection failed',
+          },
         };
       }
 
       const cacheKey = this.cacheService.getHealthCacheKey();
       console.log('Using cache key:', cacheKey);
-      
+
       return this.cacheService.wrap(
         cacheKey,
         async () => {
           console.log('Cache MISS - generating new health data');
           const dbHealth = await this.jobRepository.healthCheck();
           const natsHealth = this.natsClient.isConnected;
-          
-          console.log(`[HealthCheck] DB status: ${dbHealth.status}, NATS status: ${natsHealth ? 'connected' : 'disconnected'}`);
+
+          console.log(
+            `[HealthCheck] DB status: ${dbHealth.status}, NATS status: ${natsHealth ? 'connected' : 'disconnected'}`,
+          );
 
           return {
-            status: (dbHealth.status === 'healthy' && natsHealth) ? 'ok' : 'degraded',
+            status:
+              dbHealth.status === 'healthy' && natsHealth ? 'ok' : 'degraded',
             timestamp: new Date().toISOString(),
             service: 'app-gateway',
             database: {
               status: dbHealth.status,
-              jobCount: dbHealth.count
+              jobCount: dbHealth.count,
             },
             messaging: {
               status: natsHealth ? 'connected' : 'disconnected',
-              provider: 'NATS JetStream'
+              provider: 'NATS JetStream',
             },
             features: {
               authentication: 'enabled',
               authorization: 'enabled',
-              cache: 'enabled'
+              cache: 'enabled',
             },
             cache: {
               provider: 'Redis/Memory',
-              status: 'connected'
-            }
+              status: 'connected',
+            },
           };
         },
-        { ttl: 30000 } // 30秒缓存(30000毫秒)，健康检查不需要太长缓存
+        { ttl: 30000 }, // 30秒缓存(30000毫秒)，健康检查不需要太长缓存
       );
     } catch (error) {
       console.error('Health check cache error:', error);
       // 降级到无缓存模式
       const dbHealth = await this.jobRepository.healthCheck();
       const natsHealth = this.natsClient.isConnected;
-      
+
       return {
-        status: (dbHealth.status === 'healthy' && natsHealth) ? 'ok' : 'degraded',
+        status: dbHealth.status === 'healthy' && natsHealth ? 'ok' : 'degraded',
         timestamp: new Date().toISOString(),
         service: 'app-gateway',
         database: {
           status: dbHealth.status,
-          jobCount: dbHealth.count
+          jobCount: dbHealth.count,
         },
         messaging: {
           status: natsHealth ? 'connected' : 'disconnected',
-          provider: 'NATS JetStream'
+          provider: 'NATS JetStream',
         },
         features: {
           authentication: 'enabled',
           authorization: 'enabled',
-          cache: 'error - ' + error.message
-        }
+          cache:
+            'error - ' +
+            (error instanceof Error ? error.message : String(error)),
+        },
       };
     }
   }
@@ -158,14 +164,18 @@ export class AppController {
       return {
         timestamp: new Date().toISOString(),
         warmupStatus: this.cacheWarmupService.getRefreshStatus(),
-        cacheMetrics: this.cacheService.getMetrics()
+        cacheMetrics: this.cacheService.getMetrics(),
       };
     } catch (error) {
       return {
         timestamp: new Date().toISOString(),
-        error: error.message,
-        warmupStatus: { isActive: false, lastRefresh: null, nextDeepWarmup: null },
-        cacheMetrics: this.cacheService.getMetrics()
+        error: error instanceof Error ? error.message : String(error),
+        warmupStatus: {
+          isActive: false,
+          lastRefresh: null,
+          nextDeepWarmup: null,
+        },
+        cacheMetrics: this.cacheService.getMetrics(),
       };
     }
   }
@@ -178,13 +188,13 @@ export class AppController {
       return {
         timestamp: new Date().toISOString(),
         warmupResult: result,
-        message: 'Cache warmup triggered successfully'
+        message: 'Cache warmup triggered successfully',
       };
     } catch (error) {
       return {
         timestamp: new Date().toISOString(),
-        error: error.message,
-        message: 'Cache warmup trigger failed'
+        error: error instanceof Error ? error.message : String(error),
+        message: 'Cache warmup trigger failed',
       };
     }
   }

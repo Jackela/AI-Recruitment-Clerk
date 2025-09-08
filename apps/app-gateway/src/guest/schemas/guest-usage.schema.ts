@@ -5,33 +5,33 @@ export type GuestUsageDocument = HydratedDocument<GuestUsage>;
 
 @Schema({
   timestamps: true,
-  collection: 'guest_usages'
+  collection: 'guest_usages',
 })
 export class GuestUsage extends Document {
   @Prop({ required: true, unique: true })
-  deviceId: string;
+  deviceId!: string;
 
   @Prop({ required: true, default: 0, min: 0 })
-  usageCount: number;
+  usageCount!: number;
 
   @Prop({ required: false, default: null })
   feedbackCode?: string;
 
-  @Prop({ 
-    required: false, 
-    enum: ['generated', 'redeemed'], 
-    default: null 
+  @Prop({
+    required: false,
+    enum: ['generated', 'redeemed'],
+    default: null,
   })
   feedbackCodeStatus?: 'generated' | 'redeemed';
 
   @Prop({ required: true, default: Date.now })
-  lastUsed: Date;
+  lastUsed!: Date;
 
   @Prop({ required: true, default: Date.now })
-  createdAt: Date;
+  createdAt!: Date;
 
   @Prop({ required: true, default: Date.now })
-  updatedAt: Date;
+  updatedAt!: Date;
 }
 
 export const GuestUsageSchema = SchemaFactory.createForClass(GuestUsage);
@@ -42,5 +42,5 @@ GuestUsageSchema.index({ feedbackCode: 1 });
 // Add TTL index to automatically cleanup old records (30 days)
 GuestUsageSchema.index(
   { createdAt: 1 },
-  { expireAfterSeconds: 30 * 24 * 60 * 60 }
+  { expireAfterSeconds: 30 * 24 * 60 * 60 },
 );

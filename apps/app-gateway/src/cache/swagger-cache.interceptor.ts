@@ -23,21 +23,21 @@ export class SwaggerCacheInterceptor implements NestInterceptor {
   ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
-    
+
     // 只对 API 文档路径进行缓存
     if (!request.url.includes('/api/docs')) {
       return next.handle();
     }
 
     const cacheKey = this.cacheService.getApiDocsCacheKey();
-    
+
     // 尝试从缓存获取
     const cachedData = await this.cacheService.get(cacheKey);
     if (cachedData) {
       // 设置响应头，表明来自缓存
       response.set('X-Cache', 'HIT');
       response.set('Cache-Control', 'public, max-age=300'); // 5分钟
-      return new Observable(observer => {
+      return new Observable((observer) => {
         observer.next(cachedData);
         observer.complete();
       });

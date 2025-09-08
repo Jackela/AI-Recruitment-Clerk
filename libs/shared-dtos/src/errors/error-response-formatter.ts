@@ -237,7 +237,7 @@ export class StandardizedErrorResponseFormatter extends ErrorResponseFormatter {
   /**
    * Get recovery suggestions based on error type and code
    */
-  private static getRecoverySuggestions(errorType: string, errorCode: string): string[] {
+  private static getRecoverySuggestions(errorType: string, _errorCode: string): string[] {
     const suggestionMap: Record<string, string[]> = {
       'VALIDATION_ERROR': [
         '检查所有必填字段是否已填写',

@@ -18,27 +18,32 @@ export interface SecretValidationResult {
 @Injectable()
 export class SecretsManagerService implements OnModuleInit {
   private readonly logger = new Logger(SecretsManagerService.name);
-  private secretsCache = new Map<string, { value: string; lastRotated: Date }>();
+  private secretsCache = new Map<
+    string,
+    { value: string; lastRotated: Date }
+  >();
 
   constructor(private configService: ConfigService) {}
 
   async onModuleInit() {
     this.logger.log('🔑 初始化密钥管理服务...');
-    
+
     // 启动时验证所有关键密钥
     const validationResult = this.validateAllSecrets();
-    
+
     if (!validationResult.isValid) {
       this.logger.error('🚨 密钥验证失败！');
-      validationResult.issues.forEach(issue => 
-        this.logger.error(`   • ${issue}`)
+      validationResult.issues.forEach((issue) =>
+        this.logger.error(`   • ${issue}`),
       );
-      
+
       if (process.env.NODE_ENV === 'production') {
         throw new Error('Production environment requires valid secrets');
       }
     } else {
-      this.logger.log(`✅ 密钥验证通过 - 安全评分: ${validationResult.score}/100`);
+      this.logger.log(
+        `✅ 密钥验证通过 - 安全评分: ${validationResult.score}/100`,
+      );
     }
   }
 
@@ -93,14 +98,16 @@ export class SecretsManagerService implements OnModuleInit {
       recommendations.push('建议实施密钥轮换策略');
     }
     if (score < 50) {
-      recommendations.push('建议使用专业密钥管理服务 (如AWS KMS, HashiCorp Vault)');
+      recommendations.push(
+        '建议使用专业密钥管理服务 (如AWS KMS, HashiCorp Vault)',
+      );
     }
 
     return {
       isValid: score >= 70, // 70分以上认为可接受
       issues,
       score: Math.max(0, score),
-      recommendations
+      recommendations,
     };
   }
 
@@ -122,21 +129,27 @@ export class SecretsManagerService implements OnModuleInit {
     }
 
     // 检查密钥复杂度
-    if (jwtSecret === 'your-secret-key' || jwtSecret === 'secret' || jwtSecret === '123456') {
+    if (
+      jwtSecret === 'your-secret-key' ||
+      jwtSecret === 'secret' ||
+      jwtSecret === '123456'
+    ) {
       issues.push('JWT_SECRET 使用默认值，必须修改');
     }
 
     // 检查熵值
     const entropy = this.calculateEntropy(jwtSecret);
     if (entropy < 4.0) {
-      issues.push(`JWT_SECRET 熵值过低 (${entropy.toFixed(2)}/5.0)，建议使用更复杂的密钥`);
+      issues.push(
+        `JWT_SECRET 熵值过低 (${entropy.toFixed(2)}/5.0)，建议使用更复杂的密钥`,
+      );
     }
 
     return {
       isValid: issues.length === 0,
       issues,
       score: issues.length === 0 ? 100 : Math.max(0, 100 - issues.length * 25),
-      recommendations: []
+      recommendations: [],
     };
   }
 
@@ -151,16 +164,25 @@ export class SecretsManagerService implements OnModuleInit {
     // 检查MongoDB连接字符串
     if (!mongoUrl) {
       issues.push('MONGODB_URL 未配置');
-    } else if (mongoUrl.includes('localhost') && process.env.NODE_ENV === 'production') {
+    } else if (
+      mongoUrl.includes('localhost') &&
+      process.env.NODE_ENV === 'production'
+    ) {
       issues.push('生产环境不应使用localhost MongoDB连接');
-    } else if (!mongoUrl.includes('authSource') && !mongoUrl.includes('localhost')) {
+    } else if (
+      !mongoUrl.includes('authSource') &&
+      !mongoUrl.includes('localhost')
+    ) {
       issues.push('MongoDB连接字符串缺少authSource参数');
     }
 
     // 检查Redis连接
     if (!redisUrl) {
       issues.push('REDIS_URL 未配置');
-    } else if (redisUrl === 'redis://localhost:6379' && process.env.NODE_ENV === 'production') {
+    } else if (
+      redisUrl === 'redis://localhost:6379' &&
+      process.env.NODE_ENV === 'production'
+    ) {
       issues.push('生产环境不应使用默认Redis连接');
     }
 
@@ -168,7 +190,7 @@ export class SecretsManagerService implements OnModuleInit {
       isValid: issues.length === 0,
       issues,
       score: issues.length === 0 ? 100 : Math.max(0, 100 - issues.length * 30),
-      recommendations: []
+      recommendations: [],
     };
   }
 
@@ -193,7 +215,7 @@ export class SecretsManagerService implements OnModuleInit {
       isValid: issues.length === 0,
       issues,
       score: issues.length === 0 ? 100 : Math.max(0, 100 - issues.length * 40),
-      recommendations: []
+      recommendations: [],
     };
   }
 
@@ -218,7 +240,7 @@ export class SecretsManagerService implements OnModuleInit {
       isValid: issues.length === 0,
       issues,
       score: issues.length === 0 ? 100 : Math.max(0, 100 - issues.length * 35),
-      recommendations: []
+      recommendations: [],
     };
   }
 
@@ -244,7 +266,7 @@ export class SecretsManagerService implements OnModuleInit {
       isValid: issues.length === 0,
       issues,
       score: issues.length === 0 ? 100 : Math.max(0, 100 - issues.length * 30),
-      recommendations: []
+      recommendations: [],
     };
   }
 
@@ -253,21 +275,21 @@ export class SecretsManagerService implements OnModuleInit {
    */
   private calculateEntropy(str: string): number {
     const freq = new Map<string, number>();
-    
+
     // 统计字符频率
     for (const char of str) {
       freq.set(char, (freq.get(char) || 0) + 1);
     }
-    
+
     // 计算熵值
     let entropy = 0;
     const len = str.length;
-    
+
     for (const count of freq.values()) {
       const p = count / len;
       entropy -= p * Math.log2(p);
     }
-    
+
     return entropy;
   }
 
@@ -290,12 +312,12 @@ export class SecretsManagerService implements OnModuleInit {
     const algorithm = 'aes-256-gcm';
     const iv = crypto.randomBytes(12);
     const cipher = crypto.createCipher(algorithm, encryptionKey);
-    
+
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    
+
     const authTag = cipher.getAuthTag();
-    
+
     return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
   }
 
@@ -309,17 +331,17 @@ export class SecretsManagerService implements OnModuleInit {
     }
 
     const [ivHex, authTagHex, encrypted] = encryptedText.split(':');
-    
+
     const algorithm = 'aes-256-gcm';
     const iv = Buffer.from(ivHex, 'hex');
     const authTag = Buffer.from(authTagHex, 'hex');
-    
+
     const decipher = crypto.createDecipher(algorithm, encryptionKey);
     decipher.setAuthTag(authTag);
-    
+
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
-    
+
     return decrypted;
   }
 
@@ -328,27 +350,27 @@ export class SecretsManagerService implements OnModuleInit {
    */
   getKeyRotationRecommendations(): string[] {
     const recommendations: string[] = [];
-    
+
     recommendations.push('建议每90天轮换JWT密钥');
     recommendations.push('建议每30天轮换API密钥');
     recommendations.push('建议每180天轮换数据库密码');
     recommendations.push('建议每年轮换加密密钥');
-    
+
     return recommendations;
   }
 }
 
 /**
  * 使用示例:
- * 
+ *
  * constructor(private secretsManager: SecretsManagerService) {}
- * 
+ *
  * // 验证密钥
  * const validation = this.secretsManager.validateAllSecrets();
- * 
+ *
  * // 加密敏感数据
  * const encrypted = this.secretsManager.encrypt('sensitive data');
- * 
+ *
  * // 解密数据
  * const decrypted = this.secretsManager.decrypt(encrypted);
  */

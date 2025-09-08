@@ -4,10 +4,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { GuestApiService } from '../../services/guest/guest-api.service';
-import { 
-  DetailedAnalysisResult, 
-  RadarChartData, 
-  SkillTagStyle 
+import {
+  DetailedAnalysisResult,
+  RadarChartData,
+  SkillTagStyle,
 } from '../../interfaces/detailed-analysis.interface';
 
 @Component({
@@ -31,11 +31,19 @@ import {
       </div>
 
       <!-- Main Content -->
-      <div class="main-content" *ngIf="!isLoading() && !hasError() && analysisResult()">
+      <div
+        class="main-content"
+        *ngIf="!isLoading() && !hasError() && analysisResult()"
+      >
         <!-- Header Section -->
         <div class="header-section">
           <button (click)="goBack()" class="back-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="M19 12H5"></path>
               <path d="M12 19l-7-7 7-7"></path>
             </svg>
@@ -58,9 +66,15 @@ import {
                 </div>
               </div>
               <div class="candidate-info">
-                <h3 class="candidate-name">{{ analysisResult()?.candidateName }}</h3>
-                <p class="candidate-email">{{ analysisResult()?.candidateEmail }}</p>
-                <p class="target-position">目标职位: {{ analysisResult()?.targetPosition }}</p>
+                <h3 class="candidate-name">
+                  {{ analysisResult()?.candidateName }}
+                </h3>
+                <p class="candidate-email">
+                  {{ analysisResult()?.candidateEmail }}
+                </p>
+                <p class="target-position">
+                  目标职位: {{ analysisResult()?.targetPosition }}
+                </p>
               </div>
               <div class="analysis-time">
                 <p>分析时间: {{ getFormattedAnalysisTime() }}</p>
@@ -73,16 +87,24 @@ import {
             <div class="card-header">
               <h2>🎯 技能分析</h2>
               <button (click)="toggleSkillsExpanded()" class="expand-btn">
-                <span [class]="isSkillsExpanded() ? 'skills-collapse-btn' : 'skills-expand-btn'">
+                <span
+                  [class]="
+                    isSkillsExpanded()
+                      ? 'skills-collapse-btn'
+                      : 'skills-expand-btn'
+                  "
+                >
                   {{ isSkillsExpanded() ? '收起' : '展开' }}
                 </span>
               </button>
             </div>
             <div class="skills-content">
               <div class="skill-tags">
-                <span *ngFor="let skill of analysisResult()?.keySkills" 
-                      class="skill-tag" 
-                      [ngStyle]="getSkillTagStyle(skill)">
+                <span
+                  *ngFor="let skill of analysisResult()?.keySkills"
+                  class="skill-tag"
+                  [ngStyle]="getSkillTagStyle(skill)"
+                >
                   {{ skill }}
                 </span>
               </div>
@@ -90,7 +112,10 @@ import {
                 <p>技能匹配度: {{ getOverallMatch() }}%</p>
               </div>
               <div class="skills-heatmap">
-                <div class="heatmap-item" *ngFor="let item of getRadarChartData()">
+                <div
+                  class="heatmap-item"
+                  *ngFor="let item of getRadarChartData()"
+                >
                   <span class="skill-name">{{ item.skill }}</span>
                   <div class="skill-bar">
                     <div class="skill-fill" [style.width.%]="item.value"></div>
@@ -109,7 +134,10 @@ import {
             <h2>💼 经验分析</h2>
             <div class="experience-content">
               <div class="experience-timeline">
-                <div class="timeline-item" *ngFor="let exp of analysisResult()?.experienceDetails">
+                <div
+                  class="timeline-item"
+                  *ngFor="let exp of analysisResult()?.experienceDetails"
+                >
                   <div class="timeline-marker"></div>
                   <div class="timeline-content">
                     <h4>{{ exp.position }}</h4>
@@ -132,9 +160,15 @@ import {
             <div class="education-content">
               <div class="education-level">
                 <h4>{{ analysisResult()?.educationDetails?.degree }}学位</h4>
-                <p class="major">{{ analysisResult()?.educationDetails?.major }}</p>
-                <p class="university">{{ analysisResult()?.educationDetails?.university }}</p>
-                <p class="graduation">{{ analysisResult()?.educationDetails?.graduationYear }}年毕业</p>
+                <p class="major">
+                  {{ analysisResult()?.educationDetails?.major }}
+                </p>
+                <p class="university">
+                  {{ analysisResult()?.educationDetails?.university }}
+                </p>
+                <p class="graduation">
+                  {{ analysisResult()?.educationDetails?.graduationYear }}年毕业
+                </p>
               </div>
               <div class="major-match">
                 <p>专业匹配度: 高</p>
@@ -147,7 +181,10 @@ import {
             <h2>🤖 AI建议</h2>
             <div class="recommendations-content">
               <div class="recommendation-list">
-                <div class="recommendation-item" *ngFor="let rec of analysisResult()?.recommendations">
+                <div
+                  class="recommendation-item"
+                  *ngFor="let rec of analysisResult()?.recommendations"
+                >
                   <span class="rec-icon">💡</span>
                   <p>{{ rec }}</p>
                 </div>
@@ -155,13 +192,19 @@ import {
               <div class="strengths-section">
                 <h4>优势分析</h4>
                 <ul>
-                  <li *ngFor="let strength of analysisResult()?.strengths">{{ strength }}</li>
+                  <li *ngFor="let strength of analysisResult()?.strengths">
+                    {{ strength }}
+                  </li>
                 </ul>
               </div>
               <div class="improvements-section">
                 <h4>改进建议</h4>
                 <ul>
-                  <li *ngFor="let improvement of analysisResult()?.improvements">{{ improvement }}</li>
+                  <li
+                    *ngFor="let improvement of analysisResult()?.improvements"
+                  >
+                    {{ improvement }}
+                  </li>
                 </ul>
               </div>
             </div>
@@ -170,11 +213,17 @@ import {
           <!-- Radar Chart Card -->
           <div class="radar-chart-card card">
             <h2>📈 能力雷达图</h2>
-            <div class="radar-chart-container" [attr.data-updated]="chartUpdated()">
+            <div
+              class="radar-chart-container"
+              [attr.data-updated]="chartUpdated()"
+            >
               <div class="chart-placeholder">
                 <p>雷达图组件将在此处显示</p>
                 <div class="chart-data">
-                  <div *ngFor="let item of getRadarChartData()" class="data-item">
+                  <div
+                    *ngFor="let item of getRadarChartData()"
+                    class="data-item"
+                  >
                     {{ item.skill }}: {{ item.value }}%
                   </div>
                 </div>
@@ -193,21 +242,40 @@ import {
         <!-- Export Actions -->
         <div class="export-actions">
           <button (click)="exportToPdf()" class="export-pdf-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              ></path>
               <polyline points="14,2 14,8 20,8"></polyline>
             </svg>
             导出PDF
           </button>
           <button (click)="exportToExcel()" class="export-excel-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              ></path>
               <polyline points="14,2 14,8 20,8"></polyline>
             </svg>
             导出Excel
           </button>
           <button (click)="shareReport()" class="share-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
               <path d="M16 6l-4-4-4 4"></path>
               <line x1="12" y1="2" x2="12" y2="15"></line>
@@ -218,7 +286,7 @@ import {
       </div>
     </div>
   `,
-  styleUrls: ['./detailed-results.component.css']
+  styleUrls: ['./detailed-results.component.css'],
 })
 export class DetailedResultsComponent implements OnInit, OnDestroy {
   // State signals
@@ -237,11 +305,11 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private guestApi: GuestApiService
+    private guestApi: GuestApiService,
   ) {}
 
   ngOnInit(): void {
-    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
+    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       const sessionId = params.get('sessionId');
       if (sessionId) {
         this.sessionId.set(sessionId);
@@ -270,7 +338,8 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
 
     // Check if getDetailedResults method exists, if not create mock data
     if (this.guestApi.getDetailedResults) {
-      this.guestApi.getDetailedResults(sessionId)
+      this.guestApi
+        .getDetailedResults(sessionId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (result: DetailedAnalysisResult) => {
@@ -280,7 +349,7 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
           },
           error: (error) => {
             this.handleLoadError(error);
-          }
+          },
         });
     } else {
       // Use mock data for development/testing
@@ -295,7 +364,7 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
   private handleLoadError(error: any): void {
     this.isLoading.set(false);
     this.hasError.set(true);
-    
+
     if (error?.name === 'TimeoutError') {
       this.errorMessage.set('请求超时，请检查网络连接后重试');
     } else if (error?.status === 404) {
@@ -324,46 +393,46 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
       recommendations: [
         '技术栈匹配度高，适合高级前端开发岗位',
         '建议进行技术面试验证实际能力',
-        '可以考虑架构设计相关的技术考察'
+        '可以考虑架构设计相关的技术考察',
       ],
       skillAnalysis: {
         technical: 90,
         communication: 75,
         problemSolving: 88,
         teamwork: 82,
-        leadership: 70
+        leadership: 70,
       },
       experienceDetails: [
         {
           company: 'ABC科技公司',
           position: '高级前端工程师',
           duration: '2021-2024',
-          description: '负责企业级Web应用开发'
+          description: '负责企业级Web应用开发',
         },
         {
           company: 'XYZ创业公司',
           position: '前端工程师',
           duration: '2019-2021',
-          description: '参与产品从0到1的开发过程'
-        }
+          description: '参与产品从0到1的开发过程',
+        },
       ],
       educationDetails: {
         degree: '学士',
         major: '计算机科学与技术',
         university: '清华大学',
-        graduationYear: '2019'
+        graduationYear: '2019',
       },
       strengths: [
         '技术栈覆盖面广，掌握多种前端框架',
         '有丰富的项目实战经验',
-        '学习能力强，能快速适应新技术'
+        '学习能力强，能快速适应新技术',
       ],
       improvements: [
         '可以加强团队领导能力的培养',
         '建议深入学习后端技术，成为全栈开发者',
-        '可以参与开源项目，提升技术影响力'
+        '可以参与开源项目，提升技术影响力',
       ],
-      reportUrl: `http://localhost:3000/api/reports/${sessionId}`
+      reportUrl: `http://localhost:3000/api/reports/${sessionId}`,
     };
   }
 
@@ -405,7 +474,7 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
     const shareData = {
       title: `简历分析报告 - ${result.candidateName}`,
       text: '查看详细的AI简历分析报告',
-      url: window.location.href
+      url: window.location.href,
     };
 
     if (navigator.share) {
@@ -435,14 +504,14 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
       { skill: '沟通能力', value: skillAnalysis.communication },
       { skill: '问题解决', value: skillAnalysis.problemSolving },
       { skill: '团队协作', value: skillAnalysis.teamwork },
-      { skill: '领导能力', value: skillAnalysis.leadership }
+      { skill: '领导能力', value: skillAnalysis.leadership },
     ];
   }
 
   getOverallMatch(): number {
     const radarData = this.getRadarChartData();
     if (radarData.length === 0) return 0;
-    
+
     const total = radarData.reduce((sum, item) => sum + item.value, 0);
     return Math.round(total / radarData.length);
   }
@@ -463,12 +532,19 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
 
   getSkillTagStyle(skill: string): SkillTagStyle {
     // Generate consistent colors based on skill name
-    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+    const colors = [
+      '#3b82f6',
+      '#10b981',
+      '#f59e0b',
+      '#ef4444',
+      '#8b5cf6',
+      '#06b6d4',
+    ];
     const index = skill.length % colors.length;
-    
+
     return {
       'background-color': colors[index],
-      'color': 'white'
+      color: 'white',
     };
   }
 

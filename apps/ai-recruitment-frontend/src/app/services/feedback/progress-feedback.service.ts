@@ -32,7 +32,7 @@ export interface LoadingState {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ProgressFeedbackService {
   // Progress tracking
@@ -47,7 +47,7 @@ export class ProgressFeedbackService {
   private loadingStates = new Map<string, LoadingState>();
   private globalLoading$ = new BehaviorSubject<LoadingState>({
     isLoading: false,
-    message: ''
+    message: '',
   });
 
   // Signals for reactive access
@@ -55,20 +55,20 @@ export class ProgressFeedbackService {
   notifications = signal<StatusNotification[]>([]);
   globalLoading = signal<LoadingState>({
     isLoading: false,
-    message: ''
+    message: '',
   });
 
   constructor() {
     // Sync BehaviorSubjects with signals
-    this.progressUpdates$.subscribe(updates => {
+    this.progressUpdates$.subscribe((updates) => {
       this.progressUpdates.set(updates);
     });
 
-    this.notifications$.subscribe(notifications => {
+    this.notifications$.subscribe((notifications) => {
       this.notifications.set(notifications);
     });
 
-    this.globalLoading$.subscribe(loading => {
+    this.globalLoading$.subscribe((loading) => {
       this.globalLoading.set(loading);
     });
   }
@@ -81,7 +81,7 @@ export class ProgressFeedbackService {
       progress: 0,
       message: initialMessage,
       timestamp: new Date(),
-      type: 'info'
+      type: 'info',
     };
 
     this.activeOperations.set(id, update);
@@ -89,11 +89,11 @@ export class ProgressFeedbackService {
   }
 
   updateProgress(
-    id: string, 
-    progress: number, 
-    message: string, 
+    id: string,
+    progress: number,
+    message: string,
     stage?: string,
-    type: 'info' | 'success' | 'warning' | 'error' = 'info'
+    type: 'info' | 'success' | 'warning' | 'error' = 'info',
   ): void {
     const existing = this.activeOperations.get(id);
     if (!existing) return;
@@ -104,7 +104,7 @@ export class ProgressFeedbackService {
       message,
       stage: stage || existing.stage,
       timestamp: new Date(),
-      type
+      type,
     };
 
     this.activeOperations.set(id, update);
@@ -125,7 +125,7 @@ export class ProgressFeedbackService {
       progress: 100,
       message: finalMessage || '完成',
       timestamp: new Date(),
-      type: 'success'
+      type: 'success',
     };
 
     this.activeOperations.set(id, update);
@@ -146,7 +146,7 @@ export class ProgressFeedbackService {
       ...existing,
       message: errorMessage,
       timestamp: new Date(),
-      type: 'error'
+      type: 'error',
     };
 
     this.activeOperations.set(id, update);
@@ -160,8 +160,9 @@ export class ProgressFeedbackService {
   }
 
   private updateProgressList(): void {
-    const updates = Array.from(this.activeOperations.values())
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    const updates = Array.from(this.activeOperations.values()).sort(
+      (a, b) => b.timestamp.getTime() - a.timestamp.getTime(),
+    );
     this.progressUpdates$.next(updates);
   }
 
@@ -172,7 +173,7 @@ export class ProgressFeedbackService {
     type: 'info' | 'success' | 'warning' | 'error' = 'info',
     duration = 5000,
     action?: { label: string; handler: () => void },
-    persistent = false
+    persistent = false,
   ): string {
     const id = `notification-${++this.notificationId}`;
     const notification: StatusNotification = {
@@ -182,7 +183,7 @@ export class ProgressFeedbackService {
       type,
       duration,
       action,
-      persistent
+      persistent,
     };
 
     const current = this.notifications$.value;
@@ -200,7 +201,7 @@ export class ProgressFeedbackService {
 
   removeNotification(id: string): void {
     const current = this.notifications$.value;
-    const filtered = current.filter(n => n.id !== id);
+    const filtered = current.filter((n) => n.id !== id);
     this.notifications$.next(filtered);
   }
 
@@ -214,7 +215,14 @@ export class ProgressFeedbackService {
   }
 
   showError(title: string, message: string, persistent = true): string {
-    return this.showNotification(title, message, 'error', 0, undefined, persistent);
+    return this.showNotification(
+      title,
+      message,
+      'error',
+      0,
+      undefined,
+      persistent,
+    );
   }
 
   showWarning(title: string, message: string, duration = 6000): string {
@@ -230,14 +238,19 @@ export class ProgressFeedbackService {
     const state: LoadingState = {
       isLoading: true,
       message,
-      progress
+      progress,
     };
 
     this.loadingStates.set(key, state);
     this.updateGlobalLoading();
   }
 
-  updateLoading(key: string, message?: string, progress?: number, stage?: string): void {
+  updateLoading(
+    key: string,
+    message?: string,
+    progress?: number,
+    stage?: string,
+  ): void {
     const existing = this.loadingStates.get(key);
     if (!existing) return;
 
@@ -245,7 +258,7 @@ export class ProgressFeedbackService {
       ...existing,
       message: message || existing.message,
       progress,
-      stage
+      stage,
     };
 
     this.loadingStates.set(key, updated);
@@ -259,11 +272,11 @@ export class ProgressFeedbackService {
 
   private updateGlobalLoading(): void {
     const activeStates = Array.from(this.loadingStates.values());
-    
+
     if (activeStates.length === 0) {
       this.globalLoading$.next({
         isLoading: false,
-        message: ''
+        message: '',
       });
       return;
     }
@@ -292,18 +305,20 @@ export class ProgressFeedbackService {
   }
 
   // Batch operations
-  showBatchProgress(operations: Array<{id: string; message: string}>): void {
-    operations.forEach(op => {
+  showBatchProgress(operations: Array<{ id: string; message: string }>): void {
+    operations.forEach((op) => {
       this.startProgress(op.id, op.message);
     });
   }
 
-  updateBatchProgress(updates: Array<{id: string; progress: number; message?: string}>): void {
-    updates.forEach(update => {
+  updateBatchProgress(
+    updates: Array<{ id: string; progress: number; message?: string }>,
+  ): void {
+    updates.forEach((update) => {
       this.updateProgress(
         update.id,
         update.progress,
-        update.message || this.activeOperations.get(update.id)?.message || ''
+        update.message || this.activeOperations.get(update.id)?.message || '',
       );
     });
   }
@@ -321,8 +336,8 @@ export class ProgressFeedbackService {
 
     return {
       active,
-      completed: operations.filter(op => op.progress === 100).length,
-      averageProgress
+      completed: operations.filter((op) => op.progress === 100).length,
+      averageProgress,
     };
   }
 
@@ -334,7 +349,7 @@ export class ProgressFeedbackService {
     this.notifications$.next([]);
     this.globalLoading$.next({
       isLoading: false,
-      message: ''
+      message: '',
     });
   }
 }

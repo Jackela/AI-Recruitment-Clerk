@@ -25,12 +25,12 @@ export interface NotificationPayload {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PWAService {
   private deferredPrompt: InstallPromptEvent | null = null;
   private swRegistration: ServiceWorkerRegistration | null = null;
-  
+
   private isInstalledSubject = new BehaviorSubject<boolean>(false);
   private isInstallableSubject = new BehaviorSubject<boolean>(false);
   private isOnlineSubject = new BehaviorSubject<boolean>(navigator.onLine);
@@ -58,10 +58,11 @@ export class PWAService {
    */
   private checkInstallation(): void {
     // Check if running in standalone mode (PWA installed)
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                        (window.navigator as any).standalone ||
-                        document.referrer.includes('android-app://');
-    
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone ||
+      document.referrer.includes('android-app://');
+
     this.isInstalledSubject.next(isStandalone);
   }
 
@@ -72,10 +73,10 @@ export class PWAService {
     window.addEventListener('beforeinstallprompt', (e: Event) => {
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
-      
+
       this.deferredPrompt = e as InstallPromptEvent;
       this.isInstallableSubject.next(true);
-      
+
       console.log('PWA: Install prompt is available');
     });
 
@@ -94,7 +95,8 @@ export class PWAService {
    */
   private setupServiceWorker(): void {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw-enhanced.js')
+      navigator.serviceWorker
+        .register('/sw-enhanced.js')
         .then((registration) => {
           this.swRegistration = registration;
           console.log('SW: Service Worker registered successfully');
@@ -104,7 +106,10 @@ export class PWAService {
             const newWorker = registration.installing;
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                if (
+                  newWorker.state === 'installed' &&
+                  navigator.serviceWorker.controller
+                ) {
                   this.ngZone.run(() => {
                     this.updateAvailableSubject.next(true);
                     console.log('SW: New update available');
@@ -148,7 +153,10 @@ export class PWAService {
    * Setup background sync
    */
   private setupBackgroundSync(): void {
-    if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+    if (
+      'serviceWorker' in navigator &&
+      'sync' in window.ServiceWorkerRegistration.prototype
+    ) {
       // Background sync is supported
       console.log('Background sync is supported');
     }
@@ -184,7 +192,7 @@ export class PWAService {
     try {
       await this.deferredPrompt.prompt();
       const choiceResult = await this.deferredPrompt.userChoice;
-      
+
       if (choiceResult.outcome === 'accepted') {
         console.log('User accepted the install prompt');
         return true;
@@ -245,7 +253,7 @@ export class PWAService {
    */
   async showNotification(payload: NotificationPayload): Promise<void> {
     const permission = await this.requestNotificationPermission();
-    
+
     if (permission !== 'granted') {
       console.warn('Notification permission not granted');
       return;
@@ -276,7 +284,10 @@ export class PWAService {
    * Add to background sync queue
    */
   async addToSyncQueue(tag: string, data: any): Promise<void> {
-    if (!('serviceWorker' in navigator) || !('sync' in window.ServiceWorkerRegistration.prototype)) {
+    if (
+      !('serviceWorker' in navigator) ||
+      !('sync' in window.ServiceWorkerRegistration.prototype)
+    ) {
       console.warn('Background sync not supported');
       return;
     }
@@ -284,7 +295,7 @@ export class PWAService {
     try {
       // Store data in IndexedDB for sync
       await this.storeForSync(tag, data);
-      
+
       if (this.swRegistration) {
         // Background sync not available in standard ServiceWorkerRegistration
         // await this.swRegistration.sync?.register(tag);
@@ -301,24 +312,24 @@ export class PWAService {
   private async storeForSync(tag: string, data: any): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open('arc-mobile-db', 1);
-      
+
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
         const db = request.result;
         const transaction = db.transaction([tag], 'readwrite');
         const store = transaction.objectStore(tag);
-        
+
         const item = {
           id: Date.now().toString(),
           data,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         };
-        
+
         store.add(item);
         transaction.oncomplete = () => resolve();
         transaction.onerror = () => reject(transaction.error);
       };
-      
+
       request.onupgradeneeded = (event) => {
         const db = (event.target as any).result;
         if (!db.objectStoreNames.contains(tag)) {
@@ -345,7 +356,9 @@ export class PWAService {
       isOnline: this.isOnlineSubject.value,
       hasServiceWorker: 'serviceWorker' in navigator,
       hasNotifications: 'Notification' in window,
-      hasBackgroundSync: 'serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype
+      hasBackgroundSync:
+        'serviceWorker' in navigator &&
+        'sync' in window.ServiceWorkerRegistration.prototype,
     };
   }
 
@@ -356,7 +369,7 @@ export class PWAService {
     if ('caches' in window) {
       const cacheNames = await caches.keys();
       await Promise.all(
-        cacheNames.map(cacheName => caches.delete(cacheName))
+        cacheNames.map((cacheName) => caches.delete(cacheName)),
       );
       console.log('All caches cleared');
     }
@@ -382,7 +395,11 @@ export class PWAService {
   /**
    * Share content (Web Share API)
    */
-  async shareContent(data: { title?: string; text?: string; url?: string }): Promise<boolean> {
+  async shareContent(data: {
+    title?: string;
+    text?: string;
+    url?: string;
+  }): Promise<boolean> {
     if (!('share' in navigator)) {
       console.warn('Web Share API not supported');
       return false;

@@ -40,19 +40,23 @@ export class ReportGeneratorNatsService extends NatsClientService {
   /**
    * Publish report generated event
    */
-  async publishReportGenerated(event: ReportGeneratedEvent): Promise<NatsPublishResult> {
+  async publishReportGenerated(
+    event: ReportGeneratedEvent,
+  ): Promise<NatsPublishResult> {
     const subject = 'report.generated';
-    
+
     try {
       const result = await this.publish(subject, {
         ...event,
         eventType: 'ReportGeneratedEvent',
       });
-      
+
       if (result.success) {
-        this.logger.log(`Report generated event published successfully for reportId: ${event.reportId}`);
+        this.logger.log(
+          `Report generated event published successfully for reportId: ${event.reportId}`,
+        );
       }
-      
+
       return result;
     } catch (error) {
       this.logger.error(`Error publishing report generated event`, error);
@@ -66,22 +70,29 @@ export class ReportGeneratorNatsService extends NatsClientService {
   /**
    * Publish report generation failed event
    */
-  async publishReportGenerationFailed(event: ReportGenerationFailedEvent): Promise<NatsPublishResult> {
+  async publishReportGenerationFailed(
+    event: ReportGenerationFailedEvent,
+  ): Promise<NatsPublishResult> {
     const subject = 'report.generation.failed';
-    
+
     try {
       const result = await this.publish(subject, {
         ...event,
         eventType: 'ReportGenerationFailedEvent',
       });
-      
+
       if (result.success) {
-        this.logger.log(`Report generation failed event published for jobId: ${event.jobId}, resumeId: ${event.resumeId}`);
+        this.logger.log(
+          `Report generation failed event published for jobId: ${event.jobId}, resumeId: ${event.resumeId}`,
+        );
       }
-      
+
       return result;
     } catch (error) {
-      this.logger.error(`Error publishing report generation failed event`, error);
+      this.logger.error(
+        `Error publishing report generation failed event`,
+        error,
+      );
       return {
         success: false,
         error: error.message,
@@ -92,29 +103,25 @@ export class ReportGeneratorNatsService extends NatsClientService {
   /**
    * Subscribe to match.scored events from scoring-engine-svc
    */
-  async subscribeToMatchScored(handler: (event: any) => Promise<void>): Promise<void> {
-    await this.subscribe(
-      'analysis.match.scored',
-      handler,
-      { 
-        queueGroup: 'report-generator',
-        durableName: 'report-generator-match-scored'
-      }
-    );
+  async subscribeToMatchScored(
+    handler: (event: any) => Promise<void>,
+  ): Promise<void> {
+    await this.subscribe('analysis.match.scored', handler, {
+      queueGroup: 'report-generator',
+      durableName: 'report-generator-match-scored',
+    });
   }
 
   /**
    * Subscribe to report generation requests
    */
-  async subscribeToReportGenerationRequested(handler: (event: ReportGenerationRequestedEvent) => Promise<void>): Promise<void> {
-    await this.subscribe(
-      'report.generation.requested',
-      handler,
-      { 
-        queueGroup: 'report-generator',
-        durableName: 'report-generator-generation-requested'
-      }
-    );
+  async subscribeToReportGenerationRequested(
+    handler: (event: ReportGenerationRequestedEvent) => Promise<void>,
+  ): Promise<void> {
+    await this.subscribe('report.generation.requested', handler, {
+      queueGroup: 'report-generator',
+      durableName: 'report-generator-generation-requested',
+    });
   }
 
   /**
@@ -123,7 +130,7 @@ export class ReportGeneratorNatsService extends NatsClientService {
   async healthCheck(): Promise<{ status: string; details: any }> {
     try {
       const baseHealth = await super.healthCheck();
-      
+
       return {
         status: baseHealth.connected ? 'healthy' : 'degraded',
         details: {
@@ -132,15 +139,15 @@ export class ReportGeneratorNatsService extends NatsClientService {
             matchScored: 'subscribed',
             reportGeneration: 'subscribed',
           },
-          reportSpecificFeatures: 'available'
-        }
+          reportSpecificFeatures: 'available',
+        },
       };
     } catch (error) {
       return {
         status: 'unhealthy',
         details: {
-          error: error.message
-        }
+          error: error.message,
+        },
       };
     }
   }

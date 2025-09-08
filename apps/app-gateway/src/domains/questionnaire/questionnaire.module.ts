@@ -5,6 +5,6 @@ import { QuestionnaireIntegrationService } from './questionnaire-integration.ser
 @Module({
   controllers: [QuestionnaireController],
   providers: [QuestionnaireIntegrationService],
-  exports: [QuestionnaireIntegrationService]
+  exports: [QuestionnaireIntegrationService],
 })
 export class QuestionnaireModule {}

@@ -1,16 +1,39 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { 
-  IsString, 
-  IsNotEmpty, 
-  IsEnum, 
-  IsNumber, 
-  IsObject, 
+import {
+  IsString,
+  IsNotEmpty,
+  IsEnum,
+  IsNumber,
+  IsObject,
   IsOptional,
   IsArray,
   Min,
-  IsDateString
+  IsDateString,
 } from 'class-validator';
-import { EventType, MetricUnit, ReportType, DataScope } from '@ai-recruitment-clerk/infrastructure-shared';
+// Fallback enums for analytics
+enum EventType {
+  USER_INTERACTION = 'user_interaction',
+  SYSTEM_EVENT = 'system_event',
+  ERROR_EVENT = 'error_event',
+}
+
+enum MetricUnit {
+  COUNT = 'count',
+  PERCENTAGE = 'percentage',
+  MILLISECONDS = 'milliseconds',
+}
+
+enum ReportType {
+  SUMMARY = 'summary',
+  DETAILED = 'detailed',
+  TREND = 'trend',
+}
+
+enum DataScope {
+  USER = 'user',
+  ORGANIZATION = 'organization',
+  SYSTEM = 'system',
+}
 
 /**
  * 用户交互事件追踪DTO
@@ -21,25 +44,25 @@ export class TrackEventDto {
   @IsNotEmpty()
   sessionId: string;
 
-  @ApiProperty({ 
-    description: '事件类型', 
+  @ApiProperty({
+    description: '事件类型',
     enum: EventType,
-    example: EventType.USER_INTERACTION 
+    example: EventType.USER_INTERACTION,
   })
   @IsEnum(EventType)
   eventType: EventType;
 
-  @ApiProperty({ 
-    description: '事件数据', 
-    example: { action: 'click', target: 'submit_button' } 
+  @ApiProperty({
+    description: '事件数据',
+    example: { action: 'click', target: 'submit_button' },
   })
   @IsObject()
   eventData: any;
 
-  @ApiProperty({ 
-    description: '事件上下文（可选）', 
+  @ApiProperty({
+    description: '事件上下文（可选）',
     example: { pageUrl: '/questionnaire', userAgent: 'Chrome/91.0' },
-    required: false 
+    required: false,
   })
   @IsOptional()
   @IsObject()
@@ -50,7 +73,10 @@ export class TrackEventDto {
  * 业务指标记录DTO
  */
 export class RecordMetricDto {
-  @ApiProperty({ description: '指标名称', example: 'questionnaire_completion_rate' })
+  @ApiProperty({
+    description: '指标名称',
+    example: 'questionnaire_completion_rate',
+  })
   @IsString()
   @IsNotEmpty()
   metricName: string;
@@ -60,18 +86,18 @@ export class RecordMetricDto {
   @Min(0)
   metricValue: number;
 
-  @ApiProperty({ 
-    description: '指标单位', 
+  @ApiProperty({
+    description: '指标单位',
     enum: MetricUnit,
-    example: MetricUnit.PERCENTAGE 
+    example: MetricUnit.PERCENTAGE,
   })
   @IsEnum(MetricUnit)
   metricUnit: MetricUnit;
 
-  @ApiProperty({ 
-    description: '指标维度（可选）', 
+  @ApiProperty({
+    description: '指标维度（可选）',
     example: { source: 'web', region: 'us-east' },
-    required: false 
+    required: false,
   })
   @IsOptional()
   @IsObject()
@@ -82,9 +108,9 @@ export class RecordMetricDto {
  * 批量处理事件DTO
  */
 export class BatchProcessDto {
-  @ApiProperty({ 
-    description: '待处理的事件ID列表', 
-    example: ['event_1', 'event_2', 'event_3'] 
+  @ApiProperty({
+    description: '待处理的事件ID列表',
+    example: ['event_1', 'event_2', 'event_3'],
   })
   @IsArray()
   @IsString({ each: true })
@@ -162,9 +188,9 @@ export class PrivacyMetricsDto {
   @ApiProperty({ description: '合规分数（0-100）' })
   complianceScore: number;
 
-  @ApiProperty({ 
-    description: '风险等级', 
-    enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] 
+  @ApiProperty({
+    description: '风险等级',
+    enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'],
   })
   riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 }

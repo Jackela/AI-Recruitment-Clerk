@@ -8,7 +8,7 @@ export const registerCleanup = (fn: Cleanup) => cleaners.push(fn);
 
 export const runCleanups = async () => {
   console.log(`🧹 Running ${cleaners.length} cleanup functions...`);
-  
+
   for (const fn of cleaners.splice(0)) {
     try {
       await fn();
@@ -16,14 +16,14 @@ export const runCleanups = async () => {
       console.warn('Cleanup function failed:', error.message);
     }
   }
-  
+
   console.log('✅ All cleanup functions completed');
 };
 
 // 全局进程清理
 const globalCleanup = async () => {
   await runCleanups();
-  
+
   // 强制关闭所有活动句柄
   if (process.env.NODE_ENV === 'test') {
     setTimeout(() => {

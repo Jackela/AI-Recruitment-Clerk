@@ -1,9 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { NatsClientService, NatsPublishResult } from '@app/shared-nats-client';
+import { DeliverPolicy } from 'nats';
 
 @Injectable()
 export class ResumeParserNatsService extends NatsClientService {
-  private readonly logger = new Logger(ResumeParserNatsService.name);
+  private readonly serviceLogger = new Logger(ResumeParserNatsService.name);
 
   /**
    * Publish analysis.resume.parsed event when resume processing is complete
@@ -17,10 +18,12 @@ export class ResumeParserNatsService extends NatsClientService {
     parsingMethod?: string;
   }): Promise<NatsPublishResult> {
     const subject = 'analysis.resume.parsed';
-    
+
     try {
-      this.logger.log(`Publishing analysis.resume.parsed event for resumeId: ${event.resumeId}`);
-      
+      this.serviceLogger.log(
+        `Publishing analysis.resume.parsed event for resumeId: ${event.resumeId}`,
+      );
+
       const eventPayload = {
         jobId: event.jobId,
         resumeId: event.resumeId,
@@ -43,16 +46,24 @@ export class ResumeParserNatsService extends NatsClientService {
           'job-id': event.jobId,
         },
       });
-      
+
       if (result.success) {
-        this.logger.log(`Analysis resume parsed event published successfully for resumeId: ${event.resumeId}, messageId: ${result.messageId}`);
+        this.serviceLogger.log(
+          `Analysis resume parsed event published successfully for resumeId: ${event.resumeId}, messageId: ${result.messageId}`,
+        );
       } else {
-        this.logger.error(`Failed to publish analysis resume parsed event for resumeId: ${event.resumeId}`, result.error);
+        this.serviceLogger.error(
+          `Failed to publish analysis resume parsed event for resumeId: ${event.resumeId}`,
+          result.error,
+        );
       }
-      
+
       return result;
     } catch (error) {
-      this.logger.error(`Error publishing analysis resume parsed event for resumeId: ${event.resumeId}`, error);
+      this.serviceLogger.error(
+        `Error publishing analysis resume parsed event for resumeId: ${event.resumeId}`,
+        error,
+      );
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -71,10 +82,12 @@ export class ResumeParserNatsService extends NatsClientService {
     retryAttempt?: number;
   }): Promise<NatsPublishResult> {
     const subject = 'job.resume.failed';
-    
+
     try {
-      this.logger.log(`Publishing job.resume.failed event for resumeId: ${event.resumeId}`);
-      
+      this.serviceLogger.log(
+        `Publishing job.resume.failed event for resumeId: ${event.resumeId}`,
+      );
+
       const eventPayload = {
         jobId: event.jobId,
         resumeId: event.resumeId,
@@ -101,16 +114,24 @@ export class ResumeParserNatsService extends NatsClientService {
           'error-stage': event.stage,
         },
       });
-      
+
       if (result.success) {
-        this.logger.log(`Job resume failed event published successfully for resumeId: ${event.resumeId}, messageId: ${result.messageId}`);
+        this.serviceLogger.log(
+          `Job resume failed event published successfully for resumeId: ${event.resumeId}, messageId: ${result.messageId}`,
+        );
       } else {
-        this.logger.error(`Failed to publish job resume failed event for resumeId: ${event.resumeId}`, result.error);
+        this.serviceLogger.error(
+          `Failed to publish job resume failed event for resumeId: ${event.resumeId}`,
+          result.error,
+        );
       }
-      
+
       return result;
     } catch (error) {
-      this.logger.error(`Error publishing job resume failed event for resumeId: ${event.resumeId}`, error);
+      this.serviceLogger.error(
+        `Error publishing job resume failed event for resumeId: ${event.resumeId}`,
+        error,
+      );
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -130,13 +151,15 @@ export class ResumeParserNatsService extends NatsClientService {
       retryAttempt?: number;
       inputSize?: number;
       processingTimeMs?: number;
-    }
+    },
   ): Promise<NatsPublishResult> {
     const subject = 'resume.processing.error';
-    
+
     try {
-      this.logger.log(`Publishing processing error event for resumeId: ${resumeId}`);
-      
+      this.serviceLogger.log(
+        `Publishing processing error event for resumeId: ${resumeId}`,
+      );
+
       const eventPayload = {
         jobId,
         resumeId,
@@ -165,19 +188,30 @@ export class ResumeParserNatsService extends NatsClientService {
           'error-stage': context?.stage || 'unknown',
         },
       });
-      
+
       if (result.success) {
-        this.logger.log(`Processing error event published successfully for resumeId: ${resumeId}, messageId: ${result.messageId}`);
+        this.serviceLogger.log(
+          `Processing error event published successfully for resumeId: ${resumeId}, messageId: ${result.messageId}`,
+        );
       } else {
-        this.logger.error(`Failed to publish processing error event for resumeId: ${resumeId}`, result.error);
+        this.serviceLogger.error(
+          `Failed to publish processing error event for resumeId: ${resumeId}`,
+          result.error,
+        );
       }
-      
+
       return result;
     } catch (publishError) {
-      this.logger.error(`Error publishing processing error event for resumeId: ${resumeId}`, publishError);
+      this.serviceLogger.error(
+        `Error publishing processing error event for resumeId: ${resumeId}`,
+        publishError,
+      );
       return {
         success: false,
-        error: publishError instanceof Error ? publishError.message : 'Unknown error',
+        error:
+          publishError instanceof Error
+            ? publishError.message
+            : 'Unknown error',
       };
     }
   }
@@ -186,25 +220,27 @@ export class ResumeParserNatsService extends NatsClientService {
    * Subscribe to job.resume.submitted events
    */
   async subscribeToResumeSubmissions(
-    handler: (event: any) => Promise<void>
+    handler: (event: any) => Promise<void>,
   ): Promise<void> {
     const subject = 'job.resume.submitted';
     const durableName = 'resume-parser-job-resume-submitted';
-    
+
     try {
-      this.logger.log(`Setting up subscription to ${subject} with durable name: ${durableName}`);
-      
+      this.serviceLogger.log(
+        `Setting up subscription to ${subject} with durable name: ${durableName}`,
+      );
+
       await this.subscribe(subject, handler, {
         durableName,
         queueGroup: 'resume-parser-group',
         maxDeliver: 3,
         ackWait: 30000, // 30 seconds
-        deliverPolicy: 'new',
+        deliverPolicy: DeliverPolicy.New,
       });
-      
-      this.logger.log(`Successfully subscribed to ${subject}`);
+
+      this.serviceLogger.log(`Successfully subscribed to ${subject}`);
     } catch (error) {
-      this.logger.error(`Failed to subscribe to ${subject}`, error);
+      this.serviceLogger.error(`Failed to subscribe to ${subject}`, error);
       throw error;
     }
   }
@@ -230,11 +266,14 @@ export class ResumeParserNatsService extends NatsClientService {
     messagesReceived: number;
   }> {
     const baseHealth = await this.getHealthStatus();
-    
+
     return {
-      ...baseHealth,
+      connected: baseHealth.connected,
       service: 'resume-parser-svc',
+      lastActivity: baseHealth.lastOperationTime || new Date(),
       subscriptions: ['job.resume.submitted'],
+      messagesSent: (baseHealth as any).messagesSent ?? 0,
+      messagesReceived: (baseHealth as any).messagesReceived ?? 0,
     };
   }
 }

@@ -1,7 +1,12 @@
 import { jobReducer } from './job.reducer';
 import { initialJobState, JobState } from './job.state';
 import * as JobActions from './job.actions';
-import { Job, JobListItem, CreateJobRequest, CreateJobResponse } from './job.model';
+import {
+  Job,
+  JobListItem,
+  CreateJobRequest,
+  CreateJobResponse,
+} from './job.model';
 
 describe('Job Reducer', () => {
   const mockJobListItems: JobListItem[] = [
@@ -10,15 +15,15 @@ describe('Job Reducer', () => {
       title: '软件工程师',
       status: 'completed',
       createdAt: new Date('2024-01-01'),
-      resumeCount: 5
+      resumeCount: 5,
     },
     {
       id: '2',
       title: '产品经理',
       status: 'processing',
       createdAt: new Date('2024-01-02'),
-      resumeCount: 2
-    }
+      resumeCount: 2,
+    },
   ];
 
   const mockJob: Job = {
@@ -27,11 +32,11 @@ describe('Job Reducer', () => {
     jdText: '招聘软件工程师...',
     status: 'completed',
     createdAt: new Date('2024-01-01'),
-    resumeCount: 5
+    resumeCount: 5,
   };
 
   const mockCreateJobResponse: CreateJobResponse = {
-    jobId: 'new-job-id'
+    jobId: 'new-job-id',
   };
 
   describe('Initial State', () => {
@@ -61,7 +66,7 @@ describe('Job Reducer', () => {
     it('should handle loadJobsSuccess', () => {
       const loadingState: JobState = {
         ...initialJobState,
-        loading: true
+        loading: true,
       };
       const action = JobActions.loadJobsSuccess({ jobs: mockJobListItems });
       const state = jobReducer(loadingState, action);
@@ -74,7 +79,7 @@ describe('Job Reducer', () => {
     it('should handle loadJobsFailure', () => {
       const loadingState: JobState = {
         ...initialJobState,
-        loading: true
+        loading: true,
       };
       const error = 'Failed to load jobs';
       const action = JobActions.loadJobsFailure({ error });
@@ -97,7 +102,7 @@ describe('Job Reducer', () => {
     it('should handle loadJobSuccess', () => {
       const loadingState: JobState = {
         ...initialJobState,
-        loading: true
+        loading: true,
       };
       const action = JobActions.loadJobSuccess({ job: mockJob });
       const state = jobReducer(loadingState, action);
@@ -110,7 +115,7 @@ describe('Job Reducer', () => {
     it('should handle loadJobFailure', () => {
       const loadingState: JobState = {
         ...initialJobState,
-        loading: true
+        loading: true,
       };
       const error = 'Failed to load job';
       const action = JobActions.loadJobFailure({ error });
@@ -125,7 +130,7 @@ describe('Job Reducer', () => {
     it('should handle createJob', () => {
       const request = {
         jobTitle: '新岗位',
-        jdText: '新岗位描述'
+        jdText: '新岗位描述',
       };
       const action = JobActions.createJob({ request });
       const state = jobReducer(initialJobState, action);
@@ -137,9 +142,11 @@ describe('Job Reducer', () => {
     it('should handle createJobSuccess', () => {
       const creatingState: JobState = {
         ...initialJobState,
-        creating: true
+        creating: true,
       };
-      const action = JobActions.createJobSuccess({ response: mockCreateJobResponse });
+      const action = JobActions.createJobSuccess({
+        response: mockCreateJobResponse,
+      });
       const state = jobReducer(creatingState, action);
 
       expect(state.creating).toBe(false);
@@ -149,7 +156,7 @@ describe('Job Reducer', () => {
     it('should handle createJobFailure', () => {
       const creatingState: JobState = {
         ...initialJobState,
-        creating: true
+        creating: true,
       };
       const error = 'Failed to create job';
       const action = JobActions.createJobFailure({ error });
@@ -164,7 +171,7 @@ describe('Job Reducer', () => {
     it('should handle clearSelectedJob', () => {
       const stateWithSelectedJob: JobState = {
         ...initialJobState,
-        selectedJob: mockJob
+        selectedJob: mockJob,
       };
       const action = JobActions.clearSelectedJob();
       const state = jobReducer(stateWithSelectedJob, action);
@@ -175,7 +182,7 @@ describe('Job Reducer', () => {
     it('should handle clearJobError', () => {
       const stateWithError: JobState = {
         ...initialJobState,
-        error: 'Some error'
+        error: 'Some error',
       };
       const action = JobActions.clearJobError();
       const state = jobReducer(stateWithError, action);
@@ -198,7 +205,7 @@ describe('Job Reducer', () => {
       const stateWithData: JobState = {
         ...initialJobState,
         jobs: mockJobListItems,
-        selectedJob: mockJob
+        selectedJob: mockJob,
       };
       const action = JobActions.loadJobs();
       const newState = jobReducer(stateWithData, action);

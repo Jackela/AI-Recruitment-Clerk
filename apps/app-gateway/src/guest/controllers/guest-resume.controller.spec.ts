@@ -76,7 +76,11 @@ describe('GuestResumeController', () => {
         notes: 'Test notes',
       };
 
-      const result = await controller.analyzeResume(mockRequest, mockFile, uploadData);
+      const result = await controller.analyzeResume(
+        mockRequest,
+        mockFile,
+        uploadData,
+      );
 
       expect(result.success).toBe(true);
       expect(result.data.analysisId).toMatch(/^guest-analysis-/);
@@ -92,7 +96,11 @@ describe('GuestResumeController', () => {
         candidateEmail: 'jane@example.com',
       };
 
-      const result = await controller.analyzeResume(mockAuthenticatedRequest, mockFile, uploadData);
+      const result = await controller.analyzeResume(
+        mockAuthenticatedRequest,
+        mockFile,
+        uploadData,
+      );
 
       expect(result.success).toBe(true);
       expect(result.data.analysisId).toMatch(/^guest-analysis-/);
@@ -112,8 +120,9 @@ describe('GuestResumeController', () => {
 
       const uploadData = {};
 
-      await expect(controller.analyzeResume(mockRequest, mockFile, uploadData))
-        .rejects.toThrow(HttpException);
+      await expect(
+        controller.analyzeResume(mockRequest, mockFile, uploadData),
+      ).rejects.toThrow(HttpException);
 
       try {
         await controller.analyzeResume(mockRequest, mockFile, uploadData);
@@ -140,10 +149,16 @@ describe('GuestResumeController', () => {
       jest.spyOn(Math, 'random').mockReturnValue(0); // Make analysis ID predictable
       jest.spyOn(Date, 'now').mockReturnValue(1234567890000);
 
-      const result = await controller.analyzeResume(mockRequest, mockFile, uploadData);
+      const result = await controller.analyzeResume(
+        mockRequest,
+        mockFile,
+        uploadData,
+      );
 
       expect(result.success).toBe(true);
-      expect(result.data.analysisId).toBe('guest-analysis-1234567890000-000000000');
+      expect(result.data.analysisId).toBe(
+        'guest-analysis-1234567890000-000000000',
+      );
     });
   });
 
@@ -151,7 +166,10 @@ describe('GuestResumeController', () => {
     it('should return analysis results successfully', async () => {
       const analysisId = 'guest-analysis-1234567890000-abc123';
 
-      const result = await controller.getAnalysisResults(mockRequest, analysisId);
+      const result = await controller.getAnalysisResults(
+        mockRequest,
+        analysisId,
+      );
 
       expect(result.success).toBe(true);
       expect(result.data.analysisId).toBe(analysisId);
@@ -166,8 +184,9 @@ describe('GuestResumeController', () => {
     it('should throw error for invalid analysis ID', async () => {
       const invalidAnalysisId = 'invalid-analysis-id';
 
-      await expect(controller.getAnalysisResults(mockRequest, invalidAnalysisId))
-        .rejects.toThrow(HttpException);
+      await expect(
+        controller.getAnalysisResults(mockRequest, invalidAnalysisId),
+      ).rejects.toThrow(HttpException);
 
       try {
         await controller.getAnalysisResults(mockRequest, invalidAnalysisId);
@@ -181,7 +200,10 @@ describe('GuestResumeController', () => {
     it('should return mock analysis results with proper structure', async () => {
       const analysisId = 'guest-analysis-1234567890000-test';
 
-      const result = await controller.getAnalysisResults(mockRequest, analysisId);
+      const result = await controller.getAnalysisResults(
+        mockRequest,
+        analysisId,
+      );
 
       const { results } = result.data;
       expect(results.personalInfo).toHaveProperty('name');
@@ -235,8 +257,9 @@ describe('GuestResumeController', () => {
         needsFeedbackCode: true,
       });
 
-      await expect(controller.getDemoAnalysis(mockRequest))
-        .rejects.toThrow(HttpException);
+      await expect(controller.getDemoAnalysis(mockRequest)).rejects.toThrow(
+        HttpException,
+      );
 
       try {
         await controller.getDemoAnalysis(mockRequest);
@@ -262,7 +285,7 @@ describe('GuestResumeController', () => {
       expect(results.skills).toContainEqual({
         name: 'Python',
         category: 'Programming',
-        proficiency: 'Expert'
+        proficiency: 'Expert',
       });
       expect(results.experience.totalYears).toBe(7);
       expect(results.summary.overallScore).toBe(92);

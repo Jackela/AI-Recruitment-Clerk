@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * WebKit Static Build Configuration
- * 
+ *
  * Uses static production build to test WebKit without dev server issues
  * Tests against serve-static on port 4204
  */
@@ -11,7 +11,7 @@ export default defineConfig({
   testMatch: ['**/webkit-*.spec.ts', '**/webkit-*.test.js'],
   timeout: 45000,
   expect: {
-    timeout: 10000
+    timeout: 10000,
   },
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
@@ -25,14 +25,14 @@ export default defineConfig({
     video: 'retain-on-failure',
     navigationTimeout: 30000,
     actionTimeout: 15000,
-    ignoreHTTPSErrors: true
+    ignoreHTTPSErrors: true,
   },
   // No webServer - use external static server
   // Start with: npx serve -s dist/apps/ai-recruitment-frontend/browser -l 4204
   projects: [
     {
       name: 'webkit-static',
-      use: { 
+      use: {
         ...devices['Desktop Safari'],
         // Proven WebKit configuration
         launchOptions: {
@@ -44,15 +44,15 @@ export default defineConfig({
             '--disable-backgrounding-occluded-windows',
             '--disable-renderer-backgrounding',
             '--disable-field-trial-config',
-            '--no-first-run'
+            '--no-first-run',
           ],
-          headless: !process.env.WEBKIT_HEADED
+          headless: !process.env.WEBKIT_HEADED,
         },
         contextOptions: {
           ignoreHTTPSErrors: true,
-          bypassCSP: true
-        }
+          bypassCSP: true,
+        },
       },
-    }
+    },
   ],
 });

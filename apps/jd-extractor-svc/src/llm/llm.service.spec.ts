@@ -4,7 +4,7 @@ import { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
 import {
   createMockExtractedJdDTO,
   createMockLlmExtractionRequest,
-  createLongJdText
+  createLongJdText,
 } from '../testing/test-fixtures';
 
 describe('LlmService', () => {
@@ -43,26 +43,26 @@ describe('LlmService', () => {
       technical: ['JavaScript', 'Node.js', 'TypeScript', 'React'],
       soft: ['Communication', 'Leadership'],
       experience: '5+ years',
-      education: 'Bachelor degree in Computer Science or related field'
+      education: 'Bachelor degree in Computer Science or related field',
     },
     responsibilities: [
       'Develop and maintain scalable web applications',
       'Collaborate with cross-functional teams',
       'Mentor junior developers',
-      'Participate in code reviews and technical discussions'
+      'Participate in code reviews and technical discussions',
     ],
     benefits: [
       'Competitive salary',
       'Health insurance and dental coverage',
       'Remote work flexibility',
       'Professional development opportunities',
-      '401k matching'
+      '401k matching',
     ],
     company: {
       name: 'TechCorp Solutions',
       industry: 'Software Technology',
-      size: '200+ employees'
-    }
+      size: '200+ employees',
+    },
   };
 
   beforeEach(async () => {
@@ -95,10 +95,19 @@ describe('LlmService', () => {
       // Assert
       expect(result).toBeDefined();
       expect(result.requirements).toBeDefined();
-      expect(result.requirements.technical).toEqual(expect.arrayContaining(['JavaScript', 'Node.js', 'TypeScript', 'React']));
-      expect(result.requirements.soft).toEqual(expect.arrayContaining(['communication', 'leadership']));
+      expect(result.requirements.technical).toEqual(
+        expect.arrayContaining([
+          'JavaScript',
+          'Node.js',
+          'TypeScript',
+          'React',
+        ]),
+      );
+      expect(result.requirements.soft).toEqual(
+        expect.arrayContaining(['communication', 'leadership']),
+      );
       expect(result.requirements.experience).toBe('Senior (5+ years)');
-      expect(result.requirements.education).toBe('Bachelor\'s degree');
+      expect(result.requirements.education).toBe("Bachelor's degree");
       expect(Array.isArray(result.responsibilities)).toBe(true);
       expect(Array.isArray(result.benefits)).toBe(true);
       expect(result.company).toBeDefined();
@@ -117,7 +126,9 @@ describe('LlmService', () => {
       expect(result.requirements.soft).toEqual([]);
       expect(result.requirements.experience).toBe('Not specified');
       expect(result.requirements.education).toBe('Not specified');
-      expect(result.responsibilities).toEqual(['Key responsibilities to be defined']);
+      expect(result.responsibilities).toEqual([
+        'Key responsibilities to be defined',
+      ]);
       expect(result.benefits).toEqual([]);
     });
 
@@ -133,7 +144,9 @@ describe('LlmService', () => {
       expect(result.requirements).toBeDefined();
       expect(result.requirements.technical).toEqual([]);
       expect(result.requirements.experience).toBe('Not specified');
-      expect(result.responsibilities).toEqual(['Key responsibilities to be defined']);
+      expect(result.responsibilities).toEqual([
+        'Key responsibilities to be defined',
+      ]);
     });
 
     it('should handle very long job descriptions', async () => {
@@ -152,26 +165,28 @@ describe('LlmService', () => {
 
     it('should extract all required fields correctly', async () => {
       // This test validates the expected structure when implemented
-      
+
       // When implemented, the service should return:
       const expectedStructure = {
         requirements: {
           technical: expect.any(Array),
-          soft: expect.any(Array), 
+          soft: expect.any(Array),
           experience: expect.any(String),
-          education: expect.any(String)
+          education: expect.any(String),
         },
         responsibilities: expect.any(Array),
         benefits: expect.any(Array),
         company: {
           name: expect.any(String),
           industry: expect.any(String),
-          size: expect.any(String)
-        }
+          size: expect.any(String),
+        },
       };
 
       // Verify expected structure is well-formed
-      expect(expectedStructure.requirements.technical).toEqual(expect.any(Array));
+      expect(expectedStructure.requirements.technical).toEqual(
+        expect.any(Array),
+      );
       expect(expectedJdDto).toMatchObject(expectedStructure);
     });
   });
@@ -181,7 +196,7 @@ describe('LlmService', () => {
       // Arrange
       const request = createMockLlmExtractionRequest({
         jobTitle: 'Senior Full Stack Developer',
-        jdText: mockJdText
+        jdText: mockJdText,
       });
 
       // Act
@@ -196,14 +211,16 @@ describe('LlmService', () => {
       // Validate the structure manually instead of using the helper that may have issues
       expect(result.extractedData).toBeDefined();
       expect(result.extractedData.requirements).toBeDefined();
-      expect(Array.isArray(result.extractedData.requirements.technical)).toBe(true);
+      expect(Array.isArray(result.extractedData.requirements.technical)).toBe(
+        true,
+      );
     });
 
     it('should include processing metrics in response', async () => {
       // Arrange
       const request = createMockLlmExtractionRequest({
         jobTitle: 'Test Job',
-        jdText: 'Test description with JavaScript and leadership skills'
+        jdText: 'Test description with JavaScript and leadership skills',
       });
 
       // Act
@@ -220,7 +237,7 @@ describe('LlmService', () => {
       // Arrange
       const request = createMockLlmExtractionRequest({
         jobTitle: 'Test Job',
-        jdText: 'Basic job description'
+        jdText: 'Basic job description',
       });
 
       // Act
@@ -252,7 +269,7 @@ describe('LlmService', () => {
         requirements: null, // Invalid structure
         responsibilities: [],
         benefits: [],
-        company: {}
+        company: {},
       } as unknown as JdDTO;
 
       // Act
@@ -269,7 +286,7 @@ describe('LlmService', () => {
           technical: [],
           soft: [],
           experience: '',
-          education: ''
+          education: '',
         },
         // Missing responsibilities, benefits, company
       } as unknown as JdDTO;
@@ -288,15 +305,17 @@ describe('LlmService', () => {
           technical: [], // Empty technical skills should fail validation
           soft: ['communication'],
           experience: 'Not specified',
-          education: 'Not specified'
+          education: 'Not specified',
         },
         responsibilities: ['Some responsibility'],
         benefits: [],
-        company: {}
+        company: {},
       };
 
       // Act
-      const result = await service.validateExtractedData(jdDtoWithoutTechSkills);
+      const result = await service.validateExtractedData(
+        jdDtoWithoutTechSkills,
+      );
 
       // Assert
       expect(result).toBe(false);
@@ -310,7 +329,7 @@ describe('LlmService', () => {
         'Job description that causes transient LLM failure',
         'Text that causes multiple failures',
         'Text that triggers rate limiting',
-        'Text that causes very slow processing'
+        'Text that causes very slow processing',
       ];
 
       // Act & Assert
@@ -325,8 +344,8 @@ describe('LlmService', () => {
       // Arrange
       const jobDescriptions = [
         'Senior Developer with Java and Spring Boot experience',
-        'Frontend Engineer skilled in React and TypeScript', 
-        'DevOps Engineer with Docker and Kubernetes expertise'
+        'Frontend Engineer skilled in React and TypeScript',
+        'DevOps Engineer with Docker and Kubernetes expertise',
       ];
 
       // Act & Assert
@@ -397,9 +416,11 @@ describe('LlmService', () => {
 
     it('should handle concurrent requests efficiently', async () => {
       // Test concurrent processing capability
-      const requests = Array(5).fill(null).map(() => 
-        service.extractJobRequirements(mockJdText).catch(() => null)
-      );
+      const requests = Array(5)
+        .fill(null)
+        .map(() =>
+          service.extractJobRequirements(mockJdText).catch(() => null),
+        );
 
       await Promise.allSettled(requests);
       // All requests should complete (with expected failures)
@@ -418,7 +439,7 @@ describe('LlmService', () => {
     it('should support multiple LLM provider fallbacks', async () => {
       // Test fallback strategy when primary LLM fails
       const result = await service.extractJobRequirements(mockJdText);
-      
+
       // Assert service can handle requests (fallback implementation working)
       expect(result).toBeDefined();
       expect(result.requirements).toBeDefined();

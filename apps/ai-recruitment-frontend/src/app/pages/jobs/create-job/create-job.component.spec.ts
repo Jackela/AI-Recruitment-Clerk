@@ -21,8 +21,8 @@ describe('CreateJobComponent', () => {
     jobs: {
       ...initialJobState,
       creating: false,
-      error: null
-    }
+      error: null,
+    },
   };
 
   beforeEach(async () => {
@@ -31,12 +31,10 @@ describe('CreateJobComponent', () => {
         CreateJobComponent,
         ReactiveFormsModule,
         RouterTestingModule.withRoutes([
-          { path: 'jobs', component: CreateJobComponent }
-        ])
+          { path: 'jobs', component: CreateJobComponent },
+        ]),
       ],
-      providers: [
-        provideMockStore({ initialState })
-      ]
+      providers: [provideMockStore({ initialState })],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CreateJobComponent);
@@ -44,7 +42,7 @@ describe('CreateJobComponent', () => {
     store = TestBed.inject(MockStore);
     router = TestBed.inject(Router);
     dispatchSpy = jest.spyOn(store, 'dispatch');
-    
+
     fixture.detectChanges();
   });
 
@@ -75,14 +73,14 @@ describe('CreateJobComponent', () => {
 
     it('should be invalid with only job title', () => {
       component.createJobForm.patchValue({
-        jobTitle: '软件工程师'
+        jobTitle: '软件工程师',
       });
       expect(component.createJobForm.valid).toBe(false);
     });
 
     it('should be invalid with only jdText', () => {
       component.createJobForm.patchValue({
-        jdText: '这是一个岗位描述'
+        jdText: '这是一个岗位描述',
       });
       expect(component.createJobForm.valid).toBe(false);
     });
@@ -90,7 +88,7 @@ describe('CreateJobComponent', () => {
     it('should be valid with both fields filled', () => {
       component.createJobForm.patchValue({
         jobTitle: '软件工程师',
-        jdText: '这是一个详细的岗位描述文本'
+        jdText: '这是一个详细的岗位描述文本',
       });
       expect(component.createJobForm.valid).toBe(true);
     });
@@ -100,7 +98,7 @@ describe('CreateJobComponent', () => {
         const jobTitle = component.createJobForm.get('jobTitle');
         jobTitle?.setValue('');
         jobTitle?.markAsTouched();
-        
+
         expect(jobTitle?.errors?.['required']).toBeTruthy();
         expect(component.getFieldError('jobTitle')).toBe('该字段不能为空');
       });
@@ -109,7 +107,7 @@ describe('CreateJobComponent', () => {
         const jobTitle = component.createJobForm.get('jobTitle');
         jobTitle?.setValue('A');
         jobTitle?.markAsTouched();
-        
+
         expect(jobTitle?.errors?.['minlength']).toBeTruthy();
         expect(component.getFieldError('jobTitle')).toBe('最少输入2个字符');
       });
@@ -119,7 +117,7 @@ describe('CreateJobComponent', () => {
         const jobTitle = component.createJobForm.get('jobTitle');
         jobTitle?.setValue(longTitle);
         jobTitle?.markAsTouched();
-        
+
         expect(jobTitle?.errors?.['maxlength']).toBeTruthy();
         expect(component.getFieldError('jobTitle')).toBe('最多输入100个字符');
       });
@@ -130,7 +128,7 @@ describe('CreateJobComponent', () => {
         const jdText = component.createJobForm.get('jdText');
         jdText?.setValue('');
         jdText?.markAsTouched();
-        
+
         expect(jdText?.errors?.['required']).toBeTruthy();
         expect(component.getFieldError('jdText')).toBe('该字段不能为空');
       });
@@ -139,7 +137,7 @@ describe('CreateJobComponent', () => {
         const jdText = component.createJobForm.get('jdText');
         jdText?.setValue('Short');
         jdText?.markAsTouched();
-        
+
         expect(jdText?.errors?.['minlength']).toBeTruthy();
         expect(component.getFieldError('jdText')).toBe('最少输入10个字符');
       });
@@ -149,7 +147,7 @@ describe('CreateJobComponent', () => {
         const jdText = component.createJobForm.get('jdText');
         jdText?.setValue(longText);
         jdText?.markAsTouched();
-        
+
         expect(jdText?.errors?.['maxlength']).toBeTruthy();
         expect(component.getFieldError('jdText')).toBe('最多输入5000个字符');
       });
@@ -168,33 +166,43 @@ describe('CreateJobComponent', () => {
     });
 
     it('should render job title input', () => {
-      const jobTitleInput = fixture.debugElement.query(By.css('input[formControlName="jobTitle"]'));
+      const jobTitleInput = fixture.debugElement.query(
+        By.css('input[formControlName="jobTitle"]'),
+      );
       expect(jobTitleInput).toBeTruthy();
     });
 
     it('should render jd text textarea', () => {
-      const jdTextArea = fixture.debugElement.query(By.css('textarea[formControlName="jdText"]'));
+      const jdTextArea = fixture.debugElement.query(
+        By.css('textarea[formControlName="jdText"]'),
+      );
       expect(jdTextArea).toBeTruthy();
     });
 
     it('should render submit button', () => {
-      const submitButton = fixture.debugElement.query(By.css('button[type="submit"]'));
+      const submitButton = fixture.debugElement.query(
+        By.css('button[type="submit"]'),
+      );
       expect(submitButton).toBeTruthy();
     });
 
     it('should disable submit button when form is invalid', () => {
-      const submitButton = fixture.debugElement.query(By.css('button[type="submit"]'));
+      const submitButton = fixture.debugElement.query(
+        By.css('button[type="submit"]'),
+      );
       expect(submitButton.nativeElement.disabled).toBe(true);
     });
 
     it('should enable submit button when form is valid', () => {
       component.createJobForm.patchValue({
         jobTitle: '软件工程师',
-        jdText: '这是一个详细的岗位描述文本'
+        jdText: '这是一个详细的岗位描述文本',
       });
       fixture.detectChanges();
-      
-      const submitButton = fixture.debugElement.query(By.css('button[type="submit"]'));
+
+      const submitButton = fixture.debugElement.query(
+        By.css('button[type="submit"]'),
+      );
       expect(submitButton.nativeElement.disabled).toBe(false);
     });
   });
@@ -210,9 +218,11 @@ describe('CreateJobComponent', () => {
       const testText = '这是一个测试文本';
       component.createJobForm.patchValue({ jdText: testText });
       fixture.detectChanges();
-      
+
       const charCount = fixture.debugElement.query(By.css('.character-count'));
-      expect(charCount.nativeElement.textContent).toContain(`${testText.length} / 5000`);
+      expect(charCount.nativeElement.textContent).toContain(
+        `${testText.length} / 5000`,
+      );
     });
   });
 
@@ -221,11 +231,11 @@ describe('CreateJobComponent', () => {
       store.setState({
         jobs: {
           ...initialJobState,
-          error: 'Creation failed'
-        }
+          error: 'Creation failed',
+        },
       } as AppState);
       fixture.detectChanges();
-      
+
       const errorAlert = fixture.debugElement.query(By.css('.alert-danger'));
       expect(errorAlert).toBeTruthy();
       expect(errorAlert.nativeElement.textContent).toContain('Creation failed');
@@ -236,10 +246,14 @@ describe('CreateJobComponent', () => {
       jobTitle?.setValue('');
       jobTitle?.markAsTouched();
       fixture.detectChanges();
-      
-      const errorMessage = fixture.debugElement.query(By.css('.invalid-feedback'));
+
+      const errorMessage = fixture.debugElement.query(
+        By.css('.invalid-feedback'),
+      );
       expect(errorMessage).toBeTruthy();
-      expect(errorMessage.nativeElement.textContent.trim()).toBe('该字段不能为空');
+      expect(errorMessage.nativeElement.textContent.trim()).toBe(
+        '该字段不能为空',
+      );
     });
   });
 
@@ -248,8 +262,8 @@ describe('CreateJobComponent', () => {
       store.setState({
         jobs: {
           ...initialJobState,
-          creating: true
-        }
+          creating: true,
+        },
       } as AppState);
       fixture.detectChanges();
     });
@@ -261,13 +275,15 @@ describe('CreateJobComponent', () => {
 
     it('should disable buttons when creating', () => {
       const buttons = fixture.debugElement.queryAll(By.css('button'));
-      buttons.forEach(button => {
+      buttons.forEach((button) => {
         expect(button.nativeElement.disabled).toBe(true);
       });
     });
 
     it('should show creating text on submit button', () => {
-      const submitButton = fixture.debugElement.query(By.css('button[type="submit"]'));
+      const submitButton = fixture.debugElement.query(
+        By.css('button[type="submit"]'),
+      );
       expect(submitButton.nativeElement.textContent).toContain('创建中');
     });
   });
@@ -277,14 +293,14 @@ describe('CreateJobComponent', () => {
       jest.spyOn(component, 'onCancel');
       const backButton = fixture.debugElement.query(By.css('button'));
       backButton.nativeElement.click();
-      
+
       expect(component.onCancel).toHaveBeenCalled();
     });
 
     it('should navigate to jobs list on cancel', () => {
       jest.spyOn(router, 'navigate');
       component.onCancel();
-      
+
       expect(router.navigate).toHaveBeenCalledWith(['/jobs']);
     });
 
@@ -292,51 +308,56 @@ describe('CreateJobComponent', () => {
       jest.spyOn(component, 'onSubmit');
       component.createJobForm.patchValue({
         jobTitle: '软件工程师',
-        jdText: '这是一个详细的岗位描述文本'
+        jdText: '这是一个详细的岗位描述文本',
       });
       fixture.detectChanges();
-      
+
       const form = fixture.debugElement.query(By.css('form'));
       form.nativeElement.dispatchEvent(new Event('submit'));
-      
+
       expect(component.onSubmit).toHaveBeenCalled();
     });
 
     it('should dispatch createJob action on valid form submission', () => {
       const formData = {
         jobTitle: '软件工程师',
-        jdText: '这是一个详细的岗位描述文本'
+        jdText: '这是一个详细的岗位描述文本',
       };
       component.createJobForm.patchValue(formData);
-      
+
       component.onSubmit();
-      
-      expect(dispatchSpy).toHaveBeenCalledWith(JobActions.createJob({
-        request: formData
-      }));
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        JobActions.createJob({
+          request: formData,
+        }),
+      );
     });
 
     it('should not dispatch action on invalid form submission', () => {
       component.createJobForm.patchValue({
         jobTitle: '',
-        jdText: ''
+        jdText: '',
       });
-      
+
       const initialCallCount = dispatchSpy.mock.calls.length;
       component.onSubmit();
-      
+
       expect(dispatchSpy.mock.calls.length).toBe(initialCallCount);
     });
 
     it('should mark form as touched on invalid submission', () => {
-      jest.spyOn(component as typeof component & { markFormGroupTouched: () => void }, 'markFormGroupTouched');
+      jest.spyOn(
+        component as typeof component & { markFormGroupTouched: () => void },
+        'markFormGroupTouched',
+      );
       component.createJobForm.patchValue({
         jobTitle: '',
-        jdText: ''
+        jdText: '',
       });
-      
+
       component.onSubmit();
-      
+
       expect(component['markFormGroupTouched']).toHaveBeenCalled();
     });
   });
@@ -384,9 +405,9 @@ describe('CreateJobComponent', () => {
     it('should complete destroy subject on ngOnDestroy', () => {
       jest.spyOn(component['destroy$'], 'next');
       jest.spyOn(component['destroy$'], 'complete');
-      
+
       component.ngOnDestroy();
-      
+
       expect(component['destroy$'].next).toHaveBeenCalled();
       expect(component['destroy$'].complete).toHaveBeenCalled();
     });
@@ -401,7 +422,7 @@ describe('CreateJobComponent', () => {
 
     it('should have proper aria attributes', () => {
       const inputs = fixture.debugElement.queryAll(By.css('input, textarea'));
-      inputs.forEach(input => {
+      inputs.forEach((input) => {
         expect(input.nativeElement.id).toBeTruthy();
       });
     });

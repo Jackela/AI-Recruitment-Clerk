@@ -14,7 +14,7 @@ export class ResumeListItemDto {
     status: 'pending' | 'parsing' | 'scoring' | 'completed' | 'failed',
     createdAt: Date,
     matchScore?: number,
-    candidateName?: string
+    candidateName?: string,
   ) {
     this.id = id;
     this.jobId = jobId;
@@ -80,7 +80,7 @@ export class ResumeDetailDto {
       major: string | null;
     }[],
     matchScore?: number,
-    reportId?: string
+    reportId?: string,
   ) {
     this.id = id;
     this.jobId = jobId;

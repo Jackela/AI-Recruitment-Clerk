@@ -21,9 +21,9 @@ describe('App', () => {
         StoreModule.forRoot({
           jobs: jobReducer,
           resumes: resumeReducer,
-          reports: reportReducer
+          reports: reportReducer,
         }),
-        EffectsModule.forRoot([JobEffects, ResumeEffects, ReportEffects])
+        EffectsModule.forRoot([JobEffects, ResumeEffects, ReportEffects]),
       ],
     }).compileComponents();
   });
@@ -39,7 +39,7 @@ describe('App', () => {
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.app-title')?.textContent).toContain(
-      'AI 招聘助理'
+      'AI 招聘助理',
     );
   });
 
@@ -50,8 +50,12 @@ describe('App', () => {
     const navLinks = compiled.querySelectorAll('.nav-link');
     expect(navLinks.length).toBeGreaterThanOrEqual(2);
     // Check for actual navigation link text content (ignoring extra accessibility text)
-    const firstNavText = navLinks[0].textContent?.replace(/\s*-\s*Alt\+\d+\s*/, '').trim();
-    const secondNavText = navLinks[1].textContent?.replace(/\s*-\s*Alt\+\d+\s*/, '').trim();
+    const firstNavText = navLinks[0].textContent
+      ?.replace(/\s*-\s*Alt\+\d+\s*/, '')
+      .trim();
+    const secondNavText = navLinks[1].textContent
+      ?.replace(/\s*-\s*Alt\+\d+\s*/, '')
+      .trim();
     expect(firstNavText).toContain('仪表板');
     expect(secondNavText).toContain('智能分析'); // Updated to match actual content
   });

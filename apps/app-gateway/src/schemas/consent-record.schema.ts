@@ -7,7 +7,7 @@ export enum ConsentStatus {
   DENIED = 'denied',
   PENDING = 'pending',
   WITHDRAWN = 'withdrawn',
-  NOT_APPLICABLE = 'not_applicable'
+  NOT_APPLICABLE = 'not_applicable',
 }
 
 export enum ConsentPurpose {
@@ -17,7 +17,7 @@ export enum ConsentPurpose {
   BEHAVIORAL_ANALYTICS = 'behavioral_analytics',
   THIRD_PARTY_SHARING = 'third_party_sharing',
   PERSONALIZATION = 'personalization',
-  PERFORMANCE_MONITORING = 'performance_monitoring'
+  PERFORMANCE_MONITORING = 'performance_monitoring',
 }
 
 export enum ConsentMethod {
@@ -25,7 +25,7 @@ export enum ConsentMethod {
   IMPLIED_CONSENT = 'implied_consent',
   GRANULAR_CHOICE = 'granular_choice',
   CONTINUED_USE = 'continued_use',
-  LEGAL_REQUIREMENT = 'legal_requirement'
+  LEGAL_REQUIREMENT = 'legal_requirement',
 }
 
 export enum DataCategory {
@@ -36,7 +36,7 @@ export enum DataCategory {
   BEHAVIORAL_DATA = 'behavioral_data',
   DEVICE_INFORMATION = 'device_information',
   COMMUNICATION_PREFERENCES = 'communication_preferences',
-  SYSTEM_LOGS = 'system_logs'
+  SYSTEM_LOGS = 'system_logs',
 }
 
 export type ConsentRecordDocument = ConsentRecord & Document;
@@ -48,76 +48,76 @@ export type ConsentRecordDocument = ConsentRecord & Document;
 @Schema({
   collection: 'consent_records',
   timestamps: true,
-  versionKey: false
+  versionKey: false,
 })
 export class ConsentRecord {
   @Prop({ required: true, unique: true, index: true })
-  id: string;
+  id: string = '';
 
   @Prop({ required: true })
-  userId: string;
+  userId: string = '';
 
-  @Prop({ 
+  @Prop({
     type: String,
-    enum: Object.values(ConsentPurpose), 
+    enum: Object.values(ConsentPurpose),
     required: true,
-    index: true 
+    index: true,
   })
-  purpose: ConsentPurpose;
+  purpose: ConsentPurpose = ConsentPurpose.ESSENTIAL_SERVICES;
 
-  @Prop({ 
+  @Prop({
     type: String,
-    enum: Object.values(ConsentStatus), 
+    enum: Object.values(ConsentStatus),
     required: true,
-    index: true 
+    index: true,
   })
-  status: ConsentStatus;
+  status: ConsentStatus = ConsentStatus.PENDING;
 
-  @Prop({ 
+  @Prop({
     type: String,
     enum: Object.values(ConsentMethod),
-    required: false 
+    required: false,
   })
-  consentMethod?: ConsentMethod;
+  consentMethod?: ConsentMethod = undefined;
 
-  @Prop({ 
+  @Prop({
     type: [{ type: String, enum: Object.values(DataCategory) }],
-    default: []
+    default: [],
   })
-  dataCategories: DataCategory[];
+  dataCategories: DataCategory[] = [];
 
   @Prop({ required: false })
-  legalBasis?: string; // GDPR Article 6 legal basis
+  legalBasis?: string = undefined; // GDPR Article 6 legal basis
 
   @Prop({ required: true })
-  consentDate: Date;
+  consentDate: Date = new Date();
 
   @Prop({ required: false })
-  withdrawalDate?: Date;
+  withdrawalDate?: Date = undefined;
 
   @Prop({ required: false })
-  expiryDate?: Date; // For time-limited consent
+  expiryDate?: Date = undefined; // For time-limited consent
 
   @Prop({ required: false })
-  consentText?: string; // Text presented to user
+  consentText?: string = undefined; // Text presented to user
 
   @Prop({ required: false })
-  withdrawalReason?: string;
+  withdrawalReason?: string = undefined;
 
   @Prop({ required: false })
-  ipAddress?: string; // Proof of consent
+  ipAddress?: string = undefined; // Proof of consent
 
   @Prop({ required: false })
-  userAgent?: string; // Technical consent context
+  userAgent?: string = undefined; // Technical consent context
 
   @Prop({ type: Object, default: {} })
-  metadata?: Record<string, any>;
+  metadata?: Record<string, any> = {};
 
   @Prop({ default: Date.now })
-  createdAt: Date;
+  createdAt: Date = new Date();
 
   @Prop({ default: Date.now })
-  updatedAt: Date;
+  updatedAt: Date = new Date();
 }
 
 export const ConsentRecordSchema = SchemaFactory.createForClass(ConsentRecord);
@@ -130,14 +130,18 @@ ConsentRecordSchema.index({ expiryDate: 1 }, { sparse: true });
 ConsentRecordSchema.index({ status: 1, expiryDate: 1 });
 
 // Pre-save middleware to update timestamps
-ConsentRecordSchema.pre('save', function(next) {
+ConsentRecordSchema.pre('save', function (next) {
   this.updatedAt = new Date();
   next();
 });
 
 // Pre-save middleware to set withdrawal date when status changes to withdrawn
-ConsentRecordSchema.pre('save', function(next) {
-  if (this.isModified('status') && this.status === ConsentStatus.WITHDRAWN && !this.withdrawalDate) {
+ConsentRecordSchema.pre('save', function (next) {
+  if (
+    this.isModified('status') &&
+    this.status === ConsentStatus.WITHDRAWN &&
+    !this.withdrawalDate
+  ) {
     this.withdrawalDate = new Date();
   }
   next();
@@ -152,47 +156,47 @@ export type CookieConsentDocument = CookieConsent & Document;
 @Schema({
   collection: 'cookie_consents',
   timestamps: true,
-  versionKey: false
+  versionKey: false,
 })
 export class CookieConsent {
   @Prop({ required: true, unique: true })
-  deviceId: string;
+  deviceId: string = '';
 
   @Prop({ required: true, default: true })
-  essential: boolean; // Always true, cannot be denied
+  essential: boolean = true; // Always true, cannot be denied
 
   @Prop({ required: true, default: false })
-  functional: boolean;
+  functional: boolean = false;
 
   @Prop({ required: true, default: false })
-  analytics: boolean;
+  analytics: boolean = false;
 
   @Prop({ required: true, default: false })
-  marketing: boolean;
+  marketing: boolean = false;
 
   @Prop({ required: true })
-  consentDate: Date;
+  consentDate: Date = new Date();
 
   @Prop({ required: false })
-  expiryDate?: Date;
+  expiryDate?: Date = undefined;
 
   @Prop({ required: false, default: '1.0' })
-  consentVersion?: string;
+  consentVersion?: string = '1.0';
 
   @Prop({ required: false })
-  ipAddress?: string;
+  ipAddress?: string = undefined;
 
   @Prop({ required: false })
-  userAgent?: string;
+  userAgent?: string = undefined;
 
   @Prop({ type: Object, default: {} })
-  metadata?: Record<string, any>;
+  metadata?: Record<string, any> = {};
 
   @Prop({ default: Date.now })
-  createdAt: Date;
+  createdAt: Date = new Date();
 
   @Prop({ default: Date.now })
-  updatedAt: Date;
+  updatedAt: Date = new Date();
 }
 
 export const CookieConsentSchema = SchemaFactory.createForClass(CookieConsent);
@@ -203,16 +207,16 @@ CookieConsentSchema.index({ consentDate: -1 });
 CookieConsentSchema.index({ expiryDate: 1 }, { sparse: true });
 
 // Pre-save middleware
-CookieConsentSchema.pre('save', function(next) {
+CookieConsentSchema.pre('save', function (next) {
   this.updatedAt = new Date();
-  
+
   // Set expiry date if not provided (1 year from consent)
   if (!this.expiryDate) {
     const expiryDate = new Date(this.consentDate);
     expiryDate.setFullYear(expiryDate.getFullYear() + 1);
     this.expiryDate = expiryDate;
   }
-  
+
   next();
 });
 
@@ -225,60 +229,61 @@ export type ConsentAuditLogDocument = ConsentAuditLog & Document;
 @Schema({
   collection: 'consent_audit_logs',
   timestamps: true,
-  versionKey: false
+  versionKey: false,
 })
 export class ConsentAuditLog {
   @Prop({ required: true, unique: true, index: true })
-  id: string;
+  id: string = '';
 
   @Prop({ required: true })
-  userId: string;
+  userId: string = '';
 
   @Prop({ required: true })
-  action: string; // 'grant', 'withdraw', 'renew', 'expire'
+  action: string = ''; // 'grant', 'withdraw', 'renew', 'expire'
 
-  @Prop({ 
+  @Prop({
     type: String,
-    enum: Object.values(ConsentPurpose), 
+    enum: Object.values(ConsentPurpose),
     required: true,
-    index: true 
+    index: true,
   })
-  purpose: ConsentPurpose;
+  purpose: ConsentPurpose = ConsentPurpose.ESSENTIAL_SERVICES;
 
-  @Prop({ 
+  @Prop({
     type: String,
-    enum: Object.values(ConsentStatus), 
-    required: true 
+    enum: Object.values(ConsentStatus),
+    required: true,
   })
-  previousStatus: ConsentStatus;
+  previousStatus: ConsentStatus = ConsentStatus.PENDING;
 
-  @Prop({ 
+  @Prop({
     type: String,
-    enum: Object.values(ConsentStatus), 
-    required: true 
+    enum: Object.values(ConsentStatus),
+    required: true,
   })
-  newStatus: ConsentStatus;
+  newStatus: ConsentStatus = ConsentStatus.PENDING;
 
   @Prop({ required: false })
-  reason?: string;
+  reason?: string = undefined;
 
   @Prop({ required: false })
-  ipAddress?: string;
+  ipAddress?: string = undefined;
 
   @Prop({ required: false })
-  userAgent?: string;
+  userAgent?: string = undefined;
 
   @Prop({ type: Object, default: {} })
-  metadata?: Record<string, any>;
+  metadata?: Record<string, any> = {};
 
   @Prop({ required: true })
-  timestamp: Date;
+  timestamp: Date = new Date();
 
   @Prop({ default: Date.now })
-  createdAt: Date;
+  createdAt: Date = new Date();
 }
 
-export const ConsentAuditLogSchema = SchemaFactory.createForClass(ConsentAuditLog);
+export const ConsentAuditLogSchema =
+  SchemaFactory.createForClass(ConsentAuditLog);
 
 // Create indexes for efficient querying
 ConsentAuditLogSchema.index({ userId: 1, timestamp: -1 });
@@ -287,7 +292,7 @@ ConsentAuditLogSchema.index({ purpose: 1, timestamp: -1 });
 ConsentAuditLogSchema.index({ timestamp: -1 });
 
 // Pre-save middleware
-ConsentAuditLogSchema.pre('save', function(next) {
+ConsentAuditLogSchema.pre('save', function (next) {
   if (!this.timestamp) {
     this.timestamp = new Date();
   }

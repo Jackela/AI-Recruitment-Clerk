@@ -38,7 +38,9 @@ describe('GuestUsageService', () => {
     }).compile();
 
     service = module.get<GuestUsageService>(GuestUsageService);
-    model = module.get<Model<GuestUsageDocument>>(getModelToken(GuestUsage.name));
+    model = module.get<Model<GuestUsageDocument>>(
+      getModelToken(GuestUsage.name),
+    );
   });
 
   afterEach(() => {
@@ -57,7 +59,9 @@ describe('GuestUsageService', () => {
       const result = await service.canUse('test-device-123');
 
       expect(result).toBe(true);
-      expect(mockGuestUsageModel.findOne).toHaveBeenCalledWith({ deviceId: 'test-device-123' });
+      expect(mockGuestUsageModel.findOne).toHaveBeenCalledWith({
+        deviceId: 'test-device-123',
+      });
       expect(mockGuestUsageModel.create).toHaveBeenCalledWith({
         deviceId: 'test-device-123',
         usageCount: 1,
@@ -77,8 +81,8 @@ describe('GuestUsageService', () => {
         { deviceId: 'test-device-123' },
         {
           $inc: { usageCount: 1 },
-          $set: { lastUsed: expect.any(Date) }
-        }
+          $set: { lastUsed: expect.any(Date) },
+        },
       );
     });
 
@@ -93,11 +97,11 @@ describe('GuestUsageService', () => {
     });
 
     it('should reset usage when feedback code is redeemed', async () => {
-      const mockUser = { 
-        ...mockGuestUsage, 
+      const mockUser = {
+        ...mockGuestUsage,
         usageCount: 5,
         feedbackCode: 'fb-code-123',
-        feedbackCodeStatus: 'redeemed'
+        feedbackCodeStatus: 'redeemed',
       };
       mockGuestUsageModel.findOne.mockResolvedValue(mockUser);
       mockGuestUsageModel.updateOne.mockResolvedValue({ acknowledged: true });
@@ -113,8 +117,8 @@ describe('GuestUsageService', () => {
             feedbackCode: null,
             feedbackCodeStatus: null,
             lastUsed: expect.any(Date),
-          }
-        }
+          },
+        },
       );
     });
   });
@@ -135,18 +139,18 @@ describe('GuestUsageService', () => {
             feedbackCode: expect.stringMatching(/^fb-/),
             feedbackCodeStatus: 'generated',
             updatedAt: expect.any(Date),
-          }
-        }
+          },
+        },
       );
     });
 
     it('should return existing feedback code if already generated', async () => {
       const existingCode = 'fb-existing-code';
-      const mockUser = { 
-        ...mockGuestUsage, 
+      const mockUser = {
+        ...mockGuestUsage,
         usageCount: 5,
         feedbackCode: existingCode,
-        feedbackCodeStatus: 'generated'
+        feedbackCodeStatus: 'generated',
       };
       mockGuestUsageModel.findOne.mockResolvedValue(mockUser);
 
@@ -159,16 +163,18 @@ describe('GuestUsageService', () => {
     it('should throw error if user not found', async () => {
       mockGuestUsageModel.findOne.mockResolvedValue(null);
 
-      await expect(service.generateFeedbackCode('test-device-123'))
-        .rejects.toThrow(BadRequestException);
+      await expect(
+        service.generateFeedbackCode('test-device-123'),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw error if usage limit not reached', async () => {
       const mockUser = { ...mockGuestUsage, usageCount: 3 };
       mockGuestUsageModel.findOne.mockResolvedValue(mockUser);
 
-      await expect(service.generateFeedbackCode('test-device-123'))
-        .rejects.toThrow(BadRequestException);
+      await expect(
+        service.generateFeedbackCode('test-device-123'),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -177,7 +183,7 @@ describe('GuestUsageService', () => {
       const mockUser = {
         ...mockGuestUsage,
         feedbackCode: 'fb-valid-code',
-        feedbackCodeStatus: 'generated'
+        feedbackCodeStatus: 'generated',
       };
       mockGuestUsageModel.findOne.mockResolvedValue(mockUser);
       mockGuestUsageModel.updateOne.mockResolvedValue({ acknowledged: true });
@@ -191,16 +197,17 @@ describe('GuestUsageService', () => {
           $set: {
             feedbackCodeStatus: 'redeemed',
             updatedAt: expect.any(Date),
-          }
-        }
+          },
+        },
       );
     });
 
     it('should throw error for invalid feedback code', async () => {
       mockGuestUsageModel.findOne.mockResolvedValue(null);
 
-      await expect(service.redeemFeedbackCode('invalid-code'))
-        .rejects.toThrow(BadRequestException);
+      await expect(service.redeemFeedbackCode('invalid-code')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -253,7 +260,7 @@ describe('GuestUsageService', () => {
       expect(result).toBe(5);
       expect(mockGuestUsageModel.deleteMany).toHaveBeenCalledWith({
         createdAt: { $lt: expect.any(Date) },
-        feedbackCodeStatus: { $ne: 'generated' }
+        feedbackCodeStatus: { $ne: 'generated' },
       });
     });
   });
@@ -262,8 +269,8 @@ describe('GuestUsageService', () => {
     it('should return service statistics', async () => {
       mockGuestUsageModel.countDocuments
         .mockResolvedValueOnce(100) // totalGuests
-        .mockResolvedValueOnce(50)  // activeGuests
-        .mockResolvedValueOnce(10)  // pendingFeedbackCodes
+        .mockResolvedValueOnce(50) // activeGuests
+        .mockResolvedValueOnce(10) // pendingFeedbackCodes
         .mockResolvedValueOnce(25); // redeemedFeedbackCodes
 
       const result = await service.getServiceStats();

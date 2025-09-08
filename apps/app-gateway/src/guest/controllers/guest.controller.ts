@@ -44,7 +44,8 @@ export class GuestController {
   @Post('feedback-code')
   @ApiOperation({
     summary: 'Generate feedback code for guest user',
-    description: 'Generate a unique feedback code when guest reaches usage limit',
+    description:
+      'Generate a unique feedback code when guest reaches usage limit',
   })
   @ApiResponse({
     status: 200,
@@ -77,17 +78,21 @@ export class GuestController {
   async generateFeedbackCode(@Req() req: RequestWithDeviceId) {
     try {
       const deviceId = req.deviceId!;
-      const feedbackCode = await this.guestUsageService.generateFeedbackCode(deviceId);
+      const feedbackCode =
+        await this.guestUsageService.generateFeedbackCode(deviceId);
 
       // Construct survey URL with feedback code
       const surveyUrl = `${process.env.GUEST_FEEDBACK_URL || 'https://wj.qq.com/s2/default'}?code=${feedbackCode}`;
 
-      this.logger.log(`Feedback code generated for guest: ${this.maskDeviceId(deviceId)}`);
+      this.logger.log(
+        `Feedback code generated for guest: ${this.maskDeviceId(deviceId)}`,
+      );
 
       return {
         feedbackCode,
         surveyUrl,
-        message: '请复制此码，并点击下方链接前往问卷填写。提交成功后，您将获得奖励和新的使用次数！',
+        message:
+          '请复制此码，并点击下方链接前往问卷填写。提交成功后，您将获得奖励和新的使用次数！',
       };
     } catch (error) {
       this.logger.error('Error generating feedback code:', error);
@@ -101,7 +106,8 @@ export class GuestController {
   @Get('status')
   @ApiOperation({
     summary: 'Get guest usage status',
-    description: 'Retrieve current usage status and remaining quota for guest user',
+    description:
+      'Retrieve current usage status and remaining quota for guest user',
   })
   @ApiResponse({
     status: 200,
@@ -111,12 +117,16 @@ export class GuestController {
   @ApiUnauthorizedResponse({
     description: 'Missing or invalid device ID',
   })
-  async getUsageStatus(@Req() req: RequestWithDeviceId): Promise<GuestUsageResponseDto> {
+  async getUsageStatus(
+    @Req() req: RequestWithDeviceId,
+  ): Promise<GuestUsageResponseDto> {
     try {
       const deviceId = req.deviceId!;
       const status = await this.guestUsageService.getUsageStatus(deviceId);
 
-      this.logger.debug(`Usage status retrieved for guest: ${this.maskDeviceId(deviceId)}`);
+      this.logger.debug(
+        `Usage status retrieved for guest: ${this.maskDeviceId(deviceId)}`,
+      );
       return status;
     } catch (error) {
       this.logger.error('Error getting usage status:', error);
@@ -130,7 +140,8 @@ export class GuestController {
   @Get('details')
   @ApiOperation({
     summary: 'Get detailed guest information',
-    description: 'Retrieve detailed guest status including usage history and feedback code status',
+    description:
+      'Retrieve detailed guest status including usage history and feedback code status',
   })
   @ApiResponse({
     status: 200,
@@ -140,12 +151,16 @@ export class GuestController {
   @ApiBadRequestResponse({
     description: 'Guest record not found',
   })
-  async getGuestDetails(@Req() req: RequestWithDeviceId): Promise<GuestStatusDto> {
+  async getGuestDetails(
+    @Req() req: RequestWithDeviceId,
+  ): Promise<GuestStatusDto> {
     try {
       const deviceId = req.deviceId!;
       const details = await this.guestUsageService.getGuestStatus(deviceId);
 
-      this.logger.debug(`Guest details retrieved for: ${this.maskDeviceId(deviceId)}`);
+      this.logger.debug(
+        `Guest details retrieved for: ${this.maskDeviceId(deviceId)}`,
+      );
       return details;
     } catch (error) {
       this.logger.error('Error getting guest details:', error);
@@ -159,7 +174,8 @@ export class GuestController {
   @Post('redeem')
   @ApiOperation({
     summary: 'Redeem feedback code',
-    description: 'Redeem a feedback code to reset usage limit after survey completion',
+    description:
+      'Redeem a feedback code to reset usage limit after survey completion',
   })
   @ApiResponse({
     status: 200,
@@ -183,7 +199,9 @@ export class GuestController {
   })
   async redeemFeedbackCode(@Body() redeemDto: RedeemFeedbackCodeDto) {
     try {
-      const success = await this.guestUsageService.redeemFeedbackCode(redeemDto.feedbackCode);
+      const success = await this.guestUsageService.redeemFeedbackCode(
+        redeemDto.feedbackCode,
+      );
 
       this.logger.log(`Feedback code redeemed: ${redeemDto.feedbackCode}`);
 
@@ -255,7 +273,10 @@ export class GuestController {
       type: 'object',
       properties: {
         canUse: { type: 'boolean', example: false },
-        message: { type: 'string', example: 'Usage limit exceeded. Please get feedback code.' },
+        message: {
+          type: 'string',
+          example: 'Usage limit exceeded. Please get feedback code.',
+        },
       },
     },
   })
@@ -265,11 +286,14 @@ export class GuestController {
       const canUse = await this.guestUsageService.canUse(deviceId);
 
       if (!canUse) {
-        this.logger.debug(`Usage limit exceeded for guest: ${this.maskDeviceId(deviceId)}`);
+        this.logger.debug(
+          `Usage limit exceeded for guest: ${this.maskDeviceId(deviceId)}`,
+        );
         throw new HttpException(
           {
             canUse: false,
-            message: '免费次数已用完！参与问卷反馈(奖励￥3现金)可再获5次使用权！',
+            message:
+              '免费次数已用完！参与问卷反馈(奖励￥3现金)可再获5次使用权！',
             needsFeedbackCode: true,
           },
           HttpStatus.TOO_MANY_REQUESTS,
@@ -296,6 +320,8 @@ export class GuestController {
 
   private maskDeviceId(deviceId: string): string {
     if (deviceId.length <= 8) return '***';
-    return deviceId.substring(0, 4) + '***' + deviceId.substring(deviceId.length - 4);
+    return (
+      deviceId.substring(0, 4) + '***' + deviceId.substring(deviceId.length - 4)
+    );
   }
 }

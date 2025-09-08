@@ -2,10 +2,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { LlmService } from './llm.service';
 import { GridFsService, ReportFileMetadata } from './gridfs.service';
 import { ReportRepository, ReportCreateData } from './report.repository';
-import { ScoreBreakdown, MatchingSkill, ReportRecommendation } from '../schemas/report.schema';
-import { 
+import {
+  ScoreBreakdown,
+  MatchingSkill,
+  ReportRecommendation,
+} from '../schemas/report.schema';
+import {
   ReportGeneratorException,
-  ErrorCorrelationManager 
+  ErrorCorrelationManager,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 
 export interface JobData {
@@ -156,39 +160,39 @@ export class ReportGeneratorService {
 
   async handleMatchScored(event: MatchScoredEvent): Promise<void> {
     const startTime = Date.now();
-    
+
     try {
-      this.logger.log(`Processing match scored event for jobId: ${event.jobId}, resumeId: ${event.resumeId}`);
+      this.logger.log(
+        `Processing match scored event for jobId: ${event.jobId}, resumeId: ${event.resumeId}`,
+      );
 
       // Validate event data with correlation context
       const correlationContext = ErrorCorrelationManager.getContext();
-      
+
       if (!event.scoreDto || !event.jobId || !event.resumeId) {
-        throw new ReportGeneratorException(
-          'INVALID_EVENT_DATA',
-          {
-            provided: { 
-              scoreDto: !!event.scoreDto, 
-              jobId: !!event.jobId, 
-              resumeId: !!event.resumeId 
-            },
-            correlationId: correlationContext?.traceId
-          }
-        );
+        throw new ReportGeneratorException('INVALID_EVENT_DATA', {
+          provided: {
+            scoreDto: !!event.scoreDto,
+            jobId: !!event.jobId,
+            resumeId: !!event.resumeId,
+          },
+          correlationId: correlationContext?.traceId,
+        });
       }
 
       // Convert scoring data to report format
       const reportEvent = await this.buildReportEvent(event);
-      
+
       // Generate comprehensive report using LLM
-      const markdownReport = await this.llmService.generateReportMarkdown(reportEvent);
-      
+      const markdownReport =
+        await this.llmService.generateReportMarkdown(reportEvent);
+
       // Generate filename for the report
       const filename = this.generateReportFilename(
         'match-analysis',
         event.jobId,
         event.resumeId,
-        'md'
+        'md',
       );
 
       // Save report to GridFS
@@ -205,7 +209,7 @@ export class ReportGeneratorService {
       const fileId = await this.gridFsService.saveReport(
         markdownReport,
         filename,
-        reportFileMetadata
+        reportFileMetadata,
       );
 
       // Create structured report record in database
@@ -213,8 +217,12 @@ export class ReportGeneratorService {
         jobId: event.jobId,
         resumeId: event.resumeId,
         scoreBreakdown: this.convertToScoreBreakdown(event.scoreDto),
-        skillsAnalysis: this.convertToMatchingSkills(event.scoreDto.matchingSkills),
-        recommendation: this.convertToReportRecommendation(event.scoreDto.recommendations),
+        skillsAnalysis: this.convertToMatchingSkills(
+          event.scoreDto.matchingSkills,
+        ),
+        recommendation: this.convertToReportRecommendation(
+          event.scoreDto.recommendations,
+        ),
         summary: await this.generateExecutiveSummary(event),
         analysisConfidence: event.scoreDto.analysisConfidence,
         processingTimeMs: Date.now() - startTime,
@@ -226,7 +234,7 @@ export class ReportGeneratorService {
 
       // Save report metadata to database
       const savedReport = await this.reportRepo.createReport(reportData);
-      
+
       // Update resume record with completion status
       await this.reportRepo.updateResumeRecord(event.resumeId, {
         status: 'completed',
@@ -234,13 +242,14 @@ export class ReportGeneratorService {
         processingTimeMs: Date.now() - startTime,
       });
 
-      this.logger.log(`Successfully processed match scored event. Report ID: ${savedReport._id}, File ID: ${fileId}`);
-      
+      this.logger.log(
+        `Successfully processed match scored event. Report ID: ${savedReport._id}, File ID: ${fileId}`,
+      );
     } catch (error) {
       this.logger.error('Failed to process match scored event', {
         error: error.message,
         jobId: event.jobId,
-        resumeId: event.resumeId
+        resumeId: event.resumeId,
       });
 
       // Update resume record with error status
@@ -254,35 +263,42 @@ export class ReportGeneratorService {
     }
   }
 
-  async generateReport(request: ReportGenerationRequest): Promise<GeneratedReport> {
+  async generateReport(
+    request: ReportGenerationRequest,
+  ): Promise<GeneratedReport> {
     const startTime = Date.now();
-    
+
     try {
-      this.logger.log(`Generating ${request.reportType} report for job ${request.jobId} with ${request.resumeIds.length} resumes`);
+      this.logger.log(
+        `Generating ${request.reportType} report for job ${request.jobId} with ${request.resumeIds.length} resumes`,
+      );
 
       // Validate request with correlation
       const correlationContext = ErrorCorrelationManager.getContext();
-      
-      if (!request.jobId || !request.resumeIds || request.resumeIds.length === 0) {
-        throw new ReportGeneratorException(
-          'INVALID_REPORT_REQUEST',
-          {
-            provided: {
-              jobId: !!request.jobId,
-              resumeIds: request.resumeIds || [],
-              resumeCount: request.resumeIds?.length || 0
-            },
-            correlationId: correlationContext?.traceId
-          }
-        );
+
+      if (
+        !request.jobId ||
+        !request.resumeIds ||
+        request.resumeIds.length === 0
+      ) {
+        throw new ReportGeneratorException('INVALID_REPORT_REQUEST', {
+          provided: {
+            jobId: !!request.jobId,
+            resumeIds: request.resumeIds || [],
+            resumeCount: request.resumeIds?.length || 0,
+          },
+          correlationId: correlationContext?.traceId,
+        });
       }
 
       // Collect data for report generation
       const reportData = await this.gatherReportData(request);
-      
+
       // Generate reports in requested formats
       const generatedFiles = await Promise.all(
-        request.outputFormats.map(format => this.generateReportInFormat(reportData, format))
+        request.outputFormats.map((format) =>
+          this.generateReportInFormat(reportData, format),
+        ),
       );
 
       // Create report metadata record
@@ -317,17 +333,18 @@ export class ReportGeneratorService {
         summary: reportMetadata.summary,
       };
 
-      this.logger.log(`Successfully generated ${request.reportType} report. Report ID: ${result.reportId}`);
+      this.logger.log(
+        `Successfully generated ${request.reportType} report. Report ID: ${result.reportId}`,
+      );
       return result;
-
     } catch (error) {
       this.logger.error('Failed to generate report', {
         error: error.message,
         request: {
           jobId: request.jobId,
           resumeCount: request.resumeIds.length,
-          reportType: request.reportType
-        }
+          reportType: request.reportType,
+        },
       });
       throw error;
     }
@@ -336,39 +353,39 @@ export class ReportGeneratorService {
   async generateCandidateComparison(
     jobId: string,
     resumeIds: string[],
-    options?: { requestedBy?: string }
+    options?: { requestedBy?: string },
   ): Promise<string> {
     try {
-      this.logger.log(`Generating candidate comparison for job ${jobId} with ${resumeIds.length} candidates`);
+      this.logger.log(
+        `Generating candidate comparison for job ${jobId} with ${resumeIds.length} candidates`,
+      );
 
       // Fetch scoring data for all candidates
       const candidateData = await Promise.all(
-        resumeIds.map(async resumeId => {
+        resumeIds.map(async (resumeId) => {
           const report = await this.reportRepo.findReport({ jobId, resumeId });
           return report ? this.formatCandidateForComparison(report) : null;
-        })
+        }),
       );
 
-      const validCandidates = candidateData.filter(candidate => candidate !== null);
+      const validCandidates = candidateData.filter(
+        (candidate) => candidate !== null,
+      );
 
       if (validCandidates.length < 2) {
-        throw new ReportGeneratorException(
-          'INSUFFICIENT_CANDIDATES',
-          {
-            provided: validCandidates.length,
-            required: 2,
-            jobId: jobId
-          }
-        );
+        throw new ReportGeneratorException('INSUFFICIENT_CANDIDATES', {
+          provided: validCandidates.length,
+          required: 2,
+          jobId: jobId,
+        });
       }
 
       return await this.llmService.generateCandidateComparison(validCandidates);
-
     } catch (error) {
       this.logger.error('Failed to generate candidate comparison', {
         error: error.message,
         jobId,
-        resumeIds
+        resumeIds,
       });
       throw error;
     }
@@ -377,34 +394,35 @@ export class ReportGeneratorService {
   async generateInterviewGuide(
     jobId: string,
     resumeId: string,
-    options?: { requestedBy?: string }
+    options?: { requestedBy?: string },
   ): Promise<string> {
     try {
-      this.logger.log(`Generating interview guide for job ${jobId}, resume ${resumeId}`);
+      this.logger.log(
+        `Generating interview guide for job ${jobId}, resume ${resumeId}`,
+      );
 
       // Fetch candidate and job data
       const report = await this.reportRepo.findReport({ jobId, resumeId });
       if (!report) {
-        throw new ReportGeneratorException(
-          'REPORT_NOT_FOUND',
-          {
-            jobId: jobId,
-            resumeId: resumeId
-          }
-        );
+        throw new ReportGeneratorException('REPORT_NOT_FOUND', {
+          jobId: jobId,
+          resumeId: resumeId,
+        });
       }
 
       // Format data for interview guide generation
       const candidateData = this.formatCandidateForInterview(report);
       const jobRequirements = this.extractJobRequirements(report);
 
-      return await this.llmService.generateInterviewGuide(candidateData, jobRequirements);
-
+      return await this.llmService.generateInterviewGuide(
+        candidateData,
+        jobRequirements,
+      );
     } catch (error) {
       this.logger.error('Failed to generate interview guide', {
         error: error.message,
         jobId,
-        resumeId
+        resumeId,
       });
       throw error;
     }
@@ -463,8 +481,10 @@ export class ReportGeneratorService {
     };
   }
 
-  private convertToMatchingSkills(skills: ScoringData['matchingSkills']): MatchingSkill[] {
-    return skills.map(skill => ({
+  private convertToMatchingSkills(
+    skills: ScoringData['matchingSkills'],
+  ): MatchingSkill[] {
+    return skills.map((skill) => ({
       skill: skill.skill,
       matchScore: skill.matchScore,
       matchType: skill.matchType,
@@ -472,7 +492,9 @@ export class ReportGeneratorService {
     }));
   }
 
-  private convertToReportRecommendation(recommendations: ScoringData['recommendations']): ReportRecommendation {
+  private convertToReportRecommendation(
+    recommendations: ScoringData['recommendations'],
+  ): ReportRecommendation {
     return {
       decision: recommendations.decision,
       reasoning: recommendations.reasoning,
@@ -482,33 +504,51 @@ export class ReportGeneratorService {
     };
   }
 
-  private async generateExecutiveSummary(event: MatchScoredEvent): Promise<string> {
+  private async generateExecutiveSummary(
+    event: MatchScoredEvent,
+  ): Promise<string> {
     const score = Math.round(event.scoreDto.overallScore * 100);
     const decision = event.scoreDto.recommendations.decision;
-    
-    return `Executive Summary: Candidate scored ${score}% overall match for the position. Recommendation: ${decision.toUpperCase()}. ` +
-           `Key strengths include ${event.scoreDto.recommendations.strengths.slice(0, 2).join(' and ')}. ` +
-           `${event.scoreDto.recommendations.concerns.length > 0 ? 
-             'Areas of concern: ' + event.scoreDto.recommendations.concerns.slice(0, 1).join(', ') + '.' : 
-             'No significant concerns identified.'}`;
+
+    return (
+      `Executive Summary: Candidate scored ${score}% overall match for the position. Recommendation: ${decision.toUpperCase()}. ` +
+      `Key strengths include ${event.scoreDto.recommendations.strengths.slice(0, 2).join(' and ')}. ` +
+      `${
+        event.scoreDto.recommendations.concerns.length > 0
+          ? 'Areas of concern: ' +
+            event.scoreDto.recommendations.concerns.slice(0, 1).join(', ') +
+            '.'
+          : 'No significant concerns identified.'
+      }`
+    );
   }
 
-  private generateReportFilename(reportType: string, jobId: string, resumeId: string, extension: string): string {
+  private generateReportFilename(
+    reportType: string,
+    jobId: string,
+    resumeId: string,
+    extension: string,
+  ): string {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     return `${reportType}-${jobId}-${resumeId}-${timestamp}.${extension}`;
   }
 
-  private async gatherReportData(request: ReportGenerationRequest): Promise<any[]> {
+  private async gatherReportData(
+    request: ReportGenerationRequest,
+  ): Promise<any[]> {
     // This would typically fetch data from other services
     // For now, return placeholder data structure
-    return request.resumeIds.map(resumeId => ({
+    return request.resumeIds.map((resumeId) => ({
       resumeId,
       jobId: request.jobId,
       // Add more data fetching logic here
     }));
   }
 
-  private async generateReportInFormat(data: any, format: string): Promise<any> {
+  private async generateReportInFormat(
+    data: any,
+    format: string,
+  ): Promise<any> {
     // Placeholder for format-specific generation
     return {
       format,

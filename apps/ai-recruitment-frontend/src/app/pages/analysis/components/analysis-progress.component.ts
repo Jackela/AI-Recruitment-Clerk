@@ -1,4 +1,11 @@
-import { Component, Input, Output, EventEmitter, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -28,17 +35,33 @@ export interface ProgressUpdate {
         <h2>🔄 正在分析</h2>
         <p>AI正在处理您的简历，请稍候...</p>
       </div>
-      
+
       <!-- Steps Overview -->
       <div class="steps-overview">
-        <div class="step-item" 
-             *ngFor="let step of steps; trackBy: trackByStepId"
-             [class]="step.status">
+        <div
+          class="step-item"
+          *ngFor="let step of steps; trackBy: trackByStepId"
+          [class]="step.status"
+        >
           <div class="step-indicator">
-            <svg *ngIf="step.status === 'completed'" class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              *ngIf="step.status === 'completed'"
+              class="check-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="M9 11l3 3 8-8"></path>
             </svg>
-            <svg *ngIf="step.status === 'error'" class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              *ngIf="step.status === 'error'"
+              class="error-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -50,7 +73,10 @@ export interface ProgressUpdate {
             <p>{{ step.description }}</p>
             <div class="step-progress" *ngIf="step.status === 'active'">
               <div class="progress-bar">
-                <div class="progress-fill" [style.width.%]="step.progress"></div>
+                <div
+                  class="progress-fill"
+                  [style.width.%]="step.progress"
+                ></div>
               </div>
               <span class="progress-text">{{ step.progress }}%</span>
             </div>
@@ -59,21 +85,26 @@ export interface ProgressUpdate {
       </div>
 
       <!-- Real-time Progress Tracker -->
-      <app-progress-tracker 
+      <app-progress-tracker
         [sessionId]="sessionId"
         [showMessageLog]="showMessageLog"
-        class="progress-tracker-embedded">
+        class="progress-tracker-embedded"
+      >
       </app-progress-tracker>
 
       <!-- Cancel Option -->
       <div class="cancel-section">
-        <button (click)="onCancelClick()" class="cancel-btn" [disabled]="isCancelling">
+        <button
+          (click)="onCancelClick()"
+          class="cancel-btn"
+          [disabled]="isCancelling"
+        >
           {{ isCancelling ? '取消中...' : '取消分析' }}
         </button>
       </div>
     </div>
   `,
-  styleUrls: ['../unified-analysis.component.css']
+  styleUrls: ['../unified-analysis.component.css'],
 })
 export class AnalysisProgressComponent implements OnInit, OnDestroy {
   @Input() sessionId = '';
@@ -104,35 +135,39 @@ export class AnalysisProgressComponent implements OnInit, OnDestroy {
 
   private setupWebSocketListeners(sessionId: string): void {
     // Listen for progress updates
-    this.webSocketService.onProgress(sessionId)
+    this.webSocketService
+      .onProgress(sessionId)
       .pipe(takeUntil(this.destroy$))
-      .subscribe(progress => {
+      .subscribe((progress) => {
         this.progressUpdate.emit({
           currentStep: progress.currentStep || '',
-          progress: progress.progress || 0
+          progress: progress.progress || 0,
         });
       });
 
     // Listen for step changes
-    this.webSocketService.connect(sessionId)
+    this.webSocketService
+      .connect(sessionId)
       .pipe(takeUntil(this.destroy$))
-      .subscribe(message => {
+      .subscribe((message) => {
         if (message.type === 'step_change') {
           this.stepChange.emit(message.data?.step || message.data?.currentStep);
         }
       });
 
     // Listen for completion
-    this.webSocketService.onCompletion(sessionId)
+    this.webSocketService
+      .onCompletion(sessionId)
       .pipe(takeUntil(this.destroy$))
-      .subscribe(completion => {
+      .subscribe((completion) => {
         this.analysisCompleted.emit(completion);
       });
 
     // Listen for errors
-    this.webSocketService.onError(sessionId)
+    this.webSocketService
+      .onError(sessionId)
       .pipe(takeUntil(this.destroy$))
-      .subscribe(error => {
+      .subscribe((error) => {
         this.analysisError.emit(error);
       });
   }
@@ -154,7 +189,7 @@ export class AnalysisProgressComponent implements OnInit, OnDestroy {
     if (sessionId && sessionId !== this.sessionId) {
       // Clean up existing listeners
       this.destroy$.next();
-      
+
       // Setup new listeners
       this.setupWebSocketListeners(sessionId);
     }

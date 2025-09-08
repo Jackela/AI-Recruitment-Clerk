@@ -8,7 +8,7 @@ export class AppController {
   constructor(
     private readonly appService: AppService,
     private readonly resumeRepository: ResumeRepository,
-    private readonly gridFsService: GridFsService
+    private readonly gridFsService: GridFsService,
   ) {}
 
   @Get()
@@ -20,22 +20,25 @@ export class AppController {
   async getHealth() {
     const dbHealth = await this.resumeRepository.healthCheck();
     const gridFsHealth = await this.gridFsService.healthCheck();
-    
-    const overallStatus = dbHealth.status === 'healthy' && gridFsHealth.status === 'healthy' ? 'ok' : 'degraded';
-    
+
+    const overallStatus =
+      dbHealth.status === 'healthy' && gridFsHealth.status === 'healthy'
+        ? 'ok'
+        : 'degraded';
+
     return {
       status: overallStatus,
       timestamp: new Date().toISOString(),
       service: 'resume-parser-svc',
       database: {
         status: dbHealth.status,
-        resumeCount: dbHealth.count
+        resumeCount: dbHealth.count,
       },
       gridfs: {
         status: gridFsHealth.status,
         bucket: gridFsHealth.bucket,
-        connected: gridFsHealth.connected
-      }
+        connected: gridFsHealth.connected,
+      },
     };
   }
 }

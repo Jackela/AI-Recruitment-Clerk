@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
 import { DomainsModule } from './domains.module';
 import { AnalyticsIntegrationService } from './analytics/analytics-integration.service';
@@ -15,23 +16,29 @@ describe('Agent-6: Gateway Integration Layer Tests', () => {
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
-          ignoreEnvFile: true
+          ignoreEnvFile: true,
+          load: [() => ({ NODE_ENV: 'test' })],
         }),
+        ThrottlerModule.forRoot([{ ttl: 60, limit: 100 } as any]),
         CacheModule.register({
-          isGlobal: true
+          isGlobal: true,
         }),
-        MongooseModule.forRoot(process.env.MONGODB_TEST_URL || 'mongodb://localhost:27017/test-db', {
-          // 使用 MongoDB Memory Server 提供的测试数据库
-          useNewUrlParser: true,
-          useUnifiedTopology: true,
-        }),
-        DomainsModule
+        MongooseModule.forRoot(
+          process.env.MONGODB_TEST_URL || 'mongodb://localhost:27017/test-db',
+          {
+            serverSelectionTimeoutMS: 500,
+            connectTimeoutMS: 500,
+          } as any,
+        ),
+        DomainsModule,
       ],
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    analyticsService = moduleFixture.get<AnalyticsIntegrationService>(AnalyticsIntegrationService);
-    
+    analyticsService = moduleFixture.get<AnalyticsIntegrationService>(
+      AnalyticsIntegrationService,
+    );
+
     await app.init();
   });
 

@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException, UnauthorizedException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -6,7 +11,15 @@ import * as speakeasy from 'speakeasy';
 import * as QRCode from 'qrcode';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcryptjs';
-import { MfaMethod, EnableMfaDto, VerifyMfaDto, DisableMfaDto, GenerateBackupCodesDto, MfaStatusDto, MfaSetupResponseDto } from '../dto/mfa.dto';
+import {
+  MfaMethod,
+  EnableMfaDto,
+  VerifyMfaDto,
+  DisableMfaDto,
+  GenerateBackupCodesDto,
+  MfaStatusDto,
+  MfaSetupResponseDto,
+} from '../dto/mfa.dto';
 import { UserProfile } from '../../schemas/user-profile.schema';
 import { EmailService } from './email.service';
 import { SmsService } from './sms.service';
@@ -37,12 +50,21 @@ export class MfaService {
     private emailService: EmailService,
     private smsService: SmsService,
   ) {
-    this.issuerName = this.configService.get<string>('MFA_ISSUER_NAME') || 'AI-Recruitment-Clerk';
-    this.secretLength = parseInt(this.configService.get<string>('MFA_SECRET_LENGTH') || '32');
-    this.backupCodesCount = parseInt(this.configService.get<string>('MFA_BACKUP_CODES_COUNT') || '10');
+    this.issuerName =
+      this.configService.get<string>('MFA_ISSUER_NAME') ||
+      'AI-Recruitment-Clerk';
+    this.secretLength = parseInt(
+      this.configService.get<string>('MFA_SECRET_LENGTH') || '32',
+    );
+    this.backupCodesCount = parseInt(
+      this.configService.get<string>('MFA_BACKUP_CODES_COUNT') || '10',
+    );
   }
 
-  async enableMfa(userId: string, enableMfaDto: EnableMfaDto): Promise<MfaSetupResponseDto> {
+  async enableMfa(
+    userId: string,
+    enableMfaDto: EnableMfaDto,
+  ): Promise<MfaSetupResponseDto> {
     try {
       const user = await this.userModel.findById(userId);
       if (!user) {
@@ -50,23 +72,28 @@ export class MfaService {
       }
 
       // Verify current password
-      const isPasswordValid = await bcrypt.compare(enableMfaDto.currentPassword, user.hashedPassword);
+      const isPasswordValid = await bcrypt.compare(
+        enableMfaDto.currentPassword,
+        user.hashedPassword,
+      );
       if (!isPasswordValid) {
         throw new UnauthorizedException('Invalid password');
       }
 
-      const mfaSettings: MfaSettings = this.normalizeMfaSettings(user.mfaSettings);
+      const mfaSettings: MfaSettings = this.normalizeMfaSettings(
+        user.mfaSettings,
+      );
 
       let qrCode: string | undefined;
       let secretKey: string | undefined;
       let backupCodes: string[] | undefined;
 
       switch (enableMfaDto.method) {
-        case MfaMethod.TOTP:
+        case MfaMethod.TOTP: {
           const secret = speakeasy.generateSecret({
             name: `${this.issuerName} (${user.email})`,
             issuer: this.issuerName,
-            length: this.secretLength
+            length: this.secretLength,
           });
 
           mfaSettings.totpSecret = secret.base32;
@@ -75,10 +102,13 @@ export class MfaService {
           // Generate QR code
           qrCode = await QRCode.toDataURL(secret.otpauth_url!);
           break;
+        }
 
         case MfaMethod.SMS:
           if (!enableMfaDto.phoneNumber) {
-            throw new BadRequestException('Phone number is required for SMS MFA');
+            throw new BadRequestException(
+              'Phone number is required for SMS MFA',
+            );
           }
           mfaSettings.phoneNumber = enableMfaDto.phoneNumber;
           break;
@@ -102,7 +132,7 @@ export class MfaService {
         // Generate backup codes
         backupCodes = this.generateBackupCodes();
         mfaSettings.backupCodes = await Promise.all(
-          backupCodes.map(code => bcrypt.hash(code, 12))
+          backupCodes.map((code) => bcrypt.hash(code, 12)),
         );
       }
 
@@ -116,10 +146,13 @@ export class MfaService {
         qrCode,
         secretKey,
         backupCodes,
-        message: `${enableMfaDto.method.toUpperCase()} MFA has been enabled successfully`
+        message: `${enableMfaDto.method.toUpperCase()} MFA has been enabled successfully`,
       };
     } catch (error) {
-      this.logger.error(`Failed to enable MFA for user ${userId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to enable MFA for user ${userId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -131,7 +164,7 @@ export class MfaService {
         methods: [] as MfaMethod[],
         backupCodes: [],
         trustedDevices: [],
-        failedAttempts: 0
+        failedAttempts: 0,
       };
     }
 
@@ -140,16 +173,24 @@ export class MfaService {
       methods: (rawSettings.methods || []).map((method: string) => {
         // Convert string to MfaMethod enum
         switch (method) {
-          case 'sms': return MfaMethod.SMS;
-          case 'email': return MfaMethod.EMAIL;
-          case 'totp': return MfaMethod.TOTP;
-          default: return method as MfaMethod;
+          case 'sms':
+            return MfaMethod.SMS;
+          case 'email':
+            return MfaMethod.EMAIL;
+          case 'totp':
+            return MfaMethod.TOTP;
+          default:
+            return method as MfaMethod;
         }
-      })
+      }),
     };
   }
 
-  async verifyMfa(userId: string, verifyMfaDto: VerifyMfaDto, deviceFingerprint?: string): Promise<{ success: boolean; deviceTrusted?: boolean }> {
+  async verifyMfa(
+    userId: string,
+    verifyMfaDto: VerifyMfaDto,
+    deviceFingerprint?: string,
+  ): Promise<{ success: boolean; deviceTrusted?: boolean }> {
     try {
       const user = await this.userModel.findById(userId);
       if (!user || !user.mfaSettings?.enabled) {
@@ -160,12 +201,19 @@ export class MfaService {
 
       // Check if account is locked
       if (mfaSettings.lockedUntil && new Date() < mfaSettings.lockedUntil) {
-        const lockTimeRemaining = Math.ceil((mfaSettings.lockedUntil.getTime() - Date.now()) / 60000);
-        throw new UnauthorizedException(`Account locked due to too many failed attempts. Try again in ${lockTimeRemaining} minutes.`);
+        const lockTimeRemaining = Math.ceil(
+          (mfaSettings.lockedUntil.getTime() - Date.now()) / 60000,
+        );
+        throw new UnauthorizedException(
+          `Account locked due to too many failed attempts. Try again in ${lockTimeRemaining} minutes.`,
+        );
       }
 
       // Check if device is already trusted
-      if (deviceFingerprint && mfaSettings.trustedDevices.includes(deviceFingerprint)) {
+      if (
+        deviceFingerprint &&
+        mfaSettings.trustedDevices.includes(deviceFingerprint)
+      ) {
         this.logger.debug(`Trusted device bypassing MFA for user ${userId}`);
         return { success: true, deviceTrusted: true };
       }
@@ -174,11 +222,21 @@ export class MfaService {
 
       // Verify token based on method
       if (verifyMfaDto.method) {
-        isValidToken = await this.verifyTokenForMethod(mfaSettings, verifyMfaDto.token, verifyMfaDto.method);
+        isValidToken = await this.verifyTokenForMethod(
+          mfaSettings,
+          verifyMfaDto.token,
+          verifyMfaDto.method,
+        );
       } else {
         // Try all enabled methods
         for (const method of mfaSettings.methods) {
-          if (await this.verifyTokenForMethod(mfaSettings, verifyMfaDto.token, method)) {
+          if (
+            await this.verifyTokenForMethod(
+              mfaSettings,
+              verifyMfaDto.token,
+              method,
+            )
+          ) {
             isValidToken = true;
             break;
           }
@@ -188,11 +246,13 @@ export class MfaService {
       if (!isValidToken) {
         // Increment failed attempts
         mfaSettings.failedAttempts = (mfaSettings.failedAttempts || 0) + 1;
-        
+
         // Lock account if too many failed attempts
         if (mfaSettings.failedAttempts >= 5) {
           mfaSettings.lockedUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
-          this.logger.warn(`User ${userId} account locked due to too many MFA failures`);
+          this.logger.warn(
+            `User ${userId} account locked due to too many MFA failures`,
+          );
         }
 
         await this.userModel.findByIdAndUpdate(userId, { mfaSettings });
@@ -205,7 +265,11 @@ export class MfaService {
       mfaSettings.lastUsedAt = new Date();
 
       // Add device to trusted list if requested
-      if (verifyMfaDto.rememberDevice && deviceFingerprint && !mfaSettings.trustedDevices.includes(deviceFingerprint)) {
+      if (
+        verifyMfaDto.rememberDevice &&
+        deviceFingerprint &&
+        !mfaSettings.trustedDevices.includes(deviceFingerprint)
+      ) {
         mfaSettings.trustedDevices.push(deviceFingerprint);
         // Keep only last 5 trusted devices
         if (mfaSettings.trustedDevices.length > 5) {
@@ -218,12 +282,18 @@ export class MfaService {
       this.logger.log(`MFA verification successful for user ${userId}`);
       return { success: true, deviceTrusted: false };
     } catch (error) {
-      this.logger.error(`MFA verification failed for user ${userId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `MFA verification failed for user ${userId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
 
-  async disableMfa(userId: string, disableMfaDto: DisableMfaDto): Promise<{ success: boolean }> {
+  async disableMfa(
+    userId: string,
+    disableMfaDto: DisableMfaDto,
+  ): Promise<{ success: boolean }> {
     try {
       const user = await this.userModel.findById(userId);
       if (!user) {
@@ -231,13 +301,18 @@ export class MfaService {
       }
 
       // Verify current password
-      const isPasswordValid = await bcrypt.compare(disableMfaDto.currentPassword, user.hashedPassword);
+      const isPasswordValid = await bcrypt.compare(
+        disableMfaDto.currentPassword,
+        user.hashedPassword,
+      );
       if (!isPasswordValid) {
         throw new UnauthorizedException('Invalid password');
       }
 
       // Verify MFA token
-      const mfaVerification = await this.verifyMfa(userId, { token: disableMfaDto.mfaToken });
+      const mfaVerification = await this.verifyMfa(userId, {
+        token: disableMfaDto.mfaToken,
+      });
       if (!mfaVerification.success) {
         throw new UnauthorizedException('Invalid MFA token');
       }
@@ -248,15 +323,20 @@ export class MfaService {
         methods: [],
         backupCodes: [],
         trustedDevices: [],
-        failedAttempts: 0
+        failedAttempts: 0,
       };
 
-      await this.userModel.findByIdAndUpdate(userId, { mfaSettings: disabledMfaSettings });
+      await this.userModel.findByIdAndUpdate(userId, {
+        mfaSettings: disabledMfaSettings,
+      });
 
       this.logger.log(`MFA disabled for user ${userId}`);
       return { success: true };
     } catch (error) {
-      this.logger.error(`Failed to disable MFA for user ${userId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to disable MFA for user ${userId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -274,24 +354,32 @@ export class MfaService {
       methods: mfaSettings.methods,
       remainingBackupCodes: mfaSettings.backupCodes.length,
       deviceTrusted: false, // This would be set based on device fingerprint
-      hasBackupCodes: mfaSettings.backupCodes.length > 0
+      hasBackupCodes: mfaSettings.backupCodes.length > 0,
     };
   }
 
-  async generateNewBackupCodes(userId: string, generateBackupCodesDto: GenerateBackupCodesDto): Promise<string[]> {
+  async generateNewBackupCodes(
+    userId: string,
+    generateBackupCodesDto: GenerateBackupCodesDto,
+  ): Promise<string[]> {
     const user = await this.userModel.findById(userId);
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
 
     // Verify current password
-    const isPasswordValid = await bcrypt.compare(generateBackupCodesDto.currentPassword, user.hashedPassword);
+    const isPasswordValid = await bcrypt.compare(
+      generateBackupCodesDto.currentPassword,
+      user.hashedPassword,
+    );
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid password');
     }
 
     // Verify MFA token
-    const mfaVerification = await this.verifyMfa(userId, { token: generateBackupCodesDto.mfaToken });
+    const mfaVerification = await this.verifyMfa(userId, {
+      token: generateBackupCodesDto.mfaToken,
+    });
     if (!mfaVerification.success) {
       throw new UnauthorizedException('Invalid MFA token');
     }
@@ -299,7 +387,7 @@ export class MfaService {
     // Generate new backup codes
     const newBackupCodes = this.generateBackupCodes();
     const hashedBackupCodes = await Promise.all(
-      newBackupCodes.map(code => bcrypt.hash(code, 12))
+      newBackupCodes.map((code) => bcrypt.hash(code, 12)),
     );
 
     // Update user with new backup codes
@@ -312,7 +400,11 @@ export class MfaService {
     return newBackupCodes;
   }
 
-  private async verifyTokenForMethod(mfaSettings: MfaSettings, token: string, method: MfaMethod): Promise<boolean> {
+  private async verifyTokenForMethod(
+    mfaSettings: MfaSettings,
+    token: string,
+    method: MfaMethod,
+  ): Promise<boolean> {
     switch (method) {
       case MfaMethod.TOTP:
         if (!mfaSettings.totpSecret) return false;
@@ -320,7 +412,7 @@ export class MfaService {
           secret: mfaSettings.totpSecret,
           encoding: 'base32',
           token,
-          window: 2 // Allow 2 time steps (60 seconds) tolerance
+          window: 2, // Allow 2 time steps (60 seconds) tolerance
         });
 
       case MfaMethod.SMS:
@@ -348,7 +440,10 @@ export class MfaService {
     return codes;
   }
 
-  async sendMfaToken(userId: string, method: MfaMethod): Promise<{ success: boolean; message: string }> {
+  async sendMfaToken(
+    userId: string,
+    method: MfaMethod,
+  ): Promise<{ success: boolean; message: string }> {
     const user = await this.userModel.findById(userId);
     if (!user || !user.mfaSettings?.enabled) {
       throw new UnauthorizedException('MFA not enabled');
@@ -367,43 +462,57 @@ export class MfaService {
           if (user.mfaSettings.phoneNumber) {
             await this.smsService.sendSms(
               user.mfaSettings.phoneNumber,
-              `Your ${this.issuerName} verification code is: ${token}. This code expires in 5 minutes.`
+              `Your ${this.issuerName} verification code is: ${token}. This code expires in 5 minutes.`,
             );
           }
           break;
 
-        case MfaMethod.EMAIL:
+        case MfaMethod.EMAIL: {
           const email = user.mfaSettings.email || user.email;
           await this.emailService.sendMfaToken(email, token, this.issuerName);
           break;
+        }
 
         default:
-          throw new BadRequestException('Invalid MFA method for token generation');
+          throw new BadRequestException(
+            'Invalid MFA method for token generation',
+          );
       }
 
       return {
         success: true,
-        message: `Verification code sent via ${method.toUpperCase()}`
+        message: `Verification code sent via ${method.toUpperCase()}`,
       };
     } catch (error) {
-      this.logger.error(`Failed to send MFA token: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
-      throw new BadRequestException(`Failed to send verification code via ${method.toUpperCase()}`);
+      this.logger.error(
+        `Failed to send MFA token: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      throw new BadRequestException(
+        `Failed to send verification code via ${method.toUpperCase()}`,
+      );
     }
   }
 
-  private temporaryTokens = new Map<string, { token: string; expiresAt: Date }>();
+  private temporaryTokens = new Map<
+    string,
+    { token: string; expiresAt: Date }
+  >();
 
   private storeTemporaryToken(userId: string, token: string, expiresAt: Date) {
     // Clean up expired tokens
     this.cleanupExpiredTokens();
-    
+
     // Store new token
     this.temporaryTokens.set(userId, { token, expiresAt });
-    
+
     // Schedule cleanup
-    setTimeout(() => {
-      this.temporaryTokens.delete(userId);
-    }, 5 * 60 * 1000);
+    setTimeout(
+      () => {
+        this.temporaryTokens.delete(userId);
+      },
+      5 * 60 * 1000,
+    );
   }
 
   private cleanupExpiredTokens() {
@@ -421,12 +530,12 @@ export class MfaService {
       this.temporaryTokens.delete(userId);
       return false;
     }
-    
+
     const isValid = stored.token === token;
     if (isValid) {
       this.temporaryTokens.delete(userId);
     }
-    
+
     return isValid;
   }
 }

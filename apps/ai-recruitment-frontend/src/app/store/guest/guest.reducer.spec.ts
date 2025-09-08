@@ -156,7 +156,9 @@ describe('Guest Reducer', () => {
         surveyUrl: 'https://wj.qq.com/test',
         message: 'Code generated',
       };
-      const action = GuestActions.generateFeedbackCodeSuccess({ feedbackResponse });
+      const action = GuestActions.generateFeedbackCodeSuccess({
+        feedbackResponse,
+      });
       const result = guestReducer(state, action);
 
       expect(result.feedbackCode).toBe('fb-test-123');
@@ -175,7 +177,9 @@ describe('Guest Reducer', () => {
         isLimited: true,
         maxUsage: 5,
       };
-      const action = GuestActions.redeemFeedbackCodeSuccess({ message: 'Code redeemed' });
+      const action = GuestActions.redeemFeedbackCodeSuccess({
+        message: 'Code redeemed',
+      });
       const result = guestReducer(initialState, action);
 
       expect(result.feedbackCodeStatus).toBe('redeemed');
@@ -198,10 +202,12 @@ describe('Guest Reducer', () => {
   });
 
   describe('Resume Analysis Actions', () => {
-    const mockFile = new File(['content'], 'test.pdf', { type: 'application/pdf' });
+    const mockFile = new File(['content'], 'test.pdf', {
+      type: 'application/pdf',
+    });
 
     it('should set uploading state on resume upload', () => {
-      const action = GuestActions.uploadResume({ 
+      const action = GuestActions.uploadResume({
         file: mockFile,
         candidateName: 'John Doe',
       });
@@ -251,14 +257,24 @@ describe('Guest Reducer', () => {
           analysisId: 'analysis-123',
           status: 'completed' as const,
           progress: 100,
-          results: { personalInfo: {}, skills: [], experience: {}, education: [], summary: {} },
+          results: {
+            personalInfo: {},
+            skills: [],
+            experience: {},
+            education: [],
+            summary: {},
+          },
           completedAt: '2024-01-01T00:05:00.000Z',
         },
       };
-      const action = GuestActions.loadAnalysisResultsSuccess({ analysisResults });
+      const action = GuestActions.loadAnalysisResultsSuccess({
+        analysisResults,
+      });
       const result = guestReducer(state, action);
 
-      expect(result.analysisResults['analysis-123']).toEqual(analysisResults.data);
+      expect(result.analysisResults['analysis-123']).toEqual(
+        analysisResults.data,
+      );
       expect(result.showAnalysisResults).toBe(true);
       expect(result.isLoading).toBe(false);
       expect(result.lastUpdated).toBeTruthy();
@@ -272,7 +288,13 @@ describe('Guest Reducer', () => {
           filename: 'demo.pdf',
           completedAt: '2024-01-01T00:00:00.000Z',
           remainingUsage: 2,
-          results: { personalInfo: {}, skills: [], experience: {}, education: [], summary: {} },
+          results: {
+            personalInfo: {},
+            skills: [],
+            experience: {},
+            education: [],
+            summary: {},
+          },
         },
       };
       const action = GuestActions.loadDemoAnalysisSuccess({ demoResults });
@@ -368,8 +390,9 @@ describe('Guest Reducer', () => {
       const result = guestReducer(state, action);
 
       expect(result.lastUpdated).toBeTruthy();
-      expect(new Date(result.lastUpdated!).getTime())
-        .toBeGreaterThan(new Date().getTime() - 1000);
+      expect(new Date(result.lastUpdated!).getTime()).toBeGreaterThan(
+        new Date().getTime() - 1000,
+      );
     });
   });
 
@@ -417,8 +440,10 @@ describe('Guest Reducer', () => {
   describe('State Immutability', () => {
     it('should not mutate the original state', () => {
       const originalState = { ...state };
-      const action = GuestActions.initializeGuest({ deviceId: 'test-device-123' });
-      
+      const action = GuestActions.initializeGuest({
+        deviceId: 'test-device-123',
+      });
+
       guestReducer(state, action);
 
       expect(state).toEqual(originalState);

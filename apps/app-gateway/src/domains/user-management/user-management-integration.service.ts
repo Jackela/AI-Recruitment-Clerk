@@ -6,7 +6,7 @@ export class UserManagementIntegrationService {
   async getUserProfile(userId: string) {
     return {
       userId,
-      isActive: true
+      isActive: true,
     };
   }
 }

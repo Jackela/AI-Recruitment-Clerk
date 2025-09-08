@@ -52,7 +52,7 @@ export interface RightsRequestStatusDto {
 
 export enum DataExportFormat {
   JSON = 'json',
-  CSV = 'csv'
+  CSV = 'csv',
 }
 
 export interface UserConsentProfile {
@@ -69,7 +69,7 @@ import { environment } from '../../environments/environment';
  * Handles all GDPR compliance API interactions
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PrivacyApiService {
   private readonly baseUrl = `${environment.apiUrl}/privacy`;
@@ -83,9 +83,14 @@ export class PrivacyApiService {
   /**
    * Capture user consent for various processing purposes
    */
-  async captureConsent(captureConsentDto: CaptureConsentDto): Promise<UserConsentProfile> {
+  async captureConsent(
+    captureConsentDto: CaptureConsentDto,
+  ): Promise<UserConsentProfile> {
     return firstValueFrom(
-      this.http.post<UserConsentProfile>(`${this.baseUrl}/consent`, captureConsentDto)
+      this.http.post<UserConsentProfile>(
+        `${this.baseUrl}/consent`,
+        captureConsentDto,
+      ),
     );
   }
 
@@ -94,7 +99,10 @@ export class PrivacyApiService {
    */
   async withdrawConsent(withdrawConsentDto: WithdrawConsentDto): Promise<void> {
     return firstValueFrom(
-      this.http.put<void>(`${this.baseUrl}/consent/withdraw`, withdrawConsentDto)
+      this.http.put<void>(
+        `${this.baseUrl}/consent/withdraw`,
+        withdrawConsentDto,
+      ),
     );
   }
 
@@ -103,7 +111,7 @@ export class PrivacyApiService {
    */
   async getConsentStatus(userId: string): Promise<ConsentStatusDto> {
     return firstValueFrom(
-      this.http.get<ConsentStatusDto>(`${this.baseUrl}/consent/${userId}`)
+      this.http.get<ConsentStatusDto>(`${this.baseUrl}/consent/${userId}`),
     );
   }
 
@@ -114,42 +122,60 @@ export class PrivacyApiService {
   /**
    * Create a data subject rights request
    */
-  async createRightsRequest(createRequestDto: CreateRightsRequestDto): Promise<DataSubjectRightsRequest> {
+  async createRightsRequest(
+    createRequestDto: CreateRightsRequestDto,
+  ): Promise<DataSubjectRightsRequest> {
     return firstValueFrom(
-      this.http.post<DataSubjectRightsRequest>(`${this.baseUrl}/rights-request`, createRequestDto)
+      this.http.post<DataSubjectRightsRequest>(
+        `${this.baseUrl}/rights-request`,
+        createRequestDto,
+      ),
     );
   }
 
   /**
    * Get status of a rights request
    */
-  async getRightsRequestStatus(requestId: string): Promise<RightsRequestStatusDto> {
+  async getRightsRequestStatus(
+    requestId: string,
+  ): Promise<RightsRequestStatusDto> {
     return firstValueFrom(
-      this.http.get<RightsRequestStatusDto>(`${this.baseUrl}/rights-request/${requestId}`)
+      this.http.get<RightsRequestStatusDto>(
+        `${this.baseUrl}/rights-request/${requestId}`,
+      ),
     );
   }
 
   /**
    * Export user data (Article 15 - Right to Access)
    */
-  async exportUserData(userId: string, format: DataExportFormat = DataExportFormat.JSON): Promise<DataExportPackage> {
+  async exportUserData(
+    userId: string,
+    format: DataExportFormat = DataExportFormat.JSON,
+  ): Promise<DataExportPackage> {
     const params = new HttpParams().set('format', format);
     return firstValueFrom(
-      this.http.get<DataExportPackage>(`${this.baseUrl}/data-export/${userId}`, { params })
+      this.http.get<DataExportPackage>(
+        `${this.baseUrl}/data-export/${userId}`,
+        { params },
+      ),
     );
   }
 
   /**
    * Request data erasure (Article 17 - Right to be Forgotten)
    */
-  async requestDataErasure(userId: string, categories?: string[]): Promise<void> {
+  async requestDataErasure(
+    userId: string,
+    categories?: string[],
+  ): Promise<void> {
     let params = new HttpParams();
     if (categories && categories.length > 0) {
       params = params.set('categories', categories.join(','));
     }
-    
+
     return firstValueFrom(
-      this.http.delete<void>(`${this.baseUrl}/user-data/${userId}`, { params })
+      this.http.delete<void>(`${this.baseUrl}/user-data/${userId}`, { params }),
     );
   }
 
@@ -162,7 +188,7 @@ export class PrivacyApiService {
    */
   async setCookieConsent(cookieConsent: any): Promise<any> {
     return firstValueFrom(
-      this.http.post<any>(`${this.baseUrl}/cookie-consent`, cookieConsent)
+      this.http.post<any>(`${this.baseUrl}/cookie-consent`, cookieConsent),
     );
   }
 
@@ -171,7 +197,7 @@ export class PrivacyApiService {
    */
   async getCookieConsent(deviceId: string): Promise<any> {
     return firstValueFrom(
-      this.http.get<any>(`${this.baseUrl}/cookie-consent/${deviceId}`)
+      this.http.get<any>(`${this.baseUrl}/cookie-consent/${deviceId}`),
     );
   }
 
@@ -208,19 +234,25 @@ export class PrivacyApiService {
    * Download data export file
    */
   async downloadDataExport(downloadUrl: string): Promise<Blob> {
-    return firstValueFrom(
-      this.http.get(downloadUrl, { responseType: 'blob' })
-    );
+    return firstValueFrom(this.http.get(downloadUrl, { responseType: 'blob' }));
   }
 
   /**
    * Check if user has valid consent for a specific purpose
    */
-  async hasValidConsentForPurpose(userId: string, purpose: string): Promise<boolean> {
+  async hasValidConsentForPurpose(
+    userId: string,
+    purpose: string,
+  ): Promise<boolean> {
     try {
       const consentStatus = await this.getConsentStatus(userId);
-      const purposeStatus = consentStatus.purposes.find(p => p.purpose === purpose);
-      return purposeStatus?.status === 'granted' && !this.isConsentExpired(purposeStatus);
+      const purposeStatus = consentStatus.purposes.find(
+        (p) => p.purpose === purpose,
+      );
+      return (
+        purposeStatus?.status === 'granted' &&
+        !this.isConsentExpired(purposeStatus)
+      );
     } catch (error) {
       console.error('Error checking consent status:', error);
       return false;
@@ -240,16 +272,19 @@ export class PrivacyApiService {
    */
   getPurposeDisplayName(purpose: string): string {
     const purposeNames: Record<string, string> = {
-      'essential_services': 'Essential Services',
-      'functional_analytics': 'Functional Analytics',
-      'behavioral_analytics': 'Enhanced Analytics',
-      'marketing_communications': 'Marketing Communications',
-      'third_party_sharing': 'Third-Party Integrations',
-      'personalization': 'Personalization',
-      'performance_monitoring': 'Performance Monitoring'
+      essential_services: 'Essential Services',
+      functional_analytics: 'Functional Analytics',
+      behavioral_analytics: 'Enhanced Analytics',
+      marketing_communications: 'Marketing Communications',
+      third_party_sharing: 'Third-Party Integrations',
+      personalization: 'Personalization',
+      performance_monitoring: 'Performance Monitoring',
     };
 
-    return purposeNames[purpose] || purpose.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return (
+      purposeNames[purpose] ||
+      purpose.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
+    );
   }
 
   /**
@@ -257,13 +292,15 @@ export class PrivacyApiService {
    */
   getRetentionPeriodDescription(purpose: string): string {
     const retentionPeriods: Record<string, string> = {
-      'essential_services': 'Until account deletion or 7 years after last activity',
-      'functional_analytics': '2 years from collection',
-      'behavioral_analytics': '2 years from collection',
-      'marketing_communications': 'Until consent withdrawn or 3 years of inactivity',
-      'third_party_sharing': 'As long as third-party processing continues',
-      'personalization': '1 year from last use of personalized features',
-      'performance_monitoring': '1 year from collection'
+      essential_services:
+        'Until account deletion or 7 years after last activity',
+      functional_analytics: '2 years from collection',
+      behavioral_analytics: '2 years from collection',
+      marketing_communications:
+        'Until consent withdrawn or 3 years of inactivity',
+      third_party_sharing: 'As long as third-party processing continues',
+      personalization: '1 year from last use of personalized features',
+      performance_monitoring: '1 year from collection',
     };
 
     return retentionPeriods[purpose] || 'As specified in our Privacy Policy';
@@ -272,7 +309,10 @@ export class PrivacyApiService {
   /**
    * Validate consent request before submission
    */
-  validateConsentRequest(captureConsentDto: CaptureConsentDto): { valid: boolean; errors: string[] } {
+  validateConsentRequest(captureConsentDto: CaptureConsentDto): {
+    valid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     // Check required fields
@@ -280,7 +320,10 @@ export class PrivacyApiService {
       errors.push('User ID is required');
     }
 
-    if (!captureConsentDto.consents || captureConsentDto.consents.length === 0) {
+    if (
+      !captureConsentDto.consents ||
+      captureConsentDto.consents.length === 0
+    ) {
       errors.push('At least one consent choice is required');
     }
 
@@ -291,31 +334,43 @@ export class PrivacyApiService {
       }
 
       if (typeof consent.granted !== 'boolean') {
-        errors.push(`Consent ${index + 1}: Granted status must be true or false`);
+        errors.push(
+          `Consent ${index + 1}: Granted status must be true or false`,
+        );
       }
     });
 
     // Check for essential services consent
     const essentialConsent = captureConsentDto.consents.find(
-      c => c.purpose === 'essential_services'
+      (c) => c.purpose === 'essential_services',
     );
 
     if (essentialConsent && !essentialConsent.granted) {
-      errors.push('Consent for essential services is required to use the platform');
+      errors.push(
+        'Consent for essential services is required to use the platform',
+      );
     }
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
   /**
    * Generate consent summary for display
    */
-  generateConsentSummary(consentStatus: ConsentStatusDto): { granted: number; denied: number; total: number } {
-    const granted = consentStatus.purposes.filter(p => p.status === 'granted').length;
-    const denied = consentStatus.purposes.filter(p => p.status === 'denied').length;
+  generateConsentSummary(consentStatus: ConsentStatusDto): {
+    granted: number;
+    denied: number;
+    total: number;
+  } {
+    const granted = consentStatus.purposes.filter(
+      (p) => p.status === 'granted',
+    ).length;
+    const denied = consentStatus.purposes.filter(
+      (p) => p.status === 'denied',
+    ).length;
     const total = consentStatus.purposes.length;
 
     return { granted, denied, total };
@@ -341,6 +396,9 @@ export class PrivacyApiService {
    * Mark privacy policy as accepted
    */
   markPrivacyPolicyAccepted(): void {
-    localStorage.setItem('privacy_policy_accepted_date', new Date().toISOString());
+    localStorage.setItem(
+      'privacy_policy_accepted_date',
+      new Date().toISOString(),
+    );
   }
 }

@@ -4,17 +4,15 @@ import { RouterModule } from '@angular/router';
 import { ReportsPlaceholderComponent } from './reports-placeholder/reports-placeholder.component';
 
 @NgModule({
-  declarations: [
-    ReportsPlaceholderComponent
-  ],
+  declarations: [ReportsPlaceholderComponent],
   imports: [
     CommonModule,
     RouterModule.forChild([
       {
         path: '',
-        component: ReportsPlaceholderComponent
-      }
-    ])
-  ]
+        component: ReportsPlaceholderComponent,
+      },
+    ]),
+  ],
 })
-export class ReportsModule { }
+export class ReportsModule {}

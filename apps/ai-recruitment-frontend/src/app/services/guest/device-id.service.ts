@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DeviceIdService {
   private readonly STORAGE_KEY = 'ai-recruitment-device-id';
@@ -49,7 +49,7 @@ export class DeviceIdService {
   private initializeDeviceId(): void {
     // Try to get existing device ID from localStorage
     const storedId = this.getStoredDeviceId();
-    
+
     if (storedId && this.isValidDeviceId(storedId)) {
       this.deviceId = storedId;
     } else {
@@ -79,20 +79,24 @@ export class DeviceIdService {
 
   private generateUUID(): string {
     // Generate RFC 4122 compliant UUID v4
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0;
-      const v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
+      /[xy]/g,
+      function (c) {
+        const r = (Math.random() * 16) | 0;
+        const v = c == 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      },
+    );
   }
 
   private isValidDeviceId(deviceId: string): boolean {
     if (!deviceId || typeof deviceId !== 'string') {
       return false;
     }
-    
+
     // Validate UUID v4 format specifically
-    const uuidV4Pattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const uuidV4Pattern =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     return uuidV4Pattern.test(deviceId);
   }
 
@@ -111,7 +115,7 @@ export class DeviceIdService {
       userAgent: navigator.userAgent,
       screenResolution: `${screen.width}x${screen.height}`,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      language: navigator.language
+      language: navigator.language,
     };
   }
 }

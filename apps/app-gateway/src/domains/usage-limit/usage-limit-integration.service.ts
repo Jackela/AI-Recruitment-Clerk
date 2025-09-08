@@ -14,7 +14,7 @@ export class UsageLimitIntegrationService {
         allowed: true,
         remaining: 1000,
         resetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-        limit: 1000
+        limit: 1000,
       };
     } catch (error) {
       this.logger.error('Error checking usage limit', error);
@@ -22,7 +22,7 @@ export class UsageLimitIntegrationService {
         allowed: true,
         remaining: 0,
         resetDate: new Date(),
-        limit: 0
+        limit: 0,
       };
     }
   }
@@ -30,20 +30,24 @@ export class UsageLimitIntegrationService {
   /**
    * 记录使用 - EMERGENCY IMPLEMENTATION
    */
-  async recordUsage(userId: string, resourceType: string, amount = 1): Promise<any> {
+  async recordUsage(
+    userId: string,
+    resourceType: string,
+    amount = 1,
+  ): Promise<any> {
     try {
       this.logger.log('Recording usage', { userId, resourceType, amount });
       return {
         success: true,
         currentUsage: amount,
         remainingQuota: 1000 - amount,
-        recordedAt: new Date()
+        recordedAt: new Date(),
       };
     } catch (error) {
       this.logger.error('Error recording usage', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -51,14 +55,18 @@ export class UsageLimitIntegrationService {
   /**
    * 添加奖励配额 - EMERGENCY IMPLEMENTATION
    */
-  async addBonusQuota(userId: string, resourceType: string, amount: number): Promise<any> {
+  async addBonusQuota(
+    userId: string,
+    resourceType: string,
+    amount: number,
+  ): Promise<any> {
     try {
       this.logger.log('Adding bonus quota', { userId, resourceType, amount });
       return {
         success: true,
         newQuota: amount + 1000,
         bonusAdded: amount,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       };
     } catch (error) {
       this.logger.error('Error adding bonus quota', error);
@@ -75,7 +83,7 @@ export class UsageLimitIntegrationService {
         limits: [],
         totalCount: 0,
         page: options.page || 1,
-        totalPages: 0
+        totalPages: 0,
       };
     } catch (error) {
       this.logger.error('Error getting usage limits', error);
@@ -86,7 +94,10 @@ export class UsageLimitIntegrationService {
   /**
    * 获取使用限制详情 - EMERGENCY IMPLEMENTATION
    */
-  async getUsageLimitDetail(limitId: string, organizationId: string): Promise<any> {
+  async getUsageLimitDetail(
+    limitId: string,
+    organizationId: string,
+  ): Promise<any> {
     try {
       return {
         id: limitId,
@@ -95,7 +106,7 @@ export class UsageLimitIntegrationService {
         used: 0,
         remaining: 1000,
         resetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        organizationId
+        organizationId,
       };
     } catch (error) {
       this.logger.error('Error getting usage limit detail', error);
@@ -106,14 +117,18 @@ export class UsageLimitIntegrationService {
   /**
    * 更新使用限制策略 - EMERGENCY IMPLEMENTATION
    */
-  async updateUsageLimitPolicy(policyId: string, updateData: any, userId: string): Promise<any> {
+  async updateUsageLimitPolicy(
+    policyId: string,
+    updateData: any,
+    userId: string,
+  ): Promise<any> {
     try {
       this.logger.log('Updating usage limit policy', { policyId, userId });
       return {
         id: policyId,
         ...updateData,
         updatedBy: userId,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
     } catch (error) {
       this.logger.error('Error updating usage limit policy', error);
@@ -124,7 +139,11 @@ export class UsageLimitIntegrationService {
   /**
    * 重置使用限制 - EMERGENCY IMPLEMENTATION
    */
-  async resetUsageLimit(ip: string, organizationId: string, resetOptions: any): Promise<any> {
+  async resetUsageLimit(
+    ip: string,
+    organizationId: string,
+    resetOptions: any,
+  ): Promise<any> {
     try {
       this.logger.log('Resetting usage limit', { ip, organizationId });
       return {
@@ -132,7 +151,7 @@ export class UsageLimitIntegrationService {
         ip,
         resetAt: new Date(),
         newQuota: 1000,
-        resetBy: resetOptions.resetBy
+        resetBy: resetOptions.resetBy,
       };
     } catch (error) {
       this.logger.error('Error resetting usage limit', error);
@@ -143,14 +162,22 @@ export class UsageLimitIntegrationService {
   /**
    * 批量管理使用限制 - EMERGENCY IMPLEMENTATION
    */
-  async batchManageUsageLimits(ips: string[], action: string, organizationId: string, options: any): Promise<any> {
+  async batchManageUsageLimits(
+    ips: string[],
+    action: string,
+    organizationId: string,
+    options: any,
+  ): Promise<any> {
     try {
-      this.logger.log('Batch managing usage limits', { count: ips.length, action });
+      this.logger.log('Batch managing usage limits', {
+        count: ips.length,
+        action,
+      });
       return {
         success: true,
         processed: ips.length,
         failed: 0,
-        results: ips.map(ip => ({ ip, success: true, action }))
+        results: ips.map((ip) => ({ ip, success: true, action })),
       };
     } catch (error) {
       this.logger.error('Error batch managing usage limits', error);
@@ -161,7 +188,11 @@ export class UsageLimitIntegrationService {
   /**
    * 获取使用统计 - EMERGENCY IMPLEMENTATION
    */
-  async getUsageStatistics(organizationId: string, timeRange: any, groupBy: string): Promise<any> {
+  async getUsageStatistics(
+    organizationId: string,
+    timeRange: any,
+    groupBy: string,
+  ): Promise<any> {
     try {
       return {
         timeRange,
@@ -171,7 +202,7 @@ export class UsageLimitIntegrationService {
         averageUsage: 0,
         peakUsage: 0,
         trends: [],
-        breakdowns: {}
+        breakdowns: {},
       };
     } catch (error) {
       this.logger.error('Error getting usage statistics', error);
@@ -182,7 +213,10 @@ export class UsageLimitIntegrationService {
   /**
    * 导出使用数据 - EMERGENCY IMPLEMENTATION
    */
-  async exportUsageData(organizationId: string, exportOptions: any): Promise<any> {
+  async exportUsageData(
+    organizationId: string,
+    exportOptions: any,
+  ): Promise<any> {
     try {
       this.logger.log('Exporting usage data', { organizationId });
       return {
@@ -190,7 +224,7 @@ export class UsageLimitIntegrationService {
         format: exportOptions.format || 'csv',
         downloadUrl: `/downloads/usage_${organizationId}.${exportOptions.format || 'csv'}`,
         estimatedTime: '2-5 minutes',
-        status: 'processing'
+        status: 'processing',
       };
     } catch (error) {
       this.logger.error('Error exporting usage data', error);
@@ -201,7 +235,11 @@ export class UsageLimitIntegrationService {
   /**
    * 配置限流 - EMERGENCY IMPLEMENTATION
    */
-  async configureRateLimiting(organizationId: string, config: any, userId: string): Promise<any> {
+  async configureRateLimiting(
+    organizationId: string,
+    config: any,
+    userId: string,
+  ): Promise<any> {
     try {
       this.logger.log('Configuring rate limiting', { organizationId, userId });
       return {
@@ -209,7 +247,7 @@ export class UsageLimitIntegrationService {
         organizationId,
         config,
         updatedBy: userId,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
     } catch (error) {
       this.logger.error('Error configuring rate limiting', error);
@@ -227,14 +265,14 @@ export class UsageLimitIntegrationService {
         timestamp: new Date(),
         service: 'usage-limit-service',
         database: 'connected',
-        dependencies: 'operational'
+        dependencies: 'operational',
       };
     } catch (error) {
       this.logger.error('Error getting health status', error);
       return {
         status: 'unhealthy',
         timestamp: new Date(),
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }

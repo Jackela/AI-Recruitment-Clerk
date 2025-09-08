@@ -23,11 +23,11 @@ export class QuestionnaireIntegrationService {
    */
   async saveSubmission(submission: any): Promise<string> {
     try {
-      this.logger.log('Saving questionnaire submission', { 
+      this.logger.log('Saving questionnaire submission', {
         ip: submission.metadata?.ip,
-        answersCount: submission.answers?.length || 0
+        answersCount: submission.answers?.length || 0,
       });
-      
+
       const questionnaireId = `questionnaire_${Date.now()}`;
       return questionnaireId;
     } catch (error) {
@@ -44,7 +44,7 @@ export class QuestionnaireIntegrationService {
       this.logger.log('Tracking event', {
         ip: eventData.ip,
         event: eventData.event,
-        questionnaireId: eventData.data?.questionnaireId
+        questionnaireId: eventData.data?.questionnaireId,
       });
       // Emergency implementation: just log
     } catch (error) {
@@ -63,7 +63,7 @@ export class QuestionnaireIntegrationService {
         avgQualityScore: 0,
         activeUsers: 0,
         completionRate: 0,
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       };
     } catch (error) {
       this.logger.error('Error getting basic stats', error);
@@ -86,7 +86,7 @@ export class QuestionnaireIntegrationService {
         createdBy: data.createdBy,
         organizationId: data.organizationId,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
     } catch (error) {
       this.logger.error('Error creating questionnaire', error);
@@ -103,7 +103,7 @@ export class QuestionnaireIntegrationService {
         items: [],
         totalCount: 0,
         page: options.page || 1,
-        totalPages: 0
+        totalPages: 0,
       };
     } catch (error) {
       this.logger.error('Error getting questionnaires', error);
@@ -114,7 +114,10 @@ export class QuestionnaireIntegrationService {
   /**
    * 获取问卷详情 - EMERGENCY IMPLEMENTATION
    */
-  async getQuestionnaire(questionnaireId: string, organizationId: string): Promise<any> {
+  async getQuestionnaire(
+    questionnaireId: string,
+    organizationId: string,
+  ): Promise<any> {
     try {
       return {
         id: questionnaireId,
@@ -124,7 +127,7 @@ export class QuestionnaireIntegrationService {
         questions: [],
         organizationId,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
     } catch (error) {
       this.logger.error('Error getting questionnaire', error);
@@ -135,7 +138,11 @@ export class QuestionnaireIntegrationService {
   /**
    * 更新问卷 - EMERGENCY IMPLEMENTATION
    */
-  async updateQuestionnaire(questionnaireId: string, updateData: any, userId: string): Promise<any> {
+  async updateQuestionnaire(
+    questionnaireId: string,
+    updateData: any,
+    userId: string,
+  ): Promise<any> {
     try {
       this.logger.log('Updating questionnaire', { questionnaireId, userId });
       return {
@@ -143,7 +150,7 @@ export class QuestionnaireIntegrationService {
         title: updateData.title || 'Updated Questionnaire',
         status: updateData.status || 'draft',
         updatedAt: new Date(),
-        updatedBy: userId
+        updatedBy: userId,
       };
     } catch (error) {
       this.logger.error('Error updating questionnaire', error);
@@ -154,7 +161,11 @@ export class QuestionnaireIntegrationService {
   /**
    * 发布问卷 - EMERGENCY IMPLEMENTATION
    */
-  async publishQuestionnaire(questionnaireId: string, userId: string, options: any): Promise<any> {
+  async publishQuestionnaire(
+    questionnaireId: string,
+    userId: string,
+    options: any,
+  ): Promise<any> {
     try {
       this.logger.log('Publishing questionnaire', { questionnaireId, userId });
       return {
@@ -163,8 +174,10 @@ export class QuestionnaireIntegrationService {
         publishedAt: new Date(),
         publishedBy: userId,
         accessUrl: `https://questionnaire.com/${questionnaireId}`,
-        expirationDate: options?.expirationDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-        success: true
+        expirationDate:
+          options?.expirationDate ||
+          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        success: true,
       };
     } catch (error) {
       this.logger.error('Error publishing questionnaire', error);
@@ -175,7 +188,10 @@ export class QuestionnaireIntegrationService {
   /**
    * 提交问卷 - EMERGENCY IMPLEMENTATION
    */
-  async submitQuestionnaire(questionnaireId: string, submissionData: any): Promise<any> {
+  async submitQuestionnaire(
+    questionnaireId: string,
+    submissionData: any,
+  ): Promise<any> {
     try {
       this.logger.log('Submitting questionnaire', { questionnaireId });
       return {
@@ -186,7 +202,7 @@ export class QuestionnaireIntegrationService {
         completionTime: 120,
         incentiveEligible: true,
         success: true,
-        ...submissionData
+        ...submissionData,
       };
     } catch (error) {
       this.logger.error('Error submitting questionnaire', error);
@@ -197,7 +213,11 @@ export class QuestionnaireIntegrationService {
   /**
    * 获取问卷提交记录 - EMERGENCY IMPLEMENTATION
    */
-  async getQuestionnaireSubmissions(questionnaireId: string, organizationId: string, options: any): Promise<any> {
+  async getQuestionnaireSubmissions(
+    questionnaireId: string,
+    organizationId: string,
+    options: any,
+  ): Promise<any> {
     try {
       return {
         items: [],
@@ -205,7 +225,7 @@ export class QuestionnaireIntegrationService {
         averageQualityScore: 0,
         averageCompletionTime: 0,
         page: options.page || 1,
-        totalPages: 0
+        totalPages: 0,
       };
     } catch (error) {
       this.logger.error('Error getting questionnaire submissions', error);
@@ -216,14 +236,17 @@ export class QuestionnaireIntegrationService {
   /**
    * 获取问卷分析数据 - EMERGENCY IMPLEMENTATION
    */
-  async getQuestionnaireAnalytics(questionnaireId: string, organizationId: string): Promise<any> {
+  async getQuestionnaireAnalytics(
+    questionnaireId: string,
+    organizationId: string,
+  ): Promise<any> {
     try {
       return {
         questionnaireId,
         totalSubmissions: 0,
         averageCompletionTime: 0,
         responseRate: 0,
-        analytics: {}
+        analytics: {},
       };
     } catch (error) {
       this.logger.error('Error getting questionnaire analytics', error);
@@ -234,7 +257,11 @@ export class QuestionnaireIntegrationService {
   /**
    * 复制问卷 - EMERGENCY IMPLEMENTATION
    */
-  async duplicateQuestionnaire(questionnaireId: string, userId: string, options: any): Promise<any> {
+  async duplicateQuestionnaire(
+    questionnaireId: string,
+    userId: string,
+    options: any,
+  ): Promise<any> {
     try {
       this.logger.log('Duplicating questionnaire', { questionnaireId, userId });
       return {
@@ -242,7 +269,7 @@ export class QuestionnaireIntegrationService {
         title: `Copy of Questionnaire`,
         status: 'draft',
         createdBy: userId,
-        createdAt: new Date()
+        createdAt: new Date(),
       };
     } catch (error) {
       this.logger.error('Error duplicating questionnaire', error);
@@ -253,14 +280,19 @@ export class QuestionnaireIntegrationService {
   /**
    * 删除问卷 - EMERGENCY IMPLEMENTATION
    */
-  async deleteQuestionnaire(questionnaireId: string, userId: string, reason?: string, hardDelete?: boolean): Promise<any> {
+  async deleteQuestionnaire(
+    questionnaireId: string,
+    userId: string,
+    reason?: string,
+    hardDelete?: boolean,
+  ): Promise<any> {
     try {
       this.logger.log('Deleting questionnaire', { questionnaireId, userId });
       return {
         id: questionnaireId,
         deleted: true,
         deletedAt: new Date(),
-        deletedBy: userId
+        deletedBy: userId,
       };
     } catch (error) {
       this.logger.error('Error deleting questionnaire', error);
@@ -271,7 +303,11 @@ export class QuestionnaireIntegrationService {
   /**
    * 获取问卷模板 - EMERGENCY IMPLEMENTATION
    */
-  async getQuestionnaireTemplates(category: string, organizationId: string, options: any = {}): Promise<any> {
+  async getQuestionnaireTemplates(
+    category: string,
+    organizationId: string,
+    options: any = {},
+  ): Promise<any> {
     try {
       return {
         templates: [
@@ -279,18 +315,18 @@ export class QuestionnaireIntegrationService {
             id: 'template_1',
             name: 'Employee Satisfaction',
             category: 'HR',
-            template: {}
+            template: {},
           },
           {
-            id: 'template_2', 
+            id: 'template_2',
             name: 'Product Feedback',
             category: 'Product',
-            template: {}
-          }
+            template: {},
+          },
         ],
         total: 2,
         page: options.page || 1,
-        totalPages: 1
+        totalPages: 1,
       };
     } catch (error) {
       this.logger.error('Error getting questionnaire templates', error);
@@ -301,9 +337,16 @@ export class QuestionnaireIntegrationService {
   /**
    * 从模板创建问卷 - EMERGENCY IMPLEMENTATION
    */
-  async createFromTemplate(templateId: string, customizations: any, userId?: string): Promise<any> {
+  async createFromTemplate(
+    templateId: string,
+    customizations: any,
+    userId?: string,
+  ): Promise<any> {
     try {
-      this.logger.log('Creating questionnaire from template', { templateId, userId });
+      this.logger.log('Creating questionnaire from template', {
+        templateId,
+        userId,
+      });
       return {
         id: `questionnaire_from_template_${Date.now()}`,
         title: customizations.title || 'Questionnaire from Template',
@@ -311,7 +354,7 @@ export class QuestionnaireIntegrationService {
         status: 'draft',
         createdBy: userId,
         templateId,
-        createdAt: new Date()
+        createdAt: new Date(),
       };
     } catch (error) {
       this.logger.error('Error creating questionnaire from template', error);
@@ -322,9 +365,17 @@ export class QuestionnaireIntegrationService {
   /**
    * 导出问卷数据 - EMERGENCY IMPLEMENTATION
    */
-  async exportQuestionnaireData(questionnaireId: string, format: string, userId: string, options: any): Promise<any> {
+  async exportQuestionnaireData(
+    questionnaireId: string,
+    format: string,
+    userId: string,
+    options: any,
+  ): Promise<any> {
     try {
-      this.logger.log('Exporting questionnaire data', { questionnaireId, format });
+      this.logger.log('Exporting questionnaire data', {
+        questionnaireId,
+        format,
+      });
       return {
         exportId: `export_${Date.now()}`,
         questionnaireId,
@@ -332,7 +383,7 @@ export class QuestionnaireIntegrationService {
         downloadUrl: `/downloads/questionnaire_${questionnaireId}.${format}`,
         estimatedTime: '2-5 minutes',
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        status: 'ready'
+        status: 'ready',
       };
     } catch (error) {
       this.logger.error('Error exporting questionnaire data', error);
@@ -352,14 +403,14 @@ export class QuestionnaireIntegrationService {
         database: 'connected',
         templates: 'available',
         submissions: 'processing',
-        dependencies: 'operational'
+        dependencies: 'operational',
       };
     } catch (error) {
       this.logger.error('Error getting health status', error);
       return {
         overall: 'unhealthy',
         timestamp: new Date(),
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }

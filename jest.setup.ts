@@ -6,6 +6,13 @@
 
 import { runCleanups, clearCleanups } from './test/utils/cleanup';
 
+// Ensure test environment flag for conditional app wiring
+process.env.NODE_ENV = 'test';
+
+// Stabilize MongoDB Memory Server across environments
+process.env.MONGOMS_VERSION = process.env.MONGOMS_VERSION || '7.0.5';
+process.env.MONGOMS_DISABLE_MD5_CHECK = process.env.MONGOMS_DISABLE_MD5_CHECK || '1';
+
 // 每个测试用例后清理
 afterEach(async () => {
   try {
@@ -44,6 +51,8 @@ afterAll(async () => {
 // 测试前清空清理队列（防止前一个测试的清理函数影响当前测试）
 beforeEach(() => {
   clearCleanups();
+  // Accelerate DB initialization for app-gateway tests
+  process.env.SKIP_DB = process.env.SKIP_DB || 'true';
 });
 
 // 设置测试超时

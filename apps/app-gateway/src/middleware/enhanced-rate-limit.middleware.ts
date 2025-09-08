@@ -1,4 +1,10 @@
-import { Injectable, NestMiddleware, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NestMiddleware,
+  HttpException,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response, NextFunction } from 'express';
 import Redis, { RedisOptions } from 'ioredis';
@@ -35,25 +41,32 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
 
   private initializeRedis() {
     // 检查Redis配置
-    const disableRedis = this.configService.get('DISABLE_REDIS', 'false') === 'true';
-    const useRedis = this.configService.get('USE_REDIS_CACHE', 'true') === 'true';
+    const disableRedis =
+      this.configService.get('DISABLE_REDIS', 'false') === 'true';
+    const useRedis =
+      this.configService.get('USE_REDIS_CACHE', 'true') === 'true';
     const redisUrl = this.configService.get<string>('REDIS_URL');
-    const redisHost = this.configService.get<string>('REDISHOST') || this.configService.get<string>('REDIS_HOST');
-    
+    const redisHost =
+      this.configService.get<string>('REDISHOST') ||
+      this.configService.get<string>('REDIS_HOST');
+
     // 如果Redis被禁用或未配置，跳过Redis初始化
     if (disableRedis || !useRedis || (!redisUrl && !redisHost)) {
       this.logger.log('🔒 Redis已禁用或未配置，限流使用内存存储');
       this.redis = null;
       return;
     }
-    
+
     try {
       // 优先使用完整的 REDIS_URL；仅当没有 URL 但提供了 Host/Port 时才使用分离配置
       if (redisUrl) {
         const urlWithFamily = (() => {
           try {
             const u = new URL(redisUrl);
-            if (u.hostname.endsWith('.railway.internal') && !u.searchParams.has('family')) {
+            if (
+              u.hostname.endsWith('.railway.internal') &&
+              !u.searchParams.has('family')
+            ) {
               u.searchParams.set('family', '0');
             }
             return u.toString();
@@ -63,20 +76,26 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
         })();
         this.redis = new Redis(urlWithFamily, {
           maxRetriesPerRequest: 3,
-          lazyConnect: false,  // 改为立即连接
-          enableOfflineQueue: true,  // 启用离线队列
+          lazyConnect: false, // 改为立即连接
+          enableOfflineQueue: true, // 启用离线队列
           connectTimeout: 10000,
         });
       } else {
         const redisOptions: RedisOptions = {
           host: redisHost!,
-          port: parseInt(this.configService.get<string>('REDISPORT') || this.configService.get<string>('REDIS_PORT') || (() => {
-            throw new Error('Redis configuration incomplete: REDISHOST found but REDISPORT/REDIS_PORT is missing');
-          })()),
+          port: parseInt(
+            this.configService.get<string>('REDISPORT') ||
+              this.configService.get<string>('REDIS_PORT') ||
+              (() => {
+                throw new Error(
+                  'Redis configuration incomplete: REDISHOST found but REDISPORT/REDIS_PORT is missing',
+                );
+              })(),
+          ),
           password: this.configService.get<string>('REDIS_PASSWORD'),
           maxRetriesPerRequest: 3,
-          lazyConnect: false,  // 改为立即连接
-          enableOfflineQueue: true,  // 启用离线队列
+          lazyConnect: false, // 改为立即连接
+          enableOfflineQueue: true, // 启用离线队列
           connectTimeout: 10000,
         };
         this.redis = new Redis(redisOptions);
@@ -99,31 +118,50 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
   private initializeLimits() {
     this.operationLimits = {
       auth: {
-        window: parseInt(this.configService.get<string>('RATE_LIMIT_AUTH_WINDOW_MS') || '900000'), // 15 minutes
-        limit: parseInt(this.configService.get<string>('RATE_LIMIT_AUTH_MAX') || '5') // 5 attempts
+        window: parseInt(
+          this.configService.get<string>('RATE_LIMIT_AUTH_WINDOW_MS') ||
+            '900000',
+        ), // 15 minutes
+        limit: parseInt(
+          this.configService.get<string>('RATE_LIMIT_AUTH_MAX') || '5',
+        ), // 5 attempts
       },
       upload: {
-        window: parseInt(this.configService.get<string>('RATE_LIMIT_UPLOAD_WINDOW_MS') || '3600000'), // 1 hour
-        limit: parseInt(this.configService.get<string>('RATE_LIMIT_UPLOAD_MAX') || '20') // 20 uploads
+        window: parseInt(
+          this.configService.get<string>('RATE_LIMIT_UPLOAD_WINDOW_MS') ||
+            '3600000',
+        ), // 1 hour
+        limit: parseInt(
+          this.configService.get<string>('RATE_LIMIT_UPLOAD_MAX') || '20',
+        ), // 20 uploads
       },
       api: {
-        window: parseInt(this.configService.get<string>('RATE_LIMIT_API_WINDOW_MS') || '60000'), // 1 minute
-        limit: parseInt(this.configService.get<string>('RATE_LIMIT_API_MAX') || '60') // 60 requests
+        window: parseInt(
+          this.configService.get<string>('RATE_LIMIT_API_WINDOW_MS') || '60000',
+        ), // 1 minute
+        limit: parseInt(
+          this.configService.get<string>('RATE_LIMIT_API_MAX') || '60',
+        ), // 60 requests
       },
       default: {
-        window: parseInt(this.configService.get<string>('RATE_LIMIT_DEFAULT_WINDOW_MS') || '300000'), // 5 minutes
-        limit: parseInt(this.configService.get<string>('RATE_LIMIT_DEFAULT_MAX') || '100') // 100 requests
-      }
+        window: parseInt(
+          this.configService.get<string>('RATE_LIMIT_DEFAULT_WINDOW_MS') ||
+            '300000',
+        ), // 5 minutes
+        limit: parseInt(
+          this.configService.get<string>('RATE_LIMIT_DEFAULT_MAX') || '100',
+        ), // 100 requests
+      },
     };
 
     this.suspiciousActivityThreshold = parseInt(
-      this.configService.get<string>('SUSPICIOUS_ACTIVITY_THRESHOLD') || '10'
+      this.configService.get<string>('SUSPICIOUS_ACTIVITY_THRESHOLD') || '10',
     );
     this.maxFailedAttempts = parseInt(
-      this.configService.get<string>('MAX_LOGIN_ATTEMPTS') || '5'
+      this.configService.get<string>('MAX_LOGIN_ATTEMPTS') || '5',
     );
     this.lockoutDuration = parseInt(
-      this.configService.get<string>('LOCKOUT_DURATION') || '900000' // 15 minutes
+      this.configService.get<string>('LOCKOUT_DURATION') || '900000', // 15 minutes
     );
   }
 
@@ -134,39 +172,50 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
     }
     const clientInfo = this.extractClientInfo(req);
     const operationType = this.determineOperationType(req);
-    const limits = this.operationLimits[operationType] || this.operationLimits.default;
+    const limits =
+      this.operationLimits[operationType] || this.operationLimits.default;
 
     try {
       // Check if IP is currently locked
       const isLocked = await this.isIpLocked(clientInfo.ip);
       if (isLocked) {
         const lockInfo = await this.getLockInfo(clientInfo.ip);
-        throw new HttpException({
-          message: 'IP address temporarily locked due to suspicious activity',
-          lockUntil: lockInfo.lockedUntil,
-          reason: 'security_lockout'
-        }, HttpStatus.TOO_MANY_REQUESTS);
+        throw new HttpException(
+          {
+            message: 'IP address temporarily locked due to suspicious activity',
+            lockUntil: lockInfo.lockedUntil,
+            reason: 'security_lockout',
+          },
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
       }
 
       // Perform rate limiting check
-      const rateLimitResult = await this.checkRateLimit(clientInfo, operationType, limits);
-      
+      const rateLimitResult = await this.checkRateLimit(
+        clientInfo,
+        operationType,
+        limits,
+      );
+
       if (!rateLimitResult.allowed) {
         // Record failed attempt for suspicious activity detection
         await this.recordFailedAttempt(clientInfo.ip);
-        
+
         this.setRateLimitHeaders(res, rateLimitResult);
-        throw new HttpException({
-          message: `Rate limit exceeded for ${operationType} operations`,
-          retryAfter: rateLimitResult.retryAfter,
-          limit: limits.limit,
-          window: limits.window
-        }, HttpStatus.TOO_MANY_REQUESTS);
+        throw new HttpException(
+          {
+            message: `Rate limit exceeded for ${operationType} operations`,
+            retryAfter: rateLimitResult.retryAfter,
+            limit: limits.limit,
+            window: limits.window,
+          },
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
       }
 
       // Record successful request
       await this.recordRequest(clientInfo, operationType);
-      
+
       // Set rate limit headers
       this.setRateLimitHeaders(res, rateLimitResult);
 
@@ -175,7 +224,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
         operationType,
         remaining: rateLimitResult.remaining,
         resetTime: rateLimitResult.resetTime,
-        clientInfo
+        clientInfo,
       };
 
       next();
@@ -183,7 +232,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
       if (error instanceof HttpException) {
         throw error;
       }
-      
+
       this.logger.error(`Rate limiting error for ${clientInfo.ip}:`, error);
       // Don't block requests on rate limiting errors in production
       if (this.configService.get<string>('NODE_ENV') !== 'production') {
@@ -197,12 +246,12 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
     const ip = this.getClientIP(req);
     const userAgent = req.get('User-Agent') || 'unknown';
     const userId = (req as any).user?.sub || null;
-    
+
     return {
       ip,
       userAgent,
       userId,
-      fingerprint: this.generateFingerprint(ip, userAgent)
+      fingerprint: this.generateFingerprint(ip, userAgent),
     };
   }
 
@@ -211,12 +260,15 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
     const method = req.method.toUpperCase();
 
     // Authentication operations
-    if (path.includes('/auth/') && (method === 'POST')) {
+    if (path.includes('/auth/') && method === 'POST') {
       return 'auth';
     }
 
     // File upload operations
-    if (path.includes('/upload') || req.headers['content-type']?.includes('multipart/form-data')) {
+    if (
+      path.includes('/upload') ||
+      req.headers['content-type']?.includes('multipart/form-data')
+    ) {
       return 'upload';
     }
 
@@ -228,9 +280,19 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
     return 'default';
   }
 
-  private async checkRateLimit(clientInfo: any, operationType: string, limits: { window: number; limit: number }) {
+  private async checkRateLimit(
+    clientInfo: any,
+    operationType: string,
+    limits: { window: number; limit: number },
+  ) {
     if (!this.redis) {
-      return { allowed: true, remaining: limits.limit, retryAfter: 0, resetTime: Date.now() + limits.window, currentCount: 0 };
+      return {
+        allowed: true,
+        remaining: limits.limit,
+        retryAfter: 0,
+        resetTime: Date.now() + limits.window,
+        currentCount: 0,
+      };
     }
     const key = `rate_limit:${operationType}:${clientInfo.fingerprint}`;
     const now = Date.now();
@@ -238,21 +300,21 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
 
     // Use Redis sorted set to track requests in time window
     const pipeline = this.redis.pipeline();
-    
+
     // Remove expired entries
     pipeline.zremrangebyscore(key, '-inf', windowStart);
-    
+
     // Count current requests in window
     pipeline.zcard(key);
-    
+
     // Add current request
     pipeline.zadd(key, now, `${now}-${Math.random()}`);
-    
+
     // Set expiry on key
     pipeline.expire(key, Math.ceil(limits.window / 1000));
-    
+
     const results = await pipeline.exec();
-    const currentCount = results?.[1]?.[1] as number || 0;
+    const currentCount = (results?.[1]?.[1] as number) || 0;
 
     const allowed = currentCount < limits.limit;
     const retryAfter = allowed ? 0 : Math.ceil(limits.window / 1000);
@@ -263,29 +325,29 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
       remaining: Math.max(0, limits.limit - currentCount - (allowed ? 1 : 0)),
       retryAfter,
       resetTime,
-      currentCount: currentCount + (allowed ? 1 : 0)
+      currentCount: currentCount + (allowed ? 1 : 0),
     };
   }
 
   private async isIpLocked(ip: string): Promise<boolean> {
     if (!this.redis) return false;
-    
+
     try {
       // 确保Redis连接正常
       if (this.redis.status !== 'ready') {
         await this.redis.connect();
       }
-      
+
       const key = `security_lock:${ip}`;
       const lockInfo = await this.redis.get(key);
-    
+
       if (!lockInfo) {
         return false;
       }
 
       const { lockedUntil } = JSON.parse(lockInfo);
       const now = Date.now();
-      
+
       if (now > lockedUntil) {
         // Lock expired, remove it
         await this.redis.del(key);
@@ -308,51 +370,57 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
 
   private async recordFailedAttempt(ip: string) {
     if (!this.redis) return;
-    
+
     try {
       // 确保Redis连接正常
       if (this.redis.status !== 'ready') {
         await this.redis.connect();
       }
-      
+
       const key = `security_record:${ip}`;
       const now = Date.now();
-      
-      const recordStr = await this.redis.get(key);
-    let record: SecurityRateLimitRecord;
-    
-    if (recordStr) {
-      record = JSON.parse(recordStr);
-    } else {
-      record = {
-        requests: 0,
-        failedAttempts: 0,
-        lastAttempt: now,
-        suspiciousActivity: 0,
-        firstSeen: now
-      };
-    }
 
-    record.failedAttempts += 1;
-    record.lastAttempt = now;
-    
-    // Check for suspicious activity patterns
-    if (record.failedAttempts >= this.suspiciousActivityThreshold) {
-      record.suspiciousActivity += 1;
-      
-      // Lock IP if too many failed attempts
-      if (record.failedAttempts >= this.maxFailedAttempts) {
-        await this.lockIp(ip, now + this.lockoutDuration, 'too_many_failed_attempts');
-        this.logger.warn(`IP ${ip} locked due to ${record.failedAttempts} failed attempts`);
-        
-        // Send security alert if configured
-        await this.sendSecurityAlert(ip, 'IP_LOCKED', {
-          failedAttempts: record.failedAttempts,
-          suspiciousActivity: record.suspiciousActivity,
-          timestamp: new Date(now).toISOString()
-        });
+      const recordStr = await this.redis.get(key);
+      let record: SecurityRateLimitRecord;
+
+      if (recordStr) {
+        record = JSON.parse(recordStr);
+      } else {
+        record = {
+          requests: 0,
+          failedAttempts: 0,
+          lastAttempt: now,
+          suspiciousActivity: 0,
+          firstSeen: now,
+        };
       }
-    }
+
+      record.failedAttempts += 1;
+      record.lastAttempt = now;
+
+      // Check for suspicious activity patterns
+      if (record.failedAttempts >= this.suspiciousActivityThreshold) {
+        record.suspiciousActivity += 1;
+
+        // Lock IP if too many failed attempts
+        if (record.failedAttempts >= this.maxFailedAttempts) {
+          await this.lockIp(
+            ip,
+            now + this.lockoutDuration,
+            'too_many_failed_attempts',
+          );
+          this.logger.warn(
+            `IP ${ip} locked due to ${record.failedAttempts} failed attempts`,
+          );
+
+          // Send security alert if configured
+          await this.sendSecurityAlert(ip, 'IP_LOCKED', {
+            failedAttempts: record.failedAttempts,
+            suspiciousActivity: record.suspiciousActivity,
+            timestamp: new Date(now).toISOString(),
+          });
+        }
+      }
 
       // Store updated record with expiry
       await this.redis.setex(key, 86400, JSON.stringify(record)); // 24 hours
@@ -375,9 +443,9 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
       ip,
       lockedUntil,
       reason,
-      lockedAt: Date.now()
+      lockedAt: Date.now(),
     };
-    
+
     const ttl = Math.ceil((lockedUntil - Date.now()) / 1000);
     await this.redis.setex(key, ttl, JSON.stringify(lockData));
   }
@@ -395,12 +463,12 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
         ip,
         timestamp: new Date().toISOString(),
         details,
-        severity: 'HIGH'
+        severity: 'HIGH',
       };
 
       // In a real implementation, you would send this to your monitoring system
       this.logger.warn(`Security Alert: ${eventType}`, payload);
-      
+
       // Store alert for monitoring dashboard
       const alertKey = `security_alerts:${Date.now()}`;
       await this.redis.setex(alertKey, 86400 * 7, JSON.stringify(payload)); // Keep for 7 days
@@ -410,10 +478,16 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
   }
 
   private setRateLimitHeaders(res: Response, rateLimitResult: any) {
-    res.setHeader('X-RateLimit-Limit', rateLimitResult.currentCount?.toString() || '0');
-    res.setHeader('X-RateLimit-Remaining', rateLimitResult.remaining.toString());
+    res.setHeader(
+      'X-RateLimit-Limit',
+      rateLimitResult.currentCount?.toString() || '0',
+    );
+    res.setHeader(
+      'X-RateLimit-Remaining',
+      rateLimitResult.remaining.toString(),
+    );
     res.setHeader('X-RateLimit-Reset', rateLimitResult.resetTime.toString());
-    
+
     if (rateLimitResult.retryAfter > 0) {
       res.setHeader('Retry-After', rateLimitResult.retryAfter.toString());
     }
@@ -425,10 +499,10 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
     if (forwarded) {
       return forwarded.split(',')[0].trim();
     }
-    
+
     return (
-      req.headers['x-real-ip'] as string ||
-      req.headers['x-client-ip'] as string ||
+      (req.headers['x-real-ip'] as string) ||
+      (req.headers['x-client-ip'] as string) ||
       req.connection?.remoteAddress ||
       req.socket?.remoteAddress ||
       req.ip ||
@@ -444,9 +518,10 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
 
   // Admin methods for monitoring and management
   async getSecurityStats(period: 'hour' | 'day' | 'week' = 'day') {
-    const periodMs = period === 'hour' ? 3600000 : period === 'day' ? 86400000 : 604800000;
+    const periodMs =
+      period === 'hour' ? 3600000 : period === 'day' ? 86400000 : 604800000;
     const cutoff = Date.now() - periodMs;
-    
+
     // Get all security records
     const keys = await this.redis.keys('security_record:*');
     const stats = {
@@ -455,22 +530,26 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
       suspiciousIPs: 0,
       totalFailedAttempts: 0,
       averageFailedAttempts: 0,
-      topOffendingIPs: [] as Array<{ ip: string; failedAttempts: number; lastAttempt: number }>
+      topOffendingIPs: [] as Array<{
+        ip: string;
+        failedAttempts: number;
+        lastAttempt: number;
+      }>,
     };
 
     for (const key of keys) {
       const recordStr = await this.redis.get(key);
       if (recordStr) {
         const record: SecurityRateLimitRecord = JSON.parse(recordStr);
-        
+
         if (record.lastAttempt > cutoff) {
           stats.totalIPs += 1;
           stats.totalFailedAttempts += record.failedAttempts;
-          
+
           if (record.suspiciousActivity > 0) {
             stats.suspiciousIPs += 1;
           }
-          
+
           const ip = key.replace('security_record:', '');
           if (await this.isIpLocked(ip)) {
             stats.lockedIPs += 1;
@@ -479,14 +558,17 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
           stats.topOffendingIPs.push({
             ip,
             failedAttempts: record.failedAttempts,
-            lastAttempt: record.lastAttempt
+            lastAttempt: record.lastAttempt,
           });
         }
       }
     }
 
-    stats.averageFailedAttempts = stats.totalIPs > 0 ? stats.totalFailedAttempts / stats.totalIPs : 0;
-    stats.topOffendingIPs.sort((a, b) => b.failedAttempts - a.failedAttempts).slice(0, 10);
+    stats.averageFailedAttempts =
+      stats.totalIPs > 0 ? stats.totalFailedAttempts / stats.totalIPs : 0;
+    stats.topOffendingIPs
+      .sort((a, b) => b.failedAttempts - a.failedAttempts)
+      .slice(0, 10);
 
     return stats;
   }
@@ -494,12 +576,12 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
   async unlockIp(ip: string, reason = 'manual_unlock') {
     const key = `security_lock:${ip}`;
     const deleted = await this.redis.del(key);
-    
+
     if (deleted > 0) {
       this.logger.log(`IP ${ip} manually unlocked: ${reason}`);
       return true;
     }
-    
+
     return false;
   }
 
@@ -514,7 +596,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
         if (parsed.lockedUntil > Date.now()) {
           lockedIPs.push({
             ip: key.replace('security_lock:', ''),
-            ...parsed
+            ...parsed,
           });
         }
       }

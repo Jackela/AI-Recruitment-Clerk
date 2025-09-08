@@ -1,4 +1,9 @@
-import { Injectable, Logger, BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,8 +17,8 @@ export class GuestUsageService {
   private readonly MAX_FREE_USAGE = 5;
 
   constructor(
-    @InjectModel(GuestUsage.name) 
-    private guestUsageModel: Model<GuestUsageDocument>
+    @InjectModel(GuestUsage.name)
+    private guestUsageModel: Model<GuestUsageDocument>,
   ) {}
 
   /**
@@ -31,8 +36,10 @@ export class GuestUsageService {
           usageCount: 1,
           lastUsed: new Date(),
         });
-        
-        this.logger.log(`New guest user created: ${this.maskDeviceId(deviceId)}`);
+
+        this.logger.log(
+          `New guest user created: ${this.maskDeviceId(deviceId)}`,
+        );
         return true;
       }
 
@@ -40,7 +47,9 @@ export class GuestUsageService {
 
       // Check if user can use the service
       if (!entity.canUseService()) {
-        this.logger.debug(`Guest usage limit reached for device: ${this.maskDeviceId(deviceId)}`);
+        this.logger.debug(
+          `Guest usage limit reached for device: ${this.maskDeviceId(deviceId)}`,
+        );
         return false;
       }
 
@@ -54,11 +63,13 @@ export class GuestUsageService {
               feedbackCode: null,
               feedbackCodeStatus: null,
               lastUsed: new Date(),
-            }
-          }
+            },
+          },
         );
-        
-        this.logger.log(`Guest usage reset after feedback redemption: ${this.maskDeviceId(deviceId)}`);
+
+        this.logger.log(
+          `Guest usage reset after feedback redemption: ${this.maskDeviceId(deviceId)}`,
+        );
         return true;
       }
 
@@ -67,15 +78,19 @@ export class GuestUsageService {
         { deviceId },
         {
           $inc: { usageCount: 1 },
-          $set: { lastUsed: new Date() }
-        }
+          $set: { lastUsed: new Date() },
+        },
       );
 
-      this.logger.debug(`Guest usage incremented for device: ${this.maskDeviceId(deviceId)}`);
+      this.logger.debug(
+        `Guest usage incremented for device: ${this.maskDeviceId(deviceId)}`,
+      );
       return true;
-
     } catch (error) {
-      this.logger.error(`Error checking guest usage for device ${this.maskDeviceId(deviceId)}:`, error);
+      this.logger.error(
+        `Error checking guest usage for device ${this.maskDeviceId(deviceId)}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -93,12 +108,19 @@ export class GuestUsageService {
 
       // Check if user has reached the limit
       if (guestUsage.usageCount < this.MAX_FREE_USAGE) {
-        throw new BadRequestException('Feedback code not needed - usage limit not reached');
+        throw new BadRequestException(
+          'Feedback code not needed - usage limit not reached',
+        );
       }
 
       // Check if feedback code already generated and not redeemed
-      if (guestUsage.feedbackCode && guestUsage.feedbackCodeStatus === 'generated') {
-        this.logger.debug(`Returning existing feedback code for device: ${this.maskDeviceId(deviceId)}`);
+      if (
+        guestUsage.feedbackCode &&
+        guestUsage.feedbackCodeStatus === 'generated'
+      ) {
+        this.logger.debug(
+          `Returning existing feedback code for device: ${this.maskDeviceId(deviceId)}`,
+        );
         return guestUsage.feedbackCode;
       }
 
@@ -112,15 +134,19 @@ export class GuestUsageService {
             feedbackCode,
             feedbackCodeStatus: 'generated',
             updatedAt: new Date(),
-          }
-        }
+          },
+        },
       );
 
-      this.logger.log(`Feedback code generated for device: ${this.maskDeviceId(deviceId)}`);
+      this.logger.log(
+        `Feedback code generated for device: ${this.maskDeviceId(deviceId)}`,
+      );
       return feedbackCode;
-
     } catch (error) {
-      this.logger.error(`Error generating feedback code for device ${this.maskDeviceId(deviceId)}:`, error);
+      this.logger.error(
+        `Error generating feedback code for device ${this.maskDeviceId(deviceId)}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -130,13 +156,15 @@ export class GuestUsageService {
    */
   async redeemFeedbackCode(feedbackCode: string): Promise<boolean> {
     try {
-      const guestUsage = await this.guestUsageModel.findOne({ 
+      const guestUsage = await this.guestUsageModel.findOne({
         feedbackCode,
-        feedbackCodeStatus: 'generated' 
+        feedbackCodeStatus: 'generated',
       });
 
       if (!guestUsage) {
-        throw new BadRequestException('Invalid or already redeemed feedback code');
+        throw new BadRequestException(
+          'Invalid or already redeemed feedback code',
+        );
       }
 
       // Mark feedback code as redeemed
@@ -146,15 +174,19 @@ export class GuestUsageService {
           $set: {
             feedbackCodeStatus: 'redeemed',
             updatedAt: new Date(),
-          }
-        }
+          },
+        },
       );
 
-      this.logger.log(`Feedback code redeemed for device: ${this.maskDeviceId(guestUsage.deviceId)}`);
+      this.logger.log(
+        `Feedback code redeemed for device: ${this.maskDeviceId(guestUsage.deviceId)}`,
+      );
       return true;
-
     } catch (error) {
-      this.logger.error(`Error redeeming feedback code ${feedbackCode}:`, error);
+      this.logger.error(
+        `Error redeeming feedback code ${feedbackCode}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -181,11 +213,16 @@ export class GuestUsageService {
         canUse: entity.canUseService(),
         remainingCount: entity.getRemainingCount(),
         needsFeedbackCode: entity.needsFeedbackCode(),
-        feedbackCode: entity.feedbackCodeStatus === 'generated' ? guestUsage.feedbackCode : undefined,
+        feedbackCode:
+          entity.feedbackCodeStatus === 'generated'
+            ? guestUsage.feedbackCode
+            : undefined,
       };
-
     } catch (error) {
-      this.logger.error(`Error getting usage status for device ${this.maskDeviceId(deviceId)}:`, error);
+      this.logger.error(
+        `Error getting usage status for device ${this.maskDeviceId(deviceId)}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -211,9 +248,11 @@ export class GuestUsageService {
         feedbackCodeStatus: guestUsage.feedbackCodeStatus,
         lastUsed: guestUsage.lastUsed,
       };
-
     } catch (error) {
-      this.logger.error(`Error getting guest status for device ${this.maskDeviceId(deviceId)}:`, error);
+      this.logger.error(
+        `Error getting guest status for device ${this.maskDeviceId(deviceId)}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -228,12 +267,13 @@ export class GuestUsageService {
 
       const result = await this.guestUsageModel.deleteMany({
         createdAt: { $lt: cutoffDate },
-        feedbackCodeStatus: { $ne: 'generated' } // Keep records with pending feedback codes
+        feedbackCodeStatus: { $ne: 'generated' }, // Keep records with pending feedback codes
       });
 
-      this.logger.log(`Cleaned up ${result.deletedCount} old guest records older than ${daysOld} days`);
+      this.logger.log(
+        `Cleaned up ${result.deletedCount} old guest records older than ${daysOld} days`,
+      );
       return result.deletedCount;
-
     } catch (error) {
       this.logger.error('Error cleaning up old guest records:', error);
       throw error;
@@ -254,18 +294,18 @@ export class GuestUsageService {
         totalGuests,
         activeGuests,
         pendingFeedbackCodes,
-        redeemedFeedbackCodes
+        redeemedFeedbackCodes,
       ] = await Promise.all([
         this.guestUsageModel.countDocuments(),
         this.guestUsageModel.countDocuments({
-          lastUsed: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } // Last 7 days
+          lastUsed: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }, // Last 7 days
         }),
         this.guestUsageModel.countDocuments({
-          feedbackCodeStatus: 'generated'
+          feedbackCodeStatus: 'generated',
         }),
         this.guestUsageModel.countDocuments({
-          feedbackCodeStatus: 'redeemed'
-        })
+          feedbackCodeStatus: 'redeemed',
+        }),
       ]);
 
       return {
@@ -274,7 +314,6 @@ export class GuestUsageService {
         pendingFeedbackCodes,
         redeemedFeedbackCodes,
       };
-
     } catch (error) {
       this.logger.error('Error getting service stats:', error);
       throw error;
@@ -283,6 +322,8 @@ export class GuestUsageService {
 
   private maskDeviceId(deviceId: string): string {
     if (deviceId.length <= 8) return '***';
-    return deviceId.substring(0, 4) + '***' + deviceId.substring(deviceId.length - 4);
+    return (
+      deviceId.substring(0, 4) + '***' + deviceId.substring(deviceId.length - 4)
+    );
   }
 }

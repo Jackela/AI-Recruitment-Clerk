@@ -18,7 +18,7 @@ async function killPortProcesses(ports: number[]): Promise<void> {
         // Windows: 查找并杀掉占用端口的进程
         const result = execSync(`netstat -ano | findstr :${port}`, { encoding: 'utf8', stdio: 'pipe' });
         if (result) {
-          const lines = result.split('\n').filter(line => line.trim());
+          const lines = result.split('\n').filter((line: string) => line.trim());
           for (const line of lines) {
             const parts = line.trim().split(/\s+/);
             const pid = parts[parts.length - 1];

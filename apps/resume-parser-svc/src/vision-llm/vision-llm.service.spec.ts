@@ -1,6 +1,29 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { VisionLlmService } from './vision-llm.service';
-import { VisionLlmRequest, VisionLlmResponse } from '../dto/resume-parsing.dto';
+import { VisionLlmResponse } from '../dto/resume-parsing.dto';
+
+// Mock the external dependencies
+jest.mock('./ai-services-shared.stub', () => ({
+  GeminiClient: jest.fn().mockImplementation(() => ({
+    generateContent: jest.fn(),
+  })),
+  GeminiConfig: {},
+  PromptTemplates: {
+    resumeExtraction: 'mock template',
+  },
+  PromptBuilder: {
+    build: jest.fn(),
+  },
+}));
+
+jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => ({
+  SecureConfigValidator: {
+    validateServiceConfig: jest.fn(),
+    requireEnv: jest.fn(() => 'test-key'),
+  },
+}));
+
+jest.mock('pdf-parse-fork', () => jest.fn());
 
 describe('VisionLlmService', () => {
   let service: VisionLlmService;
@@ -13,17 +36,25 @@ describe('VisionLlmService', () => {
       name: 'John Doe',
       email: 'john.doe@email.com',
       phone: '+1234567890',
-      address: '123 Main St, San Francisco, CA'
+      address: '123 Main St, San Francisco, CA',
     },
-    skills: ['Python', 'JavaScript', 'Machine Learning', 'AWS', 'Docker', 'Kubernetes'],
+    skills: [
+      'Python',
+      'JavaScript',
+      'Machine Learning',
+      'AWS',
+      'Docker',
+      'Kubernetes',
+    ],
     workExperience: [
       {
         company: 'TechCorp Solutions',
         position: 'Senior Software Engineer',
         startDate: '2020-01-01',
         endDate: '2023-12-31',
-        description: 'Led development team for ML applications, implemented microservices architecture',
-        technologies: ['Python', 'Docker', 'AWS']
+        description:
+          'Led development team for ML applications, implemented microservices architecture',
+        technologies: ['Python', 'Docker', 'AWS'],
       },
       {
         company: 'StartupXYZ',
@@ -31,8 +62,8 @@ describe('VisionLlmService', () => {
         startDate: '2018-06-01',
         endDate: '2019-12-31',
         description: 'Developed web applications using React and Node.js',
-        technologies: ['JavaScript', 'React', 'Node.js']
-      }
+        technologies: ['JavaScript', 'React', 'Node.js'],
+      },
     ],
     education: [
       {
@@ -40,30 +71,37 @@ describe('VisionLlmService', () => {
         degree: 'Master of Science',
         field: 'Computer Science',
         graduationYear: '2018',
-        gpa: '3.8'
+        gpa: '3.8',
       },
       {
         institution: 'UC Berkeley',
         degree: 'Bachelor of Science',
         field: 'Computer Engineering',
         graduationYear: '2016',
-        gpa: '3.6'
-      }
+        gpa: '3.6',
+      },
     ],
     certifications: [
       'AWS Certified Solutions Architect',
-      'Kubernetes Administrator'
+      'Kubernetes Administrator',
     ],
-    languages: ['English (Native)', 'Spanish (Intermediate)', 'Mandarin (Basic)']
+    languages: [
+      'English (Native)',
+      'Spanish (Intermediate)',
+      'Mandarin (Basic)',
+    ],
   };
 
   const mockVisionLlmResponse: VisionLlmResponse = {
     extractedData: mockRawLlmOutput,
     confidence: 0.92,
-    processingTimeMs: 3500
+    processingTimeMs: 3500,
   };
 
   beforeEach(async () => {
+    // Clear all mocks before each test
+    jest.clearAllMocks();
+    
     const module: TestingModule = await Test.createTestingModule({
       providers: [VisionLlmService],
     }).compile();
@@ -80,8 +118,9 @@ describe('VisionLlmService', () => {
   describe('parseResumePdf', () => {
     it('should extract structured data from PDF resume', async () => {
       // Act & Assert - This will fail until implementation is ready
-      await expect(service.parseResumePdf(mockPdfBuffer, mockFilename))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(mockPdfBuffer, mockFilename),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
 
     it('should handle empty PDF buffer', async () => {
@@ -89,8 +128,9 @@ describe('VisionLlmService', () => {
       const emptyBuffer = Buffer.alloc(0);
 
       // Act & Assert
-      await expect(service.parseResumePdf(emptyBuffer, mockFilename))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(emptyBuffer, mockFilename),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
 
     it('should handle corrupted PDF files', async () => {
@@ -98,8 +138,9 @@ describe('VisionLlmService', () => {
       const corruptedBuffer = Buffer.from('corrupted pdf data');
 
       // Act & Assert
-      await expect(service.parseResumePdf(corruptedBuffer, mockFilename))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(corruptedBuffer, mockFilename),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
 
     it('should handle very large PDF files', async () => {
@@ -107,23 +148,24 @@ describe('VisionLlmService', () => {
       const largePdfBuffer = Buffer.alloc(15 * 1024 * 1024); // 15MB file
 
       // Act & Assert
-      await expect(service.parseResumePdf(largePdfBuffer, 'large-resume.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(largePdfBuffer, 'large-resume.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
 
     it('should extract all expected data fields', async () => {
       // This test validates the expected structure when implemented
-      
+
       // When implemented, the service should return data with:
       const expectedDataStructure = {
         personalInfo: expect.objectContaining({
           name: expect.any(String),
           email: expect.any(String),
-          phone: expect.any(String)
+          phone: expect.any(String),
         }),
         skills: expect.any(Array),
         workExperience: expect.any(Array),
-        education: expect.any(Array)
+        education: expect.any(Array),
       };
 
       // Verify expected structure is well-formed
@@ -135,8 +177,9 @@ describe('VisionLlmService', () => {
       const chineseResumeBuffer = Buffer.from('chinese resume pdf content');
 
       // Act & Assert
-      await expect(service.parseResumePdf(chineseResumeBuffer, 'chinese-resume.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(chineseResumeBuffer, 'chinese-resume.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
 
     it('should handle resumes with complex layouts', async () => {
@@ -144,8 +187,12 @@ describe('VisionLlmService', () => {
       const complexLayoutBuffer = Buffer.from('complex layout resume pdf');
 
       // Act & Assert
-      await expect(service.parseResumePdf(complexLayoutBuffer, 'complex-layout-resume.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(
+          complexLayoutBuffer,
+          'complex-layout-resume.pdf',
+        ),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
 
     it('should handle image-heavy resumes', async () => {
@@ -153,40 +200,42 @@ describe('VisionLlmService', () => {
       const imageHeavyBuffer = Buffer.from('image heavy resume pdf');
 
       // Act & Assert
-      await expect(service.parseResumePdf(imageHeavyBuffer, 'image-heavy-resume.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(imageHeavyBuffer, 'image-heavy-resume.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
   });
 
   describe('parseResumePdfAdvanced', () => {
     it('should process VisionLlmRequest with options and return metrics', async () => {
       // Arrange
-      const request: VisionLlmRequest = {
+      const request: any = {
         pdfBuffer: mockPdfBuffer,
         filename: mockFilename,
         options: {
           language: 'en',
-          extractionPrompt: 'Extract all relevant information from this resume'
-        }
+          extractionPrompt: 'Extract all relevant information from this resume',
+        },
       };
 
       // Act & Assert
-      await expect(service.parseResumePdfAdvanced(request))
-        .rejects.toThrow('VisionLlmService.parseResumePdfAdvanced not implemented');
+      await expect(service.parseResumePdfAdvanced(request)).rejects.toThrow(
+        'VisionLlmService.parseResumePdfAdvanced not implemented',
+      );
     });
 
     it('should include processing metrics in response', async () => {
       // Arrange
-      const request: VisionLlmRequest = {
+      const request: any = {
         pdfBuffer: mockPdfBuffer,
-        filename: mockFilename
+        filename: mockFilename,
       };
 
       // When implemented, should return:
       const expectedResponse: VisionLlmResponse = {
         extractedData: expect.any(Object),
         confidence: expect.any(Number),
-        processingTimeMs: expect.any(Number)
+        processingTimeMs: expect.any(Number),
       };
 
       // Verify structure expectations
@@ -196,46 +245,55 @@ describe('VisionLlmService', () => {
       expect(mockVisionLlmResponse.processingTimeMs).toBeGreaterThan(0);
 
       // Act & Assert
-      await expect(service.parseResumePdfAdvanced(request))
-        .rejects.toThrow('VisionLlmService.parseResumePdfAdvanced not implemented');
+      await expect(service.parseResumePdfAdvanced(request)).rejects.toThrow(
+        'VisionLlmService.parseResumePdfAdvanced not implemented',
+      );
     });
 
     it('should handle custom extraction prompts', async () => {
       // Arrange
-      const customPromptRequest: VisionLlmRequest = {
+      const customPromptRequest: any = {
         pdfBuffer: mockPdfBuffer,
         filename: mockFilename,
         options: {
-          extractionPrompt: 'Focus on technical skills and work experience only'
-        }
+          extractionPrompt:
+            'Focus on technical skills and work experience only',
+        },
       };
 
       // Act & Assert
-      await expect(service.parseResumePdfAdvanced(customPromptRequest))
-        .rejects.toThrow('VisionLlmService.parseResumePdfAdvanced not implemented');
+      await expect(
+        service.parseResumePdfAdvanced(customPromptRequest),
+      ).rejects.toThrow(
+        'VisionLlmService.parseResumePdfAdvanced not implemented',
+      );
     });
 
     it('should support different language preferences', async () => {
       // Arrange
-      const multilangRequest: VisionLlmRequest = {
+      const multilangRequest: any = {
         pdfBuffer: mockPdfBuffer,
         filename: mockFilename,
         options: {
-          language: 'zh-CN' // Chinese language preference
-        }
+          language: 'zh-CN', // Chinese language preference
+        },
       };
 
       // Act & Assert
-      await expect(service.parseResumePdfAdvanced(multilangRequest))
-        .rejects.toThrow('VisionLlmService.parseResumePdfAdvanced not implemented');
+      await expect(
+        service.parseResumePdfAdvanced(multilangRequest),
+      ).rejects.toThrow(
+        'VisionLlmService.parseResumePdfAdvanced not implemented',
+      );
     });
   });
 
   describe('validatePdfFile', () => {
     it('should validate correct PDF format', async () => {
       // Act & Assert
-      await expect(service.validatePdfFile(mockPdfBuffer))
-        .rejects.toThrow('VisionLlmService.validatePdfFile not implemented');
+      await expect(service.validatePdfFile(mockPdfBuffer)).rejects.toThrow(
+        'VisionLlmService.validatePdfFile not implemented',
+      );
     });
 
     it('should reject invalid file formats', async () => {
@@ -243,8 +301,9 @@ describe('VisionLlmService', () => {
       const invalidFileBuffer = Buffer.from('not a pdf file');
 
       // Act & Assert
-      await expect(service.validatePdfFile(invalidFileBuffer))
-        .rejects.toThrow('VisionLlmService.validatePdfFile not implemented');
+      await expect(service.validatePdfFile(invalidFileBuffer)).rejects.toThrow(
+        'VisionLlmService.validatePdfFile not implemented',
+      );
     });
 
     it('should reject corrupted PDF files', async () => {
@@ -252,14 +311,16 @@ describe('VisionLlmService', () => {
       const corruptedPdfBuffer = Buffer.from('%PDF-1.4 corrupted content');
 
       // Act & Assert
-      await expect(service.validatePdfFile(corruptedPdfBuffer))
-        .rejects.toThrow('VisionLlmService.validatePdfFile not implemented');
+      await expect(service.validatePdfFile(corruptedPdfBuffer)).rejects.toThrow(
+        'VisionLlmService.validatePdfFile not implemented',
+      );
     });
 
     it('should reject empty or null buffers', async () => {
       // Test empty buffer
-      await expect(service.validatePdfFile(Buffer.alloc(0)))
-        .rejects.toThrow('VisionLlmService.validatePdfFile not implemented');
+      await expect(service.validatePdfFile(Buffer.alloc(0))).rejects.toThrow(
+        'VisionLlmService.validatePdfFile not implemented',
+      );
     });
 
     it('should validate PDF file size limits', async () => {
@@ -267,8 +328,9 @@ describe('VisionLlmService', () => {
       const oversizedPdfBuffer = Buffer.alloc(50 * 1024 * 1024); // 50MB file
 
       // Act & Assert
-      await expect(service.validatePdfFile(oversizedPdfBuffer))
-        .rejects.toThrow('VisionLlmService.validatePdfFile not implemented');
+      await expect(service.validatePdfFile(oversizedPdfBuffer)).rejects.toThrow(
+        'VisionLlmService.validatePdfFile not implemented',
+      );
     });
   });
 
@@ -278,8 +340,9 @@ describe('VisionLlmService', () => {
       const fileSize = 2 * 1024 * 1024; // 2MB
 
       // Act & Assert
-      await expect(service.estimateProcessingTime(fileSize))
-        .rejects.toThrow('VisionLlmService.estimateProcessingTime not implemented');
+      await expect(service.estimateProcessingTime(fileSize)).rejects.toThrow(
+        'VisionLlmService.estimateProcessingTime not implemented',
+      );
     });
 
     it('should handle small files efficiently', async () => {
@@ -287,8 +350,11 @@ describe('VisionLlmService', () => {
       const smallFileSize = 100 * 1024; // 100KB
 
       // Act & Assert
-      await expect(service.estimateProcessingTime(smallFileSize))
-        .rejects.toThrow('VisionLlmService.estimateProcessingTime not implemented');
+      await expect(
+        service.estimateProcessingTime(smallFileSize),
+      ).rejects.toThrow(
+        'VisionLlmService.estimateProcessingTime not implemented',
+      );
     });
 
     it('should account for large file processing time', async () => {
@@ -296,25 +362,31 @@ describe('VisionLlmService', () => {
       const largeFileSize = 10 * 1024 * 1024; // 10MB
 
       // Act & Assert
-      await expect(service.estimateProcessingTime(largeFileSize))
-        .rejects.toThrow('VisionLlmService.estimateProcessingTime not implemented');
+      await expect(
+        service.estimateProcessingTime(largeFileSize),
+      ).rejects.toThrow(
+        'VisionLlmService.estimateProcessingTime not implemented',
+      );
     });
 
     it('should return reasonable time estimates', async () => {
       // When implemented, estimates should be realistic
       // Small files: 5-15 seconds
-      // Medium files: 15-30 seconds  
+      // Medium files: 15-30 seconds
       // Large files: 30-60 seconds
-      
+
       const testSizes = [
-        { size: 500 * 1024, expectedMax: 15000 },      // 500KB -> max 15s
+        { size: 500 * 1024, expectedMax: 15000 }, // 500KB -> max 15s
         { size: 2 * 1024 * 1024, expectedMax: 30000 }, // 2MB -> max 30s
-        { size: 5 * 1024 * 1024, expectedMax: 60000 }  // 5MB -> max 60s
+        { size: 5 * 1024 * 1024, expectedMax: 60000 }, // 5MB -> max 60s
       ];
 
       for (const testCase of testSizes) {
-        await expect(service.estimateProcessingTime(testCase.size))
-          .rejects.toThrow('VisionLlmService.estimateProcessingTime not implemented');
+        await expect(
+          service.estimateProcessingTime(testCase.size),
+        ).rejects.toThrow(
+          'VisionLlmService.estimateProcessingTime not implemented',
+        );
       }
     });
   });
@@ -322,44 +394,51 @@ describe('VisionLlmService', () => {
   describe('Error Handling & Resilience', () => {
     it('should implement retry logic for transient API failures', async () => {
       // Test retry behavior when Vision LLM API is temporarily unavailable
-      await expect(service.parseResumePdf(mockPdfBuffer, 'retry-test.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(mockPdfBuffer, 'retry-test.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
 
     it('should implement exponential backoff strategy', async () => {
       // Verify exponential backoff is implemented for retries
-      await expect(service.parseResumePdf(mockPdfBuffer, 'backoff-test.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(mockPdfBuffer, 'backoff-test.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
 
     it('should handle rate limiting from Vision LLM API', async () => {
       // Test rate limiting scenarios
-      await expect(service.parseResumePdf(mockPdfBuffer, 'rate-limit-test.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(mockPdfBuffer, 'rate-limit-test.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
 
     it('should timeout long-running requests', async () => {
       // Test timeout handling for very slow API responses
-      await expect(service.parseResumePdf(mockPdfBuffer, 'timeout-test.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(mockPdfBuffer, 'timeout-test.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
 
     it('should handle API authentication failures', async () => {
       // Test authentication error handling
-      await expect(service.parseResumePdf(mockPdfBuffer, 'auth-fail-test.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(mockPdfBuffer, 'auth-fail-test.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
 
     it('should handle quota exceeded errors', async () => {
       // Test quota/billing limit errors
-      await expect(service.parseResumePdf(mockPdfBuffer, 'quota-test.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(mockPdfBuffer, 'quota-test.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
 
     it('should handle malformed API responses', async () => {
       // Test handling of unexpected API response formats
-      await expect(service.parseResumePdf(mockPdfBuffer, 'malformed-response-test.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(mockPdfBuffer, 'malformed-response-test.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
   });
 
@@ -373,14 +452,23 @@ describe('VisionLlmService', () => {
 
     it('should extract technical skills comprehensively', async () => {
       // Verify technical skills extraction
-      const expectedSkills = ['Python', 'JavaScript', 'Machine Learning', 'AWS', 'Docker', 'Kubernetes'];
-      expect(mockRawLlmOutput.skills).toEqual(expect.arrayContaining(expectedSkills));
+      const expectedSkills = [
+        'Python',
+        'JavaScript',
+        'Machine Learning',
+        'AWS',
+        'Docker',
+        'Kubernetes',
+      ];
+      expect(mockRawLlmOutput.skills).toEqual(
+        expect.arrayContaining(expectedSkills),
+      );
     });
 
     it('should extract work experience with proper details', async () => {
       // Verify work experience extraction
       expect(mockRawLlmOutput.workExperience).toHaveLength(2);
-      
+
       const firstJob = mockRawLlmOutput.workExperience[0];
       expect(firstJob.company).toBe('TechCorp Solutions');
       expect(firstJob.position).toBe('Senior Software Engineer');
@@ -392,7 +480,7 @@ describe('VisionLlmService', () => {
     it('should extract education information correctly', async () => {
       // Verify education extraction
       expect(mockRawLlmOutput.education).toHaveLength(2);
-      
+
       const mastersDegree = mockRawLlmOutput.education[0];
       expect(mastersDegree.institution).toBe('Stanford University');
       expect(mastersDegree.degree).toBe('Master of Science');
@@ -402,8 +490,9 @@ describe('VisionLlmService', () => {
 
     it('should handle missing or incomplete information gracefully', async () => {
       // Test extraction when some fields are missing
-      await expect(service.parseResumePdf(mockPdfBuffer, 'incomplete-resume.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(mockPdfBuffer, 'incomplete-resume.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
 
     it('should maintain high confidence scores for clear content', async () => {
@@ -414,9 +503,10 @@ describe('VisionLlmService', () => {
     it('should handle low-quality scanned documents', async () => {
       // Test extraction from poor quality scans
       const lowQualityBuffer = Buffer.from('low quality scanned pdf');
-      
-      await expect(service.parseResumePdf(lowQualityBuffer, 'low-quality-scan.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+
+      await expect(
+        service.parseResumePdf(lowQualityBuffer, 'low-quality-scan.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
   });
 
@@ -436,9 +526,13 @@ describe('VisionLlmService', () => {
 
     it('should handle concurrent processing efficiently', async () => {
       // Test concurrent PDF processing
-      const concurrentRequests = Array(3).fill(null).map((_, i) =>
-        service.parseResumePdf(mockPdfBuffer, `concurrent-resume-${i}.pdf`).catch(() => null)
-      );
+      const concurrentRequests = Array(3)
+        .fill(null)
+        .map((_, i) =>
+          service
+            .parseResumePdf(mockPdfBuffer, `concurrent-resume-${i}.pdf`)
+            .catch(() => null),
+        );
 
       await Promise.allSettled(concurrentRequests);
       expect(concurrentRequests).toHaveLength(3);
@@ -446,16 +540,19 @@ describe('VisionLlmService', () => {
 
     it('should optimize processing for different file sizes', async () => {
       // Test size-based optimization
-      const smallFile = Buffer.alloc(100 * 1024);  // 100KB
+      const smallFile = Buffer.alloc(100 * 1024); // 100KB
       const mediumFile = Buffer.alloc(1024 * 1024); // 1MB
       const largeFile = Buffer.alloc(5 * 1024 * 1024); // 5MB
 
-      await expect(service.parseResumePdf(smallFile, 'small.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
-      await expect(service.parseResumePdf(mediumFile, 'medium.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
-      await expect(service.parseResumePdf(largeFile, 'large.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(smallFile, 'small.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(mediumFile, 'medium.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(largeFile, 'large.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
   });
 
@@ -470,8 +567,9 @@ describe('VisionLlmService', () => {
 
     it('should support fallback to alternative Vision APIs', async () => {
       // Test fallback strategy when primary API fails
-      await expect(service.parseResumePdf(mockPdfBuffer, 'fallback-test.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(mockPdfBuffer, 'fallback-test.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
 
     it('should handle different PDF specifications correctly', async () => {
@@ -479,41 +577,46 @@ describe('VisionLlmService', () => {
       const pdfVersions = [
         { version: '1.4', buffer: Buffer.from('pdf 1.4 content') },
         { version: '1.7', buffer: Buffer.from('pdf 1.7 content') },
-        { version: '2.0', buffer: Buffer.from('pdf 2.0 content') }
+        { version: '2.0', buffer: Buffer.from('pdf 2.0 content') },
       ];
 
       for (const pdf of pdfVersions) {
-        await expect(service.parseResumePdf(pdf.buffer, `resume-${pdf.version}.pdf`))
-          .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+        await expect(
+          service.parseResumePdf(pdf.buffer, `resume-${pdf.version}.pdf`),
+        ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
       }
     });
 
     it('should maintain API usage metrics for monitoring', async () => {
       // Test metrics collection for monitoring
-      await expect(service.parseResumePdf(mockPdfBuffer, 'metrics-test.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(mockPdfBuffer, 'metrics-test.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
   });
 
   describe('Security & Compliance', () => {
     it('should handle sensitive personal information securely', async () => {
       // Test secure handling of PII in resumes
-      await expect(service.parseResumePdf(mockPdfBuffer, 'pii-test.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(mockPdfBuffer, 'pii-test.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
 
     it('should validate file content for malicious payloads', async () => {
       // Test security validation
       const suspiciousBuffer = Buffer.from('potentially malicious pdf content');
-      
-      await expect(service.parseResumePdf(suspiciousBuffer, 'suspicious.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+
+      await expect(
+        service.parseResumePdf(suspiciousBuffer, 'suspicious.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
 
     it('should comply with data retention policies', async () => {
       // Test data handling compliance
-      await expect(service.parseResumePdf(mockPdfBuffer, 'compliance-test.pdf'))
-        .rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
+      await expect(
+        service.parseResumePdf(mockPdfBuffer, 'compliance-test.pdf'),
+      ).rejects.toThrow('VisionLlmService.parseResumePdf not implemented');
     });
   });
 });

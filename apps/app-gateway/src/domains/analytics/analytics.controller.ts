@@ -1,35 +1,37 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Put, 
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
   Delete,
-  Body, 
-  Param, 
-  Query, 
+  Body,
+  Param,
+  Query,
   UseGuards,
   Request,
   HttpCode,
   HttpStatus,
   NotFoundException,
   BadRequestException,
-  ForbiddenException
+  ForbiddenException,
 } from '@nestjs/common';
 import { Request as ExpressRequest } from 'express';
-import { 
-  ApiTags, 
-  ApiOperation, 
-  ApiResponse, 
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
   ApiBearerAuth,
   ApiQuery,
   ApiParam,
-  ApiBody
+  ApiBody,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
-import { Permission, UserDto } from '@ai-recruitment-clerk/user-management-domain';
-import { AnalyticsEvent } from '@ai-recruitment-clerk/infrastructure-shared';
+import {
+  Permission,
+  UserDto,
+} from '@ai-recruitment-clerk/user-management-domain';
 import { AnalyticsIntegrationService } from './analytics-integration.service';
 
 interface AuthenticatedRequest extends ExpressRequest {
@@ -45,7 +47,7 @@ export class AnalyticsController {
 
   @ApiOperation({
     summary: '记录用户行为事件',
-    description: '记录用户在系统中的各种行为事件，用于用户体验分析和系统优化'
+    description: '记录用户在系统中的各种行为事件，用于用户体验分析和系统优化',
   })
   @ApiResponse({
     status: 201,
@@ -59,11 +61,11 @@ export class AnalyticsController {
             eventId: { type: 'string' },
             timestamp: { type: 'string' },
             eventType: { type: 'string' },
-            processed: { type: 'boolean' }
-          }
-        }
-      }
-    }
+            processed: { type: 'boolean' },
+          },
+        },
+      },
+    },
   })
   @ApiResponse({ status: 400, description: '请求参数错误' })
   @UseGuards(RolesGuard)
@@ -72,24 +74,29 @@ export class AnalyticsController {
   @HttpCode(HttpStatus.CREATED)
   async trackEvent(
     @Request() req: AuthenticatedRequest,
-    @Body() eventData: {
+    @Body()
+    eventData: {
       eventType: string;
       category: string;
       action: string;
       label?: string;
       value?: number;
-      metadata?: any;
+      metadata?: Record<string, unknown>;
       sessionId?: string;
-    }
+    },
   ) {
     try {
+      if (!req.user.organizationId) {
+        throw new BadRequestException('Organization ID is required');
+      }
+
       const event = await this.analyticsService.trackEvent({
         ...eventData,
         userId: req.user.id,
         organizationId: req.user.organizationId,
         timestamp: new Date(),
         userAgent: req.headers['user-agent'],
-        ipAddress: req.ip
+        ipAddress: req.ip,
       });
 
       return {
@@ -99,21 +106,21 @@ export class AnalyticsController {
           eventId: event.eventId,
           timestamp: event.timestamp,
           eventType: event.eventType,
-          processed: event.processed
-        }
+          processed: event.processed,
+        },
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to track event',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '记录系统性能指标',
-    description: '记录系统关键操作的性能数据，包括响应时间、错误率、吞吐量等'
+    description: '记录系统关键操作的性能数据，包括响应时间、错误率、吞吐量等',
   })
   @ApiResponse({ status: 201, description: '性能指标记录成功' })
   @UseGuards(RolesGuard)
@@ -122,7 +129,8 @@ export class AnalyticsController {
   @HttpCode(HttpStatus.CREATED)
   async recordPerformanceMetric(
     @Request() req: AuthenticatedRequest,
-    @Body() metricData: {
+    @Body()
+    metricData: {
       metricName: string;
       value: number;
       unit: string;
@@ -130,16 +138,20 @@ export class AnalyticsController {
       service: string;
       status: 'success' | 'error' | 'timeout';
       duration?: number;
-      metadata?: any;
-    }
+      metadata?: Record<string, unknown>;
+    },
   ) {
     try {
+      if (!req.user.organizationId) {
+        throw new BadRequestException('Organization ID is required');
+      }
+
       const metric = await this.analyticsService.recordMetric({
         ...metricData,
         organizationId: req.user.organizationId,
         recordedBy: req.user.id,
         timestamp: new Date(),
-        category: 'performance'
+        category: 'performance',
       });
 
       return {
@@ -149,21 +161,21 @@ export class AnalyticsController {
           metricId: metric.metricId,
           metricName: metric.metricName,
           value: metric.value,
-          timestamp: metric.timestamp
-        }
+          timestamp: metric.timestamp,
+        },
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to record performance metric',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '记录业务指标',
-    description: '记录关键业务KPI，如用户转化率、留存率、收入指标等'
+    description: '记录关键业务KPI，如用户转化率、留存率、收入指标等',
   })
   @ApiResponse({ status: 201, description: '业务指标记录成功' })
   @UseGuards(RolesGuard)
@@ -172,22 +184,27 @@ export class AnalyticsController {
   @HttpCode(HttpStatus.CREATED)
   async recordBusinessMetric(
     @Request() req: AuthenticatedRequest,
-    @Body() metricData: {
+    @Body()
+    metricData: {
       metricName: string;
       value: number;
       unit: string;
       category: string;
       dimensions?: Record<string, any>;
       tags?: string[];
-    }
+    },
   ) {
     try {
+      if (!req.user.organizationId) {
+        throw new BadRequestException('Organization ID is required');
+      }
+
       const metric = await this.analyticsService.recordMetric({
         ...metricData,
         organizationId: req.user.organizationId,
         recordedBy: req.user.id,
         timestamp: new Date(),
-        category: 'business'
+        category: 'business',
       });
 
       return {
@@ -198,60 +215,73 @@ export class AnalyticsController {
           metricName: metric.metricName,
           value: metric.value,
           category: metric.category,
-          timestamp: metric.timestamp
-        }
+          timestamp: metric.timestamp,
+        },
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to record business metric',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '获取分析仪表板数据',
-    description: '获取组织的核心分析数据仪表板，包括关键指标和趋势'
+    description: '获取组织的核心分析数据仪表板，包括关键指标和趋势',
   })
   @ApiResponse({
     status: 200,
-    description: '仪表板数据获取成功'
+    description: '仪表板数据获取成功',
   })
-  @ApiQuery({ name: 'timeRange', required: false, enum: ['24h', '7d', '30d', '90d'], description: '时间范围' })
-  @ApiQuery({ name: 'metrics', required: false, description: '指定的指标列表（逗号分隔）' })
+  @ApiQuery({
+    name: 'timeRange',
+    required: false,
+    enum: ['24h', '7d', '30d', '90d'],
+    description: '时间范围',
+  })
+  @ApiQuery({
+    name: 'metrics',
+    required: false,
+    description: '指定的指标列表（逗号分隔）',
+  })
   @UseGuards(RolesGuard)
   @Permissions(Permission.VIEW_ANALYTICS)
   @Get('dashboard')
   async getDashboard(
     @Request() req: AuthenticatedRequest,
     @Query('timeRange') timeRange = '7d',
-    @Query('metrics') metrics?: string
+    @Query('metrics') metrics?: string,
   ) {
     try {
+      if (!req.user.organizationId) {
+        throw new BadRequestException('Organization ID is required');
+      }
+
       const metricsArray = metrics ? metrics.split(',') : undefined;
       const dashboard = await this.analyticsService.getDashboard(
         req.user.organizationId,
         timeRange,
-        metricsArray
+        metricsArray,
       );
 
       return {
         success: true,
-        data: dashboard
+        data: dashboard,
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to retrieve dashboard data',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '获取用户行为分析',
-    description: '获取指定用户或用户群体的行为分析数据和模式'
+    description: '获取指定用户或用户群体的行为分析数据和模式',
   })
   @ApiResponse({ status: 200, description: '用户行为分析获取成功' })
   @ApiQuery({ name: 'userId', required: false, description: '特定用户ID' })
@@ -266,41 +296,50 @@ export class AnalyticsController {
     @Query('userId') userId?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @Query('segmentBy') segmentBy?: string
+    @Query('segmentBy') segmentBy?: string,
   ) {
     try {
+      if (!req.user.organizationId) {
+        throw new BadRequestException('Organization ID is required');
+      }
+
       const analysis = await this.analyticsService.getUserBehaviorAnalysis(
         req.user.organizationId,
         {
           userId,
           startDate: startDate ? new Date(startDate) : undefined,
           endDate: endDate ? new Date(endDate) : undefined,
-          segmentBy
-        }
+          segmentBy,
+        },
       );
 
       return {
         success: true,
-        data: analysis
+        data: analysis,
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to retrieve user behavior analysis',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '获取系统使用统计',
-    description: '获取系统各模块的使用统计数据，包括活跃用户、功能使用频率等'
+    description: '获取系统各模块的使用统计数据，包括活跃用户、功能使用频率等',
   })
   @ApiResponse({ status: 200, description: '使用统计获取成功' })
   @ApiQuery({ name: 'module', required: false, description: '特定模块' })
   @ApiQuery({ name: 'startDate', required: false, description: '开始日期' })
   @ApiQuery({ name: 'endDate', required: false, description: '结束日期' })
-  @ApiQuery({ name: 'granularity', required: false, enum: ['hour', 'day', 'week', 'month'], description: '数据粒度' })
+  @ApiQuery({
+    name: 'granularity',
+    required: false,
+    enum: ['hour', 'day', 'week', 'month'],
+    description: '数据粒度',
+  })
   @UseGuards(RolesGuard)
   @Permissions(Permission.VIEW_ANALYTICS)
   @Get('usage/statistics')
@@ -309,35 +348,39 @@ export class AnalyticsController {
     @Query('module') module?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @Query('granularity') granularity = 'day'
+    @Query('granularity') granularity = 'day',
   ) {
     try {
+      if (!req.user.organizationId) {
+        throw new BadRequestException('Organization ID is required');
+      }
+
       const statistics = await this.analyticsService.getUsageStatistics(
         req.user.organizationId,
         {
           module,
           startDate: startDate ? new Date(startDate) : undefined,
           endDate: endDate ? new Date(endDate) : undefined,
-          granularity
-        }
+          granularity,
+        },
       );
 
       return {
         success: true,
-        data: statistics
+        data: statistics,
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to retrieve usage statistics',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '生成分析报告',
-    description: '生成指定类型的分析报告，支持多种格式输出'
+    description: '生成指定类型的分析报告，支持多种格式输出',
   })
   @ApiResponse({
     status: 201,
@@ -352,11 +395,11 @@ export class AnalyticsController {
             reportType: { type: 'string' },
             status: { type: 'string' },
             estimatedTime: { type: 'string' },
-            downloadUrl: { type: 'string' }
-          }
-        }
-      }
-    }
+            downloadUrl: { type: 'string' },
+          },
+        },
+      },
+    },
   })
   @UseGuards(RolesGuard)
   @Permissions(Permission.GENERATE_REPORT)
@@ -364,24 +407,34 @@ export class AnalyticsController {
   @HttpCode(HttpStatus.CREATED)
   async generateReport(
     @Request() req: AuthenticatedRequest,
-    @Body() reportRequest: {
-      reportType: 'user_activity' | 'performance' | 'business_metrics' | 'usage_trends' | 'comprehensive';
+    @Body()
+    reportRequest: {
+      reportType:
+        | 'user_activity'
+        | 'performance'
+        | 'business_metrics'
+        | 'usage_trends'
+        | 'comprehensive';
       format: 'pdf' | 'excel' | 'csv' | 'json';
       dateRange: { startDate: string; endDate: string };
       filters?: Record<string, any>;
       sections?: string[];
       recipients?: string[];
-    }
+    },
   ) {
     try {
+      if (!req.user.organizationId) {
+        throw new BadRequestException('Organization ID is required');
+      }
+
       const report = await this.analyticsService.generateReport({
         ...reportRequest,
         organizationId: req.user.organizationId,
         requestedBy: req.user.id,
         dateRange: {
           startDate: new Date(reportRequest.dateRange.startDate),
-          endDate: new Date(reportRequest.dateRange.endDate)
-        }
+          endDate: new Date(reportRequest.dateRange.endDate),
+        },
       });
 
       return {
@@ -392,27 +445,31 @@ export class AnalyticsController {
           reportType: report.reportType,
           status: report.status,
           estimatedTime: report.estimatedCompletionTime,
-          downloadUrl: report.downloadUrl
-        }
+          downloadUrl: report.downloadUrl,
+        },
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to generate report',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '获取报告状态和历史',
-    description: '获取报告生成状态和历史记录'
+    description: '获取报告生成状态和历史记录',
   })
   @ApiResponse({ status: 200, description: '报告列表获取成功' })
   @ApiQuery({ name: 'page', required: false, description: '页码' })
   @ApiQuery({ name: 'limit', required: false, description: '每页数量' })
   @ApiQuery({ name: 'status', required: false, description: '报告状态筛选' })
-  @ApiQuery({ name: 'reportType', required: false, description: '报告类型筛选' })
+  @ApiQuery({
+    name: 'reportType',
+    required: false,
+    description: '报告类型筛选',
+  })
   @UseGuards(RolesGuard)
   @Permissions(Permission.READ_ANALYSIS)
   @Get('reports')
@@ -421,9 +478,13 @@ export class AnalyticsController {
     @Query('page') page = 1,
     @Query('limit') limit = 20,
     @Query('status') status?: string,
-    @Query('reportType') reportType?: string
+    @Query('reportType') reportType?: string,
   ) {
     try {
+      if (!req.user.organizationId) {
+        throw new BadRequestException('Organization ID is required');
+      }
+
       const reports = await this.analyticsService.getReports(
         req.user.organizationId,
         {
@@ -431,8 +492,8 @@ export class AnalyticsController {
           limit: Math.min(limit, 100),
           status,
           reportType,
-          requestedBy: req.user.id
-        }
+          requestedBy: req.user.id,
+        },
       );
 
       return {
@@ -442,21 +503,21 @@ export class AnalyticsController {
           totalCount: reports.totalCount,
           page: page,
           totalPages: Math.ceil(reports.totalCount / limit),
-          hasNext: page * limit < reports.totalCount
-        }
+          hasNext: page * limit < reports.totalCount,
+        },
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to retrieve reports',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '获取指定报告详情',
-    description: '获取指定报告的详细信息和下载链接'
+    description: '获取指定报告的详细信息和下载链接',
   })
   @ApiResponse({ status: 200, description: '报告详情获取成功' })
   @ApiResponse({ status: 404, description: '报告未找到' })
@@ -466,10 +527,17 @@ export class AnalyticsController {
   @Get('reports/:reportId')
   async getReport(
     @Request() req: AuthenticatedRequest,
-    @Param('reportId') reportId: string
+    @Param('reportId') reportId: string,
   ) {
     try {
-      const report = await this.analyticsService.getReport(reportId, req.user.organizationId);
+      if (!req.user.organizationId) {
+        throw new BadRequestException('Organization ID is required');
+      }
+
+      const report = await this.analyticsService.getReport(
+        reportId,
+        req.user.organizationId,
+      );
 
       if (!report) {
         throw new NotFoundException('Report not found');
@@ -477,20 +545,20 @@ export class AnalyticsController {
 
       return {
         success: true,
-        data: report
+        data: report,
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to retrieve report',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '删除报告',
-    description: '删除指定的分析报告及其关联文件'
+    description: '删除指定的分析报告及其关联文件',
   })
   @ApiResponse({ status: 200, description: '报告删除成功' })
   @ApiResponse({ status: 404, description: '报告未找到' })
@@ -502,15 +570,19 @@ export class AnalyticsController {
   async deleteReport(
     @Request() req: AuthenticatedRequest,
     @Param('reportId') reportId: string,
-    @Body() deleteRequest: { reason?: string; hardDelete?: boolean }
+    @Body() deleteRequest: { reason?: string; hardDelete?: boolean },
   ) {
     try {
+      if (!req.user.organizationId) {
+        throw new BadRequestException('Organization ID is required');
+      }
+
       await this.analyticsService.deleteReport(
         reportId,
         req.user.organizationId,
         req.user.id,
         deleteRequest.reason,
-        deleteRequest.hardDelete || false
+        deleteRequest.hardDelete || false,
       );
 
       return {
@@ -520,21 +592,21 @@ export class AnalyticsController {
           reportId,
           deletedAt: new Date().toISOString(),
           deletedBy: req.user.id,
-          hardDelete: deleteRequest.hardDelete || false
-        }
+          hardDelete: deleteRequest.hardDelete || false,
+        },
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to delete report',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '获取实时分析数据',
-    description: '获取实时系统指标和用户活动数据'
+    description: '获取实时系统指标和用户活动数据',
   })
   @ApiResponse({ status: 200, description: '实时数据获取成功' })
   @ApiQuery({ name: 'metrics', required: false, description: '指定的实时指标' })
@@ -543,32 +615,36 @@ export class AnalyticsController {
   @Get('realtime')
   async getRealtimeData(
     @Request() req: AuthenticatedRequest,
-    @Query('metrics') metrics?: string
+    @Query('metrics') metrics?: string,
   ) {
     try {
-      const metricsArray = metrics ? metrics.split(',') : undefined;
+      if (!req.user.organizationId) {
+        throw new BadRequestException('Organization ID is required');
+      }
+
+      const metricsArray = metrics ? metrics.split(',') : [];
       const realtimeData = await this.analyticsService.getRealtimeData(
         req.user.organizationId,
-        metricsArray
+        metricsArray,
       );
 
       return {
         success: true,
         data: realtimeData,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to retrieve realtime data',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '配置分析数据保留策略',
-    description: '配置分析数据的保留时间和清理策略'
+    description: '配置分析数据的保留时间和清理策略',
   })
   @ApiResponse({ status: 200, description: '保留策略配置成功' })
   @UseGuards(RolesGuard)
@@ -577,41 +653,51 @@ export class AnalyticsController {
   @HttpCode(HttpStatus.OK)
   async configureDataRetention(
     @Request() req: AuthenticatedRequest,
-    @Body() retentionConfig: {
+    @Body()
+    retentionConfig: {
       eventDataRetentionDays: number;
       metricDataRetentionDays: number;
       reportRetentionDays: number;
       anonymizeAfterDays?: number;
       enableAutoCleanup: boolean;
-    }
+    },
   ) {
     try {
+      if (!req.user.organizationId) {
+        throw new BadRequestException('Organization ID is required');
+      }
+
       const config = await this.analyticsService.configureDataRetention(
         req.user.organizationId,
         retentionConfig,
-        req.user.id
+        req.user.id,
       );
 
       return {
         success: true,
         message: 'Data retention policy configured successfully',
-        data: config
+        data: config,
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to configure data retention',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '导出分析数据',
-    description: '导出指定时间范围的分析数据为各种格式'
+    description: '导出指定时间范围的分析数据为各种格式',
   })
   @ApiResponse({ status: 200, description: '数据导出成功' })
-  @ApiQuery({ name: 'format', required: false, enum: ['csv', 'json', 'excel'], description: '导出格式' })
+  @ApiQuery({
+    name: 'format',
+    required: false,
+    enum: ['csv', 'json', 'excel'],
+    description: '导出格式',
+  })
   @UseGuards(RolesGuard)
   @Permissions(Permission.GENERATE_REPORT)
   @Post('export')
@@ -619,14 +705,19 @@ export class AnalyticsController {
   async exportAnalyticsData(
     @Request() req: AuthenticatedRequest,
     @Query('format') format: 'csv' | 'json' | 'excel' = 'csv',
-    @Body() exportRequest: {
+    @Body()
+    exportRequest: {
       dataTypes: string[];
       dateRange: { startDate: string; endDate: string };
       filters?: Record<string, any>;
       includeMetadata?: boolean;
-    }
+    },
   ) {
     try {
+      if (!req.user.organizationId) {
+        throw new BadRequestException('Organization ID is required');
+      }
+
       const exportResult = await this.analyticsService.exportData(
         req.user.organizationId,
         {
@@ -635,9 +726,9 @@ export class AnalyticsController {
           requestedBy: req.user.id,
           dateRange: {
             startDate: new Date(exportRequest.dateRange.startDate),
-            endDate: new Date(exportRequest.dateRange.endDate)
-          }
-        }
+            endDate: new Date(exportRequest.dateRange.endDate),
+          },
+        },
       );
 
       return {
@@ -648,21 +739,21 @@ export class AnalyticsController {
           format: format,
           estimatedTime: exportResult.estimatedTime,
           downloadUrl: exportResult.downloadUrl,
-          expiresAt: exportResult.expiresAt
-        }
+          expiresAt: exportResult.expiresAt,
+        },
       };
     } catch (error) {
       return {
         success: false,
         error: 'Failed to export analytics data',
-        message: error instanceof Error ? error.message : String(error)
+        message: error instanceof Error ? error.message : String(error),
       };
     }
   }
 
   @ApiOperation({
     summary: '服务健康检查',
-    description: '检查分析服务的健康状态和系统指标'
+    description: '检查分析服务的健康状态和系统指标',
   })
   @ApiResponse({ status: 200, description: '服务状态' })
   @Get('health')
@@ -679,15 +770,15 @@ export class AnalyticsController {
           eventProcessing: health.eventProcessing,
           reportGeneration: health.reportGeneration,
           realtimeData: health.realtimeData,
-          dataRetention: health.dataRetention
-        }
+          dataRetention: health.dataRetention,
+        },
       };
     } catch (error) {
       return {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         service: 'analytics-reporting',
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }

@@ -1,13 +1,37 @@
-import { Component, signal, OnDestroy, computed, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  signal,
+  OnDestroy,
+  computed,
+  AfterViewInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
 // Child Components
-import { ResumeFileUploadComponent, FileUploadData } from './components/resume-file-upload.component';
-import { AnalysisProgressComponent, AnalysisStep, ProgressUpdate } from './components/analysis-progress.component';
-import { AnalysisResultsComponent, AnalysisResult, ResultAction } from './components/analysis-results.component';
-import { AnalysisErrorComponent, ErrorAction, ErrorInfo } from './components/analysis-error.component';
-import { StatisticsPanelComponent, UsageStatistics } from './components/statistics-panel.component';
+import {
+  ResumeFileUploadComponent,
+  FileUploadData,
+} from './components/resume-file-upload.component';
+import {
+  AnalysisProgressComponent,
+  AnalysisStep,
+  ProgressUpdate,
+} from './components/analysis-progress.component';
+import {
+  AnalysisResultsComponent,
+  AnalysisResult,
+  ResultAction,
+} from './components/analysis-results.component';
+import {
+  AnalysisErrorComponent,
+  ErrorAction,
+  ErrorInfo,
+} from './components/analysis-error.component';
+import {
+  StatisticsPanelComponent,
+  UsageStatistics,
+} from './components/statistics-panel.component';
 // Services
 import { GuestApiService } from '../../services/guest/guest-api.service';
 import { WebSocketService } from '../../services/websocket.service';
@@ -52,14 +76,13 @@ interface StepChangeEvent {
   imports: [
     CommonModule,
     ResumeFileUploadComponent,
-    AnalysisProgressComponent, 
+    AnalysisProgressComponent,
     AnalysisResultsComponent,
     AnalysisErrorComponent,
-    StatisticsPanelComponent
+    StatisticsPanelComponent,
   ],
   template: `
     <div class="analysis-container">
-      
       <!-- Header Section -->
       <div class="header-section">
         <h1>AI智能简历分析</h1>
@@ -67,15 +90,18 @@ interface StepChangeEvent {
       </div>
 
       <!-- Main Content Grid -->
-      <div class="content-grid" [class.analysis-mode]="currentState() !== 'upload'">
-        
+      <div
+        class="content-grid"
+        [class.analysis-mode]="currentState() !== 'upload'"
+      >
         <!-- Upload Section -->
-        <arc-resume-file-upload 
+        <arc-resume-file-upload
           *ngIf="currentState() === 'upload'"
           [isSubmitting]="isSubmitting()"
           (fileSubmitted)="onFileSubmitted($event)"
           (demoRequested)="onDemoRequested()"
-          (fileValidationError)="onFileValidationError($event)">
+          (fileValidationError)="onFileValidationError($event)"
+        >
         </arc-resume-file-upload>
 
         <!-- Analysis Progress Section -->
@@ -88,7 +114,8 @@ interface StepChangeEvent {
           (stepChange)="onStepChange($event)"
           (analysisCompleted)="onAnalysisCompleted($event)"
           (analysisError)="onAnalysisError($event)"
-          (cancelRequested)="onAnalysisCancelled()">
+          (cancelRequested)="onAnalysisCancelled()"
+        >
         </arc-analysis-progress>
 
         <!-- Results Section -->
@@ -97,7 +124,8 @@ interface StepChangeEvent {
           [result]="analysisResult()"
           [showDetailedSummary]="false"
           [isProcessing]="isProcessingAction()"
-          (actionRequested)="onResultAction($event)">
+          (actionRequested)="onResultAction($event)"
+        >
         </arc-analysis-results>
 
         <!-- Error Section -->
@@ -107,9 +135,9 @@ interface StepChangeEvent {
           [showDetails]="true"
           [isRetrying]="isRetrying()"
           (actionRequested)="onErrorAction($event)"
-          (errorReported)="onErrorReported($event)">
+          (errorReported)="onErrorReported($event)"
+        >
         </arc-analysis-error>
-
       </div>
 
       <!-- Side Panel (Statistics & Tips) -->
@@ -119,16 +147,18 @@ interface StepChangeEvent {
         [showDailyLimit]="false"
         [showInsights]="true"
         (tipCategoryChanged)="onTipCategoryChanged($event)"
-        (moreTipsRequested)="onMoreTipsRequested()">
+        (moreTipsRequested)="onMoreTipsRequested()"
+      >
       </arc-statistics-panel>
-
     </div>
   `,
-  styleUrls: ['./unified-analysis.component.css']
+  styleUrls: ['./unified-analysis.component.css'],
 })
 export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
   // Component State
-  currentState = signal<'upload' | 'analyzing' | 'completed' | 'error'>('upload');
+  currentState = signal<'upload' | 'analyzing' | 'completed' | 'error'>(
+    'upload',
+  );
   sessionId = signal('');
   errorMessage = signal('');
   isSubmitting = signal(false);
@@ -137,11 +167,41 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
 
   // Analysis State
   analysisSteps = signal<AnalysisStep[]>([
-    { id: 'upload', title: '文件上传', description: '上传并验证简历文件', status: 'pending', progress: 0 },
-    { id: 'parse', title: '解析简历', description: '提取文本和结构化信息', status: 'pending', progress: 0 },
-    { id: 'extract', title: '信息提取', description: '识别关键技能和经验', status: 'pending', progress: 0 },
-    { id: 'analyze', title: '智能分析', description: 'AI算法分析和评估', status: 'pending', progress: 0 },
-    { id: 'report', title: '生成报告', description: '创建详细分析报告', status: 'pending', progress: 0 }
+    {
+      id: 'upload',
+      title: '文件上传',
+      description: '上传并验证简历文件',
+      status: 'pending',
+      progress: 0,
+    },
+    {
+      id: 'parse',
+      title: '解析简历',
+      description: '提取文本和结构化信息',
+      status: 'pending',
+      progress: 0,
+    },
+    {
+      id: 'extract',
+      title: '信息提取',
+      description: '识别关键技能和经验',
+      status: 'pending',
+      progress: 0,
+    },
+    {
+      id: 'analyze',
+      title: '智能分析',
+      description: 'AI算法分析和评估',
+      status: 'pending',
+      progress: 0,
+    },
+    {
+      id: 'report',
+      title: '生成报告',
+      description: '创建详细分析报告',
+      status: 'pending',
+      progress: 0,
+    },
   ]);
 
   analysisResult = signal<AnalysisResult | null>(null);
@@ -157,7 +217,7 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     private readonly guestApi: GuestApiService,
     private readonly webSocketService: WebSocketService,
     private readonly router: Router,
-    private readonly toastService: ToastService
+    private readonly toastService: ToastService,
   ) {}
 
   ngAfterViewInit(): void {
@@ -249,12 +309,14 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     this.updateStepStatus('upload', 'active');
 
     try {
-      const response = await this.guestApi.analyzeResume(
-        uploadData.file, 
-        uploadData.candidateInfo.name, 
-        uploadData.candidateInfo.email, 
-        uploadData.candidateInfo.notes
-      ).toPromise();
+      const response = await this.guestApi
+        .analyzeResume(
+          uploadData.file,
+          uploadData.candidateInfo.name,
+          uploadData.candidateInfo.email,
+          uploadData.candidateInfo.notes,
+        )
+        .toPromise();
 
       const sessionId = response?.data?.analysisId || '';
       this.sessionId.set(sessionId);
@@ -274,27 +336,27 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     this.isSubmitting.set(true);
     this.currentState.set('analyzing');
     this.resetAnalysisSteps();
-    
+
     // Generate demo session ID
     const demoSessionId = `demo_${Date.now()}`;
     this.sessionId.set(demoSessionId);
-    
+
     // Start demo progress simulation
     this.guestApi.getDemoAnalysis().subscribe({
       next: () => {
         this.updateStepStatus('upload', 'active');
-        
+
         // Trigger demo WebSocket events
         setTimeout(() => {
           this.webSocketService.connect(demoSessionId).subscribe();
         }, 500);
-        
+
         this.isSubmitting.set(false);
       },
       error: (error) => {
         this.handleAnalysisError(error);
         this.isSubmitting.set(false);
-      }
+      },
     });
   }
 
@@ -303,23 +365,23 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
   private updateAnalysisProgress(stepName: string, progress: number): void {
     // Map step names to step IDs
     const stepMap: Record<string, string> = {
-      '上传文件': 'upload',
-      '解析简历': 'parse',
-      '提取关键信息': 'extract',
-      '智能分析': 'analyze',
-      '生成报告': 'report'
+      上传文件: 'upload',
+      解析简历: 'parse',
+      提取关键信息: 'extract',
+      智能分析: 'analyze',
+      生成报告: 'report',
     };
 
     const stepId = stepMap[stepName] || stepName.toLowerCase();
-    
+
     const steps = this.analysisSteps();
-    const updatedSteps = steps.map(step => {
+    const updatedSteps = steps.map((step) => {
       if (step.id === stepId) {
         return { ...step, progress, status: 'active' as const };
       }
       return step;
     });
-    
+
     this.analysisSteps.set(updatedSteps);
   }
 
@@ -333,16 +395,17 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
 
   private updateStepProgression(currentStepName: string): void {
     const stepMap: Record<string, string> = {
-      '上传文件': 'upload',
-      '解析简历': 'parse',
-      '提取关键信息': 'extract',
-      '智能分析': 'analyze',
-      '生成报告': 'report'
+      上传文件: 'upload',
+      解析简历: 'parse',
+      提取关键信息: 'extract',
+      智能分析: 'analyze',
+      生成报告: 'report',
     };
 
-    const currentStepId = stepMap[currentStepName] || currentStepName.toLowerCase();
+    const currentStepId =
+      stepMap[currentStepName] || currentStepName.toLowerCase();
     const steps = this.analysisSteps();
-    const currentIndex = steps.findIndex(step => step.id === currentStepId);
+    const currentIndex = steps.findIndex((step) => step.id === currentStepId);
 
     const updatedSteps = steps.map((step, index) => {
       if (index < currentIndex) {
@@ -359,10 +422,10 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
   private handleAnalysisCompletion(completion: AnalysisCompletionEvent): void {
     // Mark all steps as completed
     const steps = this.analysisSteps();
-    const completedSteps = steps.map(step => ({
+    const completedSteps = steps.map((step) => ({
       ...step,
       status: 'completed' as const,
-      progress: 100
+      progress: 100,
     }));
     this.analysisSteps.set(completedSteps);
 
@@ -370,28 +433,34 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     this.analysisResult.set({
       score: completion.result?.score || 85,
       summary: completion.result?.summary || '该候选人具有良好的技能匹配度',
-      keySkills: completion.result?.details?.skills || ['JavaScript', 'TypeScript', 'Angular', 'Node.js'],
+      keySkills: completion.result?.details?.skills || [
+        'JavaScript',
+        'TypeScript',
+        'Angular',
+        'Node.js',
+      ],
       experience: completion.result?.details?.experience || '3-5年软件开发经验',
       education: completion.result?.details?.education || '计算机科学学士学位',
       recommendations: completion.result?.details?.recommendations || [
         '技术栈匹配度高，适合前端开发岗位',
         '建议进行技术面试验证实际能力',
-        '可以考虑安排项目经验分享环节'
+        '可以考虑安排项目经验分享环节',
       ],
-      reportUrl: completion.result?.reportUrl
+      reportUrl: completion.result?.reportUrl,
     });
 
     this.currentState.set('completed');
   }
 
   private handleAnalysisError(error: AnalysisErrorEvent): void {
-    const errorMsg = error?.error?.message || error?.message || '分析过程中发生未知错误';
+    const errorMsg =
+      error?.error?.message || error?.message || '分析过程中发生未知错误';
     this.errorMessage.set(errorMsg);
     this.currentState.set('error');
 
     // Mark current active step as error
     const steps = this.analysisSteps();
-    const updatedSteps = steps.map(step => {
+    const updatedSteps = steps.map((step) => {
       if (step.status === 'active') {
         return { ...step, status: 'error' as const };
       }
@@ -403,20 +472,57 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
   // UI Helper Methods
   private resetAnalysisSteps(): void {
     const defaultSteps: AnalysisStep[] = [
-      { id: 'upload', title: '文件上传', description: '上传并验证简历文件', status: 'pending', progress: 0 },
-      { id: 'parse', title: '解析简历', description: '提取文本和结构化信息', status: 'pending', progress: 0 },
-      { id: 'extract', title: '信息提取', description: '识别关键技能和经验', status: 'pending', progress: 0 },
-      { id: 'analyze', title: '智能分析', description: 'AI算法分析和评估', status: 'pending', progress: 0 },
-      { id: 'report', title: '生成报告', description: '创建详细分析报告', status: 'pending', progress: 0 }
+      {
+        id: 'upload',
+        title: '文件上传',
+        description: '上传并验证简历文件',
+        status: 'pending',
+        progress: 0,
+      },
+      {
+        id: 'parse',
+        title: '解析简历',
+        description: '提取文本和结构化信息',
+        status: 'pending',
+        progress: 0,
+      },
+      {
+        id: 'extract',
+        title: '信息提取',
+        description: '识别关键技能和经验',
+        status: 'pending',
+        progress: 0,
+      },
+      {
+        id: 'analyze',
+        title: '智能分析',
+        description: 'AI算法分析和评估',
+        status: 'pending',
+        progress: 0,
+      },
+      {
+        id: 'report',
+        title: '生成报告',
+        description: '创建详细分析报告',
+        status: 'pending',
+        progress: 0,
+      },
     ];
     this.analysisSteps.set(defaultSteps);
   }
 
-  private updateStepStatus(stepId: string, status: AnalysisStep['status']): void {
+  private updateStepStatus(
+    stepId: string,
+    status: AnalysisStep['status'],
+  ): void {
     const steps = this.analysisSteps();
-    const updatedSteps = steps.map(step => {
+    const updatedSteps = steps.map((step) => {
       if (step.id === stepId) {
-        return { ...step, status, progress: status === 'completed' ? 100 : step.progress };
+        return {
+          ...step,
+          status,
+          progress: status === 'completed' ? 100 : step.progress,
+        };
       }
       return step;
     });
@@ -429,7 +535,7 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
       message: this.errorMessage(),
       code: 'ANALYSIS_ERROR',
       timestamp: new Date(),
-      recoverable: true
+      recoverable: true,
     };
   }
 
@@ -439,7 +545,7 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
       totalAnalyses: this.totalAnalyses(),
       averageScore: this.averageScore(),
       successRate: 95.2,
-      monthlyAnalyses: 156
+      monthlyAnalyses: 156,
     };
   }
 
@@ -457,7 +563,7 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     this.currentState.set('upload');
     this.errorMessage.set('');
     this.resetAnalysisSteps();
-    
+
     setTimeout(() => {
       this.isRetrying.set(false);
     }, 1000);
@@ -480,7 +586,7 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
 
   private viewDetailedResults(): void {
     this.isProcessingAction.set(true);
-    
+
     const sessionId = this.sessionId();
     if (sessionId) {
       this.router.navigate(['/results', sessionId]).finally(() => {
@@ -493,7 +599,7 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
 
   private downloadReport(): void {
     this.isProcessingAction.set(true);
-    
+
     const reportUrl = this.analysisResult()?.reportUrl;
     if (reportUrl) {
       window.open(reportUrl, '_blank');
@@ -501,7 +607,7 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     } else {
       this.toastService.error('报告链接不可用');
     }
-    
+
     setTimeout(() => {
       this.isProcessingAction.set(false);
     }, 1000);
@@ -513,7 +619,7 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
       // const stats = await this.guestApi.getStatistics().toPromise();
       // this.todayAnalyses.set(stats.todayAnalyses);
       // this.totalAnalyses.set(stats.totalAnalyses);
-      
+
       // For now, using mock data
       this.todayAnalyses.set(42);
       this.totalAnalyses.set(1247);

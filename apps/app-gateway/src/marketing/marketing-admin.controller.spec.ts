@@ -26,9 +26,9 @@ describe('MarketingAdminController', () => {
         },
       ],
     })
-    .overrideGuard(JwtAuthGuard)
-    .useValue({ canActivate: () => true }) // 模拟通过认证
-    .compile();
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true }) // 模拟通过认证
+      .compile();
 
     controller = module.get<MarketingAdminController>(MarketingAdminController);
     service = module.get<FeedbackCodeService>(FeedbackCodeService);
@@ -50,7 +50,7 @@ describe('MarketingAdminController', () => {
       usedCodes: 80,
       pendingPayments: 15,
       totalPaid: 195,
-      averageQualityScore: 4.2
+      averageQualityScore: 4.2,
     };
 
     it('应该返回完整的Dashboard数据', async () => {
@@ -68,7 +68,7 @@ describe('MarketingAdminController', () => {
       expect(result.conversion.qualityRate).toBe(18.8); // 15/80 * 100
 
       expect(result.financial.pendingAmount).toBe(45); // 15 * 3
-      expect(result.financial.averageReward).toBe(3.00);
+      expect(result.financial.averageReward).toBe(3.0);
       expect(result.financial.costPerUser).toBe(2.44); // 195/80
 
       expect(result.lastUpdated).toBeDefined();
@@ -80,7 +80,7 @@ describe('MarketingAdminController', () => {
         usedCodes: 0,
         pendingPayments: 0,
         totalPaid: 0,
-        averageQualityScore: 0
+        averageQualityScore: 0,
       };
       mockFeedbackCodeService.getMarketingStats.mockResolvedValue(emptyStats);
 
@@ -93,10 +93,12 @@ describe('MarketingAdminController', () => {
 
     it('应该处理服务错误', async () => {
       mockFeedbackCodeService.getMarketingStats.mockRejectedValue(
-        new Error('Service error')
+        new Error('Service error'),
       );
 
-      await expect(controller.getDashboardStats()).rejects.toThrow('Service error');
+      await expect(controller.getDashboardStats()).rejects.toThrow(
+        'Service error',
+      );
     });
   });
 
@@ -108,7 +110,7 @@ describe('MarketingAdminController', () => {
         alipayAccount: '138****8888',
         qualityScore: 4,
         usedAt: new Date('2023-01-01T10:00:00Z'),
-        questionnaireData: {}
+        questionnaireData: {},
       },
       {
         id: '2',
@@ -116,14 +118,21 @@ describe('MarketingAdminController', () => {
         alipayAccount: 'user@example.com',
         qualityScore: 5,
         usedAt: new Date('2023-01-01T09:00:00Z'),
-        questionnaireData: {}
-      }
+        questionnaireData: {},
+      },
     ];
 
     it('应该返回分页的待支付列表', async () => {
-      mockFeedbackCodeService.getPendingPayments.mockResolvedValue(mockPendingPayments);
+      mockFeedbackCodeService.getPendingPayments.mockResolvedValue(
+        mockPendingPayments,
+      );
 
-      const result = await controller.getPendingPayments('1', '20', 'usedAt', 'desc');
+      const result = await controller.getPendingPayments(
+        '1',
+        '20',
+        'usedAt',
+        'desc',
+      );
 
       expect(result.data).toHaveLength(2);
       expect(result.pagination.page).toBe(1);
@@ -133,9 +142,16 @@ describe('MarketingAdminController', () => {
     });
 
     it('应该正确处理分页参数', async () => {
-      mockFeedbackCodeService.getPendingPayments.mockResolvedValue(mockPendingPayments);
+      mockFeedbackCodeService.getPendingPayments.mockResolvedValue(
+        mockPendingPayments,
+      );
 
-      const result = await controller.getPendingPayments('2', '1', 'usedAt', 'desc');
+      const result = await controller.getPendingPayments(
+        '2',
+        '1',
+        'usedAt',
+        'desc',
+      );
 
       expect(result.data).toHaveLength(1); // 第二页只有1条数据
       expect(result.pagination.page).toBe(2);
@@ -143,9 +159,16 @@ describe('MarketingAdminController', () => {
     });
 
     it('应该支持不同的排序方式', async () => {
-      mockFeedbackCodeService.getPendingPayments.mockResolvedValue(mockPendingPayments);
+      mockFeedbackCodeService.getPendingPayments.mockResolvedValue(
+        mockPendingPayments,
+      );
 
-      const result = await controller.getPendingPayments('1', '20', 'qualityScore', 'asc');
+      const result = await controller.getPendingPayments(
+        '1',
+        '20',
+        'qualityScore',
+        'asc',
+      );
 
       expect(result.data[0].qualityScore).toBe(4); // 升序排列
       expect(result.data[1].qualityScore).toBe(5);
@@ -165,7 +188,7 @@ describe('MarketingAdminController', () => {
     const batchDto = {
       codes: ['FB123456789ABCD', 'FB987654321EFGH'],
       action: 'approve' as const,
-      reason: '高质量反馈'
+      reason: '高质量反馈',
     };
 
     it('应该成功批量处理支付', async () => {
@@ -176,7 +199,7 @@ describe('MarketingAdminController', () => {
       expect(service.batchUpdatePaymentStatus).toHaveBeenCalledWith(
         batchDto.codes,
         'paid',
-        batchDto.reason
+        batchDto.reason,
       );
       expect(result.success).toBe(true);
       expect(result.processedCount).toBe(2);
@@ -192,7 +215,7 @@ describe('MarketingAdminController', () => {
       expect(service.batchUpdatePaymentStatus).toHaveBeenCalledWith(
         rejectDto.codes,
         'rejected',
-        rejectDto.reason
+        rejectDto.reason,
       );
       expect(result.action).toBe('reject');
     });
@@ -200,24 +223,27 @@ describe('MarketingAdminController', () => {
     it('应该验证反馈码列表不为空', async () => {
       const emptyDto = { ...batchDto, codes: [] };
 
-      await expect(controller.processBatchPayment(emptyDto))
-        .rejects.toThrow(BadRequestException);
+      await expect(controller.processBatchPayment(emptyDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('应该验证操作类型', async () => {
       const invalidDto = { ...batchDto, action: 'invalid' as any };
 
-      await expect(controller.processBatchPayment(invalidDto))
-        .rejects.toThrow(BadRequestException);
+      await expect(controller.processBatchPayment(invalidDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('应该处理服务错误', async () => {
       mockFeedbackCodeService.batchUpdatePaymentStatus.mockRejectedValue(
-        new Error('Update failed')
+        new Error('Update failed'),
       );
 
-      await expect(controller.processBatchPayment(batchDto))
-        .rejects.toThrow('Update failed');
+      await expect(controller.processBatchPayment(batchDto)).rejects.toThrow(
+        'Update failed',
+      );
     });
   });
 
@@ -228,40 +254,54 @@ describe('MarketingAdminController', () => {
     const mockResult = {
       id: '1',
       code: testCode,
-      paymentStatus: 'paid' as const
+      paymentStatus: 'paid' as const,
     };
 
     it('应该成功处理单个支付批准', async () => {
       mockFeedbackCodeService.updatePaymentStatus.mockResolvedValue(mockResult);
 
-      const result = await controller.processSinglePayment(testCode, 'approve', testReason);
+      const result = await controller.processSinglePayment(
+        testCode,
+        'approve',
+        testReason,
+      );
 
       expect(service.updatePaymentStatus).toHaveBeenCalledWith(
         testCode,
         'paid',
-        testReason
+        testReason,
       );
       expect(result.success).toBe(true);
       expect(result.action).toBe('approve');
     });
 
     it('应该成功处理单个支付拒绝', async () => {
-      const rejectResult = { ...mockResult, paymentStatus: 'rejected' as const };
-      mockFeedbackCodeService.updatePaymentStatus.mockResolvedValue(rejectResult);
+      const rejectResult = {
+        ...mockResult,
+        paymentStatus: 'rejected' as const,
+      };
+      mockFeedbackCodeService.updatePaymentStatus.mockResolvedValue(
+        rejectResult,
+      );
 
-      const result = await controller.processSinglePayment(testCode, 'reject', testReason);
+      const result = await controller.processSinglePayment(
+        testCode,
+        'reject',
+        testReason,
+      );
 
       expect(service.updatePaymentStatus).toHaveBeenCalledWith(
         testCode,
         'rejected',
-        testReason
+        testReason,
       );
       expect(result.action).toBe('reject');
     });
 
     it('应该验证操作类型', async () => {
-      await expect(controller.processSinglePayment(testCode, 'invalid', testReason))
-        .rejects.toThrow(BadRequestException);
+      await expect(
+        controller.processSinglePayment(testCode, 'invalid', testReason),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('应该处理可选的原因参数', async () => {
@@ -272,7 +312,7 @@ describe('MarketingAdminController', () => {
       expect(service.updatePaymentStatus).toHaveBeenCalledWith(
         testCode,
         'paid',
-        undefined
+        undefined,
       );
       expect(result.success).toBe(true);
     });
@@ -285,14 +325,14 @@ describe('MarketingAdminController', () => {
         usedCodes: 80,
         pendingPayments: 15,
         totalPaid: 195,
-        averageQualityScore: 4.2
+        averageQualityScore: 4.2,
       };
       mockFeedbackCodeService.getMarketingStats.mockResolvedValue(mockStats);
 
       const exportDto = {
         startDate: '2023-01-01',
         endDate: '2023-01-31',
-        status: 'pending' as const
+        status: 'pending' as const,
       };
 
       const result = await controller.exportPaymentData(exportDto);
@@ -311,7 +351,7 @@ describe('MarketingAdminController', () => {
         usedCodes: 0,
         pendingPayments: 0,
         totalPaid: 0,
-        averageQualityScore: 0
+        averageQualityScore: 0,
       };
       mockFeedbackCodeService.getMarketingStats.mockResolvedValue(mockStats);
 
@@ -366,11 +406,12 @@ describe('MarketingAdminController', () => {
 
     it('应该处理清理错误', async () => {
       mockFeedbackCodeService.cleanupExpiredCodes.mockRejectedValue(
-        new Error('Cleanup failed')
+        new Error('Cleanup failed'),
       );
 
-      await expect(controller.performMaintenance(30))
-        .rejects.toThrow('Cleanup failed');
+      await expect(controller.performMaintenance(30)).rejects.toThrow(
+        'Cleanup failed',
+      );
     });
   });
 
@@ -399,7 +440,7 @@ describe('MarketingAdminController', () => {
         usedCodes: 800,
         pendingPayments: 150,
         totalPaid: 1950,
-        averageQualityScore: 4.1
+        averageQualityScore: 4.1,
       };
       mockFeedbackCodeService.getMarketingStats.mockResolvedValue(mockStats);
 
@@ -413,7 +454,7 @@ describe('MarketingAdminController', () => {
     it('批量操作应该高效处理大量数据', async () => {
       const largeBatch = {
         codes: Array.from({ length: 100 }, (_, i) => `FB${i}`),
-        action: 'approve' as const
+        action: 'approve' as const,
       };
       mockFeedbackCodeService.batchUpdatePaymentStatus.mockResolvedValue(100);
 
@@ -428,14 +469,17 @@ describe('MarketingAdminController', () => {
   describe('安全性测试', () => {
     it('应该要求认证', () => {
       // 确认JwtAuthGuard被应用
-      const guardMetadata = Reflect.getMetadata('__guards__', MarketingAdminController);
+      const guardMetadata = Reflect.getMetadata(
+        '__guards__',
+        MarketingAdminController,
+      );
       expect(guardMetadata).toBeDefined();
     });
 
     it('应该防止SQL注入', async () => {
       const maliciousBatch = {
         codes: ["FB'; DROP TABLE feedback_codes; --"],
-        action: 'approve' as const
+        action: 'approve' as const,
       };
       mockFeedbackCodeService.batchUpdatePaymentStatus.mockResolvedValue(0);
 
@@ -447,7 +491,7 @@ describe('MarketingAdminController', () => {
     it('应该防止批量操作滥用', async () => {
       const hugeBatch = {
         codes: Array.from({ length: 10000 }, (_, i) => `FB${i}`),
-        action: 'approve' as const
+        action: 'approve' as const,
       };
       mockFeedbackCodeService.batchUpdatePaymentStatus.mockResolvedValue(10000);
 
@@ -497,7 +541,7 @@ describe('MarketingAdminController', () => {
         usedCodes: 80,
         pendingPayments: 15,
         totalPaid: 195,
-        averageQualityScore: 4.2
+        averageQualityScore: 4.2,
       };
       mockFeedbackCodeService.getMarketingStats.mockResolvedValue(mockStats);
 

@@ -12,7 +12,7 @@ export class JobDetailDto {
     jdText: string,
     status: 'processing' | 'completed',
     createdAt: Date,
-    resumeCount = 0
+    resumeCount = 0,
   ) {
     this.id = id;
     this.title = title;
@@ -35,7 +35,7 @@ export class JobListDto {
     title: string,
     status: 'processing' | 'completed',
     createdAt: Date,
-    resumeCount = 0
+    resumeCount = 0,
   ) {
     this.id = id;
     this.title = title;

@@ -1,5 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EnhancedSkillMatcherService, JobSkillRequirement } from './enhanced-skill-matcher.service';
+import {
+  EnhancedSkillMatcherService,
+  JobSkillRequirement,
+} from './enhanced-skill-matcher.service';
 import { GeminiClient } from '@ai-recruitment-clerk/ai-services-shared';
 
 describe('EnhancedSkillMatcherService', () => {
@@ -12,20 +15,22 @@ describe('EnhancedSkillMatcherService', () => {
       matchedSkill: 'React',
       matchScore: 0.9,
       confidence: 0.85,
-      explanation: 'React experience demonstrates JavaScript proficiency'
+      explanation: 'React experience demonstrates JavaScript proficiency',
     },
     processingTimeMs: 1000,
-    confidence: 0.85
+    confidence: 0.85,
   };
 
   beforeEach(async () => {
     const mockGeminiClient = {
-      generateStructuredResponse: jest.fn().mockResolvedValue(mockGeminiResponse),
+      generateStructuredResponse: jest
+        .fn()
+        .mockResolvedValue(mockGeminiResponse),
       generateText: jest.fn().mockResolvedValue({
         data: 'Technology',
         processingTimeMs: 500,
-        confidence: 0.8
-      })
+        confidence: 0.8,
+      }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -33,12 +38,14 @@ describe('EnhancedSkillMatcherService', () => {
         EnhancedSkillMatcherService,
         {
           provide: GeminiClient,
-          useValue: mockGeminiClient
-        }
+          useValue: mockGeminiClient,
+        },
       ],
     }).compile();
 
-    service = module.get<EnhancedSkillMatcherService>(EnhancedSkillMatcherService);
+    service = module.get<EnhancedSkillMatcherService>(
+      EnhancedSkillMatcherService,
+    );
     geminiClient = module.get(GeminiClient);
   });
 
@@ -52,10 +59,14 @@ describe('EnhancedSkillMatcherService', () => {
       const jobSkills: JobSkillRequirement[] = [
         { name: 'JavaScript', weight: 1.0, required: true },
         { name: 'React', weight: 0.9, required: true },
-        { name: 'Angular', weight: 0.8, required: false }
+        { name: 'Angular', weight: 0.8, required: false },
       ];
 
-      const result = await service.matchSkills(resumeSkills, jobSkills, 'Technology');
+      const result = await service.matchSkills(
+        resumeSkills,
+        jobSkills,
+        'Technology',
+      );
 
       expect(result.overallScore).toBeGreaterThan(70);
       expect(result.matches).toHaveLength(2);
@@ -67,7 +78,7 @@ describe('EnhancedSkillMatcherService', () => {
       const resumeSkills = ['JS', 'ReactJS'];
       const jobSkills: JobSkillRequirement[] = [
         { name: 'JavaScript', weight: 1.0, required: true },
-        { name: 'React', weight: 0.9, required: true }
+        { name: 'React', weight: 0.9, required: true },
       ];
 
       const result = await service.matchSkills(resumeSkills, jobSkills);
@@ -79,10 +90,20 @@ describe('EnhancedSkillMatcherService', () => {
     it('should perform semantic matching for complex cases', async () => {
       const resumeSkills = ['Frontend Development', 'UI Libraries'];
       const jobSkills: JobSkillRequirement[] = [
-        { name: 'React', weight: 1.0, required: true, description: 'Frontend JavaScript library for building user interfaces' }
+        {
+          name: 'React',
+          weight: 1.0,
+          required: true,
+          description:
+            'Frontend JavaScript library for building user interfaces',
+        },
       ];
 
-      const result = await service.matchSkills(resumeSkills, jobSkills, 'Technology');
+      const result = await service.matchSkills(
+        resumeSkills,
+        jobSkills,
+        'Technology',
+      );
 
       expect(geminiClient.generateStructuredResponse).toHaveBeenCalled();
       expect(result.matches.length).toBeGreaterThan(0);
@@ -94,7 +115,7 @@ describe('EnhancedSkillMatcherService', () => {
       const jobSkills: JobSkillRequirement[] = [
         { name: 'JavaScript', weight: 1.0, required: true },
         { name: 'Python', weight: 0.8, required: true },
-        { name: 'Docker', weight: 0.6, required: false }
+        { name: 'Docker', weight: 0.6, required: false },
       ];
 
       geminiClient.generateStructuredResponse.mockResolvedValueOnce({
@@ -103,19 +124,21 @@ describe('EnhancedSkillMatcherService', () => {
             {
               skill: 'Python',
               priority: 'high',
-              reason: 'Critical skill required for backend development'
-            }
-          ]
+              reason: 'Critical skill required for backend development',
+            },
+          ],
         },
         processingTimeMs: 1200,
-        confidence: 0.9
+        confidence: 0.9,
       });
 
       const result = await service.matchSkills(resumeSkills, jobSkills);
 
       expect(result.gapAnalysis.missingCriticalSkills).toContain('Python');
       expect(result.gapAnalysis.missingOptionalSkills).toContain('Docker');
-      expect(result.gapAnalysis.improvementSuggestions.length).toBeGreaterThan(0);
+      expect(result.gapAnalysis.improvementSuggestions.length).toBeGreaterThan(
+        0,
+      );
     });
 
     it('should calculate confidence scores correctly', async () => {
@@ -123,33 +146,35 @@ describe('EnhancedSkillMatcherService', () => {
       const jobSkills: JobSkillRequirement[] = [
         { name: 'JavaScript', weight: 1.0, required: true },
         { name: 'React', weight: 0.9, required: true },
-        { name: 'Vue.js', weight: 0.7, required: false }
+        { name: 'Vue.js', weight: 0.7, required: false },
       ];
 
       const result = await service.matchSkills(resumeSkills, jobSkills);
 
       expect(result.confidence).toBeGreaterThan(0);
       expect(result.confidence).toBeLessThanOrEqual(1);
-      
+
       // Should have high confidence with good matches and coverage
       expect(result.confidence).toBeGreaterThan(0.8);
     });
 
     it('should handle empty skill lists gracefully', async () => {
       const result = await service.matchSkills([], []);
-      
+
       expect(result.overallScore).toBe(0);
       expect(result.matches).toHaveLength(0);
       expect(result.confidence).toBeGreaterThan(0.5);
     });
 
     it('should use fallback when AI analysis fails', async () => {
-      geminiClient.generateStructuredResponse.mockRejectedValueOnce(new Error('AI service unavailable'));
-      
+      geminiClient.generateStructuredResponse.mockRejectedValueOnce(
+        new Error('AI service unavailable'),
+      );
+
       const resumeSkills = ['JavaScript', 'React'];
       const jobSkills: JobSkillRequirement[] = [
         { name: 'JavaScript', weight: 1.0, required: true },
-        { name: 'Angular', weight: 0.8, required: false }
+        { name: 'Angular', weight: 0.8, required: false },
       ];
 
       const result = await service.matchSkills(resumeSkills, jobSkills);
@@ -163,27 +188,40 @@ describe('EnhancedSkillMatcherService', () => {
       const resumeSkills = ['JavaScript'];
       const jobSkillsWithRequired: JobSkillRequirement[] = [
         { name: 'JavaScript', weight: 1.0, required: true },
-        { name: 'Python', weight: 1.0, required: false }
+        { name: 'Python', weight: 1.0, required: false },
       ];
-      
+
       const jobSkillsWithoutRequired: JobSkillRequirement[] = [
         { name: 'JavaScript', weight: 1.0, required: false },
-        { name: 'Python', weight: 1.0, required: false }
+        { name: 'Python', weight: 1.0, required: false },
       ];
 
-      const resultWithRequired = await service.matchSkills(resumeSkills, jobSkillsWithRequired);
-      const resultWithoutRequired = await service.matchSkills(resumeSkills, jobSkillsWithoutRequired);
+      const resultWithRequired = await service.matchSkills(
+        resumeSkills,
+        jobSkillsWithRequired,
+      );
+      const resultWithoutRequired = await service.matchSkills(
+        resumeSkills,
+        jobSkillsWithoutRequired,
+      );
 
-      expect(resultWithRequired.overallScore).toBeGreaterThan(resultWithoutRequired.overallScore);
+      expect(resultWithRequired.overallScore).toBeGreaterThan(
+        resultWithoutRequired.overallScore,
+      );
     });
   });
 
   describe('error handling', () => {
     it('should handle network errors gracefully', async () => {
-      geminiClient.generateStructuredResponse.mockRejectedValue(new Error('Network error'));
-      
-      const result = await service.matchSkills(['JavaScript'], [{ name: 'JavaScript', weight: 1.0, required: true }]);
-      
+      geminiClient.generateStructuredResponse.mockRejectedValue(
+        new Error('Network error'),
+      );
+
+      const result = await service.matchSkills(
+        ['JavaScript'],
+        [{ name: 'JavaScript', weight: 1.0, required: true }],
+      );
+
       expect(result).toBeDefined();
       expect(result.overallScore).toBeGreaterThan(0);
     });
@@ -192,11 +230,14 @@ describe('EnhancedSkillMatcherService', () => {
       geminiClient.generateStructuredResponse.mockResolvedValue({
         data: null,
         processingTimeMs: 1000,
-        confidence: 0.5
+        confidence: 0.5,
       });
-      
-      const result = await service.matchSkills(['JavaScript'], [{ name: 'React', weight: 1.0, required: true }]);
-      
+
+      const result = await service.matchSkills(
+        ['JavaScript'],
+        [{ name: 'React', weight: 1.0, required: true }],
+      );
+
       expect(result).toBeDefined();
       expect(result.matches).toHaveLength(0);
     });

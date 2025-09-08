@@ -32,11 +32,11 @@ export const I18N_TEXTS = {
   APP: {
     title: 'AI 招聘助理',
     description: 'AI Recruitment Assistant Application',
-    
+
     // 导航菜单
     navigation: {
       dashboard: '仪表板',
-      analysis: '智能分析', 
+      analysis: '智能分析',
       results: '分析结果',
       jobs: '职位管理',
       reports: '报告中心',
@@ -59,11 +59,11 @@ export const I18N_TEXTS = {
         subtitle: '查看详细的分析报告',
       },
     },
-    
+
     // 欢迎信息
     welcome: {
       title: '欢迎使用AI招聘助手！',
-      message: '点击右上角的帮助按钮查看使用指南，或按 Alt+H 显示快捷键帮助'
+      message: '点击右上角的帮助按钮查看使用指南，或按 Alt+H 显示快捷键帮助',
     },
   },
 
@@ -85,7 +85,8 @@ export const I18N_TEXTS = {
     // 屏幕阅读器文本
     screenReader: {
       skipToContent: '跳转到主要内容',
-      applicationLoaded: 'AI Recruitment Assistant application loaded and ready for use',
+      applicationLoaded:
+        'AI Recruitment Assistant application loaded and ready for use',
       navigationHelp: '使用方向键导航菜单项',
       loading: 'Loading page content...',
       error: '加载失败，请稍后重试',
@@ -99,7 +100,7 @@ export const I18N_TEXTS = {
     // 键盘快捷键
     shortcuts: {
       dashboard: '跳转至仪表板',
-      analysis: '跳转至智能分析', 
+      analysis: '跳转至智能分析',
       results: '跳转至分析结果',
       help: '显示键盘快捷键帮助',
       refresh: 'Refresh data - Ctrl+Shift+R',
@@ -213,7 +214,7 @@ export type I18nTexts = typeof I18N_TEXTS;
 export function getText(path: string): string {
   const keys = path.split('.');
   let value: any = I18N_TEXTS;
-  
+
   for (const key of keys) {
     if (value && typeof value === 'object' && key in value) {
       value = value[key];
@@ -222,17 +223,20 @@ export function getText(path: string): string {
       return path; // 返回路径作为备用文本
     }
   }
-  
+
   return typeof value === 'string' ? value : path;
 }
 
 // 带参数的文本插值
-export function getTextWithParams(path: string, params: Record<string, any>): string {
+export function getTextWithParams(
+  path: string,
+  params: Record<string, any>,
+): string {
   let text = getText(path);
-  
+
   for (const [key, value] of Object.entries(params)) {
     text = text.replace(`{${key}}`, String(value));
   }
-  
+
   return text;
 }

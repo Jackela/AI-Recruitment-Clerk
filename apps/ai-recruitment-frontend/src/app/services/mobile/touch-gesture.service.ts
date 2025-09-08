@@ -34,7 +34,7 @@ export interface GestureConfig {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TouchGestureService {
   private defaultConfig: GestureConfig = {
@@ -44,7 +44,7 @@ export class TouchGestureService {
     swipeThreshold: 50,
     pinchThreshold: 10,
     velocityThreshold: 0.3,
-    preventDefaultEvents: true
+    preventDefaultEvents: true,
   };
 
   private gestureSubject = new Subject<GestureEvent>();
@@ -56,8 +56,8 @@ export class TouchGestureService {
    * Initialize touch gestures on an element
    */
   initializeGestures(
-    elementRef: ElementRef<HTMLElement>, 
-    config: Partial<GestureConfig> = {}
+    elementRef: ElementRef<HTMLElement>,
+    config: Partial<GestureConfig> = {},
   ): Observable<GestureEvent> {
     const element = elementRef.nativeElement;
     const gestureConfig = { ...this.defaultConfig, ...config };
@@ -65,7 +65,12 @@ export class TouchGestureService {
     const gestureEvents$ = new Subject<GestureEvent>();
 
     this.ngZone.runOutsideAngular(() => {
-      this.setupGestureHandlers(element, gestureConfig, gestureEvents$, destroy$);
+      this.setupGestureHandlers(
+        element,
+        gestureConfig,
+        gestureEvents$,
+        destroy$,
+      );
     });
 
     return gestureEvents$.asObservable();
@@ -78,7 +83,7 @@ export class TouchGestureService {
     element: HTMLElement,
     config: GestureConfig,
     gestureEvents$: Subject<GestureEvent>,
-    destroy$: Subject<void>
+    destroy$: Subject<void>,
   ): void {
     const touchState = {
       touches: new Map<number, TouchPoint>(),
@@ -87,13 +92,19 @@ export class TouchGestureService {
       tapCount: 0,
       pressTimer: null as any,
       initialDistance: 0,
-      initialScale: 1
+      initialScale: 1,
     };
 
     // Touch Events
-    const touchStart$ = fromEvent<TouchEvent>(element, 'touchstart', { passive: false });
-    const touchMove$ = fromEvent<TouchEvent>(element, 'touchmove', { passive: false });
-    const touchEnd$ = fromEvent<TouchEvent>(element, 'touchend', { passive: false });
+    const touchStart$ = fromEvent<TouchEvent>(element, 'touchstart', {
+      passive: false,
+    });
+    const touchMove$ = fromEvent<TouchEvent>(element, 'touchmove', {
+      passive: false,
+    });
+    const touchEnd$ = fromEvent<TouchEvent>(element, 'touchend', {
+      passive: false,
+    });
 
     // Mouse Events (for desktop testing)
     const mouseDown$ = fromEvent<MouseEvent>(element, 'mousedown');
@@ -102,20 +113,20 @@ export class TouchGestureService {
 
     // Combined start events
     const startEvents$ = merge(
-      touchStart$.pipe(map(e => ({ event: e, type: 'touch' as const }))),
-      mouseDown$.pipe(map(e => ({ event: e, type: 'mouse' as const })))
+      touchStart$.pipe(map((e) => ({ event: e, type: 'touch' as const }))),
+      mouseDown$.pipe(map((e) => ({ event: e, type: 'mouse' as const }))),
     );
 
     // Combined move events
     const moveEvents$ = merge(
-      touchMove$.pipe(map(e => ({ event: e, type: 'touch' as const }))),
-      mouseMove$.pipe(map(e => ({ event: e, type: 'mouse' as const })))
+      touchMove$.pipe(map((e) => ({ event: e, type: 'touch' as const }))),
+      mouseMove$.pipe(map((e) => ({ event: e, type: 'mouse' as const }))),
     );
 
     // Combined end events
     const endEvents$ = merge(
-      touchEnd$.pipe(map(e => ({ event: e, type: 'touch' as const }))),
-      mouseUp$.pipe(map(e => ({ event: e, type: 'mouse' as const })))
+      touchEnd$.pipe(map((e) => ({ event: e, type: 'touch' as const }))),
+      mouseUp$.pipe(map((e) => ({ event: e, type: 'mouse' as const }))),
     );
 
     // Handle start events
@@ -142,7 +153,10 @@ export class TouchGestureService {
 
       // Handle multi-touch
       if (points.length === 2) {
-        touchState.initialDistance = this.calculateDistance(points[0], points[1]);
+        touchState.initialDistance = this.calculateDistance(
+          points[0],
+          points[1],
+        );
         touchState.initialScale = 1;
       }
 
@@ -155,7 +169,7 @@ export class TouchGestureService {
             startPoint,
             target: element,
             originalEvent: event,
-            preventDefault: () => event.preventDefault()
+            preventDefault: () => event.preventDefault(),
           });
         }
       }, config.pressTimeout);
@@ -182,7 +196,7 @@ export class TouchGestureService {
         // Single touch - pan/swipe
         const currentPoint = { ...points[0], timestamp: now };
         const startPoint = Array.from(touchState.touches.values())[0];
-        
+
         if (startPoint) {
           const deltaX = currentPoint.x - startPoint.x;
           const deltaY = currentPoint.y - startPoint.y;
@@ -198,22 +212,25 @@ export class TouchGestureService {
             distance,
             target: element,
             originalEvent: event,
-            preventDefault: () => event.preventDefault()
+            preventDefault: () => event.preventDefault(),
           });
         }
       } else if (points.length === 2) {
         // Two touches - pinch
         const currentDistance = this.calculateDistance(points[0], points[1]);
         const scale = currentDistance / touchState.initialDistance;
-        
-        if (Math.abs(scale - touchState.initialScale) > config.pinchThreshold / 100) {
+
+        if (
+          Math.abs(scale - touchState.initialScale) >
+          config.pinchThreshold / 100
+        ) {
           this.emitGestureEvent(gestureEvents$, {
             type: 'pinch',
             startPoint: Array.from(touchState.touches.values())[0],
             scale,
             target: element,
             originalEvent: event,
-            preventDefault: () => event.preventDefault()
+            preventDefault: () => event.preventDefault(),
           });
           touchState.initialScale = scale;
         }
@@ -250,8 +267,11 @@ export class TouchGestureService {
         if (distance < config.swipeThreshold && duration < config.tapTimeout) {
           // Tap or double tap
           const timeSinceLastTap = now - touchState.lastTap;
-          
-          if (timeSinceLastTap < config.doubletapTimeout && touchState.tapCount === 1) {
+
+          if (
+            timeSinceLastTap < config.doubletapTimeout &&
+            touchState.tapCount === 1
+          ) {
             // Double tap
             touchState.tapCount = 0;
             this.emitGestureEvent(gestureEvents$, {
@@ -260,13 +280,13 @@ export class TouchGestureService {
               endPoint,
               target: element,
               originalEvent: event,
-              preventDefault: () => event.preventDefault()
+              preventDefault: () => event.preventDefault(),
             });
           } else {
             // Single tap (with delay to check for double tap)
             touchState.tapCount = 1;
             touchState.lastTap = now;
-            
+
             setTimeout(() => {
               if (touchState.tapCount === 1) {
                 touchState.tapCount = 0;
@@ -276,15 +296,18 @@ export class TouchGestureService {
                   endPoint,
                   target: element,
                   originalEvent: event,
-                  preventDefault: () => event.preventDefault()
+                  preventDefault: () => event.preventDefault(),
                 });
               }
             }, config.doubletapTimeout);
           }
-        } else if (distance >= config.swipeThreshold && velocity >= config.velocityThreshold) {
+        } else if (
+          distance >= config.swipeThreshold &&
+          velocity >= config.velocityThreshold
+        ) {
           // Swipe
           const direction = this.getSwipeDirection(deltaX, deltaY);
-          
+
           this.emitGestureEvent(gestureEvents$, {
             type: 'swipe',
             startPoint,
@@ -296,7 +319,7 @@ export class TouchGestureService {
             direction,
             target: element,
             originalEvent: event,
-            preventDefault: () => event.preventDefault()
+            preventDefault: () => event.preventDefault(),
           });
         }
       }
@@ -311,17 +334,19 @@ export class TouchGestureService {
    */
   private getEventPoints(event: TouchEvent | MouseEvent): TouchPoint[] {
     if ('touches' in event) {
-      return Array.from(event.touches).map(touch => ({
+      return Array.from(event.touches).map((touch) => ({
         x: touch.clientX,
         y: touch.clientY,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       }));
     } else {
-      return [{
-        x: event.clientX,
-        y: event.clientY,
-        timestamp: Date.now()
-      }];
+      return [
+        {
+          x: event.clientX,
+          y: event.clientY,
+          timestamp: Date.now(),
+        },
+      ];
     }
   }
 
@@ -337,7 +362,10 @@ export class TouchGestureService {
   /**
    * Determine swipe direction
    */
-  private getSwipeDirection(deltaX: number, deltaY: number): 'left' | 'right' | 'up' | 'down' {
+  private getSwipeDirection(
+    deltaX: number,
+    deltaY: number,
+  ): 'left' | 'right' | 'up' | 'down' {
     if (Math.abs(deltaX) > Math.abs(deltaY)) {
       return deltaX > 0 ? 'right' : 'left';
     } else {
@@ -349,8 +377,8 @@ export class TouchGestureService {
    * Emit gesture event
    */
   private emitGestureEvent(
-    gestureEvents$: Subject<GestureEvent>, 
-    gestureEvent: GestureEvent
+    gestureEvents$: Subject<GestureEvent>,
+    gestureEvent: GestureEvent,
   ): void {
     this.ngZone.run(() => {
       gestureEvents$.next(gestureEvent);
@@ -363,7 +391,7 @@ export class TouchGestureService {
    */
   onTap(elementRef: ElementRef<HTMLElement>): Observable<GestureEvent> {
     return this.initializeGestures(elementRef).pipe(
-      filter(event => event.type === 'tap')
+      filter((event) => event.type === 'tap'),
     );
   }
 
@@ -372,7 +400,7 @@ export class TouchGestureService {
    */
   onSwipe(elementRef: ElementRef<HTMLElement>): Observable<GestureEvent> {
     return this.initializeGestures(elementRef).pipe(
-      filter(event => event.type === 'swipe')
+      filter((event) => event.type === 'swipe'),
     );
   }
 
@@ -381,7 +409,7 @@ export class TouchGestureService {
    */
   onPress(elementRef: ElementRef<HTMLElement>): Observable<GestureEvent> {
     return this.initializeGestures(elementRef).pipe(
-      filter(event => event.type === 'press')
+      filter((event) => event.type === 'press'),
     );
   }
 
@@ -390,7 +418,7 @@ export class TouchGestureService {
    */
   onPinch(elementRef: ElementRef<HTMLElement>): Observable<GestureEvent> {
     return this.initializeGestures(elementRef).pipe(
-      filter(event => event.type === 'pinch')
+      filter((event) => event.type === 'pinch'),
     );
   }
 

@@ -1,2 +1,2 @@
 // Candidate Scoring Domain Services
-export * from './skills-taxonomy.js';
+export * from './skills-taxonomy';

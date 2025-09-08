@@ -1,6 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserService } from '../../auth/user.service';
-import { UserDto, UpdateUserDto, UserPreferencesDto, UserActivityDto, UserStatus } from '@ai-recruitment-clerk/user-management-domain';
+import {
+  UserDto,
+  UpdateUserDto,
+  UserPreferencesDto,
+  UserActivityDto,
+  UserStatus,
+} from '@ai-recruitment-clerk/user-management-domain';
 
 interface UserActivityResponse {
   activities: UserActivityDto[];
@@ -16,7 +22,10 @@ interface UserActivityResponse {
 @Injectable()
 export class UserManagementService {
   constructor(private readonly userService: UserService) {}
-  async updateUser(userId: string, updateData: UpdateUserDto): Promise<UserDto> {
+  async updateUser(
+    userId: string,
+    updateData: UpdateUserDto,
+  ): Promise<UserDto> {
     const updatedUser = await this.userService.updateUser(userId, updateData);
     if (!updatedUser) {
       throw new NotFoundException(`User with ID ${userId} not found`);
@@ -34,30 +43,36 @@ export class UserManagementService {
       notifications: {
         email: true,
         push: true,
-        sms: false
-      }
+        sms: false,
+      },
     } as any;
   }
 
-  async updateUserPreferences(userId: string, preferences: UserPreferencesDto): Promise<UserPreferencesDto> {
+  async updateUserPreferences(
+    userId: string,
+    preferences: UserPreferencesDto,
+  ): Promise<UserPreferencesDto> {
     // Mock implementation - in real app this would update preferences in database
     const user = await this.userService.findById(userId);
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
-    
+
     return {
       ...preferences,
-      userId
+      userId,
     } as any;
   }
 
-  async getUserActivity(userId: string, options?: {
-    startDate?: Date;
-    endDate?: Date;
-    page?: number;
-    limit?: number;
-  }): Promise<UserActivityResponse> {
+  async getUserActivity(
+    userId: string,
+    options?: {
+      startDate?: Date;
+      endDate?: Date;
+      page?: number;
+      limit?: number;
+    },
+  ): Promise<UserActivityResponse> {
     const user = await this.userService.findById(userId);
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
@@ -72,8 +87,8 @@ export class UserManagementService {
         description: 'User logged in',
         timestamp: new Date(),
         ipAddress: '127.0.0.1',
-        userAgent: 'Test User Agent'
-      }
+        userAgent: 'Test User Agent',
+      },
     ];
 
     return {
@@ -83,8 +98,8 @@ export class UserManagementService {
       summary: {
         totalActivities: mockActivities.length,
         recentLogins: 1,
-        lastActivity: user.lastActivity || new Date()
-      }
+        lastActivity: user.lastActivity || new Date(),
+      },
     };
   }
 
@@ -93,7 +108,7 @@ export class UserManagementService {
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
-    
+
     // Convert to UserDto (remove password)
     const { password, ...userDto } = user;
     return userDto as UserDto;
@@ -112,11 +127,14 @@ export class UserManagementService {
       totalActivities: 1,
       averageSessionDuration: 30,
       mostActiveHour: 14,
-      lastActivity: user.lastActivity || new Date()
+      lastActivity: user.lastActivity || new Date(),
     };
   }
 
-  async updateUserProfile(userId: string, updateData: UpdateUserDto): Promise<UserDto> {
+  async updateUserProfile(
+    userId: string,
+    updateData: UpdateUserDto,
+  ): Promise<UserDto> {
     return this.updateUser(userId, updateData);
   }
 
@@ -125,34 +143,37 @@ export class UserManagementService {
   }
 
   async softDeleteUser(userId: string, reason?: string): Promise<void> {
-    await this.userService.updateUser(userId, { 
+    await this.userService.updateUser(userId, {
       status: UserStatus.INACTIVE,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
   }
 
-  async getOrganizationUsers(organizationId: string, options?: {
-    page?: number;
-    limit?: number;
-    role?: any;
-    status?: UserStatus;
-  }): Promise<{ users: UserDto[]; totalCount: number }> {
+  async getOrganizationUsers(
+    organizationId: string,
+    options?: {
+      page?: number;
+      limit?: number;
+      role?: any;
+      status?: UserStatus;
+    },
+  ): Promise<{ users: UserDto[]; totalCount: number }> {
     let users = await this.userService.findByOrganizationId(organizationId);
-    
+
     // Filter by status if provided
     if (options?.status) {
-      users = users.filter(user => user.status === options.status);
+      users = users.filter((user) => user.status === options.status);
     }
-    
+
     // Convert to UserDto (remove passwords)
-    const userDtos = users.map(user => {
+    const userDtos = users.map((user) => {
       const { password, ...userDto } = user;
       return userDto as UserDto;
     });
-    
+
     return {
       users: userDtos,
-      totalCount: userDtos.length
+      totalCount: userDtos.length,
     };
   }
 
@@ -163,22 +184,25 @@ export class UserManagementService {
     if (!user) {
       return false;
     }
-    
+
     // In real implementation, use bcrypt.compare(password, user.password)
     return password === 'test-password' || user.password.includes('admin123');
   }
 
-
-  async updateUserStatus(userId: string, status: UserStatus, reason?: string): Promise<UserDto> {
-    const updatedUser = await this.userService.updateUser(userId, { 
+  async updateUserStatus(
+    userId: string,
+    status: UserStatus,
+    reason?: string,
+  ): Promise<UserDto> {
+    const updatedUser = await this.userService.updateUser(userId, {
       status,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
-    
+
     if (!updatedUser) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
-    
+
     // Convert to UserDto (remove password)
     const { password, ...userDto } = updatedUser;
     return userDto as UserDto;
@@ -195,7 +219,7 @@ export class UserManagementService {
       status: 'healthy',
       totalUsers: stats.totalUsers,
       activeUsers: stats.activeUsers,
-      recentActivity: stats.activeUsers // Simple approximation
+      recentActivity: stats.activeUsers, // Simple approximation
     };
   }
 }

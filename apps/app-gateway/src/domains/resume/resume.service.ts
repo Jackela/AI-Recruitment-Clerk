@@ -9,7 +9,9 @@ export class ResumeService {
    */
   async uploadResume(uploadData: any): Promise<any> {
     try {
-      this.logger.log('Uploading resume', { fileName: uploadData.file?.originalname || uploadData.fileName });
+      this.logger.log('Uploading resume', {
+        fileName: uploadData.file?.originalname || uploadData.fileName,
+      });
       return {
         resumeId: `resume_${Date.now()}`,
         fileName: uploadData.file?.originalname || uploadData.fileName,
@@ -19,7 +21,7 @@ export class ResumeService {
         candidateEmail: uploadData.candidateEmail,
         status: 'uploaded',
         uploadedAt: new Date(),
-        processingEstimate: '2-5 minutes'
+        processingEstimate: '2-5 minutes',
       };
     } catch (error) {
       this.logger.error('Error uploading resume', error);
@@ -30,19 +32,21 @@ export class ResumeService {
   /**
    * 获取简历分析 - EMERGENCY IMPLEMENTATION
    */
-  async getResumeAnalysis(resumeId: string, jobId?: string, userId?: string): Promise<any> {
+  async getResumeAnalysis(
+    resumeId: string,
+    jobId?: string,
+    userId?: string,
+  ): Promise<any> {
     try {
       return {
         resumeId,
         jobId,
         skills: ['JavaScript', 'TypeScript', 'Node.js'],
         experience: [
-          { company: 'Tech Corp', role: 'Developer', duration: '2 years' }
+          { company: 'Tech Corp', role: 'Developer', duration: '2 years' },
         ],
-        education: [
-          { school: 'University', degree: 'Computer Science' }
-        ],
-        score: 85
+        education: [{ school: 'University', degree: 'Computer Science' }],
+        score: 85,
       };
     } catch (error) {
       this.logger.error('Error getting resume analysis', error);
@@ -53,13 +57,16 @@ export class ResumeService {
   /**
    * 获取技能分析 - EMERGENCY IMPLEMENTATION
    */
-  async getResumeSkillsAnalysis(resumeId: string, userId?: string): Promise<any> {
+  async getResumeSkillsAnalysis(
+    resumeId: string,
+    userId?: string,
+  ): Promise<any> {
     try {
       return {
         resumeId,
         extractedSkills: ['JavaScript', 'TypeScript', 'React'],
         requiredSkills: ['JavaScript', 'TypeScript', 'Node.js'],
-        matchScore: 80
+        matchScore: 80,
       };
     } catch (error) {
       this.logger.error('Error getting skills analysis', error);
@@ -70,13 +77,17 @@ export class ResumeService {
   /**
    * 搜索简历 - EMERGENCY IMPLEMENTATION
    */
-  async searchResumes(searchDto: any, organizationId: string, options?: any): Promise<any> {
+  async searchResumes(
+    searchDto: any,
+    organizationId: string,
+    options?: any,
+  ): Promise<any> {
     try {
       return {
         resumes: [],
         totalCount: 0,
         page: options?.page || 1,
-        totalPages: 0
+        totalPages: 0,
       };
     } catch (error) {
       this.logger.error('Error searching resumes', error);
@@ -87,15 +98,24 @@ export class ResumeService {
   /**
    * 更新简历状态 - EMERGENCY IMPLEMENTATION
    */
-  async updateResumeStatus(resumeId: string, status: string, updatedBy: string, reason?: string): Promise<any> {
+  async updateResumeStatus(
+    resumeId: string,
+    status: string,
+    updatedBy: string,
+    reason?: string,
+  ): Promise<any> {
     try {
-      this.logger.log('Updating resume status', { resumeId, status, updatedBy });
+      this.logger.log('Updating resume status', {
+        resumeId,
+        status,
+        updatedBy,
+      });
       return {
         resumeId,
         status,
         updatedBy,
         reason,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
     } catch (error) {
       this.logger.error('Error updating resume status', error);
@@ -106,7 +126,12 @@ export class ResumeService {
   /**
    * 删除简历 - EMERGENCY IMPLEMENTATION
    */
-  async deleteResume(resumeId: string, deletedBy: string, reason?: string, hardDelete?: boolean): Promise<any> {
+  async deleteResume(
+    resumeId: string,
+    deletedBy: string,
+    reason?: string,
+    hardDelete?: boolean,
+  ): Promise<any> {
     try {
       this.logger.log('Deleting resume', { resumeId, deletedBy });
       return {
@@ -115,7 +140,7 @@ export class ResumeService {
         deletedBy,
         reason,
         hardDelete: hardDelete || false,
-        deletedAt: new Date()
+        deletedAt: new Date(),
       };
     } catch (error) {
       this.logger.error('Error deleting resume', error);
@@ -132,7 +157,7 @@ export class ResumeService {
         resumes: [],
         total: 0,
         page: filters.page || 1,
-        totalPages: 0
+        totalPages: 0,
       };
     } catch (error) {
       this.logger.error('Error getting resumes', error);
@@ -151,7 +176,7 @@ export class ResumeService {
         status: 'uploaded',
         uploadedBy: 'user_123',
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
     } catch (error) {
       this.logger.error('Error getting resume', error);
@@ -162,9 +187,17 @@ export class ResumeService {
   /**
    * 检查简历访问权限 - EMERGENCY IMPLEMENTATION
    */
-  async checkResumeAccess(resumeId: string, userId: string, organizationId?: string): Promise<boolean> {
+  async checkResumeAccess(
+    resumeId: string,
+    userId: string,
+    organizationId?: string,
+  ): Promise<boolean> {
     try {
-      this.logger.log('Checking resume access', { resumeId, userId, organizationId });
+      this.logger.log('Checking resume access', {
+        resumeId,
+        userId,
+        organizationId,
+      });
       return true; // Emergency implementation: allow all access
     } catch (error) {
       this.logger.error('Error checking resume access', error);
@@ -175,14 +208,23 @@ export class ResumeService {
   /**
    * 批量处理简历 - EMERGENCY IMPLEMENTATION
    */
-  async batchProcessResumes(resumeIds: string[], operation: string, userId: string, parameters?: any): Promise<any> {
+  async batchProcessResumes(
+    resumeIds: string[],
+    operation: string,
+    userId: string,
+    parameters?: any,
+  ): Promise<any> {
     try {
-      this.logger.log('Batch processing resumes', { count: resumeIds.length, operation, userId });
+      this.logger.log('Batch processing resumes', {
+        count: resumeIds.length,
+        operation,
+        userId,
+      });
       return {
         totalProcessed: resumeIds.length,
         successful: resumeIds.length,
         failed: 0,
-        results: resumeIds.map(id => ({ resumeId: id, success: true }))
+        results: resumeIds.map((id) => ({ resumeId: id, success: true })),
       };
     } catch (error) {
       this.logger.error('Error batch processing resumes', error);
@@ -193,13 +235,17 @@ export class ResumeService {
   /**
    * 重新处理简历 - EMERGENCY IMPLEMENTATION
    */
-  async reprocessResume(resumeId: string, userId: string, options?: any): Promise<any> {
+  async reprocessResume(
+    resumeId: string,
+    userId: string,
+    options?: any,
+  ): Promise<any> {
     try {
       this.logger.log('Reprocessing resume', { resumeId, userId });
       return {
         jobId: `reprocess_${Date.now()}`,
         estimatedTime: '3-7 minutes',
-        status: 'queued'
+        status: 'queued',
       };
     } catch (error) {
       this.logger.error('Error reprocessing resume', error);
@@ -214,11 +260,16 @@ export class ResumeService {
     try {
       return {
         totalResumes: 0,
-        processingStatus: { uploaded: 0, processing: 0, completed: 0, failed: 0 },
+        processingStatus: {
+          uploaded: 0,
+          processing: 0,
+          completed: 0,
+          failed: 0,
+        },
         averageProcessingTime: 240000, // 4 minutes in ms
         skillsDistribution: {},
         monthlyTrends: [],
-        qualityMetrics: { averageScore: 0, highQuality: 0, needsReview: 0 }
+        qualityMetrics: { averageScore: 0, highQuality: 0, needsReview: 0 },
       };
     } catch (error) {
       this.logger.error('Error getting processing stats', error);
@@ -236,13 +287,13 @@ export class ResumeService {
         database: 'connected',
         storage: 'available',
         parser: 'operational',
-        queue: 'running'
+        queue: 'running',
       };
     } catch (error) {
       this.logger.error('Error getting health status', error);
       return {
         overall: 'unhealthy',
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }

@@ -111,5 +111,6 @@ export * from './privacy/privacy-simple.dto';
 export * from './common/base-service.pattern';
 export * from './common/nats-client.pattern';
 // export * from './common/validation.patterns'; // Commented out due to ValidationResult duplicate export
-export * from './common/mobile-component.patterns';
+// Note: mobile-component.patterns depends on Angular and breaks Node test envs.
+// It is intentionally not re-exported from the root barrel to keep backend tests working.
 export * from './common/error-handling.patterns';

@@ -14,20 +14,26 @@ export class ResumeEffects {
 
   constructor(
     private actions$: Actions,
-    private apiService: ApiService
+    private apiService: ApiService,
   ) {
     this.loadResumesByJob$ = createEffect(() =>
       this.actions$.pipe(
         ofType(ResumeActions.loadResumesByJob),
         mergeMap(({ jobId }) =>
           this.apiService.getResumesByJobId(jobId).pipe(
-            map((resumes) => ResumeActions.loadResumesByJobSuccess({ resumes })),
+            map((resumes) =>
+              ResumeActions.loadResumesByJobSuccess({ resumes }),
+            ),
             catchError((error) =>
-              of(ResumeActions.loadResumesByJobFailure({ error: error.message || 'Failed to load resumes' }))
-            )
-          )
-        )
-      )
+              of(
+                ResumeActions.loadResumesByJobFailure({
+                  error: error.message || 'Failed to load resumes',
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
 
     this.loadResume$ = createEffect(() =>
@@ -37,11 +43,15 @@ export class ResumeEffects {
           this.apiService.getResumeById(resumeId).pipe(
             map((resume) => ResumeActions.loadResumeSuccess({ resume })),
             catchError((error) =>
-              of(ResumeActions.loadResumeFailure({ error: error.message || 'Failed to load resume' }))
-            )
-          )
-        )
-      )
+              of(
+                ResumeActions.loadResumeFailure({
+                  error: error.message || 'Failed to load resume',
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
 
     this.uploadResumes$ = createEffect(() =>
@@ -51,19 +61,25 @@ export class ResumeEffects {
           return this.apiService.uploadResumes(jobId, files).pipe(
             map((response) => ResumeActions.uploadResumesSuccess({ response })),
             catchError((error) =>
-              of(ResumeActions.uploadResumesFailure({ error: error.message || 'Failed to upload resumes' }))
-            )
+              of(
+                ResumeActions.uploadResumesFailure({
+                  error: error.message || 'Failed to upload resumes',
+                }),
+              ),
+            ),
           );
-        })
-      )
+        }),
+      ),
     );
 
     this.uploadResumesSuccess$ = createEffect(() =>
       this.actions$.pipe(
         ofType(ResumeActions.uploadResumesSuccess),
         // Reload resumes after successful upload
-        map(({ response }) => ResumeActions.loadResumesByJob({ jobId: response.jobId }))
-      )
+        map(({ response }) =>
+          ResumeActions.loadResumesByJob({ jobId: response.jobId }),
+        ),
+      ),
     );
   }
 }

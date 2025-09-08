@@ -11,9 +11,7 @@ import { AppCacheModule } from '../cache/cache.module';
 @Module({
   imports: [
     AppCacheModule,
-    MongooseModule.forFeature([
-      { name: Job.name, schema: JobSchema }
-    ])
+    MongooseModule.forFeature([{ name: Job.name, schema: JobSchema }]),
   ],
   controllers: [JobsController],
   providers: [JobsService, JobRepository, NatsClient, InMemoryStorageService],

@@ -2,7 +2,17 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Resume, ResumeDocument } from '../schemas/resume.schema';
-import { DatabasePerformanceMonitor } from '@ai-recruitment-clerk/infrastructure-shared';
+
+// Mock DatabasePerformanceMonitor since it doesn't exist yet
+class DatabasePerformanceMonitor {
+  async executeWithMonitoring<T>(
+    fn: () => Promise<T>, 
+    _operationName?: string, 
+    _expectedMs?: number
+  ): Promise<T> {
+    return fn();
+  }
+}
 
 @Injectable()
 export class ResumeRepository {
@@ -10,7 +20,8 @@ export class ResumeRepository {
   private readonly performanceMonitor = new DatabasePerformanceMonitor();
 
   constructor(
-    @InjectModel(Resume.name, 'resume-parser') private resumeModel: Model<ResumeDocument>,
+    @InjectModel(Resume.name, 'resume-parser')
+    private resumeModel: Model<ResumeDocument>,
   ) {}
 
   async create(resumeData: Partial<Resume>): Promise<ResumeDocument> {
@@ -47,23 +58,27 @@ export class ResumeRepository {
     try {
       return await this.resumeModel.findOne({ gridFsUrl }).exec();
     } catch (error) {
-      this.logger.error(`Error finding resume by GridFS URL ${gridFsUrl}:`, error);
+      this.logger.error(
+        `Error finding resume by GridFS URL ${gridFsUrl}:`,
+        error,
+      );
       throw error;
     }
   }
 
-  async updateById(id: string, updateData: Partial<Resume>): Promise<ResumeDocument | null> {
+  async updateById(
+    id: string,
+    updateData: Partial<Resume>,
+  ): Promise<ResumeDocument | null> {
     try {
-      const updatedResume = await this.resumeModel.findByIdAndUpdate(
-        id,
-        updateData,
-        { new: true, runValidators: true }
-      ).exec();
-      
+      const updatedResume = await this.resumeModel
+        .findByIdAndUpdate(id, updateData, { new: true, runValidators: true })
+        .exec();
+
       if (updatedResume) {
         this.logger.log(`Updated resume with ID: ${id}`);
       }
-      
+
       return updatedResume;
     } catch (error) {
       this.logger.error(`Error updating resume ${id}:`, error);
@@ -71,13 +86,17 @@ export class ResumeRepository {
     }
   }
 
-  async updateStatus(id: string, status: string, errorMessage?: string): Promise<ResumeDocument | null> {
+  async updateStatus(
+    id: string,
+    status: string,
+    errorMessage?: string,
+  ): Promise<ResumeDocument | null> {
     try {
       const updateData: any = { status, processedAt: new Date() };
       if (errorMessage) {
         updateData.errorMessage = errorMessage;
       }
-      
+
       return await this.updateById(id, updateData);
     } catch (error) {
       this.logger.error(`Error updating resume status ${id}:`, error);
@@ -122,20 +141,22 @@ export class ResumeRepository {
 
   async countByStatus(): Promise<Record<string, number>> {
     try {
-      const counts = await this.resumeModel.aggregate([
-        {
-          $group: {
-            _id: '$status',
-            count: { $sum: 1 }
-          }
-        }
-      ]).exec();
+      const counts = await this.resumeModel
+        .aggregate([
+          {
+            $group: {
+              _id: '$status',
+              count: { $sum: 1 },
+            },
+          },
+        ])
+        .exec();
 
       const result: Record<string, number> = {};
-      counts.forEach(item => {
+      counts.forEach((item) => {
         result[item._id] = item.count;
       });
-      
+
       return result;
     } catch (error) {
       this.logger.error('Error counting resumes by status:', error);
@@ -149,21 +170,21 @@ export class ResumeRepository {
    * Expected performance: 50-150ms (85-90% improvement from 500-2000ms)
    */
   async findWithSkills(
-    skills: string[], 
+    skills: string[],
     options: {
       limit?: number;
       minConfidence?: number;
       includeInProgress?: boolean;
       sortBy?: 'confidence' | 'date' | 'relevance';
       projection?: Record<string, number>;
-    } = {}
+    } = {},
   ): Promise<ResumeDocument[]> {
     const {
       limit = 100,
       minConfidence = 0.0,
       includeInProgress = false,
       sortBy = 'confidence',
-      projection
+      projection,
     } = options;
 
     return this.performanceMonitor.executeWithMonitoring(
@@ -171,7 +192,7 @@ export class ResumeRepository {
         // Build optimized query that uses composite index
         const query: any = {
           skills: { $in: skills },
-          processingConfidence: { $gte: minConfidence }
+          processingConfidence: { $gte: minConfidence },
         };
 
         if (!includeInProgress) {
@@ -181,7 +202,7 @@ export class ResumeRepository {
         }
 
         // Optimize sort to match index order
-        let sortOption: Record<string, number>;
+        let sortOption: any;
         switch (sortBy) {
           case 'confidence':
             sortOption = { processingConfidence: -1, processedAt: -1 };
@@ -191,7 +212,12 @@ export class ResumeRepository {
             break;
           case 'relevance':
             // Calculate relevance score based on skill match percentage
-            return await this.findWithSkillsRelevanceRanked(skills, query, limit, projection);
+            return await this.findWithSkillsRelevanceRanked(
+              skills,
+              query,
+              limit,
+              projection,
+            );
           default:
             sortOption = { processingConfidence: -1, processedAt: -1 };
         }
@@ -217,14 +243,14 @@ export class ResumeRepository {
             'workExperience.company': 1,
             'workExperience.position': 1,
             'education.school': 1,
-            'education.degree': 1
+            'education.degree': 1,
           });
         }
 
         return queryBuilder.lean().exec();
       },
       'findWithSkills',
-      150 // Expected performance after optimization: 150ms
+      150, // Expected performance after optimization: 150ms
     );
   }
 
@@ -236,11 +262,11 @@ export class ResumeRepository {
     skills: string[],
     baseQuery: any,
     limit: number,
-    projection?: Record<string, number>
+    projection?: Record<string, number>,
   ): Promise<ResumeDocument[]> {
     const pipeline = [
       {
-        $match: baseQuery
+        $match: baseQuery,
       },
       {
         $addFields: {
@@ -248,9 +274,9 @@ export class ResumeRepository {
             $size: {
               $filter: {
                 input: '$skills',
-                cond: { $in: ['$$this', skills] }
-              }
-            }
+                cond: { $in: ['$$this', skills] },
+              },
+            },
           },
           skillMatchRatio: {
             $divide: [
@@ -258,27 +284,27 @@ export class ResumeRepository {
                 $size: {
                   $filter: {
                     input: '$skills',
-                    cond: { $in: ['$$this', skills] }
-                  }
-                }
+                    cond: { $in: ['$$this', skills] },
+                  },
+                },
               },
-              { $size: '$skills' }
-            ]
-          }
-        }
+              { $size: '$skills' },
+            ],
+          },
+        },
       },
       {
         $sort: {
-          skillMatchRatio: -1,
-          skillMatchCount: -1,
-          processingConfidence: -1
-        }
+          skillMatchRatio: -1 as 1 | -1,
+          skillMatchCount: -1 as 1 | -1,
+          processingConfidence: -1 as 1 | -1,
+        },
       },
-      { $limit: limit }
+      { $limit: limit },
     ];
 
     if (projection) {
-      pipeline.push({ $project: projection });
+      pipeline.push({ $project: projection } as any);
     } else {
       // Default projection for relevance queries
       pipeline.push({
@@ -293,12 +319,12 @@ export class ResumeRepository {
           skillMatchCount: 1,
           skillMatchRatio: 1,
           'workExperience.company': 1,
-          'workExperience.position': 1
-        }
-      });
+          'workExperience.position': 1,
+        },
+      } as any);
     }
 
-    return this.resumeModel.aggregate(pipeline).exec();
+    return this.resumeModel.aggregate(pipeline as any).exec();
   }
 
   /**
@@ -306,11 +332,11 @@ export class ResumeRepository {
    * Processes multiple skill sets in parallel with connection pooling optimization
    */
   async findWithMultipleSkillSets(
-    skillSets: string[][], 
+    skillSets: string[][],
     options: {
       limit?: number;
       minConfidence?: number;
-    } = {}
+    } = {},
   ): Promise<Record<string, ResumeDocument[]>> {
     const { limit = 50, minConfidence = 0.0 } = options;
 
@@ -326,14 +352,14 @@ export class ResumeRepository {
               'contactInfo.name': 1,
               'contactInfo.email': 1,
               skills: 1,
-              processingConfidence: 1
-            }
+              processingConfidence: 1,
+            },
           });
 
-          return { 
-            skillSetKey: `set_${index}`, 
+          return {
+            skillSetKey: `set_${index}`,
             skills: skills.join(','),
-            results 
+            results,
           };
         });
 
@@ -348,25 +374,26 @@ export class ResumeRepository {
         return resultRecord;
       },
       'findWithMultipleSkillSets',
-      300 // Expected performance for multiple skill sets
+      300, // Expected performance for multiple skill sets
     );
   }
 
   /**
    * Health check method for monitoring
    */
-  async healthCheck(): Promise<{ status: string; count: number }> {
+  async healthCheck(): Promise<{ status: string; count: number; error?: string }> {
     try {
       const count = await this.resumeModel.countDocuments().exec();
       return {
         status: 'healthy',
-        count
+        count,
       };
     } catch (error) {
       this.logger.error('Resume repository health check failed:', error);
       return {
         status: 'unhealthy',
-        count: -1
+        count: 0,
+        error: (error as Error)?.message || 'Health check failed',
       };
     }
   }

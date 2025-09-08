@@ -9,14 +9,14 @@ import { Router } from '@angular/router';
 @Injectable()
 export class JobEffects {
   loadJobs$;
-  loadJob$; 
+  loadJob$;
   createJob$;
   createJobSuccess$;
 
   constructor(
     private actions$: Actions,
     private apiService: ApiService,
-    private router: Router
+    private router: Router,
   ) {
     this.loadJobs$ = createEffect(() =>
       this.actions$.pipe(
@@ -25,11 +25,15 @@ export class JobEffects {
           this.apiService.getAllJobs().pipe(
             map((jobs) => JobActions.loadJobsSuccess({ jobs })),
             catchError((error) =>
-              of(JobActions.loadJobsFailure({ error: error.message || 'Failed to load jobs' }))
-            )
-          )
-        )
-      )
+              of(
+                JobActions.loadJobsFailure({
+                  error: error.message || 'Failed to load jobs',
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
 
     this.loadJob$ = createEffect(() =>
@@ -39,11 +43,15 @@ export class JobEffects {
           this.apiService.getJobById(jobId).pipe(
             map((job) => JobActions.loadJobSuccess({ job })),
             catchError((error) =>
-              of(JobActions.loadJobFailure({ error: error.message || 'Failed to load job' }))
-            )
-          )
-        )
-      )
+              of(
+                JobActions.loadJobFailure({
+                  error: error.message || 'Failed to load job',
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
 
     this.createJob$ = createEffect(() =>
@@ -53,11 +61,15 @@ export class JobEffects {
           this.apiService.createJob(request).pipe(
             map((response) => JobActions.createJobSuccess({ response })),
             catchError((error) =>
-              of(JobActions.createJobFailure({ error: error.message || 'Failed to create job' }))
-            )
-          )
-        )
-      )
+              of(
+                JobActions.createJobFailure({
+                  error: error.message || 'Failed to create job',
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
 
     this.createJobSuccess$ = createEffect(() =>
@@ -68,8 +80,8 @@ export class JobEffects {
           this.router.navigate(['/jobs', response.jobId]);
         }),
         // Reload jobs list after creation
-        map(() => JobActions.loadJobs())
-      )
+        map(() => JobActions.loadJobs()),
+      ),
     );
   }
 }

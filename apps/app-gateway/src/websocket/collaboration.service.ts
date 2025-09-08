@@ -61,7 +61,10 @@ export class CollaborationService {
   /**
    * Create or join a collaboration room
    */
-  async joinRoom(roomId: string, participant: Participant): Promise<CollaborationRoom> {
+  async joinRoom(
+    roomId: string,
+    participant: Participant,
+  ): Promise<CollaborationRoom> {
     this.logger.log(`User ${participant.userId} joining room ${roomId}`);
 
     let room = this.rooms.get(roomId);
@@ -71,7 +74,7 @@ export class CollaborationService {
         participants: [],
         createdAt: new Date(),
         lastActivity: new Date(),
-        type: 'analysis'
+        type: 'analysis',
       };
       this.rooms.set(roomId, room);
     }
@@ -83,7 +86,9 @@ export class CollaborationService {
     }
 
     // Add participant to room
-    const existingIndex = room.participants.findIndex(p => p.userId === participant.userId);
+    const existingIndex = room.participants.findIndex(
+      (p) => p.userId === participant.userId,
+    );
     if (existingIndex >= 0) {
       room.participants[existingIndex] = participant;
     } else {
@@ -108,7 +113,7 @@ export class CollaborationService {
     const room = this.rooms.get(roomId);
     if (!room) return;
 
-    room.participants = room.participants.filter(p => p.userId !== userId);
+    room.participants = room.participants.filter((p) => p.userId !== userId);
     this.userToRoom.delete(userId);
     room.lastActivity = new Date();
 
@@ -125,7 +130,9 @@ export class CollaborationService {
    * Track user action in collaboration
    */
   async trackUserAction(action: CollaborationAction): Promise<void> {
-    this.logger.debug(`Tracking action: ${action.type} by ${action.userId} in ${action.roomId}`);
+    this.logger.debug(
+      `Tracking action: ${action.type} by ${action.userId} in ${action.roomId}`,
+    );
 
     const room = this.rooms.get(action.roomId);
     if (!room) {
@@ -134,10 +141,12 @@ export class CollaborationService {
     }
 
     // Update participant's last seen
-    const participant = room.participants.find(p => p.userId === action.userId);
+    const participant = room.participants.find(
+      (p) => p.userId === action.userId,
+    );
     if (participant) {
       participant.lastSeen = new Date();
-      
+
       // Handle cursor position updates
       if (action.type === 'cursor_move' && action.data) {
         participant.cursor = action.data as CursorPosition;
@@ -181,7 +190,7 @@ export class CollaborationService {
     this.logger.log(`Resolving ${conflicts.length} edit conflicts`);
 
     const resolved: EditConflict[] = [];
-    
+
     for (const conflict of conflicts) {
       // Simple last-write-wins resolution strategy
       conflict.resolution = 'accept';
@@ -215,11 +224,15 @@ export class CollaborationService {
   /**
    * Update participant cursor position
    */
-  async updateCursorPosition(roomId: string, userId: string, position: CursorPosition): Promise<void> {
+  async updateCursorPosition(
+    roomId: string,
+    userId: string,
+    position: CursorPosition,
+  ): Promise<void> {
     const room = this.rooms.get(roomId);
     if (!room) return;
 
-    const participant = room.participants.find(p => p.userId === userId);
+    const participant = room.participants.find((p) => p.userId === userId);
     if (participant) {
       participant.cursor = position;
       participant.lastSeen = new Date();

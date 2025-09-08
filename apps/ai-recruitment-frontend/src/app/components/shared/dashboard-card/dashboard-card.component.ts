@@ -10,48 +10,92 @@ import { CommonModule } from '@angular/common';
       <div class="card-icon" *ngIf="icon">
         <ng-container [ngSwitch]="icon">
           <!-- Jobs icon -->
-          <svg *ngSwitchCase="'jobs'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <svg
+            *ngSwitchCase="'jobs'"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
             <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
             <line x1="8" y1="21" x2="16" y2="21"></line>
             <line x1="12" y1="17" x2="12" y2="21"></line>
           </svg>
-          
+
           <!-- Resumes icon -->
-          <svg *ngSwitchCase="'resumes'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path d="M14,2 L6,2 C4.9,2 4,2.9 4,4 L4,20 C4,21.1 4.89,22 5.99,22 L18,22 C19.1,22 20,21.1 20,20 L20,8 L14,2 Z"></path>
+          <svg
+            *ngSwitchCase="'resumes'"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
+            <path
+              d="M14,2 L6,2 C4.9,2 4,2.9 4,4 L4,20 C4,21.1 4.89,22 5.99,22 L18,22 C19.1,22 20,21.1 20,20 L20,8 L14,2 Z"
+            ></path>
             <polyline points="14,2 14,8 20,8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>
             <line x1="16" y1="17" x2="8" y2="17"></line>
             <polyline points="10,9 9,9 8,9"></polyline>
           </svg>
-          
+
           <!-- Reports icon -->
-          <svg *ngSwitchCase="'reports'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <svg
+            *ngSwitchCase="'reports'"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
             <line x1="18" y1="20" x2="18" y2="10"></line>
             <line x1="12" y1="20" x2="12" y2="4"></line>
             <line x1="6" y1="20" x2="6" y2="14"></line>
           </svg>
-          
+
           <!-- Matches icon -->
-          <svg *ngSwitchCase="'matches'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <svg
+            *ngSwitchCase="'matches'"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
             <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
           </svg>
         </ng-container>
       </div>
-      
+
       <div class="card-content">
         <div class="card-value">{{ value }}</div>
         <div class="card-title">{{ title }}</div>
         <div class="card-subtitle" *ngIf="subtitle">{{ subtitle }}</div>
       </div>
-      
+
       <div class="card-trend" *ngIf="trend">
         <span class="trend-indicator" [class]="'trend-' + trend.type">
-          <svg *ngIf="trend.type === 'up'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <svg
+            *ngIf="trend.type === 'up'"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
             <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
             <polyline points="17 6 23 6 23 12"></polyline>
           </svg>
-          <svg *ngIf="trend.type === 'down'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <svg
+            *ngIf="trend.type === 'down'"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
             <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
             <polyline points="17 18 23 18 23 12"></polyline>
           </svg>
@@ -60,7 +104,8 @@ import { CommonModule } from '@angular/common';
       </div>
     </div>
   `,
-  styles: [`
+  styles: [
+    `
     .dashboard-card {
       background: var(--color-bg-primary);
       border-radius: var(--radius-2xl);
@@ -236,13 +281,15 @@ import { CommonModule } from '@angular/common';
         }
       }
     }
-    \n    /* Responsive design */\n    @media (max-width: 768px) {\n      .dashboard-card {\n        padding: var(--space-4);\n        \n        &:hover {\n          transform: translateY(-2px);\n        }\n      }\n      \n      .card-icon {\n        width: 40px;\n        height: 40px;\n        margin-bottom: var(--space-3);\n      }\n      \n      .card-value {\n        font-size: var(--font-size-2xl);\n      }\n      \n      .card-title {\n        font-size: var(--font-size-sm);\n      }\n      \n      .card-subtitle {\n        font-size: var(--font-size-xs);\n      }\n      \n      .trend-indicator {\n        font-size: var(--font-size-xs);\n        padding: var(--space-0-5) var(--space-1-5);\n      }\n    }\n    \n    @media (max-width: 480px) {\n      .dashboard-card {\n        padding: var(--space-3);\n      }\n      \n      .card-icon {\n        width: 36px;\n        height: 36px;\n      }\n      \n      .card-value {\n        font-size: var(--font-size-xl);\n      }\n    }\n  `]
+    \n    /* Responsive design */\n    @media (max-width: 768px) {\n      .dashboard-card {\n        padding: var(--space-4);\n        \n        &:hover {\n          transform: translateY(-2px);\n        }\n      }\n      \n      .card-icon {\n        width: 40px;\n        height: 40px;\n        margin-bottom: var(--space-3);\n      }\n      \n      .card-value {\n        font-size: var(--font-size-2xl);\n      }\n      \n      .card-title {\n        font-size: var(--font-size-sm);\n      }\n      \n      .card-subtitle {\n        font-size: var(--font-size-xs);\n      }\n      \n      .trend-indicator {\n        font-size: var(--font-size-xs);\n        padding: var(--space-0-5) var(--space-1-5);\n      }\n    }\n    \n    @media (max-width: 480px) {\n      .dashboard-card {\n        padding: var(--space-3);\n      }\n      \n      .card-icon {\n        width: 36px;\n        height: 36px;\n      }\n      \n      .card-value {\n        font-size: var(--font-size-xl);\n      }\n    }\n  `,
+  ],
 })
 export class DashboardCardComponent {
   @Input() title = '';
   @Input() subtitle = '';
   @Input() value = '';
   @Input() icon: 'jobs' | 'resumes' | 'reports' | 'matches' | null = null;
-  @Input() variant: 'default' | 'primary' | 'success' | 'warning' | 'info' = 'default';
-  @Input() trend: { type: 'up' | 'down', value: string } | null = null;
+  @Input() variant: 'default' | 'primary' | 'success' | 'warning' | 'info' =
+    'default';
+  @Input() trend: { type: 'up' | 'down'; value: string } | null = null;
 }

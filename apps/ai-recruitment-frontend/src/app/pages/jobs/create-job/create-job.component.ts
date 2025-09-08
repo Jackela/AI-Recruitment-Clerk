@@ -1,5 +1,10 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -13,7 +18,7 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './create-job.component.html',
-  styleUrl: './create-job.component.scss'
+  styleUrl: './create-job.component.scss',
 })
 export class CreateJobComponent implements OnInit, OnDestroy {
   createJobForm: FormGroup;
@@ -21,15 +26,29 @@ export class CreateJobComponent implements OnInit, OnDestroy {
   error$: Observable<string | null>;
 
   private destroy$ = new Subject<void>();
-  
+
   private fb = inject(FormBuilder);
   private store = inject(Store<AppState>);
   private router = inject(Router);
 
   constructor() {
     this.createJobForm = this.fb.group({
-      jobTitle: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      jdText: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(5000)]]
+      jobTitle: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.maxLength(100),
+        ],
+      ],
+      jdText: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(10),
+          Validators.maxLength(5000),
+        ],
+      ],
     });
 
     // Use memoized selectors instead of direct state access
@@ -50,12 +69,14 @@ export class CreateJobComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     if (this.createJobForm.valid) {
       const formValue = this.createJobForm.value;
-      this.store.dispatch(JobActions.createJob({
-        request: {
-          jobTitle: formValue.jobTitle,
-          jdText: formValue.jdText
-        }
-      }));
+      this.store.dispatch(
+        JobActions.createJob({
+          request: {
+            jobTitle: formValue.jobTitle,
+            jdText: formValue.jdText,
+          },
+        }),
+      );
     } else {
       this.markFormGroupTouched();
     }
@@ -79,7 +100,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
   }
 
   private markFormGroupTouched(): void {
-    Object.keys(this.createJobForm.controls).forEach(key => {
+    Object.keys(this.createJobForm.controls).forEach((key) => {
       this.createJobForm.get(key)?.markAsTouched();
     });
   }

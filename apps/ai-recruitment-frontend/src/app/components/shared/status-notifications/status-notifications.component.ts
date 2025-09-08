@@ -1,7 +1,10 @@
 import { Component, computed, OnInit, OnDestroy } from '@angular/core';
 // import { signal } from '@angular/core'; // Reserved for future use
 import { CommonModule } from '@angular/common';
-import { ProgressFeedbackService, StatusNotification } from '../../../services/feedback/progress-feedback.service';
+import {
+  ProgressFeedbackService,
+  StatusNotification,
+} from '../../../services/feedback/progress-feedback.service';
 import { Subject } from 'rxjs';
 // import { takeUntil } from 'rxjs/operators'; // Reserved for future use
 
@@ -11,49 +14,58 @@ import { Subject } from 'rxjs';
   imports: [CommonModule],
   template: `
     <div class="notifications-container" *ngIf="hasNotifications()">
-      <div 
+      <div
         class="notification"
         [class]="getNotificationClasses(notification)"
-        *ngFor="let notification of notifications(); trackBy: trackByNotificationId"
->
-        
+        *ngFor="
+          let notification of notifications();
+          trackBy: trackByNotificationId
+        "
+      >
         <!-- Icon -->
         <div class="notification-icon">
           <span [innerHTML]="getNotificationIcon(notification.type)"></span>
         </div>
-        
+
         <!-- Content -->
         <div class="notification-content">
           <h4 class="notification-title">{{ notification.title }}</h4>
           <p class="notification-message">{{ notification.message }}</p>
-          
+
           <!-- Action Button -->
-          <button 
+          <button
             class="notification-action"
             *ngIf="notification.action"
             (click)="handleAction(notification)"
-            type="button">
+            type="button"
+          >
             {{ notification.action.label }}
           </button>
         </div>
-        
+
         <!-- Close Button -->
-        <button 
+        <button
           class="notification-close"
           (click)="closeNotification(notification.id)"
           aria-label="关闭通知"
-          type="button">
+          type="button"
+        >
           ✕
         </button>
-        
+
         <!-- Progress Bar for persistent notifications -->
-        <div 
+        <div
           class="notification-progress"
-          *ngIf="!notification.persistent && notification.duration && notification.duration > 0">
-          <div 
+          *ngIf="
+            !notification.persistent &&
+            notification.duration &&
+            notification.duration > 0
+          "
+        >
+          <div
             class="progress-bar"
-            [style.animation-duration.ms]="notification.duration">
-          </div>
+            [style.animation-duration.ms]="notification.duration"
+          ></div>
         </div>
       </div>
     </div>
@@ -63,12 +75,15 @@ import { Subject } from 'rxjs';
       <div class="loading-content">
         <div class="loading-spinner"></div>
         <p class="loading-message">{{ globalLoading().message }}</p>
-        <div class="loading-progress" *ngIf="globalLoading().progress !== undefined">
+        <div
+          class="loading-progress"
+          *ngIf="globalLoading().progress !== undefined"
+        >
           <div class="progress-bar">
-            <div 
+            <div
               class="progress-fill"
-              [style.width.%]="globalLoading().progress">
-            </div>
+              [style.width.%]="globalLoading().progress"
+            ></div>
           </div>
           <span class="progress-text">{{ globalLoading().progress }}%</span>
         </div>
@@ -79,13 +94,13 @@ import { Subject } from 'rxjs';
     </div>
   `,
   styleUrls: ['./status-notifications.component.css'],
-  animations: []
+  animations: [],
 })
 export class StatusNotificationsComponent implements OnInit, OnDestroy {
   // Service state
   notifications = computed(() => this.feedbackService.notifications());
   globalLoading = computed(() => this.feedbackService.globalLoading());
-  
+
   // Local state
   private destroy$ = new Subject<void>();
   private notificationTimers = new Map<string, number>();
@@ -109,19 +124,23 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
     this.clearAllTimers();
 
     // Setup new timers
-    notifications.forEach(notification => {
-      if (!notification.persistent && notification.duration && notification.duration > 0) {
+    notifications.forEach((notification) => {
+      if (
+        !notification.persistent &&
+        notification.duration &&
+        notification.duration > 0
+      ) {
         const timer = window.setTimeout(() => {
           this.feedbackService.removeNotification(notification.id);
         }, notification.duration);
-        
+
         this.notificationTimers.set(notification.id, timer);
       }
     });
   }
 
   private clearAllTimers(): void {
-    this.notificationTimers.forEach(timer => {
+    this.notificationTimers.forEach((timer) => {
       window.clearTimeout(timer);
     });
     this.notificationTimers.clear();
@@ -139,7 +158,7 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
       window.clearTimeout(timer);
       this.notificationTimers.delete(id);
     }
-    
+
     this.feedbackService.removeNotification(id);
   }
 
@@ -147,7 +166,7 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
     if (notification.action?.handler) {
       notification.action.handler();
     }
-    
+
     // Auto-close after action unless persistent
     if (!notification.persistent) {
       this.closeNotification(notification.id);
@@ -157,15 +176,15 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
   getNotificationClasses(notification: StatusNotification): string {
     const classes = ['notification'];
     classes.push(`notification-${notification.type}`);
-    
+
     if (notification.persistent) {
       classes.push('notification-persistent');
     }
-    
+
     if (notification.action) {
       classes.push('notification-with-action');
     }
-    
+
     return classes.join(' ');
   }
 
@@ -174,12 +193,15 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
       info: '🔵',
       success: '✅',
       warning: '⚠️',
-      error: '❌'
+      error: '❌',
     };
     return icons[type as keyof typeof icons] || icons.info;
   }
 
-  trackByNotificationId(_index: number, notification: StatusNotification): string {
+  trackByNotificationId(
+    _index: number,
+    notification: StatusNotification,
+  ): string {
     return notification.id;
   }
 }

@@ -17,9 +17,12 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
   constructor(private configService: ConfigService) {}
 
   use(req: SecurityRequest, res: Response, next: NextFunction) {
-    const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
-    const corsOrigin = this.configService.get<string>('CORS_ORIGIN') || 'http://localhost:4200';
-    const enableSecurityLogging = this.configService.get<string>('ENABLE_SECURITY_LOGGING') === 'true';
+    const isProduction =
+      this.configService.get<string>('NODE_ENV') === 'production';
+    const corsOrigin =
+      this.configService.get<string>('CORS_ORIGIN') || 'http://localhost:4200';
+    const enableSecurityLogging =
+      this.configService.get<string>('ENABLE_SECURITY_LOGGING') === 'true';
 
     // Security risk assessment
     const securityContext = this.assessSecurityRisk(req);
@@ -28,8 +31,8 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     // Enhanced Content Security Policy
     const cspDirectives = [
       "default-src 'self'",
-      isProduction 
-        ? "script-src 'self' 'sha256-xyz123' 'nonce-${this.generateNonce()}'" 
+      isProduction
+        ? "script-src 'self' 'sha256-xyz123' 'nonce-${this.generateNonce()}'"
         : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
@@ -42,12 +45,12 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       "media-src 'self'",
       "worker-src 'self'",
       "manifest-src 'self'",
-      "upgrade-insecure-requests"
+      'upgrade-insecure-requests',
     ];
 
     // Production-grade CSP
     if (isProduction) {
-      cspDirectives.push("block-all-mixed-content");
+      cspDirectives.push('block-all-mixed-content');
       cspDirectives.push("require-trusted-types-for 'script'");
     }
 
@@ -58,41 +61,47 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    
+
     // Enhanced Permissions Policy
-    res.setHeader('Permissions-Policy', [
-      'accelerometer=()',
-      'ambient-light-sensor=()',
-      'autoplay=()',
-      'battery=()',
-      'camera=()',
-      'cross-origin-isolated=()',
-      'display-capture=()',
-      'document-domain=()',
-      'encrypted-media=()',
-      'execution-while-not-rendered=()',
-      'execution-while-out-of-viewport=()',
-      'fullscreen=()',
-      'geolocation=()',
-      'gyroscope=()',
-      'keyboard-map=()',
-      'magnetometer=()',
-      'microphone=()',
-      'midi=()',
-      'navigation-override=()',
-      'payment=()',
-      'picture-in-picture=()',
-      'publickey-credentials-get=()',
-      'screen-wake-lock=()',
-      'sync-xhr=()',
-      'usb=()',
-      'web-share=()',
-      'xr-spatial-tracking=()'
-    ].join(', '));
+    res.setHeader(
+      'Permissions-Policy',
+      [
+        'accelerometer=()',
+        'ambient-light-sensor=()',
+        'autoplay=()',
+        'battery=()',
+        'camera=()',
+        'cross-origin-isolated=()',
+        'display-capture=()',
+        'document-domain=()',
+        'encrypted-media=()',
+        'execution-while-not-rendered=()',
+        'execution-while-out-of-viewport=()',
+        'fullscreen=()',
+        'geolocation=()',
+        'gyroscope=()',
+        'keyboard-map=()',
+        'magnetometer=()',
+        'microphone=()',
+        'midi=()',
+        'navigation-override=()',
+        'payment=()',
+        'picture-in-picture=()',
+        'publickey-credentials-get=()',
+        'screen-wake-lock=()',
+        'sync-xhr=()',
+        'usb=()',
+        'web-share=()',
+        'xr-spatial-tracking=()',
+      ].join(', '),
+    );
 
     // HSTS with enhanced security (production only)
     if (isProduction) {
-      res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+      res.setHeader(
+        'Strict-Transport-Security',
+        'max-age=63072000; includeSubDomains; preload',
+      );
     }
 
     // Additional Security Headers
@@ -100,36 +109,43 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
     res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-    
+
     // Cache Control for sensitive endpoints
     if (this.isSensitiveEndpoint(req.path)) {
-      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader(
+        'Cache-Control',
+        'no-store, no-cache, must-revalidate, proxy-revalidate',
+      );
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
       res.setHeader('Surrogate-Control', 'no-store');
     }
 
     // CORS Headers (enhanced security)
-    const allowedOrigins = corsOrigin.split(',').map(origin => origin.trim());
+    const allowedOrigins = corsOrigin.split(',').map((origin) => origin.trim());
     const requestOrigin = req.get('Origin');
-    
+
     if (allowedOrigins.includes(requestOrigin || '')) {
       res.setHeader('Access-Control-Allow-Origin', requestOrigin!);
     } else if (!isProduction && allowedOrigins[0]) {
       res.setHeader('Access-Control-Allow-Origin', allowedOrigins[0]);
     }
-    
+
     res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 
-      'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-CSRF-Token, X-XSRF-Token, X-API-Key'
+    res.setHeader(
+      'Access-Control-Allow-Methods',
+      'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    );
+    res.setHeader(
+      'Access-Control-Allow-Headers',
+      'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-CSRF-Token, X-XSRF-Token, X-API-Key',
     );
     res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
 
     // Security monitoring headers
     res.setHeader('X-Request-ID', this.generateRequestId());
     res.setHeader('X-Security-Score', securityContext.riskScore.toString());
-    
+
     if (securityContext.isHighRisk) {
       res.setHeader('X-Security-Warning', 'high-risk-request');
     }
@@ -141,13 +157,16 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
 
     // Security logging
     if (enableSecurityLogging && securityContext.isHighRisk) {
-      this.logger.warn(`High-risk request detected: ${req.method} ${req.path}`, {
-        ip: req.ip,
-        userAgent: req.get('User-Agent'),
-        referer: req.get('Referer'),
-        riskScore: securityContext.riskScore,
-        securityFlags: securityContext.securityFlags
-      });
+      this.logger.warn(
+        `High-risk request detected: ${req.method} ${req.path}`,
+        {
+          ip: req.ip,
+          userAgent: req.get('User-Agent'),
+          referer: req.get('Referer'),
+          riskScore: securityContext.riskScore,
+          securityFlags: securityContext.securityFlags,
+        },
+      );
     }
 
     next();
@@ -164,7 +183,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     // Check for suspicious patterns
     const userAgent = req.get('User-Agent') || '';
     const referer = req.get('Referer') || '';
-    
+
     // Bot detection
     if (/bot|crawler|spider|scraper/i.test(userAgent)) {
       riskScore += 0.2;
@@ -184,7 +203,9 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     }
 
     // SQL injection patterns
-    if (/('|(union|select|insert|update|delete|drop|exec|script))/i.test(req.url)) {
+    if (
+      /('|(union|select|insert|update|delete|drop|exec|script))/i.test(req.url)
+    ) {
       riskScore += 0.7;
       securityFlags.push('sql_injection_pattern');
     }
@@ -210,7 +231,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     return {
       riskScore: Math.min(riskScore, 1.0),
       isHighRisk: riskScore > 0.5,
-      securityFlags
+      securityFlags,
     };
   }
 
@@ -220,10 +241,10 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       '/api/admin/',
       '/api/users/',
       '/api/security/',
-      '/api/config/'
+      '/api/config/',
     ];
-    
-    return sensitivePatterns.some(pattern => path.startsWith(pattern));
+
+    return sensitivePatterns.some((pattern) => path.startsWith(pattern));
   }
 
   private generateNonce(): string {

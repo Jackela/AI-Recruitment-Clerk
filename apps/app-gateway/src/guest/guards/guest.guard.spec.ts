@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  ExecutionContext,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { GuestGuard } from './guest.guard';
 
@@ -17,7 +21,7 @@ describe('GuestGuard', () => {
       ip: '127.0.0.1',
       connection: { remoteAddress: '127.0.0.1' },
     };
-    
+
     return {
       switchToHttp: () => ({
         getRequest: () => mockRequest,
@@ -88,7 +92,9 @@ describe('GuestGuard', () => {
     it('should throw UnauthorizedException when device ID is missing', async () => {
       const context = createMockExecutionContext({});
 
-      await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
+      await expect(guard.canActivate(context)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should throw BadRequestException for invalid device ID format', async () => {
@@ -97,7 +103,9 @@ describe('GuestGuard', () => {
         'x-device-id': invalidDeviceId,
       });
 
-      await expect(guard.canActivate(context)).rejects.toThrow(BadRequestException);
+      await expect(guard.canActivate(context)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException for too short device ID', async () => {
@@ -106,12 +114,14 @@ describe('GuestGuard', () => {
         'x-device-id': shortDeviceId,
       });
 
-      await expect(guard.canActivate(context)).rejects.toThrow(BadRequestException);
+      await expect(guard.canActivate(context)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should handle rate limiting correctly', async () => {
       const deviceId = 'test-device-12345678';
-      
+
       // Make exactly 30 requests (the limit)
       for (let i = 0; i < 30; i++) {
         const context = createMockExecutionContext({
@@ -125,7 +135,7 @@ describe('GuestGuard', () => {
       const finalContext = createMockExecutionContext({
         'x-device-id': deviceId,
       });
-      
+
       await expect(guard.canActivate(finalContext)).rejects.toThrow();
     });
   });
@@ -154,7 +164,7 @@ describe('GuestGuard', () => {
 
     it('should reset rate limit after time window', (done) => {
       const deviceId = 'test-device-12345678';
-      
+
       // Mock the rate limit window to be very short for testing
       (guard as any).RATE_LIMIT_WINDOW = 100; // 100ms
 
@@ -164,7 +174,9 @@ describe('GuestGuard', () => {
 
       // Fill up the rate limit
       Promise.all(
-        Array(30).fill(null).map(() => guard.canActivate(context))
+        Array(30)
+          .fill(null)
+          .map(() => guard.canActivate(context)),
       ).then(() => {
         // Should fail on next request
         guard.canActivate(context).catch(() => {
@@ -204,13 +216,29 @@ describe('GuestGuard', () => {
 
   describe('device ID validation', () => {
     const testCases = [
-      { id: '12345678-1234-4321-8765-123456789012', valid: true, description: 'valid UUID' },
-      { id: 'custom-device-id-12345678', valid: true, description: 'valid custom ID' },
+      {
+        id: '12345678-1234-4321-8765-123456789012',
+        valid: true,
+        description: 'valid UUID',
+      },
+      {
+        id: 'custom-device-id-12345678',
+        valid: true,
+        description: 'valid custom ID',
+      },
       { id: 'short', valid: false, description: 'too short ID' },
       { id: 'a'.repeat(129), valid: false, description: 'too long ID' },
-      { id: 'invalid-id!@#$%', valid: false, description: 'invalid characters' },
+      {
+        id: 'invalid-id!@#$%',
+        valid: false,
+        description: 'invalid characters',
+      },
       { id: '', valid: false, description: 'empty string' },
-      { id: '12345678-1234-4321-8765', valid: false, description: 'incomplete UUID' },
+      {
+        id: '12345678-1234-4321-8765',
+        valid: false,
+        description: 'incomplete UUID',
+      },
     ];
 
     testCases.forEach(({ id, valid, description }) => {

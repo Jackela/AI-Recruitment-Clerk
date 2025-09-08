@@ -51,19 +51,19 @@ class ResumeFileValidator extends FileValidator {
 
   isValid(file?: any): boolean {
     if (!file) return false;
-    
+
     // Check both MIME type and file extension
     const allowedMimeTypes = [
       'application/pdf',
       'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ];
-    
+
     const allowedExtensions = /\.(pdf|doc|docx)$/i;
-    
+
     const mimeTypeValid = allowedMimeTypes.includes(file.mimetype);
     const extensionValid = allowedExtensions.test(file.originalname);
-    
+
     return mimeTypeValid && extensionValid;
   }
 }
@@ -88,7 +88,8 @@ export class GuestResumeController {
   @UseInterceptors(FileInterceptor('resume'))
   @ApiOperation({
     summary: 'Upload and analyze resume (Guest Mode)',
-    description: 'Upload a resume file for analysis - available to both authenticated users and guests with usage limits',
+    description:
+      'Upload a resume file for analysis - available to both authenticated users and guests with usage limits',
   })
   @ApiConsumes('multipart/form-data')
   @ApiResponse({
@@ -130,10 +131,10 @@ export class GuestResumeController {
           new ResumeFileValidator(),
         ],
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
-      })
+      }),
     )
     file: any, // Express.Multer.File type fix
-    @Body() uploadData: GuestResumeUploadDto
+    @Body() uploadData: GuestResumeUploadDto,
   ) {
     try {
       const deviceId = req.deviceId!;
@@ -143,16 +144,18 @@ export class GuestResumeController {
       if (!isAuthenticated) {
         const canUse = await this.guestUsageService.canUse(deviceId);
         if (!canUse) {
-          const usageStatus = await this.guestUsageService.getUsageStatus(deviceId);
+          const usageStatus =
+            await this.guestUsageService.getUsageStatus(deviceId);
           throw new HttpException(
             {
               success: false,
               error: 'Usage limit exceeded',
-              message: '免费次数已用完！参与问卷反馈(奖励￥3现金)可再获5次使用权！',
+              message:
+                '免费次数已用完！参与问卷反馈(奖励￥3现金)可再获5次使用权！',
               needsFeedbackCode: usageStatus.needsFeedbackCode,
               feedbackCode: usageStatus.feedbackCode,
             },
-            HttpStatus.TOO_MANY_REQUESTS
+            HttpStatus.TOO_MANY_REQUESTS,
           );
         }
       }
@@ -178,13 +181,16 @@ export class GuestResumeController {
       // Store file temporarily and initiate analysis
       // Note: This would integrate with your existing resume processing service
       // For now, we'll simulate the process
-      
-      this.logger.log(`Resume analysis initiated for ${isAuthenticated ? 'user' : 'guest'}: ${analysisId}`);
+
+      this.logger.log(
+        `Resume analysis initiated for ${isAuthenticated ? 'user' : 'guest'}: ${analysisId}`,
+      );
 
       // Get remaining usage for guest users
       let remainingUsage = undefined;
       if (!isAuthenticated) {
-        const usageStatus = await this.guestUsageService.getUsageStatus(deviceId);
+        const usageStatus =
+          await this.guestUsageService.getUsageStatus(deviceId);
         remainingUsage = usageStatus.remainingCount;
       }
 
@@ -213,7 +219,7 @@ export class GuestResumeController {
           error: 'Resume processing failed',
           message: error.message || 'An unexpected error occurred',
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -222,7 +228,8 @@ export class GuestResumeController {
   @UseGuards(OptionalJwtAuthGuard, GuestGuard)
   @ApiOperation({
     summary: 'Get resume analysis results (Guest Mode)',
-    description: 'Retrieve the analysis results for a previously uploaded resume',
+    description:
+      'Retrieve the analysis results for a previously uploaded resume',
   })
   @ApiResponse({
     status: 200,
@@ -235,7 +242,10 @@ export class GuestResumeController {
           type: 'object',
           properties: {
             analysisId: { type: 'string' },
-            status: { type: 'string', enum: ['processing', 'completed', 'failed'] },
+            status: {
+              type: 'string',
+              enum: ['processing', 'completed', 'failed'],
+            },
             progress: { type: 'number', minimum: 0, maximum: 100 },
             results: {
               type: 'object',
@@ -272,7 +282,10 @@ export class GuestResumeController {
                           title: { type: 'string' },
                           company: { type: 'string' },
                           duration: { type: 'string' },
-                          responsibilities: { type: 'array', items: { type: 'string' } },
+                          responsibilities: {
+                            type: 'array',
+                            items: { type: 'string' },
+                          },
                         },
                       },
                     },
@@ -295,7 +308,10 @@ export class GuestResumeController {
                   properties: {
                     overallScore: { type: 'number', minimum: 0, maximum: 100 },
                     strengths: { type: 'array', items: { type: 'string' } },
-                    recommendations: { type: 'array', items: { type: 'string' } },
+                    recommendations: {
+                      type: 'array',
+                      items: { type: 'string' },
+                    },
                   },
                 },
               },
@@ -306,10 +322,13 @@ export class GuestResumeController {
       },
     },
   })
-  @ApiParam({ name: 'analysisId', description: 'Analysis ID returned from upload' })
+  @ApiParam({
+    name: 'analysisId',
+    description: 'Analysis ID returned from upload',
+  })
   async getAnalysisResults(
     @Req() req: RequestWithDeviceId,
-    @Param('analysisId') analysisId: string
+    @Param('analysisId') analysisId: string,
   ) {
     try {
       // Validate analysis ID format
@@ -332,10 +351,22 @@ export class GuestResumeController {
             location: 'New York, NY',
           },
           skills: [
-            { name: 'JavaScript', category: 'Programming', proficiency: 'Advanced' },
+            {
+              name: 'JavaScript',
+              category: 'Programming',
+              proficiency: 'Advanced',
+            },
             { name: 'React', category: 'Frontend', proficiency: 'Advanced' },
-            { name: 'Node.js', category: 'Backend', proficiency: 'Intermediate' },
-            { name: 'Project Management', category: 'Soft Skills', proficiency: 'Advanced' },
+            {
+              name: 'Node.js',
+              category: 'Backend',
+              proficiency: 'Intermediate',
+            },
+            {
+              name: 'Project Management',
+              category: 'Soft Skills',
+              proficiency: 'Advanced',
+            },
           ],
           experience: {
             totalYears: 5,
@@ -406,7 +437,7 @@ export class GuestResumeController {
           error: 'Failed to retrieve analysis results',
           message: error.message || 'An unexpected error occurred',
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -415,7 +446,8 @@ export class GuestResumeController {
   @UseGuards(OptionalJwtAuthGuard, GuestGuard)
   @ApiOperation({
     summary: 'Get demo analysis (Guest Mode)',
-    description: 'Get a demo analysis result without uploading a file - useful for showcasing capabilities',
+    description:
+      'Get a demo analysis result without uploading a file - useful for showcasing capabilities',
   })
   @ApiResponse({
     status: 200,
@@ -430,15 +462,17 @@ export class GuestResumeController {
       if (!isAuthenticated) {
         const canUse = await this.guestUsageService.canUse(deviceId);
         if (!canUse) {
-          const usageStatus = await this.guestUsageService.getUsageStatus(deviceId);
+          const usageStatus =
+            await this.guestUsageService.getUsageStatus(deviceId);
           throw new HttpException(
             {
               success: false,
               error: 'Usage limit exceeded',
-              message: '免费次数已用完！参与问卷反馈(奖励￥3现金)可再获5次使用权！',
+              message:
+                '免费次数已用完！参与问卷反馈(奖励￥3现金)可再获5次使用权！',
               needsFeedbackCode: usageStatus.needsFeedbackCode,
             },
-            HttpStatus.TOO_MANY_REQUESTS
+            HttpStatus.TOO_MANY_REQUESTS,
           );
         }
       }
@@ -456,10 +490,22 @@ export class GuestResumeController {
           },
           skills: [
             { name: 'Python', category: 'Programming', proficiency: 'Expert' },
-            { name: 'Machine Learning', category: 'AI/ML', proficiency: 'Advanced' },
+            {
+              name: 'Machine Learning',
+              category: 'AI/ML',
+              proficiency: 'Advanced',
+            },
             { name: 'TensorFlow', category: 'AI/ML', proficiency: 'Advanced' },
-            { name: 'Data Analysis', category: 'Analytics', proficiency: 'Expert' },
-            { name: 'Leadership', category: 'Soft Skills', proficiency: 'Advanced' },
+            {
+              name: 'Data Analysis',
+              category: 'Analytics',
+              proficiency: 'Expert',
+            },
+            {
+              name: 'Leadership',
+              category: 'Soft Skills',
+              proficiency: 'Advanced',
+            },
           ],
           experience: {
             totalYears: 7,
@@ -521,11 +567,14 @@ export class GuestResumeController {
 
       // Get remaining usage for guest users
       if (!isAuthenticated) {
-        const usageStatus = await this.guestUsageService.getUsageStatus(deviceId);
+        const usageStatus =
+          await this.guestUsageService.getUsageStatus(deviceId);
         demoAnalysis['remainingUsage'] = usageStatus.remainingCount;
       }
 
-      this.logger.log(`Demo analysis provided for ${isAuthenticated ? 'user' : 'guest'}`);
+      this.logger.log(
+        `Demo analysis provided for ${isAuthenticated ? 'user' : 'guest'}`,
+      );
 
       return {
         success: true,
@@ -544,7 +593,7 @@ export class GuestResumeController {
           error: 'Failed to generate demo analysis',
           message: error.message || 'An unexpected error occurred',
         },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }

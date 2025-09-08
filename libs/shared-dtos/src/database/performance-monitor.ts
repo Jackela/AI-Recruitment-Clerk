@@ -78,10 +78,11 @@ export class DatabasePerformanceMonitor {
       // Record failed execution metrics
       this.recordQueryExecution(queryName, duration, memoryDelta, false);
       
+      const errMsg = error instanceof Error ? error.message : String(error);
       this.logger.error(`Query ${queryName} failed after ${duration}ms`, {
         duration,
         memoryDelta,
-        error: error.message
+        error: errMsg,
       });
       
       throw error;

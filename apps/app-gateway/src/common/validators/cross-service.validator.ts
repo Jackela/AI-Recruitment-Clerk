@@ -28,7 +28,7 @@ export class CrossServiceValidator {
 
   async validate(
     data: any,
-    options: CrossServiceValidationOptions
+    options: CrossServiceValidationOptions,
   ): Promise<{
     valid: boolean;
     errors: string[];
@@ -40,18 +40,18 @@ export class CrossServiceValidator {
     try {
       if (options.parallel && !options.failFast) {
         // Run all validations in parallel
-        const validationPromises = options.rules.map(rule =>
-          this.validateRule(rule, data[rule.field], transformedData)
+        const validationPromises = options.rules.map((rule) =>
+          this.validateRule(rule, data[rule.field], transformedData),
         );
 
         const results = await Promise.allSettled(validationPromises);
-        
+
         results.forEach((result, index) => {
           if (result.status === 'rejected') {
             const rule = options.rules[index];
             errors.push(
-              rule.message || 
-              `Validation failed for field '${rule.field}': ${result.reason}`
+              rule.message ||
+                `Validation failed for field '${rule.field}': ${result.reason}`,
             );
           }
         });
@@ -61,10 +61,11 @@ export class CrossServiceValidator {
           try {
             await this.validateRule(rule, data[rule.field], transformedData);
           } catch (error) {
-            const errorMessage = rule.message || 
+            const errorMessage =
+              rule.message ||
               `Validation failed for field '${rule.field}': ${error.message}`;
             errors.push(errorMessage);
-            
+
             if (options.failFast) {
               break;
             }
@@ -86,10 +87,13 @@ export class CrossServiceValidator {
   private async validateRule(
     rule: ValidationRule,
     value: any,
-    transformedData: any
+    transformedData: any,
   ): Promise<void> {
     // Check required fields
-    if (rule.required && (value === undefined || value === null || value === '')) {
+    if (
+      rule.required &&
+      (value === undefined || value === null || value === '')
+    ) {
       throw new BadRequestException(`Field '${rule.field}' is required`);
     }
 
@@ -104,7 +108,7 @@ export class CrossServiceValidator {
         transformedData[rule.field] = rule.transform(value);
       } catch (error) {
         throw new BadRequestException(
-          `Transformation failed for field '${rule.field}': ${error.message}`
+          `Transformation failed for field '${rule.field}': ${error.message}`,
         );
       }
     }
@@ -112,10 +116,12 @@ export class CrossServiceValidator {
     // Apply custom validation if provided
     if (rule.validate) {
       try {
-        const isValid = await rule.validate(transformedData[rule.field] || value);
+        const isValid = await rule.validate(
+          transformedData[rule.field] || value,
+        );
         if (!isValid) {
           throw new BadRequestException(
-            `Custom validation failed for field '${rule.field}'`
+            `Custom validation failed for field '${rule.field}'`,
           );
         }
       } catch (error) {
@@ -123,7 +129,7 @@ export class CrossServiceValidator {
           throw error;
         }
         throw new BadRequestException(
-          `Validation error for field '${rule.field}': ${error.message}`
+          `Validation error for field '${rule.field}': ${error.message}`,
         );
       }
     }
@@ -134,7 +140,7 @@ export class CrossServiceValidator {
         rule.service,
         rule.endpoint,
         transformedData[rule.field] || value,
-        rule.field
+        rule.field,
       );
     }
   }
@@ -143,13 +149,13 @@ export class CrossServiceValidator {
     service: string,
     endpoint: string,
     value: any,
-    fieldName: string
+    fieldName: string,
   ): Promise<void> {
     try {
       // This is a placeholder for actual service communication
       // In a real implementation, you would use HTTP client or message queue
       // to communicate with other services
-      
+
       const validationRequest = {
         service,
         endpoint,
@@ -158,33 +164,36 @@ export class CrossServiceValidator {
       };
 
       this.logger.debug(
-        `Performing cross-service validation: ${JSON.stringify(validationRequest)}`
+        `Performing cross-service validation: ${JSON.stringify(validationRequest)}`,
       );
 
       // Mock validation - replace with actual service call
       const isValid = await this.mockServiceValidation(
         service,
         endpoint,
-        value
+        value,
       );
 
       if (!isValid) {
         throw new NotFoundException(
-          `Value '${value}' for field '${fieldName}' not found in ${service}`
+          `Value '${value}' for field '${fieldName}' not found in ${service}`,
         );
       }
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
-      
+
       this.logger.error(
         `Cross-service validation failed for ${service}/${endpoint}:`,
-        error
+        error,
       );
-      
+
       throw new BadRequestException(
-        `Unable to validate field '${fieldName}' with ${service} service`
+        `Unable to validate field '${fieldName}' with ${service} service`,
       );
     }
   }
@@ -193,7 +202,7 @@ export class CrossServiceValidator {
   private async mockServiceValidation(
     service: string,
     endpoint: string,
-    value: any
+    value: any,
   ): Promise<boolean> {
     // Simulate validation logic based on service and endpoint
     switch (service) {
@@ -213,7 +222,7 @@ export class CrossServiceValidator {
         }
         break;
     }
-    
+
     return true; // Default to valid for unknown services
   }
 
@@ -225,7 +234,7 @@ export class CrossServiceValidator {
     value: any,
     service: string,
     endpoint: string,
-    required = false
+    required = false,
   ): Promise<boolean> {
     const result = await this.validate(
       { [fieldName]: value },
@@ -239,7 +248,7 @@ export class CrossServiceValidator {
           },
         ],
         failFast: true,
-      }
+      },
     );
 
     return result.valid;
@@ -248,7 +257,10 @@ export class CrossServiceValidator {
   /**
    * Create validation rules for common scenarios
    */
-  static createUserValidationRule(fieldName: string, required = true): ValidationRule {
+  static createUserValidationRule(
+    fieldName: string,
+    required = true,
+  ): ValidationRule {
     return {
       field: fieldName,
       service: 'user-service',
@@ -258,7 +270,10 @@ export class CrossServiceValidator {
     };
   }
 
-  static createJobValidationRule(fieldName: string, required = true): ValidationRule {
+  static createJobValidationRule(
+    fieldName: string,
+    required = true,
+  ): ValidationRule {
     return {
       field: fieldName,
       service: 'job-service',
@@ -268,7 +283,10 @@ export class CrossServiceValidator {
     };
   }
 
-  static createResumeValidationRule(fieldName: string, required = true): ValidationRule {
+  static createResumeValidationRule(
+    fieldName: string,
+    required = true,
+  ): ValidationRule {
     return {
       field: fieldName,
       service: 'resume-service',
@@ -278,7 +296,10 @@ export class CrossServiceValidator {
     };
   }
 
-  static createEmailValidationRule(fieldName: string, required = true): ValidationRule {
+  static createEmailValidationRule(
+    fieldName: string,
+    required = true,
+  ): ValidationRule {
     return {
       field: fieldName,
       service: 'notification-service',

@@ -1,72 +1,82 @@
-import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnApplicationBootstrap,
+  OnApplicationShutdown,
+} from '@nestjs/common';
 
 @Injectable()
-export class AppService implements OnApplicationBootstrap, OnApplicationShutdown {
+export class AppService
+  implements OnApplicationBootstrap, OnApplicationShutdown
+{
   private readonly logger = new Logger(AppService.name);
   private isInitialized = false;
   private healthCheckInterval?: NodeJS.Timeout;
 
   getData(): { message: string } {
-    return { 
+    return {
       message: 'Report Generator Service API',
-      status: this.isInitialized ? 'ready' : 'initializing'
+      status: this.isInitialized ? 'ready' : 'initializing',
     };
   }
 
   async onApplicationBootstrap(): Promise<void> {
     this.logger.log('Report Generator Service starting...');
-    
+
     try {
       // Initialize database connections (handled by MongooseModule)
       await this.initializeDatabaseConnections();
-      
+
       // Initialize GridFS for report storage
       await this.initializeGridFS();
-      
+
       // Initialize NATS connections for event handling
       await this.initializeNATSConnections();
-      
+
       // Set up report generation event subscriptions
       await this.setupEventSubscriptions();
-      
+
       // Initialize performance monitoring
       await this.initializePerformanceMonitoring();
-      
+
       // Start health check monitoring
       this.startHealthCheckMonitoring();
-      
+
       this.isInitialized = true;
-      this.logger.log('Report Generator Service startup completed successfully');
-      
+      this.logger.log(
+        'Report Generator Service startup completed successfully',
+      );
     } catch (error) {
-      this.logger.error('Failed to initialize Report Generator Service:', error);
+      this.logger.error(
+        'Failed to initialize Report Generator Service:',
+        error,
+      );
       throw error;
     }
   }
 
   async onApplicationShutdown(): Promise<void> {
     this.logger.log('Report Generator Service shutting down...');
-    
+
     try {
       // Stop health check monitoring
       if (this.healthCheckInterval) {
         clearInterval(this.healthCheckInterval);
       }
-      
+
       // Clean up event subscriptions
       await this.cleanupEventSubscriptions();
-      
+
       // Clean up database connections
       await this.cleanupDatabaseConnections();
-      
+
       // Clean up NATS connections
       await this.cleanupNATSConnections();
-      
+
       // Clean up GridFS connections
       await this.cleanupGridFS();
-      
+
       this.logger.log('All connections cleaned up successfully');
-      
     } catch (error) {
       this.logger.error('Error during shutdown:', error);
     }

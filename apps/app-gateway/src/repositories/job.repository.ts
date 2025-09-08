@@ -22,10 +22,10 @@ export class JobRepository {
       });
       const savedJob = await createdJob.save();
       this.logger.log(`Created job with ID: ${savedJob._id}`);
-      
+
       // 清除相关缓存
       await this.invalidateJobCaches(savedJob);
-      
+
       return savedJob;
     } catch (error) {
       this.logger.error('Error creating job:', error);
@@ -35,7 +35,7 @@ export class JobRepository {
 
   async findById(id: string): Promise<JobDocument | null> {
     const cacheKey = this.cacheService.generateKey('db', 'job', 'id', id);
-    
+
     return this.cacheService.wrap(
       cacheKey,
       async () => {
@@ -48,21 +48,29 @@ export class JobRepository {
           throw error;
         }
       },
-      { ttl: 300000 } // 5分钟缓存(300000毫秒)，职位数据变化不频繁
+      { ttl: 300000 }, // 5分钟缓存(300000毫秒)，职位数据变化不频繁
     );
   }
 
-  async findAll(options: {
-    status?: string;
-    company?: string;
-    employmentType?: string;
-    limit?: number;
-    skip?: number;
-  } = {}): Promise<JobDocument[]> {
+  async findAll(
+    options: {
+      status?: string;
+      company?: string;
+      employmentType?: string;
+      limit?: number;
+      skip?: number;
+    } = {},
+  ): Promise<JobDocument[]> {
     // 生成基于查询参数的缓存键（稳定序列化 + SHA256，避免 Base64 截断冲突）
     const { status, company, employmentType, limit = 100, skip = 0 } = options;
-    const cacheKey = this.cacheService.getJobQueryKey({ status, company, employmentType, limit, skip });
-    
+    const cacheKey = this.cacheService.getJobQueryKey({
+      status,
+      company,
+      employmentType,
+      limit,
+      skip,
+    });
+
     return this.cacheService.wrap(
       cacheKey,
       async () => {
@@ -78,46 +86,59 @@ export class JobRepository {
             .limit(limit)
             .skip(skip)
             .exec();
-            
-          this.logger.debug(`Database query: findAll with options ${JSON.stringify(options)}, found: ${jobs.length} jobs`);
+
+          this.logger.debug(
+            `Database query: findAll with options ${JSON.stringify(options)}, found: ${jobs.length} jobs`,
+          );
           return jobs;
         } catch (error) {
           this.logger.error('Error finding jobs:', error);
           throw error;
         }
       },
-      { ttl: 120000 } // 2分钟缓存(120000毫秒)，列表查询结果变化相对频繁
+      { ttl: 120000 }, // 2分钟缓存(120000毫秒)，列表查询结果变化相对频繁
     );
   }
 
   async findByCompany(company: string, limit = 50): Promise<JobDocument[]> {
-    const cacheKey = this.cacheService.generateKey('db', 'jobs', 'company', company.toLowerCase(), limit.toString());
-    
+    const cacheKey = this.cacheService.generateKey(
+      'db',
+      'jobs',
+      'company',
+      company.toLowerCase(),
+      limit.toString(),
+    );
+
     return this.cacheService.wrap(
       cacheKey,
       async () => {
         try {
           const jobs = await this.jobModel
-            .find({ 
+            .find({
               company: new RegExp(company, 'i'),
-              status: 'active'
+              status: 'active',
             })
             .limit(limit)
             .sort({ createdAt: -1 })
             .exec();
-            
-          this.logger.debug(`Database query: findByCompany ${company}, found: ${jobs.length} jobs`);
+
+          this.logger.debug(
+            `Database query: findByCompany ${company}, found: ${jobs.length} jobs`,
+          );
           return jobs;
         } catch (error) {
           this.logger.error(`Error finding jobs by company ${company}:`, error);
           throw error;
         }
       },
-      { ttl: 180000 } // 3分钟缓存(180000毫秒)，公司职位相对稳定
+      { ttl: 180000 }, // 3分钟缓存(180000毫秒)，公司职位相对稳定
     );
   }
 
-  async findByCreatedBy(createdBy: string, limit = 100): Promise<JobDocument[]> {
+  async findByCreatedBy(
+    createdBy: string,
+    limit = 100,
+  ): Promise<JobDocument[]> {
     try {
       return await this.jobModel
         .find({ createdBy })
@@ -130,20 +151,25 @@ export class JobRepository {
     }
   }
 
-  async updateById(id: string, updateData: Partial<Job>): Promise<JobDocument | null> {
+  async updateById(
+    id: string,
+    updateData: Partial<Job>,
+  ): Promise<JobDocument | null> {
     try {
-      const updatedJob = await this.jobModel.findByIdAndUpdate(
-        id,
-        { ...updateData, updatedAt: new Date() },
-        { new: true, runValidators: true }
-      ).exec();
-      
+      const updatedJob = await this.jobModel
+        .findByIdAndUpdate(
+          id,
+          { ...updateData, updatedAt: new Date() },
+          { new: true, runValidators: true },
+        )
+        .exec();
+
       if (updatedJob) {
         this.logger.log(`Updated job with ID: ${id}`);
         // 清除相关缓存
         await this.invalidateJobCaches(updatedJob);
       }
-      
+
       return updatedJob;
     } catch (error) {
       this.logger.error(`Error updating job ${id}:`, error);
@@ -161,9 +187,9 @@ export class JobRepository {
   }
 
   async updateJdAnalysis(
-    id: string, 
-    extractedKeywords: string[], 
-    confidence: number
+    id: string,
+    extractedKeywords: string[],
+    confidence: number,
   ): Promise<JobDocument | null> {
     try {
       return await this.updateById(id, {
@@ -193,11 +219,14 @@ export class JobRepository {
     }
   }
 
-  async searchByKeywords(keywords: string[], limit = 50): Promise<JobDocument[]> {
+  async searchByKeywords(
+    keywords: string[],
+    limit = 50,
+  ): Promise<JobDocument[]> {
     try {
       const searchQuery = {
         $text: { $search: keywords.join(' ') },
-        status: 'active'
+        status: 'active',
       };
 
       return await this.jobModel
@@ -214,9 +243,9 @@ export class JobRepository {
   async findBySkills(skills: string[], limit = 50): Promise<JobDocument[]> {
     try {
       return await this.jobModel
-        .find({ 
+        .find({
           skills: { $in: skills },
-          status: 'active'
+          status: 'active',
         })
         .limit(limit)
         .sort({ createdAt: -1 })
@@ -228,71 +257,89 @@ export class JobRepository {
   }
 
   async countByStatus(): Promise<Record<string, number>> {
-    const cacheKey = this.cacheService.generateKey('db', 'jobs', 'count', 'status');
-    
+    const cacheKey = this.cacheService.generateKey(
+      'db',
+      'jobs',
+      'count',
+      'status',
+    );
+
     return this.cacheService.wrap(
       cacheKey,
       async () => {
         try {
-          const counts = await this.jobModel.aggregate([
-            {
-              $group: {
-                _id: '$status',
-                count: { $sum: 1 }
-              }
-            }
-          ]).exec();
+          const counts = await this.jobModel
+            .aggregate([
+              {
+                $group: {
+                  _id: '$status',
+                  count: { $sum: 1 },
+                },
+              },
+            ])
+            .exec();
 
           const result: Record<string, number> = {};
-          counts.forEach(item => {
+          counts.forEach((item) => {
             result[item._id] = item.count;
           });
-          
-          this.logger.debug(`Database query: countByStatus, found: ${Object.keys(result).length} statuses`);
+
+          this.logger.debug(
+            `Database query: countByStatus, found: ${Object.keys(result).length} statuses`,
+          );
           return result;
         } catch (error) {
           this.logger.error('Error counting jobs by status:', error);
           throw error;
         }
       },
-      { ttl: 600000 } // 10分钟缓存(600000毫秒)，统计数据变化不频繁
+      { ttl: 600000 }, // 10分钟缓存(600000毫秒)，统计数据变化不频繁
     );
   }
 
   async countByCompany(): Promise<Array<{ company: string; count: number }>> {
-    const cacheKey = this.cacheService.generateKey('db', 'jobs', 'count', 'company');
-    
+    const cacheKey = this.cacheService.generateKey(
+      'db',
+      'jobs',
+      'count',
+      'company',
+    );
+
     return this.cacheService.wrap(
       cacheKey,
       async () => {
         try {
-          const result = await this.jobModel.aggregate([
-            { $match: { status: 'active' } },
-            {
-              $group: {
-                _id: '$company',
-                count: { $sum: 1 }
-              }
-            },
-            { $sort: { count: -1 } },
-            { $limit: 10 },
-            {
-              $project: {
-                company: '$_id',
-                count: 1,
-                _id: 0
-              }
-            }
-          ]).exec();
-          
-          this.logger.debug(`Database query: countByCompany, found: ${result.length} companies`);
+          const result = await this.jobModel
+            .aggregate([
+              { $match: { status: 'active' } },
+              {
+                $group: {
+                  _id: '$company',
+                  count: { $sum: 1 },
+                },
+              },
+              { $sort: { count: -1 } },
+              { $limit: 10 },
+              {
+                $project: {
+                  company: '$_id',
+                  count: 1,
+                  _id: 0,
+                },
+              },
+            ])
+            .exec();
+
+          this.logger.debug(
+            `Database query: countByCompany, found: ${result.length} companies`,
+          );
           return result;
         } catch (error) {
           this.logger.error('Error counting jobs by company:', error);
           throw error;
         }
       },
-      { ttl: 900000 } // 15分钟缓存(900000毫秒)，公司统计数据变化很不频繁
+      { ttl: 900000 }, // 15分钟缓存(900000毫秒)，公司统计数据变化很不频繁
     );
   }
 
@@ -301,7 +348,7 @@ export class JobRepository {
    */
   async healthCheck(): Promise<{ status: string; count: number }> {
     const cacheKey = this.cacheService.generateKey('db', 'jobs', 'health');
-    
+
     return this.cacheService.wrap(
       cacheKey,
       async () => {
@@ -310,17 +357,17 @@ export class JobRepository {
           this.logger.debug(`Database query: healthCheck, count: ${count}`);
           return {
             status: 'healthy',
-            count
+            count,
           };
         } catch (error) {
           this.logger.error('Job repository health check failed:', error);
           return {
             status: 'unhealthy',
-            count: -1
+            count: -1,
           };
         }
       },
-      { ttl: 60000 } // 1分钟缓存(60000毫秒)，健康检查需要相对实时
+      { ttl: 60000 }, // 1分钟缓存(60000毫秒)，健康检查需要相对实时
     );
   }
 
@@ -337,13 +384,14 @@ export class JobRepository {
 
       const sampleJob = {
         title: '高级 Python 工程师',
-        description: '我们正在寻找一位经验丰富的Python工程师，负责后端系统开发和维护。要求具备Python、Django/FastAPI框架经验，熟悉数据库设计和性能优化。',
+        description:
+          '我们正在寻找一位经验丰富的Python工程师，负责后端系统开发和维护。要求具备Python、Django/FastAPI框架经验，熟悉数据库设计和性能优化。',
         requirements: [
           { skill: 'Python', level: 'required', importance: 10 },
           { skill: 'Django', level: 'required', importance: 8 },
           { skill: 'FastAPI', level: 'preferred', importance: 7 },
           { skill: 'PostgreSQL', level: 'required', importance: 7 },
-          { skill: 'Redis', level: 'preferred', importance: 6 }
+          { skill: 'Redis', level: 'preferred', importance: 6 },
         ],
         skills: ['Python', 'Django', 'FastAPI', 'PostgreSQL', 'Redis'],
         company: '科技创新公司',
@@ -353,10 +401,16 @@ export class JobRepository {
         salaryMax: 40000,
         salaryCurrency: 'CNY',
         status: 'active',
-        extractedKeywords: ['Python', 'Django', 'FastAPI', '后端开发', '数据库设计'],
+        extractedKeywords: [
+          'Python',
+          'Django',
+          'FastAPI',
+          '后端开发',
+          '数据库设计',
+        ],
         jdExtractionConfidence: 0.95,
         jdProcessedAt: new Date(),
-        createdBy: 'admin'
+        createdBy: 'admin',
       };
 
       await this.create(sampleJob);
@@ -378,17 +432,35 @@ export class JobRepository {
       ];
 
       // 清除统计缓存
-      await this.cacheService.del(this.cacheService.generateKey('db', 'jobs', 'count', 'status'));
-      await this.cacheService.del(this.cacheService.generateKey('db', 'jobs', 'count', 'company'));
-      await this.cacheService.del(this.cacheService.generateKey('db', 'jobs', 'health'));
+      await this.cacheService.del(
+        this.cacheService.generateKey('db', 'jobs', 'count', 'status'),
+      );
+      await this.cacheService.del(
+        this.cacheService.generateKey('db', 'jobs', 'count', 'company'),
+      );
+      await this.cacheService.del(
+        this.cacheService.generateKey('db', 'jobs', 'health'),
+      );
 
       if (job) {
         // 清除特定职位的缓存
-        await this.cacheService.del(this.cacheService.generateKey('db', 'job', 'id', job._id.toString()));
-        
+        const jobId =
+          (job as any)._id?.toString() || job.id?.toString() || 'unknown';
+        await this.cacheService.del(
+          this.cacheService.generateKey('db', 'job', 'id', jobId),
+        );
+
         // 清除公司相关缓存
         if (job.company) {
-          await this.cacheService.del(this.cacheService.generateKey('db', 'jobs', 'company', job.company.toLowerCase(), '50'));
+          await this.cacheService.del(
+            this.cacheService.generateKey(
+              'db',
+              'jobs',
+              'company',
+              job.company.toLowerCase(),
+              '50',
+            ),
+          );
         }
       }
 

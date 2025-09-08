@@ -1,5 +1,10 @@
 import { Directive, Input, forwardRef } from '@angular/core';
-import { NG_VALIDATORS, Validator, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  NG_VALIDATORS,
+  Validator,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
 
 @Directive({
   selector: '[arcPattern]',
@@ -8,9 +13,9 @@ import { NG_VALIDATORS, Validator, AbstractControl, ValidationErrors } from '@an
     {
       provide: NG_VALIDATORS,
       useExisting: forwardRef(() => PatternValidatorDirective),
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
 export class PatternValidatorDirective implements Validator {
   @Input() arcPattern!: string | RegExp;
@@ -21,18 +26,21 @@ export class PatternValidatorDirective implements Validator {
       return null;
     }
 
-    const pattern = typeof this.arcPattern === 'string' 
-      ? new RegExp(this.arcPattern) 
-      : this.arcPattern;
+    const pattern =
+      typeof this.arcPattern === 'string'
+        ? new RegExp(this.arcPattern)
+        : this.arcPattern;
 
     const valid = pattern.test(control.value);
 
-    return valid ? null : { 
-      pattern: {
-        message: this.patternMessage || '输入格式不正确',
-        actualValue: control.value,
-        requiredPattern: this.arcPattern.toString()
-      }
-    };
+    return valid
+      ? null
+      : {
+          pattern: {
+            message: this.patternMessage || '输入格式不正确',
+            actualValue: control.value,
+            requiredPattern: this.arcPattern.toString(),
+          },
+        };
   }
 }

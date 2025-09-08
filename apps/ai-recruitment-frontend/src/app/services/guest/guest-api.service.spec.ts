@@ -1,5 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import {
+  HttpClientTestingModule,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import { GuestApiService } from './guest-api.service';
 import { DeviceIdService } from './device-id.service';
 
@@ -26,7 +29,9 @@ describe('GuestApiService', () => {
 
     service = TestBed.inject(GuestApiService);
     httpMock = TestBed.inject(HttpTestingController);
-    mockDeviceIdService = TestBed.inject(DeviceIdService) as jest.Mocked<DeviceIdService>;
+    mockDeviceIdService = TestBed.inject(
+      DeviceIdService,
+    ) as jest.Mocked<DeviceIdService>;
   });
 
   afterEach(() => {
@@ -76,7 +81,10 @@ describe('GuestApiService', () => {
       });
 
       const req = httpMock.expectOne('/api/guest/status');
-      req.flush({ message: 'Internal server error' }, { status: 500, statusText: 'Server Error' });
+      req.flush(
+        { message: 'Internal server error' },
+        { status: 500, statusText: 'Server Error' },
+      );
     });
   });
 
@@ -129,7 +137,7 @@ describe('GuestApiService', () => {
       const req = httpMock.expectOne('/api/guest/feedback-code');
       req.flush(
         { message: 'Feedback code not needed' },
-        { status: 400, statusText: 'Bad Request' }
+        { status: 400, statusText: 'Bad Request' },
       );
     });
   });
@@ -165,7 +173,7 @@ describe('GuestApiService', () => {
       const req = httpMock.expectOne('/api/guest/redeem');
       req.flush(
         { message: 'Invalid feedback code' },
-        { status: 400, statusText: 'Bad Request' }
+        { status: 400, statusText: 'Bad Request' },
       );
     });
   });
@@ -197,12 +205,12 @@ describe('GuestApiService', () => {
 
       const req = httpMock.expectOne('/api/guest/check-usage');
       req.flush(
-        { 
+        {
           canUse: false,
           message: 'Usage limit exceeded',
           needsFeedbackCode: true,
         },
-        { status: 429, statusText: 'Too Many Requests' }
+        { status: 429, statusText: 'Too Many Requests' },
       );
     });
   });
@@ -229,14 +237,16 @@ describe('GuestApiService', () => {
         },
       };
 
-      service.analyzeResume(mockFile, candidateName, candidateEmail, notes).subscribe((response) => {
-        expect(response).toEqual(mockResponse);
-      });
+      service
+        .analyzeResume(mockFile, candidateName, candidateEmail, notes)
+        .subscribe((response) => {
+          expect(response).toEqual(mockResponse);
+        });
 
       const req = httpMock.expectOne('/api/guest/resume/analyze');
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toBeInstanceOf(FormData);
-      
+
       const formData = req.request.body as FormData;
       expect(formData.get('resume')).toBe(mockFile);
       expect(formData.get('candidateName')).toBe(candidateName);
@@ -289,7 +299,13 @@ describe('GuestApiService', () => {
           progress: 100,
           results: {
             personalInfo: { name: 'John Doe', email: 'john@example.com' },
-            skills: [{ name: 'JavaScript', category: 'Programming', proficiency: 'Advanced' }],
+            skills: [
+              {
+                name: 'JavaScript',
+                category: 'Programming',
+                proficiency: 'Advanced',
+              },
+            ],
             experience: { totalYears: 5, positions: [] },
             education: [],
             summary: { overallScore: 85, strengths: [], recommendations: [] },
@@ -302,7 +318,9 @@ describe('GuestApiService', () => {
         expect(response).toEqual(mockResponse);
       });
 
-      const req = httpMock.expectOne(`/api/guest/resume/analysis/${analysisId}`);
+      const req = httpMock.expectOne(
+        `/api/guest/resume/analysis/${analysisId}`,
+      );
       expect(req.request.method).toBe('GET');
       req.flush(mockResponse);
     });
@@ -323,7 +341,9 @@ describe('GuestApiService', () => {
         expect(response.data.progress).toBe(50);
       });
 
-      const req = httpMock.expectOne(`/api/guest/resume/analysis/${analysisId}`);
+      const req = httpMock.expectOne(
+        `/api/guest/resume/analysis/${analysisId}`,
+      );
       req.flush(mockResponse);
     });
   });
@@ -339,8 +359,16 @@ describe('GuestApiService', () => {
           results: {
             personalInfo: { name: 'Alice Chen', email: 'alice@example.com' },
             skills: [
-              { name: 'Python', category: 'Programming', proficiency: 'Expert' },
-              { name: 'Machine Learning', category: 'AI/ML', proficiency: 'Advanced' },
+              {
+                name: 'Python',
+                category: 'Programming',
+                proficiency: 'Expert',
+              },
+              {
+                name: 'Machine Learning',
+                category: 'AI/ML',
+                proficiency: 'Advanced',
+              },
             ],
             experience: { totalYears: 7, positions: [] },
             education: [],
@@ -413,7 +441,7 @@ describe('GuestApiService', () => {
         const req = httpMock.expectOne('/api/guest/status');
         req.flush(
           { message: `Error ${statusCode}` },
-          { status: statusCode, statusText: `Error ${statusCode}` }
+          { status: statusCode, statusText: `Error ${statusCode}` },
         );
       });
     });

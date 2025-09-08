@@ -6,7 +6,7 @@
 import { Logger } from '@nestjs/common';
 import { EnhancedAppException } from './enhanced-error-types';
 import { ErrorCorrelationContext, ErrorCorrelationManager } from './error-correlation';
-import { StandardizedErrorResponseFormatter } from './error-response-formatter';
+// import { StandardizedErrorResponseFormatter } from './error-response-formatter';
 
 /**
  * Log levels enum
@@ -446,7 +446,7 @@ export class StructuredErrorLogger {
   /**
    * Send to external logging system (placeholder)
    */
-  private sendToExternalLoggingSystem(entry: StructuredLogEntry): void {
+  private sendToExternalLoggingSystem(_entry: StructuredLogEntry): void {
     // Implementation would depend on your logging infrastructure
     // Examples: Send to ELK stack, Datadog, CloudWatch, etc.
     

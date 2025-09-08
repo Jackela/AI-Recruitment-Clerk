@@ -13,14 +13,20 @@ export const APP_CONFIG = {
 
   // API 配置 - 生产环境使用相对路径
   API: {
-    baseUrl: (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'),
+    baseUrl:
+      typeof window !== 'undefined'
+        ? window.location.origin
+        : 'http://localhost:3000',
     timeout: 30000,
     retryAttempts: 3,
   },
 
   // WebSocket 配置 - 生产环境使用相对路径
   WEBSOCKET: {
-    url: (typeof window !== 'undefined' ? `ws://${window.location.host}` : 'ws://localhost:3000'),
+    url:
+      typeof window !== 'undefined'
+        ? `ws://${window.location.host}`
+        : 'ws://localhost:3000',
     reconnectInterval: 3000,
     maxRetries: 5,
   },
@@ -34,10 +40,10 @@ export const APP_CONFIG = {
       warning: 8000,
       error: 10000,
     },
-    
+
     // 加载超时时间
     loadingTimeout: 30000,
-    
+
     // 动画配置
     animations: {
       fadeInDuration: 300,
@@ -57,7 +63,7 @@ export const APP_CONFIG = {
       toastDuration: 5000,
       debounceDelay: 300,
       WELCOME_DELAY: 8000,
-      INITIAL_DELAY: 2000
+      INITIAL_DELAY: 2000,
     },
   },
 
@@ -66,13 +72,13 @@ export const APP_CONFIG = {
     // 焦点管理
     focusDelay: 100,
     announceDelay: 500,
-    
+
     // 键盘导航
     keyboardNavigation: {
       skipLinkTarget: 'main-content',
       trapFocusOnModal: true,
     },
-    
+
     // 屏幕阅读器
     screenReader: {
       liveRegionDelay: 100,
@@ -84,10 +90,10 @@ export const APP_CONFIG = {
   PERFORMANCE: {
     // 图片懒加载阈值
     lazyLoadThreshold: 300,
-    
+
     // 防抖延迟
     debounceDelay: 300,
-    
+
     // 缓存配置
     cache: {
       maxAge: 5 * 60 * 1000, // 5分钟
@@ -103,7 +109,7 @@ export const APP_CONFIG = {
       backoffMultiplier: 2,
       initialDelay: 1000,
     },
-    
+
     // 错误阈值
     errorThreshold: {
       maxErrorRate: 0.1, // 10%

@@ -9,7 +9,7 @@ export interface ToastMessage {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ToastService {
   private toasts$ = new BehaviorSubject<ToastMessage[]>([]);
@@ -37,7 +37,7 @@ export class ToastService {
     // Update local toast array for backward compatibility
     const currentToasts = this.toasts$.value;
     this.toasts$.next([...currentToasts, toast]);
-    
+
     // Use ProgressFeedbackService for actual UI notification
     const title = this.getTitle(toast.type);
     const notificationId = this.progressFeedback.showNotification(
@@ -46,11 +46,11 @@ export class ToastService {
       toast.type,
       toast.duration || 5000,
       undefined,
-      false
+      false,
     );
-    
+
     this.activeToastIds.push(notificationId);
-    
+
     // Auto-remove from local array after duration
     if (toast.duration && toast.duration > 0) {
       setTimeout(() => {

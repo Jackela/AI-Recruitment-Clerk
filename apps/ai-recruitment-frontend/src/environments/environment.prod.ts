@@ -3,7 +3,7 @@ export const environment = {
   apiUrl: '/api',
   frontendUrl: '',
   // ⚡ Production API configuration
-  wsUrl: '/ws', 
+  wsUrl: '/ws',
   enableMockData: false,
-  apiTimeout: 30000
+  apiTimeout: 30000,
 };

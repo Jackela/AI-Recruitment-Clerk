@@ -1,7 +1,39 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { FeedbackCodeDto, CreateFeedbackCodeDto, MarkFeedbackCodeUsedDto, MarketingStatsDto } from '@ai-recruitment-clerk/marketing-domain';
+
+// Local DTOs for Marketing features (test-friendly and decoupled from external package)
+export interface CreateFeedbackCodeDto {
+  code: string;
+}
+
+export interface MarkFeedbackCodeUsedDto {
+  code: string;
+  alipayAccount: string;
+  questionnaireData?: any;
+}
+
+export interface FeedbackCodeDto {
+  id?: string;
+  code: string;
+  generatedAt: Date;
+  isUsed: boolean;
+  usedAt?: Date;
+  alipayAccount?: string;
+  questionnaireData?: any;
+  paymentStatus: 'pending' | 'paid' | 'rejected';
+  qualityScore?: number;
+  paymentAmount?: number;
+  createdBy?: string;
+}
+
+export interface MarketingStatsDto {
+  totalCodes: number;
+  usedCodes: number;
+  pendingPayments: number;
+  totalPaid: number;
+  averageQualityScore: number;
+}
 
 export interface FeedbackCodeDocument {
   _id?: string;
@@ -25,14 +57,19 @@ export class FeedbackCodeService {
   private readonly logger = new Logger(FeedbackCodeService.name);
 
   constructor(
-    @InjectModel('FeedbackCode') 
-    private readonly feedbackCodeModel: Model<FeedbackCodeDocument>
+    @InjectModel('FeedbackCode')
+    private readonly feedbackCodeModel: Model<FeedbackCodeDocument>,
   ) {}
 
-  async recordFeedbackCode(createDto: CreateFeedbackCodeDto, metadata?: any): Promise<FeedbackCodeDto> {
+  async recordFeedbackCode(
+    createDto: CreateFeedbackCodeDto,
+    metadata?: any,
+  ): Promise<FeedbackCodeDto> {
     try {
       // 检查反馈码是否已存在
-      const existing = await this.feedbackCodeModel.findOne({ code: createDto.code });
+      const existing = await this.feedbackCodeModel.findOne({
+        code: createDto.code,
+      });
       if (existing) {
         this.logger.warn(`反馈码已存在: ${createDto.code}`);
         return this.toDto(existing);
@@ -43,15 +80,15 @@ export class FeedbackCodeService {
         generatedAt: new Date(),
         isUsed: false,
         paymentStatus: 'pending',
-        paymentAmount: 3.00,
+        paymentAmount: 3.0,
         ipAddress: metadata?.ipAddress,
         userAgent: metadata?.userAgent,
-        sessionId: metadata?.sessionId
+        sessionId: metadata?.sessionId,
       });
 
       const saved = await feedbackCode.save();
       this.logger.log(`反馈码已记录: ${createDto.code}`);
-      
+
       return this.toDto(saved);
     } catch (error) {
       this.logger.error(`记录反馈码失败: ${createDto.code}`, error);
@@ -63,7 +100,7 @@ export class FeedbackCodeService {
     try {
       const record = await this.feedbackCodeModel.findOne({ code });
       const isValid = !!record && !record.isUsed;
-      
+
       this.logger.log(`反馈码验证: ${code} - ${isValid ? '有效' : '无效'}`);
       return isValid;
     } catch (error) {
@@ -84,37 +121,39 @@ export class FeedbackCodeService {
   }> {
     try {
       const record = await this.feedbackCodeModel.findOne({ code });
-      
+
       if (!record) {
         return {
           valid: false,
-          isUsed: false
+          isUsed: false,
         };
       }
-      
+
       return {
         valid: true,
         isUsed: record.isUsed || false,
         usedAt: record.usedAt,
         paymentStatus: record.paymentStatus,
-        qualityScore: record.qualityScore
+        qualityScore: record.qualityScore,
       };
     } catch (error) {
       this.logger.error(`获取反馈码详情失败: ${code}`, error);
       return {
         valid: false,
-        isUsed: false
+        isUsed: false,
       };
     }
   }
 
-  async markAsUsed(markUsedDto: MarkFeedbackCodeUsedDto): Promise<FeedbackCodeDto> {
+  async markAsUsed(
+    markUsedDto: MarkFeedbackCodeUsedDto,
+  ): Promise<FeedbackCodeDto> {
     try {
       const { code, alipayAccount, questionnaireData } = markUsedDto;
-      
+
       // 计算反馈质量评分
       const qualityScore = this.assessFeedbackQuality(questionnaireData);
-      
+
       const updated = await this.feedbackCodeModel.findOneAndUpdate(
         { code, isUsed: false },
         {
@@ -123,9 +162,9 @@ export class FeedbackCodeService {
           alipayAccount,
           questionnaireData,
           qualityScore,
-          paymentStatus: qualityScore >= 3 ? 'pending' : 'rejected'
+          paymentStatus: qualityScore >= 3 ? 'pending' : 'rejected',
         },
-        { new: true }
+        { new: true },
       );
 
       if (!updated) {
@@ -143,31 +182,35 @@ export class FeedbackCodeService {
   async getPendingPayments(): Promise<FeedbackCodeDto[]> {
     try {
       const pendingCodes = await this.feedbackCodeModel
-        .find({ 
-          isUsed: true, 
+        .find({
+          isUsed: true,
           paymentStatus: 'pending',
-          qualityScore: { $gte: 3 }
+          qualityScore: { $gte: 3 },
         })
         .sort({ usedAt: -1 })
         .lean();
 
-      return pendingCodes.map(code => this.toDto(code));
+      return pendingCodes.map((code) => this.toDto(code));
     } catch (error) {
       this.logger.error('获取待支付列表失败', error);
       throw error;
     }
   }
 
-  async updatePaymentStatus(code: string, status: 'paid' | 'rejected', reason?: string): Promise<FeedbackCodeDto> {
+  async updatePaymentStatus(
+    code: string,
+    status: 'paid' | 'rejected',
+    reason?: string,
+  ): Promise<FeedbackCodeDto> {
     try {
       const updated = await this.feedbackCodeModel.findOneAndUpdate(
         { code },
-        { 
+        {
           paymentStatus: status,
           paymentProcessedAt: new Date(),
-          paymentNote: reason
+          paymentNote: reason,
         },
-        { new: true }
+        { new: true },
       );
 
       if (!updated) {
@@ -186,10 +229,10 @@ export class FeedbackCodeService {
     try {
       const [
         totalCodes,
-        usedCodes, 
+        usedCodes,
         pendingPayments,
         paidCodes,
-        avgQualityResult
+        avgQualityResult,
       ] = await Promise.all([
         this.feedbackCodeModel.countDocuments(),
         this.feedbackCodeModel.countDocuments({ isUsed: true }),
@@ -197,13 +240,13 @@ export class FeedbackCodeService {
         this.feedbackCodeModel.countDocuments({ paymentStatus: 'paid' }),
         this.feedbackCodeModel.aggregate([
           { $match: { qualityScore: { $exists: true } } },
-          { $group: { _id: null, avgScore: { $avg: '$qualityScore' } } }
-        ])
+          { $group: { _id: null, avgScore: { $avg: '$qualityScore' } } },
+        ]),
       ]);
 
       const totalPaid = await this.feedbackCodeModel.aggregate([
         { $match: { paymentStatus: 'paid' } },
-        { $group: { _id: null, total: { $sum: '$paymentAmount' } } }
+        { $group: { _id: null, total: { $sum: '$paymentAmount' } } },
       ]);
 
       return {
@@ -211,7 +254,7 @@ export class FeedbackCodeService {
         usedCodes,
         pendingPayments,
         totalPaid: totalPaid[0]?.total || 0,
-        averageQualityScore: avgQualityResult[0]?.avgScore || 0
+        averageQualityScore: avgQualityResult[0]?.avgScore || 0,
       };
     } catch (error) {
       this.logger.error('获取营销统计失败', error);
@@ -221,31 +264,40 @@ export class FeedbackCodeService {
 
   private assessFeedbackQuality(questionnaireData: any): number {
     if (!questionnaireData) return 0;
-    
+
     let score = 1; // 基础分
-    
+
     // 检查文本字段长度和质量
     const textFields = [
       questionnaireData.problems,
       questionnaireData.favorite_features,
       questionnaireData.improvements,
-      questionnaireData.additional_features
-    ].filter(field => field && typeof field === 'string');
-    
+      questionnaireData.additional_features,
+    ].filter((field) => field && typeof field === 'string');
+
     // 每个有效的文本字段加分
-    textFields.forEach(text => {
+    textFields.forEach((text) => {
       if (text.length > 10) {
         score += 1;
       }
     });
-    
+
     // 检查建设性意见
     const fullText = textFields.join(' ').toLowerCase();
-    const constructiveWords = ['建议', '希望', '应该', '可以', '改进', '优化', '增加', '需要'];
-    if (constructiveWords.some(word => fullText.includes(word))) {
+    const constructiveWords = [
+      '建议',
+      '希望',
+      '应该',
+      '可以',
+      '改进',
+      '优化',
+      '增加',
+      '需要',
+    ];
+    if (constructiveWords.some((word) => fullText.includes(word))) {
       score += 1;
     }
-    
+
     // 评分范围限制在1-5
     return Math.min(Math.max(score, 1), 5);
   }
@@ -262,20 +314,24 @@ export class FeedbackCodeService {
       paymentStatus: document.paymentStatus,
       qualityScore: document.qualityScore,
       paymentAmount: document.paymentAmount,
-      createdBy: document.createdBy
+      createdBy: document.createdBy,
     };
   }
 
   // 管理员功能：批量处理支付
-  async batchUpdatePaymentStatus(codes: string[], status: 'paid' | 'rejected', reason?: string): Promise<number> {
+  async batchUpdatePaymentStatus(
+    codes: string[],
+    status: 'paid' | 'rejected',
+    reason?: string,
+  ): Promise<number> {
     try {
       const result = await this.feedbackCodeModel.updateMany(
         { code: { $in: codes } },
-        { 
+        {
           paymentStatus: status,
           paymentProcessedAt: new Date(),
-          paymentNote: reason
-        }
+          paymentNote: reason,
+        },
       );
 
       this.logger.log(`批量更新支付状态: ${result.modifiedCount} 条记录`);
@@ -287,18 +343,22 @@ export class FeedbackCodeService {
   }
 
   // 标记反馈码已使用
-  async markFeedbackCodeAsUsed(markUsedDto: MarkFeedbackCodeUsedDto): Promise<FeedbackCodeDto> {
+  async markFeedbackCodeAsUsed(
+    markUsedDto: MarkFeedbackCodeUsedDto,
+  ): Promise<FeedbackCodeDto> {
     try {
       const updated = await this.feedbackCodeModel.findOneAndUpdate(
         { code: markUsedDto.code, isUsed: false },
-        { 
+        {
           isUsed: true,
           usedAt: new Date(),
           alipayAccount: markUsedDto.alipayAccount,
           questionnaireData: markUsedDto.questionnaireData,
-          qualityScore: markUsedDto.questionnaireData ? this.assessFeedbackQuality(markUsedDto.questionnaireData) : undefined
+          qualityScore: markUsedDto.questionnaireData
+            ? this.assessFeedbackQuality(markUsedDto.questionnaireData)
+            : undefined,
         },
-        { new: true }
+        { new: true },
       );
 
       if (!updated) {
@@ -321,7 +381,7 @@ export class FeedbackCodeService {
 
       const result = await this.feedbackCodeModel.deleteMany({
         isUsed: false,
-        generatedAt: { $lt: cutoffDate }
+        generatedAt: { $lt: cutoffDate },
       });
 
       this.logger.log(`清理过期反馈码: ${result.deletedCount} 条记录`);

@@ -16,17 +16,17 @@ describe('Agent-6: Gateway Integration Layer - Unit Tests', () => {
     find: jest.fn(),
     countDocuments: jest.fn(),
     deleteMany: jest.fn(),
-    updateMany: jest.fn()
+    updateMany: jest.fn(),
   };
 
   const mockNatsClient = {
-    publishEvent: jest.fn()
+    publishEvent: jest.fn(),
   };
 
   const mockCacheManager = {
     get: jest.fn(),
     set: jest.fn(),
-    del: jest.fn()
+    del: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -34,32 +34,36 @@ describe('Agent-6: Gateway Integration Layer - Unit Tests', () => {
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
-          ignoreEnvFile: true
+          ignoreEnvFile: true,
         }),
         CacheModule.register({
-          isGlobal: true
-        })
+          isGlobal: true,
+        }),
       ],
       providers: [
         AnalyticsIntegrationService,
         AnalyticsEventRepository,
         {
           provide: getModelToken('AnalyticsEvent'),
-          useValue: mockAnalyticsEventModel
+          useValue: mockAnalyticsEventModel,
         },
         {
           provide: NatsClient,
-          useValue: mockNatsClient
+          useValue: mockNatsClient,
         },
         {
           provide: 'CACHE_MANAGER',
-          useValue: mockCacheManager
-        }
+          useValue: mockCacheManager,
+        },
       ],
     }).compile();
 
-    analyticsService = module.get<AnalyticsIntegrationService>(AnalyticsIntegrationService);
-    analyticsRepository = module.get<AnalyticsEventRepository>(AnalyticsEventRepository);
+    analyticsService = module.get<AnalyticsIntegrationService>(
+      AnalyticsIntegrationService,
+    );
+    analyticsRepository = module.get<AnalyticsEventRepository>(
+      AnalyticsEventRepository,
+    );
   });
 
   afterEach(() => {
@@ -82,22 +86,26 @@ describe('Agent-6: Gateway Integration Layer - Unit Tests', () => {
     it('should handle countSessionEvents', async () => {
       const sessionId = 'test-session-123';
       mockAnalyticsEventModel.countDocuments.mockReturnValue({
-        exec: jest.fn().mockResolvedValue(5)
+        exec: jest.fn().mockResolvedValue(5),
       });
 
       const count = await analyticsRepository.countSessionEvents(sessionId);
 
       expect(count).toBe(5);
-      expect(mockAnalyticsEventModel.countDocuments).toHaveBeenCalledWith({ sessionId });
+      expect(mockAnalyticsEventModel.countDocuments).toHaveBeenCalledWith({
+        sessionId,
+      });
     });
 
     it('should handle repository errors gracefully', async () => {
       const sessionId = 'test-session-123';
       mockAnalyticsEventModel.countDocuments.mockReturnValue({
-        exec: jest.fn().mockRejectedValue(new Error('Database error'))
+        exec: jest.fn().mockRejectedValue(new Error('Database error')),
       });
 
-      await expect(analyticsRepository.countSessionEvents(sessionId)).rejects.toThrow('Failed to count session events');
+      await expect(
+        analyticsRepository.countSessionEvents(sessionId),
+      ).rejects.toThrow('Failed to count session events');
     });
   });
 
@@ -119,7 +127,9 @@ describe('Agent-6: Gateway Integration Layer - Unit Tests', () => {
     });
 
     it('should have performPrivacyComplianceCheck method', () => {
-      expect(typeof analyticsService.performPrivacyComplianceCheck).toBe('function');
+      expect(typeof analyticsService.performPrivacyComplianceCheck).toBe(
+        'function',
+      );
     });
   });
 
@@ -127,7 +137,7 @@ describe('Agent-6: Gateway Integration Layer - Unit Tests', () => {
     it('should use cache manager for session analytics', async () => {
       const sessionId = 'test-session-123';
       const cachedData = { sessionId, eventCount: 10 };
-      
+
       mockCacheManager.get.mockResolvedValue(cachedData);
 
       // 这里需要实际调用方法来测试缓存，但由于依赖域服务，先验证方法存在
@@ -162,10 +172,12 @@ describe('Agent-6: Gateway Integration Layer - Unit Tests', () => {
     it('should handle repository errors', async () => {
       // 测试仓储错误处理
       mockAnalyticsEventModel.countDocuments.mockReturnValue({
-        exec: jest.fn().mockRejectedValue(new Error('Connection failed'))
+        exec: jest.fn().mockRejectedValue(new Error('Connection failed')),
       });
 
-      await expect(analyticsRepository.countSessionEvents('test')).rejects.toThrow();
+      await expect(
+        analyticsRepository.countSessionEvents('test'),
+      ).rejects.toThrow();
     });
   });
 

@@ -4,7 +4,12 @@ import { ReportDocument } from '../schemas/report.schema';
 import { marked } from 'marked';
 
 export interface ReportTemplate {
-  type: 'individual' | 'comparison' | 'batch' | 'executive-summary' | 'interview-guide';
+  type:
+    | 'individual'
+    | 'comparison'
+    | 'batch'
+    | 'executive-summary'
+    | 'interview-guide';
   format: 'markdown' | 'html' | 'json' | 'pdf' | 'excel';
   template: string;
   styles?: string;
@@ -39,16 +44,19 @@ export interface GeneratedReportFile {
 @Injectable()
 export class ReportTemplatesService {
   private readonly logger = new Logger(ReportTemplatesService.name);
-  
-  constructor(
-    private readonly gridFsService: GridFsService,
-  ) {}
+
+  constructor(private readonly gridFsService: GridFsService) {}
 
   async generateReportInFormat(
     reportData: ReportDocument,
     format: 'markdown' | 'html' | 'json' | 'pdf' | 'excel',
-    templateType: 'individual' | 'comparison' | 'batch' | 'executive-summary' | 'interview-guide' = 'individual',
-    additionalData?: any
+    templateType:
+      | 'individual'
+      | 'comparison'
+      | 'batch'
+      | 'executive-summary'
+      | 'interview-guide' = 'individual',
+    additionalData?: any,
   ): Promise<GeneratedReportFile> {
     try {
       this.logger.debug(`Generating ${format} report for ${templateType}`);
@@ -81,15 +89,21 @@ export class ReportTemplatesService {
           break;
         case 'excel':
           content = await this.generateExcelReport(templateType, variables);
-          mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+          mimeType =
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
           extension = 'xlsx';
           break;
         default:
           throw new Error(`Unsupported format: ${format}`);
       }
 
-      const filename = this.generateFilename(templateType, reportData.jobId, reportData.resumeId, extension);
-      
+      const filename = this.generateFilename(
+        templateType,
+        reportData.jobId,
+        reportData.resumeId,
+        extension,
+      );
+
       const metadata: ReportFileMetadata = {
         reportType: format,
         jobId: reportData.jobId,
@@ -106,13 +120,12 @@ export class ReportTemplatesService {
         mimeType,
         metadata,
       };
-
     } catch (error) {
       this.logger.error('Failed to generate report in format', {
         error: error.message,
         format,
         templateType,
-        reportData: { jobId: reportData.jobId, resumeId: reportData.resumeId }
+        reportData: { jobId: reportData.jobId, resumeId: reportData.resumeId },
       });
       throw error;
     }
@@ -120,7 +133,7 @@ export class ReportTemplatesService {
 
   private async generateMarkdownReport(
     templateType: string,
-    variables: TemplateVariables
+    variables: TemplateVariables,
   ): Promise<string> {
     const template = this.getMarkdownTemplate(templateType);
     return this.interpolateTemplate(template, variables);
@@ -128,19 +141,22 @@ export class ReportTemplatesService {
 
   private async generateHtmlReport(
     templateType: string,
-    variables: TemplateVariables
+    variables: TemplateVariables,
   ): Promise<string> {
     // First generate markdown, then convert to HTML with custom styling
-    const markdownContent = await this.generateMarkdownReport(templateType, variables);
+    const markdownContent = await this.generateMarkdownReport(
+      templateType,
+      variables,
+    );
     const htmlContent = await marked.parse(markdownContent);
     const styles = this.getHtmlStyles(templateType);
-    
+
     return this.wrapInHtmlTemplate(htmlContent, styles, variables);
   }
 
   private async generateJsonReport(
     templateType: string,
-    variables: TemplateVariables
+    variables: TemplateVariables,
   ): Promise<string> {
     const jsonData = {
       metadata: {
@@ -166,19 +182,19 @@ export class ReportTemplatesService {
 
   private async generatePdfReport(
     templateType: string,
-    variables: TemplateVariables
+    variables: TemplateVariables,
   ): Promise<string> {
     // For now, return HTML that can be converted to PDF by a PDF library
     // In production, you would use libraries like puppeteer, wkhtmltopdf, or similar
     const htmlContent = await this.generateHtmlReport(templateType, variables);
-    
+
     // Return base64 encoded content for binary storage
     return Buffer.from(htmlContent).toString('base64');
   }
 
   private async generateExcelReport(
     templateType: string,
-    variables: TemplateVariables
+    variables: TemplateVariables,
   ): Promise<string> {
     // Simplified Excel-like data structure
     // In production, you would use libraries like exceljs or xlsx
@@ -193,11 +209,12 @@ export class ReportTemplatesService {
         overallScore: variables.overallScore,
         recommendation: variables.recommendation?.decision,
       },
-      skillsBreakdown: variables.skillsAnalysis?.map(skill => ({
-        skill: skill.skill,
-        score: skill.matchScore,
-        type: skill.matchType,
-      })) || [],
+      skillsBreakdown:
+        variables.skillsAnalysis?.map((skill) => ({
+          skill: skill.skill,
+          score: skill.matchScore,
+          type: skill.matchType,
+        })) || [],
       scoreBreakdown: variables.scoreBreakdown,
     };
 
@@ -206,13 +223,14 @@ export class ReportTemplatesService {
 
   private buildTemplateVariables(
     reportData: ReportDocument,
-    additionalData?: any
+    additionalData?: any,
   ): TemplateVariables {
     return {
       reportTitle: `Recruitment Analysis Report - ${reportData.jobId}`,
       jobTitle: additionalData?.jobTitle || `Position ${reportData.jobId}`,
       jobId: reportData.jobId,
-      candidateName: additionalData?.candidateName || `Candidate ${reportData.resumeId}`,
+      candidateName:
+        additionalData?.candidateName || `Candidate ${reportData.resumeId}`,
       resumeId: reportData.resumeId,
       generatedAt: reportData.generatedAt || new Date(),
       overallScore: Math.round(reportData.scoreBreakdown.overallFit),
@@ -505,7 +523,11 @@ Comparison of {{candidates.length}} candidates for the {{jobTitle}} position.
     `;
   }
 
-  private wrapInHtmlTemplate(content: string, styles: string, variables: TemplateVariables): string {
+  private wrapInHtmlTemplate(
+    content: string,
+    styles: string,
+    variables: TemplateVariables,
+  ): string {
     return `
 <!DOCTYPE html>
 <html lang="en">
@@ -539,12 +561,19 @@ Comparison of {{candidates.length}} candidates for the {{jobTitle}} position.
     `;
   }
 
-  private interpolateTemplate(template: string, variables: TemplateVariables): string {
+  private interpolateTemplate(
+    template: string,
+    variables: TemplateVariables,
+  ): string {
     let result = template;
-    
+
     // Simple variable substitution
     Object.entries(variables).forEach(([key, value]) => {
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      if (
+        typeof value === 'object' &&
+        value !== null &&
+        !Array.isArray(value)
+      ) {
         // Handle nested objects
         Object.entries(value).forEach(([nestedKey, nestedValue]) => {
           const pattern = new RegExp(`\\{\\{${key}\\.${nestedKey}\\}\\}`, 'g');
@@ -552,29 +581,37 @@ Comparison of {{candidates.length}} candidates for the {{jobTitle}} position.
         });
       } else if (Array.isArray(value)) {
         // Handle arrays (simplified - in production use proper templating engine)
-        const pattern = new RegExp(`\\{\\{#each ${key}\\}\\}([\\s\\S]*?)\\{\\{/each\\}\\}`, 'g');
+        const pattern = new RegExp(
+          `\\{\\{#each ${key}\\}\\}([\\s\\S]*?)\\{\\{/each\\}\\}`,
+          'g',
+        );
         result = result.replace(pattern, (match, itemTemplate) => {
-          return value.map(item => {
-            let itemResult = itemTemplate;
-            if (typeof item === 'object') {
-              Object.entries(item).forEach(([itemKey, itemValue]) => {
-                itemResult = itemResult.replace(new RegExp(`\\{\\{${itemKey}\\}\\}`, 'g'), String(itemValue || ''));
-              });
-            } else {
-              itemResult = itemResult.replace(/\{\{this\}\}/g, String(item));
-            }
-            return itemResult;
-          }).join('');
+          return value
+            .map((item) => {
+              let itemResult = itemTemplate;
+              if (typeof item === 'object') {
+                Object.entries(item).forEach(([itemKey, itemValue]) => {
+                  itemResult = itemResult.replace(
+                    new RegExp(`\\{\\{${itemKey}\\}\\}`, 'g'),
+                    String(itemValue || ''),
+                  );
+                });
+              } else {
+                itemResult = itemResult.replace(/\{\{this\}\}/g, String(item));
+              }
+              return itemResult;
+            })
+            .join('');
         });
       } else {
         const pattern = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
         result = result.replace(pattern, String(value || ''));
       }
     });
-    
+
     // Clean up any remaining template variables
     result = result.replace(/\{\{[^}]+\}\}/g, '');
-    
+
     return result;
   }
 
@@ -582,25 +619,31 @@ Comparison of {{candidates.length}} candidates for the {{jobTitle}} position.
     templateType: string,
     jobId: string,
     resumeId: string,
-    extension: string
+    extension: string,
   ): string {
     const timestamp = new Date().toISOString().split('T')[0];
     return `${templateType}-report-${jobId}-${resumeId}-${timestamp}.${extension}`;
   }
 
-  async saveGeneratedReport(generatedReport: GeneratedReportFile): Promise<string> {
+  async saveGeneratedReport(
+    generatedReport: GeneratedReportFile,
+  ): Promise<string> {
     return await this.gridFsService.saveReport(
       generatedReport.content,
       generatedReport.filename,
-      generatedReport.metadata
+      generatedReport.metadata,
     );
   }
 
   async saveGeneratedReportBuffer(
     content: Buffer,
     filename: string,
-    metadata: ReportFileMetadata
+    metadata: ReportFileMetadata,
   ): Promise<string> {
-    return await this.gridFsService.saveReportBuffer(content, filename, metadata);
+    return await this.gridFsService.saveReportBuffer(
+      content,
+      filename,
+      metadata,
+    );
   }
 }

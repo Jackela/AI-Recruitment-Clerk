@@ -12,13 +12,13 @@ import { AppCacheModule } from '../cache/cache.module';
     WebSocketGateway,
     CollaborationService,
     PresenceService,
-    NotificationService
+    NotificationService,
   ],
   exports: [
     WebSocketGateway,
     CollaborationService,
     PresenceService,
-    NotificationService
+    NotificationService,
   ],
 })
 export class WebSocketModule {}

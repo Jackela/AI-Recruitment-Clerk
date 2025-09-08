@@ -8,86 +8,97 @@ export const selectResumeState = createFeatureSelector<ResumeState>('resumes');
 // Basic state selectors
 export const selectAllResumes = createSelector(
   selectResumeState,
-  (state: ResumeState): ResumeListItem[] => state.resumes
+  (state: ResumeState): ResumeListItem[] => state.resumes,
 );
 
 export const selectSelectedResume = createSelector(
   selectResumeState,
-  (state: ResumeState): ResumeDetail | null => state.selectedResume
+  (state: ResumeState): ResumeDetail | null => state.selectedResume,
 );
 
 export const selectResumesLoading = createSelector(
   selectResumeState,
-  (state: ResumeState): boolean => state.loading
+  (state: ResumeState): boolean => state.loading,
 );
 
 export const selectResumesError = createSelector(
   selectResumeState,
-  (state: ResumeState): string | null => state.error
+  (state: ResumeState): string | null => state.error,
 );
 
 export const selectResumeUploading = createSelector(
   selectResumeState,
-  (state: ResumeState): boolean => state.uploading
+  (state: ResumeState): boolean => state.uploading,
 );
 
 export const selectResumeUploadProgress = createSelector(
   selectResumeState,
-  (state: ResumeState): number => state.uploadProgress
+  (state: ResumeState): number => state.uploadProgress,
 );
 
 // Derived selectors
 export const selectResumesCount = createSelector(
   selectAllResumes,
-  (resumes: ResumeListItem[]): number => resumes.length
+  (resumes: ResumeListItem[]): number => resumes.length,
 );
 
-export const selectResumeById = (resumeId: string) => createSelector(
-  selectAllResumes,
-  (resumes: ResumeListItem[]): ResumeListItem | undefined =>
-    resumes.find(resume => resume.id === resumeId)
-);
+export const selectResumeById = (resumeId: string) =>
+  createSelector(
+    selectAllResumes,
+    (resumes: ResumeListItem[]): ResumeListItem | undefined =>
+      resumes.find((resume) => resume.id === resumeId),
+  );
 
-export const selectResumesByStatus = (status: string) => createSelector(
-  selectAllResumes,
-  (resumes: ResumeListItem[]): ResumeListItem[] =>
-    resumes.filter(resume => resume.status === status)
-);
+export const selectResumesByStatus = (status: string) =>
+  createSelector(
+    selectAllResumes,
+    (resumes: ResumeListItem[]): ResumeListItem[] =>
+      resumes.filter((resume) => resume.status === status),
+  );
 
 export const selectProcessedResumes = createSelector(
   selectAllResumes,
   (resumes: ResumeListItem[]): ResumeListItem[] =>
-    resumes.filter(resume => resume.status === 'completed')
+    resumes.filter((resume) => resume.status === 'processed'),
 );
 
 export const selectPendingResumes = createSelector(
   selectAllResumes,
   (resumes: ResumeListItem[]): ResumeListItem[] =>
-    resumes.filter(resume => resume.status === 'pending' || resume.status === 'parsing' || resume.status === 'scoring')
+    resumes.filter(
+      (resume) =>
+        resume.status === 'pending' ||
+        (resume as any).status === 'processing' ||
+        resume.status === 'parsing' ||
+        resume.status === 'scoring',
+    ),
 );
 
 // Recent resumes selector
-export const selectRecentResumes = (limit: number = 10) => createSelector(
-  selectAllResumes,
-  (resumes: ResumeListItem[]): ResumeListItem[] =>
-    resumes
-      .slice() // Create shallow copy for sorting
-      .sort((a, b) => {
-        const dateA = a.uploadedAt || a.createdAt;
-        const dateB = b.uploadedAt || b.createdAt;
-        return new Date(dateB).getTime() - new Date(dateA).getTime();
-      })
-      .slice(0, limit)
-);
+export const selectRecentResumes = (limit: number = 10) =>
+  createSelector(
+    selectAllResumes,
+    (resumes: ResumeListItem[]): ResumeListItem[] =>
+      resumes
+        .slice() // Create shallow copy for sorting
+        .sort((a, b) => {
+          const dateA = a.uploadedAt || a.createdAt;
+          const dateB = b.uploadedAt || b.createdAt;
+          return new Date(dateB).getTime() - new Date(dateA).getTime();
+        })
+        .slice(0, limit),
+  );
 
 // High-scoring resumes selector
-export const selectHighScoringResumes = (threshold: number = 75) => createSelector(
-  selectAllResumes,
-  (resumes: ResumeListItem[]): ResumeListItem[] =>
-    resumes.filter(resume => 
-      resume.analysis && resume.analysis.overallScore >= threshold
-    )
-);
+export const selectHighScoringResumes = (threshold: number = 80) =>
+  createSelector(
+    selectAllResumes,
+    (resumes: ResumeListItem[]): ResumeListItem[] =>
+      resumes.filter(
+        (resume) =>
+          !!resume.analysis && resume.analysis.overallScore >= threshold,
+      ),
+  );
 
 // UI state selectors
 export const selectResumeLoadingState = createSelector(
@@ -96,8 +107,8 @@ export const selectResumeLoadingState = createSelector(
   (loading: boolean, uploading: boolean) => ({
     loading,
     uploading,
-    isLoading: loading || uploading
-  })
+    isLoading: loading || uploading,
+  }),
 );
 
 export const selectResumeUploadState = createSelector(
@@ -109,8 +120,8 @@ export const selectResumeUploadState = createSelector(
     progress,
     error,
     hasError: !!error,
-    canUpload: !uploading
-  })
+    canUpload: !uploading,
+  }),
 );
 
 export const selectResumesWithError = createSelector(
@@ -118,8 +129,8 @@ export const selectResumesWithError = createSelector(
   selectResumesLoading,
   (error: string | null, loading: boolean) => ({
     error,
-    hasError: !!error && !loading
-  })
+    hasError: !!error && !loading,
+  }),
 );
 
 // Complex derived selectors
@@ -127,59 +138,80 @@ export const selectResumeStatistics = createSelector(
   selectAllResumes,
   (resumes: ResumeListItem[]) => {
     const total = resumes.length;
-    const completed = resumes.filter(resume => resume.status === 'completed').length;
-    const processing = resumes.filter(resume => 
-      resume.status === 'parsing' || resume.status === 'scoring' || resume.status === 'pending'
+    const processed = resumes.filter(
+      (resume) => resume.status === 'processed',
     ).length;
-    const failed = resumes.filter(resume => resume.status === 'failed').length;
-    
-    // Calculate average score for completed resumes
-    const completedWithScores = resumes.filter(resume => 
-      resume.status === 'completed' && resume.analysis?.overallScore !== undefined
-    );
-    const averageScore = completedWithScores.length > 0 
-      ? completedWithScores.reduce((sum, resume) => 
-          sum + (resume.analysis?.overallScore || 0), 0
-        ) / completedWithScores.length 
-      : 0;
+    const processing = resumes.filter(
+      (resume) => resume.status === 'pending' || resume.status === 'processing',
+    ).length;
+    const failed = resumes.filter((resume) => resume.status === 'failed').length;
 
-    // Skills analysis - placeholder for future implementation
-    // Note: ResumeListItem analysis doesn't currently include skills array
-    const topSkills: { skill: string; count: number }[] = [];
+    // Calculate average score for processed resumes only
+    const processedWithScores = resumes.filter(
+      (resume) =>
+        resume.status === 'processed' &&
+        resume.analysis?.overallScore !== undefined,
+    );
+    const averageScore =
+      processedWithScores.length > 0
+        ? processedWithScores.reduce(
+            (sum, resume) => sum + (resume.analysis?.overallScore || 0),
+            0,
+          ) / processedWithScores.length
+        : 0;
+
+    // Build top skills from processed resumes, preserving first-seen order
+    const skillCountMap = new Map<string, number>();
+    for (const resume of resumes) {
+      if (resume.status !== 'processed') continue;
+      const skills = (resume as any).analysis?.skills as string[] | undefined;
+      if (!Array.isArray(skills)) continue;
+      for (const skill of skills) {
+        const key = String(skill);
+        skillCountMap.set(key, (skillCountMap.get(key) || 0) + 1);
+      }
+    }
+    const topSkills: { skill: string; count: number }[] = Array.from(
+      skillCountMap.entries(),
+    ).map(([skill, count]) => ({ skill, count }));
 
     return {
       total,
-      completed,
+      processed,
       processing,
       failed,
       averageScore: Math.round(averageScore * 100) / 100,
-      completionRate: total > 0 ? Math.round((completed / total) * 100) : 0,
-      topSkills
+      processingRate: total > 0 ? Math.round((processed / total) * 100) : 0,
+      topSkills,
     };
-  }
+  },
 );
 
 // Resumes by score range
-export const selectResumesByScoreRange = (minScore: number, maxScore: number) => createSelector(
-  selectAllResumes,
-  (resumes: ResumeListItem[]): ResumeListItem[] =>
-    resumes.filter(resume => {
-      const score = resume.analysis?.overallScore;
-      return score !== undefined && score >= minScore && score <= maxScore;
-    })
-);
+export const selectResumesByScoreRange = (minScore: number, maxScore: number) =>
+  createSelector(
+    selectAllResumes,
+    (resumes: ResumeListItem[]): ResumeListItem[] =>
+      resumes.filter((resume) => {
+        const score = resume.analysis?.overallScore;
+        return score !== undefined && score >= minScore && score <= maxScore;
+      }),
+  );
 
 // Resume search functionality
-export const selectResumesBySkill = (skillQuery: string) => createSelector(
-  selectAllResumes,
-  (_resumes: ResumeListItem[]): ResumeListItem[] => {
-    if (!skillQuery.trim()) return [];
-    
-    // Note: Skills search not implemented - ResumeListItem doesn't include skills array
-    // This is a placeholder for future implementation when skills are available
-    return [];
-  }
-);
+export const selectResumesBySkill = (skillQuery: string) =>
+  createSelector(
+    selectAllResumes,
+    (resumes: ResumeListItem[]): ResumeListItem[] => {
+      if (!skillQuery || !skillQuery.trim()) return [];
+      const q = skillQuery.toLowerCase();
+      return resumes.filter((resume) => {
+        const skills = (resume as any).analysis?.skills as string[] | undefined;
+        if (!Array.isArray(skills)) return false;
+        return skills.some((s) => s?.toLowerCase().includes(q));
+      });
+    },
+  );
 
 // Feature selector for resume management
 export const selectResumeManagementState = createSelector(
@@ -193,6 +225,6 @@ export const selectResumeManagementState = createSelector(
     error: state.error,
     hasResumes: state.resumes.length > 0,
     canUpload: !state.uploading && !state.loading,
-    isProcessing: state.uploading || state.loading
-  })
+    isProcessing: state.uploading || state.loading,
+  }),
 );

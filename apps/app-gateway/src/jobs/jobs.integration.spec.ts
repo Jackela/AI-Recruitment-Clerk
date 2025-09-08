@@ -4,7 +4,10 @@ import { JobsController } from './jobs.controller';
 import { InMemoryStorageService } from './storage/in-memory-storage.service';
 import { NatsClient } from '../nats/nats.client';
 import { CreateJobDto } from './dto/create-job.dto';
-import { UserDto, UserRole } from '@ai-recruitment-clerk/user-management-domain';
+import {
+  UserDto,
+  UserRole,
+} from '@ai-recruitment-clerk/user-management-domain';
 
 describe('Jobs Integration Tests', () => {
   let controller: JobsController;
@@ -61,7 +64,8 @@ describe('Jobs Integration Tests', () => {
     it('should create a job and publish NATS event', async () => {
       const createJobDto: CreateJobDto = {
         jobTitle: 'Senior Software Engineer',
-        jdText: 'We are looking for a senior software engineer with 5+ years of experience in JavaScript, TypeScript, and Node.js. Experience with React and AWS is a plus.',
+        jdText:
+          'We are looking for a senior software engineer with 5+ years of experience in JavaScript, TypeScript, and Node.js. Experience with React and AWS is a plus.',
       };
 
       const result = await service.createJob(createJobDto, mockUser);
@@ -161,14 +165,18 @@ describe('Jobs Integration Tests', () => {
         },
       ];
 
-      const uploadResult = service.uploadResumes(jobResult.jobId, mockFiles, mockUser);
+      const uploadResult = service.uploadResumes(
+        jobResult.jobId,
+        mockFiles,
+        mockUser,
+      );
 
       expect(uploadResult).toBeDefined();
       expect(uploadResult.jobId).toBe(jobResult.jobId);
       expect(uploadResult.uploadedCount).toBe(2);
 
       // Wait a bit for async NATS publishing
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Verify NATS events were published for each resume
       expect(natsClient.publishResumeSubmitted).toHaveBeenCalledTimes(2);

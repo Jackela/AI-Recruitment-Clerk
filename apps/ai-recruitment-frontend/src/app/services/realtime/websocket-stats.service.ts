@@ -48,7 +48,7 @@ interface WebSocketErrorPayload {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class WebSocketStatsService {
   // WebSocket connection
@@ -57,7 +57,7 @@ export class WebSocketStatsService {
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
   private isConnected$ = new BehaviorSubject<boolean>(false);
-  
+
   // State management
   private destroy$ = new Subject<void>();
   private stats$ = new BehaviorSubject<RealtimeStats>({
@@ -69,16 +69,16 @@ export class WebSocketStatsService {
     queueLength: 0,
     errorRate: 0,
     uptime: 0,
-    lastUpdated: new Date()
+    lastUpdated: new Date(),
   });
-  
+
   private events$ = new Subject<AnalysisEvent>();
   private metrics$ = new BehaviorSubject<SystemMetrics>({
     cpuUsage: 0,
     memoryUsage: 0,
     diskUsage: 0,
     networkTraffic: 0,
-    timestamp: new Date()
+    timestamp: new Date(),
   });
 
   // Signals for reactive access
@@ -91,11 +91,13 @@ export class WebSocketStatsService {
     queueLength: 0,
     errorRate: 0,
     uptime: 0,
-    lastUpdated: new Date()
+    lastUpdated: new Date(),
   });
-  
+
   isConnected = signal(false);
-  connectionStatus = signal<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
+  connectionStatus = signal<
+    'connecting' | 'connected' | 'disconnected' | 'error'
+  >('disconnected');
   lastError = signal<string>('');
 
   // Mock data for development
@@ -104,12 +106,12 @@ export class WebSocketStatsService {
 
   constructor() {
     // Sync BehaviorSubjects with signals
-    this.stats$.subscribe(stats => this.stats.set(stats));
-    this.isConnected$.subscribe(connected => this.isConnected.set(connected));
-    
+    this.stats$.subscribe((stats) => this.stats.set(stats));
+    this.isConnected$.subscribe((connected) => this.isConnected.set(connected));
+
     // Start connection
     this.connect();
-    
+
     // Setup fallback to mock data if connection fails
     setTimeout(() => {
       if (!this.isConnected()) {
@@ -125,28 +127,27 @@ export class WebSocketStatsService {
     }
 
     this.connectionStatus.set('connecting');
-    
+
     try {
       // Use environment-specific WebSocket URL
       const wsUrl = this.getWebSocketUrl();
       this.ws = new WebSocket(wsUrl);
-      
+
       this.ws.onopen = () => {
         this.onOpen();
       };
-      
+
       this.ws.onmessage = (event) => {
         this.onMessage(event);
       };
-      
+
       this.ws.onclose = (event) => {
         this.onClose(event);
       };
-      
+
       this.ws.onerror = (error) => {
         this.onError(error);
       };
-      
     } catch (error) {
       console.error('Failed to create WebSocket connection:', error);
       this.connectionStatus.set('error');
@@ -158,7 +159,7 @@ export class WebSocketStatsService {
   private getWebSocketUrl(): string {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
-    
+
     // Development vs Production URLs
     if (host.includes('localhost') || host.includes('127.0.0.1')) {
       return `${protocol}//${host}/ws/stats`;
@@ -173,11 +174,11 @@ export class WebSocketStatsService {
     this.isConnected$.next(true);
     this.reconnectAttempts = 0;
     this.lastError.set('');
-    
+
     // Request initial data
     this.send({
       type: 'subscribe',
-      topics: ['stats', 'events', 'metrics']
+      topics: ['stats', 'events', 'metrics'],
     });
   }
 
@@ -194,7 +195,7 @@ export class WebSocketStatsService {
     console.log('WebSocket closed:', event.code, event.reason);
     this.connectionStatus.set('disconnected');
     this.isConnected$.next(false);
-    
+
     if (!event.wasClean && this.reconnectAttempts < this.maxReconnectAttempts) {
       this.scheduleReconnect();
     }
@@ -228,42 +229,50 @@ export class WebSocketStatsService {
   private updateStats(payload: Partial<RealtimeStats>): void {
     const newStats: RealtimeStats = {
       ...payload,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
     this.stats$.next(newStats);
   }
 
-  private handleAnalysisEvent(payload: Omit<AnalysisEvent, 'timestamp'> & { timestamp: string | Date }): void {
+  private handleAnalysisEvent(
+    payload: Omit<AnalysisEvent, 'timestamp'> & { timestamp: string | Date },
+  ): void {
     const event: AnalysisEvent = {
       ...payload,
-      timestamp: new Date(payload.timestamp)
+      timestamp: new Date(payload.timestamp),
     };
     this.events$.next(event);
-    
+
     // Update relevant stats
     const currentStats = this.stats$.value;
     const updatedStats = { ...currentStats };
-    
+
     switch (event.type) {
       case 'started':
         updatedStats.activeAnalyses++;
         break;
       case 'completed':
-        updatedStats.activeAnalyses = Math.max(0, updatedStats.activeAnalyses - 1);
+        updatedStats.activeAnalyses = Math.max(
+          0,
+          updatedStats.activeAnalyses - 1,
+        );
         updatedStats.completedToday++;
         break;
       case 'failed':
-        updatedStats.activeAnalyses = Math.max(0, updatedStats.activeAnalyses - 1);
+        updatedStats.activeAnalyses = Math.max(
+          0,
+          updatedStats.activeAnalyses - 1,
+        );
         break;
     }
-    
+
     this.stats$.next(updatedStats);
   }
 
   private updateMetrics(payload: Omit<SystemMetrics, 'timestamp'>): void {
     const metrics: SystemMetrics = {
       ...payload,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
     this.metrics$.next(metrics);
   }
@@ -276,9 +285,11 @@ export class WebSocketStatsService {
   private scheduleReconnect(): void {
     this.reconnectAttempts++;
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
-    
-    console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
-    
+
+    console.log(
+      `Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`,
+    );
+
     setTimeout(() => {
       if (this.reconnectAttempts <= this.maxReconnectAttempts) {
         this.connect();
@@ -298,13 +309,13 @@ export class WebSocketStatsService {
   // Mock data for development/fallback
   private enableMockMode(): void {
     if (this.mockMode) return;
-    
+
     this.mockMode = true;
     console.log('Enabling mock data mode');
-    
+
     // Generate initial mock data
     this.generateMockStats();
-    
+
     // Update mock data periodically
     this.mockInterval = setInterval(() => {
       this.generateMockStats();
@@ -316,7 +327,7 @@ export class WebSocketStatsService {
   private generateMockStats(): void {
     const baseTime = Date.now();
     const randomVariation = () => Math.random() * 0.2 - 0.1; // ±10% variation
-    
+
     const mockStats: RealtimeStats = {
       totalAnalyses: 1247 + Math.floor(Math.random() * 10),
       activeAnalyses: Math.max(0, 8 + Math.floor(Math.random() * 6 - 3)),
@@ -326,28 +337,40 @@ export class WebSocketStatsService {
       queueLength: Math.max(0, 3 + Math.floor(Math.random() * 4 - 2)),
       errorRate: Math.max(0, Math.min(100, 2.5 + randomVariation() * 5)),
       uptime: Math.floor((baseTime - (baseTime % 86400000)) / 1000), // Seconds since midnight
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
-    
+
     this.stats$.next(mockStats);
   }
 
   private generateMockEvent(): void {
-    const eventTypes: AnalysisEvent['type'][] = ['started', 'progress', 'completed', 'failed'];
-    const randomType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
-    
+    const eventTypes: AnalysisEvent['type'][] = [
+      'started',
+      'progress',
+      'completed',
+      'failed',
+    ];
+    const randomType =
+      eventTypes[Math.floor(Math.random() * eventTypes.length)];
+
     const mockEvent: AnalysisEvent = {
       type: randomType,
       analysisId: `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      progress: randomType === 'progress' ? Math.floor(Math.random() * 100) : undefined,
-      stage: randomType === 'progress' ? ['解析简历', '技能分析', '经验匹配', '生成报告'][Math.floor(Math.random() * 4)] : undefined,
+      progress:
+        randomType === 'progress' ? Math.floor(Math.random() * 100) : undefined,
+      stage:
+        randomType === 'progress'
+          ? ['解析简历', '技能分析', '经验匹配', '生成报告'][
+              Math.floor(Math.random() * 4)
+            ]
+          : undefined,
       timestamp: new Date(),
       metadata: {
         fileSize: Math.floor(Math.random() * 5000000),
-        fileType: ['pdf', 'docx', 'doc'][Math.floor(Math.random() * 3)]
-      }
+        fileType: ['pdf', 'docx', 'doc'][Math.floor(Math.random() * 3)],
+      },
     };
-    
+
     this.events$.next(mockEvent);
   }
 
@@ -357,9 +380,9 @@ export class WebSocketStatsService {
       memoryUsage: Math.max(0, Math.min(100, 60 + Math.random() * 20 - 10)),
       diskUsage: Math.max(0, Math.min(100, 35 + Math.random() * 10 - 5)),
       networkTraffic: Math.floor(Math.random() * 1000000),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
-    
+
     this.metrics$.next(mockMetrics);
   }
 
@@ -407,12 +430,12 @@ export class WebSocketStatsService {
       clearInterval(this.mockInterval);
       this.mockInterval = null;
     }
-    
+
     if (this.ws) {
       this.ws.close();
       this.ws = null;
     }
-    
+
     this.isConnected$.next(false);
     this.connectionStatus.set('disconnected');
   }
@@ -439,7 +462,7 @@ export class WebSocketStatsService {
       status: this.connectionStatus(),
       attempts: this.reconnectAttempts,
       lastError: this.lastError(),
-      mockMode: this.mockMode
+      mockMode: this.mockMode,
     };
   }
 }

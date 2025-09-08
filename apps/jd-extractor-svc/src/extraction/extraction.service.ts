@@ -1,19 +1,25 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { LlmService } from './llm.service';
 import { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
-import { JobJdSubmittedEvent, AnalysisJdExtractedEvent } from '../dto/events.dto';
+import {
+  JobJdSubmittedEvent,
+  AnalysisJdExtractedEvent,
+} from '../dto/events.dto';
 import { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
-import { 
-  RetryUtility, 
+import {
+  RetryUtility,
   WithCircuitBreaker,
   JDExtractorException,
-  ErrorCorrelationManager
+  ErrorCorrelationManager,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 
 @Injectable()
 export class ExtractionService {
   private readonly logger = new Logger(ExtractionService.name);
-  private readonly processingJobs = new Map<string, { timestamp: number; attempts: number }>();
+  private readonly processingJobs = new Map<
+    string,
+    { timestamp: number; attempts: number }
+  >();
   private readonly JOB_TIMEOUT_MS = 300000; // 5 minutes
   private readonly MAX_CONCURRENT_JOBS = 10;
 
@@ -24,19 +30,25 @@ export class ExtractionService {
 
   async handleJobJdSubmitted(event: JobJdSubmittedEvent): Promise<void> {
     const { jobId, jobTitle, jdText, timestamp } = event;
-    
-    this.logger.log(`Received job JD submitted event for jobId: ${jobId}, title: ${jobTitle}`);
+
+    this.logger.log(
+      `Received job JD submitted event for jobId: ${jobId}, title: ${jobTitle}`,
+    );
 
     // Check if we're already processing this job
     if (this.processingJobs.has(jobId)) {
-      this.logger.warn(`Job ${jobId} is already being processed, skipping duplicate event`);
+      this.logger.warn(
+        `Job ${jobId} is already being processed, skipping duplicate event`,
+      );
       return;
     }
 
     // Check concurrent job limit
     this.cleanupExpiredJobs();
     if (this.processingJobs.size >= this.MAX_CONCURRENT_JOBS) {
-      this.logger.warn(`Maximum concurrent jobs (${this.MAX_CONCURRENT_JOBS}) reached, queuing job ${jobId}`);
+      this.logger.warn(
+        `Maximum concurrent jobs (${this.MAX_CONCURRENT_JOBS}) reached, queuing job ${jobId}`,
+      );
       // In a real implementation, you would queue this job for later processing
       setTimeout(() => this.handleJobJdSubmitted(event), 5000);
       return;
@@ -48,31 +60,33 @@ export class ExtractionService {
     try {
       // Validate input with correlation context
       const correlationContext = ErrorCorrelationManager.getContext();
-      
+
       if (!jobId || !jdText || !jobTitle) {
-        throw new JDExtractorException(
-          'INVALID_EVENT_DATA',
-          {
-            provided: { 
-              jobId: !!jobId, 
-              jdText: jdText?.length || 0, 
-              jobTitle: !!jobTitle 
-            },
-            correlationId: correlationContext?.traceId
-          }
-        );
+        throw new JDExtractorException('INVALID_EVENT_DATA', {
+          provided: {
+            jobId: !!jobId,
+            jdText: jdText?.length || 0,
+            jobTitle: !!jobTitle,
+          },
+          correlationId: correlationContext?.traceId,
+        });
       }
 
-      this.logger.log(`Starting job description processing for jobId: ${jobId}`);
-      
+      this.logger.log(
+        `Starting job description processing for jobId: ${jobId}`,
+      );
+
       // Process the job description
-      const analysisResult = await this.processJobDescription(jobId, jdText, jobTitle);
-      
+      const analysisResult = await this.processJobDescription(
+        jobId,
+        jdText,
+        jobTitle,
+      );
+
       // Publish the result
       await this.publishAnalysisResult(analysisResult);
-      
+
       this.logger.log(`Successfully processed job JD for jobId: ${jobId}`);
-      
     } catch (error) {
       this.logger.error(`Error processing job JD for jobId: ${jobId}`, error);
       await this.handleProcessingError(error, jobId);
@@ -85,42 +99,42 @@ export class ExtractionService {
   @WithCircuitBreaker('llm-processing', {
     failureThreshold: 5,
     recoveryTimeout: 30000,
-    monitoringPeriod: 60000
+    monitoringPeriod: 60000,
   })
-  async processJobDescription(jobId: string, jdText: string, jobTitle: string): Promise<AnalysisJdExtractedEvent> {
+  async processJobDescription(
+    jobId: string,
+    jdText: string,
+    jobTitle: string,
+  ): Promise<AnalysisJdExtractedEvent> {
     const startTime = Date.now();
-    
+
     try {
-      this.logger.log(`Processing job description for jobId: ${jobId}, title: ${jobTitle}`);
-      
+      this.logger.log(
+        `Processing job description for jobId: ${jobId}, title: ${jobTitle}`,
+      );
+
       // Validate inputs with correlation context
       const correlationContext = ErrorCorrelationManager.getContext();
-      
+
       if (!jobId || !jdText || !jobTitle) {
-        throw new JDExtractorException(
-          'INVALID_PARAMETERS',
-          {
-            provided: {
-              jobId: !!jobId,
-              jdText: jdText?.length || 0,
-              jobTitle: !!jobTitle
-            },
-            correlationId: correlationContext?.traceId
-          }
-        );
+        throw new JDExtractorException('INVALID_PARAMETERS', {
+          provided: {
+            jobId: !!jobId,
+            jdText: jdText?.length || 0,
+            jobTitle: !!jobTitle,
+          },
+          correlationId: correlationContext?.traceId,
+        });
       }
 
       // Sanitize and validate JD text
       const sanitizedJdText = this.sanitizeJdText(jdText);
       if (sanitizedJdText.length < 50) {
-        throw new JDExtractorException(
-          'JD_TOO_SHORT',
-          {
-            actualLength: sanitizedJdText.length,
-            minimumRequired: 50,
-            jobId
-          }
-        );
+        throw new JDExtractorException('JD_TOO_SHORT', {
+          actualLength: sanitizedJdText.length,
+          minimumRequired: 50,
+          jobId,
+        });
       }
 
       // Use LLM service to extract structured data
@@ -137,23 +151,20 @@ export class ExtractionService {
           baseDelayMs: 1000,
           maxDelayMs: 10000,
           backoffMultiplier: 2,
-          jitterMs: 500
-        }
+          jitterMs: 500,
+        },
       );
-      
+
       if (!llmResponse.extractedData) {
-        throw new JDExtractorException(
-          'LLM_EMPTY_RESULT',
-          {
-            jobId,
-            jobTitle,
-            correlationId: correlationContext?.traceId
-          }
-        );
+        throw new JDExtractorException('LLM_EMPTY_RESULT', {
+          jobId,
+          jobTitle,
+          correlationId: correlationContext?.traceId,
+        });
       }
 
       const processingTimeMs = Date.now() - startTime;
-      
+
       // Create analysis result event
       const analysisResult: AnalysisJdExtractedEvent = {
         jobId,
@@ -162,12 +173,16 @@ export class ExtractionService {
         processingTimeMs,
       };
 
-      this.logger.log(`Job description processing completed for jobId: ${jobId}, processing time: ${processingTimeMs}ms`);
-      
+      this.logger.log(
+        `Job description processing completed for jobId: ${jobId}, processing time: ${processingTimeMs}ms`,
+      );
+
       return analysisResult;
-      
     } catch (error) {
-      this.logger.error(`Failed to process job description for jobId: ${jobId}`, error);
+      this.logger.error(
+        `Failed to process job description for jobId: ${jobId}`,
+        error,
+      );
       throw error;
     }
   }
@@ -175,24 +190,23 @@ export class ExtractionService {
   async publishAnalysisResult(result: AnalysisJdExtractedEvent): Promise<void> {
     try {
       this.logger.log(`Publishing analysis result for jobId: ${result.jobId}`);
-      
+
       // Validate the result before publishing
       if (!result.jobId || !result.extractedData || !result.timestamp) {
-        throw new JDExtractorException(
-          'INVALID_ANALYSIS_RESULT',
-          {
-            provided: {
-              jobId: !!result.jobId,
-              extractedData: !!result.extractedData,
-              timestamp: !!result.timestamp
-            }
-          }
-        );
+        throw new JDExtractorException('INVALID_ANALYSIS_RESULT', {
+          provided: {
+            jobId: !!result.jobId,
+            extractedData: !!result.extractedData,
+            timestamp: !!result.timestamp,
+          },
+        });
       }
 
       // Validate extracted data structure
       if (!this.validateExtractedData(result.extractedData)) {
-        this.logger.warn(`Analysis result validation failed for jobId: ${result.jobId}, publishing anyway`);
+        this.logger.warn(
+          `Analysis result validation failed for jobId: ${result.jobId}, publishing anyway`,
+        );
       }
 
       // Publish through shared NATS service
@@ -203,22 +217,23 @@ export class ExtractionService {
         confidence: 0.85, // Default confidence for LLM extraction
         extractionMethod: 'llm-structured',
       });
-      
+
       if (!publishResult.success) {
-        throw new JDExtractorException(
-          'PUBLISH_FAILED',
-          {
-            jobId: result.jobId,
-            error: publishResult.error,
-            messageId: publishResult.messageId
-          }
-        );
+        throw new JDExtractorException('PUBLISH_FAILED', {
+          jobId: result.jobId,
+          error: publishResult.error,
+          messageId: publishResult.messageId,
+        });
       }
-      
-      this.logger.log(`Analysis result published successfully for jobId: ${result.jobId}, messageId: ${publishResult.messageId}`);
-      
+
+      this.logger.log(
+        `Analysis result published successfully for jobId: ${result.jobId}, messageId: ${publishResult.messageId}`,
+      );
     } catch (error) {
-      this.logger.error(`Failed to publish analysis result for jobId: ${result.jobId}`, error);
+      this.logger.error(
+        `Failed to publish analysis result for jobId: ${result.jobId}`,
+        error,
+      );
       throw error;
     }
   }
@@ -226,7 +241,7 @@ export class ExtractionService {
   async handleProcessingError(error: Error, jobId: string): Promise<void> {
     try {
       this.logger.error(`Handling processing error for jobId: ${jobId}`, error);
-      
+
       // Log the error details
       this.logger.error({
         message: 'JD processing error details',
@@ -235,54 +250,58 @@ export class ExtractionService {
           name: error.name,
           message: error.message,
           stack: error.stack,
-        }
+        },
       });
 
       // Implement retry logic with exponential backoff
       const jobInfo = this.processingJobs.get(jobId);
-      
+
       // Publish error event to NATS for other services to handle
       await this.natsService.publishProcessingError(jobId, error, {
         stage: 'llm-extraction',
         retryAttempt: jobInfo?.attempts || 1,
       });
-      const shouldRetry = this.shouldRetryProcessing(error, jobId) && 
-                         jobInfo && jobInfo.attempts < 3;
-      
+      const shouldRetry =
+        this.shouldRetryProcessing(error, jobId) &&
+        jobInfo &&
+        jobInfo.attempts < 3;
+
       if (shouldRetry) {
         jobInfo!.attempts++;
-        this.logger.log(`Scheduling retry ${jobInfo!.attempts}/3 for jobId: ${jobId}`);
-        
-        const delay = 1000 * Math.pow(2, jobInfo!.attempts - 1) + Math.random() * 1000;
+        this.logger.log(
+          `Scheduling retry ${jobInfo!.attempts}/3 for jobId: ${jobId}`,
+        );
+
+        const delay =
+          1000 * Math.pow(2, jobInfo!.attempts - 1) + Math.random() * 1000;
         setTimeout(async () => {
           try {
             await this.handleJobJdSubmitted({
               jobId,
               jobTitle: 'Retry Job',
               jdText: 'Retry processing',
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
             } as JobJdSubmittedEvent);
           } catch (retryError) {
             this.logger.error(`Retry failed for jobId: ${jobId}`, retryError);
           }
         }, delay);
       }
-      
     } catch (publishError) {
-      this.logger.error(`Failed to handle processing error for jobId: ${jobId}`, publishError);
+      this.logger.error(
+        `Failed to handle processing error for jobId: ${jobId}`,
+        publishError,
+      );
       // Don't throw here to avoid infinite loops
     }
   }
 
   private sanitizeJdText(jdText: string): string {
     if (!jdText || typeof jdText !== 'string') {
-      throw new JDExtractorException(
-        'INVALID_JD_TEXT',
-        {
-          provided: typeof jdText,
-          expected: 'string'
-        }
-      );
+      throw new JDExtractorException('INVALID_JD_TEXT', {
+        provided: typeof jdText,
+        expected: 'string',
+      });
     }
 
     // Basic sanitization
@@ -302,7 +321,10 @@ export class ExtractionService {
       }
 
       // Check requirements structure
-      if (!data.requirements.technical || !Array.isArray(data.requirements.technical)) {
+      if (
+        !data.requirements.technical ||
+        !Array.isArray(data.requirements.technical)
+      ) {
         return false;
       }
 
@@ -310,16 +332,25 @@ export class ExtractionService {
         return false;
       }
 
-      if (!data.requirements.experience || typeof data.requirements.experience !== 'string') {
+      if (
+        !data.requirements.experience ||
+        typeof data.requirements.experience !== 'string'
+      ) {
         return false;
       }
 
-      if (!data.requirements.education || typeof data.requirements.education !== 'string') {
+      if (
+        !data.requirements.education ||
+        typeof data.requirements.education !== 'string'
+      ) {
         return false;
       }
 
       // Check responsibilities
-      if (!Array.isArray(data.responsibilities) || data.responsibilities.length === 0) {
+      if (
+        !Array.isArray(data.responsibilities) ||
+        data.responsibilities.length === 0
+      ) {
         return false;
       }
 
@@ -346,17 +377,22 @@ export class ExtractionService {
     ];
 
     const errorMessage = error.message.toLowerCase();
-    const isRetryable = retryableErrors.some(retryableError => 
-      errorMessage.includes(retryableError)
+    const isRetryable = retryableErrors.some((retryableError) =>
+      errorMessage.includes(retryableError),
     );
 
     // Don't retry validation errors or permanent failures
-    if (errorMessage.includes('invalid') || errorMessage.includes('validation failed')) {
+    if (
+      errorMessage.includes('invalid') ||
+      errorMessage.includes('validation failed')
+    ) {
       return false;
     }
 
-    this.logger.log(`Error ${isRetryable ? 'is' : 'is not'} retryable for jobId: ${jobId}: ${error.message}`);
-    
+    this.logger.log(
+      `Error ${isRetryable ? 'is' : 'is not'} retryable for jobId: ${jobId}: ${error.message}`,
+    );
+
     return isRetryable;
   }
 
@@ -384,14 +420,19 @@ export class ExtractionService {
   }
 
   // Get processing job details
-  getProcessingJobDetails(): Array<{ jobId: string; timestamp: number; attempts: number; age: number }> {
+  getProcessingJobDetails(): Array<{
+    jobId: string;
+    timestamp: number;
+    attempts: number;
+    age: number;
+  }> {
     this.cleanupExpiredJobs();
     const now = Date.now();
     return Array.from(this.processingJobs.entries()).map(([jobId, info]) => ({
       jobId,
       timestamp: info.timestamp,
       attempts: info.attempts,
-      age: now - info.timestamp
+      age: now - info.timestamp,
     }));
   }
 
@@ -400,7 +441,7 @@ export class ExtractionService {
     try {
       const natsHealth = await this.natsService.getHealthStatus();
       const processingJobsCount = this.processingJobs.size;
-      
+
       return {
         status: natsHealth.connected ? 'healthy' : 'degraded',
         details: {
@@ -409,17 +450,16 @@ export class ExtractionService {
           processingJobsCount,
           processingJobs: this.getProcessingJobDetails(),
           memoryUsage: process.memoryUsage(),
-          uptime: process.uptime()
-        }
+          uptime: process.uptime(),
+        },
       };
     } catch (error) {
       return {
         status: 'unhealthy',
         details: {
-          error: error.message
-        }
+          error: error.message,
+        },
       };
     }
   }
 }
-

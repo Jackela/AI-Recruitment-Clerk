@@ -31,12 +31,12 @@ bootstrapApplication(App, {
     SmartPreloadingStrategy,
     {
       provide: ErrorHandler,
-      useClass: GlobalErrorHandler
+      useClass: GlobalErrorHandler,
     },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: HttpErrorInterceptor,
-      multi: true
+      multi: true,
     },
     importProvidersFrom(
       HttpClientModule,
@@ -47,28 +47,27 @@ bootstrapApplication(App, {
         scrollPositionRestoration: 'enabled',
         paramsInheritanceStrategy: 'emptyOnly',
         onSameUrlNavigation: 'reload',
-        urlUpdateStrategy: 'deferred'
+        urlUpdateStrategy: 'deferred',
       }),
-      StoreModule.forRoot({
-        jobs: jobReducer,
-        resumes: resumeReducer,
-        reports: reportReducer,
-        router: routerReducer
-      }, {
-        runtimeChecks: {
-          strictStateImmutability: isDevMode(),
-          strictActionImmutability: isDevMode(),
-          strictStateSerializability: isDevMode(),
-          strictActionSerializability: isDevMode()
+      StoreModule.forRoot(
+        {
+          jobs: jobReducer,
+          resumes: resumeReducer,
+          reports: reportReducer,
+          router: routerReducer,
         },
-        metaReducers: [],
-        initialState: {}
-      }),
-      EffectsModule.forRoot([
-        JobEffects,
-        ResumeEffects,
-        ReportEffects
-      ]),
+        {
+          runtimeChecks: {
+            strictStateImmutability: isDevMode(),
+            strictActionImmutability: isDevMode(),
+            strictStateSerializability: isDevMode(),
+            strictActionSerializability: isDevMode(),
+          },
+          metaReducers: [],
+          initialState: {},
+        },
+      ),
+      EffectsModule.forRoot([JobEffects, ResumeEffects, ReportEffects]),
       StoreRouterConnectingModule.forRoot(),
       StoreDevtoolsModule.instrument({
         maxAge: 25,
@@ -77,9 +76,9 @@ bootstrapApplication(App, {
         features: {
           pause: false,
           lock: false,
-          persist: true
-        }
-      })
-    )
-  ]
+          persist: true,
+        },
+      }),
+    ),
+  ],
 }).catch((err) => console.error(err));

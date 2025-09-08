@@ -3,7 +3,7 @@ import { AccessibilityService } from '../../services/accessibility/accessibility
 
 @Directive({
   selector: '[arcSkipNavigation]',
-  standalone: true
+  standalone: true,
 })
 export class SkipNavigationDirective implements OnInit {
   private accessibilityService = inject(AccessibilityService);
@@ -22,39 +22,43 @@ export class SkipNavigationDirective implements OnInit {
     const skipToMain = this.createSkipLink(
       'Skip to main content',
       '#main-content, main, [role="main"]',
-      'main-content-skip'
+      'main-content-skip',
     );
 
     // Navigation skip link
     const skipToNav = this.createSkipLink(
       'Skip to navigation',
       'nav, [role="navigation"], .app-navigation',
-      'navigation-skip'
+      'navigation-skip',
     );
 
     // Search skip link (if exists)
     const skipToSearch = this.createSkipLink(
       'Skip to search',
       '[role="search"], .search-container, input[type="search"]',
-      'search-skip'
+      'search-skip',
     );
 
     // Footer skip link
     const skipToFooter = this.createSkipLink(
       'Skip to footer',
       'footer, [role="contentinfo"], .app-footer',
-      'footer-skip'
+      'footer-skip',
     );
 
     // Add links to container
     skipContainer.appendChild(skipToMain);
     skipContainer.appendChild(skipToNav);
-    
+
     // Only add search link if search element exists
-    if (document.querySelector('[role="search"], .search-container, input[type="search"]')) {
+    if (
+      document.querySelector(
+        '[role="search"], .search-container, input[type="search"]',
+      )
+    ) {
       skipContainer.appendChild(skipToSearch);
     }
-    
+
     skipContainer.appendChild(skipToFooter);
 
     // Insert at the beginning of the body
@@ -64,16 +68,20 @@ export class SkipNavigationDirective implements OnInit {
     this.registerSkipShortcuts();
   }
 
-  private createSkipLink(text: string, selector: string, id: string): HTMLAnchorElement {
+  private createSkipLink(
+    text: string,
+    selector: string,
+    id: string,
+  ): HTMLAnchorElement {
     const link = document.createElement('a');
     link.href = '#';
     link.textContent = text;
     link.className = 'skip-link';
     link.id = id;
-    
+
     link.setAttribute('role', 'button');
     link.setAttribute('aria-label', text);
-    
+
     link.addEventListener('click', (event) => {
       event.preventDefault();
       this.skipToTarget(selector, text);
@@ -107,18 +115,21 @@ export class SkipNavigationDirective implements OnInit {
 
       // Set focus and announce
       this.accessibilityService.setFocus(targetElement, 'navigation');
-      this.accessibilityService.announce(`Skipped to ${description}`, 'assertive');
+      this.accessibilityService.announce(
+        `Skipped to ${description}`,
+        'assertive',
+      );
 
       // Scroll into view
       targetElement.scrollIntoView({
         behavior: 'smooth',
-        block: 'start'
+        block: 'start',
       });
     } else {
       // Announce that target was not found
       this.accessibilityService.announce(
         `${description} not found on this page`,
-        'assertive'
+        'assertive',
       );
     }
   }
@@ -129,7 +140,8 @@ export class SkipNavigationDirective implements OnInit {
       key: '1',
       altKey: true,
       description: 'Skip to main content',
-      action: () => this.skipToTarget('#main-content, main, [role="main"]', 'main content')
+      action: () =>
+        this.skipToTarget('#main-content, main, [role="main"]', 'main content'),
     });
 
     // Alt+2: Skip to navigation
@@ -137,16 +149,28 @@ export class SkipNavigationDirective implements OnInit {
       key: '2',
       altKey: true,
       description: 'Skip to navigation',
-      action: () => this.skipToTarget('nav, [role="navigation"], .app-navigation', 'navigation')
+      action: () =>
+        this.skipToTarget(
+          'nav, [role="navigation"], .app-navigation',
+          'navigation',
+        ),
     });
 
     // Alt+3: Skip to search (if exists)
-    if (document.querySelector('[role="search"], .search-container, input[type="search"]')) {
+    if (
+      document.querySelector(
+        '[role="search"], .search-container, input[type="search"]',
+      )
+    ) {
       this.accessibilityService.registerShortcut({
         key: '3',
         altKey: true,
         description: 'Skip to search',
-        action: () => this.skipToTarget('[role="search"], .search-container, input[type="search"]', 'search')
+        action: () =>
+          this.skipToTarget(
+            '[role="search"], .search-container, input[type="search"]',
+            'search',
+          ),
       });
     }
 
@@ -155,7 +179,11 @@ export class SkipNavigationDirective implements OnInit {
       key: 'f',
       altKey: true,
       description: 'Skip to footer',
-      action: () => this.skipToTarget('footer, [role="contentinfo"], .app-footer', 'footer')
+      action: () =>
+        this.skipToTarget(
+          'footer, [role="contentinfo"], .app-footer',
+          'footer',
+        ),
     });
   }
 }

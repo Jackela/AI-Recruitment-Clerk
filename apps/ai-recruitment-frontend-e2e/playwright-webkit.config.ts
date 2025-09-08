@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * WebKit-specific Playwright configuration
- * 
+ *
  * Uses external server to avoid webServer configuration issues with WebKit
  * Server must be started manually on port 4203 before running tests
  */
@@ -10,7 +10,7 @@ export default defineConfig({
   testDir: './src',
   timeout: 45000, // Standard timeout for WebKit
   expect: {
-    timeout: 10000
+    timeout: 10000,
   },
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
@@ -25,13 +25,13 @@ export default defineConfig({
     video: 'retain-on-failure',
     navigationTimeout: 30000, // WebKit connects quickly
     actionTimeout: 15000,
-    ignoreHTTPSErrors: true
+    ignoreHTTPSErrors: true,
   },
   // No webServer configuration - use external server
   projects: [
     {
       name: 'webkit',
-      use: { 
+      use: {
         ...devices['Desktop Safari'],
         // Proven WebKit configuration from successful tests
         launchOptions: {
@@ -43,15 +43,15 @@ export default defineConfig({
             '--disable-backgrounding-occluded-windows',
             '--disable-renderer-backgrounding',
             '--disable-field-trial-config',
-            '--no-first-run'
+            '--no-first-run',
           ],
-          headless: !process.env.WEBKIT_HEADED
+          headless: !process.env.WEBKIT_HEADED,
         },
         contextOptions: {
           ignoreHTTPSErrors: true,
-          bypassCSP: true
-        }
+          bypassCSP: true,
+        },
       },
-    }
+    },
   ],
 });

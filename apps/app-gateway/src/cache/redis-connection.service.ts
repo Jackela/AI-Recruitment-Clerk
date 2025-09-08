@@ -3,14 +3,23 @@
  * 专门处理Railway生产环境Redis连接问题
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(RedisConnectionService.name);
   private redisClient: any = null;
-  private connectionState: 'disconnected' | 'connecting' | 'connected' | 'error' = 'disconnected';
+  private connectionState:
+    | 'disconnected'
+    | 'connecting'
+    | 'connected'
+    | 'error' = 'disconnected';
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 10;
   private reconnectInterval: NodeJS.Timeout | null = null;
@@ -30,8 +39,10 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
    */
   private async initializeConnection(): Promise<void> {
     const redisUrl = this.configService.get('REDIS_URL');
-    const useRedis = this.configService.get('USE_REDIS_CACHE', 'true') === 'true';
-    const disableRedis = this.configService.get('DISABLE_REDIS', 'false') === 'true';
+    const useRedis =
+      this.configService.get('USE_REDIS_CACHE', 'true') === 'true';
+    const disableRedis =
+      this.configService.get('DISABLE_REDIS', 'false') === 'true';
 
     // 如果禁用Redis或没有URL
     if (!useRedis || disableRedis || !redisUrl) {
@@ -58,19 +69,23 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
 
       // 动态导入Redis客户端
       const { createClient } = await import('redis');
-      
+
       // 创建Redis客户端，增强错误处理
       this.redisClient = createClient({
         url: redisUrl,
         socket: {
-          connectTimeout: parseInt(this.configService.get('REDIS_CONNECTION_TIMEOUT', '10000')),
+          connectTimeout: parseInt(
+            this.configService.get('REDIS_CONNECTION_TIMEOUT', '10000'),
+          ),
           reconnectStrategy: (retries) => {
             if (retries > this.maxReconnectAttempts) {
               this.logger.error('❌ Redis重连次数超过限制，停止重连');
               return false;
             }
             const delay = Math.min(retries * 50, 500);
-            this.logger.warn(`🔄 Redis重连中... 第${retries}次，${delay}ms后重试`);
+            this.logger.warn(
+              `🔄 Redis重连中... 第${retries}次，${delay}ms后重试`,
+            );
             return delay;
           },
         },
@@ -84,19 +99,18 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
 
       // 连接到Redis
       await this.redisClient.connect();
-      
+
       // 测试连接
       await this.redisClient.ping();
-      
+
       this.connectionState = 'connected';
       this.reconnectAttempts = 0;
       this.logger.log('✅ Redis连接成功建立');
-
     } catch (error) {
       this.connectionState = 'error';
       this.reconnectAttempts++;
       this.logger.error(`❌ Redis连接失败: ${error.message}`);
-      
+
       // 如果重连次数未超限，启动重连
       if (this.reconnectAttempts <= this.maxReconnectAttempts) {
         this.scheduleReconnect(redisUrl);
@@ -124,7 +138,7 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
     this.redisClient.on('error', (err: Error) => {
       this.connectionState = 'error';
       this.logger.warn(`⚠️ Redis连接错误: ${err.message}`);
-      
+
       // 记录常见错误的解决建议
       if (err.message.includes('ENOTFOUND')) {
         this.logger.warn('💡 DNS解析失败，请检查Redis URL是否正确');
@@ -225,7 +239,7 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
       if (!this.redisClient || this.connectionState !== 'connected') {
         return false;
       }
-      
+
       await this.redisClient.ping();
       return true;
     } catch {

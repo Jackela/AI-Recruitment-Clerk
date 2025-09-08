@@ -3,7 +3,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AnalyticsController } from './analytics.controller';
 import { AnalyticsIntegrationService } from './analytics-integration.service';
 import { AnalyticsEventRepository } from './analytics-event.repository';
-import { AnalyticsEvent, AnalyticsEventSchema } from '../../schemas/analytics-event.schema';
+import {
+  AnalyticsEvent,
+  AnalyticsEventSchema,
+} from '../../schemas/analytics-event.schema';
 import { NatsClient } from '../../nats/nats.client';
 import { AppCacheModule } from '../../cache/cache.module';
 
@@ -15,18 +18,15 @@ import { AppCacheModule } from '../../cache/cache.module';
   imports: [
     AppCacheModule,
     MongooseModule.forFeature([
-      { name: AnalyticsEvent.name, schema: AnalyticsEventSchema }
-    ])
+      { name: AnalyticsEvent.name, schema: AnalyticsEventSchema },
+    ]),
   ],
   controllers: [AnalyticsController],
   providers: [
     AnalyticsIntegrationService,
     AnalyticsEventRepository,
-    NatsClient
+    NatsClient,
   ],
-  exports: [
-    AnalyticsIntegrationService,
-    AnalyticsEventRepository
-  ]
+  exports: [AnalyticsIntegrationService, AnalyticsEventRepository],
 })
 export class AnalyticsModule {}

@@ -27,8 +27,11 @@ export class CustomValidationPipe implements PipeTransform<any> {
 
     if (errors.length > 0) {
       const formattedErrors = this.formatErrors(errors);
-      this.logger.warn('Validation failed:', { errors: formattedErrors, value });
-      
+      this.logger.warn('Validation failed:', {
+        errors: formattedErrors,
+        value,
+      });
+
       throw new BadRequestException({
         message: 'Validation failed',
         errors: formattedErrors,
@@ -39,19 +42,26 @@ export class CustomValidationPipe implements PipeTransform<any> {
     return object;
   }
 
-  private toValidate(metatype: Function): boolean {
-    const types: Function[] = [String, Boolean, Number, Array, Object];
+  private toValidate(metatype: new (...args: any[]) => any): boolean {
+    const types: Array<new (...args: any[]) => any> = [
+      String,
+      Boolean,
+      Number,
+      Array,
+      Object,
+    ];
     return !types.includes(metatype);
   }
 
   private formatErrors(errors: ValidationError[]): any[] {
-    return errors.map(error => ({
+    return errors.map((error) => ({
       property: error.property,
       value: error.value,
       constraints: error.constraints,
-      children: error.children && error.children.length > 0
-        ? this.formatErrors(error.children)
-        : undefined,
+      children:
+        error.children && error.children.length > 0
+          ? this.formatErrors(error.children)
+          : undefined,
     }));
   }
 }
@@ -69,7 +79,7 @@ export class CrossServiceValidationPipe implements PipeTransform {
       parallel?: boolean;
       failFast?: boolean;
       timeout?: number;
-    }
+    },
   ) {}
 
   async transform(value: any, metadata: ArgumentMetadata) {
@@ -99,7 +109,7 @@ export class CrossServiceValidationPipe implements PipeTransform {
       });
 
       const results = await Promise.all(validationPromises);
-      const failedValidations = results.filter(result => !result);
+      const failedValidations = results.filter((result) => !result);
 
       if (failedValidations.length > 0) {
         throw new BadRequestException({

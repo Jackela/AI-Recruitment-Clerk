@@ -54,7 +54,8 @@ export const guestReducer = createReducer(
     maxUsage: guestDetails.maxUsage,
     remainingCount: guestDetails.maxUsage - guestDetails.usageCount,
     isLimited: guestDetails.isLimited,
-    feedbackCodeStatus: guestDetails.feedbackCodeStatus || state.feedbackCodeStatus,
+    feedbackCodeStatus:
+      guestDetails.feedbackCodeStatus || state.feedbackCodeStatus,
     isLoading: false,
     error: null,
     lastUpdated: new Date().toISOString(),
@@ -118,16 +119,19 @@ export const guestReducer = createReducer(
     error: null,
   })),
 
-  on(GuestActions.generateFeedbackCodeSuccess, (state, { feedbackResponse }) => ({
-    ...state,
-    feedbackCode: feedbackResponse.feedbackCode,
-    surveyUrl: feedbackResponse.surveyUrl,
-    feedbackCodeStatus: 'generated' as const,
-    isLoading: false,
-    error: null,
-    showFeedbackModal: true,
-    lastUpdated: new Date().toISOString(),
-  })),
+  on(
+    GuestActions.generateFeedbackCodeSuccess,
+    (state, { feedbackResponse }) => ({
+      ...state,
+      feedbackCode: feedbackResponse.feedbackCode,
+      surveyUrl: feedbackResponse.surveyUrl,
+      feedbackCodeStatus: 'generated' as const,
+      isLoading: false,
+      error: null,
+      showFeedbackModal: true,
+      lastUpdated: new Date().toISOString(),
+    }),
+  ),
 
   on(GuestActions.generateFeedbackCodeFailure, (state, { error }) => ({
     ...state,
@@ -224,7 +228,10 @@ export const guestReducer = createReducer(
     },
     currentAnalysis: {
       ...state.currentAnalysis,
-      status: analysisResults.data.status === 'completed' ? 'completed' : state.currentAnalysis.status,
+      status:
+        analysisResults.data.status === 'completed'
+          ? 'completed'
+          : state.currentAnalysis.status,
       progress: analysisResults.data.progress,
     },
     showAnalysisResults: analysisResults.data.status === 'completed',
@@ -284,26 +291,31 @@ export const guestReducer = createReducer(
     showAnalysisResults: false,
   })),
 
-  on(GuestActions.updateAnalysisProgress, (state, { analysisId, progress, status }) => ({
-    ...state,
-    currentAnalysis: state.currentAnalysis.analysisId === analysisId
-      ? {
-          ...state.currentAnalysis,
-          progress,
-          status: status as any || state.currentAnalysis.status,
-        }
-      : state.currentAnalysis,
-    analysisResults: {
-      ...state.analysisResults,
-      [analysisId]: state.analysisResults[analysisId]
-        ? {
-            ...state.analysisResults[analysisId],
-            progress,
-            status: status as any || state.analysisResults[analysisId].status,
-          }
-        : state.analysisResults[analysisId],
-    },
-  })),
+  on(
+    GuestActions.updateAnalysisProgress,
+    (state, { analysisId, progress, status }) => ({
+      ...state,
+      currentAnalysis:
+        state.currentAnalysis.analysisId === analysisId
+          ? {
+              ...state.currentAnalysis,
+              progress,
+              status: (status as any) || state.currentAnalysis.status,
+            }
+          : state.currentAnalysis,
+      analysisResults: {
+        ...state.analysisResults,
+        [analysisId]: state.analysisResults[analysisId]
+          ? {
+              ...state.analysisResults[analysisId],
+              progress,
+              status:
+                (status as any) || state.analysisResults[analysisId].status,
+            }
+          : state.analysisResults[analysisId],
+      },
+    }),
+  ),
 
   // Data management
   on(GuestActions.clearGuestData, () => ({
@@ -341,5 +353,5 @@ export const guestReducer = createReducer(
   on(GuestActions.setLoading, (state, { isLoading }) => ({
     ...state,
     isLoading,
-  }))
+  })),
 );

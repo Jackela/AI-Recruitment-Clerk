@@ -15,5 +15,5 @@ export const initialResumeState: ResumeState = {
   loading: false,
   error: null,
   uploading: false,
-  uploadProgress: 0
+  uploadProgress: 0,
 };

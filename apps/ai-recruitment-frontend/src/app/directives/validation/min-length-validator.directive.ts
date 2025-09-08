@@ -1,5 +1,10 @@
 import { Directive, Input, forwardRef } from '@angular/core';
-import { NG_VALIDATORS, Validator, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  NG_VALIDATORS,
+  Validator,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
 
 @Directive({
   selector: '[arcMinLength]',
@@ -8,9 +13,9 @@ import { NG_VALIDATORS, Validator, AbstractControl, ValidationErrors } from '@an
     {
       provide: NG_VALIDATORS,
       useExisting: forwardRef(() => MinLengthValidatorDirective),
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
 export class MinLengthValidatorDirective implements Validator {
   @Input() arcMinLength!: number;
@@ -25,12 +30,12 @@ export class MinLengthValidatorDirective implements Validator {
     const minLength = Number(this.arcMinLength);
 
     if (length < minLength) {
-      return { 
+      return {
         minLength: {
           message: this.minLengthMessage || `最少需要输入 ${minLength} 个字符`,
           actualLength: length,
-          requiredLength: minLength
-        }
+          requiredLength: minLength,
+        },
       };
     }
 

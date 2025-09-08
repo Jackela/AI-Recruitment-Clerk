@@ -5,7 +5,10 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import request from 'supertest';
 import { MarketingModule } from './marketing.module';
 import { FeedbackCodeService } from './feedback-code.service';
-import { CreateFeedbackCodeDto, MarkFeedbackCodeUsedDto } from '@ai-recruitment-clerk/marketing-domain';
+import {
+  CreateFeedbackCodeDto,
+  MarkFeedbackCodeUsedDto,
+} from './feedback-code.service';
 
 describe('Marketing Integration Tests', () => {
   let app: INestApplication;
@@ -26,15 +29,12 @@ describe('Marketing Integration Tests', () => {
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [
-        MongooseModule.forRoot(mongoUri),
-        MarketingModule,
-      ],
+      imports: [MongooseModule.forRoot(mongoUri), MarketingModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
     service = moduleFixture.get<FeedbackCodeService>(FeedbackCodeService);
-    
+
     await app.init();
   });
 
@@ -45,7 +45,7 @@ describe('Marketing Integration Tests', () => {
   describe('完整营销流程集成测试', () => {
     it('应该完成从生成反馈码到支付的完整流程', async () => {
       const feedbackCode = 'FB123456789ABCD';
-      
+
       // 1. 记录反馈码
       const recordResponse = await request(app.getHttpServer())
         .post('/api/marketing/feedback-codes/record')
@@ -68,10 +68,11 @@ describe('Marketing Integration Tests', () => {
         alipayAccount: '138****8888',
         questionnaireData: {
           problems: '系统响应速度有时候比较慢，特别是在处理大文件时',
-          favorite_features: '我最喜欢AI简历解析功能，因为它能够准确识别关键信息',
+          favorite_features:
+            '我最喜欢AI简历解析功能，因为它能够准确识别关键信息',
           improvements: '建议增加批量处理功能，优化系统响应速度',
-          additional_features: '希望能够增加移动端支持和数据导出功能'
-        }
+          additional_features: '希望能够增加移动端支持和数据导出功能',
+        },
       };
 
       const markUsedResponse = await request(app.getHttpServer())
@@ -116,8 +117,8 @@ describe('Marketing Integration Tests', () => {
           problems: '无',
           favorite_features: '好',
           improvements: '没有',
-          additional_features: ''
-        }
+          additional_features: '',
+        },
       };
 
       const response = await request(app.getHttpServer())
@@ -152,8 +153,8 @@ describe('Marketing Integration Tests', () => {
           problems: '界面有时候会卡顿，希望能够优化一下',
           favorite_features: '简历解析功能非常准确，大大提高了工作效率',
           improvements: '建议增加快捷键支持，以及更多的自定义选项',
-          additional_features: '希望增加报告导出功能'
-        }
+          additional_features: '希望增加报告导出功能',
+        },
       };
 
       const response = await request(app.getHttpServer())
@@ -174,9 +175,9 @@ describe('Marketing Integration Tests', () => {
     it('应该处理不完整的webhook数据', async () => {
       const incompleteWebhook = {
         answers: {
-          feedback_code: 'FB555666777888'
+          feedback_code: 'FB555666777888',
           // 缺少alipay_account
-        }
+        },
       };
 
       const response = await request(app.getHttpServer())
@@ -214,7 +215,7 @@ describe('Marketing Integration Tests', () => {
       const invalidDto = {
         code: feedbackCode,
         alipayAccount: 'invalid-account',
-        questionnaireData: {}
+        questionnaireData: {},
       };
 
       await request(app.getHttpServer())
@@ -229,7 +230,7 @@ describe('Marketing Integration Tests', () => {
         .post('/api/marketing/feedback-codes/mark-used')
         .send({
           alipayAccount: '138****8888',
-          questionnaireData: {}
+          questionnaireData: {},
         })
         .expect(400);
 
@@ -238,7 +239,7 @@ describe('Marketing Integration Tests', () => {
         .post('/api/marketing/feedback-codes/mark-used')
         .send({
           code: 'FB123456789ABCD',
-          questionnaireData: {}
+          questionnaireData: {},
         })
         .expect(400);
     });
@@ -260,8 +261,8 @@ describe('Marketing Integration Tests', () => {
         questionnaireData: {
           problems: '测试问题',
           favorite_features: '测试功能',
-          improvements: '测试改进建议'
-        }
+          improvements: '测试改进建议',
+        },
       };
 
       // 第一次标记为使用
@@ -280,17 +281,17 @@ describe('Marketing Integration Tests', () => {
     it('应该处理并发的反馈码生成', async () => {
       // 并发创建多个反馈码
       const codes = Array.from({ length: 10 }, (_, i) => `FB${i}${Date.now()}`);
-      
-      const promises = codes.map(code =>
+
+      const promises = codes.map((code) =>
         request(app.getHttpServer())
           .post('/api/marketing/feedback-codes/record')
-          .send({ code })
+          .send({ code }),
       );
 
       const responses = await Promise.all(promises);
 
       // 所有请求都应该成功
-      responses.forEach(response => {
+      responses.forEach((response) => {
         expect(response.status).toBe(201);
         expect(response.body.success).toBe(true);
       });
@@ -302,9 +303,13 @@ describe('Marketing Integration Tests', () => {
       const startTime = Date.now();
 
       // 创建100个反馈码
-      const codes = Array.from({ length: 100 }, (_, i) => `FB${i}${Date.now()}`);
-      
-      for (const code of codes.slice(0, 10)) { // 限制测试数量以避免超时
+      const codes = Array.from(
+        { length: 100 },
+        (_, i) => `FB${i}${Date.now()}`,
+      );
+
+      for (const code of codes.slice(0, 10)) {
+        // 限制测试数量以避免超时
         await request(app.getHttpServer())
           .post('/api/marketing/feedback-codes/record')
           .send({ code })
@@ -318,7 +323,7 @@ describe('Marketing Integration Tests', () => {
     it('统计查询应该高效执行', async () => {
       // 创建一些测试数据
       const codes = ['FB001', 'FB002', 'FB003'];
-      
+
       for (const code of codes) {
         await request(app.getHttpServer())
           .post('/api/marketing/feedback-codes/record')
@@ -327,7 +332,7 @@ describe('Marketing Integration Tests', () => {
       }
 
       const startTime = Date.now();
-      
+
       await request(app.getHttpServer())
         .get('/api/marketing/feedback-codes/stats')
         .expect(200);
@@ -340,7 +345,7 @@ describe('Marketing Integration Tests', () => {
   describe('数据库集成测试', () => {
     it('应该正确持久化数据', async () => {
       const feedbackCode = 'FB_PERSIST_TEST';
-      
+
       // 通过API创建数据
       await request(app.getHttpServer())
         .post('/api/marketing/feedback-codes/record')
@@ -358,7 +363,7 @@ describe('Marketing Integration Tests', () => {
 
     it('应该正确处理数据库事务', async () => {
       const feedbackCode = 'FB_TRANSACTION_TEST';
-      
+
       await request(app.getHttpServer())
         .post('/api/marketing/feedback-codes/record')
         .send({ code: feedbackCode })
@@ -370,8 +375,8 @@ describe('Marketing Integration Tests', () => {
         questionnaireData: {
           problems: '事务测试',
           favorite_features: '事务测试',
-          improvements: '事务测试'
-        }
+          improvements: '事务测试',
+        },
       };
 
       // 标记为使用
@@ -392,7 +397,7 @@ describe('Marketing Integration Tests', () => {
       await request(app.getHttpServer())
         .get('/api/marketing/feedback-codes/validate/NONEXISTENT')
         .expect(200) // 应该返回valid: false，而不是错误
-        .expect(res => {
+        .expect((res) => {
           expect(res.body.valid).toBe(false);
         });
     });
@@ -400,11 +405,13 @@ describe('Marketing Integration Tests', () => {
     it('应该处理恶意输入', async () => {
       // SQL注入尝试
       const maliciousCode = "FB'; DROP TABLE feedback_codes; --";
-      
+
       await request(app.getHttpServer())
-        .get(`/api/marketing/feedback-codes/validate/${encodeURIComponent(maliciousCode)}`)
+        .get(
+          `/api/marketing/feedback-codes/validate/${encodeURIComponent(maliciousCode)}`,
+        )
         .expect(200)
-        .expect(res => {
+        .expect((res) => {
           expect(res.body.valid).toBe(false);
         });
     });
@@ -416,8 +423,8 @@ describe('Marketing Integration Tests', () => {
         questionnaireData: {
           problems: 'A'.repeat(10000), // 10KB文本
           favorite_features: 'B'.repeat(5000),
-          improvements: 'C'.repeat(5000)
-        }
+          improvements: 'C'.repeat(5000),
+        },
       };
 
       // 先创建反馈码
@@ -449,8 +456,8 @@ describe('Marketing Integration Tests', () => {
         data: {
           id: expect.any(String),
           code: expect.any(String),
-          generatedAt: expect.any(String)
-        }
+          generatedAt: expect.any(String),
+        },
       });
 
       // 验证反馈码响应格式
@@ -461,7 +468,7 @@ describe('Marketing Integration Tests', () => {
       expect(validateResponse.body).toMatchObject({
         valid: expect.any(Boolean),
         code: expect.any(String),
-        timestamp: expect.any(String)
+        timestamp: expect.any(String),
       });
 
       // 统计响应格式
@@ -473,7 +480,7 @@ describe('Marketing Integration Tests', () => {
         totalParticipants: expect.any(Number),
         totalRewards: expect.any(Number),
         averageRating: expect.any(Number),
-        lastUpdated: expect.any(String)
+        lastUpdated: expect.any(String),
       });
     });
   });

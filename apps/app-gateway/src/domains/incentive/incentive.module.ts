@@ -5,6 +5,6 @@ import { IncentiveIntegrationService } from './incentive-integration.service';
 @Module({
   controllers: [IncentiveController],
   providers: [IncentiveIntegrationService],
-  exports: [IncentiveIntegrationService]
+  exports: [IncentiveIntegrationService],
 })
 export class IncentiveModule {}
