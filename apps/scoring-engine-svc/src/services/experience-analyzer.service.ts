@@ -101,7 +101,7 @@ export class ExperienceAnalyzerService {
   async analyzeExperience(
     workExperience: ResumeDTO['workExperience'],
     jobRequirements: JobRequirements,
-    industryContext?: string
+    industryContext?: string,
   ): Promise<ExperienceScore> {
     const startTime = Date.now();
 
@@ -110,24 +110,27 @@ export class ExperienceAnalyzerService {
       const analysis = await this.performExperienceAnalysis(
         workExperience,
         jobRequirements,
-        industryContext
+        industryContext,
       );
 
       // Calculate weighting factors
       const weightingFactors = this.calculateWeightingFactors(
         analysis,
-        jobRequirements
+        jobRequirements,
       );
 
       // Calculate final experience score
       const breakdown = this.calculateExperienceScore(
         analysis,
         jobRequirements,
-        weightingFactors
+        weightingFactors,
       );
 
       // Calculate confidence based on data quality and analysis depth
-      const confidence = this.calculateAnalysisConfidence(analysis, workExperience);
+      const confidence = this.calculateAnalysisConfidence(
+        analysis,
+        workExperience,
+      );
 
       const processingTime = Date.now() - startTime;
       this.logger.log(`Experience analysis completed in ${processingTime}ms`);
@@ -137,9 +140,8 @@ export class ExperienceAnalyzerService {
         analysis,
         confidence,
         weightingFactors,
-        breakdown
+        breakdown,
       };
-
     } catch (error) {
       this.logger.error('Error in experience analysis', error);
       // Fallback to basic calculation
@@ -153,7 +155,7 @@ export class ExperienceAnalyzerService {
   private async performExperienceAnalysis(
     workExperience: ResumeDTO['workExperience'],
     jobRequirements: JobRequirements,
-    industryContext?: string
+    industryContext?: string,
   ): Promise<ExperienceAnalysis> {
     // Calculate basic metrics
     const totalYears = this.calculateTotalExperience(workExperience);
@@ -163,7 +165,7 @@ export class ExperienceAnalyzerService {
     const aiAnalysis = await this.performAIExperienceAnalysis(
       workExperience,
       jobRequirements,
-      industryContext
+      industryContext,
     );
 
     // Detect career gaps
@@ -172,7 +174,7 @@ export class ExperienceAnalyzerService {
     // Calculate industry experience
     const industryExperience = await this.calculateIndustryExperience(
       workExperience,
-      industryContext
+      industryContext,
     );
 
     return {
@@ -183,7 +185,7 @@ export class ExperienceAnalyzerService {
       leadershipExperience: aiAnalysis.leadershipExperience,
       careerProgression: aiAnalysis.careerProgression,
       relevanceFactors: aiAnalysis.relevanceFactors,
-      gaps
+      gaps,
     };
   }
 
@@ -193,11 +195,14 @@ export class ExperienceAnalyzerService {
   private async performAIExperienceAnalysis(
     workExperience: ResumeDTO['workExperience'],
     jobRequirements: JobRequirements,
-    industryContext?: string
+    industryContext?: string,
   ): Promise<AIExperienceAnalysis> {
-    const experienceText = workExperience.map(exp => 
-      `${exp.position} at ${exp.company} (${exp.startDate} to ${exp.endDate}): ${exp.summary}`
-    ).join('\n\n');
+    const experienceText = workExperience
+      .map(
+        (exp) =>
+          `${exp.position} at ${exp.company} (${exp.startDate} to ${exp.endDate}): ${exp.summary}`,
+      )
+      .join('\n\n');
 
     const prompt = `
       Analyze the following work experience for a ${jobRequirements.seniority} position in ${industryContext || 'general'} industry:
@@ -266,7 +271,7 @@ export class ExperienceAnalyzerService {
             "roleSimilarityScore": "number between 0-100",
             "technologyRelevance": "number between 0-100"
           }
-        }`
+        }`,
       );
 
       return response.data as AIExperienceAnalysis;
@@ -279,14 +284,20 @@ export class ExperienceAnalyzerService {
   /**
    * Calculate total years of experience
    */
-  private calculateTotalExperience(workExperience: ResumeDTO['workExperience']): number {
-    return workExperience.reduce((total, exp) => {
-      const startDate = new Date(exp.startDate);
-      const endDate = exp.endDate === 'present' ? new Date() : new Date(exp.endDate);
-      const months = (endDate.getFullYear() - startDate.getFullYear()) * 12 +
-        (endDate.getMonth() - startDate.getMonth());
-      return total + Math.max(0, months);
-    }, 0) / 12;
+  private calculateTotalExperience(
+    workExperience: ResumeDTO['workExperience'],
+  ): number {
+    return (
+      workExperience.reduce((total, exp) => {
+        const startDate = new Date(exp.startDate);
+        const endDate =
+          exp.endDate === 'present' ? new Date() : new Date(exp.endDate);
+        const months =
+          (endDate.getFullYear() - startDate.getFullYear()) * 12 +
+          (endDate.getMonth() - startDate.getMonth());
+        return total + Math.max(0, months);
+      }, 0) / 12
+    );
   }
 
   /**
@@ -294,55 +305,66 @@ export class ExperienceAnalyzerService {
    */
   private calculateRecentExperience(
     workExperience: ResumeDTO['workExperience'],
-    recentYears: number
+    recentYears: number,
   ): number {
     const cutoffDate = new Date();
     cutoffDate.setFullYear(cutoffDate.getFullYear() - recentYears);
 
-    return workExperience.reduce((total, exp) => {
-      const startDate = new Date(exp.startDate);
-      const endDate = exp.endDate === 'present' ? new Date() : new Date(exp.endDate);
-      
-      // Only count experience that overlaps with recent period
-      if (endDate < cutoffDate) return total;
-      
-      const relevantStart = startDate > cutoffDate ? startDate : cutoffDate;
-      const months = (endDate.getFullYear() - relevantStart.getFullYear()) * 12 +
-        (endDate.getMonth() - relevantStart.getMonth());
-      
-      return total + Math.max(0, months);
-    }, 0) / 12;
+    return (
+      workExperience.reduce((total, exp) => {
+        const startDate = new Date(exp.startDate);
+        const endDate =
+          exp.endDate === 'present' ? new Date() : new Date(exp.endDate);
+
+        // Only count experience that overlaps with recent period
+        if (endDate < cutoffDate) return total;
+
+        const relevantStart = startDate > cutoffDate ? startDate : cutoffDate;
+        const months =
+          (endDate.getFullYear() - relevantStart.getFullYear()) * 12 +
+          (endDate.getMonth() - relevantStart.getMonth());
+
+        return total + Math.max(0, months);
+      }, 0) / 12
+    );
   }
 
   /**
    * Analyze career gaps
    */
-  private analyzeCareerGaps(workExperience: ResumeDTO['workExperience']): ExperienceAnalysis['gaps'] {
+  private analyzeCareerGaps(
+    workExperience: ResumeDTO['workExperience'],
+  ): ExperienceAnalysis['gaps'] {
     if (workExperience.length <= 1) {
       return { hasGaps: false, gapMonths: 0, gapExplanations: [] };
     }
 
     // Sort experiences by start date
-    const sortedExperience = [...workExperience].sort((a, b) => 
-      new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+    const sortedExperience = [...workExperience].sort(
+      (a, b) =>
+        new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
     );
 
     let totalGapMonths = 0;
     const gapExplanations: string[] = [];
 
     for (let i = 1; i < sortedExperience.length; i++) {
-      const prevEnd = sortedExperience[i - 1].endDate === 'present' 
-        ? new Date() 
-        : new Date(sortedExperience[i - 1].endDate);
+      const prevEnd =
+        sortedExperience[i - 1].endDate === 'present'
+          ? new Date()
+          : new Date(sortedExperience[i - 1].endDate);
       const currentStart = new Date(sortedExperience[i].startDate);
 
-      const gapMonths = (currentStart.getFullYear() - prevEnd.getFullYear()) * 12 +
-        (currentStart.getMonth() - prevEnd.getMonth()) - 1; // Subtract 1 for normal transition
+      const gapMonths =
+        (currentStart.getFullYear() - prevEnd.getFullYear()) * 12 +
+        (currentStart.getMonth() - prevEnd.getMonth()) -
+        1; // Subtract 1 for normal transition
 
-      if (gapMonths > 2) { // Gap longer than 2 months
+      if (gapMonths > 2) {
+        // Gap longer than 2 months
         totalGapMonths += gapMonths;
         gapExplanations.push(
-          `${gapMonths}-month gap between ${sortedExperience[i - 1].company} and ${sortedExperience[i].company}`
+          `${gapMonths}-month gap between ${sortedExperience[i - 1].company} and ${sortedExperience[i].company}`,
         );
       }
     }
@@ -350,7 +372,7 @@ export class ExperienceAnalyzerService {
     return {
       hasGaps: totalGapMonths > 2,
       gapMonths: totalGapMonths,
-      gapExplanations
+      gapExplanations,
     };
   }
 
@@ -359,20 +381,27 @@ export class ExperienceAnalyzerService {
    */
   private async calculateIndustryExperience(
     workExperience: ResumeDTO['workExperience'],
-    targetIndustry?: string
+    targetIndustry?: string,
   ): Promise<{ [industry: string]: number }> {
     const industryExperience: { [industry: string]: number } = {};
 
     for (const exp of workExperience) {
       // Use AI to classify company industry if needed
-      const industry = await this.classifyCompanyIndustry(exp.company, exp.summary);
-      
+      const industry = await this.classifyCompanyIndustry(
+        exp.company,
+        exp.summary,
+      );
+
       const startDate = new Date(exp.startDate);
-      const endDate = exp.endDate === 'present' ? new Date() : new Date(exp.endDate);
-      const years = (endDate.getFullYear() - startDate.getFullYear()) +
+      const endDate =
+        exp.endDate === 'present' ? new Date() : new Date(exp.endDate);
+      const years =
+        endDate.getFullYear() -
+        startDate.getFullYear() +
         (endDate.getMonth() - startDate.getMonth()) / 12;
 
-      industryExperience[industry] = (industryExperience[industry] || 0) + years;
+      industryExperience[industry] =
+        (industryExperience[industry] || 0) + years;
     }
 
     return industryExperience;
@@ -381,7 +410,10 @@ export class ExperienceAnalyzerService {
   /**
    * Classify company industry using AI
    */
-  private async classifyCompanyIndustry(company: string, summary: string): Promise<string> {
+  private async classifyCompanyIndustry(
+    company: string,
+    summary: string,
+  ): Promise<string> {
     try {
       const prompt = `
         Classify the industry for this company/role:
@@ -405,32 +437,43 @@ export class ExperienceAnalyzerService {
    */
   private calculateWeightingFactors(
     analysis: ExperienceAnalysis,
-    jobRequirements: JobRequirements
+    jobRequirements: JobRequirements,
   ) {
     // Recency weight increases for senior positions
-    const recencyWeight = jobRequirements.seniority === 'senior' || jobRequirements.seniority === 'lead' 
-      ? 0.3 : 0.2;
+    const recencyWeight =
+      jobRequirements.seniority === 'senior' ||
+      jobRequirements.seniority === 'lead'
+        ? 0.3
+        : 0.2;
 
     // Relevance weight is higher for specialized roles
-    const relevanceWeight = jobRequirements.requiredTechnologies?.length > 0 ? 0.4 : 0.3;
+    const relevanceWeight =
+      ((jobRequirements.requiredTechnologies?.length ?? 0) > 0) ? 0.4 : 0.3;
 
     // Leadership bonus for leadership-required positions
-    const leadershipBonus = jobRequirements.leadershipRequired && analysis.leadershipExperience.hasLeadership
-      ? 0.15 : 0.05;
+    const leadershipBonus =
+      jobRequirements.leadershipRequired &&
+      analysis.leadershipExperience.hasLeadership
+        ? 0.15
+        : 0.05;
 
     // Progression bonus for ascending career trends
-    const progressionBonus = analysis.careerProgression.trend === 'ascending' ? 0.1 : 0.0;
+    const progressionBonus =
+      analysis.careerProgression.trend === 'ascending' ? 0.1 : 0.0;
 
     // Industry penalty for unrelated experience
-    const industryPenalty = jobRequirements.requiredIndustries?.length > 0 &&
-      analysis.relevanceFactors.industryRelevance < 50 ? -0.1 : 0.0;
+    const industryPenalty =
+      ((jobRequirements.requiredIndustries?.length ?? 0) > 0) &&
+      analysis.relevanceFactors.industryRelevance < 50
+        ? -0.1
+        : 0.0;
 
     return {
       recencyWeight,
       relevanceWeight,
       leadershipBonus,
       progressionBonus,
-      industryPenalty
+      industryPenalty,
     };
   }
 
@@ -440,14 +483,16 @@ export class ExperienceAnalyzerService {
   private calculateExperienceScore(
     analysis: ExperienceAnalysis,
     jobRequirements: JobRequirements,
-    weightingFactors: WeightingFactors
+    weightingFactors: WeightingFactors,
   ) {
     // Base experience score (0-100)
-    const experienceRatio = analysis.totalYears / Math.max(jobRequirements.experienceYears.min, 1);
+    const experienceRatio =
+      analysis.totalYears / Math.max(jobRequirements.experienceYears.min, 1);
     const baseExperienceScore = Math.min(100, experienceRatio * 100);
 
     // Relevance adjustment based on relevant years vs total years
-    const relevanceRatio = analysis.relevantYears / Math.max(analysis.totalYears, 1);
+    const relevanceRatio =
+      analysis.relevantYears / Math.max(analysis.totalYears, 1);
     const relevanceAdjustment = (relevanceRatio - 0.5) * 40; // -20 to +20 points
 
     // Recency adjustment - recent experience weighted higher
@@ -455,20 +500,22 @@ export class ExperienceAnalyzerService {
     const recencyAdjustment = (recentRatio - 0.3) * 30; // Boost for recent experience
 
     // Leadership bonus
-    const leadershipBonus = analysis.leadershipExperience.hasLeadership 
-      ? weightingFactors.leadershipBonus * 100 
+    const leadershipBonus = analysis.leadershipExperience.hasLeadership
+      ? weightingFactors.leadershipBonus * 100
       : 0;
 
     // Career progression bonus
-    const progressionBonus = analysis.careerProgression.score * weightingFactors.progressionBonus;
+    const progressionBonus =
+      analysis.careerProgression.score * weightingFactors.progressionBonus;
 
     // Calculate final score
-    let finalScore = baseExperienceScore + 
+    let finalScore =
+      baseExperienceScore +
       relevanceAdjustment * weightingFactors.relevanceWeight +
       recencyAdjustment * weightingFactors.recencyWeight +
       leadershipBonus +
       progressionBonus +
-      (weightingFactors.industryPenalty * 100);
+      weightingFactors.industryPenalty * 100;
 
     // Apply penalties for gaps
     if (analysis.gaps.hasGaps && analysis.gaps.gapMonths > 6) {
@@ -480,11 +527,15 @@ export class ExperienceAnalyzerService {
 
     return {
       baseExperienceScore: Math.round(baseExperienceScore),
-      relevanceAdjustment: Math.round(relevanceAdjustment * weightingFactors.relevanceWeight),
-      recencyAdjustment: Math.round(recencyAdjustment * weightingFactors.recencyWeight),
+      relevanceAdjustment: Math.round(
+        relevanceAdjustment * weightingFactors.relevanceWeight,
+      ),
+      recencyAdjustment: Math.round(
+        recencyAdjustment * weightingFactors.recencyWeight,
+      ),
       leadershipBonus: Math.round(leadershipBonus),
       progressionBonus: Math.round(progressionBonus),
-      finalScore
+      finalScore,
     };
   }
 
@@ -493,7 +544,7 @@ export class ExperienceAnalyzerService {
    */
   private calculateAnalysisConfidence(
     analysis: ExperienceAnalysis,
-    workExperience: ResumeDTO['workExperience']
+    workExperience: ResumeDTO['workExperience'],
   ): number {
     let confidence = 0.8; // Base confidence
 
@@ -502,7 +553,9 @@ export class ExperienceAnalyzerService {
     if (workExperience.length < 1) confidence -= 0.2;
 
     // Reduce confidence for missing job summaries
-    const emptySummaries = workExperience.filter(exp => !exp.summary || exp.summary.trim().length < 10).length;
+    const emptySummaries = workExperience.filter(
+      (exp) => !exp.summary || exp.summary.trim().length < 10,
+    ).length;
     confidence -= (emptySummaries / workExperience.length) * 0.2;
 
     // Reduce confidence for career gaps
@@ -511,7 +564,10 @@ export class ExperienceAnalyzerService {
     }
 
     // Increase confidence for clear career progression
-    if (analysis.careerProgression.trend === 'ascending' && analysis.careerProgression.score > 70) {
+    if (
+      analysis.careerProgression.trend === 'ascending' &&
+      analysis.careerProgression.score > 70
+    ) {
       confidence += 0.1;
     }
 
@@ -523,34 +579,35 @@ export class ExperienceAnalyzerService {
    */
   private fallbackExperienceAnalysis(
     workExperience: ResumeDTO['workExperience'],
-    jobRequirements: JobRequirements
+    jobRequirements: JobRequirements,
   ): AIExperienceAnalysis {
     const totalYears = this.calculateTotalExperience(workExperience);
-    
+
     return {
       relevantYears: totalYears * 0.8, // Assume 80% relevance
       leadershipExperience: {
-        hasLeadership: workExperience.some(exp => 
-          exp.position.toLowerCase().includes('lead') || 
-          exp.position.toLowerCase().includes('manager') ||
-          exp.position.toLowerCase().includes('director')
+        hasLeadership: workExperience.some(
+          (exp) =>
+            exp.position.toLowerCase().includes('lead') ||
+            exp.position.toLowerCase().includes('manager') ||
+            exp.position.toLowerCase().includes('director'),
         ),
         leadershipYears: totalYears * 0.3,
         teamSizeManaged: null,
-        leadershipEvidence: []
+        leadershipEvidence: [],
       },
       careerProgression: {
         score: 60, // Neutral progression
         trend: 'stable' as const,
         evidence: 'Basic career progression analysis',
-        promotions: 0
+        promotions: 0,
       },
       relevanceFactors: {
         skillAlignmentScore: 70,
         industryRelevance: 60,
         roleSimilarityScore: 65,
-        technologyRelevance: 60
-      }
+        technologyRelevance: 60,
+      },
     };
   }
 
@@ -559,36 +616,37 @@ export class ExperienceAnalyzerService {
    */
   private fallbackBasicExperienceScore(
     workExperience: ResumeDTO['workExperience'],
-    jobRequirements: JobRequirements
+    jobRequirements: JobRequirements,
   ): ExperienceScore {
     const totalYears = this.calculateTotalExperience(workExperience);
-    const experienceRatio = totalYears / Math.max(jobRequirements.experienceYears.min, 1);
+    const experienceRatio =
+      totalYears / Math.max(jobRequirements.experienceYears.min, 1);
     const baseScore = Math.min(100, Math.round(experienceRatio * 100));
 
     const analysis: ExperienceAnalysis = {
       totalYears,
       relevantYears: totalYears * 0.8,
       recentYears: this.calculateRecentExperience(workExperience, 3),
-      industryExperience: { 'Other': totalYears },
+      industryExperience: { Other: totalYears },
       leadershipExperience: {
         hasLeadership: false,
         leadershipYears: 0,
         teamSizeManaged: null,
-        leadershipEvidence: []
+        leadershipEvidence: [],
       },
       careerProgression: {
         score: 50,
         trend: 'stable',
         evidence: 'Fallback analysis',
-        promotions: 0
+        promotions: 0,
       },
       relevanceFactors: {
         skillAlignmentScore: 60,
         industryRelevance: 60,
         roleSimilarityScore: 60,
-        technologyRelevance: 60
+        technologyRelevance: 60,
       },
-      gaps: this.analyzeCareerGaps(workExperience)
+      gaps: this.analyzeCareerGaps(workExperience),
     };
 
     return {
@@ -600,7 +658,7 @@ export class ExperienceAnalyzerService {
         relevanceWeight: 0.3,
         leadershipBonus: 0.0,
         progressionBonus: 0.0,
-        industryPenalty: 0.0
+        industryPenalty: 0.0,
       },
       breakdown: {
         baseExperienceScore: baseScore,
@@ -608,8 +666,8 @@ export class ExperienceAnalyzerService {
         recencyAdjustment: 0,
         leadershipBonus: 0,
         progressionBonus: 0,
-        finalScore: baseScore
-      }
+        finalScore: baseScore,
+      },
     };
   }
 }

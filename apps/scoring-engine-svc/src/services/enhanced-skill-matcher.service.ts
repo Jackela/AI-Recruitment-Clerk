@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GeminiClient, GeminiResponse } from '@ai-recruitment-clerk/ai-services-shared';
+import { GeminiClient } from '@ai-recruitment-clerk/ai-services-shared';
 import { SkillsTaxonomy } from '@ai-recruitment-clerk/candidate-scoring-domain';
 
 export interface SkillMatchResult {
@@ -55,25 +55,27 @@ export class EnhancedSkillMatcherService {
   async matchSkills(
     resumeSkills: string[],
     jobSkills: JobSkillRequirement[],
-    industryContext?: string
+    industryContext?: string,
   ): Promise<EnhancedSkillScore> {
     const startTime = Date.now();
-    
+
     try {
       // Normalize resume skills using taxonomy
       const normalizedResumeSkills = resumeSkills
-        .map(skill => SkillsTaxonomy.normalizeSkill(skill))
-        .filter(skill => skill.length > 0);
+        .map((skill) => SkillsTaxonomy.normalizeSkill(skill))
+        .filter((skill) => skill.length > 0);
 
       // Group skills by category for better analysis
-      const resumeSkillsByCategory = SkillsTaxonomy.groupSkillsByCategory(normalizedResumeSkills);
-      
+      const resumeSkillsByCategory = SkillsTaxonomy.groupSkillsByCategory(
+        normalizedResumeSkills,
+      );
+
       const matches: SkillMatchResult[] = [];
       const breakdown = {
         exactMatches: 0,
         semanticMatches: 0,
         fuzzyMatches: 0,
-        relatedMatches: 0
+        relatedMatches: 0,
       };
 
       // Process each job skill requirement
@@ -81,9 +83,9 @@ export class EnhancedSkillMatcherService {
         const matchResult = await this.findBestSkillMatch(
           normalizedResumeSkills,
           jobSkill,
-          industryContext
+          industryContext,
         );
-        
+
         if (matchResult) {
           matches.push(matchResult);
           breakdown[`${matchResult.matchType}Matches`]++;
@@ -95,26 +97,27 @@ export class EnhancedSkillMatcherService {
         normalizedResumeSkills,
         jobSkills,
         matches,
-        industryContext
+        industryContext,
       );
 
       // Calculate overall score with weighted factors
       const overallScore = this.calculateWeightedSkillScore(matches, jobSkills);
-      
+
       // Calculate confidence based on match quality and coverage
       const confidence = this.calculateMatchConfidence(matches, jobSkills);
 
       const processingTime = Date.now() - startTime;
-      this.logger.log(`Enhanced skill matching completed in ${processingTime}ms`);
+      this.logger.log(
+        `Enhanced skill matching completed in ${processingTime}ms`,
+      );
 
       return {
         overallScore,
         matches,
         gapAnalysis,
         confidence,
-        breakdown
+        breakdown,
       };
-
     } catch (error) {
       this.logger.error('Error in enhanced skill matching', error);
       // Fallback to basic matching
@@ -128,7 +131,7 @@ export class EnhancedSkillMatcherService {
   private async findBestSkillMatch(
     resumeSkills: string[],
     jobSkill: JobSkillRequirement,
-    industryContext?: string
+    industryContext?: string,
   ): Promise<SkillMatchResult | null> {
     const normalizedJobSkill = SkillsTaxonomy.normalizeSkill(jobSkill.name);
 
@@ -141,7 +144,7 @@ export class EnhancedSkillMatcherService {
           matchScore: 1.0,
           matchType: 'exact',
           confidence: 0.95,
-          explanation: 'Exact skill match found'
+          explanation: 'Exact skill match found',
         };
       }
     }
@@ -156,7 +159,7 @@ export class EnhancedSkillMatcherService {
           matchScore: 0.9,
           matchType: 'fuzzy',
           confidence: 0.85,
-          explanation: 'Fuzzy match found using skills taxonomy'
+          explanation: 'Fuzzy match found using skills taxonomy',
         };
       }
     }
@@ -171,7 +174,7 @@ export class EnhancedSkillMatcherService {
           matchScore: 0.7,
           matchType: 'related',
           confidence: 0.75,
-          explanation: `Related skill match: ${resumeSkill} is related to ${normalizedJobSkill}`
+          explanation: `Related skill match: ${resumeSkill} is related to ${normalizedJobSkill}`,
         };
       }
     }
@@ -181,7 +184,7 @@ export class EnhancedSkillMatcherService {
       const semanticMatch = await this.performSemanticMatching(
         resumeSkills,
         jobSkill,
-        industryContext
+        industryContext,
       );
       if (semanticMatch) {
         return semanticMatch;
@@ -197,7 +200,7 @@ export class EnhancedSkillMatcherService {
   private async performSemanticMatching(
     resumeSkills: string[],
     jobSkill: JobSkillRequirement,
-    industryContext?: string
+    industryContext?: string,
   ): Promise<SkillMatchResult | null> {
     try {
       const prompt = `
@@ -225,13 +228,7 @@ export class EnhancedSkillMatcherService {
         }
       `;
 
-      const response: GeminiResponse<{
-        hasMatch: boolean;
-        matchedSkill: string | null;
-        matchScore: number;
-        confidence: number;
-        explanation: string;
-      }> = await this.geminiClient.generateStructuredResponse(
+      const response: any = await this.geminiClient.generateStructuredResponse(
         prompt,
         `{
           "hasMatch": "boolean",
@@ -239,17 +236,21 @@ export class EnhancedSkillMatcherService {
           "matchScore": "number between 0.0 and 1.0",
           "confidence": "number between 0.0 and 1.0", 
           "explanation": "string explaining the reasoning"
-        }`
+        }`,
       );
 
-      if (response.data.hasMatch && response.data.matchedSkill && response.data.matchScore >= 0.6) {
+      if (
+        response?.data?.hasMatch &&
+        response?.data?.matchedSkill &&
+        response?.data?.matchScore >= 0.6
+      ) {
         return {
-          skill: response.data.matchedSkill,
+          skill: response.data.matchedSkill as string,
           matchedJobSkill: jobSkill.name,
-          matchScore: response.data.matchScore,
+          matchScore: response.data.matchScore as number,
           matchType: 'semantic',
-          confidence: response.data.confidence,
-          explanation: response.data.explanation
+          confidence: response.data.confidence as number,
+          explanation: response.data.explanation as string,
         };
       }
 
@@ -267,29 +268,34 @@ export class EnhancedSkillMatcherService {
     resumeSkills: string[],
     jobSkills: JobSkillRequirement[],
     matches: SkillMatchResult[],
-    industryContext?: string
+    industryContext?: string,
   ): Promise<SkillGapAnalysis> {
-    const matchedJobSkills = new Set(matches.map(m => m.matchedJobSkill));
+    const matchedJobSkills = new Set(matches.map((m) => m.matchedJobSkill));
     const missingCriticalSkills = jobSkills
-      .filter(skill => skill.required && !matchedJobSkills.has(skill.name))
-      .map(skill => skill.name);
-    
+      .filter((skill) => skill.required && !matchedJobSkills.has(skill.name))
+      .map((skill) => skill.name);
+
     const missingOptionalSkills = jobSkills
-      .filter(skill => !skill.required && skill.weight > 0.5 && !matchedJobSkills.has(skill.name))
-      .map(skill => skill.name);
+      .filter(
+        (skill) =>
+          !skill.required &&
+          skill.weight > 0.5 &&
+          !matchedJobSkills.has(skill.name),
+      )
+      .map((skill) => skill.name);
 
     // Generate AI-powered improvement suggestions
     const improvementSuggestions = await this.generateImprovementSuggestions(
       resumeSkills,
       missingCriticalSkills,
       missingOptionalSkills,
-      industryContext
+      industryContext,
     );
 
     return {
       missingCriticalSkills,
       missingOptionalSkills,
-      improvementSuggestions
+      improvementSuggestions,
     };
   }
 
@@ -300,8 +306,10 @@ export class EnhancedSkillMatcherService {
     resumeSkills: string[],
     missingCritical: string[],
     missingOptional: string[],
-    industryContext?: string
-  ): Promise<{ skill: string; priority: 'high' | 'medium' | 'low'; reason: string }[]> {
+    industryContext?: string,
+  ): Promise<
+    { skill: string; priority: 'high' | 'medium' | 'low'; reason: string }[]
+  > {
     if (missingCritical.length === 0 && missingOptional.length === 0) {
       return [];
     }
@@ -343,16 +351,16 @@ export class EnhancedSkillMatcherService {
               "reason": "string"
             }
           ]
-        }`
+        }`,
       );
 
       return (response.data as any).suggestions || [];
     } catch (error) {
       this.logger.warn('Failed to generate improvement suggestions', error);
-      return missingCritical.map(skill => ({
+      return missingCritical.map((skill) => ({
         skill,
         priority: 'high' as const,
-        reason: 'Critical skill required for this position'
+        reason: 'Critical skill required for this position',
       }));
     }
   }
@@ -362,16 +370,18 @@ export class EnhancedSkillMatcherService {
    */
   private calculateWeightedSkillScore(
     matches: SkillMatchResult[],
-    jobSkills: JobSkillRequirement[]
+    jobSkills: JobSkillRequirement[],
   ): number {
     let totalPossibleScore = 0;
     let achievedScore = 0;
 
     for (const jobSkill of jobSkills) {
-      const weight = jobSkill.required ? jobSkill.weight * 1.5 : jobSkill.weight;
+      const weight = jobSkill.required
+        ? jobSkill.weight * 1.5
+        : jobSkill.weight;
       totalPossibleScore += weight;
 
-      const match = matches.find(m => m.matchedJobSkill === jobSkill.name);
+      const match = matches.find((m) => m.matchedJobSkill === jobSkill.name);
       if (match) {
         // Apply match type multipliers
         const typeMultiplier = this.getMatchTypeMultiplier(match.matchType);
@@ -379,7 +389,9 @@ export class EnhancedSkillMatcherService {
       }
     }
 
-    return totalPossibleScore > 0 ? Math.round((achievedScore / totalPossibleScore) * 100) : 0;
+    return totalPossibleScore > 0
+      ? Math.round((achievedScore / totalPossibleScore) * 100)
+      : 0;
   }
 
   /**
@@ -390,7 +402,7 @@ export class EnhancedSkillMatcherService {
       exact: 1.0,
       fuzzy: 0.95,
       semantic: 0.9,
-      related: 0.8
+      related: 0.8,
     };
     return multipliers[matchType] || 0.7;
   }
@@ -400,32 +412,39 @@ export class EnhancedSkillMatcherService {
    */
   private calculateMatchConfidence(
     matches: SkillMatchResult[],
-    jobSkills: JobSkillRequirement[]
+    jobSkills: JobSkillRequirement[],
   ): number {
     if (jobSkills.length === 0) return 1.0;
 
-    const criticalSkills = jobSkills.filter(skill => skill.required);
-    const criticalMatches = matches.filter(m => 
-      criticalSkills.some(cs => cs.name === m.matchedJobSkill)
+    const criticalSkills = jobSkills.filter((skill) => skill.required);
+    const criticalMatches = matches.filter((m) =>
+      criticalSkills.some((cs) => cs.name === m.matchedJobSkill),
     );
 
     // Base confidence on coverage of critical skills
-    const criticalCoverage = criticalSkills.length > 0 
-      ? criticalMatches.length / criticalSkills.length 
-      : 1.0;
+    const criticalCoverage =
+      criticalSkills.length > 0
+        ? criticalMatches.length / criticalSkills.length
+        : 1.0;
 
     // Average confidence of individual matches
-    const avgMatchConfidence = matches.length > 0
-      ? matches.reduce((sum, m) => sum + m.confidence, 0) / matches.length
-      : 0.5;
+    const avgMatchConfidence =
+      matches.length > 0
+        ? matches.reduce((sum, m) => sum + m.confidence, 0) / matches.length
+        : 0.5;
 
     // Overall match coverage
     const overallCoverage = matches.length / jobSkills.length;
 
     // Weighted confidence calculation
-    return Math.round(
-      (criticalCoverage * 0.5 + avgMatchConfidence * 0.3 + overallCoverage * 0.2) * 100
-    ) / 100;
+    return (
+      Math.round(
+        (criticalCoverage * 0.5 +
+          avgMatchConfidence * 0.3 +
+          overallCoverage * 0.2) *
+          100,
+      ) / 100
+    );
   }
 
   /**
@@ -433,23 +452,23 @@ export class EnhancedSkillMatcherService {
    */
   private fallbackBasicMatching(
     resumeSkills: string[],
-    jobSkills: JobSkillRequirement[]
+    jobSkills: JobSkillRequirement[],
   ): EnhancedSkillScore {
     const normalizedResumeSkills = resumeSkills
-      .map(skill => SkillsTaxonomy.normalizeSkill(skill))
-      .filter(skill => skill.length > 0);
+      .map((skill) => SkillsTaxonomy.normalizeSkill(skill))
+      .filter((skill) => skill.length > 0);
 
     const matches: SkillMatchResult[] = [];
     const breakdown = {
       exactMatches: 0,
       semanticMatches: 0,
       fuzzyMatches: 0,
-      relatedMatches: 0
+      relatedMatches: 0,
     };
 
     for (const jobSkill of jobSkills) {
       const normalizedJobSkill = SkillsTaxonomy.normalizeSkill(jobSkill.name);
-      
+
       if (normalizedResumeSkills.includes(normalizedJobSkill)) {
         matches.push({
           skill: normalizedJobSkill,
@@ -457,29 +476,40 @@ export class EnhancedSkillMatcherService {
           matchScore: 1.0,
           matchType: 'exact',
           confidence: 0.8,
-          explanation: 'Basic exact match (fallback mode)'
+          explanation: 'Basic exact match (fallback mode)',
         });
         breakdown.exactMatches++;
       }
     }
 
     const overallScore = this.calculateWeightedSkillScore(matches, jobSkills);
-    const confidence = Math.max(0.6, this.calculateMatchConfidence(matches, jobSkills));
+    const confidence = Math.max(
+      0.6,
+      this.calculateMatchConfidence(matches, jobSkills),
+    );
 
     return {
       overallScore,
       matches,
       gapAnalysis: {
         missingCriticalSkills: jobSkills
-          .filter(skill => skill.required && !matches.some(m => m.matchedJobSkill === skill.name))
-          .map(skill => skill.name),
+          .filter(
+            (skill) =>
+              skill.required &&
+              !matches.some((m) => m.matchedJobSkill === skill.name),
+          )
+          .map((skill) => skill.name),
         missingOptionalSkills: jobSkills
-          .filter(skill => !skill.required && !matches.some(m => m.matchedJobSkill === skill.name))
-          .map(skill => skill.name),
-        improvementSuggestions: []
+          .filter(
+            (skill) =>
+              !skill.required &&
+              !matches.some((m) => m.matchedJobSkill === skill.name),
+          )
+          .map((skill) => skill.name),
+        improvementSuggestions: [],
       },
       confidence,
-      breakdown
+      breakdown,
     };
   }
 }
