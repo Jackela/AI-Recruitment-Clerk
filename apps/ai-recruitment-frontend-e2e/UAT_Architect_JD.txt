@@ -1,0 +1,20 @@
+Senior Cloud Architect (C2C Coach)
+
+Role Summary:
+We are seeking a Senior Cloud Architect to lead the design and implementation of large‑scale, highly available cloud platforms.
+
+Required Skills:
+- AWS (EC2, S3, IAM, Lambda, VPC)
+- Microservices architecture (domain‑driven design, API gateway, event streaming)
+- Kubernetes (EKS preferred), containerization (Docker), and service mesh
+- Infrastructure as Code (Terraform/CDK), CI/CD automation
+- Security and compliance best practices
+
+Nice to Have:
+- Azure (AKS, Azure DevOps)
+- Observability (Prometheus, Grafana), cost optimization
+
+Responsibilities:
+- Drive cloud reference architectures and modernization roadmaps
+- Partner with engineering to deliver scalable, resilient services
+- Establish standards for reliability, performance, and security

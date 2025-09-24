@@ -105,7 +105,7 @@ export class CacheService {
     // Check if request is already pending
     const pending = this.pendingRequests.get(key);
     if (pending) {
-      return pending;
+      return pending as Observable<T>;
     }
 
     // Try to get from cache

@@ -150,9 +150,10 @@ export class AnalysisProgressComponent implements OnInit, OnDestroy {
       .connect(sessionId)
       .pipe(takeUntil(this.destroy$))
       .subscribe((message) => {
-        if (message.type === 'step_change') {
-          this.stepChange.emit(message.data?.step || message.data?.currentStep);
-        }
+          if (message.type === 'step_change') {
+            const stepVal = (message.data as any)?.['step'] ?? (message.data as any)?.['currentStep'] ?? '';
+            this.stepChange.emit(String(stepVal));
+          }
       });
 
     // Listen for completion

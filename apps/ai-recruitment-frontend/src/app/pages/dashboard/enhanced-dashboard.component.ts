@@ -438,7 +438,6 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
   bentoItems$!: Observable<BentoGridItem[]>;
 
   constructor(
-    // @ts-expect-error Reserved for future dashboard API integration
     private _dashboardApi: DashboardApiService,
     private guestApi: GuestApiService,
     private websocketStats: WebSocketStatsService,
@@ -788,7 +787,7 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
     `;
   }
 
-  private getRecentActivityContent(activities: Activity[]): string {
+  private getRecentActivityContent(activities: import('../../services/dashboard-api.service').ActivityItem[]): string {
     if (activities.length === 0) {
       return '<div class="no-activity">暂无最近活动</div>';
     }

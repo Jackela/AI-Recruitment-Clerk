@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import {
   GapAnalysisRequest,
@@ -30,8 +30,8 @@ import { GapAnalysisReportComponent } from './gap-analysis-report.component';
         </div>
 
         <div class="section">
-          <label for="resume">Upload Resume (.txt for MVP)</label>
-          <input id="resume" type="file" (change)="onFileSelected($event)" accept=".txt,.md,.text" />
+          <label for="resume">Upload Resume (.pdf or .txt)</label>
+          <input id="resume" type="file" (change)="onFileSelected($event)" accept=".pdf,.txt,.md,.text" />
         </div>
 
         <div class="actions">
@@ -47,65 +47,42 @@ import { GapAnalysisReportComponent } from './gap-analysis-report.component';
   `,
 })
 export class CoachComponent {
-  form = this.fb.group({
-    jdText: ['', [Validators.required, Validators.minLength(10)]],
-  });
+  form: FormGroup;
 
   loading = false;
   result: GapAnalysisResult | null = null;
-  private resumeText: string = '';
+  private selectedFile: File | null = null;
 
-  constructor(private fb: FormBuilder, private api: ApiService) {}
+  constructor(private fb: FormBuilder, private api: ApiService) {
+    this.form = this.fb.group({
+      jdText: ['', [Validators.required, Validators.minLength(10)]],
+    });
+  }
 
   onFileSelected(evt: Event) {
     const input = evt.target as HTMLInputElement;
     const file = input.files && input.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      this.resumeText = String(reader.result || '');
-    };
-    reader.readAsText(file);
+    this.selectedFile = file;
   }
 
   onSubmit() {
     if (this.form.invalid) return;
-    const req: GapAnalysisRequest = {
-      jdText: this.form.value.jdText || '',
-      resumeText: this.resumeText || '',
-    };
+    const jdText = this.form.value.jdText || '';
+    const file = this.selectedFile;
+    if (!file) return;
     this.loading = true;
     this.result = null;
-    this.api.submitGapAnalysis(req).subscribe({
+    this.api.submitGapAnalysisWithFile(jdText, file).subscribe({
       next: (res) => {
         this.result = res;
         this.loading = false;
       },
       error: () => {
-        // Fallback: minimal client-side diff if backend not reachable
-        this.result = this.localFallback(req);
+        // Surface error softly in UI by returning empty result
+        this.result = { matchedSkills: [], missingSkills: [], suggestedSkills: [] };
         this.loading = false;
       },
     });
   }
-
-  private localFallback(req: GapAnalysisRequest): GapAnalysisResult {
-    const jdTokens = this.tokenize(req.jdText);
-    const resumeTokens = this.tokenize(req.resumeText);
-    const matched = jdTokens.filter((s) => resumeTokens.includes(s));
-    const missing = jdTokens.filter((s) => !resumeTokens.includes(s));
-    return { matchedSkills: matched, missingSkills: missing, suggestedSkills: [] };
-  }
-
-  private tokenize(text: string): string[] {
-    return Array.from(
-      new Set(
-        (text || '')
-          .toLowerCase()
-          .split(/[^a-z0-9+#\.\-]+/)
-          .filter((t) => t && t.length > 1)
-      ),
-    );
-  }
 }
-

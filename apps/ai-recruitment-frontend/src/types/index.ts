@@ -4,7 +4,7 @@
  */
 
 // 应用配置类型
-export type { AppConfig } from '../config/app.config';
+export type { AppConfig } from '../config';
 export type { I18nTexts } from '../config/i18n.config';
 
 // 主题和可访问性类型

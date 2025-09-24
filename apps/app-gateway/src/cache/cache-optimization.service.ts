@@ -402,12 +402,7 @@ export class CacheOptimizationService implements OnModuleInit {
   /**
    * 获取缓存优化报告
    */
-  async getOptimizationReport(): Promise<{
-    performance: typeof this.performanceStats;
-    config: CacheOptimizationConfig;
-    recommendations: string[];
-    health: any;
-  }> {
+  async getOptimizationReport(): Promise<any> {
     const cacheHealth = await this.cacheService.healthCheck();
     const recommendations = this.generateOptimizationRecommendations();
 

@@ -19,6 +19,7 @@ import {
   UserDto,
   Permission,
   UserRole,
+  AuthenticatedRequest,
 } from '@ai-recruitment-clerk/user-management-domain';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -26,9 +27,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { Permissions } from './decorators/permissions.decorator';
 import { Public } from './decorators/public.decorator';
 
-interface AuthenticatedRequest extends Request {
-  user: UserDto;
-}
+// Use shared AuthenticatedRequest type
 
 @Controller('auth')
 export class AuthController {
@@ -51,11 +50,11 @@ export class AuthController {
   }> {
     const auth = await this.authService.register(createUserDto);
     return {
-      organizationId: auth.user.organizationId,
+      organizationId: auth.user.organizationId || '',
       userId: auth.user.id,
       accessToken: auth.accessToken,
       refreshToken: auth.refreshToken,
-      expiresIn: auth.expiresIn,
+      expiresIn: auth.expiresIn ?? 3600,
     };
   }
 

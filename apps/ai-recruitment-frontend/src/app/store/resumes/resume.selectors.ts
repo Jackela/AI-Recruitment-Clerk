@@ -56,22 +56,24 @@ export const selectResumesByStatus = (status: string) =>
       resumes.filter((resume) => resume.status === status),
   );
 
+const isProcessedStatus = (status: string | undefined) =>
+  status === 'completed' || status === 'processed';
+const isProcessingStatus = (status: string | undefined) =>
+  status === 'pending' ||
+  status === 'parsing' ||
+  status === 'scoring' ||
+  status === 'processing';
+
 export const selectProcessedResumes = createSelector(
   selectAllResumes,
   (resumes: ResumeListItem[]): ResumeListItem[] =>
-    resumes.filter((resume) => resume.status === 'processed'),
+    resumes.filter((resume) => isProcessedStatus(resume.status as any)),
 );
 
 export const selectPendingResumes = createSelector(
   selectAllResumes,
   (resumes: ResumeListItem[]): ResumeListItem[] =>
-    resumes.filter(
-      (resume) =>
-        resume.status === 'pending' ||
-        (resume as any).status === 'processing' ||
-        resume.status === 'parsing' ||
-        resume.status === 'scoring',
-    ),
+    resumes.filter((resume) => isProcessingStatus(resume.status as any)),
 );
 
 // Recent resumes selector
@@ -138,18 +140,18 @@ export const selectResumeStatistics = createSelector(
   selectAllResumes,
   (resumes: ResumeListItem[]) => {
     const total = resumes.length;
-    const processed = resumes.filter(
-      (resume) => resume.status === 'processed',
+    const processed = resumes.filter((r) =>
+      isProcessedStatus(r.status as any),
     ).length;
-    const processing = resumes.filter(
-      (resume) => resume.status === 'pending' || resume.status === 'processing',
+    const processing = resumes.filter((r) =>
+      isProcessingStatus(r.status as any),
     ).length;
     const failed = resumes.filter((resume) => resume.status === 'failed').length;
 
     // Calculate average score for processed resumes only
     const processedWithScores = resumes.filter(
       (resume) =>
-        resume.status === 'processed' &&
+        isProcessedStatus(resume.status as any) &&
         resume.analysis?.overallScore !== undefined,
     );
     const averageScore =
@@ -160,20 +162,24 @@ export const selectResumeStatistics = createSelector(
           ) / processedWithScores.length
         : 0;
 
-    // Build top skills from processed resumes, preserving first-seen order
+    // Build top skills from processed resumes, preserving first-seen order across resumes
     const skillCountMap = new Map<string, number>();
+    const orderedSkills: string[] = [];
     for (const resume of resumes) {
-      if (resume.status !== 'processed') continue;
+      if (!isProcessedStatus(resume.status as any)) continue;
       const skills = (resume as any).analysis?.skills as string[] | undefined;
       if (!Array.isArray(skills)) continue;
-      for (const skill of skills) {
-        const key = String(skill);
+      for (const raw of skills) {
+        const key = String(raw);
+        if (!skillCountMap.has(key)) {
+          orderedSkills.push(key);
+        }
         skillCountMap.set(key, (skillCountMap.get(key) || 0) + 1);
       }
     }
-    const topSkills: { skill: string; count: number }[] = Array.from(
-      skillCountMap.entries(),
-    ).map(([skill, count]) => ({ skill, count }));
+    const topSkills: { skill: string; count: number }[] = orderedSkills.map(
+      (skill) => ({ skill, count: skillCountMap.get(skill) || 0 }),
+    );
 
     return {
       total,

@@ -33,12 +33,26 @@ export class AppController {
       );
     }
     function tokenize(text: string) {
-      return normalize(
-        (text || '')
-          .toLowerCase()
-          .split(/[^a-z0-9+#\.\-]+/)
-          .filter((t) => t && t.length > 1),
-      );
+      // Insert spaces at lower-to-upper boundaries to split concatenations like "DevOpsAWS"
+      const spaced = (text || '').replace(/([a-z])([A-Z])/g, '$1 $2');
+      const base = spaced
+        .toLowerCase()
+        .split(/[^a-z0-9+#\.\-]+/)
+        .filter((t) => t && t.length > 1);
+
+      const out = new Set<string>();
+      for (const t of base) {
+        out.add(t);
+        // Heuristic expansions for common tech acronyms embedded in tokens
+        if (t.includes('aws')) out.add('aws');
+        if (t.includes('azure')) out.add('azure');
+        if (t.includes('kubernetes')) out.add('kubernetes');
+        if (t.includes('k8s')) out.add('kubernetes');
+        if (t.includes('gcp')) out.add('gcp');
+        if (t.includes('eks')) out.add('kubernetes');
+      }
+
+      return Array.from(out);
     }
   }
 }

@@ -37,6 +37,8 @@ import { TestRateLimitBypassFilter } from '../common/filters/test-ratelimit-bypa
 import { ErrorInterceptorFactory } from '@ai-recruitment-clerk/infrastructure-shared';
 import { ResponseTransformInterceptor } from '../common/interceptors/response-transform.interceptor';
 
+const isTestEnv = process.env.NODE_ENV === 'test';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -66,8 +68,11 @@ import { ResponseTransformInterceptor } from '../common/interceptors/response-tr
       }),
     }),
     AppCacheModule,
-    MongooseModule.forRootAsync({
-      useFactory: async () => {
+    ...(isTestEnv
+      ? []
+      : [
+          MongooseModule.forRootAsync({
+            useFactory: async () => {
         // Test-mode: always use a single in-memory Mongo instance to avoid real connections
         if (
           process.env.NODE_ENV === 'test' ||
@@ -186,38 +191,50 @@ import { ResponseTransformInterceptor } from '../common/interceptors/response-tr
           retryWrites: true, // 启用写入重试
           retryReads: true, // 启用读取重试
         };
-      },
-    }),
-    AuthModule,
-    GuestModule,
-    JobsModule,
-    DomainsModule,
-    CommonModule,
-    IntegrationModule,
-    WebSocketModule,
-    PrivacyComplianceModule,
-    SecurityModule,
+            },
+          }),
+        ]),
+    ...(isTestEnv
+      ? []
+      : [
+          AuthModule,
+          GuestModule,
+          JobsModule,
+          DomainsModule,
+          CommonModule,
+          IntegrationModule,
+          WebSocketModule,
+          PrivacyComplianceModule,
+          SecurityModule,
+        ]),
   ],
   controllers: [
-    AppController,
-    SystemController,
-    SimpleJobsController,
-    ScoringProxyController,
-    ResumesController,
-    QuestionnairesController,
-    AnalyticsController,
-    IncentivesController,
-    UsageLimitsController,
+    ...(isTestEnv
+      ? [AppController, ScoringProxyController]
+      : [
+          AppController,
+          SystemController,
+          SimpleJobsController,
+          ScoringProxyController,
+          ResumesController,
+          QuestionnairesController,
+          AnalyticsController,
+          IncentivesController,
+          UsageLimitsController,
+        ]),
     // No test-only controllers required; production controllers meet E2E contracts
   ],
   providers: [
     AppService,
-    NatsClient,
-    ProductionSecurityValidator,
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
+    ...(isTestEnv ? [] : [NatsClient, ProductionSecurityValidator]),
+    ...(isTestEnv
+      ? []
+      : [
+          {
+            provide: APP_GUARD,
+            useClass: JwtAuthGuard,
+          },
+        ]),
     // Enable throttling only when explicitly required
     ...(process.env.ENABLE_THROTTLE === 'true'
       ? [
@@ -242,7 +259,7 @@ import { ResponseTransformInterceptor } from '../common/interceptors/response-tr
         ]
       : []),
     // Error Handling Interceptors
-    ...(process.env.NODE_ENV !== 'test'
+    ...(!isTestEnv
       ? [
           {
             provide: APP_INTERCEPTOR,
@@ -290,11 +307,15 @@ export class AppModule implements NestModule {
     //   .forRoutes('*');
 
     // 基础限流只应用于游客端点
-    consumer.apply(RateLimitMiddleware).forRoutes('/api/guest/*');
+    if (!isTestEnv) {
+      consumer.apply(RateLimitMiddleware).forRoutes('/api/guest/*');
+    }
 
     // 增强限流应用于认证相关端点
-    consumer
-      .apply(EnhancedRateLimitMiddleware)
-      .forRoutes('/api/auth/*', '/api/guest/*');
+    if (!isTestEnv) {
+      consumer
+        .apply(EnhancedRateLimitMiddleware)
+        .forRoutes('/api/auth/*', '/api/guest/*');
+    }
   }
 }

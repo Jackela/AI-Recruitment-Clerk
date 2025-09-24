@@ -2,10 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { NatsClientService, NatsPublishResult } from '@app/shared-nats-client';
 import { AnalysisJdExtractedEvent } from '@ai-recruitment-clerk/job-management-domain';
 import { AnalysisResumeParsedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
+import { DeliverPolicy } from 'nats';
 
 @Injectable()
 export class ScoringEngineNatsService extends NatsClientService {
-  private readonly logger = new Logger(ScoringEngineNatsService.name);
+  private readonly serviceLogger = new Logger(ScoringEngineNatsService.name);
 
   /**
    * Publish analysis.scoring.completed event when scoring processing is complete
@@ -25,7 +26,7 @@ export class ScoringEngineNatsService extends NatsClientService {
     const subject = 'analysis.scoring.completed';
 
     try {
-      this.logger.log(
+      this.serviceLogger.log(
         `Publishing enhanced scoring completed event for resumeId: ${event.resumeId}`,
       );
 
@@ -73,11 +74,11 @@ export class ScoringEngineNatsService extends NatsClientService {
       });
 
       if (result.success) {
-        this.logger.log(
+        this.serviceLogger.log(
           `Enhanced scoring completed event published successfully for resumeId: ${event.resumeId} with confidence: ${event.enhancedMetrics?.confidenceLevel || 'medium'}, messageId: ${result.messageId}`,
         );
       } else {
-        this.logger.error(
+        this.serviceLogger.error(
           `Failed to publish enhanced scoring completed event for resumeId: ${event.resumeId}`,
           result.error,
         );
@@ -85,7 +86,7 @@ export class ScoringEngineNatsService extends NatsClientService {
 
       return result;
     } catch (error) {
-      this.logger.error(
+      this.serviceLogger.error(
         `Error publishing enhanced scoring completed event for resumeId: ${event.resumeId}`,
         error,
       );
@@ -113,7 +114,7 @@ export class ScoringEngineNatsService extends NatsClientService {
     const subject = 'analysis.scoring.failed';
 
     try {
-      this.logger.log(
+      this.serviceLogger.log(
         `Publishing scoring error event for resumeId: ${resumeId}`,
       );
 
@@ -146,11 +147,11 @@ export class ScoringEngineNatsService extends NatsClientService {
       });
 
       if (result.success) {
-        this.logger.log(
+        this.serviceLogger.log(
           `Scoring error event published successfully for resumeId: ${resumeId}, messageId: ${result.messageId}`,
         );
       } else {
-        this.logger.error(
+        this.serviceLogger.error(
           `Failed to publish scoring error event for resumeId: ${resumeId}`,
           result.error,
         );
@@ -158,7 +159,7 @@ export class ScoringEngineNatsService extends NatsClientService {
 
       return result;
     } catch (publishError) {
-      this.logger.error(
+      this.serviceLogger.error(
         `Error publishing scoring error event for resumeId: ${resumeId}`,
         publishError,
       );
@@ -182,7 +183,7 @@ export class ScoringEngineNatsService extends NatsClientService {
     const durableName = 'scoring-engine-jd-extracted';
 
     try {
-      this.logger.log(
+      this.serviceLogger.log(
         `Setting up subscription to ${subject} with durable name: ${durableName}`,
       );
 
@@ -191,12 +192,12 @@ export class ScoringEngineNatsService extends NatsClientService {
         queueGroup: 'scoring-engine-group',
         maxDeliver: 3,
         ackWait: 30000, // 30 seconds
-        deliverPolicy: 'new',
+        deliverPolicy: DeliverPolicy.New,
       });
 
-      this.logger.log(`Successfully subscribed to ${subject}`);
+      this.serviceLogger.log(`Successfully subscribed to ${subject}`);
     } catch (error) {
-      this.logger.error(`Failed to subscribe to ${subject}`, error);
+      this.serviceLogger.error(`Failed to subscribe to ${subject}`, error);
       throw error;
     }
   }
@@ -211,7 +212,7 @@ export class ScoringEngineNatsService extends NatsClientService {
     const durableName = 'scoring-engine-resume-parsed';
 
     try {
-      this.logger.log(
+      this.serviceLogger.log(
         `Setting up subscription to ${subject} with durable name: ${durableName}`,
       );
 
@@ -220,12 +221,12 @@ export class ScoringEngineNatsService extends NatsClientService {
         queueGroup: 'scoring-engine-group',
         maxDeliver: 3,
         ackWait: 30000, // 30 seconds
-        deliverPolicy: 'new',
+        deliverPolicy: DeliverPolicy.New,
       });
 
-      this.logger.log(`Successfully subscribed to ${subject}`);
+      this.serviceLogger.log(`Successfully subscribed to ${subject}`);
     } catch (error) {
-      this.logger.error(`Failed to subscribe to ${subject}`, error);
+      this.serviceLogger.error(`Failed to subscribe to ${subject}`, error);
       throw error;
     }
   }
@@ -246,7 +247,7 @@ export class ScoringEngineNatsService extends NatsClientService {
     const subject = 'scoring.processing.error';
 
     try {
-      this.logger.log(
+      this.serviceLogger.log(
         `Publishing processing error event for resumeId: ${resumeId}`,
       );
 
@@ -279,11 +280,11 @@ export class ScoringEngineNatsService extends NatsClientService {
       });
 
       if (result.success) {
-        this.logger.log(
+        this.serviceLogger.log(
           `Processing error event published successfully for resumeId: ${resumeId}, messageId: ${result.messageId}`,
         );
       } else {
-        this.logger.error(
+        this.serviceLogger.error(
           `Failed to publish processing error event for resumeId: ${resumeId}`,
           result.error,
         );
@@ -291,7 +292,7 @@ export class ScoringEngineNatsService extends NatsClientService {
 
       return result;
     } catch (publishError) {
-      this.logger.error(
+      this.serviceLogger.error(
         `Error publishing processing error event for resumeId: ${resumeId}`,
         publishError,
       );
@@ -331,9 +332,12 @@ export class ScoringEngineNatsService extends NatsClientService {
     const baseHealth = await this.getHealthStatus();
 
     return {
-      ...baseHealth,
+      connected: baseHealth.connected,
       service: 'scoring-engine-svc',
+      lastActivity: baseHealth.lastOperationTime || new Date(),
       subscriptions: ['analysis.jd.extracted', 'analysis.resume.parsed'],
+      messagesSent: (baseHealth as any).messagesSent ?? 0,
+      messagesReceived: (baseHealth as any).messagesReceived ?? 0,
     };
   }
 }

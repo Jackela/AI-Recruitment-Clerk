@@ -109,7 +109,7 @@ export class FeedbackCodeController {
           code: result.code,
           qualityScore: result.qualityScore,
           paymentStatus: result.paymentStatus,
-          eligible: result.qualityScore >= 3,
+          eligible: Number(result.qualityScore ?? 0) >= 3,
         },
       };
     } catch (error) {

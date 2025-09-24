@@ -81,15 +81,15 @@ export class UserManagementController {
   async getUserProfile(@Request() req: AuthenticatedRequest) {
     try {
       const profile = await this.userManagementService.getUserProfile(
-        req.user.id,
+        req.user.id!,
       );
       const activitySummary =
-        await this.userManagementService.getUserActivitySummary(req.user.id);
+        await this.userManagementService.getUserActivitySummary(req.user.id!);
 
       return {
         success: true,
         data: {
-          userId: req.user.id,
+          userId: req.user.id!,
           email: req.user.email,
           name: req.user.name,
           role: req.user.role,
@@ -129,7 +129,7 @@ export class UserManagementController {
   ) {
     try {
       const updatedProfile = await this.userManagementService.updateUserProfile(
-        req.user.id,
+        req.user.id!,
         updateData,
       );
 
@@ -137,7 +137,7 @@ export class UserManagementController {
         success: true,
         message: 'User profile updated successfully',
         data: {
-          userId: req.user.id,
+          userId: req.user.id!,
           updatedFields: Object.keys(updateData),
           profileCompleteness: (updatedProfile as UserProfileResponse)
             .profileCompleteness,
@@ -165,7 +165,7 @@ export class UserManagementController {
   ) {
     try {
       await this.userManagementService.updateUserPreferences(
-        req.user.id,
+        req.user.id!,
         preferences,
       );
 
@@ -173,7 +173,7 @@ export class UserManagementController {
         success: true,
         message: 'User preferences updated successfully',
         data: {
-          userId: req.user.id,
+          userId: req.user.id!,
           updatedPreferences: Object.keys(preferences),
         },
       };
@@ -205,7 +205,7 @@ export class UserManagementController {
   ) {
     try {
       const activityData = await this.userManagementService.getUserActivity(
-        req.user.id,
+        req.user.id!,
         {
           limit: Math.min(limit, 100), // Cap at 100 records
           page: Math.max(Math.floor(offset / limit) + 1, 1),
@@ -248,7 +248,7 @@ export class UserManagementController {
       // Verify password for account deletion
       const isValidPassword =
         await this.userManagementService.verifyUserPassword(
-          req.user.id,
+          req.user.id!,
           deleteRequest.confirmationPassword,
         );
 
@@ -257,7 +257,7 @@ export class UserManagementController {
       }
 
       await this.userManagementService.softDeleteUser(
-        req.user.id,
+        req.user.id!,
         deleteRequest.reason,
       );
 
@@ -302,7 +302,7 @@ export class UserManagementController {
           : req.user.organizationId;
 
       const users = await this.userManagementService.getOrganizationUsers(
-        organizationId,
+        organizationId as string,
         {
           page: Math.max(page, 1),
           limit: Math.min(limit, 100),

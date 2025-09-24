@@ -10,8 +10,8 @@ export interface AuthenticatedRequest extends Request {
   user: {
     sub: string;
     email: string;
-    id?: string;
-    organizationId?: string;
+    id: string;
+    organizationId: string;
     permissions?: string[];
     [key: string]: any;
   };

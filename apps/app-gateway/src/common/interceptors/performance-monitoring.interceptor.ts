@@ -257,8 +257,8 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
     const performanceInfo = [
       `${responseTime}ms`,
       cacheHit ? '📊 CACHE' : '🔍 DB',
-      dbQueryTime > 0 ? `DB:${dbQueryTime}ms` : '',
-      redisQueryTime > 0 ? `Redis:${redisQueryTime}ms` : '',
+      (dbQueryTime ?? 0) > 0 ? `DB:${dbQueryTime}ms` : '',
+      (redisQueryTime ?? 0) > 0 ? `Redis:${redisQueryTime}ms` : '',
     ]
       .filter(Boolean)
       .join(' ');

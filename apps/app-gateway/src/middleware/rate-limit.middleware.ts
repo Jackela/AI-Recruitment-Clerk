@@ -5,7 +5,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import { Redis } from 'ioredis';
+import Redis from 'ioredis';
 
 interface UsageRecord {
   count: number;
@@ -16,7 +16,7 @@ interface UsageRecord {
 
 @Injectable()
 export class RateLimitMiddleware implements NestMiddleware {
-  private redis: Redis;
+  private redis: Redis | null;
 
   constructor() {
     // 检查是否禁用Redis或使用Redis URL
@@ -68,7 +68,7 @@ export class RateLimitMiddleware implements NestMiddleware {
 
     try {
       // 获取当前IP的使用记录
-      const recordStr = await this.redis.get(key);
+      const recordStr = await this.redis!.get(key);
       let record: UsageRecord = recordStr
         ? JSON.parse(recordStr)
         : { count: 0, questionnaires: 0, payments: 0, lastReset: today };
@@ -119,7 +119,7 @@ export class RateLimitMiddleware implements NestMiddleware {
 
       // 记录本次使用
       record.count += 1;
-      await this.redis.setex(key, 86400, JSON.stringify(record)); // 24小时过期
+      await this.redis!.setex(key, 86400, JSON.stringify(record)); // 24小时过期
 
       // 设置响应头
       res.setHeader('X-RateLimit-Limit', totalLimit.toString());
@@ -165,13 +165,13 @@ export class RateLimitMiddleware implements NestMiddleware {
     const key = `rate_limit:${ip}:${today}`;
 
     try {
-      const recordStr = await this.redis.get(key);
+      const recordStr = await this.redis!.get(key);
       const record: UsageRecord = recordStr
         ? JSON.parse(recordStr)
         : { count: 0, questionnaires: 0, payments: 0, lastReset: today };
 
       record.questionnaires += 1;
-      await this.redis.setex(key, 86400, JSON.stringify(record));
+      await this.redis!.setex(key, 86400, JSON.stringify(record));
 
       const newLimit = 5 + record.questionnaires * 5 + record.payments * 5;
       const remaining = newLimit - record.count;
@@ -205,19 +205,19 @@ export class RateLimitMiddleware implements NestMiddleware {
 
     try {
       // 检查支付是否已经使用过
-      const paymentUsed = await this.redis.get(paymentKey);
+      const paymentUsed = await this.redis!.get(paymentKey);
       if (paymentUsed) {
         return { success: false, newLimit: 5, remaining: 0 };
       }
 
-      const recordStr = await this.redis.get(key);
+      const recordStr = await this.redis!.get(key);
       const record: UsageRecord = recordStr
         ? JSON.parse(recordStr)
         : { count: 0, questionnaires: 0, payments: 0, lastReset: today };
 
       record.payments += 1;
-      await this.redis.setex(key, 86400, JSON.stringify(record));
-      await this.redis.setex(paymentKey, 86400, 'used'); // 标记支付已使用
+      await this.redis!.setex(key, 86400, JSON.stringify(record));
+      await this.redis!.setex(paymentKey, 86400, 'used'); // 标记支付已使用
 
       const newLimit = 5 + record.questionnaires * 5 + record.payments * 5;
       const remaining = newLimit - record.count;
@@ -248,7 +248,7 @@ export class RateLimitMiddleware implements NestMiddleware {
     const key = `rate_limit:${ip}:${today}`;
 
     try {
-      const recordStr = await this.redis.get(key);
+      const recordStr = await this.redis!.get(key);
       const record: UsageRecord = recordStr
         ? JSON.parse(recordStr)
         : { count: 0, questionnaires: 0, payments: 0, lastReset: today };
@@ -307,13 +307,13 @@ export class RateLimitMiddleware implements NestMiddleware {
     const pattern = `rate_limit:*:${targetDate}`;
 
     try {
-      const keys = await this.redis.keys(pattern);
+      const keys = await this.redis!.keys(pattern);
       let totalRequests = 0;
       let totalQuestionnaires = 0;
       let totalPayments = 0;
 
       for (const key of keys) {
-        const recordStr = await this.redis.get(key);
+        const recordStr = await this.redis!.get(key);
         if (recordStr) {
           const record: UsageRecord = JSON.parse(recordStr);
           totalRequests += record.count;

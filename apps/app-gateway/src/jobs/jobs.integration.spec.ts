@@ -8,6 +8,7 @@ import {
   UserDto,
   UserRole,
 } from '@ai-recruitment-clerk/user-management-domain';
+import { CacheService } from '../cache/cache.service';
 
 describe('Jobs Integration Tests', () => {
   let controller: JobsController;
@@ -37,6 +38,13 @@ describe('Jobs Integration Tests', () => {
       }),
     };
 
+    const mockCacheService: Partial<CacheService> = {
+      get: jest.fn().mockResolvedValue(null),
+      set: jest.fn().mockResolvedValue(undefined),
+      wrap: jest.fn().mockImplementation(async (_k: string, fn: any) => fn()),
+      generateKey: jest.fn().mockImplementation((p: string, ...rest: any[]) => `${p}:${rest.join(':')}`),
+    } as any;
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [JobsController],
       providers: [
@@ -45,6 +53,10 @@ describe('Jobs Integration Tests', () => {
         {
           provide: NatsClient,
           useValue: mockNatsClient,
+        },
+        {
+          provide: CacheService,
+          useValue: mockCacheService,
         },
       ],
     }).compile();
@@ -107,6 +119,19 @@ describe('Jobs Integration Tests', () => {
           {
             provide: NatsClient,
             useValue: failingNatsClient,
+          },
+          {
+            provide: CacheService,
+            useValue: {
+              get: jest.fn().mockResolvedValue(null),
+              set: jest.fn().mockResolvedValue(undefined),
+              wrap: jest
+                .fn()
+                .mockImplementation(async (_k: string, fn: any) => fn()),
+              generateKey: jest
+                .fn()
+                .mockImplementation((p: string, ...rest: any[]) => `${p}:${rest.join(':')}`),
+            },
           },
         ],
       }).compile();
@@ -194,7 +219,7 @@ describe('Jobs Integration Tests', () => {
       });
 
       // Verify resumes were stored
-      const resumes = service.getResumesByJobId(jobResult.jobId);
+      const resumes = await service.getResumesByJobId(jobResult.jobId);
       expect(resumes).toHaveLength(2);
       expect(resumes[0].originalFilename).toBe('john_doe_resume.pdf');
       expect(resumes[1].originalFilename).toBe('jane_smith_cv.pdf');

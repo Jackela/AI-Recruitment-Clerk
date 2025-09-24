@@ -568,7 +568,7 @@ export class QuestionnaireController {
     try {
       const templates =
         await this.questionnaireService.getQuestionnaireTemplates(
-          category,
+          category ?? '',
           req.user.organizationId,
         );
 

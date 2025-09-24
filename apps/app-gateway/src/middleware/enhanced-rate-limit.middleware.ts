@@ -28,7 +28,7 @@ interface OperationLimits {
 @Injectable()
 export class EnhancedRateLimitMiddleware implements NestMiddleware {
   private readonly logger = new Logger(EnhancedRateLimitMiddleware.name);
-  private redis: Redis;
+  private redis: Redis | null;
   private operationLimits: OperationLimits;
   private suspiciousActivityThreshold: number;
   private maxFailedAttempts: number;
@@ -101,12 +101,12 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
         this.redis = new Redis(redisOptions);
       }
 
-      this.redis.on('error', (error) => {
+      this.redis!.on('error', (error) => {
         this.logger.warn('Redis连接错误，限流降级到内存存储:', error.message);
         this.redis = null;
       });
 
-      this.redis.on('connect', () => {
+      this.redis!.on('connect', () => {
         this.logger.log('✅ Redis连接成功，限流使用Redis存储');
       });
     } catch (error) {
@@ -299,7 +299,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
     const windowStart = now - limits.window;
 
     // Use Redis sorted set to track requests in time window
-    const pipeline = this.redis.pipeline();
+    const pipeline = this.redis!.pipeline();
 
     // Remove expired entries
     pipeline.zremrangebyscore(key, '-inf', windowStart);
@@ -447,7 +447,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
     };
 
     const ttl = Math.ceil((lockedUntil - Date.now()) / 1000);
-    await this.redis.setex(key, ttl, JSON.stringify(lockData));
+    await this.redis!.setex(key, ttl, JSON.stringify(lockData));
   }
 
   private async sendSecurityAlert(ip: string, eventType: string, details: any) {
@@ -471,7 +471,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
 
       // Store alert for monitoring dashboard
       const alertKey = `security_alerts:${Date.now()}`;
-      await this.redis.setex(alertKey, 86400 * 7, JSON.stringify(payload)); // Keep for 7 days
+      await this.redis!.setex(alertKey, 86400 * 7, JSON.stringify(payload)); // Keep for 7 days
     } catch (error) {
       this.logger.error('Failed to send security alert:', error);
     }
@@ -523,7 +523,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
     const cutoff = Date.now() - periodMs;
 
     // Get all security records
-    const keys = await this.redis.keys('security_record:*');
+    const keys = await this.redis!.keys('security_record:*');
     const stats = {
       totalIPs: 0,
       lockedIPs: 0,
@@ -538,7 +538,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
     };
 
     for (const key of keys) {
-      const recordStr = await this.redis.get(key);
+      const recordStr = await this.redis!.get(key);
       if (recordStr) {
         const record: SecurityRateLimitRecord = JSON.parse(recordStr);
 
@@ -575,7 +575,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
 
   async unlockIp(ip: string, reason = 'manual_unlock') {
     const key = `security_lock:${ip}`;
-    const deleted = await this.redis.del(key);
+    const deleted = await this.redis!.del(key);
 
     if (deleted > 0) {
       this.logger.log(`IP ${ip} manually unlocked: ${reason}`);
@@ -586,13 +586,16 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
   }
 
   async getLockedIPs() {
-    const keys = await this.redis.keys('security_lock:*');
-    const lockedIPs = [];
+    if (!this.redis) {
+      return [] as Array<{ ip: string; lockedUntil?: number; reason?: string }>;
+    }
+    const keys = await this.redis!.keys('security_lock:*');
+    const lockedIPs: Array<{ ip: string; lockedUntil?: number; [k: string]: any }> = [];
 
     for (const key of keys) {
-      const lockInfo = await this.redis.get(key);
+      const lockInfo = await this.redis!.get(key);
       if (lockInfo) {
-        const parsed = JSON.parse(lockInfo);
+        const parsed: any = JSON.parse(lockInfo);
         if (parsed.lockedUntil > Date.now()) {
           lockedIPs.push({
             ip: key.replace('security_lock:', ''),

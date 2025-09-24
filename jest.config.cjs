@@ -7,7 +7,7 @@ module.exports = {
     {
       displayName: 'Unit Tests',
       testEnvironment: 'node',
-      roots: ['<rootDir>/tests'],
+      roots: ['<rootDir>/apps'],
       testMatch: [
         '**/tests/**/*.spec.js',
         '**/tests/**/*.test.js'

@@ -1251,7 +1251,7 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
     func: T,
     wait: number,
   ): T {
-    let timeout: NodeJS.Timeout | null = null;
+    let timeout: ReturnType<typeof setTimeout> | null = null;
 
     return ((...args: any[]) => {
       if (timeout) {

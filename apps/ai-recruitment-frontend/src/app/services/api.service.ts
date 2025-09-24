@@ -17,14 +17,14 @@ import {
   GapAnalysisRequest,
   GapAnalysisResult,
 } from '../interfaces/gap-analysis.interface';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
-  // Use relative base URL so Nginx (container) and local dev both proxy to gateway
-  // In container, /api is proxied to app-gateway:3000/api; locally, gateway listens on :3000/api
-  private baseUrl = '/api';
+  // Use environment-driven base URL for dev/prod consistency
+  private baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
@@ -82,6 +82,19 @@ export class ApiService {
     return this.http.post<GapAnalysisResult>(
       `${this.baseUrl}/scoring/gap-analysis`,
       req,
+    );
+  }
+
+  submitGapAnalysisWithFile(
+    jdText: string,
+    file: File,
+  ): Observable<GapAnalysisResult> {
+    const form = new FormData();
+    form.append('jdText', jdText);
+    form.append('resume', file, file.name);
+    return this.http.post<GapAnalysisResult>(
+      `${this.baseUrl}/scoring/gap-analysis-file`,
+      form,
     );
   }
 }

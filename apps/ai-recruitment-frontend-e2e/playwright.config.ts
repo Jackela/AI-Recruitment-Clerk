@@ -5,8 +5,12 @@ const baseURL =
   process.env['PLAYWRIGHT_BASE_URL'] ||
   process.env['BASE_URL'] ||
   'http://localhost:4202';
-const isContainerizedTesting =
-  process.env['PLAYWRIGHT_BASE_URL'] === 'http://localhost:4200';
+
+// Honor E2E_SKIP_WEBSERVER: when true we must NEVER start Playwright webServer
+// Also skip when running against real API to ensure decoupled servers
+const skipWebServer =
+  process.env['E2E_SKIP_WEBSERVER'] === 'true' ||
+  process.env['E2E_USE_REAL_API'] === 'true';
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -42,8 +46,8 @@ export default defineConfig({
       'Accept-Language': 'en-US,en;q=0.5',
     },
   },
-  // Only start webServer if not testing against containerized system
-  ...(isContainerizedTesting
+  // Only start Playwright webServer when skipWebServer is false
+  ...(skipWebServer
     ? {}
     : {
         webServer: {
@@ -52,53 +56,52 @@ export default defineConfig({
           url: 'http://localhost:4202',
           reuseExistingServer: !process.env.CI,
           timeout: 120 * 1000,
-          // Fix: Increase startup timeout for better stability
           stderr: 'pipe',
           stdout: 'pipe',
         },
       }),
   projects: [
-    {
-      name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        // Add connection retry for stability
-        navigationTimeout: 45000,
-        actionTimeout: 15000,
-      },
-    },
-    {
-      name: 'firefox',
-      use: {
-        ...devices['Desktop Firefox'],
-        // Fix: Firefox-specific configuration for connection stability
-        navigationTimeout: 60000, // Longer timeout for Firefox
-        actionTimeout: 20000,
-        // Simplified Firefox launch options for better compatibility
-        launchOptions: {
-          timeout: 60000, // Increase browser launch timeout
-          firefoxUserPrefs: {
-            // Network optimizations
-            'network.http.connection-retry-timeout': 30,
-            'network.http.connection-timeout': 90,
-            'network.http.response.timeout': 90,
-            'dom.max_script_run_time': 0,
-            // Disable problematic features that can cause hangs
-            'browser.safebrowsing.enabled': false,
-            'browser.safebrowsing.malware.enabled': false,
-            'extensions.autoDisableScopes': 14,
-            'datareporting.policy.dataSubmissionEnabled': false,
-            'datareporting.healthreport.uploadEnabled': false,
-            // Reduce memory usage
-            'browser.cache.disk.enable': false,
-            'browser.cache.memory.enable': true,
-            'browser.cache.memory.capacity': 16384,
+        {
+          name: 'chromium',
+          use: {
+            ...devices['Desktop Chrome'],
+            // Add connection retry for stability
+            navigationTimeout: 45000,
+            actionTimeout: 15000,
           },
-          // Use headless mode for better stability
-          headless: !process.env.FIREFOX_HEADED,
         },
-      },
-    },
+        {
+          name: 'firefox',
+          use: {
+            ...devices['Desktop Firefox'],
+            // Fix: Firefox-specific configuration for connection stability
+            navigationTimeout: 60000, // Longer timeout for Firefox
+            actionTimeout: 20000,
+            // Simplified Firefox launch options for better compatibility
+            launchOptions: {
+              timeout: 60000, // Increase browser launch timeout
+              firefoxUserPrefs: {
+                // Network optimizations
+                'network.http.connection-retry-timeout': 30,
+                'network.http.connection-timeout': 90,
+                'network.http.response.timeout': 90,
+                'dom.max_script_run_time': 0,
+                // Disable problematic features that can cause hangs
+                'browser.safebrowsing.enabled': false,
+                'browser.safebrowsing.malware.enabled': false,
+                'extensions.autoDisableScopes': 14,
+                'datareporting.policy.dataSubmissionEnabled': false,
+                'datareporting.healthreport.uploadEnabled': false,
+                // Reduce memory usage
+                'browser.cache.disk.enable': false,
+                'browser.cache.memory.enable': true,
+                'browser.cache.memory.capacity': 16384,
+              },
+              // Use headless mode for better stability
+              headless: !process.env.FIREFOX_HEADED,
+            },
+          },
+        },
     // WebKit: Uses separate configuration due to dev server incompatibility
     // WebKit tests pass 100% with static builds but fail with Playwright's webServer
     // Root cause: Angular dev server crashes when WebKit connects through Playwright

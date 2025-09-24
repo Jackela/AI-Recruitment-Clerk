@@ -1,5 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// Allow skipping Playwright-managed webServer for external/prod servers
+const skipWebServer = process.env['E2E_SKIP_WEBSERVER'] === 'true';
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -39,12 +42,16 @@ export default defineConfig({
       use: { ...devices['iPad Pro'] },
     },
   ],
-  webServer: {
-    command: 'npm start',
-    url: 'http://localhost:4200',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-  },
+  ...(skipWebServer
+    ? {}
+    : {
+        webServer: {
+          command: 'npm start',
+          url: 'http://localhost:4200',
+          reuseExistingServer: !process.env.CI,
+          timeout: 120 * 1000,
+        },
+      }),
   expect: {
     timeout: 10 * 1000,
   },

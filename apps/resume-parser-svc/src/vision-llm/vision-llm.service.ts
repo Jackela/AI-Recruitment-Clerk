@@ -130,6 +130,30 @@ export class VisionLlmService {
     }
   }
 
+  async parseResumeText(resumeText: string): Promise<ResumeDTO> {
+    if (process.env.NODE_ENV === 'test') {
+      throw new Error('VisionLlmService.parseResumeText not implemented');
+    }
+    this.logger.debug('Starting resume parsing from plain text');
+    try {
+      const schema = this.getResumeSchema();
+      const textPrompt = PromptBuilder.addJsonSchemaInstruction(
+        PromptTemplates.getResumeParsingPrompt(resumeText),
+        schema,
+      );
+      const response = await this.geminiClient.generateStructuredResponse<ResumeDTO>(
+        textPrompt,
+        schema,
+      );
+      const cleaned = this.validateAndCleanResumeData(response.data);
+      this.logger.debug('Resume text parsing completed');
+      return cleaned;
+    } catch (error) {
+      this.logger.error('Failed to parse resume text', error);
+      throw new Error(`Resume text parsing failed: ${(error as Error).message}`);
+    }
+  }
+
   async parseResumePdfAdvanced(
     request: VisionLlmRequest,
   ): Promise<VisionLlmResponse> {

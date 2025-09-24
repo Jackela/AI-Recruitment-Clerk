@@ -2,7 +2,7 @@
 # Complete system orchestration for microservices-based recruitment platform
 
 services:
-  # Infrastructure Services
+  # Infrastructure Services (default)
   mongodb:
     image: mongo:7.0-jammy
     container_name: ai-recruitment-mongodb
@@ -12,7 +12,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD:?MONGODB_ROOT_PASSWORD must be set}
       MONGO_INITDB_DATABASE: ai-recruitment
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - mongodb_data:/data/db
       - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
@@ -47,8 +47,24 @@ services:
       retries: 3
       start_period: 10s
 
-  # Backend Microservices
+  redis:
+    image: redis:7-alpine
+    container_name: ai-recruitment-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - ai-recruitment-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # Backend Microservices (opt-in via profile)
   app-gateway:
+    profiles: ["apps"]
     build:
       context: .
       dockerfile: apps/app-gateway/Dockerfile
@@ -61,6 +77,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET must be set}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY must be set}
+      ENCRYPTION_MASTER_KEY: ${ENCRYPTION_MASTER_KEY:-0123456789abcdef0123456789abcdef}
+      ALLOW_INSECURE_LOCAL: "true"
       # Ensure app reads correct env key used by code (MONGO_URL)
       MONGO_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD}@mongodb:27017/ai-recruitment?authSource=admin
       # Keep legacy key for other services if any script reads it
@@ -87,6 +105,7 @@ services:
       start_period: 30s
 
   jd-extractor-svc:
+    profiles: ["apps"]
     build:
       context: .
       dockerfile: apps/jd-extractor-svc/Dockerfile
@@ -109,6 +128,7 @@ services:
       start_period: 30s
 
   resume-parser-svc:
+    profiles: ["apps"]
     build:
       context: .
       dockerfile: apps/resume-parser-svc/Dockerfile
@@ -134,6 +154,7 @@ services:
       start_period: 30s
 
   scoring-engine-svc:
+    profiles: ["apps"]
     build:
       context: .
       dockerfile: apps/scoring-engine-svc/Dockerfile
@@ -144,6 +165,8 @@ services:
       NATS_URL: nats://nats:4222
       MONGODB_URL: mongodb://admin:${MONGODB_ROOT_PASSWORD}@mongodb:27017/ai-recruitment?authSource=admin
       GEMINI_API_KEY: ${GEMINI_API_KEY:?GEMINI_API_KEY must be set}
+    ports:
+      - "3011:3000"
     depends_on:
       mongodb:
         condition: service_healthy
@@ -159,6 +182,7 @@ services:
       start_period: 30s
 
   report-generator-svc:
+    profiles: ["apps"]
     build:
       context: .
       dockerfile: apps/report-generator-svc/Dockerfile
@@ -185,6 +209,7 @@ services:
 
   # Frontend Application
   ai-recruitment-frontend:
+    profiles: ["apps"]
     build:
       context: .
       dockerfile: apps/ai-recruitment-frontend/Dockerfile

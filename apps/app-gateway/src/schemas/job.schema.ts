@@ -6,18 +6,21 @@ export type JobDocument = Job & Document;
 @Schema()
 export class JobRequirement {
   @Prop({ required: true })
-  skill: string = '';
+  skill!: string;
 
   @Prop({
     type: String,
     enum: ['required', 'preferred', 'nice-to-have'],
     default: 'required',
   })
-  level: string = 'required';
+  level!: string;
 
   @Prop({ type: Number, min: 1, max: 10, default: 5 })
-  importance: number = 5;
+  importance!: number;
 }
+
+// Explicitly create schema for nested subdocument to avoid runtime reflection issues
+export const JobRequirementSchema = SchemaFactory.createForClass(JobRequirement);
 
 @Schema({
   timestamps: true,
@@ -30,7 +33,7 @@ export class Job {
   @Prop({ required: true })
   description: string = '';
 
-  @Prop({ type: [JobRequirement], default: [] })
+  @Prop({ type: [JobRequirementSchema], default: [] })
   requirements: JobRequirement[] = [];
 
   @Prop({ type: [String], default: [] })

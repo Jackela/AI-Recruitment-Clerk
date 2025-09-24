@@ -101,9 +101,13 @@ export class NatsClientModule {
               connectionManager,
               streamManager
             );
-            
+
             // Initialize with custom options if provided
-            if (natsOptions.serviceName || natsOptions.connectionOptions || natsOptions.streams) {
+            if (
+              natsOptions.serviceName ||
+              natsOptions.connectionOptions ||
+              natsOptions.streams
+            ) {
               service.initialize(
                 {
                   serviceName: natsOptions.serviceName,
@@ -112,10 +116,11 @@ export class NatsClientModule {
                 natsOptions.streams
               );
             }
-            
+
             return service;
           },
-          inject: [ConfigModule, NatsConnectionManager, NatsStreamManager, 'NATS_OPTIONS'],
+          // Inject concrete providers, not module classes
+          inject: [ConfigService, NatsConnectionManager, NatsStreamManager, 'NATS_OPTIONS'],
         },
       ],
     };

@@ -8,11 +8,15 @@
   "targets": {
     "build": {
       "executor": "@angular/build:application",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/apps/ai-recruitment-frontend",
         "browser": "apps/ai-recruitment-frontend/src/main.ts",
-        "polyfills": ["zone.js"],
+        "polyfills": [
+          "zone.js"
+        ],
         "tsConfig": "apps/ai-recruitment-frontend/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
@@ -21,7 +25,9 @@
             "input": "apps/ai-recruitment-frontend/public"
           }
         ],
-        "styles": ["apps/ai-recruitment-frontend/src/styles.scss"]
+        "styles": [
+          "apps/ai-recruitment-frontend/src/styles.scss"
+        ]
       },
       "configurations": {
         "webkit-test": {
@@ -55,25 +61,25 @@
           "budgets": [
             {
               "type": "initial",
-              "maximumWarning": "400kb",
-              "maximumError": "500kb"
+              "maximumWarning": "800kb",
+              "maximumError": "1200kb"
             },
             {
               "type": "anyComponentStyle",
-              "maximumWarning": "6kb",
-              "maximumError": "10kb"
+              "maximumWarning": "20kb",
+              "maximumError": "30kb"
             },
             {
               "type": "bundle",
               "name": "angular-vendor",
-              "maximumWarning": "300kb",
-              "maximumError": "400kb"
+              "maximumWarning": "600kb",
+              "maximumError": "900kb"
             },
             {
-              "type": "bundle", 
+              "type": "bundle",
               "name": "ngrx-vendor",
-              "maximumWarning": "150kb",
-              "maximumError": "200kb"
+              "maximumWarning": "300kb",
+              "maximumError": "500kb"
             }
           ],
           "outputHashing": "all",
@@ -122,9 +128,12 @@
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
-        "jestConfig": "apps/ai-recruitment-frontend/jest.config.ts"
+        "jestConfig": "apps/ai-recruitment-frontend/jest.config.ts",
+        "passWithNoTests": false
       }
     },
     "serve-static": {

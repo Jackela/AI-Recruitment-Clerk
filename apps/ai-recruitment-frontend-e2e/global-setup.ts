@@ -1,9 +1,16 @@
 import { startMockServer } from './mock-server';
 import { waitForServerReady } from './browser-stability';
+import { spawn } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function globalSetup() {
   // Only start mock server if not testing against real backend
   const useRealAPI = process.env.E2E_USE_REAL_API === 'true';
+  const e2eDir = __dirname;
+  const pidFile = path.join(e2eDir, '.gateway.pid');
 
   if (!useRealAPI) {
     console.log('🚀 Starting Mock API Server for E2E testing...');
@@ -11,6 +18,17 @@ async function globalSetup() {
     console.log('✅ Mock API Server started successfully');
   } else {
     console.log('🔗 Using real API endpoints for E2E testing');
+    // If external gateway is managed outside the test, just wait for it
+    const gatewayHealthUrl =
+      process.env.GATEWAY_HEALTH_URL ||
+      'http://localhost:3000/api/auth/health';
+    console.log(`⏳ Waiting for gateway at ${gatewayHealthUrl}...`);
+    const ok = await waitForServerReady(gatewayHealthUrl, 90);
+    if (!ok) {
+      console.warn('⚠️ Gateway did not report ready within timeout');
+    } else {
+      console.log('✅ Gateway is ready');
+    }
   }
 
   // Fix: Wait for dev server to be fully ready before starting tests

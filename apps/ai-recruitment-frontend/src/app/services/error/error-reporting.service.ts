@@ -6,7 +6,7 @@ import {
   ErrorCorrelationService,
   StructuredError,
 } from './error-correlation.service';
-import { APP_CONFIG } from '../../config/app.config';
+import { APP_CONFIG } from '../../../config';
 
 export interface ErrorReport {
   errors: StructuredError[];

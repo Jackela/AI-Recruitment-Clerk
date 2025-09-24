@@ -1,4 +1,11 @@
 import { AnalysisResults } from './guest.actions';
+import {
+  PersonalInfo,
+  Skill,
+  Experience,
+  Education,
+  AnalysisSummary,
+} from '../../services/guest/guest-api.service';
 
 export interface GuestState {
   // Device and authentication
@@ -32,7 +39,13 @@ export interface GuestState {
       analysisId: string;
       status: 'processing' | 'completed' | 'failed';
       progress: number;
-      results?: AnalysisResults;
+      results?: {
+        personalInfo: PersonalInfo;
+        skills: Skill[];
+        experience: Experience;
+        education: Education[];
+        summary: AnalysisSummary;
+      };
       completedAt?: string;
     };
   };

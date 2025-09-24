@@ -102,7 +102,7 @@ export class WebSocketStatsService {
 
   // Mock data for development
   private mockMode = false;
-  private mockInterval: NodeJS.Timeout | null = null;
+  private mockInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     // Sync BehaviorSubjects with signals
@@ -210,25 +210,23 @@ export class WebSocketStatsService {
   private handleMessage(data: WebSocketMessage): void {
     switch (data.type) {
       case 'stats':
-        this.updateStats(data.payload);
+        this.updateStats((data.payload as Partial<RealtimeStats>) || {});
         break;
       case 'event':
-        this.handleAnalysisEvent(data.payload);
+        this.handleAnalysisEvent(((data.payload as any) as (Omit<AnalysisEvent, 'timestamp'> & { timestamp: string | Date })) || ({ timestamp: new Date().toISOString(), type: 'progress', analysisId: '' } as any));
         break;
       case 'metrics':
-        this.updateMetrics(data.payload);
+        this.updateMetrics((data.payload as Omit<SystemMetrics, 'timestamp'>) || ({} as any));
         break;
       case 'error':
-        this.handleServerError(data.payload);
+        this.handleServerError((data.payload as WebSocketErrorPayload) || {});
         break;
       default:
         console.warn('Unknown message type:', data.type);
     }
   }
 
-  private updateStats(payload: Partial<RealtimeStats>): void {
-    const newStats: RealtimeStats = {
-      ...payload,
+  private updateStats(payload: Partial<RealtimeStats>): void { const base = this.stats$.value; const newStats: RealtimeStats = { ...base, ...(payload as any),
       lastUpdated: new Date(),
     };
     this.stats$.next(newStats);

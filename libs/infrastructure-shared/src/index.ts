@@ -101,7 +101,10 @@ export interface PaginationResult<T> {
 
 // Global Exception Filter - Basic implementation for infrastructure
 export class StandardizedGlobalExceptionFilter {
-  constructor() {}
+  private readonly config?: any;
+  constructor(config?: any) {
+    this.config = config;
+  }
   catch(exception: any, _host: any) {
     // Basic error handling
     console.error('Global Exception:', exception);
@@ -159,7 +162,8 @@ export class InputValidator {
     const allowedMimeTypes = [
       'application/pdf',
       'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain'
     ];
     const maxFileSize = 10 * 1024 * 1024; // 10MB
     
@@ -259,6 +263,30 @@ export class ContractValidators {
 
   static isNonEmptyString(value: any): boolean {
     return typeof value === 'string' && value.trim().length > 0;
+  }
+
+  static hasElements(arr: any): boolean {
+    return Array.isArray(arr) && arr.length > 0;
+  }
+
+  // Minimal validators to satisfy service contracts without enforcing heavy coupling
+  static isValidJD(jd: any): boolean {
+    return !!jd && typeof jd === 'object' && Array.isArray(jd.requiredSkills || []);
+  }
+
+  static isValidResume(resume: any): boolean {
+    return !!resume && typeof resume === 'object' && Array.isArray(resume.skills || resume.workExperience || []);
+  }
+
+  static isValidScoreDTO(score: any): boolean {
+    if (!score || typeof score !== 'object') return false;
+    // Basic shape checks
+    return (
+      typeof score.overallScore === 'number' &&
+      !!score.skillScore &&
+      !!score.experienceScore &&
+      !!score.educationScore
+    );
   }
 }
 

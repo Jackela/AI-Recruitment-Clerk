@@ -576,17 +576,26 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
   }
 
   private handleWebSocketMessage(message: WebSocketProgressMessage): void {
-    this.addMessage(message.type, message.data?.message || '状态更新');
+    const allowed: ProgressMessage['type'][] = [
+      'info',
+      'success',
+      'error',
+      'progress',
+    ];
+    const t = (allowed.includes(message.type as any)
+      ? (message.type as any)
+      : 'info') as ProgressMessage['type'];
+    this.addMessage(t, message.data?.message || '状态更新');
 
     switch (message.type) {
       case 'step_change':
         if (message.data?.currentStep) {
           this.handleStepChange({
             currentStep: message.data.currentStep,
-            message: message.data.message,
+            message: message.data?.message as string | undefined,
             progress:
-              typeof message.data.progress === 'number'
-                ? message.data.progress
+              typeof (message.data as any)['progress'] === 'number'
+                ? ((message.data as any)['progress'] as number)
                 : undefined,
           });
         }
@@ -622,7 +631,7 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
     this.addMessage('info', data.message || `开始 ${stepName}`);
   }
 
-  private handleCompletion(_completion: ProgressCompletionData): void {
+  private handleCompletion(_completion: unknown): void {
     this.overallProgress$.next(100);
     this.currentStep$.next('分析完成');
     this.markAllStepsCompleted();

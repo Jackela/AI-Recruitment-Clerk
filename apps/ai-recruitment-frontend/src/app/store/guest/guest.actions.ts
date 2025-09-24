@@ -3,6 +3,8 @@ import {
   GuestUsageResponse,
   GuestStatusResponse,
   FeedbackCodeResponse,
+  AnalysisResultsResponse,
+  ResumeAnalysisResponse,
 } from '../../services/guest/guest-api.service';
 
 export interface AnalysisData {
@@ -165,7 +167,7 @@ export const uploadResume = createAction(
 
 export const uploadResumeSuccess = createAction(
   '[Guest] Upload Resume Success',
-  props<{ analysisData: AnalysisData }>(),
+  props<{ analysisData: ResumeAnalysisResponse }>(),
 );
 
 export const uploadResumeFailure = createAction(
@@ -180,7 +182,7 @@ export const loadAnalysisResults = createAction(
 
 export const loadAnalysisResultsSuccess = createAction(
   '[Guest] Load Analysis Results Success',
-  props<{ analysisResults: AnalysisResults }>(),
+  props<{ analysisResults: AnalysisResultsResponse }>(),
 );
 
 export const loadAnalysisResultsFailure = createAction(
@@ -192,7 +194,7 @@ export const loadDemoAnalysis = createAction('[Guest] Load Demo Analysis');
 
 export const loadDemoAnalysisSuccess = createAction(
   '[Guest] Load Demo Analysis Success',
-  props<{ demoResults: DemoAnalysisResults }>(),
+  props<{ demoResults: AnalysisResultsResponse }>(),
 );
 
 export const loadDemoAnalysisFailure = createAction(

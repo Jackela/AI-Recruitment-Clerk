@@ -206,7 +206,7 @@ export class KeyboardNavigationService {
   }
 
   private createShortcutKey(event: KeyboardEvent): string {
-    const parts = [];
+    const parts: string[] = [];
     if (event.ctrlKey) parts.push('ctrl');
     if (event.altKey) parts.push('alt');
     if (event.shiftKey) parts.push('shift');
@@ -309,7 +309,6 @@ export class KeyboardNavigationService {
   }
 
   // Reserved for future state restoration functionality
-  // @ts-expect-error Reserved for future state restoration
   private _restoreState(state: any): void {
     if (!state) return;
 
@@ -441,7 +440,7 @@ export class KeyboardNavigationService {
   }
 
   private formatShortcutKey(shortcut: KeyboardShortcut): string {
-    const parts = [];
+    const parts: string[] = [];
     if (shortcut.ctrlKey) parts.push('Ctrl');
     if (shortcut.altKey) parts.push('Alt');
     if (shortcut.shiftKey) parts.push('Shift');

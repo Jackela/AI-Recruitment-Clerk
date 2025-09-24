@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
+import { filter, takeUntil, map } from 'rxjs/operators';
 import { io, Socket } from 'socket.io-client';
 import { ToastService } from './toast.service';
 
@@ -115,7 +115,8 @@ export class WebSocketService implements OnDestroy {
    */
   onProgress(sessionId: string): Observable<ProgressUpdate> {
     return this.onMessage('progress', sessionId).pipe(
-      filter((msg) => msg.data),
+      filter((msg) => !!msg.data),
+      map((msg: any) => msg.data as ProgressUpdate),
       takeUntil(this.destroy$),
     ) as Observable<ProgressUpdate>;
   }
@@ -125,7 +126,8 @@ export class WebSocketService implements OnDestroy {
    */
   onCompletion(sessionId: string): Observable<CompletionData> {
     return this.onMessage('completed', sessionId).pipe(
-      filter((msg) => msg.data),
+      filter((msg) => !!msg.data),
+      map((msg: any) => msg.data as CompletionData),
       takeUntil(this.destroy$),
     ) as Observable<CompletionData>;
   }
@@ -135,7 +137,8 @@ export class WebSocketService implements OnDestroy {
    */
   onError(sessionId: string): Observable<ErrorData> {
     return this.onMessage('error', sessionId).pipe(
-      filter((msg) => msg.data),
+      filter((msg) => !!msg.data),
+      map((msg: any) => msg.data as ErrorData),
       takeUntil(this.destroy$),
     ) as Observable<ErrorData>;
   }

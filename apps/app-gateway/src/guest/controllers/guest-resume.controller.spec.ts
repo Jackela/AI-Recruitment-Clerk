@@ -3,15 +3,22 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { GuestResumeController } from './guest-resume.controller';
 import { GuestUsageService } from '../services/guest-usage.service';
 import { RequestWithDeviceId } from '../guards/guest.guard';
+import { NatsClient } from '../../nats/nats.client';
 
 describe('GuestResumeController', () => {
   let controller: GuestResumeController;
   let guestUsageService: jest.Mocked<GuestUsageService>;
+  let natsClient: jest.Mocked<NatsClient>;
 
   const mockGuestUsageService = {
     canUse: jest.fn(),
     getUsageStatus: jest.fn(),
   };
+
+  const mockNatsClient: Partial<jest.Mocked<NatsClient>> = {
+    publishResumeSubmitted: jest.fn().mockResolvedValue({ success: true, messageId: '1' }),
+    isConnected: true as any,
+  } as any;
 
   const mockRequest: RequestWithDeviceId = {
     deviceId: 'test-device-123',
@@ -46,11 +53,13 @@ describe('GuestResumeController', () => {
           provide: GuestUsageService,
           useValue: mockGuestUsageService,
         },
+        { provide: NatsClient, useValue: mockNatsClient },
       ],
     }).compile();
 
     controller = module.get<GuestResumeController>(GuestResumeController);
     guestUsageService = module.get(GuestUsageService);
+    natsClient = module.get(NatsClient);
   });
 
   afterEach(() => {

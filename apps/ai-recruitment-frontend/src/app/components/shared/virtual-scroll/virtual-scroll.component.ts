@@ -439,7 +439,7 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
     if (this.config.trackBy) {
       return this.config.trackBy(this.startIndex() + index, item);
     }
-    return (item as Record<string, unknown>)?.id || index;
+    return (item as Record<string, unknown>)?.['id'] || index;
   }
 
   getItemHeight(item: T, _index: number): number {

@@ -24,6 +24,10 @@ AI Recruitment Clerk is an **event-driven microservices system** that automates 
 
 ## 📚 Documentation Navigation
 
+### Project Phoenix (C2C Coach)
+- Definitive Architecture: `docs/architecture/PROJECT_PHOENIX_HLD.md`
+- Developer Guides: `docs/guides/`
+
 ### Core Documentation Suite
 | Document Type | File Path | Description |
 |---------------|-----------|-------------|

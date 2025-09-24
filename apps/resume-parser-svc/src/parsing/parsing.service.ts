@@ -12,6 +12,7 @@ import {
   ErrorCorrelationManager,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import { createHash } from 'crypto';
+import pdfParse from 'pdf-parse-fork';
 
 @Injectable()
 export class ParsingService {
@@ -196,10 +197,20 @@ export class ParsingService {
         attempts: 0,
       });
 
-      // Parse resume with retry logic
+      // Parse resume with retry logic (PDF → pdf text + LLM, TXT → direct text LLM)
       const rawLlmOutput = await RetryUtility.withExponentialBackoff(
-        () =>
-          this.visionLlmService.parseResumePdf(fileBuffer, originalFilename),
+        async () => {
+          const isPdf = fileBuffer.toString('ascii', 0, 4) === '%PDF';
+          if (isPdf) {
+            return this.visionLlmService.parseResumePdf(
+              fileBuffer,
+              originalFilename,
+            );
+          } else {
+            const text = await this.extractTextFromMaybeTextFile(fileBuffer);
+            return this.visionLlmService.parseResumeText(text);
+          }
+        },
         {
           maxAttempts: 3,
           baseDelayMs: 1000,
@@ -299,10 +310,18 @@ export class ParsingService {
       const fileHash = createHash('sha256').update(fileBuffer as any).digest('hex');
       this.logger.debug(`File integrity hash: ${fileHash}`);
 
-      // Parse resume using Vision LLM service with security context
-      this.logger.log(`Parsing resume with Vision LLM service: ${filename}`);
+      // Parse resume using appropriate strategy
+      this.logger.log(`Parsing resume with appropriate strategy: ${filename}`);
       const rawLlmOutput = await RetryUtility.withExponentialBackoff(
-        () => this.visionLlmService.parseResumePdf(fileBuffer, filename),
+        async () => {
+          const isPdf = fileBuffer.toString('ascii', 0, 4) === '%PDF';
+          if (isPdf) {
+            return this.visionLlmService.parseResumePdf(fileBuffer, filename);
+          } else {
+            const text = await this.extractTextFromMaybeTextFile(fileBuffer);
+            return this.visionLlmService.parseResumeText(text);
+          }
+        },
         { maxAttempts: 2, baseDelayMs: 1000, maxDelayMs: 5000 },
       );
 
@@ -885,6 +904,22 @@ export class ParsingService {
     }
 
     return 'application/octet-stream'; // Unknown type
+  }
+
+  // Helper: extract text from PDF using pdf-parse; for plain text buffers, decode UTF-8
+  private async extractTextFromMaybeTextFile(buffer: Buffer): Promise<string> {
+    try {
+      const header = buffer.toString('ascii', 0, 4);
+      if (header === '%PDF') {
+        const res = await pdfParse(buffer);
+        return res?.text || '';
+      }
+      // Assume UTF-8 text as fallback
+      return buffer.toString('utf8');
+    } catch (err) {
+      this.logger.warn('Failed to extract text from buffer', err as any);
+      return '';
+    }
   }
 
   private cleanupExpiredProcessing(): void {

@@ -21,7 +21,7 @@ import { WebSocketStatsService } from './services/realtime/websocket-stats.servi
 import { AccessibilityService } from './services/accessibility/accessibility.service';
 import { ThemeService } from './services/theme/theme.service';
 import { SkipNavigationDirective } from './directives/accessibility/skip-navigation.directive';
-import { APP_CONFIG } from '../config/app.config';
+import { APP_CONFIG } from '../config';
 import { getText } from '../config/i18n.config';
 
 @Component({

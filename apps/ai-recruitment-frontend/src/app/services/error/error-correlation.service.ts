@@ -112,11 +112,17 @@ export class ErrorCorrelationService {
 
     try {
       // Send to backend error reporting endpoint
+      const corr = this.getCorrelationHeaders();
+      const extraHeaders: Record<string, string> = {};
+      corr.keys().forEach((k) => {
+        const v = corr.get(k);
+        if (v) extraHeaders[k] = v;
+      });
       await fetch('/api/errors/report', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...this.getCorrelationHeaders().keys(),
+          ...extraHeaders,
         },
         body: JSON.stringify({
           ...error,

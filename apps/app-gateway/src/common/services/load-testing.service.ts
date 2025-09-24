@@ -4,10 +4,8 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../../cache/cache.service';
-import { firstValueFrom } from 'rxjs';
 
 export interface LoadTestConfig {
   targetUrl: string;
@@ -72,7 +70,6 @@ export class LoadTestingService {
   private readonly logger = new Logger(LoadTestingService.name);
 
   constructor(
-    private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     private readonly cacheService: CacheService,
   ) {}
@@ -199,21 +196,26 @@ export class LoadTestingService {
   /**
    * 发送HTTP请求
    */
-  private async makeRequest(baseUrl: string, endpoint: any): Promise<any> {
+  private async makeRequest(baseUrl: string, endpoint: any): Promise<{ status: number }> {
     const url = `${baseUrl}${endpoint.path}`;
-    const options = {
-      method: endpoint.method,
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        ...endpoint.headers,
-      },
-      data: endpoint.body,
-      timeout: 30000, // 30秒超时
-      validateStatus: () => true, // 不抛出错误，记录所有状态码
-    };
-
-    return await firstValueFrom(this.httpService.request(options));
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    try {
+      const res = await fetch(url, {
+        method: endpoint.method,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(endpoint.headers || {}),
+        },
+        body: endpoint.body ? JSON.stringify(endpoint.body) : undefined,
+        signal: controller.signal,
+      });
+      return { status: res.status };
+    } catch {
+      return { status: 599 } as any; // network error pseudo-status
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
   /**

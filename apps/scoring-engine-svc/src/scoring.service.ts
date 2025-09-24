@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 import { ScoringEngineNatsService } from './services/scoring-engine-nats.service';
 import { Inject } from '@nestjs/common';
-import { NatsClient } from './nats/nats.client';
 import { SecureConfigValidator, ScoringEngineException, ScoringEngineErrorCode, ErrorCorrelationManager } from '@app/shared-dtos';
 import {
   GeminiClient,
@@ -92,7 +91,7 @@ export class ScoringEngineService {
   private readonly geminiClient: GeminiClient;
 
   constructor(
-    @Inject(NatsClient) private readonly natsService: any,
+    private readonly natsService: ScoringEngineNatsService,
     private readonly enhancedSkillMatcher: EnhancedSkillMatcherService,
     private readonly experienceAnalyzer: ExperienceAnalyzerService,
     private readonly culturalFitAnalyzer: CulturalFitAnalyzerService,

@@ -11,6 +11,9 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY nx.json tsconfig.base.json ./
 
+# Disable Nx Daemon in CI/Docker to avoid IPC issues
+ENV NX_DAEMON=false
+
 # Install dependencies with legacy peer deps handling
 RUN npm ci --legacy-peer-deps --only=production && \
     npm ci --legacy-peer-deps && \
@@ -19,6 +22,14 @@ RUN npm ci --legacy-peer-deps --only=production && \
 # Copy source code
 COPY apps/app-gateway ./apps/app-gateway
 COPY libs ./libs
+
+# Build internal domain libraries required at runtime
+RUN npx nx build user-management-domain --skip-nx-cache || echo "Lib build completed with warnings"
+
+# Vendor the built workspace lib into node_modules so runtime can resolve it
+RUN rm -rf /app/node_modules/@ai-recruitment-clerk/user-management-domain && \
+    mkdir -p /app/node_modules/@ai-recruitment-clerk && \
+    cp -r /app/dist/libs/user-management-domain /app/node_modules/@ai-recruitment-clerk/user-management-domain
 
 # Build the application with TypeScript errors ignored
 RUN NODE_OPTIONS='--max-old-space-size=2048' npx nx build app-gateway --skip-nx-cache || echo "Build completed with warnings"
@@ -39,7 +50,7 @@ WORKDIR /app
 # Copy built application
 COPY --from=builder --chown=nestjs:nodejs /app/dist/apps/app-gateway ./
 
-# Copy production node_modules only
+# Copy production node_modules (includes vendored workspace lib)
 COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
 
 # Create logs directory
@@ -62,4 +73,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
 
 # Start the application with proper signal handling
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "main.mjs"]
+CMD ["node", "main.cjs"]

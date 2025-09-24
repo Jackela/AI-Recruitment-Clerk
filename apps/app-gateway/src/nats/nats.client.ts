@@ -80,10 +80,20 @@ export class NatsClient implements OnModuleInit, OnModuleDestroy {
     try {
       this.logger.log('Connecting to NATS JetStream...');
 
-      let natsUrl = this.configService.get<string>(
-        'NATS_URL',
-        'nats://localhost:4222',
-      );
+      let natsUrl = this.configService.get<string>('NATS_URL');
+
+      // If NATS_URL is empty and NATS_OPTIONAL is true, skip connection
+      const natsOptional = this.configService.get<string>('NATS_OPTIONAL') === 'true';
+      if (!natsUrl && natsOptional) {
+        this.logger.warn('NATS_URL is empty and NATS_OPTIONAL=true, skipping NATS connection');
+        return;
+      }
+
+      // Use fallback only if NATS is not optional
+      if (!natsUrl) {
+        natsUrl = 'nats://localhost:4222';
+        this.logger.warn('NATS_URL not configured, using fallback: nats://localhost:4222');
+      }
 
       // Railway可能提供不带协议前缀的URL，需要自动添加
       if (
@@ -330,6 +340,78 @@ export class NatsClient implements OnModuleInit, OnModuleDestroy {
         error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
+  }
+
+  /**
+   * Wait for a single event on the given subject that matches the predicate.
+   * Uses core NATS subscription (works with JetStream-published subjects too).
+   */
+  async waitForEvent<T = any>(
+    subject: string,
+    predicate: (data: any) => boolean,
+    timeoutMs = 20000,
+  ): Promise<T> {
+    if (!this.connection || this.connection.isClosed()) {
+      throw new Error('NATS connection not available');
+    }
+
+    const sub = this.connection.subscribe(subject, { max: 100 });
+    const codec = this.codec;
+
+    return new Promise<T>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        try {
+          sub.unsubscribe();
+        } catch {}
+        reject(new Error(`Timed out waiting for event on ${subject}`));
+      }, timeoutMs);
+
+      (async () => {
+        try {
+          for await (const msg of sub) {
+            try {
+              const data = JSON.parse(codec.decode(msg.data));
+              if (predicate(data)) {
+                clearTimeout(timer);
+                try {
+                  sub.unsubscribe();
+                } catch {}
+                return resolve(data as T);
+              }
+            } catch (e) {
+              // ignore malformed payloads
+              this.logger.warn(`Failed to decode event on ${subject}: ${e}`);
+            }
+          }
+        } catch (err) {
+          clearTimeout(timer);
+          try {
+            sub.unsubscribe();
+          } catch {}
+          reject(err);
+        }
+      })();
+    });
+  }
+
+  /**
+   * Convenience: wait for analysis.resume.parsed event for a given resumeId
+   */
+  async waitForAnalysisParsed(
+    resumeId: string,
+    timeoutMs = 20000,
+  ): Promise<{
+    jobId: string;
+    resumeId: string;
+    resumeDto: any;
+    timestamp?: string;
+    processingTimeMs?: number;
+  }> {
+    return this.waitForEvent(
+      'analysis.resume.parsed',
+      (e) => e && e.resumeId === resumeId,
+      timeoutMs,
+    );
   }
 
   private async disconnect(): Promise<void> {

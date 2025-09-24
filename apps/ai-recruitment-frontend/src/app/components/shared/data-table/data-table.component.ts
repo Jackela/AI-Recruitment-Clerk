@@ -589,12 +589,12 @@ export class DataTableComponent<T = Record<string, unknown>>
     }
   }
 
-  getCellValue(row: T, key: string): unknown {
+  getCellValue(row: T, key: string): any {
     const keys = key.split('.');
-    let value: unknown = row;
+    let value: any = row;
 
     for (const k of keys) {
-      value = (value as Record<string, unknown>)?.[k];
+      value = (value as Record<string, any>)?.[k];
     }
 
     return value;
@@ -851,7 +851,7 @@ export class DataTableComponent<T = Record<string, unknown>>
   }
 
   // Horizontal scroll detection
-  private hasHorizontalScroll = false;
+  hasHorizontalScroll = false;
 
   private setupScrollDetection(): void {
     if (!this.tableWrapper) return;

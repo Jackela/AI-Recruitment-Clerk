@@ -12,6 +12,7 @@ import { ExperienceAnalyzerService } from '../services/experience-analyzer.servi
 import { CulturalFitAnalyzerService } from '../services/cultural-fit-analyzer.service';
 import { ScoringConfidenceService } from '../services/scoring-confidence.service';
 import { GeminiClient } from '@ai-recruitment-clerk/ai-services-shared';
+import { NatsClient as LocalNatsClient } from '../nats/nats.client';
 import { StandardizedGlobalExceptionFilter, ExceptionFilterConfigHelper, ErrorInterceptorFactory } from '@ai-recruitment-clerk/infrastructure-shared';
 import { SecureConfigValidator } from '@app/shared-dtos';
 
@@ -29,6 +30,11 @@ import { SecureConfigValidator } from '@app/shared-dtos';
     AppService,
     ScoringEngineService,
     ScoringEngineNatsService,
+    // Map local NatsClient token to the shared NATS service implementation
+    {
+      provide: LocalNatsClient,
+      useExisting: ScoringEngineNatsService,
+    },
     EnhancedSkillMatcherService,
     ExperienceAnalyzerService,
     CulturalFitAnalyzerService,

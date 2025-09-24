@@ -99,7 +99,7 @@ export class CacheService {
         this.logger.debug(`❌ Cache MISS [${key}]`);
       }
       this.updateTotalOperations();
-      return result;
+      return (result ?? null) as T | null;
     } catch (error) {
       this.metrics.errors++;
       this.logger.warn(`缓存获取失败 [${key}]: ${error.message}`);

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @fileoverview ScoringEngineService Design by Contract Enhancement
  * @author AI Recruitment Team

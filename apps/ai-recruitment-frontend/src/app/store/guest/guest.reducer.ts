@@ -262,12 +262,14 @@ export const guestReducer = createReducer(
     currentAnalysis: {
       analysisId: demoResults.data.analysisId,
       status: 'completed' as const,
-      filename: demoResults.data.filename,
-      uploadedAt: demoResults.data.completedAt,
+      filename: state.currentAnalysis.filename,
+      uploadedAt: demoResults.data.completedAt || null,
       estimatedCompletionTime: 'Demo',
       progress: 100,
     },
-    remainingCount: demoResults.data.remainingUsage ?? state.remainingCount,
+    // Update remaining usage count from demo payload when provided
+    remainingCount:
+      (demoResults as any).data?.remainingUsage ?? state.remainingCount,
     showAnalysisResults: true,
     isLoading: false,
     error: null,

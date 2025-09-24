@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "module": "ES2022",
-    "types": ["node"],
+    "types": ["node", "express", "multer"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "target": "ES2022",

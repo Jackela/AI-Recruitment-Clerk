@@ -37,11 +37,10 @@ import {
   Currency,
   ContactInfo,
 } from '../../common/interfaces/fallback-types';
+import { AuthenticatedRequest } from '@ai-recruitment-clerk/user-management-domain';
 import { IncentiveIntegrationService } from './incentive-integration.service';
 
-interface AuthenticatedRequest extends Request {
-  user: UserDto;
-}
+// Use shared AuthenticatedRequest type with required user.id and user.organizationId
 
 @ApiTags('incentive-system')
 @ApiBearerAuth()
@@ -97,8 +96,11 @@ export class IncentiveController {
     },
   ) {
     try {
-      const userIP =
-        incentiveData.userIP || req.headers['x-forwarded-for'] || 'unknown';
+      const fwd = req.headers['x-forwarded-for'];
+      const normalizedIP = Array.isArray(fwd) ? fwd[0] : fwd;
+      const userIP = String(
+        incentiveData.userIP || normalizedIP || (req.socket as any)?.remoteAddress || 'unknown',
+      );
       const contactInfo = new ContactInfo(incentiveData.contactInfo);
 
       const incentive =

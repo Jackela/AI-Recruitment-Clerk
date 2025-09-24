@@ -60,7 +60,7 @@ import { ProgressTrackerComponent } from '../../components/shared/progress-track
             <input
               type="file"
               (change)="onFileChange($event)"
-              accept=".pdf,.doc,.docx"
+              accept=".pdf,.doc,.docx,.txt"
               id="resume-file"
               class="file-input"
             />
@@ -477,7 +477,7 @@ export class UploadResumeComponent implements OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((completion) => {
         this.analysisComplete.set(true);
-        this.reportUrl.set(completion.result?.reportUrl || '');
+        this.reportUrl.set(((completion as any)?.result?.['reportUrl'] as string) || '');
         this.output.set(JSON.stringify(completion, null, 2));
       });
 

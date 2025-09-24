@@ -15,7 +15,6 @@ import {
   Req,
   Logger,
   HttpException,
-  FileValidator,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -33,6 +32,8 @@ import { Public } from '../../auth/decorators/public.decorator';
 import { GuestGuard, RequestWithDeviceId } from '../guards/guest.guard';
 import { OptionalJwtAuthGuard } from '../guards/optional-jwt-auth.guard';
 import { GuestUsageService } from '../services/guest-usage.service';
+import { NatsClient } from '../../nats/nats.client';
+import { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
 
 interface GuestResumeUploadDto {
   candidateName?: string;
@@ -40,33 +41,26 @@ interface GuestResumeUploadDto {
   notes?: string;
 }
 
-class ResumeFileValidator extends FileValidator {
-  constructor() {
-    super({});
-  }
-
-  buildErrorMessage(): string {
-    return 'Invalid file type. Only PDF, DOC, and DOCX files are allowed.';
-  }
-
-  isValid(file?: any): boolean {
+// Lightweight file validator compatible with ParseFilePipe expectations
+const resumeFileValidator: {
+  isValid: (file?: any) => boolean;
+  buildErrorMessage: () => string;
+} = {
+  buildErrorMessage: () =>
+    'Invalid file type. Only PDF, DOC, and DOCX files are allowed.',
+  isValid: (file?: any): boolean => {
     if (!file) return false;
-
-    // Check both MIME type and file extension
     const allowedMimeTypes = [
       'application/pdf',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ];
-
     const allowedExtensions = /\.(pdf|doc|docx)$/i;
-
     const mimeTypeValid = allowedMimeTypes.includes(file.mimetype);
     const extensionValid = allowedExtensions.test(file.originalname);
-
     return mimeTypeValid && extensionValid;
-  }
-}
+  },
+};
 
 @ApiTags('Guest Resume Processing')
 @Public()
@@ -80,10 +74,13 @@ class ResumeFileValidator extends FileValidator {
 export class GuestResumeController {
   private readonly logger = new Logger(GuestResumeController.name);
 
-  constructor(private readonly guestUsageService: GuestUsageService) {}
+  constructor(
+    private readonly guestUsageService: GuestUsageService,
+    private readonly natsClient: NatsClient,
+  ) {}
 
   @Post('resume/analyze')
-  @HttpCode(HttpStatus.ACCEPTED)
+  @HttpCode(HttpStatus.OK)
   @UseGuards(OptionalJwtAuthGuard, GuestGuard)
   @UseInterceptors(FileInterceptor('resume'))
   @ApiOperation({
@@ -128,7 +125,7 @@ export class GuestResumeController {
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB limit for guests
-          new ResumeFileValidator(),
+          resumeFileValidator as any,
         ],
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),
@@ -178,35 +175,89 @@ export class GuestResumeController {
         uploadedAt: new Date(),
       };
 
-      // Store file temporarily and initiate analysis
-      // Note: This would integrate with your existing resume processing service
-      // For now, we'll simulate the process
+      // Publish resume submission event to NATS so downstream services can process it
+      try {
+        const resumeId = analysisId; // reuse analysisId as resumeId for correlation
+        const jobId = isAuthenticated
+          ? `user-job-${(req.user as any)?.id || 'unknown'}`
+          : `guest-job-${deviceId}`;
+
+        const event: ResumeSubmittedEvent = {
+          jobId,
+          resumeId,
+          originalFilename: file.originalname,
+          // In a future iteration, store the file in GridFS/S3 and provide a signed URL
+          tempGridFsUrl: '',
+        };
+
+        const publishResult = await this.natsClient.publishResumeSubmitted(
+          event,
+        );
+        if (!publishResult.success) {
+          this.logger.warn(
+            `NATS publish failed for resumeId=${resumeId}: ${publishResult.error}`,
+          );
+        } else {
+          this.logger.log(
+            `NATS publish succeeded for resumeId=${resumeId}, msgId=${publishResult.messageId}`,
+          );
+        }
+      } catch (err) {
+        this.logger.error('Error publishing resume submission to NATS', err);
+        // Continue, we will fallback to mock result below if needed
+      }
 
       this.logger.log(
         `Resume analysis initiated for ${isAuthenticated ? 'user' : 'guest'}: ${analysisId}`,
       );
 
       // Get remaining usage for guest users
-      let remainingUsage = undefined;
+      let remainingUsage: number | undefined = undefined;
       if (!isAuthenticated) {
         const usageStatus =
           await this.guestUsageService.getUsageStatus(deviceId);
         remainingUsage = usageStatus.remainingCount;
       }
 
-      return {
-        success: true,
-        message: 'Resume uploaded successfully and analysis started',
-        data: {
-          analysisId,
-          filename: file.originalname,
-          uploadedAt: analysisRequest.uploadedAt.toISOString(),
-          estimatedCompletionTime: '2-3 minutes',
-          isGuestMode: !isAuthenticated,
-          fileSize: file.size,
-          remainingUsage,
-        },
-      };
+      // Wait for real parsing result from pipeline (analysis.resume.parsed)
+      try {
+        const parsed = await this.natsClient.waitForAnalysisParsed(analysisId, 20000);
+        this.logger.log(
+          `Received analysis.resume.parsed for resumeId=${analysisId} (jobId=${parsed.jobId})`,
+        );
+
+        return {
+          success: true,
+          data: {
+            analysisId,
+            filename: file.originalname,
+            uploadedAt: analysisRequest.uploadedAt.toISOString(),
+            isGuestMode: !isAuthenticated,
+            fileSize: file.size,
+            remainingUsage,
+            results: parsed.resumeDto,
+            completedAt: new Date().toISOString(),
+          },
+        };
+      } catch (waitErr) {
+        this.logger.warn(
+          `Timed out waiting for analysis result for resumeId=${analysisId}, returning queued response: ${waitErr}`,
+        );
+
+        return {
+          success: true,
+          message: 'Resume queued for analysis',
+          data: {
+            analysisId,
+            filename: file.originalname,
+            uploadedAt: analysisRequest.uploadedAt.toISOString(),
+            estimatedCompletionTime: '2-3 minutes',
+            isGuestMode: !isAuthenticated,
+            fileSize: file.size,
+            remainingUsage,
+          },
+        };
+      }
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

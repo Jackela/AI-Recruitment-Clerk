@@ -22,6 +22,7 @@
         "NODE_ENV": "production",
         "PORT": "${{PORT}}",
         "MONGODB_URI": "${{MONGODB_URI}}",
+        "MONGO_URL": "${{MONGODB_URI}}",
         "JWT_SECRET": "${{JWT_SECRET}}",
         "GEMINI_API_KEY": "${{GEMINI_API_KEY}}",
         "FRONTEND_URL": "${{RAILWAY_STATIC_URL}}",

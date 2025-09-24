@@ -61,8 +61,17 @@ export class ProductionSecurityValidator {
 
     this.logValidationResults(result);
 
-    // In production, exit if critical issues found
-    if (process.env.NODE_ENV === 'production' && !result.isValid) {
+    // In production, exit if critical issues found (unless explicitly bypassed for local UAT)
+    const nodeEnv = this.configService.get<string>('NODE_ENV');
+    const allowInsecure = this.configService.get<string>('ALLOW_INSECURE_LOCAL') === 'true';
+    if (nodeEnv === 'production' && !result.isValid) {
+      if (allowInsecure) {
+        this.logger.warn(
+          '⚠️  ALLOW_INSECURE_LOCAL=true: Bypassing production security validation for local run',
+        );
+        this.logger.warn('Issues found:', issues);
+        return result;
+      }
       this.logger.error(
         '🚨 SECURITY VALIDATION FAILED - Application cannot start',
       );

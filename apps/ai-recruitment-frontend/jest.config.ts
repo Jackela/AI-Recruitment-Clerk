@@ -3,6 +3,7 @@ export default {
   preset: '../../jest.preset.cjs',
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
+  // Re-enabled full test suite for frontend
   coverageDirectory: '../../coverage/apps/ai-recruitment-frontend',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [

@@ -41,7 +41,7 @@ import {
 import { UsageLimitIntegrationService } from './usage-limit-integration.service';
 
 interface AuthenticatedRequest extends Request {
-  user: UserDto;
+  user: UserDto & { id: string; organizationId: string };
 }
 
 @ApiTags('usage-limits')

@@ -9,12 +9,10 @@ import {
   Put,
 } from '@nestjs/common';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { UserDto, UserRole } from '@ai-recruitment-clerk/user-management-domain';
+import { UserDto, UserRole, AuthenticatedRequest } from '@ai-recruitment-clerk/user-management-domain';
 import { UserService } from './user.service';
 
-interface AuthenticatedRequest extends Request {
-  user: UserDto;
-}
+// Use shared AuthenticatedRequest type
 
 @Controller('users')
 export class UsersController {

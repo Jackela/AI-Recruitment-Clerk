@@ -32,6 +32,7 @@
         "JWT_ISSUER": "ai-recruitment-clerk-auth",
         "GEMINI_API_KEY": "${{ GEMINI_API_KEY }}",
         "MONGODB_URI": "${{ MONGODB_URI }}",
+        "MONGO_URL": "${{ MONGODB_URI }}",
         "DATABASE_NAME": "ai-recruitment-clerk",
         "REDIS_URL": "${{ REDIS_URL }}",
         "USE_REDIS_CACHE": "true",
