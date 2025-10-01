@@ -1,9 +1,12 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { JobsService } from './jobs.service';
+import { CreateJobDto } from './dto/create-job.dto';
 
 @ApiTags('jobs')
 @Controller('jobs')
 export class SimpleJobsController {
+  constructor(private readonly jobsService: JobsService) {}
   @ApiOperation({ summary: '获取所有职位' })
   @ApiResponse({ status: 200, description: '职位列表获取成功' })
   @Get()
@@ -66,15 +69,19 @@ export class SimpleJobsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async createJob(@Body() body: any) {
-    const jobId = `job-${Math.random().toString(36).slice(2, 10)}`;
-    return {
-      success: true,
-      data: {
-        jobId,
-        title: body?.title || 'Untitled',
-        createdAt: new Date().toISOString(),
-      },
+  async createJob(@Body() body: CreateJobDto) {
+    console.log('🚨 SIMPLE JOBS CONTROLLER CALLED! 🚨');
+    // ✅ FIXED: Use real JobsService with NATS publishing for E2E tests
+    const mockUser = { 
+      id: 'e2e-test-user', 
+      organizationId: 'e2e-test-org',
+      role: 'user',
+      email: 'e2e-test@example.com'
     };
+    
+    console.log('🚨 CALLING JOBS SERVICE NOW! 🚨');
+    const result = await this.jobsService.createJob(body, mockUser);
+    console.log('🚨 JOBS SERVICE RESULT:', result, '🚨');
+    return result;
   }
 }

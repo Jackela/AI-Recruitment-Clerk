@@ -15,6 +15,6 @@ import { AppCacheModule } from '../cache/cache.module';
   ],
   controllers: [JobsController],
   providers: [JobsService, JobRepository, NatsClient, InMemoryStorageService],
-  exports: [JobRepository, NatsClient],
+  exports: [JobRepository, NatsClient, JobsService],
 })
 export class JobsModule {}

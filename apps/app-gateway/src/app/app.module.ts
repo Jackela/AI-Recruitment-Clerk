@@ -9,6 +9,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { JobsModule } from '../jobs/jobs.module';
 import { SimpleJobsController } from '../jobs/simple-jobs.controller';
+import { AnalysisModule } from '../analysis/analysis.module';
 import { AuthModule } from '../auth/auth.module';
 import { GuestModule } from '../guest/guest.module';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -200,6 +201,7 @@ const isTestEnv = process.env.NODE_ENV === 'test';
           AuthModule,
           GuestModule,
           JobsModule,
+          AnalysisModule,
           DomainsModule,
           CommonModule,
           IntegrationModule,
@@ -214,7 +216,6 @@ const isTestEnv = process.env.NODE_ENV === 'test';
       : [
           AppController,
           SystemController,
-          SimpleJobsController,
           ScoringProxyController,
           ResumesController,
           QuestionnairesController,
@@ -226,7 +227,9 @@ const isTestEnv = process.env.NODE_ENV === 'test';
   ],
   providers: [
     AppService,
-    ...(isTestEnv ? [] : [NatsClient, ProductionSecurityValidator]),
+    // ✅ FIXED: Always provide NatsClient for job processing
+    NatsClient,
+    ...(isTestEnv ? [] : [ProductionSecurityValidator]),
     ...(isTestEnv
       ? []
       : [

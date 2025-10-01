@@ -40,9 +40,7 @@ export class VisionLlmService {
     pdfBuffer: Buffer,
     filename: string,
   ): Promise<ResumeDTO> {
-    if (process.env.NODE_ENV === 'test') {
-      throw new Error('VisionLlmService.parseResumePdf not implemented');
-    }
+    // ✅ FIXED: Enable AI processing in all environments
     this.logger.debug(`Starting resume parsing for: ${filename}`);
 
     try {

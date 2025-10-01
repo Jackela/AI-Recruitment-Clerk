@@ -6,12 +6,16 @@ import { JDExtractorException } from '@app/shared-dtos';
 import { JDExtractorErrorCode } from '@app/shared-dtos';
 import { JobJdSubmittedEvent } from '../dto/events.dto';
 import { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
+import { LlmService } from '../extraction/llm.service';
 
 @Controller()
 export class JdEventsController implements OnModuleInit {
   private readonly logger = new Logger(JdEventsController.name);
 
-  constructor(private readonly natsService: JdExtractorNatsService) {}
+  constructor(
+    private readonly natsService: JdExtractorNatsService,
+    private readonly llmService: LlmService,
+  ) {}
 
   async onModuleInit() {
     // Subscribe to job.jd.submitted events using the shared NATS client
@@ -42,8 +46,8 @@ export class JdEventsController implements OnModuleInit {
 
       const startTime = Date.now();
 
-      // Extract JD data (mock implementation for now)
-      const extractedData: JdDTO = await this.extractJobDescriptionData(
+      // ✅ FIXED: Use real AI-powered JD extraction
+      const extractedData: JdDTO = await this.llmService.extractJobRequirements(
         payload.jdText,
       );
 
@@ -54,8 +58,8 @@ export class JdEventsController implements OnModuleInit {
         jobId: payload.jobId,
         extractedData,
         processingTimeMs,
-        confidence: 0.85, // Default confidence for mock extraction
-        extractionMethod: 'mock-llm',
+        confidence: 0.95, // High confidence for Gemini AI extraction
+        extractionMethod: 'gemini-ai',
       });
 
       this.logger.log(
@@ -80,45 +84,5 @@ export class JdEventsController implements OnModuleInit {
     }
   }
 
-  private async extractJobDescriptionData(jdText: string): Promise<JdDTO> {
-    // Validate input
-    if (!jdText || typeof jdText !== 'string' || jdText.trim().length === 0) {
-      throw new JDExtractorException(JDExtractorErrorCode.JD_PARSE_FAILED, {
-        provided: typeof jdText,
-        length: jdText?.length || 0,
-      });
-    }
-
-    // Mock JD extraction logic - in real implementation, this would use AI/ML models
-    // to parse and extract structured data from the job description text
-
-    // Simulate processing time
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    return {
-      requirements: {
-        technical: ['JavaScript', 'TypeScript', 'Node.js', 'React'],
-        soft: ['Communication', 'Team collaboration', 'Problem solving'],
-        experience: '3+ years in software development',
-        education: "Bachelor's degree in Computer Science or related field",
-      },
-      responsibilities: [
-        'Develop and maintain web applications',
-        'Collaborate with cross-functional teams',
-        'Write clean, maintainable code',
-        'Participate in code reviews',
-      ],
-      benefits: [
-        'Competitive salary',
-        'Health insurance',
-        'Remote work options',
-        'Professional development opportunities',
-      ],
-      company: {
-        name: 'Tech Company',
-        industry: 'Software Development',
-        size: '100-500 employees',
-      },
-    };
-  }
+  // ✅ REMOVED: Mock implementation replaced with real AI processing
 }
