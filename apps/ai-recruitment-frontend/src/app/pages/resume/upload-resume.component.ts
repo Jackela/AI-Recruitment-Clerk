@@ -8,6 +8,9 @@ import { GuestApiService } from '../../services/guest/guest-api.service';
 import { WebSocketService } from '../../services/websocket.service';
 import { ProgressTrackerComponent } from '../../components/shared/progress-tracker/progress-tracker.component';
 
+/**
+ * Represents the upload resume component.
+ */
 @Component({
   selector: 'arc-upload-resume',
   standalone: true,
@@ -110,12 +113,12 @@ import { ProgressTrackerComponent } from '../../components/shared/progress-track
       </form>
 
       <!-- 进度追踪器 -->
-      <app-progress-tracker
+      <arc-progress-tracker
         *ngIf="analysisId()"
         [sessionId]="analysisId()"
         [showMessageLog]="true"
       >
-      </app-progress-tracker>
+      </arc-progress-tracker>
 
       <!-- 结果显示 -->
       <div class="results-section" *ngIf="analysisComplete()">
@@ -411,16 +414,31 @@ export class UploadResumeComponent implements OnDestroy {
 
   private destroy$ = new Subject<void>();
 
+  /**
+   * Initializes a new instance of the Upload Resume Component.
+   * @param guestApi - The guest api.
+   * @param webSocketService - The web socket service.
+   */
   constructor(
     private readonly guestApi: GuestApiService,
     private readonly webSocketService: WebSocketService,
   ) {}
 
+  /**
+   * Performs the on file change operation.
+   * @param ev - The ev.
+   * @returns The result of the operation.
+   */
   onFileChange(ev: Event) {
     const input = ev.target as HTMLInputElement;
     this.file = input.files?.[0] || undefined;
   }
 
+  /**
+   * Performs the on submit operation.
+   * @param ev - The ev.
+   * @returns The result of the operation.
+   */
   async onSubmit(ev: Event) {
     ev.preventDefault();
     if (!this.file) {
@@ -459,6 +477,10 @@ export class UploadResumeComponent implements OnDestroy {
       });
   }
 
+  /**
+   * Retrieves demo.
+   * @returns The result of the operation.
+   */
   getDemo() {
     this.output.set('Fetching demo...');
     this.guestApi.getDemoAnalysis().subscribe({
@@ -470,6 +492,10 @@ export class UploadResumeComponent implements OnDestroy {
     });
   }
 
+  /**
+   * Performs the setup web socket listeners operation.
+   * @param sessionId - The session id.
+   */
   setupWebSocketListeners(sessionId: string): void {
     // 监听完成事件
     this.webSocketService
@@ -491,6 +517,9 @@ export class UploadResumeComponent implements OnDestroy {
       });
   }
 
+  /**
+   * Performs the reset state operation.
+   */
   resetState(): void {
     this.analysisId.set('');
     this.analysisComplete.set(false);
@@ -499,11 +528,17 @@ export class UploadResumeComponent implements OnDestroy {
     this.output.set('');
   }
 
+  /**
+   * Performs the reset analysis operation.
+   */
   resetAnalysis(): void {
     this.resetState();
     this.webSocketService.disconnect();
   }
 
+  /**
+   * Performs the view detailed results operation.
+   */
   viewDetailedResults(): void {
     // 导航到详细结果页面
     const sessionId = this.analysisId();
@@ -513,6 +548,9 @@ export class UploadResumeComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Performs the download report operation.
+   */
   downloadReport(): void {
     const url = this.reportUrl();
     if (url) {
@@ -521,6 +559,10 @@ export class UploadResumeComponent implements OnDestroy {
   }
 
   // 保留原有的poll方法作为备用
+  /**
+   * Performs the poll operation.
+   * @returns The result of the operation.
+   */
   poll() {
     const id = this.analysisId();
     if (!id) {
@@ -537,6 +579,9 @@ export class UploadResumeComponent implements OnDestroy {
     });
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

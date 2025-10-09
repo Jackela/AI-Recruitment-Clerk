@@ -1,8 +1,11 @@
-import { Injectable, signal, effect } from '@angular/core';
+import { Injectable, signal, effect, inject } from '@angular/core';
 import { ToastService } from '../toast.service';
 
 export type Theme = 'light' | 'dark' | 'auto';
 
+/**
+ * Defines the shape of the theme colors.
+ */
 export interface ThemeColors {
   primary: string;
   secondary: string;
@@ -17,6 +20,9 @@ export interface ThemeColors {
   info: string;
 }
 
+/**
+ * Provides theme functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -58,7 +64,12 @@ export class ThemeService {
     },
   };
 
-  constructor(private toastService: ToastService) {
+  private toastService = inject(ToastService);
+
+  /**
+   * Initializes a new instance of the Theme Service.
+   */
+  constructor() {
     // Initialize theme on service creation
     this.initializeTheme();
 
@@ -178,6 +189,10 @@ export class ThemeService {
 
   // Public API
 
+  /**
+   * Sets theme.
+   * @param theme - The theme.
+   */
   setTheme(theme: Theme): void {
     this.currentTheme.set(theme);
     localStorage.setItem(this.STORAGE_KEY, theme);
@@ -193,6 +208,9 @@ export class ThemeService {
     }
   }
 
+  /**
+   * Performs the toggle theme operation.
+   */
   toggleTheme(): void {
     if (this.currentTheme() === 'auto') {
       // If auto, switch to opposite of current
@@ -203,22 +221,38 @@ export class ThemeService {
     }
   }
 
+  /**
+   * Retrieves theme colors.
+   * @returns The ThemeColors.
+   */
   getThemeColors(): ThemeColors {
     return this.themes[this.isDarkMode() ? 'dark' : 'light'];
   }
 
   // Utility method for components to get current theme
+  /**
+   * Retrieves theme class.
+   * @returns The string value.
+   */
   getThemeClass(): string {
     return this.isDarkMode() ? 'theme-dark' : 'theme-light';
   }
 
   // Method to apply theme to a specific element
+  /**
+   * Performs the apply theme to element operation.
+   * @param element - The element.
+   */
   applyThemeToElement(element: HTMLElement): void {
     element.classList.remove('theme-light', 'theme-dark');
     element.classList.add(this.getThemeClass());
   }
 
   // Prefers reduced motion check
+  /**
+   * Performs the prefers reduced motion operation.
+   * @returns The boolean value.
+   */
   prefersReducedMotion(): boolean {
     return (
       window.matchMedia &&
@@ -227,6 +261,10 @@ export class ThemeService {
   }
 
   // High contrast mode check
+  /**
+   * Performs the prefers high contrast operation.
+   * @returns The boolean value.
+   */
   prefersHighContrast(): boolean {
     return (
       window.matchMedia &&

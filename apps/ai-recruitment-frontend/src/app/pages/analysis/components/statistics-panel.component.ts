@@ -1,6 +1,9 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+/**
+ * Defines the shape of the usage statistics.
+ */
 export interface UsageStatistics {
   todayAnalyses: number;
   totalAnalyses: number;
@@ -9,6 +12,9 @@ export interface UsageStatistics {
   successRate?: number;
 }
 
+/**
+ * Defines the shape of the usage tip.
+ */
 export interface UsageTip {
   icon: string;
   title: string;
@@ -16,6 +22,9 @@ export interface UsageTip {
   category?: 'file' | 'accuracy' | 'analysis' | 'general';
 }
 
+/**
+ * Represents the statistics panel component.
+ */
 @Component({
   selector: 'arc-statistics-panel',
   standalone: true,
@@ -615,6 +624,11 @@ export class StatisticsPanelComponent {
     { icon: '⏰', text: '平均分析时间: 2分30秒' },
   ];
 
+  /**
+   * Performs the format number operation.
+   * @param num - The num.
+   * @returns The string value.
+   */
   formatNumber(num: number): string {
     if (num >= 1000000) {
       return (num / 1000000).toFixed(1) + 'M';
@@ -625,12 +639,20 @@ export class StatisticsPanelComponent {
     return num.toString();
   }
 
+  /**
+   * Retrieves score class.
+   * @returns The string value.
+   */
   getScoreClass(): string {
     if (this.statistics.averageScore >= 80) return 'high';
     if (this.statistics.averageScore >= 60) return 'medium';
     return 'low';
   }
 
+  /**
+   * Retrieves daily progress percentage.
+   * @returns The number value.
+   */
   getDailyProgressPercentage(): number {
     return Math.min(
       (this.statistics.todayAnalyses / this.dailyLimit) * 100,
@@ -638,11 +660,20 @@ export class StatisticsPanelComponent {
     );
   }
 
+  /**
+   * Performs the select category operation.
+   * @param category - The category.
+   */
   selectCategory(category: string): void {
     this.selectedCategory = category;
     this.tipCategoryChanged.emit(category);
   }
 
+  /**
+   * Retrieves category label.
+   * @param category - The category.
+   * @returns The string value.
+   */
   getCategoryLabel(category: string): string {
     const labels: Record<string, string> = {
       general: '通用',
@@ -653,6 +684,10 @@ export class StatisticsPanelComponent {
     return labels[category] || category;
   }
 
+  /**
+   * Retrieves filtered tips.
+   * @returns The an array of UsageTip.
+   */
   getFilteredTips(): UsageTip[] {
     if (!this.showCategories) {
       return this.usageTips;
@@ -664,14 +699,28 @@ export class StatisticsPanelComponent {
     );
   }
 
+  /**
+   * Performs the track by tip operation.
+   * @param _index - The index.
+   * @param tip - The tip.
+   * @returns The string value.
+   */
   trackByTip(_index: number, tip: UsageTip): string {
     return `${tip.title}-${tip.description.slice(0, 20)}`;
   }
 
+  /**
+   * Performs the has more tips operation.
+   * @returns The boolean value.
+   */
   hasMoreTips(): boolean {
     return false; // Placeholder for pagination
   }
 
+  /**
+   * Performs the show more tips operation.
+   * @returns A promise that resolves when the operation completes.
+   */
   async showMoreTips(): Promise<void> {
     this.isLoadingTips = true;
     this.moreTipsRequested.emit();

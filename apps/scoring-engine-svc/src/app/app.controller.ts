@@ -1,21 +1,29 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
+import { MessagePattern } from '@nestjs/microservices';
 import { AppService } from './app.service';
-import {
+import type {
   GapAnalysisRequestDto,
   GapAnalysisResultDto,
 } from '../dto/gap-analysis.dto';
 
+/**
+ * Exposes endpoints for app.
+ */
 @Controller()
 export class AppController {
+  /**
+   * Initializes a new instance of the App Controller.
+   * @param appService - The app service.
+   */
   constructor(private readonly appService: AppService) {}
 
-  @Get()
-  getData() {
-    return this.appService.getData();
-  }
-
-  @Post('gap-analysis')
-  gapAnalysis(@Body() body: GapAnalysisRequestDto): GapAnalysisResultDto {
+  /**
+   * Performs the gap analysis operation.
+   * @param body - The body.
+   * @returns The GapAnalysisResultDto.
+   */
+  @MessagePattern('scoring.gap-analysis')
+  gapAnalysis(body: GapAnalysisRequestDto): GapAnalysisResultDto {
     const jdSkills = body.jdSkills?.length
       ? normalize(body.jdSkills)
       : tokenize(body.jdText || '');
@@ -56,3 +64,5 @@ export class AppController {
     }
   }
 }
+
+

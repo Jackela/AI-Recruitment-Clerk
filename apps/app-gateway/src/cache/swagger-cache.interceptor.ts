@@ -13,10 +13,23 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { CacheService } from './cache.service';
 
+/**
+ * Represents the swagger cache interceptor.
+ */
 @Injectable()
 export class SwaggerCacheInterceptor implements NestInterceptor {
+  /**
+   * Initializes a new instance of the Swagger Cache Interceptor.
+   * @param cacheService - The cache service.
+   */
   constructor(private readonly cacheService: CacheService) {}
 
+  /**
+   * Performs the intercept operation.
+   * @param context - The context.
+   * @param next - The next.
+   * @returns A promise that resolves to Observable<any>.
+   */
   async intercept(
     context: ExecutionContext,
     next: CallHandler,

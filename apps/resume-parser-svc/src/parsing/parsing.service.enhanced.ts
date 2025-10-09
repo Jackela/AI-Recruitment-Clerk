@@ -215,8 +215,8 @@ export class ParsingService {
   )
   @WithCircuitBreaker('resume-processing', {
     failureThreshold: 5,
-    recoveryTimeout: 60000,
-    monitoringPeriod: 300000,
+    resetTimeoutMs: 60000,
+    monitorWindow: 300000,
   })
   public async parseResumeFile(
     fileBuffer: Buffer,
@@ -466,13 +466,6 @@ export class ParsingService {
         maxAttempts: maxRetries,
         baseDelayMs: 1000,
         maxDelayMs: 10000,
-        retryIf: (error) => {
-          // Retry on network errors, but not on validation errors
-          return (
-            !error.message.includes('validation') &&
-            !error.message.includes('invalid')
-          );
-        },
       },
     );
   }

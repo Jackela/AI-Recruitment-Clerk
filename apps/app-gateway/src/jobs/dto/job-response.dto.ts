@@ -1,3 +1,6 @@
+/**
+ * Describes the job detail data transfer object.
+ */
 export class JobDetailDto {
   id: string;
   title: string;
@@ -6,6 +9,15 @@ export class JobDetailDto {
   createdAt: Date;
   resumeCount: number;
 
+  /**
+   * Initializes a new instance of the Job Detail DTO.
+   * @param id - The id.
+   * @param title - The title.
+   * @param jdText - The jd text.
+   * @param status - The status.
+   * @param createdAt - The created at.
+   * @param resumeCount - The resume count.
+   */
   constructor(
     id: string,
     title: string,
@@ -23,6 +35,9 @@ export class JobDetailDto {
   }
 }
 
+/**
+ * Describes the job list data transfer object.
+ */
 export class JobListDto {
   id: string;
   title: string;
@@ -30,6 +45,14 @@ export class JobListDto {
   createdAt: Date;
   resumeCount: number;
 
+  /**
+   * Initializes a new instance of the Job List DTO.
+   * @param id - The id.
+   * @param title - The title.
+   * @param status - The status.
+   * @param createdAt - The created at.
+   * @param resumeCount - The resume count.
+   */
   constructor(
     id: string,
     title: string,

@@ -1,17 +1,41 @@
 import {
   Incentive,
-  IncentiveId,
   IncentiveStatus,
-  IncentiveSummary,
   PaymentMethod,
-  PaymentResult,
-  ContactInfo,
   TriggerType,
-  Currency,
-  IncentiveData
+  Currency
 } from '../aggregates/incentive.aggregate.js';
+import { ContactInfo } from '../value-objects/index.js';
+import { IncentiveRules } from './incentive.rules.js';
+import {
+  IncentiveCreationResult,
+  IncentiveValidationResult,
+  IncentiveApprovalResult,
+  IncentiveRejectionResult,
+  PaymentProcessingResult,
+  BatchPaymentResult,
+  IncentiveStatsResult,
+  PendingIncentivesResult,
+  BatchPaymentItem,
+  IPIncentiveStatistics,
+  SystemIncentiveStatistics,
+  IIncentiveRepository,
+  IDomainEventBus,
+  IAuditLogger,
+  IPaymentGateway
+} from '../../application/dtos/incentive.dto.js';
 
+/**
+ * Provides incentive domain functionality.
+ */
 export class IncentiveDomainService {
+  /**
+   * Initializes a new instance of the Incentive Domain Service.
+   * @param repository - The repository.
+   * @param eventBus - The event bus.
+   * @param auditLogger - The audit logger.
+   * @param paymentGateway - The payment gateway.
+   */
   constructor(
     private readonly repository: IIncentiveRepository,
     private readonly eventBus: IDomainEventBus,
@@ -329,7 +353,7 @@ export class IncentiveDomainService {
         amount: incentive.getRewardAmount(),
         currency: Currency.CNY,
         paymentMethod,
-        recipientInfo: actualContactInfo,
+        recipientInfo: this.buildRecipientInfo(actualContactInfo),
         reference: incentiveId
       };
 
@@ -428,7 +452,7 @@ export class IncentiveDomainService {
             amount: incentive.getRewardAmount(),
             currency: Currency.CNY,
             paymentMethod,
-            recipientInfo: contactInfo,
+            recipientInfo: this.buildRecipientInfo(contactInfo),
             reference: incentive.getId().getValue()
           };
 
@@ -565,8 +589,23 @@ export class IncentiveDomainService {
     }
   }
 
+  private buildRecipientInfo(contactInfo: ContactInfo) {
+    return {
+      name: contactInfo.email ?? contactInfo.phone ?? 'Incentive Recipient',
+      email: contactInfo.email,
+      phone: contactInfo.phone,
+      address: undefined,
+      accountNumber: contactInfo.alipay ?? contactInfo.wechat,
+      bankCode: undefined,
+      metadata: {
+        wechat: contactInfo.wechat,
+        alipay: contactInfo.alipay
+      }
+    };
+  }
+
   // 私有辅助方法
-  private extractContactInfoFromIncentive(incentive: Incentive): ContactInfo {
+  private extractContactInfoFromIncentive(_incentive: Incentive): ContactInfo {
     // 从激励中提取联系信息的逻辑
     // 在实际实现中，这应该从激励的接收者中获取联系信息
     // 这里提供一个基本的实现来满足测试需要
@@ -641,7 +680,6 @@ export class IncentiveDomainService {
       rejected: 0
     };
 
-    const rewardTypeCount = new Map<string, number>();
 
     for (const incentive of allIncentives) {
       totalAmount += incentive.getRewardAmount();
@@ -685,23 +723,3 @@ export class IncentiveDomainService {
 }
 
 // Import rules and infrastructure interfaces - these need to be created separately
-import { IncentiveRules } from './incentive.rules.js';
-import {
-  IncentiveCreationResult,
-  IncentiveValidationResult,
-  IncentiveApprovalResult,
-  IncentiveRejectionResult,
-  PaymentProcessingResult,
-  BatchPaymentResult,
-  IncentiveStatsResult,
-  PendingIncentivesResult,
-  BatchPaymentItem,
-  IPIncentiveStatistics,
-  SystemIncentiveStatistics,
-  PaymentGatewayRequest,
-  PaymentGatewayResponse,
-  IIncentiveRepository,
-  IDomainEventBus,
-  IAuditLogger,
-  IPaymentGateway
-} from '../../application/dtos/incentive.dto.js';

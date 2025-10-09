@@ -6,6 +6,9 @@ import { NotificationService } from './notification.service';
 import { GuestModule } from '../guest/guest.module';
 import { AppCacheModule } from '../cache/cache.module';
 
+/**
+ * Configures the web socket module.
+ */
 @Module({
   imports: [forwardRef(() => GuestModule), AppCacheModule],
   providers: [

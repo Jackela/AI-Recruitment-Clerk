@@ -19,6 +19,9 @@ import {
 } from './mobile-swipe.component';
 import { TouchGestureService } from '../../services/mobile/touch-gesture.service';
 
+/**
+ * Defines the shape of the dashboard card.
+ */
 export interface DashboardCard {
   id: string;
   title: string;
@@ -37,6 +40,9 @@ export interface DashboardCard {
   size: 'small' | 'medium' | 'large';
 }
 
+/**
+ * Defines the shape of the quick action.
+ */
 export interface QuickAction {
   id: string;
   label: string;
@@ -46,8 +52,11 @@ export interface QuickAction {
   badge?: number;
 }
 
+/**
+ * Represents the mobile dashboard component.
+ */
 @Component({
-  selector: 'app-mobile-dashboard',
+  selector: 'arc-mobile-dashboard',
   standalone: true,
   imports: [
     CommonModule,
@@ -57,7 +66,7 @@ export interface QuickAction {
   ],
   template: `
     <!-- Mobile Navigation -->
-    <app-mobile-navigation
+    <arc-mobile-navigation
       [pageTitle]="pageTitle"
       [pageSubtitle]="pageSubtitle"
       [navItems]="navItems"
@@ -65,7 +74,7 @@ export interface QuickAction {
       [headerActions]="headerActions"
       (actionClick)="onHeaderAction($event)"
     >
-    </app-mobile-navigation>
+    </arc-mobile-navigation>
 
     <!-- Dashboard Content -->
     <div class="mobile-dashboard-content">
@@ -1057,16 +1066,28 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
   @ViewChild('quickActionsContainer', { read: ElementRef })
   quickActionsContainer!: ElementRef;
 
+  /**
+   * Initializes a new instance of the Mobile Dashboard Component.
+   * @param _touchGesture - The touch gesture.
+   */
   constructor(private readonly _touchGesture: TouchGestureService) {
     // TouchGesture service will be used for future gesture implementations
     // Prevent unused warning
     void this._touchGesture;
   }
 
+  /**
+   * Performs the ng on init operation.
+   * @returns The result of the operation.
+   */
   ngOnInit() {
     this.setupPullToRefresh();
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   * @returns The result of the operation.
+   */
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
@@ -1228,6 +1249,11 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
     }, 1500); // Reduced from 2000ms for better UX
   }
 
+  /**
+   * Performs the on header action operation.
+   * @param action - The action.
+   * @returns The result of the operation.
+   */
   onHeaderAction(action: {
     id: string;
     label: string;
@@ -1245,6 +1271,11 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the on card click operation.
+   * @param card - The card.
+   * @returns The result of the operation.
+   */
   onCardClick(card: DashboardCard) {
     if (card.route) {
       // Router navigation handled by routerLink
@@ -1252,6 +1283,11 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the on card swipe operation.
+   * @param event - The event.
+   * @returns The result of the operation.
+   */
   onCardSwipe(event: SwipeEvent) {
     // Handle swipe actions based on event.action
     switch (event.action.id) {
@@ -1273,6 +1309,11 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the on activity click operation.
+   * @param activity - The activity.
+   * @returns The result of the operation.
+   */
   onActivityClick(activity: {
     id: string;
     title: string;
@@ -1294,6 +1335,10 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the on fab click operation.
+   * @returns The result of the operation.
+   */
   onFabClick() {
     // Navigate to upload page
     // This could use Router.navigate() for programmatic navigation

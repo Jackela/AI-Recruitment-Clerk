@@ -27,6 +27,9 @@ import {
 import { EnhancedRateLimitMiddleware } from '../middleware/enhanced-rate-limit.middleware';
 import { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
+/**
+ * Exposes endpoints for security.
+ */
 @ApiTags('Security Monitoring')
 @Controller('security')
 @UseGuards(JwtAuthGuard)
@@ -34,11 +37,30 @@ import { AuthenticatedRequest } from '../common/interfaces/authenticated-request
 export class SecurityController {
   private readonly logger = new Logger(SecurityController.name);
 
+  /**
+   * Initializes a new instance of the Security Controller.
+   * @param securityMonitorService - The security monitor service.
+   * @param rateLimitService - The rate limit service.
+   */
   constructor(
     private readonly securityMonitorService: SecurityMonitorService,
     private readonly rateLimitService: EnhancedRateLimitMiddleware,
   ) {}
 
+  /**
+   * Retrieves security events.
+   * @param req - The req.
+   * @param limit - The limit.
+   * @param offset - The offset.
+   * @param severity - The severity.
+   * @param type - The type.
+   * @param resolved - The resolved.
+   * @param ip - The ip.
+   * @param userId - The user id.
+   * @param startDate - The start date.
+   * @param endDate - The end date.
+   * @returns A promise that resolves to { events: SecurityEvent[]; total: number; metadata: any }.
+   */
   @Get('events')
   @ApiOperation({ summary: 'Get security events (Admin only)' })
   @ApiQuery({ name: 'limit', required: false, type: Number })
@@ -113,6 +135,12 @@ export class SecurityController {
     }
   }
 
+  /**
+   * Retrieves security metrics.
+   * @param req - The req.
+   * @param period - The period.
+   * @returns A promise that resolves to SecurityMetrics & { metadata: any }.
+   */
   @Get('metrics')
   @ApiOperation({ summary: 'Get security metrics dashboard (Admin only)' })
   @ApiQuery({ name: 'period', required: false, enum: ['hour', 'day', 'week'] })
@@ -154,6 +182,13 @@ export class SecurityController {
     }
   }
 
+  /**
+   * Resolves security event.
+   * @param req - The req.
+   * @param eventId - The event id.
+   * @param body - The body.
+   * @returns A promise that resolves to { success: boolean; message: string }.
+   */
   @Post('events/:eventId/resolve')
   @ApiOperation({ summary: 'Resolve a security event (Admin only)' })
   @ApiResponse({
@@ -209,6 +244,12 @@ export class SecurityController {
     }
   }
 
+  /**
+   * Retrieves rate limit stats.
+   * @param req - The req.
+   * @param period - The period.
+   * @returns The result of the operation.
+   */
   @Get('rate-limit/stats')
   @ApiOperation({ summary: 'Get rate limiting statistics (Admin only)' })
   @ApiQuery({ name: 'period', required: false, enum: ['hour', 'day', 'week'] })
@@ -249,6 +290,11 @@ export class SecurityController {
     }
   }
 
+  /**
+   * Retrieves locked i ps.
+   * @param req - The req.
+   * @returns The result of the operation.
+   */
   @Get('rate-limit/locked-ips')
   @ApiOperation({ summary: 'Get currently locked IP addresses (Admin only)' })
   @ApiResponse({
@@ -284,6 +330,12 @@ export class SecurityController {
     }
   }
 
+  /**
+   * Performs the unlock ip operation.
+   * @param req - The req.
+   * @param body - The body.
+   * @returns A promise that resolves to { success: boolean; message: string }.
+   */
   @Post('rate-limit/unlock-ip')
   @ApiOperation({ summary: 'Unlock an IP address (Admin only)' })
   @ApiResponse({ status: 200, description: 'IP address unlocked successfully' })
@@ -348,6 +400,11 @@ export class SecurityController {
     }
   }
 
+  /**
+   * Retrieves security health.
+   * @param req - The req.
+   * @returns The result of the operation.
+   */
   @Get('health')
   @ApiOperation({ summary: 'Security system health check' })
   @ApiResponse({ status: 200, description: 'Security system status' })
@@ -390,6 +447,11 @@ export class SecurityController {
     }
   }
 
+  /**
+   * Performs the test security alert operation.
+   * @param req - The req.
+   * @returns The result of the operation.
+   */
   @Post('test-alert')
   @ApiOperation({ summary: 'Test security alert system (Admin only)' })
   @ApiResponse({ status: 200, description: 'Test alert sent successfully' })

@@ -19,11 +19,17 @@ export interface JdDTO {
   };
 }
 
+/**
+ * Defines the shape of the llm extraction request.
+ */
 export interface LlmExtractionRequest {
   jobTitle: string;
   jdText: string;
 }
 
+/**
+ * Defines the shape of the llm extraction response.
+ */
 export interface LlmExtractionResponse {
   extractedData: JdDTO;
   confidence: number;

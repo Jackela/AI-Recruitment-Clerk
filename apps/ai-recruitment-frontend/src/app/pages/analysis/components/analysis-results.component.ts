@@ -2,6 +2,9 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ScoreVisualizationComponent } from './score-visualization.component';
 
+/**
+ * Defines the shape of the analysis result.
+ */
 export interface AnalysisResult {
   score: number;
   summary: string;
@@ -12,11 +15,17 @@ export interface AnalysisResult {
   reportUrl?: string;
 }
 
+/**
+ * Defines the shape of the result action.
+ */
 export interface ResultAction {
   type: 'view-detailed' | 'download-report' | 'start-new';
   payload?: any;
 }
 
+/**
+ * Represents the analysis results component.
+ */
 @Component({
   selector: 'arc-analysis-results',
   standalone: true,
@@ -426,18 +435,38 @@ export class AnalysisResultsComponent {
 
   @Output() actionRequested = new EventEmitter<ResultAction>();
 
+  /**
+   * Performs the on action operation.
+   * @param type - The type.
+   */
   onAction(type: ResultAction['type']): void {
     this.actionRequested.emit({ type });
   }
 
+  /**
+   * Performs the track by skill operation.
+   * @param _index - The index.
+   * @param skill - The skill.
+   * @returns The string value.
+   */
   trackBySkill(_index: number, skill: string): string {
     return skill;
   }
 
+  /**
+   * Performs the track by recommendation operation.
+   * @param _index - The index.
+   * @param recommendation - The recommendation.
+   * @returns The string value.
+   */
   trackByRecommendation(_index: number, recommendation: string): string {
     return `${_index}-${recommendation.slice(0, 20)}`;
   }
 
+  /**
+   * Retrieves score category.
+   * @returns The string value.
+   */
   getScoreCategory(): string {
     if (!this.result) return '未知';
     const score = this.result.score;
@@ -446,6 +475,10 @@ export class AnalysisResultsComponent {
     return '待提升';
   }
 
+  /**
+   * Retrieves score class.
+   * @returns The string value.
+   */
   getScoreClass(): string {
     if (!this.result) return '';
     const score = this.result.score;
@@ -454,6 +487,10 @@ export class AnalysisResultsComponent {
     return 'low';
   }
 
+  /**
+   * Retrieves priority.
+   * @returns The string value.
+   */
   getPriority(): string {
     if (!this.result) return '未知';
     const score = this.result.score;
@@ -463,6 +500,10 @@ export class AnalysisResultsComponent {
     return '待考虑';
   }
 
+  /**
+   * Retrieves priority class.
+   * @returns The string value.
+   */
   getPriorityClass(): string {
     if (!this.result) return '';
     const score = this.result.score;

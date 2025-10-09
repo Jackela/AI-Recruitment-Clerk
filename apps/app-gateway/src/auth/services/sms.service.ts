@@ -2,12 +2,19 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Twilio } from 'twilio';
 
+/**
+ * Provides sms functionality.
+ */
 @Injectable()
 export class SmsService {
   private readonly logger = new Logger(SmsService.name);
   private twilioClient: Twilio | null = null;
   private fromPhone!: string;
 
+  /**
+   * Initializes a new instance of the Sms Service.
+   * @param configService - The config service.
+   */
   constructor(private configService: ConfigService) {
     this.initializeTwilio();
   }
@@ -32,6 +39,12 @@ export class SmsService {
     }
   }
 
+  /**
+   * Performs the send sms operation.
+   * @param phoneNumber - The phone number.
+   * @param message - The message.
+   * @returns A promise that resolves when the operation completes.
+   */
   async sendSms(phoneNumber: string, message: string): Promise<void> {
     // Validate phone number format
     if (!this.isValidPhoneNumber(phoneNumber)) {
@@ -77,6 +90,13 @@ export class SmsService {
     }
   }
 
+  /**
+   * Performs the send security alert operation.
+   * @param phoneNumber - The phone number.
+   * @param event - The event.
+   * @param details - The details.
+   * @returns A promise that resolves when the operation completes.
+   */
   async sendSecurityAlert(
     phoneNumber: string,
     event: string,
@@ -120,6 +140,11 @@ export class SmsService {
     this.logger.log(`Timestamp: ${new Date().toISOString()}`);
   }
 
+  /**
+   * Retrieves delivery status.
+   * @param messageSid - The message sid.
+   * @returns A promise that resolves to any.
+   */
   async getDeliveryStatus(messageSid: string): Promise<any> {
     if (!this.twilioClient) {
       return { status: 'not_configured', message: 'Twilio not configured' };
@@ -147,6 +172,11 @@ export class SmsService {
     }
   }
 
+  /**
+   * Validates phone number.
+   * @param phoneNumber - The phone number.
+   * @returns The { isValid: boolean; formatted?: string; error?: string; }.
+   */
   validatePhoneNumber(phoneNumber: string): {
     isValid: boolean;
     formatted?: string;
@@ -176,6 +206,10 @@ export class SmsService {
     return { isValid: true, formatted: cleaned };
   }
 
+  /**
+   * Performs the test connection operation.
+   * @returns A promise that resolves to { success: boolean; message: string }.
+   */
   async testConnection(): Promise<{ success: boolean; message: string }> {
     if (!this.twilioClient) {
       return { success: false, message: 'Twilio client not initialized' };

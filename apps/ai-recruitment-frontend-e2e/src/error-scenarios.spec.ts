@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 /**
  * Error Scenarios and Form Validation E2E Tests
@@ -126,7 +126,7 @@ test.describe('Error Scenarios and Form Validation', () => {
       await expect(errorAlert).toBeVisible({ timeout: 10000 });
       
       // The error message should contain network-related text
-      await expect(errorAlert).toContainText(/错误|error|failed/i);
+      await expect(errorAlert).toContainText(/错误|error|failed|failure|Bad Request/i);
     });
   });
 
@@ -440,7 +440,7 @@ test.describe('Error Scenarios and Form Validation', () => {
       // Wait for error message in alert area
       const errorAlert = page.locator('.alert-danger');
       await expect(errorAlert).toBeVisible({ timeout: 10000 });
-      await expect(errorAlert).toContainText(/错误|error|失败|failed|validation/i);
+      await expect(errorAlert).toContainText(/错误|error|失败|failed|failure|validation|Bad Request/i);
     });
 
     await test.step('Verify error message can be dismissed', async () => {

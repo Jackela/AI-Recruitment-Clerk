@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 test.describe('Deep Console Debug', () => {
   test('capture all console messages and errors', async ({ page }) => {

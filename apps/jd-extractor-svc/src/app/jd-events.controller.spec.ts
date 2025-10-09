@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import { JdEventsController } from './jd-events.controller';
 import { Logger } from '@nestjs/common';
 import { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
+import { LlmService } from '../extraction/llm.service';
 
 describe('JdEventsController', () => {
   let controller: JdEventsController;
@@ -16,6 +17,12 @@ describe('JdEventsController', () => {
             subscribeToJobSubmissions: jest.fn(),
             publishAnalysisJdExtracted: jest.fn().mockResolvedValue({ success: true }),
             publishProcessingError: jest.fn().mockResolvedValue({ success: true }),
+          },
+        },
+        {
+          provide: LlmService,
+          useValue: {
+            extractJobRequirements: jest.fn().mockResolvedValue({ summary: 'stub' }),
           },
         },
       ],

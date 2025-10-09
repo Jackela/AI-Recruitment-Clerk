@@ -16,17 +16,46 @@ import {
   ReportGenerationFailedEvent,
 } from '../services/report-generator-nats.service';
 
+// Enhanced type definition for health check details
+/**
+ * Defines the shape of the health check details.
+ */
+export interface HealthCheckDetails {
+  natsConnected: boolean;
+  processingReportsCount: number;
+  processingReports: string[];
+  natsDetails: {
+    connected: boolean;
+    subscriptions?: Record<string, string>;
+    reportSpecificFeatures?: string;
+    error?: string;
+  };
+  error?: string;
+}
+
+/**
+ * Exposes endpoints for report events.
+ */
 @Controller()
 @Injectable()
 export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(ReportEventsController.name);
   private readonly processingReports = new Set<string>();
 
+  /**
+   * Initializes a new instance of the Report Events Controller.
+   * @param natsService - The nats service.
+   * @param reportGeneratorService - The report generator service.
+   */
   constructor(
     private readonly natsService: ReportGeneratorNatsService,
     private readonly reportGeneratorService: ReportGeneratorService,
   ) {}
 
+  /**
+   * Performs the on module init operation.
+   * @returns A promise that resolves when the operation completes.
+   */
   async onModuleInit(): Promise<void> {
     try {
       this.logger.log('Initializing Report Events Controller...');
@@ -41,6 +70,10 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  /**
+   * Performs the on module destroy operation.
+   * @returns A promise that resolves when the operation completes.
+   */
   async onModuleDestroy(): Promise<void> {
     try {
       this.logger.log('Shutting down Report Events Controller...');
@@ -70,6 +103,11 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
     );
   }
 
+  /**
+   * Handles match scored.
+   * @param event - The event.
+   * @returns A promise that resolves when the operation completes.
+   */
   async handleMatchScored(event: MatchScoredEvent): Promise<void> {
     const { jobId, resumeId } = event;
     const reportKey = `${jobId}_${resumeId}`;
@@ -135,6 +173,11 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  /**
+   * Handles report generation requested.
+   * @param event - The event.
+   * @returns A promise that resolves when the operation completes.
+   */
   async handleReportGenerationRequested(
     event: ReportGenerationRequestedEvent,
   ): Promise<void> {
@@ -287,7 +330,11 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
   }
 
   // Health check endpoint
-  async healthCheck(): Promise<{ status: string; details: any }> {
+  /**
+   * Performs the health check operation.
+   * @returns A promise that resolves to { status: string; details: HealthCheckDetails }.
+   */
+  async healthCheck(): Promise<{ status: string; details: HealthCheckDetails }> {
     try {
       const healthCheck = await this.natsService.healthCheck();
       const natsConnected = healthCheck.status === 'healthy';
@@ -306,7 +353,14 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
       return {
         status: 'unhealthy',
         details: {
-          error: error.message,
+          natsConnected: false,
+          processingReportsCount: this.processingReports.size,
+          processingReports: Array.from(this.processingReports),
+          natsDetails: {
+            connected: false,
+            error: error instanceof Error ? error.message : String(error),
+          },
+          error: error instanceof Error ? error.message : String(error),
         },
       };
     }

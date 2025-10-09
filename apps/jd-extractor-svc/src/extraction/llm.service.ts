@@ -10,13 +10,19 @@ import {
   GeminiConfig,
   PromptTemplates,
   PromptBuilder,
-} from '@ai-recruitment-clerk/ai-services-shared';
+} from '@ai-recruitment-clerk/shared-dtos';
 
+/**
+ * Provides llm functionality.
+ */
 @Injectable()
 export class LlmService {
   private readonly logger = new Logger(LlmService.name);
   private readonly geminiClient: GeminiClient;
 
+  /**
+   * Initializes a new instance of the LLM Service.
+   */
   constructor() {
     // 🔒 SECURITY: Validate configuration before service initialization (skip in tests)
     if (process.env.NODE_ENV !== 'test') {
@@ -41,6 +47,11 @@ export class LlmService {
         : new GeminiClient(config);
   }
 
+  /**
+   * Performs the extract job requirements operation.
+   * @param jdText - The jd text.
+   * @returns A promise that resolves to JdDTO.
+   */
   async extractJobRequirements(jdText: string): Promise<JdDTO> {
     this.logger.log(
       'Extracting job requirements from JD text using Gemini API',
@@ -245,6 +256,11 @@ export class LlmService {
     };
   }
 
+  /**
+   * Performs the extract structured data operation.
+   * @param request - The request.
+   * @returns A promise that resolves to LlmExtractionResponse.
+   */
   async extractStructuredData(
     request: LlmExtractionRequest,
   ): Promise<LlmExtractionResponse> {
@@ -278,6 +294,11 @@ export class LlmService {
     }
   }
 
+  /**
+   * Validates extracted data.
+   * @param data - The data.
+   * @returns A promise that resolves to boolean value.
+   */
   async validateExtractedData(data: JdDTO): Promise<boolean> {
     // Comprehensive validation logic for production use
     if (!data.requirements || !data.responsibilities) {
@@ -514,6 +535,10 @@ export class LlmService {
     return cleanedData;
   }
 
+  /**
+   * Performs the health check operation.
+   * @returns A promise that resolves to boolean value.
+   */
   async healthCheck(): Promise<boolean> {
     try {
       return await this.geminiClient.healthCheck();

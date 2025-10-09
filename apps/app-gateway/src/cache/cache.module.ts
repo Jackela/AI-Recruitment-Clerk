@@ -13,6 +13,9 @@ import { cacheConfig } from './cache.config';
 import { Job, JobSchema } from '../schemas/job.schema';
 import { JobRepository } from '../repositories/job.repository';
 
+/**
+ * Configures the app cache module.
+ */
 @Module({
   imports: [
     CacheModule.registerAsync(cacheConfig),

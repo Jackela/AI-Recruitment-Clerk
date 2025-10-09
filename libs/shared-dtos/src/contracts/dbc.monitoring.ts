@@ -8,6 +8,9 @@
 
 import { ContractViolationError } from './dbc.decorators';
 
+/**
+ * Defines the shape of the contract metrics.
+ */
 export interface ContractMetrics {
   operationName: string;
   contractType: 'PRE' | 'POST' | 'INVARIANT';
@@ -19,6 +22,9 @@ export interface ContractMetrics {
   serviceContext: string;
 }
 
+/**
+ * Defines the shape of the performance profile.
+ */
 export interface PerformanceProfile {
   serviceName: string;
   operationName: string;
@@ -29,6 +35,9 @@ export interface PerformanceProfile {
   lastUpdated: Date;
 }
 
+/**
+ * Defines the shape of the alert threshold.
+ */
 export interface AlertThreshold {
   metricName: string;
   operator: 'gt' | 'lt' | 'eq';
@@ -52,6 +61,9 @@ export class DBCMonitor {
   private alertCooldowns: Map<string, number> = new Map();
   private readonly MAX_METRICS_HISTORY = 10000;
 
+  /**
+   * Initializes a new instance of the Dbc Monitor.
+   */
   constructor() {
     this.initializeDefaultThresholds();
     this.startPerformanceAggregation();

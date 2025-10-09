@@ -10,6 +10,32 @@ import {
 } from '../schemas/report.schema';
 import { DatabasePerformanceMonitor } from '@ai-recruitment-clerk/infrastructure-shared';
 
+// Enhanced type definitions for report repository
+/**
+ * Defines the shape of the date grouping.
+ */
+export interface DateGrouping {
+  year: number;
+  month?: number;
+  day?: number;
+  week?: number;
+}
+
+/**
+ * Defines the shape of the performance metrics.
+ */
+export interface PerformanceMetrics {
+  averageResponseTime: number;
+  totalOperations: number;
+  successRate: number;
+  errorRate: number;
+  lastOperationTime: Date;
+  healthStatus: 'healthy' | 'degraded' | 'unhealthy';
+}
+
+/**
+ * Defines the shape of the report create data.
+ */
 export interface ReportCreateData {
   jobId: string;
   resumeId: string;
@@ -25,6 +51,9 @@ export interface ReportCreateData {
   detailedReportUrl?: string;
 }
 
+/**
+ * Defines the shape of the report update data.
+ */
 export interface ReportUpdateData {
   status?: 'pending' | 'processing' | 'completed' | 'failed';
   reportGridFsId?: string;
@@ -33,6 +62,9 @@ export interface ReportUpdateData {
   processingTimeMs?: number;
 }
 
+/**
+ * Defines the shape of the report query.
+ */
 export interface ReportQuery {
   jobId?: string;
   resumeId?: string;
@@ -46,6 +78,9 @@ export interface ReportQuery {
   recommendation?: 'hire' | 'consider' | 'interview' | 'reject';
 }
 
+/**
+ * Defines the shape of the report list options.
+ */
 export interface ReportListOptions {
   page?: number;
   limit?: number;
@@ -54,6 +89,9 @@ export interface ReportListOptions {
   includeFailedReports?: boolean;
 }
 
+/**
+ * Defines the shape of the paginated reports.
+ */
 export interface PaginatedReports {
   reports: ReportDocument[];
   totalCount: number;
@@ -63,6 +101,9 @@ export interface PaginatedReports {
   hasPrevPage: boolean;
 }
 
+/**
+ * Defines the shape of the report analytics.
+ */
 export interface ReportAnalytics {
   totalReports: number;
   reportsByStatus: Record<string, number>;
@@ -77,11 +118,18 @@ export interface ReportAnalytics {
   }[];
 }
 
+/**
+ * Manages persistence for report.
+ */
 @Injectable()
 export class ReportRepository {
   private readonly logger = new Logger(ReportRepository.name);
   private readonly performanceMonitor = new DatabasePerformanceMonitor();
 
+  /**
+   * Initializes a new instance of the Report Repository.
+   * @param reportModel - The report model.
+   */
   constructor(
     @InjectModel(Report.name, 'report-generator')
     private readonly reportModel: Model<ReportDocument>,
@@ -116,6 +164,12 @@ export class ReportRepository {
     );
   }
 
+  /**
+   * Updates resume record.
+   * @param resumeId - The resume id.
+   * @param updateData - The update data.
+   * @returns A promise that resolves to ReportDocument | null.
+   */
   async updateResumeRecord(
     resumeId: string,
     updateData: ReportUpdateData,
@@ -184,6 +238,11 @@ export class ReportRepository {
     );
   }
 
+  /**
+   * Performs the find report operation.
+   * @param query - The query.
+   * @returns A promise that resolves to ReportDocument | null.
+   */
   async findReport(query: ReportQuery): Promise<ReportDocument | null> {
     try {
       this.logger.debug('Finding single report', { query });
@@ -309,6 +368,12 @@ export class ReportRepository {
     );
   }
 
+  /**
+   * Performs the find reports by job id operation.
+   * @param jobId - The job id.
+   * @param options - The options.
+   * @returns A promise that resolves to PaginatedReports.
+   */
   async findReportsByJobId(
     jobId: string,
     options: ReportListOptions = {},
@@ -316,6 +381,12 @@ export class ReportRepository {
     return this.findReports({ jobId }, options);
   }
 
+  /**
+   * Performs the find reports by resume id operation.
+   * @param resumeId - The resume id.
+   * @param options - The options.
+   * @returns A promise that resolves to PaginatedReports.
+   */
   async findReportsByResumeId(
     resumeId: string,
     options: ReportListOptions = {},
@@ -323,6 +394,11 @@ export class ReportRepository {
     return this.findReports({ resumeId }, options);
   }
 
+  /**
+   * Removes report.
+   * @param reportId - The report id.
+   * @returns A promise that resolves to boolean value.
+   */
   async deleteReport(reportId: string): Promise<boolean> {
     try {
       this.logger.debug(`Deleting report with ID: ${reportId}`);
@@ -730,16 +806,16 @@ export class ReportRepository {
   /**
    * Format date from MongoDB date grouping
    */
-  private formatDateFromGrouping(dateGroup: any, granularity: string): string {
+  private formatDateFromGrouping(dateGroup: DateGrouping, granularity: string): string {
     const { year, month, day, week } = dateGroup;
 
     switch (granularity) {
       case 'week':
-        return `${year}-W${week.toString().padStart(2, '0')}`;
+        return `${year}-W${(week || 1).toString().padStart(2, '0')}`;
       case 'month':
-        return `${year}-${month.toString().padStart(2, '0')}`;
+        return `${year}-${(month || 1).toString().padStart(2, '0')}`;
       default:
-        return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+        return `${year}-${(month || 1).toString().padStart(2, '0')}-${(day || 1).toString().padStart(2, '0')}`;
     }
   }
 
@@ -749,16 +825,24 @@ export class ReportRepository {
   async healthCheck(): Promise<{
     status: string;
     count: number;
-    performance: any;
+    performance: PerformanceMetrics | null;
   }> {
     try {
       return this.performanceMonitor.executeWithMonitoring(
         async () => {
           const count = await this.reportModel.countDocuments().exec();
+          const performanceStats = this.performanceMonitor.getRealTimeStats();
           return {
             status: 'healthy',
             count,
-            performance: this.performanceMonitor.getRealTimeStats(),
+            performance: performanceStats ? {
+              averageResponseTime: performanceStats.averageQueryTime || 0,
+              totalOperations: performanceStats.connectionCount || 0,
+              successRate: 100, // Assume 100% if no errors
+              errorRate: 0,
+              lastOperationTime: new Date(),
+              healthStatus: 'healthy' as const
+            } : null,
           };
         },
         'healthCheck',

@@ -6,6 +6,9 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 
+/**
+ * Represents the phone validator directive.
+ */
 @Directive({
   selector: '[arcPhoneValidator]',
   standalone: true,
@@ -18,6 +21,11 @@ import {
   ],
 })
 export class PhoneValidatorDirective implements Validator {
+  /**
+   * Validates the data.
+   * @param control - The control.
+   * @returns The ValidationErrors | null.
+   */
   validate(control: AbstractControl): ValidationErrors | null {
     if (!control.value) {
       return null; // Don't validate empty values

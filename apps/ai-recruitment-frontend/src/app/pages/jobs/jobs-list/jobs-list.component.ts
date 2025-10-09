@@ -8,6 +8,9 @@ import { JobListItem } from '../../../store/jobs/job.model';
 import * as JobActions from '../../../store/jobs/job.actions';
 import * as JobSelectors from '../../../store/jobs/job.selectors';
 
+/**
+ * Represents the jobs list component.
+ */
 @Component({
   selector: 'arc-jobs-list',
   standalone: true,
@@ -27,6 +30,9 @@ export class JobsListComponent implements OnInit, OnDestroy {
 
   private store = inject(Store<AppState>);
 
+  /**
+   * Initializes a new instance of the Jobs List Component.
+   */
   constructor() {
     // Use memoized selectors instead of direct state access
     this.jobs$ = this.store.select(JobSelectors.selectAllJobs);
@@ -36,23 +42,41 @@ export class JobsListComponent implements OnInit, OnDestroy {
     this.activeJobs$ = this.store.select(JobSelectors.selectActiveJobs);
   }
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     this.loadJobs();
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
+  /**
+   * Loads jobs.
+   */
   loadJobs(): void {
     this.store.dispatch(JobActions.loadJobs());
   }
 
+  /**
+   * Performs the on refresh operation.
+   */
   onRefresh(): void {
     this.loadJobs();
   }
 
+  /**
+   * Performs the track by job id operation.
+   * @param _index - The index.
+   * @param job - The job.
+   * @returns The string value.
+   */
   trackByJobId(_index: number, job: JobListItem): string {
     return job.id;
   }

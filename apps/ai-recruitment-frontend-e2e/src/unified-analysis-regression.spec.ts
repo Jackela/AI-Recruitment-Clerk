@@ -1,4 +1,13 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
+import type { Page } from '@playwright/test';
+import { waitForDeferredComponents } from './test-utils/hydration';
+
+const ANALYSIS_URL = 'http://localhost:4202/analysis';
+async function gotoAnalysis(page: Page): Promise<void> {
+  await page.goto(ANALYSIS_URL);
+  await waitForDeferredComponents(page);
+}
+
 
 /**
  * Unified Analysis Component Refactoring Regression Tests
@@ -77,7 +86,7 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
   test('Component structure validation - All child components should be present', async ({
     page,
   }) => {
-    await page.goto('http://localhost:4202/analysis');
+    await gotoAnalysis(page);
     await page.waitForTimeout(3000);
 
     // Test will verify component structure exists even if app doesn't fully load
@@ -129,7 +138,7 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
   });
 
   test('File upload component functionality validation', async ({ page }) => {
-    await page.goto('http://localhost:4202/analysis');
+    await gotoAnalysis(page);
     await page.waitForTimeout(2000);
 
     // Check for file upload elements
@@ -161,7 +170,7 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
   });
 
   test('Form validation and error handling', async ({ page }) => {
-    await page.goto('http://localhost:4202/analysis');
+    await gotoAnalysis(page);
     await page.waitForTimeout(2000);
 
     // Test form validation by trying to submit without required fields
@@ -199,7 +208,7 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
   });
 
   test('Progress tracking component validation', async ({ page }) => {
-    await page.goto('http://localhost:4202/analysis');
+    await gotoAnalysis(page);
     await page.waitForTimeout(2000);
 
     // Look for progress-related elements
@@ -225,7 +234,7 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
   });
 
   test('Results display component validation', async ({ page }) => {
-    await page.goto('http://localhost:4202/analysis');
+    await gotoAnalysis(page);
     await page.waitForTimeout(2000);
 
     // Look for results-related elements
@@ -251,7 +260,7 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
   });
 
   test('Statistics panel component validation', async ({ page }) => {
-    await page.goto('http://localhost:4202/analysis');
+    await gotoAnalysis(page);
     await page.waitForTimeout(2000);
 
     // Look for statistics-related elements
@@ -277,7 +286,7 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
   });
 
   test('Error handling component validation', async ({ page }) => {
-    await page.goto('http://localhost:4202/analysis');
+    await gotoAnalysis(page);
 
     // Trigger an error by trying invalid actions
     await page.waitForTimeout(2000);
@@ -306,7 +315,7 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
   });
 
   test('Responsive design validation', async ({ page }) => {
-    await page.goto('http://localhost:4202/analysis');
+    await gotoAnalysis(page);
     await page.waitForTimeout(2000);
 
     // Test different viewport sizes to ensure refactored components are responsive
@@ -335,7 +344,7 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
   });
 
   test('Accessibility validation', async ({ page }) => {
-    await page.goto('http://localhost:4202/analysis');
+    await gotoAnalysis(page);
     await page.waitForTimeout(2000);
 
     // Check for basic accessibility features
@@ -363,7 +372,7 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
   test('Performance validation - Component loading times', async ({ page }) => {
     const startTime = Date.now();
 
-    await page.goto('http://localhost:4202/analysis');
+    await gotoAnalysis(page);
     await page.waitForTimeout(3000);
 
     const loadTime = Date.now() - startTime;
@@ -395,7 +404,7 @@ test.describe('Unified Analysis Component - Refactoring Regression Tests', () =>
 
 test.describe('Component Integration Tests', () => {
   test('Data flow between parent and child components', async ({ page }) => {
-    await page.goto('http://localhost:4202/analysis');
+    await gotoAnalysis(page);
     await page.waitForTimeout(2000);
 
     // Test that parent component properly orchestrates child components
@@ -417,7 +426,7 @@ test.describe('Component Integration Tests', () => {
   });
 
   test('State management across refactored components', async ({ page }) => {
-    await page.goto('http://localhost:4202/analysis');
+    await gotoAnalysis(page);
     await page.waitForTimeout(2000);
 
     // Verify that component state is properly managed
@@ -437,3 +446,5 @@ test.describe('Component Integration Tests', () => {
     }
   });
 });
+
+

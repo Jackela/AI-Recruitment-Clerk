@@ -3,6 +3,9 @@ import { Document, HydratedDocument } from 'mongoose';
 
 export type GuestUsageDocument = HydratedDocument<GuestUsage>;
 
+/**
+ * Represents the guest usage.
+ */
 @Schema({
   timestamps: true,
   collection: 'guest_usages',

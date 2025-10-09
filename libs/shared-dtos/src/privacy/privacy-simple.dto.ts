@@ -201,6 +201,9 @@ export class CreateDataProcessingRecordDto {
   legalBasis!: ProcessingLegalBasis;
 }
 
+/**
+ * Describes the create breach record data transfer object.
+ */
 export class CreateBreachRecordDto {
   @IsString()
   title!: string;
@@ -222,6 +225,9 @@ export class CreateBreachRecordDto {
   reportedBy?: string;
 }
 
+/**
+ * Describes the update retention status data transfer object.
+ */
 export class UpdateRetentionStatusDto {
   @IsString()
   recordId!: string;

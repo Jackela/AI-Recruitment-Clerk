@@ -10,12 +10,26 @@ interface SecurityRequest extends Request {
   };
 }
 
+/**
+ * Represents the security headers middleware.
+ */
 @Injectable()
 export class SecurityHeadersMiddleware implements NestMiddleware {
   private readonly logger = new Logger(SecurityHeadersMiddleware.name);
 
+  /**
+   * Initializes a new instance of the Security Headers Middleware.
+   * @param configService - The config service.
+   */
   constructor(private configService: ConfigService) {}
 
+  /**
+   * Performs the use operation.
+   * @param req - The req.
+   * @param res - The res.
+   * @param next - The next.
+   * @returns The result of the operation.
+   */
   use(req: SecurityRequest, res: Response, next: NextFunction) {
     const isProduction =
       this.configService.get<string>('NODE_ENV') === 'production';

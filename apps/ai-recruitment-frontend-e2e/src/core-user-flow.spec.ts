@@ -1,5 +1,13 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { Page } from '@playwright/test';
+import { waitForDeferredComponents } from './test-utils/hydration';
+
+const BASE_URL = 'http://localhost:4202/';
+async function gotoAndHydrate(page: Page, url: string): Promise<void> {
+  await page.goto(url);
+  await page.waitForLoadState('networkidle');
+  await waitForDeferredComponents(page);
+}
 
 /**
  * Core User Flow E2E Tests
@@ -53,8 +61,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     page,
   }) => {
     // Step 1: User opens the application and sees the main dashboard
-    await page.goto('http://localhost:4202/');
-    await page.waitForLoadState('networkidle');
+    await gotoAndHydrate(page, BASE_URL);
     // Fix: Use specific selector to avoid multiple h1 elements
     await expect(page.locator('#app-title')).toBeVisible();
     await expect(page.locator('#app-title')).toContainText(
@@ -64,8 +71,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     // Step 2: User creates a new job position (FR-1: 岗位管理)
     await test.step('Create new job position', async () => {
       // Navigate to job creation page
-      await page.goto('http://localhost:4202/jobs/create');
-      await page.waitForLoadState('networkidle');
+      await gotoAndHydrate(page, `${BASE_URL}jobs/create`);
 
       // Fix: Add timeout for form to appear and better error handling
       await page.waitForTimeout(2000); // Allow Angular to fully render
@@ -125,8 +131,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     // Step 3: Navigate to jobs list and verify UI structure (Frontend validation)
     await test.step('Verify jobs list page structure', async () => {
       // Go to jobs list page
-      await page.goto('http://localhost:4202/jobs');
-      await page.waitForLoadState('networkidle');
+      await gotoAndHydrate(page, `${BASE_URL}jobs`);
       await page.waitForTimeout(1000);
 
       // Verify the page structure exists (regardless of backend data)
@@ -163,8 +168,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     // Step 4: Test navigation to reports page (FR-3: 报告与展示)
     await test.step('Navigate to reports page', async () => {
       // Navigate to reports page
-      await page.goto('http://localhost:4202/reports');
-      await page.waitForLoadState('networkidle');
+      await gotoAndHydrate(page, `${BASE_URL}reports`);
       await page.waitForTimeout(1000);
 
       // Verify reports page loads and has basic structure
@@ -184,8 +188,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     // Step 5: Test navigation between pages works correctly
     await test.step('Verify navigation flow works', async () => {
       // Test navigation from reports back to jobs
-      await page.goto('http://localhost:4202/jobs');
-      await page.waitForLoadState('networkidle');
+      await gotoAndHydrate(page, `${BASE_URL}jobs`);
 
       // Fix: Check for page title existence with better error handling
       const pageTitleCount = await page
@@ -196,8 +199,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
       }
 
       // Test navigation to create job - with better error handling
-      await page.goto('http://localhost:4202/jobs/create');
-      await page.waitForLoadState('networkidle');
+      await gotoAndHydrate(page, `${BASE_URL}jobs/create`);
       await page.waitForTimeout(1000);
 
       const hasForm = (await page.locator('form').count()) > 0;
@@ -207,8 +209,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
       }
 
       // Test navigation back to home (dashboard)
-      await page.goto('http://localhost:4202/');
-      await page.waitForLoadState('networkidle');
+      await gotoAndHydrate(page, BASE_URL);
 
       // Fix: Should redirect to dashboard, not jobs
       expect(page.url()).toContain('localhost:4202');
@@ -222,8 +223,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
     page,
   }) => {
     // Start from home page
-    await page.goto('http://localhost:4202/');
-    await page.waitForLoadState('networkidle');
+    await gotoAndHydrate(page, BASE_URL);
 
     // Fix: Verify main dashboard loads with specific elements
     await expect(page.locator('body')).toBeVisible();
@@ -242,8 +242,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
 
   test('Job creation form accessibility and validation', async ({ page }) => {
     // Navigate to job creation
-    await page.goto('http://localhost:4202/jobs/create');
-    await page.waitForLoadState('networkidle');
+    await gotoAndHydrate(page, `${BASE_URL}jobs/create`);
     await page.waitForTimeout(1500); // Allow Angular to fully render
 
     // Check for form accessibility
@@ -277,8 +276,7 @@ test.describe('Core User Flow - Job Creation to Report Viewing', () => {
 
   test('Resume upload file validation', async ({ page }) => {
     // Fix: Navigate to existing resume upload route instead of non-existent job route
-    await page.goto('http://localhost:4202/resume');
-    await page.waitForLoadState('networkidle');
+    await gotoAndHydrate(page, `${BASE_URL}resume`);
 
     // Try to upload an invalid file type
     const fileInput = page.locator('input[type="file"]');

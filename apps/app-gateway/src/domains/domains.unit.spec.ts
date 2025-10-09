@@ -4,7 +4,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { getModelToken } from '@nestjs/mongoose';
 import { AnalyticsIntegrationService } from './analytics/analytics-integration.service';
 import { AnalyticsEventRepository } from './analytics/analytics-event.repository';
-import { NatsClient } from '../nats/nats.client';
+import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
 
 describe('Agent-6: Gateway Integration Layer - Unit Tests', () => {
   let analyticsService: AnalyticsIntegrationService;

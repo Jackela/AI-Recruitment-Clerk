@@ -49,6 +49,9 @@ export enum Permission {
   MANAGE_USAGE_POLICY = 'manage_usage_policy',
 }
 
+/**
+ * Describes the user data transfer object.
+ */
 export class UserDto {
   id = '';
   email = '';
@@ -63,6 +66,9 @@ export class UserDto {
 }
 
 // User Profile Schema types
+/**
+ * Defines the shape of the user preferences.
+ */
 export interface UserPreferences {
   language?: string;
   timezone?: string;
@@ -104,12 +110,19 @@ export enum Currency {
   USD = 'USD',
 }
 
+/**
+ * Represents the contact info.
+ */
 export class ContactInfo {
   email?: string;
   phone?: string;
   wechat?: string;
   alipay?: string;
 
+  /**
+   * Initializes a new instance of the Contact Info.
+   * @param data - The data.
+   */
   constructor(data: any = {}) {
     this.email = data.email;
     this.phone = data.phone;
@@ -119,6 +132,9 @@ export class ContactInfo {
 }
 
 // Placeholder types for missing DTOs
+/**
+ * Defines the shape of the consent record.
+ */
 export interface ConsentRecord {
   id: string;
   userId: string;
@@ -130,6 +146,9 @@ export interface ConsentRecord {
   updatedAt: Date;
 }
 
+/**
+ * Defines the shape of the user consent profile.
+ */
 export interface UserConsentProfile {
   userId: string;
   consentRecords: ConsentRecord[];
@@ -142,6 +161,9 @@ export interface UserConsentProfile {
   needsConsentRenewal: () => boolean;
 }
 
+/**
+ * Describes the user consent profile data transfer object.
+ */
 export class UserConsentProfileDto {
   userId: string = '';
   consentRecords: ConsentRecord[] = [];
@@ -150,10 +172,19 @@ export class UserConsentProfileDto {
   createdAt: Date = new Date();
   updatedAt: Date = new Date();
 
+  /**
+   * Initializes a new instance of the User Consent Profile DTO.
+   * @param data - The data.
+   */
   constructor(data: Partial<UserConsentProfile> = {}) {
     Object.assign(this, data);
   }
 
+  /**
+   * Performs the has valid consent operation.
+   * @param purpose - The purpose.
+   * @returns The boolean value.
+   */
   hasValidConsent(purpose: any): boolean {
     // Implementation would check consent records
     return this.consentRecords.some(
@@ -161,12 +192,20 @@ export class UserConsentProfileDto {
     );
   }
 
+  /**
+   * Retrieves granted purposes.
+   * @returns The an array of string value.
+   */
   getGrantedPurposes(): string[] {
     return this.consentRecords
       .filter((record) => record.status === 'granted')
       .map((record) => record.purpose);
   }
 
+  /**
+   * Performs the needs consent renewal operation.
+   * @returns The boolean value.
+   */
   needsConsentRenewal(): boolean {
     // Implementation would check if consent needs renewal
     const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
@@ -174,6 +213,9 @@ export class UserConsentProfileDto {
   }
 }
 
+/**
+ * Defines the shape of the capture consent dto.
+ */
 export interface CaptureConsentDto {
   userId: string;
   consents: any[];
@@ -182,6 +224,9 @@ export interface CaptureConsentDto {
   consentVersion?: string;
 }
 
+/**
+ * Describes the capture consent request data transfer object.
+ */
 export class CaptureConsentRequestDto {
   userId: string = '';
   consents: any[] = [];
@@ -189,27 +234,44 @@ export class CaptureConsentRequestDto {
   userAgent?: string;
   consentVersion?: string;
 
+  /**
+   * Initializes a new instance of the Capture Consent Request DTO.
+   * @param data - The data.
+   */
   constructor(data: Partial<CaptureConsentDto> = {}) {
     Object.assign(this, data);
   }
 }
 
+/**
+ * Defines the shape of the withdraw consent dto.
+ */
 export interface WithdrawConsentDto {
   userId: string;
   purpose: string;
   reason?: string;
 }
 
+/**
+ * Describes the withdraw consent request data transfer object.
+ */
 export class WithdrawConsentRequestDto {
   userId: string = '';
   purpose: string = '';
   reason?: string;
 
+  /**
+   * Initializes a new instance of the Withdraw Consent Request DTO.
+   * @param data - The data.
+   */
   constructor(data: Partial<WithdrawConsentDto> = {}) {
     Object.assign(this, data);
   }
 }
 
+/**
+ * Defines the shape of the consent status dto.
+ */
 export interface ConsentStatusDto {
   userId: string;
   purposes: any[];
@@ -217,17 +279,27 @@ export interface ConsentStatusDto {
   lastUpdated: Date;
 }
 
+/**
+ * Describes the consent status response data transfer object.
+ */
 export class ConsentStatusResponseDto {
   userId: string = '';
   purposes: any[] = [];
   needsRenewal: boolean = false;
   lastUpdated: Date = new Date();
 
+  /**
+   * Initializes a new instance of the Consent Status Response DTO.
+   * @param data - The data.
+   */
   constructor(data: Partial<ConsentStatusDto> = {}) {
     Object.assign(this, data);
   }
 }
 
+/**
+ * Defines the shape of the create rights request dto.
+ */
 export interface CreateRightsRequestDto {
   userId: string;
   requestType: string;
@@ -237,6 +309,9 @@ export interface CreateRightsRequestDto {
   requestDetails?: any;
 }
 
+/**
+ * Describes the create rights request body data transfer object.
+ */
 export class CreateRightsRequestBodyDto {
   userId: string = '';
   requestType: string = '';
@@ -245,11 +320,18 @@ export class CreateRightsRequestBodyDto {
   userAgent?: string;
   requestDetails?: any;
 
+  /**
+   * Initializes a new instance of the Create Rights Request Body DTO.
+   * @param data - The data.
+   */
   constructor(data: Partial<CreateRightsRequestDto> = {}) {
     Object.assign(this, data);
   }
 }
 
+/**
+ * Defines the shape of the data export package.
+ */
 export interface DataExportPackage {
   id?: string;
   requestId?: string;
@@ -262,6 +344,9 @@ export interface DataExportPackage {
   metadata?: any;
 }
 
+/**
+ * Describes the data export package data transfer object.
+ */
 export class DataExportPackageDto {
   id?: string;
   requestId?: string;
@@ -273,11 +358,18 @@ export class DataExportPackageDto {
   createdAt: Date = new Date();
   metadata?: any;
 
+  /**
+   * Initializes a new instance of the Data Export Package DTO.
+   * @param data - The data.
+   */
   constructor(data: Partial<DataExportPackage> = {}) {
     Object.assign(this, data);
   }
 }
 
+/**
+ * Defines the shape of the process rights request dto.
+ */
 export interface ProcessRightsRequestDto {
   requestId: string;
   status: string;
@@ -291,6 +383,9 @@ export enum DataSubjectRightType {
   PORTABILITY = 'portability',
 }
 
+/**
+ * Defines the shape of the data subject rights request.
+ */
 export interface DataSubjectRightsRequest {
   id: string;
   userId: string;
@@ -303,6 +398,9 @@ export interface DataSubjectRightsRequest {
   updatedAt: Date;
 }
 
+/**
+ * Describes the data subject rights request data transfer object.
+ */
 export class DataSubjectRightsRequestDto {
   id: string = '';
   userId: string = '';
@@ -315,6 +413,10 @@ export class DataSubjectRightsRequestDto {
   requestDate: Date = new Date();
   updatedAt: Date = new Date();
 
+  /**
+   * Initializes a new instance of the Data Subject Rights Request DTO.
+   * @param data - The data.
+   */
   constructor(data: Partial<DataSubjectRightsRequest> = {}) {
     Object.assign(this, data);
   }
@@ -341,6 +443,9 @@ export enum IdentityVerificationStatus {
   FAILED = 'failed',
 }
 
+/**
+ * Defines the shape of the user preferences.
+ */
 export interface UserPreferences {
   language?: string;
   timezone?: string;
@@ -353,6 +458,9 @@ export interface UserPreferences {
   };
 }
 
+/**
+ * Defines the shape of the user preferences dto.
+ */
 export interface UserPreferencesDto {
   language?: string;
   timezone?: string;
@@ -366,6 +474,9 @@ export interface UserPreferencesDto {
   userId?: string;
 }
 
+/**
+ * Defines the shape of the user activity dto.
+ */
 export interface UserActivityDto {
   id: string;
   userId: string;
@@ -428,6 +539,12 @@ export enum ConsentStatus {
 export { ErrorInterceptorFactory } from '@ai-recruitment-clerk/infrastructure-shared';
 
 // Add circuit breaker decorator
+/**
+ * Performs the with circuit breaker operation.
+ * @param nameOrConfig - The name or config.
+ * @param config - The config.
+ * @returns The result of the operation.
+ */
 export function WithCircuitBreaker(nameOrConfig?: string | any, config?: any) {
   return function (
     target: any,
@@ -452,7 +569,17 @@ export function WithCircuitBreaker(nameOrConfig?: string | any, config?: any) {
 }
 
 // Add retry utility
+/**
+ * Represents the retry utility.
+ */
 export class RetryUtility {
+  /**
+   * Performs the retry operation.
+   * @param operation - The operation.
+   * @param maxAttempts - The max attempts.
+   * @param delay - The delay.
+   * @returns A promise that resolves to T.
+   */
   static async retry<T>(
     operation: () => Promise<T>,
     maxAttempts: number = 3,
@@ -489,6 +616,9 @@ export enum QuestionnaireStatus {
   ARCHIVED = 'archived',
 }
 
+/**
+ * Describes the questionnaire data transfer object.
+ */
 export class QuestionnaireDto {
   id = '';
   title = '';
@@ -501,6 +631,9 @@ export class QuestionnaireDto {
   updatedAt: Date = new Date();
 }
 
+/**
+ * Defines the shape of the create questionnaire dto.
+ */
 export interface CreateQuestionnaireDto {
   title: string;
   description?: string;
@@ -508,6 +641,27 @@ export interface CreateQuestionnaireDto {
   organizationId?: string;
 }
 
+/**
+ * Describes the create questionnaire data transfer object.
+ */
+export class CreateQuestionnaireDto implements CreateQuestionnaireDto {
+  title: string = '';
+  description?: string;
+  questions: any[] = [];
+  organizationId?: string;
+
+  /**
+   * Initializes a new instance of the Create Questionnaire DTO.
+   * @param data - The data.
+   */
+  constructor(data: Partial<CreateQuestionnaireDto> = {}) {
+    Object.assign(this, data);
+  }
+}
+
+/**
+ * Defines the shape of the update questionnaire dto.
+ */
 export interface UpdateQuestionnaireDto {
   title?: string;
   description?: string;
@@ -515,6 +669,27 @@ export interface UpdateQuestionnaireDto {
   status?: QuestionnaireStatus;
 }
 
+/**
+ * Describes the update questionnaire data transfer object.
+ */
+export class UpdateQuestionnaireDto implements UpdateQuestionnaireDto {
+  title?: string;
+  description?: string;
+  questions?: any[];
+  status?: QuestionnaireStatus;
+
+  /**
+   * Initializes a new instance of the Update Questionnaire DTO.
+   * @param data - The data.
+   */
+  constructor(data: Partial<UpdateQuestionnaireDto> = {}) {
+    Object.assign(this, data);
+  }
+}
+
+/**
+ * Defines the shape of the questionnaire submission dto.
+ */
 export interface QuestionnaireSubmissionDto {
   questionnaireId: string;
   answers: any[];
@@ -522,6 +697,9 @@ export interface QuestionnaireSubmissionDto {
   metadata?: any;
 }
 
+/**
+ * Describes the questionnaire response data transfer object.
+ */
 export class QuestionnaireResponseDto {
   id = '';
   questionnaireId = '';
@@ -531,6 +709,9 @@ export class QuestionnaireResponseDto {
   metadata?: any;
 }
 
+/**
+ * Describes the questionnaire analytics data transfer object.
+ */
 export class QuestionnaireAnalyticsDto {
   questionnaireId = '';
   totalSubmissions = 0;
@@ -539,6 +720,9 @@ export class QuestionnaireAnalyticsDto {
   analytics: any = {};
 }
 
+/**
+ * Describes the questionnaire template data transfer object.
+ */
 export class QuestionnaireTemplateDto {
   id = '';
   name = '';
@@ -547,6 +731,9 @@ export class QuestionnaireTemplateDto {
 }
 
 // Resume DTOs for fallback
+/**
+ * Describes the resume data transfer object.
+ */
 export class ResumeDto {
   id = '';
   fileName = '';
@@ -556,6 +743,9 @@ export class ResumeDto {
   updatedAt: Date = new Date();
 }
 
+/**
+ * Describes the resume analysis data transfer object.
+ */
 export class ResumeAnalysisDto {
   resumeId = '';
   skills: string[] = [];
@@ -564,6 +754,9 @@ export class ResumeAnalysisDto {
   score = 0;
 }
 
+/**
+ * Defines the shape of the resume upload dto.
+ */
 export interface ResumeUploadDto {
   fileName: string;
   fileContent: Buffer;
@@ -575,6 +768,9 @@ export interface ResumeUploadDto {
   tags?: string[];
 }
 
+/**
+ * Defines the shape of the resume status update dto.
+ */
 export interface ResumeStatusUpdateDto {
   resumeId: string;
   status: string;
@@ -582,6 +778,9 @@ export interface ResumeStatusUpdateDto {
   reason?: string;
 }
 
+/**
+ * Defines the shape of the resume search dto.
+ */
 export interface ResumeSearchDto {
   keywords?: string[];
   skills?: string[];
@@ -589,6 +788,9 @@ export interface ResumeSearchDto {
   location?: string;
 }
 
+/**
+ * Describes the resume skills analysis data transfer object.
+ */
 export class ResumeSkillsAnalysisDto {
   resumeId = '';
   extractedSkills: string[] = [];

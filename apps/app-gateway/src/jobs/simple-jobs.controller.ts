@@ -3,10 +3,21 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
 
+/**
+ * Exposes endpoints for simple jobs.
+ */
 @ApiTags('jobs')
 @Controller('jobs')
 export class SimpleJobsController {
+  /**
+   * Initializes a new instance of the Simple Jobs Controller.
+   * @param jobsService - The jobs service.
+   */
   constructor(private readonly jobsService: JobsService) {}
+  /**
+   * Retrieves all jobs.
+   * @returns The result of the operation.
+   */
   @ApiOperation({ summary: '获取所有职位' })
   @ApiResponse({ status: 200, description: '职位列表获取成功' })
   @Get()
@@ -67,6 +78,11 @@ export class SimpleJobsController {
     };
   }
 
+  /**
+   * Creates job.
+   * @param body - The body.
+   * @returns The result of the operation.
+   */
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createJob(@Body() body: CreateJobDto) {

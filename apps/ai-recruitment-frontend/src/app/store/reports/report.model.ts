@@ -1,3 +1,6 @@
+/**
+ * Defines the shape of the analysis report.
+ */
 export interface AnalysisReport {
   id: string;
   resumeId: string;
@@ -12,6 +15,9 @@ export interface AnalysisReport {
   generatedAt: Date;
 }
 
+/**
+ * Defines the shape of the report list item.
+ */
 export interface ReportListItem {
   id: string;
   jobId: string;
@@ -24,6 +30,9 @@ export interface ReportListItem {
   createdAt?: Date;
 }
 
+/**
+ * Defines the shape of the reports list.
+ */
 export interface ReportsList {
   jobId: string;
   reports: ReportListItem[];

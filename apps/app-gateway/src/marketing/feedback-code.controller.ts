@@ -18,12 +18,25 @@ import {
   MarkFeedbackCodeUsedDto,
 } from './feedback-code.service';
 
+/**
+ * Exposes endpoints for feedback code.
+ */
 @Controller('marketing/feedback-codes')
 export class FeedbackCodeController {
   private readonly logger = new Logger(FeedbackCodeController.name);
 
+  /**
+   * Initializes a new instance of the Feedback Code Controller.
+   * @param feedbackCodeService - The feedback code service.
+   */
   constructor(private readonly feedbackCodeService: FeedbackCodeService) {}
 
+  /**
+   * Performs the record feedback code operation.
+   * @param createDto - The create dto.
+   * @param request - The request.
+   * @returns The result of the operation.
+   */
   @Post('record')
   @HttpCode(HttpStatus.CREATED)
   async recordFeedbackCode(
@@ -63,6 +76,11 @@ export class FeedbackCodeController {
     }
   }
 
+  /**
+   * Validates feedback code.
+   * @param code - The code.
+   * @returns The result of the operation.
+   */
   @Get('validate/:code')
   async validateFeedbackCode(@Param('code') code: string) {
     try {
@@ -84,6 +102,11 @@ export class FeedbackCodeController {
     }
   }
 
+  /**
+   * Performs the mark feedback code as used operation.
+   * @param markUsedDto - The mark used dto.
+   * @returns The result of the operation.
+   */
   @Post('mark-used')
   @HttpCode(HttpStatus.OK)
   async markFeedbackCodeAsUsed(@Body() markUsedDto: MarkFeedbackCodeUsedDto) {
@@ -124,6 +147,11 @@ export class FeedbackCodeController {
   }
 
   // Alias method used by tests
+  /**
+   * Performs the mark as used operation.
+   * @param markUsedDto - The mark used dto.
+   * @returns The result of the operation.
+   */
   @Post('mark-used/alias')
   @HttpCode(HttpStatus.OK)
   async markAsUsed(@Body() markUsedDto: MarkFeedbackCodeUsedDto) {
@@ -149,6 +177,10 @@ export class FeedbackCodeController {
     };
   }
 
+  /**
+   * Retrieves public stats.
+   * @returns The result of the operation.
+   */
   @Get('stats')
   async getPublicStats() {
     try {
@@ -167,6 +199,11 @@ export class FeedbackCodeController {
     }
   }
 
+  /**
+   * Handles questionnaire webhook.
+   * @param webhookData - The webhook data.
+   * @returns The result of the operation.
+   */
   @Post('webhook/questionnaire')
   @HttpCode(HttpStatus.OK)
   async handleQuestionnaireWebhook(@Body() webhookData: any) {

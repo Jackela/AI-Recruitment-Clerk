@@ -10,14 +10,26 @@ interface NatsPublishResult {
   };
 }
 
+/**
+ * Provides jd extractor nats functionality.
+ */
 @Injectable()
 export class JdExtractorNatsService {
   private readonly logger = new Logger('JdExtractorNatsServiceStub');
 
+  /**
+   * Performs the on module init operation.
+   * @returns The result of the operation.
+   */
   async onModuleInit() {
     // no-op in tests
   }
 
+  /**
+   * Performs the publish analysis jd extracted operation.
+   * @param event - The event.
+   * @returns A promise that resolves to NatsPublishResult.
+   */
   async publishAnalysisJdExtracted(event: {
     jobId: string;
     extractedData: unknown;
@@ -33,6 +45,13 @@ export class JdExtractorNatsService {
     };
   }
 
+  /**
+   * Performs the publish processing error operation.
+   * @param jobId - The job id.
+   * @param error - The error.
+   * @param _context - The context.
+   * @returns A promise that resolves to NatsPublishResult.
+   */
   async publishProcessingError(
     jobId: string,
     error: Error,
@@ -46,6 +65,11 @@ export class JdExtractorNatsService {
     };
   }
 
+  /**
+   * Performs the publish extraction started operation.
+   * @param event - The event.
+   * @returns A promise that resolves to NatsPublishResult.
+   */
   async publishExtractionStarted(event: { jobId: string }): Promise<NatsPublishResult> {
     this.logger.debug(`Stub publish job.jd.started for ${event.jobId}`);
     return {
@@ -55,6 +79,11 @@ export class JdExtractorNatsService {
     };
   }
 
+  /**
+   * Performs the subscribe to job submissions operation.
+   * @param _handler - The handler.
+   * @returns A promise that resolves when the operation completes.
+   */
   async subscribeToJobSubmissions(
     _handler: (event: any) => Promise<void>,
   ): Promise<void> {

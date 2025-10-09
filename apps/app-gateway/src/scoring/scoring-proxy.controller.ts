@@ -10,8 +10,16 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import pdf from 'pdf-parse-fork';
 
+/**
+ * Exposes endpoints for scoring proxy.
+ */
 @Controller('scoring')
 export class ScoringProxyController {
+  /**
+   * Performs the gap analysis operation.
+   * @param body - The body.
+   * @returns The result of the operation.
+   */
   @Post('gap-analysis')
   async gapAnalysis(@Body() body: any) {
     const base = process.env.SCORING_ENGINE_URL || 'http://scoring-engine-svc:3000';
@@ -38,6 +46,12 @@ export class ScoringProxyController {
     }
   }
 
+  /**
+   * Performs the gap analysis file operation.
+   * @param file - The file.
+   * @param body - The body.
+   * @returns The result of the operation.
+   */
   @Post('gap-analysis-file')
   @UseInterceptors(FileInterceptor('resume'))
   async gapAnalysisFile(

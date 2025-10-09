@@ -11,6 +11,10 @@ export class SessionCacheService {
   private readonly IP_SESSION_PREFIX = 'ip_session:';
   private readonly DEFAULT_TTL = 24 * 60 * 60; // 24小时
 
+  /**
+   * Initializes a new instance of the Session Cache Service.
+   * @param redis - The redis.
+   */
   constructor(private readonly redis: RedisClient) {}
 
   /**

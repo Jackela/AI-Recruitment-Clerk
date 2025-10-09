@@ -656,6 +656,10 @@ export class AnalyticsContracts {
  * 分析系统契约违反异常
  */
 export class AnalyticsContractViolation extends Error {
+  /**
+   * Initializes a new instance of the Analytics Contract Violation.
+   * @param message - The message.
+   */
   constructor(message: string) {
     super(message);
     this.name = 'AnalyticsContractViolation';

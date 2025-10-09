@@ -177,6 +177,9 @@ Focus on delivering actionable insights that help the hiring team make informed 
   }
 }
 
+/**
+ * Defines the shape of the report prompt options.
+ */
 export interface ReportPromptOptions {
   temperature?: number;
   maxTokens?: number;
@@ -184,7 +187,16 @@ export interface ReportPromptOptions {
   validationLevel?: 'strict' | 'moderate' | 'lenient';
 }
 
+/**
+ * Represents the report prompt builder.
+ */
 export class ReportPromptBuilder {
+  /**
+   * Builds with options.
+   * @param basePrompt - The base prompt.
+   * @param options - The options.
+   * @returns The string value.
+   */
   static buildWithOptions(basePrompt: string, options: ReportPromptOptions = {}): string {
     let prompt = basePrompt;
 
@@ -201,6 +213,12 @@ export class ReportPromptBuilder {
     return prompt;
   }
 
+  /**
+   * Performs the add json schema instruction operation.
+   * @param prompt - The prompt.
+   * @param schema - The schema.
+   * @returns The string value.
+   */
   static addJsonSchemaInstruction(prompt: string, schema: string): string {
     return `${prompt}
 

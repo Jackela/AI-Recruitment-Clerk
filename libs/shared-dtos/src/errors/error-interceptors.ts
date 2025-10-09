@@ -33,8 +33,18 @@ import { EnhancedAppException } from './enhanced-error-types';
 export class ErrorCorrelationInterceptor implements NestInterceptor {
   private readonly logger = new Logger(ErrorCorrelationInterceptor.name);
 
+  /**
+   * Initializes a new instance of the Error Correlation Interceptor.
+   * @param serviceName - The service name.
+   */
   constructor(private readonly serviceName: string) {}
 
+  /**
+   * Performs the intercept operation.
+   * @param context - The context.
+   * @param next - The next.
+   * @returns The Observable<any>.
+   */
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const ctx = context.switchToHttp();
     const request = ctx.getRequest<Request>();
@@ -97,10 +107,20 @@ export class ErrorCorrelationInterceptor implements NestInterceptor {
 export class ErrorLoggingInterceptor implements NestInterceptor {
   private readonly structuredLogger: StructuredErrorLogger;
 
+  /**
+   * Initializes a new instance of the Error Logging Interceptor.
+   * @param serviceName - The service name.
+   */
   constructor(private readonly serviceName: string) {
     this.structuredLogger = StructuredLoggerFactory.getLogger(serviceName);
   }
 
+  /**
+   * Performs the intercept operation.
+   * @param context - The context.
+   * @param next - The next.
+   * @returns The Observable<any>.
+   */
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const operationName = this.getOperationName(context);
     const startMetrics = this.structuredLogger.logOperationStart(operationName);
@@ -160,6 +180,11 @@ export class PerformanceTrackingInterceptor implements NestInterceptor {
   private readonly structuredLogger: StructuredErrorLogger;
   private readonly logger = new Logger(PerformanceTrackingInterceptor.name);
 
+  /**
+   * Initializes a new instance of the Performance Tracking Interceptor.
+   * @param serviceName - The service name.
+   * @param performanceThresholds - The performance thresholds.
+   */
   constructor(
     private readonly serviceName: string,
     private readonly performanceThresholds: {
@@ -175,6 +200,12 @@ export class PerformanceTrackingInterceptor implements NestInterceptor {
     };
   }
 
+  /**
+   * Performs the intercept operation.
+   * @param context - The context.
+   * @param next - The next.
+   * @returns The Observable<any>.
+   */
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const operationName = this.getOperationName(context);
     const startTime = Date.now();
@@ -272,6 +303,11 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
     state: 'closed' | 'open' | 'half-open';
   }>();
 
+  /**
+   * Initializes a new instance of the Error Recovery Interceptor.
+   * @param serviceName - The service name.
+   * @param recoveryConfig - The recovery config.
+   */
   constructor(
     private readonly serviceName: string,
     private readonly recoveryConfig: {
@@ -292,6 +328,12 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
     };
   }
 
+  /**
+   * Performs the intercept operation.
+   * @param context - The context.
+   * @param next - The next.
+   * @returns The Observable<any>.
+   */
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const operationName = this.getOperationName(context);
 

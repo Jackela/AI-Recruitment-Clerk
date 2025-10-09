@@ -10,6 +10,9 @@ export interface ParsedDate {
   isPresent: boolean;
 }
 
+/**
+ * Defines the shape of the date range.
+ */
 export interface DateRange {
   start: ParsedDate;
   end: ParsedDate;
@@ -21,6 +24,9 @@ export interface DateRange {
   overlap?: boolean;
 }
 
+/**
+ * Represents the date parser.
+ */
 export class DateParser {
   private static readonly DATE_PATTERNS = [
     // ISO 8601 formats

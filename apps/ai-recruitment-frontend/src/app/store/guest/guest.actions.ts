@@ -7,6 +7,9 @@ import {
   ResumeAnalysisResponse,
 } from '../../services/guest/guest-api.service';
 
+/**
+ * Defines the shape of the analysis data.
+ */
 export interface AnalysisData {
   id: string;
   candidateName?: string;
@@ -22,6 +25,9 @@ export interface AnalysisData {
   };
 }
 
+/**
+ * Defines the shape of the analysis results.
+ */
 export interface AnalysisResults {
   analysisId: string;
   score: number;
@@ -41,6 +47,9 @@ export interface AnalysisResults {
   generatedAt: string;
 }
 
+/**
+ * Defines the shape of the demo analysis results.
+ */
 export interface DemoAnalysisResults {
   demoId: string;
   candidateName: string;

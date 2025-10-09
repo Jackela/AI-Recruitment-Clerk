@@ -3,6 +3,7 @@ import {
   NestMiddleware,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import Redis from 'ioredis';
@@ -14,10 +15,17 @@ interface UsageRecord {
   lastReset: string;
 }
 
+/**
+ * Represents the rate limit middleware.
+ */
 @Injectable()
 export class RateLimitMiddleware implements NestMiddleware {
+  private readonly logger = new Logger(RateLimitMiddleware.name);
   private redis: Redis | null;
 
+  /**
+   * Initializes a new instance of the Rate Limit Middleware.
+   */
   constructor() {
     // 检查是否禁用Redis或使用Redis URL
     const disableRedis = process.env.DISABLE_REDIS === 'true';
@@ -25,7 +33,7 @@ export class RateLimitMiddleware implements NestMiddleware {
     const redisUrl = process.env.REDIS_URL;
 
     if (disableRedis || !useRedis || (!redisUrl && !process.env.REDIS_HOST)) {
-      console.log('🔒 Redis已禁用或未配置，限流使用内存存储');
+      this.logger.log('🔒 Redis已禁用或未配置，限流使用内存存储');
       this.redis = null;
       return;
     }
@@ -51,11 +59,18 @@ export class RateLimitMiddleware implements NestMiddleware {
         });
       }
     } catch (error) {
-      console.warn('Redis初始化失败，限流降级到内存存储:', error.message);
+      this.logger.warn(`Redis初始化失败，限流降级到内存存储: ${error.message}`);
       this.redis = null;
     }
   }
 
+  /**
+   * Performs the use operation.
+   * @param req - The req.
+   * @param res - The res.
+   * @param next - The next.
+   * @returns The result of the operation.
+   */
   async use(req: Request, res: Response, next: NextFunction) {
     // 如果Redis不可用，跳过限流检查
     if (!this.redis) {
@@ -145,12 +160,17 @@ export class RateLimitMiddleware implements NestMiddleware {
       if (error instanceof HttpException) {
         throw error;
       }
-      console.error('Rate limit error:', error);
+      this.logger.error('Rate limit error', error.stack || error.message);
       next(); // 出错时不阻塞请求
     }
   }
 
   // 问卷完成后增加使用次数
+  /**
+   * Performs the complete questionnaire operation.
+   * @param ip - The ip.
+   * @returns The Promise<{ success: boolean; newLimit: number; remaining: number; }>.
+   */
   async completeQuestionnaire(ip: string): Promise<{
     success: boolean;
     newLimit: number;
@@ -182,12 +202,18 @@ export class RateLimitMiddleware implements NestMiddleware {
         remaining: Math.max(0, remaining),
       };
     } catch (error) {
-      console.error('Complete questionnaire error:', error);
+      this.logger.error('Complete questionnaire error', error.stack || error.message);
       return { success: false, newLimit: 5, remaining: 0 };
     }
   }
 
   // 支付完成后增加使用次数
+  /**
+   * Performs the complete payment operation.
+   * @param ip - The ip.
+   * @param paymentId - The payment id.
+   * @returns The Promise<{ success: boolean; newLimit: number; remaining: number; }>.
+   */
   async completePayment(
     ip: string,
     paymentId: string,
@@ -228,12 +254,17 @@ export class RateLimitMiddleware implements NestMiddleware {
         remaining: Math.max(0, remaining),
       };
     } catch (error) {
-      console.error('Complete payment error:', error);
+      this.logger.error('Complete payment error', error.stack || error.message);
       return { success: false, newLimit: 5, remaining: 0 };
     }
   }
 
   // 获取当前使用状态
+  /**
+   * Retrieves usage status.
+   * @param ip - The ip.
+   * @returns The Promise<{ currentUsage: number; totalLimit: number; remaining: number; resetTime: number; upgrades: { questionnaires: number; payments: number; }; }>.
+   */
   async getUsageStatus(ip: string): Promise<{
     currentUsage: number;
     totalLimit: number;
@@ -266,7 +297,7 @@ export class RateLimitMiddleware implements NestMiddleware {
         },
       };
     } catch (error) {
-      console.error('Get usage status error:', error);
+      this.logger.error('Get usage status error', error.stack || error.message);
       return {
         currentUsage: 0,
         totalLimit: 5,
@@ -295,6 +326,11 @@ export class RateLimitMiddleware implements NestMiddleware {
   }
 
   // 获取统计数据（管理用）
+  /**
+   * Retrieves daily stats.
+   * @param date - The date.
+   * @returns The Promise<{ date: string; totalIPs: number; totalRequests: number; questionnairesCompleted: number; paymentsCompleted: number; averageUsagePerIP: number; }>.
+   */
   async getDailyStats(date?: string): Promise<{
     date: string;
     totalIPs: number;
@@ -334,7 +370,7 @@ export class RateLimitMiddleware implements NestMiddleware {
             : 0,
       };
     } catch (error) {
-      console.error('Get daily stats error:', error);
+      this.logger.error('Get daily stats error', error.stack || error.message);
       return {
         date: targetDate,
         totalIPs: 0,

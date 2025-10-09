@@ -14,7 +14,7 @@ import {
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import { JobsServiceContracts } from './jobs.service.contracts';
 import { InMemoryStorageService } from './storage/in-memory-storage.service';
-import { NatsClient } from '../nats/nats.client';
+import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
 import { CacheService } from '../cache/cache.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import {
@@ -27,7 +27,7 @@ import { MulterFile } from './types/multer.types';
 describe('JobsServiceContracts', () => {
   let service: JobsServiceContracts;
   let storageService: jest.Mocked<InMemoryStorageService>;
-  let natsClient: jest.Mocked<NatsClient>;
+  let natsClient: jest.Mocked<AppGatewayNatsService>;
   let cacheService: jest.Mocked<CacheService>;
 
   const mockUser: UserDto = {

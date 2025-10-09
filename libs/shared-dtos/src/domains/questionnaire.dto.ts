@@ -2,6 +2,9 @@ import { ValueObject } from '../base/value-object';
 import { DomainEvent } from '../base/domain-event';
 
 // 问卷聚合根
+/**
+ * Represents the questionnaire.
+ */
 export class Questionnaire {
   private uncommittedEvents: DomainEvent[] = [];
 
@@ -15,6 +18,13 @@ export class Questionnaire {
   ) {}
 
   // 工厂方法
+  /**
+   * Creates the entity.
+   * @param templateId - The template id.
+   * @param submission - The submission.
+   * @param metadata - The metadata.
+   * @returns The Questionnaire.
+   */
   static create(
     templateId: string,
     submission: RawSubmissionData,
@@ -56,6 +66,11 @@ export class Questionnaire {
     return questionnaire;
   }
   
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The Questionnaire.
+   */
   static restore(data: QuestionnaireData): Questionnaire {
     return new Questionnaire(
       new QuestionnaireId({ value: data.id }),
@@ -68,6 +83,10 @@ export class Questionnaire {
   }
 
   // 核心业务方法
+  /**
+   * Validates submission.
+   * @returns The QuestionnaireValidationResult.
+   */
   validateSubmission(): QuestionnaireValidationResult {
     const errors: string[] = [];
     
@@ -115,53 +134,98 @@ export class Questionnaire {
     return new QuestionnaireValidationResult(errors.length === 0, errors);
   }
   
+  /**
+   * Calculates quality score.
+   * @returns The QualityScore.
+   */
   calculateQualityScore(): QualityScore {
     return this.quality.calculateScore();
   }
   
+  /**
+   * Performs the is eligible for bonus operation.
+   * @returns The boolean value.
+   */
   isEligibleForBonus(): boolean {
     return this.quality.isBonusEligible();
   }
   
+  /**
+   * Retrieves submission summary.
+   * @returns The SubmissionSummary.
+   */
   getSubmissionSummary(): SubmissionSummary {
     return this.submission.getSummary();
   }
   
   // 状态转换
+  /**
+   * Performs the mark as processed operation.
+   */
   markAsProcessed(): void {
     this.status = QuestionnaireStatus.PROCESSED;
   }
   
+  /**
+   * Performs the mark as rewarded operation.
+   */
   markAsRewarded(): void {
     this.status = QuestionnaireStatus.REWARDED;
   }
   
+  /**
+   * Performs the flag as low quality operation.
+   */
   flagAsLowQuality(): void {
     this.status = QuestionnaireStatus.LOW_QUALITY;
   }
   
   // 查询方法
+  /**
+   * Retrieves answer by question id.
+   * @param questionId - The question id.
+   * @returns The Answer | null.
+   */
   getAnswerByQuestionId(questionId: string): Answer | null {
     return this.submission.getAnswer(questionId);
   }
   
+  /**
+   * Retrieves quality metrics.
+   * @returns The QualityMetrics.
+   */
   getQualityMetrics(): QualityMetrics {
     return this.quality.getMetrics();
   }
   
+  /**
+   * Retrieves total text length.
+   * @returns The number value.
+   */
   getTotalTextLength(): number {
     return this.quality.getTotalTextLength();
   }
   
+  /**
+   * Performs the has detailed feedback operation.
+   * @returns The boolean value.
+   */
   hasDetailedFeedback(): boolean {
     return this.quality.hasDetailedFeedback();
   }
   
   // 领域事件管理
+  /**
+   * Retrieves uncommitted events.
+   * @returns The an array of DomainEvent.
+   */
   getUncommittedEvents(): DomainEvent[] {
     return [...this.uncommittedEvents];
   }
   
+  /**
+   * Performs the mark events as committed operation.
+   */
   markEventsAsCommitted(): void {
     this.uncommittedEvents = [];
   }
@@ -171,32 +235,58 @@ export class Questionnaire {
   }
   
   // Getters
+  /**
+   * Retrieves id.
+   * @returns The QuestionnaireId.
+   */
   getId(): QuestionnaireId {
     return this.id;
   }
   
+  /**
+   * Retrieves submitter ip.
+   * @returns The string value.
+   */
   getSubmitterIP(): string {
     return this.metadata.ip;
   }
   
+  /**
+   * Retrieves status.
+   * @returns The QuestionnaireStatus.
+   */
   getStatus(): QuestionnaireStatus {
     return this.status;
   }
 }
 
 // 值对象
+/**
+ * Represents the questionnaire id.
+ */
 export class QuestionnaireId extends ValueObject<{ value: string }> {
+  /**
+   * Generates the result.
+   * @returns The QuestionnaireId.
+   */
   static generate(): QuestionnaireId {
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substr(2, 9);
     return new QuestionnaireId({ value: `quest_${timestamp}_${random}` });
   }
   
+  /**
+   * Retrieves value.
+   * @returns The string value.
+   */
   getValue(): string {
     return this.props.value;
   }
 }
 
+/**
+ * Represents the questionnaire template.
+ */
 export class QuestionnaireTemplate extends ValueObject<{
   id: string;
   version: string;
@@ -204,6 +294,11 @@ export class QuestionnaireTemplate extends ValueObject<{
   requiredQuestions: string[];
   qualityThresholds: QualityThreshold[];
 }> {
+  /**
+   * Creates default.
+   * @param templateId - The template id.
+   * @returns The QuestionnaireTemplate.
+   */
   static createDefault(templateId: string): QuestionnaireTemplate {
     return new QuestionnaireTemplate({
       id: templateId,
@@ -224,11 +319,19 @@ export class QuestionnaireTemplate extends ValueObject<{
     });
   }
   
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The QuestionnaireTemplate.
+   */
   static restore(data: any): QuestionnaireTemplate {
     return new QuestionnaireTemplate(data);
   }
 }
 
+/**
+ * Represents the questionnaire submission.
+ */
 export class QuestionnaireSubmission extends ValueObject<{
   userProfile: UserProfile;
   userExperience: UserExperience;
@@ -237,6 +340,11 @@ export class QuestionnaireSubmission extends ValueObject<{
   optional: OptionalInfo;
   submittedAt: Date;
 }> {
+  /**
+   * Performs the from raw data operation.
+   * @param data - The data.
+   * @returns The QuestionnaireSubmission.
+   */
   static fromRawData(data: RawSubmissionData): QuestionnaireSubmission {
     return new QuestionnaireSubmission({
       userProfile: new UserProfile({
@@ -274,6 +382,11 @@ export class QuestionnaireSubmission extends ValueObject<{
     });
   }
   
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The QuestionnaireSubmission.
+   */
   static restore(data: any): QuestionnaireSubmission {
     return new QuestionnaireSubmission({
       ...data,
@@ -281,22 +394,42 @@ export class QuestionnaireSubmission extends ValueObject<{
     });
   }
   
+  /**
+   * Retrieves user profile.
+   * @returns The UserProfile.
+   */
   getUserProfile(): UserProfile {
     return this.props.userProfile;
   }
   
+  /**
+   * Retrieves user experience.
+   * @returns The UserExperience.
+   */
   getUserExperience(): UserExperience {
     return this.props.userExperience;
   }
   
+  /**
+   * Retrieves business value.
+   * @returns The BusinessValue.
+   */
   getBusinessValue(): BusinessValue {
     return this.props.businessValue;
   }
   
+  /**
+   * Retrieves optional info.
+   * @returns The OptionalInfo.
+   */
   getOptionalInfo(): OptionalInfo {
     return this.props.optional;
   }
   
+  /**
+   * Retrieves summary.
+   * @returns The SubmissionSummary.
+   */
   getSummary(): SubmissionSummary {
     return new SubmissionSummary({
       role: this.props.userProfile.role,
@@ -308,6 +441,11 @@ export class QuestionnaireSubmission extends ValueObject<{
     });
   }
   
+  /**
+   * Retrieves answer.
+   * @param questionId - The question id.
+   * @returns The Answer | null.
+   */
   getAnswer(questionId: string): Answer | null {
     // 简化实现，实际应该有更复杂的映射
     const answers = {
@@ -348,6 +486,9 @@ export class QuestionnaireSubmission extends ValueObject<{
   }
 }
 
+/**
+ * Represents the submission quality.
+ */
 export class SubmissionQuality extends ValueObject<{
   totalTextLength: number;
   detailedAnswers: number;
@@ -356,6 +497,11 @@ export class SubmissionQuality extends ValueObject<{
   bonusEligible: boolean;
   qualityReasons: string[];
 }> {
+  /**
+   * Calculates the result.
+   * @param submission - The submission.
+   * @returns The SubmissionQuality.
+   */
   static calculate(submission: QuestionnaireSubmission): SubmissionQuality {
     const totalTextLength = submission.getSummary().textLength;
     const completionRate = submission.getSummary().completionRate;
@@ -398,6 +544,11 @@ export class SubmissionQuality extends ValueObject<{
     });
   }
   
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The SubmissionQuality.
+   */
   static restore(data: any): SubmissionQuality {
     return new SubmissionQuality(data);
   }
@@ -438,48 +589,98 @@ export class SubmissionQuality extends ValueObject<{
     return score;
   }
   
+  /**
+   * Calculates score.
+   * @returns The QualityScore.
+   */
   calculateScore(): QualityScore {
     return new QualityScore({ value: this.props.qualityScore });
   }
   
+  /**
+   * Performs the is bonus eligible operation.
+   * @returns The boolean value.
+   */
   isBonusEligible(): boolean {
     return this.props.bonusEligible;
   }
   
+  /**
+   * Retrieves quality score.
+   * @returns The number value.
+   */
   getQualityScore(): number {
     return this.props.qualityScore;
   }
   
+  /**
+   * Retrieves quality reasons.
+   * @returns The an array of string value.
+   */
   getQualityReasons(): string[] {
     return this.props.qualityReasons;
   }
   
+  /**
+   * Retrieves metrics.
+   * @returns The QualityMetrics.
+   */
   getMetrics(): QualityMetrics {
     return new QualityMetrics(this.props);
   }
   
+  /**
+   * Retrieves total text length.
+   * @returns The number value.
+   */
   getTotalTextLength(): number {
     return this.props.totalTextLength;
   }
   
+  /**
+   * Performs the has detailed feedback operation.
+   * @returns The boolean value.
+   */
   hasDetailedFeedback(): boolean {
     return this.props.detailedAnswers >= 3;
   }
 }
 
 // 辅助值对象
+/**
+ * Represents the user profile.
+ */
 export class UserProfile extends ValueObject<{
   role: QuestionnaireUserRole;
   industry: string;
   companySize: CompanySize;
   location: string;
 }> {
+  /**
+   * Performs the role operation.
+   * @returns The QuestionnaireUserRole.
+   */
   get role(): QuestionnaireUserRole { return this.props.role; }
+  /**
+   * Performs the industry operation.
+   * @returns The string value.
+   */
   get industry(): string { return this.props.industry; }
+  /**
+   * Performs the company size operation.
+   * @returns The CompanySize.
+   */
   get companySize(): CompanySize { return this.props.companySize; }
+  /**
+   * Performs the location operation.
+   * @returns The string value.
+   */
   get location(): string { return this.props.location; }
 }
 
+/**
+ * Represents the user experience.
+ */
 export class UserExperience extends ValueObject<{
   overallSatisfaction: Rating;
   accuracyRating: Rating;
@@ -489,15 +690,46 @@ export class UserExperience extends ValueObject<{
   mainPainPoint?: string;
   improvementSuggestion?: string;
 }> {
+  /**
+   * Performs the overall satisfaction operation.
+   * @returns The Rating.
+   */
   get overallSatisfaction(): Rating { return this.props.overallSatisfaction; }
+  /**
+   * Performs the accuracy rating operation.
+   * @returns The Rating.
+   */
   get accuracyRating(): Rating { return this.props.accuracyRating; }
+  /**
+   * Performs the speed rating operation.
+   * @returns The Rating.
+   */
   get speedRating(): Rating { return this.props.speedRating; }
+  /**
+   * Performs the ui rating operation.
+   * @returns The Rating.
+   */
   get uiRating(): Rating { return this.props.uiRating; }
+  /**
+   * Performs the most useful feature operation.
+   * @returns The string value.
+   */
   get mostUsefulFeature(): string { return this.props.mostUsefulFeature; }
+  /**
+   * Performs the main pain point operation.
+   * @returns The string | undefined.
+   */
   get mainPainPoint(): string | undefined { return this.props.mainPainPoint; }
+  /**
+   * Performs the improvement suggestion operation.
+   * @returns The string | undefined.
+   */
   get improvementSuggestion(): string | undefined { return this.props.improvementSuggestion; }
 }
 
+/**
+ * Represents the business value.
+ */
 export class BusinessValue extends ValueObject<{
   currentScreeningMethod: ScreeningMethod;
   timeSpentPerResume: number;
@@ -506,32 +738,78 @@ export class BusinessValue extends ValueObject<{
   willingnessToPayMonthly: number;
   recommendLikelihood: Rating;
 }> {
+  /**
+   * Performs the current screening method operation.
+   * @returns The ScreeningMethod.
+   */
   get currentScreeningMethod(): ScreeningMethod { return this.props.currentScreeningMethod; }
+  /**
+   * Performs the time spent per resume operation.
+   * @returns The number value.
+   */
   get timeSpentPerResume(): number { return this.props.timeSpentPerResume; }
+  /**
+   * Performs the resumes per week operation.
+   * @returns The number value.
+   */
   get resumesPerWeek(): number { return this.props.resumesPerWeek; }
+  /**
+   * Performs the time saving percentage operation.
+   * @returns The number value.
+   */
   get timeSavingPercentage(): number { return this.props.timeSavingPercentage; }
+  /**
+   * Performs the willingness to pay monthly operation.
+   * @returns The number value.
+   */
   get willingnessToPayMonthly(): number { return this.props.willingnessToPayMonthly; }
+  /**
+   * Performs the recommend likelihood operation.
+   * @returns The Rating.
+   */
   get recommendLikelihood(): Rating { return this.props.recommendLikelihood; }
 }
 
+/**
+ * Represents the feature needs.
+ */
 export class FeatureNeeds extends ValueObject<{
   priorityFeatures: string[];
   integrationNeeds: string[];
 }> {}
 
+/**
+ * Represents the optional info.
+ */
 export class OptionalInfo extends ValueObject<{
   additionalFeedback?: string;
   contactPreference?: string;
 }> {
+  /**
+   * Performs the additional feedback operation.
+   * @returns The string | undefined.
+   */
   get additionalFeedback(): string | undefined { return this.props.additionalFeedback; }
+  /**
+   * Performs the contact preference operation.
+   * @returns The string | undefined.
+   */
   get contactPreference(): string | undefined { return this.props.contactPreference; }
 }
 
+/**
+ * Represents the submission metadata.
+ */
 export class SubmissionMetadata extends ValueObject<{
   ip: string;
   userAgent: string;
   timestamp: Date;
 }> {
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The SubmissionMetadata.
+   */
   static restore(data: any): SubmissionMetadata {
     return new SubmissionMetadata({
       ...data,
@@ -539,17 +817,31 @@ export class SubmissionMetadata extends ValueObject<{
     });
   }
   
+  /**
+   * Performs the ip operation.
+   * @returns The string value.
+   */
   get ip(): string {
     return this.props.ip;
   }
 }
 
+/**
+ * Represents the quality score.
+ */
 export class QualityScore extends ValueObject<{ value: number }> {
+  /**
+   * Performs the value operation.
+   * @returns The number value.
+   */
   get value(): number {
     return this.props.value;
   }
 }
 
+/**
+ * Represents the submission summary.
+ */
 export class SubmissionSummary extends ValueObject<{
   role: string;
   industry: string;
@@ -558,19 +850,49 @@ export class SubmissionSummary extends ValueObject<{
   textLength: number;
   completionRate: number;
 }> {
+  /**
+   * Performs the role operation.
+   * @returns The string value.
+   */
   get role(): string { return this.props.role; }
+  /**
+   * Performs the industry operation.
+   * @returns The string value.
+   */
   get industry(): string { return this.props.industry; }
+  /**
+   * Performs the overall satisfaction operation.
+   * @returns The number value.
+   */
   get overallSatisfaction(): number { return this.props.overallSatisfaction; }
+  /**
+   * Performs the willingness to pay monthly operation.
+   * @returns The number value.
+   */
   get willingnessToPayMonthly(): number { return this.props.willingnessToPayMonthly; }
+  /**
+   * Performs the text length operation.
+   * @returns The number value.
+   */
   get textLength(): number { return this.props.textLength; }
+  /**
+   * Performs the completion rate operation.
+   * @returns The number value.
+   */
   get completionRate(): number { return this.props.completionRate; }
 }
 
+/**
+ * Represents the answer.
+ */
 export class Answer extends ValueObject<{
   questionId: string;
   value: string;
 }> {}
 
+/**
+ * Represents the quality metrics.
+ */
 export class QualityMetrics extends ValueObject<{
   totalTextLength: number;
   detailedAnswers: number;
@@ -579,15 +901,47 @@ export class QualityMetrics extends ValueObject<{
   bonusEligible: boolean;
   qualityReasons: string[];
 }> {
+  /**
+   * Performs the total text length operation.
+   * @returns The number value.
+   */
   get totalTextLength(): number { return this.props.totalTextLength; }
+  /**
+   * Performs the detailed answers operation.
+   * @returns The number value.
+   */
   get detailedAnswers(): number { return this.props.detailedAnswers; }
+  /**
+   * Performs the completion rate operation.
+   * @returns The number value.
+   */
   get completionRate(): number { return this.props.completionRate; }
+  /**
+   * Performs the quality score operation.
+   * @returns The number value.
+   */
   get qualityScore(): number { return this.props.qualityScore; }
+  /**
+   * Performs the bonus eligible operation.
+   * @returns The boolean value.
+   */
   get bonusEligible(): boolean { return this.props.bonusEligible; }
+  /**
+   * Performs the quality reasons operation.
+   * @returns The an array of string value.
+   */
   get qualityReasons(): string[] { return this.props.qualityReasons; }
 }
 
+/**
+ * Represents the questionnaire validation result.
+ */
 export class QuestionnaireValidationResult {
+  /**
+   * Initializes a new instance of the Questionnaire Validation Result.
+   * @param isValid - The is valid.
+   * @param errors - The errors.
+   */
   constructor(
     public readonly isValid: boolean,
     public readonly errors: string[]
@@ -607,17 +961,26 @@ export type CompanySize = 'startup' | 'small' | 'medium' | 'large' | 'enterprise
 export type ScreeningMethod = 'manual' | 'ats' | 'hybrid' | 'other';
 export type Rating = 1 | 2 | 3 | 4 | 5;
 
+/**
+ * Defines the shape of the question section.
+ */
 export interface QuestionSection {
   id: string;
   name: string;
   required: boolean;
 }
 
+/**
+ * Defines the shape of the quality threshold.
+ */
 export interface QualityThreshold {
   metric: string;
   minValue: number;
 }
 
+/**
+ * Defines the shape of the raw submission data.
+ */
 export interface RawSubmissionData {
   userProfile?: {
     role?: QuestionnaireUserRole;
@@ -652,6 +1015,9 @@ export interface RawSubmissionData {
   };
 }
 
+/**
+ * Defines the shape of the questionnaire data.
+ */
 export interface QuestionnaireData {
   id: string;
   template: any;
@@ -662,7 +1028,19 @@ export interface QuestionnaireData {
 }
 
 // 领域事件
+/**
+ * Represents the questionnaire submitted event event.
+ */
 export class QuestionnaireSubmittedEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Questionnaire Submitted Event.
+   * @param questionnaireId - The questionnaire id.
+   * @param submitterIP - The submitter ip.
+   * @param qualityScore - The quality score.
+   * @param bonusEligible - The bonus eligible.
+   * @param submissionData - The submission data.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly questionnaireId: string,
     public readonly submitterIP: string,
@@ -673,7 +1051,18 @@ export class QuestionnaireSubmittedEvent implements DomainEvent {
   ) {}
 }
 
+/**
+ * Represents the high quality submission event event.
+ */
 export class HighQualitySubmissionEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the High Quality Submission Event.
+   * @param questionnaireId - The questionnaire id.
+   * @param submitterIP - The submitter ip.
+   * @param qualityScore - The quality score.
+   * @param qualityReasons - The quality reasons.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly questionnaireId: string,
     public readonly submitterIP: string,
@@ -683,7 +1072,17 @@ export class HighQualitySubmissionEvent implements DomainEvent {
   ) {}
 }
 
+/**
+ * Represents the questionnaire validation failed event event.
+ */
 export class QuestionnaireValidationFailedEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Questionnaire Validation Failed Event.
+   * @param submitterIP - The submitter ip.
+   * @param validationErrors - The validation errors.
+   * @param submissionData - The submission data.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly submitterIP: string,
     public readonly validationErrors: string[],

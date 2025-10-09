@@ -4,6 +4,7 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
 import { JdEventsController } from './jd-events.controller';
+import { HealthController } from './health.controller';
 import { ExtractionService } from '../extraction/extraction.service';
 import { LlmService } from '../extraction/llm.service';
 import { NatsClientModule } from '@app/shared-nats-client';
@@ -14,6 +15,9 @@ import {
   ErrorInterceptorFactory,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 
+/**
+ * Configures the app module.
+ */
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -23,7 +27,7 @@ import {
       serviceName: 'jd-extractor-svc',
     }),
   ],
-  controllers: [AppController, JdEventsController],
+  controllers: [AppController, JdEventsController, HealthController],
   providers: [
     AppService,
     ExtractionService,
@@ -57,8 +61,8 @@ import {
         ErrorInterceptorFactory.createPerformanceInterceptor(
           'jd-extractor-svc',
           {
-            warnThreshold: 5000, // 5 seconds - JD extraction can take time
-            errorThreshold: 30000, // 30 seconds - hard limit for JD extraction
+            timeout: 30000, // 30 seconds - hard limit for JD extraction
+            enableMetrics: true,
           },
         ),
     },

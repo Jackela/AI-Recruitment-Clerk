@@ -10,6 +10,9 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+/**
+ * Defines the shape of the swipe action.
+ */
 export interface SwipeAction {
   id: string;
   label: string;
@@ -18,13 +21,19 @@ export interface SwipeAction {
   width?: number;
 }
 
+/**
+ * Defines the shape of the swipe event.
+ */
 export interface SwipeEvent {
   action: SwipeAction;
   item: any;
 }
 
+/**
+ * Represents the mobile swipe component.
+ */
 @Component({
-  selector: 'app-mobile-swipe',
+  selector: 'arc-mobile-swipe',
   standalone: true,
   imports: [CommonModule],
   template: `
@@ -214,10 +223,18 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
   private maxSwipeDistance = 0;
   private isMouseEvent = false;
 
+  /**
+   * Performs the ng on init operation.
+   * @returns The result of the operation.
+   */
   ngOnInit() {
     this.calculateMaxSwipeDistance();
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   * @returns The result of the operation.
+   */
   ngOnDestroy() {
     // Clean up any ongoing interactions
     this.resetSwipe();
@@ -229,6 +246,11 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
     }, 0);
   }
 
+  /**
+   * Performs the on touch start operation.
+   * @param event - The event.
+   * @returns The result of the operation.
+   */
   onTouchStart(event: TouchEvent) {
     if (this.disabled) return;
 
@@ -237,6 +259,11 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
     this.startSwipe(touch.clientX);
   }
 
+  /**
+   * Performs the on touch move operation.
+   * @param event - The event.
+   * @returns The result of the operation.
+   */
   onTouchMove(event: TouchEvent) {
     if (this.disabled || !this.isDragging) return;
 
@@ -245,12 +272,22 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
     this.updateSwipe(touch.clientX);
   }
 
+  /**
+   * Performs the on touch end operation.
+   * @param _event - The event.
+   * @returns The result of the operation.
+   */
   onTouchEnd(_event: TouchEvent) {
     if (this.disabled) return;
 
     this.endSwipe();
   }
 
+  /**
+   * Performs the on mouse down operation.
+   * @param event - The event.
+   * @returns The result of the operation.
+   */
   onMouseDown(event: MouseEvent) {
     if (this.disabled || window.innerWidth >= 768) return; // Disable on desktop
 
@@ -259,6 +296,11 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
     event.preventDefault();
   }
 
+  /**
+   * Performs the on mouse move operation.
+   * @param event - The event.
+   * @returns The result of the operation.
+   */
   onMouseMove(event: MouseEvent) {
     if (this.disabled || !this.isDragging || !this.isMouseEvent) return;
 
@@ -266,12 +308,22 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
     event.preventDefault();
   }
 
+  /**
+   * Performs the on mouse up operation.
+   * @param _event - The event.
+   * @returns The result of the operation.
+   */
   onMouseUp(_event: MouseEvent) {
     if (this.disabled || !this.isMouseEvent) return;
 
     this.endSwipe();
   }
 
+  /**
+   * Performs the on mouse leave operation.
+   * @param _event - The event.
+   * @returns The result of the operation.
+   */
   onMouseLeave(_event: MouseEvent) {
     if (this.disabled || !this.isMouseEvent) return;
 
@@ -320,11 +372,20 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
     this.swipeEnd.emit();
   }
 
+  /**
+   * Performs the on action click operation.
+   * @param action - The action.
+   * @returns The result of the operation.
+   */
   onActionClick(action: SwipeAction) {
     this.swipeAction.emit({ action, item: this.item });
     this.resetSwipe();
   }
 
+  /**
+   * Performs the reset swipe operation.
+   * @returns The result of the operation.
+   */
   resetSwipe() {
     this.translateX = 0;
     this.actionsVisible = false;
@@ -334,11 +395,19 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
   }
 
   // Public method to reset swipe programmatically
+  /**
+   * Performs the reset operation.
+   * @returns The result of the operation.
+   */
   public reset() {
     this.resetSwipe();
   }
 
   // Public method to show actions programmatically
+  /**
+   * Performs the show actions operation.
+   * @returns The result of the operation.
+   */
   public showActions() {
     this.translateX = -this.maxSwipeDistance;
     this.actionsVisible = true;

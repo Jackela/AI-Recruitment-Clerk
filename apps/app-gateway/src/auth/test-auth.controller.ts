@@ -1,8 +1,16 @@
 import { Body, Controller, Get, Headers, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { testUsers, makeToken } from './test-users.store';
 
+/**
+ * Exposes endpoints for test auth.
+ */
 @Controller()
 export class TestAuthController {
+  /**
+   * Performs the register operation.
+   * @param body - The body.
+   * @returns The result of the operation.
+   */
   @Post('auth/register')
   @HttpCode(HttpStatus.CREATED)
   register(@Body() body: any) {
@@ -30,6 +38,11 @@ export class TestAuthController {
     };
   }
 
+  /**
+   * Performs the login operation.
+   * @param body - The body.
+   * @returns The result of the operation.
+   */
   @Post('auth/login')
   @HttpCode(HttpStatus.OK)
   login(@Body() body: any) {
@@ -43,6 +56,11 @@ export class TestAuthController {
   }
 
   // Convenience test endpoint to decode current user
+  /**
+   * Retrieves test profile.
+   * @param auth - The auth.
+   * @returns The result of the operation.
+   */
   @Get('auth/test-profile')
   @HttpCode(HttpStatus.OK)
   getTestProfile(@Headers('authorization') auth?: string) {

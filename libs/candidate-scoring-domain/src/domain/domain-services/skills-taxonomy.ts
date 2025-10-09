@@ -14,6 +14,9 @@ export interface SkillCategory {
   subcategories: string[];
 }
 
+/**
+ * Defines the shape of the skill mapping.
+ */
 export interface SkillMapping {
   canonical: string;
   synonyms: string[];
@@ -23,6 +26,9 @@ export interface SkillMapping {
   relatedSkills?: string[];
 }
 
+/**
+ * Defines the shape of the skill hierarchy.
+ */
 export interface SkillHierarchy {
   category: string;
   subcategories: {
@@ -33,6 +39,9 @@ export interface SkillHierarchy {
   };
 }
 
+/**
+ * Represents the skills taxonomy.
+ */
 export class SkillsTaxonomy {
   private static readonly SKILL_CATEGORIES: SkillCategory[] = [
     {
@@ -383,46 +392,7 @@ export class SkillsTaxonomy {
     }
   ];
 
-  private static readonly SKILL_HIERARCHY: SkillHierarchy[] = [
-    {
-      category: 'Programming Languages',
-      subcategories: {
-        'Frontend': {
-          skills: ['JavaScript', 'TypeScript', 'HTML', 'CSS', 'SASS', 'LESS'],
-          weight: 1.0
-        },
-        'Backend': {
-          skills: ['Python', 'Java', 'C#', 'Node.js', 'PHP', 'Go', 'Ruby'],
-          weight: 1.0
-        },
-        'Mobile': {
-          skills: ['Swift', 'Kotlin', 'Java', 'Dart', 'React Native', 'Flutter'],
-          weight: 0.9
-        },
-        'Data Science': {
-          skills: ['Python', 'R', 'SQL', 'Scala', 'Julia'],
-          weight: 0.95
-        }
-      }
-    },
-    {
-      category: 'Frameworks & Libraries',
-      subcategories: {
-        'Web Frameworks': {
-          skills: ['React', 'Vue.js', 'Angular', 'Express.js', 'NestJS', 'Spring Boot', 'Django', 'Flask', 'Laravel'],
-          weight: 0.95
-        },
-        'Mobile Frameworks': {
-          skills: ['React Native', 'Flutter', 'Xamarin', 'Ionic'],
-          weight: 0.85
-        },
-        'Testing Frameworks': {
-          skills: ['Jest', 'Mocha', 'Cypress', 'Selenium', 'JUnit', 'pytest'],
-          weight: 0.8
-        }
-      }
-    }
-  ];
+
 
   /**
    * Normalize a skill name to its canonical form

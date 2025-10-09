@@ -13,6 +13,9 @@ import {
   StructuredError,
 } from '../../../services/error/error-correlation.service';
 
+/**
+ * Defines the shape of the error info.
+ */
 export interface ErrorInfo {
   message: string;
   stack?: string;
@@ -25,14 +28,27 @@ export interface ErrorInfo {
   recoverable?: boolean;
 }
 
+/**
+ * Represents the global error handler.
+ */
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
+  /**
+   * Initializes a new instance of the Global Error Handler.
+   * @param toastService - The toast service.
+   * @param router - The router.
+   * @param errorCorrelation - The error correlation.
+   */
   constructor(
     private toastService: ToastService,
     private router: Router,
     private errorCorrelation: ErrorCorrelationService,
   ) {}
 
+  /**
+   * Handles error.
+   * @param error - The error.
+   */
   handleError(error: Error): void {
     try {
       // Create structured error with correlation
@@ -344,6 +360,9 @@ export class GlobalErrorHandler implements ErrorHandler {
   }
 }
 
+/**
+ * Represents the error boundary component.
+ */
 @Component({
   selector: 'arc-error-boundary',
   standalone: true,
@@ -669,11 +688,19 @@ export class ErrorBoundaryComponent implements OnInit {
   showDetails = signal(false);
   errorHistory = signal<ErrorInfo[]>([]);
 
+  /**
+   * Initializes a new instance of the Error Boundary Component.
+   * @param router - The router.
+   * @param toastService - The toast service.
+   */
   constructor(
     private router: Router,
     private toastService: ToastService,
   ) {}
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     // Check for stored errors
     this.loadErrorHistory();
@@ -706,6 +733,10 @@ export class ErrorBoundaryComponent implements OnInit {
     }
   }
 
+  /**
+   * Performs the display error operation.
+   * @param errorInfo - The error info.
+   */
   displayError(errorInfo: ErrorInfo): void {
     this.hasError.set(true);
     this.errorMessage.set(errorInfo.message);
@@ -715,24 +746,40 @@ export class ErrorBoundaryComponent implements OnInit {
     this.componentName.set(errorInfo.componentName);
   }
 
+  /**
+   * Performs the reset error operation.
+   */
   resetError(): void {
     this.hasError.set(false);
     this.showDetails.set(false);
   }
 
+  /**
+   * Performs the reload operation.
+   */
   reload(): void {
     window.location.reload();
   }
 
+  /**
+   * Performs the go home operation.
+   */
   goHome(): void {
     this.resetError();
     this.router.navigate(['/']);
   }
 
+  /**
+   * Performs the toggle details operation.
+   */
   toggleDetails(): void {
     this.showDetails.update((value) => !value);
   }
 
+  /**
+   * Performs the is development operation.
+   * @returns The boolean value.
+   */
   isDevelopment(): boolean {
     return (
       window.location.hostname === 'localhost' ||
@@ -741,6 +788,9 @@ export class ErrorBoundaryComponent implements OnInit {
     );
   }
 
+  /**
+   * Performs the clear history operation.
+   */
   clearHistory(): void {
     sessionStorage.removeItem('app-errors');
     this.errorHistory.set([]);

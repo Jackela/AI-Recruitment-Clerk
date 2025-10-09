@@ -1,25 +1,43 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { PreloadingStrategy, Route } from '@angular/router';
 import { Observable, of, timer } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
+import { LoggerService } from './shared/logger.service';
 
+/**
+ * Represents the smart preloading strategy.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class SmartPreloadingStrategy implements PreloadingStrategy {
+  private readonly logger = inject(LoggerService).createLogger('SmartPreloadingStrategy');
   private preloadedModules = new Set<string>();
   private networkCondition: 'slow' | 'fast' = 'fast';
   private userEngagement = {
+    clicks: 0,
+    prefetches: 0,
+    routeFrequency: {} as Record<string, number>,
+    connectionInfo: {} as Record<string, unknown>,
     isIdle: false,
     interactionCount: 0,
     lastInteraction: Date.now(),
   };
 
+  /**
+   * Initializes a new instance of the Smart Preloading Strategy.
+   */
   constructor() {
     this.detectNetworkCondition();
     this.trackUserEngagement();
   }
 
+  /**
+   * Performs the preload operation.
+   * @param route - The route.
+   * @param load - The load.
+   * @returns The Observable<any>.
+   */
   preload(route: Route, load: () => Observable<any>): Observable<any> {
     const routePath = route.path || 'unknown';
 
@@ -38,7 +56,7 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
 
     return timer(delay).pipe(
       mergeMap(() => {
-        console.log(`[SmartPreloading] Preloading route: ${routePath}`);
+        this.logger.debug(`Preloading route: ${routePath}`);
         this.preloadedModules.add(routePath);
         return load();
       }),
@@ -128,8 +146,8 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
         this.networkCondition = ['slow-2g', '2g', '3g'].includes(newType)
           ? 'slow'
           : 'fast';
-        console.log(
-          `[SmartPreloading] Network condition changed to: ${this.networkCondition}`,
+        this.logger.log(
+          `Network condition changed to: ${this.networkCondition}`,
         );
       });
     } else {
@@ -145,9 +163,9 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
     testImage.onload = () => {
       const loadTime = performance.now() - startTime;
       this.networkCondition = loadTime > 1000 ? 'slow' : 'fast';
-      console.log(
-        `[SmartPreloading] Network speed test: ${loadTime}ms - ${this.networkCondition}`,
-      );
+      this.logger.performance('Network speed test', loadTime, {
+        networkCondition: this.networkCondition
+      });
     };
 
     testImage.onerror = () => {
@@ -193,15 +211,27 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
   }
 
   // Public methods for debugging and monitoring
+  /**
+   * Retrieves preloaded modules.
+   * @returns The Set<string>.
+   */
   getPreloadedModules(): Set<string> {
     return new Set(this.preloadedModules);
   }
 
+  /**
+   * Retrieves network condition.
+   * @returns The string value.
+   */
   getNetworkCondition(): string {
     return this.networkCondition;
   }
 
-  getUserEngagement(): any {
+  /**
+   * Retrieves user engagement.
+   * @returns The {clicks: number; prefetches: number; routeFrequency: Record<string, number>; connectionInfo: Record<string, unknown>}.
+   */
+  getUserEngagement(): {clicks: number; prefetches: number; routeFrequency: Record<string, number>; connectionInfo: Record<string, unknown>} {
     return { ...this.userEngagement };
   }
 }

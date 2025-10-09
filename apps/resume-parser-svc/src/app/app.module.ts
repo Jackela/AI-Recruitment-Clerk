@@ -9,6 +9,7 @@ import { ParsingService } from '../parsing/parsing.service';
 import { VisionLlmService } from '../vision-llm/vision-llm.service';
 import { GridFsService } from '../gridfs/gridfs.service';
 import { FieldMapperService } from '../field-mapper/field-mapper.service';
+import { PdfTextExtractorService } from '../parsing/pdf-text-extractor.service';
 import { NatsClientModule } from '@app/shared-nats-client';
 import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
 import { Resume, ResumeSchema } from '../schemas/resume.schema';
@@ -19,6 +20,9 @@ import {
   ErrorInterceptorFactory,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 
+/**
+ * Configures the app module.
+ */
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -30,7 +34,10 @@ import {
     }),
     MongooseModule.forRoot(
       process.env.MONGODB_URL ||
-        'mongodb://admin:password123@localhost:27017/ai-recruitment?authSource=admin',
+        process.env.MONGO_URL ||
+        (() => {
+          throw new Error('MONGODB_URL or MONGO_URL environment variable is required');
+        })(),
       {
         connectionName: 'resume-parser',
       },
@@ -47,6 +54,7 @@ import {
     VisionLlmService,
     GridFsService,
     FieldMapperService,
+    PdfTextExtractorService,
     ResumeParserNatsService,
     ResumeRepository,
     // Enhanced Error Handling System
@@ -77,8 +85,7 @@ import {
         ErrorInterceptorFactory.createPerformanceInterceptor(
           'resume-parser-svc',
           {
-            warnThreshold: 5000, // 5 seconds - parsing can take time
-            errorThreshold: 30000, // 30 seconds - hard limit for resume parsing
+            timeout: 30000, // 30 seconds - hard limit for resume parsing
           },
         ),
     },
@@ -88,6 +95,7 @@ import {
     VisionLlmService,
     GridFsService,
     FieldMapperService,
+    PdfTextExtractorService,
     ResumeParserNatsService,
     ResumeRepository,
   ],

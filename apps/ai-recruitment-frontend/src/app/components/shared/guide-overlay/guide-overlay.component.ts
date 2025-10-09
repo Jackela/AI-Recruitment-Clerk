@@ -20,6 +20,9 @@ interface HighlightPosition extends Position {
   height: string;
 }
 
+/**
+ * Represents the guide overlay component.
+ */
 @Component({
   selector: 'arc-guide-overlay',
   standalone: true,
@@ -134,8 +137,15 @@ export class GuideOverlayComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private resizeObserver?: ResizeObserver;
 
+  /**
+   * Initializes a new instance of the Guide Overlay Component.
+   * @param guideService - The guide service.
+   */
   constructor(private guideService: NavigationGuideService) {}
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     // Watch for step changes to update positions
     // Note: currentStep is a signal, we'll use effect for watching changes
@@ -145,6 +155,9 @@ export class GuideOverlayComponent implements OnInit, OnDestroy {
     this.setupResizeObserver();
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -243,31 +256,56 @@ export class GuideOverlayComponent implements OnInit, OnDestroy {
   }
 
   // Component methods
+  /**
+   * Performs the next step operation.
+   */
   nextStep(): void {
     this.guideService.nextStep();
   }
 
+  /**
+   * Performs the previous step operation.
+   */
   previousStep(): void {
     this.guideService.previousStep();
   }
 
+  /**
+   * Performs the skip guide operation.
+   */
   skipGuide(): void {
     this.guideService.skipFlow();
   }
 
   // Helper methods
+  /**
+   * Performs the can go previous operation.
+   * @returns The boolean value.
+   */
   canGoPrevious(): boolean {
     return this.stepIndex() > 0;
   }
 
+  /**
+   * Performs the is last step operation.
+   * @returns The boolean value.
+   */
   isLastStep(): boolean {
     return this.stepIndex() === this.totalSteps() - 1;
   }
 
+  /**
+   * Performs the show progress operation.
+   * @returns The boolean value.
+   */
   showProgress(): boolean {
     return this.totalSteps() > 1;
   }
 
+  /**
+   * Retrieves tooltip classes.
+   * @returns The string value.
+   */
   getTooltipClasses(): string {
     const step = this.currentStep();
     const classes = ['guide-tooltip'];
@@ -277,10 +315,18 @@ export class GuideOverlayComponent implements OnInit, OnDestroy {
     return classes.join(' ');
   }
 
+  /**
+   * Retrieves tooltip position.
+   * @returns The Position.
+   */
   getTooltipPosition(): Position {
     return this.tooltipPosition();
   }
 
+  /**
+   * Retrieves highlight position.
+   * @returns The HighlightPosition.
+   */
   getHighlightPosition(): HighlightPosition {
     return this.highlightPosition();
   }

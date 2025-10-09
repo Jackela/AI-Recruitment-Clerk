@@ -24,6 +24,9 @@ import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
 import { RedisTokenBlacklistService } from '../security/redis-token-blacklist.service';
 
+/**
+ * Provides auth functionality.
+ */
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -36,6 +39,13 @@ export class AuthService {
   private readonly LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
   private readonly TOKEN_BLACKLIST_CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hour
 
+  /**
+   * Initializes a new instance of the Auth Service.
+   * @param userService - The user service.
+   * @param jwtService - The jwt service.
+   * @param configService - The config service.
+   * @param tokenBlacklistService - The token blacklist service.
+   */
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
@@ -51,6 +61,11 @@ export class AuthService {
     }
   }
 
+  /**
+   * Performs the register operation.
+   * @param createUserDto - The create user dto.
+   * @returns A promise that resolves to AuthResponseDto.
+   */
   async register(createUserDto: CreateUserDto): Promise<AuthResponseDto> {
     // Normalize input for tests: generate orgId if missing; split name
     const normalized: any = { ...createUserDto };
@@ -84,6 +99,11 @@ export class AuthService {
     return this.generateAuthResponse(user);
   }
 
+  /**
+   * Performs the login operation.
+   * @param loginDto - The login dto.
+   * @returns A promise that resolves to AuthResponseDto.
+   */
   @WithCircuitBreaker('auth-login', {
     failureThreshold: 10,
     recoveryTimeout: 60000,
@@ -114,6 +134,12 @@ export class AuthService {
     return this.generateAuthResponse(user);
   }
 
+  /**
+   * Validates user.
+   * @param email - The email.
+   * @param password - The password.
+   * @returns A promise that resolves to UserDto | null.
+   */
   async validateUser(email: string, password: string): Promise<UserDto | null> {
     const user = await this.userService.findByEmail(email);
     if (!user) {
@@ -143,6 +169,12 @@ export class AuthService {
     return userDto;
   }
 
+  /**
+   * Validates jwt payload.
+   * @param payload - The payload.
+   * @param token - The token.
+   * @returns A promise that resolves to UserDto.
+   */
   async validateJwtPayload(
     payload: JwtPayload,
     token?: string,
@@ -202,6 +234,11 @@ export class AuthService {
     return userDto;
   }
 
+  /**
+   * Performs the refresh token operation.
+   * @param refreshToken - The refresh token.
+   * @returns A promise that resolves to AuthResponseDto.
+   */
   async refreshToken(refreshToken: string): Promise<AuthResponseDto> {
     try {
       // Validate refresh token format
@@ -286,6 +323,13 @@ export class AuthService {
     };
   }
 
+  /**
+   * Performs the logout operation.
+   * @param userId - The user id.
+   * @param accessToken - The access token.
+   * @param refreshToken - The refresh token.
+   * @returns A promise that resolves when the operation completes.
+   */
   async logout(
     userId: string,
     accessToken?: string,
@@ -339,6 +383,13 @@ export class AuthService {
     }
   }
 
+  /**
+   * Performs the change password operation.
+   * @param userId - The user id.
+   * @param currentPassword - The current password.
+   * @param newPassword - The new password.
+   * @returns A promise that resolves when the operation completes.
+   */
   async changePassword(
     userId: string,
     currentPassword: string,

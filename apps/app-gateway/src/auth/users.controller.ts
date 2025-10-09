@@ -14,9 +14,21 @@ import { UserService } from './user.service';
 
 // Use shared AuthenticatedRequest type
 
+/**
+ * Exposes endpoints for users.
+ */
 @Controller('users')
 export class UsersController {
+  /**
+   * Initializes a new instance of the Users Controller.
+   * @param userService - The user service.
+   */
   constructor(private readonly userService: UserService) {}
+  /**
+   * Retrieves profile.
+   * @param req - The req.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   @HttpCode(HttpStatus.OK)
@@ -24,6 +36,10 @@ export class UsersController {
     return req.user;
   }
 
+  /**
+   * Retrieves activity.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Get('activity')
   @HttpCode(HttpStatus.OK)
@@ -31,6 +47,11 @@ export class UsersController {
     return { active: true, timestamp: new Date().toISOString() };
   }
 
+  /**
+   * Updates profile post.
+   * @param req - The req.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Post('profile')
   @HttpCode(HttpStatus.OK)
@@ -52,6 +73,11 @@ export class UsersController {
     };
   }
 
+  /**
+   * Updates profile put.
+   * @param req - The req.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Put('profile')
   @HttpCode(HttpStatus.OK)
@@ -59,6 +85,11 @@ export class UsersController {
     return this.updateProfilePost(req);
   }
 
+  /**
+   * Retrieves organization users.
+   * @param req - The req.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Get('organization/users')
   @HttpCode(HttpStatus.OK)

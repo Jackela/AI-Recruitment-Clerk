@@ -30,8 +30,17 @@ function genId(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
+/**
+ * Exposes endpoints for resumes.
+ */
 @Controller()
 export class ResumesController {
+  /**
+   * Performs the upload operation.
+   * @param file - The file.
+   * @param body - The body.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Post('resumes/upload')
   @UseInterceptors(FileInterceptor('resume'))
@@ -61,6 +70,11 @@ export class ResumesController {
     return { resumeId: id };
   }
 
+  /**
+   * Retrieves resume.
+   * @param id - The id.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Get('resumes/:id')
   @HttpCode(HttpStatus.OK)
@@ -81,6 +95,11 @@ export class ResumesController {
     };
   }
 
+  /**
+   * Retrieves analysis.
+   * @param id - The id.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Get('resumes/:id/analysis')
   @HttpCode(HttpStatus.OK)
@@ -95,6 +114,12 @@ export class ResumesController {
     };
   }
 
+  /**
+   * Updates status.
+   * @param id - The id.
+   * @param body - The body.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Put('resumes/:id/status')
   @HttpCode(HttpStatus.OK)
@@ -110,6 +135,10 @@ export class ResumesController {
     return { resumeId: id, newStatus };
   }
 
+  /**
+   * Performs the search operation.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Post('resumes/search')
   @HttpCode(HttpStatus.OK)
@@ -121,6 +150,10 @@ export class ResumesController {
     return { resumes: items };
   }
 
+  /**
+   * Performs the batch operation.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Post('resumes/batch/process')
   @HttpCode(HttpStatus.ACCEPTED)

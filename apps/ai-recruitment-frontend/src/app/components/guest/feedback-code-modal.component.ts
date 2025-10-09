@@ -7,8 +7,11 @@ import { GuestState } from '../../store/guest/guest.state';
 import * as GuestActions from '../../store/guest/guest.actions';
 import { ToastService } from '../../services/toast.service';
 
+/**
+ * Represents the feedback code modal component.
+ */
 @Component({
-  selector: 'app-feedback-code-modal',
+  selector: 'arc-feedback-code-modal',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
@@ -247,6 +250,11 @@ export class FeedbackCodeModalComponent implements OnInit {
   copied = false;
   redemptionCode = '';
 
+  /**
+   * Initializes a new instance of the Feedback Code Modal Component.
+   * @param store - The store.
+   * @param toastService - The toast service.
+   */
   constructor(
     private store: Store<{ guest: GuestState }>,
     private toastService: ToastService,
@@ -259,6 +267,9 @@ export class FeedbackCodeModalComponent implements OnInit {
     this.error$ = this.store.select((state) => state.guest.error);
   }
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     // Pre-populate redemption code with generated feedback code
     this.guestState$.subscribe((state) => {
@@ -268,22 +279,37 @@ export class FeedbackCodeModalComponent implements OnInit {
     });
   }
 
+  /**
+   * Performs the copied class operation.
+   * @returns The string value.
+   */
   get copiedClass(): string {
     return this.copied
       ? 'bg-green-100 text-green-700 border border-green-200'
       : 'bg-gray-100 text-gray-700 border border-gray-200';
   }
 
+  /**
+   * Performs the close modal operation.
+   */
   closeModal(): void {
     this.store.dispatch(GuestActions.hideFeedbackModal());
   }
 
+  /**
+   * Performs the on backdrop click operation.
+   * @param event - The event.
+   */
   onBackdropClick(event: Event): void {
     if (event.target === event.currentTarget) {
       this.closeModal();
     }
   }
 
+  /**
+   * Performs the copy feedback code operation.
+   * @param input - The input.
+   */
   copyFeedbackCode(input: HTMLInputElement): void {
     input.select();
     input.setSelectionRange(0, 99999); // For mobile devices
@@ -296,16 +322,22 @@ export class FeedbackCodeModalComponent implements OnInit {
       setTimeout(() => {
         this.copied = false;
       }, 2000);
-    } catch (err) {
+    } catch {
       this.toastService.error('复制失败，请手动选择复制');
     }
   }
 
+  /**
+   * Performs the track survey click operation.
+   */
   trackSurveyClick(): void {
     // Track survey click for analytics
     this.store.dispatch(GuestActions.updateLastActivity());
   }
 
+  /**
+   * Performs the redeem code operation.
+   */
   redeemCode(): void {
     if (this.redemptionCode.trim()) {
       this.store.dispatch(

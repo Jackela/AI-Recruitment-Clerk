@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JobsService } from './jobs.service';
 import { JobsController } from './jobs.controller';
 import { InMemoryStorageService } from './storage/in-memory-storage.service';
-import { NatsClient } from '../nats/nats.client';
+import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import {
   UserDto,
@@ -13,7 +13,7 @@ import { CacheService } from '../cache/cache.service';
 describe('Jobs Integration Tests', () => {
   let controller: JobsController;
   let service: JobsService;
-  let natsClient: NatsClient;
+  let natsClient: AppGatewayNatsService;
 
   const mockUser: UserDto = {
     id: 'user-1',

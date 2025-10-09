@@ -1,8 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { ScoringEventsController } from './scoring-events.controller';
 import { Logger } from '@nestjs/common';
-import { AnalysisJdExtractedEvent } from '@ai-recruitment-clerk/job-management-domain';
-import { AnalysisResumeParsedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
+import type { AnalysisJdExtractedEvent } from '@ai-recruitment-clerk/job-management-domain';
+import type { AnalysisResumeParsedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
 
 describe('ScoringEventsController', () => {
   let controller: ScoringEventsController;

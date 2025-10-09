@@ -1,6 +1,13 @@
 import { ValueObject } from './base/value-object.js';
 
+/**
+ * Represents the ip address.
+ */
 export class IPAddress extends ValueObject<{ value: string }> {
+  /**
+   * Initializes a new instance of the IP Address.
+   * @param props - The props.
+   */
   constructor(props: { value: string }) {
     if (!IPAddress.isValidIPv4(props.value)) {
       throw new Error(`Invalid IPv4 address: ${props.value}`);
@@ -13,6 +20,10 @@ export class IPAddress extends ValueObject<{ value: string }> {
     return ipv4Regex.test(ip);
   }
 
+  /**
+   * Retrieves value.
+   * @returns The string value.
+   */
   getValue(): string {
     return this.props.value;
   }

@@ -8,6 +8,9 @@ import {
 import { Subject } from 'rxjs';
 // import { takeUntil } from 'rxjs/operators'; // Reserved for future use
 
+/**
+ * Represents the status notifications component.
+ */
 @Component({
   selector: 'arc-status-notifications',
   standalone: true,
@@ -105,14 +108,24 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private notificationTimers = new Map<string, number>();
 
+  /**
+   * Initializes a new instance of the Status Notifications Component.
+   * @param feedbackService - The feedback service.
+   */
   constructor(private feedbackService: ProgressFeedbackService) {}
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     // Setup auto-dismiss timers for notifications
     // Note: notifications is a signal, we'll use effect for watching changes
     this.setupNotificationTimers(this.notifications());
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -147,10 +160,18 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
   }
 
   // Component methods
+  /**
+   * Performs the has notifications operation.
+   * @returns The boolean value.
+   */
   hasNotifications(): boolean {
     return this.notifications().length > 0;
   }
 
+  /**
+   * Performs the close notification operation.
+   * @param id - The id.
+   */
   closeNotification(id: string): void {
     // Clear timer if exists
     const timer = this.notificationTimers.get(id);
@@ -162,6 +183,10 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
     this.feedbackService.removeNotification(id);
   }
 
+  /**
+   * Handles action.
+   * @param notification - The notification.
+   */
   handleAction(notification: StatusNotification): void {
     if (notification.action?.handler) {
       notification.action.handler();
@@ -173,6 +198,11 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Retrieves notification classes.
+   * @param notification - The notification.
+   * @returns The string value.
+   */
   getNotificationClasses(notification: StatusNotification): string {
     const classes = ['notification'];
     classes.push(`notification-${notification.type}`);
@@ -188,6 +218,11 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
     return classes.join(' ');
   }
 
+  /**
+   * Retrieves notification icon.
+   * @param type - The type.
+   * @returns The string value.
+   */
   getNotificationIcon(type: string): string {
     const icons = {
       info: '🔵',
@@ -198,6 +233,12 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
     return icons[type as keyof typeof icons] || icons.info;
   }
 
+  /**
+   * Performs the track by notification id operation.
+   * @param _index - The index.
+   * @param notification - The notification.
+   * @returns The string value.
+   */
   trackByNotificationId(
     _index: number,
     notification: StatusNotification,

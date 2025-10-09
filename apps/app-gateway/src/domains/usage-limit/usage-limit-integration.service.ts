@@ -1,5 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 
+/**
+ * Provides usage limit integration functionality.
+ */
 @Injectable()
 export class UsageLimitIntegrationService {
   private readonly logger = new Logger(UsageLimitIntegrationService.name);

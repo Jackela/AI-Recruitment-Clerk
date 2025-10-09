@@ -4,6 +4,9 @@ import { Observable } from 'rxjs';
 import { DeviceIdService } from './device-id.service';
 import { DetailedAnalysisResult } from '../../interfaces/detailed-analysis.interface';
 
+/**
+ * Defines the shape of the guest usage response.
+ */
 export interface GuestUsageResponse {
   canUse: boolean;
   remainingCount: number;
@@ -11,6 +14,9 @@ export interface GuestUsageResponse {
   feedbackCode?: string;
 }
 
+/**
+ * Defines the shape of the guest status response.
+ */
 export interface GuestStatusResponse {
   deviceId: string;
   usageCount: number;
@@ -20,12 +26,18 @@ export interface GuestStatusResponse {
   lastUsed: Date;
 }
 
+/**
+ * Defines the shape of the feedback code response.
+ */
 export interface FeedbackCodeResponse {
   feedbackCode: string;
   surveyUrl: string;
   message: string;
 }
 
+/**
+ * Defines the shape of the resume analysis response.
+ */
 export interface ResumeAnalysisResponse {
   success: boolean;
   data: {
@@ -39,6 +51,9 @@ export interface ResumeAnalysisResponse {
   };
 }
 
+/**
+ * Defines the shape of the personal info.
+ */
 export interface PersonalInfo {
   name: string;
   email?: string;
@@ -48,6 +63,9 @@ export interface PersonalInfo {
   github?: string;
 }
 
+/**
+ * Defines the shape of the skill.
+ */
 export interface Skill {
   name: string;
   proficiency: 'beginner' | 'intermediate' | 'advanced' | 'expert';
@@ -55,6 +73,9 @@ export interface Skill {
   yearsOfExperience?: number;
 }
 
+/**
+ * Defines the shape of the experience.
+ */
 export interface Experience {
   totalYears: number;
   positions: Array<{
@@ -69,6 +90,9 @@ export interface Experience {
   }>;
 }
 
+/**
+ * Defines the shape of the education.
+ */
 export interface Education {
   degree: string;
   institution: string;
@@ -79,6 +103,9 @@ export interface Education {
   relevantCoursework?: string[];
 }
 
+/**
+ * Defines the shape of the analysis summary.
+ */
 export interface AnalysisSummary {
   overallScore: number;
   strengths: string[];
@@ -87,6 +114,9 @@ export interface AnalysisSummary {
   improvementAreas: string[];
 }
 
+/**
+ * Defines the shape of the analysis results response.
+ */
 export interface AnalysisResultsResponse {
   success: boolean;
   data: {
@@ -104,12 +134,20 @@ export interface AnalysisResultsResponse {
   };
 }
 
+/**
+ * Provides guest api functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class GuestApiService {
   private readonly baseUrl = '/api/guest';
 
+  /**
+   * Initializes a new instance of the Guest API Service.
+   * @param http - The http.
+   * @param deviceIdService - The device id service.
+   */
   constructor(
     private http: HttpClient,
     private deviceIdService: DeviceIdService,

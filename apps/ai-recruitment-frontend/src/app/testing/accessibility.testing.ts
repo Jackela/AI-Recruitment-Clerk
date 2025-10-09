@@ -1,5 +1,8 @@
 import { ComponentFixture } from '@angular/core/testing';
 
+/**
+ * Defines the shape of the accessibility test result.
+ */
 export interface AccessibilityTestResult {
   element: HTMLElement;
   issues: AccessibilityIssue[];
@@ -7,6 +10,9 @@ export interface AccessibilityTestResult {
   passed: boolean;
 }
 
+/**
+ * Defines the shape of the accessibility issue.
+ */
 export interface AccessibilityIssue {
   type: 'error' | 'warning' | 'info';
   rule: string;
@@ -15,6 +21,9 @@ export interface AccessibilityIssue {
   suggestion?: string;
 }
 
+/**
+ * Represents the accessibility tester.
+ */
 export class AccessibilityTester {
   /**
    * Run comprehensive accessibility tests on a component

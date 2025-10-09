@@ -1,14 +1,22 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { FieldMappingResult } from '../dto/resume-parsing.dto';
-import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 import { SkillsTaxonomy } from '@ai-recruitment-clerk/candidate-scoring-domain';
 import { DateParser } from './date-parser';
 import { ExperienceCalculator } from './experience-calculator';
 
+/**
+ * Provides field mapper functionality.
+ */
 @Injectable()
 export class FieldMapperService {
   private readonly logger = new Logger(FieldMapperService.name);
 
+  /**
+   * Performs the normalize to resume dto operation.
+   * @param rawLlmOutput - The raw llm output.
+   * @returns A promise that resolves to ResumeDTO.
+   */
   async normalizeToResumeDto(rawLlmOutput: any): Promise<ResumeDTO> {
     try {
       this.logger.debug(
@@ -50,6 +58,11 @@ export class FieldMapperService {
     }
   }
 
+  /**
+   * Performs the normalize with validation operation.
+   * @param rawLlmOutput - The raw llm output.
+   * @returns A promise that resolves to FieldMappingResult.
+   */
   async normalizeWithValidation(
     rawLlmOutput: any,
   ): Promise<FieldMappingResult> {
@@ -85,6 +98,11 @@ export class FieldMapperService {
     }
   }
 
+  /**
+   * Validates resume data.
+   * @param resumeDto - The resume dto.
+   * @returns A promise that resolves to an array of string value.
+   */
   async validateResumeData(resumeDto: ResumeDTO): Promise<string[]> {
     const errors: string[] = [];
 
@@ -188,6 +206,11 @@ export class FieldMapperService {
     }
   }
 
+  /**
+   * Maps contact info.
+   * @param rawContactInfo - The raw contact info.
+   * @returns A promise that resolves to ResumeDTO['contactInfo'].
+   */
   async mapContactInfo(rawContactInfo: any): Promise<ResumeDTO['contactInfo']> {
     try {
       if (!rawContactInfo || typeof rawContactInfo !== 'object') {
@@ -210,6 +233,11 @@ export class FieldMapperService {
     }
   }
 
+  /**
+   * Maps work experience.
+   * @param rawWorkExperience - The raw work experience.
+   * @returns A promise that resolves to ResumeDTO['workExperience'].
+   */
   async mapWorkExperience(
     rawWorkExperience: any[],
   ): Promise<ResumeDTO['workExperience']> {
@@ -270,6 +298,11 @@ export class FieldMapperService {
     }
   }
 
+  /**
+   * Maps education.
+   * @param rawEducation - The raw education.
+   * @returns A promise that resolves to ResumeDTO['education'].
+   */
   async mapEducation(rawEducation: any[]): Promise<ResumeDTO['education']> {
     try {
       if (!Array.isArray(rawEducation)) {
@@ -312,6 +345,11 @@ export class FieldMapperService {
     }
   }
 
+  /**
+   * Performs the normalize skills operation.
+   * @param rawSkills - The raw skills.
+   * @returns A promise that resolves to an array of string value.
+   */
   async normalizeSkills(rawSkills: any[]): Promise<string[]> {
     try {
       if (!Array.isArray(rawSkills)) {
@@ -320,7 +358,7 @@ export class FieldMapperService {
         // Try to handle string input (comma-separated skills)
         if (typeof rawSkills === 'string') {
           rawSkills = (rawSkills as string)
-            .split(/[,;\\n]/)
+            .split(/[,;\n]/)
             .map((s) => s.trim())
             .filter((s) => s.length > 0);
         } else {
@@ -388,6 +426,11 @@ export class FieldMapperService {
     }
   }
 
+  /**
+   * Performs the normalize dates operation.
+   * @param dateString - The date string.
+   * @returns A promise that resolves to string value.
+   */
   async normalizeDates(dateString: string): Promise<string> {
     try {
       if (!dateString || typeof dateString !== 'string') {
@@ -455,10 +498,10 @@ export class FieldMapperService {
 
       const dateRangePatterns = [
         // Common date range patterns
-        /(\\d{4}[-/]\\d{1,2}[-/]\\d{1,2})\\s*[-\\u2013\\u2014to]\\s*(\\d{4}[-/]\\d{1,2}[-/]\\d{1,2}|present|current)/gi,
-        /(\\d{1,2}[/-]\\d{4})\\s*[-\\u2013\\u2014to]\\s*(\\d{1,2}[/-]\\d{4}|present|current)/gi,
-        /(\\w+\\s+\\d{4})\\s*[-\\u2013\\u2014to]\\s*(\\w+\\s+\\d{4}|present|current)/gi,
-        /(\\d{4})\\s*[-\\u2013\\u2014to]\\s*(\\d{4}|present|current)/gi,
+        /(\d{4}[-/]\d{1,2}[-/]\d{1,2})\s*[-\u2013\u2014to]\s*(\d{4}[-/]\d{1,2}[-/]\d{1,2}|present|current)/gi,
+        /(\d{1,2}[/-]\d{4})\s*[-\u2013\u2014to]\s*(\d{1,2}[/-]\d{4}|present|current)/gi,
+        /(\w+\s+\d{4})\s*[-\u2013\u2014to]\s*(\w+\s+\d{4}|present|current)/gi,
+        /(\d{4})\s*[-\u2013\u2014to]\s*(\d{4}|present|current)/gi,
       ];
 
       const extractedRanges: {
@@ -505,7 +548,19 @@ export class FieldMapperService {
 
     // Common degree mappings
     const degreeMap: Record<string, string> = {
-      // Bachelor's degrees
+      // Full degree names (check these first)
+      'bachelor of science': 'Bachelor of Science',
+      'bachelor of arts': 'Bachelor of Arts',
+      'bachelor of technology': 'Bachelor of Technology',
+      'bachelor of engineering': 'Bachelor of Engineering',
+      'master of science': 'Master of Science',
+      'master of arts': 'Master of Arts',
+      'master of business administration': 'Master of Business Administration',
+      'master of technology': 'Master of Technology',
+      'master of engineering': 'Master of Engineering',
+      'doctor of philosophy': 'Doctor of Philosophy',
+
+      // Bachelor's degrees (abbreviated)
       bachelor: "Bachelor's Degree",
       bachelors: "Bachelor's Degree",
       "bachelor's": "Bachelor's Degree",
@@ -517,7 +572,7 @@ export class FieldMapperService {
       btech: 'Bachelor of Technology',
       beng: 'Bachelor of Engineering',
 
-      // Master's degrees
+      // Master's degrees (abbreviated)
       master: "Master's Degree",
       masters: "Master's Degree",
       "master's": "Master's Degree",
@@ -573,7 +628,7 @@ export class FieldMapperService {
       return '';
     }
 
-    return value.trim().replace(/\\s+/g, ' ');
+    return value.trim().replace(/\s+/g, ' ');
   }
 
   /**
@@ -584,7 +639,7 @@ export class FieldMapperService {
       return null;
     }
 
-    const normalized = name.trim().replace(/\\s+/g, ' ');
+    const normalized = name.trim().replace(/\s+/g, ' ');
 
     // Basic name validation
     if (normalized.length < 2 || normalized.length > 100) {
@@ -592,7 +647,7 @@ export class FieldMapperService {
     }
 
     // Check if it looks like a name (letters, spaces, common punctuation)
-    if (!/^[a-zA-Z\\s\\-\\'\\.]+$/.test(normalized)) {
+    if (!/^[a-zA-Z\s\-\'\.]+$/.test(normalized)) {
       return null;
     }
 
@@ -609,11 +664,9 @@ export class FieldMapperService {
 
     const normalized = email.trim().toLowerCase();
 
-    if (this.isValidEmail(normalized)) {
-      return normalized;
-    }
-
-    return null;
+    // Return the normalized email regardless of validity
+    // Let the validation step determine if it's valid
+    return normalized;
   }
 
   /**
@@ -625,10 +678,10 @@ export class FieldMapperService {
     }
 
     // Remove all non-digit characters except + and ()
-    let normalized = phone.replace(/[^\\d\\+\\(\\)\\-\\s]/g, '');
+    let normalized = phone.replace(/[^\d\+\(\)\-\s]/g, '');
 
     // Remove extra whitespace
-    normalized = normalized.trim().replace(/\\s+/g, ' ');
+    normalized = normalized.trim().replace(/\s+/g, ' ');
 
     if (this.isValidPhone(normalized)) {
       return normalized;
@@ -645,7 +698,7 @@ export class FieldMapperService {
       return false;
     }
 
-    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     return emailRegex.test(email);
   }
 
@@ -658,7 +711,7 @@ export class FieldMapperService {
     }
 
     // Remove all non-digit characters
-    const digitsOnly = phone.replace(/\\D/g, '');
+    const digitsOnly = phone.replace(/\D/g, '');
 
     // Valid phone numbers should have 7-15 digits
     return digitsOnly.length >= 7 && digitsOnly.length <= 15;

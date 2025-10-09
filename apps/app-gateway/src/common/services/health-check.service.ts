@@ -1,6 +1,9 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
+/**
+ * Defines the shape of the service health.
+ */
 export interface ServiceHealth {
   name: string;
   status: 'healthy' | 'degraded' | 'unhealthy';
@@ -10,6 +13,9 @@ export interface ServiceHealth {
   metadata?: any;
 }
 
+/**
+ * Defines the shape of the system health.
+ */
 export interface SystemHealth {
   overall: 'healthy' | 'degraded' | 'unhealthy';
   services: ServiceHealth[];
@@ -18,6 +24,9 @@ export interface SystemHealth {
   version: string;
 }
 
+/**
+ * Defines the shape of the health check config.
+ */
 export interface HealthCheckConfig {
   name: string;
   url?: string;
@@ -27,6 +36,9 @@ export interface HealthCheckConfig {
   healthCheck?: () => Promise<{ healthy: boolean; metadata?: any }>;
 }
 
+/**
+ * Provides health check functionality.
+ */
 @Injectable()
 export class HealthCheckService implements OnModuleInit {
   private readonly logger = new Logger(HealthCheckService.name);
@@ -34,6 +46,10 @@ export class HealthCheckService implements OnModuleInit {
   private serviceHealths = new Map<string, ServiceHealth>();
   private healthCheckConfigs: HealthCheckConfig[] = [];
 
+  /**
+   * Performs the on module init operation.
+   * @returns The result of the operation.
+   */
   async onModuleInit() {
     this.logger.log('Initializing health check service');
 
@@ -44,6 +60,10 @@ export class HealthCheckService implements OnModuleInit {
     await this.performAllHealthChecks();
   }
 
+  /**
+   * Performs the register health check operation.
+   * @param config - The config.
+   */
   registerHealthCheck(config: HealthCheckConfig): void {
     this.healthCheckConfigs.push({
       timeout: 5000,
@@ -55,6 +75,10 @@ export class HealthCheckService implements OnModuleInit {
     this.logger.debug(`Registered health check for ${config.name}`);
   }
 
+  /**
+   * Retrieves system health.
+   * @returns A promise that resolves to SystemHealth.
+   */
   async getSystemHealth(): Promise<SystemHealth> {
     const services = Array.from(this.serviceHealths.values());
     const overall = this.calculateOverallHealth(services);
@@ -68,10 +92,20 @@ export class HealthCheckService implements OnModuleInit {
     };
   }
 
+  /**
+   * Retrieves service health.
+   * @param serviceName - The service name.
+   * @returns A promise that resolves to ServiceHealth | null.
+   */
   async getServiceHealth(serviceName: string): Promise<ServiceHealth | null> {
     return this.serviceHealths.get(serviceName) || null;
   }
 
+  /**
+   * Performs the check service health operation.
+   * @param serviceName - The service name.
+   * @returns A promise that resolves to ServiceHealth.
+   */
   async checkServiceHealth(serviceName: string): Promise<ServiceHealth> {
     const config = this.healthCheckConfigs.find((c) => c.name === serviceName);
 
@@ -84,6 +118,10 @@ export class HealthCheckService implements OnModuleInit {
     return await this.performHealthCheck(config);
   }
 
+  /**
+   * Performs the perform scheduled health checks operation.
+   * @returns A promise that resolves when the operation completes.
+   */
   @Cron(CronExpression.EVERY_30_SECONDS)
   async performScheduledHealthChecks(): Promise<void> {
     try {

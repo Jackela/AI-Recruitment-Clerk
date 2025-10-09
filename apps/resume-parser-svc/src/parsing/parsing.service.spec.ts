@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { ParsingService } from './parsing.service';
 import { VisionLlmService } from '../vision-llm/vision-llm.service';
+import { PdfTextExtractorService } from './pdf-text-extractor.service';
 import { GridFsService } from '../gridfs/gridfs.service';
 import { FieldMapperService } from '../field-mapper/field-mapper.service';
 import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
@@ -16,6 +17,7 @@ import {
 describe('ParsingService', () => {
   let service: ParsingService;
   let visionLlmService: jest.Mocked<VisionLlmService>;
+  let pdfTextExtractorService: jest.Mocked<PdfTextExtractorService>;
   let gridFsService: jest.Mocked<GridFsService>;
   let fieldMapperService: jest.Mocked<FieldMapperService>;
   let natsClient: jest.Mocked<ResumeParserNatsService>;
@@ -32,6 +34,13 @@ describe('ParsingService', () => {
           provide: VisionLlmService,
           useValue: {
             parseResumePdf: jest.fn(),
+            parseResumeText: jest.fn(),
+          },
+        },
+        {
+          provide: PdfTextExtractorService,
+          useValue: {
+            extractText: jest.fn(),
           },
         },
         {
@@ -62,6 +71,7 @@ describe('ParsingService', () => {
 
     service = module.get<ParsingService>(ParsingService);
     visionLlmService = module.get(VisionLlmService);
+    pdfTextExtractorService = module.get(PdfTextExtractorService);
     gridFsService = module.get(GridFsService);
     fieldMapperService = module.get(FieldMapperService);
     natsClient = module.get(ResumeParserNatsService);
@@ -80,7 +90,8 @@ describe('ParsingService', () => {
 
     beforeEach(() => {
       gridFsService.downloadFile.mockResolvedValue(mockPdfBuffer);
-      visionLlmService.parseResumePdf.mockResolvedValue(mockResumeDto);
+      pdfTextExtractorService.extractText.mockResolvedValue('Mock extracted text from PDF');
+      visionLlmService.parseResumeText.mockResolvedValue(mockResumeDto);
       fieldMapperService.normalizeToResumeDto.mockResolvedValue(mockResumeDto);
       natsClient.publishAnalysisResumeParsed.mockResolvedValue(
         createMockNatsPublishResult(true),
@@ -96,9 +107,11 @@ describe('ParsingService', () => {
       expect(gridFsService.downloadFile).toHaveBeenCalledWith(
         validEvent.tempGridFsUrl,
       );
-      expect(visionLlmService.parseResumePdf).toHaveBeenCalledWith(
+      expect(pdfTextExtractorService.extractText).toHaveBeenCalledWith(
         mockPdfBuffer,
-        validEvent.originalFilename,
+      );
+      expect(visionLlmService.parseResumeText).toHaveBeenCalledWith(
+        'Mock extracted text from PDF',
       );
       expect(fieldMapperService.normalizeToResumeDto).toHaveBeenCalledWith(
         mockResumeDto,
@@ -146,9 +159,20 @@ describe('ParsingService', () => {
       });
     });
 
+    it('should handle PDF text extraction errors', async () => {
+      const extractionError = new Error('PDF text extraction failed');
+      pdfTextExtractorService.extractText.mockRejectedValue(extractionError);
+
+      await expect(service.handleResumeSubmitted(validEvent)).rejects.toThrow(
+        'PDF text extraction failed',
+      );
+
+      expect(natsClient.publishJobResumeFailed).toHaveBeenCalled();
+    });
+
     it('should handle Vision LLM service errors', async () => {
       const llmError = new Error('LLM processing failed');
-      visionLlmService.parseResumePdf.mockRejectedValue(llmError);
+      visionLlmService.parseResumeText.mockRejectedValue(llmError);
 
       await expect(service.handleResumeSubmitted(validEvent)).rejects.toThrow(
         'LLM processing failed',
@@ -197,7 +221,8 @@ describe('ParsingService', () => {
 
     beforeEach(() => {
       gridFsService.downloadFile.mockResolvedValue(mockPdfBuffer);
-      visionLlmService.parseResumePdf.mockResolvedValue(mockResumeDto);
+      pdfTextExtractorService.extractText.mockResolvedValue('Mock extracted text from PDF');
+      visionLlmService.parseResumeText.mockResolvedValue(mockResumeDto);
       fieldMapperService.normalizeToResumeDto.mockResolvedValue(mockResumeDto);
     });
 
@@ -220,9 +245,11 @@ describe('ParsingService', () => {
       });
 
       expect(gridFsService.downloadFile).toHaveBeenCalledWith(gridFsUrl);
-      expect(visionLlmService.parseResumePdf).toHaveBeenCalledWith(
+      expect(pdfTextExtractorService.extractText).toHaveBeenCalledWith(
         mockPdfBuffer,
-        filename,
+      );
+      expect(visionLlmService.parseResumeText).toHaveBeenCalledWith(
+        'Mock extracted text from PDF',
       );
       expect(fieldMapperService.normalizeToResumeDto).toHaveBeenCalledWith(
         mockResumeDto,
@@ -259,8 +286,18 @@ describe('ParsingService', () => {
       ).rejects.toThrow(/Failed to download file or file is empty/);
     });
 
+    it('should handle PDF text extraction errors in processResumeFile', async () => {
+      const extractionError = new Error('PDF extraction failed');
+      pdfTextExtractorService.extractText.mockRejectedValue(extractionError);
+
+      await expect(
+        service.processResumeFile(jobId, resumeId, gridFsUrl, filename, 'org-123'),
+      ).rejects.toThrow('PDF extraction failed');
+    });
+
     it('should handle Vision LLM empty results', async () => {
-      visionLlmService.parseResumePdf.mockResolvedValue(null as any);
+      pdfTextExtractorService.extractText.mockResolvedValue('Extracted text');
+      visionLlmService.parseResumeText.mockResolvedValue(null as any);
 
       await expect(
         service.processResumeFile(jobId, resumeId, gridFsUrl, filename, 'org-123'),
@@ -285,7 +322,7 @@ describe('ParsingService', () => {
         `Downloading file from GridFS: ${gridFsUrl}`,
       );
       expect(loggerSpy).toHaveBeenCalledWith(
-        `Parsing resume with Vision LLM service: ${filename}`,
+        `Parsing resume with appropriate strategy: ${filename}`,
       );
       expect(loggerSpy).toHaveBeenCalledWith(
         `Normalizing extracted data for resume: ${resumeId}`,

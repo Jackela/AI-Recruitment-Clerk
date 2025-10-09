@@ -9,6 +9,9 @@ import {
 
 export type AnalyticsEventDocument = AnalyticsEvent & Document;
 
+/**
+ * Represents the analytics event event.
+ */
 @Schema({
   collection: 'analytics_events',
   timestamps: true,

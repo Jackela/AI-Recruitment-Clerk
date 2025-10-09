@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 import { ScoringEngineNatsService } from './services/scoring-engine-nats.service';
 import { Inject } from '@nestjs/common';
 import { SecureConfigValidator, ScoringEngineException, ScoringEngineErrorCode, ErrorCorrelationManager } from '@app/shared-dtos';
 import {
   GeminiClient,
   GeminiConfig,
-} from '@ai-recruitment-clerk/ai-services-shared';
+} from '@ai-recruitment-clerk/shared-dtos';
 import {
   EnhancedSkillMatcherService,
   JobSkillRequirement,
@@ -28,6 +28,9 @@ import {
   ScoreReliabilityReport,
 } from './services/scoring-confidence.service';
 
+/**
+ * Defines the shape of the jd dto.
+ */
 export interface JdDTO {
   requiredSkills: JobSkillRequirement[];
   experienceYears: { min: number; max: number };
@@ -45,6 +48,9 @@ export interface JdDTO {
   requiredTechnologies?: string[];
 }
 
+/**
+ * Defines the shape of the score component.
+ */
 export interface ScoreComponent {
   score: number;
   details: string;
@@ -66,6 +72,9 @@ export interface ScoreComponent {
       };
 }
 
+/**
+ * Defines the shape of the score dto.
+ */
 export interface ScoreDTO {
   overallScore: number;
   skillScore: ScoreComponent;
@@ -85,11 +94,22 @@ export interface ScoreDTO {
   };
 }
 
+/**
+ * Provides scoring engine functionality.
+ */
 @Injectable()
 export class ScoringEngineService {
   private readonly jdCache = new Map<string, JdDTO>();
   private readonly geminiClient: GeminiClient;
 
+  /**
+   * Initializes a new instance of the Scoring Engine Service.
+   * @param natsService - The nats service.
+   * @param enhancedSkillMatcher - The enhanced skill matcher.
+   * @param experienceAnalyzer - The experience analyzer.
+   * @param culturalFitAnalyzer - The cultural fit analyzer.
+   * @param confidenceService - The confidence service.
+   */
   constructor(
     private readonly natsService: ScoringEngineNatsService,
     private readonly enhancedSkillMatcher: EnhancedSkillMatcherService,
@@ -119,10 +139,19 @@ export class ScoringEngineService {
     }
   }
 
+  /**
+   * Handles jd extracted event.
+   * @param event - The event.
+   */
   handleJdExtractedEvent(event: { jobId: string; jdDto: JdDTO }): void {
     this.jdCache.set(event.jobId, event.jdDto);
   }
 
+  /**
+   * Handles resume parsed event.
+   * @param event - The event.
+   * @returns A promise that resolves when the operation completes.
+   */
   async handleResumeParsedEvent(event: {
     jobId: string;
     resumeId: string;

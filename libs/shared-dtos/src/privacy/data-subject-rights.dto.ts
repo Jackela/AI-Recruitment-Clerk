@@ -128,6 +128,9 @@ export class DataRectificationRequest extends DataSubjectRightsRequest {
   justification?: string;
 }
 
+/**
+ * Describes the field correction data transfer object.
+ */
 export class FieldCorrectionDto {
   @IsString()
   @IsNotEmpty()
@@ -351,6 +354,9 @@ export class DataExportPackage {
   createdAt!: Date;
 }
 
+/**
+ * Represents the data category export.
+ */
 export class DataCategoryExport {
   @IsString()
   @IsNotEmpty()
@@ -426,6 +432,9 @@ export class RightsRequestStatusDto {
   activityLog?: RequestActivityLog[];
 }
 
+/**
+ * Represents the request activity log.
+ */
 export class RequestActivityLog {
   @IsDateString()
   timestamp!: Date;

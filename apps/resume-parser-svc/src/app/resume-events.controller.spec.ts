@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ResumeEventsController } from './resume-events.controller';
 import { ParsingService } from '../parsing/parsing.service';
-import { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
+import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
 // TestProviders import removed - using inline mocks
 
 describe('ResumeEventsController', () => {

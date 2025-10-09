@@ -4,7 +4,7 @@
  * Tests WebKit against production static build to bypass dev server issues
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 test.describe('WebKit Static Build Tests', () => {
   test('WebKit works with static production build', async ({

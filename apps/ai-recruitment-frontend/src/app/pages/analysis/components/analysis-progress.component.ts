@@ -5,6 +5,7 @@ import {
   EventEmitter,
   OnDestroy,
   OnInit,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
@@ -12,6 +13,9 @@ import { takeUntil } from 'rxjs/operators';
 import { WebSocketService } from '../../../services/websocket.service';
 import { ProgressTrackerComponent } from '../../../components/shared/progress-tracker/progress-tracker.component';
 
+/**
+ * Defines the shape of the analysis step.
+ */
 export interface AnalysisStep {
   id: string;
   title: string;
@@ -20,11 +24,17 @@ export interface AnalysisStep {
   progress: number;
 }
 
+/**
+ * Defines the shape of the progress update.
+ */
 export interface ProgressUpdate {
   currentStep: string;
   progress: number;
 }
 
+/**
+ * Represents the analysis progress component.
+ */
 @Component({
   selector: 'arc-analysis-progress',
   standalone: true,
@@ -85,12 +95,12 @@ export interface ProgressUpdate {
       </div>
 
       <!-- Real-time Progress Tracker -->
-      <app-progress-tracker
+      <arc-progress-tracker
         [sessionId]="sessionId"
         [showMessageLog]="showMessageLog"
         class="progress-tracker-embedded"
       >
-      </app-progress-tracker>
+      </arc-progress-tracker>
 
       <!-- Cancel Option -->
       <div class="cancel-section">
@@ -120,14 +130,20 @@ export class AnalysisProgressComponent implements OnInit, OnDestroy {
   isCancelling = false;
   private destroy$ = new Subject<void>();
 
-  constructor(private readonly webSocketService: WebSocketService) {}
+  private readonly webSocketService = inject(WebSocketService);
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     if (this.sessionId) {
       this.setupWebSocketListeners(this.sessionId);
     }
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -173,6 +189,9 @@ export class AnalysisProgressComponent implements OnInit, OnDestroy {
       });
   }
 
+  /**
+   * Performs the on cancel click operation.
+   */
   onCancelClick(): void {
     this.isCancelling = true;
     this.webSocketService.disconnect();
@@ -182,10 +201,20 @@ export class AnalysisProgressComponent implements OnInit, OnDestroy {
     }, 1000);
   }
 
+  /**
+   * Performs the track by step id operation.
+   * @param _index - The index.
+   * @param step - The step.
+   * @returns The string value.
+   */
   trackByStepId(_index: number, step: AnalysisStep): string {
     return step.id;
   }
 
+  /**
+   * Updates session id.
+   * @param sessionId - The session id.
+   */
   updateSessionId(sessionId: string): void {
     if (sessionId && sessionId !== this.sessionId) {
       // Clean up existing listeners

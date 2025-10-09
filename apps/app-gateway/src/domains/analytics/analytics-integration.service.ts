@@ -133,7 +133,7 @@ enum DataScope {
   SYSTEM = 'system',
 }
 import { AnalyticsEventRepository } from './analytics-event.repository';
-import { NatsClient } from '../../nats/nats.client';
+import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
 import { Cache } from 'cache-manager';
 import { Inject } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -147,9 +147,15 @@ export class AnalyticsIntegrationService {
   private readonly logger = new Logger(AnalyticsIntegrationService.name);
   private readonly domainService: AnalyticsDomainService;
 
+  /**
+   * Initializes a new instance of the Analytics Integration Service.
+   * @param repository - The repository.
+   * @param natsClient - The nats client.
+   * @param cacheManager - The cache manager.
+   */
   constructor(
     private readonly repository: AnalyticsEventRepository,
-    private readonly natsClient: NatsClient,
+    private readonly natsClient: AppGatewayNatsService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {
     // 初始化领域服务

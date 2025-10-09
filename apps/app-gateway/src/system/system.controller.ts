@@ -34,10 +34,17 @@ import {
   AuthenticatedRequest,
 } from '@ai-recruitment-clerk/user-management-domain';
 
+/**
+ * Exposes endpoints for system.
+ */
 @ApiTags('system')
 @ApiBearerAuth()
 @Controller('system')
 export class SystemController {
+  /**
+   * Retrieves system health.
+   * @returns A promise that resolves to { success: boolean; data: any }.
+   */
   @ApiOperation({
     summary: '系统健康检查',
     description: '获取系统整体健康状态和所有服务的运行状况',
@@ -87,6 +94,11 @@ export class SystemController {
     }
   }
 
+  /**
+   * Retrieves system status.
+   * @param res - The res.
+   * @returns The Promise<{ success: boolean; data: { status: 'operational' | 'degraded' | 'maintenance' | 'outage'; version: string; environment: string; uptime: number; services: { total: number; healthy: number; degraded: number; unhealthy: number; }; lastUpdated: string; }; }>.
+   */
   @ApiOperation({
     summary: '获取系统状态概览',
     description: '获取系统整体状态的快速概览',
@@ -153,6 +165,11 @@ export class SystemController {
   }
 
   // Simple validation endpoint used by tests
+  /**
+   * Validates data.
+   * @param body - The body.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Post('validate')
   @HttpCode(HttpStatus.OK)
@@ -182,6 +199,11 @@ export class SystemController {
   }
 
   // System metrics stub
+  /**
+   * Retrieves metrics.
+   * @param _timeRange - The time range.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Get('metrics')
   @HttpCode(HttpStatus.OK)
@@ -195,6 +217,11 @@ export class SystemController {
   }
 
   // Integration test runner stub
+  /**
+   * Performs the run integration operation.
+   * @param body - The body.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Post('integration-test')
   @HttpCode(HttpStatus.OK)

@@ -1,3 +1,6 @@
+/**
+ * Defines the shape of the resume list item.
+ */
 export interface ResumeListItem {
   id: string;
   jobId: string;
@@ -15,6 +18,9 @@ export interface ResumeListItem {
   };
 }
 
+/**
+ * Defines the shape of the resume detail.
+ */
 export interface ResumeDetail {
   id: string;
   jobId: string;
@@ -44,6 +50,9 @@ export interface ResumeDetail {
   createdAt: Date;
 }
 
+/**
+ * Defines the shape of the resume upload response.
+ */
 export interface ResumeUploadResponse {
   jobId: string;
   submittedResumes: number;

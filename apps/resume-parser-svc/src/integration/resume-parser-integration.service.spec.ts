@@ -9,7 +9,7 @@ import {
   VisionLlmResponse,
   FieldMappingResult,
 } from '../dto/resume-parsing.dto';
-import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
 describe('ResumeParserIntegrationService', () => {
   let service: ResumeParserIntegrationService;

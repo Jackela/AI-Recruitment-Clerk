@@ -5,6 +5,13 @@ import { GridFSBucket, GridFSBucketWriteStream, ObjectId } from 'mongodb';
 import * as stream from 'stream';
 import * as crypto from 'crypto';
 
+// Convert Node Buffer to a Uint8Array view so crypto typings accept it without copies.
+const toUint8ArrayView = (buffer: Buffer): Uint8Array =>
+  new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+
+/**
+ * Defines the shape of the report file metadata.
+ */
 export interface ReportFileMetadata {
   reportType: 'markdown' | 'html' | 'pdf' | 'json' | 'excel';
   jobId: string;
@@ -18,6 +25,9 @@ export interface ReportFileMetadata {
   encoding?: string;
 }
 
+/**
+ * Defines the shape of the saved report file.
+ */
 export interface SavedReportFile {
   fileId: string;
   filename: string;
@@ -27,6 +37,9 @@ export interface SavedReportFile {
   metadata: ReportFileMetadata;
 }
 
+/**
+ * Defines the shape of the report file query.
+ */
 export interface ReportFileQuery {
   jobId?: string;
   resumeId?: string;
@@ -36,22 +49,55 @@ export interface ReportFileQuery {
   dateTo?: Date;
 }
 
+// Enhanced type definition for GridFS filter operations
+/**
+ * Defines the shape of the grid fs filter.
+ */
+export interface GridFSFilter {
+  'metadata.jobId'?: string;
+  'metadata.resumeId'?: string;
+  'metadata.reportType'?: string;
+  'metadata.generatedBy'?: string;
+  'metadata.generatedAt'?: {
+    $gte?: Date;
+    $lte?: Date;
+  };
+  [key: string]: unknown;
+}
+
+/**
+ * Provides grid fs functionality.
+ */
 @Injectable()
 export class GridFsService {
   private readonly logger = new Logger(GridFsService.name);
   private gridFSBucket: GridFSBucket;
 
+  /**
+   * Initializes a new instance of the Grid FS Service.
+   * @param connection - The connection.
+   */
   constructor(
     @InjectConnection('report-generator')
     private readonly connection: Connection,
   ) {
     // Initialize GridFS bucket for storing report files
+    if (!this.connection.db) {
+      throw new Error('MongoDB database connection not available');
+    }
     this.gridFSBucket = new GridFSBucket(this.connection.db, {
       bucketName: 'reports',
       chunkSizeBytes: 255 * 1024, // 255 KB chunks for optimal performance
     });
   }
 
+  /**
+   * Performs the save report operation.
+   * @param content - The content.
+   * @param filename - The filename.
+   * @param metadata - The metadata.
+   * @returns A promise that resolves to string value.
+   */
   async saveReport(
     content: string,
     filename: string,
@@ -121,6 +167,13 @@ export class GridFsService {
     }
   }
 
+  /**
+   * Performs the save report buffer operation.
+   * @param buffer - The buffer.
+   * @param filename - The filename.
+   * @param metadata - The metadata.
+   * @returns A promise that resolves to string value.
+   */
   async saveReportBuffer(
     buffer: Buffer,
     filename: string,
@@ -134,7 +187,7 @@ export class GridFsService {
       // Generate content hash for integrity verification
       const contentHash = crypto
         .createHash('sha256')
-        .update(buffer)
+        .update(toUint8ArrayView(buffer))
         .digest('hex');
 
       // Enhanced metadata with file information
@@ -190,6 +243,11 @@ export class GridFsService {
     }
   }
 
+  /**
+   * Retrieves report.
+   * @param fileId - The file id.
+   * @returns A promise that resolves to Buffer.
+   */
   async getReport(fileId: string): Promise<Buffer> {
     try {
       this.logger.debug(`Retrieving report file: ${fileId}`);
@@ -197,11 +255,11 @@ export class GridFsService {
       const objectId = new ObjectId(fileId);
       const downloadStream = this.gridFSBucket.openDownloadStream(objectId);
 
-      const chunks: Buffer[] = [];
+      const chunks: Uint8Array[] = [];
 
       return new Promise((resolve, reject) => {
         downloadStream.on('data', (chunk: Buffer) => {
-          chunks.push(chunk);
+          chunks.push(toUint8ArrayView(chunk));
         });
 
         downloadStream.on('error', (error) => {
@@ -229,6 +287,11 @@ export class GridFsService {
     }
   }
 
+  /**
+   * Retrieves report stream.
+   * @param fileId - The file id.
+   * @returns A promise that resolves to NodeJS.ReadableStream.
+   */
   async getReportStream(fileId: string): Promise<NodeJS.ReadableStream> {
     try {
       this.logger.debug(`Creating stream for report file: ${fileId}`);
@@ -254,6 +317,11 @@ export class GridFsService {
     }
   }
 
+  /**
+   * Retrieves report metadata.
+   * @param fileId - The file id.
+   * @returns A promise that resolves to ReportFileMetadata | null.
+   */
   async getReportMetadata(fileId: string): Promise<ReportFileMetadata | null> {
     try {
       this.logger.debug(`Getting metadata for report file: ${fileId}`);
@@ -276,13 +344,18 @@ export class GridFsService {
     }
   }
 
+  /**
+   * Performs the find report files operation.
+   * @param query - The query.
+   * @returns A promise that resolves to an array of SavedReportFile.
+   */
   async findReportFiles(
     query: ReportFileQuery = {},
   ): Promise<SavedReportFile[]> {
     try {
       this.logger.debug('Finding report files', { query });
 
-      const filter: any = {};
+      const filter: GridFSFilter = {};
 
       if (query.jobId) {
         filter['metadata.jobId'] = query.jobId;
@@ -332,6 +405,11 @@ export class GridFsService {
     }
   }
 
+  /**
+   * Removes report.
+   * @param fileId - The file id.
+   * @returns A promise that resolves to boolean value.
+   */
   async deleteReport(fileId: string): Promise<boolean> {
     try {
       this.logger.debug(`Deleting report file: ${fileId}`);
@@ -358,6 +436,11 @@ export class GridFsService {
     }
   }
 
+  /**
+   * Performs the verify report integrity operation.
+   * @param fileId - The file id.
+   * @returns A promise that resolves to boolean value.
+   */
   async verifyReportIntegrity(fileId: string): Promise<boolean> {
     try {
       this.logger.debug(`Verifying integrity of report file: ${fileId}`);
@@ -375,7 +458,7 @@ export class GridFsService {
       // Verify content hash
       const actualHash = crypto
         .createHash('sha256')
-        .update(fileBuffer)
+        .update(toUint8ArrayView(fileBuffer))
         .digest('hex');
       const isValid = actualHash === metadata.contentHash;
 
@@ -399,6 +482,10 @@ export class GridFsService {
     }
   }
 
+  /**
+   * Retrieves storage stats.
+   * @returns The Promise<{ totalFiles: number; totalSize: number; sizeByType: Record<string, { count: number; size: number }>; }>.
+   */
   async getStorageStats(): Promise<{
     totalFiles: number;
     totalSize: number;
@@ -434,6 +521,10 @@ export class GridFsService {
     }
   }
 
+  /**
+   * Performs the health check operation.
+   * @returns A promise that resolves to boolean value.
+   */
   async healthCheck(): Promise<boolean> {
     try {
       // Test connection by listing a small number of files

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GeminiClient } from '@ai-recruitment-clerk/ai-services-shared';
-import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
+import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 import { JobRequirements } from './experience-analyzer.service';
 
 interface CulturalRecommendations {
@@ -9,6 +9,9 @@ interface CulturalRecommendations {
   developmentAreas: string[];
 }
 
+/**
+ * Defines the shape of the cultural fit indicators.
+ */
 export interface CulturalFitIndicators {
   companySize: {
     preference: 'startup' | 'scaleup' | 'enterprise' | 'mixed' | 'unknown';
@@ -55,6 +58,9 @@ export interface CulturalFitIndicators {
   };
 }
 
+/**
+ * Defines the shape of the soft skills assessment.
+ */
 export interface SoftSkillsAssessment {
   technicalCommunication: number; // 0-100
   problemSolving: number; // 0-100
@@ -69,6 +75,9 @@ export interface SoftSkillsAssessment {
   };
 }
 
+/**
+ * Defines the shape of the company profile.
+ */
 export interface CompanyProfile {
   size: 'startup' | 'scaleup' | 'enterprise';
   culture: {
@@ -85,6 +94,9 @@ export interface CompanyProfile {
   };
 }
 
+/**
+ * Defines the shape of the alignment scores.
+ */
 export interface AlignmentScores {
   companySizeAlignment: number;
   workStyleAlignment: number;
@@ -93,6 +105,9 @@ export interface AlignmentScores {
   communicationAlignment: number;
 }
 
+/**
+ * Defines the shape of the cultural fit score.
+ */
 export interface CulturalFitScore {
   overallScore: number;
   indicators: CulturalFitIndicators;
@@ -106,10 +121,17 @@ export interface CulturalFitScore {
   };
 }
 
+/**
+ * Provides cultural fit analyzer functionality.
+ */
 @Injectable()
 export class CulturalFitAnalyzerService {
   private readonly logger = new Logger(CulturalFitAnalyzerService.name);
 
+  /**
+   * Initializes a new instance of the Cultural Fit Analyzer Service.
+   * @param geminiClient - The gemini client.
+   */
   constructor(private readonly geminiClient: GeminiClient) {}
 
   /**

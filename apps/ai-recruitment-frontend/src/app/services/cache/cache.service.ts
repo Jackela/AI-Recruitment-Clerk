@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { Observable, of, throwError, from } from 'rxjs';
 import { tap, switchMap, catchError, shareReplay } from 'rxjs/operators';
 
+/**
+ * Defines the shape of the cache config.
+ */
 export interface CacheConfig {
   ttl?: number; // Time to live in milliseconds
   maxSize?: number; // Maximum cache size
@@ -11,6 +14,9 @@ export interface CacheConfig {
   encrypt?: boolean;
 }
 
+/**
+ * Defines the shape of the cache entry.
+ */
 export interface CacheEntry<T = unknown> {
   key: string;
   value: T;
@@ -22,6 +28,9 @@ export interface CacheEntry<T = unknown> {
   encrypted?: boolean;
 }
 
+/**
+ * Defines the shape of the cache stats.
+ */
 export interface CacheStats {
   hits: number;
   misses: number;
@@ -30,6 +39,9 @@ export interface CacheStats {
   hitRate: number;
 }
 
+/**
+ * Provides cache functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -58,6 +70,9 @@ export class CacheService {
   private storeName = 'cache';
   private db: IDBDatabase | null = null;
 
+  /**
+   * Initializes a new instance of the Cache Service.
+   */
   constructor() {
     this.initIndexedDB();
     this.startCleanupTimer();
@@ -95,6 +110,13 @@ export class CacheService {
   }
 
   // Main caching method with deduplication
+  /**
+   * Performs the cache operation.
+   * @param key - The key.
+   * @param factory - The factory.
+   * @param config - The config.
+   * @returns The Observable<T>.
+   */
   cache<T>(
     key: string,
     factory: () => Observable<T>,
@@ -140,6 +162,12 @@ export class CacheService {
   }
 
   // Get value from cache
+  /**
+   * Retrieves the value.
+   * @param key - The key.
+   * @param config - The config.
+   * @returns A promise that resolves to T | null.
+   */
   async get<T>(key: string, config?: CacheConfig): Promise<T | null> {
     const mergedConfig = { ...this.defaultConfig, ...config };
 
@@ -158,6 +186,13 @@ export class CacheService {
   }
 
   // Set value in cache
+  /**
+   * Sets the value.
+   * @param key - The key.
+   * @param value - The value.
+   * @param config - The config.
+   * @returns A promise that resolves when the operation completes.
+   */
   async set<T>(key: string, value: T, config?: CacheConfig): Promise<void> {
     const mergedConfig = { ...this.defaultConfig, ...config };
     const entry: CacheEntry<T> = {
@@ -195,6 +230,12 @@ export class CacheService {
   }
 
   // Remove from cache
+  /**
+   * Removes the entity.
+   * @param key - The key.
+   * @param config - The config.
+   * @returns A promise that resolves when the operation completes.
+   */
   async remove(key: string, config?: CacheConfig): Promise<void> {
     const mergedConfig = { ...this.defaultConfig, ...config };
 
@@ -217,6 +258,11 @@ export class CacheService {
   }
 
   // Clear cache
+  /**
+   * Performs the clear operation.
+   * @param config - The config.
+   * @returns A promise that resolves when the operation completes.
+   */
   async clear(config?: CacheConfig): Promise<void> {
     const mergedConfig = { ...this.defaultConfig, ...config };
 
@@ -519,10 +565,20 @@ export class CacheService {
 
   // Public API
 
+  /**
+   * Retrieves stats.
+   * @returns The CacheStats.
+   */
   getStats(): CacheStats {
     return { ...this.cacheStats };
   }
 
+  /**
+   * Performs the preload operation.
+   * @param keys - The keys.
+   * @param factory - The factory.
+   * @param config - The config.
+   */
   preload<T>(
     keys: string[],
     factory: (key: string) => Observable<T>,
@@ -533,6 +589,10 @@ export class CacheService {
     });
   }
 
+  /**
+   * Performs the invalidate operation.
+   * @param pattern - The pattern.
+   */
   invalidate(pattern: string | RegExp): void {
     const regex = typeof pattern === 'string' ? new RegExp(pattern) : pattern;
 

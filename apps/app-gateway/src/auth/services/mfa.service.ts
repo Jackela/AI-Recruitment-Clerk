@@ -37,6 +37,9 @@ interface MfaSettings {
   lockedUntil?: Date;
 }
 
+/**
+ * Provides mfa functionality.
+ */
 @Injectable()
 export class MfaService {
   private readonly logger = new Logger(MfaService.name);
@@ -44,6 +47,13 @@ export class MfaService {
   private readonly secretLength: number;
   private readonly backupCodesCount: number;
 
+  /**
+   * Initializes a new instance of the Mfa Service.
+   * @param userModel - The user model.
+   * @param configService - The config service.
+   * @param emailService - The email service.
+   * @param smsService - The sms service.
+   */
   constructor(
     @InjectModel(UserProfile.name) private userModel: Model<UserProfile>,
     private configService: ConfigService,
@@ -61,6 +71,12 @@ export class MfaService {
     );
   }
 
+  /**
+   * Performs the enable mfa operation.
+   * @param userId - The user id.
+   * @param enableMfaDto - The enable mfa dto.
+   * @returns A promise that resolves to MfaSetupResponseDto.
+   */
   async enableMfa(
     userId: string,
     enableMfaDto: EnableMfaDto,
@@ -186,6 +202,13 @@ export class MfaService {
     };
   }
 
+  /**
+   * Performs the verify mfa operation.
+   * @param userId - The user id.
+   * @param verifyMfaDto - The verify mfa dto.
+   * @param deviceFingerprint - The device fingerprint.
+   * @returns A promise that resolves to { success: boolean; deviceTrusted?: boolean }.
+   */
   async verifyMfa(
     userId: string,
     verifyMfaDto: VerifyMfaDto,
@@ -290,6 +313,12 @@ export class MfaService {
     }
   }
 
+  /**
+   * Performs the disable mfa operation.
+   * @param userId - The user id.
+   * @param disableMfaDto - The disable mfa dto.
+   * @returns A promise that resolves to { success: boolean }.
+   */
   async disableMfa(
     userId: string,
     disableMfaDto: DisableMfaDto,
@@ -341,6 +370,11 @@ export class MfaService {
     }
   }
 
+  /**
+   * Retrieves mfa status.
+   * @param userId - The user id.
+   * @returns A promise that resolves to MfaStatusDto.
+   */
   async getMfaStatus(userId: string): Promise<MfaStatusDto> {
     const user = await this.userModel.findById(userId);
     if (!user) {
@@ -358,6 +392,12 @@ export class MfaService {
     };
   }
 
+  /**
+   * Generates new backup codes.
+   * @param userId - The user id.
+   * @param generateBackupCodesDto - The generate backup codes dto.
+   * @returns A promise that resolves to an array of string value.
+   */
   async generateNewBackupCodes(
     userId: string,
     generateBackupCodesDto: GenerateBackupCodesDto,
@@ -440,6 +480,12 @@ export class MfaService {
     return codes;
   }
 
+  /**
+   * Performs the send mfa token operation.
+   * @param userId - The user id.
+   * @param method - The method.
+   * @returns A promise that resolves to { success: boolean; message: string }.
+   */
   async sendMfaToken(
     userId: string,
     method: MfaMethod,

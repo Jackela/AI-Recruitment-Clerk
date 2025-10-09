@@ -1,5 +1,5 @@
-import { Module, DynamicModule, Global } from '@nestjs/common';
-import { NatsConnectionManager, NatsStreamManager } from '@app/shared-nats-client';
+import { Module, DynamicModule, Global, Logger } from '@nestjs/common';
+import { NatsConnectionManager, NatsStreamManager, StreamConfigFactory } from '@app/shared-nats-client';
 import { connect, NatsConnection, JetStreamManager } from 'nats';
 
 /**
@@ -9,8 +9,14 @@ import { connect, NatsConnection, JetStreamManager } from 'nats';
 @Global()
 @Module({})
 export class TestNatsModule {
+  private static readonly logger = new Logger(TestNatsModule.name);
   private static natsConnection: NatsConnection;
 
+  /**
+   * Performs the for root operation.
+   * @param useDocker - The use docker.
+   * @returns A promise that resolves to DynamicModule.
+   */
   static async forRoot(useDocker = false): Promise<DynamicModule> {
     let connectionManager: any;
     let streamManager: any;
@@ -28,18 +34,24 @@ export class TestNatsModule {
 
         const jsm = await this.natsConnection.jetstreamManager();
         
-        // Create test stream if it doesn't exist
+        // Create test stream using shared configuration factory
         try {
+          const testStreamConfig = StreamConfigFactory.createDev(
+            'RESUME_PARSER_TEST',
+            ['resume.*', 'job.*', 'report.*']
+          );
           await jsm.streams.add({
-            name: 'RESUME_PARSER_TEST',
-            subjects: ['resume.*', 'job.*', 'report.*'],
-            retention: 'limits',
-            max_msgs: 10000,
-            max_age: 24 * 60 * 60 * 1000000000, // 24 hours in nanoseconds
+            name: testStreamConfig.name,
+            subjects: testStreamConfig.subjects,
+            retention: testStreamConfig.retention,
+            max_msgs: testStreamConfig.maxMsgs,
+            max_age: testStreamConfig.maxAge,
+            discard: testStreamConfig.discard,
+            duplicate_window: testStreamConfig.duplicateWindow,
           });
         } catch (err: any) {
           if (!err.message?.includes('stream name already in use')) {
-            console.error('Failed to create test stream:', err);
+            this.logger.error('Failed to create test stream', err.stack || err.message);
           }
         }
 
@@ -57,7 +69,7 @@ export class TestNatsModule {
           deleteStream: jest.fn().mockResolvedValue(undefined),
         };
       } catch (error) {
-        console.error('Failed to connect to NATS:', error);
+        this.logger.error('Failed to connect to NATS', error.stack || error.message);
         // Fall back to mocks if connection fails
         return this.getMockProviders();
       }
@@ -119,6 +131,10 @@ export class TestNatsModule {
     };
   }
 
+  /**
+   * Performs the close connection operation.
+   * @returns A promise that resolves when the operation completes.
+   */
   static async closeConnection(): Promise<void> {
     if (this.natsConnection) {
       await this.natsConnection.drain();

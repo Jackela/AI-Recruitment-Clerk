@@ -1,13 +1,19 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, takeUntil, map } from 'rxjs/operators';
 import { io, Socket } from 'socket.io-client';
 import { ToastService } from './toast.service';
 
+/**
+ * Defines the shape of the web socket message data.
+ */
 export interface WebSocketMessageData {
   [key: string]: unknown;
 }
 
+/**
+ * Defines the shape of the web socket message.
+ */
 export interface WebSocketMessage {
   type: 'progress' | 'step_change' | 'completed' | 'error' | 'status_update';
   sessionId: string;
@@ -15,6 +21,9 @@ export interface WebSocketMessage {
   timestamp: Date;
 }
 
+/**
+ * Defines the shape of the progress update.
+ */
 export interface ProgressUpdate {
   progress: number;
   currentStep: string;
@@ -22,6 +31,9 @@ export interface ProgressUpdate {
   estimatedTimeRemaining?: number;
 }
 
+/**
+ * Defines the shape of the analysis result.
+ */
 export interface AnalysisResult {
   analysisId: string;
   score: number;
@@ -40,17 +52,26 @@ export interface AnalysisResult {
   generatedAt: string;
 }
 
+/**
+ * Defines the shape of the completion data.
+ */
 export interface CompletionData {
   analysisId: string;
   result: AnalysisResult;
   processingTime: number;
 }
 
+/**
+ * Defines the shape of the error data.
+ */
 export interface ErrorData {
   error: string;
   code?: string;
 }
 
+/**
+ * Provides web socket functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -65,7 +86,7 @@ export class WebSocketService implements OnDestroy {
   private messages$ = new Subject<WebSocketMessage>();
   private destroy$ = new Subject<void>();
 
-  constructor(private toastService: ToastService) {}
+  private toastService = inject(ToastService);
 
   /**
    * 连接到WebSocket服务器
@@ -231,6 +252,9 @@ export class WebSocketService implements OnDestroy {
     return `${protocol}//${host}${port}/ws`;
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

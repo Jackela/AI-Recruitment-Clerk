@@ -49,6 +49,12 @@ export const ResumeParserErrorMessages: Record<ResumeParserErrorCode, string> = 
  * Resume Parser Service Exception
  */
 export class ResumeParserException extends EnhancedAppException {
+  /**
+   * Initializes a new instance of the Resume Parser Exception.
+   * @param code - The code.
+   * @param details - The details.
+   * @param context - The context.
+   */
   constructor(
     code: ResumeParserErrorCode,
     details?: any,
@@ -111,6 +117,12 @@ export enum ReportGeneratorErrorCode {
  * Report Generator Service Exception
  */
 export class ReportGeneratorException extends EnhancedAppException {
+  /**
+   * Initializes a new instance of the Report Generator Exception.
+   * @param code - The code.
+   * @param details - The details.
+   * @param context - The context.
+   */
   constructor(
     code: ReportGeneratorErrorCode,
     details?: any,
@@ -173,6 +185,12 @@ export enum JDExtractorErrorCode {
  * JD Extractor Service Exception
  */
 export class JDExtractorException extends EnhancedAppException {
+  /**
+   * Initializes a new instance of the JD Extractor Exception.
+   * @param code - The code.
+   * @param details - The details.
+   * @param context - The context.
+   */
   constructor(
     code: JDExtractorErrorCode,
     details?: any,
@@ -234,6 +252,12 @@ export enum ScoringEngineErrorCode {
  * Scoring Engine Service Exception
  */
 export class ScoringEngineException extends EnhancedAppException {
+  /**
+   * Initializes a new instance of the Scoring Engine Exception.
+   * @param code - The code.
+   * @param details - The details.
+   * @param context - The context.
+   */
   constructor(
     code: ScoringEngineErrorCode,
     details?: any,
@@ -296,6 +320,12 @@ export enum AppGatewayErrorCode {
  * App Gateway Service Exception
  */
 export class AppGatewayException extends EnhancedAppException {
+  /**
+   * Initializes a new instance of the App Gateway Exception.
+   * @param code - The code.
+   * @param details - The details.
+   * @param context - The context.
+   */
   constructor(
     code: AppGatewayErrorCode,
     details?: any,
@@ -362,13 +392,22 @@ export enum DatabaseErrorCode {
   TRANSACTION_FAILED = 'DB_TRANSACTION_FAILED',
   INDEX_CORRUPTION = 'DB_INDEX_CORRUPTION',
   DISK_FULL = 'DB_DISK_FULL',
-  PERFORMANCE_DEGRADATION = 'DB_PERFORMANCE_DEGRADATION'
+  PERFORMANCE_DEGRADATION = 'DB_PERFORMANCE_DEGRADATION',
+  OPERATION_FAILED = 'DB_OPERATION_FAILED'
 }
 
 /**
  * Database Exception
  */
 export class DatabaseException extends EnhancedAppException {
+  /**
+   * Initializes a new instance of the Database Exception.
+   * @param code - The code.
+   * @param operation - The operation.
+   * @param table - The table.
+   * @param details - The details.
+   * @param context - The context.
+   */
   constructor(
     code: DatabaseErrorCode,
     operation: string,
@@ -384,7 +423,8 @@ export class DatabaseException extends EnhancedAppException {
       [DatabaseErrorCode.TRANSACTION_FAILED]: 'Database transaction failed',
       [DatabaseErrorCode.INDEX_CORRUPTION]: 'Database index corruption detected',
       [DatabaseErrorCode.DISK_FULL]: 'Database disk space full',
-      [DatabaseErrorCode.PERFORMANCE_DEGRADATION]: 'Database performance degradation detected'
+      [DatabaseErrorCode.PERFORMANCE_DEGRADATION]: 'Database performance degradation detected',
+      [DatabaseErrorCode.OPERATION_FAILED]: 'Database operation failed'
     };
 
     super(
@@ -418,6 +458,13 @@ export class DatabaseException extends EnhancedAppException {
  * Error factory for creating service-specific errors
  */
 export class DomainErrorFactory {
+  /**
+   * Performs the resume parser error operation.
+   * @param code - The code.
+   * @param details - The details.
+   * @param context - The context.
+   * @returns The ResumeParserException.
+   */
   static resumeParserError(
     code: ResumeParserErrorCode,
     details?: any,
@@ -426,6 +473,13 @@ export class DomainErrorFactory {
     return new ResumeParserException(code, details, context);
   }
 
+  /**
+   * Performs the report generator error operation.
+   * @param code - The code.
+   * @param details - The details.
+   * @param context - The context.
+   * @returns The ReportGeneratorException.
+   */
   static reportGeneratorError(
     code: ReportGeneratorErrorCode,
     details?: any,
@@ -434,6 +488,13 @@ export class DomainErrorFactory {
     return new ReportGeneratorException(code, details, context);
   }
 
+  /**
+   * Performs the jd extractor error operation.
+   * @param code - The code.
+   * @param details - The details.
+   * @param context - The context.
+   * @returns The JDExtractorException.
+   */
   static jdExtractorError(
     code: JDExtractorErrorCode,
     details?: any,
@@ -442,6 +503,13 @@ export class DomainErrorFactory {
     return new JDExtractorException(code, details, context);
   }
 
+  /**
+   * Performs the scoring engine error operation.
+   * @param code - The code.
+   * @param details - The details.
+   * @param context - The context.
+   * @returns The ScoringEngineException.
+   */
   static scoringEngineError(
     code: ScoringEngineErrorCode,
     details?: any,
@@ -450,6 +518,13 @@ export class DomainErrorFactory {
     return new ScoringEngineException(code, details, context);
   }
 
+  /**
+   * Performs the app gateway error operation.
+   * @param code - The code.
+   * @param details - The details.
+   * @param context - The context.
+   * @returns The AppGatewayException.
+   */
   static appGatewayError(
     code: AppGatewayErrorCode,
     details?: any,
@@ -458,6 +533,15 @@ export class DomainErrorFactory {
     return new AppGatewayException(code, details, context);
   }
 
+  /**
+   * Performs the database error operation.
+   * @param code - The code.
+   * @param operation - The operation.
+   * @param table - The table.
+   * @param details - The details.
+   * @param context - The context.
+   * @returns The DatabaseException.
+   */
   static databaseError(
     code: DatabaseErrorCode,
     operation: string,

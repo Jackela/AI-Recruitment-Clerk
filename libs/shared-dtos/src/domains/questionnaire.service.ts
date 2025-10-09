@@ -1,12 +1,27 @@
 import { Questionnaire, RawSubmissionData, SubmissionMetadata, QuestionnaireValidationFailedEvent } from './questionnaire.dto';
 
+/**
+ * Provides questionnaire domain functionality.
+ */
 export class QuestionnaireDomainService {
+  /**
+   * Initializes a new instance of the Questionnaire Domain Service.
+   * @param repository - The repository.
+   * @param templateService - The template service.
+   * @param eventBus - The event bus.
+   */
   constructor(
     private readonly repository: IQuestionnaireRepository,
     private readonly templateService: IQuestionnaireTemplateService,
     private readonly eventBus: IDomainEventBus
   ) {}
 
+  /**
+   * Performs the submit questionnaire operation.
+   * @param rawData - The raw data.
+   * @param metadata - The metadata.
+   * @returns A promise that resolves to QuestionnaireSubmissionResult.
+   */
   async submitQuestionnaire(
     rawData: RawSubmissionData,
     metadata: SubmissionMetadata
@@ -54,6 +69,10 @@ export class QuestionnaireDomainService {
     }
   }
 
+  /**
+   * Performs the analyze submission trends operation.
+   * @returns A promise that resolves to SubmissionTrendsAnalysis.
+   */
   async analyzeSubmissionTrends(): Promise<SubmissionTrendsAnalysis> {
     const recentSubmissions = await this.repository.findRecent(30); // 最近30天
     
@@ -71,6 +90,11 @@ export class QuestionnaireDomainService {
     });
   }
 
+  /**
+   * Validates ip submission limit.
+   * @param ip - The ip.
+   * @returns A promise that resolves to IPSubmissionCheckResult.
+   */
   async validateIPSubmissionLimit(ip: string): Promise<IPSubmissionCheckResult> {
     const today = new Date();
     const todaySubmissions = await this.repository.findByIPAndDate(ip, today);
@@ -173,6 +197,9 @@ export class QuestionnaireDomainService {
 }
 
 // 结果类
+/**
+ * Represents the questionnaire submission result.
+ */
 export class QuestionnaireSubmissionResult {
   private constructor(
     public readonly success: boolean,
@@ -185,6 +212,11 @@ export class QuestionnaireSubmissionResult {
     public readonly errors?: string[]
   ) {}
   
+  /**
+   * Performs the success operation.
+   * @param data - The data.
+   * @returns The QuestionnaireSubmissionResult.
+   */
   static success(data: {
     questionnaireId: string;
     qualityScore: number;
@@ -194,12 +226,29 @@ export class QuestionnaireSubmissionResult {
     return new QuestionnaireSubmissionResult(true, data);
   }
   
+  /**
+   * Performs the failed operation.
+   * @param errors - The errors.
+   * @returns The QuestionnaireSubmissionResult.
+   */
   static failed(errors: string[]): QuestionnaireSubmissionResult {
     return new QuestionnaireSubmissionResult(false, undefined, errors);
   }
 }
 
+/**
+ * Represents the submission trends analysis.
+ */
 export class SubmissionTrendsAnalysis {
+  /**
+   * Initializes a new instance of the Submission Trends Analysis.
+   * @param totalSubmissions - The total submissions.
+   * @param averageQualityScore - The average quality score.
+   * @param bonusEligibilityRate - The bonus eligibility rate.
+   * @param topPainPoints - The top pain points.
+   * @param averageWillingnessToPay - The average willingness to pay.
+   * @param userSegmentation - The user segmentation.
+   */
   constructor(
     public readonly totalSubmissions: number,
     public readonly averageQualityScore: number,
@@ -209,6 +258,11 @@ export class SubmissionTrendsAnalysis {
     public readonly userSegmentation: UserSegmentation
   ) {}
   
+  /**
+   * Creates the entity.
+   * @param data - The data.
+   * @returns The SubmissionTrendsAnalysis.
+   */
   static create(data: {
     totalSubmissions: number;
     averageQualityScore: number;
@@ -227,6 +281,10 @@ export class SubmissionTrendsAnalysis {
     );
   }
   
+  /**
+   * Performs the empty operation.
+   * @returns The SubmissionTrendsAnalysis.
+   */
   static empty(): SubmissionTrendsAnalysis {
     return new SubmissionTrendsAnalysis(
       0, 0, 0, [], 0,
@@ -235,6 +293,9 @@ export class SubmissionTrendsAnalysis {
   }
 }
 
+/**
+ * Represents the ip submission check result.
+ */
 export class IPSubmissionCheckResult {
   private constructor(
     public readonly allowed: boolean,
@@ -242,16 +303,32 @@ export class IPSubmissionCheckResult {
     public readonly reason?: string
   ) {}
   
+  /**
+   * Performs the allowed operation.
+   * @returns The IPSubmissionCheckResult.
+   */
   static allowed(): IPSubmissionCheckResult {
     return new IPSubmissionCheckResult(true, false);
   }
   
+  /**
+   * Performs the blocked operation.
+   * @param reason - The reason.
+   * @returns The IPSubmissionCheckResult.
+   */
   static blocked(reason: string): IPSubmissionCheckResult {
     return new IPSubmissionCheckResult(false, true, reason);
   }
 }
 
+/**
+ * Represents the user segmentation.
+ */
 export class UserSegmentation {
+  /**
+   * Initializes a new instance of the User Segmentation.
+   * @param data - The data.
+   */
   constructor(
     public readonly data: {
       byRole: { [key: string]: number };
@@ -262,6 +339,9 @@ export class UserSegmentation {
 }
 
 // 接口定义
+/**
+ * Defines the shape of the i questionnaire repository.
+ */
 export interface IQuestionnaireRepository {
   save(questionnaire: Questionnaire): Promise<void>;
   findById(id: string): Promise<Questionnaire | null>;
@@ -269,10 +349,16 @@ export interface IQuestionnaireRepository {
   findRecent(days: number): Promise<Questionnaire[]>;
 }
 
+/**
+ * Defines the shape of the i questionnaire template service.
+ */
 export interface IQuestionnaireTemplateService {
   getCurrentTemplate(): Promise<{ id: string; version: string }>;
 }
 
+/**
+ * Defines the shape of the i domain event bus.
+ */
 export interface IDomainEventBus {
   publish(event: any): Promise<void>;
 }

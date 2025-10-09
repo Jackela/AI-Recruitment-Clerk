@@ -8,6 +8,9 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 
+/**
+ * Defines the shape of the secret validation result.
+ */
 export interface SecretValidationResult {
   isValid: boolean;
   issues: string[];
@@ -15,6 +18,9 @@ export interface SecretValidationResult {
   recommendations: string[];
 }
 
+/**
+ * Provides secrets manager functionality.
+ */
 @Injectable()
 export class SecretsManagerService implements OnModuleInit {
   private readonly logger = new Logger(SecretsManagerService.name);
@@ -23,8 +29,16 @@ export class SecretsManagerService implements OnModuleInit {
     { value: string; lastRotated: Date }
   >();
 
+  /**
+   * Initializes a new instance of the Secrets Manager Service.
+   * @param configService - The config service.
+   */
   constructor(private configService: ConfigService) {}
 
+  /**
+   * Performs the on module init operation.
+   * @returns The result of the operation.
+   */
   async onModuleInit() {
     this.logger.log('🔑 初始化密钥管理服务...');
 

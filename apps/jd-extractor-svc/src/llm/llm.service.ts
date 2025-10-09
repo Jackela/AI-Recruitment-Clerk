@@ -5,10 +5,18 @@ import {
   LlmExtractionResponse,
 } from '@ai-recruitment-clerk/job-management-domain';
 
+/**
+ * Provides llm functionality.
+ */
 @Injectable()
 export class LlmService {
   private readonly logger = new Logger(LlmService.name);
 
+  /**
+   * Performs the extract job requirements operation.
+   * @param jdText - The jd text.
+   * @returns A promise that resolves to JdDTO.
+   */
   async extractJobRequirements(jdText: string): Promise<JdDTO> {
     this.logger.log('Extracting job requirements from JD text');
 
@@ -33,6 +41,11 @@ export class LlmService {
     return extractedData;
   }
 
+  /**
+   * Performs the extract structured data operation.
+   * @param request - The request.
+   * @returns A promise that resolves to LlmExtractionResponse.
+   */
   async extractStructuredData(
     request: LlmExtractionRequest,
   ): Promise<LlmExtractionResponse> {
@@ -66,6 +79,11 @@ export class LlmService {
     }
   }
 
+  /**
+   * Validates extracted data.
+   * @param data - The data.
+   * @returns A promise that resolves to boolean value.
+   */
   async validateExtractedData(data: JdDTO): Promise<boolean> {
     // Basic validation logic
     if (!data.requirements || !data.responsibilities) {

@@ -1,8 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+/**
+ * Represents the dashboard card component.
+ */
 @Component({
-  selector: 'app-dashboard-card',
+  selector: 'arc-dashboard-card',
   standalone: true,
   imports: [CommonModule],
   template: `

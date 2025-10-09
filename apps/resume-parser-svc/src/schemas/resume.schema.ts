@@ -3,6 +3,9 @@ import { Document } from 'mongoose';
 
 export type ResumeDocument = Resume & Document;
 
+/**
+ * Represents the contact info.
+ */
 @Schema()
 export class ContactInfo {
   @Prop({ type: String, default: null })
@@ -15,6 +18,9 @@ export class ContactInfo {
   phone!: string | null;
 }
 
+/**
+ * Represents the work experience.
+ */
 @Schema()
 export class WorkExperience {
   @Prop({ required: true })
@@ -33,6 +39,9 @@ export class WorkExperience {
   summary!: string;
 }
 
+/**
+ * Represents the education.
+ */
 @Schema()
 export class Education {
   @Prop({ required: true })
@@ -45,6 +54,9 @@ export class Education {
   major!: string | null;
 }
 
+/**
+ * Represents the resume.
+ */
 @Schema({
   timestamps: true,
   collection: 'resumes',

@@ -1,7 +1,29 @@
-import { ValueObject } from '../base/value-object.js';
 import { DomainEvent } from '../domain-events/base/domain-event.js';
 
+import {
+  IncentiveId,
+  IncentiveRecipient,
+  ContactInfo,
+  IncentiveReward,
+  IncentiveTrigger,
+  IncentiveValidationResult,
+  PaymentResult,
+  IncentiveSummary
+} from '../value-objects/index.js';
+
+import {
+  IncentiveCreatedEvent,
+  IncentiveValidatedEvent,
+  IncentiveValidationFailedEvent,
+  IncentiveApprovedEvent,
+  IncentiveRejectedEvent,
+  IncentivePaidEvent,
+  PaymentFailedEvent
+} from '../domain-events/index.js';
 // Incentive聚合根 - 管理红包激励系统的核心业务逻辑
+/**
+ * Represents the incentive.
+ */
 export class Incentive {
   private uncommittedEvents: DomainEvent[] = [];
 
@@ -17,6 +39,14 @@ export class Incentive {
   ) {}
 
   // 工厂方法 - 创建问卷完成激励
+  /**
+   * Creates questionnaire incentive.
+   * @param ip - The ip.
+   * @param questionnaireId - The questionnaire id.
+   * @param qualityScore - The quality score.
+   * @param contactInfo - The contact info.
+   * @returns The Incentive.
+   */
   static createQuestionnaireIncentive(
     ip: string,
     questionnaireId: string,
@@ -55,6 +85,13 @@ export class Incentive {
   }
 
   // 工厂方法 - 创建推荐激励
+  /**
+   * Creates referral incentive.
+   * @param referrerIP - The referrer ip.
+   * @param referredIP - The referred ip.
+   * @param contactInfo - The contact info.
+   * @returns The Incentive.
+   */
   static createReferralIncentive(
     referrerIP: string,
     referredIP: string,
@@ -87,6 +124,11 @@ export class Incentive {
   }
 
   // 工厂方法 - 从持久化数据恢复
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The Incentive.
+   */
   static restore(data: IncentiveData): Incentive {
     return new Incentive(
       new IncentiveId({ value: data.id }),
@@ -101,6 +143,10 @@ export class Incentive {
   }
 
   // 核心业务方法 - 验证激励资格
+  /**
+   * Validates eligibility.
+   * @returns The IncentiveValidationResult.
+   */
   validateEligibility(): IncentiveValidationResult {
     const validationErrors: string[] = [];
 
@@ -147,6 +193,10 @@ export class Incentive {
   }
 
   // 批准处理
+  /**
+   * Performs the approve for processing operation.
+   * @param reason - The reason.
+   */
   approveForProcessing(reason: string): void {
     if (this.status !== IncentiveStatus.PENDING_VALIDATION) {
       throw new Error(`Cannot approve incentive in ${this.status} status`);
@@ -165,6 +215,10 @@ export class Incentive {
   }
 
   // 拒绝激励
+  /**
+   * Performs the reject operation.
+   * @param reason - The reason.
+   */
   reject(reason: string): void {
     if (this.status === IncentiveStatus.PAID) {
       throw new Error('Cannot reject already paid incentive');
@@ -182,6 +236,12 @@ export class Incentive {
   }
 
   // 执行支付
+  /**
+   * Performs the execute payment operation.
+   * @param paymentMethod - The payment method.
+   * @param transactionId - The transaction id.
+   * @returns The PaymentResult.
+   */
   executePayment(paymentMethod: PaymentMethod, transactionId: string): PaymentResult {
     if (this.status !== IncentiveStatus.APPROVED) {
       return PaymentResult.failed(`Cannot pay incentive in ${this.status} status`);
@@ -241,6 +301,10 @@ export class Incentive {
   }
 
   // 查询方法
+  /**
+   * Retrieves incentive summary.
+   * @returns The IncentiveSummary.
+   */
   getIncentiveSummary(): IncentiveSummary {
     return new IncentiveSummary({
       id: this.id.getValue(),
@@ -264,10 +328,17 @@ export class Incentive {
   }
 
   // 领域事件管理
+  /**
+   * Retrieves uncommitted events.
+   * @returns The an array of DomainEvent.
+   */
   getUncommittedEvents(): DomainEvent[] {
     return [...this.uncommittedEvents];
   }
 
+  /**
+   * Performs the mark events as committed operation.
+   */
   markEventsAsCommitted(): void {
     this.uncommittedEvents = [];
   }
@@ -277,28 +348,51 @@ export class Incentive {
   }
 
   // Getters
+  /**
+   * Retrieves id.
+   * @returns The IncentiveId.
+   */
   getId(): IncentiveId {
     return this.id;
   }
 
+  /**
+   * Retrieves status.
+   * @returns The IncentiveStatus.
+   */
   getStatus(): IncentiveStatus {
     return this.status;
   }
 
+  /**
+   * Retrieves recipient ip.
+   * @returns The string value.
+   */
   getRecipientIP(): string {
     return this.recipient.getIP();
   }
 
+  /**
+   * Retrieves reward amount.
+   * @returns The number value.
+   */
   getRewardAmount(): number {
     return this.reward.getAmount();
   }
 
+  /**
+   * Retrieves created at.
+   * @returns The Date.
+   */
   getCreatedAt(): Date {
     return this.createdAt;
   }
 }
 
 // 接口定义
+/**
+ * Defines the shape of the incentive data.
+ */
 export interface IncentiveData {
   id: string;
   recipient: any;
@@ -349,24 +443,3 @@ export enum PaymentMethod {
   MANUAL = 'manual'
 }
 
-// Import domain events and value objects
-import {
-  IncentiveCreatedEvent,
-  IncentiveValidatedEvent,
-  IncentiveValidationFailedEvent,
-  IncentiveApprovedEvent,
-  IncentiveRejectedEvent,
-  IncentivePaidEvent,
-  PaymentFailedEvent
-} from '../domain-events/index.js';
-
-import {
-  IncentiveId,
-  IncentiveRecipient,
-  ContactInfo,
-  IncentiveReward,
-  IncentiveTrigger,
-  IncentiveValidationResult,
-  PaymentResult,
-  IncentiveSummary
-} from '../value-objects/index.js';

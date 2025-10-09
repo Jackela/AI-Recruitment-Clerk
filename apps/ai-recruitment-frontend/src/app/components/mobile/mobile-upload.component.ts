@@ -12,6 +12,9 @@ import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 // import { takeUntil } from 'rxjs'; // Reserved for future use
 
+/**
+ * Defines the shape of the upload file.
+ */
 export interface UploadFile {
   id: string;
   file: File;
@@ -24,8 +27,11 @@ export interface UploadFile {
   error?: string;
 }
 
+/**
+ * Represents the mobile upload component.
+ */
 @Component({
-  selector: 'app-mobile-upload',
+  selector: 'arc-mobile-upload',
   standalone: true,
   imports: [CommonModule],
   template: `
@@ -713,6 +719,10 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
   isDragOver = false;
   private destroy$ = new Subject<void>();
 
+  /**
+   * Performs the accepted mime types operation.
+   * @returns The string value.
+   */
   get acceptedMimeTypes(): string {
     const mimeMap: { [key: string]: string[] } = {
       PDF: ['application/pdf'],
@@ -732,14 +742,26 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
       .join(',');
   }
 
+  /**
+   * Performs the total size operation.
+   * @returns The number value.
+   */
   get totalSize(): number {
     return this.files.reduce((total, file) => total + file.size, 0);
   }
 
+  /**
+   * Performs the has uploading operation.
+   * @returns The boolean value.
+   */
   get hasUploading(): boolean {
     return this.files.some((file) => file.status === 'uploading');
   }
 
+  /**
+   * Performs the can submit operation.
+   * @returns The boolean value.
+   */
   get canSubmit(): boolean {
     return (
       this.files.length > 0 &&
@@ -749,10 +771,18 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     );
   }
 
+  /**
+   * Performs the can clear all operation.
+   * @returns The boolean value.
+   */
   get canClearAll(): boolean {
     return this.files.length > 0 && !this.hasUploading;
   }
 
+  /**
+   * Performs the overall progress operation.
+   * @returns The number value.
+   */
   get overallProgress(): number {
     if (this.files.length === 0) return 0;
 
@@ -765,12 +795,20 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     return Math.round(totalProgress / this.files.length);
   }
 
+  /**
+   * Performs the ng on init operation.
+   * @returns The result of the operation.
+   */
   ngOnInit() {
     // Handle drag events on document to prevent default browser behavior
     document.addEventListener('dragover', this.preventDefault);
     document.addEventListener('drop', this.preventDefault);
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   * @returns The result of the operation.
+   */
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
@@ -782,12 +820,22 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     e.preventDefault();
   };
 
+  /**
+   * Performs the on drag over operation.
+   * @param event - The event.
+   * @returns The result of the operation.
+   */
   onDragOver(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
     this.isDragOver = true;
   }
 
+  /**
+   * Performs the on drag leave operation.
+   * @param event - The event.
+   * @returns The result of the operation.
+   */
   onDragLeave(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
@@ -802,6 +850,11 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the on drop operation.
+   * @param event - The event.
+   * @returns The result of the operation.
+   */
   onDrop(event: DragEvent) {
     event.preventDefault();
     event.stopPropagation();
@@ -813,6 +866,11 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     this.processFiles(files);
   }
 
+  /**
+   * Performs the trigger file select operation.
+   * @param event - The event.
+   * @returns The result of the operation.
+   */
   triggerFileSelect(event?: Event) {
     if (event) {
       event.stopPropagation();
@@ -822,6 +880,11 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the open camera operation.
+   * @param event - The event.
+   * @returns The result of the operation.
+   */
   openCamera(event: Event) {
     event.stopPropagation();
     if (!this.disabled) {
@@ -829,6 +892,11 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the on file select operation.
+   * @param event - The event.
+   * @returns The result of the operation.
+   */
   onFileSelect(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files) {
@@ -838,6 +906,11 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the on camera capture operation.
+   * @param event - The event.
+   * @returns The result of the operation.
+   */
   onCameraCapture(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files) {
@@ -919,6 +992,11 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }
 
+  /**
+   * Removes file.
+   * @param file - The file.
+   * @returns The result of the operation.
+   */
   removeFile(file: UploadFile) {
     const index = this.files.findIndex((f) => f.id === file.id);
     if (index !== -1) {
@@ -927,12 +1005,21 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the clear all operation.
+   * @returns The result of the operation.
+   */
   clearAll() {
     if (this.canClearAll) {
       this.files = [];
     }
   }
 
+  /**
+   * Performs the retry upload operation.
+   * @param file - The file.
+   * @returns The result of the operation.
+   */
   retryUpload(file: UploadFile) {
     file.status = 'pending';
     file.progress = 0;
@@ -940,6 +1027,10 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     this.uploadFiles([file]);
   }
 
+  /**
+   * Performs the submit upload operation.
+   * @returns The result of the operation.
+   */
   submitUpload() {
     const pendingFiles = this.files.filter(
       (f) => f.status === 'pending' || f.status === 'error',
@@ -997,6 +1088,11 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the format file size operation.
+   * @param bytes - The bytes.
+   * @returns The string value.
+   */
   formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 B';
 
@@ -1007,6 +1103,12 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   }
 
+  /**
+   * Performs the track by file id operation.
+   * @param _index - The index.
+   * @param file - The file.
+   * @returns The string value.
+   */
   trackByFileId(_index: number, file: UploadFile): string {
     return file.id;
   }

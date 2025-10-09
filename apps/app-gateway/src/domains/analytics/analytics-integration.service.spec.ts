@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AnalyticsIntegrationService } from './analytics-integration.service';
 import { AnalyticsEventRepository } from './analytics-event.repository';
-import { NatsClient } from '../../nats/nats.client';
+import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { Logger } from '@nestjs/common';
@@ -9,7 +9,7 @@ import { Logger } from '@nestjs/common';
 describe('AnalyticsIntegrationService', () => {
   let service: AnalyticsIntegrationService;
   let repository: jest.Mocked<AnalyticsEventRepository>;
-  let natsClient: jest.Mocked<NatsClient>;
+  let natsClient: jest.Mocked<AppGatewayNatsService>;
   let cacheManager: jest.Mocked<Cache>;
 
   beforeEach(async () => {

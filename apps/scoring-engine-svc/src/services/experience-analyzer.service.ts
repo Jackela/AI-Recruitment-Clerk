@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GeminiClient } from '@ai-recruitment-clerk/ai-services-shared';
-import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
+import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
 interface AIExperienceAnalysis {
   relevantYears: number;
@@ -24,6 +24,9 @@ interface AIExperienceAnalysis {
   };
 }
 
+/**
+ * Defines the shape of the experience analysis.
+ */
 export interface ExperienceAnalysis {
   totalYears: number;
   relevantYears: number;
@@ -56,6 +59,9 @@ export interface ExperienceAnalysis {
   };
 }
 
+/**
+ * Defines the shape of the weighting factors.
+ */
 export interface WeightingFactors {
   recencyWeight: number;
   relevanceWeight: number;
@@ -64,6 +70,9 @@ export interface WeightingFactors {
   industryPenalty: number;
 }
 
+/**
+ * Defines the shape of the experience score.
+ */
 export interface ExperienceScore {
   overallScore: number;
   analysis: ExperienceAnalysis;
@@ -79,6 +88,9 @@ export interface ExperienceScore {
   };
 }
 
+/**
+ * Defines the shape of the job requirements.
+ */
 export interface JobRequirements {
   experienceYears: { min: number; max: number };
   requiredIndustries?: string[];
@@ -89,10 +101,17 @@ export interface JobRequirements {
   seniority: 'junior' | 'mid' | 'senior' | 'lead' | 'executive';
 }
 
+/**
+ * Provides experience analyzer functionality.
+ */
 @Injectable()
 export class ExperienceAnalyzerService {
   private readonly logger = new Logger(ExperienceAnalyzerService.name);
 
+  /**
+   * Initializes a new instance of the Experience Analyzer Service.
+   * @param geminiClient - The gemini client.
+   */
   constructor(private readonly geminiClient: GeminiClient) {}
 
   private getNow(): Date {

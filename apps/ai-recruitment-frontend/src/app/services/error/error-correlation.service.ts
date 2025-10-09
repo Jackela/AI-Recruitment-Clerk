@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 
+/**
+ * Defines the shape of the error correlation context.
+ */
 export interface ErrorCorrelationContext {
   traceId: string;
   spanId: string;
@@ -13,6 +16,9 @@ export interface ErrorCorrelationContext {
   referrer?: string;
 }
 
+/**
+ * Defines the shape of the structured error.
+ */
 export interface StructuredError {
   correlationId: string;
   errorCode: string;
@@ -26,6 +32,9 @@ export interface StructuredError {
   recoverable: boolean;
 }
 
+/**
+ * Provides error correlation functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -35,6 +44,9 @@ export class ErrorCorrelationService {
   private readonly errorHistory: StructuredError[] = [];
   private readonly maxHistorySize = 50;
 
+  /**
+   * Initializes a new instance of the Error Correlation Service.
+   */
   constructor() {
     // Generate new context on page navigation
     this.setupNavigationListener();
@@ -421,14 +433,16 @@ export class ErrorCorrelationService {
     return firstPaint ? Math.round(firstPaint.startTime) : undefined;
   }
 
-  private getMemoryUsage(): any {
-    return (window as any).performance?.memory
+  private getMemoryUsage(): {usedJSHeapSize?: number; totalJSHeapSize?: number; jsHeapSizeLimit?: number} | null {
+    const performanceWithMemory = (window as any)?.performance?.memory;
+    
+    return performanceWithMemory
       ? {
-          usedJSHeapSize: (window as any).performance.memory.usedJSHeapSize,
-          totalJSHeapSize: (window as any).performance.memory.totalJSHeapSize,
-          jsHeapSizeLimit: (window as any).performance.memory.jsHeapSizeLimit,
+          usedJSHeapSize: performanceWithMemory.usedJSHeapSize || 0,
+          totalJSHeapSize: performanceWithMemory.totalJSHeapSize || 0,
+          jsHeapSizeLimit: performanceWithMemory.jsHeapSizeLimit || 0,
         }
-      : undefined;
+      : null;
   }
 
   private groupBy<T extends Record<string, any>>(

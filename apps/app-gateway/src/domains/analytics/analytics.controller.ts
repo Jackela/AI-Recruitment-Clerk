@@ -38,13 +38,26 @@ interface AuthenticatedRequest extends ExpressRequest {
   user: UserDto;
 }
 
+/**
+ * Exposes endpoints for analytics.
+ */
 @ApiTags('analytics-reporting')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('analytics')
 export class AnalyticsController {
+  /**
+   * Initializes a new instance of the Analytics Controller.
+   * @param analyticsService - The analytics service.
+   */
   constructor(private readonly analyticsService: AnalyticsIntegrationService) {}
 
+  /**
+   * Performs the track event operation.
+   * @param req - The req.
+   * @param eventData - The event data.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '记录用户行为事件',
     description: '记录用户在系统中的各种行为事件，用于用户体验分析和系统优化',
@@ -118,6 +131,12 @@ export class AnalyticsController {
     }
   }
 
+  /**
+   * Performs the record performance metric operation.
+   * @param req - The req.
+   * @param metricData - The metric data.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '记录系统性能指标',
     description: '记录系统关键操作的性能数据，包括响应时间、错误率、吞吐量等',
@@ -173,6 +192,12 @@ export class AnalyticsController {
     }
   }
 
+  /**
+   * Performs the record business metric operation.
+   * @param req - The req.
+   * @param metricData - The metric data.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '记录业务指标',
     description: '记录关键业务KPI，如用户转化率、留存率、收入指标等',
@@ -227,6 +252,13 @@ export class AnalyticsController {
     }
   }
 
+  /**
+   * Retrieves dashboard.
+   * @param req - The req.
+   * @param timeRange - The time range.
+   * @param metrics - The metrics.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取分析仪表板数据',
     description: '获取组织的核心分析数据仪表板，包括关键指标和趋势',
@@ -279,6 +311,15 @@ export class AnalyticsController {
     }
   }
 
+  /**
+   * Retrieves user behavior analysis.
+   * @param req - The req.
+   * @param userId - The user id.
+   * @param startDate - The start date.
+   * @param endDate - The end date.
+   * @param segmentBy - The segment by.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取用户行为分析',
     description: '获取指定用户或用户群体的行为分析数据和模式',
@@ -326,6 +367,15 @@ export class AnalyticsController {
     }
   }
 
+  /**
+   * Retrieves usage statistics.
+   * @param req - The req.
+   * @param module - The module.
+   * @param startDate - The start date.
+   * @param endDate - The end date.
+   * @param granularity - The granularity.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取系统使用统计',
     description: '获取系统各模块的使用统计数据，包括活跃用户、功能使用频率等',
@@ -378,6 +428,12 @@ export class AnalyticsController {
     }
   }
 
+  /**
+   * Generates report.
+   * @param req - The req.
+   * @param reportRequest - The report request.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '生成分析报告',
     description: '生成指定类型的分析报告，支持多种格式输出',
@@ -457,6 +513,15 @@ export class AnalyticsController {
     }
   }
 
+  /**
+   * Retrieves reports.
+   * @param req - The req.
+   * @param page - The page.
+   * @param limit - The limit.
+   * @param status - The status.
+   * @param reportType - The report type.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取报告状态和历史',
     description: '获取报告生成状态和历史记录',
@@ -515,6 +580,12 @@ export class AnalyticsController {
     }
   }
 
+  /**
+   * Retrieves report.
+   * @param req - The req.
+   * @param reportId - The report id.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取指定报告详情',
     description: '获取指定报告的详细信息和下载链接',
@@ -556,6 +627,13 @@ export class AnalyticsController {
     }
   }
 
+  /**
+   * Removes report.
+   * @param req - The req.
+   * @param reportId - The report id.
+   * @param deleteRequest - The delete request.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '删除报告',
     description: '删除指定的分析报告及其关联文件',
@@ -604,6 +682,12 @@ export class AnalyticsController {
     }
   }
 
+  /**
+   * Retrieves realtime data.
+   * @param req - The req.
+   * @param metrics - The metrics.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取实时分析数据',
     description: '获取实时系统指标和用户活动数据',
@@ -642,6 +726,12 @@ export class AnalyticsController {
     }
   }
 
+  /**
+   * Performs the configure data retention operation.
+   * @param req - The req.
+   * @param retentionConfig - The retention config.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '配置分析数据保留策略',
     description: '配置分析数据的保留时间和清理策略',
@@ -687,6 +777,13 @@ export class AnalyticsController {
     }
   }
 
+  /**
+   * Performs the export analytics data operation.
+   * @param req - The req.
+   * @param format - The format.
+   * @param exportRequest - The export request.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '导出分析数据',
     description: '导出指定时间范围的分析数据为各种格式',
@@ -751,6 +848,10 @@ export class AnalyticsController {
     }
   }
 
+  /**
+   * Performs the health check operation.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '服务健康检查',
     description: '检查分析服务的健康状态和系统指标',

@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -10,6 +9,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+// Standardized Error Handling
+import { 
+  HandleErrors, 
+  ErrorUtils 
+} from '@ai-recruitment-clerk/shared-dtos';
 
 type Questionnaire = {
   id: string;
@@ -23,8 +27,16 @@ function id(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
+/**
+ * Exposes endpoints for questionnaires.
+ */
 @Controller()
 export class QuestionnairesController {
+  /**
+   * Creates the entity.
+   * @param _body - The body.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Post('questionnaires')
   @HttpCode(HttpStatus.CREATED)
@@ -35,6 +47,11 @@ export class QuestionnairesController {
   }
 
   // singular create for performance tests
+  /**
+   * Creates singular.
+   * @param _body - The body.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Post('questionnaire')
   @HttpCode(HttpStatus.CREATED)
@@ -44,12 +61,31 @@ export class QuestionnairesController {
     return { questionnaireId: qid };
   }
 
+  /**
+   * Performs the publish operation.
+   * @param qid - The qid.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Post('questionnaires/:id/publish')
   @HttpCode(HttpStatus.OK)
+  @HandleErrors({
+    defaultErrorType: 'NOT_FOUND_ERROR',
+    defaultErrorCode: 'QUESTIONNAIRE_NOT_FOUND',
+    defaultSeverity: 'low',
+    businessImpact: 'low',
+    userImpact: 'minimal',
+    recoveryStrategies: [
+      'Check the questionnaire ID and try again',
+      'Verify the questionnaire exists',
+      'Create a new questionnaire if needed'
+    ]
+  })
   publish(@Param('id') qid: string) {
     const q = questionnaires.get(qid);
-    if (!q) throw new BadRequestException({ statusCode: 404, message: 'Not Found' });
+    if (!q) {
+      throw ErrorUtils.createNotFoundError('Questionnaire', qid, { operation: 'publish' });
+    }
     q.published = true;
     questionnaires.set(qid, q);
     return {
@@ -58,6 +94,11 @@ export class QuestionnairesController {
     };
   }
 
+  /**
+   * Performs the publish singular operation.
+   * @param qid - The qid.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Post('questionnaire/:id/publish')
   @HttpCode(HttpStatus.OK)
@@ -65,6 +106,12 @@ export class QuestionnairesController {
     return this.publish(qid);
   }
 
+  /**
+   * Performs the submit singular operation.
+   * @param qid - The qid.
+   * @param body - The body.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Post('questionnaire/:id/submit')
   @HttpCode(HttpStatus.CREATED)
@@ -72,6 +119,12 @@ export class QuestionnairesController {
     return this.submitInternal(qid, body);
   }
 
+  /**
+   * Performs the submit plural operation.
+   * @param qid - The qid.
+   * @param body - The body.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Post('questionnaires/:id/submit')
   @HttpCode(HttpStatus.CREATED)
@@ -79,12 +132,26 @@ export class QuestionnairesController {
     return this.submitInternal(qid, body);
   }
 
+  /**
+   * Performs the analytics operation.
+   * @param qid - The qid.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Get('questionnaires/:id/analytics')
   @HttpCode(HttpStatus.OK)
+  @HandleErrors({
+    defaultErrorType: 'NOT_FOUND_ERROR',
+    defaultErrorCode: 'QUESTIONNAIRE_NOT_FOUND',
+    defaultSeverity: 'low',
+    businessImpact: 'low',
+    userImpact: 'minimal'
+  })
   analytics(@Param('id') qid: string) {
     const q = questionnaires.get(qid);
-    if (!q) throw new BadRequestException({ statusCode: 404, message: 'Not Found' });
+    if (!q) {
+      throw ErrorUtils.createNotFoundError('Questionnaire', qid, { operation: 'analytics' });
+    }
     const count = q.submissions.length || 1;
     const avg = q.submissions.reduce((s, a) => s + a.qualityScore, 0) / count || 75;
     return {
@@ -94,6 +161,10 @@ export class QuestionnairesController {
     };
   }
 
+  /**
+   * Performs the export data operation.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Get('questionnaires/export')
   @HttpCode(HttpStatus.OK)
@@ -104,6 +175,10 @@ export class QuestionnairesController {
     };
   }
 
+  /**
+   * Performs the list operation.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Get('questionnaire')
   @HttpCode(HttpStatus.OK)
@@ -118,8 +193,16 @@ export class QuestionnairesController {
 
   private submitInternal(qid: string, _body: any) {
     const q = questionnaires.get(qid);
-    if (!q) throw new BadRequestException({ statusCode: 404, message: 'Not Found' });
-    if (!q.published) throw new BadRequestException({ statusCode: 404, message: 'Not Found' });
+    if (!q) {
+      throw ErrorUtils.createNotFoundError('Questionnaire', qid, { operation: 'submit' });
+    }
+    if (!q.published) {
+      throw ErrorUtils.createValidationError(
+        'Questionnaire is not published and cannot accept submissions',
+        { questionnaireId: qid, published: q.published },
+        'published'
+      );
+    }
     const sid = id('sub');
     const qualityScore = 80;
     q.submissions.push({ id: sid, qualityScore });

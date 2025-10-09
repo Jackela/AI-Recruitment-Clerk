@@ -4,7 +4,7 @@
  * Minimal test to verify Firefox can launch and connect to dev server
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 test.describe('Simple Firefox Test', () => {
   test('Firefox basic connection test', async ({ page, browserName }) => {

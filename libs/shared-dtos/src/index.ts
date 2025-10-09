@@ -51,6 +51,15 @@ export * from './errors/structured-logging';
 export * from './errors/global-exception.filter';
 export * from './errors/error-interceptors';
 
+// Error Handling Infrastructure
+export * from './interceptors/global-error.interceptor';
+export * from './interceptors/global-exception.filter';
+export * from './interceptors/error-handling.module';
+
+// Error Handling Decorators and Utilities
+export * from './decorators/error-handling.decorators';
+export * from './utils/error-handling.utilities';
+
 // Design by Contract
 export * from './contracts/dbc.decorators';
 

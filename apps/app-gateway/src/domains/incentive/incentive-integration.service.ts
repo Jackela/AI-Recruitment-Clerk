@@ -1,5 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 
+/**
+ * Provides incentive integration functionality.
+ */
 @Injectable()
 export class IncentiveIntegrationService {
   private readonly logger = new Logger(IncentiveIntegrationService.name);

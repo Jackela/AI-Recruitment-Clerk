@@ -211,9 +211,14 @@ export const I18N_TEXTS = {
 export type I18nTexts = typeof I18N_TEXTS;
 
 // 文本获取工具函数
+/**
+ * Retrieves text.
+ * @param path - The path.
+ * @returns The string value.
+ */
 export function getText(path: string): string {
   const keys = path.split('.');
-  let value: any = I18N_TEXTS;
+  let value: unknown = I18N_TEXTS;
 
   for (const key of keys) {
     if (value && typeof value === 'object' && key in value) {
@@ -228,6 +233,12 @@ export function getText(path: string): string {
 }
 
 // 带参数的文本插值
+/**
+ * Retrieves text with params.
+ * @param path - The path.
+ * @param params - The params.
+ * @returns The string value.
+ */
 export function getTextWithParams(
   path: string,
   params: Record<string, any>,

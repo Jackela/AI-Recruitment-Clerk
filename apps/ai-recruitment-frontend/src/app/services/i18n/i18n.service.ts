@@ -6,10 +6,16 @@ import { ToastService } from '../toast.service';
 
 export type Language = 'zh-CN' | 'en-US' | 'zh-TW' | 'ja-JP' | 'ko-KR';
 
+/**
+ * Defines the shape of the translation strings.
+ */
 export interface TranslationStrings {
   [key: string]: string | TranslationStrings;
 }
 
+/**
+ * Defines the shape of the language config.
+ */
 export interface LanguageConfig {
   code: Language;
   name: string;
@@ -24,6 +30,9 @@ export interface LanguageConfig {
   };
 }
 
+/**
+ * Provides i18n functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -108,6 +117,11 @@ export class I18nService {
   // Translation cache
   private translationCache = new Map<Language, TranslationStrings>();
 
+  /**
+   * Initializes a new instance of the I18n Service.
+   * @param http - The http.
+   * @param toastService - The toast service.
+   */
   constructor(
     private http: HttpClient,
     private toastService: ToastService,
@@ -226,6 +240,10 @@ export class I18nService {
 
   // Public API
 
+  /**
+   * Sets language.
+   * @param language - The language.
+   */
   setLanguage(language: Language): void {
     if (!this.languages[language]) {
       console.error(`Unsupported language: ${language}`);
@@ -240,18 +258,32 @@ export class I18nService {
     this.toastService.success(`语言已切换到${config.nativeName}`);
   }
 
+  /**
+   * Retrieves available languages.
+   * @returns The an array of LanguageConfig.
+   */
   getAvailableLanguages(): LanguageConfig[] {
     return Object.values(this.languages);
   }
 
+  /**
+   * Retrieves current language config.
+   * @returns The LanguageConfig.
+   */
   getCurrentLanguageConfig(): LanguageConfig {
     return this.languages[this.currentLanguage()];
   }
 
+  /**
+   * Performs the translate operation.
+   * @param key - The key.
+   * @param params - The params.
+   * @returns The string value.
+   */
   translate(key: string, params?: Record<string, any>): string {
     const translations = this.translations.value;
     const keys = key.split('.');
-    let value: any = translations;
+    let value: unknown = translations;
 
     for (const k of keys) {
       value = value?.[k];
@@ -266,7 +298,7 @@ export class I18nService {
     // Replace parameters
     if (params) {
       Object.entries(params).forEach(([param, val]) => {
-        value = value.replace(new RegExp(`{{${param}}}`, 'g'), String(val));
+        value = (value as string).replace(new RegExp(`{{${param}}}`, 'g'), String(val));
       });
     }
 
@@ -274,12 +306,24 @@ export class I18nService {
   }
 
   // Shorthand
+  /**
+   * Performs the t operation.
+   * @param key - The key.
+   * @param params - The params.
+   * @returns The string value.
+   */
   t(key: string, params?: Record<string, any>): string {
     return this.translate(key, params);
   }
 
   // Format methods
 
+  /**
+   * Performs the format date operation.
+   * @param date - The date.
+   * @param _format - The format.
+   * @returns The string value.
+   */
   formatDate(date: Date | string, _format?: string): string {
     const config = this.getCurrentLanguageConfig();
     const dateObj = typeof date === 'string' ? new Date(date) : date;
@@ -290,6 +334,11 @@ export class I18nService {
     }).format(dateObj);
   }
 
+  /**
+   * Performs the format time operation.
+   * @param date - The date.
+   * @returns The string value.
+   */
   formatTime(date: Date | string): string {
     const config = this.getCurrentLanguageConfig();
     const dateObj = typeof date === 'string' ? new Date(date) : date;
@@ -299,6 +348,11 @@ export class I18nService {
     }).format(dateObj);
   }
 
+  /**
+   * Performs the format date time operation.
+   * @param date - The date.
+   * @returns The string value.
+   */
   formatDateTime(date: Date | string): string {
     const config = this.getCurrentLanguageConfig();
     const dateObj = typeof date === 'string' ? new Date(date) : date;
@@ -309,6 +363,12 @@ export class I18nService {
     }).format(dateObj);
   }
 
+  /**
+   * Performs the format number operation.
+   * @param value - The value.
+   * @param decimals - The decimals.
+   * @returns The string value.
+   */
   formatNumber(value: number, decimals?: number): string {
     const config = this.getCurrentLanguageConfig();
 
@@ -318,6 +378,11 @@ export class I18nService {
     }).format(value);
   }
 
+  /**
+   * Performs the format currency operation.
+   * @param value - The value.
+   * @returns The string value.
+   */
   formatCurrency(value: number): string {
     const config = this.getCurrentLanguageConfig();
 
@@ -338,6 +403,12 @@ export class I18nService {
     }).format(value);
   }
 
+  /**
+   * Performs the format percent operation.
+   * @param value - The value.
+   * @param decimals - The decimals.
+   * @returns The string value.
+   */
   formatPercent(value: number, decimals = 0): string {
     const config = this.getCurrentLanguageConfig();
 

@@ -26,6 +26,9 @@ import {
   WithCircuitBreaker,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 
+/**
+ * Defines the shape of the extraction request.
+ */
 export interface ExtractionRequest {
   jobTitle: string;
   jdText: string;
@@ -36,6 +39,9 @@ export interface ExtractionRequest {
   };
 }
 
+/**
+ * Defines the shape of the extraction result.
+ */
 export interface ExtractionResult {
   jobTitle: string;
   requiredSkills: Array<{
@@ -69,14 +75,6 @@ export interface ExtractionResult {
  * @since 1.0.0
  */
 @Injectable()
-@Invariant(
-  (instance: ExtractionServiceContracts) =>
-    !!instance.llmService &&
-    !!instance.natsClient &&
-    instance.MAX_CONCURRENT_JOBS > 0 &&
-    instance.JOB_TIMEOUT_MS > 0,
-  'Extraction service dependencies and configuration must be valid',
-)
 export class ExtractionServiceContracts {
   private readonly logger = new Logger(ExtractionServiceContracts.name);
   private readonly processingJobs = new Map<
@@ -86,6 +84,11 @@ export class ExtractionServiceContracts {
   private readonly JOB_TIMEOUT_MS = 300000; // 5 minutes
   private readonly MAX_CONCURRENT_JOBS = 10;
 
+  /**
+   * Initializes a new instance of the Extraction Service Contracts.
+   * @param llmService - The llm service.
+   * @param natsClient - The nats client.
+   */
   constructor(
     private readonly llmService: LlmService,
     private readonly natsClient: NatsClient,
@@ -223,8 +226,6 @@ export class ExtractionServiceContracts {
 
       throw new ContractViolationError(
         `JD extraction failed: ${error.message}`,
-        'POST',
-        'ExtractionService.extractJobRequirements',
       );
     }
   }
@@ -406,24 +407,18 @@ export class ExtractionServiceContracts {
     if (result.requiredSkills.length === 0) {
       throw new ContractViolationError(
         'Extraction must identify at least one required skill',
-        'POST',
-        'ExtractionService.validateExtractionQuality',
       );
     }
 
     if (result.confidence < 0.5) {
       throw new ContractViolationError(
         `Extraction confidence too low: ${result.confidence} (minimum 0.5)`,
-        'POST',
-        'ExtractionService.validateExtractionQuality',
       );
     }
 
     if (result.experienceYears.min < 0 || result.experienceYears.max > 50) {
       throw new ContractViolationError(
         `Invalid experience years range: ${result.experienceYears.min}-${result.experienceYears.max}`,
-        'POST',
-        'ExtractionService.validateExtractionQuality',
       );
     }
   }

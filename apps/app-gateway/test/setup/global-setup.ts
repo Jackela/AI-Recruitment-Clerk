@@ -1,5 +1,9 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
+/**
+ * Performs the global setup operation.
+ * @returns The result of the operation.
+ */
 export default async function globalSetup() {
   console.log('🚀 Starting Integration Test Suite Global Setup');
 

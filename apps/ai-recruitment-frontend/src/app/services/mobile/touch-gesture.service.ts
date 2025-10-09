@@ -1,13 +1,19 @@
-import { Injectable, ElementRef, NgZone } from '@angular/core';
+import { Injectable, ElementRef, NgZone, inject } from '@angular/core';
 import { Observable, Subject, fromEvent, merge } from 'rxjs';
 import { takeUntil, map, filter } from 'rxjs/operators';
 
+/**
+ * Defines the shape of the touch point.
+ */
 export interface TouchPoint {
   x: number;
   y: number;
   timestamp: number;
 }
 
+/**
+ * Defines the shape of the gesture event.
+ */
 export interface GestureEvent {
   type: 'tap' | 'doubletap' | 'press' | 'swipe' | 'pinch' | 'pan';
   startPoint: TouchPoint;
@@ -23,6 +29,9 @@ export interface GestureEvent {
   preventDefault: () => void;
 }
 
+/**
+ * Defines the shape of the gesture config.
+ */
 export interface GestureConfig {
   tapTimeout: number;
   doubletapTimeout: number;
@@ -33,6 +42,9 @@ export interface GestureConfig {
   preventDefaultEvents: boolean;
 }
 
+/**
+ * Provides touch gesture functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -50,7 +62,7 @@ export class TouchGestureService {
   private gestureSubject = new Subject<GestureEvent>();
   public gesture$ = this.gestureSubject.asObservable();
 
-  constructor(private ngZone: NgZone) {}
+  private ngZone = inject(NgZone);
 
   /**
    * Initialize touch gestures on an element

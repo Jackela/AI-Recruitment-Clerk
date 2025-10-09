@@ -1,12 +1,24 @@
 import { Controller, Post, Body, Logger } from '@nestjs/common';
 import { WebSocketGateway } from '../../websocket/websocket.gateway';
 
+/**
+ * Exposes endpoints for web socket demo.
+ */
 @Controller('api/guest/websocket')
 export class WebSocketDemoController {
   private readonly logger = new Logger(WebSocketDemoController.name);
 
+  /**
+   * Initializes a new instance of the Web Socket Demo Controller.
+   * @param webSocketGateway - The web socket gateway.
+   */
   constructor(private readonly webSocketGateway: WebSocketGateway) {}
 
+  /**
+   * Performs the simulate progress operation.
+   * @param body - The body.
+   * @returns A promise that resolves to { message: string }.
+   */
   @Post('demo-progress')
   async simulateProgress(
     @Body() body: { sessionId: string },
@@ -105,6 +117,11 @@ export class WebSocketDemoController {
     return Math.round((remainingProgress / 100) * totalTime);
   }
 
+  /**
+   * Performs the simulate error operation.
+   * @param body - The body.
+   * @returns A promise that resolves to { message: string }.
+   */
   @Post('demo-error')
   async simulateError(
     @Body() body: { sessionId: string },

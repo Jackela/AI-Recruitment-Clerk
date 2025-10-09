@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { JobRepository } from '../repositories/job.repository';
-import { NatsClient } from '../nats/nats.client';
+import { NatsClientService } from '@ai-recruitment-clerk/shared-nats-client';
 import { CacheService } from '../cache/cache.service';
 import { CacheWarmupService } from '../cache/cache-warmup.service';
 
@@ -10,7 +10,7 @@ describe('AppController', () => {
   let controller: AppController;
   let appService: jest.Mocked<AppService>;
   let jobRepository: jest.Mocked<JobRepository>;
-  let natsClient: jest.Mocked<NatsClient>;
+  let natsClient: jest.Mocked<NatsClientService>;
   let cacheService: jest.Mocked<CacheService>;
   let cacheWarmupService: jest.Mocked<CacheWarmupService>;
 
@@ -64,7 +64,7 @@ describe('AppController', () => {
           useValue: mockJobRepository,
         },
         {
-          provide: NatsClient,
+          provide: NatsClientService,
           useValue: mockNatsClient,
         },
         {
@@ -81,7 +81,7 @@ describe('AppController', () => {
     controller = module.get<AppController>(AppController);
     appService = module.get(AppService);
     jobRepository = module.get(JobRepository);
-    natsClient = module.get(NatsClient);
+    natsClient = module.get(NatsClientService);
     cacheService = module.get(CacheService);
     cacheWarmupService = module.get(CacheWarmupService);
 

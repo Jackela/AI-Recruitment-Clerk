@@ -19,9 +19,22 @@ interface UserActivityResponse {
   };
 }
 
+/**
+ * Provides user management functionality.
+ */
 @Injectable()
 export class UserManagementService {
+  /**
+   * Initializes a new instance of the User Management Service.
+   * @param userService - The user service.
+   */
   constructor(private readonly userService: UserService) {}
+  /**
+   * Updates user.
+   * @param userId - The user id.
+   * @param updateData - The update data.
+   * @returns A promise that resolves to UserDto.
+   */
   async updateUser(
     userId: string,
     updateData: UpdateUserDto,
@@ -35,6 +48,11 @@ export class UserManagementService {
     return userDto as UserDto;
   }
 
+  /**
+   * Retrieves user preferences.
+   * @param userId - The user id.
+   * @returns A promise that resolves to UserPreferencesDto.
+   */
   async getUserPreferences(userId: string): Promise<UserPreferencesDto> {
     // Mock implementation - in real app this would be in a separate preferences service
     return {
@@ -48,6 +66,12 @@ export class UserManagementService {
     } as any;
   }
 
+  /**
+   * Updates user preferences.
+   * @param userId - The user id.
+   * @param preferences - The preferences.
+   * @returns A promise that resolves to UserPreferencesDto.
+   */
   async updateUserPreferences(
     userId: string,
     preferences: UserPreferencesDto,
@@ -64,6 +88,12 @@ export class UserManagementService {
     } as any;
   }
 
+  /**
+   * Retrieves user activity.
+   * @param userId - The user id.
+   * @param options - The options.
+   * @returns A promise that resolves to UserActivityResponse.
+   */
   async getUserActivity(
     userId: string,
     options?: {
@@ -103,6 +133,11 @@ export class UserManagementService {
     };
   }
 
+  /**
+   * Retrieves user profile.
+   * @param userId - The user id.
+   * @returns A promise that resolves to UserDto.
+   */
   async getUserProfile(userId: string): Promise<UserDto> {
     const user = await this.userService.findById(userId);
     if (!user) {
@@ -114,6 +149,11 @@ export class UserManagementService {
     return userDto as UserDto;
   }
 
+  /**
+   * Retrieves user activity summary.
+   * @param userId - The user id.
+   * @returns A promise that resolves to any.
+   */
   async getUserActivitySummary(userId: string): Promise<any> {
     const user = await this.userService.findById(userId);
     if (!user) {
@@ -131,6 +171,12 @@ export class UserManagementService {
     };
   }
 
+  /**
+   * Updates user profile.
+   * @param userId - The user id.
+   * @param updateData - The update data.
+   * @returns A promise that resolves to UserDto.
+   */
   async updateUserProfile(
     userId: string,
     updateData: UpdateUserDto,
@@ -138,10 +184,21 @@ export class UserManagementService {
     return this.updateUser(userId, updateData);
   }
 
+  /**
+   * Removes user.
+   * @param userId - The user id.
+   * @returns A promise that resolves when the operation completes.
+   */
   async deleteUser(userId: string): Promise<void> {
     await this.userService.deleteUser(userId);
   }
 
+  /**
+   * Performs the soft delete user operation.
+   * @param userId - The user id.
+   * @param reason - The reason.
+   * @returns A promise that resolves when the operation completes.
+   */
   async softDeleteUser(userId: string, reason?: string): Promise<void> {
     await this.userService.updateUser(userId, {
       status: UserStatus.INACTIVE,
@@ -149,6 +206,12 @@ export class UserManagementService {
     });
   }
 
+  /**
+   * Retrieves organization users.
+   * @param organizationId - The organization id.
+   * @param options - The options.
+   * @returns A promise that resolves to { users: UserDto[]; totalCount: number }.
+   */
   async getOrganizationUsers(
     organizationId: string,
     options?: {
@@ -177,6 +240,12 @@ export class UserManagementService {
     };
   }
 
+  /**
+   * Performs the verify user password operation.
+   * @param userId - The user id.
+   * @param password - The password.
+   * @returns A promise that resolves to boolean value.
+   */
   async verifyUserPassword(userId: string, password: string): Promise<boolean> {
     // This would typically use bcrypt to compare hashed passwords
     // For testing purposes, we'll do a simple check
@@ -189,6 +258,13 @@ export class UserManagementService {
     return password === 'test-password' || user.password.includes('admin123');
   }
 
+  /**
+   * Updates user status.
+   * @param userId - The user id.
+   * @param status - The status.
+   * @param reason - The reason.
+   * @returns A promise that resolves to UserDto.
+   */
   async updateUserStatus(
     userId: string,
     status: UserStatus,
@@ -208,6 +284,10 @@ export class UserManagementService {
     return userDto as UserDto;
   }
 
+  /**
+   * Retrieves health status.
+   * @returns The Promise<{ status: string; totalUsers: number; activeUsers: number; recentActivity: number; }>.
+   */
   async getHealthStatus(): Promise<{
     status: string;
     totalUsers: number;

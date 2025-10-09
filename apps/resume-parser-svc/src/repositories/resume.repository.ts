@@ -14,16 +14,28 @@ class DatabasePerformanceMonitor {
   }
 }
 
+/**
+ * Manages persistence for resume.
+ */
 @Injectable()
 export class ResumeRepository {
   private readonly logger = new Logger(ResumeRepository.name);
   private readonly performanceMonitor = new DatabasePerformanceMonitor();
 
+  /**
+   * Initializes a new instance of the Resume Repository.
+   * @param resumeModel - The resume model.
+   */
   constructor(
     @InjectModel(Resume.name, 'resume-parser')
     private resumeModel: Model<ResumeDocument>,
   ) {}
 
+  /**
+   * Creates the entity.
+   * @param resumeData - The resume data.
+   * @returns A promise that resolves to ResumeDocument.
+   */
   async create(resumeData: Partial<Resume>): Promise<ResumeDocument> {
     try {
       const createdResume = new this.resumeModel(resumeData);
@@ -36,6 +48,11 @@ export class ResumeRepository {
     }
   }
 
+  /**
+   * Performs the find by id operation.
+   * @param id - The id.
+   * @returns A promise that resolves to ResumeDocument | null.
+   */
   async findById(id: string): Promise<ResumeDocument | null> {
     try {
       return await this.resumeModel.findById(id).exec();
@@ -45,6 +62,11 @@ export class ResumeRepository {
     }
   }
 
+  /**
+   * Performs the find by email operation.
+   * @param email - The email.
+   * @returns A promise that resolves to an array of ResumeDocument.
+   */
   async findByEmail(email: string): Promise<ResumeDocument[]> {
     try {
       return await this.resumeModel.find({ 'contactInfo.email': email }).exec();
@@ -54,6 +76,11 @@ export class ResumeRepository {
     }
   }
 
+  /**
+   * Performs the find by grid fs url operation.
+   * @param gridFsUrl - The grid fs url.
+   * @returns A promise that resolves to ResumeDocument | null.
+   */
   async findByGridFsUrl(gridFsUrl: string): Promise<ResumeDocument | null> {
     try {
       return await this.resumeModel.findOne({ gridFsUrl }).exec();
@@ -66,6 +93,12 @@ export class ResumeRepository {
     }
   }
 
+  /**
+   * Updates by id.
+   * @param id - The id.
+   * @param updateData - The update data.
+   * @returns A promise that resolves to ResumeDocument | null.
+   */
   async updateById(
     id: string,
     updateData: Partial<Resume>,
@@ -86,6 +119,13 @@ export class ResumeRepository {
     }
   }
 
+  /**
+   * Updates status.
+   * @param id - The id.
+   * @param status - The status.
+   * @param errorMessage - The error message.
+   * @returns A promise that resolves to ResumeDocument | null.
+   */
   async updateStatus(
     id: string,
     status: string,
@@ -104,6 +144,11 @@ export class ResumeRepository {
     }
   }
 
+  /**
+   * Removes by id.
+   * @param id - The id.
+   * @returns A promise that resolves to boolean value.
+   */
   async deleteById(id: string): Promise<boolean> {
     try {
       const result = await this.resumeModel.findByIdAndDelete(id).exec();
@@ -118,6 +163,12 @@ export class ResumeRepository {
     }
   }
 
+  /**
+   * Performs the find by status operation.
+   * @param status - The status.
+   * @param limit - The limit.
+   * @returns A promise that resolves to an array of ResumeDocument.
+   */
   async findByStatus(status: string, limit = 100): Promise<ResumeDocument[]> {
     try {
       return await this.resumeModel
@@ -131,14 +182,28 @@ export class ResumeRepository {
     }
   }
 
+  /**
+   * Performs the find pending operation.
+   * @param limit - The limit.
+   * @returns A promise that resolves to an array of ResumeDocument.
+   */
   async findPending(limit = 50): Promise<ResumeDocument[]> {
     return this.findByStatus('pending', limit);
   }
 
+  /**
+   * Performs the find completed operation.
+   * @param limit - The limit.
+   * @returns A promise that resolves to an array of ResumeDocument.
+   */
   async findCompleted(limit = 100): Promise<ResumeDocument[]> {
     return this.findByStatus('completed', limit);
   }
 
+  /**
+   * Performs the count by status operation.
+   * @returns A promise that resolves to Record<string, number>.
+   */
   async countByStatus(): Promise<Record<string, number>> {
     try {
       const counts = await this.resumeModel

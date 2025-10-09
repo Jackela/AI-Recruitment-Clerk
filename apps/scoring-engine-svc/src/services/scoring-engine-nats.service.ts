@@ -1,9 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { NatsClientService, NatsPublishResult } from '@app/shared-nats-client';
-import { AnalysisJdExtractedEvent } from '@ai-recruitment-clerk/job-management-domain';
-import { AnalysisResumeParsedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
+import type { AnalysisJdExtractedEvent } from '@ai-recruitment-clerk/job-management-domain';
+import type { AnalysisResumeParsedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
 import { DeliverPolicy } from 'nats';
 
+/**
+ * Provides scoring engine nats functionality.
+ */
 @Injectable()
 export class ScoringEngineNatsService extends NatsClientService {
   private readonly serviceLogger = new Logger(ScoringEngineNatsService.name);

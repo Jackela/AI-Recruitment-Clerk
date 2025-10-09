@@ -3,6 +3,9 @@ import { UsageLimitPolicy } from '../value-objects/usage-limit-policy.value-obje
 import { UsageStatistics } from '../value-objects/usage-statistics.value-object.js';
 import { BonusType } from '../../application/dtos/usage-limit.dto.js';
 
+/**
+ * Represents the usage limit rules.
+ */
 export class UsageLimitRules {
   // 核心业务规则常量
   static readonly DEFAULT_DAILY_LIMIT = 5;
@@ -253,7 +256,15 @@ export class UsageLimitRules {
 }
 
 // 支持类和枚举
+/**
+ * Represents the risk score.
+ */
 export class RiskScore {
+  /**
+   * Initializes a new instance of the Risk Score.
+   * @param score - The score.
+   * @param factors - The factors.
+   */
   constructor(
     public readonly score: number,
     public readonly factors: string[]
@@ -273,7 +284,14 @@ export enum RecommendedAction {
   BLOCK_TEMPORARILY = 'block_temporarily'
 }
 
+/**
+ * Represents the usage violation report.
+ */
 export class UsageViolationReport {
+  /**
+   * Initializes a new instance of the Usage Violation Report.
+   * @param data - The data.
+   */
   constructor(public readonly data: {
     ip: string;
     violationType: ViolationType;
@@ -286,15 +304,48 @@ export class UsageViolationReport {
     nextAllowedTime: Date;
   }) {}
 
+  /**
+   * Performs the ip operation.
+   * @returns The string value.
+   */
   get ip(): string { return this.data.ip; }
+  /**
+   * Performs the violation type operation.
+   * @returns The ViolationType.
+   */
   get violationType(): ViolationType { return this.data.violationType; }
+  /**
+   * Performs the current usage operation.
+   * @returns The number value.
+   */
   get currentUsage(): number { return this.data.currentUsage; }
+  /**
+   * Performs the allowed quota operation.
+   * @returns The number value.
+   */
   get allowedQuota(): number { return this.data.allowedQuota; }
+  /**
+   * Performs the risk score operation.
+   * @returns The number value.
+   */
   get riskScore(): number { return this.data.riskScore; }
+  /**
+   * Performs the recommended action operation.
+   * @returns The RecommendedAction.
+   */
   get recommendedAction(): RecommendedAction { return this.data.recommendedAction; }
 }
 
+/**
+ * Represents the bonus validation result.
+ */
 export class BonusValidationResult {
+  /**
+   * Initializes a new instance of the Bonus Validation Result.
+   * @param isValid - The is valid.
+   * @param errors - The errors.
+   * @param approvedAmount - The approved amount.
+   */
   constructor(
     public readonly isValid: boolean,
     public readonly errors: string[],
@@ -302,7 +353,14 @@ export class BonusValidationResult {
   ) {}
 }
 
+/**
+ * Represents the usage efficiency.
+ */
 export class UsageEfficiency {
+  /**
+   * Initializes a new instance of the Usage Efficiency.
+   * @param data - The data.
+   */
   constructor(public readonly data: {
     baseUtilization: number;
     bonusUtilization: number;
@@ -310,8 +368,24 @@ export class UsageEfficiency {
     wasteageScore: number;
   }) {}
 
+  /**
+   * Performs the base utilization operation.
+   * @returns The number value.
+   */
   get baseUtilization(): number { return this.data.baseUtilization; }
+  /**
+   * Performs the bonus utilization operation.
+   * @returns The number value.
+   */
   get bonusUtilization(): number { return this.data.bonusUtilization; }
+  /**
+   * Performs the overall efficiency operation.
+   * @returns The number value.
+   */
   get overallEfficiency(): number { return this.data.overallEfficiency; }
+  /**
+   * Performs the wasteage score operation.
+   * @returns The number value.
+   */
   get wasteageScore(): number { return this.data.wasteageScore; }
 }

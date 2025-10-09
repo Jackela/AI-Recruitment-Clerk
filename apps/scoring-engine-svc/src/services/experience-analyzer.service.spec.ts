@@ -3,8 +3,8 @@ import {
   ExperienceAnalyzerService,
   JobRequirements,
 } from './experience-analyzer.service';
-import { GeminiClient } from '@ai-recruitment-clerk/ai-services-shared';
-import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
+import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
 describe('ExperienceAnalyzerService', () => {
   let service: ExperienceAnalyzerService;

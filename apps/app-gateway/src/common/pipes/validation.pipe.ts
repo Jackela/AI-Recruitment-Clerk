@@ -8,10 +8,19 @@ import {
 import { validate, ValidationError } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 
+/**
+ * Represents the custom validation pipe.
+ */
 @Injectable()
 export class CustomValidationPipe implements PipeTransform<any> {
   private readonly logger = new Logger(CustomValidationPipe.name);
 
+  /**
+   * Performs the transform operation.
+   * @param value - The value.
+   * @param { metatype } - The { metatype }.
+   * @returns The result of the operation.
+   */
   async transform(value: any, { metatype }: ArgumentMetadata) {
     if (!metatype || !this.toValidate(metatype)) {
       return value;
@@ -73,6 +82,11 @@ export class CustomValidationPipe implements PipeTransform<any> {
 export class CrossServiceValidationPipe implements PipeTransform {
   private readonly logger = new Logger(CrossServiceValidationPipe.name);
 
+  /**
+   * Initializes a new instance of the Cross Service Validation Pipe.
+   * @param validationRules - The validation rules.
+   * @param options - The options.
+   */
   constructor(
     private readonly validationRules?: any[],
     private readonly options?: {
@@ -82,6 +96,12 @@ export class CrossServiceValidationPipe implements PipeTransform {
     },
   ) {}
 
+  /**
+   * Performs the transform operation.
+   * @param value - The value.
+   * @param metadata - The metadata.
+   * @returns The result of the operation.
+   */
   async transform(value: any, metadata: ArgumentMetadata) {
     // First, apply standard validation
     const standardPipe = new CustomValidationPipe();

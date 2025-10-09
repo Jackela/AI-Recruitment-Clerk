@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ReportRepository } from './report.repository';
 
+/**
+ * Defines the shape of the performance metrics.
+ */
 export interface PerformanceMetrics {
   operationName: string;
   startTime: number;
@@ -20,6 +23,9 @@ export interface PerformanceMetrics {
   };
 }
 
+/**
+ * Defines the shape of the quality metrics.
+ */
 export interface QualityMetrics {
   reportId: string;
   qualityScore: number;
@@ -35,6 +41,9 @@ export interface QualityMetrics {
   timestamp: Date;
 }
 
+/**
+ * Defines the shape of the performance summary.
+ */
 export interface PerformanceSummary {
   totalReports: number;
   successRate: number;
@@ -57,6 +66,9 @@ export interface PerformanceSummary {
   }[];
 }
 
+/**
+ * Provides performance monitor functionality.
+ */
 @Injectable()
 export class PerformanceMonitorService {
   private readonly logger = new Logger(PerformanceMonitorService.name);
@@ -74,11 +86,21 @@ export class PerformanceMonitorService {
     maxRetentionDays: parseInt(process.env.METRICS_RETENTION_DAYS || '30'), // 30 days
   };
 
+  /**
+   * Initializes a new instance of the Performance Monitor Service.
+   * @param reportRepository - The report repository.
+   */
   constructor(private readonly reportRepository: ReportRepository) {
     // Clean up old metrics every hour
     setInterval(() => this.cleanupOldMetrics(), 60 * 60 * 1000);
   }
 
+  /**
+   * Performs the start operation operation.
+   * @param operationName - The operation name.
+   * @param metadata - The metadata.
+   * @returns The string value.
+   */
   startOperation(
     operationName: string,
     metadata?: PerformanceMetrics['metadata'],
@@ -98,6 +120,14 @@ export class PerformanceMonitorService {
     return operationId;
   }
 
+  /**
+   * Performs the end operation operation.
+   * @param operationId - The operation id.
+   * @param success - The success.
+   * @param errorMessage - The error message.
+   * @param additionalMetadata - The additional metadata.
+   * @returns The PerformanceMetrics | null.
+   */
   endOperation(
     operationId: string,
     success: boolean,
@@ -133,6 +163,10 @@ export class PerformanceMonitorService {
     return metrics;
   }
 
+  /**
+   * Performs the record quality metrics operation.
+   * @param qualityMetrics - The quality metrics.
+   */
   recordQualityMetrics(qualityMetrics: QualityMetrics): void {
     this.qualityMetrics.push({
       ...qualityMetrics,
@@ -147,6 +181,11 @@ export class PerformanceMonitorService {
     this.checkQualityAlerts(qualityMetrics);
   }
 
+  /**
+   * Retrieves performance summary.
+   * @param dateRange - The date range.
+   * @returns A promise that resolves to PerformanceSummary.
+   */
   async getPerformanceSummary(dateRange?: {
     startDate: Date;
     endDate: Date;
@@ -246,6 +285,10 @@ export class PerformanceMonitorService {
     }
   }
 
+  /**
+   * Retrieves system health.
+   * @returns The Promise<{ status: 'healthy' | 'degraded' | 'unhealthy'; metrics: { activeOperations: number; recentSuccessRate: number; averageResponseTime: number; qualityScore: number; }; alerts: string[]; }>.
+   */
   async getSystemHealth(): Promise<{
     status: 'healthy' | 'degraded' | 'unhealthy';
     metrics: {

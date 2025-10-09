@@ -74,7 +74,16 @@ async function bootstrap() {
           ]
         : ['http://localhost:4200', 'http://localhost:4202'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Device-ID'],
+    allowedHeaders: [
+      'Content-Type', 
+      'Authorization', 
+      'X-Device-ID',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+      'Access-Control-Request-Method',
+      'Access-Control-Request-Headers'
+    ],
     credentials: true,
     optionsSuccessStatus: 200,
     maxAge: 3600,

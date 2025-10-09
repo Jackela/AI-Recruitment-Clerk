@@ -1,6 +1,9 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+/**
+ * Defines the shape of the bento card data.
+ */
 export interface BentoCardData {
   title: string;
   subtitle?: string;
@@ -29,8 +32,11 @@ export interface BentoCardData {
   status?: 'active' | 'inactive' | 'warning' | 'error' | 'success';
 }
 
+/**
+ * Represents the bento card component.
+ */
 @Component({
-  selector: 'app-bento-card',
+  selector: 'arc-bento-card',
   standalone: true,
   imports: [CommonModule],
   template: `
@@ -635,6 +641,10 @@ export class BentoCardComponent {
   @Input() data!: BentoCardData;
   @Output() actionClick = new EventEmitter<BentoCardData['actions']>();
 
+  /**
+   * Retrieves card classes.
+   * @returns The string value.
+   */
   getCardClasses(): string {
     const classes = ['bento-card'];
 
@@ -645,6 +655,11 @@ export class BentoCardComponent {
     return classes.join(' ');
   }
 
+  /**
+   * Performs the format value operation.
+   * @param value - The value.
+   * @returns The string value.
+   */
   formatValue(value: string | number): string {
     if (typeof value === 'number') {
       // Format large numbers with appropriate suffixes
@@ -658,6 +673,10 @@ export class BentoCardComponent {
     return value;
   }
 
+  /**
+   * Retrieves progress percentage.
+   * @returns The number value.
+   */
   getProgressPercentage(): number {
     if (!this.data.progress) return 0;
     return Math.min(
@@ -666,12 +685,21 @@ export class BentoCardComponent {
     );
   }
 
+  /**
+   * Retrieves progress label.
+   * @returns The string value.
+   */
   getProgressLabel(): string {
     if (!this.data.progress) return '';
     const percentage = this.getProgressPercentage().toFixed(0);
     return `Progress: ${percentage}% (${this.data.progress.value} of ${this.data.progress.max})`;
   }
 
+  /**
+   * Retrieves metric aria label.
+   * @param metric - The metric.
+   * @returns The string value.
+   */
   getMetricAriaLabel(metric: NonNullable<BentoCardData['metrics']>[0]): string {
     let label = `${metric.label}: ${this.formatValue(metric.value)}`;
     if (metric.trend) {
@@ -686,6 +714,11 @@ export class BentoCardComponent {
     return label;
   }
 
+  /**
+   * Retrieves trend aria label.
+   * @param trend - The trend.
+   * @returns The string value.
+   */
   getTrendAriaLabel(
     trend: NonNullable<NonNullable<BentoCardData['metrics']>[0]['trend']>,
   ): string {
@@ -698,6 +731,10 @@ export class BentoCardComponent {
     return `Trend: ${direction} by ${trend.value}`;
   }
 
+  /**
+   * Performs the on action click operation.
+   * @param action - The action.
+   */
   onActionClick(action: NonNullable<BentoCardData['actions']>[0]): void {
     this.actionClick.emit([action]);
     if (action.onClick) {
@@ -705,6 +742,12 @@ export class BentoCardComponent {
     }
   }
 
+  /**
+   * Performs the track by metric label operation.
+   * @param _index - The index.
+   * @param metric - The metric.
+   * @returns The string value.
+   */
   trackByMetricLabel(
     _index: number,
     metric: NonNullable<BentoCardData['metrics']>[0],
@@ -712,6 +755,12 @@ export class BentoCardComponent {
     return metric.label;
   }
 
+  /**
+   * Performs the track by action label operation.
+   * @param _index - The index.
+   * @param action - The action.
+   * @returns The string value.
+   */
   trackByActionLabel(
     _index: number,
     action: NonNullable<BentoCardData['actions']>[0],

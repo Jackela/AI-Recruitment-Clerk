@@ -31,6 +31,10 @@ export default {
     alias: {
       'class-transformer/storage': join(__dirname, './webpack.alias-stubs/class-transformer/storage.js'),
       // Force-bundle internal libs instead of treating them as external packages
+      '@ai-recruitment-clerk/shared-dtos': join(
+        __dirname,
+        '../../libs/shared-dtos/src/index.ts',
+      ),
       '@ai-recruitment-clerk/user-management-domain': join(
         __dirname,
         '../../libs/user-management-domain/src/index.ts',

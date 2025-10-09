@@ -1,5 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 
+/**
+ * Defines the shape of the query performance metrics.
+ */
 export interface QueryPerformanceMetrics {
   queryName: string;
   totalExecutions: number;
@@ -15,6 +18,9 @@ export interface QueryPerformanceMetrics {
   p99Duration?: number;
 }
 
+/**
+ * Defines the shape of the query execution.
+ */
 export interface QueryExecution {
   duration: number;
   memoryDelta: number;

@@ -20,6 +20,9 @@ export enum MfaMethod {
   TOTP = 'totp',
 }
 
+/**
+ * Describes the enable mfa data transfer object.
+ */
 export class EnableMfaDto {
   @ApiProperty({ enum: MfaMethod, description: 'MFA method to enable' })
   @IsEnum(MfaMethod)
@@ -50,6 +53,9 @@ export class EnableMfaDto {
   currentPassword: string = '';
 }
 
+/**
+ * Describes the verify mfa data transfer object.
+ */
 export class VerifyMfaDto {
   @ApiProperty({ description: 'MFA token/code' })
   @IsString()
@@ -69,6 +75,9 @@ export class VerifyMfaDto {
   rememberDevice?: boolean = false;
 }
 
+/**
+ * Describes the disable mfa data transfer object.
+ */
 export class DisableMfaDto {
   @ApiProperty({ description: 'Current password for verification' })
   @IsString()
@@ -83,6 +92,9 @@ export class DisableMfaDto {
   mfaToken: string = '';
 }
 
+/**
+ * Describes the generate backup codes data transfer object.
+ */
 export class GenerateBackupCodesDto {
   @ApiProperty({ description: 'Current password for verification' })
   @IsString()
@@ -97,6 +109,9 @@ export class GenerateBackupCodesDto {
   mfaToken: string = '';
 }
 
+/**
+ * Describes the use backup code data transfer object.
+ */
 export class UseBackupCodeDto {
   @ApiProperty({ description: 'Backup recovery code' })
   @IsString()
@@ -106,6 +121,9 @@ export class UseBackupCodeDto {
   backupCode: string = '';
 }
 
+/**
+ * Describes the mfa status data transfer object.
+ */
 export class MfaStatusDto {
   @ApiProperty({ description: 'Whether MFA is enabled' })
   @IsBoolean()
@@ -129,6 +147,9 @@ export class MfaStatusDto {
   hasBackupCodes: boolean = false;
 }
 
+/**
+ * Describes the mfa setup response data transfer object.
+ */
 export class MfaSetupResponseDto {
   @ApiProperty({ description: 'Whether setup was successful' })
   success: boolean = false;

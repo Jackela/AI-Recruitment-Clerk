@@ -11,11 +11,18 @@ import { GuestUsage, GuestUsageDocument } from '../schemas/guest-usage.schema';
 import { GuestUsageEntity } from '../entities/guest-usage.entity';
 import { GuestUsageResponseDto, GuestStatusDto } from '../dto/guest.dto';
 
+/**
+ * Provides guest usage functionality.
+ */
 @Injectable()
 export class GuestUsageService {
   private readonly logger = new Logger(GuestUsageService.name);
   private readonly MAX_FREE_USAGE = 5;
 
+  /**
+   * Initializes a new instance of the Guest Usage Service.
+   * @param guestUsageModel - The guest usage model.
+   */
   constructor(
     @InjectModel(GuestUsage.name)
     private guestUsageModel: Model<GuestUsageDocument>,

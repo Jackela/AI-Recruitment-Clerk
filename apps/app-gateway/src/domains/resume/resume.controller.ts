@@ -69,13 +69,27 @@ const resumeFileValidator: {
 
 // Use imported interface instead of local definition
 
+/**
+ * Exposes endpoints for resume.
+ */
 @ApiTags('resume-processing')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('resumes')
 export class ResumeController {
+  /**
+   * Initializes a new instance of the Resume Controller.
+   * @param resumeService - The resume service.
+   */
   constructor(private readonly resumeService: ResumeService) {}
 
+  /**
+   * Performs the upload resume operation.
+   * @param req - The req.
+   * @param file - The file.
+   * @param uploadData - The upload data.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '上传简历文件',
     description: '上传PDF/DOC/DOCX格式的简历文件进行解析和分析',
@@ -151,6 +165,12 @@ export class ResumeController {
     }
   }
 
+  /**
+   * Retrieves resume.
+   * @param req - The req.
+   * @param resumeId - The resume id.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取简历解析结果',
     description: '获取指定简历的解析结果和分析数据',
@@ -198,6 +218,13 @@ export class ResumeController {
     }
   }
 
+  /**
+   * Retrieves resume analysis.
+   * @param req - The req.
+   * @param resumeId - The resume id.
+   * @param jobId - The job id.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取简历分析结果',
     description: '获取简历的详细分析，包括技能匹配、经验评估等',
@@ -243,6 +270,12 @@ export class ResumeController {
     }
   }
 
+  /**
+   * Retrieves resume skills.
+   * @param req - The req.
+   * @param resumeId - The resume id.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取简历技能分析',
     description: '获取简历中识别的技能和技能评级',
@@ -277,6 +310,13 @@ export class ResumeController {
     }
   }
 
+  /**
+   * Updates resume status.
+   * @param req - The req.
+   * @param resumeId - The resume id.
+   * @param statusUpdate - The status update.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '更新简历状态',
     description: '更新简历的处理状态或审核状态',
@@ -317,6 +357,12 @@ export class ResumeController {
     }
   }
 
+  /**
+   * Performs the batch process resumes operation.
+   * @param req - The req.
+   * @param batchRequest - The batch request.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '批量处理简历',
     description: '批量操作多个简历（状态更新、分析等）',
@@ -362,6 +408,14 @@ export class ResumeController {
     }
   }
 
+  /**
+   * Performs the search resumes operation.
+   * @param req - The req.
+   * @param searchCriteria - The search criteria.
+   * @param page - The page.
+   * @param limit - The limit.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '搜索简历',
     description: '根据技能、经验、关键词等搜索简历',
@@ -408,6 +462,13 @@ export class ResumeController {
     }
   }
 
+  /**
+   * Performs the reprocess resume operation.
+   * @param req - The req.
+   * @param resumeId - The resume id.
+   * @param reprocessOptions - The reprocess options.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '重新处理简历',
     description: '重新分析和处理已上传的简历',
@@ -454,6 +515,13 @@ export class ResumeController {
     }
   }
 
+  /**
+   * Removes resume.
+   * @param req - The req.
+   * @param resumeId - The resume id.
+   * @param deleteRequest - The delete request.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '删除简历',
     description: '软删除指定的简历记录',
@@ -496,6 +564,11 @@ export class ResumeController {
     }
   }
 
+  /**
+   * Retrieves processing stats.
+   * @param req - The req.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取简历处理统计',
     description: '获取组织的简历处理统计信息',
@@ -530,6 +603,10 @@ export class ResumeController {
     }
   }
 
+  /**
+   * Performs the health check operation.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '服务健康检查',
     description: '检查简历处理服务的健康状态',

@@ -8,14 +8,26 @@ import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../../auth/decorators/public.decorator';
 
+/**
+ * Implements the optional jwt auth guard logic.
+ */
 @Injectable()
 export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
   private readonly logger = new Logger(OptionalJwtAuthGuard.name);
 
+  /**
+   * Initializes a new instance of the Optional Jwt Auth Guard.
+   * @param reflector - The reflector.
+   */
   constructor(private reflector: Reflector) {
     super();
   }
 
+  /**
+   * Performs the can activate operation.
+   * @param context - The context.
+   * @returns A promise that resolves to boolean value.
+   */
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
@@ -40,6 +52,14 @@ export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
     }
   }
 
+  /**
+   * Handles request.
+   * @param err - The err.
+   * @param user - The user.
+   * @param info - The info.
+   * @param context - The context.
+   * @returns The result of the operation.
+   */
   handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
 

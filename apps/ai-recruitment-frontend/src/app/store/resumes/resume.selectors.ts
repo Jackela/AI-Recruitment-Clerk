@@ -77,7 +77,7 @@ export const selectPendingResumes = createSelector(
 );
 
 // Recent resumes selector
-export const selectRecentResumes = (limit: number = 10) =>
+export const selectRecentResumes = (limit = 10) =>
   createSelector(
     selectAllResumes,
     (resumes: ResumeListItem[]): ResumeListItem[] =>
@@ -92,7 +92,7 @@ export const selectRecentResumes = (limit: number = 10) =>
   );
 
 // High-scoring resumes selector
-export const selectHighScoringResumes = (threshold: number = 80) =>
+export const selectHighScoringResumes = (threshold = 80) =>
   createSelector(
     selectAllResumes,
     (resumes: ResumeListItem[]): ResumeListItem[] =>

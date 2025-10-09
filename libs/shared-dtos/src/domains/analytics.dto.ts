@@ -2,6 +2,9 @@ import { ValueObject } from '../base/value-object';
 import { DomainEvent } from '../base/domain-event';
 
 // Analytics聚合根 - 管理用户行为数据收集和分析的核心业务逻辑
+/**
+ * Represents the analytics event event.
+ */
 export class AnalyticsEvent {
   private uncommittedEvents: DomainEvent[] = [];
 
@@ -18,6 +21,15 @@ export class AnalyticsEvent {
   ) {}
 
   // 工厂方法 - 创建用户交互事件
+  /**
+   * Creates user interaction event.
+   * @param sessionId - The session id.
+   * @param userId - The user id.
+   * @param eventType - The event type.
+   * @param eventData - The event data.
+   * @param context - The context.
+   * @returns The AnalyticsEvent.
+   */
   static createUserInteractionEvent(
     sessionId: string,
     userId: string,
@@ -54,6 +66,14 @@ export class AnalyticsEvent {
   }
 
   // 工厂方法 - 创建系统性能事件
+  /**
+   * Creates system performance event.
+   * @param operation - The operation.
+   * @param duration - The duration.
+   * @param success - The success.
+   * @param metadata - The metadata.
+   * @returns The AnalyticsEvent.
+   */
   static createSystemPerformanceEvent(
     operation: string,
     duration: number,
@@ -88,6 +108,14 @@ export class AnalyticsEvent {
   }
 
   // 工厂方法 - 创建业务指标事件
+  /**
+   * Creates business metric event.
+   * @param metricName - The metric name.
+   * @param metricValue - The metric value.
+   * @param metricUnit - The metric unit.
+   * @param dimensions - The dimensions.
+   * @returns The AnalyticsEvent.
+   */
   static createBusinessMetricEvent(
     metricName: string,
     metricValue: number,
@@ -123,6 +151,11 @@ export class AnalyticsEvent {
   }
 
   // 工厂方法 - 从持久化数据恢复
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The AnalyticsEvent.
+   */
   static restore(data: AnalyticsEventData): AnalyticsEvent {
     return new AnalyticsEvent(
       new AnalyticsEventId({ value: data.id }),
@@ -138,6 +171,10 @@ export class AnalyticsEvent {
   }
 
   // 核心业务方法 - 验证事件数据
+  /**
+   * Validates event.
+   * @returns The EventValidationResult.
+   */
   validateEvent(): EventValidationResult {
     const validationErrors: string[] = [];
 
@@ -190,6 +227,9 @@ export class AnalyticsEvent {
   }
 
   // 处理事件数据
+  /**
+   * Performs the process event operation.
+   */
   processEvent(): void {
     if (this.status !== EventStatus.PENDING_PROCESSING) {
       throw new Error(`Cannot process event in ${this.status} status`);
@@ -210,6 +250,9 @@ export class AnalyticsEvent {
   }
 
   // 匿名化处理敏感数据
+  /**
+   * Performs the anonymize data operation.
+   */
   anonymizeData(): void {
     if (this.status === EventStatus.ANONYMIZED) {
       throw new Error('Event data is already anonymized');
@@ -229,6 +272,9 @@ export class AnalyticsEvent {
   }
 
   // 标记为已过期，准备删除
+  /**
+   * Performs the mark as expired operation.
+   */
   markAsExpired(): void {
     if (this.status === EventStatus.EXPIRED) {
       return;
@@ -298,6 +344,10 @@ export class AnalyticsEvent {
   }
 
   // 查询方法
+  /**
+   * Retrieves event summary.
+   * @returns The AnalyticsEventSummary.
+   */
   getEventSummary(): AnalyticsEventSummary {
     return new AnalyticsEventSummary({
       id: this.id.getValue(),
@@ -316,10 +366,17 @@ export class AnalyticsEvent {
   }
 
   // 领域事件管理
+  /**
+   * Retrieves uncommitted events.
+   * @returns The an array of DomainEvent.
+   */
   getUncommittedEvents(): DomainEvent[] {
     return [...this.uncommittedEvents];
   }
 
+  /**
+   * Performs the mark events as committed operation.
+   */
   markEventsAsCommitted(): void {
     this.uncommittedEvents = [];
   }
@@ -329,52 +386,98 @@ export class AnalyticsEvent {
   }
 
   // Getters
+  /**
+   * Retrieves id.
+   * @returns The AnalyticsEventId.
+   */
   getId(): AnalyticsEventId {
     return this.id;
   }
 
+  /**
+   * Retrieves status.
+   * @returns The EventStatus.
+   */
   getStatus(): EventStatus {
     return this.status;
   }
 
+  /**
+   * Retrieves session id.
+   * @returns The string value.
+   */
   getSessionId(): string {
     return this.session.getSessionId();
   }
 
+  /**
+   * Retrieves user id.
+   * @returns The string | undefined.
+   */
   getUserId(): string | undefined {
     return this.session.getUserId();
   }
 
+  /**
+   * Retrieves event type.
+   * @returns The EventType.
+   */
   getEventType(): EventType {
     return this.eventData.getEventType();
   }
 
+  /**
+   * Retrieves timestamp.
+   * @returns The string value.
+   */
   getTimestamp(): string {
     return this.timestamp.toISOString();
   }
 
+  /**
+   * Retrieves created at.
+   * @returns The Date.
+   */
   getCreatedAt(): Date {
     return this.createdAt;
   }
 
+  /**
+   * Retrieves retention expiry.
+   * @returns The Date | undefined.
+   */
   getRetentionExpiry(): Date | undefined {
     return this.retentionExpiry;
   }
 }
 
 // 值对象定义
+/**
+ * Represents the analytics event id.
+ */
 export class AnalyticsEventId extends ValueObject<{ value: string }> {
+  /**
+   * Generates the result.
+   * @returns The AnalyticsEventId.
+   */
   static generate(): AnalyticsEventId {
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substr(2, 9);
     return new AnalyticsEventId({ value: `analytics_${timestamp}_${random}` });
   }
   
+  /**
+   * Retrieves value.
+   * @returns The string value.
+   */
   getValue(): string {
     return this.props.value;
   }
 }
 
+/**
+ * Represents the user session.
+ */
 export class UserSession extends ValueObject<{
   sessionId: string;
   userId?: string;
@@ -383,6 +486,14 @@ export class UserSession extends ValueObject<{
   consentStatus: ConsentStatus;
   isSystemSession: boolean;
 }> {
+  /**
+   * Creates the entity.
+   * @param sessionId - The session id.
+   * @param userId - The user id.
+   * @param deviceInfo - The device info.
+   * @param geoLocation - The geo location.
+   * @returns The UserSession.
+   */
   static create(sessionId: string, userId?: string, deviceInfo?: DeviceInfo, geoLocation?: GeoLocation): UserSession {
     return new UserSession({
       sessionId,
@@ -394,6 +505,10 @@ export class UserSession extends ValueObject<{
     });
   }
 
+  /**
+   * Creates system session.
+   * @returns The UserSession.
+   */
   static createSystemSession(): UserSession {
     return new UserSession({
       sessionId: `system_${Date.now()}`,
@@ -402,6 +517,11 @@ export class UserSession extends ValueObject<{
     });
   }
 
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The UserSession.
+   */
   static restore(data: any): UserSession {
     return new UserSession({
       sessionId: data.sessionId,
@@ -413,24 +533,44 @@ export class UserSession extends ValueObject<{
     });
   }
 
+  /**
+   * Retrieves session id.
+   * @returns The string value.
+   */
   getSessionId(): string {
     return this.props.sessionId;
   }
 
+  /**
+   * Retrieves user id.
+   * @returns The string | undefined.
+   */
   getUserId(): string | undefined {
     return this.props.userId;
   }
 
+  /**
+   * Performs the has valid consent operation.
+   * @returns The boolean value.
+   */
   hasValidConsent(): boolean {
     return this.props.consentStatus === ConsentStatus.GRANTED || 
            this.props.consentStatus === ConsentStatus.NOT_APPLICABLE;
   }
 
+  /**
+   * Performs the is valid operation.
+   * @returns The boolean value.
+   */
   isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
 
+  /**
+   * Retrieves validation errors.
+   * @returns The an array of string value.
+   */
   getValidationErrors(): string[] {
     const errors: string[] = [];
 
@@ -449,6 +589,9 @@ export class UserSession extends ValueObject<{
     return errors;
   }
 
+  /**
+   * Performs the anonymize operation.
+   */
   anonymize(): void {
     // 匿名化用户标识信息
     const newProps = { ...this.props };
@@ -459,21 +602,36 @@ export class UserSession extends ValueObject<{
   }
 }
 
+/**
+ * Represents the device info.
+ */
 export class DeviceInfo extends ValueObject<{
   userAgent: string;
   screenResolution: string;
   language: string;
   timezone: string;
 }> {
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The DeviceInfo.
+   */
   static restore(data: any): DeviceInfo {
     return new DeviceInfo(data);
   }
 
+  /**
+   * Performs the is valid operation.
+   * @returns The boolean value.
+   */
   isValid(): boolean {
     return !!(this.props.userAgent && this.props.language);
   }
 }
 
+/**
+ * Represents the geo location.
+ */
 export class GeoLocation extends ValueObject<{
   country: string;
   region: string;
@@ -481,21 +639,39 @@ export class GeoLocation extends ValueObject<{
   latitude?: number;
   longitude?: number;
 }> {
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The GeoLocation.
+   */
   static restore(data: any): GeoLocation {
     return new GeoLocation(data);
   }
 
+  /**
+   * Performs the is valid operation.
+   * @returns The boolean value.
+   */
   isValid(): boolean {
     return !!(this.props.country && this.props.region);
   }
 }
 
+/**
+ * Represents the event data.
+ */
 export class EventData extends ValueObject<{
   eventType: EventType;
   eventCategory: EventCategory;
   payload: any;
   sensitiveDataMask: string[];
 }> {
+  /**
+   * Creates the entity.
+   * @param eventType - The event type.
+   * @param payload - The payload.
+   * @returns The EventData.
+   */
   static create(eventType: EventType, payload: any): EventData {
     return new EventData({
       eventType,
@@ -505,6 +681,13 @@ export class EventData extends ValueObject<{
     });
   }
 
+  /**
+   * Creates performance event.
+   * @param operation - The operation.
+   * @param duration - The duration.
+   * @param success - The success.
+   * @returns The EventData.
+   */
   static createPerformanceEvent(operation: string, duration: number, success: boolean): EventData {
     return new EventData({
       eventType: EventType.SYSTEM_PERFORMANCE,
@@ -514,6 +697,13 @@ export class EventData extends ValueObject<{
     });
   }
 
+  /**
+   * Creates metric event.
+   * @param metricName - The metric name.
+   * @param metricValue - The metric value.
+   * @param metricUnit - The metric unit.
+   * @returns The EventData.
+   */
   static createMetricEvent(metricName: string, metricValue: number, metricUnit: MetricUnit): EventData {
     return new EventData({
       eventType: EventType.BUSINESS_METRIC,
@@ -523,6 +713,11 @@ export class EventData extends ValueObject<{
     });
   }
 
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The EventData.
+   */
   static restore(data: any): EventData {
     return new EventData(data);
   }
@@ -548,14 +743,26 @@ export class EventData extends ValueObject<{
     }
   }
 
+  /**
+   * Retrieves event type.
+   * @returns The EventType.
+   */
   getEventType(): EventType {
     return this.props.eventType;
   }
 
+  /**
+   * Retrieves event category.
+   * @returns The EventCategory.
+   */
   getEventCategory(): EventCategory {
     return this.props.eventCategory;
   }
 
+  /**
+   * Performs the contains sensitive data operation.
+   * @returns The boolean value.
+   */
   containsSensitiveData(): boolean {
     // 检查是否包含敏感数据的逻辑
     const sensitiveKeys = ['email', 'phone', 'address', 'ssn', 'creditCard'];
@@ -564,11 +771,19 @@ export class EventData extends ValueObject<{
     return sensitiveKeys.some(key => payloadStr.includes(key));
   }
 
+  /**
+   * Performs the is valid operation.
+   * @returns The boolean value.
+   */
   isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
 
+  /**
+   * Retrieves validation errors.
+   * @returns The an array of string value.
+   */
   getValidationErrors(): string[] {
     const errors: string[] = [];
 
@@ -587,6 +802,9 @@ export class EventData extends ValueObject<{
     return errors;
   }
 
+  /**
+   * Performs the anonymize operation.
+   */
   anonymize(): void {
     // 匿名化敏感数据
     if (this.containsSensitiveData()) {
@@ -597,10 +815,18 @@ export class EventData extends ValueObject<{
   }
 }
 
+/**
+ * Represents the event timestamp.
+ */
 export class EventTimestamp extends ValueObject<{
   timestamp: Date;
   timezone: string;
 }> {
+  /**
+   * Performs the now operation.
+   * @param timezone - The timezone.
+   * @returns The EventTimestamp.
+   */
   static now(timezone?: string): EventTimestamp {
     return new EventTimestamp({
       timestamp: new Date(),
@@ -608,6 +834,11 @@ export class EventTimestamp extends ValueObject<{
     });
   }
 
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The EventTimestamp.
+   */
   static restore(data: any): EventTimestamp {
     return new EventTimestamp({
       timestamp: new Date(data.timestamp),
@@ -615,15 +846,27 @@ export class EventTimestamp extends ValueObject<{
     });
   }
 
+  /**
+   * Performs the to iso string operation.
+   * @returns The string value.
+   */
   toISOString(): string {
     return this.props.timestamp.toISOString();
   }
 
+  /**
+   * Performs the is valid operation.
+   * @returns The boolean value.
+   */
   isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
 
+  /**
+   * Retrieves validation errors.
+   * @returns The an array of string value.
+   */
   getValidationErrors(): string[] {
     const errors: string[] = [];
 
@@ -652,6 +895,9 @@ export class EventTimestamp extends ValueObject<{
   }
 }
 
+/**
+ * Represents the event context.
+ */
 export class EventContext extends ValueObject<{
   requestId?: string;
   userAgent?: string;
@@ -660,6 +906,11 @@ export class EventContext extends ValueObject<{
   dimensions: Record<string, string>;
   metadata: Record<string, any>;
 }> {
+  /**
+   * Creates the entity.
+   * @param context - The context.
+   * @returns The EventContext.
+   */
   static create(context: any): EventContext {
     return new EventContext({
       requestId: context.requestId,
@@ -671,15 +922,28 @@ export class EventContext extends ValueObject<{
     });
   }
 
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The EventContext.
+   */
   static restore(data: any): EventContext {
     return new EventContext(data);
   }
 
+  /**
+   * Performs the is valid operation.
+   * @returns The boolean value.
+   */
   isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
 
+  /**
+   * Retrieves validation errors.
+   * @returns The an array of string value.
+   */
   getValidationErrors(): string[] {
     const errors: string[] = [];
 
@@ -694,6 +958,9 @@ export class EventContext extends ValueObject<{
     return errors;
   }
 
+  /**
+   * Performs the anonymize operation.
+   */
   anonymize(): void {
     // 匿名化上下文中的敏感信息
     const newProps = { ...this.props };
@@ -704,20 +971,39 @@ export class EventContext extends ValueObject<{
 }
 
 // 结果类
+/**
+ * Represents the event validation result.
+ */
 export class EventValidationResult {
+  /**
+   * Initializes a new instance of the Event Validation Result.
+   * @param isValid - The is valid.
+   * @param errors - The errors.
+   */
   constructor(
     public readonly isValid: boolean,
     public readonly errors: string[]
   ) {}
 }
 
+/**
+ * Represents the privacy compliance result.
+ */
 export class PrivacyComplianceResult {
+  /**
+   * Initializes a new instance of the Privacy Compliance Result.
+   * @param isCompliant - The is compliant.
+   * @param errors - The errors.
+   */
   constructor(
     public readonly isCompliant: boolean,
     public readonly errors: string[]
   ) {}
 }
 
+/**
+ * Represents the analytics event summary.
+ */
 export class AnalyticsEventSummary extends ValueObject<{
   id: string;
   sessionId: string;
@@ -732,12 +1018,40 @@ export class AnalyticsEventSummary extends ValueObject<{
   isAnonymized: boolean;
   daysSinceCreation: number;
 }> {
+  /**
+   * Performs the id operation.
+   * @returns The string value.
+   */
   get id(): string { return this.props.id; }
+  /**
+   * Performs the session id operation.
+   * @returns The string value.
+   */
   get sessionId(): string { return this.props.sessionId; }
+  /**
+   * Performs the user id operation.
+   * @returns The string | undefined.
+   */
   get userId(): string | undefined { return this.props.userId; }
+  /**
+   * Performs the event type operation.
+   * @returns The EventType.
+   */
   get eventType(): EventType { return this.props.eventType; }
+  /**
+   * Performs the status operation.
+   * @returns The EventStatus.
+   */
   get status(): EventStatus { return this.props.status; }
+  /**
+   * Performs the is anonymized operation.
+   * @returns The boolean value.
+   */
   get isAnonymized(): boolean { return this.props.isAnonymized; }
+  /**
+   * Performs the days since creation operation.
+   * @returns The number value.
+   */
   get daysSinceCreation(): number { return this.props.daysSinceCreation; }
 }
 
@@ -784,6 +1098,9 @@ export enum MetricUnit {
 }
 
 // 接口定义
+/**
+ * Defines the shape of the analytics event data.
+ */
 export interface AnalyticsEventData {
   id: string;
   session: any;
@@ -797,7 +1114,19 @@ export interface AnalyticsEventData {
 }
 
 // 领域事件
+/**
+ * Represents the analytics event created event event.
+ */
 export class AnalyticsEventCreatedEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Analytics Event Created Event.
+   * @param eventId - The event id.
+   * @param sessionId - The session id.
+   * @param userId - The user id.
+   * @param eventType - The event type.
+   * @param timestamp - The timestamp.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly eventId: string,
     public readonly sessionId: string,
@@ -808,7 +1137,18 @@ export class AnalyticsEventCreatedEvent implements DomainEvent {
   ) {}
 }
 
+/**
+ * Represents the system performance event created event event.
+ */
 export class SystemPerformanceEventCreatedEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the System Performance Event Created Event.
+   * @param eventId - The event id.
+   * @param operation - The operation.
+   * @param duration - The duration.
+   * @param success - The success.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly eventId: string,
     public readonly operation: string,
@@ -818,7 +1158,19 @@ export class SystemPerformanceEventCreatedEvent implements DomainEvent {
   ) {}
 }
 
+/**
+ * Represents the business metric event created event event.
+ */
 export class BusinessMetricEventCreatedEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Business Metric Event Created Event.
+   * @param eventId - The event id.
+   * @param metricName - The metric name.
+   * @param metricValue - The metric value.
+   * @param metricUnit - The metric unit.
+   * @param dimensions - The dimensions.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly eventId: string,
     public readonly metricName: string,
@@ -829,7 +1181,17 @@ export class BusinessMetricEventCreatedEvent implements DomainEvent {
   ) {}
 }
 
+/**
+ * Represents the analytics event validated event event.
+ */
 export class AnalyticsEventValidatedEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Analytics Event Validated Event.
+   * @param eventId - The event id.
+   * @param sessionId - The session id.
+   * @param eventType - The event type.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly eventId: string,
     public readonly sessionId: string,
@@ -838,7 +1200,17 @@ export class AnalyticsEventValidatedEvent implements DomainEvent {
   ) {}
 }
 
+/**
+ * Represents the analytics event validation failed event event.
+ */
 export class AnalyticsEventValidationFailedEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Analytics Event Validation Failed Event.
+   * @param eventId - The event id.
+   * @param sessionId - The session id.
+   * @param errors - The errors.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly eventId: string,
     public readonly sessionId: string,
@@ -847,7 +1219,17 @@ export class AnalyticsEventValidationFailedEvent implements DomainEvent {
   ) {}
 }
 
+/**
+ * Represents the analytics event processed event event.
+ */
 export class AnalyticsEventProcessedEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Analytics Event Processed Event.
+   * @param eventId - The event id.
+   * @param sessionId - The session id.
+   * @param eventType - The event type.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly eventId: string,
     public readonly sessionId: string,
@@ -856,14 +1238,31 @@ export class AnalyticsEventProcessedEvent implements DomainEvent {
   ) {}
 }
 
+/**
+ * Represents the analytics event anonymized event event.
+ */
 export class AnalyticsEventAnonymizedEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Analytics Event Anonymized Event.
+   * @param eventId - The event id.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly eventId: string,
     public readonly occurredAt: Date
   ) {}
 }
 
+/**
+ * Represents the analytics event expired event event.
+ */
 export class AnalyticsEventExpiredEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Analytics Event Expired Event.
+   * @param eventId - The event id.
+   * @param sessionId - The session id.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly eventId: string,
     public readonly sessionId: string,

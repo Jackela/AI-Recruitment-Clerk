@@ -5,6 +5,9 @@
 
 import { Logger } from '@nestjs/common';
 
+/**
+ * Defines the shape of the service config.
+ */
 export interface ServiceConfig {
   serviceName: string;
   enableMetrics?: boolean;
@@ -12,16 +15,26 @@ export interface ServiceConfig {
   retryConfig?: RetryConfig;
 }
 
+/**
+ * Defines the shape of the retry config.
+ */
 export interface RetryConfig {
   maxRetries: number;
   retryDelay: number;
   exponentialBackoff?: boolean;
 }
 
+/**
+ * Provides base functionality.
+ */
 export abstract class BaseService {
   protected readonly logger: Logger;
   protected readonly config: ServiceConfig;
 
+  /**
+   * Initializes a new instance of the Base Service.
+   * @param config - The config.
+   */
   constructor(config: ServiceConfig) {
     this.config = { enableMetrics: true, enableCaching: false, ...config };
     this.logger = new Logger(this.config.serviceName);
@@ -123,7 +136,7 @@ export abstract class BaseService {
   protected async withCache<T>(
     key: string,
     operation: () => Promise<T>,
-    ttl: number = 300000 // 5 minutes default
+    ttl = 300000 // 5 minutes default
   ): Promise<T> {
     if (!this.config.enableCaching) {
       return operation();
@@ -168,6 +181,10 @@ export abstract class BaseService {
  * 数据访问层基类
  */
 export abstract class BaseRepository<T> extends BaseService {
+  /**
+   * Initializes a new instance of the Base Repository.
+   * @param serviceName - The service name.
+   */
   constructor(serviceName: string) {
     super({ serviceName: `${serviceName}Repository` });
   }
@@ -177,6 +194,11 @@ export abstract class BaseRepository<T> extends BaseService {
   protected abstract updateEntity(id: string, data: Partial<T>): Promise<T>;
   protected abstract deleteEntity(id: string): Promise<boolean>;
 
+  /**
+   * Creates the entity.
+   * @param data - The data.
+   * @returns A promise that resolves to T.
+   */
   async create(data: Partial<T>): Promise<T> {
     return this.withTiming(
       () => this.createEntity(data),
@@ -184,6 +206,11 @@ export abstract class BaseRepository<T> extends BaseService {
     );
   }
 
+  /**
+   * Performs the find one operation.
+   * @param id - The id.
+   * @returns A promise that resolves to T | null.
+   */
   async findOne(id: string): Promise<T | null> {
     return this.withCache(
       `entity:${id}`,
@@ -191,6 +218,12 @@ export abstract class BaseRepository<T> extends BaseService {
     );
   }
 
+  /**
+   * Updates the entity.
+   * @param id - The id.
+   * @param data - The data.
+   * @returns A promise that resolves to T.
+   */
   async update(id: string, data: Partial<T>): Promise<T> {
     return this.withTiming(
       () => this.updateEntity(id, data),
@@ -198,6 +231,11 @@ export abstract class BaseRepository<T> extends BaseService {
     );
   }
 
+  /**
+   * Removes the entity.
+   * @param id - The id.
+   * @returns A promise that resolves to boolean value.
+   */
   async delete(id: string): Promise<boolean> {
     return this.withTiming(
       () => this.deleteEntity(id),

@@ -1,11 +1,17 @@
 import { Logger } from '@nestjs/common';
 
+/**
+ * Defines the shape of the security validation result.
+ */
 export interface SecurityValidationResult {
   isValid: boolean;
   missingVariables: string[];
   errors: string[];
 }
 
+/**
+ * Represents the secure config validator.
+ */
 export class SecureConfigValidator {
   private static readonly logger = new Logger(SecureConfigValidator.name);
   

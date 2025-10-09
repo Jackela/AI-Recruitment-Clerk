@@ -4,7 +4,7 @@
  * Specific test to validate WebKit connection stability fixes
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 test.describe('WebKit Stability Validation', () => {
   test('WebKit can reliably connect to dev server', async ({

@@ -15,6 +15,9 @@ import { DailyUsageResetEvent } from '../domain-events/daily-usage-reset.event.j
 import { BonusType, UsageLimitData } from '../../application/dtos/usage-limit.dto.js';
 
 // UsageLimit聚合根 - 管理IP使用限制和配额分配
+/**
+ * Represents the usage limit.
+ */
 export class UsageLimit {
   private uncommittedEvents: DomainEvent[] = [];
 
@@ -28,6 +31,12 @@ export class UsageLimit {
   ) {}
 
   // 工厂方法 - 创建新的使用限制
+  /**
+   * Creates the entity.
+   * @param ip - The ip.
+   * @param policy - The policy.
+   * @returns The UsageLimit.
+   */
   static create(ip: string, policy: UsageLimitPolicy): UsageLimit {
     const limitId = UsageLimitId.generate();
     const ipAddress = new IPAddress({ value: ip });
@@ -55,6 +64,11 @@ export class UsageLimit {
   }
 
   // 工厂方法 - 从持久化数据恢复
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The UsageLimit.
+   */
   static restore(data: UsageLimitData): UsageLimit {
     return new UsageLimit(
       new UsageLimitId({ value: data.id }),
@@ -67,6 +81,10 @@ export class UsageLimit {
   }
 
   // 核心业务方法 - 检查是否可以使用
+  /**
+   * Performs the can use operation.
+   * @returns The UsageLimitCheckResult.
+   */
   canUse(): UsageLimitCheckResult {
     this.resetIfNeeded();
     
@@ -91,6 +109,10 @@ export class UsageLimit {
   }
 
   // 记录使用
+  /**
+   * Performs the record usage operation.
+   * @returns The UsageRecordResult.
+   */
   recordUsage(): UsageRecordResult {
     this.resetIfNeeded();
 
@@ -117,6 +139,11 @@ export class UsageLimit {
   }
 
   // 添加奖励配额
+  /**
+   * Performs the add bonus quota operation.
+   * @param bonusType - The bonus type.
+   * @param amount - The amount.
+   */
   addBonusQuota(bonusType: BonusType, amount: number): void {
     if (amount <= 0) {
       throw new Error('Bonus quota amount must be positive');
@@ -174,6 +201,10 @@ export class UsageLimit {
   }
 
   // 查询方法
+  /**
+   * Retrieves usage statistics.
+   * @returns The UsageStatistics.
+   */
   getUsageStatistics(): UsageStatistics {
     return new UsageStatistics({
       ip: this.ip.getValue(),
@@ -194,10 +225,17 @@ export class UsageLimit {
   }
 
   // 领域事件管理
+  /**
+   * Retrieves uncommitted events.
+   * @returns The an array of DomainEvent.
+   */
   getUncommittedEvents(): DomainEvent[] {
     return [...this.uncommittedEvents];
   }
 
+  /**
+   * Performs the mark events as committed operation.
+   */
   markEventsAsCommitted(): void {
     this.uncommittedEvents = [];
   }
@@ -207,18 +245,34 @@ export class UsageLimit {
   }
 
   // Getters
+  /**
+   * Retrieves id.
+   * @returns The UsageLimitId.
+   */
   getId(): UsageLimitId {
     return this.id;
   }
 
+  /**
+   * Retrieves ip.
+   * @returns The string value.
+   */
   getIP(): string {
     return this.ip.getValue();
   }
 
+  /**
+   * Retrieves current usage.
+   * @returns The number value.
+   */
   getCurrentUsage(): number {
     return this.usageTracking.getCurrentCount();
   }
 
+  /**
+   * Retrieves available quota.
+   * @returns The number value.
+   */
   getAvailableQuota(): number {
     return this.quotaAllocation.getAvailableQuota() - this.usageTracking.getCurrentCount();
   }

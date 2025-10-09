@@ -1,13 +1,19 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { LoggerService } from '../shared/logger.service';
 
+/**
+ * Provides guest usage functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class GuestUsageService {
+  private readonly logger = inject(LoggerService).createLogger('GuestUsageService');
+  
   private readonly STORAGE_KEYS = {
     USAGE_COUNT: 'ai_guest_usage_count',
     FEEDBACK_CODE: 'ai_guest_feedback_code',
@@ -18,7 +24,12 @@ export class GuestUsageService {
   private readonly MAX_GUEST_USAGE = 5;
   private readonly API_BASE_URL = `${environment.apiUrl}/marketing/feedback-codes`;
 
-  constructor(private http: HttpClient) {
+  private http = inject(HttpClient);
+
+  /**
+   * Initializes a new instance of the Guest Usage Service.
+   */
+  constructor() {
     this.initializeSession();
   }
 
@@ -44,17 +55,24 @@ export class GuestUsageService {
     );
   }
 
+  /**
+   * Retrieves usage count.
+   * @returns The number value.
+   */
   getUsageCount(): number {
     try {
       const count = localStorage.getItem(this.STORAGE_KEYS.USAGE_COUNT) || '0';
       const parsed = parseInt(count, 10);
       return isNaN(parsed) ? 0 : parsed;
     } catch (error) {
-      console.warn('Error reading usage count from localStorage:', error);
+      this.logger.warn('Error reading usage count from localStorage', error);
       return 0;
     }
   }
 
+  /**
+   * Performs the increment usage operation.
+   */
   incrementUsage(): void {
     const current = this.getUsageCount();
     const newCount = current + 1;
@@ -71,23 +89,39 @@ export class GuestUsageService {
       const history = localStorage.getItem('ai_usage_history');
       return history ? JSON.parse(history) : [];
     } catch (error) {
-      console.warn('Error parsing usage history from localStorage:', error);
+      this.logger.warn('Error parsing usage history from localStorage', error);
       return [];
     }
   }
 
+  /**
+   * Retrieves remaining usage.
+   * @returns The number value.
+   */
   getRemainingUsage(): number {
     return Math.max(0, this.MAX_GUEST_USAGE - this.getUsageCount());
   }
 
+  /**
+   * Performs the is usage exhausted operation.
+   * @returns The boolean value.
+   */
   isUsageExhausted(): boolean {
     return this.getUsageCount() >= this.MAX_GUEST_USAGE;
   }
 
+  /**
+   * Performs the can use feature operation.
+   * @returns The boolean value.
+   */
   canUseFeature(): boolean {
     return !this.isUsageExhausted();
   }
 
+  /**
+   * Generates feedback code.
+   * @returns The string value.
+   */
   generateFeedbackCode(): string {
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substr(2, 8);
@@ -104,6 +138,10 @@ export class GuestUsageService {
     return code;
   }
 
+  /**
+   * Retrieves feedback code.
+   * @returns The string | null.
+   */
   getFeedbackCode(): string | null {
     return localStorage.getItem(this.STORAGE_KEYS.FEEDBACK_CODE);
   }
@@ -114,15 +152,21 @@ export class GuestUsageService {
     );
   }
 
-  getGuestStats(): any {
+  /**
+   * Retrieves guest stats.
+   * @returns The {usageCount: number; remainingUsage: number; maxUsage: number; isExhausted: boolean; lastUsedDate: string | null; firstVisit: string | null; sessionId: string | null; usageHistory: string[]}.
+   */
+  getGuestStats(): {usageCount: number; remainingUsage: number; maxUsage: number; isExhausted: boolean; lastUsedDate: string | null; firstVisit: string | null; sessionId: string | null; usageHistory: string[]} {
+    const usageHistory = this.getUsageHistory();
     return {
       usageCount: this.getUsageCount(),
       remainingUsage: this.getRemainingUsage(),
       maxUsage: this.MAX_GUEST_USAGE,
       isExhausted: this.isUsageExhausted(),
+      lastUsedDate: usageHistory.length > 0 ? usageHistory[usageHistory.length - 1] : null,
       firstVisit: localStorage.getItem(this.STORAGE_KEYS.FIRST_VISIT),
       sessionId: localStorage.getItem(this.STORAGE_KEYS.USER_SESSION),
-      usageHistory: this.getUsageHistory(),
+      usageHistory: usageHistory,
     };
   }
 
@@ -149,7 +193,7 @@ export class GuestUsageService {
         return true; // 权限已刷新
       }
     } catch (error) {
-      console.warn('检查反馈码状态失败:', error);
+      this.logger.warn('检查反馈码状态失败', error);
       // API调用失败时，不影响用户体验
     }
 
@@ -177,7 +221,7 @@ export class GuestUsageService {
     // 清空当前反馈码，为下一轮生成准备
     localStorage.removeItem(this.STORAGE_KEYS.FEEDBACK_CODE);
 
-    console.log('用户权限已刷新：反馈码已核销，获得新的使用次数');
+    this.logger.log('用户权限已刷新：反馈码已核销，获得新的使用次数');
   }
 
   /**
@@ -207,6 +251,9 @@ export class GuestUsageService {
     }
   }
 
+  /**
+   * Performs the reset usage operation.
+   */
   resetUsage(): void {
     Object.values(this.STORAGE_KEYS).forEach((key) => {
       localStorage.removeItem(key);

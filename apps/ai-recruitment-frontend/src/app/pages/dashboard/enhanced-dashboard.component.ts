@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { LoggerService } from '../../services/shared/logger.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Observable, of, interval, Subject, combineLatest } from 'rxjs';
@@ -44,8 +45,11 @@ interface Activity {
   status: string;
 }
 
+/**
+ * Represents the enhanced dashboard component.
+ */
 @Component({
-  selector: 'app-enhanced-dashboard',
+  selector: 'arc-enhanced-dashboard',
   standalone: true,
   imports: [CommonModule, RouterModule, SharedModule, BentoGridComponent],
   template: `
@@ -64,13 +68,13 @@ interface Activity {
       </div>
 
       <!-- Main Bento Grid Dashboard -->
-      <app-bento-grid
+      <arc-bento-grid
         [items]="(bentoItems$ | async) || []"
         [gridSize]="'default'"
         [ariaLabel]="'招聘系统仪表板'"
         [onItemClickHandler]="onBentoItemClick.bind(this)"
       >
-      </app-bento-grid>
+      </arc-bento-grid>
 
       <!-- Quick Actions -->
       <div class="quick-actions-section">
@@ -437,17 +441,38 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
   systemHealth$!: Observable<SystemHealth>;
   bentoItems$!: Observable<BentoGridItem[]>;
 
+  /**
+   * Initializes a new instance of the Enhanced Dashboard Component.
+   * @param _dashboardApi - The dashboard api.
+   * @param guestApi - The guest api.
+   * @param websocketStats - The websocket stats.
+   * @param progressFeedback - The progress feedback.
+   * @param loggerService - The logger service.
+   */
   constructor(
     private _dashboardApi: DashboardApiService,
     private guestApi: GuestApiService,
     private websocketStats: WebSocketStatsService,
     private progressFeedback: ProgressFeedbackService,
-  ) {}
+    private loggerService: LoggerService,
+  ) {
+    this.logger = this.loggerService.createLogger('EnhancedDashboardComponent');
+  }
 
+  private logger: ReturnType<LoggerService['createLogger']>;
+
+  /**
+   * Performs the ng on init operation.
+   * @returns The result of the operation.
+   */
   ngOnInit() {
     this.initializeDataStreams();
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   * @returns The result of the operation.
+   */
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
@@ -458,7 +483,7 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
     const realtimeStats$ = this.websocketStats.subscribeToStats().pipe(
       takeUntil(this.destroy$),
       catchError(() => {
-        console.warn('WebSocket stats unavailable, using mock data');
+        this.logger.warn('WebSocket stats unavailable, using mock data');
         return of(this.createMockRealtimeStats());
       }),
     );
@@ -806,6 +831,11 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
       .join('');
   }
 
+  /**
+   * Retrieves system status text.
+   * @param status - The status.
+   * @returns The string value.
+   */
   getSystemStatusText(status?: string): string {
     switch (status) {
       case 'healthy':
@@ -819,11 +849,15 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the on bento item click operation.
+   * @param item - The item.
+   */
   onBentoItemClick(item: BentoGridItem): void {
-    console.log('Clicked item:', item.id);
+    this.logger.userAction('Bento grid item clicked', { itemId: item.id, itemVariant: item.variant, itemSize: item.size });
   }
 
   private navigateToReports(): void {
-    console.log('Navigate to reports');
+    this.logger.userAction('Navigate to reports');
   }
 }

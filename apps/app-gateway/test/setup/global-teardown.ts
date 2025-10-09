@@ -1,3 +1,7 @@
+/**
+ * Performs the global teardown operation.
+ * @returns The result of the operation.
+ */
 export default async function globalTeardown() {
   console.log('🧹 Starting Integration Test Suite Global Teardown');
 

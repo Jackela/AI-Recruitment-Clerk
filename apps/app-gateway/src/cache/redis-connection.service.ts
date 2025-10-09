@@ -11,6 +11,9 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+/**
+ * Provides redis connection functionality.
+ */
 @Injectable()
 export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(RedisConnectionService.name);
@@ -24,12 +27,24 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
   private maxReconnectAttempts = 10;
   private reconnectInterval: NodeJS.Timeout | null = null;
 
+  /**
+   * Initializes a new instance of the Redis Connection Service.
+   * @param configService - The config service.
+   */
   constructor(private configService: ConfigService) {}
 
+  /**
+   * Performs the on module init operation.
+   * @returns The result of the operation.
+   */
   async onModuleInit() {
     await this.initializeConnection();
   }
 
+  /**
+   * Performs the on module destroy operation.
+   * @returns The result of the operation.
+   */
   async onModuleDestroy() {
     await this.cleanup();
   }

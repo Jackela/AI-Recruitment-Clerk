@@ -6,6 +6,52 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
+// Enhanced type definitions for dashboard widgets
+export type FilterValue = string | number | boolean | string[] | number[];
+export type WidgetDataValue = number | string | boolean | Date | null;
+export type TimeSeriesDataPoint = {
+  timestamp: Date;
+  value: WidgetDataValue;
+  [key: string]: WidgetDataValue;
+};
+
+export type ChartDataset = {
+  label: string;
+  data: Array<{ x: Date; y: number }>;
+  borderColor: string;
+  backgroundColor: string;
+};
+
+export type ChartData = {
+  datasets: ChartDataset[];
+};
+
+export type GaugeData = {
+  value: number;
+  max: number;
+  thresholds: Array<{
+    value: number;
+    color: string;
+    operator: '>' | '<' | '=' | '>=' | '<=';
+  }>;
+};
+
+export type TableData = {
+  columns: string[];
+  rows: Record<string, WidgetDataValue>[];
+};
+
+export type MetricData = {
+  value: number;
+  previousValue: number;
+  change: number;
+  changePercent: number;
+  trend: 'up' | 'down' | 'stable';
+  status: 'normal' | 'warning' | 'critical';
+};
+
+export type WidgetData = ChartData | GaugeData | TableData | MetricData | TimeSeriesDataPoint | TimeSeriesDataPoint[] | number | string;
+
 export interface DashboardWidget {
   id: string;
   type: 'metric' | 'chart' | 'status' | 'alert' | 'log' | 'map' | 'gauge' | 'table';
@@ -28,9 +74,9 @@ export interface DashboardWidget {
       color: string;
       operator: '>' | '<' | '=' | '>=' | '<=';
     }>;
-    filters?: Record<string, any>;
+    filters?: Record<string, FilterValue>;
   };
-  data?: any;
+  data?: WidgetData;
   lastUpdated?: Date;
   status: 'active' | 'loading' | 'error' | 'disabled';
 }
@@ -97,10 +143,10 @@ export class MonitoringDashboardService {
   private readonly logger = new Logger(MonitoringDashboardService.name);
   
   private dashboards = new Map<string, Dashboard>();
-  private widgetData = new Map<string, any>();
+  private widgetData = new Map<string, WidgetData>();
   private dashboardData: DashboardData | null = null;
   
-  private readonly dataSources = new Map<string, () => Promise<any>>();
+  private readonly dataSources = new Map<string, () => Promise<WidgetData>>();
 
   constructor() {
     this.initializeDataSources();
@@ -234,14 +280,14 @@ export class MonitoringDashboardService {
   /**
    * Get widget data
    */
-  getWidgetData(widgetId: string): any {
+  getWidgetData(widgetId: string): WidgetData | undefined {
     return this.widgetData.get(widgetId);
   }
 
   /**
    * Export dashboard configuration
    */
-  exportDashboard(dashboardId: string): any {
+  exportDashboard(dashboardId: string): DashboardExport | null {
     const dashboard = this.dashboards.get(dashboardId);
     if (!dashboard) return null;
 
@@ -258,7 +304,7 @@ export class MonitoringDashboardService {
   /**
    * Import dashboard configuration
    */
-  importDashboard(dashboardConfig: any): Dashboard | null {
+  importDashboard(dashboardConfig: DashboardExport): Dashboard | null {
     try {
       const { dashboard } = dashboardConfig;
       return this.createDashboard(dashboard);
@@ -339,7 +385,7 @@ export class MonitoringDashboardService {
     }
   }
 
-  private processWidgetData(widget: DashboardWidget, rawData: any): any {
+  private processWidgetData(widget: DashboardWidget, rawData: WidgetData): WidgetData {
     const { config } = widget;
     
     // Apply filters
@@ -357,7 +403,7 @@ export class MonitoringDashboardService {
     if (config.timeRange && Array.isArray(data)) {
       const timeRangeMs = this.parseTimeRange(config.timeRange);
       const cutoffTime = Date.now() - timeRangeMs;
-      data = data.filter((item: any) => 
+      data = data.filter((item: TimeSeriesDataPoint) => 
         item.timestamp && new Date(item.timestamp).getTime() > cutoffTime
       );
     }
@@ -377,7 +423,7 @@ export class MonitoringDashboardService {
     }
   }
 
-  private processChartData(data: any, config: DashboardWidget['config']): any {
+  private processChartData(data: WidgetData, config: DashboardWidget['config']): ChartData {
     if (typeof data === 'number') {
       return {
         datasets: [{
@@ -406,7 +452,7 @@ export class MonitoringDashboardService {
     return data;
   }
 
-  private processGaugeData(data: any, config: DashboardWidget['config']): any {
+  private processGaugeData(data: WidgetData, config: DashboardWidget['config']): GaugeData {
     const value = typeof data === 'number' ? data : data?.value || 0;
     const max = config.thresholds?.reduce((max, threshold) => Math.max(max, threshold.value), 100) || 100;
     
@@ -417,7 +463,7 @@ export class MonitoringDashboardService {
     };
   }
 
-  private processTableData(data: any, config: DashboardWidget['config']): any {
+  private processTableData(data: WidgetData, config: DashboardWidget['config']): TableData {
     if (!Array.isArray(data)) {
       return { rows: [], columns: [] };
     }
@@ -429,7 +475,7 @@ export class MonitoringDashboardService {
     };
   }
 
-  private processMetricData(data: any, config: DashboardWidget['config']): any {
+  private processMetricData(data: WidgetData, config: DashboardWidget['config']): MetricData {
     const value = typeof data === 'number' ? data : data?.value || 0;
     const previousValue = data?.previousValue || value;
     const change = value - previousValue;
@@ -467,7 +513,7 @@ export class MonitoringDashboardService {
     return 'normal';
   }
 
-  private applyFilters(data: any, filters: Record<string, any>): any {
+  private applyFilters(data: WidgetData, filters: Record<string, FilterValue>): WidgetData {
     if (!Array.isArray(data)) return data;
 
     return data.filter(item => {

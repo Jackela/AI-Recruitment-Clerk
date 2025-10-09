@@ -2,6 +2,9 @@ import { ValueObject } from '../base/value-object';
 import { DomainEvent } from '../base/domain-event';
 
 // Incentive聚合根 - 管理红包激励系统的核心业务逻辑
+/**
+ * Represents the incentive.
+ */
 export class Incentive {
   private uncommittedEvents: DomainEvent[] = [];
 
@@ -17,6 +20,14 @@ export class Incentive {
   ) {}
 
   // 工厂方法 - 创建问卷完成激励
+  /**
+   * Creates questionnaire incentive.
+   * @param ip - The ip.
+   * @param questionnaireId - The questionnaire id.
+   * @param qualityScore - The quality score.
+   * @param contactInfo - The contact info.
+   * @returns The Incentive.
+   */
   static createQuestionnaireIncentive(
     ip: string,
     questionnaireId: string,
@@ -55,6 +66,13 @@ export class Incentive {
   }
 
   // 工厂方法 - 创建推荐激励
+  /**
+   * Creates referral incentive.
+   * @param referrerIP - The referrer ip.
+   * @param referredIP - The referred ip.
+   * @param contactInfo - The contact info.
+   * @returns The Incentive.
+   */
   static createReferralIncentive(
     referrerIP: string,
     referredIP: string,
@@ -87,6 +105,11 @@ export class Incentive {
   }
 
   // 工厂方法 - 从持久化数据恢复
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The Incentive.
+   */
   static restore(data: IncentiveData): Incentive {
     return new Incentive(
       new IncentiveId({ value: data.id }),
@@ -101,6 +124,10 @@ export class Incentive {
   }
 
   // 核心业务方法 - 验证激励资格
+  /**
+   * Validates eligibility.
+   * @returns The IncentiveValidationResult.
+   */
   validateEligibility(): IncentiveValidationResult {
     const validationErrors: string[] = [];
 
@@ -147,6 +174,10 @@ export class Incentive {
   }
 
   // 批准处理
+  /**
+   * Performs the approve for processing operation.
+   * @param reason - The reason.
+   */
   approveForProcessing(reason: string): void {
     if (this.status !== IncentiveStatus.PENDING_VALIDATION) {
       throw new Error(`Cannot approve incentive in ${this.status} status`);
@@ -165,6 +196,10 @@ export class Incentive {
   }
 
   // 拒绝激励
+  /**
+   * Performs the reject operation.
+   * @param reason - The reason.
+   */
   reject(reason: string): void {
     if (this.status === IncentiveStatus.PAID) {
       throw new Error('Cannot reject already paid incentive');
@@ -182,6 +217,12 @@ export class Incentive {
   }
 
   // 执行支付
+  /**
+   * Performs the execute payment operation.
+   * @param paymentMethod - The payment method.
+   * @param transactionId - The transaction id.
+   * @returns The PaymentResult.
+   */
   executePayment(paymentMethod: PaymentMethod, transactionId: string): PaymentResult {
     if (this.status !== IncentiveStatus.APPROVED) {
       return PaymentResult.failed(`Cannot pay incentive in ${this.status} status`);
@@ -241,6 +282,10 @@ export class Incentive {
   }
 
   // 查询方法
+  /**
+   * Retrieves incentive summary.
+   * @returns The IncentiveSummary.
+   */
   getIncentiveSummary(): IncentiveSummary {
     return new IncentiveSummary({
       id: this.id.getValue(),
@@ -264,10 +309,17 @@ export class Incentive {
   }
 
   // 领域事件管理
+  /**
+   * Retrieves uncommitted events.
+   * @returns The an array of DomainEvent.
+   */
   getUncommittedEvents(): DomainEvent[] {
     return [...this.uncommittedEvents];
   }
 
+  /**
+   * Performs the mark events as committed operation.
+   */
   markEventsAsCommitted(): void {
     this.uncommittedEvents = [];
   }
@@ -277,45 +329,85 @@ export class Incentive {
   }
 
   // Getters
+  /**
+   * Retrieves id.
+   * @returns The IncentiveId.
+   */
   getId(): IncentiveId {
     return this.id;
   }
 
+  /**
+   * Retrieves status.
+   * @returns The IncentiveStatus.
+   */
   getStatus(): IncentiveStatus {
     return this.status;
   }
 
+  /**
+   * Retrieves recipient ip.
+   * @returns The string value.
+   */
   getRecipientIP(): string {
     return this.recipient.getIP();
   }
 
+  /**
+   * Retrieves reward amount.
+   * @returns The number value.
+   */
   getRewardAmount(): number {
     return this.reward.getAmount();
   }
 
+  /**
+   * Retrieves created at.
+   * @returns The Date.
+   */
   getCreatedAt(): Date {
     return this.createdAt;
   }
 }
 
 // 值对象定义
+/**
+ * Represents the incentive id.
+ */
 export class IncentiveId extends ValueObject<{ value: string }> {
+  /**
+   * Generates the result.
+   * @returns The IncentiveId.
+   */
   static generate(): IncentiveId {
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substr(2, 9);
     return new IncentiveId({ value: `incentive_${timestamp}_${random}` });
   }
   
+  /**
+   * Retrieves value.
+   * @returns The string value.
+   */
   getValue(): string {
     return this.props.value;
   }
 }
 
+/**
+ * Represents the incentive recipient.
+ */
 export class IncentiveRecipient extends ValueObject<{
   ip: string;
   contactInfo: ContactInfo;
   verificationStatus: VerificationStatus;
 }> {
+  /**
+   * Creates the entity.
+   * @param ip - The ip.
+   * @param contactInfo - The contact info.
+   * @returns The IncentiveRecipient.
+   */
   static create(ip: string, contactInfo: ContactInfo): IncentiveRecipient {
     return new IncentiveRecipient({
       ip,
@@ -324,6 +416,11 @@ export class IncentiveRecipient extends ValueObject<{
     });
   }
 
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The IncentiveRecipient.
+   */
   static restore(data: any): IncentiveRecipient {
     return new IncentiveRecipient({
       ip: data.ip,
@@ -332,19 +429,35 @@ export class IncentiveRecipient extends ValueObject<{
     });
   }
 
+  /**
+   * Retrieves ip.
+   * @returns The string value.
+   */
   getIP(): string {
     return this.props.ip;
   }
 
+  /**
+   * Performs the has valid contact info operation.
+   * @returns The boolean value.
+   */
   hasValidContactInfo(): boolean {
     return this.props.contactInfo.isValid();
   }
 
+  /**
+   * Performs the is valid operation.
+   * @returns The boolean value.
+   */
   isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
 
+  /**
+   * Retrieves validation errors.
+   * @returns The an array of string value.
+   */
   getValidationErrors(): string[] {
     const errors: string[] = [];
 
@@ -360,21 +473,37 @@ export class IncentiveRecipient extends ValueObject<{
   }
 }
 
+/**
+ * Represents the contact info.
+ */
 export class ContactInfo extends ValueObject<{
   email?: string;
   phone?: string;
   wechat?: string;
   alipay?: string;
 }> {
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The ContactInfo.
+   */
   static restore(data: any): ContactInfo {
     return new ContactInfo(data);
   }
 
+  /**
+   * Performs the is valid operation.
+   * @returns The boolean value.
+   */
   isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
 
+  /**
+   * Retrieves validation errors.
+   * @returns The an array of string value.
+   */
   getValidationErrors(): string[] {
     const errors: string[] = [];
     const { email, phone, wechat, alipay } = this.props;
@@ -403,6 +532,10 @@ export class ContactInfo extends ValueObject<{
     return errors;
   }
 
+  /**
+   * Retrieves primary contact.
+   * @returns The string value.
+   */
   getPrimaryContact(): string {
     if (this.props.wechat) return `WeChat: ${this.props.wechat}`;
     if (this.props.alipay) return `Alipay: ${this.props.alipay}`;
@@ -411,18 +544,42 @@ export class ContactInfo extends ValueObject<{
     return 'No contact info';
   }
 
+  /**
+   * Performs the email operation.
+   * @returns The string | undefined.
+   */
   get email(): string | undefined { return this.props.email; }
+  /**
+   * Performs the phone operation.
+   * @returns The string | undefined.
+   */
   get phone(): string | undefined { return this.props.phone; }
+  /**
+   * Performs the wechat operation.
+   * @returns The string | undefined.
+   */
   get wechat(): string | undefined { return this.props.wechat; }
+  /**
+   * Performs the alipay operation.
+   * @returns The string | undefined.
+   */
   get alipay(): string | undefined { return this.props.alipay; }
 }
 
+/**
+ * Represents the incentive reward.
+ */
 export class IncentiveReward extends ValueObject<{
   amount: number;
   currency: Currency;
   rewardType: RewardType;
   calculationMethod: string;
 }> {
+  /**
+   * Calculates for questionnaire.
+   * @param qualityScore - The quality score.
+   * @returns The IncentiveReward.
+   */
   static calculateForQuestionnaire(qualityScore: number): IncentiveReward {
     let amount = 0;
     let calculationMethod = '';
@@ -449,6 +606,10 @@ export class IncentiveReward extends ValueObject<{
     });
   }
 
+  /**
+   * Creates referral reward.
+   * @returns The IncentiveReward.
+   */
   static createReferralReward(): IncentiveReward {
     return new IncentiveReward({
       amount: 3,
@@ -458,23 +619,44 @@ export class IncentiveReward extends ValueObject<{
     });
   }
 
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The IncentiveReward.
+   */
   static restore(data: any): IncentiveReward {
     return new IncentiveReward(data);
   }
 
+  /**
+   * Retrieves amount.
+   * @returns The number value.
+   */
   getAmount(): number {
     return this.props.amount;
   }
 
+  /**
+   * Retrieves currency.
+   * @returns The Currency.
+   */
   getCurrency(): Currency {
     return this.props.currency;
   }
 
+  /**
+   * Performs the is valid operation.
+   * @returns The boolean value.
+   */
   isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
 
+  /**
+   * Retrieves validation errors.
+   * @returns The an array of string value.
+   */
   getValidationErrors(): string[] {
     const errors: string[] = [];
 
@@ -494,11 +676,20 @@ export class IncentiveReward extends ValueObject<{
   }
 }
 
+/**
+ * Represents the incentive trigger.
+ */
 export class IncentiveTrigger extends ValueObject<{
   triggerType: TriggerType;
   triggerData: any;
   qualifiedAt: Date;
 }> {
+  /**
+   * Performs the from questionnaire operation.
+   * @param questionnaireId - The questionnaire id.
+   * @param qualityScore - The quality score.
+   * @returns The IncentiveTrigger.
+   */
   static fromQuestionnaire(questionnaireId: string, qualityScore: number): IncentiveTrigger {
     return new IncentiveTrigger({
       triggerType: TriggerType.QUESTIONNAIRE_COMPLETION,
@@ -507,6 +698,11 @@ export class IncentiveTrigger extends ValueObject<{
     });
   }
 
+  /**
+   * Performs the from referral operation.
+   * @param referredIP - The referred ip.
+   * @returns The IncentiveTrigger.
+   */
   static fromReferral(referredIP: string): IncentiveTrigger {
     return new IncentiveTrigger({
       triggerType: TriggerType.REFERRAL,
@@ -515,6 +711,11 @@ export class IncentiveTrigger extends ValueObject<{
     });
   }
 
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The IncentiveTrigger.
+   */
   static restore(data: any): IncentiveTrigger {
     return new IncentiveTrigger({
       ...data,
@@ -522,15 +723,27 @@ export class IncentiveTrigger extends ValueObject<{
     });
   }
 
+  /**
+   * Retrieves trigger type.
+   * @returns The TriggerType.
+   */
   getTriggerType(): TriggerType {
     return this.props.triggerType;
   }
 
+  /**
+   * Performs the is valid operation.
+   * @returns The boolean value.
+   */
   isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
 
+  /**
+   * Retrieves validation errors.
+   * @returns The an array of string value.
+   */
   getValidationErrors(): string[] {
     const errors: string[] = [];
 
@@ -567,13 +780,24 @@ export class IncentiveTrigger extends ValueObject<{
 }
 
 // 结果类
+/**
+ * Represents the incentive validation result.
+ */
 export class IncentiveValidationResult {
+  /**
+   * Initializes a new instance of the Incentive Validation Result.
+   * @param isValid - The is valid.
+   * @param errors - The errors.
+   */
   constructor(
     public readonly isValid: boolean,
     public readonly errors: string[]
   ) {}
 }
 
+/**
+ * Represents the payment result.
+ */
 export class PaymentResult {
   private constructor(
     public readonly success: boolean,
@@ -583,15 +807,30 @@ export class PaymentResult {
     public readonly error?: string
   ) {}
 
+  /**
+   * Performs the success operation.
+   * @param transactionId - The transaction id.
+   * @param amount - The amount.
+   * @param currency - The currency.
+   * @returns The PaymentResult.
+   */
   static success(transactionId: string, amount: number, currency: Currency): PaymentResult {
     return new PaymentResult(true, transactionId, amount, currency);
   }
 
+  /**
+   * Performs the failed operation.
+   * @param error - The error.
+   * @returns The PaymentResult.
+   */
   static failed(error: string): PaymentResult {
     return new PaymentResult(false, undefined, undefined, undefined, error);
   }
 }
 
+/**
+ * Represents the incentive summary.
+ */
 export class IncentiveSummary extends ValueObject<{
   id: string;
   recipientIP: string;
@@ -605,11 +844,35 @@ export class IncentiveSummary extends ValueObject<{
   canBePaid: boolean;
   daysSinceCreation: number;
 }> {
+  /**
+   * Performs the id operation.
+   * @returns The string value.
+   */
   get id(): string { return this.props.id; }
+  /**
+   * Performs the recipient ip operation.
+   * @returns The string value.
+   */
   get recipientIP(): string { return this.props.recipientIP; }
+  /**
+   * Performs the reward amount operation.
+   * @returns The number value.
+   */
   get rewardAmount(): number { return this.props.rewardAmount; }
+  /**
+   * Performs the status operation.
+   * @returns The IncentiveStatus.
+   */
   get status(): IncentiveStatus { return this.props.status; }
+  /**
+   * Performs the can be paid operation.
+   * @returns The boolean value.
+   */
   get canBePaid(): boolean { return this.props.canBePaid; }
+  /**
+   * Performs the days since creation operation.
+   * @returns The number value.
+   */
   get daysSinceCreation(): number { return this.props.daysSinceCreation; }
 }
 
@@ -653,6 +916,9 @@ export enum PaymentMethod {
 }
 
 // 接口定义
+/**
+ * Defines the shape of the incentive data.
+ */
 export interface IncentiveData {
   id: string;
   recipient: any;
@@ -665,7 +931,19 @@ export interface IncentiveData {
 }
 
 // 领域事件
+/**
+ * Represents the incentive created event event.
+ */
 export class IncentiveCreatedEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Incentive Created Event.
+   * @param incentiveId - The incentive id.
+   * @param recipientIP - The recipient ip.
+   * @param rewardAmount - The reward amount.
+   * @param currency - The currency.
+   * @param triggerType - The trigger type.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly incentiveId: string,
     public readonly recipientIP: string,
@@ -676,7 +954,17 @@ export class IncentiveCreatedEvent implements DomainEvent {
   ) {}
 }
 
+/**
+ * Represents the incentive validated event event.
+ */
 export class IncentiveValidatedEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Incentive Validated Event.
+   * @param incentiveId - The incentive id.
+   * @param recipientIP - The recipient ip.
+   * @param rewardAmount - The reward amount.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly incentiveId: string,
     public readonly recipientIP: string,
@@ -685,7 +973,17 @@ export class IncentiveValidatedEvent implements DomainEvent {
   ) {}
 }
 
+/**
+ * Represents the incentive validation failed event event.
+ */
 export class IncentiveValidationFailedEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Incentive Validation Failed Event.
+   * @param incentiveId - The incentive id.
+   * @param recipientIP - The recipient ip.
+   * @param errors - The errors.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly incentiveId: string,
     public readonly recipientIP: string,
@@ -694,7 +992,18 @@ export class IncentiveValidationFailedEvent implements DomainEvent {
   ) {}
 }
 
+/**
+ * Represents the incentive approved event event.
+ */
 export class IncentiveApprovedEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Incentive Approved Event.
+   * @param incentiveId - The incentive id.
+   * @param recipientIP - The recipient ip.
+   * @param rewardAmount - The reward amount.
+   * @param reason - The reason.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly incentiveId: string,
     public readonly recipientIP: string,
@@ -704,7 +1013,17 @@ export class IncentiveApprovedEvent implements DomainEvent {
   ) {}
 }
 
+/**
+ * Represents the incentive rejected event event.
+ */
 export class IncentiveRejectedEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Incentive Rejected Event.
+   * @param incentiveId - The incentive id.
+   * @param recipientIP - The recipient ip.
+   * @param reason - The reason.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly incentiveId: string,
     public readonly recipientIP: string,
@@ -713,7 +1032,20 @@ export class IncentiveRejectedEvent implements DomainEvent {
   ) {}
 }
 
+/**
+ * Represents the incentive paid event event.
+ */
 export class IncentivePaidEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Incentive Paid Event.
+   * @param incentiveId - The incentive id.
+   * @param recipientIP - The recipient ip.
+   * @param amount - The amount.
+   * @param currency - The currency.
+   * @param paymentMethod - The payment method.
+   * @param transactionId - The transaction id.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly incentiveId: string,
     public readonly recipientIP: string,
@@ -725,7 +1057,17 @@ export class IncentivePaidEvent implements DomainEvent {
   ) {}
 }
 
+/**
+ * Represents the payment failed event event.
+ */
 export class PaymentFailedEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Payment Failed Event.
+   * @param incentiveId - The incentive id.
+   * @param recipientIP - The recipient ip.
+   * @param error - The error.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly incentiveId: string,
     public readonly recipientIP: string,

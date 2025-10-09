@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { VisionLlmService } from '../vision-llm/vision-llm.service';
+import { PdfTextExtractorService } from './pdf-text-extractor.service';
 import { GridFsService } from '../gridfs/gridfs.service';
 import { FieldMapperService } from '../field-mapper/field-mapper.service';
 import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
@@ -14,6 +15,9 @@ import {
 import { createHash } from 'crypto';
 import pdfParse from 'pdf-parse-fork';
 
+/**
+ * Provides parsing functionality.
+ */
 @Injectable()
 export class ParsingService {
   private readonly logger = new Logger(ParsingService.name);
@@ -29,8 +33,17 @@ export class ParsingService {
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   ];
 
+  /**
+   * Initializes a new instance of the Parsing Service.
+   * @param visionLlmService - The vision llm service.
+   * @param pdfTextExtractorService - The pdf text extractor service.
+   * @param gridFsService - The grid fs service.
+   * @param fieldMapperService - The field mapper service.
+   * @param natsService - The nats service.
+   */
   constructor(
     private readonly visionLlmService: VisionLlmService,
+    private readonly pdfTextExtractorService: PdfTextExtractorService,
     private readonly gridFsService: GridFsService,
     private readonly fieldMapperService: FieldMapperService,
     private readonly natsService: ResumeParserNatsService,
@@ -47,6 +60,10 @@ export class ParsingService {
   }
 
   // Backward-compatible processing stats expected by contract tests
+  /**
+   * Retrieves processing stats.
+   * @returns The { activeJobs: number; totalCapacity: number; isHealthy: boolean }.
+   */
   getProcessingStats(): { activeJobs: number; totalCapacity: number; isHealthy: boolean } {
     const activeJobs = this.processingFiles.size;
     const totalCapacity = 10;
@@ -58,6 +75,13 @@ export class ParsingService {
   }
 
   // Backward-compatible single-file parser expected by contract tests
+  /**
+   * Performs the parse resume file operation.
+   * @param buffer - The buffer.
+   * @param filename - The filename.
+   * @param userId - The user id.
+   * @returns A promise that resolves to any.
+   */
   async parseResumeFile(buffer: Buffer, filename: string, userId: string): Promise<any> {
     const started = Date.now();
     const jobId = `${filename}-${Date.now()}`;
@@ -87,8 +111,17 @@ export class ParsingService {
         };
       }
 
-      // Extract + normalize
-      const raw = await this.visionLlmService.parseResumePdf(buffer, filename);
+      // Extract text first, then normalize
+      this.logger.log(`Extracting text from PDF: ${filename}`);
+      const extractedText = await this.pdfTextExtractorService.extractText(buffer);
+      this.logger.debug(`Extracted ${extractedText.length} characters from PDF`);
+      
+      // Log sample of extracted text for debugging (first 200 chars)
+      const textSample = extractedText.substring(0, 200).replace(/\n/g, ' ');
+      this.logger.debug(`Text sample: ${textSample}...`);
+      
+      // Pass extracted text to LLM for processing
+      const raw = await this.visionLlmService.parseResumeText(extractedText);
       const resumeDto = await this.fieldMapperService.normalizeToResumeDto(raw as any);
 
       // Attempt to upload original file for reference URL (best-effort)
@@ -132,10 +165,15 @@ export class ParsingService {
     }
   }
 
+  /**
+   * Handles resume submitted.
+   * @param event - The event.
+   * @returns A promise that resolves when the operation completes.
+   */
   @WithCircuitBreaker('resume-processing', {
     failureThreshold: 5,
-    recoveryTimeout: 60000,
-    monitoringPeriod: 300000,
+    resetTimeoutMs: 60000,
+    monitorWindow: 300000,
   })
   async handleResumeSubmitted(event: any): Promise<void> {
     const {
@@ -197,15 +235,22 @@ export class ParsingService {
         attempts: 0,
       });
 
-      // Parse resume with retry logic (PDF → pdf text + LLM, TXT → direct text LLM)
+      // Parse resume with retry logic (PDF → text extraction → LLM, TXT → direct text LLM)
       const rawLlmOutput = await RetryUtility.withExponentialBackoff(
         async () => {
           const isPdf = fileBuffer.toString('ascii', 0, 4) === '%PDF';
           if (isPdf) {
-            return this.visionLlmService.parseResumePdf(
-              fileBuffer,
-              originalFilename,
-            );
+            // First extract text from PDF using dedicated service
+            this.logger.log(`Extracting text from PDF: ${originalFilename}`);
+            const extractedText = await this.pdfTextExtractorService.extractText(fileBuffer);
+            this.logger.debug(`Extracted ${extractedText.length} characters from PDF`);
+            
+            // Log sample of extracted text for debugging (first 200 chars)
+            const textSample = extractedText.substring(0, 200).replace(/\n/g, ' ');
+            this.logger.debug(`Text sample: ${textSample}...`);
+            
+            // Then pass extracted text to LLM for processing
+            return this.visionLlmService.parseResumeText(extractedText);
           } else {
             const text = await this.extractTextFromMaybeTextFile(fileBuffer);
             return this.visionLlmService.parseResumeText(text);
@@ -269,6 +314,15 @@ export class ParsingService {
     }
   }
 
+  /**
+   * Performs the process resume file operation.
+   * @param jobId - The job id.
+   * @param resumeId - The resume id.
+   * @param gridFsUrl - The grid fs url.
+   * @param filename - The filename.
+   * @param organizationId - The organization id.
+   * @returns A promise that resolves to any.
+   */
   async processResumeFile(
     jobId: string,
     resumeId: string,
@@ -316,7 +370,17 @@ export class ParsingService {
         async () => {
           const isPdf = fileBuffer.toString('ascii', 0, 4) === '%PDF';
           if (isPdf) {
-            return this.visionLlmService.parseResumePdf(fileBuffer, filename);
+            // First extract text from PDF using dedicated service
+            this.logger.log(`Extracting text from PDF: ${filename}`);
+            const extractedText = await this.pdfTextExtractorService.extractText(fileBuffer);
+            this.logger.debug(`Extracted ${extractedText.length} characters from PDF`);
+            
+            // Log sample of extracted text for debugging (first 200 chars)
+            const textSample = extractedText.substring(0, 200).replace(/\n/g, ' ');
+            this.logger.debug(`Text sample: ${textSample}...`);
+            
+            // Then pass extracted text to LLM for processing
+            return this.visionLlmService.parseResumeText(extractedText);
           } else {
             const text = await this.extractTextFromMaybeTextFile(fileBuffer);
             return this.visionLlmService.parseResumeText(text);
@@ -384,6 +448,11 @@ export class ParsingService {
     }
   }
 
+  /**
+   * Performs the publish success event operation.
+   * @param result - The result.
+   * @returns A promise that resolves when the operation completes.
+   */
   async publishSuccessEvent(result: any): Promise<void> {
     try {
       this.logger.log(
@@ -444,6 +513,15 @@ export class ParsingService {
     }
   }
 
+  /**
+   * Performs the publish failure event operation.
+   * @param jobId - The job id.
+   * @param resumeId - The resume id.
+   * @param filename - The filename.
+   * @param error - The error.
+   * @param retryCount - The retry count.
+   * @returns A promise that resolves when the operation completes.
+   */
   async publishFailureEvent(
     jobId: string,
     resumeId: string,
@@ -506,6 +584,14 @@ export class ParsingService {
     }
   }
 
+  /**
+   * Handles processing error.
+   * @param error - The error.
+   * @param jobId - The job id.
+   * @param resumeId - The resume id.
+   * @param originalData - The original data.
+   * @returns A promise that resolves when the operation completes.
+   */
   async handleProcessingError(
     error: Error,
     jobId: string,
@@ -942,6 +1028,10 @@ export class ParsingService {
   }
 
   // Enhanced health check with security metrics
+  /**
+   * Performs the health check operation.
+   * @returns A promise that resolves to { status: string; details: any }.
+   */
   async healthCheck(): Promise<{ status: string; details: any }> {
     try {
       const natsHealth = await this.natsService.getHealthStatus();
@@ -983,6 +1073,10 @@ export class ParsingService {
   }
 
   // Get security metrics for monitoring
+  /**
+   * Retrieves security metrics.
+   * @returns The { activeProcessingFiles: number; totalProcessedToday: number; encryptionFailures: number; validationFailures: number; }.
+   */
   getSecurityMetrics(): {
     activeProcessingFiles: number;
     totalProcessedToday: number;

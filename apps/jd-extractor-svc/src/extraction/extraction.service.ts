@@ -13,6 +13,9 @@ import {
   ErrorCorrelationManager,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 
+/**
+ * Provides extraction functionality.
+ */
 @Injectable()
 export class ExtractionService {
   private readonly logger = new Logger(ExtractionService.name);
@@ -23,11 +26,21 @@ export class ExtractionService {
   private readonly JOB_TIMEOUT_MS = 300000; // 5 minutes
   private readonly MAX_CONCURRENT_JOBS = 10;
 
+  /**
+   * Initializes a new instance of the Extraction Service.
+   * @param llmService - The llm service.
+   * @param natsService - The nats service.
+   */
   constructor(
     private readonly llmService: LlmService,
     private readonly natsService: JdExtractorNatsService,
   ) {}
 
+  /**
+   * Handles job jd submitted.
+   * @param event - The event.
+   * @returns A promise that resolves when the operation completes.
+   */
   async handleJobJdSubmitted(event: JobJdSubmittedEvent): Promise<void> {
     const { jobId, jobTitle, jdText, timestamp } = event;
 
@@ -96,10 +109,17 @@ export class ExtractionService {
     }
   }
 
+  /**
+   * Performs the process job description operation.
+   * @param jobId - The job id.
+   * @param jdText - The jd text.
+   * @param jobTitle - The job title.
+   * @returns A promise that resolves to AnalysisJdExtractedEvent.
+   */
   @WithCircuitBreaker('llm-processing', {
     failureThreshold: 5,
-    recoveryTimeout: 30000,
-    monitoringPeriod: 60000,
+    resetTimeoutMs: 30000,
+    monitorWindow: 60000,
   })
   async processJobDescription(
     jobId: string,
@@ -187,6 +207,11 @@ export class ExtractionService {
     }
   }
 
+  /**
+   * Performs the publish analysis result operation.
+   * @param result - The result.
+   * @returns A promise that resolves when the operation completes.
+   */
   async publishAnalysisResult(result: AnalysisJdExtractedEvent): Promise<void> {
     try {
       this.logger.log(`Publishing analysis result for jobId: ${result.jobId}`);
@@ -238,6 +263,12 @@ export class ExtractionService {
     }
   }
 
+  /**
+   * Handles processing error.
+   * @param error - The error.
+   * @param jobId - The job id.
+   * @returns A promise that resolves when the operation completes.
+   */
   async handleProcessingError(error: Error, jobId: string): Promise<void> {
     try {
       this.logger.error(`Handling processing error for jobId: ${jobId}`, error);
@@ -408,18 +439,31 @@ export class ExtractionService {
   }
 
   // Utility method to get processing status
+  /**
+   * Performs the is processing operation.
+   * @param jobId - The job id.
+   * @returns The boolean value.
+   */
   isProcessing(jobId: string): boolean {
     this.cleanupExpiredJobs();
     return this.processingJobs.has(jobId);
   }
 
   // Utility method to get currently processing jobs
+  /**
+   * Retrieves processing jobs.
+   * @returns The an array of string value.
+   */
   getProcessingJobs(): string[] {
     this.cleanupExpiredJobs();
     return Array.from(this.processingJobs.keys());
   }
 
   // Get processing job details
+  /**
+   * Retrieves processing job details.
+   * @returns The Array<{ jobId: string; timestamp: number; attempts: number; age: number; }>.
+   */
   getProcessingJobDetails(): Array<{
     jobId: string;
     timestamp: number;
@@ -437,6 +481,10 @@ export class ExtractionService {
   }
 
   // Health check method
+  /**
+   * Performs the health check operation.
+   * @returns A promise that resolves to { status: string; details: any }.
+   */
   async healthCheck(): Promise<{ status: string; details: any }> {
     try {
       const natsHealth = await this.natsService.getHealthStatus();

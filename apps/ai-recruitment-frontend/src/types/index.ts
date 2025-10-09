@@ -15,6 +15,9 @@ export type Theme = 'light' | 'dark' | 'high-contrast';
 export type NotificationType = 'success' | 'info' | 'warning' | 'error';
 
 // 组件通用类型
+/**
+ * Defines the shape of the base component.
+ */
 export interface BaseComponent {
   id: string;
   className?: string;
@@ -22,16 +25,22 @@ export interface BaseComponent {
 }
 
 // 表单类型
+/**
+ * Defines the shape of the form validation.
+ */
 export interface FormValidation {
   required?: boolean;
   minLength?: number;
   maxLength?: number;
   pattern?: RegExp;
-  custom?: (value: any) => string | null;
+  custom?: (value: unknown) => string | null;
 }
 
 // API响应类型
-export interface ApiResponse<T = any> {
+/**
+ * Defines the shape of the api response.
+ */
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -40,6 +49,9 @@ export interface ApiResponse<T = any> {
 }
 
 // 用户偏好设置
+/**
+ * Defines the shape of the user preferences.
+ */
 export interface UserPreferences {
   theme: Theme;
   fontSize: FontSize;
@@ -49,6 +61,9 @@ export interface UserPreferences {
 }
 
 // 性能指标类型
+/**
+ * Defines the shape of the performance metrics.
+ */
 export interface PerformanceMetrics {
   responseTime: number;
   throughput: number;

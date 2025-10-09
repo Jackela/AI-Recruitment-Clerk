@@ -1,6 +1,9 @@
 import { Directive, OnInit, inject } from '@angular/core';
 import { AccessibilityService } from '../../services/accessibility/accessibility.service';
 
+/**
+ * Represents the skip navigation directive.
+ */
 @Directive({
   selector: '[arcSkipNavigation]',
   standalone: true,
@@ -8,6 +11,9 @@ import { AccessibilityService } from '../../services/accessibility/accessibility
 export class SkipNavigationDirective implements OnInit {
   private accessibilityService = inject(AccessibilityService);
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     this.createSkipLinks();
   }

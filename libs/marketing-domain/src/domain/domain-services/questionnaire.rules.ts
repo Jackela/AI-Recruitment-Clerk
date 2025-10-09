@@ -1,6 +1,9 @@
 import { QuestionnaireSubmission } from '../value-objects/questionnaire-submission.value-object.js';
 import { QuestionnaireValidationResult } from '../value-objects/questionnaire-validation-result.value-object.js';
 
+/**
+ * Represents the questionnaire rules.
+ */
 export class QuestionnaireRules {
   // 质量评估规则
   static readonly MIN_TEXT_LENGTH_FOR_BONUS = 50;
@@ -18,6 +21,11 @@ export class QuestionnaireRules {
   ];
 
   // 业务规则方法
+  /**
+   * Performs the is high quality submission operation.
+   * @param submission - The submission.
+   * @returns The boolean value.
+   */
   static isHighQualitySubmission(submission: QuestionnaireSubmission): boolean {
     const summary = submission.getSummary();
     const textLength = summary.textLength;
@@ -29,6 +37,11 @@ export class QuestionnaireRules {
            completionRate >= this.MIN_COMPLETION_RATE;
   }
 
+  /**
+   * Calculates quality score.
+   * @param submission - The submission.
+   * @returns The number value.
+   */
   static calculateQualityScore(submission: QuestionnaireSubmission): number {
     const summary = submission.getSummary();
     let score = 0;
@@ -45,6 +58,11 @@ export class QuestionnaireRules {
     return Math.min(100, Math.round(score));
   }
 
+  /**
+   * Performs the is valid submission operation.
+   * @param submission - The submission.
+   * @returns The QuestionnaireValidationResult.
+   */
   static isValidSubmission(submission: QuestionnaireSubmission): QuestionnaireValidationResult {
     const errors: string[] = [];
     
@@ -91,10 +109,22 @@ export class QuestionnaireRules {
     return new QuestionnaireValidationResult(errors.length === 0, errors);
   }
 
+  /**
+   * Performs the is valid rating operation.
+   * @param rating - The rating.
+   * @returns The boolean value.
+   */
   static isValidRating(rating: number): boolean {
     return rating >= 1 && rating <= 5;
   }
 
+  /**
+   * Performs the is eligible for bonus operation.
+   * @param qualityScore - The quality score.
+   * @param textLength - The text length.
+   * @param detailedAnswers - The detailed answers.
+   * @returns The boolean value.
+   */
   static isEligibleForBonus(
     qualityScore: number,
     textLength: number,
@@ -150,17 +180,5 @@ export class QuestionnaireRules {
     return score;
   }
 
-  private static hasValue(obj: any, path: string): boolean {
-    const keys = path.split('.');
-    let current = obj;
-    
-    for (const key of keys) {
-      if (!current || typeof current !== 'object' || !(key in current)) {
-        return false;
-      }
-      current = current[key];
-    }
-    
-    return current !== undefined && current !== null && current !== '';
-  }
+
 }

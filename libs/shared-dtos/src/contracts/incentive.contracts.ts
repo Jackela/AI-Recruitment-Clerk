@@ -3,7 +3,6 @@ import {
   IncentiveStatus,
   PaymentMethod,
   ContactInfo,
-  TriggerType,
   IncentiveValidationResult,
   PaymentResult
 } from '../domains/incentive.dto';
@@ -542,6 +541,10 @@ export class IncentiveContracts {
  * 激励系统契约违反异常
  */
 export class IncentiveContractViolation extends Error {
+  /**
+   * Initializes a new instance of the Incentive Contract Violation.
+   * @param message - The message.
+   */
   constructor(message: string) {
     super(message);
     this.name = 'IncentiveContractViolation';
@@ -551,7 +554,7 @@ export class IncentiveContractViolation extends Error {
 /**
  * 激励系统设计契约装饰器
  */
-export function requireValidIncentive(target: any, propertyName: string, descriptor: PropertyDescriptor) {
+export function requireValidIncentive(_target: any, propertyName: string, descriptor: PropertyDescriptor) {
   const method = descriptor.value;
   
   descriptor.value = function (...args: any[]) {
@@ -568,7 +571,7 @@ export function requireValidIncentive(target: any, propertyName: string, descrip
 /**
  * 支付操作契约装饰器
  */
-export function requireApprovedIncentive(target: any, propertyName: string, descriptor: PropertyDescriptor) {
+export function requireApprovedIncentive(_target: any, propertyName: string, descriptor: PropertyDescriptor) {
   const method = descriptor.value;
   
   descriptor.value = function (...args: any[]) {

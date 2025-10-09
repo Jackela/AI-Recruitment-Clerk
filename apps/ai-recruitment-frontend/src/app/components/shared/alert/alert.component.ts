@@ -3,8 +3,11 @@ import { CommonModule } from '@angular/common';
 
 export type AlertType = 'success' | 'info' | 'warning' | 'danger';
 
+/**
+ * Represents the alert component.
+ */
 @Component({
-  selector: 'app-alert',
+  selector: 'arc-alert',
   standalone: true,
   imports: [CommonModule],
   template: `
@@ -182,6 +185,10 @@ export class AlertComponent {
   @Input() dismissible = false;
   @Output() dismissed = new EventEmitter<void>();
 
+  /**
+   * Performs the on dismiss operation.
+   * @returns The result of the operation.
+   */
   onDismiss() {
     this.dismissed.emit();
   }

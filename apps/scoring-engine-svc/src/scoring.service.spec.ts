@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ScoringEngineService, JdDTO } from './scoring.service';
-import { NatsClient } from './nats/nats.client';
+import { ScoringEngineNatsService } from './services/scoring-engine-nats.service';
 import { EnhancedSkillMatcherService } from './services/enhanced-skill-matcher.service';
 import { ExperienceAnalyzerService } from './services/experience-analyzer.service';
 import { CulturalFitAnalyzerService } from './services/cultural-fit-analyzer.service';
 import { ScoringConfidenceService } from './services/scoring-confidence.service';
-import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
 describe('ScoringEngineService', () => {
   let service: ScoringEngineService;
-  let natsClient: jest.Mocked<NatsClient>;
+  let natsService: jest.Mocked<ScoringEngineNatsService>;
   let skillMatcher: jest.Mocked<EnhancedSkillMatcherService>;
   let experienceAnalyzer: jest.Mocked<ExperienceAnalyzerService>;
   let culturalFitAnalyzer: jest.Mocked<CulturalFitAnalyzerService>;
@@ -324,7 +324,7 @@ describe('ScoringEngineService', () => {
   };
 
   beforeEach(async () => {
-    const mockNatsClient = {
+    const mockNatsService = {
       emit: jest.fn().mockResolvedValue({ success: true }),
       publishScoringCompleted: jest.fn().mockResolvedValue({ success: true }),
       publishScoringError: jest.fn().mockResolvedValue({ success: true }),
@@ -349,7 +349,7 @@ describe('ScoringEngineService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ScoringEngineService,
-        { provide: NatsClient, useValue: mockNatsClient },
+        { provide: ScoringEngineNatsService, useValue: mockNatsService },
         { provide: EnhancedSkillMatcherService, useValue: mockSkillMatcher },
         {
           provide: ExperienceAnalyzerService,
@@ -364,7 +364,7 @@ describe('ScoringEngineService', () => {
     }).compile();
 
     service = module.get<ScoringEngineService>(ScoringEngineService);
-    natsClient = module.get(NatsClient);
+    natsService = module.get(ScoringEngineNatsService);
     skillMatcher = module.get(EnhancedSkillMatcherService);
     experienceAnalyzer = module.get(ExperienceAnalyzerService);
     culturalFitAnalyzer = module.get(CulturalFitAnalyzerService);
@@ -429,7 +429,7 @@ describe('ScoringEngineService', () => {
 
       expect(confidenceService.generateConfidenceReport).toHaveBeenCalled();
 
-      expect(natsClient.emit).toHaveBeenCalledWith(
+      expect(natsService.emit).toHaveBeenCalledWith(
         'analysis.match.scored',
         expect.objectContaining({
           jobId: 'test-job-123',
@@ -448,7 +448,7 @@ describe('ScoringEngineService', () => {
         }),
       );
 
-      expect(natsClient.publishScoringCompleted).toHaveBeenCalledWith(
+      expect(natsService.publishScoringCompleted).toHaveBeenCalledWith(
         expect.objectContaining({
           jobId: 'test-job-123',
           resumeId: 'test-resume-456',
@@ -489,7 +489,7 @@ describe('ScoringEngineService', () => {
 
       await service.handleResumeParsedEvent(event);
 
-      expect(natsClient.publishScoringError).toHaveBeenCalledWith(
+      expect(natsService.publishScoringError).toHaveBeenCalledWith(
         'test-job-123',
         'test-resume-456',
         expect.any(Error),
@@ -510,7 +510,7 @@ describe('ScoringEngineService', () => {
       await service.handleResumeParsedEvent(event);
 
       // Should still emit a score event (basic scoring)
-      expect(natsClient.emit).toHaveBeenCalledWith(
+      expect(natsService.emit).toHaveBeenCalledWith(
         'analysis.match.scored',
         expect.objectContaining({
           scoreDto: expect.objectContaining({
@@ -551,7 +551,7 @@ describe('ScoringEngineService', () => {
       await service.handleResumeParsedEvent(event);
 
       // The overall score should be calculated using weighted components
-      expect(natsClient.emit).toHaveBeenCalledWith(
+      expect(natsService.emit).toHaveBeenCalledWith(
         'analysis.match.scored',
         expect.objectContaining({
           scoreDto: expect.objectContaining({
@@ -664,3 +664,5 @@ describe('ScoringEngineService', () => {
     });
   });
 });
+
+

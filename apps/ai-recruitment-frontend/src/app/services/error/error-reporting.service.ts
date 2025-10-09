@@ -8,6 +8,9 @@ import {
 } from './error-correlation.service';
 import { APP_CONFIG } from '../../../config';
 
+/**
+ * Defines the shape of the error report.
+ */
 export interface ErrorReport {
   errors: StructuredError[];
   userFeedback?: string;
@@ -19,6 +22,9 @@ export interface ErrorReport {
   timestamp: Date;
 }
 
+/**
+ * Defines the shape of the error report submission.
+ */
 export interface ErrorReportSubmission {
   reportId: string;
   submittedAt: Date;
@@ -26,6 +32,9 @@ export interface ErrorReportSubmission {
   retryCount: number;
 }
 
+/**
+ * Provides error reporting functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -34,6 +43,11 @@ export class ErrorReportingService {
   private readonly maxRetryAttempts = 3;
   private readonly retryDelay = 2000;
 
+  /**
+   * Initializes a new instance of the Error Reporting Service.
+   * @param http - The http.
+   * @param errorCorrelation - The error correlation.
+   */
   constructor(
     private http: HttpClient,
     private errorCorrelation: ErrorCorrelationService,

@@ -7,8 +7,11 @@ import { WebSocketDemoController } from './controllers/websocket-demo.controller
 import { WebSocketModule } from '../websocket/websocket.module';
 import { GuestGuard } from './guards/guest.guard';
 import { GuestUsage, GuestUsageSchema } from './schemas/guest-usage.schema';
-import { NatsClient } from '../nats/nats.client';
+import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
 
+/**
+ * Configures the guest module.
+ */
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -21,7 +24,7 @@ import { NatsClient } from '../nats/nats.client';
     GuestResumeController,
     WebSocketDemoController,
   ],
-  providers: [GuestUsageService, GuestGuard, NatsClient],
+  providers: [GuestUsageService, GuestGuard, AppGatewayNatsService],
   exports: [GuestUsageService, GuestGuard],
 })
 export class GuestModule {}

@@ -64,6 +64,10 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
   private readonly structuredLogger: StructuredErrorLogger;
   private readonly config: Required<GlobalExceptionFilterConfig>;
 
+  /**
+   * Initializes a new instance of the Standardized Global Exception Filter.
+   * @param config - The config.
+   */
   constructor(config: GlobalExceptionFilterConfig) {
     this.config = {
       enableCorrelation: true,
@@ -79,6 +83,11 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
     this.structuredLogger = StructuredLoggerFactory.getLogger(this.config.serviceName);
   }
 
+  /**
+   * Performs the catch operation.
+   * @param exception - The exception.
+   * @param host - The host.
+   */
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();

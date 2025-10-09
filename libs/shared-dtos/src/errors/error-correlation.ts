@@ -20,6 +20,7 @@ export interface ErrorCorrelationContext {
   timestamp: string;          // Context creation timestamp
   serviceName: string;        // Originating service
   operationName: string;      // Specific operation
+  startTime?: number;         // Operation start time
   executionTime?: number;     // Operation execution time
   metadata?: Record<string, any>; // Additional context metadata
 }
@@ -152,6 +153,22 @@ export class ErrorCorrelationManager {
    */
   static getContext(): ErrorCorrelationContext | undefined {
     return this.currentContext || undefined;
+  }
+
+  /**
+   * Update current correlation context
+   */
+  static updateContext(updates: Partial<ErrorCorrelationContext>): void {
+    if (this.currentContext) {
+      this.currentContext = {
+        ...this.currentContext,
+        ...updates,
+        metadata: {
+          ...this.currentContext.metadata,
+          ...updates.metadata,
+        },
+      };
+    }
   }
 
   /**
@@ -327,6 +344,10 @@ export function WithCorrelation(serviceName: string, operationName: string) {
 export class AsyncCorrelationManager {
   private static asyncLocalStorage: any; // AsyncLocalStorage from 'async_hooks'
   
+  /**
+   * Performs the initialize operation.
+   * @returns The result of the operation.
+   */
   static initialize() {
     if (typeof require !== 'undefined') {
       try {
@@ -338,6 +359,12 @@ export class AsyncCorrelationManager {
     }
   }
 
+  /**
+   * Performs the run operation.
+   * @param context - The context.
+   * @param callback - The callback.
+   * @returns The T.
+   */
   static run<T>(context: ErrorCorrelationContext, callback: () => T): T {
     if (this.asyncLocalStorage) {
       return this.asyncLocalStorage.run(context, callback);
@@ -346,6 +373,10 @@ export class AsyncCorrelationManager {
     return ErrorCorrelationManager.withContext(context, async () => callback()) as T;
   }
 
+  /**
+   * Retrieves store.
+   * @returns The ErrorCorrelationContext | undefined.
+   */
   static getStore(): ErrorCorrelationContext | undefined {
     if (this.asyncLocalStorage) {
       return this.asyncLocalStorage.getStore();

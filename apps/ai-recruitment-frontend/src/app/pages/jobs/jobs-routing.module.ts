@@ -15,6 +15,9 @@ const routes: Routes = [
   },
 ];
 
+/**
+ * Configures the jobs routing module.
+ */
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],

@@ -9,12 +9,18 @@ import {
 } from '../../../services/websocket.service';
 import { ToastService } from '../../../services/toast.service';
 
+/**
+ * Defines the shape of the progress message.
+ */
 export interface ProgressMessage {
   type: 'info' | 'success' | 'error' | 'progress';
   message: string;
   timestamp: Date;
 }
 
+/**
+ * Defines the shape of the web socket progress message.
+ */
 export interface WebSocketProgressMessage {
   type: string;
   data?: {
@@ -24,24 +30,36 @@ export interface WebSocketProgressMessage {
   };
 }
 
+/**
+ * Defines the shape of the step change data.
+ */
 export interface StepChangeData {
   currentStep: string;
   message?: string;
   progress?: number;
 }
 
+/**
+ * Defines the shape of the progress completion data.
+ */
 export interface ProgressCompletionData {
   progress?: number;
   message?: string;
   finalStep?: string;
 }
 
+/**
+ * Defines the shape of the progress error data.
+ */
 export interface ProgressErrorData {
   error?: string;
   message?: string;
   code?: string | number;
 }
 
+/**
+ * Defines the shape of the progress step.
+ */
 export interface ProgressStep {
   id: string;
   label: string;
@@ -50,8 +68,11 @@ export interface ProgressStep {
   progress?: number;
 }
 
+/**
+ * Represents the progress tracker component.
+ */
 @Component({
-  selector: 'app-progress-tracker',
+  selector: 'arc-progress-tracker',
   standalone: true,
   imports: [CommonModule],
   template: `
@@ -499,11 +520,19 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private messages: ProgressMessage[] = [];
 
+  /**
+   * Initializes a new instance of the Progress Tracker Component.
+   * @param webSocketService - The web socket service.
+   * @param toastService - The toast service.
+   */
   constructor(
     private webSocketService: WebSocketService,
     private toastService: ToastService,
   ) {}
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     if (!this.sessionId) {
       this.toastService.error('会话ID缺失，无法跟踪进度');
@@ -514,6 +543,9 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
     this.connectToWebSocket();
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -696,6 +728,11 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
     this.recentMessages$.next([...this.messages]);
   }
 
+  /**
+   * Retrieves status text.
+   * @param status - The status.
+   * @returns The string value.
+   */
   getStatusText(status: string | null): string {
     switch (status) {
       case 'connected':
@@ -711,16 +748,31 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Retrieves step number.
+   * @param stepId - The step id.
+   * @returns The number value.
+   */
   getStepNumber(stepId: string): number {
     return this.steps.findIndex((s) => s.id === stepId) + 1;
   }
 
+  /**
+   * Performs the format time operation.
+   * @param seconds - The seconds.
+   * @returns The string value.
+   */
   formatTime(seconds: number): string {
     if (seconds < 60) return `${seconds}秒`;
     const minutes = Math.floor(seconds / 60);
     return `${minutes}分${seconds % 60}秒`;
   }
 
+  /**
+   * Performs the format timestamp operation.
+   * @param timestamp - The timestamp.
+   * @returns The string value.
+   */
   formatTimestamp(timestamp: Date): string {
     return timestamp.toLocaleTimeString('zh-CN', {
       hour12: false,
@@ -730,10 +782,22 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Performs the track by step id operation.
+   * @param _index - The index.
+   * @param step - The step.
+   * @returns The string value.
+   */
   trackByStepId(_index: number, step: ProgressStep): string {
     return step.id;
   }
 
+  /**
+   * Performs the track by message operation.
+   * @param index - The index.
+   * @param message - The message.
+   * @returns The string value.
+   */
   trackByMessage(index: number, message: ProgressMessage): string {
     return `${message.timestamp.getTime()}_${index}`;
   }

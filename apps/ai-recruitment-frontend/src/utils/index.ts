@@ -4,7 +4,7 @@
  */
 
 // 防抖函数
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   delay: number,
 ): (...args: Parameters<T>) => void {
@@ -17,7 +17,13 @@ export function debounce<T extends (...args: any[]) => any>(
 }
 
 // 节流函数
-export function throttle<T extends (...args: any[]) => any>(
+/**
+ * Performs the throttle operation.
+ * @param func - The func.
+ * @param delay - The delay.
+ * @returns The (...args: Parameters<T>) => void.
+ */
+export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
   delay: number,
 ): (...args: Parameters<T>) => void {
@@ -33,6 +39,11 @@ export function throttle<T extends (...args: any[]) => any>(
 }
 
 // 深拷贝函数
+/**
+ * Performs the deep clone operation.
+ * @param obj - The obj.
+ * @returns The T.
+ */
 export function deepClone<T>(obj: T): T {
   if (obj === null || typeof obj !== 'object') {
     return obj;
@@ -60,6 +71,12 @@ export function deepClone<T>(obj: T): T {
 }
 
 // 生成随机ID
+/**
+ * Generates id.
+ * @param prefix - The prefix.
+ * @param length - The length.
+ * @returns The string value.
+ */
 export function generateId(prefix = '', length = 8): string {
   const chars =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -73,6 +90,11 @@ export function generateId(prefix = '', length = 8): string {
 }
 
 // 格式化文件大小
+/**
+ * Performs the format file size operation.
+ * @param bytes - The bytes.
+ * @returns The string value.
+ */
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
 
@@ -84,6 +106,12 @@ export function formatFileSize(bytes: number): string {
 }
 
 // 格式化日期
+/**
+ * Performs the format date operation.
+ * @param date - The date.
+ * @param format - The format.
+ * @returns The string value.
+ */
 export function formatDate(
   date: Date | string,
   format = 'YYYY-MM-DD HH:mm:ss',
@@ -107,6 +135,11 @@ export function formatDate(
 }
 
 // 计算相对时间
+/**
+ * Retrieves relative time.
+ * @param date - The date.
+ * @returns The string value.
+ */
 export function getRelativeTime(date: Date | string): string {
   const now = new Date();
   const target = typeof date === 'string' ? new Date(date) : date;
@@ -134,23 +167,42 @@ export function getRelativeTime(date: Date | string): string {
 }
 
 // 验证邮箱
+/**
+ * Performs the is valid email operation.
+ * @param email - The email.
+ * @returns The boolean value.
+ */
 export function isValidEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 }
 
 // 验证手机号
+/**
+ * Performs the is valid phone operation.
+ * @param phone - The phone.
+ * @returns The boolean value.
+ */
 export function isValidPhone(phone: string): boolean {
   const phoneRegex = /^1[3-9]\d{9}$/;
   return phoneRegex.test(phone);
 }
 
 // 获取文件扩展名
+/**
+ * Retrieves file extension.
+ * @param filename - The filename.
+ * @returns The string value.
+ */
 export function getFileExtension(filename: string): string {
   return filename.slice(((filename.lastIndexOf('.') - 1) >>> 0) + 2);
 }
 
 // 检查是否为移动设备
+/**
+ * Performs the is mobile device operation.
+ * @returns The boolean value.
+ */
 export function isMobileDevice(): boolean {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
     navigator.userAgent,
@@ -158,6 +210,10 @@ export function isMobileDevice(): boolean {
 }
 
 // 检查是否支持 WebP
+/**
+ * Performs the supports web p operation.
+ * @returns A promise that resolves to boolean value.
+ */
 export function supportsWebP(): Promise<boolean> {
   return new Promise((resolve) => {
     const webP = new Image();
@@ -168,6 +224,11 @@ export function supportsWebP(): Promise<boolean> {
 }
 
 // 复制到剪贴板
+/**
+ * Performs the copy to clipboard operation.
+ * @param text - The text.
+ * @returns A promise that resolves to boolean value.
+ */
 export async function copyToClipboard(text: string): Promise<boolean> {
   try {
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -187,19 +248,30 @@ export async function copyToClipboard(text: string): Promise<boolean> {
       document.body.removeChild(textArea);
       return successful;
     }
-  } catch (err) {
-    console.error('复制到剪贴板失败:', err);
+  } catch (error) {
+    console.error('复制到剪贴板失败:', error);
     return false;
   }
 }
 
 // 等待函数
+/**
+ * Performs the sleep operation.
+ * @param ms - The ms.
+ * @returns A promise that resolves when the operation completes.
+ */
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // 错误处理包装器
-export function withErrorHandling<T extends (...args: any[]) => any>(
+/**
+ * Performs the with error handling operation.
+ * @param fn - The fn.
+ * @param errorHandler - The error handler.
+ * @returns The T.
+ */
+export function withErrorHandling<T extends (...args: unknown[]) => unknown>(
   fn: T,
   errorHandler?: (error: Error) => void,
 ): T {

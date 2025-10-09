@@ -66,7 +66,7 @@ export const selectCurrentJobReports = createSelector(
 );
 
 // Recent reports selector
-export const selectRecentReports = (limit: number = 5) =>
+export const selectRecentReports = (limit = 5) =>
   createSelector(
     selectAllReports,
     (reports: ReportListItem[]): ReportListItem[] =>

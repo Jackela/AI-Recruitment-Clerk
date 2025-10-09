@@ -8,6 +8,9 @@ import {
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
+/**
+ * Defines the shape of the aria live message.
+ */
 export interface AriaLiveMessage {
   id: string;
   message: string;
@@ -15,12 +18,18 @@ export interface AriaLiveMessage {
   timestamp: number;
 }
 
+/**
+ * Defines the shape of the focus target.
+ */
 export interface FocusTarget {
   element: HTMLElement;
   reason: 'navigation' | 'modal' | 'error' | 'notification' | 'restoration';
   priority: number;
 }
 
+/**
+ * Defines the shape of the keyboard shortcut.
+ */
 export interface KeyboardShortcut {
   key: string;
   ctrlKey?: boolean;
@@ -33,6 +42,9 @@ export interface KeyboardShortcut {
   disabled?: boolean;
 }
 
+/**
+ * Provides accessibility functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -75,6 +87,9 @@ export class AccessibilityService {
     screenReaderActive: this.screenReaderActive(),
   }));
 
+  /**
+   * Initializes a new instance of the Accessibility Service.
+   */
   constructor() {
     this.initializeAccessibilitySettings();
     this.setupRouterAccessibility();

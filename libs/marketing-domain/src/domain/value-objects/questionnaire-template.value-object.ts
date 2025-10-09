@@ -1,16 +1,25 @@
 import { ValueObject } from './base/value-object.js';
 
+/**
+ * Defines the shape of the question section.
+ */
 export interface QuestionSection {
   id: string;
   name: string;
   required: boolean;
 }
 
+/**
+ * Defines the shape of the quality threshold.
+ */
 export interface QualityThreshold {
   metric: string;
   minValue: number;
 }
 
+/**
+ * Represents the questionnaire template.
+ */
 export class QuestionnaireTemplate extends ValueObject<{
   id: string;
   version: string;
@@ -18,6 +27,11 @@ export class QuestionnaireTemplate extends ValueObject<{
   requiredQuestions: string[];
   qualityThresholds: QualityThreshold[];
 }> {
+  /**
+   * Creates default.
+   * @param templateId - The template id.
+   * @returns The QuestionnaireTemplate.
+   */
   static createDefault(templateId: string): QuestionnaireTemplate {
     return new QuestionnaireTemplate({
       id: templateId,
@@ -38,6 +52,11 @@ export class QuestionnaireTemplate extends ValueObject<{
     });
   }
   
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The QuestionnaireTemplate.
+   */
   static restore(data: any): QuestionnaireTemplate {
     return new QuestionnaireTemplate(data);
   }

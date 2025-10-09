@@ -12,6 +12,9 @@ import { Observable, throwError, of } from 'rxjs';
 import { catchError, timeout, retry, tap } from 'rxjs/operators';
 import { Cache } from 'cache-manager';
 
+/**
+ * Defines the shape of the service integration options.
+ */
 export interface ServiceIntegrationOptions {
   timeout?: number;
   retries?: number;
@@ -28,6 +31,9 @@ export interface ServiceIntegrationOptions {
   };
 }
 
+/**
+ * Represents the service integration interceptor.
+ */
 @Injectable()
 export class ServiceIntegrationInterceptor implements NestInterceptor {
   private readonly logger = new Logger(ServiceIntegrationInterceptor.name);
@@ -40,11 +46,22 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
     }
   >();
 
+  /**
+   * Initializes a new instance of the Service Integration Interceptor.
+   * @param options - The options.
+   * @param cacheManager - The cache manager.
+   */
   constructor(
     private readonly options: ServiceIntegrationOptions = {},
     @Inject('CACHE_MANAGER') private readonly cacheManager?: Cache,
   ) {}
 
+  /**
+   * Performs the intercept operation.
+   * @param context - The context.
+   * @param next - The next.
+   * @returns A promise that resolves to Observable<any>.
+   */
   async intercept(
     context: ExecutionContext,
     next: CallHandler,

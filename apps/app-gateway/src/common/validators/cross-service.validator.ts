@@ -5,6 +5,9 @@ import {
   Logger,
 } from '@nestjs/common';
 
+/**
+ * Defines the shape of the validation rule.
+ */
 export interface ValidationRule {
   field: string;
   service: string;
@@ -15,6 +18,9 @@ export interface ValidationRule {
   message?: string;
 }
 
+/**
+ * Defines the shape of the cross service validation options.
+ */
 export interface CrossServiceValidationOptions {
   rules: ValidationRule[];
   parallel?: boolean;
@@ -22,10 +28,19 @@ export interface CrossServiceValidationOptions {
   timeout?: number;
 }
 
+/**
+ * Represents the cross service validator.
+ */
 @Injectable()
 export class CrossServiceValidator {
   private readonly logger = new Logger(CrossServiceValidator.name);
 
+  /**
+   * Validates the data.
+   * @param data - The data.
+   * @param options - The options.
+   * @returns The Promise<{ valid: boolean; errors: string[]; transformedData: any; }>.
+   */
   async validate(
     data: any,
     options: CrossServiceValidationOptions,
@@ -270,6 +285,12 @@ export class CrossServiceValidator {
     };
   }
 
+  /**
+   * Creates job validation rule.
+   * @param fieldName - The field name.
+   * @param required - The required.
+   * @returns The ValidationRule.
+   */
   static createJobValidationRule(
     fieldName: string,
     required = true,
@@ -283,6 +304,12 @@ export class CrossServiceValidator {
     };
   }
 
+  /**
+   * Creates resume validation rule.
+   * @param fieldName - The field name.
+   * @param required - The required.
+   * @returns The ValidationRule.
+   */
   static createResumeValidationRule(
     fieldName: string,
     required = true,
@@ -296,6 +323,12 @@ export class CrossServiceValidator {
     };
   }
 
+  /**
+   * Creates email validation rule.
+   * @param fieldName - The field name.
+   * @param required - The required.
+   * @returns The ValidationRule.
+   */
   static createEmailValidationRule(
     fieldName: string,
     required = true,

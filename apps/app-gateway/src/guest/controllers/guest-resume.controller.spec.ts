@@ -3,19 +3,19 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { GuestResumeController } from './guest-resume.controller';
 import { GuestUsageService } from '../services/guest-usage.service';
 import { RequestWithDeviceId } from '../guards/guest.guard';
-import { NatsClient } from '../../nats/nats.client';
+import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
 
 describe('GuestResumeController', () => {
   let controller: GuestResumeController;
   let guestUsageService: jest.Mocked<GuestUsageService>;
-  let natsClient: jest.Mocked<NatsClient>;
+  let natsClient: jest.Mocked<AppGatewayNatsService>;
 
   const mockGuestUsageService = {
     canUse: jest.fn(),
     getUsageStatus: jest.fn(),
   };
 
-  const mockNatsClient: Partial<jest.Mocked<NatsClient>> = {
+  const mockNatsClient: Partial<jest.Mocked<AppGatewayNatsService>> = {
     publishResumeSubmitted: jest.fn().mockResolvedValue({ success: true, messageId: '1' }),
     isConnected: true as any,
   } as any;
@@ -53,13 +53,13 @@ describe('GuestResumeController', () => {
           provide: GuestUsageService,
           useValue: mockGuestUsageService,
         },
-        { provide: NatsClient, useValue: mockNatsClient },
+        { provide: AppGatewayNatsService, useValue: mockNatsClient },
       ],
     }).compile();
 
     controller = module.get<GuestResumeController>(GuestResumeController);
     guestUsageService = module.get(GuestUsageService);
-    natsClient = module.get(NatsClient);
+    natsClient = module.get(AppGatewayNatsService);
   });
 
   afterEach(() => {

@@ -13,7 +13,16 @@ import {
   UsageEfficiency 
 } from './usage-limit.rules';
 
+/**
+ * Provides usage limit domain functionality.
+ */
 export class UsageLimitDomainService {
+  /**
+   * Initializes a new instance of the Usage Limit Domain Service.
+   * @param repository - The repository.
+   * @param eventBus - The event bus.
+   * @param auditLogger - The audit logger.
+   */
   constructor(
     private readonly repository: IUsageLimitRepository,
     private readonly eventBus: IDomainEventBus,
@@ -423,6 +432,9 @@ export class UsageLimitDomainService {
 }
 
 // 结果类和接口定义
+/**
+ * Represents the usage limit result.
+ */
 export class UsageLimitResult {
   private constructor(
     public readonly success: boolean,
@@ -437,6 +449,11 @@ export class UsageLimitResult {
     public readonly errors?: string[]
   ) {}
 
+  /**
+   * Performs the success operation.
+   * @param data - The data.
+   * @returns The UsageLimitResult.
+   */
   static success(data: {
     allowed: boolean;
     remainingQuota: number;
@@ -448,11 +465,19 @@ export class UsageLimitResult {
     return new UsageLimitResult(true, data);
   }
 
+  /**
+   * Performs the failed operation.
+   * @param errors - The errors.
+   * @returns The UsageLimitResult.
+   */
   static failed(errors: string[]): UsageLimitResult {
     return new UsageLimitResult(false, undefined, errors);
   }
 }
 
+/**
+ * Represents the usage tracking result.
+ */
 export class UsageTrackingResult {
   private constructor(
     public readonly success: boolean,
@@ -464,6 +489,11 @@ export class UsageTrackingResult {
     public readonly error?: string
   ) {}
 
+  /**
+   * Performs the success operation.
+   * @param data - The data.
+   * @returns The UsageTrackingResult.
+   */
   static success(data: {
     currentUsage: number;
     remainingQuota: number;
@@ -472,11 +502,19 @@ export class UsageTrackingResult {
     return new UsageTrackingResult(true, data);
   }
 
+  /**
+   * Performs the failed operation.
+   * @param error - The error.
+   * @returns The UsageTrackingResult.
+   */
   static failed(error: string): UsageTrackingResult {
     return new UsageTrackingResult(false, undefined, error);
   }
 }
 
+/**
+ * Represents the bonus quota result.
+ */
 export class BonusQuotaResult {
   private constructor(
     public readonly success: boolean,
@@ -488,6 +526,11 @@ export class BonusQuotaResult {
     public readonly errors?: string[]
   ) {}
 
+  /**
+   * Performs the success operation.
+   * @param data - The data.
+   * @returns The BonusQuotaResult.
+   */
   static success(data: {
     addedAmount: number;
     newTotalQuota: number;
@@ -496,11 +539,19 @@ export class BonusQuotaResult {
     return new BonusQuotaResult(true, data);
   }
 
+  /**
+   * Performs the failed operation.
+   * @param errors - The errors.
+   * @returns The BonusQuotaResult.
+   */
   static failed(errors: string[]): BonusQuotaResult {
     return new BonusQuotaResult(false, undefined, errors);
   }
 }
 
+/**
+ * Represents the usage stats result.
+ */
 export class UsageStatsResult {
   private constructor(
     public readonly success: boolean,
@@ -521,6 +572,11 @@ export class UsageStatsResult {
     public readonly errors?: string[]
   ) {}
 
+  /**
+   * Performs the success operation.
+   * @param data - The data.
+   * @returns The UsageStatsResult.
+   */
   static success(data: {
     individual?: {
       ip: string;
@@ -538,11 +594,19 @@ export class UsageStatsResult {
     return new UsageStatsResult(true, data);
   }
 
+  /**
+   * Performs the failed operation.
+   * @param errors - The errors.
+   * @returns The UsageStatsResult.
+   */
   static failed(errors: string[]): UsageStatsResult {
     return new UsageStatsResult(false, undefined, errors);
   }
 }
 
+/**
+ * Represents the usage analysis result.
+ */
 export class UsageAnalysisResult {
   private constructor(
     public readonly success: boolean,
@@ -550,14 +614,28 @@ export class UsageAnalysisResult {
     public readonly errors?: string[]
   ) {}
 
+  /**
+   * Performs the success operation.
+   * @param data - The data.
+   * @returns The UsageAnalysisResult.
+   */
   static success(data: UsagePatternAnalysis): UsageAnalysisResult {
     return new UsageAnalysisResult(true, data);
   }
 
+  /**
+   * Performs the failed operation.
+   * @param errors - The errors.
+   * @returns The UsageAnalysisResult.
+   */
   static failed(errors: string[]): UsageAnalysisResult {
     return new UsageAnalysisResult(false, undefined, errors);
   }
 
+  /**
+   * Performs the empty operation.
+   * @returns The UsageAnalysisResult.
+   */
   static empty(): UsageAnalysisResult {
     return new UsageAnalysisResult(true, {
       timeRange: { startDate: new Date(), endDate: new Date() },
@@ -571,6 +649,9 @@ export class UsageAnalysisResult {
   }
 }
 
+/**
+ * Represents the risk assessment result.
+ */
 export class RiskAssessmentResult {
   private constructor(
     public readonly success: boolean,
@@ -578,21 +659,37 @@ export class RiskAssessmentResult {
     public readonly errors?: string[]
   ) {}
 
+  /**
+   * Performs the success operation.
+   * @param data - The data.
+   * @returns The RiskAssessmentResult.
+   */
   static success(data: IPRiskAssessment[]): RiskAssessmentResult {
     return new RiskAssessmentResult(true, data);
   }
 
+  /**
+   * Performs the failed operation.
+   * @param errors - The errors.
+   * @returns The RiskAssessmentResult.
+   */
   static failed(errors: string[]): RiskAssessmentResult {
     return new RiskAssessmentResult(false, undefined, errors);
   }
 }
 
 // 类型定义
+/**
+ * Defines the shape of the time range.
+ */
 export interface TimeRange {
   startDate: Date;
   endDate: Date;
 }
 
+/**
+ * Defines the shape of the system usage statistics.
+ */
 export interface SystemUsageStatistics {
   totalIPs: number;
   activeIPs: number;
@@ -603,6 +700,9 @@ export interface SystemUsageStatistics {
   averageUsagePerIP: number;
 }
 
+/**
+ * Defines the shape of the usage pattern.
+ */
 export interface UsagePattern {
   type: 'peak' | 'low' | 'consistent' | 'sporadic';
   timeWindow: string;
@@ -610,6 +710,9 @@ export interface UsagePattern {
   description: string;
 }
 
+/**
+ * Defines the shape of the usage pattern analysis.
+ */
 export interface UsagePatternAnalysis {
   timeRange: TimeRange;
   totalAnalyzedIPs: number;
@@ -620,6 +723,9 @@ export interface UsagePatternAnalysis {
   averageUsagePerIP: number;
 }
 
+/**
+ * Defines the shape of the ip risk assessment.
+ */
 export interface IPRiskAssessment {
   ip: string;
   riskScore: number;
@@ -631,6 +737,9 @@ export interface IPRiskAssessment {
 }
 
 // 接口定义
+/**
+ * Defines the shape of the i usage limit repository.
+ */
 export interface IUsageLimitRepository {
   save(usageLimit: UsageLimit): Promise<void>;
   findByIP(ip: string): Promise<UsageLimit | null>;
@@ -639,10 +748,16 @@ export interface IUsageLimitRepository {
   deleteExpired(olderThan: Date): Promise<number>;
 }
 
+/**
+ * Defines the shape of the i domain event bus.
+ */
 export interface IDomainEventBus {
   publish(event: any): Promise<void>;
 }
 
+/**
+ * Defines the shape of the i audit logger.
+ */
 export interface IAuditLogger {
   logBusinessEvent(eventType: string, data: any): Promise<void>;
   logSecurityEvent(eventType: string, data: any): Promise<void>;

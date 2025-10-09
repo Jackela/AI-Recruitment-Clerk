@@ -4,8 +4,15 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 let currentUsage = 0;
 let quota = 100;
 
+/**
+ * Exposes endpoints for usage limits.
+ */
 @Controller('usage-limits')
 export class UsageLimitsController {
+  /**
+   * Performs the check operation.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Get('check')
   @HttpCode(HttpStatus.OK)
@@ -17,6 +24,11 @@ export class UsageLimitsController {
     };
   }
 
+  /**
+   * Performs the record operation.
+   * @param _body - The body.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Post('record')
   @HttpCode(HttpStatus.CREATED)
@@ -28,6 +40,11 @@ export class UsageLimitsController {
     };
   }
 
+  /**
+   * Performs the bonus operation.
+   * @param body - The body.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Post('bonus')
   @HttpCode(HttpStatus.CREATED)

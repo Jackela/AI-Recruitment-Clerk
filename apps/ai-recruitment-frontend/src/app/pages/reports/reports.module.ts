@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReportsPlaceholderComponent } from './reports-placeholder/reports-placeholder.component';
 
+/**
+ * Configures the reports module.
+ */
 @NgModule({
   declarations: [ReportsPlaceholderComponent],
   imports: [

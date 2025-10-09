@@ -146,7 +146,7 @@ export function Invariant(condition: (instance: any) => boolean, message: string
         this.checkInvariant();
       }
       
-      private checkInvariant() {
+      public checkInvariant() {
         if (!condition(this)) {
           throw new ContractViolationError(
             message, 

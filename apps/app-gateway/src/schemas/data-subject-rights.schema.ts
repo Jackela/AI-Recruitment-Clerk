@@ -180,6 +180,9 @@ DataSubjectRightsRequestSchema.pre('save', function (next) {
  */
 export type RightsRequestActivityDocument = RightsRequestActivity & Document;
 
+/**
+ * Represents the rights request activity.
+ */
 @Schema({
   collection: 'rights_request_activities',
   timestamps: true,
@@ -237,6 +240,9 @@ RightsRequestActivitySchema.index({ timestamp: -1 });
  */
 export type DataExportPackageDocument = DataExportPackage & Document;
 
+/**
+ * Represents the data export package.
+ */
 @Schema({
   collection: 'data_export_packages',
   timestamps: true,
@@ -329,6 +335,9 @@ DataExportPackageSchema.pre('save', function (next) {
  */
 export type IdentityVerificationDocument = IdentityVerification & Document;
 
+/**
+ * Represents the identity verification.
+ */
 @Schema({
   collection: 'identity_verifications',
   timestamps: true,

@@ -1,3 +1,6 @@
+/**
+ * Defines the shape of the nats stream config.
+ */
 export interface NatsStreamConfig {
   name: string;
   subjects: string[];
@@ -8,6 +11,9 @@ export interface NatsStreamConfig {
   duplicate_window: number; // nanoseconds
 }
 
+/**
+ * Defines the shape of the nats consumer config.
+ */
 export interface NatsConsumerConfig {
   durable_name: string;
   filter_subject: string;

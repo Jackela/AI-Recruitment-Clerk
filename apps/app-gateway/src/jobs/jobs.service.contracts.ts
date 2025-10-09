@@ -32,8 +32,8 @@ import {
   UserRole,
 } from '@ai-recruitment-clerk/user-management-domain';
 import { JobJdSubmittedEvent } from '@ai-recruitment-clerk/job-management-domain';
-import { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
-import { NatsClient } from '../nats/nats.client';
+import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
+import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
 import { CacheService } from '../cache/cache.service';
 
 /**
@@ -45,19 +45,18 @@ import { CacheService } from '../cache/cache.service';
  * @since 1.0.0
  */
 @Injectable()
-@Invariant(
-  (instance: JobsServiceContracts) =>
-    !!instance.storageService &&
-    !!instance.natsClient &&
-    !!instance.cacheService,
-  'Dependencies must be properly injected',
-)
 export class JobsServiceContracts {
   private readonly logger = new Logger(JobsServiceContracts.name);
 
+  /**
+   * Initializes a new instance of the Jobs Service Contracts.
+   * @param storageService - The storage service.
+   * @param natsClient - The nats client.
+   * @param cacheService - The cache service.
+   */
   constructor(
     private readonly storageService: InMemoryStorageService,
-    private readonly natsClient: NatsClient,
+    private readonly natsClient: AppGatewayNatsService,
     private readonly cacheService: CacheService,
   ) {
     this.storageService.seedMockData();
@@ -79,20 +78,25 @@ export class JobsServiceContracts {
    * @since 1.0.0
    */
   @Requires(
-    (dto: CreateJobDto, user: UserDto) =>
-      ContractValidators.isNonEmptyString(dto.jobTitle) &&
-      ContractValidators.isNonEmptyString(dto.jdText) &&
-      !!user &&
-      ContractValidators.isNonEmptyString(user.id) &&
-      ContractValidators.isNonEmptyString(user.organizationId),
+    (...args: any[]) => {
+      const dto = args[0] as CreateJobDto;
+      const user = args[1] as UserDto;
+      return ContractValidators.isNonEmptyString(dto.jobTitle) &&
+             ContractValidators.isNonEmptyString(dto.jdText) &&
+             !!user &&
+             ContractValidators.isNonEmptyString(user.id) &&
+             ContractValidators.isNonEmptyString(user.organizationId);
+    },
     'Job creation requires valid title, JD text, and authenticated user with organization',
   )
   @Ensures(
-    (result: { jobId: string }) =>
-      ContractValidators.isNonEmptyString(result.jobId) &&
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
-        result.jobId,
-      ),
+    (...args: any[]) => {
+      const result = args[0] as { jobId: string };
+      return ContractValidators.isNonEmptyString(result.jobId) &&
+             /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
+               result.jobId,
+             );
+    },
     'Must return valid UUID job ID',
   )
   async createJob(
@@ -178,19 +182,25 @@ export class JobsServiceContracts {
    * @since 1.0.0
    */
   @Requires(
-    (jobId: string, files: MulterFile[], user: UserDto) =>
-      ContractValidators.isNonEmptyString(jobId) &&
-      Array.isArray(files) &&
-      files.length > 0 &&
-      files.every((f) => f.size > 0 && f.size <= 10 * 1024 * 1024) && // 10MB limit
-      !!user &&
-      ContractValidators.isNonEmptyString(user.id),
+    (...args: any[]) => {
+      const jobId = args[0] as string;
+      const files = args[1] as MulterFile[];
+      const user = args[2] as UserDto;
+      return ContractValidators.isNonEmptyString(jobId) &&
+             Array.isArray(files) &&
+             files.length > 0 &&
+             files.every((f) => f.size > 0 && f.size <= 10 * 1024 * 1024) && // 10MB limit
+             !!user &&
+             ContractValidators.isNonEmptyString(user.id);
+    },
     'Resume upload requires valid job ID, non-empty file array within size limits, and authenticated user',
   )
   @Ensures(
-    (result: ResumeUploadResponseDto) =>
-      ContractValidators.isNonEmptyString(result.jobId) &&
-      result.submittedResumes >= 0,
+    (...args: any[]) => {
+      const result = args[0] as ResumeUploadResponseDto;
+      return ContractValidators.isNonEmptyString(result.jobId) &&
+             result.submittedResumes >= 0;
+    },
     'Must return valid upload response with job ID and count',
   )
   uploadResumes(
@@ -281,14 +291,16 @@ export class JobsServiceContracts {
    * @since 1.0.0
    */
   @Ensures(
-    (result: JobListDto[]) =>
-      Array.isArray(result) &&
-      result.every(
-        (job) =>
-          ContractValidators.isNonEmptyString(job.id) &&
-          ContractValidators.isNonEmptyString(job.title) &&
-          ['processing', 'completed', 'failed'].includes(job.status),
-      ),
+    (...args: any[]) => {
+      const result = args[0] as JobListDto[];
+      return Array.isArray(result) &&
+             result.every(
+               (job) =>
+                 ContractValidators.isNonEmptyString(job.id) &&
+                 ContractValidators.isNonEmptyString(job.title) &&
+                 ['processing', 'completed', 'failed'].includes(job.status),
+             );
+    },
     'Must return valid job list with proper structure',
   )
   async getAllJobs(): Promise<JobListDto[]> {
@@ -328,15 +340,17 @@ export class JobsServiceContracts {
    * @since 1.0.0
    */
   @Requires(
-    (jobId: string) => ContractValidators.isNonEmptyString(jobId),
+    (...args: any[]) => ContractValidators.isNonEmptyString(args[0]),
     'Job ID must be non-empty string',
   )
   @Ensures(
-    (result: JobDetailDto) =>
-      !!result &&
-      ContractValidators.isNonEmptyString(result.id) &&
-      ContractValidators.isNonEmptyString(result.title) &&
-      ['processing', 'completed', 'failed'].includes(result.status),
+    (...args: any[]) => {
+      const result = args[0] as JobDetailDto;
+      return !!result &&
+             ContractValidators.isNonEmptyString(result.id) &&
+             ContractValidators.isNonEmptyString(result.title) &&
+             ['processing', 'completed', 'failed'].includes(result.status);
+    },
     'Must return valid job detail object',
   )
   async getJobById(jobId: string): Promise<JobDetailDto> {

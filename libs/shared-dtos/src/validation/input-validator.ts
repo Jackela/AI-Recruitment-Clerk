@@ -1,7 +1,10 @@
-import { BadRequestException } from '@nestjs/common';
+// import { BadRequestException } from '@nestjs/common';
 import { createHash } from 'crypto';
 import * as path from 'path';
 
+/**
+ * Defines the shape of the file validation options.
+ */
 export interface FileValidationOptions {
   maxSize: number; // in bytes
   allowedMimeTypes: string[];
@@ -10,13 +13,19 @@ export interface FileValidationOptions {
   requireVirusFreeCertificate?: boolean;
 }
 
+/**
+ * Defines the shape of the validation result.
+ */
 export interface ValidationResult {
   isValid: boolean;
   errors: string[];
-  sanitizedValue?: any;
-  metadata?: Record<string, any>;
+  sanitizedValue?: unknown;
+  metadata?: Record<string, unknown>;
 }
 
+/**
+ * Represents the input validator.
+ */
 export class InputValidator {
   
   // File validation constants
@@ -31,6 +40,7 @@ export class InputValidator {
   
   // Malicious file patterns
   private static readonly MALICIOUS_PATTERNS = [
+    // eslint-disable-next-line no-control-regex
     /\x00/g, // null bytes
     /<script/gi, // script tags
     /javascript:/gi, // javascript protocol
@@ -43,7 +53,7 @@ export class InputValidator {
   /**
    * Validates uploaded resume files
    */
-  static validateResumeFile(file: any): ValidationResult {
+  static validateResumeFile(file: { buffer: Buffer; originalname: string; mimetype?: string; size: number }): ValidationResult {
     const options: FileValidationOptions = {
       maxSize: this.DEFAULT_MAX_FILE_SIZE,
       allowedMimeTypes: this.RESUME_MIME_TYPES,
@@ -57,7 +67,7 @@ export class InputValidator {
   /**
    * Comprehensive file validation
    */
-  static validateFile(file: any, options: FileValidationOptions): ValidationResult {
+  static validateFile(file: { buffer: Buffer; originalname: string; mimetype?: string; size: number }, options: FileValidationOptions): ValidationResult {
     const errors: string[] = [];
     
     if (!file) {
@@ -73,7 +83,7 @@ export class InputValidator {
     }
 
     // Validate MIME type
-    if (options.allowedMimeTypes.length > 0 && !options.allowedMimeTypes.includes(file.mimetype)) {
+    if (options.allowedMimeTypes.length > 0 && file.mimetype && !options.allowedMimeTypes.includes(file.mimetype)) {
       errors.push(`File type '${file.mimetype}' is not allowed. Allowed types: ${options.allowedMimeTypes.join(', ')}`);
     }
 
@@ -91,7 +101,7 @@ export class InputValidator {
 
     // Basic malware scanning (content-based)
     if (options.scanForMalware) {
-      const malwareResult = this.scanForMaliciousContent(file.buffer || file.data);
+      const malwareResult = this.scanForMaliciousContent(file.buffer);
       if (!malwareResult.isValid) {
         errors.push(...malwareResult.errors);
       }
@@ -105,7 +115,7 @@ export class InputValidator {
       sanitizedValue: isValid ? {
         ...file,
         originalname: this.sanitizeFilename(file.originalname),
-        hash: this.generateFileHash(file.buffer || file.data)
+        hash: this.generateFileHash(file.buffer)
       } : undefined,
       metadata: {
         size: file.size,
@@ -270,7 +280,7 @@ export class InputValidator {
         errors.push('Private/local URLs are not allowed');
       }
 
-    } catch (error) {
+    } catch (_error) {
       errors.push('Invalid URL format');
     }
 
@@ -285,7 +295,7 @@ export class InputValidator {
    * Validates JSON object structure
    */
   static validateJsonObject(
-    obj: any, 
+    obj: unknown, 
     schema: Record<string, { type: string; required?: boolean; maxLength?: number }>
   ): ValidationResult {
     const errors: string[] = [];
@@ -339,6 +349,7 @@ export class InputValidator {
     }
 
     // Check for dangerous characters
+    // eslint-disable-next-line no-control-regex
     const dangerousChars = /[<>:"/\\|?*\x00-\x1f]/g;
     if (dangerousChars.test(filename)) {
       errors.push('Filename contains invalid characters');
@@ -358,6 +369,7 @@ export class InputValidator {
 
   private static sanitizeFilename(filename: string): string {
     return filename
+      // eslint-disable-next-line no-control-regex
       .replace(/[<>:"/\\|?*\x00-\x1f]/g, '_')
       .replace(/\.\./g, '.')
       .replace(/^\.+/, '')
@@ -411,7 +423,7 @@ export class InputValidator {
   }
 
   private static generateFileHash(buffer: Buffer): string {
-    return createHash('sha256').update(buffer as any).digest('hex');
+    return createHash('sha256').update(Uint8Array.from(buffer)).digest('hex');
   }
 
   private static formatBytes(bytes: number): string {
@@ -430,9 +442,9 @@ export class InputValidator {
     // Enhanced SQL injection patterns
     const sqlInjectionPatterns = [
       /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\b)/gi,
-      /(\'\s*OR\s*\')/gi,
-      /(\'; )/g,
-      /(\-\-)/g,
+      /('\s*OR\s*')/gi,
+      /('; )/g,
+      /(--)/g,
       /(\bunion\b)/gi,
       /(\bdrop\b)/gi,
       /(\/\*|\*\/)/g

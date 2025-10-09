@@ -17,6 +17,9 @@ import {
 } from './mobile-swipe.component';
 import { TouchGestureService } from '../../services/mobile/touch-gesture.service';
 
+/**
+ * Defines the shape of the candidate result.
+ */
 export interface CandidateResult {
   id: string;
   name: string;
@@ -47,6 +50,9 @@ export interface CandidateResult {
   resumeUrl?: string;
 }
 
+/**
+ * Defines the shape of the results filter.
+ */
 export interface ResultsFilter {
   score: { min: number; max: number };
   experience: string[];
@@ -55,8 +61,11 @@ export interface ResultsFilter {
   status: string[];
 }
 
+/**
+ * Represents the mobile results component.
+ */
 @Component({
-  selector: 'app-mobile-results',
+  selector: 'arc-mobile-results',
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule, MobileSwipeComponent],
   template: `
@@ -1107,6 +1116,11 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
   ];
 
   // Swipe actions
+  /**
+   * Retrieves swipe actions.
+   * @param _candidate - The candidate.
+   * @returns The an array of SwipeAction.
+   */
   getSwipeActions(_candidate: CandidateResult): SwipeAction[] {
     return [
       {
@@ -1155,17 +1169,29 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     },
   ];
 
+  /**
+   * Initializes a new instance of the Mobile Results Component.
+   * @param _touchGesture - The touch gesture.
+   */
   constructor(private readonly _touchGesture: TouchGestureService) {
     // TouchGesture service will be used for future gesture implementations
     // Prevent unused warning
     void this._touchGesture;
   }
 
+  /**
+   * Performs the ng on init operation.
+   * @returns The result of the operation.
+   */
   ngOnInit() {
     this.applyFilters();
     this.setupGestures();
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   * @returns The result of the operation.
+   */
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
@@ -1176,6 +1202,10 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     // Implementation would go here
   }
 
+  /**
+   * Performs the active filters count operation.
+   * @returns The number value.
+   */
   get activeFiltersCount(): number {
     let count = 0;
     if (this.filters.score.min > 0) count++;
@@ -1187,25 +1217,46 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
   }
 
   // Filter methods
+  /**
+   * Performs the toggle filters operation.
+   * @returns The result of the operation.
+   */
   toggleFilters() {
     this.showFilters = !this.showFilters;
     this.showSort = false;
   }
 
+  /**
+   * Performs the toggle sort operation.
+   * @returns The result of the operation.
+   */
   toggleSort() {
     this.showSort = !this.showSort;
     this.showFilters = false;
   }
 
+  /**
+   * Performs the toggle view operation.
+   * @returns The result of the operation.
+   */
   toggleView() {
     this.viewMode = this.viewMode === 'card' ? 'detailed' : 'card';
   }
 
+  /**
+   * Performs the on filter change operation.
+   * @returns The result of the operation.
+   */
   onFilterChange() {
     this.applyFilters();
     this.filtersChanged.emit(this.filters);
   }
 
+  /**
+   * Performs the toggle status filter operation.
+   * @param status - The status.
+   * @returns The result of the operation.
+   */
   toggleStatusFilter(status: string) {
     const index = this.filters.status.indexOf(status);
     if (index > -1) {
@@ -1216,6 +1267,11 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     this.onFilterChange();
   }
 
+  /**
+   * Performs the toggle experience filter operation.
+   * @param experience - The experience.
+   * @returns The result of the operation.
+   */
   toggleExperienceFilter(experience: string) {
     const index = this.filters.experience.indexOf(experience);
     if (index > -1) {
@@ -1226,6 +1282,10 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     this.onFilterChange();
   }
 
+  /**
+   * Performs the clear filters operation.
+   * @returns The result of the operation.
+   */
   clearFilters() {
     this.filters = {
       score: { min: 0, max: 100 },
@@ -1237,6 +1297,11 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     this.onFilterChange();
   }
 
+  /**
+   * Sets sort option.
+   * @param sortValue - The sort value.
+   * @returns The result of the operation.
+   */
   setSortOption(sortValue: string) {
     this.currentSort = sortValue;
     this.showSort = false;
@@ -1291,6 +1356,10 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Retrieves match summary.
+   * @returns The string value.
+   */
   getMatchSummary(): string {
     if (this.filteredResults.length === 0) return '';
 
@@ -1309,10 +1378,21 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
   }
 
   // Selection methods
+  /**
+   * Performs the is selected operation.
+   * @param candidate - The candidate.
+   * @returns The boolean value.
+   */
   isSelected(candidate: CandidateResult): boolean {
     return this.selectedCandidates.some((c) => c.id === candidate.id);
   }
 
+  /**
+   * Performs the toggle selection operation.
+   * @param candidate - The candidate.
+   * @param event - The event.
+   * @returns The result of the operation.
+   */
   toggleSelection(candidate: CandidateResult, event: Event) {
     event.stopPropagation();
 
@@ -1326,10 +1406,19 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the select all operation.
+   * @returns The result of the operation.
+   */
   selectAll() {
     this.selectedCandidates = [...this.filteredResults];
   }
 
+  /**
+   * Performs the bulk action operation.
+   * @param action - The action.
+   * @returns The result of the operation.
+   */
   bulkAction(action: string) {
     this.bulkActionTriggered.emit({
       action,
@@ -1339,10 +1428,20 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
   }
 
   // Event handlers
+  /**
+   * Performs the on candidate click operation.
+   * @param candidate - The candidate.
+   * @returns The result of the operation.
+   */
   onCandidateClick(candidate: CandidateResult) {
     this.candidateSelected.emit(candidate);
   }
 
+  /**
+   * Performs the on candidate long press operation.
+   * @param candidate - The candidate.
+   * @returns The result of the operation.
+   */
   onCandidateLongPress(candidate: CandidateResult) {
     this.selectedCandidate = candidate;
     this.showQuickActions = true;
@@ -1353,6 +1452,11 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the on swipe action operation.
+   * @param event - The event.
+   * @returns The result of the operation.
+   */
   onSwipeAction(event: SwipeEvent) {
     this.candidateAction.emit({
       action: event.action.id,
@@ -1360,6 +1464,13 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Performs the on quick action operation.
+   * @param action - The action.
+   * @param candidate - The candidate.
+   * @param event - The event.
+   * @returns The result of the operation.
+   */
   onQuickAction(action: any, candidate: CandidateResult, event: Event) {
     event.stopPropagation();
     this.candidateAction.emit({
@@ -1370,6 +1481,12 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     this.selectedCandidate = null;
   }
 
+  /**
+   * Performs the track by candidate operation.
+   * @param _index - The index.
+   * @param candidate - The candidate.
+   * @returns The string value.
+   */
   trackByCandidate(_index: number, candidate: CandidateResult): string {
     return candidate.id;
   }

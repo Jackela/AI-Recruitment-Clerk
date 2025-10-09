@@ -5,8 +5,11 @@ import {
   FieldMappingResult,
   VisionLlmResponse,
 } from '../dto/resume-parsing.dto';
-import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
+/**
+ * Defines the shape of the resume parsing result.
+ */
 export interface ResumeParsingResult {
   resumeDto: ResumeDTO;
   validationErrors: string[];
@@ -22,6 +25,9 @@ export interface ResumeParsingResult {
   };
 }
 
+/**
+ * Defines the shape of the resume parsing options.
+ */
 export interface ResumeParsingOptions {
   enableValidation?: boolean;
   enableExperienceCalculation?: boolean;
@@ -31,10 +37,18 @@ export interface ResumeParsingOptions {
   retryAttempts?: number;
 }
 
+/**
+ * Provides resume parser integration functionality.
+ */
 @Injectable()
 export class ResumeParserIntegrationService {
   private readonly logger = new Logger(ResumeParserIntegrationService.name);
 
+  /**
+   * Initializes a new instance of the Resume Parser Integration Service.
+   * @param visionLlmService - The vision llm service.
+   * @param fieldMapperService - The field mapper service.
+   */
   constructor(
     private readonly visionLlmService: VisionLlmService,
     private readonly fieldMapperService: FieldMapperService,
@@ -174,7 +188,7 @@ export class ResumeParserIntegrationService {
   > {
     this.logger.log(`Starting batch processing of ${resumes.length} resumes`);
 
-    const results = [];
+    const results: Array<{ filename: string; result: ResumeParsingResult; error?: string }> = [];
 
     for (const resume of resumes) {
       try {
@@ -198,7 +212,7 @@ export class ResumeParserIntegrationService {
         );
         results.push({
           filename: resume.filename,
-          result: null as any,
+          result: {} as ResumeParsingResult, // Provide empty result structure
           error: error instanceof Error ? error.message : String(error),
         });
       }

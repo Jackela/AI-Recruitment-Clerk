@@ -7,15 +7,27 @@ import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { JobRepository } from '../repositories/job.repository';
 import { CacheService } from './cache.service';
 
+/**
+ * Provides cache warmup functionality.
+ */
 @Injectable()
 export class CacheWarmupService implements OnApplicationBootstrap {
   private readonly logger = new Logger(CacheWarmupService.name);
 
+  /**
+   * Initializes a new instance of the Cache Warmup Service.
+   * @param cacheService - The cache service.
+   * @param jobRepository - The job repository.
+   */
   constructor(
     private readonly cacheService: CacheService,
     private readonly jobRepository: JobRepository,
   ) {}
 
+  /**
+   * Performs the on application bootstrap operation.
+   * @returns The result of the operation.
+   */
   async onApplicationBootstrap() {
     // 延迟5秒启动预热，让应用完全启动
     setTimeout(() => {

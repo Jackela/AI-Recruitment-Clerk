@@ -1,6 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 
+/**
+ * Defines the shape of the realtime stats.
+ */
 export interface RealtimeStats {
   totalAnalyses: number;
   activeAnalyses: number;
@@ -13,6 +16,9 @@ export interface RealtimeStats {
   lastUpdated: Date;
 }
 
+/**
+ * Defines the shape of the analysis event.
+ */
 export interface AnalysisEvent {
   type: 'started' | 'progress' | 'completed' | 'failed';
   analysisId: string;
@@ -26,6 +32,9 @@ export interface AnalysisEvent {
   };
 }
 
+/**
+ * Defines the shape of the system metrics.
+ */
 export interface SystemMetrics {
   cpuUsage: number;
   memoryUsage: number;
@@ -47,6 +56,9 @@ interface WebSocketErrorPayload {
   details?: unknown;
 }
 
+/**
+ * Provides web socket stats functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -104,6 +116,9 @@ export class WebSocketStatsService {
   private mockMode = false;
   private mockInterval: ReturnType<typeof setInterval> | null = null;
 
+  /**
+   * Initializes a new instance of the Web Socket Stats Service.
+   */
   constructor() {
     // Sync BehaviorSubjects with signals
     this.stats$.subscribe((stats) => this.stats.set(stats));
@@ -385,27 +400,50 @@ export class WebSocketStatsService {
   }
 
   // Public API
+  /**
+   * Retrieves stats.
+   * @returns The RealtimeStats.
+   */
   getStats(): RealtimeStats {
     return this.stats$.value;
   }
 
+  /**
+   * Retrieves metrics.
+   * @returns The SystemMetrics.
+   */
   getMetrics(): SystemMetrics {
     return this.metrics$.value;
   }
 
+  /**
+   * Performs the subscribe to events operation.
+   * @returns The result of the operation.
+   */
   subscribeToEvents() {
     return this.events$.asObservable();
   }
 
+  /**
+   * Performs the subscribe to stats operation.
+   * @returns The result of the operation.
+   */
   subscribeToStats() {
     return this.stats$.asObservable();
   }
 
+  /**
+   * Performs the subscribe to metrics operation.
+   * @returns The result of the operation.
+   */
   subscribeToMetrics() {
     return this.metrics$.asObservable();
   }
 
   // Manual refresh for fallback
+  /**
+   * Performs the refresh stats operation.
+   */
   refreshStats(): void {
     if (this.isConnected()) {
       this.send({ type: 'refresh', target: 'stats' });
@@ -415,6 +453,9 @@ export class WebSocketStatsService {
   }
 
   // Connection management
+  /**
+   * Performs the reconnect operation.
+   */
   reconnect(): void {
     if (this.ws) {
       this.ws.close();
@@ -423,6 +464,9 @@ export class WebSocketStatsService {
     this.connect();
   }
 
+  /**
+   * Performs the disconnect operation.
+   */
   disconnect(): void {
     if (this.mockInterval) {
       clearInterval(this.mockInterval);
@@ -439,6 +483,9 @@ export class WebSocketStatsService {
   }
 
   // Cleanup
+  /**
+   * Performs the destroy operation.
+   */
   destroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -446,10 +493,18 @@ export class WebSocketStatsService {
   }
 
   // Development helpers
+  /**
+   * Performs the is mock mode operation.
+   * @returns The boolean value.
+   */
   isMockMode(): boolean {
     return this.mockMode;
   }
 
+  /**
+   * Retrieves connection info.
+   * @returns The { status: string; attempts: number; lastError: string; mockMode: boolean; }.
+   */
   getConnectionInfo(): {
     status: string;
     attempts: number;

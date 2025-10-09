@@ -21,8 +21,11 @@ interface ActivityItem {
   status?: 'processing' | 'completed' | 'failed';
 }
 
+/**
+ * Represents the dashboard component.
+ */
 @Component({
-  selector: 'app-dashboard',
+  selector: 'arc-dashboard',
   standalone: true,
   imports: [CommonModule, RouterModule, SharedModule],
   template: `
@@ -717,6 +720,10 @@ interface ActivityItem {
 export class DashboardComponent implements OnInit {
   stats$!: Observable<DashboardStats>;
 
+  /**
+   * Performs the ng on init operation.
+   * @returns The result of the operation.
+   */
   ngOnInit() {
     this.loadDashboardData();
   }
@@ -767,10 +774,21 @@ export class DashboardComponent implements OnInit {
     this.stats$ = of(mockStats);
   }
 
+  /**
+   * Performs the track by activity id operation.
+   * @param _index - The index.
+   * @param activity - The activity.
+   * @returns The string value.
+   */
   trackByActivityId(_index: number, activity: ActivityItem): string {
     return activity.id;
   }
 
+  /**
+   * Retrieves status text.
+   * @param status - The status.
+   * @returns The string value.
+   */
   getStatusText(status: string): string {
     switch (status) {
       case 'processing':

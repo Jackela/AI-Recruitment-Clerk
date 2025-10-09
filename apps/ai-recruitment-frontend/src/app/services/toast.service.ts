@@ -1,13 +1,19 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ProgressFeedbackService } from './feedback/progress-feedback.service';
 import { Observable, BehaviorSubject } from 'rxjs';
 
+/**
+ * Defines the shape of the toast message.
+ */
 export interface ToastMessage {
   message: string;
   type: 'success' | 'error' | 'warning' | 'info';
   duration?: number;
 }
 
+/**
+ * Provides toast functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -15,20 +21,40 @@ export class ToastService {
   private toasts$ = new BehaviorSubject<ToastMessage[]>([]);
   private activeToastIds: string[] = [];
 
-  constructor(private progressFeedback: ProgressFeedbackService) {}
+  private progressFeedback = inject(ProgressFeedbackService);
 
+  /**
+   * Performs the success operation.
+   * @param message - The message.
+   * @param duration - The duration.
+   */
   success(message: string, duration = 3000): void {
     this.show({ message, type: 'success', duration });
   }
 
+  /**
+   * Performs the error operation.
+   * @param message - The message.
+   * @param duration - The duration.
+   */
   error(message: string, duration = 5000): void {
     this.show({ message, type: 'error', duration });
   }
 
+  /**
+   * Performs the warning operation.
+   * @param message - The message.
+   * @param duration - The duration.
+   */
   warning(message: string, duration = 4000): void {
     this.show({ message, type: 'warning', duration });
   }
 
+  /**
+   * Performs the info operation.
+   * @param message - The message.
+   * @param duration - The duration.
+   */
   info(message: string, duration = 3000): void {
     this.show({ message, type: 'info', duration });
   }
@@ -84,14 +110,25 @@ export class ToastService {
     }
   }
 
+  /**
+   * Retrieves toasts.
+   * @returns The an array of ToastMessage.
+   */
   getToasts(): ToastMessage[] {
     return this.toasts$.value;
   }
 
+  /**
+   * Retrieves toasts$.
+   * @returns The Observable<ToastMessage[]>.
+   */
   getToasts$(): Observable<ToastMessage[]> {
     return this.toasts$.asObservable();
   }
 
+  /**
+   * Performs the clear operation.
+   */
   clear(): void {
     this.toasts$.next([]);
     // Clear all notifications from ProgressFeedbackService

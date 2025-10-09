@@ -7,7 +7,7 @@ import {
   AnalyticsEvent,
   AnalyticsEventSchema,
 } from '../../schemas/analytics-event.schema';
-import { NatsClient } from '../../nats/nats.client';
+import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
 import { AppCacheModule } from '../../cache/cache.module';
 
 /**
@@ -25,7 +25,7 @@ import { AppCacheModule } from '../../cache/cache.module';
   providers: [
     AnalyticsIntegrationService,
     AnalyticsEventRepository,
-    NatsClient,
+    AppGatewayNatsService,
   ],
   exports: [AnalyticsIntegrationService, AnalyticsEventRepository],
 })

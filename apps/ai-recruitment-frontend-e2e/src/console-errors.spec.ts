@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 /**
  * Test to Capture Console Errors and Understand Why Angular Isn't Bootstrapping

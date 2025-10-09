@@ -8,11 +8,17 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import * as crypto from 'crypto';
 
+/**
+ * Defines the shape of the cache options.
+ */
 export interface CacheOptions {
   ttl?: number;
   tags?: string[];
 }
 
+/**
+ * Defines the shape of the cache metrics.
+ */
 export interface CacheMetrics {
   hits: number;
   misses: number;
@@ -23,6 +29,9 @@ export interface CacheMetrics {
   totalOperations: number;
 }
 
+/**
+ * Provides cache functionality.
+ */
 @Injectable()
 export class CacheService {
   private readonly logger = new Logger(CacheService.name);
@@ -36,6 +45,10 @@ export class CacheService {
     totalOperations: 0,
   };
 
+  /**
+   * Initializes a new instance of the Cache Service.
+   * @param cacheManager - The cache manager.
+   */
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {
     // 设置错误处理器防止未处理的错误
     this.setupErrorHandling();

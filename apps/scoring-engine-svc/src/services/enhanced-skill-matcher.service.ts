@@ -1,7 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GeminiClient } from '@ai-recruitment-clerk/ai-services-shared';
+import { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
 import { SkillsTaxonomy } from '@ai-recruitment-clerk/candidate-scoring-domain';
 
+/**
+ * Defines the shape of the skill match result.
+ */
 export interface SkillMatchResult {
   skill: string;
   matchedJobSkill: string;
@@ -11,6 +14,9 @@ export interface SkillMatchResult {
   explanation?: string;
 }
 
+/**
+ * Defines the shape of the skill gap analysis.
+ */
 export interface SkillGapAnalysis {
   missingCriticalSkills: string[];
   missingOptionalSkills: string[];
@@ -21,6 +27,9 @@ export interface SkillGapAnalysis {
   }[];
 }
 
+/**
+ * Defines the shape of the enhanced skill score.
+ */
 export interface EnhancedSkillScore {
   overallScore: number;
   matches: SkillMatchResult[];
@@ -34,6 +43,9 @@ export interface EnhancedSkillScore {
   };
 }
 
+/**
+ * Defines the shape of the job skill requirement.
+ */
 export interface JobSkillRequirement {
   name: string;
   weight: number;
@@ -43,10 +55,17 @@ export interface JobSkillRequirement {
   description?: string;
 }
 
+/**
+ * Provides enhanced skill matcher functionality.
+ */
 @Injectable()
 export class EnhancedSkillMatcherService {
   private readonly logger = new Logger(EnhancedSkillMatcherService.name);
 
+  /**
+   * Initializes a new instance of the Enhanced Skill Matcher Service.
+   * @param geminiClient - The gemini client.
+   */
   constructor(private readonly geminiClient: GeminiClient) {}
 
   /**

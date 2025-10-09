@@ -1,10 +1,10 @@
-import { Controller, Logger, OnModuleInit, Optional, Inject } from '@nestjs/common';
+import { Controller, Logger, OnModuleInit, Optional } from '@nestjs/common';
 import { EventPattern } from '@nestjs/microservices';
-import {
+import type {
   AnalysisJdExtractedEvent,
   JdDTO as ExtractedJdDTO,
 } from '@ai-recruitment-clerk/job-management-domain';
-import {
+import type {
   AnalysisResumeParsedEvent,
   ResumeDTO,
 } from '@ai-recruitment-clerk/resume-processing-domain';
@@ -12,15 +12,29 @@ import { ScoringEngineException, ScoringEngineErrorCode, ErrorCorrelationManager
 import { ScoringEngineNatsService } from '../services/scoring-engine-nats.service';
 import { ScoringEngineService, JdDTO } from '../scoring.service';
 
+/**
+ * Exposes endpoints for scoring events.
+ */
 @Controller()
 export class ScoringEventsController implements OnModuleInit {
   private readonly logger = new Logger(ScoringEventsController.name);
 
+  /**
+   * Initializes a new instance of the Scoring Events Controller.
+   * @param natsService - The nats service.
+   * @param scoringEngine - The scoring engine.
+   */
   constructor(
-    @Optional() private readonly natsService?: any,
-    @Optional() private readonly scoringEngine?: ScoringEngineService,
+    @Optional()
+    private readonly natsService?: ScoringEngineNatsService,
+    @Optional()
+    private readonly scoringEngine?: ScoringEngineService,
   ) {}
 
+  /**
+   * Performs the on module init operation.
+   * @returns The result of the operation.
+   */
   async onModuleInit() {
     // Subscribe to analysis events using the shared NATS service
     if (!this.natsService) return;
@@ -32,6 +46,11 @@ export class ScoringEventsController implements OnModuleInit {
     );
   }
 
+  /**
+   * Handles jd extracted.
+   * @param payload - The payload.
+   * @returns A promise that resolves when the operation completes.
+   */
   @EventPattern('analysis.jd.extracted')
   async handleJdExtracted(payload: AnalysisJdExtractedEvent): Promise<void> {
     try {
@@ -76,6 +95,11 @@ export class ScoringEventsController implements OnModuleInit {
     }
   }
 
+  /**
+   * Handles resume parsed.
+   * @param payload - The payload.
+   * @returns A promise that resolves when the operation completes.
+   */
   @EventPattern('analysis.resume.parsed')
   async handleResumeParsed(payload: AnalysisResumeParsedEvent): Promise<void> {
     try {

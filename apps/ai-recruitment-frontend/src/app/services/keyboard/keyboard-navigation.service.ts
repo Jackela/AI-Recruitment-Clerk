@@ -1,6 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 import { Subject } from 'rxjs';
 
+/**
+ * Defines the shape of the keyboard shortcut.
+ */
 export interface KeyboardShortcut {
   key: string;
   ctrlKey?: boolean;
@@ -11,12 +14,18 @@ export interface KeyboardShortcut {
   context?: string;
 }
 
+/**
+ * Defines the shape of the navigation state.
+ */
 export interface NavigationState {
   currentPage: string;
   previousPage?: string;
   preservedState?: any;
 }
 
+/**
+ * Provides keyboard navigation functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -40,6 +49,9 @@ export class KeyboardNavigationService {
     event: KeyboardEvent;
   }>();
 
+  /**
+   * Initializes a new instance of the Keyboard Navigation Service.
+   */
   constructor() {
     this.initializeGlobalShortcuts();
     this.setupEventListeners();
@@ -223,10 +235,19 @@ export class KeyboardNavigationService {
   }
 
   // Public API methods
+  /**
+   * Performs the register global shortcut operation.
+   * @param shortcut - The shortcut.
+   */
   registerGlobalShortcut(shortcut: KeyboardShortcut): void {
     this.globalShortcuts.push(shortcut);
   }
 
+  /**
+   * Performs the register context shortcut operation.
+   * @param context - The context.
+   * @param shortcut - The shortcut.
+   */
   registerContextShortcut(context: string, shortcut: KeyboardShortcut): void {
     if (!this.contextShortcuts.has(context)) {
       this.contextShortcuts.set(context, []);
@@ -234,6 +255,11 @@ export class KeyboardNavigationService {
     this.contextShortcuts.get(context)!.push(shortcut);
   }
 
+  /**
+   * Performs the unregister shortcut operation.
+   * @param key - The key.
+   * @param context - The context.
+   */
   unregisterShortcut(key: string, context?: string): void {
     if (context) {
       const shortcuts = this.contextShortcuts.get(context);
@@ -284,7 +310,7 @@ export class KeyboardNavigationService {
     }
   }
 
-  private preserveCurrentState(): any {
+  private preserveCurrentState(): {scrollTop: number; scrollLeft: number; formData: Record<string, string>; timestamp: number} {
     // Preserve scroll position and form data
     return {
       scrollTop: window.scrollY,
@@ -414,6 +440,10 @@ export class KeyboardNavigationService {
   }
 
   // Help system
+  /**
+   * Retrieves all shortcuts.
+   * @returns The { global: KeyboardShortcut[]; contexts: Record<string, KeyboardShortcut[]>; }.
+   */
   getAllShortcuts(): {
     global: KeyboardShortcut[];
     contexts: Record<string, KeyboardShortcut[]>;
@@ -429,11 +459,20 @@ export class KeyboardNavigationService {
     };
   }
 
+  /**
+   * Retrieves shortcuts for context.
+   * @param context - The context.
+   * @returns The an array of KeyboardShortcut.
+   */
   getShortcutsForContext(context: string): KeyboardShortcut[] {
     return this.contextShortcuts.get(context) || [];
   }
 
   // Accessibility helpers
+  /**
+   * Performs the announce shortcut operation.
+   * @param shortcut - The shortcut.
+   */
   announceShortcut(shortcut: KeyboardShortcut): void {
     const announcement = `快捷键: ${this.formatShortcutKey(shortcut)}, ${shortcut.description}`;
     this.announceToScreenReader(announcement);
@@ -467,6 +506,9 @@ export class KeyboardNavigationService {
   }
 
   // Cleanup
+  /**
+   * Performs the destroy operation.
+   */
   destroy(): void {
     // Remove event listeners if needed
     this._shortcuts.clear();

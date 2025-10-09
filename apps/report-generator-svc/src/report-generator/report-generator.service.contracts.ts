@@ -15,6 +15,8 @@ import {
   ContractValidators,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import { LlmService } from './llm.service';
+import type { ExtractedResumeData as LlmExtractedResumeData, JobRequirements as LlmJobRequirements, ScoringBreakdown as LlmScoringBreakdown } from './llm.service';
+import type { ReportEvent } from './report-generator.service';
 import { GridFsService, ReportFileMetadata } from './gridfs.service';
 import { ReportRepository, ReportCreateData } from './report.repository';
 import {
@@ -23,6 +25,9 @@ import {
   ReportRecommendation,
 } from '../schemas/report.schema';
 
+/**
+ * Defines the shape of the job data.
+ */
 export interface JobData {
   jobId: string;
   title: string;
@@ -42,6 +47,9 @@ export interface JobData {
   };
 }
 
+/**
+ * Defines the shape of the resume data.
+ */
 export interface ResumeData {
   resumeId: string;
   candidateName: string;
@@ -73,6 +81,63 @@ export interface ResumeData {
   };
 }
 
+// Type aliases for contract method signatures
+export type CandidateInfo = ResumeData;
+export type JobInfo = JobData;
+
+// Enhanced report data structure
+/**
+ * Defines the shape of the prepared report data.
+ */
+export interface PreparedReportData {
+  candidate: {
+    name: string;
+    email: string;
+    phone?: string;
+    location?: string;
+    skills: string[];
+    workExperience: Array<{
+      position: string;
+      company: string;
+      duration: string;
+      description: string;
+      skills: string[];
+    }>;
+    education: Array<{
+      degree: string;
+      school: string;
+      year: string;
+      field: string;
+    }>;
+    certifications: Array<{
+      name: string;
+      issuer: string;
+      year: string;
+    }>;
+  };
+  job: {
+    title: string;
+    description: string;
+    requirements: JobData['requirements'];
+    company?: JobData['companyInfo'];
+  };
+  scoring: ScoringData;
+  analysis: {
+    overallFit: number;
+    strengths: string[];
+    developmentAreas: string[];
+    recommendations: ReportRecommendation[];
+  };
+  metadata: {
+    generatedAt: Date;
+    version: string;
+    requestedBy?: string;
+  };
+}
+
+/**
+ * Defines the shape of the scoring data.
+ */
 export interface ScoringData {
   overallScore: number;
   scoreBreakdown: ScoreBreakdown;
@@ -85,6 +150,9 @@ export interface ScoringData {
   recommendations: ReportRecommendation[];
 }
 
+/**
+ * Defines the shape of the report result.
+ */
 export interface ReportResult {
   reportId: string;
   pdfUrl: string;
@@ -100,6 +168,9 @@ export interface ReportResult {
   };
 }
 
+/**
+ * Defines the shape of the report generation request.
+ */
 export interface ReportGenerationRequest {
   jobData: JobData;
   resumeData: ResumeData;
@@ -128,6 +199,12 @@ export interface ReportGenerationRequest {
 export class ReportGeneratorServiceContracts {
   private readonly logger = new Logger(ReportGeneratorServiceContracts.name);
 
+  /**
+   * Initializes a new instance of the Report Generator Service Contracts.
+   * @param llmService - The llm service.
+   * @param gridfsService - The gridfs service.
+   * @param reportRepository - The report repository.
+   */
   constructor(
     private readonly llmService: LlmService,
     private readonly gridfsService: GridFsService,
@@ -139,8 +216,8 @@ export class ReportGeneratorServiceContracts {
    *
    * @method generateAnalysisReport
    * @param {ScoringData[]} scoringResults - Candidate scoring results
-   * @param {any} candidateInfo - Candidate information
-   * @param {any} jobInfo - Job requirements information
+   * @param {CandidateInfo} candidateInfo - Candidate information
+   * @param {JobInfo} jobInfo - Job requirements information
    * @returns {Promise<ReportResult>} Generated report with metadata
    *
    * @requires Valid scoring results with scores in 0-100 range
@@ -157,7 +234,7 @@ export class ReportGeneratorServiceContracts {
    * @since 1.0.0
    */
   @Requires(
-    (scoringResults: ScoringData[], candidateInfo: any, jobInfo: any) =>
+    (scoringResults: ScoringData[], candidateInfo: CandidateInfo, jobInfo: JobInfo) =>
       ContractValidators.hasElements(scoringResults) &&
       scoringResults.every((s) =>
         ContractValidators.isValidScoreRange(s.overallScore),
@@ -177,8 +254,8 @@ export class ReportGeneratorServiceContracts {
   )
   async generateAnalysisReport(
     scoringResults: ScoringData[],
-    candidateInfo: any,
-    jobInfo: any,
+    candidateInfo: CandidateInfo,
+    jobInfo: JobInfo,
   ): Promise<ReportResult> {
     const startTime = Date.now();
 
@@ -189,8 +266,6 @@ export class ReportGeneratorServiceContracts {
         if (!ContractValidators.isValidProcessingTime(elapsed, 30000)) {
           throw new ContractViolationError(
             `Report generation exceeded 30 second limit (${elapsed}ms)`,
-            'POST',
-            'ReportGeneratorService.generateAnalysisReport',
           );
         }
       };
@@ -204,8 +279,15 @@ export class ReportGeneratorServiceContracts {
       processingTimeCheck();
 
       // Generate markdown content with LLM
+      const reportEvent = this.mapPreparedDataToReportEvent(
+        reportData,
+        candidateInfo,
+        jobInfo,
+        scoringResults,
+      );
+
       const markdownContent =
-        await this.llmService.generateReportMarkdown(reportData);
+        await this.llmService.generateReportMarkdown(reportEvent);
       processingTimeCheck();
 
       // Convert to PDF with quality validation
@@ -216,8 +298,6 @@ export class ReportGeneratorServiceContracts {
       if (!this.validatePDFQuality(pdfBuffer)) {
         throw new ContractViolationError(
           'Generated PDF does not meet quality standards',
-          'POST',
-          'ReportGeneratorService.generateAnalysisReport',
         );
       }
 
@@ -311,8 +391,6 @@ export class ReportGeneratorServiceContracts {
       // Wrap other errors as contract violations
       throw new ContractViolationError(
         `Report generation failed: ${error.message}`,
-        'POST',
-        'ReportGeneratorService.generateAnalysisReport',
       );
     }
   }
@@ -390,21 +468,242 @@ export class ReportGeneratorServiceContracts {
 
   // Helper methods for report generation
 
+  private mapPreparedDataToReportEvent(
+    prepared: PreparedReportData,
+    candidateInfo: CandidateInfo,
+    jobInfo: JobInfo,
+    scoringResults: ScoringData[],
+  ): ReportEvent {
+    return {
+      jobId: jobInfo.jobId,
+      resumeIds: [candidateInfo.resumeId],
+      jobData: this.mapJobInfoToReportEvent(jobInfo),
+      resumesData: this.mapCandidateInfoToReportEvent(candidateInfo, scoringResults),
+      scoringResults: this.mapScoringResultsToReportEvent(candidateInfo, scoringResults),
+      metadata: {
+        generatedAt: prepared.metadata.generatedAt,
+        reportType: 'analysis',
+        requestedBy: prepared.metadata.requestedBy,
+      },
+    };
+  }
+
+  private mapJobInfoToReportEvent(jobInfo: JobInfo): ReportEvent['jobData'] {
+    return {
+      title: jobInfo.title,
+      description: jobInfo.description,
+      requirements: this.mapJobRequirements(jobInfo.requirements),
+    };
+  }
+
+  private mapJobRequirements(
+    requirements: JobInfo['requirements'],
+  ): LlmJobRequirements | undefined {
+    if (!requirements) {
+      return undefined;
+    }
+
+    const mapped: LlmJobRequirements = {};
+
+    if (requirements.requiredSkills?.length) {
+      mapped.requiredSkills = requirements.requiredSkills.map((skill) => ({
+        name: skill.name,
+        weight: skill.weight,
+      }));
+    }
+
+    if (requirements.experienceYears) {
+      mapped.experienceYears = {
+        min: requirements.experienceYears.min,
+        max: requirements.experienceYears.max,
+      };
+    }
+
+    if (requirements.educationLevel) {
+      mapped.educationLevel = requirements.educationLevel;
+    }
+
+    if (requirements.location) {
+      mapped.locationRequirements = {
+        locations: [requirements.location],
+      };
+    }
+
+    return mapped;
+  }
+
+  private mapCandidateInfoToReportEvent(
+    candidateInfo: CandidateInfo,
+    scoringResults: ScoringData[],
+  ): ReportEvent['resumesData'] {
+    const primaryScoring = scoringResults[0];
+
+    const resumeEntry = {
+      id: candidateInfo.resumeId,
+      candidateName: candidateInfo.candidateName,
+      extractedData: this.mapCandidateExtractedData(candidateInfo),
+    } as {
+      id: string;
+      candidateName?: string;
+      extractedData?: LlmExtractedResumeData;
+      score?: number;
+      matchingSkills?: string[];
+      missingSkills?: string[];
+    };
+
+    if (primaryScoring) {
+      resumeEntry.score = primaryScoring.overallScore;
+
+      const matchingSkills = primaryScoring.matchingSkills?.map(
+        (skill) => skill.skill,
+      );
+      if (matchingSkills?.length) {
+        resumeEntry.matchingSkills = matchingSkills;
+      }
+
+      const missingSkills = primaryScoring.gapAnalysis?.missingSkills ?? [];
+      if (missingSkills.length > 0) {
+        resumeEntry.missingSkills = missingSkills;
+      }
+    }
+
+    return [resumeEntry];
+  }
+
+  private mapCandidateExtractedData(
+    candidateInfo: CandidateInfo,
+  ): LlmExtractedResumeData {
+    const extracted = candidateInfo.extractedData;
+
+    return {
+      personalInfo: {
+        name: candidateInfo.candidateName,
+        email: extracted.personalInfo.email,
+        phone: extracted.personalInfo.phone,
+        location: extracted.personalInfo.location,
+      },
+      workExperience: extracted.workExperience?.map((experience) => ({
+        company: experience.company,
+        position: experience.position,
+        duration: experience.duration,
+        description: experience.description,
+        skills: experience.skills,
+      })),
+      education: extracted.education?.map((education) => ({
+        institution: education.school,
+        degree: education.degree,
+        field: education.field,
+        year: this.parseEducationYear(education.year),
+      })),
+      skills: extracted.skills?.map((skill) => ({
+        name: skill,
+        category: 'general',
+      })),
+      certifications: extracted.certifications?.flatMap((certification) => {
+        const date = this.toIsoDateFromYear(certification.year);
+        return date
+          ? [{
+              name: certification.name,
+              issuer: certification.issuer,
+              date,
+            }]
+          : [];
+      }),
+    };
+  }
+
+  private mapScoringResultsToReportEvent(
+    candidateInfo: CandidateInfo,
+    scoringResults: ScoringData[],
+  ): ReportEvent['scoringResults'] {
+    if (!scoringResults.length) {
+      return undefined;
+    }
+
+    return scoringResults.map((score) => ({
+      resumeId: candidateInfo.resumeId,
+      score: score.overallScore,
+      breakdown: this.mapScoreBreakdownToLlm(score.scoreBreakdown),
+      recommendations: this.collectRecommendationSummaries(score.recommendations),
+    }));
+  }
+
+  private mapScoreBreakdownToLlm(
+    breakdown: ScoreBreakdown,
+  ): LlmScoringBreakdown {
+    return {
+      skillsMatch: breakdown.skillsMatch,
+      experienceMatch: breakdown.experienceMatch,
+      educationMatch: breakdown.educationMatch,
+      certificationMatch: breakdown.educationMatch,
+      overallScore: breakdown.overallFit,
+      weightedFactors: {
+        technical: breakdown.skillsMatch,
+        experience: breakdown.experienceMatch,
+        cultural: breakdown.overallFit,
+        potential: breakdown.overallFit,
+      },
+      confidenceScore: this.normalizeScore(breakdown.overallFit),
+    };
+  }
+
+  private collectRecommendationSummaries(
+    recommendations: ReportRecommendation[],
+  ): string[] | undefined {
+    if (!recommendations?.length) {
+      return undefined;
+    }
+
+    const summary = recommendations.flatMap((recommendation) => [
+      recommendation.decision,
+      recommendation.reasoning,
+      ...(recommendation.strengths ?? []),
+      ...(recommendation.concerns ?? []),
+      ...(recommendation.suggestions ?? []),
+    ]);
+
+    const cleaned = summary.filter((value): value is string => !!value && value.trim().length > 0);
+
+    return cleaned.length ? cleaned : undefined;
+  }
+
+  private normalizeScore(score: number): number {
+    const normalized = score / 100;
+    return Math.max(0, Math.min(1, Number.isFinite(normalized) ? normalized : 0));
+  }
+
+  private parseEducationYear(year: string): number {
+    const parsed = Number.parseInt(year, 10);
+    return Number.isFinite(parsed) ? parsed : new Date().getFullYear();
+  }
+
+  private toIsoDateFromYear(year: string | undefined): string | undefined {
+    if (!year) {
+      return undefined;
+    }
+
+    const parsed = Number.parseInt(year, 10);
+    if (!Number.isFinite(parsed)) {
+      return undefined;
+    }
+
+    return `${parsed}-01-01`;
+  }
   private async prepareReportData(
     scoringResults: ScoringData[],
-    candidateInfo: any,
-    jobInfo: any,
-  ): Promise<any> {
+    candidateInfo: CandidateInfo,
+    jobInfo: JobInfo,
+  ): Promise<PreparedReportData> {
     return {
       candidate: {
         name: candidateInfo.candidateName,
-        email: candidateInfo.personalInfo.email,
-        phone: candidateInfo.personalInfo.phone,
-        location: candidateInfo.personalInfo.location,
-        skills: candidateInfo.skills,
-        workExperience: candidateInfo.workExperience,
-        education: candidateInfo.education,
-        certifications: candidateInfo.certifications || [],
+        email: candidateInfo.extractedData?.personalInfo?.email ?? '',
+        phone: candidateInfo.extractedData?.personalInfo?.phone,
+        location: candidateInfo.extractedData?.personalInfo?.location,
+        skills: candidateInfo.extractedData?.skills ?? [],
+        workExperience: candidateInfo.extractedData?.workExperience ?? [],
+        education: candidateInfo.extractedData?.education ?? [],
+        certifications: candidateInfo.extractedData?.certifications ?? [],
       },
       job: {
         title: jobInfo.title,
@@ -422,6 +721,7 @@ export class ReportGeneratorServiceContracts {
       metadata: {
         generatedAt: new Date(),
         version: '1.0.0',
+        requestedBy: undefined,
       },
     };
   }
@@ -503,3 +803,12 @@ startxref
     return Math.min(10, Math.ceil(contentSize / 200000));
   }
 }
+
+
+
+
+
+
+
+
+

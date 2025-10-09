@@ -7,8 +7,17 @@ function id(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
+/**
+ * Exposes endpoints for analytics.
+ */
 @Controller('analytics')
 export class AnalyticsController {
+  /**
+   * Performs the event operation.
+   * @param _body - The body.
+   * @param res - The res.
+   * @returns The result of the operation.
+   */
   @Public()
   @Post('events')
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -17,6 +26,11 @@ export class AnalyticsController {
     return res.status(HttpStatus.NO_CONTENT).send();
   }
 
+  /**
+   * Performs the perf operation.
+   * @param _body - The body.
+   * @returns The result of the operation.
+   */
   @Public()
   @Post('metrics/performance')
   @HttpCode(HttpStatus.CREATED)
@@ -24,6 +38,11 @@ export class AnalyticsController {
     return { metricId: id('met') };
   }
 
+  /**
+   * Performs the biz operation.
+   * @param _body - The body.
+   * @returns The result of the operation.
+   */
   @Public()
   @Post('metrics/business')
   @HttpCode(HttpStatus.CREATED)
@@ -31,6 +50,11 @@ export class AnalyticsController {
     return { metricId: id('met') };
   }
 
+  /**
+   * Performs the report operation.
+   * @param body - The body.
+   * @returns The result of the operation.
+   */
   @Public()
   @Post('reports/generate')
   @HttpCode(HttpStatus.CREATED)
@@ -43,6 +67,10 @@ export class AnalyticsController {
   }
 
   // Dashboard
+  /**
+   * Performs the export operation.
+   * @returns The result of the operation.
+   */
   @Public()
   @Post('export')
   @HttpCode(HttpStatus.OK)
@@ -50,6 +78,10 @@ export class AnalyticsController {
     return { exportId: id('exp'), status: 'completed', url: `/exports/${id('exp')}.json` };
   }
 
+  /**
+   * Performs the dashboard operation.
+   * @returns The result of the operation.
+   */
   @Public()
   @Get('dashboard')
   @HttpCode(HttpStatus.OK)

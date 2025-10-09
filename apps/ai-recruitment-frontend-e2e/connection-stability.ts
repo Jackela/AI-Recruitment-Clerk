@@ -6,6 +6,9 @@
 
 import { Page, expect } from '@playwright/test';
 
+/**
+ * Defines the shape of the retry options.
+ */
 export interface RetryOptions {
   maxRetries?: number;
   delayMs?: number;
@@ -13,6 +16,9 @@ export interface RetryOptions {
   browserName?: string;
 }
 
+/**
+ * Defines the shape of the navigation options.
+ */
 export interface NavigationOptions {
   waitUntil?: 'load' | 'domcontentloaded' | 'networkidle';
   timeout?: number;

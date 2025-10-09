@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
@@ -6,8 +6,11 @@ import { takeUntil } from 'rxjs/operators';
 import { GuestState } from '../../store/guest/guest.state';
 import * as GuestActions from '../../store/guest/guest.actions';
 
+/**
+ * Represents the guest limit modal component.
+ */
 @Component({
-  selector: 'app-guest-limit-modal',
+  selector: 'arc-guest-limit-modal',
   standalone: true,
   imports: [CommonModule],
   template: `
@@ -188,20 +191,28 @@ import * as GuestActions from '../../store/guest/guest.actions';
 })
 export class GuestLimitModalComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  private autoCloseTimer: any = null;
+  private autoCloseTimer: ReturnType<typeof setTimeout> | null = null;
 
   showModal$: Observable<boolean>;
   guestState$: Observable<GuestState>;
   isLoading$: Observable<boolean>;
   error$: Observable<string | null>;
 
-  constructor(private store: Store<{ guest: GuestState }>) {
+  private store = inject(Store<{ guest: GuestState }>);
+
+  /**
+   * Initializes a new instance of the Guest Limit Modal Component.
+   */
+  constructor() {
     this.showModal$ = this.store.select((state) => state.guest.showLimitModal);
     this.guestState$ = this.store.select((state) => state.guest);
     this.isLoading$ = this.store.select((state) => state.guest.isLoading);
     this.error$ = this.store.select((state) => state.guest.error);
   }
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     // Auto-close modal after 30 seconds if no action taken
     this.showModal$.pipe(takeUntil(this.destroy$)).subscribe((showModal) => {
@@ -224,6 +235,9 @@ export class GuestLimitModalComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     // Clear any pending timer
     if (this.autoCloseTimer) {
@@ -235,20 +249,33 @@ export class GuestLimitModalComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  /**
+   * Performs the close modal operation.
+   */
   closeModal(): void {
     this.store.dispatch(GuestActions.hideLimitModal());
   }
 
+  /**
+   * Performs the on backdrop click operation.
+   * @param event - The event.
+   */
   onBackdropClick(event: Event): void {
     if (event.target === event.currentTarget) {
       this.closeModal();
     }
   }
 
+  /**
+   * Generates feedback code.
+   */
   generateFeedbackCode(): void {
     this.store.dispatch(GuestActions.generateFeedbackCode());
   }
 
+  /**
+   * Performs the try demo operation.
+   */
   tryDemo(): void {
     this.store.dispatch(GuestActions.loadDemoAnalysis());
     this.closeModal();

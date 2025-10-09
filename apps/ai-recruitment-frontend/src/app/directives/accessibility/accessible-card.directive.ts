@@ -8,6 +8,9 @@ import {
 } from '@angular/core';
 import { AccessibilityService } from '../../services/accessibility/accessibility.service';
 
+/**
+ * Represents the accessible card directive.
+ */
 @Directive({
   selector: '[arcAccessibleCard]',
   standalone: true,
@@ -27,11 +30,17 @@ export class AccessibleCardDirective implements OnInit, OnDestroy {
 
   private element!: HTMLElement;
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     this.element = this.elementRef.nativeElement;
     this.setupAccessibility();
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     // Cleanup any event listeners if needed
   }

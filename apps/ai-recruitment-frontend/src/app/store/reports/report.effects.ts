@@ -5,11 +5,19 @@ import { catchError, map, mergeMap } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
 import * as ReportActions from './report.actions';
 
+/**
+ * Represents the report effects.
+ */
 @Injectable()
 export class ReportEffects {
   loadReportsByJob$;
   loadReport$;
 
+  /**
+   * Initializes a new instance of the Report Effects.
+   * @param actions$ - The actions$.
+   * @param apiService - The api service.
+   */
   constructor(
     private actions$: Actions,
     private apiService: ApiService,

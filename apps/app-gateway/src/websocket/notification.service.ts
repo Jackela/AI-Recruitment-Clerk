@@ -2,6 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CacheService } from '../cache/cache.service';
 
 // Notification interfaces
+/**
+ * Defines the shape of the notification data.
+ */
 export interface NotificationData {
   id: string;
   userId: string;
@@ -18,6 +21,9 @@ export interface NotificationData {
   expiresAt?: Date;
 }
 
+/**
+ * Defines the shape of the notification preferences.
+ */
 export interface NotificationPreferences {
   userId: string;
   emailNotifications: boolean;
@@ -37,6 +43,9 @@ export interface NotificationPreferences {
   };
 }
 
+/**
+ * Defines the shape of the broadcast message.
+ */
 export interface BroadcastMessage {
   id: string;
   roomId?: string;
@@ -51,6 +60,9 @@ export interface BroadcastMessage {
   expiresAt?: Date;
 }
 
+/**
+ * Provides notification functionality.
+ */
 @Injectable()
 export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
@@ -58,6 +70,10 @@ export class NotificationService {
   private userPreferences = new Map<string, NotificationPreferences>();
   private broadcastMessages = new Map<string, BroadcastMessage>();
 
+  /**
+   * Initializes a new instance of the Notification Service.
+   * @param cacheService - The cache service.
+   */
   constructor(private readonly cacheService: CacheService) {
     this.setupDefaultPreferences();
   }

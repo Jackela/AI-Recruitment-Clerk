@@ -12,11 +12,17 @@ import { Request } from 'express';
 import { createHash } from 'crypto';
 import { Reflector } from '@nestjs/core';
 
+/**
+ * Defines the shape of the request with device id.
+ */
 export interface RequestWithDeviceId extends Request {
   deviceId?: string;
   isGuest?: boolean;
 }
 
+/**
+ * Implements the guest guard logic.
+ */
 @Injectable()
 export class GuestGuard implements CanActivate {
   private readonly logger = new Logger(GuestGuard.name);
@@ -27,11 +33,20 @@ export class GuestGuard implements CanActivate {
   private readonly RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
   private readonly RATE_LIMIT_MAX_REQUESTS = 30; // 30 requests per minute for guests
 
+  /**
+   * Initializes a new instance of the Guest Guard.
+   * @param reflector - The reflector.
+   */
   constructor(private reflector: Reflector) {
     // Cleanup rate limit entries every 5 minutes
     setInterval(() => this.cleanupRateLimits(), 5 * 60 * 1000);
   }
 
+  /**
+   * Performs the can activate operation.
+   * @param context - The context.
+   * @returns A promise that resolves to boolean value.
+   */
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<RequestWithDeviceId>();
     const deviceId = this.extractDeviceId(request);
@@ -160,6 +175,10 @@ export class GuestGuard implements CanActivate {
   }
 
   // Utility method to get rate limit status for monitoring
+  /**
+   * Retrieves rate limit status.
+   * @returns The { activeGuests: number; totalRequests: number; }.
+   */
   getRateLimitStatus(): {
     activeGuests: number;
     totalRequests: number;
