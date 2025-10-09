@@ -4,7 +4,7 @@
  * Specific test to validate Firefox connection stability fixes
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 test.describe('Firefox Stability Validation', () => {
   test('Firefox can reliably connect to dev server', async ({

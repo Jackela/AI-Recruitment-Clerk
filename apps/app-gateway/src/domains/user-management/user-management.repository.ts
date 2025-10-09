@@ -13,6 +13,9 @@ import {
 } from '@ai-recruitment-clerk/user-management-domain';
 
 // User Entity Schema for MongoDB
+/**
+ * Defines the shape of the user entity.
+ */
 export interface UserEntity {
   _id?: string;
   id: string;
@@ -45,8 +48,15 @@ export interface UserEntity {
 // Define mongoose schema name
 export const USER_SCHEMA_NAME = 'User';
 
+/**
+ * Manages persistence for user management.
+ */
 @Injectable()
 export class UserManagementRepository {
+  /**
+   * Initializes a new instance of the User Management Repository.
+   * @param userModel - The user model.
+   */
   constructor(
     @InjectModel(USER_SCHEMA_NAME)
     private readonly userModel: Model<UserEntity>,

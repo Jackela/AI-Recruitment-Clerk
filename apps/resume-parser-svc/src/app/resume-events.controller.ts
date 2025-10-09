@@ -1,21 +1,33 @@
 import { Controller, Logger, OnModuleInit } from '@nestjs/common';
 import { EventPattern } from '@nestjs/microservices';
-import {
+import type {
   ResumeSubmittedEvent,
   ResumeDTO,
 } from '@ai-recruitment-clerk/resume-processing-domain';
 import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
 import { ParsingService } from '../parsing/parsing.service';
 
+/**
+ * Exposes endpoints for resume events.
+ */
 @Controller()
 export class ResumeEventsController implements OnModuleInit {
   private readonly logger = new Logger(ResumeEventsController.name);
 
+  /**
+   * Initializes a new instance of the Resume Events Controller.
+   * @param natsService - The nats service.
+   * @param parsingService - The parsing service.
+   */
   constructor(
     private readonly natsService: ResumeParserNatsService,
     private readonly parsingService: ParsingService,
   ) {}
 
+  /**
+   * Performs the on module init operation.
+   * @returns The result of the operation.
+   */
   async onModuleInit() {
     // Subscribe to job.resume.submitted events using the shared NATS service
     await this.natsService.subscribeToResumeSubmissions(
@@ -23,6 +35,11 @@ export class ResumeEventsController implements OnModuleInit {
     );
   }
 
+  /**
+   * Handles resume submitted.
+   * @param payload - The payload.
+   * @returns A promise that resolves when the operation completes.
+   */
   @EventPattern('job.resume.submitted')
   async handleResumeSubmitted(payload: ResumeSubmittedEvent): Promise<void> {
     // ✅ FIXED: Use real AI-powered resume parsing service

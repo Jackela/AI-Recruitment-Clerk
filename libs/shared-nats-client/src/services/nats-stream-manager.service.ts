@@ -16,6 +16,10 @@ import { NatsConnectionManager } from './nats-connection-manager.service';
 export class NatsStreamManager {
   private readonly logger = new Logger(NatsStreamManager.name);
 
+  /**
+   * Initializes a new instance of the NATS Stream Manager.
+   * @param connectionManager - The connection manager.
+   */
   constructor(private readonly connectionManager: NatsConnectionManager) {}
 
   /**

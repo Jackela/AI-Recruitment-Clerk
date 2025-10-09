@@ -6,6 +6,9 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 
+/**
+ * Represents the required validator directive.
+ */
 @Directive({
   selector: '[arcRequired]',
   standalone: true,
@@ -21,6 +24,11 @@ export class RequiredValidatorDirective implements Validator {
   @Input() arcRequired: boolean | string = true;
   @Input() customMessage?: string;
 
+  /**
+   * Validates the data.
+   * @param control - The control.
+   * @returns The ValidationErrors | null.
+   */
   validate(control: AbstractControl): ValidationErrors | null {
     // Check if validation is enabled
     const isRequired =

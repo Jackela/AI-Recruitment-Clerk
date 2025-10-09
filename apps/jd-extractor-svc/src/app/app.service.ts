@@ -5,6 +5,9 @@ import {
   OnApplicationShutdown,
 } from '@nestjs/common';
 
+/**
+ * Provides app functionality.
+ */
 @Injectable()
 export class AppService
   implements OnApplicationBootstrap, OnApplicationShutdown
@@ -13,10 +16,18 @@ export class AppService
   private isInitialized = false;
   private subscriptions: Map<string, any> = new Map();
 
+  /**
+   * Retrieves data.
+   * @returns The result of the operation.
+   */
   getData() {
     return { message: 'Hello API' };
   }
 
+  /**
+   * Performs the on application bootstrap operation.
+   * @returns A promise that resolves when the operation completes.
+   */
   async onApplicationBootstrap(): Promise<void> {
     this.logger.log('JD Extractor Service starting...');
 
@@ -44,6 +55,10 @@ export class AppService
     }
   }
 
+  /**
+   * Performs the on application shutdown operation.
+   * @returns A promise that resolves when the operation completes.
+   */
   async onApplicationShutdown(): Promise<void> {
     this.logger.log('JD Extractor Service shutting down...');
 

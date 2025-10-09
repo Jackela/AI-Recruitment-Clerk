@@ -3,6 +3,9 @@ import { QuestionnaireSubmission } from './questionnaire-submission.value-object
 import { QualityScore } from './quality-score.value-object.js';
 import { QualityMetrics } from './quality-metrics.value-object.js';
 
+/**
+ * Represents the submission quality.
+ */
 export class SubmissionQuality extends ValueObject<{
   totalTextLength: number;
   detailedAnswers: number;
@@ -11,6 +14,11 @@ export class SubmissionQuality extends ValueObject<{
   bonusEligible: boolean;
   qualityReasons: string[];
 }> {
+  /**
+   * Calculates the result.
+   * @param submission - The submission.
+   * @returns The SubmissionQuality.
+   */
   static calculate(submission: QuestionnaireSubmission): SubmissionQuality {
     const totalTextLength = submission.getSummary().textLength;
     const completionRate = submission.getSummary().completionRate;
@@ -53,6 +61,11 @@ export class SubmissionQuality extends ValueObject<{
     });
   }
   
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The SubmissionQuality.
+   */
   static restore(data: any): SubmissionQuality {
     return new SubmissionQuality(data);
   }
@@ -93,30 +106,58 @@ export class SubmissionQuality extends ValueObject<{
     return score;
   }
   
+  /**
+   * Calculates score.
+   * @returns The QualityScore.
+   */
   calculateScore(): QualityScore {
     return new QualityScore({ value: this.props.qualityScore });
   }
   
+  /**
+   * Performs the is bonus eligible operation.
+   * @returns The boolean value.
+   */
   isBonusEligible(): boolean {
     return this.props.bonusEligible;
   }
   
+  /**
+   * Retrieves quality score.
+   * @returns The number value.
+   */
   getQualityScore(): number {
     return this.props.qualityScore;
   }
   
+  /**
+   * Retrieves quality reasons.
+   * @returns The an array of string value.
+   */
   getQualityReasons(): string[] {
     return this.props.qualityReasons;
   }
   
+  /**
+   * Retrieves metrics.
+   * @returns The QualityMetrics.
+   */
   getMetrics(): QualityMetrics {
     return new QualityMetrics(this.props);
   }
   
+  /**
+   * Retrieves total text length.
+   * @returns The number value.
+   */
   getTotalTextLength(): number {
     return this.props.totalTextLength;
   }
   
+  /**
+   * Performs the has detailed feedback operation.
+   * @returns The boolean value.
+   */
   hasDetailedFeedback(): boolean {
     return this.props.detailedAnswers >= 3;
   }

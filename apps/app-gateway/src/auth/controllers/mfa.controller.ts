@@ -31,6 +31,9 @@ import {
   MfaMethod,
 } from '../dto/mfa.dto';
 
+/**
+ * Exposes endpoints for mfa.
+ */
 @ApiTags('Multi-Factor Authentication')
 @Controller('auth/mfa')
 @UseGuards(JwtAuthGuard)
@@ -39,8 +42,17 @@ import {
 export class MfaController {
   private readonly logger = new Logger(MfaController.name);
 
+  /**
+   * Initializes a new instance of the Mfa Controller.
+   * @param mfaService - The mfa service.
+   */
   constructor(private readonly mfaService: MfaService) {}
 
+  /**
+   * Retrieves mfa status.
+   * @param req - The req.
+   * @returns A promise that resolves to MfaStatusDto.
+   */
   @Get('status')
   @ApiOperation({ summary: 'Get MFA status for current user' })
   @ApiResponse({
@@ -65,6 +77,12 @@ export class MfaController {
     }
   }
 
+  /**
+   * Performs the enable mfa operation.
+   * @param req - The req.
+   * @param enableMfaDto - The enable mfa dto.
+   * @returns A promise that resolves to MfaSetupResponseDto.
+   */
   @Post('enable')
   @ApiOperation({ summary: 'Enable MFA for current user' })
   @ApiResponse({
@@ -107,6 +125,12 @@ export class MfaController {
     }
   }
 
+  /**
+   * Performs the verify mfa operation.
+   * @param req - The req.
+   * @param verifyMfaDto - The verify mfa dto.
+   * @returns A promise that resolves to { success: boolean; deviceTrusted?: boolean; message: string }.
+   */
   @Post('verify')
   @ApiOperation({ summary: 'Verify MFA token' })
   @ApiResponse({ status: 200, description: 'MFA verified successfully' })
@@ -158,6 +182,12 @@ export class MfaController {
     }
   }
 
+  /**
+   * Performs the disable mfa operation.
+   * @param req - The req.
+   * @param disableMfaDto - The disable mfa dto.
+   * @returns A promise that resolves to { success: boolean; message: string }.
+   */
   @Post('disable')
   @ApiOperation({ summary: 'Disable MFA for current user' })
   @ApiResponse({ status: 200, description: 'MFA disabled successfully' })
@@ -194,6 +224,12 @@ export class MfaController {
     }
   }
 
+  /**
+   * Generates backup codes.
+   * @param req - The req.
+   * @param generateBackupCodesDto - The generate backup codes dto.
+   * @returns A promise that resolves to { success: boolean; backupCodes: string[]; message: string }.
+   */
   @Post('backup-codes/generate')
   @ApiOperation({ summary: 'Generate new backup codes' })
   @ApiResponse({
@@ -235,6 +271,12 @@ export class MfaController {
     }
   }
 
+  /**
+   * Performs the send mfa token operation.
+   * @param req - The req.
+   * @param body - The body.
+   * @returns A promise that resolves to { success: boolean; message: string }.
+   */
   @Post('send-token/:method')
   @ApiOperation({ summary: 'Send MFA token via SMS or Email' })
   @ApiResponse({ status: 200, description: 'MFA token sent successfully' })
@@ -288,6 +330,11 @@ export class MfaController {
     }
   }
 
+  /**
+   * Removes trusted devices.
+   * @param req - The req.
+   * @returns A promise that resolves to { success: boolean; message: string }.
+   */
   @Delete('trusted-devices')
   @ApiOperation({ summary: 'Remove all trusted devices' })
   @ApiResponse({

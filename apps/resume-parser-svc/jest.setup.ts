@@ -48,8 +48,8 @@ jest.mock('pdf-parse-fork', () => {
   }));
 });
 
-// Mock @ai-recruitment-clerk/ai-services-shared module
-jest.mock('@ai-recruitment-clerk/ai-services-shared', () => ({
+// Mock @ai-recruitment-clerk/shared-dtos module
+jest.mock('@ai-recruitment-clerk/shared-dtos', () => ({
   ContractTestUtils: {
     validateContract: jest.fn().mockReturnValue(true),
     createTestData: jest.fn().mockReturnValue({}),

@@ -1,6 +1,9 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import fs from 'fs';
 import path from 'path';
+import { waitForDeferredComponents } from './test-utils/hydration';
+
+const COACH_ROUTE = '/coach';
 
 test.describe('PDF UAT - Real File', () => {
   test('Coach page accepts JD + real PDF and shows correct skills', async ({ page }) => {
@@ -8,31 +11,30 @@ test.describe('PDF UAT - Real File', () => {
     const jdPath = path.resolve(root, 'UAT_Architect_JD.txt');
     const pdfPath = path.resolve(root, '简历.pdf');
 
-    // Ensure test artifacts exist
     expect(fs.existsSync(jdPath)).toBeTruthy();
     expect(fs.existsSync(pdfPath)).toBeTruthy();
 
     const jd = fs.readFileSync(jdPath, 'utf-8');
 
-    // Navigate to Coach page
-    await page.goto('/coach');
+    await page.goto(COACH_ROUTE);
+    await waitForDeferredComponents(page);
 
-    // Fill JD
-    await page.locator('#jd').fill(jd);
+    const jdTextarea = page.locator('#jd, textarea[name="jd"], [data-testid="jd-input"]').first();
+    await expect(jdTextarea).toBeVisible({ timeout: 10000 });
+    await jdTextarea.fill(jd);
 
-    // Upload real PDF resume
-    const fileInput = page.locator('#resume');
+    const fileInput = page.locator('#resume, input[type="file"], [data-testid="resume-upload"]').first();
+    await expect(fileInput).toBeVisible({ timeout: 10000 });
     await fileInput.setInputFiles(pdfPath);
 
-    // Submit analysis
-    await Promise.all([
-      page.getByRole('button', { name: /analyze/i }).click(),
-    ]);
+    const analyzeButton = page.getByRole('button', { name: /analyze|分析|提交|start/i }).first();
+    await expect(analyzeButton).toBeEnabled({ timeout: 10000 });
+    await analyzeButton.click();
 
-    // Wait for Diagnostic Report to be visible
-    await expect(page.getByRole('heading', { name: /diagnostic report/i })).toBeVisible({ timeout: 20000 });
+    await expect(
+      page.getByRole('heading', { name: /diagnostic report/i }),
+    ).toBeVisible({ timeout: 20000 });
 
-    // Assertions (case-insensitive)
     const matchedSection = page.getByText(/Matched Skills/i).locator('xpath=..');
     await expect(matchedSection).toContainText(/aws/i);
     await expect(matchedSection).toContainText(/kubernetes/i);
@@ -41,4 +43,3 @@ test.describe('PDF UAT - Real File', () => {
     await expect(missingSection).toContainText(/azure/i);
   });
 });
-

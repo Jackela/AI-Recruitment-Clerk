@@ -1,8 +1,10 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { I18nService, Language } from '../../../services/i18n/i18n.service';
-// import { LanguageConfig } from '../../../services/i18n/i18n.service'; // Reserved for future use
+import { I18nService, Language, LanguageConfig } from '../../../services/i18n/i18n.service';
 
+/**
+ * Represents the language selector component.
+ */
 @Component({
   selector: 'arc-language-selector',
   standalone: true,
@@ -297,9 +299,14 @@ export class LanguageSelectorComponent {
   currentLanguageConfig = computed(() =>
     this.i18nService.getCurrentLanguageConfig(),
   );
-  availableLanguages!: any[];
+  availableLanguages!: LanguageConfig[];
 
-  constructor(private i18nService: I18nService) {
+  private i18nService = inject(I18nService);
+
+  /**
+   * Initializes a new instance of the Language Selector Component.
+   */
+  constructor() {
     this.availableLanguages = this.i18nService.getAvailableLanguages();
     // Close dropdown on outside click
     this.setupOutsideClickHandler();
@@ -308,6 +315,9 @@ export class LanguageSelectorComponent {
     this.setupKeyboardHandler();
   }
 
+  /**
+   * Performs the toggle dropdown operation.
+   */
   toggleDropdown(): void {
     this.dropdownOpen = !this.dropdownOpen;
 
@@ -322,11 +332,20 @@ export class LanguageSelectorComponent {
     }
   }
 
+  /**
+   * Performs the select language operation.
+   * @param language - The language.
+   */
   selectLanguage(language: Language): void {
     this.i18nService.setLanguage(language);
     this.dropdownOpen = false;
   }
 
+  /**
+   * Retrieves flag emoji.
+   * @param language - The language.
+   * @returns The string value.
+   */
   getFlagEmoji(language: Language): string {
     const flags: Record<Language, string> = {
       'zh-CN': '🇨🇳',

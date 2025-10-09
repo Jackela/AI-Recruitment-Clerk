@@ -4,7 +4,7 @@
  * Complete WebKit test suite using external server configuration
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 test.describe('WebKit Complete Test Suite', () => {
   test('WebKit can establish basic connection', async ({

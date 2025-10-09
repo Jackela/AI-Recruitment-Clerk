@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
 
+/**
+ * Represents the reports placeholder component.
+ */
 @Component({
   selector: 'arc-reports-placeholder',
   standalone: false,

@@ -13,6 +13,9 @@ export enum UserStatus {
   SUSPENDED = 'suspended'
 }
 
+/**
+ * Describes the create user data transfer object.
+ */
 export class CreateUserDto {
   @IsEmail()
   @IsNotEmpty()
@@ -42,6 +45,9 @@ export class CreateUserDto {
   status?: UserStatus = UserStatus.ACTIVE;
 }
 
+/**
+ * Describes the login data transfer object.
+ */
 export class LoginDto {
   @IsEmail()
   @IsNotEmpty()
@@ -52,6 +58,9 @@ export class LoginDto {
   password!: string;
 }
 
+/**
+ * Describes the user data transfer object.
+ */
 export class UserDto {
   id!: string;
   email!: string;
@@ -64,11 +73,18 @@ export class UserDto {
   updatedAt!: Date;
   
   // Computed property
+  /**
+   * Performs the name operation.
+   * @returns The string value.
+   */
   get name(): string {
     return `${this.firstName} ${this.lastName}`;
   }
 }
 
+/**
+ * Represents the jwt payload.
+ */
 export class JwtPayload {
   sub!: string; // user id
   email!: string;
@@ -80,6 +96,9 @@ export class JwtPayload {
   iss?: string; // issuer
 }
 
+/**
+ * Describes the auth response data transfer object.
+ */
 export class AuthResponseDto {
   accessToken!: string;
   refreshToken!: string;
@@ -87,12 +106,18 @@ export class AuthResponseDto {
   expiresIn!: number;
 }
 
+/**
+ * Describes the refresh token data transfer object.
+ */
 export class RefreshTokenDto {
   @IsString()
   @IsNotEmpty()
   refreshToken!: string;
 }
 
+/**
+ * Describes the update user data transfer object.
+ */
 export class UpdateUserDto {
   @IsString()
   @IsOptional()
@@ -119,6 +144,9 @@ export class UpdateUserDto {
   organizationId?: string;
 }
 
+/**
+ * Describes the user preferences data transfer object.
+ */
 export class UserPreferencesDto {
   @IsString()
   @IsOptional()
@@ -140,6 +168,9 @@ export class UserPreferencesDto {
   };
 }
 
+/**
+ * Describes the user activity data transfer object.
+ */
 export class UserActivityDto {
   id!: string;
   userId!: string;

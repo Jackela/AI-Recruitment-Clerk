@@ -41,7 +41,7 @@ describe('ApiService', () => {
 describe('ApiService (HTTP Integration Tests)', () => {
   let service: ApiService;
   let httpMock: HttpTestingController;
-  const baseUrl = '/api';
+  const baseUrl = environment.apiUrl; // Use actual environment config
 
   beforeEach(() => {
     TestBed.configureTestingModule({

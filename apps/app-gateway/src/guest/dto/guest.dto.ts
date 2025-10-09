@@ -10,6 +10,9 @@ import {
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+/**
+ * Describes the generate feedback code data transfer object.
+ */
 export class GenerateFeedbackCodeDto {
   @ApiProperty({
     description: 'Unique device identifier',
@@ -20,6 +23,9 @@ export class GenerateFeedbackCodeDto {
   deviceId: string;
 }
 
+/**
+ * Describes the guest usage response data transfer object.
+ */
 export class GuestUsageResponseDto {
   @ApiProperty({
     description: 'Whether the guest can use the service',
@@ -55,6 +61,9 @@ export class GuestUsageResponseDto {
   feedbackCode?: string;
 }
 
+/**
+ * Describes the redeem feedback code data transfer object.
+ */
 export class RedeemFeedbackCodeDto {
   @ApiProperty({
     description: 'Feedback code to redeem',
@@ -65,6 +74,9 @@ export class RedeemFeedbackCodeDto {
   feedbackCode: string;
 }
 
+/**
+ * Describes the guest status data transfer object.
+ */
 export class GuestStatusDto {
   @ApiProperty({
     description: 'Device identifier',

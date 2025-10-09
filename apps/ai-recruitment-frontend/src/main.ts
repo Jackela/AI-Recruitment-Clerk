@@ -2,10 +2,8 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { importProvidersFrom, isDevMode, ErrorHandler } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { ReactiveFormsModule } from '@angular/forms';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
-import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { StoreRouterConnectingModule, routerReducer } from '@ngrx/router-store';
 import { provideBrowserGlobalErrorListeners } from '@angular/core';
 
@@ -25,8 +23,10 @@ import { JobEffects } from './app/store/jobs/job.effects';
 import { ResumeEffects } from './app/store/resumes/resume.effects';
 import { ReportEffects } from './app/store/reports/report.effects';
 
-bootstrapApplication(App, {
-  providers: [
+async function bootstrap(): Promise<void> {
+  const devMode = isDevMode();
+
+  const baseProviders = [
     provideBrowserGlobalErrorListeners(),
     SmartPreloadingStrategy,
     {
@@ -40,7 +40,6 @@ bootstrapApplication(App, {
     },
     importProvidersFrom(
       HttpClientModule,
-      ReactiveFormsModule,
       RouterModule.forRoot(appRoutes, {
         preloadingStrategy: SmartPreloadingStrategy,
         enableTracing: false, // Disable in production
@@ -58,10 +57,10 @@ bootstrapApplication(App, {
         },
         {
           runtimeChecks: {
-            strictStateImmutability: isDevMode(),
-            strictActionImmutability: isDevMode(),
-            strictStateSerializability: isDevMode(),
-            strictActionSerializability: isDevMode(),
+            strictStateImmutability: devMode,
+            strictActionImmutability: devMode,
+            strictStateSerializability: devMode,
+            strictActionSerializability: devMode,
           },
           metaReducers: [],
           initialState: {},
@@ -69,16 +68,30 @@ bootstrapApplication(App, {
       ),
       EffectsModule.forRoot([JobEffects, ResumeEffects, ReportEffects]),
       StoreRouterConnectingModule.forRoot(),
-      StoreDevtoolsModule.instrument({
-        maxAge: 25,
-        logOnly: !isDevMode(),
-        connectInZone: true,
-        features: {
-          pause: false,
-          lock: false,
-          persist: true,
-        },
-      }),
     ),
-  ],
-}).catch((err) => console.error(err));
+  ];
+
+  if (devMode) {
+    const { StoreDevtoolsModule } = await import('@ngrx/store-devtools');
+    baseProviders.push(
+      importProvidersFrom(
+        StoreDevtoolsModule.instrument({
+          maxAge: 25,
+          logOnly: !devMode,
+          connectInZone: true,
+          features: {
+            pause: false,
+            lock: false,
+            persist: true,
+          },
+        }),
+      ),
+    );
+  }
+
+  await bootstrapApplication(App, {
+    providers: baseProviders,
+  });
+}
+
+bootstrap().catch((err) => console.error(err));

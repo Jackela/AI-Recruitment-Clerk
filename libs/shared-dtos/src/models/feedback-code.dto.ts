@@ -1,3 +1,6 @@
+/**
+ * Defines the shape of the feedback code dto.
+ */
 export interface FeedbackCodeDto {
   id?: string;
   code: string;
@@ -12,16 +15,25 @@ export interface FeedbackCodeDto {
   createdBy?: string;
 }
 
+/**
+ * Defines the shape of the create feedback code dto.
+ */
 export interface CreateFeedbackCodeDto {
   code: string;
 }
 
+/**
+ * Defines the shape of the mark feedback code used dto.
+ */
 export interface MarkFeedbackCodeUsedDto {
   code: string;
   alipayAccount: string;
   questionnaireData: any;
 }
 
+/**
+ * Defines the shape of the payment request dto.
+ */
 export interface PaymentRequestDto {
   feedbackCode: string;
   alipayAccount: string;
@@ -29,6 +41,9 @@ export interface PaymentRequestDto {
   qualityScore: number;
 }
 
+/**
+ * Defines the shape of the marketing stats dto.
+ */
 export interface MarketingStatsDto {
   totalCodes: number;
   usedCodes: number;

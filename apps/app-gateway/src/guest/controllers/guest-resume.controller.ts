@@ -29,11 +29,12 @@ import {
   ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
 import { Public } from '../../auth/decorators/public.decorator';
-import { GuestGuard, RequestWithDeviceId } from '../guards/guest.guard';
+import { GuestGuard } from '../guards/guest.guard';
+import type { RequestWithDeviceId } from '../guards/guest.guard';
 import { OptionalJwtAuthGuard } from '../guards/optional-jwt-auth.guard';
 import { GuestUsageService } from '../services/guest-usage.service';
-import { NatsClient } from '../../nats/nats.client';
-import { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
+import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
+import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
 
 interface GuestResumeUploadDto {
   candidateName?: string;
@@ -62,6 +63,9 @@ const resumeFileValidator: {
   },
 };
 
+/**
+ * Exposes endpoints for guest resume.
+ */
 @ApiTags('Guest Resume Processing')
 @Public()
 @Controller('guest')
@@ -74,11 +78,23 @@ const resumeFileValidator: {
 export class GuestResumeController {
   private readonly logger = new Logger(GuestResumeController.name);
 
+  /**
+   * Initializes a new instance of the Guest Resume Controller.
+   * @param guestUsageService - The guest usage service.
+   * @param natsClient - The nats client.
+   */
   constructor(
     private readonly guestUsageService: GuestUsageService,
-    private readonly natsClient: NatsClient,
+    private readonly natsClient: AppGatewayNatsService,
   ) {}
 
+  /**
+   * Performs the analyze resume operation.
+   * @param req - The req.
+   * @param file - The file.
+   * @param uploadData - The upload data.
+   * @returns The result of the operation.
+   */
   @Post('resume/analyze')
   @HttpCode(HttpStatus.OK)
   @UseGuards(OptionalJwtAuthGuard, GuestGuard)
@@ -275,6 +291,12 @@ export class GuestResumeController {
     }
   }
 
+  /**
+   * Retrieves analysis results.
+   * @param req - The req.
+   * @param analysisId - The analysis id.
+   * @returns The result of the operation.
+   */
   @Get('resume/analysis/:analysisId')
   @UseGuards(OptionalJwtAuthGuard, GuestGuard)
   @ApiOperation({
@@ -493,6 +515,11 @@ export class GuestResumeController {
     }
   }
 
+  /**
+   * Retrieves demo analysis.
+   * @param req - The req.
+   * @returns The result of the operation.
+   */
   @Get('resume/demo-analysis')
   @UseGuards(OptionalJwtAuthGuard, GuestGuard)
   @ApiOperation({
@@ -649,3 +676,4 @@ export class GuestResumeController {
     }
   }
 }
+

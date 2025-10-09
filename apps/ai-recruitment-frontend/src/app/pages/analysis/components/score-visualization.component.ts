@@ -1,6 +1,9 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+/**
+ * Represents the score visualization component.
+ */
 @Component({
   selector: 'arc-score-visualization',
   standalone: true,
@@ -246,14 +249,18 @@ import { CommonModule } from '@angular/common';
   ],
 })
 export class ScoreVisualizationComponent implements OnChanges {
-  @Input() score: number = 0;
-  @Input() summary: string = '';
-  @Input() showIndicator: boolean = true;
-  @Input() animated: boolean = true;
+  @Input() score = 0;
+  @Input() summary = '';
+  @Input() showIndicator = true;
+  @Input() animated = true;
 
   private animatedScore = 0;
   private animationDuration = 2000; // 2 seconds
 
+  /**
+   * Performs the ng on changes operation.
+   * @param changes - The changes.
+   */
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['score'] && this.animated) {
       this.animateScore();
@@ -290,12 +297,20 @@ export class ScoreVisualizationComponent implements OnChanges {
     return 1 - Math.pow(1 - t, 3);
   }
 
+  /**
+   * Retrieves score circumference.
+   * @returns The string value.
+   */
   getScoreCircumference(): string {
     const radius = 50;
     const circumference = 2 * Math.PI * radius;
     return `${circumference} ${circumference}`;
   }
 
+  /**
+   * Retrieves score offset.
+   * @returns The number value.
+   */
   getScoreOffset(): number {
     const displayScore = this.animated ? this.animatedScore : this.score;
     const radius = 50;
@@ -303,12 +318,20 @@ export class ScoreVisualizationComponent implements OnChanges {
     return circumference - (displayScore / 100) * circumference;
   }
 
+  /**
+   * Retrieves score color.
+   * @returns The string value.
+   */
   getScoreColor(): string {
     if (this.score >= 80) return '#10b981';
     if (this.score >= 60) return '#f59e0b';
     return '#ef4444';
   }
 
+  /**
+   * Retrieves score category.
+   * @returns The string value.
+   */
   getScoreCategory(): string {
     if (this.score >= 80) return '优秀';
     if (this.score >= 60) return '良好';

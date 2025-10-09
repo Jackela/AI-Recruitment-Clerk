@@ -3,8 +3,11 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { GuestUsageService } from '../../services/marketing/guest-usage.service';
 
+/**
+ * Represents the campaign component.
+ */
 @Component({
-  selector: 'app-campaign',
+  selector: 'arc-campaign',
   standalone: true,
   imports: [CommonModule],
   template: `
@@ -151,11 +154,19 @@ export class CampaignComponent implements OnInit {
   codeCopied = false;
   questionnaireUrl = 'https://wj.qq.com/s2/14781436/'; // 待替换为实际问卷链接
 
+  /**
+   * Initializes a new instance of the Campaign Component.
+   * @param guestUsageService - The guest usage service.
+   * @param router - The router.
+   */
   constructor(
     private guestUsageService: GuestUsageService,
     public router: Router,
   ) {}
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     this.initializeComponent();
   }
@@ -229,16 +240,26 @@ export class CampaignComponent implements OnInit {
     }
   }
 
+  /**
+   * Performs the usage progress operation.
+   * @returns The number value.
+   */
   get usageProgress(): number {
     return (this.usageCount / 5) * 100;
   }
 
+  /**
+   * Performs the start experience operation.
+   */
   startExperience(): void {
     if (this.guestUsageService.canUseFeature()) {
       this.router.navigate(['/dashboard']);
     }
   }
 
+  /**
+   * Performs the copy feedback code operation.
+   */
   copyFeedbackCode(): void {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(this.feedbackCode).then(() => {
@@ -258,6 +279,9 @@ export class CampaignComponent implements OnInit {
     }
   }
 
+  /**
+   * Performs the track questionnaire click operation.
+   */
   trackQuestionnaireClick(): void {
     // 记录问卷点击事件，用于后续数据分析
     console.log('用户点击问卷链接', {
@@ -266,6 +290,9 @@ export class CampaignComponent implements OnInit {
     });
   }
 
+  /**
+   * Performs the show guest stats operation.
+   */
   showGuestStats(): void {
     const stats = this.guestUsageService.getGuestStats();
     alert(

@@ -7,6 +7,9 @@ import {
 } from '../domains/usage-limit.dto';
 import { UsageLimitRules } from '../domains/usage-limit.rules';
 
+/**
+ * Represents the usage limit contracts.
+ */
 export class UsageLimitContracts {
   
   /**
@@ -353,6 +356,9 @@ export class UsageLimitContracts {
 }
 
 // 辅助类型
+/**
+ * Defines the shape of the contract validation result.
+ */
 export interface ContractValidationResult {
   isValid: boolean;
   violations: string[];

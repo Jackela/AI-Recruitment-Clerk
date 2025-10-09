@@ -3,16 +3,25 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 // Local DTOs for Marketing features (test-friendly and decoupled from external package)
+/**
+ * Defines the shape of the create feedback code dto.
+ */
 export interface CreateFeedbackCodeDto {
   code: string;
 }
 
+/**
+ * Defines the shape of the mark feedback code used dto.
+ */
 export interface MarkFeedbackCodeUsedDto {
   code: string;
   alipayAccount: string;
   questionnaireData?: any;
 }
 
+/**
+ * Defines the shape of the feedback code dto.
+ */
 export interface FeedbackCodeDto {
   id?: string;
   code: string;
@@ -27,6 +36,9 @@ export interface FeedbackCodeDto {
   createdBy?: string;
 }
 
+/**
+ * Defines the shape of the marketing stats dto.
+ */
 export interface MarketingStatsDto {
   totalCodes: number;
   usedCodes: number;
@@ -35,6 +47,9 @@ export interface MarketingStatsDto {
   averageQualityScore: number;
 }
 
+/**
+ * Defines the shape of the feedback code document.
+ */
 export interface FeedbackCodeDocument {
   _id?: string;
   code: string;
@@ -52,15 +67,28 @@ export interface FeedbackCodeDocument {
   sessionId?: string;
 }
 
+/**
+ * Provides feedback code functionality.
+ */
 @Injectable()
 export class FeedbackCodeService {
   private readonly logger = new Logger(FeedbackCodeService.name);
 
+  /**
+   * Initializes a new instance of the Feedback Code Service.
+   * @param feedbackCodeModel - The feedback code model.
+   */
   constructor(
     @InjectModel('FeedbackCode')
     private readonly feedbackCodeModel: Model<FeedbackCodeDocument>,
   ) {}
 
+  /**
+   * Performs the record feedback code operation.
+   * @param createDto - The create dto.
+   * @param metadata - The metadata.
+   * @returns A promise that resolves to FeedbackCodeDto.
+   */
   async recordFeedbackCode(
     createDto: CreateFeedbackCodeDto,
     metadata?: any,
@@ -96,6 +124,11 @@ export class FeedbackCodeService {
     }
   }
 
+  /**
+   * Validates feedback code.
+   * @param code - The code.
+   * @returns A promise that resolves to boolean value.
+   */
   async validateFeedbackCode(code: string): Promise<boolean> {
     try {
       const record = await this.feedbackCodeModel.findOne({ code });
@@ -145,6 +178,11 @@ export class FeedbackCodeService {
     }
   }
 
+  /**
+   * Performs the mark as used operation.
+   * @param markUsedDto - The mark used dto.
+   * @returns A promise that resolves to FeedbackCodeDto.
+   */
   async markAsUsed(
     markUsedDto: MarkFeedbackCodeUsedDto,
   ): Promise<FeedbackCodeDto> {
@@ -179,6 +217,10 @@ export class FeedbackCodeService {
     }
   }
 
+  /**
+   * Retrieves pending payments.
+   * @returns A promise that resolves to an array of FeedbackCodeDto.
+   */
   async getPendingPayments(): Promise<FeedbackCodeDto[]> {
     try {
       const pendingCodes = await this.feedbackCodeModel
@@ -197,6 +239,13 @@ export class FeedbackCodeService {
     }
   }
 
+  /**
+   * Updates payment status.
+   * @param code - The code.
+   * @param status - The status.
+   * @param reason - The reason.
+   * @returns A promise that resolves to FeedbackCodeDto.
+   */
   async updatePaymentStatus(
     code: string,
     status: 'paid' | 'rejected',
@@ -225,6 +274,10 @@ export class FeedbackCodeService {
     }
   }
 
+  /**
+   * Retrieves marketing stats.
+   * @returns A promise that resolves to MarketingStatsDto.
+   */
   async getMarketingStats(): Promise<MarketingStatsDto> {
     try {
       const [
@@ -319,6 +372,13 @@ export class FeedbackCodeService {
   }
 
   // 管理员功能：批量处理支付
+  /**
+   * Performs the batch update payment status operation.
+   * @param codes - The codes.
+   * @param status - The status.
+   * @param reason - The reason.
+   * @returns A promise that resolves to number value.
+   */
   async batchUpdatePaymentStatus(
     codes: string[],
     status: 'paid' | 'rejected',
@@ -343,6 +403,11 @@ export class FeedbackCodeService {
   }
 
   // 标记反馈码已使用
+  /**
+   * Performs the mark feedback code as used operation.
+   * @param markUsedDto - The mark used dto.
+   * @returns A promise that resolves to FeedbackCodeDto.
+   */
   async markFeedbackCodeAsUsed(
     markUsedDto: MarkFeedbackCodeUsedDto,
   ): Promise<FeedbackCodeDto> {
@@ -374,6 +439,11 @@ export class FeedbackCodeService {
   }
 
   // 数据清理：删除过期的未使用反馈码
+  /**
+   * Performs the cleanup expired codes operation.
+   * @param daysOld - The days old.
+   * @returns A promise that resolves to number value.
+   */
   async cleanupExpiredCodes(daysOld = 30): Promise<number> {
     try {
       const cutoffDate = new Date();

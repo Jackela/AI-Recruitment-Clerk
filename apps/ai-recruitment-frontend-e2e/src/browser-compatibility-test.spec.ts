@@ -4,7 +4,7 @@
  * Comprehensive test to validate consistent behavior across all supported browsers
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 test.describe('Cross-Browser Compatibility', () => {
   test('All browsers can load the application', async ({

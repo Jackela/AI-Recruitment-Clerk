@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
 
+/**
+ * Provides device id functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -7,6 +10,9 @@ export class DeviceIdService {
   private readonly STORAGE_KEY = 'ai-recruitment-device-id';
   private deviceId: string | null = null;
 
+  /**
+   * Initializes a new instance of the Device ID Service.
+   */
   constructor() {
     // Don't auto-initialize - only initialize when requested
   }

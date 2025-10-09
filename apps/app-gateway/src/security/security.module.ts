@@ -6,6 +6,9 @@ import { RedisTokenBlacklistService } from './redis-token-blacklist.service';
 import { UserProfile, UserProfileSchema } from '../schemas/user-profile.schema';
 import { EnhancedRateLimitMiddleware } from '../middleware/enhanced-rate-limit.middleware';
 
+/**
+ * Configures the security module.
+ */
 @Module({
   imports: [
     MongooseModule.forFeature([

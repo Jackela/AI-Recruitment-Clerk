@@ -3,6 +3,9 @@ import { Document } from 'mongoose';
 
 export type JobDocument = Job & Document;
 
+/**
+ * Represents the job requirement.
+ */
 @Schema()
 export class JobRequirement {
   @Prop({ required: true })
@@ -22,6 +25,9 @@ export class JobRequirement {
 // Explicitly create schema for nested subdocument to avoid runtime reflection issues
 export const JobRequirementSchema = SchemaFactory.createForClass(JobRequirement);
 
+/**
+ * Represents the job.
+ */
 @Schema({
   timestamps: true,
   collection: 'jobs',

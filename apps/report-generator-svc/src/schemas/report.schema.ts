@@ -3,6 +3,9 @@ import { Document } from 'mongoose';
 
 export type ReportDocument = Report & Document;
 
+/**
+ * Represents the score breakdown.
+ */
 @Schema()
 export class ScoreBreakdown {
   @Prop({ required: true, min: 0, max: 100 })
@@ -18,6 +21,9 @@ export class ScoreBreakdown {
   overallFit: number = 0;
 }
 
+/**
+ * Represents the matching skill.
+ */
 @Schema()
 export class MatchingSkill {
   @Prop({ required: true })
@@ -37,6 +43,9 @@ export class MatchingSkill {
   explanation?: string;
 }
 
+/**
+ * Represents the report recommendation.
+ */
 @Schema()
 export class ReportRecommendation {
   @Prop({
@@ -59,6 +68,9 @@ export class ReportRecommendation {
   suggestions: string[] = [];
 }
 
+/**
+ * Represents the report.
+ */
 @Schema({
   timestamps: true,
   collection: 'reports',

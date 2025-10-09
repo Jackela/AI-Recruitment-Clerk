@@ -1,7 +1,10 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { BehaviorSubject, fromEvent } from 'rxjs';
 // import { filter, take } from 'rxjs/operators'; // Reserved for future use
 
+/**
+ * Defines the shape of the install prompt event.
+ */
 export interface InstallPromptEvent extends Event {
   readonly platforms: string[];
   readonly userChoice: Promise<{
@@ -11,19 +14,25 @@ export interface InstallPromptEvent extends Event {
   prompt(): Promise<void>;
 }
 
+/**
+ * Defines the shape of the notification payload.
+ */
 export interface NotificationPayload {
   title: string;
   body: string;
   icon?: string;
   badge?: string;
   image?: string;
-  data?: any;
-  actions?: any[]; // NotificationAction type not available in browser
+  data?: Record<string, unknown>;
+  actions?: Array<{action: string; title: string; icon?: string}>; // NotificationAction type not available in browser
   tag?: string;
   silent?: boolean;
   requireInteraction?: boolean;
 }
 
+/**
+ * Provides pwa functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -41,7 +50,12 @@ export class PWAService {
   public isOnline$ = this.isOnlineSubject.asObservable();
   public updateAvailable$ = this.updateAvailableSubject.asObservable();
 
-  constructor(private ngZone: NgZone) {
+  private ngZone = inject(NgZone);
+
+  /**
+   * Initializes a new instance of the Pwa Service.
+   */
+  constructor() {
     this.initializePWA();
   }
 

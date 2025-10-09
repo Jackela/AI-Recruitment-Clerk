@@ -44,15 +44,28 @@ interface AuthenticatedRequest extends Request {
   user: UserDto & { id: string; organizationId: string };
 }
 
+/**
+ * Exposes endpoints for usage limit.
+ */
 @ApiTags('usage-limits')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('usage-limits')
 export class UsageLimitController {
+  /**
+   * Initializes a new instance of the Usage Limit Controller.
+   * @param usageLimitService - The usage limit service.
+   */
   constructor(
     private readonly usageLimitService: UsageLimitIntegrationService,
   ) {}
 
+  /**
+   * Performs the check usage limit operation.
+   * @param req - The req.
+   * @param ip - The ip.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '检查使用限制状态',
     description: '检查指定IP的使用限制和剩余配额状态',
@@ -125,6 +138,12 @@ export class UsageLimitController {
     }
   }
 
+  /**
+   * Performs the record usage operation.
+   * @param req - The req.
+   * @param usageData - The usage data.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '记录使用',
     description: '记录一次API使用，消耗配额并返回剩余状态',
@@ -206,6 +225,12 @@ export class UsageLimitController {
     }
   }
 
+  /**
+   * Performs the add bonus quota operation.
+   * @param req - The req.
+   * @param bonusData - The bonus data.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '添加奖励配额',
     description: '为指定IP添加奖励配额，如问卷完成奖励或推荐奖励',
@@ -266,6 +291,15 @@ export class UsageLimitController {
     }
   }
 
+  /**
+   * Retrieves usage limits.
+   * @param req - The req.
+   * @param page - The page.
+   * @param limit - The limit.
+   * @param sortBy - The sort by.
+   * @param filterBy - The filter by.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取使用限制列表',
     description: '获取组织的所有IP使用限制记录（管理员功能）',
@@ -331,6 +365,12 @@ export class UsageLimitController {
     }
   }
 
+  /**
+   * Retrieves usage limit detail.
+   * @param req - The req.
+   * @param ip - The ip.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取特定IP使用详情',
     description: '获取指定IP的详细使用历史和配额信息',
@@ -368,6 +408,12 @@ export class UsageLimitController {
     }
   }
 
+  /**
+   * Updates usage limit policy.
+   * @param req - The req.
+   * @param policyData - The policy data.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '更新使用限制策略',
     description: '配置组织的默认使用限制策略和配额设置',
@@ -426,6 +472,13 @@ export class UsageLimitController {
     }
   }
 
+  /**
+   * Performs the reset usage limit operation.
+   * @param req - The req.
+   * @param ip - The ip.
+   * @param resetData - The reset data.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '重置使用记录',
     description: '管理员手动重置指定IP的使用记录和配额',
@@ -481,6 +534,12 @@ export class UsageLimitController {
     }
   }
 
+  /**
+   * Performs the batch manage usage limits operation.
+   * @param req - The req.
+   * @param batchRequest - The batch request.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '批量操作使用限制',
     description: '批量重置、添加配额或更新多个IP的使用限制',
@@ -536,6 +595,13 @@ export class UsageLimitController {
     }
   }
 
+  /**
+   * Retrieves usage statistics.
+   * @param req - The req.
+   * @param timeRange - The time range.
+   * @param groupBy - The group by.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取使用统计数据',
     description: '获取组织的使用限制系统统计和分析数据',
@@ -593,6 +659,13 @@ export class UsageLimitController {
     }
   }
 
+  /**
+   * Performs the export usage data operation.
+   * @param req - The req.
+   * @param format - The format.
+   * @param exportRequest - The export request.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '导出使用限制数据',
     description: '导出组织的使用限制数据为CSV或Excel格式',
@@ -655,6 +728,12 @@ export class UsageLimitController {
     }
   }
 
+  /**
+   * Performs the configure rate limiting operation.
+   * @param req - The req.
+   * @param rateLimitConfig - The rate limit config.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '设置速率限制',
     description: '配置API速率限制参数和阈值',
@@ -703,6 +782,10 @@ export class UsageLimitController {
     }
   }
 
+  /**
+   * Performs the health check operation.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '服务健康检查',
     description: '检查使用限制系统的健康状态和性能指标',

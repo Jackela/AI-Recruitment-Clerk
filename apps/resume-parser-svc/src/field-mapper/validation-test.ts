@@ -4,7 +4,7 @@
 import { SkillsTaxonomy } from '@ai-recruitment-clerk/candidate-scoring-domain';
 import { DateParser } from './date-parser';
 import { ExperienceCalculator } from './experience-calculator';
-import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
 // Test Skills Taxonomy
 console.log('=== Testing Skills Taxonomy ===');

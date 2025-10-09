@@ -37,6 +37,9 @@ interface PerformanceMetrics {
   };
 }
 
+/**
+ * Provides performance monitor functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -44,6 +47,9 @@ export class PerformanceMonitorService {
   private metrics: Partial<PerformanceMetrics> = {};
   private observers: Map<string, PerformanceObserver> = new Map();
 
+  /**
+   * Initializes a new instance of the Performance Monitor Service.
+   */
   constructor() {
     this.initializeMonitoring();
   }
@@ -237,14 +243,27 @@ export class PerformanceMonitorService {
   }
 
   // Public API
+  /**
+   * Retrieves metrics.
+   * @returns The Partial<PerformanceMetrics>.
+   */
   getMetrics(): Partial<PerformanceMetrics> {
     return { ...this.metrics };
   }
 
+  /**
+   * Retrieves core web vitals.
+   * @returns The Partial<PerformanceMetrics['coreWebVitals']>.
+   */
   getCoreWebVitals(): Partial<PerformanceMetrics['coreWebVitals']> {
     return { ...this.metrics.coreWebVitals };
   }
 
+  /**
+   * Performs the measure component render operation.
+   * @param _componentName - The component name.
+   * @returns The () => void.
+   */
   measureComponentRender(_componentName: string): () => void {
     const startTime = performance.now();
 
@@ -259,6 +278,11 @@ export class PerformanceMonitorService {
     };
   }
 
+  /**
+   * Performs the measure user interaction operation.
+   * @param _actionName - The action name.
+   * @returns The () => void.
+   */
   measureUserInteraction(_actionName: string): () => void {
     const startTime = performance.now();
 
@@ -274,16 +298,25 @@ export class PerformanceMonitorService {
     };
   }
 
+  /**
+   * Performs the report custom metric operation.
+   * @param _name - The name.
+   * @param _value - The value.
+   * @param _unit - The unit.
+   */
   reportCustomMetric(
     _name: string,
     _value: number,
-    _unit: string = 'ms',
+    _unit = 'ms',
   ): void {
     // Custom metric reported: ${name} (${value}${unit})
     // Store in metrics for potential reporting
     // Store custom metric for reporting
   }
 
+  /**
+   * Performs the destroy operation.
+   */
   destroy(): void {
     // Clean up observers
     this.observers.forEach((observer) => observer.disconnect());
@@ -291,6 +324,10 @@ export class PerformanceMonitorService {
   }
 
   // Lighthouse Score Estimation
+  /**
+   * Performs the estimate lighthouse score operation.
+   * @returns The number value.
+   */
   estimateLighthouseScore(): number {
     let score = 100;
 

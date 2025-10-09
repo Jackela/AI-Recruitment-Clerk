@@ -76,6 +76,10 @@ export class StructuredErrorLogger {
   private readonly logger: Logger;
   private readonly serviceName: string;
   
+  /**
+   * Initializes a new instance of the Structured Error Logger.
+   * @param serviceName - The service name.
+   */
   constructor(serviceName: string) {
     this.serviceName = serviceName;
     this.logger = new Logger(`${serviceName}-ErrorLogger`);

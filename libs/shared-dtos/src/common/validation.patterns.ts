@@ -5,18 +5,27 @@
 
 import { BadRequestException } from '@nestjs/common';
 
+/**
+ * Defines the shape of the validation result.
+ */
 export interface ValidationResult {
   isValid: boolean;
   errors: string[];
   warnings?: string[];
 }
 
+/**
+ * Defines the shape of the file validation config.
+ */
 export interface FileValidationConfig {
   maxSize: number; // bytes
   allowedTypes: string[];
   allowedExtensions: string[];
 }
 
+/**
+ * Defines the shape of the email validation config.
+ */
 export interface EmailValidationConfig {
   allowedDomains?: string[];
   blockedDomains?: string[];
@@ -205,6 +214,11 @@ export abstract class BaseValidator {
  * 简历特定验证器
  */
 export class ResumeValidator extends BaseValidator {
+  /**
+   * Validates resume file.
+   * @param file - The file.
+   * @returns The ValidationResult.
+   */
   static validateResumeFile(file: any): ValidationResult {
     return this.validateFile(file, {
       maxSize: 10 * 1024 * 1024, // 10MB
@@ -213,10 +227,18 @@ export class ResumeValidator extends BaseValidator {
     });
   }
 
+  /**
+   * Validates experience.
+   * @param years - The years.
+   */
   static validateExperience(years: number): void {
     this.validateNumberRange(years, 'Experience', 0, 50);
   }
 
+  /**
+   * Validates skills.
+   * @param skills - The skills.
+   */
   static validateSkills(skills: string[]): void {
     this.validateArrayLength(skills, 'Skills', 1, 20);
     
@@ -230,11 +252,21 @@ export class ResumeValidator extends BaseValidator {
  * 工作描述验证器
  */
 export class JobDescriptionValidator extends BaseValidator {
+  /**
+   * Validates job title.
+   * @param title - The title.
+   */
   static validateJobTitle(title: string): void {
     this.validateRequired(title, 'Job title');
     this.validateStringLength(title, 'Job title', 5, 100);
   }
 
+  /**
+   * Validates salary range.
+   * @param min - The min.
+   * @param max - The max.
+   * @returns The ValidationResult.
+   */
   static validateSalaryRange(min: number, max: number): ValidationResult {
     const result: ValidationResult = { isValid: true, errors: [] };
     
@@ -251,6 +283,10 @@ export class JobDescriptionValidator extends BaseValidator {
     return result;
   }
 
+  /**
+   * Validates requirements.
+   * @param requirements - The requirements.
+   */
   static validateRequirements(requirements: string[]): void {
     this.validateArrayLength(requirements, 'Requirements', 1, 10);
     

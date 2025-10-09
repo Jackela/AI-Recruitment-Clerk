@@ -15,6 +15,9 @@ import {
 import { ToastService } from '../toast.service';
 import { ProgressFeedbackService } from '../feedback/progress-feedback.service';
 
+/**
+ * Defines the shape of the batch operation.
+ */
 export interface BatchOperation<T = any> {
   id: string;
   type: 'create' | 'update' | 'delete' | 'process';
@@ -23,6 +26,9 @@ export interface BatchOperation<T = any> {
   config?: BatchConfig;
 }
 
+/**
+ * Defines the shape of the batch config.
+ */
 export interface BatchConfig {
   concurrent?: number;
   chunkSize?: number;
@@ -34,15 +40,21 @@ export interface BatchConfig {
   progressMessage?: string;
 }
 
-export interface BatchResult<T = any> {
+/**
+ * Defines the shape of the batch result.
+ */
+export interface BatchResult<T = unknown> {
   successful: T[];
-  failed: Array<{ item: T; error: any }>;
+  failed: Array<{ item: T; error: Error | unknown }>;
   total: number;
   successCount: number;
   failureCount: number;
   duration: number;
 }
 
+/**
+ * Defines the shape of the batch progress.
+ */
 export interface BatchProgress {
   operationId: string;
   current: number;
@@ -54,6 +66,9 @@ export interface BatchProgress {
   estimatedTimeRemaining?: number;
 }
 
+/**
+ * Provides batch operations functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -80,12 +95,22 @@ export class BatchOperationsService {
       this.currentOperations().filter((op) => op.status === 'failed').length,
   );
 
+  /**
+   * Initializes a new instance of the Batch Operations Service.
+   * @param toastService - The toast service.
+   * @param progressFeedback - The progress feedback.
+   */
   constructor(
     private toastService: ToastService,
     private progressFeedback: ProgressFeedbackService,
   ) {}
 
   // Main batch operation execution
+  /**
+   * Performs the execute batch operation.
+   * @param operation - The operation.
+   * @returns The Observable<BatchResult<T>>.
+   */
   executeBatch<T>(operation: BatchOperation<T>): Observable<BatchResult<T>> {
     const config: BatchConfig = {
       concurrent: 3,
@@ -291,9 +316,9 @@ export class BatchOperationsService {
   // Process individual item with retry logic
   private processItem<T>(
     item: T,
-    action: (item: T) => Observable<any>,
+    action: (item: T) => Observable<unknown>,
     config: BatchConfig,
-  ): Observable<{ item: T; success: boolean; result?: any; error?: any }> {
+  ): Observable<{ item: T; success: boolean; result?: unknown; error?: Error | unknown }> {
     return action(item).pipe(
       timeout(config.timeout!),
       retry({
@@ -341,6 +366,10 @@ export class BatchOperationsService {
 
   // Public API
 
+  /**
+   * Performs the cancel operation operation.
+   * @param operationId - The operation id.
+   */
   cancelOperation(operationId: string): void {
     const cancelSignal = this.activeOperations.get(operationId);
     if (cancelSignal) {
@@ -357,16 +386,31 @@ export class BatchOperationsService {
     }
   }
 
+  /**
+   * Performs the cancel all operations operation.
+   */
   cancelAllOperations(): void {
     this.activeOperations.forEach((_, id) => this.cancelOperation(id));
   }
 
+  /**
+   * Retrieves progress.
+   * @param operationId - The operation id.
+   * @returns The BatchProgress | undefined.
+   */
   getProgress(operationId: string): BatchProgress | undefined {
     return this.operationProgress.get(operationId);
   }
 
   // Batch operation helpers
 
+  /**
+   * Performs the batch create operation.
+   * @param items - The items.
+   * @param createFn - The create fn.
+   * @param config - The config.
+   * @returns The Observable<BatchResult<T>>.
+   */
   batchCreate<T>(
     items: T[],
     createFn: (item: T) => Observable<any>,
@@ -386,6 +430,13 @@ export class BatchOperationsService {
     return this.executeBatch(operation);
   }
 
+  /**
+   * Performs the batch update operation.
+   * @param items - The items.
+   * @param updateFn - The update fn.
+   * @param config - The config.
+   * @returns The Observable<BatchResult<T>>.
+   */
   batchUpdate<T>(
     items: T[],
     updateFn: (item: T) => Observable<any>,
@@ -405,6 +456,13 @@ export class BatchOperationsService {
     return this.executeBatch(operation);
   }
 
+  /**
+   * Performs the batch delete operation.
+   * @param items - The items.
+   * @param deleteFn - The delete fn.
+   * @param config - The config.
+   * @returns The Observable<BatchResult<T>>.
+   */
   batchDelete<T>(
     items: T[],
     deleteFn: (item: T) => Observable<any>,
@@ -425,6 +483,13 @@ export class BatchOperationsService {
     return this.executeBatch(operation);
   }
 
+  /**
+   * Performs the batch process operation.
+   * @param items - The items.
+   * @param processFn - The process fn.
+   * @param config - The config.
+   * @returns The Observable<BatchResult<T>>.
+   */
   batchProcess<T>(
     items: T[],
     processFn: (item: T) => Observable<any>,

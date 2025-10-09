@@ -13,6 +13,9 @@ import * as JobActions from '../../../store/jobs/job.actions';
 import * as JobSelectors from '../../../store/jobs/job.selectors';
 import { Router } from '@angular/router';
 
+/**
+ * Represents the create job component.
+ */
 @Component({
   selector: 'arc-create-job',
   standalone: true,
@@ -31,6 +34,9 @@ export class CreateJobComponent implements OnInit, OnDestroy {
   private store = inject(Store<AppState>);
   private router = inject(Router);
 
+  /**
+   * Initializes a new instance of the Create Job Component.
+   */
   constructor() {
     this.createJobForm = this.fb.group({
       jobTitle: [
@@ -56,16 +62,25 @@ export class CreateJobComponent implements OnInit, OnDestroy {
     this.error$ = this.store.select(JobSelectors.selectJobsError);
   }
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     // Clear any previous errors
     this.store.dispatch(JobActions.clearJobError());
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
+  /**
+   * Performs the on submit operation.
+   */
   onSubmit(): void {
     if (this.createJobForm.valid) {
       const formValue = this.createJobForm.value;
@@ -82,19 +97,33 @@ export class CreateJobComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the on cancel operation.
+   */
   onCancel(): void {
     this.router.navigate(['/jobs']);
   }
 
+  /**
+   * Performs the on clear error operation.
+   */
   onClearError(): void {
     this.store.dispatch(JobActions.clearJobError());
   }
 
   // Getter methods for easy access to form controls in template
+  /**
+   * Performs the job title operation.
+   * @returns The result of the operation.
+   */
   get jobTitle() {
     return this.createJobForm.get('jobTitle');
   }
 
+  /**
+   * Performs the jd text operation.
+   * @returns The result of the operation.
+   */
   get jdText() {
     return this.createJobForm.get('jdText');
   }
@@ -105,6 +134,11 @@ export class CreateJobComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Retrieves field error.
+   * @param fieldName - The field name.
+   * @returns The string | null.
+   */
   getFieldError(fieldName: string): string | null {
     const control = this.createJobForm.get(fieldName);
     if (control && control.errors && control.touched) {

@@ -10,6 +10,9 @@ import {
 } from '../errors/gemini-errors';
 import { SecureConfigValidator } from '../config/secure-config.validator';
 
+/**
+ * Defines the shape of the gemini config.
+ */
 export interface GeminiConfig {
   apiKey: string;
   model?: string;
@@ -19,6 +22,9 @@ export interface GeminiConfig {
   topK?: number;
 }
 
+/**
+ * Defines the shape of the gemini response.
+ */
 export interface GeminiResponse<T = unknown> {
   data: T;
   tokensUsed?: number;
@@ -26,6 +32,9 @@ export interface GeminiResponse<T = unknown> {
   confidence: number;
 }
 
+/**
+ * Represents the gemini client.
+ */
 @Injectable()
 export class GeminiClient {
   private readonly logger = new Logger(GeminiClient.name);
@@ -37,6 +46,10 @@ export class GeminiClient {
     lastResetTime: Date.now(),
   };
 
+  /**
+   * Initializes a new instance of the Gemini Client.
+   * @param config - The config.
+   */
   constructor(private readonly config: GeminiConfig) {
     // 🔒 SECURITY: Strict fail-fast validation - no fallback mechanisms allowed
     if (!config.apiKey) {
@@ -113,6 +126,12 @@ export class GeminiClient {
   }
 
 
+  /**
+   * Generates text.
+   * @param prompt - The prompt.
+   * @param retries - The retries.
+   * @returns A promise that resolves to GeminiResponse<string>.
+   */
   async generateText(prompt: string, retries = 3): Promise<GeminiResponse<string>> {
     this.checkRateLimit();
 
@@ -174,6 +193,13 @@ export class GeminiClient {
     throw new GeminiApiError('All retry attempts failed');
   }
 
+  /**
+   * Generates structured response.
+   * @param prompt - The prompt.
+   * @param schema - The schema.
+   * @param retries - The retries.
+   * @returns A promise that resolves to GeminiResponse<T>.
+   */
   async generateStructuredResponse<T>(
     prompt: string,
     schema: string,
@@ -223,6 +249,14 @@ Important guidelines:
     }
   }
 
+  /**
+   * Generates with vision.
+   * @param prompt - The prompt.
+   * @param imageData - The image data.
+   * @param mimeType - The mime type.
+   * @param retries - The retries.
+   * @returns A promise that resolves to GeminiResponse<string>.
+   */
   async generateWithVision(
     prompt: string,
     imageData: Buffer | string,
@@ -276,6 +310,15 @@ Important guidelines:
     throw new GeminiApiError('All retry attempts failed');
   }
 
+  /**
+   * Generates structured vision response.
+   * @param prompt - The prompt.
+   * @param imageData - The image data.
+   * @param mimeType - The mime type.
+   * @param schema - The schema.
+   * @param retries - The retries.
+   * @returns A promise that resolves to GeminiResponse<T>.
+   */
   async generateStructuredVisionResponse<T>(
     prompt: string,
     imageData: Buffer | string,
@@ -326,6 +369,10 @@ Important guidelines:
     }
   }
 
+  /**
+   * Performs the health check operation.
+   * @returns A promise that resolves to boolean value.
+   */
   async healthCheck(): Promise<boolean> {
     try {
       const response = await this.generateText('Respond with "OK" to confirm API connectivity.', 1);

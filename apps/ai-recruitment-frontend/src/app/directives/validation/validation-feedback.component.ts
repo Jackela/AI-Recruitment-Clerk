@@ -2,6 +2,9 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, ValidationErrors } from '@angular/forms';
 
+/**
+ * Represents the validation feedback component.
+ */
 @Component({
   selector: 'arc-validation-feedback',
   standalone: true,
@@ -178,6 +181,10 @@ export class ValidationFeedbackComponent {
     date: '请输入有效的日期',
   };
 
+  /**
+   * Performs the should show error operation.
+   * @returns The boolean value.
+   */
   shouldShowError(): boolean {
     if (!this.control) return false;
     return !!(
@@ -186,14 +193,26 @@ export class ValidationFeedbackComponent {
     );
   }
 
+  /**
+   * Performs the is valid operation.
+   * @returns The boolean value.
+   */
   isValid(): boolean {
     return this.control?.valid ?? false;
   }
 
+  /**
+   * Performs the was touched operation.
+   * @returns The boolean value.
+   */
   wasTouched(): boolean {
     return this.control?.touched ?? false;
   }
 
+  /**
+   * Retrieves error message.
+   * @returns The string value.
+   */
   getErrorMessage(): string {
     if (!this.control || !this.control.errors) {
       return '';
@@ -216,6 +235,10 @@ export class ValidationFeedbackComponent {
     return this.defaultErrorMessages[errorKey] || '输入值无效';
   }
 
+  /**
+   * Retrieves errors.
+   * @returns The ValidationErrors | null.
+   */
   getErrors(): ValidationErrors | null {
     return this.control?.errors ?? null;
   }

@@ -213,6 +213,24 @@
   position: relative;
 }
 
+.language-selector-placeholder,
+.theme-toggle-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  min-width: 2.5rem;
+  border-radius: var(--radius-md);
+  background: var(--color-secondary-50);
+  color: var(--color-secondary-300);
+  border: 1px solid var(--color-secondary-100);
+  pointer-events: none;
+}
+
+.theme-toggle-placeholder {
+  font-size: var(--font-size-base);
+}
+
 // ===== 操作按钮样式 =====
 .help-btn,
 .settings-btn {

@@ -6,6 +6,7 @@ import {
   Req,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { RateLimitMiddleware } from '../middleware/rate-limit.middleware';
@@ -60,13 +61,26 @@ interface QuestionnaireSubmission {
   };
 }
 
+/**
+ * Exposes endpoints for questionnaire.
+ */
 @Controller('questionnaire')
 export class QuestionnaireController {
+  private readonly logger = new Logger(QuestionnaireController.name);
+  /**
+   * Initializes a new instance of the Questionnaire Controller.
+   * @param questionnaireService - The questionnaire service.
+   * @param rateLimitMiddleware - The rate limit middleware.
+   */
   constructor(
     private readonly questionnaireService: QuestionnaireIntegrationService,
     private readonly rateLimitMiddleware: RateLimitMiddleware,
   ) {}
 
+  /**
+   * Retrieves questionnaire template.
+   * @returns The result of the operation.
+   */
   @Get('template')
   getQuestionnaireTemplate() {
     return {
@@ -295,6 +309,12 @@ export class QuestionnaireController {
     };
   }
 
+  /**
+   * Performs the submit questionnaire operation.
+   * @param submission - The submission.
+   * @param request - The request.
+   * @returns The result of the operation.
+   */
   @Post('submit')
   async submitQuestionnaire(
     @Body() submission: QuestionnaireSubmission,
@@ -345,7 +365,7 @@ export class QuestionnaireController {
 
       if (!usageResult.success) {
         // 即使额度增加失败，问卷也已保存，记录错误但不影响用户
-        console.error(
+        this.logger.error(
           'Failed to increase usage limit after questionnaire completion',
         );
       }
@@ -376,7 +396,7 @@ export class QuestionnaireController {
         ],
       };
     } catch (error) {
-      console.error('Questionnaire submission error:', error);
+      this.logger.error('Questionnaire submission error', error.stack || error.message);
 
       if (error instanceof HttpException) {
         throw error;
@@ -392,6 +412,11 @@ export class QuestionnaireController {
     }
   }
 
+  /**
+   * Retrieves questionnaire stats.
+   * @param request - The request.
+   * @returns The result of the operation.
+   */
   @Get('stats')
   async getQuestionnaireStats(@Req() request: Request) {
     // 简单的管理接口，实际应该加权限验证

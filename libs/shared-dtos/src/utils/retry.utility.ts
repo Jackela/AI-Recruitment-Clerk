@@ -1,5 +1,8 @@
 import { Logger } from '@nestjs/common';
 
+/**
+ * Defines the shape of the retry options.
+ */
 export interface RetryOptions {
   maxAttempts: number;
   baseDelayMs: number;
@@ -9,12 +12,18 @@ export interface RetryOptions {
   retryIf?: (error: Error | unknown) => boolean;
 }
 
+/**
+ * Defines the shape of the circuit breaker options.
+ */
 export interface CircuitBreakerOptions {
   failureThreshold: number;
   recoveryTimeout: number;
   monitoringPeriod: number;
 }
 
+/**
+ * Represents the retry utility.
+ */
 export class RetryUtility {
   private static readonly logger = new Logger(RetryUtility.name);
 
@@ -142,6 +151,12 @@ export class CircuitBreaker {
     private readonly options: CircuitBreakerOptions
   ) {}
 
+  /**
+   * Retrieves instance.
+   * @param name - The name.
+   * @param options - The options.
+   * @returns The CircuitBreaker.
+   */
   static getInstance(name: string, options: CircuitBreakerOptions): CircuitBreaker {
     if (!this.instances.has(name)) {
       this.instances.set(name, new CircuitBreaker(name, options));
@@ -149,6 +164,11 @@ export class CircuitBreaker {
     return this.instances.get(name)!;
   }
 
+  /**
+   * Performs the execute operation.
+   * @param operation - The operation.
+   * @returns A promise that resolves to T.
+   */
   async execute<T>(operation: () => Promise<T>): Promise<T> {
     if (this.state === 'OPEN') {
       if (Date.now() - this.lastFailureTime > this.options.recoveryTimeout) {
@@ -189,10 +209,18 @@ export class CircuitBreaker {
     this.state = 'CLOSED';
   }
 
+  /**
+   * Retrieves state.
+   * @returns The string value.
+   */
   getState(): string {
     return this.state;
   }
 
+  /**
+   * Retrieves failures.
+   * @returns The number value.
+   */
   getFailures(): number {
     return this.failures;
   }

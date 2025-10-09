@@ -8,16 +8,26 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 
+/**
+ * Defines the shape of the security validation result.
+ */
 export interface SecurityValidationResult {
   isValid: boolean;
   issues: string[];
   score: number; // 0-100 security score
 }
 
+/**
+ * Represents the production security validator.
+ */
 @Injectable()
 export class ProductionSecurityValidator {
   private readonly logger = new Logger(ProductionSecurityValidator.name);
 
+  /**
+   * Initializes a new instance of the Production Security Validator.
+   * @param configService - The config service.
+   */
   constructor(private readonly configService: ConfigService) {}
 
   /**

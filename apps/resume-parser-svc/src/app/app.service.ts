@@ -8,6 +8,9 @@ import { GridFsService } from '../gridfs/gridfs.service';
 import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
 import { ParsingService } from '../parsing/parsing.service';
 
+/**
+ * Provides app functionality.
+ */
 @Injectable()
 export class AppService
   implements OnApplicationBootstrap, OnApplicationShutdown
@@ -15,12 +18,22 @@ export class AppService
   private readonly logger = new Logger(AppService.name);
   private isInitialized = false;
 
+  /**
+   * Initializes a new instance of the App Service.
+   * @param gridFsService - The grid fs service.
+   * @param natsService - The nats service.
+   * @param parsingService - The parsing service.
+   */
   constructor(
     private readonly gridFsService: GridFsService,
     private readonly natsService: ResumeParserNatsService,
     private readonly parsingService: ParsingService,
   ) {}
 
+  /**
+   * Retrieves data.
+   * @returns The { message: string; status?: string }.
+   */
   getData(): { message: string; status?: string } {
     return {
       message: 'Resume Parser Service API',
@@ -28,6 +41,10 @@ export class AppService
     };
   }
 
+  /**
+   * Performs the on application bootstrap operation.
+   * @returns A promise that resolves when the operation completes.
+   */
   async onApplicationBootstrap(): Promise<void> {
     this.logger.log('Resume Parser Service starting...');
 
@@ -57,6 +74,10 @@ export class AppService
     }
   }
 
+  /**
+   * Performs the on application shutdown operation.
+   * @returns A promise that resolves when the operation completes.
+   */
   async onApplicationShutdown(): Promise<void> {
     this.logger.log('Resume Parser Service shutting down...');
 

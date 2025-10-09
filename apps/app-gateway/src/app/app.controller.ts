@@ -1,21 +1,38 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Post, Logger } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Public } from '../auth/decorators/public.decorator';
 import { JobRepository } from '../repositories/job.repository';
-import { NatsClient } from '../nats/nats.client';
+import { NatsClientService } from '@ai-recruitment-clerk/shared-nats-client';
 import { CacheService } from '../cache/cache.service';
 import { CacheWarmupService } from '../cache/cache-warmup.service';
 
+/**
+ * Exposes endpoints for app.
+ */
 @Controller()
 export class AppController {
+  private readonly logger = new Logger(AppController.name);
+
+  /**
+   * Initializes a new instance of the App Controller.
+   * @param appService - The app service.
+   * @param jobRepository - The job repository.
+   * @param natsClient - The nats client.
+   * @param cacheService - The cache service.
+   * @param cacheWarmupService - The cache warmup service.
+   */
   constructor(
     private readonly appService: AppService,
     private readonly jobRepository: JobRepository,
-    private readonly natsClient: NatsClient,
+    private readonly natsClient: NatsClientService,
     private readonly cacheService: CacheService,
     private readonly cacheWarmupService: CacheWarmupService,
   ) {}
 
+  /**
+   * Retrieves welcome.
+   * @returns The result of the operation.
+   */
   @Public()
   @Get('/')
   getWelcome() {
@@ -27,12 +44,20 @@ export class AppController {
     };
   }
 
+  /**
+   * Retrieves data.
+   * @returns The result of the operation.
+   */
   @Public()
   @Get('status')
   getData() {
     return this.appService.getData();
   }
 
+  /**
+   * Retrieves cache metrics.
+   * @returns The result of the operation.
+   */
   @Public()
   @Get('cache/metrics')
   async getCacheMetrics() {
@@ -43,7 +68,7 @@ export class AppController {
         cache: cacheHealth,
       };
     } catch (error) {
-      console.error('Cache metrics error:', error);
+      this.logger.error('Cache metrics error', error.stack || error.message);
       return {
         timestamp: new Date().toISOString(),
         cache: {
@@ -56,13 +81,17 @@ export class AppController {
     }
   }
 
+  /**
+   * Retrieves health.
+   * @returns The result of the operation.
+   */
   @Public()
   @Get('health')
   async getHealth() {
     try {
       // 测试缓存服务是否可用
       if (!this.cacheService) {
-        console.error('CacheService is not injected!');
+        this.logger.error('CacheService is not injected!');
         // 直接返回基本健康检查
         const dbHealth = await this.jobRepository.healthCheck();
         const natsHealth = this.natsClient.isConnected;
@@ -89,16 +118,16 @@ export class AppController {
       }
 
       const cacheKey = this.cacheService.getHealthCacheKey();
-      console.log('Using cache key:', cacheKey);
+      this.logger.debug(`Using cache key: ${cacheKey}`);
 
       return this.cacheService.wrap(
         cacheKey,
         async () => {
-          console.log('Cache MISS - generating new health data');
+          this.logger.debug('Cache MISS - generating new health data');
           const dbHealth = await this.jobRepository.healthCheck();
           const natsHealth = this.natsClient.isConnected;
 
-          console.log(
+          this.logger.log(
             `[HealthCheck] DB status: ${dbHealth.status}, NATS status: ${natsHealth ? 'connected' : 'disconnected'}`,
           );
 
@@ -129,7 +158,7 @@ export class AppController {
         { ttl: 30000 }, // 30秒缓存(30000毫秒)，健康检查不需要太长缓存
       );
     } catch (error) {
-      console.error('Health check cache error:', error);
+      this.logger.error('Health check cache error', error.stack || error.message);
       // 降级到无缓存模式
       const dbHealth = await this.jobRepository.healthCheck();
       const natsHealth = this.natsClient.isConnected;
@@ -157,6 +186,10 @@ export class AppController {
     }
   }
 
+  /**
+   * Retrieves cache warmup status.
+   * @returns The result of the operation.
+   */
   @Public()
   @Get('cache/warmup/status')
   async getCacheWarmupStatus() {
@@ -180,6 +213,10 @@ export class AppController {
     }
   }
 
+  /**
+   * Performs the trigger cache warmup operation.
+   * @returns The result of the operation.
+   */
   @Public()
   @Post('cache/warmup/trigger')
   async triggerCacheWarmup() {

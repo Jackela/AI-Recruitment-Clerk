@@ -313,6 +313,9 @@ Provide specific, actionable feedback that helps understand the candidate's prof
   }
 }
 
+/**
+ * Defines the shape of the prompt options.
+ */
 export interface PromptOptions {
   temperature?: number;
   maxTokens?: number;
@@ -320,7 +323,16 @@ export interface PromptOptions {
   validationLevel?: 'strict' | 'moderate' | 'lenient';
 }
 
+/**
+ * Represents the prompt builder.
+ */
 export class PromptBuilder {
+  /**
+   * Builds with options.
+   * @param basePrompt - The base prompt.
+   * @param options - The options.
+   * @returns The string value.
+   */
   static buildWithOptions(basePrompt: string, options: PromptOptions = {}): string {
     let prompt = basePrompt;
 
@@ -337,6 +349,12 @@ export class PromptBuilder {
     return prompt;
   }
 
+  /**
+   * Performs the add json schema instruction operation.
+   * @param prompt - The prompt.
+   * @param schema - The schema.
+   * @returns The string value.
+   */
   static addJsonSchemaInstruction(prompt: string, schema: string): string {
     return `${prompt}
 

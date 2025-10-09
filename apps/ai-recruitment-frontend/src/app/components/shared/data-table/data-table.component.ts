@@ -16,6 +16,9 @@ import { FormsModule } from '@angular/forms';
 import { fromEvent, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 
+/**
+ * Defines the shape of the table column.
+ */
 export interface TableColumn {
   key: string;
   label: string;
@@ -31,6 +34,9 @@ export interface TableColumn {
   truncateLength?: number; // Character limit for text truncation
 }
 
+/**
+ * Defines the shape of the table options.
+ */
 export interface TableOptions {
   pageSize?: number;
   pageSizeOptions?: number[];
@@ -46,16 +52,25 @@ export interface TableOptions {
   emptyMessage?: string;
 }
 
+/**
+ * Defines the shape of the sort event.
+ */
 export interface SortEvent {
   column: string;
   direction: 'asc' | 'desc' | null;
 }
 
+/**
+ * Defines the shape of the page event.
+ */
 export interface PageEvent {
   pageIndex: number;
   pageSize: number;
 }
 
+/**
+ * Represents the data table component.
+ */
 @Component({
   selector: 'arc-data-table',
   standalone: true,
@@ -548,6 +563,10 @@ export class DataTableComponent<T = Record<string, unknown>>
     Math.min(this.startIndex() + this.pageSize, this.totalItems()),
   );
 
+  /**
+   * Performs the ng on init operation.
+   * @returns The result of the operation.
+   */
   ngOnInit() {
     // Set default options
     this.options = {
@@ -575,11 +594,19 @@ export class DataTableComponent<T = Record<string, unknown>>
     }));
   }
 
+  /**
+   * Performs the ng after view init operation.
+   * @returns The result of the operation.
+   */
   ngAfterViewInit() {
     this.setupScrollDetection();
     this.setupResizeObserver();
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   * @returns The result of the operation.
+   */
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
@@ -589,26 +616,45 @@ export class DataTableComponent<T = Record<string, unknown>>
     }
   }
 
-  getCellValue(row: T, key: string): any {
+  /**
+   * Retrieves cell value.
+   * @param row - The row.
+   * @param key - The key.
+   * @returns The unknown.
+   */
+  getCellValue(row: T, key: string): unknown {
     const keys = key.split('.');
-    let value: any = row;
+    let value: unknown = row;
 
     for (const k of keys) {
-      value = (value as Record<string, any>)?.[k];
+      value = (value as Record<string, unknown>)?.[k];
     }
 
     return value;
   }
 
+  /**
+   * Performs the on search operation.
+   * @returns The result of the operation.
+   */
   onSearch() {
     this.currentPage.set(0);
   }
 
+  /**
+   * Performs the clear search operation.
+   * @returns The result of the operation.
+   */
   clearSearch() {
     this.searchTerm = '';
     this.onSearch();
   }
 
+  /**
+   * Handles sort.
+   * @param column - The column.
+   * @returns The result of the operation.
+   */
   handleSort(column: string) {
     if (this.sortColumn() === column) {
       // Toggle direction
@@ -631,6 +677,10 @@ export class DataTableComponent<T = Record<string, unknown>>
     });
   }
 
+  /**
+   * Performs the previous page operation.
+   * @returns The result of the operation.
+   */
   previousPage() {
     if (this.currentPage() > 0) {
       this.currentPage.update((p) => p - 1);
@@ -638,6 +688,10 @@ export class DataTableComponent<T = Record<string, unknown>>
     }
   }
 
+  /**
+   * Performs the next page operation.
+   * @returns The result of the operation.
+   */
   nextPage() {
     if (this.currentPage() < this.totalPages() - 1) {
       this.currentPage.update((p) => p + 1);
@@ -645,16 +699,29 @@ export class DataTableComponent<T = Record<string, unknown>>
     }
   }
 
+  /**
+   * Performs the go to page operation.
+   * @param page - The page.
+   * @returns The result of the operation.
+   */
   goToPage(page: number) {
     this.currentPage.set(page);
     this.emitPageChange();
   }
 
+  /**
+   * Performs the on page size change operation.
+   * @returns The result of the operation.
+   */
   onPageSizeChange() {
     this.currentPage.set(0);
     this.emitPageChange();
   }
 
+  /**
+   * Performs the emit page change operation.
+   * @returns The result of the operation.
+   */
   emitPageChange() {
     this.onPageChange.emit({
       pageIndex: this.currentPage(),
@@ -662,6 +729,10 @@ export class DataTableComponent<T = Record<string, unknown>>
     });
   }
 
+  /**
+   * Retrieves page numbers.
+   * @returns The an array of number value.
+   */
   getPageNumbers(): number[] {
     const total = this.totalPages();
     const current = this.currentPage();
@@ -669,7 +740,7 @@ export class DataTableComponent<T = Record<string, unknown>>
 
     const maxVisible = 5;
     let start = Math.max(0, current - Math.floor(maxVisible / 2));
-    let end = Math.min(total, start + maxVisible);
+    const end = Math.min(total, start + maxVisible);
 
     if (end - start < maxVisible) {
       start = Math.max(0, end - maxVisible);
@@ -682,15 +753,28 @@ export class DataTableComponent<T = Record<string, unknown>>
     return pages;
   }
 
+  /**
+   * Performs the is selected operation.
+   * @param row - The row.
+   * @returns The boolean value.
+   */
   isSelected(row: T): boolean {
     return this.selectedRows().includes(row);
   }
 
+  /**
+   * Performs the is all selected operation.
+   * @returns The boolean value.
+   */
   isAllSelected(): boolean {
     const pageData = this.paginatedData();
     return pageData.length > 0 && pageData.every((row) => this.isSelected(row));
   }
 
+  /**
+   * Performs the is some selected operation.
+   * @returns The boolean value.
+   */
   isSomeSelected(): boolean {
     const pageData = this.paginatedData();
     return (
@@ -698,6 +782,11 @@ export class DataTableComponent<T = Record<string, unknown>>
     );
   }
 
+  /**
+   * Performs the toggle select operation.
+   * @param row - The row.
+   * @returns The result of the operation.
+   */
   toggleSelect(row: T) {
     const selected = [...this.selectedRows()];
     const index = selected.indexOf(row);
@@ -717,6 +806,10 @@ export class DataTableComponent<T = Record<string, unknown>>
     this.onSelectionChange.emit(selected);
   }
 
+  /**
+   * Performs the toggle select all operation.
+   * @returns The result of the operation.
+   */
   toggleSelectAll() {
     const pageData = this.paginatedData();
     const selected = [...this.selectedRows()];
@@ -742,6 +835,10 @@ export class DataTableComponent<T = Record<string, unknown>>
     this.onSelectionChange.emit(selected);
   }
 
+  /**
+   * Performs the export data operation.
+   * @returns The result of the operation.
+   */
   exportData() {
     this.onExport.emit();
     // Default CSV export implementation
@@ -785,6 +882,11 @@ export class DataTableComponent<T = Record<string, unknown>>
     document.body.removeChild(link);
   }
 
+  /**
+   * Retrieves next sort direction.
+   * @param column - The column.
+   * @returns The 'asc' | 'desc' | null.
+   */
   getNextSortDirection(column: string): 'asc' | 'desc' | null {
     const currentColumn = this.sortColumn();
     const currentDirection = this.sortDirection();
@@ -803,6 +905,11 @@ export class DataTableComponent<T = Record<string, unknown>>
   }
 
   // Mobile responsiveness methods
+  /**
+   * Retrieves column classes.
+   * @param column - The column.
+   * @returns The string value.
+   */
   getColumnClasses(column: TableColumn): string {
     const classes: string[] = [];
 
@@ -822,6 +929,11 @@ export class DataTableComponent<T = Record<string, unknown>>
     return classes.join(' ');
   }
 
+  /**
+   * Retrieves column label.
+   * @param column - The column.
+   * @returns The string value.
+   */
   getColumnLabel(column: TableColumn): string {
     // Use mobile label on small screens if available
     if (window.innerWidth <= 768 && column.mobileLabel) {
@@ -830,6 +942,12 @@ export class DataTableComponent<T = Record<string, unknown>>
     return column.label;
   }
 
+  /**
+   * Retrieves truncated value.
+   * @param row - The row.
+   * @param column - The column.
+   * @returns The string value.
+   */
   getTruncatedValue(row: T, column: TableColumn): string {
     const value = this.getCellValue(row, column.key);
     const text = String(value || '');
@@ -841,6 +959,12 @@ export class DataTableComponent<T = Record<string, unknown>>
     return text;
   }
 
+  /**
+   * Performs the should show tooltip operation.
+   * @param row - The row.
+   * @param column - The column.
+   * @returns The boolean value.
+   */
   shouldShowTooltip(row: T, column: TableColumn): boolean {
     if (!column.truncateLength) return false;
 

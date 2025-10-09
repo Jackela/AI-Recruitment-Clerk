@@ -7,6 +7,9 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { CacheService } from './cache.service';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
+/**
+ * Defines the shape of the cache optimization config.
+ */
 export interface CacheOptimizationConfig {
   // 缓存策略配置
   strategies: {
@@ -31,6 +34,9 @@ export interface CacheOptimizationConfig {
   };
 }
 
+/**
+ * Provides cache optimization functionality.
+ */
 @Injectable()
 export class CacheOptimizationService implements OnModuleInit {
   private readonly logger = new Logger(CacheOptimizationService.name);
@@ -71,8 +77,16 @@ export class CacheOptimizationService implements OnModuleInit {
     lastOptimization: Date.now(),
   };
 
+  /**
+   * Initializes a new instance of the Cache Optimization Service.
+   * @param cacheService - The cache service.
+   */
   constructor(private readonly cacheService: CacheService) {}
 
+  /**
+   * Performs the on module init operation.
+   * @returns The result of the operation.
+   */
   async onModuleInit() {
     this.logger.log('🔧 Cache optimization service initialized');
     await this.loadOptimizationConfig();

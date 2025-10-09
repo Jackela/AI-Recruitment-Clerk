@@ -25,6 +25,9 @@ interface OperationLimits {
   default: { window: number; limit: number };
 }
 
+/**
+ * Represents the enhanced rate limit middleware.
+ */
 @Injectable()
 export class EnhancedRateLimitMiddleware implements NestMiddleware {
   private readonly logger = new Logger(EnhancedRateLimitMiddleware.name);
@@ -34,6 +37,10 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
   private maxFailedAttempts: number;
   private lockoutDuration: number;
 
+  /**
+   * Initializes a new instance of the Enhanced Rate Limit Middleware.
+   * @param configService - The config service.
+   */
   constructor(private configService: ConfigService) {
     this.initializeRedis();
     this.initializeLimits();
@@ -165,6 +172,13 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
     );
   }
 
+  /**
+   * Performs the use operation.
+   * @param req - The req.
+   * @param res - The res.
+   * @param next - The next.
+   * @returns The result of the operation.
+   */
   async use(req: Request, res: Response, next: NextFunction) {
     // 若Redis不可用，直接放行（生产环境不阻塞请求）
     if (!this.redis) {
@@ -517,6 +531,11 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
   }
 
   // Admin methods for monitoring and management
+  /**
+   * Retrieves security stats.
+   * @param period - The period.
+   * @returns The result of the operation.
+   */
   async getSecurityStats(period: 'hour' | 'day' | 'week' = 'day') {
     const periodMs =
       period === 'hour' ? 3600000 : period === 'day' ? 86400000 : 604800000;
@@ -573,6 +592,12 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
     return stats;
   }
 
+  /**
+   * Performs the unlock ip operation.
+   * @param ip - The ip.
+   * @param reason - The reason.
+   * @returns The result of the operation.
+   */
   async unlockIp(ip: string, reason = 'manual_unlock') {
     const key = `security_lock:${ip}`;
     const deleted = await this.redis!.del(key);
@@ -585,6 +610,10 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
     return false;
   }
 
+  /**
+   * Retrieves locked i ps.
+   * @returns The result of the operation.
+   */
   async getLockedIPs() {
     if (!this.redis) {
       return [] as Array<{ ip: string; lockedUntil?: number; reason?: string }>;

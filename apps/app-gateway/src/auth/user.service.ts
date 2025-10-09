@@ -19,11 +19,17 @@ interface UserEntity extends UserDto {
   };
 }
 
+/**
+ * Provides user functionality.
+ */
 @Injectable()
 export class UserService {
   private users: Map<string, UserEntity> = new Map();
   private emailToIdMap: Map<string, string> = new Map();
 
+  /**
+   * Initializes a new instance of the User Service.
+   */
   constructor() {
     // Initialize with some default users for development
     this.initializeDefaultUsers();
@@ -86,6 +92,11 @@ export class UserService {
     });
   }
 
+  /**
+   * Creates the entity.
+   * @param createUserDto - The create user dto.
+   * @returns A promise that resolves to UserEntity.
+   */
   async create(
     createUserDto: CreateUserDto & { password: string },
   ): Promise<UserEntity> {
@@ -130,21 +141,42 @@ export class UserService {
     return user;
   }
 
+  /**
+   * Performs the find by id operation.
+   * @param id - The id.
+   * @returns A promise that resolves to UserEntity | null.
+   */
   async findById(id: string): Promise<UserEntity | null> {
     return this.users.get(id) || null;
   }
 
+  /**
+   * Performs the find by email operation.
+   * @param email - The email.
+   * @returns A promise that resolves to UserEntity | null.
+   */
   async findByEmail(email: string): Promise<UserEntity | null> {
     const id = this.emailToIdMap.get(email);
     return id ? this.users.get(id) || null : null;
   }
 
+  /**
+   * Performs the find by organization id operation.
+   * @param organizationId - The organization id.
+   * @returns A promise that resolves to an array of UserEntity.
+   */
   async findByOrganizationId(organizationId: string): Promise<UserEntity[]> {
     return Array.from(this.users.values()).filter(
       (user) => user.organizationId === organizationId,
     );
   }
 
+  /**
+   * Updates password.
+   * @param id - The id.
+   * @param hashedPassword - The hashed password.
+   * @returns A promise that resolves when the operation completes.
+   */
   async updatePassword(id: string, hashedPassword: string): Promise<void> {
     const user = this.users.get(id);
     if (!user) {
@@ -156,6 +188,11 @@ export class UserService {
     this.users.set(id, user);
   }
 
+  /**
+   * Updates last activity.
+   * @param id - The id.
+   * @returns A promise that resolves when the operation completes.
+   */
   async updateLastActivity(id: string): Promise<void> {
     const user = this.users.get(id);
     if (user) {
@@ -164,6 +201,12 @@ export class UserService {
     }
   }
 
+  /**
+   * Updates user.
+   * @param id - The id.
+   * @param updates - The updates.
+   * @returns A promise that resolves to UserEntity.
+   */
   async updateUser(
     id: string,
     updates: Partial<Omit<UserDto, 'id' | 'createdAt'>>,
@@ -192,6 +235,11 @@ export class UserService {
     return updatedUser;
   }
 
+  /**
+   * Removes user.
+   * @param id - The id.
+   * @returns A promise that resolves when the operation completes.
+   */
   async deleteUser(id: string): Promise<void> {
     const user = this.users.get(id);
     if (user) {
@@ -200,6 +248,11 @@ export class UserService {
     }
   }
 
+  /**
+   * Performs the list users operation.
+   * @param organizationId - The organization id.
+   * @returns A promise that resolves to an array of UserEntity.
+   */
   async listUsers(organizationId?: string): Promise<UserEntity[]> {
     const users = Array.from(this.users.values());
 
@@ -291,6 +344,10 @@ export class UserService {
   }
 
   // Health check for service
+  /**
+   * Retrieves stats.
+   * @returns The Promise<{ totalUsers: number; activeUsers: number; organizations: string[]; }>.
+   */
   async getStats(): Promise<{
     totalUsers: number;
     activeUsers: number;

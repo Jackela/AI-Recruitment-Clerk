@@ -20,11 +20,21 @@ import { CacheService } from '../../cache/cache.service';
 import { CacheOptimizationService } from '../../cache/cache-optimization.service';
 import { DatabaseOptimizationMiddleware } from '../middleware/database-optimization.middleware';
 
+/**
+ * Exposes endpoints for performance.
+ */
 @ApiTags('performance')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('performance')
 export class PerformanceController {
+  /**
+   * Initializes a new instance of the Performance Controller.
+   * @param performanceInterceptor - The performance interceptor.
+   * @param cacheService - The cache service.
+   * @param cacheOptimization - The cache optimization.
+   * @param dbOptimization - The db optimization.
+   */
   constructor(
     private readonly performanceInterceptor: PerformanceMonitoringInterceptor,
     private readonly cacheService: CacheService,
@@ -32,6 +42,10 @@ export class PerformanceController {
     private readonly dbOptimization: DatabaseOptimizationMiddleware,
   ) {}
 
+  /**
+   * Retrieves performance stats.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取实时性能统计',
     description: '获取系统当前性能指标和实时统计信息',
@@ -65,6 +79,12 @@ export class PerformanceController {
     };
   }
 
+  /**
+   * Retrieves historical metrics.
+   * @param date - The date.
+   * @param window - The window.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取性能历史数据',
     description: '获取指定时间段的历史性能数据',
@@ -116,6 +136,10 @@ export class PerformanceController {
     };
   }
 
+  /**
+   * Generates performance report.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '生成性能报告',
     description: '生成完整的系统性能分析报告',
@@ -156,6 +180,10 @@ export class PerformanceController {
     };
   }
 
+  /**
+   * Performs the trigger optimization operation.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '触发性能优化',
     description: '手动触发系统性能优化流程',
@@ -195,6 +223,10 @@ export class PerformanceController {
     }
   }
 
+  /**
+   * Retrieves cache performance.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取缓存性能详情',
     description: '获取详细的缓存性能指标和优化建议',
@@ -217,6 +249,10 @@ export class PerformanceController {
     };
   }
 
+  /**
+   * Retrieves database performance.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取数据库性能详情',
     description: '获取详细的数据库性能指标和优化建议',
@@ -244,6 +280,10 @@ export class PerformanceController {
     };
   }
 
+  /**
+   * Performs the warmup cache operation.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '预热缓存',
     description: '手动预热系统缓存以提升性能',

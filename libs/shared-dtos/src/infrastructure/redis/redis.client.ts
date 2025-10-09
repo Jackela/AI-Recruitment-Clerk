@@ -11,6 +11,9 @@ export class RedisClient implements OnModuleDestroy {
   private useInMemoryStore = false;
   private memoryStore = new Map<string, { value: string; expireAt?: number }>();
 
+  /**
+   * Initializes a new instance of the Redis Client.
+   */
   constructor() {
     // 配置开关：仅当明确启用并且存在连接信息时才连接Redis
     const disableRedis = process.env.DISABLE_REDIS === 'true';
@@ -61,6 +64,10 @@ export class RedisClient implements OnModuleDestroy {
     this.setupEventHandlers();
   }
 
+  /**
+   * Performs the on module destroy operation.
+   * @returns The result of the operation.
+   */
   async onModuleDestroy() {
     if (this.redis) {
       await this.redis.disconnect();

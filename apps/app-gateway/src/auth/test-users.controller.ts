@@ -2,8 +2,16 @@ import { Controller, Get, Headers, HttpCode, HttpStatus } from '@nestjs/common';
 import { Public } from './decorators/public.decorator';
 import { testUsers, decodeEmailFromToken } from './test-users.store';
 
+/**
+ * Exposes endpoints for test users.
+ */
 @Controller()
 export class TestUsersController {
+  /**
+   * Retrieves profile.
+   * @param auth - The auth.
+   * @returns The result of the operation.
+   */
   @Public()
   @Get('users/profile')
   @HttpCode(HttpStatus.OK)
@@ -16,6 +24,10 @@ export class TestUsersController {
     };
   }
 
+  /**
+   * Retrieves activity.
+   * @returns The result of the operation.
+   */
   @Public()
   @Get('users/activity')
   @HttpCode(HttpStatus.OK)
@@ -26,6 +38,11 @@ export class TestUsersController {
     };
   }
 
+  /**
+   * Performs the list org users operation.
+   * @param auth - The auth.
+   * @returns The result of the operation.
+   */
   @Public()
   @Get('users/organization/users')
   @HttpCode(HttpStatus.OK)

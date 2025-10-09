@@ -2,11 +2,18 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
+/**
+ * Provides email functionality.
+ */
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private transporter!: nodemailer.Transporter;
 
+  /**
+   * Initializes a new instance of the Email Service.
+   * @param configService - The config service.
+   */
   constructor(private configService: ConfigService) {
     this.initializeTransporter();
   }
@@ -44,6 +51,13 @@ export class EmailService {
     });
   }
 
+  /**
+   * Performs the send mfa token operation.
+   * @param email - The email.
+   * @param token - The token.
+   * @param issuer - The issuer.
+   * @returns A promise that resolves when the operation completes.
+   */
   async sendMfaToken(
     email: string,
     token: string,
@@ -78,6 +92,13 @@ export class EmailService {
     }
   }
 
+  /**
+   * Performs the send account security alert operation.
+   * @param email - The email.
+   * @param event - The event.
+   * @param details - The details.
+   * @returns A promise that resolves when the operation completes.
+   */
   async sendAccountSecurityAlert(
     email: string,
     event: string,

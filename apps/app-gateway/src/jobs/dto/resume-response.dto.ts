@@ -1,3 +1,6 @@
+/**
+ * Describes the resume list item data transfer object.
+ */
 export class ResumeListItemDto {
   id: string;
   jobId: string;
@@ -7,6 +10,16 @@ export class ResumeListItemDto {
   candidateName?: string;
   createdAt: Date;
 
+  /**
+   * Initializes a new instance of the Resume List Item DTO.
+   * @param id - The id.
+   * @param jobId - The job id.
+   * @param originalFilename - The original filename.
+   * @param status - The status.
+   * @param createdAt - The created at.
+   * @param matchScore - The match score.
+   * @param candidateName - The candidate name.
+   */
   constructor(
     id: string,
     jobId: string,
@@ -26,6 +39,9 @@ export class ResumeListItemDto {
   }
 }
 
+/**
+ * Describes the resume detail data transfer object.
+ */
 export class ResumeDetailDto {
   id: string;
   jobId: string;
@@ -54,6 +70,21 @@ export class ResumeDetailDto {
   reportId?: string;
   createdAt: Date;
 
+  /**
+   * Initializes a new instance of the Resume Detail DTO.
+   * @param id - The id.
+   * @param jobId - The job id.
+   * @param originalFilename - The original filename.
+   * @param status - The status.
+   * @param createdAt - The created at.
+   * @param candidateName - The candidate name.
+   * @param contactInfo - The contact info.
+   * @param skills - The skills.
+   * @param workExperience - The work experience.
+   * @param education - The education.
+   * @param matchScore - The match score.
+   * @param reportId - The report id.
+   */
   constructor(
     id: string,
     jobId: string,

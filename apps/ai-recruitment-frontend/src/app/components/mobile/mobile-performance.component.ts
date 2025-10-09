@@ -9,6 +9,9 @@ import {
 import { CommonModule } from '@angular/common';
 import { Subject, interval, takeUntil } from 'rxjs';
 
+/**
+ * Defines the shape of the performance metrics.
+ */
 export interface PerformanceMetrics {
   // Core Web Vitals
   lcp: number | null; // Largest Contentful Paint
@@ -39,8 +42,11 @@ export interface PerformanceMetrics {
   overall: 'excellent' | 'good' | 'needs-improvement' | 'poor';
 }
 
+/**
+ * Represents the mobile performance component.
+ */
 @Component({
-  selector: 'app-mobile-performance',
+  selector: 'arc-mobile-performance',
   standalone: true,
   imports: [CommonModule],
   template: `
@@ -453,8 +459,16 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
   private performanceObserver?: PerformanceObserver;
   private layoutShiftScore = 0;
 
+  /**
+   * Initializes a new instance of the Mobile Performance Component.
+   * @param ngZone - The ng zone.
+   */
   constructor(private ngZone: NgZone) {}
 
+  /**
+   * Performs the ng on init operation.
+   * @returns The result of the operation.
+   */
   ngOnInit() {
     // Only show in development or when explicitly enabled
     this.showMetrics.set(
@@ -468,6 +482,10 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   * @returns The result of the operation.
+   */
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
@@ -645,6 +663,10 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
     this.updateMetric('overall', overall);
   }
 
+  /**
+   * Retrieves overall score.
+   * @returns The number value.
+   */
   getOverallScore(): number {
     const m = this.metrics();
     let score = 100;
@@ -675,6 +697,10 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
     return Math.max(0, Math.round(score));
   }
 
+  /**
+   * Retrieves lcp status.
+   * @returns The string value.
+   */
   getLCPStatus(): string {
     const lcp = this.metrics().lcp;
     if (lcp === null) return '';
@@ -684,6 +710,10 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
     return 'poor';
   }
 
+  /**
+   * Retrieves fid status.
+   * @returns The string value.
+   */
   getFIDStatus(): string {
     const fid = this.metrics().fid;
     if (fid === null) return '';
@@ -693,6 +723,10 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
     return 'poor';
   }
 
+  /**
+   * Retrieves cls status.
+   * @returns The string value.
+   */
   getCLSStatus(): string {
     const cls = this.metrics().cls;
     if (cls === null) return '';
@@ -702,12 +736,22 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
     return 'poor';
   }
 
+  /**
+   * Retrieves memory usage percent.
+   * @returns The number value.
+   */
   getMemoryUsagePercent(): number {
     const m = this.metrics();
     if (m.totalJSHeapSize === 0) return 0;
     return (m.usedJSHeapSize / m.totalJSHeapSize) * 100;
   }
 
+  /**
+   * Performs the format metric operation.
+   * @param value - The value.
+   * @param unit - The unit.
+   * @returns The string value.
+   */
   formatMetric(value: number | null, unit: string): string {
     if (value === null) return 'N/A';
     if (unit === 'ms') return `${Math.round(value)}ms`;
@@ -715,6 +759,11 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
     return `${Math.round(value)}${unit}`;
   }
 
+  /**
+   * Performs the format bytes operation.
+   * @param bytes - The bytes.
+   * @returns The string value.
+   */
   formatBytes(bytes: number): string {
     if (bytes === 0) return '0 B';
     const k = 1024;
@@ -723,6 +772,10 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   }
 
+  /**
+   * Retrieves performance tips.
+   * @returns The an array of string value.
+   */
   getPerformanceTips(): string[] {
     const tips: string[] = [];
     const m = this.metrics();
@@ -757,6 +810,10 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
     return tips;
   }
 
+  /**
+   * Performs the toggle expanded operation.
+   * @returns The result of the operation.
+   */
   toggleExpanded() {
     this.expanded.update((current) => !current);
   }

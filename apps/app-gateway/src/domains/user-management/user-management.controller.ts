@@ -44,13 +44,25 @@ interface UserProfileResponse extends UserDto {
   profileCompleteness?: number;
 }
 
+/**
+ * Exposes endpoints for user management.
+ */
 @ApiTags('user-management')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UserManagementController {
+  /**
+   * Initializes a new instance of the User Management Controller.
+   * @param userManagementService - The user management service.
+   */
   constructor(private readonly userManagementService: UserManagementService) {}
 
+  /**
+   * Retrieves user profile.
+   * @param req - The req.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取用户档案',
     description: '获取当前用户的完整档案信息，包括个人信息、偏好设置和活动统计',
@@ -115,6 +127,12 @@ export class UserManagementController {
     }
   }
 
+  /**
+   * Updates user profile.
+   * @param req - The req.
+   * @param updateData - The update data.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '更新用户档案',
     description: '更新用户的基本信息和个人档案',
@@ -152,6 +170,12 @@ export class UserManagementController {
     }
   }
 
+  /**
+   * Updates user preferences.
+   * @param req - The req.
+   * @param preferences - The preferences.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '更新用户偏好',
     description: '更新用户的系统偏好设置，包括通知、界面和行为偏好',
@@ -186,6 +210,15 @@ export class UserManagementController {
     }
   }
 
+  /**
+   * Retrieves user activity.
+   * @param req - The req.
+   * @param limit - The limit.
+   * @param offset - The offset.
+   * @param startDate - The start date.
+   * @param endDate - The end date.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取用户活动历史',
     description: '获取用户的活动记录和使用统计',
@@ -232,6 +265,12 @@ export class UserManagementController {
     }
   }
 
+  /**
+   * Removes user account.
+   * @param req - The req.
+   * @param deleteRequest - The delete request.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '删除用户账户',
     description: '软删除用户账户（仅标记为已删除，保留审计记录）',
@@ -279,6 +318,15 @@ export class UserManagementController {
   }
 
   // Admin-only endpoints
+  /**
+   * Retrieves organization users.
+   * @param req - The req.
+   * @param page - The page.
+   * @param limit - The limit.
+   * @param role - The role.
+   * @param status - The status.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取组织用户列表',
     description: '管理员获取组织内的所有用户（需要管理员权限）',
@@ -330,6 +378,13 @@ export class UserManagementController {
     }
   }
 
+  /**
+   * Updates user status.
+   * @param req - The req.
+   * @param userId - The user id.
+   * @param statusUpdate - The status update.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '更新用户状态',
     description: '管理员更新用户的账户状态（需要管理员权限）',
@@ -380,6 +435,10 @@ export class UserManagementController {
     }
   }
 
+  /**
+   * Performs the health check operation.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '系统健康检查',
     description: '检查用户管理服务的健康状态',

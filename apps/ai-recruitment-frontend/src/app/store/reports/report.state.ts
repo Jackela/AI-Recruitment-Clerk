@@ -1,5 +1,8 @@
 import { AnalysisReport, ReportListItem } from './report.model';
 
+/**
+ * Defines the shape of the report state.
+ */
 export interface ReportState {
   reports: ReportListItem[];
   selectedReport: AnalysisReport | null;

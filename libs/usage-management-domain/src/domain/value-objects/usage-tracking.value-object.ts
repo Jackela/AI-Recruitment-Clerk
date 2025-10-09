@@ -1,11 +1,18 @@
 import { ValueObject } from './base/value-object.js';
 import { UsageRecord } from './usage-record.value-object.js';
 
+/**
+ * Represents the usage tracking.
+ */
 export class UsageTracking extends ValueObject<{
   currentCount: number;
   usageHistory: UsageRecord[];
   lastUsageAt?: Date;
 }> {
+  /**
+   * Creates empty.
+   * @returns The UsageTracking.
+   */
   static createEmpty(): UsageTracking {
     return new UsageTracking({
       currentCount: 0,
@@ -14,6 +21,11 @@ export class UsageTracking extends ValueObject<{
     });
   }
 
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The UsageTracking.
+   */
   static restore(data: any): UsageTracking {
     return new UsageTracking({
       currentCount: data.currentCount,
@@ -22,6 +34,10 @@ export class UsageTracking extends ValueObject<{
     });
   }
 
+  /**
+   * Performs the increment usage operation.
+   * @returns The UsageTracking.
+   */
   incrementUsage(): UsageTracking {
     const record = new UsageRecord({
       timestamp: new Date(),
@@ -35,14 +51,26 @@ export class UsageTracking extends ValueObject<{
     });
   }
 
+  /**
+   * Retrieves current count.
+   * @returns The number value.
+   */
   getCurrentCount(): number {
     return this.props.currentCount;
   }
 
+  /**
+   * Retrieves last usage at.
+   * @returns The Date | undefined.
+   */
   getLastUsageAt(): Date | undefined {
     return this.props.lastUsageAt;
   }
 
+  /**
+   * Retrieves usage history.
+   * @returns The an array of UsageRecord.
+   */
   getUsageHistory(): UsageRecord[] {
     return [...this.props.usageHistory];
   }

@@ -1,5 +1,8 @@
 import * as crypto from 'crypto';
 
+/**
+ * Defines the shape of the encryption config.
+ */
 export interface EncryptionConfig {
   algorithm: string;
   keyLength: number;
@@ -8,6 +11,9 @@ export interface EncryptionConfig {
   saltLength: number;
 }
 
+/**
+ * Defines the shape of the encrypted data.
+ */
 export interface EncryptedData {
   encryptedData: string;
   iv: string;
@@ -15,6 +21,9 @@ export interface EncryptedData {
   salt: string;
 }
 
+/**
+ * Provides encryption functionality.
+ */
 export class EncryptionService {
   private static readonly config: EncryptionConfig = {
     algorithm: 'aes-256-gcm',

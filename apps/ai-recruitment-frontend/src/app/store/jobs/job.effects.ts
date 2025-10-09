@@ -6,6 +6,9 @@ import { ApiService } from '../../services/api.service';
 import * as JobActions from './job.actions';
 import { Router } from '@angular/router';
 
+/**
+ * Represents the job effects.
+ */
 @Injectable()
 export class JobEffects {
   loadJobs$;
@@ -13,6 +16,12 @@ export class JobEffects {
   createJob$;
   createJobSuccess$;
 
+  /**
+   * Initializes a new instance of the Job Effects.
+   * @param actions$ - The actions$.
+   * @param apiService - The api service.
+   * @param router - The router.
+   */
   constructor(
     private actions$: Actions,
     private apiService: ApiService,

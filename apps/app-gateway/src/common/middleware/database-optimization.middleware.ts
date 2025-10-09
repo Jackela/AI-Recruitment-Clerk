@@ -25,6 +25,9 @@ interface QueryOptimizationConfig {
   queryPlanCache: boolean; // 查询计划缓存
 }
 
+/**
+ * Represents the database optimization middleware.
+ */
 @Injectable()
 export class DatabaseOptimizationMiddleware implements NestMiddleware {
   private readonly logger = new Logger(DatabaseOptimizationMiddleware.name);
@@ -56,10 +59,21 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     }
   >();
 
+  /**
+   * Initializes a new instance of the Database Optimization Middleware.
+   * @param connection - The connection.
+   */
   constructor(@InjectConnection() private readonly connection: Connection) {
     this.initializeOptimization();
   }
 
+  /**
+   * Performs the use operation.
+   * @param req - The req.
+   * @param res - The res.
+   * @param next - The next.
+   * @returns The result of the operation.
+   */
   async use(req: Request, res: Response, next: NextFunction) {
     const queryStartTime = Date.now();
 
@@ -364,11 +378,19 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
   }
 
   // 公共方法：获取数据库性能指标
+  /**
+   * Retrieves performance metrics.
+   * @returns The DatabaseMetrics.
+   */
   getPerformanceMetrics(): DatabaseMetrics {
     return { ...this.metrics };
   }
 
   // 公共方法：获取优化建议
+  /**
+   * Retrieves optimization recommendations.
+   * @returns The Promise<{ performance: DatabaseMetrics; recommendations: string[]; health: string; }>.
+   */
   async getOptimizationRecommendations(): Promise<{
     performance: DatabaseMetrics;
     recommendations: string[];
@@ -404,6 +426,10 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
   }
 
   // 公共方法：手动触发优化
+  /**
+   * Performs the trigger manual optimization operation.
+   * @returns The Promise<{ success: boolean; duration: number; optimizations: string[]; }>.
+   */
   async triggerManualOptimization(): Promise<{
     success: boolean;
     duration: number;

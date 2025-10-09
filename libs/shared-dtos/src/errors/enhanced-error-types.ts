@@ -11,8 +11,17 @@ import { ErrorCorrelationContext, ErrorCorrelationManager } from './error-correl
  * Extended error types for comprehensive error classification
  */
 export enum ExtendedErrorType {
-  // Existing types from error-handling.patterns.ts are imported
-  // New domain-specific error types
+  // Common error types compatible with ErrorUtils
+  VALIDATION_ERROR = 'VALIDATION_ERROR',
+  AUTHENTICATION_ERROR = 'AUTHENTICATION_ERROR',
+  AUTHORIZATION_ERROR = 'AUTHORIZATION_ERROR',
+  NOT_FOUND_ERROR = 'NOT_FOUND_ERROR',
+  RATE_LIMIT_ERROR = 'RATE_LIMIT_ERROR',
+  EXTERNAL_SERVICE_ERROR = 'EXTERNAL_SERVICE_ERROR',
+  SYSTEM_ERROR = 'SYSTEM_ERROR',
+  PERFORMANCE_ERROR = 'PERFORMANCE_ERROR',
+  
+  // Domain-specific error types
   NATS_MESSAGE_ERROR = 'NATS_MESSAGE_ERROR',
   PARSING_ERROR = 'PARSING_ERROR',
   ML_MODEL_ERROR = 'ML_MODEL_ERROR',
@@ -50,6 +59,15 @@ export interface EnhancedErrorDetails extends ErrorDetails {
 export class EnhancedAppException extends AppException {
   public readonly enhancedDetails: EnhancedErrorDetails;
   
+  /**
+   * Initializes a new instance of the Enhanced App Exception.
+   * @param type - The type.
+   * @param code - The code.
+   * @param message - The message.
+   * @param httpStatus - The http status.
+   * @param details - The details.
+   * @param context - The context.
+   */
   constructor(
     type: CombinedErrorType,
     code: string,
@@ -166,6 +184,13 @@ export class EnhancedAppException extends AppException {
  * NATS messaging error
  */
 export class NatsMessageException extends EnhancedAppException {
+  /**
+   * Initializes a new instance of the NATS Message Exception.
+   * @param operation - The operation.
+   * @param subject - The subject.
+   * @param message - The message.
+   * @param originalError - The original error.
+   */
   constructor(
     operation: string,
     subject: string,
@@ -206,6 +231,13 @@ export class NatsMessageException extends EnhancedAppException {
  * ML Model processing error
  */
 export class MLModelException extends EnhancedAppException {
+  /**
+   * Initializes a new instance of the ML Model Exception.
+   * @param modelName - The model name.
+   * @param operation - The operation.
+   * @param message - The message.
+   * @param confidence - The confidence.
+   */
   constructor(
     modelName: string,
     operation: string,
@@ -245,6 +277,14 @@ export class MLModelException extends EnhancedAppException {
  * File parsing error
  */
 export class ParsingException extends EnhancedAppException {
+  /**
+   * Initializes a new instance of the Parsing Exception.
+   * @param fileType - The file type.
+   * @param fileName - The file name.
+   * @param parserType - The parser type.
+   * @param message - The message.
+   * @param fileSize - The file size.
+   */
   constructor(
     fileType: string,
     fileName: string,
@@ -286,6 +326,13 @@ export class ParsingException extends EnhancedAppException {
  * Cache operation error
  */
 export class CacheException extends EnhancedAppException {
+  /**
+   * Initializes a new instance of the Cache Exception.
+   * @param operation - The operation.
+   * @param key - The key.
+   * @param cacheType - The cache type.
+   * @param message - The message.
+   */
   constructor(
     operation: string,
     key: string,
@@ -325,6 +372,13 @@ export class CacheException extends EnhancedAppException {
  * Queue operation error
  */
 export class QueueException extends EnhancedAppException {
+  /**
+   * Initializes a new instance of the Queue Exception.
+   * @param operation - The operation.
+   * @param queueName - The queue name.
+   * @param message - The message.
+   * @param messageId - The message id.
+   */
   constructor(
     operation: string,
     queueName: string,
@@ -364,6 +418,13 @@ export class QueueException extends EnhancedAppException {
  * Template processing error
  */
 export class TemplateException extends EnhancedAppException {
+  /**
+   * Initializes a new instance of the Template Exception.
+   * @param templateName - The template name.
+   * @param operation - The operation.
+   * @param message - The message.
+   * @param templateData - The template data.
+   */
   constructor(
     templateName: string,
     operation: string,

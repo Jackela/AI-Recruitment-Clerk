@@ -16,14 +16,18 @@ import { AriaLiveComponent } from './components/shared/aria-live/aria-live.compo
 import { ThemeToggleComponent } from './components/shared/theme-toggle/theme-toggle.component';
 import { LanguageSelectorComponent } from './components/shared/language-selector/language-selector.component';
 import { ProgressFeedbackService } from './services/feedback/progress-feedback.service';
-import { KeyboardNavigationService } from './services/keyboard/keyboard-navigation.service';
-import { WebSocketStatsService } from './services/realtime/websocket-stats.service';
+import type { KeyboardNavigationService } from './services/keyboard/keyboard-navigation.service';
+import type { WebSocketStatsService } from './services/realtime/websocket-stats.service';
 import { AccessibilityService } from './services/accessibility/accessibility.service';
 import { ThemeService } from './services/theme/theme.service';
 import { SkipNavigationDirective } from './directives/accessibility/skip-navigation.directive';
 import { APP_CONFIG } from '../config';
 import { getText } from '../config/i18n.config';
+import type { Subscription } from 'rxjs';
 
+/**
+ * Represents the app.
+ */
 @Component({
   selector: 'arc-root',
   standalone: true,
@@ -49,12 +53,13 @@ export class App implements OnInit, OnDestroy {
   // Navigation guide service (preserved for future use)
   // private navigationGuide = inject(NavigationGuideService);
   private progressFeedback = inject(ProgressFeedbackService);
-  private keyboardNav = inject(KeyboardNavigationService);
-  private websocketStats = inject(WebSocketStatsService);
   private accessibilityService = inject(AccessibilityService);
   private themeService = inject(ThemeService);
   // private i18nService = inject(I18nService); // Reserved for future i18n implementation
   private injector = inject(Injector);
+  private keyboardNav: KeyboardNavigationService | null = null;
+  private websocketStats: WebSocketStatsService | null = null;
+  private websocketStatsSubscription: Subscription | null = null;
 
   keyboardHelpVisible = signal(false);
   isLoading = signal(false);
@@ -65,32 +70,42 @@ export class App implements OnInit, OnDestroy {
   reducedMotionEnabled = signal(false);
   currentFontSize = signal<'normal' | 'large' | 'larger'>('normal');
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     // Initialize theme service (will auto-apply saved theme)
     // Theme service initializes automatically in constructor
 
     // Initialize UX services
-    this.initializeUXServices();
+    this.scheduleKeyboardNavigationInit();
+    void this.initializeUXServices();
 
     // Setup global keyboard shortcuts
-    this.setupKeyboardShortcuts();
+    void this.setupKeyboardShortcuts();
 
     // Initialize accessibility features
     this.initializeAccessibility();
 
     // Show welcome notification for first-time users
-    this.showWelcomeMessage();
+    void this.initializeWelcomeMessage();
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     // Cleanup services
-    this.websocketStats.destroy();
-    this.keyboardNav.destroy();
+    this.websocketStatsSubscription?.unsubscribe();
+    this.websocketStats?.destroy();
+    this.keyboardNav?.destroy();
   }
 
-  private initializeUXServices(): void {
+  private async initializeUXServices(): Promise<void> {
+    const websocketStats = await this.ensureWebsocketStats();
+
     // Start real-time statistics
-    this.websocketStats.subscribeToStats().subscribe((stats) => {
+    this.websocketStatsSubscription = websocketStats.subscribeToStats().subscribe((stats) => {
       // Update global stats
       if (stats.errorRate > 10) {
         this.progressFeedback.showWarning(
@@ -103,7 +118,7 @@ export class App implements OnInit, OnDestroy {
     // Monitor connection status
     // Note: isConnected is a signal, we'll use effect for watching changes
     // For now, just check initial state
-    if (!this.websocketStats.isConnected()) {
+    if (!websocketStats.isConnected()) {
       this.progressFeedback.showInfo(
         '连接状态',
         '正在使用离线模式，统计数据可能不是最新的',
@@ -111,89 +126,73 @@ export class App implements OnInit, OnDestroy {
     }
   }
 
-  private setupKeyboardShortcuts(): void {
-    // Navigation shortcuts
-    this.accessibilityService.registerShortcut({
-      key: '1',
-      altKey: true,
-      description: getText('ACCESSIBILITY.shortcuts.dashboard'),
-      action: () => this.navigateTo('/dashboard'),
-    });
+  private async ensureWebsocketStats(): Promise<WebSocketStatsService> {
+    if (!this.websocketStats) {
+      const { WebSocketStatsService } = await import(
+        './services/realtime/websocket-stats.service'
+      );
+      this.websocketStats = this.injector.get(WebSocketStatsService);
+    }
 
-    this.accessibilityService.registerShortcut({
-      key: '2',
-      altKey: true,
-      description: getText('ACCESSIBILITY.shortcuts.analysis'),
-      action: () => this.navigateTo('/analysis'),
-    });
+    return this.websocketStats;
+  }
 
-    this.accessibilityService.registerShortcut({
-      key: '3',
-      altKey: true,
-      description: getText('ACCESSIBILITY.shortcuts.results'),
-      action: () => this.navigateTo('/results'),
-    });
+  private scheduleKeyboardNavigationInit(): void {
+    const load = () => {
+      void this.ensureKeyboardNavigation();
+    };
 
-    // Help shortcut
-    this.accessibilityService.registerShortcut({
-      key: 'h',
-      altKey: true,
-      description: 'Show keyboard help',
-      action: () => this.showKeyboardHelp(),
-    });
+    const idle = (window as typeof window & { requestIdleCallback?: (cb: () => void) => number })
+      .requestIdleCallback;
 
-    // App-specific shortcuts
-    this.accessibilityService.registerShortcut({
-      key: 'r',
-      ctrlKey: true,
-      shiftKey: true,
-      description: 'Refresh data',
-      action: () => this.refreshData(),
-    });
+    if (typeof idle === 'function') {
+      idle(load);
+    } else {
+      setTimeout(load, 0);
+    }
+  }
 
-    this.accessibilityService.registerShortcut({
-      key: 'n',
-      ctrlKey: true,
-      description: 'New analysis',
-      action: () => this.navigateToAnalysis(),
-    });
+  private async ensureKeyboardNavigation(): Promise<void> {
+    if (this.keyboardNav) {
+      return;
+    }
 
-    // Modal shortcuts
-    this.accessibilityService.registerShortcut({
-      key: 'Escape',
-      description: 'Close modals and menus',
-      action: () => this.closeModalsAndMenus(),
-    });
+    const { KeyboardNavigationService } = await import(
+      './services/keyboard/keyboard-navigation.service'
+    );
+    this.keyboardNav = this.injector.get(KeyboardNavigationService);
+  }
 
-    // Theme shortcuts
-    this.accessibilityService.registerShortcut({
-      key: 't',
-      altKey: true,
-      description: 'Toggle theme',
-      action: () => this.themeService.toggleTheme(),
+  private async setupKeyboardShortcuts(): Promise<void> {
+    const { registerKeyboardShortcuts } = await import('./setup-keyboard-shortcuts');
+
+    registerKeyboardShortcuts({
+      accessibilityService: this.accessibilityService,
+      themeService: this.themeService,
+      navigateTo: (route) => this.navigateTo(route),
+      showKeyboardHelp: () => this.showKeyboardHelp(),
+      refreshData: () => this.refreshData(),
+      navigateToAnalysis: () => this.navigateToAnalysis(),
+      closeModals: () => this.closeModalsAndMenus(),
+      getText,
     });
   }
 
-  private showWelcomeMessage(): void {
-    // Check if first visit
-    const isFirstVisit = !localStorage.getItem('app_visited');
+  private async initializeWelcomeMessage(): Promise<void> {
+    const { scheduleWelcomeMessage } = await import('./welcome-message');
 
-    if (isFirstVisit) {
-      localStorage.setItem('app_visited', 'true');
-
-      setTimeout(() => {
-        this.progressFeedback.showSuccess(
-          getText('APP.welcome.title'),
-          getText('APP.welcome.message'),
-          APP_CONFIG.UI.TIMING.WELCOME_DELAY,
-        );
-      }, APP_CONFIG.UI.TIMING.INITIAL_DELAY);
-    }
+    scheduleWelcomeMessage({
+      progressFeedback: this.progressFeedback,
+      config: APP_CONFIG,
+      getText,
+    });
   }
 
   private refreshData(): void {
     this.progressFeedback.startLoading('refresh', '正在刷新数据...');
-    this.websocketStats.refreshStats();
+    void this.ensureWebsocketStats().then((websocketStats) => {
+      websocketStats.refreshStats();
+    });
 
     setTimeout(() => {
       this.progressFeedback.stopLoading('refresh');
@@ -210,7 +209,7 @@ export class App implements OnInit, OnDestroy {
   private initializeAccessibility(): void {
     // Subscribe to accessibility state changes
     // Check if we're in a test environment by looking for window.__karma__
-    const isTestEnvironment = typeof (window as any).__karma__ !== 'undefined';
+    const isTestEnvironment = typeof (window as Window & { __karma__?: unknown }).__karma__ !== 'undefined';
 
     if (!isTestEnvironment) {
       // Only use effect in non-test environment
@@ -249,6 +248,9 @@ export class App implements OnInit, OnDestroy {
     this.currentFontSize.set(state.fontSize);
   }
 
+  /**
+   * Performs the show keyboard help operation.
+   */
   showKeyboardHelp(): void {
     this.keyboardHelpVisible.set(true);
     this.accessibilityService.announce(
@@ -265,6 +267,9 @@ export class App implements OnInit, OnDestroy {
     }, 100);
   }
 
+  /**
+   * Performs the hide keyboard help operation.
+   */
   hideKeyboardHelp(): void {
     this.keyboardHelpVisible.set(false);
     this.accessibilityService.releaseFocusTrap();
@@ -274,6 +279,9 @@ export class App implements OnInit, OnDestroy {
     );
   }
 
+  /**
+   * Performs the toggle settings menu operation.
+   */
   toggleSettingsMenu(): void {
     const isOpen = !this.settingsMenuOpen();
     this.settingsMenuOpen.set(isOpen);
@@ -301,18 +309,27 @@ export class App implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the toggle high contrast operation.
+   */
   toggleHighContrast(): void {
     const enabled = !this.highContrastEnabled();
     this.accessibilityService.setHighContrast(enabled);
     this.settingsMenuOpen.set(false);
   }
 
+  /**
+   * Performs the toggle reduced motion operation.
+   */
   toggleReducedMotion(): void {
     const enabled = !this.reducedMotionEnabled();
     this.accessibilityService.setReducedMotion(enabled);
     this.settingsMenuOpen.set(false);
   }
 
+  /**
+   * Performs the increase font size operation.
+   */
   increaseFontSize(): void {
     const currentSize = this.currentFontSize();
     const nextSize =

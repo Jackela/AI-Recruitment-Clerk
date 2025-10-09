@@ -12,10 +12,22 @@ import {
   hasAllPermissions,
 } from '@ai-recruitment-clerk/user-management-domain';
 
+/**
+ * Implements the roles guard logic.
+ */
 @Injectable()
 export class RolesGuard implements CanActivate {
+  /**
+   * Initializes a new instance of the Roles Guard.
+   * @param reflector - The reflector.
+   */
   constructor(private reflector: Reflector) {}
 
+  /**
+   * Performs the can activate operation.
+   * @param context - The context.
+   * @returns The boolean value.
+   */
   canActivate(context: ExecutionContext): boolean {
     const requiredPermissions = this.reflector.getAllAndOverride<Permission[]>(
       PERMISSIONS_KEY,

@@ -11,6 +11,9 @@ export type CompanySize = 'startup' | 'small' | 'medium' | 'large' | 'enterprise
 export type ScreeningMethod = 'manual' | 'ats' | 'hybrid' | 'other';
 export type Rating = 1 | 2 | 3 | 4 | 5;
 
+/**
+ * Defines the shape of the raw submission data.
+ */
 export interface RawSubmissionData {
   userProfile?: {
     role?: QuestionnaireUserRole;

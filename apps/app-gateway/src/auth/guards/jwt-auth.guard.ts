@@ -14,6 +14,9 @@ import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { Request } from 'express';
 import { createHash } from 'crypto';
 
+/**
+ * Implements the jwt auth guard logic.
+ */
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   private readonly logger = new Logger(JwtAuthGuard.name);
@@ -25,6 +28,10 @@ export class JwtAuthGuard implements CanActivate {
   private readonly RATE_LIMIT_MAX_REQUESTS = 100; // 100 requests per minute
   private readonly RATE_LIMIT_CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
+  /**
+   * Initializes a new instance of the Jwt Auth Guard.
+   * @param reflector - The reflector.
+   */
   constructor(private reflector: Reflector) {
     // Cleanup expired rate limit entries - skip in test environment to prevent worker issues
     if (process.env.NODE_ENV !== 'test') {
@@ -35,6 +42,11 @@ export class JwtAuthGuard implements CanActivate {
     }
   }
 
+  /**
+   * Performs the can activate operation.
+   * @param context - The context.
+   * @returns A promise that resolves to boolean value.
+   */
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
 
@@ -90,6 +102,14 @@ export class JwtAuthGuard implements CanActivate {
     return true;
   }
 
+  /**
+   * Handles request.
+   * @param err - The err.
+   * @param user - The user.
+   * @param info - The info.
+   * @param context - The context.
+   * @returns The result of the operation.
+   */
   handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
     const request = context.switchToHttp().getRequest<Request>();
 
@@ -196,6 +216,10 @@ export class JwtAuthGuard implements CanActivate {
   }
 
   // Get rate limit status for monitoring
+  /**
+   * Retrieves rate limit status.
+   * @returns The { activeClients: number; blockedClients: number; totalRequests: number; }.
+   */
   getRateLimitStatus(): {
     activeClients: number;
     blockedClients: number;

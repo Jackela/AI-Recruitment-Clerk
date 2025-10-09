@@ -26,13 +26,24 @@ interface PaymentExportDto {
   status?: 'pending' | 'paid' | 'rejected';
 }
 
+/**
+ * Exposes endpoints for marketing admin.
+ */
 @Controller('admin/marketing')
 @UseGuards(JwtAuthGuard) // 确保只有管理员可以访问
 export class MarketingAdminController {
   private readonly logger = new Logger(MarketingAdminController.name);
 
+  /**
+   * Initializes a new instance of the Marketing Admin Controller.
+   * @param feedbackCodeService - The feedback code service.
+   */
   constructor(private readonly feedbackCodeService: FeedbackCodeService) {}
 
+  /**
+   * Retrieves dashboard stats.
+   * @returns The result of the operation.
+   */
   @Get('dashboard')
   async getDashboardStats() {
     try {
@@ -70,6 +81,14 @@ export class MarketingAdminController {
     }
   }
 
+  /**
+   * Retrieves pending payments.
+   * @param page - The page.
+   * @param limit - The limit.
+   * @param sortBy - The sort by.
+   * @param sortOrder - The sort order.
+   * @returns The result of the operation.
+   */
   @Get('pending-payments')
   async getPendingPayments(
     @Query('page') page = '1',
@@ -115,6 +134,11 @@ export class MarketingAdminController {
     }
   }
 
+  /**
+   * Performs the process batch payment operation.
+   * @param batchDto - The batch dto.
+   * @returns The result of the operation.
+   */
   @Post('batch-payment')
   @HttpCode(HttpStatus.OK)
   async processBatchPayment(@Body() batchDto: BatchPaymentDto) {
@@ -151,6 +175,13 @@ export class MarketingAdminController {
     }
   }
 
+  /**
+   * Performs the process single payment operation.
+   * @param code - The code.
+   * @param action - The action.
+   * @param reason - The reason.
+   * @returns The result of the operation.
+   */
   @Post('payment/:code/:action')
   @HttpCode(HttpStatus.OK)
   async processSinglePayment(
@@ -183,6 +214,11 @@ export class MarketingAdminController {
     }
   }
 
+  /**
+   * Performs the export payment data operation.
+   * @param exportDto - The export dto.
+   * @returns The result of the operation.
+   */
   @Get('export/payments')
   async exportPaymentData(@Query() exportDto: PaymentExportDto) {
     try {
@@ -210,6 +246,11 @@ export class MarketingAdminController {
     }
   }
 
+  /**
+   * Retrieves analytics trends.
+   * @param days - The days.
+   * @returns The result of the operation.
+   */
   @Get('analytics/trends')
   async getAnalyticsTrends(@Query('days') days = '30') {
     try {
@@ -245,6 +286,11 @@ export class MarketingAdminController {
     }
   }
 
+  /**
+   * Performs the perform maintenance operation.
+   * @param days - The days.
+   * @returns The result of the operation.
+   */
   @Post('maintenance/cleanup')
   @HttpCode(HttpStatus.OK)
   async performMaintenance(@Body('days') days = 30) {
@@ -265,6 +311,12 @@ export class MarketingAdminController {
     }
   }
 
+  /**
+   * Retrieves audit logs.
+   * @param page - The page.
+   * @param limit - The limit.
+   * @returns The result of the operation.
+   */
   @Get('audit/logs')
   async getAuditLogs(
     @Query('page') page: string,

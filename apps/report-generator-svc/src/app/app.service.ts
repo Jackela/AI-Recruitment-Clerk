@@ -5,6 +5,9 @@ import {
   OnApplicationShutdown,
 } from '@nestjs/common';
 
+/**
+ * Provides app functionality.
+ */
 @Injectable()
 export class AppService
   implements OnApplicationBootstrap, OnApplicationShutdown
@@ -13,13 +16,21 @@ export class AppService
   private isInitialized = false;
   private healthCheckInterval?: NodeJS.Timeout;
 
-  getData(): { message: string } {
+  /**
+   * Retrieves data.
+   * @returns The { message: string; status: string }.
+   */
+  getData(): { message: string; status: string } {
     return {
       message: 'Report Generator Service API',
       status: this.isInitialized ? 'ready' : 'initializing',
     };
   }
 
+  /**
+   * Performs the on application bootstrap operation.
+   * @returns A promise that resolves when the operation completes.
+   */
   async onApplicationBootstrap(): Promise<void> {
     this.logger.log('Report Generator Service starting...');
 
@@ -55,6 +66,10 @@ export class AppService
     }
   }
 
+  /**
+   * Performs the on application shutdown operation.
+   * @returns A promise that resolves when the operation completes.
+   */
   async onApplicationShutdown(): Promise<void> {
     this.logger.log('Report Generator Service shutting down...');
 

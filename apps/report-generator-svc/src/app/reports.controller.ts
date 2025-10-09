@@ -27,6 +27,9 @@ import {
 import { GridFsService } from '../report-generator/gridfs.service';
 import { ReportTemplatesService } from '../report-generator/report-templates.service';
 
+/**
+ * Defines the shape of the report generation request dto.
+ */
 export interface ReportGenerationRequestDto {
   jobId: string;
   resumeIds: string[];
@@ -41,18 +44,27 @@ export interface ReportGenerationRequestDto {
   };
 }
 
+/**
+ * Defines the shape of the candidate comparison request dto.
+ */
 export interface CandidateComparisonRequestDto {
   jobId: string;
   resumeIds: string[];
   requestedBy?: string;
 }
 
+/**
+ * Defines the shape of the interview guide request dto.
+ */
 export interface InterviewGuideRequestDto {
   jobId: string;
   resumeId: string;
   requestedBy?: string;
 }
 
+/**
+ * Defines the shape of the report query dto.
+ */
 export interface ReportQueryDto {
   jobId?: string;
   resumeId?: string;
@@ -79,11 +91,21 @@ class AuthGuard {
   }
 }
 
+/**
+ * Exposes endpoints for reports.
+ */
 @Controller('api/reports')
 @UseGuards(AuthGuard)
 export class ReportsController {
   private readonly logger = new Logger(ReportsController.name);
 
+  /**
+   * Initializes a new instance of the Reports Controller.
+   * @param reportGeneratorService - The report generator service.
+   * @param reportRepository - The report repository.
+   * @param gridFsService - The grid fs service.
+   * @param reportTemplatesService - The report templates service.
+   */
   constructor(
     private readonly reportGeneratorService: ReportGeneratorService,
     private readonly reportRepository: ReportRepository,
@@ -91,6 +113,11 @@ export class ReportsController {
     private readonly reportTemplatesService: ReportTemplatesService,
   ) {}
 
+  /**
+   * Generates report.
+   * @param request - The request.
+   * @returns The result of the operation.
+   */
   @Post('generate')
   async generateReport(@Body() request: ReportGenerationRequestDto) {
     try {
@@ -149,6 +176,11 @@ export class ReportsController {
     }
   }
 
+  /**
+   * Generates candidate comparison.
+   * @param request - The request.
+   * @returns The result of the operation.
+   */
   @Post('compare-candidates')
   async generateCandidateComparison(
     @Body() request: CandidateComparisonRequestDto,
@@ -201,6 +233,11 @@ export class ReportsController {
     }
   }
 
+  /**
+   * Generates interview guide.
+   * @param request - The request.
+   * @returns The result of the operation.
+   */
   @Post('interview-guide')
   async generateInterviewGuide(@Body() request: InterviewGuideRequestDto) {
     try {
@@ -245,6 +282,11 @@ export class ReportsController {
     }
   }
 
+  /**
+   * Retrieves reports.
+   * @param queryDto - The query dto.
+   * @returns The result of the operation.
+   */
   @Get()
   async getReports(@Query() queryDto: ReportQueryDto) {
     try {
@@ -296,6 +338,11 @@ export class ReportsController {
     }
   }
 
+  /**
+   * Retrieves report.
+   * @param reportId - The report id.
+   * @returns The result of the operation.
+   */
   @Get(':reportId')
   async getReport(@Param('reportId') reportId: string) {
     try {
@@ -328,6 +375,13 @@ export class ReportsController {
     }
   }
 
+  /**
+   * Performs the download report file operation.
+   * @param fileId - The file id.
+   * @param format - The format.
+   * @param response - The response.
+   * @returns The result of the operation.
+   */
   @Get('file/:fileId')
   async downloadReportFile(
     @Param('fileId') fileId: string,
@@ -378,6 +432,11 @@ export class ReportsController {
     }
   }
 
+  /**
+   * Removes report.
+   * @param reportId - The report id.
+   * @returns The result of the operation.
+   */
   @Delete(':reportId')
   async deleteReport(@Param('reportId') reportId: string) {
     try {
@@ -409,6 +468,12 @@ export class ReportsController {
     }
   }
 
+  /**
+   * Retrieves reports by job.
+   * @param jobId - The job id.
+   * @param queryDto - The query dto.
+   * @returns The result of the operation.
+   */
   @Get('job/:jobId')
   async getReportsByJob(
     @Param('jobId') jobId: string,
@@ -447,6 +512,12 @@ export class ReportsController {
     }
   }
 
+  /**
+   * Retrieves reports by resume.
+   * @param resumeId - The resume id.
+   * @param queryDto - The query dto.
+   * @returns The result of the operation.
+   */
   @Get('resume/:resumeId')
   async getReportsByResume(
     @Param('resumeId') resumeId: string,
@@ -485,6 +556,11 @@ export class ReportsController {
     }
   }
 
+  /**
+   * Retrieves report analytics.
+   * @param queryDto - The query dto.
+   * @returns The result of the operation.
+   */
   @Get('analytics/overview')
   async getReportAnalytics(@Query() queryDto: ReportQueryDto) {
     try {
@@ -524,6 +600,10 @@ export class ReportsController {
     }
   }
 
+  /**
+   * Retrieves storage stats.
+   * @returns The result of the operation.
+   */
   @Get('storage/stats')
   async getStorageStats() {
     try {
@@ -547,6 +627,10 @@ export class ReportsController {
     }
   }
 
+  /**
+   * Performs the health check operation.
+   * @returns The result of the operation.
+   */
   @Get('health')
   async healthCheck() {
     try {

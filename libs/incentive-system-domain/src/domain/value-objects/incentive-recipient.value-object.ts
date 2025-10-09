@@ -2,11 +2,20 @@ import { ValueObject } from '../base/value-object.js';
 import { ContactInfo } from './contact-info.value-object.js';
 import { VerificationStatus } from '../aggregates/incentive.aggregate.js';
 
+/**
+ * Represents the incentive recipient.
+ */
 export class IncentiveRecipient extends ValueObject<{
   ip: string;
   contactInfo: ContactInfo;
   verificationStatus: VerificationStatus;
 }> {
+  /**
+   * Creates the entity.
+   * @param ip - The ip.
+   * @param contactInfo - The contact info.
+   * @returns The IncentiveRecipient.
+   */
   static create(ip: string, contactInfo: ContactInfo): IncentiveRecipient {
     return new IncentiveRecipient({
       ip,
@@ -15,6 +24,11 @@ export class IncentiveRecipient extends ValueObject<{
     });
   }
 
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The IncentiveRecipient.
+   */
   static restore(data: any): IncentiveRecipient {
     return new IncentiveRecipient({
       ip: data.ip,
@@ -23,19 +37,35 @@ export class IncentiveRecipient extends ValueObject<{
     });
   }
 
+  /**
+   * Retrieves ip.
+   * @returns The string value.
+   */
   getIP(): string {
     return this.props.ip;
   }
 
+  /**
+   * Performs the has valid contact info operation.
+   * @returns The boolean value.
+   */
   hasValidContactInfo(): boolean {
     return this.props.contactInfo.isValid();
   }
 
+  /**
+   * Performs the is valid operation.
+   * @returns The boolean value.
+   */
   isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
 
+  /**
+   * Retrieves validation errors.
+   * @returns The an array of string value.
+   */
   getValidationErrors(): string[] {
     const errors: string[] = [];
 

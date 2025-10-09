@@ -146,6 +146,9 @@ Create 15-20 targeted questions that thoroughly assess the candidate's fit for t
   }
 }
 
+/**
+ * Defines the shape of the scoring prompt options.
+ */
 export interface ScoringPromptOptions {
   temperature?: number;
   maxTokens?: number;
@@ -153,7 +156,16 @@ export interface ScoringPromptOptions {
   validationLevel?: 'strict' | 'moderate' | 'lenient';
 }
 
+/**
+ * Represents the scoring prompt builder.
+ */
 export class ScoringPromptBuilder {
+  /**
+   * Builds with options.
+   * @param basePrompt - The base prompt.
+   * @param options - The options.
+   * @returns The string value.
+   */
   static buildWithOptions(basePrompt: string, options: ScoringPromptOptions = {}): string {
     let prompt = basePrompt;
 
@@ -170,6 +182,12 @@ export class ScoringPromptBuilder {
     return prompt;
   }
 
+  /**
+   * Performs the add json schema instruction operation.
+   * @param prompt - The prompt.
+   * @param schema - The schema.
+   * @returns The string value.
+   */
   static addJsonSchemaInstruction(prompt: string, schema: string): string {
     return `${prompt}
 

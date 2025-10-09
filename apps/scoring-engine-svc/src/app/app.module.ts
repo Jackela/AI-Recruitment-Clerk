@@ -4,6 +4,7 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ScoringEventsController } from './scoring-events.controller';
+import { HealthController } from './health.controller';
 import { ScoringEngineService } from '../scoring.service';
 import { NatsClientModule } from '@app/shared-nats-client';
 import { ScoringEngineNatsService } from '../services/scoring-engine-nats.service';
@@ -11,11 +12,14 @@ import { EnhancedSkillMatcherService } from '../services/enhanced-skill-matcher.
 import { ExperienceAnalyzerService } from '../services/experience-analyzer.service';
 import { CulturalFitAnalyzerService } from '../services/cultural-fit-analyzer.service';
 import { ScoringConfidenceService } from '../services/scoring-confidence.service';
-import { GeminiClient } from '@ai-recruitment-clerk/ai-services-shared';
+import { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
 import { NatsClient as LocalNatsClient } from '../nats/nats.client';
 import { StandardizedGlobalExceptionFilter, ExceptionFilterConfigHelper, ErrorInterceptorFactory } from '@ai-recruitment-clerk/infrastructure-shared';
 import { SecureConfigValidator } from '@app/shared-dtos';
 
+/**
+ * Configures the app module.
+ */
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -25,7 +29,7 @@ import { SecureConfigValidator } from '@app/shared-dtos';
       serviceName: 'scoring-engine-svc',
     }),
   ],
-  controllers: [AppController, ScoringEventsController],
+  controllers: [AppController, ScoringEventsController, HealthController],
   providers: [
     AppService,
     ScoringEngineService,
@@ -83,8 +87,8 @@ import { SecureConfigValidator } from '@app/shared-dtos';
         ErrorInterceptorFactory.createPerformanceInterceptor(
           'scoring-engine-svc',
           {
-            warnThreshold: 5000, // 5 seconds - scoring can take time with AI analysis
-            errorThreshold: 30000, // 30 seconds - hard limit for scoring process
+            timeout: 30000, // 30 seconds - hard limit for scoring process
+            enableMetrics: true,
           },
         ),
     },

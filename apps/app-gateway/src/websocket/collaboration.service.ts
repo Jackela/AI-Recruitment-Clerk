@@ -2,6 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CacheService } from '../cache/cache.service';
 
 // Collaboration interfaces
+/**
+ * Defines the shape of the collaboration room.
+ */
 export interface CollaborationRoom {
   id: string;
   participants: Participant[];
@@ -11,6 +14,9 @@ export interface CollaborationRoom {
   type: 'analysis' | 'review' | 'discussion';
 }
 
+/**
+ * Defines the shape of the participant.
+ */
 export interface Participant {
   userId: string;
   name: string;
@@ -20,12 +26,18 @@ export interface Participant {
   cursor?: CursorPosition;
 }
 
+/**
+ * Defines the shape of the cursor position.
+ */
 export interface CursorPosition {
   x: number;
   y: number;
   elementId?: string;
 }
 
+/**
+ * Defines the shape of the collaboration action.
+ */
 export interface CollaborationAction {
   type: 'join' | 'leave' | 'edit' | 'comment' | 'cursor_move';
   userId: string;
@@ -34,6 +46,9 @@ export interface CollaborationAction {
   timestamp: Date;
 }
 
+/**
+ * Defines the shape of the document edit.
+ */
 export interface DocumentEdit {
   id: string;
   userId: string;
@@ -44,18 +59,28 @@ export interface DocumentEdit {
   timestamp: Date;
 }
 
+/**
+ * Defines the shape of the edit conflict.
+ */
 export interface EditConflict {
   editId: string;
   conflictingEdits: DocumentEdit[];
   resolution: 'accept' | 'reject' | 'merge';
 }
 
+/**
+ * Provides collaboration functionality.
+ */
 @Injectable()
 export class CollaborationService {
   private readonly logger = new Logger(CollaborationService.name);
   private rooms = new Map<string, CollaborationRoom>();
   private userToRoom = new Map<string, string>();
 
+  /**
+   * Initializes a new instance of the Collaboration Service.
+   * @param cacheService - The cache service.
+   */
   constructor(private readonly cacheService: CacheService) {}
 
   /**

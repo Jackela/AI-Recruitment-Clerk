@@ -3,19 +3,36 @@ import { AppService } from './app.service';
 import { ResumeRepository } from '../repositories/resume.repository';
 import { GridFsService } from '../gridfs/gridfs.service';
 
+/**
+ * Exposes endpoints for app.
+ */
 @Controller()
 export class AppController {
+  /**
+   * Initializes a new instance of the App Controller.
+   * @param appService - The app service.
+   * @param resumeRepository - The resume repository.
+   * @param gridFsService - The grid fs service.
+   */
   constructor(
     private readonly appService: AppService,
     private readonly resumeRepository: ResumeRepository,
     private readonly gridFsService: GridFsService,
   ) {}
 
+  /**
+   * Retrieves data.
+   * @returns The result of the operation.
+   */
   @Get()
   getData() {
     return this.appService.getData();
   }
 
+  /**
+   * Retrieves health.
+   * @returns The result of the operation.
+   */
   @Get('health')
   async getHealth() {
     const dbHealth = await this.resumeRepository.healthCheck();

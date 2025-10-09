@@ -9,6 +9,9 @@ import {
   ContactInfo 
 } from './incentive.dto';
 
+/**
+ * Represents the incentive rules.
+ */
 export class IncentiveRules {
   // 核心业务规则常量 - 红包激励系统
   static readonly BASE_QUESTIONNAIRE_REWARD = 5; // 5元基础奖励
@@ -418,7 +421,16 @@ export class IncentiveRules {
 }
 
 // 结果类定义
+/**
+ * Represents the incentive eligibility result.
+ */
 export class IncentiveEligibilityResult {
+  /**
+   * Initializes a new instance of the Incentive Eligibility Result.
+   * @param isEligible - The is eligible.
+   * @param errors - The errors.
+   * @param expectedReward - The expected reward.
+   */
   constructor(
     public readonly isEligible: boolean,
     public readonly errors: string[],
@@ -426,7 +438,16 @@ export class IncentiveEligibilityResult {
   ) {}
 }
 
+/**
+ * Represents the payment eligibility result.
+ */
 export class PaymentEligibilityResult {
+  /**
+   * Initializes a new instance of the Payment Eligibility Result.
+   * @param isEligible - The is eligible.
+   * @param errors - The errors.
+   * @param approvedAmount - The approved amount.
+   */
   constructor(
     public readonly isEligible: boolean,
     public readonly errors: string[],
@@ -434,7 +455,16 @@ export class PaymentEligibilityResult {
   ) {}
 }
 
+/**
+ * Represents the payment method validation result.
+ */
 export class PaymentMethodValidationResult {
+  /**
+   * Initializes a new instance of the Payment Method Validation Result.
+   * @param isValid - The is valid.
+   * @param errors - The errors.
+   * @param paymentMethod - The payment method.
+   */
   constructor(
     public readonly isValid: boolean,
     public readonly errors: string[],
@@ -442,7 +472,16 @@ export class PaymentMethodValidationResult {
   ) {}
 }
 
+/**
+ * Represents the incentive priority.
+ */
 export class IncentivePriority {
+  /**
+   * Initializes a new instance of the Incentive Priority.
+   * @param score - The score.
+   * @param level - The level.
+   * @param factors - The factors.
+   */
   constructor(
     public readonly score: number,
     public readonly level: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT',
@@ -450,7 +489,19 @@ export class IncentivePriority {
   ) {}
 }
 
+/**
+ * Represents the incentive risk assessment.
+ */
 export class IncentiveRiskAssessment {
+  /**
+   * Initializes a new instance of the Incentive Risk Assessment.
+   * @param incentiveId - The incentive id.
+   * @param recipientIP - The recipient ip.
+   * @param riskScore - The risk score.
+   * @param riskLevel - The risk level.
+   * @param riskFactors - The risk factors.
+   * @param recommendedActions - The recommended actions.
+   */
   constructor(
     public readonly incentiveId: string,
     public readonly recipientIP: string,
@@ -461,7 +512,18 @@ export class IncentiveRiskAssessment {
   ) {}
 }
 
+/**
+ * Represents the batch payment validation result.
+ */
 export class BatchPaymentValidationResult {
+  /**
+   * Initializes a new instance of the Batch Payment Validation Result.
+   * @param isValid - The is valid.
+   * @param errors - The errors.
+   * @param warnings - The warnings.
+   * @param validIncentiveCount - The valid incentive count.
+   * @param totalAmount - The total amount.
+   */
   constructor(
     public readonly isValid: boolean,
     public readonly errors: string[],
@@ -472,6 +534,9 @@ export class BatchPaymentValidationResult {
 }
 
 // 接口定义
+/**
+ * Defines the shape of the incentive usage history.
+ */
 export interface IncentiveUsageHistory {
   ip: string;
   totalIncentivesToday: number;

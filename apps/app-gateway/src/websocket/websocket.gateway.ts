@@ -116,6 +116,9 @@ interface ActivityFeedItem {
   metadata?: any;
 }
 
+/**
+ * Represents the web socket gateway.
+ */
 @WSGateway({
   cors: {
     origin: ['http://localhost:4200', 'http://localhost:4201'],
@@ -142,6 +145,14 @@ export class WebSocketGateway
     }
   >();
 
+  /**
+   * Initializes a new instance of the Web Socket Gateway.
+   * @param guestUsageService - The guest usage service.
+   * @param collaborationService - The collaboration service.
+   * @param presenceService - The presence service.
+   * @param notificationService - The notification service.
+   * @param cacheService - The cache service.
+   */
   constructor(
     private readonly guestUsageService: GuestUsageService,
     private readonly collaborationService: CollaborationService,
@@ -150,10 +161,21 @@ export class WebSocketGateway
     private readonly cacheService: CacheService,
   ) {}
 
+  /**
+   * Performs the after init operation.
+   * @param server - The server.
+   * @returns The result of the operation.
+   */
   afterInit(server: Server) {
     this.logger.log('WebSocket Gateway initialized');
   }
 
+  /**
+   * Handles connection.
+   * @param client - The client.
+   * @param args - The args.
+   * @returns The result of the operation.
+   */
   handleConnection(client: Socket, ...args: any[]) {
     const sessionId = client.handshake.query.sessionId as string;
     this.logger.log(`Client connected: ${client.id}, SessionId: ${sessionId}`);
@@ -175,6 +197,11 @@ export class WebSocketGateway
     }
   }
 
+  /**
+   * Handles disconnect.
+   * @param client - The client.
+   * @returns The result of the operation.
+   */
   handleDisconnect(client: Socket) {
     const sessionId = this.clientSessions.get(client.id);
     this.logger.log(
@@ -247,6 +274,11 @@ export class WebSocketGateway
     });
   }
 
+  /**
+   * Handles subscribe session.
+   * @param data - The data.
+   * @param client - The client.
+   */
   @SubscribeMessage('subscribe_session')
   handleSubscribeSession(
     @MessageBody() data: { sessionId: string },
@@ -262,6 +294,11 @@ export class WebSocketGateway
     this.sendCurrentStatus(sessionId, client);
   }
 
+  /**
+   * Handles unsubscribe session.
+   * @param data - The data.
+   * @param client - The client.
+   */
   @SubscribeMessage('unsubscribe_session')
   handleUnsubscribeSession(
     @MessageBody() data: { sessionId: string },

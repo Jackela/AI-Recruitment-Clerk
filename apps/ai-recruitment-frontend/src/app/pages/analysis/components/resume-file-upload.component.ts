@@ -10,6 +10,9 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+/**
+ * Defines the shape of the candidate info.
+ */
 export interface CandidateInfo {
   name: string;
   email: string;
@@ -17,11 +20,17 @@ export interface CandidateInfo {
   notes: string;
 }
 
+/**
+ * Defines the shape of the file upload data.
+ */
 export interface FileUploadData {
   file: File;
   candidateInfo: CandidateInfo;
 }
 
+/**
+ * Represents the resume file upload component.
+ */
 @Component({
   selector: 'arc-resume-file-upload',
   standalone: true,
@@ -216,16 +225,28 @@ export class ResumeFileUploadComponent {
   };
 
   // File Upload Methods
+  /**
+   * Performs the on drag over operation.
+   * @param event - The event.
+   */
   onDragOver(event: DragEvent): void {
     event.preventDefault();
     this.isDragOver.set(true);
   }
 
+  /**
+   * Performs the on drag leave operation.
+   * @param event - The event.
+   */
   onDragLeave(event: DragEvent): void {
     event.preventDefault();
     this.isDragOver.set(false);
   }
 
+  /**
+   * Performs the on drop operation.
+   * @param event - The event.
+   */
   onDrop(event: DragEvent): void {
     event.preventDefault();
     this.isDragOver.set(false);
@@ -236,6 +257,10 @@ export class ResumeFileUploadComponent {
     }
   }
 
+  /**
+   * Performs the on file select operation.
+   * @param event - The event.
+   */
   onFileSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -267,6 +292,10 @@ export class ResumeFileUploadComponent {
     this.selectedFile.set(file);
   }
 
+  /**
+   * Removes file.
+   * @param event - The event.
+   */
   removeFile(event: Event): void {
     event.stopPropagation();
     this.selectedFile.set(null);
@@ -275,12 +304,21 @@ export class ResumeFileUploadComponent {
     }
   }
 
+  /**
+   * Performs the format file size operation.
+   * @param bytes - The bytes.
+   * @returns The string value.
+   */
   formatFileSize(bytes: number): string {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
+  /**
+   * Performs the on submit operation.
+   * @param event - The event.
+   */
   onSubmit(event: Event): void {
     event.preventDefault();
 
@@ -296,10 +334,16 @@ export class ResumeFileUploadComponent {
     });
   }
 
+  /**
+   * Performs the on demo click operation.
+   */
   onDemoClick(): void {
     this.demoRequested.emit();
   }
 
+  /**
+   * Performs the reset form operation.
+   */
   resetForm(): void {
     this.selectedFile.set(null);
     this.candidateInfo = {

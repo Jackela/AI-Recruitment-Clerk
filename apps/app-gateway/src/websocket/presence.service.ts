@@ -2,6 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CacheService } from '../cache/cache.service';
 
 // Presence interfaces
+/**
+ * Defines the shape of the presence info.
+ */
 export interface PresenceInfo {
   userId: string;
   status: 'online' | 'away' | 'offline';
@@ -12,6 +15,9 @@ export interface PresenceInfo {
   metadata?: Record<string, any>;
 }
 
+/**
+ * Defines the shape of the device info.
+ */
 export interface DeviceInfo {
   type: 'desktop' | 'mobile' | 'tablet';
   browser?: string;
@@ -19,6 +25,9 @@ export interface DeviceInfo {
   userAgent?: string;
 }
 
+/**
+ * Defines the shape of the user activity.
+ */
 export interface UserActivity {
   userId: string;
   action: string;
@@ -27,6 +36,9 @@ export interface UserActivity {
   metadata?: Record<string, any>;
 }
 
+/**
+ * Provides presence functionality.
+ */
 @Injectable()
 export class PresenceService {
   private readonly logger = new Logger(PresenceService.name);
@@ -34,6 +46,10 @@ export class PresenceService {
   private sessionToUser = new Map<string, string>();
   private userSessions = new Map<string, Set<string>>();
 
+  /**
+   * Initializes a new instance of the Presence Service.
+   * @param cacheService - The cache service.
+   */
   constructor(private readonly cacheService: CacheService) {
     // Setup periodic cleanup
     this.setupPeriodicCleanup();

@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { AccessibilityService } from '../../../services/accessibility/accessibility.service';
 import { Subscription } from 'rxjs';
 
+/**
+ * Defines the shape of the live message.
+ */
 export interface LiveMessage {
   id: string;
   message: string;
@@ -10,6 +13,9 @@ export interface LiveMessage {
   timestamp: number;
 }
 
+/**
+ * Represents the aria live component.
+ */
 @Component({
   selector: 'arc-aria-live',
   standalone: true,
@@ -118,6 +124,9 @@ export class AriaLiveComponent implements OnInit, OnDestroy {
   currentStatus = '';
   currentAlert = '';
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     // Subscribe to accessibility service live messages (test-compatible)
     const isTestEnvironment = typeof (window as any).__karma__ !== 'undefined';
@@ -166,10 +175,19 @@ export class AriaLiveComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 
+  /**
+   * Performs the track by message id operation.
+   * @param _index - The index.
+   * @param message - The message.
+   * @returns The string value.
+   */
   trackByMessageId(_index: number, message: LiveMessage): string {
     return message.id;
   }

@@ -1,7 +1,8 @@
 const { merge } = require('webpack-merge');
-const path = require('path');
+const webpack = require('webpack');
+const TerserPlugin = require('terser-webpack-plugin');
 
-module.exports = (config, context) => {
+module.exports = (config) => {
   return merge(config, {
     optimization: {
       splitChunks: {
@@ -65,6 +66,16 @@ module.exports = (config, context) => {
       sideEffects: false,
       // Minification
       minimize: true,
+      minimizer: [
+        new TerserPlugin({
+          terserOptions: {
+            compress: {
+              drop_console: true,
+              drop_debugger: true,
+            },
+          },
+        }),
+      ],
       // Code concatenation 
       concatenateModules: true
     },
@@ -73,9 +84,16 @@ module.exports = (config, context) => {
         // Optimize lodash imports
         'lodash': 'lodash-es',
         // Rxjs operator optimization
-        'rxjs/operators': 'rxjs/operators'
+        'rxjs/operators': 'rxjs/operators',
+        // Strip Angular debug utilities from production bundle
+        '@angular/core/fesm2022/debug_node.mjs$': false
       }
     },
+    plugins: [
+      new webpack.IgnorePlugin({
+        resourceRegExp: /@angular\/core\/fesm2022\/debug_node\.mjs$/
+      })
+    ],
     performance: {
       maxAssetSize: 500000,
       maxEntrypointSize: 1000000,

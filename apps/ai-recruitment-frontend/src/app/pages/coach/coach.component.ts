@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
@@ -7,10 +7,14 @@ import {
   GapAnalysisResult,
 } from '../../interfaces/gap-analysis.interface';
 import { GapAnalysisReportComponent } from './gap-analysis-report.component';
+import { LoggerService } from '../../services/shared/logger.service';
 
+/**
+ * Represents the coach component.
+ */
 @Component({
   standalone: true,
-  selector: 'app-coach',
+  selector: 'arc-coach',
   imports: [CommonModule, ReactiveFormsModule, GapAnalysisReportComponent],
   styles: [
     `
@@ -41,7 +45,7 @@ import { GapAnalysisReportComponent } from './gap-analysis-report.component';
       </form>
 
       <div class="section">
-        <app-gap-analysis-report [result]="result"></app-gap-analysis-report>
+        <arc-gap-analysis-report [result]="result"></arc-gap-analysis-report>
       </div>
     </div>
   `,
@@ -53,12 +57,24 @@ export class CoachComponent {
   result: GapAnalysisResult | null = null;
   private selectedFile: File | null = null;
 
-  constructor(private fb: FormBuilder, private api: ApiService) {
+  private fb = inject(FormBuilder);
+  private api = inject(ApiService);
+  private logger = inject(LoggerService).createLogger('CoachComponent');
+
+  /**
+   * Initializes a new instance of the Coach Component.
+   */
+  constructor() {
     this.form = this.fb.group({
       jdText: ['', [Validators.required, Validators.minLength(10)]],
     });
   }
 
+  /**
+   * Performs the on file selected operation.
+   * @param evt - The evt.
+   * @returns The result of the operation.
+   */
   onFileSelected(evt: Event) {
     const input = evt.target as HTMLInputElement;
     const file = input.files && input.files[0];
@@ -66,11 +82,18 @@ export class CoachComponent {
     this.selectedFile = file;
   }
 
+  /**
+   * Performs the on submit operation.
+   * @returns The result of the operation.
+   */
   onSubmit() {
     if (this.form.invalid) return;
     const jdText = this.form.value.jdText || '';
     const file = this.selectedFile;
     if (!file) return;
+    this.logger.debug('Starting gap analysis API call');
+    this.logger.debug('JD Text provided', { textLength: jdText.length });
+    this.logger.debug('Resume file provided', { fileName: file.name, fileSize: file.size });
     this.loading = true;
     this.result = null;
     this.api.submitGapAnalysisWithFile(jdText, file).subscribe({
@@ -78,7 +101,9 @@ export class CoachComponent {
         this.result = res;
         this.loading = false;
       },
-      error: () => {
+      error: (error) => {
+        this.logger.error('Gap analysis API call failed', error);
+        this.logger.error('API error details', error?.error);
         // Surface error softly in UI by returning empty result
         this.result = { matchedSkills: [], missingSkills: [], suggestedSkills: [] };
         this.loading = false;

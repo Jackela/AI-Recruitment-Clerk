@@ -6,6 +6,9 @@ export enum BonusType {
   PROMOTION = 'promotion'
 }
 
+/**
+ * Defines the shape of the usage limit data.
+ */
 export interface UsageLimitData {
   id: string;
   ip: string;

@@ -8,12 +8,20 @@ interface TokenRecord {
   reason: string;
 }
 
+/**
+ * Provides redis token blacklist functionality.
+ */
 @Injectable()
 export class RedisTokenBlacklistService {
   private readonly logger = new Logger(RedisTokenBlacklistService.name);
   private readonly blacklistedTokens = new Map<string, TokenRecord>();
   private readonly blacklistedUsers = new Set<string>();
 
+  /**
+   * Performs the is token blacklisted operation.
+   * @param token - The token.
+   * @returns A promise that resolves to boolean value.
+   */
   async isTokenBlacklisted(token: string): Promise<boolean> {
     const record = this.blacklistedTokens.get(token);
     if (!record) {
@@ -29,10 +37,23 @@ export class RedisTokenBlacklistService {
     return true;
   }
 
+  /**
+   * Performs the is user blacklisted operation.
+   * @param userId - The user id.
+   * @returns A promise that resolves to boolean value.
+   */
   async isUserBlacklisted(userId: string): Promise<boolean> {
     return this.blacklistedUsers.has(userId);
   }
 
+  /**
+   * Performs the blacklist token operation.
+   * @param token - The token.
+   * @param userId - The user id.
+   * @param exp - The exp.
+   * @param reason - The reason.
+   * @returns A promise that resolves when the operation completes.
+   */
   async blacklistToken(
     token: string,
     userId: string,
@@ -54,6 +75,12 @@ export class RedisTokenBlacklistService {
     );
   }
 
+  /**
+   * Performs the blacklist all user tokens operation.
+   * @param userId - The user id.
+   * @param reason - The reason.
+   * @returns A promise that resolves to number value.
+   */
   async blacklistAllUserTokens(
     userId: string,
     reason: string,
@@ -74,6 +101,10 @@ export class RedisTokenBlacklistService {
     return count;
   }
 
+  /**
+   * Retrieves metrics.
+   * @returns The any.
+   */
   getMetrics(): any {
     return {
       blacklistedTokensCount: this.blacklistedTokens.size,
@@ -82,6 +113,10 @@ export class RedisTokenBlacklistService {
     };
   }
 
+  /**
+   * Performs the health check operation.
+   * @returns A promise that resolves to any.
+   */
   async healthCheck(): Promise<any> {
     return {
       status: 'healthy',
@@ -92,6 +127,10 @@ export class RedisTokenBlacklistService {
   }
 
   // Cleanup expired tokens
+  /**
+   * Performs the cleanup operation.
+   * @returns The number value.
+   */
   cleanup(): number {
     const now = Date.now();
     let cleaned = 0;

@@ -25,7 +25,18 @@ import {
   DataPrivacyMetrics
 } from './analytics.rules';
 
+/**
+ * Provides analytics domain functionality.
+ */
 export class AnalyticsDomainService {
+  /**
+   * Initializes a new instance of the Analytics Domain Service.
+   * @param repository - The repository.
+   * @param eventBus - The event bus.
+   * @param auditLogger - The audit logger.
+   * @param privacyService - The privacy service.
+   * @param sessionTracker - The session tracker.
+   */
   constructor(
     private readonly repository: IAnalyticsRepository,
     private readonly eventBus: IDomainEventBus,
@@ -678,6 +689,9 @@ export class AnalyticsDomainService {
 }
 
 // 结果类定义
+/**
+ * Represents the event creation result.
+ */
 export class EventCreationResult {
   private constructor(
     public readonly success: boolean,
@@ -685,15 +699,28 @@ export class EventCreationResult {
     public readonly errors?: string[]
   ) {}
 
+  /**
+   * Performs the success operation.
+   * @param data - The data.
+   * @returns The EventCreationResult.
+   */
   static success(data: AnalyticsEventSummary): EventCreationResult {
     return new EventCreationResult(true, data);
   }
 
+  /**
+   * Performs the failed operation.
+   * @param errors - The errors.
+   * @returns The EventCreationResult.
+   */
   static failed(errors: string[]): EventCreationResult {
     return new EventCreationResult(false, undefined, errors);
   }
 }
 
+/**
+ * Represents the batch processing result.
+ */
 export class BatchProcessingResult {
   private constructor(
     public readonly success: boolean,
@@ -706,6 +733,11 @@ export class BatchProcessingResult {
     public readonly errors?: string[]
   ) {}
 
+  /**
+   * Performs the success operation.
+   * @param data - The data.
+   * @returns The BatchProcessingResult.
+   */
   static success(data: {
     totalEvents: number;
     successCount: number;
@@ -715,11 +747,19 @@ export class BatchProcessingResult {
     return new BatchProcessingResult(true, data);
   }
 
+  /**
+   * Performs the failed operation.
+   * @param errors - The errors.
+   * @returns The BatchProcessingResult.
+   */
   static failed(errors: string[]): BatchProcessingResult {
     return new BatchProcessingResult(false, undefined, errors);
   }
 }
 
+/**
+ * Represents the privacy compliance result.
+ */
 export class PrivacyComplianceResult {
   private constructor(
     public readonly success: boolean,
@@ -732,6 +772,11 @@ export class PrivacyComplianceResult {
     public readonly errors?: string[]
   ) {}
 
+  /**
+   * Performs the success operation.
+   * @param data - The data.
+   * @returns The PrivacyComplianceResult.
+   */
   static success(data: {
     eventId: string;
     riskAssessment: PrivacyComplianceRiskAssessment;
@@ -741,11 +786,19 @@ export class PrivacyComplianceResult {
     return new PrivacyComplianceResult(true, data);
   }
 
+  /**
+   * Performs the failed operation.
+   * @param errors - The errors.
+   * @returns The PrivacyComplianceResult.
+   */
   static failed(errors: string[]): PrivacyComplianceResult {
     return new PrivacyComplianceResult(false, undefined, errors);
   }
 }
 
+/**
+ * Represents the data retention report result.
+ */
 export class DataRetentionReportResult {
   private constructor(
     public readonly success: boolean,
@@ -760,6 +813,11 @@ export class DataRetentionReportResult {
     public readonly errors?: string[]
   ) {}
 
+  /**
+   * Performs the success operation.
+   * @param data - The data.
+   * @returns The DataRetentionReportResult.
+   */
   static success(data: {
     reportPeriod: { startDate: Date; endDate: Date };
     totalEvents: number;
@@ -771,11 +829,19 @@ export class DataRetentionReportResult {
     return new DataRetentionReportResult(true, data);
   }
 
+  /**
+   * Performs the failed operation.
+   * @param errors - The errors.
+   * @returns The DataRetentionReportResult.
+   */
   static failed(errors: string[]): DataRetentionReportResult {
     return new DataRetentionReportResult(false, undefined, errors);
   }
 }
 
+/**
+ * Represents the session analytics result.
+ */
 export class SessionAnalyticsResult {
   private constructor(
     public readonly success: boolean,
@@ -783,15 +849,28 @@ export class SessionAnalyticsResult {
     public readonly errors?: string[]
   ) {}
 
+  /**
+   * Performs the success operation.
+   * @param data - The data.
+   * @returns The SessionAnalyticsResult.
+   */
   static success(data: SessionAnalytics): SessionAnalyticsResult {
     return new SessionAnalyticsResult(true, data);
   }
 
+  /**
+   * Performs the failed operation.
+   * @param errors - The errors.
+   * @returns The SessionAnalyticsResult.
+   */
   static failed(errors: string[]): SessionAnalyticsResult {
     return new SessionAnalyticsResult(false, undefined, errors);
   }
 }
 
+/**
+ * Represents the event processing metrics result.
+ */
 export class EventProcessingMetricsResult {
   private constructor(
     public readonly success: boolean,
@@ -799,15 +878,28 @@ export class EventProcessingMetricsResult {
     public readonly errors?: string[]
   ) {}
 
+  /**
+   * Performs the success operation.
+   * @param data - The data.
+   * @returns The EventProcessingMetricsResult.
+   */
   static success(data: EventProcessingMetrics): EventProcessingMetricsResult {
     return new EventProcessingMetricsResult(true, data);
   }
 
+  /**
+   * Performs the failed operation.
+   * @param errors - The errors.
+   * @returns The EventProcessingMetricsResult.
+   */
   static failed(errors: string[]): EventProcessingMetricsResult {
     return new EventProcessingMetricsResult(false, undefined, errors);
   }
 }
 
+/**
+ * Represents the data privacy metrics result.
+ */
 export class DataPrivacyMetricsResult {
   private constructor(
     public readonly success: boolean,
@@ -815,15 +907,28 @@ export class DataPrivacyMetricsResult {
     public readonly errors?: string[]
   ) {}
 
+  /**
+   * Performs the success operation.
+   * @param data - The data.
+   * @returns The DataPrivacyMetricsResult.
+   */
   static success(data: DataPrivacyMetrics): DataPrivacyMetricsResult {
     return new DataPrivacyMetricsResult(true, data);
   }
 
+  /**
+   * Performs the failed operation.
+   * @param errors - The errors.
+   * @returns The DataPrivacyMetricsResult.
+   */
   static failed(errors: string[]): DataPrivacyMetricsResult {
     return new DataPrivacyMetricsResult(false, undefined, errors);
   }
 }
 
+/**
+ * Represents the reporting access result.
+ */
 export class ReportingAccessResult {
   private constructor(
     public readonly success: boolean,
@@ -831,16 +936,29 @@ export class ReportingAccessResult {
     public readonly errors?: string[]
   ) {}
 
+  /**
+   * Performs the success operation.
+   * @param data - The data.
+   * @returns The ReportingAccessResult.
+   */
   static success(data: ReportingPermissionsResult): ReportingAccessResult {
     return new ReportingAccessResult(true, data);
   }
 
+  /**
+   * Performs the failed operation.
+   * @param errors - The errors.
+   * @returns The ReportingAccessResult.
+   */
   static failed(errors: string[]): ReportingAccessResult {
     return new ReportingAccessResult(false, undefined, errors);
   }
 }
 
 // 接口定义
+/**
+ * Defines the shape of the batch processing item.
+ */
 export interface BatchProcessingItem {
   eventId: string;
   success: boolean;
@@ -849,6 +967,9 @@ export interface BatchProcessingItem {
 }
 
 // 仓储接口定义
+/**
+ * Defines the shape of the i analytics repository.
+ */
 export interface IAnalyticsRepository {
   save(event: AnalyticsEvent): Promise<void>;
   findById(id: string): Promise<AnalyticsEvent | null>;
@@ -860,22 +981,34 @@ export interface IAnalyticsRepository {
   anonymizeOldEvents(olderThanDays: number): Promise<number>;
 }
 
+/**
+ * Defines the shape of the i domain event bus.
+ */
 export interface IDomainEventBus {
   publish(event: any): Promise<void>;
 }
 
+/**
+ * Defines the shape of the i audit logger.
+ */
 export interface IAuditLogger {
   logBusinessEvent(eventType: string, data: any): Promise<void>;
   logSecurityEvent(eventType: string, data: any): Promise<void>;
   logError(eventType: string, data: any): Promise<void>;
 }
 
+/**
+ * Defines the shape of the i privacy service.
+ */
 export interface IPrivacyService {
   getUserConsentStatus(userId: string): Promise<ConsentStatus>;
   anonymizeUserData(userId: string): Promise<void>;
   deleteUserData(userId: string): Promise<void>;
 }
 
+/**
+ * Defines the shape of the i session tracker.
+ */
 export interface ISessionTracker {
   updateSessionActivity(sessionId: string, userId: string): Promise<void>;
   getSession(sessionId: string): Promise<UserSession | null>;

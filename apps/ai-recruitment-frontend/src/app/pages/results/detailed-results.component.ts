@@ -10,6 +10,9 @@ import {
   SkillTagStyle,
 } from '../../interfaces/detailed-analysis.interface';
 
+/**
+ * Represents the detailed results component.
+ */
 @Component({
   selector: 'arc-detailed-results',
   standalone: true,
@@ -302,12 +305,21 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private lastLoadedSessionId = '';
 
+  /**
+   * Initializes a new instance of the Detailed Results Component.
+   * @param route - The route.
+   * @param router - The router.
+   * @param guestApi - The guest api.
+   */
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private guestApi: GuestApiService,
   ) {}
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       const sessionId = params.get('sessionId');
@@ -321,11 +333,18 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
+  /**
+   * Loads detailed results.
+   * @param sessionId - The session id.
+   */
   loadDetailedResults(sessionId: string): void {
     // Prevent duplicate loading
     if (this.lastLoadedSessionId === sessionId && this.analysisResult()) {
@@ -437,10 +456,16 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
   }
 
   // User Interaction Methods
+  /**
+   * Performs the go back operation.
+   */
   goBack(): void {
     this.router.navigate(['/analysis']);
   }
 
+  /**
+   * Performs the retry load operation.
+   */
   retryLoad(): void {
     const sessionId = this.sessionId();
     if (sessionId) {
@@ -449,10 +474,16 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the toggle skills expanded operation.
+   */
   toggleSkillsExpanded(): void {
     this.isSkillsExpanded.set(!this.isSkillsExpanded());
   }
 
+  /**
+   * Performs the export to pdf operation.
+   */
   exportToPdf(): void {
     const result = this.analysisResult();
     if (result?.reportUrl) {
@@ -460,6 +491,9 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the export to excel operation.
+   */
   exportToExcel(): void {
     const result = this.analysisResult();
     if (result?.reportUrl) {
@@ -467,6 +501,10 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the share report operation.
+   * @returns A promise that resolves when the operation completes.
+   */
   async shareReport(): Promise<void> {
     const result = this.analysisResult();
     if (!result) return;
@@ -495,6 +533,10 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
   }
 
   // Data Computation Methods
+  /**
+   * Retrieves radar chart data.
+   * @returns The an array of RadarChartData.
+   */
   getRadarChartData(): RadarChartData[] {
     const skillAnalysis = this.analysisResult()?.skillAnalysis;
     if (!skillAnalysis) return [];
@@ -508,6 +550,10 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
     ];
   }
 
+  /**
+   * Retrieves overall match.
+   * @returns The number value.
+   */
   getOverallMatch(): number {
     const radarData = this.getRadarChartData();
     if (radarData.length === 0) return 0;
@@ -516,6 +562,10 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
     return Math.round(total / radarData.length);
   }
 
+  /**
+   * Retrieves formatted analysis time.
+   * @returns The string value.
+   */
   getFormattedAnalysisTime(): string {
     const result = this.analysisResult();
     if (!result?.analysisTime) return '';
@@ -524,12 +574,21 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
     return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
   }
 
+  /**
+   * Retrieves experience years.
+   * @returns The number value.
+   */
   getExperienceYears(): number {
     const experienceText = this.analysisResult()?.experience || '';
     const match = experienceText.match(/(\d+)年/);
     return match ? parseInt(match[1], 10) : 0;
   }
 
+  /**
+   * Retrieves skill tag style.
+   * @param skill - The skill.
+   * @returns The SkillTagStyle.
+   */
   getSkillTagStyle(skill: string): SkillTagStyle {
     // Generate consistent colors based on skill name
     const colors = [
@@ -549,10 +608,18 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
   }
 
   // Responsive Design Support
+  /**
+   * Performs the is mobile device operation.
+   * @returns The boolean value.
+   */
   isMobileDevice(): boolean {
     return window.innerWidth <= 768;
   }
 
+  /**
+   * Retrieves layout class.
+   * @returns The string value.
+   */
   getLayoutClass(): string {
     const classes = ['results-container'];
     if (this.isMobileDevice()) {

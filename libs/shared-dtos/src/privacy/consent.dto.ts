@@ -261,6 +261,9 @@ export class CaptureConsentDto {
   consentVersion?: string;
 }
 
+/**
+ * Describes the consent grant data transfer object.
+ */
 export class ConsentGrantDto {
   @IsEnum(ConsentPurpose)
   purpose!: ConsentPurpose;

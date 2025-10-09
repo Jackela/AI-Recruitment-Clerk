@@ -61,12 +61,18 @@ export enum DataCategory {
   COMMUNICATION_PREFERENCES = 'communication_preferences',
 }
 
+/**
+ * Defines the shape of the consent grant dto.
+ */
 export interface ConsentGrantDto {
   purpose: ConsentPurpose;
   granted: boolean;
   method: ConsentMethod;
 }
 
+/**
+ * Defines the shape of the processing purpose info.
+ */
 export interface ProcessingPurposeInfo {
   purpose: ConsentPurpose;
   description: string;
@@ -86,7 +92,7 @@ import { ToastService } from '../../services/toast.service';
  * Provides comprehensive consent capture and management interface
  */
 @Component({
-  selector: 'app-consent-management',
+  selector: 'arc-consent-management',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './consent-management.component.html',
@@ -190,6 +196,12 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
 
   readonly ConsentPurpose = ConsentPurpose;
 
+  /**
+   * Initializes a new instance of the Consent Management Component.
+   * @param fb - The fb.
+   * @param privacyApi - The privacy api.
+   * @param toast - The toast.
+   */
   constructor(
     private fb: FormBuilder,
     private privacyApi: PrivacyApiService,
@@ -198,12 +210,18 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
     this.initializeForm();
   }
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     if (this.userId && this.mode !== 'initial') {
       this.loadCurrentConsent();
     }
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -229,18 +247,37 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Performs the consents array operation.
+   * @returns The FormArray.
+   */
   get consentsArray(): FormArray {
     return this.consentForm.get('consents') as FormArray;
   }
 
+  /**
+   * Retrieves purpose info.
+   * @param index - The index.
+   * @returns The ProcessingPurposeInfo.
+   */
   getPurposeInfo(index: number): ProcessingPurposeInfo {
     return this.processingPurposes[index];
   }
 
+  /**
+   * Performs the is purpose required operation.
+   * @param index - The index.
+   * @returns The boolean value.
+   */
   isPurposeRequired(index: number): boolean {
     return this.processingPurposes[index].isRequired;
   }
 
+  /**
+   * Performs the can withdraw purpose operation.
+   * @param index - The index.
+   * @returns The boolean value.
+   */
   canWithdrawPurpose(index: number): boolean {
     return this.processingPurposes[index].isOptOut;
   }
@@ -275,6 +312,10 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Performs the on submit operation.
+   * @returns A promise that resolves when the operation completes.
+   */
   async onSubmit(): Promise<void> {
     if (this.consentForm.invalid || !this.userId) {
       this.markFormGroupTouched(this.consentForm);
@@ -320,6 +361,11 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the withdraw consent operation.
+   * @param purpose - The purpose.
+   * @returns A promise that resolves when the operation completes.
+   */
   async withdrawConsent(purpose: ConsentPurpose): Promise<void> {
     if (!this.userId) return;
 
@@ -394,11 +440,21 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
   }
 
   // Utility methods for template
+  /**
+   * Performs the is field invalid operation.
+   * @param fieldName - The field name.
+   * @returns The boolean value.
+   */
   isFieldInvalid(fieldName: string): boolean {
     const field = this.consentForm.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));
   }
 
+  /**
+   * Retrieves field error.
+   * @param fieldName - The field name.
+   * @returns The string value.
+   */
   getFieldError(fieldName: string): string {
     const field = this.consentForm.get(fieldName);
     if (field?.errors) {
@@ -409,6 +465,11 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
     return '';
   }
 
+  /**
+   * Retrieves current consent status.
+   * @param purpose - The purpose.
+   * @returns The ConsentStatus | undefined.
+   */
   getCurrentConsentStatus(purpose: ConsentPurpose): ConsentStatus | undefined {
     if (!this.currentConsentStatus) return undefined;
     const purposeStatus = this.currentConsentStatus.purposes.find(
@@ -417,6 +478,11 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
     return purposeStatus?.status as ConsentStatus;
   }
 
+  /**
+   * Retrieves consent date.
+   * @param purpose - The purpose.
+   * @returns The Date | undefined.
+   */
   getConsentDate(purpose: ConsentPurpose): Date | undefined {
     if (!this.currentConsentStatus) return undefined;
     const purposeStatus = this.currentConsentStatus.purposes.find(
@@ -425,6 +491,10 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
     return purposeStatus?.grantedAt;
   }
 
+  /**
+   * Performs the needs renewal operation.
+   * @returns The boolean value.
+   */
   needsRenewal(): boolean {
     return this.currentConsentStatus?.needsRenewal || false;
   }

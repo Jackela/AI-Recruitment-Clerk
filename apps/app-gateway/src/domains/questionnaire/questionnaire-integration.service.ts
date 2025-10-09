@@ -1,5 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 
+/**
+ * Provides questionnaire integration functionality.
+ */
 @Injectable()
 export class QuestionnaireIntegrationService {
   private readonly logger = new Logger(QuestionnaireIntegrationService.name);

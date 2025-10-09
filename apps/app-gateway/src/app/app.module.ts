@@ -1,4 +1,4 @@
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer, Logger } from '@nestjs/common';
 // Use in-memory Mongo for tests
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { ConfigModule } from '@nestjs/config';
@@ -13,7 +13,8 @@ import { AnalysisModule } from '../analysis/analysis.module';
 import { AuthModule } from '../auth/auth.module';
 import { GuestModule } from '../guest/guest.module';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { NatsClient } from '../nats/nats.client';
+import { NatsClientModule } from '@ai-recruitment-clerk/shared-nats-client';
+import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
 import { AppCacheModule } from '../cache/cache.module';
 import { DomainsModule } from '../domains/domains.module';
 import { CommonModule, IntegrationModule } from '../common/common.module';
@@ -33,13 +34,16 @@ import { SecurityHeadersMiddleware } from '../middleware/security-headers.middle
 import { RateLimitMiddleware } from '../middleware/rate-limit.middleware';
 import { EnhancedRateLimitMiddleware } from '../middleware/enhanced-rate-limit.middleware';
 import { ProductionSecurityValidator } from '../common/security/production-security-validator';
-import { AppGatewayGlobalExceptionFilter } from '../common/filters/global-exception.filter';
 import { TestRateLimitBypassFilter } from '../common/filters/test-ratelimit-bypass.filter';
-import { ErrorInterceptorFactory } from '@ai-recruitment-clerk/infrastructure-shared';
 import { ResponseTransformInterceptor } from '../common/interceptors/response-transform.interceptor';
+// Standardized Error Handling Infrastructure
+import { ErrorHandlingModule } from '@ai-recruitment-clerk/shared-dtos';
 
 const isTestEnv = process.env.NODE_ENV === 'test';
 
+/**
+ * Configures the app module.
+ */
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -69,6 +73,12 @@ const isTestEnv = process.env.NODE_ENV === 'test';
       }),
     }),
     AppCacheModule,
+    // Standardized Error Handling Infrastructure
+    ErrorHandlingModule.forService('app-gateway'),
+    // Configure shared NATS client with app-gateway service name
+    NatsClientModule.forRoot({
+      serviceName: 'app-gateway',
+    }),
     ...(isTestEnv
       ? []
       : [
@@ -131,24 +141,24 @@ const isTestEnv = process.env.NODE_ENV === 'test';
             } as any;
           }
         }
-        // 调试环境变量
-        console.log('🔍 MongoDB连接调试信息:');
-        console.log('- NODE_ENV:', process.env.NODE_ENV);
-        console.log('- MONGO_URL存在:', !!process.env.MONGO_URL);
+        // MongoDB连接调试信息
+        const logger = new Logger('AppModule');
+        logger.debug('MongoDB连接调试信息');
+        logger.debug(`NODE_ENV: ${process.env.NODE_ENV}`);
+        logger.debug(`MONGO_URL存在: ${!!process.env.MONGO_URL}`);
         if (process.env.MONGO_URL) {
-          console.log(
-            '- MONGO_URL (masked):',
-            process.env.MONGO_URL.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'),
+          logger.debug(
+            `MONGO_URL (masked): ${process.env.MONGO_URL.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')}`,
           );
         }
 
         const mongoUri = process.env.MONGO_URL;
 
         if (!mongoUri) {
-          console.warn(
-            '⚠️ MONGO_URL not configured - database features will be limited',
+          logger.warn(
+            'MONGO_URL not configured - database features will be limited',
           );
-          console.warn(
+          logger.warn(
             '📋 Please add MongoDB service in Railway and set MONGO_URL environment variable',
           );
           // Fallback to local memory server if tests set a flag
@@ -162,9 +172,8 @@ const isTestEnv = process.env.NODE_ENV === 'test';
             maxPoolSize: 5,
           };
         }
-        console.log(
-          '- 最终使用的URI (masked):',
-          mongoUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'),
+        logger.debug(
+          `最终使用的URI (masked): ${mongoUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')}`,
         );
 
         return {
@@ -227,8 +236,8 @@ const isTestEnv = process.env.NODE_ENV === 'test';
   ],
   providers: [
     AppService,
-    // ✅ FIXED: Always provide NatsClient for job processing
-    NatsClient,
+    // Use shared NATS client service instead of custom implementation
+    AppGatewayNatsService,
     ...(isTestEnv ? [] : [ProductionSecurityValidator]),
     ...(isTestEnv
       ? []
@@ -247,11 +256,6 @@ const isTestEnv = process.env.NODE_ENV === 'test';
           },
         ]
       : []),
-    // Enhanced Error Handling System
-    {
-      provide: APP_FILTER,
-      useClass: AppGatewayGlobalExceptionFilter,
-    },
     // In test, bypass stray 429s except on /system/status for stability
     ...(process.env.NODE_ENV === 'test'
       ? [
@@ -261,46 +265,20 @@ const isTestEnv = process.env.NODE_ENV === 'test';
           },
         ]
       : []),
-    // Error Handling Interceptors
-    ...(!isTestEnv
-      ? [
-          {
-            provide: APP_INTERCEPTOR,
-            useFactory: () =>
-              ErrorInterceptorFactory.createCorrelationInterceptor('app-gateway'),
-          },
-          {
-            provide: APP_INTERCEPTOR,
-            useFactory: () =>
-              ErrorInterceptorFactory.createLoggingInterceptor('app-gateway'),
-          },
-          {
-            provide: APP_INTERCEPTOR,
-            useFactory: () =>
-              ErrorInterceptorFactory.createPerformanceInterceptor('app-gateway', {
-                warnThreshold: 2000, // 2 seconds warning for API gateway
-                errorThreshold: 5000, // 5 seconds error threshold
-              }),
-          },
-          {
-            provide: APP_INTERCEPTOR,
-            useFactory: () =>
-              ErrorInterceptorFactory.createRecoveryInterceptor('app-gateway', {
-                enableCircuitBreaker: true,
-                failureThreshold: 3,
-                recoveryTimeout: 30000, // 30 seconds
-              }),
-          },
-        ]
-      : []),
     // Standardize successful API responses for E2E tests
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseTransformInterceptor,
     },
+    // Note: Standardized error handling is provided by ErrorHandlingModule
   ],
 })
 export class AppModule implements NestModule {
+  /**
+   * Performs the configure operation.
+   * @param consumer - The consumer.
+   * @returns The result of the operation.
+   */
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(SecurityHeadersMiddleware).forRoutes('*');
 

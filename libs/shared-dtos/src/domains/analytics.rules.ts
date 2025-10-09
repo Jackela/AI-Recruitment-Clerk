@@ -8,6 +8,9 @@ import {
   UserSession
 } from './analytics.dto';
 
+/**
+ * Represents the analytics rules.
+ */
 export class AnalyticsRules {
   // 核心业务规则常量 - 数据分析系统
   static readonly MAX_EVENTS_PER_SESSION = 1000;        // 单会话最大事件数
@@ -534,7 +537,16 @@ export class AnalyticsRules {
 }
 
 // 结果类定义
+/**
+ * Represents the event creation eligibility result.
+ */
 export class EventCreationEligibilityResult {
+  /**
+   * Initializes a new instance of the Event Creation Eligibility Result.
+   * @param isEligible - The is eligible.
+   * @param errors - The errors.
+   * @param priority - The priority.
+   */
   constructor(
     public readonly isEligible: boolean,
     public readonly errors: string[],
@@ -542,14 +554,31 @@ export class EventCreationEligibilityResult {
   ) {}
 }
 
+/**
+ * Represents the event data validation result.
+ */
 export class EventDataValidationResult {
+  /**
+   * Initializes a new instance of the Event Data Validation Result.
+   * @param isValid - The is valid.
+   * @param errors - The errors.
+   */
   constructor(
     public readonly isValid: boolean,
     public readonly errors: string[]
   ) {}
 }
 
+/**
+ * Represents the event priority.
+ */
 export class EventPriority {
+  /**
+   * Initializes a new instance of the Event Priority.
+   * @param score - The score.
+   * @param level - The level.
+   * @param factors - The factors.
+   */
   constructor(
     public readonly score: number,
     public readonly level: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
@@ -557,7 +586,17 @@ export class EventPriority {
   ) {}
 }
 
+/**
+ * Represents the batch processing eligibility result.
+ */
 export class BatchProcessingEligibilityResult {
+  /**
+   * Initializes a new instance of the Batch Processing Eligibility Result.
+   * @param isEligible - The is eligible.
+   * @param errors - The errors.
+   * @param warnings - The warnings.
+   * @param eligibleEventCount - The eligible event count.
+   */
   constructor(
     public readonly isEligible: boolean,
     public readonly errors: string[],
@@ -566,7 +605,19 @@ export class BatchProcessingEligibilityResult {
   ) {}
 }
 
+/**
+ * Represents the analytics data retention policy.
+ */
 export class AnalyticsDataRetentionPolicy {
+  /**
+   * Initializes a new instance of the Analytics Data Retention Policy.
+   * @param eventId - The event id.
+   * @param retentionExpiry - The retention expiry.
+   * @param anonymizationThreshold - The anonymization threshold.
+   * @param daysUntilExpiry - The days until expiry.
+   * @param daysUntilAnonymization - The days until anonymization.
+   * @param recommendedActions - The recommended actions.
+   */
   constructor(
     public readonly eventId: string,
     public readonly retentionExpiry: Date,
@@ -577,7 +628,19 @@ export class AnalyticsDataRetentionPolicy {
   ) {}
 }
 
+/**
+ * Represents the privacy compliance risk assessment.
+ */
 export class PrivacyComplianceRiskAssessment {
+  /**
+   * Initializes a new instance of the Privacy Compliance Risk Assessment.
+   * @param eventId - The event id.
+   * @param sessionId - The session id.
+   * @param riskScore - The risk score.
+   * @param riskLevel - The risk level.
+   * @param riskFactors - The risk factors.
+   * @param recommendedActions - The recommended actions.
+   */
   constructor(
     public readonly eventId: string,
     public readonly sessionId: string,
@@ -588,7 +651,18 @@ export class PrivacyComplianceRiskAssessment {
   ) {}
 }
 
+/**
+ * Represents the anonymization requirement result.
+ */
 export class AnonymizationRequirementResult {
+  /**
+   * Initializes a new instance of the Anonymization Requirement Result.
+   * @param isRequired - The is required.
+   * @param isOverdue - The is overdue.
+   * @param urgency - The urgency.
+   * @param daysSinceCreation - The days since creation.
+   * @param anonymizationThresholdDays - The anonymization threshold days.
+   */
   constructor(
     public readonly isRequired: boolean,
     public readonly isOverdue: boolean,
@@ -598,7 +672,16 @@ export class AnonymizationRequirementResult {
   ) {}
 }
 
+/**
+ * Represents the reporting permissions result.
+ */
 export class ReportingPermissionsResult {
+  /**
+   * Initializes a new instance of the Reporting Permissions Result.
+   * @param hasAccess - The has access.
+   * @param permissions - The permissions.
+   * @param restrictions - The restrictions.
+   */
   constructor(
     public readonly hasAccess: boolean,
     public readonly permissions: string[],
@@ -622,6 +705,9 @@ export enum DataScope {
 }
 
 // 接口定义
+/**
+ * Defines the shape of the session analytics.
+ */
 export interface SessionAnalytics {
   sessionId: string;
   userId?: string;
@@ -633,6 +719,9 @@ export interface SessionAnalytics {
   averageEventInterval: number;
 }
 
+/**
+ * Defines the shape of the event processing metrics.
+ */
 export interface EventProcessingMetrics {
   totalEvents: number;
   processedEvents: number;
@@ -642,6 +731,9 @@ export interface EventProcessingMetrics {
   errorRate: number;
 }
 
+/**
+ * Defines the shape of the data privacy metrics.
+ */
 export interface DataPrivacyMetrics {
   totalEvents: number;
   anonymizedEvents: number;

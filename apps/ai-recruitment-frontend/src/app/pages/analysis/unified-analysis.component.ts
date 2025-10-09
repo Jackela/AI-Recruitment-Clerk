@@ -70,6 +70,9 @@ interface StepChangeEvent {
   currentStep?: string;
 }
 
+/**
+ * Represents the unified analysis component.
+ */
 @Component({
   selector: 'arc-unified-analysis',
   standalone: true,
@@ -213,6 +216,13 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
 
   private destroy$ = new Subject<void>();
 
+  /**
+   * Initializes a new instance of the Unified Analysis Component.
+   * @param guestApi - The guest api.
+   * @param webSocketService - The web socket service.
+   * @param router - The router.
+   * @param toastService - The toast service.
+   */
   constructor(
     private readonly guestApi: GuestApiService,
     private readonly webSocketService: WebSocketService,
@@ -220,45 +230,82 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     private readonly toastService: ToastService,
   ) {}
 
+  /**
+   * Performs the ng after view init operation.
+   */
   ngAfterViewInit(): void {
     // Load real statistics from API
     this.loadStatistics();
   }
 
   // Child Component Event Handlers
+  /**
+   * Performs the on file submitted operation.
+   * @param uploadData - The upload data.
+   */
   onFileSubmitted(uploadData: FileUploadData): void {
     this.startAnalysis(uploadData);
   }
 
+  /**
+   * Performs the on demo requested operation.
+   */
   onDemoRequested(): void {
     this.startDemo();
   }
 
+  /**
+   * Performs the on file validation error operation.
+   * @param errorMessage - The error message.
+   */
   onFileValidationError(errorMessage: string): void {
     this.errorMessage.set(errorMessage);
     this.currentState.set('error');
   }
 
+  /**
+   * Performs the on progress update operation.
+   * @param update - The update.
+   */
   onProgressUpdate(update: ProgressUpdate): void {
     this.updateAnalysisProgress(update.currentStep, update.progress);
   }
 
+  /**
+   * Performs the on step change operation.
+   * @param stepName - The step name.
+   */
   onStepChange(stepName: string): void {
     this.handleStepChange({ step: stepName });
   }
 
+  /**
+   * Performs the on analysis completed operation.
+   * @param completion - The completion.
+   */
   onAnalysisCompleted(completion: AnalysisCompletionEvent): void {
     this.handleAnalysisCompletion(completion);
   }
 
+  /**
+   * Performs the on analysis error operation.
+   * @param error - The error.
+   */
   onAnalysisError(error: AnalysisErrorEvent): void {
     this.handleAnalysisError(error);
   }
 
+  /**
+   * Performs the on analysis cancelled operation.
+   */
   onAnalysisCancelled(): void {
     this.cancelAnalysis();
   }
 
+  /**
+   * Performs the on result action operation.
+   * @param action - The action.
+   */
   onResultAction(action: ResultAction): void {
     switch (action.type) {
       case 'view-detailed':
@@ -273,6 +320,10 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     }
   }
 
+  /**
+   * Performs the on error action operation.
+   * @param action - The action.
+   */
   onErrorAction(action: ErrorAction): void {
     switch (action.type) {
       case 'retry':
@@ -287,14 +338,25 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     }
   }
 
+  /**
+   * Performs the on error reported operation.
+   * @param _errorInfo - The error info.
+   */
   onErrorReported(_errorInfo: ErrorInfo): void {
     this.toastService.success('错误报告已发送，感谢您的反馈');
   }
 
+  /**
+   * Performs the on tip category changed operation.
+   * @param _category - The category.
+   */
   onTipCategoryChanged(_category: string): void {
     // Handle tip category changes if needed
   }
 
+  /**
+   * Performs the on more tips requested operation.
+   */
   onMoreTipsRequested(): void {
     // Load more tips if needed
   }
@@ -530,6 +592,10 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
   }
 
   // Helper Methods
+  /**
+   * Retrieves error info.
+   * @returns The ErrorInfo.
+   */
   getErrorInfo(): ErrorInfo {
     return {
       message: this.errorMessage(),
@@ -539,6 +605,10 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     };
   }
 
+  /**
+   * Retrieves usage statistics.
+   * @returns The UsageStatistics.
+   */
   getUsageStatistics(): UsageStatistics {
     return {
       todayAnalyses: this.todayAnalyses(),
@@ -628,6 +698,9 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     }
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

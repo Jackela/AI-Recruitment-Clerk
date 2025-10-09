@@ -1,3 +1,6 @@
+/**
+ * Defines the shape of the detailed analysis result.
+ */
 export interface DetailedAnalysisResult {
   sessionId: string;
   candidateName: string;
@@ -18,6 +21,9 @@ export interface DetailedAnalysisResult {
   reportUrl: string;
 }
 
+/**
+ * Defines the shape of the skill analysis.
+ */
 export interface SkillAnalysis {
   technical: number;
   communication: number;
@@ -26,6 +32,9 @@ export interface SkillAnalysis {
   leadership: number;
 }
 
+/**
+ * Defines the shape of the experience detail.
+ */
 export interface ExperienceDetail {
   company: string;
   position: string;
@@ -33,6 +42,9 @@ export interface ExperienceDetail {
   description: string;
 }
 
+/**
+ * Defines the shape of the education detail.
+ */
 export interface EducationDetail {
   degree: string;
   major: string;
@@ -40,11 +52,17 @@ export interface EducationDetail {
   graduationYear: string;
 }
 
+/**
+ * Defines the shape of the radar chart data.
+ */
 export interface RadarChartData {
   skill: string;
   value: number;
 }
 
+/**
+ * Defines the shape of the skill tag style.
+ */
 export interface SkillTagStyle {
   'background-color': string;
   color: string;

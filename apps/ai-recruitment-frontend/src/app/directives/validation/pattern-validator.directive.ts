@@ -6,6 +6,9 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 
+/**
+ * Represents the pattern validator directive.
+ */
 @Directive({
   selector: '[arcPattern]',
   standalone: true,
@@ -21,6 +24,11 @@ export class PatternValidatorDirective implements Validator {
   @Input() arcPattern!: string | RegExp;
   @Input() patternMessage?: string;
 
+  /**
+   * Validates the data.
+   * @param control - The control.
+   * @returns The ValidationErrors | null.
+   */
   validate(control: AbstractControl): ValidationErrors | null {
     if (!control.value || !this.arcPattern) {
       return null;

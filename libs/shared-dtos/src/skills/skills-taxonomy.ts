@@ -9,6 +9,9 @@ export interface SkillCategory {
   subcategories: string[];
 }
 
+/**
+ * Defines the shape of the skill mapping.
+ */
 export interface SkillMapping {
   canonical: string;
   synonyms: string[];
@@ -18,6 +21,9 @@ export interface SkillMapping {
   relatedSkills?: string[];
 }
 
+/**
+ * Defines the shape of the skill hierarchy.
+ */
 export interface SkillHierarchy {
   category: string;
   subcategories: {
@@ -28,6 +34,9 @@ export interface SkillHierarchy {
   };
 }
 
+/**
+ * Represents the skills taxonomy.
+ */
 export class SkillsTaxonomy {
   private static readonly SKILL_CATEGORIES: SkillCategory[] = [
     {

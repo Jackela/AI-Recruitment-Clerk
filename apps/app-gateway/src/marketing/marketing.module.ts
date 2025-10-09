@@ -5,6 +5,9 @@ import { FeedbackCodeService } from './feedback-code.service';
 import { FeedbackCodeSchema } from './schemas/feedback-code.schema';
 import { MarketingAdminController } from './marketing-admin.controller';
 
+/**
+ * Configures the marketing module.
+ */
 @Module({
   imports: [
     MongooseModule.forFeature([

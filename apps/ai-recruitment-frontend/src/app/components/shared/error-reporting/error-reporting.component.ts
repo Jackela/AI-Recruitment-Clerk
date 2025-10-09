@@ -13,6 +13,9 @@ import {
 } from '../../../services/error/error-correlation.service';
 import { ToastService } from '../../../services/toast.service';
 
+/**
+ * Represents the error reporting component.
+ */
 @Component({
   selector: 'arc-error-reporting',
   standalone: true,
@@ -581,6 +584,13 @@ export class ErrorReportingComponent {
     icon: string;
   }> = [];
 
+  /**
+   * Initializes a new instance of the Error Reporting Component.
+   * @param fb - The fb.
+   * @param errorReporting - The error reporting.
+   * @param errorCorrelation - The error correlation.
+   * @param toastService - The toast service.
+   */
   constructor(
     private fb: FormBuilder,
     private errorReporting: ErrorReportingService,
@@ -598,6 +608,10 @@ export class ErrorReportingComponent {
     this.categories = this.errorReporting.getUserFriendlyCategories();
   }
 
+  /**
+   * Performs the show operation.
+   * @param errors - The errors.
+   */
   show(errors?: StructuredError[]): void {
     if (errors && errors.length > 0) {
       this.errors = errors;
@@ -619,22 +633,36 @@ export class ErrorReportingComponent {
     this.resetForm();
   }
 
+  /**
+   * Performs the close operation.
+   */
   close(): void {
     this.isVisible.set(false);
     this.resetForm();
   }
 
+  /**
+   * Performs the selected category operation.
+   * @returns The result of the operation.
+   */
   selectedCategory() {
     const categoryKey = this.reportForm.get('category')?.value;
     return this.categories.find((cat) => cat.key === categoryKey);
   }
 
+  /**
+   * Performs the add reproduction step operation.
+   */
   addReproductionStep(): void {
     const steps = [...this.reproductionSteps()];
     steps.push('');
     this.reproductionSteps.set(steps);
   }
 
+  /**
+   * Removes reproduction step.
+   * @param index - The index.
+   */
   removeReproductionStep(index: number): void {
     const steps = [...this.reproductionSteps()];
     steps.splice(index, 1);
@@ -644,16 +672,30 @@ export class ErrorReportingComponent {
     this.reproductionSteps.set(steps);
   }
 
+  /**
+   * Updates reproduction step.
+   * @param index - The index.
+   * @param event - The event.
+   */
   updateReproductionStep(index: number, event: any): void {
     const steps = [...this.reproductionSteps()];
     steps[index] = event.target.value;
     this.reproductionSteps.set(steps);
   }
 
+  /**
+   * Performs the format guidance operation.
+   * @param guidance - The guidance.
+   * @returns The string value.
+   */
   formatGuidance(guidance: string): string {
     return guidance.replace(/\n/g, '<br>').replace(/•/g, '&bull;');
   }
 
+  /**
+   * Performs the on submit operation.
+   * @returns A promise that resolves when the operation completes.
+   */
   async onSubmit(): Promise<void> {
     if (!this.reportForm.valid) return;
 

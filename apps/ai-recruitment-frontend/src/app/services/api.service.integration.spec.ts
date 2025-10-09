@@ -16,11 +16,12 @@ import {
   ResumeUploadResponse,
 } from '../store/resumes/resume.model';
 import { AnalysisReport, ReportsList } from '../store/reports/report.model';
+import { environment } from '../../environments/environment';
 
 describe('ApiService Integration Tests', () => {
   let service: ApiService;
   let httpMock: HttpTestingController;
-  const baseUrl = '/api';
+  const baseUrl = environment.apiUrl; // Use actual environment config
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -571,7 +572,7 @@ describe('ApiService Integration Tests', () => {
         },
       });
 
-      const req = httpMock.expectOne(`/api/reports/restricted-report`);
+      const req = httpMock.expectOne(`${baseUrl}/reports/restricted-report`);
       req.flush('Access forbidden', { status: 403, statusText: 'Forbidden' });
     });
   });

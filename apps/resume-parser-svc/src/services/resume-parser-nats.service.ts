@@ -2,6 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { NatsClientService, NatsPublishResult } from '@app/shared-nats-client';
 import { DeliverPolicy } from 'nats';
 
+/**
+ * Provides resume parser nats functionality.
+ */
 @Injectable()
 export class ResumeParserNatsService extends NatsClientService {
   private readonly serviceLogger = new Logger(ResumeParserNatsService.name);

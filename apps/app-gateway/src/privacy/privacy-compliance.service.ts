@@ -42,6 +42,10 @@ export class PrivacyComplianceService {
   private readonly consentRecordModel: any; // Temporary fallback until proper injection
   private readonly dataSubjectRightsModel: any; // Temporary fallback until proper injection
 
+  /**
+   * Initializes a new instance of the Privacy Compliance Service.
+   * @param userProfileModel - The user profile model.
+   */
   constructor(
     @InjectModel(UserProfile.name)
     private userProfileModel: Model<UserProfileDocument>,

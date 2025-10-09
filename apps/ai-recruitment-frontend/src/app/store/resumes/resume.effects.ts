@@ -5,6 +5,9 @@ import { catchError, map, mergeMap, switchMap } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
 import * as ResumeActions from './resume.actions';
 
+/**
+ * Represents the resume effects.
+ */
 @Injectable()
 export class ResumeEffects {
   loadResumesByJob$;
@@ -12,6 +15,11 @@ export class ResumeEffects {
   uploadResumes$;
   uploadResumesSuccess$;
 
+  /**
+   * Initializes a new instance of the Resume Effects.
+   * @param actions$ - The actions$.
+   * @param apiService - The api service.
+   */
   constructor(
     private actions$: Actions,
     private apiService: ApiService,

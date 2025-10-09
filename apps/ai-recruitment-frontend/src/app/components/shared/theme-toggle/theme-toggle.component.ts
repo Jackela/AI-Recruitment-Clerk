@@ -1,7 +1,10 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ThemeService, Theme } from '../../../services/theme/theme.service';
 
+/**
+ * Represents the theme toggle component.
+ */
 @Component({
   selector: 'arc-theme-toggle',
   standalone: true,
@@ -401,24 +404,44 @@ export class ThemeToggleComponent {
   currentTheme = computed(() => this.themeService.currentTheme());
   isDarkMode = computed(() => this.themeService.isDarkMode());
 
-  constructor(private themeService: ThemeService) {
+  private themeService = inject(ThemeService);
+
+  /**
+   * Initializes a new instance of the Theme Toggle Component.
+   */
+  constructor() {
     // Close dropdown on outside click
     this.setupOutsideClickHandler();
   }
 
+  /**
+   * Sets theme.
+   * @param theme - The theme.
+   */
   setTheme(theme: Theme): void {
     this.themeService.setTheme(theme);
   }
 
+  /**
+   * Performs the toggle dropdown operation.
+   */
   toggleDropdown(): void {
     this.dropdownOpen = !this.dropdownOpen;
   }
 
+  /**
+   * Performs the select theme operation.
+   * @param theme - The theme.
+   */
   selectTheme(theme: Theme): void {
     this.setTheme(theme);
     this.dropdownOpen = false;
   }
 
+  /**
+   * Retrieves theme label.
+   * @returns The string value.
+   */
   getThemeLabel(): string {
     const theme = this.currentTheme();
     switch (theme) {

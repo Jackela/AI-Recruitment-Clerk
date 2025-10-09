@@ -31,7 +31,7 @@ global.ResizeObserver = class ResizeObserver {
 // Mock IntersectionObserver for lazy loading tests
 global.IntersectionObserver = class IntersectionObserver {
   root: Element | null = null;
-  rootMargin: string = '0px';
+  rootMargin = '0px';
   thresholds: ReadonlyArray<number> = [];
 
   constructor(_callback: IntersectionObserverCallback) {}

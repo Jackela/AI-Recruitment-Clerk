@@ -5,11 +5,15 @@ import {
   EventEmitter,
   OnInit,
   OnDestroy,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { Subject, takeUntil, filter } from 'rxjs';
 
+/**
+ * Defines the shape of the mobile nav item.
+ */
 export interface MobileNavItem {
   id: string;
   label: string;
@@ -19,8 +23,11 @@ export interface MobileNavItem {
   disabled?: boolean;
 }
 
+/**
+ * Represents the mobile navigation component.
+ */
 @Component({
-  selector: 'app-mobile-navigation',
+  selector: 'arc-mobile-navigation',
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
@@ -883,20 +890,24 @@ export class MobileNavigationComponent implements OnInit, OnDestroy {
   @Input() showBackButton = false;
   @Input() navItems: MobileNavItem[] = [];
   @Input() menuItems: MobileNavItem[] = [];
-  @Input() headerActions: any[] = [];
-  @Input() menuActions: any[] = [];
+  @Input() headerActions: Array<{id: string; label: string; icon?: string; action: () => void}> = [];
+  @Input() menuActions: Array<{id: string; label: string; icon?: string; action: () => void}> = [];
 
   @Output() backClick = new EventEmitter<void>();
-  @Output() actionClick = new EventEmitter<any>();
-  @Output() menuActionClick = new EventEmitter<any>();
+  @Output() actionClick = new EventEmitter<{id: string; label: string}>(); 
+  @Output() menuActionClick = new EventEmitter<{id: string; label: string}>();
 
   currentRoute = '';
   isMenuOpen = false;
   isScrolled = false;
   private destroy$ = new Subject<void>();
 
-  constructor(private router: Router) {}
+  private router = inject(Router);
 
+  /**
+   * Performs the ng on init operation.
+   * @returns The result of the operation.
+   */
   ngOnInit() {
     // Track current route
     this.router.events
@@ -915,6 +926,10 @@ export class MobileNavigationComponent implements OnInit, OnDestroy {
     window.addEventListener('scroll', this.handleScroll.bind(this));
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   * @returns The result of the operation.
+   */
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
@@ -925,19 +940,37 @@ export class MobileNavigationComponent implements OnInit, OnDestroy {
     this.isScrolled = window.scrollY > 10;
   }
 
+  /**
+   * Performs the on back click operation.
+   * @returns The result of the operation.
+   */
   onBackClick() {
     this.backClick.emit();
   }
 
+  /**
+   * Performs the on action click operation.
+   * @param action - The action.
+   * @returns The result of the operation.
+   */
   onActionClick(action: any) {
     this.actionClick.emit(action);
   }
 
+  /**
+   * Performs the on menu action click operation.
+   * @param action - The action.
+   * @returns The result of the operation.
+   */
   onMenuActionClick(action: any) {
     this.menuActionClick.emit(action);
     this.closeMenu();
   }
 
+  /**
+   * Performs the toggle menu operation.
+   * @returns The result of the operation.
+   */
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
 
@@ -949,11 +982,20 @@ export class MobileNavigationComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the close menu operation.
+   * @returns The result of the operation.
+   */
   closeMenu() {
     this.isMenuOpen = false;
     document.body.style.overflow = '';
   }
 
+  /**
+   * Performs the on menu item click operation.
+   * @param item - The item.
+   * @returns The result of the operation.
+   */
   onMenuItemClick(item: MobileNavItem) {
     if (!item.disabled) {
       this.closeMenu();

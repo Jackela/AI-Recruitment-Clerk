@@ -1,11 +1,17 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+/**
+ * Defines the shape of the error action.
+ */
 export interface ErrorAction {
   type: 'retry' | 'start-new' | 'contact-support';
   payload?: any;
 }
 
+/**
+ * Defines the shape of the error info.
+ */
 export interface ErrorInfo {
   message: string;
   code?: string;
@@ -14,6 +20,9 @@ export interface ErrorInfo {
   timestamp?: Date;
 }
 
+/**
+ * Represents the analysis error component.
+ */
 @Component({
   selector: 'arc-analysis-error',
   standalone: true,
@@ -440,10 +449,18 @@ export class AnalysisErrorComponent {
 
   isReporting = false;
 
+  /**
+   * Performs the on action operation.
+   * @param type - The type.
+   */
   onAction(type: ErrorAction['type']): void {
     this.actionRequested.emit({ type });
   }
 
+  /**
+   * Performs the send error report operation.
+   * @returns A promise that resolves when the operation completes.
+   */
   async sendErrorReport(): Promise<void> {
     if (!this.errorInfo) return;
 
@@ -456,6 +473,10 @@ export class AnalysisErrorComponent {
     }
   }
 
+  /**
+   * Retrieves header description.
+   * @returns The string value.
+   */
   getHeaderDescription(): string {
     if (this.isNetworkError()) {
       return '网络连接或服务器响应异常';
@@ -466,35 +487,63 @@ export class AnalysisErrorComponent {
     return '处理过程中遇到问题';
   }
 
+  /**
+   * Retrieves icon class.
+   * @returns The string value.
+   */
   getIconClass(): string {
     if (this.isNetworkError()) return 'network';
     if (this.isServerError()) return 'server';
     return '';
   }
 
+  /**
+   * Performs the is network error operation.
+   * @returns The boolean value.
+   */
   isNetworkError(): boolean {
     const code = this.errorInfo?.code?.toLowerCase();
     return code?.includes('network') || code?.includes('timeout') || false;
   }
 
+  /**
+   * Performs the is file error operation.
+   * @returns The boolean value.
+   */
   isFileError(): boolean {
     const code = this.errorInfo?.code?.toLowerCase();
     return code?.includes('file') || code?.includes('parse') || false;
   }
 
+  /**
+   * Performs the is server error operation.
+   * @returns The boolean value.
+   */
   isServerError(): boolean {
     const code = this.errorInfo?.code?.toLowerCase();
     return code?.includes('server') || code?.includes('internal') || false;
   }
 
+  /**
+   * Performs the is recoverable operation.
+   * @returns The boolean value.
+   */
   isRecoverable(): boolean {
     return this.errorInfo?.recoverable !== false;
   }
 
+  /**
+   * Performs the should show support operation.
+   * @returns The boolean value.
+   */
   shouldShowSupport(): boolean {
     return !this.isRecoverable() || this.isServerError();
   }
 
+  /**
+   * Retrieves suggestions.
+   * @returns The an array of string value.
+   */
   getSuggestions(): string[] {
     if (this.isNetworkError()) {
       return [
@@ -528,6 +577,10 @@ export class AnalysisErrorComponent {
     ];
   }
 
+  /**
+   * Retrieves troubleshooting tips.
+   * @returns The Array<{ title: string; description: string }>.
+   */
   getTroubleshootingTips(): Array<{ title: string; description: string }> {
     return [
       {
@@ -551,6 +604,11 @@ export class AnalysisErrorComponent {
     ];
   }
 
+  /**
+   * Performs the format timestamp operation.
+   * @param timestamp - The timestamp.
+   * @returns The string value.
+   */
   formatTimestamp(timestamp: Date | undefined): string {
     if (!timestamp) return 'N/A';
     return new Intl.DateTimeFormat('zh-CN', {

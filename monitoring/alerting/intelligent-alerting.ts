@@ -7,6 +7,109 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 
+// Enhanced type definitions for intelligent alerting system
+export type ConditionValue = string | number | boolean | string[] | number[];
+export type ActionParameterValue = string | number | boolean | string[] | number[] | Record<string, unknown>;
+
+export interface AlertContext {
+  correlationId?: string;
+  userId?: string;
+  sessionId?: string;
+  requestId?: string;
+  sourceIp?: string;
+  userAgent?: string;
+  additionalData?: Record<string, ConditionValue>;
+}
+
+export interface PerformanceContext {
+  avgCpuUsage: number;
+  avgMemoryUsage: number;
+  requestThroughput: number;
+  errorRate: number;
+  responseTime?: number;
+  activeConnections?: number;
+}
+
+export interface HealthContext {
+  totalServices: number;
+  healthyServices: number;
+  degradedServices: number;
+  unhealthyServices: number;
+  serviceDetails?: Array<{
+    name: string;
+    status: 'healthy' | 'degraded' | 'unhealthy' | 'critical';
+    uptime?: number;
+    lastCheck?: Date;
+  }>;
+}
+
+export interface SecurityContext {
+  eventType: 'authentication' | 'authorization' | 'intrusion' | 'data_breach' | 'malware' | 'other';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  sourceIp?: string;
+  targetResource?: string;
+  attackVector?: string;
+  confidence?: number;
+}
+
+export interface SystemHealthData {
+  overall: 'healthy' | 'degraded' | 'unhealthy' | 'critical';
+  services?: Array<{
+    name: string;
+    status: 'healthy' | 'degraded' | 'unhealthy' | 'critical';
+    uptime?: number;
+    responseTime?: number;
+  }>;
+  metrics?: {
+    cpu?: number;
+    memory?: number;
+    disk?: number;
+    network?: number;
+  };
+}
+
+export interface SecurityEventData {
+  events?: SecurityContext[];
+  metrics?: {
+    criticalEvents: number;
+    suspiciousActivities: number;
+    blockedRequests: number;
+    threatLevel: 'low' | 'medium' | 'high' | 'critical';
+  };
+}
+
+export interface PerformanceEventData {
+  metric: string;
+  value: number;
+  threshold?: number;
+  timeWindow?: number;
+  trend?: 'improving' | 'stable' | 'degrading';
+  context?: PerformanceContext;
+}
+
+export interface HealthEventData {
+  systemHealth?: SystemHealthData;
+  affectedServices?: string[];
+  healthScore?: number;
+  context?: HealthContext;
+}
+
+export interface RemediationAction {
+  action: 'restart_service' | 'scale_up' | 'scale_down' | 'block_ip' | 'restart_services' | 'block_suspicious_ips' | string;
+  parameters: Record<string, ActionParameterValue>;
+  conditions?: Array<{
+    metric: string;
+    operator: '>' | '<' | '=' | '>=' | '<=' | '!=' | 'contains' | 'not_contains';
+    value: ConditionValue;
+  }>;
+}
+
+export interface SuppressionCondition {
+  metric: string;
+  operator: '>' | '<' | '=' | '>=' | '<=' | '!=' | 'contains' | 'not_contains';
+  value: ConditionValue;
+}
+
 export interface Alert {
   id: string;
   type: 'health' | 'performance' | 'security' | 'business' | 'system';
@@ -24,7 +127,7 @@ export interface Alert {
       impactLevel?: 'low' | 'medium' | 'high' | 'critical';
       autoResolvable?: boolean;
     };
-    context?: any;
+    context?: AlertContext;
   };
   escalation: {
     level: number;
@@ -67,11 +170,7 @@ export interface AlertRule {
   severity: Alert['severity'];
   enabled: boolean;
   suppressionRules?: {
-    conditions: Array<{
-      metric: string;
-      operator: string;
-      value: any;
-    }>;
+    conditions: SuppressionCondition[];
     duration: number; // minutes
   };
   escalationPolicy: {
@@ -83,11 +182,11 @@ export interface AlertRule {
     enabled: boolean;
     actions: Array<{
       action: string;
-      parameters: Record<string, any>;
+      parameters: Record<string, ActionParameterValue>;
       conditions?: Array<{
         metric: string;
-        operator: string;
-        value: any;
+        operator: '>' | '<' | '=' | '>=' | '<=' | '!=' | 'contains' | 'not_contains';
+        value: ConditionValue;
       }>;
     }>;
   };
@@ -299,7 +398,7 @@ export class IntelligentAlertingService {
    * Event handlers for system monitoring
    */
   @OnEvent('health.critical')
-  handleHealthCritical(data: any): void {
+  handleHealthCritical(data: HealthEventData): void {
     this.createAlert({
       type: 'health',
       severity: 'critical',
@@ -314,7 +413,7 @@ export class IntelligentAlertingService {
   }
 
   @OnEvent('health.unhealthy')
-  handleHealthUnhealthy(data: any): void {
+  handleHealthUnhealthy(data: HealthEventData): void {
     this.createAlert({
       type: 'health',
       severity: 'error',
@@ -329,7 +428,7 @@ export class IntelligentAlertingService {
   }
 
   @OnEvent('security.critical')
-  handleSecurityCritical(data: any): void {
+  handleSecurityCritical(data: SecurityEventData): void {
     this.createAlert({
       type: 'security',
       severity: 'critical',
@@ -344,7 +443,7 @@ export class IntelligentAlertingService {
   }
 
   @OnEvent('performance.degraded')
-  handlePerformanceDegraded(data: any): void {
+  handlePerformanceDegraded(data: PerformanceEventData): void {
     this.createAlert({
       type: 'performance',
       severity: 'warning',
@@ -507,11 +606,11 @@ export class IntelligentAlertingService {
     }
   }
 
-  private shouldExecuteAction(action: any, alert: Alert): boolean {
+  private shouldExecuteAction(action: RemediationAction, alert: Alert): boolean {
     if (!action.conditions) return true;
 
     // Check all conditions
-    return action.conditions.every((condition: any) => {
+    return action.conditions.every((condition) => {
       const metricValue = alert.metadata.metrics?.[condition.metric];
       if (metricValue === undefined) return false;
 
@@ -527,7 +626,7 @@ export class IntelligentAlertingService {
     });
   }
 
-  private executeRemediationAction(action: any, alert: Alert): void {
+  private executeRemediationAction(action: RemediationAction, alert: Alert): void {
     // Log the action
     alert.actions.taken.push({
       action: action.action,
@@ -674,7 +773,7 @@ export class IntelligentAlertingService {
     return alert.type !== 'security' && alert.severity !== 'critical';
   }
 
-  private getPerformanceContext(): any {
+  private getPerformanceContext(): PerformanceContext {
     return {
       avgCpuUsage: 45,
       avgMemoryUsage: 68,
@@ -683,7 +782,7 @@ export class IntelligentAlertingService {
     };
   }
 
-  private getHealthContext(): any {
+  private getHealthContext(): HealthContext {
     return {
       totalServices: 6,
       healthyServices: 4,

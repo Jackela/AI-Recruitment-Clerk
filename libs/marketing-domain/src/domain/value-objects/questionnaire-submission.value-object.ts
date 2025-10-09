@@ -8,6 +8,9 @@ import { SubmissionSummary } from './submission-summary.value-object.js';
 import { Answer } from './answer.value-object.js';
 import { RawSubmissionData } from '../../application/dtos/questionnaire.dto.js';
 
+/**
+ * Represents the questionnaire submission.
+ */
 export class QuestionnaireSubmission extends ValueObject<{
   userProfile: UserProfile;
   userExperience: UserExperience;
@@ -16,6 +19,11 @@ export class QuestionnaireSubmission extends ValueObject<{
   optional: OptionalInfo;
   submittedAt: Date;
 }> {
+  /**
+   * Performs the from raw data operation.
+   * @param data - The data.
+   * @returns The QuestionnaireSubmission.
+   */
   static fromRawData(data: RawSubmissionData): QuestionnaireSubmission {
     return new QuestionnaireSubmission({
       userProfile: new UserProfile({
@@ -53,6 +61,11 @@ export class QuestionnaireSubmission extends ValueObject<{
     });
   }
   
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The QuestionnaireSubmission.
+   */
   static restore(data: any): QuestionnaireSubmission {
     return new QuestionnaireSubmission({
       ...data,
@@ -60,22 +73,42 @@ export class QuestionnaireSubmission extends ValueObject<{
     });
   }
   
+  /**
+   * Retrieves user profile.
+   * @returns The UserProfile.
+   */
   getUserProfile(): UserProfile {
     return this.props.userProfile;
   }
   
+  /**
+   * Retrieves user experience.
+   * @returns The UserExperience.
+   */
   getUserExperience(): UserExperience {
     return this.props.userExperience;
   }
   
+  /**
+   * Retrieves business value.
+   * @returns The BusinessValue.
+   */
   getBusinessValue(): BusinessValue {
     return this.props.businessValue;
   }
   
+  /**
+   * Retrieves optional info.
+   * @returns The OptionalInfo.
+   */
   getOptionalInfo(): OptionalInfo {
     return this.props.optional;
   }
   
+  /**
+   * Retrieves summary.
+   * @returns The SubmissionSummary.
+   */
   getSummary(): SubmissionSummary {
     return new SubmissionSummary({
       role: this.props.userProfile.role,
@@ -87,6 +120,11 @@ export class QuestionnaireSubmission extends ValueObject<{
     });
   }
   
+  /**
+   * Retrieves answer.
+   * @param questionId - The question id.
+   * @returns The Answer | null.
+   */
   getAnswer(questionId: string): Answer | null {
     // 简化实现，实际应该有更复杂的映射
     const answers = {

@@ -1,8 +1,52 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { GridFsService, ReportFileMetadata } from './gridfs.service';
-import { ReportDocument } from '../schemas/report.schema';
+import { ReportDocument, ScoreBreakdown, MatchingSkill, ReportRecommendation } from '../schemas/report.schema';
 import { marked } from 'marked';
 
+// Enhanced type definitions for report templates
+/**
+ * Defines the shape of the candidate comparison data.
+ */
+export interface CandidateComparisonData {
+  name: string;
+  score: number;
+  recommendation: string;
+  skills: string[];
+  strengths?: string[];
+  concerns?: string[];
+  experience?: number;
+  education?: number;
+}
+
+/**
+ * Defines the shape of the interview question.
+ */
+export interface InterviewQuestion {
+  category: string;
+  questions: Array<{
+    question: string;
+    lookFor: string;
+    followUp: string[];
+  }>;
+}
+
+/**
+ * Defines the shape of the additional template data.
+ */
+export interface AdditionalTemplateData {
+  jobTitle?: string;
+  candidateName?: string;
+  detailedAnalysis?: string;
+  companyLogo?: string;
+  companyName?: string;
+  candidates?: CandidateComparisonData[];
+  interviewQuestions?: InterviewQuestion[];
+  customData?: Record<string, unknown>;
+}
+
+/**
+ * Defines the shape of the report template.
+ */
 export interface ReportTemplate {
   type:
     | 'individual'
@@ -15,6 +59,9 @@ export interface ReportTemplate {
   styles?: string;
 }
 
+/**
+ * Defines the shape of the template variables.
+ */
 export interface TemplateVariables {
   reportTitle: string;
   jobTitle: string;
@@ -23,17 +70,20 @@ export interface TemplateVariables {
   resumeId?: string;
   generatedAt: Date;
   overallScore?: number;
-  scoreBreakdown?: any;
-  skillsAnalysis?: any[];
-  recommendation?: any;
+  scoreBreakdown?: ScoreBreakdown;
+  skillsAnalysis?: MatchingSkill[];
+  recommendation?: ReportRecommendation;
   summary: string;
   detailedAnalysis?: string;
   companyLogo?: string;
   companyName?: string;
-  candidates?: any[];
-  interviewQuestions?: any[];
+  candidates?: CandidateComparisonData[];
+  interviewQuestions?: InterviewQuestion[];
 }
 
+/**
+ * Defines the shape of the generated report file.
+ */
 export interface GeneratedReportFile {
   content: string;
   filename: string;
@@ -41,12 +91,27 @@ export interface GeneratedReportFile {
   metadata: ReportFileMetadata;
 }
 
+/**
+ * Provides report templates functionality.
+ */
 @Injectable()
 export class ReportTemplatesService {
   private readonly logger = new Logger(ReportTemplatesService.name);
 
+  /**
+   * Initializes a new instance of the Report Templates Service.
+   * @param gridFsService - The grid fs service.
+   */
   constructor(private readonly gridFsService: GridFsService) {}
 
+  /**
+   * Generates report in format.
+   * @param reportData - The report data.
+   * @param format - The format.
+   * @param templateType - The template type.
+   * @param additionalData - The additional data.
+   * @returns A promise that resolves to GeneratedReportFile.
+   */
   async generateReportInFormat(
     reportData: ReportDocument,
     format: 'markdown' | 'html' | 'json' | 'pdf' | 'excel',
@@ -56,7 +121,7 @@ export class ReportTemplatesService {
       | 'batch'
       | 'executive-summary'
       | 'interview-guide' = 'individual',
-    additionalData?: any,
+    additionalData?: AdditionalTemplateData,
   ): Promise<GeneratedReportFile> {
     try {
       this.logger.debug(`Generating ${format} report for ${templateType}`);
@@ -223,7 +288,7 @@ export class ReportTemplatesService {
 
   private buildTemplateVariables(
     reportData: ReportDocument,
-    additionalData?: any,
+    additionalData?: AdditionalTemplateData,
   ): TemplateVariables {
     return {
       reportTitle: `Recruitment Analysis Report - ${reportData.jobId}`,
@@ -625,6 +690,11 @@ Comparison of {{candidates.length}} candidates for the {{jobTitle}} position.
     return `${templateType}-report-${jobId}-${resumeId}-${timestamp}.${extension}`;
   }
 
+  /**
+   * Performs the save generated report operation.
+   * @param generatedReport - The generated report.
+   * @returns A promise that resolves to string value.
+   */
   async saveGeneratedReport(
     generatedReport: GeneratedReportFile,
   ): Promise<string> {
@@ -635,6 +705,13 @@ Comparison of {{candidates.length}} candidates for the {{jobTitle}} position.
     );
   }
 
+  /**
+   * Performs the save generated report buffer operation.
+   * @param content - The content.
+   * @param filename - The filename.
+   * @param metadata - The metadata.
+   * @returns A promise that resolves to string value.
+   */
   async saveGeneratedReportBuffer(
     content: Buffer,
     filename: string,

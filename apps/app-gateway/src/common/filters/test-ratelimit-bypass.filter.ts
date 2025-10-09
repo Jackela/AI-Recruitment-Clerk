@@ -1,7 +1,16 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
 
+/**
+ * Represents the test rate limit bypass filter.
+ */
 @Catch(HttpException)
 export class TestRateLimitBypassFilter implements ExceptionFilter {
+  /**
+   * Performs the catch operation.
+   * @param exception - The exception.
+   * @param host - The host.
+   * @returns The result of the operation.
+   */
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();

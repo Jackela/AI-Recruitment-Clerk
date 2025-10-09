@@ -100,6 +100,17 @@
           "optimization": false,
           "extractLicenses": false,
           "sourceMap": true
+        },
+        "test": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "fileReplacements": [
+            {
+              "replace": "apps/ai-recruitment-frontend/src/environments/environment.ts",
+              "with": "apps/ai-recruitment-frontend/src/environments/environment.test.ts"
+            }
+          ]
         }
       },
       "defaultConfiguration": "production"
@@ -113,6 +124,9 @@
         },
         "development": {
           "buildTarget": "ai-recruitment-frontend:build:development"
+        },
+        "test": {
+          "buildTarget": "ai-recruitment-frontend:build:test"
         }
       },
       "defaultConfiguration": "development"

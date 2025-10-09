@@ -153,6 +153,9 @@ ConsentRecordSchema.pre('save', function (next) {
  */
 export type CookieConsentDocument = CookieConsent & Document;
 
+/**
+ * Represents the cookie consent.
+ */
 @Schema({
   collection: 'cookie_consents',
   timestamps: true,
@@ -226,6 +229,9 @@ CookieConsentSchema.pre('save', function (next) {
  */
 export type ConsentAuditLogDocument = ConsentAuditLog & Document;
 
+/**
+ * Represents the consent audit log.
+ */
 @Schema({
   collection: 'consent_audit_logs',
   timestamps: true,

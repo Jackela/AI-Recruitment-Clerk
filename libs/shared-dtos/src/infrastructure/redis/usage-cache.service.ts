@@ -11,6 +11,10 @@ export class UsageCacheService {
   private readonly BONUS_PREFIX = 'bonus:';
   private readonly DEFAULT_TTL = 24 * 60 * 60; // 24小时
 
+  /**
+   * Initializes a new instance of the Usage Cache Service.
+   * @param redis - The redis.
+   */
   constructor(private readonly redis: RedisClient) {}
 
   /**

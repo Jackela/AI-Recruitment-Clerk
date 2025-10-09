@@ -31,6 +31,9 @@ interface AnalyticsDashboardData {
   processedResumesCount: number;
 }
 
+/**
+ * Represents the analytics dashboard component.
+ */
 @Component({
   selector: 'arc-analytics-dashboard',
   standalone: true,
@@ -575,6 +578,10 @@ interface AnalyticsDashboardData {
 export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
   dashboardData$: Observable<AnalyticsDashboardData>;
 
+  /**
+   * Initializes a new instance of the Analytics Dashboard Component.
+   * @param store - The store.
+   */
   constructor(private store: Store<AppState>) {
     // Demonstrate usage of selectors from all three feature stores
     this.dashboardData$ = combineLatest([
@@ -620,11 +627,17 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
     );
   }
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     // Component initialization
     console.log('Analytics Dashboard initialized with NgRx selectors');
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     // Cleanup if needed
   }

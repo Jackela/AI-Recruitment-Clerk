@@ -17,6 +17,9 @@ import { Subject, fromEvent, animationFrameScheduler } from 'rxjs';
 import { takeUntil, throttleTime, distinctUntilChanged } from 'rxjs/operators';
 // import { debounceTime } from 'rxjs/operators'; // Reserved for future use
 
+/**
+ * Defines the shape of the virtual scroll config.
+ */
 export interface VirtualScrollConfig<T = unknown> {
   itemHeight: number;
   bufferSize?: number;
@@ -34,6 +37,9 @@ interface ScrollState {
   clientHeight: number;
 }
 
+/**
+ * Represents the virtual scroll component.
+ */
 @Component({
   selector: 'arc-virtual-scroll',
   standalone: true,
@@ -354,6 +360,9 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
     return (scrollTop / (scrollHeight - clientHeight)) * 100;
   });
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     this.setupScrollListener();
     this.setupResizeObserver();
@@ -367,6 +376,9 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -431,10 +443,20 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the on scroll operation.
+   * @param _event - The event.
+   */
   onScroll(_event: Event): void {
     // Handled by scroll listener
   }
 
+  /**
+   * Performs the track by fn operation.
+   * @param index - The index.
+   * @param item - The item.
+   * @returns The unknown.
+   */
   trackByFn(index: number, item: T): unknown {
     if (this.config.trackBy) {
       return this.config.trackBy(this.startIndex() + index, item);
@@ -442,6 +464,12 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
     return (item as Record<string, unknown>)?.['id'] || index;
   }
 
+  /**
+   * Retrieves item height.
+   * @param item - The item.
+   * @param _index - The index.
+   * @returns The number value.
+   */
   getItemHeight(item: T, _index: number): number {
     if (!this.config.enableDynamicHeight) {
       return this.config.itemHeight;
@@ -475,6 +503,11 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
 
   // Public API
 
+  /**
+   * Performs the scroll to index operation.
+   * @param index - The index.
+   * @param behavior - The behavior.
+   */
   scrollToIndex(index: number, behavior: ScrollBehavior = 'auto'): void {
     const itemHeight = this.getAverageItemHeight();
     const scrollTop = index * itemHeight;
@@ -485,6 +518,11 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Performs the scroll to item operation.
+   * @param item - The item.
+   * @param behavior - The behavior.
+   */
   scrollToItem(item: T, behavior: ScrollBehavior = 'auto'): void {
     const index = this.items.indexOf(item);
     if (index !== -1) {
@@ -492,11 +530,18 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the refresh operation.
+   */
   refresh(): void {
     this.updateScrollState();
     this.itemHeightCache.clear();
   }
 
+  /**
+   * Sets loading.
+   * @param loading - The loading.
+   */
   setLoading(loading: boolean): void {
     this.isLoading.set(loading);
   }

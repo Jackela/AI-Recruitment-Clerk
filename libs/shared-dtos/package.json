@@ -25,5 +25,11 @@
     "class-transformer": "^0.5.1",
     "ioredis": "^5.7.0",
     "mongoose": "^8.17.1"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
+    "rxjs": "^7.0.0",
+    "reflect-metadata": "^0.1.13"
   }
 }

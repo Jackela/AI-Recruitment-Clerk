@@ -3,8 +3,11 @@
  */
 
 import { DateParser, DateRange } from './date-parser';
-import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
+/**
+ * Defines the shape of the experience analysis.
+ */
 export interface ExperienceAnalysis {
   totalExperienceMonths: number;
   totalExperienceYears: number;
@@ -23,6 +26,9 @@ export interface ExperienceAnalysis {
   };
 }
 
+/**
+ * Defines the shape of the position analysis.
+ */
 export interface PositionAnalysis {
   company: string;
   position: string;
@@ -33,6 +39,9 @@ export interface PositionAnalysis {
   seniorityIndicators: string[];
 }
 
+/**
+ * Represents the experience calculator.
+ */
 export class ExperienceCalculator {
   private static readonly SENIORITY_KEYWORDS = {
     Entry: [

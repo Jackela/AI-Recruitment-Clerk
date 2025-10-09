@@ -5,6 +5,9 @@ export { UsageCacheService } from './usage-cache.service';
 export { RedisModule } from './redis.module';
 
 // Interfaces for other agents
+/**
+ * Defines the shape of the i cache service.
+ */
 export interface ICacheService {
   set(key: string, value: string, ttl?: number): Promise<void>;
   get(key: string): Promise<string | null>;
@@ -12,6 +15,9 @@ export interface ICacheService {
   exists(key: string): Promise<boolean>;
 }
 
+/**
+ * Defines the shape of the i session cache.
+ */
 export interface ISessionCache {
   cacheSession(session: any): Promise<void>;
   getSessionById(sessionId: string): Promise<any | null>;
@@ -19,6 +25,9 @@ export interface ISessionCache {
   removeSession(sessionId: string, ip: string): Promise<void>;
 }
 
+/**
+ * Defines the shape of the i usage cache.
+ */
 export interface IUsageCache {
   getDailyUsage(ip: string): Promise<number>;
   incrementDailyUsage(ip: string): Promise<number>;

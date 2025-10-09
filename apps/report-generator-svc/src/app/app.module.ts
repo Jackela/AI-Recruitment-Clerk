@@ -21,6 +21,9 @@ import {
   ErrorInterceptorFactory,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 
+/**
+ * Configures the app module.
+ */
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -32,7 +35,10 @@ import {
     }),
     MongooseModule.forRoot(
       process.env.MONGODB_URL ||
-        'mongodb://admin:password123@localhost:27017/ai-recruitment?authSource=admin',
+        process.env.MONGO_URL ||
+        (() => {
+          throw new Error('MONGODB_URL or MONGO_URL environment variable is required');
+        })(),
       {
         connectionName: 'report-generator',
       },
@@ -82,8 +88,7 @@ import {
         ErrorInterceptorFactory.createPerformanceInterceptor(
           'report-generator-svc',
           {
-            warnThreshold: 10000, // 10 seconds - report generation can take time
-            errorThreshold: 60000, // 60 seconds - hard limit for report generation
+            timeout: 60000, // 60 seconds - hard limit for report generation
           },
         ),
     },

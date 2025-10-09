@@ -16,12 +16,18 @@ export interface MobileComponentConfig {
   animationDuration?: number;
 }
 
+/**
+ * Defines the shape of the swipe config.
+ */
 export interface SwipeConfig {
   threshold: number;
   velocity: number;
   direction: 'horizontal' | 'vertical' | 'both';
 }
 
+/**
+ * Defines the shape of the loading state.
+ */
 export interface LoadingState {
   isLoading: boolean;
   loadingText?: string;
@@ -53,12 +59,18 @@ export abstract class BaseMobileComponent implements OnInit, OnDestroy {
     animationDuration: 300
   };
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     this.config = { ...this.defaultConfig, ...this.config };
     this.setupComponent();
     this.onMobileInit();
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     this.isDestroyed = true;
     this.destroy$.next();
@@ -353,6 +365,9 @@ export interface CardData {
   metadata?: Record<string, any>;
 }
 
+/**
+ * Defines the shape of the card action.
+ */
 export interface CardAction {
   id: string;
   label: string;
@@ -411,6 +426,15 @@ export class TouchGestureUtil {
   static readonly SWIPE_THRESHOLD = 50;
   static readonly SWIPE_VELOCITY = 0.3;
 
+  /**
+   * Performs the detect swipe operation.
+   * @param startX - The start x.
+   * @param startY - The start y.
+   * @param endX - The end x.
+   * @param endY - The end y.
+   * @param timeElapsed - The time elapsed.
+   * @returns The 'left' | 'right' | 'up' | 'down' | null.
+   */
   static detectSwipe(
     startX: number,
     startY: number,
@@ -434,6 +458,12 @@ export class TouchGestureUtil {
     }
   }
 
+  /**
+   * Performs the add touch listeners operation.
+   * @param element - The element.
+   * @param callbacks - The callbacks.
+   * @returns The () => void.
+   */
   static addTouchListeners(
     element: HTMLElement,
     callbacks: {

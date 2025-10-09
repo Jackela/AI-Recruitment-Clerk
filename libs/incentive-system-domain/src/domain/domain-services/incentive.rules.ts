@@ -341,42 +341,91 @@ export class IncentiveRules {
 }
 
 // 结果类定义
+/**
+ * Represents the incentive eligibility result.
+ */
 export class IncentiveEligibilityResult {
+  /**
+   * Initializes a new instance of the Incentive Eligibility Result.
+   * @param isEligible - The is eligible.
+   * @param errors - The errors.
+   */
   constructor(
     public readonly isEligible: boolean,
     public readonly errors: string[]
   ) {}
 }
 
+/**
+ * Represents the payment eligibility result.
+ */
 export class PaymentEligibilityResult {
+  /**
+   * Initializes a new instance of the Payment Eligibility Result.
+   * @param isEligible - The is eligible.
+   * @param errors - The errors.
+   */
   constructor(
     public readonly isEligible: boolean,
     public readonly errors: string[]
   ) {}
 }
 
+/**
+ * Represents the payment method validation result.
+ */
 export class PaymentMethodValidationResult {
+  /**
+   * Initializes a new instance of the Payment Method Validation Result.
+   * @param isValid - The is valid.
+   * @param errors - The errors.
+   */
   constructor(
     public readonly isValid: boolean,
     public readonly errors: string[]
   ) {}
 }
 
+/**
+ * Represents the batch payment validation result.
+ */
 export class BatchPaymentValidationResult {
+  /**
+   * Initializes a new instance of the Batch Payment Validation Result.
+   * @param isValid - The is valid.
+   * @param errors - The errors.
+   */
   constructor(
     public readonly isValid: boolean,
     public readonly errors: string[]
   ) {}
 }
 
+/**
+ * Represents the incentive priority.
+ */
 export class IncentivePriority {
+  /**
+   * Initializes a new instance of the Incentive Priority.
+   * @param score - The score.
+   * @param factors - The factors.
+   */
   constructor(
     public readonly score: number,
     public readonly factors: string[]
   ) {}
 }
 
+/**
+ * Represents the incentive risk assessment.
+ */
 export class IncentiveRiskAssessment {
+  /**
+   * Initializes a new instance of the Incentive Risk Assessment.
+   * @param riskScore - The risk score.
+   * @param riskLevel - The risk level.
+   * @param riskFactors - The risk factors.
+   */
   constructor(
     public readonly riskScore: number,
     public readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH',
@@ -384,7 +433,14 @@ export class IncentiveRiskAssessment {
   ) {}
 }
 
+/**
+ * Represents the incentive usage history.
+ */
 export class IncentiveUsageHistory {
+  /**
+   * Initializes a new instance of the Incentive Usage History.
+   * @param data - The data.
+   */
   constructor(public readonly data: {
     totalIncentives: number;
     statusBreakdown: {
@@ -400,8 +456,24 @@ export class IncentiveUsageHistory {
     dailyDistribution: Record<string, number>;
   }) {}
 
+  /**
+   * Performs the total incentives operation.
+   * @returns The number value.
+   */
   get totalIncentives(): number { return this.data.totalIncentives; }
+  /**
+   * Performs the conversion rate operation.
+   * @returns The number value.
+   */
   get conversionRate(): number { return this.data.conversionRate; }
+  /**
+   * Performs the total amount operation.
+   * @returns The number value.
+   */
   get totalAmount(): number { return this.data.totalAmount; }
+  /**
+   * Performs the paid amount operation.
+   * @returns The number value.
+   */
   get paidAmount(): number { return this.data.paidAmount; }
 }

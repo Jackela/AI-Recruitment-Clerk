@@ -8,15 +8,27 @@ import { JobJdSubmittedEvent } from '../dto/events.dto';
 import { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
 import { LlmService } from '../extraction/llm.service';
 
+/**
+ * Exposes endpoints for jd events.
+ */
 @Controller()
 export class JdEventsController implements OnModuleInit {
   private readonly logger = new Logger(JdEventsController.name);
 
+  /**
+   * Initializes a new instance of the JD Events Controller.
+   * @param natsService - The nats service.
+   * @param llmService - The llm service.
+   */
   constructor(
     private readonly natsService: JdExtractorNatsService,
     private readonly llmService: LlmService,
   ) {}
 
+  /**
+   * Performs the on module init operation.
+   * @returns The result of the operation.
+   */
   async onModuleInit() {
     // Subscribe to job.jd.submitted events using the shared NATS client
     await this.natsService.subscribeToJobSubmissions(
@@ -24,6 +36,11 @@ export class JdEventsController implements OnModuleInit {
     );
   }
 
+  /**
+   * Handles job submitted.
+   * @param payload - The payload.
+   * @returns A promise that resolves when the operation completes.
+   */
   @EventPattern('job.jd.submitted')
   async handleJobSubmitted(payload: any): Promise<void> {
     try {

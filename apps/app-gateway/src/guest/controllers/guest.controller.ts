@@ -20,13 +20,17 @@ import {
   ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
 import { GuestUsageService } from '../services/guest-usage.service';
-import { GuestGuard, RequestWithDeviceId } from '../guards/guest.guard';
+import { GuestGuard } from '../guards/guest.guard';
+import type { RequestWithDeviceId } from '../guards/guest.guard';
 import {
   GuestUsageResponseDto,
   GuestStatusDto,
   RedeemFeedbackCodeDto,
 } from '../dto/guest.dto';
 
+/**
+ * Exposes endpoints for guest.
+ */
 @ApiTags('Guest Services')
 @Controller('guest')
 @UseGuards(GuestGuard)
@@ -39,8 +43,17 @@ import {
 export class GuestController {
   private readonly logger = new Logger(GuestController.name);
 
+  /**
+   * Initializes a new instance of the Guest Controller.
+   * @param guestUsageService - The guest usage service.
+   */
   constructor(private readonly guestUsageService: GuestUsageService) {}
 
+  /**
+   * Generates feedback code.
+   * @param req - The req.
+   * @returns The result of the operation.
+   */
   @Post('feedback-code')
   @ApiOperation({
     summary: 'Generate feedback code for guest user',
@@ -103,6 +116,11 @@ export class GuestController {
     }
   }
 
+  /**
+   * Retrieves usage status.
+   * @param req - The req.
+   * @returns A promise that resolves to GuestUsageResponseDto.
+   */
   @Get('status')
   @ApiOperation({
     summary: 'Get guest usage status',
@@ -137,6 +155,11 @@ export class GuestController {
     }
   }
 
+  /**
+   * Retrieves guest details.
+   * @param req - The req.
+   * @returns A promise that resolves to GuestStatusDto.
+   */
   @Get('details')
   @ApiOperation({
     summary: 'Get detailed guest information',
@@ -171,6 +194,11 @@ export class GuestController {
     }
   }
 
+  /**
+   * Performs the redeem feedback code operation.
+   * @param redeemDto - The redeem dto.
+   * @returns The result of the operation.
+   */
   @Post('redeem')
   @ApiOperation({
     summary: 'Redeem feedback code',
@@ -218,6 +246,10 @@ export class GuestController {
     }
   }
 
+  /**
+   * Retrieves service stats.
+   * @returns The result of the operation.
+   */
   @Get('stats')
   @ApiOperation({
     summary: 'Get service statistics (Admin only)',
@@ -250,6 +282,11 @@ export class GuestController {
     }
   }
 
+  /**
+   * Performs the check usage operation.
+   * @param req - The req.
+   * @returns The result of the operation.
+   */
   @Post('check-usage')
   @ApiOperation({
     summary: 'Check if guest can use service',
@@ -325,3 +362,4 @@ export class GuestController {
     );
   }
 }
+

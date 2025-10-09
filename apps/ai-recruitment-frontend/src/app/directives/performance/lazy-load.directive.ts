@@ -9,6 +9,9 @@ import {
   EventEmitter,
 } from '@angular/core';
 
+/**
+ * Defines the shape of the lazy load config.
+ */
 export interface LazyLoadConfig {
   threshold?: number;
   rootMargin?: string;
@@ -20,6 +23,9 @@ export interface LazyLoadConfig {
   preload?: boolean;
 }
 
+/**
+ * Represents the lazy load directive.
+ */
 @Directive({
   selector: '[arcLazyLoad]',
   standalone: true,
@@ -48,11 +54,19 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
     preload: false,
   };
 
+  /**
+   * Initializes a new instance of the Lazy Load Directive.
+   * @param el - The el.
+   * @param renderer - The renderer.
+   */
   constructor(
     private el: ElementRef<HTMLImageElement | HTMLDivElement>,
     private renderer: Renderer2,
   ) {}
 
+  /**
+   * Performs the ng on init operation.
+   */
   ngOnInit(): void {
     const config = { ...this.defaultConfig, ...this.lazyLoadConfig };
 
@@ -73,6 +87,9 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   */
   ngOnDestroy(): void {
     if (this.observer) {
       this.observer.disconnect();

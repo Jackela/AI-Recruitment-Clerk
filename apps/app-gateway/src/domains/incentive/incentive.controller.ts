@@ -42,13 +42,26 @@ import { IncentiveIntegrationService } from './incentive-integration.service';
 
 // Use shared AuthenticatedRequest type with required user.id and user.organizationId
 
+/**
+ * Exposes endpoints for incentive.
+ */
 @ApiTags('incentive-system')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('incentives')
 export class IncentiveController {
+  /**
+   * Initializes a new instance of the Incentive Controller.
+   * @param incentiveService - The incentive service.
+   */
   constructor(private readonly incentiveService: IncentiveIntegrationService) {}
 
+  /**
+   * Creates questionnaire incentive.
+   * @param req - The req.
+   * @param incentiveData - The incentive data.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '创建问卷完成激励',
     description: '基于问卷完成情况和质量评分创建激励奖励',
@@ -148,6 +161,12 @@ export class IncentiveController {
     }
   }
 
+  /**
+   * Creates referral incentive.
+   * @param req - The req.
+   * @param referralData - The referral data.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '创建推荐激励',
     description: '为成功推荐新用户的推荐人创建激励奖励',
@@ -216,6 +235,17 @@ export class IncentiveController {
     }
   }
 
+  /**
+   * Retrieves incentives.
+   * @param req - The req.
+   * @param page - The page.
+   * @param limit - The limit.
+   * @param status - The status.
+   * @param rewardType - The reward type.
+   * @param startDate - The start date.
+   * @param endDate - The end date.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取激励列表',
     description: '获取组织的激励记录列表，支持分页和筛选',
@@ -289,6 +319,12 @@ export class IncentiveController {
     }
   }
 
+  /**
+   * Retrieves incentive.
+   * @param req - The req.
+   * @param incentiveId - The incentive id.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取激励详情',
     description: '获取指定激励的详细信息，包括所有相关数据',
@@ -326,6 +362,12 @@ export class IncentiveController {
     }
   }
 
+  /**
+   * Validates incentive.
+   * @param req - The req.
+   * @param incentiveId - The incentive id.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '验证激励资格',
     description: '验证指定激励的资格和状态，检查是否符合支付条件',
@@ -366,6 +408,13 @@ export class IncentiveController {
     }
   }
 
+  /**
+   * Performs the approve incentive operation.
+   * @param req - The req.
+   * @param incentiveId - The incentive id.
+   * @param approvalData - The approval data.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '批准激励',
     description: '管理员批准激励进行支付处理',
@@ -412,6 +461,13 @@ export class IncentiveController {
     }
   }
 
+  /**
+   * Performs the reject incentive operation.
+   * @param req - The req.
+   * @param incentiveId - The incentive id.
+   * @param rejectionData - The rejection data.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '拒绝激励',
     description: '管理员拒绝激励支付申请',
@@ -459,6 +515,13 @@ export class IncentiveController {
     }
   }
 
+  /**
+   * Performs the process payment operation.
+   * @param req - The req.
+   * @param incentiveId - The incentive id.
+   * @param paymentData - The payment data.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '执行激励支付',
     description: '对已批准的激励执行实际支付操作',
@@ -537,6 +600,12 @@ export class IncentiveController {
     }
   }
 
+  /**
+   * Performs the batch process incentives operation.
+   * @param req - The req.
+   * @param batchRequest - The batch request.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '批量处理激励',
     description: '批量操作多个激励（批准、拒绝、支付等）',
@@ -591,6 +660,13 @@ export class IncentiveController {
     }
   }
 
+  /**
+   * Retrieves incentive statistics.
+   * @param req - The req.
+   * @param timeRange - The time range.
+   * @param groupBy - The group by.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '获取激励统计数据',
     description: '获取组织的激励系统统计数据和分析报告',
@@ -648,6 +724,13 @@ export class IncentiveController {
     }
   }
 
+  /**
+   * Performs the export incentive data operation.
+   * @param req - The req.
+   * @param format - The format.
+   * @param exportRequest - The export request.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '导出激励数据',
     description: '导出激励数据为CSV或Excel格式',
@@ -710,6 +793,12 @@ export class IncentiveController {
     }
   }
 
+  /**
+   * Performs the configure incentive rules operation.
+   * @param req - The req.
+   * @param rulesConfig - The rules config.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '配置激励规则',
     description: '配置组织的激励奖励规则和阈值',
@@ -769,6 +858,10 @@ export class IncentiveController {
     }
   }
 
+  /**
+   * Performs the health check operation.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '服务健康检查',
     description: '检查激励系统服务的健康状态',

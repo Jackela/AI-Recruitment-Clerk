@@ -41,13 +41,26 @@ interface AuthenticatedRequest extends Request {
   user: UserDto;
 }
 
+/**
+ * Exposes endpoints for jobs.
+ */
 @ApiTags('jobs')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller()
 export class JobsController {
+  /**
+   * Initializes a new instance of the Jobs Controller.
+   * @param jobsService - The jobs service.
+   */
   constructor(private readonly jobsService: JobsService) {}
 
+  /**
+   * Creates job.
+   * @param req - The req.
+   * @param dto - The dto.
+   * @returns The result of the operation.
+   */
   @ApiOperation({
     summary: '创建新职位',
     description: '创建一个新的职位招聘信息，需要CREATE_JOB权限',
@@ -67,6 +80,13 @@ export class JobsController {
     return this.jobsService.createJob(dto, req.user);
   }
 
+  /**
+   * Performs the upload resumes operation.
+   * @param req - The req.
+   * @param params - The params.
+   * @param files - The files.
+   * @returns The ResumeUploadResponseDto.
+   */
   @Permissions(Permission.UPLOAD_RESUME)
   @Post('jobs/:jobId/resumes')
   @HttpCode(HttpStatus.ACCEPTED)
@@ -80,12 +100,23 @@ export class JobsController {
   }
 
   // GET endpoints for frontend
+  /**
+   * Retrieves all jobs.
+   * @param req - The req.
+   * @returns A promise that resolves to an array of JobListDto.
+   */
   @Permissions(Permission.READ_JOB)
   @Get('jobs')
   getAllJobs(@Request() req: AuthenticatedRequest): Promise<JobListDto[]> {
     return this.jobsService.getAllJobs();
   }
 
+  /**
+   * Retrieves job by id.
+   * @param req - The req.
+   * @param jobId - The job id.
+   * @returns The JobDetailDto.
+   */
   @Permissions(Permission.READ_JOB)
   @Get('jobs/:jobId')
   getJobById(
@@ -95,6 +126,12 @@ export class JobsController {
     return this.jobsService.getJobById(jobId);
   }
 
+  /**
+   * Retrieves resumes by job id.
+   * @param req - The req.
+   * @param jobId - The job id.
+   * @returns A promise that resolves to an array of ResumeListItemDto.
+   */
   @Permissions(Permission.READ_RESUME)
   @Get('jobs/:jobId/resumes')
   getResumesByJobId(
@@ -104,6 +141,12 @@ export class JobsController {
     return this.jobsService.getResumesByJobId(jobId);
   }
 
+  /**
+   * Retrieves reports by job id.
+   * @param req - The req.
+   * @param jobId - The job id.
+   * @returns A promise that resolves to ReportsListDto.
+   */
   @Permissions(Permission.GENERATE_REPORT)
   @Get('jobs/:jobId/reports')
   getReportsByJobId(
@@ -113,6 +156,12 @@ export class JobsController {
     return this.jobsService.getReportsByJobId(jobId);
   }
 
+  /**
+   * Retrieves resume by id.
+   * @param req - The req.
+   * @param resumeId - The resume id.
+   * @returns A promise that resolves to ResumeDetailDto.
+   */
   @Permissions(Permission.READ_RESUME)
   @Get('resumes/:resumeId')
   getResumeById(
@@ -122,6 +171,12 @@ export class JobsController {
     return this.jobsService.getResumeById(resumeId);
   }
 
+  /**
+   * Retrieves report by id.
+   * @param req - The req.
+   * @param reportId - The report id.
+   * @returns A promise that resolves to AnalysisReportDto.
+   */
   @Permissions(Permission.READ_ANALYSIS)
   @Get('reports/:reportId')
   getReportById(

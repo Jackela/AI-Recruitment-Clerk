@@ -1,8 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+/**
+ * Represents the loading component.
+ */
 @Component({
-  selector: 'app-loading',
+  selector: 'arc-loading',
   standalone: true,
   imports: [CommonModule],
   template: `

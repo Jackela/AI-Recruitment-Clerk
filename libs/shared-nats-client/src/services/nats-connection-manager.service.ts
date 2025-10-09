@@ -22,6 +22,10 @@ export class NatsConnectionManager implements OnModuleDestroy {
   private reconnectAttempts = 0;
 
 
+  /**
+   * Performs the on module destroy operation.
+   * @returns The result of the operation.
+   */
   async onModuleDestroy() {
     await this.disconnect();
   }

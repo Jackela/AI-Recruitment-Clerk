@@ -25,23 +25,25 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PrivacyComplianceService } from './privacy-compliance.service';
 import {
+  CaptureConsentRequestDto,
+  ConsentStatusResponseDto,
+  CreateRightsRequestBodyDto,
+  DataExportFormat,
+  DataExportPackageDto,
+  DataSubjectRightType,
+  DataSubjectRightsRequestDto,
+  UserConsentProfileDto,
+  WithdrawConsentRequestDto,
+} from '../common/interfaces/fallback-types';
+import type {
   CaptureConsentDto,
-  WithdrawConsentDto,
   ConsentStatusDto,
   CreateRightsRequestDto,
-  DataSubjectRightsRequest,
   DataExportPackage,
+  DataSubjectRightsRequest,
   ProcessRightsRequestDto,
-  DataExportFormat,
-  DataSubjectRightType,
   UserConsentProfile,
-  UserConsentProfileDto,
-  ConsentStatusResponseDto,
-  DataSubjectRightsRequestDto,
-  DataExportPackageDto,
-  CaptureConsentRequestDto,
-  WithdrawConsentRequestDto,
-  CreateRightsRequestBodyDto,
+  WithdrawConsentDto,
 } from '../common/interfaces/fallback-types';
 
 /**
@@ -53,6 +55,10 @@ import {
 export class PrivacyComplianceController {
   private readonly logger = new Logger(PrivacyComplianceController.name);
 
+  /**
+   * Initializes a new instance of the Privacy Compliance Controller.
+   * @param privacyService - The privacy service.
+   */
   constructor(private readonly privacyService: PrivacyComplianceService) {}
 
   /**
@@ -85,6 +91,11 @@ export class PrivacyComplianceController {
     return (await this.privacyService.captureConsent(captureConsentDto)) as any;
   }
 
+  /**
+   * Performs the withdraw consent operation.
+   * @param withdrawConsentDto - The withdraw consent dto.
+   * @returns A promise that resolves when the operation completes.
+   */
   @Put('consent/withdraw')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
@@ -110,6 +121,11 @@ export class PrivacyComplianceController {
     await this.privacyService.withdrawConsent(withdrawConsentDto);
   }
 
+  /**
+   * Retrieves consent status.
+   * @param userId - The user id.
+   * @returns A promise that resolves to ConsentStatusDto.
+   */
   @Get('consent/:userId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -167,6 +183,12 @@ export class PrivacyComplianceController {
     )) as any;
   }
 
+  /**
+   * Performs the export user data operation.
+   * @param userId - The user id.
+   * @param format - The format.
+   * @returns A promise that resolves to DataExportPackage.
+   */
   @Get('data-export/:userId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -200,6 +222,12 @@ export class PrivacyComplianceController {
     )) as any;
   }
 
+  /**
+   * Removes user data.
+   * @param userId - The user id.
+   * @param categories - The categories.
+   * @returns A promise that resolves when the operation completes.
+   */
   @Delete('user-data/:userId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
@@ -272,6 +300,10 @@ export class PrivacyComplianceController {
     ];
   }
 
+  /**
+   * Retrieves compliance status.
+   * @returns A promise that resolves to any.
+   */
   @Get('compliance-status')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -312,6 +344,10 @@ export class PrivacyComplianceController {
     };
   }
 
+  /**
+   * Performs the privacy health check operation.
+   * @returns A promise that resolves to any.
+   */
   @Post('privacy-health-check')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -368,6 +404,11 @@ export class PrivacyComplianceController {
     };
   }
 
+  /**
+   * Retrieves cookie consent.
+   * @param deviceId - The device id.
+   * @returns A promise that resolves to any.
+   */
   @Get('cookie-consent/:deviceId')
   @ApiOperation({
     summary: 'Get cookie consent preferences',
@@ -390,3 +431,4 @@ export class PrivacyComplianceController {
     };
   }
 }
+

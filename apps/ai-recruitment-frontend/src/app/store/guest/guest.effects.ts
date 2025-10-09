@@ -15,8 +15,17 @@ import { GuestState } from './guest.state';
 import * as GuestActions from './guest.actions';
 import { selectGuestState } from './guest.selectors';
 
+/**
+ * Represents the guest effects.
+ */
 @Injectable()
 export class GuestEffects {
+  /**
+   * Initializes a new instance of the Guest Effects.
+   * @param actions$ - The actions$.
+   * @param guestApiService - The guest api service.
+   * @param store - The store.
+   */
   constructor(
     private actions$: Actions,
     private guestApiService: GuestApiService,

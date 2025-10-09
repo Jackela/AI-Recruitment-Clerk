@@ -1,7 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+/**
+ * Defines the shape of the dashboard stats.
+ */
 export interface DashboardStats {
   totalJobs: number;
   totalResumes: number;
@@ -21,6 +24,9 @@ export interface DashboardStats {
   };
 }
 
+/**
+ * Defines the shape of the activity item.
+ */
 export interface ActivityItem {
   id: string;
   type:
@@ -42,6 +48,9 @@ export interface ActivityItem {
   };
 }
 
+/**
+ * Defines the shape of the system health.
+ */
 export interface SystemHealth {
   status: 'healthy' | 'warning' | 'error';
   timestamp: string;
@@ -61,13 +70,16 @@ export interface SystemHealth {
   };
 }
 
+/**
+ * Provides dashboard api functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class DashboardApiService {
   private readonly baseUrl = '/api';
 
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   /**
    * Get comprehensive dashboard statistics

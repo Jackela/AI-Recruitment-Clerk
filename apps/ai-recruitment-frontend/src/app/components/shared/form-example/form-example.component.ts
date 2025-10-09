@@ -10,6 +10,9 @@ import {
 import { VALIDATION_DIRECTIVES } from '../../../directives/validation';
 import { ToastService } from '../../../services/toast.service';
 
+/**
+ * Represents the form example component.
+ */
 @Component({
   selector: 'arc-form-example',
   standalone: true,
@@ -331,6 +334,11 @@ export class FormExampleComponent {
   // Reactive form
   reactiveForm: FormGroup;
 
+  /**
+   * Initializes a new instance of the Form Example Component.
+   * @param fb - The fb.
+   * @param toastService - The toast service.
+   */
   constructor(
     private fb: FormBuilder,
     private toastService: ToastService,
@@ -342,11 +350,18 @@ export class FormExampleComponent {
     });
   }
 
+  /**
+   * Performs the on template submit operation.
+   * @param value - The value.
+   */
   onTemplateSubmit(value: any): void {
     this.toastService.success('模板表单提交成功！');
     console.log('Template form value:', value);
   }
 
+  /**
+   * Performs the on reactive submit operation.
+   */
   onReactiveSubmit(): void {
     if (this.reactiveForm.valid) {
       this.toastService.success('响应式表单提交成功！');

@@ -12,7 +12,7 @@ import { NatsClientService, NatsPublishResult } from '@app/shared-nats-client';
  */
 @Injectable()
 export class JdExtractorNatsService extends NatsClientService {
-  private readonly logger = new Logger(JdExtractorNatsService.name);
+  private readonly serviceLogger = new Logger(JdExtractorNatsService.name);
 
   /**
    * Initialize the JD Extractor NATS service with service-specific configuration
@@ -42,7 +42,7 @@ export class JdExtractorNatsService extends NatsClientService {
     const subject = 'analysis.jd.extracted';
 
     try {
-      this.logger.log(
+      this.serviceLogger.log(
         `📤 Publishing analysis.jd.extracted event for jobId: ${event.jobId}`,
       );
 
@@ -65,11 +65,11 @@ export class JdExtractorNatsService extends NatsClientService {
       const result = await this.publish(subject, enrichedEvent);
 
       if (result.success) {
-        this.logger.log(
+        this.serviceLogger.log(
           `✅ Analysis JD extracted event published successfully - JobId: ${event.jobId}, MessageId: ${result.messageId}, Confidence: ${enrichedEvent.quality.confidence}`,
         );
       } else {
-        this.logger.error(
+        this.serviceLogger.error(
           `❌ Failed to publish analysis JD extracted event - JobId: ${event.jobId}, Error: ${result.error}`,
         );
       }
@@ -78,7 +78,7 @@ export class JdExtractorNatsService extends NatsClientService {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(
+      this.serviceLogger.error(
         `❌ Error publishing analysis JD extracted event for jobId: ${event.jobId}`,
         error,
       );
@@ -114,7 +114,7 @@ export class JdExtractorNatsService extends NatsClientService {
     const subject = 'job.jd.failed';
 
     try {
-      this.logger.log(
+      this.serviceLogger.log(
         `📤 Publishing processing error event for jobId: ${jobId}`,
       );
 
@@ -141,11 +141,11 @@ export class JdExtractorNatsService extends NatsClientService {
       const result = await this.publish(subject, errorEvent);
 
       if (result.success) {
-        this.logger.log(
+        this.serviceLogger.log(
           `✅ Processing error event published successfully - JobId: ${jobId}, MessageId: ${result.messageId}, Severity: ${errorEvent.severity}`,
         );
       } else {
-        this.logger.error(
+        this.serviceLogger.error(
           `❌ Failed to publish processing error event - JobId: ${jobId}, Error: ${result.error}`,
         );
       }
@@ -154,7 +154,7 @@ export class JdExtractorNatsService extends NatsClientService {
     } catch (publishError) {
       const errorMessage =
         publishError instanceof Error ? publishError.message : 'Unknown error';
-      this.logger.error(
+      this.serviceLogger.error(
         `❌ Error publishing processing error event for jobId: ${jobId}`,
         publishError,
       );
@@ -184,7 +184,7 @@ export class JdExtractorNatsService extends NatsClientService {
     const subject = 'job.jd.started';
 
     try {
-      this.logger.log(
+      this.serviceLogger.log(
         `📤 Publishing extraction started event for jobId: ${event.jobId}`,
       );
 
@@ -199,11 +199,11 @@ export class JdExtractorNatsService extends NatsClientService {
       const result = await this.publish(subject, startedEvent);
 
       if (result.success) {
-        this.logger.log(
+        this.serviceLogger.log(
           `✅ Extraction started event published - JobId: ${event.jobId}, MessageId: ${result.messageId}`,
         );
       } else {
-        this.logger.error(
+        this.serviceLogger.error(
           `❌ Failed to publish extraction started event - JobId: ${event.jobId}, Error: ${result.error}`,
         );
       }
@@ -212,7 +212,7 @@ export class JdExtractorNatsService extends NatsClientService {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(
+      this.serviceLogger.error(
         `❌ Error publishing extraction started event for jobId: ${event.jobId}`,
         error,
       );

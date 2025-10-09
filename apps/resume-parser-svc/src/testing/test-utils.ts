@@ -7,6 +7,9 @@ import { NatsConnectionManager, NatsStreamManager } from '@app/shared-nats-clien
 import { getModelToken } from '@nestjs/mongoose';
 import { Logger } from '@nestjs/common';
 
+/**
+ * Defines the shape of the test module options.
+ */
 export interface TestModuleOptions {
   useDocker?: boolean;
   imports?: any[];

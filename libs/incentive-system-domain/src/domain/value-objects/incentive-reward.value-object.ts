@@ -1,12 +1,20 @@
 import { ValueObject } from '../base/value-object.js';
 import { Currency, RewardType } from '../aggregates/incentive.aggregate.js';
 
+/**
+ * Represents the incentive reward.
+ */
 export class IncentiveReward extends ValueObject<{
   amount: number;
   currency: Currency;
   rewardType: RewardType;
   calculationMethod: string;
 }> {
+  /**
+   * Calculates for questionnaire.
+   * @param qualityScore - The quality score.
+   * @returns The IncentiveReward.
+   */
   static calculateForQuestionnaire(qualityScore: number): IncentiveReward {
     let amount = 0;
     let calculationMethod = '';
@@ -33,6 +41,10 @@ export class IncentiveReward extends ValueObject<{
     });
   }
 
+  /**
+   * Creates referral reward.
+   * @returns The IncentiveReward.
+   */
   static createReferralReward(): IncentiveReward {
     return new IncentiveReward({
       amount: 3,
@@ -42,23 +54,44 @@ export class IncentiveReward extends ValueObject<{
     });
   }
 
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The IncentiveReward.
+   */
   static restore(data: any): IncentiveReward {
     return new IncentiveReward(data);
   }
 
+  /**
+   * Retrieves amount.
+   * @returns The number value.
+   */
   getAmount(): number {
     return this.props.amount;
   }
 
+  /**
+   * Retrieves currency.
+   * @returns The Currency.
+   */
   getCurrency(): Currency {
     return this.props.currency;
   }
 
+  /**
+   * Performs the is valid operation.
+   * @returns The boolean value.
+   */
   isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
 
+  /**
+   * Retrieves validation errors.
+   * @returns The an array of string value.
+   */
   getValidationErrors(): string[] {
     const errors: string[] = [];
 

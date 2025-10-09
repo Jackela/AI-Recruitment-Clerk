@@ -1,10 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { UserPreferencesDto as UserPreferences } from '../common/interfaces/fallback-types';
+import type { UserPreferences } from '../common/interfaces/fallback-types';
 import { ConsentStatus } from './consent-record.schema';
 
 export type UserProfileDocument = UserProfile & Document;
 
+/**
+ * Represents the user profile.
+ */
 @Schema({
   collection: 'user_profiles',
   timestamps: true,
@@ -97,3 +100,4 @@ export const UserProfileSchema = SchemaFactory.createForClass(UserProfile);
 UserProfileSchema.index({ email: 1 });
 UserProfileSchema.index({ isActive: 1, lastLoginAt: -1 });
 UserProfileSchema.index({ 'sessionInfo.currentSessionId': 1 });
+

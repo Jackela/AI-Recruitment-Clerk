@@ -139,6 +139,9 @@ export class DataProcessingRecord {
   updatedAt!: Date;
 }
 
+/**
+ * Represents the third party transfer.
+ */
 export class ThirdPartyTransfer {
   @IsString()
   @IsNotEmpty()
@@ -167,6 +170,9 @@ export class ThirdPartyTransfer {
   dataCategories?: string[];
 }
 
+/**
+ * Represents the security measure.
+ */
 export class SecurityMeasure {
   @IsString()
   @IsNotEmpty()
@@ -358,6 +364,9 @@ export class PrivacyImpactAssessment {
   updatedAt!: Date;
 }
 
+/**
+ * Represents the risk assessment.
+ */
 export class RiskAssessment {
   @IsString()
   @IsNotEmpty()
@@ -473,6 +482,9 @@ export class DataBreachRecord {
   updatedAt!: Date;
 }
 
+/**
+ * Represents the breach notification.
+ */
 export class BreachNotification {
   @IsEnum(['supervisory_authority', 'data_subjects', 'internal', 'third_party'])
   type!: string;
@@ -637,6 +649,9 @@ export class CreateDataProcessingRecordDto {
   // ... other fields as optional for creation
 }
 
+/**
+ * Describes the create breach record data transfer object.
+ */
 export class CreateBreachRecordDto {
   @IsString()
   @IsNotEmpty()
@@ -661,6 +676,9 @@ export class CreateBreachRecordDto {
   reportedBy?: string;
 }
 
+/**
+ * Describes the update retention status data transfer object.
+ */
 export class UpdateRetentionStatusDto {
   @IsUUID()
   recordId!: string;

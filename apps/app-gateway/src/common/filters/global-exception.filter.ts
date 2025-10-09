@@ -26,6 +26,9 @@ class ExceptionFilterConfigHelper {
  * Extends the standardized filter with service-specific configuration
  */
 export class AppGatewayGlobalExceptionFilter extends StandardizedGlobalExceptionFilter {
+  /**
+   * Initializes a new instance of the App Gateway Global Exception Filter.
+   */
   constructor() {
     super({
       serviceName: 'app-gateway',

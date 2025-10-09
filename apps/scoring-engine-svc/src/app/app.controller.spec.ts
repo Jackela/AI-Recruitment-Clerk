@@ -12,10 +12,33 @@ describe('AppController', () => {
     }).compile();
   });
 
-  describe('getData', () => {
-    it('should return "Hello API"', () => {
-      const appController = app.get<AppController>(AppController);
-      expect(appController.getData()).toEqual({ message: 'Hello API' });
+  describe('gapAnalysis', () => {
+    it('should return matched and missing skills based on provided lists', () => {
+      const controller = app.get<AppController>(AppController);
+
+      const response = controller.gapAnalysis({
+        jdSkills: ['TypeScript', 'Node', 'CI/CD'],
+        resumeSkills: ['typescript', 'GraphQL'],
+      });
+
+      expect(response).toEqual({
+        matchedSkills: expect.arrayContaining(['typescript']),
+        missingSkills: expect.arrayContaining(['node', 'ci/cd']),
+        suggestedSkills: [],
+      });
+    });
+
+    it('tokenizes free-text job description when explicit skills missing', () => {
+      const controller = app.get<AppController>(AppController);
+
+      const response = controller.gapAnalysis({
+        jdText: 'We need DevOpsAWS engineers',
+        resumeText: 'Experienced with aws and docker',
+      });
+
+      expect(response.matchedSkills).toContain('aws');
+      expect(response.missingSkills).toEqual(expect.arrayContaining(['dev', 'ops']));
     });
   });
 });
+

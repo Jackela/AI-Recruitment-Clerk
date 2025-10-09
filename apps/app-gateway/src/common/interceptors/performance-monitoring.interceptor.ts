@@ -14,6 +14,9 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { CacheService } from '../../cache/cache.service';
 
+/**
+ * Defines the shape of the performance metrics.
+ */
 export interface PerformanceMetrics {
   endpoint: string;
   method: string;
@@ -26,6 +29,9 @@ export interface PerformanceMetrics {
   redisQueryTime?: number;
 }
 
+/**
+ * Represents the performance monitoring interceptor.
+ */
 @Injectable()
 export class PerformanceMonitoringInterceptor implements NestInterceptor {
   private readonly logger = new Logger(PerformanceMonitoringInterceptor.name);
@@ -34,8 +40,18 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
     critical: 500, // 500ms
   };
 
+  /**
+   * Initializes a new instance of the Performance Monitoring Interceptor.
+   * @param cacheService - The cache service.
+   */
   constructor(private readonly cacheService: CacheService) {}
 
+  /**
+   * Performs the intercept operation.
+   * @param context - The context.
+   * @param next - The next.
+   * @returns The Observable<any>.
+   */
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const startTime = Date.now();
     const request = context.switchToHttp().getRequest();
@@ -277,6 +293,10 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
   }
 
   // 获取性能统计的公共方法
+  /**
+   * Retrieves performance stats.
+   * @returns A promise that resolves to any.
+   */
   async getPerformanceStats(): Promise<any> {
     try {
       const statsKey = this.cacheService.generateKey(
@@ -302,6 +322,12 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
   }
 
   // 获取历史指标
+  /**
+   * Retrieves historical metrics.
+   * @param date - The date.
+   * @param window - The window.
+   * @returns A promise that resolves to an array of PerformanceMetrics.
+   */
   async getHistoricalMetrics(
     date?: string,
     window?: string,
@@ -327,6 +353,10 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
   }
 
   // 性能报告生成
+  /**
+   * Generates performance report.
+   * @returns The Promise<{ summary: any; slowestEndpoints: any[]; recommendations: string[]; }>.
+   */
   async generatePerformanceReport(): Promise<{
     summary: any;
     slowestEndpoints: any[];

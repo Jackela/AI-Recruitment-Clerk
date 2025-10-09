@@ -7,8 +7,16 @@ function id(prefix: string) {
 
 const incentives = new Map<string, { id: string; amount: number; status: 'approved' | 'pending' }>();
 
+/**
+ * Exposes endpoints for incentives.
+ */
 @Controller('incentives')
 export class IncentivesController {
+  /**
+   * Creates the entity.
+   * @param body - The body.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Post('questionnaire')
   @HttpCode(HttpStatus.CREATED)
@@ -19,6 +27,11 @@ export class IncentivesController {
     return { incentiveId, rewardAmount: amount };
   }
 
+  /**
+   * Validates the data.
+   * @param id - The id.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Post(':id/validate')
   @HttpCode(HttpStatus.OK)
@@ -26,6 +39,12 @@ export class IncentivesController {
     return { isValid: incentives.has(id) };
   }
 
+  /**
+   * Performs the approve operation.
+   * @param id - The id.
+   * @param _body - The body.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Put(':id/approve')
   @HttpCode(HttpStatus.OK)
@@ -36,6 +55,11 @@ export class IncentivesController {
     return { approvedAt: new Date().toISOString(), approvalStatus: 'approved' };
   }
 
+  /**
+   * Performs the stats operation.
+   * @param _timeRange - The time range.
+   * @returns The result of the operation.
+   */
   @UseGuards(JwtAuthGuard)
   @Get('stats/overview')
   @HttpCode(HttpStatus.OK)

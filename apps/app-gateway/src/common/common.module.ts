@@ -19,6 +19,9 @@ import { CustomValidationPipe } from './pipes/validation.pipe';
 import { HealthCheckService } from './services/health-check.service';
 import { CrossServiceValidator } from './validators/cross-service.validator';
 
+/**
+ * Configures the common module.
+ */
 @Global()
 @Module({
   imports: [

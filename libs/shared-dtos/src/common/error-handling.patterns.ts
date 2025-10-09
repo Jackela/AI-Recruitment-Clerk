@@ -54,6 +54,15 @@ export interface ErrorDetails {
 export class AppException extends HttpException {
   public readonly errorDetails: ErrorDetails;
   
+  /**
+   * Initializes a new instance of the App Exception.
+   * @param type - The type.
+   * @param code - The code.
+   * @param message - The message.
+   * @param httpStatus - The http status.
+   * @param details - The details.
+   * @param context - The context.
+   */
   constructor(
     type: ErrorType,
     code: string,
@@ -75,26 +84,51 @@ export class AppException extends HttpException {
     };
   }
 
+  /**
+   * Performs the with trace id operation.
+   * @param traceId - The trace id.
+   * @returns The this.
+   */
   withTraceId(traceId: string): this {
     this.errorDetails.traceId = traceId;
     return this;
   }
 
+  /**
+   * Performs the with user id operation.
+   * @param userId - The user id.
+   * @returns The this.
+   */
   withUserId(userId: string): this {
     this.errorDetails.userId = userId;
     return this;
   }
 
+  /**
+   * Performs the with session id operation.
+   * @param sessionId - The session id.
+   * @returns The this.
+   */
   withSessionId(sessionId: string): this {
     this.errorDetails.sessionId = sessionId;
     return this;
   }
 
+  /**
+   * Performs the with severity operation.
+   * @param severity - The severity.
+   * @returns The this.
+   */
   withSeverity(severity: ErrorSeverity): this {
     this.errorDetails.severity = severity;
     return this;
   }
 
+  /**
+   * Performs the with context operation.
+   * @param context - The context.
+   * @returns The this.
+   */
   withContext(context: Record<string, any>): this {
     this.errorDetails.context = { ...this.errorDetails.context, ...context };
     return this;
@@ -105,6 +139,12 @@ export class AppException extends HttpException {
  * 业务逻辑异常
  */
 export class BusinessLogicException extends AppException {
+  /**
+   * Initializes a new instance of the Business Logic Exception.
+   * @param code - The code.
+   * @param message - The message.
+   * @param details - The details.
+   */
   constructor(code: string, message: string, details?: any) {
     super(
       ErrorType.BUSINESS_LOGIC,
@@ -120,6 +160,11 @@ export class BusinessLogicException extends AppException {
  * 验证异常
  */
 export class ValidationException extends AppException {
+  /**
+   * Initializes a new instance of the Validation Exception.
+   * @param message - The message.
+   * @param validationErrors - The validation errors.
+   */
   constructor(message: string, validationErrors?: any) {
     super(
       ErrorType.VALIDATION,
@@ -135,6 +180,11 @@ export class ValidationException extends AppException {
  * 资源未找到异常
  */
 export class ResourceNotFoundException extends AppException {
+  /**
+   * Initializes a new instance of the Resource Not Found Exception.
+   * @param resource - The resource.
+   * @param identifier - The identifier.
+   */
   constructor(resource: string, identifier: string) {
     super(
       ErrorType.NOT_FOUND,
@@ -150,7 +200,11 @@ export class ResourceNotFoundException extends AppException {
  * 权限异常
  */
 export class UnauthorizedException extends AppException {
-  constructor(message: string = 'Unauthorized access') {
+  /**
+   * Initializes a new instance of the Unauthorized Exception.
+   * @param message - The message.
+   */
+  constructor(message = 'Unauthorized access') {
     super(
       ErrorType.AUTHORIZATION,
       'UNAUTHORIZED',
@@ -164,7 +218,11 @@ export class UnauthorizedException extends AppException {
  * 禁止访问异常
  */
 export class ForbiddenException extends AppException {
-  constructor(message: string = 'Access forbidden') {
+  /**
+   * Initializes a new instance of the Forbidden Exception.
+   * @param message - The message.
+   */
+  constructor(message = 'Access forbidden') {
     super(
       ErrorType.AUTHORIZATION,
       'FORBIDDEN',
@@ -178,6 +236,11 @@ export class ForbiddenException extends AppException {
  * 冲突异常
  */
 export class ConflictException extends AppException {
+  /**
+   * Initializes a new instance of the Conflict Exception.
+   * @param message - The message.
+   * @param conflictDetails - The conflict details.
+   */
   constructor(message: string, conflictDetails?: any) {
     super(
       ErrorType.CONFLICT,
@@ -193,6 +256,12 @@ export class ConflictException extends AppException {
  * 外部服务异常
  */
 export class ExternalServiceException extends AppException {
+  /**
+   * Initializes a new instance of the External Service Exception.
+   * @param serviceName - The service name.
+   * @param message - The message.
+   * @param statusCode - The status code.
+   */
   constructor(serviceName: string, message: string, statusCode?: number) {
     super(
       ErrorType.EXTERNAL_SERVICE,
@@ -332,9 +401,9 @@ export class ErrorRecoveryStrategy {
    */
   static async withRetry<T>(
     operation: () => Promise<T>,
-    maxRetries: number = 3,
-    baseDelay: number = 1000,
-    exponentialBackoff: boolean = true
+    maxRetries = 3,
+    baseDelay = 1000,
+    exponentialBackoff = true
   ): Promise<T> {
     let lastError: Error;
     let delay = baseDelay;
@@ -370,8 +439,8 @@ export class ErrorRecoveryStrategy {
    */
   static circuitBreaker<T>(
     operation: () => Promise<T>,
-    failureThreshold: number = 5,
-    timeout: number = 60000
+    failureThreshold = 5,
+    timeout = 60000
   ): () => Promise<T> {
     let failureCount = 0;
     let lastFailureTime = 0;

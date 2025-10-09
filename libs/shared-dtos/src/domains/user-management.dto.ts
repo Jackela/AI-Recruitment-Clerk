@@ -2,6 +2,9 @@ import { ValueObject } from '../base/value-object';
 import { DomainEvent } from '../base/domain-event';
 
 // 用户会话聚合根
+/**
+ * Represents the user session.
+ */
 export class UserSession {
   private uncommittedEvents: DomainEvent[] = [];
 
@@ -15,6 +18,11 @@ export class UserSession {
   ) {}
 
   // 工厂方法
+  /**
+   * Creates the entity.
+   * @param ip - The ip.
+   * @returns The UserSession.
+   */
   static create(ip: string): UserSession {
     const sessionId = SessionId.generate();
     const ipAddress = new IPAddress({ value: ip });
@@ -38,6 +46,11 @@ export class UserSession {
     return session;
   }
   
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The UserSession.
+   */
   static restore(data: SessionData): UserSession {
     return new UserSession(
       new SessionId({ value: data.id }),
@@ -50,6 +63,10 @@ export class UserSession {
   }
   
   // 核心业务方法
+  /**
+   * Performs the record usage operation.
+   * @returns The UsageResult.
+   */
   recordUsage(): UsageResult {
     if (!this.canUse()) {
       return UsageResult.failed('Usage quota exceeded');
@@ -79,6 +96,9 @@ export class UserSession {
     });
   }
   
+  /**
+   * Performs the expire operation.
+   */
   expire(): void {
     this.status = SessionStatus.EXPIRED;
     this.addEvent(new SessionExpiredEvent(
@@ -87,14 +107,26 @@ export class UserSession {
     ));
   }
   
+  /**
+   * Performs the is valid operation.
+   * @returns The boolean value.
+   */
   isValid(): boolean {
     return this.status === SessionStatus.ACTIVE && !this.isExpired();
   }
   
+  /**
+   * Performs the can use operation.
+   * @returns The boolean value.
+   */
   canUse(): boolean {
     return this.isValid() && this.getRemainingQuota() > 0;
   }
   
+  /**
+   * Retrieves daily usage.
+   * @returns The UsageStats.
+   */
   getDailyUsage(): UsageStats {
     return new UsageStats({
       used: this.dailyQuota.getUsed(),
@@ -120,10 +152,17 @@ export class UserSession {
   }
   
   // 领域事件管理
+  /**
+   * Retrieves uncommitted events.
+   * @returns The an array of DomainEvent.
+   */
   getUncommittedEvents(): DomainEvent[] {
     return [...this.uncommittedEvents];
   }
   
+  /**
+   * Performs the mark events as committed operation.
+   */
   markEventsAsCommitted(): void {
     this.uncommittedEvents = [];
   }
@@ -133,33 +172,63 @@ export class UserSession {
   }
   
   // Getters for other agents
+  /**
+   * Retrieves id.
+   * @returns The SessionId.
+   */
   getId(): SessionId {
     return this.id;
   }
   
+  /**
+   * Retrieves ip.
+   * @returns The IPAddress.
+   */
   getIP(): IPAddress {
     return this.ip;
   }
   
+  /**
+   * Retrieves status.
+   * @returns The SessionStatus.
+   */
   getStatus(): SessionStatus {
     return this.status;
   }
 }
 
 // 值对象
+/**
+ * Represents the session id.
+ */
 export class SessionId extends ValueObject<{ value: string }> {
+  /**
+   * Generates the result.
+   * @returns The SessionId.
+   */
   static generate(): SessionId {
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substr(2, 9);
     return new SessionId({ value: `session_${timestamp}_${random}` });
   }
   
+  /**
+   * Retrieves value.
+   * @returns The string value.
+   */
   getValue(): string {
     return this.props.value;
   }
 }
 
+/**
+ * Represents the ip address.
+ */
 export class IPAddress extends ValueObject<{ value: string }> {
+  /**
+   * Initializes a new instance of the IP Address.
+   * @param props - The props.
+   */
   constructor(props: { value: string }) {
     if (!props.value || !/^\d+\.\d+\.\d+\.\d+$/.test(props.value)) {
       throw new Error('IP address must be valid IPv4 format');
@@ -167,17 +236,28 @@ export class IPAddress extends ValueObject<{ value: string }> {
     super(props);
   }
   
+  /**
+   * Retrieves value.
+   * @returns The string value.
+   */
   getValue(): string {
     return this.props.value;
   }
 }
 
+/**
+ * Represents the usage quota.
+ */
 export class UsageQuota extends ValueObject<{
   daily: number;
   used: number;
   questionnaireBonuses: number;
   paymentBonuses: number;
 }> {
+  /**
+   * Creates default.
+   * @returns The UsageQuota.
+   */
   static createDefault(): UsageQuota {
     return new UsageQuota({
       daily: 5,
@@ -187,10 +267,19 @@ export class UsageQuota extends ValueObject<{
     });
   }
   
+  /**
+   * Performs the restore operation.
+   * @param data - The data.
+   * @returns The UsageQuota.
+   */
   static restore(data: any): UsageQuota {
     return new UsageQuota(data);
   }
   
+  /**
+   * Performs the increment usage operation.
+   * @returns The UsageQuota.
+   */
   incrementUsage(): UsageQuota {
     return new UsageQuota({
       ...this.props,
@@ -198,6 +287,10 @@ export class UsageQuota extends ValueObject<{
     });
   }
   
+  /**
+   * Performs the add questionnaire bonus operation.
+   * @returns The UsageQuota.
+   */
   addQuestionnaireBonus(): UsageQuota {
     return new UsageQuota({
       ...this.props,
@@ -205,6 +298,10 @@ export class UsageQuota extends ValueObject<{
     });
   }
   
+  /**
+   * Performs the add payment bonus operation.
+   * @returns The UsageQuota.
+   */
   addPaymentBonus(): UsageQuota {
     return new UsageQuota({
       ...this.props,
@@ -212,10 +309,18 @@ export class UsageQuota extends ValueObject<{
     });
   }
   
+  /**
+   * Retrieves total limit.
+   * @returns The number value.
+   */
   getTotalLimit(): number {
     return this.props.daily + this.props.questionnaireBonuses + this.props.paymentBonuses;
   }
   
+  /**
+   * Retrieves used.
+   * @returns The number value.
+   */
   getUsed(): number {
     return this.props.used;
   }
@@ -227,29 +332,51 @@ export enum SessionStatus {
   EXPIRED = 'expired'
 }
 
+/**
+ * Represents the usage stats.
+ */
 export class UsageStats extends ValueObject<{
   used: number;
   remaining: number;
   total: number;
   resetTime: Date;
 }> {
+  /**
+   * Performs the used operation.
+   * @returns The number value.
+   */
   get used(): number {
     return this.props.used;
   }
   
+  /**
+   * Performs the remaining operation.
+   * @returns The number value.
+   */
   get remaining(): number {
     return this.props.remaining;
   }
   
+  /**
+   * Performs the total operation.
+   * @returns The number value.
+   */
   get total(): number {
     return this.props.total;
   }
   
+  /**
+   * Performs the reset time operation.
+   * @returns The Date.
+   */
   get resetTime(): Date {
     return this.props.resetTime;
   }
 }
 
+/**
+ * Represents the usage result.
+ */
 export class UsageResult {
   private constructor(
     public readonly success: boolean,
@@ -257,19 +384,36 @@ export class UsageResult {
     public readonly error?: string
   ) {}
   
+  /**
+   * Performs the success operation.
+   * @param data - The data.
+   * @returns The UsageResult.
+   */
   static success(data: { used: number; remaining: number }): UsageResult {
     return new UsageResult(true, data);
   }
   
+  /**
+   * Performs the failed operation.
+   * @param error - The error.
+   * @returns The UsageResult.
+   */
   static failed(error: string): UsageResult {
     return new UsageResult(false, undefined, error);
   }
   
+  /**
+   * Performs the quota exceeded operation.
+   * @returns The boolean value.
+   */
   get quotaExceeded(): boolean {
     return !this.success && this.error === 'Usage quota exceeded';
   }
 }
 
+/**
+ * Defines the shape of the session data.
+ */
 export interface SessionData {
   id: string;
   ip: string;
@@ -280,7 +424,15 @@ export interface SessionData {
 }
 
 // 领域服务
+/**
+ * Provides session validation functionality.
+ */
 export class SessionValidationService {
+  /**
+   * Validates the data.
+   * @param session - The session.
+   * @returns The UserManagementValidationResult.
+   */
   validate(session: UserSession): UserManagementValidationResult {
     const errors: string[] = [];
     
@@ -296,7 +448,15 @@ export class SessionValidationService {
   }
 }
 
+/**
+ * Represents the user management validation result.
+ */
 export class UserManagementValidationResult {
+  /**
+   * Initializes a new instance of the User Management Validation Result.
+   * @param isValid - The is valid.
+   * @param errors - The errors.
+   */
   constructor(
     public readonly isValid: boolean,
     public readonly errors: string[]
@@ -304,7 +464,16 @@ export class UserManagementValidationResult {
 }
 
 // 领域事件
+/**
+ * Represents the session created event event.
+ */
 export class SessionCreatedEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Session Created Event.
+   * @param sessionId - The session id.
+   * @param ip - The ip.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly sessionId: string,
     public readonly ip: string,
@@ -312,7 +481,17 @@ export class SessionCreatedEvent implements DomainEvent {
   ) {}
 }
 
+/**
+ * Represents the usage recorded event event.
+ */
 export class UsageRecordedEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Usage Recorded Event.
+   * @param sessionId - The session id.
+   * @param usageCount - The usage count.
+   * @param remainingQuota - The remaining quota.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly sessionId: string,
     public readonly usageCount: number,
@@ -321,7 +500,16 @@ export class UsageRecordedEvent implements DomainEvent {
   ) {}
 }
 
+/**
+ * Represents the session expired event event.
+ */
 export class SessionExpiredEvent implements DomainEvent {
+  /**
+   * Initializes a new instance of the Session Expired Event.
+   * @param sessionId - The session id.
+   * @param expiredAt - The expired at.
+   * @param occurredAt - The occurred at.
+   */
   constructor(
     public readonly sessionId: string,
     public readonly expiredAt: Date,

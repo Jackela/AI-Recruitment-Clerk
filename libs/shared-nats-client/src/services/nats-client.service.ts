@@ -25,16 +25,30 @@ export class NatsClientService implements OnModuleInit, OnModuleDestroy {
   private readonly activeSubscriptions = new Map<string, ConsumerMessages>();
   private serviceName = 'nats-client';
 
+  /**
+   * Initializes a new instance of the NATS Client Service.
+   * @param configService - The config service.
+   * @param connectionManager - The connection manager.
+   * @param streamManager - The stream manager.
+   */
   constructor(
     private readonly configService: ConfigService,
     private readonly connectionManager: NatsConnectionManager,
     private readonly streamManager: NatsStreamManager
   ) {}
 
+  /**
+   * Performs the on module init operation.
+   * @returns The result of the operation.
+   */
   async onModuleInit() {
     await this.initialize();
   }
 
+  /**
+   * Performs the on module destroy operation.
+   * @returns The result of the operation.
+   */
   async onModuleDestroy() {
     await this.shutdown();
   }

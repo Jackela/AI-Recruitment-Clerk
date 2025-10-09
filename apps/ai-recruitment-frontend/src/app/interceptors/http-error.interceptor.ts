@@ -13,14 +13,29 @@ import { Router } from '@angular/router';
 import { ErrorCorrelationService } from '../services/error/error-correlation.service';
 import { APP_CONFIG } from '../../config/app.config';
 
+/**
+ * Represents the http error interceptor.
+ */
 @Injectable()
 export class HttpErrorInterceptor implements HttpInterceptor {
+  /**
+   * Initializes a new instance of the Http Error Interceptor.
+   * @param toastService - The toast service.
+   * @param router - The router.
+   * @param errorCorrelation - The error correlation.
+   */
   constructor(
     private toastService: ToastService,
     private router: Router,
     private errorCorrelation: ErrorCorrelationService,
   ) {}
 
+  /**
+   * Performs the intercept operation.
+   * @param request - The request.
+   * @param next - The next.
+   * @returns The Observable<HttpEvent<any>>.
+   */
   intercept(
     request: HttpRequest<any>,
     next: HttpHandler,
@@ -315,6 +330,10 @@ export class HttpErrorInterceptor implements HttpInterceptor {
 }
 
 // Provider function for app.config.ts
+/**
+ * Performs the provide http error interceptor operation.
+ * @returns The result of the operation.
+ */
 export function provideHttpErrorInterceptor() {
   return {
     provide: 'HTTP_INTERCEPTORS',

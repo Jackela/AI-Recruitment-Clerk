@@ -10,6 +10,9 @@ export interface ValidationResult {
   contractName: string;
 }
 
+/**
+ * Defines the shape of the contract comparison result.
+ */
 export interface ContractComparisonResult {
   structureMatch: boolean;
   typeMatch: boolean;
@@ -22,6 +25,49 @@ export interface ContractComparisonResult {
   }>;
 }
 
+// Enhanced type definitions for contract validation data
+// Using flexible types that allow validation while maintaining type safety
+/**
+ * Defines the shape of the unknown job data.
+ */
+export interface UnknownJobData {
+  id?: string | unknown;
+  title?: string | unknown;
+  status?: string | unknown;
+  createdAt?: Date | unknown;
+  resumeCount?: number | unknown;
+  jdText?: string | unknown;
+  [key: string]: unknown;
+}
+
+/**
+ * Defines the shape of the unknown report data.
+ */
+export interface UnknownReportData {
+  id?: string | unknown;
+  candidateName?: string | unknown;
+  matchScore?: number | unknown;
+  oneSentenceSummary?: string | unknown;
+  generatedAt?: Date | unknown;
+  resumeId?: string | unknown;
+  jobId?: string | unknown;
+  strengths?: unknown[] | unknown;
+  potentialGaps?: unknown[] | unknown;
+  redFlags?: unknown[] | unknown;
+  suggestedInterviewQuestions?: unknown[] | unknown;
+  [key: string]: unknown;
+}
+
+/**
+ * Defines the shape of the unknown validation data.
+ */
+export interface UnknownValidationData {
+  type?: string | unknown;
+  [key: string]: unknown;
+}
+
+export type ValidationDataInput = UnknownJobData | UnknownReportData | UnknownValidationData | Record<string, unknown>;
+
 /**
  * Runtime contract validator
  */
@@ -29,7 +75,7 @@ export class ContractValidator {
   /**
    * Validate job contract structure and types
    */
-  static validateJobContract(data: any, contractType: 'JobBase' | 'JobDetail' | 'JobListItem'): ValidationResult {
+  static validateJobContract(data: UnknownJobData, contractType: 'JobBase' | 'JobDetail' | 'JobListItem'): ValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
@@ -40,7 +86,7 @@ export class ContractValidator {
     if (!data.title || typeof data.title !== 'string') {
       errors.push('title must be a non-empty string');
     }
-    if (!data.status || !['draft', 'active', 'processing', 'completed', 'closed'].includes(data.status)) {
+    if (!data.status || typeof data.status !== 'string' || !['draft', 'active', 'processing', 'completed', 'closed'].includes(data.status)) {
       errors.push('status must be one of: draft, active, processing, completed, closed');
     }
     if (!data.createdAt || !(data.createdAt instanceof Date)) {
@@ -68,7 +114,7 @@ export class ContractValidator {
   /**
    * Validate report contract structure and types
    */
-  static validateReportContract(data: any, contractType: 'AnalysisReport' | 'ReportListItem'): ValidationResult {
+  static validateReportContract(data: UnknownReportData, contractType: 'AnalysisReport' | 'ReportListItem'): ValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
@@ -122,7 +168,7 @@ export class ContractValidator {
   /**
    * Compare frontend and backend contract structures
    */
-  static compareContracts(frontendData: any, backendData: any, _contractName: string): ContractComparisonResult {
+  static compareContracts(frontendData: Record<string, unknown>, backendData: Record<string, unknown>, _contractName: string): ContractComparisonResult {
     const frontendKeys = new Set(Object.keys(frontendData));
     const backendKeys = new Set(Object.keys(backendData));
 
@@ -157,7 +203,7 @@ export class ContractValidator {
   /**
    * Validate all contracts in a data object
    */
-  static validateAllContracts(data: any): ValidationResult[] {
+  static validateAllContracts(data: UnknownValidationData): ValidationResult[] {
     const results: ValidationResult[] = [];
 
     // Add specific contract validations based on data type

@@ -13,6 +13,9 @@ import {
   headers as natsHeaders,
 } from 'nats';
 
+/**
+ * Defines the shape of the nats config.
+ */
 export interface NatsConfig {
   servers: string[];
   serviceName: string;
@@ -21,12 +24,18 @@ export interface NatsConfig {
   connectionTimeout?: number;
 }
 
+/**
+ * Defines the shape of the message pattern.
+ */
 export interface MessagePattern {
   subject: string;
   data: any;
   headers?: Record<string, string>;
 }
 
+/**
+ * Defines the shape of the consumer config.
+ */
 export interface ConsumerConfig {
   stream: string;
   consumer: string;
@@ -34,6 +43,9 @@ export interface ConsumerConfig {
   handler: (data: any) => Promise<void>;
 }
 
+/**
+ * Represents the base nats client.
+ */
 @Injectable()
 export abstract class BaseNatsClient implements OnModuleDestroy {
   protected readonly logger: Logger;
@@ -41,6 +53,10 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   protected jetstream: JetStreamClient | null = null;
   protected jsm: JetStreamManager | null = null;
   
+  /**
+   * Initializes a new instance of the Base NATS Client.
+   * @param config - The config.
+   */
   constructor(protected readonly config: NatsConfig) {
     this.logger = new Logger(`${config.serviceName}NatsClient`);
   }

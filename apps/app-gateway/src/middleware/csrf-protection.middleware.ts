@@ -16,6 +16,9 @@ interface CsrfRequest extends Request {
   };
 }
 
+/**
+ * Represents the csrf protection middleware.
+ */
 @Injectable()
 export class CsrfProtectionMiddleware implements NestMiddleware {
   private readonly logger = new Logger(CsrfProtectionMiddleware.name);
@@ -23,6 +26,10 @@ export class CsrfProtectionMiddleware implements NestMiddleware {
   private readonly excludedPaths: string[];
   private readonly safeMethods = ['GET', 'HEAD', 'OPTIONS'];
 
+  /**
+   * Initializes a new instance of the Csrf Protection Middleware.
+   * @param configService - The config service.
+   */
   constructor(private configService: ConfigService) {
     this.csrfSecret =
       this.configService.get<string>('CSRF_SECRET') ||
@@ -37,6 +44,13 @@ export class CsrfProtectionMiddleware implements NestMiddleware {
     ];
   }
 
+  /**
+   * Performs the use operation.
+   * @param req - The req.
+   * @param res - The res.
+   * @param next - The next.
+   * @returns The result of the operation.
+   */
   use(req: CsrfRequest, res: Response, next: NextFunction) {
     // Skip CSRF protection for safe HTTP methods
     if (this.safeMethods.includes(req.method)) {
@@ -176,6 +190,12 @@ export class CsrfProtectionMiddleware implements NestMiddleware {
 }
 
 // Utility function to generate CSRF token for use in controllers
+/**
+ * Generates csrf token for response.
+ * @param secret - The secret.
+ * @param sessionId - The session id.
+ * @returns The string value.
+ */
 export function generateCsrfTokenForResponse(
   secret: string,
   sessionId: string,

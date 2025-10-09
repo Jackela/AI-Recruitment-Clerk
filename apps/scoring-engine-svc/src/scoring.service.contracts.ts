@@ -15,13 +15,13 @@ import {
   Invariant,
   ContractValidators,
 } from '@ai-recruitment-clerk/infrastructure-shared';
-import { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 import { NatsClient } from './nats/nats.client';
 import {
   GeminiClient,
   GeminiConfig,
   SecureConfigValidator,
-} from '@ai-recruitment-clerk/ai-services-shared';
+} from '@ai-recruitment-clerk/shared-dtos';
 import {
   EnhancedSkillMatcherService,
   JobSkillRequirement,
@@ -43,6 +43,9 @@ import {
   ScoreReliabilityReport,
 } from './services/scoring-confidence.service';
 
+/**
+ * Defines the shape of the jd dto.
+ */
 export interface JdDTO {
   requiredSkills: JobSkillRequirement[];
   experienceYears: { min: number; max: number };
@@ -59,6 +62,9 @@ export interface JdDTO {
   requiredTechnologies?: string[];
 }
 
+/**
+ * Defines the shape of the score component.
+ */
 export interface ScoreComponent {
   score: number;
   details: string;
@@ -80,6 +86,9 @@ export interface ScoreComponent {
       };
 }
 
+/**
+ * Defines the shape of the score dto.
+ */
 export interface ScoreDTO {
   overallScore: number;
   skillScore: ScoreComponent;
@@ -119,6 +128,14 @@ export class ScoringEngineServiceContracts {
   private readonly jdCache = new Map<string, JdDTO>();
   private readonly geminiClient: GeminiClient;
 
+  /**
+   * Initializes a new instance of the Scoring Engine Service Contracts.
+   * @param natsClient - The nats client.
+   * @param enhancedSkillMatcher - The enhanced skill matcher.
+   * @param experienceAnalyzer - The experience analyzer.
+   * @param culturalFitAnalyzer - The cultural fit analyzer.
+   * @param confidenceService - The confidence service.
+   */
   constructor(
     private readonly natsClient: NatsClient,
     private readonly enhancedSkillMatcher: EnhancedSkillMatcherService,

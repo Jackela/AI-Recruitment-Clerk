@@ -1,5 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 
+/**
+ * Provides resume functionality.
+ */
 @Injectable()
 export class ResumeService {
   private readonly logger = new Logger(ResumeService.name);

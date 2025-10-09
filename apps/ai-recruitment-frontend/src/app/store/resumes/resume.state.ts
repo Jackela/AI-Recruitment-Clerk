@@ -1,5 +1,8 @@
 import { ResumeListItem, ResumeDetail } from './resume.model';
 
+/**
+ * Defines the shape of the resume state.
+ */
 export interface ResumeState {
   resumes: ResumeListItem[];
   selectedResume: ResumeDetail | null;

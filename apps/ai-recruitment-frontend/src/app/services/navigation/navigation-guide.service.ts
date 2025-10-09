@@ -1,7 +1,10 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
+/**
+ * Defines the shape of the guide step.
+ */
 export interface GuideStep {
   id: string;
   target: string;
@@ -12,6 +15,9 @@ export interface GuideStep {
   nextStep?: string;
 }
 
+/**
+ * Defines the shape of the onboarding flow.
+ */
 export interface OnboardingFlow {
   id: string;
   name: string;
@@ -20,6 +26,9 @@ export interface OnboardingFlow {
   completedKey: string;
 }
 
+/**
+ * Provides navigation guide functionality.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -140,7 +149,12 @@ export class NavigationGuideService {
     },
   };
 
-  constructor(private router: Router) {
+  private router = inject(Router);
+
+  /**
+   * Initializes a new instance of the Navigation Guide Service.
+   */
+  constructor() {
     this.initializeFirstTimeCheck();
     this.trackRouteChanges();
   }
@@ -175,6 +189,10 @@ export class NavigationGuideService {
     }
   }
 
+  /**
+   * Performs the start flow operation.
+   * @param flowId - The flow id.
+   */
   startFlow(flowId: string): void {
     const flow = this.flows[flowId];
     if (!flow || this.hasCompletedFlow(flowId)) return;
@@ -185,6 +203,9 @@ export class NavigationGuideService {
     this.showCurrentStep();
   }
 
+  /**
+   * Performs the next step operation.
+   */
   nextStep(): void {
     const flow = this.currentFlow();
     if (!flow) return;
@@ -198,6 +219,9 @@ export class NavigationGuideService {
     }
   }
 
+  /**
+   * Performs the previous step operation.
+   */
   previousStep(): void {
     const currentIndex = this.stepIndex();
     if (currentIndex > 0) {
@@ -206,6 +230,9 @@ export class NavigationGuideService {
     }
   }
 
+  /**
+   * Performs the skip flow operation.
+   */
   skipFlow(): void {
     this.completeFlow();
   }
@@ -263,6 +290,11 @@ export class NavigationGuideService {
   }
 
   // Public methods for component interaction
+  /**
+   * Performs the show contextual help operation.
+   * @param target - The target.
+   * @param content - The content.
+   */
   showContextualHelp(target: string, content: string): void {
     const helpStep: GuideStep = {
       id: 'contextual-help',
@@ -284,6 +316,9 @@ export class NavigationGuideService {
     }, 100);
   }
 
+  /**
+   * Performs the hide contextual help operation.
+   */
   hideContextualHelp(): void {
     this.isGuideActive.set(false);
     this.currentStep.set(null);
@@ -293,6 +328,9 @@ export class NavigationGuideService {
   }
 
   // Reset onboarding for testing
+  /**
+   * Performs the reset onboarding operation.
+   */
   resetOnboarding(): void {
     Object.values(this.flows).forEach((flow) => {
       localStorage.removeItem(flow.completedKey);
@@ -301,11 +339,19 @@ export class NavigationGuideService {
   }
 
   // Get available flows for manual triggering
+  /**
+   * Retrieves available flows.
+   * @returns The an array of OnboardingFlow.
+   */
   getAvailableFlows(): OnboardingFlow[] {
     return Object.values(this.flows);
   }
 
   // Check if user has completed all onboarding
+  /**
+   * Performs the has completed all onboarding operation.
+   * @returns The boolean value.
+   */
   hasCompletedAllOnboarding(): boolean {
     return Object.values(this.flows).every((flow) =>
       this.hasCompletedFlow(flow.id),

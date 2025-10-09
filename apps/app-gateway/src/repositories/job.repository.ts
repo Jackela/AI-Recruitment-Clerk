@@ -4,15 +4,28 @@ import { Model } from 'mongoose';
 import { Job, JobDocument } from '../schemas/job.schema';
 import { CacheService } from '../cache/cache.service';
 
+/**
+ * Manages persistence for job.
+ */
 @Injectable()
 export class JobRepository {
   private readonly logger = new Logger(JobRepository.name);
 
+  /**
+   * Initializes a new instance of the Job Repository.
+   * @param jobModel - The job model.
+   * @param cacheService - The cache service.
+   */
   constructor(
     @InjectModel(Job.name) private jobModel: Model<JobDocument>,
     private readonly cacheService: CacheService,
   ) {}
 
+  /**
+   * Creates the entity.
+   * @param jobData - The job data.
+   * @returns A promise that resolves to JobDocument.
+   */
   async create(jobData: Partial<Job>): Promise<JobDocument> {
     try {
       const createdJob = new this.jobModel({
@@ -33,6 +46,11 @@ export class JobRepository {
     }
   }
 
+  /**
+   * Performs the find by id operation.
+   * @param id - The id.
+   * @returns A promise that resolves to JobDocument | null.
+   */
   async findById(id: string): Promise<JobDocument | null> {
     const cacheKey = this.cacheService.generateKey('db', 'job', 'id', id);
 
@@ -52,6 +70,11 @@ export class JobRepository {
     );
   }
 
+  /**
+   * Performs the find all operation.
+   * @param options - The options.
+   * @returns A promise that resolves to an array of JobDocument.
+   */
   async findAll(
     options: {
       status?: string;
@@ -100,6 +123,12 @@ export class JobRepository {
     );
   }
 
+  /**
+   * Performs the find by company operation.
+   * @param company - The company.
+   * @param limit - The limit.
+   * @returns A promise that resolves to an array of JobDocument.
+   */
   async findByCompany(company: string, limit = 50): Promise<JobDocument[]> {
     const cacheKey = this.cacheService.generateKey(
       'db',
@@ -135,6 +164,12 @@ export class JobRepository {
     );
   }
 
+  /**
+   * Performs the find by created by operation.
+   * @param createdBy - The created by.
+   * @param limit - The limit.
+   * @returns A promise that resolves to an array of JobDocument.
+   */
   async findByCreatedBy(
     createdBy: string,
     limit = 100,
@@ -151,6 +186,12 @@ export class JobRepository {
     }
   }
 
+  /**
+   * Updates by id.
+   * @param id - The id.
+   * @param updateData - The update data.
+   * @returns A promise that resolves to JobDocument | null.
+   */
   async updateById(
     id: string,
     updateData: Partial<Job>,
@@ -177,6 +218,12 @@ export class JobRepository {
     }
   }
 
+  /**
+   * Updates status.
+   * @param id - The id.
+   * @param status - The status.
+   * @returns A promise that resolves to JobDocument | null.
+   */
   async updateStatus(id: string, status: string): Promise<JobDocument | null> {
     try {
       return await this.updateById(id, { status });
@@ -186,6 +233,13 @@ export class JobRepository {
     }
   }
 
+  /**
+   * Updates jd analysis.
+   * @param id - The id.
+   * @param extractedKeywords - The extracted keywords.
+   * @param confidence - The confidence.
+   * @returns A promise that resolves to JobDocument | null.
+   */
   async updateJdAnalysis(
     id: string,
     extractedKeywords: string[],
@@ -203,6 +257,11 @@ export class JobRepository {
     }
   }
 
+  /**
+   * Removes by id.
+   * @param id - The id.
+   * @returns A promise that resolves to boolean value.
+   */
   async deleteById(id: string): Promise<boolean> {
     try {
       const result = await this.jobModel.findByIdAndDelete(id).exec();
@@ -219,6 +278,12 @@ export class JobRepository {
     }
   }
 
+  /**
+   * Performs the search by keywords operation.
+   * @param keywords - The keywords.
+   * @param limit - The limit.
+   * @returns A promise that resolves to an array of JobDocument.
+   */
   async searchByKeywords(
     keywords: string[],
     limit = 50,
@@ -240,6 +305,12 @@ export class JobRepository {
     }
   }
 
+  /**
+   * Performs the find by skills operation.
+   * @param skills - The skills.
+   * @param limit - The limit.
+   * @returns A promise that resolves to an array of JobDocument.
+   */
   async findBySkills(skills: string[], limit = 50): Promise<JobDocument[]> {
     try {
       return await this.jobModel
@@ -256,6 +327,10 @@ export class JobRepository {
     }
   }
 
+  /**
+   * Performs the count by status operation.
+   * @returns A promise that resolves to Record<string, number>.
+   */
   async countByStatus(): Promise<Record<string, number>> {
     const cacheKey = this.cacheService.generateKey(
       'db',
@@ -297,6 +372,10 @@ export class JobRepository {
     );
   }
 
+  /**
+   * Performs the count by company operation.
+   * @returns A promise that resolves to Array<{ company: string; count: number }>.
+   */
   async countByCompany(): Promise<Array<{ company: string; count: number }>> {
     const cacheKey = this.cacheService.generateKey(
       'db',

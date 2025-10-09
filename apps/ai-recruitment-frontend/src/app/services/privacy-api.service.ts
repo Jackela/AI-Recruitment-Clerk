@@ -1,7 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 // Temporary local types until shared-dtos compilation is fixed
+/**
+ * Defines the shape of the capture consent dto.
+ */
 export interface CaptureConsentDto {
   userId: string;
   consents: Array<{
@@ -11,12 +14,18 @@ export interface CaptureConsentDto {
   consentVersion?: string;
 }
 
+/**
+ * Defines the shape of the withdraw consent dto.
+ */
 export interface WithdrawConsentDto {
   userId: string;
   purpose: string;
   reason?: string;
 }
 
+/**
+ * Defines the shape of the consent status dto.
+ */
 export interface ConsentStatusDto {
   userId: string;
   needsRenewal: boolean;
@@ -29,22 +38,34 @@ export interface ConsentStatusDto {
   }>;
 }
 
+/**
+ * Defines the shape of the create rights request dto.
+ */
 export interface CreateRightsRequestDto {
   requestType: string;
   userId: string;
 }
 
+/**
+ * Defines the shape of the data subject rights request.
+ */
 export interface DataSubjectRightsRequest {
   id: string;
   requestType: string;
   status: string;
 }
 
+/**
+ * Defines the shape of the data export package.
+ */
 export interface DataExportPackage {
   downloadUrl: string;
   expiryDate: string;
 }
 
+/**
+ * Defines the shape of the rights request status dto.
+ */
 export interface RightsRequestStatusDto {
   status: string;
   progress: number;
@@ -55,6 +76,9 @@ export enum DataExportFormat {
   CSV = 'csv',
 }
 
+/**
+ * Defines the shape of the user consent profile.
+ */
 export interface UserConsentProfile {
   userId: string;
   consents: Array<{
@@ -74,7 +98,7 @@ import { environment } from '../../environments/environment';
 export class PrivacyApiService {
   private readonly baseUrl = `${environment.apiUrl}/privacy`;
 
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   /**
    * CONSENT MANAGEMENT
@@ -208,8 +232,8 @@ export class PrivacyApiService {
   /**
    * Get data processing records (Article 30)
    */
-  getProcessingRecords(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/processing-records`);
+  getProcessingRecords(): Observable<Array<{id: string; date: string; purpose: string; dataTypes: string[]}>> {
+    return this.http.get<Array<{id: string; date: string; purpose: string; dataTypes: string[]}>>(`${this.baseUrl}/processing-records`);
   }
 
   /**

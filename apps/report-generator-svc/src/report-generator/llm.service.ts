@@ -2,21 +2,258 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   GeminiClient,
   GeminiConfig,
-} from '@ai-recruitment-clerk/ai-services-shared';
+} from '@ai-recruitment-clerk/shared-dtos';
 import { SecureConfigValidator } from '@app/shared-dtos';
 
-interface ReportEvent {
+// Enhanced type definitions for LLM service
+/**
+ * Defines the shape of the job requirements.
+ */
+export interface JobRequirements {
+  requiredSkills?: Array<{
+    name: string;
+    weight: number;
+    category?: string;
+    mandatory?: boolean;
+  }>;
+  preferredSkills?: Array<{
+    name: string;
+    weight: number;
+    category?: string;
+  }>;
+  experienceYears?: {
+    min: number;
+    max: number;
+  };
+  educationLevel?: string;
+  certifications?: string[];
+  languages?: Array<{
+    language: string;
+    proficiency: 'basic' | 'intermediate' | 'advanced' | 'native';
+  }>;
+  locationRequirements?: {
+    remote?: boolean;
+    onSite?: boolean;
+    hybrid?: boolean;
+    locations?: string[];
+  };
+}
+
+/**
+ * Defines the shape of the extracted resume data.
+ */
+export interface ExtractedResumeData {
+  personalInfo?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    location?: string;
+    summary?: string;
+  };
+  workExperience?: Array<{
+    company: string;
+    position: string;
+    duration: string;
+    description: string;
+    skills?: string[];
+    achievements?: string[];
+  }>;
+  education?: Array<{
+    institution: string;
+    degree: string;
+    field: string;
+    year: number;
+    gpa?: number;
+  }>;
+  skills?: Array<{
+    name: string;
+    category: string;
+    proficiency?: string;
+    yearsOfExperience?: number;
+  }>;
+  certifications?: Array<{
+    name: string;
+    issuer: string;
+    date: string;
+    expiryDate?: string;
+  }>;
+  languages?: Array<{
+    language: string;
+    proficiency: 'basic' | 'intermediate' | 'advanced' | 'native';
+  }>;
+  projects?: Array<{
+    name: string;
+    description: string;
+    technologies: string[];
+    url?: string;
+  }>;
+}
+
+/**
+ * Defines the shape of the scoring breakdown.
+ */
+export interface ScoringBreakdown {
+  skillsMatch: number;
+  experienceMatch: number;
+  educationMatch: number;
+  certificationMatch: number;
+  locationMatch?: number;
+  overallScore: number;
+  weightedFactors: {
+    technical: number;
+    experience: number;
+    cultural: number;
+    potential: number;
+  };
+  confidenceScore: number;
+}
+
+/**
+ * Defines the shape of the candidate data.
+ */
+export interface CandidateData {
+  id: string;
+  name?: string;
+  email?: string;
+  score?: number;
+  recommendation?: 'strong_hire' | 'hire' | 'consider' | 'pass';
+  skills?: string[];
+  matchingSkills?: string[];
+  missingSkills?: string[];
+  strengths?: string[];
+  concerns?: string[];
+  experience?: ExtractedResumeData['workExperience'];
+  education?: ExtractedResumeData['education'];
+  extractedData?: ExtractedResumeData;
+  interviewNotes?: string;
+  salaryExpectation?: {
+    min: number;
+    max: number;
+    currency: string;
+  };
+}
+
+/**
+ * Defines the shape of the job data.
+ */
+export interface JobData {
+  id: string;
+  title?: string;
+  description?: string;
+  requirements?: JobRequirements;
+  department?: string;
+  location?: string;
+  employmentType?: 'full_time' | 'part_time' | 'contract' | 'internship';
+  salaryRange?: {
+    min: number;
+    max: number;
+    currency: string;
+  };
+  postedDate?: Date;
+  applicationDeadline?: Date;
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
+}
+
+/**
+ * Defines the shape of the overall analysis.
+ */
+export interface OverallAnalysis {
+  totalCandidates: number;
+  averageScore: number;
+  topCandidateScore: number;
+  qualifiedCandidatesCount: number;
+  commonSkillGaps: string[];
+  marketCompetitiveness: 'low' | 'medium' | 'high';
+  recommendedHiringTimeline: string;
+  diversityMetrics?: {
+    genderDistribution?: Record<string, number>;
+    locationDistribution?: Record<string, number>;
+    experienceDistribution?: Record<string, number>;
+  };
+  riskFactors?: string[];
+  opportunityInsights?: string[];
+}
+
+/**
+ * Defines the shape of the aggregated metrics.
+ */
+export interface AggregatedMetrics {
+  scoreDistribution: {
+    excellent: number; // 90-100%
+    good: number; // 75-89%
+    fair: number; // 60-74%
+    poor: number; // below 60%
+  };
+  skillsAnalysis: {
+    mostCommonSkills: Array<{ skill: string; count: number }>;
+    rareSkills: Array<{ skill: string; count: number }>;
+    skillGaps: Array<{ skill: string; gapPercentage: number }>;
+  };
+  experienceAnalysis: {
+    averageYears: number;
+    medianYears: number;
+    experienceDistribution: Record<string, number>;
+  };
+  educationAnalysis: {
+    degreeDistribution: Record<string, number>;
+    institutionTiers: Record<string, number>;
+  };
+  geographicAnalysis?: {
+    locationDistribution: Record<string, number>;
+    remotePreference: number;
+  };
+}
+
+/**
+ * Defines the shape of the comparison criteria.
+ */
+export interface ComparisonCriteria {
+  weightings: {
+    technicalSkills: number;
+    experience: number;
+    education: number;
+    culturalFit: number;
+    growth: number;
+  };
+  mandatoryRequirements: string[];
+  preferredAttributes: string[];
+  dealBreakers: string[];
+  priorityOrder: Array<'experience' | 'skills' | 'education' | 'potential' | 'culture'>;
+}
+
+/**
+ * Defines the shape of the skills gap analysis.
+ */
+export interface SkillsGapAnalysis {
+  candidateSkills: string[];
+  requiredSkills: string[];
+  missingSkills: string[];
+  transferableSkills: string[];
+  learningCurveEstimate: {
+    quick: string[]; // 1-3 months
+    moderate: string[]; // 3-6 months
+    extended: string[]; // 6+ months
+  };
+  developmentPriorities: Array<{
+    skill: string;
+    importance: 'critical' | 'important' | 'nice_to_have';
+    timeToCompetency: string;
+    learningResources: string[];
+  }>;
+}
+
+export interface ReportEvent {
   jobId: string;
   resumeIds: string[];
   jobData?: {
     title?: string;
     description?: string;
-    requirements?: any;
+    requirements?: JobRequirements;
   };
   resumesData?: Array<{
     id: string;
     candidateName?: string;
-    extractedData?: any;
+    extractedData?: ExtractedResumeData;
     score?: number;
     matchingSkills?: string[];
     missingSkills?: string[];
@@ -24,7 +261,7 @@ interface ReportEvent {
   scoringResults?: Array<{
     resumeId: string;
     score: number;
-    breakdown?: any;
+    breakdown?: ScoringBreakdown;
     recommendations?: string[];
   }>;
   metadata?: {
@@ -34,11 +271,17 @@ interface ReportEvent {
   };
 }
 
+/**
+ * Provides llm functionality.
+ */
 @Injectable()
 export class LlmService {
   private readonly logger = new Logger(LlmService.name);
   private readonly geminiClient: GeminiClient;
 
+  /**
+   * Initializes a new instance of the LLM Service.
+   */
   constructor() {
     // 🔒 SECURITY: Validate configuration before service initialization
     SecureConfigValidator.validateServiceConfig('ReportGeneratorLlmService', [
@@ -55,6 +298,11 @@ export class LlmService {
     this.geminiClient = new GeminiClient(config);
   }
 
+  /**
+   * Generates report markdown.
+   * @param event - The event.
+   * @returns A promise that resolves to string value.
+   */
   async generateReportMarkdown(event: ReportEvent): Promise<string> {
     this.logger.debug(`Starting report generation for job: ${event.jobId}`);
 
@@ -101,7 +349,7 @@ Generate a comprehensive recruitment analysis report in Markdown format for the 
       prompt += `## Requirements\n`;
       if (event.jobData.requirements.requiredSkills) {
         prompt += `**Required Skills:**\n`;
-        event.jobData.requirements.requiredSkills.forEach((skill: any) => {
+        event.jobData.requirements.requiredSkills.forEach((skill) => {
           prompt += `- ${skill.name} (Weight: ${skill.weight})\n`;
         });
         prompt += `\n`;
@@ -249,7 +497,12 @@ Generate ONLY the markdown report content, no additional explanations.`;
     return formattedReport;
   }
 
-  async generateCandidateComparison(candidates: any[]): Promise<string> {
+  /**
+   * Generates candidate comparison.
+   * @param candidates - The candidates.
+   * @returns A promise that resolves to string value.
+   */
+  async generateCandidateComparison(candidates: CandidateData[]): Promise<string> {
     this.logger.debug(
       `Generating candidate comparison for ${candidates.length} candidates`,
     );
@@ -267,7 +520,7 @@ Generate ONLY the markdown report content, no additional explanations.`;
     }
   }
 
-  private buildComparisonPrompt(candidates: any[]): string {
+  private buildComparisonPrompt(candidates: CandidateData[]): string {
     let prompt = `Generate a detailed candidate comparison analysis in Markdown format.\n\nCandidates to Compare:\n`;
 
     candidates.forEach((candidate, index) => {
@@ -283,7 +536,7 @@ Generate ONLY the markdown report content, no additional explanations.`;
       }
 
       if (candidate.education) {
-        prompt += `**Education:** ${candidate.education.map((edu) => `${edu.degree} from ${edu.school}`).join(', ')}\n`;
+        prompt += `**Education:** ${candidate.education.map((edu) => `${edu.degree} from ${edu.institution}`).join(', ')}\n`;
       }
     });
 
@@ -292,9 +545,15 @@ Generate ONLY the markdown report content, no additional explanations.`;
     return prompt;
   }
 
+  /**
+   * Generates interview guide.
+   * @param candidateData - The candidate data.
+   * @param jobRequirements - The job requirements.
+   * @returns A promise that resolves to string value.
+   */
   async generateInterviewGuide(
-    candidateData: any,
-    jobRequirements: any,
+    candidateData: CandidateData,
+    jobRequirements: JobRequirements,
   ): Promise<string> {
     this.logger.debug(
       `Generating interview guide for candidate: ${candidateData.name || candidateData.id}`,
@@ -311,10 +570,17 @@ Generate ONLY the markdown report content, no additional explanations.`;
     }
   }
 
+  /**
+   * Generates skills assessment report.
+   * @param candidateData - The candidate data.
+   * @param jobRequirements - The job requirements.
+   * @param skillsGapAnalysis - The skills gap analysis.
+   * @returns A promise that resolves to string value.
+   */
   async generateSkillsAssessmentReport(
-    candidateData: any,
-    jobRequirements: any,
-    skillsGapAnalysis?: any,
+    candidateData: CandidateData,
+    jobRequirements: JobRequirements,
+    skillsGapAnalysis?: SkillsGapAnalysis,
   ): Promise<string> {
     this.logger.debug(
       `Generating skills assessment report for candidate: ${candidateData.name || candidateData.id}`,
@@ -373,10 +639,17 @@ Use professional language, provide specific recommendations, and include actiona
     }
   }
 
+  /**
+   * Generates executive summary.
+   * @param jobData - The job data.
+   * @param candidatesData - The candidates data.
+   * @param overallAnalysis - The overall analysis.
+   * @returns A promise that resolves to string value.
+   */
   async generateExecutiveSummary(
-    jobData: any,
-    candidatesData: any[],
-    overallAnalysis: any,
+    jobData: JobData,
+    candidatesData: CandidateData[],
+    overallAnalysis: OverallAnalysis,
   ): Promise<string> {
     this.logger.debug(
       `Generating executive summary for ${candidatesData.length} candidates`,
@@ -443,11 +716,19 @@ Format for C-level executives with focus on business impact, ROI, and strategic 
     }
   }
 
+  /**
+   * Generates batch analysis report.
+   * @param jobData - The job data.
+   * @param candidatesData - The candidates data.
+   * @param aggregatedMetrics - The aggregated metrics.
+   * @param comparisonCriteria - The comparison criteria.
+   * @returns A promise that resolves to string value.
+   */
   async generateBatchAnalysisReport(
-    jobData: any,
-    candidatesData: any[],
-    aggregatedMetrics: any,
-    comparisonCriteria: any,
+    jobData: JobData,
+    candidatesData: CandidateData[],
+    aggregatedMetrics: AggregatedMetrics,
+    comparisonCriteria: ComparisonCriteria,
   ): Promise<string> {
     this.logger.debug(
       `Generating batch analysis report for ${candidatesData.length} candidates`,
@@ -531,6 +812,10 @@ Provide actionable insights that enable data-driven hiring decisions while highl
     }
   }
 
+  /**
+   * Performs the health check operation.
+   * @returns A promise that resolves to boolean value.
+   */
   async healthCheck(): Promise<boolean> {
     try {
       return await this.geminiClient.healthCheck();

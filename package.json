@@ -11,7 +11,7 @@
     "npm": ">=10.0.0"
   },
   "scripts": {
-    "build": "NODE_OPTIONS='--max-old-space-size=2048' npx nx build app-gateway --prod --parallel=1",
+    "build": "npx nx build app-gateway --prod --parallel=1",
     "start": "node dist/apps/app-gateway/main.cjs",
     "start:prod": "NODE_ENV=production node dist/apps/app-gateway/main.cjs",
     "postinstall": "echo 'Skipping build in postinstall'",
@@ -154,6 +154,7 @@
     "@types/node-fetch": "^2.6.13",
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
+    "@types/pdf-parse": "^1.1.5",
     "axios": "^1.6.0",
     "bcryptjs": "^3.0.2",
     "cache-manager": "5.2.4",
@@ -174,6 +175,7 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "pdf-parse": "^2.1.1",
     "pdf-parse-fork": "^1.2.0",
     "qrcode": "^1.5.4",
     "redis": "^4.7.0",

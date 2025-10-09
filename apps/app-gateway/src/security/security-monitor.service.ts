@@ -5,6 +5,9 @@ import { Model } from 'mongoose';
 import Redis, { RedisOptions } from 'ioredis';
 import { UserProfile } from '../schemas/user-profile.schema';
 
+/**
+ * Defines the shape of the security event.
+ */
 export interface SecurityEvent {
   id: string;
   type:
@@ -25,6 +28,9 @@ export interface SecurityEvent {
   resolvedBy?: string;
 }
 
+/**
+ * Defines the shape of the security metrics.
+ */
 export interface SecurityMetrics {
   totalEvents: number;
   criticalEvents: number;
@@ -38,11 +44,19 @@ export interface SecurityMetrics {
   eventsByHour: Array<{ hour: number; count: number }>;
 }
 
+/**
+ * Provides security monitor functionality.
+ */
 @Injectable()
 export class SecurityMonitorService {
   private readonly logger = new Logger(SecurityMonitorService.name);
   private redis: Redis | null;
 
+  /**
+   * Initializes a new instance of the Security Monitor Service.
+   * @param userModel - The user model.
+   * @param configService - The config service.
+   */
   constructor(
     @InjectModel(UserProfile.name) private userModel: Model<UserProfile>,
     private configService: ConfigService,
@@ -123,6 +137,11 @@ export class SecurityMonitorService {
     }
   }
 
+  /**
+   * Performs the record security event operation.
+   * @param event - The event.
+   * @returns A promise that resolves to string value.
+   */
   async recordSecurityEvent(
     event: Omit<SecurityEvent, 'id' | 'timestamp' | 'resolved'>,
   ): Promise<string> {
@@ -181,6 +200,11 @@ export class SecurityMonitorService {
     }
   }
 
+  /**
+   * Retrieves security events.
+   * @param options - The options.
+   * @returns A promise that resolves to { events: SecurityEvent[]; total: number }.
+   */
   async getSecurityEvents(
     options: {
       limit?: number;
@@ -259,6 +283,11 @@ export class SecurityMonitorService {
     }
   }
 
+  /**
+   * Retrieves security metrics.
+   * @param period - The period.
+   * @returns A promise that resolves to SecurityMetrics.
+   */
   async getSecurityMetrics(
     period: 'hour' | 'day' | 'week' = 'day',
   ): Promise<SecurityMetrics> {
@@ -386,6 +415,13 @@ export class SecurityMonitorService {
     }
   }
 
+  /**
+   * Resolves security event.
+   * @param eventId - The event id.
+   * @param resolvedBy - The resolved by.
+   * @param resolution - The resolution.
+   * @returns A promise that resolves to boolean value.
+   */
   async resolveSecurityEvent(
     eventId: string,
     resolvedBy: string,
@@ -542,6 +578,14 @@ export class SecurityMonitorService {
   }
 
   // Helper method for other services to use
+  /**
+   * Performs the record login failure operation.
+   * @param ip - The ip.
+   * @param userAgent - The user agent.
+   * @param attemptedEmail - The attempted email.
+   * @param userId - The user id.
+   * @returns The result of the operation.
+   */
   async recordLoginFailure(
     ip: string,
     userAgent: string,
@@ -561,6 +605,14 @@ export class SecurityMonitorService {
     });
   }
 
+  /**
+   * Performs the record account lockout operation.
+   * @param ip - The ip.
+   * @param userAgent - The user agent.
+   * @param userId - The user id.
+   * @param reason - The reason.
+   * @returns The result of the operation.
+   */
   async recordAccountLockout(
     ip: string,
     userAgent: string,
@@ -580,6 +632,14 @@ export class SecurityMonitorService {
     });
   }
 
+  /**
+   * Performs the record mfa failure operation.
+   * @param ip - The ip.
+   * @param userAgent - The user agent.
+   * @param userId - The user id.
+   * @param method - The method.
+   * @returns The result of the operation.
+   */
   async recordMfaFailure(
     ip: string,
     userAgent: string,
@@ -599,6 +659,14 @@ export class SecurityMonitorService {
     });
   }
 
+  /**
+   * Performs the record suspicious activity operation.
+   * @param ip - The ip.
+   * @param userAgent - The user agent.
+   * @param activity - The activity.
+   * @param details - The details.
+   * @returns The result of the operation.
+   */
   async recordSuspiciousActivity(
     ip: string,
     userAgent: string,

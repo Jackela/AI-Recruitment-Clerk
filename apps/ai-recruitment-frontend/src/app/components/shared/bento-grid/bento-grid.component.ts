@@ -19,6 +19,9 @@ import { Subject, fromEvent } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 // import { takeUntil } from 'rxjs/operators'; // Reserved for future use
 
+/**
+ * Defines the shape of the bento grid item.
+ */
 export interface BentoGridItem {
   id: string;
   title: string;
@@ -42,8 +45,11 @@ export interface BentoGridItem {
   customTemplate?: TemplateRef<unknown>;
 }
 
+/**
+ * Represents the bento grid component.
+ */
 @Component({
-  selector: 'app-bento-grid',
+  selector: 'arc-bento-grid',
   standalone: true,
   imports: [CommonModule, AccessibleCardDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -921,6 +927,12 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
   dynamicColumns = 'repeat(4, 1fr)';
 
   // Optimized trackBy function
+  /**
+   * Performs the track by item id operation.
+   * @param _index - The index.
+   * @param item - The item.
+   * @returns The TrackByFunction<BentoGridItem>.
+   */
   readonly trackByItemId: TrackByFunction<BentoGridItem> = (
     _index: number,
     item: BentoGridItem,
@@ -929,6 +941,11 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
   };
 
   // Enhanced grid item classes with overflow protection
+  /**
+   * Retrieves item classes.
+   * @param item - The item.
+   * @returns The string value.
+   */
   getItemClasses(item: BentoGridItem): string {
     const classes = [
       `size-${item.size || 'medium'}`,
@@ -950,11 +967,19 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
     return classes.join(' ');
   }
 
+  /**
+   * Performs the ng on init operation.
+   * @returns The result of the operation.
+   */
   ngOnInit() {
     // Initialize grid calculations
     this.calculateOptimalGridColumns();
   }
 
+  /**
+   * Performs the ng after view init operation.
+   * @returns The result of the operation.
+   */
   ngAfterViewInit() {
     // Setup intersection observer for animations with debouncing
     this.setupIntersectionObserver();
@@ -965,6 +990,10 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the ng on destroy operation.
+   * @returns The result of the operation.
+   */
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
@@ -980,6 +1009,10 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // Handle window resize events
+  /**
+   * Performs the on window resize operation.
+   * @param _event - The event.
+   */
   @HostListener('window:resize', ['$event'])
   onWindowResize(_event: Event): void {
     if (this.autoResize) {
@@ -989,6 +1022,11 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Remove the old getItemClasses method as it's been replaced above
 
+  /**
+   * Retrieves item aria label.
+   * @param item - The item.
+   * @returns The string value.
+   */
   getItemAriaLabel(item: BentoGridItem): string {
     let label = item.title;
 
@@ -1011,6 +1049,11 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
     return label;
   }
 
+  /**
+   * Retrieves trend aria label.
+   * @param trend - The trend.
+   * @returns The string value.
+   */
   getTrendAriaLabel(trend: BentoGridItem['trend']): string {
     if (!trend) return '';
 
@@ -1024,6 +1067,10 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
     return `Trend: ${direction} by ${trend.value}${trend.period ? ' ' + trend.period : ''}`;
   }
 
+  /**
+   * Performs the on item click operation.
+   * @param item - The item.
+   */
   onItemClick(item: BentoGridItem): void {
     if (item.clickable && this.onItemClickHandler) {
       this.onItemClickHandler(item);
@@ -1036,6 +1083,11 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the on action click operation.
+   * @param item - The item.
+   * @param event - The event.
+   */
   onActionClick(item: BentoGridItem, event: Event): void {
     event.stopPropagation();
     if (item.action?.onClick) {
@@ -1049,6 +1101,10 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the on item focus operation.
+   * @param item - The item.
+   */
   onItemFocus(item: BentoGridItem): void {
     // Announce focus for complex items
     if (item.trend || item.badge) {
@@ -1070,16 +1126,30 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Performs the on item blur operation.
+   * @param _item - The item.
+   */
   onItemBlur(_item: BentoGridItem): void {
     // Optional: Handle blur events if needed
   }
 
+  /**
+   * Retrieves card state.
+   * @param item - The item.
+   * @returns The string value.
+   */
   getCardState(item: BentoGridItem): string {
     if (item.badge) return item.badge;
     if (item.trend?.type) return item.trend.type;
     return 'normal';
   }
 
+  /**
+   * Retrieves card shortcuts.
+   * @param item - The item.
+   * @returns The an array of string value.
+   */
   getCardShortcuts(item: BentoGridItem): string[] {
     const shortcuts: string[] = [];
 
@@ -1094,6 +1164,11 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
     return shortcuts;
   }
 
+  /**
+   * Retrieves card instructions.
+   * @param item - The item.
+   * @returns The string value.
+   */
   getCardInstructions(item: BentoGridItem): string {
     if (item.clickable && item.action) {
       return `Card is clickable. Press Enter or Space to activate. ${item.action.text} action is available.`;
@@ -1247,13 +1322,13 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // Utility function for debouncing
-  private debounce<T extends (...args: any[]) => any>(
+  private debounce<T extends (...args: unknown[]) => unknown>(
     func: T,
     wait: number,
   ): T {
     let timeout: ReturnType<typeof setTimeout> | null = null;
 
-    return ((...args: any[]) => {
+    return ((...args: Parameters<T>) => {
       if (timeout) {
         clearTimeout(timeout);
       }
@@ -1265,11 +1340,18 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // Public API for manual grid recalculation
+  /**
+   * Performs the recalculate grid operation.
+   */
   public recalculateGrid(): void {
     this.calculateOptimalGridColumns();
   }
 
   // Getter for current column count (for debugging/testing)
+  /**
+   * Performs the current columns operation.
+   * @returns The number value.
+   */
   public get currentColumns(): number {
     return this._currentColumns;
   }

@@ -7,6 +7,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../../cache/cache.service';
 
+/**
+ * Defines the shape of the load test config.
+ */
 export interface LoadTestConfig {
   targetUrl: string;
   concurrency: number;
@@ -21,6 +24,9 @@ export interface LoadTestConfig {
   }[];
 }
 
+/**
+ * Defines the shape of the load test result.
+ */
 export interface LoadTestResult {
   summary: {
     totalRequests: number;
@@ -65,10 +71,18 @@ export interface LoadTestResult {
   };
 }
 
+/**
+ * Provides load testing functionality.
+ */
 @Injectable()
 export class LoadTestingService {
   private readonly logger = new Logger(LoadTestingService.name);
 
+  /**
+   * Initializes a new instance of the Load Testing Service.
+   * @param configService - The config service.
+   * @param cacheService - The cache service.
+   */
   constructor(
     private readonly configService: ConfigService,
     private readonly cacheService: CacheService,

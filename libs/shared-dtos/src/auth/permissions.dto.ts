@@ -91,18 +91,43 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   ]
 };
 
+/**
+ * Represents the required permissions.
+ */
 export class RequiredPermissions {
+  /**
+   * Initializes a new instance of the Required Permissions.
+   * @param permissions - The permissions.
+   */
   constructor(public permissions: Permission[]) {}
 }
 
+/**
+ * Performs the has permission operation.
+ * @param userRole - The user role.
+ * @param requiredPermission - The required permission.
+ * @returns The boolean value.
+ */
 export function hasPermission(userRole: UserRole, requiredPermission: Permission): boolean {
   return ROLE_PERMISSIONS[userRole]?.includes(requiredPermission) || false;
 }
 
+/**
+ * Performs the has any permission operation.
+ * @param userRole - The user role.
+ * @param requiredPermissions - The required permissions.
+ * @returns The boolean value.
+ */
 export function hasAnyPermission(userRole: UserRole, requiredPermissions: Permission[]): boolean {
   return requiredPermissions.some(permission => hasPermission(userRole, permission));
 }
 
+/**
+ * Performs the has all permissions operation.
+ * @param userRole - The user role.
+ * @param requiredPermissions - The required permissions.
+ * @returns The boolean value.
+ */
 export function hasAllPermissions(userRole: UserRole, requiredPermissions: Permission[]): boolean {
   return requiredPermissions.every(permission => hasPermission(userRole, permission));
 }

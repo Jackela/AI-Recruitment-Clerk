@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 interface RedPacketConfig {
   baseAmount: 5; // 基础问卷红包5元
@@ -23,8 +23,12 @@ interface RedPacketRecord {
   failureReason?: string;
 }
 
+/**
+ * Provides red packet functionality.
+ */
 @Injectable()
 export class RedPacketService {
+  private readonly logger = new Logger(RedPacketService.name);
   private readonly config: RedPacketConfig = {
     baseAmount: 5,
     qualityBonus: 3,
@@ -34,6 +38,11 @@ export class RedPacketService {
   };
 
   // 问卷完成红包发放
+  /**
+   * Performs the process questionnaire reward operation.
+   * @param data - The data.
+   * @returns The Promise<{ success: boolean; amount: number; message: string; redPacketId?: string; error?: string; }>.
+   */
   async processQuestionnaireReward(data: {
     ip: string;
     questionnaireId: string;
@@ -123,7 +132,7 @@ export class RedPacketService {
         };
       }
     } catch (error) {
-      console.error('Red packet processing error:', error);
+      this.logger.error('Red packet processing error', error.stack || error.message);
       return {
         success: false,
         amount: 0,
@@ -134,6 +143,11 @@ export class RedPacketService {
   }
 
   // 推荐奖励红包
+  /**
+   * Performs the process referral reward operation.
+   * @param data - The data.
+   * @returns The Promise<{ success: boolean; rewards: { referrer: { amount: number; sent: boolean }; referee: { amount: number; sent: boolean }; }; message: string; }>.
+   */
   async processReferralReward(data: {
     referrerIP: string;
     refereeIP: string;
@@ -196,7 +210,7 @@ export class RedPacketService {
             : '推荐奖励发送部分失败，请联系客服',
       };
     } catch (error) {
-      console.error('Referral reward error:', error);
+      this.logger.error('Referral reward error', error.stack || error.message);
       return {
         success: false,
         rewards: {
@@ -209,6 +223,11 @@ export class RedPacketService {
   }
 
   // 获取红包统计数据
+  /**
+   * Retrieves red packet stats.
+   * @param date - The date.
+   * @returns The Promise<{ date: string; totalSent: number; totalAmount: number; successRate: number; breakdown: { questionnaire: { count: number; amount: number }; qualityBonus: { count: number; amount: number }; referral: { count: number; amount: number }; }; budgetUsage: { used: number; remaining: number; percentage: number; }; }>.
+   */
   async getRedPacketStats(date?: string): Promise<{
     date: string;
     totalSent: number;
@@ -283,7 +302,7 @@ export class RedPacketService {
         budgetUsage,
       };
     } catch (error) {
-      console.error('Get red packet stats error:', error);
+      this.logger.error('Get red packet stats error', error.stack || error.message);
       return {
         date: targetDate,
         totalSent: 0,
@@ -389,7 +408,7 @@ export class RedPacketService {
 
   private async saveRedPacketRecord(redPacket: RedPacketRecord): Promise<void> {
     // TODO: 保存到数据库
-    console.log('Saving red packet record:', redPacket);
+    this.logger.log('Saving red packet record', { redPacket });
   }
 
   private async updateRedPacketStatus(
@@ -399,7 +418,7 @@ export class RedPacketService {
     failureReason?: string,
   ): Promise<void> {
     // TODO: 更新数据库记录状态
-    console.log('Updating red packet status:', {
+    this.logger.log('Updating red packet status', {
       id,
       status,
       sentAt,

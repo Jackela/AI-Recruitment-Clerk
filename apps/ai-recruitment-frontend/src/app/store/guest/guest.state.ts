@@ -7,6 +7,9 @@ import {
   AnalysisSummary,
 } from '../../services/guest/guest-api.service';
 
+/**
+ * Defines the shape of the guest state.
+ */
 export interface GuestState {
   // Device and authentication
   deviceId: string | null;

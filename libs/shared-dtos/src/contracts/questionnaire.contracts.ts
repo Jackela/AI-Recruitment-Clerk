@@ -1,8 +1,17 @@
 import { RawSubmissionData, SubmissionMetadata } from '../domains/questionnaire.dto';
 import { QuestionnaireSubmissionResult, IPSubmissionCheckResult } from '../domains/questionnaire.service';
 
+/**
+ * Represents the questionnaire contracts.
+ */
 export class QuestionnaireContracts {
   
+  /**
+   * Performs the submit questionnaire operation.
+   * @param rawData - The raw data.
+   * @param metadata - The metadata.
+   * @returns The QuestionnaireSubmissionResult.
+   */
   static submitQuestionnaire(
     rawData: RawSubmissionData,
     metadata: SubmissionMetadata
@@ -38,6 +47,11 @@ export class QuestionnaireContracts {
     return mockResult;
   }
 
+  /**
+   * Validates ip submission limit.
+   * @param ip - The ip.
+   * @returns The IPSubmissionCheckResult.
+   */
   static validateIPSubmissionLimit(ip: string): IPSubmissionCheckResult {
     // 前置条件验证
     if (!ip || !/^\d+\.\d+\.\d+\.\d+$/.test(ip)) {

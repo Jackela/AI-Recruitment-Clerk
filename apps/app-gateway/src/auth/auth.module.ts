@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Logger } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -16,6 +16,9 @@ import { UserProfile, UserProfileSchema } from '../schemas/user-profile.schema';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SecurityModule } from '../security/security.module';
 
+/**
+ * Configures the auth module.
+ */
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -25,7 +28,9 @@ import { SecurityModule } from '../security/security.module';
     SecurityModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: async (configService: ConfigService) => {
+        const logger = new Logger('AuthModule');
+        return {
         secret: (() => {
           const jwtSecret = configService.get<string>('JWT_SECRET');
           const nodeEnv = configService.get<string>('NODE_ENV');
@@ -36,14 +41,14 @@ import { SecurityModule } from '../security/security.module';
                 'JWT_SECRET environment variable is required for production deployment. Please set a secure JWT_SECRET in your environment variables.',
               );
             }
-            console.warn(
+            logger.warn(
               '⚠️  WARNING: Using fallback JWT secret for development. Set JWT_SECRET environment variable for production.',
             );
             return 'dev-jwt-secret-change-in-production-' + Date.now();
           }
 
           if (jwtSecret.length < 32) {
-            console.warn(
+            logger.warn(
               '⚠️  WARNING: JWT_SECRET should be at least 32 characters long for security.',
             );
           }
@@ -55,7 +60,8 @@ import { SecurityModule } from '../security/security.module';
           issuer: 'ai-recruitment-clerk',
           audience: 'ai-recruitment-users',
         },
-      }),
+      };
+      },
       inject: [ConfigService],
     }),
   ],

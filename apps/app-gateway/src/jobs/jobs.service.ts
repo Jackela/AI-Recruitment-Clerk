@@ -17,17 +17,26 @@ import {
   UserRole,
 } from '@ai-recruitment-clerk/user-management-domain';
 import { JobJdSubmittedEvent } from '@ai-recruitment-clerk/job-management-domain';
-import { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
-import { NatsClient } from '../nats/nats.client';
+import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
+import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
 import { CacheService } from '../cache/cache.service';
 
+/**
+ * Provides jobs functionality.
+ */
 @Injectable()
 export class JobsService {
   private readonly logger = new Logger(JobsService.name);
 
+  /**
+   * Initializes a new instance of the Jobs Service.
+   * @param storageService - The storage service.
+   * @param natsClient - The nats client.
+   * @param cacheService - The cache service.
+   */
   constructor(
     private readonly storageService: InMemoryStorageService,
-    private readonly natsClient: NatsClient,
+    private readonly natsClient: AppGatewayNatsService,
     private readonly cacheService: CacheService,
   ) {
     // Initialize with mock data for development
@@ -58,6 +67,12 @@ export class JobsService {
     return items.filter((item) => item.organizationId === user.organizationId);
   }
 
+  /**
+   * Creates job.
+   * @param dto - The dto.
+   * @param user - The user.
+   * @returns A promise that resolves to { jobId: string }.
+   */
   async createJob(
     dto: CreateJobDto,
     user: UserDto,
@@ -126,6 +141,13 @@ export class JobsService {
     return { jobId };
   }
 
+  /**
+   * Performs the upload resumes operation.
+   * @param jobId - The job id.
+   * @param files - The files.
+   * @param user - The user.
+   * @returns The ResumeUploadResponseDto.
+   */
   uploadResumes(
     jobId: string,
     files: MulterFile[],
@@ -204,6 +226,10 @@ export class JobsService {
   }
 
   // GET methods for frontend
+  /**
+   * Retrieves all jobs.
+   * @returns A promise that resolves to an array of JobListDto.
+   */
   async getAllJobs(): Promise<JobListDto[]> {
     const cacheKey = this.cacheService.generateKey('jobs', 'list');
 
@@ -227,6 +253,11 @@ export class JobsService {
     );
   }
 
+  /**
+   * Retrieves job by id.
+   * @param jobId - The job id.
+   * @returns The JobDetailDto.
+   */
   getJobById(jobId: string): JobDetailDto {
     const job = this.storageService.getJob(jobId);
     if (!job) {
@@ -235,6 +266,11 @@ export class JobsService {
     return job;
   }
 
+  /**
+   * Retrieves resumes by job id.
+   * @param jobId - The job id.
+   * @returns A promise that resolves to an array of ResumeListItemDto.
+   */
   async getResumesByJobId(jobId: string): Promise<ResumeListItemDto[]> {
     const cacheKey = this.cacheService.generateKey('resumes', 'job', jobId);
 
@@ -265,6 +301,11 @@ export class JobsService {
     );
   }
 
+  /**
+   * Retrieves resume by id.
+   * @param resumeId - The resume id.
+   * @returns A promise that resolves to ResumeDetailDto.
+   */
   async getResumeById(resumeId: string): Promise<ResumeDetailDto> {
     const cacheKey = this.cacheService.generateKey(
       'resumes',
@@ -285,6 +326,11 @@ export class JobsService {
     );
   }
 
+  /**
+   * Retrieves reports by job id.
+   * @param jobId - The job id.
+   * @returns A promise that resolves to ReportsListDto.
+   */
   async getReportsByJobId(jobId: string): Promise<ReportsListDto> {
     const cacheKey = this.cacheService.generateKey('reports', 'job', jobId);
 
@@ -313,6 +359,11 @@ export class JobsService {
     );
   }
 
+  /**
+   * Retrieves report by id.
+   * @param reportId - The report id.
+   * @returns A promise that resolves to AnalysisReportDto.
+   */
   async getReportById(reportId: string): Promise<AnalysisReportDto> {
     const cacheKey = this.cacheService.generateKey(
       'reports',
