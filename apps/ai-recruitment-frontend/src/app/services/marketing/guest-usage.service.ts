@@ -12,8 +12,9 @@ import { LoggerService } from '../shared/logger.service';
   providedIn: 'root',
 })
 export class GuestUsageService {
-  private readonly logger = inject(LoggerService).createLogger('GuestUsageService');
-  
+  private readonly logger =
+    inject(LoggerService).createLogger('GuestUsageService');
+
   private readonly STORAGE_KEYS = {
     USAGE_COUNT: 'ai_guest_usage_count',
     FEEDBACK_CODE: 'ai_guest_feedback_code',
@@ -156,14 +157,24 @@ export class GuestUsageService {
    * Retrieves guest stats.
    * @returns The {usageCount: number; remainingUsage: number; maxUsage: number; isExhausted: boolean; lastUsedDate: string | null; firstVisit: string | null; sessionId: string | null; usageHistory: string[]}.
    */
-  getGuestStats(): {usageCount: number; remainingUsage: number; maxUsage: number; isExhausted: boolean; lastUsedDate: string | null; firstVisit: string | null; sessionId: string | null; usageHistory: string[]} {
+  getGuestStats(): {
+    usageCount: number;
+    remainingUsage: number;
+    maxUsage: number;
+    isExhausted: boolean;
+    lastUsedDate: string | null;
+    firstVisit: string | null;
+    sessionId: string | null;
+    usageHistory: string[];
+  } {
     const usageHistory = this.getUsageHistory();
     return {
       usageCount: this.getUsageCount(),
       remainingUsage: this.getRemainingUsage(),
       maxUsage: this.MAX_GUEST_USAGE,
       isExhausted: this.isUsageExhausted(),
-      lastUsedDate: usageHistory.length > 0 ? usageHistory[usageHistory.length - 1] : null,
+      lastUsedDate:
+        usageHistory.length > 0 ? usageHistory[usageHistory.length - 1] : null,
       firstVisit: localStorage.getItem(this.STORAGE_KEYS.FIRST_VISIT),
       sessionId: localStorage.getItem(this.STORAGE_KEYS.USER_SESSION),
       usageHistory: usageHistory,

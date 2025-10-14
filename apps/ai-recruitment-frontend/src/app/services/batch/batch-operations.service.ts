@@ -318,7 +318,12 @@ export class BatchOperationsService {
     item: T,
     action: (item: T) => Observable<unknown>,
     config: BatchConfig,
-  ): Observable<{ item: T; success: boolean; result?: unknown; error?: Error | unknown }> {
+  ): Observable<{
+    item: T;
+    success: boolean;
+    result?: unknown;
+    error?: Error | unknown;
+  }> {
     return action(item).pipe(
       timeout(config.timeout!),
       retry({

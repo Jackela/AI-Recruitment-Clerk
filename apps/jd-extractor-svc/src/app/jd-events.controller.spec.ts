@@ -15,14 +15,20 @@ describe('JdEventsController', () => {
           provide: JdExtractorNatsService,
           useValue: {
             subscribeToJobSubmissions: jest.fn(),
-            publishAnalysisJdExtracted: jest.fn().mockResolvedValue({ success: true }),
-            publishProcessingError: jest.fn().mockResolvedValue({ success: true }),
+            publishAnalysisJdExtracted: jest
+              .fn()
+              .mockResolvedValue({ success: true }),
+            publishProcessingError: jest
+              .fn()
+              .mockResolvedValue({ success: true }),
           },
         },
         {
           provide: LlmService,
           useValue: {
-            extractJobRequirements: jest.fn().mockResolvedValue({ summary: 'stub' }),
+            extractJobRequirements: jest
+              .fn()
+              .mockResolvedValue({ summary: 'stub' }),
           },
         },
       ],
@@ -33,9 +39,7 @@ describe('JdEventsController', () => {
   it('logs received jobId', async () => {
     const spy = jest.spyOn(Logger.prototype, 'log').mockImplementation();
     await controller.handleJobSubmitted({ jobId: '123', jdText: 'text' });
-    expect(spy).toHaveBeenCalledWith(
-      expect.stringContaining('jobId: 123'),
-    );
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining('jobId: 123'));
     spy.mockRestore();
   });
 });

@@ -14,4 +14,3 @@ export interface GapAnalysisRequest {
   jdText: string;
   resumeText: string;
 }
-

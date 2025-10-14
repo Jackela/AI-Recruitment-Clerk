@@ -25,7 +25,9 @@ export class NatsClient {
    * @param _payload - The payload.
    * @returns A promise that resolves to { success: boolean }.
    */
-  async publishScoringCompleted(_payload: unknown): Promise<{ success: boolean }> {
+  async publishScoringCompleted(
+    _payload: unknown,
+  ): Promise<{ success: boolean }> {
     return Promise.resolve({ success: true });
   }
   /**
@@ -35,7 +37,11 @@ export class NatsClient {
    * @param _error - The error.
    * @returns A promise that resolves to { success: boolean }.
    */
-  async publishScoringError(_jobId: string, _resumeId: string, _error: unknown): Promise<{ success: boolean }> {
+  async publishScoringError(
+    _jobId: string,
+    _resumeId: string,
+    _error: unknown,
+  ): Promise<{ success: boolean }> {
     return Promise.resolve({ success: true });
   }
   /**
@@ -53,7 +59,10 @@ export class NatsClient {
    * @param _handler - The handler.
    * @returns The { unsubscribe: () => void }.
    */
-  subscribe(_subject: string, _handler: (msg: unknown) => void): { unsubscribe: () => void } {
+  subscribe(
+    _subject: string,
+    _handler: (msg: unknown) => void,
+  ): { unsubscribe: () => void } {
     return { unsubscribe: () => void 0 };
   }
   /**

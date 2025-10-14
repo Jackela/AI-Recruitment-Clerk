@@ -36,13 +36,15 @@ export class GlobalErrorInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
-    
+
     // Set correlation context from request headers
     this.setCorrelationContext(request);
 
     return next.handle().pipe(
       catchError((error: Error) => {
-        return throwError(() => this.transformError(error, request, response, context));
+        return throwError(() =>
+          this.transformError(error, request, response, context),
+        );
       }),
     );
   }
@@ -75,7 +77,10 @@ export class GlobalErrorInterceptor implements NestInterceptor {
 
     // Handle unknown errors
     const appError = ErrorHandler.handleError(error, operationContext);
-    const enhancedError = this.convertAppExceptionToEnhanced(appError, operationContext);
+    const enhancedError = this.convertAppExceptionToEnhanced(
+      appError,
+      operationContext,
+    );
     this.setErrorResponse(enhancedError, request, response);
     return enhancedError;
   }
@@ -89,7 +94,7 @@ export class GlobalErrorInterceptor implements NestInterceptor {
     }
 
     const enhancedError = new EnhancedAppException(
-      appError.errorDetails?.type as any || 'SYSTEM_ERROR',
+      (appError.errorDetails?.type as any) || 'SYSTEM_ERROR',
       appError.errorDetails?.code || 'UNKNOWN_ERROR',
       appError.message,
       appError.getStatus?.() || 500,
@@ -154,9 +159,12 @@ export class GlobalErrorInterceptor implements NestInterceptor {
     response.setHeader('X-Error-Type', error.enhancedDetails.type);
     response.setHeader('X-Error-Code', error.enhancedDetails.code);
     response.setHeader('X-Error-Severity', error.enhancedDetails.severity);
-    
+
     if (error.enhancedDetails.correlationContext?.traceId) {
-      response.setHeader('X-Trace-ID', error.enhancedDetails.correlationContext.traceId);
+      response.setHeader(
+        'X-Trace-ID',
+        error.enhancedDetails.correlationContext.traceId,
+      );
     }
 
     // Log error for monitoring
@@ -167,10 +175,11 @@ export class GlobalErrorInterceptor implements NestInterceptor {
   }
 
   private setCorrelationContext(request: Request): void {
-    const traceId = (request.headers['x-trace-id'] as string) || 
-                   (request.headers['x-request-id'] as string) || 
-                   `trace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+    const traceId =
+      (request.headers['x-trace-id'] as string) ||
+      (request.headers['x-request-id'] as string) ||
+      `trace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
     const requestId = (request.headers['x-request-id'] as string) || traceId;
     const userId = (request as any).user?.id;
     const sessionId = (request as any).sessionId;
@@ -235,7 +244,12 @@ export class GlobalErrorInterceptor implements NestInterceptor {
   }
 
   private sanitizeHeaders(headers: any): Record<string, string> {
-    const sensitiveHeaders = ['authorization', 'cookie', 'x-api-key', 'x-auth-token'];
+    const sensitiveHeaders = [
+      'authorization',
+      'cookie',
+      'x-api-key',
+      'x-auth-token',
+    ];
     const sanitized: Record<string, string> = {};
 
     Object.keys(headers).forEach((key) => {

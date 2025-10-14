@@ -14,7 +14,11 @@ import { CulturalFitAnalyzerService } from '../services/cultural-fit-analyzer.se
 import { ScoringConfidenceService } from '../services/scoring-confidence.service';
 import { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
 import { NatsClient as LocalNatsClient } from '../nats/nats.client';
-import { StandardizedGlobalExceptionFilter, ExceptionFilterConfigHelper, ErrorInterceptorFactory } from '@ai-recruitment-clerk/infrastructure-shared';
+import {
+  StandardizedGlobalExceptionFilter,
+  ExceptionFilterConfigHelper,
+  ErrorInterceptorFactory,
+} from '@ai-recruitment-clerk/infrastructure-shared';
 import { SecureConfigValidator } from '@app/shared-dtos';
 
 /**

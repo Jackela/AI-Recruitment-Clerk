@@ -4,7 +4,10 @@
  */
 
 import { Logger } from '@nestjs/common';
-import { EnhancedAppException, ExtendedErrorType } from '../errors/enhanced-error-types';
+import {
+  EnhancedAppException,
+  ExtendedErrorType,
+} from '../errors/enhanced-error-types';
 import { ErrorHandler } from '../common/error-handling.patterns';
 import { ErrorCorrelationManager } from '../errors/error-correlation';
 
@@ -37,15 +40,20 @@ interface ErrorHandlingConfig {
  * Automatically catches and enhances errors with correlation context
  */
 export function HandleErrors(config: ErrorHandlingConfig = {}) {
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyName: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const method = descriptor.value;
     const className = target.constructor.name;
     const methodName = propertyName;
     const logger = config.logger || new Logger(`${className}.${methodName}`);
 
     descriptor.value = async function (...args: any[]) {
-      const operationContext = config.operationContext || `${className}.${methodName}`;
-      
+      const operationContext =
+        config.operationContext || `${className}.${methodName}`;
+
       try {
         // Set operation context in correlation manager
         const existingContext = ErrorCorrelationManager.getContext();
@@ -96,13 +104,25 @@ export function DefaultErrorHandling(config: ErrorHandlingConfig) {
  * Injects error correlation context into method parameters
  */
 export function ErrorContext() {
-  return function (target: any, propertyName: string | symbol | undefined, parameterIndex: number) {
+  return function (
+    target: any,
+    propertyName: string | symbol | undefined,
+    parameterIndex: number,
+  ) {
     if (propertyName === undefined) {
-      throw new Error('PropertyName cannot be undefined in ErrorContext decorator');
+      throw new Error(
+        'PropertyName cannot be undefined in ErrorContext decorator',
+      );
     }
-    const existingMetadata = Reflect.getMetadata('error:context', target, propertyName) || [];
+    const existingMetadata =
+      Reflect.getMetadata('error:context', target, propertyName) || [];
     existingMetadata.push(parameterIndex);
-    Reflect.defineMetadata('error:context', existingMetadata, target, propertyName);
+    Reflect.defineMetadata(
+      'error:context',
+      existingMetadata,
+      target,
+      propertyName,
+    );
   };
 }
 
@@ -121,15 +141,27 @@ export function RetryWithErrorHandling(options: {
     maxRetries = 3,
     baseDelay = 1000,
     exponentialBackoff = true,
-    retryCondition = (error) => !(error instanceof EnhancedAppException && 
-      ['VALIDATION_ERROR', 'AUTHENTICATION_ERROR', 'AUTHORIZATION_ERROR'].includes(error.enhancedDetails.type)),
+    retryCondition = (error) =>
+      !(
+        error instanceof EnhancedAppException &&
+        [
+          'VALIDATION_ERROR',
+          'AUTHENTICATION_ERROR',
+          'AUTHORIZATION_ERROR',
+        ].includes(error.enhancedDetails.type)
+      ),
     errorConfig = {},
   } = options;
 
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyName: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const method = descriptor.value;
     const className = target.constructor.name;
-    const logger = errorConfig.logger || new Logger(`${className}.${propertyName}`);
+    const logger =
+      errorConfig.logger || new Logger(`${className}.${propertyName}`);
 
     descriptor.value = async function (...args: any[]) {
       let lastError: Error;
@@ -146,14 +178,17 @@ export function RetryWithErrorHandling(options: {
             break;
           }
 
-          logger.warn(`Retry attempt ${attempt}/${maxRetries} for ${propertyName}`, {
-            error: lastError.message,
-            attempt,
-            nextRetryIn: delay,
-          });
+          logger.warn(
+            `Retry attempt ${attempt}/${maxRetries} for ${propertyName}`,
+            {
+              error: lastError.message,
+              attempt,
+              nextRetryIn: delay,
+            },
+          );
 
           await sleep(delay);
-          
+
           if (exponentialBackoff) {
             delay *= 2;
           }
@@ -161,7 +196,11 @@ export function RetryWithErrorHandling(options: {
       }
 
       // Transform final error
-      const enhancedError = transformError(lastError!, errorConfig, `${className}.${propertyName}`);
+      const enhancedError = transformError(
+        lastError!,
+        errorConfig,
+        `${className}.${propertyName}`,
+      );
       throw enhancedError;
     };
 
@@ -173,18 +212,30 @@ export function RetryWithErrorHandling(options: {
  * Method decorator for performance monitoring with error correlation
  * Tracks method execution time and correlates with errors
  */
-export function MonitorPerformance(config: {
-  slowThreshold?: number;
-  errorOnSlow?: boolean;
-  includeArgs?: boolean;
-  errorConfig?: ErrorHandlingConfig;
-} = {}) {
-  const { slowThreshold = 5000, errorOnSlow = false, includeArgs = false, errorConfig = {} } = config;
+export function MonitorPerformance(
+  config: {
+    slowThreshold?: number;
+    errorOnSlow?: boolean;
+    includeArgs?: boolean;
+    errorConfig?: ErrorHandlingConfig;
+  } = {},
+) {
+  const {
+    slowThreshold = 5000,
+    errorOnSlow = false,
+    includeArgs = false,
+    errorConfig = {},
+  } = config;
 
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyName: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const method = descriptor.value;
     const className = target.constructor.name;
-    const logger = errorConfig.logger || new Logger(`${className}.${propertyName}`);
+    const logger =
+      errorConfig.logger || new Logger(`${className}.${propertyName}`);
 
     descriptor.value = async function (...args: any[]) {
       const startTime = Date.now();
@@ -210,7 +261,7 @@ export function MonitorPerformance(config: {
         // Log performance metrics
         if (executionTime > slowThreshold) {
           const message = `Slow operation detected: ${operationContext} took ${executionTime}ms`;
-          
+
           if (errorOnSlow) {
             const performanceError = new EnhancedAppException(
               ExtendedErrorType.PERFORMANCE_ERROR,
@@ -231,9 +282,13 @@ export function MonitorPerformance(config: {
         return result;
       } catch (error) {
         const executionTime = Date.now() - startTime;
-        
+
         // Enhance error with performance context
-        const enhancedError = transformError(error, errorConfig, operationContext);
+        const enhancedError = transformError(
+          error,
+          errorConfig,
+          operationContext,
+        );
         enhancedError.withContext({ executionTime, failedAt: executionTime });
 
         throw enhancedError;
@@ -332,5 +387,5 @@ function logEnhancedError(
  * Utility function for sleep delay
  */
 function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

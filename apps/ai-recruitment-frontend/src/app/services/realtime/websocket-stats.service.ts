@@ -228,10 +228,21 @@ export class WebSocketStatsService {
         this.updateStats((data.payload as Partial<RealtimeStats>) || {});
         break;
       case 'event':
-        this.handleAnalysisEvent(((data.payload as any) as (Omit<AnalysisEvent, 'timestamp'> & { timestamp: string | Date })) || ({ timestamp: new Date().toISOString(), type: 'progress', analysisId: '' } as any));
+        this.handleAnalysisEvent(
+          (data.payload as any as Omit<AnalysisEvent, 'timestamp'> & {
+            timestamp: string | Date;
+          }) ||
+            ({
+              timestamp: new Date().toISOString(),
+              type: 'progress',
+              analysisId: '',
+            } as any),
+        );
         break;
       case 'metrics':
-        this.updateMetrics((data.payload as Omit<SystemMetrics, 'timestamp'>) || ({} as any));
+        this.updateMetrics(
+          (data.payload as Omit<SystemMetrics, 'timestamp'>) || ({} as any),
+        );
         break;
       case 'error':
         this.handleServerError((data.payload as WebSocketErrorPayload) || {});
@@ -241,7 +252,11 @@ export class WebSocketStatsService {
     }
   }
 
-  private updateStats(payload: Partial<RealtimeStats>): void { const base = this.stats$.value; const newStats: RealtimeStats = { ...base, ...(payload as any),
+  private updateStats(payload: Partial<RealtimeStats>): void {
+    const base = this.stats$.value;
+    const newStats: RealtimeStats = {
+      ...base,
+      ...(payload as any),
       lastUpdated: new Date(),
     };
     this.stats$.next(newStats);

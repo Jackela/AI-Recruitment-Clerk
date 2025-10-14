@@ -5,7 +5,10 @@
 
 import { Logger } from '@nestjs/common';
 import { EnhancedAppException } from './enhanced-error-types';
-import { ErrorCorrelationContext, ErrorCorrelationManager } from './error-correlation';
+import {
+  ErrorCorrelationContext,
+  ErrorCorrelationManager,
+} from './error-correlation';
 // import { StandardizedErrorResponseFormatter } from './error-response-formatter';
 
 /**
@@ -13,10 +16,10 @@ import { ErrorCorrelationContext, ErrorCorrelationManager } from './error-correl
  */
 export enum LogLevel {
   DEBUG = 'debug',
-  INFO = 'info', 
+  INFO = 'info',
   WARN = 'warn',
   ERROR = 'error',
-  FATAL = 'fatal'
+  FATAL = 'fatal',
 }
 
 /**
@@ -75,7 +78,7 @@ export interface PerformanceMetrics {
 export class StructuredErrorLogger {
   private readonly logger: Logger;
   private readonly serviceName: string;
-  
+
   /**
    * Initializes a new instance of the Structured Error Logger.
    * @param serviceName - The service name.
@@ -91,11 +94,12 @@ export class StructuredErrorLogger {
   logError(
     error: EnhancedAppException,
     operation?: string,
-    additionalContext?: Record<string, any>
+    additionalContext?: Record<string, any>,
   ): void {
-    const correlationContext = error.enhancedDetails.correlationContext ||
-                              ErrorCorrelationManager.getContext();
-    
+    const correlationContext =
+      error.enhancedDetails.correlationContext ||
+      ErrorCorrelationManager.getContext();
+
     const logEntry = this.buildLogEntry(
       this.mapSeverityToLogLevel(error.enhancedDetails.severity),
       error.enhancedDetails.message,
@@ -108,25 +112,26 @@ export class StructuredErrorLogger {
           severity: error.enhancedDetails.severity,
           businessImpact: error.enhancedDetails.businessImpact,
           userImpact: error.enhancedDetails.userImpact,
-          stack: process.env.NODE_ENV !== 'production' ? error.stack : undefined
+          stack:
+            process.env.NODE_ENV !== 'production' ? error.stack : undefined,
         },
         context: {
-          executionTime: correlationContext?.executionTime
+          executionTime: correlationContext?.executionTime,
         },
         metadata: {
           ...error.enhancedDetails.details,
           recoveryStrategies: error.enhancedDetails.recoveryStrategies,
           affectedOperations: error.enhancedDetails.affectedOperations,
-          ...additionalContext
+          ...additionalContext,
         },
         monitoring: {
           tags: error.enhancedDetails.monitoringTags || {},
           metrics: {
             timestamp: Date.now(),
-            executionTime: correlationContext?.executionTime || 0
-          }
-        }
-      }
+            executionTime: correlationContext?.executionTime || 0,
+          },
+        },
+      },
     );
 
     this.writeLogEntry(logEntry);
@@ -138,10 +143,10 @@ export class StructuredErrorLogger {
   logPerformance(
     operation: string,
     metrics: PerformanceMetrics,
-    additionalMetadata?: Record<string, any>
+    additionalMetadata?: Record<string, any>,
   ): void {
     const correlationContext = ErrorCorrelationManager.getContext();
-    
+
     const logEntry = this.buildLogEntry(
       LogLevel.INFO,
       `Performance metrics for ${operation}`,
@@ -152,21 +157,21 @@ export class StructuredErrorLogger {
           duration: metrics.duration,
           memoryUsage: metrics.memoryUsage,
           cpuUsage: metrics.cpuUsage,
-          ...additionalMetadata
+          ...additionalMetadata,
         },
         monitoring: {
           tags: {
             operation,
-            type: 'performance'
+            type: 'performance',
           },
           metrics: {
             duration: metrics.duration || 0,
             memoryHeapUsed: metrics.memoryUsage?.heapUsed || 0,
             memoryHeapTotal: metrics.memoryUsage?.heapTotal || 0,
-            timestamp: Date.now()
-          }
-        }
-      }
+            timestamp: Date.now(),
+          },
+        },
+      },
     );
 
     this.writeLogEntry(logEntry);
@@ -177,7 +182,7 @@ export class StructuredErrorLogger {
    */
   logOperationStart(
     operation: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
   ): PerformanceMetrics {
     const correlationContext = ErrorCorrelationManager.getContext();
     const startTime = Date.now();
@@ -192,19 +197,19 @@ export class StructuredErrorLogger {
       {
         metadata: {
           phase: 'start',
-          ...metadata
+          ...metadata,
         },
         monitoring: {
           tags: {
             operation,
-            phase: 'start'
+            phase: 'start',
           },
           metrics: {
             startTime,
-            memoryHeapUsed: memoryStart.heapUsed
-          }
-        }
-      }
+            memoryHeapUsed: memoryStart.heapUsed,
+          },
+        },
+      },
     );
 
     this.writeLogEntry(logEntry);
@@ -212,7 +217,7 @@ export class StructuredErrorLogger {
     return {
       startTime,
       memoryUsage: memoryStart,
-      cpuUsage: cpuStart
+      cpuUsage: cpuStart,
     };
   }
 
@@ -223,7 +228,7 @@ export class StructuredErrorLogger {
     operation: string,
     startMetrics: PerformanceMetrics,
     success: boolean = true,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
   ): PerformanceMetrics {
     const endTime = Date.now();
     const memoryEnd = process.memoryUsage();
@@ -240,7 +245,7 @@ export class StructuredErrorLogger {
       endTime,
       duration,
       memoryUsage: memoryEnd,
-      cpuUsage: cpuEnd
+      cpuUsage: cpuEnd,
     };
 
     const logEntry = this.buildLogEntry(
@@ -253,27 +258,28 @@ export class StructuredErrorLogger {
           phase: 'complete',
           success,
           duration,
-          ...metadata
+          ...metadata,
         },
         monitoring: {
           tags: {
             operation,
             phase: 'complete',
-            success: success.toString()
+            success: success.toString(),
           },
           metrics: {
             duration,
-            memoryDelta: memoryEnd.heapUsed - startMetrics.memoryUsage!.heapUsed,
+            memoryDelta:
+              memoryEnd.heapUsed - startMetrics.memoryUsage!.heapUsed,
             cpuUser: cpuEnd.user / 1000, // Convert to milliseconds
             cpuSystem: cpuEnd.system / 1000,
-            timestamp: endTime
-          }
-        }
-      }
+            timestamp: endTime,
+          },
+        },
+      },
     );
 
     this.writeLogEntry(logEntry);
-    
+
     return completeMetrics;
   }
 
@@ -283,28 +289,28 @@ export class StructuredErrorLogger {
   async withLogging<T>(
     operation: string,
     fn: () => Promise<T>,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
   ): Promise<T> {
     const startMetrics = this.logOperationStart(operation, metadata);
-    
+
     try {
       const result = await fn();
       this.logOperationComplete(operation, startMetrics, true, {
         ...metadata,
-        resultType: typeof result
+        resultType: typeof result,
       });
       return result;
     } catch (error) {
       this.logOperationComplete(operation, startMetrics, false, {
         ...metadata,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
-      
+
       // If it's already an enhanced error, log it with full context
       if (error instanceof EnhancedAppException) {
         this.logError(error, operation, metadata);
       }
-      
+
       throw error;
     }
   }
@@ -316,10 +322,10 @@ export class StructuredErrorLogger {
     direction: 'outbound' | 'inbound',
     targetService: string,
     operation: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
   ): void {
     const correlationContext = ErrorCorrelationManager.getContext();
-    
+
     const logEntry = this.buildLogEntry(
       LogLevel.DEBUG,
       `${direction.toUpperCase()} call to ${targetService} for ${operation}`,
@@ -329,20 +335,20 @@ export class StructuredErrorLogger {
         metadata: {
           direction,
           targetService,
-          ...metadata
+          ...metadata,
         },
         monitoring: {
           tags: {
             direction,
             targetService,
             operation,
-            type: 'service-boundary'
+            type: 'service-boundary',
           },
           metrics: {
-            timestamp: Date.now()
-          }
-        }
-      }
+            timestamp: Date.now(),
+          },
+        },
+      },
     );
 
     this.writeLogEntry(logEntry);
@@ -356,7 +362,7 @@ export class StructuredErrorLogger {
     message: string,
     operation?: string,
     correlationContext?: ErrorCorrelationContext | null,
-    additionalData?: Partial<StructuredLogEntry>
+    additionalData?: Partial<StructuredLogEntry>,
   ): StructuredLogEntry {
     return {
       timestamp: new Date().toISOString(),
@@ -364,22 +370,26 @@ export class StructuredErrorLogger {
       message,
       service: this.serviceName,
       operation,
-      correlation: correlationContext ? {
-        traceId: correlationContext.traceId,
-        requestId: correlationContext.requestId,
-        spanId: correlationContext.spanId,
-        parentSpanId: correlationContext.parentSpanId,
-        userId: correlationContext.userId,
-        sessionId: correlationContext.sessionId
-      } : undefined,
-      context: correlationContext ? {
-        method: correlationContext.metadata?.method,
-        path: correlationContext.metadata?.path,
-        ip: correlationContext.clientIp,
-        userAgent: correlationContext.userAgent,
-        executionTime: correlationContext.executionTime
-      } : undefined,
-      ...additionalData
+      correlation: correlationContext
+        ? {
+            traceId: correlationContext.traceId,
+            requestId: correlationContext.requestId,
+            spanId: correlationContext.spanId,
+            parentSpanId: correlationContext.parentSpanId,
+            userId: correlationContext.userId,
+            sessionId: correlationContext.sessionId,
+          }
+        : undefined,
+      context: correlationContext
+        ? {
+            method: correlationContext.metadata?.method,
+            path: correlationContext.metadata?.path,
+            ip: correlationContext.clientIp,
+            userAgent: correlationContext.userAgent,
+            executionTime: correlationContext.executionTime,
+          }
+        : undefined,
+      ...additionalData,
     };
   }
 
@@ -416,13 +426,11 @@ export class StructuredErrorLogger {
    * Format log message for readability
    */
   private formatLogMessage(entry: StructuredLogEntry): string {
-    const correlationPrefix = entry.correlation?.traceId 
+    const correlationPrefix = entry.correlation?.traceId
       ? `[${entry.correlation.traceId}] `
       : '';
-    
-    const operationPrefix = entry.operation 
-      ? `[${entry.operation}] `
-      : '';
+
+    const operationPrefix = entry.operation ? `[${entry.operation}] ` : '';
 
     return `${correlationPrefix}${operationPrefix}${entry.message}`;
   }
@@ -438,12 +446,12 @@ export class StructuredErrorLogger {
       context: entry.context,
       metadata: entry.metadata,
       monitoring: entry.monitoring,
-      error: entry.error
+      error: entry.error,
     };
 
     // Remove undefined/null values
     const cleanContext = JSON.parse(JSON.stringify(context));
-    
+
     return JSON.stringify(cleanContext);
   }
 
@@ -453,7 +461,7 @@ export class StructuredErrorLogger {
   private sendToExternalLoggingSystem(_entry: StructuredLogEntry): void {
     // Implementation would depend on your logging infrastructure
     // Examples: Send to ELK stack, Datadog, CloudWatch, etc.
-    
+
     if (process.env.EXTERNAL_LOGGING_ENABLED === 'true') {
       // Example: Send to external system
       // await this.externalLogger.send(entry);
@@ -465,12 +473,12 @@ export class StructuredErrorLogger {
    */
   private mapSeverityToLogLevel(severity: string): LogLevel {
     const severityMap: Record<string, LogLevel> = {
-      'low': LogLevel.INFO,
-      'medium': LogLevel.WARN,
-      'high': LogLevel.ERROR,
-      'critical': LogLevel.FATAL
+      low: LogLevel.INFO,
+      medium: LogLevel.WARN,
+      high: LogLevel.ERROR,
+      critical: LogLevel.FATAL,
     };
-    
+
     return severityMap[severity] || LogLevel.ERROR;
   }
 
@@ -479,22 +487,23 @@ export class StructuredErrorLogger {
    */
   static createOperationLogger(serviceName: string) {
     const logger = new StructuredErrorLogger(serviceName);
-    
+
     return function LogOperation(operationName?: string) {
-      return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+      return function (
+        target: any,
+        propertyName: string,
+        descriptor: PropertyDescriptor,
+      ) {
         const method = descriptor.value;
-        const operation = operationName || `${target.constructor.name}.${propertyName}`;
+        const operation =
+          operationName || `${target.constructor.name}.${propertyName}`;
 
         descriptor.value = async function (...args: any[]) {
-          return logger.withLogging(
-            operation,
-            () => method.apply(this, args),
-            {
-              className: target.constructor.name,
-              methodName: propertyName,
-              argumentCount: args.length
-            }
-          );
+          return logger.withLogging(operation, () => method.apply(this, args), {
+            className: target.constructor.name,
+            methodName: propertyName,
+            argumentCount: args.length,
+          });
         };
 
         return descriptor;
@@ -530,9 +539,10 @@ export class StructuredLoggerFactory {
   }): void {
     // Apply global configuration
     if (config.enableExternalLogging !== undefined) {
-      process.env.EXTERNAL_LOGGING_ENABLED = config.enableExternalLogging.toString();
+      process.env.EXTERNAL_LOGGING_ENABLED =
+        config.enableExternalLogging.toString();
     }
-    
+
     // Additional configuration logic here
   }
 

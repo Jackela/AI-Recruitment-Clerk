@@ -161,7 +161,10 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
       if (this.connection.readyState === 1) {
         // Connected
         // 更新连接池指标
-        this.metrics.activeConnections = (this.connection.db as any)?.listCollections ? 1 : 0;
+        this.metrics.activeConnections = (this.connection.db as any)
+          ?.listCollections
+          ? 1
+          : 0;
         this.metrics.connectionPoolSize = this.config.connectionPoolSize;
       } else {
         this.logger.warn('⚠️ Database connection not ready');

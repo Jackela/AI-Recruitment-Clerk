@@ -70,6 +70,36 @@ export interface ErrorData {
 }
 
 /**
+ * Defines the shape of job update events.
+ */
+export interface JobUpdateEvent {
+  jobId: string;
+  title: string;
+  status: 'processing' | 'completed' | 'failed' | 'active' | 'draft' | 'closed';
+  timestamp: Date;
+  updatedBy?: string;
+  organizationId?: string;
+  metadata?: {
+    confidence?: number;
+    extractedKeywords?: string[];
+    processingTime?: number;
+    errorMessage?: string;
+  };
+}
+
+/**
+ * Defines the shape of job progress events.
+ */
+export interface JobProgressEvent {
+  jobId: string;
+  step: string;
+  progress: number;
+  message?: string;
+  estimatedTimeRemaining?: number;
+  timestamp: Date;
+}
+
+/**
  * Provides web socket functionality.
  */
 @Injectable({
@@ -84,6 +114,8 @@ export class WebSocketService implements OnDestroy {
     'connecting' | 'connected' | 'disconnected' | 'error'
   >('disconnected');
   private messages$ = new Subject<WebSocketMessage>();
+  private jobUpdates$ = new Subject<JobUpdateEvent>();
+  private jobProgress$ = new Subject<JobProgressEvent>();
   private destroy$ = new Subject<void>();
 
   private toastService = inject(ToastService);
@@ -220,6 +252,60 @@ export class WebSocketService implements OnDestroy {
       }
     });
 
+    // Listen for job-specific events
+    this.socket.on(
+      'job_updated',
+      (eventData: { type: string; data: JobUpdateEvent; timestamp: Date }) => {
+        try {
+          const jobUpdate: JobUpdateEvent = {
+            ...eventData.data,
+            timestamp: new Date(eventData.data.timestamp),
+          };
+          this.jobUpdates$.next(jobUpdate);
+        } catch (error) {
+          console.warn('Failed to parse job_updated event:', error);
+        }
+      },
+    );
+
+    this.socket.on(
+      'job_progress',
+      (eventData: {
+        type: string;
+        data: JobProgressEvent;
+        timestamp: Date;
+      }) => {
+        try {
+          const jobProgress: JobProgressEvent = {
+            ...eventData.data,
+            timestamp: new Date(eventData.data.timestamp),
+          };
+          this.jobProgress$.next(jobProgress);
+        } catch (error) {
+          console.warn('Failed to parse job_progress event:', error);
+        }
+      },
+    );
+
+    this.socket.on(
+      'job_subscription_confirmed',
+      (data: { jobId: string; message: string; timestamp: Date }) => {
+        console.log(`✅ Job subscription confirmed for job ${data.jobId}`);
+      },
+    );
+
+    this.socket.on(
+      'job_subscription_error',
+      (data: { jobId: string; error: string; timestamp: Date }) => {
+        console.error(
+          `❌ Job subscription error for job ${data.jobId}: ${data.error}`,
+        );
+        this.toastService.error(
+          `Failed to subscribe to job updates: ${data.error}`,
+        );
+      },
+    );
+
     this.socket.on('disconnect', (_reason) => {
       // Socket disconnected
       this.connectionStatus$.next('disconnected');
@@ -247,9 +333,88 @@ export class WebSocketService implements OnDestroy {
   private getSocketUrl(): string {
     const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
     const host = window.location.hostname;
-    const port = window.location.hostname === 'localhost' ? ':3000' : '';
+    // Use port 8080 for app-gateway WebSocket connection
+    const port = window.location.hostname === 'localhost' ? ':8080' : '';
 
     return `${protocol}//${host}${port}/ws`;
+  }
+
+  // Job-specific methods
+
+  /**
+   * Subscribe to updates for a specific job.
+   * @param jobId - The job ID to subscribe to
+   * @param organizationId - The organization ID for multi-tenant security
+   */
+  subscribeToJob(jobId: string, organizationId?: string): void {
+    if (this.socket && this.socket.connected) {
+      this.socket.emit('subscribe_job', { jobId, organizationId });
+    } else {
+      console.warn(`Cannot subscribe to job ${jobId}: WebSocket not connected`);
+    }
+  }
+
+  /**
+   * Unsubscribe from updates for a specific job.
+   * @param jobId - The job ID to unsubscribe from
+   */
+  unsubscribeFromJob(jobId: string): void {
+    if (this.socket && this.socket.connected) {
+      this.socket.emit('unsubscribe_job', { jobId });
+    }
+  }
+
+  /**
+   * Listen for job status updates.
+   * @param jobId - Optional job ID to filter by specific job
+   * @returns Observable of job update events
+   */
+  onJobUpdated(jobId?: string): Observable<JobUpdateEvent> {
+    return this.jobUpdates$.asObservable().pipe(
+      filter((update) => (jobId ? update.jobId === jobId : true)),
+      takeUntil(this.destroy$),
+    );
+  }
+
+  /**
+   * Listen for job progress updates.
+   * @param jobId - Optional job ID to filter by specific job
+   * @returns Observable of job progress events
+   */
+  onJobProgress(jobId?: string): Observable<JobProgressEvent> {
+    return this.jobProgress$.asObservable().pipe(
+      filter((progress) => (jobId ? progress.jobId === jobId : true)),
+      takeUntil(this.destroy$),
+    );
+  }
+
+  /**
+   * Connect to WebSocket and automatically subscribe to job updates.
+   * @param sessionId - Session ID for connection
+   * @param jobId - Optional job ID to automatically subscribe to
+   * @param organizationId - Organization ID for multi-tenant security
+   * @returns Observable of WebSocket messages
+   */
+  connectWithJobSubscription(
+    sessionId: string,
+    jobId?: string,
+    organizationId?: string,
+  ): Observable<WebSocketMessage> {
+    const connection$ = this.connect(sessionId);
+
+    // Auto-subscribe to job updates once connected
+    if (jobId) {
+      this.getConnectionStatus()
+        .pipe(
+          filter((status) => status === 'connected'),
+          takeUntil(this.destroy$),
+        )
+        .subscribe(() => {
+          this.subscribeToJob(jobId, organizationId);
+        });
+    }
+
+    return connection$;
   }
 
   /**

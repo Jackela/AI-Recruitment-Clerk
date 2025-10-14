@@ -1,4 +1,13 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsBoolean, IsArray, ValidateNested, IsDateString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsBoolean,
+  IsArray,
+  ValidateNested,
+  IsDateString,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 /**
@@ -11,25 +20,25 @@ export enum ConsentStatus {
   DENIED = 'denied',
   PENDING = 'pending',
   WITHDRAWN = 'withdrawn',
-  NOT_APPLICABLE = 'not_applicable'
+  NOT_APPLICABLE = 'not_applicable',
 }
 
 export enum ConsentPurpose {
-  ESSENTIAL_SERVICES = 'essential_services',           // Contract performance
-  FUNCTIONAL_ANALYTICS = 'functional_analytics',       // Legitimate interest
+  ESSENTIAL_SERVICES = 'essential_services', // Contract performance
+  FUNCTIONAL_ANALYTICS = 'functional_analytics', // Legitimate interest
   MARKETING_COMMUNICATIONS = 'marketing_communications', // Consent required
-  BEHAVIORAL_ANALYTICS = 'behavioral_analytics',       // Consent required
-  THIRD_PARTY_SHARING = 'third_party_sharing',        // Consent required
-  PERSONALIZATION = 'personalization',                // Legitimate interest/Consent
-  PERFORMANCE_MONITORING = 'performance_monitoring'    // Legitimate interest
+  BEHAVIORAL_ANALYTICS = 'behavioral_analytics', // Consent required
+  THIRD_PARTY_SHARING = 'third_party_sharing', // Consent required
+  PERSONALIZATION = 'personalization', // Legitimate interest/Consent
+  PERFORMANCE_MONITORING = 'performance_monitoring', // Legitimate interest
 }
 
 export enum ConsentMethod {
-  EXPLICIT_OPT_IN = 'explicit_opt_in',           // Article 7 compliant
-  IMPLIED_CONSENT = 'implied_consent',           // For legitimate interests
-  GRANULAR_CHOICE = 'granular_choice',          // Per-purpose consent
-  CONTINUED_USE = 'continued_use',              // Service continuation
-  LEGAL_REQUIREMENT = 'legal_requirement'       // Regulatory obligation
+  EXPLICIT_OPT_IN = 'explicit_opt_in', // Article 7 compliant
+  IMPLIED_CONSENT = 'implied_consent', // For legitimate interests
+  GRANULAR_CHOICE = 'granular_choice', // Per-purpose consent
+  CONTINUED_USE = 'continued_use', // Service continuation
+  LEGAL_REQUIREMENT = 'legal_requirement', // Regulatory obligation
 }
 
 export enum DataCategory {
@@ -40,7 +49,7 @@ export enum DataCategory {
   BEHAVIORAL_DATA = 'behavioral_data',
   DEVICE_INFORMATION = 'device_information',
   COMMUNICATION_PREFERENCES = 'communication_preferences',
-  SYSTEM_LOGS = 'system_logs'
+  SYSTEM_LOGS = 'system_logs',
 }
 
 /**
@@ -178,7 +187,7 @@ export class UserConsentProfile {
    * Check if user has valid consent for a specific purpose
    */
   hasValidConsent(purpose: ConsentPurpose): boolean {
-    const record = this.consentRecords.find(r => r.purpose === purpose);
+    const record = this.consentRecords.find((r) => r.purpose === purpose);
     if (!record) return false;
 
     if (record.status !== ConsentStatus.GRANTED) return false;
@@ -196,9 +205,9 @@ export class UserConsentProfile {
    */
   getGrantedPurposes(): ConsentPurpose[] {
     return this.consentRecords
-      .filter(r => r.status === ConsentStatus.GRANTED)
-      .filter(r => !r.expiryDate || new Date() <= new Date(r.expiryDate))
-      .map(r => r.purpose);
+      .filter((r) => r.status === ConsentStatus.GRANTED)
+      .filter((r) => !r.expiryDate || new Date() <= new Date(r.expiryDate))
+      .map((r) => r.purpose);
   }
 
   /**
@@ -207,7 +216,7 @@ export class UserConsentProfile {
   needsConsentRenewal(): boolean {
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-    
+
     return this.lastConsentUpdate < oneYearAgo;
   }
 }

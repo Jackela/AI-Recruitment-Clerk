@@ -4,26 +4,25 @@
  * @since 1.0.0
  */
 
-import { 
-  ContractViolationError, 
-  Requires, 
-  Ensures, 
+import {
+  ContractViolationError,
+  Requires,
+  Ensures,
   ContractValidators,
-  ContractTestUtils 
+  ContractTestUtils,
 } from './dbc.decorators';
 
 /**
  * Test class for DBC framework validation
  */
 class TestService {
-  
   @Requires(
     (value: string) => ContractValidators.isNonEmptyString(value),
-    'Value must be non-empty string'
+    'Value must be non-empty string',
   )
   @Ensures(
     (result: string) => result.includes('processed'),
-    'Result must contain processed marker'
+    'Result must contain processed marker',
   )
   async processValue(value: string): Promise<string> {
     return `processed: ${value}`;
@@ -31,7 +30,7 @@ class TestService {
 
   @Requires(
     (email: string) => ContractValidators.isValidEmail(email),
-    'Email must be valid format'
+    'Email must be valid format',
   )
   async validateEmail(email: string): Promise<boolean> {
     return true;
@@ -50,7 +49,7 @@ describe('DBC Framework', () => {
       await ContractTestUtils.expectAsyncContractViolation(
         () => service.processValue(''),
         'PRE',
-        'Value must be non-empty string'
+        'Value must be non-empty string',
       );
     });
 
@@ -58,7 +57,7 @@ describe('DBC Framework', () => {
       await ContractTestUtils.expectAsyncContractViolation(
         () => service.validateEmail('invalid-email'),
         'PRE',
-        'Email must be valid format'
+        'Email must be valid format',
       );
     });
   });

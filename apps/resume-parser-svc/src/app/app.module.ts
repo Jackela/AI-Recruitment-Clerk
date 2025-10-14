@@ -36,7 +36,9 @@ import {
       process.env.MONGODB_URL ||
         process.env.MONGO_URL ||
         (() => {
-          throw new Error('MONGODB_URL or MONGO_URL environment variable is required');
+          throw new Error(
+            'MONGODB_URL or MONGO_URL environment variable is required',
+          );
         })(),
       {
         connectionName: 'resume-parser',

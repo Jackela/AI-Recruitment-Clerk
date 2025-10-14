@@ -396,7 +396,10 @@ export class QuestionnaireController {
         ],
       };
     } catch (error) {
-      this.logger.error('Questionnaire submission error', error.stack || error.message);
+      this.logger.error(
+        'Questionnaire submission error',
+        error.stack || error.message,
+      );
 
       if (error instanceof HttpException) {
         throw error;

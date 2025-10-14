@@ -30,7 +30,7 @@ export class QuestionnaireSubmission extends ValueObject<{
         role: data.userProfile?.role || 'other',
         industry: data.userProfile?.industry || '',
         companySize: data.userProfile?.companySize || 'unknown',
-        location: data.userProfile?.location || ''
+        location: data.userProfile?.location || '',
       }),
       userExperience: new UserExperience({
         overallSatisfaction: data.userExperience?.overallSatisfaction || 1,
@@ -39,28 +39,30 @@ export class QuestionnaireSubmission extends ValueObject<{
         uiRating: data.userExperience?.uiRating || 1,
         mostUsefulFeature: data.userExperience?.mostUsefulFeature || '',
         mainPainPoint: data.userExperience?.mainPainPoint,
-        improvementSuggestion: data.userExperience?.improvementSuggestion
+        improvementSuggestion: data.userExperience?.improvementSuggestion,
       }),
       businessValue: new BusinessValue({
-        currentScreeningMethod: data.businessValue?.currentScreeningMethod || 'manual',
+        currentScreeningMethod:
+          data.businessValue?.currentScreeningMethod || 'manual',
         timeSpentPerResume: data.businessValue?.timeSpentPerResume || 0,
         resumesPerWeek: data.businessValue?.resumesPerWeek || 0,
         timeSavingPercentage: data.businessValue?.timeSavingPercentage || 0,
-        willingnessToPayMonthly: data.businessValue?.willingnessToPayMonthly || 0,
-        recommendLikelihood: data.businessValue?.recommendLikelihood || 1
+        willingnessToPayMonthly:
+          data.businessValue?.willingnessToPayMonthly || 0,
+        recommendLikelihood: data.businessValue?.recommendLikelihood || 1,
       }),
       featureNeeds: new FeatureNeeds({
         priorityFeatures: data.featureNeeds?.priorityFeatures || [],
-        integrationNeeds: data.featureNeeds?.integrationNeeds || []
+        integrationNeeds: data.featureNeeds?.integrationNeeds || [],
       }),
       optional: new OptionalInfo({
         additionalFeedback: data.optional?.additionalFeedback,
-        contactPreference: data.optional?.contactPreference
+        contactPreference: data.optional?.contactPreference,
       }),
-      submittedAt: new Date()
+      submittedAt: new Date(),
     });
   }
-  
+
   /**
    * Performs the restore operation.
    * @param data - The data.
@@ -69,10 +71,10 @@ export class QuestionnaireSubmission extends ValueObject<{
   static restore(data: any): QuestionnaireSubmission {
     return new QuestionnaireSubmission({
       ...data,
-      submittedAt: new Date(data.submittedAt)
+      submittedAt: new Date(data.submittedAt),
     });
   }
-  
+
   /**
    * Retrieves user profile.
    * @returns The UserProfile.
@@ -80,7 +82,7 @@ export class QuestionnaireSubmission extends ValueObject<{
   getUserProfile(): UserProfile {
     return this.props.userProfile;
   }
-  
+
   /**
    * Retrieves user experience.
    * @returns The UserExperience.
@@ -88,7 +90,7 @@ export class QuestionnaireSubmission extends ValueObject<{
   getUserExperience(): UserExperience {
     return this.props.userExperience;
   }
-  
+
   /**
    * Retrieves business value.
    * @returns The BusinessValue.
@@ -96,7 +98,7 @@ export class QuestionnaireSubmission extends ValueObject<{
   getBusinessValue(): BusinessValue {
     return this.props.businessValue;
   }
-  
+
   /**
    * Retrieves optional info.
    * @returns The OptionalInfo.
@@ -104,7 +106,7 @@ export class QuestionnaireSubmission extends ValueObject<{
   getOptionalInfo(): OptionalInfo {
     return this.props.optional;
   }
-  
+
   /**
    * Retrieves summary.
    * @returns The SubmissionSummary.
@@ -116,10 +118,10 @@ export class QuestionnaireSubmission extends ValueObject<{
       overallSatisfaction: this.props.userExperience.overallSatisfaction,
       willingnessToPayMonthly: this.props.businessValue.willingnessToPayMonthly,
       textLength: this.calculateTotalTextLength(),
-      completionRate: this.calculateCompletionRate()
+      completionRate: this.calculateCompletionRate(),
     });
   }
-  
+
   /**
    * Retrieves answer.
    * @param questionId - The question id.
@@ -130,14 +132,15 @@ export class QuestionnaireSubmission extends ValueObject<{
     const answers = {
       role: this.props.userProfile.role,
       industry: this.props.userProfile.industry,
-      overallSatisfaction: this.props.userExperience.overallSatisfaction.toString(),
-      mostUsefulFeature: this.props.userExperience.mostUsefulFeature
+      overallSatisfaction:
+        this.props.userExperience.overallSatisfaction.toString(),
+      mostUsefulFeature: this.props.userExperience.mostUsefulFeature,
     };
-    
+
     const value = answers[questionId as keyof typeof answers];
     return value ? new Answer({ questionId, value: value.toString() }) : null;
   }
-  
+
   private calculateTotalTextLength(): number {
     const textFields = [
       this.props.userProfile.industry,
@@ -145,12 +148,12 @@ export class QuestionnaireSubmission extends ValueObject<{
       this.props.userExperience.mostUsefulFeature,
       this.props.userExperience.mainPainPoint || '',
       this.props.userExperience.improvementSuggestion || '',
-      this.props.optional.additionalFeedback || ''
+      this.props.optional.additionalFeedback || '',
     ];
-    
+
     return textFields.join(' ').length;
   }
-  
+
   private calculateCompletionRate(): number {
     const requiredFields = 5; // role, industry, satisfaction, screening method, willingness to pay
     const completedFields = [
@@ -158,9 +161,9 @@ export class QuestionnaireSubmission extends ValueObject<{
       this.props.userProfile.industry,
       this.props.userExperience.overallSatisfaction,
       this.props.businessValue.currentScreeningMethod,
-      this.props.businessValue.willingnessToPayMonthly
-    ].filter(field => field && field !== 0).length;
-    
+      this.props.businessValue.willingnessToPayMonthly,
+    ].filter((field) => field && field !== 0).length;
+
     return completedFields / requiredFields;
   }
 }

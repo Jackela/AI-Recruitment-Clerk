@@ -18,7 +18,7 @@ export class UsageLimitPolicy extends ValueObject<{
       dailyLimit: 5,
       bonusEnabled: true,
       maxBonusQuota: 20,
-      resetTimeUTC: 0 // Midnight UTC
+      resetTimeUTC: 0, // Midnight UTC
     });
   }
 
@@ -35,20 +35,28 @@ export class UsageLimitPolicy extends ValueObject<{
    * Performs the daily limit operation.
    * @returns The number value.
    */
-  get dailyLimit(): number { return this.props.dailyLimit; }
+  get dailyLimit(): number {
+    return this.props.dailyLimit;
+  }
   /**
    * Performs the bonus enabled operation.
    * @returns The boolean value.
    */
-  get bonusEnabled(): boolean { return this.props.bonusEnabled; }
+  get bonusEnabled(): boolean {
+    return this.props.bonusEnabled;
+  }
   /**
    * Performs the max bonus quota operation.
    * @returns The number value.
    */
-  get maxBonusQuota(): number { return this.props.maxBonusQuota; }
+  get maxBonusQuota(): number {
+    return this.props.maxBonusQuota;
+  }
   /**
    * Performs the reset time utc operation.
    * @returns The number value.
    */
-  get resetTimeUTC(): number { return this.props.resetTimeUTC; }
+  get resetTimeUTC(): number {
+    return this.props.resetTimeUTC;
+  }
 }

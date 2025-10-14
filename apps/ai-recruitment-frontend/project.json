@@ -8,15 +8,11 @@
   "targets": {
     "build": {
       "executor": "@angular/build:application",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/ai-recruitment-frontend",
         "browser": "apps/ai-recruitment-frontend/src/main.ts",
-        "polyfills": [
-          "zone.js"
-        ],
+        "polyfills": ["zone.js"],
         "tsConfig": "apps/ai-recruitment-frontend/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
@@ -25,9 +21,7 @@
             "input": "apps/ai-recruitment-frontend/public"
           }
         ],
-        "styles": [
-          "apps/ai-recruitment-frontend/src/styles.scss"
-        ]
+        "styles": ["apps/ai-recruitment-frontend/src/styles.scss"]
       },
       "configurations": {
         "webkit-test": {
@@ -142,9 +136,7 @@
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
         "jestConfig": "apps/ai-recruitment-frontend/jest.config.ts",
         "passWithNoTests": false

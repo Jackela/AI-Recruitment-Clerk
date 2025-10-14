@@ -84,7 +84,7 @@ export interface ErrorNotification {
  * Provides error handling functionality.
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ErrorHandlingService implements ErrorHandler {
   private readonly errors$ = new BehaviorSubject<ErrorNotification[]>([]);
@@ -112,7 +112,7 @@ export class ErrorHandlingService implements ErrorHandler {
    */
   handleError(error: any): void {
     const errorContext = this.createErrorContext();
-    
+
     if (error instanceof HttpErrorResponse) {
       this.handleHttpError(error, errorContext);
     } else if (error instanceof Error) {
@@ -132,10 +132,10 @@ export class ErrorHandlingService implements ErrorHandler {
    */
   handleHttpError(
     httpError: HttpErrorResponse,
-    context?: Partial<ErrorContext>
+    context?: Partial<ErrorContext>,
   ): Observable<never> {
     const errorContext = { ...this.createErrorContext(), ...context };
-    
+
     // Check if it's a standardized error response
     if (this.isStandardizedError(httpError.error)) {
       this.processStandardizedError(httpError.error, errorContext);
@@ -151,13 +151,14 @@ export class ErrorHandlingService implements ErrorHandler {
    */
   handleJavaScriptError(error: Error, context?: Partial<ErrorContext>): void {
     const errorContext = { ...this.createErrorContext(), ...context };
-    
+
     const notification: ErrorNotification = {
       id: this.generateErrorId(),
       type: 'error',
       title: 'Application Error',
       message: error.message,
-      userMessage: 'An unexpected error occurred. Please refresh the page and try again.',
+      userMessage:
+        'An unexpected error occurred. Please refresh the page and try again.',
       timestamp: new Date(),
       acknowledged: false,
       retryable: true,
@@ -165,7 +166,7 @@ export class ErrorHandlingService implements ErrorHandler {
         'Refresh the page',
         'Clear browser cache',
         'Try again in a few moments',
-        'Contact support if problem persists'
+        'Contact support if problem persists',
       ],
     };
 
@@ -179,7 +180,7 @@ export class ErrorHandlingService implements ErrorHandler {
    */
   handleUnknownError(error: any, context?: Partial<ErrorContext>): void {
     const errorContext = { ...this.createErrorContext(), ...context };
-    
+
     const notification: ErrorNotification = {
       id: this.generateErrorId(),
       type: 'error',
@@ -192,7 +193,7 @@ export class ErrorHandlingService implements ErrorHandler {
       recoveryStrategies: [
         'Try the operation again',
         'Refresh the page',
-        'Contact support if needed'
+        'Contact support if needed',
       ],
     };
 
@@ -206,7 +207,7 @@ export class ErrorHandlingService implements ErrorHandler {
    */
   private processStandardizedError(
     errorResponse: StandardizedErrorResponse,
-    context: ErrorContext
+    context: ErrorContext,
   ): void {
     const notification: ErrorNotification = {
       id: this.generateErrorId(),
@@ -231,7 +232,7 @@ export class ErrorHandlingService implements ErrorHandler {
    */
   private processGenericHttpError(
     httpError: HttpErrorResponse,
-    context: ErrorContext
+    context: ErrorContext,
   ): void {
     const notification: ErrorNotification = {
       id: this.generateErrorId(),
@@ -255,7 +256,7 @@ export class ErrorHandlingService implements ErrorHandler {
    */
   private handleSpecialErrorTypes(
     errorResponse: StandardizedErrorResponse,
-    context: ErrorContext
+    context: ErrorContext,
   ): void {
     switch (errorResponse.error.type) {
       case 'AUTHENTICATION_ERROR':
@@ -278,7 +279,7 @@ export class ErrorHandlingService implements ErrorHandler {
    */
   private handleSpecialHttpErrors(
     httpError: HttpErrorResponse,
-    context: ErrorContext
+    context: ErrorContext,
   ): void {
     switch (httpError.status) {
       case 401:
@@ -301,12 +302,12 @@ export class ErrorHandlingService implements ErrorHandler {
    */
   private handleAuthenticationError(
     errorResponse: StandardizedErrorResponse,
-    context: ErrorContext
+    context: ErrorContext,
   ): void {
     // Clear user session
     localStorage.removeItem('auth_token');
     sessionStorage.clear();
-    
+
     // Redirect to login
     this.redirectToLogin();
   }
@@ -316,7 +317,7 @@ export class ErrorHandlingService implements ErrorHandler {
    */
   private handleAuthorizationError(
     errorResponse: StandardizedErrorResponse,
-    context: ErrorContext
+    context: ErrorContext,
   ): void {
     // Show access denied message
     this.showAccessDeniedMessage();
@@ -327,7 +328,7 @@ export class ErrorHandlingService implements ErrorHandler {
    */
   private handleRateLimitError(
     errorResponse: StandardizedErrorResponse,
-    context: ErrorContext
+    context: ErrorContext,
   ): void {
     const resetTime = errorResponse.details?.resetTime;
     if (resetTime) {
@@ -340,7 +341,7 @@ export class ErrorHandlingService implements ErrorHandler {
    */
   private handleValidationError(
     errorResponse: StandardizedErrorResponse,
-    context: ErrorContext
+    context: ErrorContext,
   ): void {
     // Validation errors are usually handled by forms
     // Just show the user message
@@ -361,8 +362,8 @@ export class ErrorHandlingService implements ErrorHandler {
    */
   acknowledgeError(errorId: string): void {
     const errors = this.errors$.value;
-    const errorIndex = errors.findIndex(e => e.id === errorId);
-    
+    const errorIndex = errors.findIndex((e) => e.id === errorId);
+
     if (errorIndex !== -1) {
       errors[errorIndex].acknowledged = true;
       this.errors$.next([...errors]);
@@ -380,7 +381,7 @@ export class ErrorHandlingService implements ErrorHandler {
    * Clear specific error notification
    */
   clearError(errorId: string): void {
-    const errors = this.errors$.value.filter(e => e.id !== errorId);
+    const errors = this.errors$.value.filter((e) => e.id !== errorId);
     this.errors$.next(errors);
   }
 
@@ -389,7 +390,7 @@ export class ErrorHandlingService implements ErrorHandler {
    */
   retryOperation<T>(
     operation: () => Observable<T>,
-    errorId: string
+    errorId: string,
   ): Observable<T> {
     this.clearError(errorId);
     return operation();
@@ -398,11 +399,13 @@ export class ErrorHandlingService implements ErrorHandler {
   // Private helper methods
 
   private isStandardizedError(error: any): error is StandardizedErrorResponse {
-    return error && 
-           error.success === false && 
-           error.error && 
-           typeof error.error.type === 'string' &&
-           typeof error.error.code === 'string';
+    return (
+      error &&
+      error.success === false &&
+      error.error &&
+      typeof error.error.type === 'string' &&
+      typeof error.error.code === 'string'
+    );
   }
 
   private createErrorContext(): ErrorContext {
@@ -417,12 +420,12 @@ export class ErrorHandlingService implements ErrorHandler {
   private addErrorNotification(notification: ErrorNotification): void {
     const errors = this.errors$.value;
     errors.unshift(notification);
-    
+
     // Keep only last 10 errors
     if (errors.length > 10) {
       errors.splice(10);
     }
-    
+
     this.errors$.next([...errors]);
   }
 
@@ -430,13 +433,19 @@ export class ErrorHandlingService implements ErrorHandler {
     if (this.toastService) {
       switch (notification.type) {
         case 'error':
-          this.toastService.error(notification.userMessage || notification.message);
+          this.toastService.error(
+            notification.userMessage || notification.message,
+          );
           break;
         case 'warning':
-          this.toastService.warning(notification.userMessage || notification.message);
+          this.toastService.warning(
+            notification.userMessage || notification.message,
+          );
           break;
         case 'info':
-          this.toastService.info(notification.userMessage || notification.message);
+          this.toastService.info(
+            notification.userMessage || notification.message,
+          );
           break;
       }
     }
@@ -457,8 +466,9 @@ export class ErrorHandlingService implements ErrorHandler {
   }
 
   private formatErrorTitle(errorType: string): string {
-    return errorType.replace(/_/g, ' ')
-                   .replace(/\b\w/g, l => l.toUpperCase());
+    return errorType
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (l) => l.toUpperCase());
   }
 
   private getGenericHttpErrorMessage(status: number): string {
@@ -532,7 +542,9 @@ export class ErrorHandlingService implements ErrorHandler {
 
   private showRateLimitMessage(resetTime: Date): void {
     if (this.toastService) {
-      this.toastService.warning(`请求限制，请在 ${resetTime.toLocaleTimeString()} 后重试`);
+      this.toastService.warning(
+        `请求限制，请在 ${resetTime.toLocaleTimeString()} 后重试`,
+      );
     }
   }
 

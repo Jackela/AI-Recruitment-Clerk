@@ -23,7 +23,9 @@ class ReportGeneratorNatsServiceStub {
   );
 
   public subscribeToReportGenerationRequested = jest.fn(
-    async (handler: (event: ReportGenerationRequestedEvent) => Promise<void>) => {
+    async (
+      handler: (event: ReportGenerationRequestedEvent) => Promise<void>,
+    ) => {
       this.reportRequestHandler = handler;
     },
   );
@@ -127,7 +129,9 @@ describe('ReportEventsController NATS integration', () => {
   it('publishes report generation failed when report creation throws', async () => {
     await controller.onModuleInit();
 
-    reportServiceStub.handleMatchScored.mockRejectedValueOnce(new Error('db down'));
+    reportServiceStub.handleMatchScored.mockRejectedValueOnce(
+      new Error('db down'),
+    );
 
     const event: MatchScoredEvent = {
       jobId: 'job-err',
@@ -151,7 +155,9 @@ describe('ReportEventsController NATS integration', () => {
   it('handles manual report generation requests via NATS', async () => {
     await controller.onModuleInit();
 
-    expect(natsStub.subscribeToReportGenerationRequested).toHaveBeenCalledTimes(1);
+    expect(natsStub.subscribeToReportGenerationRequested).toHaveBeenCalledTimes(
+      1,
+    );
     expect(natsStub.reportRequestHandler).toBeDefined();
 
     const request: ReportGenerationRequestedEvent = {
@@ -174,6 +180,3 @@ describe('ReportEventsController NATS integration', () => {
     expect(natsStub.publishReportGenerationFailed).not.toHaveBeenCalled();
   });
 });
-
-
-

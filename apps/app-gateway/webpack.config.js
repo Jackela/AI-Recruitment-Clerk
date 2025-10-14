@@ -29,7 +29,10 @@ export default {
   },
   resolve: {
     alias: {
-      'class-transformer/storage': join(__dirname, './webpack.alias-stubs/class-transformer/storage.js'),
+      'class-transformer/storage': join(
+        __dirname,
+        './webpack.alias-stubs/class-transformer/storage.js',
+      ),
       // Force-bundle internal libs instead of treating them as external packages
       '@ai-recruitment-clerk/shared-dtos': join(
         __dirname,
@@ -42,8 +45,8 @@ export default {
     },
     extensionAlias: {
       '.js': ['.ts', '.js'],
-      '.mjs': ['.mts', '.mjs']
-    }
+      '.mjs': ['.mts', '.mjs'],
+    },
   },
   externals: [
     (context, request, callback) => {
@@ -56,18 +59,18 @@ export default {
       callback();
     },
     {
-    'bcrypt': 'bcrypt',
-    'sqlite3': 'sqlite3',
-    'better-sqlite3': 'better-sqlite3',
-    'mysql2': 'mysql2',
-    'pg': 'pg',
-    'pg-native': 'pg-native',
-    'tedious': 'tedious',
-    'mysql': 'mysql',
-    'ioredis': 'ioredis',
-    'redis': 'redis',
-    'level': 'level'
-  }
+      bcrypt: 'bcrypt',
+      sqlite3: 'sqlite3',
+      'better-sqlite3': 'better-sqlite3',
+      mysql2: 'mysql2',
+      pg: 'pg',
+      'pg-native': 'pg-native',
+      tedious: 'tedious',
+      mysql: 'mysql',
+      ioredis: 'ioredis',
+      redis: 'redis',
+      level: 'level',
+    },
   ],
   plugins: [
     new NxAppWebpackPlugin({

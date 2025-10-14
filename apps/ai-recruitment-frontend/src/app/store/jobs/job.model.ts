@@ -5,7 +5,7 @@ export interface Job {
   id: string;
   title: string;
   jdText: string;
-  status: 'draft' | 'active' | 'processing' | 'completed' | 'closed';
+  status: 'draft' | 'active' | 'processing' | 'completed' | 'failed' | 'closed';
   createdAt: Date;
   resumeCount: number;
 }
@@ -16,7 +16,7 @@ export interface Job {
 export interface JobListItem {
   id: string;
   title: string;
-  status: 'draft' | 'active' | 'processing' | 'completed' | 'closed';
+  status: 'draft' | 'active' | 'processing' | 'completed' | 'failed' | 'closed';
   createdAt: Date;
   resumeCount: number;
 }

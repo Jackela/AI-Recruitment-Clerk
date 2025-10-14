@@ -250,7 +250,10 @@ Create 15-20 targeted questions that thoroughly assess the candidate's fit for t
   /**
    * Skills Assessment Template
    */
-  static getSkillsAssessmentPrompt(requiredSkills: string[], candidateSkills: string[]): string {
+  static getSkillsAssessmentPrompt(
+    requiredSkills: string[],
+    candidateSkills: string[],
+  ): string {
     return `
 Perform a detailed skills gap analysis between job requirements and candidate qualifications.
 
@@ -333,17 +336,23 @@ export class PromptBuilder {
    * @param options - The options.
    * @returns The string value.
    */
-  static buildWithOptions(basePrompt: string, options: PromptOptions = {}): string {
+  static buildWithOptions(
+    basePrompt: string,
+    options: PromptOptions = {},
+  ): string {
     let prompt = basePrompt;
 
     if (options.validationLevel === 'strict') {
-      prompt += '\n\nSTRICT VALIDATION: Ensure 100% accuracy. Use null for any uncertain information.';
+      prompt +=
+        '\n\nSTRICT VALIDATION: Ensure 100% accuracy. Use null for any uncertain information.';
     } else if (options.validationLevel === 'lenient') {
-      prompt += '\n\nFLEXIBLE EXTRACTION: Make reasonable inferences where information is implied.';
+      prompt +=
+        '\n\nFLEXIBLE EXTRACTION: Make reasonable inferences where information is implied.';
     }
 
     if (options.includeExamples) {
-      prompt += '\n\nProvide examples or context for your extraction decisions when helpful.';
+      prompt +=
+        '\n\nProvide examples or context for your extraction decisions when helpful.';
     }
 
     return prompt;

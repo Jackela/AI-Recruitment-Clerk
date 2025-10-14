@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsEnum, IsNumber, IsBoolean, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsNumber,
+  IsBoolean,
+  IsArray,
+} from 'class-validator';
 
 /**
  * 简化的隐私基础设施DTO
@@ -11,7 +18,7 @@ export enum ProcessingLegalBasis {
   LEGAL_OBLIGATION = 'legal_obligation',
   VITAL_INTERESTS = 'vital_interests',
   PUBLIC_TASK = 'public_task',
-  LEGITIMATE_INTERESTS = 'legitimate_interests'
+  LEGITIMATE_INTERESTS = 'legitimate_interests',
 }
 
 export enum DataRetentionStatus {
@@ -20,20 +27,20 @@ export enum DataRetentionStatus {
   ANONYMIZED = 'anonymized',
   DELETED = 'deleted',
   ARCHIVED = 'archived',
-  LEGAL_HOLD = 'legal_hold'
+  LEGAL_HOLD = 'legal_hold',
 }
 
 export enum BreachSeverity {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 export enum BreachType {
   CONFIDENTIALITY = 'confidentiality',
   INTEGRITY = 'integrity',
-  AVAILABILITY = 'availability'
+  AVAILABILITY = 'availability',
 }
 
 export enum BreachStatus {
@@ -43,7 +50,7 @@ export enum BreachStatus {
   NOTIFIED_AUTHORITY = 'notified_authority',
   NOTIFIED_SUBJECTS = 'notified_subjects',
   RESOLVED = 'resolved',
-  CLOSED = 'closed'
+  CLOSED = 'closed',
 }
 
 /**

@@ -17,6 +17,6 @@ export class IncentiveApprovedEvent implements DomainEvent {
     public readonly recipientIP: string,
     public readonly rewardAmount: number,
     public readonly reason: string,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }

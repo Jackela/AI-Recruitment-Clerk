@@ -107,3 +107,54 @@ export const selectJobManagementState = createSelector(
     hasJobs: state.jobs.length > 0,
   }),
 );
+
+// WebSocket-related selectors
+export const selectWebSocketStatus = createSelector(
+  selectJobState,
+  (state: JobState): 'connecting' | 'connected' | 'disconnected' | 'error' =>
+    state.webSocketStatus,
+);
+
+export const selectWebSocketConnected = createSelector(
+  selectJobState,
+  (state: JobState): boolean => state.webSocketConnected,
+);
+
+export const selectJobProgress = createSelector(
+  selectJobState,
+  (state: JobState) => state.jobProgress,
+);
+
+export const selectJobProgressById = (jobId: string) =>
+  createSelector(
+    selectJobProgress,
+    (jobProgress) => jobProgress[jobId] || null,
+  );
+
+// Enhanced job management state with WebSocket info
+export const selectJobManagementStateWithWebSocket = createSelector(
+  selectJobState,
+  (state: JobState) => ({
+    jobs: state.jobs,
+    selectedJob: state.selectedJob,
+    loading: state.loading,
+    creating: state.creating,
+    error: state.error,
+    canCreateJob: !state.loading && !state.creating,
+    hasJobs: state.jobs.length > 0,
+    webSocketConnected: state.webSocketConnected,
+    webSocketStatus: state.webSocketStatus,
+    jobProgress: state.jobProgress,
+  }),
+);
+
+// Selector for jobs with their current progress
+export const selectJobsWithProgress = createSelector(
+  selectAllJobs,
+  selectJobProgress,
+  (jobs, jobProgress) =>
+    jobs.map((job) => ({
+      ...job,
+      progress: jobProgress[job.id] || null,
+    })),
+);

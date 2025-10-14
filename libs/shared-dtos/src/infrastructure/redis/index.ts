@@ -32,5 +32,9 @@ export interface IUsageCache {
   getDailyUsage(ip: string): Promise<number>;
   incrementDailyUsage(ip: string): Promise<number>;
   canUse(ip: string, baseQuota?: number): Promise<boolean>;
-  addBonusQuota(ip: string, bonusType: 'questionnaire' | 'payment', amount: number): Promise<number>;
+  addBonusQuota(
+    ip: string,
+    bonusType: 'questionnaire' | 'payment',
+    amount: number,
+  ): Promise<number>;
 }

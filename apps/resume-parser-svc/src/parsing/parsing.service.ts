@@ -64,7 +64,11 @@ export class ParsingService {
    * Retrieves processing stats.
    * @returns The { activeJobs: number; totalCapacity: number; isHealthy: boolean }.
    */
-  getProcessingStats(): { activeJobs: number; totalCapacity: number; isHealthy: boolean } {
+  getProcessingStats(): {
+    activeJobs: number;
+    totalCapacity: number;
+    isHealthy: boolean;
+  } {
     const activeJobs = this.processingFiles.size;
     const totalCapacity = 10;
     return {
@@ -82,7 +86,11 @@ export class ParsingService {
    * @param userId - The user id.
    * @returns A promise that resolves to any.
    */
-  async parseResumeFile(buffer: Buffer, filename: string, userId: string): Promise<any> {
+  async parseResumeFile(
+    buffer: Buffer,
+    filename: string,
+    userId: string,
+  ): Promise<any> {
     const started = Date.now();
     const jobId = `${filename}-${Date.now()}`;
 
@@ -90,7 +98,11 @@ export class ParsingService {
     if (!(buffer instanceof Buffer) || buffer.length === 0) {
       throw new Error('File buffer must be valid and non-empty');
     }
-    if (!filename || typeof filename !== 'string' || filename.trim().length === 0) {
+    if (
+      !filename ||
+      typeof filename !== 'string' ||
+      filename.trim().length === 0
+    ) {
       throw new Error('File name must be non-empty string');
     }
     if (!userId || typeof userId !== 'string' || userId.trim().length === 0) {
@@ -113,22 +125,33 @@ export class ParsingService {
 
       // Extract text first, then normalize
       this.logger.log(`Extracting text from PDF: ${filename}`);
-      const extractedText = await this.pdfTextExtractorService.extractText(buffer);
-      this.logger.debug(`Extracted ${extractedText.length} characters from PDF`);
-      
+      const extractedText =
+        await this.pdfTextExtractorService.extractText(buffer);
+      this.logger.debug(
+        `Extracted ${extractedText.length} characters from PDF`,
+      );
+
       // Log sample of extracted text for debugging (first 200 chars)
       const textSample = extractedText.substring(0, 200).replace(/\n/g, ' ');
       this.logger.debug(`Text sample: ${textSample}...`);
-      
+
       // Pass extracted text to LLM for processing
       const raw = await this.visionLlmService.parseResumeText(extractedText);
-      const resumeDto = await this.fieldMapperService.normalizeToResumeDto(raw as any);
+      const resumeDto = await this.fieldMapperService.normalizeToResumeDto(
+        raw as any,
+      );
 
       // Attempt to upload original file for reference URL (best-effort)
       let fileUrl: string | undefined;
       try {
-        if (this.gridFsService && typeof (this.gridFsService as any).uploadFile === 'function') {
-          fileUrl = await (this.gridFsService as any).uploadFile(buffer, filename);
+        if (
+          this.gridFsService &&
+          typeof (this.gridFsService as any).uploadFile === 'function'
+        ) {
+          fileUrl = await (this.gridFsService as any).uploadFile(
+            buffer,
+            filename,
+          );
         }
       } catch (e) {
         // If storage fails, return failed with appropriate message
@@ -137,7 +160,12 @@ export class ParsingService {
           jobId,
           status: 'failed',
           warnings: [`Processing failed: ${msg}`],
-          metadata: { duration: Date.now() - started, userId, filename, error: msg },
+          metadata: {
+            duration: Date.now() - started,
+            userId,
+            filename,
+            error: msg,
+          },
         };
       }
 
@@ -160,7 +188,12 @@ export class ParsingService {
         jobId,
         status: 'failed',
         warnings: [`Processing failed: ${msg}`],
-        metadata: { duration: Date.now() - started, userId, filename, error: msg },
+        metadata: {
+          duration: Date.now() - started,
+          userId,
+          filename,
+          error: msg,
+        },
       };
     }
   }
@@ -228,7 +261,9 @@ export class ParsingService {
       );
 
       // Add to processing map
-      const fileHash = createHash('sha256').update(fileBuffer as any).digest('hex');
+      const fileHash = createHash('sha256')
+        .update(fileBuffer as any)
+        .digest('hex');
       this.processingFiles.set(processingKey, {
         timestamp: Date.now(),
         hash: fileHash,
@@ -242,13 +277,18 @@ export class ParsingService {
           if (isPdf) {
             // First extract text from PDF using dedicated service
             this.logger.log(`Extracting text from PDF: ${originalFilename}`);
-            const extractedText = await this.pdfTextExtractorService.extractText(fileBuffer);
-            this.logger.debug(`Extracted ${extractedText.length} characters from PDF`);
-            
+            const extractedText =
+              await this.pdfTextExtractorService.extractText(fileBuffer);
+            this.logger.debug(
+              `Extracted ${extractedText.length} characters from PDF`,
+            );
+
             // Log sample of extracted text for debugging (first 200 chars)
-            const textSample = extractedText.substring(0, 200).replace(/\n/g, ' ');
+            const textSample = extractedText
+              .substring(0, 200)
+              .replace(/\n/g, ' ');
             this.logger.debug(`Text sample: ${textSample}...`);
-            
+
             // Then pass extracted text to LLM for processing
             return this.visionLlmService.parseResumeText(extractedText);
           } else {
@@ -361,7 +401,9 @@ export class ParsingService {
       );
 
       // Additional security check: verify file hasn't been tampered with
-      const fileHash = createHash('sha256').update(fileBuffer as any).digest('hex');
+      const fileHash = createHash('sha256')
+        .update(fileBuffer as any)
+        .digest('hex');
       this.logger.debug(`File integrity hash: ${fileHash}`);
 
       // Parse resume using appropriate strategy
@@ -372,13 +414,18 @@ export class ParsingService {
           if (isPdf) {
             // First extract text from PDF using dedicated service
             this.logger.log(`Extracting text from PDF: ${filename}`);
-            const extractedText = await this.pdfTextExtractorService.extractText(fileBuffer);
-            this.logger.debug(`Extracted ${extractedText.length} characters from PDF`);
-            
+            const extractedText =
+              await this.pdfTextExtractorService.extractText(fileBuffer);
+            this.logger.debug(
+              `Extracted ${extractedText.length} characters from PDF`,
+            );
+
             // Log sample of extracted text for debugging (first 200 chars)
-            const textSample = extractedText.substring(0, 200).replace(/\n/g, ' ');
+            const textSample = extractedText
+              .substring(0, 200)
+              .replace(/\n/g, ' ');
             this.logger.debug(`Text sample: ${textSample}...`);
-            
+
             // Then pass extracted text to LLM for processing
             return this.visionLlmService.parseResumeText(extractedText);
           } else {

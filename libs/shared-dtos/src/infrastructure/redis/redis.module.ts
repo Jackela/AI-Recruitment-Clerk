@@ -8,15 +8,7 @@ import { UsageCacheService } from './usage-cache.service';
  */
 @Global()
 @Module({
-  providers: [
-    RedisClient,
-    SessionCacheService,
-    UsageCacheService,
-  ],
-  exports: [
-    RedisClient,
-    SessionCacheService,
-    UsageCacheService,
-  ],
+  providers: [RedisClient, SessionCacheService, UsageCacheService],
+  exports: [RedisClient, SessionCacheService, UsageCacheService],
 })
 export class RedisModule {}

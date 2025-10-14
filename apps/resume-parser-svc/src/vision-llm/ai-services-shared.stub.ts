@@ -23,7 +23,10 @@ export class GeminiClient {
    * @param _schema - The schema.
    * @returns A promise that resolves to { data: T }.
    */
-  async generateStructuredResponse<T>(_prompt: string, _schema: any): Promise<{ data: T }> {
+  async generateStructuredResponse<T>(
+    _prompt: string,
+    _schema: any,
+  ): Promise<{ data: T }> {
     return { data: {} as T };
   }
   /**

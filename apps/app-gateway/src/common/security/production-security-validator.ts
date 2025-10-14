@@ -73,7 +73,8 @@ export class ProductionSecurityValidator {
 
     // In production, exit if critical issues found (unless explicitly bypassed for local UAT)
     const nodeEnv = this.configService.get<string>('NODE_ENV');
-    const allowInsecure = this.configService.get<string>('ALLOW_INSECURE_LOCAL') === 'true';
+    const allowInsecure =
+      this.configService.get<string>('ALLOW_INSECURE_LOCAL') === 'true';
     if (nodeEnv === 'production' && !result.isValid) {
       if (allowInsecure) {
         this.logger.warn(

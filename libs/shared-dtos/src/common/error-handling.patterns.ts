@@ -19,7 +19,7 @@ export enum ErrorType {
   DATABASE = 'DATABASE_ERROR',
   FILE_UPLOAD = 'FILE_UPLOAD_ERROR',
   BUSINESS_LOGIC = 'BUSINESS_LOGIC_ERROR',
-  SYSTEM = 'SYSTEM_ERROR'
+  SYSTEM = 'SYSTEM_ERROR',
 }
 
 /**
@@ -29,7 +29,7 @@ export enum ErrorSeverity {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 /**
@@ -53,7 +53,7 @@ export interface ErrorDetails {
  */
 export class AppException extends HttpException {
   public readonly errorDetails: ErrorDetails;
-  
+
   /**
    * Initializes a new instance of the App Exception.
    * @param type - The type.
@@ -69,10 +69,10 @@ export class AppException extends HttpException {
     message: string,
     httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
     details?: any,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ) {
     super(message, httpStatus);
-    
+
     this.errorDetails = {
       type,
       code,
@@ -80,7 +80,7 @@ export class AppException extends HttpException {
       details,
       timestamp: new Date().toISOString(),
       severity: ErrorSeverity.MEDIUM,
-      context
+      context,
     };
   }
 
@@ -151,7 +151,7 @@ export class BusinessLogicException extends AppException {
       code,
       message,
       HttpStatus.BAD_REQUEST,
-      details
+      details,
     );
   }
 }
@@ -171,7 +171,7 @@ export class ValidationException extends AppException {
       'VALIDATION_FAILED',
       message,
       HttpStatus.BAD_REQUEST,
-      validationErrors
+      validationErrors,
     );
   }
 }
@@ -191,7 +191,7 @@ export class ResourceNotFoundException extends AppException {
       'RESOURCE_NOT_FOUND',
       `${resource} with identifier '${identifier}' not found`,
       HttpStatus.NOT_FOUND,
-      { resource, identifier }
+      { resource, identifier },
     );
   }
 }
@@ -209,7 +209,7 @@ export class UnauthorizedException extends AppException {
       ErrorType.AUTHORIZATION,
       'UNAUTHORIZED',
       message,
-      HttpStatus.UNAUTHORIZED
+      HttpStatus.UNAUTHORIZED,
     );
   }
 }
@@ -223,12 +223,7 @@ export class ForbiddenException extends AppException {
    * @param message - The message.
    */
   constructor(message = 'Access forbidden') {
-    super(
-      ErrorType.AUTHORIZATION,
-      'FORBIDDEN',
-      message,
-      HttpStatus.FORBIDDEN
-    );
+    super(ErrorType.AUTHORIZATION, 'FORBIDDEN', message, HttpStatus.FORBIDDEN);
   }
 }
 
@@ -247,7 +242,7 @@ export class ConflictException extends AppException {
       'RESOURCE_CONFLICT',
       message,
       HttpStatus.CONFLICT,
-      conflictDetails
+      conflictDetails,
     );
   }
 }
@@ -268,7 +263,7 @@ export class ExternalServiceException extends AppException {
       'EXTERNAL_SERVICE_ERROR',
       `External service '${serviceName}' error: ${message}`,
       HttpStatus.BAD_GATEWAY,
-      { serviceName, originalStatusCode: statusCode }
+      { serviceName, originalStatusCode: statusCode },
     );
   }
 }
@@ -284,7 +279,7 @@ export class ErrorHandler {
    */
   static handleError(error: Error, context?: string): AppException {
     const traceId = this.generateTraceId();
-    
+
     // 如果已经是AppException，直接返回
     if (error instanceof AppException) {
       error.withTraceId(traceId);
@@ -295,14 +290,17 @@ export class ErrorHandler {
     // 转换为标准异常
     const appException = this.convertToAppException(error, traceId);
     this.logError(appException, context);
-    
+
     return appException;
   }
 
   /**
    * 转换为应用异常
    */
-  private static convertToAppException(error: Error, traceId: string): AppException {
+  private static convertToAppException(
+    error: Error,
+    traceId: string,
+  ): AppException {
     // 数据库错误
     if (this.isDatabaseError(error)) {
       return new AppException(
@@ -310,16 +308,17 @@ export class ErrorHandler {
         'DATABASE_ERROR',
         'Database operation failed',
         HttpStatus.INTERNAL_SERVER_ERROR,
-        { originalError: error.message }
-      ).withTraceId(traceId).withSeverity(ErrorSeverity.HIGH);
+        { originalError: error.message },
+      )
+        .withTraceId(traceId)
+        .withSeverity(ErrorSeverity.HIGH);
     }
 
     // 网络错误
     if (this.isNetworkError(error)) {
-      return new ExternalServiceException(
-        'unknown',
-        error.message
-      ).withTraceId(traceId);
+      return new ExternalServiceException('unknown', error.message).withTraceId(
+        traceId,
+      );
     }
 
     // 默认系统错误
@@ -328,8 +327,10 @@ export class ErrorHandler {
       'SYSTEM_ERROR',
       'An unexpected error occurred',
       HttpStatus.INTERNAL_SERVER_ERROR,
-      { originalError: error.message }
-    ).withTraceId(traceId).withSeverity(ErrorSeverity.CRITICAL);
+      { originalError: error.message },
+    )
+      .withTraceId(traceId)
+      .withSeverity(ErrorSeverity.CRITICAL);
   }
 
   /**
@@ -345,7 +346,7 @@ export class ErrorHandler {
       code: errorDetails.code,
       severity: errorDetails.severity,
       details: errorDetails.details,
-      context: errorDetails.context
+      context: errorDetails.context,
     };
 
     switch (errorDetails.severity) {
@@ -375,9 +376,15 @@ export class ErrorHandler {
    * 检查是否为数据库错误
    */
   private static isDatabaseError(error: Error): boolean {
-    const dbErrorKeywords = ['mongodb', 'mysql', 'postgres', 'connection', 'timeout'];
-    return dbErrorKeywords.some(keyword => 
-      error.message.toLowerCase().includes(keyword)
+    const dbErrorKeywords = [
+      'mongodb',
+      'mysql',
+      'postgres',
+      'connection',
+      'timeout',
+    ];
+    return dbErrorKeywords.some((keyword) =>
+      error.message.toLowerCase().includes(keyword),
     );
   }
 
@@ -385,9 +392,14 @@ export class ErrorHandler {
    * 检查是否为网络错误
    */
   private static isNetworkError(error: Error): boolean {
-    const networkErrorKeywords = ['ECONNREFUSED', 'ETIMEDOUT', 'ENOTFOUND', 'network'];
-    return networkErrorKeywords.some(keyword => 
-      error.message.includes(keyword)
+    const networkErrorKeywords = [
+      'ECONNREFUSED',
+      'ETIMEDOUT',
+      'ENOTFOUND',
+      'network',
+    ];
+    return networkErrorKeywords.some((keyword) =>
+      error.message.includes(keyword),
     );
   }
 }
@@ -403,7 +415,7 @@ export class ErrorRecoveryStrategy {
     operation: () => Promise<T>,
     maxRetries = 3,
     baseDelay = 1000,
-    exponentialBackoff = true
+    exponentialBackoff = true,
   ): Promise<T> {
     let lastError: Error;
     let delay = baseDelay;
@@ -413,7 +425,7 @@ export class ErrorRecoveryStrategy {
         return await operation();
       } catch (error) {
         lastError = error as Error;
-        
+
         if (attempt === maxRetries) {
           break;
         }
@@ -424,7 +436,7 @@ export class ErrorRecoveryStrategy {
         }
 
         await this.sleep(delay);
-        
+
         if (exponentialBackoff) {
           delay *= 2;
         }
@@ -440,7 +452,7 @@ export class ErrorRecoveryStrategy {
   static circuitBreaker<T>(
     operation: () => Promise<T>,
     failureThreshold = 5,
-    timeout = 60000
+    timeout = 60000,
   ): () => Promise<T> {
     let failureCount = 0;
     let lastFailureTime = 0;
@@ -456,7 +468,7 @@ export class ErrorRecoveryStrategy {
             ErrorType.EXTERNAL_SERVICE,
             'CIRCUIT_BREAKER_OPEN',
             'Circuit breaker is open, service temporarily unavailable',
-            HttpStatus.SERVICE_UNAVAILABLE
+            HttpStatus.SERVICE_UNAVAILABLE,
           );
         }
         state = 'HALF_OPEN';
@@ -464,11 +476,11 @@ export class ErrorRecoveryStrategy {
 
       try {
         const result = await operation();
-        
+
         // 成功时重置状态
         failureCount = 0;
         state = 'CLOSED';
-        
+
         return result;
       } catch (error) {
         failureCount++;
@@ -492,9 +504,9 @@ export class ErrorRecoveryStrategy {
         ErrorType.AUTHENTICATION,
         ErrorType.AUTHORIZATION,
         ErrorType.VALIDATION,
-        ErrorType.NOT_FOUND
+        ErrorType.NOT_FOUND,
       ];
-      
+
       return !nonRetryableTypes.includes(error.errorDetails.type);
     }
 
@@ -503,7 +515,7 @@ export class ErrorRecoveryStrategy {
   }
 
   private static sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
@@ -516,7 +528,7 @@ export class ErrorResponseFormatter {
    */
   static format(error: AppException): any {
     const { errorDetails } = error;
-    
+
     return {
       success: false,
       error: {
@@ -524,13 +536,13 @@ export class ErrorResponseFormatter {
         code: errorDetails.code,
         message: errorDetails.message,
         timestamp: errorDetails.timestamp,
-        traceId: errorDetails.traceId
+        traceId: errorDetails.traceId,
       },
       // 在生产环境中可能需要隐藏详细信息
       ...(process.env.NODE_ENV !== 'production' && {
         details: errorDetails.details,
-        context: errorDetails.context
-      })
+        context: errorDetails.context,
+      }),
     };
   }
 
@@ -549,7 +561,7 @@ export class ErrorResponseFormatter {
       [ErrorType.DATABASE]: '数据服务暂时不可用，请稍后重试',
       [ErrorType.FILE_UPLOAD]: '文件上传失败，请检查文件格式和大小',
       [ErrorType.BUSINESS_LOGIC]: error.errorDetails.message,
-      [ErrorType.SYSTEM]: '系统出现错误，请联系管理员'
+      [ErrorType.SYSTEM]: '系统出现错误，请联系管理员',
     };
 
     return messageMap[error.errorDetails.type] || '未知错误';

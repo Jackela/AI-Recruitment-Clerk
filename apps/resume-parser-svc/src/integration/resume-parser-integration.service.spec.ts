@@ -189,11 +189,7 @@ describe('ResumeParserIntegrationService', () => {
 
       // Act
       // Test the parsing - result is not used as we're testing the calls
-      await service.parseResume(
-        mockPdfBuffer,
-        'test-resume.pdf',
-        options,
-      );
+      await service.parseResume(mockPdfBuffer, 'test-resume.pdf', options);
 
       // Assert
       expect(fieldMapperService.normalizeToResumeDto).toHaveBeenCalledWith(

@@ -9,19 +9,19 @@ import { randomBytes } from 'crypto';
  * Error correlation context interface
  */
 export interface ErrorCorrelationContext {
-  requestId: string;           // Unique request identifier  
-  traceId: string;            // Distributed trace ID
-  spanId: string;             // Current service span
-  parentSpanId?: string;      // Parent service span  
-  userId?: string;            // User context
-  sessionId?: string;         // Session context
-  clientIp?: string;          // Client information
-  userAgent?: string;         // User agent
-  timestamp: string;          // Context creation timestamp
-  serviceName: string;        // Originating service
-  operationName: string;      // Specific operation
-  startTime?: number;         // Operation start time
-  executionTime?: number;     // Operation execution time
+  requestId: string; // Unique request identifier
+  traceId: string; // Distributed trace ID
+  spanId: string; // Current service span
+  parentSpanId?: string; // Parent service span
+  userId?: string; // User context
+  sessionId?: string; // Session context
+  clientIp?: string; // Client information
+  userAgent?: string; // User agent
+  timestamp: string; // Context creation timestamp
+  serviceName: string; // Originating service
+  operationName: string; // Specific operation
+  startTime?: number; // Operation start time
+  executionTime?: number; // Operation execution time
   metadata?: Record<string, any>; // Additional context metadata
 }
 
@@ -47,9 +47,10 @@ export class ErrorCorrelationManager {
   private static readonly REQUEST_HEADER_NAME = 'x-request-id';
   private static readonly SPAN_HEADER_NAME = 'x-span-id';
   private static readonly PARENT_SPAN_HEADER_NAME = 'x-parent-span-id';
-  
+
   // Thread-local storage for correlation context (using AsyncLocalStorage in production)
-  private static currentContext: ErrorCorrelationContext | undefined = undefined;
+  private static currentContext: ErrorCorrelationContext | undefined =
+    undefined;
   private static contextStack: ErrorCorrelationContext[] = [];
 
   /**
@@ -60,7 +61,7 @@ export class ErrorCorrelationManager {
   }
 
   /**
-   * Generate distributed trace identifier  
+   * Generate distributed trace identifier
    */
   static generateTraceId(): string {
     return `trace_${Date.now()}_${randomBytes(12).toString('hex')}`;
@@ -79,13 +80,14 @@ export class ErrorCorrelationManager {
   static createContextFromRequest(
     request: any,
     serviceName: string,
-    operationName: string
+    operationName: string,
   ): ErrorCorrelationContext {
     const headers = request.headers || {};
-    
+
     // Extract existing correlation IDs or generate new ones
     const traceId = headers[this.TRACE_HEADER_NAME] || this.generateTraceId();
-    const requestId = headers[this.REQUEST_HEADER_NAME] || this.generateRequestId();
+    const requestId =
+      headers[this.REQUEST_HEADER_NAME] || this.generateRequestId();
     const parentSpanId = headers[this.SPAN_HEADER_NAME] || undefined;
     const spanId = this.generateSpanId();
 
@@ -106,8 +108,8 @@ export class ErrorCorrelationManager {
         url: request.url,
         path: request.path || request.route?.path,
         query: request.query,
-        contentType: headers['content-type']
-      }
+        contentType: headers['content-type'],
+      },
     };
 
     return context;
@@ -119,7 +121,7 @@ export class ErrorCorrelationManager {
   static createInternalContext(
     serviceName: string,
     operationName: string,
-    parentContext?: ErrorCorrelationContext
+    parentContext?: ErrorCorrelationContext,
   ): ErrorCorrelationContext {
     const context: ErrorCorrelationContext = {
       requestId: parentContext?.requestId || this.generateRequestId(),
@@ -131,7 +133,7 @@ export class ErrorCorrelationManager {
       timestamp: new Date().toISOString(),
       serviceName,
       operationName,
-      metadata: parentContext?.metadata
+      metadata: parentContext?.metadata,
     };
 
     return context;
@@ -183,7 +185,7 @@ export class ErrorCorrelationManager {
    */
   static async withContext<T>(
     context: ErrorCorrelationContext,
-    operation: () => Promise<T>
+    operation: () => Promise<T>,
   ): Promise<T> {
     this.setContext(context);
     try {
@@ -199,7 +201,9 @@ export class ErrorCorrelationManager {
   /**
    * Create correlation headers for outbound requests
    */
-  static createCorrelationHeaders(context?: ErrorCorrelationContext): Record<string, string> {
+  static createCorrelationHeaders(
+    context?: ErrorCorrelationContext,
+  ): Record<string, string> {
     const ctx = context || this.getContext();
     if (!ctx) {
       return {};
@@ -209,9 +213,11 @@ export class ErrorCorrelationManager {
       [this.TRACE_HEADER_NAME]: ctx.traceId,
       [this.REQUEST_HEADER_NAME]: ctx.requestId,
       [this.SPAN_HEADER_NAME]: ctx.spanId,
-      ...(ctx.parentSpanId && { [this.PARENT_SPAN_HEADER_NAME]: ctx.parentSpanId }),
+      ...(ctx.parentSpanId && {
+        [this.PARENT_SPAN_HEADER_NAME]: ctx.parentSpanId,
+      }),
       ...(ctx.userId && { 'x-user-id': ctx.userId }),
-      ...(ctx.sessionId && { 'x-session-id': ctx.sessionId })
+      ...(ctx.sessionId && { 'x-session-id': ctx.sessionId }),
     };
   }
 
@@ -220,14 +226,14 @@ export class ErrorCorrelationManager {
    */
   static enrichContext(
     context: ErrorCorrelationContext,
-    metadata: Record<string, any>
+    metadata: Record<string, any>,
   ): ErrorCorrelationContext {
     return {
       ...context,
       metadata: {
         ...context.metadata,
-        ...metadata
-      }
+        ...metadata,
+      },
     };
   }
 
@@ -237,7 +243,7 @@ export class ErrorCorrelationManager {
   static createChildContext(
     parentContext: ErrorCorrelationContext,
     serviceName: string,
-    operationName: string
+    operationName: string,
   ): ErrorCorrelationContext {
     return {
       ...parentContext,
@@ -246,7 +252,7 @@ export class ErrorCorrelationManager {
       serviceName,
       operationName,
       timestamp: new Date().toISOString(),
-      executionTime: undefined // Reset execution time for child operation
+      executionTime: undefined, // Reset execution time for child operation
     };
   }
 
@@ -267,7 +273,9 @@ export class ErrorCorrelationManager {
   /**
    * Generate correlation summary for logging
    */
-  static getCorrelationSummary(context?: ErrorCorrelationContext): Record<string, any> {
+  static getCorrelationSummary(
+    context?: ErrorCorrelationContext,
+  ): Record<string, any> {
     const ctx = context || this.getContext();
     if (!ctx) {
       return {};
@@ -283,7 +291,7 @@ export class ErrorCorrelationManager {
       userId: ctx.userId,
       sessionId: ctx.sessionId,
       executionTime: ctx.executionTime,
-      timestamp: ctx.timestamp
+      timestamp: ctx.timestamp,
     };
   }
 
@@ -294,12 +302,21 @@ export class ErrorCorrelationManager {
     isValid: boolean;
     missingFields: string[];
   } {
-    const requiredFields = ['requestId', 'traceId', 'spanId', 'serviceName', 'operationName', 'timestamp'];
-    const missingFields = requiredFields.filter((field) => !(context as any)[field]);
-    
+    const requiredFields = [
+      'requestId',
+      'traceId',
+      'spanId',
+      'serviceName',
+      'operationName',
+      'timestamp',
+    ];
+    const missingFields = requiredFields.filter(
+      (field) => !(context as any)[field],
+    );
+
     return {
       isValid: missingFields.length === 0,
-      missingFields
+      missingFields,
     };
   }
 }
@@ -308,29 +325,42 @@ export class ErrorCorrelationManager {
  * Correlation context decorator for methods
  */
 export function WithCorrelation(serviceName: string, operationName: string) {
-  return function (_target: any, _propertyName: string, descriptor: PropertyDescriptor) {
+  return function (
+    _target: any,
+    _propertyName: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const method = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
       // Try to extract context from first argument (often a request object)
       let context = ErrorCorrelationManager.getContext();
-      
+
       if (!context && args[0] && typeof args[0] === 'object') {
         const potentialRequest = args[0];
-        if (potentialRequest.headers || potentialRequest.method || potentialRequest.url) {
+        if (
+          potentialRequest.headers ||
+          potentialRequest.method ||
+          potentialRequest.url
+        ) {
           context = ErrorCorrelationManager.createContextFromRequest(
             potentialRequest,
             serviceName,
-            operationName
+            operationName,
           );
         }
       }
 
       if (!context) {
-        context = ErrorCorrelationManager.createInternalContext(serviceName, operationName);
+        context = ErrorCorrelationManager.createInternalContext(
+          serviceName,
+          operationName,
+        );
       }
 
-      return ErrorCorrelationManager.withContext(context, () => method.apply(this, args));
+      return ErrorCorrelationManager.withContext(context, () =>
+        method.apply(this, args),
+      );
     };
 
     return descriptor;
@@ -343,7 +373,7 @@ export function WithCorrelation(serviceName: string, operationName: string) {
  */
 export class AsyncCorrelationManager {
   private static asyncLocalStorage: any; // AsyncLocalStorage from 'async_hooks'
-  
+
   /**
    * Performs the initialize operation.
    * @returns The result of the operation.
@@ -354,7 +384,9 @@ export class AsyncCorrelationManager {
         const { AsyncLocalStorage } = require('async_hooks');
         this.asyncLocalStorage = new AsyncLocalStorage();
       } catch (error) {
-        console.warn('AsyncLocalStorage not available, falling back to basic correlation manager');
+        console.warn(
+          'AsyncLocalStorage not available, falling back to basic correlation manager',
+        );
       }
     }
   }
@@ -370,7 +402,9 @@ export class AsyncCorrelationManager {
       return this.asyncLocalStorage.run(context, callback);
     }
     // Fallback to basic context management
-    return ErrorCorrelationManager.withContext(context, async () => callback()) as T;
+    return ErrorCorrelationManager.withContext(context, async () =>
+      callback(),
+    ) as T;
   }
 
   /**

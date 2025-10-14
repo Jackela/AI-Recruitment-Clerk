@@ -9,7 +9,7 @@ export class PaymentResult {
     public readonly transactionId?: string,
     public readonly amount?: number,
     public readonly currency?: Currency,
-    public readonly error?: string
+    public readonly error?: string,
   ) {}
 
   /**
@@ -19,7 +19,11 @@ export class PaymentResult {
    * @param currency - The currency.
    * @returns The PaymentResult.
    */
-  static success(transactionId: string, amount: number, currency: Currency): PaymentResult {
+  static success(
+    transactionId: string,
+    amount: number,
+    currency: Currency,
+  ): PaymentResult {
     return new PaymentResult(true, transactionId, amount, currency);
   }
 

@@ -1,10 +1,10 @@
 /**
  * Shared NATS Client Library
- * 
+ *
  * A comprehensive NATS JetStream client library for AI Recruitment Clerk microservices.
  * Provides unified messaging infrastructure with connection management, stream handling,
  * and service-specific extensions.
- * 
+ *
  * @author AI Recruitment Team
  * @version 1.0.0
  * @since 1.0.0

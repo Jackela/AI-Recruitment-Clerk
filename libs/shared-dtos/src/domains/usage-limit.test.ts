@@ -8,21 +8,24 @@ import {
   BonusType,
   UsageLimitCheckResult,
   UsageRecordResult,
-  UsageStatistics
+  UsageStatistics,
 } from './usage-limit.dto';
 
-import { UsageLimitRules, ViolationType, RecommendedAction } from './usage-limit.rules';
+import {
+  UsageLimitRules,
+  ViolationType,
+  RecommendedAction,
+} from './usage-limit.rules';
 import { UsageLimitContracts } from '../contracts/usage-limit.contracts';
 import {
   UsageLimitDomainService,
   UsageLimitResult,
   UsageTrackingResult,
   BonusQuotaResult,
-  UsageStatsResult
+  UsageStatsResult,
 } from './usage-limit.service';
 
 describe('Agent-2: UsageLimit Domain Service Tests', () => {
-
   // Test Data
   const validIP = '192.168.1.100';
   const invalidIP = 'not-an-ip';
@@ -34,24 +37,24 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
     findByIP: jest.fn(),
     findAll: jest.fn().mockResolvedValue([]),
     findByTimeRange: jest.fn().mockResolvedValue([]),
-    deleteExpired: jest.fn().mockResolvedValue(0)
+    deleteExpired: jest.fn().mockResolvedValue(0),
   };
 
   const mockEventBus = {
-    publish: jest.fn()
+    publish: jest.fn(),
   };
 
   const mockAuditLogger = {
     logBusinessEvent: jest.fn(),
     logSecurityEvent: jest.fn(),
     logError: jest.fn(),
-    logViolation: jest.fn()
+    logViolation: jest.fn(),
   };
 
   const domainService = new UsageLimitDomainService(
     mockRepository,
     mockEventBus,
-    mockAuditLogger
+    mockAuditLogger,
   );
 
   beforeEach(() => {
@@ -102,7 +105,7 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
 
     it('should block usage when at limit', () => {
       const usageLimit = UsageLimit.create(validIP, policy);
-      
+
       // Use up all quota
       for (let i = 0; i < policy.dailyLimit; i++) {
         usageLimit.recordUsage();
@@ -115,7 +118,7 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
 
     it('should provide accurate remaining quota', () => {
       const usageLimit = UsageLimit.create(validIP, policy);
-      
+
       // Use 2 out of 5
       usageLimit.recordUsage();
       usageLimit.recordUsage();
@@ -127,20 +130,22 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
 
     it('should publish violation event when limit exceeded', () => {
       const usageLimit = UsageLimit.create(validIP, policy);
-      
+
       // Use up all quota
       for (let i = 0; i < policy.dailyLimit; i++) {
         usageLimit.recordUsage();
       }
-      
+
       // Clear creation event
       usageLimit.markEventsAsCommitted();
 
       // Try to check usage when at limit
       usageLimit.canUse();
-      
+
       const events = usageLimit.getUncommittedEvents();
-      const violationEvent = events.find(e => e.constructor.name === 'UsageLimitExceededEvent');
+      const violationEvent = events.find(
+        (e) => e.constructor.name === 'UsageLimitExceededEvent',
+      );
       expect(violationEvent).toBeDefined();
     });
   });
@@ -158,7 +163,7 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
 
     it('should fail to record usage when limit reached', () => {
       const usageLimit = UsageLimit.create(validIP, policy);
-      
+
       // Use up all quota
       for (let i = 0; i < policy.dailyLimit; i++) {
         usageLimit.recordUsage();
@@ -176,13 +181,15 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
       usageLimit.recordUsage();
 
       const events = usageLimit.getUncommittedEvents();
-      const usageEvent = events.find(e => e.constructor.name === 'UsageRecordedEvent');
+      const usageEvent = events.find(
+        (e) => e.constructor.name === 'UsageRecordedEvent',
+      );
       expect(usageEvent).toBeDefined();
     });
 
     it('should maintain usage history', () => {
       const usageLimit = UsageLimit.create(validIP, policy);
-      
+
       usageLimit.recordUsage();
       usageLimit.recordUsage();
 
@@ -206,7 +213,7 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
 
     it('should add payment bonus quota correctly', () => {
       const usageLimit = UsageLimit.create(validIP, policy);
-      
+
       usageLimit.addBonusQuota(BonusType.PAYMENT, 10);
 
       const stats = usageLimit.getUsageStatistics();
@@ -215,7 +222,7 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
 
     it('should allow usage with bonus quota', () => {
       const usageLimit = UsageLimit.create(validIP, policy);
-      
+
       // Use up base quota
       for (let i = 0; i < policy.dailyLimit; i++) {
         usageLimit.recordUsage();
@@ -249,7 +256,9 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
       usageLimit.addBonusQuota(BonusType.QUESTIONNAIRE, 5);
 
       const events = usageLimit.getUncommittedEvents();
-      const bonusEvent = events.find(e => e.constructor.name === 'BonusQuotaAddedEvent');
+      const bonusEvent = events.find(
+        (e) => e.constructor.name === 'BonusQuotaAddedEvent',
+      );
       expect(bonusEvent).toBeDefined();
     });
   });
@@ -288,7 +297,9 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
     });
 
     it('should calculate correct bonus amounts', () => {
-      expect(UsageLimitRules.calculateBonusQuota(BonusType.QUESTIONNAIRE)).toBe(5);
+      expect(UsageLimitRules.calculateBonusQuota(BonusType.QUESTIONNAIRE)).toBe(
+        5,
+      );
       expect(UsageLimitRules.calculateBonusQuota(BonusType.PAYMENT)).toBe(10);
       expect(UsageLimitRules.calculateBonusQuota(BonusType.REFERRAL)).toBe(3);
       expect(UsageLimitRules.calculateBonusQuota(BonusType.PROMOTION)).toBe(2);
@@ -307,7 +318,7 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
         dailyLimit: -1, // Invalid
         bonusEnabled: true,
         maxBonusQuota: 20,
-        resetTimeUTC: 0
+        resetTimeUTC: 0,
       });
       expect(UsageLimitRules.isValidUsagePolicy(invalidPolicy)).toBe(false);
     });
@@ -315,12 +326,12 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
     it('should detect rate limiting', () => {
       const now = new Date();
       const recentUsage = [];
-      
+
       // Create 10 recent usage records (just under limit)
       for (let i = 0; i < 10; i++) {
         recentUsage.push({
-          timestamp: new Date(now.getTime() - (i * 5000)), // 5 seconds apart
-          count: i + 1
+          timestamp: new Date(now.getTime() - i * 5000), // 5 seconds apart
+          count: i + 1,
         });
       }
 
@@ -337,7 +348,7 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
         availableQuota: 10,
         bonusQuota: 0,
         resetAt: new Date(),
-        lastActivityAt: new Date()
+        lastActivityAt: new Date(),
       });
 
       const riskScore = UsageLimitRules.calculateRiskScore(highUsageStats);
@@ -347,13 +358,16 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
 
     it('should generate violation reports', () => {
       const usageLimit = UsageLimit.create(validIP, policy);
-      
+
       // Use up quota to create violation
       for (let i = 0; i < policy.dailyLimit; i++) {
         usageLimit.recordUsage();
       }
 
-      const report = UsageLimitRules.generateViolationReport(validIP, usageLimit);
+      const report = UsageLimitRules.generateViolationReport(
+        validIP,
+        usageLimit,
+      );
       expect(report.ip).toBe(validIP);
       expect(report.currentUsage).toBe(policy.dailyLimit);
       expect(report.violationType).toBe(ViolationType.QUOTA_EXCEEDED);
@@ -412,7 +426,7 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
         UsageLimitContracts.performanceContract(
           () => usageLimit.canUse(),
           100, // 100ms limit
-          'canUse operation'
+          'canUse operation',
         );
       }).not.toThrow();
     });
@@ -434,7 +448,7 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
       mockRepository.save.mockResolvedValue(undefined);
 
       const result = await domainService.checkUsageLimit(validIP);
-      
+
       expect(result.success).toBe(true);
       expect(result.data?.allowed).toBe(true);
       expect(mockRepository.save).toHaveBeenCalled();
@@ -458,7 +472,7 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
       for (let i = 0; i < policy.dailyLimit; i++) {
         usageLimit.recordUsage();
       }
-      
+
       mockRepository.findByIP.mockResolvedValue(usageLimit);
 
       const result = await domainService.recordUsage(validIP);
@@ -472,7 +486,10 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
       mockRepository.findByIP.mockResolvedValue(usageLimit);
       mockRepository.save.mockResolvedValue(undefined);
 
-      const result = await domainService.addBonusQuota(validIP, BonusType.QUESTIONNAIRE);
+      const result = await domainService.addBonusQuota(
+        validIP,
+        BonusType.QUESTIONNAIRE,
+      );
 
       expect(result.success).toBe(true);
       expect(result.data?.addedAmount).toBe(5);
@@ -482,7 +499,7 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
     it('should get usage statistics successfully', async () => {
       const usageLimit = UsageLimit.create(validIP, policy);
       usageLimit.recordUsage(); // Add some usage
-      
+
       mockRepository.findByIP.mockResolvedValue(usageLimit);
 
       const result = await domainService.getUsageStatistics(validIP);
@@ -499,23 +516,25 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
       const result = await domainService.checkUsageLimit(validIP);
 
       expect(result.success).toBe(false);
-      expect(result.errors).toContain('Internal error occurred while checking usage limit');
+      expect(result.errors).toContain(
+        'Internal error occurred while checking usage limit',
+      );
       expect(mockAuditLogger.logError).toHaveBeenCalledWith(
         'CHECK_USAGE_LIMIT_ERROR',
-        expect.objectContaining({ ip: validIP })
+        expect.objectContaining({ ip: validIP }),
       );
     });
 
     it('should analyze usage patterns', async () => {
       const timeRange = {
         startDate: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-        endDate: new Date()
+        endDate: new Date(),
       };
       const usageLimits = [
         UsageLimit.create('192.168.1.1', policy),
-        UsageLimit.create('192.168.1.2', policy)
+        UsageLimit.create('192.168.1.2', policy),
       ];
-      
+
       mockRepository.findByTimeRange.mockResolvedValue(usageLimits);
 
       const result = await domainService.analyzeUsagePatterns(timeRange);
@@ -531,7 +550,7 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
       for (let i = 0; i < policy.dailyLimit; i++) {
         highUsageLimit.recordUsage();
       }
-      
+
       mockRepository.findAll.mockResolvedValue([highUsageLimit]);
 
       const result = await domainService.getHighRiskIPs();
@@ -566,7 +585,7 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
         dailyLimit: 10,
         bonusEnabled: false,
         maxBonusQuota: 15,
-        resetTimeUTC: 8
+        resetTimeUTC: 8,
       });
       expect(restored.dailyLimit).toBe(10);
       expect(restored.bonusEnabled).toBe(false);

@@ -36,6 +36,7 @@ MongoDB / Cache / External Services
 - `GET /analytics/reports/retention` - Generate data retention reports
 
 **Features**:
+
 - ✅ Privacy-first design with GDPR compliance
 - ✅ Event-driven architecture with domain events
 - ✅ Caching for performance optimization
@@ -48,6 +49,7 @@ MongoDB / Cache / External Services
 **Purpose**: User profile management and session tracking.
 
 **Key Endpoints**:
+
 - `GET /users/profile` - Get user profile
 - `POST /users/preferences` - Update user preferences
 
@@ -58,6 +60,7 @@ MongoDB / Cache / External Services
 **Purpose**: Dynamic questionnaire generation and response collection.
 
 **Key Endpoints**:
+
 - `GET /questionnaire` - Get available questionnaires
 
 **Status**: ⚠️ Simplified implementation (placeholder)
@@ -67,6 +70,7 @@ MongoDB / Cache / External Services
 **Purpose**: API rate limiting and usage tracking.
 
 **Key Endpoints**:
+
 - `GET /usage-limits` - Get current usage limits
 
 **Status**: ⚠️ Simplified implementation (placeholder)
@@ -76,6 +80,7 @@ MongoDB / Cache / External Services
 **Purpose**: Reward system and incentive management.
 
 **Key Endpoints**:
+
 - `GET /incentives` - Get available incentives
 
 **Status**: ⚠️ Simplified implementation (placeholder)
@@ -85,6 +90,7 @@ MongoDB / Cache / External Services
 All endpoints require JWT authentication via `Authorization: Bearer <token>` header.
 
 Permission-based access control is implemented using decorators:
+
 - `@Permissions(Permission.TRACK_ANALYTICS)` - Analytics tracking
 - `@Permissions(Permission.READ_ANALYTICS)` - Analytics reading
 - `@Permissions(Permission.MANAGE_PRIVACY)` - Privacy management
@@ -93,6 +99,7 @@ Permission-based access control is implemented using decorators:
 ## Data Models
 
 ### Analytics Event Structure
+
 ```typescript
 {
   eventId: string;
@@ -115,6 +122,7 @@ Permission-based access control is implemented using decorators:
 ```
 
 ### User Profile Structure
+
 ```typescript
 {
   userId: string;
@@ -195,6 +203,7 @@ All endpoints return standardized error responses:
 ## Development Setup
 
 1. **Environment Variables**:
+
 ```env
 MONGODB_URL=mongodb://admin:password123@localhost:27017/ai-recruitment?authSource=admin
 REDIS_URL=redis://localhost:6379
@@ -203,6 +212,7 @@ NODE_ENV=development
 ```
 
 2. **Running Tests**:
+
 ```bash
 # Unit tests
 npm run test
@@ -215,6 +225,7 @@ npm run test:cov
 ```
 
 3. **API Documentation**:
+
 - Swagger UI available at `/api/docs` when running in development
 - OpenAPI specification available at `/api/docs-json`
 
@@ -241,6 +252,7 @@ npm run test:cov
 ## API Testing Examples
 
 ### Track User Interaction
+
 ```bash
 curl -X POST http://localhost:3000/analytics/events/user-interaction \
   -H "Authorization: Bearer <token>" \
@@ -259,12 +271,14 @@ curl -X POST http://localhost:3000/analytics/events/user-interaction \
 ```
 
 ### Get Session Analytics
+
 ```bash
 curl -X GET "http://localhost:3000/analytics/sessions/session_12345?startDate=2024-01-01&endDate=2024-01-31" \
   -H "Authorization: Bearer <token>"
 ```
 
 ### Generate Privacy Metrics
+
 ```bash
 curl -X GET "http://localhost:3000/analytics/metrics/privacy?startDate=2024-01-01&endDate=2024-01-31" \
   -H "Authorization: Bearer <token>"

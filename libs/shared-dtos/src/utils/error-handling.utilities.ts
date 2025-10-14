@@ -4,7 +4,10 @@
  */
 
 import { Logger, HttpStatus } from '@nestjs/common';
-import { EnhancedAppException, ExtendedErrorType } from '../errors/enhanced-error-types';
+import {
+  EnhancedAppException,
+  ExtendedErrorType,
+} from '../errors/enhanced-error-types';
 import { DomainErrorFactory, DatabaseErrorCode } from '../errors/domain-errors';
 import { ErrorCorrelationManager } from '../errors/error-correlation';
 
@@ -162,11 +165,11 @@ export class ErrorUtils {
       'EXTERNAL_SERVICE_FAILED',
       `External service '${serviceName}' failed during ${operation}`,
       HttpStatus.BAD_GATEWAY,
-      { 
-        serviceName, 
-        operation, 
+      {
+        serviceName,
+        operation,
         originalError: originalError?.message,
-        ...context 
+        ...context,
       },
     );
 
@@ -220,23 +223,28 @@ export class ErrorUtils {
 
     try {
       logger.debug(`Starting operation: ${errorContext.operationName}`);
-      
+
       const result = await operation();
-      
+
       const executionTime = Date.now() - startTime;
-      logger.debug(`Operation completed: ${errorContext.operationName} (${executionTime}ms)`);
-      
+      logger.debug(
+        `Operation completed: ${errorContext.operationName} (${executionTime}ms)`,
+      );
+
       return result;
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      logger.error(`Operation failed: ${errorContext.operationName} (${executionTime}ms)`, {
-        error: error instanceof Error ? error.message : String(error),
-        executionTime,
-      });
+      logger.error(
+        `Operation failed: ${errorContext.operationName} (${executionTime}ms)`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          executionTime,
+        },
+      );
 
       // If already an enhanced error, just add context and re-throw
       if (error instanceof EnhancedAppException) {
-        error.withContext({ 
+        error.withContext({
           operationName: errorContext.operationName,
           executionTime,
         });
@@ -250,11 +258,12 @@ export class ErrorUtils {
 
       // Create enhanced error from regular error
       const enhancedError = new EnhancedAppException(
-        (errorContext.defaultErrorType as any) || ExtendedErrorType.SYSTEM_ERROR,
+        (errorContext.defaultErrorType as any) ||
+          ExtendedErrorType.SYSTEM_ERROR,
         errorContext.defaultErrorCode || 'OPERATION_FAILED',
         error instanceof Error ? error.message : 'An unexpected error occurred',
         HttpStatus.INTERNAL_SERVER_ERROR,
-        { 
+        {
           originalError: error instanceof Error ? error.message : String(error),
           operationName: errorContext.operationName,
           executionTime,
@@ -287,7 +296,7 @@ export class ErrorUtils {
     additionalContext?: Record<string, any>,
   ): void {
     const existingContext = ErrorCorrelationManager.getContext();
-    
+
     if (existingContext) {
       ErrorCorrelationManager.updateContext({
         operationName,
@@ -329,7 +338,7 @@ export class ErrorUtils {
         httpStatus,
         context,
       );
-      
+
       error.withSeverity('medium' as any);
       throw error;
     }
@@ -346,16 +355,19 @@ export class ErrorUtils {
       value?: any;
     }>,
   ): void {
-    const failures = validations.filter(v => !v.condition);
-    
+    const failures = validations.filter((v) => !v.condition);
+
     if (failures.length > 0) {
-      const validationDetails = failures.reduce((acc, failure) => {
-        acc[failure.field] = {
-          message: failure.message,
-          value: failure.value,
-        };
-        return acc;
-      }, {} as Record<string, any>);
+      const validationDetails = failures.reduce(
+        (acc, failure) => {
+          acc[failure.field] = {
+            message: failure.message,
+            value: failure.value,
+          };
+          return acc;
+        },
+        {} as Record<string, any>,
+      );
 
       throw this.createValidationError(
         `Validation failed for ${failures.length} field(s)`,
@@ -382,8 +394,15 @@ export class ErrorUtils {
       maxRetries = 3,
       baseDelay = 1000,
       exponentialBackoff = true,
-      retryCondition = (error) => !(error instanceof EnhancedAppException && 
-        ['VALIDATION_ERROR', 'AUTHENTICATION_ERROR', 'AUTHORIZATION_ERROR'].includes(error.enhancedDetails.type)),
+      retryCondition = (error) =>
+        !(
+          error instanceof EnhancedAppException &&
+          [
+            'VALIDATION_ERROR',
+            'AUTHENTICATION_ERROR',
+            'AUTHORIZATION_ERROR',
+          ].includes(error.enhancedDetails.type)
+        ),
       operationName,
       logger = this.logger,
     } = options;
@@ -401,14 +420,17 @@ export class ErrorUtils {
           break;
         }
 
-        logger.warn(`Retry attempt ${attempt}/${maxRetries} for ${operationName}`, {
-          error: lastError.message,
-          attempt,
-          nextRetryIn: delay,
-        });
+        logger.warn(
+          `Retry attempt ${attempt}/${maxRetries} for ${operationName}`,
+          {
+            error: lastError.message,
+            attempt,
+            nextRetryIn: delay,
+          },
+        );
 
-        await new Promise(resolve => setTimeout(resolve, delay));
-        
+        await new Promise((resolve) => setTimeout(resolve, delay));
+
         if (exponentialBackoff) {
           delay *= 2;
         }
@@ -417,7 +439,7 @@ export class ErrorUtils {
 
     // Enhance final error
     if (lastError instanceof EnhancedAppException) {
-      throw lastError.withContext({ 
+      throw lastError.withContext({
         retryAttempts: maxRetries,
         operationName,
       });
@@ -428,7 +450,7 @@ export class ErrorUtils {
       'RETRY_EXHAUSTED',
       `Operation ${operationName} failed after ${maxRetries} retries`,
       HttpStatus.INTERNAL_SERVER_ERROR,
-      { 
+      {
         originalError: lastError?.message || 'Unknown error',
         retryAttempts: maxRetries,
         operationName,

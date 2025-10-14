@@ -17,7 +17,12 @@ export interface NatsStreamConfig {
 export interface NatsConsumerConfig {
   durable_name: string;
   filter_subject: string;
-  deliver_policy: 'all' | 'last' | 'new' | 'by_start_sequence' | 'by_start_time';
+  deliver_policy:
+    | 'all'
+    | 'last'
+    | 'new'
+    | 'by_start_sequence'
+    | 'by_start_time';
   ack_policy: 'none' | 'all' | 'explicit';
   max_deliver: number;
   ack_wait: number; // nanoseconds
@@ -41,7 +46,7 @@ export const NATS_STREAMS: Record<string, NatsStreamConfig> = {
     max_msgs: 50000,
     discard: 'old',
     duplicate_window: 5 * 60 * 1000 * 1000000, // 5 minutes for deduplication
-  }
+  },
 };
 
 export const NATS_CONNECTION_OPTIONS = {

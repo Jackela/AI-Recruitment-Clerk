@@ -334,7 +334,10 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
    * Performs the health check operation.
    * @returns A promise that resolves to { status: string; details: HealthCheckDetails }.
    */
-  async healthCheck(): Promise<{ status: string; details: HealthCheckDetails }> {
+  async healthCheck(): Promise<{
+    status: string;
+    details: HealthCheckDetails;
+  }> {
     try {
       const healthCheck = await this.natsService.healthCheck();
       const natsConnected = healthCheck.status === 'healthy';

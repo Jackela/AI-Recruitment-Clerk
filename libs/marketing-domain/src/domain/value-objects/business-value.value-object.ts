@@ -1,5 +1,8 @@
 import { ValueObject } from './base/value-object.js';
-import { ScreeningMethod, Rating } from '../../application/dtos/questionnaire.dto.js';
+import {
+  ScreeningMethod,
+  Rating,
+} from '../../application/dtos/questionnaire.dto.js';
 
 /**
  * Represents the business value.
@@ -16,30 +19,42 @@ export class BusinessValue extends ValueObject<{
    * Performs the current screening method operation.
    * @returns The ScreeningMethod.
    */
-  get currentScreeningMethod(): ScreeningMethod { return this.props.currentScreeningMethod; }
+  get currentScreeningMethod(): ScreeningMethod {
+    return this.props.currentScreeningMethod;
+  }
   /**
    * Performs the time spent per resume operation.
    * @returns The number value.
    */
-  get timeSpentPerResume(): number { return this.props.timeSpentPerResume; }
+  get timeSpentPerResume(): number {
+    return this.props.timeSpentPerResume;
+  }
   /**
    * Performs the resumes per week operation.
    * @returns The number value.
    */
-  get resumesPerWeek(): number { return this.props.resumesPerWeek; }
+  get resumesPerWeek(): number {
+    return this.props.resumesPerWeek;
+  }
   /**
    * Performs the time saving percentage operation.
    * @returns The number value.
    */
-  get timeSavingPercentage(): number { return this.props.timeSavingPercentage; }
+  get timeSavingPercentage(): number {
+    return this.props.timeSavingPercentage;
+  }
   /**
    * Performs the willingness to pay monthly operation.
    * @returns The number value.
    */
-  get willingnessToPayMonthly(): number { return this.props.willingnessToPayMonthly; }
+  get willingnessToPayMonthly(): number {
+    return this.props.willingnessToPayMonthly;
+  }
   /**
    * Performs the recommend likelihood operation.
    * @returns The Rating.
    */
-  get recommendLikelihood(): Rating { return this.props.recommendLikelihood; }
+  get recommendLikelihood(): Rating {
+    return this.props.recommendLikelihood;
+  }
 }

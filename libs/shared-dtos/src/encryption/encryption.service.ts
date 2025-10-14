@@ -28,12 +28,14 @@ export class EncryptionService {
   private static readonly config: EncryptionConfig = {
     algorithm: 'aes-256-gcm',
     keyLength: 32, // 256 bits
-    ivLength: 16,  // 128 bits
+    ivLength: 16, // 128 bits
     tagLength: 16, // 128 bits
-    saltLength: 32 // 256 bits
+    saltLength: 32, // 256 bits
   };
 
-  private static readonly masterKey = process.env['ENCRYPTION_MASTER_KEY'] || 'default-key-change-in-production-please-use-32-bytes-key';
+  private static readonly masterKey =
+    process.env['ENCRYPTION_MASTER_KEY'] ||
+    'default-key-change-in-production-please-use-32-bytes-key';
 
   /**
    * Derives an encryption key from the master key and salt using PBKDF2
@@ -44,7 +46,7 @@ export class EncryptionService {
       salt as any, // Type assertion for Node.js 20 compatibility
       100000, // iterations
       this.config.keyLength,
-      'sha256'
+      'sha256',
     );
   }
 
@@ -61,26 +63,30 @@ export class EncryptionService {
     // Generate random salt and IV
     const salt = crypto.randomBytes(this.config.saltLength);
     const iv = crypto.randomBytes(this.config.ivLength);
-    
+
     // Derive key from master key and salt
     const key = this.deriveKey(salt);
-    
+
     // Create cipher with Node.js 20 compatible approach
-    const cipher = crypto.createCipheriv(this.config.algorithm as any, key as any, iv as any) as crypto.CipherGCM;
+    const cipher = crypto.createCipheriv(
+      this.config.algorithm as any,
+      key as any,
+      iv as any,
+    ) as crypto.CipherGCM;
     cipher.setAAD(Buffer.from('ai-recruitment-clerk') as any); // Additional authenticated data
-    
+
     // Encrypt the data
     let encrypted = cipher.update(plaintext, 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    
+
     // Get the authentication tag
     const tag = cipher.getAuthTag();
-    
+
     return {
       encryptedData: encrypted,
       iv: iv.toString('hex'),
       tag: tag.toString('hex'),
-      salt: salt.toString('hex')
+      salt: salt.toString('hex'),
     };
   }
 
@@ -99,22 +105,32 @@ export class EncryptionService {
       const salt = Buffer.from(encryptedData.salt, 'hex');
       const iv = Buffer.from(encryptedData.iv, 'hex');
       const tag = Buffer.from(encryptedData.tag, 'hex');
-      
+
       // Derive the same key used for encryption
       const key = this.deriveKey(salt);
-      
+
       // Create decipher with Node.js 20 compatible approach
-      const decipher = crypto.createDecipheriv(this.config.algorithm as any, key as any, iv as any) as crypto.DecipherGCM;
+      const decipher = crypto.createDecipheriv(
+        this.config.algorithm as any,
+        key as any,
+        iv as any,
+      ) as crypto.DecipherGCM;
       decipher.setAAD(Buffer.from('ai-recruitment-clerk') as any); // Same AAD as encryption
       decipher.setAuthTag(tag as any);
-      
+
       // Decrypt the data
-      let decrypted = decipher.update(encryptedData.encryptedData, 'hex', 'utf8');
+      let decrypted = decipher.update(
+        encryptedData.encryptedData,
+        'hex',
+        'utf8',
+      );
       decrypted += decipher.final('utf8');
-      
+
       return decrypted;
     } catch (error) {
-      throw new Error(`Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -126,16 +142,20 @@ export class EncryptionService {
    */
   static encryptFields<T extends Record<string, any>>(
     data: T,
-    fieldsToEncrypt: (keyof T)[]
+    fieldsToEncrypt: (keyof T)[],
   ): T & { _encrypted: { [K in keyof T]?: EncryptedData } } {
-    const result = { ...data, _encrypted: {} as { [K in keyof T]?: EncryptedData } };
+    const result = {
+      ...data,
+      _encrypted: {} as { [K in keyof T]?: EncryptedData },
+    };
 
-    fieldsToEncrypt.forEach(field => {
+    fieldsToEncrypt.forEach((field) => {
       if (data[field] != null) {
-        const fieldValue = typeof data[field] === 'string' 
-          ? data[field] 
-          : JSON.stringify(data[field]);
-        
+        const fieldValue =
+          typeof data[field] === 'string'
+            ? data[field]
+            : JSON.stringify(data[field]);
+
         result._encrypted[field] = this.encrypt(fieldValue);
         // Replace original field with placeholder
         (result as any)[field] = '[ENCRYPTED]';
@@ -151,15 +171,16 @@ export class EncryptionService {
    * @param fieldsToDecrypt - Array of field names to decrypt
    * @returns Object with specified fields decrypted
    */
-  static decryptFields<T extends Record<string, any> & { _encrypted?: Record<string, EncryptedData> }>(
-    data: T,
-    fieldsToDecrypt: (keyof T)[]
-  ): Omit<T, '_encrypted'> {
+  static decryptFields<
+    T extends Record<string, any> & {
+      _encrypted?: Record<string, EncryptedData>;
+    },
+  >(data: T, fieldsToDecrypt: (keyof T)[]): Omit<T, '_encrypted'> {
     const result = { ...data };
     delete (result as any)._encrypted;
 
     if (data._encrypted) {
-      fieldsToDecrypt.forEach(field => {
+      fieldsToDecrypt.forEach((field) => {
         const encryptedField = data._encrypted![field as string];
         if (encryptedField) {
           try {
@@ -171,7 +192,10 @@ export class EncryptionService {
               (result as any)[field] = decryptedValue;
             }
           } catch (error) {
-            console.error(`Failed to decrypt field ${String(field)}:`, error instanceof Error ? error.message : 'Unknown error');
+            console.error(
+              `Failed to decrypt field ${String(field)}:`,
+              error instanceof Error ? error.message : 'Unknown error',
+            );
             (result as any)[field] = '[DECRYPTION_FAILED]';
           }
         }
@@ -186,7 +210,10 @@ export class EncryptionService {
    */
   static encryptUserPII(user: any): any {
     const piiFields = ['firstName', 'lastName', 'email', 'phone', 'address'];
-    return this.encryptFields(user, piiFields.filter(field => user[field] != null));
+    return this.encryptFields(
+      user,
+      piiFields.filter((field) => user[field] != null),
+    );
   }
 
   /**
@@ -201,15 +228,28 @@ export class EncryptionService {
    * Encrypts resume content and sensitive data
    */
   static encryptResumeData(resume: any): any {
-    const sensitiveFields = ['resumeText', 'personalInfo', 'contactInfo', 'originalFilename'];
-    return this.encryptFields(resume, sensitiveFields.filter(field => resume[field] != null));
+    const sensitiveFields = [
+      'resumeText',
+      'personalInfo',
+      'contactInfo',
+      'originalFilename',
+    ];
+    return this.encryptFields(
+      resume,
+      sensitiveFields.filter((field) => resume[field] != null),
+    );
   }
 
   /**
    * Decrypts resume content and sensitive data
    */
   static decryptResumeData(encryptedResume: any): any {
-    const sensitiveFields = ['resumeText', 'personalInfo', 'contactInfo', 'originalFilename'];
+    const sensitiveFields = [
+      'resumeText',
+      'personalInfo',
+      'contactInfo',
+      'originalFilename',
+    ];
     return this.decryptFields(encryptedResume, sensitiveFields);
   }
 
@@ -226,8 +266,13 @@ export class EncryptionService {
   static validateConfig(): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
-    if (this.masterKey === 'default-key-change-in-production-please-use-32-bytes-key') {
-      errors.push('Using default encryption key. Please set ENCRYPTION_MASTER_KEY environment variable.');
+    if (
+      this.masterKey ===
+      'default-key-change-in-production-please-use-32-bytes-key'
+    ) {
+      errors.push(
+        'Using default encryption key. Please set ENCRYPTION_MASTER_KEY environment variable.',
+      );
     }
 
     if (this.masterKey.length < 32) {
@@ -240,7 +285,7 @@ export class EncryptionService {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 }

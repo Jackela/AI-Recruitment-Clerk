@@ -16,10 +16,10 @@ import { Request } from 'express';
 
 /**
  * Authenticated HTTP request interface extending Express Request with user context.
- * 
+ *
  * Used throughout the application for endpoints requiring authentication.
  * Provides access to validated user information and security context.
- * 
+ *
  * @example
  * ```typescript
  * @UseGuards(JwtAuthGuard)
@@ -29,7 +29,7 @@ import { Request } from 'express';
  *   return await this.userService.getUserData(userId, orgId);
  * }
  * ```
- * 
+ *
  * @see {@link UserDto} for user data structure details
  * @since v1.0.0
  */
@@ -55,10 +55,10 @@ export interface AuthenticatedRequest extends Request {
 
 /**
  * User data transfer object for API responses and client communication.
- * 
+ *
  * Standardized user representation across all services and components.
  * Excludes sensitive data like passwords and includes optional display fields.
- * 
+ *
  * @example
  * ```typescript
  * const userResponse: UserDto = {
@@ -74,7 +74,7 @@ export interface AuthenticatedRequest extends Request {
  *   updatedAt: new Date('2024-01-20')
  * };
  * ```
- * 
+ *
  * @see {@link AuthenticatedRequest} for request context usage
  * @see {@link UserRole} for available user roles
  * @see {@link Permission} for permission definitions
@@ -113,11 +113,11 @@ export interface UserDto {
 
 /**
  * System permission enumeration for role-based access control.
- * 
+ *
  * Defines granular permissions for users across the recruitment platform.
  * Used by guards and authorization decorators to control access to endpoints.
  * Supports both colon-style (OAuth2) and snake_case (internal) naming conventions.
- * 
+ *
  * @example
  * ```typescript
  * @UseGuards(JwtAuthGuard, RolesGuard)
@@ -126,7 +126,7 @@ export interface UserDto {
  *   // Only users with both permissions can access
  * }
  * ```
- * 
+ *
  * @see {@link UserRole} for role-based permission groupings
  * @see {@link AuthenticatedRequest} for user permission context
  * @since v1.0.0
@@ -179,21 +179,21 @@ export enum Permission {
 
 /**
  * User login credentials for authentication.
- * 
+ *
  * Standard email/password authentication payload for JWT token generation.
  * Used by login endpoints and authentication middleware.
- * 
+ *
  * @example
  * ```typescript
  * const loginRequest: LoginDto = {
  *   email: 'user@company.com',
  *   password: 'securePassword123'
  * };
- * 
+ *
  * const response = await authService.login(loginRequest);
  * const { accessToken, refreshToken } = response;
  * ```
- * 
+ *
  * @see {@link AuthResponseDto} for login response format
  * @see {@link AuthenticatedRequest} for authenticated session context
  * @since v1.0.0
@@ -207,10 +207,10 @@ export interface LoginDto {
 
 /**
  * User creation payload for new account registration.
- * 
+ *
  * Contains all required and optional fields for creating new user accounts.
  * Supports both self-registration and admin-created accounts with role assignment.
- * 
+ *
  * @example
  * ```typescript
  * const newUser: CreateUserDto = {
@@ -222,10 +222,10 @@ export interface LoginDto {
  *   role: UserRole.RECRUITER,
  *   status: UserStatus.ACTIVE
  * };
- * 
+ *
  * const user = await userService.createUser(newUser);
  * ```
- * 
+ *
  * @see {@link UserDto} for created user response format
  * @see {@link UserRole} for available role options
  * @see {@link UserStatus} for status values
@@ -250,10 +250,10 @@ export interface CreateUserDto {
 
 /**
  * User update payload for modifying existing accounts.
- * 
+ *
  * All fields are optional to support partial updates.
  * Password changes require separate secure endpoint for security.
- * 
+ *
  * @example
  * ```typescript
  * const userUpdate: UpdateUserDto = {
@@ -263,10 +263,10 @@ export interface CreateUserDto {
  *   status: UserStatus.ACTIVE,
  *   updatedAt: new Date()
  * };
- * 
+ *
  * const updatedUser = await userService.updateUser(userId, userUpdate);
  * ```
- * 
+ *
  * @see {@link UserDto} for updated user response format
  * @see {@link UserRole} for role change options
  * @see {@link UserStatus} for status transition rules
@@ -349,16 +349,16 @@ export interface JwtPayload {
 
 export enum UserRole {
   ADMIN = 'admin',
-  HR_MANAGER = 'hr_manager', 
+  HR_MANAGER = 'hr_manager',
   RECRUITER = 'recruiter',
-  USER = 'user'
+  USER = 'user',
 }
 
 export enum UserStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
   SUSPENDED = 'suspended',
-  PENDING = 'pending'
+  PENDING = 'pending',
 }
 
 // Permission checking utility functions
@@ -368,14 +368,19 @@ export enum UserStatus {
  * @param requiredPermissions - The required permissions.
  * @returns The boolean value.
  */
-export function hasAllPermissions(userPermissions: string[] = [], requiredPermissions: string[] = []): boolean {
+export function hasAllPermissions(
+  userPermissions: string[] = [],
+  requiredPermissions: string[] = [],
+): boolean {
   if (!requiredPermissions || requiredPermissions.length === 0) {
     return true;
   }
-  
+
   if (!userPermissions || userPermissions.length === 0) {
     return false;
   }
-  
-  return requiredPermissions.every(permission => userPermissions.includes(permission));
+
+  return requiredPermissions.every((permission) =>
+    userPermissions.includes(permission),
+  );
 }

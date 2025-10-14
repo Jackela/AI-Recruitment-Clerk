@@ -7,7 +7,7 @@
 // Job Management Contracts
 export { JobContracts } from './job-management/job.contracts.js';
 
-// Report Generation Contracts  
+// Report Generation Contracts
 export { ReportContracts } from './report-generation/report.contracts.js';
 
 // Resume Processing Contracts

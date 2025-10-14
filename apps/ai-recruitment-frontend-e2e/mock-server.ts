@@ -66,7 +66,7 @@ export async function startMockServer(): Promise<number> {
 
   const app = express();
   const upload = multer();
-  
+
   // Enable CORS and JSON parsing
   app.use(cors());
   app.use(express.json());
@@ -149,87 +149,105 @@ export async function startMockServer(): Promise<number> {
   // Gap analysis endpoints for coach functionality
   app.post('/api/scoring/gap-analysis', (req, res) => {
     const { jdText = '', resumeText = '' } = req.body;
-    
+
     // Mock skill matching logic based on test expectations
     const matchedSkills = [];
     const missingSkills = [];
-    
-    if (jdText.toLowerCase().includes('aws') && resumeText.toLowerCase().includes('aws')) {
+
+    if (
+      jdText.toLowerCase().includes('aws') &&
+      resumeText.toLowerCase().includes('aws')
+    ) {
       matchedSkills.push('aws');
     } else if (jdText.toLowerCase().includes('aws')) {
       missingSkills.push('aws');
     }
-    
-    if (jdText.toLowerCase().includes('kubernetes') && resumeText.toLowerCase().includes('kubernetes')) {
+
+    if (
+      jdText.toLowerCase().includes('kubernetes') &&
+      resumeText.toLowerCase().includes('kubernetes')
+    ) {
       matchedSkills.push('kubernetes');
     } else if (jdText.toLowerCase().includes('kubernetes')) {
       missingSkills.push('kubernetes');
     }
-    
+
     res.json({
       success: true,
       data: {
         matchedSkills,
         missingSkills,
-        suggestedSkills: ['docker', 'terraform']
-      }
+        suggestedSkills: ['docker', 'terraform'],
+      },
     });
   });
 
-  app.post('/api/scoring/gap-analysis-file', upload.single('resume'), (req, res) => {
-    console.log('🔍 Mock: gap-analysis-file endpoint called');
-    console.log('🔍 Mock: Body:', req.body);
-    console.log('🔍 Mock: File:', req.file ? { name: req.file.originalname, size: req.file.size } : 'No file');
-    
-    // Handle different PDF scenarios based on filename
-    const filename = req.file?.originalname || '';
-    let response;
-    
-    if (filename.includes('multi-page')) {
-      // Multi-page PDF - skills found on last page (Kubernetes, AWS)
-      response = {
-        success: true,
-        data: {
-          matchedSkills: ['kubernetes', 'aws', 'javascript', 'react'],
-          missingSkills: ['azure', 'terraform'],
-          suggestedSkills: ['docker', 'ci/cd', 'monitoring'],
-          metadata: {
-            pages: 2,
-            lastPageSkills: ['kubernetes', 'aws']
-          }
-        }
-      };
-    } else if (filename.includes('image-only')) {
-      // Image-based PDF - text extraction failed, but frontend expects success: true with empty data
-      // Frontend doesn't handle success: false properly, so return success: true with empty results
-      response = {
-        success: true,
-        data: {
-          matchedSkills: [],
-          missingSkills: [],
-          suggestedSkills: [],
-          metadata: {
-            extractionMethod: 'OCR_FAILED',
-            isImageBased: true,
-            errorNote: 'Text extraction failed for image-based PDF'
-          }
-        }
-      };
-    } else {
-      // Default behavior for existing tests
-      response = {
-        success: true,
-        data: {
-          matchedSkills: ['aws', 'kubernetes', 'microservices', 'docker'],
-          missingSkills: ['azure', 'terraform'],
-          suggestedSkills: ['devops', 'ci/cd', 'monitoring']
-        }
-      };
-    }
-    
-    console.log('🔍 Mock: Returning response:', JSON.stringify(response, null, 2));
-    res.json(response);
-  });
+  app.post(
+    '/api/scoring/gap-analysis-file',
+    upload.single('resume'),
+    (req, res) => {
+      console.log('🔍 Mock: gap-analysis-file endpoint called');
+      console.log('🔍 Mock: Body:', req.body);
+      console.log(
+        '🔍 Mock: File:',
+        req.file
+          ? { name: req.file.originalname, size: req.file.size }
+          : 'No file',
+      );
+
+      // Handle different PDF scenarios based on filename
+      const filename = req.file?.originalname || '';
+      let response;
+
+      if (filename.includes('multi-page')) {
+        // Multi-page PDF - skills found on last page (Kubernetes, AWS)
+        response = {
+          success: true,
+          data: {
+            matchedSkills: ['kubernetes', 'aws', 'javascript', 'react'],
+            missingSkills: ['azure', 'terraform'],
+            suggestedSkills: ['docker', 'ci/cd', 'monitoring'],
+            metadata: {
+              pages: 2,
+              lastPageSkills: ['kubernetes', 'aws'],
+            },
+          },
+        };
+      } else if (filename.includes('image-only')) {
+        // Image-based PDF - text extraction failed, but frontend expects success: true with empty data
+        // Frontend doesn't handle success: false properly, so return success: true with empty results
+        response = {
+          success: true,
+          data: {
+            matchedSkills: [],
+            missingSkills: [],
+            suggestedSkills: [],
+            metadata: {
+              extractionMethod: 'OCR_FAILED',
+              isImageBased: true,
+              errorNote: 'Text extraction failed for image-based PDF',
+            },
+          },
+        };
+      } else {
+        // Default behavior for existing tests
+        response = {
+          success: true,
+          data: {
+            matchedSkills: ['aws', 'kubernetes', 'microservices', 'docker'],
+            missingSkills: ['azure', 'terraform'],
+            suggestedSkills: ['devops', 'ci/cd', 'monitoring'],
+          },
+        };
+      }
+
+      console.log(
+        '🔍 Mock: Returning response:',
+        JSON.stringify(response, null, 2),
+      );
+      res.json(response);
+    },
+  );
 
   // Error simulation endpoints
   app.get('/api/error/timeout', (req, res) => {
@@ -252,7 +270,9 @@ export async function startMockServer(): Promise<number> {
   // Start the server with allocated port and enhanced error handling
   return new Promise((resolve, reject) => {
     mockServer = app.listen(serverPort!, () => {
-      console.log(`🚀 Mock API server started for E2E testing on port ${serverPort}`);
+      console.log(
+        `🚀 Mock API server started for E2E testing on port ${serverPort}`,
+      );
       resolve(serverPort!);
     });
 
@@ -261,19 +281,28 @@ export async function startMockServer(): Promise<number> {
       if (error.code === 'EADDRINUSE') {
         console.error(`🚨 Port ${serverPort} is already in use!`);
         // Attempt automatic recovery
-        portManager.forceKillPort(serverPort!).then(() => {
-          console.log('🔄 Attempting to restart after port cleanup...');
-          setTimeout(() => {
-            if (mockServer) {
-              mockServer.listen(serverPort!, () => {
-                console.log(`🚀 Mock API server restarted on port ${serverPort}`);
-                resolve(serverPort!);
-              });
-            }
-          }, 2000);
-        }).catch(() => {
-          reject(new Error(`Failed to start mock server: port ${serverPort} unavailable`));
-        });
+        portManager
+          .forceKillPort(serverPort!)
+          .then(() => {
+            console.log('🔄 Attempting to restart after port cleanup...');
+            setTimeout(() => {
+              if (mockServer) {
+                mockServer.listen(serverPort!, () => {
+                  console.log(
+                    `🚀 Mock API server restarted on port ${serverPort}`,
+                  );
+                  resolve(serverPort!);
+                });
+              }
+            }, 2000);
+          })
+          .catch(() => {
+            reject(
+              new Error(
+                `Failed to start mock server: port ${serverPort} unavailable`,
+              ),
+            );
+          });
       } else {
         reject(error);
       }
@@ -284,11 +313,14 @@ export async function startMockServer(): Promise<number> {
     // Add startup timeout
     setTimeout(() => {
       if (!mockServer?.listening) {
-        reject(new Error(`Mock server failed to start within timeout on port ${serverPort}`));
+        reject(
+          new Error(
+            `Mock server failed to start within timeout on port ${serverPort}`,
+          ),
+        );
       }
     }, 10000);
   });
-
 }
 
 /**
@@ -299,7 +331,7 @@ export async function stopMockServer(): Promise<void> {
   return new Promise((resolve) => {
     if (mockServer) {
       console.log(`🛑 Stopping Mock API server on port ${serverPort}...`);
-      
+
       // Set timeout for graceful shutdown
       const shutdownTimeout = setTimeout(() => {
         console.warn('⚠️ Force closing mock server due to timeout');
@@ -309,21 +341,21 @@ export async function stopMockServer(): Promise<void> {
         }
         resolve();
       }, 5000);
-      
+
       mockServer.close(() => {
         clearTimeout(shutdownTimeout);
         console.log('✅ Mock API server stopped gracefully');
-        
+
         // Release port allocation
         if (serverPort) {
           portManager.releasePort('mock-api');
         }
-        
+
         mockServer = null;
         serverPort = null;
         resolve();
       });
-      
+
       // Stop accepting new connections immediately
       mockServer.removeAllListeners('request');
     } else {
@@ -368,11 +400,16 @@ export function resetMockServer() {
  * Retrieves mock server status.
  * @returns The { running: boolean; port: number | null; healthy: boolean }.
  */
-export function getMockServerStatus(): { running: boolean; port: number | null; healthy: boolean } {
+export function getMockServerStatus(): {
+  running: boolean;
+  port: number | null;
+  healthy: boolean;
+} {
   return {
     running: mockServer !== null && mockServer.listening,
     port: serverPort,
-    healthy: mockServer !== null && mockServer.listening && !mockServer.destroyed
+    healthy:
+      mockServer !== null && mockServer.listening && !mockServer.destroyed,
   };
 }
 
@@ -382,20 +419,20 @@ export function getMockServerStatus(): { running: boolean; port: number | null; 
  */
 export async function healthCheckMockServer(): Promise<boolean> {
   if (!serverPort) return false;
-  
+
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 3000);
-    
+
     const response = await fetch(`http://localhost:${serverPort}/api/health`, {
       method: 'GET',
       signal: controller.signal,
       headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'E2E-MockServer/1.0'
-      }
+        Accept: 'application/json',
+        'User-Agent': 'E2E-MockServer/1.0',
+      },
     });
-    
+
     clearTimeout(timeoutId);
     return response.ok;
   } catch {
@@ -413,4 +450,8 @@ export function getMockServerPort(): number | null {
 
 // Legacy MSW exports for compatibility (no-ops)
 export const handlers = [];
-export const mockServer_MSW = { listen: () => {}, close: () => {}, resetHandlers: () => {} };
+export const mockServer_MSW = {
+  listen: () => {},
+  close: () => {},
+  resetHandlers: () => {},
+};

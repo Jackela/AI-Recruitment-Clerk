@@ -3,7 +3,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TestDatabaseModule } from './test-database.module';
 import { TestNatsModule } from './test-nats.module';
-import { NatsConnectionManager, NatsStreamManager } from '@app/shared-nats-client';
+import {
+  NatsConnectionManager,
+  NatsStreamManager,
+} from '@app/shared-nats-client';
 import { getModelToken } from '@nestjs/mongoose';
 import { Logger } from '@nestjs/common';
 
@@ -21,8 +24,10 @@ export interface TestModuleOptions {
 /**
  * Create a test module with proper database and NATS connections
  */
-export async function createTestModule(options: TestModuleOptions = {}): Promise<TestingModule> {
-  const { 
+export async function createTestModule(
+  options: TestModuleOptions = {},
+): Promise<TestingModule> {
+  const {
     useDocker = process.env.USE_DOCKER === 'true',
     imports = [],
     providers = [],
@@ -39,12 +44,8 @@ export async function createTestModule(options: TestModuleOptions = {}): Promise
       await TestNatsModule.forRoot(useDocker),
       ...imports,
     ],
-    providers: [
-      ...providers,
-    ],
-    controllers: [
-      ...controllers,
-    ],
+    providers: [...providers],
+    controllers: [...controllers],
   });
 
   // Override logger to prevent console output during tests
@@ -57,7 +58,7 @@ export async function createTestModule(options: TestModuleOptions = {}): Promise
   });
 
   const module = await moduleBuilder.compile();
-  
+
   return module;
 }
 
@@ -70,7 +71,8 @@ export const createMockProviders = () => ({
     useValue: {
       get: jest.fn((key: string) => {
         const config: Record<string, any> = {
-          MONGODB_URI: 'mongodb://testuser:testpass@localhost:27018/resume-parser-test',
+          MONGODB_URI:
+            'mongodb://testuser:testpass@localhost:27018/resume-parser-test',
           NATS_SERVERS: 'nats://testuser:testpass@localhost:4223',
           SERVICE_NAME: 'resume-parser-svc-test',
           GRIDFS_BUCKET_NAME: 'test-resumes',
@@ -80,7 +82,7 @@ export const createMockProviders = () => ({
       }),
     },
   },
-  
+
   natsConnectionManager: {
     provide: NatsConnectionManager,
     useValue: {

@@ -16,10 +16,10 @@ export class SubmissionMetadata extends ValueObject<{
   static restore(data: any): SubmissionMetadata {
     return new SubmissionMetadata({
       ...data,
-      timestamp: new Date(data.timestamp)
+      timestamp: new Date(data.timestamp),
     });
   }
-  
+
   /**
    * Performs the ip operation.
    * @returns The string value.

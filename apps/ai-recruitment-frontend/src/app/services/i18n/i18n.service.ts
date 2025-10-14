@@ -298,7 +298,10 @@ export class I18nService {
     // Replace parameters
     if (params) {
       Object.entries(params).forEach(([param, val]) => {
-        value = (value as string).replace(new RegExp(`{{${param}}}`, 'g'), String(val));
+        value = (value as string).replace(
+          new RegExp(`{{${param}}}`, 'g'),
+          String(val),
+        );
       });
     }
 

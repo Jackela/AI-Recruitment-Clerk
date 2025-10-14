@@ -614,9 +614,9 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
       'error',
       'progress',
     ];
-    const t = (allowed.includes(message.type as any)
-      ? (message.type as any)
-      : 'info') as ProgressMessage['type'];
+    const t = (
+      allowed.includes(message.type as any) ? (message.type as any) : 'info'
+    ) as ProgressMessage['type'];
     this.addMessage(t, message.data?.message || '状态更新');
 
     switch (message.type) {

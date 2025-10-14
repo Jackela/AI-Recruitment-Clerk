@@ -27,17 +27,16 @@ export interface ValidationResult {
  * Represents the input validator.
  */
 export class InputValidator {
-  
   // File validation constants
   private static readonly DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
   private static readonly RESUME_MIME_TYPES = [
     'application/pdf',
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'text/plain'
+    'text/plain',
   ];
   private static readonly RESUME_EXTENSIONS = ['.pdf', '.doc', '.docx', '.txt'];
-  
+
   // Malicious file patterns
   private static readonly MALICIOUS_PATTERNS = [
     // eslint-disable-next-line no-control-regex
@@ -53,12 +52,17 @@ export class InputValidator {
   /**
    * Validates uploaded resume files
    */
-  static validateResumeFile(file: { buffer: Buffer; originalname: string; mimetype?: string; size: number }): ValidationResult {
+  static validateResumeFile(file: {
+    buffer: Buffer;
+    originalname: string;
+    mimetype?: string;
+    size: number;
+  }): ValidationResult {
     const options: FileValidationOptions = {
       maxSize: this.DEFAULT_MAX_FILE_SIZE,
       allowedMimeTypes: this.RESUME_MIME_TYPES,
       allowedExtensions: this.RESUME_EXTENSIONS,
-      scanForMalware: true
+      scanForMalware: true,
     };
 
     return this.validateFile(file, options);
@@ -67,30 +71,51 @@ export class InputValidator {
   /**
    * Comprehensive file validation
    */
-  static validateFile(file: { buffer: Buffer; originalname: string; mimetype?: string; size: number }, options: FileValidationOptions): ValidationResult {
+  static validateFile(
+    file: {
+      buffer: Buffer;
+      originalname: string;
+      mimetype?: string;
+      size: number;
+    },
+    options: FileValidationOptions,
+  ): ValidationResult {
     const errors: string[] = [];
-    
+
     if (!file) {
       return {
         isValid: false,
-        errors: ['File is required']
+        errors: ['File is required'],
       };
     }
 
     // Validate file size
     if (file.size > options.maxSize) {
-      errors.push(`File size ${this.formatBytes(file.size)} exceeds maximum allowed size ${this.formatBytes(options.maxSize)}`);
+      errors.push(
+        `File size ${this.formatBytes(file.size)} exceeds maximum allowed size ${this.formatBytes(options.maxSize)}`,
+      );
     }
 
     // Validate MIME type
-    if (options.allowedMimeTypes.length > 0 && file.mimetype && !options.allowedMimeTypes.includes(file.mimetype)) {
-      errors.push(`File type '${file.mimetype}' is not allowed. Allowed types: ${options.allowedMimeTypes.join(', ')}`);
+    if (
+      options.allowedMimeTypes.length > 0 &&
+      file.mimetype &&
+      !options.allowedMimeTypes.includes(file.mimetype)
+    ) {
+      errors.push(
+        `File type '${file.mimetype}' is not allowed. Allowed types: ${options.allowedMimeTypes.join(', ')}`,
+      );
     }
 
     // Validate file extension
     const ext = path.extname(file.originalname).toLowerCase();
-    if (options.allowedExtensions.length > 0 && !options.allowedExtensions.includes(ext)) {
-      errors.push(`File extension '${ext}' is not allowed. Allowed extensions: ${options.allowedExtensions.join(', ')}`);
+    if (
+      options.allowedExtensions.length > 0 &&
+      !options.allowedExtensions.includes(ext)
+    ) {
+      errors.push(
+        `File extension '${ext}' is not allowed. Allowed extensions: ${options.allowedExtensions.join(', ')}`,
+      );
     }
 
     // Validate filename
@@ -108,21 +133,23 @@ export class InputValidator {
     }
 
     const isValid = errors.length === 0;
-    
+
     return {
       isValid,
       errors,
-      sanitizedValue: isValid ? {
-        ...file,
-        originalname: this.sanitizeFilename(file.originalname),
-        hash: this.generateFileHash(file.buffer)
-      } : undefined,
+      sanitizedValue: isValid
+        ? {
+            ...file,
+            originalname: this.sanitizeFilename(file.originalname),
+            hash: this.generateFileHash(file.buffer),
+          }
+        : undefined,
       metadata: {
         size: file.size,
         mimetype: file.mimetype,
         extension: ext,
-        originalSize: file.size
-      }
+        originalSize: file.size,
+      },
     };
   }
 
@@ -130,7 +157,7 @@ export class InputValidator {
    * Validates and sanitizes text input
    */
   static validateText(
-    text: string, 
+    text: string,
     options: {
       maxLength?: number;
       minLength?: number;
@@ -138,7 +165,7 @@ export class InputValidator {
       allowSpecialChars?: boolean;
       pattern?: RegExp;
       trim?: boolean;
-    } = {}
+    } = {},
   ): ValidationResult {
     const errors: string[] = [];
     let sanitizedText = text;
@@ -146,7 +173,7 @@ export class InputValidator {
     if (!text && text !== '') {
       return {
         isValid: false,
-        errors: ['Text is required']
+        errors: ['Text is required'],
       };
     }
 
@@ -203,8 +230,8 @@ export class InputValidator {
       sanitizedValue: sanitizedText,
       metadata: {
         originalLength: text.length,
-        sanitizedLength: sanitizedText.length
-      }
+        sanitizedLength: sanitizedText.length,
+      },
     };
   }
 
@@ -213,11 +240,11 @@ export class InputValidator {
    */
   static validateEmail(email: string): ValidationResult {
     const errors: string[] = [];
-    
+
     if (!email) {
       return {
         isValid: false,
-        errors: ['Email is required']
+        errors: ['Email is required'],
       };
     }
 
@@ -250,36 +277,44 @@ export class InputValidator {
     return {
       isValid: errors.length === 0,
       errors,
-      sanitizedValue: normalizedEmail
+      sanitizedValue: normalizedEmail,
     };
   }
 
   /**
    * Validates URL
    */
-  static validateUrl(url: string, options: { allowedProtocols?: string[] } = {}): ValidationResult {
+  static validateUrl(
+    url: string,
+    options: { allowedProtocols?: string[] } = {},
+  ): ValidationResult {
     const errors: string[] = [];
     const allowedProtocols = options.allowedProtocols || ['http:', 'https:'];
 
     if (!url) {
       return {
         isValid: false,
-        errors: ['URL is required']
+        errors: ['URL is required'],
       };
     }
 
     try {
       const parsedUrl = new URL(url);
-      
+
       if (!allowedProtocols.includes(parsedUrl.protocol)) {
-        errors.push(`Protocol '${parsedUrl.protocol}' is not allowed. Allowed protocols: ${allowedProtocols.join(', ')}`);
+        errors.push(
+          `Protocol '${parsedUrl.protocol}' is not allowed. Allowed protocols: ${allowedProtocols.join(', ')}`,
+        );
       }
 
       // Check for suspicious patterns
-      if (parsedUrl.hostname === 'localhost' || parsedUrl.hostname.startsWith('192.168.') || parsedUrl.hostname.startsWith('10.')) {
+      if (
+        parsedUrl.hostname === 'localhost' ||
+        parsedUrl.hostname.startsWith('192.168.') ||
+        parsedUrl.hostname.startsWith('10.')
+      ) {
         errors.push('Private/local URLs are not allowed');
       }
-
     } catch (_error) {
       errors.push('Invalid URL format');
     }
@@ -287,7 +322,7 @@ export class InputValidator {
     return {
       isValid: errors.length === 0,
       errors,
-      sanitizedValue: url.trim()
+      sanitizedValue: url.trim(),
     };
   }
 
@@ -295,15 +330,18 @@ export class InputValidator {
    * Validates JSON object structure
    */
   static validateJsonObject(
-    obj: unknown, 
-    schema: Record<string, { type: string; required?: boolean; maxLength?: number }>
+    obj: unknown,
+    schema: Record<
+      string,
+      { type: string; required?: boolean; maxLength?: number }
+    >,
   ): ValidationResult {
     const errors: string[] = [];
 
     if (!obj || typeof obj !== 'object') {
       return {
         isValid: false,
-        errors: ['Object is required']
+        errors: ['Object is required'],
       };
     }
 
@@ -319,18 +357,26 @@ export class InputValidator {
         const actualType = Array.isArray(value) ? 'array' : typeof value;
 
         if (actualType !== rules.type && rules.type !== 'any') {
-          errors.push(`Field '${key}' must be of type ${rules.type}, got ${actualType}`);
+          errors.push(
+            `Field '${key}' must be of type ${rules.type}, got ${actualType}`,
+          );
         }
 
-        if (rules.maxLength && typeof value === 'string' && value.length > rules.maxLength) {
-          errors.push(`Field '${key}' exceeds maximum length of ${rules.maxLength}`);
+        if (
+          rules.maxLength &&
+          typeof value === 'string' &&
+          value.length > rules.maxLength
+        ) {
+          errors.push(
+            `Field '${key}' exceeds maximum length of ${rules.maxLength}`,
+          );
         }
       }
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -363,17 +409,19 @@ export class InputValidator {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
   private static sanitizeFilename(filename: string): string {
-    return filename
-      // eslint-disable-next-line no-control-regex
-      .replace(/[<>:"/\\|?*\x00-\x1f]/g, '_')
-      .replace(/\.\./g, '.')
-      .replace(/^\.+/, '')
-      .substring(0, 255);
+    return (
+      filename
+        // eslint-disable-next-line no-control-regex
+        .replace(/[<>:"/\\|?*\x00-\x1f]/g, '_')
+        .replace(/\.\./g, '.')
+        .replace(/^\.+/, '')
+        .substring(0, 255)
+    );
   }
 
   private static scanForMaliciousContent(buffer: Buffer): ValidationResult {
@@ -395,9 +443,9 @@ export class InputValidator {
 
     // Check for executable file signatures
     const executableSignatures = [
-      [0x4D, 0x5A], // PE executable
-      [0x7F, 0x45, 0x4C, 0x46], // ELF executable
-      [0xCA, 0xFE, 0xBA, 0xBE], // Mach-O executable
+      [0x4d, 0x5a], // PE executable
+      [0x7f, 0x45, 0x4c, 0x46], // ELF executable
+      [0xca, 0xfe, 0xba, 0xbe], // Mach-O executable
     ];
 
     for (const signature of executableSignatures) {
@@ -418,7 +466,7 @@ export class InputValidator {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -447,7 +495,7 @@ export class InputValidator {
       /(--)/g,
       /(\bunion\b)/gi,
       /(\bdrop\b)/gi,
-      /(\/\*|\*\/)/g
+      /(\/\*|\*\/)/g,
     ];
 
     // Enhanced XSS patterns
@@ -458,7 +506,7 @@ export class InputValidator {
       /vbscript:/gi,
       /on\w+\s*=/gi,
       /<\s*script/gi,
-      /<\s*iframe/gi
+      /<\s*iframe/gi,
     ];
 
     const requestString = JSON.stringify(request).toLowerCase();
@@ -480,13 +528,14 @@ export class InputValidator {
     }
 
     // Check request size
-    if (requestString.length > 1024 * 1024) { // 1MB limit
+    if (requestString.length > 1024 * 1024) {
+      // 1MB limit
       errors.push('Request payload is too large');
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 }

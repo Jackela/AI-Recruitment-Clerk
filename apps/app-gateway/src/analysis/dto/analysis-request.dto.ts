@@ -7,7 +7,8 @@ import { ApiProperty } from '@nestjs/swagger';
 export class AnalysisRequestDto {
   @ApiProperty({
     description: '职位描述文本',
-    example: 'We are seeking a Senior Cloud Architect to lead the design and implementation of large-scale, highly available cloud platforms. Required Skills: AWS, Kubernetes, Docker...',
+    example:
+      'We are seeking a Senior Cloud Architect to lead the design and implementation of large-scale, highly available cloud platforms. Required Skills: AWS, Kubernetes, Docker...',
     maxLength: 10000,
   })
   @IsString()

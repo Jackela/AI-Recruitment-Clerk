@@ -125,7 +125,10 @@ export class SystemController {
       // Simple in-memory rate limiter for tests: allow first 8 requests per minute, then 429
       const bucket = Math.floor(Date.now() / 60000);
       (global as any).__STATUS_BUCKET__ ||= { bucket, count: 0 };
-      const state = (global as any).__STATUS_BUCKET__ as { bucket: number; count: number };
+      const state = (global as any).__STATUS_BUCKET__ as {
+        bucket: number;
+        count: number;
+      };
       if (state.bucket !== bucket) {
         state.bucket = bucket;
         state.count = 0;
@@ -138,7 +141,10 @@ export class SystemController {
       res.setHeader('X-RateLimit-Remaining', String(Math.max(0, remaining)));
       res.setHeader('X-RateLimit-Reset', String(reset));
       if (state.count > limit) {
-        throw new HttpException('Too Many Requests', HttpStatus.TOO_MANY_REQUESTS);
+        throw new HttpException(
+          'Too Many Requests',
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
       }
       return {
         success: true,
@@ -189,7 +195,8 @@ export class SystemController {
 
     const transformedData = { ...data };
     if (typeof transformedData.organizationId === 'string') {
-      transformedData.organizationId = transformedData.organizationId.toLowerCase();
+      transformedData.organizationId =
+        transformedData.organizationId.toLowerCase();
     }
     return {
       valid,

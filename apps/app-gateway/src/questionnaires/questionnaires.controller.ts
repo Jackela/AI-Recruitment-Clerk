@@ -10,10 +10,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 // Standardized Error Handling
-import { 
-  HandleErrors, 
-  ErrorUtils 
-} from '@ai-recruitment-clerk/shared-dtos';
+import { HandleErrors, ErrorUtils } from '@ai-recruitment-clerk/shared-dtos';
 
 type Questionnaire = {
   id: string;
@@ -78,13 +75,15 @@ export class QuestionnairesController {
     recoveryStrategies: [
       'Check the questionnaire ID and try again',
       'Verify the questionnaire exists',
-      'Create a new questionnaire if needed'
-    ]
+      'Create a new questionnaire if needed',
+    ],
   })
   publish(@Param('id') qid: string) {
     const q = questionnaires.get(qid);
     if (!q) {
-      throw ErrorUtils.createNotFoundError('Questionnaire', qid, { operation: 'publish' });
+      throw ErrorUtils.createNotFoundError('Questionnaire', qid, {
+        operation: 'publish',
+      });
     }
     q.published = true;
     questionnaires.set(qid, q);
@@ -145,15 +144,18 @@ export class QuestionnairesController {
     defaultErrorCode: 'QUESTIONNAIRE_NOT_FOUND',
     defaultSeverity: 'low',
     businessImpact: 'low',
-    userImpact: 'minimal'
+    userImpact: 'minimal',
   })
   analytics(@Param('id') qid: string) {
     const q = questionnaires.get(qid);
     if (!q) {
-      throw ErrorUtils.createNotFoundError('Questionnaire', qid, { operation: 'analytics' });
+      throw ErrorUtils.createNotFoundError('Questionnaire', qid, {
+        operation: 'analytics',
+      });
     }
     const count = q.submissions.length || 1;
-    const avg = q.submissions.reduce((s, a) => s + a.qualityScore, 0) / count || 75;
+    const avg =
+      q.submissions.reduce((s, a) => s + a.qualityScore, 0) / count || 75;
     return {
       totalSubmissions: q.submissions.length,
       averageQualityScore: Math.max(1, Math.round(avg)),
@@ -194,13 +196,15 @@ export class QuestionnairesController {
   private submitInternal(qid: string, _body: any) {
     const q = questionnaires.get(qid);
     if (!q) {
-      throw ErrorUtils.createNotFoundError('Questionnaire', qid, { operation: 'submit' });
+      throw ErrorUtils.createNotFoundError('Questionnaire', qid, {
+        operation: 'submit',
+      });
     }
     if (!q.published) {
       throw ErrorUtils.createValidationError(
         'Questionnaire is not published and cannot accept submissions',
         { questionnaireId: qid, published: q.published },
-        'published'
+        'published',
       );
     }
     const sid = id('sub');

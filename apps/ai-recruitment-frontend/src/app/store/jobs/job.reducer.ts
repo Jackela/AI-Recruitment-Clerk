@@ -76,4 +76,73 @@ export const jobReducer = createReducer(
     ...state,
     error: null,
   })),
+
+  // WebSocket Job Updates
+  on(
+    JobActions.jobUpdatedViaWebSocket,
+    (state, { jobId, title, status, timestamp, organizationId, metadata }) => {
+      // Update the job in the jobs array
+      const updatedJobs = state.jobs.map((job) => {
+        if (job.id === jobId) {
+          return {
+            ...job,
+            title,
+            status,
+            // Add any additional fields that might be updated
+          };
+        }
+        return job;
+      });
+
+      // Update selected job if it matches
+      const updatedSelectedJob =
+        state.selectedJob?.id === jobId
+          ? {
+              ...state.selectedJob,
+              title,
+              status,
+            }
+          : state.selectedJob;
+
+      return {
+        ...state,
+        jobs: updatedJobs,
+        selectedJob: updatedSelectedJob,
+        // Clear any previous errors when receiving updates
+        error: null,
+      };
+    },
+  ),
+
+  on(
+    JobActions.jobProgressViaWebSocket,
+    (
+      state,
+      { jobId, step, progress, message, estimatedTimeRemaining, timestamp },
+    ) => ({
+      ...state,
+      jobProgress: {
+        ...state.jobProgress,
+        [jobId]: {
+          step,
+          progress,
+          message,
+          estimatedTimeRemaining,
+          timestamp,
+        },
+      },
+    }),
+  ),
+
+  // WebSocket Connection Management
+  on(JobActions.webSocketConnectionStatusChanged, (state, { status }) => ({
+    ...state,
+    webSocketStatus: status,
+    webSocketConnected: status === 'connected',
+  })),
+
+  on(JobActions.initializeWebSocketConnection, (state) => ({
+    ...state,
+    webSocketStatus: 'connecting' as const,
+  })),
 );

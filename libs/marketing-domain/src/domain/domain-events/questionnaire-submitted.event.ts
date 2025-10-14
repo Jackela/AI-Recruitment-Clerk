@@ -20,6 +20,6 @@ export class QuestionnaireSubmittedEvent implements DomainEvent {
     public readonly qualityScore: number,
     public readonly bonusEligible: boolean,
     public readonly submissionData: SubmissionSummary,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }

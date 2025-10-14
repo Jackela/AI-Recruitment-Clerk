@@ -2,11 +2,13 @@ import { Injectable } from '@nestjs/common';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 import { ScoringEngineNatsService } from './services/scoring-engine-nats.service';
 import { Inject } from '@nestjs/common';
-import { SecureConfigValidator, ScoringEngineException, ScoringEngineErrorCode, ErrorCorrelationManager } from '@app/shared-dtos';
 import {
-  GeminiClient,
-  GeminiConfig,
-} from '@ai-recruitment-clerk/shared-dtos';
+  SecureConfigValidator,
+  ScoringEngineException,
+  ScoringEngineErrorCode,
+  ErrorCorrelationManager,
+} from '@app/shared-dtos';
+import { GeminiClient, GeminiConfig } from '@ai-recruitment-clerk/shared-dtos';
 import {
   EnhancedSkillMatcherService,
   JobSkillRequirement,
@@ -251,7 +253,11 @@ export class ScoringEngineService {
     resumeDto: ResumeDTO,
   ): Promise<ScoreDTO> {
     const startTime = Date.now();
-    const processingMetrics: { aiResponseTimes: number[]; fallbackUsed: boolean[]; errorRates: number[] } = {
+    const processingMetrics: {
+      aiResponseTimes: number[];
+      fallbackUsed: boolean[];
+      errorRates: number[];
+    } = {
       aiResponseTimes: [],
       fallbackUsed: [],
       errorRates: [],
@@ -379,7 +385,12 @@ export class ScoringEngineService {
               details: `Cultural alignment: ${Object.values(culturalFitAnalysis.alignmentScores).reduce((a, b) => a + b, 0) / Object.keys(culturalFitAnalysis.alignmentScores).length}% avg alignment`,
               confidence: culturalFitAnalysis.confidence,
               evidenceStrength: componentScores.culturalFit.evidenceStrength,
-              breakdown: { ...(culturalFitAnalysis.alignmentScores as unknown as Record<string, unknown>) },
+              breakdown: {
+                ...(culturalFitAnalysis.alignmentScores as unknown as Record<
+                  string,
+                  unknown
+                >),
+              },
             }
           : undefined,
         enhancedSkillAnalysis,

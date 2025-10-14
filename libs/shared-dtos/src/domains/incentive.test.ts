@@ -13,7 +13,7 @@ import {
   PaymentMethod,
   ContactInfo,
   PaymentResult,
-  IncentiveValidationResult
+  IncentiveValidationResult,
 } from './incentive.dto';
 
 import {
@@ -23,10 +23,13 @@ import {
   PaymentMethodValidationResult,
   IncentivePriority,
   IncentiveRiskAssessment,
-  BatchPaymentValidationResult
+  BatchPaymentValidationResult,
 } from './incentive.rules';
 
-import { IncentiveContracts, IncentiveContractViolation } from '../contracts/incentive.contracts';
+import {
+  IncentiveContracts,
+  IncentiveContractViolation,
+} from '../contracts/incentive.contracts';
 
 import {
   IncentiveDomainService,
@@ -35,21 +38,20 @@ import {
   IncentiveApprovalResult,
   PaymentProcessingResult,
   BatchPaymentResult,
-  IncentiveStatsResult
+  IncentiveStatsResult,
 } from './incentive.service';
 
 describe('Agent-4: Incentive Domain Service Tests', () => {
-
   // 测试数据
   const validIP = '192.168.1.100';
   const invalidIP = 'not-an-ip';
   const questionnaireId = 'quest_12345';
   const referredIP = '192.168.1.101';
-  
+
   const validContactInfo = new ContactInfo({
     email: 'test@example.com',
     wechat: 'test_wechat',
-    alipay: 'test_alipay'
+    alipay: 'test_alipay',
   });
 
   const invalidContactInfo = new ContactInfo({});
@@ -64,28 +66,28 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
     findPendingIncentives: jest.fn(),
     findReferralIncentive: jest.fn(),
     countTodayIncentives: jest.fn().mockResolvedValue(0),
-    deleteExpired: jest.fn()
+    deleteExpired: jest.fn(),
   };
 
   const mockEventBus = {
-    publish: jest.fn()
+    publish: jest.fn(),
   };
 
   const mockAuditLogger = {
     logBusinessEvent: jest.fn(),
     logSecurityEvent: jest.fn(),
-    logError: jest.fn()
+    logError: jest.fn(),
   };
 
   const mockPaymentGateway = {
-    processPayment: jest.fn()
+    processPayment: jest.fn(),
   };
 
   const domainService = new IncentiveDomainService(
     mockRepository,
     mockEventBus,
     mockAuditLogger,
-    mockPaymentGateway
+    mockPaymentGateway,
   );
 
   beforeEach(() => {
@@ -98,7 +100,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         95,
-        validContactInfo
+        validContactInfo,
       );
 
       expect(incentive).toBeDefined();
@@ -113,7 +115,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         75,
-        validContactInfo
+        validContactInfo,
       );
 
       expect(incentive.getRewardAmount()).toBe(5); // Standard reward
@@ -125,7 +127,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         95, // Above 90 threshold
-        validContactInfo
+        validContactInfo,
       );
 
       expect(incentive.getRewardAmount()).toBe(8); // High quality bonus
@@ -137,7 +139,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         55,
-        validContactInfo
+        validContactInfo,
       );
 
       expect(incentive.getRewardAmount()).toBe(3); // Basic reward
@@ -148,7 +150,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
       const incentive = Incentive.createReferralIncentive(
         validIP,
         referredIP,
-        validContactInfo
+        validContactInfo,
       );
 
       expect(incentive).toBeDefined();
@@ -162,15 +164,17 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         80,
-        validContactInfo
+        validContactInfo,
       );
       const incentive2 = Incentive.createReferralIncentive(
         validIP,
         referredIP,
-        validContactInfo
+        validContactInfo,
       );
 
-      expect(incentive1.getId().getValue()).not.toBe(incentive2.getId().getValue());
+      expect(incentive1.getId().getValue()).not.toBe(
+        incentive2.getId().getValue(),
+      );
     });
 
     it('should publish domain events on creation', () => {
@@ -178,13 +182,15 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85,
-        validContactInfo
+        validContactInfo,
       );
-      
+
       const events = incentive.getUncommittedEvents();
       expect(events.length).toBeGreaterThan(0);
-      
-      const createdEvent = events.find(e => e.constructor.name === 'IncentiveCreatedEvent');
+
+      const createdEvent = events.find(
+        (e) => e.constructor.name === 'IncentiveCreatedEvent',
+      );
       expect(createdEvent).toBeDefined();
     });
   });
@@ -195,7 +201,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85,
-        validContactInfo
+        validContactInfo,
       );
 
       const result = incentive.validateEligibility();
@@ -209,14 +215,16 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85,
-        invalidContactInfo
+        invalidContactInfo,
       );
 
       const result = incentive.validateEligibility();
 
       expect(result.isValid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors).toContain('At least one contact method is required');
+      expect(result.errors).toContain(
+        'At least one contact method is required',
+      );
     });
 
     it('should publish validation events', () => {
@@ -224,14 +232,16 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85,
-        validContactInfo
+        validContactInfo,
       );
-      
+
       incentive.markEventsAsCommitted(); // Clear creation events
       incentive.validateEligibility();
 
       const events = incentive.getUncommittedEvents();
-      const validationEvent = events.find(e => e.constructor.name === 'IncentiveValidatedEvent');
+      const validationEvent = events.find(
+        (e) => e.constructor.name === 'IncentiveValidatedEvent',
+      );
       expect(validationEvent).toBeDefined();
     });
   });
@@ -242,13 +252,13 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         60, // Basic quality - starts as pending
-        validContactInfo
+        validContactInfo,
       );
 
       expect(incentive.getStatus()).toBe(IncentiveStatus.PENDING_VALIDATION);
 
       incentive.approveForProcessing('Quality check passed');
-      
+
       expect(incentive.getStatus()).toBe(IncentiveStatus.APPROVED);
     });
 
@@ -257,7 +267,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         60,
-        validContactInfo
+        validContactInfo,
       );
 
       incentive.reject('Insufficient quality score');
@@ -270,7 +280,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85, // Auto-approved
-        validContactInfo
+        validContactInfo,
       );
 
       expect(() => {
@@ -283,7 +293,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85,
-        validContactInfo
+        validContactInfo,
       );
 
       // Simulate payment
@@ -301,10 +311,13 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85, // Auto-approved
-        validContactInfo
+        validContactInfo,
       );
 
-      const result = incentive.executePayment(PaymentMethod.WECHAT_PAY, 'txn_12345');
+      const result = incentive.executePayment(
+        PaymentMethod.WECHAT_PAY,
+        'txn_12345',
+      );
 
       expect(result.success).toBe(true);
       expect(result.transactionId).toBe('txn_12345');
@@ -318,13 +331,18 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         60, // Pending validation
-        validContactInfo
+        validContactInfo,
       );
 
-      const result = incentive.executePayment(PaymentMethod.WECHAT_PAY, 'txn_12345');
+      const result = incentive.executePayment(
+        PaymentMethod.WECHAT_PAY,
+        'txn_12345',
+      );
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain('Cannot pay incentive in pending_validation status');
+      expect(result.error).toContain(
+        'Cannot pay incentive in pending_validation status',
+      );
     });
 
     it('should validate payment conditions', () => {
@@ -332,13 +350,18 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85,
-        invalidContactInfo // Invalid contact info
+        invalidContactInfo, // Invalid contact info
       );
 
-      const result = incentive.executePayment(PaymentMethod.WECHAT_PAY, 'txn_12345');
+      const result = incentive.executePayment(
+        PaymentMethod.WECHAT_PAY,
+        'txn_12345',
+      );
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain('Valid contact information required for payment');
+      expect(result.error).toContain(
+        'Valid contact information required for payment',
+      );
     });
 
     it('should check incentive expiry', () => {
@@ -346,7 +369,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85,
-        validContactInfo
+        validContactInfo,
       );
 
       // Mock old creation date
@@ -354,7 +377,10 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
       oldDate.setDate(oldDate.getDate() - 35); // 35 days ago
       Object.defineProperty(incentive, 'createdAt', { value: oldDate });
 
-      const result = incentive.executePayment(PaymentMethod.WECHAT_PAY, 'txn_12345');
+      const result = incentive.executePayment(
+        PaymentMethod.WECHAT_PAY,
+        'txn_12345',
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('Incentive has expired');
@@ -367,7 +393,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         TriggerType.QUESTIONNAIRE_COMPLETION,
         { questionnaireId, qualityScore: 85 },
-        2 // Existing incentives today
+        2, // Existing incentives today
       );
 
       expect(result.isEligible).toBe(true);
@@ -380,11 +406,13 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         TriggerType.QUESTIONNAIRE_COMPLETION,
         { questionnaireId, qualityScore: 85 },
-        3 // At daily limit
+        3, // At daily limit
       );
 
       expect(result.isEligible).toBe(false);
-      expect(result.errors).toContain('Daily incentive limit reached (3 per IP)');
+      expect(result.errors).toContain(
+        'Daily incentive limit reached (3 per IP)',
+      );
     });
 
     it('should reject low quality scores', () => {
@@ -392,11 +420,13 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         TriggerType.QUESTIONNAIRE_COMPLETION,
         { questionnaireId, qualityScore: 45 }, // Below minimum
-        1
+        1,
       );
 
       expect(result.isEligible).toBe(false);
-      expect(result.errors).toContain('Quality score must be at least 50 to qualify for reward');
+      expect(result.errors).toContain(
+        'Quality score must be at least 50 to qualify for reward',
+      );
     });
 
     it('should calculate correct questionnaire rewards', () => {
@@ -421,7 +451,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85, // Auto-approved
-        validContactInfo
+        validContactInfo,
       );
 
       const result = IncentiveRules.canPayIncentive(incentive);
@@ -434,7 +464,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
     it('should validate payment method compatibility', () => {
       const result = IncentiveRules.validatePaymentMethodCompatibility(
         PaymentMethod.WECHAT_PAY,
-        validContactInfo
+        validContactInfo,
       );
 
       expect(result.isValid).toBe(true);
@@ -444,12 +474,12 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
 
     it('should detect payment method incompatibility', () => {
       const contactWithoutWechat = new ContactInfo({
-        email: 'test@example.com'
+        email: 'test@example.com',
       });
 
       const result = IncentiveRules.validatePaymentMethodCompatibility(
         PaymentMethod.WECHAT_PAY,
-        contactWithoutWechat
+        contactWithoutWechat,
       );
 
       expect(result.isValid).toBe(false);
@@ -463,10 +493,11 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         95, // High value reward (8 CNY)
-        validContactInfo
+        validContactInfo,
       );
 
-      const priority = IncentiveRules.calculateProcessingPriority(highValueIncentive);
+      const priority =
+        IncentiveRules.calculateProcessingPriority(highValueIncentive);
 
       expect(priority.score).toBeGreaterThan(40); // Lowered threshold for realistic scoring
       expect(priority.level).toBe('MEDIUM'); // Updated expectation based on actual scoring
@@ -478,7 +509,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         95,
-        validContactInfo
+        validContactInfo,
       );
 
       const usageHistory = {
@@ -486,10 +517,13 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         totalIncentivesToday: 2,
         totalIncentivesThisWeek: 8,
         totalIncentivesThisMonth: 15,
-        consecutiveDaysActive: 3
+        consecutiveDaysActive: 3,
       };
 
-      const assessment = IncentiveRules.generateRiskAssessment(incentive, usageHistory);
+      const assessment = IncentiveRules.generateRiskAssessment(
+        incentive,
+        usageHistory,
+      );
 
       expect(assessment.incentiveId).toBe(incentive.getId().getValue());
       expect(assessment.recipientIP).toBe(validIP);
@@ -500,12 +534,21 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
     });
 
     it('should validate batch payment operations', () => {
-      const questionnaire = Incentive.createQuestionnaireIncentive(validIP, questionnaireId, 85, validContactInfo); // Auto-approved (≥70), 5元
-      const referral = Incentive.createReferralIncentive(validIP, referredIP, validContactInfo); // Needs manual approval, 3元
-      
+      const questionnaire = Incentive.createQuestionnaireIncentive(
+        validIP,
+        questionnaireId,
+        85,
+        validContactInfo,
+      ); // Auto-approved (≥70), 5元
+      const referral = Incentive.createReferralIncentive(
+        validIP,
+        referredIP,
+        validContactInfo,
+      ); // Needs manual approval, 3元
+
       // Ensure referral is approved (questionnaire is auto-approved)
       referral.approveForProcessing('Test approval');
-      
+
       const incentives = [questionnaire, referral];
 
       const result = IncentiveRules.validateBatchPayment(incentives);
@@ -525,7 +568,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
           invalidIP,
           questionnaireId,
           85,
-          validContactInfo
+          validContactInfo,
         );
       }).toThrow(IncentiveContractViolation);
     });
@@ -535,7 +578,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         IncentiveContracts.createReferralIncentive(
           validIP,
           validIP, // Same IP for referrer and referred
-          validContactInfo
+          validContactInfo,
         );
       }).toThrow(IncentiveContractViolation);
     });
@@ -545,7 +588,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85,
-        validContactInfo
+        validContactInfo,
       );
 
       expect(() => {
@@ -558,7 +601,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85,
-        validContactInfo
+        validContactInfo,
       );
 
       const result = IncentiveContracts.validateIncentive(incentive);
@@ -573,14 +616,14 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         60, // Pending validation
-        validContactInfo
+        validContactInfo,
       );
 
       expect(() => {
         IncentiveContracts.executePayment(
           pendingIncentive,
           PaymentMethod.WECHAT_PAY,
-          'txn_123'
+          'txn_123',
         );
       }).toThrow(IncentiveContractViolation);
     });
@@ -590,14 +633,14 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85,
-        validContactInfo
+        validContactInfo,
       );
 
       expect(() => {
         IncentiveContracts.performanceContract(
           () => incentive.getIncentiveSummary(),
           100, // 100ms limit
-          'getIncentiveSummary'
+          'getIncentiveSummary',
         );
       }).not.toThrow();
     });
@@ -615,7 +658,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85,
-        validContactInfo
+        validContactInfo,
       );
 
       expect(result.success).toBe(true);
@@ -628,8 +671,8 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
           ip: validIP,
           questionnaireId,
           qualityScore: 85,
-          rewardAmount: 5 // Quality score 85 = Standard reward
-        })
+          rewardAmount: 5, // Quality score 85 = Standard reward
+        }),
       );
     });
 
@@ -638,7 +681,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         invalidIP,
         questionnaireId,
         85,
-        validContactInfo
+        validContactInfo,
       );
 
       expect(result.success).toBe(false);
@@ -650,13 +693,15 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85,
-        validContactInfo
+        validContactInfo,
       );
-      
+
       mockRepository.findById.mockResolvedValue(incentive);
       mockRepository.save.mockResolvedValue(undefined);
 
-      const result = await domainService.validateIncentive(incentive.getId().getValue());
+      const result = await domainService.validateIncentive(
+        incentive.getId().getValue(),
+      );
 
       expect(result.success).toBe(true);
       expect(result.data?.isValid).toBe(true);
@@ -667,15 +712,15 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         60, // Pending validation
-        validContactInfo
+        validContactInfo,
       );
-      
+
       mockRepository.findById.mockResolvedValue(incentive);
       mockRepository.save.mockResolvedValue(undefined);
 
       const result = await domainService.approveIncentive(
         incentive.getId().getValue(),
-        'Quality check passed'
+        'Quality check passed',
       );
 
       expect(result.success).toBe(true);
@@ -687,19 +732,19 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85, // Auto-approved
-        validContactInfo
+        validContactInfo,
       );
-      
+
       mockRepository.findById.mockResolvedValue(incentive);
       mockRepository.save.mockResolvedValue(undefined);
       mockPaymentGateway.processPayment.mockResolvedValue({
         success: true,
-        transactionId: 'txn_12345'
+        transactionId: 'txn_12345',
       });
 
       const result = await domainService.processPayment(
         incentive.getId().getValue(),
-        PaymentMethod.WECHAT_PAY
+        PaymentMethod.WECHAT_PAY,
       );
 
       expect(result.success).toBe(true);
@@ -713,7 +758,9 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
       const result = await domainService.validateIncentive('test_id');
 
       expect(result.success).toBe(false);
-      expect(result.errors).toContain('Internal error occurred while validating incentive');
+      expect(result.errors).toContain(
+        'Internal error occurred while validating incentive',
+      );
       expect(mockAuditLogger.logError).toHaveBeenCalled();
     });
   });
@@ -732,9 +779,12 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
     });
 
     it('should detect invalid recipient', () => {
-      const recipient = IncentiveRecipient.create(invalidIP, invalidContactInfo);
+      const recipient = IncentiveRecipient.create(
+        invalidIP,
+        invalidContactInfo,
+      );
       expect(recipient.isValid()).toBe(false);
-      
+
       const errors = recipient.getValidationErrors();
       expect(errors).toContain('Valid IP address is required');
       expect(errors).toContain('At least one contact method is required');
@@ -776,8 +826,13 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
     });
 
     it('should create and validate triggers', () => {
-      const questionnaireTrigger = IncentiveTrigger.fromQuestionnaire(questionnaireId, 85);
-      expect(questionnaireTrigger.getTriggerType()).toBe(TriggerType.QUESTIONNAIRE_COMPLETION);
+      const questionnaireTrigger = IncentiveTrigger.fromQuestionnaire(
+        questionnaireId,
+        85,
+      );
+      expect(questionnaireTrigger.getTriggerType()).toBe(
+        TriggerType.QUESTIONNAIRE_COMPLETION,
+      );
       expect(questionnaireTrigger.isValid()).toBe(true);
 
       const referralTrigger = IncentiveTrigger.fromReferral(referredIP);
@@ -792,7 +847,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85,
-        validContactInfo
+        validContactInfo,
       );
 
       const summary = incentive.getIncentiveSummary();
@@ -809,7 +864,7 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85,
-        validContactInfo
+        validContactInfo,
       );
 
       const summary = incentive.getIncentiveSummary();
@@ -821,14 +876,14 @@ describe('Agent-4: Incentive Domain Service Tests', () => {
         validIP,
         questionnaireId,
         85, // Auto-approved
-        validContactInfo
+        validContactInfo,
       );
 
       const pendingIncentive = Incentive.createQuestionnaireIncentive(
         validIP,
         questionnaireId,
         60, // Pending validation
-        validContactInfo
+        validContactInfo,
       );
 
       expect(approvedIncentive.getIncentiveSummary().canBePaid).toBe(true);

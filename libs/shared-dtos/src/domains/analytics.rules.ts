@@ -1,11 +1,11 @@
-import { 
-  AnalyticsEvent, 
-  EventType, 
+import {
+  AnalyticsEvent,
+  EventType,
   EventCategory,
-  EventStatus, 
+  EventStatus,
   ConsentStatus,
   MetricUnit,
-  UserSession
+  UserSession,
 } from './analytics.dto';
 
 /**
@@ -13,24 +13,24 @@ import {
  */
 export class AnalyticsRules {
   // 核心业务规则常量 - 数据分析系统
-  static readonly MAX_EVENTS_PER_SESSION = 1000;        // 单会话最大事件数
-  static readonly MAX_SESSION_DURATION_HOURS = 24;      // 最大会话时长（小时）
-  static readonly EVENT_PROCESSING_BATCH_SIZE = 100;    // 事件处理批次大小
-  static readonly MIN_EVENT_INTERVAL_MS = 100;          // 最小事件间隔（毫秒）
-  
+  static readonly MAX_EVENTS_PER_SESSION = 1000; // 单会话最大事件数
+  static readonly MAX_SESSION_DURATION_HOURS = 24; // 最大会话时长（小时）
+  static readonly EVENT_PROCESSING_BATCH_SIZE = 100; // 事件处理批次大小
+  static readonly MIN_EVENT_INTERVAL_MS = 100; // 最小事件间隔（毫秒）
+
   // 数据保留期限常量
-  static readonly USER_DATA_RETENTION_DAYS = 730;       // 用户数据保留期（2年）
-  static readonly SYSTEM_DATA_RETENTION_DAYS = 90;      // 系统数据保留期（3个月）
-  static readonly BUSINESS_DATA_RETENTION_DAYS = 1095;  // 业务数据保留期（3年）
-  static readonly ERROR_DATA_RETENTION_DAYS = 365;      // 错误数据保留期（1年）
-  
+  static readonly USER_DATA_RETENTION_DAYS = 730; // 用户数据保留期（2年）
+  static readonly SYSTEM_DATA_RETENTION_DAYS = 90; // 系统数据保留期（3个月）
+  static readonly BUSINESS_DATA_RETENTION_DAYS = 1095; // 业务数据保留期（3年）
+  static readonly ERROR_DATA_RETENTION_DAYS = 365; // 错误数据保留期（1年）
+
   // 隐私合规常量
-  static readonly ANONYMIZATION_THRESHOLD_DAYS = 365;   // 自动匿名化阈值（1年）
-  static readonly CONSENT_EXPIRY_DAYS = 730;            // 用户同意过期时间（2年）
+  static readonly ANONYMIZATION_THRESHOLD_DAYS = 365; // 自动匿名化阈值（1年）
+  static readonly CONSENT_EXPIRY_DAYS = 730; // 用户同意过期时间（2年）
   static readonly MAX_PERSONAL_DATA_STORAGE_DAYS = 1095; // 个人数据最大存储时间（3年）
 
-  // 性能监控常量  
-  static readonly MAX_EVENT_SIZE_BYTES = 50 * 1024;     // 最大事件大小（50KB）
+  // 性能监控常量
+  static readonly MAX_EVENT_SIZE_BYTES = 50 * 1024; // 最大事件大小（50KB）
   static readonly CRITICAL_PERFORMANCE_THRESHOLD_MS = 5000; // 关键性能阈值（5秒）
   static readonly HIGH_VOLUME_THRESHOLD_EVENTS_PER_MINUTE = 600; // 高流量阈值（每分钟600事件）
 
@@ -42,7 +42,7 @@ export class AnalyticsRules {
     eventType: EventType,
     eventData: any,
     consentStatus: ConsentStatus,
-    existingEventsInSession?: number
+    existingEventsInSession?: number,
   ): EventCreationEligibilityResult {
     const errors: string[] = [];
 
@@ -64,17 +64,24 @@ export class AnalyticsRules {
     // 验证会话事件数量限制
     const sessionEvents = existingEventsInSession || 0;
     if (sessionEvents >= this.MAX_EVENTS_PER_SESSION) {
-      errors.push(`Session event limit exceeded (${this.MAX_EVENTS_PER_SESSION} events max)`);
+      errors.push(
+        `Session event limit exceeded (${this.MAX_EVENTS_PER_SESSION} events max)`,
+      );
     }
 
     // 验证事件数据大小
     const eventSizeBytes = JSON.stringify(eventData).length;
     if (eventSizeBytes > this.MAX_EVENT_SIZE_BYTES) {
-      errors.push(`Event size exceeds limit (${eventSizeBytes} > ${this.MAX_EVENT_SIZE_BYTES} bytes)`);
+      errors.push(
+        `Event size exceeds limit (${eventSizeBytes} > ${this.MAX_EVENT_SIZE_BYTES} bytes)`,
+      );
     }
 
     // 验证事件数据完整性
-    const dataValidation = this.validateEventDataStructure(eventType, eventData);
+    const dataValidation = this.validateEventDataStructure(
+      eventType,
+      eventData,
+    );
     if (!dataValidation.isValid) {
       errors.push(...dataValidation.errors);
     }
@@ -82,14 +89,17 @@ export class AnalyticsRules {
     return new EventCreationEligibilityResult(
       errors.length === 0,
       errors,
-      this.calculateEventPriority(eventType)
+      this.calculateEventPriority(eventType),
     );
   }
 
   /**
    * 验证用户同意状态是否有效
    */
-  static isConsentValid(consentStatus: ConsentStatus, eventType: EventType): boolean {
+  static isConsentValid(
+    consentStatus: ConsentStatus,
+    eventType: EventType,
+  ): boolean {
     // 系统事件不需要用户同意
     if (this.isSystemEventType(eventType)) {
       return consentStatus === ConsentStatus.NOT_APPLICABLE;
@@ -106,7 +116,7 @@ export class AnalyticsRules {
     const systemEventTypes = [
       EventType.SYSTEM_PERFORMANCE,
       EventType.ERROR_EVENT,
-      EventType.API_CALL
+      EventType.API_CALL,
     ];
     return systemEventTypes.includes(eventType);
   }
@@ -114,7 +124,10 @@ export class AnalyticsRules {
   /**
    * 验证事件数据结构
    */
-  static validateEventDataStructure(eventType: EventType, eventData: any): EventDataValidationResult {
+  static validateEventDataStructure(
+    eventType: EventType,
+    eventData: any,
+  ): EventDataValidationResult {
     const errors: string[] = [];
 
     if (!eventData) {
@@ -176,7 +189,9 @@ export class AnalyticsRules {
           errors.push('Business metric event requires metricName field');
         }
         if (typeof eventData.metricValue !== 'number') {
-          errors.push('Business metric event requires numeric metricValue field');
+          errors.push(
+            'Business metric event requires numeric metricValue field',
+          );
         }
         if (!Object.values(MetricUnit).includes(eventData.metricUnit)) {
           errors.push('Business metric event requires valid metricUnit');
@@ -245,14 +260,16 @@ export class AnalyticsRules {
     return new EventPriority(
       Math.min(100, priority),
       this.getPriorityLevel(priority),
-      factors
+      factors,
     );
   }
 
   /**
    * 验证事件是否可以进行批量处理
    */
-  static canBatchProcessEvents(events: AnalyticsEvent[]): BatchProcessingEligibilityResult {
+  static canBatchProcessEvents(
+    events: AnalyticsEvent[],
+  ): BatchProcessingEligibilityResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
@@ -262,58 +279,68 @@ export class AnalyticsRules {
     }
 
     if (events.length > this.EVENT_PROCESSING_BATCH_SIZE) {
-      errors.push(`Batch size exceeds limit (${events.length} > ${this.EVENT_PROCESSING_BATCH_SIZE})`);
+      errors.push(
+        `Batch size exceeds limit (${events.length} > ${this.EVENT_PROCESSING_BATCH_SIZE})`,
+      );
     }
 
     // 验证事件状态
-    const invalidStatusEvents = events.filter(event => 
-      event.getStatus() !== EventStatus.PENDING_PROCESSING
+    const invalidStatusEvents = events.filter(
+      (event) => event.getStatus() !== EventStatus.PENDING_PROCESSING,
     );
     if (invalidStatusEvents.length > 0) {
-      warnings.push(`${invalidStatusEvents.length} events are not in pending status`);
+      warnings.push(
+        `${invalidStatusEvents.length} events are not in pending status`,
+      );
     }
 
     // 检查事件时间分布
-    const eventTimes = events.map(event => new Date(event.getTimestamp()).getTime());
+    const eventTimes = events.map((event) =>
+      new Date(event.getTimestamp()).getTime(),
+    );
     const timeSpan = Math.max(...eventTimes) - Math.min(...eventTimes);
     const maxTimeSpanMs = 60 * 60 * 1000; // 1小时
-    
+
     if (timeSpan > maxTimeSpanMs) {
       warnings.push('Events span more than 1 hour, consider splitting batch');
     }
 
-    const eligibleCount = events.filter(event => 
-      event.getStatus() === EventStatus.PENDING_PROCESSING
+    const eligibleCount = events.filter(
+      (event) => event.getStatus() === EventStatus.PENDING_PROCESSING,
     ).length;
 
     return new BatchProcessingEligibilityResult(
       errors.length === 0,
       errors,
       warnings,
-      eligibleCount
+      eligibleCount,
     );
   }
 
   /**
    * 生成数据保留策略建议
    */
-  static generateRetentionPolicy(event: AnalyticsEvent): AnalyticsDataRetentionPolicy {
+  static generateRetentionPolicy(
+    event: AnalyticsEvent,
+  ): AnalyticsDataRetentionPolicy {
     const eventType = event.getEventType();
     const createdAt = event.getCreatedAt();
     const retentionDays = this.getRetentionPeriodDays(eventType);
-    
+
     const retentionExpiry = new Date(createdAt);
     retentionExpiry.setDate(retentionExpiry.getDate() + retentionDays);
-    
+
     const anonymizationThreshold = new Date(createdAt);
-    anonymizationThreshold.setDate(anonymizationThreshold.getDate() + this.ANONYMIZATION_THRESHOLD_DAYS);
-    
-    const daysUntilExpiry = Math.ceil(
-      (retentionExpiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+    anonymizationThreshold.setDate(
+      anonymizationThreshold.getDate() + this.ANONYMIZATION_THRESHOLD_DAYS,
     );
-    
+
+    const daysUntilExpiry = Math.ceil(
+      (retentionExpiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+    );
+
     const daysUntilAnonymization = Math.ceil(
-      (anonymizationThreshold.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+      (anonymizationThreshold.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
     );
 
     return new AnalyticsDataRetentionPolicy(
@@ -322,7 +349,7 @@ export class AnalyticsRules {
       anonymizationThreshold,
       daysUntilExpiry,
       daysUntilAnonymization,
-      this.getRetentionActions(daysUntilExpiry, daysUntilAnonymization)
+      this.getRetentionActions(daysUntilExpiry, daysUntilAnonymization),
     );
   }
 
@@ -331,7 +358,7 @@ export class AnalyticsRules {
    */
   static assessPrivacyComplianceRisk(
     event: AnalyticsEvent,
-    userSession: UserSession
+    userSession: UserSession,
   ): PrivacyComplianceRiskAssessment {
     let riskScore = 0;
     const riskFactors: string[] = [];
@@ -351,10 +378,12 @@ export class AnalyticsRules {
 
     // 检查是否包含敏感数据
     const daysSinceCreation = Math.floor(
-      (Date.now() - event.getCreatedAt().getTime()) / (1000 * 60 * 60 * 24)
+      (Date.now() - event.getCreatedAt().getTime()) / (1000 * 60 * 60 * 24),
     );
-    if (daysSinceCreation > this.ANONYMIZATION_THRESHOLD_DAYS && 
-        event.getStatus() !== EventStatus.ANONYMIZED) {
+    if (
+      daysSinceCreation > this.ANONYMIZATION_THRESHOLD_DAYS &&
+      event.getStatus() !== EventStatus.ANONYMIZED
+    ) {
       riskScore += 30;
       riskFactors.push('Data should be anonymized based on age');
     }
@@ -371,20 +400,23 @@ export class AnalyticsRules {
       Math.min(100, riskScore),
       this.getRiskLevel(riskScore),
       riskFactors,
-      this.getPrivacyComplianceActions(riskScore)
+      this.getPrivacyComplianceActions(riskScore),
     );
   }
 
   /**
    * 验证数据匿名化要求
    */
-  static validateAnonymizationRequirement(event: AnalyticsEvent): AnonymizationRequirementResult {
+  static validateAnonymizationRequirement(
+    event: AnalyticsEvent,
+  ): AnonymizationRequirementResult {
     const daysSinceCreation = Math.floor(
-      (Date.now() - event.getCreatedAt().getTime()) / (1000 * 60 * 60 * 24)
+      (Date.now() - event.getCreatedAt().getTime()) / (1000 * 60 * 60 * 24),
     );
 
     const isRequired = daysSinceCreation >= this.ANONYMIZATION_THRESHOLD_DAYS;
-    const isOverdue = daysSinceCreation > this.ANONYMIZATION_THRESHOLD_DAYS + 30; // 30天宽限期
+    const isOverdue =
+      daysSinceCreation > this.ANONYMIZATION_THRESHOLD_DAYS + 30; // 30天宽限期
 
     let urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
     if (isOverdue) {
@@ -402,7 +434,7 @@ export class AnalyticsRules {
       isOverdue,
       urgency,
       daysSinceCreation,
-      this.ANONYMIZATION_THRESHOLD_DAYS
+      this.ANONYMIZATION_THRESHOLD_DAYS,
     );
   }
 
@@ -412,7 +444,7 @@ export class AnalyticsRules {
   static calculateReportingPermissions(
     userRole: string,
     reportType: ReportType,
-    dataScope: DataScope
+    dataScope: DataScope,
   ): ReportingPermissionsResult {
     const permissions: string[] = [];
     const restrictions: string[] = [];
@@ -423,7 +455,7 @@ export class AnalyticsRules {
       case 'administrator':
         permissions.push('full_access', 'export_data', 'view_personal_data');
         break;
-      
+
       case 'analyst':
       case 'data_analyst':
         permissions.push('view_aggregated_data', 'create_reports');
@@ -432,26 +464,29 @@ export class AnalyticsRules {
         }
         restrictions.push('cannot_view_raw_personal_data');
         break;
-      
+
       case 'viewer':
       case 'readonly':
         permissions.push('view_reports');
         restrictions.push('cannot_export_data', 'cannot_view_personal_data');
         break;
-      
+
       default:
         restrictions.push('no_access_permissions');
     }
 
     // 基于报告类型的权限
-    if (reportType === ReportType.USER_BEHAVIOR && !permissions.includes('view_personal_data')) {
+    if (
+      reportType === ReportType.USER_BEHAVIOR &&
+      !permissions.includes('view_personal_data')
+    ) {
       restrictions.push('user_behavior_requires_elevated_permissions');
     }
 
     return new ReportingPermissionsResult(
       permissions.length > 0 && !permissions.includes('no_access_permissions'),
       permissions,
-      restrictions
+      restrictions,
     );
   }
 
@@ -462,38 +497,45 @@ export class AnalyticsRules {
       case EventType.PAGE_VIEW:
       case EventType.FORM_SUBMISSION:
         return this.USER_DATA_RETENTION_DAYS;
-      
+
       case EventType.SYSTEM_PERFORMANCE:
       case EventType.API_CALL:
         return this.SYSTEM_DATA_RETENTION_DAYS;
-      
+
       case EventType.BUSINESS_METRIC:
       case EventType.CONVERSION_EVENT:
         return this.BUSINESS_DATA_RETENTION_DAYS;
-      
+
       case EventType.ERROR_EVENT:
         return this.ERROR_DATA_RETENTION_DAYS;
-      
+
       default:
         return this.USER_DATA_RETENTION_DAYS;
     }
   }
 
-  private static getPriorityLevel(score: number): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
+  private static getPriorityLevel(
+    score: number,
+  ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
     if (score >= 85) return 'CRITICAL';
     if (score >= 70) return 'HIGH';
     if (score >= 50) return 'MEDIUM';
     return 'LOW';
   }
 
-  private static getRiskLevel(score: number): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
+  private static getRiskLevel(
+    score: number,
+  ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
     if (score >= 75) return 'CRITICAL';
     if (score >= 50) return 'HIGH';
     if (score >= 25) return 'MEDIUM';
     return 'LOW';
   }
 
-  private static getRetentionActions(daysUntilExpiry: number, daysUntilAnonymization: number): string[] {
+  private static getRetentionActions(
+    daysUntilExpiry: number,
+    daysUntilAnonymization: number,
+  ): string[] {
     const actions: string[] = [];
 
     if (daysUntilExpiry <= 0) {
@@ -550,7 +592,7 @@ export class EventCreationEligibilityResult {
   constructor(
     public readonly isEligible: boolean,
     public readonly errors: string[],
-    public readonly priority: EventPriority
+    public readonly priority: EventPriority,
   ) {}
 }
 
@@ -565,7 +607,7 @@ export class EventDataValidationResult {
    */
   constructor(
     public readonly isValid: boolean,
-    public readonly errors: string[]
+    public readonly errors: string[],
   ) {}
 }
 
@@ -582,7 +624,7 @@ export class EventPriority {
   constructor(
     public readonly score: number,
     public readonly level: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
-    public readonly factors: string[]
+    public readonly factors: string[],
   ) {}
 }
 
@@ -601,7 +643,7 @@ export class BatchProcessingEligibilityResult {
     public readonly isEligible: boolean,
     public readonly errors: string[],
     public readonly warnings: string[],
-    public readonly eligibleEventCount: number
+    public readonly eligibleEventCount: number,
   ) {}
 }
 
@@ -624,7 +666,7 @@ export class AnalyticsDataRetentionPolicy {
     public readonly anonymizationThreshold: Date,
     public readonly daysUntilExpiry: number,
     public readonly daysUntilAnonymization: number,
-    public readonly recommendedActions: string[]
+    public readonly recommendedActions: string[],
   ) {}
 }
 
@@ -647,7 +689,7 @@ export class PrivacyComplianceRiskAssessment {
     public readonly riskScore: number,
     public readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
     public readonly riskFactors: string[],
-    public readonly recommendedActions: string[]
+    public readonly recommendedActions: string[],
   ) {}
 }
 
@@ -668,7 +710,7 @@ export class AnonymizationRequirementResult {
     public readonly isOverdue: boolean,
     public readonly urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
     public readonly daysSinceCreation: number,
-    public readonly anonymizationThresholdDays: number
+    public readonly anonymizationThresholdDays: number,
   ) {}
 }
 
@@ -685,7 +727,7 @@ export class ReportingPermissionsResult {
   constructor(
     public readonly hasAccess: boolean,
     public readonly permissions: string[],
-    public readonly restrictions: string[]
+    public readonly restrictions: string[],
   ) {}
 }
 
@@ -695,13 +737,13 @@ export enum ReportType {
   SYSTEM_PERFORMANCE = 'system_performance',
   BUSINESS_METRICS = 'business_metrics',
   ERROR_ANALYSIS = 'error_analysis',
-  CONVERSION_FUNNEL = 'conversion_funnel'
+  CONVERSION_FUNNEL = 'conversion_funnel',
 }
 
 export enum DataScope {
   FULL_ACCESS = 'full_access',
   ANONYMIZED_ONLY = 'anonymized_only',
-  AGGREGATED_ONLY = 'aggregated_only'
+  AGGREGATED_ONLY = 'aggregated_only',
 }
 
 // 接口定义

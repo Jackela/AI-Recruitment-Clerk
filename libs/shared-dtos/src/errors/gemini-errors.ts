@@ -12,7 +12,7 @@ export class GeminiApiError extends Error {
   constructor(
     message: string,
     public readonly statusCode?: number,
-    public readonly originalError?: Error
+    public readonly originalError?: Error,
   ) {
     super(message);
     this.name = 'GeminiApiError';
@@ -30,7 +30,7 @@ export class GeminiRateLimitError extends GeminiApiError {
    */
   constructor(
     message = 'Gemini API rate limit exceeded',
-    public readonly retryAfter?: number
+    public readonly retryAfter?: number,
   ) {
     super(message, 429);
     this.name = 'GeminiRateLimitError';
@@ -48,7 +48,7 @@ export class GeminiValidationError extends GeminiApiError {
    */
   constructor(
     message: string,
-    public readonly validationDetails?: unknown
+    public readonly validationDetails?: unknown,
   ) {
     super(message, 400);
     this.name = 'GeminiValidationError';
@@ -80,7 +80,7 @@ export class GeminiParsingError extends GeminiApiError {
    */
   constructor(
     message: string,
-    public readonly rawResponse?: string
+    public readonly rawResponse?: string,
   ) {
     super(message, 422);
     this.name = 'GeminiParsingError';

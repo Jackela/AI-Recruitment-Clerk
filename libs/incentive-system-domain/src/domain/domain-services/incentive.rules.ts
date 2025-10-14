@@ -1,6 +1,9 @@
 import { Incentive } from '../aggregates/incentive.aggregate.js';
 import { ContactInfo } from '../value-objects/contact-info.value-object.js';
-import { TriggerType, PaymentMethod } from '../aggregates/incentive.aggregate.js';
+import {
+  TriggerType,
+  PaymentMethod,
+} from '../aggregates/incentive.aggregate.js';
 
 /**
  * 激励系统业务规则引擎
@@ -12,7 +15,7 @@ export class IncentiveRules {
   static readonly MIN_QUALITY_SCORE = 50;
   static readonly HIGH_QUALITY_THRESHOLD = 70;
   static readonly EXCELLENT_QUALITY_THRESHOLD = 90;
-  
+
   // 支付相关常量
   static readonly MIN_PAYMENT_AMOUNT = 0.01;
   static readonly MAX_PAYMENT_AMOUNT = 100;
@@ -25,7 +28,7 @@ export class IncentiveRules {
     ip: string,
     triggerType: TriggerType,
     triggerData: any,
-    todayIncentiveCount: number
+    todayIncentiveCount: number,
   ): IncentiveEligibilityResult {
     const errors: string[] = [];
 
@@ -36,7 +39,9 @@ export class IncentiveRules {
 
     // 检查每日激励限制
     if (todayIncentiveCount >= this.MAX_DAILY_INCENTIVES) {
-      errors.push(`Daily incentive limit exceeded (max ${this.MAX_DAILY_INCENTIVES})`);
+      errors.push(
+        `Daily incentive limit exceeded (max ${this.MAX_DAILY_INCENTIVES})`,
+      );
     }
 
     // 特定触发类型的验证
@@ -45,14 +50,21 @@ export class IncentiveRules {
         if (!triggerData.questionnaireId) {
           errors.push('Questionnaire ID is required');
         }
-        if (typeof triggerData.qualityScore !== 'number' || 
-            triggerData.qualityScore < this.MIN_QUALITY_SCORE) {
-          errors.push(`Quality score must be at least ${this.MIN_QUALITY_SCORE}`);
+        if (
+          typeof triggerData.qualityScore !== 'number' ||
+          triggerData.qualityScore < this.MIN_QUALITY_SCORE
+        ) {
+          errors.push(
+            `Quality score must be at least ${this.MIN_QUALITY_SCORE}`,
+          );
         }
         break;
 
       case TriggerType.REFERRAL:
-        if (!triggerData.referredIP || !this.isValidIPAddress(triggerData.referredIP)) {
+        if (
+          !triggerData.referredIP ||
+          !this.isValidIPAddress(triggerData.referredIP)
+        ) {
           errors.push('Valid referred IP address is required');
         }
         if (triggerData.referredIP === ip) {
@@ -64,10 +76,7 @@ export class IncentiveRules {
         errors.push(`Unsupported trigger type: ${triggerType}`);
     }
 
-    return new IncentiveEligibilityResult(
-      errors.length === 0,
-      errors
-    );
+    return new IncentiveEligibilityResult(errors.length === 0, errors);
   }
 
   /**
@@ -91,15 +100,15 @@ export class IncentiveRules {
     }
 
     // 检查是否过期
-    const daysSinceCreation = (Date.now() - incentive.getCreatedAt().getTime()) / (1000 * 60 * 60 * 24);
+    const daysSinceCreation =
+      (Date.now() - incentive.getCreatedAt().getTime()) / (1000 * 60 * 60 * 24);
     if (daysSinceCreation > this.PAYMENT_EXPIRY_DAYS) {
-      errors.push(`Incentive has expired (${daysSinceCreation.toFixed(1)} days old, max ${this.PAYMENT_EXPIRY_DAYS})`);
+      errors.push(
+        `Incentive has expired (${daysSinceCreation.toFixed(1)} days old, max ${this.PAYMENT_EXPIRY_DAYS})`,
+      );
     }
 
-    return new PaymentEligibilityResult(
-      errors.length === 0,
-      errors
-    );
+    return new PaymentEligibilityResult(errors.length === 0, errors);
   }
 
   /**
@@ -107,7 +116,7 @@ export class IncentiveRules {
    */
   static validatePaymentMethodCompatibility(
     paymentMethod: PaymentMethod,
-    contactInfo: ContactInfo
+    contactInfo: ContactInfo,
   ): PaymentMethodValidationResult {
     const errors: string[] = [];
 
@@ -142,16 +151,15 @@ export class IncentiveRules {
       errors.push(...contactInfo.getValidationErrors());
     }
 
-    return new PaymentMethodValidationResult(
-      errors.length === 0,
-      errors
-    );
+    return new PaymentMethodValidationResult(errors.length === 0, errors);
   }
 
   /**
    * 验证批量支付
    */
-  static validateBatchPayment(incentives: Incentive[]): BatchPaymentValidationResult {
+  static validateBatchPayment(
+    incentives: Incentive[],
+  ): BatchPaymentValidationResult {
     const errors: string[] = [];
 
     if (incentives.length === 0) {
@@ -169,7 +177,7 @@ export class IncentiveRules {
 
     for (const incentive of incentives) {
       const id = incentive.getId().getValue();
-      
+
       if (seenIds.has(id)) {
         duplicateIds.add(id);
       }
@@ -185,17 +193,18 @@ export class IncentiveRules {
     }
 
     if (duplicateIds.size > 0) {
-      errors.push(`Duplicate incentive IDs found: ${Array.from(duplicateIds).join(', ')}`);
+      errors.push(
+        `Duplicate incentive IDs found: ${Array.from(duplicateIds).join(', ')}`,
+      );
     }
 
     if (totalAmount > 1000) {
-      errors.push(`Total batch payment amount (${totalAmount}) exceeds limit (1000)`);
+      errors.push(
+        `Total batch payment amount (${totalAmount}) exceeds limit (1000)`,
+      );
     }
 
-    return new BatchPaymentValidationResult(
-      errors.length === 0,
-      errors
-    );
+    return new BatchPaymentValidationResult(errors.length === 0, errors);
   }
 
   /**
@@ -219,7 +228,8 @@ export class IncentiveRules {
     }
 
     // 基于创建时间的紧急程度
-    const daysSinceCreation = (Date.now() - incentive.getCreatedAt().getTime()) / (1000 * 60 * 60 * 24);
+    const daysSinceCreation =
+      (Date.now() - incentive.getCreatedAt().getTime()) / (1000 * 60 * 60 * 24);
     if (daysSinceCreation >= 25) {
       score += 25;
       factors.push('Near expiry');
@@ -252,7 +262,7 @@ export class IncentiveRules {
   static assessIncentiveRisk(
     ip: string,
     todayIncentiveCount: number,
-    recentIncentiveHistory: number[]
+    recentIncentiveHistory: number[],
   ): IncentiveRiskAssessment {
     let riskScore = 0;
     const riskFactors: string[] = [];
@@ -268,7 +278,9 @@ export class IncentiveRules {
 
     // 历史模式分析
     if (recentIncentiveHistory.length >= 7) {
-      const averageDaily = recentIncentiveHistory.reduce((a, b) => a + b, 0) / recentIncentiveHistory.length;
+      const averageDaily =
+        recentIncentiveHistory.reduce((a, b) => a + b, 0) /
+        recentIncentiveHistory.length;
       if (averageDaily >= 2.5) {
         riskScore += 30;
         riskFactors.push('Consistent high usage pattern');
@@ -281,8 +293,8 @@ export class IncentiveRules {
       riskFactors.push('Invalid IP address');
     }
 
-    const riskLevel = riskScore >= 60 ? 'HIGH' : 
-                     riskScore >= 30 ? 'MEDIUM' : 'LOW';
+    const riskLevel =
+      riskScore >= 60 ? 'HIGH' : riskScore >= 30 ? 'MEDIUM' : 'LOW';
 
     return new IncentiveRiskAssessment(riskScore, riskLevel, riskFactors);
   }
@@ -292,7 +304,8 @@ export class IncentiveRules {
    */
   static isValidIPAddress(ip: string): boolean {
     if (!ip || typeof ip !== 'string') return false;
-    const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    const ipRegex =
+      /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
     return ipRegex.test(ip);
   }
 
@@ -305,7 +318,7 @@ export class IncentiveRules {
       approved: 0,
       paid: 0,
       rejected: 0,
-      expired: 0
+      expired: 0,
     };
 
     let totalAmount = 0;
@@ -334,8 +347,11 @@ export class IncentiveRules {
       statusBreakdown: statusCounts,
       totalAmount,
       paidAmount,
-      conversionRate: incentives.length > 0 ? (statusCounts.paid / incentives.length) * 100 : 0,
-      dailyDistribution: Object.fromEntries(dailyStats)
+      conversionRate:
+        incentives.length > 0
+          ? (statusCounts.paid / incentives.length) * 100
+          : 0,
+      dailyDistribution: Object.fromEntries(dailyStats),
     });
   }
 }
@@ -352,7 +368,7 @@ export class IncentiveEligibilityResult {
    */
   constructor(
     public readonly isEligible: boolean,
-    public readonly errors: string[]
+    public readonly errors: string[],
   ) {}
 }
 
@@ -367,7 +383,7 @@ export class PaymentEligibilityResult {
    */
   constructor(
     public readonly isEligible: boolean,
-    public readonly errors: string[]
+    public readonly errors: string[],
   ) {}
 }
 
@@ -382,7 +398,7 @@ export class PaymentMethodValidationResult {
    */
   constructor(
     public readonly isValid: boolean,
-    public readonly errors: string[]
+    public readonly errors: string[],
   ) {}
 }
 
@@ -397,7 +413,7 @@ export class BatchPaymentValidationResult {
    */
   constructor(
     public readonly isValid: boolean,
-    public readonly errors: string[]
+    public readonly errors: string[],
   ) {}
 }
 
@@ -412,7 +428,7 @@ export class IncentivePriority {
    */
   constructor(
     public readonly score: number,
-    public readonly factors: string[]
+    public readonly factors: string[],
   ) {}
 }
 
@@ -429,7 +445,7 @@ export class IncentiveRiskAssessment {
   constructor(
     public readonly riskScore: number,
     public readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH',
-    public readonly riskFactors: string[]
+    public readonly riskFactors: string[],
   ) {}
 }
 
@@ -441,39 +457,49 @@ export class IncentiveUsageHistory {
    * Initializes a new instance of the Incentive Usage History.
    * @param data - The data.
    */
-  constructor(public readonly data: {
-    totalIncentives: number;
-    statusBreakdown: {
-      pending: number;
-      approved: number;
-      paid: number;
-      rejected: number;
-      expired: number;
-    };
-    totalAmount: number;
-    paidAmount: number;
-    conversionRate: number;
-    dailyDistribution: Record<string, number>;
-  }) {}
+  constructor(
+    public readonly data: {
+      totalIncentives: number;
+      statusBreakdown: {
+        pending: number;
+        approved: number;
+        paid: number;
+        rejected: number;
+        expired: number;
+      };
+      totalAmount: number;
+      paidAmount: number;
+      conversionRate: number;
+      dailyDistribution: Record<string, number>;
+    },
+  ) {}
 
   /**
    * Performs the total incentives operation.
    * @returns The number value.
    */
-  get totalIncentives(): number { return this.data.totalIncentives; }
+  get totalIncentives(): number {
+    return this.data.totalIncentives;
+  }
   /**
    * Performs the conversion rate operation.
    * @returns The number value.
    */
-  get conversionRate(): number { return this.data.conversionRate; }
+  get conversionRate(): number {
+    return this.data.conversionRate;
+  }
   /**
    * Performs the total amount operation.
    * @returns The number value.
    */
-  get totalAmount(): number { return this.data.totalAmount; }
+  get totalAmount(): number {
+    return this.data.totalAmount;
+  }
   /**
    * Performs the paid amount operation.
    * @returns The number value.
    */
-  get paidAmount(): number { return this.data.paidAmount; }
+  get paidAmount(): number {
+    return this.data.paidAmount;
+  }
 }

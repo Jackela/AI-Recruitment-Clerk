@@ -147,11 +147,11 @@ export class ApiService {
     const form = new FormData();
     form.append('jdText', jdText);
     form.append('resume', file, file.name);
-    return this.http.post<{success: boolean, data: GapAnalysisResult}>(
-      `${this.baseUrl}/scoring/gap-analysis-file`,
-      form,
-    ).pipe(
-      map(response => response.data)
-    );
+    return this.http
+      .post<{
+        success: boolean;
+        data: GapAnalysisResult;
+      }>(`${this.baseUrl}/scoring/gap-analysis-file`, form)
+      .pipe(map((response) => response.data));
   }
 }

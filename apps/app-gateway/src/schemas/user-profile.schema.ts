@@ -100,4 +100,3 @@ export const UserProfileSchema = SchemaFactory.createForClass(UserProfile);
 UserProfileSchema.index({ email: 1 });
 UserProfileSchema.index({ isActive: 1, lastLoginAt: -1 });
 UserProfileSchema.index({ 'sessionInfo.currentSessionId': 1 });
-

@@ -52,7 +52,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   protected connection: NatsConnection | null = null;
   protected jetstream: JetStreamClient | null = null;
   protected jsm: JetStreamManager | null = null;
-  
+
   /**
    * Initializes a new instance of the Base NATS Client.
    * @param config - The config.
@@ -67,7 +67,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   async connect(): Promise<void> {
     try {
       this.logger.log('Connecting to NATS servers...');
-      
+
       this.connection = await connect({
         servers: this.config.servers,
         timeout: this.config.connectionTimeout || 5000,
@@ -80,13 +80,12 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
       this.jsm = await this.connection.jetstreamManager();
 
       this.logger.log('Successfully connected to NATS');
-      
+
       // 设置连接事件监听
       this.setupConnectionHandlers();
-      
+
       // 初始化子类特定配置
       await this.onConnected();
-      
     } catch (error) {
       this.logger.error('Failed to connect to NATS', error);
       throw error;
@@ -115,7 +114,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
       await this.jetstream.publish(
         pattern.subject,
         JSON.stringify(pattern.data),
-        { headers: hdrs }
+        { headers: hdrs },
       );
 
       this.logger.debug(`Published message to ${pattern.subject}`);
@@ -138,12 +137,17 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
       await this.ensureStream(config.stream, [config.subject]);
 
       // 创建或获取消费者
-      const consumer = await this.jetstream.consumers.get(config.stream, config.consumer);
-      
+      const consumer = await this.jetstream.consumers.get(
+        config.stream,
+        config.consumer,
+      );
+
       // 开始消费消息
       const messages = await consumer.consume();
-      
-      this.logger.log(`Created consumer ${config.consumer} for stream ${config.stream}`);
+
+      this.logger.log(
+        `Created consumer ${config.consumer} for stream ${config.stream}`,
+      );
 
       // 处理消息
       for await (const message of messages) {
@@ -151,10 +155,13 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
           const data = JSON.parse(message.data.toString());
           await config.handler(data);
           message.ack();
-          
+
           this.logger.debug(`Processed message from ${message.subject}`);
         } catch (error) {
-          this.logger.error(`Failed to process message from ${message.subject}`, error);
+          this.logger.error(
+            `Failed to process message from ${message.subject}`,
+            error,
+          );
           message.nak();
         }
       }
@@ -167,7 +174,11 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   /**
    * 请求-响应模式
    */
-  async request<T>(subject: string, data: any, timeout: number = 5000): Promise<T> {
+  async request<T>(
+    subject: string,
+    data: any,
+    timeout: number = 5000,
+  ): Promise<T> {
     if (!this.connection) {
       throw new Error('NATS connection not established');
     }
@@ -176,7 +187,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
       const response = await this.connection.request(
         subject,
         JSON.stringify(data),
-        { timeout }
+        { timeout },
       );
 
       return JSON.parse(response.data.toString());
@@ -189,14 +200,17 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   /**
    * 订阅主题
    */
-  async subscribe(subject: string, handler: (data: any) => Promise<void>): Promise<void> {
+  async subscribe(
+    subject: string,
+    handler: (data: any) => Promise<void>,
+  ): Promise<void> {
     if (!this.connection) {
       throw new Error('NATS connection not established');
     }
 
     try {
       const subscription = this.connection.subscribe(subject);
-      
+
       this.logger.log(`Subscribed to ${subject}`);
 
       for await (const message of subscription) {
@@ -216,7 +230,10 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   /**
    * 确保JetStream流存在
    */
-  private async ensureStream(streamName: string, subjects: string[]): Promise<void> {
+  private async ensureStream(
+    streamName: string,
+    subjects: string[],
+  ): Promise<void> {
     if (!this.jsm) {
       throw new Error('JetStream Manager not initialized');
     }
@@ -233,7 +250,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
         max_msgs: 10000,
         max_bytes: 100 * 1024 * 1024, // 100MB
       });
-      
+
       this.logger.log(`Created stream ${streamName}`);
     }
   }
@@ -252,7 +269,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
     (async () => {
       for await (const status of this.connection!.status()) {
         this.logger.log(`NATS connection status: ${status.type}`);
-        
+
         if (status.type === 'reconnect') {
           this.logger.log('NATS reconnected successfully');
         } else if (status.type === 'disconnect') {

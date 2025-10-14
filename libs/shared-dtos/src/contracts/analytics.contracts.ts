@@ -4,7 +4,7 @@ import {
   EventType,
   MetricUnit,
   UserSession,
-  EventValidationResult
+  EventValidationResult,
 } from '../domains/analytics.dto';
 import { AnalyticsRules } from '../domains/analytics.rules';
 
@@ -13,7 +13,6 @@ import { AnalyticsRules } from '../domains/analytics.rules';
  * 提供前置条件、后置条件和不变式的验证
  */
 export class AnalyticsContracts {
-  
   /**
    * 创建用户交互事件的契约验证
    */
@@ -22,59 +21,65 @@ export class AnalyticsContracts {
     userId: string,
     eventType: EventType,
     eventData: any,
-    context?: any
+    context?: any,
   ): AnalyticsEvent {
     // 前置条件验证
     this.requireValidSessionId(sessionId, 'createUserInteractionEvent');
     this.require(
       !!(userId && userId.trim().length > 0),
       'User ID is required for user interaction event',
-      'createUserInteractionEvent'
+      'createUserInteractionEvent',
     );
     this.require(
       Object.values(EventType).includes(eventType),
       'Valid event type is required',
-      'createUserInteractionEvent'
+      'createUserInteractionEvent',
     );
     this.require(
       eventData !== null && eventData !== undefined,
       'Event data is required',
-      'createUserInteractionEvent'
+      'createUserInteractionEvent',
     );
     this.require(
       !AnalyticsRules.isSystemEventType(eventType),
       'Cannot create system event type with user interaction method',
-      'createUserInteractionEvent'
+      'createUserInteractionEvent',
     );
 
     // 执行创建
-    const event = AnalyticsEvent.createUserInteractionEvent(sessionId, userId, eventType, eventData, context);
+    const event = AnalyticsEvent.createUserInteractionEvent(
+      sessionId,
+      userId,
+      eventType,
+      eventData,
+      context,
+    );
 
     // 后置条件验证
     this.ensure(
       event !== null && event !== undefined,
       'Event creation must return a valid instance',
-      'createUserInteractionEvent'
+      'createUserInteractionEvent',
     );
     this.ensure(
       event.getSessionId() === sessionId,
       'Created event must have correct session ID',
-      'createUserInteractionEvent'
+      'createUserInteractionEvent',
     );
     this.ensure(
       event.getUserId() === userId,
       'Created event must have correct user ID',
-      'createUserInteractionEvent'
+      'createUserInteractionEvent',
     );
     this.ensure(
       event.getEventType() === eventType,
       'Created event must have correct event type',
-      'createUserInteractionEvent'
+      'createUserInteractionEvent',
     );
     this.ensure(
       event.getStatus() === EventStatus.PENDING_PROCESSING,
       'New event must be in pending processing status',
-      'createUserInteractionEvent'
+      'createUserInteractionEvent',
     );
 
     return event;
@@ -87,53 +92,58 @@ export class AnalyticsContracts {
     operation: string,
     duration: number,
     success: boolean,
-    metadata?: any
+    metadata?: any,
   ): AnalyticsEvent {
     // 前置条件验证
     this.require(
       !!(operation && operation.trim().length > 0),
       'Operation name is required for performance event',
-      'createSystemPerformanceEvent'
+      'createSystemPerformanceEvent',
     );
     this.require(
       typeof duration === 'number' && duration >= 0,
       'Duration must be a non-negative number',
-      'createSystemPerformanceEvent'
+      'createSystemPerformanceEvent',
     );
     this.require(
       duration <= 300000, // 5分钟上限
       'Duration cannot exceed 5 minutes (300000ms)',
-      'createSystemPerformanceEvent'
+      'createSystemPerformanceEvent',
     );
     this.require(
       typeof success === 'boolean',
       'Success flag must be a boolean value',
-      'createSystemPerformanceEvent'
+      'createSystemPerformanceEvent',
     );
 
     // 执行创建
-    const event = AnalyticsEvent.createSystemPerformanceEvent(operation, duration, success, metadata);
+    const event = AnalyticsEvent.createSystemPerformanceEvent(
+      operation,
+      duration,
+      success,
+      metadata,
+    );
 
     // 后置条件验证
     this.ensure(
       event !== null && event !== undefined,
       'Performance event creation must return a valid instance',
-      'createSystemPerformanceEvent'
+      'createSystemPerformanceEvent',
     );
     this.ensure(
       event.getEventType() === EventType.SYSTEM_PERFORMANCE,
       'Created event must be a system performance event',
-      'createSystemPerformanceEvent'
+      'createSystemPerformanceEvent',
     );
     this.ensure(
       event.getStatus() === EventStatus.PENDING_PROCESSING,
       'New performance event must be in pending processing status',
-      'createSystemPerformanceEvent'
+      'createSystemPerformanceEvent',
     );
     this.ensure(
       event.getUserId() === undefined,
       'System performance event should not have user ID',
-      'createSystemPerformanceEvent'
+      'createSystemPerformanceEvent',
     );
 
     return event;
@@ -146,28 +156,28 @@ export class AnalyticsContracts {
     metricName: string,
     metricValue: number,
     metricUnit: MetricUnit,
-    dimensions?: Record<string, string>
+    dimensions?: Record<string, string>,
   ): AnalyticsEvent {
     // 前置条件验证
     this.require(
       !!(metricName && metricName.trim().length > 0),
       'Metric name is required for business metric event',
-      'createBusinessMetricEvent'
+      'createBusinessMetricEvent',
     );
     this.require(
       typeof metricValue === 'number' && !isNaN(metricValue),
       'Metric value must be a valid number',
-      'createBusinessMetricEvent'
+      'createBusinessMetricEvent',
     );
     this.require(
       Object.values(MetricUnit).includes(metricUnit),
       'Valid metric unit is required',
-      'createBusinessMetricEvent'
+      'createBusinessMetricEvent',
     );
     this.require(
       metricValue >= 0,
       'Metric value cannot be negative',
-      'createBusinessMetricEvent'
+      'createBusinessMetricEvent',
     );
 
     // 验证dimensions格式（如果提供）
@@ -175,33 +185,38 @@ export class AnalyticsContracts {
       this.require(
         typeof dimensions === 'object' && dimensions !== null,
         'Dimensions must be an object',
-        'createBusinessMetricEvent'
+        'createBusinessMetricEvent',
       );
       this.require(
         Object.keys(dimensions).length <= 20,
         'Dimensions cannot have more than 20 keys',
-        'createBusinessMetricEvent'
+        'createBusinessMetricEvent',
       );
     }
 
     // 执行创建
-    const event = AnalyticsEvent.createBusinessMetricEvent(metricName, metricValue, metricUnit, dimensions);
+    const event = AnalyticsEvent.createBusinessMetricEvent(
+      metricName,
+      metricValue,
+      metricUnit,
+      dimensions,
+    );
 
     // 后置条件验证
     this.ensure(
       event !== null && event !== undefined,
       'Business metric event creation must return a valid instance',
-      'createBusinessMetricEvent'
+      'createBusinessMetricEvent',
     );
     this.ensure(
       event.getEventType() === EventType.BUSINESS_METRIC,
       'Created event must be a business metric event',
-      'createBusinessMetricEvent'
+      'createBusinessMetricEvent',
     );
     this.ensure(
       event.getStatus() === EventStatus.PENDING_PROCESSING,
       'New business metric event must be in pending processing status',
-      'createBusinessMetricEvent'
+      'createBusinessMetricEvent',
     );
 
     return event;
@@ -215,12 +230,12 @@ export class AnalyticsContracts {
     this.require(
       event !== null && event !== undefined,
       'Event is required for validation',
-      'validateEvent'
+      'validateEvent',
     );
     this.require(
       event.getStatus() !== EventStatus.EXPIRED,
       'Cannot validate expired event',
-      'validateEvent'
+      'validateEvent',
     );
 
     // 验证不变式
@@ -233,17 +248,17 @@ export class AnalyticsContracts {
     this.ensure(
       result !== null && result !== undefined,
       'Validation must return a result',
-      'validateEvent'
+      'validateEvent',
     );
     this.ensure(
       typeof result.isValid === 'boolean',
       'Validation result must have boolean validity flag',
-      'validateEvent'
+      'validateEvent',
     );
     this.ensure(
       Array.isArray(result.errors),
       'Validation result must have errors array',
-      'validateEvent'
+      'validateEvent',
     );
 
     // 验证逻辑一致性
@@ -251,13 +266,13 @@ export class AnalyticsContracts {
       this.ensure(
         result.errors.length === 0,
         'Valid event must have no errors',
-        'validateEvent'
+        'validateEvent',
       );
     } else {
       this.ensure(
         result.errors.length > 0,
         'Invalid event must have at least one error',
-        'validateEvent'
+        'validateEvent',
       );
     }
 
@@ -275,12 +290,12 @@ export class AnalyticsContracts {
     this.require(
       event !== null && event !== undefined,
       'Event is required for processing',
-      'processEvent'
+      'processEvent',
     );
     this.require(
       originalStatus === EventStatus.PENDING_PROCESSING,
       'Only pending events can be processed',
-      'processEvent'
+      'processEvent',
     );
 
     // 验证事件有效性
@@ -288,7 +303,7 @@ export class AnalyticsContracts {
     this.require(
       validationResult.isValid,
       `Cannot process invalid event: ${validationResult.errors.join(', ')}`,
-      'processEvent'
+      'processEvent',
     );
 
     // 验证不变式
@@ -301,12 +316,12 @@ export class AnalyticsContracts {
     this.ensure(
       event.getStatus() === EventStatus.PROCESSED,
       'Processed event must be in processed status',
-      'processEvent'
+      'processEvent',
     );
     this.ensure(
       event.getStatus() !== originalStatus,
       'Event status must change after processing',
-      'processEvent'
+      'processEvent',
     );
   }
 
@@ -321,25 +336,26 @@ export class AnalyticsContracts {
     this.require(
       event !== null && event !== undefined,
       'Event is required for anonymization',
-      'anonymizeEventData'
+      'anonymizeEventData',
     );
     this.require(
       originalStatus !== EventStatus.EXPIRED,
       'Cannot anonymize expired event',
-      'anonymizeEventData'
+      'anonymizeEventData',
     );
     this.require(
       originalStatus !== EventStatus.ANONYMIZED,
       'Event is already anonymized',
-      'anonymizeEventData'
+      'anonymizeEventData',
     );
 
     // 验证匿名化需求
-    const anonymizationRequirement = AnalyticsRules.validateAnonymizationRequirement(event);
+    const anonymizationRequirement =
+      AnalyticsRules.validateAnonymizationRequirement(event);
     this.require(
       anonymizationRequirement.isRequired,
       'Event does not require anonymization yet',
-      'anonymizeEventData'
+      'anonymizeEventData',
     );
 
     // 验证不变式
@@ -352,7 +368,7 @@ export class AnalyticsContracts {
     this.ensure(
       event.getStatus() === EventStatus.ANONYMIZED,
       'Anonymized event must be in anonymized status',
-      'anonymizeEventData'
+      'anonymizeEventData',
     );
   }
 
@@ -367,12 +383,12 @@ export class AnalyticsContracts {
     this.require(
       event !== null && event !== undefined,
       'Event is required for expiry marking',
-      'markEventAsExpired'
+      'markEventAsExpired',
     );
     this.require(
       originalStatus !== EventStatus.EXPIRED,
       'Event is already marked as expired',
-      'markEventAsExpired'
+      'markEventAsExpired',
     );
 
     // 验证过期条件
@@ -380,12 +396,12 @@ export class AnalyticsContracts {
     this.require(
       retentionExpiry !== undefined,
       'Event must have retention expiry date to be marked as expired',
-      'markEventAsExpired'
+      'markEventAsExpired',
     );
     this.require(
       !!(retentionExpiry && Date.now() > retentionExpiry.getTime()),
       'Event can only be marked as expired after retention period',
-      'markEventAsExpired'
+      'markEventAsExpired',
     );
 
     // 验证不变式
@@ -398,7 +414,7 @@ export class AnalyticsContracts {
     this.ensure(
       event.getStatus() === EventStatus.EXPIRED,
       'Expired event must be in expired status',
-      'markEventAsExpired'
+      'markEventAsExpired',
     );
   }
 
@@ -410,27 +426,27 @@ export class AnalyticsContracts {
     this.invariant(
       event.getId() !== null && event.getId() !== undefined,
       'Event must always have a valid ID',
-      'AnalyticsEvent'
+      'AnalyticsEvent',
     );
     this.invariant(
       !!(event.getSessionId() && event.getSessionId().length > 0),
       'Event must always have a session ID',
-      'AnalyticsEvent'
+      'AnalyticsEvent',
     );
     this.invariant(
       Object.values(EventType).includes(event.getEventType()),
       'Event must always have a valid event type',
-      'AnalyticsEvent'
+      'AnalyticsEvent',
     );
     this.invariant(
       Object.values(EventStatus).includes(event.getStatus()),
       'Event must always have a valid status',
-      'AnalyticsEvent'
+      'AnalyticsEvent',
     );
     this.invariant(
       event.getCreatedAt() instanceof Date,
       'Event must always have a valid creation date',
-      'AnalyticsEvent'
+      'AnalyticsEvent',
     );
 
     // 时间相关不变式
@@ -438,7 +454,7 @@ export class AnalyticsContracts {
     this.invariant(
       event.getCreatedAt() <= now,
       'Event creation date must not be in the future',
-      'AnalyticsEvent'
+      'AnalyticsEvent',
     );
 
     // 时间戳有效性
@@ -446,18 +462,18 @@ export class AnalyticsContracts {
     this.invariant(
       !!(timestamp && typeof timestamp === 'string' && timestamp.length > 0),
       'Event must always have a valid timestamp',
-      'AnalyticsEvent'
+      'AnalyticsEvent',
     );
 
     // 用户相关不变式
     const eventType = event.getEventType();
     const userId = event.getUserId();
-    
+
     if (!AnalyticsRules.isSystemEventType(eventType)) {
       this.invariant(
         userId !== undefined && userId.length > 0,
         'User events must have a valid user ID',
-        'AnalyticsEvent'
+        'AnalyticsEvent',
       );
     }
 
@@ -479,7 +495,7 @@ export class AnalyticsContracts {
       this.invariant(
         retentionExpiry > event.getCreatedAt(),
         'Retention expiry must be after creation date',
-        'AnalyticsEvent'
+        'AnalyticsEvent',
       );
     }
 
@@ -488,7 +504,7 @@ export class AnalyticsContracts {
     this.invariant(
       sessionId.length >= 10 && sessionId.length <= 100,
       'Session ID must be between 10 and 100 characters',
-      'AnalyticsEvent'
+      'AnalyticsEvent',
     );
   }
 
@@ -498,22 +514,22 @@ export class AnalyticsContracts {
   static validateBatchOperation<T>(
     items: T[],
     maxBatchSize: number,
-    operationName: string
+    operationName: string,
   ): void {
     this.require(
       Array.isArray(items),
       `${operationName} requires an array of items`,
-      operationName
+      operationName,
     );
     this.require(
       items.length > 0,
       `${operationName} requires at least one item`,
-      operationName
+      operationName,
     );
     this.require(
       items.length <= maxBatchSize,
       `${operationName} batch size cannot exceed ${maxBatchSize}`,
-      operationName
+      operationName,
     );
   }
 
@@ -522,17 +538,17 @@ export class AnalyticsContracts {
    */
   static validatePrivacyCompliance(
     event: AnalyticsEvent,
-    userSession: UserSession
+    userSession: UserSession,
   ): void {
     this.require(
       event !== null && event !== undefined,
       'Event is required for privacy compliance validation',
-      'validatePrivacyCompliance'
+      'validatePrivacyCompliance',
     );
     this.require(
       userSession !== null && userSession !== undefined,
       'User session is required for privacy compliance validation',
-      'validatePrivacyCompliance'
+      'validatePrivacyCompliance',
     );
 
     // 验证用户同意
@@ -541,7 +557,7 @@ export class AnalyticsContracts {
       this.require(
         userSession.hasValidConsent(),
         'Valid user consent is required for user data collection',
-        'validatePrivacyCompliance'
+        'validatePrivacyCompliance',
       );
     }
 
@@ -551,7 +567,7 @@ export class AnalyticsContracts {
       this.require(
         Date.now() <= retentionExpiry.getTime(),
         'Event data retention period has been exceeded',
-        'validatePrivacyCompliance'
+        'validatePrivacyCompliance',
       );
     }
   }
@@ -562,20 +578,20 @@ export class AnalyticsContracts {
   static performanceContract<T>(
     operation: () => T,
     maxExecutionTimeMs: number,
-    operationName: string
+    operationName: string,
   ): T {
     const startTime = Date.now();
-    
+
     try {
       const result = operation();
       const executionTime = Date.now() - startTime;
-      
+
       this.ensure(
         executionTime <= maxExecutionTimeMs,
         `${operationName} exceeded maximum execution time: ${executionTime}ms > ${maxExecutionTimeMs}ms`,
-        operationName
+        operationName,
       );
-      
+
       return result;
     } catch (error) {
       const executionTime = Date.now() - startTime;
@@ -587,27 +603,27 @@ export class AnalyticsContracts {
   /**
    * 数据质量契约验证
    */
-  static validateDataQuality(
-    eventType: EventType,
-    eventData: any
-  ): void {
+  static validateDataQuality(eventType: EventType, eventData: any): void {
     this.require(
       Object.values(EventType).includes(eventType),
       'Valid event type is required for data quality validation',
-      'validateDataQuality'
+      'validateDataQuality',
     );
     this.require(
       eventData !== null && eventData !== undefined,
       'Event data is required for quality validation',
-      'validateDataQuality'
+      'validateDataQuality',
     );
 
     // 验证数据结构
-    const dataValidation = AnalyticsRules.validateEventDataStructure(eventType, eventData);
+    const dataValidation = AnalyticsRules.validateEventDataStructure(
+      eventType,
+      eventData,
+    );
     this.require(
       dataValidation.isValid,
       `Data quality validation failed: ${dataValidation.errors.join(', ')}`,
-      'validateDataQuality'
+      'validateDataQuality',
     );
 
     // 验证数据大小
@@ -615,39 +631,64 @@ export class AnalyticsContracts {
     this.require(
       dataSize <= AnalyticsRules.MAX_EVENT_SIZE_BYTES,
       `Event data size exceeds limit: ${dataSize} > ${AnalyticsRules.MAX_EVENT_SIZE_BYTES} bytes`,
-      'validateDataQuality'
+      'validateDataQuality',
     );
   }
 
   // 私有辅助方法
-  private static require(condition: boolean, message: string, operation: string): void {
+  private static require(
+    condition: boolean,
+    message: string,
+    operation: string,
+  ): void {
     if (!condition) {
-      throw new AnalyticsContractViolation(`Precondition failed in ${operation}: ${message}`);
+      throw new AnalyticsContractViolation(
+        `Precondition failed in ${operation}: ${message}`,
+      );
     }
   }
 
-  private static ensure(condition: boolean, message: string, operation: string): void {
+  private static ensure(
+    condition: boolean,
+    message: string,
+    operation: string,
+  ): void {
     if (!condition) {
-      throw new AnalyticsContractViolation(`Postcondition failed in ${operation}: ${message}`);
+      throw new AnalyticsContractViolation(
+        `Postcondition failed in ${operation}: ${message}`,
+      );
     }
   }
 
-  private static invariant(condition: boolean, message: string, entity: string): void {
+  private static invariant(
+    condition: boolean,
+    message: string,
+    entity: string,
+  ): void {
     if (!condition) {
-      throw new AnalyticsContractViolation(`Invariant violated in ${entity}: ${message}`);
+      throw new AnalyticsContractViolation(
+        `Invariant violated in ${entity}: ${message}`,
+      );
     }
   }
 
-  private static requireValidSessionId(sessionId: string, operation: string): void {
+  private static requireValidSessionId(
+    sessionId: string,
+    operation: string,
+  ): void {
     this.require(
-      !!(sessionId && typeof sessionId === 'string' && sessionId.trim().length > 0),
+      !!(
+        sessionId &&
+        typeof sessionId === 'string' &&
+        sessionId.trim().length > 0
+      ),
       'Session ID is required',
-      operation
+      operation,
     );
     this.require(
       sessionId.length >= 10 && sessionId.length <= 100,
       'Session ID must be between 10 and 100 characters',
-      operation
+      operation,
     );
   }
 }
@@ -669,15 +710,21 @@ export class AnalyticsContractViolation extends Error {
 /**
  * 分析系统设计契约装饰器
  */
-export function requireValidEvent(_target: any, propertyName: string, descriptor: PropertyDescriptor) {
+export function requireValidEvent(
+  _target: any,
+  propertyName: string,
+  descriptor: PropertyDescriptor,
+) {
   const method = descriptor.value;
-  
+
   descriptor.value = function (...args: any[]) {
     const event = args[0];
     if (!event) {
-      throw new AnalyticsContractViolation(`Method ${propertyName} requires a valid analytics event as first argument`);
+      throw new AnalyticsContractViolation(
+        `Method ${propertyName} requires a valid analytics event as first argument`,
+      );
     }
-    
+
     AnalyticsContracts.validateInvariants(event);
     return method.apply(this, args);
   };
@@ -686,15 +733,21 @@ export function requireValidEvent(_target: any, propertyName: string, descriptor
 /**
  * 事件处理契约装饰器
  */
-export function requirePendingEvent(_target: any, propertyName: string, descriptor: PropertyDescriptor) {
+export function requirePendingEvent(
+  _target: any,
+  propertyName: string,
+  descriptor: PropertyDescriptor,
+) {
   const method = descriptor.value;
-  
+
   descriptor.value = function (...args: any[]) {
     const event = args[0];
     if (!event || event.getStatus() !== EventStatus.PENDING_PROCESSING) {
-      throw new AnalyticsContractViolation(`Method ${propertyName} requires a pending analytics event`);
+      throw new AnalyticsContractViolation(
+        `Method ${propertyName} requires a pending analytics event`,
+      );
     }
-    
+
     return method.apply(this, args);
   };
 }
@@ -702,17 +755,21 @@ export function requirePendingEvent(_target: any, propertyName: string, descript
 /**
  * 隐私合规契约装饰器
  */
-export function requirePrivacyCompliance(_target: any, _propertyName: string, descriptor: PropertyDescriptor) {
+export function requirePrivacyCompliance(
+  _target: any,
+  _propertyName: string,
+  descriptor: PropertyDescriptor,
+) {
   const method = descriptor.value;
-  
+
   descriptor.value = function (...args: any[]) {
     const event = args[0];
     const userSession = args[1];
-    
+
     if (event && userSession) {
       AnalyticsContracts.validatePrivacyCompliance(event, userSession);
     }
-    
+
     return method.apply(this, args);
   };
 }
@@ -721,14 +778,18 @@ export function requirePrivacyCompliance(_target: any, _propertyName: string, de
  * 性能监控契约装饰器
  */
 export function monitorAnalyticsPerformance(maxTimeMs: number) {
-  return function (_target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function (
+    _target: any,
+    propertyName: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const method = descriptor.value;
-    
+
     descriptor.value = function (...args: any[]) {
       return AnalyticsContracts.performanceContract(
         () => method.apply(this, args),
         maxTimeMs,
-        `${_target?.constructor?.name || 'Unknown'}.${propertyName}`
+        `${_target?.constructor?.name || 'Unknown'}.${propertyName}`,
       );
     };
   };
@@ -737,9 +798,13 @@ export function monitorAnalyticsPerformance(maxTimeMs: number) {
 /**
  * 数据质量验证装饰器
  */
-export function validateEventDataQuality(_target: any, _propertyName: string, descriptor: PropertyDescriptor) {
+export function validateEventDataQuality(
+  _target: any,
+  _propertyName: string,
+  descriptor: PropertyDescriptor,
+) {
   const method = descriptor.value;
-  
+
   descriptor.value = function (...args: any[]) {
     // 假设第一个参数是eventType，第二个是eventData
     if (args.length >= 2) {
@@ -747,7 +812,7 @@ export function validateEventDataQuality(_target: any, _propertyName: string, de
       const eventData = args[1];
       AnalyticsContracts.validateDataQuality(eventType, eventData);
     }
-    
+
     return method.apply(this, args);
   };
 }

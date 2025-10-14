@@ -218,7 +218,9 @@ export class TestProviders {
           validationErrors: [],
           mappingConfidence: 0.95,
         }),
-        normalizeSkills: jest.fn().mockResolvedValue(['JavaScript', 'TypeScript']),
+        normalizeSkills: jest
+          .fn()
+          .mockResolvedValue(['JavaScript', 'TypeScript']),
         calculateExperience: jest.fn().mockResolvedValue({
           totalYears: 5,
           relevantYears: 3,
@@ -236,8 +238,12 @@ export class TestProviders {
     return {
       provide: 'GridFsService',
       useValue: {
-        uploadFile: jest.fn().mockResolvedValue('gridfs://resume-files/507f1f77bcf86cd799439011'),
-        downloadFile: jest.fn().mockResolvedValue(Buffer.from('test-pdf-content')),
+        uploadFile: jest
+          .fn()
+          .mockResolvedValue('gridfs://resume-files/507f1f77bcf86cd799439011'),
+        downloadFile: jest
+          .fn()
+          .mockResolvedValue(Buffer.from('test-pdf-content')),
         fileExists: jest.fn().mockResolvedValue(true),
         getFileInfo: jest.fn().mockResolvedValue({
           _id: '507f1f77bcf86cd799439011',

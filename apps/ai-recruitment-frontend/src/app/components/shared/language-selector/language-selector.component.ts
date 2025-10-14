@@ -1,6 +1,10 @@
 import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { I18nService, Language, LanguageConfig } from '../../../services/i18n/i18n.service';
+import {
+  I18nService,
+  Language,
+  LanguageConfig,
+} from '../../../services/i18n/i18n.service';
 
 /**
  * Represents the language selector component.

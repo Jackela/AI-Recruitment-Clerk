@@ -18,9 +18,7 @@
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "libs/marketing-domain/**/*.ts"
-        ]
+        "lintFilePatterns": ["libs/marketing-domain/**/*.ts"]
       }
     },
     "test": {

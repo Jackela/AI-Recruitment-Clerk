@@ -1,0 +1,88 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "confirm": "Confirm",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "refresh": "Refresh",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "reset": "Reset",
+    "yes": "Yes",
+    "no": "No",
+    "required": "Required",
+    "characters": "characters"
+  },
+  "app": {
+    "title": "AI Recruitment Assistant",
+    "description": "Intelligent Resume Screening and Analysis System",
+    "welcome": "Welcome to AI Recruitment Assistant"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "analysis": "Analysis",
+    "results": "Results",
+    "settings": "Settings",
+    "help": "Help",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "jobs": {
+    "createJob": {
+      "title": "Create New Position",
+      "information": "Position Information",
+      "jobTitle": {
+        "label": "Position Title",
+        "placeholder": "Enter position title, e.g.: Senior Python Developer",
+        "hint": "Recommend using clear, specific position titles like \"Senior Java Developer\", \"Product Manager\", etc."
+      },
+      "jobDescription": {
+        "label": "Job Description (JD)",
+        "placeholder": "Enter detailed job description, including responsibilities, requirements, skills, etc...",
+        "hint": "Please include the following key information to improve matching accuracy:",
+        "requirements": {
+          "skills": "Skill Requirements: Programming languages, frameworks, tools, etc.",
+          "experience": "Work Experience: Years required, relevant experience",
+          "education": "Education Requirements: Minimum education, major requirements",
+          "other": "Other Requirements: Soft skills, special requirements, etc."
+        }
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "creating": "Creating...",
+        "create": "Create Position"
+      },
+      "progress": {
+        "title": "Position Creation Progress",
+        "estimatedTimeRemaining": "Estimated remaining time:",
+        "initializing": "Initializing...",
+        "processing": "Processing your job description..."
+      }
+    }
+  },
+  "validation": {
+    "required": "This field is required",
+    "minLength": "Minimum {{length}} characters required",
+    "maxLength": "Maximum {{length}} characters allowed",
+    "email": "Please enter a valid email address",
+    "pattern": "Invalid format"
+  },
+  "messages": {
+    "success": "Operation successful",
+    "error": "Operation failed",
+    "warning": "Warning",
+    "info": "Info",
+    "confirmDelete": "Are you sure you want to delete?",
+    "noData": "No data available",
+    "networkError": "Network error, please try again later"
+  }
+}

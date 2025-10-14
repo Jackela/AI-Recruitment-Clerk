@@ -18,9 +18,7 @@
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "libs/resume-processing-domain/**/*.ts"
-        ]
+        "lintFilePatterns": ["libs/resume-processing-domain/**/*.ts"]
       }
     },
     "test": {

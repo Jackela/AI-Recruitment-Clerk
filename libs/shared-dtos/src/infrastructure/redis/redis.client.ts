@@ -33,7 +33,10 @@ export class RedisClient implements OnModuleDestroy {
       const urlWithFamily = (() => {
         try {
           const u = new URL(redisUrl);
-          if (u.hostname.endsWith('.railway.internal') && !u.searchParams.has('family')) {
+          if (
+            u.hostname.endsWith('.railway.internal') &&
+            !u.searchParams.has('family')
+          ) {
             u.searchParams.set('family', '0');
           }
           return u.toString();
@@ -50,9 +53,15 @@ export class RedisClient implements OnModuleDestroy {
     } else {
       this.redis = new Redis({
         host: redisHost!,
-        port: parseInt(process.env.REDISPORT || process.env.REDIS_PORT || (() => {
-          throw new Error('Redis configuration incomplete: REDISHOST found but REDISPORT/REDIS_PORT is missing');
-        })()),
+        port: parseInt(
+          process.env.REDISPORT ||
+            process.env.REDIS_PORT ||
+            (() => {
+              throw new Error(
+                'Redis configuration incomplete: REDISHOST found but REDISPORT/REDIS_PORT is missing',
+              );
+            })(),
+        ),
         password: process.env.REDIS_PASSWORD,
         db: parseInt(process.env.REDIS_DB || '0'),
         maxRetriesPerRequest: 3,
@@ -88,7 +97,9 @@ export class RedisClient implements OnModuleDestroy {
    * 检查连接状态
    */
   isRedisConnected(): boolean {
-    return this.isConnected && this.redis !== null && this.redis.status === 'ready';
+    return (
+      this.isConnected && this.redis !== null && this.redis.status === 'ready'
+    );
   }
 
   /**
@@ -314,7 +325,11 @@ export class RedisClient implements OnModuleDestroy {
   async keys(pattern: string): Promise<string[]> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
-      const regex = new RegExp('^' + pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$');
+      const regex = new RegExp(
+        '^' +
+          pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') +
+          '$',
+      );
       const now = Date.now();
       const keys: string[] = [];
       for (const [k, v] of this.memoryStore.entries()) {

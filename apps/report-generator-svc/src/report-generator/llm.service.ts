@@ -1,8 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  GeminiClient,
-  GeminiConfig,
-} from '@ai-recruitment-clerk/shared-dtos';
+import { GeminiClient, GeminiConfig } from '@ai-recruitment-clerk/shared-dtos';
 import { SecureConfigValidator } from '@app/shared-dtos';
 
 // Enhanced type definitions for LLM service
@@ -218,7 +215,9 @@ export interface ComparisonCriteria {
   mandatoryRequirements: string[];
   preferredAttributes: string[];
   dealBreakers: string[];
-  priorityOrder: Array<'experience' | 'skills' | 'education' | 'potential' | 'culture'>;
+  priorityOrder: Array<
+    'experience' | 'skills' | 'education' | 'potential' | 'culture'
+  >;
 }
 
 /**
@@ -502,7 +501,9 @@ Generate ONLY the markdown report content, no additional explanations.`;
    * @param candidates - The candidates.
    * @returns A promise that resolves to string value.
    */
-  async generateCandidateComparison(candidates: CandidateData[]): Promise<string> {
+  async generateCandidateComparison(
+    candidates: CandidateData[],
+  ): Promise<string> {
     this.logger.debug(
       `Generating candidate comparison for ${candidates.length} candidates`,
     );

@@ -8,7 +8,7 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  Logger
+  Logger,
 } from '@nestjs/common';
 import { Observable, throwError } from 'rxjs';
 import { tap, catchError, finalize } from 'rxjs/operators';
@@ -16,12 +16,12 @@ import { Request, Response } from 'express';
 
 import {
   ErrorCorrelationManager,
-  ErrorCorrelationContext
+  ErrorCorrelationContext,
 } from './error-correlation';
 import {
   StructuredErrorLogger,
   StructuredLoggerFactory,
-  PerformanceMetrics
+  PerformanceMetrics,
 } from './structured-logging';
 import { EnhancedAppException } from './enhanced-error-types';
 
@@ -57,7 +57,7 @@ export class ErrorCorrelationInterceptor implements NestInterceptor {
     const correlationContext = ErrorCorrelationManager.createContextFromRequest(
       request,
       this.serviceName,
-      operationName
+      operationName,
     );
 
     // Set correlation headers in response
@@ -67,7 +67,7 @@ export class ErrorCorrelationInterceptor implements NestInterceptor {
 
     // Execute within correlation context
     ErrorCorrelationManager.setContext(correlationContext);
-    
+
     return next.handle().pipe(
       tap(() => {
         // Request completed successfully
@@ -78,13 +78,13 @@ export class ErrorCorrelationInterceptor implements NestInterceptor {
         if (error instanceof EnhancedAppException) {
           error.withCorrelation(correlationContext);
         }
-        
+
         return throwError(() => error);
       }),
       finalize(() => {
         // Clean up correlation context
         ErrorCorrelationManager.clearContext();
-      })
+      }),
     );
   }
 
@@ -94,7 +94,7 @@ export class ErrorCorrelationInterceptor implements NestInterceptor {
   private getOperationName(context: ExecutionContext): string {
     const handler = context.getHandler();
     const controller = context.getClass();
-    
+
     return `${controller.name}.${handler.name}`;
   }
 }
@@ -134,8 +134,8 @@ export class ErrorLoggingInterceptor implements NestInterceptor {
           true,
           {
             resultType: typeof result,
-            hasResult: result !== undefined && result !== null
-          }
+            hasResult: result !== undefined && result !== null,
+          },
         );
       }),
       catchError((error) => {
@@ -146,8 +146,8 @@ export class ErrorLoggingInterceptor implements NestInterceptor {
           false,
           {
             errorType: error?.constructor?.name || 'Unknown',
-            errorMessage: error?.message || 'Unknown error'
-          }
+            errorMessage: error?.message || 'Unknown error',
+          },
         );
 
         // Log the error itself if it's an enhanced exception
@@ -156,7 +156,7 @@ export class ErrorLoggingInterceptor implements NestInterceptor {
         }
 
         return throwError(() => error);
-      })
+      }),
     );
   }
 
@@ -166,7 +166,7 @@ export class ErrorLoggingInterceptor implements NestInterceptor {
   private getOperationName(context: ExecutionContext): string {
     const handler = context.getHandler();
     const controller = context.getClass();
-    
+
     return `${controller.name}.${handler.name}`;
   }
 }
@@ -188,15 +188,15 @@ export class PerformanceTrackingInterceptor implements NestInterceptor {
   constructor(
     private readonly serviceName: string,
     private readonly performanceThresholds: {
-      warnThreshold?: number;    // milliseconds
-      errorThreshold?: number;   // milliseconds
-    } = {}
+      warnThreshold?: number; // milliseconds
+      errorThreshold?: number; // milliseconds
+    } = {},
   ) {
     this.structuredLogger = StructuredLoggerFactory.getLogger(serviceName);
     this.performanceThresholds = {
-      warnThreshold: 1000,  // 1 second
+      warnThreshold: 1000, // 1 second
       errorThreshold: 5000, // 5 seconds
-      ...performanceThresholds
+      ...performanceThresholds,
     };
   }
 
@@ -224,7 +224,7 @@ export class PerformanceTrackingInterceptor implements NestInterceptor {
           endTime,
           duration,
           memoryUsage: endMemory,
-          cpuUsage: endCpu
+          cpuUsage: endCpu,
         };
 
         // Log performance metrics
@@ -234,8 +234,8 @@ export class PerformanceTrackingInterceptor implements NestInterceptor {
           {
             memoryDelta: endMemory.heapUsed - startMemory.heapUsed,
             cpuUserTime: endCpu.user / 1000,
-            cpuSystemTime: endCpu.system / 1000
-          }
+            cpuSystemTime: endCpu.system / 1000,
+          },
         );
 
         // Check performance thresholds
@@ -246,14 +246,17 @@ export class PerformanceTrackingInterceptor implements NestInterceptor {
         if (context) {
           context.executionTime = duration;
         }
-      })
+      }),
     );
   }
 
   /**
    * Check if performance exceeds thresholds
    */
-  private checkPerformanceThresholds(operationName: string, duration: number): void {
+  private checkPerformanceThresholds(
+    operationName: string,
+    duration: number,
+  ): void {
     const { warnThreshold, errorThreshold } = this.performanceThresholds;
 
     if (errorThreshold && duration > errorThreshold) {
@@ -263,8 +266,8 @@ export class PerformanceTrackingInterceptor implements NestInterceptor {
           operationName,
           duration,
           threshold: errorThreshold,
-          severity: 'critical'
-        }
+          severity: 'critical',
+        },
       );
     } else if (warnThreshold && duration > warnThreshold) {
       this.logger.warn(
@@ -273,8 +276,8 @@ export class PerformanceTrackingInterceptor implements NestInterceptor {
           operationName,
           duration,
           threshold: warnThreshold,
-          severity: 'warning'
-        }
+          severity: 'warning',
+        },
       );
     }
   }
@@ -285,7 +288,7 @@ export class PerformanceTrackingInterceptor implements NestInterceptor {
   private getOperationName(context: ExecutionContext): string {
     const handler = context.getHandler();
     const controller = context.getClass();
-    
+
     return `${controller.name}.${handler.name}`;
   }
 }
@@ -297,11 +300,14 @@ export class PerformanceTrackingInterceptor implements NestInterceptor {
 @Injectable()
 export class ErrorRecoveryInterceptor implements NestInterceptor {
   private readonly logger = new Logger(ErrorRecoveryInterceptor.name);
-  private readonly circuitBreakers = new Map<string, {
-    failures: number;
-    lastFailure: number;
-    state: 'closed' | 'open' | 'half-open';
-  }>();
+  private readonly circuitBreakers = new Map<
+    string,
+    {
+      failures: number;
+      lastFailure: number;
+      state: 'closed' | 'open' | 'half-open';
+    }
+  >();
 
   /**
    * Initializes a new instance of the Error Recovery Interceptor.
@@ -316,15 +322,15 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
       recoveryTimeout?: number;
       enableRetry?: boolean;
       maxRetries?: number;
-    } = {}
+    } = {},
   ) {
     this.recoveryConfig = {
       enableCircuitBreaker: true,
       failureThreshold: 5,
       recoveryTimeout: 60000, // 1 minute
-      enableRetry: false,      // Disabled by default to avoid infinite loops
+      enableRetry: false, // Disabled by default to avoid infinite loops
       maxRetries: 3,
-      ...recoveryConfig
+      ...recoveryConfig,
     };
   }
 
@@ -338,19 +344,22 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
     const operationName = this.getOperationName(context);
 
     // Check circuit breaker state
-    if (this.recoveryConfig.enableCircuitBreaker && this.isCircuitOpen(operationName)) {
+    if (
+      this.recoveryConfig.enableCircuitBreaker &&
+      this.isCircuitOpen(operationName)
+    ) {
       const circuitBreakerError = new EnhancedAppException(
         'EXTERNAL_SERVICE_ERROR' as any,
         'CIRCUIT_BREAKER_OPEN',
         `Circuit breaker is open for operation: ${operationName}`,
-        503
+        503,
       )
         .withBusinessImpact('high')
         .withUserImpact('severe')
         .withRecoveryStrategies([
           'Wait for circuit breaker to reset',
           'Use alternative service',
-          'Enable fallback mechanism'
+          'Enable fallback mechanism',
         ]);
 
       return throwError(() => circuitBreakerError);
@@ -371,23 +380,26 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
 
         // Enhance error with recovery context
         if (error instanceof EnhancedAppException) {
-          const recoveryStrategies = this.getRecoveryStrategies(error, operationName);
+          const recoveryStrategies = this.getRecoveryStrategies(
+            error,
+            operationName,
+          );
           error.withRecoveryStrategies(recoveryStrategies);
-          
+
           // Add circuit breaker information
           if (this.recoveryConfig.enableCircuitBreaker) {
             const circuitState = this.circuitBreakers.get(operationName);
             if (circuitState) {
               error.withMonitoringTags({
                 'circuit.state': circuitState.state,
-                'circuit.failures': circuitState.failures.toString()
+                'circuit.failures': circuitState.failures.toString(),
               });
             }
           }
         }
 
         return throwError(() => error);
-      })
+      }),
     );
   }
 
@@ -399,7 +411,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
     if (!circuit) return false;
 
     const now = Date.now();
-    
+
     if (circuit.state === 'open') {
       // Check if recovery timeout has passed
       if (now - circuit.lastFailure > this.recoveryConfig.recoveryTimeout!) {
@@ -430,7 +442,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
       circuit.state = 'open';
       this.logger.error(
         `Circuit breaker opened for ${operationName} after ${circuit.failures} failures`,
-        { operationName, failures: circuit.failures }
+        { operationName, failures: circuit.failures },
       );
     }
   }
@@ -452,7 +464,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
    */
   private getRecoveryStrategies(
     error: EnhancedAppException,
-    operationName: string
+    operationName: string,
   ): string[] {
     const baseStrategies = error.enhancedDetails.recoveryStrategies || [];
     const contextStrategies: string[] = [];
@@ -462,7 +474,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
       const circuit = this.circuitBreakers.get(operationName);
       if (circuit && circuit.state === 'open') {
         contextStrategies.push(
-          `Wait ${Math.round(this.recoveryConfig.recoveryTimeout! / 1000)}s for circuit breaker reset`
+          `Wait ${Math.round(this.recoveryConfig.recoveryTimeout! / 1000)}s for circuit breaker reset`,
         );
       }
     }
@@ -470,7 +482,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
     // Add retry strategies if enabled
     if (this.recoveryConfig.enableRetry) {
       contextStrategies.push(
-        `Retry operation (max ${this.recoveryConfig.maxRetries} attempts)`
+        `Retry operation (max ${this.recoveryConfig.maxRetries} attempts)`,
       );
     }
 
@@ -483,7 +495,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
   private getOperationName(context: ExecutionContext): string {
     const handler = context.getHandler();
     const controller = context.getClass();
-    
+
     return `${controller.name}.${handler.name}`;
   }
 }
@@ -495,14 +507,18 @@ export class ErrorInterceptorFactory {
   /**
    * Create correlation interceptor
    */
-  static createCorrelationInterceptor(serviceName: string): ErrorCorrelationInterceptor {
+  static createCorrelationInterceptor(
+    serviceName: string,
+  ): ErrorCorrelationInterceptor {
     return new ErrorCorrelationInterceptor(serviceName);
   }
 
   /**
    * Create logging interceptor
    */
-  static createLoggingInterceptor(serviceName: string): ErrorLoggingInterceptor {
+  static createLoggingInterceptor(
+    serviceName: string,
+  ): ErrorLoggingInterceptor {
     return new ErrorLoggingInterceptor(serviceName);
   }
 
@@ -511,7 +527,7 @@ export class ErrorInterceptorFactory {
    */
   static createPerformanceInterceptor(
     serviceName: string,
-    thresholds?: { warnThreshold?: number; errorThreshold?: number }
+    thresholds?: { warnThreshold?: number; errorThreshold?: number },
   ): PerformanceTrackingInterceptor {
     return new PerformanceTrackingInterceptor(serviceName, thresholds);
   }
@@ -525,7 +541,7 @@ export class ErrorInterceptorFactory {
       enableCircuitBreaker?: boolean;
       failureThreshold?: number;
       recoveryTimeout?: number;
-    }
+    },
   ): ErrorRecoveryInterceptor {
     return new ErrorRecoveryInterceptor(serviceName, config);
   }
@@ -540,19 +556,22 @@ export class ErrorInterceptorFactory {
       enableLogging?: boolean;
       enablePerformance?: boolean;
       enableRecovery?: boolean;
-      performanceThresholds?: { warnThreshold?: number; errorThreshold?: number };
+      performanceThresholds?: {
+        warnThreshold?: number;
+        errorThreshold?: number;
+      };
       recoveryConfig?: {
         enableCircuitBreaker?: boolean;
         failureThreshold?: number;
         recoveryTimeout?: number;
       };
-    } = {}
+    } = {},
   ): any[] {
     const {
       enableCorrelation = true,
       enableLogging = true,
       enablePerformance = true,
-      enableRecovery = false // Disabled by default to avoid complexity
+      enableRecovery = false, // Disabled by default to avoid complexity
     } = options;
 
     const interceptors: any[] = [];
@@ -566,11 +585,18 @@ export class ErrorInterceptorFactory {
     }
 
     if (enablePerformance) {
-      interceptors.push(this.createPerformanceInterceptor(serviceName, options.performanceThresholds));
+      interceptors.push(
+        this.createPerformanceInterceptor(
+          serviceName,
+          options.performanceThresholds,
+        ),
+      );
     }
 
     if (enableRecovery) {
-      interceptors.push(this.createRecoveryInterceptor(serviceName, options.recoveryConfig));
+      interceptors.push(
+        this.createRecoveryInterceptor(serviceName, options.recoveryConfig),
+      );
     }
 
     return interceptors;

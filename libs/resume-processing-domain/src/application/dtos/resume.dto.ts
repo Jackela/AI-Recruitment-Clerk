@@ -18,7 +18,7 @@ export interface ResumeDTO {
     company: string;
     position: string;
     startDate: string; // ISO 8601 Date
-    endDate: string;   // ISO 8601 Date or "present"
+    endDate: string; // ISO 8601 Date or "present"
     summary: string;
   }[];
   education: {

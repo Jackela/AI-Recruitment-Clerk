@@ -6,7 +6,7 @@ export class UsageRecordResult {
     private readonly success: boolean,
     private readonly currentUsage?: number,
     private readonly remainingQuota?: number,
-    private readonly error?: string
+    private readonly error?: string,
   ) {}
 
   /**
@@ -15,7 +15,10 @@ export class UsageRecordResult {
    * @param remainingQuota - The remaining quota.
    * @returns The UsageRecordResult.
    */
-  static success(currentUsage: number, remainingQuota: number): UsageRecordResult {
+  static success(
+    currentUsage: number,
+    remainingQuota: number,
+  ): UsageRecordResult {
     return new UsageRecordResult(true, currentUsage, remainingQuota);
   }
 

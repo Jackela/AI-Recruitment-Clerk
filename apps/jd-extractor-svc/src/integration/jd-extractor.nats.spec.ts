@@ -3,14 +3,19 @@ import { JdEventsController } from '../app/jd-events.controller';
 import { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
 import { LlmService } from '../extraction/llm.service';
 
-type JobSubmissionHandler = (event: { jobId: string; jdText: string }) => Promise<void>;
+type JobSubmissionHandler = (event: {
+  jobId: string;
+  jdText: string;
+}) => Promise<void>;
 
 class JdExtractorNatsServiceStub {
   public jobSubmissionHandler?: JobSubmissionHandler;
 
-  public subscribeToJobSubmissions = jest.fn(async (handler: JobSubmissionHandler) => {
-    this.jobSubmissionHandler = handler;
-  });
+  public subscribeToJobSubmissions = jest.fn(
+    async (handler: JobSubmissionHandler) => {
+      this.jobSubmissionHandler = handler;
+    },
+  );
 
   public publishAnalysisJdExtracted = jest
     .fn()
@@ -55,9 +60,14 @@ describe('JD Extractor NATS integration', () => {
     expect(natsStub.subscribeToJobSubmissions).toHaveBeenCalledTimes(1);
     expect(natsStub.jobSubmissionHandler).toBeDefined();
 
-    await natsStub.jobSubmissionHandler!({ jobId: 'job-123', jdText: 'Analyze this JD' });
+    await natsStub.jobSubmissionHandler!({
+      jobId: 'job-123',
+      jdText: 'Analyze this JD',
+    });
 
-    expect(llmServiceMock.extractJobRequirements).toHaveBeenCalledWith('Analyze this JD');
+    expect(llmServiceMock.extractJobRequirements).toHaveBeenCalledWith(
+      'Analyze this JD',
+    );
     expect(natsStub.publishAnalysisJdExtracted).toHaveBeenCalledWith(
       expect.objectContaining({
         jobId: 'job-123',
@@ -72,7 +82,10 @@ describe('JD Extractor NATS integration', () => {
     const failure = new Error('LLM offline');
     llmServiceMock.extractJobRequirements.mockRejectedValueOnce(failure);
 
-    await natsStub.jobSubmissionHandler!({ jobId: 'job-error', jdText: 'bad jd' });
+    await natsStub.jobSubmissionHandler!({
+      jobId: 'job-error',
+      jdText: 'bad jd',
+    });
 
     expect(natsStub.publishProcessingError).toHaveBeenCalledWith(
       'job-error',

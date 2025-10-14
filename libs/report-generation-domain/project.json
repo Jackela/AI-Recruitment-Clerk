@@ -18,9 +18,7 @@
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "libs/report-generation-domain/**/*.ts"
-        ]
+        "lintFilePatterns": ["libs/report-generation-domain/**/*.ts"]
       }
     },
     "test": {

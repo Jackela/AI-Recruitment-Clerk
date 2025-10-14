@@ -99,14 +99,20 @@ export class LlmService {
       if (startIdx === -1) return '';
       const afterStart = startIdx + startMarker.length;
       const endIdx = prompt.indexOf(endMarker, afterStart);
-      const body = endIdx === -1 ? prompt.slice(afterStart) : prompt.slice(afterStart, endIdx);
+      const body =
+        endIdx === -1
+          ? prompt.slice(afterStart)
+          : prompt.slice(afterStart, endIdx);
       return body.trim();
     };
 
     const parseJd = (jdText: string) => {
       const text = jdText || '';
       const lower = text.toLowerCase();
-      const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+      const lines = text
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .filter(Boolean);
 
       // Technical skills: pick common techs or from Requirements bullets
       const techCandidates = [
@@ -131,12 +137,23 @@ export class LlmService {
         // Fallback: scan bullets after 'Requirements:'
         let inReq = false;
         for (const l of lines) {
-          if (/^requirements[:：]?$/i.test(l)) { inReq = true; continue; }
-          if (/^[A-Za-z].*[:：]$/.test(l)) { inReq = false; }
+          if (/^requirements[:：]?$/i.test(l)) {
+            inReq = true;
+            continue;
+          }
+          if (/^[A-Za-z].*[:：]$/.test(l)) {
+            inReq = false;
+          }
           if (inReq && /^[-•]/.test(l)) {
             const lc = l.toLowerCase();
             for (const cand of techCandidates) {
-              if (lc.includes(cand)) tech.push(cand.replace('nodejs','Node.js').replace('node.js','Node.js').replace(/\bjavascript\b/i,'JavaScript'));
+              if (lc.includes(cand))
+                tech.push(
+                  cand
+                    .replace('nodejs', 'Node.js')
+                    .replace('node.js', 'Node.js')
+                    .replace(/\bjavascript\b/i, 'JavaScript'),
+                );
             }
           }
         }
@@ -150,8 +167,13 @@ export class LlmService {
         // try bullets under Requirements/Responsibilities
         let inAny = false;
         for (const l of lines) {
-          if (/^(requirements|responsibilities)[:：]?$/i.test(l)) { inAny = true; continue; }
-          if (/^[A-Za-z].*[:：]$/.test(l)) { inAny = false; }
+          if (/^(requirements|responsibilities)[:：]?$/i.test(l)) {
+            inAny = true;
+            continue;
+          }
+          if (/^[A-Za-z].*[:：]$/.test(l)) {
+            inAny = false;
+          }
           if (inAny && /^[-•]/.test(l)) {
             const lc = l.toLowerCase();
             if (lc.includes('communication')) softSet.add('communication');
@@ -170,7 +192,7 @@ export class LlmService {
 
       // Education
       let education = 'Not specified';
-      if (lower.includes("bachelor")) education = "Bachelor's degree";
+      if (lower.includes('bachelor')) education = "Bachelor's degree";
       else if (lower.includes('master')) education = "Master's degree";
       else if (lower.includes('phd')) education = 'PhD or equivalent';
 
@@ -184,8 +206,11 @@ export class LlmService {
           if (after) responsibilities.push(after);
           continue;
         }
-        if (/^[A-Za-z].*[:：]$/.test(l)) { inResp = false; }
-        if (inResp && /^[-•]/.test(l)) responsibilities.push(l.replace(/^[-•]\s*/, '').trim());
+        if (/^[A-Za-z].*[:：]$/.test(l)) {
+          inResp = false;
+        }
+        if (inResp && /^[-•]/.test(l))
+          responsibilities.push(l.replace(/^[-•]\s*/, '').trim());
       }
       if (responsibilities.length === 0) {
         responsibilities.push('Key responsibilities to be defined');
@@ -201,14 +226,28 @@ export class LlmService {
           if (after) {
             after
               .split(/[,;]/)
-              .map((s) => s.trim().toLowerCase().replace(/[\.;:,]+$/,''))
+              .map((s) =>
+                s
+                  .trim()
+                  .toLowerCase()
+                  .replace(/[\.;:,]+$/, ''),
+              )
               .filter(Boolean)
               .forEach((b) => benefits.push(b));
           }
           continue;
         }
-        if (/^[A-Za-z].*[:：]$/.test(l)) { inBen = false; }
-        if (inBen && /^[-•]/.test(l)) benefits.push(l.replace(/^[-•]\s*/, '').trim().toLowerCase().replace(/[\.;:,]+$/,''));
+        if (/^[A-Za-z].*[:：]$/.test(l)) {
+          inBen = false;
+        }
+        if (inBen && /^[-•]/.test(l))
+          benefits.push(
+            l
+              .replace(/^[-•]\s*/, '')
+              .trim()
+              .toLowerCase()
+              .replace(/[\.;:,]+$/, ''),
+          );
       }
 
       // Company
@@ -221,8 +260,10 @@ export class LlmService {
         const sentence = after.split(/\bis\b/i)[0].trim();
         companyName = sentence || undefined;
         if (lower.includes('software')) companyIndustry = 'Software Technology';
-        const sizeMatch = lower.match(/(\d+\s*\+?\s*employees|\d+\s*-\s*\d+\s*employees|\d+\s*\+?\s*\w*\s*employees)/);
-        if (sizeMatch) companySize = sizeMatch[0].replace(/\s+/g,' ').trim();
+        const sizeMatch = lower.match(
+          /(\d+\s*\+?\s*employees|\d+\s*-\s*\d+\s*employees|\d+\s*\+?\s*\w*\s*employees)/,
+        );
+        if (sizeMatch) companySize = sizeMatch[0].replace(/\s+/g, ' ').trim();
       }
       if (!companyName) {
         companyName = lines[0] || undefined;

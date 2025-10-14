@@ -17,7 +17,7 @@ export class AnalyticsEvent {
     private status: EventStatus,
     private readonly createdAt: Date,
     private processedAt?: Date,
-    private retentionExpiry?: Date
+    private retentionExpiry?: Date,
   ) {}
 
   // 工厂方法 - 创建用户交互事件
@@ -35,7 +35,7 @@ export class AnalyticsEvent {
     userId: string,
     eventType: EventType,
     eventData: any,
-    context?: any
+    context?: any,
   ): AnalyticsEvent {
     const eventId = AnalyticsEventId.generate();
     const session = UserSession.create(sessionId, userId);
@@ -50,17 +50,19 @@ export class AnalyticsEvent {
       timestamp,
       eventContext,
       EventStatus.PENDING_PROCESSING,
-      new Date()
+      new Date(),
     );
 
-    event.addEvent(new AnalyticsEventCreatedEvent(
-      eventId.getValue(),
-      sessionId,
-      userId,
-      eventType,
-      timestamp.toISOString(),
-      new Date()
-    ));
+    event.addEvent(
+      new AnalyticsEventCreatedEvent(
+        eventId.getValue(),
+        sessionId,
+        userId,
+        eventType,
+        timestamp.toISOString(),
+        new Date(),
+      ),
+    );
 
     return event;
   }
@@ -78,7 +80,7 @@ export class AnalyticsEvent {
     operation: string,
     duration: number,
     success: boolean,
-    metadata?: any
+    metadata?: any,
   ): AnalyticsEvent {
     const eventId = AnalyticsEventId.generate();
     const session = UserSession.createSystemSession();
@@ -93,16 +95,18 @@ export class AnalyticsEvent {
       timestamp,
       eventContext,
       EventStatus.PENDING_PROCESSING,
-      new Date()
+      new Date(),
     );
 
-    event.addEvent(new SystemPerformanceEventCreatedEvent(
-      eventId.getValue(),
-      operation,
-      duration,
-      success,
-      new Date()
-    ));
+    event.addEvent(
+      new SystemPerformanceEventCreatedEvent(
+        eventId.getValue(),
+        operation,
+        duration,
+        success,
+        new Date(),
+      ),
+    );
 
     return event;
   }
@@ -120,13 +124,17 @@ export class AnalyticsEvent {
     metricName: string,
     metricValue: number,
     metricUnit: MetricUnit,
-    dimensions?: Record<string, string>
+    dimensions?: Record<string, string>,
   ): AnalyticsEvent {
     const eventId = AnalyticsEventId.generate();
     const session = UserSession.createSystemSession();
     const timestamp = EventTimestamp.now();
     const eventContext = EventContext.create({ dimensions: dimensions || {} });
-    const data = EventData.createMetricEvent(metricName, metricValue, metricUnit);
+    const data = EventData.createMetricEvent(
+      metricName,
+      metricValue,
+      metricUnit,
+    );
 
     const event = new AnalyticsEvent(
       eventId,
@@ -135,17 +143,19 @@ export class AnalyticsEvent {
       timestamp,
       eventContext,
       EventStatus.PENDING_PROCESSING,
-      new Date()
+      new Date(),
     );
 
-    event.addEvent(new BusinessMetricEventCreatedEvent(
-      eventId.getValue(),
-      metricName,
-      metricValue,
-      metricUnit,
-      dimensions || {},
-      new Date()
-    ));
+    event.addEvent(
+      new BusinessMetricEventCreatedEvent(
+        eventId.getValue(),
+        metricName,
+        metricValue,
+        metricUnit,
+        dimensions || {},
+        new Date(),
+      ),
+    );
 
     return event;
   }
@@ -166,7 +176,7 @@ export class AnalyticsEvent {
       data.status,
       new Date(data.createdAt),
       data.processedAt ? new Date(data.processedAt) : undefined,
-      data.retentionExpiry ? new Date(data.retentionExpiry) : undefined
+      data.retentionExpiry ? new Date(data.retentionExpiry) : undefined,
     );
   }
 
@@ -208,19 +218,23 @@ export class AnalyticsEvent {
     const result = new EventValidationResult(isValid, validationErrors);
 
     if (isValid) {
-      this.addEvent(new AnalyticsEventValidatedEvent(
-        this.id.getValue(),
-        this.session.getSessionId(),
-        this.eventData.getEventType(),
-        new Date()
-      ));
+      this.addEvent(
+        new AnalyticsEventValidatedEvent(
+          this.id.getValue(),
+          this.session.getSessionId(),
+          this.eventData.getEventType(),
+          new Date(),
+        ),
+      );
     } else {
-      this.addEvent(new AnalyticsEventValidationFailedEvent(
-        this.id.getValue(),
-        this.session.getSessionId(),
-        validationErrors,
-        new Date()
-      ));
+      this.addEvent(
+        new AnalyticsEventValidationFailedEvent(
+          this.id.getValue(),
+          this.session.getSessionId(),
+          validationErrors,
+          new Date(),
+        ),
+      );
     }
 
     return result;
@@ -241,12 +255,14 @@ export class AnalyticsEvent {
     // 设置数据保留期限
     this.retentionExpiry = this.calculateRetentionExpiry();
 
-    this.addEvent(new AnalyticsEventProcessedEvent(
-      this.id.getValue(),
-      this.session.getSessionId(),
-      this.eventData.getEventType(),
-      new Date()
-    ));
+    this.addEvent(
+      new AnalyticsEventProcessedEvent(
+        this.id.getValue(),
+        this.session.getSessionId(),
+        this.eventData.getEventType(),
+        new Date(),
+      ),
+    );
   }
 
   // 匿名化处理敏感数据
@@ -265,10 +281,9 @@ export class AnalyticsEvent {
 
     this.status = EventStatus.ANONYMIZED;
 
-    this.addEvent(new AnalyticsEventAnonymizedEvent(
-      this.id.getValue(),
-      new Date()
-    ));
+    this.addEvent(
+      new AnalyticsEventAnonymizedEvent(this.id.getValue(), new Date()),
+    );
   }
 
   // 标记为已过期，准备删除
@@ -282,11 +297,13 @@ export class AnalyticsEvent {
 
     this.status = EventStatus.EXPIRED;
 
-    this.addEvent(new AnalyticsEventExpiredEvent(
-      this.id.getValue(),
-      this.session.getSessionId(),
-      new Date()
-    ));
+    this.addEvent(
+      new AnalyticsEventExpiredEvent(
+        this.id.getValue(),
+        this.session.getSessionId(),
+        new Date(),
+      ),
+    );
   }
 
   // 隐私合规性验证
@@ -295,7 +312,9 @@ export class AnalyticsEvent {
 
     // 检查是否包含敏感个人信息
     if (this.eventData.containsSensitiveData()) {
-      errors.push('Event contains sensitive personal data without proper anonymization');
+      errors.push(
+        'Event contains sensitive personal data without proper anonymization',
+      );
     }
 
     // 检查数据保留政策合规性
@@ -325,7 +344,7 @@ export class AnalyticsEvent {
       case EventType.USER_INTERACTION:
         return 730; // 2年
       case EventType.SYSTEM_PERFORMANCE:
-        return 90;  // 3个月
+        return 90; // 3个月
       case EventType.BUSINESS_METRIC:
         return 1095; // 3年
       case EventType.ERROR_EVENT:
@@ -361,7 +380,9 @@ export class AnalyticsEvent {
       processedAt: this.processedAt,
       retentionExpiry: this.retentionExpiry,
       isAnonymized: this.status === EventStatus.ANONYMIZED,
-      daysSinceCreation: Math.floor((Date.now() - this.createdAt.getTime()) / (1000 * 60 * 60 * 24))
+      daysSinceCreation: Math.floor(
+        (Date.now() - this.createdAt.getTime()) / (1000 * 60 * 60 * 24),
+      ),
     });
   }
 
@@ -465,7 +486,7 @@ export class AnalyticsEventId extends ValueObject<{ value: string }> {
     const random = Math.random().toString(36).substr(2, 9);
     return new AnalyticsEventId({ value: `analytics_${timestamp}_${random}` });
   }
-  
+
   /**
    * Retrieves value.
    * @returns The string value.
@@ -494,14 +515,19 @@ export class UserSession extends ValueObject<{
    * @param geoLocation - The geo location.
    * @returns The UserSession.
    */
-  static create(sessionId: string, userId?: string, deviceInfo?: DeviceInfo, geoLocation?: GeoLocation): UserSession {
+  static create(
+    sessionId: string,
+    userId?: string,
+    deviceInfo?: DeviceInfo,
+    geoLocation?: GeoLocation,
+  ): UserSession {
     return new UserSession({
       sessionId,
       userId,
       deviceInfo,
       geoLocation,
       consentStatus: ConsentStatus.GRANTED,
-      isSystemSession: false
+      isSystemSession: false,
     });
   }
 
@@ -513,7 +539,7 @@ export class UserSession extends ValueObject<{
     return new UserSession({
       sessionId: `system_${Date.now()}`,
       consentStatus: ConsentStatus.NOT_APPLICABLE,
-      isSystemSession: true
+      isSystemSession: true,
     });
   }
 
@@ -526,10 +552,14 @@ export class UserSession extends ValueObject<{
     return new UserSession({
       sessionId: data.sessionId,
       userId: data.userId,
-      deviceInfo: data.deviceInfo ? DeviceInfo.restore(data.deviceInfo) : undefined,
-      geoLocation: data.geoLocation ? GeoLocation.restore(data.geoLocation) : undefined,
+      deviceInfo: data.deviceInfo
+        ? DeviceInfo.restore(data.deviceInfo)
+        : undefined,
+      geoLocation: data.geoLocation
+        ? GeoLocation.restore(data.geoLocation)
+        : undefined,
       consentStatus: data.consentStatus,
-      isSystemSession: data.isSystemSession
+      isSystemSession: data.isSystemSession,
     });
   }
 
@@ -554,8 +584,10 @@ export class UserSession extends ValueObject<{
    * @returns The boolean value.
    */
   hasValidConsent(): boolean {
-    return this.props.consentStatus === ConsentStatus.GRANTED || 
-           this.props.consentStatus === ConsentStatus.NOT_APPLICABLE;
+    return (
+      this.props.consentStatus === ConsentStatus.GRANTED ||
+      this.props.consentStatus === ConsentStatus.NOT_APPLICABLE
+    );
   }
 
   /**
@@ -677,7 +709,7 @@ export class EventData extends ValueObject<{
       eventType,
       eventCategory: EventData.categorizeEvent(eventType),
       payload,
-      sensitiveDataMask: []
+      sensitiveDataMask: [],
     });
   }
 
@@ -688,12 +720,16 @@ export class EventData extends ValueObject<{
    * @param success - The success.
    * @returns The EventData.
    */
-  static createPerformanceEvent(operation: string, duration: number, success: boolean): EventData {
+  static createPerformanceEvent(
+    operation: string,
+    duration: number,
+    success: boolean,
+  ): EventData {
     return new EventData({
       eventType: EventType.SYSTEM_PERFORMANCE,
       eventCategory: EventCategory.SYSTEM,
       payload: { operation, duration, success },
-      sensitiveDataMask: []
+      sensitiveDataMask: [],
     });
   }
 
@@ -704,12 +740,16 @@ export class EventData extends ValueObject<{
    * @param metricUnit - The metric unit.
    * @returns The EventData.
    */
-  static createMetricEvent(metricName: string, metricValue: number, metricUnit: MetricUnit): EventData {
+  static createMetricEvent(
+    metricName: string,
+    metricValue: number,
+    metricUnit: MetricUnit,
+  ): EventData {
     return new EventData({
       eventType: EventType.BUSINESS_METRIC,
       eventCategory: EventCategory.BUSINESS,
       payload: { metricName, metricValue, metricUnit },
-      sensitiveDataMask: []
+      sensitiveDataMask: [],
     });
   }
 
@@ -728,16 +768,16 @@ export class EventData extends ValueObject<{
       case EventType.PAGE_VIEW:
       case EventType.FORM_SUBMISSION:
         return EventCategory.USER_BEHAVIOR;
-      
+
       case EventType.SYSTEM_PERFORMANCE:
       case EventType.ERROR_EVENT:
       case EventType.API_CALL:
         return EventCategory.SYSTEM;
-      
+
       case EventType.BUSINESS_METRIC:
       case EventType.CONVERSION_EVENT:
         return EventCategory.BUSINESS;
-      
+
       default:
         return EventCategory.OTHER;
     }
@@ -767,8 +807,8 @@ export class EventData extends ValueObject<{
     // 检查是否包含敏感数据的逻辑
     const sensitiveKeys = ['email', 'phone', 'address', 'ssn', 'creditCard'];
     const payloadStr = JSON.stringify(this.props.payload).toLowerCase();
-    
-    return sensitiveKeys.some(key => payloadStr.includes(key));
+
+    return sensitiveKeys.some((key) => payloadStr.includes(key));
   }
 
   /**
@@ -810,7 +850,10 @@ export class EventData extends ValueObject<{
     if (this.containsSensitiveData()) {
       const newProps = { ...this.props };
       newProps.payload = { ...this.props.payload, _anonymized: true };
-      Object.defineProperty(this, 'props', { value: newProps, writable: false });
+      Object.defineProperty(this, 'props', {
+        value: newProps,
+        writable: false,
+      });
     }
   }
 }
@@ -830,7 +873,7 @@ export class EventTimestamp extends ValueObject<{
   static now(timezone?: string): EventTimestamp {
     return new EventTimestamp({
       timestamp: new Date(),
-      timezone: timezone || Intl.DateTimeFormat().resolvedOptions().timeZone
+      timezone: timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
     });
   }
 
@@ -842,7 +885,7 @@ export class EventTimestamp extends ValueObject<{
   static restore(data: any): EventTimestamp {
     return new EventTimestamp({
       timestamp: new Date(data.timestamp),
-      timezone: data.timezone
+      timezone: data.timezone,
     });
   }
 
@@ -918,7 +961,7 @@ export class EventContext extends ValueObject<{
       referrer: context.referrer,
       pageUrl: context.pageUrl,
       dimensions: context.dimensions || {},
-      metadata: context.metadata || {}
+      metadata: context.metadata || {},
     });
   }
 
@@ -982,7 +1025,7 @@ export class EventValidationResult {
    */
   constructor(
     public readonly isValid: boolean,
-    public readonly errors: string[]
+    public readonly errors: string[],
   ) {}
 }
 
@@ -997,7 +1040,7 @@ export class PrivacyComplianceResult {
    */
   constructor(
     public readonly isCompliant: boolean,
-    public readonly errors: string[]
+    public readonly errors: string[],
   ) {}
 }
 
@@ -1022,37 +1065,51 @@ export class AnalyticsEventSummary extends ValueObject<{
    * Performs the id operation.
    * @returns The string value.
    */
-  get id(): string { return this.props.id; }
+  get id(): string {
+    return this.props.id;
+  }
   /**
    * Performs the session id operation.
    * @returns The string value.
    */
-  get sessionId(): string { return this.props.sessionId; }
+  get sessionId(): string {
+    return this.props.sessionId;
+  }
   /**
    * Performs the user id operation.
    * @returns The string | undefined.
    */
-  get userId(): string | undefined { return this.props.userId; }
+  get userId(): string | undefined {
+    return this.props.userId;
+  }
   /**
    * Performs the event type operation.
    * @returns The EventType.
    */
-  get eventType(): EventType { return this.props.eventType; }
+  get eventType(): EventType {
+    return this.props.eventType;
+  }
   /**
    * Performs the status operation.
    * @returns The EventStatus.
    */
-  get status(): EventStatus { return this.props.status; }
+  get status(): EventStatus {
+    return this.props.status;
+  }
   /**
    * Performs the is anonymized operation.
    * @returns The boolean value.
    */
-  get isAnonymized(): boolean { return this.props.isAnonymized; }
+  get isAnonymized(): boolean {
+    return this.props.isAnonymized;
+  }
   /**
    * Performs the days since creation operation.
    * @returns The number value.
    */
-  get daysSinceCreation(): number { return this.props.daysSinceCreation; }
+  get daysSinceCreation(): number {
+    return this.props.daysSinceCreation;
+  }
 }
 
 // 枚举定义
@@ -1064,14 +1121,14 @@ export enum EventType {
   ERROR_EVENT = 'error_event',
   API_CALL = 'api_call',
   BUSINESS_METRIC = 'business_metric',
-  CONVERSION_EVENT = 'conversion_event'
+  CONVERSION_EVENT = 'conversion_event',
 }
 
 export enum EventCategory {
   USER_BEHAVIOR = 'user_behavior',
   SYSTEM = 'system',
   BUSINESS = 'business',
-  OTHER = 'other'
+  OTHER = 'other',
 }
 
 export enum EventStatus {
@@ -1079,14 +1136,14 @@ export enum EventStatus {
   PROCESSED = 'processed',
   ANONYMIZED = 'anonymized',
   EXPIRED = 'expired',
-  ERROR = 'error'
+  ERROR = 'error',
 }
 
 export enum ConsentStatus {
   GRANTED = 'granted',
   DENIED = 'denied',
   PENDING = 'pending',
-  NOT_APPLICABLE = 'not_applicable'
+  NOT_APPLICABLE = 'not_applicable',
 }
 
 export enum MetricUnit {
@@ -1094,7 +1151,7 @@ export enum MetricUnit {
   PERCENTAGE = 'percentage',
   DURATION_MS = 'duration_ms',
   BYTES = 'bytes',
-  CURRENCY = 'currency'
+  CURRENCY = 'currency',
 }
 
 // 接口定义
@@ -1133,7 +1190,7 @@ export class AnalyticsEventCreatedEvent implements DomainEvent {
     public readonly userId: string | undefined,
     public readonly eventType: EventType,
     public readonly timestamp: string,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -1154,7 +1211,7 @@ export class SystemPerformanceEventCreatedEvent implements DomainEvent {
     public readonly operation: string,
     public readonly duration: number,
     public readonly success: boolean,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -1177,7 +1234,7 @@ export class BusinessMetricEventCreatedEvent implements DomainEvent {
     public readonly metricValue: number,
     public readonly metricUnit: MetricUnit,
     public readonly dimensions: Record<string, string>,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -1196,7 +1253,7 @@ export class AnalyticsEventValidatedEvent implements DomainEvent {
     public readonly eventId: string,
     public readonly sessionId: string,
     public readonly eventType: EventType,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -1215,7 +1272,7 @@ export class AnalyticsEventValidationFailedEvent implements DomainEvent {
     public readonly eventId: string,
     public readonly sessionId: string,
     public readonly errors: string[],
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -1234,7 +1291,7 @@ export class AnalyticsEventProcessedEvent implements DomainEvent {
     public readonly eventId: string,
     public readonly sessionId: string,
     public readonly eventType: EventType,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -1249,7 +1306,7 @@ export class AnalyticsEventAnonymizedEvent implements DomainEvent {
    */
   constructor(
     public readonly eventId: string,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -1266,6 +1323,6 @@ export class AnalyticsEventExpiredEvent implements DomainEvent {
   constructor(
     public readonly eventId: string,
     public readonly sessionId: string,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }

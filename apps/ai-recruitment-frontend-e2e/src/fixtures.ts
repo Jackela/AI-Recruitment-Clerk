@@ -37,7 +37,10 @@ export const test = base.extend({
 
     const originalWaitForRequest = page.waitForRequest.bind(page);
     page.waitForRequest = (urlOrPredicate, options) => {
-      return originalWaitForRequest(urlOrPredicate as string | RegExp | ((request: Request) => boolean), options);
+      return originalWaitForRequest(
+        urlOrPredicate as string | RegExp | ((request: Request) => boolean),
+        options,
+      );
     };
 
     await use(page);

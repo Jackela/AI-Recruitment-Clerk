@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Headers, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
 import { testUsers, makeToken } from './test-users.store';
 
 /**
@@ -14,7 +22,8 @@ export class TestAuthController {
   @Post('auth/register')
   @HttpCode(HttpStatus.CREATED)
   register(@Body() body: any) {
-    const orgId = body.organizationId || 'org-' + Math.random().toString(36).slice(2, 8);
+    const orgId =
+      body.organizationId || 'org-' + Math.random().toString(36).slice(2, 8);
     const userId = 'user-' + Math.random().toString(36).slice(2, 8);
     const now = new Date().toISOString();
 
@@ -68,7 +77,10 @@ export class TestAuthController {
     if (!token.startsWith('test-token-')) {
       return { success: false, error: 'Invalid test token' };
     }
-    const email = Buffer.from(token.replace('test-token-', ''), 'base64').toString();
+    const email = Buffer.from(
+      token.replace('test-token-', ''),
+      'base64',
+    ).toString();
     const user = testUsers.get(email);
     return {
       success: true,

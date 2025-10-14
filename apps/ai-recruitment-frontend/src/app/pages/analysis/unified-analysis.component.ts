@@ -366,6 +366,7 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
   // Analysis Methods
   private async startAnalysis(uploadData: FileUploadData): Promise<void> {
     this.isSubmitting.set(true);
+    this.sessionId.set('');
     this.currentState.set('analyzing');
     this.resetAnalysisSteps();
     this.updateStepStatus('upload', 'active');
@@ -381,12 +382,16 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
         .toPromise();
 
       const sessionId = response?.data?.analysisId || '';
-      this.sessionId.set(sessionId);
-
-      if (sessionId) {
-        this.updateStepStatus('upload', 'completed');
-        this.updateStepStatus('parse', 'active');
+      if (!sessionId) {
+        const errorMessage = '未能创建分析会话，请稍后重试';
+        this.toastService.error(errorMessage);
+        this.handleAnalysisError({ message: errorMessage });
+        return;
       }
+
+      this.sessionId.set(sessionId);
+      this.updateStepStatus('upload', 'completed');
+      this.updateStepStatus('parse', 'active');
     } catch (error) {
       this.handleAnalysisError(error);
     } finally {

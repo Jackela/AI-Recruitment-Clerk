@@ -34,7 +34,7 @@ describe('DBC Production Monitoring', () => {
         memoryUsage: 1024,
         success: true,
         timestamp: new Date(),
-        serviceContext: 'ScoringService'
+        serviceContext: 'ScoringService',
       };
 
       monitor.recordContractExecution(metric);
@@ -54,7 +54,7 @@ describe('DBC Production Monitoring', () => {
         memoryUsage: 2048,
         success: true,
         timestamp: new Date(),
-        serviceContext: 'ReportService'
+        serviceContext: 'ReportService',
       };
 
       const violationMetric: ContractMetrics = {
@@ -65,7 +65,7 @@ describe('DBC Production Monitoring', () => {
         success: false,
         errorMessage: 'Invalid input parameters',
         timestamp: new Date(),
-        serviceContext: 'ReportService'
+        serviceContext: 'ReportService',
       };
 
       monitor.recordContractExecution(successMetric);
@@ -88,13 +88,15 @@ describe('DBC Production Monitoring', () => {
           success: i < 4, // One failure
           errorMessage: i === 4 ? 'Processing timeout' : undefined,
           timestamp: new Date(),
-          serviceContext: 'ExtractionService'
+          serviceContext: 'ExtractionService',
         });
       }
 
       const stats = monitor.getPerformanceStats();
       const extractionProfile = stats.servicePerformance.find(
-        (p: any) => p.serviceName === 'ExtractionService' && p.operationName === 'extractJD'
+        (p: any) =>
+          p.serviceName === 'ExtractionService' &&
+          p.operationName === 'extractJD',
       );
 
       expect(extractionProfile).toBeDefined();
@@ -116,21 +118,25 @@ describe('DBC Production Monitoring', () => {
           success: i < 2, // Only first 2 succeed, rest fail
           errorMessage: i >= 2 ? 'Contract violation' : undefined,
           timestamp: new Date(),
-          serviceContext: 'TestService'
+          serviceContext: 'TestService',
         });
       }
 
       const alerts = monitor.getActiveAlerts();
-      const criticalAlert = alerts.find(alert => 
-        alert.metricName === 'violationRate' && alert.alertLevel === 'critical'
+      const criticalAlert = alerts.find(
+        (alert) =>
+          alert.metricName === 'violationRate' &&
+          alert.alertLevel === 'critical',
       );
-      const warningAlert = alerts.find(alert => 
-        alert.metricName === 'violationRate' && alert.alertLevel === 'warning'
+      const warningAlert = alerts.find(
+        (alert) =>
+          alert.metricName === 'violationRate' &&
+          alert.alertLevel === 'warning',
       );
 
       // Should have at least a warning alert (>5%) or critical alert (>15%)
       expect(criticalAlert || warningAlert).toBeDefined();
-      
+
       if (criticalAlert) {
         expect(criticalAlert.currentValue).toBeGreaterThan(0.15);
       } else if (warningAlert) {
@@ -148,21 +154,25 @@ describe('DBC Production Monitoring', () => {
           memoryUsage: 1024,
           success: true,
           timestamp: new Date(),
-          serviceContext: 'SlowService'
+          serviceContext: 'SlowService',
         });
       }
 
       const alerts = monitor.getActiveAlerts();
-      const criticalAlert = alerts.find(alert => 
-        alert.metricName === 'averageExecutionTime' && alert.alertLevel === 'critical'
+      const criticalAlert = alerts.find(
+        (alert) =>
+          alert.metricName === 'averageExecutionTime' &&
+          alert.alertLevel === 'critical',
       );
-      const warningAlert = alerts.find(alert => 
-        alert.metricName === 'averageExecutionTime' && alert.alertLevel === 'warning'
+      const warningAlert = alerts.find(
+        (alert) =>
+          alert.metricName === 'averageExecutionTime' &&
+          alert.alertLevel === 'warning',
       );
 
       // Should have at least a warning alert (>100ms) or critical alert (>500ms)
       expect(criticalAlert || warningAlert).toBeDefined();
-      
+
       if (criticalAlert) {
         expect(criticalAlert.currentValue).toBeGreaterThan(500);
       } else if (warningAlert) {
@@ -181,7 +191,7 @@ describe('DBC Production Monitoring', () => {
           success: false,
           errorMessage: 'Test violation',
           timestamp: new Date(),
-          serviceContext: 'CooldownService'
+          serviceContext: 'CooldownService',
         });
       }
 
@@ -204,12 +214,14 @@ describe('DBC Production Monitoring', () => {
         memoryUsage: 1024,
         success: true,
         timestamp: new Date(),
-        serviceContext: 'ValidationService'
+        serviceContext: 'ValidationService',
       });
 
       const optimization = monitor.optimizePerformance();
       const slowOpOptimization = optimization.optimizations.find(
-        (opt: any) => opt.type === 'performance' && opt.issue === 'slow_contract_validation'
+        (opt: any) =>
+          opt.type === 'performance' &&
+          opt.issue === 'slow_contract_validation',
       );
 
       expect(slowOpOptimization).toBeDefined();
@@ -228,18 +240,22 @@ describe('DBC Production Monitoring', () => {
           success: i < 5, // 50% success rate
           errorMessage: i >= 5 ? 'Validation failed' : undefined,
           timestamp: new Date(),
-          serviceContext: 'ProblematicService'
+          serviceContext: 'ProblematicService',
         });
       }
 
       const optimization = monitor.optimizePerformance();
       const qualityOptimization = optimization.optimizations.find(
-        (opt: any) => opt.type === 'quality' && opt.issue === 'high_contract_violation_rate'
+        (opt: any) =>
+          opt.type === 'quality' &&
+          opt.issue === 'high_contract_violation_rate',
       );
 
       expect(qualityOptimization).toBeDefined();
       expect(qualityOptimization.impact).toBe('critical');
-      expect(qualityOptimization.affectedServices).toContain('ProblematicService');
+      expect(qualityOptimization.affectedServices).toContain(
+        'ProblematicService',
+      );
     });
 
     it('should suggest memory optimizations when needed', () => {
@@ -249,12 +265,12 @@ describe('DBC Production Monitoring', () => {
         heapTotal: 550 * 1024 * 1024,
         heapUsed: 520 * 1024 * 1024, // Over 500MB threshold
         external: 10 * 1024 * 1024,
-        arrayBuffers: 5 * 1024 * 1024
+        arrayBuffers: 5 * 1024 * 1024,
       });
 
       const optimization = monitor.optimizePerformance();
       const memoryOptimization = optimization.optimizations.find(
-        (opt: any) => opt.type === 'memory'
+        (opt: any) => opt.type === 'memory',
       );
 
       expect(memoryOptimization).toBeDefined();
@@ -273,7 +289,7 @@ describe('DBC Production Monitoring', () => {
         { success: true, time: 55 },
         { success: false, time: 30 },
         { success: true, time: 70 },
-        { success: true, time: 40 }
+        { success: true, time: 40 },
       ];
 
       scenarios.forEach((scenario, index) => {
@@ -285,7 +301,7 @@ describe('DBC Production Monitoring', () => {
           success: scenario.success,
           errorMessage: !scenario.success ? 'Test error' : undefined,
           timestamp: new Date(),
-          serviceContext: 'MixedService'
+          serviceContext: 'MixedService',
         });
       });
 
@@ -313,7 +329,7 @@ describe('DBC Production Monitoring', () => {
           memoryUsage: 512,
           success: true, // No violations
           timestamp: new Date(),
-          serviceContext: 'PerfectService'
+          serviceContext: 'PerfectService',
         });
       }
 
@@ -332,7 +348,7 @@ describe('DBC Production Monitoring', () => {
           success: i > 7, // High violations
           errorMessage: i <= 7 ? 'Multiple failures' : undefined,
           timestamp: new Date(),
-          serviceContext: 'PoorService'
+          serviceContext: 'PoorService',
         });
       }
 
@@ -351,7 +367,7 @@ describe('DBC Production Monitoring', () => {
         success: false, // Violation
         errorMessage: 'Contract failed',
         timestamp: new Date(),
-        serviceContext: 'ProblematicService'
+        serviceContext: 'ProblematicService',
       });
 
       const healthReport = monitor.generateHealthReport();
@@ -359,13 +375,17 @@ describe('DBC Production Monitoring', () => {
 
       expect(recommendations).toBeInstanceOf(Array);
       expect(recommendations.length).toBeGreaterThan(0);
-      
+
       // Should contain specific recommendations
-      const hasPerformanceRec = recommendations.some((rec: string) => 
-        rec.toLowerCase().includes('performance') || rec.toLowerCase().includes('slow')
+      const hasPerformanceRec = recommendations.some(
+        (rec: string) =>
+          rec.toLowerCase().includes('performance') ||
+          rec.toLowerCase().includes('slow'),
       );
-      const hasViolationRec = recommendations.some((rec: string) => 
-        rec.toLowerCase().includes('violation') || rec.toLowerCase().includes('validation')
+      const hasViolationRec = recommendations.some(
+        (rec: string) =>
+          rec.toLowerCase().includes('violation') ||
+          rec.toLowerCase().includes('validation'),
       );
 
       expect(hasPerformanceRec || hasViolationRec).toBe(true);
@@ -375,24 +395,28 @@ describe('DBC Production Monitoring', () => {
   describe('Monitoring Decorator', () => {
     // Import the singleton dbcMonitor for decorator tests
     const { dbcMonitor } = require('./dbc.monitoring');
-    
+
     class TestService {
       @withMonitoring('TestService')
       async successfulOperation(value: number): Promise<number> {
         // Simulate some processing time
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
         return value * 2;
       }
 
       @withMonitoring('TestService')
       async failingOperation(): Promise<never> {
-        throw new ContractViolationError('Test violation', 'PRE', 'TestService.failingOperation');
+        throw new ContractViolationError(
+          'Test violation',
+          'PRE',
+          'TestService.failingOperation',
+        );
       }
 
       @withMonitoring('TestService')
       async slowOperation(): Promise<string> {
         // Simulate slow operation
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 50));
         return 'completed';
       }
     }
@@ -402,7 +426,7 @@ describe('DBC Production Monitoring', () => {
       const result = await service.successfulOperation(5);
 
       expect(result).toBe(10);
-      
+
       // Check if monitoring recorded the operation using singleton
       const stats = dbcMonitor.getPerformanceStats();
       expect(stats.totalContracts).toBeGreaterThan(0);
@@ -410,9 +434,11 @@ describe('DBC Production Monitoring', () => {
 
     it('should monitor failing operations', async () => {
       const service = new TestService();
-      
-      await expect(service.failingOperation()).rejects.toThrow('Test violation');
-      
+
+      await expect(service.failingOperation()).rejects.toThrow(
+        'Test violation',
+      );
+
       // Check if violation was recorded using singleton
       const stats = dbcMonitor.getPerformanceStats();
       expect(stats.contractViolations).toBeGreaterThan(0);
@@ -421,12 +447,12 @@ describe('DBC Production Monitoring', () => {
     it('should record execution time accurately', async () => {
       const service = new TestService();
       const startTime = Date.now();
-      
+
       await service.slowOperation();
-      
+
       const endTime = Date.now();
       const actualDuration = endTime - startTime;
-      
+
       const stats = dbcMonitor.getPerformanceStats();
       // Since dbcMonitor is a singleton, average time may be affected by other tests
       // Just verify that the operation was recorded and took some time
@@ -438,7 +464,7 @@ describe('DBC Production Monitoring', () => {
   describe('Production Stress Testing', () => {
     it('should handle high-volume metrics efficiently', () => {
       const startTime = Date.now();
-      
+
       // Simulate high-volume metric recording
       for (let i = 0; i < 1000; i++) {
         monitor.recordContractExecution({
@@ -449,7 +475,7 @@ describe('DBC Production Monitoring', () => {
           success: i % 20 !== 0, // 5% failure rate
           errorMessage: i % 20 === 0 ? 'Stress test failure' : undefined,
           timestamp: new Date(),
-          serviceContext: `Service_${i % 5}`
+          serviceContext: `Service_${i % 5}`,
         });
       }
 
@@ -463,7 +489,7 @@ describe('DBC Production Monitoring', () => {
 
     it('should maintain memory bounds under load', () => {
       const initialMemory = process.memoryUsage().heapUsed;
-      
+
       // Record many metrics to test memory management
       for (let i = 0; i < 2000; i++) {
         monitor.recordContractExecution({
@@ -473,13 +499,13 @@ describe('DBC Production Monitoring', () => {
           memoryUsage: 512,
           success: true,
           timestamp: new Date(),
-          serviceContext: 'MemoryTestService'
+          serviceContext: 'MemoryTestService',
         });
       }
 
       const finalMemory = process.memoryUsage().heapUsed;
       const memoryIncrease = finalMemory - initialMemory;
-      
+
       // Memory increase should be reasonable (less than 50MB for this test)
       expect(memoryIncrease).toBeLessThan(50 * 1024 * 1024);
 
@@ -497,7 +523,7 @@ describe('DBC Production Monitoring', () => {
           memoryUsage: 1024,
           success: i % 10 !== 0,
           timestamp: new Date(),
-          serviceContext: 'ReportTestService'
+          serviceContext: 'ReportTestService',
         });
       }
 

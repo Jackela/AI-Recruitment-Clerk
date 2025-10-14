@@ -94,7 +94,9 @@ export class FieldMapperService {
       return result;
     } catch (error) {
       this.logger.error('Failed to normalize with validation', error);
-      throw new Error(`Normalization with validation failed: ${(error as Error).message}`);
+      throw new Error(
+        `Normalization with validation failed: ${(error as Error).message}`,
+      );
     }
   }
 

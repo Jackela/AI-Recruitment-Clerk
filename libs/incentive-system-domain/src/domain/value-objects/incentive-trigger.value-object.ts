@@ -15,11 +15,14 @@ export class IncentiveTrigger extends ValueObject<{
    * @param qualityScore - The quality score.
    * @returns The IncentiveTrigger.
    */
-  static fromQuestionnaire(questionnaireId: string, qualityScore: number): IncentiveTrigger {
+  static fromQuestionnaire(
+    questionnaireId: string,
+    qualityScore: number,
+  ): IncentiveTrigger {
     return new IncentiveTrigger({
       triggerType: TriggerType.QUESTIONNAIRE_COMPLETION,
       triggerData: { questionnaireId, qualityScore },
-      qualifiedAt: new Date()
+      qualifiedAt: new Date(),
     });
   }
 
@@ -32,7 +35,7 @@ export class IncentiveTrigger extends ValueObject<{
     return new IncentiveTrigger({
       triggerType: TriggerType.REFERRAL,
       triggerData: { referredIP },
-      qualifiedAt: new Date()
+      qualifiedAt: new Date(),
     });
   }
 
@@ -44,7 +47,7 @@ export class IncentiveTrigger extends ValueObject<{
   static restore(data: any): IncentiveTrigger {
     return new IncentiveTrigger({
       ...data,
-      qualifiedAt: new Date(data.qualifiedAt)
+      qualifiedAt: new Date(data.qualifiedAt),
     });
   }
 
@@ -86,9 +89,11 @@ export class IncentiveTrigger extends ValueObject<{
         if (!this.props.triggerData.questionnaireId) {
           errors.push('Questionnaire ID is required');
         }
-        if (typeof this.props.triggerData.qualityScore !== 'number' ||
-            this.props.triggerData.qualityScore < 0 ||
-            this.props.triggerData.qualityScore > 100) {
+        if (
+          typeof this.props.triggerData.qualityScore !== 'number' ||
+          this.props.triggerData.qualityScore < 0 ||
+          this.props.triggerData.qualityScore > 100
+        ) {
           errors.push('Valid quality score (0-100) is required');
         }
         break;

@@ -6,7 +6,7 @@ export class UsageLimitCheckResult {
   private constructor(
     private readonly allowed: boolean,
     private readonly remainingQuota?: number,
-    private readonly blockReason?: string
+    private readonly blockReason?: string,
   ) {}
 
   /**

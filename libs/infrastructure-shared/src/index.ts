@@ -4,11 +4,11 @@
 
 export enum DataSubjectRightType {
   ACCESS = 'access',
-  RECTIFICATION = 'rectification', 
+  RECTIFICATION = 'rectification',
   ERASURE = 'erasure',
   PORTABILITY = 'portability',
   RESTRICTION = 'restriction',
-  OBJECTION = 'objection'
+  OBJECTION = 'objection',
 }
 
 export enum RequestStatus {
@@ -16,21 +16,21 @@ export enum RequestStatus {
   IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
   REJECTED = 'rejected',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
 }
 
 export enum IdentityVerificationStatus {
   NOT_VERIFIED = 'not_verified',
   PENDING = 'pending',
   VERIFIED = 'verified',
-  FAILED = 'failed'
+  FAILED = 'failed',
 }
 
 export enum DataExportFormat {
   JSON = 'json',
   CSV = 'csv',
   PDF = 'pdf',
-  XML = 'xml'
+  XML = 'xml',
 }
 
 export enum JobStatus {
@@ -38,7 +38,7 @@ export enum JobStatus {
   RUNNING = 'running',
   COMPLETED = 'completed',
   FAILED = 'failed',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
 }
 
 export enum JobType {
@@ -46,35 +46,35 @@ export enum JobType {
   REPORT_GENERATION = 'report_generation',
   ANALYTICS = 'analytics',
   BACKUP = 'backup',
-  CLEANUP = 'cleanup'
+  CLEANUP = 'cleanup',
 }
 
 export enum EventType {
   USER_ACTION = 'user_action',
   SYSTEM_EVENT = 'system_event',
   ERROR_EVENT = 'error_event',
-  PERFORMANCE_EVENT = 'performance_event'
+  PERFORMANCE_EVENT = 'performance_event',
 }
 
 export enum EventStatus {
   PENDING = 'pending',
   PROCESSING = 'processing',
   COMPLETED = 'completed',
-  FAILED = 'failed'
+  FAILED = 'failed',
 }
 
 export enum EventCategory {
   AUTHENTICATION = 'authentication',
   ANALYTICS = 'analytics',
   SYSTEM = 'system',
-  USER = 'user'
+  USER = 'user',
 }
 
 export enum ConsentStatus {
   PENDING = 'pending',
   GRANTED = 'granted',
   DENIED = 'denied',
-  WITHDRAWN = 'withdrawn'
+  WITHDRAWN = 'withdrawn',
 }
 
 // Add any other commonly used infrastructure types
@@ -178,7 +178,10 @@ export class ExceptionFilterConfigHelper {
  * @param _config - The config.
  * @returns The result of the operation.
  */
-export function createGlobalExceptionFilter(_serviceName: string, _config?: ExceptionFilterConfig) {
+export function createGlobalExceptionFilter(
+  _serviceName: string,
+  _config?: ExceptionFilterConfig,
+) {
   return new StandardizedGlobalExceptionFilter(_config);
 }
 
@@ -227,9 +230,13 @@ export class ErrorInterceptorFactory {
    * @param _options - The options.
    * @returns The Interceptor.
    */
-  static createCorrelationInterceptor(_serviceName: string, _options?: InterceptorOptions): Interceptor {
+  static createCorrelationInterceptor(
+    _serviceName: string,
+    _options?: InterceptorOptions,
+  ): Interceptor {
     return {
-      intercept: (_context: ExecutionContext, next: CallHandler) => next.handle()
+      intercept: (_context: ExecutionContext, next: CallHandler) =>
+        next.handle(),
     };
   }
   /**
@@ -238,9 +245,13 @@ export class ErrorInterceptorFactory {
    * @param _options - The options.
    * @returns The Interceptor.
    */
-  static createLoggingInterceptor(_serviceName: string, _options?: InterceptorOptions): Interceptor {
+  static createLoggingInterceptor(
+    _serviceName: string,
+    _options?: InterceptorOptions,
+  ): Interceptor {
     return {
-      intercept: (_context: ExecutionContext, next: CallHandler) => next.handle()
+      intercept: (_context: ExecutionContext, next: CallHandler) =>
+        next.handle(),
     };
   }
   /**
@@ -249,9 +260,13 @@ export class ErrorInterceptorFactory {
    * @param _options - The options.
    * @returns The Interceptor.
    */
-  static createPerformanceInterceptor(_serviceName: string, _options?: InterceptorOptions): Interceptor {
+  static createPerformanceInterceptor(
+    _serviceName: string,
+    _options?: InterceptorOptions,
+  ): Interceptor {
     return {
-      intercept: (_context: ExecutionContext, next: CallHandler) => next.handle()
+      intercept: (_context: ExecutionContext, next: CallHandler) =>
+        next.handle(),
     };
   }
   /**
@@ -260,9 +275,13 @@ export class ErrorInterceptorFactory {
    * @param _options - The options.
    * @returns The Interceptor.
    */
-  static createRecoveryInterceptor(_serviceName: string, _options?: InterceptorOptions): Interceptor {
+  static createRecoveryInterceptor(
+    _serviceName: string,
+    _options?: InterceptorOptions,
+  ): Interceptor {
     return {
-      intercept: (_context: ExecutionContext, next: CallHandler) => next.handle()
+      intercept: (_context: ExecutionContext, next: CallHandler) =>
+        next.handle(),
     };
   }
 }
@@ -285,8 +304,10 @@ export class InputValidator {
    * @param input - The input.
    * @returns The ValidationInput.
    */
-  static validate(input: ValidationInput): ValidationInput { return input; }
-  
+  static validate(input: ValidationInput): ValidationInput {
+    return input;
+  }
+
   /**
    * Validates resume file.
    * @param file - The file.
@@ -303,33 +324,33 @@ export class InputValidator {
       'application/pdf',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/plain'
+      'text/plain',
     ];
     const maxFileSize = 10 * 1024 * 1024; // 10MB
-    
+
     // Check file size
     if (file.size > maxFileSize) {
       errors.push(`File size exceeds maximum of ${maxFileSize} bytes`);
     }
-    
+
     // Check mime type
     if (file.mimetype && !allowedMimeTypes.includes(file.mimetype)) {
       errors.push(`Invalid mime type: ${file.mimetype}`);
     }
-    
+
     // Check file name
     if (!file.originalname || file.originalname.length === 0) {
       errors.push('File name is required');
     }
-    
+
     // Check buffer
     if (!file.buffer || file.buffer.length === 0) {
       errors.push('File buffer is empty');
     }
-    
+
     return {
       isValid: errors.length === 0,
-      errors: errors.length > 0 ? errors : undefined
+      errors: errors.length > 0 ? errors : undefined,
     };
   }
 }
@@ -361,14 +382,18 @@ export class EncryptionService {
    * @param data - The data.
    * @returns The EncryptableData.
    */
-  static encrypt(data: EncryptableData): EncryptableData { return data; }
+  static encrypt(data: EncryptableData): EncryptableData {
+    return data;
+  }
   /**
    * Performs the decrypt operation.
    * @param data - The data.
    * @returns The EncryptableData.
    */
-  static decrypt(data: EncryptableData): EncryptableData { return data; }
-  
+  static decrypt(data: EncryptableData): EncryptableData {
+    return data;
+  }
+
   /**
    * Performs the encrypt user pii operation.
    * @param data - The data.
@@ -377,9 +402,9 @@ export class EncryptionService {
   static encryptUserPII(data: UserPIIData): UserPIIData {
     // Mock implementation - in production this would use real encryption
     if (!data) return data;
-    
+
     const encrypted = { ...data };
-    
+
     // Encrypt sensitive fields
     if (encrypted.email) {
       encrypted.email = `encrypted_${Buffer.from(encrypted.email).toString('base64')}`;
@@ -393,10 +418,10 @@ export class EncryptionService {
     if (encrypted.address && typeof encrypted.address === 'string') {
       encrypted.address = `encrypted_${Buffer.from(encrypted.address).toString('base64')}`;
     }
-    
+
     encrypted._encrypted = true;
     encrypted._encryptedAt = new Date().toISOString();
-    
+
     return encrypted;
   }
 }
@@ -444,8 +469,15 @@ export function Ensures(_predicate: PredicateFunction, _message?: string) {
  * @param _message - The message.
  * @returns The result of the operation.
  */
-export function Invariant(_predicate: PredicateFunction, _message?: string): ClassDecorator & MethodDecorator {
-  return ((target: DecoratorTarget, _propertyKey?: string | symbol, descriptor?: PropertyDescriptor) => {
+export function Invariant(
+  _predicate: PredicateFunction,
+  _message?: string,
+): ClassDecorator & MethodDecorator {
+  return ((
+    target: DecoratorTarget,
+    _propertyKey?: string | symbol,
+    descriptor?: PropertyDescriptor,
+  ) => {
     // Support both class and method decorators without enforcing runtime behavior
     if (descriptor) {
       return descriptor;
@@ -536,7 +568,11 @@ export class ContractValidators {
    * @returns The jd is JobDescriptionContract.
    */
   static isValidJD(jd: unknown): jd is JobDescriptionContract {
-    return !!jd && typeof jd === 'object' && Array.isArray((jd as JobDescriptionContract).requiredSkills || []);
+    return (
+      !!jd &&
+      typeof jd === 'object' &&
+      Array.isArray((jd as JobDescriptionContract).requiredSkills || [])
+    );
   }
 
   /**
@@ -546,7 +582,11 @@ export class ContractValidators {
    */
   static isValidResume(resume: unknown): resume is ResumeContract {
     const resumeObj = resume as ResumeContract;
-    return !!resume && typeof resume === 'object' && Array.isArray(resumeObj.skills || resumeObj.workExperience || []);
+    return (
+      !!resume &&
+      typeof resume === 'object' &&
+      Array.isArray(resumeObj.skills || resumeObj.workExperience || [])
+    );
   }
 
   /**
@@ -571,8 +611,14 @@ export class ContractValidators {
    * @param result - The result.
    * @returns The result is ExtractionResultContract.
    */
-  static isValidExtractionResult(result: unknown): result is ExtractionResultContract {
-    return !!result && typeof result === 'object' && Array.isArray((result as ExtractionResultContract).requiredSkills || []);
+  static isValidExtractionResult(
+    result: unknown,
+  ): result is ExtractionResultContract {
+    return (
+      !!result &&
+      typeof result === 'object' &&
+      Array.isArray((result as ExtractionResultContract).requiredSkills || [])
+    );
   }
 
   /**
@@ -590,7 +636,10 @@ export class ContractValidators {
    * @param maxTime - The max time.
    * @returns The time is number.
    */
-  static isValidProcessingTime(time: unknown, maxTime?: number): time is number {
+  static isValidProcessingTime(
+    time: unknown,
+    maxTime?: number,
+  ): time is number {
     if (typeof time !== 'number' || time < 0) return false;
     return maxTime ? time <= maxTime : true;
   }
@@ -600,11 +649,16 @@ export class ContractValidators {
    * @param result - The result.
    * @returns The result is { reportId: string; [key: string]: unknown }.
    */
-  static isValidReportResult(result: unknown): result is { reportId: string; [key: string]: unknown } {
+  static isValidReportResult(
+    result: unknown,
+  ): result is { reportId: string; [key: string]: unknown } {
     const resultObj = result as { reportId?: string };
-    return !!result && typeof result === 'object' && 
-           typeof resultObj.reportId === 'string' &&
-           resultObj.reportId.length > 0;
+    return (
+      !!result &&
+      typeof result === 'object' &&
+      typeof resultObj.reportId === 'string' &&
+      resultObj.reportId.length > 0
+    );
   }
 
   /**
@@ -625,11 +679,16 @@ export class ContractValidators {
    * @param jobInfo - The job info.
    * @returns The jobInfo is { jobId: string; [key: string]: unknown }.
    */
-  static isValidJobInfo(jobInfo: unknown): jobInfo is { jobId: string; [key: string]: unknown } {
+  static isValidJobInfo(
+    jobInfo: unknown,
+  ): jobInfo is { jobId: string; [key: string]: unknown } {
     const jobObj = jobInfo as { jobId?: string };
-    return !!jobInfo && typeof jobInfo === 'object' && 
-           typeof jobObj.jobId === 'string' &&
-           jobObj.jobId.length > 0;
+    return (
+      !!jobInfo &&
+      typeof jobInfo === 'object' &&
+      typeof jobObj.jobId === 'string' &&
+      jobObj.jobId.length > 0
+    );
   }
 
   /**
@@ -637,11 +696,16 @@ export class ContractValidators {
    * @param candidateInfo - The candidate info.
    * @returns The candidateInfo is { resumeId: string; [key: string]: unknown }.
    */
-  static isValidCandidateInfo(candidateInfo: unknown): candidateInfo is { resumeId: string; [key: string]: unknown } {
+  static isValidCandidateInfo(
+    candidateInfo: unknown,
+  ): candidateInfo is { resumeId: string; [key: string]: unknown } {
     const candidateObj = candidateInfo as { resumeId?: string };
-    return !!candidateInfo && typeof candidateInfo === 'object' && 
-           typeof candidateObj.resumeId === 'string' &&
-           candidateObj.resumeId.length > 0;
+    return (
+      !!candidateInfo &&
+      typeof candidateInfo === 'object' &&
+      typeof candidateObj.resumeId === 'string' &&
+      candidateObj.resumeId.length > 0
+    );
   }
 
   /**
@@ -679,22 +743,22 @@ export class RetryUtility {
    * @returns A promise that resolves to T.
    */
   static async retry<T>(
-    operation: () => Promise<T>, 
+    operation: () => Promise<T>,
     maxAttempts: number = 3,
-    delay: number = 1000
+    delay: number = 1000,
   ): Promise<T> {
     let lastError: Error | undefined;
-    
+
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         return await operation();
       } catch (error) {
         lastError = error as Error;
         if (attempt === maxAttempts) break;
-        await new Promise(resolve => setTimeout(resolve, delay * attempt));
+        await new Promise((resolve) => setTimeout(resolve, delay * attempt));
       }
     }
-    
+
     throw lastError || new Error('Operation failed after maximum attempts');
   }
 
@@ -712,36 +776,36 @@ export class RetryUtility {
       maxDelayMs?: number;
       backoffMultiplier?: number;
       jitterMs?: number;
-    } = {}
+    } = {},
   ): Promise<T> {
     const {
       maxAttempts = 3,
       baseDelayMs = 1000,
       maxDelayMs = 10000,
       backoffMultiplier = 2,
-      jitterMs = 500
+      jitterMs = 500,
     } = options;
-    
+
     let lastError: Error | undefined;
-    
+
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         return await operation();
       } catch (error) {
         lastError = error;
         if (attempt === maxAttempts) break;
-        
+
         let delay = baseDelayMs * Math.pow(backoffMultiplier, attempt - 1);
         delay = Math.min(delay, maxDelayMs);
-        
+
         // Add jitter
         const jitter = (Math.random() - 0.5) * 2 * jitterMs;
         delay = Math.max(0, delay + jitter);
-        
-        await new Promise(resolve => setTimeout(resolve, delay));
+
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
-    
+
     throw lastError || new Error('Operation failed after maximum attempts');
   }
 }
@@ -762,8 +826,15 @@ export interface CircuitBreakerConfig {
  * @param _config - The config.
  * @returns The result of the operation.
  */
-export function WithCircuitBreaker(_propertyKey?: string, _config?: CircuitBreakerConfig) {
-  return function (_target: DecoratorTarget, propertyName: string, descriptor: PropertyDescriptor) {
+export function WithCircuitBreaker(
+  _propertyKey?: string,
+  _config?: CircuitBreakerConfig,
+) {
+  return function (
+    _target: DecoratorTarget,
+    propertyName: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const method = descriptor.value;
     descriptor.value = async function (...args: unknown[]) {
       try {
@@ -796,7 +867,7 @@ export class ResumeParserException extends Error {
    */
   constructor(
     public readonly code: string,
-    public readonly context?: ErrorContext
+    public readonly context?: ErrorContext,
   ) {
     super(`Resume parser error: ${code}`);
     this.name = 'ResumeParserException';
@@ -815,7 +886,7 @@ export class JDExtractorException extends Error {
    */
   constructor(
     public readonly code: string,
-    public readonly context?: ErrorContext
+    public readonly context?: ErrorContext,
   ) {
     super(`JD extractor error: ${code}`);
     this.name = 'JDExtractorException';
@@ -834,7 +905,7 @@ export class ReportGeneratorException extends Error {
    */
   constructor(
     public readonly code: string,
-    public readonly context?: any
+    public readonly context?: any,
   ) {
     super(`Report generator error: ${code}`);
     this.name = 'ReportGeneratorException';
@@ -847,7 +918,7 @@ export class ReportGeneratorException extends Error {
  */
 export class ErrorCorrelationManager {
   private static context: { traceId?: string; requestId?: string } = {};
-  
+
   /**
    * Sets context.
    * @param context - The context.
@@ -856,7 +927,7 @@ export class ErrorCorrelationManager {
   static setContext(context: { traceId?: string; requestId?: string }) {
     this.context = context;
   }
-  
+
   /**
    * Retrieves context.
    * @returns The result of the operation.
@@ -864,7 +935,7 @@ export class ErrorCorrelationManager {
   static getContext() {
     return this.context;
   }
-  
+
   /**
    * Generates trace id.
    * @returns The string value.
@@ -887,19 +958,21 @@ export class DatabasePerformanceMonitor {
    * @returns A promise that resolves to T.
    */
   async executeWithMonitoring<T>(
-    fn: () => Promise<T>, 
-    operationName?: string, 
-    expectedMs?: number
+    fn: () => Promise<T>,
+    operationName?: string,
+    expectedMs?: number,
   ): Promise<T> {
     const startTime = Date.now();
     try {
       const result = await fn();
       const duration = Date.now() - startTime;
-      
+
       if (expectedMs && duration > expectedMs) {
-        console.warn(`${operationName} took ${duration}ms, expected ${expectedMs}ms`);
+        console.warn(
+          `${operationName} took ${duration}ms, expected ${expectedMs}ms`,
+        );
       }
-      
+
       return result;
     } catch (error) {
       const duration = Date.now() - startTime;

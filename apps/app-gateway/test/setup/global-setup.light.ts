@@ -7,4 +7,3 @@ export default async function globalSetup() {
   process.env.NODE_ENV = 'test';
   process.env.SKIP_DB = process.env.SKIP_DB || 'true';
 }
-

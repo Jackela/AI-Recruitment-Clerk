@@ -7,7 +7,12 @@ export namespace JobContracts {
   /**
    * Standardized job status enum - must be kept in sync between frontend and backend
    */
-  export type JobStatus = 'draft' | 'active' | 'processing' | 'completed' | 'closed';
+  export type JobStatus =
+    | 'draft'
+    | 'active'
+    | 'processing'
+    | 'completed'
+    | 'closed';
 
   /**
    * Base job interface with common fields

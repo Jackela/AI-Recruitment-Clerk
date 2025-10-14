@@ -40,7 +40,7 @@ export interface LoadingState {
 export abstract class BaseMobileComponent implements OnInit, OnDestroy {
   @Input() config: MobileComponentConfig = {};
   @Input() loadingState: LoadingState = { isLoading: false };
-  
+
   @Output() swipeLeft = new EventEmitter<any>();
   @Output() swipeRight = new EventEmitter<any>();
   @Output() swipeUp = new EventEmitter<any>();
@@ -56,7 +56,7 @@ export abstract class BaseMobileComponent implements OnInit, OnDestroy {
     enableSwipe: true,
     enablePullToRefresh: false,
     showLoadingSpinner: true,
-    animationDuration: 300
+    animationDuration: 300,
   };
 
   /**
@@ -85,7 +85,7 @@ export abstract class BaseMobileComponent implements OnInit, OnDestroy {
     if (this.config.enableSwipe) {
       this.setupSwipeHandlers();
     }
-    
+
     if (this.config.enablePullToRefresh) {
       this.setupPullToRefresh();
     }
@@ -108,7 +108,10 @@ export abstract class BaseMobileComponent implements OnInit, OnDestroy {
   /**
    * 处理滑动事件
    */
-  protected handleSwipe(direction: 'left' | 'right' | 'up' | 'down', data?: any): void {
+  protected handleSwipe(
+    direction: 'left' | 'right' | 'up' | 'down',
+    data?: any,
+  ): void {
     switch (direction) {
       case 'left':
         this.swipeLeft.emit(data);
@@ -128,11 +131,15 @@ export abstract class BaseMobileComponent implements OnInit, OnDestroy {
   /**
    * 显示加载状态
    */
-  protected setLoading(isLoading: boolean, text?: string, progress?: number): void {
+  protected setLoading(
+    isLoading: boolean,
+    text?: string,
+    progress?: number,
+  ): void {
     this.loadingState = {
       isLoading,
       loadingText: text,
-      progress
+      progress,
     };
   }
 
@@ -264,7 +271,7 @@ export abstract class BaseMobileFormComponent extends BaseMobileComponent {
     for (const [field, rules] of Object.entries(this.validationRules)) {
       const value = this.formData[field];
       const errors = this.validateField(field, value, rules as any);
-      
+
       if (errors.length > 0) {
         this.formErrors[field] = errors;
         this.isFormValid = false;
@@ -305,7 +312,7 @@ export abstract class BaseMobileFormComponent extends BaseMobileComponent {
   protected onFieldChange(field: string, value: any): void {
     this.formData[field] = value;
     this.fieldChange.emit({ field, value });
-    
+
     // 实时验证
     if (this.showValidationErrors) {
       this.validateForm();
@@ -386,7 +393,10 @@ export abstract class BaseMobileCardComponent extends BaseMobileComponent {
   @Input() cardStyle: 'flat' | 'elevated' | 'outlined' = 'elevated';
 
   @Output() cardClick = new EventEmitter<CardData>();
-  @Output() actionClick = new EventEmitter<{ action: CardAction; card: CardData }>();
+  @Output() actionClick = new EventEmitter<{
+    action: CardAction;
+    card: CardData;
+  }>();
 
   protected onMobileInit(): void {
     this.onCardInit();
@@ -440,7 +450,7 @@ export class TouchGestureUtil {
     startY: number,
     endX: number,
     endY: number,
-    timeElapsed: number
+    timeElapsed: number,
   ): 'left' | 'right' | 'up' | 'down' | null {
     const deltaX = endX - startX;
     const deltaY = endY - startY;
@@ -470,7 +480,7 @@ export class TouchGestureUtil {
       onSwipe?: (direction: string, data?: any) => void;
       onTap?: (event: TouchEvent) => void;
       onLongPress?: (event: TouchEvent) => void;
-    }
+    },
   ): () => void {
     let startX = 0;
     let startY = 0;
@@ -505,7 +515,7 @@ export class TouchGestureUtil {
       // 检测轻击
       if (timeElapsed < 200 && callbacks.onTap) {
         const distance = Math.sqrt(
-          Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2)
+          Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2),
         );
         if (distance < 10) {
           callbacks.onTap(event);
@@ -515,7 +525,13 @@ export class TouchGestureUtil {
 
       // 检测滑动
       if (callbacks.onSwipe) {
-        const direction = this.detectSwipe(startX, startY, endX, endY, timeElapsed);
+        const direction = this.detectSwipe(
+          startX,
+          startY,
+          endX,
+          endY,
+          timeElapsed,
+        );
         if (direction) {
           callbacks.onSwipe(direction);
         }

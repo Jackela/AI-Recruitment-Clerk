@@ -457,7 +457,10 @@ export class ReportGeneratorService {
       const savedReport = await this.reportRepo.createReport(reportMetadata);
 
       const result: GeneratedReport = {
-        reportId: (savedReport._id instanceof Types.ObjectId ? savedReport._id.toString() : (savedReport._id as string)) || '',
+        reportId:
+          (savedReport._id instanceof Types.ObjectId
+            ? savedReport._id.toString()
+            : (savedReport._id as string)) || '',
         jobId: request.jobId,
         resumeIds: request.resumeIds,
         reportType: request.reportType,
@@ -510,7 +513,9 @@ export class ReportGeneratorService {
         resumeIds.map(async (resumeId) => {
           const report = await this.reportRepo.findReport({ jobId, resumeId });
           return report
-            ? this.formatCandidateForComparison(report as unknown as ReportDocument)
+            ? this.formatCandidateForComparison(
+                report as unknown as ReportDocument,
+              )
             : null;
         }),
       );
@@ -569,8 +574,12 @@ export class ReportGeneratorService {
       }
 
       // Format data for interview guide generation
-      const candidateData = this.formatCandidateForInterview(report as unknown as ReportDocument);
-      const jobRequirements = this.extractJobRequirements(report as unknown as ReportDocument);
+      const candidateData = this.formatCandidateForInterview(
+        report as unknown as ReportDocument,
+      );
+      const jobRequirements = this.extractJobRequirements(
+        report as unknown as ReportDocument,
+      );
 
       const llmCandidateData: LlmCandidateData = {
         id: candidateData.id,
@@ -578,7 +587,9 @@ export class ReportGeneratorService {
         score: candidateData.scoreBreakdown
           ? candidateData.scoreBreakdown.overallFit / 100
           : undefined,
-        recommendation: this.mapRecommendationDecision(candidateData.recommendation?.decision),
+        recommendation: this.mapRecommendationDecision(
+          candidateData.recommendation?.decision,
+        ),
         skills: candidateData.skills.map((skill) => skill.skill),
         matchingSkills: candidateData.skills.map((skill) => skill.skill),
         missingSkills: [],
@@ -636,7 +647,10 @@ export class ReportGeneratorService {
       this.reportRepo.healthCheck(),
     ]);
 
-    const allHealthy = llmHealth && gridFsHealth && (typeof repoHealth === 'boolean' ? repoHealth : true);
+    const allHealthy =
+      llmHealth &&
+      gridFsHealth &&
+      (typeof repoHealth === 'boolean' ? repoHealth : true);
 
     return {
       status: allHealthy ? 'healthy' : 'degraded',
@@ -648,7 +662,9 @@ export class ReportGeneratorService {
     };
   }
 
-  private async buildReportEvent(event: MatchScoredEvent): Promise<ReportEvent> {
+  private async buildReportEvent(
+    event: MatchScoredEvent,
+  ): Promise<ReportEvent> {
     return {
       jobId: event.jobId,
       resumeIds: [event.resumeId],
@@ -736,7 +752,9 @@ export class ReportGeneratorService {
       resumeEntry.score = scoringData.overallScore;
     }
 
-    const matchingSkills = scoringData?.matchingSkills?.map((skill) => skill.skill);
+    const matchingSkills = scoringData?.matchingSkills?.map(
+      (skill) => skill.skill,
+    );
     if (matchingSkills?.length) {
       resumeEntry.matchingSkills = matchingSkills;
     }
@@ -970,7 +988,9 @@ export class ReportGeneratorService {
     return [];
   }
 
-  private generateOverallRecommendation(data: ReportDataItem[]): ReportRecommendation {
+  private generateOverallRecommendation(
+    data: ReportDataItem[],
+  ): ReportRecommendation {
     // Placeholder recommendation logic
     return {
       decision: 'consider',
@@ -1004,7 +1024,9 @@ export class ReportGeneratorService {
     };
   }
 
-  private mapRecommendationDecision(decision?: string): LlmCandidateData['recommendation'] {
+  private mapRecommendationDecision(
+    decision?: string,
+  ): LlmCandidateData['recommendation'] {
     switch (decision) {
       case 'hire':
         return 'hire';
@@ -1023,7 +1045,9 @@ export class ReportGeneratorService {
     }
   }
 
-  private formatCandidateForComparison(report: ReportDocument): CandidateComparisonData {
+  private formatCandidateForComparison(
+    report: ReportDocument,
+  ): CandidateComparisonData {
     return {
       id: report.resumeId,
       name: `Candidate ${report.resumeId}`,
@@ -1033,7 +1057,9 @@ export class ReportGeneratorService {
     };
   }
 
-  private formatCandidateForInterview(report: ReportDocument): InterviewCandidateData {
+  private formatCandidateForInterview(
+    report: ReportDocument,
+  ): InterviewCandidateData {
     return {
       id: report.resumeId,
       name: `Candidate ${report.resumeId}`,
@@ -1043,7 +1069,9 @@ export class ReportGeneratorService {
     };
   }
 
-  private extractJobRequirements(report: ReportDocument): ExtractedJobRequirements {
+  private extractJobRequirements(
+    report: ReportDocument,
+  ): ExtractedJobRequirements {
     return {
       requiredSkills: report.skillsAnalysis.map((skill) => skill.skill),
       experienceLevel: 'mid-level',

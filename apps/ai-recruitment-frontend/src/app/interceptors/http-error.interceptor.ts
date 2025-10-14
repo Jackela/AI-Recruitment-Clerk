@@ -60,8 +60,18 @@ export class HttpErrorInterceptor implements HttpInterceptor {
       timeout(APP_CONFIG.API.timeout),
 
       // Retry failed requests with exponential backoff
-      (retry({ count: this.getRetryCount(request.method), delay: (_error: any, retryIndex: number) => { const delayMs = APP_CONFIG.ERROR_HANDLING.retryConfig.initialDelay * Math.pow(APP_CONFIG.ERROR_HANDLING.retryConfig.backoffMultiplier, retryIndex - 1); return new Promise((resolve) => setTimeout(resolve, delayMs)); } }) as any),
-
+      retry({
+        count: this.getRetryCount(request.method),
+        delay: (_error: any, retryIndex: number) => {
+          const delayMs =
+            APP_CONFIG.ERROR_HANDLING.retryConfig.initialDelay *
+            Math.pow(
+              APP_CONFIG.ERROR_HANDLING.retryConfig.backoffMultiplier,
+              retryIndex - 1,
+            );
+          return new Promise((resolve) => setTimeout(resolve, delayMs));
+        },
+      }) as any,
       catchError((error: HttpErrorResponse) => {
         // Create structured error with correlation
         const structuredError = this.errorCorrelation.createStructuredError(
@@ -140,7 +150,8 @@ export class HttpErrorInterceptor implements HttpInterceptor {
     // Don't show notifications for cancelled requests or aborted requests
     if (
       error.status === 0 &&
-      (error.error instanceof ProgressEvent || String(error.name) === 'TimeoutError')
+      (error.error instanceof ProgressEvent ||
+        String(error.name) === 'TimeoutError')
     ) {
       return;
     }

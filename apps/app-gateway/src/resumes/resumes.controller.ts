@@ -45,10 +45,7 @@ export class ResumesController {
   @Post('resumes/upload')
   @UseInterceptors(FileInterceptor('resume'))
   @HttpCode(HttpStatus.CREATED)
-  upload(
-    @UploadedFile() file: Express.Multer.File,
-    @Body() body: any,
-  ) {
+  upload(@UploadedFile() file: Express.Multer.File, @Body() body: any) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }

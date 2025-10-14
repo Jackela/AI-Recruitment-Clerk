@@ -4,7 +4,6 @@ import type { MatchScoredEvent } from '../report-generator/report-generator.serv
 
 // Enhanced type definitions for NATS service
 
-
 /**
  * Defines the shape of the health check details.
  */
@@ -85,7 +84,10 @@ export class ReportGeneratorNatsService extends NatsClientService {
 
       return result;
     } catch (error) {
-      this.serviceLogger.error(`Error publishing report generated event`, error);
+      this.serviceLogger.error(
+        `Error publishing report generated event`,
+        error,
+      );
       return {
         success: false,
         error: error.message,
@@ -153,7 +155,10 @@ export class ReportGeneratorNatsService extends NatsClientService {
   /**
    * Health check for report generator specific NATS functionality
    */
-  async healthCheck(): Promise<{ status: string; details: HealthCheckDetails }> {
+  async healthCheck(): Promise<{
+    status: string;
+    details: HealthCheckDetails;
+  }> {
     try {
       return {
         status: 'healthy',

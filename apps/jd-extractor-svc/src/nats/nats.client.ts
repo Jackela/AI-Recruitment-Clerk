@@ -1,4 +1,8 @@
-export type NatsPublishResult = { success: boolean; messageId?: string; error?: string };
+export type NatsPublishResult = {
+  success: boolean;
+  messageId?: string;
+  error?: string;
+};
 
 /**
  * Represents the nats client.
@@ -10,7 +14,10 @@ export class NatsClient {
    * @param _payload - The payload.
    * @returns A promise that resolves to NatsPublishResult.
    */
-  async publish(_subject: string, _payload: unknown): Promise<NatsPublishResult> {
+  async publish(
+    _subject: string,
+    _payload: unknown,
+  ): Promise<NatsPublishResult> {
     return { success: true };
   }
   /**
@@ -28,7 +35,10 @@ export class NatsClient {
    * @param _error - The error.
    * @returns A promise that resolves to NatsPublishResult.
    */
-  async publishProcessingError(_jobId: string, _error: Error): Promise<NatsPublishResult> {
+  async publishProcessingError(
+    _jobId: string,
+    _error: Error,
+  ): Promise<NatsPublishResult> {
     return { success: true };
   }
   /**

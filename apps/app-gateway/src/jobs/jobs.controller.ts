@@ -95,7 +95,7 @@ export class JobsController {
     @Request() req: AuthenticatedRequest,
     @Param() params: JobParamsDto,
     @UploadedFiles(new FileValidationPipe()) files: MulterFile[],
-  ): ResumeUploadResponseDto {
+  ): Promise<ResumeUploadResponseDto> {
     return this.jobsService.uploadResumes(params.jobId, files, req.user);
   }
 
@@ -122,7 +122,7 @@ export class JobsController {
   getJobById(
     @Request() req: AuthenticatedRequest,
     @Param('jobId') jobId: string,
-  ): JobDetailDto {
+  ): Promise<JobDetailDto> {
     return this.jobsService.getJobById(jobId);
   }
 

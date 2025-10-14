@@ -57,7 +57,9 @@ export class JdExtractorNatsService {
     error: Error,
     _context?: { stage?: string; inputSize?: number; retryAttempt?: number },
   ): Promise<NatsPublishResult> {
-    this.logger.debug(`Stub publish job.jd.failed for ${jobId}: ${error?.message}`);
+    this.logger.debug(
+      `Stub publish job.jd.failed for ${jobId}: ${error?.message}`,
+    );
     return {
       success: true,
       messageId: `err-${jobId}`,
@@ -70,7 +72,9 @@ export class JdExtractorNatsService {
    * @param event - The event.
    * @returns A promise that resolves to NatsPublishResult.
    */
-  async publishExtractionStarted(event: { jobId: string }): Promise<NatsPublishResult> {
+  async publishExtractionStarted(event: {
+    jobId: string;
+  }): Promise<NatsPublishResult> {
     this.logger.debug(`Stub publish job.jd.started for ${event.jobId}`);
     return {
       success: true,
@@ -90,4 +94,3 @@ export class JdExtractorNatsService {
     // no-op in unit tests
   }
 }
-

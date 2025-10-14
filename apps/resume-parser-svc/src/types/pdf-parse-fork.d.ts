@@ -42,7 +42,10 @@ declare module 'pdf-parse-fork' {
     version: PDFVersion;
   }
 
-  function pdf(dataBuffer: Buffer, options?: PDFExtractOptions): Promise<PDFData>;
-  
+  function pdf(
+    dataBuffer: Buffer,
+    options?: PDFExtractOptions,
+  ): Promise<PDFData>;
+
   export = pdf;
 }

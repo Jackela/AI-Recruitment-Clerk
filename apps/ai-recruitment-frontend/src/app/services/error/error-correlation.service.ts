@@ -433,9 +433,13 @@ export class ErrorCorrelationService {
     return firstPaint ? Math.round(firstPaint.startTime) : undefined;
   }
 
-  private getMemoryUsage(): {usedJSHeapSize?: number; totalJSHeapSize?: number; jsHeapSizeLimit?: number} | null {
+  private getMemoryUsage(): {
+    usedJSHeapSize?: number;
+    totalJSHeapSize?: number;
+    jsHeapSizeLimit?: number;
+  } | null {
     const performanceWithMemory = (window as any)?.performance?.memory;
-    
+
     return performanceWithMemory
       ? {
           usedJSHeapSize: performanceWithMemory.usedJSHeapSize || 0,

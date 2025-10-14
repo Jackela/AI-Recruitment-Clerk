@@ -84,123 +84,126 @@ const isTestEnv = process.env.NODE_ENV === 'test';
       : [
           MongooseModule.forRootAsync({
             useFactory: async () => {
-        // Test-mode: always use a single in-memory Mongo instance to avoid real connections
-        if (
-          process.env.NODE_ENV === 'test' ||
-          process.env.JEST_WORKER_ID ||
-          process.env.CI === 'true'
-        ) {
-          if (process.env.SKIP_DB === 'true') {
-            // fully bypass DB connections in some perf suites
-            return {
-              uri: 'mongodb://127.0.0.1:27017/skip-tests',
-              serverSelectionTimeoutMS: 1,
-              connectTimeoutMS: 1,
-              maxPoolSize: 1,
-              autoCreate: false,
-              autoIndex: false,
-            } as any;
-          }
-          // If an external URI is provided by global setup, prefer it
-          if (process.env.MONGODB_TEST_URL) {
-            return {
-              uri: process.env.MONGODB_TEST_URL,
-              serverSelectionTimeoutMS: 500,
-              connectTimeoutMS: 500,
-              maxPoolSize: 5,
-            };
-          }
-          // Otherwise, start (or reuse) an in-memory server
-          try {
-            process.env.MONGOMS_VERSION = process.env.MONGOMS_VERSION || '7.0.5';
-            process.env.MONGOMS_DISABLE_MD5_CHECK =
-              process.env.MONGOMS_DISABLE_MD5_CHECK || '1';
-            let mongod = (global as any).__MONGOD__ as MongoMemoryServer | undefined;
-            if (!mongod) {
-              mongod = await MongoMemoryServer.create({
-                binary: { version: process.env.MONGOMS_VERSION },
-              });
-              (global as any).__MONGOD__ = mongod;
-            }
-            const uri = mongod.getUri();
-            return {
-              uri,
-              serverSelectionTimeoutMS: 500,
-              connectTimeoutMS: 500,
-              maxPoolSize: 5,
-            };
-          } catch (e) {
-            // Fallback to skip mode if memory-server fails
-            return {
-              uri: 'mongodb://127.0.0.1:27017/skip-tests',
-              serverSelectionTimeoutMS: 1,
-              connectTimeoutMS: 1,
-              maxPoolSize: 1,
-              autoCreate: false,
-              autoIndex: false,
-            } as any;
-          }
-        }
-        // MongoDB连接调试信息
-        const logger = new Logger('AppModule');
-        logger.debug('MongoDB连接调试信息');
-        logger.debug(`NODE_ENV: ${process.env.NODE_ENV}`);
-        logger.debug(`MONGO_URL存在: ${!!process.env.MONGO_URL}`);
-        if (process.env.MONGO_URL) {
-          logger.debug(
-            `MONGO_URL (masked): ${process.env.MONGO_URL.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')}`,
-          );
-        }
+              // Test-mode: always use a single in-memory Mongo instance to avoid real connections
+              if (
+                process.env.NODE_ENV === 'test' ||
+                process.env.JEST_WORKER_ID ||
+                process.env.CI === 'true'
+              ) {
+                if (process.env.SKIP_DB === 'true') {
+                  // fully bypass DB connections in some perf suites
+                  return {
+                    uri: 'mongodb://127.0.0.1:27017/skip-tests',
+                    serverSelectionTimeoutMS: 1,
+                    connectTimeoutMS: 1,
+                    maxPoolSize: 1,
+                    autoCreate: false,
+                    autoIndex: false,
+                  } as any;
+                }
+                // If an external URI is provided by global setup, prefer it
+                if (process.env.MONGODB_TEST_URL) {
+                  return {
+                    uri: process.env.MONGODB_TEST_URL,
+                    serverSelectionTimeoutMS: 500,
+                    connectTimeoutMS: 500,
+                    maxPoolSize: 5,
+                  };
+                }
+                // Otherwise, start (or reuse) an in-memory server
+                try {
+                  process.env.MONGOMS_VERSION =
+                    process.env.MONGOMS_VERSION || '7.0.5';
+                  process.env.MONGOMS_DISABLE_MD5_CHECK =
+                    process.env.MONGOMS_DISABLE_MD5_CHECK || '1';
+                  let mongod = (global as any).__MONGOD__ as
+                    | MongoMemoryServer
+                    | undefined;
+                  if (!mongod) {
+                    mongod = await MongoMemoryServer.create({
+                      binary: { version: process.env.MONGOMS_VERSION },
+                    });
+                    (global as any).__MONGOD__ = mongod;
+                  }
+                  const uri = mongod.getUri();
+                  return {
+                    uri,
+                    serverSelectionTimeoutMS: 500,
+                    connectTimeoutMS: 500,
+                    maxPoolSize: 5,
+                  };
+                } catch (e) {
+                  // Fallback to skip mode if memory-server fails
+                  return {
+                    uri: 'mongodb://127.0.0.1:27017/skip-tests',
+                    serverSelectionTimeoutMS: 1,
+                    connectTimeoutMS: 1,
+                    maxPoolSize: 1,
+                    autoCreate: false,
+                    autoIndex: false,
+                  } as any;
+                }
+              }
+              // MongoDB连接调试信息
+              const logger = new Logger('AppModule');
+              logger.debug('MongoDB连接调试信息');
+              logger.debug(`NODE_ENV: ${process.env.NODE_ENV}`);
+              logger.debug(`MONGO_URL存在: ${!!process.env.MONGO_URL}`);
+              if (process.env.MONGO_URL) {
+                logger.debug(
+                  `MONGO_URL (masked): ${process.env.MONGO_URL.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')}`,
+                );
+              }
 
-        const mongoUri = process.env.MONGO_URL;
+              const mongoUri = process.env.MONGO_URL;
 
-        if (!mongoUri) {
-          logger.warn(
-            'MONGO_URL not configured - database features will be limited',
-          );
-          logger.warn(
-            '📋 Please add MongoDB service in Railway and set MONGO_URL environment variable',
-          );
-          // Fallback to local memory server if tests set a flag
-          const mongod = await MongoMemoryServer.create();
-          const uri = mongod.getUri();
-          (global as any).__MONGOD__ = mongod;
-          return {
-            uri,
-            serverSelectionTimeoutMS: 500,
-            connectTimeoutMS: 500,
-            maxPoolSize: 5,
-          };
-        }
-        logger.debug(
-          `最终使用的URI (masked): ${mongoUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')}`,
-        );
+              if (!mongoUri) {
+                logger.warn(
+                  'MONGO_URL not configured - database features will be limited',
+                );
+                logger.warn(
+                  '📋 Please add MongoDB service in Railway and set MONGO_URL environment variable',
+                );
+                // Fallback to local memory server if tests set a flag
+                const mongod = await MongoMemoryServer.create();
+                const uri = mongod.getUri();
+                (global as any).__MONGOD__ = mongod;
+                return {
+                  uri,
+                  serverSelectionTimeoutMS: 500,
+                  connectTimeoutMS: 500,
+                  maxPoolSize: 5,
+                };
+              }
+              logger.debug(
+                `最终使用的URI (masked): ${mongoUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')}`,
+              );
 
-        return {
-          uri: mongoUri,
-          // 连接池优化配置
-          maxPoolSize: 20, // 最大连接数
-          minPoolSize: 5, // 最小连接数
-          maxIdleTimeMS: 30000, // 连接空闲30秒后关闭
-          serverSelectionTimeoutMS: 5000, // 服务器选择超时5秒
-          socketTimeoutMS: 30000, // Socket超时30秒
-          connectTimeoutMS: 10000, // 连接超时10秒
+              return {
+                uri: mongoUri,
+                // 连接池优化配置
+                maxPoolSize: 20, // 最大连接数
+                minPoolSize: 5, // 最小连接数
+                maxIdleTimeMS: 30000, // 连接空闲30秒后关闭
+                serverSelectionTimeoutMS: 5000, // 服务器选择超时5秒
+                socketTimeoutMS: 30000, // Socket超时30秒
+                connectTimeoutMS: 10000, // 连接超时10秒
 
-          // 健康检查配置
-          heartbeatFrequencyMS: 10000, // 心跳检查间隔10秒
+                // 健康检查配置
+                heartbeatFrequencyMS: 10000, // 心跳检查间隔10秒
 
-          // 写入关注和读取偏好
-          writeConcern: {
-            w: 1, // 等待主节点确认
-            j: true, // 等待写入日志
-            wtimeoutMS: 5000, // 写入超时5秒
-          },
-          readPreference: 'primary', // 从主节点读取，确保数据一致性
+                // 写入关注和读取偏好
+                writeConcern: {
+                  w: 1, // 等待主节点确认
+                  j: true, // 等待写入日志
+                  wtimeoutMS: 5000, // 写入超时5秒
+                },
+                readPreference: 'primary', // 从主节点读取，确保数据一致性
 
-          // 重试配置
-          retryWrites: true, // 启用写入重试
-          retryReads: true, // 启用读取重试
-        };
+                // 重试配置
+                retryWrites: true, // 启用写入重试
+                retryReads: true, // 启用读取重试
+              };
             },
           }),
         ]),

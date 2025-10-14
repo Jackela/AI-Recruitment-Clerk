@@ -18,9 +18,7 @@
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "libs/job-management-domain/**/*.ts"
-        ]
+        "lintFilePatterns": ["libs/job-management-domain/**/*.ts"]
       }
     },
     "test": {

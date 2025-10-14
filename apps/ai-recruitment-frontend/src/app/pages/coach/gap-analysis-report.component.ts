@@ -33,4 +33,3 @@ import { GapAnalysisResult } from '../../interfaces/gap-analysis.interface';
 export class GapAnalysisReportComponent {
   @Input() result: GapAnalysisResult | null = null;
 }
-

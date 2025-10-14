@@ -58,13 +58,18 @@ class MockRedisClient {
         get: () => this,
         incrby: () => this,
         expire: () => this,
-        exec: async () => [[null, '5'], [null, '3']]
-      })
+        exec: async () => [
+          [null, '5'],
+          [null, '3'],
+        ],
+      }),
     };
   }
 
   async connect() {}
-  isRedisConnected() { return true; }
+  isRedisConnected() {
+    return true;
+  }
 }
 
 describe('Redis Infrastructure', () => {
@@ -92,13 +97,20 @@ describe('Redis Infrastructure', () => {
       await redisClient.set('test-key', 'test-value');
       const value = await redisClient.get('test-key');
 
-      expect(redisClient.getClient().set).toHaveBeenCalledWith('test-key', 'test-value');
+      expect(redisClient.getClient().set).toHaveBeenCalledWith(
+        'test-key',
+        'test-value',
+      );
       expect(value).toBe('test-value');
     });
 
     it('should set values with TTL', async () => {
       await redisClient.set('test-key', 'test-value', 3600);
-      expect(redisClient.getClient().setex).toHaveBeenCalledWith('test-key', 3600, 'test-value');
+      expect(redisClient.getClient().setex).toHaveBeenCalledWith(
+        'test-key',
+        3600,
+        'test-value',
+      );
     });
 
     it('should delete keys', async () => {
@@ -128,7 +140,11 @@ describe('Redis Infrastructure', () => {
       await redisClient.hset('hash-key', 'field', 'hash-value');
       const value = await redisClient.hget('hash-key', 'field');
 
-      expect(redisClient.getClient().hset).toHaveBeenCalledWith('hash-key', 'field', 'hash-value');
+      expect(redisClient.getClient().hset).toHaveBeenCalledWith(
+        'hash-key',
+        'field',
+        'hash-value',
+      );
       expect(value).toBe('hash-value');
     });
   });
@@ -142,7 +158,7 @@ describe('Redis Infrastructure', () => {
 
     it('should cache session data', async () => {
       await sessionCache.cacheSession(testSession);
-      
+
       expect(redisClient.getClient().set).toHaveBeenCalledTimes(2); // session + IP mapping
     });
 
@@ -153,33 +169,50 @@ describe('Redis Infrastructure', () => {
         status: 'active',
         createdAt: new Date(),
         lastActiveAt: new Date(),
-        quota: { daily: 5, used: 0, questionnaireBonuses: 0, paymentBonuses: 0 }
+        quota: {
+          daily: 5,
+          used: 0,
+          questionnaireBonuses: 0,
+          paymentBonuses: 0,
+        },
       };
 
       const mockGet = redisClient.getClient().get as jest.Mock;
       mockGet.mockResolvedValueOnce(JSON.stringify(sessionData));
 
-      const retrieved = await sessionCache.getSessionById(testSession.getId().getValue());
-      
+      const retrieved = await sessionCache.getSessionById(
+        testSession.getId().getValue(),
+      );
+
       expect(retrieved).toBeDefined();
-      expect(retrieved?.getId().getValue()).toBe(testSession.getId().getValue());
+      expect(retrieved?.getId().getValue()).toBe(
+        testSession.getId().getValue(),
+      );
     });
 
     it('should retrieve session by IP', async () => {
       const mockGet = redisClient.getClient().get as jest.Mock;
       mockGet
         .mockResolvedValueOnce(testSession.getId().getValue()) // IP -> session ID
-        .mockResolvedValueOnce(JSON.stringify({ // session data
-          id: testSession.getId().getValue(),
-          ip: '192.168.1.1',
-          status: 'active',
-          createdAt: new Date(),
-          lastActiveAt: new Date(),
-          quota: { daily: 5, used: 0, questionnaireBonuses: 0, paymentBonuses: 0 }
-        }));
+        .mockResolvedValueOnce(
+          JSON.stringify({
+            // session data
+            id: testSession.getId().getValue(),
+            ip: '192.168.1.1',
+            status: 'active',
+            createdAt: new Date(),
+            lastActiveAt: new Date(),
+            quota: {
+              daily: 5,
+              used: 0,
+              questionnaireBonuses: 0,
+              paymentBonuses: 0,
+            },
+          }),
+        );
 
       const retrieved = await sessionCache.getSessionByIP('192.168.1.1');
-      
+
       expect(retrieved).toBeDefined();
       expect(retrieved?.getIP().getValue()).toBe('192.168.1.1');
     });
@@ -189,13 +222,16 @@ describe('Redis Infrastructure', () => {
       mockGet.mockResolvedValueOnce(null);
 
       const retrieved = await sessionCache.getSessionById('non-existent');
-      
+
       expect(retrieved).toBeNull();
     });
 
     it('should remove session cache', async () => {
-      await sessionCache.removeSession(testSession.getId().getValue(), '192.168.1.1');
-      
+      await sessionCache.removeSession(
+        testSession.getId().getValue(),
+        '192.168.1.1',
+      );
+
       expect(redisClient.getClient().del).toHaveBeenCalledTimes(2); // session + IP mapping
     });
 
@@ -203,20 +239,22 @@ describe('Redis Infrastructure', () => {
       const mockExists = redisClient.getClient().exists as jest.Mock;
       mockExists.mockResolvedValueOnce(1);
 
-      const exists = await sessionCache.sessionExists(testSession.getId().getValue());
-      
+      const exists = await sessionCache.sessionExists(
+        testSession.getId().getValue(),
+      );
+
       expect(exists).toBe(true);
     });
 
     it('should get IP session stats', async () => {
       const mockGet = redisClient.getClient().get as jest.Mock;
       const mockTtl = redisClient.getClient().ttl as jest.Mock;
-      
+
       mockGet.mockResolvedValueOnce('session-id');
       mockTtl.mockResolvedValueOnce(3600);
 
       const stats = await sessionCache.getIPSessionStats('192.168.1.1');
-      
+
       expect(stats.hasActiveSession).toBe(true);
       expect(stats.sessionId).toBe('session-id');
       expect(stats.remainingTTL).toBe(3600);
@@ -231,7 +269,7 @@ describe('Redis Infrastructure', () => {
       mockGet.mockResolvedValueOnce('3');
 
       const usage = await usageCache.getDailyUsage(testIP);
-      
+
       expect(usage).toBe(3);
     });
 
@@ -240,7 +278,7 @@ describe('Redis Infrastructure', () => {
       mockGet.mockResolvedValueOnce(null);
 
       const usage = await usageCache.getDailyUsage(testIP);
-      
+
       expect(usage).toBe(0);
     });
 
@@ -249,7 +287,7 @@ describe('Redis Infrastructure', () => {
       mockIncr.mockResolvedValueOnce(1);
 
       const newUsage = await usageCache.incrementDailyUsage(testIP);
-      
+
       expect(newUsage).toBe(1);
       expect(redisClient.getClient().incr).toHaveBeenCalled();
     });
@@ -259,7 +297,7 @@ describe('Redis Infrastructure', () => {
       mockIncr.mockResolvedValueOnce(1); // First usage
 
       await usageCache.incrementDailyUsage(testIP);
-      
+
       expect(redisClient.getClient().expire).toHaveBeenCalled();
     });
 
@@ -268,7 +306,7 @@ describe('Redis Infrastructure', () => {
       mockGet.mockResolvedValueOnce('5');
 
       const bonus = await usageCache.getBonusQuota(testIP, 'questionnaire');
-      
+
       expect(bonus).toBe(5);
     });
 
@@ -276,16 +314,26 @@ describe('Redis Infrastructure', () => {
       const mockPipeline = {
         incrby: jest.fn().mockReturnThis(),
         expire: jest.fn().mockReturnThis(),
-        exec: jest.fn().mockResolvedValue([[null, 5], [null, 1]])
+        exec: jest.fn().mockResolvedValue([
+          [null, 5],
+          [null, 1],
+        ]),
       };
-      
+
       const mockPipelineFactory = redisClient.getClient().pipeline as jest.Mock;
       mockPipelineFactory.mockReturnValue(mockPipeline);
 
-      const newTotal = await usageCache.addBonusQuota(testIP, 'questionnaire', 5);
-      
+      const newTotal = await usageCache.addBonusQuota(
+        testIP,
+        'questionnaire',
+        5,
+      );
+
       expect(newTotal).toBe(5);
-      expect(mockPipeline.incrby).toHaveBeenCalledWith(expect.stringContaining('questionnaire'), 5);
+      expect(mockPipeline.incrby).toHaveBeenCalledWith(
+        expect.stringContaining('questionnaire'),
+        5,
+      );
     });
 
     it('should get total quota correctly', async () => {
@@ -293,15 +341,15 @@ describe('Redis Infrastructure', () => {
         get: jest.fn().mockReturnThis(),
         exec: jest.fn().mockResolvedValue([
           [null, '5'], // questionnaire bonus
-          [null, '3']  // payment bonus
-        ])
+          [null, '3'], // payment bonus
+        ]),
       };
-      
+
       const mockPipelineFactory = redisClient.getClient().pipeline as jest.Mock;
       mockPipelineFactory.mockReturnValue(mockPipeline);
 
       const quota = await usageCache.getTotalQuota(testIP, 5);
-      
+
       expect(quota.base).toBe(5);
       expect(quota.questionnaire).toBe(5);
       expect(quota.payment).toBe(3);
@@ -316,15 +364,15 @@ describe('Redis Infrastructure', () => {
           [null, '2'], // used
           [null, '5'], // questionnaire bonus
           [null, '3'], // payment bonus
-          [null, 3600] // ttl
-        ])
+          [null, 3600], // ttl
+        ]),
       };
-      
+
       const mockPipelineFactory = redisClient.getClient().pipeline as jest.Mock;
       mockPipelineFactory.mockReturnValue(mockPipeline);
 
       const status = await usageCache.getUsageStatus(testIP, 5);
-      
+
       expect(status.used).toBe(2);
       expect(status.quota.total).toBe(13); // 5 + 5 + 3
       expect(status.remaining).toBe(11); // 13 - 2
@@ -339,15 +387,15 @@ describe('Redis Infrastructure', () => {
           [null, '5'], // used (equals base quota)
           [null, null], // no questionnaire bonus
           [null, null], // no payment bonus
-          [null, 3600]
-        ])
+          [null, 3600],
+        ]),
       };
-      
+
       const mockPipelineFactory = redisClient.getClient().pipeline as jest.Mock;
       mockPipelineFactory.mockReturnValue(mockPipeline);
 
       const status = await usageCache.getUsageStatus(testIP, 5);
-      
+
       expect(status.used).toBe(5);
       expect(status.remaining).toBe(0);
       expect(status.canUse).toBe(false);
@@ -361,15 +409,15 @@ describe('Redis Infrastructure', () => {
           [null, '2'], // used
           [null, null], // no questionnaire bonus
           [null, null], // no payment bonus
-          [null, 3600]
-        ])
+          [null, 3600],
+        ]),
       };
-      
+
       const mockPipelineFactory = redisClient.getClient().pipeline as jest.Mock;
       mockPipelineFactory.mockReturnValue(mockPipeline);
 
       const canUse = await usageCache.canUse(testIP, 5);
-      
+
       expect(canUse).toBe(true);
     });
   });

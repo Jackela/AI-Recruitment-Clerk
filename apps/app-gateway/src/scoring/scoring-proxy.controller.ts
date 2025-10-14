@@ -22,7 +22,8 @@ export class ScoringProxyController {
    */
   @Post('gap-analysis')
   async gapAnalysis(@Body() body: any) {
-    const base = process.env.SCORING_ENGINE_URL || 'http://scoring-engine-svc:3000';
+    const base =
+      process.env.SCORING_ENGINE_URL || 'http://scoring-engine-svc:3000';
     const url = `${base.replace(/\/$/, '')}/gap-analysis`;
     try {
       const res = await fetch(url, {
@@ -40,7 +41,10 @@ export class ScoringProxyController {
       return data;
     } catch (error) {
       throw new HttpException(
-        { message: 'Failed to reach scoring engine', error: (error as Error).message },
+        {
+          message: 'Failed to reach scoring engine',
+          error: (error as Error).message,
+        },
         HttpStatus.BAD_GATEWAY,
       );
     }
@@ -88,12 +92,16 @@ export class ScoringProxyController {
       }
     } catch (err) {
       throw new HttpException(
-        { message: 'Failed to extract resume text', error: (err as Error).message },
+        {
+          message: 'Failed to extract resume text',
+          error: (err as Error).message,
+        },
         HttpStatus.BAD_REQUEST,
       );
     }
 
-    const base = process.env.SCORING_ENGINE_URL || 'http://scoring-engine-svc:3000';
+    const base =
+      process.env.SCORING_ENGINE_URL || 'http://scoring-engine-svc:3000';
     const url = `${base.replace(/\/$/, '')}/gap-analysis`;
     const payload = { jdText: body?.jdText || '', resumeText };
 
@@ -117,7 +125,11 @@ export class ScoringProxyController {
       const resumeSkills = tokenize(resumeText || '');
       const matched = jdSkills.filter((s) => resumeSkills.includes(s));
       const missing = jdSkills.filter((s) => !resumeSkills.includes(s));
-      return { matchedSkills: matched, missingSkills: missing, suggestedSkills: [] };
+      return {
+        matchedSkills: matched,
+        missingSkills: missing,
+        suggestedSkills: [],
+      };
     }
 
     function tokenize(text: string) {

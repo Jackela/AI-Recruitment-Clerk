@@ -1,5 +1,9 @@
 import { Module, DynamicModule, Global, Logger } from '@nestjs/common';
-import { NatsConnectionManager, NatsStreamManager, StreamConfigFactory } from '@app/shared-nats-client';
+import {
+  NatsConnectionManager,
+  NatsStreamManager,
+  StreamConfigFactory,
+} from '@app/shared-nats-client';
 import { connect, NatsConnection, JetStreamManager } from 'nats';
 
 /**
@@ -23,8 +27,9 @@ export class TestNatsModule {
 
     if (useDocker) {
       // Use real NATS connection for integration tests
-      const natsUrl = process.env.NATS_SERVERS || 'nats://testuser:testpass@localhost:4223';
-      
+      const natsUrl =
+        process.env.NATS_SERVERS || 'nats://testuser:testpass@localhost:4223';
+
       try {
         this.natsConnection = await connect({
           servers: natsUrl,
@@ -33,12 +38,12 @@ export class TestNatsModule {
         });
 
         const jsm = await this.natsConnection.jetstreamManager();
-        
+
         // Create test stream using shared configuration factory
         try {
           const testStreamConfig = StreamConfigFactory.createDev(
             'RESUME_PARSER_TEST',
-            ['resume.*', 'job.*', 'report.*']
+            ['resume.*', 'job.*', 'report.*'],
           );
           await jsm.streams.add({
             name: testStreamConfig.name,
@@ -51,7 +56,10 @@ export class TestNatsModule {
           });
         } catch (err: any) {
           if (!err.message?.includes('stream name already in use')) {
-            this.logger.error('Failed to create test stream', err.stack || err.message);
+            this.logger.error(
+              'Failed to create test stream',
+              err.stack || err.message,
+            );
           }
         }
 
@@ -69,7 +77,10 @@ export class TestNatsModule {
           deleteStream: jest.fn().mockResolvedValue(undefined),
         };
       } catch (error) {
-        this.logger.error('Failed to connect to NATS', error.stack || error.message);
+        this.logger.error(
+          'Failed to connect to NATS',
+          error.stack || error.message,
+        );
         // Fall back to mocks if connection fails
         return this.getMockProviders();
       }

@@ -812,7 +812,9 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
     `;
   }
 
-  private getRecentActivityContent(activities: import('../../services/dashboard-api.service').ActivityItem[]): string {
+  private getRecentActivityContent(
+    activities: import('../../services/dashboard-api.service').ActivityItem[],
+  ): string {
     if (activities.length === 0) {
       return '<div class="no-activity">暂无最近活动</div>';
     }
@@ -854,7 +856,11 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
    * @param item - The item.
    */
   onBentoItemClick(item: BentoGridItem): void {
-    this.logger.userAction('Bento grid item clicked', { itemId: item.id, itemVariant: item.variant, itemSize: item.size });
+    this.logger.userAction('Bento grid item clicked', {
+      itemId: item.id,
+      itemVariant: item.variant,
+      itemSize: item.size,
+    });
   }
 
   private navigateToReports(): void {

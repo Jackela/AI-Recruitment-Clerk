@@ -202,7 +202,10 @@ export class RateLimitMiddleware implements NestMiddleware {
         remaining: Math.max(0, remaining),
       };
     } catch (error) {
-      this.logger.error('Complete questionnaire error', error.stack || error.message);
+      this.logger.error(
+        'Complete questionnaire error',
+        error.stack || error.message,
+      );
       return { success: false, newLimit: 5, remaining: 0 };
     }
   }

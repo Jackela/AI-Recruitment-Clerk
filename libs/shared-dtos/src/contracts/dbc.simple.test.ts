@@ -4,10 +4,7 @@
  * @since 1.0.0
  */
 
-import { 
-  ContractViolationError, 
-  ContractValidators 
-} from './dbc.decorators';
+import { ContractViolationError, ContractValidators } from './dbc.decorators';
 
 describe('DBC Framework - Validators Only', () => {
   describe('ContractViolationError', () => {
@@ -15,7 +12,7 @@ describe('DBC Framework - Validators Only', () => {
       const error = new ContractViolationError(
         'Test error',
         'PRE',
-        'TestClass.testMethod'
+        'TestClass.testMethod',
       );
 
       expect(error).toBeInstanceOf(Error);
@@ -31,8 +28,12 @@ describe('DBC Framework - Validators Only', () => {
     describe('isValidEmail', () => {
       it('should validate correct email formats', () => {
         expect(ContractValidators.isValidEmail('test@example.com')).toBe(true);
-        expect(ContractValidators.isValidEmail('user.name+tag@example.org')).toBe(true);
-        expect(ContractValidators.isValidEmail('user123@test-domain.co.uk')).toBe(true);
+        expect(
+          ContractValidators.isValidEmail('user.name+tag@example.org'),
+        ).toBe(true);
+        expect(
+          ContractValidators.isValidEmail('user123@test-domain.co.uk'),
+        ).toBe(true);
       });
 
       it('should reject invalid email formats', () => {
@@ -40,7 +41,9 @@ describe('DBC Framework - Validators Only', () => {
         expect(ContractValidators.isValidEmail('test@')).toBe(false);
         expect(ContractValidators.isValidEmail('@example.com')).toBe(false);
         expect(ContractValidators.isValidEmail('')).toBe(false);
-        expect(ContractValidators.isValidEmail('test space@example.com')).toBe(false);
+        expect(ContractValidators.isValidEmail('test space@example.com')).toBe(
+          false,
+        );
       });
 
       it('should handle non-string inputs', () => {
@@ -79,8 +82,12 @@ describe('DBC Framework - Validators Only', () => {
       });
 
       it('should reject oversized files', () => {
-        expect(ContractValidators.isValidFileSize(11 * 1024 * 1024)).toBe(false); // 11MB > 10MB default
-        expect(ContractValidators.isValidFileSize(20 * 1024 * 1024)).toBe(false); // 20MB
+        expect(ContractValidators.isValidFileSize(11 * 1024 * 1024)).toBe(
+          false,
+        ); // 11MB > 10MB default
+        expect(ContractValidators.isValidFileSize(20 * 1024 * 1024)).toBe(
+          false,
+        ); // 20MB
       });
 
       it('should reject zero or negative sizes', () => {
@@ -98,7 +105,7 @@ describe('DBC Framework - Validators Only', () => {
       it('should validate PDF file objects', () => {
         const pdfFile = {
           mimetype: 'application/pdf',
-          originalname: 'document.pdf'
+          originalname: 'document.pdf',
         };
         expect(ContractValidators.isPdfFile(pdfFile)).toBe(true);
       });
@@ -106,7 +113,7 @@ describe('DBC Framework - Validators Only', () => {
       it('should validate case insensitive PDF extensions', () => {
         const pdfFile = {
           mimetype: 'application/pdf',
-          originalname: 'document.PDF'
+          originalname: 'document.PDF',
         };
         expect(ContractValidators.isPdfFile(pdfFile)).toBe(true);
       });
@@ -114,7 +121,7 @@ describe('DBC Framework - Validators Only', () => {
       it('should reject non-PDF files', () => {
         const docFile = {
           mimetype: 'application/msword',
-          originalname: 'document.doc'
+          originalname: 'document.doc',
         };
         expect(ContractValidators.isPdfFile(docFile)).toBe(false);
       });
@@ -122,7 +129,7 @@ describe('DBC Framework - Validators Only', () => {
       it('should reject files with wrong extension', () => {
         const file = {
           mimetype: 'application/pdf',
-          originalname: 'document.txt'
+          originalname: 'document.txt',
         };
         expect(ContractValidators.isPdfFile(file)).toBe(false);
       });
@@ -161,7 +168,7 @@ describe('DBC Framework - Validators Only', () => {
           throw new ContractViolationError(
             'Input must be non-empty string',
             'PRE',
-            'TestService.validateInput'
+            'TestService.validateInput',
           );
         }
         return `processed: ${input}`;
@@ -172,21 +179,23 @@ describe('DBC Framework - Validators Only', () => {
 
       // Failure case
       expect(() => validateInput('')).toThrow(ContractViolationError);
-      expect(() => validateInput('')).toThrow('[PRE] TestService.validateInput: Input must be non-empty string');
+      expect(() => validateInput('')).toThrow(
+        '[PRE] TestService.validateInput: Input must be non-empty string',
+      );
     });
 
     it('should simulate postcondition validation', () => {
       const processAndValidate = (input: string) => {
         const result = `processed: ${input}`;
-        
+
         if (!result.includes('processed')) {
           throw new ContractViolationError(
             'Result must contain processed marker',
             'POST',
-            'TestService.processAndValidate'
+            'TestService.processAndValidate',
           );
         }
-        
+
         return result;
       };
 
@@ -201,23 +210,23 @@ describe('DBC Framework - Validators Only', () => {
             throw new ContractViolationError(
               'Buffer must be valid and non-empty',
               'PRE',
-              'ParsingService.parseFile'
+              'ParsingService.parseFile',
             );
           }
-          
+
           if (!ContractValidators.isNonEmptyString(filename)) {
             throw new ContractViolationError(
               'Filename must be non-empty string',
               'PRE',
-              'ParsingService.parseFile'
+              'ParsingService.parseFile',
             );
           }
-          
+
           if (!ContractValidators.isValidFileSize(buffer.length)) {
             throw new ContractViolationError(
               'File size exceeds limits',
               'PRE',
-              'ParsingService.parseFile'
+              'ParsingService.parseFile',
             );
           }
 
@@ -226,7 +235,7 @@ describe('DBC Framework - Validators Only', () => {
             jobId: `job_${Date.now()}`,
             status: 'completed' as const,
             warnings: [] as string[],
-            metadata: { duration: 100 }
+            metadata: { duration: 100 },
           };
 
           // Postconditions
@@ -234,37 +243,52 @@ describe('DBC Framework - Validators Only', () => {
             throw new ContractViolationError(
               'Job ID must be generated',
               'POST',
-              'ParsingService.parseFile'
+              'ParsingService.parseFile',
             );
           }
 
-          if (!['processing', 'completed', 'failed', 'partial'].includes(result.status)) {
+          if (
+            !['processing', 'completed', 'failed', 'partial'].includes(
+              result.status,
+            )
+          ) {
             throw new ContractViolationError(
               'Status must be valid',
               'POST',
-              'ParsingService.parseFile'
+              'ParsingService.parseFile',
             );
           }
 
           return result;
-        }
+        },
       };
 
       // Test success case
       const validBuffer = Buffer.from('test content');
-      const result = mockParsingService.parseFile(validBuffer, 'test.pdf', 'user123');
+      const result = mockParsingService.parseFile(
+        validBuffer,
+        'test.pdf',
+        'user123',
+      );
       expect(result.status).toBe('completed');
       expect(result.jobId).toMatch(/^job_\d+$/);
 
       // Test precondition failures
-      expect(() => mockParsingService.parseFile(Buffer.alloc(0), 'test.pdf', 'user123'))
-        .toThrow('Buffer must be valid and non-empty');
-      
-      expect(() => mockParsingService.parseFile(validBuffer, '', 'user123'))
-        .toThrow('Filename must be non-empty string');
-      
-      expect(() => mockParsingService.parseFile(Buffer.alloc(11 * 1024 * 1024), 'test.pdf', 'user123'))
-        .toThrow('File size exceeds limits');
+      expect(() =>
+        mockParsingService.parseFile(Buffer.alloc(0), 'test.pdf', 'user123'),
+      ).toThrow('Buffer must be valid and non-empty');
+
+      expect(() =>
+        mockParsingService.parseFile(validBuffer, '', 'user123'),
+      ).toThrow('Filename must be non-empty string');
+
+      expect(() =>
+        mockParsingService.parseFile(
+          Buffer.alloc(11 * 1024 * 1024),
+          'test.pdf',
+          'user123',
+        ),
+      ).toThrow('File size exceeds limits');
     });
   });
 });

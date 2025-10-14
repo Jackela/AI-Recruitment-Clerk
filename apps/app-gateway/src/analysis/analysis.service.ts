@@ -72,14 +72,19 @@ export class AnalysisService {
         timestamp,
       };
 
-      this.logger.log(`📤 Publishing JD extraction event for job: ${virtualJobId}`);
-      const jdPublishResult = await this.natsClient.publishJobJdSubmitted(jdEvent);
+      this.logger.log(
+        `📤 Publishing JD extraction event for job: ${virtualJobId}`,
+      );
+      const jdPublishResult =
+        await this.natsClient.publishJobJdSubmitted(jdEvent);
 
       if (!jdPublishResult.success) {
         throw new Error(`Failed to publish JD event: ${jdPublishResult.error}`);
       }
 
-      this.logger.log(`✅ JD extraction event published: ${jdPublishResult.messageId}`);
+      this.logger.log(
+        `✅ JD extraction event published: ${jdPublishResult.messageId}`,
+      );
 
       // Step 2: Publish resume processing event
       const resumeId = this.generateResumeId();
@@ -90,24 +95,32 @@ export class AnalysisService {
         tempGridFsUrl: `analysis://session/${analysisId}/${resumeId}`,
       };
 
-      this.logger.log(`📤 Publishing resume processing event for resume: ${resumeId}`);
-      const resumePublishResult = await this.natsClient.publishResumeSubmitted(resumeEvent);
+      this.logger.log(
+        `📤 Publishing resume processing event for resume: ${resumeId}`,
+      );
+      const resumePublishResult =
+        await this.natsClient.publishResumeSubmitted(resumeEvent);
 
       if (!resumePublishResult.success) {
-        throw new Error(`Failed to publish resume event: ${resumePublishResult.error}`);
+        throw new Error(
+          `Failed to publish resume event: ${resumePublishResult.error}`,
+        );
       }
 
-      this.logger.log(`✅ Resume processing event published: ${resumePublishResult.messageId}`);
+      this.logger.log(
+        `✅ Resume processing event published: ${resumePublishResult.messageId}`,
+      );
 
       // Return analysis initiation response
       const response: AnalysisInitiatedResponseDto = {
         analysisId,
         status: 'processing',
-        message: 'Analysis pipeline initiated successfully. JD extraction and resume parsing events have been published.',
+        message:
+          'Analysis pipeline initiated successfully. JD extraction and resume parsing events have been published.',
         estimatedProcessingTime: 30, // 30 seconds estimate
         processingSteps: [
           'jd_extraction',
-          'resume_parsing', 
+          'resume_parsing',
           'skill_matching',
           'scoring_analysis',
           'report_generation',
@@ -115,11 +128,15 @@ export class AnalysisService {
         timestamp,
       };
 
-      this.logger.log(`🎯 Analysis pipeline initiated successfully: ${analysisId}`);
+      this.logger.log(
+        `🎯 Analysis pipeline initiated successfully: ${analysisId}`,
+      );
       return response;
-
     } catch (error) {
-      this.logger.error(`❌ Failed to initiate analysis pipeline: ${analysisId}`, error);
+      this.logger.error(
+        `❌ Failed to initiate analysis pipeline: ${analysisId}`,
+        error,
+      );
       throw new Error(`Analysis pipeline failed: ${error.message}`);
     }
   }
