@@ -66,7 +66,11 @@ export interface UnknownValidationData {
   [key: string]: unknown;
 }
 
-export type ValidationDataInput = UnknownJobData | UnknownReportData | UnknownValidationData | Record<string, unknown>;
+export type ValidationDataInput =
+  | UnknownJobData
+  | UnknownReportData
+  | UnknownValidationData
+  | Record<string, unknown>;
 
 /**
  * Runtime contract validator
@@ -75,7 +79,10 @@ export class ContractValidator {
   /**
    * Validate job contract structure and types
    */
-  static validateJobContract(data: UnknownJobData, contractType: 'JobBase' | 'JobDetail' | 'JobListItem'): ValidationResult {
+  static validateJobContract(
+    data: UnknownJobData,
+    contractType: 'JobBase' | 'JobDetail' | 'JobListItem',
+  ): ValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
@@ -86,8 +93,16 @@ export class ContractValidator {
     if (!data.title || typeof data.title !== 'string') {
       errors.push('title must be a non-empty string');
     }
-    if (!data.status || typeof data.status !== 'string' || !['draft', 'active', 'processing', 'completed', 'closed'].includes(data.status)) {
-      errors.push('status must be one of: draft, active, processing, completed, closed');
+    if (
+      !data.status ||
+      typeof data.status !== 'string' ||
+      !['draft', 'active', 'processing', 'completed', 'closed'].includes(
+        data.status,
+      )
+    ) {
+      errors.push(
+        'status must be one of: draft, active, processing, completed, closed',
+      );
     }
     if (!data.createdAt || !(data.createdAt instanceof Date)) {
       errors.push('createdAt must be a Date object');
@@ -107,14 +122,17 @@ export class ContractValidator {
       isValid: errors.length === 0,
       errors,
       warnings,
-      contractName: contractType
+      contractName: contractType,
     };
   }
 
   /**
    * Validate report contract structure and types
    */
-  static validateReportContract(data: UnknownReportData, contractType: 'AnalysisReport' | 'ReportListItem'): ValidationResult {
+  static validateReportContract(
+    data: UnknownReportData,
+    contractType: 'AnalysisReport' | 'ReportListItem',
+  ): ValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
@@ -125,10 +143,17 @@ export class ContractValidator {
     if (!data.candidateName || typeof data.candidateName !== 'string') {
       errors.push('candidateName must be a non-empty string');
     }
-    if (typeof data.matchScore !== 'number' || data.matchScore < 0 || data.matchScore > 100) {
+    if (
+      typeof data.matchScore !== 'number' ||
+      data.matchScore < 0 ||
+      data.matchScore > 100
+    ) {
       errors.push('matchScore must be a number between 0 and 100');
     }
-    if (!data.oneSentenceSummary || typeof data.oneSentenceSummary !== 'string') {
+    if (
+      !data.oneSentenceSummary ||
+      typeof data.oneSentenceSummary !== 'string'
+    ) {
       errors.push('oneSentenceSummary must be a non-empty string');
     }
     if (!data.generatedAt || !(data.generatedAt instanceof Date)) {
@@ -161,20 +186,32 @@ export class ContractValidator {
       isValid: errors.length === 0,
       errors,
       warnings,
-      contractName: contractType
+      contractName: contractType,
     };
   }
 
   /**
    * Compare frontend and backend contract structures
    */
-  static compareContracts(frontendData: Record<string, unknown>, backendData: Record<string, unknown>, _contractName: string): ContractComparisonResult {
+  static compareContracts(
+    frontendData: Record<string, unknown>,
+    backendData: Record<string, unknown>,
+    _contractName: string,
+  ): ContractComparisonResult {
     const frontendKeys = new Set(Object.keys(frontendData));
     const backendKeys = new Set(Object.keys(backendData));
 
-    const missingFields = [...backendKeys].filter(key => !frontendKeys.has(key));
-    const extraFields = [...frontendKeys].filter(key => !backendKeys.has(key));
-    const typeMismatches: Array<{field: string; expected: string; actual: string}> = [];
+    const missingFields = [...backendKeys].filter(
+      (key) => !frontendKeys.has(key),
+    );
+    const extraFields = [...frontendKeys].filter(
+      (key) => !backendKeys.has(key),
+    );
+    const typeMismatches: Array<{
+      field: string;
+      expected: string;
+      actual: string;
+    }> = [];
 
     // Check type mismatches for common fields
     for (const key of frontendKeys) {
@@ -185,7 +222,7 @@ export class ContractValidator {
           typeMismatches.push({
             field: key,
             expected: backendType,
-            actual: frontendType
+            actual: frontendType,
           });
         }
       }
@@ -196,7 +233,7 @@ export class ContractValidator {
       typeMatch: typeMismatches.length === 0,
       missingFields,
       extraFields,
-      typeMismatches
+      typeMismatches,
     };
   }
 

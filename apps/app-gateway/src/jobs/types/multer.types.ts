@@ -26,7 +26,7 @@ export class MulterFile implements MulterFile {
   filename: string = '';
   path: string = '';
   buffer: Buffer = Buffer.alloc(0);
-  
+
   /**
    * Initializes a new instance of the Multer File.
    * @param data - The data.

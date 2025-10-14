@@ -16,7 +16,9 @@ describe('GuestResumeController', () => {
   };
 
   const mockNatsClient: Partial<jest.Mocked<AppGatewayNatsService>> = {
-    publishResumeSubmitted: jest.fn().mockResolvedValue({ success: true, messageId: '1' }),
+    publishResumeSubmitted: jest
+      .fn()
+      .mockResolvedValue({ success: true, messageId: '1' }),
     isConnected: true as any,
   } as any;
 

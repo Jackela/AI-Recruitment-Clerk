@@ -105,15 +105,17 @@ export class App implements OnInit, OnDestroy {
     const websocketStats = await this.ensureWebsocketStats();
 
     // Start real-time statistics
-    this.websocketStatsSubscription = websocketStats.subscribeToStats().subscribe((stats) => {
-      // Update global stats
-      if (stats.errorRate > 10) {
-        this.progressFeedback.showWarning(
-          '系统警告',
-          '当前系统错误率较高，可能影响分析速度',
-        );
-      }
-    });
+    this.websocketStatsSubscription = websocketStats
+      .subscribeToStats()
+      .subscribe((stats) => {
+        // Update global stats
+        if (stats.errorRate > 10) {
+          this.progressFeedback.showWarning(
+            '系统警告',
+            '当前系统错误率较高，可能影响分析速度',
+          );
+        }
+      });
 
     // Monitor connection status
     // Note: isConnected is a signal, we'll use effect for watching changes
@@ -142,8 +144,11 @@ export class App implements OnInit, OnDestroy {
       void this.ensureKeyboardNavigation();
     };
 
-    const idle = (window as typeof window & { requestIdleCallback?: (cb: () => void) => number })
-      .requestIdleCallback;
+    const idle = (
+      window as typeof window & {
+        requestIdleCallback?: (cb: () => void) => number;
+      }
+    ).requestIdleCallback;
 
     if (typeof idle === 'function') {
       idle(load);
@@ -164,7 +169,9 @@ export class App implements OnInit, OnDestroy {
   }
 
   private async setupKeyboardShortcuts(): Promise<void> {
-    const { registerKeyboardShortcuts } = await import('./setup-keyboard-shortcuts');
+    const { registerKeyboardShortcuts } = await import(
+      './setup-keyboard-shortcuts'
+    );
 
     registerKeyboardShortcuts({
       accessibilityService: this.accessibilityService,
@@ -209,7 +216,9 @@ export class App implements OnInit, OnDestroy {
   private initializeAccessibility(): void {
     // Subscribe to accessibility state changes
     // Check if we're in a test environment by looking for window.__karma__
-    const isTestEnvironment = typeof (window as Window & { __karma__?: unknown }).__karma__ !== 'undefined';
+    const isTestEnvironment =
+      typeof (window as Window & { __karma__?: unknown }).__karma__ !==
+      'undefined';
 
     if (!isTestEnvironment) {
       // Only use effect in non-test environment

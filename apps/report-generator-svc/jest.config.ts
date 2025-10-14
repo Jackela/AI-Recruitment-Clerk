@@ -2,9 +2,7 @@ export default {
   displayName: 'report-generator-svc',
   preset: '../../jest.preset.cjs',
   testEnvironment: 'node',
-  testPathIgnorePatterns: [
-    '<rootDir>/src/report-generator/.*\\.spec\\.ts$',
-  ],
+  testPathIgnorePatterns: ['<rootDir>/src/report-generator/.*\\.spec\\.ts$'],
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },

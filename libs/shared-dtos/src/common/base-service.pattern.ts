@@ -46,7 +46,7 @@ export abstract class BaseService {
   protected handleError(error: Error, context?: string): void {
     const errorContext = context || 'Unknown Operation';
     this.logger.error(`[${errorContext}] ${error.message}`, error.stack);
-    
+
     if (this.config.enableMetrics) {
       this.recordMetric('error', errorContext);
     }
@@ -57,7 +57,7 @@ export abstract class BaseService {
    */
   protected logSuccess(operation: string, _data?: any): void {
     this.logger.log(`[${operation}] Operation completed successfully`);
-    
+
     if (this.config.enableMetrics) {
       this.recordMetric('success', operation);
     }
@@ -69,12 +69,13 @@ export abstract class BaseService {
   protected async withRetry<T>(
     operation: () => Promise<T>,
     context: string,
-    customConfig?: RetryConfig
+    customConfig?: RetryConfig,
   ): Promise<T> {
-    const retryConfig = customConfig || this.config.retryConfig || {
-      maxRetries: 3,
-      retryDelay: 1000
-    };
+    const retryConfig = customConfig ||
+      this.config.retryConfig || {
+        maxRetries: 3,
+        retryDelay: 1000,
+      };
 
     let lastError: Error;
     let delay = retryConfig.retryDelay;
@@ -88,7 +89,9 @@ export abstract class BaseService {
         return result;
       } catch (error) {
         lastError = error as Error;
-        this.logger.warn(`[${context}] Attempt ${attempt} failed: ${error.message}`);
+        this.logger.warn(
+          `[${context}] Attempt ${attempt} failed: ${error.message}`,
+        );
 
         if (attempt < retryConfig.maxRetries) {
           await this.sleep(delay);
@@ -108,20 +111,20 @@ export abstract class BaseService {
    */
   protected async withTiming<T>(
     operation: () => Promise<T>,
-    operationName: string
+    operationName: string,
   ): Promise<T> {
     const startTime = Date.now();
-    
+
     try {
       const result = await operation();
       const duration = Date.now() - startTime;
-      
+
       this.logger.debug(`[${operationName}] Completed in ${duration}ms`);
-      
+
       if (this.config.enableMetrics) {
         this.recordMetric('timing', operationName, { duration });
       }
-      
+
       return result;
     } catch (error) {
       const duration = Date.now() - startTime;
@@ -136,7 +139,7 @@ export abstract class BaseService {
   protected async withCache<T>(
     key: string,
     operation: () => Promise<T>,
-    ttl = 300000 // 5 minutes default
+    ttl = 300000, // 5 minutes default
   ): Promise<T> {
     if (!this.config.enableCaching) {
       return operation();
@@ -153,12 +156,12 @@ export abstract class BaseService {
     const result = await operation();
     this.setCache(key, result, ttl);
     this.logger.debug(`Cache set for key: ${key}`);
-    
+
     return result;
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private recordMetric(type: string, operation: string, data?: any): void {
@@ -200,10 +203,7 @@ export abstract class BaseRepository<T> extends BaseService {
    * @returns A promise that resolves to T.
    */
   async create(data: Partial<T>): Promise<T> {
-    return this.withTiming(
-      () => this.createEntity(data),
-      'create'
-    );
+    return this.withTiming(() => this.createEntity(data), 'create');
   }
 
   /**
@@ -212,10 +212,7 @@ export abstract class BaseRepository<T> extends BaseService {
    * @returns A promise that resolves to T | null.
    */
   async findOne(id: string): Promise<T | null> {
-    return this.withCache(
-      `entity:${id}`,
-      () => this.findById(id)
-    );
+    return this.withCache(`entity:${id}`, () => this.findById(id));
   }
 
   /**
@@ -225,10 +222,7 @@ export abstract class BaseRepository<T> extends BaseService {
    * @returns A promise that resolves to T.
    */
   async update(id: string, data: Partial<T>): Promise<T> {
-    return this.withTiming(
-      () => this.updateEntity(id, data),
-      'update'
-    );
+    return this.withTiming(() => this.updateEntity(id, data), 'update');
   }
 
   /**
@@ -237,9 +231,6 @@ export abstract class BaseRepository<T> extends BaseService {
    * @returns A promise that resolves to boolean value.
    */
   async delete(id: string): Promise<boolean> {
-    return this.withTiming(
-      () => this.deleteEntity(id),
-      'delete'
-    );
+    return this.withTiming(() => this.deleteEntity(id), 'delete');
   }
 }

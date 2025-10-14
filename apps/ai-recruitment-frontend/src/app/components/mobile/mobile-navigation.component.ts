@@ -890,12 +890,22 @@ export class MobileNavigationComponent implements OnInit, OnDestroy {
   @Input() showBackButton = false;
   @Input() navItems: MobileNavItem[] = [];
   @Input() menuItems: MobileNavItem[] = [];
-  @Input() headerActions: Array<{id: string; label: string; icon?: string; action: () => void}> = [];
-  @Input() menuActions: Array<{id: string; label: string; icon?: string; action: () => void}> = [];
+  @Input() headerActions: Array<{
+    id: string;
+    label: string;
+    icon?: string;
+    action: () => void;
+  }> = [];
+  @Input() menuActions: Array<{
+    id: string;
+    label: string;
+    icon?: string;
+    action: () => void;
+  }> = [];
 
   @Output() backClick = new EventEmitter<void>();
-  @Output() actionClick = new EventEmitter<{id: string; label: string}>(); 
-  @Output() menuActionClick = new EventEmitter<{id: string; label: string}>();
+  @Output() actionClick = new EventEmitter<{ id: string; label: string }>();
+  @Output() menuActionClick = new EventEmitter<{ id: string; label: string }>();
 
   currentRoute = '';
   isMenuOpen = false;

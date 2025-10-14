@@ -8,6 +8,7 @@ import { WebSocketModule } from '../websocket/websocket.module';
 import { GuestGuard } from './guards/guest.guard';
 import { GuestUsage, GuestUsageSchema } from './schemas/guest-usage.schema';
 import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
+import { GridFsService } from '../services/gridfs.service';
 
 /**
  * Configures the guest module.
@@ -24,7 +25,12 @@ import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
     GuestResumeController,
     WebSocketDemoController,
   ],
-  providers: [GuestUsageService, GuestGuard, AppGatewayNatsService],
-  exports: [GuestUsageService, GuestGuard],
+  providers: [
+    GuestUsageService,
+    GuestGuard,
+    AppGatewayNatsService,
+    GridFsService,
+  ],
+  exports: [GuestUsageService, GuestGuard, GridFsService],
 })
 export class GuestModule {}

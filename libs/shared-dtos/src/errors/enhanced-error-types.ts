@@ -4,8 +4,15 @@
  */
 
 import { HttpStatus } from '@nestjs/common';
-import { AppException, ErrorType, ErrorDetails } from '../common/error-handling.patterns';
-import { ErrorCorrelationContext, ErrorCorrelationManager } from './error-correlation';
+import {
+  AppException,
+  ErrorType,
+  ErrorDetails,
+} from '../common/error-handling.patterns';
+import {
+  ErrorCorrelationContext,
+  ErrorCorrelationManager,
+} from './error-correlation';
 
 /**
  * Extended error types for comprehensive error classification
@@ -20,7 +27,7 @@ export enum ExtendedErrorType {
   EXTERNAL_SERVICE_ERROR = 'EXTERNAL_SERVICE_ERROR',
   SYSTEM_ERROR = 'SYSTEM_ERROR',
   PERFORMANCE_ERROR = 'PERFORMANCE_ERROR',
-  
+
   // Domain-specific error types
   NATS_MESSAGE_ERROR = 'NATS_MESSAGE_ERROR',
   PARSING_ERROR = 'PARSING_ERROR',
@@ -32,7 +39,7 @@ export enum ExtendedErrorType {
   TEMPLATE_ERROR = 'TEMPLATE_ERROR',
   ANALYTICS_ERROR = 'ANALYTICS_ERROR',
   CACHE_ERROR = 'CACHE_ERROR',
-  QUEUE_ERROR = 'QUEUE_ERROR'
+  QUEUE_ERROR = 'QUEUE_ERROR',
 }
 
 /**
@@ -58,7 +65,7 @@ export interface EnhancedErrorDetails extends ErrorDetails {
  */
 export class EnhancedAppException extends AppException {
   public readonly enhancedDetails: EnhancedErrorDetails;
-  
+
   /**
    * Initializes a new instance of the Enhanced App Exception.
    * @param type - The type.
@@ -74,13 +81,13 @@ export class EnhancedAppException extends AppException {
     message: string,
     httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
     details?: any,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ) {
     super(type as ErrorType, code, message, httpStatus, details, context);
-    
+
     // Enhance error details with correlation context
     const correlationContext = ErrorCorrelationManager.getContext();
-    
+
     this.enhancedDetails = {
       ...this.errorDetails,
       correlationContext,
@@ -89,7 +96,7 @@ export class EnhancedAppException extends AppException {
       relatedErrors: [],
       businessImpact: 'medium',
       userImpact: 'moderate',
-      monitoringTags: {}
+      monitoringTags: {},
     };
   }
 
@@ -145,9 +152,9 @@ export class EnhancedAppException extends AppException {
    * Add monitoring tags for observability
    */
   withMonitoringTags(tags: Record<string, string>): this {
-    this.enhancedDetails.monitoringTags = { 
-      ...this.enhancedDetails.monitoringTags, 
-      ...tags 
+    this.enhancedDetails.monitoringTags = {
+      ...this.enhancedDetails.monitoringTags,
+      ...tags,
     };
     return this;
   }
@@ -163,19 +170,22 @@ export class EnhancedAppException extends AppException {
         message: this.enhancedDetails.message,
         severity: this.enhancedDetails.severity,
         businessImpact: this.enhancedDetails.businessImpact,
-        userImpact: this.enhancedDetails.userImpact
+        userImpact: this.enhancedDetails.userImpact,
       },
-      correlation: this.enhancedDetails.correlationContext ? 
-        ErrorCorrelationManager.getCorrelationSummary(this.enhancedDetails.correlationContext) : null,
+      correlation: this.enhancedDetails.correlationContext
+        ? ErrorCorrelationManager.getCorrelationSummary(
+            this.enhancedDetails.correlationContext,
+          )
+        : null,
       recovery: {
         strategies: this.enhancedDetails.recoveryStrategies,
         affectedOperations: this.enhancedDetails.affectedOperations,
-        relatedErrors: this.enhancedDetails.relatedErrors
+        relatedErrors: this.enhancedDetails.relatedErrors,
       },
       monitoring: this.enhancedDetails.monitoringTags,
       timestamp: this.enhancedDetails.timestamp,
       details: this.enhancedDetails.details,
-      context: this.enhancedDetails.context
+      context: this.enhancedDetails.context,
     };
   }
 }
@@ -195,33 +205,33 @@ export class NatsMessageException extends EnhancedAppException {
     operation: string,
     subject: string,
     message: string,
-    originalError?: Error
+    originalError?: Error,
   ) {
     super(
       ExtendedErrorType.NATS_MESSAGE_ERROR,
       'NATS_MESSAGE_FAILED',
       `NATS ${operation} failed for subject '${subject}': ${message}`,
       HttpStatus.SERVICE_UNAVAILABLE,
-      { 
-        operation, 
-        subject, 
-        originalError: originalError?.message 
-      }
+      {
+        operation,
+        subject,
+        originalError: originalError?.message,
+      },
     );
 
     this.withBusinessImpact('high')
-        .withUserImpact('moderate')
-        .withRecoveryStrategies([
-          'Retry message operation',
-          'Check NATS server connectivity', 
-          'Verify subject permissions',
-          'Use alternative communication channel'
-        ])
-        .withMonitoringTags({
-          'nats.operation': operation,
-          'nats.subject': subject,
-          'component': 'messaging'
-        });
+      .withUserImpact('moderate')
+      .withRecoveryStrategies([
+        'Retry message operation',
+        'Check NATS server connectivity',
+        'Verify subject permissions',
+        'Use alternative communication channel',
+      ])
+      .withMonitoringTags({
+        'nats.operation': operation,
+        'nats.subject': subject,
+        component: 'messaging',
+      });
   }
 }
 
@@ -242,34 +252,34 @@ export class MLModelException extends EnhancedAppException {
     modelName: string,
     operation: string,
     message: string,
-    confidence?: number
+    confidence?: number,
   ) {
     super(
       ExtendedErrorType.ML_MODEL_ERROR,
       'ML_MODEL_PROCESSING_FAILED',
       `ML model '${modelName}' ${operation} failed: ${message}`,
       HttpStatus.UNPROCESSABLE_ENTITY,
-      { 
-        modelName, 
-        operation, 
+      {
+        modelName,
+        operation,
         confidence,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     );
 
     this.withBusinessImpact('medium')
-        .withUserImpact('moderate')
-        .withRecoveryStrategies([
-          'Use fallback model',
-          'Retry with different parameters',
-          'Use rule-based fallback',
-          'Request human review'
-        ])
-        .withMonitoringTags({
-          'ml.model': modelName,
-          'ml.operation': operation,
-          'component': 'ml-processing'
-        });
+      .withUserImpact('moderate')
+      .withRecoveryStrategies([
+        'Use fallback model',
+        'Retry with different parameters',
+        'Use rule-based fallback',
+        'Request human review',
+      ])
+      .withMonitoringTags({
+        'ml.model': modelName,
+        'ml.operation': operation,
+        component: 'ml-processing',
+      });
   }
 }
 
@@ -290,35 +300,35 @@ export class ParsingException extends EnhancedAppException {
     fileName: string,
     parserType: string,
     message: string,
-    fileSize?: number
+    fileSize?: number,
   ) {
     super(
       ExtendedErrorType.PARSING_ERROR,
       'FILE_PARSING_FAILED',
       `Failed to parse ${fileType} file '${fileName}' using ${parserType}: ${message}`,
       HttpStatus.UNPROCESSABLE_ENTITY,
-      { 
-        fileType, 
-        fileName, 
+      {
+        fileType,
+        fileName,
         parserType,
         fileSize,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     );
 
     this.withBusinessImpact('medium')
-        .withUserImpact('moderate')
-        .withRecoveryStrategies([
-          'Try alternative parser',
-          'Check file format compatibility',
-          'Use OCR if text extraction failed',
-          'Request file resubmission'
-        ])
-        .withMonitoringTags({
-          'parser.type': parserType,
-          'file.type': fileType,
-          'component': 'file-processing'
-        });
+      .withUserImpact('moderate')
+      .withRecoveryStrategies([
+        'Try alternative parser',
+        'Check file format compatibility',
+        'Use OCR if text extraction failed',
+        'Request file resubmission',
+      ])
+      .withMonitoringTags({
+        'parser.type': parserType,
+        'file.type': fileType,
+        component: 'file-processing',
+      });
   }
 }
 
@@ -337,34 +347,34 @@ export class CacheException extends EnhancedAppException {
     operation: string,
     key: string,
     cacheType: string,
-    message: string
+    message: string,
   ) {
     super(
       ExtendedErrorType.CACHE_ERROR,
       'CACHE_OPERATION_FAILED',
       `Cache ${operation} failed for key '${key}' in ${cacheType}: ${message}`,
       HttpStatus.SERVICE_UNAVAILABLE,
-      { 
-        operation, 
-        key, 
+      {
+        operation,
+        key,
         cacheType,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     );
 
     this.withBusinessImpact('low')
-        .withUserImpact('minimal')
-        .withRecoveryStrategies([
-          'Bypass cache and fetch from source',
-          'Use alternative cache instance',
-          'Clear cache if corrupted',
-          'Continue operation without cache'
-        ])
-        .withMonitoringTags({
-          'cache.operation': operation,
-          'cache.type': cacheType,
-          'component': 'caching'
-        });
+      .withUserImpact('minimal')
+      .withRecoveryStrategies([
+        'Bypass cache and fetch from source',
+        'Use alternative cache instance',
+        'Clear cache if corrupted',
+        'Continue operation without cache',
+      ])
+      .withMonitoringTags({
+        'cache.operation': operation,
+        'cache.type': cacheType,
+        component: 'caching',
+      });
   }
 }
 
@@ -383,34 +393,34 @@ export class QueueException extends EnhancedAppException {
     operation: string,
     queueName: string,
     message: string,
-    messageId?: string
+    messageId?: string,
   ) {
     super(
       ExtendedErrorType.QUEUE_ERROR,
       'QUEUE_OPERATION_FAILED',
       `Queue ${operation} failed on '${queueName}': ${message}`,
       HttpStatus.SERVICE_UNAVAILABLE,
-      { 
-        operation, 
-        queueName, 
+      {
+        operation,
+        queueName,
         messageId,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     );
 
     this.withBusinessImpact('medium')
-        .withUserImpact('moderate')
-        .withRecoveryStrategies([
-          'Retry queue operation',
-          'Use dead letter queue',
-          'Process message synchronously',
-          'Alert operations team'
-        ])
-        .withMonitoringTags({
-          'queue.operation': operation,
-          'queue.name': queueName,
-          'component': 'queue-processing'
-        });
+      .withUserImpact('moderate')
+      .withRecoveryStrategies([
+        'Retry queue operation',
+        'Use dead letter queue',
+        'Process message synchronously',
+        'Alert operations team',
+      ])
+      .withMonitoringTags({
+        'queue.operation': operation,
+        'queue.name': queueName,
+        component: 'queue-processing',
+      });
   }
 }
 
@@ -429,34 +439,34 @@ export class TemplateException extends EnhancedAppException {
     templateName: string,
     operation: string,
     message: string,
-    templateData?: Record<string, any>
+    templateData?: Record<string, any>,
   ) {
     super(
       ExtendedErrorType.TEMPLATE_ERROR,
       'TEMPLATE_PROCESSING_FAILED',
       `Template '${templateName}' ${operation} failed: ${message}`,
       HttpStatus.UNPROCESSABLE_ENTITY,
-      { 
-        templateName, 
+      {
+        templateName,
         operation,
         templateData,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     );
 
     this.withBusinessImpact('medium')
-        .withUserImpact('moderate')
-        .withRecoveryStrategies([
-          'Use fallback template',
-          'Validate template syntax',
-          'Check template data compatibility',
-          'Generate basic format output'
-        ])
-        .withMonitoringTags({
-          'template.name': templateName,
-          'template.operation': operation,
-          'component': 'template-processing'
-        });
+      .withUserImpact('moderate')
+      .withRecoveryStrategies([
+        'Use fallback template',
+        'Validate template syntax',
+        'Check template data compatibility',
+        'Generate basic format output',
+      ])
+      .withMonitoringTags({
+        'template.name': templateName,
+        'template.operation': operation,
+        component: 'template-processing',
+      });
   }
 }
 
@@ -471,7 +481,7 @@ export class ErrorFactory {
     operation: string,
     subject: string,
     message: string,
-    originalError?: Error
+    originalError?: Error,
   ): NatsMessageException {
     return new NatsMessageException(operation, subject, message, originalError);
   }
@@ -485,7 +495,7 @@ export class ErrorFactory {
     modelName: string,
     operation: string,
     message: string,
-    confidence?: number
+    confidence?: number,
   ): MLModelException {
     return new MLModelException(modelName, operation, message, confidence);
   }
@@ -498,9 +508,15 @@ export class ErrorFactory {
     fileName: string,
     parserType: string,
     message: string,
-    fileSize?: number
+    fileSize?: number,
   ): ParsingException {
-    return new ParsingException(fileType, fileName, parserType, message, fileSize);
+    return new ParsingException(
+      fileType,
+      fileName,
+      parserType,
+      message,
+      fileSize,
+    );
   }
 
   /**
@@ -510,7 +526,7 @@ export class ErrorFactory {
     operation: string,
     key: string,
     cacheType: string,
-    message: string
+    message: string,
   ): CacheException {
     return new CacheException(operation, key, cacheType, message);
   }
@@ -522,7 +538,7 @@ export class ErrorFactory {
     operation: string,
     queueName: string,
     message: string,
-    messageId?: string
+    messageId?: string,
   ): QueueException {
     return new QueueException(operation, queueName, message, messageId);
   }
@@ -534,8 +550,13 @@ export class ErrorFactory {
     templateName: string,
     operation: string,
     message: string,
-    templateData?: Record<string, any>
+    templateData?: Record<string, any>,
   ): TemplateException {
-    return new TemplateException(templateName, operation, message, templateData);
+    return new TemplateException(
+      templateName,
+      operation,
+      message,
+      templateData,
+    );
   }
 }

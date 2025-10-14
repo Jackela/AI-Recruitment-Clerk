@@ -20,7 +20,7 @@ export class IncentiveRecipient extends ValueObject<{
     return new IncentiveRecipient({
       ip,
       contactInfo,
-      verificationStatus: VerificationStatus.PENDING
+      verificationStatus: VerificationStatus.PENDING,
     });
   }
 
@@ -33,7 +33,7 @@ export class IncentiveRecipient extends ValueObject<{
     return new IncentiveRecipient({
       ip: data.ip,
       contactInfo: ContactInfo.restore(data.contactInfo),
-      verificationStatus: data.verificationStatus
+      verificationStatus: data.verificationStatus,
     });
   }
 
@@ -69,7 +69,12 @@ export class IncentiveRecipient extends ValueObject<{
   getValidationErrors(): string[] {
     const errors: string[] = [];
 
-    if (!this.props.ip || !/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(this.props.ip)) {
+    if (
+      !this.props.ip ||
+      !/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
+        this.props.ip,
+      )
+    ) {
       errors.push('Valid IP address is required');
     }
 

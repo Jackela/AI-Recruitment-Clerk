@@ -11,7 +11,13 @@ describe('UploadResumeComponent', () => {
     await TestBed.configureTestingModule({
       imports: [UploadResumeComponent],
       providers: [
-        { provide: GuestApiService, useValue: { analyzeResume: () => ({ subscribe: (_: any) => {} }), getDemoAnalysis: () => ({ subscribe: (_: any) => {} }) } },
+        {
+          provide: GuestApiService,
+          useValue: {
+            analyzeResume: () => ({ subscribe: (_: any) => {} }),
+            getDemoAnalysis: () => ({ subscribe: (_: any) => {} }),
+          },
+        },
         {
           provide: WebSocketService,
           useValue: {
@@ -29,9 +35,8 @@ describe('UploadResumeComponent', () => {
   });
 
   it('should accept both .pdf and .txt files in input accept attribute', () => {
-    const input: HTMLInputElement | null = fixture.nativeElement.querySelector(
-      'input[type="file"]',
-    );
+    const input: HTMLInputElement | null =
+      fixture.nativeElement.querySelector('input[type="file"]');
     expect(input).toBeTruthy();
     expect(input!.accept).toContain('.pdf');
     expect(input!.accept).toContain('.txt');

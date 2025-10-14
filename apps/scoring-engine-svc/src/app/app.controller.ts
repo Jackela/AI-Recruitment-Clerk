@@ -33,7 +33,11 @@ export class AppController {
 
     const matched = jdSkills.filter((s) => resumeSkills.includes(s));
     const missing = jdSkills.filter((s) => !resumeSkills.includes(s));
-    return { matchedSkills: matched, missingSkills: missing, suggestedSkills: [] };
+    return {
+      matchedSkills: matched,
+      missingSkills: missing,
+      suggestedSkills: [],
+    };
 
     function normalize(arr: string[]) {
       return Array.from(
@@ -64,5 +68,3 @@ export class AppController {
     }
   }
 }
-
-

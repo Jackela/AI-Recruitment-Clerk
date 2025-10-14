@@ -304,11 +304,7 @@ export class PerformanceMonitorService {
    * @param _value - The value.
    * @param _unit - The unit.
    */
-  reportCustomMetric(
-    _name: string,
-    _value: number,
-    _unit = 'ms',
-  ): void {
+  reportCustomMetric(_name: string, _value: number, _unit = 'ms'): void {
     // Custom metric reported: ${name} (${value}${unit})
     // Store in metrics for potential reporting
     // Store custom metric for reporting

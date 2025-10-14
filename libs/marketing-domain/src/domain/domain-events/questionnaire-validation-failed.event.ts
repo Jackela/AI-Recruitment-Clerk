@@ -16,6 +16,6 @@ export class QuestionnaireValidationFailedEvent implements DomainEvent {
     public readonly submitterIP: string,
     public readonly validationErrors: string[],
     public readonly submissionData: Partial<RawSubmissionData>,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }

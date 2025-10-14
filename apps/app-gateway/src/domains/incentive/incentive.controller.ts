@@ -112,7 +112,10 @@ export class IncentiveController {
       const fwd = req.headers['x-forwarded-for'];
       const normalizedIP = Array.isArray(fwd) ? fwd[0] : fwd;
       const userIP = String(
-        incentiveData.userIP || normalizedIP || (req.socket as any)?.remoteAddress || 'unknown',
+        incentiveData.userIP ||
+          normalizedIP ||
+          (req.socket as any)?.remoteAddress ||
+          'unknown',
       );
       const contactInfo = new ContactInfo(incentiveData.contactInfo);
 

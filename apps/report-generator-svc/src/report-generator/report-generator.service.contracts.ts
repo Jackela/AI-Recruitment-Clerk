@@ -15,7 +15,11 @@ import {
   ContractValidators,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import { LlmService } from './llm.service';
-import type { ExtractedResumeData as LlmExtractedResumeData, JobRequirements as LlmJobRequirements, ScoringBreakdown as LlmScoringBreakdown } from './llm.service';
+import type {
+  ExtractedResumeData as LlmExtractedResumeData,
+  JobRequirements as LlmJobRequirements,
+  ScoringBreakdown as LlmScoringBreakdown,
+} from './llm.service';
 import type { ReportEvent } from './report-generator.service';
 import { GridFsService, ReportFileMetadata } from './gridfs.service';
 import { ReportRepository, ReportCreateData } from './report.repository';
@@ -234,7 +238,11 @@ export class ReportGeneratorServiceContracts {
    * @since 1.0.0
    */
   @Requires(
-    (scoringResults: ScoringData[], candidateInfo: CandidateInfo, jobInfo: JobInfo) =>
+    (
+      scoringResults: ScoringData[],
+      candidateInfo: CandidateInfo,
+      jobInfo: JobInfo,
+    ) =>
       ContractValidators.hasElements(scoringResults) &&
       scoringResults.every((s) =>
         ContractValidators.isValidScoreRange(s.overallScore),
@@ -478,8 +486,14 @@ export class ReportGeneratorServiceContracts {
       jobId: jobInfo.jobId,
       resumeIds: [candidateInfo.resumeId],
       jobData: this.mapJobInfoToReportEvent(jobInfo),
-      resumesData: this.mapCandidateInfoToReportEvent(candidateInfo, scoringResults),
-      scoringResults: this.mapScoringResultsToReportEvent(candidateInfo, scoringResults),
+      resumesData: this.mapCandidateInfoToReportEvent(
+        candidateInfo,
+        scoringResults,
+      ),
+      scoringResults: this.mapScoringResultsToReportEvent(
+        candidateInfo,
+        scoringResults,
+      ),
       metadata: {
         generatedAt: prepared.metadata.generatedAt,
         reportType: 'analysis',
@@ -602,11 +616,13 @@ export class ReportGeneratorServiceContracts {
       certifications: extracted.certifications?.flatMap((certification) => {
         const date = this.toIsoDateFromYear(certification.year);
         return date
-          ? [{
-              name: certification.name,
-              issuer: certification.issuer,
-              date,
-            }]
+          ? [
+              {
+                name: certification.name,
+                issuer: certification.issuer,
+                date,
+              },
+            ]
           : [];
       }),
     };
@@ -624,7 +640,9 @@ export class ReportGeneratorServiceContracts {
       resumeId: candidateInfo.resumeId,
       score: score.overallScore,
       breakdown: this.mapScoreBreakdownToLlm(score.scoreBreakdown),
-      recommendations: this.collectRecommendationSummaries(score.recommendations),
+      recommendations: this.collectRecommendationSummaries(
+        score.recommendations,
+      ),
     }));
   }
 
@@ -662,14 +680,19 @@ export class ReportGeneratorServiceContracts {
       ...(recommendation.suggestions ?? []),
     ]);
 
-    const cleaned = summary.filter((value): value is string => !!value && value.trim().length > 0);
+    const cleaned = summary.filter(
+      (value): value is string => !!value && value.trim().length > 0,
+    );
 
     return cleaned.length ? cleaned : undefined;
   }
 
   private normalizeScore(score: number): number {
     const normalized = score / 100;
-    return Math.max(0, Math.min(1, Number.isFinite(normalized) ? normalized : 0));
+    return Math.max(
+      0,
+      Math.min(1, Number.isFinite(normalized) ? normalized : 0),
+    );
   }
 
   private parseEducationYear(year: string): number {
@@ -803,12 +826,3 @@ startxref
     return Math.min(10, Math.ceil(contentSize / 200000));
   }
 }
-
-
-
-
-
-
-
-
-

@@ -6,10 +6,7 @@
  * @module ReportContractTests
  */
 
-import { 
-  ContractViolationError, 
-  ContractValidators 
-} from './dbc.decorators';
+import { ContractViolationError, ContractValidators } from './dbc.decorators';
 
 describe('ReportGeneratorService DBC Validators', () => {
   describe('isValidCandidateInfo', () => {
@@ -19,27 +16,29 @@ describe('ReportGeneratorService DBC Validators', () => {
         personalInfo: {
           email: 'john.doe@example.com',
           phone: '+1234567890',
-          location: 'New York, NY'
+          location: 'New York, NY',
         },
         workExperience: [
           {
             position: 'Software Developer',
             company: 'Tech Corp',
             duration: '2020-2023',
-            description: 'Full-stack development'
-          }
+            description: 'Full-stack development',
+          },
         ],
         skills: ['JavaScript', 'React', 'Node.js'],
         education: [
           {
             degree: 'Bachelor of Computer Science',
             school: 'University of Technology',
-            year: '2020'
-          }
-        ]
+            year: '2020',
+          },
+        ],
       };
 
-      expect(ContractValidators.isValidCandidateInfo(validCandidate)).toBe(true);
+      expect(ContractValidators.isValidCandidateInfo(validCandidate)).toBe(
+        true,
+      );
     });
 
     it('should reject candidate without name', () => {
@@ -47,10 +46,12 @@ describe('ReportGeneratorService DBC Validators', () => {
         candidateName: '',
         personalInfo: { email: 'test@example.com' },
         workExperience: [{}],
-        skills: ['JavaScript']
+        skills: ['JavaScript'],
       };
 
-      expect(ContractValidators.isValidCandidateInfo(invalidCandidate)).toBe(false);
+      expect(ContractValidators.isValidCandidateInfo(invalidCandidate)).toBe(
+        false,
+      );
     });
 
     it('should reject candidate with invalid email', () => {
@@ -58,10 +59,12 @@ describe('ReportGeneratorService DBC Validators', () => {
         candidateName: 'John Doe',
         personalInfo: { email: 'invalid-email' },
         workExperience: [{}],
-        skills: ['JavaScript']
+        skills: ['JavaScript'],
       };
 
-      expect(ContractValidators.isValidCandidateInfo(invalidCandidate)).toBe(false);
+      expect(ContractValidators.isValidCandidateInfo(invalidCandidate)).toBe(
+        false,
+      );
     });
 
     it('should reject candidate without skills', () => {
@@ -69,10 +72,12 @@ describe('ReportGeneratorService DBC Validators', () => {
         candidateName: 'John Doe',
         personalInfo: { email: 'john@example.com' },
         workExperience: [{}],
-        skills: []
+        skills: [],
       };
 
-      expect(ContractValidators.isValidCandidateInfo(invalidCandidate)).toBe(false);
+      expect(ContractValidators.isValidCandidateInfo(invalidCandidate)).toBe(
+        false,
+      );
     });
 
     it('should reject candidate with invalid work experience', () => {
@@ -80,10 +85,12 @@ describe('ReportGeneratorService DBC Validators', () => {
         candidateName: 'John Doe',
         personalInfo: { email: 'john@example.com' },
         workExperience: 'not an array',
-        skills: ['JavaScript']
+        skills: ['JavaScript'],
       };
 
-      expect(ContractValidators.isValidCandidateInfo(invalidCandidate)).toBe(false);
+      expect(ContractValidators.isValidCandidateInfo(invalidCandidate)).toBe(
+        false,
+      );
     });
   });
 
@@ -95,16 +102,16 @@ describe('ReportGeneratorService DBC Validators', () => {
         requirements: {
           requiredSkills: [
             { name: 'JavaScript', weight: 0.8 },
-            { name: 'React', weight: 0.7 }
+            { name: 'React', weight: 0.7 },
           ],
           experienceYears: { min: 3, max: 8 },
-          educationLevel: 'bachelor'
+          educationLevel: 'bachelor',
         },
         companyInfo: {
           name: 'Tech Innovations Inc',
           industry: 'Technology',
-          size: 'Medium'
-        }
+          size: 'Medium',
+        },
       };
 
       expect(ContractValidators.isValidJobInfo(validJob)).toBe(true);
@@ -115,8 +122,8 @@ describe('ReportGeneratorService DBC Validators', () => {
         title: '',
         description: 'Job description here',
         requirements: {
-          requiredSkills: [{ name: 'JavaScript', weight: 0.8 }]
-        }
+          requiredSkills: [{ name: 'JavaScript', weight: 0.8 }],
+        },
       };
 
       expect(ContractValidators.isValidJobInfo(invalidJob)).toBe(false);
@@ -127,8 +134,8 @@ describe('ReportGeneratorService DBC Validators', () => {
         title: 'Software Engineer',
         description: '',
         requirements: {
-          requiredSkills: [{ name: 'JavaScript', weight: 0.8 }]
-        }
+          requiredSkills: [{ name: 'JavaScript', weight: 0.8 }],
+        },
       };
 
       expect(ContractValidators.isValidJobInfo(invalidJob)).toBe(false);
@@ -139,8 +146,8 @@ describe('ReportGeneratorService DBC Validators', () => {
         title: 'Software Engineer',
         description: 'Job description here',
         requirements: {
-          requiredSkills: []
-        }
+          requiredSkills: [],
+        },
       };
 
       expect(ContractValidators.isValidJobInfo(invalidJob)).toBe(false);
@@ -150,7 +157,7 @@ describe('ReportGeneratorService DBC Validators', () => {
       const invalidJob = {
         title: 'Software Engineer',
         description: 'Job description here',
-        requirements: null
+        requirements: null,
       };
 
       expect(ContractValidators.isValidJobInfo(invalidJob)).toBe(false);
@@ -169,8 +176,8 @@ describe('ReportGeneratorService DBC Validators', () => {
           jobId: 'job_123',
           resumeId: 'resume_456',
           candidateName: 'John Doe',
-          reportType: 'analysis'
-        }
+          reportType: 'analysis',
+        },
       };
 
       expect(ContractValidators.isValidReportResult(validResult)).toBe(true);
@@ -181,7 +188,7 @@ describe('ReportGeneratorService DBC Validators', () => {
         reportId: '',
         pdfUrl: 'https://storage.example.com/report.pdf',
         generatedAt: new Date(),
-        pageCount: 5
+        pageCount: 5,
       };
 
       expect(ContractValidators.isValidReportResult(invalidResult)).toBe(false);
@@ -192,7 +199,7 @@ describe('ReportGeneratorService DBC Validators', () => {
         reportId: 'report_123',
         pdfUrl: '',
         generatedAt: new Date(),
-        pageCount: 5
+        pageCount: 5,
       };
 
       expect(ContractValidators.isValidReportResult(invalidResult)).toBe(false);
@@ -203,7 +210,7 @@ describe('ReportGeneratorService DBC Validators', () => {
         reportId: 'report_123',
         pdfUrl: 'https://storage.example.com/report.pdf',
         generatedAt: 'not a date',
-        pageCount: 5
+        pageCount: 5,
       };
 
       expect(ContractValidators.isValidReportResult(invalidResult)).toBe(false);
@@ -214,7 +221,7 @@ describe('ReportGeneratorService DBC Validators', () => {
         reportId: 'report_123',
         pdfUrl: 'https://storage.example.com/report.pdf',
         generatedAt: new Date(),
-        pageCount: 0 // Must be > 0
+        pageCount: 0, // Must be > 0
       };
 
       expect(ContractValidators.isValidReportResult(invalidResult)).toBe(false);
@@ -225,7 +232,7 @@ describe('ReportGeneratorService DBC Validators', () => {
         reportId: 'report_123',
         pdfUrl: 'https://storage.example.com/report.pdf',
         generatedAt: new Date(),
-        pageCount: -1
+        pageCount: -1,
       };
 
       expect(ContractValidators.isValidReportResult(invalidResult)).toBe(false);
@@ -246,7 +253,9 @@ describe('ReportGeneratorService DBC Validators', () => {
 
     it('should validate with custom time limits', () => {
       expect(ContractValidators.isValidProcessingTime(45000, 50000)).toBe(true); // 45s < 50s limit
-      expect(ContractValidators.isValidProcessingTime(55000, 50000)).toBe(false); // 55s > 50s limit
+      expect(ContractValidators.isValidProcessingTime(55000, 50000)).toBe(
+        false,
+      ); // 55s > 50s limit
     });
 
     it('should reject zero or negative processing times', () => {
@@ -255,9 +264,13 @@ describe('ReportGeneratorService DBC Validators', () => {
     });
 
     it('should reject non-numeric processing times', () => {
-      expect(ContractValidators.isValidProcessingTime('5000' as any)).toBe(false);
+      expect(ContractValidators.isValidProcessingTime('5000' as any)).toBe(
+        false,
+      );
       expect(ContractValidators.isValidProcessingTime(null as any)).toBe(false);
-      expect(ContractValidators.isValidProcessingTime(undefined as any)).toBe(false);
+      expect(ContractValidators.isValidProcessingTime(undefined as any)).toBe(
+        false,
+      );
     });
   });
 
@@ -284,21 +297,29 @@ describe('ReportGeneratorService DBC Validators', () => {
 
   describe('Integration Test - Report Generation Workflow', () => {
     it('should simulate complete report generation workflow', () => {
-      const mockReportGeneration = (scoringResults: any[], candidateInfo: any, jobInfo: any) => {
+      const mockReportGeneration = (
+        scoringResults: any[],
+        candidateInfo: any,
+        jobInfo: any,
+      ) => {
         // Precondition validation
         if (!ContractValidators.hasElements(scoringResults)) {
           throw new ContractViolationError(
             'Scoring results must be non-empty array',
             'PRE',
-            'ReportGenerator.generateAnalysisReport'
+            'ReportGenerator.generateAnalysisReport',
           );
         }
 
-        if (!scoringResults.every(s => ContractValidators.isValidScoreRange(s.overallScore))) {
+        if (
+          !scoringResults.every((s) =>
+            ContractValidators.isValidScoreRange(s.overallScore),
+          )
+        ) {
           throw new ContractViolationError(
             'All scoring results must have valid score ranges',
             'PRE',
-            'ReportGenerator.generateAnalysisReport'
+            'ReportGenerator.generateAnalysisReport',
           );
         }
 
@@ -306,7 +327,7 @@ describe('ReportGeneratorService DBC Validators', () => {
           throw new ContractViolationError(
             'Candidate information must be valid',
             'PRE',
-            'ReportGenerator.generateAnalysisReport'
+            'ReportGenerator.generateAnalysisReport',
           );
         }
 
@@ -314,16 +335,16 @@ describe('ReportGeneratorService DBC Validators', () => {
           throw new ContractViolationError(
             'Job information must be valid',
             'PRE',
-            'ReportGenerator.generateAnalysisReport'
+            'ReportGenerator.generateAnalysisReport',
           );
         }
 
         // Mock report generation
         const startTime = Date.now();
-        
+
         // Simulate processing delay
         const processingTime = 2000; // 2 seconds
-        
+
         const result = {
           reportId: `report_${Date.now()}`,
           pdfUrl: `https://storage.example.com/reports/report_${Date.now()}.pdf`,
@@ -334,8 +355,8 @@ describe('ReportGeneratorService DBC Validators', () => {
             jobId: jobInfo.jobId || 'job_123',
             resumeId: candidateInfo.resumeId || 'resume_456',
             candidateName: candidateInfo.candidateName,
-            reportType: 'analysis'
-          }
+            reportType: 'analysis',
+          },
         };
 
         // Postcondition validation
@@ -343,7 +364,7 @@ describe('ReportGeneratorService DBC Validators', () => {
           throw new ContractViolationError(
             'Generated report result must be valid',
             'POST',
-            'ReportGenerator.generateAnalysisReport'
+            'ReportGenerator.generateAnalysisReport',
           );
         }
 
@@ -351,7 +372,7 @@ describe('ReportGeneratorService DBC Validators', () => {
           throw new ContractViolationError(
             'Report generation must complete within time limit',
             'POST',
-            'ReportGenerator.generateAnalysisReport'
+            'ReportGenerator.generateAnalysisReport',
           );
         }
 
@@ -359,32 +380,45 @@ describe('ReportGeneratorService DBC Validators', () => {
       };
 
       // Test with valid inputs
-      const validScoringResults = [{
-        overallScore: 85,
-        scoreBreakdown: {},
-        matchingSkills: [],
-        gapAnalysis: { missingSkills: [], developmentAreas: [], strengthAreas: [] },
-        recommendations: []
-      }];
+      const validScoringResults = [
+        {
+          overallScore: 85,
+          scoreBreakdown: {},
+          matchingSkills: [],
+          gapAnalysis: {
+            missingSkills: [],
+            developmentAreas: [],
+            strengthAreas: [],
+          },
+          recommendations: [],
+        },
+      ];
 
       const validCandidate = {
         candidateName: 'Alice Johnson',
         personalInfo: { email: 'alice@example.com', phone: '+1234567890' },
-        workExperience: [{ position: 'Developer', company: 'Tech Co', duration: '2020-2023' }],
-        skills: ['JavaScript', 'Python', 'React']
+        workExperience: [
+          { position: 'Developer', company: 'Tech Co', duration: '2020-2023' },
+        ],
+        skills: ['JavaScript', 'Python', 'React'],
       };
 
       const validJob = {
         title: 'Senior Developer',
-        description: 'Looking for a senior developer with strong technical skills',
+        description:
+          'Looking for a senior developer with strong technical skills',
         requirements: {
           requiredSkills: [{ name: 'JavaScript', weight: 0.8 }],
-          experienceYears: { min: 3, max: 8 }
-        }
+          experienceYears: { min: 3, max: 8 },
+        },
       };
 
-      const result = mockReportGeneration(validScoringResults, validCandidate, validJob);
-      
+      const result = mockReportGeneration(
+        validScoringResults,
+        validCandidate,
+        validJob,
+      );
+
       expect(result.reportId).toContain('report_');
       expect(result.pdfUrl).toContain('https://storage.example.com');
       expect(result.pageCount).toBeGreaterThan(0);
@@ -400,11 +434,17 @@ describe('ReportGeneratorService DBC Validators', () => {
       }).toThrow('All scoring results must have valid score ranges');
 
       expect(() => {
-        mockReportGeneration(validScoringResults, { candidateName: '' }, validJob);
+        mockReportGeneration(
+          validScoringResults,
+          { candidateName: '' },
+          validJob,
+        );
       }).toThrow('Candidate information must be valid');
 
       expect(() => {
-        mockReportGeneration(validScoringResults, validCandidate, { title: '' });
+        mockReportGeneration(validScoringResults, validCandidate, {
+          title: '',
+        });
       }).toThrow('Job information must be valid');
     });
   });
@@ -412,18 +452,18 @@ describe('ReportGeneratorService DBC Validators', () => {
   describe('Performance and Quality Tests', () => {
     it('should validate report generation constraints efficiently', () => {
       const startTime = Date.now();
-      
+
       const validCandidate = {
         candidateName: 'Test User',
         personalInfo: { email: 'test@example.com' },
         workExperience: [{}],
-        skills: ['JavaScript']
+        skills: ['JavaScript'],
       };
 
       const validJob = {
         title: 'Developer',
         description: 'Test job description',
-        requirements: { requiredSkills: [{ name: 'JavaScript' }] }
+        requirements: { requiredSkills: [{ name: 'JavaScript' }] },
       };
 
       // Run multiple validations
@@ -433,7 +473,7 @@ describe('ReportGeneratorService DBC Validators', () => {
         ContractValidators.isValidProcessingTime(15000);
         ContractValidators.isValidConfidenceLevel(0.85);
       }
-      
+
       const duration = Date.now() - startTime;
       expect(duration).toBeLessThan(100); // Should complete in under 100ms
     });
@@ -444,19 +484,21 @@ describe('ReportGeneratorService DBC Validators', () => {
         pdfUrl: 'https://storage.example.com/test.pdf',
         generatedAt: new Date(),
         pageCount: 3,
-        fileSize: 500000 // 500KB
+        fileSize: 500000, // 500KB
       };
 
       // File size constraints (100KB - 5MB)
       expect(reportResult.fileSize).toBeGreaterThanOrEqual(100000);
       expect(reportResult.fileSize).toBeLessThanOrEqual(5242880);
-      
+
       // Page count constraints (positive)
       expect(reportResult.pageCount).toBeGreaterThan(0);
-      
+
       // Timestamp validation
       expect(reportResult.generatedAt).toBeInstanceOf(Date);
-      expect(reportResult.generatedAt.getTime()).toBeLessThanOrEqual(Date.now());
+      expect(reportResult.generatedAt.getTime()).toBeLessThanOrEqual(
+        Date.now(),
+      );
     });
   });
 });

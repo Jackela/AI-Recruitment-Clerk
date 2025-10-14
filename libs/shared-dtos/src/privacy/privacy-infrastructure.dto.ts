@@ -1,4 +1,17 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsBoolean, IsArray, ValidateNested, IsDateString, IsUUID, IsNumber, IsUrl } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsBoolean,
+  IsArray,
+  ValidateNested,
+  IsDateString,
+  IsUUID,
+  IsNumber,
+  IsUrl,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 /**
@@ -7,12 +20,12 @@ import { Type } from 'class-transformer';
  */
 
 export enum ProcessingLegalBasis {
-  CONSENT = 'consent',                           // Article 6(1)(a)
-  CONTRACT = 'contract',                         // Article 6(1)(b) 
-  LEGAL_OBLIGATION = 'legal_obligation',         // Article 6(1)(c)
-  VITAL_INTERESTS = 'vital_interests',           // Article 6(1)(d)
-  PUBLIC_TASK = 'public_task',                   // Article 6(1)(e)
-  LEGITIMATE_INTERESTS = 'legitimate_interests'  // Article 6(1)(f)
+  CONSENT = 'consent', // Article 6(1)(a)
+  CONTRACT = 'contract', // Article 6(1)(b)
+  LEGAL_OBLIGATION = 'legal_obligation', // Article 6(1)(c)
+  VITAL_INTERESTS = 'vital_interests', // Article 6(1)(d)
+  PUBLIC_TASK = 'public_task', // Article 6(1)(e)
+  LEGITIMATE_INTERESTS = 'legitimate_interests', // Article 6(1)(f)
 }
 
 export enum DataRetentionStatus {
@@ -21,20 +34,20 @@ export enum DataRetentionStatus {
   ANONYMIZED = 'anonymized',
   DELETED = 'deleted',
   ARCHIVED = 'archived',
-  LEGAL_HOLD = 'legal_hold'
+  LEGAL_HOLD = 'legal_hold',
 }
 
 export enum BreachSeverity {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 export enum BreachType {
-  CONFIDENTIALITY = 'confidentiality',  // Unauthorized access
-  INTEGRITY = 'integrity',              // Unauthorized alteration
-  AVAILABILITY = 'availability'         // Loss of access/destruction
+  CONFIDENTIALITY = 'confidentiality', // Unauthorized access
+  INTEGRITY = 'integrity', // Unauthorized alteration
+  AVAILABILITY = 'availability', // Loss of access/destruction
 }
 
 export enum BreachStatus {
@@ -44,7 +57,7 @@ export enum BreachStatus {
   NOTIFIED_AUTHORITY = 'notified_authority',
   NOTIFIED_SUBJECTS = 'notified_subjects',
   RESOLVED = 'resolved',
-  CLOSED = 'closed'
+  CLOSED = 'closed',
 }
 
 /**
@@ -345,7 +358,13 @@ export class PrivacyImpactAssessment {
     consultationSummary: string;
   };
 
-  @IsEnum(['draft', 'under_review', 'approved', 'rejected', 'requires_revision'])
+  @IsEnum([
+    'draft',
+    'under_review',
+    'approved',
+    'rejected',
+    'requires_revision',
+  ])
   status!: string;
 
   @IsString()
@@ -440,7 +459,12 @@ export class DataBreachRecord {
 
   @IsOptional()
   rootCause?: {
-    category: 'human_error' | 'system_failure' | 'malicious_attack' | 'third_party' | 'other';
+    category:
+      | 'human_error'
+      | 'system_failure'
+      | 'malicious_attack'
+      | 'third_party'
+      | 'other';
     description: string;
     contributingFactors: string[];
   };
@@ -540,7 +564,14 @@ export class CrossBorderTransfer {
   @IsString({ each: true })
   purposesOfTransfer!: string[];
 
-  @IsEnum(['adequacy_decision', 'standard_contractual_clauses', 'binding_corporate_rules', 'consent', 'contract_necessity', 'derogation'])
+  @IsEnum([
+    'adequacy_decision',
+    'standard_contractual_clauses',
+    'binding_corporate_rules',
+    'consent',
+    'contract_necessity',
+    'derogation',
+  ])
   legalMechanism!: string;
 
   @IsString()

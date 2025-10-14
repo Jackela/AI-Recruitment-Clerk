@@ -8,7 +8,7 @@ import {
   ContactInfo,
   TriggerType,
   Currency,
-  IncentiveData
+  IncentiveData,
 } from './incentive.dto';
 import {
   IncentiveRules,
@@ -18,7 +18,7 @@ import {
   IncentivePriority,
   IncentiveRiskAssessment,
   BatchPaymentValidationResult,
-  IncentiveUsageHistory
+  IncentiveUsageHistory,
 } from './incentive.rules';
 
 /**
@@ -36,7 +36,7 @@ export class IncentiveDomainService {
     private readonly repository: IIncentiveRepository,
     private readonly eventBus: IDomainEventBus,
     private readonly auditLogger: IAuditLogger,
-    private readonly paymentGateway: IPaymentGateway
+    private readonly paymentGateway: IPaymentGateway,
   ) {}
 
   /**
@@ -46,7 +46,7 @@ export class IncentiveDomainService {
     ip: string,
     questionnaireId: string,
     qualityScore: number,
-    contactInfo: ContactInfo
+    contactInfo: ContactInfo,
   ): Promise<IncentiveCreationResult> {
     try {
       // 获取IP今日激励数量
@@ -57,7 +57,7 @@ export class IncentiveDomainService {
         ip,
         TriggerType.QUESTIONNAIRE_COMPLETION,
         { questionnaireId, qualityScore },
-        todayIncentives
+        todayIncentives,
       );
 
       if (!eligibility.isEligible) {
@@ -65,7 +65,7 @@ export class IncentiveDomainService {
           ip,
           questionnaireId,
           qualityScore,
-          errors: eligibility.errors
+          errors: eligibility.errors,
         });
         return IncentiveCreationResult.failed(eligibility.errors);
       }
@@ -75,7 +75,7 @@ export class IncentiveDomainService {
         ip,
         questionnaireId,
         qualityScore,
-        contactInfo
+        contactInfo,
       );
 
       // 保存到存储
@@ -95,21 +95,23 @@ export class IncentiveDomainService {
         questionnaireId,
         qualityScore,
         rewardAmount: incentive.getRewardAmount(),
-        status: incentive.getStatus()
+        status: incentive.getStatus(),
       });
 
       return IncentiveCreationResult.success(incentive.getIncentiveSummary());
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       await this.auditLogger.logError('CREATE_QUESTIONNAIRE_INCENTIVE_ERROR', {
         ip,
         questionnaireId,
         qualityScore,
-        error: errorMessage
+        error: errorMessage,
       });
       console.error('Error creating questionnaire incentive:', error);
-      return IncentiveCreationResult.failed(['Internal error occurred while creating incentive']);
+      return IncentiveCreationResult.failed([
+        'Internal error occurred while creating incentive',
+      ]);
     }
   }
 
@@ -119,35 +121,45 @@ export class IncentiveDomainService {
   async createReferralIncentive(
     referrerIP: string,
     referredIP: string,
-    contactInfo: ContactInfo
+    contactInfo: ContactInfo,
   ): Promise<IncentiveCreationResult> {
     try {
       // 验证推荐资格
-      const todayIncentives = await this.repository.countTodayIncentives(referrerIP);
+      const todayIncentives =
+        await this.repository.countTodayIncentives(referrerIP);
       const eligibility = IncentiveRules.canCreateIncentive(
         referrerIP,
         TriggerType.REFERRAL,
         { referredIP },
-        todayIncentives
+        todayIncentives,
       );
 
       if (!eligibility.isEligible) {
         await this.auditLogger.logBusinessEvent('REFERRAL_INCENTIVE_DENIED', {
           referrerIP,
           referredIP,
-          errors: eligibility.errors
+          errors: eligibility.errors,
         });
         return IncentiveCreationResult.failed(eligibility.errors);
       }
 
       // 验证被推荐IP是否有效且未重复
-      const existingReferral = await this.repository.findReferralIncentive(referrerIP, referredIP);
+      const existingReferral = await this.repository.findReferralIncentive(
+        referrerIP,
+        referredIP,
+      );
       if (existingReferral) {
-        return IncentiveCreationResult.failed(['Referral incentive already exists for this IP pair']);
+        return IncentiveCreationResult.failed([
+          'Referral incentive already exists for this IP pair',
+        ]);
       }
 
       // 创建推荐激励
-      const incentive = Incentive.createReferralIncentive(referrerIP, referredIP, contactInfo);
+      const incentive = Incentive.createReferralIncentive(
+        referrerIP,
+        referredIP,
+        contactInfo,
+      );
       await this.repository.save(incentive);
 
       // 发布领域事件
@@ -161,27 +173,31 @@ export class IncentiveDomainService {
         incentiveId: incentive.getId().getValue(),
         referrerIP,
         referredIP,
-        rewardAmount: incentive.getRewardAmount()
+        rewardAmount: incentive.getRewardAmount(),
       });
 
       return IncentiveCreationResult.success(incentive.getIncentiveSummary());
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       await this.auditLogger.logError('CREATE_REFERRAL_INCENTIVE_ERROR', {
         referrerIP,
         referredIP,
-        error: errorMessage
+        error: errorMessage,
       });
       console.error('Error creating referral incentive:', error);
-      return IncentiveCreationResult.failed(['Internal error occurred while creating referral incentive']);
+      return IncentiveCreationResult.failed([
+        'Internal error occurred while creating referral incentive',
+      ]);
     }
   }
 
   /**
    * 验证激励资格
    */
-  async validateIncentive(incentiveId: string): Promise<IncentiveValidationResult> {
+  async validateIncentive(
+    incentiveId: string,
+  ): Promise<IncentiveValidationResult> {
     try {
       const incentive = await this.repository.findById(incentiveId);
       if (!incentive) {
@@ -204,31 +220,36 @@ export class IncentiveDomainService {
       await this.auditLogger.logBusinessEvent('INCENTIVE_VALIDATED', {
         incentiveId,
         isValid: validationResult.isValid,
-        errors: validationResult.errors
+        errors: validationResult.errors,
       });
 
       return IncentiveValidationResult.success({
         incentiveId,
         isValid: validationResult.isValid,
         errors: validationResult.errors,
-        status: incentive.getStatus()
+        status: incentive.getStatus(),
       });
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       await this.auditLogger.logError('VALIDATE_INCENTIVE_ERROR', {
         incentiveId,
-        error: errorMessage
+        error: errorMessage,
       });
       console.error('Error validating incentive:', error);
-      return IncentiveValidationResult.failed(['Internal error occurred while validating incentive']);
+      return IncentiveValidationResult.failed([
+        'Internal error occurred while validating incentive',
+      ]);
     }
   }
 
   /**
    * 批准激励处理
    */
-  async approveIncentive(incentiveId: string, reason: string): Promise<IncentiveApprovalResult> {
+  async approveIncentive(
+    incentiveId: string,
+    reason: string,
+  ): Promise<IncentiveApprovalResult> {
     try {
       const incentive = await this.repository.findById(incentiveId);
       if (!incentive) {
@@ -249,31 +270,36 @@ export class IncentiveDomainService {
       await this.auditLogger.logBusinessEvent('INCENTIVE_APPROVED', {
         incentiveId,
         reason,
-        rewardAmount: incentive.getRewardAmount()
+        rewardAmount: incentive.getRewardAmount(),
       });
 
       return IncentiveApprovalResult.success({
         incentiveId,
         status: incentive.getStatus(),
-        rewardAmount: incentive.getRewardAmount()
+        rewardAmount: incentive.getRewardAmount(),
       });
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       await this.auditLogger.logError('APPROVE_INCENTIVE_ERROR', {
         incentiveId,
         reason,
-        error: errorMessage
+        error: errorMessage,
       });
       console.error('Error approving incentive:', error);
-      return IncentiveApprovalResult.failed(['Internal error occurred while approving incentive']);
+      return IncentiveApprovalResult.failed([
+        'Internal error occurred while approving incentive',
+      ]);
     }
   }
 
   /**
    * 拒绝激励
    */
-  async rejectIncentive(incentiveId: string, reason: string): Promise<IncentiveRejectionResult> {
+  async rejectIncentive(
+    incentiveId: string,
+    reason: string,
+  ): Promise<IncentiveRejectionResult> {
     try {
       const incentive = await this.repository.findById(incentiveId);
       if (!incentive) {
@@ -293,24 +319,26 @@ export class IncentiveDomainService {
 
       await this.auditLogger.logBusinessEvent('INCENTIVE_REJECTED', {
         incentiveId,
-        reason
+        reason,
       });
 
       return IncentiveRejectionResult.success({
         incentiveId,
         status: incentive.getStatus(),
-        rejectionReason: reason
+        rejectionReason: reason,
       });
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       await this.auditLogger.logError('REJECT_INCENTIVE_ERROR', {
         incentiveId,
         reason,
-        error: errorMessage
+        error: errorMessage,
       });
       console.error('Error rejecting incentive:', error);
-      return IncentiveRejectionResult.failed(['Internal error occurred while rejecting incentive']);
+      return IncentiveRejectionResult.failed([
+        'Internal error occurred while rejecting incentive',
+      ]);
     }
   }
 
@@ -320,7 +348,7 @@ export class IncentiveDomainService {
   async processPayment(
     incentiveId: string,
     paymentMethod: PaymentMethod,
-    contactInfo?: ContactInfo
+    contactInfo?: ContactInfo,
   ): Promise<PaymentProcessingResult> {
     try {
       const incentive = await this.repository.findById(incentiveId);
@@ -335,11 +363,13 @@ export class IncentiveDomainService {
       }
 
       // 验证支付方式兼容性
-      const actualContactInfo = contactInfo || this.extractContactInfoFromIncentive(incentive);
-      const methodValidation = IncentiveRules.validatePaymentMethodCompatibility(
-        paymentMethod,
-        actualContactInfo
-      );
+      const actualContactInfo =
+        contactInfo || this.extractContactInfoFromIncentive(incentive);
+      const methodValidation =
+        IncentiveRules.validatePaymentMethodCompatibility(
+          paymentMethod,
+          actualContactInfo,
+        );
       if (!methodValidation.isValid) {
         return PaymentProcessingResult.failed(methodValidation.errors);
       }
@@ -350,13 +380,17 @@ export class IncentiveDomainService {
         currency: Currency.CNY,
         paymentMethod,
         recipientInfo: actualContactInfo,
-        reference: incentiveId
+        reference: incentiveId,
       };
 
-      const gatewayResult = await this.paymentGateway.processPayment(paymentRequest);
-      
+      const gatewayResult =
+        await this.paymentGateway.processPayment(paymentRequest);
+
       // 执行激励支付
-      const paymentResult = incentive.executePayment(paymentMethod, gatewayResult.transactionId);
+      const paymentResult = incentive.executePayment(
+        paymentMethod,
+        gatewayResult.transactionId,
+      );
 
       if (paymentResult.success) {
         await this.repository.save(incentive);
@@ -373,7 +407,7 @@ export class IncentiveDomainService {
           amount: paymentResult.amount,
           currency: paymentResult.currency,
           paymentMethod,
-          transactionId: gatewayResult.transactionId
+          transactionId: gatewayResult.transactionId,
         });
 
         return PaymentProcessingResult.success({
@@ -382,27 +416,29 @@ export class IncentiveDomainService {
           amount: paymentResult.amount!,
           currency: paymentResult.currency!,
           paymentMethod,
-          status: incentive.getStatus()
+          status: incentive.getStatus(),
         });
       } else {
         await this.auditLogger.logBusinessEvent('INCENTIVE_PAYMENT_FAILED', {
           incentiveId,
           error: paymentResult.error,
-          paymentMethod
+          paymentMethod,
         });
 
         return PaymentProcessingResult.failed([paymentResult.error!]);
       }
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       await this.auditLogger.logError('PROCESS_PAYMENT_ERROR', {
         incentiveId,
         paymentMethod,
-        error: errorMessage
+        error: errorMessage,
       });
       console.error('Error processing payment:', error);
-      return PaymentProcessingResult.failed(['Internal error occurred while processing payment']);
+      return PaymentProcessingResult.failed([
+        'Internal error occurred while processing payment',
+      ]);
     }
   }
 
@@ -411,7 +447,7 @@ export class IncentiveDomainService {
    */
   async processBatchPayment(
     incentiveIds: string[],
-    paymentMethod: PaymentMethod
+    paymentMethod: PaymentMethod,
   ): Promise<BatchPaymentResult> {
     try {
       // 获取所有激励
@@ -437,7 +473,7 @@ export class IncentiveDomainService {
           results.push({
             incentiveId: incentive.getId().getValue(),
             success: false,
-            error: eligibility.errors.join(', ')
+            error: eligibility.errors.join(', '),
           });
           continue;
         }
@@ -449,15 +485,19 @@ export class IncentiveDomainService {
             currency: Currency.CNY,
             paymentMethod,
             recipientInfo: contactInfo,
-            reference: incentive.getId().getValue()
+            reference: incentive.getId().getValue(),
           };
 
-          const gatewayResult = await this.paymentGateway.processPayment(paymentRequest);
-          const paymentResult = incentive.executePayment(paymentMethod, gatewayResult.transactionId);
+          const gatewayResult =
+            await this.paymentGateway.processPayment(paymentRequest);
+          const paymentResult = incentive.executePayment(
+            paymentMethod,
+            gatewayResult.transactionId,
+          );
 
           if (paymentResult.success) {
             await this.repository.save(incentive);
-            
+
             // 发布领域事件
             const events = incentive.getUncommittedEvents();
             for (const event of events) {
@@ -469,7 +509,7 @@ export class IncentiveDomainService {
               incentiveId: incentive.getId().getValue(),
               success: true,
               transactionId: gatewayResult.transactionId,
-              amount: paymentResult.amount!
+              amount: paymentResult.amount!,
             });
 
             successCount++;
@@ -478,15 +518,18 @@ export class IncentiveDomainService {
             results.push({
               incentiveId: incentive.getId().getValue(),
               success: false,
-              error: paymentResult.error!
+              error: paymentResult.error!,
             });
           }
         } catch (paymentError) {
-          const errorMessage = paymentError instanceof Error ? paymentError.message : 'Payment error';
+          const errorMessage =
+            paymentError instanceof Error
+              ? paymentError.message
+              : 'Payment error';
           results.push({
             incentiveId: incentive.getId().getValue(),
             success: false,
-            error: errorMessage
+            error: errorMessage,
           });
         }
       }
@@ -496,7 +539,7 @@ export class IncentiveDomainService {
         successCount,
         failureCount: incentiveIds.length - successCount,
         totalPaidAmount,
-        paymentMethod
+        paymentMethod,
       });
 
       return BatchPaymentResult.success({
@@ -504,18 +547,20 @@ export class IncentiveDomainService {
         successCount,
         failureCount: incentiveIds.length - successCount,
         totalPaidAmount,
-        results
+        results,
       });
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       await this.auditLogger.logError('PROCESS_BATCH_PAYMENT_ERROR', {
         incentiveIds,
         paymentMethod,
-        error: errorMessage
+        error: errorMessage,
       });
       console.error('Error processing batch payment:', error);
-      return BatchPaymentResult.failed(['Internal error occurred while processing batch payment']);
+      return BatchPaymentResult.failed([
+        'Internal error occurred while processing batch payment',
+      ]);
     }
   }
 
@@ -524,7 +569,7 @@ export class IncentiveDomainService {
    */
   async getIncentiveStatistics(
     ip?: string,
-    timeRange?: { startDate: Date; endDate: Date }
+    timeRange?: { startDate: Date; endDate: Date },
   ): Promise<IncentiveStatsResult> {
     try {
       if (ip) {
@@ -535,23 +580,25 @@ export class IncentiveDomainService {
 
         const incentives = await this.repository.findByIP(ip, timeRange);
         const stats = this.calculateIPStatistics(ip, incentives);
-        
+
         return IncentiveStatsResult.success({ individual: stats });
       } else {
         // 获取系统整体统计
         const systemStats = await this.calculateSystemStatistics(timeRange);
         return IncentiveStatsResult.success({ system: systemStats });
       }
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       await this.auditLogger.logError('GET_INCENTIVE_STATISTICS_ERROR', {
         ip,
         timeRange,
-        error: errorMessage
+        error: errorMessage,
       });
       console.error('Error getting incentive statistics:', error);
-      return IncentiveStatsResult.failed(['Internal error occurred while getting statistics']);
+      return IncentiveStatsResult.failed([
+        'Internal error occurred while getting statistics',
+      ]);
     }
   }
 
@@ -560,28 +607,33 @@ export class IncentiveDomainService {
    */
   async getPendingIncentives(
     status?: IncentiveStatus,
-    limit = 50
+    limit = 50,
   ): Promise<PendingIncentivesResult> {
     try {
-      const incentives = await this.repository.findPendingIncentives(status, limit);
+      const incentives = await this.repository.findPendingIncentives(
+        status,
+        limit,
+      );
       const prioritizedIncentives = incentives
-        .map(incentive => ({
+        .map((incentive) => ({
           incentive: incentive.getIncentiveSummary(),
-          priority: IncentiveRules.calculateProcessingPriority(incentive)
+          priority: IncentiveRules.calculateProcessingPriority(incentive),
         }))
         .sort((a, b) => b.priority.score - a.priority.score);
 
       return PendingIncentivesResult.success(prioritizedIncentives);
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       await this.auditLogger.logError('GET_PENDING_INCENTIVES_ERROR', {
         status,
         limit,
-        error: errorMessage
+        error: errorMessage,
       });
       console.error('Error getting pending incentives:', error);
-      return PendingIncentivesResult.failed(['Internal error occurred while getting pending incentives']);
+      return PendingIncentivesResult.failed([
+        'Internal error occurred while getting pending incentives',
+      ]);
     }
   }
 
@@ -593,20 +645,23 @@ export class IncentiveDomainService {
     return new ContactInfo({
       email: 'test@example.com',
       wechat: 'test_wechat',
-      alipay: 'test_alipay'
+      alipay: 'test_alipay',
     });
   }
 
-  private calculateIPStatistics(ip: string, incentives: Incentive[]): IPIncentiveStatistics {
+  private calculateIPStatistics(
+    ip: string,
+    incentives: Incentive[],
+  ): IPIncentiveStatistics {
     let totalAmount = 0;
     let paidAmount = 0;
     let pendingAmount = 0;
-    
+
     const statusCount = {
       pending: 0,
       approved: 0,
       paid: 0,
-      rejected: 0
+      rejected: 0,
     };
 
     for (const incentive of incentives) {
@@ -639,26 +694,30 @@ export class IncentiveDomainService {
       paidAmount,
       pendingAmount,
       statusBreakdown: statusCount,
-      averageReward: incentives.length > 0 ? totalAmount / incentives.length : 0,
-      lastIncentiveDate: incentives.length > 0 ? 
-        Math.max(...incentives.map(i => i.getCreatedAt().getTime())) : undefined
+      averageReward:
+        incentives.length > 0 ? totalAmount / incentives.length : 0,
+      lastIncentiveDate:
+        incentives.length > 0
+          ? Math.max(...incentives.map((i) => i.getCreatedAt().getTime()))
+          : undefined,
     };
   }
 
-  private async calculateSystemStatistics(
-    timeRange?: { startDate: Date; endDate: Date }
-  ): Promise<SystemIncentiveStatistics> {
+  private async calculateSystemStatistics(timeRange?: {
+    startDate: Date;
+    endDate: Date;
+  }): Promise<SystemIncentiveStatistics> {
     const allIncentives = await this.repository.findAll(timeRange);
-    
+
     let totalAmount = 0;
     let paidAmount = 0;
     const uniqueIPs = new Set<string>();
-    
+
     const statusCount = {
       pending: 0,
       approved: 0,
       paid: 0,
-      rejected: 0
+      rejected: 0,
     };
 
     const rewardTypeCount = new Map<string, number>();
@@ -691,15 +750,20 @@ export class IncentiveDomainService {
       paidAmount,
       pendingAmount: totalAmount - paidAmount,
       statusBreakdown: statusCount,
-      averageRewardPerIncentive: allIncentives.length > 0 ? totalAmount / allIncentives.length : 0,
+      averageRewardPerIncentive:
+        allIncentives.length > 0 ? totalAmount / allIncentives.length : 0,
       averageRewardPerIP: uniqueIPs.size > 0 ? totalAmount / uniqueIPs.size : 0,
-      conversionRate: allIncentives.length > 0 ? (statusCount.paid / allIncentives.length) * 100 : 0
+      conversionRate:
+        allIncentives.length > 0
+          ? (statusCount.paid / allIncentives.length) * 100
+          : 0,
     };
   }
 
   private isValidIPAddress(ip: string): boolean {
     if (!ip || typeof ip !== 'string') return false;
-    const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    const ipRegex =
+      /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
     return ipRegex.test(ip);
   }
 }
@@ -712,7 +776,7 @@ export class IncentiveCreationResult {
   private constructor(
     public readonly success: boolean,
     public readonly data?: IncentiveSummary,
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**
@@ -746,7 +810,7 @@ export class IncentiveValidationResult {
       errors: string[];
       status: IncentiveStatus;
     },
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**
@@ -784,7 +848,7 @@ export class IncentiveApprovalResult {
       status: IncentiveStatus;
       rewardAmount: number;
     },
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**
@@ -821,7 +885,7 @@ export class IncentiveRejectionResult {
       status: IncentiveStatus;
       rejectionReason: string;
     },
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**
@@ -861,7 +925,7 @@ export class PaymentProcessingResult {
       paymentMethod: PaymentMethod;
       status: IncentiveStatus;
     },
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**
@@ -903,7 +967,7 @@ export class BatchPaymentResult {
       totalPaidAmount: number;
       results: BatchPaymentItem[];
     },
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**
@@ -941,7 +1005,7 @@ export class IncentiveStatsResult {
       individual?: IPIncentiveStatistics;
       system?: SystemIncentiveStatistics;
     },
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**
@@ -976,7 +1040,7 @@ export class PendingIncentivesResult {
       incentive: IncentiveSummary;
       priority: IncentivePriority;
     }>,
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**
@@ -984,10 +1048,12 @@ export class PendingIncentivesResult {
    * @param data - The data.
    * @returns The PendingIncentivesResult.
    */
-  static success(data: Array<{
-    incentive: IncentiveSummary;
-    priority: IncentivePriority;
-  }>): PendingIncentivesResult {
+  static success(
+    data: Array<{
+      incentive: IncentiveSummary;
+      priority: IncentivePriority;
+    }>,
+  ): PendingIncentivesResult {
     return new PendingIncentivesResult(true, data);
   }
 
@@ -1080,10 +1146,19 @@ export interface IIncentiveRepository {
   save(incentive: Incentive): Promise<void>;
   findById(id: string): Promise<Incentive | null>;
   findByIds(ids: string[]): Promise<Incentive[]>;
-  findByIP(ip: string, timeRange?: { startDate: Date; endDate: Date }): Promise<Incentive[]>;
+  findByIP(
+    ip: string,
+    timeRange?: { startDate: Date; endDate: Date },
+  ): Promise<Incentive[]>;
   findAll(timeRange?: { startDate: Date; endDate: Date }): Promise<Incentive[]>;
-  findPendingIncentives(status?: IncentiveStatus, limit?: number): Promise<Incentive[]>;
-  findReferralIncentive(referrerIP: string, referredIP: string): Promise<Incentive | null>;
+  findPendingIncentives(
+    status?: IncentiveStatus,
+    limit?: number,
+  ): Promise<Incentive[]>;
+  findReferralIncentive(
+    referrerIP: string,
+    referredIP: string,
+  ): Promise<Incentive | null>;
   countTodayIncentives(ip: string): Promise<number>;
   deleteExpired(olderThanDays: number): Promise<number>;
 }
@@ -1108,5 +1183,7 @@ export interface IAuditLogger {
  * Defines the shape of the i payment gateway.
  */
 export interface IPaymentGateway {
-  processPayment(request: PaymentGatewayRequest): Promise<PaymentGatewayResponse>;
+  processPayment(
+    request: PaymentGatewayRequest,
+  ): Promise<PaymentGatewayResponse>;
 }

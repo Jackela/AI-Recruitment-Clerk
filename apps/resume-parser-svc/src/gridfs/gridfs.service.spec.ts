@@ -20,14 +20,11 @@ describe('GridFsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        GridFsService,
-        TestProviders.getMockGridFsConnection(),
-      ],
+      providers: [GridFsService, TestProviders.getMockGridFsConnection()],
     }).compile();
 
     service = module.get<GridFsService>(GridFsService);
-    
+
     // Mock the internal GridFS bucket
     const mockGridFSBucket = {
       openDownloadStream: jest.fn().mockImplementation(() => ({
@@ -49,11 +46,11 @@ describe('GridFsService', () => {
       }),
       delete: jest.fn().mockResolvedValue(undefined),
     };
-    
+
     (service as any).gridFSBucket = mockGridFSBucket;
     const connectionProvider = TestProviders.getMockGridFsConnection();
     (service as any).connection = (connectionProvider as any).useValue;
-    
+
     // Instead of mocking private method, ensure service methods work properly
     // The service should handle URL extraction internally
   });
@@ -69,10 +66,10 @@ describe('GridFsService', () => {
       it('should establish MongoDB GridFS connection', async () => {
         // Mock the connect method
         service.connect = jest.fn().mockResolvedValue(undefined);
-        
+
         // Act
         await service.connect();
-        
+
         // Assert
         expect(service.connect).toHaveBeenCalled();
         expect(service).toBeDefined();
@@ -80,8 +77,10 @@ describe('GridFsService', () => {
 
       it('should handle connection failures gracefully', async () => {
         // Mock connection failure
-        service.connect = jest.fn().mockRejectedValue(new Error('Connection failed'));
-        
+        service.connect = jest
+          .fn()
+          .mockRejectedValue(new Error('Connection failed'));
+
         // Act & Assert
         await expect(service.connect()).rejects.toThrow('Connection failed');
       });
@@ -96,7 +95,7 @@ describe('GridFsService', () => {
           }
           return Promise.resolve();
         });
-        
+
         // Act - simulate retry
         try {
           await service.connect();
@@ -104,8 +103,8 @@ describe('GridFsService', () => {
           // Retry on failure
           await service.connect();
         }
-        
-        // Assert  
+
+        // Assert
         expect(service.connect).toHaveBeenCalledTimes(2);
       });
 
@@ -120,7 +119,7 @@ describe('GridFsService', () => {
       it('should clean up connections properly', async () => {
         // Act
         await service.disconnect();
-        
+
         // Assert
         expect(service).toBeDefined();
       });
@@ -128,10 +127,10 @@ describe('GridFsService', () => {
       it('should handle disconnect when not connected', async () => {
         // Setup
         (service as any).connection.readyState = 0;
-        
+
         // Act
         await service.disconnect();
-        
+
         // Assert
         expect(service).toBeDefined();
       });
@@ -139,7 +138,7 @@ describe('GridFsService', () => {
       it('should wait for pending operations to complete', async () => {
         // Act
         await service.disconnect();
-        
+
         // Assert
         expect(service).toBeDefined();
       });
@@ -273,7 +272,8 @@ describe('GridFsService', () => {
 
       it('should handle files with missing metadata', async () => {
         // Arrange
-        const fileWithMissingMetadata = 'gridfs://temp/507f1f77bcf86cd799439019';
+        const fileWithMissingMetadata =
+          'gridfs://temp/507f1f77bcf86cd799439019';
 
         // Act & Assert
         await expect(
@@ -489,10 +489,19 @@ describe('GridFsService', () => {
     it('should handle high-throughput file operations', async () => {
       // Test concurrent file operations
       const operations = [
-        () => service.downloadFile('gridfs://temp/507f1f77bcf86cd799439015').catch(() => null),
+        () =>
+          service
+            .downloadFile('gridfs://temp/507f1f77bcf86cd799439015')
+            .catch(() => null),
         () => service.uploadFile(mockFileBuffer, 'test1.pdf').catch(() => null),
-        () => service.fileExists('gridfs://temp/507f1f77bcf86cd799439016').catch(() => null),
-        () => service.getFileInfo('gridfs://temp/507f1f77bcf86cd799439017').catch(() => null),
+        () =>
+          service
+            .fileExists('gridfs://temp/507f1f77bcf86cd799439016')
+            .catch(() => null),
+        () =>
+          service
+            .getFileInfo('gridfs://temp/507f1f77bcf86cd799439017')
+            .catch(() => null),
       ];
 
       const results = await Promise.allSettled(operations.map((op) => op()));

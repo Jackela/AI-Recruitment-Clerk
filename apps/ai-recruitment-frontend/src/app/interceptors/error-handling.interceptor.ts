@@ -9,7 +9,7 @@ import {
   HttpHandler,
   HttpEvent,
   HttpInterceptor,
-  HttpErrorResponse
+  HttpErrorResponse,
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
@@ -20,7 +20,6 @@ import { ErrorHandlingService } from '../services/error/error-handling.service';
  */
 @Injectable()
 export class ErrorHandlingInterceptor implements HttpInterceptor {
-
   /**
    * Initializes a new instance of the Error Handling Interceptor.
    * @param errorHandlingService - The error handling service.
@@ -33,14 +32,18 @@ export class ErrorHandlingInterceptor implements HttpInterceptor {
    * @param next - The next.
    * @returns The Observable<HttpEvent<unknown>>.
    */
-  intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+  intercept(
+    request: HttpRequest<unknown>,
+    next: HttpHandler,
+  ): Observable<HttpEvent<unknown>> {
     return next.handle(request).pipe(
       // Retry failed requests based on error type
       retry({
         count: this.getRetryCount(request),
-        delay: (error, retryCount) => this.getRetryDelay(error, retryCount, request)
+        delay: (error, retryCount) =>
+          this.getRetryDelay(error, retryCount, request),
       }),
-      
+
       // Handle errors
       catchError((error: HttpErrorResponse) => {
         const context = {
@@ -50,7 +53,7 @@ export class ErrorHandlingInterceptor implements HttpInterceptor {
         };
 
         return this.errorHandlingService.handleHttpError(error, context);
-      })
+      }),
     );
   }
 
@@ -76,21 +79,21 @@ export class ErrorHandlingInterceptor implements HttpInterceptor {
    * Calculate retry delay with exponential backoff
    */
   private getRetryDelay(
-    error: HttpErrorResponse, 
-    retryCount: number, 
-    request: HttpRequest<unknown>
+    error: HttpErrorResponse,
+    retryCount: number,
+    request: HttpRequest<unknown>,
   ): Observable<number> {
     // Only retry on specific error codes
     const retryableStatusCodes = [408, 429, 500, 502, 503, 504];
-    
+
     if (!retryableStatusCodes.includes(error.status)) {
       return throwError(() => error);
     }
 
     // Exponential backoff: 1s, 2s, 4s
     const delay = Math.pow(2, retryCount - 1) * 1000;
-    
-    return new Observable(observer => {
+
+    return new Observable((observer) => {
       setTimeout(() => {
         observer.next(delay);
         observer.complete();

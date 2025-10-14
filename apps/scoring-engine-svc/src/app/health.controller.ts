@@ -55,7 +55,7 @@ export class HealthController {
   })
   getHealth(): HealthResponse {
     const uptime = Date.now() - this.startTime;
-    
+
     return {
       status: 'ok',
       timestamp: new Date().toISOString(),

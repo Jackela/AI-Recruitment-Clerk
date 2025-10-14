@@ -37,8 +37,9 @@ describe('AppController', () => {
       });
 
       expect(response.matchedSkills).toContain('aws');
-      expect(response.missingSkills).toEqual(expect.arrayContaining(['dev', 'ops']));
+      expect(response.missingSkills).toEqual(
+        expect.arrayContaining(['dev', 'ops']),
+      );
     });
   });
 });
-

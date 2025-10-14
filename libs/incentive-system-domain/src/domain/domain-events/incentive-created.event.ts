@@ -20,6 +20,6 @@ export class IncentiveCreatedEvent implements DomainEvent {
     public readonly rewardAmount: number,
     public readonly currency: Currency,
     public readonly triggerType: TriggerType,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }

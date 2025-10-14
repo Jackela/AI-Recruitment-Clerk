@@ -27,4 +27,3 @@ export function scheduleWelcomeMessage({
     );
   }, config.UI.TIMING.INITIAL_DELAY);
 }
-

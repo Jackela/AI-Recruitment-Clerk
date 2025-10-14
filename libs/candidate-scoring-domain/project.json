@@ -18,9 +18,7 @@
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "libs/candidate-scoring-domain/**/*.ts"
-        ]
+        "lintFilePatterns": ["libs/candidate-scoring-domain/**/*.ts"]
       }
     },
     "test": {

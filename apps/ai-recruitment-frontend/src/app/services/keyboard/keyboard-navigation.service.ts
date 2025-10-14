@@ -310,7 +310,12 @@ export class KeyboardNavigationService {
     }
   }
 
-  private preserveCurrentState(): {scrollTop: number; scrollLeft: number; formData: Record<string, string>; timestamp: number} {
+  private preserveCurrentState(): {
+    scrollTop: number;
+    scrollLeft: number;
+    formData: Record<string, string>;
+    timestamp: number;
+  } {
     // Preserve scroll position and form data
     return {
       scrollTop: window.scrollY,

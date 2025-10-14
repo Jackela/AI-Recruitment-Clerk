@@ -17,7 +17,7 @@ export class UsageTracking extends ValueObject<{
     return new UsageTracking({
       currentCount: 0,
       usageHistory: [],
-      lastUsageAt: undefined
+      lastUsageAt: undefined,
     });
   }
 
@@ -30,7 +30,7 @@ export class UsageTracking extends ValueObject<{
     return new UsageTracking({
       currentCount: data.currentCount,
       usageHistory: data.usageHistory.map((r: any) => new UsageRecord(r)),
-      lastUsageAt: data.lastUsageAt ? new Date(data.lastUsageAt) : undefined
+      lastUsageAt: data.lastUsageAt ? new Date(data.lastUsageAt) : undefined,
     });
   }
 
@@ -41,13 +41,13 @@ export class UsageTracking extends ValueObject<{
   incrementUsage(): UsageTracking {
     const record = new UsageRecord({
       timestamp: new Date(),
-      count: this.props.currentCount + 1
+      count: this.props.currentCount + 1,
     });
 
     return new UsageTracking({
       currentCount: this.props.currentCount + 1,
       usageHistory: [...this.props.usageHistory, record],
-      lastUsageAt: new Date()
+      lastUsageAt: new Date(),
     });
   }
 

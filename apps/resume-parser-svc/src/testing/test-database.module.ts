@@ -22,7 +22,9 @@ export class TestDatabaseModule {
 
     if (useDocker) {
       // Use Docker MongoDB for integration tests
-      mongoUri = process.env.MONGODB_URI || 'mongodb://testuser:testpass@localhost:27018/resume-parser-test?authSource=admin';
+      mongoUri =
+        process.env.MONGODB_URI ||
+        'mongodb://testuser:testpass@localhost:27018/resume-parser-test?authSource=admin';
     } else {
       // Use in-memory MongoDB for unit tests
       if (!mongod) {
@@ -71,7 +73,7 @@ export class TestDatabaseModule {
    */
   static async clearDatabase(connection: Connection): Promise<void> {
     if (!connection) return;
-    
+
     const collections = connection.collections;
     for (const key in collections) {
       const collection = collections[key];

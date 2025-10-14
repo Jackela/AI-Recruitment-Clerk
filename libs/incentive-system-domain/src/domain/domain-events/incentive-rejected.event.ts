@@ -15,6 +15,6 @@ export class IncentiveRejectedEvent implements DomainEvent {
     public readonly incentiveId: string,
     public readonly recipientIP: string,
     public readonly reason: string,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }

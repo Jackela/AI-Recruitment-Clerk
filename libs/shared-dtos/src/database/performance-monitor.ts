@@ -35,16 +35,19 @@ export interface QueryExecution {
 @Injectable()
 export class DatabasePerformanceMonitor {
   private readonly logger = new Logger(DatabasePerformanceMonitor.name);
-  private readonly queryMetrics = new Map<string, {
-    totalExecutions: number;
-    totalDuration: number;
-    totalMemory: number;
-    successCount: number;
-    errorCount: number;
-    maxDuration: number;
-    minDuration: number;
-    executions: QueryExecution[];
-  }>();
+  private readonly queryMetrics = new Map<
+    string,
+    {
+      totalExecutions: number;
+      totalDuration: number;
+      totalMemory: number;
+      successCount: number;
+      errorCount: number;
+      maxDuration: number;
+      minDuration: number;
+      executions: QueryExecution[];
+    }
+  >();
 
   private readonly PERFORMANCE_WARNING_THRESHOLD_MS = 1000;
   private readonly PERFORMANCE_ERROR_THRESHOLD_MS = 5000;
@@ -60,37 +63,37 @@ export class DatabasePerformanceMonitor {
   async executeWithMonitoring<T>(
     operation: () => Promise<T>,
     queryName: string,
-    expectedPerformanceMs?: number
+    expectedPerformanceMs?: number,
   ): Promise<T> {
     const startTime = Date.now();
     const startMemory = process.memoryUsage().heapUsed;
-    
+
     try {
       const result = await operation();
       const duration = Date.now() - startTime;
       const memoryDelta = process.memoryUsage().heapUsed - startMemory;
-      
+
       // Record successful execution metrics
       this.recordQueryExecution(queryName, duration, memoryDelta, true);
-      
+
       // Performance alerting
       this.evaluatePerformance(queryName, duration, expectedPerformanceMs);
-      
+
       return result;
     } catch (error) {
       const duration = Date.now() - startTime;
       const memoryDelta = process.memoryUsage().heapUsed - startMemory;
-      
+
       // Record failed execution metrics
       this.recordQueryExecution(queryName, duration, memoryDelta, false);
-      
+
       const errMsg = error instanceof Error ? error.message : String(error);
       this.logger.error(`Query ${queryName} failed after ${duration}ms`, {
         duration,
         memoryDelta,
         error: errMsg,
       });
-      
+
       throw error;
     }
   }
@@ -101,12 +104,12 @@ export class DatabasePerformanceMonitor {
   async executeWithTimeout<T>(
     operation: () => Promise<T>,
     queryName: string,
-    timeoutMs: number = 10000
+    timeoutMs: number = 10000,
   ): Promise<T> {
     return this.executeWithMonitoring(
       () => this.withTimeout(operation(), timeoutMs),
       queryName,
-      timeoutMs * 0.8 // Set warning at 80% of timeout
+      timeoutMs * 0.8, // Set warning at 80% of timeout
     );
   }
 
@@ -117,10 +120,10 @@ export class DatabasePerformanceMonitor {
     queryName: string,
     duration: number,
     memoryDelta: number,
-    success: boolean
+    success: boolean,
   ): void {
     let metrics = this.queryMetrics.get(queryName);
-    
+
     if (!metrics) {
       metrics = {
         totalExecutions: 0,
@@ -130,7 +133,7 @@ export class DatabasePerformanceMonitor {
         errorCount: 0,
         maxDuration: 0,
         minDuration: Infinity,
-        executions: []
+        executions: [],
       };
       this.queryMetrics.set(queryName, metrics);
     }
@@ -141,7 +144,7 @@ export class DatabasePerformanceMonitor {
     metrics.totalMemory += memoryDelta;
     metrics.maxDuration = Math.max(metrics.maxDuration, duration);
     metrics.minDuration = Math.min(metrics.minDuration, duration);
-    
+
     if (success) {
       metrics.successCount++;
     } else {
@@ -153,11 +156,11 @@ export class DatabasePerformanceMonitor {
       duration,
       memoryDelta,
       success,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
-    
+
     metrics.executions.push(execution);
-    
+
     // Maintain bounded history
     if (metrics.executions.length > this.MAX_EXECUTION_HISTORY) {
       metrics.executions.shift();
@@ -170,33 +173,46 @@ export class DatabasePerformanceMonitor {
   private evaluatePerformance(
     queryName: string,
     duration: number,
-    expectedPerformanceMs?: number
+    expectedPerformanceMs?: number,
   ): void {
-    const performanceRatio = expectedPerformanceMs 
-      ? duration / expectedPerformanceMs 
+    const performanceRatio = expectedPerformanceMs
+      ? duration / expectedPerformanceMs
       : null;
 
     if (duration > this.PERFORMANCE_ERROR_THRESHOLD_MS) {
-      this.logger.error(`🚨 CRITICAL: Query ${queryName} took ${duration}ms (threshold: ${this.PERFORMANCE_ERROR_THRESHOLD_MS}ms)`, {
-        queryName,
-        duration,
-        expectedPerformanceMs,
-        performanceRatio
-      });
+      this.logger.error(
+        `🚨 CRITICAL: Query ${queryName} took ${duration}ms (threshold: ${this.PERFORMANCE_ERROR_THRESHOLD_MS}ms)`,
+        {
+          queryName,
+          duration,
+          expectedPerformanceMs,
+          performanceRatio,
+        },
+      );
     } else if (duration > this.PERFORMANCE_WARNING_THRESHOLD_MS) {
-      this.logger.warn(`⚠️ SLOW: Query ${queryName} took ${duration}ms (threshold: ${this.PERFORMANCE_WARNING_THRESHOLD_MS}ms)`, {
-        queryName,
-        duration,
-        expectedPerformanceMs,
-        performanceRatio
-      });
-    } else if (expectedPerformanceMs && performanceRatio && performanceRatio < 0.5) {
-      this.logger.debug(`🚀 OPTIMIZED: Query ${queryName} performed ${Math.round((1 - performanceRatio) * 100)}% better than expected`, {
-        queryName,
-        duration,
-        expectedPerformanceMs,
-        improvement: `${Math.round((1 - performanceRatio) * 100)}%`
-      });
+      this.logger.warn(
+        `⚠️ SLOW: Query ${queryName} took ${duration}ms (threshold: ${this.PERFORMANCE_WARNING_THRESHOLD_MS}ms)`,
+        {
+          queryName,
+          duration,
+          expectedPerformanceMs,
+          performanceRatio,
+        },
+      );
+    } else if (
+      expectedPerformanceMs &&
+      performanceRatio &&
+      performanceRatio < 0.5
+    ) {
+      this.logger.debug(
+        `🚀 OPTIMIZED: Query ${queryName} performed ${Math.round((1 - performanceRatio) * 100)}% better than expected`,
+        {
+          queryName,
+          duration,
+          expectedPerformanceMs,
+          improvement: `${Math.round((1 - performanceRatio) * 100)}%`,
+        },
+      );
     }
   }
 
@@ -208,8 +224,8 @@ export class DatabasePerformanceMonitor {
     p99Duration: number;
   } {
     const successfulExecutions = executions
-      .filter(e => e.success)
-      .map(e => e.duration)
+      .filter((e) => e.success)
+      .map((e) => e.duration)
       .sort((a, b) => a - b);
 
     if (successfulExecutions.length === 0) {
@@ -221,7 +237,7 @@ export class DatabasePerformanceMonitor {
 
     return {
       p95Duration: successfulExecutions[p95Index] || 0,
-      p99Duration: successfulExecutions[p99Index] || 0
+      p99Duration: successfulExecutions[p99Index] || 0,
     };
   }
 
@@ -230,10 +246,10 @@ export class DatabasePerformanceMonitor {
    */
   getPerformanceReport(): Record<string, QueryPerformanceMetrics> {
     const report: Record<string, QueryPerformanceMetrics> = {};
-    
+
     for (const [queryName, rawMetrics] of this.queryMetrics.entries()) {
       const percentiles = this.calculatePercentiles(rawMetrics.executions);
-      
+
       const metrics: QueryPerformanceMetrics = {
         queryName,
         totalExecutions: rawMetrics.totalExecutions,
@@ -242,20 +258,25 @@ export class DatabasePerformanceMonitor {
         successCount: rawMetrics.successCount,
         errorCount: rawMetrics.errorCount,
         maxDuration: rawMetrics.maxDuration,
-        minDuration: rawMetrics.minDuration === Infinity ? 0 : rawMetrics.minDuration,
-        avgDuration: rawMetrics.totalExecutions > 0 
-          ? Math.round(rawMetrics.totalDuration / rawMetrics.totalExecutions)
-          : 0,
-        successRate: rawMetrics.totalExecutions > 0 
-          ? Math.round((rawMetrics.successCount / rawMetrics.totalExecutions) * 100) 
-          : 0,
+        minDuration:
+          rawMetrics.minDuration === Infinity ? 0 : rawMetrics.minDuration,
+        avgDuration:
+          rawMetrics.totalExecutions > 0
+            ? Math.round(rawMetrics.totalDuration / rawMetrics.totalExecutions)
+            : 0,
+        successRate:
+          rawMetrics.totalExecutions > 0
+            ? Math.round(
+                (rawMetrics.successCount / rawMetrics.totalExecutions) * 100,
+              )
+            : 0,
         p95Duration: percentiles.p95Duration,
-        p99Duration: percentiles.p99Duration
+        p99Duration: percentiles.p99Duration,
       };
-      
+
       report[queryName] = metrics;
     }
-    
+
     return report;
   }
 
@@ -283,7 +304,7 @@ export class DatabasePerformanceMonitor {
   getProblematicQueries(minExecutions = 5): QueryPerformanceMetrics[] {
     const report = this.getPerformanceReport();
     return Object.values(report)
-      .filter(m => m.totalExecutions >= minExecutions)
+      .filter((m) => m.totalExecutions >= minExecutions)
       .sort((a, b) => a.successRate - b.successRate)
       .slice(0, 10);
   }
@@ -312,17 +333,26 @@ export class DatabasePerformanceMonitor {
   } {
     const report = this.getPerformanceReport();
     const queries = Object.values(report);
-    
-    const totalExecutions = queries.reduce((sum, q) => sum + q.totalExecutions, 0);
+
+    const totalExecutions = queries.reduce(
+      (sum, q) => sum + q.totalExecutions,
+      0,
+    );
     const totalDuration = queries.reduce((sum, q) => sum + q.totalDuration, 0);
     const totalSuccesses = queries.reduce((sum, q) => sum + q.successCount, 0);
-    const slowQueries = queries.filter(q => q.avgDuration > this.PERFORMANCE_WARNING_THRESHOLD_MS).length;
-    
+    const slowQueries = queries.filter(
+      (q) => q.avgDuration > this.PERFORMANCE_WARNING_THRESHOLD_MS,
+    ).length;
+
     return {
       totalQueries: totalExecutions,
-      avgResponseTime: totalExecutions > 0 ? Math.round(totalDuration / totalExecutions) : 0,
-      successRate: totalExecutions > 0 ? Math.round((totalSuccesses / totalExecutions) * 100) : 0,
-      slowQueries
+      avgResponseTime:
+        totalExecutions > 0 ? Math.round(totalDuration / totalExecutions) : 0,
+      successRate:
+        totalExecutions > 0
+          ? Math.round((totalSuccesses / totalExecutions) * 100)
+          : 0,
+      slowQueries,
     };
   }
 
@@ -333,8 +363,11 @@ export class DatabasePerformanceMonitor {
     return Promise.race([
       promise,
       new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error(`Operation timed out after ${timeoutMs}ms`)), timeoutMs);
-      })
+        setTimeout(
+          () => reject(new Error(`Operation timed out after ${timeoutMs}ms`)),
+          timeoutMs,
+        );
+      }),
     ]);
   }
 
@@ -344,12 +377,14 @@ export class DatabasePerformanceMonitor {
   exportMetrics(): {
     timestamp: Date;
     metrics: Record<string, QueryPerformanceMetrics>;
-    summary: ReturnType<typeof DatabasePerformanceMonitor.prototype.getRealTimeStats>;
+    summary: ReturnType<
+      typeof DatabasePerformanceMonitor.prototype.getRealTimeStats
+    >;
   } {
     return {
       timestamp: new Date(),
       metrics: this.getPerformanceReport(),
-      summary: this.getRealTimeStats()
+      summary: this.getRealTimeStats(),
     };
   }
 }

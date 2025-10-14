@@ -11,7 +11,9 @@ import { LoggerService } from './shared/logger.service';
   providedIn: 'root',
 })
 export class SmartPreloadingStrategy implements PreloadingStrategy {
-  private readonly logger = inject(LoggerService).createLogger('SmartPreloadingStrategy');
+  private readonly logger = inject(LoggerService).createLogger(
+    'SmartPreloadingStrategy',
+  );
   private preloadedModules = new Set<string>();
   private networkCondition: 'slow' | 'fast' = 'fast';
   private userEngagement = {
@@ -164,7 +166,7 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
       const loadTime = performance.now() - startTime;
       this.networkCondition = loadTime > 1000 ? 'slow' : 'fast';
       this.logger.performance('Network speed test', loadTime, {
-        networkCondition: this.networkCondition
+        networkCondition: this.networkCondition,
       });
     };
 
@@ -231,7 +233,12 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
    * Retrieves user engagement.
    * @returns The {clicks: number; prefetches: number; routeFrequency: Record<string, number>; connectionInfo: Record<string, unknown>}.
    */
-  getUserEngagement(): {clicks: number; prefetches: number; routeFrequency: Record<string, number>; connectionInfo: Record<string, unknown>} {
+  getUserEngagement(): {
+    clicks: number;
+    prefetches: number;
+    routeFrequency: Record<string, number>;
+    connectionInfo: Record<string, unknown>;
+  } {
     return { ...this.userEngagement };
   }
 }

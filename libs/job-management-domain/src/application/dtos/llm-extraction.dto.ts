@@ -4,4 +4,7 @@
  */
 
 // Re-export from job-description.dto to maintain backward compatibility
-export type { LlmExtractionRequest, LlmExtractionResponse } from './job-description.dto.js';
+export type {
+  LlmExtractionRequest,
+  LlmExtractionResponse,
+} from './job-description.dto.js';

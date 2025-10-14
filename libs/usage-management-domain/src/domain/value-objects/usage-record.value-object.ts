@@ -11,10 +11,14 @@ export class UsageRecord extends ValueObject<{
    * Performs the timestamp operation.
    * @returns The Date.
    */
-  get timestamp(): Date { return this.props.timestamp; }
+  get timestamp(): Date {
+    return this.props.timestamp;
+  }
   /**
    * Performs the count operation.
    * @returns The number value.
    */
-  get count(): number { return this.props.count; }
+  get count(): number {
+    return this.props.count;
+  }
 }

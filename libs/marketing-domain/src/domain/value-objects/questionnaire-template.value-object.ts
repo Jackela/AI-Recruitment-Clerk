@@ -41,17 +41,23 @@ export class QuestionnaireTemplate extends ValueObject<{
         { id: 'experience', name: 'User Experience', required: true },
         { id: 'business', name: 'Business Value', required: true },
         { id: 'features', name: 'Feature Needs', required: false },
-        { id: 'optional', name: 'Optional Info', required: false }
+        { id: 'optional', name: 'Optional Info', required: false },
       ],
-      requiredQuestions: ['role', 'industry', 'overallSatisfaction', 'currentScreeningMethod', 'willingnessToPayMonthly'],
+      requiredQuestions: [
+        'role',
+        'industry',
+        'overallSatisfaction',
+        'currentScreeningMethod',
+        'willingnessToPayMonthly',
+      ],
       qualityThresholds: [
         { metric: 'textLength', minValue: 50 },
         { metric: 'completionRate', minValue: 0.8 },
-        { metric: 'detailedAnswers', minValue: 3 }
-      ]
+        { metric: 'detailedAnswers', minValue: 3 },
+      ],
     });
   }
-  
+
   /**
    * Performs the restore operation.
    * @param data - The data.

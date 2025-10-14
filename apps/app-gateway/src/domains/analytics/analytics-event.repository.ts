@@ -66,7 +66,10 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
         { upsert: true, new: true },
       );
     } catch (error) {
-      this.logger.error('Error saving analytics event', error.stack || error.message);
+      this.logger.error(
+        'Error saving analytics event',
+        error.stack || error.message,
+      );
       throw new Error('Failed to save analytics event');
     }
   }
@@ -83,7 +86,10 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
         .exec();
       return document ? this.mapToEntity(document) : null;
     } catch (error) {
-      this.logger.error('Error finding analytics event by id', error.stack || error.message);
+      this.logger.error(
+        'Error finding analytics event by id',
+        error.stack || error.message,
+      );
       throw new Error('Failed to find analytics event');
     }
   }
@@ -101,7 +107,10 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
         .exec();
       return documents.map((doc) => this.mapToEntity(doc));
     } catch (error) {
-      this.logger.error('Error finding analytics events by sessionId', error.stack || error.message);
+      this.logger.error(
+        'Error finding analytics events by sessionId',
+        error.stack || error.message,
+      );
       throw new Error('Failed to find analytics events by sessionId');
     }
   }
@@ -119,7 +128,10 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
         .exec();
       return documents.map((doc) => this.mapToEntity(doc));
     } catch (error) {
-      this.logger.error('Error finding analytics events by userId', error.stack || error.message);
+      this.logger.error(
+        'Error finding analytics events by userId',
+        error.stack || error.message,
+      );
       throw new Error('Failed to find analytics events by userId');
     }
   }
@@ -136,7 +148,10 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
         .updateOne({ eventId: id }, { $set: { status } })
         .exec();
     } catch (error) {
-      this.logger.error('Error updating analytics event status', error.stack || error.message);
+      this.logger.error(
+        'Error updating analytics event status',
+        error.stack || error.message,
+      );
       throw new Error('Failed to update analytics event status');
     }
   }
@@ -150,7 +165,10 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
     try {
       await this.analyticsEventModel.deleteOne({ eventId: id }).exec();
     } catch (error) {
-      this.logger.error('Error deleting analytics event', error.stack || error.message);
+      this.logger.error(
+        'Error deleting analytics event',
+        error.stack || error.message,
+      );
       throw new Error('Failed to delete analytics event');
     }
   }
@@ -168,7 +186,10 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
 
       return documents.map((doc) => this.mapToEntity(doc));
     } catch (error) {
-      this.logger.error('Error finding analytics events by ids', error.stack || error.message);
+      this.logger.error(
+        'Error finding analytics events by ids',
+        error.stack || error.message,
+      );
       throw new Error('Failed to find analytics events');
     }
   }
@@ -196,7 +217,10 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
       const documents = await query.sort({ timestamp: -1 }).exec();
       return documents.map((doc) => this.mapToEntity(doc));
     } catch (error) {
-      this.logger.error('Error finding analytics events by session', error.stack || error.message);
+      this.logger.error(
+        'Error finding analytics events by session',
+        error.stack || error.message,
+      );
       throw new Error('Failed to find session analytics events');
     }
   }
@@ -224,7 +248,10 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
 
       return documents.map((doc) => this.mapToEntity(doc));
     } catch (error) {
-      this.logger.error('Error finding analytics events by date range', error.stack || error.message);
+      this.logger.error(
+        'Error finding analytics events by date range',
+        error.stack || error.message,
+      );
       throw new Error('Failed to find analytics events by date range');
     }
   }
@@ -240,7 +267,10 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
         .countDocuments({ sessionId })
         .exec();
     } catch (error) {
-      this.logger.error('Error counting session events', error.stack || error.message);
+      this.logger.error(
+        'Error counting session events',
+        error.stack || error.message,
+      );
       throw new Error('Failed to count session events');
     }
   }
@@ -266,7 +296,10 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
 
       return result.deletedCount || 0;
     } catch (error) {
-      this.logger.error('Error deleting expired events', error.stack || error.message);
+      this.logger.error(
+        'Error deleting expired events',
+        error.stack || error.message,
+      );
       throw new Error('Failed to delete expired events');
     }
   }
@@ -304,7 +337,10 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
 
       return result.modifiedCount || 0;
     } catch (error) {
-      this.logger.error('Error anonymizing old events', error.stack || error.message);
+      this.logger.error(
+        'Error anonymizing old events',
+        error.stack || error.message,
+      );
       throw new Error('Failed to anonymize old events');
     }
   }

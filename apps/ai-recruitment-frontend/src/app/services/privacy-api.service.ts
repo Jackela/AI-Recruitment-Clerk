@@ -232,8 +232,12 @@ export class PrivacyApiService {
   /**
    * Get data processing records (Article 30)
    */
-  getProcessingRecords(): Observable<Array<{id: string; date: string; purpose: string; dataTypes: string[]}>> {
-    return this.http.get<Array<{id: string; date: string; purpose: string; dataTypes: string[]}>>(`${this.baseUrl}/processing-records`);
+  getProcessingRecords(): Observable<
+    Array<{ id: string; date: string; purpose: string; dataTypes: string[] }>
+  > {
+    return this.http.get<
+      Array<{ id: string; date: string; purpose: string; dataTypes: string[] }>
+    >(`${this.baseUrl}/processing-records`);
   }
 
   /**

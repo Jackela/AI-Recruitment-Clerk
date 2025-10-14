@@ -13,7 +13,7 @@ import {
   EventTimestamp,
   EventContext,
   EventValidationResult,
-  PrivacyComplianceResult
+  PrivacyComplianceResult,
 } from './analytics.dto';
 
 import {
@@ -25,10 +25,13 @@ import {
   AnonymizationRequirementResult,
   ReportingPermissionsResult,
   ReportType,
-  DataScope
+  DataScope,
 } from './analytics.rules';
 
-import { AnalyticsContracts, AnalyticsContractViolation } from '../contracts/analytics.contracts';
+import {
+  AnalyticsContracts,
+  AnalyticsContractViolation,
+} from '../contracts/analytics.contracts';
 
 import {
   AnalyticsDomainService,
@@ -37,21 +40,20 @@ import {
   PrivacyComplianceResult as ServicePrivacyComplianceResult,
   SessionAnalyticsResult,
   EventProcessingMetricsResult,
-  DataPrivacyMetricsResult
+  DataPrivacyMetricsResult,
 } from './analytics.service';
 
 describe('Agent-5: Analytics Domain Service Tests', () => {
-
   // 测试数据
   const validSessionId = 'session_12345_abcdef';
   const validUserId = 'user_67890';
   const systemSessionId = 'system_1234567890';
-  
+
   const validDeviceInfo = new DeviceInfo({
     userAgent: 'Mozilla/5.0 Chrome/91.0',
     screenResolution: '1920x1080',
     language: 'en-US',
-    timezone: 'America/New_York'
+    timezone: 'America/New_York',
   });
 
   const validGeoLocation = new GeoLocation({
@@ -59,20 +61,20 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
     region: 'NY',
     city: 'New York',
     latitude: 40.7128,
-    longitude: -74.0060
+    longitude: -74.006,
   });
 
   const validUserSession = UserSession.create(
     validSessionId,
     validUserId,
     validDeviceInfo,
-    validGeoLocation
+    validGeoLocation,
   );
 
   const validEventData = {
     action: 'click',
     target: 'submit_button',
-    value: 'questionnaire_submit'
+    value: 'questionnaire_submit',
   };
 
   // Mock 实现
@@ -84,29 +86,29 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
     findByDateRange: jest.fn(),
     countSessionEvents: jest.fn().mockResolvedValue(5),
     deleteExpired: jest.fn(),
-    anonymizeOldEvents: jest.fn()
+    anonymizeOldEvents: jest.fn(),
   };
 
   const mockEventBus = {
-    publish: jest.fn()
+    publish: jest.fn(),
   };
 
   const mockAuditLogger = {
     logBusinessEvent: jest.fn(),
     logSecurityEvent: jest.fn(),
-    logError: jest.fn()
+    logError: jest.fn(),
   };
 
   const mockPrivacyService = {
     getUserConsentStatus: jest.fn().mockResolvedValue(ConsentStatus.GRANTED),
     anonymizeUserData: jest.fn(),
-    deleteUserData: jest.fn()
+    deleteUserData: jest.fn(),
   };
 
   const mockSessionTracker = {
     updateSessionActivity: jest.fn(),
     getSession: jest.fn().mockResolvedValue(validUserSession),
-    endSession: jest.fn()
+    endSession: jest.fn(),
   };
 
   const domainService = new AnalyticsDomainService(
@@ -114,7 +116,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
     mockEventBus,
     mockAuditLogger,
     mockPrivacyService,
-    mockSessionTracker
+    mockSessionTracker,
   );
 
   beforeEach(() => {
@@ -128,7 +130,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validUserId,
         EventType.USER_INTERACTION,
         validEventData,
-        { pageUrl: '/questionnaire' }
+        { pageUrl: '/questionnaire' },
       );
 
       expect(event).toBeDefined();
@@ -144,7 +146,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         'database_query',
         150,
         true,
-        { queryType: 'SELECT', tableName: 'users' }
+        { queryType: 'SELECT', tableName: 'users' },
       );
 
       expect(event).toBeDefined();
@@ -159,7 +161,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         'questionnaire_completion_rate',
         85.5,
         MetricUnit.PERCENTAGE,
-        { source: 'ai_recruitment', period: 'daily' }
+        { source: 'ai_recruitment', period: 'daily' },
       );
 
       expect(event).toBeDefined();
@@ -173,12 +175,12 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
       const event2 = AnalyticsEvent.createSystemPerformanceEvent(
         'api_call',
         200,
-        true
+        true,
       );
 
       expect(event1.getId().getValue()).not.toBe(event2.getId().getValue());
@@ -189,13 +191,15 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
-      
+
       const events = event.getUncommittedEvents();
       expect(events.length).toBeGreaterThan(0);
-      
-      const createdEvent = events.find(e => e.constructor.name === 'AnalyticsEventCreatedEvent');
+
+      const createdEvent = events.find(
+        (e) => e.constructor.name === 'AnalyticsEventCreatedEvent',
+      );
       expect(createdEvent).toBeDefined();
     });
   });
@@ -206,7 +210,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       const result = event.validateEvent();
@@ -221,7 +225,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         '', // Invalid session ID
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       const result = event.validateEvent();
@@ -236,14 +240,16 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
-      
+
       event.markEventsAsCommitted(); // Clear creation events
       event.validateEvent();
 
       const events = event.getUncommittedEvents();
-      const validationEvent = events.find(e => e.constructor.name === 'AnalyticsEventValidatedEvent');
+      const validationEvent = events.find(
+        (e) => e.constructor.name === 'AnalyticsEventValidatedEvent',
+      );
       expect(validationEvent).toBeDefined();
     });
   });
@@ -254,13 +260,13 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       expect(event.getStatus()).toBe(EventStatus.PENDING_PROCESSING);
 
       event.processEvent();
-      
+
       expect(event.getStatus()).toBe(EventStatus.PROCESSED);
     });
 
@@ -269,7 +275,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       event.processEvent(); // First processing
@@ -284,13 +290,13 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       expect(event.getRetentionExpiry()).toBeUndefined();
 
       event.processEvent();
-      
+
       expect(event.getRetentionExpiry()).toBeDefined();
       expect(event.getRetentionExpiry()!.getTime()).toBeGreaterThan(Date.now());
     });
@@ -302,19 +308,19 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       // Process event first to set retention expiry
       event.processEvent();
-      
+
       // Mock old creation date to trigger anonymization requirement
       const oldDate = new Date();
       oldDate.setDate(oldDate.getDate() - 400); // 400 days ago
       Object.defineProperty(event, 'createdAt', { value: oldDate });
 
       event.anonymizeData();
-      
+
       expect(event.getStatus()).toBe(EventStatus.ANONYMIZED);
     });
 
@@ -323,11 +329,11 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       event.markAsExpired();
-      
+
       expect(event.getStatus()).toBe(EventStatus.EXPIRED);
     });
 
@@ -336,11 +342,11 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       event.processEvent();
-      
+
       // Mock old creation date
       const oldDate = new Date();
       oldDate.setDate(oldDate.getDate() - 400);
@@ -361,7 +367,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         EventType.USER_INTERACTION,
         validEventData,
         ConsentStatus.GRANTED,
-        5 // Existing events in session
+        5, // Existing events in session
       );
 
       expect(result.isEligible).toBe(true);
@@ -375,11 +381,13 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         EventType.USER_INTERACTION,
         validEventData,
         ConsentStatus.GRANTED,
-        1000 // At session limit
+        1000, // At session limit
       );
 
       expect(result.isEligible).toBe(false);
-      expect(result.errors).toContain('Session event limit exceeded (1000 events max)');
+      expect(result.errors).toContain(
+        'Session event limit exceeded (1000 events max)',
+      );
     });
 
     it('should reject when user consent is missing', () => {
@@ -388,11 +396,13 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         EventType.USER_INTERACTION,
         validEventData,
         ConsentStatus.DENIED,
-        5
+        5,
       );
 
       expect(result.isEligible).toBe(false);
-      expect(result.errors).toContain('Valid user consent is required for this event type');
+      expect(result.errors).toContain(
+        'Valid user consent is required for this event type',
+      );
     });
 
     it('should validate event data structure correctly', () => {
@@ -400,8 +410,8 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         EventType.USER_INTERACTION,
         {
           action: 'click',
-          target: 'button'
-        }
+          target: 'button',
+        },
       );
 
       expect(validResult.isValid).toBe(true);
@@ -411,7 +421,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         EventType.USER_INTERACTION,
         {
           // Missing required fields
-        }
+        },
       );
 
       expect(invalidResult.isValid).toBe(false);
@@ -419,8 +429,12 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
     });
 
     it('should calculate event priority correctly', () => {
-      const errorPriority = AnalyticsRules.calculateEventPriority(EventType.ERROR_EVENT);
-      const interactionPriority = AnalyticsRules.calculateEventPriority(EventType.USER_INTERACTION);
+      const errorPriority = AnalyticsRules.calculateEventPriority(
+        EventType.ERROR_EVENT,
+      );
+      const interactionPriority = AnalyticsRules.calculateEventPriority(
+        EventType.USER_INTERACTION,
+      );
 
       expect(errorPriority.score).toBeGreaterThan(interactionPriority.score);
       expect(errorPriority.level).toBe('CRITICAL');
@@ -433,9 +447,9 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
           validSessionId,
           validUserId,
           EventType.USER_INTERACTION,
-          validEventData
+          validEventData,
         ),
-        AnalyticsEvent.createSystemPerformanceEvent('test_op', 100, true)
+        AnalyticsEvent.createSystemPerformanceEvent('test_op', 100, true),
       ];
 
       const result = AnalyticsRules.canBatchProcessEvents(events);
@@ -452,7 +466,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       const policy = AnalyticsRules.generateRetentionPolicy(event);
@@ -469,10 +483,13 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
-      const assessment = AnalyticsRules.assessPrivacyComplianceRisk(event, validUserSession);
+      const assessment = AnalyticsRules.assessPrivacyComplianceRisk(
+        event,
+        validUserSession,
+      );
 
       expect(assessment.eventId).toBe(event.getId().getValue());
       expect(assessment.sessionId).toBe(validSessionId);
@@ -487,11 +504,12 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       // Mock recent creation date
-      const recentResult = AnalyticsRules.validateAnonymizationRequirement(event);
+      const recentResult =
+        AnalyticsRules.validateAnonymizationRequirement(event);
       expect(recentResult.isRequired).toBe(false);
       expect(recentResult.urgency).toBe('LOW');
 
@@ -509,7 +527,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
       const adminResult = AnalyticsRules.calculateReportingPermissions(
         'admin',
         ReportType.USER_BEHAVIOR,
-        DataScope.FULL_ACCESS
+        DataScope.FULL_ACCESS,
       );
 
       expect(adminResult.hasAccess).toBe(true);
@@ -518,7 +536,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
       const viewerResult = AnalyticsRules.calculateReportingPermissions(
         'viewer',
         ReportType.USER_BEHAVIOR,
-        DataScope.ANONYMIZED_ONLY
+        DataScope.ANONYMIZED_ONLY,
       );
 
       expect(viewerResult.hasAccess).toBe(true);
@@ -533,7 +551,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
           '', // Invalid session ID
           validUserId,
           EventType.USER_INTERACTION,
-          validEventData
+          validEventData,
         );
       }).toThrow(AnalyticsContractViolation);
     });
@@ -543,7 +561,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         AnalyticsContracts.createSystemPerformanceEvent(
           'test_op',
           -100, // Invalid negative duration
-          true
+          true,
         );
       }).toThrow(AnalyticsContractViolation);
     });
@@ -553,7 +571,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         AnalyticsContracts.createBusinessMetricEvent(
           'test_metric',
           -50, // Invalid negative value
-          MetricUnit.COUNT
+          MetricUnit.COUNT,
         );
       }).toThrow(AnalyticsContractViolation);
     });
@@ -563,7 +581,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       expect(() => {
@@ -576,7 +594,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       const result = AnalyticsContracts.validateEvent(event);
@@ -591,12 +609,12 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       // Process once
       AnalyticsContracts.processEvent(event);
-      
+
       // Try to process again
       expect(() => {
         AnalyticsContracts.processEvent(event);
@@ -608,14 +626,14 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       expect(() => {
         AnalyticsContracts.performanceContract(
           () => event.getEventSummary(),
           100, // 100ms limit
-          'getEventSummary'
+          'getEventSummary',
         );
       }).not.toThrow();
     });
@@ -634,7 +652,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validUserId,
         EventType.USER_INTERACTION,
         validEventData,
-        { pageUrl: '/questionnaire' }
+        { pageUrl: '/questionnaire' },
       );
 
       expect(result.success).toBe(true);
@@ -647,23 +665,27 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         expect.objectContaining({
           sessionId: validSessionId,
           userId: validUserId,
-          eventType: EventType.USER_INTERACTION
-        })
+          eventType: EventType.USER_INTERACTION,
+        }),
       );
     });
 
     it('should handle event creation failure', async () => {
-      mockPrivacyService.getUserConsentStatus.mockResolvedValue(ConsentStatus.DENIED);
+      mockPrivacyService.getUserConsentStatus.mockResolvedValue(
+        ConsentStatus.DENIED,
+      );
 
       const result = await domainService.createUserInteractionEvent(
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       expect(result.success).toBe(false);
-      expect(result.errors).toContain('Valid user consent is required for this event type');
+      expect(result.errors).toContain(
+        'Valid user consent is required for this event type',
+      );
     });
 
     it('should create system performance event through service', async () => {
@@ -673,7 +695,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         'database_query',
         150,
         true,
-        { queryType: 'SELECT' }
+        { queryType: 'SELECT' },
       );
 
       expect(result.success).toBe(true);
@@ -688,7 +710,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         'completion_rate',
         85.5,
         MetricUnit.PERCENTAGE,
-        { source: 'questionnaire' }
+        { source: 'questionnaire' },
       );
 
       expect(result.success).toBe(true);
@@ -701,16 +723,20 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
-      const event2 = AnalyticsEvent.createSystemPerformanceEvent('test', 100, true);
-      
+      const event2 = AnalyticsEvent.createSystemPerformanceEvent(
+        'test',
+        100,
+        true,
+      );
+
       mockRepository.findByIds.mockResolvedValue([event1, event2]);
       mockRepository.save.mockResolvedValue(undefined);
 
       const result = await domainService.processBatchEvents([
         event1.getId().getValue(),
-        event2.getId().getValue()
+        event2.getId().getValue(),
       ]);
 
       expect(result.success).toBe(true);
@@ -724,14 +750,14 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
-      
+
       mockRepository.findById.mockResolvedValue(event);
       mockRepository.save.mockResolvedValue(undefined);
 
       const result = await domainService.performPrivacyComplianceCheck(
-        event.getId().getValue()
+        event.getId().getValue(),
       );
 
       expect(result.success).toBe(true);
@@ -741,18 +767,22 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
 
     it('should handle service errors gracefully', async () => {
       // Setup valid consent but database error
-      mockPrivacyService.getUserConsentStatus.mockResolvedValue(ConsentStatus.GRANTED);
+      mockPrivacyService.getUserConsentStatus.mockResolvedValue(
+        ConsentStatus.GRANTED,
+      );
       mockRepository.save.mockRejectedValue(new Error('Database error'));
 
       const result = await domainService.createUserInteractionEvent(
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       expect(result.success).toBe(false);
-      expect(result.errors).toContain('Internal error occurred while creating event');
+      expect(result.errors).toContain(
+        'Internal error occurred while creating event',
+      );
       expect(mockAuditLogger.logError).toHaveBeenCalled();
     });
   });
@@ -774,7 +804,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
     it('should detect invalid session', () => {
       const session = UserSession.create('', undefined); // Invalid session
       expect(session.isValid()).toBe(false);
-      
+
       const errors = session.getValidationErrors();
       expect(errors).toContain('Session ID is required');
       expect(errors).toContain('User ID is required for user sessions');
@@ -787,7 +817,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         userAgent: '',
         screenResolution: '',
         language: '',
-        timezone: ''
+        timezone: '',
       });
       expect(invalidDeviceInfo.isValid()).toBe(false);
     });
@@ -798,13 +828,16 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
       const invalidGeoLocation = new GeoLocation({
         country: '',
         region: '',
-        city: ''
+        city: '',
       });
       expect(invalidGeoLocation.isValid()).toBe(false);
     });
 
     it('should validate event data correctly', () => {
-      const eventData = EventData.create(EventType.USER_INTERACTION, validEventData);
+      const eventData = EventData.create(
+        EventType.USER_INTERACTION,
+        validEventData,
+      );
       expect(eventData.getEventType()).toBe(EventType.USER_INTERACTION);
       expect(eventData.isValid()).toBe(true);
       expect(eventData.getValidationErrors()).toEqual([]);
@@ -822,7 +855,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         pageUrl: '/test',
         referrer: 'https://example.com',
         dimensions: { source: 'web' },
-        metadata: { version: '1.0' }
+        metadata: { version: '1.0' },
       });
       expect(context.isValid()).toBe(true);
       expect(context.getValidationErrors()).toEqual([]);
@@ -835,7 +868,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       const summary = event.getEventSummary();
@@ -854,7 +887,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       // Mock creation date to 2 days ago
@@ -871,14 +904,14 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         validSessionId,
         validUserId,
         EventType.USER_INTERACTION,
-        validEventData
+        validEventData,
       );
 
       let summary = event.getEventSummary();
       expect(summary.status).toBe(EventStatus.PENDING_PROCESSING);
 
       event.processEvent();
-      
+
       summary = event.getEventSummary();
       expect(summary.status).toBe(EventStatus.PROCESSED);
     });
@@ -887,17 +920,25 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
   describe('11. System Integration Tests', () => {
     it('should generate data retention report', async () => {
       const events = [
-        AnalyticsEvent.createUserInteractionEvent(validSessionId, validUserId, EventType.USER_INTERACTION, validEventData),
-        AnalyticsEvent.createSystemPerformanceEvent('test', 100, true)
+        AnalyticsEvent.createUserInteractionEvent(
+          validSessionId,
+          validUserId,
+          EventType.USER_INTERACTION,
+          validEventData,
+        ),
+        AnalyticsEvent.createSystemPerformanceEvent('test', 100, true),
       ];
-      
+
       mockRepository.findByDateRange.mockResolvedValue(events);
 
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 30);
       const endDate = new Date();
 
-      const result = await domainService.generateDataRetentionReport(startDate, endDate);
+      const result = await domainService.generateDataRetentionReport(
+        startDate,
+        endDate,
+      );
 
       expect(result.success).toBe(true);
       expect(result.data?.totalEvents).toBe(2);
@@ -906,10 +947,20 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
 
     it('should get session analytics', async () => {
       const events = [
-        AnalyticsEvent.createUserInteractionEvent(validSessionId, validUserId, EventType.USER_INTERACTION, validEventData),
-        AnalyticsEvent.createUserInteractionEvent(validSessionId, validUserId, EventType.PAGE_VIEW, { pageUrl: '/test' })
+        AnalyticsEvent.createUserInteractionEvent(
+          validSessionId,
+          validUserId,
+          EventType.USER_INTERACTION,
+          validEventData,
+        ),
+        AnalyticsEvent.createUserInteractionEvent(
+          validSessionId,
+          validUserId,
+          EventType.PAGE_VIEW,
+          { pageUrl: '/test' },
+        ),
       ];
-      
+
       mockRepository.findBySession.mockResolvedValue(events);
 
       const result = await domainService.getSessionAnalytics(validSessionId);
@@ -921,19 +972,31 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
     });
 
     it('should get event processing metrics', async () => {
-      const event1 = AnalyticsEvent.createUserInteractionEvent(validSessionId, validUserId, EventType.USER_INTERACTION, validEventData);
-      const event2 = AnalyticsEvent.createSystemPerformanceEvent('test', 100, true);
-      
+      const event1 = AnalyticsEvent.createUserInteractionEvent(
+        validSessionId,
+        validUserId,
+        EventType.USER_INTERACTION,
+        validEventData,
+      );
+      const event2 = AnalyticsEvent.createSystemPerformanceEvent(
+        'test',
+        100,
+        true,
+      );
+
       event1.processEvent();
       event2.processEvent();
-      
+
       mockRepository.findByDateRange.mockResolvedValue([event1, event2]);
 
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 7);
       const endDate = new Date();
 
-      const result = await domainService.getEventProcessingMetrics({ startDate, endDate });
+      const result = await domainService.getEventProcessingMetrics({
+        startDate,
+        endDate,
+      });
 
       expect(result.success).toBe(true);
       expect(result.data?.totalEvents).toBe(2);
@@ -942,16 +1005,28 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
     });
 
     it('should get data privacy metrics', async () => {
-      const event1 = AnalyticsEvent.createUserInteractionEvent(validSessionId, validUserId, EventType.USER_INTERACTION, validEventData);
-      const event2 = AnalyticsEvent.createSystemPerformanceEvent('test', 100, true);
-      
+      const event1 = AnalyticsEvent.createUserInteractionEvent(
+        validSessionId,
+        validUserId,
+        EventType.USER_INTERACTION,
+        validEventData,
+      );
+      const event2 = AnalyticsEvent.createSystemPerformanceEvent(
+        'test',
+        100,
+        true,
+      );
+
       mockRepository.findByDateRange.mockResolvedValue([event1, event2]);
 
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 30);
       const endDate = new Date();
 
-      const result = await domainService.getDataPrivacyMetrics({ startDate, endDate });
+      const result = await domainService.getDataPrivacyMetrics({
+        startDate,
+        endDate,
+      });
 
       expect(result.success).toBe(true);
       expect(result.data?.totalEvents).toBe(2);
@@ -963,7 +1038,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
       const result = await domainService.validateReportingAccess(
         'admin',
         ReportType.USER_BEHAVIOR,
-        DataScope.FULL_ACCESS
+        DataScope.FULL_ACCESS,
       );
 
       expect(result.success).toBe(true);

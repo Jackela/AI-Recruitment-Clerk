@@ -16,7 +16,7 @@ export class QuestionnaireDomainService {
   constructor(
     private readonly repository: IQuestionnaireRepository,
     private readonly templateService: IQuestionnaireTemplateService,
-    private readonly eventBus: IDomainEventBus
+    private readonly eventBus: IDomainEventBus,
   ) {}
 
   /**
@@ -27,45 +27,53 @@ export class QuestionnaireDomainService {
    */
   async submitQuestionnaire(
     rawData: RawSubmissionData,
-    metadata: SubmissionMetadata
+    metadata: SubmissionMetadata,
   ): Promise<QuestionnaireSubmissionResult> {
     try {
       // 获取当前问卷模板
       const template = await this.templateService.getCurrentTemplate();
-      
+
       // 创建问卷聚合
-      const questionnaire = Questionnaire.create(template.id, rawData, metadata);
-      
+      const questionnaire = Questionnaire.create(
+        template.id,
+        rawData,
+        metadata,
+      );
+
       // 验证提交数据
       const validationResult = questionnaire.validateSubmission();
       if (!validationResult.isValid) {
-        await this.publishValidationFailedEvent(questionnaire, validationResult, rawData, metadata);
+        await this.publishValidationFailedEvent(
+          questionnaire,
+          validationResult,
+          rawData,
+          metadata,
+        );
         return QuestionnaireSubmissionResult.failed(validationResult.errors);
       }
-      
+
       // 计算质量分数
       const qualityScore = questionnaire.calculateQualityScore();
-      
+
       // 检查奖励资格
       const bonusEligible = questionnaire.isEligibleForBonus();
-      
+
       // 保存问卷
       await this.repository.save(questionnaire);
-      
+
       // 发布领域事件（事件已在聚合根中创建）
       const events = questionnaire.getUncommittedEvents();
       for (const event of events) {
         await this.eventBus.publish(event);
       }
       questionnaire.markEventsAsCommitted();
-      
+
       return QuestionnaireSubmissionResult.success({
         questionnaireId: questionnaire.getId().getValue(),
         qualityScore: qualityScore.value,
         bonusEligible,
-        summary: questionnaire.getSubmissionSummary()
+        summary: questionnaire.getSubmissionSummary(),
       });
-      
     } catch (error) {
       console.error('Error submitting questionnaire:', error);
       return QuestionnaireSubmissionResult.failed(['Internal error occurred']);
@@ -78,18 +86,19 @@ export class QuestionnaireDomainService {
    */
   async analyzeSubmissionTrends(): Promise<SubmissionTrendsAnalysis> {
     const recentSubmissions = await this.repository.findRecent(30); // 最近30天
-    
+
     if (recentSubmissions.length === 0) {
       return SubmissionTrendsAnalysis.empty();
     }
-    
+
     return SubmissionTrendsAnalysis.create({
       totalSubmissions: recentSubmissions.length,
       averageQualityScore: this.calculateAverageQuality(recentSubmissions),
-      bonusEligibilityRate: this.calculateBonusEligibilityRate(recentSubmissions),
+      bonusEligibilityRate:
+        this.calculateBonusEligibilityRate(recentSubmissions),
       topPainPoints: this.extractTopPainPoints(),
       averageWillingnessToPay: this.calculateAverageWTP(recentSubmissions),
-      userSegmentation: this.segmentUsers(recentSubmissions)
+      userSegmentation: this.segmentUsers(recentSubmissions),
     });
   }
 
@@ -98,18 +107,20 @@ export class QuestionnaireDomainService {
    * @param ip - The ip.
    * @returns A promise that resolves to IPSubmissionCheckResult.
    */
-  async validateIPSubmissionLimit(ip: string): Promise<IPSubmissionCheckResult> {
+  async validateIPSubmissionLimit(
+    ip: string,
+  ): Promise<IPSubmissionCheckResult> {
     const today = new Date();
     const todaySubmissions = await this.repository.findByIPAndDate(ip, today);
-    
+
     const maxSubmissionsPerDay = 1; // 每IP每天最备1份问卷
-    
+
     if (todaySubmissions.length >= maxSubmissionsPerDay) {
       return IPSubmissionCheckResult.blocked(
-        `IP ${ip} has already submitted ${todaySubmissions.length} questionnaire(s) today`
+        `IP ${ip} has already submitted ${todaySubmissions.length} questionnaire(s) today`,
       );
     }
-    
+
     return IPSubmissionCheckResult.allowed();
   }
 
@@ -117,47 +128,53 @@ export class QuestionnaireDomainService {
     _questionnaire: Questionnaire,
     validationResult: any,
     rawData: RawSubmissionData,
-    metadata: SubmissionMetadata
+    metadata: SubmissionMetadata,
   ): Promise<void> {
     const event = new QuestionnaireValidationFailedEvent(
       metadata.ip,
       validationResult.errors,
       rawData,
-      new Date()
+      new Date(),
     );
-    
+
     await this.eventBus.publish(event);
   }
 
   private calculateAverageQuality(submissions: Questionnaire[]): number {
     if (submissions.length === 0) return 0;
-    
+
     const totalQuality = submissions.reduce((sum, q) => {
       return sum + q.calculateQualityScore().value;
     }, 0);
-    
+
     return Math.round((totalQuality / submissions.length) * 100) / 100;
   }
 
   private calculateBonusEligibilityRate(submissions: Questionnaire[]): number {
     if (submissions.length === 0) return 0;
-    
-    const eligibleCount = submissions.filter(q => q.isEligibleForBonus()).length;
+
+    const eligibleCount = submissions.filter((q) =>
+      q.isEligibleForBonus(),
+    ).length;
     return Math.round((eligibleCount / submissions.length) * 10000) / 100; // 百分比，保疙2位小数
   }
 
   private extractTopPainPoints(): string[] {
     // 返回模拟的高频痛点
-    return ['Manual screening is time-consuming', 'Difficulty finding qualified candidates', 'High interview dropout rate'];
+    return [
+      'Manual screening is time-consuming',
+      'Difficulty finding qualified candidates',
+      'High interview dropout rate',
+    ];
   }
 
   private calculateAverageWTP(submissions: Questionnaire[]): number {
     if (submissions.length === 0) return 0;
-    
+
     const totalWTP = submissions.reduce((sum, q) => {
       return sum + q.getSubmissionSummary().willingnessToPayMonthly;
     }, 0);
-    
+
     return Math.round((totalWTP / submissions.length) * 100) / 100;
   }
 
@@ -165,18 +182,19 @@ export class QuestionnaireDomainService {
     const segments = {
       byRole: {} as { [key: string]: number },
       byIndustry: {} as { [key: string]: number },
-      bySatisfaction: { high: 0, medium: 0, low: 0 }
+      bySatisfaction: { high: 0, medium: 0, low: 0 },
     };
-    
-    submissions.forEach(q => {
+
+    submissions.forEach((q) => {
       const summary = q.getSubmissionSummary();
-      
+
       // 角色分段
       segments.byRole[summary.role] = (segments.byRole[summary.role] || 0) + 1;
-      
+
       // 行业分段
-      segments.byIndustry[summary.industry] = (segments.byIndustry[summary.industry] || 0) + 1;
-      
+      segments.byIndustry[summary.industry] =
+        (segments.byIndustry[summary.industry] || 0) + 1;
+
       // 满意度分段
       if (summary.overallSatisfaction >= 4) {
         segments.bySatisfaction.high++;
@@ -186,7 +204,7 @@ export class QuestionnaireDomainService {
         segments.bySatisfaction.low++;
       }
     });
-    
+
     return new UserSegmentation(segments);
   }
 }
@@ -204,9 +222,9 @@ export class QuestionnaireSubmissionResult {
       bonusEligible: boolean;
       summary: any;
     },
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
-  
+
   /**
    * Performs the success operation.
    * @param data - The data.
@@ -220,7 +238,7 @@ export class QuestionnaireSubmissionResult {
   }): QuestionnaireSubmissionResult {
     return new QuestionnaireSubmissionResult(true, data);
   }
-  
+
   /**
    * Performs the failed operation.
    * @param errors - The errors.
@@ -250,9 +268,9 @@ export class SubmissionTrendsAnalysis {
     public readonly bonusEligibilityRate: number,
     public readonly topPainPoints: string[],
     public readonly averageWillingnessToPay: number,
-    public readonly userSegmentation: UserSegmentation
+    public readonly userSegmentation: UserSegmentation,
   ) {}
-  
+
   /**
    * Creates the entity.
    * @param data - The data.
@@ -272,18 +290,26 @@ export class SubmissionTrendsAnalysis {
       data.bonusEligibilityRate,
       data.topPainPoints,
       data.averageWillingnessToPay,
-      data.userSegmentation
+      data.userSegmentation,
     );
   }
-  
+
   /**
    * Performs the empty operation.
    * @returns The SubmissionTrendsAnalysis.
    */
   static empty(): SubmissionTrendsAnalysis {
     return new SubmissionTrendsAnalysis(
-      0, 0, 0, [], 0,
-      new UserSegmentation({ byRole: {}, byIndustry: {}, bySatisfaction: { high: 0, medium: 0, low: 0 } })
+      0,
+      0,
+      0,
+      [],
+      0,
+      new UserSegmentation({
+        byRole: {},
+        byIndustry: {},
+        bySatisfaction: { high: 0, medium: 0, low: 0 },
+      }),
     );
   }
 }
@@ -295,9 +321,9 @@ export class IPSubmissionCheckResult {
   private constructor(
     public readonly allowed: boolean,
     public readonly blocked: boolean,
-    public readonly reason?: string
+    public readonly reason?: string,
   ) {}
-  
+
   /**
    * Performs the allowed operation.
    * @returns The IPSubmissionCheckResult.
@@ -305,7 +331,7 @@ export class IPSubmissionCheckResult {
   static allowed(): IPSubmissionCheckResult {
     return new IPSubmissionCheckResult(true, false);
   }
-  
+
   /**
    * Performs the blocked operation.
    * @param reason - The reason.
@@ -329,7 +355,7 @@ export class UserSegmentation {
       byRole: { [key: string]: number };
       byIndustry: { [key: string]: number };
       bySatisfaction: { high: number; medium: number; low: number };
-    }
+    },
   ) {}
 }
 

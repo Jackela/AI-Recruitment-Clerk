@@ -16,7 +16,7 @@ export class Incentive {
     private status: IncentiveStatus,
     private readonly createdAt: Date,
     private processedAt?: Date,
-    private paidAt?: Date
+    private paidAt?: Date,
   ) {}
 
   // 工厂方法 - 创建问卷完成激励
@@ -32,11 +32,14 @@ export class Incentive {
     ip: string,
     questionnaireId: string,
     qualityScore: number,
-    contactInfo: ContactInfo
+    contactInfo: ContactInfo,
   ): Incentive {
     const incentiveId = IncentiveId.generate();
     const recipient = IncentiveRecipient.create(ip, contactInfo);
-    const trigger = IncentiveTrigger.fromQuestionnaire(questionnaireId, qualityScore);
+    const trigger = IncentiveTrigger.fromQuestionnaire(
+      questionnaireId,
+      qualityScore,
+    );
     const reward = IncentiveReward.calculateForQuestionnaire(qualityScore);
 
     const incentive = new Incentive(
@@ -45,17 +48,19 @@ export class Incentive {
       reward,
       trigger,
       IncentiveStatus.PENDING_VALIDATION,
-      new Date()
+      new Date(),
     );
 
-    incentive.addEvent(new IncentiveCreatedEvent(
-      incentiveId.getValue(),
-      ip,
-      reward.getAmount(),
-      reward.getCurrency(),
-      trigger.getTriggerType(),
-      new Date()
-    ));
+    incentive.addEvent(
+      new IncentiveCreatedEvent(
+        incentiveId.getValue(),
+        ip,
+        reward.getAmount(),
+        reward.getCurrency(),
+        trigger.getTriggerType(),
+        new Date(),
+      ),
+    );
 
     // 如果质量足够高，自动进入处理状态
     if (qualityScore >= 70) {
@@ -76,7 +81,7 @@ export class Incentive {
   static createReferralIncentive(
     referrerIP: string,
     referredIP: string,
-    contactInfo: ContactInfo
+    contactInfo: ContactInfo,
   ): Incentive {
     const incentiveId = IncentiveId.generate();
     const recipient = IncentiveRecipient.create(referrerIP, contactInfo);
@@ -89,17 +94,19 @@ export class Incentive {
       reward,
       trigger,
       IncentiveStatus.PENDING_VALIDATION,
-      new Date()
+      new Date(),
     );
 
-    incentive.addEvent(new IncentiveCreatedEvent(
-      incentiveId.getValue(),
-      referrerIP,
-      reward.getAmount(),
-      reward.getCurrency(),
-      trigger.getTriggerType(),
-      new Date()
-    ));
+    incentive.addEvent(
+      new IncentiveCreatedEvent(
+        incentiveId.getValue(),
+        referrerIP,
+        reward.getAmount(),
+        reward.getCurrency(),
+        trigger.getTriggerType(),
+        new Date(),
+      ),
+    );
 
     return incentive;
   }
@@ -119,7 +126,7 @@ export class Incentive {
       data.status,
       new Date(data.createdAt),
       data.processedAt ? new Date(data.processedAt) : undefined,
-      data.paidAt ? new Date(data.paidAt) : undefined
+      data.paidAt ? new Date(data.paidAt) : undefined,
     );
   }
 
@@ -155,19 +162,23 @@ export class Incentive {
     const result = new IncentiveValidationResult(isValid, validationErrors);
 
     if (isValid) {
-      this.addEvent(new IncentiveValidatedEvent(
-        this.id.getValue(),
-        this.recipient.getIP(),
-        this.reward.getAmount(),
-        new Date()
-      ));
+      this.addEvent(
+        new IncentiveValidatedEvent(
+          this.id.getValue(),
+          this.recipient.getIP(),
+          this.reward.getAmount(),
+          new Date(),
+        ),
+      );
     } else {
-      this.addEvent(new IncentiveValidationFailedEvent(
-        this.id.getValue(),
-        this.recipient.getIP(),
-        validationErrors,
-        new Date()
-      ));
+      this.addEvent(
+        new IncentiveValidationFailedEvent(
+          this.id.getValue(),
+          this.recipient.getIP(),
+          validationErrors,
+          new Date(),
+        ),
+      );
     }
 
     return result;
@@ -186,13 +197,15 @@ export class Incentive {
     this.status = IncentiveStatus.APPROVED;
     this.processedAt = new Date();
 
-    this.addEvent(new IncentiveApprovedEvent(
-      this.id.getValue(),
-      this.recipient.getIP(),
-      this.reward.getAmount(),
-      reason,
-      new Date()
-    ));
+    this.addEvent(
+      new IncentiveApprovedEvent(
+        this.id.getValue(),
+        this.recipient.getIP(),
+        this.reward.getAmount(),
+        reason,
+        new Date(),
+      ),
+    );
   }
 
   // 拒绝激励
@@ -208,12 +221,14 @@ export class Incentive {
     this.status = IncentiveStatus.REJECTED;
     this.processedAt = new Date();
 
-    this.addEvent(new IncentiveRejectedEvent(
-      this.id.getValue(),
-      this.recipient.getIP(),
-      reason,
-      new Date()
-    ));
+    this.addEvent(
+      new IncentiveRejectedEvent(
+        this.id.getValue(),
+        this.recipient.getIP(),
+        reason,
+        new Date(),
+      ),
+    );
   }
 
   // 执行支付
@@ -223,9 +238,14 @@ export class Incentive {
    * @param transactionId - The transaction id.
    * @returns The PaymentResult.
    */
-  executePayment(paymentMethod: PaymentMethod, transactionId: string): PaymentResult {
+  executePayment(
+    paymentMethod: PaymentMethod,
+    transactionId: string,
+  ): PaymentResult {
     if (this.status !== IncentiveStatus.APPROVED) {
-      return PaymentResult.failed(`Cannot pay incentive in ${this.status} status`);
+      return PaymentResult.failed(
+        `Cannot pay incentive in ${this.status} status`,
+      );
     }
 
     try {
@@ -235,31 +255,35 @@ export class Incentive {
       this.status = IncentiveStatus.PAID;
       this.paidAt = new Date();
 
-      this.addEvent(new IncentivePaidEvent(
-        this.id.getValue(),
-        this.recipient.getIP(),
-        this.reward.getAmount(),
-        this.reward.getCurrency(),
-        paymentMethod,
-        transactionId,
-        new Date()
-      ));
+      this.addEvent(
+        new IncentivePaidEvent(
+          this.id.getValue(),
+          this.recipient.getIP(),
+          this.reward.getAmount(),
+          this.reward.getCurrency(),
+          paymentMethod,
+          transactionId,
+          new Date(),
+        ),
+      );
 
       return PaymentResult.success(
         transactionId,
         this.reward.getAmount(),
-        this.reward.getCurrency()
+        this.reward.getCurrency(),
       );
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Payment failed';
-      
-      this.addEvent(new PaymentFailedEvent(
-        this.id.getValue(),
-        this.recipient.getIP(),
-        errorMessage,
-        new Date()
-      ));
+      const errorMessage =
+        error instanceof Error ? error.message : 'Payment failed';
+
+      this.addEvent(
+        new PaymentFailedEvent(
+          this.id.getValue(),
+          this.recipient.getIP(),
+          errorMessage,
+          new Date(),
+        ),
+      );
 
       return PaymentResult.failed(errorMessage);
     }
@@ -275,7 +299,8 @@ export class Incentive {
     }
 
     // 检查是否在合理时间范围内
-    const daysSinceCreation = (Date.now() - this.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+    const daysSinceCreation =
+      (Date.now() - this.createdAt.getTime()) / (1000 * 60 * 60 * 24);
     if (daysSinceCreation > 30) {
       throw new Error('Incentive has expired (>30 days old)');
     }
@@ -298,14 +323,18 @@ export class Incentive {
       processedAt: this.processedAt,
       paidAt: this.paidAt,
       canBePaid: this.canBePaid(),
-      daysSinceCreation: Math.floor((Date.now() - this.createdAt.getTime()) / (1000 * 60 * 60 * 24))
+      daysSinceCreation: Math.floor(
+        (Date.now() - this.createdAt.getTime()) / (1000 * 60 * 60 * 24),
+      ),
     });
   }
 
   private canBePaid(): boolean {
-    return this.status === IncentiveStatus.APPROVED && 
-           this.recipient.hasValidContactInfo() &&
-           this.reward.getAmount() > 0;
+    return (
+      this.status === IncentiveStatus.APPROVED &&
+      this.recipient.hasValidContactInfo() &&
+      this.reward.getAmount() > 0
+    );
   }
 
   // 领域事件管理
@@ -384,7 +413,7 @@ export class IncentiveId extends ValueObject<{ value: string }> {
     const random = Math.random().toString(36).substr(2, 9);
     return new IncentiveId({ value: `incentive_${timestamp}_${random}` });
   }
-  
+
   /**
    * Retrieves value.
    * @returns The string value.
@@ -412,7 +441,7 @@ export class IncentiveRecipient extends ValueObject<{
     return new IncentiveRecipient({
       ip,
       contactInfo,
-      verificationStatus: VerificationStatus.PENDING
+      verificationStatus: VerificationStatus.PENDING,
     });
   }
 
@@ -425,7 +454,7 @@ export class IncentiveRecipient extends ValueObject<{
     return new IncentiveRecipient({
       ip: data.ip,
       contactInfo: ContactInfo.restore(data.contactInfo),
-      verificationStatus: data.verificationStatus
+      verificationStatus: data.verificationStatus,
     });
   }
 
@@ -461,7 +490,12 @@ export class IncentiveRecipient extends ValueObject<{
   getValidationErrors(): string[] {
     const errors: string[] = [];
 
-    if (!this.props.ip || !/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(this.props.ip)) {
+    if (
+      !this.props.ip ||
+      !/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
+        this.props.ip,
+      )
+    ) {
       errors.push('Valid IP address is required');
     }
 
@@ -548,22 +582,30 @@ export class ContactInfo extends ValueObject<{
    * Performs the email operation.
    * @returns The string | undefined.
    */
-  get email(): string | undefined { return this.props.email; }
+  get email(): string | undefined {
+    return this.props.email;
+  }
   /**
    * Performs the phone operation.
    * @returns The string | undefined.
    */
-  get phone(): string | undefined { return this.props.phone; }
+  get phone(): string | undefined {
+    return this.props.phone;
+  }
   /**
    * Performs the wechat operation.
    * @returns The string | undefined.
    */
-  get wechat(): string | undefined { return this.props.wechat; }
+  get wechat(): string | undefined {
+    return this.props.wechat;
+  }
   /**
    * Performs the alipay operation.
    * @returns The string | undefined.
    */
-  get alipay(): string | undefined { return this.props.alipay; }
+  get alipay(): string | undefined {
+    return this.props.alipay;
+  }
 }
 
 /**
@@ -602,7 +644,7 @@ export class IncentiveReward extends ValueObject<{
       amount,
       currency: Currency.CNY,
       rewardType: RewardType.QUESTIONNAIRE_COMPLETION,
-      calculationMethod
+      calculationMethod,
     });
   }
 
@@ -615,7 +657,7 @@ export class IncentiveReward extends ValueObject<{
       amount: 3,
       currency: Currency.CNY,
       rewardType: RewardType.REFERRAL,
-      calculationMethod: 'Fixed referral reward'
+      calculationMethod: 'Fixed referral reward',
     });
   }
 
@@ -690,11 +732,14 @@ export class IncentiveTrigger extends ValueObject<{
    * @param qualityScore - The quality score.
    * @returns The IncentiveTrigger.
    */
-  static fromQuestionnaire(questionnaireId: string, qualityScore: number): IncentiveTrigger {
+  static fromQuestionnaire(
+    questionnaireId: string,
+    qualityScore: number,
+  ): IncentiveTrigger {
     return new IncentiveTrigger({
       triggerType: TriggerType.QUESTIONNAIRE_COMPLETION,
       triggerData: { questionnaireId, qualityScore },
-      qualifiedAt: new Date()
+      qualifiedAt: new Date(),
     });
   }
 
@@ -707,7 +752,7 @@ export class IncentiveTrigger extends ValueObject<{
     return new IncentiveTrigger({
       triggerType: TriggerType.REFERRAL,
       triggerData: { referredIP },
-      qualifiedAt: new Date()
+      qualifiedAt: new Date(),
     });
   }
 
@@ -719,7 +764,7 @@ export class IncentiveTrigger extends ValueObject<{
   static restore(data: any): IncentiveTrigger {
     return new IncentiveTrigger({
       ...data,
-      qualifiedAt: new Date(data.qualifiedAt)
+      qualifiedAt: new Date(data.qualifiedAt),
     });
   }
 
@@ -761,9 +806,11 @@ export class IncentiveTrigger extends ValueObject<{
         if (!this.props.triggerData.questionnaireId) {
           errors.push('Questionnaire ID is required');
         }
-        if (typeof this.props.triggerData.qualityScore !== 'number' ||
-            this.props.triggerData.qualityScore < 0 ||
-            this.props.triggerData.qualityScore > 100) {
+        if (
+          typeof this.props.triggerData.qualityScore !== 'number' ||
+          this.props.triggerData.qualityScore < 0 ||
+          this.props.triggerData.qualityScore > 100
+        ) {
           errors.push('Valid quality score (0-100) is required');
         }
         break;
@@ -791,7 +838,7 @@ export class IncentiveValidationResult {
    */
   constructor(
     public readonly isValid: boolean,
-    public readonly errors: string[]
+    public readonly errors: string[],
   ) {}
 }
 
@@ -804,7 +851,7 @@ export class PaymentResult {
     public readonly transactionId?: string,
     public readonly amount?: number,
     public readonly currency?: Currency,
-    public readonly error?: string
+    public readonly error?: string,
   ) {}
 
   /**
@@ -814,7 +861,11 @@ export class PaymentResult {
    * @param currency - The currency.
    * @returns The PaymentResult.
    */
-  static success(transactionId: string, amount: number, currency: Currency): PaymentResult {
+  static success(
+    transactionId: string,
+    amount: number,
+    currency: Currency,
+  ): PaymentResult {
     return new PaymentResult(true, transactionId, amount, currency);
   }
 
@@ -848,32 +899,44 @@ export class IncentiveSummary extends ValueObject<{
    * Performs the id operation.
    * @returns The string value.
    */
-  get id(): string { return this.props.id; }
+  get id(): string {
+    return this.props.id;
+  }
   /**
    * Performs the recipient ip operation.
    * @returns The string value.
    */
-  get recipientIP(): string { return this.props.recipientIP; }
+  get recipientIP(): string {
+    return this.props.recipientIP;
+  }
   /**
    * Performs the reward amount operation.
    * @returns The number value.
    */
-  get rewardAmount(): number { return this.props.rewardAmount; }
+  get rewardAmount(): number {
+    return this.props.rewardAmount;
+  }
   /**
    * Performs the status operation.
    * @returns The IncentiveStatus.
    */
-  get status(): IncentiveStatus { return this.props.status; }
+  get status(): IncentiveStatus {
+    return this.props.status;
+  }
   /**
    * Performs the can be paid operation.
    * @returns The boolean value.
    */
-  get canBePaid(): boolean { return this.props.canBePaid; }
+  get canBePaid(): boolean {
+    return this.props.canBePaid;
+  }
   /**
    * Performs the days since creation operation.
    * @returns The number value.
    */
-  get daysSinceCreation(): number { return this.props.daysSinceCreation; }
+  get daysSinceCreation(): number {
+    return this.props.daysSinceCreation;
+  }
 }
 
 // 枚举定义
@@ -882,37 +945,37 @@ export enum IncentiveStatus {
   APPROVED = 'approved',
   REJECTED = 'rejected',
   PAID = 'paid',
-  EXPIRED = 'expired'
+  EXPIRED = 'expired',
 }
 
 export enum VerificationStatus {
   PENDING = 'pending',
   VERIFIED = 'verified',
-  FAILED = 'failed'
+  FAILED = 'failed',
 }
 
 export enum Currency {
   CNY = 'CNY',
-  USD = 'USD'
+  USD = 'USD',
 }
 
 export enum RewardType {
   QUESTIONNAIRE_COMPLETION = 'questionnaire_completion',
   REFERRAL = 'referral',
-  PROMOTION = 'promotion'
+  PROMOTION = 'promotion',
 }
 
 export enum TriggerType {
   QUESTIONNAIRE_COMPLETION = 'questionnaire_completion',
   REFERRAL = 'referral',
-  SYSTEM_PROMOTION = 'system_promotion'
+  SYSTEM_PROMOTION = 'system_promotion',
 }
 
 export enum PaymentMethod {
   WECHAT_PAY = 'wechat_pay',
   ALIPAY = 'alipay',
   BANK_TRANSFER = 'bank_transfer',
-  MANUAL = 'manual'
+  MANUAL = 'manual',
 }
 
 // 接口定义
@@ -950,7 +1013,7 @@ export class IncentiveCreatedEvent implements DomainEvent {
     public readonly rewardAmount: number,
     public readonly currency: Currency,
     public readonly triggerType: TriggerType,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -969,7 +1032,7 @@ export class IncentiveValidatedEvent implements DomainEvent {
     public readonly incentiveId: string,
     public readonly recipientIP: string,
     public readonly rewardAmount: number,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -988,7 +1051,7 @@ export class IncentiveValidationFailedEvent implements DomainEvent {
     public readonly incentiveId: string,
     public readonly recipientIP: string,
     public readonly errors: string[],
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -1009,7 +1072,7 @@ export class IncentiveApprovedEvent implements DomainEvent {
     public readonly recipientIP: string,
     public readonly rewardAmount: number,
     public readonly reason: string,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -1028,7 +1091,7 @@ export class IncentiveRejectedEvent implements DomainEvent {
     public readonly incentiveId: string,
     public readonly recipientIP: string,
     public readonly reason: string,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -1053,7 +1116,7 @@ export class IncentivePaidEvent implements DomainEvent {
     public readonly currency: Currency,
     public readonly paymentMethod: PaymentMethod,
     public readonly transactionId: string,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -1072,6 +1135,6 @@ export class PaymentFailedEvent implements DomainEvent {
     public readonly incentiveId: string,
     public readonly recipientIP: string,
     public readonly error: string,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }

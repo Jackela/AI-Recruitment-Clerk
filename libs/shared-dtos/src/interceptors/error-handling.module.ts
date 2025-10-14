@@ -30,10 +30,7 @@ import { StandardizedErrorResponseFormatter } from '../errors/error-response-for
     ErrorCorrelationManager,
     StandardizedErrorResponseFormatter,
   ],
-  exports: [
-    ErrorCorrelationManager,
-    StandardizedErrorResponseFormatter,
-  ],
+  exports: [ErrorCorrelationManager, StandardizedErrorResponseFormatter],
 })
 export class ErrorHandlingModule {
   /**

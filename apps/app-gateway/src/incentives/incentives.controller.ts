@@ -1,11 +1,25 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 function id(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-const incentives = new Map<string, { id: string; amount: number; status: 'approved' | 'pending' }>();
+const incentives = new Map<
+  string,
+  { id: string; amount: number; status: 'approved' | 'pending' }
+>();
 
 /**
  * Exposes endpoints for incentives.
@@ -49,7 +63,11 @@ export class IncentivesController {
   @Put(':id/approve')
   @HttpCode(HttpStatus.OK)
   approve(@Param('id') id: string, @Body() _body: any) {
-    const rec = incentives.get(id) || { id, amount: 1, status: 'pending' as const };
+    const rec = incentives.get(id) || {
+      id,
+      amount: 1,
+      status: 'pending' as const,
+    };
     rec.status = 'approved';
     incentives.set(id, rec);
     return { approvedAt: new Date().toISOString(), approvalStatus: 'approved' };
@@ -64,7 +82,10 @@ export class IncentivesController {
   @Get('stats/overview')
   @HttpCode(HttpStatus.OK)
   stats(@Query('timeRange') _timeRange?: string) {
-    const totalRewards = Array.from(incentives.values()).reduce((s, r) => s + r.amount, 0);
+    const totalRewards = Array.from(incentives.values()).reduce(
+      (s, r) => s + r.amount,
+      0,
+    );
     return {
       overview: {
         totalRewards,
@@ -72,4 +93,3 @@ export class IncentivesController {
     };
   }
 }
-

@@ -32,6 +32,7 @@ test/
 **Purpose**: Validate individual API endpoints and basic integration patterns.
 
 **Coverage**:
+
 - Authentication and authorization flows
 - User management operations
 - Resume processing endpoints
@@ -43,6 +44,7 @@ test/
 - Error handling and edge cases
 
 **Key Features**:
+
 - Mock data setup and cleanup
 - Token-based authentication testing
 - Role-based access control validation
@@ -54,6 +56,7 @@ test/
 **Purpose**: End-to-end workflow testing and comprehensive business process validation.
 
 **Coverage**:
+
 - Complete user registration and onboarding workflows
 - Full resume processing pipeline (upload → analysis → approval → matching)
 - Questionnaire lifecycle (creation → publishing → submission → analytics)
@@ -65,6 +68,7 @@ test/
 - Error recovery and resilience patterns
 
 **Key Features**:
+
 - Real business workflow simulation
 - Multi-service integration testing
 - Data consistency validation
@@ -76,6 +80,7 @@ test/
 **Purpose**: Validate communication and data consistency between microservices.
 
 **Coverage**:
+
 - Service-to-service communication patterns
 - Data validation across service boundaries
 - Circuit breaker and resilience testing
@@ -85,6 +90,7 @@ test/
 - Failover and recovery mechanisms
 
 **Key Features**:
+
 - Mock service scenarios
 - Network failure simulation
 - Service timeout testing
@@ -96,6 +102,7 @@ test/
 **Purpose**: Validate system performance under various load conditions and identify bottlenecks.
 
 **Coverage**:
+
 - Response time benchmarks for all endpoints
 - Concurrent user load simulation
 - Memory usage and resource monitoring
@@ -105,6 +112,7 @@ test/
 - Performance regression detection
 
 **Key Features**:
+
 - Configurable load levels
 - Performance metric collection
 - Memory usage tracking
@@ -262,20 +270,23 @@ expect(responseTime).toHavePerformanceWithin(1000); // Within 1 second
 
 ```typescript
 // Available in all test files via global.testUtils
-testUtils.generateTestEmail('prefix')     // Generate unique test email
-testUtils.generateTestUserId()           // Generate unique user ID
-testUtils.createMockFile(1024)          // Create mock file buffer
-testUtils.measurePerformance(operation) // Measure operation performance
-testUtils.cleanupTestData(collections) // Cleanup test data
+testUtils.generateTestEmail('prefix'); // Generate unique test email
+testUtils.generateTestUserId(); // Generate unique user ID
+testUtils.createMockFile(1024); // Create mock file buffer
+testUtils.measurePerformance(operation); // Measure operation performance
+testUtils.cleanupTestData(collections); // Cleanup test data
 ```
 
 ### Performance Monitoring
 
 ```typescript
 // Built-in performance tracking
-const { result, responseTime, memoryDelta } = await measurePerformance('category', async () => {
+const { result, responseTime, memoryDelta } = await measurePerformance(
+  'category',
+  async () => {
     return await request(app).get('/endpoint');
-});
+  },
+);
 ```
 
 ## 🐛 Debugging Tests
@@ -316,24 +327,24 @@ npm run test:integration -- --verbose --no-coverage
 
 ### Response Time Targets
 
-| Endpoint Category | Target Response Time | Performance Threshold |
-|-------------------|---------------------|----------------------|
-| Authentication    | < 1 second          | 95th percentile < 2s |
-| User Profile      | < 800ms             | 95th percentile < 1.5s |
-| Resume Upload     | < 8 seconds         | 95th percentile < 15s |
-| Search Operations | < 2 seconds         | 95th percentile < 4s |
-| Analytics Dashboard | < 3 seconds       | 95th percentile < 6s |
-| Health Checks     | < 500ms             | 95th percentile < 1s |
+| Endpoint Category   | Target Response Time | Performance Threshold  |
+| ------------------- | -------------------- | ---------------------- |
+| Authentication      | < 1 second           | 95th percentile < 2s   |
+| User Profile        | < 800ms              | 95th percentile < 1.5s |
+| Resume Upload       | < 8 seconds          | 95th percentile < 15s  |
+| Search Operations   | < 2 seconds          | 95th percentile < 4s   |
+| Analytics Dashboard | < 3 seconds          | 95th percentile < 6s   |
+| Health Checks       | < 500ms              | 95th percentile < 1s   |
 
 ### Load Testing Targets
 
-| Metric | Target | Critical Threshold |
-|--------|--------|-------------------|
-| Concurrent Users | 50+ | 100+ |
-| Requests per Second | 100+ | 200+ |
-| Error Rate | < 1% | < 5% |
-| Memory Usage | < 512MB | < 1GB |
-| CPU Utilization | < 70% | < 90% |
+| Metric              | Target  | Critical Threshold |
+| ------------------- | ------- | ------------------ |
+| Concurrent Users    | 50+     | 100+               |
+| Requests per Second | 100+    | 200+               |
+| Error Rate          | < 1%    | < 5%               |
+| Memory Usage        | < 512MB | < 1GB              |
+| CPU Utilization     | < 70%   | < 90%              |
 
 ## 🔄 Continuous Integration
 
@@ -343,7 +354,7 @@ npm run test:integration -- --verbose --no-coverage
 # Example GitHub Actions workflow
 - name: Run Integration Tests
   run: npm run test:integration
-  
+
 - name: Upload Test Results
   uses: actions/upload-artifact@v2
   with:

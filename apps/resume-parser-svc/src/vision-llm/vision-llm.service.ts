@@ -40,7 +40,9 @@ export class VisionLlmService {
 
     // In tests, use stubbed Gemini client; otherwise real client
     this.geminiClient = new GeminiClient(config);
-    this.logger.log(`🔍 VisionLlmService initialized with real GeminiClient - API Key: ${config.apiKey.substring(0, 10)}...`);
+    this.logger.log(
+      `🔍 VisionLlmService initialized with real GeminiClient - API Key: ${config.apiKey.substring(0, 10)}...`,
+    );
   }
 
   /**
@@ -157,16 +159,19 @@ export class VisionLlmService {
         PromptTemplates.getResumeParsingPrompt(resumeText),
         schema,
       );
-      const response = await this.geminiClient.generateStructuredResponse<ResumeDTO>(
-        textPrompt,
-        schema,
-      );
+      const response =
+        await this.geminiClient.generateStructuredResponse<ResumeDTO>(
+          textPrompt,
+          schema,
+        );
       const cleaned = this.validateAndCleanResumeData(response.data);
       this.logger.debug('Resume text parsing completed');
       return cleaned;
     } catch (error) {
       this.logger.error('Failed to parse resume text', error);
-      throw new Error(`Resume text parsing failed: ${(error as Error).message}`);
+      throw new Error(
+        `Resume text parsing failed: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -179,7 +184,9 @@ export class VisionLlmService {
     request: VisionLlmRequest,
   ): Promise<VisionLlmResponse> {
     if (process.env.NODE_ENV === 'test') {
-      throw new Error('VisionLlmService.parseResumePdfAdvanced not implemented');
+      throw new Error(
+        'VisionLlmService.parseResumePdfAdvanced not implemented',
+      );
     }
     const startTime = Date.now();
 
@@ -241,7 +248,9 @@ export class VisionLlmService {
    */
   async estimateProcessingTime(fileSize: number): Promise<number> {
     if (process.env.NODE_ENV === 'test') {
-      throw new Error('VisionLlmService.estimateProcessingTime not implemented');
+      throw new Error(
+        'VisionLlmService.estimateProcessingTime not implemented',
+      );
     }
     // Base processing time estimation based on file size and complexity
     const baseMsPerKB = 50; // 50ms per KB as baseline

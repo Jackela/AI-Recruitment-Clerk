@@ -188,7 +188,11 @@ export class ResumeParserIntegrationService {
   > {
     this.logger.log(`Starting batch processing of ${resumes.length} resumes`);
 
-    const results: Array<{ filename: string; result: ResumeParsingResult; error?: string }> = [];
+    const results: Array<{
+      filename: string;
+      result: ResumeParsingResult;
+      error?: string;
+    }> = [];
 
     for (const resume of resumes) {
       try {
@@ -203,7 +207,7 @@ export class ResumeParserIntegrationService {
         results.push({
           filename: resume.filename,
           result,
-          error: failed ? errMsg ?? 'Processing failed' : errMsg,
+          error: failed ? (errMsg ?? 'Processing failed') : errMsg,
         });
       } catch (error) {
         this.logger.error(

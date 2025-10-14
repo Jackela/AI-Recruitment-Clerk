@@ -146,7 +146,9 @@ export const selectResumeStatistics = createSelector(
     const processing = resumes.filter((r) =>
       isProcessingStatus(r.status as any),
     ).length;
-    const failed = resumes.filter((resume) => resume.status === 'failed').length;
+    const failed = resumes.filter(
+      (resume) => resume.status === 'failed',
+    ).length;
 
     // Calculate average score for processed resumes only
     const processedWithScores = resumes.filter(

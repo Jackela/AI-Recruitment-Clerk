@@ -37,7 +37,7 @@ export class IncentiveReward extends ValueObject<{
       amount,
       currency: Currency.CNY,
       rewardType: RewardType.QUESTIONNAIRE_COMPLETION,
-      calculationMethod
+      calculationMethod,
     });
   }
 
@@ -50,7 +50,7 @@ export class IncentiveReward extends ValueObject<{
       amount: 3,
       currency: Currency.CNY,
       rewardType: RewardType.REFERRAL,
-      calculationMethod: 'Fixed referral reward'
+      calculationMethod: 'Fixed referral reward',
     });
   }
 

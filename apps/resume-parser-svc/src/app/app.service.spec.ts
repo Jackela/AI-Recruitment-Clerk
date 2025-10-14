@@ -86,11 +86,11 @@ describe('AppService', () => {
       expect(natsService.subscribe).toHaveBeenCalledTimes(2);
       expect(natsService.subscribe).toHaveBeenCalledWith(
         'resume.parse.request',
-        expect.any(Function)
+        expect.any(Function),
       );
       expect(natsService.subscribe).toHaveBeenCalledWith(
         'resume.retry.request',
-        expect.any(Function)
+        expect.any(Function),
       );
       expect((service as any).isInitialized).toBe(true);
     });
@@ -134,7 +134,7 @@ describe('AppService', () => {
       natsService.subscribe.mockRejectedValue(error);
 
       await expect(service.onApplicationBootstrap()).rejects.toThrow(
-        'NATS connection failed'
+        'NATS connection failed',
       );
       expect((service as any).isInitialized).toBe(false);
     });
@@ -144,7 +144,7 @@ describe('AppService', () => {
       natsService.subscribe.mockRejectedValue(error);
 
       await expect(service.onApplicationBootstrap()).rejects.toThrow(
-        'Subscription failed'
+        'Subscription failed',
       );
       expect((service as any).isInitialized).toBe(false);
     });
@@ -158,9 +158,13 @@ describe('AppService', () => {
       expect(logSpy).toHaveBeenCalledWith('Resume Parser Service starting...');
       expect(logSpy).toHaveBeenCalledWith('GridFS service initialized');
       expect(logSpy).toHaveBeenCalledWith('NATS client initialized');
-      expect(logSpy).toHaveBeenCalledWith('Event subscriptions set up successfully');
+      expect(logSpy).toHaveBeenCalledWith(
+        'Event subscriptions set up successfully',
+      );
       expect(logSpy).toHaveBeenCalledWith('Parsing service initialized');
-      expect(logSpy).toHaveBeenCalledWith('Resume Parser Service startup completed successfully');
+      expect(logSpy).toHaveBeenCalledWith(
+        'Resume Parser Service startup completed successfully',
+      );
     });
   });
 
@@ -169,13 +173,13 @@ describe('AppService', () => {
       await service.onApplicationShutdown();
 
       expect(Logger.prototype.log).toHaveBeenCalledWith(
-        'Resume Parser Service shutting down...'
+        'Resume Parser Service shutting down...',
       );
       expect(Logger.prototype.log).toHaveBeenCalledWith(
-        'Event subscriptions cleaned up'
+        'Event subscriptions cleaned up',
       );
       expect(Logger.prototype.log).toHaveBeenCalledWith(
-        'All connections cleaned up successfully'
+        'All connections cleaned up successfully',
       );
     });
 
@@ -189,7 +193,7 @@ describe('AppService', () => {
 
       expect(Logger.prototype.error).toHaveBeenCalledWith(
         'Error during shutdown:',
-        expect.any(Error)
+        expect.any(Error),
       );
     });
 
@@ -198,9 +202,13 @@ describe('AppService', () => {
 
       await service.onApplicationShutdown();
 
-      expect(logSpy).toHaveBeenCalledWith('Resume Parser Service shutting down...');
+      expect(logSpy).toHaveBeenCalledWith(
+        'Resume Parser Service shutting down...',
+      );
       expect(logSpy).toHaveBeenCalledWith('Event subscriptions cleaned up');
-      expect(logSpy).toHaveBeenCalledWith('All connections cleaned up successfully');
+      expect(logSpy).toHaveBeenCalledWith(
+        'All connections cleaned up successfully',
+      );
     });
   });
 
@@ -213,11 +221,11 @@ describe('AppService', () => {
       expect(natsService.subscribe).toHaveBeenCalledTimes(2);
       expect(natsService.subscribe).toHaveBeenCalledWith(
         'resume.parse.request',
-        expect.any(Function)
+        expect.any(Function),
       );
       expect(natsService.subscribe).toHaveBeenCalledWith(
         'resume.retry.request',
-        expect.any(Function)
+        expect.any(Function),
       );
     });
 
@@ -226,7 +234,7 @@ describe('AppService', () => {
       natsService.subscribe.mockRejectedValue(error);
 
       await expect((service as any).setupEventSubscriptions()).rejects.toThrow(
-        'Subscription error'
+        'Subscription error',
       );
     });
   });
@@ -236,7 +244,7 @@ describe('AppService', () => {
       await (service as any).cleanupEventSubscriptions();
 
       expect(Logger.prototype.log).toHaveBeenCalledWith(
-        'Event subscriptions cleaned up'
+        'Event subscriptions cleaned up',
       );
     });
 
@@ -250,9 +258,9 @@ describe('AppService', () => {
 
       try {
         await (service as any).cleanupEventSubscriptions();
-    } catch (error) {
-      expect((error as any).message).toBe('Cleanup error');
-    }
+      } catch (error) {
+        expect((error as any).message).toBe('Cleanup error');
+      }
 
       cleanupSpy.mockRestore();
     });
@@ -263,7 +271,7 @@ describe('AppService', () => {
       await (service as any).initializeParsingService();
 
       expect(Logger.prototype.log).toHaveBeenCalledWith(
-        'Parsing service initialized'
+        'Parsing service initialized',
       );
     });
 
@@ -277,9 +285,9 @@ describe('AppService', () => {
 
       try {
         await (service as any).initializeParsingService();
-    } catch (error) {
-      expect((error as any).message).toBe('Init error');
-    }
+      } catch (error) {
+        expect((error as any).message).toBe('Init error');
+      }
 
       initSpy.mockRestore();
     });

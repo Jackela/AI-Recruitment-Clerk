@@ -40,9 +40,9 @@ describe('AppController', () => {
 
   describe('getData', () => {
     it('should return data from app service', () => {
-      const mockData = { 
+      const mockData = {
         message: 'Resume Parser Service API',
-        status: 'ready' 
+        status: 'ready',
       };
       appService.getData.mockReturnValue(mockData);
 
@@ -53,9 +53,9 @@ describe('AppController', () => {
     });
 
     it('should handle initializing status', () => {
-      const mockData = { 
+      const mockData = {
         message: 'Resume Parser Service API',
-        status: 'initializing' 
+        status: 'initializing',
       };
       appService.getData.mockReturnValue(mockData);
 
@@ -72,7 +72,7 @@ describe('AppController', () => {
         status: 'healthy',
         count: 10,
       });
-      
+
       gridFsService.healthCheck.mockResolvedValue({
         status: 'healthy',
         bucket: 'resumes',
@@ -104,7 +104,7 @@ describe('AppController', () => {
         status: 'unhealthy',
         count: 0,
       });
-      
+
       gridFsService.healthCheck.mockResolvedValue({
         status: 'healthy',
         bucket: 'resumes',
@@ -133,7 +133,7 @@ describe('AppController', () => {
         status: 'healthy',
         count: 5,
       });
-      
+
       gridFsService.healthCheck.mockResolvedValue({
         status: 'unhealthy',
         bucket: 'resumes',
@@ -162,7 +162,7 @@ describe('AppController', () => {
         status: 'unhealthy',
         count: 0,
       });
-      
+
       gridFsService.healthCheck.mockResolvedValue({
         status: 'unhealthy',
         bucket: 'resumes',
@@ -187,15 +187,19 @@ describe('AppController', () => {
     });
 
     it('should handle health check errors gracefully', async () => {
-      resumeRepository.healthCheck.mockRejectedValue(new Error('DB connection failed'));
-      
+      resumeRepository.healthCheck.mockRejectedValue(
+        new Error('DB connection failed'),
+      );
+
       gridFsService.healthCheck.mockResolvedValue({
         status: 'healthy',
         bucket: 'resumes',
         connected: true,
       });
 
-      await expect(controller.getHealth()).rejects.toThrow('DB connection failed');
+      await expect(controller.getHealth()).rejects.toThrow(
+        'DB connection failed',
+      );
     });
 
     it('should include timestamp in ISO format', async () => {
@@ -203,7 +207,7 @@ describe('AppController', () => {
         status: 'healthy',
         count: 10,
       });
-      
+
       gridFsService.healthCheck.mockResolvedValue({
         status: 'healthy',
         bucket: 'resumes',
@@ -212,7 +216,7 @@ describe('AppController', () => {
 
       const result = await controller.getHealth();
       const timestampRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
-      
+
       expect(result.timestamp).toMatch(timestampRegex);
     });
   });

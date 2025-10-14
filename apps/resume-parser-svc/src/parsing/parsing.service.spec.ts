@@ -90,7 +90,9 @@ describe('ParsingService', () => {
 
     beforeEach(() => {
       gridFsService.downloadFile.mockResolvedValue(mockPdfBuffer);
-      pdfTextExtractorService.extractText.mockResolvedValue('Mock extracted text from PDF');
+      pdfTextExtractorService.extractText.mockResolvedValue(
+        'Mock extracted text from PDF',
+      );
       visionLlmService.parseResumeText.mockResolvedValue(mockResumeDto);
       fieldMapperService.normalizeToResumeDto.mockResolvedValue(mockResumeDto);
       natsClient.publishAnalysisResumeParsed.mockResolvedValue(
@@ -221,7 +223,9 @@ describe('ParsingService', () => {
 
     beforeEach(() => {
       gridFsService.downloadFile.mockResolvedValue(mockPdfBuffer);
-      pdfTextExtractorService.extractText.mockResolvedValue('Mock extracted text from PDF');
+      pdfTextExtractorService.extractText.mockResolvedValue(
+        'Mock extracted text from PDF',
+      );
       visionLlmService.parseResumeText.mockResolvedValue(mockResumeDto);
       fieldMapperService.normalizeToResumeDto.mockResolvedValue(mockResumeDto);
     });
@@ -282,7 +286,13 @@ describe('ParsingService', () => {
       gridFsService.downloadFile.mockResolvedValue(Buffer.alloc(0)); // Empty buffer
 
       await expect(
-        service.processResumeFile(jobId, resumeId, gridFsUrl, filename, 'org-123'),
+        service.processResumeFile(
+          jobId,
+          resumeId,
+          gridFsUrl,
+          filename,
+          'org-123',
+        ),
       ).rejects.toThrow(/Failed to download file or file is empty/);
     });
 
@@ -291,7 +301,13 @@ describe('ParsingService', () => {
       pdfTextExtractorService.extractText.mockRejectedValue(extractionError);
 
       await expect(
-        service.processResumeFile(jobId, resumeId, gridFsUrl, filename, 'org-123'),
+        service.processResumeFile(
+          jobId,
+          resumeId,
+          gridFsUrl,
+          filename,
+          'org-123',
+        ),
       ).rejects.toThrow('PDF extraction failed');
     });
 
@@ -300,7 +316,13 @@ describe('ParsingService', () => {
       visionLlmService.parseResumeText.mockResolvedValue(null as any);
 
       await expect(
-        service.processResumeFile(jobId, resumeId, gridFsUrl, filename, 'org-123'),
+        service.processResumeFile(
+          jobId,
+          resumeId,
+          gridFsUrl,
+          filename,
+          'org-123',
+        ),
       ).rejects.toThrow(/Vision LLM service returned empty result/);
     });
 
@@ -308,12 +330,24 @@ describe('ParsingService', () => {
       fieldMapperService.normalizeToResumeDto.mockResolvedValue(null as any);
 
       await expect(
-        service.processResumeFile(jobId, resumeId, gridFsUrl, filename, 'org-123'),
+        service.processResumeFile(
+          jobId,
+          resumeId,
+          gridFsUrl,
+          filename,
+          'org-123',
+        ),
       ).rejects.toThrow(/Field mapping failed/);
     });
 
     it('should log processing steps', async () => {
-      await service.processResumeFile(jobId, resumeId, gridFsUrl, filename, 'org-123');
+      await service.processResumeFile(
+        jobId,
+        resumeId,
+        gridFsUrl,
+        filename,
+        'org-123',
+      );
 
       expect(loggerSpy).toHaveBeenCalledWith(
         `Processing resume file for jobId: ${jobId}, resumeId: ${resumeId}, filename: ${filename}`,

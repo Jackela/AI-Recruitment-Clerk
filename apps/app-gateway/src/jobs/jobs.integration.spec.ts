@@ -42,7 +42,11 @@ describe('Jobs Integration Tests', () => {
       get: jest.fn().mockResolvedValue(null),
       set: jest.fn().mockResolvedValue(undefined),
       wrap: jest.fn().mockImplementation(async (_k: string, fn: any) => fn()),
-      generateKey: jest.fn().mockImplementation((p: string, ...rest: any[]) => `${p}:${rest.join(':')}`),
+      generateKey: jest
+        .fn()
+        .mockImplementation(
+          (p: string, ...rest: any[]) => `${p}:${rest.join(':')}`,
+        ),
     } as any;
 
     const module: TestingModule = await Test.createTestingModule({
@@ -130,7 +134,9 @@ describe('Jobs Integration Tests', () => {
                 .mockImplementation(async (_k: string, fn: any) => fn()),
               generateKey: jest
                 .fn()
-                .mockImplementation((p: string, ...rest: any[]) => `${p}:${rest.join(':')}`),
+                .mockImplementation(
+                  (p: string, ...rest: any[]) => `${p}:${rest.join(':')}`,
+                ),
             },
           },
         ],

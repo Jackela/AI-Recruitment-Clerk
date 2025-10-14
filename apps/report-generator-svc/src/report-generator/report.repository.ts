@@ -806,7 +806,10 @@ export class ReportRepository {
   /**
    * Format date from MongoDB date grouping
    */
-  private formatDateFromGrouping(dateGroup: DateGrouping, granularity: string): string {
+  private formatDateFromGrouping(
+    dateGroup: DateGrouping,
+    granularity: string,
+  ): string {
     const { year, month, day, week } = dateGroup;
 
     switch (granularity) {
@@ -835,14 +838,16 @@ export class ReportRepository {
           return {
             status: 'healthy',
             count,
-            performance: performanceStats ? {
-              averageResponseTime: performanceStats.averageQueryTime || 0,
-              totalOperations: performanceStats.connectionCount || 0,
-              successRate: 100, // Assume 100% if no errors
-              errorRate: 0,
-              lastOperationTime: new Date(),
-              healthStatus: 'healthy' as const
-            } : null,
+            performance: performanceStats
+              ? {
+                  averageResponseTime: performanceStats.averageQueryTime || 0,
+                  totalOperations: performanceStats.connectionCount || 0,
+                  successRate: 100, // Assume 100% if no errors
+                  errorRate: 0,
+                  lastOperationTime: new Date(),
+                  healthStatus: 'healthy' as const,
+                }
+              : null,
           };
         },
         'healthCheck',

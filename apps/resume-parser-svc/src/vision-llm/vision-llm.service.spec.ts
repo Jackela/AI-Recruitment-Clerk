@@ -7,21 +7,29 @@ jest.mock('./ai-services-shared.stub', () => ({
   GeminiClient: jest.fn().mockImplementation(() => ({
     generateStructuredResponse: jest.fn().mockResolvedValue({
       data: {
-        contactInfo: { name: 'Test User', email: 'test@example.com', phone: '123-456-7890' },
+        contactInfo: {
+          name: 'Test User',
+          email: 'test@example.com',
+          phone: '123-456-7890',
+        },
         skills: ['JavaScript', 'TypeScript'],
         workExperience: [],
-        education: []
-      }
+        education: [],
+      },
     }),
     generateStructuredVisionResponse: jest.fn().mockResolvedValue({
       data: {
-        contactInfo: { name: 'Test User', email: 'test@example.com', phone: '123-456-7890' },
+        contactInfo: {
+          name: 'Test User',
+          email: 'test@example.com',
+          phone: '123-456-7890',
+        },
         skills: ['JavaScript', 'TypeScript'],
         workExperience: [],
-        education: []
-      }
+        education: [],
+      },
     }),
-    healthCheck: jest.fn().mockResolvedValue({ status: 'ok' })
+    healthCheck: jest.fn().mockResolvedValue({ status: 'ok' }),
   })),
   GeminiConfig: {},
   PromptTemplates: {
@@ -40,7 +48,9 @@ jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => ({
   },
 }));
 
-jest.mock('pdf-parse-fork', () => jest.fn().mockResolvedValue({ text: 'Sample PDF text content' }));
+jest.mock('pdf-parse-fork', () =>
+  jest.fn().mockResolvedValue({ text: 'Sample PDF text content' }),
+);
 
 describe('VisionLlmService', () => {
   let service: VisionLlmService;
@@ -118,7 +128,7 @@ describe('VisionLlmService', () => {
   beforeEach(async () => {
     // Clear all mocks before each test
     jest.clearAllMocks();
-    
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [VisionLlmService],
     }).compile();
@@ -151,16 +161,16 @@ describe('VisionLlmService', () => {
       `;
 
       // Act & Assert - In test mode, this method is not implemented
-      await expect(
-        service.parseResumeText(resumeText),
-      ).rejects.toThrow('VisionLlmService.parseResumeText not implemented');
+      await expect(service.parseResumeText(resumeText)).rejects.toThrow(
+        'VisionLlmService.parseResumeText not implemented',
+      );
     });
 
     it('should handle empty text input', async () => {
       // Act & Assert
-      await expect(
-        service.parseResumeText(''),
-      ).rejects.toThrow('VisionLlmService.parseResumeText not implemented');
+      await expect(service.parseResumeText('')).rejects.toThrow(
+        'VisionLlmService.parseResumeText not implemented',
+      );
     });
 
     it('should handle malformed text input', async () => {
@@ -168,9 +178,9 @@ describe('VisionLlmService', () => {
       const malformedText = 'Random text without resume structure';
 
       // Act & Assert
-      await expect(
-        service.parseResumeText(malformedText),
-      ).rejects.toThrow('VisionLlmService.parseResumeText not implemented');
+      await expect(service.parseResumeText(malformedText)).rejects.toThrow(
+        'VisionLlmService.parseResumeText not implemented',
+      );
     });
 
     it('should handle non-English text', async () => {
@@ -178,9 +188,9 @@ describe('VisionLlmService', () => {
       const chineseText = '张三\n工程师\n北京大学';
 
       // Act & Assert
-      await expect(
-        service.parseResumeText(chineseText),
-      ).rejects.toThrow('VisionLlmService.parseResumeText not implemented');
+      await expect(service.parseResumeText(chineseText)).rejects.toThrow(
+        'VisionLlmService.parseResumeText not implemented',
+      );
     });
 
     it('should extract all expected data fields from text', async () => {
@@ -205,7 +215,7 @@ describe('VisionLlmService', () => {
     it('should extract structured data from PDF resume', async () => {
       // Act
       const result = await service.parseResumePdf(mockPdfBuffer, mockFilename);
-      
+
       // Assert
       expect(result).toBeDefined();
       expect(result.contactInfo).toBeDefined();
@@ -217,7 +227,7 @@ describe('VisionLlmService', () => {
     it('should handle empty PDF buffer gracefully', async () => {
       // Arrange
       const emptyBuffer = Buffer.alloc(0);
-      
+
       // Act & Assert - In test mode, may return mock data or fail gracefully
       try {
         const result = await service.parseResumePdf(emptyBuffer, mockFilename);
@@ -233,10 +243,13 @@ describe('VisionLlmService', () => {
     it('should handle corrupted PDF files gracefully', async () => {
       // Arrange
       const corruptedBuffer = Buffer.from('corrupted pdf data');
-      
+
       // Act & Assert - In test mode, may return mock data or fail gracefully
       try {
-        const result = await service.parseResumePdf(corruptedBuffer, mockFilename);
+        const result = await service.parseResumePdf(
+          corruptedBuffer,
+          mockFilename,
+        );
         // If it succeeds (test mode), verify structure
         expect(result).toBeDefined();
         expect(result.contactInfo).toBeDefined();
@@ -304,7 +317,7 @@ describe('VisionLlmService', () => {
     it('should return true for any buffer in test mode', async () => {
       // Act
       const result = await service.validatePdfFile(mockPdfBuffer);
-      
+
       // Assert - In test mode, should return true
       expect(result).toBe(true);
     });
@@ -315,7 +328,7 @@ describe('VisionLlmService', () => {
 
       // Act
       const result = await service.validatePdfFile(invalidFileBuffer);
-      
+
       // Assert - In test mode, should return true for any buffer
       expect(result).toBe(true);
     });
@@ -347,9 +360,7 @@ describe('VisionLlmService', () => {
       ];
 
       for (const size of testSizes) {
-        await expect(
-          service.estimateProcessingTime(size),
-        ).rejects.toThrow(
+        await expect(service.estimateProcessingTime(size)).rejects.toThrow(
           'VisionLlmService.estimateProcessingTime not implemented',
         );
       }
@@ -476,18 +487,19 @@ describe('VisionLlmService', () => {
     it('should optimize processing for different text lengths', async () => {
       // Test text length optimization
       const shortText = 'John Doe\nEngineer';
-      const mediumText = 'John Doe\nEngineer\nSkills: JavaScript\nExperience: 5 years';
+      const mediumText =
+        'John Doe\nEngineer\nSkills: JavaScript\nExperience: 5 years';
       const longText = shortText.repeat(100);
 
-      await expect(
-        service.parseResumeText(shortText),
-      ).rejects.toThrow('VisionLlmService.parseResumeText not implemented');
-      await expect(
-        service.parseResumeText(mediumText),
-      ).rejects.toThrow('VisionLlmService.parseResumeText not implemented');
-      await expect(
-        service.parseResumeText(longText),
-      ).rejects.toThrow('VisionLlmService.parseResumeText not implemented');
+      await expect(service.parseResumeText(shortText)).rejects.toThrow(
+        'VisionLlmService.parseResumeText not implemented',
+      );
+      await expect(service.parseResumeText(mediumText)).rejects.toThrow(
+        'VisionLlmService.parseResumeText not implemented',
+      );
+      await expect(service.parseResumeText(longText)).rejects.toThrow(
+        'VisionLlmService.parseResumeText not implemented',
+      );
     });
   });
 
@@ -516,9 +528,9 @@ describe('VisionLlmService', () => {
       ];
 
       for (const format of textFormats) {
-        await expect(
-          service.parseResumeText(format.content),
-        ).rejects.toThrow('VisionLlmService.parseResumeText not implemented');
+        await expect(service.parseResumeText(format.content)).rejects.toThrow(
+          'VisionLlmService.parseResumeText not implemented',
+        );
       }
     });
 
@@ -534,26 +546,26 @@ describe('VisionLlmService', () => {
     it('should handle sensitive personal information securely in text', async () => {
       // Test secure handling of PII in resume text
       const piiText = 'John Doe\nSSN: 123-45-6789\nEmail: john@example.com';
-      await expect(
-        service.parseResumeText(piiText),
-      ).rejects.toThrow('VisionLlmService.parseResumeText not implemented');
+      await expect(service.parseResumeText(piiText)).rejects.toThrow(
+        'VisionLlmService.parseResumeText not implemented',
+      );
     });
 
     it('should validate text content for malicious inputs', async () => {
       // Test security validation for text
       const suspiciousText = '<script>alert("xss")</script>John Doe Engineer';
 
-      await expect(
-        service.parseResumeText(suspiciousText),
-      ).rejects.toThrow('VisionLlmService.parseResumeText not implemented');
+      await expect(service.parseResumeText(suspiciousText)).rejects.toThrow(
+        'VisionLlmService.parseResumeText not implemented',
+      );
     });
 
     it('should comply with data retention policies for text processing', async () => {
       // Test data handling compliance for text
       const complianceText = 'GDPR compliant resume text data';
-      await expect(
-        service.parseResumeText(complianceText),
-      ).rejects.toThrow('VisionLlmService.parseResumeText not implemented');
+      await expect(service.parseResumeText(complianceText)).rejects.toThrow(
+        'VisionLlmService.parseResumeText not implemented',
+      );
     });
   });
 });

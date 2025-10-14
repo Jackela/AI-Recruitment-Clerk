@@ -7,8 +7,9 @@
 The **Design by Contract (DBC) Framework** is a production-ready quality assurance system that provides comprehensive contract-based validation, monitoring, and performance optimization for the AI Recruitment Clerk microservices architecture.
 
 ### ⭐ **Key Achievements**
+
 - **✅ 137/137 Tests Passing** - 100% contract validation coverage
-- **✅ 3 Core Services Protected** - Complete microservices contract coverage  
+- **✅ 3 Core Services Protected** - Complete microservices contract coverage
 - **✅ Production Monitoring** - Real-time contract violation detection
 - **✅ Performance Contracts** - SLA enforcement with automated alerting
 - **✅ Enterprise Grade** - Ready for production deployment
@@ -22,11 +23,11 @@ The **Design by Contract (DBC) Framework** is a production-ready quality assuran
 ```
 libs/shared-dtos/src/contracts/
 ├── 🏗️ dbc.decorators.ts           # Core DBC decorators & validators
-├── 📊 dbc.monitoring.ts           # Production monitoring system  
+├── 📊 dbc.monitoring.ts           # Production monitoring system
 ├── 🔗 dbc.integration.test.ts     # End-to-end validation framework
 └── 🧪 Service Contract Tests:
     ├── dbc.scoring.test.ts        # Scoring service (26 tests)
-    ├── dbc.report.test.ts         # Report generation (27 tests)  
+    ├── dbc.report.test.ts         # Report generation (27 tests)
     ├── dbc.extraction.test.ts     # JD extraction (17 tests)
     ├── dbc.simple.test.ts         # Framework core (19 tests)
     └── dbc.validation.test.js     # Legacy validation (10 tests)
@@ -50,7 +51,7 @@ Validates method inputs before execution:
 
 ```typescript
 @Requires(
-  (jdText: string) => 
+  (jdText: string) =>
     ContractValidators.isNonEmptyString(jdText) &&
     jdText.length >= 100 && jdText.length <= 50000,
   'JD text must be 100-50000 characters'
@@ -66,7 +67,7 @@ Validates method outputs after execution:
 
 ```typescript
 @Ensures(
-  (result: ScoringResult) => 
+  (result: ScoringResult) =>
     ContractValidators.isValidScoreRange(result.overallScore) &&
     ContractValidators.isValidScoreDTO(result),
   'Must return valid scoring result with 0-100 range'
@@ -83,11 +84,11 @@ Validates class invariants throughout object lifecycle:
 ```typescript
 @Injectable()
 @Invariant(
-  (instance: ReportGeneratorServiceContracts) => 
-    !!instance.llmService && 
-    !!instance.gridfsService && 
+  (instance: ReportGeneratorServiceContracts) =>
+    !!instance.llmService &&
+    !!instance.gridfsService &&
     !!instance.reportRepository,
-  'Report generation dependencies must be properly injected'
+  'Report generation dependencies must be properly injected',
 )
 export class ReportGeneratorServiceContracts {
   // Class protected by invariant
@@ -165,21 +166,23 @@ const alerts = dbcMonitor.getActiveAlerts();
 ```typescript
 @Injectable()
 export class ScoringServiceContracts {
-  
   @Requires(
-    (jd: any, resume: any) => 
-      ContractValidators.isValidJD(jd) && 
+    (jd: any, resume: any) =>
+      ContractValidators.isValidJD(jd) &&
       ContractValidators.isValidResume(resume),
-    'Scoring requires valid JD and resume data'
+    'Scoring requires valid JD and resume data',
   )
   @Ensures(
-    (result: ScoringResult) => 
+    (result: ScoringResult) =>
       ContractValidators.isValidScoreRange(result.overallScore) &&
-      result.scoreBreakdown && 
+      result.scoreBreakdown &&
       result.matchingSkills.length > 0,
-    'Must return valid score (0-100) with breakdown and skills'
+    'Must return valid score (0-100) with breakdown and skills',
   )
-  async calculateEnhancedMatchScore(jd: any, resume: any): Promise<ScoringResult> {
+  async calculateEnhancedMatchScore(
+    jd: any,
+    resume: any,
+  ): Promise<ScoringResult> {
     // Performance Contract: <100ms processing time
     // Quality Contract: 0-100 score range validation
     // Business Contract: Non-empty skills matching required
@@ -188,6 +191,7 @@ export class ScoringServiceContracts {
 ```
 
 **Test Coverage**: 26/26 tests passing ✅
+
 - Precondition validation: JD and resume structure validation
 - Postcondition validation: Score range and breakdown verification
 - Performance testing: 1000 validations under 100ms
@@ -200,25 +204,26 @@ export class ScoringServiceContracts {
 ```typescript
 @Injectable()
 export class ReportGeneratorServiceContracts {
-  
   @Requires(
-    (scoringResults: ScoringData[], candidateInfo: any, jobInfo: any) => 
+    (scoringResults: ScoringData[], candidateInfo: any, jobInfo: any) =>
       ContractValidators.hasElements(scoringResults) &&
       ContractValidators.isValidCandidateInfo(candidateInfo) &&
       ContractValidators.isValidJobInfo(jobInfo),
-    'Report generation requires valid scoring results and complete info'
+    'Report generation requires valid scoring results and complete info',
   )
   @Ensures(
-    (result: ReportResult) => 
+    (result: ReportResult) =>
       ContractValidators.isValidReportResult(result) &&
-      result.fileSize >= 100000 && result.fileSize <= 5242880 && // 100KB-5MB
-      result.pageCount >= 2 && result.pageCount <= 20,
-    'Must return valid report (100KB-5MB, 2-20 pages)'
+      result.fileSize >= 100000 &&
+      result.fileSize <= 5242880 && // 100KB-5MB
+      result.pageCount >= 2 &&
+      result.pageCount <= 20,
+    'Must return valid report (100KB-5MB, 2-20 pages)',
   )
   async generateAnalysisReport(
-    scoringResults: ScoringData[], 
-    candidateInfo: any, 
-    jobInfo: any
+    scoringResults: ScoringData[],
+    candidateInfo: any,
+    jobInfo: any,
   ): Promise<ReportResult> {
     // Performance Contract: <30 seconds generation time
     // Quality Contract: PDF file size and page count limits
@@ -228,6 +233,7 @@ export class ReportGeneratorServiceContracts {
 ```
 
 **Test Coverage**: 27/27 tests passing ✅
+
 - File quality validation: PDF format, size limits, page counts
 - Processing time contracts: 30-second generation limit
 - Batch processing: Concurrent report generation with limits
@@ -240,20 +246,20 @@ export class ReportGeneratorServiceContracts {
 ```typescript
 @Injectable()
 export class ExtractionServiceContracts {
-  
   @Requires(
-    (jdText: string) => 
+    (jdText: string) =>
       ContractValidators.isNonEmptyString(jdText) &&
-      jdText.length >= 100 && jdText.length <= 50000 &&
+      jdText.length >= 100 &&
+      jdText.length <= 50000 &&
       /job|position|role|responsibilities/i.test(jdText),
-    'JD extraction requires valid text (100-50000 chars) with job content'
+    'JD extraction requires valid text (100-50000 chars) with job content',
   )
   @Ensures(
-    (result: ExtractionResult) => 
+    (result: ExtractionResult) =>
       ContractValidators.isValidExtractionResult(result) &&
       ContractValidators.isValidConfidenceLevel(result.confidence) &&
       result.extractionMetadata.processingTime <= 15000,
-    'Must return valid extraction with confidence and <15s processing time'
+    'Must return valid extraction with confidence and <15s processing time',
   )
   async extractJobRequirements(jdText: string): Promise<ExtractionResult> {
     // Performance Contract: <15 seconds LLM response time
@@ -264,6 +270,7 @@ export class ExtractionServiceContracts {
 ```
 
 **Test Coverage**: 17/17 tests passing ✅
+
 - LLM integration stability: Circuit breaker and fallback mechanisms
 - Extraction quality: Minimum confidence levels and required skills
 - Performance validation: 15-second processing time limits
@@ -275,17 +282,17 @@ export class ExtractionServiceContracts {
 
 ### 📊 **Test Suite Breakdown**
 
-| Test Suite | Focus Area | Tests | Status |
-|------------|------------|-------|--------|
-| **dbc.scoring.test.ts** | Scoring service validation | 26 | ✅ |
-| **dbc.report.test.ts** | Report generation quality | 27 | ✅ |
-| **dbc.extraction.test.ts** | JD extraction contracts | 17 | ✅ |
-| **dbc.integration.test.ts** | End-to-end validation | 10 | ✅ |
-| **dbc.monitoring.test.ts** | Production monitoring | 18 | ✅ |
-| **dbc.simple.test.ts** | Core framework | 19 | ✅ |
-| **dbc.test.ts** | TypeScript integration | 7 | ✅ |
-| **dbc.validation.test.js** | Legacy validation | 10 | ✅ |
-| **Total** | **Complete Framework** | **137** | **✅** |
+| Test Suite                  | Focus Area                 | Tests   | Status |
+| --------------------------- | -------------------------- | ------- | ------ |
+| **dbc.scoring.test.ts**     | Scoring service validation | 26      | ✅     |
+| **dbc.report.test.ts**      | Report generation quality  | 27      | ✅     |
+| **dbc.extraction.test.ts**  | JD extraction contracts    | 17      | ✅     |
+| **dbc.integration.test.ts** | End-to-end validation      | 10      | ✅     |
+| **dbc.monitoring.test.ts**  | Production monitoring      | 18      | ✅     |
+| **dbc.simple.test.ts**      | Core framework             | 19      | ✅     |
+| **dbc.test.ts**             | TypeScript integration     | 7       | ✅     |
+| **dbc.validation.test.js**  | Legacy validation          | 10      | ✅     |
+| **Total**                   | **Complete Framework**     | **137** | **✅** |
 
 ### 🔄 **End-to-End Integration Testing**
 
@@ -303,7 +310,7 @@ describe('End-to-End Contract Validation Chain', () => {
     };
     expect(ContractValidators.isValidExtractionResult(extractedJD)).toBe(true);
 
-    // Step 2: Resume Parser Output  
+    // Step 2: Resume Parser Output
     const parsedResume = {
       candidateName: 'Sarah Chen',
       skills: ['JavaScript', 'React', 'Node.js'],
@@ -341,21 +348,21 @@ describe('End-to-End Contract Validation Chain', () => {
 
 ### 🎯 **Contract Execution Performance**
 
-| Operation | Target | Actual | Status |
-|-----------|--------|---------|--------|
-| **Contract Validation** | <1ms | <0.5ms | ✅ |
-| **Batch Validation (1000x)** | <100ms | <50ms | ✅ |
-| **Health Report Generation** | <100ms | <25ms | ✅ |
-| **Monitoring Overhead** | <5% | <2% | ✅ |
+| Operation                    | Target | Actual | Status |
+| ---------------------------- | ------ | ------ | ------ |
+| **Contract Validation**      | <1ms   | <0.5ms | ✅     |
+| **Batch Validation (1000x)** | <100ms | <50ms  | ✅     |
+| **Health Report Generation** | <100ms | <25ms  | ✅     |
+| **Monitoring Overhead**      | <5%    | <2%    | ✅     |
 
 ### 📊 **Service Performance Contracts**
 
-| Service | Processing Time | Success Rate | Memory Usage |
-|---------|----------------|--------------|--------------|
-| **JD Extraction** | <15 seconds | >95% | <100MB |
-| **Resume Parsing** | <30 seconds | >95% | <200MB |
-| **Scoring Engine** | <100ms | >99% | <50MB |
-| **Report Generation** | <30 seconds | >95% | <150MB |
+| Service               | Processing Time | Success Rate | Memory Usage |
+| --------------------- | --------------- | ------------ | ------------ |
+| **JD Extraction**     | <15 seconds     | >95%         | <100MB       |
+| **Resume Parsing**    | <30 seconds     | >95%         | <200MB       |
+| **Scoring Engine**    | <100ms          | >99%         | <50MB        |
+| **Report Generation** | <30 seconds     | >95%         | <150MB       |
 
 ---
 
@@ -364,34 +371,36 @@ describe('End-to-End Contract Validation Chain', () => {
 ### 🚀 **Quick Start**
 
 1. **Install Dependencies**
+
 ```bash
 npm install
 ```
 
 2. **Import DBC Framework**
+
 ```typescript
-import { 
-  Requires, 
-  Ensures, 
-  Invariant, 
+import {
+  Requires,
+  Ensures,
+  Invariant,
   ContractValidators,
   dbcMonitor,
-  withMonitoring 
+  withMonitoring,
 } from '@libs/shared-dtos/contracts';
 ```
 
 3. **Add Contracts to Your Service**
+
 ```typescript
 @Injectable()
 export class YourService {
-  
   @Requires(
     (input: any) => ContractValidators.isValidInput(input),
-    'Input must be valid'
+    'Input must be valid',
   )
   @Ensures(
     (result: any) => ContractValidators.isValidOutput(result),
-    'Output must be valid'
+    'Output must be valid',
   )
   @withMonitoring('YourService')
   async yourMethod(input: any): Promise<any> {
@@ -405,17 +414,21 @@ export class YourService {
 ```typescript
 describe('Your Service Contracts', () => {
   it('should validate inputs and outputs', () => {
-    const validInput = { /* valid data */ };
-    const invalidInput = { /* invalid data */ };
-    
+    const validInput = {
+      /* valid data */
+    };
+    const invalidInput = {
+      /* invalid data */
+    };
+
     expect(ContractValidators.isValidInput(validInput)).toBe(true);
     expect(ContractValidators.isValidInput(invalidInput)).toBe(false);
   });
-  
+
   it('should monitor performance', async () => {
     const service = new YourService();
     await service.yourMethod(validInput);
-    
+
     const stats = dbcMonitor.getPerformanceStats();
     expect(stats.totalContracts).toBeGreaterThan(0);
   });
@@ -456,7 +469,7 @@ setInterval(() => {
 ```typescript
 // Add custom validator to ContractValidators
 export function isValidCustomData(data: any): boolean {
-  return !!(data && 
+  return !!(data &&
     data.requiredField &&
     typeof data.numericField === 'number' &&
     data.numericField >= 0 &&
@@ -479,7 +492,7 @@ ContractValidators.isValidCustomData = isValidCustomData;
 ```typescript
 // Multi-parameter validation
 @Requires(
-  (param1: any, param2: any, param3?: any) => 
+  (param1: any, param2: any, param3?: any) =>
     ContractValidators.isValidParam1(param1) &&
     ContractValidators.isValidParam2(param2) &&
     (!param3 || ContractValidators.isValidParam3(param3)),
@@ -488,7 +501,7 @@ ContractValidators.isValidCustomData = isValidCustomData;
 
 // Complex postcondition with context
 @Ensures(
-  (result: any, param1: any, param2: any) => 
+  (result: any, param1: any, param2: any) =>
     ContractValidators.isValidResult(result) &&
     result.calculatedFrom === param1.id &&
     result.timestamp >= param2.startTime,
@@ -519,10 +532,10 @@ try {
 } catch (error) {
   if (error instanceof ContractViolationError) {
     console.error('Contract Violation:', {
-      type: error.contractType,      // 'PRE', 'POST', or 'INVARIANT'
-      message: error.message,        // Descriptive error message
-      method: error.methodName,      // Method where violation occurred
-      timestamp: error.timestamp     // When violation occurred
+      type: error.contractType, // 'PRE', 'POST', or 'INVARIANT'
+      message: error.message, // Descriptive error message
+      method: error.methodName, // Method where violation occurred
+      timestamp: error.timestamp, // When violation occurred
     });
   }
 }
@@ -535,13 +548,14 @@ try {
 process.env.DBC_DEBUG = 'true';
 
 // Monitor specific service performance
-const serviceStats = dbcMonitor.getPerformanceStats()
-  .servicePerformance
-  .filter(s => s.serviceName === 'YourService');
+const serviceStats = dbcMonitor
+  .getPerformanceStats()
+  .servicePerformance.filter((s) => s.serviceName === 'YourService');
 
 // Get recent contract violations
-const recentAlerts = dbcMonitor.getActiveAlerts()
-  .filter(alert => alert.timestamp > Date.now() - 3600000); // Last hour
+const recentAlerts = dbcMonitor
+  .getActiveAlerts()
+  .filter((alert) => alert.timestamp > Date.now() - 3600000); // Last hour
 ```
 
 ---
@@ -562,14 +576,14 @@ const recentAlerts = dbcMonitor.getActiveAlerts()
 // Production monitoring configuration
 const productionConfig = {
   alertThresholds: {
-    violationRate: 0.05,        // 5% violation rate warning
+    violationRate: 0.05, // 5% violation rate warning
     criticalViolationRate: 0.15, // 15% critical alert
-    averageExecutionTime: 100,   // 100ms performance warning  
-    criticalExecutionTime: 500   // 500ms critical alert
+    averageExecutionTime: 100, // 100ms performance warning
+    criticalExecutionTime: 500, // 500ms critical alert
   },
-  healthCheckInterval: 60000,    // 1 minute health checks
-  alertCooldown: 300000,         // 5 minute alert cooldown
-  metricsRetention: 10000        // Keep 10K metrics in memory
+  healthCheckInterval: 60000, // 1 minute health checks
+  alertCooldown: 300000, // 5 minute alert cooldown
+  metricsRetention: 10000, // Keep 10K metrics in memory
 };
 ```
 
@@ -577,7 +591,7 @@ const productionConfig = {
 
 ```typescript
 // Optimize contract validation performance
-ContractValidators.enableCaching = true;  // Cache validation results
+ContractValidators.enableCaching = true; // Cache validation results
 ContractValidators.batchValidation = true; // Batch multiple validations
 
 // Monitor optimization impact
@@ -599,12 +613,12 @@ console.log('Optimization recommendations:', optimizationReport.optimizations);
 
 ### 🛣 **Roadmap**
 
-| Feature | Priority | Timeline | Status |
-|---------|----------|----------|--------|
-| Contract Evolution API | High | Q1 2025 | 📋 Planned |
-| ML-Based Optimization | Medium | Q2 2025 | 📋 Planned |
-| Distributed Validation | High | Q3 2025 | 📋 Planned |
-| Advanced Dashboards | Medium | Q4 2025 | 📋 Planned |
+| Feature                | Priority | Timeline | Status     |
+| ---------------------- | -------- | -------- | ---------- |
+| Contract Evolution API | High     | Q1 2025  | 📋 Planned |
+| ML-Based Optimization  | Medium   | Q2 2025  | 📋 Planned |
+| Distributed Validation | High     | Q3 2025  | 📋 Planned |
+| Advanced Dashboards    | Medium   | Q4 2025  | 📋 Planned |
 
 ---
 
@@ -629,12 +643,12 @@ console.log('Optimization recommendations:', optimizationReport.optimizations);
 
 ## 🏆 **Conclusion**
 
-The **Design by Contract (DBC) Framework** represents a **production-ready, enterprise-grade quality assurance system** that transforms how we approach software reliability in microservices architectures. 
+The **Design by Contract (DBC) Framework** represents a **production-ready, enterprise-grade quality assurance system** that transforms how we approach software reliability in microservices architectures.
 
 ### 🎯 **Key Benefits Delivered**
 
 - **✅ Zero Production Contract Violations** - 100% critical path protection
-- **✅ Predictable Performance** - SLA enforcement with real-time monitoring  
+- **✅ Predictable Performance** - SLA enforcement with real-time monitoring
 - **✅ Proactive Quality Assurance** - Issues caught before they impact users
 - **✅ Comprehensive Observability** - Full visibility into system behavior
 - **✅ Enterprise Scalability** - Designed for high-throughput production environments

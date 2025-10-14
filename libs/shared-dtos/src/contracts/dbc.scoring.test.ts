@@ -6,10 +6,7 @@
  * @module ScoringContractTests
  */
 
-import { 
-  ContractViolationError, 
-  ContractValidators 
-} from './dbc.decorators';
+import { ContractViolationError, ContractValidators } from './dbc.decorators';
 
 describe('ScoringService DBC Validators', () => {
   describe('isValidJD', () => {
@@ -17,12 +14,12 @@ describe('ScoringService DBC Validators', () => {
       const validJD = {
         requiredSkills: [
           { skill: 'JavaScript', level: 'advanced' },
-          { skill: 'React', level: 'intermediate' }
+          { skill: 'React', level: 'intermediate' },
         ],
         experienceYears: { min: 3, max: 7 },
         educationLevel: 'bachelor',
         seniority: 'mid',
-        softSkills: ['communication', 'teamwork']
+        softSkills: ['communication', 'teamwork'],
       };
 
       expect(ContractValidators.isValidJD(validJD)).toBe(true);
@@ -33,7 +30,7 @@ describe('ScoringService DBC Validators', () => {
         requiredSkills: [],
         experienceYears: { min: 3, max: 7 },
         educationLevel: 'bachelor',
-        seniority: 'mid'
+        seniority: 'mid',
       };
 
       expect(ContractValidators.isValidJD(invalidJD)).toBe(false);
@@ -44,7 +41,7 @@ describe('ScoringService DBC Validators', () => {
         requiredSkills: [{ skill: 'JavaScript', level: 'advanced' }],
         experienceYears: { min: 5, max: 3 }, // max < min
         educationLevel: 'bachelor',
-        seniority: 'mid'
+        seniority: 'mid',
       };
 
       expect(ContractValidators.isValidJD(invalidJD)).toBe(false);
@@ -55,7 +52,7 @@ describe('ScoringService DBC Validators', () => {
         requiredSkills: [{ skill: 'JavaScript', level: 'advanced' }],
         experienceYears: { min: -1, max: 5 },
         educationLevel: 'bachelor',
-        seniority: 'mid'
+        seniority: 'mid',
       };
 
       expect(ContractValidators.isValidJD(invalidJD)).toBe(false);
@@ -66,7 +63,7 @@ describe('ScoringService DBC Validators', () => {
         requiredSkills: [{ skill: 'JavaScript', level: 'advanced' }],
         experienceYears: { min: 3, max: 7 },
         educationLevel: 'invalid',
-        seniority: 'mid'
+        seniority: 'mid',
       };
 
       expect(ContractValidators.isValidJD(invalidJD)).toBe(false);
@@ -77,7 +74,7 @@ describe('ScoringService DBC Validators', () => {
         requiredSkills: [{ skill: 'JavaScript', level: 'advanced' }],
         experienceYears: { min: 3, max: 7 },
         educationLevel: 'bachelor',
-        seniority: 'invalid'
+        seniority: 'invalid',
       };
 
       expect(ContractValidators.isValidJD(invalidJD)).toBe(false);
@@ -93,18 +90,18 @@ describe('ScoringService DBC Validators', () => {
             company: 'Tech Corp',
             position: 'Developer',
             startDate: '2020-01-01',
-            endDate: 'present'
-          }
+            endDate: 'present',
+          },
         ],
         education: {
           degree: 'bachelor',
           major: 'Computer Science',
-          school: 'University'
+          school: 'University',
         },
         contactInfo: {
           name: 'John Doe',
-          email: 'john@example.com'
-        }
+          email: 'john@example.com',
+        },
       };
 
       expect(ContractValidators.isValidResume(validResume)).toBe(true);
@@ -115,7 +112,7 @@ describe('ScoringService DBC Validators', () => {
         skills: [],
         workExperience: [{ company: 'Tech Corp' }],
         education: { degree: 'bachelor' },
-        contactInfo: { name: 'John Doe' }
+        contactInfo: { name: 'John Doe' },
       };
 
       expect(ContractValidators.isValidResume(invalidResume)).toBe(false);
@@ -126,7 +123,7 @@ describe('ScoringService DBC Validators', () => {
         skills: ['JavaScript'],
         workExperience: 'not an array',
         education: { degree: 'bachelor' },
-        contactInfo: { name: 'John Doe' }
+        contactInfo: { name: 'John Doe' },
       };
 
       expect(ContractValidators.isValidResume(invalidResume)).toBe(false);
@@ -137,7 +134,7 @@ describe('ScoringService DBC Validators', () => {
         skills: ['JavaScript'],
         workExperience: [{ company: 'Tech Corp' }],
         education: { degree: 'bachelor' },
-        contactInfo: { email: 'john@example.com' } // missing name
+        contactInfo: { email: 'john@example.com' }, // missing name
       };
 
       expect(ContractValidators.isValidResume(invalidResume)).toBe(false);
@@ -147,7 +144,7 @@ describe('ScoringService DBC Validators', () => {
       const invalidResume = {
         skills: ['JavaScript'],
         workExperience: [{ company: 'Tech Corp' }],
-        contactInfo: { name: 'John Doe' }
+        contactInfo: { name: 'John Doe' },
         // missing education
       };
 
@@ -183,16 +180,16 @@ describe('ScoringService DBC Validators', () => {
         overallScore: 85,
         skillScore: {
           score: 90,
-          details: 'Strong technical skills match'
+          details: 'Strong technical skills match',
         },
         experienceScore: {
           score: 80,
-          details: '5 years relevant experience'
+          details: '5 years relevant experience',
         },
         educationScore: {
           score: 85,
-          details: 'Bachelor degree meets requirements'
-        }
+          details: 'Bachelor degree meets requirements',
+        },
       };
 
       expect(ContractValidators.isValidScoreDTO(validScoreDTO)).toBe(true);
@@ -203,7 +200,7 @@ describe('ScoringService DBC Validators', () => {
         overallScore: 150, // Invalid range
         skillScore: { score: 90, details: 'Good skills' },
         experienceScore: { score: 80, details: 'Good experience' },
-        educationScore: { score: 85, details: 'Good education' }
+        educationScore: { score: 85, details: 'Good education' },
       };
 
       expect(ContractValidators.isValidScoreDTO(invalidScoreDTO)).toBe(false);
@@ -214,7 +211,7 @@ describe('ScoringService DBC Validators', () => {
         overallScore: 85,
         // Missing skillScore
         experienceScore: { score: 80, details: 'Good experience' },
-        educationScore: { score: 85, details: 'Good education' }
+        educationScore: { score: 85, details: 'Good education' },
       };
 
       expect(ContractValidators.isValidScoreDTO(invalidScoreDTO)).toBe(false);
@@ -225,7 +222,7 @@ describe('ScoringService DBC Validators', () => {
         overallScore: 85,
         skillScore: { score: 90, details: '' }, // Empty details
         experienceScore: { score: 80, details: 'Good experience' },
-        educationScore: { score: 85, details: 'Good education' }
+        educationScore: { score: 85, details: 'Good education' },
       };
 
       expect(ContractValidators.isValidScoreDTO(invalidScoreDTO)).toBe(false);
@@ -236,7 +233,7 @@ describe('ScoringService DBC Validators', () => {
         overallScore: 85,
         skillScore: { score: -10, details: 'Invalid score' }, // Invalid range
         experienceScore: { score: 80, details: 'Good experience' },
-        educationScore: { score: 85, details: 'Good education' }
+        educationScore: { score: 85, details: 'Good education' },
       };
 
       expect(ContractValidators.isValidScoreDTO(invalidScoreDTO)).toBe(false);
@@ -245,26 +242,44 @@ describe('ScoringService DBC Validators', () => {
 
   describe('isValidExperienceRange', () => {
     it('should validate reasonable experience ranges', () => {
-      expect(ContractValidators.isValidExperienceRange({ min: 0, max: 5 })).toBe(true);
-      expect(ContractValidators.isValidExperienceRange({ min: 3, max: 10 })).toBe(true);
-      expect(ContractValidators.isValidExperienceRange({ min: 10, max: 20 })).toBe(true);
+      expect(
+        ContractValidators.isValidExperienceRange({ min: 0, max: 5 }),
+      ).toBe(true);
+      expect(
+        ContractValidators.isValidExperienceRange({ min: 3, max: 10 }),
+      ).toBe(true);
+      expect(
+        ContractValidators.isValidExperienceRange({ min: 10, max: 20 }),
+      ).toBe(true);
     });
 
     it('should reject invalid experience ranges', () => {
-      expect(ContractValidators.isValidExperienceRange({ min: 5, max: 3 })).toBe(false); // max < min
-      expect(ContractValidators.isValidExperienceRange({ min: -1, max: 5 })).toBe(false); // negative min
-      expect(ContractValidators.isValidExperienceRange({ min: 0, max: 60 })).toBe(false); // unrealistic max
+      expect(
+        ContractValidators.isValidExperienceRange({ min: 5, max: 3 }),
+      ).toBe(false); // max < min
+      expect(
+        ContractValidators.isValidExperienceRange({ min: -1, max: 5 }),
+      ).toBe(false); // negative min
+      expect(
+        ContractValidators.isValidExperienceRange({ min: 0, max: 60 }),
+      ).toBe(false); // unrealistic max
     });
 
     it('should handle edge cases', () => {
-      expect(ContractValidators.isValidExperienceRange({ min: 0, max: 0 })).toBe(true); // Same min/max
-      expect(ContractValidators.isValidExperienceRange({ min: 0, max: 50 })).toBe(true); // Max limit
+      expect(
+        ContractValidators.isValidExperienceRange({ min: 0, max: 0 }),
+      ).toBe(true); // Same min/max
+      expect(
+        ContractValidators.isValidExperienceRange({ min: 0, max: 50 }),
+      ).toBe(true); // Max limit
     });
 
     it('should reject invalid objects', () => {
       expect(ContractValidators.isValidExperienceRange(null)).toBe(false);
       expect(ContractValidators.isValidExperienceRange({})).toBe(false);
-      expect(ContractValidators.isValidExperienceRange({ min: 'three', max: 5 })).toBe(false);
+      expect(
+        ContractValidators.isValidExperienceRange({ min: 'three', max: 5 }),
+      ).toBe(false);
       expect(ContractValidators.isValidExperienceRange({ min: 3 })).toBe(false); // Missing max
     });
   });
@@ -277,7 +292,7 @@ describe('ScoringService DBC Validators', () => {
           throw new ContractViolationError(
             'Invalid JD structure',
             'PRE',
-            'ScoringService.calculateEnhancedMatchScore'
+            'ScoringService.calculateEnhancedMatchScore',
           );
         }
 
@@ -285,7 +300,7 @@ describe('ScoringService DBC Validators', () => {
           throw new ContractViolationError(
             'Invalid resume structure',
             'PRE',
-            'ScoringService.calculateEnhancedMatchScore'
+            'ScoringService.calculateEnhancedMatchScore',
           );
         }
 
@@ -296,24 +311,24 @@ describe('ScoringService DBC Validators', () => {
 
         const overallScore = Math.round(
           skillMatchPercentage * 40 + // 40% weight
-          experienceMatchPercentage * 35 + // 35% weight  
-          educationMatchPercentage * 25 // 25% weight
+            experienceMatchPercentage * 35 + // 35% weight
+            educationMatchPercentage * 25, // 25% weight
         );
 
         const result = {
           overallScore,
           skillScore: {
             score: Math.round(skillMatchPercentage * 100),
-            details: `Skills analysis: ${skillMatchPercentage * 100}% match with required skills`
+            details: `Skills analysis: ${skillMatchPercentage * 100}% match with required skills`,
           },
           experienceScore: {
             score: Math.round(experienceMatchPercentage * 100),
-            details: `Experience analysis: ${experienceMatchPercentage * 100}% relevance match`
+            details: `Experience analysis: ${experienceMatchPercentage * 100}% relevance match`,
           },
           educationScore: {
             score: Math.round(educationMatchPercentage * 100),
-            details: `Education analysis: ${educationMatchPercentage * 100}% requirement match`
-          }
+            details: `Education analysis: ${educationMatchPercentage * 100}% requirement match`,
+          },
         };
 
         // Postcondition validation
@@ -321,7 +336,7 @@ describe('ScoringService DBC Validators', () => {
           throw new ContractViolationError(
             'Invalid scoring result structure',
             'POST',
-            'ScoringService.calculateEnhancedMatchScore'
+            'ScoringService.calculateEnhancedMatchScore',
           );
         }
 
@@ -334,18 +349,25 @@ describe('ScoringService DBC Validators', () => {
         experienceYears: { min: 3, max: 7 },
         educationLevel: 'bachelor',
         seniority: 'mid',
-        softSkills: ['communication']
+        softSkills: ['communication'],
       };
 
       const validResume = {
         skills: ['JavaScript', 'React'],
-        workExperience: [{ company: 'Tech Corp', position: 'Developer', startDate: '2020-01-01', endDate: 'present' }],
+        workExperience: [
+          {
+            company: 'Tech Corp',
+            position: 'Developer',
+            startDate: '2020-01-01',
+            endDate: 'present',
+          },
+        ],
         education: { degree: 'bachelor', major: 'CS', school: 'University' },
-        contactInfo: { name: 'John Doe', email: 'john@example.com' }
+        contactInfo: { name: 'John Doe', email: 'john@example.com' },
       };
 
       const result = mockScoringWorkflow(validJD, validResume);
-      
+
       expect(result.overallScore).toBeGreaterThanOrEqual(0);
       expect(result.overallScore).toBeLessThanOrEqual(100);
       expect(result.skillScore.details).toContain('Skills analysis');
@@ -364,13 +386,13 @@ describe('ScoringService DBC Validators', () => {
   describe('Performance and Consistency Tests', () => {
     it('should validate efficiently at scale', () => {
       const startTime = Date.now();
-      
+
       const validJD = {
         requiredSkills: [{ skill: 'JavaScript', level: 'advanced' }],
         experienceYears: { min: 3, max: 7 },
         educationLevel: 'bachelor',
         seniority: 'mid',
-        softSkills: ['communication']
+        softSkills: ['communication'],
       };
 
       // Run 1000 validations
@@ -379,7 +401,7 @@ describe('ScoringService DBC Validators', () => {
         ContractValidators.isValidScoreRange(75);
         ContractValidators.isValidExperienceRange({ min: 2, max: 8 });
       }
-      
+
       const duration = Date.now() - startTime;
       expect(duration).toBeLessThan(100); // Should complete in under 100ms
     });
@@ -390,7 +412,7 @@ describe('ScoringService DBC Validators', () => {
         experienceYears: { min: 2, max: 5 },
         educationLevel: 'bachelor',
         seniority: 'junior',
-        softSkills: ['teamwork']
+        softSkills: ['teamwork'],
       };
 
       // Same input should always return same result

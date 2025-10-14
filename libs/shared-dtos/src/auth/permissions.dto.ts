@@ -6,46 +6,46 @@ export enum Permission {
   READ_JOB = 'read_job',
   UPDATE_JOB = 'update_job',
   DELETE_JOB = 'delete_job',
-  
+
   // Resume Management
   UPLOAD_RESUME = 'upload_resume',
   READ_RESUME = 'read_resume',
   DELETE_RESUME = 'delete_resume',
-  
+
   // Analysis & Reports
   READ_ANALYSIS = 'read_analysis',
   GENERATE_REPORT = 'generate_report',
-  
+
   // User Management
   CREATE_USER = 'create_user',
   READ_USER = 'read_user',
   UPDATE_USER = 'update_user',
   DELETE_USER = 'delete_user',
   MANAGE_USER = 'manage_user',
-  
+
   // Organization Management
   READ_ORGANIZATION = 'read_organization',
   UPDATE_ORGANIZATION = 'update_organization',
-  
+
   // System Administration
   SYSTEM_CONFIG = 'system_config',
   VIEW_LOGS = 'view_logs',
   MANAGE_INTEGRATIONS = 'manage_integrations',
-  
+
   // Analytics & Metrics
   TRACK_METRICS = 'track_metrics',
   VIEW_ANALYTICS = 'view_analytics',
-  
+
   // Incentive Management
   VALIDATE_INCENTIVE = 'validate_incentive',
   APPROVE_INCENTIVE = 'approve_incentive',
-  REJECT_INCENTIVE = 'reject_incentive'
+  REJECT_INCENTIVE = 'reject_incentive',
 }
 
 export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   [UserRole.ADMIN]: [
     // Full system access
-    ...Object.values(Permission)
+    ...Object.values(Permission),
   ],
   [UserRole.HR_MANAGER]: [
     // Job and user management
@@ -65,7 +65,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.READ_ORGANIZATION,
     Permission.UPDATE_ORGANIZATION,
     Permission.TRACK_METRICS,
-    Permission.VIEW_ANALYTICS
+    Permission.VIEW_ANALYTICS,
   ],
   [UserRole.RECRUITER]: [
     // Job and resume management
@@ -78,7 +78,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.GENERATE_REPORT,
     Permission.READ_USER,
     Permission.READ_ORGANIZATION,
-    Permission.VIEW_ANALYTICS
+    Permission.VIEW_ANALYTICS,
   ],
   [UserRole.VIEWER]: [
     // Read-only access
@@ -87,8 +87,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     Permission.READ_ANALYSIS,
     Permission.READ_USER,
     Permission.READ_ORGANIZATION,
-    Permission.VIEW_ANALYTICS
-  ]
+    Permission.VIEW_ANALYTICS,
+  ],
 };
 
 /**
@@ -108,7 +108,10 @@ export class RequiredPermissions {
  * @param requiredPermission - The required permission.
  * @returns The boolean value.
  */
-export function hasPermission(userRole: UserRole, requiredPermission: Permission): boolean {
+export function hasPermission(
+  userRole: UserRole,
+  requiredPermission: Permission,
+): boolean {
   return ROLE_PERMISSIONS[userRole]?.includes(requiredPermission) || false;
 }
 
@@ -118,8 +121,13 @@ export function hasPermission(userRole: UserRole, requiredPermission: Permission
  * @param requiredPermissions - The required permissions.
  * @returns The boolean value.
  */
-export function hasAnyPermission(userRole: UserRole, requiredPermissions: Permission[]): boolean {
-  return requiredPermissions.some(permission => hasPermission(userRole, permission));
+export function hasAnyPermission(
+  userRole: UserRole,
+  requiredPermissions: Permission[],
+): boolean {
+  return requiredPermissions.some((permission) =>
+    hasPermission(userRole, permission),
+  );
 }
 
 /**
@@ -128,6 +136,11 @@ export function hasAnyPermission(userRole: UserRole, requiredPermissions: Permis
  * @param requiredPermissions - The required permissions.
  * @returns The boolean value.
  */
-export function hasAllPermissions(userRole: UserRole, requiredPermissions: Permission[]): boolean {
-  return requiredPermissions.every(permission => hasPermission(userRole, permission));
+export function hasAllPermissions(
+  userRole: UserRole,
+  requiredPermissions: Permission[],
+): boolean {
+  return requiredPermissions.every((permission) =>
+    hasPermission(userRole, permission),
+  );
 }

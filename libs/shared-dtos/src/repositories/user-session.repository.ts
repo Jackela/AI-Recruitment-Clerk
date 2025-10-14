@@ -17,7 +17,9 @@ export interface IUserSessionRepository {
  */
 export interface IUserSessionService {
   createOrRetrieveSession(ip: string): Promise<UserSession>;
-  recordUsage(sessionId: string): Promise<{ success: boolean; remaining: number }>;
+  recordUsage(
+    sessionId: string,
+  ): Promise<{ success: boolean; remaining: number }>;
   getUsageStats(sessionId: string): Promise<UsageStats>;
   expireOldSessions(): Promise<number>;
 }

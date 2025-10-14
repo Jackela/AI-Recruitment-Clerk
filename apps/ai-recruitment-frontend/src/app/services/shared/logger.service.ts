@@ -6,7 +6,7 @@ export enum LogLevel {
   LOG = 1,
   WARN = 2,
   ERROR = 3,
-  NONE = 4
+  NONE = 4,
 }
 
 /**
@@ -25,11 +25,13 @@ export interface LogEntry {
  * Provides logger functionality.
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LoggerService {
   private readonly isDevelopment = !environment.production;
-  private readonly logLevel: LogLevel = this.isDevelopment ? LogLevel.DEBUG : LogLevel.WARN;
+  private readonly logLevel: LogLevel = this.isDevelopment
+    ? LogLevel.DEBUG
+    : LogLevel.WARN;
   private readonly maxLogEntries = 1000;
   private logHistory: LogEntry[] = [];
 
@@ -64,9 +66,18 @@ export class LoggerService {
   /**
    * Log performance metrics
    */
-  performance(operation: string, duration: number, context?: string, data?: any): void {
+  performance(
+    operation: string,
+    duration: number,
+    context?: string,
+    data?: any,
+  ): void {
     const message = `⚡ ${operation} completed in ${duration}ms`;
-    this.writeLog(LogLevel.LOG, message, context, { operation, duration, ...data });
+    this.writeLog(LogLevel.LOG, message, context, {
+      operation,
+      duration,
+      ...data,
+    });
   }
 
   /**
@@ -80,9 +91,20 @@ export class LoggerService {
   /**
    * Log API calls and responses
    */
-  api(method: string, url: string, status: number, duration?: number, context?: string): void {
+  api(
+    method: string,
+    url: string,
+    status: number,
+    duration?: number,
+    context?: string,
+  ): void {
     const message = `🌐 ${method} ${url} → ${status}${duration ? ` (${duration}ms)` : ''}`;
-    this.writeLog(LogLevel.LOG, message, context, { method, url, status, duration });
+    this.writeLog(LogLevel.LOG, message, context, {
+      method,
+      url,
+      status,
+      duration,
+    });
   }
 
   /**
@@ -107,7 +129,7 @@ export class LoggerService {
     message: string,
     context?: string,
     data?: any,
-    error?: Error
+    error?: Error,
   ): void {
     // Check if we should log at this level
     if (level < this.logLevel) {
@@ -121,7 +143,7 @@ export class LoggerService {
       context,
       data,
       timestamp,
-      error
+      error,
     };
 
     // Add to history
@@ -136,7 +158,7 @@ export class LoggerService {
     }
 
     // In production, only output errors and warnings
-    if (!this.isDevelopment && (level >= LogLevel.WARN)) {
+    if (!this.isDevelopment && level >= LogLevel.WARN) {
       this.outputToConsole(logEntry);
     }
 
@@ -197,13 +219,16 @@ export class LoggerService {
     return {
       log: (message: string, data?: any) => this.log(message, context, data),
       warn: (message: string, data?: any) => this.warn(message, context, data),
-      error: (message: string, error?: Error | any) => this.error(message, context, error),
-      debug: (message: string, data?: any) => this.debug(message, context, data),
-      performance: (operation: string, duration: number, data?: any) => 
+      error: (message: string, error?: Error | any) =>
+        this.error(message, context, error),
+      debug: (message: string, data?: any) =>
+        this.debug(message, context, data),
+      performance: (operation: string, duration: number, data?: any) =>
         this.performance(operation, duration, context, data),
-      userAction: (action: string, data?: any) => this.userAction(action, context, data),
-      api: (method: string, url: string, status: number, duration?: number) => 
-        this.api(method, url, status, duration, context)
+      userAction: (action: string, data?: any) =>
+        this.userAction(action, context, data),
+      api: (method: string, url: string, status: number, duration?: number) =>
+        this.api(method, url, status, duration, context),
     };
   }
 }
@@ -212,11 +237,11 @@ export class LoggerService {
  * Logger decorator for automatic context injection
  */
 export function Logger(context?: string) {
-  return function(target: any, propertyKey: string) {
+  return function (target: any, propertyKey: string) {
     const loggerContext = context || target.constructor.name;
-    
+
     Object.defineProperty(target, propertyKey, {
-      get: function() {
+      get: function () {
         if (!this._logger) {
           const loggerService = new LoggerService();
           this._logger = loggerService.createLogger(loggerContext);
@@ -224,7 +249,7 @@ export function Logger(context?: string) {
         return this._logger;
       },
       enumerable: true,
-      configurable: true
+      configurable: true,
     });
   };
 }

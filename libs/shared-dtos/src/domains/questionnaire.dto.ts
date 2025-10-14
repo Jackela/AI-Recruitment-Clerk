@@ -14,7 +14,7 @@ export class Questionnaire {
     private readonly submission: QuestionnaireSubmission,
     private readonly quality: SubmissionQuality,
     private readonly metadata: SubmissionMetadata,
-    private status: QuestionnaireStatus
+    private status: QuestionnaireStatus,
   ) {}
 
   // 工厂方法
@@ -28,44 +28,49 @@ export class Questionnaire {
   static create(
     templateId: string,
     submission: RawSubmissionData,
-    metadata: SubmissionMetadata
+    metadata: SubmissionMetadata,
   ): Questionnaire {
     const id = QuestionnaireId.generate();
     const template = QuestionnaireTemplate.createDefault(templateId);
-    const questionnaireSubmission = QuestionnaireSubmission.fromRawData(submission);
+    const questionnaireSubmission =
+      QuestionnaireSubmission.fromRawData(submission);
     const quality = SubmissionQuality.calculate(questionnaireSubmission);
-    
+
     const questionnaire = new Questionnaire(
       id,
       template,
       questionnaireSubmission,
       quality,
       metadata,
-      QuestionnaireStatus.SUBMITTED
+      QuestionnaireStatus.SUBMITTED,
     );
-    
-    questionnaire.addEvent(new QuestionnaireSubmittedEvent(
-      id.getValue(),
-      metadata.ip,
-      quality.getQualityScore(),
-      quality.isBonusEligible(),
-      questionnaireSubmission.getSummary(),
-      new Date()
-    ));
-    
-    if (quality.isBonusEligible()) {
-      questionnaire.addEvent(new HighQualitySubmissionEvent(
+
+    questionnaire.addEvent(
+      new QuestionnaireSubmittedEvent(
         id.getValue(),
         metadata.ip,
         quality.getQualityScore(),
-        quality.getQualityReasons(),
-        new Date()
-      ));
+        quality.isBonusEligible(),
+        questionnaireSubmission.getSummary(),
+        new Date(),
+      ),
+    );
+
+    if (quality.isBonusEligible()) {
+      questionnaire.addEvent(
+        new HighQualitySubmissionEvent(
+          id.getValue(),
+          metadata.ip,
+          quality.getQualityScore(),
+          quality.getQualityReasons(),
+          new Date(),
+        ),
+      );
     }
-    
+
     return questionnaire;
   }
-  
+
   /**
    * Performs the restore operation.
    * @param data - The data.
@@ -78,7 +83,7 @@ export class Questionnaire {
       QuestionnaireSubmission.restore(data.submission),
       SubmissionQuality.restore(data.quality),
       SubmissionMetadata.restore(data.metadata),
-      data.status
+      data.status,
     );
   }
 
@@ -89,51 +94,57 @@ export class Questionnaire {
    */
   validateSubmission(): QuestionnaireValidationResult {
     const errors: string[] = [];
-    
+
     // 检查必填字段
     const profile = this.submission.getUserProfile();
     const experience = this.submission.getUserExperience();
     const business = this.submission.getBusinessValue();
-    
+
     if (!profile) {
       errors.push('User profile is required');
       return new QuestionnaireValidationResult(false, errors);
     }
-    
+
     if (!experience) {
-      errors.push('User experience is required');  
+      errors.push('User experience is required');
       return new QuestionnaireValidationResult(false, errors);
     }
-    
+
     if (!business) {
       errors.push('Business value is required');
       return new QuestionnaireValidationResult(false, errors);
     }
-    
+
     // 验证具体字段
     if (!profile.role || profile.role === 'other') {
       errors.push('Valid user role is required');
     }
-    
+
     if (!profile.industry || profile.industry === '') {
       errors.push('Industry is required');
     }
-    
-    if (!experience.overallSatisfaction || experience.overallSatisfaction === 1) {
+
+    if (
+      !experience.overallSatisfaction ||
+      experience.overallSatisfaction === 1
+    ) {
       errors.push('Overall satisfaction rating (above 1) is required');
     }
-    
-    if (!business.currentScreeningMethod || business.currentScreeningMethod === 'manual') {
+
+    if (
+      !business.currentScreeningMethod ||
+      business.currentScreeningMethod === 'manual'
+    ) {
       errors.push('Current screening method other than manual is required');
     }
-    
+
     if (business.willingnessToPayMonthly === 0) {
       errors.push('Willingness to pay must be greater than 0');
     }
-    
+
     return new QuestionnaireValidationResult(errors.length === 0, errors);
   }
-  
+
   /**
    * Calculates quality score.
    * @returns The QualityScore.
@@ -141,7 +152,7 @@ export class Questionnaire {
   calculateQualityScore(): QualityScore {
     return this.quality.calculateScore();
   }
-  
+
   /**
    * Performs the is eligible for bonus operation.
    * @returns The boolean value.
@@ -149,7 +160,7 @@ export class Questionnaire {
   isEligibleForBonus(): boolean {
     return this.quality.isBonusEligible();
   }
-  
+
   /**
    * Retrieves submission summary.
    * @returns The SubmissionSummary.
@@ -157,7 +168,7 @@ export class Questionnaire {
   getSubmissionSummary(): SubmissionSummary {
     return this.submission.getSummary();
   }
-  
+
   // 状态转换
   /**
    * Performs the mark as processed operation.
@@ -165,21 +176,21 @@ export class Questionnaire {
   markAsProcessed(): void {
     this.status = QuestionnaireStatus.PROCESSED;
   }
-  
+
   /**
    * Performs the mark as rewarded operation.
    */
   markAsRewarded(): void {
     this.status = QuestionnaireStatus.REWARDED;
   }
-  
+
   /**
    * Performs the flag as low quality operation.
    */
   flagAsLowQuality(): void {
     this.status = QuestionnaireStatus.LOW_QUALITY;
   }
-  
+
   // 查询方法
   /**
    * Retrieves answer by question id.
@@ -189,7 +200,7 @@ export class Questionnaire {
   getAnswerByQuestionId(questionId: string): Answer | null {
     return this.submission.getAnswer(questionId);
   }
-  
+
   /**
    * Retrieves quality metrics.
    * @returns The QualityMetrics.
@@ -197,7 +208,7 @@ export class Questionnaire {
   getQualityMetrics(): QualityMetrics {
     return this.quality.getMetrics();
   }
-  
+
   /**
    * Retrieves total text length.
    * @returns The number value.
@@ -205,7 +216,7 @@ export class Questionnaire {
   getTotalTextLength(): number {
     return this.quality.getTotalTextLength();
   }
-  
+
   /**
    * Performs the has detailed feedback operation.
    * @returns The boolean value.
@@ -213,7 +224,7 @@ export class Questionnaire {
   hasDetailedFeedback(): boolean {
     return this.quality.hasDetailedFeedback();
   }
-  
+
   // 领域事件管理
   /**
    * Retrieves uncommitted events.
@@ -222,18 +233,18 @@ export class Questionnaire {
   getUncommittedEvents(): DomainEvent[] {
     return [...this.uncommittedEvents];
   }
-  
+
   /**
    * Performs the mark events as committed operation.
    */
   markEventsAsCommitted(): void {
     this.uncommittedEvents = [];
   }
-  
+
   private addEvent(event: DomainEvent): void {
     this.uncommittedEvents.push(event);
   }
-  
+
   // Getters
   /**
    * Retrieves id.
@@ -242,7 +253,7 @@ export class Questionnaire {
   getId(): QuestionnaireId {
     return this.id;
   }
-  
+
   /**
    * Retrieves submitter ip.
    * @returns The string value.
@@ -250,7 +261,7 @@ export class Questionnaire {
   getSubmitterIP(): string {
     return this.metadata.ip;
   }
-  
+
   /**
    * Retrieves status.
    * @returns The QuestionnaireStatus.
@@ -274,7 +285,7 @@ export class QuestionnaireId extends ValueObject<{ value: string }> {
     const random = Math.random().toString(36).substr(2, 9);
     return new QuestionnaireId({ value: `quest_${timestamp}_${random}` });
   }
-  
+
   /**
    * Retrieves value.
    * @returns The string value.
@@ -308,17 +319,23 @@ export class QuestionnaireTemplate extends ValueObject<{
         { id: 'experience', name: 'User Experience', required: true },
         { id: 'business', name: 'Business Value', required: true },
         { id: 'features', name: 'Feature Needs', required: false },
-        { id: 'optional', name: 'Optional Info', required: false }
+        { id: 'optional', name: 'Optional Info', required: false },
       ],
-      requiredQuestions: ['role', 'industry', 'overallSatisfaction', 'currentScreeningMethod', 'willingnessToPayMonthly'],
+      requiredQuestions: [
+        'role',
+        'industry',
+        'overallSatisfaction',
+        'currentScreeningMethod',
+        'willingnessToPayMonthly',
+      ],
       qualityThresholds: [
         { metric: 'textLength', minValue: 50 },
         { metric: 'completionRate', minValue: 0.8 },
-        { metric: 'detailedAnswers', minValue: 3 }
-      ]
+        { metric: 'detailedAnswers', minValue: 3 },
+      ],
     });
   }
-  
+
   /**
    * Performs the restore operation.
    * @param data - The data.
@@ -351,7 +368,7 @@ export class QuestionnaireSubmission extends ValueObject<{
         role: data.userProfile?.role || 'other',
         industry: data.userProfile?.industry || '',
         companySize: data.userProfile?.companySize || 'unknown',
-        location: data.userProfile?.location || ''
+        location: data.userProfile?.location || '',
       }),
       userExperience: new UserExperience({
         overallSatisfaction: data.userExperience?.overallSatisfaction || 1,
@@ -360,28 +377,30 @@ export class QuestionnaireSubmission extends ValueObject<{
         uiRating: data.userExperience?.uiRating || 1,
         mostUsefulFeature: data.userExperience?.mostUsefulFeature || '',
         mainPainPoint: data.userExperience?.mainPainPoint,
-        improvementSuggestion: data.userExperience?.improvementSuggestion
+        improvementSuggestion: data.userExperience?.improvementSuggestion,
       }),
       businessValue: new BusinessValue({
-        currentScreeningMethod: data.businessValue?.currentScreeningMethod || 'manual',
+        currentScreeningMethod:
+          data.businessValue?.currentScreeningMethod || 'manual',
         timeSpentPerResume: data.businessValue?.timeSpentPerResume || 0,
         resumesPerWeek: data.businessValue?.resumesPerWeek || 0,
         timeSavingPercentage: data.businessValue?.timeSavingPercentage || 0,
-        willingnessToPayMonthly: data.businessValue?.willingnessToPayMonthly || 0,
-        recommendLikelihood: data.businessValue?.recommendLikelihood || 1
+        willingnessToPayMonthly:
+          data.businessValue?.willingnessToPayMonthly || 0,
+        recommendLikelihood: data.businessValue?.recommendLikelihood || 1,
       }),
       featureNeeds: new FeatureNeeds({
         priorityFeatures: data.featureNeeds?.priorityFeatures || [],
-        integrationNeeds: data.featureNeeds?.integrationNeeds || []
+        integrationNeeds: data.featureNeeds?.integrationNeeds || [],
       }),
       optional: new OptionalInfo({
         additionalFeedback: data.optional?.additionalFeedback,
-        contactPreference: data.optional?.contactPreference
+        contactPreference: data.optional?.contactPreference,
       }),
-      submittedAt: new Date()
+      submittedAt: new Date(),
     });
   }
-  
+
   /**
    * Performs the restore operation.
    * @param data - The data.
@@ -390,10 +409,10 @@ export class QuestionnaireSubmission extends ValueObject<{
   static restore(data: any): QuestionnaireSubmission {
     return new QuestionnaireSubmission({
       ...data,
-      submittedAt: new Date(data.submittedAt)
+      submittedAt: new Date(data.submittedAt),
     });
   }
-  
+
   /**
    * Retrieves user profile.
    * @returns The UserProfile.
@@ -401,7 +420,7 @@ export class QuestionnaireSubmission extends ValueObject<{
   getUserProfile(): UserProfile {
     return this.props.userProfile;
   }
-  
+
   /**
    * Retrieves user experience.
    * @returns The UserExperience.
@@ -409,7 +428,7 @@ export class QuestionnaireSubmission extends ValueObject<{
   getUserExperience(): UserExperience {
     return this.props.userExperience;
   }
-  
+
   /**
    * Retrieves business value.
    * @returns The BusinessValue.
@@ -417,7 +436,7 @@ export class QuestionnaireSubmission extends ValueObject<{
   getBusinessValue(): BusinessValue {
     return this.props.businessValue;
   }
-  
+
   /**
    * Retrieves optional info.
    * @returns The OptionalInfo.
@@ -425,7 +444,7 @@ export class QuestionnaireSubmission extends ValueObject<{
   getOptionalInfo(): OptionalInfo {
     return this.props.optional;
   }
-  
+
   /**
    * Retrieves summary.
    * @returns The SubmissionSummary.
@@ -437,10 +456,10 @@ export class QuestionnaireSubmission extends ValueObject<{
       overallSatisfaction: this.props.userExperience.overallSatisfaction,
       willingnessToPayMonthly: this.props.businessValue.willingnessToPayMonthly,
       textLength: this.calculateTotalTextLength(),
-      completionRate: this.calculateCompletionRate()
+      completionRate: this.calculateCompletionRate(),
     });
   }
-  
+
   /**
    * Retrieves answer.
    * @param questionId - The question id.
@@ -451,14 +470,15 @@ export class QuestionnaireSubmission extends ValueObject<{
     const answers = {
       role: this.props.userProfile.role,
       industry: this.props.userProfile.industry,
-      overallSatisfaction: this.props.userExperience.overallSatisfaction.toString(),
-      mostUsefulFeature: this.props.userExperience.mostUsefulFeature
+      overallSatisfaction:
+        this.props.userExperience.overallSatisfaction.toString(),
+      mostUsefulFeature: this.props.userExperience.mostUsefulFeature,
     };
-    
+
     const value = answers[questionId as keyof typeof answers];
     return value ? new Answer({ questionId, value: value.toString() }) : null;
   }
-  
+
   private calculateTotalTextLength(): number {
     const textFields = [
       this.props.userProfile.industry,
@@ -466,12 +486,12 @@ export class QuestionnaireSubmission extends ValueObject<{
       this.props.userExperience.mostUsefulFeature,
       this.props.userExperience.mainPainPoint || '',
       this.props.userExperience.improvementSuggestion || '',
-      this.props.optional.additionalFeedback || ''
+      this.props.optional.additionalFeedback || '',
     ];
-    
+
     return textFields.join(' ').length;
   }
-  
+
   private calculateCompletionRate(): number {
     const requiredFields = 5; // role, industry, satisfaction, screening method, willingness to pay
     const completedFields = [
@@ -479,9 +499,9 @@ export class QuestionnaireSubmission extends ValueObject<{
       this.props.userProfile.industry,
       this.props.userExperience.overallSatisfaction,
       this.props.businessValue.currentScreeningMethod,
-      this.props.businessValue.willingnessToPayMonthly
-    ].filter(field => field && field !== 0).length;
-    
+      this.props.businessValue.willingnessToPayMonthly,
+    ].filter((field) => field && field !== 0).length;
+
     return completedFields / requiredFields;
   }
 }
@@ -506,44 +526,46 @@ export class SubmissionQuality extends ValueObject<{
     const totalTextLength = submission.getSummary().textLength;
     const completionRate = submission.getSummary().completionRate;
     const detailedAnswers = SubmissionQuality.countDetailedAnswers(submission);
-    
+
     let qualityScore = 0;
     const qualityReasons: string[] = [];
-    
+
     // 完成度评分 (40分)
     const completionScore = completionRate * 40;
     qualityScore += completionScore;
     if (completionRate >= 0.8) {
       qualityReasons.push('High completion rate');
     }
-    
+
     // 文本质量评分 (30分)
     const textQualityScore = Math.min(30, totalTextLength / 10); // 每10字符1分，最多30分
     qualityScore += textQualityScore;
     if (totalTextLength >= 50) {
       qualityReasons.push('Detailed text responses');
     }
-    
+
     // 商业价值评分 (30分)
-    const businessValueScore = SubmissionQuality.calculateBusinessValueScore(submission);
+    const businessValueScore =
+      SubmissionQuality.calculateBusinessValueScore(submission);
     qualityScore += businessValueScore;
     if (businessValueScore >= 20) {
       qualityReasons.push('High business value responses');
     }
-    
+
     const finalScore = Math.min(100, Math.round(qualityScore));
-    const bonusEligible = finalScore >= 70 && totalTextLength >= 50 && detailedAnswers >= 3;
-    
+    const bonusEligible =
+      finalScore >= 70 && totalTextLength >= 50 && detailedAnswers >= 3;
+
     return new SubmissionQuality({
       totalTextLength,
       detailedAnswers,
       completionRate,
       qualityScore: finalScore,
       bonusEligible,
-      qualityReasons
+      qualityReasons,
     });
   }
-  
+
   /**
    * Performs the restore operation.
    * @param data - The data.
@@ -552,43 +574,47 @@ export class SubmissionQuality extends ValueObject<{
   static restore(data: any): SubmissionQuality {
     return new SubmissionQuality(data);
   }
-  
-  private static countDetailedAnswers(submission: QuestionnaireSubmission): number {
+
+  private static countDetailedAnswers(
+    submission: QuestionnaireSubmission,
+  ): number {
     const userExp = submission.getUserExperience();
     const optional = submission.getOptionalInfo();
     let count = 0;
-    
+
     if ((userExp.mainPainPoint || '').length > 20) count++;
     if ((userExp.improvementSuggestion || '').length > 20) count++;
     if ((optional.additionalFeedback || '').length > 30) count++;
-    
+
     return count;
   }
-  
-  private static calculateBusinessValueScore(submission: QuestionnaireSubmission): number {
+
+  private static calculateBusinessValueScore(
+    submission: QuestionnaireSubmission,
+  ): number {
     const businessValue = submission.getBusinessValue();
     let score = 0;
-    
+
     // 愿意付费金额评分
     if (businessValue.willingnessToPayMonthly > 0) {
       score += Math.min(15, businessValue.willingnessToPayMonthly / 10); // 每10元1分，最多15分
     }
-    
+
     // 推荐可能性评分
     if (businessValue.recommendLikelihood >= 4) {
       score += 10;
     } else if (businessValue.recommendLikelihood >= 3) {
       score += 5;
     }
-    
+
     // 时间节省评分
     if (businessValue.timeSavingPercentage >= 50) {
       score += 5;
     }
-    
+
     return score;
   }
-  
+
   /**
    * Calculates score.
    * @returns The QualityScore.
@@ -596,7 +622,7 @@ export class SubmissionQuality extends ValueObject<{
   calculateScore(): QualityScore {
     return new QualityScore({ value: this.props.qualityScore });
   }
-  
+
   /**
    * Performs the is bonus eligible operation.
    * @returns The boolean value.
@@ -604,7 +630,7 @@ export class SubmissionQuality extends ValueObject<{
   isBonusEligible(): boolean {
     return this.props.bonusEligible;
   }
-  
+
   /**
    * Retrieves quality score.
    * @returns The number value.
@@ -612,7 +638,7 @@ export class SubmissionQuality extends ValueObject<{
   getQualityScore(): number {
     return this.props.qualityScore;
   }
-  
+
   /**
    * Retrieves quality reasons.
    * @returns The an array of string value.
@@ -620,7 +646,7 @@ export class SubmissionQuality extends ValueObject<{
   getQualityReasons(): string[] {
     return this.props.qualityReasons;
   }
-  
+
   /**
    * Retrieves metrics.
    * @returns The QualityMetrics.
@@ -628,7 +654,7 @@ export class SubmissionQuality extends ValueObject<{
   getMetrics(): QualityMetrics {
     return new QualityMetrics(this.props);
   }
-  
+
   /**
    * Retrieves total text length.
    * @returns The number value.
@@ -636,7 +662,7 @@ export class SubmissionQuality extends ValueObject<{
   getTotalTextLength(): number {
     return this.props.totalTextLength;
   }
-  
+
   /**
    * Performs the has detailed feedback operation.
    * @returns The boolean value.
@@ -660,22 +686,30 @@ export class UserProfile extends ValueObject<{
    * Performs the role operation.
    * @returns The QuestionnaireUserRole.
    */
-  get role(): QuestionnaireUserRole { return this.props.role; }
+  get role(): QuestionnaireUserRole {
+    return this.props.role;
+  }
   /**
    * Performs the industry operation.
    * @returns The string value.
    */
-  get industry(): string { return this.props.industry; }
+  get industry(): string {
+    return this.props.industry;
+  }
   /**
    * Performs the company size operation.
    * @returns The CompanySize.
    */
-  get companySize(): CompanySize { return this.props.companySize; }
+  get companySize(): CompanySize {
+    return this.props.companySize;
+  }
   /**
    * Performs the location operation.
    * @returns The string value.
    */
-  get location(): string { return this.props.location; }
+  get location(): string {
+    return this.props.location;
+  }
 }
 
 /**
@@ -694,37 +728,51 @@ export class UserExperience extends ValueObject<{
    * Performs the overall satisfaction operation.
    * @returns The Rating.
    */
-  get overallSatisfaction(): Rating { return this.props.overallSatisfaction; }
+  get overallSatisfaction(): Rating {
+    return this.props.overallSatisfaction;
+  }
   /**
    * Performs the accuracy rating operation.
    * @returns The Rating.
    */
-  get accuracyRating(): Rating { return this.props.accuracyRating; }
+  get accuracyRating(): Rating {
+    return this.props.accuracyRating;
+  }
   /**
    * Performs the speed rating operation.
    * @returns The Rating.
    */
-  get speedRating(): Rating { return this.props.speedRating; }
+  get speedRating(): Rating {
+    return this.props.speedRating;
+  }
   /**
    * Performs the ui rating operation.
    * @returns The Rating.
    */
-  get uiRating(): Rating { return this.props.uiRating; }
+  get uiRating(): Rating {
+    return this.props.uiRating;
+  }
   /**
    * Performs the most useful feature operation.
    * @returns The string value.
    */
-  get mostUsefulFeature(): string { return this.props.mostUsefulFeature; }
+  get mostUsefulFeature(): string {
+    return this.props.mostUsefulFeature;
+  }
   /**
    * Performs the main pain point operation.
    * @returns The string | undefined.
    */
-  get mainPainPoint(): string | undefined { return this.props.mainPainPoint; }
+  get mainPainPoint(): string | undefined {
+    return this.props.mainPainPoint;
+  }
   /**
    * Performs the improvement suggestion operation.
    * @returns The string | undefined.
    */
-  get improvementSuggestion(): string | undefined { return this.props.improvementSuggestion; }
+  get improvementSuggestion(): string | undefined {
+    return this.props.improvementSuggestion;
+  }
 }
 
 /**
@@ -742,32 +790,44 @@ export class BusinessValue extends ValueObject<{
    * Performs the current screening method operation.
    * @returns The ScreeningMethod.
    */
-  get currentScreeningMethod(): ScreeningMethod { return this.props.currentScreeningMethod; }
+  get currentScreeningMethod(): ScreeningMethod {
+    return this.props.currentScreeningMethod;
+  }
   /**
    * Performs the time spent per resume operation.
    * @returns The number value.
    */
-  get timeSpentPerResume(): number { return this.props.timeSpentPerResume; }
+  get timeSpentPerResume(): number {
+    return this.props.timeSpentPerResume;
+  }
   /**
    * Performs the resumes per week operation.
    * @returns The number value.
    */
-  get resumesPerWeek(): number { return this.props.resumesPerWeek; }
+  get resumesPerWeek(): number {
+    return this.props.resumesPerWeek;
+  }
   /**
    * Performs the time saving percentage operation.
    * @returns The number value.
    */
-  get timeSavingPercentage(): number { return this.props.timeSavingPercentage; }
+  get timeSavingPercentage(): number {
+    return this.props.timeSavingPercentage;
+  }
   /**
    * Performs the willingness to pay monthly operation.
    * @returns The number value.
    */
-  get willingnessToPayMonthly(): number { return this.props.willingnessToPayMonthly; }
+  get willingnessToPayMonthly(): number {
+    return this.props.willingnessToPayMonthly;
+  }
   /**
    * Performs the recommend likelihood operation.
    * @returns The Rating.
    */
-  get recommendLikelihood(): Rating { return this.props.recommendLikelihood; }
+  get recommendLikelihood(): Rating {
+    return this.props.recommendLikelihood;
+  }
 }
 
 /**
@@ -789,12 +849,16 @@ export class OptionalInfo extends ValueObject<{
    * Performs the additional feedback operation.
    * @returns The string | undefined.
    */
-  get additionalFeedback(): string | undefined { return this.props.additionalFeedback; }
+  get additionalFeedback(): string | undefined {
+    return this.props.additionalFeedback;
+  }
   /**
    * Performs the contact preference operation.
    * @returns The string | undefined.
    */
-  get contactPreference(): string | undefined { return this.props.contactPreference; }
+  get contactPreference(): string | undefined {
+    return this.props.contactPreference;
+  }
 }
 
 /**
@@ -813,10 +877,10 @@ export class SubmissionMetadata extends ValueObject<{
   static restore(data: any): SubmissionMetadata {
     return new SubmissionMetadata({
       ...data,
-      timestamp: new Date(data.timestamp)
+      timestamp: new Date(data.timestamp),
     });
   }
-  
+
   /**
    * Performs the ip operation.
    * @returns The string value.
@@ -854,32 +918,44 @@ export class SubmissionSummary extends ValueObject<{
    * Performs the role operation.
    * @returns The string value.
    */
-  get role(): string { return this.props.role; }
+  get role(): string {
+    return this.props.role;
+  }
   /**
    * Performs the industry operation.
    * @returns The string value.
    */
-  get industry(): string { return this.props.industry; }
+  get industry(): string {
+    return this.props.industry;
+  }
   /**
    * Performs the overall satisfaction operation.
    * @returns The number value.
    */
-  get overallSatisfaction(): number { return this.props.overallSatisfaction; }
+  get overallSatisfaction(): number {
+    return this.props.overallSatisfaction;
+  }
   /**
    * Performs the willingness to pay monthly operation.
    * @returns The number value.
    */
-  get willingnessToPayMonthly(): number { return this.props.willingnessToPayMonthly; }
+  get willingnessToPayMonthly(): number {
+    return this.props.willingnessToPayMonthly;
+  }
   /**
    * Performs the text length operation.
    * @returns The number value.
    */
-  get textLength(): number { return this.props.textLength; }
+  get textLength(): number {
+    return this.props.textLength;
+  }
   /**
    * Performs the completion rate operation.
    * @returns The number value.
    */
-  get completionRate(): number { return this.props.completionRate; }
+  get completionRate(): number {
+    return this.props.completionRate;
+  }
 }
 
 /**
@@ -905,32 +981,44 @@ export class QualityMetrics extends ValueObject<{
    * Performs the total text length operation.
    * @returns The number value.
    */
-  get totalTextLength(): number { return this.props.totalTextLength; }
+  get totalTextLength(): number {
+    return this.props.totalTextLength;
+  }
   /**
    * Performs the detailed answers operation.
    * @returns The number value.
    */
-  get detailedAnswers(): number { return this.props.detailedAnswers; }
+  get detailedAnswers(): number {
+    return this.props.detailedAnswers;
+  }
   /**
    * Performs the completion rate operation.
    * @returns The number value.
    */
-  get completionRate(): number { return this.props.completionRate; }
+  get completionRate(): number {
+    return this.props.completionRate;
+  }
   /**
    * Performs the quality score operation.
    * @returns The number value.
    */
-  get qualityScore(): number { return this.props.qualityScore; }
+  get qualityScore(): number {
+    return this.props.qualityScore;
+  }
   /**
    * Performs the bonus eligible operation.
    * @returns The boolean value.
    */
-  get bonusEligible(): boolean { return this.props.bonusEligible; }
+  get bonusEligible(): boolean {
+    return this.props.bonusEligible;
+  }
   /**
    * Performs the quality reasons operation.
    * @returns The an array of string value.
    */
-  get qualityReasons(): string[] { return this.props.qualityReasons; }
+  get qualityReasons(): string[] {
+    return this.props.qualityReasons;
+  }
 }
 
 /**
@@ -944,7 +1032,7 @@ export class QuestionnaireValidationResult {
    */
   constructor(
     public readonly isValid: boolean,
-    public readonly errors: string[]
+    public readonly errors: string[],
   ) {}
 }
 
@@ -953,11 +1041,22 @@ export enum QuestionnaireStatus {
   SUBMITTED = 'submitted',
   PROCESSED = 'processed',
   REWARDED = 'rewarded',
-  LOW_QUALITY = 'low_quality'
+  LOW_QUALITY = 'low_quality',
 }
 
-export type QuestionnaireUserRole = 'hr' | 'recruiter' | 'manager' | 'founder' | 'other';
-export type CompanySize = 'startup' | 'small' | 'medium' | 'large' | 'enterprise' | 'unknown';
+export type QuestionnaireUserRole =
+  | 'hr'
+  | 'recruiter'
+  | 'manager'
+  | 'founder'
+  | 'other';
+export type CompanySize =
+  | 'startup'
+  | 'small'
+  | 'medium'
+  | 'large'
+  | 'enterprise'
+  | 'unknown';
 export type ScreeningMethod = 'manual' | 'ats' | 'hybrid' | 'other';
 export type Rating = 1 | 2 | 3 | 4 | 5;
 
@@ -1047,7 +1146,7 @@ export class QuestionnaireSubmittedEvent implements DomainEvent {
     public readonly qualityScore: number,
     public readonly bonusEligible: boolean,
     public readonly submissionData: SubmissionSummary,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -1068,7 +1167,7 @@ export class HighQualitySubmissionEvent implements DomainEvent {
     public readonly submitterIP: string,
     public readonly qualityScore: number,
     public readonly qualityReasons: string[],
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -1087,6 +1186,6 @@ export class QuestionnaireValidationFailedEvent implements DomainEvent {
     public readonly submitterIP: string,
     public readonly validationErrors: string[],
     public readonly submissionData: Partial<RawSubmissionData>,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }

@@ -158,7 +158,10 @@ export class AppController {
         { ttl: 30000 }, // 30秒缓存(30000毫秒)，健康检查不需要太长缓存
       );
     } catch (error) {
-      this.logger.error('Health check cache error', error.stack || error.message);
+      this.logger.error(
+        'Health check cache error',
+        error.stack || error.message,
+      );
       // 降级到无缓存模式
       const dbHealth = await this.jobRepository.healthCheck();
       const natsHealth = this.natsClient.isConnected;

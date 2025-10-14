@@ -59,7 +59,7 @@ export class StreamConfigFactory {
   static create(
     name: string,
     subjects: string[],
-    options: Partial<Omit<StreamConfig, 'name' | 'subjects'>> = {}
+    options: Partial<Omit<StreamConfig, 'name' | 'subjects'>> = {},
   ): StreamConfig {
     return {
       name,
@@ -79,7 +79,7 @@ export class StreamConfigFactory {
   static createDev(
     name: string,
     subjects: string[],
-    options: Partial<Omit<StreamConfig, 'name' | 'subjects'>> = {}
+    options: Partial<Omit<StreamConfig, 'name' | 'subjects'>> = {},
   ): StreamConfig {
     return this.create(name, subjects, {
       maxAge: 1 * 24 * 60 * 60 * 1000 * 1000000, // 1 day for dev
@@ -95,7 +95,7 @@ export class StreamConfigFactory {
   static createProd(
     name: string,
     subjects: string[],
-    options: Partial<Omit<StreamConfig, 'name' | 'subjects'>> = {}
+    options: Partial<Omit<StreamConfig, 'name' | 'subjects'>> = {},
   ): StreamConfig {
     return this.create(name, subjects, {
       maxAge: 30 * 24 * 60 * 60 * 1000 * 1000000, // 30 days for prod

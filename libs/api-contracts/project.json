@@ -18,9 +18,7 @@
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "libs/api-contracts/**/*.ts"
-        ]
+        "lintFilePatterns": ["libs/api-contracts/**/*.ts"]
       }
     },
     "test": {

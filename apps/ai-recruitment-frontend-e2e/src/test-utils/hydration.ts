@@ -10,9 +10,11 @@ const HYDRATED_COMPONENTS = [
 async function waitForIdle(page: Page): Promise<void> {
   await page.evaluate(() => {
     return new Promise<void>((resolve) => {
-      const idle = (window as typeof window & {
-        requestIdleCallback?: (callback: IdleRequestCallback) => number;
-      }).requestIdleCallback;
+      const idle = (
+        window as typeof window & {
+          requestIdleCallback?: (callback: IdleRequestCallback) => number;
+        }
+      ).requestIdleCallback;
 
       if (typeof idle === 'function') {
         idle(() => resolve());
@@ -47,7 +49,9 @@ export async function waitForDeferredComponents(
 
   await Promise.all(
     selectors.map((selector) =>
-      page.waitForSelector(selector, { state: 'attached', timeout: 10000 }).catch(() => undefined),
+      page
+        .waitForSelector(selector, { state: 'attached', timeout: 10000 })
+        .catch(() => undefined),
     ),
   );
 }

@@ -18,9 +18,7 @@
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "libs/shared-nats-client/**/*.ts"
-        ]
+        "lintFilePatterns": ["libs/shared-nats-client/**/*.ts"]
       }
     },
     "test": {

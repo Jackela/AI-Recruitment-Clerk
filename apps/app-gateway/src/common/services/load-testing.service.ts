@@ -210,7 +210,10 @@ export class LoadTestingService {
   /**
    * 发送HTTP请求
    */
-  private async makeRequest(baseUrl: string, endpoint: any): Promise<{ status: number }> {
+  private async makeRequest(
+    baseUrl: string,
+    endpoint: any,
+  ): Promise<{ status: number }> {
     const url = `${baseUrl}${endpoint.path}`;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 30000);

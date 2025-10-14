@@ -89,7 +89,7 @@ describe('GridFsService Integration', () => {
     }).compile();
 
     service = module.get<GridFsService>(GridFsService);
-    
+
     // Mock the internal GridFS bucket
     (service as any).gridFSBucket = mockGridFSBucket;
   }, 30000);

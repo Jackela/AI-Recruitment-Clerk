@@ -11,6 +11,6 @@ export default {
     'src/**/*.ts',
     '!src/**/*.spec.ts',
     '!src/**/*.d.ts',
-    '!src/index.ts'
-  ]
+    '!src/index.ts',
+  ],
 };

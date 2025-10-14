@@ -158,26 +158,26 @@ export interface ComponentScores {
 
 /**
  * ScoringConfidenceService - AI-powered confidence assessment for intelligent scoring reliability.
- * 
+ *
  * Leverages statistical analysis and machine learning patterns to analyze resume scoring accuracy
  * and generate confidence metrics with risk assessment for recruitment decision-making.
- * 
+ *
  * **Algorithm Details:**
  * - Model: Statistical confidence intervals with variance analysis
  * - Confidence Threshold: 70% minimum for reliable recommendations
  * - Fallback Strategy: Multi-factor assessment when AI confidence is low
- * 
+ *
  * **Performance Characteristics:**
  * - Average Processing Time: 150-300ms per analysis
  * - Accuracy Rate: 92% confidence prediction accuracy
  * - Supported Formats: Resume DTOs with component scoring breakdowns
- * 
+ *
  * **Confidence Assessment Framework:**
  * 1. Data Quality Analysis (completeness, consistency, recency, detail)
  * 2. Analysis Reliability Assessment (algorithm confidence, AI response quality)
  * 3. Score Variance Calculation (stability across multiple factors)
  * 4. Recommendation Certainty Determination (overall decision confidence)
- * 
+ *
  * @example
  * ```typescript
  * const confidenceReport = confidenceService.generateConfidenceReport(
@@ -185,17 +185,17 @@ export interface ComponentScores {
  *   resumeData,
  *   processingMetrics
  * );
- * 
+ *
  * console.log(`Overall Confidence: ${confidenceReport.overallConfidence}%`);
  * console.log(`Reliability Grade: ${confidenceReport.qualityIndicators.reliabilityGrade}`);
- * 
+ *
  * if (confidenceReport.overallConfidence >= 80) {
  *   console.log('High confidence recommendation - proceed with hiring decision');
  * } else {
  *   console.log('Review required:', confidenceReport.recommendations.actionItems);
  * }
  * ```
- * 
+ *
  * @see {@link ComponentScores} for input scoring structure
  * @see {@link ScoreReliabilityReport} for output format details
  * @see {@link ConfidenceMetrics} for detailed confidence breakdowns
@@ -207,20 +207,20 @@ export class ScoringConfidenceService {
 
   /**
    * Generate comprehensive confidence and reliability report for resume scoring analysis.
-   * 
+   *
    * Analyzes component scores, resume data quality, and processing metrics to determine
    * the reliability and confidence level of AI-generated scoring recommendations.
    * Provides actionable insights for hiring decision-making with risk assessment.
-   * 
+   *
    * @param {ComponentScores} componentScores - Individual scoring components (skills, experience, cultural fit)
    * @param {ResumeDTO} resume - Parsed resume data with extracted fields and metadata
    * @param {ProcessingMetrics} processingMetrics - AI processing performance and error metrics
    * @returns {ScoreReliabilityReport} Comprehensive confidence analysis with recommendations
-   * 
+   *
    * @throws {ValidationException} When component scores are incomplete or invalid
    * @throws {ProcessingException} When analysis algorithms fail or timeout
    * @throws {ServiceException} When confidence calculation encounters system errors
-   * 
+   *
    * @example
    * ```typescript
    * const componentScores = {
@@ -229,13 +229,13 @@ export class ScoringConfidenceService {
    *   culturalFitScore: 92,
    *   overallScore: 83
    * };
-   * 
+   *
    * const report = service.generateConfidenceReport(
    *   componentScores,
    *   resumeData,
    *   { aiResponseTimes: [200, 180, 220], fallbackUsed: [false, false, false] }
    * );
-   * 
+   *
    * // High confidence decision
    * if (report.overallConfidence >= 85) {
    *   console.log('Proceed with confidence:', report.recommendations.scoringReliability);
@@ -249,7 +249,7 @@ export class ScoringConfidenceService {
    *   console.log('Risk factors:', report.recommendations.riskMitigation);
    * }
    * ```
-   * 
+   *
    * @see {@link assessDataQuality} for data quality assessment logic
    * @see {@link assessAnalysisReliability} for AI reliability validation
    * @see {@link calculateOverallConfidence} for confidence scoring algorithm

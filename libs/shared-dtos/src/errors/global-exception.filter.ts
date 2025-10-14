@@ -9,33 +9,33 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
-  Logger
+  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ThrottlerException } from '@nestjs/throttler';
 import { ValidationError } from 'class-validator';
 
-import { 
-  AppException, 
-  ErrorHandler, 
+import {
+  AppException,
+  ErrorHandler,
   ErrorType,
-  ErrorSeverity 
+  ErrorSeverity,
 } from '../common/error-handling.patterns';
-import { 
-  EnhancedAppException, 
-  CombinedErrorType 
+import {
+  EnhancedAppException,
+  CombinedErrorType,
 } from './enhanced-error-types';
-import { 
-  ErrorCorrelationManager, 
-  ErrorCorrelationContext 
+import {
+  ErrorCorrelationManager,
+  ErrorCorrelationContext,
 } from './error-correlation';
-import { 
+import {
   StandardizedErrorResponseFormatter,
-  StandardizedErrorResponse 
+  StandardizedErrorResponse,
 } from './error-response-formatter';
-import { 
+import {
   StructuredErrorLogger,
-  StructuredLoggerFactory 
+  StructuredLoggerFactory,
 } from './structured-logging';
 
 /**
@@ -48,11 +48,14 @@ export interface GlobalExceptionFilterConfig {
   enablePerformanceTracking?: boolean;
   includeStackTrace?: boolean;
   enableErrorRecovery?: boolean;
-  customErrorMapping?: Record<string, {
-    httpStatus: HttpStatus;
-    errorType: CombinedErrorType;
-    userMessage?: string;
-  }>;
+  customErrorMapping?: Record<
+    string,
+    {
+      httpStatus: HttpStatus;
+      errorType: CombinedErrorType;
+      userMessage?: string;
+    }
+  >;
 }
 
 /**
@@ -76,11 +79,15 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
       includeStackTrace: process.env.NODE_ENV !== 'production',
       enableErrorRecovery: true,
       customErrorMapping: {},
-      ...config
+      ...config,
     };
 
-    this.logger = new Logger(`${this.config.serviceName}-GlobalExceptionFilter`);
-    this.structuredLogger = StructuredLoggerFactory.getLogger(this.config.serviceName);
+    this.logger = new Logger(
+      `${this.config.serviceName}-GlobalExceptionFilter`,
+    );
+    this.structuredLogger = StructuredLoggerFactory.getLogger(
+      this.config.serviceName,
+    );
   }
 
   /**
@@ -98,15 +105,15 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
 
     // Convert to standardized enhanced exception
     const enhancedException = this.convertToEnhancedException(
-      exception, 
-      correlationContext
+      exception,
+      correlationContext,
     );
 
     // Build standardized error response
     const errorResponse = this.buildErrorResponse(
       enhancedException,
       request,
-      correlationContext
+      correlationContext,
     );
 
     // Log error with structured logging
@@ -128,29 +135,31 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
   /**
    * Get or create correlation context from request
    */
-  private getOrCreateCorrelationContext(request: Request): ErrorCorrelationContext {
+  private getOrCreateCorrelationContext(
+    request: Request,
+  ): ErrorCorrelationContext {
     if (this.config.enableCorrelation) {
       // Try to get existing context first
       let context = ErrorCorrelationManager.getContext();
-      
+
       if (!context) {
         // Create new context from request
         context = ErrorCorrelationManager.createContextFromRequest(
           request,
           this.config.serviceName,
-          this.getOperationName(request)
+          this.getOperationName(request),
         );
         ErrorCorrelationManager.setContext(context);
       }
-      
+
       return context;
     }
-    
+
     // Create minimal context if correlation is disabled
     return ErrorCorrelationManager.createContextFromRequest(
       request,
       this.config.serviceName,
-      this.getOperationName(request)
+      this.getOperationName(request),
     );
   }
 
@@ -159,7 +168,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
    */
   private convertToEnhancedException(
     exception: unknown,
-    correlationContext: ErrorCorrelationContext
+    correlationContext: ErrorCorrelationContext,
   ): EnhancedAppException {
     // If already an EnhancedAppException, add correlation context
     if (exception instanceof EnhancedAppException) {
@@ -174,13 +183,17 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
         exception.errorDetails.message,
         exception.getStatus(),
         exception.errorDetails.details,
-        exception.errorDetails.context
+        exception.errorDetails.context,
       );
-      
+
       return enhanced
         .withCorrelation(correlationContext)
-        .withTraceId(exception.errorDetails.traceId || correlationContext.traceId)
-        .withUserId(exception.errorDetails.userId ?? correlationContext.userId ?? '')
+        .withTraceId(
+          exception.errorDetails.traceId || correlationContext.traceId,
+        )
+        .withUserId(
+          exception.errorDetails.userId ?? correlationContext.userId ?? '',
+        )
         .withSeverity(exception.errorDetails.severity);
     }
 
@@ -190,7 +203,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
         ErrorType.RATE_LIMIT,
         'RATE_LIMIT_EXCEEDED',
         'Too many requests, please try again later',
-        HttpStatus.TOO_MANY_REQUESTS
+        HttpStatus.TOO_MANY_REQUESTS,
       )
         .withCorrelation(correlationContext)
         .withBusinessImpact('medium')
@@ -198,7 +211,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
         .withRecoveryStrategies([
           'Wait before retrying',
           'Reduce request frequency',
-          'Contact support for rate limit increase'
+          'Contact support for rate limit increase',
         ]);
     }
 
@@ -210,7 +223,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
         'VALIDATION_FAILED',
         'Request validation failed',
         HttpStatus.BAD_REQUEST,
-        this.formatValidationErrors(validationErrors)
+        this.formatValidationErrors(validationErrors),
       )
         .withCorrelation(correlationContext)
         .withBusinessImpact('low')
@@ -218,7 +231,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
         .withRecoveryStrategies([
           'Check all required fields',
           'Verify data formats',
-          'Review field constraints'
+          'Review field constraints',
         ]);
     }
 
@@ -226,28 +239,23 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       const status = exception.getStatus();
       const response = exception.getResponse();
-      
+
       let errorType: CombinedErrorType;
       let errorCode: string;
       let message: string;
-      
+
       if (typeof response === 'object' && response !== null) {
         const responseObj = response as any;
         message = responseObj.message || exception.message;
         errorCode = responseObj.error || this.mapStatusToErrorCode(status);
         errorType = this.mapStatusToErrorType(status);
       } else {
-        message = response as string || exception.message;
+        message = (response as string) || exception.message;
         errorCode = this.mapStatusToErrorCode(status);
         errorType = this.mapStatusToErrorType(status);
       }
 
-      return new EnhancedAppException(
-        errorType,
-        errorCode,
-        message,
-        status
-      )
+      return new EnhancedAppException(errorType, errorCode, message, status)
         .withCorrelation(correlationContext)
         .withBusinessImpact(this.mapStatusToBusinessImpact(status))
         .withUserImpact(this.mapStatusToUserImpact(status))
@@ -256,7 +264,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
 
     // Handle generic errors using existing ErrorHandler
     const handledException = ErrorHandler.handleError(
-      exception instanceof Error ? exception : new Error(String(exception))
+      exception instanceof Error ? exception : new Error(String(exception)),
     );
 
     return new EnhancedAppException(
@@ -264,7 +272,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
       handledException.errorDetails.code,
       handledException.errorDetails.message,
       handledException.getStatus(),
-      handledException.errorDetails.details
+      handledException.errorDetails.details,
     )
       .withCorrelation(correlationContext)
       .withSeverity(ErrorSeverity.HIGH)
@@ -273,7 +281,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
       .withRecoveryStrategies([
         'Retry the operation',
         'Check system status',
-        'Contact technical support'
+        'Contact technical support',
       ]);
   }
 
@@ -283,17 +291,17 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
   private buildErrorResponse(
     error: EnhancedAppException,
     request: Request,
-    correlationContext: ErrorCorrelationContext
+    correlationContext: ErrorCorrelationContext,
   ): StandardizedErrorResponse {
     const requestContext = {
       path: request.path,
       method: request.method,
-      ip: this.getClientIp(request)
+      ip: this.getClientIp(request),
     };
 
     return StandardizedErrorResponseFormatter.formatEnhanced(
       error,
-      requestContext
+      requestContext,
     );
   }
 
@@ -303,28 +311,24 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
   private logError(
     error: EnhancedAppException,
     request: Request,
-    correlationContext: ErrorCorrelationContext
+    correlationContext: ErrorCorrelationContext,
   ): void {
     if (this.config.enableStructuredLogging) {
-      this.structuredLogger.logError(
-        error,
-        correlationContext.operationName,
-        {
-          request: {
-            method: request.method,
-            path: request.path,
-            ip: this.getClientIp(request),
-            userAgent: request.headers['user-agent'],
-            query: request.query,
-            params: request.params
-          }
-        }
-      );
+      this.structuredLogger.logError(error, correlationContext.operationName, {
+        request: {
+          method: request.method,
+          path: request.path,
+          ip: this.getClientIp(request),
+          userAgent: request.headers['user-agent'],
+          query: request.query,
+          params: request.params,
+        },
+      });
     } else {
       // Fallback to basic logging
       const { severity } = error.enhancedDetails;
       const logMessage = `${request.method} ${request.path} - ${error.enhancedDetails.code}: ${error.enhancedDetails.message}`;
-      
+
       switch (severity) {
         case 'critical':
         case 'high':
@@ -344,11 +348,11 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
    */
   private trackErrorMetrics(
     error: EnhancedAppException,
-    _correlationContext: ErrorCorrelationContext
+    _correlationContext: ErrorCorrelationContext,
   ): void {
     // This would integrate with your metrics system
     // Example: Prometheus, DataDog, CloudWatch, etc.
-    
+
     const metrics = {
       errorType: error.enhancedDetails.type,
       errorCode: error.enhancedDetails.code,
@@ -358,7 +362,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
       serviceName: this.config.serviceName,
       operationName: _correlationContext.operationName,
       executionTime: _correlationContext.executionTime || 0,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     // Send to metrics collector
@@ -401,21 +405,25 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
    * Check if exception is validation error
    */
   private isValidationError(exception: unknown): boolean {
-    return Array.isArray(exception) && 
-           exception.length > 0 && 
-           exception[0] instanceof ValidationError;
+    return (
+      Array.isArray(exception) &&
+      exception.length > 0 &&
+      exception[0] instanceof ValidationError
+    );
   }
 
   /**
    * Format validation errors
    */
   private formatValidationErrors(errors: ValidationError[]): any {
-    return errors.map(error => ({
+    return errors.map((error) => ({
       property: error.property,
       value: error.value,
       constraints: error.constraints,
-      children: error.children && error.children.length > 0 ? 
-        this.formatValidationErrors(error.children) : undefined,
+      children:
+        error.children && error.children.length > 0
+          ? this.formatValidationErrors(error.children)
+          : undefined,
     }));
   }
 
@@ -434,7 +442,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
       500: ErrorType.SYSTEM,
       502: ErrorType.EXTERNAL_SERVICE,
       503: ErrorType.EXTERNAL_SERVICE,
-      504: ErrorType.EXTERNAL_SERVICE
+      504: ErrorType.EXTERNAL_SERVICE,
     };
 
     return statusMap[status] || ErrorType.SYSTEM;
@@ -455,7 +463,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
       500: 'INTERNAL_SERVER_ERROR',
       502: 'BAD_GATEWAY',
       503: 'SERVICE_UNAVAILABLE',
-      504: 'GATEWAY_TIMEOUT'
+      504: 'GATEWAY_TIMEOUT',
     };
 
     return codeMap[status] || 'UNKNOWN_ERROR';
@@ -464,7 +472,9 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
   /**
    * Map HTTP status to business impact
    */
-  private mapStatusToBusinessImpact(status: number): 'low' | 'medium' | 'high' | 'critical' {
+  private mapStatusToBusinessImpact(
+    status: number,
+  ): 'low' | 'medium' | 'high' | 'critical' {
     if (status >= 500) return 'high';
     if (status === 429) return 'medium';
     if (status >= 400) return 'low';
@@ -474,7 +484,9 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
   /**
    * Map HTTP status to user impact
    */
-  private mapStatusToUserImpact(status: number): 'none' | 'minimal' | 'moderate' | 'severe' {
+  private mapStatusToUserImpact(
+    status: number,
+  ): 'none' | 'minimal' | 'moderate' | 'severe' {
     if (status >= 500) return 'severe';
     if (status === 401 || status === 403) return 'moderate';
     if (status >= 400) return 'moderate';
@@ -486,19 +498,57 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
    */
   private getRecoveryStrategiesForStatus(status: number): string[] {
     const strategyMap: Record<number, string[]> = {
-      400: ['Check request parameters', 'Validate input data', 'Review API documentation'],
-      401: ['Login again', 'Check authentication credentials', 'Verify token validity'],
-      403: ['Check permissions', 'Contact administrator', 'Verify access rights'],
-      404: ['Check resource exists', 'Verify URL path', 'Check resource identifier'],
+      400: [
+        'Check request parameters',
+        'Validate input data',
+        'Review API documentation',
+      ],
+      401: [
+        'Login again',
+        'Check authentication credentials',
+        'Verify token validity',
+      ],
+      403: [
+        'Check permissions',
+        'Contact administrator',
+        'Verify access rights',
+      ],
+      404: [
+        'Check resource exists',
+        'Verify URL path',
+        'Check resource identifier',
+      ],
       409: ['Refresh data', 'Resolve conflicts', 'Try again later'],
-      429: ['Wait before retrying', 'Reduce request frequency', 'Contact support'],
-      500: ['Retry operation', 'Check system status', 'Contact technical support'],
-      502: ['Retry operation', 'Check service status', 'Use alternative endpoint'],
+      429: [
+        'Wait before retrying',
+        'Reduce request frequency',
+        'Contact support',
+      ],
+      500: [
+        'Retry operation',
+        'Check system status',
+        'Contact technical support',
+      ],
+      502: [
+        'Retry operation',
+        'Check service status',
+        'Use alternative endpoint',
+      ],
       503: ['Wait and retry', 'Check service availability', 'Use cached data'],
-      504: ['Retry with timeout', 'Check network connectivity', 'Use asynchronous processing']
+      504: [
+        'Retry with timeout',
+        'Check network connectivity',
+        'Use asynchronous processing',
+      ],
     };
 
-    return strategyMap[status] || ['Retry operation', 'Check system status', 'Contact support'];
+    return (
+      strategyMap[status] || [
+        'Retry operation',
+        'Check system status',
+        'Contact support',
+      ]
+    );
   }
 }
 
@@ -507,11 +557,11 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
  */
 export function createGlobalExceptionFilter(
   serviceName: string,
-  customConfig?: Partial<GlobalExceptionFilterConfig>
+  customConfig?: Partial<GlobalExceptionFilterConfig>,
 ): StandardizedGlobalExceptionFilter {
   const config: GlobalExceptionFilterConfig = {
     serviceName,
-    ...customConfig
+    ...customConfig,
   };
 
   return new StandardizedGlobalExceptionFilter(config);
@@ -531,12 +581,12 @@ export class ExceptionFilterConfigHelper {
       enablePerformanceTracking: true,
       enableErrorRecovery: true,
       customErrorMapping: {
-        'CIRCUIT_BREAKER_OPEN': {
+        CIRCUIT_BREAKER_OPEN: {
           httpStatus: HttpStatus.SERVICE_UNAVAILABLE,
           errorType: ErrorType.EXTERNAL_SERVICE,
-          userMessage: '服务暂时不可用，请稍后重试'
-        }
-      }
+          userMessage: '服务暂时不可用，请稍后重试',
+        },
+      },
     };
   }
 
@@ -548,7 +598,7 @@ export class ExceptionFilterConfigHelper {
       enableCorrelation: true,
       enableStructuredLogging: true,
       enablePerformanceTracking: true,
-      includeStackTrace: true
+      includeStackTrace: true,
     };
   }
 
@@ -559,7 +609,7 @@ export class ExceptionFilterConfigHelper {
     return {
       includeStackTrace: false,
       enableErrorRecovery: true,
-      enablePerformanceTracking: true
+      enablePerformanceTracking: true,
     };
   }
 }

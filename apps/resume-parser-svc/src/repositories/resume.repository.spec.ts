@@ -13,10 +13,7 @@ describe('ResumeRepository', () => {
   beforeEach(async () => {
     // Use TestProviders for consistent mock setup
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ResumeRepository,
-        TestProviders.getMockResumeModel(),
-      ],
+      providers: [ResumeRepository, TestProviders.getMockResumeModel()],
     }).compile();
 
     repository = module.get<ResumeRepository>(ResumeRepository);
@@ -34,7 +31,11 @@ describe('ResumeRepository', () => {
   describe('create', () => {
     it('should create a new resume successfully', async () => {
       const resumeData = {
-        contactInfo: { name: 'John Doe', email: 'john@example.com', phone: '+1-234-567-8900' },
+        contactInfo: {
+          name: 'John Doe',
+          email: 'john@example.com',
+          phone: '+1-234-567-8900',
+        },
         skills: ['JavaScript', 'TypeScript'],
         status: 'pending' as const,
       };
@@ -58,7 +59,7 @@ describe('ResumeRepository', () => {
       });
       expect(savedResume.save).toHaveBeenCalled();
       expect(Logger.prototype.log).toHaveBeenCalledWith(
-        'Created resume with ID: resume-123'
+        'Created resume with ID: resume-123',
       );
     });
 
@@ -72,8 +73,13 @@ describe('ResumeRepository', () => {
 
       (mockResumeModel as any).mockImplementation(() => failingResume);
 
-      await expect(repository.create(resumeData)).rejects.toThrow('Validation failed');
-      expect(Logger.prototype.error).toHaveBeenCalledWith('Error creating resume:', error);
+      await expect(repository.create(resumeData)).rejects.toThrow(
+        'Validation failed',
+      );
+      expect(Logger.prototype.error).toHaveBeenCalledWith(
+        'Error creating resume:',
+        error,
+      );
     });
   });
 
@@ -110,10 +116,12 @@ describe('ResumeRepository', () => {
         exec: jest.fn().mockRejectedValue(error),
       });
 
-      await expect(repository.findById('resume-123')).rejects.toThrow('Database error');
+      await expect(repository.findById('resume-123')).rejects.toThrow(
+        'Database error',
+      );
       expect(Logger.prototype.error).toHaveBeenCalledWith(
         'Error finding resume by ID resume-123:',
-        error
+        error,
       );
     });
   });
@@ -153,10 +161,12 @@ describe('ResumeRepository', () => {
         exec: jest.fn().mockRejectedValue(error),
       });
 
-      await expect(repository.findByEmail('test@example.com')).rejects.toThrow('Query failed');
+      await expect(repository.findByEmail('test@example.com')).rejects.toThrow(
+        'Query failed',
+      );
       expect(Logger.prototype.error).toHaveBeenCalledWith(
         'Error finding resumes by email test@example.com:',
-        error
+        error,
       );
     });
   });
@@ -172,7 +182,9 @@ describe('ResumeRepository', () => {
         exec: jest.fn().mockResolvedValue(mockResume),
       });
 
-      const result = await repository.findByGridFsUrl('gridfs://resume-file-123');
+      const result = await repository.findByGridFsUrl(
+        'gridfs://resume-file-123',
+      );
 
       expect(result).toEqual(mockResume);
       expect(mockResumeModel.findOne).toHaveBeenCalledWith({
@@ -196,7 +208,9 @@ describe('ResumeRepository', () => {
         exec: jest.fn().mockRejectedValue(error),
       });
 
-      await expect(repository.findByGridFsUrl('gridfs://test')).rejects.toThrow('GridFS error');
+      await expect(repository.findByGridFsUrl('gridfs://test')).rejects.toThrow(
+        'GridFS error',
+      );
     });
   });
 
@@ -218,9 +232,11 @@ describe('ResumeRepository', () => {
       expect(mockResumeModel.findByIdAndUpdate).toHaveBeenCalledWith(
         'resume-123',
         updateData,
-        { new: true, runValidators: true }
+        { new: true, runValidators: true },
       );
-      expect(Logger.prototype.log).toHaveBeenCalledWith('Updated resume with ID: resume-123');
+      expect(Logger.prototype.log).toHaveBeenCalledWith(
+        'Updated resume with ID: resume-123',
+      );
     });
 
     it('should return null when updating non-existent resume', async () => {
@@ -228,7 +244,9 @@ describe('ResumeRepository', () => {
         exec: jest.fn().mockResolvedValue(null),
       });
 
-      const result = await repository.updateById('nonexistent', { status: 'completed' });
+      const result = await repository.updateById('nonexistent', {
+        status: 'completed',
+      });
 
       expect(result).toBeNull();
     });
@@ -239,10 +257,12 @@ describe('ResumeRepository', () => {
         exec: jest.fn().mockRejectedValue(error),
       });
 
-      await expect(repository.updateById('resume-123', {})).rejects.toThrow('Update failed');
+      await expect(repository.updateById('resume-123', {})).rejects.toThrow(
+        'Update failed',
+      );
       expect(Logger.prototype.error).toHaveBeenCalledWith(
         'Error updating resume resume-123:',
-        error
+        error,
       );
     });
   });
@@ -268,7 +288,7 @@ describe('ResumeRepository', () => {
           status: 'completed',
           processedAt: expect.any(Date),
         }),
-        { new: true, runValidators: true }
+        { new: true, runValidators: true },
       );
     });
 
@@ -283,7 +303,11 @@ describe('ResumeRepository', () => {
         exec: jest.fn().mockResolvedValue(updatedResume),
       });
 
-      const result = await repository.updateStatus('resume-123', 'failed', 'Parsing error');
+      const result = await repository.updateStatus(
+        'resume-123',
+        'failed',
+        'Parsing error',
+      );
 
       expect(result).toEqual(updatedResume);
       expect(mockResumeModel.findByIdAndUpdate).toHaveBeenCalledWith(
@@ -292,7 +316,7 @@ describe('ResumeRepository', () => {
           status: 'failed',
           errorMessage: 'Parsing error',
         }),
-        { new: true, runValidators: true }
+        { new: true, runValidators: true },
       );
     });
 
@@ -302,9 +326,9 @@ describe('ResumeRepository', () => {
         exec: jest.fn().mockRejectedValue(error),
       });
 
-      await expect(repository.updateStatus('resume-123', 'completed')).rejects.toThrow(
-        'Status update failed'
-      );
+      await expect(
+        repository.updateStatus('resume-123', 'completed'),
+      ).rejects.toThrow('Status update failed');
     });
   });
 
@@ -319,8 +343,12 @@ describe('ResumeRepository', () => {
       const result = await repository.deleteById('resume-123');
 
       expect(result).toBe(true);
-      expect(mockResumeModel.findByIdAndDelete).toHaveBeenCalledWith('resume-123');
-      expect(Logger.prototype.log).toHaveBeenCalledWith('Deleted resume with ID: resume-123');
+      expect(mockResumeModel.findByIdAndDelete).toHaveBeenCalledWith(
+        'resume-123',
+      );
+      expect(Logger.prototype.log).toHaveBeenCalledWith(
+        'Deleted resume with ID: resume-123',
+      );
     });
 
     it('should return false when deleting non-existent resume', async () => {
@@ -339,10 +367,12 @@ describe('ResumeRepository', () => {
         exec: jest.fn().mockRejectedValue(error),
       });
 
-      await expect(repository.deleteById('resume-123')).rejects.toThrow('Deletion failed');
+      await expect(repository.deleteById('resume-123')).rejects.toThrow(
+        'Deletion failed',
+      );
       expect(Logger.prototype.error).toHaveBeenCalledWith(
         'Error deleting resume resume-123:',
-        error
+        error,
       );
     });
   });
@@ -392,7 +422,9 @@ describe('ResumeRepository', () => {
         exec: jest.fn().mockRejectedValue(error),
       });
 
-      await expect(repository.findByStatus('pending')).rejects.toThrow('Status query failed');
+      await expect(repository.findByStatus('pending')).rejects.toThrow(
+        'Status query failed',
+      );
     });
   });
 
@@ -445,7 +477,9 @@ describe('ResumeRepository', () => {
       const result = await repository.findCompleted();
 
       expect(result).toEqual(mockResumes);
-      expect(mockResumeModel.find).toHaveBeenCalledWith({ status: 'completed' });
+      expect(mockResumeModel.find).toHaveBeenCalledWith({
+        status: 'completed',
+      });
       expect(chainMock.limit).toHaveBeenCalledWith(100);
     });
 
@@ -510,10 +544,12 @@ describe('ResumeRepository', () => {
         exec: jest.fn().mockRejectedValue(error),
       });
 
-      await expect(repository.countByStatus()).rejects.toThrow('Aggregation failed');
+      await expect(repository.countByStatus()).rejects.toThrow(
+        'Aggregation failed',
+      );
       expect(Logger.prototype.error).toHaveBeenCalledWith(
         'Error counting resumes by status:',
-        error
+        error,
       );
     });
   });
@@ -586,7 +622,9 @@ describe('ResumeRepository', () => {
         exec: jest.fn().mockRejectedValue(error),
       });
 
-      await expect(repository.findWithSkills(['Java'])).rejects.toThrow('Skill search failed');
+      await expect(repository.findWithSkills(['Java'])).rejects.toThrow(
+        'Skill search failed',
+      );
     });
   });
 

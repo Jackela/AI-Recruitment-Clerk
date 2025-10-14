@@ -3,7 +3,7 @@ export enum BonusType {
   QUESTIONNAIRE = 'questionnaire',
   PAYMENT = 'payment',
   REFERRAL = 'referral',
-  PROMOTION = 'promotion'
+  PROMOTION = 'promotion',
 }
 
 /**

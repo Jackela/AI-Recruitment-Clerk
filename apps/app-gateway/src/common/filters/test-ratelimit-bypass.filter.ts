@@ -1,4 +1,10 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 
 /**
  * Represents the test rate limit bypass filter.
@@ -23,12 +29,16 @@ export class TestRateLimitBypassFilter implements ExceptionFilter {
       exception.getStatus() === HttpStatus.TOO_MANY_REQUESTS &&
       request?.url !== '/system/status'
     ) {
-      return response.status(HttpStatus.OK).json({ success: true, data: { bypassedRateLimit: true } });
+      return response
+        .status(HttpStatus.OK)
+        .json({ success: true, data: { bypassedRateLimit: true } });
     }
 
     // Default behavior: pass through the original exception response
     const status = (exception as any).getStatus?.() ?? 500;
-    const payload = (exception as any).getResponse?.() ?? { statusCode: status };
+    const payload = (exception as any).getResponse?.() ?? {
+      statusCode: status,
+    };
     response.status(status).json(payload);
   }
 }

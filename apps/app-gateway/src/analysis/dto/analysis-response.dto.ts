@@ -95,7 +95,8 @@ export class AnalysisResultDto {
 
   @ApiProperty({
     description: '分析总结',
-    example: '该候选人具有强的云架构背景，特别是在AWS和Kubernetes方面，但缺乏Azure和Terraform经验。',
+    example:
+      '该候选人具有强的云架构背景，特别是在AWS和Kubernetes方面，但缺乏Azure和Terraform经验。',
   })
   summary: string;
 
@@ -107,7 +108,12 @@ export class AnalysisResultDto {
 
   @ApiProperty({
     description: '处理时间统计（毫秒）',
-    example: { jdExtraction: 1200, resumeParsing: 2300, skillMatching: 800, scoring: 500 },
+    example: {
+      jdExtraction: 1200,
+      resumeParsing: 2300,
+      skillMatching: 800,
+      scoring: 500,
+    },
   })
   processingTimes?: Record<string, number>;
 

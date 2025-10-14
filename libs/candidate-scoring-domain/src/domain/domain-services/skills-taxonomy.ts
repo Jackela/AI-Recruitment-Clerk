@@ -47,44 +47,78 @@ export class SkillsTaxonomy {
     {
       name: 'Programming Languages',
       weight: 1.0,
-      subcategories: ['Frontend', 'Backend', 'Mobile', 'Data Science', 'Systems']
+      subcategories: [
+        'Frontend',
+        'Backend',
+        'Mobile',
+        'Data Science',
+        'Systems',
+      ],
     },
     {
       name: 'Frameworks & Libraries',
       weight: 0.9,
-      subcategories: ['Web Frameworks', 'Mobile Frameworks', 'Testing Frameworks', 'UI Libraries']
+      subcategories: [
+        'Web Frameworks',
+        'Mobile Frameworks',
+        'Testing Frameworks',
+        'UI Libraries',
+      ],
     },
     {
       name: 'Databases',
       weight: 0.8,
-      subcategories: ['SQL', 'NoSQL', 'Cloud Databases', 'In-Memory']
+      subcategories: ['SQL', 'NoSQL', 'Cloud Databases', 'In-Memory'],
     },
     {
       name: 'Cloud & DevOps',
       weight: 0.85,
-      subcategories: ['Cloud Platforms', 'CI/CD', 'Containerization', 'Monitoring']
+      subcategories: [
+        'Cloud Platforms',
+        'CI/CD',
+        'Containerization',
+        'Monitoring',
+      ],
     },
     {
       name: 'Tools & IDE',
       weight: 0.7,
-      subcategories: ['IDEs', 'Version Control', 'Project Management', 'Design Tools']
+      subcategories: [
+        'IDEs',
+        'Version Control',
+        'Project Management',
+        'Design Tools',
+      ],
     },
     {
       name: 'Soft Skills',
       weight: 0.6,
-      subcategories: ['Leadership', 'Communication', 'Problem Solving', 'Project Management']
-    }
+      subcategories: [
+        'Leadership',
+        'Communication',
+        'Problem Solving',
+        'Project Management',
+      ],
+    },
   ];
 
   private static readonly SKILL_MAPPINGS: SkillMapping[] = [
     // Programming Languages - Frontend
     {
       canonical: 'JavaScript',
-      synonyms: ['js', 'javascript', 'JS', 'ECMAScript', 'es6', 'es2015', 'es2020'],
+      synonyms: [
+        'js',
+        'javascript',
+        'JS',
+        'ECMAScript',
+        'es6',
+        'es2015',
+        'es2020',
+      ],
       category: 'Programming Languages',
       subcategory: 'Frontend',
       weight: 1.0,
-      relatedSkills: ['TypeScript', 'Node.js', 'React', 'Vue.js']
+      relatedSkills: ['TypeScript', 'Node.js', 'React', 'Vue.js'],
     },
     {
       canonical: 'TypeScript',
@@ -92,7 +126,7 @@ export class SkillsTaxonomy {
       category: 'Programming Languages',
       subcategory: 'Frontend',
       weight: 1.0,
-      relatedSkills: ['JavaScript', 'Angular', 'React', 'Node.js']
+      relatedSkills: ['JavaScript', 'Angular', 'React', 'Node.js'],
     },
     {
       canonical: 'HTML',
@@ -100,7 +134,7 @@ export class SkillsTaxonomy {
       category: 'Programming Languages',
       subcategory: 'Frontend',
       weight: 0.8,
-      relatedSkills: ['CSS', 'JavaScript', 'Web Development']
+      relatedSkills: ['CSS', 'JavaScript', 'Web Development'],
     },
     {
       canonical: 'CSS',
@@ -108,7 +142,7 @@ export class SkillsTaxonomy {
       category: 'Programming Languages',
       subcategory: 'Frontend',
       weight: 0.8,
-      relatedSkills: ['HTML', 'SASS', 'LESS', 'Bootstrap']
+      relatedSkills: ['HTML', 'SASS', 'LESS', 'Bootstrap'],
     },
 
     // Programming Languages - Backend
@@ -118,7 +152,7 @@ export class SkillsTaxonomy {
       category: 'Programming Languages',
       subcategory: 'Backend',
       weight: 1.0,
-      relatedSkills: ['Django', 'Flask', 'FastAPI', 'Pandas', 'NumPy']
+      relatedSkills: ['Django', 'Flask', 'FastAPI', 'Pandas', 'NumPy'],
     },
     {
       canonical: 'Java',
@@ -126,7 +160,7 @@ export class SkillsTaxonomy {
       category: 'Programming Languages',
       subcategory: 'Backend',
       weight: 1.0,
-      relatedSkills: ['Spring', 'Spring Boot', 'Maven', 'Gradle']
+      relatedSkills: ['Spring', 'Spring Boot', 'Maven', 'Gradle'],
     },
     {
       canonical: 'C#',
@@ -134,7 +168,7 @@ export class SkillsTaxonomy {
       category: 'Programming Languages',
       subcategory: 'Backend',
       weight: 1.0,
-      relatedSkills: ['ASP.NET', '.NET Core', 'Entity Framework']
+      relatedSkills: ['ASP.NET', '.NET Core', 'Entity Framework'],
     },
     {
       canonical: 'Node.js',
@@ -142,7 +176,7 @@ export class SkillsTaxonomy {
       category: 'Programming Languages',
       subcategory: 'Backend',
       weight: 0.95,
-      relatedSkills: ['JavaScript', 'Express.js', 'npm', 'NestJS']
+      relatedSkills: ['JavaScript', 'Express.js', 'npm', 'NestJS'],
     },
     {
       canonical: 'PHP',
@@ -150,7 +184,7 @@ export class SkillsTaxonomy {
       category: 'Programming Languages',
       subcategory: 'Backend',
       weight: 0.9,
-      relatedSkills: ['Laravel', 'Symfony', 'WordPress', 'MySQL']
+      relatedSkills: ['Laravel', 'Symfony', 'WordPress', 'MySQL'],
     },
     {
       canonical: 'Go',
@@ -158,7 +192,7 @@ export class SkillsTaxonomy {
       category: 'Programming Languages',
       subcategory: 'Backend',
       weight: 0.95,
-      relatedSkills: ['Docker', 'Kubernetes', 'gRPC']
+      relatedSkills: ['Docker', 'Kubernetes', 'gRPC'],
     },
     {
       canonical: 'Rust',
@@ -166,7 +200,7 @@ export class SkillsTaxonomy {
       category: 'Programming Languages',
       subcategory: 'Systems',
       weight: 0.9,
-      relatedSkills: ['WebAssembly', 'Systems Programming']
+      relatedSkills: ['WebAssembly', 'Systems Programming'],
     },
 
     // Frameworks & Libraries - Web
@@ -176,7 +210,7 @@ export class SkillsTaxonomy {
       category: 'Frameworks & Libraries',
       subcategory: 'Web Frameworks',
       weight: 1.0,
-      relatedSkills: ['JavaScript', 'TypeScript', 'JSX', 'Redux', 'Next.js']
+      relatedSkills: ['JavaScript', 'TypeScript', 'JSX', 'Redux', 'Next.js'],
     },
     {
       canonical: 'Vue.js',
@@ -184,7 +218,7 @@ export class SkillsTaxonomy {
       category: 'Frameworks & Libraries',
       subcategory: 'Web Frameworks',
       weight: 0.9,
-      relatedSkills: ['JavaScript', 'TypeScript', 'Nuxt.js', 'Vuex']
+      relatedSkills: ['JavaScript', 'TypeScript', 'Nuxt.js', 'Vuex'],
     },
     {
       canonical: 'Angular',
@@ -192,7 +226,7 @@ export class SkillsTaxonomy {
       category: 'Frameworks & Libraries',
       subcategory: 'Web Frameworks',
       weight: 0.95,
-      relatedSkills: ['TypeScript', 'RxJS', 'Angular CLI']
+      relatedSkills: ['TypeScript', 'RxJS', 'Angular CLI'],
     },
     {
       canonical: 'Express.js',
@@ -200,7 +234,7 @@ export class SkillsTaxonomy {
       category: 'Frameworks & Libraries',
       subcategory: 'Web Frameworks',
       weight: 0.85,
-      relatedSkills: ['Node.js', 'JavaScript', 'REST API']
+      relatedSkills: ['Node.js', 'JavaScript', 'REST API'],
     },
     {
       canonical: 'NestJS',
@@ -208,7 +242,7 @@ export class SkillsTaxonomy {
       category: 'Frameworks & Libraries',
       subcategory: 'Web Frameworks',
       weight: 0.8,
-      relatedSkills: ['Node.js', 'TypeScript', 'Express.js']
+      relatedSkills: ['Node.js', 'TypeScript', 'Express.js'],
     },
 
     // Backend Frameworks
@@ -218,7 +252,7 @@ export class SkillsTaxonomy {
       category: 'Frameworks & Libraries',
       subcategory: 'Web Frameworks',
       weight: 0.95,
-      relatedSkills: ['Java', 'Spring', 'Maven', 'Gradle']
+      relatedSkills: ['Java', 'Spring', 'Maven', 'Gradle'],
     },
     {
       canonical: 'Django',
@@ -226,7 +260,7 @@ export class SkillsTaxonomy {
       category: 'Frameworks & Libraries',
       subcategory: 'Web Frameworks',
       weight: 0.9,
-      relatedSkills: ['Python', 'Django REST Framework', 'PostgreSQL']
+      relatedSkills: ['Python', 'Django REST Framework', 'PostgreSQL'],
     },
     {
       canonical: 'Flask',
@@ -234,7 +268,7 @@ export class SkillsTaxonomy {
       category: 'Frameworks & Libraries',
       subcategory: 'Web Frameworks',
       weight: 0.85,
-      relatedSkills: ['Python', 'SQLAlchemy', 'Jinja2']
+      relatedSkills: ['Python', 'SQLAlchemy', 'Jinja2'],
     },
     {
       canonical: 'Laravel',
@@ -242,7 +276,7 @@ export class SkillsTaxonomy {
       category: 'Frameworks & Libraries',
       subcategory: 'Web Frameworks',
       weight: 0.85,
-      relatedSkills: ['PHP', 'Eloquent', 'Artisan', 'Blade']
+      relatedSkills: ['PHP', 'Eloquent', 'Artisan', 'Blade'],
     },
 
     // Databases - SQL
@@ -252,7 +286,7 @@ export class SkillsTaxonomy {
       category: 'Databases',
       subcategory: 'SQL',
       weight: 0.9,
-      relatedSkills: ['SQL', 'Database Design', 'pgAdmin']
+      relatedSkills: ['SQL', 'Database Design', 'pgAdmin'],
     },
     {
       canonical: 'MySQL',
@@ -260,7 +294,7 @@ export class SkillsTaxonomy {
       category: 'Databases',
       subcategory: 'SQL',
       weight: 0.85,
-      relatedSkills: ['SQL', 'Database Design', 'phpMyAdmin']
+      relatedSkills: ['SQL', 'Database Design', 'phpMyAdmin'],
     },
     {
       canonical: 'SQL Server',
@@ -268,7 +302,7 @@ export class SkillsTaxonomy {
       category: 'Databases',
       subcategory: 'SQL',
       weight: 0.85,
-      relatedSkills: ['SQL', 'T-SQL', 'SSMS']
+      relatedSkills: ['SQL', 'T-SQL', 'SSMS'],
     },
     {
       canonical: 'Oracle Database',
@@ -276,7 +310,7 @@ export class SkillsTaxonomy {
       category: 'Databases',
       subcategory: 'SQL',
       weight: 0.8,
-      relatedSkills: ['SQL', 'PL/SQL', 'Oracle SQL Developer']
+      relatedSkills: ['SQL', 'PL/SQL', 'Oracle SQL Developer'],
     },
 
     // Databases - NoSQL
@@ -286,7 +320,7 @@ export class SkillsTaxonomy {
       category: 'Databases',
       subcategory: 'NoSQL',
       weight: 0.9,
-      relatedSkills: ['NoSQL', 'Mongoose', 'Atlas']
+      relatedSkills: ['NoSQL', 'Mongoose', 'Atlas'],
     },
     {
       canonical: 'Redis',
@@ -294,7 +328,7 @@ export class SkillsTaxonomy {
       category: 'Databases',
       subcategory: 'In-Memory',
       weight: 0.8,
-      relatedSkills: ['Caching', 'Session Management']
+      relatedSkills: ['Caching', 'Session Management'],
     },
     {
       canonical: 'Elasticsearch',
@@ -302,7 +336,7 @@ export class SkillsTaxonomy {
       category: 'Databases',
       subcategory: 'NoSQL',
       weight: 0.8,
-      relatedSkills: ['Search Engine', 'Kibana', 'Logstash']
+      relatedSkills: ['Search Engine', 'Kibana', 'Logstash'],
     },
 
     // Cloud & DevOps
@@ -312,7 +346,7 @@ export class SkillsTaxonomy {
       category: 'Cloud & DevOps',
       subcategory: 'Cloud Platforms',
       weight: 1.0,
-      relatedSkills: ['EC2', 'S3', 'Lambda', 'RDS', 'CloudFormation']
+      relatedSkills: ['EC2', 'S3', 'Lambda', 'RDS', 'CloudFormation'],
     },
     {
       canonical: 'Azure',
@@ -320,7 +354,7 @@ export class SkillsTaxonomy {
       category: 'Cloud & DevOps',
       subcategory: 'Cloud Platforms',
       weight: 0.95,
-      relatedSkills: ['Azure Functions', 'Azure DevOps', 'ARM Templates']
+      relatedSkills: ['Azure Functions', 'Azure DevOps', 'ARM Templates'],
     },
     {
       canonical: 'Google Cloud',
@@ -328,7 +362,7 @@ export class SkillsTaxonomy {
       category: 'Cloud & DevOps',
       subcategory: 'Cloud Platforms',
       weight: 0.9,
-      relatedSkills: ['Compute Engine', 'Cloud Functions', 'BigQuery']
+      relatedSkills: ['Compute Engine', 'Cloud Functions', 'BigQuery'],
     },
     {
       canonical: 'Docker',
@@ -336,7 +370,11 @@ export class SkillsTaxonomy {
       category: 'Cloud & DevOps',
       subcategory: 'Containerization',
       weight: 0.95,
-      relatedSkills: ['Kubernetes', 'Container Orchestration', 'Docker Compose']
+      relatedSkills: [
+        'Kubernetes',
+        'Container Orchestration',
+        'Docker Compose',
+      ],
     },
     {
       canonical: 'Kubernetes',
@@ -344,7 +382,7 @@ export class SkillsTaxonomy {
       category: 'Cloud & DevOps',
       subcategory: 'Containerization',
       weight: 0.9,
-      relatedSkills: ['Docker', 'Container Orchestration', 'Helm']
+      relatedSkills: ['Docker', 'Container Orchestration', 'Helm'],
     },
 
     // Version Control & Tools
@@ -354,7 +392,7 @@ export class SkillsTaxonomy {
       category: 'Tools & IDE',
       subcategory: 'Version Control',
       weight: 0.9,
-      relatedSkills: ['GitHub', 'GitLab', 'Bitbucket']
+      relatedSkills: ['GitHub', 'GitLab', 'Bitbucket'],
     },
     {
       canonical: 'GitHub',
@@ -362,7 +400,7 @@ export class SkillsTaxonomy {
       category: 'Tools & IDE',
       subcategory: 'Version Control',
       weight: 0.8,
-      relatedSkills: ['Git', 'CI/CD', 'Pull Requests']
+      relatedSkills: ['Git', 'CI/CD', 'Pull Requests'],
     },
 
     // Soft Skills
@@ -372,27 +410,35 @@ export class SkillsTaxonomy {
       category: 'Soft Skills',
       subcategory: 'Leadership',
       weight: 0.8,
-      relatedSkills: ['Project Management', 'Mentoring', 'Team Building']
+      relatedSkills: ['Project Management', 'Mentoring', 'Team Building'],
     },
     {
       canonical: 'Communication',
-      synonyms: ['communication', 'verbal communication', 'written communication', 'presentation'],
+      synonyms: [
+        'communication',
+        'verbal communication',
+        'written communication',
+        'presentation',
+      ],
       category: 'Soft Skills',
       subcategory: 'Communication',
       weight: 0.7,
-      relatedSkills: ['Public Speaking', 'Technical Writing', 'Documentation']
+      relatedSkills: ['Public Speaking', 'Technical Writing', 'Documentation'],
     },
     {
       canonical: 'Problem Solving',
-      synonyms: ['problem solving', 'analytical thinking', 'critical thinking', 'troubleshooting'],
+      synonyms: [
+        'problem solving',
+        'analytical thinking',
+        'critical thinking',
+        'troubleshooting',
+      ],
       category: 'Soft Skills',
       subcategory: 'Problem Solving',
       weight: 0.8,
-      relatedSkills: ['Debugging', 'Analysis', 'Root Cause Analysis']
-    }
+      relatedSkills: ['Debugging', 'Analysis', 'Root Cause Analysis'],
+    },
   ];
-
-
 
   /**
    * Normalize a skill name to its canonical form
@@ -403,11 +449,12 @@ export class SkillsTaxonomy {
     }
 
     const cleanSkill = skillName.trim().toLowerCase();
-    
+
     // Find exact match first
-    const exactMatch = this.SKILL_MAPPINGS.find(mapping => 
-      mapping.canonical.toLowerCase() === cleanSkill ||
-      mapping.synonyms.some(syn => syn.toLowerCase() === cleanSkill)
+    const exactMatch = this.SKILL_MAPPINGS.find(
+      (mapping) =>
+        mapping.canonical.toLowerCase() === cleanSkill ||
+        mapping.synonyms.some((syn) => syn.toLowerCase() === cleanSkill),
     );
 
     if (exactMatch) {
@@ -415,10 +462,12 @@ export class SkillsTaxonomy {
     }
 
     // Try partial matching for common variations
-    const partialMatch = this.SKILL_MAPPINGS.find(mapping => 
-      mapping.synonyms.some(syn => 
-        cleanSkill.includes(syn.toLowerCase()) || syn.toLowerCase().includes(cleanSkill)
-      )
+    const partialMatch = this.SKILL_MAPPINGS.find((mapping) =>
+      mapping.synonyms.some(
+        (syn) =>
+          cleanSkill.includes(syn.toLowerCase()) ||
+          syn.toLowerCase().includes(cleanSkill),
+      ),
     );
 
     if (partialMatch) {
@@ -432,15 +481,17 @@ export class SkillsTaxonomy {
   /**
    * Get skill category and weight
    */
-  static getSkillInfo(skillName: string): { category: string; subcategory?: string; weight: number } | null {
+  static getSkillInfo(
+    skillName: string,
+  ): { category: string; subcategory?: string; weight: number } | null {
     const normalized = this.normalizeSkill(skillName);
-    const mapping = this.SKILL_MAPPINGS.find(m => m.canonical === normalized);
-    
+    const mapping = this.SKILL_MAPPINGS.find((m) => m.canonical === normalized);
+
     if (mapping) {
       return {
         category: mapping.category,
         subcategory: mapping.subcategory,
-        weight: mapping.weight
+        weight: mapping.weight,
       };
     }
 
@@ -452,8 +503,8 @@ export class SkillsTaxonomy {
    */
   static getRelatedSkills(skillName: string): string[] {
     const normalized = this.normalizeSkill(skillName);
-    const mapping = this.SKILL_MAPPINGS.find(m => m.canonical === normalized);
-    
+    const mapping = this.SKILL_MAPPINGS.find((m) => m.canonical === normalized);
+
     return mapping?.relatedSkills || [];
   }
 
@@ -469,10 +520,10 @@ export class SkillsTaxonomy {
     for (const skill of skills) {
       const normalized = this.normalizeSkill(skill);
       if (processedSkills.has(normalized)) continue;
-      
+
       processedSkills.add(normalized);
       const skillInfo = this.getSkillInfo(normalized);
-      
+
       if (skillInfo) {
         totalScore += skillInfo.weight;
       } else {
@@ -493,12 +544,12 @@ export class SkillsTaxonomy {
     for (const skill of skills) {
       const normalized = this.normalizeSkill(skill);
       const skillInfo = this.getSkillInfo(normalized);
-      
+
       const category = skillInfo?.category || 'Other';
       if (!groups[category]) {
         groups[category] = [];
       }
-      
+
       if (!groups[category].includes(normalized)) {
         groups[category].push(normalized);
       }
@@ -512,7 +563,7 @@ export class SkillsTaxonomy {
    */
   static suggestRelatedSkills(skills: string[], maxSuggestions = 5): string[] {
     const suggestions = new Set<string>();
-    const existingSkills = new Set(skills.map(s => this.normalizeSkill(s)));
+    const existingSkills = new Set(skills.map((s) => this.normalizeSkill(s)));
 
     for (const skill of skills) {
       const relatedSkills = this.getRelatedSkills(skill);
@@ -538,7 +589,10 @@ export class SkillsTaxonomy {
 
     for (const mapping of this.SKILL_MAPPINGS) {
       // Check canonical name
-      const canonicalScore = this.calculateSimilarity(cleanInput, mapping.canonical.toLowerCase());
+      const canonicalScore = this.calculateSimilarity(
+        cleanInput,
+        mapping.canonical.toLowerCase(),
+      );
       if (canonicalScore > bestScore && canonicalScore >= threshold) {
         bestScore = canonicalScore;
         bestMatch = mapping.canonical;
@@ -546,7 +600,10 @@ export class SkillsTaxonomy {
 
       // Check synonyms
       for (const synonym of mapping.synonyms) {
-        const synonymScore = this.calculateSimilarity(cleanInput, synonym.toLowerCase());
+        const synonymScore = this.calculateSimilarity(
+          cleanInput,
+          synonym.toLowerCase(),
+        );
         if (synonymScore > bestScore && synonymScore >= threshold) {
           bestScore = synonymScore;
           bestMatch = mapping.canonical;
@@ -567,7 +624,9 @@ export class SkillsTaxonomy {
     if (len1 === 0) return len2 === 0 ? 1 : 0;
     if (len2 === 0) return 0;
 
-    const matrix = Array(len1 + 1).fill(null).map(() => Array(len2 + 1).fill(null));
+    const matrix = Array(len1 + 1)
+      .fill(null)
+      .map(() => Array(len2 + 1).fill(null));
 
     for (let i = 0; i <= len1; i++) matrix[i][0] = i;
     for (let j = 0; j <= len2; j++) matrix[0][j] = j;
@@ -576,9 +635,9 @@ export class SkillsTaxonomy {
       for (let j = 1; j <= len2; j++) {
         const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
         matrix[i][j] = Math.min(
-          matrix[i - 1][j] + 1,      // deletion
-          matrix[i][j - 1] + 1,      // insertion
-          matrix[i - 1][j - 1] + cost // substitution
+          matrix[i - 1][j] + 1, // deletion
+          matrix[i][j - 1] + 1, // insertion
+          matrix[i - 1][j - 1] + cost, // substitution
         );
       }
     }
@@ -593,23 +652,23 @@ export class SkillsTaxonomy {
   private static capitalizeSkill(skill: string): string {
     // Handle special cases
     const specialCases: Record<string, string> = {
-      'html': 'HTML',
-      'css': 'CSS',
-      'sql': 'SQL',
-      'api': 'API',
-      'rest': 'REST',
-      'graphql': 'GraphQL',
-      'json': 'JSON',
-      'xml': 'XML',
-      'http': 'HTTP',
-      'https': 'HTTPS',
-      'tcp': 'TCP',
-      'ip': 'IP',
-      'dns': 'DNS',
-      'aws': 'AWS',
-      'gcp': 'GCP',
+      html: 'HTML',
+      css: 'CSS',
+      sql: 'SQL',
+      api: 'API',
+      rest: 'REST',
+      graphql: 'GraphQL',
+      json: 'JSON',
+      xml: 'XML',
+      http: 'HTTP',
+      https: 'HTTPS',
+      tcp: 'TCP',
+      ip: 'IP',
+      dns: 'DNS',
+      aws: 'AWS',
+      gcp: 'GCP',
       'ci/cd': 'CI/CD',
-      'devops': 'DevOps'
+      devops: 'DevOps',
     };
 
     const lower = skill.toLowerCase();
@@ -618,9 +677,10 @@ export class SkillsTaxonomy {
     }
 
     // Default capitalization
-    return skill.split(' ').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    ).join(' ');
+    return skill
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   }
 
   /**
@@ -634,8 +694,8 @@ export class SkillsTaxonomy {
    * Get skills by category
    */
   static getSkillsByCategory(categoryName: string): string[] {
-    return this.SKILL_MAPPINGS
-      .filter(mapping => mapping.category === categoryName)
-      .map(mapping => mapping.canonical);
+    return this.SKILL_MAPPINGS.filter(
+      (mapping) => mapping.category === categoryName,
+    ).map((mapping) => mapping.canonical);
   }
 }

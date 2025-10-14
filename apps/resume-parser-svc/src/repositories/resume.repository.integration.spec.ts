@@ -10,7 +10,8 @@ describe('ResumeRepository Integration', () => {
 
   beforeAll(async () => {
     // Start MongoDB memory server and get test module
-    const mongooseModule = await MongodbTestSetup.getMongooseTestModule('resume-parser');
+    const mongooseModule =
+      await MongodbTestSetup.getMongooseTestModule('resume-parser');
     const featureModule = MongodbTestSetup.getMongooseFeatureModule(
       [{ name: Resume.name, schema: ResumeSchema }],
       'resume-parser',

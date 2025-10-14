@@ -75,20 +75,28 @@ export class ContactInfo extends ValueObject<{
    * Performs the email operation.
    * @returns The string | undefined.
    */
-  get email(): string | undefined { return this.props.email; }
+  get email(): string | undefined {
+    return this.props.email;
+  }
   /**
    * Performs the phone operation.
    * @returns The string | undefined.
    */
-  get phone(): string | undefined { return this.props.phone; }
+  get phone(): string | undefined {
+    return this.props.phone;
+  }
   /**
    * Performs the wechat operation.
    * @returns The string | undefined.
    */
-  get wechat(): string | undefined { return this.props.wechat; }
+  get wechat(): string | undefined {
+    return this.props.wechat;
+  }
   /**
    * Performs the alipay operation.
    * @returns The string | undefined.
    */
-  get alipay(): string | undefined { return this.props.alipay; }
+  get alipay(): string | undefined {
+    return this.props.alipay;
+  }
 }

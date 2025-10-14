@@ -40,7 +40,8 @@ module.exports = {
         '^@ai-recruitment-clerk/ai-services-shared$': '<rootDir>/libs/ai-services-shared/src/index.ts',
         '^@ai-recruitment-clerk/api-contracts$': '<rootDir>/libs/api-contracts/src/index.ts',
         '^@ai-recruitment-clerk/candidate-scoring-domain$': '<rootDir>/libs/candidate-scoring-domain/src/index.ts',
-        '^@ai-recruitment-clerk/user-management-domain$': '<rootDir>/libs/user-management-domain/src/index.ts'
+        '^@ai-recruitment-clerk/user-management-domain$': '<rootDir>/libs/user-management-domain/src/index.ts',
+        '^@ai-recruitment-clerk/shared-dtos$': '<rootDir>/libs/shared-dtos/src/index.ts'
       },
       setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
       testEnvironment: 'node',

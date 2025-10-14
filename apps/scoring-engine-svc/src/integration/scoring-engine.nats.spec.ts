@@ -11,20 +11,26 @@ interface ScoringServiceStub {
 }
 
 class ScoringEngineNatsServiceStub {
-  public jdExtractedHandler?: (event: AnalysisJdExtractedEvent) => Promise<void>;
-  public resumeParsedHandler?: (event: AnalysisResumeParsedEvent) => Promise<void>;
+  public jdExtractedHandler?: (
+    event: AnalysisJdExtractedEvent,
+  ) => Promise<void>;
+  public resumeParsedHandler?: (
+    event: AnalysisResumeParsedEvent,
+  ) => Promise<void>;
 
-  public subscribeToJdExtracted = jest.fn(async (handler: (event: AnalysisJdExtractedEvent) => Promise<void>) => {
-    this.jdExtractedHandler = handler;
-  });
+  public subscribeToJdExtracted = jest.fn(
+    async (handler: (event: AnalysisJdExtractedEvent) => Promise<void>) => {
+      this.jdExtractedHandler = handler;
+    },
+  );
 
-  public subscribeToResumeParsed = jest.fn(async (handler: (event: AnalysisResumeParsedEvent) => Promise<void>) => {
-    this.resumeParsedHandler = handler;
-  });
+  public subscribeToResumeParsed = jest.fn(
+    async (handler: (event: AnalysisResumeParsedEvent) => Promise<void>) => {
+      this.resumeParsedHandler = handler;
+    },
+  );
 
-  public publishScoringError = jest
-    .fn()
-    .mockResolvedValue({ success: true });
+  public publishScoringError = jest.fn().mockResolvedValue({ success: true });
 }
 
 describe('ScoringEventsController NATS integration', () => {
@@ -98,7 +104,11 @@ describe('ScoringEventsController NATS integration', () => {
       jobId: 'job-001',
       resumeId: 'resume-123',
       resumeDto: {
-        contactInfo: { name: 'Candidate', email: 'candidate@example.com', phone: null },
+        contactInfo: {
+          name: 'Candidate',
+          email: 'candidate@example.com',
+          phone: null,
+        },
         skills: ['TypeScript'],
         workExperience: [
           {
@@ -144,7 +154,11 @@ describe('ScoringEventsController NATS integration', () => {
       jobId: 'job-err',
       resumeId: 'resume-err',
       resumeDto: {
-        contactInfo: { name: 'Candidate', email: 'candidate@example.com', phone: null },
+        contactInfo: {
+          name: 'Candidate',
+          email: 'candidate@example.com',
+          phone: null,
+        },
         skills: ['TypeScript'],
         workExperience: [],
         education: [],

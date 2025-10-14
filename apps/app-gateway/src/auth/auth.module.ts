@@ -31,36 +31,36 @@ import { SecurityModule } from '../security/security.module';
       useFactory: async (configService: ConfigService) => {
         const logger = new Logger('AuthModule');
         return {
-        secret: (() => {
-          const jwtSecret = configService.get<string>('JWT_SECRET');
-          const nodeEnv = configService.get<string>('NODE_ENV');
+          secret: (() => {
+            const jwtSecret = configService.get<string>('JWT_SECRET');
+            const nodeEnv = configService.get<string>('NODE_ENV');
 
-          if (!jwtSecret) {
-            if (nodeEnv === 'production') {
-              throw new Error(
-                'JWT_SECRET environment variable is required for production deployment. Please set a secure JWT_SECRET in your environment variables.',
+            if (!jwtSecret) {
+              if (nodeEnv === 'production') {
+                throw new Error(
+                  'JWT_SECRET environment variable is required for production deployment. Please set a secure JWT_SECRET in your environment variables.',
+                );
+              }
+              logger.warn(
+                '⚠️  WARNING: Using fallback JWT secret for development. Set JWT_SECRET environment variable for production.',
+              );
+              return 'dev-jwt-secret-change-in-production-' + Date.now();
+            }
+
+            if (jwtSecret.length < 32) {
+              logger.warn(
+                '⚠️  WARNING: JWT_SECRET should be at least 32 characters long for security.',
               );
             }
-            logger.warn(
-              '⚠️  WARNING: Using fallback JWT secret for development. Set JWT_SECRET environment variable for production.',
-            );
-            return 'dev-jwt-secret-change-in-production-' + Date.now();
-          }
 
-          if (jwtSecret.length < 32) {
-            logger.warn(
-              '⚠️  WARNING: JWT_SECRET should be at least 32 characters long for security.',
-            );
-          }
-
-          return jwtSecret;
-        })(),
-        signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '1h',
-          issuer: 'ai-recruitment-clerk',
-          audience: 'ai-recruitment-users',
-        },
-      };
+            return jwtSecret;
+          })(),
+          signOptions: {
+            expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '1h',
+            issuer: 'ai-recruitment-clerk',
+            audience: 'ai-recruitment-users',
+          },
+        };
       },
       inject: [ConfigService],
     }),

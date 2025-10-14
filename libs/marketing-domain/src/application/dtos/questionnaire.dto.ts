@@ -3,11 +3,22 @@ export enum QuestionnaireStatus {
   SUBMITTED = 'submitted',
   PROCESSED = 'processed',
   REWARDED = 'rewarded',
-  LOW_QUALITY = 'low_quality'
+  LOW_QUALITY = 'low_quality',
 }
 
-export type QuestionnaireUserRole = 'hr' | 'recruiter' | 'manager' | 'founder' | 'other';
-export type CompanySize = 'startup' | 'small' | 'medium' | 'large' | 'enterprise' | 'unknown';
+export type QuestionnaireUserRole =
+  | 'hr'
+  | 'recruiter'
+  | 'manager'
+  | 'founder'
+  | 'other';
+export type CompanySize =
+  | 'startup'
+  | 'small'
+  | 'medium'
+  | 'large'
+  | 'enterprise'
+  | 'unknown';
 export type ScreeningMethod = 'manual' | 'ats' | 'hybrid' | 'other';
 export type Rating = 1 | 2 | 3 | 4 | 5;
 

@@ -1,4 +1,12 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Res,
+} from '@nestjs/common';
 import { Response } from 'express';
 import { Public } from '../auth/decorators/public.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -75,7 +83,11 @@ export class AnalyticsController {
   @Post('export')
   @HttpCode(HttpStatus.OK)
   export() {
-    return { exportId: id('exp'), status: 'completed', url: `/exports/${id('exp')}.json` };
+    return {
+      exportId: id('exp'),
+      status: 'completed',
+      url: `/exports/${id('exp')}.json`,
+    };
   }
 
   /**

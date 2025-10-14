@@ -1,7 +1,11 @@
 import { UsageLimit } from '../aggregates/usage-limit.aggregate.js';
 import { UsageLimitPolicy } from '../value-objects/usage-limit-policy.value-object.js';
 import { BonusType } from '../../application/dtos/usage-limit.dto.js';
-import { UsageLimitRules, UsageViolationReport, UsageEfficiency } from './usage-limit.rules.js';
+import {
+  UsageLimitRules,
+  UsageViolationReport,
+  UsageEfficiency,
+} from './usage-limit.rules.js';
 
 /**
  * Provides usage limit domain functionality.
@@ -16,7 +20,7 @@ export class UsageLimitDomainService {
   constructor(
     private readonly repository: IUsageLimitRepository,
     private readonly eventBus: IDomainEventBus,
-    private readonly auditLogger: IAuditLogger
+    private readonly auditLogger: IAuditLogger,
   ) {}
 
   /**
@@ -36,10 +40,10 @@ export class UsageLimitDomainService {
         const policy = UsageLimitPolicy.createDefault();
         usageLimit = UsageLimit.create(ip, policy);
         await this.repository.save(usageLimit);
-        
+
         await this.auditLogger.logBusinessEvent('USAGE_LIMIT_CREATED', {
           ip,
-          dailyLimit: policy.dailyLimit
+          dailyLimit: policy.dailyLimit,
         });
       }
 
@@ -64,22 +68,33 @@ export class UsageLimitDomainService {
         currentUsage: statistics.currentUsage,
         dailyLimit: statistics.dailyLimit,
         resetAt: statistics.resetAt,
-        bonusQuota: statistics.bonusQuota
+        bonusQuota: statistics.bonusQuota,
       });
 
       // 如果超出限制，记录违规报告
       if (!checkResult.isAllowed()) {
-        const violationReport = UsageLimitRules.generateViolationReport(ip, usageLimit);
-        await this.auditLogger.logViolation('USAGE_LIMIT_EXCEEDED', violationReport);
+        const violationReport = UsageLimitRules.generateViolationReport(
+          ip,
+          usageLimit,
+        );
+        await this.auditLogger.logViolation(
+          'USAGE_LIMIT_EXCEEDED',
+          violationReport,
+        );
       }
 
       return result;
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      await this.auditLogger.logError('CHECK_USAGE_LIMIT_ERROR', { ip, error: errorMessage });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      await this.auditLogger.logError('CHECK_USAGE_LIMIT_ERROR', {
+        ip,
+        error: errorMessage,
+      });
       console.error('Error checking usage limit:', error);
-      return UsageLimitResult.failed(['Internal error occurred while checking usage limit']);
+      return UsageLimitResult.failed([
+        'Internal error occurred while checking usage limit',
+      ]);
     }
   }
 
@@ -96,7 +111,9 @@ export class UsageLimitDomainService {
       // 获取使用限制
       const usageLimit = await this.repository.findByIP(ip);
       if (!usageLimit) {
-        return UsageTrackingResult.failed('Usage limit not found. Please check limit first.');
+        return UsageTrackingResult.failed(
+          'Usage limit not found. Please check limit first.',
+        );
       }
 
       // 记录使用
@@ -104,7 +121,7 @@ export class UsageLimitDomainService {
       if (!recordResult.isSuccess()) {
         await this.auditLogger.logBusinessEvent('USAGE_RECORDING_FAILED', {
           ip,
-          error: recordResult.getError()
+          error: recordResult.getError(),
         });
         return UsageTrackingResult.failed(recordResult.getError()!);
       }
@@ -123,20 +140,25 @@ export class UsageLimitDomainService {
       await this.auditLogger.logBusinessEvent('USAGE_RECORDED', {
         ip,
         currentUsage: recordResult.getCurrentUsage(),
-        remainingQuota: recordResult.getRemainingQuota()
+        remainingQuota: recordResult.getRemainingQuota(),
       });
 
       return UsageTrackingResult.success({
         currentUsage: recordResult.getCurrentUsage()!,
         remainingQuota: recordResult.getRemainingQuota()!,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      await this.auditLogger.logError('RECORD_USAGE_ERROR', { ip, error: errorMessage });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      await this.auditLogger.logError('RECORD_USAGE_ERROR', {
+        ip,
+        error: errorMessage,
+      });
       console.error('Error recording usage:', error);
-      return UsageTrackingResult.failed('Internal error occurred while recording usage');
+      return UsageTrackingResult.failed(
+        'Internal error occurred while recording usage',
+      );
     }
   }
 
@@ -144,9 +166,9 @@ export class UsageLimitDomainService {
    * 添加奖励配额
    */
   async addBonusQuota(
-    ip: string, 
-    bonusType: BonusType, 
-    customAmount?: number
+    ip: string,
+    bonusType: BonusType,
+    customAmount?: number,
   ): Promise<BonusQuotaResult> {
     try {
       // 验证输入
@@ -161,15 +183,16 @@ export class UsageLimitDomainService {
       }
 
       // 确定奖励数量
-      const bonusAmount = customAmount || UsageLimitRules.calculateBonusQuota(bonusType);
+      const bonusAmount =
+        customAmount || UsageLimitRules.calculateBonusQuota(bonusType);
       const statistics = usageLimit.getUsageStatistics();
-      
+
       // 验证奖励请求
       const validation = UsageLimitRules.validateBonusQuotaRequest(
         bonusType,
         bonusAmount,
         statistics.bonusQuota,
-        UsageLimitPolicy.createDefault()
+        UsageLimitPolicy.createDefault(),
       );
 
       if (!validation.isValid) {
@@ -177,7 +200,7 @@ export class UsageLimitDomainService {
           ip,
           bonusType,
           requestedAmount: bonusAmount,
-          errors: validation.errors
+          errors: validation.errors,
         });
         return BonusQuotaResult.failed(validation.errors);
       }
@@ -200,24 +223,28 @@ export class UsageLimitDomainService {
         ip,
         bonusType,
         addedAmount: validation.approvedAmount,
-        newTotalQuota: usageLimit.getAvailableQuota() + usageLimit.getCurrentUsage()
+        newTotalQuota:
+          usageLimit.getAvailableQuota() + usageLimit.getCurrentUsage(),
       });
 
       return BonusQuotaResult.success({
         addedAmount: validation.approvedAmount,
-        newTotalQuota: usageLimit.getAvailableQuota() + usageLimit.getCurrentUsage(),
-        bonusType
+        newTotalQuota:
+          usageLimit.getAvailableQuota() + usageLimit.getCurrentUsage(),
+        bonusType,
       });
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      await this.auditLogger.logError('ADD_BONUS_QUOTA_ERROR', { 
-        ip, 
-        bonusType, 
-        error: errorMessage 
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      await this.auditLogger.logError('ADD_BONUS_QUOTA_ERROR', {
+        ip,
+        bonusType,
+        error: errorMessage,
       });
       console.error('Error adding bonus quota:', error);
-      return BonusQuotaResult.failed(['Internal error occurred while adding bonus quota']);
+      return BonusQuotaResult.failed([
+        'Internal error occurred while adding bonus quota',
+      ]);
     }
   }
 
@@ -250,26 +277,31 @@ export class UsageLimitDomainService {
             resetAt: statistics.resetAt,
             lastActivityAt: statistics.lastActivityAt,
             usagePercentage: statistics.getUsagePercentage(),
-            efficiency
-          }
+            efficiency,
+          },
         });
       } else {
         // 获取系统整体统计
         const systemStats = await this.calculateSystemStatistics();
         return UsageStatsResult.success({ system: systemStats });
       }
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      await this.auditLogger.logError('GET_USAGE_STATISTICS_ERROR', { ip, error: errorMessage });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      await this.auditLogger.logError('GET_USAGE_STATISTICS_ERROR', {
+        ip,
+        error: errorMessage,
+      });
       console.error('Error getting usage statistics:', error);
-      return UsageStatsResult.failed(['Internal error occurred while getting statistics']);
+      return UsageStatsResult.failed([
+        'Internal error occurred while getting statistics',
+      ]);
     }
   }
 
   private async calculateSystemStatistics(): Promise<SystemUsageStatistics> {
     const allUsageLimits = await this.repository.findAll();
-    
+
     let totalUsage = 0;
     let totalQuota = 0;
     let totalBonusQuota = 0;
@@ -280,9 +312,11 @@ export class UsageLimitDomainService {
       totalUsage += stats.currentUsage;
       totalQuota += stats.availableQuota;
       totalBonusQuota += stats.bonusQuota;
-      
-      if (stats.lastActivityAt && 
-          (Date.now() - stats.lastActivityAt.getTime()) < 24 * 60 * 60 * 1000) {
+
+      if (
+        stats.lastActivityAt &&
+        Date.now() - stats.lastActivityAt.getTime() < 24 * 60 * 60 * 1000
+      ) {
         activeIPs++;
       }
     }
@@ -294,7 +328,8 @@ export class UsageLimitDomainService {
       totalQuota,
       totalBonusQuota,
       systemUtilization: totalQuota > 0 ? (totalUsage / totalQuota) * 100 : 0,
-      averageUsagePerIP: allUsageLimits.length > 0 ? totalUsage / allUsageLimits.length : 0
+      averageUsagePerIP:
+        allUsageLimits.length > 0 ? totalUsage / allUsageLimits.length : 0,
     };
   }
 }
@@ -314,7 +349,7 @@ export class UsageLimitResult {
       resetAt: Date;
       bonusQuota: number;
     },
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**
@@ -354,7 +389,7 @@ export class UsageTrackingResult {
       remainingQuota: number;
       timestamp: Date;
     },
-    public readonly error?: string
+    public readonly error?: string,
   ) {}
 
   /**
@@ -391,7 +426,7 @@ export class BonusQuotaResult {
       newTotalQuota: number;
       bonusType: BonusType;
     },
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**
@@ -437,7 +472,7 @@ export class UsageStatsResult {
       };
       system?: SystemUsageStatistics;
     },
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**

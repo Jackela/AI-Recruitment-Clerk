@@ -2,7 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ResumeParserNatsService } from './resume-parser-nats.service';
-import { NatsConnectionManager, NatsStreamManager } from '@app/shared-nats-client';
+import {
+  NatsConnectionManager,
+  NatsStreamManager,
+} from '@app/shared-nats-client';
 
 describe('ResumeParserNatsService', () => {
   let service: ResumeParserNatsService;
@@ -12,7 +15,9 @@ describe('ResumeParserNatsService', () => {
 
   beforeEach(async () => {
     // Create mocks for base class methods
-    mockPublish = jest.fn().mockResolvedValue({ success: true, messageId: 'test-msg-id' });
+    mockPublish = jest
+      .fn()
+      .mockResolvedValue({ success: true, messageId: 'test-msg-id' });
     mockSubscribe = jest.fn().mockResolvedValue(undefined);
     mockGetHealthStatus = jest.fn().mockResolvedValue({
       connected: true,
@@ -119,7 +124,7 @@ describe('ResumeParserNatsService', () => {
             'resume-id': 'resume-456',
             'job-id': 'job-123',
           }),
-        })
+        }),
       );
     });
 
@@ -144,7 +149,7 @@ describe('ResumeParserNatsService', () => {
           confidence: 0.85,
           parsingMethod: 'ai-vision-llm',
         }),
-        expect.anything()
+        expect.anything(),
       );
     });
 
@@ -163,7 +168,7 @@ describe('ResumeParserNatsService', () => {
 
       expect(Logger.prototype.error).toHaveBeenCalledWith(
         `Failed to publish analysis resume parsed event for resumeId: ${mockEvent.resumeId}`,
-        'Network error'
+        'Network error',
       );
     });
 
@@ -180,7 +185,7 @@ describe('ResumeParserNatsService', () => {
 
       expect(Logger.prototype.error).toHaveBeenCalledWith(
         `Error publishing analysis resume parsed event for resumeId: ${mockEvent.resumeId}`,
-        error
+        error,
       );
     });
 
@@ -195,9 +200,11 @@ describe('ResumeParserNatsService', () => {
       expect(mockPublish).toHaveBeenCalledWith(
         'analysis.resume.parsed',
         expect.objectContaining({
-          timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/),
+          timestamp: expect.stringMatching(
+            /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/,
+          ),
         }),
-        expect.anything()
+        expect.anything(),
       );
     });
   });
@@ -249,7 +256,7 @@ describe('ResumeParserNatsService', () => {
             'job-id': 'job-111',
             'error-stage': 'text-extraction',
           }),
-        })
+        }),
       );
     });
 
@@ -273,7 +280,7 @@ describe('ResumeParserNatsService', () => {
         expect.objectContaining({
           retryAttempt: 1,
         }),
-        expect.anything()
+        expect.anything(),
       );
     });
 
@@ -292,7 +299,7 @@ describe('ResumeParserNatsService', () => {
 
       expect(Logger.prototype.error).toHaveBeenCalledWith(
         `Failed to publish job resume failed event for resumeId: ${mockFailedEvent.resumeId}`,
-        'Queue full'
+        'Queue full',
       );
     });
 
@@ -327,7 +334,7 @@ describe('ResumeParserNatsService', () => {
         'job-666',
         'resume-777',
         new Error('Processing error'),
-        context
+        context,
       );
 
       expect(result).toEqual({
@@ -356,7 +363,7 @@ describe('ResumeParserNatsService', () => {
           headers: expect.objectContaining({
             'error-stage': 'parsing',
           }),
-        })
+        }),
       );
     });
 
@@ -369,7 +376,7 @@ describe('ResumeParserNatsService', () => {
       await service.publishProcessingError(
         'job-999',
         'resume-000',
-        new Error('Error')
+        new Error('Error'),
       );
 
       expect(mockPublish).toHaveBeenCalledWith(
@@ -378,7 +385,7 @@ describe('ResumeParserNatsService', () => {
           stage: 'unknown',
           retryAttempt: 1,
         }),
-        expect.anything()
+        expect.anything(),
       );
     });
 
@@ -391,7 +398,7 @@ describe('ResumeParserNatsService', () => {
       const result = await service.publishProcessingError(
         'job-aaa',
         'resume-bbb',
-        new Error('Test error')
+        new Error('Test error'),
       );
 
       expect(result).toEqual({
@@ -407,7 +414,7 @@ describe('ResumeParserNatsService', () => {
       const result = await service.publishProcessingError(
         'job-ccc',
         'resume-ddd',
-        new Error('Original error')
+        new Error('Original error'),
       );
 
       expect(result).toEqual({
@@ -433,11 +440,11 @@ describe('ResumeParserNatsService', () => {
           maxDeliver: 3,
           ackWait: 30000,
           deliverPolicy: 'new',
-        })
+        }),
       );
 
       expect(Logger.prototype.log).toHaveBeenCalledWith(
-        'Successfully subscribed to job.resume.submitted'
+        'Successfully subscribed to job.resume.submitted',
       );
     });
 
@@ -446,13 +453,13 @@ describe('ResumeParserNatsService', () => {
       mockSubscribe.mockRejectedValue(error);
       const handler = jest.fn();
 
-      await expect(service.subscribeToResumeSubmissions(handler)).rejects.toThrow(
-        'Subscription failed'
-      );
+      await expect(
+        service.subscribeToResumeSubmissions(handler),
+      ).rejects.toThrow('Subscription failed');
 
       expect(Logger.prototype.error).toHaveBeenCalledWith(
         'Failed to subscribe to job.resume.submitted',
-        error
+        error,
       );
     });
 
@@ -463,7 +470,7 @@ describe('ResumeParserNatsService', () => {
       await service.subscribeToResumeSubmissions(handler);
 
       expect(Logger.prototype.log).toHaveBeenCalledWith(
-        'Setting up subscription to job.resume.submitted with durable name: resume-parser-job-resume-submitted'
+        'Setting up subscription to job.resume.submitted with durable name: resume-parser-job-resume-submitted',
       );
     });
   });
@@ -472,10 +479,10 @@ describe('ResumeParserNatsService', () => {
     it('should generate unique message IDs', () => {
       // Access private method through type assertion
       const generateId = (service as any).generateResumeMessageId;
-      
+
       const id1 = generateId.call(service, 'resume-123', 'parsed');
       const id2 = generateId.call(service, 'resume-123', 'parsed');
-      
+
       expect(id1).toContain('resume-parsed-resume-123');
       expect(id2).toContain('resume-parsed-resume-123');
       expect(id1).not.toBe(id2); // Should be unique
@@ -484,7 +491,7 @@ describe('ResumeParserNatsService', () => {
     it('should include timestamp and random component', () => {
       const generateId = (service as any).generateResumeMessageId;
       const id = generateId.call(service, 'resume-456', 'failed');
-      
+
       expect(id).toMatch(/^resume-failed-resume-456-\d+-[a-z0-9]{9}$/);
     });
   });
@@ -516,7 +523,7 @@ describe('ResumeParserNatsService', () => {
       mockGetHealthStatus.mockRejectedValue(error);
 
       await expect(service.getServiceHealthStatus()).rejects.toThrow(
-        'Health check failed'
+        'Health check failed',
       );
     });
   });

@@ -107,7 +107,9 @@ export class UserService {
     let firstName = createUserDto.firstName;
     let lastName = createUserDto.lastName;
     if ((!firstName || !lastName) && (createUserDto as any).name) {
-      const parts = String((createUserDto as any).name).trim().split(/\s+/);
+      const parts = String((createUserDto as any).name)
+        .trim()
+        .split(/\s+/);
       firstName = firstName || parts[0] || '';
       lastName = lastName || parts.slice(1).join(' ') || '';
     }
@@ -129,7 +131,8 @@ export class UserService {
       },
       role: createUserDto.role || UserRole.USER,
       organizationId:
-        createUserDto.organizationId || `org-${Math.random().toString(36).substr(2, 8)}`,
+        createUserDto.organizationId ||
+        `org-${Math.random().toString(36).substr(2, 8)}`,
       status: createUserDto.status || UserStatus.ACTIVE,
       createdAt: now,
       updatedAt: now,

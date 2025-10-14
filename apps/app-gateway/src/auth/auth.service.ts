@@ -75,7 +75,8 @@ export class AuthService {
     if ((!normalized.firstName || !normalized.lastName) && normalized.name) {
       const parts = String(normalized.name).trim().split(/\s+/);
       normalized.firstName = normalized.firstName || parts[0] || '';
-      normalized.lastName = normalized.lastName || parts.slice(1).join(' ') || '';
+      normalized.lastName =
+        normalized.lastName || parts.slice(1).join(' ') || '';
     }
     // Check if user already exists
     const existingUser = await this.userService.findByEmail(normalized.email);
@@ -86,7 +87,8 @@ export class AuthService {
     // Hash password
     // Use lower bcrypt rounds in test to meet performance thresholds
     const saltEnv = this.configService.get<string>('BCRYPT_ROUNDS');
-    const saltRounds = process.env.NODE_ENV === 'test' ? parseInt(saltEnv || '4') : 12;
+    const saltRounds =
+      process.env.NODE_ENV === 'test' ? parseInt(saltEnv || '4') : 12;
     const hashedPassword = await bcrypt.hash(normalized.password, saltRounds);
 
     // Create user

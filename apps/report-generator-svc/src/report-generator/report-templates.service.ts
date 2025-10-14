@@ -1,6 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { GridFsService, ReportFileMetadata } from './gridfs.service';
-import { ReportDocument, ScoreBreakdown, MatchingSkill, ReportRecommendation } from '../schemas/report.schema';
+import {
+  ReportDocument,
+  ScoreBreakdown,
+  MatchingSkill,
+  ReportRecommendation,
+} from '../schemas/report.schema';
 import { marked } from 'marked';
 
 // Enhanced type definitions for report templates

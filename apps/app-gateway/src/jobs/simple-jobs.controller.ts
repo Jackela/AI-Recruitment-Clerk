@@ -1,4 +1,11 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
@@ -88,13 +95,13 @@ export class SimpleJobsController {
   async createJob(@Body() body: CreateJobDto) {
     console.log('🚨 SIMPLE JOBS CONTROLLER CALLED! 🚨');
     // ✅ FIXED: Use real JobsService with NATS publishing for E2E tests
-    const mockUser = { 
-      id: 'e2e-test-user', 
+    const mockUser = {
+      id: 'e2e-test-user',
       organizationId: 'e2e-test-org',
       role: 'user',
-      email: 'e2e-test@example.com'
+      email: 'e2e-test@example.com',
     };
-    
+
     console.log('🚨 CALLING JOBS SERVICE NOW! 🚨');
     const result = await this.jobsService.createJob(body, mockUser);
     console.log('🚨 JOBS SERVICE RESULT:', result, '🚨');

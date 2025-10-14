@@ -485,7 +485,7 @@ export class ExperienceAnalyzerService {
 
     // Relevance weight is higher for specialized roles
     const relevanceWeight =
-      ((jobRequirements.requiredTechnologies?.length ?? 0) > 0) ? 0.4 : 0.3;
+      (jobRequirements.requiredTechnologies?.length ?? 0) > 0 ? 0.4 : 0.3;
 
     // Leadership bonus for leadership-required positions
     const leadershipBonus =
@@ -500,7 +500,7 @@ export class ExperienceAnalyzerService {
 
     // Industry penalty for unrelated experience
     const industryPenalty =
-      ((jobRequirements.requiredIndustries?.length ?? 0) > 0) &&
+      (jobRequirements.requiredIndustries?.length ?? 0) > 0 &&
       analysis.relevanceFactors.industryRelevance < 50
         ? -0.1
         : 0.0;

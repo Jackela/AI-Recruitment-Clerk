@@ -5,7 +5,9 @@ import { GridFsService } from '../gridfs/gridfs.service';
 import { FieldMapperService } from '../field-mapper/field-mapper.service';
 import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
 
-jest.mock('pdf-parse-fork', () => jest.fn(async () => ({ text: 'Sample PDF text content' })));
+jest.mock('pdf-parse-fork', () =>
+  jest.fn(async () => ({ text: 'Sample PDF text content' })),
+);
 
 describe('ParsingService - PDF Extraction', () => {
   let service: ParsingService;
@@ -39,4 +41,3 @@ describe('ParsingService - PDF Extraction', () => {
     expect(text).toBe(expected);
   });
 });
-

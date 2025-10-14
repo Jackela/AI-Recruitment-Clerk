@@ -1,4 +1,9 @@
-import { UsageLimit, BonusType, UsageLimitPolicy, UsageStatistics } from './usage-limit.dto';
+import {
+  UsageLimit,
+  BonusType,
+  UsageLimitPolicy,
+  UsageStatistics,
+} from './usage-limit.dto';
 
 /**
  * Represents the usage limit rules.
@@ -18,7 +23,8 @@ export class UsageLimitRules {
   static readonly MAX_REQUESTS_PER_MINUTE = 10;
 
   // 验证规则
-  static readonly IP_VALIDATION_REGEX = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+  static readonly IP_VALIDATION_REGEX =
+    /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
   // 核心业务规则方法
 
@@ -55,17 +61,31 @@ export class UsageLimitRules {
   /**
    * 验证奖励配额是否超过限制
    */
-  static isValidBonusQuota(currentBonusQuota: number, additionalBonus: number): boolean {
-    return (currentBonusQuota + additionalBonus) <= this.MAX_BONUS_QUOTA;
+  static isValidBonusQuota(
+    currentBonusQuota: number,
+    additionalBonus: number,
+  ): boolean {
+    return currentBonusQuota + additionalBonus <= this.MAX_BONUS_QUOTA;
   }
 
   /**
    * 检查是否应该重置使用计数（基于时间）
    */
-  static shouldResetUsage(lastResetAt: Date, currentTime: Date = new Date()): boolean {
-    const lastResetDate = new Date(lastResetAt.getFullYear(), lastResetAt.getMonth(), lastResetAt.getDate());
-    const currentDate = new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate());
-    
+  static shouldResetUsage(
+    lastResetAt: Date,
+    currentTime: Date = new Date(),
+  ): boolean {
+    const lastResetDate = new Date(
+      lastResetAt.getFullYear(),
+      lastResetAt.getMonth(),
+      lastResetAt.getDate(),
+    );
+    const currentDate = new Date(
+      currentTime.getFullYear(),
+      currentTime.getMonth(),
+      currentTime.getDate(),
+    );
+
     return currentDate > lastResetDate;
   }
 
@@ -86,18 +106,24 @@ export class UsageLimitRules {
     if (!ip || typeof ip !== 'string') {
       return false;
     }
-    
+
     return this.IP_VALIDATION_REGEX.test(ip);
   }
 
   /**
    * 检查使用频率是否过高（防止滥用）
    */
-  static isRateLimited(usageHistory: Array<{ timestamp: Date; count: number }>): boolean {
+  static isRateLimited(
+    usageHistory: Array<{ timestamp: Date; count: number }>,
+  ): boolean {
     const now = new Date();
-    const windowStart = new Date(now.getTime() - (this.RATE_LIMIT_WINDOW_MINUTES * 60 * 1000));
-    
-    const recentUsage = usageHistory.filter(record => record.timestamp >= windowStart);
+    const windowStart = new Date(
+      now.getTime() - this.RATE_LIMIT_WINDOW_MINUTES * 60 * 1000,
+    );
+
+    const recentUsage = usageHistory.filter(
+      (record) => record.timestamp >= windowStart,
+    );
     return recentUsage.length >= this.MAX_REQUESTS_PER_MINUTE;
   }
 
@@ -126,7 +152,8 @@ export class UsageLimitRules {
 
     // 持续使用模式风险
     if (statistics.lastActivityAt) {
-      const hoursSinceLastActivity = (Date.now() - statistics.lastActivityAt.getTime()) / (1000 * 60 * 60);
+      const hoursSinceLastActivity =
+        (Date.now() - statistics.lastActivityAt.getTime()) / (1000 * 60 * 60);
       if (hoursSinceLastActivity < 1) {
         score += 10;
         factors.push('Very recent activity');
@@ -140,21 +167,26 @@ export class UsageLimitRules {
    * 验证使用限制策略的有效性
    */
   static isValidUsagePolicy(policy: UsageLimitPolicy): boolean {
-    return policy.dailyLimit > 0 &&
-           policy.dailyLimit <= 50 &&
-           policy.maxBonusQuota >= 0 &&
-           policy.maxBonusQuota <= 100 &&
-           policy.resetTimeUTC >= 0 &&
-           policy.resetTimeUTC <= 23;
+    return (
+      policy.dailyLimit > 0 &&
+      policy.dailyLimit <= 50 &&
+      policy.maxBonusQuota >= 0 &&
+      policy.maxBonusQuota <= 100 &&
+      policy.resetTimeUTC >= 0 &&
+      policy.resetTimeUTC <= 23
+    );
   }
 
   /**
    * 生成使用限制违规报告
    */
-  static generateViolationReport(ip: string, usageLimit: UsageLimit): UsageViolationReport {
+  static generateViolationReport(
+    ip: string,
+    usageLimit: UsageLimit,
+  ): UsageViolationReport {
     const statistics = usageLimit.getUsageStatistics();
     const riskScore = this.calculateRiskScore(statistics);
-    
+
     return new UsageViolationReport({
       ip,
       violationType: this.determineViolationType(statistics),
@@ -164,19 +196,21 @@ export class UsageLimitRules {
       riskScore: riskScore.score,
       riskFactors: riskScore.factors,
       recommendedAction: this.getRecommendedAction(riskScore.score),
-      nextAllowedTime: statistics.resetAt
+      nextAllowedTime: statistics.resetAt,
     });
   }
 
-  private static determineViolationType(statistics: UsageStatistics): ViolationType {
+  private static determineViolationType(
+    statistics: UsageStatistics,
+  ): ViolationType {
     if (statistics.currentUsage >= statistics.availableQuota) {
       return ViolationType.QUOTA_EXCEEDED;
     }
-    
+
     if (statistics.getUsagePercentage() >= 90) {
       return ViolationType.HIGH_USAGE_WARNING;
     }
-    
+
     return ViolationType.RATE_LIMIT_APPROACHED;
   }
 
@@ -188,7 +222,7 @@ export class UsageLimitRules {
     } else if (riskScore >= 20) {
       return RecommendedAction.WARN_USER;
     }
-    
+
     return RecommendedAction.CONTINUE_NORMAL;
   }
 
@@ -199,7 +233,7 @@ export class UsageLimitRules {
     bonusType: BonusType,
     requestedAmount: number,
     currentBonusQuota: number,
-    policy: UsageLimitPolicy
+    policy: UsageLimitPolicy,
   ): BonusValidationResult {
     const errors: string[] = [];
 
@@ -215,12 +249,16 @@ export class UsageLimitRules {
 
     const standardBonus = this.calculateBonusQuota(bonusType);
     if (requestedAmount > standardBonus * 2) {
-      errors.push(`Requested bonus amount (${requestedAmount}) exceeds maximum allowed (${standardBonus * 2})`);
+      errors.push(
+        `Requested bonus amount (${requestedAmount}) exceeds maximum allowed (${standardBonus * 2})`,
+      );
     }
 
     // 验证总配额限制
     if (!this.isValidBonusQuota(currentBonusQuota, requestedAmount)) {
-      errors.push(`Total bonus quota would exceed maximum limit (${this.MAX_BONUS_QUOTA})`);
+      errors.push(
+        `Total bonus quota would exceed maximum limit (${this.MAX_BONUS_QUOTA})`,
+      );
     }
 
     // 验证策略设置
@@ -231,23 +269,30 @@ export class UsageLimitRules {
     return new BonusValidationResult(
       errors.length === 0,
       errors,
-      errors.length === 0 ? requestedAmount : 0
+      errors.length === 0 ? requestedAmount : 0,
     );
   }
 
   /**
    * 计算使用效率指标
    */
-  static calculateUsageEfficiency(statistics: UsageStatistics): UsageEfficiency {
+  static calculateUsageEfficiency(
+    statistics: UsageStatistics,
+  ): UsageEfficiency {
     const utilizationRate = statistics.currentUsage / statistics.dailyLimit;
-    const bonusUtilization = statistics.bonusQuota > 0 ? 
-      Math.min(statistics.currentUsage, statistics.bonusQuota) / statistics.bonusQuota : 0;
+    const bonusUtilization =
+      statistics.bonusQuota > 0
+        ? Math.min(statistics.currentUsage, statistics.bonusQuota) /
+          statistics.bonusQuota
+        : 0;
 
     return new UsageEfficiency({
       baseUtilization: Math.min(utilizationRate, 1.0),
       bonusUtilization,
       overallEfficiency: (utilizationRate + bonusUtilization) / 2,
-      wasteageScore: Math.max(0, statistics.availableQuota - statistics.currentUsage) / statistics.availableQuota
+      wasteageScore:
+        Math.max(0, statistics.availableQuota - statistics.currentUsage) /
+        statistics.availableQuota,
     });
   }
 }
@@ -264,21 +309,21 @@ export class RiskScore {
    */
   constructor(
     public readonly score: number,
-    public readonly factors: string[]
+    public readonly factors: string[],
   ) {}
 }
 
 export enum ViolationType {
   QUOTA_EXCEEDED = 'quota_exceeded',
-  HIGH_USAGE_WARNING = 'high_usage_warning', 
-  RATE_LIMIT_APPROACHED = 'rate_limit_approached'
+  HIGH_USAGE_WARNING = 'high_usage_warning',
+  RATE_LIMIT_APPROACHED = 'rate_limit_approached',
 }
 
 export enum RecommendedAction {
   CONTINUE_NORMAL = 'continue_normal',
   WARN_USER = 'warn_user',
   MONITOR_CLOSELY = 'monitor_closely',
-  BLOCK_TEMPORARILY = 'block_temporarily'
+  BLOCK_TEMPORARILY = 'block_temporarily',
 }
 
 /**
@@ -289,48 +334,62 @@ export class UsageViolationReport {
    * Initializes a new instance of the Usage Violation Report.
    * @param data - The data.
    */
-  constructor(public readonly data: {
-    ip: string;
-    violationType: ViolationType;
-    currentUsage: number;
-    allowedQuota: number;
-    violationTime: Date;
-    riskScore: number;
-    riskFactors: string[];
-    recommendedAction: RecommendedAction;
-    nextAllowedTime: Date;
-  }) {}
+  constructor(
+    public readonly data: {
+      ip: string;
+      violationType: ViolationType;
+      currentUsage: number;
+      allowedQuota: number;
+      violationTime: Date;
+      riskScore: number;
+      riskFactors: string[];
+      recommendedAction: RecommendedAction;
+      nextAllowedTime: Date;
+    },
+  ) {}
 
   /**
    * Performs the ip operation.
    * @returns The string value.
    */
-  get ip(): string { return this.data.ip; }
+  get ip(): string {
+    return this.data.ip;
+  }
   /**
    * Performs the violation type operation.
    * @returns The ViolationType.
    */
-  get violationType(): ViolationType { return this.data.violationType; }
+  get violationType(): ViolationType {
+    return this.data.violationType;
+  }
   /**
    * Performs the current usage operation.
    * @returns The number value.
    */
-  get currentUsage(): number { return this.data.currentUsage; }
+  get currentUsage(): number {
+    return this.data.currentUsage;
+  }
   /**
    * Performs the allowed quota operation.
    * @returns The number value.
    */
-  get allowedQuota(): number { return this.data.allowedQuota; }
+  get allowedQuota(): number {
+    return this.data.allowedQuota;
+  }
   /**
    * Performs the risk score operation.
    * @returns The number value.
    */
-  get riskScore(): number { return this.data.riskScore; }
+  get riskScore(): number {
+    return this.data.riskScore;
+  }
   /**
    * Performs the recommended action operation.
    * @returns The RecommendedAction.
    */
-  get recommendedAction(): RecommendedAction { return this.data.recommendedAction; }
+  get recommendedAction(): RecommendedAction {
+    return this.data.recommendedAction;
+  }
 }
 
 /**
@@ -346,7 +405,7 @@ export class BonusValidationResult {
   constructor(
     public readonly isValid: boolean,
     public readonly errors: string[],
-    public readonly approvedAmount: number
+    public readonly approvedAmount: number,
   ) {}
 }
 
@@ -358,31 +417,41 @@ export class UsageEfficiency {
    * Initializes a new instance of the Usage Efficiency.
    * @param data - The data.
    */
-  constructor(public readonly data: {
-    baseUtilization: number;
-    bonusUtilization: number;
-    overallEfficiency: number;
-    wasteageScore: number;
-  }) {}
+  constructor(
+    public readonly data: {
+      baseUtilization: number;
+      bonusUtilization: number;
+      overallEfficiency: number;
+      wasteageScore: number;
+    },
+  ) {}
 
   /**
    * Performs the base utilization operation.
    * @returns The number value.
    */
-  get baseUtilization(): number { return this.data.baseUtilization; }
+  get baseUtilization(): number {
+    return this.data.baseUtilization;
+  }
   /**
    * Performs the bonus utilization operation.
    * @returns The number value.
    */
-  get bonusUtilization(): number { return this.data.bonusUtilization; }
+  get bonusUtilization(): number {
+    return this.data.bonusUtilization;
+  }
   /**
    * Performs the overall efficiency operation.
    * @returns The number value.
    */
-  get overallEfficiency(): number { return this.data.overallEfficiency; }
+  get overallEfficiency(): number {
+    return this.data.overallEfficiency;
+  }
   /**
    * Performs the wasteage score operation.
    * @returns The number value.
    */
-  get wasteageScore(): number { return this.data.wasteageScore; }
+  get wasteageScore(): number {
+    return this.data.wasteageScore;
+  }
 }

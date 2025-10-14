@@ -24,11 +24,11 @@ export class SessionCacheService {
     const sessionData = this.serializeSession(session);
     const sessionKey = this.getSessionKey(session.getId().getValue());
     const ipKey = this.getIPSessionKey(session.getIP().getValue());
-    
+
     // 同时缓存会话数据和IP映射
     await Promise.all([
       this.redis.set(sessionKey, JSON.stringify(sessionData), this.DEFAULT_TTL),
-      this.redis.set(ipKey, session.getId().getValue(), this.DEFAULT_TTL)
+      this.redis.set(ipKey, session.getId().getValue(), this.DEFAULT_TTL),
     ]);
   }
 
@@ -38,11 +38,11 @@ export class SessionCacheService {
   async getSessionById(sessionId: string): Promise<UserSession | null> {
     const sessionKey = this.getSessionKey(sessionId);
     const sessionDataStr = await this.redis.get(sessionKey);
-    
+
     if (!sessionDataStr) {
       return null;
     }
-    
+
     try {
       const sessionData = JSON.parse(sessionDataStr) as SessionData;
       return UserSession.restore(sessionData);
@@ -58,11 +58,11 @@ export class SessionCacheService {
   async getSessionByIP(ip: string): Promise<UserSession | null> {
     const ipKey = this.getIPSessionKey(ip);
     const sessionId = await this.redis.get(ipKey);
-    
+
     if (!sessionId) {
       return null;
     }
-    
+
     return this.getSessionById(sessionId);
   }
 
@@ -72,11 +72,8 @@ export class SessionCacheService {
   async removeSession(sessionId: string, ip: string): Promise<void> {
     const sessionKey = this.getSessionKey(sessionId);
     const ipKey = this.getIPSessionKey(ip);
-    
-    await Promise.all([
-      this.redis.del(sessionKey),
-      this.redis.del(ipKey)
-    ]);
+
+    await Promise.all([this.redis.del(sessionKey), this.redis.del(ipKey)]);
   }
 
   /**
@@ -97,17 +94,17 @@ export class SessionCacheService {
   }> {
     const ipKey = this.getIPSessionKey(ip);
     const sessionId = await this.redis.get(ipKey);
-    
+
     if (!sessionId) {
       return { hasActiveSession: false };
     }
-    
+
     const ttl = await this.redis.ttl(ipKey);
-    
+
     return {
       hasActiveSession: true,
       sessionId,
-      remainingTTL: ttl > 0 ? ttl : undefined
+      remainingTTL: ttl > 0 ? ttl : undefined,
     };
   }
 
@@ -117,9 +114,9 @@ export class SessionCacheService {
   async cleanExpiredSessions(): Promise<number> {
     const pattern = `${this.SESSION_PREFIX}*`;
     const keys = await this.redis.keys(pattern);
-    
+
     let cleanedCount = 0;
-    
+
     for (const key of keys) {
       const ttl = await this.redis.ttl(key);
       if (ttl === -1 || ttl === -2) {
@@ -128,7 +125,7 @@ export class SessionCacheService {
         cleanedCount++;
       }
     }
-    
+
     return cleanedCount;
   }
 
@@ -144,13 +141,17 @@ export class SessionCacheService {
   /**
    * 延长会话有效期
    */
-  async extendSessionTTL(sessionId: string, ip: string, ttl: number = this.DEFAULT_TTL): Promise<void> {
+  async extendSessionTTL(
+    sessionId: string,
+    ip: string,
+    ttl: number = this.DEFAULT_TTL,
+  ): Promise<void> {
     const sessionKey = this.getSessionKey(sessionId);
     const ipKey = this.getIPSessionKey(ip);
-    
+
     await Promise.all([
       this.redis.expire(sessionKey, ttl),
-      this.redis.expire(ipKey, ttl)
+      this.redis.expire(ipKey, ttl),
     ]);
   }
 
@@ -174,8 +175,8 @@ export class SessionCacheService {
         daily: usage.total,
         used: usage.used,
         questionnaireBonuses: 0,
-        paymentBonuses: 0
-      }
+        paymentBonuses: 0,
+      },
     };
   }
 }

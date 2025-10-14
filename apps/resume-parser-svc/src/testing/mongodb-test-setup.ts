@@ -105,12 +105,9 @@ export class MongodbTestSetup {
     connectionName: string = 'resume-parser',
   ): Promise<ModuleMetadata> {
     const mongooseModule = await this.getMongooseTestModule(connectionName);
-    
+
     return {
-      imports: [
-        mongooseModule,
-        ...additionalImports,
-      ],
+      imports: [mongooseModule, ...additionalImports],
       providers: additionalProviders,
     };
   }

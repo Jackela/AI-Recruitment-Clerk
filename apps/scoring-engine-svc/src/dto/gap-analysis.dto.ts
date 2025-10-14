@@ -16,4 +16,3 @@ export interface GapAnalysisResultDto {
   missingSkills: string[];
   suggestedSkills?: string[];
 }
-

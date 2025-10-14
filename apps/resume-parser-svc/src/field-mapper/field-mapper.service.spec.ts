@@ -7,7 +7,9 @@ type SkillsTaxonomyType = {
   normalizeSkill: (skill: string) => string;
   categorize: (skill: string) => string;
   fuzzyMatchSkill: (skill: string) => string;
-  getSkillInfo: (skill: string) => { name: string; category: string; weight: number } | null;
+  getSkillInfo: (
+    skill: string,
+  ) => { name: string; category: string; weight: number } | null;
   calculateSkillScore: (skills: string[]) => number;
   groupSkillsByCategory: (skills: string[]) => Record<string, string[]>;
   getRelatedSkills: (skill: string) => string[];
@@ -36,12 +38,15 @@ const categorizeLocal = (skill: string): string => {
 };
 
 const SkillsTaxonomy: SkillsTaxonomyType = {
-  normalizeSkill: jest.fn((skill: string): string => normalizeSkillLocal(skill)),
+  normalizeSkill: jest.fn((skill: string): string =>
+    normalizeSkillLocal(skill),
+  ),
   categorize: jest.fn((skill: string): string => categorizeLocal(skill)),
   fuzzyMatchSkill: jest.fn((skill: string): string => {
     if (!skill) return '';
     const s = skill.toLowerCase();
-    if (s.replace('srip', 'script') === 'javascript' || s === 'javasript') return 'JavaScript';
+    if (s.replace('srip', 'script') === 'javascript' || s === 'javasript')
+      return 'JavaScript';
     return normalizeSkillLocal(skill);
   }),
   getSkillInfo: jest.fn((skill: string) => {
@@ -57,21 +62,23 @@ const SkillsTaxonomy: SkillsTaxonomyType = {
     if (!Array.isArray(skills) || skills.length === 0) return 0;
     return Math.min(100, Math.max(1, skills.length * 10));
   }),
-  groupSkillsByCategory: jest.fn((skills: string[]): Record<string, string[]> => {
-    const grouped: Record<string, string[]> = {
-      'Programming Languages': [],
-      'Frameworks & Libraries': [],
-      Databases: [],
-      Other: [],
-    };
-    (Array.isArray(skills) ? skills : []).forEach((s) => {
-      if (!s) return;
-      const cat = categorizeLocal(s);
-      if (!grouped[cat]) grouped[cat] = [];
-      grouped[cat].push(s);
-    });
-    return grouped;
-  }),
+  groupSkillsByCategory: jest.fn(
+    (skills: string[]): Record<string, string[]> => {
+      const grouped: Record<string, string[]> = {
+        'Programming Languages': [],
+        'Frameworks & Libraries': [],
+        Databases: [],
+        Other: [],
+      };
+      (Array.isArray(skills) ? skills : []).forEach((s) => {
+        if (!s) return;
+        const cat = categorizeLocal(s);
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(s);
+      });
+      return grouped;
+    },
+  ),
   getRelatedSkills: jest.fn((skill: string): string[] => {
     const normalized = normalizeSkillLocal(skill);
     if (normalized === 'JavaScript') return ['TypeScript', 'React', 'Node.js'];
@@ -84,11 +91,19 @@ const DateParser = {
     if (!dateStr || dateStr === 'invalid-date') {
       return { date: null, isPresent: false, confidence: 0 };
     }
-    if (dateStr === 'present' || dateStr === 'Present' || dateStr === 'current') {
+    if (
+      dateStr === 'present' ||
+      dateStr === 'Present' ||
+      dateStr === 'current'
+    ) {
       return { date: 'present' as const, isPresent: true, confidence: 0.95 };
     }
     const d = new Date(dateStr);
-    return { date: d, isPresent: false, confidence: isNaN(d.getTime()) ? 0 : 0.95 };
+    return {
+      date: d,
+      isPresent: false,
+      confidence: isNaN(d.getTime()) ? 0 : 0.95,
+    };
   }),
   normalizeToISO: jest.fn((dateStr: string) => {
     if (!dateStr || dateStr === 'invalid-date') return '';
@@ -96,16 +111,26 @@ const DateParser = {
     if (dateStr === 'January 2023') return '2023-01-01';
     if (dateStr === '01/15/2023') return '2023-01-15';
     // If ISO already
-    if (/^\d{4}-\d{2}(-\d{2})?$/.test(dateStr)) return dateStr.length === 7 ? `${dateStr}-01` : dateStr;
+    if (/^\d{4}-\d{2}(-\d{2})?$/.test(dateStr))
+      return dateStr.length === 7 ? `${dateStr}-01` : dateStr;
     return '';
   }),
   calculateDuration: jest.fn((start: any, end: any) => {
-    const startDate: Date | null = start?.date === 'present' ? new Date() : start?.date ?? null;
+    const startDate: Date | null =
+      start?.date === 'present' ? new Date() : (start?.date ?? null);
     const endDate: Date | 'present' | null = end?.date ?? null;
-    const effectiveEnd = endDate === 'present' ? new Date() : (endDate as Date | null);
-    if (!startDate || !effectiveEnd) return { years: 0, months: 0, totalMonths: 0 };
-    const months = (effectiveEnd.getFullYear() - startDate.getFullYear()) * 12 + (effectiveEnd.getMonth() - startDate.getMonth());
-    return { years: Math.floor(months / 12), months: months % 12, totalMonths: Math.max(0, months) };
+    const effectiveEnd =
+      endDate === 'present' ? new Date() : (endDate as Date | null);
+    if (!startDate || !effectiveEnd)
+      return { years: 0, months: 0, totalMonths: 0 };
+    const months =
+      (effectiveEnd.getFullYear() - startDate.getFullYear()) * 12 +
+      (effectiveEnd.getMonth() - startDate.getMonth());
+    return {
+      years: Math.floor(months / 12),
+      months: months % 12,
+      totalMonths: Math.max(0, months),
+    };
   }),
   isReasonableDate: jest.fn((parsed: any) => {
     if (!parsed) return false;
@@ -124,8 +149,8 @@ const ExperienceCalculator = {
       workExperience.length === 0
         ? 'Entry'
         : workExperience.length > 1
-        ? 'Senior'
-        : 'Mid',
+          ? 'Senior'
+          : 'Mid',
     relevantYears: workExperience.length * 2.5,
     // Fields expected by later assertions in the spec
     totalExperienceYears: workExperience.length * 3,
@@ -168,7 +193,8 @@ jest.mock('@ai-recruitment-clerk/candidate-scoring-domain', () => {
       fuzzyMatchSkill: jest.fn((skill: string) => {
         if (!skill) return '';
         const s = skill.toLowerCase();
-        if (s.replace('srip', 'script') === 'javascript' || s === 'javasript') return 'JavaScript';
+        if (s.replace('srip', 'script') === 'javascript' || s === 'javasript')
+          return 'JavaScript';
         return normalizeSkillLocal(skill);
       }),
       getSkillInfo: jest.fn((skill: string) => {
@@ -199,7 +225,8 @@ jest.mock('@ai-recruitment-clerk/candidate-scoring-domain', () => {
       }),
       getRelatedSkills: jest.fn((skill: string) => {
         const normalized = normalizeSkillLocal(skill);
-        if (normalized === 'JavaScript') return ['TypeScript', 'React', 'Node.js'];
+        if (normalized === 'JavaScript')
+          return ['TypeScript', 'React', 'Node.js'];
         return [];
       }),
     },
@@ -213,8 +240,16 @@ jest.mock('./date-parser', () => {
         if (!dateStr || dateStr === 'invalid-date') {
           return { date: null, isPresent: false, confidence: 0 };
         }
-        if (dateStr === 'present' || dateStr === 'Present' || dateStr === 'current') {
-          return { date: 'present' as const, isPresent: true, confidence: 0.95 };
+        if (
+          dateStr === 'present' ||
+          dateStr === 'Present' ||
+          dateStr === 'current'
+        ) {
+          return {
+            date: 'present' as const,
+            isPresent: true,
+            confidence: 0.95,
+          };
         }
         const d = new Date(dateStr);
         if (isNaN(d.getTime())) {
@@ -227,16 +262,26 @@ jest.mock('./date-parser', () => {
         if (dateStr === 'present' || dateStr === 'current') return 'present';
         if (dateStr === 'January 2023') return '2023-01-01';
         if (dateStr === '01/15/2023') return '2023-01-15';
-        if (/^\d{4}-\d{2}(-\d{2})?$/.test(dateStr)) return dateStr.length === 7 ? `${dateStr}-01` : dateStr;
+        if (/^\d{4}-\d{2}(-\d{2})?$/.test(dateStr))
+          return dateStr.length === 7 ? `${dateStr}-01` : dateStr;
         return '';
       }),
       calculateDuration: jest.fn((start: any, end: any) => {
-        const startDate: Date | null = start?.date === 'present' ? new Date() : start?.date ?? null;
+        const startDate: Date | null =
+          start?.date === 'present' ? new Date() : (start?.date ?? null);
         const endDate: Date | 'present' | null = end?.date ?? null;
-        const effectiveEnd = endDate === 'present' ? new Date() : (endDate as Date | null);
-        if (!startDate || !effectiveEnd) return { years: 0, months: 0, totalMonths: 0 };
-        const months = (effectiveEnd.getFullYear() - startDate.getFullYear()) * 12 + (effectiveEnd.getMonth() - startDate.getMonth());
-        return { years: Math.floor(months / 12), months: months % 12, totalMonths: Math.max(0, months) };
+        const effectiveEnd =
+          endDate === 'present' ? new Date() : (endDate as Date | null);
+        if (!startDate || !effectiveEnd)
+          return { years: 0, months: 0, totalMonths: 0 };
+        const months =
+          (effectiveEnd.getFullYear() - startDate.getFullYear()) * 12 +
+          (effectiveEnd.getMonth() - startDate.getMonth());
+        return {
+          years: Math.floor(months / 12),
+          months: months % 12,
+          totalMonths: Math.max(0, months),
+        };
       }),
       isReasonableDate: jest.fn((parsed: any) => {
         if (!parsed) return false;
@@ -253,23 +298,27 @@ jest.mock('./date-parser', () => {
 jest.mock('./experience-calculator', () => {
   return {
     ExperienceCalculator: {
-      analyzeExperience: jest.fn((workExperience: any[], _education?: any[]) => ({
-        totalYears: workExperience.length * 3,
-        seniorityLevel:
-          workExperience.length === 0
-            ? 'Entry'
-            : workExperience.length > 1
-            ? 'Senior'
-            : 'Mid',
-        relevantYears: workExperience.length * 2.5,
-        totalExperienceYears: workExperience.length * 3,
-        confidenceScore: workExperience.length === 0 ? 0 : 0.8,
-        experienceDetails: { totalPositions: workExperience.length },
-        overlappingPositions: workExperience.length > 1 ? [workExperience[0]] : [],
-      })),
+      analyzeExperience: jest.fn(
+        (workExperience: any[], _education?: any[]) => ({
+          totalYears: workExperience.length * 3,
+          seniorityLevel:
+            workExperience.length === 0
+              ? 'Entry'
+              : workExperience.length > 1
+                ? 'Senior'
+                : 'Mid',
+          relevantYears: workExperience.length * 2.5,
+          totalExperienceYears: workExperience.length * 3,
+          confidenceScore: workExperience.length === 0 ? 0 : 0.8,
+          experienceDetails: { totalPositions: workExperience.length },
+          overlappingPositions:
+            workExperience.length > 1 ? [workExperience[0]] : [],
+        }),
+      ),
       calculateTotalYears: jest.fn(() => 5),
       getExperienceSummary: jest.fn((analysis: any) => {
-        if (!analysis || !analysis.totalYears) return 'No work experience found';
+        if (!analysis || !analysis.totalYears)
+          return 'No work experience found';
         return `${analysis.totalYears} years total experience at ${analysis.level || 'mid'} level`;
       }),
     },

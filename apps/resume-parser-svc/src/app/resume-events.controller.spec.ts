@@ -16,7 +16,7 @@ describe('ResumeEventsController', () => {
       }),
       handleRetryRequest: jest.fn().mockResolvedValue({
         resumeDto: { name: 'Test User', skills: ['JavaScript'] },
-        confidence: 0.90,
+        confidence: 0.9,
       }),
       parseResume: jest.fn().mockResolvedValue({
         resumeDto: { name: 'Test User', skills: ['JavaScript'] },
@@ -26,9 +26,7 @@ describe('ResumeEventsController', () => {
 
     const moduleRef: TestingModule = await Test.createTestingModule({
       controllers: [ResumeEventsController],
-      providers: [
-        { provide: ParsingService, useValue: mockParsingService },
-      ],
+      providers: [{ provide: ParsingService, useValue: mockParsingService }],
     }).compile();
 
     controller = moduleRef.get<ResumeEventsController>(ResumeEventsController);
@@ -48,9 +46,9 @@ describe('ResumeEventsController', () => {
         originalFilename: 'file.pdf',
         tempGridFsUrl: 'http://example.com',
       };
-      
+
       controller.handleResumeSubmitted(payload);
-      
+
       expect(spy).toHaveBeenCalledWith(
         '[RESUME-PARSER-SVC] Received event for resumeId: res1 on jobId: job1',
       );
@@ -62,7 +60,7 @@ describe('ResumeEventsController', () => {
       // Note: In the actual controller, this happens via NATS events
       expect(parsingService.handleParseRequest).toBeDefined();
       expect(parsingService.handleParseRequest).toBeInstanceOf(Function);
-      
+
       // Verify service can handle typical payload structure
       const typicalPayload = {
         jobId: 'job-123',

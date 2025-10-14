@@ -100,7 +100,9 @@ describe('CreateJobComponent', () => {
         jobTitle?.markAsTouched();
 
         expect(jobTitle?.errors?.['required']).toBeTruthy();
-        expect(component.getFieldError('jobTitle')).toBe('该字段不能为空');
+        expect(component.getFieldError('jobTitle')).toEqual({
+          key: 'validation.required',
+        });
       });
 
       it('should enforce minimum length', () => {
@@ -109,7 +111,10 @@ describe('CreateJobComponent', () => {
         jobTitle?.markAsTouched();
 
         expect(jobTitle?.errors?.['minlength']).toBeTruthy();
-        expect(component.getFieldError('jobTitle')).toBe('最少输入2个字符');
+        expect(component.getFieldError('jobTitle')).toEqual({
+          key: 'validation.minLength',
+          params: { length: 2 },
+        });
       });
 
       it('should enforce maximum length', () => {
@@ -119,7 +124,10 @@ describe('CreateJobComponent', () => {
         jobTitle?.markAsTouched();
 
         expect(jobTitle?.errors?.['maxlength']).toBeTruthy();
-        expect(component.getFieldError('jobTitle')).toBe('最多输入100个字符');
+        expect(component.getFieldError('jobTitle')).toEqual({
+          key: 'validation.maxLength',
+          params: { length: 100 },
+        });
       });
     });
 
@@ -130,7 +138,9 @@ describe('CreateJobComponent', () => {
         jdText?.markAsTouched();
 
         expect(jdText?.errors?.['required']).toBeTruthy();
-        expect(component.getFieldError('jdText')).toBe('该字段不能为空');
+        expect(component.getFieldError('jdText')).toEqual({
+          key: 'validation.required',
+        });
       });
 
       it('should enforce minimum length', () => {
@@ -139,7 +149,10 @@ describe('CreateJobComponent', () => {
         jdText?.markAsTouched();
 
         expect(jdText?.errors?.['minlength']).toBeTruthy();
-        expect(component.getFieldError('jdText')).toBe('最少输入10个字符');
+        expect(component.getFieldError('jdText')).toEqual({
+          key: 'validation.minLength',
+          params: { length: 10 },
+        });
       });
 
       it('should enforce maximum length', () => {
@@ -149,7 +162,10 @@ describe('CreateJobComponent', () => {
         jdText?.markAsTouched();
 
         expect(jdText?.errors?.['maxlength']).toBeTruthy();
-        expect(component.getFieldError('jdText')).toBe('最多输入5000个字符');
+        expect(component.getFieldError('jdText')).toEqual({
+          key: 'validation.maxLength',
+          params: { length: 5000 },
+        });
       });
     });
   });
@@ -392,8 +408,30 @@ describe('CreateJobComponent', () => {
         const jobTitle = component.createJobForm.get('jobTitle');
         jobTitle?.setValue('');
         jobTitle?.markAsTouched();
-        expect(component.getFieldError('jobTitle')).toBe('该字段不能为空');
+        expect(component.getFieldError('jobTitle')).toEqual({
+          key: 'validation.required',
+        });
       });
+
+      it('should resolve translation descriptors to localized strings', () => {
+        const translateSpy = jest
+          .spyOn(component['i18nService'], 'translate')
+          .mockReturnValue('translated message');
+
+        expect(
+          component.getFieldErrorMessage({ key: 'validation.required' }),
+        ).toBe('translated message');
+
+        translateSpy.mockRestore();
+      });
+    });
+
+    it('should report field errors via hasFieldError', () => {
+      const jobTitle = component.createJobForm.get('jobTitle');
+      jobTitle?.setValue('');
+      jobTitle?.markAsTouched();
+
+      expect(component.hasFieldError('jobTitle')).toBe(true);
     });
   });
 

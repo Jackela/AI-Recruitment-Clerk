@@ -1,6 +1,11 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  Validators,
+  FormGroup,
+} from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import {
   GapAnalysisRequest,
@@ -18,10 +23,24 @@ import { LoggerService } from '../../services/shared/logger.service';
   imports: [CommonModule, ReactiveFormsModule, GapAnalysisReportComponent],
   styles: [
     `
-    .coach-container { max-width: 880px; margin: 0 auto; padding: 16px; }
-    textarea { width: 100%; min-height: 140px; }
-    .actions { margin-top: 12px; display: flex; gap: 8px; align-items: center; }
-    .section { margin-top: 16px; }
+      .coach-container {
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+      textarea {
+        width: 100%;
+        min-height: 140px;
+      }
+      .actions {
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .section {
+        margin-top: 16px;
+      }
     `,
   ],
   template: `
@@ -30,16 +49,27 @@ import { LoggerService } from '../../services/shared/logger.service';
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="section">
           <label for="jd">Paste Job Description</label>
-          <textarea id="jd" formControlName="jdText" placeholder="Paste the JD text here..."></textarea>
+          <textarea
+            id="jd"
+            formControlName="jdText"
+            placeholder="Paste the JD text here..."
+          ></textarea>
         </div>
 
         <div class="section">
           <label for="resume">Upload Resume (.pdf or .txt)</label>
-          <input id="resume" type="file" (change)="onFileSelected($event)" accept=".pdf,.txt,.md,.text" />
+          <input
+            id="resume"
+            type="file"
+            (change)="onFileSelected($event)"
+            accept=".pdf,.txt,.md,.text"
+          />
         </div>
 
         <div class="actions">
-          <button type="submit" [disabled]="loading || form.invalid">Analyze</button>
+          <button type="submit" [disabled]="loading || form.invalid">
+            Analyze
+          </button>
           <span *ngIf="loading">Analyzing...</span>
         </div>
       </form>
@@ -93,7 +123,10 @@ export class CoachComponent {
     if (!file) return;
     this.logger.debug('Starting gap analysis API call');
     this.logger.debug('JD Text provided', { textLength: jdText.length });
-    this.logger.debug('Resume file provided', { fileName: file.name, fileSize: file.size });
+    this.logger.debug('Resume file provided', {
+      fileName: file.name,
+      fileSize: file.size,
+    });
     this.loading = true;
     this.result = null;
     this.api.submitGapAnalysisWithFile(jdText, file).subscribe({
@@ -105,7 +138,11 @@ export class CoachComponent {
         this.logger.error('Gap analysis API call failed', error);
         this.logger.error('API error details', error?.error);
         // Surface error softly in UI by returning empty result
-        this.result = { matchedSkills: [], missingSkills: [], suggestedSkills: [] };
+        this.result = {
+          matchedSkills: [],
+          missingSkills: [],
+          suggestedSkills: [],
+        };
         this.loading = false;
       },
     });

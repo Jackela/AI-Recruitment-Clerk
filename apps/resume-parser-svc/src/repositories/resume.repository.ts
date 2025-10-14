@@ -6,9 +6,9 @@ import { Resume, ResumeDocument } from '../schemas/resume.schema';
 // Mock DatabasePerformanceMonitor since it doesn't exist yet
 class DatabasePerformanceMonitor {
   async executeWithMonitoring<T>(
-    fn: () => Promise<T>, 
-    _operationName?: string, 
-    _expectedMs?: number
+    fn: () => Promise<T>,
+    _operationName?: string,
+    _expectedMs?: number,
   ): Promise<T> {
     return fn();
   }
@@ -446,7 +446,11 @@ export class ResumeRepository {
   /**
    * Health check method for monitoring
    */
-  async healthCheck(): Promise<{ status: string; count: number; error?: string }> {
+  async healthCheck(): Promise<{
+    status: string;
+    count: number;
+    error?: string;
+  }> {
     try {
       const count = await this.resumeModel.countDocuments().exec();
       return {

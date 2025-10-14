@@ -20,6 +20,6 @@ export class BonusQuotaAddedEvent implements DomainEvent {
     public readonly bonusType: BonusType,
     public readonly bonusAmount: number,
     public readonly newTotalQuota: number,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }

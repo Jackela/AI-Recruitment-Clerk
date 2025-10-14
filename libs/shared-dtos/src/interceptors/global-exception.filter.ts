@@ -44,18 +44,26 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    this.logger.debug(`Processing exception in GlobalExceptionFilter: ${exception}`);
+    this.logger.debug(
+      `Processing exception in GlobalExceptionFilter: ${exception}`,
+    );
 
     try {
       const processedException = this.processException(exception, request);
       this.sendErrorResponse(processedException, request, response);
     } catch (processingError) {
-      this.logger.error('Error in exception filter processing', processingError);
+      this.logger.error(
+        'Error in exception filter processing',
+        processingError,
+      );
       this.sendFallbackErrorResponse(response);
     }
   }
 
-  private processException(exception: unknown, request: Request): EnhancedAppException {
+  private processException(
+    exception: unknown,
+    request: Request,
+  ): EnhancedAppException {
     // Set correlation context if not already set
     this.ensureCorrelationContext(request);
 
@@ -71,8 +79,14 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     // If Error object, use ErrorHandler
     if (exception instanceof Error) {
-      const appError = ErrorHandler.handleError(exception, 'GlobalExceptionFilter');
-      return this.convertAppExceptionToEnhanced(appError, 'GlobalExceptionFilter');
+      const appError = ErrorHandler.handleError(
+        exception,
+        'GlobalExceptionFilter',
+      );
+      return this.convertAppExceptionToEnhanced(
+        appError,
+        'GlobalExceptionFilter',
+      );
     }
 
     // Handle unknown exceptions
@@ -88,7 +102,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     const enhancedError = new EnhancedAppException(
-      appError.errorDetails?.type as any || 'SYSTEM_ERROR',
+      (appError.errorDetails?.type as any) || 'SYSTEM_ERROR',
       appError.errorDetails?.code || 'UNKNOWN_ERROR',
       appError.message,
       appError.getStatus?.() || 500,
@@ -103,7 +117,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     return enhancedError;
   }
 
-  private convertHttpExceptionToEnhanced(httpError: HttpException): EnhancedAppException {
+  private convertHttpExceptionToEnhanced(
+    httpError: HttpException,
+  ): EnhancedAppException {
     const errorResponse = httpError.getResponse();
     const httpStatus = httpError.getStatus();
 
@@ -130,15 +146,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     return enhancedError;
   }
 
-  private createUnknownErrorException(exception: unknown): EnhancedAppException {
+  private createUnknownErrorException(
+    exception: unknown,
+  ): EnhancedAppException {
     const errorMessage = this.extractErrorMessage(exception);
-    
+
     const enhancedError = new EnhancedAppException(
       'SYSTEM_ERROR' as any,
       'UNKNOWN_EXCEPTION',
       `An unexpected error occurred: ${errorMessage}`,
       HttpStatus.INTERNAL_SERVER_ERROR,
-      { 
+      {
         originalException: String(exception),
         exceptionType: typeof exception,
       },
@@ -154,23 +172,23 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     if (typeof exception === 'string') {
       return exception;
     }
-    
+
     if (exception && typeof exception === 'object') {
       const errorObj = exception as any;
-      
+
       if (errorObj.message) {
         return String(errorObj.message);
       }
-      
+
       if (errorObj.error) {
         return String(errorObj.error);
       }
-      
+
       if (errorObj.toString) {
         return errorObj.toString();
       }
     }
-    
+
     return 'Unknown error occurred';
   }
 
@@ -195,9 +213,12 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     response.setHeader('X-Error-Code', error.enhancedDetails.code);
     response.setHeader('X-Error-Severity', error.enhancedDetails.severity);
     response.setHeader('X-Service-Name', this.serviceName || 'unknown');
-    
+
     if (error.enhancedDetails.correlationContext?.traceId) {
-      response.setHeader('X-Trace-ID', error.enhancedDetails.correlationContext.traceId);
+      response.setHeader(
+        'X-Trace-ID',
+        error.enhancedDetails.correlationContext.traceId,
+      );
     }
 
     // Log error for monitoring
@@ -228,10 +249,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
   private ensureCorrelationContext(request: Request): void {
     if (!ErrorCorrelationManager.getContext()) {
-      const traceId = (request.headers['x-trace-id'] as string) || 
-                     (request.headers['x-request-id'] as string) || 
-                     `trace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+      const traceId =
+        (request.headers['x-trace-id'] as string) ||
+        (request.headers['x-request-id'] as string) ||
+        `trace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
       ErrorCorrelationManager.setContext({
         traceId,
         requestId: traceId,

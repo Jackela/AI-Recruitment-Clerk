@@ -132,7 +132,10 @@ export class RedPacketService {
         };
       }
     } catch (error) {
-      this.logger.error('Red packet processing error', error.stack || error.message);
+      this.logger.error(
+        'Red packet processing error',
+        error.stack || error.message,
+      );
       return {
         success: false,
         amount: 0,
@@ -302,7 +305,10 @@ export class RedPacketService {
         budgetUsage,
       };
     } catch (error) {
-      this.logger.error('Get red packet stats error', error.stack || error.message);
+      this.logger.error(
+        'Get red packet stats error',
+        error.stack || error.message,
+      );
       return {
         date: targetDate,
         totalSent: 0,

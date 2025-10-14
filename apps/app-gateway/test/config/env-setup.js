@@ -4,12 +4,16 @@ process.env.LOG_LEVEL = 'error'; // Reduce logging during tests
 
 // Stabilize mongodb-memory-server
 process.env.MONGOMS_VERSION = process.env.MONGOMS_VERSION || '7.0.5';
-process.env.MONGOMS_DISABLE_MD5_CHECK = process.env.MONGOMS_DISABLE_MD5_CHECK || '1';
+process.env.MONGOMS_DISABLE_MD5_CHECK =
+  process.env.MONGOMS_DISABLE_MD5_CHECK || '1';
 // Skip actual DB connections inside AppModule for performance tests
 process.env.SKIP_DB = process.env.SKIP_DB || 'true';
 
 // Prefer in-memory Mongo started by global-setup; fall back to localhost if missing
-process.env.MONGO_URL = process.env.MONGODB_TEST_URL || process.env.MONGO_URL || 'mongodb://localhost:27017/ai-recruitment-test';
+process.env.MONGO_URL =
+  process.env.MONGODB_TEST_URL ||
+  process.env.MONGO_URL ||
+  'mongodb://localhost:27017/ai-recruitment-test';
 
 // Test-specific configuration
 process.env.JWT_SECRET = 'integration-test-jwt-secret-key';

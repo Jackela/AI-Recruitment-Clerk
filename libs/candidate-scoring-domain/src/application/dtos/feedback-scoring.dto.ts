@@ -12,7 +12,7 @@ export interface FeedbackCodeDto {
   alipayAccount?: string;
   questionnaireData?: any;
   paymentStatus: 'pending' | 'paid' | 'rejected';
-  qualityScore?: number;  // This is the scoring-related field
+  qualityScore?: number; // This is the scoring-related field
   paymentAmount?: number;
   createdBy?: string;
 }
@@ -40,7 +40,7 @@ export interface PaymentRequestDto {
   feedbackCode: string;
   alipayAccount: string;
   amount: number;
-  qualityScore: number;  // This is the scoring-related field
+  qualityScore: number; // This is the scoring-related field
 }
 
 /**
@@ -51,5 +51,5 @@ export interface MarketingStatsDto {
   usedCodes: number;
   pendingPayments: number;
   totalPaid: number;
-  averageQualityScore: number;  // This is the scoring-related field
+  averageQualityScore: number; // This is the scoring-related field
 }

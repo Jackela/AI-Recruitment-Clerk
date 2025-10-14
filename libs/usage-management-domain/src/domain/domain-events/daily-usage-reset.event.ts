@@ -19,6 +19,6 @@ export class DailyUsageResetEvent implements DomainEvent {
     public readonly previousUsage: number,
     public readonly previousQuota: number,
     public readonly newDailyLimit: number,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }

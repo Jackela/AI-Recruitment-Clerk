@@ -77,28 +77,26 @@ export class JobsServiceContracts {
    *
    * @since 1.0.0
    */
-  @Requires(
-    (...args: any[]) => {
-      const dto = args[0] as CreateJobDto;
-      const user = args[1] as UserDto;
-      return ContractValidators.isNonEmptyString(dto.jobTitle) &&
-             ContractValidators.isNonEmptyString(dto.jdText) &&
-             !!user &&
-             ContractValidators.isNonEmptyString(user.id) &&
-             ContractValidators.isNonEmptyString(user.organizationId);
-    },
-    'Job creation requires valid title, JD text, and authenticated user with organization',
-  )
-  @Ensures(
-    (...args: any[]) => {
-      const result = args[0] as { jobId: string };
-      return ContractValidators.isNonEmptyString(result.jobId) &&
-             /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
-               result.jobId,
-             );
-    },
-    'Must return valid UUID job ID',
-  )
+  @Requires((...args: any[]) => {
+    const dto = args[0] as CreateJobDto;
+    const user = args[1] as UserDto;
+    return (
+      ContractValidators.isNonEmptyString(dto.jobTitle) &&
+      ContractValidators.isNonEmptyString(dto.jdText) &&
+      !!user &&
+      ContractValidators.isNonEmptyString(user.id) &&
+      ContractValidators.isNonEmptyString(user.organizationId)
+    );
+  }, 'Job creation requires valid title, JD text, and authenticated user with organization')
+  @Ensures((...args: any[]) => {
+    const result = args[0] as { jobId: string };
+    return (
+      ContractValidators.isNonEmptyString(result.jobId) &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
+        result.jobId,
+      )
+    );
+  }, 'Must return valid UUID job ID')
   async createJob(
     dto: CreateJobDto,
     user: UserDto,
@@ -181,28 +179,26 @@ export class JobsServiceContracts {
    *
    * @since 1.0.0
    */
-  @Requires(
-    (...args: any[]) => {
-      const jobId = args[0] as string;
-      const files = args[1] as MulterFile[];
-      const user = args[2] as UserDto;
-      return ContractValidators.isNonEmptyString(jobId) &&
-             Array.isArray(files) &&
-             files.length > 0 &&
-             files.every((f) => f.size > 0 && f.size <= 10 * 1024 * 1024) && // 10MB limit
-             !!user &&
-             ContractValidators.isNonEmptyString(user.id);
-    },
-    'Resume upload requires valid job ID, non-empty file array within size limits, and authenticated user',
-  )
-  @Ensures(
-    (...args: any[]) => {
-      const result = args[0] as ResumeUploadResponseDto;
-      return ContractValidators.isNonEmptyString(result.jobId) &&
-             result.submittedResumes >= 0;
-    },
-    'Must return valid upload response with job ID and count',
-  )
+  @Requires((...args: any[]) => {
+    const jobId = args[0] as string;
+    const files = args[1] as MulterFile[];
+    const user = args[2] as UserDto;
+    return (
+      ContractValidators.isNonEmptyString(jobId) &&
+      Array.isArray(files) &&
+      files.length > 0 &&
+      files.every((f) => f.size > 0 && f.size <= 10 * 1024 * 1024) && // 10MB limit
+      !!user &&
+      ContractValidators.isNonEmptyString(user.id)
+    );
+  }, 'Resume upload requires valid job ID, non-empty file array within size limits, and authenticated user')
+  @Ensures((...args: any[]) => {
+    const result = args[0] as ResumeUploadResponseDto;
+    return (
+      ContractValidators.isNonEmptyString(result.jobId) &&
+      result.submittedResumes >= 0
+    );
+  }, 'Must return valid upload response with job ID and count')
   uploadResumes(
     jobId: string,
     files: MulterFile[],
@@ -290,19 +286,18 @@ export class JobsServiceContracts {
    *
    * @since 1.0.0
    */
-  @Ensures(
-    (...args: any[]) => {
-      const result = args[0] as JobListDto[];
-      return Array.isArray(result) &&
-             result.every(
-               (job) =>
-                 ContractValidators.isNonEmptyString(job.id) &&
-                 ContractValidators.isNonEmptyString(job.title) &&
-                 ['processing', 'completed', 'failed'].includes(job.status),
-             );
-    },
-    'Must return valid job list with proper structure',
-  )
+  @Ensures((...args: any[]) => {
+    const result = args[0] as JobListDto[];
+    return (
+      Array.isArray(result) &&
+      result.every(
+        (job) =>
+          ContractValidators.isNonEmptyString(job.id) &&
+          ContractValidators.isNonEmptyString(job.title) &&
+          ['processing', 'completed', 'failed'].includes(job.status),
+      )
+    );
+  }, 'Must return valid job list with proper structure')
   async getAllJobs(): Promise<JobListDto[]> {
     const cacheKey = this.cacheService.generateKey('jobs', 'list');
 
@@ -343,16 +338,15 @@ export class JobsServiceContracts {
     (...args: any[]) => ContractValidators.isNonEmptyString(args[0]),
     'Job ID must be non-empty string',
   )
-  @Ensures(
-    (...args: any[]) => {
-      const result = args[0] as JobDetailDto;
-      return !!result &&
-             ContractValidators.isNonEmptyString(result.id) &&
-             ContractValidators.isNonEmptyString(result.title) &&
-             ['processing', 'completed', 'failed'].includes(result.status);
-    },
-    'Must return valid job detail object',
-  )
+  @Ensures((...args: any[]) => {
+    const result = args[0] as JobDetailDto;
+    return (
+      !!result &&
+      ContractValidators.isNonEmptyString(result.id) &&
+      ContractValidators.isNonEmptyString(result.title) &&
+      ['processing', 'completed', 'failed'].includes(result.status)
+    );
+  }, 'Must return valid job detail object')
   async getJobById(jobId: string): Promise<JobDetailDto> {
     const cacheKey = this.cacheService.generateKey('jobs', 'detail', jobId);
 

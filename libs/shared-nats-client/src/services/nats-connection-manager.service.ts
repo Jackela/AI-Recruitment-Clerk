@@ -1,10 +1,10 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
-import { 
-  connect, 
-  NatsConnection, 
-  JetStreamClient, 
+import {
+  connect,
+  NatsConnection,
+  JetStreamClient,
   StringCodec,
-  ConnectionOptions 
+  ConnectionOptions,
 } from 'nats';
 import { NatsConnectionConfig, NatsHealthResult } from '../interfaces';
 
@@ -20,7 +20,6 @@ export class NatsConnectionManager implements OnModuleDestroy {
   private readonly codec = StringCodec();
   private connectionStartTime: number | null = null;
   private reconnectAttempts = 0;
-
 
   /**
    * Performs the on module destroy operation.
@@ -41,7 +40,9 @@ export class NatsConnectionManager implements OnModuleDestroy {
       }
 
       this.logger.log('Connecting to NATS JetStream...');
-      this.logger.log(`Server(s): ${Array.isArray(config.url) ? config.url.join(', ') : config.url}`);
+      this.logger.log(
+        `Server(s): ${Array.isArray(config.url) ? config.url.join(', ') : config.url}`,
+      );
       this.logger.log(`Service: ${config.serviceName}`);
 
       const connectionOptions: ConnectionOptions = {
@@ -63,13 +64,15 @@ export class NatsConnectionManager implements OnModuleDestroy {
       this.logger.log('✅ Successfully connected to NATS JetStream');
     } catch (error) {
       this.logger.error('❌ Failed to connect to NATS JetStream', error);
-      
+
       // If connection is optional (development mode), don't throw
       if (config.optional) {
-        this.logger.warn('⚠️ NATS connection failed but marked as optional - continuing without NATS');
+        this.logger.warn(
+          '⚠️ NATS connection failed but marked as optional - continuing without NATS',
+        );
         return;
       }
-      
+
       throw error;
     }
   }
@@ -126,15 +129,15 @@ export class NatsConnectionManager implements OnModuleDestroy {
   async getHealthStatus(): Promise<NatsHealthResult> {
     const connected = this.isConnected;
     const jetstreamAvailable = this.jetstream !== null;
-    
+
     let subscriptionCount = 0;
     let currentServer: string | undefined;
-    
+
     try {
       if (this.connection) {
         const status = this.connection.getServer();
         currentServer = status;
-        
+
         // Get subscription count (approximation)
         const stats = this.connection.stats();
         subscriptionCount = stats.inMsgs > 0 ? 1 : 0; // Simplified count
@@ -143,8 +146,8 @@ export class NatsConnectionManager implements OnModuleDestroy {
       this.logger.warn('Could not get detailed connection stats', error);
     }
 
-    const uptimeMs = this.connectionStartTime 
-      ? Date.now() - this.connectionStartTime 
+    const uptimeMs = this.connectionStartTime
+      ? Date.now() - this.connectionStartTime
       : 0;
 
     return {
@@ -198,11 +201,15 @@ export class NatsConnectionManager implements OnModuleDestroy {
       for await (const status of this.connection.status()) {
         switch (status.type) {
           case 'disconnect':
-            this.logger.warn(`🟡 NATS disconnected from server: ${status.data}`);
+            this.logger.warn(
+              `🟡 NATS disconnected from server: ${status.data}`,
+            );
             break;
           case 'reconnecting':
             this.reconnectAttempts++;
-            this.logger.log(`🔄 NATS reconnecting to server: ${status.data} (attempt ${this.reconnectAttempts})`);
+            this.logger.log(
+              `🔄 NATS reconnecting to server: ${status.data} (attempt ${this.reconnectAttempts})`,
+            );
             break;
           case 'reconnect':
             this.logger.log(`🟢 NATS reconnected to server: ${status.data}`);

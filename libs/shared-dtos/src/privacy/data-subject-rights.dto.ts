@@ -1,4 +1,16 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsBoolean, IsArray, ValidateNested, IsDateString, IsUUID, IsNumber } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsBoolean,
+  IsArray,
+  ValidateNested,
+  IsDateString,
+  IsUUID,
+  IsNumber,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 /**
@@ -7,12 +19,12 @@ import { Type } from 'class-transformer';
  */
 
 export enum DataSubjectRightType {
-  ACCESS = 'access',                    // Article 15 - Right to access
-  RECTIFICATION = 'rectification',      // Article 16 - Right to rectification
-  ERASURE = 'erasure',                  // Article 17 - Right to erasure
-  PORTABILITY = 'portability',          // Article 20 - Right to data portability
-  OBJECTION = 'objection',              // Article 21 - Right to object
-  RESTRICT_PROCESSING = 'restrict_processing' // Article 18 - Right to restrict processing
+  ACCESS = 'access', // Article 15 - Right to access
+  RECTIFICATION = 'rectification', // Article 16 - Right to rectification
+  ERASURE = 'erasure', // Article 17 - Right to erasure
+  PORTABILITY = 'portability', // Article 20 - Right to data portability
+  OBJECTION = 'objection', // Article 21 - Right to object
+  RESTRICT_PROCESSING = 'restrict_processing', // Article 18 - Right to restrict processing
 }
 
 export enum RequestStatus {
@@ -21,21 +33,21 @@ export enum RequestStatus {
   COMPLETED = 'completed',
   REJECTED = 'rejected',
   PARTIALLY_COMPLETED = 'partially_completed',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
 }
 
 export enum IdentityVerificationStatus {
   PENDING = 'pending',
   VERIFIED = 'verified',
   FAILED = 'failed',
-  NOT_REQUIRED = 'not_required'
+  NOT_REQUIRED = 'not_required',
 }
 
 export enum DataExportFormat {
   JSON = 'json',
   CSV = 'csv',
   PDF = 'pdf',
-  XML = 'xml'
+  XML = 'xml',
 }
 
 /**
@@ -151,7 +163,13 @@ export class FieldCorrectionDto {
  * Data erasure request (Article 17 - Right to be forgotten)
  */
 export class DataErasureRequest extends DataSubjectRightsRequest {
-  @IsEnum(['withdrawal_of_consent', 'no_longer_necessary', 'unlawful_processing', 'legal_obligation', 'public_interest'])
+  @IsEnum([
+    'withdrawal_of_consent',
+    'no_longer_necessary',
+    'unlawful_processing',
+    'legal_obligation',
+    'public_interest',
+  ])
   @IsOptional()
   erasureGround?: string;
 
@@ -227,7 +245,12 @@ export class ProcessingObjectionRequest extends DataSubjectRightsRequest {
  * Processing restriction request (Article 18)
  */
 export class ProcessingRestrictionRequest extends DataSubjectRightsRequest {
-  @IsEnum(['accuracy_contested', 'processing_unlawful', 'no_longer_needed', 'objection_pending'])
+  @IsEnum([
+    'accuracy_contested',
+    'processing_unlawful',
+    'no_longer_needed',
+    'objection_pending',
+  ])
   restrictionGround!: string;
 
   @IsArray()
@@ -274,7 +297,12 @@ export class IdentityVerificationDto {
   @IsUUID()
   requestId!: string;
 
-  @IsEnum(['email_verification', 'phone_verification', 'document_upload', 'security_questions'])
+  @IsEnum([
+    'email_verification',
+    'phone_verification',
+    'document_upload',
+    'security_questions',
+  ])
   verificationType!: string;
 
   @IsOptional()

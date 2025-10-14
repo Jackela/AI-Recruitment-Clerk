@@ -22,10 +22,7 @@ import { AnalysisRequestDto } from './dto/analysis-request.dto';
 import { AnalysisInitiatedResponseDto } from './dto/analysis-response.dto';
 import { MulterFile } from '../jobs/types/multer.types';
 // Standardized Error Handling
-import { 
-  HandleErrors, 
-  ErrorUtils
-} from '@ai-recruitment-clerk/shared-dtos';
+import { HandleErrors, ErrorUtils } from '@ai-recruitment-clerk/shared-dtos';
 
 /**
  * Exposes endpoints for analysis.
@@ -49,7 +46,8 @@ export class AnalysisController {
    */
   @ApiOperation({
     summary: '启动简历分析流程',
-    description: '接收职位描述和简历文件，启动完整的简历分析流程，包括JD提取、简历解析、技能匹配和评分',
+    description:
+      '接收职位描述和简历文件，启动完整的简历分析流程，包括JD提取、简历解析、技能匹配和评分',
   })
   @ApiResponse({
     status: 202,
@@ -104,9 +102,9 @@ export class AnalysisController {
       'Check that all required fields are provided',
       'Ensure file is in PDF format and under 10MB',
       'Verify job description is not empty',
-      'Try uploading the file again'
+      'Try uploading the file again',
     ],
-    operationContext: 'Analysis.startAnalysis'
+    operationContext: 'Analysis.startAnalysis',
   })
   async startAnalysis(
     @Body() analysisRequest: AnalysisRequestDto,
@@ -148,12 +146,13 @@ export class AnalysisController {
 
     // Use withErrorHandling wrapper for the service call
     return await ErrorUtils.withErrorHandling(
-      () => this.analysisService.initiateAnalysis(
-        analysisRequest.jdText,
-        resumeFile,
-        analysisRequest.sessionId,
-        analysisRequest.options,
-      ),
+      () =>
+        this.analysisService.initiateAnalysis(
+          analysisRequest.jdText,
+          resumeFile,
+          analysisRequest.sessionId,
+          analysisRequest.options,
+        ),
       {
         operationName: 'Analysis.initiateAnalysis',
         defaultErrorType: 'EXTERNAL_SERVICE_ERROR',
@@ -164,7 +163,7 @@ export class AnalysisController {
         recoveryStrategies: [
           'Try the analysis again in a few moments',
           'Check that the file is not corrupted',
-          'Contact support if the problem persists'
+          'Contact support if the problem persists',
         ],
         logger: this.logger,
       },

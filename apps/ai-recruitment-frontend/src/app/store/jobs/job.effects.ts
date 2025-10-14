@@ -1,8 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { of } from 'rxjs';
-import { catchError, map, mergeMap, tap } from 'rxjs/operators';
+import { of, EMPTY } from 'rxjs';
+import {
+  catchError,
+  map,
+  mergeMap,
+  tap,
+  switchMap,
+  takeUntil,
+  filter,
+} from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
+import { WebSocketService } from '../../services/websocket.service';
 import * as JobActions from './job.actions';
 import { Router } from '@angular/router';
 
@@ -15,17 +24,25 @@ export class JobEffects {
   loadJob$;
   createJob$;
   createJobSuccess$;
+  initializeWebSocketConnection$;
+  subscribeToJobUpdates$;
+  unsubscribeFromJobUpdates$;
+  listenToJobUpdates$;
+  listenToJobProgress$;
+  webSocketConnectionStatus$;
 
   /**
    * Initializes a new instance of the Job Effects.
    * @param actions$ - The actions$.
    * @param apiService - The api service.
    * @param router - The router.
+   * @param webSocketService - The WebSocket service.
    */
   constructor(
     private actions$: Actions,
     private apiService: ApiService,
     private router: Router,
+    private webSocketService: WebSocketService,
   ) {
     this.loadJobs$ = createEffect(() =>
       this.actions$.pipe(
@@ -84,13 +101,113 @@ export class JobEffects {
     this.createJobSuccess$ = createEffect(() =>
       this.actions$.pipe(
         ofType(JobActions.createJobSuccess),
-        tap(({ response }) => {
-          // Navigate to job details page after successful creation
-          this.router.navigate(['/jobs', response.jobId]);
-        }),
+        // Note: Navigation removed to allow progress tracking UI to remain visible
+        // The CreateJobComponent will handle navigation after progress completion
         // Reload jobs list after creation
         map(() => JobActions.loadJobs()),
       ),
+    );
+
+    // WebSocket Effects
+
+    this.initializeWebSocketConnection$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(JobActions.initializeWebSocketConnection),
+        switchMap(({ sessionId, organizationId }) => {
+          // Connect to WebSocket and listen for connection status changes
+          this.webSocketService.connectWithJobSubscription(
+            sessionId,
+            undefined,
+            organizationId,
+          );
+
+          return this.webSocketService.getConnectionStatus().pipe(
+            map((status) =>
+              JobActions.webSocketConnectionStatusChanged({ status }),
+            ),
+            catchError((error) => {
+              console.error('WebSocket connection error:', error);
+              return of(
+                JobActions.webSocketConnectionStatusChanged({
+                  status: 'error',
+                }),
+              );
+            }),
+          );
+        }),
+      ),
+    );
+
+    this.subscribeToJobUpdates$ = createEffect(
+      () =>
+        this.actions$.pipe(
+          ofType(JobActions.subscribeToJobUpdates),
+          tap(({ jobId, organizationId }) => {
+            this.webSocketService.subscribeToJob(jobId, organizationId);
+          }),
+        ),
+      { dispatch: false },
+    );
+
+    this.unsubscribeFromJobUpdates$ = createEffect(
+      () =>
+        this.actions$.pipe(
+          ofType(JobActions.unsubscribeFromJobUpdates),
+          tap(({ jobId }) => {
+            this.webSocketService.unsubscribeFromJob(jobId);
+          }),
+        ),
+      { dispatch: false },
+    );
+
+    this.listenToJobUpdates$ = createEffect(() =>
+      this.webSocketService.onJobUpdated().pipe(
+        map((jobUpdate) =>
+          JobActions.jobUpdatedViaWebSocket({
+            jobId: jobUpdate.jobId,
+            title: jobUpdate.title,
+            status: jobUpdate.status,
+            timestamp: jobUpdate.timestamp,
+            organizationId: jobUpdate.organizationId,
+            metadata: jobUpdate.metadata,
+          }),
+        ),
+        catchError((error) => {
+          console.error('Error processing job update:', error);
+          return EMPTY;
+        }),
+      ),
+    );
+
+    this.listenToJobProgress$ = createEffect(() =>
+      this.webSocketService.onJobProgress().pipe(
+        map((jobProgress) =>
+          JobActions.jobProgressViaWebSocket({
+            jobId: jobProgress.jobId,
+            step: jobProgress.step,
+            progress: jobProgress.progress,
+            message: jobProgress.message,
+            estimatedTimeRemaining: jobProgress.estimatedTimeRemaining,
+            timestamp: jobProgress.timestamp,
+          }),
+        ),
+        catchError((error) => {
+          console.error('Error processing job progress:', error);
+          return EMPTY;
+        }),
+      ),
+    );
+
+    this.webSocketConnectionStatus$ = createEffect(
+      () =>
+        this.actions$.pipe(
+          ofType(JobActions.webSocketConnectionStatusChanged),
+          tap(({ status }) => {
+            console.log(`WebSocket connection status changed to: ${status}`);
+            // You can add toast notifications here if needed
+          }),
+        ),
+      { dispatch: false },
     );
   }
 }

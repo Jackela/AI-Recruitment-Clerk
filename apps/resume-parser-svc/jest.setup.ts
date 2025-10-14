@@ -28,10 +28,14 @@ global.console = {
 
 // Set test environment variables (override with .env.test if exists)
 process.env.NODE_ENV = process.env.NODE_ENV || 'test';
-process.env.MONGODB_URI = process.env.MONGODB_URI || 'mongodb://testuser:testpass@localhost:27018/resume-parser-test?authSource=admin';
-process.env.NATS_SERVERS = process.env.NATS_SERVERS || 'nats://testuser:testpass@localhost:4223';
+process.env.MONGODB_URI =
+  process.env.MONGODB_URI ||
+  'mongodb://testuser:testpass@localhost:27018/resume-parser-test?authSource=admin';
+process.env.NATS_SERVERS =
+  process.env.NATS_SERVERS || 'nats://testuser:testpass@localhost:4223';
 process.env.SERVICE_NAME = process.env.SERVICE_NAME || 'resume-parser-svc-test';
-process.env.GRIDFS_BUCKET_NAME = process.env.GRIDFS_BUCKET_NAME || 'test-resumes';
+process.env.GRIDFS_BUCKET_NAME =
+  process.env.GRIDFS_BUCKET_NAME || 'test-resumes';
 
 // Increase test timeout for integration tests
 jest.setTimeout(30000);

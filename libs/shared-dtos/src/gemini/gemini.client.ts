@@ -1,12 +1,17 @@
-import { GoogleGenerativeAI, GenerativeModel, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
+import {
+  GoogleGenerativeAI,
+  GenerativeModel,
+  HarmCategory,
+  HarmBlockThreshold,
+} from '@google/generative-ai';
 import { Injectable, Logger } from '@nestjs/common';
-import { 
-  GeminiApiError, 
-  GeminiRateLimitError, 
-  GeminiValidationError, 
-  GeminiTimeoutError, 
-  GeminiParsingError, 
-  GeminiConfigurationError 
+import {
+  GeminiApiError,
+  GeminiRateLimitError,
+  GeminiValidationError,
+  GeminiTimeoutError,
+  GeminiParsingError,
+  GeminiConfigurationError,
 } from '../errors/gemini-errors';
 import { SecureConfigValidator } from '../config/secure-config.validator';
 
@@ -53,7 +58,8 @@ export class GeminiClient {
   constructor(private readonly config: GeminiConfig) {
     // 🔒 SECURITY: Strict fail-fast validation - no fallback mechanisms allowed
     if (!config.apiKey) {
-      const error = '🔒 SECURITY: GeminiConfig.apiKey is required and cannot be empty';
+      const error =
+        '🔒 SECURITY: GeminiConfig.apiKey is required and cannot be empty';
       this.logger.error(error);
       throw new GeminiConfigurationError(error);
     }
@@ -95,8 +101,10 @@ export class GeminiClient {
           },
         ],
       });
-      
-      this.logger.log('✅ GeminiClient initialized successfully with secure configuration');
+
+      this.logger.log(
+        '✅ GeminiClient initialized successfully with secure configuration',
+      );
     } catch (error) {
       const errorMessage = `🔒 SECURITY: Failed to initialize GeminiClient: ${error instanceof Error ? error.message : 'Unknown error'}`;
       this.logger.error(errorMessage);
@@ -118,13 +126,12 @@ export class GeminiClient {
       const waitTime = 60000 - timeSinceReset;
       throw new GeminiRateLimitError(
         `Rate limit exceeded. Please wait ${Math.ceil(waitTime / 1000)} seconds.`,
-        Math.ceil(waitTime / 1000)
+        Math.ceil(waitTime / 1000),
       );
     }
 
     this.rateLimit.requestsThisMinute++;
   }
-
 
   /**
    * Generates text.
@@ -132,7 +139,10 @@ export class GeminiClient {
    * @param retries - The retries.
    * @returns A promise that resolves to GeminiResponse<string>.
    */
-  async generateText(prompt: string, retries = 3): Promise<GeminiResponse<string>> {
+  async generateText(
+    prompt: string,
+    retries = 3,
+  ): Promise<GeminiResponse<string>> {
     this.checkRateLimit();
 
     const startTime = Date.now();
@@ -143,7 +153,7 @@ export class GeminiClient {
 
         const result = await this.model.generateContent(prompt);
         const response = await result.response;
-        
+
         if (!response.text()) {
           throw new GeminiApiError('Empty response from Gemini API');
         }
@@ -157,38 +167,61 @@ export class GeminiClient {
           confidence: 0.85, // Default confidence score
         };
       } catch (error) {
-        this.logger.warn(`Attempt ${attempt} failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        this.logger.warn(
+          `Attempt ${attempt} failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
 
         if (attempt === retries) {
-          this.logger.error(`All ${retries} attempts failed for Gemini request`);
-          
+          this.logger.error(
+            `All ${retries} attempts failed for Gemini request`,
+          );
+
           // Convert generic errors to specific Gemini errors
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          if (errorMessage?.includes('rate limit') || errorMessage?.includes('quota')) {
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
+          if (
+            errorMessage?.includes('rate limit') ||
+            errorMessage?.includes('quota')
+          ) {
             throw new GeminiRateLimitError(errorMessage);
           }
-          
-          const hasTimeoutCode = typeof error === 'object' && error !== null && 
-            'code' in error && error.code === 'TIMEOUT';
+
+          const hasTimeoutCode =
+            typeof error === 'object' &&
+            error !== null &&
+            'code' in error &&
+            error.code === 'TIMEOUT';
           if (errorMessage?.includes('timeout') || hasTimeoutCode) {
             throw new GeminiTimeoutError(errorMessage);
           }
-          
-          if (errorMessage?.includes('invalid') || errorMessage?.includes('validation')) {
+
+          if (
+            errorMessage?.includes('invalid') ||
+            errorMessage?.includes('validation')
+          ) {
             throw new GeminiValidationError(errorMessage);
           }
-          
-          const statusCode = typeof error === 'object' && error !== null && 
-            'status' in error && typeof error.status === 'number' ? error.status : undefined;
-          throw new GeminiApiError(errorMessage || 'Unknown Gemini API error', statusCode, error as Error);
+
+          const statusCode =
+            typeof error === 'object' &&
+            error !== null &&
+            'status' in error &&
+            typeof error.status === 'number'
+              ? error.status
+              : undefined;
+          throw new GeminiApiError(
+            errorMessage || 'Unknown Gemini API error',
+            statusCode,
+            error as Error,
+          );
         }
 
         // Exponential backoff
         const delay = Math.pow(2, attempt - 1) * 1000;
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
-    
+
     // This should never be reached due to the throw statements above
     throw new GeminiApiError('All retry attempts failed');
   }
@@ -203,7 +236,7 @@ export class GeminiClient {
   async generateStructuredResponse<T>(
     prompt: string,
     schema: string,
-    retries = 3
+    retries = 3,
   ): Promise<GeminiResponse<T>> {
     const structuredPrompt = `${prompt}
 
@@ -222,7 +255,7 @@ Important guidelines:
     try {
       // Clean the response to extract JSON
       let jsonText = response.data.trim();
-      
+
       // Remove potential markdown formatting
       if (jsonText.startsWith('```json')) {
         jsonText = jsonText.replace(/```json\s*/, '').replace(/\s*```$/, '');
@@ -244,7 +277,7 @@ Important guidelines:
       });
       throw new GeminiParsingError(
         `Invalid JSON response from Gemini: ${parseError instanceof Error ? parseError.message : 'Parse error'}`,
-        response.data
+        response.data,
       );
     }
   }
@@ -261,27 +294,33 @@ Important guidelines:
     prompt: string,
     imageData: Buffer | string,
     mimeType: string,
-    retries = 3
+    retries = 3,
   ): Promise<GeminiResponse<string>> {
     this.checkRateLimit();
 
     const startTime = Date.now();
-    const visionModel = this.genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+    const visionModel = this.genAI.getGenerativeModel({
+      model: 'gemini-1.5-pro',
+    });
 
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        this.logger.debug(`Generating vision response (attempt ${attempt}/${retries})`);
+        this.logger.debug(
+          `Generating vision response (attempt ${attempt}/${retries})`,
+        );
 
         const imagePart = {
           inlineData: {
-            data: Buffer.isBuffer(imageData) ? imageData.toString('base64') : imageData,
+            data: Buffer.isBuffer(imageData)
+              ? imageData.toString('base64')
+              : imageData,
             mimeType,
           },
         };
 
         const result = await visionModel.generateContent([prompt, imagePart]);
         const response = await result.response;
-        
+
         if (!response.text()) {
           throw new GeminiApiError('Empty response from Gemini Vision API');
         }
@@ -294,7 +333,9 @@ Important guidelines:
           confidence: 0.8, // Slightly lower confidence for vision tasks
         };
       } catch (error) {
-        this.logger.warn(`Vision attempt ${attempt} failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        this.logger.warn(
+          `Vision attempt ${attempt} failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
 
         if (attempt === retries) {
           this.logger.error(`All ${retries} vision attempts failed`);
@@ -302,10 +343,10 @@ Important guidelines:
         }
 
         const delay = Math.pow(2, attempt - 1) * 1000;
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
-    
+
     // This should never be reached due to the throw statements above
     throw new GeminiApiError('All retry attempts failed');
   }
@@ -324,7 +365,7 @@ Important guidelines:
     imageData: Buffer | string,
     mimeType: string,
     schema: string,
-    retries = 3
+    retries = 3,
   ): Promise<GeminiResponse<T>> {
     const structuredPrompt = `${prompt}
 
@@ -338,11 +379,16 @@ Important guidelines:
 - For arrays, return empty arrays [] if no items found
 - For dates, use ISO 8601 format (YYYY-MM-DD)`;
 
-    const response = await this.generateWithVision(structuredPrompt, imageData, mimeType, retries);
+    const response = await this.generateWithVision(
+      structuredPrompt,
+      imageData,
+      mimeType,
+      retries,
+    );
 
     try {
       let jsonText = response.data.trim();
-      
+
       // Remove potential markdown formatting
       if (jsonText.startsWith('```json')) {
         jsonText = jsonText.replace(/```json\s*/, '').replace(/\s*```$/, '');
@@ -364,7 +410,7 @@ Important guidelines:
       });
       throw new GeminiParsingError(
         `Invalid JSON response from Gemini Vision: ${parseError instanceof Error ? parseError.message : 'Parse error'}`,
-        response.data
+        response.data,
       );
     }
   }
@@ -375,10 +421,15 @@ Important guidelines:
    */
   async healthCheck(): Promise<boolean> {
     try {
-      const response = await this.generateText('Respond with "OK" to confirm API connectivity.', 1);
+      const response = await this.generateText(
+        'Respond with "OK" to confirm API connectivity.',
+        1,
+      );
       return response.data.toLowerCase().includes('ok');
     } catch (error) {
-      this.logger.error(`GeminiClient health check failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      this.logger.error(
+        `GeminiClient health check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       return false;
     }
   }

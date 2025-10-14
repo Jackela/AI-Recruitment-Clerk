@@ -4,7 +4,8 @@ import {
   Output,
   EventEmitter,
   OnDestroy,
-  OnInit,
+  OnChanges,
+  SimpleChanges,
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -116,7 +117,7 @@ export interface ProgressUpdate {
   `,
   styleUrls: ['../unified-analysis.component.css'],
 })
-export class AnalysisProgressComponent implements OnInit, OnDestroy {
+export class AnalysisProgressComponent implements OnChanges, OnDestroy {
   @Input() sessionId = '';
   @Input() showMessageLog = true;
   @Input() steps: AnalysisStep[] = [];
@@ -133,11 +134,27 @@ export class AnalysisProgressComponent implements OnInit, OnDestroy {
   private readonly webSocketService = inject(WebSocketService);
 
   /**
-   * Performs the ng on init operation.
+   * Reacts to session id changes to wire or tear down WebSocket listeners.
+   * @param changes - The changed inputs.
    */
-  ngOnInit(): void {
-    if (this.sessionId) {
-      this.setupWebSocketListeners(this.sessionId);
+  ngOnChanges(changes: SimpleChanges): void {
+    const sessionIdChange = changes['sessionId'];
+    if (!sessionIdChange) {
+      return;
+    }
+
+    const newSessionId: string = sessionIdChange.currentValue;
+    const previousSessionId: string | undefined =
+      sessionIdChange.previousValue;
+
+    if (newSessionId && newSessionId !== previousSessionId) {
+      this.destroy$.next();
+      this.setupWebSocketListeners(newSessionId);
+      return;
+    }
+
+    if (!newSessionId && previousSessionId) {
+      this.destroy$.next();
     }
   }
 
@@ -166,10 +183,13 @@ export class AnalysisProgressComponent implements OnInit, OnDestroy {
       .connect(sessionId)
       .pipe(takeUntil(this.destroy$))
       .subscribe((message) => {
-          if (message.type === 'step_change') {
-            const stepVal = (message.data as any)?.['step'] ?? (message.data as any)?.['currentStep'] ?? '';
-            this.stepChange.emit(String(stepVal));
-          }
+        if (message.type === 'step_change') {
+          const stepVal =
+            (message.data as any)?.['step'] ??
+            (message.data as any)?.['currentStep'] ??
+            '';
+          this.stepChange.emit(String(stepVal));
+        }
       });
 
     // Listen for completion
@@ -211,17 +231,4 @@ export class AnalysisProgressComponent implements OnInit, OnDestroy {
     return step.id;
   }
 
-  /**
-   * Updates session id.
-   * @param sessionId - The session id.
-   */
-  updateSessionId(sessionId: string): void {
-    if (sessionId && sessionId !== this.sessionId) {
-      // Clean up existing listeners
-      this.destroy$.next();
-
-      // Setup new listeners
-      this.setupWebSocketListeners(sessionId);
-    }
-  }
 }

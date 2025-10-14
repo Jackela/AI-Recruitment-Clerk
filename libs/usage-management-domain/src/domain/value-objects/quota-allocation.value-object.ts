@@ -18,7 +18,7 @@ export class QuotaAllocation extends ValueObject<{
     return new QuotaAllocation({
       baseQuota,
       bonusQuota: 0,
-      bonusBreakdown: new Map()
+      bonusBreakdown: new Map(),
     });
   }
 
@@ -31,7 +31,7 @@ export class QuotaAllocation extends ValueObject<{
     return new QuotaAllocation({
       baseQuota: data.baseQuota,
       bonusQuota: data.bonusQuota,
-      bonusBreakdown: new Map(data.bonusBreakdown || [])
+      bonusBreakdown: new Map(data.bonusBreakdown || []),
     });
   }
 
@@ -49,7 +49,7 @@ export class QuotaAllocation extends ValueObject<{
     return new QuotaAllocation({
       baseQuota: this.props.baseQuota,
       bonusQuota: this.props.bonusQuota + amount,
-      bonusBreakdown: newBreakdown
+      bonusBreakdown: newBreakdown,
     });
   }
 

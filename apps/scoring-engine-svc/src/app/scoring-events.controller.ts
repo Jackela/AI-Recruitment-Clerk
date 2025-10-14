@@ -8,7 +8,11 @@ import type {
   AnalysisResumeParsedEvent,
   ResumeDTO,
 } from '@ai-recruitment-clerk/resume-processing-domain';
-import { ScoringEngineException, ScoringEngineErrorCode, ErrorCorrelationManager } from '@app/shared-dtos';
+import {
+  ScoringEngineException,
+  ScoringEngineErrorCode,
+  ErrorCorrelationManager,
+} from '@app/shared-dtos';
 import { ScoringEngineNatsService } from '../services/scoring-engine-nats.service';
 import { ScoringEngineService, JdDTO } from '../scoring.service';
 

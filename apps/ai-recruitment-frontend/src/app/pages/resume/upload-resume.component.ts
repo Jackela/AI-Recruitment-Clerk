@@ -503,7 +503,9 @@ export class UploadResumeComponent implements OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((completion) => {
         this.analysisComplete.set(true);
-        this.reportUrl.set(((completion as any)?.result?.['reportUrl'] as string) || '');
+        this.reportUrl.set(
+          ((completion as any)?.result?.['reportUrl'] as string) || '',
+        );
         this.output.set(JSON.stringify(completion, null, 2));
       });
 

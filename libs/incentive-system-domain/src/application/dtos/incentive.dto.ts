@@ -2,7 +2,7 @@ import {
   Incentive,
   IncentiveStatus,
   Currency,
-  PaymentMethod
+  PaymentMethod,
 } from '../../domain/aggregates/incentive.aggregate.js';
 import { IncentiveSummary } from '../../domain/value-objects/index.js';
 import { IncentivePriority } from '../../domain/domain-services/incentive.rules.js';
@@ -17,7 +17,7 @@ export class IncentiveCreationResult {
   private constructor(
     public readonly success: boolean,
     public readonly data?: IncentiveSummary,
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**
@@ -51,7 +51,7 @@ export class IncentiveValidationResult {
       errors: string[];
       status: IncentiveStatus;
     },
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**
@@ -89,7 +89,7 @@ export class IncentiveApprovalResult {
       status: IncentiveStatus;
       rewardAmount: number;
     },
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**
@@ -126,7 +126,7 @@ export class IncentiveRejectionResult {
       status: IncentiveStatus;
       rejectionReason: string;
     },
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**
@@ -166,7 +166,7 @@ export class PaymentProcessingResult {
       paymentMethod: PaymentMethod;
       status: IncentiveStatus;
     },
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**
@@ -208,7 +208,7 @@ export class BatchPaymentResult {
       totalPaidAmount: number;
       results: BatchPaymentItem[];
     },
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**
@@ -246,7 +246,7 @@ export class IncentiveStatsResult {
       individual?: IPIncentiveStatistics;
       system?: SystemIncentiveStatistics;
     },
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**
@@ -281,7 +281,7 @@ export class PendingIncentivesResult {
       incentive: IncentiveSummary;
       priority: IncentivePriority;
     }>,
-    public readonly errors?: string[]
+    public readonly errors?: string[],
   ) {}
 
   /**
@@ -289,10 +289,12 @@ export class PendingIncentivesResult {
    * @param data - The data.
    * @returns The PendingIncentivesResult.
    */
-  static success(data: Array<{
-    incentive: IncentiveSummary;
-    priority: IncentivePriority;
-  }>): PendingIncentivesResult {
+  static success(
+    data: Array<{
+      incentive: IncentiveSummary;
+      priority: IncentivePriority;
+    }>,
+  ): PendingIncentivesResult {
     return new PendingIncentivesResult(true, data);
   }
 
@@ -418,8 +420,14 @@ export interface IIncentiveRepository {
   findByIds(ids: string[]): Promise<IncentiveEntity[]>;
   findByIP(ip: string, timeRange?: TimeRange): Promise<IncentiveEntity[]>;
   findAll(timeRange?: TimeRange): Promise<IncentiveEntity[]>;
-  findPendingIncentives(status?: IncentiveStatus, limit?: number): Promise<IncentiveEntity[]>;
-  findReferralIncentive(referrerIP: string, referredIP: string): Promise<IncentiveEntity | null>;
+  findPendingIncentives(
+    status?: IncentiveStatus,
+    limit?: number,
+  ): Promise<IncentiveEntity[]>;
+  findReferralIncentive(
+    referrerIP: string,
+    referredIP: string,
+  ): Promise<IncentiveEntity | null>;
   countTodayIncentives(ip: string): Promise<number>;
   deleteExpired(olderThanDays: number): Promise<number>;
 }
@@ -459,5 +467,7 @@ export interface IAuditLogger {
  * Defines the shape of the i payment gateway.
  */
 export interface IPaymentGateway {
-  processPayment(request: PaymentGatewayRequest): Promise<PaymentGatewayResponse>;
+  processPayment(
+    request: PaymentGatewayRequest,
+  ): Promise<PaymentGatewayResponse>;
 }

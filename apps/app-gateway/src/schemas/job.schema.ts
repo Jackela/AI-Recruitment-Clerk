@@ -23,7 +23,8 @@ export class JobRequirement {
 }
 
 // Explicitly create schema for nested subdocument to avoid runtime reflection issues
-export const JobRequirementSchema = SchemaFactory.createForClass(JobRequirement);
+export const JobRequirementSchema =
+  SchemaFactory.createForClass(JobRequirement);
 
 /**
  * Represents the job.
@@ -87,6 +88,9 @@ export class Job {
   @Prop({ type: String })
   createdBy: string = ''; // User ID reference
 
+  @Prop({ type: String, index: true })
+  organizationId: string = ''; // Organization ID for multi-tenant access control
+
   @Prop({ type: Date, default: Date.now })
   createdAt: Date = new Date();
 
@@ -103,3 +107,5 @@ JobSchema.index({ status: 1 });
 JobSchema.index({ employmentType: 1 });
 JobSchema.index({ createdAt: -1 });
 JobSchema.index({ createdBy: 1 });
+JobSchema.index({ organizationId: 1 });
+JobSchema.index({ organizationId: 1, status: 1 }); // Compound index for multi-tenant queries

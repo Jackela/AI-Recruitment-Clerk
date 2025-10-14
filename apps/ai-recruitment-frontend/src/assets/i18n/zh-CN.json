@@ -1,0 +1,88 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "confirm": "确认",
+    "search": "搜索",
+    "filter": "筛选",
+    "export": "导出",
+    "import": "导入",
+    "refresh": "刷新",
+    "close": "关闭",
+    "back": "返回",
+    "next": "下一步",
+    "previous": "上一步",
+    "submit": "提交",
+    "reset": "重置",
+    "yes": "是",
+    "no": "否",
+    "required": "必填",
+    "characters": "字符"
+  },
+  "app": {
+    "title": "AI智能招聘助手",
+    "description": "智能简历筛选和分析系统",
+    "welcome": "欢迎使用AI智能招聘助手"
+  },
+  "navigation": {
+    "dashboard": "控制台",
+    "analysis": "分析",
+    "results": "结果",
+    "settings": "设置",
+    "help": "帮助",
+    "profile": "个人资料",
+    "logout": "退出"
+  },
+  "jobs": {
+    "createJob": {
+      "title": "创建新岗位",
+      "information": "岗位信息",
+      "jobTitle": {
+        "label": "岗位名称",
+        "placeholder": "请输入岗位名称，如：高级Python开发工程师",
+        "hint": "建议使用清晰、具体的岗位名称，如"高级Java开发工程师"、"产品经理"等。"
+      },
+      "jobDescription": {
+        "label": "岗位描述 (JD)",
+        "placeholder": "请输入详细的岗位描述，包括职责、要求、技能等...",
+        "hint": "请包含以下关键信息以提高匹配准确性：",
+        "requirements": {
+          "skills": "技能要求：编程语言、框架、工具等",
+          "experience": "工作经验：年限要求、相关经验",
+          "education": "学历要求：最低学历、专业要求",
+          "other": "其他要求：软技能、特殊要求等"
+        }
+      },
+      "actions": {
+        "cancel": "取消",
+        "creating": "创建中...",
+        "create": "创建岗位"
+      },
+      "progress": {
+        "title": "岗位创建进度",
+        "estimatedTimeRemaining": "预计剩余时间:",
+        "initializing": "初始化中...",
+        "processing": "正在处理您的岗位描述..."
+      }
+    }
+  },
+  "validation": {
+    "required": "该字段不能为空",
+    "minLength": "最少输入{{length}}个字符",
+    "maxLength": "最多输入{{length}}个字符",
+    "email": "请输入有效的邮箱地址",
+    "pattern": "格式不正确"
+  },
+  "messages": {
+    "success": "操作成功",
+    "error": "操作失败",
+    "warning": "警告",
+    "info": "提示",
+    "confirmDelete": "确定要删除吗？",
+    "noData": "暂无数据",
+    "networkError": "网络错误，请稍后重试"
+  }
+}

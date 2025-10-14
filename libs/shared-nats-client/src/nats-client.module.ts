@@ -3,22 +3,25 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { NatsClientService } from './services/nats-client.service';
 import { NatsConnectionManager } from './services/nats-connection-manager.service';
 import { NatsStreamManager } from './services/nats-stream-manager.service';
-import { StreamConfig, NatsConnectionConfig } from './interfaces/nats-config.interface';
+import {
+  StreamConfig,
+  NatsConnectionConfig,
+} from './interfaces/nats-config.interface';
 
 /**
  * Shared NATS Client Module
- * 
+ *
  * Provides NATS JetStream messaging capabilities across microservices.
  * This module is marked as @Global() so it can be imported once at the root
  * and used throughout the application.
- * 
+ *
  * Features:
  * - Automatic connection management and reconnection
  * - JetStream stream and consumer management
  * - High-level publish/subscribe API
  * - Health monitoring and diagnostics
  * - Service-specific extensions support
- * 
+ *
  * Usage:
  * ```typescript
  * @Module({
@@ -26,37 +29,27 @@ import { StreamConfig, NatsConnectionConfig } from './interfaces/nats-config.int
  * })
  * export class AppModule {}
  * ```
- * 
+ *
  * Environment Variables:
  * - NATS_URL: NATS server connection URL (default: nats://localhost:4222)
  * - NATS_OPTIONAL: Whether NATS is optional for development (default: false)
- * 
+ *
  * @author AI Recruitment Team
  * @since 1.0.0
  */
 @Global()
 @Module({
-  imports: [
-    ConfigModule,
-  ],
-  providers: [
-    NatsConnectionManager,
-    NatsStreamManager,
-    NatsClientService,
-  ],
-  exports: [
-    NatsClientService,
-    NatsConnectionManager,
-    NatsStreamManager,
-  ],
+  imports: [ConfigModule],
+  providers: [NatsConnectionManager, NatsStreamManager, NatsClientService],
+  exports: [NatsClientService, NatsConnectionManager, NatsStreamManager],
 })
 export class NatsClientModule {
   /**
    * Create a configured NATS Client Module with custom settings
-   * 
+   *
    * @param options Configuration options for the NATS client
    * @returns Configured module
-   * 
+   *
    * @example
    * ```typescript
    * @Module({
@@ -94,12 +87,12 @@ export class NatsClientModule {
               serviceName?: string;
               streams?: StreamConfig[];
               connectionOptions?: Partial<NatsConnectionConfig>;
-            }
+            },
           ) => {
             const service = new NatsClientService(
               configService,
               connectionManager,
-              streamManager
+              streamManager,
             );
 
             // Initialize with custom options if provided
@@ -113,14 +106,19 @@ export class NatsClientModule {
                   serviceName: natsOptions.serviceName,
                   ...natsOptions.connectionOptions,
                 },
-                natsOptions.streams
+                natsOptions.streams,
               );
             }
 
             return service;
           },
           // Inject concrete providers, not module classes
-          inject: [ConfigService, NatsConnectionManager, NatsStreamManager, 'NATS_OPTIONS'],
+          inject: [
+            ConfigService,
+            NatsConnectionManager,
+            NatsStreamManager,
+            'NATS_OPTIONS',
+          ],
         },
       ],
     };

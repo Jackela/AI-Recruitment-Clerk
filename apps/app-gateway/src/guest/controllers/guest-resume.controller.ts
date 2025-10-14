@@ -35,6 +35,10 @@ import { OptionalJwtAuthGuard } from '../guards/optional-jwt-auth.guard';
 import { GuestUsageService } from '../services/guest-usage.service';
 import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
 import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
+import {
+  GridFsService,
+  ResumeFileMetadata,
+} from '../../services/gridfs.service';
 
 interface GuestResumeUploadDto {
   candidateName?: string;
@@ -82,10 +86,12 @@ export class GuestResumeController {
    * Initializes a new instance of the Guest Resume Controller.
    * @param guestUsageService - The guest usage service.
    * @param natsClient - The nats client.
+   * @param gridFsService - The GridFS service for file storage.
    */
   constructor(
     private readonly guestUsageService: GuestUsageService,
     private readonly natsClient: AppGatewayNatsService,
+    private readonly gridFsService: GridFsService,
   ) {}
 
   /**
@@ -191,36 +197,122 @@ export class GuestResumeController {
         uploadedAt: new Date(),
       };
 
-      // Publish resume submission event to NATS so downstream services can process it
+      // Store the file in GridFS and publish resume submission event to NATS
+      let tempGridFsUrl = '';
       try {
         const resumeId = analysisId; // reuse analysisId as resumeId for correlation
         const jobId = isAuthenticated
           ? `user-job-${(req.user as any)?.id || 'unknown'}`
           : `guest-job-${deviceId}`;
 
+        // ✅ PRIORITY 1 FIX: Store file in GridFS first
+        this.logger.debug(
+          `Storing resume file in GridFS for analysis: ${analysisId}`,
+        );
+
+        const fileMetadata: ResumeFileMetadata = {
+          fileType: 'resume',
+          analysisId,
+          deviceId: isAuthenticated ? undefined : deviceId,
+          userId: isAuthenticated ? (req.user as any)?.id : undefined,
+          originalFilename: file.originalname,
+          mimeType: file.mimetype,
+          fileSize: file.size,
+          uploadedAt: new Date(),
+          candidateName: uploadData.candidateName,
+          candidateEmail: uploadData.candidateEmail,
+          notes: uploadData.notes,
+          isGuestMode: !isAuthenticated,
+        };
+
+        // Store file buffer in GridFS and get the URL
+        tempGridFsUrl = await this.gridFsService.storeResumeFile(
+          file.buffer,
+          file.originalname,
+          fileMetadata,
+        );
+
+        this.logger.log(
+          `Resume file stored in GridFS successfully: ${tempGridFsUrl}`,
+          {
+            analysisId,
+            originalFilename: file.originalname,
+            fileSize: file.size,
+            gridFsUrl: tempGridFsUrl,
+          },
+        );
+
+        // ✅ PRIORITY 1 FIX: Use actual GridFS URL in NATS event
         const event: ResumeSubmittedEvent = {
           jobId,
           resumeId,
           originalFilename: file.originalname,
-          // In a future iteration, store the file in GridFS/S3 and provide a signed URL
-          tempGridFsUrl: '',
+          tempGridFsUrl, // Now contains actual GridFS URL instead of empty string
         };
 
-        const publishResult = await this.natsClient.publishResumeSubmitted(
-          event,
-        );
+        const publishResult =
+          await this.natsClient.publishResumeSubmitted(event);
         if (!publishResult.success) {
           this.logger.warn(
             `NATS publish failed for resumeId=${resumeId}: ${publishResult.error}`,
           );
+          // If NATS publish fails, clean up the GridFS file
+          try {
+            await this.gridFsService.deleteResumeFile(tempGridFsUrl);
+            this.logger.debug(
+              `Cleaned up GridFS file after NATS failure: ${tempGridFsUrl}`,
+            );
+          } catch (cleanupErr) {
+            this.logger.error(
+              'Failed to cleanup GridFS file after NATS failure',
+              cleanupErr,
+            );
+          }
         } else {
           this.logger.log(
             `NATS publish succeeded for resumeId=${resumeId}, msgId=${publishResult.messageId}`,
+            {
+              analysisId,
+              gridFsUrl: tempGridFsUrl,
+              messageId: publishResult.messageId,
+            },
           );
         }
       } catch (err) {
-        this.logger.error('Error publishing resume submission to NATS', err);
-        // Continue, we will fallback to mock result below if needed
+        this.logger.error(
+          'Error storing file or publishing resume submission to NATS',
+          err,
+          {
+            analysisId,
+            originalFilename: file.originalname,
+            fileSize: file.size,
+          },
+        );
+
+        // If GridFS storage was successful but NATS failed, attempt cleanup
+        if (tempGridFsUrl) {
+          try {
+            await this.gridFsService.deleteResumeFile(tempGridFsUrl);
+            this.logger.debug(
+              `Cleaned up GridFS file after error: ${tempGridFsUrl}`,
+            );
+          } catch (cleanupErr) {
+            this.logger.error(
+              'Failed to cleanup GridFS file after error',
+              cleanupErr,
+            );
+          }
+        }
+
+        // Re-throw the error to let the outer catch handle the HTTP response
+        throw new HttpException(
+          {
+            success: false,
+            error: 'File storage failed',
+            message: 'Failed to store resume file for analysis',
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
       }
 
       this.logger.log(
@@ -237,7 +329,10 @@ export class GuestResumeController {
 
       // Wait for real parsing result from pipeline (analysis.resume.parsed)
       try {
-        const parsed = await this.natsClient.waitForAnalysisParsed(analysisId, 20000);
+        const parsed = await this.natsClient.waitForAnalysisParsed(
+          analysisId,
+          20000,
+        );
         this.logger.log(
           `Received analysis.resume.parsed for resumeId=${analysisId} (jobId=${parsed.jobId})`,
         );
@@ -676,4 +771,3 @@ export class GuestResumeController {
     }
   }
 }
-

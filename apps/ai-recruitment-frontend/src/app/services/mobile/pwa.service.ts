@@ -24,7 +24,7 @@ export interface NotificationPayload {
   badge?: string;
   image?: string;
   data?: Record<string, unknown>;
-  actions?: Array<{action: string; title: string; icon?: string}>; // NotificationAction type not available in browser
+  actions?: Array<{ action: string; title: string; icon?: string }>; // NotificationAction type not available in browser
   tag?: string;
   silent?: boolean;
   requireInteraction?: boolean;

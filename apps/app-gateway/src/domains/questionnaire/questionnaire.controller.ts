@@ -822,6 +822,3 @@ export class QuestionnaireController {
     }
   }
 }
-
-
-

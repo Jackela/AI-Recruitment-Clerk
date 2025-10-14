@@ -1,12 +1,15 @@
-export const testUsers = new Map<string, {
-  userId: string;
-  email: string;
-  name?: string;
-  role?: string;
-  organizationId?: string;
-  createdAt: string;
-  updatedAt: string;
-}>();
+export const testUsers = new Map<
+  string,
+  {
+    userId: string;
+    email: string;
+    name?: string;
+    role?: string;
+    organizationId?: string;
+    createdAt: string;
+    updatedAt: string;
+  }
+>();
 
 /**
  * Performs the make token operation.
@@ -31,4 +34,3 @@ export function decodeEmailFromToken(authHeader?: string): string | null {
     return null;
   }
 }
-

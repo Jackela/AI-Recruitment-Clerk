@@ -56,3 +56,60 @@ export const clearSelectedJob = createAction('[Job] Clear Selected Job');
 
 // Clear Error
 export const clearJobError = createAction('[Job] Clear Error');
+
+// WebSocket Job Updates
+export const jobUpdatedViaWebSocket = createAction(
+  '[Job] Job Updated via WebSocket',
+  props<{
+    jobId: string;
+    title: string;
+    status:
+      | 'processing'
+      | 'completed'
+      | 'failed'
+      | 'active'
+      | 'draft'
+      | 'closed';
+    timestamp: Date;
+    organizationId?: string;
+    metadata?: {
+      confidence?: number;
+      extractedKeywords?: string[];
+      processingTime?: number;
+      errorMessage?: string;
+    };
+  }>(),
+);
+
+export const jobProgressViaWebSocket = createAction(
+  '[Job] Job Progress via WebSocket',
+  props<{
+    jobId: string;
+    step: string;
+    progress: number;
+    message?: string;
+    estimatedTimeRemaining?: number;
+    timestamp: Date;
+  }>(),
+);
+
+// WebSocket Connection Management
+export const initializeWebSocketConnection = createAction(
+  '[Job] Initialize WebSocket Connection',
+  props<{ sessionId: string; organizationId?: string }>(),
+);
+
+export const subscribeToJobUpdates = createAction(
+  '[Job] Subscribe to Job Updates',
+  props<{ jobId: string; organizationId?: string }>(),
+);
+
+export const unsubscribeFromJobUpdates = createAction(
+  '[Job] Unsubscribe from Job Updates',
+  props<{ jobId: string }>(),
+);
+
+export const webSocketConnectionStatusChanged = createAction(
+  '[Job] WebSocket Connection Status Changed',
+  props<{ status: 'connecting' | 'connected' | 'disconnected' | 'error' }>(),
+);

@@ -4,7 +4,10 @@
  */
 
 import { HttpStatus } from '@nestjs/common';
-import { EnhancedAppException, ExtendedErrorType } from './enhanced-error-types';
+import {
+  EnhancedAppException,
+  ExtendedErrorType,
+} from './enhanced-error-types';
 import { ErrorType } from '../common/error-handling.patterns';
 
 /**
@@ -13,7 +16,7 @@ import { ErrorType } from '../common/error-handling.patterns';
 export enum ResumeParserErrorCode {
   FILE_PARSE_FAILED = 'RESUME_PARSE_FAILED',
   UNSUPPORTED_FORMAT = 'UNSUPPORTED_FILE_FORMAT',
-  FILE_TOO_LARGE = 'FILE_SIZE_EXCEEDED', 
+  FILE_TOO_LARGE = 'FILE_SIZE_EXCEEDED',
   CONTENT_EXTRACTION_FAILED = 'CONTENT_EXTRACTION_FAILED',
   SKILL_DETECTION_FAILED = 'SKILL_DETECTION_FAILED',
   PDF_CORRUPTION = 'PDF_CORRUPTION_DETECTED',
@@ -23,27 +26,39 @@ export enum ResumeParserErrorCode {
   WORK_EXPERIENCE_EXTRACTION_FAILED = 'WORK_EXPERIENCE_EXTRACTION_FAILED',
   EDUCATION_EXTRACTION_FAILED = 'EDUCATION_EXTRACTION_FAILED',
   GEMINI_PARSING_FAILED = 'GEMINI_PARSING_FAILED',
-  GRIDFS_STORAGE_FAILED = 'GRIDFS_STORAGE_FAILED'
+  GRIDFS_STORAGE_FAILED = 'GRIDFS_STORAGE_FAILED',
 }
 
 /**
  * Resume Parser Service Error Messages
  */
-export const ResumeParserErrorMessages: Record<ResumeParserErrorCode, string> = {
-  [ResumeParserErrorCode.FILE_PARSE_FAILED]: 'Failed to parse resume file',
-  [ResumeParserErrorCode.UNSUPPORTED_FORMAT]: 'Resume file format is not supported',
-  [ResumeParserErrorCode.FILE_TOO_LARGE]: 'Resume file size exceeds maximum limit',
-  [ResumeParserErrorCode.CONTENT_EXTRACTION_FAILED]: 'Failed to extract text content from resume',
-  [ResumeParserErrorCode.SKILL_DETECTION_FAILED]: 'Failed to detect skills from resume content',
-  [ResumeParserErrorCode.PDF_CORRUPTION]: 'PDF file appears to be corrupted',
-  [ResumeParserErrorCode.OCR_PROCESSING_FAILED]: 'OCR processing failed for scanned resume',
-  [ResumeParserErrorCode.RESUME_STRUCTURE_INVALID]: 'Resume structure is invalid or unrecognizable',
-  [ResumeParserErrorCode.PERSONAL_INFO_EXTRACTION_FAILED]: 'Failed to extract personal information',
-  [ResumeParserErrorCode.WORK_EXPERIENCE_EXTRACTION_FAILED]: 'Failed to extract work experience',
-  [ResumeParserErrorCode.EDUCATION_EXTRACTION_FAILED]: 'Failed to extract education information',
-  [ResumeParserErrorCode.GEMINI_PARSING_FAILED]: 'Gemini AI parsing service failed',
-  [ResumeParserErrorCode.GRIDFS_STORAGE_FAILED]: 'Failed to store resume in GridFS'
-};
+export const ResumeParserErrorMessages: Record<ResumeParserErrorCode, string> =
+  {
+    [ResumeParserErrorCode.FILE_PARSE_FAILED]: 'Failed to parse resume file',
+    [ResumeParserErrorCode.UNSUPPORTED_FORMAT]:
+      'Resume file format is not supported',
+    [ResumeParserErrorCode.FILE_TOO_LARGE]:
+      'Resume file size exceeds maximum limit',
+    [ResumeParserErrorCode.CONTENT_EXTRACTION_FAILED]:
+      'Failed to extract text content from resume',
+    [ResumeParserErrorCode.SKILL_DETECTION_FAILED]:
+      'Failed to detect skills from resume content',
+    [ResumeParserErrorCode.PDF_CORRUPTION]: 'PDF file appears to be corrupted',
+    [ResumeParserErrorCode.OCR_PROCESSING_FAILED]:
+      'OCR processing failed for scanned resume',
+    [ResumeParserErrorCode.RESUME_STRUCTURE_INVALID]:
+      'Resume structure is invalid or unrecognizable',
+    [ResumeParserErrorCode.PERSONAL_INFO_EXTRACTION_FAILED]:
+      'Failed to extract personal information',
+    [ResumeParserErrorCode.WORK_EXPERIENCE_EXTRACTION_FAILED]:
+      'Failed to extract work experience',
+    [ResumeParserErrorCode.EDUCATION_EXTRACTION_FAILED]:
+      'Failed to extract education information',
+    [ResumeParserErrorCode.GEMINI_PARSING_FAILED]:
+      'Gemini AI parsing service failed',
+    [ResumeParserErrorCode.GRIDFS_STORAGE_FAILED]:
+      'Failed to store resume in GridFS',
+  };
 
 /**
  * Resume Parser Service Exception
@@ -58,7 +73,7 @@ export class ResumeParserException extends EnhancedAppException {
   constructor(
     code: ResumeParserErrorCode,
     details?: any,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ) {
     super(
       ExtendedErrorType.PARSING_ERROR,
@@ -66,33 +81,53 @@ export class ResumeParserException extends EnhancedAppException {
       ResumeParserErrorMessages[code],
       HttpStatus.UNPROCESSABLE_ENTITY,
       details,
-      context
+      context,
     );
 
     this.withBusinessImpact('medium')
-        .withUserImpact('moderate')
-        .withRecoveryStrategies(this.getRecoveryStrategies(code))
-        .withMonitoringTags({
-          'service': 'resume-parser',
-          'error.code': code,
-          'component': 'resume-processing'
-        });
+      .withUserImpact('moderate')
+      .withRecoveryStrategies(this.getRecoveryStrategies(code))
+      .withMonitoringTags({
+        service: 'resume-parser',
+        'error.code': code,
+        component: 'resume-processing',
+      });
   }
 
   private getRecoveryStrategies(code: ResumeParserErrorCode): string[] {
     switch (code) {
       case ResumeParserErrorCode.FILE_PARSE_FAILED:
-        return ['Try alternative parser', 'Check file integrity', 'Request file resubmission'];
+        return [
+          'Try alternative parser',
+          'Check file integrity',
+          'Request file resubmission',
+        ];
       case ResumeParserErrorCode.UNSUPPORTED_FORMAT:
-        return ['Convert file to supported format', 'Use OCR for image-based files', 'Request PDF version'];
+        return [
+          'Convert file to supported format',
+          'Use OCR for image-based files',
+          'Request PDF version',
+        ];
       case ResumeParserErrorCode.FILE_TOO_LARGE:
         return ['Compress file', 'Split into sections', 'Use cloud processing'];
       case ResumeParserErrorCode.OCR_PROCESSING_FAILED:
-        return ['Improve image quality', 'Try different OCR engine', 'Manual transcription'];
+        return [
+          'Improve image quality',
+          'Try different OCR engine',
+          'Manual transcription',
+        ];
       case ResumeParserErrorCode.GEMINI_PARSING_FAILED:
-        return ['Use fallback parser', 'Retry with different prompt', 'Process sections individually'];
+        return [
+          'Use fallback parser',
+          'Retry with different prompt',
+          'Process sections individually',
+        ];
       default:
-        return ['Retry operation', 'Use alternative processing method', 'Request technical support'];
+        return [
+          'Retry operation',
+          'Use alternative processing method',
+          'Request technical support',
+        ];
     }
   }
 }
@@ -110,7 +145,7 @@ export enum ReportGeneratorErrorCode {
   CHART_RENDERING_FAILED = 'CHART_RENDERING_FAILED',
   REPORT_STORAGE_FAILED = 'REPORT_STORAGE_FAILED',
   TEMPLATE_COMPILATION_FAILED = 'TEMPLATE_COMPILATION_FAILED',
-  DATA_VALIDATION_FAILED = 'REPORT_DATA_VALIDATION_FAILED'
+  DATA_VALIDATION_FAILED = 'REPORT_DATA_VALIDATION_FAILED',
 }
 
 /**
@@ -126,19 +161,29 @@ export class ReportGeneratorException extends EnhancedAppException {
   constructor(
     code: ReportGeneratorErrorCode,
     details?: any,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ) {
     const messages: Record<ReportGeneratorErrorCode, string> = {
-      [ReportGeneratorErrorCode.REPORT_GENERATION_FAILED]: 'Report generation process failed',
-      [ReportGeneratorErrorCode.TEMPLATE_NOT_FOUND]: 'Report template not found',
-      [ReportGeneratorErrorCode.DATA_AGGREGATION_FAILED]: 'Failed to aggregate report data',
-      [ReportGeneratorErrorCode.EXPORT_FORMAT_UNSUPPORTED]: 'Export format is not supported',
-      [ReportGeneratorErrorCode.ANALYTICS_COMPUTATION_FAILED]: 'Analytics computation failed',
-      [ReportGeneratorErrorCode.PDF_GENERATION_FAILED]: 'PDF report generation failed',
-      [ReportGeneratorErrorCode.CHART_RENDERING_FAILED]: 'Chart rendering failed',
-      [ReportGeneratorErrorCode.REPORT_STORAGE_FAILED]: 'Failed to store generated report',
-      [ReportGeneratorErrorCode.TEMPLATE_COMPILATION_FAILED]: 'Report template compilation failed',
-      [ReportGeneratorErrorCode.DATA_VALIDATION_FAILED]: 'Report data validation failed'
+      [ReportGeneratorErrorCode.REPORT_GENERATION_FAILED]:
+        'Report generation process failed',
+      [ReportGeneratorErrorCode.TEMPLATE_NOT_FOUND]:
+        'Report template not found',
+      [ReportGeneratorErrorCode.DATA_AGGREGATION_FAILED]:
+        'Failed to aggregate report data',
+      [ReportGeneratorErrorCode.EXPORT_FORMAT_UNSUPPORTED]:
+        'Export format is not supported',
+      [ReportGeneratorErrorCode.ANALYTICS_COMPUTATION_FAILED]:
+        'Analytics computation failed',
+      [ReportGeneratorErrorCode.PDF_GENERATION_FAILED]:
+        'PDF report generation failed',
+      [ReportGeneratorErrorCode.CHART_RENDERING_FAILED]:
+        'Chart rendering failed',
+      [ReportGeneratorErrorCode.REPORT_STORAGE_FAILED]:
+        'Failed to store generated report',
+      [ReportGeneratorErrorCode.TEMPLATE_COMPILATION_FAILED]:
+        'Report template compilation failed',
+      [ReportGeneratorErrorCode.DATA_VALIDATION_FAILED]:
+        'Report data validation failed',
     };
 
     super(
@@ -147,22 +192,22 @@ export class ReportGeneratorException extends EnhancedAppException {
       messages[code],
       HttpStatus.UNPROCESSABLE_ENTITY,
       details,
-      context
+      context,
     );
 
     this.withBusinessImpact('medium')
-        .withUserImpact('moderate')
-        .withRecoveryStrategies([
-          'Use fallback template',
-          'Regenerate with simplified data',
-          'Use alternative export format',
-          'Process data in smaller chunks'
-        ])
-        .withMonitoringTags({
-          'service': 'report-generator',
-          'error.code': code,
-          'component': 'report-processing'
-        });
+      .withUserImpact('moderate')
+      .withRecoveryStrategies([
+        'Use fallback template',
+        'Regenerate with simplified data',
+        'Use alternative export format',
+        'Process data in smaller chunks',
+      ])
+      .withMonitoringTags({
+        service: 'report-generator',
+        'error.code': code,
+        component: 'report-processing',
+      });
   }
 }
 
@@ -178,7 +223,7 @@ export enum JDExtractorErrorCode {
   GEMINI_EXTRACTION_FAILED = 'GEMINI_JD_EXTRACTION_FAILED',
   SALARY_EXTRACTION_FAILED = 'SALARY_EXTRACTION_FAILED',
   LOCATION_EXTRACTION_FAILED = 'LOCATION_EXTRACTION_FAILED',
-  EXPERIENCE_LEVEL_EXTRACTION_FAILED = 'EXPERIENCE_LEVEL_EXTRACTION_FAILED'
+  EXPERIENCE_LEVEL_EXTRACTION_FAILED = 'EXPERIENCE_LEVEL_EXTRACTION_FAILED',
 }
 
 /**
@@ -194,18 +239,26 @@ export class JDExtractorException extends EnhancedAppException {
   constructor(
     code: JDExtractorErrorCode,
     details?: any,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ) {
     const messages: Record<JDExtractorErrorCode, string> = {
       [JDExtractorErrorCode.JD_PARSE_FAILED]: 'Job description parsing failed',
-      [JDExtractorErrorCode.REQUIREMENTS_EXTRACTION_FAILED]: 'Failed to extract job requirements',
-      [JDExtractorErrorCode.SKILL_MAPPING_FAILED]: 'Failed to map skills from job description',
-      [JDExtractorErrorCode.COMPANY_INFO_EXTRACTION_FAILED]: 'Failed to extract company information',
-      [JDExtractorErrorCode.JD_STRUCTURE_INVALID]: 'Job description structure is invalid',
-      [JDExtractorErrorCode.GEMINI_EXTRACTION_FAILED]: 'Gemini AI extraction service failed',
-      [JDExtractorErrorCode.SALARY_EXTRACTION_FAILED]: 'Failed to extract salary information',
-      [JDExtractorErrorCode.LOCATION_EXTRACTION_FAILED]: 'Failed to extract location information',
-      [JDExtractorErrorCode.EXPERIENCE_LEVEL_EXTRACTION_FAILED]: 'Failed to extract experience level requirements'
+      [JDExtractorErrorCode.REQUIREMENTS_EXTRACTION_FAILED]:
+        'Failed to extract job requirements',
+      [JDExtractorErrorCode.SKILL_MAPPING_FAILED]:
+        'Failed to map skills from job description',
+      [JDExtractorErrorCode.COMPANY_INFO_EXTRACTION_FAILED]:
+        'Failed to extract company information',
+      [JDExtractorErrorCode.JD_STRUCTURE_INVALID]:
+        'Job description structure is invalid',
+      [JDExtractorErrorCode.GEMINI_EXTRACTION_FAILED]:
+        'Gemini AI extraction service failed',
+      [JDExtractorErrorCode.SALARY_EXTRACTION_FAILED]:
+        'Failed to extract salary information',
+      [JDExtractorErrorCode.LOCATION_EXTRACTION_FAILED]:
+        'Failed to extract location information',
+      [JDExtractorErrorCode.EXPERIENCE_LEVEL_EXTRACTION_FAILED]:
+        'Failed to extract experience level requirements',
     };
 
     super(
@@ -214,22 +267,22 @@ export class JDExtractorException extends EnhancedAppException {
       messages[code],
       HttpStatus.UNPROCESSABLE_ENTITY,
       details,
-      context
+      context,
     );
 
     this.withBusinessImpact('medium')
-        .withUserImpact('moderate')
-        .withRecoveryStrategies([
-          'Use alternative extraction method',
-          'Parse with different AI model',
-          'Use rule-based extraction',
-          'Request manual review'
-        ])
-        .withMonitoringTags({
-          'service': 'jd-extractor',
-          'error.code': code,
-          'component': 'jd-processing'
-        });
+      .withUserImpact('moderate')
+      .withRecoveryStrategies([
+        'Use alternative extraction method',
+        'Parse with different AI model',
+        'Use rule-based extraction',
+        'Request manual review',
+      ])
+      .withMonitoringTags({
+        service: 'jd-extractor',
+        'error.code': code,
+        component: 'jd-processing',
+      });
   }
 }
 
@@ -245,7 +298,7 @@ export enum ScoringEngineErrorCode {
   EXPERIENCE_SCORING_FAILED = 'EXPERIENCE_SCORING_FAILED',
   EDUCATION_SCORING_FAILED = 'EDUCATION_SCORING_FAILED',
   OVERALL_SCORE_CALCULATION_FAILED = 'OVERALL_SCORE_CALCULATION_FAILED',
-  CONFIDENCE_CALCULATION_FAILED = 'CONFIDENCE_CALCULATION_FAILED'
+  CONFIDENCE_CALCULATION_FAILED = 'CONFIDENCE_CALCULATION_FAILED',
 }
 
 /**
@@ -261,18 +314,27 @@ export class ScoringEngineException extends EnhancedAppException {
   constructor(
     code: ScoringEngineErrorCode,
     details?: any,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ) {
     const messages: Record<ScoringEngineErrorCode, string> = {
-      [ScoringEngineErrorCode.SCORING_ALGORITHM_FAILED]: 'Scoring algorithm execution failed',
-      [ScoringEngineErrorCode.INSUFFICIENT_DATA]: 'Insufficient data for accurate scoring',
-      [ScoringEngineErrorCode.WEIGHT_CALCULATION_ERROR]: 'Error calculating scoring weights',
-      [ScoringEngineErrorCode.MODEL_PREDICTION_FAILED]: 'ML model prediction failed',
-      [ScoringEngineErrorCode.SKILL_MATCHING_FAILED]: 'Skill matching algorithm failed',
-      [ScoringEngineErrorCode.EXPERIENCE_SCORING_FAILED]: 'Experience scoring failed',
-      [ScoringEngineErrorCode.EDUCATION_SCORING_FAILED]: 'Education scoring failed',
-      [ScoringEngineErrorCode.OVERALL_SCORE_CALCULATION_FAILED]: 'Overall score calculation failed',
-      [ScoringEngineErrorCode.CONFIDENCE_CALCULATION_FAILED]: 'Confidence score calculation failed'
+      [ScoringEngineErrorCode.SCORING_ALGORITHM_FAILED]:
+        'Scoring algorithm execution failed',
+      [ScoringEngineErrorCode.INSUFFICIENT_DATA]:
+        'Insufficient data for accurate scoring',
+      [ScoringEngineErrorCode.WEIGHT_CALCULATION_ERROR]:
+        'Error calculating scoring weights',
+      [ScoringEngineErrorCode.MODEL_PREDICTION_FAILED]:
+        'ML model prediction failed',
+      [ScoringEngineErrorCode.SKILL_MATCHING_FAILED]:
+        'Skill matching algorithm failed',
+      [ScoringEngineErrorCode.EXPERIENCE_SCORING_FAILED]:
+        'Experience scoring failed',
+      [ScoringEngineErrorCode.EDUCATION_SCORING_FAILED]:
+        'Education scoring failed',
+      [ScoringEngineErrorCode.OVERALL_SCORE_CALCULATION_FAILED]:
+        'Overall score calculation failed',
+      [ScoringEngineErrorCode.CONFIDENCE_CALCULATION_FAILED]:
+        'Confidence score calculation failed',
     };
 
     super(
@@ -281,23 +343,23 @@ export class ScoringEngineException extends EnhancedAppException {
       messages[code],
       HttpStatus.UNPROCESSABLE_ENTITY,
       details,
-      context
+      context,
     );
 
     this.withBusinessImpact('high')
-        .withUserImpact('moderate')
-        .withRecoveryStrategies([
-          'Use fallback scoring algorithm',
-          'Apply rule-based scoring',
-          'Use default weights',
-          'Request additional data',
-          'Generate partial scores'
-        ])
-        .withMonitoringTags({
-          'service': 'scoring-engine',
-          'error.code': code,
-          'component': 'scoring-processing'
-        });
+      .withUserImpact('moderate')
+      .withRecoveryStrategies([
+        'Use fallback scoring algorithm',
+        'Apply rule-based scoring',
+        'Use default weights',
+        'Request additional data',
+        'Generate partial scores',
+      ])
+      .withMonitoringTags({
+        service: 'scoring-engine',
+        'error.code': code,
+        component: 'scoring-processing',
+      });
   }
 }
 
@@ -313,7 +375,7 @@ export enum AppGatewayErrorCode {
   REQUEST_VALIDATION_FAILED = 'REQUEST_VALIDATION_FAILED',
   SERVICE_TIMEOUT = 'DOWNSTREAM_SERVICE_TIMEOUT',
   LOAD_BALANCER_ERROR = 'LOAD_BALANCER_ERROR',
-  CIRCUIT_BREAKER_OPEN = 'CIRCUIT_BREAKER_OPEN'
+  CIRCUIT_BREAKER_OPEN = 'CIRCUIT_BREAKER_OPEN',
 }
 
 /**
@@ -329,18 +391,20 @@ export class AppGatewayException extends EnhancedAppException {
   constructor(
     code: AppGatewayErrorCode,
     details?: any,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ) {
     const messages: Record<AppGatewayErrorCode, string> = {
-      [AppGatewayErrorCode.SERVICE_UNAVAILABLE]: 'Downstream service is unavailable',
+      [AppGatewayErrorCode.SERVICE_UNAVAILABLE]:
+        'Downstream service is unavailable',
       [AppGatewayErrorCode.ROUTING_FAILED]: 'Request routing failed',
       [AppGatewayErrorCode.RATE_LIMIT_EXCEEDED]: 'API rate limit exceeded',
       [AppGatewayErrorCode.AUTHENTICATION_FAILED]: 'API authentication failed',
       [AppGatewayErrorCode.AUTHORIZATION_FAILED]: 'API authorization failed',
-      [AppGatewayErrorCode.REQUEST_VALIDATION_FAILED]: 'Request validation failed',
+      [AppGatewayErrorCode.REQUEST_VALIDATION_FAILED]:
+        'Request validation failed',
       [AppGatewayErrorCode.SERVICE_TIMEOUT]: 'Downstream service timeout',
       [AppGatewayErrorCode.LOAD_BALANCER_ERROR]: 'Load balancer error',
-      [AppGatewayErrorCode.CIRCUIT_BREAKER_OPEN]: 'Circuit breaker is open'
+      [AppGatewayErrorCode.CIRCUIT_BREAKER_OPEN]: 'Circuit breaker is open',
     };
 
     const httpStatusMap: Record<AppGatewayErrorCode, HttpStatus> = {
@@ -352,7 +416,8 @@ export class AppGatewayException extends EnhancedAppException {
       [AppGatewayErrorCode.REQUEST_VALIDATION_FAILED]: HttpStatus.BAD_REQUEST,
       [AppGatewayErrorCode.SERVICE_TIMEOUT]: HttpStatus.GATEWAY_TIMEOUT,
       [AppGatewayErrorCode.LOAD_BALANCER_ERROR]: HttpStatus.BAD_GATEWAY,
-      [AppGatewayErrorCode.CIRCUIT_BREAKER_OPEN]: HttpStatus.SERVICE_UNAVAILABLE
+      [AppGatewayErrorCode.CIRCUIT_BREAKER_OPEN]:
+        HttpStatus.SERVICE_UNAVAILABLE,
     };
 
     super(
@@ -361,23 +426,23 @@ export class AppGatewayException extends EnhancedAppException {
       messages[code],
       httpStatusMap[code],
       details,
-      context
+      context,
     );
 
     this.withBusinessImpact('high')
-        .withUserImpact('severe')
-        .withRecoveryStrategies([
-          'Retry with exponential backoff',
-          'Use alternative service instance',
-          'Enable circuit breaker',
-          'Implement graceful degradation',
-          'Cache previous results'
-        ])
-        .withMonitoringTags({
-          'service': 'app-gateway',
-          'error.code': code,
-          'component': 'api-gateway'
-        });
+      .withUserImpact('severe')
+      .withRecoveryStrategies([
+        'Retry with exponential backoff',
+        'Use alternative service instance',
+        'Enable circuit breaker',
+        'Implement graceful degradation',
+        'Cache previous results',
+      ])
+      .withMonitoringTags({
+        service: 'app-gateway',
+        'error.code': code,
+        component: 'api-gateway',
+      });
   }
 }
 
@@ -393,7 +458,7 @@ export enum DatabaseErrorCode {
   INDEX_CORRUPTION = 'DB_INDEX_CORRUPTION',
   DISK_FULL = 'DB_DISK_FULL',
   PERFORMANCE_DEGRADATION = 'DB_PERFORMANCE_DEGRADATION',
-  OPERATION_FAILED = 'DB_OPERATION_FAILED'
+  OPERATION_FAILED = 'DB_OPERATION_FAILED',
 }
 
 /**
@@ -413,7 +478,7 @@ export class DatabaseException extends EnhancedAppException {
     operation: string,
     table?: string,
     details?: any,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ) {
     const messages: Record<DatabaseErrorCode, string> = {
       [DatabaseErrorCode.CONNECTION_FAILED]: 'Database connection failed',
@@ -421,10 +486,12 @@ export class DatabaseException extends EnhancedAppException {
       [DatabaseErrorCode.CONSTRAINT_VIOLATION]: 'Database constraint violation',
       [DatabaseErrorCode.DUPLICATE_KEY]: 'Duplicate key constraint violation',
       [DatabaseErrorCode.TRANSACTION_FAILED]: 'Database transaction failed',
-      [DatabaseErrorCode.INDEX_CORRUPTION]: 'Database index corruption detected',
+      [DatabaseErrorCode.INDEX_CORRUPTION]:
+        'Database index corruption detected',
       [DatabaseErrorCode.DISK_FULL]: 'Database disk space full',
-      [DatabaseErrorCode.PERFORMANCE_DEGRADATION]: 'Database performance degradation detected',
-      [DatabaseErrorCode.OPERATION_FAILED]: 'Database operation failed'
+      [DatabaseErrorCode.PERFORMANCE_DEGRADATION]:
+        'Database performance degradation detected',
+      [DatabaseErrorCode.OPERATION_FAILED]: 'Database operation failed',
     };
 
     super(
@@ -433,24 +500,24 @@ export class DatabaseException extends EnhancedAppException {
       `${messages[code]} during ${operation}${table ? ` on table ${table}` : ''}`,
       HttpStatus.INTERNAL_SERVER_ERROR,
       { operation, table, ...details },
-      context
+      context,
     );
 
     this.withBusinessImpact('high')
-        .withUserImpact('severe')
-        .withRecoveryStrategies([
-          'Retry with connection pool reset',
-          'Use read replica if available',
-          'Implement database failover',
-          'Enable query optimization',
-          'Scale database resources'
-        ])
-        .withMonitoringTags({
-          'db.operation': operation,
-          'db.table': table || 'unknown',
-          'error.code': code,
-          'component': 'database'
-        });
+      .withUserImpact('severe')
+      .withRecoveryStrategies([
+        'Retry with connection pool reset',
+        'Use read replica if available',
+        'Implement database failover',
+        'Enable query optimization',
+        'Scale database resources',
+      ])
+      .withMonitoringTags({
+        'db.operation': operation,
+        'db.table': table || 'unknown',
+        'error.code': code,
+        component: 'database',
+      });
   }
 }
 
@@ -468,7 +535,7 @@ export class DomainErrorFactory {
   static resumeParserError(
     code: ResumeParserErrorCode,
     details?: any,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): ResumeParserException {
     return new ResumeParserException(code, details, context);
   }
@@ -483,7 +550,7 @@ export class DomainErrorFactory {
   static reportGeneratorError(
     code: ReportGeneratorErrorCode,
     details?: any,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): ReportGeneratorException {
     return new ReportGeneratorException(code, details, context);
   }
@@ -498,7 +565,7 @@ export class DomainErrorFactory {
   static jdExtractorError(
     code: JDExtractorErrorCode,
     details?: any,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): JDExtractorException {
     return new JDExtractorException(code, details, context);
   }
@@ -513,7 +580,7 @@ export class DomainErrorFactory {
   static scoringEngineError(
     code: ScoringEngineErrorCode,
     details?: any,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): ScoringEngineException {
     return new ScoringEngineException(code, details, context);
   }
@@ -528,7 +595,7 @@ export class DomainErrorFactory {
   static appGatewayError(
     code: AppGatewayErrorCode,
     details?: any,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): AppGatewayException {
     return new AppGatewayException(code, details, context);
   }
@@ -547,7 +614,7 @@ export class DomainErrorFactory {
     operation: string,
     table?: string,
     details?: any,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): DatabaseException {
     return new DatabaseException(code, operation, table, details, context);
   }

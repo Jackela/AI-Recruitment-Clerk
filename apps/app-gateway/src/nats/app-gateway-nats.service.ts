@@ -1,5 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { NatsClientService, NatsPublishResult } from '@ai-recruitment-clerk/shared-nats-client';
+import {
+  NatsClientService,
+  NatsPublishResult,
+} from '@ai-recruitment-clerk/shared-nats-client';
 
 // Local event interfaces to maintain compatibility
 interface JobJdSubmittedEvent {
@@ -34,11 +37,15 @@ export class AppGatewayNatsService {
   /**
    * Publish a job description submitted event
    */
-  async publishJobJdSubmitted(event: JobJdSubmittedEvent): Promise<NatsPublishResult> {
+  async publishJobJdSubmitted(
+    event: JobJdSubmittedEvent,
+  ): Promise<NatsPublishResult> {
     const subject = 'job.jd.submitted';
 
     try {
-      this.logger.log(`Publishing job.jd.submitted event for jobId: ${event.jobId}`);
+      this.logger.log(
+        `Publishing job.jd.submitted event for jobId: ${event.jobId}`,
+      );
 
       const result = await this.natsClient.publish(subject, {
         ...event,
@@ -72,7 +79,9 @@ export class AppGatewayNatsService {
   /**
    * Publish a resume submitted event
    */
-  async publishResumeSubmitted(event: ResumeSubmittedEvent): Promise<NatsPublishResult> {
+  async publishResumeSubmitted(
+    event: ResumeSubmittedEvent,
+  ): Promise<NatsPublishResult> {
     const subject = 'job.resume.submitted';
 
     try {
@@ -180,5 +189,29 @@ export class AppGatewayNatsService {
    */
   async getHealthStatus() {
     return this.natsClient.getHealthStatus();
+  }
+
+  /**
+   * Subscribe to analysis.jd.extracted events
+   */
+  async subscribeToAnalysisCompleted(
+    handler: (event: any, metadata?: any) => Promise<void>,
+  ): Promise<void> {
+    return this.natsClient.subscribe('analysis.jd.extracted', handler, {
+      durableName: 'app-gateway-jd-analysis-completed',
+      queueGroup: 'app-gateway-jobs',
+    });
+  }
+
+  /**
+   * Subscribe to job.jd.failed events
+   */
+  async subscribeToAnalysisFailed(
+    handler: (event: any, metadata?: any) => Promise<void>,
+  ): Promise<void> {
+    return this.natsClient.subscribe('job.jd.failed', handler, {
+      durableName: 'app-gateway-jd-analysis-failed',
+      queueGroup: 'app-gateway-jobs',
+    });
   }
 }

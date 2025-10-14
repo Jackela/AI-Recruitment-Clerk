@@ -14,7 +14,7 @@ export class UsageLimit {
     private readonly policy: UsageLimitPolicy,
     private quotaAllocation: QuotaAllocation,
     private usageTracking: UsageTracking,
-    private lastResetAt: Date
+    private lastResetAt: Date,
   ) {}
 
   // 工厂方法 - 创建新的使用限制
@@ -37,15 +37,17 @@ export class UsageLimit {
       policy,
       quotaAllocation,
       usageTracking,
-      now
+      now,
     );
 
-    usageLimit.addEvent(new UsageLimitCreatedEvent(
-      limitId.getValue(),
-      ip,
-      policy.dailyLimit,
-      now
-    ));
+    usageLimit.addEvent(
+      new UsageLimitCreatedEvent(
+        limitId.getValue(),
+        ip,
+        policy.dailyLimit,
+        now,
+      ),
+    );
 
     return usageLimit;
   }
@@ -63,7 +65,7 @@ export class UsageLimit {
       UsageLimitPolicy.restore(data.policy),
       QuotaAllocation.restore(data.quotaAllocation),
       UsageTracking.restore(data.usageTracking),
-      new Date(data.lastResetAt)
+      new Date(data.lastResetAt),
     );
   }
 
@@ -74,21 +76,23 @@ export class UsageLimit {
    */
   canUse(): UsageLimitCheckResult {
     this.resetIfNeeded();
-    
+
     const currentUsage = this.usageTracking.getCurrentCount();
     const availableQuota = this.quotaAllocation.getAvailableQuota();
 
     if (currentUsage >= availableQuota) {
       const reason = this.generateLimitReachedReason();
-      this.addEvent(new UsageLimitExceededEvent(
-        this.id.getValue(),
-        this.ip.getValue(),
-        currentUsage,
-        availableQuota,
-        reason,
-        new Date()
-      ));
-      
+      this.addEvent(
+        new UsageLimitExceededEvent(
+          this.id.getValue(),
+          this.ip.getValue(),
+          currentUsage,
+          availableQuota,
+          reason,
+          new Date(),
+        ),
+      );
+
       return UsageLimitCheckResult.blocked(reason);
     }
 
@@ -111,17 +115,20 @@ export class UsageLimit {
     const previousCount = this.usageTracking.getCurrentCount();
     this.usageTracking = this.usageTracking.incrementUsage();
 
-    this.addEvent(new UsageRecordedEvent(
-      this.id.getValue(),
-      this.ip.getValue(),
-      previousCount + 1,
-      this.quotaAllocation.getAvailableQuota(),
-      new Date()
-    ));
+    this.addEvent(
+      new UsageRecordedEvent(
+        this.id.getValue(),
+        this.ip.getValue(),
+        previousCount + 1,
+        this.quotaAllocation.getAvailableQuota(),
+        new Date(),
+      ),
+    );
 
     return UsageRecordResult.success(
       this.usageTracking.getCurrentCount(),
-      this.quotaAllocation.getAvailableQuota() - this.usageTracking.getCurrentCount()
+      this.quotaAllocation.getAvailableQuota() -
+        this.usageTracking.getCurrentCount(),
     );
   }
 
@@ -139,21 +146,31 @@ export class UsageLimit {
     const newAllocation = this.quotaAllocation.addBonus(bonusType, amount);
     this.quotaAllocation = newAllocation;
 
-    this.addEvent(new BonusQuotaAddedEvent(
-      this.id.getValue(),
-      this.ip.getValue(),
-      bonusType,
-      amount,
-      newAllocation.getAvailableQuota(),
-      new Date()
-    ));
+    this.addEvent(
+      new BonusQuotaAddedEvent(
+        this.id.getValue(),
+        this.ip.getValue(),
+        bonusType,
+        amount,
+        newAllocation.getAvailableQuota(),
+        new Date(),
+      ),
+    );
   }
 
   // 检查是否需要重置（每日午夜）
   private resetIfNeeded(): void {
     const now = new Date();
-    const lastMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const lastResetMidnight = new Date(this.lastResetAt.getFullYear(), this.lastResetAt.getMonth(), this.lastResetAt.getDate());
+    const lastMidnight = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
+    const lastResetMidnight = new Date(
+      this.lastResetAt.getFullYear(),
+      this.lastResetAt.getMonth(),
+      this.lastResetAt.getDate(),
+    );
 
     if (lastMidnight > lastResetMidnight) {
       this.performDailyReset();
@@ -164,27 +181,33 @@ export class UsageLimit {
   private performDailyReset(): void {
     const oldUsage = this.usageTracking.getCurrentCount();
     const oldQuota = this.quotaAllocation.getAvailableQuota();
-    
+
     this.usageTracking = UsageTracking.createEmpty();
-    this.quotaAllocation = QuotaAllocation.createDefault(this.policy.dailyLimit);
+    this.quotaAllocation = QuotaAllocation.createDefault(
+      this.policy.dailyLimit,
+    );
     this.lastResetAt = new Date();
 
-    this.addEvent(new DailyUsageResetEvent(
-      this.id.getValue(),
-      this.ip.getValue(),
-      oldUsage,
-      oldQuota,
-      this.policy.dailyLimit,
-      this.lastResetAt
-    ));
+    this.addEvent(
+      new DailyUsageResetEvent(
+        this.id.getValue(),
+        this.ip.getValue(),
+        oldUsage,
+        oldQuota,
+        this.policy.dailyLimit,
+        this.lastResetAt,
+      ),
+    );
   }
 
   private generateLimitReachedReason(): string {
     const current = this.usageTracking.getCurrentCount();
     const available = this.quotaAllocation.getAvailableQuota();
-    
-    return `Daily usage limit reached: ${current}/${available} uses consumed. ` +
-           `Limit resets at midnight UTC. Consider completing questionnaire for bonus quota.`;
+
+    return (
+      `Daily usage limit reached: ${current}/${available} uses consumed. ` +
+      `Limit resets at midnight UTC. Consider completing questionnaire for bonus quota.`
+    );
   }
 
   // 查询方法
@@ -200,7 +223,7 @@ export class UsageLimit {
       availableQuota: this.quotaAllocation.getAvailableQuota(),
       bonusQuota: this.quotaAllocation.getBonusQuota(),
       resetAt: this.getNextResetTime(),
-      lastActivityAt: this.usageTracking.getLastUsageAt()
+      lastActivityAt: this.usageTracking.getLastUsageAt(),
     });
   }
 
@@ -261,7 +284,10 @@ export class UsageLimit {
    * @returns The number value.
    */
   getAvailableQuota(): number {
-    return this.quotaAllocation.getAvailableQuota() - this.usageTracking.getCurrentCount();
+    return (
+      this.quotaAllocation.getAvailableQuota() -
+      this.usageTracking.getCurrentCount()
+    );
   }
 }
 
@@ -279,7 +305,7 @@ export class UsageLimitId extends ValueObject<{ value: string }> {
     const random = Math.random().toString(36).substr(2, 9);
     return new UsageLimitId({ value: `usage_${timestamp}_${random}` });
   }
-  
+
   /**
    * Retrieves value.
    * @returns The string value.
@@ -305,7 +331,8 @@ export class IPAddress extends ValueObject<{ value: string }> {
   }
 
   private static isValidIPv4(ip: string): boolean {
-    const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    const ipv4Regex =
+      /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
     return ipv4Regex.test(ip);
   }
 
@@ -336,7 +363,7 @@ export class UsageLimitPolicy extends ValueObject<{
       dailyLimit: 5,
       bonusEnabled: true,
       maxBonusQuota: 20,
-      resetTimeUTC: 0 // Midnight UTC
+      resetTimeUTC: 0, // Midnight UTC
     });
   }
 
@@ -353,22 +380,30 @@ export class UsageLimitPolicy extends ValueObject<{
    * Performs the daily limit operation.
    * @returns The number value.
    */
-  get dailyLimit(): number { return this.props.dailyLimit; }
+  get dailyLimit(): number {
+    return this.props.dailyLimit;
+  }
   /**
    * Performs the bonus enabled operation.
    * @returns The boolean value.
    */
-  get bonusEnabled(): boolean { return this.props.bonusEnabled; }
+  get bonusEnabled(): boolean {
+    return this.props.bonusEnabled;
+  }
   /**
    * Performs the max bonus quota operation.
    * @returns The number value.
    */
-  get maxBonusQuota(): number { return this.props.maxBonusQuota; }
+  get maxBonusQuota(): number {
+    return this.props.maxBonusQuota;
+  }
   /**
    * Performs the reset time utc operation.
    * @returns The number value.
    */
-  get resetTimeUTC(): number { return this.props.resetTimeUTC; }
+  get resetTimeUTC(): number {
+    return this.props.resetTimeUTC;
+  }
 }
 
 /**
@@ -388,7 +423,7 @@ export class QuotaAllocation extends ValueObject<{
     return new QuotaAllocation({
       baseQuota,
       bonusQuota: 0,
-      bonusBreakdown: new Map()
+      bonusBreakdown: new Map(),
     });
   }
 
@@ -401,7 +436,7 @@ export class QuotaAllocation extends ValueObject<{
     return new QuotaAllocation({
       baseQuota: data.baseQuota,
       bonusQuota: data.bonusQuota,
-      bonusBreakdown: new Map(data.bonusBreakdown || [])
+      bonusBreakdown: new Map(data.bonusBreakdown || []),
     });
   }
 
@@ -419,7 +454,7 @@ export class QuotaAllocation extends ValueObject<{
     return new QuotaAllocation({
       baseQuota: this.props.baseQuota,
       bonusQuota: this.props.bonusQuota + amount,
-      bonusBreakdown: newBreakdown
+      bonusBreakdown: newBreakdown,
     });
   }
 
@@ -464,7 +499,7 @@ export class UsageTracking extends ValueObject<{
     return new UsageTracking({
       currentCount: 0,
       usageHistory: [],
-      lastUsageAt: undefined
+      lastUsageAt: undefined,
     });
   }
 
@@ -477,7 +512,7 @@ export class UsageTracking extends ValueObject<{
     return new UsageTracking({
       currentCount: data.currentCount,
       usageHistory: data.usageHistory.map((r: any) => new UsageRecord(r)),
-      lastUsageAt: data.lastUsageAt ? new Date(data.lastUsageAt) : undefined
+      lastUsageAt: data.lastUsageAt ? new Date(data.lastUsageAt) : undefined,
     });
   }
 
@@ -488,13 +523,13 @@ export class UsageTracking extends ValueObject<{
   incrementUsage(): UsageTracking {
     const record = new UsageRecord({
       timestamp: new Date(),
-      count: this.props.currentCount + 1
+      count: this.props.currentCount + 1,
     });
 
     return new UsageTracking({
       currentCount: this.props.currentCount + 1,
       usageHistory: [...this.props.usageHistory, record],
-      lastUsageAt: new Date()
+      lastUsageAt: new Date(),
     });
   }
 
@@ -534,12 +569,16 @@ export class UsageRecord extends ValueObject<{
    * Performs the timestamp operation.
    * @returns The Date.
    */
-  get timestamp(): Date { return this.props.timestamp; }
+  get timestamp(): Date {
+    return this.props.timestamp;
+  }
   /**
    * Performs the count operation.
    * @returns The number value.
    */
-  get count(): number { return this.props.count; }
+  get count(): number {
+    return this.props.count;
+  }
 }
 
 // 结果类
@@ -550,7 +589,7 @@ export class UsageLimitCheckResult {
   private constructor(
     private readonly allowed: boolean,
     private readonly remainingQuota?: number,
-    private readonly blockReason?: string
+    private readonly blockReason?: string,
   ) {}
 
   /**
@@ -604,7 +643,7 @@ export class UsageRecordResult {
     private readonly success: boolean,
     private readonly currentUsage?: number,
     private readonly remainingQuota?: number,
-    private readonly error?: string
+    private readonly error?: string,
   ) {}
 
   /**
@@ -613,7 +652,10 @@ export class UsageRecordResult {
    * @param remainingQuota - The remaining quota.
    * @returns The UsageRecordResult.
    */
-  static success(currentUsage: number, remainingQuota: number): UsageRecordResult {
+  static success(
+    currentUsage: number,
+    remainingQuota: number,
+  ): UsageRecordResult {
     return new UsageRecordResult(true, currentUsage, remainingQuota);
   }
 
@@ -675,44 +717,60 @@ export class UsageStatistics extends ValueObject<{
    * Performs the ip operation.
    * @returns The string value.
    */
-  get ip(): string { return this.props.ip; }
+  get ip(): string {
+    return this.props.ip;
+  }
   /**
    * Performs the current usage operation.
    * @returns The number value.
    */
-  get currentUsage(): number { return this.props.currentUsage; }
+  get currentUsage(): number {
+    return this.props.currentUsage;
+  }
   /**
    * Performs the daily limit operation.
    * @returns The number value.
    */
-  get dailyLimit(): number { return this.props.dailyLimit; }
+  get dailyLimit(): number {
+    return this.props.dailyLimit;
+  }
   /**
    * Performs the available quota operation.
    * @returns The number value.
    */
-  get availableQuota(): number { return this.props.availableQuota; }
+  get availableQuota(): number {
+    return this.props.availableQuota;
+  }
   /**
    * Performs the bonus quota operation.
    * @returns The number value.
    */
-  get bonusQuota(): number { return this.props.bonusQuota; }
+  get bonusQuota(): number {
+    return this.props.bonusQuota;
+  }
   /**
    * Performs the reset at operation.
    * @returns The Date.
    */
-  get resetAt(): Date { return this.props.resetAt; }
+  get resetAt(): Date {
+    return this.props.resetAt;
+  }
   /**
    * Performs the last activity at operation.
    * @returns The Date | undefined.
    */
-  get lastActivityAt(): Date | undefined { return this.props.lastActivityAt; }
-  
+  get lastActivityAt(): Date | undefined {
+    return this.props.lastActivityAt;
+  }
+
   /**
    * Retrieves usage percentage.
    * @returns The number value.
    */
   getUsagePercentage(): number {
-    return Math.round((this.props.currentUsage / this.props.availableQuota) * 100);
+    return Math.round(
+      (this.props.currentUsage / this.props.availableQuota) * 100,
+    );
   }
 }
 
@@ -721,7 +779,7 @@ export enum BonusType {
   QUESTIONNAIRE = 'questionnaire',
   PAYMENT = 'payment',
   REFERRAL = 'referral',
-  PROMOTION = 'promotion'
+  PROMOTION = 'promotion',
 }
 
 /**
@@ -752,7 +810,7 @@ export class UsageLimitCreatedEvent implements DomainEvent {
     public readonly usageLimitId: string,
     public readonly ip: string,
     public readonly dailyLimit: number,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -775,7 +833,7 @@ export class UsageLimitExceededEvent implements DomainEvent {
     public readonly currentUsage: number,
     public readonly availableQuota: number,
     public readonly reason: string,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -796,7 +854,7 @@ export class UsageRecordedEvent implements DomainEvent {
     public readonly ip: string,
     public readonly newUsageCount: number,
     public readonly remainingQuota: number,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -819,7 +877,7 @@ export class BonusQuotaAddedEvent implements DomainEvent {
     public readonly bonusType: BonusType,
     public readonly bonusAmount: number,
     public readonly newTotalQuota: number,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }
 
@@ -842,6 +900,6 @@ export class DailyUsageResetEvent implements DomainEvent {
     public readonly previousUsage: number,
     public readonly previousQuota: number,
     public readonly newDailyLimit: number,
-    public readonly occurredAt: Date
+    public readonly occurredAt: Date,
   ) {}
 }

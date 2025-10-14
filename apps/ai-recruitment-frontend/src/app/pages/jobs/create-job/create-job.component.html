@@ -8,9 +8,9 @@
         (click)="onCancel()"
         [disabled]="creating$ | async"
       >
-        ← 返回
+        ← {{ 'common.back' | translate }}
       </button>
-      <h2 class="page-title">创建新岗位</h2>
+      <h2 class="page-title">{{ 'jobs.createJob.title' | translate }}</h2>
     </div>
   </div>
 
@@ -18,7 +18,12 @@
   <div *ngIf="error$ | async as error" class="alert alert-danger mb-3">
     <div class="d-flex justify-content-between align-items-center">
       <span>{{ error }}</span>
-      <button type="button" class="btn-close" (click)="onClearError()">
+      <button
+        type="button"
+        class="btn-close"
+        (click)="onClearError()"
+        [attr.aria-label]="'common.close' | translate"
+      >
         ×
       </button>
     </div>
@@ -27,60 +32,64 @@
   <!-- Create Job Form -->
   <div class="create-job-form card">
     <div class="card-header">
-      <h3>岗位信息</h3>
+      <h3>{{ 'jobs.createJob.information' | translate }}</h3>
     </div>
     <div class="card-body">
       <form [formGroup]="createJobForm" (ngSubmit)="onSubmit()" novalidate>
         <!-- Job Title -->
         <div class="form-group">
           <label for="jobTitle" class="form-label">
-            岗位名称 <span class="text-danger">*</span>
+            {{ 'jobs.createJob.jobTitle.label' | translate }} <span class="text-danger">*</span>
           </label>
           <input
             type="text"
             id="jobTitle"
             class="form-control"
             formControlName="jobTitle"
-            [class.is-invalid]="getFieldError('jobTitle')"
-            placeholder="请输入岗位名称，如：高级Python开发工程师"
+            [class.is-invalid]="hasFieldError('jobTitle')"
+            [placeholder]="'jobs.createJob.jobTitle.placeholder' | translate"
             maxlength="100"
           />
-          <div *ngIf="getFieldError('jobTitle')" class="invalid-feedback">
-            {{ getFieldError('jobTitle') }}
-          </div>
+          <ng-container *ngIf="getFieldError('jobTitle') as jobTitleError">
+            <div class="invalid-feedback">
+              {{ jobTitleError.key | translate: jobTitleError.params }}
+            </div>
+          </ng-container>
           <div class="form-text">
-            建议使用清晰、具体的岗位名称，如“高级Java开发工程师”、“产品经理”等。
+            {{ 'jobs.createJob.jobTitle.hint' | translate }}
           </div>
         </div>
 
         <!-- Job Description -->
         <div class="form-group">
           <label for="jdText" class="form-label">
-            岗位描述 (JD) <span class="text-danger">*</span>
+            {{ 'jobs.createJob.jobDescription.label' | translate }} <span class="text-danger">*</span>
           </label>
           <textarea
             id="jdText"
             class="form-control"
             formControlName="jdText"
-            [class.is-invalid]="getFieldError('jdText')"
-            placeholder="请输入详细的岗位描述，包括职责、要求、技能等..."
+            [class.is-invalid]="hasFieldError('jdText')"
+            [placeholder]="'jobs.createJob.jobDescription.placeholder' | translate"
             rows="12"
             maxlength="5000"
           ></textarea>
-          <div *ngIf="getFieldError('jdText')" class="invalid-feedback">
-            {{ getFieldError('jdText') }}
-          </div>
+          <ng-container *ngIf="getFieldError('jdText') as jdTextError">
+            <div class="invalid-feedback">
+              {{ jdTextError.key | translate: jdTextError.params }}
+            </div>
+          </ng-container>
           <div class="form-text">
-            <div class="mb-2">请包含以下关键信息以提高匹配准确性：</div>
+            <div class="mb-2">{{ 'jobs.createJob.jobDescription.hint' | translate }}</div>
             <ul class="requirements-list">
-              <li><strong>技能要求</strong>：编程语言、框架、工具等</li>
-              <li><strong>工作经验</strong>：年限要求、相关经验</li>
-              <li><strong>学历要求</strong>：最低学历、专业要求</li>
-              <li><strong>其他要求</strong>：软技能、特殊要求等</li>
+              <li>{{ 'jobs.createJob.jobDescription.requirements.skills' | translate }}</li>
+              <li>{{ 'jobs.createJob.jobDescription.requirements.experience' | translate }}</li>
+              <li>{{ 'jobs.createJob.jobDescription.requirements.education' | translate }}</li>
+              <li>{{ 'jobs.createJob.jobDescription.requirements.other' | translate }}</li>
             </ul>
           </div>
           <div class="character-count">
-            {{ jdText?.value?.length || 0 }} / 5000 字符
+            {{ jdText?.value?.length || 0 }} / 5000 {{ 'common.characters' | translate }}
           </div>
         </div>
 
@@ -92,7 +101,7 @@
             (click)="onCancel()"
             [disabled]="creating$ | async"
           >
-            取消
+            {{ 'jobs.createJob.actions.cancel' | translate }}
           </button>
           <button
             type="submit"
@@ -100,10 +109,61 @@
             [disabled]="!createJobForm.valid || (creating$ | async)"
           >
             <span *ngIf="creating$ | async" class="spinner"></span>
-            {{ (creating$ | async) ? '创建中...' : '创建岗位' }}
+            {{ (creating$ | async) ? ('jobs.createJob.actions.creating' | translate) : ('jobs.createJob.actions.create' | translate) }}
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Progress Tracking Section -->
+  <div *ngIf="shouldShowProgress()" class="progress-tracking-container card">
+    <div class="card-header">
+      <h3>{{ 'jobs.createJob.progress.title' | translate }}</h3>
+    </div>
+    <div class="card-body">
+      <!-- Progress Bar -->
+      <div class="progress-section">
+        <div class="progress-header">
+          <span class="progress-label">{{ getCurrentStep() }}</span>
+          <span class="progress-percentage">{{ getProgressPercentage() }}%</span>
+        </div>
+        <div class="progress-bar-container">
+          <div 
+            class="progress-bar" 
+            [style.width.%]="getProgressPercentage()"
+            [attr.aria-valuenow]="getProgressPercentage()"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            role="progressbar"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Status Message -->
+      <div class="status-section">
+        <div class="status-message">
+          <span class="status-icon">🔄</span>
+          <span class="status-text">{{ getProgressMessage() }}</span>
+        </div>
+        
+        <!-- Estimated Time Remaining -->
+        <div *ngIf="getEstimatedTimeRemaining()" class="time-remaining">
+          <span class="time-label">{{ 'jobs.createJob.progress.estimatedTimeRemaining' | translate }}</span>
+          <span class="time-value">{{ getEstimatedTimeRemaining() }}</span>
+        </div>
+      </div>
+
+      <!-- Progress Steps Indicator -->
+      <div class="steps-indicator">
+        <div class="step" 
+             *ngFor="let step of getProgressSteps(); let i = index"
+             [class.completed]="step.completed"
+             [class.active]="step.active">
+          <div class="step-number">{{ i + 1 }}</div>
+          <div class="step-label">{{ step.label }}</div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

@@ -619,7 +619,11 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
       return [] as Array<{ ip: string; lockedUntil?: number; reason?: string }>;
     }
     const keys = await this.redis!.keys('security_lock:*');
-    const lockedIPs: Array<{ ip: string; lockedUntil?: number; [k: string]: any }> = [];
+    const lockedIPs: Array<{
+      ip: string;
+      lockedUntil?: number;
+      [k: string]: any;
+    }> = [];
 
     for (const key of keys) {
       const lockInfo = await this.redis!.get(key);

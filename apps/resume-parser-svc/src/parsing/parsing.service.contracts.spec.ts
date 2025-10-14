@@ -31,7 +31,9 @@ jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => ({
           await fn();
           throw new Error(`Expected contract violation: ${errorMessage}`);
         } catch (error: any) {
-          if (error.message === `Expected contract violation: ${errorMessage}`) {
+          if (
+            error.message === `Expected contract violation: ${errorMessage}`
+          ) {
             throw error;
           }
           // Contract violation occurred as expected
@@ -39,7 +41,9 @@ jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => ({
       },
     ),
   },
-  WithCircuitBreaker: () => (_target: any, _key?: string, descriptor?: PropertyDescriptor) => descriptor || ({} as any),
+  WithCircuitBreaker:
+    () => (_target: any, _key?: string, descriptor?: PropertyDescriptor) =>
+      descriptor || ({} as any),
 }));
 
 /**
@@ -210,7 +214,8 @@ describe('ParsingService - Contract Validation', () => {
 
       // Act & Assert
       await ContractTestUtils.expectAsyncContractViolation(
-        () => (service as any).parseResumeFile(validBuffer, emptyFileName, userId),
+        () =>
+          (service as any).parseResumeFile(validBuffer, emptyFileName, userId),
         'PRE',
         'File name must be non-empty string',
       );
@@ -232,7 +237,8 @@ describe('ParsingService - Contract Validation', () => {
 
       // Act & Assert
       await ContractTestUtils.expectAsyncContractViolation(
-        () => (service as any).parseResumeFile(validBuffer, fileName, emptyUserId),
+        () =>
+          (service as any).parseResumeFile(validBuffer, fileName, emptyUserId),
         'PRE',
         'User ID must be non-empty string',
       );
@@ -254,7 +260,8 @@ describe('ParsingService - Contract Validation', () => {
 
       // Act & Assert
       await ContractTestUtils.expectAsyncContractViolation(
-        () => (service as any).parseResumeFile(oversizedBuffer, fileName, userId),
+        () =>
+          (service as any).parseResumeFile(oversizedBuffer, fileName, userId),
         'PRE',
         'File size must be within acceptable limits',
       );
@@ -276,7 +283,12 @@ describe('ParsingService - Contract Validation', () => {
 
       // Act & Assert
       await ContractTestUtils.expectAsyncContractViolation(
-        () => (service as any).parseResumeFile(validBuffer, whitespaceFileName, userId),
+        () =>
+          (service as any).parseResumeFile(
+            validBuffer,
+            whitespaceFileName,
+            userId,
+          ),
         'PRE',
         'File name must be non-empty string',
       );

@@ -32,7 +32,7 @@ export class RetryUtility {
    */
   static async withExponentialBackoff<T>(
     operation: () => Promise<T>,
-    options: Partial<RetryOptions> = {}
+    options: Partial<RetryOptions> = {},
   ): Promise<T> {
     const config: RetryOptions = {
       maxAttempts: 3,
@@ -41,23 +41,25 @@ export class RetryUtility {
       backoffMultiplier: 2,
       jitterMs: 1000,
       retryIf: (error) => this.isRetriableError(error),
-      ...options
+      ...options,
     };
 
     let lastError: Error | unknown;
-    
+
     for (let attempt = 1; attempt <= config.maxAttempts; attempt++) {
       try {
-        this.logger.debug(`Attempting operation (attempt ${attempt}/${config.maxAttempts})`);
+        this.logger.debug(
+          `Attempting operation (attempt ${attempt}/${config.maxAttempts})`,
+        );
         return await operation();
       } catch (error) {
         lastError = error;
-        
+
         // Don't retry on last attempt or if error is not retriable
         if (attempt === config.maxAttempts || !config.retryIf!(error)) {
           this.logger.error(
             `Operation failed after ${attempt} attempts: ${error instanceof Error ? error.message : String(error)}`,
-            error instanceof Error ? error.stack : undefined
+            error instanceof Error ? error.stack : undefined,
           );
           throw error;
         }
@@ -65,14 +67,14 @@ export class RetryUtility {
         // Calculate delay with exponential backoff and jitter
         const exponentialDelay = Math.min(
           config.baseDelayMs * Math.pow(config.backoffMultiplier, attempt - 1),
-          config.maxDelayMs
+          config.maxDelayMs,
         );
-        
+
         const jitter = Math.random() * config.jitterMs;
         const totalDelay = exponentialDelay + jitter;
 
         this.logger.warn(
-          `Operation failed (attempt ${attempt}), retrying in ${totalDelay.toFixed(0)}ms: ${error instanceof Error ? error.message : String(error)}`
+          `Operation failed (attempt ${attempt}), retrying in ${totalDelay.toFixed(0)}ms: ${error instanceof Error ? error.message : String(error)}`,
         );
 
         await this.delay(totalDelay);
@@ -87,40 +89,53 @@ export class RetryUtility {
    */
   private static isRetriableError(error: Error | unknown): boolean {
     // Type guard to check if error has specific properties
-    const hasProperty = (obj: unknown, prop: string): obj is Record<string, unknown> => {
+    const hasProperty = (
+      obj: unknown,
+      prop: string,
+    ): obj is Record<string, unknown> => {
       return obj !== null && typeof obj === 'object' && prop in obj;
     };
 
     // Network errors
-    if (hasProperty(error, 'code') && (
-      error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT'
-    )) {
+    if (
+      hasProperty(error, 'code') &&
+      (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT')
+    ) {
       return true;
     }
 
     // HTTP errors that are typically retriable
-    if (hasProperty(error, 'status') && typeof error.status === 'number' && (
-      error.status === 408 || // Request Timeout
-      error.status === 429 || // Too Many Requests
-      error.status === 502 || // Bad Gateway
-      error.status === 503 || // Service Unavailable
-      error.status === 504    // Gateway Timeout
-    )) {
+    if (
+      hasProperty(error, 'status') &&
+      typeof error.status === 'number' &&
+      (error.status === 408 || // Request Timeout
+        error.status === 429 || // Too Many Requests
+        error.status === 502 || // Bad Gateway
+        error.status === 503 || // Service Unavailable
+        error.status === 504) // Gateway Timeout
+    ) {
       return true;
     }
 
     // Database connection errors
-    if (hasProperty(error, 'message') && typeof error.message === 'string' && (
-      error.message.includes('connection') ||
-      error.message.includes('timeout') ||
-      error.message.includes('ENOTFOUND')
-    )) {
+    if (
+      hasProperty(error, 'message') &&
+      typeof error.message === 'string' &&
+      (error.message.includes('connection') ||
+        error.message.includes('timeout') ||
+        error.message.includes('ENOTFOUND'))
+    ) {
       return true;
     }
 
     // External API errors
-    if (hasProperty(error, 'name') && error.name === 'GoogleGenerativeAIError' && 
-        hasProperty(error, 'status') && typeof error.status === 'number' && error.status >= 500) {
+    if (
+      hasProperty(error, 'name') &&
+      error.name === 'GoogleGenerativeAIError' &&
+      hasProperty(error, 'status') &&
+      typeof error.status === 'number' &&
+      error.status >= 500
+    ) {
       return true;
     }
 
@@ -131,7 +146,7 @@ export class RetryUtility {
    * Simple delay utility
    */
   private static delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
@@ -148,7 +163,7 @@ export class CircuitBreaker {
 
   private constructor(
     private readonly name: string,
-    private readonly options: CircuitBreakerOptions
+    private readonly options: CircuitBreakerOptions,
   ) {}
 
   /**
@@ -157,7 +172,10 @@ export class CircuitBreaker {
    * @param options - The options.
    * @returns The CircuitBreaker.
    */
-  static getInstance(name: string, options: CircuitBreakerOptions): CircuitBreaker {
+  static getInstance(
+    name: string,
+    options: CircuitBreakerOptions,
+  ): CircuitBreaker {
     if (!this.instances.has(name)) {
       this.instances.set(name, new CircuitBreaker(name, options));
     }
@@ -181,12 +199,12 @@ export class CircuitBreaker {
 
     try {
       const result = await operation();
-      
+
       if (this.state === 'HALF_OPEN') {
         this.reset();
         // Circuit breaker moving to CLOSED state
       }
-      
+
       return result;
     } catch (error) {
       this.recordFailure();
@@ -230,13 +248,17 @@ export class CircuitBreaker {
  * Decorator for automatic retry with circuit breaker
  */
 export function Retry(options: Partial<RetryOptions> = {}) {
-  return function (_target: unknown, _propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    _target: unknown,
+    _propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: unknown[]) {
       return RetryUtility.withExponentialBackoff(
         () => originalMethod.apply(this, args),
-        options
+        options,
       );
     };
 
@@ -252,12 +274,19 @@ export function WithCircuitBreaker(
   options: CircuitBreakerOptions = {
     failureThreshold: 5,
     recoveryTimeout: 30000,
-    monitoringPeriod: 60000
-  }
+    monitoringPeriod: 60000,
+  },
 ) {
-  return function (target: { constructor: { name: string } }, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: { constructor: { name: string } },
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const originalMethod = descriptor.value;
-    const circuitBreaker = CircuitBreaker.getInstance(`${target.constructor.name}.${propertyKey}.${name}`, options);
+    const circuitBreaker = CircuitBreaker.getInstance(
+      `${target.constructor.name}.${propertyKey}.${name}`,
+      options,
+    );
 
     descriptor.value = async function (...args: unknown[]) {
       return circuitBreaker.execute(() => originalMethod.apply(this, args));

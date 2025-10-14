@@ -1,16 +1,23 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 
 export enum UserRole {
   ADMIN = 'admin',
   HR_MANAGER = 'hr_manager',
   RECRUITER = 'recruiter',
-  VIEWER = 'viewer'
+  VIEWER = 'viewer',
 }
 
 export enum UserStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
-  SUSPENDED = 'suspended'
+  SUSPENDED = 'suspended',
 }
 
 /**
@@ -71,7 +78,7 @@ export class UserDto {
   status!: UserStatus;
   createdAt!: Date;
   updatedAt!: Date;
-  
+
   // Computed property
   /**
    * Performs the name operation.

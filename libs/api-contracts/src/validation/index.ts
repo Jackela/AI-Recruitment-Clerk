@@ -5,5 +5,5 @@
 export {
   ContractValidator,
   type ValidationResult,
-  type ContractComparisonResult
+  type ContractComparisonResult,
 } from './contract.validator.js';

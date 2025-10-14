@@ -50,11 +50,16 @@ export class AppService
 
     try {
       // Initialize GridFS connections (already handled by GridFsService.onModuleInit)
-      if (this.gridFsService && typeof (this.gridFsService as any).healthCheck === 'function') {
+      if (
+        this.gridFsService &&
+        typeof (this.gridFsService as any).healthCheck === 'function'
+      ) {
         const gridFsHealth = await (this.gridFsService as any).healthCheck();
         this.logger.log(`GridFS service initialized: ${gridFsHealth.status}`);
       } else {
-        this.logger.log('GridFS service initialized (healthCheck unavailable in this environment)');
+        this.logger.log(
+          'GridFS service initialized (healthCheck unavailable in this environment)',
+        );
       }
 
       // Initialize NATS subscriptions (already handled by NatsClient.onModuleInit)
@@ -96,15 +101,23 @@ export class AppService
     try {
       // Subscribe to resume processing events through shared NATS service
       // Using ResumeParserNatsService to handle resume submitted events
-      if (this.natsService && typeof (this.natsService as any).subscribeToResumeSubmissions === 'function') {
-        await (this.natsService as any).subscribeToResumeSubmissions(async (event: any) => {
-          // Handle resume submission through parsing service
-          if (this.parsingService && event) {
-            await this.parsingService.handleResumeSubmitted(event);
-          }
-        });
+      if (
+        this.natsService &&
+        typeof (this.natsService as any).subscribeToResumeSubmissions ===
+          'function'
+      ) {
+        await (this.natsService as any).subscribeToResumeSubmissions(
+          async (event: any) => {
+            // Handle resume submission through parsing service
+            if (this.parsingService && event) {
+              await this.parsingService.handleResumeSubmitted(event);
+            }
+          },
+        );
       } else {
-        this.logger.log('NATS subscription skipped (subscribeToResumeSubmissions unavailable)');
+        this.logger.log(
+          'NATS subscription skipped (subscribeToResumeSubmissions unavailable)',
+        );
       }
 
       this.logger.log('Event subscriptions set up successfully');

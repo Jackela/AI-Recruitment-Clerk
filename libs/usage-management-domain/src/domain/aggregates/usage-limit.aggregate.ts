@@ -12,7 +12,10 @@ import { UsageLimitExceededEvent } from '../domain-events/usage-limit-exceeded.e
 import { UsageRecordedEvent } from '../domain-events/usage-recorded.event.js';
 import { BonusQuotaAddedEvent } from '../domain-events/bonus-quota-added.event.js';
 import { DailyUsageResetEvent } from '../domain-events/daily-usage-reset.event.js';
-import { BonusType, UsageLimitData } from '../../application/dtos/usage-limit.dto.js';
+import {
+  BonusType,
+  UsageLimitData,
+} from '../../application/dtos/usage-limit.dto.js';
 
 // UsageLimit聚合根 - 管理IP使用限制和配额分配
 /**
@@ -27,7 +30,7 @@ export class UsageLimit {
     private readonly policy: UsageLimitPolicy,
     private quotaAllocation: QuotaAllocation,
     private usageTracking: UsageTracking,
-    private lastResetAt: Date
+    private lastResetAt: Date,
   ) {}
 
   // 工厂方法 - 创建新的使用限制
@@ -50,15 +53,17 @@ export class UsageLimit {
       policy,
       quotaAllocation,
       usageTracking,
-      now
+      now,
     );
 
-    usageLimit.addEvent(new UsageLimitCreatedEvent(
-      limitId.getValue(),
-      ip,
-      policy.dailyLimit,
-      now
-    ));
+    usageLimit.addEvent(
+      new UsageLimitCreatedEvent(
+        limitId.getValue(),
+        ip,
+        policy.dailyLimit,
+        now,
+      ),
+    );
 
     return usageLimit;
   }
@@ -76,7 +81,7 @@ export class UsageLimit {
       UsageLimitPolicy.restore(data.policy),
       QuotaAllocation.restore(data.quotaAllocation),
       UsageTracking.restore(data.usageTracking),
-      new Date(data.lastResetAt)
+      new Date(data.lastResetAt),
     );
   }
 
@@ -87,21 +92,23 @@ export class UsageLimit {
    */
   canUse(): UsageLimitCheckResult {
     this.resetIfNeeded();
-    
+
     const currentUsage = this.usageTracking.getCurrentCount();
     const availableQuota = this.quotaAllocation.getAvailableQuota();
 
     if (currentUsage >= availableQuota) {
       const reason = this.generateLimitReachedReason();
-      this.addEvent(new UsageLimitExceededEvent(
-        this.id.getValue(),
-        this.ip.getValue(),
-        currentUsage,
-        availableQuota,
-        reason,
-        new Date()
-      ));
-      
+      this.addEvent(
+        new UsageLimitExceededEvent(
+          this.id.getValue(),
+          this.ip.getValue(),
+          currentUsage,
+          availableQuota,
+          reason,
+          new Date(),
+        ),
+      );
+
       return UsageLimitCheckResult.blocked(reason);
     }
 
@@ -124,17 +131,20 @@ export class UsageLimit {
     const previousCount = this.usageTracking.getCurrentCount();
     this.usageTracking = this.usageTracking.incrementUsage();
 
-    this.addEvent(new UsageRecordedEvent(
-      this.id.getValue(),
-      this.ip.getValue(),
-      previousCount + 1,
-      this.quotaAllocation.getAvailableQuota(),
-      new Date()
-    ));
+    this.addEvent(
+      new UsageRecordedEvent(
+        this.id.getValue(),
+        this.ip.getValue(),
+        previousCount + 1,
+        this.quotaAllocation.getAvailableQuota(),
+        new Date(),
+      ),
+    );
 
     return UsageRecordResult.success(
       this.usageTracking.getCurrentCount(),
-      this.quotaAllocation.getAvailableQuota() - this.usageTracking.getCurrentCount()
+      this.quotaAllocation.getAvailableQuota() -
+        this.usageTracking.getCurrentCount(),
     );
   }
 
@@ -152,21 +162,31 @@ export class UsageLimit {
     const newAllocation = this.quotaAllocation.addBonus(bonusType, amount);
     this.quotaAllocation = newAllocation;
 
-    this.addEvent(new BonusQuotaAddedEvent(
-      this.id.getValue(),
-      this.ip.getValue(),
-      bonusType,
-      amount,
-      newAllocation.getAvailableQuota(),
-      new Date()
-    ));
+    this.addEvent(
+      new BonusQuotaAddedEvent(
+        this.id.getValue(),
+        this.ip.getValue(),
+        bonusType,
+        amount,
+        newAllocation.getAvailableQuota(),
+        new Date(),
+      ),
+    );
   }
 
   // 检查是否需要重置（每日午夜）
   private resetIfNeeded(): void {
     const now = new Date();
-    const lastMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const lastResetMidnight = new Date(this.lastResetAt.getFullYear(), this.lastResetAt.getMonth(), this.lastResetAt.getDate());
+    const lastMidnight = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
+    const lastResetMidnight = new Date(
+      this.lastResetAt.getFullYear(),
+      this.lastResetAt.getMonth(),
+      this.lastResetAt.getDate(),
+    );
 
     if (lastMidnight > lastResetMidnight) {
       this.performDailyReset();
@@ -177,27 +197,33 @@ export class UsageLimit {
   private performDailyReset(): void {
     const oldUsage = this.usageTracking.getCurrentCount();
     const oldQuota = this.quotaAllocation.getAvailableQuota();
-    
+
     this.usageTracking = UsageTracking.createEmpty();
-    this.quotaAllocation = QuotaAllocation.createDefault(this.policy.dailyLimit);
+    this.quotaAllocation = QuotaAllocation.createDefault(
+      this.policy.dailyLimit,
+    );
     this.lastResetAt = new Date();
 
-    this.addEvent(new DailyUsageResetEvent(
-      this.id.getValue(),
-      this.ip.getValue(),
-      oldUsage,
-      oldQuota,
-      this.policy.dailyLimit,
-      this.lastResetAt
-    ));
+    this.addEvent(
+      new DailyUsageResetEvent(
+        this.id.getValue(),
+        this.ip.getValue(),
+        oldUsage,
+        oldQuota,
+        this.policy.dailyLimit,
+        this.lastResetAt,
+      ),
+    );
   }
 
   private generateLimitReachedReason(): string {
     const current = this.usageTracking.getCurrentCount();
     const available = this.quotaAllocation.getAvailableQuota();
-    
-    return `Daily usage limit reached: ${current}/${available} uses consumed. ` +
-           `Limit resets at midnight UTC. Consider completing questionnaire for bonus quota.`;
+
+    return (
+      `Daily usage limit reached: ${current}/${available} uses consumed. ` +
+      `Limit resets at midnight UTC. Consider completing questionnaire for bonus quota.`
+    );
   }
 
   // 查询方法
@@ -213,7 +239,7 @@ export class UsageLimit {
       availableQuota: this.quotaAllocation.getAvailableQuota(),
       bonusQuota: this.quotaAllocation.getBonusQuota(),
       resetAt: this.getNextResetTime(),
-      lastActivityAt: this.usageTracking.getLastUsageAt()
+      lastActivityAt: this.usageTracking.getLastUsageAt(),
     });
   }
 
@@ -274,6 +300,9 @@ export class UsageLimit {
    * @returns The number value.
    */
   getAvailableQuota(): number {
-    return this.quotaAllocation.getAvailableQuota() - this.usageTracking.getCurrentCount();
+    return (
+      this.quotaAllocation.getAvailableQuota() -
+      this.usageTracking.getCurrentCount()
+    );
   }
 }

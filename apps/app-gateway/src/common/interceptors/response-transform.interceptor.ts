@@ -22,7 +22,12 @@ export class ResponseTransformInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((data: any) => {
         // If controller already returns a standardized shape, pass through
-        if (data && typeof data === 'object' && 'success' in data && 'data' in data) {
+        if (
+          data &&
+          typeof data === 'object' &&
+          'success' in data &&
+          'data' in data
+        ) {
           return data;
         }
 
@@ -35,4 +40,3 @@ export class ResponseTransformInterceptor implements NestInterceptor {
     );
   }
 }
-

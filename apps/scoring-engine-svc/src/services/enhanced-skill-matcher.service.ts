@@ -171,16 +171,22 @@ export class EnhancedSkillMatcherService {
     // 2. Try synonym/fuzzy match from taxonomy
     for (const resumeSkill of resumeSkills) {
       const normalizedResume = SkillsTaxonomy.normalizeSkill(resumeSkill);
-      const aliasMap: Record<string, string> = { js: 'javascript', reactjs: 'react' };
+      const aliasMap: Record<string, string> = {
+        js: 'javascript',
+        reactjs: 'react',
+      };
       const alias = aliasMap[normalizedResume];
       const fuzzyFromJob = SkillsTaxonomy.fuzzyMatchSkill(jobSkill.name, 0.8);
       const fuzzyFromResume = SkillsTaxonomy.fuzzyMatchSkill(resumeSkill, 0.8);
       if (
         (fuzzyFromJob && fuzzyFromJob === normalizedResume) ||
         (fuzzyFromResume && fuzzyFromResume === normalizedJobSkill) ||
-        (normalizedResume.includes(normalizedJobSkill) && normalizedResume !== normalizedJobSkill) ||
-        (normalizedJobSkill.includes(normalizedResume) && normalizedResume !== normalizedJobSkill) ||
-        (normalizedResume === normalizedJobSkill && resumeSkill.toLowerCase() !== jobSkill.name.toLowerCase()) ||
+        (normalizedResume.includes(normalizedJobSkill) &&
+          normalizedResume !== normalizedJobSkill) ||
+        (normalizedJobSkill.includes(normalizedResume) &&
+          normalizedResume !== normalizedJobSkill) ||
+        (normalizedResume === normalizedJobSkill &&
+          resumeSkill.toLowerCase() !== jobSkill.name.toLowerCase()) ||
         (alias && alias === normalizedJobSkill)
       ) {
         return {

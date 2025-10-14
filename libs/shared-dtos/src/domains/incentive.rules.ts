@@ -1,12 +1,12 @@
-import { 
-  Incentive, 
-  IncentiveReward, 
-  IncentiveStatus, 
-  Currency, 
-  RewardType, 
+import {
+  Incentive,
+  IncentiveReward,
+  IncentiveStatus,
+  Currency,
+  RewardType,
   TriggerType,
   PaymentMethod,
-  ContactInfo 
+  ContactInfo,
 } from './incentive.dto';
 
 /**
@@ -15,33 +15,33 @@ import {
 export class IncentiveRules {
   // 核心业务规则常量 - 红包激励系统
   static readonly BASE_QUESTIONNAIRE_REWARD = 5; // 5元基础奖励
-  static readonly HIGH_QUALITY_BONUS = 3;        // 高质量额外奖励（8元总计）
-  static readonly BASIC_QUALITY_PENALTY = 2;     // 基础质量惩罚（3元总计）
-  static readonly MIN_QUALITY_SCORE = 50;        // 最低获得奖励分数
-  static readonly HIGH_QUALITY_THRESHOLD = 90;   // 高质量阈值
+  static readonly HIGH_QUALITY_BONUS = 3; // 高质量额外奖励（8元总计）
+  static readonly BASIC_QUALITY_PENALTY = 2; // 基础质量惩罚（3元总计）
+  static readonly MIN_QUALITY_SCORE = 50; // 最低获得奖励分数
+  static readonly HIGH_QUALITY_THRESHOLD = 90; // 高质量阈值
   static readonly STANDARD_QUALITY_THRESHOLD = 70; // 标准质量阈值
-  
+
   // 推荐奖励常量
-  static readonly REFERRAL_REWARD_AMOUNT = 3;    // 推荐奖励3元
-  
+  static readonly REFERRAL_REWARD_AMOUNT = 3; // 推荐奖励3元
+
   // 系统限制常量
-  static readonly MAX_REWARD_AMOUNT = 100;       // 单笔最大奖励100元
-  static readonly MIN_REWARD_AMOUNT = 1;         // 单笔最小奖励1元
-  static readonly INCENTIVE_EXPIRY_DAYS = 30;    // 激励过期时间30天
+  static readonly MAX_REWARD_AMOUNT = 100; // 单笔最大奖励100元
+  static readonly MIN_REWARD_AMOUNT = 1; // 单笔最小奖励1元
+  static readonly INCENTIVE_EXPIRY_DAYS = 30; // 激励过期时间30天
   static readonly MAX_DAILY_INCENTIVES_PER_IP = 3; // 每IP每日最大激励数量
-  
+
   // 支付相关常量
-  static readonly MIN_PAYOUT_AMOUNT = 5;         // 最小提现金额5元
+  static readonly MIN_PAYOUT_AMOUNT = 5; // 最小提现金额5元
   static readonly PAYMENT_PROCESSING_TIMEOUT_MINUTES = 30; // 支付处理超时30分钟
 
   /**
    * 验证激励创建的资格条件
    */
   static canCreateIncentive(
-    ip: string, 
-    triggerType: TriggerType, 
+    ip: string,
+    triggerType: TriggerType,
     triggerData: any,
-    existingIncentivesToday?: number
+    existingIncentivesToday?: number,
   ): IncentiveEligibilityResult {
     const errors: string[] = [];
 
@@ -53,7 +53,9 @@ export class IncentiveRules {
     // 验证每日激励限制
     const todayIncentives = existingIncentivesToday || 0;
     if (todayIncentives >= this.MAX_DAILY_INCENTIVES_PER_IP) {
-      errors.push(`Daily incentive limit reached (${this.MAX_DAILY_INCENTIVES_PER_IP} per IP)`);
+      errors.push(
+        `Daily incentive limit reached (${this.MAX_DAILY_INCENTIVES_PER_IP} per IP)`,
+      );
     }
 
     // 根据触发类型验证特定条件
@@ -62,13 +64,17 @@ export class IncentiveRules {
         if (!triggerData.questionnaireId) {
           errors.push('Questionnaire ID is required');
         }
-        if (typeof triggerData.qualityScore !== 'number' || 
-            triggerData.qualityScore < 0 || 
-            triggerData.qualityScore > 100) {
+        if (
+          typeof triggerData.qualityScore !== 'number' ||
+          triggerData.qualityScore < 0 ||
+          triggerData.qualityScore > 100
+        ) {
           errors.push('Valid quality score (0-100) is required');
         }
         if (triggerData.qualityScore < this.MIN_QUALITY_SCORE) {
-          errors.push(`Quality score must be at least ${this.MIN_QUALITY_SCORE} to qualify for reward`);
+          errors.push(
+            `Quality score must be at least ${this.MIN_QUALITY_SCORE} to qualify for reward`,
+          );
         }
         break;
 
@@ -91,21 +97,26 @@ export class IncentiveRules {
     return new IncentiveEligibilityResult(
       errors.length === 0,
       errors,
-      errors.length === 0 ? this.calculateExpectedReward(triggerType, triggerData) : 0
+      errors.length === 0
+        ? this.calculateExpectedReward(triggerType, triggerData)
+        : 0,
     );
   }
 
   /**
    * 计算预期奖励金额
    */
-  static calculateExpectedReward(triggerType: TriggerType, triggerData: any): number {
+  static calculateExpectedReward(
+    triggerType: TriggerType,
+    triggerData: any,
+  ): number {
     switch (triggerType) {
       case TriggerType.QUESTIONNAIRE_COMPLETION:
         return this.calculateQuestionnaireReward(triggerData.qualityScore);
-      
+
       case TriggerType.REFERRAL:
         return this.REFERRAL_REWARD_AMOUNT;
-      
+
       default:
         return 0;
     }
@@ -134,31 +145,39 @@ export class IncentiveRules {
 
     // 验证状态
     if (incentive.getStatus() !== IncentiveStatus.APPROVED) {
-      errors.push(`Incentive must be approved for payment (current status: ${incentive.getStatus()})`);
+      errors.push(
+        `Incentive must be approved for payment (current status: ${incentive.getStatus()})`,
+      );
     }
 
     // 验证奖励金额
     const rewardAmount = incentive.getRewardAmount();
     if (rewardAmount < this.MIN_PAYOUT_AMOUNT) {
-      errors.push(`Reward amount (${rewardAmount}) is below minimum payout threshold (${this.MIN_PAYOUT_AMOUNT})`);
+      errors.push(
+        `Reward amount (${rewardAmount}) is below minimum payout threshold (${this.MIN_PAYOUT_AMOUNT})`,
+      );
     }
 
     if (rewardAmount > this.MAX_REWARD_AMOUNT) {
-      errors.push(`Reward amount (${rewardAmount}) exceeds maximum allowed (${this.MAX_REWARD_AMOUNT})`);
+      errors.push(
+        `Reward amount (${rewardAmount}) exceeds maximum allowed (${this.MAX_REWARD_AMOUNT})`,
+      );
     }
 
     // 验证过期状态
     const daysSinceCreation = Math.floor(
-      (Date.now() - incentive.getCreatedAt().getTime()) / (1000 * 60 * 60 * 24)
+      (Date.now() - incentive.getCreatedAt().getTime()) / (1000 * 60 * 60 * 24),
     );
     if (daysSinceCreation > this.INCENTIVE_EXPIRY_DAYS) {
-      errors.push(`Incentive has expired (${daysSinceCreation} days old, limit: ${this.INCENTIVE_EXPIRY_DAYS})`);
+      errors.push(
+        `Incentive has expired (${daysSinceCreation} days old, limit: ${this.INCENTIVE_EXPIRY_DAYS})`,
+      );
     }
 
     return new PaymentEligibilityResult(
       errors.length === 0,
       errors,
-      errors.length === 0 ? rewardAmount : 0
+      errors.length === 0 ? rewardAmount : 0,
     );
   }
 
@@ -167,7 +186,7 @@ export class IncentiveRules {
    */
   static validatePaymentMethodCompatibility(
     paymentMethod: PaymentMethod,
-    contactInfo: ContactInfo
+    contactInfo: ContactInfo,
   ): PaymentMethodValidationResult {
     const errors: string[] = [];
 
@@ -186,14 +205,18 @@ export class IncentiveRules {
 
       case PaymentMethod.BANK_TRANSFER:
         if (!contactInfo.phone && !contactInfo.email) {
-          errors.push('Phone or email is required for bank transfer verification');
+          errors.push(
+            'Phone or email is required for bank transfer verification',
+          );
         }
         break;
 
       case PaymentMethod.MANUAL:
         // Manual payment requires at least one contact method
         if (!contactInfo.isValid()) {
-          errors.push('Valid contact information is required for manual payment');
+          errors.push(
+            'Valid contact information is required for manual payment',
+          );
         }
         break;
 
@@ -204,7 +227,7 @@ export class IncentiveRules {
     return new PaymentMethodValidationResult(
       errors.length === 0,
       errors,
-      paymentMethod
+      paymentMethod,
     );
   }
 
@@ -217,7 +240,7 @@ export class IncentiveRules {
 
     const rewardAmount = incentive.getRewardAmount();
     const daysSinceCreation = Math.floor(
-      (Date.now() - incentive.getCreatedAt().getTime()) / (1000 * 60 * 60 * 24)
+      (Date.now() - incentive.getCreatedAt().getTime()) / (1000 * 60 * 60 * 24),
     );
 
     // 金额因子 (0-30分)
@@ -273,7 +296,7 @@ export class IncentiveRules {
     return new IncentivePriority(
       Math.min(100, priority),
       this.getPriorityLevel(priority),
-      factors
+      factors,
     );
   }
 
@@ -282,14 +305,14 @@ export class IncentiveRules {
    */
   static generateRiskAssessment(
     incentive: Incentive,
-    ipUsageHistory?: IncentiveUsageHistory
+    ipUsageHistory?: IncentiveUsageHistory,
   ): IncentiveRiskAssessment {
     let riskScore = 0;
     const riskFactors: string[] = [];
 
     const rewardAmount = incentive.getRewardAmount();
     const daysSinceCreation = Math.floor(
-      (Date.now() - incentive.getCreatedAt().getTime()) / (1000 * 60 * 60 * 24)
+      (Date.now() - incentive.getCreatedAt().getTime()) / (1000 * 60 * 60 * 24),
     );
 
     // 金额风险评估
@@ -300,12 +323,18 @@ export class IncentiveRules {
 
     // 使用历史风险评估
     if (ipUsageHistory) {
-      if (ipUsageHistory.totalIncentivesToday >= this.MAX_DAILY_INCENTIVES_PER_IP * 0.8) {
+      if (
+        ipUsageHistory.totalIncentivesToday >=
+        this.MAX_DAILY_INCENTIVES_PER_IP * 0.8
+      ) {
         riskScore += 25;
         riskFactors.push('High daily usage');
       }
 
-      if (ipUsageHistory.totalIncentivesThisWeek >= this.MAX_DAILY_INCENTIVES_PER_IP * 5) {
+      if (
+        ipUsageHistory.totalIncentivesThisWeek >=
+        this.MAX_DAILY_INCENTIVES_PER_IP * 5
+      ) {
         riskScore += 20;
         riskFactors.push('High weekly usage');
       }
@@ -328,14 +357,16 @@ export class IncentiveRules {
       Math.min(100, riskScore),
       this.getRiskLevel(riskScore),
       riskFactors,
-      this.getRecommendedActions(riskScore)
+      this.getRecommendedActions(riskScore),
     );
   }
 
   /**
    * 验证批量支付操作
    */
-  static validateBatchPayment(incentives: Incentive[]): BatchPaymentValidationResult {
+  static validateBatchPayment(
+    incentives: Incentive[],
+  ): BatchPaymentValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
     let totalAmount = 0;
@@ -357,7 +388,9 @@ export class IncentiveRules {
         validCount++;
         totalAmount += eligibility.approvedAmount;
       } else {
-        warnings.push(`Incentive ${incentive.getId().getValue()}: ${eligibility.errors.join(', ')}`);
+        warnings.push(
+          `Incentive ${incentive.getId().getValue()}: ${eligibility.errors.join(', ')}`,
+        );
       }
     }
 
@@ -366,7 +399,9 @@ export class IncentiveRules {
     }
 
     if (totalAmount > 10000) {
-      warnings.push(`Large batch payment amount: ¥${totalAmount}. Consider splitting into smaller batches.`);
+      warnings.push(
+        `Large batch payment amount: ¥${totalAmount}. Consider splitting into smaller batches.`,
+      );
     }
 
     return new BatchPaymentValidationResult(
@@ -374,25 +409,30 @@ export class IncentiveRules {
       errors,
       warnings,
       validCount,
-      totalAmount
+      totalAmount,
     );
   }
 
   // 私有辅助方法
   private static isValidIPAddress(ip: string): boolean {
     if (!ip || typeof ip !== 'string') return false;
-    const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+    const ipRegex =
+      /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
     return ipRegex.test(ip);
   }
 
-  private static getPriorityLevel(score: number): 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT' {
+  private static getPriorityLevel(
+    score: number,
+  ): 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT' {
     if (score >= 80) return 'URGENT';
     if (score >= 60) return 'HIGH';
     if (score >= 40) return 'MEDIUM';
     return 'LOW';
   }
 
-  private static getRiskLevel(score: number): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
+  private static getRiskLevel(
+    score: number,
+  ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
     if (score >= 75) return 'CRITICAL';
     if (score >= 50) return 'HIGH';
     if (score >= 25) return 'MEDIUM';
@@ -434,7 +474,7 @@ export class IncentiveEligibilityResult {
   constructor(
     public readonly isEligible: boolean,
     public readonly errors: string[],
-    public readonly expectedReward: number
+    public readonly expectedReward: number,
   ) {}
 }
 
@@ -451,7 +491,7 @@ export class PaymentEligibilityResult {
   constructor(
     public readonly isEligible: boolean,
     public readonly errors: string[],
-    public readonly approvedAmount: number
+    public readonly approvedAmount: number,
   ) {}
 }
 
@@ -468,7 +508,7 @@ export class PaymentMethodValidationResult {
   constructor(
     public readonly isValid: boolean,
     public readonly errors: string[],
-    public readonly paymentMethod: PaymentMethod
+    public readonly paymentMethod: PaymentMethod,
   ) {}
 }
 
@@ -485,7 +525,7 @@ export class IncentivePriority {
   constructor(
     public readonly score: number,
     public readonly level: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT',
-    public readonly factors: string[]
+    public readonly factors: string[],
   ) {}
 }
 
@@ -508,7 +548,7 @@ export class IncentiveRiskAssessment {
     public readonly riskScore: number,
     public readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
     public readonly riskFactors: string[],
-    public readonly recommendedActions: string[]
+    public readonly recommendedActions: string[],
   ) {}
 }
 
@@ -529,7 +569,7 @@ export class BatchPaymentValidationResult {
     public readonly errors: string[],
     public readonly warnings: string[],
     public readonly validIncentiveCount: number,
-    public readonly totalAmount: number
+    public readonly totalAmount: number,
   ) {}
 }
 
@@ -550,14 +590,14 @@ export interface IncentiveUsageHistory {
 // 枚举定义
 export enum IncentiveRiskLevel {
   LOW = 'low',
-  MEDIUM = 'medium', 
+  MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 export enum ProcessingPriority {
   LOW = 'low',
   MEDIUM = 'medium',
-  HIGH = 'high', 
-  URGENT = 'urgent'
+  HIGH = 'high',
+  URGENT = 'urgent',
 }

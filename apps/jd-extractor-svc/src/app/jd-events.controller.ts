@@ -52,13 +52,16 @@ export class JdEventsController implements OnModuleInit {
       const correlationContext = ErrorCorrelationManager.getContext();
 
       if (!payload.jobId || !payload.jdText) {
-        throw new JDExtractorException(JDExtractorErrorCode.JD_STRUCTURE_INVALID, {
-          provided: {
-            jobId: !!payload.jobId,
-            jdText: !!payload.jdText,
+        throw new JDExtractorException(
+          JDExtractorErrorCode.JD_STRUCTURE_INVALID,
+          {
+            provided: {
+              jobId: !!payload.jobId,
+              jdText: !!payload.jdText,
+            },
+            correlationId: correlationContext?.traceId,
           },
-          correlationId: correlationContext?.traceId,
-        });
+        );
       }
 
       const startTime = Date.now();

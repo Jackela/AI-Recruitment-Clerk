@@ -3,9 +3,9 @@
 
 <!-- ARIA Live Regions -->
 @defer (on idle) {
-  <arc-aria-live></arc-aria-live>
+<arc-aria-live></arc-aria-live>
 } @placeholder {
-  <div aria-hidden="true"></div>
+<div aria-hidden="true"></div>
 }
 
 <div
@@ -81,27 +81,27 @@
       >
         <!-- Language Selector -->
         @defer (on idle) {
-          <arc-language-selector></arc-language-selector>
+        <arc-language-selector></arc-language-selector>
         } @placeholder {
-          <div
-            class="language-selector-placeholder"
-            aria-hidden="true"
-            role="presentation"
-          ></div>
+        <div
+          class="language-selector-placeholder"
+          aria-hidden="true"
+          role="presentation"
+        ></div>
         }
 
         <!-- Theme Toggle -->
         @defer (on idle) {
-          <arc-theme-toggle></arc-theme-toggle>
+        <arc-theme-toggle></arc-theme-toggle>
         } @placeholder {
-          <button
-            class="theme-toggle-placeholder"
-            type="button"
-            aria-hidden="true"
-            tabindex="-1"
-          >
-            ⚙️
-          </button>
+        <button
+          class="theme-toggle-placeholder"
+          type="button"
+          aria-hidden="true"
+          tabindex="-1"
+        >
+          ⚙️
+        </button>
         }
 
         <button
@@ -191,25 +191,23 @@
 
   <!-- Global UX Components -->
   @defer (when guideOverlayVisible(); prefetch on idle) {
-    <arc-guide-overlay
-      role="dialog"
-      [attr.aria-label]="getText('ACCESSIBILITY.aria.guideOverlay')"
-      [attr.aria-hidden]="!guideOverlayVisible()"
-    >
-    </arc-guide-overlay>
+  <arc-guide-overlay
+    role="dialog"
+    [attr.aria-label]="getText('ACCESSIBILITY.aria.guideOverlay')"
+    [attr.aria-hidden]="!guideOverlayVisible()"
+  >
+  </arc-guide-overlay>
   } @placeholder {
-    <div aria-hidden="true"></div>
-  }
-
-  @defer (on idle) {
-    <arc-status-notifications
-      role="log"
-      aria-live="polite"
-      [attr.aria-label]="getText('ACCESSIBILITY.aria.notifications')"
-    >
-    </arc-status-notifications>
+  <div aria-hidden="true"></div>
+  } @defer (on idle) {
+  <arc-status-notifications
+    role="log"
+    aria-live="polite"
+    [attr.aria-label]="getText('ACCESSIBILITY.aria.notifications')"
+  >
+  </arc-status-notifications>
   } @placeholder {
-    <div aria-hidden="true"></div>
+  <div aria-hidden="true"></div>
   }
 
   <!-- Keyboard Help Modal -->
@@ -222,53 +220,53 @@
     [class.visible]="keyboardHelpVisible()"
   >
     @defer (when keyboardHelpVisible(); prefetch on idle) {
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2 id="keyboard-help-title">
-            {{ getText('ACCESSIBILITY.keyboardShortcuts') }}
-          </h2>
-          <button
-            type="button"
-            class="close-btn"
-            [attr.aria-label]="getText('COMMON.close')"
-            (click)="hideKeyboardHelp()"
-          >
-            <span aria-hidden="true">✕</span>
-          </button>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="keyboard-help-title">
+          {{ getText('ACCESSIBILITY.keyboardShortcuts') }}
+        </h2>
+        <button
+          type="button"
+          class="close-btn"
+          [attr.aria-label]="getText('COMMON.close')"
+          (click)="hideKeyboardHelp()"
+        >
+          <span aria-hidden="true">✕</span>
+        </button>
+      </div>
+      <div id="keyboard-help-description" class="modal-body">
+        <div class="shortcut-section">
+          <h3>{{ getText('ACCESSIBILITY.navigation') }}</h3>
+          <ul role="list">
+            <li>
+              <kbd>Alt + 1</kbd> - {{ getText('APP.navigation.dashboard') }}
+            </li>
+            <li>
+              <kbd>Alt + 2</kbd> - {{ getText('APP.navigation.analysis') }}
+            </li>
+            <li>
+              <kbd>Alt + 3</kbd> - {{ getText('APP.navigation.results') }}
+            </li>
+            <li><kbd>Alt + H</kbd> - {{ getText('APP.navigation.help') }}</li>
+          </ul>
         </div>
-        <div id="keyboard-help-description" class="modal-body">
-          <div class="shortcut-section">
-            <h3>{{ getText('ACCESSIBILITY.navigation') }}</h3>
-            <ul role="list">
-              <li>
-                <kbd>Alt + 1</kbd> - {{ getText('APP.navigation.dashboard') }}
-              </li>
-              <li>
-                <kbd>Alt + 2</kbd> - {{ getText('APP.navigation.analysis') }}
-              </li>
-              <li>
-                <kbd>Alt + 3</kbd> - {{ getText('APP.navigation.results') }}
-              </li>
-              <li><kbd>Alt + H</kbd> - {{ getText('APP.navigation.help') }}</li>
-            </ul>
-          </div>
-          <div class="shortcut-section">
-            <h3>{{ getText('ACCESSIBILITY.actions') }}</h3>
-            <ul role="list">
-              <li>
-                <kbd>Ctrl + Shift + R</kbd> - {{ getText('COMMON.refresh') }}
-              </li>
-              <li>
-                <kbd>Ctrl + N</kbd> - {{ getText('APP.navigation.analysis') }}
-              </li>
-              <li><kbd>Alt + T</kbd> - 切换主题</li>
-              <li><kbd>Escape</kbd> - {{ getText('COMMON.close') }}</li>
-            </ul>
-          </div>
+        <div class="shortcut-section">
+          <h3>{{ getText('ACCESSIBILITY.actions') }}</h3>
+          <ul role="list">
+            <li>
+              <kbd>Ctrl + Shift + R</kbd> - {{ getText('COMMON.refresh') }}
+            </li>
+            <li>
+              <kbd>Ctrl + N</kbd> - {{ getText('APP.navigation.analysis') }}
+            </li>
+            <li><kbd>Alt + T</kbd> - 切换主题</li>
+            <li><kbd>Escape</kbd> - {{ getText('COMMON.close') }}</li>
+          </ul>
         </div>
       </div>
+    </div>
     } @placeholder {
-      <div class="modal-content" aria-hidden="true"></div>
+    <div class="modal-content" aria-hidden="true"></div>
     }
   </div>
 </div>
