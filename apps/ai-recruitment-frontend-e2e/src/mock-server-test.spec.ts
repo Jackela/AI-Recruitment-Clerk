@@ -4,6 +4,8 @@ import { test, expect } from './fixtures';
  * Test with Mock API Server to Verify Angular Bootstrap
  */
 
+const LANDING_PATH = '/jobs';
+
 test.describe('Angular App with Mock API', () => {
   test.beforeEach(async ({ page }) => {
     // Mock all API endpoints to prevent network errors - use /api/ prefix
@@ -66,7 +68,11 @@ test.describe('Angular App with Mock API', () => {
 
   test('Angular app should load with mocked APIs', async ({ page }) => {
     console.log('📍 Navigating to application with mocked APIs...');
-    await page.goto('http://localhost:4202/');
+    await page.goto('/');
+    await page.waitForURL(
+      (url) => url.pathname.startsWith(LANDING_PATH),
+      { timeout: 15_000 },
+    );
 
     console.log('📍 Waiting for network to settle...');
     await page.waitForLoadState('networkidle');
@@ -137,7 +143,7 @@ test.describe('Angular App with Mock API', () => {
     // Increase timeout for this test
     test.setTimeout(45000);
 
-    await page.goto('http://localhost:4202/jobs/create');
+    await page.goto('/jobs/create');
     await page.waitForLoadState('networkidle');
 
     // Wait for Angular to bootstrap and render

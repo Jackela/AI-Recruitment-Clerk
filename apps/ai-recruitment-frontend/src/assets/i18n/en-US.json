@@ -30,6 +30,7 @@
   "navigation": {
     "dashboard": "Dashboard",
     "analysis": "Analysis",
+    "jobs": "Job Management",
     "results": "Results",
     "settings": "Settings",
     "help": "Help",

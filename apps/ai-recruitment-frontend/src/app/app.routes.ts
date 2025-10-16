@@ -9,11 +9,8 @@ export const preloadingStrategy = {
 export const appRoutes: Route[] = [
   {
     path: '',
-    loadComponent: () =>
-      import('./pages/dashboard/enhanced-dashboard.component').then(
-        (m) => m.EnhancedDashboardComponent,
-      ),
-    data: { preload: true, priority: 'high' },
+    pathMatch: 'full',
+    redirectTo: 'jobs',
   },
   {
     path: 'dashboard',

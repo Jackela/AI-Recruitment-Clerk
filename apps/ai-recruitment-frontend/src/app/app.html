@@ -60,6 +60,19 @@
         </a>
 
         <a
+          routerLink="/jobs"
+          routerLinkActive="active"
+          class="nav-link"
+          role="menuitem"
+          [attr.aria-label]="getText('APP.navigation.jobs')"
+          [attr.title]="getText('APP.navigation.jobs') + ' (Alt+4)'"
+        >
+          <span class="nav-icon" aria-hidden="true">💼</span>
+          <span class="nav-text">{{ getText('APP.navigation.jobs') }}</span>
+          <span class="sr-only">- Alt+4</span>
+        </a>
+
+        <a
           routerLink="/results"
           routerLinkActive="active"
           class="nav-link"

@@ -4,6 +4,8 @@ import { test, expect } from './fixtures';
  * Test to Capture Console Errors and Understand Why Angular Isn't Bootstrapping
  */
 
+const LANDING_PATH = '/jobs';
+
 test.describe('Console Error Detection', () => {
   test('capture all console messages and errors', async ({ page }) => {
     const allMessages: Array<{ type: string; text: string }> = [];
@@ -40,7 +42,11 @@ test.describe('Console Error Detection', () => {
     });
 
     console.log('📍 Starting page navigation...');
-    const response = await page.goto('http://localhost:4202/');
+    const response = await page.goto('/');
+    await page.waitForURL(
+      (url) => url.pathname.startsWith(LANDING_PATH),
+      { timeout: 15_000 },
+    );
     console.log('📍 Response status:', response?.status());
 
     console.log('📍 Waiting for network to settle...');
@@ -129,7 +135,7 @@ test.describe('Console Error Detection', () => {
       }
     });
 
-    await page.goto('http://localhost:4202/');
+    await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(5000);
 

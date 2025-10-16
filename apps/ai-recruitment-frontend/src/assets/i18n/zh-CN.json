@@ -30,6 +30,7 @@
   "navigation": {
     "dashboard": "控制台",
     "analysis": "分析",
+    "jobs": "岗位管理",
     "results": "结果",
     "settings": "设置",
     "help": "帮助",

@@ -40,8 +40,8 @@ export interface ResultAction {
       <div class="results-content" *ngIf="result">
         <!-- Score Display -->
         <arc-score-visualization
-          [score]="result.score"
-          [summary]="result.summary"
+          [score]="scoreValue"
+          [summary]="summaryText"
           [showIndicator]="true"
           [animated]="true"
         >
@@ -49,12 +49,12 @@ export interface ResultAction {
 
         <!-- Key Insights -->
         <div class="insights-grid">
-          <div class="insight-card" *ngIf="result.keySkills?.length">
+          <div class="insight-card" *ngIf="keySkills.length">
             <h4>🎯 关键技能</h4>
             <div class="skill-tags">
               <span
                 class="skill-tag"
-                *ngFor="let skill of result.keySkills; trackBy: trackBySkill"
+                *ngFor="let skill of keySkills; trackBy: trackBySkill"
                 [title]="'技能: ' + skill"
               >
                 {{ skill }}
@@ -62,27 +62,27 @@ export interface ResultAction {
             </div>
           </div>
 
-          <div class="insight-card" *ngIf="result.experience">
+          <div class="insight-card" *ngIf="experienceText">
             <h4>💼 工作经验</h4>
-            <p>{{ result.experience }}</p>
+            <p>{{ experienceText }}</p>
           </div>
 
-          <div class="insight-card" *ngIf="result.education">
+          <div class="insight-card" *ngIf="educationText">
             <h4>🎓 教育背景</h4>
-            <p>{{ result.education }}</p>
+            <p>{{ educationText }}</p>
           </div>
         </div>
 
         <!-- Recommendations -->
         <div
           class="recommendations-section"
-          *ngIf="result.recommendations?.length"
+          *ngIf="recommendations.length"
         >
           <h4>📋 建议</h4>
           <ul class="recommendations-list" role="list">
             <li
               *ngFor="
-                let rec of result.recommendations;
+                let rec of recommendations;
                 trackBy: trackByRecommendation
               "
               role="listitem"
@@ -99,9 +99,7 @@ export interface ResultAction {
             <div class="stat-item">
               <span class="stat-label">技能匹配数</span>
               <span class="stat-value"
-                >{{ result.keySkills.length || 0 }}/{{
-                  totalRequiredSkills
-                }}</span
+                >{{ keySkills.length }}/{{ totalRequiredSkills }}</span
               >
             </div>
             <div class="stat-item">
@@ -145,7 +143,7 @@ export interface ResultAction {
         <button
           (click)="onAction('download-report')"
           class="secondary-btn"
-          *ngIf="result?.reportUrl"
+          *ngIf="hasReport"
           [disabled]="isProcessing"
           aria-label="下载分析报告PDF文件"
         >
@@ -435,6 +433,58 @@ export class AnalysisResultsComponent {
 
   @Output() actionRequested = new EventEmitter<ResultAction>();
 
+  get keySkills(): string[] {
+    const skills = this.result?.keySkills;
+    if (!Array.isArray(skills)) {
+      return [];
+    }
+    return skills
+      .filter((skill): skill is string => typeof skill === 'string')
+      .map((skill) => skill.trim())
+      .filter((skill) => skill.length > 0);
+  }
+
+  get recommendations(): string[] {
+    const recs = this.result?.recommendations;
+    if (!Array.isArray(recs)) {
+      return [];
+    }
+    return recs
+      .filter((item): item is string => typeof item === 'string')
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+  }
+
+  get experienceText(): string {
+    const experience = this.result?.experience;
+    return typeof experience === 'string' ? experience.trim() : '';
+  }
+
+  get educationText(): string {
+    const education = this.result?.education;
+    return typeof education === 'string' ? education.trim() : '';
+  }
+
+  get summaryText(): string {
+    const summary = this.result?.summary;
+    return typeof summary === 'string' && summary.trim().length > 0
+      ? summary.trim()
+      : '暂无摘要';
+  }
+
+  get scoreValue(): number {
+    const score = this.result?.score;
+    if (typeof score === 'number' && Number.isFinite(score)) {
+      return Math.max(0, Math.min(100, score));
+    }
+    return 0;
+  }
+
+  get hasReport(): boolean {
+    const url = this.result?.reportUrl;
+    return typeof url === 'string' && url.trim().length > 0;
+  }
+
   /**
    * Performs the on action operation.
    * @param type - The type.
@@ -469,7 +519,7 @@ export class AnalysisResultsComponent {
    */
   getScoreCategory(): string {
     if (!this.result) return '未知';
-    const score = this.result.score;
+    const score = this.scoreValue;
     if (score >= 80) return '优秀';
     if (score >= 60) return '良好';
     return '待提升';
@@ -481,7 +531,7 @@ export class AnalysisResultsComponent {
    */
   getScoreClass(): string {
     if (!this.result) return '';
-    const score = this.result.score;
+    const score = this.scoreValue;
     if (score >= 80) return 'high';
     if (score >= 60) return 'medium';
     return 'low';
@@ -493,7 +543,7 @@ export class AnalysisResultsComponent {
    */
   getPriority(): string {
     if (!this.result) return '未知';
-    const score = this.result.score;
+    const score = this.scoreValue;
     if (score >= 85) return '高优先级';
     if (score >= 70) return '中优先级';
     if (score >= 50) return '低优先级';
@@ -506,7 +556,7 @@ export class AnalysisResultsComponent {
    */
   getPriorityClass(): string {
     if (!this.result) return '';
-    const score = this.result.score;
+    const score = this.scoreValue;
     if (score >= 85) return 'high';
     if (score >= 70) return 'medium';
     return 'low';

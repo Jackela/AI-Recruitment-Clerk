@@ -1,0 +1,480 @@
+// Timesheet Table Component Styles
+// Extends the base data-table styles with timesheet-specific enhancements
+
+@use '../data-table/data-table.component.scss';
+
+.timesheet-table-container {
+  // Timesheet-specific container enhancements
+  .table-toolbar {
+    .view-selector {
+      margin-left: 1rem;
+      padding: 0.5rem;
+      border: 1px solid #e1e5e9;
+      border-radius: 4px;
+      background: white;
+      font-size: 0.875rem;
+
+      &:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+      }
+    }
+
+    .bulk-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-left: 1rem;
+
+      .bulk-btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &.edit-bulk-btn {
+          background: #28a745;
+          color: white;
+
+          &:hover {
+            background: #218838;
+            transform: translateY(-1px);
+          }
+        }
+
+        &.delete-bulk-btn {
+          background: #dc3545;
+          color: white;
+
+          &:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+          }
+        }
+      }
+    }
+  }
+
+  // Responsive table wrapper enhancements
+  .table-wrapper {
+    &.mobile-view {
+      .timesheet-table {
+        th, td {
+          padding: 0.5rem 0.25rem;
+          font-size: 0.875rem;
+        }
+
+        // Hide low priority columns on mobile
+        .priority-low {
+          display: none;
+        }
+
+        // Compress medium priority columns
+        .priority-medium {
+          max-width: 100px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+    }
+
+    &.tablet-view {
+      .timesheet-table {
+        // Hide only low priority columns on tablet
+        .priority-low {
+          display: none;
+        }
+      }
+    }
+
+    &.desktop-view {
+      // Show all columns on desktop
+      .timesheet-table {
+        .priority-low,
+        .priority-medium,
+        .priority-high {
+          display: table-cell;
+        }
+      }
+    }
+  }
+
+  // Enhanced timesheet table styles
+  .timesheet-table {
+    // Row status styling
+    tbody tr {
+      &.draft {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+      }
+
+      &.submitted {
+        background-color: #cff4fc;
+        border-left: 4px solid #0dcaf0;
+      }
+
+      &.approved {
+        background-color: #d1e7dd;
+        border-left: 4px solid #198754;
+      }
+
+      &.rejected {
+        background-color: #f8d7da;
+        border-left: 4px solid #dc3545;
+      }
+
+      &:hover {
+        &.draft {
+          background-color: #fff0b3;
+        }
+
+        &.submitted {
+          background-color: #b6effb;
+        }
+
+        &.approved {
+          background-color: #badbcc;
+        }
+
+        &.rejected {
+          background-color: #f5c2c7;
+        }
+      }
+    }
+
+    // Column-specific styling based on configuration
+    .priority-high {
+      font-weight: 600;
+      background-color: rgba(0, 123, 255, 0.05);
+    }
+
+    .priority-medium {
+      background-color: rgba(108, 117, 125, 0.05);
+    }
+
+    .priority-low {
+      color: #6c757d;
+      font-size: 0.875rem;
+    }
+
+    .bulk-editable {
+      position: relative;
+
+      &::after {
+        content: '✎';
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        font-size: 0.75rem;
+        color: #28a745;
+        opacity: 0.7;
+      }
+    }
+
+    // Cell content styling
+    .duration-display {
+      font-weight: 500;
+      color: #0d6efd;
+      font-family: 'Courier New', monospace;
+    }
+
+    .status-badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      &.status-draft {
+        background-color: #fff3cd;
+        color: #664d03;
+        border: 1px solid #ffecb5;
+      }
+
+      &.status-submitted {
+        background-color: #cff4fc;
+        color: #055160;
+        border: 1px solid #9eeaf9;
+      }
+
+      &.status-approved {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        border: 1px solid #a3cfbb;
+      }
+
+      &.status-rejected {
+        background-color: #f8d7da;
+        color: #58151c;
+        border: 1px solid #f1aeb5;
+      }
+    }
+
+    // Badge styling for billable status
+    .badge {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      border-radius: 12px;
+      font-weight: 500;
+
+      &.badge-success {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        border: 1px solid #a3cfbb;
+      }
+
+      &.badge-danger {
+        background-color: #f8d7da;
+        color: #58151c;
+        border: 1px solid #f1aeb5;
+      }
+    }
+
+    // Action buttons enhancements for timesheet
+    .action-buttons {
+      .action-btn {
+        &[disabled] {
+          opacity: 0.5;
+          cursor: not-allowed;
+          
+          &:hover {
+            transform: none;
+            box-shadow: none;
+          }
+        }
+
+        &.view-btn {
+          &:hover {
+            background-color: #0dcaf0;
+            border-color: #0dcaf0;
+          }
+        }
+
+        &.edit-btn {
+          &:hover:not([disabled]) {
+            background-color: #ffc107;
+            border-color: #ffc107;
+          }
+        }
+
+        &.delete-btn {
+          &:hover:not([disabled]) {
+            background-color: #dc3545;
+            border-color: #dc3545;
+          }
+        }
+      }
+    }
+  }
+
+  // Enhanced pagination info for timesheet context
+  .pagination-info {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-weight: 500;
+  }
+
+  // Loading overlay enhancements
+  .loading-overlay {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(2px);
+
+    .spinner {
+      border-color: #0d6efd;
+      border-top-color: transparent;
+      width: 2rem;
+      height: 2rem;
+    }
+
+    p {
+      color: #0d6efd;
+      font-weight: 500;
+    }
+  }
+
+  // Empty state customization for timesheet
+  .empty-state {
+    svg {
+      color: #6c757d;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      color: #6c757d;
+      font-size: 1rem;
+      margin: 0;
+    }
+  }
+}
+
+// Responsive breakpoints for timesheet table
+@media (max-width: 768px) {
+  .timesheet-table-container {
+    .table-toolbar {
+      flex-direction: column;
+      gap: 1rem;
+
+      .toolbar-left,
+      .toolbar-right {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .search-box {
+        width: 100%;
+      }
+
+      .view-selector {
+        width: 100%;
+        margin-left: 0;
+      }
+
+      .bulk-actions {
+        margin-left: 0;
+        justify-content: center;
+      }
+    }
+
+    .timesheet-table {
+      font-size: 0.875rem;
+
+      th, td {
+        padding: 0.5rem 0.25rem;
+      }
+
+      .th-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+      }
+
+      .sort-indicator {
+        align-self: flex-end;
+      }
+    }
+
+    .table-pagination {
+      .pagination-controls {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+      }
+
+      .page-size-select {
+        order: -1;
+        width: 100%;
+      }
+    }
+  }
+}
+
+@media (max-width: 1024px) and (min-width: 769px) {
+  .timesheet-table-container {
+    .table-toolbar {
+      .bulk-actions {
+        .bulk-btn {
+          padding: 0.375rem 0.75rem;
+          font-size: 0.8125rem;
+        }
+      }
+    }
+
+    .timesheet-table {
+      th, td {
+        padding: 0.75rem 0.5rem;
+      }
+    }
+  }
+}
+
+// Print styles for timesheet reports
+@media print {
+  .timesheet-table-container {
+    .table-toolbar,
+    .table-pagination {
+      display: none;
+    }
+
+    .timesheet-table {
+      box-shadow: none;
+      border: 1px solid #000;
+
+      th, td {
+        border: 1px solid #000;
+        padding: 0.5rem;
+        font-size: 0.875rem;
+        color: #000;
+        background: white !important;
+      }
+
+      .action-buttons {
+        display: none;
+      }
+
+      .checkbox-column {
+        display: none;
+      }
+    }
+  }
+}
+
+// Accessibility enhancements
+.timesheet-table-container {
+  .timesheet-table {
+    th {
+      &:focus {
+        outline: 2px solid #0d6efd;
+        outline-offset: -2px;
+      }
+    }
+
+    .action-btn {
+      &:focus {
+        outline: 2px solid #0d6efd;
+        outline-offset: 2px;
+      }
+    }
+  }
+
+  .search-input {
+    &:focus {
+      outline: none;
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+    }
+  }
+}
+
+// Dark mode support (if applicable)
+@media (prefers-color-scheme: dark) {
+  .timesheet-table-container {
+    .timesheet-table {
+      tbody tr {
+        &.draft {
+          background-color: rgba(255, 193, 7, 0.1);
+          border-left-color: #ffc107;
+        }
+
+        &.submitted {
+          background-color: rgba(13, 202, 240, 0.1);
+          border-left-color: #0dcaf0;
+        }
+
+        &.approved {
+          background-color: rgba(25, 135, 84, 0.1);
+          border-left-color: #198754;
+        }
+
+        &.rejected {
+          background-color: rgba(220, 53, 69, 0.1);
+          border-left-color: #dc3545;
+        }
+      }
+    }
+  }
+}

@@ -4,19 +4,25 @@ import { test, expect } from './fixtures';
  * Simple Debug Test - Direct Angular App Verification
  */
 
+const LANDING_PATH = '/jobs';
+
 test.describe('Simple Angular App Test', () => {
   test('check if arc-root exists and app loads with longer timeout', async ({
     page,
   }) => {
     console.log('Navigating to application...');
-    await page.goto('http://localhost:4202/');
+    await page.goto('/');
+    await page.waitForURL(
+      (url) => url.pathname.startsWith(LANDING_PATH),
+      { timeout: 15_000 },
+    );
 
     console.log('Waiting for network to settle...');
     await page.waitForLoadState('domcontentloaded');
 
-    console.log('Waiting 10 seconds for Angular to bootstrap...');
+    console.log('Waiting for Angular to bootstrap...');
     await page.waitForFunction(() => document.readyState === 'complete', {
-      timeout: 10000,
+      timeout: 5000,
     });
 
     // Check if arc-root exists
@@ -36,11 +42,14 @@ test.describe('Simple Angular App Test', () => {
       expect(arcRootContent.length).toBeGreaterThan(10);
 
       // Look for the app header text
-      const hasAppTitle = (await page.locator('text=AI 招聘助理').count()) > 0;
+      const hasAppTitle =
+        (await page.locator('#app-title').filter({ hasText: 'AI 招聘助理' }).count()) > 0;
       console.log('App title found:', hasAppTitle);
 
       if (hasAppTitle) {
-        await expect(page.locator('text=AI 招聘助理')).toBeVisible();
+        await expect(
+          page.locator('#app-title').filter({ hasText: 'AI 招聘助理' }),
+        ).toBeVisible();
         console.log('✅ Angular app is working correctly!');
       } else {
         console.log('⚠️ Angular loaded but content not visible');
@@ -50,10 +59,8 @@ test.describe('Simple Angular App Test', () => {
 
         // Even if header is not visible, check for jobs page content
         const hasJobsContent =
-          (await page
-            .locator('nav a')
-            .filter({ hasText: '岗位管理' })
-            .count()) > 0;
+          (await page.locator('nav a').filter({ hasText: '岗位管理' }).count()) >
+          0;
         console.log('Jobs page content found:', hasJobsContent);
 
         if (hasJobsContent) {
@@ -69,18 +76,18 @@ test.describe('Simple Angular App Test', () => {
   test('direct navigation to specific routes', async ({ page }) => {
     // Test jobs list page
     console.log('Testing /jobs route...');
-    await page.goto('http://localhost:4202/jobs');
+    await page.goto('/jobs');
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(500);
 
     const jobsPageContent = await page.content();
     console.log('Jobs page HTML preview:', jobsPageContent.substring(0, 1000));
 
     // Test create job page
     console.log('Testing /jobs/create route...');
-    await page.goto('http://localhost:4202/jobs/create');
+    await page.goto('/jobs/create');
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(500);
 
     const createPageContent = await page.content();
     console.log(

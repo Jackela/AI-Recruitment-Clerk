@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { DeviceIdService } from './device-id.service';
 import { DetailedAnalysisResult } from '../../interfaces/detailed-analysis.interface';
 
@@ -277,11 +278,59 @@ export class GuestApiService {
     pendingFeedbackCodes: number;
     redeemedFeedbackCodes: number;
   }> {
-    return this.http.get<{
-      totalGuests: number;
-      activeGuests: number;
-      pendingFeedbackCodes: number;
-      redeemedFeedbackCodes: number;
-    }>(`${this.baseUrl}/stats`, { headers: this.getGuestHeaders() });
+    return this.http
+      .get(`${this.baseUrl}/stats`, {
+        headers: this.getGuestHeaders(),
+        responseType: 'text',
+      })
+      .pipe(map((rawResponse) => this.parseGuestStats(rawResponse)));
+  }
+
+  private parseGuestStats(
+    rawResponse: unknown,
+  ): {
+    totalGuests: number;
+    activeGuests: number;
+    pendingFeedbackCodes: number;
+    redeemedFeedbackCodes: number;
+  } {
+    let parsed: unknown = {};
+
+    if (typeof rawResponse === 'string') {
+      const trimmed = rawResponse.trim();
+      if (trimmed.length > 0) {
+        try {
+          parsed = JSON.parse(trimmed);
+        } catch {
+          // Keep fallback if parsing fails.
+        }
+      }
+    } else if (typeof rawResponse === 'object' && rawResponse !== null) {
+      parsed = rawResponse;
+    }
+
+    if (typeof parsed !== 'object' || parsed === null) {
+      parsed = {};
+    }
+
+    const data = parsed as Record<string, unknown>;
+
+    const toNumber = (value: unknown): number => {
+      if (typeof value === 'number') {
+        return value;
+      }
+      if (typeof value === 'string') {
+        const numericValue = Number(value);
+        return Number.isFinite(numericValue) ? numericValue : 0;
+      }
+      return 0;
+    };
+
+    return {
+      totalGuests: toNumber(data.totalGuests),
+      activeGuests: toNumber(data.activeGuests),
+      pendingFeedbackCodes: toNumber(data.pendingFeedbackCodes),
+      redeemedFeedbackCodes: toNumber(data.redeemedFeedbackCodes),
+    };
   }
 }

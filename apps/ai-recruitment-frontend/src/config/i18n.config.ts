@@ -38,7 +38,7 @@ export const I18N_TEXTS = {
       dashboard: '仪表板',
       analysis: '智能分析',
       results: '分析结果',
-      jobs: '职位管理',
+      jobs: '岗位管理',
       reports: '报告中心',
       settings: '设置',
       help: '帮助',

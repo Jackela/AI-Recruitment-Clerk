@@ -79,6 +79,17 @@ export async function startMockServer(): Promise<number> {
     });
   });
 
+  // Guest statistics endpoint used by frontend dashboard
+  app.get('/api/guest/stats', (_req, res) => {
+    res.json({
+      totalGuests: 1247,
+      activeGuests: 312,
+      pendingFeedbackCodes: 48,
+      redeemedFeedbackCodes: 196,
+      lastUpdated: new Date().toISOString(),
+    });
+  });
+
   // Jobs endpoints
   app.get('/api/jobs', (req, res) => {
     res.json(mockJobs);

@@ -9,6 +9,9 @@ import { webkit } from '@playwright/test';
 
 async function testWebKitConnection() {
   console.log('🌐 Starting WebKit diagnostic test...');
+  const baseUrl = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:4200';
+  const homeUrl = new URL('/', baseUrl).toString();
+  const healthUrl = new URL('/health', baseUrl).toString();
   
   let browser = null;
   let context = null;
@@ -77,7 +80,7 @@ async function testWebKitConnection() {
     // Test 4: Server Health Check (simple request first)
     console.log('📝 Test 4: Server health check...');
     try {
-      const healthResponse = await page.goto('http://localhost:4202/health', { 
+      const healthResponse = await page.goto(healthUrl, { 
         waitUntil: 'domcontentloaded', 
         timeout: 15000 
       });
@@ -91,9 +94,9 @@ async function testWebKitConnection() {
     const navStartTime = Date.now();
     
     try {
-      console.log('🔄 Attempting navigation to http://localhost:4202/...');
+      console.log(`🔄 Attempting navigation to ${homeUrl}...`);
       
-      const response = await page.goto('http://localhost:4202/', { 
+      const response = await page.goto(homeUrl, { 
         waitUntil: 'domcontentloaded', 
         timeout: 30000 
       });
@@ -154,7 +157,7 @@ async function testWebKitConnection() {
         
         // Check if server is responsive at all
         try {
-          const testResponse = await fetch('http://localhost:4202/', { 
+          const testResponse = await fetch(homeUrl, { 
             method: 'HEAD',
             signal: AbortSignal.timeout(5000) 
           });

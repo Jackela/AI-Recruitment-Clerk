@@ -52,6 +52,16 @@ server {
         try_files $uri $uri/ /index.html;
     }
 
+    # Ensure JSON assets are served with the correct content type
+    location ~* ^/assets/.*\.json$ {
+        types { application/json json; }
+        default_type application/json;
+        add_header Content-Type "application/json; charset=utf-8";
+        try_files $uri =404;
+        expires 1h;
+        add_header Cache-Control "public, max-age=3600";
+    }
+
     # API proxy to backend
     location /api/ {
         proxy_pass http://app-gateway:3000/api/;

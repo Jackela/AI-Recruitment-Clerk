@@ -8,7 +8,7 @@ test.describe('Debug Selectors', () => {
   test('Find correct selectors for jobs page', async ({ page }) => {
     console.log('🔍 Debugging selectors for jobs page...');
 
-    await page.goto('http://localhost:4202/jobs');
+    await page.goto('/jobs');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 

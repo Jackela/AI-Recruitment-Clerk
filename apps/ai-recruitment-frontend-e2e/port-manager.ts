@@ -61,6 +61,103 @@ export class PortManager {
     });
   }
 
+  private shouldSkipServiceCleanup(serviceName: string): boolean {
+    if (process.env['E2E_FORCE_PORT_SWEEP'] === 'true') {
+      return false;
+    }
+
+    if (
+      serviceName === 'gateway' &&
+      process.env['E2E_USE_REAL_API'] !== 'true' &&
+      process.env['E2E_FORCE_GATEWAY_CLEANUP'] !== 'true'
+    ) {
+      return true;
+    }
+
+    if (
+      serviceName === 'dev-server' &&
+      process.env['E2E_SKIP_WEBSERVER'] === 'true' &&
+      process.env['E2E_FORCE_DEVSERVER_CLEANUP'] !== 'true'
+    ) {
+      return true;
+    }
+
+    if (
+      serviceName === 'mock-api' &&
+      process.env['E2E_USE_REAL_API'] === 'true'
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private getProtectedPorts(): Set<number> {
+    const ports = new Set<number>();
+
+    const envPorts = process.env['E2E_PROTECTED_PORTS'];
+    if (envPorts) {
+      for (const token of envPorts.split(',')) {
+        const parsed = Number.parseInt(token.trim(), 10);
+        if (!Number.isNaN(parsed)) {
+          ports.add(parsed);
+        }
+      }
+    }
+
+    if (process.env['E2E_USE_REAL_API'] !== 'true') {
+      ports.add(3000);
+    }
+
+    if (process.env['E2E_SKIP_WEBSERVER'] === 'true') {
+      ports.add(4200);
+    }
+
+    return ports;
+  }
+
+  private isProtectedProcess(name?: string): boolean {
+    if (!name) {
+      return false;
+    }
+
+    const normalized = name.toLowerCase();
+    const protectedKeywords = [
+      'com.docker',
+      'docker',
+      'vpnkit',
+      'hyper-v',
+      'vmmem',
+      'vmwp',
+      'wsl',
+      'lxd',
+      'containerd',
+      'podman',
+    ];
+
+    return protectedKeywords.some((keyword) => normalized.includes(keyword));
+  }
+
+  private async getProcessNameByPid(pid: string): Promise<string | undefined> {
+    if (!pid) {
+      return undefined;
+    }
+
+    try {
+      if (process.platform === 'win32') {
+        const { stdout } = await execAsync(
+          `tasklist /FI "PID eq ${pid}" /FO CSV /NH`,
+        );
+        return stdout.split(',')[0]?.replace(/"/g, '');
+      }
+
+      const { stdout } = await execAsync(`ps -p ${pid} -o comm=`);
+      return stdout.trim();
+    } catch {
+      return undefined;
+    }
+  }
+
   /**
    * Retrieves instance.
    * @returns The PortManager.
@@ -193,6 +290,14 @@ export class PortManager {
    * Force kill process on a specific port with enhanced reliability
    */
   async forceKillPort(port: number): Promise<boolean> {
+    const protectedPorts = this.getProtectedPorts();
+    if (protectedPorts.has(port)) {
+      console.log(
+        `🛡️ Skipping force kill for protected port ${port} (external service)`,
+      );
+      return false;
+    }
+
     const isWindows = process.platform === 'win32';
     let killedAny = false;
 
@@ -212,6 +317,14 @@ export class PortManager {
               const pid = parts[parts.length - 1];
 
               if (pid && pid !== '0' && !isNaN(parseInt(pid))) {
+                const processName = await this.getProcessNameByPid(pid);
+                if (this.isProtectedProcess(processName)) {
+                  console.log(
+                    `🛡️ Skipping protected process ${processName} (PID ${pid}) on port ${port}`,
+                  );
+                  continue;
+                }
+
                 try {
                   await execAsync(`taskkill /PID ${pid} /F /T`, {
                     timeout: 10000,
@@ -255,6 +368,14 @@ export class PortManager {
               .filter((pid) => pid.trim() && !isNaN(parseInt(pid)));
 
             for (const pid of pids) {
+              const processName = await this.getProcessNameByPid(pid);
+              if (this.isProtectedProcess(processName)) {
+                console.log(
+                  `🛡️ Skipping protected process ${processName} (PID ${pid}) on port ${port}`,
+                );
+                continue;
+              }
+
               try {
                 // Try graceful termination first
                 await execAsync(`kill -TERM ${pid}`, { timeout: 5000 });
@@ -339,10 +460,14 @@ export class PortManager {
   async cleanupAllPorts(): Promise<void> {
     console.log('🧹 Starting comprehensive port cleanup...');
 
+    const protectedPorts = this.getProtectedPorts();
     const allPorts = new Set<number>();
 
     // Collect all configured ports
-    for (const config of this.serverConfigs.values()) {
+    for (const [serviceName, config] of this.serverConfigs) {
+      if (this.shouldSkipServiceCleanup(serviceName)) {
+        continue;
+      }
       allPorts.add(config.defaultPort);
       config.fallbackPorts.forEach((port) => allPorts.add(port));
     }
@@ -354,9 +479,23 @@ export class PortManager {
 
     // Sequential cleanup to prevent race conditions
     for (const port of Array.from(allPorts)) {
+      if (protectedPorts.has(port)) {
+        console.log(
+          `🛡️ Skipping cleanup for protected port ${port} (external service)`,
+        );
+        continue;
+      }
+
       try {
         const status = await this.getPortStatus(port);
         if (!status.isAvailable) {
+          if (this.isProtectedProcess(status.processName)) {
+            console.log(
+              `🛡️ Skipping cleanup for port ${port} owned by protected process ${status.processName}`,
+            );
+            continue;
+          }
+
           console.log(
             `🔄 Cleaning up port ${port} (${status.processName}, PID: ${status.processId})`,
           );

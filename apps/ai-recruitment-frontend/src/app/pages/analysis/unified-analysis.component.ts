@@ -209,6 +209,55 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
 
   analysisResult = signal<AnalysisResult | null>(null);
 
+  private normalizeScore(value: unknown, fallback = 0): number {
+    const numeric =
+      typeof value === 'number' && Number.isFinite(value)
+        ? value
+        : Number(value);
+    if (!Number.isFinite(numeric)) {
+      return fallback;
+    }
+    return Math.max(0, Math.min(100, numeric));
+  }
+
+  private normalizeString(value: unknown, fallback = ''): string {
+    if (typeof value !== 'string') {
+      return fallback;
+    }
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : fallback;
+  }
+
+  private normalizeStringArray(value: unknown): string[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+
+    return value
+      .filter((item): item is string => typeof item === 'string')
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+  }
+
+  private normalizeUrl(value: unknown): string | undefined {
+    if (typeof value !== 'string') {
+      return undefined;
+    }
+
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return undefined;
+    }
+
+    try {
+      // eslint-disable-next-line no-new
+      new URL(trimmed);
+      return trimmed;
+    } catch {
+      return undefined;
+    }
+  }
+
   // Statistics (will be replaced with real API data)
   todayAnalyses = signal(42);
   totalAnalyses = signal(1247);
@@ -497,23 +546,20 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     this.analysisSteps.set(completedSteps);
 
     // Set analysis result
+    const result = completion.result ?? {};
+    const details = result.details ?? {};
+
     this.analysisResult.set({
-      score: completion.result?.score || 85,
-      summary: completion.result?.summary || '该候选人具有良好的技能匹配度',
-      keySkills: completion.result?.details?.skills || [
-        'JavaScript',
-        'TypeScript',
-        'Angular',
-        'Node.js',
-      ],
-      experience: completion.result?.details?.experience || '3-5年软件开发经验',
-      education: completion.result?.details?.education || '计算机科学学士学位',
-      recommendations: completion.result?.details?.recommendations || [
-        '技术栈匹配度高，适合前端开发岗位',
-        '建议进行技术面试验证实际能力',
-        '可以考虑安排项目经验分享环节',
-      ],
-      reportUrl: completion.result?.reportUrl,
+      score: this.normalizeScore(result.score, 0),
+      summary: this.normalizeString(
+        result.summary,
+        '分析已完成，但暂无摘要可显示',
+      ),
+      keySkills: this.normalizeStringArray(details.skills),
+      experience: this.normalizeString(details.experience, ''),
+      education: this.normalizeString(details.education, ''),
+      recommendations: this.normalizeStringArray(details.recommendations),
+      reportUrl: this.normalizeUrl(result.reportUrl),
     });
 
     this.currentState.set('completed');
