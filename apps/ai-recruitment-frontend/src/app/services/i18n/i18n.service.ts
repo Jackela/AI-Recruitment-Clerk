@@ -1,7 +1,7 @@
 import { Injectable, signal, effect } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { of, BehaviorSubject } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, finalize, tap } from 'rxjs/operators';
 import { ToastService } from '../toast.service';
 
 export type Language = 'zh-CN' | 'en-US' | 'zh-TW' | 'ja-JP' | 'ko-KR';
@@ -173,31 +173,30 @@ export class I18nService {
       return;
     }
 
+    const fallbackTranslations = this.getFallbackTranslations(language);
+    // Seed with fallback to avoid blank keys before HTTP completes
+    this.translations.next(fallbackTranslations);
+
     this.isLoading.set(true);
 
     // Load translation file
     this.http
       .get<TranslationStrings>(`/assets/i18n/${language}.json`)
       .pipe(
+        catchError((error) => {
+          console.error(`Failed to load translations for ${language}:`, error);
+          this.toastService.warning('语言包加载失败，已使用内置翻译');
+          return of(fallbackTranslations);
+        }),
         tap((translations) => {
           this.translationCache.set(language, translations);
           this.translations.next(translations);
         }),
-        catchError((error) => {
-          console.error(`Failed to load translations for ${language}:`, error);
-          // Fallback to embedded translations
-          return of(this.getFallbackTranslations(language));
+        finalize(() => {
+          this.isLoading.set(false);
         }),
       )
-      .subscribe({
-        next: (_translations) => {
-          this.isLoading.set(false);
-        },
-        error: () => {
-          this.isLoading.set(false);
-          this.toastService.error('无法加载语言包');
-        },
-      });
+      .subscribe();
   }
 
   private applyLanguage(language: Language): void {
@@ -455,6 +454,7 @@ export class I18nService {
         navigation: {
           dashboard: '控制台',
           analysis: '分析',
+          jobs: '岗位管理',
           results: '结果',
           settings: '设置',
           help: '帮助',
@@ -469,6 +469,13 @@ export class I18nService {
           confirmDelete: '确定要删除吗？',
           noData: '暂无数据',
           networkError: '网络错误，请稍后重试',
+        },
+        validation: {
+          required: '该字段不能为空',
+          minLength: '最少输入{{length}}个字符',
+          maxLength: '最多输入{{length}}个字符',
+          email: '请输入有效的邮箱地址',
+          pattern: '格式不正确',
         },
       },
       'en-US': {
@@ -501,6 +508,7 @@ export class I18nService {
         navigation: {
           dashboard: 'Dashboard',
           analysis: 'Analysis',
+          jobs: 'Job Management',
           results: 'Results',
           settings: 'Settings',
           help: 'Help',
@@ -515,6 +523,13 @@ export class I18nService {
           confirmDelete: 'Are you sure you want to delete?',
           noData: 'No data available',
           networkError: 'Network error, please try again later',
+        },
+        validation: {
+          required: 'This field is required',
+          minLength: 'Minimum {{length}} characters required',
+          maxLength: 'Maximum {{length}} characters allowed',
+          email: 'Please enter a valid email address',
+          pattern: 'Invalid format',
         },
       },
       'zh-TW': {
@@ -547,6 +562,7 @@ export class I18nService {
         navigation: {
           dashboard: '控制台',
           analysis: '分析',
+          jobs: '崗位管理',
           results: '結果',
           settings: '設定',
           help: '說明',
@@ -561,6 +577,13 @@ export class I18nService {
           confirmDelete: '確定要刪除嗎？',
           noData: '暫無資料',
           networkError: '網路錯誤，請稍後重試',
+        },
+        validation: {
+          required: '此欄位為必填',
+          minLength: '至少輸入{{length}}個字元',
+          maxLength: '最多輸入{{length}}個字元',
+          email: '請輸入有效的電子郵件地址',
+          pattern: '格式不正確',
         },
       },
       'ja-JP': {
@@ -593,6 +616,7 @@ export class I18nService {
         navigation: {
           dashboard: 'ダッシュボード',
           analysis: '分析',
+          jobs: '職務管理',
           results: '結果',
           settings: '設定',
           help: 'ヘルプ',
@@ -607,6 +631,13 @@ export class I18nService {
           confirmDelete: '削除してもよろしいですか？',
           noData: 'データがありません',
           networkError: 'ネットワークエラー、後でもう一度お試しください',
+        },
+        validation: {
+          required: 'この項目は必須です',
+          minLength: '{{length}}文字以上入力してください',
+          maxLength: '{{length}}文字以内で入力してください',
+          email: '有効なメールアドレスを入力してください',
+          pattern: '形式が正しくありません',
         },
       },
       'ko-KR': {
@@ -639,6 +670,7 @@ export class I18nService {
         navigation: {
           dashboard: '대시보드',
           analysis: '분석',
+          jobs: '채용 관리',
           results: '결과',
           settings: '설정',
           help: '도움말',
@@ -653,6 +685,13 @@ export class I18nService {
           confirmDelete: '삭제하시겠습니까?',
           noData: '데이터 없음',
           networkError: '네트워크 오류, 나중에 다시 시도하세요',
+        },
+        validation: {
+          required: '이 필드는 필수입니다',
+          minLength: '{{length}}자 이상 입력하세요',
+          maxLength: '{{length}}자 이하로 입력하세요',
+          email: '유효한 이메일 주소를 입력하세요',
+          pattern: '형식이 올바르지 않습니다',
         },
       },
     };

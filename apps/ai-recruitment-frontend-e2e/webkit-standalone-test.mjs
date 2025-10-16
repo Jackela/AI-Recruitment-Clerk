@@ -10,12 +10,18 @@ import { E2EMonitoring } from './monitoring-system.mjs';
 
 let devServer = null;
 const monitoring = new E2EMonitoring();
+const baseUrl =
+  process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:4200';
+const baseUrlObject = new URL(baseUrl);
+const devServerPort = baseUrlObject.port || '80';
+const homeUrl = new URL('/', baseUrlObject).toString();
+const jobsUrl = new URL('/jobs', baseUrlObject).toString();
 
 async function startDevServer() {
   return new Promise((resolve, reject) => {
     console.log('🚀 Starting development server manually...');
     
-    devServer = spawn('npx', ['nx', 'run', 'ai-recruitment-frontend:serve', '--port', '4202'], {
+    devServer = spawn('npx', ['nx', 'run', 'ai-recruitment-frontend:serve', '--port', devServerPort], {
       stdio: 'pipe',
       shell: true,
       cwd: process.cwd()
@@ -27,7 +33,7 @@ async function startDevServer() {
       const output = data.toString();
       console.log('📝 Server:', output.trim());
       
-      if (output.includes('Local:') || output.includes('localhost:4202')) {
+      if (output.includes('Local:') || output.includes(`localhost:${devServerPort}`)) {
         if (!serverReady) {
           serverReady = true;
           console.log('✅ Development server started successfully');
@@ -126,7 +132,7 @@ async function runWebKitTest() {
     // Test 1: Basic Connection
     console.log('📝 Test 1: Basic WebKit connection...');
     try {
-      await page.goto('http://localhost:4202/', { 
+        await page.goto(homeUrl, { 
         waitUntil: 'domcontentloaded',
         timeout: 30000 
       });
@@ -171,7 +177,7 @@ async function runWebKitTest() {
     // Test 3: Navigation
     console.log('📝 Test 3: Navigation test...');
     try {
-      await page.goto('http://localhost:4202/jobs', { 
+      await page.goto(jobsUrl, { 
         waitUntil: 'domcontentloaded',
         timeout: 30000 
       });

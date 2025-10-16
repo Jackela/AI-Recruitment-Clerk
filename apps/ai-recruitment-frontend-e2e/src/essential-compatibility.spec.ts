@@ -21,11 +21,7 @@ test.describe('Essential Cross-Browser Compatibility', () => {
     console.log(`🔌 Testing ${browserName} basic connection...`);
 
     // Use connection health check utility
-    const isHealthy = await checkConnectionHealth(
-      page,
-      'http://localhost:4202/',
-      browserName,
-    );
+    const isHealthy = await checkConnectionHealth(page, '/', browserName);
 
     if (!isHealthy) {
       console.log(
@@ -34,7 +30,7 @@ test.describe('Essential Cross-Browser Compatibility', () => {
 
       // Fallback: simple navigation test
       try {
-        await page.goto('http://localhost:4202/', {
+        await page.goto('/', {
           waitUntil: 'domcontentloaded',
           timeout:
             BROWSER_CONFIGS[browserName as keyof typeof BROWSER_CONFIGS]
@@ -60,7 +56,7 @@ test.describe('Essential Cross-Browser Compatibility', () => {
     // Use stable navigation utility
     await stableNavigation(
       page,
-      'http://localhost:4202/',
+      '/',
       {
         waitUntil: 'domcontentloaded',
         retries: 2,
@@ -103,7 +99,7 @@ test.describe('Essential Cross-Browser Compatibility', () => {
 
     await stableNavigation(
       page,
-      'http://localhost:4202/',
+      '/',
       {
         waitUntil: 'load',
         retries: 2,
@@ -161,7 +157,7 @@ test.describe('Essential Cross-Browser Compatibility', () => {
     // Start from home
     await stableNavigation(
       page,
-      'http://localhost:4202/',
+      '/',
       {
         waitUntil: 'domcontentloaded',
         retries: 2,
@@ -174,7 +170,7 @@ test.describe('Essential Cross-Browser Compatibility', () => {
 
     // Try navigation to a single route (most stable)
     try {
-      await page.goto('http://localhost:4202/jobs', {
+      await page.goto('/jobs', {
         waitUntil: 'domcontentloaded',
         timeout:
           BROWSER_CONFIGS[browserName as keyof typeof BROWSER_CONFIGS]
@@ -184,7 +180,7 @@ test.describe('Essential Cross-Browser Compatibility', () => {
       // Verify navigation worked
       await expect(page.locator('body')).toBeVisible({ timeout: 15000 });
       const currentUrl = page.url();
-      expect(currentUrl).toContain('/jobs');
+      expect(new URL(currentUrl).pathname).toContain('/jobs');
 
       console.log(`✅ ${browserName} navigation to /jobs successful`);
     } catch (error) {

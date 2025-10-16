@@ -39,7 +39,7 @@ export function getTestEnvironment(): TestEnvironment {
       process.env.PLAYWRIGHT_BASE_URL ||
       (devServerPort
         ? `http://localhost:${devServerPort}`
-        : 'http://localhost:4202'),
+        : 'http://localhost:4200'),
     useRealApi: process.env.E2E_USE_REAL_API === 'true',
     skipWebServer: process.env.E2E_SKIP_WEBSERVER === 'true',
     isCI: !!process.env.CI,

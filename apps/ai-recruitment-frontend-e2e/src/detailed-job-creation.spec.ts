@@ -10,6 +10,8 @@ const mockJobResponse = {
   message: 'Job received and is being processed.',
 };
 
+const LANDING_PATH = '/jobs';
+
 test.describe('Detailed Job Creation Analysis', () => {
   test.beforeEach(async ({ page }) => {
     // Mock the job creation API
@@ -40,7 +42,12 @@ test.describe('Detailed Job Creation Analysis', () => {
       }
     });
 
-    await page.goto('http://localhost:4202/');
+    await page.goto('/');
+    await page.waitForURL(
+      (url) => url.pathname.startsWith(LANDING_PATH),
+      { timeout: 15_000 },
+    );
+    await page.waitForLoadState('domcontentloaded');
   });
 
   test('Detailed job creation and verification flow', async ({ page }) => {
@@ -49,7 +56,7 @@ test.describe('Detailed Job Creation Analysis', () => {
     // Step 1: Navigate to job creation page
     await test.step('Navigate to job creation', async () => {
       console.log('Step 1: Navigating to /jobs/create');
-      await page.goto('http://localhost:4202/jobs/create');
+      await page.goto('/jobs/create');
       await page.waitForLoadState('networkidle');
 
       // Verify form exists
@@ -98,7 +105,7 @@ test.describe('Detailed Job Creation Analysis', () => {
     await test.step('Navigate to jobs list and check content', async () => {
       console.log('Step 4: Navigating to jobs list');
 
-      await page.goto('http://localhost:4202/jobs');
+      await page.goto('/jobs');
       await page.waitForLoadState('networkidle');
 
       // Wait for any async loading

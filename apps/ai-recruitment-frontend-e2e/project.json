@@ -5,5 +5,25 @@
   "sourceRoot": "apps/ai-recruitment-frontend-e2e/src",
   "implicitDependencies": ["ai-recruitment-frontend"],
   "// targets": "to see all targets run: nx show project ai-recruitment-frontend-e2e --web",
-  "targets": {}
+  "targets": {
+    "e2e": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{projectRoot}/test-results",
+        "{workspaceRoot}/playwright-report"
+      ],
+      "options": {
+        "cwd": "apps/ai-recruitment-frontend-e2e",
+        "command": "npx playwright test",
+        "env": {
+          "E2E_SKIP_WEBSERVER": "false",
+          "DEV_SERVER_PORT": "4202",
+          "PLAYWRIGHT_BASE_URL": "http://localhost:4202",
+          "E2E_PROTECTED_PORTS": "3000,4200",
+          "E2E_USE_REAL_API": "false"
+        },
+        "forwardAllArgs": true
+      }
+    }
+  }
 }

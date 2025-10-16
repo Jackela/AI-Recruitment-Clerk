@@ -8,6 +8,9 @@ import { webkit } from '@playwright/test';
 
 async function testWebKitDirect() {
   console.log('🌐 Testing WebKit against manually started server...');
+  const baseUrl = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:4204';
+  const homeUrl = new URL('/', baseUrl).toString();
+  const jobsUrl = new URL('/jobs', baseUrl).toString();
   
   let browser = null;
   let context = null;
@@ -37,9 +40,9 @@ async function testWebKitDirect() {
     
     page = await context.newPage();
     
-    console.log('🔄 Attempting connection to http://localhost:4204/...');
+    console.log(`🔄 Attempting connection to ${homeUrl}...`);
     
-    const response = await page.goto('http://localhost:4204/', { 
+    const response = await page.goto(homeUrl, { 
       waitUntil: 'domcontentloaded',
       timeout: 30000 
     });
@@ -71,7 +74,7 @@ async function testWebKitDirect() {
     
     // Test navigation
     console.log('🔄 Testing navigation to /jobs...');
-    await page.goto('http://localhost:4204/jobs', { 
+    await page.goto(jobsUrl, { 
       waitUntil: 'domcontentloaded',
       timeout: 30000 
     });

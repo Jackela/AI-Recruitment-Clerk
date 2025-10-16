@@ -28,6 +28,9 @@ async function globalSetup() {
   }
 
   const useRealAPI = process.env.E2E_USE_REAL_API === 'true';
+  const skipWebServer =
+    process.env.E2E_SKIP_WEBSERVER === 'true' ||
+    process.env.E2E_USE_REAL_API === 'true';
   const e2eDir = __dirname;
   const pidFile = path.join(e2eDir, '.gateway.pid');
   let mockServerPort: number | null = null;
@@ -121,55 +124,67 @@ async function globalSetup() {
   }
 
   // Handle dev server with dynamic port allocation
-  console.log('🎯 Configuring development server...');
+  if (!skipWebServer) {
+    console.log('🎯 Configuring development server...');
 
-  try {
-    // Try to allocate dev server port
-    devServerPort = await portManager.allocatePort('dev-server');
-    process.env.DEV_SERVER_PORT = devServerPort.toString();
-    process.env.PLAYWRIGHT_BASE_URL = `http://localhost:${devServerPort}`;
+    try {
+      // Try to allocate dev server port
+      devServerPort = await portManager.allocatePort('dev-server');
+      process.env.DEV_SERVER_PORT = devServerPort.toString();
+      process.env.PLAYWRIGHT_BASE_URL = `http://localhost:${devServerPort}`;
 
-    console.log(`📝 Dev server will use port ${devServerPort}`);
-  } catch (error) {
-    console.warn(
-      '⚠️ Could not allocate dev server port, using default:',
-      error,
-    );
-
-    // Fall back to checking if the default port is available
-    const defaultPort = 4202;
-    const isDefaultAvailable = await portManager.isPortAvailable(defaultPort);
-
-    if (!isDefaultAvailable) {
+      console.log(`📝 Dev server will use port ${devServerPort}`);
+    } catch (error) {
       console.warn(
-        `⚠️ Default dev server port ${defaultPort} is occupied, attempting cleanup...`,
+        '⚠️ Could not allocate dev server port, using default:',
+        error,
       );
-      await portManager.forceKillPort(defaultPort);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Fall back to checking if the default port is available
+      const defaultPort = 4202;
+      const isDefaultAvailable = await portManager.isPortAvailable(defaultPort);
+
+      if (!isDefaultAvailable) {
+        console.warn(
+          `⚠️ Default dev server port ${defaultPort} is occupied, attempting cleanup...`,
+        );
+        await portManager.forceKillPort(defaultPort);
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+
+      devServerPort = defaultPort;
+      process.env.DEV_SERVER_PORT = devServerPort.toString();
+      process.env.PLAYWRIGHT_BASE_URL = `http://localhost:${devServerPort}`;
     }
 
-    devServerPort = defaultPort;
-    process.env.DEV_SERVER_PORT = devServerPort.toString();
-    process.env.PLAYWRIGHT_BASE_URL = `http://localhost:${devServerPort}`;
-  }
+    // Wait for dev server to be ready (if webServer is disabled, this will be external)
+    const devServerUrl =
+      process.env.PLAYWRIGHT_BASE_URL || `http://localhost:${devServerPort}`;
+    console.log(`⏳ Waiting for dev server at ${devServerUrl} to be ready...`);
 
-  // Wait for dev server to be ready (if webServer is disabled, this will be external)
-  const devServerUrl =
-    process.env.PLAYWRIGHT_BASE_URL || `http://localhost:${devServerPort}`;
-  console.log(`⏳ Waiting for dev server at ${devServerUrl} to be ready...`);
-
-  const isServerReady = await waitForServerReady(devServerUrl, 60);
-  if (!isServerReady) {
-    console.error(
-      `❌ Dev server at ${devServerUrl} is not responding after 60 seconds`,
-    );
-    console.error(
-      '   This may cause Firefox connection issues during parallel test execution',
-    );
+    const isServerReady = await waitForServerReady(devServerUrl, 60);
+    if (!isServerReady) {
+      console.error(
+        `❌ Dev server at ${devServerUrl} is not responding after 60 seconds`,
+      );
+      console.error(
+        '   This may cause Firefox connection issues during parallel test execution',
+      );
+    } else {
+      console.log(`✅ Dev server is ready and responsive`);
+      // Add stability delay to ensure server is fully stable
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
   } else {
-    console.log(`✅ Dev server is ready and responsive`);
-    // Add stability delay to ensure server is fully stable
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    delete process.env.DEV_SERVER_PORT;
+    const externalBaseUrl =
+      process.env.PLAYWRIGHT_BASE_URL ||
+      process.env.E2E_EXTERNAL_BASE_URL ||
+      'http://localhost:4200';
+    process.env.PLAYWRIGHT_BASE_URL = externalBaseUrl;
+    console.log(
+      `🎯 Skipping dev server startup. Using external base URL: ${externalBaseUrl}`,
+    );
   }
 
   // Final health check for all services

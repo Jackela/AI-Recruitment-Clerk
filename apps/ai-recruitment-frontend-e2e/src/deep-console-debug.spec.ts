@@ -1,5 +1,7 @@
 import { test, expect } from './fixtures';
 
+const LANDING_PATH = '/jobs';
+
 test.describe('Deep Console Debug', () => {
   test('capture all console messages and errors', async ({ page }) => {
     const allMessages: string[] = [];
@@ -25,7 +27,11 @@ test.describe('Deep Console Debug', () => {
     });
 
     console.log('Starting page navigation...');
-    await page.goto('http://localhost:4202/');
+    await page.goto('/');
+    await page.waitForURL(
+      (url) => url.pathname.startsWith(LANDING_PATH),
+      { timeout: 15_000 },
+    );
 
     console.log('Waiting for network to settle...');
     await page.waitForLoadState('networkidle');
@@ -51,7 +57,7 @@ test.describe('Deep Console Debug', () => {
     }
 
     // Check if main.js is actually being loaded
-    const response = await page.goto('http://localhost:4202/');
+    const response = await page.goto('/');
     const responseText = await response?.text();
     console.log(
       'Response includes main.js:',

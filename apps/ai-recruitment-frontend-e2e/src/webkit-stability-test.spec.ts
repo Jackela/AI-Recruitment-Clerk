@@ -20,7 +20,7 @@ test.describe('WebKit Stability Validation', () => {
     for (let i = 1; i <= 3; i++) {
       console.log(`🔄 WebKit connection test ${i}/3`);
 
-      await page.goto('http://localhost:4202/', {
+      await page.goto('/', {
         waitUntil: 'domcontentloaded', // Proven to work in diagnostic
         timeout: 30000, // Standard timeout - diagnostic showed WebKit connects quickly
       });
@@ -60,7 +60,7 @@ test.describe('WebKit Stability Validation', () => {
 
     console.log('🌐 Testing WebKit JavaScript execution...');
 
-    await page.goto('http://localhost:4202/', {
+    await page.goto('/', {
       waitUntil: 'domcontentloaded', // Proven to work from diagnostic
       timeout: 30000, // Standard timeout
     });
@@ -102,7 +102,7 @@ test.describe('WebKit Stability Validation', () => {
     console.log('🌐 Testing WebKit navigation...');
 
     // Start from home - use proven approach from diagnostic
-    await page.goto('http://localhost:4202/', {
+    await page.goto('/', {
       waitUntil: 'domcontentloaded',
       timeout: 30000,
     });
@@ -113,7 +113,7 @@ test.describe('WebKit Stability Validation', () => {
     // Test navigation to single route (most reliable)
     console.log('🔄 Testing WebKit navigation to /jobs...');
 
-    await page.goto('http://localhost:4202/jobs', {
+    await page.goto('/jobs', {
       waitUntil: 'domcontentloaded',
       timeout: 30000,
     });

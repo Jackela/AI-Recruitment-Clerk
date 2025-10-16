@@ -9,7 +9,9 @@ import { firefox } from '@playwright/test';
 
 async function testFirefoxLaunch() {
   console.log('🦊 Starting Firefox diagnostic test...');
-  
+  const baseUrl = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:4200';
+  const homeUrl = new URL('/', baseUrl).toString();
+
   let browser = null;
   let context = null;
   let page = null;
@@ -58,7 +60,7 @@ async function testFirefoxLaunch() {
     const navStartTime = Date.now();
     
     try {
-      await page.goto('http://localhost:4202/', { 
+      await page.goto(homeUrl, { 
         waitUntil: 'domcontentloaded', 
         timeout: 30000 
       });

@@ -1,4 +1,5 @@
 import { test, expect } from './fixtures';
+import type { Page } from '@playwright/test';
 
 /**
  * Debug User Flow - Step by Step Testing
@@ -9,6 +10,16 @@ const mockJobResponse = {
   jobId: 'test-job-123',
   message: 'Job received and is being processed.',
 };
+
+const LANDING_PATH = '/jobs';
+
+async function waitForLanding(page: Page): Promise<void> {
+  await page.waitForURL(
+    (url) => url.pathname.startsWith(LANDING_PATH),
+    { timeout: 15_000 },
+  );
+  await page.waitForLoadState('domcontentloaded');
+}
 
 test.describe('Debug User Flow - Step by Step', () => {
   test.beforeEach(async ({ page }) => {
@@ -72,20 +83,19 @@ test.describe('Debug User Flow - Step by Step', () => {
       },
     );
 
-    await page.goto('http://localhost:4202/');
+    await page.goto('/');
+    await waitForLanding(page);
   });
 
   test('Step 1: Application loads and shows dashboard', async ({ page }) => {
     console.log('Testing application load...');
 
-    // Fix: Check that application loads with specific selector to avoid multiple h1 elements
+    await expect(page).toHaveURL(/\/jobs/);
     await expect(page.locator('#app-title')).toBeVisible();
-    await expect(page.locator('#app-title')).toContainText(
-      'AI Recruitment Assistant',
-    );
-    // Fix: Use more specific selector to avoid multiple text matches
     await expect(
-      page.locator('.welcome-title').filter({ hasText: 'AI 招聘助理' }),
+      page.locator('h2.page-title, .page-title').filter({
+        hasText: '岗位管理',
+      }),
     ).toBeVisible();
 
     console.log('✅ Application loaded successfully');
@@ -95,7 +105,7 @@ test.describe('Debug User Flow - Step by Step', () => {
     console.log('Testing navigation to job creation...');
 
     // Navigate to job creation page
-    await page.goto('http://localhost:4202/jobs/create');
+    await page.goto('/jobs/create');
     await page.waitForLoadState('networkidle');
 
     // Check for job creation form
@@ -113,7 +123,7 @@ test.describe('Debug User Flow - Step by Step', () => {
   test('Step 3: Can fill and submit job creation form', async ({ page }) => {
     console.log('Testing job creation form submission...');
 
-    await page.goto('http://localhost:4202/jobs/create');
+    await page.goto('/jobs/create');
     await page.waitForLoadState('networkidle');
 
     // Fill form using correct selectors
@@ -145,7 +155,7 @@ test.describe('Debug User Flow - Step by Step', () => {
 
     try {
       // Try to navigate directly to a job details page
-      await page.goto(`http://localhost:4202/jobs/${mockJobResponse.jobId}`);
+      await page.goto(`/jobs/${mockJobResponse.jobId}`);
 
       // Use a shorter timeout and handle failure gracefully
       await page.waitForLoadState('networkidle', { timeout: 15000 });
@@ -200,7 +210,7 @@ test.describe('Debug User Flow - Step by Step', () => {
       console.log('⚠️ Failed to load job details page:', error.message);
 
       // Check if we can at least navigate to the jobs list
-      await page.goto('http://localhost:4202/jobs');
+      await page.goto('/jobs');
       await page.waitForLoadState('networkidle', { timeout: 10000 });
 
       const jobsPageContent = await page.textContent('body');

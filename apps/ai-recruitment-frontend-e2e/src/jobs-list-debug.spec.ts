@@ -7,7 +7,7 @@ import { test, expect } from './fixtures';
 test.describe('Jobs List Component Debug', () => {
   test.beforeEach(async ({ page }) => {
     // Ensure we have a proper base URL
-    const baseURL = 'http://localhost:4202';
+    const baseURL = '/';
 
     // Set base URL if not already set
     if (!page.url() || page.url() === 'about:blank') {
@@ -43,7 +43,7 @@ test.describe('Jobs List Component Debug', () => {
   test('Check jobs list page structure and content', async ({ page }) => {
     console.log('🔍 Testing jobs list page structure...');
 
-    await page.goto('http://localhost:4202/jobs');
+    await page.goto('/jobs');
     await page.waitForLoadState('networkidle');
 
     // Wait for potential async loading
@@ -122,7 +122,7 @@ test.describe('Jobs List Component Debug', () => {
       }
     });
 
-    await page.goto('http://localhost:4202/jobs');
+    await page.goto('/jobs');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 

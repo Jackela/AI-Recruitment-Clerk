@@ -20,7 +20,7 @@ test.describe('Firefox Stability Validation', () => {
     for (let i = 1; i <= 3; i++) {
       console.log(`🔄 Firefox connection test ${i}/3`);
 
-      await page.goto('http://localhost:4202/', {
+      await page.goto('/', {
         waitUntil: 'networkidle',
         timeout: 60000, // Extended timeout for Firefox
       });
@@ -51,7 +51,7 @@ test.describe('Firefox Stability Validation', () => {
     console.log('🦊 Testing Firefox error handling...');
 
     // Test navigation to non-existent route
-    await page.goto('http://localhost:4202/nonexistent-route', {
+    await page.goto('/nonexistent-route', {
       waitUntil: 'networkidle',
       timeout: 30000,
     });
@@ -72,14 +72,14 @@ test.describe('Firefox Stability Validation', () => {
     console.log('🦊 Testing Firefox rapid navigation...');
 
     // Start from home
-    await page.goto('http://localhost:4202/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'networkidle' });
     await expect(page.locator('#app-title')).toBeVisible();
 
     // Rapid navigation test
     const routes = ['/jobs', '/reports', '/resume'];
 
     for (const route of routes) {
-      await page.goto(`http://localhost:4202${route}`, {
+      await page.goto(route, {
         waitUntil: 'load', // Use 'load' instead of 'networkidle' for speed
         timeout: 30000,
       });

@@ -14,7 +14,7 @@ test.describe('Cross-Browser Compatibility', () => {
     console.log(`🌐 Testing ${browserName} browser compatibility...`);
 
     // Navigate to application
-    await page.goto('http://localhost:4202/', {
+    await page.goto('/', {
       waitUntil: 'domcontentloaded',
       timeout: 30000,
     });
@@ -40,7 +40,7 @@ test.describe('Cross-Browser Compatibility', () => {
     console.log(`🧭 Testing ${browserName} navigation...`);
 
     // Start from home
-    await page.goto('http://localhost:4202/', {
+    await page.goto('/', {
       waitUntil: 'domcontentloaded',
     });
     await expect(page.locator('#app-title')).toBeVisible();
@@ -49,7 +49,7 @@ test.describe('Cross-Browser Compatibility', () => {
     const routes = ['/jobs', '/reports', '/resume'];
 
     for (const route of routes) {
-      await page.goto(`http://localhost:4202${route}`, {
+      await page.goto(route, {
         waitUntil: 'domcontentloaded',
         timeout: 20000,
       });
@@ -69,7 +69,7 @@ test.describe('Cross-Browser Compatibility', () => {
   }) => {
     console.log(`⚡ Testing ${browserName} JavaScript execution...`);
 
-    await page.goto('http://localhost:4202/', {
+    await page.goto('/', {
       waitUntil: 'domcontentloaded',
     });
 
@@ -96,7 +96,7 @@ test.describe('Cross-Browser Compatibility', () => {
   }) => {
     console.log(`♿ Testing ${browserName} accessibility...`);
 
-    await page.goto('http://localhost:4202/', {
+    await page.goto('/', {
       waitUntil: 'domcontentloaded',
     });
 

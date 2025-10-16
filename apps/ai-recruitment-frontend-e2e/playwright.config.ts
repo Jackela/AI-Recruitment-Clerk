@@ -1,19 +1,28 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// Support both development (with dev server) and production (containerized) testing
-// Use dynamically allocated port from global-setup if available
-const baseURL =
-  process.env['PLAYWRIGHT_BASE_URL'] ||
-  process.env['BASE_URL'] ||
-  (process.env['DEV_SERVER_PORT']
-    ? `http://localhost:${process.env['DEV_SERVER_PORT']}`
-    : 'http://localhost:4202');
-
 // Honor E2E_SKIP_WEBSERVER: when true we must NEVER start Playwright webServer
 // Also skip when running against real API to ensure decoupled servers
 const skipWebServer =
   process.env['E2E_SKIP_WEBSERVER'] === 'true' ||
   process.env['E2E_USE_REAL_API'] === 'true';
+
+const parsedDevServerPort = process.env['DEV_SERVER_PORT']
+  ? Number.parseInt(process.env['DEV_SERVER_PORT'], 10)
+  : undefined;
+const devServerPort = Number.isFinite(parsedDevServerPort ?? NaN)
+  ? parsedDevServerPort
+  : undefined;
+
+// Support both development (with dev server) and production (containerized) testing.
+// Default to the external stack (Docker) when the dev server is skipped.
+const fallbackBaseURL = skipWebServer
+  ? process.env['E2E_EXTERNAL_BASE_URL'] || 'http://localhost:4200'
+  : `http://localhost:${devServerPort ?? 4202}`;
+
+const baseURL =
+  process.env['PLAYWRIGHT_BASE_URL'] ||
+  process.env['BASE_URL'] ||
+  fallbackBaseURL;
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -61,8 +70,8 @@ export default defineConfig({
     ? {}
     : {
         webServer: {
-          command: process.env['DEV_SERVER_PORT']
-            ? `npx nx run ai-recruitment-frontend:serve:test --port ${process.env['DEV_SERVER_PORT']} --host 0.0.0.0`
+          command: devServerPort
+            ? `npx nx run ai-recruitment-frontend:serve:test --port ${devServerPort} --host 0.0.0.0`
             : 'npx nx run ai-recruitment-frontend:serve:test --port 4202 --host 0.0.0.0',
           url: baseURL,
           reuseExistingServer: !process.env.CI,

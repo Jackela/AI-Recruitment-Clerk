@@ -4,10 +4,16 @@ import { test, expect } from './fixtures';
  * Diagnostic Tests to Debug Application Loading Issues
  */
 
+const LANDING_PATH = '/jobs';
+
 test.describe('Application Diagnostics', () => {
   test('capture page content and HTML structure', async ({ page }) => {
     console.log('Navigating to application...');
-    await page.goto('http://localhost:4202/');
+    await page.goto('/');
+    await page.waitForURL(
+      (url) => url.pathname.startsWith(LANDING_PATH),
+      { timeout: 15_000 },
+    );
 
     console.log('Waiting for network to settle...');
     await page.waitForLoadState('networkidle');
@@ -70,7 +76,7 @@ test.describe('Application Diagnostics', () => {
   test('check if Angular development server is responding', async ({
     page,
   }) => {
-    const response = await page.goto('http://localhost:4202/');
+    const response = await page.goto('/');
     console.log('Response status:', response?.status());
     console.log('Response headers:', await response?.allHeaders());
 
@@ -83,7 +89,7 @@ test.describe('Application Diagnostics', () => {
   });
 
   test('manually check for Angular bootstrap', async ({ page }) => {
-    await page.goto('http://localhost:4202/');
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
 
     // Wait for Angular to potentially bootstrap

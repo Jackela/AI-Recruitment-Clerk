@@ -14,7 +14,7 @@ test.describe('Simple Firefox Test', () => {
     console.log('🦊 Testing basic Firefox connection...');
 
     // Single navigation test with extended timeout
-    await page.goto('http://localhost:4202/', {
+    await page.goto('/', {
       waitUntil: 'domcontentloaded', // Less strict than networkidle
       timeout: 60000,
     });
@@ -46,7 +46,7 @@ test.describe('Simple Firefox Test', () => {
     console.log('🦊 Testing Firefox simple navigation...');
 
     // Navigate to home
-    await page.goto('http://localhost:4202/', {
+    await page.goto('/', {
       waitUntil: 'load',
       timeout: 30000,
     });
@@ -55,7 +55,7 @@ test.describe('Simple Firefox Test', () => {
     await expect(page.locator('body')).toBeVisible();
 
     // Try navigation to jobs
-    await page.goto('http://localhost:4202/jobs', {
+    await page.goto('/jobs', {
       waitUntil: 'load',
       timeout: 30000,
     });
