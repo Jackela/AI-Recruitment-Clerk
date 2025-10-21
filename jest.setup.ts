@@ -17,6 +17,12 @@ process.env.MONGOMS_DISABLE_MD5_CHECK = process.env.MONGOMS_DISABLE_MD5_CHECK ||
 afterEach(async () => {
   try {
     await runCleanups();
+    
+    // 清理时钟和定时器
+    if (typeof jest !== 'undefined') {
+      jest.useRealTimers();
+      jest.clearAllTimers();
+    }
   } catch (error) {
     console.error('❌ afterEach清理失败:', error);
     // 不抛出错误，避免影响测试结果
