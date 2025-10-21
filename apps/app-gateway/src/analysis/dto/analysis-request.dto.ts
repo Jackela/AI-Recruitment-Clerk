@@ -14,7 +14,7 @@ export class AnalysisRequestDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(10000, { message: '职位描述不能超过10,000个字符' })
-  jdText: string;
+  jdText!: string;
 
   @ApiProperty({
     description: '分析会话ID（可选，用于关联多次分析）',

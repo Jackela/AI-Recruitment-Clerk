@@ -1061,9 +1061,9 @@ describe('MobileDashboardComponent', () => {
       // Test handling of events with missing properties
       const partialTouchEvent = {
         type: 'touchstart',
-        touches: [],
+        touches: [] as unknown as TouchList,
         preventDefault: jest.fn(),
-      } as Partial<TouchEvent> as TouchEvent;
+      } as unknown as TouchEvent;
 
       expect(() => {
         component['setupPullToRefresh']();

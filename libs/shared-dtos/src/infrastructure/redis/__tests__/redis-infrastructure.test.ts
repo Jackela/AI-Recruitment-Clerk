@@ -1,79 +1,108 @@
-// Mock Redis implementations for testing business logic
-class MockRedisClient {
-  private storage = new Map<string, string>();
-  private ttls = new Map<string, number>();
+import { RedisClient } from '../redis.client';
+import { SessionCacheService } from '../session-cache.service';
+import { UsageCacheService } from '../usage-cache.service';
+import { UserSession } from '../../../domains/user-management.dto';
 
-  async set(key: string, value: string, ttl?: number): Promise<void> {
-    this.storage.set(key, value);
-    if (ttl) {
-      this.ttls.set(key, Date.now() + ttl * 1000);
-    }
-  }
+type RedisClientMocks = {
+  redisClient: jest.Mocked<RedisClient>;
+  internals: {
+    set: jest.Mock;
+    setex: jest.Mock;
+    get: jest.Mock;
+    del: jest.Mock;
+    exists: jest.Mock;
+    incr: jest.Mock;
+    incrby: jest.Mock;
+    expire: jest.Mock;
+    ttl: jest.Mock;
+    hset: jest.Mock;
+    hget: jest.Mock;
+    pipeline: jest.Mock;
+    connect: jest.Mock;
+  };
+  pipeline: {
+    get: jest.Mock;
+    incrby: jest.Mock;
+    expire: jest.Mock;
+    ttl: jest.Mock;
+    exec: jest.Mock;
+  };
+};
 
-  async get(key: string): Promise<string | null> {
-    const ttl = this.ttls.get(key);
-    if (ttl && Date.now() > ttl) {
-      this.storage.delete(key);
-      this.ttls.delete(key);
-      return null;
-    }
-    return this.storage.get(key) || null;
-  }
+function createRedisClientMock(): RedisClientMocks {
+  const pipeline = {
+    get: jest.fn().mockReturnThis(),
+    incrby: jest.fn().mockReturnThis(),
+    expire: jest.fn().mockReturnThis(),
+    ttl: jest.fn().mockReturnThis(),
+    exec: jest.fn().mockResolvedValue([]),
+  };
 
-  async del(key: string): Promise<number> {
-    const deleted = this.storage.delete(key);
-    this.ttls.delete(key);
-    return deleted ? 1 : 0;
-  }
+  const internals = {
+    set: jest.fn().mockResolvedValue(undefined),
+    setex: jest.fn().mockResolvedValue(undefined),
+    get: jest.fn().mockResolvedValue(null),
+    del: jest.fn().mockResolvedValue(1),
+    exists: jest.fn().mockResolvedValue(0),
+    incr: jest.fn().mockResolvedValue(1),
+    incrby: jest.fn().mockResolvedValue(1),
+    expire: jest.fn().mockResolvedValue(true),
+    ttl: jest.fn().mockResolvedValue(3600),
+    hset: jest.fn().mockResolvedValue('OK'),
+    hget: jest.fn().mockResolvedValue(null),
+    pipeline: jest.fn().mockReturnValue(pipeline),
+    connect: jest.fn().mockResolvedValue(undefined),
+  };
 
-  async exists(key: string): Promise<boolean> {
-    return this.storage.has(key);
-  }
+  const redisClient = {
+    set: jest.fn(async (key: string, value: string, ttl?: number) => {
+      if (ttl) {
+        await internals.setex(key, ttl, value);
+      } else {
+        await internals.set(key, value);
+      }
+    }),
+    get: jest.fn(async (key: string) => internals.get(key)),
+    del: jest.fn((key: string) => internals.del(key)),
+    exists: jest.fn((key: string) =>
+      Promise.resolve(Boolean(internals.exists(key))),
+    ),
+    incr: jest.fn((key: string) => internals.incr(key)),
+    expire: jest.fn((key: string, ttl: number) => internals.expire(key, ttl)),
+    ttl: jest.fn((key: string) => internals.ttl(key)),
+    keys: jest.fn().mockResolvedValue([]),
+    mget: jest.fn().mockResolvedValue([]),
+    hset: jest.fn((key: string, field: string, value: string) =>
+      internals.hset(key, field, value),
+    ),
+    hget: jest.fn((key: string, field: string) =>
+      internals.hget(key, field),
+    ),
+    getClient: jest.fn(() => internals as any),
+    connect: jest.fn(async () => {
+      await internals.connect();
+    }),
+    isRedisConnected: jest.fn().mockReturnValue(true),
+  } as unknown as jest.Mocked<RedisClient>;
 
-  async incr(key: string): Promise<number> {
-    const current = parseInt(this.storage.get(key) || '0', 10);
-    const newValue = current + 1;
-    this.storage.set(key, newValue.toString());
-    return newValue;
-  }
-
-  async expire(key: string, seconds: number): Promise<boolean> {
-    if (this.storage.has(key)) {
-      this.ttls.set(key, Date.now() + seconds * 1000);
-      return true;
-    }
-    return false;
-  }
-
-  async ttl(key: string): Promise<number> {
-    const ttl = this.ttls.get(key);
-    if (!ttl) return -1;
-    const remaining = Math.ceil((ttl - Date.now()) / 1000);
-    return remaining > 0 ? remaining : -2;
-  }
-
-  getClient() {
-    return {
-      pipeline: () => ({
-        get: () => this,
-        incrby: () => this,
-        expire: () => this,
-        exec: async () => [
-          [null, '5'],
-          [null, '3'],
-        ],
-      }),
-    };
-  }
-
-  async connect() {}
-  isRedisConnected() {
-    return true;
-  }
+  return { redisClient, internals, pipeline };
 }
 
 describe('Redis Infrastructure', () => {
-  let mockRedis: MockRedisClient;
+  let redisClient: jest.Mocked<RedisClient>;
+  let sessionCache: SessionCacheService;
+  let usageCache: UsageCacheService;
+  let redisInternals: RedisClientMocks['internals'];
+  let pipelineMock: RedisClientMocks['pipeline'];
+
+  beforeEach(() => {
+    const mocks = createRedisClientMock();
+    redisClient = mocks.redisClient;
+    redisInternals = mocks.internals;
+    pipelineMock = mocks.pipeline;
+    sessionCache = new SessionCacheService(redisClient);
+    usageCache = new UsageCacheService(redisClient);
+  });
 
   describe('RedisClient', () => {
     it('should be defined', () => {
@@ -159,7 +188,7 @@ describe('Redis Infrastructure', () => {
     it('should cache session data', async () => {
       await sessionCache.cacheSession(testSession);
 
-      expect(redisClient.getClient().set).toHaveBeenCalledTimes(2); // session + IP mapping
+      expect(redisClient.getClient().setex).toHaveBeenCalledTimes(2); // session data + IP mapping
     });
 
     it('should retrieve session by ID', async () => {

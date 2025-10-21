@@ -59,17 +59,24 @@ export class MarketingAdminController {
           averageQualityScore: Number(stats.averageQualityScore.toFixed(2)),
         },
         conversion: {
-          usageRate: Number(
-            ((stats.usedCodes / stats.totalCodes) * 100).toFixed(1),
-          ),
-          qualityRate: Number(
-            ((stats.pendingPayments / stats.usedCodes) * 100).toFixed(1),
-          ),
+          usageRate:
+            stats.totalCodes > 0
+              ? Number(((stats.usedCodes / stats.totalCodes) * 100).toFixed(1))
+              : 0,
+          qualityRate:
+            stats.usedCodes > 0
+              ? Number(
+                  ((stats.pendingPayments / stats.usedCodes) * 100).toFixed(1),
+                )
+              : 0,
         },
         financial: {
           pendingAmount: stats.pendingPayments * 3,
           averageReward: 3.0,
-          costPerUser: Number((stats.totalPaid / stats.usedCodes).toFixed(2)),
+          costPerUser:
+            stats.usedCodes > 0
+              ? Number((stats.totalPaid / stats.usedCodes).toFixed(2))
+              : 0,
         },
         lastUpdated: new Date().toISOString(),
       };

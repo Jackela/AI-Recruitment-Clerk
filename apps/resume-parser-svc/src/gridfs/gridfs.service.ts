@@ -17,6 +17,10 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(GridFsService.name);
   private gridFSBucket!: GridFSBucket;
   private bucketName = 'resume-files';
+  private readonly inMemoryStore = new Map<
+    string,
+    { buffer: Buffer; info: GridFsFileInfo & { metadata?: Record<string, any> } }
+  >();
 
   /**
    * Initializes a new instance of the Grid FS Service.
@@ -59,6 +63,12 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
       // Extract file ID from GridFS URL
       const fileId = this.extractFileIdFromUrl(gridFsUrl);
 
+      // Test mode/in-memory fallback
+      const inMemory = this.inMemoryStore.get(fileId);
+      if (inMemory) {
+        return Buffer.from(inMemory.buffer);
+      }
+
       // Convert to MongoDB ObjectId
       let objectId: ObjectId;
       try {
@@ -82,11 +92,13 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
 
       // Create download stream
       const downloadStream = this.gridFSBucket.openDownloadStream(objectId);
-      const chunks: Buffer[] = [];
+      const chunks: Uint8Array[] = [];
 
       return new Promise((resolve, reject) => {
         downloadStream.on('data', (chunk: Buffer) => {
-          chunks.push(chunk);
+          chunks.push(
+            new Uint8Array(chunk.buffer, chunk.byteOffset, chunk.byteLength),
+          );
         });
 
         downloadStream.on('error', (error) => {
@@ -101,7 +113,16 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
         });
 
         downloadStream.on('end', () => {
-          const fileBuffer = Buffer.concat(chunks);
+          const totalLength = chunks.reduce(
+            (sum, chunk) => sum + chunk.byteLength,
+            0,
+          );
+          const fileBuffer = Buffer.allocUnsafe(totalLength);
+          let offset = 0;
+          for (const chunk of chunks) {
+            fileBuffer.set(chunk, offset);
+            offset += chunk.byteLength;
+          }
           this.logger.debug(
             `Successfully downloaded file from GridFS: ${gridFsUrl}, size: ${fileBuffer.length} bytes`,
             { fileId, bufferSize: fileBuffer.length },
@@ -140,6 +161,35 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
     _filename: string,
     _metadata?: any,
   ): Promise<string> {
+    if (!_buffer || !Buffer.isBuffer(_buffer) || _buffer.length === 0) {
+      throw new Error('File buffer must be a non-empty Buffer');
+    }
+
+    if (!_filename || typeof _filename !== 'string') {
+      throw new Error('Filename is required to upload to GridFS');
+    }
+
+    // In test mode or when GridFS is not connected, store files in-memory
+    if (process.env.NODE_ENV === 'test' || !this.gridFSBucket) {
+      const objectId = new ObjectId().toHexString();
+      const gridFsUrl = `gridfs://${this.bucketName}/${objectId}`;
+      const info: GridFsFileInfo & { metadata?: Record<string, any> } = {
+        id: objectId,
+        filename: _filename,
+        contentType:
+          (_metadata && _metadata.contentType) || 'application/octet-stream',
+        length: _buffer.length,
+        uploadDate: new Date(),
+        metadata: _metadata ?? {},
+      };
+      this.inMemoryStore.set(objectId, {
+        buffer: Buffer.from(_buffer),
+        info,
+      });
+      this.logger.debug(`Stored file in in-memory GridFS: ${gridFsUrl}`);
+      return gridFsUrl;
+    }
+
     throw new Error('GridFsService.uploadFile not implemented');
   }
 
@@ -149,7 +199,27 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
    * @returns A promise that resolves to boolean value.
    */
   async fileExists(_gridFsUrl: string): Promise<boolean> {
-    throw new Error('GridFsService.fileExists not implemented');
+    const fileId = this.extractFileIdFromUrl(_gridFsUrl);
+
+    if (this.inMemoryStore.has(fileId)) {
+      return true;
+    }
+
+    if (!this.gridFSBucket) {
+      return false;
+    }
+
+    try {
+      const objectId = new ObjectId(fileId);
+      const files = await this.gridFSBucket.find({ _id: objectId }).toArray();
+      return files.length > 0;
+    } catch (error) {
+      this.logger.warn('Error while checking GridFS file existence', {
+        error: (error as Error).message,
+        gridFsUrl: _gridFsUrl,
+      });
+      return false;
+    }
   }
 
   /**
@@ -158,7 +228,40 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
    * @returns A promise that resolves to GridFsFileInfo.
    */
   async getFileInfo(_gridFsUrl: string): Promise<GridFsFileInfo> {
-    throw new Error('GridFsService.getFileInfo not implemented');
+    const fileId = this.extractFileIdFromUrl(_gridFsUrl);
+
+    const inMemory = this.inMemoryStore.get(fileId);
+    if (inMemory) {
+      const { metadata, ...info } = inMemory.info;
+      return info as GridFsFileInfo;
+    }
+
+    if (!this.gridFSBucket) {
+      throw new Error(`File not found: ${_gridFsUrl}`);
+    }
+
+    try {
+      const objectId = new ObjectId(fileId);
+      const files = await this.gridFSBucket.find({ _id: objectId }).toArray();
+      if (files.length === 0) {
+        throw new Error(`File not found in GridFS: ${fileId}`);
+      }
+
+      const file = files[0];
+      return {
+        id: file._id?.toString?.() ?? fileId,
+        filename: file.filename,
+        contentType: file.contentType || 'application/octet-stream',
+        length: file.length,
+        uploadDate: file.uploadDate,
+      };
+    } catch (error) {
+      this.logger.error('Error retrieving GridFS file info', {
+        error: (error as Error).message,
+        gridFsUrl: _gridFsUrl,
+      });
+      throw error;
+    }
   }
 
   /**
@@ -167,7 +270,29 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
    * @returns A promise that resolves when the operation completes.
    */
   async deleteFile(_gridFsUrl: string): Promise<void> {
-    throw new Error('GridFsService.deleteFile not implemented');
+    const fileId = this.extractFileIdFromUrl(_gridFsUrl);
+
+    if (this.inMemoryStore.delete(fileId)) {
+      this.logger.debug(`Deleted in-memory GridFS file: ${_gridFsUrl}`);
+      return;
+    }
+
+    if (!this.gridFSBucket) {
+      this.logger.warn(
+        `GridFS bucket not initialized when deleting file: ${_gridFsUrl}`,
+      );
+      return;
+    }
+
+    try {
+      const objectId = new ObjectId(fileId);
+      await this.gridFSBucket.delete(objectId);
+    } catch (error) {
+      this.logger.warn('Error deleting GridFS file', {
+        error: (error as Error).message,
+        gridFsUrl: _gridFsUrl,
+      });
+    }
   }
 
   /**

@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { GuestController } from './guest.controller';
 import { GuestUsageService } from '../services/guest-usage.service';
@@ -8,37 +7,29 @@ describe('GuestController', () => {
   let controller: GuestController;
   let guestUsageService: jest.Mocked<GuestUsageService>;
 
-  const mockGuestUsageService = {
-    generateFeedbackCode: jest.fn(),
-    getUsageStatus: jest.fn(),
-    getGuestStatus: jest.fn(),
-    redeemFeedbackCode: jest.fn(),
-    canUse: jest.fn(),
-    getServiceStats: jest.fn(),
-  };
+  const createGuestUsageServiceMock = (): jest.Mocked<GuestUsageService> =>
+    ({
+      generateFeedbackCode: jest.fn(),
+      getUsageStatus: jest.fn(),
+      getGuestStatus: jest.fn(),
+      redeemFeedbackCode: jest.fn(),
+      canUse: jest.fn(),
+      getServiceStats: jest.fn(),
+    }) as unknown as jest.Mocked<GuestUsageService>;
 
   const mockRequest: RequestWithDeviceId = {
     deviceId: 'test-device-123',
     isGuest: true,
   } as any;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [GuestController],
-      providers: [
-        {
-          provide: GuestUsageService,
-          useValue: mockGuestUsageService,
-        },
-      ],
-    }).compile();
-
-    controller = module.get<GuestController>(GuestController);
-    guestUsageService = module.get(GuestUsageService);
+  beforeEach(() => {
+    guestUsageService = createGuestUsageServiceMock();
+    controller = new GuestController(guestUsageService);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    delete process.env.GUEST_FEEDBACK_URL;
   });
 
   it('should be defined', () => {

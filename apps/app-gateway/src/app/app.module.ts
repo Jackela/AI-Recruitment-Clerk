@@ -16,6 +16,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { NatsClientModule } from '@ai-recruitment-clerk/shared-nats-client';
 import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
 import { AppCacheModule } from '../cache/cache.module';
+import { EmbeddingModule } from '../embedding/embedding.module';
 import { DomainsModule } from '../domains/domains.module';
 import { CommonModule, IntegrationModule } from '../common/common.module';
 import { WebSocketModule } from '../websocket/websocket.module';
@@ -73,6 +74,7 @@ const isTestEnv = process.env.NODE_ENV === 'test';
       }),
     }),
     AppCacheModule,
+    EmbeddingModule,
     // Standardized Error Handling Infrastructure
     ErrorHandlingModule.forService('app-gateway'),
     // Configure shared NATS client with app-gateway service name

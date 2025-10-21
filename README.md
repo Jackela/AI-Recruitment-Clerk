@@ -19,6 +19,7 @@ AI Recruitment Clerk is an **event-driven microservices system** that automates 
 - 🤖 **Intelligent Resume Parsing**: Vision LLM-based structured extraction from PDF resumes
 - 📋 **Smart JD Analysis**: Automated extraction of job requirements and key skills
 - ⚡ **Precise Matching Scoring**: AI-driven candidate-position compatibility calculation
+- 🧠 **Semantic Cache Optimization**: Reuses high-confidence JD analyses via vector similarity to cut latency and API spend
 - 🔄 **Event-Driven Architecture**: High-reliability asynchronous processing with NATS JetStream
 - 📊 **Smart Report Generation**: Automated generation of detailed matching analysis reports
 
@@ -93,6 +94,17 @@ graph TD
 | **Testing** | Jest + Playwright | Unit + E2E testing |
 | **AI Services** | Gemini Vision API | PDF parsing and structured extraction |
 | **Containerization** | Docker + Docker Compose | Production deployment |
+
+## 🧠 Semantic Caching & Embedding Service
+
+- `EmbeddingModule` (`apps/app-gateway/src/embedding`) centralizes embedding generation with a pluggable `IEmbeddingProvider` and a default OpenAI-backed implementation featuring configurable retries and timeouts.
+- `CacheService.wrapSemantic()` wraps fallback operations with vector similarity lookups, storing results in Redis/RediSearch when available and gracefully degrading to in-memory mode when Redis is disabled.
+- `VectorStoreService` manages vector indices (`FT.CREATE`, `KNN`) and is safe to override for alternative stores in tests.
+- `JobsService.createJob()` now consults the semantic cache to reuse completed JD analyses, short-circuiting duplicate NATS workload and delivering immediate results for near-duplicate postings.
+- Configure the feature via:
+  - `OPENAI_API_KEY`, `OPENAI_EMBEDDING_MODEL`, `OPENAI_EMBEDDING_API_URL`, `OPENAI_EMBEDDING_TIMEOUT_MS`, `OPENAI_EMBEDDING_MAX_RETRIES`, `OPENAI_EMBEDDING_RETRY_DELAY_MS`
+  - `SEMANTIC_CACHE_ENABLED`, `SEMANTIC_CACHE_SIMILARITY_THRESHOLD`, `SEMANTIC_CACHE_TTL_MS`, `SEMANTIC_CACHE_MAX_RESULTS`
+  - Optional tuning: `SEMANTIC_CACHE_INDEX_NAME`, `SEMANTIC_CACHE_KEY_PREFIX`, `SEMANTIC_CACHE_VECTOR_FIELD`, `SEMANTIC_CACHE_VECTOR_DIMS`, `SEMANTIC_CACHE_DISTANCE_METRIC`
 
 ## 📁 Workspace Structure
 

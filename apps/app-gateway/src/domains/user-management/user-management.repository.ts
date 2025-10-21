@@ -264,7 +264,7 @@ export class UserManagementRepository {
    */
   async updateSecurityFlag(
     userId: string,
-    flag: keyof UserEntity['securityFlags'],
+    flag: keyof NonNullable<UserEntity['securityFlags']>,
     value: boolean,
   ): Promise<void> {
     try {

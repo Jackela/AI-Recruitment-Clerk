@@ -13,19 +13,19 @@ export type UserDocument = User & Document;
 @Schema({ timestamps: true, collection: 'users' })
 export class User {
   @Prop({ required: true, unique: true })
-  id: string;
+  id: string = '';
 
   @Prop({ required: true, unique: true, lowercase: true })
-  email: string;
+  email: string = '';
 
   @Prop({ required: true })
-  password: string;
+  password: string = '';
 
   @Prop({ required: false, default: '' })
-  firstName: string;
+  firstName: string = '';
 
   @Prop({ required: false, default: '' })
-  lastName: string;
+  lastName: string = '';
 
   @Prop({
     type: String,
@@ -33,7 +33,7 @@ export class User {
     enum: Object.values(UserRole),
     default: UserRole.USER,
   })
-  role: UserRole;
+  role: UserRole = UserRole.USER;
 
   @Prop()
   organizationId?: string;
@@ -44,7 +44,7 @@ export class User {
     enum: Object.values(UserStatus),
     default: UserStatus.ACTIVE,
   })
-  status: UserStatus;
+  status: UserStatus = UserStatus.ACTIVE;
 
   @Prop()
   lastActivity?: Date;
@@ -64,7 +64,7 @@ export class User {
     account_locked?: boolean;
     password_reset_required?: boolean;
     two_factor_enabled?: boolean;
-  };
+  } = {};
 
   @Prop({
     type: {
@@ -92,13 +92,20 @@ export class User {
       push?: boolean;
       sms?: boolean;
     };
+  } = {
+    language: 'en',
+    notifications: {
+      email: true,
+      push: false,
+      sms: false,
+    },
   };
 
   @Prop({ type: Date })
-  createdAt: Date;
+  createdAt: Date = new Date();
 
   @Prop({ type: Date })
-  updatedAt: Date;
+  updatedAt: Date = new Date();
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

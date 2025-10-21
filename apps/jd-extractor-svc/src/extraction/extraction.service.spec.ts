@@ -1,6 +1,26 @@
 // Mock dependencies completely for comprehensive testing - MUST be before imports
 jest.mock('./llm.service');
 jest.mock('../services/jd-extractor-nats.service');
+
+// Create a proper mock constructor function that Jest can track
+const JDExtractorExceptionMock = jest.fn(function JDExtractorException(this: any, message: string, details?: any) {
+  if (!(this instanceof JDExtractorExceptionMock)) {
+    return new (JDExtractorExceptionMock as any)(message, details);
+  }
+  
+  Error.captureStackTrace(this, JDExtractorExceptionMock);
+  this.name = 'JDExtractorException';
+  this.message = message;
+  this.details = details;
+  
+  return this;
+}) as any;
+
+// Set up prototype chain properly for Error inheritance
+JDExtractorExceptionMock.prototype = Object.create(Error.prototype);
+JDExtractorExceptionMock.prototype.constructor = JDExtractorExceptionMock;
+JDExtractorExceptionMock.prototype.name = 'JDExtractorException';
+
 jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => ({
   RetryUtility: {
     withExponentialBackoff: jest.fn(),
@@ -8,12 +28,7 @@ jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => ({
   WithCircuitBreaker: jest.fn(
     (name, options) => (target, propertyName, descriptor) => descriptor,
   ),
-  JDExtractorException: jest.fn().mockImplementation((message, details) => {
-    const error = new Error(message);
-    error.name = 'JDExtractorException';
-    (error as any).details = details;
-    return error;
-  }),
+  JDExtractorException: JDExtractorExceptionMock,
   ErrorCorrelationManager: {
     getContext: jest.fn(() => ({ traceId: 'test-trace-id' })),
   },
@@ -41,9 +56,7 @@ import {
 
 // Get references to the mocked functions
 const MockRetryUtility = RetryUtility as jest.Mocked<typeof RetryUtility>;
-const MockJDExtractorException = JDExtractorException as jest.MockedClass<
-  typeof JDExtractorException
->;
+const MockJDExtractorException = JDExtractorExceptionMock;
 const MockErrorCorrelationManager = ErrorCorrelationManager as jest.Mocked<
   typeof ErrorCorrelationManager
 >;

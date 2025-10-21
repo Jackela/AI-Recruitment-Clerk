@@ -75,3 +75,12 @@ console.error = (...args: any[]) => {
   }
   originalConsoleError.apply(console, args);
 };
+
+// 全局会话结束时强制清理所有残留资源
+process.on('beforeExit', () => {
+  // 强制关闭所有未完成的定时器
+  if (typeof jest !== 'undefined' && jest.useRealTimers) {
+    jest.useRealTimers();
+    jest.clearAllTimers();
+  }
+});

@@ -8,15 +8,20 @@ import {
 
 // In a real implementation, this would connect to MongoDB
 // For now, we'll use a simple in-memory store with some mock users
+type SecurityFlagKey =
+  | 'tokens_revoked'
+  | 'account_locked'
+  | 'password_reset_required'
+  | 'two_factor_enabled';
+
 interface UserEntity extends UserDto {
   password: string;
+  firstName: string;
+  lastName: string;
+  createdAt: Date;
+  updatedAt: Date;
   lastActivity?: Date;
-  securityFlags?: {
-    tokens_revoked?: boolean;
-    account_locked?: boolean;
-    password_reset_required?: boolean;
-    two_factor_enabled?: boolean;
-  };
+  securityFlags: Partial<Record<SecurityFlagKey, boolean>>;
 }
 
 /**
@@ -51,6 +56,7 @@ export class UserService {
         status: UserStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date(),
+        securityFlags: {},
       } as UserEntity,
       {
         id: 'hr-001',
@@ -67,6 +73,7 @@ export class UserService {
         status: UserStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date(),
+        securityFlags: {},
       } as UserEntity,
       {
         id: 'recruiter-001',
@@ -83,6 +90,7 @@ export class UserService {
         status: UserStatus.ACTIVE,
         createdAt: new Date(),
         updatedAt: new Date(),
+        securityFlags: {},
       } as UserEntity,
     ];
 
@@ -120,22 +128,24 @@ export class UserService {
       lastName = '';
     }
 
+    const resolvedFirstName = firstName ?? '';
+    const resolvedLastName = lastName ?? '';
+
     const user: UserEntity = {
       id,
       email: createUserDto.email,
       password: createUserDto.password,
-      firstName,
-      lastName,
+      firstName: resolvedFirstName,
+      lastName: resolvedLastName,
       get name() {
-        return `${this.firstName} ${this.lastName}`;
+        return `${this.firstName} ${this.lastName}`.trim();
       },
       role: createUserDto.role || UserRole.USER,
-      organizationId:
-        createUserDto.organizationId ||
-        `org-${Math.random().toString(36).substr(2, 8)}`,
+      organizationId: createUserDto.organizationId,
       status: createUserDto.status || UserStatus.ACTIVE,
       createdAt: now,
       updatedAt: now,
+      securityFlags: {},
     };
 
     this.users.set(id, user);
@@ -271,11 +281,7 @@ export class UserService {
    */
   async updateSecurityFlag(
     userId: string,
-    flag:
-      | 'tokens_revoked'
-      | 'account_locked'
-      | 'password_reset_required'
-      | 'two_factor_enabled',
+    flag: SecurityFlagKey,
     value: boolean,
   ): Promise<void> {
     const user = this.users.get(userId);
@@ -316,7 +322,11 @@ export class UserService {
     userId: string,
   ): Promise<UserEntity['securityFlags'] | null> {
     const user = this.users.get(userId);
-    return user?.securityFlags || null;
+    const flags = user?.securityFlags;
+    if (!flags || Object.keys(flags).length === 0) {
+      return null;
+    }
+    return flags;
   }
 
   /**
@@ -324,7 +334,7 @@ export class UserService {
    */
   async hasSecurityFlag(
     userId: string,
-    flag: keyof UserEntity['securityFlags'],
+    flag: SecurityFlagKey,
   ): Promise<boolean> {
     const user = this.users.get(userId);
     return user?.securityFlags?.[flag] || false;

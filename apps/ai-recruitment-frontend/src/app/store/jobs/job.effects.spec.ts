@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Router } from '@angular/router';
-import { Observable, of, throwError } from 'rxjs';
+import { firstValueFrom, Observable, of, throwError } from 'rxjs';
 import { Action } from '@ngrx/store';
 import { JobEffects } from './job.effects';
 import { ApiService } from '../../services/api.service';
@@ -184,24 +184,18 @@ describe('JobEffects', () => {
   });
 
   describe('createJobSuccess$', () => {
-    it('should navigate to job details and trigger loadJobs action', (done) => {
+    it('should dispatch loadJobs without triggering navigation', async () => {
       actions$ = of(
         JobActions.createJobSuccess({ response: mockCreateJobResponse }),
       );
 
-      const results: Action[] = [];
-      effects.createJobSuccess$.subscribe((action) => {
-        results.push(action);
+      const action = await firstValueFrom(effects.createJobSuccess$);
 
-        if (results.length === 1) {
-          expect(router.navigate).toHaveBeenCalledWith(['/jobs', 'new-job-id']);
-          expect(action).toEqual(JobActions.loadJobs());
-          done();
-        }
-      });
+      expect(action).toEqual(JobActions.loadJobs());
+      expect(router.navigate).not.toHaveBeenCalled();
     });
 
-    it('should handle navigation with different job id', (done) => {
+    it('should handle different job ids without navigation', async () => {
       const differentResponse: CreateJobResponse = {
         jobId: 'different-job-id',
       };
@@ -209,47 +203,37 @@ describe('JobEffects', () => {
         JobActions.createJobSuccess({ response: differentResponse }),
       );
 
-      effects.createJobSuccess$.subscribe((action) => {
-        expect(router.navigate).toHaveBeenCalledWith([
-          '/jobs',
-          'different-job-id',
-        ]);
-        expect(action).toEqual(JobActions.loadJobs());
-        done();
-      });
+      const action = await firstValueFrom(effects.createJobSuccess$);
+
+      expect(action).toEqual(JobActions.loadJobs());
+      expect(router.navigate).not.toHaveBeenCalled();
     });
   });
 
   describe('Effect Integration', () => {
-    it('should chain loadJobs and loadJobsSuccess effects', (done) => {
+    it('should chain loadJobs and loadJobsSuccess effects', async () => {
       apiService.getAllJobs.mockReturnValue(of(mockJobListItems));
 
       actions$ = of(JobActions.loadJobs());
 
-      effects.loadJobs$.subscribe((successAction) => {
-        expect(successAction.type).toBe('[Job] Load Jobs Success');
-        expect(apiService.getAllJobs).toHaveBeenCalled();
-        done();
-      });
+      const successAction = await firstValueFrom(effects.loadJobs$);
+      expect(successAction.type).toBe('[Job] Load Jobs Success');
+      expect(apiService.getAllJobs).toHaveBeenCalled();
     });
 
-    it('should handle multiple effect calls in sequence', (done) => {
+    it('should handle multiple effect calls in sequence', async () => {
       apiService.createJob.mockReturnValue(of(mockCreateJobResponse));
 
       actions$ = of(JobActions.createJob({ request: mockCreateJobRequest }));
 
-      // First verify createJob effect produces createJobSuccess action
-      effects.createJob$.subscribe((successAction) => {
-        expect(successAction.type).toBe('[Job] Create Job Success');
+      const successAction = await firstValueFrom(effects.createJob$);
+      expect(successAction.type).toBe('[Job] Create Job Success');
 
-        // Then verify createJobSuccess effect produces loadJobs action
-        actions$ = of(successAction);
-        effects.createJobSuccess$.subscribe((loadAction) => {
-          expect(loadAction.type).toBe('[Job] Load Jobs');
-          expect(router.navigate).toHaveBeenCalledWith(['/jobs', 'new-job-id']);
-          done();
-        });
-      });
+      actions$ = of(successAction);
+      const loadAction = await firstValueFrom(effects.createJobSuccess$);
+
+      expect(loadAction.type).toBe('[Job] Load Jobs');
+      expect(router.navigate).not.toHaveBeenCalled();
     });
   });
 });

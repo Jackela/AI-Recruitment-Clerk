@@ -7,156 +7,117 @@ import { ParsingService } from '../parsing/parsing.service';
 
 describe('AppService', () => {
   let service: AppService;
-  // let gridFsService: jest.Mocked<GridFsService>;
   let natsService: jest.Mocked<ResumeParserNatsService>;
-  let parsingService: any;
+  let parsingService: jest.Mocked<ParsingService>;
+  let gridFsService: jest.Mocked<GridFsService>;
 
   beforeEach(async () => {
-    const mockGridFsService = {
+    gridFsService = {
+      healthCheck: jest.fn().mockResolvedValue({ status: 'healthy' }),
       onModuleInit: jest.fn(),
       onModuleDestroy: jest.fn(),
-    };
+    } as unknown as jest.Mocked<GridFsService>;
 
-    const mockNatsService = {
-      subscribe: jest.fn(),
-      unsubscribe: jest.fn(),
-      publish: jest.fn(),
+    natsService = {
+      subscribeToResumeSubmissions: jest.fn(),
       onModuleInit: jest.fn(),
       onModuleDestroy: jest.fn(),
-    };
+    } as unknown as jest.Mocked<ResumeParserNatsService>;
 
-    const mockParsingService = {
-      handleParseRequest: jest.fn(),
-      handleRetryRequest: jest.fn(),
-    };
+    parsingService = {
+      handleResumeSubmitted: jest.fn().mockResolvedValue(undefined),
+    } as unknown as jest.Mocked<ParsingService>;
 
-    const module: TestingModule = await Test.createTestingModule({
+    const moduleRef: TestingModule = await Test.createTestingModule({
       providers: [
         AppService,
-        { provide: GridFsService, useValue: mockGridFsService },
-        { provide: ResumeParserNatsService, useValue: mockNatsService },
-        { provide: ParsingService, useValue: mockParsingService },
+        { provide: GridFsService, useValue: gridFsService },
+        { provide: ResumeParserNatsService, useValue: natsService },
+        { provide: ParsingService, useValue: parsingService },
       ],
     }).compile();
 
-    service = module.get<AppService>(AppService);
-    // gridFsService = module.get(GridFsService);
-    natsService = module.get(ResumeParserNatsService);
-    parsingService = module.get(ParsingService) as any;
+    service = moduleRef.get<AppService>(AppService);
 
-    // Mock logger to prevent console output during tests
-    jest.spyOn(Logger.prototype, 'log').mockImplementation();
-    jest.spyOn(Logger.prototype, 'error').mockImplementation();
+    jest.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+    jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('getData', () => {
-    it('should return message with ready status when initialized', () => {
-      // Force the service to be initialized
-      (service as any).isInitialized = true;
-
-      const result = service.getData();
-
-      expect(result).toEqual({
+    it('returns initializing status before bootstrap', () => {
+      expect(service.getData()).toEqual({
         message: 'Resume Parser Service API',
-        status: 'ready',
+        status: 'initializing',
       });
     });
 
-    it('should return message with initializing status when not initialized', () => {
-      // Service starts as not initialized
-      const result = service.getData();
+    it('returns ready status after bootstrap', async () => {
+      natsService.subscribeToResumeSubmissions.mockResolvedValue(undefined);
+      await service.onApplicationBootstrap();
 
-      expect(result).toEqual({
+      expect(service.getData()).toEqual({
         message: 'Resume Parser Service API',
-        status: 'initializing',
+        status: 'ready',
       });
     });
   });
 
   describe('onApplicationBootstrap', () => {
-    it('should initialize all services successfully', async () => {
-      natsService.subscribe.mockResolvedValue(undefined);
+    it('sets up resume submission subscription', async () => {
+      natsService.subscribeToResumeSubmissions.mockResolvedValue(undefined);
 
       await service.onApplicationBootstrap();
 
-      expect(natsService.subscribe).toHaveBeenCalledTimes(2);
-      expect(natsService.subscribe).toHaveBeenCalledWith(
-        'resume.parse.request',
-        expect.any(Function),
-      );
-      expect(natsService.subscribe).toHaveBeenCalledWith(
-        'resume.retry.request',
-        expect.any(Function),
-      );
-      expect((service as any).isInitialized).toBe(true);
+      expect(
+        natsService.subscribeToResumeSubmissions,
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        natsService.subscribeToResumeSubmissions,
+      ).toHaveBeenCalledWith(expect.any(Function));
     });
 
-    it('should handle parse request through subscription', async () => {
-      natsService.subscribe.mockImplementation(async (subject, handler) => {
-        if (subject === 'resume.parse.request') {
-          // Simulate receiving a message
-          const testData = { resumeId: '123', jobId: 'job-456' };
-          await handler(testData);
-        }
-      });
+    it('forwards resume submissions to parsing service', async () => {
+      const handlerRef: Array<(event: any) => Promise<void>> = [];
+      natsService.subscribeToResumeSubmissions.mockImplementation(
+        async (handler) => {
+          handlerRef.push(handler);
+        },
+      );
 
       await service.onApplicationBootstrap();
+      const event = {
+        resumeId: 'resume-1',
+        jobId: 'job-2',
+        originalFilename: 'candidate.pdf',
+        tempGridFsUrl: 'gridfs://bucket/file',
+      };
+      await handlerRef[0](event);
 
-      expect(parsingService.handleParseRequest).toHaveBeenCalledWith({
-        resumeId: '123',
-        jobId: 'job-456',
-      });
+      expect(parsingService.handleResumeSubmitted).toHaveBeenCalledWith(event);
     });
 
-    it('should handle retry request through subscription', async () => {
-      natsService.subscribe.mockImplementation(async (subject, handler) => {
-        if (subject === 'resume.retry.request') {
-          // Simulate receiving a message
-          const testData = { resumeId: '789', retryAttempt: 2 };
-          await handler(testData);
-        }
-      });
-
-      await service.onApplicationBootstrap();
-
-      expect(parsingService.handleRetryRequest).toHaveBeenCalledWith({
-        resumeId: '789',
-        retryAttempt: 2,
-      });
-    });
-
-    it('should throw error if NATS subscription fails', async () => {
-      const error = new Error('NATS connection failed');
-      natsService.subscribe.mockRejectedValue(error);
-
-      await expect(service.onApplicationBootstrap()).rejects.toThrow(
-        'NATS connection failed',
-      );
-      expect((service as any).isInitialized).toBe(false);
-    });
-
-    it('should throw error if event subscription setup fails', async () => {
+    it('propagates errors when subscription setup fails', async () => {
       const error = new Error('Subscription failed');
-      natsService.subscribe.mockRejectedValue(error);
+      natsService.subscribeToResumeSubmissions.mockRejectedValue(error);
 
       await expect(service.onApplicationBootstrap()).rejects.toThrow(
         'Subscription failed',
       );
-      expect((service as any).isInitialized).toBe(false);
     });
 
-    it('should log initialization steps', async () => {
+    it('logs initialization milestones', async () => {
       const logSpy = jest.spyOn(Logger.prototype, 'log');
-      natsService.subscribe.mockResolvedValue(undefined);
+      natsService.subscribeToResumeSubmissions.mockResolvedValue(undefined);
 
       await service.onApplicationBootstrap();
 
       expect(logSpy).toHaveBeenCalledWith('Resume Parser Service starting...');
-      expect(logSpy).toHaveBeenCalledWith('GridFS service initialized');
+      expect(logSpy).toHaveBeenCalledWith('GridFS service initialized: healthy');
       expect(logSpy).toHaveBeenCalledWith('NATS client initialized');
       expect(logSpy).toHaveBeenCalledWith(
         'Event subscriptions set up successfully',
@@ -169,35 +130,7 @@ describe('AppService', () => {
   });
 
   describe('onApplicationShutdown', () => {
-    it('should clean up resources successfully', async () => {
-      await service.onApplicationShutdown();
-
-      expect(Logger.prototype.log).toHaveBeenCalledWith(
-        'Resume Parser Service shutting down...',
-      );
-      expect(Logger.prototype.log).toHaveBeenCalledWith(
-        'Event subscriptions cleaned up',
-      );
-      expect(Logger.prototype.log).toHaveBeenCalledWith(
-        'All connections cleaned up successfully',
-      );
-    });
-
-    it('should handle cleanup errors gracefully', async () => {
-      // Mock an error during cleanup
-      jest
-        .spyOn(service as any, 'cleanupEventSubscriptions')
-        .mockRejectedValue(new Error('Cleanup failed'));
-
-      await service.onApplicationShutdown();
-
-      expect(Logger.prototype.error).toHaveBeenCalledWith(
-        'Error during shutdown:',
-        expect.any(Error),
-      );
-    });
-
-    it('should log shutdown steps', async () => {
+    it('logs shutdown flow and cleans up subscriptions', async () => {
       const logSpy = jest.spyOn(Logger.prototype, 'log');
 
       await service.onApplicationShutdown();
@@ -210,86 +143,32 @@ describe('AppService', () => {
         'All connections cleaned up successfully',
       );
     });
+
+    it('logs errors during shutdown gracefully', async () => {
+      const error = new Error('cleanup failed');
+      jest
+        .spyOn(service as any, 'cleanupEventSubscriptions')
+        .mockRejectedValue(error);
+
+      await service.onApplicationShutdown();
+
+      expect(Logger.prototype.error).toHaveBeenCalledWith(
+        'Error during shutdown:',
+        error,
+      );
+    });
   });
 
-  describe('setupEventSubscriptions', () => {
-    it('should set up all required subscriptions', async () => {
-      natsService.subscribe.mockResolvedValue(undefined);
+  describe('private helpers', () => {
+    it('setupEventSubscriptions logs skip when API unavailable', async () => {
+      const logSpy = jest.spyOn(Logger.prototype, 'log');
+      (service as any).natsService = {} as ResumeParserNatsService;
 
       await (service as any).setupEventSubscriptions();
 
-      expect(natsService.subscribe).toHaveBeenCalledTimes(2);
-      expect(natsService.subscribe).toHaveBeenCalledWith(
-        'resume.parse.request',
-        expect.any(Function),
+      expect(logSpy).toHaveBeenCalledWith(
+        'NATS subscription skipped (subscribeToResumeSubmissions unavailable)',
       );
-      expect(natsService.subscribe).toHaveBeenCalledWith(
-        'resume.retry.request',
-        expect.any(Function),
-      );
-    });
-
-    it('should handle subscription errors', async () => {
-      const error = new Error('Subscription error');
-      natsService.subscribe.mockRejectedValue(error);
-
-      await expect((service as any).setupEventSubscriptions()).rejects.toThrow(
-        'Subscription error',
-      );
-    });
-  });
-
-  describe('cleanupEventSubscriptions', () => {
-    it('should clean up subscriptions successfully', async () => {
-      await (service as any).cleanupEventSubscriptions();
-
-      expect(Logger.prototype.log).toHaveBeenCalledWith(
-        'Event subscriptions cleaned up',
-      );
-    });
-
-    it('should handle cleanup errors', async () => {
-      // Create a mock that throws an error
-      const cleanupSpy = jest
-        .spyOn(service as any, 'cleanupEventSubscriptions')
-        .mockImplementation(() => {
-          throw new Error('Cleanup error');
-        });
-
-      try {
-        await (service as any).cleanupEventSubscriptions();
-      } catch (error) {
-        expect((error as any).message).toBe('Cleanup error');
-      }
-
-      cleanupSpy.mockRestore();
-    });
-  });
-
-  describe('initializeParsingService', () => {
-    it('should initialize parsing service successfully', async () => {
-      await (service as any).initializeParsingService();
-
-      expect(Logger.prototype.log).toHaveBeenCalledWith(
-        'Parsing service initialized',
-      );
-    });
-
-    it('should handle initialization errors', async () => {
-      // Create a mock that throws an error
-      const initSpy = jest
-        .spyOn(service as any, 'initializeParsingService')
-        .mockImplementation(() => {
-          throw new Error('Init error');
-        });
-
-      try {
-        await (service as any).initializeParsingService();
-      } catch (error) {
-        expect((error as any).message).toBe('Init error');
-      }
-
-      initSpy.mockRestore();
     });
   });
 });

@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import {
   ExecutionContext,
   UnauthorizedException,
@@ -9,11 +8,10 @@ import { GuestGuard } from './guest.guard';
 
 describe('GuestGuard', () => {
   let guard: GuestGuard;
-  let reflector: Reflector;
 
   const mockReflector = {
     getAllAndOverride: jest.fn(),
-  };
+  } as unknown as Reflector;
 
   const createMockExecutionContext = (headers: any = {}): ExecutionContext => {
     const mockRequest = {
@@ -31,30 +29,24 @@ describe('GuestGuard', () => {
     } as any;
   };
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        GuestGuard,
-        {
-          provide: Reflector,
-          useValue: mockReflector,
-        },
-      ],
-    }).compile();
+  const originalSetInterval = global.setInterval;
 
-    guard = module.get<GuestGuard>(GuestGuard);
-    reflector = module.get<Reflector>(Reflector);
+  const createGuard = () => new GuestGuard(mockReflector);
+
+  beforeEach(() => {
+    (global as any).setInterval = jest.fn().mockReturnValue(1);
+    guard = createGuard();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    (global as any).setInterval = originalSetInterval;
     // Clear rate limit map to prevent test interference
     (guard as any).rateLimitMap.clear();
   });
 
   afterAll(() => {
-    // Clear any active intervals
-    jest.clearAllTimers();
+    (global as any).setInterval = originalSetInterval;
   });
 
   it('should be defined', () => {

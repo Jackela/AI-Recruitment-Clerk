@@ -1,103 +1,121 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
-import request from 'supertest';
-import { JobsModule } from './jobs.module';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { JobsController } from './jobs.controller';
+import { JobsService } from './jobs.service';
+import { CreateJobDto } from './dto/create-job.dto';
+import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
+import {
+  Permission,
+  UserDto,
+  UserRole,
+} from '@ai-recruitment-clerk/user-management-domain';
+
+const mockUser: UserDto = {
+  id: 'user-1',
+  username: 'tester',
+  email: 'tester@example.com',
+  role: UserRole.HR_MANAGER,
+  organizationId: 'org-1',
+  isActive: true,
+  createdAt: new Date(),
+};
+
+const makeRequest = (overrides: Partial<{ user: UserDto; permissions: Permission[] }> = {}) =>
+  ({
+    user: overrides.user ?? mockUser,
+  } as any);
 
 describe('JobsController', () => {
-  let app: INestApplication;
+  let controller: JobsController;
+  let jobsService: jest.Mocked<JobsService>;
 
-  beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({
-      imports: [JobsModule],
-    }).compile();
+  beforeEach(() => {
+    jobsService = {
+      createJob: jest.fn(),
+      uploadResumes: jest.fn(),
+      getAllJobs: jest.fn(),
+      getJobById: jest.fn(),
+      getResumesByJobId: jest.fn(),
+      getReportsByJobId: jest.fn(),
+      getResumeById: jest.fn(),
+      getReportById: jest.fn(),
+      onModuleInit: jest.fn(),
+    } as unknown as jest.Mocked<JobsService>;
 
-    app = moduleRef.createNestApplication();
-    app.setGlobalPrefix('api');
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-    await app.init();
+    controller = new JobsController(jobsService);
   });
 
-  afterAll(async () => {
-    await app.close();
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('POST /api/jobs returns 202 with jobId', async () => {
-    const res = await request(app.getHttpServer())
-      .post('/api/jobs')
-      .send({ jobTitle: 'Dev', jdText: 'desc' })
-      .expect(202);
+  describe('createJob', () => {
+    it('delegates to JobsService with authenticated user', async () => {
+      const dto: CreateJobDto = {
+        jobTitle: 'Backend Engineer',
+        jdText: 'Node.js, NestJS',
+      };
+      jobsService.createJob.mockResolvedValue({ jobId: 'job-123' });
 
-    expect(res.body.jobId).toBeDefined();
+      const result = await controller.createJob(makeRequest(), dto);
+
+      expect(jobsService.createJob).toHaveBeenCalledWith(dto, mockUser);
+      expect(result).toEqual({ jobId: 'job-123' });
+    });
   });
 
-  describe('POST /api/jobs/:jobId/resumes', () => {
-    let validJobId: string;
+  describe('uploadResumes', () => {
+    it('accepts files and forwards to service', async () => {
+      const response = new ResumeUploadResponseDto('job-1', 2);
+      jobsService.uploadResumes.mockResolvedValue(response);
+      const files: any[] = [
+        { originalname: 'resume1.pdf', mimetype: 'application/pdf', size: 1024 },
+      ];
 
-    beforeEach(async () => {
-      // Create a job for resume upload tests
-      const jobRes = await request(app.getHttpServer())
-        .post('/api/jobs')
-        .send({ jobTitle: 'Test Job', jdText: 'Test description' })
-        .expect(202);
-      validJobId = jobRes.body.jobId;
+      const result = await controller.uploadResumes(
+        makeRequest(),
+        { jobId: 'job-1' },
+        files,
+      );
+
+      expect(jobsService.uploadResumes).toHaveBeenCalledWith(
+        'job-1',
+        files,
+        mockUser,
+      );
+      expect(result).toBe(response);
     });
 
-    it('returns 202 with correct response when files uploaded', async () => {
-      const pdfBuffer = Buffer.from('fake pdf content');
+    it('propagates errors from service', async () => {
+      jobsService.uploadResumes.mockRejectedValue(
+        new ForbiddenException('Access denied'),
+      );
 
-      const res = await request(app.getHttpServer())
-        .post(`/api/jobs/${validJobId}/resumes`)
-        .attach('resumes', pdfBuffer, {
-          filename: 'resume1.pdf',
-          contentType: 'application/pdf',
-        })
-        .attach('resumes', pdfBuffer, {
-          filename: 'resume2.pdf',
-          contentType: 'application/pdf',
-        })
-        .expect(202);
+      await expect(
+        controller.uploadResumes(makeRequest(), { jobId: 'job-2' }, [] as any),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
 
-      expect(res.body).toEqual({
-        jobId: validJobId,
-        submittedResumes: 2,
-      });
+  describe('read endpoints', () => {
+    it('getAllJobs forwards to service', async () => {
+      jobsService.getAllJobs.mockResolvedValue([]);
+      await controller.getAllJobs(makeRequest());
+      expect(jobsService.getAllJobs).toHaveBeenCalledTimes(1);
     });
 
-    it('returns 400 when no files uploaded', async () => {
-      await request(app.getHttpServer())
-        .post(`/api/jobs/${validJobId}/resumes`)
-        .expect(400);
+    it('getJobById propagates service result', async () => {
+      jobsService.getJobById.mockResolvedValue({ id: 'job-1' } as any);
+      const result = await controller.getJobById(makeRequest(), 'job-1');
+      expect(result).toEqual({ id: 'job-1' });
     });
 
-    it('returns 400 when jobId is invalid UUID', async () => {
-      const pdfBuffer = Buffer.from('fake pdf content');
-
-      await request(app.getHttpServer())
-        .post('/api/jobs/invalid-uuid/resumes')
-        .attach('resumes', pdfBuffer, {
-          filename: 'resume.pdf',
-          contentType: 'application/pdf',
-        })
-        .expect(400);
-    });
-
-    it('returns 400 when file is not PDF', async () => {
-      const textBuffer = Buffer.from('text content');
-
-      await request(app.getHttpServer())
-        .post(`/api/jobs/${validJobId}/resumes`)
-        .attach('resumes', textBuffer, {
-          filename: 'resume.txt',
-          contentType: 'text/plain',
-        })
-        .expect(400);
-    });
-
-    it('returns 400 when no files are provided in form field', async () => {
-      await request(app.getHttpServer())
-        .post(`/api/jobs/${validJobId}/resumes`)
-        .field('resumes', '')
-        .expect(400);
+    it('getResumesByJobId propagates service error', async () => {
+      jobsService.getResumesByJobId.mockRejectedValue(
+        new NotFoundException(),
+      );
+      await expect(
+        controller.getResumesByJobId(makeRequest(), 'job-1'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

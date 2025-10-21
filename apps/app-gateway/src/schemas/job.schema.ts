@@ -9,17 +9,17 @@ export type JobDocument = Job & Document;
 @Schema()
 export class JobRequirement {
   @Prop({ required: true })
-  skill!: string;
+  skill: string = '';
 
   @Prop({
     type: String,
     enum: ['required', 'preferred', 'nice-to-have'],
     default: 'required',
   })
-  level!: string;
+  level: string = 'required';
 
   @Prop({ type: Number, min: 1, max: 10, default: 5 })
-  importance!: number;
+  importance: number = 5;
 }
 
 // Explicitly create schema for nested subdocument to avoid runtime reflection issues

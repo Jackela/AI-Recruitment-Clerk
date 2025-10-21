@@ -31,11 +31,16 @@ interface OperationLimits {
 @Injectable()
 export class EnhancedRateLimitMiddleware implements NestMiddleware {
   private readonly logger = new Logger(EnhancedRateLimitMiddleware.name);
-  private redis: Redis | null;
-  private operationLimits: OperationLimits;
-  private suspiciousActivityThreshold: number;
-  private maxFailedAttempts: number;
-  private lockoutDuration: number;
+  private redis: Redis | null = null;
+  private operationLimits: OperationLimits = {
+    auth: { window: 60000, limit: 10 },
+    upload: { window: 60000, limit: 10 },
+    api: { window: 60000, limit: 10 },
+    default: { window: 60000, limit: 10 },
+  };
+  private suspiciousActivityThreshold = 0;
+  private maxFailedAttempts = 0;
+  private lockoutDuration = 0;
 
   /**
    * Initializes a new instance of the Enhanced Rate Limit Middleware.

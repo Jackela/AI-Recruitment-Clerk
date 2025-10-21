@@ -155,7 +155,7 @@ interface JobProgressEvent {
 export class WebSocketGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  @WebSocketServer() server: Server;
+  @WebSocketServer() server!: Server;
   private logger: Logger = new Logger('WebSocketGateway');
   private clientSessions = new Map<string, string>(); // clientId -> sessionId
   private clientUsers = new Map<string, UserPresence>(); // clientId -> user info

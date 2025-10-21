@@ -19,7 +19,7 @@ import {
   Ensures,
   Invariant,
   ContractValidators,
-} from '@ai-recruitment-clerk/infrastructure-shared';
+} from '@ai-recruitment-clerk/shared-dtos';
 import { CreateJobDto } from './dto/create-job.dto';
 import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
 import { MulterFile } from './types/multer.types';
@@ -47,6 +47,16 @@ import { CacheService } from '../cache/cache.service';
 @Injectable()
 export class JobsServiceContracts {
   private readonly logger = new Logger(JobsServiceContracts.name);
+
+  private assertPrecondition(
+    condition: boolean,
+    message: string,
+    context: string,
+  ) {
+    if (!condition) {
+      throw new ContractViolationError(message, 'PRE', context);
+    }
+  }
 
   /**
    * Initializes a new instance of the Jobs Service Contracts.
@@ -101,6 +111,16 @@ export class JobsServiceContracts {
     dto: CreateJobDto,
     user: UserDto,
   ): Promise<{ jobId: string }> {
+    this.assertPrecondition(
+      ContractValidators.isNonEmptyString(dto.jobTitle) &&
+        ContractValidators.isNonEmptyString(dto.jdText) &&
+        !!user &&
+        ContractValidators.isNonEmptyString(user.id) &&
+        ContractValidators.isNonEmptyString(user.organizationId),
+      'Job creation requires valid title, JD text, and authenticated user with organization',
+      'JobsServiceContracts.createJob',
+    );
+
     const jobId = randomUUID();
     const job = new JobDetailDto(
       jobId,
@@ -151,14 +171,16 @@ export class JobsServiceContracts {
     }
 
     // Keep the simulation for now to maintain existing behavior until real processing is implemented
-    setTimeout(() => {
-      const existingJob = this.storageService.getJob(jobId);
-      if (existingJob && existingJob.status === 'processing') {
-        existingJob.status = 'completed';
-        this.storageService.createJob(existingJob);
-        this.logger.log(`Job ${jobId} processing completed (simulated)`);
-      }
-    }, 2000);
+    if (process.env.NODE_ENV !== 'test') {
+      setTimeout(() => {
+        const existingJob = this.storageService.getJob(jobId);
+        if (existingJob && existingJob.status === 'processing') {
+          existingJob.status = 'completed';
+          this.storageService.createJob(existingJob);
+          this.logger.log(`Job ${jobId} processing completed (simulated)`);
+        }
+      }, 2000);
+    }
 
     return { jobId };
   }
@@ -204,9 +226,18 @@ export class JobsServiceContracts {
     files: MulterFile[],
     user: UserDto,
   ): ResumeUploadResponseDto {
-    if (!files || files.length === 0) {
-      return new ResumeUploadResponseDto(jobId, 0);
-    }
+    this.assertPrecondition(
+      ContractValidators.isNonEmptyString(jobId) &&
+        Array.isArray(files) &&
+        files.length > 0 &&
+        files.every(
+          (file) => file.size > 0 && file.size <= 10 * 1024 * 1024,
+        ) &&
+        !!user &&
+        ContractValidators.isNonEmptyString(user.id),
+      'Resume upload requires valid job ID, non-empty file array within size limits, and authenticated user',
+      'JobsServiceContracts.uploadResumes',
+    );
 
     const job = this.storageService.getJob(jobId);
     if (!job) {
@@ -264,12 +295,14 @@ export class JobsServiceContracts {
       }
 
       // Keep the simulation for now
-      setTimeout(
-        () => {
-          this.simulateResumeProcessing(resumeId, jobId, file.originalname);
-        },
-        (index + 1) * 3000,
-      );
+      if (process.env.NODE_ENV !== 'test') {
+        setTimeout(
+          () => {
+            this.simulateResumeProcessing(resumeId, jobId, file.originalname);
+          },
+          (index + 1) * 3000,
+        );
+      }
     });
 
     return new ResumeUploadResponseDto(jobId, files.length);
@@ -348,6 +381,12 @@ export class JobsServiceContracts {
     );
   }, 'Must return valid job detail object')
   async getJobById(jobId: string): Promise<JobDetailDto> {
+    this.assertPrecondition(
+      ContractValidators.isNonEmptyString(jobId),
+      'Job ID must be non-empty string',
+      'JobsServiceContracts.getJobById',
+    );
+
     const cacheKey = this.cacheService.generateKey('jobs', 'detail', jobId);
 
     return this.cacheService.wrap(

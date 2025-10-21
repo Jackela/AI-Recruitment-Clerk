@@ -20,7 +20,7 @@ export class GenerateFeedbackCodeDto {
   })
   @IsString()
   @Length(8, 128)
-  deviceId: string;
+  deviceId!: string;
 }
 
 /**
@@ -32,7 +32,7 @@ export class GuestUsageResponseDto {
     example: true,
   })
   @IsBoolean()
-  canUse: boolean;
+  canUse!: boolean;
 
   @ApiProperty({
     description: 'Remaining usage count for the guest',
@@ -43,14 +43,14 @@ export class GuestUsageResponseDto {
   @IsNumber()
   @Min(0)
   @Max(5)
-  remainingCount: number;
+  remainingCount!: number;
 
   @ApiProperty({
     description: 'Whether the guest needs a feedback code to continue',
     example: false,
   })
   @IsBoolean()
-  needsFeedbackCode: boolean;
+  needsFeedbackCode!: boolean;
 
   @ApiPropertyOptional({
     description: 'Current feedback code if generated',
@@ -71,7 +71,7 @@ export class RedeemFeedbackCodeDto {
   })
   @IsString()
   @Length(10, 256)
-  feedbackCode: string;
+  feedbackCode!: string;
 }
 
 /**
@@ -83,7 +83,7 @@ export class GuestStatusDto {
     example: 'uuid-device-12345',
   })
   @IsString()
-  deviceId: string;
+  deviceId!: string;
 
   @ApiProperty({
     description: 'Current usage count',
@@ -91,7 +91,7 @@ export class GuestStatusDto {
   })
   @IsNumber()
   @Min(0)
-  usageCount: number;
+  usageCount!: number;
 
   @ApiProperty({
     description: 'Maximum allowed usage count',
@@ -99,14 +99,14 @@ export class GuestStatusDto {
   })
   @IsNumber()
   @Min(1)
-  maxUsage: number;
+  maxUsage!: number;
 
   @ApiProperty({
     description: 'Whether usage is currently limited',
     example: false,
   })
   @IsBoolean()
-  isLimited: boolean;
+  isLimited!: boolean;
 
   @ApiPropertyOptional({
     description: 'Status of feedback code if exists',
@@ -121,5 +121,5 @@ export class GuestStatusDto {
     description: 'Last usage timestamp',
     example: '2024-01-01T00:00:00.000Z',
   })
-  lastUsed: Date;
+  lastUsed!: Date;
 }

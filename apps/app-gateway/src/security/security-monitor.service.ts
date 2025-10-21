@@ -50,7 +50,7 @@ export interface SecurityMetrics {
 @Injectable()
 export class SecurityMonitorService {
   private readonly logger = new Logger(SecurityMonitorService.name);
-  private redis: Redis | null;
+  private redis: Redis | null = null;
 
   /**
    * Initializes a new instance of the Security Monitor Service.

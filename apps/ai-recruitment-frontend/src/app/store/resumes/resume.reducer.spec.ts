@@ -15,7 +15,7 @@ describe('Resume Reducer', () => {
       fileName: 'resume1.pdf',
       status: 'processed',
       uploadedAt: new Date('2024-01-01'),
-      score: 85,
+      matchScore: 85,
     },
     {
       id: 'resume2',
@@ -23,7 +23,7 @@ describe('Resume Reducer', () => {
       fileName: 'resume2.pdf',
       status: 'processing',
       uploadedAt: new Date('2024-01-02'),
-      score: null,
+      matchScore: undefined as any,
     },
   ];
 
@@ -33,7 +33,7 @@ describe('Resume Reducer', () => {
     fileName: 'resume1.pdf',
     status: 'processed',
     uploadedAt: new Date('2024-01-01'),
-    score: 85,
+    matchScore: 85,
     extractedData: {
       name: 'John Doe',
       email: 'john@example.com',

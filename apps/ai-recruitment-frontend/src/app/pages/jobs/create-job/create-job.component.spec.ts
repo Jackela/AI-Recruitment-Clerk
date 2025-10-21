@@ -9,6 +9,11 @@ import { CreateJobComponent } from './create-job.component';
 import { AppState } from '../../../store/app.state';
 import * as JobActions from '../../../store/jobs/job.actions';
 import { initialJobState } from '../../../store/jobs/job.state';
+import { I18nService } from '../../../services/i18n/i18n.service';
+
+type TranslationValue =
+  | string
+  | ((params?: Record<string, unknown>) => string);
 
 describe('CreateJobComponent', () => {
   let component: CreateJobComponent;
@@ -16,6 +21,48 @@ describe('CreateJobComponent', () => {
   let store: MockStore<AppState>;
   let router: Router;
   let dispatchSpy: jest.SpyInstance;
+  const translationMap: Record<string, TranslationValue> = {
+    'common.back': '返回',
+    'common.characters': '字符',
+    'common.close': '关闭',
+    'common.loading': '加载中',
+    'jobs.createJob.title': '创建新岗位',
+    'jobs.createJob.information': '岗位信息',
+    'jobs.createJob.jobTitle.label': '岗位名称',
+    'jobs.createJob.jobTitle.placeholder': '请输入岗位名称',
+    'jobs.createJob.jobTitle.hint': '提供清晰的岗位名称',
+    'jobs.createJob.jobDescription.label': '岗位描述',
+    'jobs.createJob.jobDescription.placeholder': '请输入岗位描述',
+    'jobs.createJob.jobDescription.hint': '描述岗位职责与要求',
+    'jobs.createJob.jobDescription.requirements.skills': '列出核心技能要求',
+    'jobs.createJob.jobDescription.requirements.experience': '说明经验要求',
+    'jobs.createJob.jobDescription.requirements.education': '说明教育背景',
+    'jobs.createJob.jobDescription.requirements.other': '补充其他要求',
+    'jobs.createJob.actions.cancel': '取消',
+    'jobs.createJob.actions.create': '创建岗位',
+    'jobs.createJob.actions.creating': '创建中',
+    'jobs.createJob.progress.initializing': '初始化',
+    'jobs.createJob.progress.processing': '处理中',
+    'jobs.createJob.progress.estimatedTimeRemaining': '预计剩余时间',
+    'jobs.createJob.progress.title': '创建进度',
+    'messages.success': '成功',
+    'validation.required': '该字段不能为空',
+    'validation.minLength': (params) =>
+      `至少 ${params?.['length'] ?? 0} 个字符`,
+    'validation.maxLength': (params) =>
+      `最多 ${params?.['length'] ?? 0} 个字符`,
+  };
+  const i18nServiceMock = {
+    translate: jest.fn(
+      (key: string, params?: Record<string, unknown>) => {
+        const translation = translationMap[key];
+        if (typeof translation === 'function') {
+          return translation(params);
+        }
+        return translation ?? key;
+      },
+    ),
+  };
 
   const initialState: Partial<AppState> = {
     jobs: {
@@ -26,6 +73,17 @@ describe('CreateJobComponent', () => {
   };
 
   beforeEach(async () => {
+    i18nServiceMock.translate.mockClear();
+    i18nServiceMock.translate.mockImplementation(
+      (key: string, params?: Record<string, unknown>) => {
+        const translation = translationMap[key];
+        if (typeof translation === 'function') {
+          return translation(params);
+        }
+        return translation ?? key;
+      },
+    );
+
     await TestBed.configureTestingModule({
       imports: [
         CreateJobComponent,
@@ -34,13 +92,20 @@ describe('CreateJobComponent', () => {
           { path: 'jobs', component: CreateJobComponent },
         ]),
       ],
-      providers: [provideMockStore({ initialState })],
+      providers: [
+        provideMockStore({ initialState }),
+        {
+          provide: I18nService,
+          useValue: i18nServiceMock,
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CreateJobComponent);
     component = fixture.componentInstance;
     store = TestBed.inject(MockStore);
     router = TestBed.inject(Router);
+
     dispatchSpy = jest.spyOn(store, 'dispatch');
 
     fixture.detectChanges();
@@ -58,6 +123,15 @@ describe('CreateJobComponent', () => {
 
     it('should dispatch clearJobError on init', () => {
       expect(dispatchSpy).toHaveBeenCalledWith(JobActions.clearJobError());
+    });
+
+    it('should dispatch initializeWebSocketConnection on init', () => {
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        JobActions.initializeWebSocketConnection({
+          sessionId: expect.any(String),
+          organizationId: undefined,
+        }),
+      );
     });
 
     it('should initialize observables', () => {
