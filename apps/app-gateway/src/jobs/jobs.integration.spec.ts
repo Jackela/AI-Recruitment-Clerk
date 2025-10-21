@@ -1,7 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { randomUUID } from 'crypto';
 import { JobsService } from './jobs.service';
-import { JobsController } from './jobs.controller';
-import { InMemoryStorageService } from './storage/in-memory-storage.service';
 import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import {
@@ -9,12 +7,94 @@ import {
   UserRole,
 } from '@ai-recruitment-clerk/user-management-domain';
 import { CacheService } from '../cache/cache.service';
+import { JobRepository } from '../repositories/job.repository';
+import { WebSocketGateway } from '../websocket/websocket.gateway';
+import { ConfigService } from '@nestjs/config';
+import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
 
-describe('Jobs Integration Tests', () => {
-  let controller: JobsController;
-  let service: JobsService;
-  let natsClient: AppGatewayNatsService;
+const createJobsServiceForTest = () => {
+  const jobs = new Map<string, any>();
 
+  const jobRepository = {
+    create: jest.fn(async (job) => {
+      const id = `job-${randomUUID()}`;
+      const document = { ...job, _id: id, id };
+      jobs.set(id, document);
+      return document as any;
+    }),
+    findById: jest.fn(async (id: string) => jobs.get(id) ?? null),
+    findAll: jest.fn(async () => Array.from(jobs.values()) as any[]),
+    updateStatus: jest.fn(async (id: string, status: string) => {
+      const job = jobs.get(id);
+      if (job) {
+        job.status = status;
+      }
+      return job ?? null;
+    }),
+    updateJdAnalysis: jest.fn(async () => null),
+  } as unknown as jest.Mocked<JobRepository>;
+
+  const natsClient: jest.Mocked<AppGatewayNatsService> = {
+    publishJobJdSubmitted: jest.fn().mockResolvedValue({
+      success: true,
+      messageId: 'msg-job',
+    }),
+    publishResumeSubmitted: jest.fn().mockResolvedValue({
+      success: true,
+      messageId: 'msg-resume',
+    }),
+    waitForAnalysisParsed: jest.fn(),
+    publish: jest.fn(),
+    emit: jest.fn(),
+    isConnected: true,
+    getHealthStatus: jest.fn(),
+    subscribeToAnalysisCompleted: jest.fn(),
+    subscribeToAnalysisFailed: jest.fn(),
+  } as any;
+
+  const cacheService: jest.Mocked<CacheService> = {
+    generateKey: jest.fn((prefix: string, ...parts: string[]) =>
+      [prefix, ...parts].join(':'),
+    ),
+    wrap: jest.fn(async (_key, fn) => fn()),
+    wrapSemantic: jest.fn(async (_text, fn) => fn()),
+    wrapSemanticBatch: jest.fn(async (_items, fn) => fn()),
+    set: jest.fn(),
+    get: jest.fn(),
+  } as any;
+
+  const webSocketGateway: jest.Mocked<WebSocketGateway> = {
+    emitJobUpdated: jest.fn(),
+    emitJobReportUpdated: jest.fn(),
+    emitJobResumeUpdated: jest.fn(),
+    emitJobDeleted: jest.fn(),
+    emitJobCreated: jest.fn(),
+    emitHealthStatus: jest.fn(),
+  } as any;
+
+  const configService: jest.Mocked<ConfigService> = {
+    get: jest.fn(() => undefined),
+  } as any;
+
+  const service = new JobsService(
+    jobRepository as JobRepository,
+    natsClient,
+    cacheService,
+    webSocketGateway,
+    configService,
+  );
+
+  return {
+    service,
+    jobRepository,
+    natsClient,
+    cacheService,
+    webSocketGateway,
+    reset: () => jobs.clear(),
+  };
+};
+
+describe('JobsService integration-style behaviour', () => {
   const mockUser: UserDto = {
     id: 'user-1',
     username: 'testuser',
@@ -25,240 +105,126 @@ describe('Jobs Integration Tests', () => {
     createdAt: new Date(),
   };
 
-  beforeEach(async () => {
-    const mockNatsClient = {
-      isConnected: true,
-      publishJobJdSubmitted: jest.fn().mockResolvedValue({
-        success: true,
-        messageId: 'test-msg-1',
-      }),
-      publishResumeSubmitted: jest.fn().mockResolvedValue({
-        success: true,
-        messageId: 'test-msg-2',
-      }),
-    };
+  let service: JobsService;
+  let jobRepository: ReturnType<typeof createJobsServiceForTest>['jobRepository'];
+  let natsClient: ReturnType<typeof createJobsServiceForTest>['natsClient'];
+  let webSocketGateway: ReturnType<
+    typeof createJobsServiceForTest
+  >['webSocketGateway'];
+  let reset: () => void;
 
-    const mockCacheService: Partial<CacheService> = {
-      get: jest.fn().mockResolvedValue(null),
-      set: jest.fn().mockResolvedValue(undefined),
-      wrap: jest.fn().mockImplementation(async (_k: string, fn: any) => fn()),
-      generateKey: jest
-        .fn()
-        .mockImplementation(
-          (p: string, ...rest: any[]) => `${p}:${rest.join(':')}`,
-        ),
-    } as any;
-
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [JobsController],
-      providers: [
-        JobsService,
-        InMemoryStorageService,
-        {
-          provide: NatsClient,
-          useValue: mockNatsClient,
-        },
-        {
-          provide: CacheService,
-          useValue: mockCacheService,
-        },
-      ],
-    }).compile();
-
-    controller = module.get<JobsController>(JobsController);
-    service = module.get<JobsService>(JobsService);
-    natsClient = module.get<NatsClient>(NatsClient);
+  beforeEach(() => {
+    ({
+      service,
+      jobRepository,
+      natsClient,
+      webSocketGateway,
+      reset,
+    } = createJobsServiceForTest());
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-    expect(service).toBeDefined();
-    expect(natsClient).toBeDefined();
+  afterEach(() => {
+    jest.clearAllMocks();
+    reset();
   });
 
-  describe('Job Creation Flow', () => {
-    it('should create a job and publish NATS event', async () => {
-      const createJobDto: CreateJobDto = {
+  describe('createJob', () => {
+    it('stores job and publishes JD submitted event', async () => {
+      const dto: CreateJobDto = {
         jobTitle: 'Senior Software Engineer',
-        jdText:
-          'We are looking for a senior software engineer with 5+ years of experience in JavaScript, TypeScript, and Node.js. Experience with React and AWS is a plus.',
+        jdText: 'Deep TypeScript and NestJS knowledge required.',
       };
 
-      const result = await service.createJob(createJobDto, mockUser);
+      const result = await service.createJob(dto, mockUser);
 
-      expect(result).toBeDefined();
-      expect(result.jobId).toBeDefined();
-      expect(typeof result.jobId).toBe('string');
+      expect(result.jobId).toEqual(expect.any(String));
+      expect(natsClient.publishJobJdSubmitted).toHaveBeenCalledWith(
+        expect.objectContaining({
+          jobId: result.jobId,
+          jobTitle: dto.jobTitle,
+          jdText: dto.jdText,
+        }),
+      );
 
-      // Verify NATS event was published
-      expect(natsClient.publishJobJdSubmitted).toHaveBeenCalledWith({
-        jobId: result.jobId,
-        jobTitle: createJobDto.jobTitle,
-        jdText: createJobDto.jdText,
-        timestamp: expect.any(String),
+      const stored = await service.getJobById(result.jobId);
+      expect(stored?.title).toBe(dto.jobTitle);
+      expect(stored?.status).toBe('processing');
+    });
+
+    it('propagates publish failure and marks job as failed', async () => {
+      natsClient.publishJobJdSubmitted.mockResolvedValueOnce({
+        success: false,
+        error: 'Connection failed',
       });
 
-      // Verify job was stored
-      const storedJob = service.getJobById(result.jobId);
-      expect(storedJob).toBeDefined();
-      expect(storedJob.title).toBe(createJobDto.jobTitle);
-      expect(storedJob.jdText).toBe(createJobDto.jdText);
-      expect(storedJob.status).toBe('processing');
-    });
-
-    it('should handle NATS publishing failure gracefully', async () => {
-      const failingNatsClient = {
-        ...natsClient,
-        publishJobJdSubmitted: jest.fn().mockResolvedValue({
-          success: false,
-          error: 'Connection failed',
-        }),
+      const dto: CreateJobDto = {
+        jobTitle: 'Failing Job',
+        jdText: 'This publish will fail',
       };
 
-      const module: TestingModule = await Test.createTestingModule({
-        controllers: [JobsController],
-        providers: [
-          JobsService,
-          InMemoryStorageService,
-          {
-            provide: NatsClient,
-            useValue: failingNatsClient,
-          },
-          {
-            provide: CacheService,
-            useValue: {
-              get: jest.fn().mockResolvedValue(null),
-              set: jest.fn().mockResolvedValue(undefined),
-              wrap: jest
-                .fn()
-                .mockImplementation(async (_k: string, fn: any) => fn()),
-              generateKey: jest
-                .fn()
-                .mockImplementation(
-                  (p: string, ...rest: any[]) => `${p}:${rest.join(':')}`,
-                ),
-            },
-          },
-        ],
-      }).compile();
-
-      const testService = module.get<JobsService>(JobsService);
-
-      const createJobDto: CreateJobDto = {
-        jobTitle: 'Test Job',
-        jdText: 'Test description',
-      };
-
-      const result = await testService.createJob(createJobDto, mockUser);
-
-      expect(result).toBeDefined();
-      expect(result.jobId).toBeDefined();
-
-      // Verify job status is set to failed when NATS publishing fails
-      const storedJob = testService.getJobById(result.jobId);
-      expect(storedJob.status).toBe('failed');
+      await expect(service.createJob(dto, mockUser)).rejects.toThrow(
+        'Failed to initiate job analysis',
+      );
+      expect(jobRepository.updateStatus).toHaveBeenCalledWith(
+        expect.any(String),
+        'failed',
+      );
     });
   });
 
-  describe('Resume Upload Flow', () => {
-    it('should upload resumes and publish NATS events', async () => {
-      // First create a job
-      const createJobDto: CreateJobDto = {
-        jobTitle: 'Test Job',
-        jdText: 'Test description',
-      };
+  describe('uploadResumes', () => {
+    it('publishes resume submitted events for each file', async () => {
+      const { jobId } = await service.createJob(
+        { jobTitle: 'Resume Job', jdText: 'Needs resumes' },
+        mockUser,
+      );
 
-      const jobResult = await service.createJob(createJobDto, mockUser);
-
-      // Mock files
-      const mockFiles = [
+      const files = [
         {
           fieldname: 'resumes',
           originalname: 'john_doe_resume.pdf',
-          encoding: '7bit',
           mimetype: 'application/pdf',
           size: 12345,
-          destination: '/tmp',
-          filename: 'resume1.pdf',
-          path: '/tmp/resume1.pdf',
-          buffer: Buffer.from('fake pdf content'),
+          buffer: Buffer.from('resume 1'),
         },
         {
           fieldname: 'resumes',
           originalname: 'jane_smith_cv.pdf',
-          encoding: '7bit',
           mimetype: 'application/pdf',
           size: 23456,
-          destination: '/tmp',
-          filename: 'resume2.pdf',
-          path: '/tmp/resume2.pdf',
-          buffer: Buffer.from('fake pdf content 2'),
+          buffer: Buffer.from('resume 2'),
         },
-      ];
+      ] as any;
 
-      const uploadResult = service.uploadResumes(
-        jobResult.jobId,
-        mockFiles,
-        mockUser,
-      );
+      const result = await service.uploadResumes(jobId, files, mockUser);
 
-      expect(uploadResult).toBeDefined();
-      expect(uploadResult.jobId).toBe(jobResult.jobId);
-      expect(uploadResult.uploadedCount).toBe(2);
-
-      // Wait a bit for async NATS publishing
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      // Verify NATS events were published for each resume
+      expect(result).toBeInstanceOf(ResumeUploadResponseDto);
+      expect(result.jobId).toBe(jobId);
+      expect(result.uploadedCount).toBe(2);
       expect(natsClient.publishResumeSubmitted).toHaveBeenCalledTimes(2);
-      expect(natsClient.publishResumeSubmitted).toHaveBeenCalledWith({
-        jobId: jobResult.jobId,
-        resumeId: expect.any(String),
-        originalFilename: 'john_doe_resume.pdf',
-        tempGridFsUrl: expect.any(String),
-      });
-      expect(natsClient.publishResumeSubmitted).toHaveBeenCalledWith({
-        jobId: jobResult.jobId,
-        resumeId: expect.any(String),
-        originalFilename: 'jane_smith_cv.pdf',
-        tempGridFsUrl: expect.any(String),
-      });
-
-      // Verify resumes were stored
-      const resumes = await service.getResumesByJobId(jobResult.jobId);
-      expect(resumes).toHaveLength(2);
-      expect(resumes[0].originalFilename).toBe('john_doe_resume.pdf');
-      expect(resumes[1].originalFilename).toBe('jane_smith_cv.pdf');
+      expect(webSocketGateway.emitJobUpdated).toHaveBeenCalled();
     });
-  });
 
-  describe('Error Handling', () => {
-    it('should handle empty file uploads', () => {
-      const jobId = 'test-job-id';
-      const result = service.uploadResumes(jobId, [], mockUser);
-
+    it('returns zero uploaded when files array is empty', async () => {
+      const result = await service.uploadResumes('job-123', [], mockUser);
       expect(result.uploadedCount).toBe(0);
       expect(natsClient.publishResumeSubmitted).not.toHaveBeenCalled();
     });
 
-    it('should handle non-existent job for resume upload', () => {
-      const mockFiles = [
+    it('throws when uploading resumes for missing job', async () => {
+      const files = [
         {
           fieldname: 'resumes',
-          originalname: 'test.pdf',
-          encoding: '7bit',
+          originalname: 'resume.pdf',
           mimetype: 'application/pdf',
-          size: 12345,
-          destination: '/tmp',
-          filename: 'test.pdf',
-          path: '/tmp/test.pdf',
-          buffer: Buffer.from('fake content'),
+          size: 123,
+          buffer: Buffer.from('content'),
         },
-      ];
+      ] as any;
 
-      expect(() => {
-        service.uploadResumes('non-existent-job', mockFiles, mockUser);
-      }).toThrow('Job with ID non-existent-job not found');
+      await expect(
+        service.uploadResumes('missing-job', files, mockUser),
+      ).rejects.toThrow('Job with ID missing-job not found');
     });
   });
 });

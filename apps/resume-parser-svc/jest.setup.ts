@@ -100,10 +100,12 @@ afterEach(async () => {
 afterAll(async () => {
   jest.restoreAllMocks();
   await runCleanups();
-  // Force exit after 5 seconds if cleanup hangs
-  setTimeout(() => {
-    process.exit(0);
-  }, 5000);
+  if (process.env.JEST_FORCE_EXIT === 'true') {
+    // Allow opt-in force exit for legacy CI pipelines
+    setTimeout(() => {
+      process.exit(0);
+    }, 5000);
+  }
 });
 
 // Handle unhandled promise rejections

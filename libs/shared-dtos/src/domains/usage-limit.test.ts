@@ -325,7 +325,7 @@ describe('Agent-2: UsageLimit Domain Service Tests', () => {
 
     it('should detect rate limiting', () => {
       const now = new Date();
-      const recentUsage = [];
+      const recentUsage: Array<{ timestamp: Date; count: number }> = [];
 
       // Create 10 recent usage records (just under limit)
       for (let i = 0; i < 10; i++) {

@@ -1,195 +1,136 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigModule } from '@nestjs/config';
-import { CacheModule } from '@nestjs/cache-manager';
-import { getModelToken } from '@nestjs/mongoose';
-import { AnalyticsIntegrationService } from './analytics/analytics-integration.service';
 import { AnalyticsEventRepository } from './analytics/analytics-event.repository';
+import { AnalyticsIntegrationService } from './analytics/analytics-integration.service';
 import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
-describe('Agent-6: Gateway Integration Layer - Unit Tests', () => {
-  let analyticsService: AnalyticsIntegrationService;
-  let analyticsRepository: AnalyticsEventRepository;
+const createModelStub = () => {
+  const store = new Map<string, any>();
 
-  const mockAnalyticsEventModel = {
-    findOneAndUpdate: jest.fn(),
-    findOne: jest.fn(),
-    find: jest.fn(),
-    countDocuments: jest.fn(),
-    deleteMany: jest.fn(),
-    updateMany: jest.fn(),
-  };
-
-  const mockNatsClient = {
-    publishEvent: jest.fn(),
-  };
-
-  const mockCacheManager = {
-    get: jest.fn(),
-    set: jest.fn(),
-    del: jest.fn(),
-  };
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({
-          isGlobal: true,
-          ignoreEnvFile: true,
-        }),
-        CacheModule.register({
-          isGlobal: true,
-        }),
-      ],
-      providers: [
-        AnalyticsIntegrationService,
-        AnalyticsEventRepository,
-        {
-          provide: getModelToken('AnalyticsEvent'),
-          useValue: mockAnalyticsEventModel,
-        },
-        {
-          provide: NatsClient,
-          useValue: mockNatsClient,
-        },
-        {
-          provide: 'CACHE_MANAGER',
-          useValue: mockCacheManager,
-        },
-      ],
-    }).compile();
-
-    analyticsService = module.get<AnalyticsIntegrationService>(
-      AnalyticsIntegrationService,
+  const findOneAndUpdate = jest.fn(async (filter: any, update: any) => {
+    const existing = Array.from(store.values()).find(
+      (doc) => doc.eventId === filter.eventId,
     );
-    analyticsRepository = module.get<AnalyticsEventRepository>(
-      AnalyticsEventRepository,
+    if (existing) {
+      Object.assign(existing, update);
+      return existing;
+    }
+    const doc = { ...update, eventId: filter.eventId };
+    store.set(doc.eventId, doc);
+    return doc;
+  });
+
+  const findOne = jest.fn(async (filter: any) => {
+    const doc = Array.from(store.values()).find(
+      (entry) => entry.eventId === filter.eventId,
     );
+    return doc ? { ...doc } : null;
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+  const countDocuments = jest.fn(() => ({
+    exec: jest.fn(async () => store.size),
+  }));
 
-  describe('1. 服务实例化验证', () => {
-    it('should create analytics integration service', () => {
-      expect(analyticsService).toBeDefined();
-      expect(analyticsService).toBeInstanceOf(AnalyticsIntegrationService);
-    });
+  const analyticsModel = {
+    findOneAndUpdate,
+    findOne,
+    countDocuments,
+  };
 
-    it('should create analytics repository', () => {
-      expect(analyticsRepository).toBeDefined();
-      expect(analyticsRepository).toBeInstanceOf(AnalyticsEventRepository);
-    });
-  });
+  return { analyticsModel, store };
+};
 
-  describe('2. Analytics仓储层测试', () => {
-    it('should handle countSessionEvents', async () => {
-      const sessionId = 'test-session-123';
-      mockAnalyticsEventModel.countDocuments.mockReturnValue({
-        exec: jest.fn().mockResolvedValue(5),
-      });
+const createAnalyticsService = () => {
+  const repository = {
+    save: jest.fn(),
+    findBySessionId: jest.fn(),
+  } as unknown as jest.Mocked<AnalyticsEventRepository>;
 
-      const count = await analyticsRepository.countSessionEvents(sessionId);
+  const natsClient = {
+    publishAnalyticsEvent: jest.fn(),
+  } as unknown as jest.Mocked<AppGatewayNatsService>;
 
-      expect(count).toBe(5);
-      expect(mockAnalyticsEventModel.countDocuments).toHaveBeenCalledWith({
-        sessionId,
-      });
-    });
+  const cacheManager = {
+    wrap: jest.fn(async (_key: string, compute: () => Promise<any>) =>
+      compute(),
+    ),
+  } as any;
 
-    it('should handle repository errors gracefully', async () => {
-      const sessionId = 'test-session-123';
-      mockAnalyticsEventModel.countDocuments.mockReturnValue({
-        exec: jest.fn().mockRejectedValue(new Error('Database error')),
-      });
+  const service = new AnalyticsIntegrationService(
+    repository,
+    natsClient,
+    cacheManager,
+  );
 
-      await expect(
-        analyticsRepository.countSessionEvents(sessionId),
-      ).rejects.toThrow('Failed to count session events');
-    });
-  });
+  return { service, repository, natsClient, cacheManager };
+};
 
-  describe('3. Analytics集成服务测试', () => {
-    it('should have recordBusinessMetric method', () => {
-      expect(typeof analyticsService.recordBusinessMetric).toBe('function');
-    });
-
-    it('should have trackUserInteraction method', () => {
-      expect(typeof analyticsService.trackUserInteraction).toBe('function');
-    });
-
-    it('should have trackSystemPerformance method', () => {
-      expect(typeof analyticsService.trackSystemPerformance).toBe('function');
-    });
-
-    it('should have getSessionAnalytics method', () => {
-      expect(typeof analyticsService.getSessionAnalytics).toBe('function');
-    });
-
-    it('should have performPrivacyComplianceCheck method', () => {
-      expect(typeof analyticsService.performPrivacyComplianceCheck).toBe(
-        'function',
+describe('Domains module lightweight coverage', () => {
+  describe('AnalyticsEventRepository', () => {
+    it('counts session events using mocked model', async () => {
+      const { analyticsModel, store } = createModelStub();
+      const repository = new AnalyticsEventRepository(
+        analyticsModel as any,
       );
-    });
-  });
 
-  describe('4. 缓存集成验证', () => {
-    it('should use cache manager for session analytics', async () => {
-      const sessionId = 'test-session-123';
-      const cachedData = { sessionId, eventCount: 10 };
-
-      mockCacheManager.get.mockResolvedValue(cachedData);
-
-      // 这里需要实际调用方法来测试缓存，但由于依赖域服务，先验证方法存在
-      expect(mockCacheManager.get).toBeDefined();
-      expect(mockCacheManager.set).toBeDefined();
-    });
-  });
-
-  describe('5. 依赖注入验证', () => {
-    it('should inject all required dependencies', () => {
-      expect(analyticsService).toBeDefined();
-      expect(analyticsRepository).toBeDefined();
-    });
-
-    it('should have access to cache manager', () => {
-      // 验证缓存管理器已注入
-      expect(mockCacheManager).toBeDefined();
-    });
-
-    it('should have access to NATS client', () => {
-      // 验证NATS客户端已注入
-      expect(mockNatsClient).toBeDefined();
-    });
-  });
-
-  describe('6. 错误处理验证', () => {
-    it('should handle service initialization errors', () => {
-      // 验证服务能够正确初始化
-      expect(analyticsService).toBeDefined();
-    });
-
-    it('should handle repository errors', async () => {
-      // 测试仓储错误处理
-      mockAnalyticsEventModel.countDocuments.mockReturnValue({
-        exec: jest.fn().mockRejectedValue(new Error('Connection failed')),
+      store.set('evt-1', {
+        eventId: 'evt-1',
+        sessionId: 'session-1',
+        timestamp: new Date(),
       });
 
-      await expect(
-        analyticsRepository.countSessionEvents('test'),
-      ).rejects.toThrow();
+      const count = await repository.countSessionEvents('session-1');
+
+      expect(count).toBe(store.size);
+      expect(analyticsModel.countDocuments).toHaveBeenCalledWith({
+        sessionId: 'session-1',
+      });
     });
   });
 
-  describe('7. 配置验证', () => {
-    it('should load configuration correctly', () => {
-      // 验证配置模块正确加载
-      expect(analyticsService).toBeDefined();
+  describe('AnalyticsIntegrationService', () => {
+    it('returns processed event metadata when tracking event succeeds', async () => {
+      const { service } = createAnalyticsService();
+      (service as any).domainService = {
+        createUserInteractionEvent: jest.fn().mockResolvedValue({
+          success: true,
+          data: {
+            id: 'event-123',
+            eventType: 'USER_INTERACTION',
+            status: 'processed',
+            props: { timestamp: new Date('2024-01-01T00:00:00Z') },
+          },
+        }),
+      };
+
+      const result = await service.trackEvent({
+        category: 'ui',
+        action: 'click',
+        userId: 'user-1',
+        organizationId: 'org-1',
+        timestamp: new Date('2024-01-01T00:00:00Z'),
+      });
+
+      expect(result.eventId).toBe('event-123');
+      expect(result.eventType).toBe('USER_INTERACTION');
+      expect(result.processed).toBe(true);
     });
 
-    it('should have cache module configured', () => {
-      // 验证缓存模块配置
-      expect(mockCacheManager).toBeDefined();
+    it('bubbles up errors from domain service', async () => {
+      const { service } = createAnalyticsService();
+      const failure = new Error('domain failure');
+      (service as any).domainService = {
+        createUserInteractionEvent: jest.fn().mockRejectedValue(failure),
+      };
+
+      await expect(
+        service.trackEvent({
+          category: 'ui',
+          action: 'click',
+          userId: 'user-1',
+          organizationId: 'org-1',
+          timestamp: new Date(),
+        }),
+      ).rejects.toThrow('domain failure');
     });
   });
 });

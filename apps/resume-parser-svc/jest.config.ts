@@ -25,8 +25,13 @@ export default {
     },
   },
   moduleNameMapper: {
+    '\\.(?:worker\\.min\\.mjs\\?url)$': '<rootDir>/test/pdf-worker.stub.js',
+    '^pdf-parse$': '<rootDir>/../../__mocks__/pdf-parse.js',
     '^@app/(.*)$': '<rootDir>/../../libs/$1/src',
     '^@ai-recruitment-clerk/(.*)$': '<rootDir>/../../libs/$1/src',
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(pdfjs-dist|pdf-parse)/)',
+  ],
   maxWorkers: 1, // Run tests sequentially for MongoDB memory server
 };

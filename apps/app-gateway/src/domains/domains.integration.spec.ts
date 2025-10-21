@@ -1,89 +1,35 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { CacheModule } from '@nestjs/cache-manager';
-import { DomainsModule } from './domains.module';
 import { AnalyticsIntegrationService } from './analytics/analytics-integration.service';
 
-describe('Agent-6: Gateway Integration Layer Tests', () => {
-  let app: INestApplication;
-  let analyticsService: AnalyticsIntegrationService;
+describe('DomainsModule lightweight smoke tests', () => {
+  const createService = () => {
+    const mockRepo = {
+      createEvent: jest.fn(),
+      getRecentEvents: jest.fn().mockResolvedValue([]),
+    } as any;
+    const mockNats = {
+      publishAnalyticsEvent: jest.fn().mockResolvedValue({ success: true }),
+    } as any;
+    const mockCache = {
+      wrap: jest.fn(async (_key: string, fn: any) => fn()),
+    } as any;
 
-  beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({
-          isGlobal: true,
-          ignoreEnvFile: true,
-          load: [() => ({ NODE_ENV: 'test' })],
-        }),
-        ThrottlerModule.forRoot([{ ttl: 60, limit: 100 } as any]),
-        CacheModule.register({
-          isGlobal: true,
-        }),
-        MongooseModule.forRoot(
-          process.env.MONGODB_TEST_URL || 'mongodb://localhost:27017/test-db',
-          {
-            serverSelectionTimeoutMS: 500,
-            connectTimeoutMS: 500,
-          } as any,
-        ),
-        DomainsModule,
-      ],
-    }).compile();
+    return new AnalyticsIntegrationService(mockRepo, mockNats, mockCache);
+  };
 
-    app = moduleFixture.createNestApplication();
-    analyticsService = moduleFixture.get<AnalyticsIntegrationService>(
-      AnalyticsIntegrationService,
+  it('instantiates analytics integration service with mocks', () => {
+    const service = createService();
+    expect(service).toBeInstanceOf(AnalyticsIntegrationService);
+  });
+
+  it('delegates event tracking to repository and cache', async () => {
+    const service = createService();
+    const result = await service.getDashboard('org-1');
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        organizationId: 'org-1',
+        data: expect.objectContaining({ totalEvents: 0 }),
+      }),
     );
-
-    await app.init();
-  });
-
-  afterAll(async () => {
-    await app.close();
-  });
-
-  describe('1. 模块集成验证', () => {
-    it('should load domains module successfully', () => {
-      expect(app).toBeDefined();
-    });
-
-    it('should inject analytics integration service', () => {
-      expect(analyticsService).toBeDefined();
-      expect(analyticsService).toBeInstanceOf(AnalyticsIntegrationService);
-    });
-  });
-
-  describe('2. Analytics集成测试', () => {
-    it('should create analytics integration service', () => {
-      expect(analyticsService).toBeDefined();
-    });
-
-    // 这里可以添加更多的集成测试
-    // 由于需要MongoDB连接，暂时保持简化
-  });
-
-  describe('3. 路由集成验证', () => {
-    it('should register analytics routes', () => {
-      const server = app.getHttpServer();
-      expect(server).toBeDefined();
-    });
-  });
-
-  describe('4. 缓存集成验证', () => {
-    it('should have cache manager available', () => {
-      // 验证缓存模块是否正确注册
-      expect(app).toBeDefined();
-    });
-  });
-
-  describe('5. 依赖注入验证', () => {
-    it('should resolve all domain services', () => {
-      // 验证所有服务都能正确解析
-      expect(analyticsService).toBeDefined();
-    });
   });
 });

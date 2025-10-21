@@ -231,7 +231,7 @@ describe('ApiService Integration Tests', () => {
             fileName: 'john_doe_resume.pdf',
             status: 'processed',
             uploadedAt: new Date('2024-01-01'),
-            score: 85,
+            matchScore: 85,
           },
           {
             id: 'resume-2',
@@ -239,7 +239,7 @@ describe('ApiService Integration Tests', () => {
             fileName: 'jane_smith_resume.pdf',
             status: 'processing',
             uploadedAt: new Date('2024-01-02'),
-            score: null,
+            matchScore: undefined as any,
           },
         ];
 
@@ -275,7 +275,7 @@ describe('ApiService Integration Tests', () => {
           fileName: 'candidate_resume.pdf',
           status: 'processed',
           uploadedAt: new Date('2024-01-01'),
-          score: 92,
+          matchScore: 92,
           extractedData: {
             name: 'Alex Johnson',
             email: 'alex.johnson@email.com',

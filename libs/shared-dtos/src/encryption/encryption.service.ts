@@ -33,16 +33,19 @@ export class EncryptionService {
     saltLength: 32, // 256 bits
   };
 
-  private static readonly masterKey =
-    process.env['ENCRYPTION_MASTER_KEY'] ||
-    'default-key-change-in-production-please-use-32-bytes-key';
+  private static getMasterKey(): string {
+    return (
+      process.env['ENCRYPTION_MASTER_KEY'] ||
+      'default-key-change-in-production-please-use-32-bytes-key'
+    );
+  }
 
   /**
    * Derives an encryption key from the master key and salt using PBKDF2
    */
   private static deriveKey(salt: Buffer): Buffer {
     return crypto.pbkdf2Sync(
-      this.masterKey,
+      this.getMasterKey(),
       salt as any, // Type assertion for Node.js 20 compatibility
       100000, // iterations
       this.config.keyLength,
@@ -266,16 +269,17 @@ export class EncryptionService {
   static validateConfig(): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
+    const masterKey = this.getMasterKey();
+
     if (
-      this.masterKey ===
-      'default-key-change-in-production-please-use-32-bytes-key'
+      masterKey === 'default-key-change-in-production-please-use-32-bytes-key'
     ) {
       errors.push(
         'Using default encryption key. Please set ENCRYPTION_MASTER_KEY environment variable.',
       );
     }
 
-    if (this.masterKey.length < 32) {
+    if (masterKey.length < 32) {
       errors.push('Encryption key must be at least 32 characters long.');
     }
 

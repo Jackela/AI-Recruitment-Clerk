@@ -68,14 +68,15 @@ export class AppController {
         cache: cacheHealth,
       };
     } catch (error) {
-      this.logger.error('Cache metrics error', error.stack || error.message);
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error('Cache metrics error', message);
       return {
         timestamp: new Date().toISOString(),
         cache: {
           status: 'error',
           connected: false,
           metrics: this.cacheService.getMetrics(),
-          error: error instanceof Error ? error.message : String(error),
+          error: message,
         },
       };
     }
@@ -93,7 +94,12 @@ export class AppController {
       if (!this.cacheService) {
         this.logger.error('CacheService is not injected!');
         // 直接返回基本健康检查
-        const dbHealth = await this.jobRepository.healthCheck();
+        let dbHealth: { status: string; count?: number };
+        try {
+          dbHealth = await this.jobRepository.healthCheck();
+        } catch {
+          dbHealth = { status: 'unhealthy', count: 0 };
+        }
         const natsHealth = this.natsClient.isConnected;
 
         return {
@@ -120,7 +126,7 @@ export class AppController {
       const cacheKey = this.cacheService.getHealthCacheKey();
       this.logger.debug(`Using cache key: ${cacheKey}`);
 
-      return this.cacheService.wrap(
+      return await this.cacheService.wrap(
         cacheKey,
         async () => {
           this.logger.debug('Cache MISS - generating new health data');
@@ -158,12 +164,15 @@ export class AppController {
         { ttl: 30000 }, // 30秒缓存(30000毫秒)，健康检查不需要太长缓存
       );
     } catch (error) {
-      this.logger.error(
-        'Health check cache error',
-        error.stack || error.message,
-      );
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error('Health check cache error', message);
       // 降级到无缓存模式
-      const dbHealth = await this.jobRepository.healthCheck();
+      let dbHealth: { status: string; count?: number };
+      try {
+        dbHealth = await this.jobRepository.healthCheck();
+      } catch {
+        dbHealth = { status: 'unhealthy', count: 0 };
+      }
       const natsHealth = this.natsClient.isConnected;
 
       return {

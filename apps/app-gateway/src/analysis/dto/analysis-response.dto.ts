@@ -8,20 +8,20 @@ export class AnalysisInitiatedResponseDto {
     description: '分析会话ID',
     example: 'analysis_xyz789',
   })
-  analysisId: string;
+  analysisId!: string;
 
   @ApiProperty({
     description: '分析状态',
     example: 'processing',
     enum: ['initiated', 'processing', 'completed', 'failed'],
   })
-  status: 'initiated' | 'processing' | 'completed' | 'failed';
+  status!: 'initiated' | 'processing' | 'completed' | 'failed';
 
   @ApiProperty({
     description: '状态消息',
     example: 'Analysis pipeline initiated successfully',
   })
-  message: string;
+  message!: string;
 
   @ApiProperty({
     description: '预计处理时间（秒）',
@@ -39,7 +39,7 @@ export class AnalysisInitiatedResponseDto {
     description: '创建时间戳',
     example: '2025-09-30T13:15:00.000Z',
   })
-  timestamp: string;
+  timestamp!: string;
 }
 
 /**
@@ -50,13 +50,13 @@ export class SkillMatchDto {
     description: '技能名称',
     example: 'AWS',
   })
-  skill: string;
+  skill!: string;
 
   @ApiProperty({
     description: '匹配置信度 (0-1)',
     example: 0.95,
   })
-  confidence: number;
+  confidence!: number;
 
   @ApiProperty({
     description: '技能分类',
@@ -73,38 +73,38 @@ export class AnalysisResultDto {
     description: '分析会话ID',
     example: 'analysis_xyz789',
   })
-  analysisId: string;
+  analysisId!: string;
 
   @ApiProperty({
     description: '整体匹配分数 (0-100)',
     example: 85,
   })
-  overallScore: number;
+  overallScore!: number;
 
   @ApiProperty({
     description: '匹配的技能列表',
     type: [SkillMatchDto],
   })
-  matchedSkills: SkillMatchDto[];
+  matchedSkills!: SkillMatchDto[];
 
   @ApiProperty({
     description: '缺失的关键技能',
     example: ['Azure', 'Terraform'],
   })
-  missingSkills: string[];
+  missingSkills!: string[];
 
   @ApiProperty({
     description: '分析总结',
     example:
       '该候选人具有强的云架构背景，特别是在AWS和Kubernetes方面，但缺乏Azure和Terraform经验。',
   })
-  summary: string;
+  summary!: string;
 
   @ApiProperty({
     description: '推荐建议',
     example: ['建议进行技术面试验证AWS技能', '可考虑提供Azure培训'],
   })
-  recommendations: string[];
+  recommendations!: string[];
 
   @ApiProperty({
     description: '处理时间统计（毫秒）',
@@ -121,5 +121,5 @@ export class AnalysisResultDto {
     description: '完成时间戳',
     example: '2025-09-30T13:15:30.000Z',
   })
-  completedAt: string;
+  completedAt!: string;
 }

@@ -23,7 +23,7 @@ describe('ResumeEffects', () => {
       fileName: 'resume1.pdf',
       status: 'processed',
       uploadedAt: new Date('2024-01-01'),
-      score: 85,
+      matchScore: 85,
     },
   ];
 
@@ -33,7 +33,7 @@ describe('ResumeEffects', () => {
     fileName: 'resume1.pdf',
     status: 'processed',
     uploadedAt: new Date('2024-01-01'),
-    score: 85,
+    matchScore: 85,
     extractedData: {
       name: 'John Doe',
       email: 'john@example.com',

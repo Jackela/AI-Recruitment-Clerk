@@ -7,6 +7,8 @@ import { Injectable, Inject, Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import * as crypto from 'crypto';
+import { EmbeddingService } from '../embedding/embedding.service';
+import { VectorStoreService } from './vector-store.service';
 
 /**
  * Defines the shape of the cache options.
@@ -14,6 +16,17 @@ import * as crypto from 'crypto';
 export interface CacheOptions {
   ttl?: number;
   tags?: string[];
+}
+
+/**
+ * Options for semantic caching wrapper.
+ */
+export interface SemanticCacheOptions {
+  ttl: number;
+  similarityThreshold: number;
+  maxResults?: number;
+  cacheKey?: string;
+  forceRefresh?: boolean;
 }
 
 /**
@@ -49,7 +62,11 @@ export class CacheService {
    * Initializes a new instance of the Cache Service.
    * @param cacheManager - The cache manager.
    */
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {
+  constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly embeddingService: EmbeddingService,
+    private readonly vectorStoreService: VectorStoreService,
+  ) {
     // 设置错误处理器防止未处理的错误
     this.setupErrorHandling();
 
@@ -226,6 +243,92 @@ export class CacheService {
         throw fnError;
       }
     }
+  }
+
+  /**
+   * 语义缓存包装器：通过向量相似度提升缓存命中率。
+   */
+  async wrapSemantic<T>(
+    semanticText: string,
+    fallbackFn: () => Promise<T>,
+    options: SemanticCacheOptions,
+  ): Promise<T> {
+    if (!options) {
+      this.logger.warn('wrapSemantic invoked without options; skipping cache.');
+      return fallbackFn();
+    }
+
+    if (!semanticText || semanticText.trim().length === 0) {
+      this.logger.debug('wrapSemantic invoked without semantic text; skipping cache.');
+      return fallbackFn();
+    }
+
+    let queryVector: number[] | null = null;
+    try {
+      queryVector = await this.embeddingService.createEmbedding(semanticText);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`Embedding generation failed, bypassing semantic cache: ${message}`);
+      return fallbackFn();
+    }
+
+    if (!Array.isArray(queryVector) || queryVector.length === 0) {
+      this.logger.warn('Embedding provider returned empty vector; bypassing semantic cache.');
+      return fallbackFn();
+    }
+
+    const rawThreshold = Number(options.similarityThreshold ?? 0);
+    const similarityThreshold = Number.isFinite(rawThreshold)
+      ? Math.max(0, Math.min(1, rawThreshold))
+      : 0;
+
+    const shouldSearch = options.forceRefresh !== true;
+    const matches = shouldSearch
+      ? await this.vectorStoreService.findSimilar(
+          queryVector,
+          similarityThreshold,
+          options.maxResults ?? 5,
+        )
+      : [];
+
+    for (const match of matches) {
+      const cached = await this.get<T>(match.cacheKey);
+      if (cached !== null && cached !== undefined) {
+        if (cached && typeof cached === 'object') {
+          (cached as Record<string, unknown>).semanticSimilarity =
+            match.similarity;
+        }
+        this.logger.debug(
+          `🔁 Semantic cache HIT [${match.cacheKey}] similarity=${match.similarity.toFixed(3)}`,
+        );
+        return cached;
+      }
+    }
+
+    this.logger.debug('Semantic cache MISS; invoking fallback.');
+    const result = await fallbackFn();
+    if (result === null || result === undefined) {
+      this.logger.debug('Semantic cache fallback returned empty result; skipping store.');
+      return result;
+    }
+
+    const cacheKey = options.cacheKey ?? crypto.randomUUID();
+
+    try {
+      await this.set(cacheKey, result, { ttl: options.ttl });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`Failed to persist semantic cache entry [${cacheKey}]: ${message}`);
+    }
+
+    try {
+      await this.vectorStoreService.addVector(cacheKey, queryVector);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`Failed to index semantic vector for [${cacheKey}]: ${message}`);
+    }
+
+    return result;
   }
 
   /**

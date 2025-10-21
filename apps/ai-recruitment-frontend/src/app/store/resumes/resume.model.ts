@@ -5,6 +5,11 @@ export interface ResumeListItem {
   id: string;
   jobId: string;
   originalFilename: string;
+  /**
+   * Optional aliases for backward compatibility with older API responses/tests.
+   */
+  filename?: string;
+  fileName?: string;
   status: 'pending' | 'parsing' | 'scoring' | 'completed' | 'failed';
   matchScore?: number;
   candidateName?: string;
@@ -25,6 +30,8 @@ export interface ResumeDetail {
   id: string;
   jobId: string;
   originalFilename: string;
+  filename?: string;
+  fileName?: string;
   status: 'pending' | 'parsing' | 'scoring' | 'completed' | 'failed';
   candidateName?: string;
   contactInfo?: {
@@ -46,6 +53,14 @@ export interface ResumeDetail {
     major: string | null;
   }[];
   matchScore?: number;
+  uploadedAt?: Date;
+  extractedData?: {
+    name?: string;
+    email?: string;
+    skills?: string[];
+    experience?: string;
+  };
+  summary?: string;
   reportId?: string;
   createdAt: Date;
 }
@@ -56,4 +71,17 @@ export interface ResumeDetail {
 export interface ResumeUploadResponse {
   jobId: string;
   submittedResumes: number;
+  /**
+   * Optional metadata returned by some endpoints/tests.
+   */
+  success?: boolean;
+  uploadedCount?: number;
+  failedCount?: number;
+  processedIds?: string[];
+  resumes?: Array<{
+    filename: string;
+    status: 'success' | 'failed';
+    resumeId?: string;
+    error?: string;
+  }>;
 }

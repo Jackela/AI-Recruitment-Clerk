@@ -2,9 +2,6 @@ module.exports = {
   displayName: 'api-contracts',
   preset: '../../jest.preset.cjs',
   testEnvironment: 'node',
-  testPathIgnorePatterns: [
-    '<rootDir>/src/',
-  ],
   transform: {
     '^.+\\.[tj]s$': [
       'ts-jest',
@@ -15,6 +12,9 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'js'],
   coverageDirectory: '../../coverage/libs/api-contracts',
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',

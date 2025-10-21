@@ -134,7 +134,7 @@ describe('EncryptionService', () => {
       expect(decrypted.email).toBe('john.doe@example.com');
       expect(decrypted.id).toBe('user-123');
       expect(decrypted.role).toBe('user');
-      expect(decrypted._encrypted).toBeUndefined();
+      expect((decrypted as any)._encrypted).toBeUndefined();
     });
 
     it('should handle complex object fields', () => {

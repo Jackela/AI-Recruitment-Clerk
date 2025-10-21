@@ -12,6 +12,8 @@ import { RedisConnectionService } from './redis-connection.service';
 import { cacheConfig } from './cache.config';
 import { Job, JobSchema } from '../schemas/job.schema';
 import { JobRepository } from '../repositories/job.repository';
+import { VectorStoreService } from './vector-store.service';
+import { EmbeddingModule } from '../embedding/embedding.module';
 
 /**
  * Configures the app cache module.
@@ -20,17 +22,20 @@ import { JobRepository } from '../repositories/job.repository';
   imports: [
     CacheModule.registerAsync(cacheConfig),
     MongooseModule.forFeature([{ name: Job.name, schema: JobSchema }]),
+    EmbeddingModule,
   ],
   providers: [
     CacheService,
     CacheWarmupService,
     RedisConnectionService,
+    VectorStoreService,
     JobRepository,
   ],
   exports: [
     CacheService,
     CacheWarmupService,
     RedisConnectionService,
+    VectorStoreService,
     CacheModule,
   ],
 })
