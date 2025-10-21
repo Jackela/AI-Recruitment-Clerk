@@ -18,11 +18,12 @@ import {
  */
 @Injectable()
 export class ExtractionService {
-  private readonly logger = new Logger(ExtractionService.name);
+  private readonly logger: Logger;
   private readonly processingJobs = new Map<
     string,
     { timestamp: number; attempts: number }
   >();
+  private readonly pendingTimers: NodeJS.Timeout[] = [];
   private readonly JOB_TIMEOUT_MS = 300000; // 5 minutes
   private readonly MAX_CONCURRENT_JOBS = 10;
 
@@ -30,11 +31,15 @@ export class ExtractionService {
    * Initializes a new instance of the Extraction Service.
    * @param llmService - The llm service.
    * @param natsService - The nats service.
+   * @param logger - The logger instance (optional, creates new if not provided).
    */
   constructor(
     private readonly llmService: LlmService,
     private readonly natsService: JdExtractorNatsService,
-  ) {}
+    logger?: Logger,
+  ) {
+    this.logger = logger || new Logger(ExtractionService.name);
+  }
 
   /**
    * Handles job jd submitted.
@@ -63,7 +68,8 @@ export class ExtractionService {
         `Maximum concurrent jobs (${this.MAX_CONCURRENT_JOBS}) reached, queuing job ${jobId}`,
       );
       // In a real implementation, you would queue this job for later processing
-      setTimeout(() => this.handleJobJdSubmitted(event), 5000);
+      const timer = setTimeout(() => this.handleJobJdSubmitted(event), 5000);
+      this.pendingTimers.push(timer);
       return;
     }
 
@@ -305,7 +311,7 @@ export class ExtractionService {
 
         const delay =
           1000 * Math.pow(2, jobInfo!.attempts - 1) + Math.random() * 1000;
-        setTimeout(async () => {
+        const timer = setTimeout(async () => {
           try {
             await this.handleJobJdSubmitted({
               jobId,
@@ -317,6 +323,7 @@ export class ExtractionService {
             this.logger.error(`Retry failed for jobId: ${jobId}`, retryError);
           }
         }, delay);
+        this.pendingTimers.push(timer);
       }
     } catch (publishError) {
       this.logger.error(
@@ -509,5 +516,17 @@ export class ExtractionService {
         },
       };
     }
+  }
+
+  /**
+   * Clears all pending timers to prevent memory leaks.
+   * Should be called during shutdown or in tests.
+   */
+  clearPendingTimers(): void {
+    this.logger.log(
+      `Clearing ${this.pendingTimers.length} pending timers`,
+    );
+    this.pendingTimers.forEach((timer) => clearTimeout(timer));
+    this.pendingTimers.length = 0;
   }
 }
