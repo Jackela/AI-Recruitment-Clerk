@@ -2,7 +2,6 @@ import {
   AnalyticsEvent,
   AnalyticsEventId,
   EventType,
-  EventCategory,
   EventStatus,
   ConsentStatus,
   MetricUnit,
@@ -12,8 +11,6 @@ import {
   EventData,
   EventTimestamp,
   EventContext,
-  EventValidationResult,
-  PrivacyComplianceResult,
 } from './analytics.dto';
 
 import {
@@ -35,19 +32,13 @@ import {
 
 import {
   AnalyticsDomainService,
-  EventCreationResult,
-  BatchProcessingResult,
   PrivacyComplianceResult as ServicePrivacyComplianceResult,
-  SessionAnalyticsResult,
-  EventProcessingMetricsResult,
-  DataPrivacyMetricsResult,
 } from './analytics.service';
 
 describe('Agent-5: Analytics Domain Service Tests', () => {
   // 测试数据
   const validSessionId = 'session_12345_abcdef';
   const validUserId = 'user_67890';
-  const systemSessionId = 'system_1234567890';
 
   const validDeviceInfo = new DeviceInfo({
     userAgent: 'Mozilla/5.0 Chrome/91.0',

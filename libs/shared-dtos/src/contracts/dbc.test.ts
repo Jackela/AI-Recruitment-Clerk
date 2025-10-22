@@ -5,7 +5,6 @@
  */
 
 import {
-  ContractViolationError,
   Requires,
   Ensures,
   ContractValidators,
@@ -29,10 +28,10 @@ class TestService {
   }
 
   @Requires(
-    (email: string) => ContractValidators.isValidEmail(email),
+    (_email: string) => ContractValidators.isValidEmail(_email),
     'Email must be valid format',
   )
-  async validateEmail(email: string): Promise<boolean> {
+  async validateEmail(_email: string): Promise<boolean> {
     return true;
   }
 }

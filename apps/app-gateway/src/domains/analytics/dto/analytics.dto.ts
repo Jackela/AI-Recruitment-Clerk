@@ -84,7 +84,7 @@ export class RecordMetricDto {
   @ApiProperty({ description: '指标值', example: 85.5 })
   @IsNumber()
   @Min(0)
-  metricValue: number;
+  metricValue: number = 0;
 
   @ApiProperty({
     description: '指标单位',
@@ -92,7 +92,7 @@ export class RecordMetricDto {
     example: MetricUnit.PERCENTAGE,
   })
   @IsEnum(MetricUnit)
-  metricUnit: MetricUnit;
+  metricUnit: MetricUnit = MetricUnit.COUNT;
 
   @ApiProperty({
     description: '指标维度（可选）',
@@ -114,7 +114,7 @@ export class BatchProcessDto {
   })
   @IsArray()
   @IsString({ each: true })
-  eventIds: string[];
+  eventIds: string[] = [];
 }
 
 /**
@@ -122,28 +122,28 @@ export class BatchProcessDto {
  */
 export class SessionAnalyticsDto {
   @ApiProperty({ description: '会话ID' })
-  sessionId: string;
+  sessionId: string = '';
 
   @ApiProperty({ description: '用户ID' })
   userId?: string;
 
   @ApiProperty({ description: '会话开始时间' })
-  startTime: Date;
+  startTime: Date = new Date();
 
   @ApiProperty({ description: '会话结束时间' })
-  endTime: Date;
+  endTime: Date = new Date();
 
   @ApiProperty({ description: '事件数量' })
-  eventCount: number;
+  eventCount: number = 0;
 
   @ApiProperty({ description: '最后活动时间' })
-  lastActivityTime: Date;
+  lastActivityTime: Date = new Date();
 
   @ApiProperty({ description: '是否活跃中' })
-  isActive: boolean;
+  isActive: boolean = false;
 
   @ApiProperty({ description: '平均事件间隔（毫秒）' })
-  averageEventInterval: number;
+  averageEventInterval: number = 0;
 }
 
 /**

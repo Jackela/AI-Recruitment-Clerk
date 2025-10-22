@@ -13,5 +13,4 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/apps/scoring-engine-svc',
-  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
 };

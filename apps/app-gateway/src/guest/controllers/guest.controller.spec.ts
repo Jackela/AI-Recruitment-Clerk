@@ -20,7 +20,7 @@ describe('GuestController', () => {
   const mockRequest: RequestWithDeviceId = {
     deviceId: 'test-device-123',
     isGuest: true,
-  } as any;
+  } as RequestWithDeviceId;
 
   beforeEach(() => {
     guestUsageService = createGuestUsageServiceMock();
@@ -189,15 +189,16 @@ describe('GuestController', () => {
       try {
         await controller.checkUsage(mockRequest);
       } catch (error) {
-        expect(error).toBeInstanceOf(HttpException);
-        expect((error as HttpException).getStatus()).toBe(
-          HttpStatus.TOO_MANY_REQUESTS,
-        );
-        expect((error as HttpException).getResponse()).toMatchObject({
-          canUse: false,
-          message: '免费次数已用完！参与问卷反馈(奖励￥3现金)可再获5次使用权！',
-          needsFeedbackCode: true,
-        });
+        if (error instanceof HttpException) {
+          expect(error.getStatus()).toBe(HttpStatus.TOO_MANY_REQUESTS);
+          expect(error.getResponse()).toMatchObject({
+            canUse: false,
+            message: '免费次数已用完！参与问卷反馈(奖励￥3现金)可再获5次使用权！',
+            needsFeedbackCode: true,
+          });
+        } else {
+          throw error;
+        }
       }
     });
 

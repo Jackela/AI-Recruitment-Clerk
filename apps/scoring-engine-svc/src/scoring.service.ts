@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 import { ScoringEngineNatsService } from './services/scoring-engine-nats.service';
-import { Inject } from '@nestjs/common';
 import {
   SecureConfigValidator,
   ScoringEngineException,
@@ -102,7 +101,6 @@ export interface ScoreDTO {
 @Injectable()
 export class ScoringEngineService {
   private readonly jdCache = new Map<string, JdDTO>();
-  private readonly geminiClient: GeminiClient;
 
   /**
    * Initializes a new instance of the Scoring Engine Service.
@@ -126,19 +124,7 @@ export class ScoringEngineService {
       ]);
     }
 
-    // Initialize Gemini client with validated environment configuration (use dummy in tests)
-    if (process.env.NODE_ENV === 'test') {
-      // Use a no-op stub in tests to avoid external init and security checks
-      this.geminiClient = {} as unknown as GeminiClient;
-    } else {
-      const geminiConfig: GeminiConfig = {
-        apiKey: SecureConfigValidator.requireEnv('GEMINI_API_KEY'),
-        model: 'gemini-1.5-flash',
-        temperature: 0.3,
-        maxOutputTokens: 8192,
-      };
-      this.geminiClient = new GeminiClient(geminiConfig);
-    }
+    // Gemini client initialization removed - service uses injected dependencies for AI analysis
   }
 
   /**
@@ -445,8 +431,8 @@ export class ScoringEngineService {
    */
   private _calculateDynamicWeights(
     jdDto: JdDTO,
-    skillAnalysis: EnhancedSkillScore,
-    experienceAnalysis: ExperienceScore,
+    _skillAnalysis: EnhancedSkillScore,
+    _experienceAnalysis: ExperienceScore,
   ) {
     // Base weights
     let skillsWeight = 0.5;
@@ -567,7 +553,7 @@ export class ScoringEngineService {
 
   private _identifyRelevantMajors(
     resumeDto: ResumeDTO,
-    jdDto: JdDTO,
+    _jdDto: JdDTO,
   ): string[] {
     // Simple heuristic based on common tech skills -> major mappings
     const techSkills = resumeDto.skills.filter((skill) =>
@@ -593,7 +579,7 @@ export class ScoringEngineService {
   }
 
   private _getEducationLevelName(level: number): string {
-    const levelNames = {
+    const levelNames: Record<number, string> = {
       0: 'Any',
       1: 'Bachelor',
       2: 'Master',

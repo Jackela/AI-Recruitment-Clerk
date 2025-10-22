@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Post,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -16,6 +17,8 @@ import { CreateJobDto } from './dto/create-job.dto';
 @ApiTags('jobs')
 @Controller('jobs')
 export class SimpleJobsController {
+  private readonly logger = new Logger(SimpleJobsController.name);
+  
   /**
    * Initializes a new instance of the Simple Jobs Controller.
    * @param jobsService - The jobs service.
@@ -93,7 +96,7 @@ export class SimpleJobsController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createJob(@Body() body: CreateJobDto) {
-    console.log('🚨 SIMPLE JOBS CONTROLLER CALLED! 🚨');
+    this.logger.log('Simple jobs controller: createSimpleJob called');
     // ✅ FIXED: Use real JobsService with NATS publishing for E2E tests
     const mockUser = {
       id: 'e2e-test-user',
@@ -102,9 +105,9 @@ export class SimpleJobsController {
       email: 'e2e-test@example.com',
     };
 
-    console.log('🚨 CALLING JOBS SERVICE NOW! 🚨');
+    this.logger.debug('Calling jobs service with create job DTO');
     const result = await this.jobsService.createJob(body, mockUser);
-    console.log('🚨 JOBS SERVICE RESULT:', result, '🚨');
+    this.logger.debug(`Jobs service result: ${JSON.stringify(result)}` );
     return result;
   }
 }
