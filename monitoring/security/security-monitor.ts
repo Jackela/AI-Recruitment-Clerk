@@ -7,6 +7,25 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
+/**
+ * HTTP Request interface for security monitoring
+ * Compatible with Express/Fastify request objects
+ */
+export interface HttpRequest {
+  url: string;
+  method: string;
+  headers: {
+    'user-agent'?: string;
+    'x-forwarded-for'?: string;
+    'x-real-ip'?: string;
+    [key: string]: string | undefined;
+  };
+  body?: unknown;
+  query?: Record<string, unknown>;
+  connection?: { remoteAddress?: string };
+  socket?: { remoteAddress?: string };
+}
+
 export interface SecurityEvent {
   id: string;
   type: 'authentication_failure' | 'suspicious_activity' | 'ddos_attempt' | 'data_breach' | 'unauthorized_access' | 'injection_attempt' | 'privilege_escalation';
@@ -21,7 +40,7 @@ export interface SecurityEvent {
   details: {
     endpoint?: string;
     method?: string;
-    payload?: any;
+    payload?: unknown;
     description: string;
     riskScore: number; // 0-100
   };
@@ -77,7 +96,7 @@ export class SecurityMonitorService {
   /**
    * Monitor HTTP request for security threats
    */
-  monitorRequest(req: any): SecurityEvent | null {
+  monitorRequest(req: HttpRequest): SecurityEvent | null {
     const clientIP = this.extractClientIP(req);
     const userAgent = req.headers['user-agent'] || 'unknown';
     const endpoint = req.url;
@@ -360,7 +379,7 @@ export class SecurityMonitorService {
     return `sec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private extractClientIP(req: any): string {
+  private extractClientIP(req: HttpRequest): string {
     return req.headers['x-forwarded-for']?.split(',')[0] ||
            req.headers['x-real-ip'] ||
            req.connection?.remoteAddress ||
@@ -401,7 +420,7 @@ export class SecurityMonitorService {
     return null;
   }
 
-  private detectSQLInjection(req: any): SecurityEvent | null {
+  private detectSQLInjection(req: HttpRequest): SecurityEvent | null {
     const sqlPatterns = [
       /(\s*(union|select|insert|update|delete|drop|create|alter)\s+)/i,
       /(\s*(or|and)\s+\d+\s*=\s*\d+)/i,
@@ -431,7 +450,7 @@ export class SecurityMonitorService {
     return null;
   }
 
-  private detectXSSAttempt(req: any): SecurityEvent | null {
+  private detectXSSAttempt(req: HttpRequest): SecurityEvent | null {
     const xssPatterns = [
       /<script[^>]*>.*<\/script>/i,
       /javascript:/i,
@@ -462,7 +481,7 @@ export class SecurityMonitorService {
     return null;
   }
 
-  private detectPathTraversal(req: any): SecurityEvent | null {
+  private detectPathTraversal(req: HttpRequest): SecurityEvent | null {
     const pathTraversalPatterns = [
       /\.\.\//,
       /\.\.\\\/,

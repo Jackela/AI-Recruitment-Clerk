@@ -14,6 +14,7 @@ export class AppService
 {
   private readonly logger = new Logger(AppService.name);
   private subscriptions: Map<string, any> = new Map();
+  private isInitialized = false;
 
   /**
    * Retrieves data.

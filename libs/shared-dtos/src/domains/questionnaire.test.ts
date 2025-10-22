@@ -1,26 +1,18 @@
 import {
   Questionnaire,
-  QuestionnaireId,
   QuestionnaireSubmission,
   SubmissionQuality,
   UserProfile,
-  UserExperience,
   BusinessValue,
-  FeatureNeeds,
   OptionalInfo,
   SubmissionMetadata,
   QuestionnaireStatus,
-  QuestionnaireValidationResult,
-  QualityScore,
   RawSubmissionData,
 } from './questionnaire.dto';
 
 import { QuestionnaireRules } from './questionnaire.rules';
 import {
   QuestionnaireDomainService,
-  QuestionnaireSubmissionResult,
-  SubmissionTrendsAnalysis,
-  IPSubmissionCheckResult,
 } from './questionnaire.service';
 
 describe('Agent-3: Questionnaire Domain Entity Tests', () => {
@@ -136,8 +128,6 @@ describe('Agent-3: Questionnaire Domain Entity Tests', () => {
     });
 
     it('should validate individual business rules', () => {
-      const submission = QuestionnaireSubmission.fromRawData(mockRawData);
-
       expect(QuestionnaireRules.isValidRating(4)).toBe(true);
       expect(QuestionnaireRules.isValidRating(0)).toBe(false);
       expect(QuestionnaireRules.isValidRating(6)).toBe(false);

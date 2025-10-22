@@ -340,8 +340,6 @@ describe('ReportGeneratorService DBC Validators', () => {
         }
 
         // Mock report generation
-        const startTime = Date.now();
-
         // Simulate processing delay
         const processingTime = 2000; // 2 seconds
 

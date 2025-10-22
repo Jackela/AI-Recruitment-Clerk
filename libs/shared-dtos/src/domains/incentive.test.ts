@@ -4,21 +4,15 @@ import {
   IncentiveRecipient,
   IncentiveReward,
   IncentiveTrigger,
-  IncentiveSummary,
   IncentiveStatus,
-  VerificationStatus,
   Currency,
-  RewardType,
   TriggerType,
   PaymentMethod,
   ContactInfo,
-  PaymentResult,
-  IncentiveValidationResult,
 } from './incentive.dto';
 
 import {
   IncentiveRules,
-  IncentiveEligibilityResult,
   PaymentEligibilityResult,
   PaymentMethodValidationResult,
   IncentivePriority,

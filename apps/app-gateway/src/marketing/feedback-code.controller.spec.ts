@@ -6,7 +6,14 @@ import {
   MarkFeedbackCodeUsedDto,
 } from './feedback-code.service';
 
-const createRequest = (overrides: Record<string, unknown> = {}) =>
+interface MockRequest {
+  get: jest.Mock;
+  connection: { remoteAddress: string };
+  socket: { remoteAddress: string };
+  [key: string]: unknown;
+}
+
+const createRequest = (overrides: Record<string, unknown> = {}): MockRequest =>
   ({
     get: jest.fn().mockImplementation((header: string) => {
       if (header === 'User-Agent') {
@@ -20,7 +27,7 @@ const createRequest = (overrides: Record<string, unknown> = {}) =>
     connection: { remoteAddress: '192.0.2.1' },
     socket: { remoteAddress: '192.0.2.1' },
     ...overrides,
-  } as any);
+  });
 
 const createService = (): jest.Mocked<FeedbackCodeService> =>
   ({
@@ -54,11 +61,16 @@ describe('FeedbackCodeController (lightweight)', () => {
             header === 'User-Agent' ? 'jest-agent' : '198.51.100.5',
           ),
       });
+      interface FeedbackCodeRecord {
+        id: string;
+        code: string;
+        generatedAt: Date;
+      }
       service.recordFeedbackCode.mockResolvedValue({
         id: 'doc-1',
         code: dto.code,
         generatedAt: new Date('2024-01-01T00:00:00Z'),
-      } as any);
+      } as FeedbackCodeRecord);
 
       const result = await controller.recordFeedbackCode(dto, request);
 
@@ -116,11 +128,16 @@ describe('FeedbackCodeController (lightweight)', () => {
     };
 
     it('marks a code as used and returns summary', async () => {
+      interface MarkUsedResult {
+        code: string;
+        paymentStatus: string;
+        qualityScore: number;
+      }
       service.markFeedbackCodeAsUsed.mockResolvedValue({
         code: dto.code,
         paymentStatus: 'pending',
         qualityScore: 0.9,
-      } as any);
+      } as MarkUsedResult);
 
       const result = await controller.markFeedbackCodeAsUsed(dto);
 

@@ -2,13 +2,6 @@ import { EncryptionService } from './encryption.service';
 
 describe('EncryptionService', () => {
   const testData = 'This is sensitive test data that needs encryption!';
-  const testEmail = 'john.doe@example.com';
-  const testPersonalInfo = {
-    firstName: 'John',
-    lastName: 'Doe',
-    phone: '+1-555-123-4567',
-    address: '123 Main St, Anytown, USA',
-  };
 
   beforeEach(() => {
     // Reset environment for each test

@@ -351,7 +351,7 @@ export class SecretsManagerService implements OnModuleInit {
     const authTag = Buffer.from(authTagHex, 'hex');
 
     const decipher = crypto.createDecipher(algorithm, encryptionKey);
-    decipher.setAuthTag(authTag);
+    decipher.setAuthTag(Uint8Array.from(authTag));
 
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');

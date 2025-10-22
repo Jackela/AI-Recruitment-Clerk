@@ -92,14 +92,10 @@ describe('Redis Infrastructure', () => {
   let redisClient: jest.Mocked<RedisClient>;
   let sessionCache: SessionCacheService;
   let usageCache: UsageCacheService;
-  let redisInternals: RedisClientMocks['internals'];
-  let pipelineMock: RedisClientMocks['pipeline'];
 
   beforeEach(() => {
     const mocks = createRedisClientMock();
     redisClient = mocks.redisClient;
-    redisInternals = mocks.internals;
-    pipelineMock = mocks.pipeline;
     sessionCache = new SessionCacheService(redisClient);
     usageCache = new UsageCacheService(redisClient);
   });
