@@ -13,7 +13,6 @@ export class AppService
   implements OnApplicationBootstrap, OnApplicationShutdown
 {
   private readonly logger = new Logger(AppService.name);
-  private isInitialized = false;
   private subscriptions: Map<string, any> = new Map();
 
   /**
@@ -150,7 +149,7 @@ export class AppService
     // Handle job description extraction requests
     return {
       subject: 'jd.extract.request',
-      handler: async (data: any) => {
+      handler: async (_data: any) => {
         this.logger.log('Processing JD extraction request');
         // Process extraction request
       },
@@ -161,7 +160,7 @@ export class AppService
     // Handle job description analysis requests
     return {
       subject: 'jd.analyze.request',
-      handler: async (data: any) => {
+      handler: async (_data: any) => {
         this.logger.log('Processing JD analysis request');
         // Process analysis request
       },
@@ -172,7 +171,7 @@ export class AppService
     // Handle job description validation requests
     return {
       subject: 'jd.validate.request',
-      handler: async (data: any) => {
+      handler: async (_data: any) => {
         this.logger.log('Processing JD validation request');
         // Process validation request
       },
@@ -182,7 +181,7 @@ export class AppService
   private async cleanupEventSubscriptions(): Promise<void> {
     try {
       // Unsubscribe from all active subscriptions
-      for (const [subject, subscription] of this.subscriptions) {
+      for (const [subject, _subscription] of this.subscriptions) {
         // Cleanup subscription
         this.logger.log(`Cleaned up subscription for: ${subject}`);
       }
