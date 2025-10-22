@@ -1,8 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import {
-  EMBEDDING_PROVIDER,
-  IEmbeddingProvider,
-} from './interfaces/embedding-provider.interface';
+import { EMBEDDING_PROVIDER } from './interfaces/embedding-provider.interface';
+import type { IEmbeddingProvider } from './interfaces/embedding-provider.interface';
 
 /**
  * Application-level facade around the configured embedding provider.

@@ -8,7 +8,14 @@ let mockServer: Server | null = null;
 let serverPort: number | null = null;
 
 // Mock data
-const mockJobs = [
+const mockJobs: Array<{
+  id: string;
+  title: string;
+  description: string;
+  requirements: string[];
+  status: string;
+  createdAt: string;
+}> = [
   {
     id: '1',
     title: '高级前端开发工程师',
@@ -95,10 +102,11 @@ export async function startMockServer(): Promise<number> {
     res.json(mockJobs);
   });
 
-  app.get('/api/jobs/:id', (req, res) => {
+  app.get('/api/jobs/:id', (req, res): void => {
     const job = mockJobs.find((j) => j.id === req.params.id);
     if (!job) {
-      return res.status(404).json({ error: 'Job not found' });
+      res.status(404).json({ error: 'Job not found' });
+      return;
     }
     res.json(job);
   });
@@ -116,19 +124,21 @@ export async function startMockServer(): Promise<number> {
     res.status(201).json(newJob);
   });
 
-  app.put('/api/jobs/:id', (req, res) => {
+  app.put('/api/jobs/:id', (req, res): void => {
     const jobIndex = mockJobs.findIndex((j) => j.id === req.params.id);
     if (jobIndex === -1) {
-      return res.status(404).json({ error: 'Job not found' });
+      res.status(404).json({ error: 'Job not found' });
+      return;
     }
     mockJobs[jobIndex] = { ...mockJobs[jobIndex], ...req.body };
     res.json(mockJobs[jobIndex]);
   });
 
-  app.delete('/api/jobs/:id', (req, res) => {
+  app.delete('/api/jobs/:id', (req, res): void => {
     const jobIndex = mockJobs.findIndex((j) => j.id === req.params.id);
     if (jobIndex === -1) {
-      return res.status(404).json({ error: 'Job not found' });
+      res.status(404).json({ error: 'Job not found' });
+      return;
     }
     mockJobs.splice(jobIndex, 1);
     res.status(204).send();
@@ -139,10 +149,11 @@ export async function startMockServer(): Promise<number> {
     res.json(mockReports);
   });
 
-  app.get('/api/reports/:id', (req, res) => {
+  app.get('/api/reports/:id', (req, res): void => {
     const report = mockReports.find((r) => r.id === req.params.id);
     if (!report) {
-      return res.status(404).json({ error: 'Report not found' });
+      res.status(404).json({ error: 'Report not found' });
+      return;
     }
     res.json(report);
   });
@@ -169,18 +180,18 @@ export async function startMockServer(): Promise<number> {
       jdText.toLowerCase().includes('aws') &&
       resumeText.toLowerCase().includes('aws')
     ) {
-      matchedSkills.push('aws');
+      (matchedSkills as string[]).push('aws');
     } else if (jdText.toLowerCase().includes('aws')) {
-      missingSkills.push('aws');
+      (missingSkills as string[]).push('aws');
     }
 
     if (
       jdText.toLowerCase().includes('kubernetes') &&
       resumeText.toLowerCase().includes('kubernetes')
     ) {
-      matchedSkills.push('kubernetes');
+      (matchedSkills as string[]).push('kubernetes');
     } else if (jdText.toLowerCase().includes('kubernetes')) {
-      missingSkills.push('kubernetes');
+      (missingSkills as string[]).push('kubernetes');
     }
 
     res.json({
@@ -420,7 +431,7 @@ export function getMockServerStatus(): {
     running: mockServer !== null && mockServer.listening,
     port: serverPort,
     healthy:
-      mockServer !== null && mockServer.listening && !mockServer.destroyed,
+      mockServer !== null && mockServer.listening && !(mockServer as any).destroyed,
   };
 }
 

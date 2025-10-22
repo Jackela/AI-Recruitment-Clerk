@@ -90,10 +90,12 @@ expect.extend({
 // Type declarations for custom matchers - using proper Jest types
 import '@jest/types';
 
-declare module '@jest/expect' {
-  interface Matchers<R> {
-    toBeValidApiResponse(): R;
-    toHavePerformanceWithin(expectedMs: number): R;
+declare global {
+  namespace jest {
+    interface Matchers<R> {
+      toBeValidApiResponse(): R;
+      toHavePerformanceWithin(expectedMs: number): R;
+    }
   }
 }
 
