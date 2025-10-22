@@ -18,6 +18,6 @@ export class AppController {
    */
   @Get()
   getData() {
-    return { message: 'Hello API' };
+    return this.appService.getData();
   }
 }

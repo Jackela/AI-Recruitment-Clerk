@@ -1,10 +1,9 @@
 import { Controller, Logger, OnModuleInit } from '@nestjs/common';
-import { EventPattern, Payload } from '@nestjs/microservices';
+import { EventPattern } from '@nestjs/microservices';
 import { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
 import { ErrorCorrelationManager } from '@app/shared-dtos';
 import { JDExtractorException } from '@app/shared-dtos';
 import { JDExtractorErrorCode } from '@app/shared-dtos';
-import { JobJdSubmittedEvent } from '../dto/events.dto';
 import { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
 import { LlmService } from '../extraction/llm.service';
 
