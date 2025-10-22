@@ -151,10 +151,10 @@ export class SessionAnalyticsDto {
  */
 export class ProcessingMetricsDto {
   @ApiProperty({ description: '总事件数' })
-  totalEvents: number;
+  totalEvents: number = 0;
 
   @ApiProperty({ description: '已处理事件数' })
-  processedEvents: number;
+  processedEvents: number = 0;
 
   @ApiProperty({ description: '失败事件数' })
   failedEvents: number = 0;

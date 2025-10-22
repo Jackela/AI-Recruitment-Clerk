@@ -92,7 +92,7 @@ interface JasmineInterface {
     methods.forEach((method) => {
       const jestSpy = jest.fn();
       // Add Jasmine-style chaining methods
-      const spyWithMethods = jestSpy as JasmineSpy;
+      const spyWithMethods = jestSpy as unknown as JasmineSpy;
       spyWithMethods.and = {
         returnValue: (value: unknown) => jestSpy.mockReturnValue(value),
         returnValues: (...values: unknown[]) => {
@@ -117,11 +117,13 @@ interface JasmineInterface {
   },
   createSpy: (_name?: string) => {
     const jestSpy = jest.fn();
-    const spyWithMethods = jestSpy as JasmineSpy;
+    const spyWithMethods = jestSpy as unknown as JasmineSpy;
     spyWithMethods.and = {
       returnValue: (value: unknown) => jestSpy.mockReturnValue(value),
-      returnValues: (...values: unknown[]) =>
-        jestSpy.mockReturnValueOnce(...values),
+      returnValues: (...values: unknown[]) => {
+        values.forEach((value) => jestSpy.mockReturnValueOnce(value));
+        return jestSpy;
+      },
       callFake: (fn: (...args: unknown[]) => unknown) =>
         jestSpy.mockImplementation(fn),
       callThrough: () => jestSpy.mockImplementation(),
@@ -141,12 +143,14 @@ interface JasmineInterface {
     spyOn?: (object: Record<string, unknown>, method: string) => JasmineSpy;
   }
 ).spyOn = (object: Record<string, unknown>, method: string) => {
-  const jestSpy = jest.spyOn(object, method);
-  const spyWithMethods = jestSpy as JasmineSpy;
+  const jestSpy = jest.spyOn(object as any, method as any);
+  const spyWithMethods = jestSpy as unknown as JasmineSpy;
   spyWithMethods.and = {
-    returnValue: (value: unknown) => jestSpy.mockReturnValue(value),
-    returnValues: (...values: unknown[]) =>
-      jestSpy.mockReturnValueOnce(...values),
+    returnValue: (value: unknown) => jestSpy.mockReturnValue(value as any),
+    returnValues: (...values: unknown[]) => {
+      values.forEach((value) => jestSpy.mockReturnValueOnce(value as any));
+      return jestSpy;
+    },
     callFake: (fn: (...args: unknown[]) => unknown) =>
       jestSpy.mockImplementation(fn),
     callThrough: () => jestSpy.mockImplementation(),
