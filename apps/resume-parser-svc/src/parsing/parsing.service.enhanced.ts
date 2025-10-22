@@ -381,7 +381,7 @@ export class ParsingService {
     fileBuffer: Buffer,
     userId: string,
   ): Promise<void> {
-    const fileHash = createHash('sha256').update(fileBuffer).digest('hex');
+    const fileHash = createHash('sha256').update(Uint8Array.from(fileBuffer)).digest('hex');
     const existingProcessing = Array.from(this.processingFiles.values()).find(
       (p) => p.hash === fileHash,
     );
@@ -431,7 +431,7 @@ export class ParsingService {
    * @since 1.1.0
    */
   private trackProcessingAttempt(jobId: string, fileBuffer: Buffer): void {
-    const fileHash = createHash('sha256').update(fileBuffer).digest('hex');
+    const fileHash = createHash('sha256').update(Uint8Array.from(fileBuffer)).digest('hex');
     this.processingFiles.set(jobId, {
       timestamp: Date.now(),
       hash: fileHash,
