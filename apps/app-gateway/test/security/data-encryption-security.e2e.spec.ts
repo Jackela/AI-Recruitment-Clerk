@@ -49,8 +49,8 @@ describe('🔐 Data Security & Encryption Tests', () => {
     address: '123 Sensitive St, Privacy City, PC 12345',
     dateOfBirth: '1990-01-01',
     personalNote: 'This contains sensitive personal information for testing',
-    apiKey: 'sk_test_1234567890abcdef',
-    token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.sensitive.data',
+    apiKey: process.env.TEST_API_KEY || 'test-api-key-placeholder',
+    token: process.env.TEST_JWT_TOKEN || 'test-token-placeholder',
   };
 
   beforeAll(async () => {

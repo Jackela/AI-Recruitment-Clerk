@@ -8,4 +8,5 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/apps/report-generator-svc',
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
 };

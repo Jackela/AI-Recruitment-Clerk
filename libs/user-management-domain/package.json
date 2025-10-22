@@ -2,7 +2,7 @@
   "name": "@ai-recruitment-clerk/user-management-domain",
   "version": "1.0.0",
   "description": "User management domain layer for AI Recruitment Clerk",
-  "type": "commonjs",
+  "type": "module",
   "main": "./src/index.js",
   "exports": {
     ".": {

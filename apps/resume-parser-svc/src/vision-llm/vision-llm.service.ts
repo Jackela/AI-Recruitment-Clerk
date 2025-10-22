@@ -1,4 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
+import {
+  CircuitBreaker,
+  RetryHandler,
+  DEFAULT_RETRY_CONFIG,
+} from './vision-llm-error-handler';
 import { VisionLlmRequest, VisionLlmResponse } from '../dto/resume-parsing.dto';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 import {
@@ -17,6 +22,8 @@ import pdfParse from 'pdf-parse-fork';
 export class VisionLlmService {
   private readonly logger = new Logger(VisionLlmService.name);
   private readonly geminiClient: GeminiClient;
+  private readonly circuitBreaker: CircuitBreaker;
+  private readonly retryHandler: RetryHandler;
 
   /**
    * Initializes a new instance of the Vision LLM Service.
@@ -40,6 +47,13 @@ export class VisionLlmService {
 
     // In tests, use stubbed Gemini client; otherwise real client
     this.geminiClient = this.createGeminiClient(config);
+
+    // Initialize error handling mechanisms (FAIL-FAST architecture)
+    this.circuitBreaker = new CircuitBreaker(5, 60000, this.logger);
+    this.retryHandler = new RetryHandler({
+      ...DEFAULT_RETRY_CONFIG,
+      timeout: 30000, // 30s timeout for LLM API calls
+    });
   }
 
   /**
