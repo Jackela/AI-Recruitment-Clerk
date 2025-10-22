@@ -79,10 +79,10 @@ export default {
       main: './src/main.ts',
       tsConfig: './tsconfig.app.json',
       assets: ['./src/assets'],
-      optimization: false,
+      optimization: true,
       outputHashing: 'none',
       generatePackageJson: false,
-      typeCheck: false,
+      typeCheck: true,
       // Ensure CommonJS output to be compatible with Node runtime in this repo
       outputModule: false,
     }),
