@@ -42,7 +42,7 @@ export class TrackEventDto {
   @ApiProperty({ description: '会话ID', example: 'session_12345' })
   @IsString()
   @IsNotEmpty()
-  sessionId: string;
+  sessionId: string = '';
 
   @ApiProperty({
     description: '事件类型',
@@ -50,7 +50,7 @@ export class TrackEventDto {
     example: EventType.USER_INTERACTION,
   })
   @IsEnum(EventType)
-  eventType: EventType;
+  eventType: EventType = EventType.USER_INTERACTION;
 
   @ApiProperty({
     description: '事件数据',
@@ -79,7 +79,7 @@ export class RecordMetricDto {
   })
   @IsString()
   @IsNotEmpty()
-  metricName: string;
+  metricName: string = '';
 
   @ApiProperty({ description: '指标值', example: 85.5 })
   @IsNumber()
@@ -157,16 +157,16 @@ export class ProcessingMetricsDto {
   processedEvents: number;
 
   @ApiProperty({ description: '失败事件数' })
-  failedEvents: number;
+  failedEvents: number = 0;
 
   @ApiProperty({ description: '平均处理时间（毫秒）' })
-  averageProcessingTime: number;
+  averageProcessingTime: number = 0;
 
   @ApiProperty({ description: '每秒吞吐量' })
-  throughputPerSecond: number;
+  throughputPerSecond: number = 0;
 
   @ApiProperty({ description: '错误率（百分比）' })
-  errorRate: number;
+  errorRate: number = 0;
 }
 
 /**
@@ -174,25 +174,25 @@ export class ProcessingMetricsDto {
  */
 export class PrivacyMetricsDto {
   @ApiProperty({ description: '总事件数' })
-  totalEvents: number;
+  totalEvents: number = 0;
 
   @ApiProperty({ description: '已匿名化事件数' })
-  anonymizedEvents: number;
+  anonymizedEvents: number = 0;
 
   @ApiProperty({ description: '已过期事件数' })
-  expiredEvents: number;
+  expiredEvents: number = 0;
 
   @ApiProperty({ description: '待匿名化事件数' })
-  pendingAnonymization: number;
+  pendingAnonymization: number = 0;
 
   @ApiProperty({ description: '合规分数（0-100）' })
-  complianceScore: number;
+  complianceScore: number = 0;
 
   @ApiProperty({
     description: '风险等级',
     enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'],
   })
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';
 }
 
 /**
@@ -200,16 +200,16 @@ export class PrivacyMetricsDto {
  */
 export class ReportingAccessDto {
   @ApiProperty({ description: '是否有访问权限' })
-  hasAccess: boolean;
+  hasAccess: boolean = false;
 
   @ApiProperty({ description: '权限列表' })
-  permissions: string[];
+  permissions: string[] = [];
 
   @ApiProperty({ description: '访问限制' })
-  restrictions: string[];
+  restrictions: string[] = [];
 
   @ApiProperty({ description: '数据范围限制' })
-  dataScope: string;
+  dataScope: string = '';
 
   @ApiProperty({ description: '过期时间' })
   expiresAt?: Date;
@@ -223,22 +223,25 @@ export class DataRetentionReportDto {
   reportPeriod: {
     startDate: Date;
     endDate: Date;
+  } = {
+    startDate: new Date(),
+    endDate: new Date(),
   };
 
   @ApiProperty({ description: '总事件数' })
-  totalEvents: number;
+  totalEvents: number = 0;
 
   @ApiProperty({ description: '待删除事件数' })
-  eventsToDelete: number;
+  eventsToDelete: number = 0;
 
   @ApiProperty({ description: '待匿名化事件数' })
-  eventsToAnonymize: number;
+  eventsToAnonymize: number = 0;
 
   @ApiProperty({ description: '按事件类型统计' })
-  eventTypeStatistics: Record<string, any>;
+  eventTypeStatistics: Record<string, any> = {};
 
   @ApiProperty({ description: '保留策略列表' })
-  retentionPolicies: any[];
+  retentionPolicies: any[] = [];
 }
 
 /**
@@ -246,7 +249,7 @@ export class DataRetentionReportDto {
  */
 export class EventCreationResultDto {
   @ApiProperty({ description: '是否成功' })
-  success: boolean;
+  success: boolean = false;
 
   @ApiProperty({ description: '事件摘要', required: false })
   data?: {
@@ -267,7 +270,7 @@ export class EventCreationResultDto {
  */
 export class BatchProcessingResultDto {
   @ApiProperty({ description: '是否成功' })
-  success: boolean;
+  success: boolean = false;
 
   @ApiProperty({ description: '处理结果', required: false })
   data?: {

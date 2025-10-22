@@ -31,7 +31,6 @@ export class TestDatabaseModule {
         mongod = await MongoMemoryServer.create({
           instance: {
             dbName: 'resume-parser-test',
-            auth: false,
           },
         });
       }
