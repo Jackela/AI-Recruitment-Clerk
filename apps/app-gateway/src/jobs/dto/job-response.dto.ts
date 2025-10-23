@@ -67,3 +67,19 @@ export class JobListDto {
     this.resumeCount = resumeCount;
   }
 }
+
+/**
+ * Create Job Request contract (frontend parity)
+ * Kept lightweight here to align field naming validation.
+ */
+export interface CreateJobRequestDto {
+  jobTitle: string;
+  jdText: string;
+}
+
+/**
+ * Create Job Response contract (frontend parity)
+ */
+export interface CreateJobResponseDto {
+  jobId: string;
+}
