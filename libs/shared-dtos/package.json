@@ -18,7 +18,7 @@
   "author": "AI Recruitment Clerk Team",
   "license": "MIT",
   "devDependencies": {
-    "typescript": "~5.8.2"
+    "typescript": "~5.9.3"
   },
   "dependencies": {
     "class-validator": "^0.14.2",
