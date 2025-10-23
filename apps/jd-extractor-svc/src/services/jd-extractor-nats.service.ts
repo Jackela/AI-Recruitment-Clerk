@@ -255,7 +255,7 @@ export class JdExtractorNatsService extends NatsClientService {
     }
 
     let count = 0;
-    for (const [key, value] of Object.entries(data)) {
+    for (const [_key, value] of Object.entries(data)) {
       if (value !== null && value !== undefined && value !== '') {
         if (Array.isArray(value) && value.length > 0) {
           count++;

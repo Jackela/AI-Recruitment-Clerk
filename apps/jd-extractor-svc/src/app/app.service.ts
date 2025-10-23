@@ -14,7 +14,6 @@ export class AppService
 {
   private readonly logger = new Logger(AppService.name);
   private subscriptions: Map<string, any> = new Map();
-  private isInitialized = false;
 
   /**
    * Retrieves data.
@@ -47,7 +46,6 @@ export class AppService
       // Validate all components are working
       await this.validateServiceHealth();
 
-      this.isInitialized = true;
       this.logger.log('JD Extractor Service startup completed successfully');
     } catch (error) {
       this.logger.error('Failed to initialize JD Extractor Service:', error);

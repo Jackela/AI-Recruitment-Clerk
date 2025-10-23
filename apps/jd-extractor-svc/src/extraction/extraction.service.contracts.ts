@@ -11,7 +11,6 @@ import {
   ContractViolationError,
   Requires,
   Ensures,
-  Invariant,
   ContractValidators,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import { LlmService } from '../llm/llm.service';
@@ -23,7 +22,6 @@ import {
 import { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
 import {
   RetryUtility,
-  WithCircuitBreaker,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 
 /**

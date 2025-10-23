@@ -154,7 +154,6 @@ export class RetryUtility {
  * Circuit Breaker implementation for preventing cascade failures
  */
 export class CircuitBreaker {
-  private static readonly logger = new Logger(CircuitBreaker.name);
   private static instances = new Map<string, CircuitBreaker>();
 
   private failures = 0;
