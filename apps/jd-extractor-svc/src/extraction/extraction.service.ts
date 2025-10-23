@@ -47,7 +47,7 @@ export class ExtractionService {
    * @returns A promise that resolves when the operation completes.
    */
   async handleJobJdSubmitted(event: JobJdSubmittedEvent): Promise<void> {
-    const { jobId, jobTitle, jdText, timestamp } = event;
+    const { jobId, jobTitle, jdText } = event;
 
     this.logger.log(
       `Received job JD submitted event for jobId: ${jobId}, title: ${jobTitle}`,
