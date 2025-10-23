@@ -89,7 +89,7 @@ export class CrossServiceValidationPipe implements PipeTransform {
    */
   constructor(
     private readonly validationRules?: any[],
-    private readonly options?: {
+    private readonly _options?: {
       parallel?: boolean;
       failFast?: boolean;
       timeout?: number;
