@@ -92,7 +92,7 @@ export class JobsController {
   @HttpCode(HttpStatus.ACCEPTED)
   @UseInterceptors(FilesInterceptor('resumes', 10)) // Max 10 files
   uploadResumes(
-    @Request() _req: AuthenticatedRequest,
+    @Request() req: AuthenticatedRequest,
     @Param() params: JobParamsDto,
     @UploadedFiles(new FileValidationPipe()) files: MulterFile[],
   ): Promise<ResumeUploadResponseDto> {

@@ -574,8 +574,8 @@ export const dbcMonitor = new DBCMonitor();
  */
 export function withMonitoring(serviceContext: string) {
   return function (
-    _target: any,
-    _propertyKey: string,
+    target: any,
+    propertyKey: string,
     descriptor: PropertyDescriptor,
   ) {
     const originalMethod = descriptor.value;

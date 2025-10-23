@@ -80,7 +80,7 @@ export class PrivacyComplianceController {
   @ApiResponse({ status: 404, description: 'User not found' })
   async captureConsent(
     @Body(ValidationPipe) captureConsentDto: CaptureConsentDto,
-    @Req() _req: any,
+    @Req() req: any,
   ): Promise<UserConsentProfile> {
     this.logger.log(`Capturing consent for user: ${captureConsentDto.userId}`);
 
@@ -168,7 +168,7 @@ export class PrivacyComplianceController {
   @ApiResponse({ status: 400, description: 'Invalid request data' })
   async createRightsRequest(
     @Body(ValidationPipe) createRequestDto: CreateRightsRequestDto,
-    @Req() _req: any,
+    @Req() req: any,
   ): Promise<DataSubjectRightsRequest> {
     this.logger.log(
       `Creating rights request: ${createRequestDto.requestType} for user: ${createRequestDto.userId}`,
@@ -391,7 +391,7 @@ export class PrivacyComplianceController {
   @ApiResponse({ status: 201, description: 'Cookie consent saved' })
   async setCookieConsent(
     @Body() cookieConsent: any,
-    @Req() _req: any,
+    @Req() req: any,
   ): Promise<any> {
     this.logger.log('Setting cookie consent preferences');
 
