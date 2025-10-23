@@ -34,3 +34,12 @@ Use this guide to complete the acceptance sign‑off for feature `001-functional
 - Update `acceptance-catalog.md` and affected checklists to reflect changes.
 - Re-baseline SC‑002 targets if scope changes materially impact total case counts; document
   the adjustment in the sign‑off report.
+
+## Automation
+
+- Generate acceptance status snapshot:
+  - `npm run acceptance:status`
+  - Options: `-- -FeatureDir "specs/001-functional-acceptance" -OutName "acceptance-status-<date>.md"`
+- Generate sign-off report from a run JSON:
+  - `npm run acceptance:signoff -- -RunId RUN-YYYYMMDD-NN`
+  - or: `npm run acceptance:signoff -- -RunFile specs/001-functional-acceptance/runs/RUN-YYYYMMDD-NN.json`

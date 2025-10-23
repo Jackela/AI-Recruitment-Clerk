@@ -42,7 +42,9 @@
     "build:check": "nx run-many --target=build --all --parallel=false",
     "validate:contracts": "node tools/contract-validation/validate-contracts.js",
     "validate:contracts:ci": "npm run validate:contracts",
-    "build:with-contracts": "npm run validate:contracts && npm run build"
+    "build:with-contracts": "npm run validate:contracts && npm run build",
+    "acceptance:status": "pwsh -NoLogo -NoProfile -File scripts/acceptance-status.ps1",
+    "acceptance:signoff": "pwsh -NoLogo -NoProfile -File scripts/generate-signoff.ps1"
   },
   "devDependencies": {
     "@angular-devkit/architect": "^0.2003.1",
