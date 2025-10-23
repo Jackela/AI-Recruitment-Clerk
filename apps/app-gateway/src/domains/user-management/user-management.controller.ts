@@ -11,7 +11,6 @@ import {
   Request,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
 import {
@@ -30,10 +29,8 @@ import {
   Permission,
   UserRole,
   UserStatus,
-  CreateUserDto,
   UpdateUserDto,
   UserPreferencesDto,
-  UserActivityDto,
   AuthenticatedRequest,
 } from '@ai-recruitment-clerk/user-management-domain';
 import { UserManagementService } from './user-management.service';

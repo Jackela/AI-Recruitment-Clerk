@@ -4,10 +4,9 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, FilterQuery, UpdateQuery, QueryOptions } from 'mongoose';
+import { Model, FilterQuery, UpdateQuery } from 'mongoose';
 import {
   CreateUserDto,
-  UserDto,
   UserRole,
   UserStatus,
 } from '@ai-recruitment-clerk/user-management-domain';
@@ -313,7 +312,7 @@ export class UserManagementRepository {
   /**
    * Soft delete user (mark as inactive)
    */
-  async softDeleteById(id: string, reason?: string): Promise<void> {
+  async softDeleteById(id: string, _reason?: string): Promise<void> {
     try {
       await this.updateById(id, {
         status: UserStatus.INACTIVE,

@@ -158,10 +158,10 @@ export class WebSocketGateway
   @WebSocketServer() server!: Server;
   private logger: Logger = new Logger('WebSocketGateway');
   private clientSessions = new Map<string, string>(); // clientId -> sessionId
-  private clientUsers = new Map<string, UserPresence>(); // clientId -> user info
-  private activeRooms = new Map<string, Set<string>>(); // roomId -> Set<clientId>
-  private documentSessions = new Map<string, Set<string>>(); // documentId -> Set<clientId>
-  private collaborationRooms = new Map<
+  private _clientUsers = new Map<string, UserPresence>(); // clientId -> user info
+  private _activeRooms = new Map<string, Set<string>>(); // roomId -> Set<clientId>
+  private _documentSessions = new Map<string, Set<string>>(); // documentId -> Set<clientId>
+  private _collaborationRooms = new Map<
     string,
     {
       participants: Map<string, UserPresence>;

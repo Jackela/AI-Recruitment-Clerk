@@ -2,12 +2,12 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  BadRequestException,
+  
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ConsentStatus, DataCategory } from '../schemas/consent-record.schema';
+import { ConsentStatus } from '../schemas/consent-record.schema';
 import {
   ConsentRecord,
   UserConsentProfile,
@@ -18,11 +18,11 @@ import {
   DataSubjectRightsRequest,
   CreateRightsRequestDto,
   DataExportPackage,
-  ProcessRightsRequestDto,
+  
   RequestStatus,
   DataExportFormat,
   IdentityVerificationStatus,
-  UserPreferencesDto,
+  
   ConsentPurpose,
 } from '../common/interfaces/fallback-types';
 import {
@@ -1008,7 +1008,7 @@ export class PrivacyComplianceService {
 
       // Generate secure filename
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `gdpr-data-export-${exportPackage.userId}-${timestamp}.json`;
+      const _filename = `gdpr-data-export-${exportPackage.userId}-${timestamp}.json`;
 
       // Store file securely with encryption
       const fileInfo = await this.storeSecureFile(exportBuffer, filename);
@@ -1075,7 +1075,7 @@ export class PrivacyComplianceService {
       const fileId = this.generateSecureFileId();
 
       // Encrypt file content
-      const encryptedBuffer = await this.encryptFileContent(fileBuffer);
+      const _encryptedBuffer = await this.encryptFileContent(fileBuffer);
 
       // Store in secure location (GridFS or secure file storage)
       const storagePath = await this.storeEncryptedFile(
@@ -1186,7 +1186,7 @@ export class PrivacyComplianceService {
   ): Promise<void> {
     try {
       // Record download information for audit purposes
-      const downloadRecord = {
+      const _downloadRecord = {
         userId,
         fileId,
         downloadUrl: downloadUrl.replace(/signature=[^&]*/, 'signature=***'), // Hide signature in logs

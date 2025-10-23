@@ -45,7 +45,7 @@ export class ResumesController {
   @Post('resumes/upload')
   @UseInterceptors(FileInterceptor('resume'))
   @HttpCode(HttpStatus.CREATED)
-  upload(@UploadedFile() file: Express.Multer.File, @Body() body: any) {
+  upload(@UploadedFile() file: Express.Multer.File, @Body() _body: any) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
@@ -120,7 +120,7 @@ export class ResumesController {
   @UseGuards(JwtAuthGuard)
   @Put('resumes/:id/status')
   @HttpCode(HttpStatus.OK)
-  updateStatus(@Param('id') id: string, @Body() body: any) {
+  updateStatus(@Param('id') id: string, @Body() _body: any) {
     const rec = resumeStore.get(id);
     if (!rec) {
       throw new NotFoundException('Resume not found');

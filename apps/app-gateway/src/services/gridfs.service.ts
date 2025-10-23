@@ -344,7 +344,7 @@ export class GridFsService {
    * @param analysisId - The analysis ID.
    * @returns A unique filename.
    */
-  private generateUniqueFilename(
+  private _generateUniqueFilename(
     originalFilename: string,
     analysisId: string,
   ): string {
