@@ -133,6 +133,7 @@ export interface ExecutionHost {
  */
 export class StandardizedGlobalExceptionFilter {
   private readonly config?: ExceptionFilterConfig;
+
   /**
    * Initializes a new instance of the Standardized Global Exception Filter.
    * @param config - The config.
@@ -474,7 +475,7 @@ export function Invariant(
   _message?: string,
 ): ClassDecorator & MethodDecorator {
   return ((
-    target: DecoratorTarget,
+    _target: DecoratorTarget,
     _propertyKey?: string | symbol,
     descriptor?: PropertyDescriptor,
   ) => {

@@ -55,9 +55,9 @@ export class ParsingService {
   }
 
   // Backward-compatible alias expected by contract tests
-  private get natsClient() {
-    return this.natsService;
-  }
+  // private get natsClient(): ResumeParserNatsService {
+  //   return this.natsService;
+  // }
 
   // Backward-compatible processing stats expected by contract tests
   /**

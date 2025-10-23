@@ -343,7 +343,7 @@ export class QuestionnaireIntegrationService {
   async createFromTemplate(
     templateId: string,
     customizations: any,
-    _userId?: string,
+    userId?: string,
   ): Promise<any> {
     try {
       this.logger.log('Creating questionnaire from template', {

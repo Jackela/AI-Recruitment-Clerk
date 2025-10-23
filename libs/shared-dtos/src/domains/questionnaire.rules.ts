@@ -200,17 +200,8 @@ export class QuestionnaireRules {
     return score;
   }
 
-  private static hasValue(obj: any, path: string): boolean {
-    const keys = path.split('.');
-    let current = obj;
-
-    for (const key of keys) {
-      if (!current || typeof current !== 'object' || !(key in current)) {
-        return false;
-      }
-      current = current[key];
-    }
-
-    return current !== undefined && current !== null && current !== '';
-  }
+  // Simplified implementation - not currently used
+  // private static hasValue(_obj: any, _path: string): boolean {
+  //   return true;
+  // }
 }

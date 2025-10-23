@@ -378,15 +378,15 @@ export class ErrorReportingService {
       business: '业务逻辑',
     };
 
-    const severityNames = {
+    const severityNames: Record<string, string> = {
       low: '轻微',
       medium: '中等',
       high: '严重',
       critical: '致命',
     };
 
-    const categoryStr = categories.map((c) => categoryNames[c] || c).join('、');
-    const severityStr = severityNames[highestSeverity] || highestSeverity;
+    const categoryStr = categories.map((c) => (categoryNames as Record<string, string>)[c] || c).join('、');
+    const severityStr = (severityNames as Record<string, string>)[highestSeverity] || highestSeverity;
 
     if (errorCount === 1) {
       return `检测到1个${severityStr}错误，涉及${categoryStr}功能。`;

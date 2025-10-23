@@ -1130,8 +1130,8 @@ export class PrivacyComplianceService {
   }
 
   private async storeEncryptedFile(
-    encryptedBuffer: Buffer,
-    filename: string,
+    _encryptedBuffer: Buffer,
+    _filename: string,
     fileId: string,
   ): Promise<string> {
     try {
@@ -1152,7 +1152,7 @@ export class PrivacyComplianceService {
 
   private async createSecureDownloadUrl(
     fileId: string,
-    filename: string,
+    _filename: string,
   ): Promise<string> {
     try {
       // Generate time-limited, signed URL
@@ -1181,21 +1181,21 @@ export class PrivacyComplianceService {
 
   private async recordDataExportDownload(
     userId: string,
-    fileId: string,
-    downloadUrl: string,
+    _fileId: string,
+    _downloadUrl: string,
   ): Promise<void> {
     try {
       // Record download information for audit purposes
       // Note: In production, this should be stored in an audit collection
-      const downloadRecord = {
-        userId,
-        fileId,
-        downloadUrl: downloadUrl.replace(/signature=[^&]*/, 'signature=***'), // Hide signature in logs
-        generatedAt: new Date(),
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-        accessed: false,
-        accessLog: [],
-      };
+      // const downloadRecord = {
+      //   userId,
+      //   fileId,
+      //   downloadUrl: downloadUrl.replace(/signature=[^&]*/, 'signature=***'), // Hide signature in logs
+      //   generatedAt: new Date(),
+      //   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      //   accessed: false,
+      //   accessLog: [],
+      // };
 
       // Store in audit collection or database
       // await this.auditModel.create(downloadRecord);
@@ -1218,7 +1218,7 @@ export class PrivacyComplianceService {
   }
 
   private async checkErasureEligibility(
-    userId: string,
+    _userId: string,
   ): Promise<{ eligible: boolean; reason?: string }> {
     // TODO: Implement erasure eligibility checks
     // - Active job applications

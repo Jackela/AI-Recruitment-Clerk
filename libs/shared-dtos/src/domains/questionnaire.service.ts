@@ -127,7 +127,7 @@ export class QuestionnaireDomainService {
   }
 
   private async publishValidationFailedEvent(
-    questionnaire: Questionnaire,
+    _questionnaire: Questionnaire,
     validationResult: any,
     rawData: RawSubmissionData,
     metadata: SubmissionMetadata,
@@ -161,14 +161,14 @@ export class QuestionnaireDomainService {
     return Math.round((eligibleCount / submissions.length) * 10000) / 100; // 百分比，保疙2位小数
   }
 
-  private extractTopPainPoints(submissions: Questionnaire[]): string[] {
-    const painPoints: { [key: string]: number } = {};
+  private extractTopPainPoints(_submissions: Questionnaire[]): string[] {
+    // const painPoints: { [key: string]: number } = {};
 
-    submissions.forEach((q) => {
-      const experience = q.getSubmissionSummary();
-      // 简化实现，实际应该从提交数据中提取痛点
-      // 这里返回模拟数据
-    });
+    // submissions.forEach((q) => {
+    //   const experience = q.getSubmissionSummary();
+    //   // 简化实现，实际应该从提交数据中提取痛点
+    //   // 这里返回模拟数据
+    // });
 
     // 返回模拟的高频痛点
     return [

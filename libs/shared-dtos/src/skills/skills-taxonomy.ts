@@ -435,7 +435,8 @@ export class SkillsTaxonomy {
     },
   ];
 
-  private static readonly SKILL_HIERARCHY: SkillHierarchy[] = [
+  // Skill hierarchy for future use
+  /* private static readonly SKILL_HIERARCHY: SkillHierarchy[] = [
     {
       category: 'Programming Languages',
       subcategories: {
@@ -491,7 +492,7 @@ export class SkillsTaxonomy {
         },
       },
     },
-  ];
+  ]; */
 
   /**
    * Normalize a skill name to its canonical form

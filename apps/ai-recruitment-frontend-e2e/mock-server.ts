@@ -173,8 +173,8 @@ export async function startMockServer(): Promise<number> {
     const { jdText = '', resumeText = '' } = req.body;
 
     // Mock skill matching logic based on test expectations
-    const matchedSkills = [];
-    const missingSkills = [];
+    const matchedSkills: string[] = [];
+    const missingSkills: string[] = [];
 
     if (
       jdText.toLowerCase().includes('aws') &&
