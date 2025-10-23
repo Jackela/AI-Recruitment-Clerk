@@ -291,7 +291,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
   private buildErrorResponse(
     error: EnhancedAppException,
     request: Request,
-    correlationContext: ErrorCorrelationContext,
+    _correlationContext: ErrorCorrelationContext,
   ): StandardizedErrorResponse {
     const requestContext = {
       path: request.path,

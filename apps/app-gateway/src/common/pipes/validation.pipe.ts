@@ -89,7 +89,7 @@ export class CrossServiceValidationPipe implements PipeTransform {
    */
   constructor(
     private readonly validationRules?: any[],
-    private readonly options?: {
+    private readonly _options?: {
       parallel?: boolean;
       failFast?: boolean;
       timeout?: number;
@@ -115,11 +115,11 @@ export class CrossServiceValidationPipe implements PipeTransform {
     return validatedValue;
   }
 
-  private async performCrossServiceValidation(value: any): Promise<void> {
+  private async performCrossServiceValidation(_value: any): Promise<void> {
     try {
       // Mock cross-service validation
       // In real implementation, this would validate against other services
-      const validationPromises = this.validationRules!.map(async (rule) => {
+      const validationPromises = this.validationRules!.map(async (_rule) => {
         // Simulate service validation
         return new Promise<boolean>((resolve) => {
           setTimeout(() => {

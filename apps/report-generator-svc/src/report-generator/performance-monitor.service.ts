@@ -90,7 +90,7 @@ export class PerformanceMonitorService {
    * Initializes a new instance of the Performance Monitor Service.
    * @param reportRepository - The report repository.
    */
-  constructor(private readonly reportRepository: ReportRepository) {
+  constructor(private readonly _reportRepository: ReportRepository) {
     // Clean up old metrics every hour
     setInterval(() => this.cleanupOldMetrics(), 60 * 60 * 1000);
   }
@@ -458,8 +458,8 @@ export class PerformanceMonitorService {
 
   private generateQualityTrends(
     qualityMetrics: QualityMetrics[],
-    startDate: Date,
-    endDate: Date,
+    _startDate: Date,
+    _endDate: Date,
   ): { date: string; averageQuality: number; reportCount: number }[] {
     const dailyData = new Map<string, { scores: number[]; count: number }>();
 
@@ -486,8 +486,8 @@ export class PerformanceMonitorService {
 
   private generatePerformanceTrends(
     performanceMetrics: PerformanceMetrics[],
-    startDate: Date,
-    endDate: Date,
+    _startDate: Date,
+    _endDate: Date,
   ): {
     date: string;
     averageTime: number;

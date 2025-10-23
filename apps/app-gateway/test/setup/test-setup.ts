@@ -1,4 +1,3 @@
-import { Logger } from '@nestjs/common';
 
 // Global test configuration and utilities
 beforeEach(() => {

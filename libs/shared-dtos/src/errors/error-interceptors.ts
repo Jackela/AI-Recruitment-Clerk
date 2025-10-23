@@ -16,7 +16,6 @@ import { Request, Response } from 'express';
 
 import {
   ErrorCorrelationManager,
-  ErrorCorrelationContext,
 } from './error-correlation';
 import {
   StructuredErrorLogger,
@@ -37,7 +36,7 @@ export class ErrorCorrelationInterceptor implements NestInterceptor {
    * Initializes a new instance of the Error Correlation Interceptor.
    * @param serviceName - The service name.
    */
-  constructor(private readonly serviceName: string) {}
+  constructor(private readonly _serviceName: string) {}
 
   /**
    * Performs the intercept operation.
@@ -56,7 +55,7 @@ export class ErrorCorrelationInterceptor implements NestInterceptor {
     // Create or propagate correlation context
     const correlationContext = ErrorCorrelationManager.createContextFromRequest(
       request,
-      this.serviceName,
+      this._serviceName,
       operationName,
     );
 
@@ -111,8 +110,8 @@ export class ErrorLoggingInterceptor implements NestInterceptor {
    * Initializes a new instance of the Error Logging Interceptor.
    * @param serviceName - The service name.
    */
-  constructor(private readonly serviceName: string) {
-    this.structuredLogger = StructuredLoggerFactory.getLogger(serviceName);
+  constructor(private readonly _serviceName: string) {
+    this.structuredLogger = StructuredLoggerFactory.getLogger(_serviceName);
   }
 
   /**
@@ -186,13 +185,13 @@ export class PerformanceTrackingInterceptor implements NestInterceptor {
    * @param performanceThresholds - The performance thresholds.
    */
   constructor(
-    private readonly serviceName: string,
+    private readonly _serviceName: string,
     private readonly performanceThresholds: {
       warnThreshold?: number; // milliseconds
       errorThreshold?: number; // milliseconds
     } = {},
   ) {
-    this.structuredLogger = StructuredLoggerFactory.getLogger(serviceName);
+    this.structuredLogger = StructuredLoggerFactory.getLogger(_serviceName);
     this.performanceThresholds = {
       warnThreshold: 1000, // 1 second
       errorThreshold: 5000, // 5 seconds
@@ -315,7 +314,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
    * @param recoveryConfig - The recovery config.
    */
   constructor(
-    private readonly serviceName: string,
+    private readonly _serviceName: string,
     private readonly recoveryConfig: {
       enableCircuitBreaker?: boolean;
       failureThreshold?: number;

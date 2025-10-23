@@ -36,14 +36,15 @@ interface GuestStats {
   redeemedFeedbackCodes: number;
 }
 
-interface Activity {
-  id: string;
-  type: string;
-  title: string;
-  description: string;
-  timestamp: Date;
-  status: string;
-}
+// Activity interface defined but not currently used
+// interface Activity {
+//   id: string;
+//   type: string;
+//   title: string;
+//   description: string;
+//   timestamp: Date;
+//   status: string;
+// }
 
 /**
  * Represents the enhanced dashboard component.
@@ -443,7 +444,7 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
 
   /**
    * Initializes a new instance of the Enhanced Dashboard Component.
-   * @param _dashboardApi - The dashboard api.
+   * @param dashboardApi - The dashboard api.
    * @param guestApi - The guest api.
    * @param websocketStats - The websocket stats.
    * @param progressFeedback - The progress feedback.

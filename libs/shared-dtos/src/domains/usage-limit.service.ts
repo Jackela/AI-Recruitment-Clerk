@@ -2,14 +2,10 @@ import {
   UsageLimit,
   UsageLimitPolicy,
   BonusType,
-  UsageStatistics,
-  UsageLimitCheckResult,
-  UsageRecordResult,
 } from './usage-limit.dto';
 import {
   UsageLimitRules,
   UsageViolationReport,
-  BonusValidationResult,
   UsageEfficiency,
 } from './usage-limit.rules';
 

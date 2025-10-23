@@ -25,15 +25,15 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PrivacyComplianceService } from './privacy-compliance.service';
 import {
-  CaptureConsentRequestDto,
+  
   ConsentStatusResponseDto,
-  CreateRightsRequestBodyDto,
+  
   DataExportFormat,
   DataExportPackageDto,
-  DataSubjectRightType,
+  
   DataSubjectRightsRequestDto,
   UserConsentProfileDto,
-  WithdrawConsentRequestDto,
+  
 } from '../common/interfaces/fallback-types';
 import type {
   CaptureConsentDto,

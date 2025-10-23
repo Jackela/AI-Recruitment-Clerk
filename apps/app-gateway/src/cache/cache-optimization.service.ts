@@ -5,7 +5,7 @@
 
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { CacheService } from './cache.service';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 
 /**
  * Defines the shape of the cache optimization config.

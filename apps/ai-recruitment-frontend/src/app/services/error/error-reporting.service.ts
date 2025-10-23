@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, from } from 'rxjs';
-import { catchError, retry, delay } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, retry } from 'rxjs/operators';
 import {
   ErrorCorrelationService,
   StructuredError,
 } from './error-correlation.service';
-import { APP_CONFIG } from '../../../config';
 
 /**
  * Defines the shape of the error report.
@@ -379,15 +378,15 @@ export class ErrorReportingService {
       business: '业务逻辑',
     };
 
-    const severityNames = {
+    const severityNames: Record<string, string> = {
       low: '轻微',
       medium: '中等',
       high: '严重',
       critical: '致命',
     };
 
-    const categoryStr = categories.map((c) => categoryNames[c] || c).join('、');
-    const severityStr = severityNames[highestSeverity] || highestSeverity;
+    const categoryStr = categories.map((c) => (categoryNames as Record<string, string>)[c] || c).join('、');
+    const severityStr = (severityNames as Record<string, string>)[highestSeverity] || highestSeverity;
 
     if (errorCount === 1) {
       return `检测到1个${severityStr}错误，涉及${categoryStr}功能。`;

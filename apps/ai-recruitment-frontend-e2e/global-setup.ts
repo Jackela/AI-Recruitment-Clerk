@@ -5,11 +5,6 @@ import {
   validateTestEnvironment,
   logTestEnvironment,
 } from './test-environment';
-import { spawn } from 'child_process';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function globalSetup() {
   console.log('🚀 Starting E2E test environment setup...');
@@ -31,8 +26,6 @@ async function globalSetup() {
   const skipWebServer =
     process.env.E2E_SKIP_WEBSERVER === 'true' ||
     process.env.E2E_USE_REAL_API === 'true';
-  const e2eDir = __dirname;
-  const pidFile = path.join(e2eDir, '.gateway.pid');
   let mockServerPort: number | null = null;
   let devServerPort: number | null = null;
 

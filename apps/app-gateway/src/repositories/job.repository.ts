@@ -506,9 +506,7 @@ export class JobRepository {
   private async invalidateJobCaches(job?: JobDocument): Promise<void> {
     try {
       // 清除列表缓存（影响 findAll 查询）
-      const listKeys = [
-        'db:jobs:findAll:*', // 通配符模式，需要遍历删除
-      ];
+      // Note: Pattern-based cache invalidation would require scanning all keys
 
       // 清除统计缓存
       await this.cacheService.del(

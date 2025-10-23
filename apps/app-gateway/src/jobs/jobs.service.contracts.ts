@@ -17,15 +17,14 @@ import {
   ContractViolationError,
   Requires,
   Ensures,
-  Invariant,
   ContractValidators,
 } from '@ai-recruitment-clerk/shared-dtos';
 import { CreateJobDto } from './dto/create-job.dto';
 import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
 import { MulterFile } from './types/multer.types';
 import { JobListDto, JobDetailDto } from './dto/job-response.dto';
-import { ResumeListItemDto, ResumeDetailDto } from './dto/resume-response.dto';
-import { AnalysisReportDto, ReportsListDto } from './dto/report-response.dto';
+import {  ResumeDetailDto } from './dto/resume-response.dto';
+import { AnalysisReportDto } from './dto/report-response.dto';
 import { InMemoryStorageService } from './storage/in-memory-storage.service';
 import {
   UserDto,
@@ -415,15 +414,6 @@ export class JobsServiceContracts {
     return user.organizationId === resourceOrganizationId;
   }
 
-  private filterByOrganization<T extends { organizationId?: string }>(
-    user: UserDto,
-    items: T[],
-  ): T[] {
-    if (user.role === UserRole.ADMIN) {
-      return items;
-    }
-    return items.filter((item) => item.organizationId === user.organizationId);
-  }
 
   private extractCandidateName(filename: string): string {
     const nameMatch = filename.match(/^([^_]+)/);

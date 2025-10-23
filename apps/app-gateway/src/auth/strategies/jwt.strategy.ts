@@ -20,13 +20,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    */
   constructor(
     private readonly authService: AuthService,
-    private readonly configService: ConfigService,
+    private readonly _configService: ConfigService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey:
-        configService.get<string>('JWT_SECRET') ||
+        _configService.get<string>('JWT_SECRET') ||
         'ai-recruitment-secret-key-change-in-production',
       issuer: 'ai-recruitment-clerk',
       audience: 'ai-recruitment-users',

@@ -4,7 +4,7 @@ import {
   NatsStreamManager,
   StreamConfigFactory,
 } from '@app/shared-nats-client';
-import { connect, NatsConnection, JetStreamManager } from 'nats';
+import { connect, NatsConnection } from 'nats';
 
 /**
  * Test NATS Module for Integration Testing

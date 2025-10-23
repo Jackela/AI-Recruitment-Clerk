@@ -279,7 +279,7 @@ export class UsageLimitContracts {
     const policy = UsageLimitPolicy.createDefault();
 
     // 检查是否需要重置（通过调用canUse触发重置检查）
-    const checkResult = usageLimit.canUse();
+    usageLimit.canUse();
 
     // 后置条件验证（如果发生了重置）
     const afterUsage = usageLimit.getCurrentUsage();

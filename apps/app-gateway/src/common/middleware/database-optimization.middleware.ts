@@ -140,7 +140,6 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
 
   private setupQueryMonitoring(req: Request) {
     // 由于Mongoose的限制，我们主要监控请求级别的查询
-    const originalQuery = req.query;
     const queryKey = this.generateQueryKey(req);
 
     if (this.config.queryPlanCache && this.queryCache.has(queryKey)) {
@@ -234,7 +233,6 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
 
   private analyzePerformanceTrends() {
     const avgQueryTime = this.metrics.queryExecutionTime;
-    const slowQueryRate = this.metrics.slowQueries;
 
     // 性能趋势分析
     if (avgQueryTime > this.config.slowQueryThreshold * 2) {

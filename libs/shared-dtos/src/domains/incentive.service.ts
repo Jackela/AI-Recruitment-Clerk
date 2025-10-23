@@ -1,24 +1,15 @@
 import {
   Incentive,
-  IncentiveId,
   IncentiveStatus,
   IncentiveSummary,
   PaymentMethod,
-  PaymentResult,
   ContactInfo,
   TriggerType,
   Currency,
-  IncentiveData,
 } from './incentive.dto';
 import {
   IncentiveRules,
-  IncentiveEligibilityResult,
-  PaymentEligibilityResult,
-  PaymentMethodValidationResult,
   IncentivePriority,
-  IncentiveRiskAssessment,
-  BatchPaymentValidationResult,
-  IncentiveUsageHistory,
 } from './incentive.rules';
 
 /**
@@ -638,7 +629,7 @@ export class IncentiveDomainService {
   }
 
   // 私有辅助方法
-  private extractContactInfoFromIncentive(incentive: Incentive): ContactInfo {
+  private extractContactInfoFromIncentive(_incentive: Incentive): ContactInfo {
     // 从激励中提取联系信息的逻辑
     // 在实际实现中，这应该从激励的接收者中获取联系信息
     // 这里提供一个基本的实现来满足测试需要
@@ -720,7 +711,7 @@ export class IncentiveDomainService {
       rejected: 0,
     };
 
-    const rewardTypeCount = new Map<string, number>();
+    // const rewardTypeCount = new Map<string, number>();
 
     for (const incentive of allIncentives) {
       totalAmount += incentive.getRewardAmount();

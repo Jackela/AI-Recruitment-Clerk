@@ -9,7 +9,7 @@ export interface PresenceInfo {
   userId: string;
   status: 'online' | 'away' | 'offline';
   lastSeen: Date;
-  sessionId: string;
+  _sessionId: string;
   location?: string;
   device?: DeviceInfo;
   metadata?: Record<string, any>;
@@ -61,7 +61,7 @@ export class PresenceService {
   async updateUserStatus(
     userId: string,
     status: 'online' | 'away' | 'offline',
-    sessionId?: string,
+    _sessionId?: string,
     metadata?: Record<string, any>,
   ): Promise<void> {
     this.logger.debug(`Updating status for user ${userId}: ${status}`);
@@ -73,8 +73,8 @@ export class PresenceService {
       userId,
       status,
       lastSeen: now,
-      sessionId:
-        sessionId || currentPresence?.sessionId || `session_${Date.now()}`,
+      _sessionId:
+        _sessionId || currentPresence?._sessionId || `session_${Date.now()}`,
       location: currentPresence?.location,
       device: currentPresence?.device,
       metadata: { ...currentPresence?.metadata, ...metadata },
@@ -83,13 +83,13 @@ export class PresenceService {
     this.userPresence.set(userId, presence);
 
     // Track session mapping
-    if (sessionId) {
-      this.sessionToUser.set(sessionId, userId);
+    if (_sessionId) {
+      this.sessionToUser.set(_sessionId, userId);
 
       if (!this.userSessions.has(userId)) {
         this.userSessions.set(userId, new Set());
       }
-      this.userSessions.get(userId)!.add(sessionId);
+      this.userSessions.get(userId)!.add(_sessionId);
     }
 
     // Cache presence info
@@ -103,11 +103,11 @@ export class PresenceService {
    */
   async trackUserSession(
     userId: string,
-    sessionId: string,
+    _sessionId: string,
     device?: DeviceInfo,
     location?: string,
   ): Promise<void> {
-    this.logger.debug(`Tracking session ${sessionId} for user ${userId}`);
+    this.logger.debug(`Tracking session ${_sessionId} for user ${userId}`);
 
     const currentPresence = this.userPresence.get(userId);
     const now = new Date();
@@ -116,19 +116,19 @@ export class PresenceService {
       userId,
       status: 'online',
       lastSeen: now,
-      sessionId,
+      _sessionId,
       location,
       device,
       metadata: currentPresence?.metadata || {},
     };
 
     this.userPresence.set(userId, presence);
-    this.sessionToUser.set(sessionId, userId);
+    this.sessionToUser.set(_sessionId, userId);
 
     if (!this.userSessions.has(userId)) {
       this.userSessions.set(userId, new Set());
     }
-    this.userSessions.get(userId)!.add(sessionId);
+    this.userSessions.get(userId)!.add(_sessionId);
 
     await this.cachePresenceInfo(presence);
   }
@@ -136,7 +136,7 @@ export class PresenceService {
   /**
    * Get users in a specific session/room
    */
-  async getUsersInSession(sessionId: string): Promise<PresenceInfo[]> {
+  async getUsersInSession(_sessionId: string): Promise<PresenceInfo[]> {
     // For room-based presence, we'd need to track room memberships
     // For now, return all online users as a simplified implementation
     const onlineUsers: PresenceInfo[] = [];
@@ -231,9 +231,9 @@ export class PresenceService {
   /**
    * Set user as offline and cleanup session
    */
-  async setUserOffline(userId: string, sessionId?: string): Promise<void> {
+  async setUserOffline(userId: string, _sessionId?: string): Promise<void> {
     this.logger.debug(
-      `Setting user ${userId} offline${sessionId ? ` (session: ${sessionId})` : ''}`,
+      `Setting user ${userId} offline${_sessionId ? ` (session: ${_sessionId})` : ''}`,
     );
 
     const presence = this.userPresence.get(userId);
@@ -244,11 +244,11 @@ export class PresenceService {
     }
 
     // Cleanup session mapping
-    if (sessionId) {
-      this.sessionToUser.delete(sessionId);
+    if (_sessionId) {
+      this.sessionToUser.delete(_sessionId);
       const userSessionsSet = this.userSessions.get(userId);
       if (userSessionsSet) {
-        userSessionsSet.delete(sessionId);
+        userSessionsSet.delete(_sessionId);
         if (userSessionsSet.size === 0) {
           this.userSessions.delete(userId);
           // If no more sessions, mark as offline
@@ -293,8 +293,8 @@ export class PresenceService {
   /**
    * Get user by session ID
    */
-  async getUserBySession(sessionId: string): Promise<string | null> {
-    return this.sessionToUser.get(sessionId) || null;
+  async getUserBySession(_sessionId: string): Promise<string | null> {
+    return this.sessionToUser.get(_sessionId) || null;
   }
 
   /**

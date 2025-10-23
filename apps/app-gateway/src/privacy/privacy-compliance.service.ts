@@ -2,12 +2,12 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  BadRequestException,
+  
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ConsentStatus, DataCategory } from '../schemas/consent-record.schema';
+import { ConsentStatus } from '../schemas/consent-record.schema';
 import {
   ConsentRecord,
   UserConsentProfile,
@@ -18,11 +18,11 @@ import {
   DataSubjectRightsRequest,
   CreateRightsRequestDto,
   DataExportPackage,
-  ProcessRightsRequestDto,
+  
   RequestStatus,
   DataExportFormat,
   IdentityVerificationStatus,
-  UserPreferencesDto,
+  
   ConsentPurpose,
 } from '../common/interfaces/fallback-types';
 import {
@@ -1186,15 +1186,16 @@ export class PrivacyComplianceService {
   ): Promise<void> {
     try {
       // Record download information for audit purposes
-      const downloadRecord = {
-        userId,
-        fileId,
-        downloadUrl: downloadUrl.replace(/signature=[^&]*/, 'signature=***'), // Hide signature in logs
-        generatedAt: new Date(),
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-        accessed: false,
-        accessLog: [],
-      };
+      // Note: In production, this should be stored in an audit collection
+      // const downloadRecord = {
+      //   userId,
+      //   fileId,
+      //   downloadUrl: downloadUrl.replace(/signature=[^&]*/, 'signature=***'), // Hide signature in logs
+      //   generatedAt: new Date(),
+      //   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      //   accessed: false,
+      //   accessLog: [],
+      // };
 
       // Store in audit collection or database
       // await this.auditModel.create(downloadRecord);

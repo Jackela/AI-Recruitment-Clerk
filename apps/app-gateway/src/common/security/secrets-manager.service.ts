@@ -24,10 +24,8 @@ export interface SecretValidationResult {
 @Injectable()
 export class SecretsManagerService implements OnModuleInit {
   private readonly logger = new Logger(SecretsManagerService.name);
-  private secretsCache = new Map<
-    string,
-    { value: string; lastRotated: Date }
-  >();
+  // Reserved for caching implementation
+  // private secretsCache: Map<string, { value: string; lastRotated: Date }> = new Map();
 
   /**
    * Initializes a new instance of the Secrets Manager Service.
@@ -344,10 +342,9 @@ export class SecretsManagerService implements OnModuleInit {
       throw new Error('ENCRYPTION_KEY not configured');
     }
 
-    const [ivHex, authTagHex, encrypted] = encryptedText.split(':');
+    const [_ivHex, authTagHex, encrypted] = encryptedText.split(':');
 
     const algorithm = 'aes-256-gcm';
-    const iv = Buffer.from(ivHex, 'hex');
     const authTag = Buffer.from(authTagHex, 'hex');
 
     const decipher = crypto.createDecipher(algorithm, encryptionKey);

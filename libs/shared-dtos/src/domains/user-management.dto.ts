@@ -13,7 +13,7 @@ export class UserSession {
     private readonly ip: IPAddress,
     private status: SessionStatus,
     private readonly createdAt: Date,
-    private lastActiveAt: Date,
+    private _lastActiveAt: Date,
     private readonly dailyQuota: UsageQuota,
   ) {}
 
@@ -77,7 +77,7 @@ export class UserSession {
     const newQuota = this.dailyQuota.incrementUsage();
     // Replace the quota object immutably
     (this as any).dailyQuota = newQuota;
-    this.lastActiveAt = new Date();
+    this._lastActiveAt = new Date();
 
     const remaining = this.getRemainingQuota();
 
