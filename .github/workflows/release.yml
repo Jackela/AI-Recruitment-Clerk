@@ -106,7 +106,7 @@ jobs:
 
       - name: 🔔 Notify on Failure
         if: failure()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             core.setFailed('❌ Semantic release failed. Please check the logs for details.');
