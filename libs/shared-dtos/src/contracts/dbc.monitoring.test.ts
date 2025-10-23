@@ -292,7 +292,7 @@ describe('DBC Production Monitoring', () => {
         { success: true, time: 40 },
       ];
 
-      scenarios.forEach((scenario, index) => {
+      scenarios.forEach((scenario) => {
         monitor.recordContractExecution({
           operationName: 'mixedOperation',
           contractType: 'POST',

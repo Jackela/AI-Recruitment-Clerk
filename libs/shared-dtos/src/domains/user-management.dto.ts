@@ -79,6 +79,8 @@ export class UserSession {
     // Replace the quota object immutably
     (this as any).dailyQuota = newQuota;
     this._lastActiveAt = new Date();
+    // No-op read to satisfy TS6138 for private field
+    void this._lastActiveAt;
 
     const remaining = this.getRemainingQuota();
 

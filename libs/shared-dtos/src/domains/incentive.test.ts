@@ -11,29 +11,14 @@ import {
   ContactInfo,
 } from './incentive.dto';
 
-import {
-  IncentiveRules,
-  PaymentEligibilityResult,
-  PaymentMethodValidationResult,
-  IncentivePriority,
-  IncentiveRiskAssessment,
-  BatchPaymentValidationResult,
-} from './incentive.rules';
+import { IncentiveRules } from './incentive.rules';
 
 import {
   IncentiveContracts,
   IncentiveContractViolation,
 } from '../contracts/incentive.contracts';
 
-import {
-  IncentiveDomainService,
-  IncentiveCreationResult,
-  IncentiveValidationResult as ServiceValidationResult,
-  IncentiveApprovalResult,
-  PaymentProcessingResult,
-  BatchPaymentResult,
-  IncentiveStatsResult,
-} from './incentive.service';
+import { IncentiveDomainService } from './incentive.service';
 
 describe('Agent-4: Incentive Domain Service Tests', () => {
   // 测试数据

@@ -466,10 +466,13 @@ export class CulturalFitAnalyzerService {
   }
 
   private calculateCompanySizeAlignment(
-    candidatePreference: string,
-    companySize: string,
+    candidatePreference: CulturalFitIndicators['companySize']['preference'],
+    companySize: CompanyProfile['size'],
   ): number {
-    const alignmentMatrix = {
+    const alignmentMatrix: Record<
+      CulturalFitIndicators['companySize']['preference'],
+      Record<CompanyProfile['size'], number>
+    > = {
       startup: { startup: 100, scaleup: 70, enterprise: 30 },
       scaleup: { startup: 70, scaleup: 100, enterprise: 80 },
       enterprise: { startup: 40, scaleup: 80, enterprise: 100 },
@@ -525,9 +528,9 @@ export class CulturalFitAnalyzerService {
 
   private calculateInnovationAlignment(
     innovationScore: number,
-    companyInnovation: string,
+    companyInnovation: CompanyProfile['culture']['innovation'],
   ): number {
-    const innovationRequirements = {
+    const innovationRequirements: Record<CompanyProfile['culture']['innovation'], number> = {
       high: 80,
       medium: 60,
       low: 40,

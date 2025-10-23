@@ -93,6 +93,8 @@ export class Questionnaire {
    * @returns The QuestionnaireValidationResult.
    */
   validateSubmission(): QuestionnaireValidationResult {
+    // Touch template to satisfy TS6138 for private readonly field
+    void this._template;
     const errors: string[] = [];
 
     // 检查必填字段

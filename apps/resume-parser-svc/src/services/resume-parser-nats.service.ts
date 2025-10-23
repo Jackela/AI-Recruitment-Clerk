@@ -273,7 +273,10 @@ export class ResumeParserNatsService extends NatsClientService {
     return {
       connected: baseHealth.connected,
       service: 'resume-parser-svc',
-      lastActivity: baseHealth.lastOperationTime || new Date(),
+      lastActivity:
+        (baseHealth as any).lastActivity ||
+        (baseHealth as any).lastOperationTime ||
+        new Date(),
       subscriptions: ['job.resume.submitted'],
       messagesSent: (baseHealth as any).messagesSent ?? 0,
       messagesReceived: (baseHealth as any).messagesReceived ?? 0,

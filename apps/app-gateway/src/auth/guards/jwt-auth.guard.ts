@@ -82,14 +82,14 @@ export class JwtAuthGuard implements CanActivate {
     const authHeader = request.headers['authorization'] || '';
     if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
       // Minimal token presence check; in real prod, passport-jwt validates this
-      request.user = (request.user || {
+      (request as any).user = ((request as any).user || {
         id: 'user-uat',
         sub: 'user-uat',
         email: 'uat@example.com',
         organizationId: 'org-uat',
         role: 'user',
-      }) as any;
-    } else if (!request.user) {
+      });
+    } else if (!(request as any).user) {
       // Attach a benign guest identity to satisfy downstream typings
       (request as any).user = {
         id: 'guest',

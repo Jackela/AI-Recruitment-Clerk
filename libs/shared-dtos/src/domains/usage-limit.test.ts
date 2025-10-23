@@ -6,24 +6,12 @@ import {
   QuotaAllocation,
   UsageTracking,
   BonusType,
-  UsageLimitCheckResult,
-  UsageRecordResult,
   UsageStatistics,
 } from './usage-limit.dto';
 
-import {
-  UsageLimitRules,
-  ViolationType,
-  RecommendedAction,
-} from './usage-limit.rules';
+import { UsageLimitRules, ViolationType } from './usage-limit.rules';
 import { UsageLimitContracts } from '../contracts/usage-limit.contracts';
-import {
-  UsageLimitDomainService,
-  UsageLimitResult,
-  UsageTrackingResult,
-  BonusQuotaResult,
-  UsageStatsResult,
-} from './usage-limit.service';
+import { UsageLimitDomainService } from './usage-limit.service';
 
 describe('Agent-2: UsageLimit Domain Service Tests', () => {
   // Test Data

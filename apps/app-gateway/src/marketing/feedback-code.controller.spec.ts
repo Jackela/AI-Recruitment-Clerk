@@ -65,14 +65,18 @@ describe('FeedbackCodeController (lightweight)', () => {
         id: string;
         code: string;
         generatedAt: Date;
+        isUsed: boolean;
+        paymentStatus: string;
       }
       service.recordFeedbackCode.mockResolvedValue({
         id: 'doc-1',
         code: dto.code,
         generatedAt: new Date('2024-01-01T00:00:00Z'),
-      } as FeedbackCodeRecord);
+        isUsed: false,
+        paymentStatus: 'pending',
+      } as any);
 
-      const result = await controller.recordFeedbackCode(dto, request);
+      const result = await controller.recordFeedbackCode(dto, request as any);
 
       expect(result.success).toBe(true);
       expect(result.data.code).toBe(dto.code);
@@ -87,7 +91,10 @@ describe('FeedbackCodeController (lightweight)', () => {
 
     it('rejects invalid request payloads', async () => {
       await expect(
-        controller.recordFeedbackCode({ code: '123' }, createRequest()),
+        controller.recordFeedbackCode(
+          { code: '123' },
+          createRequest() as any,
+        ),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -95,7 +102,7 @@ describe('FeedbackCodeController (lightweight)', () => {
       service.recordFeedbackCode.mockRejectedValue(new Error('db error'));
 
       await expect(
-        controller.recordFeedbackCode(dto, createRequest()),
+        controller.recordFeedbackCode(dto, createRequest() as any),
       ).rejects.toThrow('db error');
     });
   });
@@ -137,7 +144,9 @@ describe('FeedbackCodeController (lightweight)', () => {
         code: dto.code,
         paymentStatus: 'pending',
         qualityScore: 0.9,
-      } as MarkUsedResult);
+        generatedAt: new Date('2024-01-01T00:00:00Z'),
+        isUsed: true,
+      } as any);
 
       const result = await controller.markFeedbackCodeAsUsed(dto);
 

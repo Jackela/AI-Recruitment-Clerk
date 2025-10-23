@@ -571,7 +571,25 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
     if (!result?.analysisTime) return '';
 
     const date = new Date(result.analysisTime);
-    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    // Format deterministically in zh-CN using Asia/Shanghai timezone to avoid environment variance
+    const formatter = new Intl.DateTimeFormat('zh-CN', {
+      timeZone: 'Asia/Shanghai',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    const parts = formatter.formatToParts(date);
+    const get = (type: Intl.DateTimeFormatPartTypes) =>
+      parts.find((p) => p.type === type)?.value || '';
+    const year = get('year');
+    const month = get('month');
+    const day = get('day');
+    const hour = get('hour');
+    const minute = get('minute');
+    return `${year}年${month}月${day}日 ${hour}:${minute}`;
   }
 
   /**

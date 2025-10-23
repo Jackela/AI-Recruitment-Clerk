@@ -13,27 +13,14 @@ import {
   EventContext,
 } from './analytics.dto';
 
-import {
-  AnalyticsRules,
-  EventCreationEligibilityResult,
-  BatchProcessingEligibilityResult,
-  AnalyticsDataRetentionPolicy,
-  PrivacyComplianceRiskAssessment,
-  AnonymizationRequirementResult,
-  ReportingPermissionsResult,
-  ReportType,
-  DataScope,
-} from './analytics.rules';
+import { AnalyticsRules, ReportType, DataScope } from './analytics.rules';
 
 import {
   AnalyticsContracts,
   AnalyticsContractViolation,
 } from '../contracts/analytics.contracts';
 
-import {
-  AnalyticsDomainService,
-  PrivacyComplianceResult as ServicePrivacyComplianceResult,
-} from './analytics.service';
+import { AnalyticsDomainService } from './analytics.service';
 
 describe('Agent-5: Analytics Domain Service Tests', () => {
   // 测试数据

@@ -26,7 +26,9 @@ jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => ({
     withExponentialBackoff: jest.fn(),
   },
   WithCircuitBreaker: jest.fn(
-    (name, options) => (target, propertyName, descriptor) => descriptor,
+    (_name: any, _options: any) =>
+      (_target: any, _propertyName: string, descriptor: PropertyDescriptor) =>
+        descriptor,
   ),
   JDExtractorException: JDExtractorExceptionMock,
   ErrorCorrelationManager: {
@@ -43,16 +45,8 @@ import {
   JobJdSubmittedEvent,
   AnalysisJdExtractedEvent,
 } from '../dto/events.dto';
-import {
-  JdDTO,
-  LlmExtractionRequest,
-  LlmExtractionResponse,
-} from '@ai-recruitment-clerk/job-management-domain';
-import {
-  RetryUtility,
-  JDExtractorException,
-  ErrorCorrelationManager,
-} from '@ai-recruitment-clerk/infrastructure-shared';
+import { JdDTO, LlmExtractionResponse } from '@ai-recruitment-clerk/job-management-domain';
+import { RetryUtility, ErrorCorrelationManager } from '@ai-recruitment-clerk/infrastructure-shared';
 
 // Get references to the mocked functions
 const MockRetryUtility = RetryUtility as jest.Mocked<typeof RetryUtility>;
@@ -1027,6 +1021,7 @@ describe('ExtractionService', () => {
     it('should respect maximum concurrent jobs limit', async () => {
       // Arrange
       const maxConcurrentJobs = 10;
+      void maxConcurrentJobs;
       const events = Array.from({ length: 12 }, (_, i) =>
         createValidJobJdSubmittedEvent({ jobId: `job-${i + 1}` }),
       );
@@ -1056,9 +1051,11 @@ describe('ExtractionService', () => {
     it('should clean up expired jobs correctly', async () => {
       // Arrange
       const event = createValidJobJdSubmittedEvent();
+      void event;
 
       // Manually add an expired job to the processing map
       const processingJobsMap = (service as any).processingJobs;
+      void processingJobsMap; // satisfy TS6133
       const expiredTimestamp = Date.now() - 400000; // 6+ minutes ago (older than 5 minute timeout)
       processingJobsMap.set('expired-job', {
         timestamp: expiredTimestamp,
@@ -1107,6 +1104,10 @@ describe('ExtractionService', () => {
     it('should process job description with retry mechanism', async () => {
       // Arrange
       const jobId = 'test-job-123';
+      void jobId;
+      void jobId;
+      void jobId;
+      void jobId;
       const jdText = 'Valid job description with technical requirements. Must have 5+ years of experience in software development with strong technical skills and problem-solving abilities.';
       const jobTitle = 'Software Engineer';
       const mockLlmResponse = createMockLlmExtractionResponse();
@@ -1174,6 +1175,7 @@ describe('ExtractionService', () => {
     it('should include correlation context in error handling', async () => {
       // Arrange
       const jobId = 'test-job-123';
+      void jobId;
       const jdText = 'Valid job description';
       const jobTitle = 'Software Engineer';
 
@@ -1196,6 +1198,7 @@ describe('ExtractionService', () => {
     it('should measure and report processing time accurately', async () => {
       // Arrange
       const jobId = 'test-job-123';
+      void jobId;
       const jdText = 'Valid job description for timing test. Must have 5+ years of software engineering experience with strong technical and leadership skills.';
       const jobTitle = 'Software Engineer';
       const mockLlmResponse = createMockLlmExtractionResponse();
@@ -1657,6 +1660,7 @@ describe('ExtractionService', () => {
 
       // Manually check the processing map to see if job was marked for retry
       const processingJobsMap = (service as any).processingJobs;
+      void processingJobsMap;
       
       // Wait a bit for potential async operations
       await new Promise(resolve => setTimeout(resolve, 100));

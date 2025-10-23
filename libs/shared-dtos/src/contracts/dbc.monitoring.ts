@@ -578,6 +578,8 @@ export function withMonitoring(serviceContext: string) {
     propertyKey: string,
     descriptor: PropertyDescriptor,
   ) {
+    // Touch target to satisfy TS6133 in strict settings
+    void target;
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {

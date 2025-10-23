@@ -150,7 +150,7 @@ describe('JDExtractionService DBC Validators', () => {
 
   describe('Integration Test - JD Extraction Workflow', () => {
     it('should simulate complete JD extraction workflow with contracts', () => {
-      const mockJDExtraction = (jdText: string, extractionConfig?: any) => {
+      const mockJDExtraction = (jdText: string, _extractionConfig?: any) => {
         // Precondition validation
         if (!ContractValidators.isNonEmptyString(jdText)) {
           throw new ContractViolationError(
@@ -181,6 +181,7 @@ describe('JDExtractionService DBC Validators', () => {
 
         // Mock extraction processing
         const startTime = Date.now();
+        void startTime; // satisfy TS6133 in strict test config
 
         // Simulate LLM processing delay
         const processingTime = 3000; // 3 seconds

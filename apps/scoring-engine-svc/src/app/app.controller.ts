@@ -24,6 +24,8 @@ export class AppController {
    */
   @MessagePattern('scoring.gap-analysis')
   gapAnalysis(body: GapAnalysisRequestDto): GapAnalysisResultDto {
+    // Touch injected service to satisfy TS6138 (no-op read)
+    void this._appService;
     const jdSkills = body.jdSkills?.length
       ? normalize(body.jdSkills)
       : tokenize(body.jdText || '');

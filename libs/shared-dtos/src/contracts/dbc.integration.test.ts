@@ -101,6 +101,7 @@ describe('End-to-End Contract Validation Chain', () => {
           candidateName: parsedResume.candidateName,
         },
       };
+      void _scoringInput; // satisfy TS6133
 
       // Mock scoring calculation (using proper DTO structure)
       const scoringResult = {
@@ -372,6 +373,7 @@ describe('End-to-End Contract Validation Chain', () => {
       const _resumeExperience = [
         { position: 'Developer', company: 'TechCorp', duration: '2019-2023' }, // 4 years experience
       ];
+      void _resumeExperience; // satisfy TS6133 (no-unused-locals) in strict test config
 
       // Validate experience range compatibility
       const experienceYears = 4; // Calculated from resume

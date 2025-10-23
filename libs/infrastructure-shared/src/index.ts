@@ -149,6 +149,8 @@ export class StandardizedGlobalExceptionFilter {
    */
   catch(exception: Error | unknown, _host: ExecutionHost) {
     // Basic error handling
+    // Touch config to satisfy TS6133/TS6138 when not used by minimal impl
+    void this._config;
     console.error('Global Exception:', exception);
   }
 }
