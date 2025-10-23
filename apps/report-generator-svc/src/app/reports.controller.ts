@@ -110,7 +110,7 @@ export class ReportsController {
     private readonly reportGeneratorService: ReportGeneratorService,
     private readonly reportRepository: ReportRepository,
     private readonly gridFsService: GridFsService,
-    private readonly reportTemplatesService: ReportTemplatesService,
+    private readonly _reportTemplatesService: ReportTemplatesService,
   ) {}
 
   /**

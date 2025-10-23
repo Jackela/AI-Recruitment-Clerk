@@ -168,11 +168,11 @@ export class WebSocketGateway
    * @param cacheService - The cache service.
    */
   constructor(
-    private readonly guestUsageService: GuestUsageService,
-    private readonly collaborationService: CollaborationService,
-    private readonly presenceService: PresenceService,
-    private readonly notificationService: NotificationService,
-    private readonly cacheService: CacheService,
+    private readonly _guestUsageService: GuestUsageService,
+    private readonly _collaborationService: CollaborationService,
+    private readonly _presenceService: PresenceService,
+    private readonly _notificationService: NotificationService,
+    private readonly _cacheService: CacheService,
   ) {}
 
   /**

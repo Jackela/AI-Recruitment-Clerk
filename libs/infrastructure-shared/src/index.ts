@@ -132,14 +132,14 @@ export interface ExecutionHost {
  * Represents the standardized global exception filter.
  */
 export class StandardizedGlobalExceptionFilter {
-  private readonly config?: ExceptionFilterConfig;
+  private readonly _config?: ExceptionFilterConfig;
 
   /**
    * Initializes a new instance of the Standardized Global Exception Filter.
    * @param config - The config.
    */
   constructor(config?: ExceptionFilterConfig) {
-    this.config = config;
+    this._config = config;
   }
   /**
    * Performs the catch operation.

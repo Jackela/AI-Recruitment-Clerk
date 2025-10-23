@@ -39,7 +39,7 @@ export class JobEffects {
   constructor(
     private actions$: Actions,
     private apiService: ApiService,
-    private router: Router,
+    private _router: Router,
     private webSocketService: WebSocketService,
   ) {
     this.loadJobs$ = createEffect(() =>

@@ -96,7 +96,7 @@ export class ParsingService {
     private readonly visionLlmService: VisionLlmService,
     private readonly gridFsService: GridFsService,
     private readonly fieldMapperService: FieldMapperService,
-    private readonly natsService: ResumeParserNatsService,
+    private readonly _natsService: ResumeParserNatsService,
   ) {
     // Periodic cleanup of expired processing records
     setInterval(() => this.cleanupExpiredProcessing(), 5 * 60 * 1000); // Every 5 minutes

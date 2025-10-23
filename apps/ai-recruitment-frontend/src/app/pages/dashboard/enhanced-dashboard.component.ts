@@ -451,7 +451,7 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
    * @param loggerService - The logger service.
    */
   constructor(
-    private dashboardApi: DashboardApiService,
+    private _dashboardApi: DashboardApiService,
     private guestApi: GuestApiService,
     private websocketStats: WebSocketStatsService,
     private progressFeedback: ProgressFeedbackService,
