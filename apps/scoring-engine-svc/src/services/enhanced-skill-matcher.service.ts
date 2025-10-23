@@ -441,7 +441,7 @@ export class EnhancedSkillMatcherService {
       fuzzy: 0.95,
       semantic: 0.9,
       related: 0.8,
-    };
+    } as Record<string, number>;
     return multipliers[matchType] || 0.7;
   }
 
