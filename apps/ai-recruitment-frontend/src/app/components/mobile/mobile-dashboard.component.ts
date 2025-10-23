@@ -1059,7 +1059,6 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
   // Enhanced state management for pull-to-refresh
   isPullRefreshVisible = false;
   isRefreshing = false;
-  private refreshCooldown = false; // Prevent rapid refresh attempts
 
   @ViewChild('dashboardContainer', { read: ElementRef })
   dashboardContainer!: ElementRef;

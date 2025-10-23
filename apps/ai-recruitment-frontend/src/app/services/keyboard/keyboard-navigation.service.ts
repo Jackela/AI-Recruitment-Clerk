@@ -339,26 +339,6 @@ export class KeyboardNavigationService {
     return formData;
   }
 
-  // Reserved for future state restoration functionality
-  private _restoreState(state: any): void {
-    if (!state) return;
-
-    // Restore scroll position
-    setTimeout(() => {
-      window.scrollTo(state.scrollLeft || 0, state.scrollTop || 0);
-    }, 100);
-
-    // Restore form data
-    Object.entries(state.formData || {}).forEach(([key, value]) => {
-      const element = document.querySelector(
-        `[name="${key}"], #${key}`,
-      ) as HTMLInputElement;
-      if (element) {
-        element.value = value as string;
-      }
-    });
-  }
-
   // Action handlers
   private _handleEscape(): void {
     // Close modals, guides, or return to previous page

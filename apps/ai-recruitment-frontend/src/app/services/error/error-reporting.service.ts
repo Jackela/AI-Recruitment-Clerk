@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, from } from 'rxjs';
-import { catchError, retry, delay } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, retry } from 'rxjs/operators';
 import {
   ErrorCorrelationService,
   StructuredError,
 } from './error-correlation.service';
-import { APP_CONFIG } from '../../../config';
 
 /**
  * Defines the shape of the error report.

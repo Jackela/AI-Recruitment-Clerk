@@ -4,7 +4,7 @@
  * Custom test hooks to handle browser-specific issues and improve test reliability
  */
 
-import { test as base, Browser } from '@playwright/test';
+import { test as base } from '@playwright/test';
 import {
   addBrowserLaunchDelay,
   withFirefoxConnectionRetry,
