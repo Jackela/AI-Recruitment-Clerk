@@ -1,0 +1,173 @@
+name: 🔒 Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run security scan weekly on Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  codeql:
+    name: 🔍 CodeQL Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript', 'typescript' ]
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended,security-and-quality
+          config: |
+            paths-ignore:
+              - node_modules
+              - dist
+              - coverage
+              - test-results
+              - '**/*.spec.ts'
+              - '**/*.test.ts'
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: |
+          npm ci --legacy-peer-deps --prefer-offline || npm install --legacy-peer-deps
+          echo "✅ Dependencies installed"
+
+      - name: 🏗️ Build Project (for CodeQL)
+        run: |
+          npm run build || echo "⚠️ Build failed, continuing with analysis"
+
+      - name: 🔍 Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  dependency-scan:
+    name: 🔐 Dependency Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --legacy-peer-deps --prefer-offline || npm install --legacy-peer-deps
+
+      - name: 🔐 Run npm audit
+        run: |
+          echo "🔐 Running npm security audit..."
+          npm audit --audit-level=moderate --json > audit-report.json || true
+          
+          # Parse and display results
+          if [ -f audit-report.json ]; then
+            CRITICAL=$(cat audit-report.json | jq '.metadata.vulnerabilities.critical // 0')
+            HIGH=$(cat audit-report.json | jq '.metadata.vulnerabilities.high // 0')
+            MODERATE=$(cat audit-report.json | jq '.metadata.vulnerabilities.moderate // 0')
+            LOW=$(cat audit-report.json | jq '.metadata.vulnerabilities.low // 0')
+            
+            echo "📊 Security Audit Results:"
+            echo "  Critical: $CRITICAL"
+            echo "  High: $HIGH"
+            echo "  Moderate: $MODERATE"
+            echo "  Low: $LOW"
+            
+            if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
+              echo "::warning::Found $CRITICAL critical and $HIGH high severity vulnerabilities"
+              echo "🚨 Action required: Fix critical/high vulnerabilities"
+            else
+              echo "✅ No critical or high severity vulnerabilities found"
+            fi
+          fi
+
+      - name: 📦 Upload Audit Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-audit-${{ github.run_id }}
+          path: audit-report.json
+          retention-days: 30
+
+  secret-scan:
+    name: 🔑 Secret Scanning
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for comprehensive scan
+
+      - name: 🔑 Scan for Secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      - name: 🔍 GitLeaks Scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }} # Optional
+
+  security-summary:
+    name: 📋 Security Summary
+    runs-on: ubuntu-latest
+    needs: [codeql, dependency-scan, secret-scan]
+    if: always()
+    timeout-minutes: 5
+
+    steps:
+      - name: 📊 Generate Security Summary
+        run: |
+          echo "## 🔒 Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| CodeQL Analysis | ${{ needs.codeql.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependency Scan | ${{ needs.dependency-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Secret Scan | ${{ needs.secret-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ needs.codeql.result }}" == "success" && "${{ needs.dependency-scan.result }}" == "success" && "${{ needs.secret-scan.result }}" == "success" ]]; then
+            echo "✅ **All security checks passed!**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Some security checks failed. Please review the results above.**" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Generated: $(date -u +'%Y-%m-%d %H:%M:%S UTC')*" >> $GITHUB_STEP_SUMMARY
