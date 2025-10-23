@@ -208,6 +208,41 @@ describe('AuthService', () => {
 });
 ```
 
+## 🧰 Using act Locally (GitHub Actions)
+
+This repo supports validating GitHub Actions locally with `act`.
+
+- Prerequisites:
+  - Docker Desktop running
+  - act >= 0.2.80 (`act --version`)
+  - Node >= 20.18 (matches repo engines)
+
+- Environment quirk:
+  - Workflows check `env.ACT`. When set (act sets it automatically), steps that rely on GitHub-hosted services are skipped to avoid errors locally (e.g., artifact upload, CodeQL SARIF upload).
+
+- Common commands:
+  - `act -l` — list jobs
+  - `act -j quality-check -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-22.04`
+  - `act -j build-and-test -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-22.04`
+  - `act -j validate-contracts -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-22.04`
+  - `act -j coverage -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-22.04`
+  - `act -j dependency-scan -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-22.04`
+
+- Expected behavior under act:
+  - Artifact uploads are skipped.
+  - Codecov uploads log 400 locally without token (non-fatal).
+  - CodeQL analyze step is skipped; validate on GitHub for SARIF upload.
+  - Secret scanning steps continue-on-error in local runs.
+
+## ✅ Acceptance Scripts
+
+We provide scripts to track acceptance documentation status and generate sign-off reports:
+
+- `npm run acceptance:status` — summarizes checklist status and latest run reports
+- `npm run acceptance:signoff` — generates a sign-off report into `specs/001-functional-acceptance/reports/`
+
+See `specs/001-functional-acceptance/` for the acceptance catalog, checklists, and report templates.
+
 ### Running Tests
 
 ```bash
