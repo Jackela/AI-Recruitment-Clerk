@@ -88,6 +88,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🐛 Bug Fixes
 
 * **ai-processing:** enable real AI processing instead of mock implementations ([af01e3e](https://github.com/Jackela/AI-Recruitment-Clerk/commit/af01e3e84bf739a0f62cdd7822338610222ab7ef))
+* **ci:** improve contract security check pattern specificity ([a00de7a](https://github.com/Jackela/AI-Recruitment-Clerk/commit/a00de7a9cee9fe26d0867a2efa04559b51d3ee8d))
+* **ci:** Resolve additional TypeScript compilation errors in frontend components ([dbe2877](https://github.com/Jackela/AI-Recruitment-Clerk/commit/dbe287736e3a111d77dfe67520a9d6eacf99e8db))
+* **ci:** Resolve critical pipeline failures and implement fail-fast architecture ([7fa6e11](https://github.com/Jackela/AI-Recruitment-Clerk/commit/7fa6e112a2c6c0aaf48bcdb2a07f9af57b6c6df8))
+* **ci:** Resolve critical TypeScript compilation errors blocking CI/CD pipeline ([7993734](https://github.com/Jackela/AI-Recruitment-Clerk/commit/7993734ef823ab17e96bd56543b2927168e69989))
+* **jd-extractor:** implement timer tracking and cleanup to prevent memory leaks ([ee62233](https://github.com/Jackela/AI-Recruitment-Clerk/commit/ee622336a6ac5c43f523c3c06ed560dd382e6800))
+* **production:** Harden infrastructure and fix production build ([ff2de1a](https://github.com/Jackela/AI-Recruitment-Clerk/commit/ff2de1a9a65d45b29a82c10a8c37145b4e7987cb))
+* **railway:** resolve critical TypeScript build errors for deployment ([3c25a77](https://github.com/Jackela/AI-Recruitment-Clerk/commit/3c25a77e8ad6006c112be6b385c24427465908d9))
+* remove unused private methods in app-gateway (partial) ([6afcc5e](https://github.com/Jackela/AI-Recruitment-Clerk/commit/6afcc5e8e118a08b7fdb3f6b5ea928e420e40c6e))
+* remove unused variables in jd-extractor and shared-dtos ([2095ede](https://github.com/Jackela/AI-Recruitment-Clerk/commit/2095ede130a89b35a3e94ba53aac61f5397cce66))
+* resolve all frontend and E2E test TS6133 unused variable errors ([d7df01c](https://github.com/Jackela/AI-Recruitment-Clerk/commit/d7df01c155e16c0ef99373b77a03288af1ba8b96))
+* resolve all test utility TypeScript errors and IEmbeddingProvider warning ([056797f](https://github.com/Jackela/AI-Recruitment-Clerk/commit/056797fe53779e3043c8c94bae4d8f2df8007d7b))
+* resolve regression errors from over-aggressive unused parameter prefixing ([5727640](https://github.com/Jackela/AI-Recruitment-Clerk/commit/572764074aa12ed14374803acf013bc68c68a151))
+* resolve remaining ~90 unused variable errors in app-gateway ([62545d1](https://github.com/Jackela/AI-Recruitment-Clerk/commit/62545d171cdaa6898a51d8595fc2343ff6a1b3de))
+* resolve TypeScript strict mode errors across all services ([6e5e10e](https://github.com/Jackela/AI-Recruitment-Clerk/commit/6e5e10ebe37ddd8c347c22b0719ab5736affb11a))
+* resolve unused variable errors across backend services ([8e36f56](https://github.com/Jackela/AI-Recruitment-Clerk/commit/8e36f5625c83c4ec44a99dfb362298136053d87a))
+* restore parameters used in method bodies (TS2552) ([4017617](https://github.com/Jackela/AI-Recruitment-Clerk/commit/40176170907df18043addf624bb23561333db78c))
+* **tests:** comprehensive test suite repair and optimization ([37db70b](https://github.com/Jackela/AI-Recruitment-Clerk/commit/37db70bb659eb3f2608f7b8e5bc16f2f8e58c811))
+* **typescript:** resolve TS strict mode errors in tests and services ([89d9d2b](https://github.com/Jackela/AI-Recruitment-Clerk/commit/89d9d2b240cce413d5f6938379d5245cd0b9b0fb))
+* **typescript:** resolve TS2339 error in input-validator validateJsonObject ([6b8d680](https://github.com/Jackela/AI-Recruitment-Clerk/commit/6b8d680abe9d068d8e19d3a68a636bf054e31f3a))
+
+### 📚 Documentation
+
+* add comprehensive project status report (92/100 quality score) ([b999c10](https://github.com/Jackela/AI-Recruitment-Clerk/commit/b999c1009ae2f84a06b49e02c33cf227c14fa34c))
+* **architecture:** Document system architecture and API contracts ([fe70f21](https://github.com/Jackela/AI-Recruitment-Clerk/commit/fe70f2182a236e345b7559be9ccf9ca04a2b49b3))
+* **project:** comprehensive documentation improvements and root cleanup ([ae196c5](https://github.com/Jackela/AI-Recruitment-Clerk/commit/ae196c55dead9edbf8736e0f12f1534f6b0bb0d5))
+* **project:** Create initial project documentation and standards ([d3c3f70](https://github.com/Jackela/AI-Recruitment-Clerk/commit/d3c3f7068547151b4cb0580e057018945895b422))
+
+### ♻️ Code Refactoring
+
+* align SecureConfigValidator and error types to shared-dtos ([2c9bd48](https://github.com/Jackela/AI-Recruitment-Clerk/commit/2c9bd4876c49f447de9654acbe46bed247267ffe))
+* **components:** Create reusable Bento Grid components and shared utilities ([1b2fe46](https://github.com/Jackela/AI-Recruitment-Clerk/commit/1b2fe46924f411b6dde858aa18c93817fc7508f2))
+* **frontend:** Decompose oversized components into maintainable modules ([96fcd0b](https://github.com/Jackela/AI-Recruitment-Clerk/commit/96fcd0b14cc0eba06b75bfe68118204e6bfba008))
+* **jd-extractor:** fix unused variable warnings and improve code quality ([cf409ba](https://github.com/Jackela/AI-Recruitment-Clerk/commit/cf409baaba7417e4372d476aa6fbad5b945e863a))
+* prefix unused class properties with underscore (TS6138) ([a104ea9](https://github.com/Jackela/AI-Recruitment-Clerk/commit/a104ea9f50d8f890dda666cc5f6a9257693ed94d))
+* **quality:** Improve initial code quality and address linting issues ([3f51321](https://github.com/Jackela/AI-Recruitment-Clerk/commit/3f51321bdb76ba8e46622c9c4de586f5636d6011))
+* **state:** Implement NgRx selectors and unit tests for state management ([104a951](https://github.com/Jackela/AI-Recruitment-Clerk/commit/104a95158c8f3317bf704ca195666ee480146044))
+
+### 🏗️ Build System
+
+* **tooling:** Configure Nx monorepo and core development tools ([b033104](https://github.com/Jackela/AI-Recruitment-Clerk/commit/b03310467d56be680d02f58fc1b92f73eb5dfa2e))
+
+## 1.0.0 (2025-10-23)
+
+### ✨ Features
+
+* **acceptance:** seed and align docs for 001-functional-acceptance (checklists, evidence, runs, sign-off); add branch artifacts and templates ([1bba587](https://github.com/Jackela/AI-Recruitment-Clerk/commit/1bba58702df38a4c5034f1594b89b5c30447ca01))
+* Complete project-wide refactoring and stabilization ([3f93975](https://github.com/Jackela/AI-Recruitment-Clerk/commit/3f9397501d85b404255784011d5ac53674f9df78))
+* comprehensive code quality improvements and TypeScript strict mode compliance ([a5abfec](https://github.com/Jackela/AI-Recruitment-Clerk/commit/a5abfec409fe834566c0a466aa03e91d61b1e386))
+* comprehensive infrastructure improvements and strict mode enforcement ([9057e3d](https://github.com/Jackela/AI-Recruitment-Clerk/commit/9057e3d1cae664181e77b3485c76291bdf0ab91c))
+* **deployment:** Configure Railway deployment, Dockerfiles, and nixpacks ([c3866b9](https://github.com/Jackela/AI-Recruitment-Clerk/commit/c3866b96fc597a37fd948c2191733f5b0343f3cc))
+* **frontend:** Add responsive mobile-first UI with accessibility compliance ([a48c3d8](https://github.com/Jackela/AI-Recruitment-Clerk/commit/a48c3d80659c0c06d487767192bcb4f28cd8949d))
+* **gateway:** Scaffold app-gateway with NestJS and Express ([3dd8e13](https://github.com/Jackela/AI-Recruitment-Clerk/commit/3dd8e13fb4283ebff15a13f9f9aeab4aa94f4990))
+* **github:** implement comprehensive GitHub best practices infrastructure ([353e0be](https://github.com/Jackela/AI-Recruitment-Clerk/commit/353e0be447c8312960b6a47a11582ccbabd1096c))
+* **microservices:** Implement job-description and resume-parser services ([791af2f](https://github.com/Jackela/AI-Recruitment-Clerk/commit/791af2f358a8746b7c80f6b02047a77b65a1e4d2))
+* **microservices:** Implement scoring-engine and report-generator services ([0963ef7](https://github.com/Jackela/AI-Recruitment-Clerk/commit/0963ef79683ddb3b904201c04db298513ece33dd))
+* **monitoring:** Add health checks, logging, and monitoring systems ([d6702cd](https://github.com/Jackela/AI-Recruitment-Clerk/commit/d6702cd36d85375d77813a62d845d3be21576549))
+* **orchestration:** Add Docker Compose and container orchestration ([605ec77](https://github.com/Jackela/AI-Recruitment-Clerk/commit/605ec7791648941d2c5ad68df121cf7a282fdeb4))
+* **security:** Implement Redis token blacklist and security hardening ([21c3843](https://github.com/Jackela/AI-Recruitment-Clerk/commit/21c384380100fa1cf50caa86cb59d188ebbfd30a))
+
+### 🐛 Bug Fixes
+
+* **ai-processing:** enable real AI processing instead of mock implementations ([af01e3e](https://github.com/Jackela/AI-Recruitment-Clerk/commit/af01e3e84bf739a0f62cdd7822338610222ab7ef))
 * **ci:** Resolve additional TypeScript compilation errors in frontend components ([dbe2877](https://github.com/Jackela/AI-Recruitment-Clerk/commit/dbe287736e3a111d77dfe67520a9d6eacf99e8db))
 * **ci:** Resolve critical pipeline failures and implement fail-fast architecture ([7fa6e11](https://github.com/Jackela/AI-Recruitment-Clerk/commit/7fa6e112a2c6c0aaf48bcdb2a07f9af57b6c6df8))
 * **ci:** Resolve critical TypeScript compilation errors blocking CI/CD pipeline ([7993734](https://github.com/Jackela/AI-Recruitment-Clerk/commit/7993734ef823ab17e96bd56543b2927168e69989))
