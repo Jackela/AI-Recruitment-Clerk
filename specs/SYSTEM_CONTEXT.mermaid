@@ -1,0 +1,50 @@
+```mermaid
+C4Context
+    title System Context Diagram - AI Recruitment Clerk
+
+    Person(recruiter, "Recruiter", "HR professional using the system to screen candidates")
+    Person(candidate, "Candidate", "Job applicant submitting resume")
+    
+    System(aiRecruitment, "AI Recruitment Clerk", "Intelligent resume screening and job matching system")
+    
+    System_Ext(geminiAPI, "Gemini Vision API", "Google AI service for PDF parsing and structured data extraction")
+    System_Ext(openaiAPI, "OpenAI Embeddings API", "Vector embedding generation for semantic caching")
+    
+    SystemDb(mongodb, "MongoDB + GridFS", "Document database and file storage")
+    SystemQueue(nats, "NATS JetStream", "Event streaming and message queue")
+    SystemDb_Ext(redis, "Redis", "Caching layer and vector store")
+    
+    Rel(recruiter, aiRecruitment, "Creates job postings, reviews matches", "HTTPS")
+    Rel(candidate, aiRecruitment, "Uploads resume", "HTTPS")
+    Rel(aiRecruitment, geminiAPI, "Extracts structured data from PDFs", "HTTPS/REST")
+    Rel(aiRecruitment, openaiAPI, "Generates text embeddings", "HTTPS/REST")
+    Rel(aiRecruitment, mongodb, "Stores jobs, resumes, results", "MongoDB Protocol")
+    Rel(aiRecruitment, nats, "Publishes/consumes events", "NATS Protocol")
+    Rel(aiRecruitment, redis, "Caches embeddings and results", "Redis Protocol")
+    
+    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+```
+
+## System Boundary
+
+### Internal Components (AI Recruitment Clerk System)
+- **Angular Frontend** - User interface for recruiters
+- **API Gateway** - Entry point and request routing
+- **Resume Parser Service** - PDF parsing with Vision LLM
+- **JD Extractor Service** - Job description analysis
+- **Scoring Engine Service** - AI-powered matching algorithm
+
+### External Dependencies
+- **Gemini Vision API** - Third-party AI service for resume parsing
+- **OpenAI Embeddings API** - Vector embedding generation for semantic search
+- **MongoDB + GridFS** - Primary data store and file storage
+- **NATS JetStream** - Event streaming backbone
+- **Redis** - Caching and vector similarity search
+
+### Key Interactions
+1. **User → System**: HTTPS/REST API for job creation and resume upload
+2. **System → Gemini**: Structured extraction from PDF resumes
+3. **System → OpenAI**: Text embedding for semantic caching
+4. **System → MongoDB**: Persistent data storage
+5. **System → NATS**: Asynchronous event-driven communication
+6. **System → Redis**: High-performance caching and vector search
