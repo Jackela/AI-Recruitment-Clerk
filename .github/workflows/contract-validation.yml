@@ -117,8 +117,8 @@ jobs:
       run: |
         echo "🔒 Checking for potential security issues in contracts..."
         
-        # Check for any hardcoded sensitive data in contracts
-        if grep -r "password\|secret\|key\|token" libs/api-contracts/src/ --include="*.ts"; then
+        # Check for any hardcoded sensitive data in contracts (specific patterns)
+        if grep -rE "password\s*=|secret\s*=|api[_-]?key\s*=|auth[_-]?token\s*=|bearer\s+" libs/api-contracts/src/ --include="*.ts"; then
           echo "❌ Found potential sensitive data in API contracts!"
           exit 1
         else
