@@ -96,7 +96,7 @@ export class UserManagementService {
    */
   async getUserActivity(
     userId: string,
-    options?: {
+    _options?: {
       startDate?: Date;
       endDate?: Date;
       page?: number;
@@ -199,7 +199,7 @@ export class UserManagementService {
    * @param reason - The reason.
    * @returns A promise that resolves when the operation completes.
    */
-  async softDeleteUser(userId: string, reason?: string): Promise<void> {
+  async softDeleteUser(userId: string, _reason?: string): Promise<void> {
     await this.userService.updateUser(userId, {
       status: UserStatus.INACTIVE,
       updatedAt: new Date(),
@@ -268,7 +268,7 @@ export class UserManagementService {
   async updateUserStatus(
     userId: string,
     status: UserStatus,
-    reason?: string,
+    _reason?: string,
   ): Promise<UserDto> {
     const updatedUser = await this.userService.updateUser(userId, {
       status,

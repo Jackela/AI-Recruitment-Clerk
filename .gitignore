@@ -301,3 +301,25 @@ claude-flow
 claude-flow.bat
 claude-flow.ps1
 hive-mind-prompt-*.txt
+
+# AI Assistant Tools
+.codex/
+.specify/
+
+# Temporary development files (root cleanup)
+tmp_*
+temp.*
+perf*.log
+*_run_dev.log
+gateway*.log
+scoring_engine*.log
+frontend*.log
+gw.log
+cookies.txt
+test-resume.*
+missing_*.txt
+wave*.json
+wave*.html
+简历.pdf
+E:CodeAI-*
+.env

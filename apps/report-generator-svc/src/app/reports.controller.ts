@@ -110,7 +110,7 @@ export class ReportsController {
     private readonly reportGeneratorService: ReportGeneratorService,
     private readonly reportRepository: ReportRepository,
     private readonly gridFsService: GridFsService,
-    private readonly reportTemplatesService: ReportTemplatesService,
+    private readonly _reportTemplatesService: ReportTemplatesService,
   ) {}
 
   /**
@@ -385,7 +385,7 @@ export class ReportsController {
   @Get('file/:fileId')
   async downloadReportFile(
     @Param('fileId') fileId: string,
-    @Query('format') format: string,
+    @Query('format') _format: string,
     @Res() response: Response,
   ) {
     try {

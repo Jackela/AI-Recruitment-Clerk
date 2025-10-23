@@ -282,7 +282,7 @@ export class I18nService {
   translate(key: string, params?: Record<string, any>): string {
     const translations = this.translations.value;
     const keys = key.split('.');
-    let value: unknown = translations;
+    let value: any = translations;
 
     for (const k of keys) {
       value = value?.[k];

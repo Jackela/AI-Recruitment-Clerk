@@ -6,7 +6,7 @@
 import { Injectable, ErrorHandler, Injector } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, of, throwError, BehaviorSubject } from 'rxjs';
+import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { ToastService } from '../toast.service';
 
 // Interfaces for standardized error responses from backend
@@ -279,7 +279,7 @@ export class ErrorHandlingService implements ErrorHandler {
    */
   private handleSpecialHttpErrors(
     httpError: HttpErrorResponse,
-    context: ErrorContext,
+    _context: ErrorContext,
   ): void {
     switch (httpError.status) {
       case 401:
@@ -301,8 +301,8 @@ export class ErrorHandlingService implements ErrorHandler {
    * Authentication error handling
    */
   private handleAuthenticationError(
-    errorResponse: StandardizedErrorResponse,
-    context: ErrorContext,
+    _errorResponse: StandardizedErrorResponse,
+    _context: ErrorContext,
   ): void {
     // Clear user session
     localStorage.removeItem('auth_token');
@@ -316,8 +316,8 @@ export class ErrorHandlingService implements ErrorHandler {
    * Authorization error handling
    */
   private handleAuthorizationError(
-    errorResponse: StandardizedErrorResponse,
-    context: ErrorContext,
+    _errorResponse: StandardizedErrorResponse,
+    _context: ErrorContext,
   ): void {
     // Show access denied message
     this.showAccessDeniedMessage();
@@ -328,7 +328,7 @@ export class ErrorHandlingService implements ErrorHandler {
    */
   private handleRateLimitError(
     errorResponse: StandardizedErrorResponse,
-    context: ErrorContext,
+    _context: ErrorContext,
   ): void {
     const resetTime = errorResponse.details?.resetTime;
     if (resetTime) {
@@ -341,7 +341,7 @@ export class ErrorHandlingService implements ErrorHandler {
    */
   private handleValidationError(
     errorResponse: StandardizedErrorResponse,
-    context: ErrorContext,
+    _context: ErrorContext,
   ): void {
     // Validation errors are usually handled by forms
     // Just show the user message
@@ -557,7 +557,7 @@ export class ErrorHandlingService implements ErrorHandler {
     }
   }
 
-  private sendToLoggingService(error: any, context: ErrorContext): void {
+  private sendToLoggingService(_error: any, _context: ErrorContext): void {
     // Implementation for sending errors to logging service
     // This could be an HTTP call to your logging endpoint
   }

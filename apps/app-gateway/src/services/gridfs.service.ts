@@ -338,18 +338,4 @@ export class GridFsService {
     return match[1];
   }
 
-  /**
-   * Generates a unique filename for resume storage.
-   * @param originalFilename - The original filename.
-   * @param analysisId - The analysis ID.
-   * @returns A unique filename.
-   */
-  private generateUniqueFilename(
-    originalFilename: string,
-    analysisId: string,
-  ): string {
-    const extension = originalFilename.split('.').pop() || 'file';
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    return `resume-${analysisId}-${timestamp}.${extension}`;
-  }
 }

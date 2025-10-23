@@ -17,8 +17,8 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiConsumes,
-  ApiParam,
+  
+  
 } from '@nestjs/swagger';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
@@ -107,7 +107,7 @@ export class JobsController {
    */
   @Permissions(Permission.READ_JOB)
   @Get('jobs')
-  getAllJobs(@Request() req: AuthenticatedRequest): Promise<JobListDto[]> {
+  getAllJobs(@Request() _req: AuthenticatedRequest): Promise<JobListDto[]> {
     return this.jobsService.getAllJobs();
   }
 
@@ -120,7 +120,7 @@ export class JobsController {
   @Permissions(Permission.READ_JOB)
   @Get('jobs/:jobId')
   getJobById(
-    @Request() req: AuthenticatedRequest,
+    @Request() _req: AuthenticatedRequest,
     @Param('jobId') jobId: string,
   ): Promise<JobDetailDto> {
     return this.jobsService.getJobById(jobId);
@@ -135,7 +135,7 @@ export class JobsController {
   @Permissions(Permission.READ_RESUME)
   @Get('jobs/:jobId/resumes')
   getResumesByJobId(
-    @Request() req: AuthenticatedRequest,
+    @Request() _req: AuthenticatedRequest,
     @Param('jobId') jobId: string,
   ): Promise<ResumeListItemDto[]> {
     return this.jobsService.getResumesByJobId(jobId);
@@ -150,7 +150,7 @@ export class JobsController {
   @Permissions(Permission.GENERATE_REPORT)
   @Get('jobs/:jobId/reports')
   getReportsByJobId(
-    @Request() req: AuthenticatedRequest,
+    @Request() _req: AuthenticatedRequest,
     @Param('jobId') jobId: string,
   ): Promise<ReportsListDto> {
     return this.jobsService.getReportsByJobId(jobId);
@@ -165,7 +165,7 @@ export class JobsController {
   @Permissions(Permission.READ_RESUME)
   @Get('resumes/:resumeId')
   getResumeById(
-    @Request() req: AuthenticatedRequest,
+    @Request() _req: AuthenticatedRequest,
     @Param('resumeId') resumeId: string,
   ): Promise<ResumeDetailDto> {
     return this.jobsService.getResumeById(resumeId);
@@ -180,7 +180,7 @@ export class JobsController {
   @Permissions(Permission.READ_ANALYSIS)
   @Get('reports/:reportId')
   getReportById(
-    @Request() req: AuthenticatedRequest,
+    @Request() _req: AuthenticatedRequest,
     @Param('reportId') reportId: string,
   ): Promise<AnalysisReportDto> {
     return this.jobsService.getReportById(reportId);

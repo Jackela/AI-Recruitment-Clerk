@@ -79,7 +79,7 @@ export async function startMockServer(): Promise<number> {
   app.use(express.json());
 
   // Health check
-  app.get('/api/health', (req, res) => {
+  app.get('/api/health', (_req, res) => {
     res.json({
       status: 'ok',
       timestamp: new Date().toISOString(),
@@ -98,7 +98,7 @@ export async function startMockServer(): Promise<number> {
   });
 
   // Jobs endpoints
-  app.get('/api/jobs', (req, res) => {
+  app.get('/api/jobs', (_req, res) => {
     res.json(mockJobs);
   });
 
@@ -145,7 +145,7 @@ export async function startMockServer(): Promise<number> {
   });
 
   // Reports endpoints
-  app.get('/api/reports', (req, res) => {
+  app.get('/api/reports', (_req, res) => {
     res.json(mockReports);
   });
 
@@ -159,7 +159,7 @@ export async function startMockServer(): Promise<number> {
   });
 
   // File upload endpoint
-  app.post('/api/upload/resume', upload.single('resume'), (req, res) => {
+  app.post('/api/upload/resume', upload.single('resume'), (_req, res) => {
     res.json({
       id: 'upload-' + Date.now(),
       filename: 'resume.pdf',
@@ -173,8 +173,8 @@ export async function startMockServer(): Promise<number> {
     const { jdText = '', resumeText = '' } = req.body;
 
     // Mock skill matching logic based on test expectations
-    const matchedSkills = [];
-    const missingSkills = [];
+    const matchedSkills: string[] = [];
+    const missingSkills: string[] = [];
 
     if (
       jdText.toLowerCase().includes('aws') &&
@@ -272,11 +272,11 @@ export async function startMockServer(): Promise<number> {
   );
 
   // Error simulation endpoints
-  app.get('/api/error/timeout', (req, res) => {
+  app.get('/api/error/timeout', (_req, res) => {
     res.status(408).json({ error: 'Request timeout' });
   });
 
-  app.get('/api/error/server', (req, res) => {
+  app.get('/api/error/server', (_req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   });
 

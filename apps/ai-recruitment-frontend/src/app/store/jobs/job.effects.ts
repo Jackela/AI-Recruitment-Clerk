@@ -7,8 +7,6 @@ import {
   mergeMap,
   tap,
   switchMap,
-  takeUntil,
-  filter,
 } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
 import { WebSocketService } from '../../services/websocket.service';
@@ -41,7 +39,7 @@ export class JobEffects {
   constructor(
     private actions$: Actions,
     private apiService: ApiService,
-    private router: Router,
+    private _router: Router,
     private webSocketService: WebSocketService,
   ) {
     this.loadJobs$ = createEffect(() =>

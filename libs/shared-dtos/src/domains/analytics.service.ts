@@ -1,19 +1,14 @@
 import {
   AnalyticsEvent,
-  AnalyticsEventId,
   EventStatus,
   EventType,
-  EventCategory,
   ConsentStatus,
   MetricUnit,
   AnalyticsEventSummary,
-  AnalyticsEventData,
   UserSession,
 } from './analytics.dto';
 import {
   AnalyticsRules,
-  EventCreationEligibilityResult,
-  BatchProcessingEligibilityResult,
   AnalyticsDataRetentionPolicy,
   PrivacyComplianceRiskAssessment,
   AnonymizationRequirementResult,
@@ -599,7 +594,7 @@ export class AnalyticsDomainService {
       );
 
       let totalProcessingTime = 0;
-      processedEventsWithTimes.forEach((event) => {
+      processedEventsWithTimes.forEach((_event) => {
         // 估算处理时间（这里需要根据实际实现调整）
         totalProcessingTime += 100; // 默认100ms处理时间
       });

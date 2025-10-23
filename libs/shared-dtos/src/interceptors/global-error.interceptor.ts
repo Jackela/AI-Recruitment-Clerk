@@ -9,7 +9,6 @@ import {
   ExecutionContext,
   CallHandler,
   HttpException,
-  HttpStatus,
   Logger,
 } from '@nestjs/common';
 import { Observable, throwError } from 'rxjs';

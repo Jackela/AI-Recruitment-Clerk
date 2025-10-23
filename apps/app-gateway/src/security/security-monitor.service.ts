@@ -58,7 +58,7 @@ export class SecurityMonitorService {
    * @param configService - The config service.
    */
   constructor(
-    @InjectModel(UserProfile.name) private userModel: Model<UserProfile>,
+    @InjectModel(UserProfile.name) private _userModel: Model<UserProfile>,
     private configService: ConfigService,
   ) {
     this.initializeRedis();

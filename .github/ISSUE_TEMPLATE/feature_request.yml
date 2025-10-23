@@ -1,0 +1,237 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement for AI Recruitment Clerk
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+assignees:
+  - Jackela
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new feature! Please provide detailed information to help us evaluate your request.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm the following before submitting
+      options:
+        - label: I have searched existing issues to avoid duplicates
+          required: true
+        - label: I have checked the [roadmap](../docs) for planned features
+          required: true
+        - label: This feature aligns with the project's goals
+          required: false
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: Feature Type
+      description: What type of feature is this?
+      options:
+        - New Functionality
+        - Enhancement to Existing Feature
+        - Performance Improvement
+        - Developer Experience
+        - Documentation
+        - Testing/Quality
+        - Infrastructure
+        - Security
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      description: Which component would this feature impact?
+      options:
+        - Frontend (Angular UI)
+        - API Gateway
+        - Resume Parser Service
+        - JD Extractor Service
+        - Scoring Engine Service
+        - Report Generator Service
+        - Database Layer
+        - Message Queue
+        - Infrastructure/Deployment
+        - Documentation
+        - Multiple Components
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Suggested Priority
+      description: How important is this feature?
+      options:
+        - Critical - Blocker for production use
+        - High - Significant value or user request
+        - Medium - Nice to have
+        - Low - Minor improvement
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Is your feature request related to a problem? Describe the problem.
+      placeholder: |
+        I'm always frustrated when...
+        Current limitation is...
+        Users are unable to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like to see
+      placeholder: |
+        I would like to...
+        The feature should...
+        It should work by...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: Have you considered any alternative approaches?
+      placeholder: |
+        Alternative 1: ...
+        Alternative 2: ...
+        Workaround: ...
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: Use Cases
+      description: Describe specific scenarios where this feature would be valuable
+      placeholder: |
+        Use Case 1: ...
+        Use Case 2: ...
+        User Story: As a [role], I want [feature] so that [benefit]
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: How will we know this feature is complete?
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Criterion 3
+      value: |
+        - [ ] Feature implementation complete
+        - [ ] Unit tests added with >90% coverage
+        - [ ] Documentation updated
+        - [ ] E2E tests added
+        - [ ] Performance benchmarks acceptable
+
+  - type: textarea
+    id: technical-details
+    attributes:
+      label: Technical Details (Optional)
+      description: Any technical implementation suggestions?
+      placeholder: |
+        API endpoints needed:
+        - POST /api/...
+        
+        Database changes:
+        - New collection: ...
+        
+        Dependencies:
+        - Package: ...
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Mockups/Wireframes
+      description: Add any visual representations or diagrams
+      placeholder: Drag and drop images or attach links to mockups
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact Analysis
+      description: What would be the impact of implementing this feature?
+      placeholder: |
+        Positive impacts:
+        - Improved user experience
+        - Faster processing
+        
+        Potential risks:
+        - Breaking changes
+        - Performance concerns
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Does this feature depend on other features or external factors?
+      placeholder: |
+        Depends on:
+        - Feature #123
+        - External API XYZ
+
+  - type: dropdown
+    id: breaking-change
+    attributes:
+      label: Breaking Change?
+      description: Would this introduce breaking changes?
+      options:
+        - "No"
+        - "Yes - Minor"
+        - "Yes - Major"
+        - "Unknown"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: willing-to-implement
+    attributes:
+      label: Are you willing to implement this feature?
+      description: Would you like to contribute a PR?
+      options:
+        - "Yes, I can implement this"
+        - "Yes, with guidance"
+        - "No, but I can help test"
+        - "No, just suggesting"
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any other information or context
+      placeholder: |
+        Related issues:
+        - #123
+        
+        External references:
+        - https://...
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Submission Checklist
+      options:
+        - label: I have provided a clear problem statement
+          required: true
+        - label: I have described the proposed solution
+          required: true
+        - label: I have considered alternative approaches
+          required: false
+        - label: I have defined acceptance criteria
+          required: true

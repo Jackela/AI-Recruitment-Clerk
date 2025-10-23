@@ -8,7 +8,6 @@ import {
   IsOptional,
   IsArray,
   Min,
-  IsDateString,
 } from 'class-validator';
 // Fallback enums for analytics
 enum EventType {

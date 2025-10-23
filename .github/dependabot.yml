@@ -1,0 +1,257 @@
+# Dependabot Configuration for AI Recruitment Clerk
+# Documentation: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+
+updates:
+  # ============================================================================
+  # NPM Dependencies (Root & Workspace)
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "Jackela"
+    assignees:
+      - "Jackela"
+    labels:
+      - "dependencies"
+      - "npm"
+      - "automated"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    versioning-strategy: "increase"
+    # Group minor and patch updates together
+    groups:
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "patch"
+    # Auto-merge rules (requires GitHub Actions workflow)
+    allow:
+      - dependency-name: "*"
+        dependency-type: "all"
+
+  # ============================================================================
+  # GitHub Actions Workflows
+  # ============================================================================
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "Jackela"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci/cd"
+    commit-message:
+      prefix: "ci(deps)"
+      include: "scope"
+
+  # ============================================================================
+  # Docker Dependencies
+  # ============================================================================
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "Jackela"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "infrastructure"
+    commit-message:
+      prefix: "chore(docker)"
+      include: "scope"
+
+  # ============================================================================
+  # Frontend Application Dependencies
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/apps/ai-recruitment-frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "11:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "Jackela"
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "npm"
+    commit-message:
+      prefix: "chore(deps-frontend)"
+    groups:
+      angular-core:
+        patterns:
+          - "@angular/*"
+      rxjs:
+        patterns:
+          - "rxjs"
+      testing:
+        patterns:
+          - "jest*"
+          - "@types/jest"
+          - "ts-jest"
+
+  # ============================================================================
+  # Backend Services Dependencies
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/apps/app-gateway"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "backend"
+      - "app-gateway"
+    commit-message:
+      prefix: "chore(deps-gateway)"
+
+  - package-ecosystem: "npm"
+    directory: "/apps/resume-parser-svc"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "10:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "backend"
+      - "resume-parser"
+    commit-message:
+      prefix: "chore(deps-parser)"
+
+  - package-ecosystem: "npm"
+    directory: "/apps/jd-extractor-svc"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "11:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "backend"
+      - "jd-extractor"
+    commit-message:
+      prefix: "chore(deps-jd)"
+
+  - package-ecosystem: "npm"
+    directory: "/apps/scoring-engine-svc"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "backend"
+      - "scoring-engine"
+    commit-message:
+      prefix: "chore(deps-scoring)"
+
+  - package-ecosystem: "npm"
+    directory: "/apps/report-generator-svc"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "10:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "backend"
+      - "report-generator"
+    commit-message:
+      prefix: "chore(deps-reports)"
+
+  # ============================================================================
+  # Shared Libraries Dependencies
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/libs/shared-dtos"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "shared-libs"
+    commit-message:
+      prefix: "chore(deps-dtos)"
+
+  - package-ecosystem: "npm"
+    directory: "/libs/infrastructure-shared"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "10:00"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "shared-libs"
+    commit-message:
+      prefix: "chore(deps-infra)"
+
+# ============================================================================
+# Dependabot Configuration Notes
+# ============================================================================
+#
+# Auto-Merge Strategy:
+# - Patch updates: Auto-merge after CI passes (requires workflow)
+# - Minor updates: Group and review weekly
+# - Major updates: Manual review required
+#
+# Labels:
+# - "dependencies": All Dependabot PRs
+# - Specific labels for filtering (npm, docker, github-actions)
+# - Component labels (frontend, backend, etc.)
+#
+# Schedule:
+# - Spread across week to avoid overwhelming CI/CD
+# - Monday-Friday business hours (UTC)
+# - Grouped by ecosystem and component
+#
+# Security Updates:
+# - Enabled by default (separate from version updates)
+# - Created immediately when vulnerability detected
+# - Labeled with "security"
+#
+# Grouping Strategy:
+# - Development dependencies: Grouped together
+# - Production dependencies: Patch-only groups
+# - Framework updates: Separate groups (Angular, NestJS)
+#
+# Best Practices:
+# - Review and merge weekly
+# - Test thoroughly before merging production dependencies
+# - Monitor for breaking changes in major updates
+# - Keep GitHub Actions up-to-date for security
+#
+# ============================================================================

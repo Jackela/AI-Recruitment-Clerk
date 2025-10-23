@@ -39,7 +39,7 @@ export interface CursorPosition {
  * Defines the shape of the collaboration action.
  */
 export interface CollaborationAction {
-  type: 'join' | 'leave' | 'edit' | 'comment' | 'cursor_move';
+  type: 'join' | 'leave' | '_edit' | 'comment' | 'cursor_move';
   userId: string;
   roomId: string;
   data?: any;
@@ -47,7 +47,7 @@ export interface CollaborationAction {
 }
 
 /**
- * Defines the shape of the document edit.
+ * Defines the shape of the document _edit.
  */
 export interface DocumentEdit {
   id: string;
@@ -60,7 +60,7 @@ export interface DocumentEdit {
 }
 
 /**
- * Defines the shape of the edit conflict.
+ * Defines the shape of the _edit conflict.
  */
 export interface EditConflict {
   editId: string;
@@ -183,25 +183,25 @@ export class CollaborationService {
   }
 
   /**
-   * Handle document edit operations
+   * Handle document _edit operations
    */
-  async handleDocumentEdit(edit: DocumentEdit): Promise<void> {
-    this.logger.debug(`Processing document edit in room ${edit.roomId}`);
+  async handleDocumentEdit(_edit: DocumentEdit): Promise<void> {
+    this.logger.debug(`Processing document _edit in room ${_edit.roomId}`);
 
-    const room = this.rooms.get(edit.roomId);
+    const room = this.rooms.get(_edit.roomId);
     if (!room) {
-      this.logger.warn(`Room ${edit.roomId} not found for document edit`);
+      this.logger.warn(`Room ${_edit.roomId} not found for document _edit`);
       return;
     }
 
-    // Store edit in cache for conflict resolution
-    const editKey = `collaboration:edit:${edit.roomId}:${edit.id}`;
-    await this.cacheService.set(editKey, edit, { ttl: 3600 }); // 1 hour TTL
+    // Store _edit in cache for conflict resolution
+    const editKey = `collaboration:_edit:${_edit.roomId}:${_edit.id}`;
+    await this.cacheService.set(editKey, _edit, { ttl: 3600 }); // 1 hour TTL
 
     // Check for conflicts (simplified)
-    const conflicts = await this.detectConflicts(edit);
+    const conflicts = await this.detectConflicts(_edit);
     if (conflicts.length > 0) {
-      this.logger.warn(`Conflicts detected for edit ${edit.id}:`, conflicts);
+      this.logger.warn(`Conflicts detected for _edit ${_edit.id}:`, conflicts);
       // In a real implementation, you'd emit conflict events
     }
 
@@ -209,10 +209,10 @@ export class CollaborationService {
   }
 
   /**
-   * Resolve edit conflicts
+   * Resolve _edit conflicts
    */
   async resolveConflicts(conflicts: EditConflict[]): Promise<EditConflict[]> {
-    this.logger.log(`Resolving ${conflicts.length} edit conflicts`);
+    this.logger.log(`Resolving ${conflicts.length} _edit conflicts`);
 
     const resolved: EditConflict[] = [];
 
@@ -278,9 +278,9 @@ export class CollaborationService {
   }
 
   /**
-   * Detect edit conflicts (simplified implementation)
+   * Detect _edit conflicts (simplified implementation)
    */
-  private async detectConflicts(edit: DocumentEdit): Promise<EditConflict[]> {
+  private async detectConflicts(_edit: DocumentEdit): Promise<EditConflict[]> {
     // In a real implementation, this would check for overlapping edits
     // For now, return empty array (no conflicts)
     return [];
