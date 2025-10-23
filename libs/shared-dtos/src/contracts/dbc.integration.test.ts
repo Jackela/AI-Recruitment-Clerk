@@ -86,7 +86,7 @@ describe('End-to-End Contract Validation Chain', () => {
       expect(ContractValidators.isValidCandidateInfo(parsedResume)).toBe(true);
 
       // Step 3: Scoring Service Calculation
-      const scoringInput = {
+      const _scoringInput = {
         jd: {
           requiredSkills: extractedJD.requiredSkills,
           experienceYears: extractedJD.experienceYears,
@@ -369,7 +369,7 @@ describe('End-to-End Contract Validation Chain', () => {
 
       // Experience format consistency
       const extractedExperience = { min: 3, max: 7 };
-      const resumeExperience = [
+      const _resumeExperience = [
         { position: 'Developer', company: 'TechCorp', duration: '2019-2023' }, // 4 years experience
       ];
 

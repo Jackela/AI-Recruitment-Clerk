@@ -353,7 +353,7 @@ export class RedPacketService {
     }
   }
 
-  private async sendWeChatRedPacket(redPacket: RedPacketRecord): Promise<{
+  private async sendWeChatRedPacket(_redPacket: RedPacketRecord): Promise<{
     success: boolean;
     transactionId?: string;
     error?: string;
@@ -375,7 +375,7 @@ export class RedPacketService {
     });
   }
 
-  private async sendAlipayRedPacket(redPacket: RedPacketRecord): Promise<{
+  private async sendAlipayRedPacket(_redPacket: RedPacketRecord): Promise<{
     success: boolean;
     transactionId?: string;
     error?: string;
@@ -402,7 +402,7 @@ export class RedPacketService {
     return `rp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private async checkDailyLimit(ip: string): Promise<number> {
+  private async checkDailyLimit(_ip: string): Promise<number> {
     // TODO: 从数据库查询今日该IP已获得的红包数量
     return 0;
   }
@@ -468,7 +468,7 @@ export class RedPacketService {
   }
 
   private async getRedPacketRecordsByDate(
-    date: string,
+    _date: string,
   ): Promise<RedPacketRecord[]> {
     // TODO: 从数据库获取指定日期的红包记录
     return [];

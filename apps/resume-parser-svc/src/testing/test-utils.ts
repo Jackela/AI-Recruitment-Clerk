@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TestDatabaseModule } from './test-database.module';
 import { TestNatsModule } from './test-nats.module';
@@ -179,7 +178,7 @@ export const createMockMongoModel = (modelName: string) => {
  */
 export const createMockGridFSConnection = () => {
   const mockGridFSBucket = {
-    openDownloadStream: jest.fn().mockImplementation((id) => ({
+    openDownloadStream: jest.fn().mockImplementation((_id) => ({
       on: jest.fn((event, callback) => {
         if (event === 'data') callback(Buffer.from('mock file data'));
         if (event === 'end') setTimeout(callback, 10);
@@ -188,7 +187,7 @@ export const createMockGridFSConnection = () => {
       pipe: jest.fn(),
       read: jest.fn(),
     })),
-    openUploadStream: jest.fn().mockImplementation((filename, options) => ({
+    openUploadStream: jest.fn().mockImplementation((_filename, _options) => ({
       id: '507f1f77bcf86cd799439011',
       write: jest.fn(),
       end: jest.fn((callback) => callback && callback()),

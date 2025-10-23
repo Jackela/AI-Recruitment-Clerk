@@ -110,7 +110,7 @@ export class JwtAuthGuard implements CanActivate {
    * @param context - The context.
    * @returns The result of the operation.
    */
-  handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
+  handleRequest(err: any, user: any, _info: any, context: ExecutionContext) {
     const request = context.switchToHttp().getRequest<Request>();
 
     if (err) {

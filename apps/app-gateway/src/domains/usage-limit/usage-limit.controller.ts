@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Put,
-  Delete,
   Body,
   Param,
   Query,
@@ -13,7 +12,6 @@ import {
   HttpStatus,
   NotFoundException,
   BadRequestException,
-  ForbiddenException,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -23,7 +21,6 @@ import {
   ApiBearerAuth,
   ApiParam,
   ApiQuery,
-  ApiBody,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
@@ -31,12 +28,9 @@ import { Permissions } from '../../auth/decorators/permissions.decorator';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import {
   UserDto,
-  Permission,
 } from '@ai-recruitment-clerk/user-management-domain';
 import {
   BonusType,
-  UsageStatistics,
-  UsageLimitPolicy,
 } from '@ai-recruitment-clerk/usage-management-domain';
 import { UsageLimitIntegrationService } from './usage-limit-integration.service';
 

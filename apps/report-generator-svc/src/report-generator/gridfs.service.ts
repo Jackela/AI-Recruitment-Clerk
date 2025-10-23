@@ -536,13 +536,4 @@ export class GridFsService {
     }
   }
 
-  private generateFilename(
-    reportType: string,
-    jobId: string,
-    resumeId: string,
-    extension: string,
-  ): string {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    return `${reportType}-${jobId}-${resumeId}-${timestamp}.${extension}`;
-  }
 }

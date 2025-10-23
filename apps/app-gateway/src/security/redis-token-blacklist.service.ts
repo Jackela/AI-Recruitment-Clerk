@@ -89,7 +89,7 @@ export class RedisTokenBlacklistService {
 
     // Count tokens for this user
     let count = 0;
-    for (const [token, record] of this.blacklistedTokens.entries()) {
+    for (const [_token, record] of this.blacklistedTokens.entries()) {
       if (record.userId === userId) {
         count++;
       }

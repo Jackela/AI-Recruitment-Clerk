@@ -1,0 +1,21 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/Jackela/AI-Recruitment-Clerk/tree/main/docs
+    about: Check our comprehensive documentation for guides and references
+  
+  - name: 💬 GitHub Discussions
+    url: https://github.com/Jackela/AI-Recruitment-Clerk/discussions
+    about: Ask questions and discuss ideas with the community
+  
+  - name: 🔒 Security Vulnerability
+    url: https://github.com/Jackela/AI-Recruitment-Clerk/security/advisories/new
+    about: Report security vulnerabilities privately (DO NOT create public issues)
+  
+  - name: 📖 Contributing Guide
+    url: https://github.com/Jackela/AI-Recruitment-Clerk/blob/main/CONTRIBUTING.md
+    about: Learn how to contribute to AI Recruitment Clerk
+  
+  - name: 🗺️ Project Roadmap
+    url: https://github.com/Jackela/AI-Recruitment-Clerk/projects
+    about: View our project roadmap and planned features

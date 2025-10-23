@@ -204,7 +204,7 @@ describe('DBC Framework - Validators Only', () => {
 
     it('should demonstrate comprehensive validation workflow', () => {
       const mockParsingService = {
-        parseFile: (buffer: Buffer, filename: string, userId: string) => {
+        parseFile: (buffer: Buffer, filename: string, _userId: string) => {
           // Preconditions
           if (!Buffer.isBuffer(buffer) || buffer.length === 0) {
             throw new ContractViolationError(

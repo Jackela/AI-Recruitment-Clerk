@@ -7,7 +7,6 @@ import {
   ScoringEngineErrorCode,
   ErrorCorrelationManager,
 } from '@app/shared-dtos';
-import { GeminiClient, GeminiConfig } from '@ai-recruitment-clerk/shared-dtos';
 import {
   EnhancedSkillMatcherService,
   JobSkillRequirement,

@@ -1,0 +1,31 @@
+# Terraform local state and caches
+.terraform/
+.terraform*/
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Terraform variable files (may contain secrets)
+*.tfvars
+*.tfvars.json
+
+# Lock and crash logs
+.terraform.lock.hcl
+crash.log
+crash.*.log
+
+# Plan files
+*.plan
+*.tfplan
+
+# Override files
+*override.tf
+*override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Module archives
+*.zip
+*.tar.gz
+

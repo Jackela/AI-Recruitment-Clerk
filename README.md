@@ -49,6 +49,8 @@ AI Recruitment Clerk is an **event-driven microservices system** that automates 
 
 ## 🏗 System Architecture
 
+### High-Level Architecture
+
 ```mermaid
 graph TD
     subgraph "User Interface Layer"
@@ -79,6 +81,130 @@ graph TD
     NATS -->|Event Distribution| JD & RP & SC
     RP -->|API Calls| LLM
     JD & RP & SC -->|Read/Write| DB
+```
+
+### Event-Driven Workflow - Resume Processing
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant Gateway
+    participant NATS
+    participant ResumeParser
+    participant VisionLLM
+    participant ScoringEngine
+    participant MongoDB
+
+    User->>Frontend: Upload Resume
+    Frontend->>Gateway: POST /api/jobs/:id/resume
+    Gateway->>MongoDB: Store PDF in GridFS
+    Gateway->>NATS: Publish job.resume.submitted
+    
+    NATS->>ResumeParser: Deliver Event
+    ResumeParser->>MongoDB: Download PDF from GridFS
+    ResumeParser->>VisionLLM: Extract structured data
+    VisionLLM-->>ResumeParser: Parsed JSON data
+    ResumeParser->>MongoDB: Save parsed resume
+    ResumeParser->>NATS: Publish analysis.resume.parsed
+    
+    NATS->>ScoringEngine: Deliver Event
+    ScoringEngine->>MongoDB: Fetch JD & Resume
+    ScoringEngine->>ScoringEngine: Calculate match score
+    ScoringEngine->>MongoDB: Save scoring result
+    ScoringEngine->>NATS: Publish analysis.match.scored
+    
+    Gateway->>MongoDB: Poll for results
+    Gateway-->>Frontend: Return job status
+    Frontend-->>User: Display match results
+```
+
+### Semantic Caching Architecture
+
+```mermaid
+graph LR
+    A[Job Creation Request] --> B{Semantic Cache Check}
+    B -->|Cache Hit<br/>Similarity > 0.85| C[Return Cached JD Analysis]
+    B -->|Cache Miss| D[Generate Vector Embedding]
+    D --> E[Process JD with LLM]
+    E --> F[Store Analysis + Vector]
+    F --> G[Redis Vector Store]
+    G --> H[NATS Event Publication]
+    
+    style C fill:#90EE90
+    style E fill:#FFB6C1
+    style G fill:#87CEEB
+```
+
+### Docker Deployment Architecture
+
+```mermaid
+graph TB
+    subgraph "Docker Host"
+        subgraph "Frontend"
+            angular[Angular SPA<br/>:4200]
+        end
+        
+        subgraph "Backend Services"
+            gateway[API Gateway<br/>:3000]
+            
+            subgraph "Microservices"
+                resume[Resume Parser<br/>:3001]
+                jd[JD Extractor<br/>:3002]
+                scoring[Scoring Engine<br/>:3003]
+            end
+        end
+        
+        subgraph "Infrastructure"
+            nats[NATS JetStream<br/>:4222]
+            mongo[(MongoDB<br/>:27017)]
+            redis[(Redis<br/>:6379)]
+        end
+    end
+    
+    subgraph "External Services"
+        gemini[Gemini Vision API]
+        openai[OpenAI Embeddings]
+    end
+    
+    angular --> gateway
+    gateway --> nats
+    gateway --> redis
+    nats --> resume & jd & scoring
+    resume & jd & scoring --> mongo
+    resume --> gemini
+    gateway --> openai
+    
+    style angular fill:#DD0031
+    style gateway fill:#E0234E
+    style nats fill:#27AAE1
+    style mongo fill:#47A248
+    style redis fill:#DC382D
+```
+
+### Data Flow & State Management
+
+```mermaid
+stateDiagram-v2
+    [*] --> JobCreated: User creates job
+    JobCreated --> ResumeUploaded: Upload resume
+    ResumeUploaded --> Parsing: NATS event
+    Parsing --> Parsed: Vision LLM success
+    Parsing --> Failed: LLM error
+    Parsed --> Scoring: Resume parsed event
+    Scoring --> Completed: Match scored
+    Completed --> [*]
+    Failed --> [*]
+    
+    note right of Parsing
+        Resume Parser Service
+        Vision LLM integration
+    end note
+    
+    note right of Scoring
+        Scoring Engine Service
+        AI-powered matching
+    end note
 ```
 
 ## 🛠 Technology Stack
@@ -226,6 +352,190 @@ Detailed event definitions are available in the [`libs/shared-dtos`](./libs/shar
 - 📈 **Efficiency Improvement**: 70% reduction in manual screening time
 - 🐳 **Deployment Time**: <60 seconds for complete system startup
 
+## 📖 API Examples
+
+### Create a Job Posting
+
+```bash
+curl -X POST http://localhost:3000/api/jobs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Senior Full-Stack Developer",
+    "description": "We are looking for an experienced Full-Stack Developer...",
+    "requirements": "5+ years experience with Node.js, React, TypeScript",
+    "location": "Remote",
+    "salary": "120000-180000"
+  }'
+```
+
+### Upload Resume for Job
+
+```bash
+curl -X POST http://localhost:3000/api/jobs/{jobId}/resume \
+  -H "Content-Type: multipart/form-data" \
+  -F "resume=@/path/to/resume.pdf" \
+  -F "candidateName=John Doe" \
+  -F "candidateEmail=john@example.com"
+```
+
+### Get Job Status
+
+```bash
+curl -X GET http://localhost:3000/api/jobs/{jobId} \
+  -H "Accept: application/json"
+```
+
+### Get Match Results
+
+```bash
+curl -X GET http://localhost:3000/api/jobs/{jobId}/results \
+  -H "Accept: application/json"
+```
+
+### Health Check
+
+```bash
+curl http://localhost:3000/api/health
+```
+
+**Response Example**:
+```json
+{
+  "status": "ok",
+  "timestamp": "2025-01-23T10:00:00.000Z",
+  "services": {
+    "database": "healthy",
+    "nats": "healthy",
+    "redis": "healthy"
+  }
+}
+```
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+#### Issue: Docker containers fail to start
+
+**Symptoms**: `docker-compose up` fails or containers exit immediately
+
+**Solutions**:
+```bash
+# Check Docker daemon status
+docker info
+
+# Clean up old containers and volumes
+docker-compose down -v
+docker system prune -a
+
+# Rebuild images
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+#### Issue: MongoDB connection refused
+
+**Symptoms**: `MongoNetworkError: connect ECONNREFUSED`
+
+**Solutions**:
+```bash
+# Verify MongoDB is running
+docker ps | grep mongo
+
+# Check MongoDB logs
+docker logs ai-recruitment-mongodb
+
+# Restart MongoDB container
+docker-compose restart mongodb
+
+# Verify connection string in .env
+MONGODB_URL=mongodb://admin:devpassword123@localhost:27017/ai-recruitment?authSource=admin
+```
+
+#### Issue: NATS connection timeout
+
+**Symptoms**: Services can't connect to NATS
+
+**Solutions**:
+```bash
+# Check NATS server status
+curl http://localhost:8222/varz
+
+# View NATS logs
+docker logs ai-recruitment-nats
+
+# Restart NATS container
+docker-compose restart nats
+```
+
+#### Issue: Vision LLM API errors
+
+**Symptoms**: Resume parsing fails with 401/403 errors
+
+**Solutions**:
+1. Verify API key in `.env`:
+   ```bash
+   GEMINI_API_KEY=your-actual-api-key-here
+   ```
+
+2. Check API quota/limits on Google Cloud Console
+
+3. Test API key:
+   ```bash
+   curl -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}" \
+     -H 'Content-Type: application/json' \
+     -d '{"contents":[{"parts":[{"text":"test"}]}]}'
+   ```
+
+#### Issue: High memory usage
+
+**Symptoms**: Services consuming excessive RAM
+
+**Solutions**:
+```bash
+# Check container resource usage
+docker stats
+
+# Limit container memory in docker-compose.yml
+services:
+  app-gateway:
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+# Adjust Node.js heap size
+NODE_OPTIONS="--max-old-space-size=512"
+```
+
+#### Issue: Build fails with TypeScript errors
+
+**Symptoms**: `npx nx build` fails with type errors
+
+**Solutions**:
+```bash
+# Clean TypeScript cache
+rm -rf node_modules/.cache
+rm -rf dist
+
+# Reinstall dependencies
+npm ci --legacy-peer-deps
+
+# Run type check
+npx tsc --noEmit --project tsconfig.ci.json
+
+# Build with verbose output
+npx nx build app-gateway --verbose
+```
+
+### Getting Help
+
+- **Documentation**: Check [docs/](./docs/) directory
+- **GitHub Issues**: Search existing issues or create new one
+- **Logs**: Check `docker-compose logs -f <service-name>`
+- **Health Endpoints**: `http://localhost:3000/api/health`
+- **NATS Monitor**: `http://localhost:8222`
+
 ## 🤝 Contributing Guidelines
 
 1. Follow TDD development methodology
@@ -233,6 +543,8 @@ Detailed event definitions are available in the [`libs/shared-dtos`](./libs/shar
 3. Use TypeScript strict mode
 4. Follow NestJS best practices
 5. Run complete test suite before committing
+6. Read [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines
+7. Follow [Code of Conduct](./CODE_OF_CONDUCT.md)
 
 ## 📄 License
 

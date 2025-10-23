@@ -1,4 +1,4 @@
-import { test as base, expect } from '@playwright/test';
+import { test as base } from '@playwright/test';
 import type { Request } from '@playwright/test';
 import { waitForAppHydration } from './test-utils/hydration';
 

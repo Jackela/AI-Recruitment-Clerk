@@ -15,8 +15,6 @@ import {
   HttpStatus,
   ParseFilePipe,
   MaxFileSizeValidator,
-  FileTypeValidator,
-  BadRequestException,
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
@@ -29,14 +27,11 @@ import {
   ApiBearerAuth,
   ApiParam,
   ApiQuery,
-  ApiBody,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
 import {
-  UserDto,
-  Permission,
   ResumeDto,
   ResumeAnalysisDto,
   ResumeUploadDto,

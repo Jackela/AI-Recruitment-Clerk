@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, FilterQuery, UpdateQuery, QueryOptions } from 'mongoose';
+import { Model, FilterQuery } from 'mongoose';
 import {
   Report,
   ReportDocument,

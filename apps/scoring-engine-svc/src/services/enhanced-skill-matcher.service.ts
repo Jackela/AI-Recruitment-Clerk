@@ -85,9 +85,9 @@ export class EnhancedSkillMatcherService {
         .filter((skill) => skill.length > 0);
 
       // Group skills by category for better analysis
-      const resumeSkillsByCategory = SkillsTaxonomy.groupSkillsByCategory(
-        normalizedResumeSkills,
-      );
+      // const resumeSkillsByCategory = SkillsTaxonomy.groupSkillsByCategory(
+      //   normalizedResumeSkills,
+      // );
 
       const matches: SkillMatchResult[] = [];
       const breakdown = {
@@ -441,7 +441,7 @@ export class EnhancedSkillMatcherService {
       fuzzy: 0.95,
       semantic: 0.9,
       related: 0.8,
-    };
+    } as Record<string, number>;
     return multipliers[matchType] || 0.7;
   }
 

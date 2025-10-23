@@ -11,7 +11,6 @@ import {
   HttpStatus,
   ParseFilePipe,
   MaxFileSizeValidator,
-  FileTypeValidator,
   Req,
   Logger,
   HttpException,
@@ -495,7 +494,7 @@ export class GuestResumeController {
     description: 'Analysis ID returned from upload',
   })
   async getAnalysisResults(
-    @Req() req: RequestWithDeviceId,
+    @Req() _req: RequestWithDeviceId,
     @Param('analysisId') analysisId: string,
   ) {
     try {

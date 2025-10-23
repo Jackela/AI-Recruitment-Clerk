@@ -418,7 +418,7 @@ export class ExperienceAnalyzerService {
    */
   private async calculateIndustryExperience(
     workExperience: ResumeDTO['workExperience'],
-    targetIndustry?: string,
+    _targetIndustry?: string,
   ): Promise<{ [industry: string]: number }> {
     const industryExperience: { [industry: string]: number } = {};
 
@@ -624,7 +624,7 @@ export class ExperienceAnalyzerService {
    */
   private fallbackExperienceAnalysis(
     workExperience: ResumeDTO['workExperience'],
-    jobRequirements: JobRequirements,
+    _jobRequirements: JobRequirements,
   ): AIExperienceAnalysis {
     const totalYears = this.calculateTotalExperience(workExperience);
 

@@ -18,7 +18,7 @@ export class ResponseTransformInterceptor implements NestInterceptor {
    * @param next - The next.
    * @returns The Observable<any>.
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(_context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
       map((data: any) => {
         // If controller already returns a standardized shape, pass through

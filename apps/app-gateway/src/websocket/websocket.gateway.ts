@@ -158,17 +158,6 @@ export class WebSocketGateway
   @WebSocketServer() server!: Server;
   private logger: Logger = new Logger('WebSocketGateway');
   private clientSessions = new Map<string, string>(); // clientId -> sessionId
-  private clientUsers = new Map<string, UserPresence>(); // clientId -> user info
-  private activeRooms = new Map<string, Set<string>>(); // roomId -> Set<clientId>
-  private documentSessions = new Map<string, Set<string>>(); // documentId -> Set<clientId>
-  private collaborationRooms = new Map<
-    string,
-    {
-      participants: Map<string, UserPresence>;
-      messages: CollaborationMessage[];
-      lastActivity: Date;
-    }
-  >();
 
   /**
    * Initializes a new instance of the Web Socket Gateway.
@@ -179,11 +168,11 @@ export class WebSocketGateway
    * @param cacheService - The cache service.
    */
   constructor(
-    private readonly guestUsageService: GuestUsageService,
-    private readonly collaborationService: CollaborationService,
-    private readonly presenceService: PresenceService,
-    private readonly notificationService: NotificationService,
-    private readonly cacheService: CacheService,
+    private readonly _guestUsageService: GuestUsageService,
+    private readonly _collaborationService: CollaborationService,
+    private readonly _presenceService: PresenceService,
+    private readonly _notificationService: NotificationService,
+    private readonly _cacheService: CacheService,
   ) {}
 
   /**
@@ -191,7 +180,7 @@ export class WebSocketGateway
    * @param server - The server.
    * @returns The result of the operation.
    */
-  afterInit(server: Server) {
+  afterInit(_server: Server) {
     this.logger.log('WebSocket Gateway initialized');
   }
 
@@ -201,7 +190,7 @@ export class WebSocketGateway
    * @param args - The args.
    * @returns The result of the operation.
    */
-  handleConnection(client: Socket, ...args: any[]) {
+  handleConnection(client: Socket, ..._args: any[]) {
     const sessionId = client.handshake.query.sessionId as string;
     this.logger.log(`Client connected: ${client.id}, SessionId: ${sessionId}`);
 
