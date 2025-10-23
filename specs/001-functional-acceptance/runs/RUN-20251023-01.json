@@ -1,0 +1,18 @@
+{
+  "id": "RUN-20251023-01",
+  "date": "2025-10-23T10:30:00Z",
+  "executor": "QA Lead (placeholder)",
+  "environment": "pre-release",
+  "flags": {},
+  "dataset": "seed-2025-10-22#placeholder",
+  "cases": [
+    {
+      "caseId": "CASE-P1J-001",
+      "result": "Pass",
+      "evidence": [
+        "specs/001-functional-acceptance/evidence/2025-10-23/RUN-20251023-01/CASE-P1J-001_result_01.png"
+      ]
+    }
+  ]
+}
+
