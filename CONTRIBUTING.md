@@ -295,11 +295,19 @@ Closes #123"
 
 2. **Run quality checks**
    ```bash
-   npm run lint
-   npm run typecheck
-   npm test
-   npm run build
+   npm run lint          # Linting check
+   npm run typecheck     # TypeScript compilation
+   npm test              # Run unit tests
+   npm run test:coverage # Generate coverage report
+   npm run build         # Build project
    ```
+   
+   **CI/CD Checks**: All pull requests automatically run:
+   - ✅ Quality check (TypeScript + Lint + Security audit)
+   - 🧪 Build & Test (Full test suite)
+   - 📊 Coverage report (Minimum 70% threshold)
+   - 🔒 Security scan (CodeQL + dependency audit + secret scan)
+   - 🚀 Semantic release (on merge to main/develop)
 
 3. **Update documentation**
    - Update README.md if needed
@@ -319,32 +327,44 @@ Closes #123"
    - Fill out the PR template completely
    - Link related issues
 
-3. **PR Checklist**
+3. **PR Checklist** (See full checklist in [PR template](.github/PULL_REQUEST_TEMPLATE.md))
    - [ ] Code follows style guidelines
    - [ ] Self-review completed
    - [ ] Comments added for complex logic
    - [ ] Documentation updated
-   - [ ] Tests added/updated
-   - [ ] All tests passing
-   - [ ] No new warnings
-   - [ ] CHANGELOG.md updated
+   - [ ] Tests added/updated (target: 90%+ coverage for new code)
+   - [ ] All tests passing locally
+   - [ ] No new TypeScript warnings
+   - [ ] CHANGELOG.md updated (automated via semantic-release)
+   - [ ] CI/CD checks pass (all 4 workflows)
+   - [ ] No security vulnerabilities introduced
 
 ### PR Review Process
 
-1. **Automated Checks**
-   - CI/CD pipeline must pass
-   - Code coverage must meet threshold
-   - No security vulnerabilities
+1. **Automated Checks** (All must pass)
+   - ✅ **Quality Check**: TypeScript compilation + Lint + Security audit
+   - 🧪 **Build & Test**: Full test suite execution
+   - 📊 **Coverage Report**: Minimum 70% line coverage (target: 90% for new code)
+   - 🔒 **Security Scan**: 
+     - CodeQL analysis (JavaScript/TypeScript)
+     - Dependency vulnerability scan
+     - Secret scanning (TruffleHog + GitLeaks)
 
-2. **Code Review**
-   - At least one approval required
-   - Address all review comments
-   - Update as needed
+2. **Code Review** (Required before merge)
+   - At least one approval required (auto-assigned via CODEOWNERS)
+   - All conversations must be resolved
+   - Address all review comments with code changes or explanations
+   - Re-request review after updates
 
-3. **Merging**
-   - Squash and merge for feature branches
-   - Merge commit for release branches
-   - Delete branch after merge
+3. **Merging** (Automated versioning)
+   - **Squash and merge** for feature branches (keeps history clean)
+   - **Semantic release** automatically:
+     - Analyzes commit messages
+     - Determines version bump (major/minor/patch)
+     - Generates CHANGELOG.md
+     - Creates GitHub Release
+     - Adds release tags
+   - Delete branch after merge (automated)
 
 ## 🐛 Reporting Bugs
 
@@ -446,9 +466,89 @@ Contributors will be recognized in:
 - **Issues**: Search existing issues first
 - **Email**: Contact maintainers for private matters
 
+## 🔄 CI/CD Workflows
+
+### Automated Workflows
+
+All pull requests and pushes trigger automated workflows:
+
+#### 1. Quality Check (`.github/workflows/ci.yml`)
+- **Triggers**: Push/PR to main/develop
+- **Jobs**:
+  - TypeScript compilation check
+  - Lint verification
+  - Security audit (npm audit)
+  - Build verification
+  - Test suite execution
+- **Timeout**: 15 minutes
+
+#### 2. Test Coverage (`.github/workflows/coverage.yml`)
+- **Triggers**: Push/PR to main/develop
+- **Jobs**:
+  - Generate coverage report
+  - Upload to Codecov (if configured)
+  - Comment PR with coverage summary
+  - Fail if coverage <70% (warning only)
+- **Artifacts**: Coverage reports (14 days retention)
+
+#### 3. Security Scan (`.github/workflows/security.yml`)
+- **Triggers**: Push/PR to main/develop + Weekly schedule (Monday 9 AM UTC)
+- **Jobs**:
+  - CodeQL analysis (JavaScript + TypeScript)
+  - Dependency security scan
+  - Secret scanning (TruffleHog + GitLeaks)
+  - Generate security summary
+- **Artifacts**: Audit reports (30 days retention)
+
+#### 4. Semantic Release (`.github/workflows/release.yml`)
+- **Triggers**: Push to main/develop only (not PRs)
+- **Actions**:
+  - Analyze conventional commits
+  - Determine version bump
+  - Update CHANGELOG.md
+  - Create GitHub Release
+  - Add git tags
+  - Comment on related issues/PRs
+- **Configuration**: `.releaserc.json`
+
+### Workflow Status Badges
+
+Add to your PR description to show CI status:
+```markdown
+![CI](https://github.com/Jackela/AI-Recruitment-Clerk/workflows/CI/badge.svg)
+![Coverage](https://github.com/Jackela/AI-Recruitment-Clerk/workflows/Coverage/badge.svg)
+![Security](https://github.com/Jackela/AI-Recruitment-Clerk/workflows/Security/badge.svg)
+```
+
+### Troubleshooting CI Failures
+
+**TypeScript Errors**:
+```bash
+npx tsc --noEmit --project tsconfig.ci.json
+```
+
+**Test Failures**:
+```bash
+npm test -- --verbose
+npm run test:coverage
+```
+
+**Lint Issues**:
+```bash
+npm run lint -- --fix
+```
+
+**Security Vulnerabilities**:
+```bash
+npm audit fix
+npm audit fix --force  # For breaking changes
+```
+
+---
+
 ## 📄 License
 
-By contributing, you agree that your contributions will be licensed under the ISC License.
+By contributing, you agree that your contributions will be licensed under the MIT License.
 
 ---
 

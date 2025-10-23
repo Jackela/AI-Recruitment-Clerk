@@ -85,6 +85,17 @@ jobs:
           mkdir -p test-reports coverage
           npm run test:ci || true
 
+      - name: 📊 Generate Test Summary
+        if: always()
+        run: |
+          echo "## 🧪 Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f test-reports/test-results.json ]; then
+            echo "✅ Tests completed successfully" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Test results not found or tests failed" >> $GITHUB_STEP_SUMMARY
+          fi
+
       - name: 📊 Upload Test Results
         uses: actions/upload-artifact@v4
         if: always()

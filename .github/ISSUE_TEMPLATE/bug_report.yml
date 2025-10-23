@@ -1,0 +1,163 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior in AI Recruitment Clerk
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+assignees:
+  - Jackela
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug! Please fill out the information below to help us resolve the issue quickly.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm the following before submitting
+      options:
+        - label: I have searched existing issues to avoid duplicates
+          required: true
+        - label: I am using the latest version of AI Recruitment Clerk
+          required: true
+        - label: I have read the [documentation](../docs)
+          required: false
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Bug Severity
+      description: How severe is this bug?
+      options:
+        - Critical - Application crash or data loss
+        - High - Major functionality broken
+        - Medium - Feature not working as expected
+        - Low - Minor issue or cosmetic problem
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      description: Which part of the system is affected?
+      options:
+        - Frontend (Angular UI)
+        - API Gateway
+        - Resume Parser Service
+        - JD Extractor Service
+        - Scoring Engine Service
+        - Report Generator Service
+        - Database (MongoDB)
+        - Message Queue (NATS)
+        - Infrastructure/Deployment
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of the bug
+      placeholder: What went wrong?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Detailed steps to reproduce the behavior
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Upload file '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should have happened?
+      placeholder: Describe the expected result
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: Describe what went wrong
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs
+      description: Paste relevant error messages or logs
+      placeholder: |
+        ```
+        Error: ...
+        Stack trace: ...
+        ```
+      render: shell
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Information
+      description: Please provide details about your environment
+      value: |
+        - **OS**: [e.g., Windows 11, macOS 14.0, Ubuntu 22.04]
+        - **Node.js Version**: [e.g., 20.18.0]
+        - **npm Version**: [e.g., 10.0.0]
+        - **Browser**: [e.g., Chrome 120, Firefox 121]
+        - **Deployment**: [e.g., Docker, Railway, Local]
+        - **MongoDB Version**: [e.g., 7.0]
+        - **NATS Version**: [e.g., 2.10]
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Add screenshots or videos if applicable
+      placeholder: Drag and drop images here
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information
+      placeholder: Add any other context about the problem
+
+  - type: dropdown
+    id: willing-to-fix
+    attributes:
+      label: Are you willing to submit a PR to fix this bug?
+      options:
+        - "Yes"
+        - "No"
+        - "Maybe with guidance"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Submission Checklist
+      options:
+        - label: I have provided all required information
+          required: true
+        - label: I have checked that this is not a duplicate issue
+          required: true
+        - label: I have included error logs if available
+          required: false
