@@ -501,7 +501,7 @@ export class ReportGeneratorService {
   async generateCandidateComparison(
     jobId: string,
     resumeIds: string[],
-    options?: { requestedBy?: string },
+    _options?: { requestedBy?: string },
   ): Promise<string> {
     try {
       this.logger.log(
@@ -557,7 +557,7 @@ export class ReportGeneratorService {
   async generateInterviewGuide(
     jobId: string,
     resumeId: string,
-    options?: { requestedBy?: string },
+    _options?: { requestedBy?: string },
   ): Promise<string> {
     try {
       this.logger.log(
@@ -961,7 +961,7 @@ export class ReportGeneratorService {
   }
 
   private async generateReportInFormat(
-    data: ReportDataItem[],
+    _data: ReportDataItem[],
     format: GeneratedReportFile['format'],
   ): Promise<GeneratedReportFile> {
     // Placeholder for format-specific generation
@@ -973,7 +973,7 @@ export class ReportGeneratorService {
     };
   }
 
-  private aggregateScoreBreakdown(data: ReportDataItem[]): ScoreBreakdown {
+  private aggregateScoreBreakdown(_data: ReportDataItem[]): ScoreBreakdown {
     // Placeholder aggregation logic
     return {
       skillsMatch: 75,
@@ -983,13 +983,13 @@ export class ReportGeneratorService {
     };
   }
 
-  private aggregateSkillsAnalysis(data: ReportDataItem[]): MatchingSkill[] {
+  private aggregateSkillsAnalysis(_data: ReportDataItem[]): MatchingSkill[] {
     // Placeholder skills analysis
     return [];
   }
 
   private generateOverallRecommendation(
-    data: ReportDataItem[],
+    _data: ReportDataItem[],
   ): ReportRecommendation {
     // Placeholder recommendation logic
     return {
@@ -1001,11 +1001,11 @@ export class ReportGeneratorService {
     };
   }
 
-  private async generateBatchSummary(data: ReportDataItem[]): Promise<string> {
-    return `Batch report summary for ${data.length} candidates.`;
+  private async generateBatchSummary(_data: ReportDataItem[]): Promise<string> {
+    return `Batch report summary for ${_data.length} candidates.`;
   }
 
-  private calculateAverageConfidence(data: ReportDataItem[]): number {
+  private calculateAverageConfidence(_data: ReportDataItem[]): number {
     return 0.85; // Placeholder
   }
 

@@ -385,7 +385,7 @@ export class ReportsController {
   @Get('file/:fileId')
   async downloadReportFile(
     @Param('fileId') fileId: string,
-    @Query('format') format: string,
+    @Query('format') _format: string,
     @Res() response: Response,
   ) {
     try {

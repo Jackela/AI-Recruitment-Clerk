@@ -263,7 +263,7 @@ export class ReportTemplatesService {
   }
 
   private async generateExcelReport(
-    templateType: string,
+    _templateType: string,
     variables: TemplateVariables,
   ): Promise<string> {
     // Simplified Excel-like data structure
@@ -449,7 +449,7 @@ Comparison of {{candidates.length}} candidates for the {{jobTitle}} position.
     }
   }
 
-  private getHtmlStyles(templateType: string): string {
+  private getHtmlStyles(_templateType: string): string {
     return `
       <style>
         body {
@@ -655,7 +655,7 @@ Comparison of {{candidates.length}} candidates for the {{jobTitle}} position.
           `\\{\\{#each ${key}\\}\\}([\\s\\S]*?)\\{\\{/each\\}\\}`,
           'g',
         );
-        result = result.replace(pattern, (match, itemTemplate) => {
+        result = result.replace(pattern, (_match, itemTemplate) => {
           return value
             .map((item) => {
               let itemResult = itemTemplate;

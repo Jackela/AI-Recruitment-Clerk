@@ -1,14 +1,12 @@
-import { Module, NestModule, MiddlewareConsumer, Logger } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 // Use in-memory Mongo for tests
 import { DatabaseModule } from '../database/database.module';
 import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { JobsModule } from '../jobs/jobs.module';
-import { SimpleJobsController } from '../jobs/simple-jobs.controller';
 import { AnalysisModule } from '../analysis/analysis.module';
 import { AuthModule } from '../auth/auth.module';
 import { GuestModule } from '../guest/guest.module';
@@ -30,7 +28,6 @@ import { QuestionnairesController } from '../questionnaires/questionnaires.contr
 import { AnalyticsController } from '../analytics/analytics.controller';
 import { IncentivesController } from '../incentives/incentives.controller';
 import { UsageLimitsController } from '../usage/usage-limits.controller';
-import { CsrfProtectionMiddleware } from '../middleware/csrf-protection.middleware';
 import { SecurityHeadersMiddleware } from '../middleware/security-headers.middleware';
 import { RateLimitMiddleware } from '../middleware/rate-limit.middleware';
 import { EnhancedRateLimitMiddleware } from '../middleware/enhanced-rate-limit.middleware';

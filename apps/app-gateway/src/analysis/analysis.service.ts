@@ -42,7 +42,7 @@ export class AnalysisService {
   async initiateAnalysis(
     jdText: string,
     resumeFile: MulterFile,
-    sessionId?: string,
+    _sessionId?: string,
     options?: string,
   ): Promise<AnalysisInitiatedResponseDto> {
     const analysisId = this.generateAnalysisId();
@@ -52,10 +52,9 @@ export class AnalysisService {
 
     try {
       // Parse options if provided
-      let analysisOptions = {};
       if (options) {
         try {
-          analysisOptions = JSON.parse(options);
+          JSON.parse(options);
         } catch (error) {
           this.logger.warn('Invalid options JSON provided, using defaults');
         }
