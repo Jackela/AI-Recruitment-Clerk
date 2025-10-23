@@ -97,7 +97,7 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
     statusCode: number,
     userId?: string,
     request?: any,
-    data?: any,
+    _data?: any,
     error?: any,
   ) {
     const responseTime = Date.now() - startTime;

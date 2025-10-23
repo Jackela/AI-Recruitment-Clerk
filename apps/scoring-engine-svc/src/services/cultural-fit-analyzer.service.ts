@@ -330,7 +330,7 @@ export class CulturalFitAnalyzerService {
    */
   private async assessSoftSkills(
     resume: ResumeDTO,
-    jobRequirements: JobRequirements,
+    _jobRequirements: JobRequirements,
   ): Promise<SoftSkillsAssessment> {
     const experienceText = resume.workExperience
       .map((exp) => `${exp.position} at ${exp.company}: ${exp.summary}`)
@@ -564,7 +564,7 @@ export class CulturalFitAnalyzerService {
    * Generate personalized recommendations
    */
   private async generateRecommendations(
-    indicators: CulturalFitIndicators,
+    _indicators: CulturalFitIndicators,
     softSkills: SoftSkillsAssessment,
     companyProfile: CompanyProfile,
     alignmentScores: AlignmentScores,
@@ -696,7 +696,7 @@ export class CulturalFitAnalyzerService {
    */
   private fallbackCulturalFitAnalysis(
     resume: ResumeDTO,
-    companyProfile: CompanyProfile,
+    _companyProfile: CompanyProfile,
   ): CulturalFitScore {
     const indicators = this.fallbackCulturalIndicators(resume);
     const softSkills = this.fallbackSoftSkillsAssessment(resume);
@@ -725,7 +725,7 @@ export class CulturalFitAnalyzerService {
   /**
    * Fallback cultural indicators
    */
-  private fallbackCulturalIndicators(resume: ResumeDTO): CulturalFitIndicators {
+  private fallbackCulturalIndicators(_resume: ResumeDTO): CulturalFitIndicators {
     return {
       companySize: {
         preference: 'mixed',
@@ -768,7 +768,7 @@ export class CulturalFitAnalyzerService {
    * Fallback soft skills assessment
    */
   private fallbackSoftSkillsAssessment(
-    resume: ResumeDTO,
+    _resume: ResumeDTO,
   ): SoftSkillsAssessment {
     return {
       technicalCommunication: 60,

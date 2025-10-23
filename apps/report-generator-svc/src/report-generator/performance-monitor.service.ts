@@ -458,8 +458,8 @@ export class PerformanceMonitorService {
 
   private generateQualityTrends(
     qualityMetrics: QualityMetrics[],
-    startDate: Date,
-    endDate: Date,
+    _startDate: Date,
+    _endDate: Date,
   ): { date: string; averageQuality: number; reportCount: number }[] {
     const dailyData = new Map<string, { scores: number[]; count: number }>();
 
@@ -486,8 +486,8 @@ export class PerformanceMonitorService {
 
   private generatePerformanceTrends(
     performanceMetrics: PerformanceMetrics[],
-    startDate: Date,
-    endDate: Date,
+    _startDate: Date,
+    _endDate: Date,
   ): {
     date: string;
     averageTime: number;

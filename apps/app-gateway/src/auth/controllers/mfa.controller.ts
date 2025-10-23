@@ -25,7 +25,6 @@ import {
   VerifyMfaDto,
   DisableMfaDto,
   GenerateBackupCodesDto,
-  UseBackupCodeDto,
   MfaStatusDto,
   MfaSetupResponseDto,
   MfaMethod,

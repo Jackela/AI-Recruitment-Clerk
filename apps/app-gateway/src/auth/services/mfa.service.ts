@@ -570,18 +570,6 @@ export class MfaService {
     }
   }
 
-  private verifyTemporaryToken(userId: string, token: string): boolean {
-    const stored = this.temporaryTokens.get(userId);
-    if (!stored || stored.expiresAt < new Date()) {
-      this.temporaryTokens.delete(userId);
-      return false;
-    }
-
-    const isValid = stored.token === token;
-    if (isValid) {
-      this.temporaryTokens.delete(userId);
-    }
-
-    return isValid;
-  }
+  // Reserved for future implementation
+  // private verifyTemporaryToken(userId: string, token: string): boolean
 }

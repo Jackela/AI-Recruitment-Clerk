@@ -10,7 +10,6 @@ import { GlobalExceptionFilter } from './filters/global-exception.filter';
 
 // Interceptors
 import { ResponseTransformInterceptor } from './interceptors/response-transform.interceptor';
-import { ServiceIntegrationInterceptor } from './interceptors/service-integration.interceptor';
 
 // Pipes
 import { CustomValidationPipe } from './pipes/validation.pipe';
