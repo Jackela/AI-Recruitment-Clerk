@@ -13,6 +13,7 @@ export class UserSession {
     private readonly ip: IPAddress,
     private status: SessionStatus,
     private readonly createdAt: Date,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private _lastActiveAt: Date,
     private readonly dailyQuota: UsageQuota,
   ) {}
