@@ -4,6 +4,9 @@ import { ResumeRepository } from './resume.repository';
 import { Resume, ResumeSchema } from '../schemas/resume.schema';
 import { MongodbTestSetup } from '../testing/mongodb-test-setup';
 
+// Increase Jest timeout to accommodate MongoDB binary download/startup in CI containers
+jest.setTimeout(120000);
+
 describe('ResumeRepository Integration', () => {
   let repository: ResumeRepository;
   let module: TestingModule;
@@ -30,7 +33,7 @@ describe('ResumeRepository Integration', () => {
     }).compile();
 
     repository = module.get<ResumeRepository>(ResumeRepository);
-  }, 30000);
+  }, 120000);
 
   afterAll(async () => {
     if (module) {
