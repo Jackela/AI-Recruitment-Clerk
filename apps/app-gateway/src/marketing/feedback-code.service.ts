@@ -284,7 +284,7 @@ export class FeedbackCodeService {
         totalCodes,
         usedCodes,
         pendingPayments,
-        paidCodes,
+        _paidCodes,
         avgQualityResult,
       ] = await Promise.all([
         this.feedbackCodeModel.countDocuments(),

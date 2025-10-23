@@ -545,7 +545,7 @@ export { ErrorInterceptorFactory } from '@ai-recruitment-clerk/infrastructure-sh
  * @param config - The config.
  * @returns The result of the operation.
  */
-export function WithCircuitBreaker(nameOrConfig?: string | any, config?: any) {
+export function WithCircuitBreaker(nameOrConfig?: string | any, _config?: any) {
   return function (
     _target: any,
     propertyName: string,

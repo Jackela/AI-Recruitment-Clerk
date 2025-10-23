@@ -119,13 +119,13 @@ export class AppGatewayNatsService {
   }
 
   /**
-   * Wait for a single event on the given subject that matches the predicate.
+   * Wait for a single event on the given subject that matches the _predicate.
    * This is a simplified implementation that will work for basic use cases.
    * For production, consider implementing proper subscription management.
    */
   async waitForEvent<T = any>(
     subject: string,
-    predicate: (data: any) => boolean,
+    _predicate: (data: any) => boolean,
     timeoutMs = 20000,
   ): Promise<T> {
     // For now, we'll implement a basic timeout-based response

@@ -25,15 +25,15 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PrivacyComplianceService } from './privacy-compliance.service';
 import {
-  CaptureConsentRequestDto,
+  
   ConsentStatusResponseDto,
-  CreateRightsRequestBodyDto,
+  
   DataExportFormat,
   DataExportPackageDto,
-  DataSubjectRightType,
+  
   DataSubjectRightsRequestDto,
   UserConsentProfileDto,
-  WithdrawConsentRequestDto,
+  
 } from '../common/interfaces/fallback-types';
 import type {
   CaptureConsentDto,
@@ -80,7 +80,7 @@ export class PrivacyComplianceController {
   @ApiResponse({ status: 404, description: 'User not found' })
   async captureConsent(
     @Body(ValidationPipe) captureConsentDto: CaptureConsentDto,
-    @Req() req: any,
+    @Req() _req: any,
   ): Promise<UserConsentProfile> {
     this.logger.log(`Capturing consent for user: ${captureConsentDto.userId}`);
 
@@ -168,7 +168,7 @@ export class PrivacyComplianceController {
   @ApiResponse({ status: 400, description: 'Invalid request data' })
   async createRightsRequest(
     @Body(ValidationPipe) createRequestDto: CreateRightsRequestDto,
-    @Req() req: any,
+    @Req() _req: any,
   ): Promise<DataSubjectRightsRequest> {
     this.logger.log(
       `Creating rights request: ${createRequestDto.requestType} for user: ${createRequestDto.userId}`,
@@ -391,7 +391,7 @@ export class PrivacyComplianceController {
   @ApiResponse({ status: 201, description: 'Cookie consent saved' })
   async setCookieConsent(
     @Body() cookieConsent: any,
-    @Req() req: any,
+    @Req() _req: any,
   ): Promise<any> {
     this.logger.log('Setting cookie consent preferences');
 

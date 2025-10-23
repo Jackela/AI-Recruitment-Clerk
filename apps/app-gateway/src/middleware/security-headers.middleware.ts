@@ -46,7 +46,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     const cspDirectives = [
       "default-src 'self'",
       isProduction
-        ? "script-src 'self' 'sha256-xyz123' 'nonce-${this.generateNonce()}'"
+        ? "script-src 'self' 'sha256-xyz123' 'nonce-${this._generateNonce()}'"
         : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
@@ -196,7 +196,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
 
     // Check for suspicious patterns
     const userAgent = req.get('User-Agent') || '';
-    const referer = req.get('Referer') || '';
+    const _referer = req.get('Referer') || '';
 
     // Bot detection
     if (/bot|crawler|spider|scraper/i.test(userAgent)) {
@@ -261,7 +261,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     return sensitivePatterns.some((pattern) => path.startsWith(pattern));
   }
 
-  private generateNonce(): string {
+  private _generateNonce(): string {
     return require('crypto').randomBytes(16).toString('base64');
   }
 

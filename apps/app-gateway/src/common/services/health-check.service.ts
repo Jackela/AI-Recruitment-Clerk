@@ -338,7 +338,6 @@ export class HealthCheckService implements OnModuleInit {
 
           await client.connect();
           const pong = await client.ping();
-          const _info = await client.info('memory');
           await client.disconnect();
 
           return {

@@ -80,7 +80,7 @@ export class UsageLimitIntegrationService {
   /**
    * 获取使用限制列表 - EMERGENCY IMPLEMENTATION
    */
-  async getUsageLimits(organizationId: string, options: any): Promise<any> {
+  async getUsageLimits(_organizationId: string, options: any): Promise<any> {
     try {
       return {
         limits: [],
@@ -168,8 +168,8 @@ export class UsageLimitIntegrationService {
   async batchManageUsageLimits(
     ips: string[],
     action: string,
-    organizationId: string,
-    options: any,
+    _organizationId: string,
+    _options: any,
   ): Promise<any> {
     try {
       this.logger.log('Batch managing usage limits', {
@@ -192,7 +192,7 @@ export class UsageLimitIntegrationService {
    * 获取使用统计 - EMERGENCY IMPLEMENTATION
    */
   async getUsageStatistics(
-    organizationId: string,
+    _organizationId: string,
     timeRange: any,
     groupBy: string,
   ): Promise<any> {

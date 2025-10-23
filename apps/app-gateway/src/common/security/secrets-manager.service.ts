@@ -342,10 +342,9 @@ export class SecretsManagerService implements OnModuleInit {
       throw new Error('ENCRYPTION_KEY not configured');
     }
 
-    const [ivHex, authTagHex, encrypted] = encryptedText.split(':');
+    const [_ivHex, authTagHex, encrypted] = encryptedText.split(':');
 
     const algorithm = 'aes-256-gcm';
-    const _iv = Buffer.from(ivHex, 'hex');
     const authTag = Buffer.from(authTagHex, 'hex');
 
     const decipher = crypto.createDecipher(algorithm, encryptionKey);
