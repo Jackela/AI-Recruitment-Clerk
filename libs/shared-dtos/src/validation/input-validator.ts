@@ -353,7 +353,7 @@ export class InputValidator {
       }
 
       if (key in obj) {
-        const value = obj[key as keyof typeof obj];
+        const value = (obj as Record<string, unknown>)[key];
         const actualType = Array.isArray(value) ? 'array' : typeof value;
 
         if (actualType !== rules.type && rules.type !== 'any') {
