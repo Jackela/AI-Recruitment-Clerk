@@ -5,3 +5,11 @@
 /.nx/workspace-dataroot
 
 .angular
+
+# Additional common patterns
+node_modules/
+build/
+out/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

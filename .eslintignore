@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+coverage/
+*.min.js
+e2e/
+.nx/
+tmp/
+temp/
+out/
