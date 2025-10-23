@@ -21,6 +21,7 @@ jobs:
   codeql:
     name: 🔍 CodeQL Analysis
     runs-on: ubuntu-latest
+    if: ${{ env.ACT != 'true' }}
     timeout-minutes: 30
 
     strategy:
