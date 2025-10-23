@@ -1130,8 +1130,8 @@ export class PrivacyComplianceService {
   }
 
   private async storeEncryptedFile(
-    _encryptedBuffer: Buffer,
-    _filename: string,
+    encryptedBuffer: Buffer,
+    filename: string,
     fileId: string,
   ): Promise<string> {
     try {
@@ -1152,7 +1152,7 @@ export class PrivacyComplianceService {
 
   private async createSecureDownloadUrl(
     fileId: string,
-    _filename: string,
+    filename: string,
   ): Promise<string> {
     try {
       // Generate time-limited, signed URL
@@ -1181,8 +1181,8 @@ export class PrivacyComplianceService {
 
   private async recordDataExportDownload(
     userId: string,
-    _fileId: string,
-    _downloadUrl: string,
+    fileId: string,
+    downloadUrl: string,
   ): Promise<void> {
     try {
       // Record download information for audit purposes
@@ -1218,7 +1218,7 @@ export class PrivacyComplianceService {
   }
 
   private async checkErasureEligibility(
-    _userId: string,
+    userId: string,
   ): Promise<{ eligible: boolean; reason?: string }> {
     // TODO: Implement erasure eligibility checks
     // - Active job applications
