@@ -7,8 +7,6 @@ import {
   mergeMap,
   tap,
   switchMap,
-  takeUntil,
-  filter,
 } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
 import { WebSocketService } from '../../services/websocket.service';

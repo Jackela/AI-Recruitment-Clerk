@@ -80,7 +80,7 @@ export const jobReducer = createReducer(
   // WebSocket Job Updates
   on(
     JobActions.jobUpdatedViaWebSocket,
-    (state, { jobId, title, status, timestamp, organizationId, metadata }) => {
+    (state, { jobId, title, status }) => {
       // Update the job in the jobs array
       const updatedJobs = state.jobs.map((job) => {
         if (job.id === jobId) {

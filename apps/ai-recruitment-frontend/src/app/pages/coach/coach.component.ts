@@ -8,7 +8,6 @@ import {
 } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import {
-  GapAnalysisRequest,
   GapAnalysisResult,
 } from '../../interfaces/gap-analysis.interface';
 import { GapAnalysisReportComponent } from './gap-analysis-report.component';
