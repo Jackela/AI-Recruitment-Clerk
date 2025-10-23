@@ -1008,7 +1008,7 @@ export class PrivacyComplianceService {
 
       // Generate secure filename
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const _filename = `gdpr-data-export-${exportPackage.userId}-${timestamp}.json`;
+      const filename = `gdpr-data-export-${exportPackage.userId}-${timestamp}.json`;
 
       // Store file securely with encryption
       const fileInfo = await this.storeSecureFile(exportBuffer, filename);
@@ -1075,7 +1075,7 @@ export class PrivacyComplianceService {
       const fileId = this.generateSecureFileId();
 
       // Encrypt file content
-      const _encryptedBuffer = await this.encryptFileContent(fileBuffer);
+      const encryptedBuffer = await this.encryptFileContent(fileBuffer);
 
       // Store in secure location (GridFS or secure file storage)
       const storagePath = await this.storeEncryptedFile(
@@ -1186,7 +1186,8 @@ export class PrivacyComplianceService {
   ): Promise<void> {
     try {
       // Record download information for audit purposes
-      const _downloadRecord = {
+      // Note: In production, this should be stored in an audit collection
+      const downloadRecord = {
         userId,
         fileId,
         downloadUrl: downloadUrl.replace(/signature=[^&]*/, 'signature=***'), // Hide signature in logs

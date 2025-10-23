@@ -196,7 +196,6 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
 
     // Check for suspicious patterns
     const userAgent = req.get('User-Agent') || '';
-    const _referer = req.get('Referer') || '';
 
     // Bot detection
     if (/bot|crawler|spider|scraper/i.test(userAgent)) {
@@ -261,9 +260,6 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     return sensitivePatterns.some((pattern) => path.startsWith(pattern));
   }
 
-  private _generateNonce(): string {
-    return require('crypto').randomBytes(16).toString('base64');
-  }
 
   private generateRequestId(): string {
     return require('crypto').randomBytes(8).toString('hex');

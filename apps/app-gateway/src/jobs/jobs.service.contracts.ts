@@ -414,15 +414,6 @@ export class JobsServiceContracts {
     return user.organizationId === resourceOrganizationId;
   }
 
-  private _filterByOrganization<T extends { organizationId?: string }>(
-    user: UserDto,
-    items: T[],
-  ): T[] {
-    if (user.role === UserRole.ADMIN) {
-      return items;
-    }
-    return items.filter((item) => item.organizationId === user.organizationId);
-  }
 
   private extractCandidateName(filename: string): string {
     const nameMatch = filename.match(/^([^_]+)/);

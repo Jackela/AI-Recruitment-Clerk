@@ -136,16 +136,6 @@ export class JobsService implements OnModuleInit {
     return user.organizationId === resourceOrganizationId;
   }
 
-  private _filterByOrganization<T extends { organizationId?: string }>(
-    user: UserDto,
-    items: T[],
-  ): T[] {
-    if (user.role === UserRole.ADMIN) {
-      return items; // Admins see everything
-    }
-
-    return items.filter((item) => item.organizationId === user.organizationId);
-  }
 
   /**
    * Creates job.
@@ -691,11 +681,6 @@ export class JobsService implements OnModuleInit {
   }
 
   // Helper methods
-  private _extractCandidateName(filename: string): string {
-    // Simple name extraction from filename
-    const nameMatch = filename.match(/^([^_]+)/);
-    return nameMatch ? nameMatch[1] : 'Unknown';
-  }
 
   // NATS Subscription Methods
 
