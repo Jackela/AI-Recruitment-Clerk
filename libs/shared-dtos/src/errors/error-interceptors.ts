@@ -16,7 +16,6 @@ import { Request, Response } from 'express';
 
 import {
   ErrorCorrelationManager,
-  ErrorCorrelationContext,
 } from './error-correlation';
 import {
   StructuredErrorLogger,

@@ -408,7 +408,7 @@ export class SecurityController {
   @Get('health')
   @ApiOperation({ summary: 'Security system health check' })
   @ApiResponse({ status: 200, description: 'Security system status' })
-  async getSecurityHealth(@Request() req: AuthenticatedRequest) {
+  async getSecurityHealth(@Request() _req: AuthenticatedRequest) {
     try {
       const metrics =
         await this.securityMonitorService.getSecurityMetrics('hour');

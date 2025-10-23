@@ -76,7 +76,7 @@ export class JobsController {
   @Permissions(Permission.CREATE_JOB)
   @Post('jobs')
   @HttpCode(HttpStatus.ACCEPTED)
-  createJob(@Request() _req: AuthenticatedRequest, @Body() dto: CreateJobDto) {
+  createJob(@Request() req: AuthenticatedRequest, @Body() dto: CreateJobDto) {
     return this.jobsService.createJob(dto, req.user);
   }
 

@@ -15,7 +15,7 @@ export const test = base.extend<{
   stablePage: any;
 }>({
   // Custom page fixture with Firefox stability enhancements
-  stablePage: async ({ page, browserName }, use) => {
+  stablePage: async ({ page, browserName }: { page: any; browserName: string }, use: (page: any) => Promise<void>) => {
     // Add browser-specific launch delays
     await addBrowserLaunchDelay(browserName);
 
@@ -30,7 +30,7 @@ export const test = base.extend<{
       };
 
       // Add Firefox-specific error handling for common issues
-      page.on('pageerror', (error) => {
+      page.on('pageerror', (error: Error) => {
         if (error.message.includes('NS_ERROR_CONNECTION_REFUSED')) {
           console.warn(
             `🦊 Firefox connection error detected: ${error.message}`,

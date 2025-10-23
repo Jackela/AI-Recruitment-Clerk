@@ -16,7 +16,6 @@ import { CommonModule } from '@angular/common';
 import { AccessibleCardDirective } from '../../../directives/accessibility/accessible-card.directive';
 import { AccessibilityService } from '../../../services/accessibility/accessibility.service';
 import { Subject } from 'rxjs';
-import { debounceTime, takeUntil } from 'rxjs/operators';
 
 /**
  * Defines the shape of the bento grid item.

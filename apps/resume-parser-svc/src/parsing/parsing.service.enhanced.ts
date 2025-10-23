@@ -14,8 +14,6 @@ import { ResumeParserNatsService } from '../services/resume-parser-nats.service'
 import {
   RetryUtility,
   WithCircuitBreaker,
-  InputValidator,
-  EncryptionService,
   Requires,
   Ensures,
   Invariant,
@@ -80,12 +78,6 @@ export class ParsingService {
     { timestamp: number; hash: string; attempts: number }
   >();
   private readonly FILE_TIMEOUT_MS = 600000; // 10 minutes
-  private readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-  private readonly ALLOWED_MIME_TYPES = [
-    'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  ];
 
   /**
    * Creates ParsingService with dependency injection
@@ -172,17 +164,17 @@ export class ParsingService {
    * @version 1.1.0 - Added DBC contracts and enhanced validation
    */
   @Requires(
-    (fileBuffer, fileName, userId) =>
+    (fileBuffer, _fileName, _userId) =>
       Buffer.isBuffer(fileBuffer) && fileBuffer.length > 0,
     'File buffer must be valid and non-empty',
   )
   @Requires(
-    (fileBuffer, fileName, userId) =>
+    (_fileBuffer, fileName, _userId) =>
       ContractValidators.isNonEmptyString(fileName),
     'File name must be non-empty string',
   )
   @Requires(
-    (fileBuffer, fileName, userId) =>
+    (_fileBuffer, _fileName, userId) =>
       ContractValidators.isNonEmptyString(userId),
     'User ID must be non-empty string',
   )
@@ -379,7 +371,7 @@ export class ParsingService {
    */
   private async checkDuplicateProcessing(
     fileBuffer: Buffer,
-    userId: string,
+    _userId: string,
   ): Promise<void> {
     const fileHash = createHash('sha256').update(Uint8Array.from(fileBuffer)).digest('hex');
     const existingProcessing = Array.from(this.processingFiles.values()).find(

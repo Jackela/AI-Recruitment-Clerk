@@ -255,7 +255,7 @@ export class GlobalErrorHandler implements ErrorHandler {
   }
 
   private logStructuredError(
-    _error: Error,
+    error: Error,
     structuredError: StructuredError,
   ): void {
     if (!this.isDevelopment()) return;

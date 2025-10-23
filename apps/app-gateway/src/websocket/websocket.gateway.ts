@@ -180,7 +180,7 @@ export class WebSocketGateway
    * @param server - The server.
    * @returns The result of the operation.
    */
-  afterInit(server: Server) {
+  afterInit(_server: Server) {
     this.logger.log('WebSocket Gateway initialized');
   }
 
@@ -190,7 +190,7 @@ export class WebSocketGateway
    * @param args - The args.
    * @returns The result of the operation.
    */
-  handleConnection(client: Socket, ...args: any[]) {
+  handleConnection(client: Socket, ..._args: any[]) {
     const sessionId = client.handshake.query.sessionId as string;
     this.logger.log(`Client connected: ${client.id}, SessionId: ${sessionId}`);
 
