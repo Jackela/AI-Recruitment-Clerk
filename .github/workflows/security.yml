@@ -21,7 +21,6 @@ jobs:
   codeql:
     name: 🔍 CodeQL Analysis
     runs-on: ubuntu-latest
-    if: ${{ env.ACT != 'true' }}
     timeout-minutes: 30
 
     strategy:
@@ -63,6 +62,7 @@ jobs:
           npm run build || echo "⚠️ Build failed, continuing with analysis"
 
       - name: 🔍 Perform CodeQL Analysis
+        if: ${{ env.ACT != 'true' }}
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:${{ matrix.language }}"
