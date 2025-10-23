@@ -98,7 +98,7 @@ jobs:
 
       - name: 📊 Upload Test Results
         uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ always() && env.ACT != 'true' }}
         with:
           name: test-results-${{ github.run_id }}
           path: |
