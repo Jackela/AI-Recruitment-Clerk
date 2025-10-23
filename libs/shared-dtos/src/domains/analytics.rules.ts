@@ -1,7 +1,6 @@
 import {
   AnalyticsEvent,
   EventType,
-  EventCategory,
   EventStatus,
   ConsentStatus,
   MetricUnit,

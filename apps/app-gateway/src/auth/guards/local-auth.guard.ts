@@ -11,7 +11,7 @@ export class LocalAuthGuard implements CanActivate {
    * @param context - The context.
    * @returns The boolean | Promise<boolean>.
    */
-  canActivate(context: ExecutionContext): boolean | Promise<boolean> {
+  canActivate(_context: ExecutionContext): boolean | Promise<boolean> {
     // Allow local auth in UAT environment; real validation handled in AuthController
     return true;
   }

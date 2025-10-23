@@ -1,9 +1,6 @@
 import {
   Incentive,
-  IncentiveReward,
   IncentiveStatus,
-  Currency,
-  RewardType,
   TriggerType,
   PaymentMethod,
   ContactInfo,
@@ -370,7 +367,6 @@ export class IncentiveRules {
     const errors: string[] = [];
     const warnings: string[] = [];
     let totalAmount = 0;
-    const paymentMethods = new Set<PaymentMethod>();
 
     if (incentives.length === 0) {
       errors.push('No incentives provided for batch payment');

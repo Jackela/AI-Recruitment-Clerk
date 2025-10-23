@@ -198,7 +198,7 @@ export class HealthCheckService implements OnModuleInit {
 
   private async performHttpHealthCheck(
     url: string,
-    timeout: number,
+    _timeout: number,
   ): Promise<{ healthy: boolean; metadata?: any }> {
     try {
       // Mock HTTP health check - replace with actual HTTP client
@@ -241,7 +241,6 @@ export class HealthCheckService implements OnModuleInit {
       return 'healthy';
     }
 
-    const healthyCount = services.filter((s) => s.status === 'healthy').length;
     const degradedCount = services.filter(
       (s) => s.status === 'degraded',
     ).length;
@@ -339,7 +338,6 @@ export class HealthCheckService implements OnModuleInit {
 
           await client.connect();
           const pong = await client.ping();
-          const info = await client.info('memory');
           await client.disconnect();
 
           return {

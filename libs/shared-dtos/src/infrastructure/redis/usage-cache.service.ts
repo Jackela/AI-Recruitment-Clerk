@@ -9,7 +9,6 @@ export class UsageCacheService {
   private readonly USAGE_PREFIX = 'usage:';
   private readonly DAILY_PREFIX = 'daily:';
   private readonly BONUS_PREFIX = 'bonus:';
-  private readonly DEFAULT_TTL = 24 * 60 * 60; // 24小时
 
   /**
    * Initializes a new instance of the Usage Cache Service.

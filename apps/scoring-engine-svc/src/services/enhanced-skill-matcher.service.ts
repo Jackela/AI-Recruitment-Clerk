@@ -85,9 +85,9 @@ export class EnhancedSkillMatcherService {
         .filter((skill) => skill.length > 0);
 
       // Group skills by category for better analysis
-      const resumeSkillsByCategory = SkillsTaxonomy.groupSkillsByCategory(
-        normalizedResumeSkills,
-      );
+      // const resumeSkillsByCategory = SkillsTaxonomy.groupSkillsByCategory(
+      //   normalizedResumeSkills,
+      // );
 
       const matches: SkillMatchResult[] = [];
       const breakdown = {

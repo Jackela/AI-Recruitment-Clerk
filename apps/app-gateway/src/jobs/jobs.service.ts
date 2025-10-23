@@ -136,16 +136,6 @@ export class JobsService implements OnModuleInit {
     return user.organizationId === resourceOrganizationId;
   }
 
-  private filterByOrganization<T extends { organizationId?: string }>(
-    user: UserDto,
-    items: T[],
-  ): T[] {
-    if (user.role === UserRole.ADMIN) {
-      return items; // Admins see everything
-    }
-
-    return items.filter((item) => item.organizationId === user.organizationId);
-  }
 
   /**
    * Creates job.
@@ -691,11 +681,6 @@ export class JobsService implements OnModuleInit {
   }
 
   // Helper methods
-  private extractCandidateName(filename: string): string {
-    // Simple name extraction from filename
-    const nameMatch = filename.match(/^([^_]+)/);
-    return nameMatch ? nameMatch[1] : 'Unknown';
-  }
 
   // NATS Subscription Methods
 
@@ -758,7 +743,7 @@ export class JobsService implements OnModuleInit {
         extractedFields: number;
       };
     },
-    metadata?: any,
+    _metadata?: any,
   ): Promise<void> {
     const startTime = Date.now();
 
@@ -891,7 +876,7 @@ export class JobsService implements OnModuleInit {
       version: string;
       severity: 'low' | 'medium' | 'high' | 'critical';
     },
-    metadata?: any,
+    _metadata?: any,
   ): Promise<void> {
     const startTime = Date.now();
 

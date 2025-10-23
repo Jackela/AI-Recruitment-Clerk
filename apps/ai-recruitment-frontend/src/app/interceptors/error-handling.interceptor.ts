@@ -81,7 +81,7 @@ export class ErrorHandlingInterceptor implements HttpInterceptor {
   private getRetryDelay(
     error: HttpErrorResponse,
     retryCount: number,
-    request: HttpRequest<unknown>,
+    _request: HttpRequest<unknown>,
   ): Observable<number> {
     // Only retry on specific error codes
     const retryableStatusCodes = [408, 429, 500, 502, 503, 504];

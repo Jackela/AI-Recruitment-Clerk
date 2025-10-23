@@ -16,7 +16,6 @@ import {
   UserDto,
 } from '@ai-recruitment-clerk/user-management-domain';
 import {
-  RetryUtility,
   WithCircuitBreaker,
 } from '../common/interfaces/fallback-types';
 import * as bcrypt from 'bcryptjs';
@@ -454,25 +453,9 @@ export class AuthService {
     this.failedLoginAttempts.set(clientId, attempts);
   }
 
-  private blacklistToken(token: string, exp: number): void {
-    // Only store token hash to save memory
-    const tokenHash = createHash('sha256').update(token).digest('hex');
-    this.blacklistedTokens.set(tokenHash, exp * 1000); // Convert to milliseconds
-  }
-
-  private isTokenBlacklisted(token: string): boolean {
-    const tokenHash = createHash('sha256').update(token).digest('hex');
-    const exp = this.blacklistedTokens.get(tokenHash);
-    if (!exp) return false;
-
-    // Remove expired tokens
-    if (Date.now() > exp) {
-      this.blacklistedTokens.delete(tokenHash);
-      return false;
-    }
-
-    return true;
-  }
+  // Token blacklist methods reserved for future implementation
+  // private blacklistToken(token: string, exp: number): void
+  // private isTokenBlacklisted(token: string): boolean
 
   private cleanupBlacklistedTokens(): void {
     const now = Date.now();

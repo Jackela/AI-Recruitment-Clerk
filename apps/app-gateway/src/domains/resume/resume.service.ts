@@ -38,7 +38,7 @@ export class ResumeService {
   async getResumeAnalysis(
     resumeId: string,
     jobId?: string,
-    userId?: string,
+    _userId?: string,
   ): Promise<any> {
     try {
       return {
@@ -62,7 +62,7 @@ export class ResumeService {
    */
   async getResumeSkillsAnalysis(
     resumeId: string,
-    userId?: string,
+    _userId?: string,
   ): Promise<any> {
     try {
       return {
@@ -81,8 +81,8 @@ export class ResumeService {
    * 搜索简历 - EMERGENCY IMPLEMENTATION
    */
   async searchResumes(
-    searchDto: any,
-    organizationId: string,
+    _searchDto: any,
+    _organizationId: string,
     options?: any,
   ): Promise<any> {
     try {
@@ -154,7 +154,7 @@ export class ResumeService {
   /**
    * 获取简历列表 - EMERGENCY IMPLEMENTATION
    */
-  async getResumes(organizationId: string, filters: any): Promise<any> {
+  async getResumes(_organizationId: string, filters: any): Promise<any> {
     try {
       return {
         resumes: [],
@@ -215,7 +215,7 @@ export class ResumeService {
     resumeIds: string[],
     operation: string,
     userId: string,
-    parameters?: any,
+    _parameters?: any,
   ): Promise<any> {
     try {
       this.logger.log('Batch processing resumes', {
@@ -241,7 +241,7 @@ export class ResumeService {
   async reprocessResume(
     resumeId: string,
     userId: string,
-    options?: any,
+    _options?: any,
   ): Promise<any> {
     try {
       this.logger.log('Reprocessing resume', { resumeId, userId });
@@ -259,7 +259,7 @@ export class ResumeService {
   /**
    * 获取处理统计 - EMERGENCY IMPLEMENTATION
    */
-  async getProcessingStats(organizationId: string): Promise<any> {
+  async getProcessingStats(_organizationId: string): Promise<any> {
     try {
       return {
         totalResumes: 0,

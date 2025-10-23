@@ -22,8 +22,8 @@ import pdfParse from 'pdf-parse-fork';
 export class VisionLlmService {
   private readonly logger = new Logger(VisionLlmService.name);
   private readonly geminiClient: GeminiClient;
-  private readonly circuitBreaker: CircuitBreaker;
-  private readonly retryHandler: RetryHandler;
+  private readonly _circuitBreaker: CircuitBreaker;
+  private readonly _retryHandler: RetryHandler;
 
   /**
    * Initializes a new instance of the Vision LLM Service.
@@ -49,8 +49,8 @@ export class VisionLlmService {
     this.geminiClient = this.createGeminiClient(config);
 
     // Initialize error handling mechanisms (FAIL-FAST architecture)
-    this.circuitBreaker = new CircuitBreaker(5, 60000, this.logger);
-    this.retryHandler = new RetryHandler({
+    this._circuitBreaker = new CircuitBreaker(5, 60000, this.logger);
+    this._retryHandler = new RetryHandler({
       ...DEFAULT_RETRY_CONFIG,
       timeout: 30000, // 30s timeout for LLM API calls
     });

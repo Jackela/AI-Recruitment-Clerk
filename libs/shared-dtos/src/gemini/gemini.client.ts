@@ -55,9 +55,9 @@ export class GeminiClient {
    * Initializes a new instance of the Gemini Client.
    * @param config - The config.
    */
-  constructor(private readonly config: GeminiConfig) {
+  constructor(private readonly _config: GeminiConfig) {
     // 🔒 SECURITY: Strict fail-fast validation - no fallback mechanisms allowed
-    if (!config.apiKey) {
+    if (!_config.apiKey) {
       const error =
         '🔒 SECURITY: GeminiConfig.apiKey is required and cannot be empty';
       this.logger.error(error);
@@ -65,22 +65,22 @@ export class GeminiClient {
     }
 
     // Validate against insecure fallback patterns
-    if (SecureConfigValidator.isInsecureFallbackValue(config.apiKey)) {
-      const error = `🔒 SECURITY: GeminiConfig.apiKey contains insecure fallback value: ${config.apiKey}`;
+    if (SecureConfigValidator.isInsecureFallbackValue(_config.apiKey)) {
+      const error = `🔒 SECURITY: GeminiConfig.apiKey contains insecure fallback value: ${_config.apiKey}`;
       this.logger.error(error);
       throw new GeminiConfigurationError(error);
     }
 
     // Initialize Gemini client with validated configuration
     try {
-      this.genAI = new GoogleGenerativeAI(config.apiKey);
+      this.genAI = new GoogleGenerativeAI(_config.apiKey);
       this.model = this.genAI.getGenerativeModel({
-        model: config.model || 'gemini-1.5-flash',
+        model: _config.model || 'gemini-1.5-flash',
         generationConfig: {
-          temperature: config.temperature || 0.3,
-          topK: config.topK || 40,
-          topP: config.topP || 0.95,
-          maxOutputTokens: config.maxOutputTokens || 8192,
+          temperature: _config.temperature || 0.3,
+          topK: _config.topK || 40,
+          topP: _config.topP || 0.95,
+          maxOutputTokens: _config.maxOutputTokens || 8192,
         },
         safetySettings: [
           {

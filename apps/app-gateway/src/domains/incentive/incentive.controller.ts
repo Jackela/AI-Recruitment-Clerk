@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Put,
-  Delete,
   Body,
   Param,
   Query,
@@ -12,8 +11,6 @@ import {
   HttpCode,
   HttpStatus,
   NotFoundException,
-  BadRequestException,
-  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -22,19 +19,14 @@ import {
   ApiBearerAuth,
   ApiParam,
   ApiQuery,
-  ApiBody,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
 import {
-  UserDto,
-  Permission,
   IncentiveStatus,
   RewardType,
-  TriggerType,
   PaymentMethod,
-  Currency,
   ContactInfo,
 } from '../../common/interfaces/fallback-types';
 import { AuthenticatedRequest } from '@ai-recruitment-clerk/user-management-domain';

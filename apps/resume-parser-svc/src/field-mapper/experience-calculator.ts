@@ -294,7 +294,7 @@ export class ExperienceCalculator {
    */
   private static calculateRelevantExperience(
     positions: PositionAnalysis[],
-    targetSkills?: string[],
+    _targetSkills?: string[],
   ): number {
     let relevantMonths = 0;
     const currentDate = new Date();

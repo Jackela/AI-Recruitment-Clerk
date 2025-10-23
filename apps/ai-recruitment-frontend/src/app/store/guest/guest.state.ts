@@ -1,4 +1,3 @@
-import { AnalysisResults } from './guest.actions';
 import {
   PersonalInfo,
   Skill,

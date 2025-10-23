@@ -42,7 +42,7 @@ export class EmailService {
     this.transporter = nodemailer.createTransport(smtpConfig);
 
     // Verify connection configuration
-    this.transporter.verify((error, success) => {
+    this.transporter.verify((error, _success) => {
       if (error) {
         this.logger.error('SMTP connection failed:', error);
       } else {

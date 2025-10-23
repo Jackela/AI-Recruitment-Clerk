@@ -8,7 +8,6 @@ import {
   EnhancedAppException,
   ExtendedErrorType,
 } from '../errors/enhanced-error-types';
-import { ErrorHandler } from '../common/error-handling.patterns';
 import { ErrorCorrelationManager } from '../errors/error-correlation';
 
 /**

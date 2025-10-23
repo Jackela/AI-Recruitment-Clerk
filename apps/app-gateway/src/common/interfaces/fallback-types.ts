@@ -545,17 +545,17 @@ export { ErrorInterceptorFactory } from '@ai-recruitment-clerk/infrastructure-sh
  * @param config - The config.
  * @returns The result of the operation.
  */
-export function WithCircuitBreaker(nameOrConfig?: string | any, config?: any) {
+export function WithCircuitBreaker(nameOrConfig?: string | any, _config?: any) {
   return function (
-    target: any,
+    _target: any,
     propertyName: string,
     descriptor: PropertyDescriptor,
   ) {
     const method = descriptor.value;
     const circuitName =
       typeof nameOrConfig === 'string' ? nameOrConfig : propertyName;
-    const circuitConfig =
-      typeof nameOrConfig === 'string' ? config : nameOrConfig;
+    // Circuit config reserved for future use
+    // const circuitConfig = typeof nameOrConfig === 'string' ? config : nameOrConfig;
 
     descriptor.value = async function (...args: any[]) {
       try {

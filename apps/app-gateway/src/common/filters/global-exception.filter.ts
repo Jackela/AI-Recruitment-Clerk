@@ -3,11 +3,9 @@
  * Uses centralized error handling system with correlation and structured logging
  */
 
-import { ErrorInterceptorFactory } from '../interfaces/fallback-types';
-
 // Fallback implementations for missing infrastructure-shared components
 class StandardizedGlobalExceptionFilter {
-  constructor(config: any) {
+  constructor(_config: any) {
     // Basic exception filter implementation
   }
 }

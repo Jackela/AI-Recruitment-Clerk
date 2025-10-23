@@ -100,7 +100,7 @@ export class QuestionnaireIntegrationService {
   /**
    * 获取问卷列表 - EMERGENCY IMPLEMENTATION
    */
-  async getQuestionnaires(organizationId: string, options: any): Promise<any> {
+  async getQuestionnaires(_organizationId: string, options: any): Promise<any> {
     try {
       return {
         items: [],
@@ -217,8 +217,8 @@ export class QuestionnaireIntegrationService {
    * 获取问卷提交记录 - EMERGENCY IMPLEMENTATION
    */
   async getQuestionnaireSubmissions(
-    questionnaireId: string,
-    organizationId: string,
+    _questionnaireId: string,
+    _organizationId: string,
     options: any,
   ): Promise<any> {
     try {
@@ -241,7 +241,7 @@ export class QuestionnaireIntegrationService {
    */
   async getQuestionnaireAnalytics(
     questionnaireId: string,
-    organizationId: string,
+    _organizationId: string,
   ): Promise<any> {
     try {
       return {
@@ -263,7 +263,7 @@ export class QuestionnaireIntegrationService {
   async duplicateQuestionnaire(
     questionnaireId: string,
     userId: string,
-    options: any,
+    _options: any,
   ): Promise<any> {
     try {
       this.logger.log('Duplicating questionnaire', { questionnaireId, userId });
@@ -286,8 +286,8 @@ export class QuestionnaireIntegrationService {
   async deleteQuestionnaire(
     questionnaireId: string,
     userId: string,
-    reason?: string,
-    hardDelete?: boolean,
+    _reason?: string,
+    _hardDelete?: boolean,
   ): Promise<any> {
     try {
       this.logger.log('Deleting questionnaire', { questionnaireId, userId });
@@ -307,8 +307,8 @@ export class QuestionnaireIntegrationService {
    * 获取问卷模板 - EMERGENCY IMPLEMENTATION
    */
   async getQuestionnaireTemplates(
-    category: string,
-    organizationId: string,
+    _category: string,
+    _organizationId: string,
     options: any = {},
   ): Promise<any> {
     try {
@@ -371,8 +371,8 @@ export class QuestionnaireIntegrationService {
   async exportQuestionnaireData(
     questionnaireId: string,
     format: string,
-    userId: string,
-    options: any,
+    _userId: string,
+    _options: any,
   ): Promise<any> {
     try {
       this.logger.log('Exporting questionnaire data', {

@@ -113,7 +113,7 @@ export class GlobalErrorHandler implements ErrorHandler {
 
   private showErrorNotification(
     errorInfo: ErrorInfo,
-    structuredError: StructuredError,
+    _structuredError: StructuredError,
   ): void {
     let message = errorInfo.message;
 
@@ -183,7 +183,6 @@ export class GlobalErrorHandler implements ErrorHandler {
     error: Error,
   ): 'network' | 'validation' | 'runtime' | 'security' | 'business' {
     const message = error.message?.toLowerCase() || '';
-    const stack = error.stack?.toLowerCase() || '';
 
     // Network-related errors
     if (
@@ -272,7 +271,7 @@ export class GlobalErrorHandler implements ErrorHandler {
   }
 
   private handleErrorRecovery(
-    error: Error,
+    _error: Error,
     structuredError: StructuredError,
     errorInfo: ErrorInfo,
   ): void {

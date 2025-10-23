@@ -10,7 +10,7 @@ export class Questionnaire {
 
   private constructor(
     private readonly id: QuestionnaireId,
-    private readonly template: QuestionnaireTemplate,
+    private readonly _template: QuestionnaireTemplate,
     private readonly submission: QuestionnaireSubmission,
     private readonly quality: SubmissionQuality,
     private readonly metadata: SubmissionMetadata,

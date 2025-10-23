@@ -7,7 +7,7 @@ import {
 } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
-import { takeUntil, filter, tap } from 'rxjs/operators';
+import { takeUntil, filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { AppState } from '../../../store/app.state';
 import * as JobActions from '../../../store/jobs/job.actions';

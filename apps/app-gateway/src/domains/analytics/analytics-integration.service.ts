@@ -1,16 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 // Fallback implementations for analytics domain service
 class AnalyticsDomainService {
-  constructor(deps: any) {}
-  async trackEvent(event: any): Promise<void> {}
-  async recordMetric(metric: any): Promise<void> {}
-  async generateReport(type: any): Promise<any> {}
+  constructor(_deps: any) {}
+  async trackEvent(_event: any): Promise<void> {}
+  async recordMetric(_metric: any): Promise<void> {}
+  async generateReport(_type: any): Promise<any> {}
   async createUserInteractionEvent(
-    sessionId: string,
-    userId: string,
+    _sessionId: string,
+    _userId: string,
     eventType: any,
-    eventData: any,
-    context?: any,
+    _eventData: any,
+    _context?: any,
   ): Promise<any> {
     return {
       success: true,
@@ -23,10 +23,10 @@ class AnalyticsDomainService {
     };
   }
   async createBusinessMetricEvent(
-    metricName: string,
-    value: number,
-    unit: any,
-    metadata?: any,
+    _metricName: string,
+    _value: number,
+    _unit: any,
+    _metadata?: any,
   ): Promise<any> {
     return {
       success: true,
@@ -38,38 +38,38 @@ class AnalyticsDomainService {
     };
   }
   async createSystemPerformanceEvent(
-    operation: string,
-    duration: number,
-    success: boolean,
-    metadata?: any,
+    _operation: string,
+    _duration: number,
+    _success: boolean,
+    _metadata?: any,
   ): Promise<any> {
     return { success: true, data: { id: 'test-perf', status: 'PROCESSED' } };
   }
-  async processBatchEvents(eventIds: string[]): Promise<any> {
-    return { success: true, processedCount: eventIds.length };
+  async processBatchEvents(_eventIds: string[]): Promise<any> {
+    return { success: true, processedCount: _eventIds.length };
   }
-  async performPrivacyComplianceCheck(eventId: string): Promise<any> {
+  async performPrivacyComplianceCheck(_eventId: string): Promise<any> {
     return { success: true, compliant: true };
   }
   async generateDataRetentionReport(
-    startDate: Date,
-    endDate: Date,
+    _startDate: Date,
+    _endDate: Date,
   ): Promise<any> {
     return { success: true, report: {} };
   }
-  async getSessionAnalytics(sessionId: string, timeRange?: any): Promise<any> {
+  async getSessionAnalytics(_sessionId: string, _timeRange?: any): Promise<any> {
     return { success: true, analytics: {} };
   }
-  async getEventProcessingMetrics(timeRange: any): Promise<any> {
+  async getEventProcessingMetrics(_timeRange: any): Promise<any> {
     return { success: true, metrics: {} };
   }
-  async getDataPrivacyMetrics(timeRange: any): Promise<any> {
+  async getDataPrivacyMetrics(_timeRange: any): Promise<any> {
     return { success: true, metrics: {} };
   }
   async validateReportingAccess(
-    userRole: string,
-    reportType: any,
-    dataScope: any,
+    _userRole: string,
+    _reportType: any,
+    _dataScope: any,
   ): Promise<any> {
     return { success: true, hasAccess: true };
   }
@@ -525,11 +525,11 @@ export class AnalyticsIntegrationService {
    */
   private createPrivacyService(): IPrivacyService {
     return {
-      checkConsent: async (userId: string): Promise<boolean> => {
+      checkConsent: async (_userId: string): Promise<boolean> => {
         // 简化实现 - 检查用户同意状态
         return true;
       },
-      getUserConsentStatus: async (userId: string): Promise<ConsentStatus> => {
+      getUserConsentStatus: async (_userId: string): Promise<ConsentStatus> => {
         // 从用户配置或数据库获取同意状态
         // 这里简化实现，实际应从用户管理模块获取
         return ConsentStatus.GRANTED;
@@ -734,7 +734,7 @@ export class AnalyticsIntegrationService {
   async configureDataRetention(
     organizationId: string,
     retentionConfig: any,
-    userId?: string,
+    _userId?: string,
   ) {
     try {
       return {

@@ -189,16 +189,16 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
     if (!this.redis) {
       return next();
     }
-    const clientInfo = this.extractClientInfo(req);
+    const _clientInfo = this.extractClientInfo(req);
     const operationType = this.determineOperationType(req);
     const limits =
       this.operationLimits[operationType] || this.operationLimits.default;
 
     try {
       // Check if IP is currently locked
-      const isLocked = await this.isIpLocked(clientInfo.ip);
+      const isLocked = await this.isIpLocked(_clientInfo.ip);
       if (isLocked) {
-        const lockInfo = await this.getLockInfo(clientInfo.ip);
+        const lockInfo = await this.getLockInfo(_clientInfo.ip);
         throw new HttpException(
           {
             message: 'IP address temporarily locked due to suspicious activity',
@@ -211,14 +211,14 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
 
       // Perform rate limiting check
       const rateLimitResult = await this.checkRateLimit(
-        clientInfo,
+        _clientInfo,
         operationType,
         limits,
       );
 
       if (!rateLimitResult.allowed) {
         // Record failed attempt for suspicious activity detection
-        await this.recordFailedAttempt(clientInfo.ip);
+        await this.recordFailedAttempt(_clientInfo.ip);
 
         this.setRateLimitHeaders(res, rateLimitResult);
         throw new HttpException(
@@ -233,7 +233,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
       }
 
       // Record successful request
-      await this.recordRequest(clientInfo, operationType);
+      await this.recordRequest(_clientInfo, operationType);
 
       // Set rate limit headers
       this.setRateLimitHeaders(res, rateLimitResult);
@@ -243,7 +243,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
         operationType,
         remaining: rateLimitResult.remaining,
         resetTime: rateLimitResult.resetTime,
-        clientInfo,
+        _clientInfo,
       };
 
       next();
@@ -252,7 +252,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
         throw error;
       }
 
-      this.logger.error(`Rate limiting error for ${clientInfo.ip}:`, error);
+      this.logger.error(`Rate limiting error for ${_clientInfo.ip}:`, error);
       // Don't block requests on rate limiting errors in production
       if (this.configService.get<string>('NODE_ENV') !== 'production') {
         throw error;
@@ -300,7 +300,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
   }
 
   private async checkRateLimit(
-    clientInfo: any,
+    _clientInfo: any,
     operationType: string,
     limits: { window: number; limit: number },
   ) {
@@ -313,7 +313,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
         currentCount: 0,
       };
     }
-    const key = `rate_limit:${operationType}:${clientInfo.fingerprint}`;
+    const key = `rate_limit:${operationType}:${_clientInfo.fingerprint}`;
     const now = Date.now();
     const windowStart = now - limits.window;
 
@@ -448,7 +448,7 @@ export class EnhancedRateLimitMiddleware implements NestMiddleware {
     }
   }
 
-  private async recordRequest(clientInfo: any, operationType: string) {
+  private async recordRequest(_clientInfo: any, operationType: string) {
     if (!this.redis) return;
     // Record successful request for analytics
     const key = `analytics:requests:${operationType}:${new Date().toISOString().split('T')[0]}`;
