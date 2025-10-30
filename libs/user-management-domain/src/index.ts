@@ -236,6 +236,8 @@ export interface CreateUserDto {
   email: string;
   /** Initial password - must meet security requirements */
   password: string;
+  /** Optional username for display purposes */
+  username?: string;
   /** User's first name for personalization */
   firstName?: string;
   /** User's last name for formal communications */

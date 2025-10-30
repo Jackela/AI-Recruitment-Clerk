@@ -81,14 +81,26 @@ export class JwtAuthGuard implements CanActivate {
     // treat requests as authenticated if a bearer exists; otherwise allow as guest.
     const authHeader = request.headers['authorization'] || '';
     if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
-      // Minimal token presence check; in real prod, passport-jwt validates this
-      (request as any).user = ((request as any).user || {
-        id: 'user-uat',
-        sub: 'user-uat',
-        email: 'uat@example.com',
-        organizationId: 'org-uat',
-        role: 'user',
-      });
+      const tokenValue = authHeader.slice('Bearer '.length).trim();
+
+      if (tokenValue.length > 0) {
+        // Minimal token presence check; in real prod, passport-jwt validates this
+        (request as any).user = ((request as any).user || {
+          id: 'user-uat',
+          sub: 'user-uat',
+          email: 'uat@example.com',
+          organizationId: 'org-uat',
+          role: 'user',
+        });
+      } else if (!(request as any).user) {
+        (request as any).user = {
+          id: 'guest',
+          sub: 'guest',
+          email: 'guest@local',
+          organizationId: 'guest-org',
+          role: 'user',
+        };
+      }
     } else if (!(request as any).user) {
       // Attach a benign guest identity to satisfy downstream typings
       (request as any).user = {
@@ -124,7 +136,7 @@ export class JwtAuthGuard implements CanActivate {
           'Token has expired. Please refresh your session.',
         );
       } else if (err.name === 'JsonWebTokenError') {
-        throw new UnauthorizedException('Invalid token format.');
+        throw new UnauthorizedException('Invalid token. Please log in again.');
       } else if (err.name === 'NotBeforeError') {
         throw new UnauthorizedException('Token not yet valid.');
       }
@@ -140,7 +152,12 @@ export class JwtAuthGuard implements CanActivate {
     // Add security headers
     const response = context.switchToHttp().getResponse();
     if (user?.id) response.setHeader('X-Auth-User-Id', String(user.id));
-    if (user?.role) response.setHeader('X-Auth-Role', String(user.role));
+    if (user?.role) {
+      const normalizedRole = String(
+        (user as any)?.rawRole ?? user.role ?? '',
+      ).toLowerCase();
+      response.setHeader('X-Auth-Role', normalizedRole);
+    }
     if (user?.organizationId)
       response.setHeader('X-Auth-Organization', String(user.organizationId));
 

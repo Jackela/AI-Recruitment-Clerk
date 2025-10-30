@@ -43,12 +43,27 @@ export default async (): Promise<void> => {
   console.log('🧹 执行全局清理检查...');
   
   try {
-    // 清理可能的端口占用
-    await killPortProcesses(COMMON_TEST_PORTS);
+    // 清理可能的端口占用（仅在显式启用时）
+    if (process.env.CLEANUP_PORTS === 'true') {
+      await killPortProcesses(COMMON_TEST_PORTS);
+    }
     
     // 检查活动句柄（延迟执行以允许清理完成）
     setTimeout(() => {
-      const activeHandles = (process as any)._getActiveHandles?.() || [];
+      const rawHandles = (process as any)._getActiveHandles?.() || [];
+      const filterStandardHandle = (handle: any): boolean => {
+        if (!handle) return false;
+        if (handle.isTTY) return true;
+        const fd = handle._handle?.fd ?? handle.fd;
+        if (typeof fd === 'number' && (fd === 0 || fd === 1 || fd === 2)) {
+          return true;
+        }
+        if (handle.constructor?.name === 'Pipe' && typeof fd === 'number' && fd <= 3) {
+          return true;
+        }
+        return false;
+      };
+      const activeHandles = rawHandles.filter((handle: any) => !filterStandardHandle(handle));
       const activeRequests = (process as any)._getActiveRequests?.() || [];
       
       if (activeHandles.length > 0 || activeRequests.length > 0) {

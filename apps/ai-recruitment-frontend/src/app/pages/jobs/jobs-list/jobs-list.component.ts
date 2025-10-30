@@ -4,6 +4,7 @@ import { Observable, Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { DashboardCardComponent } from '../../../components/shared/dashboard-card/dashboard-card.component';
 import { AppState } from '../../../store/app.state';
 import { JobListItem } from '../../../store/jobs/job.model';
 import * as JobActions from '../../../store/jobs/job.actions';
@@ -15,7 +16,7 @@ import * as JobSelectors from '../../../store/jobs/job.selectors';
 @Component({
   selector: 'arc-jobs-list',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, DashboardCardComponent],
   templateUrl: './jobs-list.component.html',
   styleUrl: './jobs-list.component.scss',
 })
@@ -209,5 +210,22 @@ export class JobsListComponent implements OnInit, OnDestroy {
    */
   isJobProcessing(job: JobListItem): boolean {
     return job.status === 'processing';
+  }
+
+  /**
+   * Gets the translated status text for display.
+   * @param status - The job status
+   * @returns Translated status string
+   */
+  getStatusText(status: string): string {
+    const statusMap: Record<string, string> = {
+      processing: '处理中',
+      completed: '已完成',
+      active: '活跃',
+      draft: '草稿',
+      closed: '已关闭',
+      failed: '失败',
+    };
+    return statusMap[status] || status;
   }
 }

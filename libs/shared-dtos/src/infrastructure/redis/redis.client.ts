@@ -118,18 +118,20 @@ export class RedisClient implements OnModuleDestroy {
   /**
    * 设置键值对
    */
-  async set(key: string, value: string, ttl?: number): Promise<void> {
+  async set(key: string, value: string, ttl?: number): Promise<'OK'> {
     await this.ensureConnection();
+    const normalizedValue = String(value);
     if (this.useInMemoryStore) {
       const expireAt = ttl ? Date.now() + ttl * 1000 : undefined;
-      this.memoryStore.set(key, { value, expireAt });
-      return;
+      this.memoryStore.set(key, { value: normalizedValue, expireAt });
+      return 'OK';
     }
     if (ttl) {
-      await this.redis!.setex(key, ttl, value);
-    } else {
-      await this.redis!.set(key, value);
+      await this.redis!.setex(key, ttl, normalizedValue);
+      return 'OK';
     }
+    await this.redis!.set(key, normalizedValue);
+    return 'OK';
   }
 
   /**
@@ -197,7 +199,8 @@ export class RedisClient implements OnModuleDestroy {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
       const entry = this.memoryStore.get(key);
-      if (!entry || !entry.expireAt) return -1;
+      if (!entry) return -2;
+      if (!entry.expireAt) return -1;
       const remainingMs = entry.expireAt - Date.now();
       return remainingMs > 0 ? Math.ceil(remainingMs / 1000) : -2;
     }
@@ -210,9 +213,14 @@ export class RedisClient implements OnModuleDestroy {
   async incr(key: string): Promise<number> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
-      const current = parseInt((await this.get(key)) || '0', 10);
-      const next = current + 1;
-      await this.set(key, String(next));
+      const now = Date.now();
+      const entry = this.memoryStore.get(key);
+      const isExpired = entry?.expireAt !== undefined && now > entry.expireAt;
+      const baseValue =
+        entry && !isExpired ? parseInt(entry.value, 10) || 0 : 0;
+      const next = baseValue + 1;
+      const expireAt = entry && !isExpired ? entry.expireAt : undefined;
+      this.memoryStore.set(key, { value: String(next), expireAt });
       return next;
     }
     return this.redis!.incr(key);
@@ -224,9 +232,14 @@ export class RedisClient implements OnModuleDestroy {
   async decr(key: string): Promise<number> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
-      const current = parseInt((await this.get(key)) || '0', 10);
-      const next = current - 1;
-      await this.set(key, String(next));
+      const now = Date.now();
+      const entry = this.memoryStore.get(key);
+      const isExpired = entry?.expireAt !== undefined && now > entry.expireAt;
+      const baseValue =
+        entry && !isExpired ? parseInt(entry.value, 10) || 0 : 0;
+      const next = baseValue - 1;
+      const expireAt = entry && !isExpired ? entry.expireAt : undefined;
+      this.memoryStore.set(key, { value: String(next), expireAt });
       return next;
     }
     return this.redis!.decr(key);
@@ -268,11 +281,24 @@ export class RedisClient implements OnModuleDestroy {
   async hset(key: string, field: string, value: string): Promise<number> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
-      const existing = (await this.get(key)) || '{}';
-      const obj = JSON.parse(existing);
+      const now = Date.now();
+      const entry = this.memoryStore.get(key);
+      const isExpired = entry?.expireAt !== undefined && now > entry.expireAt;
+      const expireAt = entry && !isExpired ? entry.expireAt : undefined;
+      let obj: Record<string, string> = {};
+      if (entry && !isExpired) {
+        try {
+          obj = JSON.parse(entry.value);
+        } catch {
+          obj = {};
+        }
+      }
       const isNew = obj[field] === undefined ? 1 : 0;
       obj[field] = value;
-      await this.set(key, JSON.stringify(obj));
+      this.memoryStore.set(key, {
+        value: JSON.stringify(obj),
+        expireAt,
+      });
       return isNew;
     }
     return this.redis!.hset(key, field, value);
@@ -284,9 +310,19 @@ export class RedisClient implements OnModuleDestroy {
   async hget(key: string, field: string): Promise<string | null> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
-      const existing = (await this.get(key)) || '{}';
-      const obj = JSON.parse(existing);
-      return obj[field] ?? null;
+      const now = Date.now();
+      const entry = this.memoryStore.get(key);
+      const isExpired = entry?.expireAt !== undefined && now > entry.expireAt;
+      if (!entry || isExpired) {
+        if (isExpired) this.memoryStore.delete(key);
+        return null;
+      }
+      try {
+        const obj = JSON.parse(entry.value);
+        return obj[field] ?? null;
+      } catch {
+        return null;
+      }
     }
     return this.redis!.hget(key, field);
   }
@@ -297,8 +333,18 @@ export class RedisClient implements OnModuleDestroy {
   async hgetall(key: string): Promise<Record<string, string>> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
-      const existing = (await this.get(key)) || '{}';
-      return JSON.parse(existing);
+      const now = Date.now();
+      const entry = this.memoryStore.get(key);
+      const isExpired = entry?.expireAt !== undefined && now > entry.expireAt;
+      if (!entry || isExpired) {
+        if (isExpired) this.memoryStore.delete(key);
+        return {};
+      }
+      try {
+        return JSON.parse(entry.value);
+      } catch {
+        return {};
+      }
     }
     return this.redis!.hgetall(key);
   }
@@ -309,11 +355,25 @@ export class RedisClient implements OnModuleDestroy {
   async hdel(key: string, field: string): Promise<number> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
-      const existing = (await this.get(key)) || '{}';
-      const obj = JSON.parse(existing);
+      const now = Date.now();
+      const entry = this.memoryStore.get(key);
+      const isExpired = entry?.expireAt !== undefined && now > entry.expireAt;
+      if (!entry || isExpired) {
+        if (isExpired) this.memoryStore.delete(key);
+        return 0;
+      }
+      let obj: Record<string, string> = {};
+      try {
+        obj = JSON.parse(entry.value);
+      } catch {
+        obj = {};
+      }
       const existed = Object.prototype.hasOwnProperty.call(obj, field) ? 1 : 0;
       delete obj[field];
-      await this.set(key, JSON.stringify(obj));
+      this.memoryStore.set(key, {
+        value: JSON.stringify(obj),
+        expireAt: entry.expireAt,
+      });
       return existed;
     }
     return this.redis!.hdel(key, field);

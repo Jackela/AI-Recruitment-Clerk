@@ -54,7 +54,7 @@ interface ActivityItem {
           aria-label="Dashboard statistics cards"
           *ngIf="stats$ | async as stats"
         >
-          <app-dashboard-card
+          <arc-dashboard-card
             title="职位数量"
             [value]="stats.totalJobs.toString()"
             subtitle="当前活跃职位"
@@ -65,9 +65,9 @@ interface ActivityItem {
               'Jobs statistics: ' + stats.totalJobs + ' active positions'
             "
           >
-          </app-dashboard-card>
+          </arc-dashboard-card>
 
-          <app-dashboard-card
+          <arc-dashboard-card
             title="简历总数"
             [value]="stats.totalResumes.toString()"
             subtitle="已上传简历"
@@ -78,9 +78,9 @@ interface ActivityItem {
               'Resume statistics: ' + stats.totalResumes + ' uploaded resumes'
             "
           >
-          </app-dashboard-card>
+          </arc-dashboard-card>
 
-          <app-dashboard-card
+          <arc-dashboard-card
             title="分析报告"
             [value]="stats.totalReports.toString()"
             subtitle="已生成报告"
@@ -91,9 +91,9 @@ interface ActivityItem {
               'Reports statistics: ' + stats.totalReports + ' generated reports'
             "
           >
-          </app-dashboard-card>
+          </arc-dashboard-card>
 
-          <app-dashboard-card
+          <arc-dashboard-card
             title="匹配结果"
             [value]="stats.activeMatches.toString()"
             subtitle="待处理匹配"
@@ -104,7 +104,7 @@ interface ActivityItem {
               'Matches statistics: ' + stats.activeMatches + ' pending matches'
             "
           >
-          </app-dashboard-card>
+          </arc-dashboard-card>
         </div>
       </section>
 
@@ -280,442 +280,7 @@ interface ActivityItem {
       </div>
     </div>
   `,
-  styles: [
-    `
-      .dashboard-container {
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-
-      .welcome-section {
-        text-align: center;
-        margin-bottom: var(--space-2xl);
-        padding: var(--space-8) var(--space-6);
-        background: var(--color-bg-fantasy);
-        border-radius: var(--radius-2xl);
-        color: white;
-        box-shadow: var(--shadow-2xl);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        position: relative;
-        overflow: hidden;
-
-        &::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: radial-gradient(
-            circle at 30% 20%,
-            rgba(255, 255, 255, 0.1),
-            transparent 50%
-          );
-          pointer-events: none;
-        }
-      }
-
-      .welcome-title {
-        font-family: var(--font-family-fantasy-heading);
-        font-size: var(--font-size-3xl);
-        font-weight: var(--font-weight-fantasy-h1);
-        margin: 0 0 var(--space-2) 0;
-        line-height: var(--line-height-tight);
-        letter-spacing: -0.02em;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        position: relative;
-        z-index: 1;
-      }
-
-      .welcome-subtitle {
-        font-family: var(--font-family-body);
-        font-size: var(--font-size-lg);
-        font-weight: var(--font-weight-fantasy-large);
-        opacity: 0.95;
-        margin: 0;
-        line-height: var(--line-height-normal);
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-        position: relative;
-        z-index: 1;
-      }
-
-      .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 2rem;
-        margin-bottom: 3rem;
-      }
-
-      .section-title {
-        font-family: var(--font-family-fantasy-heading);
-        font-size: var(--font-size-xl);
-        font-weight: var(--font-weight-fantasy-h2);
-        color: var(--color-text-fantasy);
-        margin-bottom: var(--space-6);
-        padding-bottom: var(--space-2);
-        border-bottom: 2px solid var(--color-primary-200);
-        background: linear-gradient(
-          90deg,
-          var(--color-primary-700),
-          var(--color-royal-600)
-        );
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        position: relative;
-
-        &::after {
-          content: '';
-          position: absolute;
-          bottom: -2px;
-          left: 0;
-          width: 60px;
-          height: 2px;
-          background: linear-gradient(
-            90deg,
-            var(--color-primary-600),
-            var(--color-royal-500)
-          );
-          border-radius: var(--radius-full);
-        }
-      }
-
-      .quick-actions-section {
-        margin-bottom: 3rem;
-      }
-
-      .actions-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1.5rem;
-      }
-
-      .action-card {
-        display: flex;
-        align-items: center;
-        gap: var(--space-4);
-        padding: var(--space-6);
-        background: var(--color-bg-primary);
-        border-radius: var(--radius-2xl);
-        text-decoration: none;
-        color: inherit;
-        box-shadow: var(--shadow-md);
-        transition: all var(--transition-base);
-        border: 1px solid var(--color-border-secondary);
-        position: relative;
-        overflow: hidden;
-
-        &::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 1px;
-          background: linear-gradient(
-            90deg,
-            transparent,
-            var(--color-primary-300),
-            transparent
-          );
-          opacity: 0;
-          transition: opacity var(--transition-base);
-        }
-
-        &:hover {
-          transform: translateY(-4px);
-          box-shadow: var(--shadow-2xl);
-          text-decoration: none;
-          color: inherit;
-          border-color: var(--color-primary-300);
-
-          &::before {
-            opacity: 1;
-          }
-        }
-
-        &:active {
-          transform: translateY(-2px);
-        }
-      }
-
-      .action-icon {
-        flex-shrink: 0;
-        width: var(--space-16);
-        height: var(--space-16);
-        background: linear-gradient(
-          135deg,
-          var(--color-primary-600),
-          var(--color-royal-600)
-        );
-        border-radius: var(--radius-xl);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        box-shadow: var(--shadow-lg);
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        transition: all var(--transition-base);
-
-        .action-card:hover & {
-          transform: scale(1.1) rotate(3deg);
-          box-shadow: var(--shadow-xl);
-        }
-      }
-
-      .action-content {
-        flex: 1;
-      }
-
-      .action-title {
-        font-family: var(--font-family-fantasy-heading);
-        font-size: var(--font-size-lg);
-        font-weight: var(--font-weight-fantasy-large);
-        color: var(--color-text-fantasy);
-        margin-bottom: var(--space-1);
-        line-height: var(--line-height-tight);
-        letter-spacing: -0.01em;
-      }
-
-      .action-description {
-        font-family: var(--font-family-body);
-        font-size: var(--font-size-sm);
-        color: var(--color-text-secondary);
-        margin: 0;
-        line-height: var(--line-height-normal);
-      }
-
-      .recent-activity-section {
-        margin-bottom: 3rem;
-      }
-
-      .activity-list {
-        background: var(--color-bg-primary);
-        border-radius: var(--radius-2xl);
-        overflow: hidden;
-        box-shadow: var(--shadow-lg);
-        border: 1px solid var(--color-border-secondary);
-      }
-
-      .activity-item {
-        display: flex;
-        align-items: center;
-        gap: var(--space-4);
-        padding: var(--space-4) var(--space-6);
-        border-bottom: 1px solid var(--color-border-secondary);
-        transition: all var(--transition-base);
-        position: relative;
-
-        &:last-child {
-          border-bottom: none;
-        }
-
-        &:hover {
-          background: var(--color-bg-secondary);
-          transform: translateX(4px);
-        }
-
-        &::before {
-          content: '';
-          position: absolute;
-          left: 0;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 3px;
-          height: 0;
-          background: linear-gradient(
-            180deg,
-            var(--color-primary-600),
-            var(--color-royal-600)
-          );
-          border-radius: var(--radius-full);
-          transition: height var(--transition-base);
-        }
-
-        &:hover::before {
-          height: 60%;
-        }
-      }
-
-      .activity-icon {
-        flex-shrink: 0;
-        width: var(--space-10);
-        height: var(--space-10);
-        border-radius: var(--radius-lg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: var(--shadow-sm);
-        transition: all var(--transition-base);
-
-        &.activity-job-created {
-          background: linear-gradient(
-            135deg,
-            var(--color-primary-100),
-            var(--color-primary-50)
-          );
-          border: 1px solid var(--color-primary-200);
-          color: var(--color-primary-700);
-        }
-
-        &.activity-resume-uploaded {
-          background: linear-gradient(
-            135deg,
-            var(--color-success-100),
-            var(--color-success-50)
-          );
-          border: 1px solid var(--color-success-200);
-          color: var(--color-success-700);
-        }
-
-        &.activity-report-generated {
-          background: linear-gradient(
-            135deg,
-            var(--color-royal-100),
-            var(--color-royal-50)
-          );
-          border: 1px solid var(--color-royal-200);
-          color: var(--color-royal-700);
-        }
-
-        &.activity-match-found {
-          background: linear-gradient(
-            135deg,
-            var(--color-warning-100),
-            var(--color-warning-50)
-          );
-          border: 1px solid var(--color-warning-200);
-          color: var(--color-warning-700);
-        }
-
-        .activity-item:hover & {
-          transform: scale(1.1);
-          box-shadow: var(--shadow-md);
-        }
-      }
-
-      .activity-content {
-        flex: 1;
-      }
-
-      .activity-title {
-        font-family: var(--font-family-fantasy-heading);
-        font-weight: var(--font-weight-fantasy-large);
-        color: var(--color-text-fantasy);
-        margin-bottom: var(--space-1);
-        font-size: var(--font-size-base);
-        line-height: var(--line-height-tight);
-      }
-
-      .activity-description {
-        font-family: var(--font-family-body);
-        font-size: var(--font-size-sm);
-        color: var(--color-text-secondary);
-        margin-bottom: var(--space-1);
-        line-height: var(--line-height-normal);
-      }
-
-      .activity-timestamp {
-        font-family: var(--font-family-body);
-        font-size: var(--font-size-xs);
-        color: var(--color-text-tertiary);
-        font-weight: var(--font-weight-medium);
-      }
-
-      .activity-status {
-        flex-shrink: 0;
-        padding: var(--space-1) var(--space-3);
-        border-radius: var(--radius-xl);
-        font-family: var(--font-family-body);
-        font-size: var(--font-size-xs);
-        font-weight: var(--font-weight-semibold);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        border: 1px solid transparent;
-        transition: all var(--transition-base);
-
-        &.status-processing {
-          background: linear-gradient(
-            135deg,
-            var(--color-warning-50),
-            var(--color-ember-50)
-          );
-          color: var(--color-warning-800);
-          border-color: var(--color-warning-200);
-          box-shadow: var(--shadow-xs);
-
-          &::before {
-            content: '⚡';
-            margin-right: var(--space-1);
-          }
-        }
-
-        &.status-completed {
-          background: linear-gradient(
-            135deg,
-            var(--color-success-50),
-            var(--color-emerald-50)
-          );
-          color: var(--color-success-800);
-          border-color: var(--color-success-200);
-          box-shadow: var(--shadow-xs);
-
-          &::before {
-            content: '✓';
-            margin-right: var(--space-1);
-          }
-        }
-
-        &.status-failed {
-          background: linear-gradient(
-            135deg,
-            var(--color-error-50),
-            var(--color-error-100)
-          );
-          color: var(--color-error-800);
-          border-color: var(--color-error-200);
-          box-shadow: var(--shadow-xs);
-
-          &::before {
-            content: '⚠';
-            margin-right: var(--space-1);
-          }
-        }
-      }
-
-      .activity-empty {
-        padding: 3rem;
-        text-align: center;
-      }
-
-      /* Responsive design */
-      @media (max-width: 768px) {
-        .welcome-title {
-          font-size: 2rem;
-        }
-
-        .welcome-subtitle {
-          font-size: 1rem;
-        }
-
-        .stats-grid {
-          grid-template-columns: 1fr;
-          gap: 1rem;
-        }
-
-        .actions-grid {
-          grid-template-columns: 1fr;
-          gap: 1rem;
-        }
-
-        .activity-item {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 0.75rem;
-        }
-      }
-    `,
-  ],
+  styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent implements OnInit {
   stats$!: Observable<DashboardStats>;

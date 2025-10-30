@@ -10,8 +10,8 @@ module.exports = {
   testEnvironment: 'node',
   testTimeout: 30000,
   
-  // Force single-threaded execution to prevent handle conflicts
-  maxWorkers: 1,
+  // Allow configurable parallelism (default to full core usage unless overridden)
+  maxWorkers: process.env.JEST_MAX_WORKERS || '100%',
   
   // Clean up between tests
   clearMocks: true,

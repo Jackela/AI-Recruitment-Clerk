@@ -1,93 +1,337 @@
 <div class="jobs-list-container">
-  <!-- Header -->
-  <div class="page-header">
-    <div class="d-flex justify-content-between align-items-center">
-      <h2 class="page-title">岗位管理</h2>
+  <!-- Fantasy Header Section -->
+  <header class="page-header" role="banner">
+    <div class="header-content">
+      <div class="header-text">
+        <h1 id="page-title" class="page-title">岗位管理</h1>
+        <p class="page-subtitle" role="doc-subtitle">管理您的招聘职位和候选人</p>
+      </div>
       <div class="header-actions">
         <button
           type="button"
-          class="btn btn-secondary mr-2"
+          class="btn-refresh"
           (click)="onRefresh()"
           [disabled]="loading$ | async"
+          [attr.aria-label]="'刷新职位列表'"
         >
-          <span *ngIf="loading$ | async" class="spinner"></span>
-          刷新
+          <svg
+            *ngIf="!(loading$ | async)"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path>
+            <path d="M21 3v5h-5"></path>
+          </svg>
+          <span *ngIf="loading$ | async" class="spinner" aria-hidden="true"></span>
+          <span>刷新</span>
         </button>
-        <a routerLink="/jobs/create" class="btn btn-primary">创建新岗位</a>
+        <a routerLink="/jobs/create" class="btn-primary" [attr.aria-label]="'创建新岗位'">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="16"></line>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+          <span>创建新岗位</span>
+        </a>
       </div>
     </div>
+  </header>
+
+  <!-- Statistics Panel -->
+  <section class="stats-section" aria-labelledby="stats-heading" *ngIf="jobsStatistics$ | async as stats">
+    <h2 id="stats-heading" class="sr-only">职位统计</h2>
+    <div class="stats-grid" role="group" aria-label="职位统计卡片">
+      <arc-dashboard-card
+        title="总职位数"
+        [value]="stats.totalJobs.toString()"
+        subtitle="所有职位"
+        icon="jobs"
+        variant="primary"
+        [trend]="{ type: 'up', value: '+12%' }"
+        role="article"
+        [attr.aria-label]="'总职位数: ' + stats.totalJobs"
+      ></arc-dashboard-card>
+
+      <arc-dashboard-card
+        title="活跃职位"
+        [value]="stats.activeJobs.toString()"
+        subtitle="正在招聘"
+        icon="resumes"
+        variant="success"
+        [trend]="{ type: 'up', value: '+8%' }"
+        role="article"
+        [attr.aria-label]="'活跃职位: ' + stats.activeJobs"
+      ></arc-dashboard-card>
+
+      <arc-dashboard-card
+        title="候选人总数"
+        [value]="stats.totalApplicants.toString()"
+        subtitle="所有简历"
+        icon="matches"
+        variant="info"
+        [trend]="{ type: 'up', value: '+23%' }"
+        role="article"
+        [attr.aria-label]="'候选人总数: ' + stats.totalApplicants"
+      ></arc-dashboard-card>
+
+      <arc-dashboard-card
+        title="平均招聘周期"
+        [value]="stats.avgTimeToHire + '天'"
+        subtitle="招聘效率"
+        icon="reports"
+        variant="warning"
+        [trend]="{ type: 'down', value: '-3天' }"
+        role="article"
+        [attr.aria-label]="'平均招聘周期: ' + stats.avgTimeToHire + '天'"
+      ></arc-dashboard-card>
+    </div>
+  </section>
+
+  <!-- Error Banner -->
+  <div
+    *ngIf="error$ | async as error"
+    class="error-banner"
+    aria-live="assertive"
+  >
+    <div class="alert-danger" role="alert">
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span class="error-message">{{ error }}</span>
+    </div>
+    <button (click)="onRefresh()" class="error-retry" [attr.aria-label]="'重试'">
+      重试
+    </button>
   </div>
 
-  <!-- Error Message -->
-  <div *ngIf="error$ | async as error" class="alert alert-danger mb-3">
-    {{ error }}
+  <!-- Loading State with Skeletons -->
+  <div *ngIf="loading$ | async" class="loading-state" role="status" aria-live="polite">
+    <div class="skeleton-grid">
+      <div class="skeleton-card" *ngFor="let item of [1, 2, 3, 4, 5, 6]">
+        <div class="skeleton-header">
+          <div class="skeleton-title"></div>
+          <div class="skeleton-badge"></div>
+        </div>
+        <div class="skeleton-content">
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line short"></div>
+        </div>
+        <div class="skeleton-footer">
+          <div class="skeleton-button"></div>
+          <div class="skeleton-button"></div>
+        </div>
+      </div>
+    </div>
+    <p class="text-center" aria-hidden="true">加载中</p>
+    <span class="sr-only">正在加载职位列表...</span>
   </div>
 
-  <!-- Loading State -->
-  <div *ngIf="loading$ | async" class="text-center">
-    <div class="spinner"></div>
-    加载中...
-  </div>
-
-  <!-- Jobs List -->
-  <div *ngIf="(loading$ | async) === false" class="jobs-grid">
-    <div
-      *ngFor="let job of jobs$ | async; trackBy: trackByJobId"
-      class="job-card card"
-    >
-      <div class="card-body">
-        <div class="job-header">
-          <h3 class="job-title">{{ job.title }}</h3>
+  <!-- Jobs Bento Grid -->
+  <section
+    *ngIf="(loading$ | async) === false"
+    class="jobs-section"
+    aria-labelledby="jobs-heading"
+  >
+    <h2 id="jobs-heading" class="sr-only">职位列表</h2>
+    <div class="jobs-bento-grid jobs-grid" role="grid" aria-label="职位卡片网格">
+      <div
+        *ngFor="let job of jobs$ | async; trackBy: trackByJobId"
+        class="job-bento-card job-card"
+        [class.processing]="isJobProcessing(job)"
+        role="gridcell"
+        [attr.aria-label]="job.title + ', ' + job.department"
+        tabindex="0"
+      >
+        <!-- Card Header with Icon and Status -->
+        <div class="card-header">
+          <div class="card-icon" aria-hidden="true">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+          </div>
           <span
-            class="job-status"
-            [class.status-processing]="job.status === 'processing'"
-            [class.status-completed]="job.status === 'completed'"
+            class="status-badge job-status"
+            [class.badge-processing]="job.status === 'processing'"
+            [class.badge-completed]="job.status === 'completed'"
+            [class.badge-active]="job.status === 'active'"
+            [attr.aria-label]="'状态: ' + getStatusText(job.status)"
           >
-            {{ job.status === 'processing' ? '处理中' : '已完成' }}
+            {{ getStatusText(job.status) }}
           </span>
         </div>
 
-        <div class="job-meta">
-          <span class="resume-count">
-            <strong>{{ job.resumeCount }}</strong> 份简历
-          </span>
-          <span class="created-date">
-            {{ job.createdAt | date: 'yyyy-MM-dd HH:mm' }}
-          </span>
+        <!-- Card Content -->
+        <div class="card-content">
+          <h3 class="job-title">{{ job.title }}</h3>
+          <p class="job-department">{{ job.department || '未分类部门' }}</p>
+
+          <div class="job-meta">
+            <div class="meta-item resume-count" [attr.aria-label]="'简历数量: ' + job.resumeCount">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                ></path>
+                <polyline points="14,2 14,8 20,8"></polyline>
+              </svg>
+              <span><strong>{{ job.resumeCount }}</strong> 份简历</span>
+            </div>
+            <div class="meta-item" [attr.aria-label]="'创建时间: ' + (job.createdAt | date: 'yyyy-MM-dd')">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12,6 12,12 16,14"></polyline>
+              </svg>
+              <span>{{ job.createdAt | date: 'yyyy-MM-dd' }}</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar for Processing Jobs -->
+          <div
+            *ngIf="isJobProcessing(job) && (jobsWithProgress$ | async) as jobsWithProgress"
+            class="progress-container"
+          >
+            <ng-container *ngFor="let jobWithProgress of jobsWithProgress">
+              <div *ngIf="jobWithProgress.id === job.id" class="progress-wrapper">
+                <div class="progress-bar">
+                  <div
+                    class="progress-fill"
+                    [style.width.%]="getJobProgress(jobWithProgress) || 0"
+                    [attr.aria-valuenow]="getJobProgress(jobWithProgress)"
+                    [attr.aria-valuemin]="0"
+                    [attr.aria-valuemax]="100"
+                    role="progressbar"
+                  ></div>
+                </div>
+                <span class="progress-text">{{ getCurrentStep(jobWithProgress) || '处理中...' }}</span>
+              </div>
+            </ng-container>
+          </div>
         </div>
 
-        <!-- Actions according to PRD requirements -->
-        <div class="job-actions mt-3">
-          <!-- FR-2: Resume Processing - Upload resumes for this job -->
+        <!-- Card Actions -->
+        <div class="card-actions">
           <button
-            class="btn btn-outline-primary btn-sm mr-2"
-            title="为此岗位上传简历"
+            class="action-btn primary"
+            [routerLink]="['/jobs', job.id]"
+            [attr.aria-label]="'查看 ' + job.title + ' 详情'"
           >
-            上传简历
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            <span>查看详情</span>
           </button>
-
-          <!-- FR-3: Reporting & Display - View analysis results for this job -->
           <button
-            class="btn btn-outline-secondary btn-sm"
+            class="action-btn secondary"
             [routerLink]="['/reports']"
             [queryParams]="{ jobId: job.id }"
-            title="查看此岗位的分析报告"
+            [attr.aria-label]="'查看 ' + job.title + ' 报告'"
           >
-            查看报告
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            <span>查看报告</span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Empty State -->
-    <div *ngIf="(jobs$ | async)?.length === 0" class="empty-state card">
-      <div class="card-body text-center">
-        <h3>暂无岗位</h3>
-        <p class="text-muted">
-          您还没有创建任何岗位。点击上方按钮创建您的第一个岗位吧！
-        </p>
-        <a routerLink="/jobs/create" class="btn btn-primary">创建新岗位</a>
+    <!-- Beautiful Empty State -->
+    <div
+      *ngIf="(jobs$ | async)?.length === 0"
+      class="empty-state"
+      role="status"
+      aria-live="polite"
+    >
+      <div class="empty-illustration" aria-hidden="true">
+        <svg
+          width="120"
+          height="120"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+        </svg>
       </div>
+      <h3 class="empty-title">暂无岗位</h3>
+      <p class="empty-description">
+        您还没有创建任何职位。<br />
+        点击下方按钮创建您的第一个职位吧！
+      </p>
+      <a routerLink="/jobs/create" class="btn-primary" [attr.aria-label]="'创建第一个职位'">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="16"></line>
+          <line x1="8" y1="12" x2="16" y2="12"></line>
+        </svg>
+        <span>创建新岗位</span>
+      </a>
     </div>
-  </div>
+  </section>
 </div>

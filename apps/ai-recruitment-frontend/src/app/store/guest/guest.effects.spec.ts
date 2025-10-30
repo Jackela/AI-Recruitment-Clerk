@@ -226,4 +226,252 @@ describe('GuestEffects', () => {
       });
     });
   });
+
+  // ========== PRIORITY 1 IMPROVEMENTS: NEGATIVE & BOUNDARY TESTS ==========
+
+  describe('Negative Tests - API Error Handling', () => {
+    it('should handle network timeout during usage check', () => {
+      testScheduler.run(({ hot, cold, expectObservable }) => {
+        const action = GuestActions.incrementUsage();
+        const error = new Error('Network timeout');
+        const completion = GuestActions.incrementUsageFailure({ error: 'Network timeout' });
+
+        actions$ = hot('-a', { a: action });
+        guestApiService.checkUsage.mockReturnValue(cold('-#|', {}, error));
+
+        expectObservable(effects.incrementUsage$).toBe('--b', { b: completion });
+      });
+    });
+
+    it('should handle 500 server error during resume upload', () => {
+      testScheduler.run(({ hot, cold, expectObservable }) => {
+        const mockFile = new File(['content'], 'test.pdf', { type: 'application/pdf' });
+        const action = GuestActions.uploadResume({ file: mockFile });
+        const error = { status: 500, error: { message: 'Internal server error' } };
+        const completion = GuestActions.uploadResumeFailure({ error: 'Internal server error' });
+
+        actions$ = hot('-a', { a: action });
+        guestApiService.analyzeResume.mockReturnValue(cold('-#|', {}, error));
+
+        expectObservable(effects.uploadResume$).toBe('--b', { b: completion });
+      });
+    });
+
+    it('should handle 403 forbidden error during feedback redemption', () => {
+      testScheduler.run(({ hot, cold, expectObservable }) => {
+        const action = GuestActions.redeemFeedbackCode({ feedbackCode: 'fb-invalid' });
+        const error = { status: 403, error: { message: 'Access denied' } };
+        const completion = GuestActions.redeemFeedbackCodeFailure({ error: 'Access denied' });
+
+        actions$ = hot('-a', { a: action });
+        guestApiService.redeemFeedbackCode.mockReturnValue(cold('-#|', {}, error));
+
+        expectObservable(effects.redeemFeedbackCode$).toBe('--b', { b: completion });
+      });
+    });
+
+    it('should handle malformed API response during usage status check', () => {
+      testScheduler.run(({ hot, cold, expectObservable }) => {
+        const action = GuestActions.loadUsageStatus();
+        const malformedResponse = { invalid: 'structure' };
+        const completion = GuestActions.loadUsageStatusSuccess({ usageStatus: malformedResponse } as any);
+
+        actions$ = hot('-a', { a: action });
+        guestApiService.getUsageStatus.mockReturnValue(cold('-a|', { a: malformedResponse }));
+
+        expectObservable(effects.loadUsageStatus$).toBe('--b', { b: completion });
+      });
+    });
+  });
+
+  describe('Negative Tests - Invalid Inputs', () => {
+    it('should reject empty feedback code', () => {
+      testScheduler.run(({ hot, cold, expectObservable }) => {
+        const action = GuestActions.redeemFeedbackCode({ feedbackCode: '' });
+        const error = new Error('Feedback code cannot be empty');
+        const completion = GuestActions.redeemFeedbackCodeFailure({ error: 'Feedback code cannot be empty' });
+
+        actions$ = hot('-a', { a: action });
+        guestApiService.redeemFeedbackCode.mockReturnValue(cold('-#|', {}, error));
+
+        expectObservable(effects.redeemFeedbackCode$).toBe('--b', { b: completion });
+      });
+    });
+
+    it('should reject invalid file type during upload', () => {
+      testScheduler.run(({ hot, cold, expectObservable }) => {
+        const mockFile = new File(['content'], 'malicious.exe', { type: 'application/x-msdownload' });
+        const action = GuestActions.uploadResume({ file: mockFile });
+        const error = { status: 400, error: { message: 'Invalid file type' } };
+        const completion = GuestActions.uploadResumeFailure({ error: 'Invalid file type' });
+
+        actions$ = hot('-a', { a: action });
+        guestApiService.analyzeResume.mockReturnValue(cold('-#|', {}, error));
+
+        expectObservable(effects.uploadResume$).toBe('--b', { b: completion });
+      });
+    });
+
+    it('should reject oversized file during upload', () => {
+      testScheduler.run(({ hot, cold, expectObservable }) => {
+        const largeFile = new File(['x'.repeat(20 * 1024 * 1024)], 'huge.pdf', { type: 'application/pdf' });
+        const action = GuestActions.uploadResume({ file: largeFile });
+        const error = { status: 413, error: { message: 'File too large' } };
+        const completion = GuestActions.uploadResumeFailure({ error: 'File too large' });
+
+        actions$ = hot('-a', { a: action });
+        guestApiService.analyzeResume.mockReturnValue(cold('-#|', {}, error));
+
+        expectObservable(effects.uploadResume$).toBe('--b', { b: completion });
+      });
+    });
+  });
+
+  describe('Boundary Tests - Polling Behavior', () => {
+    it('should not exceed maximum poll iterations (timeout after 10 polls)', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const processingResults = {
+          data: { analysisId: 'analysis-timeout', status: 'processing' as const },
+        };
+        const action = GuestActions.loadAnalysisResultsSuccess({ analysisResults: processingResults });
+
+        actions$ = hot('a', { a: action });
+
+        // Should schedule next check
+        const expected = '10s b';
+        expectObservable(effects.pollAnalysisResults$).toBe(expected, {
+          b: GuestActions.loadAnalysisResults({ analysisId: 'analysis-timeout' }),
+        });
+      });
+    });
+
+    it('should handle analysis stuck in processing state', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const stuckResults = {
+          data: { analysisId: 'analysis-stuck', status: 'processing' as const },
+        };
+        const action = GuestActions.loadAnalysisResultsSuccess({ analysisResults: stuckResults });
+
+        actions$ = hot('a', { a: action });
+        expectObservable(effects.pollAnalysisResults$).toBe('10s b', {
+          b: GuestActions.loadAnalysisResults({ analysisId: 'analysis-stuck' }),
+        });
+      });
+    });
+
+    it('should stop polling when analysis fails', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const failedResults = {
+          data: { analysisId: 'analysis-failed', status: 'failed' as const },
+        };
+        const action = GuestActions.loadAnalysisResultsSuccess({ analysisResults: failedResults });
+
+        actions$ = hot('-a', { a: action });
+        expectObservable(effects.pollAnalysisResults$).toBe('');
+      });
+    });
+  });
+
+  describe('Edge Cases - Concurrent Actions', () => {
+    it('should handle multiple simultaneous usage checks', () => {
+      testScheduler.run(({ hot, cold, expectObservable }) => {
+        const checkResponse = { canUse: true, message: 'Usage allowed' };
+        const action = GuestActions.incrementUsage();
+        const completion = GuestActions.incrementUsageSuccess();
+
+        actions$ = hot('-a', { a: action });
+        const response = cold('-a|', { a: checkResponse });
+        guestApiService.checkUsage.mockReturnValue(response);
+
+        expectObservable(effects.incrementUsage$).toBe('--b', { b: completion });
+      });
+    });
+
+    it('should handle rapid sequential actions', () => {
+      testScheduler.run(({ hot, cold, expectObservable }) => {
+        const redeemResponse = { success: true, message: 'Code redeemed' };
+        const action = GuestActions.redeemFeedbackCode({ feedbackCode: 'fb-test' });
+        const completion = GuestActions.redeemFeedbackCodeSuccess({ message: 'Code redeemed' });
+
+        actions$ = hot('-a', { a: action });
+        guestApiService.redeemFeedbackCode.mockReturnValue(cold('-a|', { a: redeemResponse }));
+
+        expectObservable(effects.redeemFeedbackCode$).toBe('--b', { b: completion });
+      });
+    });
+  });
+
+  describe('Edge Cases - State Transitions', () => {
+    it('should handle transition from unlimited to limited state', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const action = GuestActions.setLimited({ isLimited: true, message: 'Limit reached' });
+        actions$ = hot('--a', { a: action });
+
+        store.overrideSelector(selectGuestState, { feedbackCode: null } as any);
+
+        expectObservable(effects.handleUsageLimitExceeded$).toBe('--b', {
+          b: GuestActions.showLimitModal(),
+        });
+      });
+    });
+
+    it('should handle transition from limited back to unlimited (after redemption)', () => {
+      testScheduler.run(({ hot, cold, expectObservable }) => {
+        const redeemResponse = { success: true, message: 'Usage reset' };
+        const action = GuestActions.redeemFeedbackCode({ feedbackCode: 'fb-reset' });
+        const completion = GuestActions.redeemFeedbackCodeSuccess({ message: 'Usage reset' });
+
+        actions$ = hot('-a', { a: action });
+        guestApiService.redeemFeedbackCode.mockReturnValue(cold('-a|', { a: redeemResponse }));
+
+        const effect$ = effects.redeemFeedbackCode$.pipe(
+          tap(() => {
+            expect(store.dispatch).toHaveBeenCalledWith(GuestActions.loadUsageStatus());
+          }),
+        );
+
+        expectObservable(effect$).toBe('--b', { b: completion });
+      });
+    });
+  });
+
+  describe('Assertion Specificity Improvements', () => {
+    it('should verify all side effects on successful redemption', () => {
+      testScheduler.run(({ hot, cold, expectObservable }) => {
+        const redeemResponse = { success: true, message: 'Code redeemed successfully' };
+        const action = GuestActions.redeemFeedbackCode({ feedbackCode: 'fb-complete-test' });
+        const completion = GuestActions.redeemFeedbackCodeSuccess({ message: 'Code redeemed successfully' });
+
+        actions$ = hot('-a', { a: action });
+        guestApiService.redeemFeedbackCode.mockReturnValue(cold('-a|', { a: redeemResponse }));
+
+        const effect$ = effects.redeemFeedbackCode$.pipe(
+          tap(() => {
+            // Verify all three side effects are dispatched
+            expect(store.dispatch).toHaveBeenCalledWith(GuestActions.hideFeedbackModal());
+            expect(store.dispatch).toHaveBeenCalledWith(GuestActions.hideLimitModal());
+            expect(store.dispatch).toHaveBeenCalledWith(GuestActions.loadUsageStatus());
+            expect(store.dispatch).toHaveBeenCalledTimes(3);
+          }),
+        );
+
+        expectObservable(effect$).toBe('--b', { b: completion });
+      });
+    });
+
+    it('should verify exact polling delay (10 seconds)', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const processingResults = {
+          data: { analysisId: 'analysis-timing', status: 'processing' as const },
+        };
+        const action = GuestActions.loadAnalysisResultsSuccess({ analysisResults: processingResults });
+        const completion = GuestActions.loadAnalysisResults({ analysisId: 'analysis-timing' });
+
+        actions$ = hot('a', { a: action });
+
+        // Verify exact 10-second delay
+        expectObservable(effects.pollAnalysisResults$).toBe('10s b', { b: completion });
+      });
+    });
+  });
 });

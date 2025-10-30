@@ -1,4 +1,3 @@
-import { Test } from '@nestjs/testing';
 import { JdEventsController } from '../app/jd-events.controller';
 import { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
 import { LlmService } from '../extraction/llm.service';
@@ -39,15 +38,15 @@ describe('JD Extractor NATS integration', () => {
         .mockResolvedValue({ summary: 'structured-result' }),
     };
 
-    const moduleRef = await Test.createTestingModule({
-      controllers: [JdEventsController],
-      providers: [
-        { provide: JdExtractorNatsService, useValue: natsStub },
-        { provide: LlmService, useValue: llmServiceMock },
-      ],
-    }).compile();
-
-    controller = moduleRef.get(JdEventsController);
+    controller = new JdEventsController(
+      natsStub as unknown as JdExtractorNatsService,
+      llmServiceMock as unknown as LlmService,
+    );
+    (controller as any).logger = {
+      log: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+    };
   });
 
   afterEach(() => {

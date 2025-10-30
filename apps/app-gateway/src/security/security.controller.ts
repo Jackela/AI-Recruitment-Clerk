@@ -88,7 +88,7 @@ export class SecurityController {
     @Query('endDate') endDate?: string,
   ): Promise<{ events: SecurityEvent[]; total: number; metadata: any }> {
     // Check if user has admin role
-    if (req.user.role !== 'admin') {
+    if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
     }
 
@@ -154,7 +154,7 @@ export class SecurityController {
     @Query('period') period: 'hour' | 'day' | 'week' = 'day',
   ): Promise<SecurityMetrics & { metadata: any }> {
     // Check if user has admin role
-    if (req.user.role !== 'admin') {
+    if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
     }
 
@@ -203,7 +203,7 @@ export class SecurityController {
     @Body() body: { resolution: string },
   ): Promise<{ success: boolean; message: string }> {
     // Check if user has admin role
-    if (req.user.role !== 'admin') {
+    if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
     }
 
@@ -263,7 +263,7 @@ export class SecurityController {
     @Query('period') period: 'hour' | 'day' | 'week' = 'day',
   ) {
     // Check if user has admin role
-    if (req.user.role !== 'admin') {
+    if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
     }
 
@@ -304,7 +304,7 @@ export class SecurityController {
   @ApiResponse({ status: 403, description: 'Admin access required' })
   async getLockedIPs(@Request() req: AuthenticatedRequest) {
     // Check if user has admin role
-    if (req.user.role !== 'admin') {
+    if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
     }
 
@@ -349,7 +349,7 @@ export class SecurityController {
     @Body() body: { ip: string; reason?: string },
   ): Promise<{ success: boolean; message: string }> {
     // Check if user has admin role
-    if (req.user.role !== 'admin') {
+    if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
     }
 
@@ -458,7 +458,7 @@ export class SecurityController {
   @ApiResponse({ status: 403, description: 'Admin access required' })
   async testSecurityAlert(@Request() req: AuthenticatedRequest) {
     // Check if user has admin role
-    if (req.user.role !== 'admin') {
+    if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
     }
 
@@ -495,5 +495,10 @@ export class SecurityController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  private isAdmin(user: any): boolean {
+    const role = String(user?.rawRole ?? user?.role ?? '').toLowerCase();
+    return role === 'admin';
   }
 }

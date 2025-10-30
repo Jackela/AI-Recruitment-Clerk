@@ -54,6 +54,12 @@ describe('ScoringEventsController NATS integration', () => {
     }).compile();
 
     controller = moduleRef.get(ScoringEventsController);
+    (controller as any).logger = {
+      log: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+    };
   });
 
   afterEach(() => {

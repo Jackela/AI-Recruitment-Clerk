@@ -38,6 +38,15 @@ export class RedisTokenBlacklistService {
   }
 
   /**
+   * Backwards compatible alias for checking if a token is blacklisted.
+   * @param token - The token.
+   * @returns A promise that resolves to boolean value.
+   */
+  async isBlacklisted(token: string): Promise<boolean> {
+    return this.isTokenBlacklisted(token);
+  }
+
+  /**
    * Performs the is user blacklisted operation.
    * @param userId - The user id.
    * @returns A promise that resolves to boolean value.
@@ -73,6 +82,23 @@ export class RedisTokenBlacklistService {
     this.logger.debug(
       `Token blacklisted for user ${userId}, reason: ${reason}`,
     );
+  }
+
+  /**
+   * Backwards compatible alias for blacklisting a token.
+   * @param token - The token.
+   * @param userId - The user id.
+   * @param exp - The exp.
+   * @param reason - The reason.
+   * @returns A promise that resolves when the operation completes.
+   */
+  async addToken(
+    token: string,
+    userId: string,
+    exp: number,
+    reason: string,
+  ): Promise<void> {
+    await this.blacklistToken(token, userId, exp, reason);
   }
 
   /**

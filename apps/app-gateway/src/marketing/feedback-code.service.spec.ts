@@ -195,4 +195,255 @@ describe('FeedbackCodeService (mocked model)', () => {
       );
     });
   });
+
+  // ========== PRIORITY 1 IMPROVEMENTS: NEGATIVE & BOUNDARY TESTS ==========
+
+  describe('Boundary Tests - Code Generation', () => {
+    it('should handle exactly maximum code length', async () => {
+      const maxLengthCode = 'FB' + 'A'.repeat(30);
+      const result = await service.recordFeedbackCode({ code: maxLengthCode });
+
+      expect(result.code).toBe(maxLengthCode);
+      expect(store.has(maxLengthCode)).toBe(true);
+    });
+
+    it('should handle minimum valid code (FB + 1 char)', async () => {
+      const minCode = 'FB1';
+      const result = await service.recordFeedbackCode({ code: minCode });
+
+      expect(result.code).toBe(minCode);
+      expect(store.has(minCode)).toBe(true);
+    });
+  });
+
+  describe('Negative Tests - Invalid Code Operations', () => {
+    it('should handle empty feedback code gracefully', async () => {
+      const result = await service.recordFeedbackCode({ code: '' });
+      expect(result.code).toBe('');
+    });
+
+    it('should handle code with special characters', async () => {
+      const specialCode = 'FB<script>alert("xss")</script>';
+      const result = await service.recordFeedbackCode({ code: specialCode });
+      expect(result.code).toBe(specialCode);
+    });
+
+    it('should reject marking non-existent code as used', async () => {
+      await expect(
+        service.markFeedbackCodeAsUsed({
+          code: 'FBNONEXISTENT',
+          alipayAccount: 'user@example.com',
+        }),
+      ).rejects.toThrow();
+    });
+
+    it('should accept any alipay account format', async () => {
+      await service.recordFeedbackCode({ code: 'FBINVALID' });
+
+      const result = await service.markFeedbackCodeAsUsed({
+        code: 'FBINVALID',
+        alipayAccount: 'any-account-format',
+      });
+
+      expect(result.alipayAccount).toBe('any-account-format');
+    });
+  });
+
+  describe('Negative Tests - Database Failures', () => {
+    it('should handle database failure during code creation', async () => {
+      model.prototype.save.mockRejectedValueOnce(
+        new Error('Database connection lost'),
+      );
+
+      await expect(
+        service.recordFeedbackCode({ code: 'FBFAIL' }),
+      ).rejects.toThrow('Database connection lost');
+    });
+
+    it('should handle database failure during update', async () => {
+      await service.recordFeedbackCode({ code: 'FBUPDATE' });
+      model.findOneAndUpdate.mockRejectedValueOnce(
+        new Error('Update operation failed'),
+      );
+
+      await expect(
+        service.markFeedbackCodeAsUsed({
+          code: 'FBUPDATE',
+          alipayAccount: 'user@example.com',
+        }),
+      ).rejects.toThrow('Update operation failed');
+    });
+
+    it('should handle database failure during cleanup', async () => {
+      model.deleteMany.mockRejectedValueOnce(
+        new Error('Cleanup operation failed'),
+      );
+
+      await expect(service.cleanupExpiredCodes(30)).rejects.toThrow(
+        'Cleanup operation failed',
+      );
+    });
+  });
+
+  describe('Edge Cases - Quality Score Calculation', () => {
+    it('should calculate quality score with complete questionnaire', async () => {
+      await service.recordFeedbackCode({ code: 'FBQUALITY' });
+      const result = await service.markFeedbackCodeAsUsed({
+        code: 'FBQUALITY',
+        alipayAccount: 'user@example.com',
+        questionnaireData: {
+          improvements: '建议增加批量功能和API接口',
+          usability: 5,
+          satisfaction: 5,
+          features: '简历解析、职位匹配、数据分析',
+        },
+      });
+
+      expect(result.qualityScore).toBeGreaterThanOrEqual(3);
+      expect(result.qualityScore).toBeLessThanOrEqual(5);
+    });
+
+    it('should handle minimal questionnaire data', async () => {
+      await service.recordFeedbackCode({ code: 'FBMINIMAL' });
+      const result = await service.markFeedbackCodeAsUsed({
+        code: 'FBMINIMAL',
+        alipayAccount: 'user@example.com',
+        questionnaireData: { improvements: '无' },
+      });
+
+      expect(result.qualityScore).toBeGreaterThanOrEqual(1);
+      expect(result.qualityScore).toBeLessThanOrEqual(3);
+    });
+
+    it('should handle empty questionnaire data', async () => {
+      await service.recordFeedbackCode({ code: 'FBEMPTY' });
+      const result = await service.markFeedbackCodeAsUsed({
+        code: 'FBEMPTY',
+        alipayAccount: 'user@example.com',
+        questionnaireData: {},
+      });
+
+      expect(result.qualityScore).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('Edge Cases - Concurrent Operations', () => {
+    it('should handle concurrent code redemptions', async () => {
+      await service.recordFeedbackCode({ code: 'FB0001' });
+      await service.recordFeedbackCode({ code: 'FB0002' });
+      await service.recordFeedbackCode({ code: 'FB0003' });
+
+      const promises = [
+        service.markFeedbackCodeAsUsed({
+          code: 'FB0001',
+          alipayAccount: 'user1@example.com',
+        }),
+        service.markFeedbackCodeAsUsed({
+          code: 'FB0002',
+          alipayAccount: 'user2@example.com',
+        }),
+        service.markFeedbackCodeAsUsed({
+          code: 'FB0003',
+          alipayAccount: 'user3@example.com',
+        }),
+      ];
+
+      const results = await Promise.all(promises);
+
+      results.forEach((result) => {
+        expect(result.isUsed).toBe(true);
+        expect(result.alipayAccount).toBeDefined();
+      });
+    });
+
+    it('should handle race condition on duplicate code creation', async () => {
+      const promises = Array(3)
+        .fill(null)
+        .map(() => service.recordFeedbackCode({ code: 'FBRACE' }));
+
+      const results = await Promise.all(promises);
+
+      results.forEach((result) => {
+        expect(result.code).toBe('FBRACE');
+      });
+      // Mock allows multiple saves, real implementation would prevent duplicates
+      expect(model.prototype.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('Boundary Tests - Cleanup Thresholds', () => {
+    it('should cleanup codes at exactly expiration threshold', async () => {
+      const thirtyOneDaysAgo = new Date();
+      thirtyOneDaysAgo.setDate(thirtyOneDaysAgo.getDate() - 31);
+
+      const expiredEntry = {
+        _id: 'EXPIRED',
+        code: 'FBEXPIRED',
+        generatedAt: thirtyOneDaysAgo,
+        isUsed: false,
+        paymentStatus: 'pending' as const,
+        paymentAmount: 3,
+      };
+      store.set('FBEXPIRED', expiredEntry);
+
+      const deleted = await service.cleanupExpiredCodes(30);
+
+      expect(deleted).toBeGreaterThanOrEqual(1);
+      expect(store.has('FBEXPIRED')).toBe(false);
+    });
+
+    it('should not cleanup codes just before threshold (29 days)', async () => {
+      const twentyNineDaysAgo = new Date();
+      twentyNineDaysAgo.setDate(twentyNineDaysAgo.getDate() - 29);
+
+      const recentEntry = {
+        _id: 'RECENT',
+        code: 'FBRECENT',
+        generatedAt: twentyNineDaysAgo,
+        isUsed: false,
+        paymentStatus: 'pending' as const,
+        paymentAmount: 3,
+      };
+      store.set('FBRECENT', recentEntry);
+
+      await service.cleanupExpiredCodes(30);
+
+      expect(store.has('FBRECENT')).toBe(true);
+    });
+  });
+
+  describe('Assertion Specificity Improvements', () => {
+    it('should return complete feedback code structure', async () => {
+      const result = await service.recordFeedbackCode({
+        code: 'FBCOMPLETE',
+      });
+
+      expect(result.code).toBe('FBCOMPLETE');
+      expect(result.generatedAt).toBeInstanceOf(Date);
+      expect(result.isUsed).toBe(false);
+      expect(result.paymentStatus).toBe('pending');
+      expect(result.paymentAmount).toBeGreaterThanOrEqual(0);
+      expect(result.code.startsWith('FB')).toBe(true);
+    });
+
+    it('should update all required fields when marking as used', async () => {
+      await service.recordFeedbackCode({ code: 'FBFIELDS' });
+      const result = await service.markFeedbackCodeAsUsed({
+        code: 'FBFIELDS',
+        alipayAccount: 'complete@example.com',
+        questionnaireData: { rating: 5 },
+      });
+
+      expect(result).toMatchObject({
+        code: 'FBFIELDS',
+        isUsed: true,
+        alipayAccount: 'complete@example.com',
+        questionnaireData: expect.any(Object),
+        qualityScore: expect.any(Number),
+        usedAt: expect.any(Date),
+      });
+      expect(result.usedAt).toBeInstanceOf(Date);
+      expect(result.qualityScore).toBeGreaterThan(0);
+    });
+  });
 });

@@ -258,18 +258,15 @@ export class CacheService {
       return fallbackFn();
     }
 
-    if (!semanticText || semanticText.trim().length === 0) {
-      this.logger.debug('wrapSemantic invoked without semantic text; skipping cache.');
-      return fallbackFn();
-    }
+    const normalizedText = semanticText ?? '';
 
     let queryVector: number[] | null = null;
     try {
-      queryVector = await this.embeddingService.createEmbedding(semanticText);
+      queryVector = await this.embeddingService.createEmbedding(normalizedText);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.warn(`Embedding generation failed, bypassing semantic cache: ${message}`);
-      return fallbackFn();
+      throw error instanceof Error ? error : new Error(message);
     }
 
     if (!Array.isArray(queryVector) || queryVector.length === 0) {
@@ -291,8 +288,17 @@ export class CacheService {
         )
       : [];
 
-    for (const match of matches) {
-      const cached = await this.get<T>(match.cacheKey);
+    const relevantMatches = matches.filter(
+      (match) => match.similarity >= similarityThreshold,
+    );
+
+    for (const match of relevantMatches) {
+      let cached: T | null | undefined;
+      try {
+        cached = await this.cacheManager.get<T>(match.cacheKey);
+      } catch (error) {
+        throw error instanceof Error ? error : new Error(String(error));
+      }
       if (cached !== null && cached !== undefined) {
         if (cached && typeof cached === 'object') {
           (cached as Record<string, unknown>).semanticSimilarity =
@@ -312,13 +318,14 @@ export class CacheService {
       return result;
     }
 
-    const cacheKey = options.cacheKey ?? crypto.randomUUID();
+    const cacheKey = options.cacheKey ?? this.generateSemanticCacheKey(normalizedText);
 
     try {
-      await this.set(cacheKey, result, { ttl: options.ttl });
+      await this.cacheManager.set(cacheKey, result, options.ttl);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.warn(`Failed to persist semantic cache entry [${cacheKey}]: ${message}`);
+      throw error instanceof Error ? error : new Error(message);
     }
 
     try {
@@ -384,6 +391,11 @@ export class CacheService {
     const queryStr = JSON.stringify(orderedQuery);
     const hash = crypto.createHash('sha256').update(queryStr).digest('hex');
     return this.generateKey('db', 'jobs', 'findall', hash);
+  }
+
+  private generateSemanticCacheKey(text: string): string {
+    const hash = crypto.createHash('sha256').update(text).digest('hex');
+    return `semantic:${hash}`;
   }
 
   /**

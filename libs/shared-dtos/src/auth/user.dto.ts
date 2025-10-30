@@ -33,6 +33,10 @@ export class CreateUserDto {
   password!: string;
 
   @IsString()
+  @IsOptional()
+  username?: string;
+
+  @IsString()
   @IsNotEmpty()
   firstName!: string;
 

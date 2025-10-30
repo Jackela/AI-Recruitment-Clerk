@@ -83,6 +83,23 @@ export const selectJobsStatistics = createSelector(
     const active = jobs.filter((job) => job.status === 'active').length;
     const draft = jobs.filter((job) => job.status === 'draft').length;
     const closed = jobs.filter((job) => job.status === 'closed').length;
+    const processing = jobs.filter((job) => job.status === 'processing').length;
+    const totalApplicants = jobs.reduce(
+      (sum, job) => sum + (job.resumeCount || 0),
+      0,
+    );
+    const totalDaysSinceCreation = jobs.reduce((sum, job) => {
+      const createdAt = new Date(job.createdAt).getTime();
+      const now = Date.now();
+      return createdAt ? sum + Math.max(0, now - createdAt) : sum;
+    }, 0);
+    const avgTimeToHire =
+      total > 0
+        ? Math.max(
+            0,
+            Math.round(totalDaysSinceCreation / total / (1000 * 60 * 60 * 24)),
+          )
+        : 0;
 
     return {
       total,
@@ -90,6 +107,13 @@ export const selectJobsStatistics = createSelector(
       draft,
       closed,
       activePercentage: total > 0 ? Math.round((active / total) * 100) : 0,
+      totalJobs: total,
+      activeJobs: active,
+      draftJobs: draft,
+      closedJobs: closed,
+      processingJobs: processing,
+      totalApplicants,
+      avgTimeToHire,
     };
   },
 );

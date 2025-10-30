@@ -19,6 +19,19 @@ interface UserActivityResponse {
   };
 }
 
+type InternalUser = UserDto & {
+  password?: string;
+  lastActivity?: Date;
+};
+
+interface OrganizationUsersResponse {
+  users: UserDto[];
+  totalCount: number;
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 /**
  * Provides user management functionality.
  */
@@ -44,8 +57,9 @@ export class UserManagementService {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
     // Convert to UserDto (remove password)
-    const { password, ...userDto } = updatedUser;
-    return userDto as UserDto;
+    const { password, ...userDto } = updatedUser as InternalUser;
+    void password;
+    return userDto;
   }
 
   /**
@@ -128,7 +142,8 @@ export class UserManagementService {
       summary: {
         totalActivities: mockActivities.length,
         recentLogins: 1,
-        lastActivity: user.lastActivity || new Date(),
+        lastActivity:
+          (user as InternalUser).lastActivity || new Date(),
       },
     };
   }
@@ -145,8 +160,9 @@ export class UserManagementService {
     }
 
     // Convert to UserDto (remove password)
-    const { password, ...userDto } = user;
-    return userDto as UserDto;
+    const { password, ...userDto } = user as InternalUser;
+    void password;
+    return userDto;
   }
 
   /**
@@ -163,11 +179,13 @@ export class UserManagementService {
     return {
       userId,
       totalLogins: 1,
-      lastLoginDate: user.lastActivity || new Date(),
+      lastLoginDate:
+        (user as InternalUser).lastActivity || new Date(),
       totalActivities: 1,
       averageSessionDuration: 30,
       mostActiveHour: 14,
-      lastActivity: user.lastActivity || new Date(),
+      lastActivity:
+        (user as InternalUser).lastActivity || new Date(),
     };
   }
 
@@ -220,7 +238,7 @@ export class UserManagementService {
       role?: any;
       status?: UserStatus;
     },
-  ): Promise<{ users: UserDto[]; totalCount: number }> {
+  ): Promise<OrganizationUsersResponse> {
     let users = await this.userService.findByOrganizationId(organizationId);
 
     // Filter by status if provided
@@ -230,13 +248,21 @@ export class UserManagementService {
 
     // Convert to UserDto (remove passwords)
     const userDtos = users.map((user) => {
-      const { password, ...userDto } = user;
-      return userDto as UserDto;
+      const { password, ...userDto } = user as InternalUser;
+      void password;
+      return userDto;
     });
+
+    const totalCount = userDtos.length;
+    const pageSize = options?.limit ?? totalCount;
+    const page = options?.page ?? 1;
 
     return {
       users: userDtos,
-      totalCount: userDtos.length,
+      totalCount,
+      total: totalCount,
+      page,
+      pageSize,
     };
   }
 
@@ -255,7 +281,12 @@ export class UserManagementService {
     }
 
     // In real implementation, use bcrypt.compare(password, user.password)
-    return password === 'test-password' || user.password.includes('admin123');
+    const userWithSensitive = user as InternalUser;
+    return (
+      password === 'test-password' ||
+      userWithSensitive.password === password ||
+      userWithSensitive.password?.includes('admin123') === true
+    );
   }
 
   /**
@@ -280,8 +311,9 @@ export class UserManagementService {
     }
 
     // Convert to UserDto (remove password)
-    const { password, ...userDto } = updatedUser;
-    return userDto as UserDto;
+    const { password, ...userDto } = updatedUser as InternalUser;
+    void password;
+    return userDto;
   }
 
   /**

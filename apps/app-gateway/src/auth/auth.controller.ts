@@ -351,14 +351,26 @@ export class AuthController {
   @Get('users')
   async getUsers(@Request() req: AuthenticatedRequest): Promise<UserDto[]> {
     // HR Managers and Recruiters can only see users in their organization
+    const requesterRole = String(
+      (req.user as any)?.rawRole ?? req.user.role ?? '',
+    ).toLowerCase();
+
     const organizationId =
-      req.user.role === UserRole.ADMIN ? undefined : req.user.organizationId;
+      requesterRole === UserRole.ADMIN ? undefined : req.user.organizationId;
     const users = await this.userService.listUsers(organizationId);
 
     // Remove password field from response
-    return users.map(
-      ({ password, ...userWithoutPassword }) => userWithoutPassword as UserDto,
-    );
+    return users.map((user) => {
+      const { password: _password, ...userWithoutPassword } = user as any;
+
+      return {
+        ...userWithoutPassword,
+        role: String(
+          (userWithoutPassword as any)?.rawRole ??
+            userWithoutPassword.role ?? '',
+        ).toLowerCase(),
+      } as UserDto;
+    });
   }
 
   /**

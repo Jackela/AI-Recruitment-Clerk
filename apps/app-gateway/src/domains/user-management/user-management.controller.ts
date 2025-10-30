@@ -341,8 +341,12 @@ export class UserManagementController {
     @Query('status') status?: string,
   ) {
     try {
+      const requesterRole = String(
+        (req.user as any)?.rawRole ?? req.user.role ?? '',
+      ).toLowerCase();
+
       const organizationId =
-        req.user.role === UserRole.ADMIN
+        requesterRole === UserRole.ADMIN
           ? (req.query.organizationId as string)
           : req.user.organizationId;
 

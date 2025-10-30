@@ -133,6 +133,9 @@ export class LlmService {
       if (hasWord('node.js') || hasWord('nodejs')) tech.push('Node.js');
       if (hasWord('typescript')) tech.push('TypeScript');
       if (hasWord('react')) tech.push('React');
+      if (/\bjava\b/i.test(text) && !tech.includes('Java')) {
+        tech.push('Java');
+      }
       if (tech.length === 0) {
         // Fallback: scan bullets after 'Requirements:'
         let inReq = false;

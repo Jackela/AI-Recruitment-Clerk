@@ -99,9 +99,13 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   async getOrganizationUsers(@Request() req: AuthenticatedRequest) {
     // Enforce simple RBAC: only admins (and optionally HR managers) can list org users
+    const requesterRole = String(
+      (req.user as any)?.rawRole ?? req.user.role ?? '',
+    ).toLowerCase();
+
     if (
-      req.user.role !== UserRole.ADMIN &&
-      req.user.role !== UserRole.HR_MANAGER
+      requesterRole !== UserRole.ADMIN &&
+      requesterRole !== UserRole.HR_MANAGER
     ) {
       return {
         success: false,
@@ -117,7 +121,7 @@ export class UsersController {
         userId: u.id,
         email: u.email,
         name: u.name,
-        role: u.role,
+        role: String((u as any)?.rawRole ?? u.role ?? '').toLowerCase(),
         organizationId: u.organizationId,
       })),
     };

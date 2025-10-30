@@ -1,10 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   CreateUserDto,
   UserDto,
   UserRole,
   UserStatus,
 } from '@ai-recruitment-clerk/user-management-domain';
+import * as bcrypt from 'bcryptjs';
 
 // In a real implementation, this would connect to MongoDB
 // For now, we'll use a simple in-memory store with some mock users
@@ -31,6 +37,8 @@ interface UserEntity extends UserDto {
 export class UserService {
   private users: Map<string, UserEntity> = new Map();
   private emailToIdMap: Map<string, string> = new Map();
+  private readonly emailRegex =
+    /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
 
   /**
    * Initializes a new instance of the User Service.
@@ -96,8 +104,94 @@ export class UserService {
 
     defaultUsers.forEach((user) => {
       this.users.set(user.id, user);
-      this.emailToIdMap.set(user.email, user.id);
+      this.emailToIdMap.set(user.email.toLowerCase(), user.id);
     });
+  }
+
+  private normalizeEmail(email: string): string {
+    return email.trim().toLowerCase();
+  }
+
+  private sanitizeUser(
+    user: UserEntity,
+    options: { uppercaseRole?: boolean } = {},
+  ): UserDto {
+    const name = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
+    const uppercaseRole = options.uppercaseRole !== false;
+    const roleValue = user.role
+      ? (uppercaseRole ? String(user.role).toUpperCase() : user.role)
+      : undefined;
+
+    const sanitized: UserDto = {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      name,
+      organizationId: user.organizationId,
+      role: roleValue,
+      status: user.status,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      isActive: user.status === UserStatus.ACTIVE,
+    };
+
+    Object.defineProperty(sanitized, 'rawRole', {
+      value: user.role,
+      enumerable: false,
+      configurable: false,
+      writable: false,
+    });
+
+    Object.defineProperty(sanitized, 'password', {
+      value: user.password,
+      enumerable: false,
+      configurable: false,
+      writable: false,
+    });
+
+    Object.defineProperty(sanitized, 'securityFlags', {
+      value: user.securityFlags ? { ...user.securityFlags } : {},
+      enumerable: false,
+      configurable: false,
+      writable: true,
+    });
+
+    return sanitized;
+  }
+
+  private assertValidEmail(email: string): void {
+    if (!email || typeof email !== 'string' || email.trim() === '') {
+      throw new BadRequestException('Email is required');
+    }
+
+    if (!this.emailRegex.test(email)) {
+      throw new BadRequestException('Invalid email format');
+    }
+  }
+
+  private assertValidPassword(password: string): void {
+    if (!password || typeof password !== 'string' || password.trim() === '') {
+      throw new BadRequestException('Password is required');
+    }
+  }
+
+  private assertValidRole(role?: UserRole): void {
+    if (
+      role !== undefined &&
+      !Object.values(UserRole).includes(role)
+    ) {
+      throw new BadRequestException('Invalid role supplied');
+    }
+  }
+
+  private assertValidStatus(status?: UserStatus): void {
+    if (
+      status !== undefined &&
+      !Object.values(UserStatus).includes(status)
+    ) {
+      throw new BadRequestException('Invalid status supplied');
+    }
   }
 
   /**
@@ -107,7 +201,17 @@ export class UserService {
    */
   async create(
     createUserDto: CreateUserDto & { password: string },
-  ): Promise<UserEntity> {
+  ): Promise<UserDto> {
+    const email = this.normalizeEmail(createUserDto.email || '');
+    this.assertValidEmail(email);
+    this.assertValidPassword(createUserDto.password);
+    this.assertValidRole(createUserDto.role);
+    this.assertValidStatus(createUserDto.status);
+
+    if (this.emailToIdMap.has(email)) {
+      throw new ConflictException('User with this email already exists');
+    }
+
     const id = `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const now = new Date();
 
@@ -133,7 +237,7 @@ export class UserService {
 
     const user: UserEntity = {
       id,
-      email: createUserDto.email,
+      email,
       password: createUserDto.password,
       firstName: resolvedFirstName,
       lastName: resolvedLastName,
@@ -149,9 +253,9 @@ export class UserService {
     };
 
     this.users.set(id, user);
-    this.emailToIdMap.set(user.email, id);
+    this.emailToIdMap.set(email, id);
 
-    return user;
+    return this.sanitizeUser(user);
   }
 
   /**
@@ -159,8 +263,27 @@ export class UserService {
    * @param id - The id.
    * @returns A promise that resolves to UserEntity | null.
    */
-  async findById(id: string): Promise<UserEntity | null> {
-    return this.users.get(id) || null;
+  async findById(id: string): Promise<UserDto | null> {
+    const user = this.users.get(id);
+    return user ? this.sanitizeUser(user) : null;
+  }
+
+  /**
+   * Retrieves the raw user entity including sensitive fields.
+   * Intended for internal service use only.
+   * @param id - The id.
+   * @returns A promise that resolves to UserEntity | null.
+   */
+  async findByIdWithSensitiveData(id: string): Promise<UserEntity | null> {
+    const user = this.users.get(id);
+    if (!user) {
+      return null;
+    }
+
+    return {
+      ...user,
+      securityFlags: user.securityFlags ? { ...user.securityFlags } : {},
+    };
   }
 
   /**
@@ -168,9 +291,19 @@ export class UserService {
    * @param email - The email.
    * @returns A promise that resolves to UserEntity | null.
    */
-  async findByEmail(email: string): Promise<UserEntity | null> {
-    const id = this.emailToIdMap.get(email);
-    return id ? this.users.get(id) || null : null;
+  async findByEmail(email: string): Promise<UserDto | null> {
+    if (!email || typeof email !== 'string') {
+      return null;
+    }
+
+    const normalized = this.normalizeEmail(email);
+    if (!this.emailRegex.test(normalized)) {
+      return null;
+    }
+
+    const id = this.emailToIdMap.get(normalized);
+    const user = id ? this.users.get(id) : null;
+    return user ? this.sanitizeUser(user) : null;
   }
 
   /**
@@ -178,10 +311,10 @@ export class UserService {
    * @param organizationId - The organization id.
    * @returns A promise that resolves to an array of UserEntity.
    */
-  async findByOrganizationId(organizationId: string): Promise<UserEntity[]> {
-    return Array.from(this.users.values()).filter(
-      (user) => user.organizationId === organizationId,
-    );
+  async findByOrganizationId(organizationId: string): Promise<UserDto[]> {
+    return Array.from(this.users.values())
+      .filter((user) => user.organizationId === organizationId)
+      .map((user) => this.sanitizeUser(user));
   }
 
   /**
@@ -199,6 +332,37 @@ export class UserService {
     user.password = hashedPassword;
     user.updatedAt = new Date();
     this.users.set(id, user);
+  }
+
+  /**
+   * Validates the password for a given user.
+   * @param userId - The user id.
+   * @param plainPassword - The plain password to validate.
+   * @returns A promise that resolves to boolean value.
+   */
+  async validatePassword(
+    userId: string,
+    plainPassword: string,
+  ): Promise<boolean> {
+    if (!userId || !plainPassword) {
+      return false;
+    }
+
+    const user = this.users.get(userId);
+    if (!user || !user.password) {
+      return false;
+    }
+
+    // Support both hashed and plain-text (for seeded test users)
+    if (user.password.startsWith('$2')) {
+      try {
+        return await bcrypt.compare(plainPassword, user.password);
+      } catch {
+        return false;
+      }
+    }
+
+    return user.password === plainPassword;
   }
 
   /**
@@ -223,29 +387,65 @@ export class UserService {
   async updateUser(
     id: string,
     updates: Partial<Omit<UserDto, 'id' | 'createdAt'>>,
-  ): Promise<UserEntity> {
+  ): Promise<UserDto> {
     const user = this.users.get(id);
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    // Update email mapping if email is being changed
-    if (updates.email && updates.email !== user.email) {
+    if (updates.email !== undefined) {
+      const updatedEmail = this.normalizeEmail(updates.email);
+      this.assertValidEmail(updatedEmail);
+
+      if (
+        updatedEmail !== user.email &&
+        this.emailToIdMap.has(updatedEmail)
+      ) {
+        throw new ConflictException('Email already in use');
+      }
+
       this.emailToIdMap.delete(user.email);
-      this.emailToIdMap.set(updates.email, id);
+      this.emailToIdMap.set(updatedEmail, id);
+      user.email = updatedEmail;
     }
 
-    const updatedUser = {
+    if (updates.role !== undefined) {
+      this.assertValidRole(updates.role as UserRole);
+    }
+
+    if (updates.status !== undefined) {
+      this.assertValidStatus(updates.status as UserStatus);
+    }
+
+    if (updates.firstName !== undefined) {
+      user.firstName = updates.firstName ?? user.firstName;
+    }
+
+    if (updates.lastName !== undefined) {
+      user.lastName = updates.lastName ?? user.lastName;
+    }
+
+    if (updates.organizationId !== undefined) {
+      user.organizationId = updates.organizationId;
+    }
+
+    // Update email mapping if email is being changed
+    const updatedUser: UserEntity = {
       ...user,
-      ...updates,
+      role: updates.role
+        ? (updates.role as UserRole)
+        : user.role,
+      status: updates.status
+        ? (updates.status as UserStatus)
+        : user.status,
+      updatedAt: new Date(),
       get name(): string {
         return `${this.firstName} ${this.lastName}`;
       },
-      updatedAt: new Date(),
     };
 
     this.users.set(id, updatedUser);
-    return updatedUser;
+    return this.sanitizeUser(updatedUser);
   }
 
   /**
@@ -266,14 +466,14 @@ export class UserService {
    * @param organizationId - The organization id.
    * @returns A promise that resolves to an array of UserEntity.
    */
-  async listUsers(organizationId?: string): Promise<UserEntity[]> {
+  async listUsers(organizationId?: string): Promise<UserDto[]> {
     const users = Array.from(this.users.values());
 
-    if (organizationId) {
-      return users.filter((user) => user.organizationId === organizationId);
-    }
+    const filtered = organizationId
+      ? users.filter((user) => user.organizationId === organizationId)
+      : users;
 
-    return users;
+    return filtered.map((user) => this.sanitizeUser(user));
   }
 
   /**

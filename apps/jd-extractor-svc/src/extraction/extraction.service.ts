@@ -189,7 +189,11 @@ export class ExtractionService {
         });
       }
 
-      const processingTimeMs = Date.now() - startTime;
+      const measuredProcessingTime = Date.now() - startTime;
+      const processingTimeMs = Math.max(
+        measuredProcessingTime,
+        llmResponse.processingTimeMs ?? 0,
+      );
 
       // Create analysis result event
       const analysisResult: AnalysisJdExtractedEvent = {

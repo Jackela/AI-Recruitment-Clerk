@@ -1,0 +1,650 @@
+// =====================
+// ANALYSIS PROGRESS COMPONENT - FANTASY BENTO GRID THEME
+// =====================
+
+.progress-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+// =====================
+// PROGRESS BENTO CARD
+// =====================
+.progress-bento-card {
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-primary),
+    var(--color-bg-secondary)
+  );
+  border-radius: var(--radius-2xl);
+  border: 2px solid var(--color-primary-200);
+  box-shadow: var(--shadow-2xl), 0 0 40px rgba(99, 102, 241, 0.1);
+  backdrop-filter: blur(8px);
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.4s ease-out;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(99, 102, 241, 0.05),
+      transparent 50%,
+      rgba(139, 92, 246, 0.05)
+    );
+    pointer-events: none;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 256px;
+    height: 256px;
+    background: radial-gradient(
+      circle,
+      rgba(99, 102, 241, 0.1),
+      transparent 70%
+    );
+    border-radius: 50%;
+    transform: translate(50%, -50%);
+    pointer-events: none;
+    blur: 60px;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// =====================
+// CARD HEADER
+// =====================
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: var(--space-8);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border-secondary);
+  position: relative;
+  z-index: 1;
+}
+
+.header-content {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  flex: 1;
+}
+
+.header-icon {
+  width: var(--space-14);
+  height: var(--space-14);
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-500),
+    var(--color-royal-600)
+  );
+  color: white;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-lg), 0 0 20px rgba(99, 102, 241, 0.3);
+  animation: pulse 2s infinite;
+
+  svg {
+    animation: rotate 2s linear infinite;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.header-text {
+  flex: 1;
+}
+
+.card-title {
+  font-family: var(--font-family-fantasy-heading);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-fantasy-h1);
+  margin: 0 0 var(--space-1) 0;
+  line-height: var(--line-height-tight);
+  background: linear-gradient(
+    135deg,
+    var(--color-text-primary),
+    var(--color-text-secondary)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.card-subtitle {
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.cancel-icon-btn {
+  width: var(--space-10);
+  height: var(--space-10);
+  border: none;
+  background: var(--color-error-100);
+  color: var(--color-error-700);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-base);
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+
+  &:hover {
+    background: var(--color-error-200);
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: var(--shadow-md);
+  }
+
+  &:active {
+    transform: scale(0.95) rotate(90deg);
+  }
+}
+
+// =====================
+// CARD BODY
+// =====================
+.card-body {
+  padding: var(--space-6) var(--space-8);
+  position: relative;
+  z-index: 1;
+}
+
+// =====================
+// STEPS LIST
+// =====================
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.step-card {
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  border: 2px solid var(--color-border-primary);
+  background: var(--color-bg-primary);
+  transition: all var(--transition-base);
+  display: flex;
+  gap: var(--space-4);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      135deg,
+      transparent,
+      rgba(99, 102, 241, 0.02)
+    );
+    opacity: 0;
+    transition: opacity var(--transition-base);
+  }
+
+  &.step-pending {
+    border-color: var(--color-border-primary);
+    background: var(--color-bg-primary);
+  }
+
+  &.step-active {
+    border-color: var(--color-primary-300);
+    background: linear-gradient(
+      135deg,
+      var(--color-primary-50),
+      var(--color-bg-primary)
+    );
+    box-shadow: var(--shadow-lg), 0 0 20px rgba(99, 102, 241, 0.15);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &.step-completed {
+    border-color: var(--color-success-300);
+    background: linear-gradient(
+      135deg,
+      var(--color-success-50),
+      var(--color-bg-primary)
+    );
+  }
+
+  &.step-error {
+    border-color: var(--color-error-300);
+    background: linear-gradient(
+      135deg,
+      var(--color-error-50),
+      var(--color-bg-primary)
+    );
+  }
+}
+
+// =====================
+// STEP ICON
+// =====================
+.step-icon-wrapper {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  padding-top: var(--space-1);
+}
+
+.step-icon-circle {
+  width: var(--space-12);
+  height: var(--space-12);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+  position: relative;
+
+  .step-pending & {
+    background: linear-gradient(
+      135deg,
+      var(--color-neutral-100),
+      var(--color-neutral-200)
+    );
+    color: var(--color-neutral-500);
+  }
+
+  .step-active & {
+    background: linear-gradient(
+      135deg,
+      var(--color-primary-500),
+      var(--color-royal-600)
+    );
+    color: white;
+    box-shadow: var(--shadow-lg), 0 0 16px rgba(99, 102, 241, 0.4);
+    animation: pulse 2s infinite;
+
+    .icon-spinner {
+      animation: rotate 2s linear infinite;
+    }
+  }
+
+  .step-completed & {
+    background: linear-gradient(
+      135deg,
+      var(--color-success-500),
+      var(--color-emerald-500)
+    );
+    color: white;
+    box-shadow: var(--shadow-md);
+  }
+
+  .step-error & {
+    background: linear-gradient(
+      135deg,
+      var(--color-error-500),
+      var(--color-error-600)
+    );
+    color: white;
+    box-shadow: var(--shadow-md);
+  }
+}
+
+// =====================
+// STEP CONTENT
+// =====================
+.step-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.step-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.step-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.step-title {
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-1) 0;
+  line-height: var(--line-height-tight);
+}
+
+.step-description {
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: var(--line-height-relaxed);
+}
+
+.step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+  transition: all var(--transition-base);
+
+  .step-pending & {
+    background: var(--color-neutral-100);
+    color: var(--color-neutral-600);
+    border: 1px solid var(--color-neutral-200);
+  }
+
+  .step-active & {
+    background: var(--color-primary-100);
+    color: var(--color-primary-800);
+    border: 1px solid var(--color-primary-200);
+  }
+
+  .step-completed & {
+    background: var(--color-success-100);
+    color: var(--color-success-800);
+    border: 1px solid var(--color-success-200);
+  }
+
+  .step-error & {
+    background: var(--color-error-100);
+    color: var(--color-error-800);
+    border: 1px solid var(--color-error-200);
+  }
+}
+
+// =====================
+// PROGRESS BAR
+// =====================
+.progress-bar-wrapper {
+  margin-top: var(--space-3);
+}
+
+.progress-bar-track {
+  width: 100%;
+  height: 8px;
+  background: var(--color-neutral-200);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+
+  .step-active & {
+    background: linear-gradient(
+      90deg,
+      var(--color-primary-600),
+      var(--color-royal-600)
+    );
+  }
+
+  .step-completed & {
+    background: linear-gradient(
+      90deg,
+      var(--color-success-500),
+      var(--color-emerald-500)
+    );
+  }
+
+  .step-error & {
+    background: linear-gradient(
+      90deg,
+      var(--color-error-500),
+      var(--color-error-600)
+    );
+  }
+}
+
+.progress-shimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+// =====================
+// PROGRESS TRACKER EMBEDDED
+// =====================
+.progress-tracker-embedded {
+  margin-top: var(--space-6);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border-secondary);
+}
+
+// =====================
+// CARD FOOTER
+// =====================
+.card-footer {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-6) var(--space-8);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-secondary);
+  position: relative;
+  z-index: 1;
+}
+
+.btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-xl);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  border: 1px solid var(--color-error-300);
+  background: var(--color-error-50);
+  color: var(--color-error-700);
+  box-shadow: var(--shadow-sm);
+
+  svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  &:hover:not(:disabled) {
+    background: var(--color-error-100);
+    border-color: var(--color-error-400);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(220, 38, 38, 0.3);
+    border-top-color: var(--color-error-700);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// =====================
+// RESPONSIVE DESIGN
+// =====================
+@media (max-width: 768px) {
+  .progress-container {
+    padding: var(--space-3);
+  }
+
+  .progress-bento-card {
+    border-radius: var(--radius-xl);
+  }
+
+  .card-header {
+    padding: var(--space-6) var(--space-5);
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .header-content {
+    width: 100%;
+  }
+
+  .cancel-icon-btn {
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-4);
+  }
+
+  .card-body {
+    padding: var(--space-4) var(--space-5);
+  }
+
+  .step-card {
+    padding: var(--space-4);
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .step-icon-wrapper {
+    padding-top: 0;
+  }
+
+  .step-header {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .step-badge {
+    align-self: flex-start;
+  }
+
+  .card-footer {
+    padding: var(--space-5);
+
+    .btn-cancel {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .card-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .header-icon {
+    width: var(--space-12);
+    height: var(--space-12);
+  }
+
+  .step-icon-circle {
+    width: var(--space-10);
+    height: var(--space-10);
+  }
+
+  .step-title {
+    font-size: var(--font-size-sm);
+  }
+
+  .step-description {
+    font-size: var(--font-size-xs);
+  }
+}

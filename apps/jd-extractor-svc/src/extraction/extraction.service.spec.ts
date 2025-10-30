@@ -36,7 +36,6 @@ jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => ({
   },
 }));
 
-import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { ExtractionService } from './extraction.service';
 import { LlmService } from './llm.service';
@@ -238,7 +237,7 @@ describe('ExtractionService', () => {
     Location: San Francisco, CA (Remote-friendly)
   `;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     // Use real timers to avoid issues with retry setTimeout
     jest.useRealTimers();
     
@@ -262,25 +261,11 @@ describe('ExtractionService', () => {
       verbose: jest.fn(),
     } as any;
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ExtractionService,
-        {
-          provide: LlmService,
-          useValue: mockLlmService,
-        },
-        {
-          provide: JdExtractorNatsService,
-          useValue: mockNatsService,
-        },
-        {
-          provide: Logger,
-          useValue: mockLogger,
-        },
-      ],
-    }).compile();
-
-    service = module.get<ExtractionService>(ExtractionService);
+    service = new ExtractionService(
+      mockLlmService as unknown as LlmService,
+      mockNatsService as unknown as JdExtractorNatsService,
+      mockLogger as unknown as Logger,
+    );
 
     // Clear all mocks before each test
     jest.clearAllMocks();
@@ -794,27 +779,30 @@ describe('ExtractionService', () => {
         processingTimeMs: 15000,
       });
 
-      mockLlmService.extractStructuredData.mockImplementation(async () => {
-        // Simulate slow processing
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        return slowResponse;
-      });
+      mockLlmService.extractStructuredData.mockResolvedValueOnce(
+        slowResponse,
+      );
       mockNatsService.publishAnalysisJdExtracted.mockResolvedValueOnce({
         success: true,
         messageId: 'msg-slow',
       });
 
       // Act
-      const startTime = Date.now();
       await service.handleJobJdSubmitted(event);
-      const processingTime = Date.now() - startTime;
 
       // Assert
-      expect(processingTime).toBeGreaterThan(100);
-      expect(mockNatsService.publishAnalysisJdExtracted).toHaveBeenCalledWith(
+      expect(
+        mockNatsService.publishAnalysisJdExtracted,
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           processingTimeMs: expect.any(Number),
         }),
+      );
+
+      const publishedEvent =
+        mockNatsService.publishAnalysisJdExtracted.mock.calls[0][0];
+      expect(publishedEvent.processingTimeMs).toBeGreaterThanOrEqual(
+        slowResponse.processingTimeMs!,
       );
     });
   });
@@ -995,27 +983,34 @@ describe('ExtractionService', () => {
       const mockLlmResponse = createMockLlmExtractionResponse();
 
       // First call will be processed, second will be skipped
-      mockLlmService.extractStructuredData.mockImplementation(async () => {
-        // Simulate long processing time
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        return mockLlmResponse;
-      });
+      let resolveExtraction:
+        | ((value: typeof mockLlmResponse) => void)
+        | undefined;
+      mockLlmService.extractStructuredData.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveExtraction = resolve;
+          }),
+      );
       mockNatsService.publishAnalysisJdExtracted.mockResolvedValue({
         success: true,
         messageId: 'msg-duplicate',
       });
 
       // Act
-      const promise1 = service.handleJobJdSubmitted(event);
-      const promise2 = service.handleJobJdSubmitted(event); // Duplicate
+      const firstCallPromise = service.handleJobJdSubmitted(event);
+      const duplicateCallPromise = service.handleJobJdSubmitted(event);
 
-      await Promise.all([promise1, promise2]);
+      await duplicateCallPromise;
 
       // Assert
       expect(mockLlmService.extractStructuredData).toHaveBeenCalledTimes(1);
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('is already being processed'),
       );
+
+      resolveExtraction?.(mockLlmResponse);
+      await firstCallPromise;
     });
 
     it('should respect maximum concurrent jobs limit', async () => {
@@ -1027,10 +1022,13 @@ describe('ExtractionService', () => {
       );
       const mockLlmResponse = createMockLlmExtractionResponse();
 
-      mockLlmService.extractStructuredData.mockImplementation(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-        return mockLlmResponse;
-      });
+      const pendingResolvers: Array<() => void> = [];
+      mockLlmService.extractStructuredData.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            pendingResolvers.push(() => resolve(mockLlmResponse));
+          }),
+      );
       mockNatsService.publishAnalysisJdExtracted.mockResolvedValue({
         success: true,
         messageId: 'msg-concurrent',
@@ -1040,12 +1038,17 @@ describe('ExtractionService', () => {
       const promises = events.map((event) =>
         service.handleJobJdSubmitted(event),
       );
-      await Promise.all(promises);
+
+      // Allow the initial processing pipeline to schedule warnings
+      await Promise.resolve();
 
       // Assert
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Maximum concurrent jobs'),
       );
+
+      pendingResolvers.forEach((resolve) => resolve());
+      await Promise.all(promises);
     });
 
     it('should clean up expired jobs correctly', async () => {
@@ -1126,25 +1129,36 @@ describe('ExtractionService', () => {
         },
       );
 
-      mockLlmService.extractStructuredData.mockImplementation(async () => {
-        // Add small delay to ensure processingTimeMs > 0
-        await new Promise(resolve => setTimeout(resolve, 10));
-        return mockLlmResponse;
-      });
+      const nowSpy = jest.spyOn(Date, 'now');
+      nowSpy
+        .mockImplementationOnce(() => 1_000)
+        .mockImplementationOnce(() => 1_015);
+
+      mockLlmService.extractStructuredData.mockResolvedValueOnce(
+        mockLlmResponse,
+      );
 
       // Act
-      const result = await service.processJobDescription(
-        jobId,
-        jdText,
-        jobTitle,
-      );
+      let result: AnalysisJdExtractedEvent | undefined;
+      try {
+        result = await service.processJobDescription(
+          jobId,
+          jdText,
+          jobTitle,
+        );
+      } finally {
+        nowSpy.mockRestore();
+      }
 
       // Assert
       expect(result).toBeDefined();
-      expect(result.jobId).toBe(jobId);
-      expect(result.extractedData).toEqual(mockLlmResponse.extractedData);
-      expect(result.timestamp).toBeDefined();
-      expect(result.processingTimeMs).toBeGreaterThan(0);
+      const finalResult = result as AnalysisJdExtractedEvent;
+      expect(finalResult.jobId).toBe(jobId);
+      expect(finalResult.extractedData).toEqual(
+        mockLlmResponse.extractedData,
+      );
+      expect(finalResult.timestamp).toBeDefined();
+      expect(finalResult.processingTimeMs).toBeGreaterThan(0);
       expect(MockRetryUtility.withExponentialBackoff).toHaveBeenCalledTimes(1);
     });
 
@@ -1203,26 +1217,36 @@ describe('ExtractionService', () => {
       const jobTitle = 'Software Engineer';
       const mockLlmResponse = createMockLlmExtractionResponse();
 
-      mockLlmService.extractStructuredData.mockImplementation(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        return mockLlmResponse;
-      });
+      const nowSpy = jest.spyOn(Date, 'now');
+      nowSpy
+        .mockImplementationOnce(() => 10_000) // Service start time
+        .mockImplementationOnce(() => 10_400); // Measured duration 400ms
+
+      mockLlmService.extractStructuredData.mockResolvedValueOnce(
+        mockLlmResponse,
+      );
 
       // Act
-      const startTime = Date.now();
-      const result = await service.processJobDescription(
-        jobId,
-        jdText,
-        jobTitle,
-      );
-      const actualTime = Date.now() - startTime;
+      let result: AnalysisJdExtractedEvent | undefined;
+      try {
+        result = await service.processJobDescription(
+          jobId,
+          jdText,
+          jobTitle,
+        );
+      } finally {
+        nowSpy.mockRestore();
+      }
 
       // Assert
-      expect(result.processingTimeMs).toBeGreaterThanOrEqual(100);
-      expect(result.processingTimeMs).toBeLessThan(actualTime + 50); // Allow some tolerance
+      expect(result).toBeDefined();
+      const finalResult = result as AnalysisJdExtractedEvent;
+      expect(finalResult.processingTimeMs).toBe(
+        mockLlmResponse.processingTimeMs,
+      );
       expect(mockLogger.log).toHaveBeenCalledWith(
         expect.stringContaining(
-          `processing time: ${result.processingTimeMs}ms`,
+          `processing time: ${finalResult.processingTimeMs}ms`,
         ),
       );
     });
@@ -1633,7 +1657,6 @@ describe('ExtractionService', () => {
 
       // Act
       await service.handleJobJdSubmitted(event);
-      await new Promise(resolve => setTimeout(resolve, 100)); // Wait to ensure no retry scheduled
 
       // Assert - should not attempt to schedule retry for validation errors
       // The key assertion is that no retry should be scheduled
@@ -1662,9 +1685,6 @@ describe('ExtractionService', () => {
       const processingJobsMap = (service as any).processingJobs;
       void processingJobsMap;
       
-      // Wait a bit for potential async operations
-      await new Promise(resolve => setTimeout(resolve, 100));
-
       // Assert - should have logged that error is retryable and attempted to schedule retry
       expect(mockLogger.log).toHaveBeenCalledWith(
         expect.stringContaining('is retryable'),

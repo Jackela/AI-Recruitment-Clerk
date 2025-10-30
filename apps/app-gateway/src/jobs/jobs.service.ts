@@ -128,7 +128,11 @@ export class JobsService implements OnModuleInit {
     resourceOrganizationId?: string,
   ): boolean {
     // Admins have access to all resources
-    if (user.role === UserRole.ADMIN) {
+    const normalizedRole = String(
+      (user as any)?.rawRole ?? user.role ?? '',
+    ).toLowerCase();
+
+    if (normalizedRole === UserRole.ADMIN) {
       return true;
     }
 
