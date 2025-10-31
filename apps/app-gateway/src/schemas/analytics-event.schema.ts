@@ -5,7 +5,7 @@ import {
   EventStatus,
   EventCategory,
   ConsentStatus,
-} from '../common/interfaces/fallback-types';
+} from '@ai-recruitment-clerk/shared-dtos';
 
 export type AnalyticsEventDocument = AnalyticsEvent & Document;
 
@@ -28,13 +28,13 @@ export class AnalyticsEvent {
   userId?: string = undefined;
 
   @Prop({ type: String, required: true, enum: Object.values(EventType) })
-  eventType: EventType = EventType.USER_ACTION;
+  eventType: EventType = EventType.USER_INTERACTION;
 
   @Prop({ type: String, required: true, enum: Object.values(EventCategory) })
   eventCategory: EventCategory = EventCategory.SYSTEM;
 
   @Prop({ type: String, required: true, enum: Object.values(EventStatus) })
-  status: EventStatus = EventStatus.PENDING;
+  status: EventStatus = EventStatus.PENDING_PROCESSING;
 
   @Prop({ type: Object, required: true })
   eventData: any = {};

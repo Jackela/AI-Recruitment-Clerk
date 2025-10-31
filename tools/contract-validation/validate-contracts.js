@@ -25,7 +25,7 @@ function validateTypeScriptContracts() {
     
     // Compile the type safety validator to check for compile-time errors
     const result = execSync(
-      'npx tsc --noEmit tools/contract-validation/type-safety-validator.ts',
+      'npx tsc -p tools/contract-validation/tsconfig.json',
       { 
         cwd: rootDir, 
         encoding: 'utf8',

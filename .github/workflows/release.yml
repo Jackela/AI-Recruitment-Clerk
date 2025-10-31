@@ -39,6 +39,25 @@ jobs:
           npm ci --legacy-peer-deps --prefer-offline || npm install --legacy-peer-deps
           echo "✅ Dependencies installed"
 
+      - name: 🔐 Enforce dependency gate
+        run: |
+          echo "🔐 Generating dependency inventory..."
+          npm audit --audit-level=moderate --json > data/security/dependency-inventory.json || true
+          echo "🚧 Evaluating release gate..."
+          node scripts/dependency-gate.mjs
+
+      - name: 🗂️ Attach release gate summary
+        if: always()
+        run: |
+          if [ -f data/security/release-gate-summary.json ]; then
+            echo "### Dependency Release Gate" >> $GITHUB_STEP_SUMMARY
+            echo '' >> $GITHUB_STEP_SUMMARY
+            echo '\`\`\`json' >> $GITHUB_STEP_SUMMARY
+            cat data/security/release-gate-summary.json >> $GITHUB_STEP_SUMMARY
+            echo '\`\`\`' >> $GITHUB_STEP_SUMMARY
+            echo '' >> $GITHUB_STEP_SUMMARY
+          fi
+
       - name: 📦 Install Semantic Release Dependencies
         run: |
           npm install -D \

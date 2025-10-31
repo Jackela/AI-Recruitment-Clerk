@@ -16,9 +16,7 @@ import {
   UserDto,
   UserStatus,
 } from '@ai-recruitment-clerk/user-management-domain';
-import {
-  WithCircuitBreaker,
-} from '../common/interfaces/fallback-types';
+import { WithCircuitBreaker } from '@ai-recruitment-clerk/shared-dtos';
 import * as bcrypt from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';

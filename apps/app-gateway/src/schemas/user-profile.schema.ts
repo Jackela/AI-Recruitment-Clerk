@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import type { UserPreferences } from '../common/interfaces/fallback-types';
+import type { UserPreferencesDto } from '@ai-recruitment-clerk/shared-dtos';
 import { ConsentStatus } from './consent-record.schema';
 
 export type UserProfileDocument = UserProfile & Document;
@@ -30,7 +30,7 @@ export class UserProfile {
   avatar?: string = undefined;
 
   @Prop({ type: Object })
-  preferences?: UserPreferences = undefined;
+  preferences?: UserPreferencesDto = undefined;
 
   @Prop({
     type: String,

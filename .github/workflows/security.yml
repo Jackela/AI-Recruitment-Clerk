@@ -87,25 +87,28 @@ jobs:
           echo "🔐 Running npm security audit..."
           npm audit --audit-level=moderate --json > audit-report.json || true
           
-          # Parse and display results
           if [ -f audit-report.json ]; then
-            CRITICAL=$(cat audit-report.json | jq '.metadata.vulnerabilities.critical // 0')
-            HIGH=$(cat audit-report.json | jq '.metadata.vulnerabilities.high // 0')
-            MODERATE=$(cat audit-report.json | jq '.metadata.vulnerabilities.moderate // 0')
-            LOW=$(cat audit-report.json | jq '.metadata.vulnerabilities.low // 0')
-            
+            CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' < audit-report.json)
+            HIGH=$(jq '.metadata.vulnerabilities.high // 0' < audit-report.json)
+            MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' < audit-report.json)
+            LOW=$(jq '.metadata.vulnerabilities.low // 0' < audit-report.json)
+
             echo "📊 Security Audit Results:"
             echo "  Critical: $CRITICAL"
             echo "  High: $HIGH"
             echo "  Moderate: $MODERATE"
             echo "  Low: $LOW"
-            
-            if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
-              echo "::warning::Found $CRITICAL critical and $HIGH high severity vulnerabilities"
-              echo "🚨 Action required: Fix critical/high vulnerabilities"
+
+            if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ] || [ "$MODERATE" -gt 0 ]; then
+              echo "::error::Dependency vulnerabilities detected (critical: $CRITICAL, high: $HIGH, moderate: $MODERATE)"
+              echo "🚨 Action required: Resolve all high and moderate vulnerabilities before releasing."
+              exit 1
             else
-              echo "✅ No critical or high severity vulnerabilities found"
+              echo "✅ No critical, high, or moderate severity vulnerabilities found"
             fi
+          else
+            echo "::error::audit-report.json not found; failing dependency scan."
+            exit 1
           fi
 
       - name: 📦 Upload Audit Report

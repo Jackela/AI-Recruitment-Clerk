@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { EventStatus } from '@ai-recruitment-clerk/shared-dtos';
 // Fallback interfaces and types
 interface IAnalyticsRepository {
   save(event: AnalyticsEventEntity): Promise<void>;
@@ -9,15 +10,6 @@ interface IAnalyticsRepository {
   findByUserId(userId: string): Promise<AnalyticsEventEntity[]>;
   updateStatus(id: string, status: EventStatus): Promise<void>;
   delete(id: string): Promise<void>;
-}
-
-enum EventStatus {
-  PENDING = 'pending',
-  PROCESSING = 'processing',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  EXPIRED = 'expired',
-  ANONYMIZED = 'anonymized',
 }
 
 interface AnalyticsEventEntity {

@@ -12,6 +12,7 @@ export namespace JobContracts {
     | 'active'
     | 'processing'
     | 'completed'
+    | 'failed'
     | 'closed';
 
   /**

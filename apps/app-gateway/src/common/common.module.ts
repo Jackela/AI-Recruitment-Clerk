@@ -17,6 +17,7 @@ import { CustomValidationPipe } from './pipes/validation.pipe';
 // Services
 import { HealthCheckService } from './services/health-check.service';
 import { CrossServiceValidator } from './validators/cross-service.validator';
+import { ConditionalThrottlerGuard } from './guards/conditional-throttler.guard';
 
 /**
  * Configures the common module.
@@ -72,10 +73,13 @@ import { CrossServiceValidator } from './validators/cross-service.validator';
       useFactory: () => new CustomValidationPipe(),
     },
 
-    // Global rate limiting guard
+    // Base throttler guard instance
+    ThrottlerGuard,
+
+    // Global rate limiting guard wrapper
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      useClass: ConditionalThrottlerGuard,
     },
 
     // Common services

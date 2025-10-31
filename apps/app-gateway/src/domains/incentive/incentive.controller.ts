@@ -28,7 +28,7 @@ import {
   RewardType,
   PaymentMethod,
   ContactInfo,
-} from '../../common/interfaces/fallback-types';
+} from '@ai-recruitment-clerk/shared-dtos';
 import { AuthenticatedRequest } from '@ai-recruitment-clerk/user-management-domain';
 import { IncentiveIntegrationService } from './incentive-integration.service';
 

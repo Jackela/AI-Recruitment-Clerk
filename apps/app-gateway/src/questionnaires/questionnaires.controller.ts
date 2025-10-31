@@ -11,24 +11,19 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 // Standardized Error Handling
 import { HandleErrors, ErrorUtils } from '@ai-recruitment-clerk/shared-dtos';
-
-type Questionnaire = {
-  id: string;
-  published: boolean;
-  submissions: Array<{ id: string; qualityScore: number }>;
-};
-
-const questionnaires = new Map<string, Questionnaire>();
-
-function id(prefix: string) {
-  return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
-}
+import {
+  QuestionnairesService,
+  QuestionnaireNotFoundError,
+  QuestionnaireNotPublishedError,
+} from './questionnaires.service';
+import { SubmitQuestionnaireDto } from './dto/submit-questionnaire.dto';
 
 /**
  * Exposes endpoints for questionnaires.
  */
 @Controller()
 export class QuestionnairesController {
+  constructor(private readonly questionnairesService: QuestionnairesService) {}
   /**
    * Creates the entity.
    * @param _body - The body.
@@ -37,10 +32,8 @@ export class QuestionnairesController {
   @UseGuards(JwtAuthGuard)
   @Post('questionnaires')
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() _body: any) {
-    const qid = id('q');
-    questionnaires.set(qid, { id: qid, published: false, submissions: [] });
-    return { questionnaireId: qid };
+  create(@Body() _body: Record<string, unknown>) {
+    return this.questionnairesService.createQuestionnaire();
   }
 
   // singular create for performance tests
@@ -52,10 +45,8 @@ export class QuestionnairesController {
   @UseGuards(JwtAuthGuard)
   @Post('questionnaire')
   @HttpCode(HttpStatus.CREATED)
-  createSingular(@Body() _body: any) {
-    const qid = id('q');
-    questionnaires.set(qid, { id: qid, published: false, submissions: [] });
-    return { questionnaireId: qid };
+  createSingular(@Body() _body: Record<string, unknown>) {
+    return this.questionnairesService.createQuestionnaire();
   }
 
   /**
@@ -79,18 +70,16 @@ export class QuestionnairesController {
     ],
   })
   publish(@Param('id') qid: string) {
-    const q = questionnaires.get(qid);
-    if (!q) {
-      throw ErrorUtils.createNotFoundError('Questionnaire', qid, {
-        operation: 'publish',
-      });
+    try {
+      return this.questionnairesService.publishQuestionnaire(qid);
+    } catch (error) {
+      if (error instanceof QuestionnaireNotFoundError) {
+        throw ErrorUtils.createNotFoundError('Questionnaire', qid, {
+          operation: 'publish',
+        });
+      }
+      throw error;
     }
-    q.published = true;
-    questionnaires.set(qid, q);
-    return {
-      accessUrl: `/q/${qid}`,
-      publicId: id('pub'),
-    };
   }
 
   /**
@@ -114,7 +103,10 @@ export class QuestionnairesController {
   @UseGuards(JwtAuthGuard)
   @Post('questionnaire/:id/submit')
   @HttpCode(HttpStatus.CREATED)
-  submitSingular(@Param('id') qid: string, @Body() body: any) {
+  submitSingular(
+    @Param('id') qid: string,
+    @Body() body: SubmitQuestionnaireDto,
+  ) {
     return this.submitInternal(qid, body);
   }
 
@@ -127,7 +119,10 @@ export class QuestionnairesController {
   @UseGuards(JwtAuthGuard)
   @Post('questionnaires/:id/submit')
   @HttpCode(HttpStatus.CREATED)
-  submitPlural(@Param('id') qid: string, @Body() body: any) {
+  submitPlural(
+    @Param('id') qid: string,
+    @Body() body: SubmitQuestionnaireDto,
+  ) {
     return this.submitInternal(qid, body);
   }
 
@@ -147,20 +142,16 @@ export class QuestionnairesController {
     userImpact: 'minimal',
   })
   analytics(@Param('id') qid: string) {
-    const q = questionnaires.get(qid);
-    if (!q) {
-      throw ErrorUtils.createNotFoundError('Questionnaire', qid, {
-        operation: 'analytics',
-      });
+    try {
+      return this.questionnairesService.getAnalytics(qid);
+    } catch (error) {
+      if (error instanceof QuestionnaireNotFoundError) {
+        throw ErrorUtils.createNotFoundError('Questionnaire', qid, {
+          operation: 'analytics',
+        });
+      }
+      throw error;
     }
-    const count = q.submissions.length || 1;
-    const avg =
-      q.submissions.reduce((s, a) => s + a.qualityScore, 0) / count || 75;
-    return {
-      totalSubmissions: q.submissions.length,
-      averageQualityScore: Math.max(1, Math.round(avg)),
-      completionRate: 100,
-    };
   }
 
   /**
@@ -171,10 +162,7 @@ export class QuestionnairesController {
   @Get('questionnaires/export')
   @HttpCode(HttpStatus.OK)
   exportData() {
-    return {
-      exportUrl: `/exports/${id('report')}.json`,
-      expiresAt: new Date(Date.now() + 3600_000).toISOString(),
-    };
+    return this.questionnairesService.exportQuestionnaireData();
   }
 
   /**
@@ -185,35 +173,26 @@ export class QuestionnairesController {
   @Get('questionnaire')
   @HttpCode(HttpStatus.OK)
   list() {
-    const list = Array.from(questionnaires.values()).map((q) => ({
-      questionnaireId: q.id,
-      published: q.published,
-      submissions: q.submissions.length,
-    }));
-    return { items: list, total: list.length, page: 1, limit: 20 };
+    return this.questionnairesService.listQuestionnaires();
   }
 
-  private submitInternal(qid: string, _body: any) {
-    const q = questionnaires.get(qid);
-    if (!q) {
-      throw ErrorUtils.createNotFoundError('Questionnaire', qid, {
-        operation: 'submit',
-      });
+  private submitInternal(qid: string, _body: SubmitQuestionnaireDto) {
+    try {
+      return this.questionnairesService.submitQuestionnaire(qid);
+    } catch (error) {
+      if (error instanceof QuestionnaireNotFoundError) {
+        throw ErrorUtils.createNotFoundError('Questionnaire', qid, {
+          operation: 'submit',
+        });
+      }
+      if (error instanceof QuestionnaireNotPublishedError) {
+        throw ErrorUtils.createValidationError(
+          'Questionnaire is not published and cannot accept submissions',
+          { questionnaireId: qid, published: false },
+          'published',
+        );
+      }
+      throw error;
     }
-    if (!q.published) {
-      throw ErrorUtils.createValidationError(
-        'Questionnaire is not published and cannot accept submissions',
-        { questionnaireId: qid, published: q.published },
-        'published',
-      );
-    }
-    const sid = id('sub');
-    const qualityScore = 80;
-    q.submissions.push({ id: sid, qualityScore });
-    questionnaires.set(qid, q);
-    return {
-      submissionId: sid,
-      qualityScore,
-    };
   }
 }

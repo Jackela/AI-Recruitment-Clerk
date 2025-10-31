@@ -11,66 +11,60 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-
-function id(prefix: string) {
-  return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-const incentives = new Map<
-  string,
-  { id: string; amount: number; status: 'approved' | 'pending' }
->();
+import { IncentivesService } from './incentives.service';
+import { CreateQuestionnaireIncentiveDto } from './dto/create-questionnaire-incentive.dto';
+import { ApproveIncentiveDto } from './dto/approve-incentive.dto';
 
 /**
  * Exposes endpoints for incentives.
  */
 @Controller('incentives')
 export class IncentivesController {
+  constructor(private readonly incentivesService: IncentivesService) {}
+
   /**
-   * Creates the entity.
-   * @param body - The body.
+   * Creates a questionnaire incentive.
+   * @param body - The request payload.
    * @returns The result of the operation.
    */
   @UseGuards(JwtAuthGuard)
   @Post('questionnaire')
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() body: any) {
-    const incentiveId = id('inc');
-    const amount = Math.max(1, Math.round((body?.qualityScore || 80) / 10));
-    incentives.set(incentiveId, { id: incentiveId, amount, status: 'pending' });
-    return { incentiveId, rewardAmount: amount };
+  create(@Body() body: CreateQuestionnaireIncentiveDto) {
+    const result = this.incentivesService.createQuestionnaireIncentive(body);
+    return {
+      incentiveId: result.incentiveId,
+      rewardAmount: result.rewardAmount,
+      currency: 'USD',
+      status: result.status,
+      canBePaid: result.status === 'approved',
+      createdAt: result.createdAt,
+    };
   }
 
   /**
    * Validates the data.
    * @param id - The id.
-   * @returns The result of the operation.
+  * @returns The result of the operation.
    */
   @UseGuards(JwtAuthGuard)
   @Post(':id/validate')
   @HttpCode(HttpStatus.OK)
   validate(@Param('id') id: string) {
-    return { isValid: incentives.has(id) };
+    return { isValid: this.incentivesService.validateIncentive(id) };
   }
 
   /**
    * Performs the approve operation.
    * @param id - The id.
-   * @param _body - The body.
+   * @param body - The body.
    * @returns The result of the operation.
    */
   @UseGuards(JwtAuthGuard)
   @Put(':id/approve')
   @HttpCode(HttpStatus.OK)
-  approve(@Param('id') id: string, @Body() _body: any) {
-    const rec = incentives.get(id) || {
-      id,
-      amount: 1,
-      status: 'pending' as const,
-    };
-    rec.status = 'approved';
-    incentives.set(id, rec);
-    return { approvedAt: new Date().toISOString(), approvalStatus: 'approved' };
+  approve(@Param('id') id: string, @Body() body: ApproveIncentiveDto) {
+    return this.incentivesService.approveIncentive(id, body);
   }
 
   /**
@@ -82,14 +76,7 @@ export class IncentivesController {
   @Get('stats/overview')
   @HttpCode(HttpStatus.OK)
   stats(@Query('timeRange') _timeRange?: string) {
-    const totalRewards = Array.from(incentives.values()).reduce(
-      (s, r) => s + r.amount,
-      0,
-    );
-    return {
-      overview: {
-        totalRewards,
-      },
-    };
+    const overview = this.incentivesService.getOverviewStats();
+    return { overview };
   }
 }

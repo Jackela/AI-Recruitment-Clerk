@@ -3,14 +3,14 @@
  * Build-time validation to ensure frontend and backend contracts remain synchronized
  */
 
-import { JobContracts, ReportContracts, ResumeContracts } from '@ai-recruitment-clerk/api-contracts';
+import { JobContracts, ReportContracts } from '@ai-recruitment-clerk/api-contracts';
 
 // Import frontend models for comparison
 type FrontendJob = {
   id: string;
   title: string;
   jdText: string;
-  status: 'draft' | 'active' | 'processing' | 'completed' | 'closed';
+  status: JobContracts.JobStatus;
   createdAt: Date;
   resumeCount: number;
 };
@@ -18,7 +18,7 @@ type FrontendJob = {
 type FrontendJobListItem = {
   id: string;
   title: string;
-  status: 'draft' | 'active' | 'processing' | 'completed' | 'closed';
+  status: JobContracts.JobStatus;
   createdAt: Date;
   resumeCount: number;
 };
@@ -80,8 +80,22 @@ export class TypeSafetyValidator {
     const issues: Array<{type: 'missing_field' | 'extra_field' | 'type_mismatch'; field: string; description: string}> = [];
     
     // Check status enum compatibility
-    const frontendStatuses = ['draft', 'active', 'processing', 'completed', 'closed'];
-    const backendStatuses = ['draft', 'active', 'processing', 'completed', 'closed']; // Should match JobContracts.JobStatus
+    const frontendStatuses: JobContracts.JobStatus[] = [
+      'draft',
+      'active',
+      'processing',
+      'completed',
+      'failed',
+      'closed',
+    ];
+    const backendStatuses: JobContracts.JobStatus[] = [
+      'draft',
+      'active',
+      'processing',
+      'completed',
+      'failed',
+      'closed',
+    ];
     
     const missingStatuses = backendStatuses.filter(status => !frontendStatuses.includes(status));
     const extraStatuses = frontendStatuses.filter(status => !backendStatuses.includes(status));

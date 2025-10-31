@@ -1,0 +1,182 @@
+openapi: 3.0.3
+info:
+  title: Dependency Hardening API
+  version: 0.1.0
+  description: Interfaces for tracking dependency vulnerabilities and release gating decisions.
+servers:
+  - url: https://api.example.com
+paths:
+  /security/dependency-vulnerabilities:
+    get:
+      summary: List dependency vulnerabilities
+      description: Returns high and moderate-severity dependency vulnerabilities and their remediation details.
+      responses:
+        '200':
+          description: Current vulnerability inventory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VulnerabilityList'
+  /security/dependency-vulnerabilities/{vulnerabilityId}/remediation:
+    post:
+      summary: Create remediation record
+      description: Logs remediation ownership and plan for a vulnerability.
+      parameters:
+        - name: vulnerabilityId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemediationInput'
+      responses:
+        '201':
+          description: Remediation record created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemediationRecord'
+  /security/dependency-vulnerabilities/{vulnerabilityId}/remediation:
+    patch:
+      summary: Update remediation status
+      description: Updates remediation progress or marks completion with verification evidence.
+      parameters:
+        - name: vulnerabilityId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemediationUpdate'
+      responses:
+        '200':
+          description: Updated remediation record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemediationRecord'
+  /security/release-gate:
+    get:
+      summary: Retrieve release gating status
+      description: Indicates whether deployment is permitted based on outstanding vulnerabilities.
+      responses:
+        '200':
+          description: Release gate summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReleaseGateStatus'
+components:
+  schemas:
+    VulnerabilityList:
+      type: object
+      properties:
+        generatedAt:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vulnerability'
+    Vulnerability:
+      type: object
+      required: [id, packageName, currentVersion, severity, status]
+      properties:
+        id:
+          type: string
+        packageName:
+          type: string
+        currentVersion:
+          type: string
+        severity:
+          type: string
+          enum: [High, Moderate]
+        fixVersion:
+          type: string
+          nullable: true
+        detectionDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [Detected, InRemediation, Resolved]
+        owner:
+          type: string
+          nullable: true
+        targetCompletionDate:
+          type: string
+          format: date
+          nullable: true
+    RemediationInput:
+      type: object
+      required: [owner, strategy, targetCompletionDate]
+      properties:
+        owner:
+          type: string
+        strategy:
+          type: string
+          enum: [Upgrade, Replace, Patch, Remove]
+        targetCompletionDate:
+          type: string
+          format: date
+        notes:
+          type: string
+          nullable: true
+    RemediationUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [Planned, InProgress, Completed, Blocked]
+        verificationEvidence:
+          type: string
+        notes:
+          type: string
+    RemediationRecord:
+      allOf:
+        - $ref: '#/components/schemas/RemediationInput'
+        - type: object
+          required: [recordId, status]
+          properties:
+            recordId:
+              type: string
+            status:
+              type: string
+              enum: [Planned, InProgress, Completed, Blocked]
+            verificationEvidence:
+              type: string
+              nullable: true
+            reviewedBy:
+              type: string
+              nullable: true
+            reviewDate:
+              type: string
+              format: date-time
+              nullable: true
+    ReleaseGateStatus:
+      type: object
+      required: [isBlocked, outstandingHigh, outstandingModerate]
+      properties:
+        isBlocked:
+          type: boolean
+        outstandingHigh:
+          type: integer
+          minimum: 0
+        outstandingModerate:
+          type: integer
+          minimum: 0
+        nextReview:
+          type: string
+          format: date-time
+          nullable: true
+        notes:
+          type: string
+          nullable: true

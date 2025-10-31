@@ -221,8 +221,8 @@ export function getText(path: string): string {
   let value: unknown = I18N_TEXTS;
 
   for (const key of keys) {
-    if (value && typeof value === 'object' && key in value) {
-      value = value[key];
+    if (value && typeof value === 'object' && key in (value as Record<string, unknown>)) {
+      value = (value as Record<string, unknown>)[key];
     } else {
       console.warn(`Translation key not found: ${path}`);
       return path; // 返回路径作为备用文本
@@ -241,7 +241,7 @@ export function getText(path: string): string {
  */
 export function getTextWithParams(
   path: string,
-  params: Record<string, any>,
+  params: Record<string, unknown>,
 ): string {
   let text = getText(path);
 

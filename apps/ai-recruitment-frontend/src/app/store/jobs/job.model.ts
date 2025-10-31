@@ -1,3 +1,5 @@
+import { JobContracts } from '@ai-recruitment-clerk/api-contracts';
+
 /**
  * Defines the shape of the job.
  */
@@ -5,7 +7,7 @@ export interface Job {
   id: string;
   title: string;
   jdText: string;
-  status: 'draft' | 'active' | 'processing' | 'completed' | 'failed' | 'closed';
+  status: JobContracts.JobStatus;
   createdAt: Date;
   resumeCount: number;
 }
@@ -16,7 +18,7 @@ export interface Job {
 export interface JobListItem {
   id: string;
   title: string;
-  status: 'draft' | 'active' | 'processing' | 'completed' | 'failed' | 'closed';
+  status: JobContracts.JobStatus;
   createdAt: Date;
   resumeCount: number;
 }

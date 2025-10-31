@@ -3,7 +3,7 @@ import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { DatabaseModule } from '../database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { JobsModule } from '../jobs/jobs.module';
@@ -28,6 +28,9 @@ import { QuestionnairesController } from '../questionnaires/questionnaires.contr
 import { AnalyticsController } from '../analytics/analytics.controller';
 import { IncentivesController } from '../incentives/incentives.controller';
 import { UsageLimitsController } from '../usage/usage-limits.controller';
+import { IncentivesService } from '../incentives/incentives.service';
+import { UsageLimitsService } from '../usage/usage-limits.service';
+import { QuestionnairesService } from '../questionnaires/questionnaires.service';
 import { SecurityHeadersMiddleware } from '../middleware/security-headers.middleware';
 import { RateLimitMiddleware } from '../middleware/rate-limit.middleware';
 import { EnhancedRateLimitMiddleware } from '../middleware/enhanced-rate-limit.middleware';
@@ -118,6 +121,9 @@ const isTestEnv = process.env.NODE_ENV === 'test';
     AppService,
     // Use shared NATS client service instead of custom implementation
     AppGatewayNatsService,
+    QuestionnairesService,
+    IncentivesService,
+    UsageLimitsService,
     ...(isTestEnv ? [] : [ProductionSecurityValidator]),
     ...(isTestEnv
       ? []
@@ -127,15 +133,6 @@ const isTestEnv = process.env.NODE_ENV === 'test';
             useClass: JwtAuthGuard,
           },
         ]),
-    // Enable throttling only when explicitly required
-    ...(process.env.ENABLE_THROTTLE === 'true'
-      ? [
-          {
-            provide: APP_GUARD,
-            useClass: ThrottlerGuard,
-          },
-        ]
-      : []),
     // In test, bypass stray 429s except on /system/status for stability
     ...(process.env.NODE_ENV === 'test'
       ? [
@@ -146,10 +143,14 @@ const isTestEnv = process.env.NODE_ENV === 'test';
         ]
       : []),
     // Standardize successful API responses for E2E tests
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: ResponseTransformInterceptor,
-    },
+    ...(isTestEnv
+      ? [
+          {
+            provide: APP_INTERCEPTOR,
+            useClass: ResponseTransformInterceptor,
+          },
+        ]
+      : []),
     // Note: Standardized error handling is provided by ErrorHandlingModule
   ],
 })

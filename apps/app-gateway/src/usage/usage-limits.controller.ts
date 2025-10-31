@@ -8,15 +8,16 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-
-let currentUsage = 0;
-let quota = 100;
+import { UsageLimitsService } from './usage-limits.service';
+import { RecordUsageDto } from './dto/record-usage.dto';
+import { GrantBonusDto } from './dto/grant-bonus.dto';
 
 /**
  * Exposes endpoints for usage limits.
  */
 @Controller('usage-limits')
 export class UsageLimitsController {
+  constructor(private readonly usageLimitsService: UsageLimitsService) {}
   /**
    * Performs the check operation.
    * @returns The result of the operation.
@@ -25,11 +26,7 @@ export class UsageLimitsController {
   @Get('check')
   @HttpCode(HttpStatus.OK)
   check() {
-    return {
-      currentUsage,
-      availableQuota: Math.max(0, quota - currentUsage),
-      canUse: currentUsage < quota,
-    };
+    return this.usageLimitsService.getUsageStatus();
   }
 
   /**
@@ -40,12 +37,8 @@ export class UsageLimitsController {
   @UseGuards(JwtAuthGuard)
   @Post('record')
   @HttpCode(HttpStatus.CREATED)
-  record(@Body() _body: any) {
-    currentUsage += 1;
-    return {
-      currentUsage,
-      remainingQuota: Math.max(0, quota - currentUsage),
-    };
+  record(@Body() _body: RecordUsageDto) {
+    return this.usageLimitsService.recordUsage();
   }
 
   /**
@@ -56,9 +49,8 @@ export class UsageLimitsController {
   @UseGuards(JwtAuthGuard)
   @Post('bonus')
   @HttpCode(HttpStatus.CREATED)
-  bonus(@Body() body: any) {
-    const amount = Number(body?.amount || 0);
-    if (amount > 0) quota += amount;
-    return { newTotalQuota: quota };
+  bonus(@Body() body: GrantBonusDto) {
+    const amount = Number(body?.amount ?? 0);
+    return this.usageLimitsService.addBonusQuota(amount);
   }
 }

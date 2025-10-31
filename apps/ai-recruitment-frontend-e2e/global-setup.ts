@@ -121,9 +121,17 @@ async function globalSetup() {
     console.log('🎯 Configuring development server...');
 
     try {
-      // Try to allocate dev server port
-      devServerPort = await portManager.allocatePort('dev-server');
-      process.env.DEV_SERVER_PORT = devServerPort.toString();
+      if (process.env.DEV_SERVER_PORT) {
+        devServerPort = Number.parseInt(process.env.DEV_SERVER_PORT, 10);
+        console.log(
+          `📝 Dev server port preconfigured via env: ${devServerPort}`,
+        );
+      } else {
+        // Try to allocate dev server port dynamically
+        devServerPort = await portManager.allocatePort('dev-server');
+        process.env.DEV_SERVER_PORT = devServerPort.toString();
+      }
+
       process.env.PLAYWRIGHT_BASE_URL = `http://localhost:${devServerPort}`;
 
       console.log(`📝 Dev server will use port ${devServerPort}`);
@@ -145,7 +153,10 @@ async function globalSetup() {
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
 
-      devServerPort = defaultPort;
+      devServerPort = Number.parseInt(
+        process.env.DEV_SERVER_PORT ?? defaultPort.toString(),
+        10,
+      );
       process.env.DEV_SERVER_PORT = devServerPort.toString();
       process.env.PLAYWRIGHT_BASE_URL = `http://localhost:${devServerPort}`;
     }

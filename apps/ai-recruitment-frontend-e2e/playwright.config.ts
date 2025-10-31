@@ -27,6 +27,59 @@ const baseURL =
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
+const projects = [
+  {
+    name: 'chromium',
+    use: {
+      ...devices['Desktop Chrome'],
+      // Enhanced connection retry for dynamic port environment
+      navigationTimeout: 90000, // Extended for port allocation
+      actionTimeout: 30000, // Extended for infrastructure stability
+      launchOptions: {
+        timeout: 60000, // Increase browser launch timeout
+        args: [
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding',
+          '--no-sandbox', // For CI stability
+          '--disable-dev-shm-usage', // For CI stability
+        ],
+        headless: !process.env.CHROME_HEADED,
+      },
+    },
+  },
+];
+
+if (process.env.E2E_ENABLE_FIREFOX === 'true') {
+  projects.push({
+    name: 'firefox',
+    use: {
+      ...devices['Desktop Firefox'],
+      navigationTimeout: 90000,
+      actionTimeout: 30000,
+      launchOptions: {
+        timeout: 60000,
+        firefoxUserPrefs: {
+          'network.http.connection-retry-timeout': 30,
+          'network.http.connection-timeout': 90,
+          'network.http.response.timeout': 90,
+          'dom.max_script_run_time': 0,
+          'browser.safebrowsing.enabled': false,
+          'browser.safebrowsing.malware.enabled': false,
+          'extensions.autoDisableScopes': 14,
+          'datareporting.policy.dataSubmissionEnabled': false,
+          'datareporting.healthreport.uploadEnabled': false,
+          'browser.cache.disk.enable': false,
+          'browser.cache.memory.enable': true,
+          'browser.cache.memory.capacity': 16384,
+        },
+        headless: !process.env.FIREFOX_HEADED,
+      },
+    },
+  });
+}
+
 export default defineConfig({
   testDir: './src',
   timeout: 30000,
@@ -80,90 +133,5 @@ export default defineConfig({
           stdout: 'pipe',
         },
       }),
-  projects: [
-    {
-      name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        // Enhanced connection retry for dynamic port environment
-        navigationTimeout: 90000, // Extended for port allocation
-        actionTimeout: 30000, // Extended for infrastructure stability
-        launchOptions: {
-          timeout: 60000, // Increase browser launch timeout
-          args: [
-            '--disable-web-security',
-            '--disable-features=VizDisplayCompositor',
-            '--disable-backgrounding-occluded-windows',
-            '--disable-renderer-backgrounding',
-            '--no-sandbox', // For CI stability
-            '--disable-dev-shm-usage', // For CI stability
-          ],
-          headless: !process.env.CHROME_HEADED,
-        },
-      },
-    },
-    {
-      name: 'firefox',
-      use: {
-        ...devices['Desktop Firefox'],
-        // Enhanced Firefox configuration for dynamic port infrastructure
-        navigationTimeout: 90000, // Extended timeout for Firefox + port allocation
-        actionTimeout: 30000, // Extended for Firefox stability
-        // Simplified Firefox launch options for better compatibility
-        launchOptions: {
-          timeout: 60000, // Increase browser launch timeout
-          firefoxUserPrefs: {
-            // Network optimizations
-            'network.http.connection-retry-timeout': 30,
-            'network.http.connection-timeout': 90,
-            'network.http.response.timeout': 90,
-            'dom.max_script_run_time': 0,
-            // Disable problematic features that can cause hangs
-            'browser.safebrowsing.enabled': false,
-            'browser.safebrowsing.malware.enabled': false,
-            'extensions.autoDisableScopes': 14,
-            'datareporting.policy.dataSubmissionEnabled': false,
-            'datareporting.healthreport.uploadEnabled': false,
-            // Reduce memory usage
-            'browser.cache.disk.enable': false,
-            'browser.cache.memory.enable': true,
-            'browser.cache.memory.capacity': 16384,
-          },
-          // Use headless mode for better stability
-          headless: !process.env.FIREFOX_HEADED,
-        },
-      },
-    },
-    // WebKit: Uses separate configuration due to dev server incompatibility
-    // WebKit tests pass 100% with static builds but fail with Playwright's webServer
-    // Root cause: Angular dev server crashes when WebKit connects through Playwright
-    // Solution: Use scripts/run-webkit-tests.mjs or playwright-webkit-static.config.ts
-    //
-    // Uncomment below to test WebKit with dev server (will fail):
-    // {
-    //   name: 'webkit',
-    //   use: {
-    //     ...devices['Desktop Safari'],
-    //     navigationTimeout: 45000,
-    //     actionTimeout: 15000,
-    //     launchOptions: {
-    //       timeout: 30000,
-    //       args: [
-    //         '--disable-web-security',
-    //         '--disable-features=VizDisplayCompositor',
-    //         '--disable-ipc-flooding-protection',
-    //         '--disable-backgrounding-occluded-windows',
-    //         '--disable-renderer-backgrounding',
-    //         '--disable-field-trial-config',
-    //         '--no-first-run'
-    //       ],
-    //       headless: !process.env.WEBKIT_HEADED
-    //     },
-    //     contextOptions: {
-    //       ignoreHTTPSErrors: true,
-    //       bypassCSP: true
-    //     }
-    //   },
-    // }
-  ],
+  projects,
 });

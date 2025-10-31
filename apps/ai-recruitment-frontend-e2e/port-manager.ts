@@ -477,8 +477,19 @@ export class PortManager {
       allPorts.add(port);
     }
 
+    const activeDevServerPort =
+      process.env['DEV_SERVER_PORT'] &&
+      Number.parseInt(process.env['DEV_SERVER_PORT'], 10);
+
     // Sequential cleanup to prevent race conditions
     for (const port of Array.from(allPorts)) {
+      if (Number.isFinite(activeDevServerPort) && port === activeDevServerPort) {
+        console.log(
+          `🛡️ Skipping cleanup for active dev server port ${port} (managed by Playwright)`,
+        );
+        continue;
+      }
+
       if (protectedPorts.has(port)) {
         console.log(
           `🛡️ Skipping cleanup for protected port ${port} (external service)`,

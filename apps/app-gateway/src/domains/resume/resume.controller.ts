@@ -38,7 +38,7 @@ import {
   ResumeStatusUpdateDto,
   ResumeSearchDto,
   ResumeSkillsAnalysisDto,
-} from '../../common/interfaces/fallback-types';
+} from '@ai-recruitment-clerk/shared-dtos';
 import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import { ResumeService } from './resume.service';
 
