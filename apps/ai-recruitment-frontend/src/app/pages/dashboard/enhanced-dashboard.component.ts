@@ -10,7 +10,6 @@ import {
   BentoGridItem,
 } from '../../components/shared/bento-grid/bento-grid.component';
 import {
-  DashboardApiService,
   DashboardStats,
   SystemHealth,
 } from '../../services/dashboard-api.service';
@@ -444,14 +443,12 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
 
   /**
    * Initializes a new instance of the Enhanced Dashboard Component.
-   * @param dashboardApi - The dashboard api.
    * @param guestApi - The guest api.
    * @param websocketStats - The websocket stats.
    * @param progressFeedback - The progress feedback.
    * @param loggerService - The logger service.
    */
   constructor(
-    private _dashboardApi: DashboardApiService,
     private guestApi: GuestApiService,
     private websocketStats: WebSocketStatsService,
     private progressFeedback: ProgressFeedbackService,

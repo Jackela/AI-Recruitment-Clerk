@@ -32,8 +32,8 @@ import {
   QuestionnaireAnalyticsDto,
   QuestionnaireTemplateDto,
   QuestionnaireStatus,
-} from '../../common/interfaces/fallback-types';
-import type { QuestionnaireSubmissionDto } from '../../common/interfaces/fallback-types';
+} from '@ai-recruitment-clerk/shared-dtos';
+import type { QuestionnaireSubmissionDto } from '@ai-recruitment-clerk/shared-dtos';
 import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import { QuestionnaireIntegrationService } from './questionnaire-integration.service';
 

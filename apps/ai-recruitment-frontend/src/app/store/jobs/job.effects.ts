@@ -11,7 +11,6 @@ import {
 import { ApiService } from '../../services/api.service';
 import { WebSocketService } from '../../services/websocket.service';
 import * as JobActions from './job.actions';
-import { Router } from '@angular/router';
 
 /**
  * Represents the job effects.
@@ -33,13 +32,11 @@ export class JobEffects {
    * Initializes a new instance of the Job Effects.
    * @param actions$ - The actions$.
    * @param apiService - The api service.
-   * @param router - The router.
    * @param webSocketService - The WebSocket service.
    */
   constructor(
     private actions$: Actions,
     private apiService: ApiService,
-    private _router: Router,
     private webSocketService: WebSocketService,
   ) {
     this.loadJobs$ = createEffect(() =>

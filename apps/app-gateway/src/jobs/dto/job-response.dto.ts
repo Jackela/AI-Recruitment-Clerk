@@ -1,3 +1,5 @@
+import { JobContracts } from '@ai-recruitment-clerk/api-contracts';
+
 /**
  * Describes the job detail data transfer object.
  */
@@ -5,7 +7,7 @@ export class JobDetailDto {
   id: string;
   title: string;
   jdText: string;
-  status: 'processing' | 'completed';
+  status: JobContracts.JobStatus;
   createdAt: Date;
   resumeCount: number;
 
@@ -22,7 +24,7 @@ export class JobDetailDto {
     id: string,
     title: string,
     jdText: string,
-    status: 'processing' | 'completed',
+    status: JobContracts.JobStatus,
     createdAt: Date,
     resumeCount = 0,
   ) {
@@ -41,7 +43,7 @@ export class JobDetailDto {
 export class JobListDto {
   id: string;
   title: string;
-  status: 'processing' | 'completed';
+  status: JobContracts.JobStatus;
   createdAt: Date;
   resumeCount: number;
 
@@ -56,7 +58,7 @@ export class JobListDto {
   constructor(
     id: string,
     title: string,
-    status: 'processing' | 'completed',
+    status: JobContracts.JobStatus,
     createdAt: Date,
     resumeCount = 0,
   ) {

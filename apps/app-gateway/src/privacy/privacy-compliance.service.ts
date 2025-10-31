@@ -24,7 +24,7 @@ import {
   IdentityVerificationStatus,
   
   ConsentPurpose,
-} from '../common/interfaces/fallback-types';
+} from '@ai-recruitment-clerk/shared-dtos';
 import {
   UserProfile,
   UserProfileDocument,

@@ -36,3 +36,10 @@
 ## Security & Configuration Tips
 - Environment: start from `.env.example`; never commit secrets. Review `SECURITY.md`.
 - Docker/Orchestration: reference `docker-compose.*.yml` for local stacks; validate contracts via `npm run validate:contracts` before builds.
+
+## Active Technologies
+- TypeScript (Node.js 20.x) + Nx build system, NestJS backend services, Angular frontend, Jest, Playwright, npm audit tooling (001-harden-deps)
+- Existing service data stores (MongoDB/PostgreSQL) unchanged; no new storage required (001-harden-deps)
+
+## Recent Changes
+- 001-harden-deps: Added TypeScript (Node.js 20.x) + Nx build system, NestJS backend services, Angular frontend, Jest, Playwright, npm audit tooling

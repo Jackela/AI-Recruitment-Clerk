@@ -34,7 +34,7 @@ import {
   DataSubjectRightsRequestDto,
   UserConsentProfileDto,
   
-} from '../common/interfaces/fallback-types';
+} from '@ai-recruitment-clerk/shared-dtos';
 import type {
   CaptureConsentDto,
   ConsentStatusDto,
@@ -44,7 +44,7 @@ import type {
   ProcessRightsRequestDto,
   UserConsentProfile,
   WithdrawConsentDto,
-} from '../common/interfaces/fallback-types';
+} from '@ai-recruitment-clerk/shared-dtos';
 
 /**
  * GDPR Privacy Compliance Controller

@@ -5,7 +5,7 @@ import {
   RequestStatus,
   IdentityVerificationStatus,
   DataExportFormat,
-} from '../common/interfaces/fallback-types';
+} from '@ai-recruitment-clerk/shared-dtos';
 
 export type DataSubjectRightsRequestDocument = DataSubjectRightsRequest &
   Document;

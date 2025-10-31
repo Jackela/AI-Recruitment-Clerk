@@ -66,11 +66,11 @@ test.describe('Basic Application Health', () => {
     await page.goto('/jobs/create');
     await page.waitForLoadState('domcontentloaded');
 
-    const hasJobTitleInput =
-      (await page.locator('input[formControlName="jobTitle"]').count()) > 0;
-    const hasJdTextarea =
-      (await page.locator('textarea[formControlName="jdText"]').count()) > 0;
-    expect(hasJobTitleInput && hasJdTextarea).toBe(true);
+    const jobTitleInput = page.locator('input[formControlName="jobTitle"]');
+    const jdTextarea = page.locator('textarea[formControlName="jdText"]');
+
+    await expect(jobTitleInput).toBeVisible({ timeout: 15_000 });
+    await expect(jdTextarea).toBeVisible({ timeout: 15_000 });
   });
 
   test('responsive design check', async ({ page }) => {

@@ -108,12 +108,8 @@ interface UserSession {
   isActive: boolean;
 }
 
-// Import enums from fallback-types
-import {
-  EventType,
-  EventStatus,
-  ConsentStatus,
-} from '../../common/interfaces/fallback-types';
+// Import enums from shared DTOs package
+import { EventType, EventStatus, ConsentStatus } from '@ai-recruitment-clerk/shared-dtos';
 
 enum MetricUnit {
   COUNT = 'count',
