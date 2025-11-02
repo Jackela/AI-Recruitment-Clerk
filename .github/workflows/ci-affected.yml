@@ -1,0 +1,26 @@
+name: ci-affected
+
+on:
+  pull_request:
+
+jobs:
+  affected:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - name: Print affected graph
+        run: npx nx print-affected --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }}
+      - name: Lint affected
+        run: npx nx affected -t lint --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }} --parallel=3
+      - name: Test affected
+        run: npx nx affected -t test --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }} --parallel=2
+      - name: Build affected
+        run: npx nx affected -t build --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }} --parallel=2
+      - name: E2E affected
+        run: npx nx affected -t e2e --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }} --parallel=1

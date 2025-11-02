@@ -1,0 +1,36 @@
+openapi: 3.0.3
+info:
+  title: Observability API (Deployment & Gray)
+  version: '1.0.0'
+paths:
+  /ops/observability/funnels:
+    get:
+      summary: Get funnel metrics for gray rollout
+      parameters:
+        - in: query
+          name: window
+          schema: { type: string, example: '24h' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FunnelMetrics'
+  /ops/observability/health:
+    get:
+      summary: Get service health snapshot
+      responses:
+        '200': { description: OK }
+
+components:
+  schemas:
+    FunnelMetrics:
+      type: object
+      properties:
+        window: { type: string }
+        exposure: { type: integer }
+        success: { type: integer }
+        error: { type: integer }
+        cancel: { type: integer }
+        successRate: { type: number }

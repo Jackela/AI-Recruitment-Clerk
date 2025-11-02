@@ -1,0 +1,4 @@
+-P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest
+# Uncomment and adjust if you need more disk space or rootless mode
+# -b
+

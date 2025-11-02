@@ -184,3 +184,7 @@ Closes all outstanding integration and deployment requirements.
 **Quality Gate**: ✅ PASSED  
 **Deployment**: ✅ ONE-CLICK READY  
 **Documentation**: ✅ COMPLETE
+## Required Checks
+- [ ] CI: lint, typecheck, build, test_coverage, e2e_smoke, pii_scan
+- [ ] Contracts: `node tools/contract-validation/validate-contracts.js` reports all pass
+- [ ] Ops docs consulted for auth and runbooks (docs/pivot/ops-auth.md, docs/pivot/runbook.md)

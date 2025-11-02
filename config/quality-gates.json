@@ -1,0 +1,7 @@
+{
+  "coverage": 0.85,
+  "lintErrors": 0,
+  "typecheck": true,
+  "requireE2ESmoke": true
+}
+

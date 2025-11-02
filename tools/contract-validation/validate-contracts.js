@@ -157,6 +157,7 @@ function validateStatusEnums() {
  */
 async function main() {
   const results = [
+    validateOpenApiSmoke(),
     validateTypeScriptContracts(),
     checkForContractTodos(),
     validateFieldNaming(),
@@ -184,3 +185,32 @@ main().catch(error => {
   console.error('❌ Contract validation script failed:', error);
   process.exit(1);
 });
+
+/**
+ * OpenAPI smoke checks to ensure required paths and schemas exist
+ */
+function validateOpenApiSmoke() {
+  console.log('🧪 Performing OpenAPI smoke checks...');
+  const required = [
+    { file: 'specs/002-cicd-quality-migration/contracts/feature-flags.yaml', strings: ['openapi: 3', '/ops/flags:', 'components:', 'FeatureFlag:'] },
+    { file: 'specs/002-cicd-quality-migration/contracts/release.yaml', strings: ['openapi: 3', '/ops/release/deploy:', 'components:', 'DeployResponse:'] },
+    { file: 'specs/002-cicd-quality-migration/contracts/observability.yaml', strings: ['openapi: 3', '/ops/observability/funnels:', 'components:', 'FunnelMetrics:'] },
+  ];
+  let ok = true;
+  for (const r of required) {
+    const path = join(rootDir, r.file);
+    if (!existsSync(path)) {
+      console.warn(`⚠️  Missing OpenAPI file: ${r.file}`);
+      ok = false; continue;
+    }
+    const content = readFileSync(path, 'utf8');
+    for (const s of r.strings) {
+      if (!content.includes(s)) {
+        console.warn(`⚠️  ${r.file} missing string: ${s}`);
+        ok = false;
+      }
+    }
+  }
+  if (ok) console.log('✅ OpenAPI smoke checks passed');
+  return ok;
+}
