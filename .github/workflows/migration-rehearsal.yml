@@ -1,0 +1,27 @@
+name: migration-rehearsal
+
+on:
+  workflow_dispatch:
+
+jobs:
+  rehearsal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - name: Convert resume fixtures
+        run: node tools/migration/convert-resume-format.mjs
+      - name: Compare summary
+        run: node tools/migration/compare-summary.mjs
+      - name: Consistency metrics
+        run: node tools/migration/consistency-metrics.mjs
+      - name: Upload migration logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-logs
+          path: tools/logs/migration
+          if-no-files-found: ignore

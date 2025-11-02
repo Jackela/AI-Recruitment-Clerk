@@ -20,7 +20,7 @@
     "test:app-gateway": "jest --config jest.config.cjs --passWithNoTests apps/app-gateway",
     "test:ci": "jest --config jest.config.cjs --ci --coverage --passWithNoTests",
     "test:coverage": "jest --config jest.config.cjs --coverage --passWithNoTests",
-    "lint": "node -e \"console.log('Lint skipped for CI fast-path'); process.exit(0)\"",
+    "lint": "npx nx run-many -t lint --all --parallel=3",
     "typecheck": "tsc --noEmit --project tsconfig.ci.json",
     "audit": "nx audit",
     "dependency-scan": "act -j dependency-scan -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest",
@@ -45,9 +45,17 @@
     "validate:contracts:ci": "npm run validate:contracts",
     "build:with-contracts": "npm run validate:contracts && npm run build",
     "acceptance:status": "pwsh -NoLogo -NoProfile -File scripts/acceptance-status.ps1",
-    "acceptance:signoff": "pwsh -NoLogo -NoProfile -File scripts/generate-signoff.ps1"
+    "acceptance:signoff": "pwsh -NoLogo -NoProfile -File scripts/generate-signoff.ps1",
+    "act:ci": "act -W .github/workflows/ci.yml -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest",
+    "act:ci-affected": "act -W .github/workflows/ci-affected.yml -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest",
+    "act:cd:pre": "act -W .github/workflows/cd.yml -e .github/workflows/events/cd-pre.json -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest",
+    "act:cd:prod": "act -W .github/workflows/cd.yml -e .github/workflows/events/cd-prod.json -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest",
+    "act:e2e-nightly": "act -W .github/workflows/e2e-nightly.yml -e .github/workflows/events/dispatch.json -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest",
+    "act:migration-rehearsal": "act -W .github/workflows/migration-rehearsal.yml -e .github/workflows/events/dispatch.json -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest",
+    "act:cd:local": "act -W .github/workflows/cd-local.yml -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest"
   },
   "devDependencies": {
+    "ajv": "^8.17.1",
     "@angular-devkit/architect": "^0.2003.8",
     "@angular-devkit/core": "~20.3.8",
     "@angular-devkit/schematics": "~20.3.8",

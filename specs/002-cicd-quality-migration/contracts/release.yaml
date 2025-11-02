@@ -1,0 +1,53 @@
+openapi: 3.0.3
+info:
+  title: Release & Rollout API
+  version: '1.0.0'
+paths:
+  /ops/release/deploy:
+    post:
+      summary: Deploy artifact to pre-release or production
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [channel, artifactId]
+              properties:
+                channel: { type: string, enum: [pre-release, production] }
+                artifactId: { type: string }
+      responses:
+        '202':
+          description: Deployment started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeployResponse'
+  /ops/release/rollback:
+    post:
+      summary: Rollback production to previous artifact
+      responses:
+        '202': { description: Rollback started }
+  /ops/release/gray:
+    post:
+      summary: Update gray rollout percentage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [flagKey, percentage]
+              properties:
+                flagKey: { type: string }
+                percentage: { type: number, minimum: 0, maximum: 100 }
+      responses:
+        '200': { description: Updated }
+
+components:
+  schemas:
+    DeployResponse:
+      type: object
+      properties:
+        deploymentId: { type: string }
+        status: { type: string, enum: [started, completed, failed] }

@@ -9,12 +9,14 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import pdf from 'pdf-parse-fork';
+import { MetricsService } from '../ops/metrics.service';
 
 /**
  * Exposes endpoints for scoring proxy.
  */
 @Controller('scoring')
 export class ScoringProxyController {
+  constructor(private readonly metrics: MetricsService) {}
   /**
    * Performs the gap analysis operation.
    * @param body - The body.
@@ -22,6 +24,7 @@ export class ScoringProxyController {
    */
   @Post('gap-analysis')
   async gapAnalysis(@Body() body: any) {
+    this.metrics.incExposure();
     const base =
       process.env.SCORING_ENGINE_URL || 'http://scoring-engine-svc:3000';
     const url = `${base.replace(/\/$/, '')}/gap-analysis`;
@@ -38,8 +41,10 @@ export class ScoringProxyController {
           res.status as HttpStatus,
         );
       }
+      this.metrics.incSuccess();
       return data;
     } catch (error) {
+      this.metrics.incError();
       throw new HttpException(
         {
           message: 'Failed to reach scoring engine',
@@ -118,6 +123,7 @@ export class ScoringProxyController {
           res.status as HttpStatus,
         );
       }
+      this.metrics.incSuccess();
       return data;
     } catch (error) {
       // As a fallback, perform improved token matching locally if scoring engine is unreachable
@@ -125,6 +131,7 @@ export class ScoringProxyController {
       const resumeSkills = tokenize(resumeText || '');
       const matched = jdSkills.filter((s) => resumeSkills.includes(s));
       const missing = jdSkills.filter((s) => !resumeSkills.includes(s));
+      this.metrics.incError();
       return {
         matchedSkills: matched,
         missingSkills: missing,
@@ -153,3 +160,4 @@ export class ScoringProxyController {
     }
   }
 }
+    this.metrics.incExposure();

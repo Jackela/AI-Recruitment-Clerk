@@ -39,54 +39,40 @@ import { TestRateLimitBypassFilter } from '../common/filters/test-ratelimit-bypa
 import { ResponseTransformInterceptor } from '../common/interceptors/response-transform.interceptor';
 // Standardized Error Handling Infrastructure
 import { ErrorHandlingModule } from '@ai-recruitment-clerk/shared-dtos';
+import { ReleaseController } from '../ops/release.controller';
+import { GrayController } from '../ops/gray.controller';
+import { RollbackService } from '../ops/rollback.service';
+import { FlagsController } from '../ops/flags.controller';
+import { DualRunMiddleware } from '../middleware/dual-run.middleware';
+import { AuditMiddleware } from '../middleware/audit.middleware';
+import { AuditController } from '../ops/audit.controller';
+import { MetricsService } from '../ops/metrics.service';
+import { ObservabilityController } from '../ops/observability.controller';
+import { ImpactController } from '../ops/impact.controller';
 
 const isTestEnv = process.env.NODE_ENV === 'test';
 
-/**
- * Configures the app module.
- */
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // Make config accessible to all modules
+      isGlobal: true,
       envFilePath: ['.env', '.env.local', '.env.production'],
-      cache: true, // Improve performance by caching variables
+      cache: true,
     }),
     ThrottlerModule.forRootAsync({
       useFactory: () => ({
         throttlers: [
-          {
-            name: 'short',
-            ttl: 60000, // 1 minute
-            limit: 20, // 20 requests per minute
-          },
-          {
-            name: 'medium',
-            ttl: 600000, // 10 minutes
-            limit: 100, // 100 requests per 10 minutes
-          },
-          {
-            name: 'long',
-            ttl: 3600000, // 1 hour
-            limit: 500, // 500 requests per hour
-          },
+          { name: 'short', ttl: 60000, limit: 20 },
+          { name: 'medium', ttl: 600000, limit: 100 },
+          { name: 'long', ttl: 3600000, limit: 500 },
         ],
       }),
     }),
     AppCacheModule,
     EmbeddingModule,
-    // Standardized Error Handling Infrastructure
     ErrorHandlingModule.forService('app-gateway'),
-    // Configure shared NATS client with app-gateway service name
-    NatsClientModule.forRoot({
-      serviceName: 'app-gateway',
-    }),
-    ...(isTestEnv
-      ? []
-      : [
-    // Centralized database configuration with strict test/prod separation
-    DatabaseModule,
-        ]),
+    NatsClientModule.forRoot({ serviceName: 'app-gateway' }),
+    ...(isTestEnv ? [] : [DatabaseModule]),
     ...(isTestEnv
       ? []
       : [
@@ -114,70 +100,44 @@ const isTestEnv = process.env.NODE_ENV === 'test';
           AnalyticsController,
           IncentivesController,
           UsageLimitsController,
+          ReleaseController,
+          GrayController,
+          FlagsController,
+          ObservabilityController,
+          ImpactController,
+          AuditController,
         ]),
-    // No test-only controllers required; production controllers meet E2E contracts
   ],
   providers: [
     AppService,
-    // Use shared NATS client service instead of custom implementation
     AppGatewayNatsService,
     QuestionnairesService,
     IncentivesService,
     UsageLimitsService,
+    RollbackService,
+    MetricsService,
     ...(isTestEnv ? [] : [ProductionSecurityValidator]),
     ...(isTestEnv
       ? []
       : [
-          {
-            provide: APP_GUARD,
-            useClass: JwtAuthGuard,
-          },
+          { provide: APP_GUARD, useClass: JwtAuthGuard },
         ]),
-    // In test, bypass stray 429s except on /system/status for stability
     ...(process.env.NODE_ENV === 'test'
       ? [
-          {
-            provide: APP_FILTER,
-            useClass: TestRateLimitBypassFilter,
-          },
+          { provide: APP_FILTER, useClass: TestRateLimitBypassFilter },
+          { provide: APP_INTERCEPTOR, useClass: ResponseTransformInterceptor },
         ]
       : []),
-    // Standardize successful API responses for E2E tests
-    ...(isTestEnv
-      ? [
-          {
-            provide: APP_INTERCEPTOR,
-            useClass: ResponseTransformInterceptor,
-          },
-        ]
-      : []),
-    // Note: Standardized error handling is provided by ErrorHandlingModule
   ],
 })
 export class AppModule implements NestModule {
-  /**
-   * Performs the configure operation.
-   * @param consumer - The consumer.
-   * @returns The result of the operation.
-   */
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(SecurityHeadersMiddleware).forRoutes('*');
-
-    // Temporarily disable CSRF for development/debugging
-    // consumer
-    //   .apply(CsrfProtectionMiddleware)
-    //   .forRoutes('*');
-
-    // 基础限流只应用于游客端点
+    consumer.apply(AuditMiddleware).forRoutes('/ops/*');
     if (!isTestEnv) {
       consumer.apply(RateLimitMiddleware).forRoutes('/api/guest/*');
-    }
-
-    // 增强限流应用于认证相关端点
-    if (!isTestEnv) {
-      consumer
-        .apply(EnhancedRateLimitMiddleware)
-        .forRoutes('/api/auth/*', '/api/guest/*');
+      consumer.apply(EnhancedRateLimitMiddleware).forRoutes('/api/auth/*', '/api/guest/*');
+      consumer.apply(DualRunMiddleware).forRoutes('/scoring/*');
     }
   }
 }

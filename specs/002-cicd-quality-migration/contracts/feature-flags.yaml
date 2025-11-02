@@ -1,0 +1,93 @@
+openapi: 3.0.3
+info:
+  title: Feature Flags API
+  version: '1.0.0'
+paths:
+  /ops/flags:
+    get:
+      summary: List feature flags
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureFlagList'
+    post:
+      summary: Create or update a feature flag
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeatureFlag'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureFlag'
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureFlag'
+  /ops/flags/{key}:
+    get:
+      summary: Get flag by key
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureFlag'
+        '404': { description: Not Found }
+    delete:
+      summary: Delete flag
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema:
+            type: string
+      responses:
+        '204': { description: Deleted }
+components:
+  schemas:
+    FeatureFlag:
+      type: object
+      required: [key, enabled, rolloutPercentage]
+      properties:
+        key: { type: string }
+        description: { type: string }
+        enabled: { type: boolean }
+        rolloutPercentage: { type: number, minimum: 0, maximum: 100 }
+        cohorts:
+          type: array
+          items: { type: string }
+        killSwitch: { type: boolean }
+        updatedBy: { type: string }
+        updatedAt: { type: string, format: date-time }
+        auditId: { type: string }
+    FeatureFlagList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureFlag'
+    ApiError:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
