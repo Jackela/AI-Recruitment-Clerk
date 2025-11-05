@@ -60,6 +60,7 @@ if (process.env.E2E_ENABLE_FIREFOX === 'true') {
       actionTimeout: 30000,
       launchOptions: {
         timeout: 60000,
+        args: [],
         headless: !process.env.FIREFOX_HEADED,
       },
     },

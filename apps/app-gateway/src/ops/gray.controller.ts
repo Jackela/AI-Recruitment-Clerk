@@ -2,7 +2,7 @@ import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { OpsGuard } from './ops.guard';
 import { OpsPermissionsGuard } from './ops-permissions.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
-import { Permission } from '@ai-recruitment-clerk/shared-dtos';
+import { Permission } from '@ai-recruitment-clerk/user-management-domain';
 import { featureFlags } from '../config/feature-flags.config';
 
 @Controller('ops/release')
