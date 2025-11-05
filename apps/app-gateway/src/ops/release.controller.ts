@@ -9,7 +9,7 @@ import { Permission } from '@ai-recruitment-clerk/user-management-domain';
 export class ReleaseController {
   @Post('deploy')
   @HttpCode(202)
-  @Permissions(Permission.SYSTEM_CONFIG, Permission.MANAGE_INTEGRATIONS)
+  @Permissions(Permission.SYSTEM_CONFIG, Permission.SYSTEM_CONFIG)
   deploy(@Body() body: { channel: 'pre-release' | 'production'; artifactId: string }) {
     return { deploymentId: `dep_${Date.now()}`, status: 'started', channel: body.channel, artifactId: body.artifactId };
   }
