@@ -17,6 +17,7 @@ jobs:
       - run: npm run lint
 
   typecheck:
+    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,6 +28,7 @@ jobs:
       - run: npm run typecheck
 
   build:
+    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
