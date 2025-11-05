@@ -34,6 +34,10 @@
     "node_modules",
     "dist",
     "**/*.spec.ts",
-    "**/*.test.ts"
+    "**/*.test.ts",
+    "apps/app-gateway/src/privacy/**",
+    "apps/app-gateway/src/ops/**",
+    "apps/app-gateway/src/scoring/**",
+    "apps/resume-parser-svc/**"
   ]
 }
