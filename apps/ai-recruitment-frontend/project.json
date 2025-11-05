@@ -104,6 +104,7 @@
           "optimization": false,
           "extractLicenses": false,
           "sourceMap": true,
+          "tsConfig": "apps/ai-recruitment-frontend/tsconfig.e2e.json",
           "fileReplacements": [
             {
               "replace": "apps/ai-recruitment-frontend/src/environments/environment.ts",
