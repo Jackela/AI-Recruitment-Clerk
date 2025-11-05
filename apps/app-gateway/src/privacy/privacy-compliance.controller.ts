@@ -33,12 +33,8 @@ import {
 } from '@ai-recruitment-clerk/shared-dtos';
 import type {
   CaptureConsentDto,
-  ConsentStatusDto,
   CreateRightsRequestDto,
-  DataExportPackage,
-  DataSubjectRightsRequest,
   ProcessRightsRequestDto,
-  UserConsentProfile,
   WithdrawConsentDto,
 } from '@ai-recruitment-clerk/shared-dtos';
 
