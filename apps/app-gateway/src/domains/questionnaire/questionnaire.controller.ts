@@ -24,16 +24,7 @@ import {
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
-import {
-  QuestionnaireDto,
-  CreateQuestionnaireDto,
-  UpdateQuestionnaireDto,
-  QuestionnaireResponseDto,
-  QuestionnaireAnalyticsDto,
-  QuestionnaireTemplateDto,
-  QuestionnaireStatus,
-} from '@ai-recruitment-clerk/shared-dtos';
-import type { QuestionnaireSubmissionDto } from '@ai-recruitment-clerk/shared-dtos';
+import { QuestionnaireStatus } from '@ai-recruitment-clerk/shared-dtos';
 import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import { QuestionnaireIntegrationService } from './questionnaire-integration.service';
 
@@ -90,7 +81,7 @@ export class QuestionnaireController {
   @HttpCode(HttpStatus.CREATED)
   async createQuestionnaire(
     @Request() req: AuthenticatedRequest,
-    @Body() createDto: CreateQuestionnaireDto,
+    @Body() createDto: Record<string, any>,
   ) {
     try {
       const questionnaire = await this.questionnaireService.createQuestionnaire(
@@ -137,7 +128,6 @@ export class QuestionnaireController {
   @ApiResponse({
     status: 200,
     description: '问卷列表获取成功',
-    type: [QuestionnaireDto],
   })
   @ApiQuery({ name: 'page', required: false, description: '页码' })
   @ApiQuery({ name: 'limit', required: false, description: '每页数量' })
@@ -200,7 +190,6 @@ export class QuestionnaireController {
   @ApiResponse({
     status: 200,
     description: '问卷详情获取成功',
-    type: QuestionnaireDto,
   })
   @ApiResponse({ status: 404, description: '问卷未找到' })
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
@@ -253,7 +242,7 @@ export class QuestionnaireController {
   async updateQuestionnaire(
     @Request() req: AuthenticatedRequest,
     @Param('questionnaireId') questionnaireId: string,
-    @Body() updateDto: UpdateQuestionnaireDto,
+    @Body() updateDto: Record<string, any>,
   ) {
     try {
       const updatedQuestionnaire =
@@ -374,7 +363,7 @@ export class QuestionnaireController {
   async submitQuestionnaire(
     @Request() req: AuthenticatedRequest,
     @Param('questionnaireId') questionnaireId: string,
-    @Body() submission: QuestionnaireSubmissionDto,
+    @Body() submission: Record<string, any>,
   ) {
     try {
       const submissionResult =
@@ -426,7 +415,6 @@ export class QuestionnaireController {
   @ApiResponse({
     status: 200,
     description: '提交记录获取成功',
-    type: [QuestionnaireResponseDto],
   })
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @ApiQuery({ name: 'page', required: false, description: '页码' })
@@ -490,7 +478,6 @@ export class QuestionnaireController {
   @ApiResponse({
     status: 200,
     description: '分析报告获取成功',
-    type: QuestionnaireAnalyticsDto,
   })
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @UseGuards(RolesGuard)
@@ -636,7 +623,6 @@ export class QuestionnaireController {
   @ApiResponse({
     status: 200,
     description: '模板列表获取成功',
-    type: [QuestionnaireTemplateDto],
   })
   @ApiQuery({ name: 'category', required: false, description: '模板分类' })
   @Get('templates/list')

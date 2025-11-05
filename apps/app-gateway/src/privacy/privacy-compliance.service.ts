@@ -18,12 +18,11 @@ import {
   DataSubjectRightsRequest,
   CreateRightsRequestDto,
   DataExportPackage,
-  
   RequestStatus,
   DataExportFormat,
   IdentityVerificationStatus,
-  
   ConsentPurpose,
+  DataCategory,
 } from '@ai-recruitment-clerk/shared-dtos';
 import {
   UserProfile,
@@ -340,12 +339,19 @@ export class PrivacyComplianceService {
       // Collect all personal data for the user
       const userData = await this.collectUserData(userId);
 
+      // Transform to DataCategoryExport[]
+      const dataCategories = (userData || []).map((item: any) => ({
+        category: String(item.dataType || 'unknown'),
+        description: `Collected from ${String(item.service || 'unknown')}`,
+        data: item.data,
+        sources: item.service ? [String(item.service)] : [],
+      }));
+
       const exportPackage: DataExportPackage = {
         requestId: uuidv4(),
         userId,
-        data: userData,
         format,
-        dataCategories: userData,
+        dataCategories,
         metadata: {
           exportDate: new Date(),
           dataController: 'AI Recruitment Clerk',
@@ -404,36 +410,36 @@ export class PrivacyComplianceService {
    * PRIVATE HELPER METHODS
    */
 
-  private getDefaultDataCategories(purpose: ConsentPurpose): string[] {
-    const categoryMap = {
+  private getDefaultDataCategories(purpose: ConsentPurpose): DataCategory[] {
+    const categoryMap: Record<ConsentPurpose, DataCategory[]> = {
       [ConsentPurpose.ESSENTIAL_SERVICES]: [
-        'authentication',
-        'profile_information',
+        DataCategory.AUTHENTICATION,
+        DataCategory.PROFILE_INFORMATION,
       ],
       [ConsentPurpose.BEHAVIORAL_ANALYTICS]: [
-        'behavioral_data',
-        'device_information',
+        DataCategory.BEHAVIORAL_DATA,
+        DataCategory.DEVICE_INFORMATION,
       ],
       [ConsentPurpose.MARKETING_COMMUNICATIONS]: [
-        'communication_preferences',
-        'profile_information',
+        DataCategory.COMMUNICATION_PREFERENCES,
+        DataCategory.PROFILE_INFORMATION,
       ],
       [ConsentPurpose.FUNCTIONAL_ANALYTICS]: [
-        'system_logs',
-        'performance_data',
+        DataCategory.SYSTEM_LOGS,
+        DataCategory.DEVICE_INFORMATION,
       ],
       [ConsentPurpose.THIRD_PARTY_SHARING]: [
-        'resume_content',
-        'job_preferences',
+        DataCategory.RESUME_CONTENT,
+        DataCategory.JOB_PREFERENCES,
       ],
       [ConsentPurpose.PERSONALIZATION]: [
-        'profile_information',
-        'job_preferences',
+        DataCategory.PROFILE_INFORMATION,
+        DataCategory.JOB_PREFERENCES,
       ],
-      [ConsentPurpose.PERFORMANCE_MONITORING]: ['system_logs'],
-    };
+      [ConsentPurpose.PERFORMANCE_MONITORING]: [DataCategory.SYSTEM_LOGS],
+    } as any;
 
-    return categoryMap[purpose] || ['general'];
+    return categoryMap[purpose] || [DataCategory.SYSTEM_LOGS];
   }
 
   private getLegalBasisForPurpose(purpose: ConsentPurpose): string {
@@ -492,22 +498,22 @@ export class PrivacyComplianceService {
 
       // Stop all related processing activities based on purpose
       switch (purpose) {
-        case ConsentPurpose.RESUME_PROCESSING:
+        case ConsentPurpose.ESSENTIAL_SERVICES:
           await this.stopResumeProcessing(userId);
           await this.stopJobMatchingActivities(userId);
           break;
 
-        case ConsentPurpose.MARKETING:
+        case ConsentPurpose.MARKETING_COMMUNICATIONS:
           await this.stopMarketingActivities(userId);
           await this.removeFromMarketingLists(userId);
           break;
 
-        case ConsentPurpose.ANALYTICS:
+        case ConsentPurpose.BEHAVIORAL_ANALYTICS:
           await this.stopAnalyticsCollection(userId);
           await this.anonymizeAnalyticsData(userId);
           break;
 
-        case ConsentPurpose.COMMUNICATION:
+        case ConsentPurpose.PERSONALIZATION:
           await this.stopCommunicationActivities(userId);
           await this.unsubscribeFromNotifications(userId);
           break;
@@ -989,17 +995,22 @@ export class PrivacyComplianceService {
       this.logger.log(`Generating secure download URL for export package`);
 
       // Create comprehensive data export
+      const flatData = (exportPackage.dataCategories || []).map((dc) => ({
+        service: (dc.sources && dc.sources[0]) || 'unknown',
+        dataType: dc.category || 'unknown',
+        data: (dc as any).data,
+      }));
       const exportData = {
         metadata: {
           exportedAt: new Date().toISOString(),
           dataSubject: exportPackage.userId,
-          totalRecords: exportPackage.data?.length || 0,
+          totalRecords: flatData.length,
           exportFormat: 'JSON',
           gdprCompliant: true,
-          packageId: exportPackage.id,
+          packageId: exportPackage.requestId,
         },
-        data: exportPackage.data || [],
-        summary: this.generateDataSummary(exportPackage.data || []),
+        data: flatData,
+        summary: this.generateDataSummary(flatData),
       };
 
       // Convert to JSON with proper formatting
