@@ -25,15 +25,11 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PrivacyComplianceService } from './privacy-compliance.service';
 import {
-  
-  ConsentStatusResponseDto,
-  
   DataExportFormat,
-  DataExportPackageDto,
-  
-  DataSubjectRightsRequestDto,
-  UserConsentProfileDto,
-  
+  DataExportPackage,
+  DataSubjectRightsRequest,
+  UserConsentProfile,
+  ConsentStatusDto,
 } from '@ai-recruitment-clerk/shared-dtos';
 import type {
   CaptureConsentDto,
@@ -74,7 +70,7 @@ export class PrivacyComplianceController {
   @ApiResponse({
     status: 201,
     description: 'Consent captured successfully',
-    type: UserConsentProfileDto,
+    type: UserConsentProfile,
   })
   @ApiResponse({ status: 400, description: 'Invalid consent data' })
   @ApiResponse({ status: 404, description: 'User not found' })
@@ -137,7 +133,7 @@ export class PrivacyComplianceController {
   @ApiResponse({
     status: 200,
     description: 'Consent status retrieved',
-    type: ConsentStatusResponseDto,
+    type: ConsentStatusDto,
   })
   @ApiResponse({ status: 404, description: 'User not found' })
   async getConsentStatus(
@@ -163,7 +159,7 @@ export class PrivacyComplianceController {
   @ApiResponse({
     status: 201,
     description: 'Rights request created',
-    type: DataSubjectRightsRequestDto,
+    type: DataSubjectRightsRequest,
   })
   @ApiResponse({ status: 400, description: 'Invalid request data' })
   async createRightsRequest(
@@ -206,7 +202,7 @@ export class PrivacyComplianceController {
   @ApiResponse({
     status: 200,
     description: 'Data export package created',
-    type: DataExportPackageDto,
+    type: DataExportPackage,
   })
   @ApiResponse({ status: 404, description: 'User not found' })
   async exportUserData(

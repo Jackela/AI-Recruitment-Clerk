@@ -80,7 +80,7 @@ export class ScoringProxyController {
     let resumeText = '';
     try {
       if (mimetype.includes('pdf') || filename.endsWith('.pdf')) {
-        const parsed = await pdf(Buffer.from(file.buffer));
+        const parsed = await pdf(file.buffer as unknown as Uint8Array);
         resumeText = parsed.text || '';
       } else if (
         mimetype.startsWith('text/') ||
@@ -88,7 +88,7 @@ export class ScoringProxyController {
         filename.endsWith('.md') ||
         filename.endsWith('.text')
       ) {
-        resumeText = Buffer.from(file.buffer).toString('utf-8');
+        resumeText = (file.buffer as Buffer).toString('utf-8');
       } else {
         throw new HttpException(
           { message: 'Unsupported file type' },

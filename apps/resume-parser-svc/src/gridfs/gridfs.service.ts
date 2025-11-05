@@ -66,7 +66,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
       // Test mode/in-memory fallback
       const inMemory = this.inMemoryStore.get(fileId);
       if (inMemory) {
-        return Buffer.from(inMemory.buffer);
+        return inMemory.buffer;
       }
 
       // Convert to MongoDB ObjectId
@@ -183,7 +183,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
         metadata: _metadata ?? {},
       };
       this.inMemoryStore.set(objectId, {
-        buffer: Buffer.from(_buffer),
+        buffer: _buffer,
         info,
       });
       this.logger.debug(`Stored file in in-memory GridFS: ${gridFsUrl}`);
