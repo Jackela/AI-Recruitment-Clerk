@@ -31,14 +31,7 @@ import {
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
-import {
-  ResumeDto,
-  ResumeAnalysisDto,
-  ResumeUploadDto,
-  ResumeStatusUpdateDto,
-  ResumeSearchDto,
-  ResumeSkillsAnalysisDto,
-} from '@ai-recruitment-clerk/shared-dtos';
+import { ResumeUploadDto } from '../../jobs/dto/resume-upload.dto';
 import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import { ResumeService } from './resume.service';
 
@@ -173,7 +166,6 @@ export class ResumeController {
   @ApiResponse({
     status: 200,
     description: '简历数据获取成功',
-    type: ResumeDto,
   })
   @ApiResponse({ status: 404, description: '简历未找到' })
   @ApiParam({ name: 'resumeId', description: '简历ID' })
@@ -227,7 +219,6 @@ export class ResumeController {
   @ApiResponse({
     status: 200,
     description: '分析结果获取成功',
-    type: ResumeAnalysisDto,
   })
   @ApiParam({ name: 'resumeId', description: '简历ID' })
   @ApiQuery({
@@ -278,7 +269,6 @@ export class ResumeController {
   @ApiResponse({
     status: 200,
     description: '技能分析获取成功',
-    type: ResumeSkillsAnalysisDto,
   })
   @ApiParam({ name: 'resumeId', description: '简历ID' })
   @Get(':resumeId/skills')
@@ -323,7 +313,7 @@ export class ResumeController {
   async updateResumeStatus(
     @Request() req: AuthenticatedRequest,
     @Param('resumeId') resumeId: string,
-    @Body() statusUpdate: ResumeStatusUpdateDto,
+    @Body() statusUpdate: { status: string; reason?: string },
   ) {
     try {
       await this.resumeService.updateResumeStatus(
@@ -424,7 +414,14 @@ export class ResumeController {
   @HttpCode(HttpStatus.OK)
   async searchResumes(
     @Request() req: AuthenticatedRequest,
-    @Body() searchCriteria: ResumeSearchDto,
+    @Body()
+    searchCriteria: {
+      keywords?: string;
+      skills?: string[];
+      minYears?: number;
+      maxYears?: number;
+      [key: string]: any;
+    },
     @Query('page') page = 1,
     @Query('limit') limit = 20,
   ) {

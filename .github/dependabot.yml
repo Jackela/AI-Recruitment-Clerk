@@ -65,25 +65,25 @@ updates:
       include: "scope"
 
   # ============================================================================
-  # Docker Dependencies
+  # Docker Dependencies (disabled until repo has standard Dockerfiles)
   # ============================================================================
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "tuesday"
-      time: "09:00"
-      timezone: "UTC"
-    open-pull-requests-limit: 5
-    reviewers:
-      - "Jackela"
-    labels:
-      - "dependencies"
-      - "docker"
-      - "infrastructure"
-    commit-message:
-      prefix: "chore(docker)"
-      include: "scope"
+  # - package-ecosystem: "docker"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"
+  #     day: "tuesday"
+  #     time: "09:00"
+  #     timezone: "UTC"
+  #   open-pull-requests-limit: 5
+  #   reviewers:
+  #     - "Jackela"
+  #   labels:
+  #     - "dependencies"
+  #     - "docker"
+  #     - "infrastructure"
+  #   commit-message:
+  #     prefix: "chore(docker)"
+  #     include: "scope"
 
   # ============================================================================
   # Frontend Application Dependencies

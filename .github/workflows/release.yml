@@ -39,6 +39,9 @@ jobs:
           npm ci --legacy-peer-deps --prefer-offline || npm install --legacy-peer-deps
           echo "✅ Dependencies installed"
 
+      - name: Prepare dependency gate folder
+        run: mkdir -p data/security
+
       - name: 🔐 Enforce dependency gate
         run: |
           echo "🔐 Generating dependency inventory..."
