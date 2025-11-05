@@ -80,7 +80,7 @@ export class ScoringProxyController {
     let resumeText = '';
     try {
       if (mimetype.includes('pdf') || filename.endsWith('.pdf')) {
-        const parsed = await pdf(file.buffer as unknown as Uint8Array);
+        const parsed = await pdf(file.buffer as Buffer);
         resumeText = parsed.text || '';
       } else if (
         mimetype.startsWith('text/') ||
