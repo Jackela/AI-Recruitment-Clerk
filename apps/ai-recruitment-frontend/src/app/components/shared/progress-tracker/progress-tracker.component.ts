@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, BehaviorSubject } from 'rxjs';
 // import { Observable } from 'rxjs'; // Reserved for future use
@@ -26,6 +26,7 @@ export interface WebSocketProgressMessage {
   data?: {
     message?: string;
     currentStep?: string;
+    progress?: number;
     [key: string]: unknown;
   };
 }
@@ -504,6 +505,9 @@ export interface ProgressStep {
   ],
 })
 export class ProgressTrackerComponent implements OnInit, OnDestroy {
+  private readonly webSocketService = inject(WebSocketService);
+  private readonly toastService = inject(ToastService);
+
   @Input() sessionId = '';
   @Input() steps: ProgressStep[] = [];
   @Input() showMessageLog = true;
@@ -519,16 +523,6 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
   private messages: ProgressMessage[] = [];
-
-  /**
-   * Initializes a new instance of the Progress Tracker Component.
-   * @param webSocketService - The web socket service.
-   * @param toastService - The toast service.
-   */
-  constructor(
-    private webSocketService: WebSocketService,
-    private toastService: ToastService,
-  ) {}
 
   /**
    * Performs the ng on init operation.
@@ -608,15 +602,7 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
   }
 
   private handleWebSocketMessage(message: WebSocketProgressMessage): void {
-    const allowed: ProgressMessage['type'][] = [
-      'info',
-      'success',
-      'error',
-      'progress',
-    ];
-    const t = (
-      allowed.includes(message.type as any) ? (message.type as any) : 'info'
-    ) as ProgressMessage['type'];
+    const t = isProgressMessageType(message.type) ? message.type : 'info';
     this.addMessage(t, message.data?.message || '状态更新');
 
     switch (message.type) {
@@ -624,10 +610,13 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
         if (message.data?.currentStep) {
           this.handleStepChange({
             currentStep: message.data.currentStep,
-            message: message.data?.message as string | undefined,
+            message:
+              typeof message.data.message === 'string'
+                ? message.data.message
+                : undefined,
             progress:
-              typeof (message.data as any)['progress'] === 'number'
-                ? ((message.data as any)['progress'] as number)
+              typeof message.data.progress === 'number'
+                ? message.data.progress
                 : undefined,
           });
         }
@@ -802,3 +791,5 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
     return `${message.timestamp.getTime()}_${index}`;
   }
 }
+const isProgressMessageType = (value: string): value is ProgressMessage['type'] =>
+  ['info', 'success', 'error', 'progress'].includes(value as ProgressMessage['type']);

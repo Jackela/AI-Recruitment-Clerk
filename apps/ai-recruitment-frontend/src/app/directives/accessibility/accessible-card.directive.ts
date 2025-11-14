@@ -16,8 +16,8 @@ import { AccessibilityService } from '../../services/accessibility/accessibility
   standalone: true,
 })
 export class AccessibleCardDirective implements OnInit, OnDestroy {
-  private elementRef = inject(ElementRef);
-  private accessibilityService = inject(AccessibilityService);
+  private readonly elementRef = inject(ElementRef);
+  private readonly accessibilityService = inject(AccessibilityService);
 
   @Input() cardTitle?: string;
   @Input() cardDescription?: string;
@@ -29,6 +29,8 @@ export class AccessibleCardDirective implements OnInit, OnDestroy {
   @Input() cardInstructions?: string;
 
   private element!: HTMLElement;
+  private descriptionElement?: HTMLElement;
+  private keydownHandler?: (event: KeyboardEvent) => void;
 
   /**
    * Performs the ng on init operation.
@@ -42,7 +44,15 @@ export class AccessibleCardDirective implements OnInit, OnDestroy {
    * Performs the ng on destroy operation.
    */
   ngOnDestroy(): void {
-    // Cleanup any event listeners if needed
+    if (this.keydownHandler) {
+      this.element.removeEventListener('keydown', this.keydownHandler);
+      this.keydownHandler = undefined;
+    }
+
+    if (this.descriptionElement?.parentElement) {
+      this.descriptionElement.parentElement.removeChild(this.descriptionElement);
+      this.descriptionElement = undefined;
+    }
   }
 
   private setupAccessibility(): void {
@@ -84,6 +94,7 @@ export class AccessibleCardDirective implements OnInit, OnDestroy {
         descElement.id = descId;
         descElement.className = 'sr-only';
         descElement.textContent = ariaDescription;
+        this.descriptionElement = descElement;
         this.element.appendChild(descElement);
       }
     }
@@ -93,7 +104,8 @@ export class AccessibleCardDirective implements OnInit, OnDestroy {
       this.element.setAttribute('tabindex', '0');
 
       // Add keyboard event listeners
-      this.element.addEventListener('keydown', this.handleKeydown.bind(this));
+      this.keydownHandler = (event: KeyboardEvent) => this.handleKeydown(event);
+      this.element.addEventListener('keydown', this.keydownHandler);
     }
 
     // Add focus styles

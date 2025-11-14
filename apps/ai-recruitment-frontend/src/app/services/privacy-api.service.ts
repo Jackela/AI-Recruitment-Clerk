@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 // Temporary local types until shared-dtos compilation is fixed
+type JsonMap = Record<string, unknown>;
 /**
  * Defines the shape of the capture consent dto.
  */
@@ -210,18 +211,20 @@ export class PrivacyApiService {
   /**
    * Set cookie consent preferences
    */
-  async setCookieConsent(cookieConsent: any): Promise<any> {
+  async setCookieConsent(
+    cookieConsent: JsonMap,
+  ): Promise<JsonMap> {
     return firstValueFrom(
-      this.http.post<any>(`${this.baseUrl}/cookie-consent`, cookieConsent),
+      this.http.post<JsonMap>(`${this.baseUrl}/cookie-consent`, cookieConsent),
     );
   }
 
   /**
    * Get cookie consent preferences
    */
-  async getCookieConsent(deviceId: string): Promise<any> {
+  async getCookieConsent(deviceId: string): Promise<JsonMap> {
     return firstValueFrom(
-      this.http.get<any>(`${this.baseUrl}/cookie-consent/${deviceId}`),
+      this.http.get<JsonMap>(`${this.baseUrl}/cookie-consent/${deviceId}`),
     );
   }
 
@@ -243,15 +246,15 @@ export class PrivacyApiService {
   /**
    * Get GDPR compliance status
    */
-  getComplianceStatus(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/compliance-status`);
+  getComplianceStatus(): Observable<JsonMap> {
+    return this.http.get<JsonMap>(`${this.baseUrl}/compliance-status`);
   }
 
   /**
    * Privacy infrastructure health check
    */
-  privacyHealthCheck(): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/privacy-health-check`, {});
+  privacyHealthCheck(): Observable<JsonMap> {
+    return this.http.post<JsonMap>(`${this.baseUrl}/privacy-health-check`, {});
   }
 
   /**
@@ -290,7 +293,9 @@ export class PrivacyApiService {
   /**
    * Check if consent is expired
    */
-  private isConsentExpired(purposeStatus: any): boolean {
+  private isConsentExpired(
+    purposeStatus: ConsentStatusDto['purposes'][number],
+  ): boolean {
     if (!purposeStatus.expiryDate) return false;
     return new Date() > new Date(purposeStatus.expiryDate);
   }

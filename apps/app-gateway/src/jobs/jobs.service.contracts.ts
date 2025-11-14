@@ -19,9 +19,10 @@ import {
   Ensures,
   ContractValidators,
 } from '@ai-recruitment-clerk/shared-dtos';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 import { CreateJobDto } from './dto/create-job.dto';
 import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
-import { MulterFile } from './types/multer.types';
+import type { MulterFile } from './types/multer.types';
 import { JobListDto, JobDetailDto } from './dto/job-response.dto';
 import {  ResumeDetailDto } from './dto/resume-response.dto';
 import { AnalysisReportDto } from './dto/report-response.dto';
@@ -46,6 +47,7 @@ import { CacheService } from '../cache/cache.service';
 @Injectable()
 export class JobsServiceContracts {
   private readonly logger = new Logger(JobsServiceContracts.name);
+  private readonly config = getConfig();
 
   private assertPrecondition(
     condition: boolean,
@@ -170,7 +172,7 @@ export class JobsServiceContracts {
     }
 
     // Keep the simulation for now to maintain existing behavior until real processing is implemented
-    if (process.env.NODE_ENV !== 'test') {
+    if (!this.config.env.isTest) {
       setTimeout(() => {
         const existingJob = this.storageService.getJob(jobId);
         if (existingJob && existingJob.status === 'processing') {
@@ -294,7 +296,7 @@ export class JobsServiceContracts {
       }
 
       // Keep the simulation for now
-      if (process.env.NODE_ENV !== 'test') {
+      if (!this.config.env.isTest) {
         setTimeout(
           () => {
             this.simulateResumeProcessing(resumeId, jobId, file.originalname);

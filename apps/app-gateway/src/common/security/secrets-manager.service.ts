@@ -5,8 +5,8 @@
  */
 
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Defines the shape of the secret validation result.
@@ -24,14 +24,11 @@ export interface SecretValidationResult {
 @Injectable()
 export class SecretsManagerService implements OnModuleInit {
   private readonly logger = new Logger(SecretsManagerService.name);
+  private readonly config = getConfig();
   // Reserved for caching implementation
   // private secretsCache: Map<string, { value: string; lastRotated: Date }> = new Map();
 
-  /**
-   * Initializes a new instance of the Secrets Manager Service.
-   * @param configService - The config service.
-   */
-  constructor(private configService: ConfigService) {}
+  constructor() {}
 
   /**
    * Performs the on module init operation.
@@ -49,7 +46,7 @@ export class SecretsManagerService implements OnModuleInit {
         this.logger.error(`   • ${issue}`),
       );
 
-      if (process.env.NODE_ENV === 'production') {
+      if (this.config.env.isProduction) {
         throw new Error('Production environment requires valid secrets');
       }
     } else {
@@ -127,7 +124,7 @@ export class SecretsManagerService implements OnModuleInit {
    * 验证JWT密钥强度
    */
   private validateJwtSecret(): SecretValidationResult {
-    const jwtSecret = this.configService.get<string>('JWT_SECRET');
+    const jwtSecret = this.config.auth.jwt.secret;
     const issues: string[] = [];
 
     if (!jwtSecret) {
@@ -169,8 +166,13 @@ export class SecretsManagerService implements OnModuleInit {
    * 验证数据库连接密钥
    */
   private validateDatabaseSecrets(): SecretValidationResult {
-    const mongoUrl = this.configService.get<string>('MONGODB_URL');
-    const redisUrl = this.configService.get<string>('REDIS_URL');
+    const mongoUrl = this.config.database.url;
+    const redisUrl =
+      this.config.cache.redis.url ||
+      this.config.cache.redis.privateUrl ||
+      (this.config.cache.redis.host && this.config.cache.redis.port
+        ? `redis://${this.config.cache.redis.host}:${this.config.cache.redis.port}`
+        : undefined);
     const issues: string[] = [];
 
     // 检查MongoDB连接字符串
@@ -178,7 +180,7 @@ export class SecretsManagerService implements OnModuleInit {
       issues.push('MONGODB_URL 未配置');
     } else if (
       mongoUrl.includes('localhost') &&
-      process.env.NODE_ENV === 'production'
+      this.config.env.isProduction
     ) {
       issues.push('生产环境不应使用localhost MongoDB连接');
     } else if (
@@ -193,7 +195,7 @@ export class SecretsManagerService implements OnModuleInit {
       issues.push('REDIS_URL 未配置');
     } else if (
       redisUrl === 'redis://localhost:6379' &&
-      process.env.NODE_ENV === 'production'
+      this.config.env.isProduction
     ) {
       issues.push('生产环境不应使用默认Redis连接');
     }
@@ -210,8 +212,8 @@ export class SecretsManagerService implements OnModuleInit {
    * 验证API密钥
    */
   private validateApiKeys(): SecretValidationResult {
-    const geminiKey = this.configService.get<string>('GEMINI_API_KEY');
-    const openaiKey = this.configService.get<string>('OPENAI_API_KEY');
+    const geminiKey = this.config.integrations.gemini.apiKey;
+    const openaiKey = this.config.integrations.openai.apiKey;
     const issues: string[] = [];
 
     if (!geminiKey || geminiKey === 'your-gemini-api-key-here') {
@@ -235,15 +237,15 @@ export class SecretsManagerService implements OnModuleInit {
    * 验证CORS配置
    */
   private validateCorsConfiguration(): SecretValidationResult {
-    const allowedOrigins = this.configService.get<string>('ALLOWED_ORIGINS');
+    const allowedOrigins = this.config.cors.origins;
     const issues: string[] = [];
 
-    if (process.env.NODE_ENV === 'production') {
-      if (!allowedOrigins) {
+    if (this.config.env.isProduction) {
+      if (!allowedOrigins || allowedOrigins.length === 0) {
         issues.push('生产环境必须配置 ALLOWED_ORIGINS');
-      } else if (allowedOrigins.includes('*')) {
+      } else if (allowedOrigins.some((origin) => origin === '*')) {
         issues.push('生产环境不应允许所有域名访问 (*)');
-      } else if (allowedOrigins.includes('localhost')) {
+      } else if (allowedOrigins.some((origin) => origin.includes('localhost'))) {
         issues.push('生产环境CORS配置包含localhost域名');
       }
     }
@@ -260,14 +262,14 @@ export class SecretsManagerService implements OnModuleInit {
    * 验证加密配置
    */
   private validateEncryptionKeys(): SecretValidationResult {
-    const encryptionKey = this.configService.get<string>('ENCRYPTION_KEY');
-    const saltRounds = this.configService.get<number>('BCRYPT_SALT_ROUNDS', 10);
+    const encryptionKey = this.config.security.encryptionKey;
+    const saltRounds = this.config.auth.bcrypt.rounds;
     const issues: string[] = [];
 
     if (!encryptionKey) {
       issues.push('ENCRYPTION_KEY 未配置');
-    } else if (encryptionKey.length !== 32) {
-      issues.push('ENCRYPTION_KEY 必须为32字符长度 (AES-256)');
+    } else if (encryptionKey.length < 32) {
+      issues.push('ENCRYPTION_KEY 必须至少为32字符长度 (AES-256)');
     }
 
     if (saltRounds < 12) {
@@ -316,7 +318,7 @@ export class SecretsManagerService implements OnModuleInit {
    * 加密敏感数据
    */
   encrypt(text: string): string {
-    const encryptionKey = this.configService.get<string>('ENCRYPTION_KEY');
+    const encryptionKey = this.config.security.encryptionKey;
     if (!encryptionKey) {
       throw new Error('ENCRYPTION_KEY not configured');
     }
@@ -337,7 +339,7 @@ export class SecretsManagerService implements OnModuleInit {
    * 解密敏感数据
    */
   decrypt(encryptedText: string): string {
-    const encryptionKey = this.configService.get<string>('ENCRYPTION_KEY');
+    const encryptionKey = this.config.security.encryptionKey;
     if (!encryptionKey) {
       throw new Error('ENCRYPTION_KEY not configured');
     }

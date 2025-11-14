@@ -17,6 +17,14 @@ import { AccessibleCardDirective } from '../../../directives/accessibility/acces
 import { AccessibilityService } from '../../../services/accessibility/accessibility.service';
 import { Subject } from 'rxjs';
 
+type IdleRequestCallback = (
+  deadline: { didTimeout: boolean; timeRemaining(): number },
+) => void;
+
+type IdleRequestOptions = {
+  timeout?: number;
+};
+
 /**
  * Defines the shape of the bento grid item.
  */
@@ -1184,8 +1192,15 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Use requestIdleCallback for better performance
     const scheduleAnimation = (callback: () => void) => {
-      if ('requestIdleCallback' in window) {
-        (window as any).requestIdleCallback(callback, { timeout: 100 });
+      const win = window as typeof window & {
+        requestIdleCallback?: (
+          cb: IdleRequestCallback,
+          options?: IdleRequestOptions,
+        ) => number;
+      };
+
+      if (win.requestIdleCallback) {
+        win.requestIdleCallback(() => callback(), { timeout: 100 });
       } else {
         setTimeout(callback, 0);
       }

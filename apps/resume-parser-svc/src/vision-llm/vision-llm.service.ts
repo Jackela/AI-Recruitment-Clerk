@@ -14,6 +14,7 @@ import {
 } from '@ai-recruitment-clerk/shared-dtos';
 import { SecureConfigValidator } from '@app/shared-dtos';
 import pdfParse from 'pdf-parse-fork';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Provides vision llm functionality.
@@ -24,13 +25,14 @@ export class VisionLlmService {
   private readonly geminiClient: GeminiClient;
   private readonly _circuitBreaker: CircuitBreaker;
   private readonly _retryHandler: RetryHandler;
+  private readonly config = getConfig();
 
   /**
    * Initializes a new instance of the Vision LLM Service.
    */
   constructor() {
     // 🔒 SECURITY: Validate configuration before service initialization (skip in tests)
-    if (process.env.NODE_ENV !== 'test') {
+    if (!this.config.env.isTest) {
       SecureConfigValidator.validateServiceConfig('VisionLlmService', [
         'GEMINI_API_KEY',
       ]);
@@ -38,9 +40,10 @@ export class VisionLlmService {
 
     const config: GeminiConfig = {
       apiKey:
-        process.env.NODE_ENV === 'test'
+        this.config.env.isTest
           ? 'test-api-key'
-          : SecureConfigValidator.requireEnv('GEMINI_API_KEY'),
+          : this.config.integrations.gemini.apiKey ||
+            SecureConfigValidator.requireEnv('GEMINI_API_KEY'),
       model: 'gemini-1.5-pro', // Using Pro model for vision capabilities
       temperature: 0.1, // Very low temperature for consistent extraction
     };
@@ -160,7 +163,7 @@ export class VisionLlmService {
    * @returns A promise that resolves to ResumeDTO.
    */
   async parseResumeText(resumeText: string): Promise<ResumeDTO> {
-    if (process.env.NODE_ENV === 'test') {
+    if (this.config.env.isTest) {
       throw new Error('VisionLlmService.parseResumeText not implemented');
     }
     this.logger.debug('Starting resume parsing from plain text');
@@ -194,32 +197,28 @@ export class VisionLlmService {
   async parseResumePdfAdvanced(
     request: VisionLlmRequest,
   ): Promise<VisionLlmResponse> {
-    if (process.env.NODE_ENV === 'test') {
+    if (this.config.env.isTest) {
       throw new Error(
         'VisionLlmService.parseResumePdfAdvanced not implemented',
       );
     }
     const startTime = Date.now();
 
-    try {
-      const resumeData = await this.parseResumePdf(
-        request.pdfBuffer,
-        request.filename,
-      );
+    const resumeData = await this.parseResumePdf(
+      request.pdfBuffer,
+      request.filename,
+    );
 
-      const processingTimeMs = Date.now() - startTime;
+    const processingTimeMs = Date.now() - startTime;
 
-      // Calculate confidence based on data completeness
-      const confidence = this.calculateConfidence(resumeData);
+    // Calculate confidence based on data completeness
+    const confidence = this.calculateConfidence(resumeData);
 
-      return {
-        extractedData: resumeData,
-        confidence,
-        processingTimeMs,
-      };
-    } catch (error) {
-      throw error;
-    }
+    return {
+      extractedData: resumeData,
+      confidence,
+      processingTimeMs,
+    };
   }
 
   /**
@@ -229,7 +228,7 @@ export class VisionLlmService {
    */
   async validatePdfFile(pdfBuffer: Buffer): Promise<boolean> {
     // In test mode, return true for valid test PDFs
-    if (process.env.NODE_ENV === 'test') {
+    if (this.config.env.isTest) {
       return true;
     }
     try {
@@ -258,7 +257,7 @@ export class VisionLlmService {
    * @returns A promise that resolves to number value.
    */
   async estimateProcessingTime(fileSize: number): Promise<number> {
-    if (process.env.NODE_ENV === 'test') {
+    if (this.config.env.isTest) {
       throw new Error(
         'VisionLlmService.estimateProcessingTime not implemented',
       );
@@ -279,7 +278,6 @@ export class VisionLlmService {
     return Math.round(estimatedMs);
   }
 
-  // @ts-ignore - Method reserved for future use
   private _buildResumeExtractionPrompt(extractedText: string): string {
     return `
 Extract structured information from this resume text. Focus on identifying:
@@ -301,7 +299,6 @@ Extraction Guidelines:
 - Be thorough but accurate - only extract clearly visible information`;
   }
 
-  // @ts-ignore - Method reserved for future use
   private _buildVisionPrompt(): string {
     return `
 Analyze this resume document and extract structured information. Focus on:

@@ -3,7 +3,9 @@ import {
   ErrorHandler,
   Injectable,
   OnInit,
+  OnDestroy,
   signal,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -12,6 +14,7 @@ import {
   ErrorCorrelationService,
   StructuredError,
 } from '../../../services/error/error-correlation.service';
+import { Subscription } from 'rxjs';
 
 /**
  * Defines the shape of the error info.
@@ -33,17 +36,9 @@ export interface ErrorInfo {
  */
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
-  /**
-   * Initializes a new instance of the Global Error Handler.
-   * @param toastService - The toast service.
-   * @param router - The router.
-   * @param errorCorrelation - The error correlation.
-   */
-  constructor(
-    private toastService: ToastService,
-    private router: Router,
-    private errorCorrelation: ErrorCorrelationService,
-  ) {}
+  private readonly toastService = inject(ToastService);
+  private readonly router = inject(Router);
+  private readonly errorCorrelation = inject(ErrorCorrelationService);
 
   /**
    * Handles error.
@@ -66,7 +61,11 @@ export class GlobalErrorHandler implements ErrorHandler {
       const errorInfo = this.parseError(error, structuredError);
 
       // Report error to backend (async)
-      this.errorCorrelation.reportError(structuredError).catch(() => {});
+      this.errorCorrelation
+        .reportError(structuredError)
+        .catch((reportError) =>
+          console.warn('Failed to report error', reportError),
+        );
 
       // Show user-friendly error notification
       this.showErrorNotification(errorInfo, structuredError);
@@ -327,8 +326,8 @@ export class GlobalErrorHandler implements ErrorHandler {
         url: window.location.href,
       };
       sessionStorage.setItem('last_error', JSON.stringify(simpleError));
-    } catch (e) {
-      // Even storage failed, nothing we can do
+    } catch (storageError) {
+      console.warn('Unable to persist fallback error info', storageError);
     }
 
     // Simple user notification
@@ -674,7 +673,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     `,
   ],
 })
-export class ErrorBoundaryComponent implements OnInit {
+export class ErrorBoundaryComponent implements OnInit, OnDestroy {
   // Error state
   hasError = signal(false);
   errorMessage = signal('页面遇到了一个意外错误。请刷新页面重试。');
@@ -687,15 +686,9 @@ export class ErrorBoundaryComponent implements OnInit {
   showDetails = signal(false);
   errorHistory = signal<ErrorInfo[]>([]);
 
-  /**
-   * Initializes a new instance of the Error Boundary Component.
-   * @param router - The router.
-   * @param toastService - The toast service.
-   */
-  constructor(
-    private router: Router,
-    private toastService: ToastService,
-  ) {}
+  private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
+  private routerSubscription?: Subscription;
 
   /**
    * Performs the ng on init operation.
@@ -705,12 +698,16 @@ export class ErrorBoundaryComponent implements OnInit {
     this.loadErrorHistory();
 
     // Listen for navigation errors
-    this.router.events.subscribe((event) => {
+    this.routerSubscription = this.router.events.subscribe((event) => {
       // Reset error state on successful navigation
       if (event.constructor.name === 'NavigationEnd') {
         this.resetError();
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.routerSubscription?.unsubscribe();
   }
 
   private loadErrorHistory(): void {
@@ -725,8 +722,8 @@ export class ErrorBoundaryComponent implements OnInit {
           const latestError = errors[errors.length - 1];
           this.displayError(latestError);
         }
-      } catch (e) {
-        // Invalid stored data, clear it
+      } catch (parseError) {
+        console.warn('Invalid stored error data', parseError);
         sessionStorage.removeItem('app-errors');
       }
     }

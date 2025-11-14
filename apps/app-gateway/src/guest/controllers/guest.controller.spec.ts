@@ -2,6 +2,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { GuestController } from './guest.controller';
 import { GuestUsageService } from '../services/guest-usage.service';
 import { RequestWithDeviceId } from '../guards/guest.guard';
+import { resetConfigCache } from '@ai-recruitment-clerk/configuration';
 
 describe('GuestController', () => {
   let controller: GuestController;
@@ -22,14 +23,20 @@ describe('GuestController', () => {
     isGuest: true,
   } as RequestWithDeviceId;
 
+  const buildController = () => {
+    resetConfigCache();
+    return new GuestController(guestUsageService);
+  };
+
   beforeEach(() => {
     guestUsageService = createGuestUsageServiceMock();
-    controller = new GuestController(guestUsageService);
+    controller = buildController();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
     delete process.env.GUEST_FEEDBACK_URL;
+    resetConfigCache();
   });
 
   it('should be defined', () => {
@@ -45,6 +52,7 @@ describe('GuestController', () => {
         mockFeedbackCode,
       );
       process.env.GUEST_FEEDBACK_URL = 'https://wj.qq.com/s2/test';
+      controller = buildController();
 
       const result = await controller.generateFeedbackCode(mockRequest);
 

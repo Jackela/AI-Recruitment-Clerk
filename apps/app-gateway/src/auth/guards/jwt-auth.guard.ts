@@ -13,6 +13,7 @@ import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { Request } from 'express';
 import { createHash } from 'crypto';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Implements the jwt auth guard logic.
@@ -20,6 +21,7 @@ import { createHash } from 'crypto';
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   private readonly logger = new Logger(JwtAuthGuard.name);
+  private readonly appConfig = getConfig();
   private readonly requestCounts = new Map<
     string,
     { count: number; resetTime: number; blocked: boolean }
@@ -34,7 +36,7 @@ export class JwtAuthGuard implements CanActivate {
    */
   constructor(private reflector: Reflector) {
     // Cleanup expired rate limit entries - skip in test environment to prevent worker issues
-    if (process.env.NODE_ENV !== 'test') {
+    if (!this.appConfig.env.isTest) {
       setInterval(
         () => this.cleanupRateLimits(),
         this.RATE_LIMIT_CLEANUP_INTERVAL,
@@ -60,8 +62,8 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     // Strictly disable per-request rate limiting in tests to avoid flakiness
-    if (process.env.NODE_ENV !== 'test') {
-      const force = process.env.FORCE_RATE_LIMIT === 'true';
+    if (!this.appConfig.env.isTest) {
+      const force = this.appConfig.rateLimiting.forceEnabled;
       // Only enforce rate limit when explicitly requested or forced by env
       if (force || (request as any).__testRateLimit === true) {
         const clientId = this.getClientIdentifier(request);

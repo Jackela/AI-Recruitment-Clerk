@@ -1,12 +1,8 @@
+import { Action } from '@ngrx/store';
 import { jobReducer } from './job.reducer';
 import { initialJobState, JobState } from './job.state';
 import * as JobActions from './job.actions';
-import {
-  Job,
-  JobListItem,
-  CreateJobRequest,
-  CreateJobResponse,
-} from './job.model';
+import { Job, JobListItem, CreateJobResponse } from './job.model';
 
 describe('Job Reducer', () => {
   const mockJobListItems: JobListItem[] = [
@@ -41,7 +37,8 @@ describe('Job Reducer', () => {
 
   describe('Initial State', () => {
     it('should return the initial state', () => {
-      const result = jobReducer(undefined, { type: 'Unknown' } as any);
+      const unknownAction: Action = { type: 'Unknown' };
+      const result = jobReducer(undefined, unknownAction);
       expect(result).toBe(initialJobState);
     });
 

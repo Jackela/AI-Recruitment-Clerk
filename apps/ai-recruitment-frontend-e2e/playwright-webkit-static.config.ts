@@ -1,4 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
+import { getTestingEnvironment } from './testing-env';
+
+const testingEnv = getTestingEnvironment();
 
 /**
  * WebKit Static Build Configuration
@@ -14,8 +17,8 @@ export default defineConfig({
     timeout: 10000,
   },
   fullyParallel: false,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  forbidOnly: testingEnv.isCi,
+  retries: testingEnv.isCi ? 1 : 0,
   workers: 1, // Single worker for WebKit stability
   reporter: 'html',
   use: {
@@ -46,7 +49,7 @@ export default defineConfig({
             '--disable-field-trial-config',
             '--no-first-run',
           ],
-          headless: !process.env.WEBKIT_HEADED,
+          headless: !testingEnv.webkitHeaded,
         },
         contextOptions: {
           ignoreHTTPSErrors: true,

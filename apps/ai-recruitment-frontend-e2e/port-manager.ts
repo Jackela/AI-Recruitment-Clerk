@@ -8,6 +8,7 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import net from 'net';
+import { getTestingEnvironment } from './testing-env';
 
 const execAsync = promisify(exec);
 
@@ -62,30 +63,28 @@ export class PortManager {
   }
 
   private shouldSkipServiceCleanup(serviceName: string): boolean {
-    if (process.env['E2E_FORCE_PORT_SWEEP'] === 'true') {
+    const env = getTestingEnvironment();
+    if (env.forcePortSweep) {
       return false;
     }
 
     if (
       serviceName === 'gateway' &&
-      process.env['E2E_USE_REAL_API'] !== 'true' &&
-      process.env['E2E_FORCE_GATEWAY_CLEANUP'] !== 'true'
+      !env.useRealApi &&
+      !env.forceGatewayCleanup
     ) {
       return true;
     }
 
     if (
       serviceName === 'dev-server' &&
-      process.env['E2E_SKIP_WEBSERVER'] === 'true' &&
-      process.env['E2E_FORCE_DEVSERVER_CLEANUP'] !== 'true'
+      env.skipWebServer &&
+      !env.forceDevServerCleanup
     ) {
       return true;
     }
 
-    if (
-      serviceName === 'mock-api' &&
-      process.env['E2E_USE_REAL_API'] === 'true'
-    ) {
+    if (serviceName === 'mock-api' && env.useRealApi) {
       return true;
     }
 
@@ -93,23 +92,14 @@ export class PortManager {
   }
 
   private getProtectedPorts(): Set<number> {
-    const ports = new Set<number>();
+    const env = getTestingEnvironment();
+    const ports = new Set<number>(env.protectedPorts);
 
-    const envPorts = process.env['E2E_PROTECTED_PORTS'];
-    if (envPorts) {
-      for (const token of envPorts.split(',')) {
-        const parsed = Number.parseInt(token.trim(), 10);
-        if (!Number.isNaN(parsed)) {
-          ports.add(parsed);
-        }
-      }
-    }
-
-    if (process.env['E2E_USE_REAL_API'] !== 'true') {
+    if (!env.useRealApi) {
       ports.add(3000);
     }
 
-    if (process.env['E2E_SKIP_WEBSERVER'] === 'true') {
+    if (env.skipWebServer) {
       ports.add(4200);
     }
 
@@ -477,9 +467,8 @@ export class PortManager {
       allPorts.add(port);
     }
 
-    const activeDevServerPort =
-      process.env['DEV_SERVER_PORT'] &&
-      Number.parseInt(process.env['DEV_SERVER_PORT'], 10);
+    const envSnapshot = getTestingEnvironment();
+    const activeDevServerPort = envSnapshot.devServerPort;
 
     // Sequential cleanup to prevent race conditions
     for (const port of Array.from(allPorts)) {

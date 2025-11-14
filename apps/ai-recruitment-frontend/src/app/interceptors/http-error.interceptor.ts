@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   HttpInterceptor,
   HttpRequest,
@@ -10,7 +10,10 @@ import { Observable, throwError } from 'rxjs';
 import { catchError, retry, timeout } from 'rxjs/operators';
 import { ToastService } from '../services/toast.service';
 import { Router } from '@angular/router';
-import { ErrorCorrelationService } from '../services/error/error-correlation.service';
+import {
+  ErrorCorrelationService,
+  StructuredError,
+} from '../services/error/error-correlation.service';
 import { APP_CONFIG } from '../../config/app.config';
 
 /**
@@ -18,40 +21,35 @@ import { APP_CONFIG } from '../../config/app.config';
  */
 @Injectable()
 export class HttpErrorInterceptor implements HttpInterceptor {
-  /**
-   * Initializes a new instance of the Http Error Interceptor.
-   * @param toastService - The toast service.
-   * @param router - The router.
-   * @param errorCorrelation - The error correlation.
-   */
-  constructor(
-    private toastService: ToastService,
-    private router: Router,
-    private errorCorrelation: ErrorCorrelationService,
-  ) {}
+  private readonly toastService = inject(ToastService);
+  private readonly router = inject(Router);
+  private readonly errorCorrelation = inject(ErrorCorrelationService);
 
   /**
    * Performs the intercept operation.
    * @param request - The request.
    * @param next - The next.
-   * @returns The Observable<HttpEvent<any>>.
+   * @returns The Observable<HttpEvent<unknown>>.
    */
   intercept(
-    request: HttpRequest<any>,
+    request: HttpRequest<unknown>,
     next: HttpHandler,
-  ): Observable<HttpEvent<any>> {
+  ): Observable<HttpEvent<unknown>> {
     // Add correlation headers to outgoing requests
+    const correlationHeaders = this.errorCorrelation.getCorrelationHeaders();
+    const headerEntries = correlationHeaders
+      .keys()
+      .map((key) => {
+        const value = correlationHeaders.get(key);
+        return value ? [key, value] : null;
+      })
+      .filter(
+        (entry): entry is [string, string] => Array.isArray(entry) && entry[1],
+      );
+
     const correlatedRequest = request.clone({
       setHeaders: {
-        ...Object.fromEntries(
-          this.errorCorrelation
-            .getCorrelationHeaders()
-            .keys()
-            .map((key) => [
-              key,
-              this.errorCorrelation.getCorrelationHeaders().get(key)!,
-            ]),
-        ),
+        ...Object.fromEntries(headerEntries),
       },
     });
 
@@ -62,7 +60,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
       // Retry failed requests with exponential backoff
       retry({
         count: this.getRetryCount(request.method),
-        delay: (_error: any, retryIndex: number) => {
+        delay: (_error: HttpErrorResponse, retryIndex: number) => {
           const delayMs =
             APP_CONFIG.ERROR_HANDLING.retryConfig.initialDelay *
             Math.pow(
@@ -71,7 +69,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
             );
           return new Promise((resolve) => setTimeout(resolve, delayMs));
         },
-      }) as any,
+      }),
       catchError((error: HttpErrorResponse) => {
         // Create structured error with correlation
         const structuredError = this.errorCorrelation.createStructuredError(
@@ -85,7 +83,9 @@ export class HttpErrorInterceptor implements HttpInterceptor {
         this.logError(request, error, structuredError);
 
         // Report error to backend (async)
-        this.errorCorrelation.reportError(structuredError).catch(() => {});
+        this.errorCorrelation
+          .reportError(structuredError)
+          .catch(() => undefined);
 
         // Show user-friendly notification
         const userMessage = this.getErrorMessage(error.status, error);
@@ -145,7 +145,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
     status: number,
     message: string,
     error: HttpErrorResponse,
-    structuredError: any,
+    structuredError: StructuredError,
   ): void {
     // Don't show notifications for cancelled requests or aborted requests
     if (
@@ -182,7 +182,10 @@ export class HttpErrorInterceptor implements HttpInterceptor {
     }
   }
 
-  private handleSpecificErrors(status: number, structuredError: any): void {
+  private handleSpecificErrors(
+    status: number,
+    structuredError: StructuredError,
+  ): void {
     switch (status) {
       case 401:
         // Unauthorized - redirect to login with correlation context
@@ -239,9 +242,9 @@ export class HttpErrorInterceptor implements HttpInterceptor {
   }
 
   private logError(
-    request: HttpRequest<any>,
+    request: HttpRequest<unknown>,
     error: HttpErrorResponse,
-    structuredError: any,
+    structuredError: StructuredError,
   ): void {
     if (!this.isDevelopment()) return;
 
@@ -265,7 +268,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
     console.groupEnd();
   }
 
-  private shouldShowNotification(structuredError: any): boolean {
+  private shouldShowNotification(structuredError: StructuredError): boolean {
     // Prevent notification spam for same error within 5 seconds
     const lastNotificationKey = `last_notification_${structuredError.errorCode}`;
     const lastTime = parseInt(
@@ -289,7 +292,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
     return durations.warning;
   }
 
-  private handleRateLimit(structuredError: any): void {
+  private handleRateLimit(structuredError: StructuredError): void {
     // Store rate limit event for exponential backoff
     const rateLimitKey = 'rate_limit_backoff';
     const backoffTime = Math.min(
@@ -307,7 +310,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
     );
   }
 
-  private checkMaintenanceMode(structuredError: any): void {
+  private checkMaintenanceMode(structuredError: StructuredError): void {
     // Check if this might be a maintenance mode
     const maintenanceIndicators = ['maintenance', 'scheduled', 'downtime'];
     const errorMessage = structuredError.message.toLowerCase();

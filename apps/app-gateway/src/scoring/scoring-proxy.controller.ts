@@ -1,3 +1,5 @@
+import type { Express } from 'express';
+import 'multer';
 import {
   Body,
   Controller,
@@ -10,6 +12,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import pdf from 'pdf-parse-fork';
 import { MetricsService } from '../ops/metrics.service';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Exposes endpoints for scoring proxy.
@@ -17,6 +20,8 @@ import { MetricsService } from '../ops/metrics.service';
 @Controller('scoring')
 export class ScoringProxyController {
   constructor(private readonly metrics: MetricsService) {}
+  private readonly config = getConfig();
+
   /**
    * Performs the gap analysis operation.
    * @param body - The body.
@@ -25,8 +30,7 @@ export class ScoringProxyController {
   @Post('gap-analysis')
   async gapAnalysis(@Body() body: any) {
     this.metrics.incExposure();
-    const base =
-      process.env.SCORING_ENGINE_URL || 'http://scoring-engine-svc:3000';
+    const base = this.config.integrations.scoring.baseUrl;
     const url = `${base.replace(/\/$/, '')}/gap-analysis`;
     try {
       const res = await fetch(url, {
@@ -105,8 +109,7 @@ export class ScoringProxyController {
       );
     }
 
-    const base =
-      process.env.SCORING_ENGINE_URL || 'http://scoring-engine-svc:3000';
+    const base = this.config.integrations.scoring.baseUrl;
     const url = `${base.replace(/\/$/, '')}/gap-analysis`;
     const payload = { jdText: body?.jdText || '', resumeText };
 
@@ -144,7 +147,7 @@ export class ScoringProxyController {
       const spaced = (text || '').replace(/([a-z])([A-Z])/g, '$1 $2');
       const base = spaced
         .toLowerCase()
-        .split(/[^a-z0-9+#\.\-]+/)
+        .split(/[^a-z0-9+#.-]+/)
         .filter((t) => t && t.length > 1);
       const out = new Set<string>();
       for (const t of base) {

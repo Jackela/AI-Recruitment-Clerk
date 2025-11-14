@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-recruitment-clerk/specs/001-audit-architecture/validation/manifest-schema.json",
+  "title": "Governance Validation Manifest",
+  "type": "object",
+  "required": [
+    "runId",
+    "branch",
+    "commit",
+    "trigger",
+    "generatedAt",
+    "tests",
+    "act",
+    "githubActions",
+    "parity",
+    "result"
+  ],
+  "properties": {
+    "runId": { "type": "string" },
+    "branch": { "type": "string" },
+    "commit": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+    "trigger": { "type": "string", "enum": ["remediation", "scheduled", "pre-merge"] },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "components": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "remediationIds": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tests": {
+      "type": "object",
+      "required": ["lint", "unit", "integration", "typecheck", "e2e"],
+      "properties": {
+        "lint": { "$ref": "#/definitions/TestStatus" },
+        "unit": { "$ref": "#/definitions/TestStatus" },
+        "integration": { "$ref": "#/definitions/TestStatus" },
+        "typecheck": { "$ref": "#/definitions/TestStatus" },
+        "e2e": { "$ref": "#/definitions/TestStatus" }
+      }
+    },
+    "act": {
+      "type": "object",
+      "required": ["workflow", "image", "status", "logPath"],
+      "properties": {
+        "workflow": { "type": "string" },
+        "image": { "type": "string" },
+        "status": { "type": "string", "enum": ["pass", "fail"] },
+        "logPath": { "type": "string" }
+      }
+    },
+    "githubActions": {
+      "type": "object",
+      "required": ["workflowUrl", "conclusion"],
+      "properties": {
+        "workflowUrl": { "type": "string" },
+        "conclusion": { "type": "string", "enum": ["success", "failure", "cancelled"] },
+        "jobs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "status"],
+            "properties": {
+              "name": { "type": "string" },
+              "status": { "type": "string" },
+              "runner": { "type": "string" },
+              "durationMs": { "type": "number", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "parity": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "string", "enum": ["match", "drift", "blocked"] },
+        "notes": { "type": "string" },
+        "missingSecrets": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "remediationCoverage": {
+      "type": "object",
+      "properties": {
+        "highSeverityCovered": { "type": "number", "minimum": 0, "maximum": 100 },
+        "threshold": { "type": "number", "minimum": 0, "maximum": 100 }
+      }
+    },
+    "result": { "type": "string", "enum": ["pass", "fail", "blocked"] },
+    "notes": { "type": "string" }
+  },
+  "definitions": {
+    "TestStatus": {
+      "type": "object",
+      "required": ["status", "startedAt", "completedAt"],
+      "properties": {
+        "status": { "type": "string", "enum": ["pass", "fail", "skipped"] },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "completedAt": { "type": "string", "format": "date-time" },
+        "command": { "type": "string" },
+        "logPath": { "type": "string" }
+      }
+    }
+  }
+}

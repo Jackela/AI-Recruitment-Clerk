@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
@@ -16,8 +16,8 @@ export interface ErrorReport {
   reproductionSteps?: string[];
   expectedBehavior?: string;
   actualBehavior?: string;
-  browserInfo: Record<string, any>;
-  systemInfo: Record<string, any>;
+  browserInfo: Record<string, string | number | boolean | undefined>;
+  systemInfo: Record<string, string | number | boolean>;
   timestamp: Date;
 }
 
@@ -41,16 +41,15 @@ export class ErrorReportingService {
   private readonly pendingReports: ErrorReportSubmission[] = [];
   private readonly maxRetryAttempts = 3;
   private readonly retryDelay = 2000;
+  private readonly http = inject(HttpClient);
+  private readonly errorCorrelation = inject(ErrorCorrelationService);
 
   /**
    * Initializes a new instance of the Error Reporting Service.
    * @param http - The http.
    * @param errorCorrelation - The error correlation.
    */
-  constructor(
-    private http: HttpClient,
-    private errorCorrelation: ErrorCorrelationService,
-  ) {
+  constructor() {
     // Initialize pending reports from storage
     this.loadPendingReports();
 
@@ -223,7 +222,7 @@ export class ErrorReportingService {
     const headers = this.errorCorrelation.getCorrelationHeaders();
 
     return this.http
-      .post<any>(
+      .post<{ reportId: string; submitted: boolean }>(
         '/api/errors/user-reports',
         {
           reportId,
@@ -287,8 +286,8 @@ export class ErrorReportingService {
       const data = JSON.parse(stored);
       data[reportId] = report;
       localStorage.setItem('error_report_data', JSON.stringify(data));
-    } catch (e) {
-      console.warn('Failed to store error report:', e);
+    } catch (error) {
+      console.warn('Failed to store error report:', error);
     }
   }
 
@@ -297,8 +296,8 @@ export class ErrorReportingService {
       const stored = localStorage.getItem('error_report_data') || '{}';
       const data = JSON.parse(stored);
       return data[reportId] || null;
-    } catch (e) {
-      console.warn('Failed to retrieve stored error report:', e);
+    } catch (error) {
+      console.warn('Failed to retrieve stored error report:', error);
       return null;
     }
   }
@@ -310,8 +309,8 @@ export class ErrorReportingService {
         const reports = JSON.parse(stored);
         this.pendingReports.push(...reports);
       }
-    } catch (e) {
-      console.warn('Failed to load pending reports:', e);
+    } catch (error) {
+      console.warn('Failed to load pending reports:', error);
     }
   }
 
@@ -321,12 +320,21 @@ export class ErrorReportingService {
         'pending_error_reports',
         JSON.stringify(this.pendingReports),
       );
-    } catch (e) {
-      console.warn('Failed to save pending reports:', e);
+    } catch (error) {
+      console.warn('Failed to save pending reports:', error);
     }
   }
 
-  private getBrowserInfo(): Record<string, any> {
+  private getBrowserInfo(): Record<string, string | number | boolean | undefined> {
+    const navigatorConnection = (navigator as Navigator & {
+      connection?: {
+        effectiveType?: string;
+        downlink?: number;
+        rtt?: number;
+      };
+      deviceMemory?: number;
+    }).connection;
+
     return {
       userAgent: navigator.userAgent,
       language: navigator.language,
@@ -336,18 +344,21 @@ export class ErrorReportingService {
       onLine: navigator.onLine,
       maxTouchPoints: navigator.maxTouchPoints,
       hardwareConcurrency: navigator.hardwareConcurrency,
-      deviceMemory: (navigator as any).deviceMemory,
-      connection: (navigator as any).connection
+      deviceMemory:
+        typeof navigator.deviceMemory === 'number'
+          ? navigator.deviceMemory
+          : undefined,
+      connection: navigatorConnection
         ? {
-            effectiveType: (navigator as any).connection.effectiveType,
-            downlink: (navigator as any).connection.downlink,
-            rtt: (navigator as any).connection.rtt,
+            effectiveType: navigatorConnection.effectiveType,
+            downlink: navigatorConnection.downlink,
+            rtt: navigatorConnection.rtt,
           }
         : undefined,
     };
   }
 
-  private getSystemInfo(): Record<string, any> {
+  private getSystemInfo(): Record<string, string | number | boolean> {
     return {
       screenResolution: `${screen.width}x${screen.height}`,
       colorDepth: screen.colorDepth,
@@ -437,7 +448,9 @@ export class ErrorReportingService {
     }
 
     // Check for recoverable errors
-    const recoverableErrors = errors.filter((e) => e.recoverable);
+    const recoverableErrors = errors.filter(
+      (structuredError) => structuredError.recoverable,
+    );
     if (recoverableErrors.length > 0) {
       guidance.push('• 部分错误可以自动恢复，请稍等片刻');
     }
@@ -460,7 +473,7 @@ export class ErrorReportingService {
       localStorage.setItem(test, 'test');
       localStorage.removeItem(test);
       return true;
-    } catch (e) {
+    } catch {
       return false;
     }
   }
@@ -471,7 +484,7 @@ export class ErrorReportingService {
       sessionStorage.setItem(test, 'test');
       sessionStorage.removeItem(test);
       return true;
-    } catch (e) {
+    } catch {
       return false;
     }
   }

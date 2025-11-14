@@ -7,6 +7,7 @@ import {
   Renderer2,
   Output,
   EventEmitter,
+  inject,
 } from '@angular/core';
 
 /**
@@ -33,13 +34,17 @@ export interface LazyLoadConfig {
 export class LazyLoadDirective implements OnInit, OnDestroy {
   @Input('arcLazyLoad') imageSrc!: string;
   @Input() lazyLoadConfig: LazyLoadConfig = {};
-  @Output() loaded = new EventEmitter<void>();
-  @Output() error = new EventEmitter<Error>();
+  @Output() lazyLoaded = new EventEmitter<void>();
+  @Output() lazyError = new EventEmitter<Error>();
 
   private observer: IntersectionObserver | null = null;
   private retryCount = 0;
   private isLoaded = false;
   private placeholderElement: HTMLElement | null = null;
+  private readonly host = inject<
+    ElementRef<HTMLImageElement | HTMLDivElement>
+  >(ElementRef);
+  private readonly renderer = inject(Renderer2);
 
   private readonly defaultConfig: LazyLoadConfig = {
     threshold: 0.1,
@@ -54,21 +59,18 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
     preload: false,
   };
 
-  /**
-   * Initializes a new instance of the Lazy Load Directive.
-   * @param el - The el.
-   * @param renderer - The renderer.
-   */
-  constructor(
-    private el: ElementRef<HTMLImageElement | HTMLDivElement>,
-    private renderer: Renderer2,
-  ) {}
+  private getConfig(): Required<LazyLoadConfig> {
+    return {
+      ...this.defaultConfig,
+      ...this.lazyLoadConfig,
+    } as Required<LazyLoadConfig>;
+  }
 
   /**
    * Performs the ng on init operation.
    */
   ngOnInit(): void {
-    const config = { ...this.defaultConfig, ...this.lazyLoadConfig };
+    const config = this.getConfig();
 
     // Set up placeholder
     this.setupPlaceholder(config);
@@ -97,19 +99,19 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
     }
 
     if (this.placeholderElement) {
-      this.renderer.removeChild(
-        this.el.nativeElement.parentElement,
-        this.placeholderElement,
-      );
+      const parent = this.host.nativeElement.parentElement;
+      if (parent && this.placeholderElement) {
+        this.renderer.removeChild(parent, this.placeholderElement);
+      }
     }
   }
 
-  private setupPlaceholder(config: LazyLoadConfig): void {
-    const element = this.el.nativeElement;
+  private setupPlaceholder(config: Required<LazyLoadConfig>): void {
+    const element = this.host.nativeElement;
 
     if (element instanceof HTMLImageElement) {
       // For img elements, set placeholder as src
-      this.renderer.setAttribute(element, 'src', config.placeholder!);
+      this.renderer.setAttribute(element, 'src', config.placeholder);
       this.renderer.setAttribute(element, 'data-src', this.imageSrc);
 
       // Add loading styles
@@ -173,11 +175,11 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
     this.renderer.setStyle(spinner, 'animation', 'spin 0.6s linear infinite');
 
     this.renderer.appendChild(overlay, spinner);
-    this.renderer.appendChild(this.el.nativeElement, overlay);
+    this.renderer.appendChild(this.host.nativeElement, overlay);
     this.placeholderElement = overlay;
   }
 
-  private setupIntersectionObserver(config: LazyLoadConfig): void {
+  private setupIntersectionObserver(config: Required<LazyLoadConfig>): void {
     const options: IntersectionObserverInit = {
       threshold: config.threshold,
       rootMargin: config.rootMargin,
@@ -194,12 +196,12 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
       });
     }, options);
 
-    this.observer.observe(this.el.nativeElement);
+    this.observer.observe(this.host.nativeElement);
   }
 
   private loadImage(): void {
-    const element = this.el.nativeElement;
-    const config = { ...this.defaultConfig, ...this.lazyLoadConfig };
+    const element = this.host.nativeElement;
+    const config = this.getConfig();
 
     if (element instanceof HTMLImageElement) {
       this.loadImageElement(element, config);
@@ -210,7 +212,7 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
 
   private loadImageElement(
     img: HTMLImageElement,
-    config: LazyLoadConfig,
+    config: Required<LazyLoadConfig>,
   ): void {
     const tempImg = new Image();
 
@@ -224,7 +226,7 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
       }
 
       this.isLoaded = true;
-      this.loaded.emit();
+      this.lazyLoaded.emit();
     };
 
     tempImg.onerror = () => {
@@ -236,7 +238,7 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
 
   private loadBackgroundImage(
     element: HTMLElement,
-    config: LazyLoadConfig,
+    config: Required<LazyLoadConfig>,
   ): void {
     const tempImg = new Image();
 
@@ -260,7 +262,7 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
       }
 
       this.isLoaded = true;
-      this.loaded.emit();
+      this.lazyLoaded.emit();
     };
 
     tempImg.onerror = () => {
@@ -270,16 +272,19 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
     tempImg.src = this.imageSrc;
   }
 
-  private handleLoadError(element: HTMLElement, config: LazyLoadConfig): void {
-    if (this.retryCount < config.retryCount!) {
+  private handleLoadError(
+    element: HTMLElement,
+    config: Required<LazyLoadConfig>,
+  ): void {
+    if (this.retryCount < config.retryCount) {
       this.retryCount++;
       setTimeout(() => {
         this.loadImage();
-      }, config.retryDelay! * this.retryCount);
+      }, config.retryDelay * this.retryCount);
     } else {
       // Load error image
       if (element instanceof HTMLImageElement) {
-        this.renderer.setAttribute(element, 'src', config.errorImage!);
+        this.renderer.setAttribute(element, 'src', config.errorImage);
       } else {
         this.renderer.setStyle(
           element,
@@ -302,7 +307,7 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
       }
 
       const error = new Error(`Failed to load image: ${this.imageSrc}`);
-      this.error.emit(error);
+      this.lazyError.emit(error);
     }
   }
 

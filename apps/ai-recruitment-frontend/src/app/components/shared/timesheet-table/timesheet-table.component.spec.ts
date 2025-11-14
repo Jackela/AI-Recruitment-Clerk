@@ -31,14 +31,22 @@ const BASE_ENTRIES: TimesheetEntry[] = [
   },
 ];
 
+type MutableURL = typeof URL & {
+  createObjectURL?: (obj: Blob | MediaSource) => string;
+  revokeObjectURL?: (url?: string) => void;
+};
+
 beforeAll(() => {
-  if (!globalThis.URL.createObjectURL) {
-    (globalThis.URL as any).createObjectURL = jest.fn(() => 'blob:mock-url');
+  const mutableUrl = globalThis.URL as MutableURL;
+
+  if (!mutableUrl.createObjectURL) {
+    mutableUrl.createObjectURL = jest.fn(() => 'blob:mock-url');
   } else {
     jest.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-url');
   }
-  if (!globalThis.URL.revokeObjectURL) {
-    (globalThis.URL as any).revokeObjectURL = jest.fn();
+
+  if (!mutableUrl.revokeObjectURL) {
+    mutableUrl.revokeObjectURL = jest.fn();
   } else {
     jest.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
   }
@@ -113,7 +121,9 @@ describe('TimesheetTableComponent (lightweight regression)', () => {
     fixture.detectChanges();
 
     const exportSpy = jest.spyOn(component.onExport, 'emit');
-    const downloadSpy = jest.spyOn(component as any, 'downloadCSV');
+    type DownloadHost = { downloadCSV: () => void };
+    const downloadTarget = component as unknown as DownloadHost;
+    const downloadSpy = jest.spyOn(downloadTarget, 'downloadCSV');
 
     component.exportData();
 

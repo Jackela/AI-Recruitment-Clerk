@@ -367,10 +367,11 @@ export class CacheService {
 
   // IndexedDB operations
   private async getFromIndexedDB<T>(key: string): Promise<T | null> {
-    if (!this.db) return null;
+    const db = this.db;
+    if (!db) return null;
 
     return new Promise((resolve) => {
-      const transaction = this.db!.transaction([this.storeName], 'readonly');
+      const transaction = db.transaction([this.storeName], 'readonly');
       const store = transaction.objectStore(this.storeName);
       const request = store.get(key);
 
@@ -398,10 +399,11 @@ export class CacheService {
   }
 
   private async setInIndexedDB<T>(entry: CacheEntry<T>): Promise<void> {
-    if (!this.db) return;
+    const db = this.db;
+    if (!db) return;
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readwrite');
+      const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
       const request = store.put(entry);
 
@@ -411,10 +413,11 @@ export class CacheService {
   }
 
   private async removeFromIndexedDB(key: string): Promise<void> {
-    if (!this.db) return;
+    const db = this.db;
+    if (!db) return;
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readwrite');
+      const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
       const request = store.delete(key);
 
@@ -424,10 +427,11 @@ export class CacheService {
   }
 
   private async clearIndexedDB(): Promise<void> {
-    if (!this.db) return;
+    const db = this.db;
+    if (!db) return;
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readwrite');
+      const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
       const request = store.clear();
 

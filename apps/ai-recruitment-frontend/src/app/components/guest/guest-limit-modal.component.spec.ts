@@ -11,6 +11,7 @@ describe('GuestLimitModalComponent', () => {
   let fixture: ComponentFixture<GuestLimitModalComponent>;
   let store: jest.Mocked<Store<{ guest: GuestState }>>;
   let mockState: BehaviorSubject<GuestState>;
+  type GuestStoreSelector<T> = (state: { guest: GuestState }) => T;
 
   beforeEach(async () => {
     mockState = new BehaviorSubject<GuestState>({
@@ -42,13 +43,15 @@ describe('GuestLimitModalComponent', () => {
     store = TestBed.inject(Store) as jest.Mocked<Store<{ guest: GuestState }>>;
 
     // Setup store selectors - provide observables for each property
-    store.select.mockImplementation((selector: any) => {
-      if (typeof selector === 'function') {
-        return mockState.pipe(map((state) => selector({ guest: state })));
-      }
-      // Handle string-based selectors
-      return mockState.asObservable();
-    });
+    store.select.mockImplementation(
+      (selector: GuestStoreSelector<unknown> | string) => {
+        if (typeof selector === 'function') {
+          return mockState.pipe(map((state) => selector({ guest: state })));
+        }
+        // Handle string-based selectors
+        return mockState.asObservable();
+      },
+    );
 
     // Ensure all observables are properly initialized
     component.showModal$ = mockState.pipe(map((state) => state.showLimitModal));

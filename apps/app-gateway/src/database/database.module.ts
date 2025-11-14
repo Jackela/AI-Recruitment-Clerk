@@ -1,21 +1,23 @@
 import { Module, Logger } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 @Module({
   imports: [
     MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => {
+      useFactory: async () => {
         const logger = new Logger('DatabaseModule');
-        const isTestEnv = 
-          process.env.NODE_ENV === 'test' || 
-          !!process.env.JEST_WORKER_ID || 
-          process.env.CI === 'true';
+        const runtimeConfig = getConfig();
+        const isTestEnv =
+          runtimeConfig.env.isTest ||
+          runtimeConfig.env.isCi ||
+          Boolean(runtimeConfig.env.jestWorkerId);
+        const forceInMemory =
+          process.env.GATEWAY_SERVE_CHECK === 'true' ||
+          process.env.SKIP_DB === 'true';
 
-        if (isTestEnv) {
+        if (isTestEnv || forceInMemory) {
           logger.log('Test environment detected - using MongoDB Memory Server');
           const mongod = await MongoMemoryServer.create({
             instance: {
@@ -34,8 +36,8 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
             socketTimeoutMS: 10000,
           };
         } else {
-          const mongoUri = configService.get<string>('MONGO_URL') || process.env.MONGO_URL;
-          
+          const mongoUri = runtimeConfig.database.url;
+
           if (!mongoUri) {
             logger.error('MONGO_URL not configured - Production deployment requires MongoDB');
             throw new Error('MONGO_URL not configured - Production deployment requires MongoDB');

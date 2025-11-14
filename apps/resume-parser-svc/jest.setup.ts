@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { Logger } from '@nestjs/common';
 import { config } from 'dotenv';
 import { join } from 'path';
+import { getTestingEnvironment } from '@ai-recruitment-clerk/configuration';
 
 // Load test environment variables
 config({ path: join(__dirname, '.env.test') });
@@ -27,15 +28,15 @@ global.console = {
 };
 
 // Set test environment variables (override with .env.test if exists)
+const testingEnv = getTestingEnvironment({
+  serviceName: 'resume-parser-svc-test',
+});
 process.env.NODE_ENV = process.env.NODE_ENV || 'test';
-process.env.MONGODB_URI =
-  process.env.MONGODB_URI ||
-  'mongodb://testuser:testpass@localhost:27018/resume-parser-test?authSource=admin';
-process.env.NATS_SERVERS =
-  process.env.NATS_SERVERS || 'nats://testuser:testpass@localhost:4223';
-process.env.SERVICE_NAME = process.env.SERVICE_NAME || 'resume-parser-svc-test';
-process.env.GRIDFS_BUCKET_NAME =
-  process.env.GRIDFS_BUCKET_NAME || 'test-resumes';
+process.env.MONGODB_URI = testingEnv.mongoUri;
+process.env.NATS_SERVERS = testingEnv.natsUrl;
+process.env.SERVICE_NAME = testingEnv.serviceName;
+process.env.GRIDFS_BUCKET_NAME = testingEnv.gridFsBucket;
+process.env.GRIDFS_CHUNK_SIZE = String(testingEnv.gridFsChunkSize);
 
 // Increase test timeout for integration tests
 jest.setTimeout(30000);
@@ -100,7 +101,7 @@ afterEach(async () => {
 afterAll(async () => {
   jest.restoreAllMocks();
   await runCleanups();
-  if (process.env.JEST_FORCE_EXIT === 'true') {
+  if (testingEnv.jestForceExit) {
     // Allow opt-in force exit for legacy CI pipelines
     setTimeout(() => {
       process.exit(0);

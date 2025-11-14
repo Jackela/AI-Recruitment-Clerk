@@ -16,7 +16,7 @@ import {
   QuestionnaireNotFoundError,
   QuestionnaireNotPublishedError,
 } from './questionnaires.service';
-import { SubmitQuestionnaireDto } from './dto/submit-questionnaire.dto';
+import type { SubmitQuestionnaireDto } from './dto/submit-questionnaire.dto';
 
 /**
  * Exposes endpoints for questionnaires.

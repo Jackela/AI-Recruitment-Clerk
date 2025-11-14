@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ReportRepository } from './report.repository';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Defines the shape of the performance metrics.
@@ -72,25 +72,27 @@ export interface PerformanceSummary {
 @Injectable()
 export class PerformanceMonitorService {
   private readonly logger = new Logger(PerformanceMonitorService.name);
+  private readonly config = getConfig();
   private readonly activeMetrics = new Map<string, PerformanceMetrics>();
   private readonly qualityMetrics: QualityMetrics[] = [];
   private readonly performanceHistory: PerformanceMetrics[] = [];
 
   // Performance thresholds (configurable via environment)
   private readonly thresholds = {
-    maxGenerationTime: parseInt(
-      process.env.MAX_REPORT_GENERATION_TIME_MS || '30000',
-    ), // 30 seconds
-    minSuccessRate: parseFloat(process.env.MIN_SUCCESS_RATE || '0.95'), // 95%
-    minQualityScore: parseFloat(process.env.MIN_QUALITY_SCORE || '4.0'), // 4.0/5.0
-    maxRetentionDays: parseInt(process.env.METRICS_RETENTION_DAYS || '30'), // 30 days
+    maxGenerationTime:
+      this.config.monitoring.performance?.maxGenerationTime ?? 30000,
+    minSuccessRate:
+      this.config.monitoring.performance?.minSuccessRate ?? 0.95,
+    minQualityScore:
+      this.config.monitoring.performance?.minQualityScore ?? 4.0,
+    maxRetentionDays:
+      this.config.monitoring.performance?.maxRetentionDays ?? 30,
   };
 
   /**
    * Initializes a new instance of the Performance Monitor Service.
-   * @param reportRepository - The report repository.
    */
-  constructor(private readonly _reportRepository: ReportRepository) {
+  constructor() {
     // Clean up old metrics every hour
     setInterval(() => this.cleanupOldMetrics(), 60 * 60 * 1000);
   }

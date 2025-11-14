@@ -5,6 +5,7 @@ import {
   validateTestEnvironment,
   logTestEnvironment,
 } from './test-environment';
+import { getTestingEnvironment } from './testing-env';
 
 async function globalSetup() {
   console.log('🚀 Starting E2E test environment setup...');
@@ -22,12 +23,11 @@ async function globalSetup() {
     // Continue with setup but log the error
   }
 
-  const useRealAPI = process.env.E2E_USE_REAL_API === 'true';
-  const skipWebServer =
-    process.env.E2E_SKIP_WEBSERVER === 'true' ||
-    process.env.E2E_USE_REAL_API === 'true';
-  let mockServerPort: number | null = null;
-  let devServerPort: number | null = null;
+  let testingEnv = getTestingEnvironment();
+  const useRealAPI = testingEnv.useRealApi;
+  const skipWebServer = testingEnv.skipWebServer || useRealAPI;
+  let mockServerPort: number | null = testingEnv.mockApiPort ?? null;
+  let devServerPort: number | null = testingEnv.devServerPort ?? null;
 
   if (!useRealAPI) {
     console.log('🚀 Starting Mock API Server with dynamic port allocation...');
@@ -42,6 +42,7 @@ async function globalSetup() {
       // Set environment variable for tests to use
       process.env.MOCK_API_PORT = mockServerPort.toString();
       process.env.MOCK_API_URL = `http://localhost:${mockServerPort}`;
+      testingEnv = getTestingEnvironment();
 
       // Wait for mock server to be ready with dynamic URL
       const mockServerUrl = `http://localhost:${mockServerPort}/api/health`;
@@ -61,6 +62,7 @@ async function globalSetup() {
           mockServerPort = await startMockServer();
           process.env.MOCK_API_PORT = mockServerPort.toString();
           process.env.MOCK_API_URL = `http://localhost:${mockServerPort}`;
+          testingEnv = getTestingEnvironment();
 
           const retryReady = await portManager.waitForService(
             'mock-api',
@@ -89,9 +91,10 @@ async function globalSetup() {
     try {
       const gatewayPort = await portManager.allocatePort('gateway');
       process.env.GATEWAY_PORT = gatewayPort.toString();
+      testingEnv = getTestingEnvironment();
 
       const gatewayHealthUrl =
-        process.env.GATEWAY_HEALTH_URL ||
+        testingEnv.gatewayHealthUrl ||
         `http://localhost:${gatewayPort}/api/auth/health`;
 
       console.log(`⏳ Waiting for gateway at ${gatewayHealthUrl}...`);
@@ -106,8 +109,7 @@ async function globalSetup() {
 
       // Fall back to checking default port
       const fallbackUrl =
-        process.env.GATEWAY_HEALTH_URL ||
-        'http://localhost:3000/api/auth/health';
+        testingEnv.gatewayHealthUrl || 'http://localhost:3000/api/auth/health';
       console.log(`⏳ Checking fallback gateway at ${fallbackUrl}...`);
       const ok = await waitForServerReady(fallbackUrl, 90);
       if (!ok) {
@@ -121,8 +123,8 @@ async function globalSetup() {
     console.log('🎯 Configuring development server...');
 
     try {
-      if (process.env.DEV_SERVER_PORT) {
-        devServerPort = Number.parseInt(process.env.DEV_SERVER_PORT, 10);
+      if (testingEnv.devServerPort) {
+        devServerPort = testingEnv.devServerPort;
         console.log(
           `📝 Dev server port preconfigured via env: ${devServerPort}`,
         );
@@ -130,9 +132,11 @@ async function globalSetup() {
         // Try to allocate dev server port dynamically
         devServerPort = await portManager.allocatePort('dev-server');
         process.env.DEV_SERVER_PORT = devServerPort.toString();
+        testingEnv = getTestingEnvironment();
       }
 
       process.env.PLAYWRIGHT_BASE_URL = `http://localhost:${devServerPort}`;
+      testingEnv = getTestingEnvironment();
 
       console.log(`📝 Dev server will use port ${devServerPort}`);
     } catch (error) {
@@ -153,17 +157,19 @@ async function globalSetup() {
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
 
-      devServerPort = Number.parseInt(
-        process.env.DEV_SERVER_PORT ?? defaultPort.toString(),
-        10,
-      );
-      process.env.DEV_SERVER_PORT = devServerPort.toString();
-      process.env.PLAYWRIGHT_BASE_URL = `http://localhost:${devServerPort}`;
+      devServerPort = testingEnv.devServerPort ?? defaultPort;
+      testingEnv = getTestingEnvironment();
     }
+
+    if (devServerPort === null) {
+      devServerPort = testingEnv.devServerPort ?? 4202;
+    }
+    process.env.DEV_SERVER_PORT = devServerPort.toString();
+    process.env.PLAYWRIGHT_BASE_URL = `http://localhost:${devServerPort}`;
 
     // Wait for dev server to be ready (if webServer is disabled, this will be external)
     const devServerUrl =
-      process.env.PLAYWRIGHT_BASE_URL || `http://localhost:${devServerPort}`;
+      testingEnv.playwrightBaseUrl || `http://localhost:${devServerPort}`;
     console.log(`⏳ Waiting for dev server at ${devServerUrl} to be ready...`);
 
     const isServerReady = await waitForServerReady(devServerUrl, 60);
@@ -182,12 +188,13 @@ async function globalSetup() {
   } else {
     delete process.env.DEV_SERVER_PORT;
     const externalBaseUrl =
-      process.env.PLAYWRIGHT_BASE_URL ||
-      process.env.E2E_EXTERNAL_BASE_URL ||
+      testingEnv.externalBaseUrl ||
+      testingEnv.playwrightBaseUrl ||
       'http://localhost:4200';
     process.env.PLAYWRIGHT_BASE_URL = externalBaseUrl;
+    testingEnv = getTestingEnvironment();
     console.log(
-      `🎯 Skipping dev server startup. Using external base URL: ${externalBaseUrl}`,
+      `🎯 Skipping dev server startup. Using external base URL: ${testingEnv.playwrightBaseUrl}`,
     );
   }
 

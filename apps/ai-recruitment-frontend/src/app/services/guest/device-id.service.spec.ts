@@ -147,7 +147,7 @@ describe('DeviceIdService', () => {
         .spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions')
         .mockReturnValue({
           timeZone: 'America/New_York',
-        } as any);
+        } as Intl.ResolvedDateTimeFormatOptions);
     });
 
     it('should generate device fingerprint', () => {
@@ -176,10 +176,10 @@ describe('DeviceIdService', () => {
       // Mock console methods before creating service
       const consoleSpy = jest
         .spyOn(console, 'warn')
-        .mockImplementation(() => {});
+        .mockImplementation(() => undefined);
       const errorSpy = jest
         .spyOn(console, 'error')
-        .mockImplementation(() => {});
+        .mockImplementation(() => undefined);
 
       // Override the global localStorage mock to throw errors
       Object.defineProperty(window, 'localStorage', {

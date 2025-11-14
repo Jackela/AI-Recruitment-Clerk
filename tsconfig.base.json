@@ -16,9 +16,6 @@
     "baseUrl": ".",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    
-    // 多代理修复: TypeScript严格模式启用
-    // 基于代码质量专家建议，提升类型安全性
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -33,22 +30,47 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@app/shared-dtos": ["libs/shared-dtos/src/index.ts"],
-      "@app/shared-nats-client": ["libs/shared-nats-client/src/index.ts"],
-      "@app/microservices-shared": ["libs/shared-nats-client/src/index.ts"],
+      "@ai-recruitment-clerk/ai-services-shared": [
+        "libs/ai-services-shared/src/index.ts"
+      ],
+      "@ai-recruitment-clerk/api-contracts": [
+        "libs/api-contracts/src/index.ts"
+      ],
+      "@ai-recruitment-clerk/candidate-scoring-domain": [
+        "libs/candidate-scoring-domain/src/index.ts"
+      ],
+      "@ai-recruitment-clerk/configuration": ["libs/configuration/src/index.ts"],
+      "@ai-recruitment-clerk/incentive-system-domain": [
+        "libs/incentive-system-domain/src/index.ts"
+      ],
+      "@ai-recruitment-clerk/infrastructure-shared": [
+        "libs/infrastructure-shared/src/index.ts"
+      ],
+      "@ai-recruitment-clerk/job-management-domain": [
+        "libs/job-management-domain/src/index.ts"
+      ],
+      "@ai-recruitment-clerk/marketing-domain": [
+        "libs/marketing-domain/src/index.ts"
+      ],
+      "@ai-recruitment-clerk/report-generation-domain": [
+        "libs/report-generation-domain/src/index.ts"
+      ],
+      "@ai-recruitment-clerk/resume-processing-domain": [
+        "libs/resume-processing-domain/src/index.ts"
+      ],
       "@ai-recruitment-clerk/shared-dtos": ["libs/shared-dtos/src/index.ts"],
-      "@ai-recruitment-clerk/infrastructure-shared": ["libs/infrastructure-shared/src/index.ts"],
-      "@ai-recruitment-clerk/shared-nats-client": ["libs/shared-nats-client/src/index.ts"],
-      "@ai-recruitment-clerk/ai-services-shared": ["libs/ai-services-shared/src/index.ts"],
-      "@ai-recruitment-clerk/api-contracts": ["libs/api-contracts/src/index.ts"],
-      "@ai-recruitment-clerk/candidate-scoring-domain": ["libs/candidate-scoring-domain/src/index.ts"],
-      "@ai-recruitment-clerk/incentive-system-domain": ["libs/incentive-system-domain/src/index.ts"],
-      "@ai-recruitment-clerk/job-management-domain": ["libs/job-management-domain/src/index.ts"],
-      "@ai-recruitment-clerk/marketing-domain": ["libs/marketing-domain/src/index.ts"],
-      "@ai-recruitment-clerk/report-generation-domain": ["libs/report-generation-domain/src/index.ts"],
-      "@ai-recruitment-clerk/resume-processing-domain": ["libs/resume-processing-domain/src/index.ts"],
-      "@ai-recruitment-clerk/usage-management-domain": ["libs/usage-management-domain/src/index.ts"],
-      "@ai-recruitment-clerk/user-management-domain": ["libs/user-management-domain/src/index.ts"]
+      "@ai-recruitment-clerk/shared-nats-client": [
+        "libs/shared-nats-client/src/index.ts"
+      ],
+      "@ai-recruitment-clerk/usage-management-domain": [
+        "libs/usage-management-domain/src/index.ts"
+      ],
+      "@ai-recruitment-clerk/user-management-domain": [
+        "libs/user-management-domain/src/index.ts"
+      ],
+      "@app/microservices-shared": ["libs/shared-nats-client/src/index.ts"],
+      "@app/shared-dtos": ["libs/shared-dtos/src/index.ts"],
+      "@app/shared-nats-client": ["libs/shared-nats-client/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -328,7 +328,7 @@ export class GridFsService {
    * @returns The file ID.
    */
   private extractFileIdFromUrl(gridFsUrl: string): string {
-    const urlPattern = /^gridfs:\/\/[^\/]+\/(.+)$/;
+    const urlPattern = /^gridfs:\/\/[^/]+\/(.+)$/;
     const match = gridFsUrl.match(urlPattern);
 
     if (!match) {

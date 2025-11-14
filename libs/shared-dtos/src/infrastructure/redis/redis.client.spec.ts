@@ -1,4 +1,5 @@
 import { RedisClient } from './redis.client';
+import { resetConfigCache } from '@ai-recruitment-clerk/configuration';
 
 describe('RedisClient (in-memory mode)', () => {
   const prevEnv = { ...process.env } as Record<string, string | undefined>;
@@ -9,10 +10,12 @@ describe('RedisClient (in-memory mode)', () => {
     delete process.env.REDIS_URL;
     delete process.env.REDISHOST;
     delete process.env.REDIS_HOST;
+    resetConfigCache();
   });
 
   afterAll(() => {
     process.env = prevEnv;
+    resetConfigCache();
   });
 
   it('sets and gets simple values', async () => {

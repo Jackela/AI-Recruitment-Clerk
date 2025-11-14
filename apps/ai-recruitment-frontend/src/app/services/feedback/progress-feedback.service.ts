@@ -11,7 +11,7 @@ export interface ProgressUpdate {
   message: string;
   timestamp: Date;
   type: 'info' | 'success' | 'warning' | 'error';
-  details?: any;
+  details?: unknown;
 }
 
 /**

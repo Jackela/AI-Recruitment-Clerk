@@ -1,3 +1,5 @@
+import { getTestingEnvironment } from './testing-env';
+
 /**
  * Test Environment Configuration
  *
@@ -20,29 +22,17 @@ export interface TestEnvironment {
  * Get current test environment configuration
  */
 export function getTestEnvironment(): TestEnvironment {
-  const mockApiPort = process.env.MOCK_API_PORT
-    ? parseInt(process.env.MOCK_API_PORT, 10)
-    : undefined;
-  const devServerPort = process.env.DEV_SERVER_PORT
-    ? parseInt(process.env.DEV_SERVER_PORT, 10)
-    : undefined;
-  const gatewayPort = process.env.GATEWAY_PORT
-    ? parseInt(process.env.GATEWAY_PORT, 10)
-    : undefined;
+  const env = getTestingEnvironment();
 
   return {
-    mockApiPort,
-    mockApiUrl: process.env.MOCK_API_URL,
-    devServerPort,
-    gatewayPort,
-    playwrightBaseUrl:
-      process.env.PLAYWRIGHT_BASE_URL ||
-      (devServerPort
-        ? `http://localhost:${devServerPort}`
-        : 'http://localhost:4200'),
-    useRealApi: process.env.E2E_USE_REAL_API === 'true',
-    skipWebServer: process.env.E2E_SKIP_WEBSERVER === 'true',
-    isCI: !!process.env.CI,
+    mockApiPort: env.mockApiPort,
+    mockApiUrl: env.mockApiUrl,
+    devServerPort: env.devServerPort,
+    gatewayPort: env.gatewayPort,
+    playwrightBaseUrl: env.playwrightBaseUrl,
+    useRealApi: env.useRealApi,
+    skipWebServer: env.skipWebServer,
+    isCI: env.isCi,
   };
 }
 

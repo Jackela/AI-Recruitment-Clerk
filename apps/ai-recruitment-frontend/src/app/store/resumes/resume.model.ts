@@ -20,6 +20,7 @@ export interface ResumeListItem {
     skillsMatch: number;
     experienceMatch: number;
     educationMatch: number;
+    skills?: string[];
   };
 }
 

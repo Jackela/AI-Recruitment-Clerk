@@ -5,12 +5,14 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Represents the test rate limit bypass filter.
  */
 @Catch(HttpException)
 export class TestRateLimitBypassFilter implements ExceptionFilter {
+  private readonly config = getConfig();
   /**
    * Performs the catch operation.
    * @param exception - The exception.
@@ -24,7 +26,7 @@ export class TestRateLimitBypassFilter implements ExceptionFilter {
 
     // Only in tests: downgrade 429 to 200 for all endpoints except /system/status
     if (
-      process.env.NODE_ENV === 'test' &&
+      this.config.env.isTest &&
       exception.getStatus &&
       exception.getStatus() === HttpStatus.TOO_MANY_REQUESTS &&
       request?.url !== '/system/status'

@@ -1,0 +1,306 @@
+openapi: 3.0.3
+info:
+  title: Governance Orchestrator API
+  version: 0.1.0
+  description: >-
+    Service contracts that catalog Nx components, record best-practice findings,
+    plan remediation, and capture validation runs used to gate merges.
+servers:
+  - url: https://governance.local/api
+paths:
+  /components:
+    get:
+      summary: List all registered components with current principle scores.
+      parameters:
+        - in: query
+          name: principle
+          schema:
+            type: string
+            enum: [SSOT, SOLID, DDD]
+          description: Optional filter to components failing a given principle.
+      responses:
+        '200':
+          description: Components retrieved.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SystemComponent'
+    post:
+      summary: Register or update a component inventory record.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SystemComponent'
+      responses:
+        '201':
+          description: Component recorded.
+  /findings:
+    get:
+      summary: Query findings with optional severity/principle filters.
+      parameters:
+        - name: componentId
+          in: query
+          schema:
+            type: string
+        - name: severity
+          in: query
+          schema:
+            type: string
+            enum: [high, medium, low]
+      responses:
+        '200':
+          description: Matching findings.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BestPracticeFinding'
+    post:
+      summary: Create a new best-practice finding.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BestPracticeFinding'
+      responses:
+        '201':
+          description: Finding created.
+  /remediations:
+    get:
+      summary: List remediation work items with status filtering.
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [planned, in-progress, ready-for-validation, verified, blocked]
+      responses:
+        '200':
+          description: Matching remediations.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RemediationWorkItem'
+    post:
+      summary: Create or update remediation work items for a finding.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemediationWorkItem'
+      responses:
+        '202':
+          description: Remediation accepted.
+  /validation-runs:
+    post:
+      summary: Record results of local + remote validation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidationRun'
+      responses:
+        '201':
+          description: Validation run stored.
+    get:
+      summary: Retrieve historical validation runs.
+      parameters:
+        - name: result
+          in: query
+          schema:
+            type: string
+            enum: [pass, fail, blocked]
+      responses:
+        '200':
+          description: Validation runs list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ValidationRun'
+  /validation-runs/{runId}/parity:
+    post:
+      summary: Attach comparison data between local `act` output and remote GitHub Actions jobs.
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                actLogPath:
+                  type: string
+                githubActionsUrl:
+                  type: string
+                parityStatus:
+                  type: string
+                  enum: [match, drift]
+                notes:
+                  type: string
+              required: [actLogPath, githubActionsUrl, parityStatus]
+      responses:
+        '204':
+          description: Parity info updated.
+components:
+  schemas:
+    SystemComponent:
+      type: object
+      required: [componentId, type, ownerTeam, principleScores, lastAuditedAt]
+      properties:
+        componentId:
+          type: string
+        type:
+          type: string
+          enum: [application, library, tooling, script]
+        ownerTeam:
+          type: string
+        principleScores:
+          type: object
+          additionalProperties:
+            type: string
+            enum: [pass, fail, not-applicable]
+        evidenceLinks:
+          type: array
+          items:
+            type: string
+        dependencies:
+          type: array
+          items:
+            type: string
+        lastAuditedAt:
+          type: string
+          format: date-time
+    BestPracticeFinding:
+      type: object
+      required: [findingId, componentId, principle, severity, description, evidence, status]
+      properties:
+        findingId:
+          type: string
+        componentId:
+          type: string
+        principle:
+          type: string
+          enum: [SSOT, SOLID, DDD]
+        severity:
+          type: string
+          enum: [high, medium, low]
+        description:
+          type: string
+        evidence:
+          type: string
+        openedAt:
+          type: string
+          format: date-time
+        targetClosure:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [open, in-progress, closed, waived]
+    RemediationWorkItem:
+      type: object
+      required: [remediationId, findingId, owner, status, verificationSteps]
+      properties:
+        remediationId:
+          type: string
+        findingId:
+          type: string
+        owner:
+          type: string
+        milestones:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              dueDate:
+                type: string
+                format: date
+              acceptanceCriteria:
+                type: string
+        dependencies:
+          type: array
+          items:
+            type: string
+        verificationSteps:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [planned, in-progress, ready-for-validation, verified, blocked]
+    ValidationRun:
+      type: object
+      required: [runId, components, testsExecuted, actSimulation, githubActions, trigger, result]
+      properties:
+        runId:
+          type: string
+        components:
+          type: array
+          items:
+            type: string
+        remediationIds:
+          type: array
+          items:
+            type: string
+        testsExecuted:
+          type: object
+          properties:
+            unit:
+              type: string
+            integration:
+              type: string
+            lint:
+              type: string
+            typecheck:
+              type: string
+            e2e:
+              type: string
+        actSimulation:
+          type: object
+          properties:
+            workflow:
+              type: string
+            image:
+              type: string
+            status:
+              type: string
+              enum: [pass, fail]
+            logPath:
+              type: string
+        githubActions:
+          type: object
+          properties:
+            workflowUrl:
+              type: string
+            conclusion:
+              type: string
+              enum: [success, failure, cancelled]
+            jobMatrix:
+              type: object
+        trigger:
+          type: string
+          enum: [remediation, scheduled, pre-merge]
+        result:
+          type: string
+          enum: [pass, fail, blocked]
+        notes:
+          type: string

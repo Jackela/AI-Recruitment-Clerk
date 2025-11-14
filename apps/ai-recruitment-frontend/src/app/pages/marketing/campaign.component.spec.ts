@@ -6,15 +6,24 @@ import {
 } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { By } from '@angular/platform-browser';
-import { DebugElement } from '@angular/core';
 import { CampaignComponent } from './campaign.component';
 import { GuestUsageService } from '../../services/marketing/guest-usage.service';
+
+type GuestUsageServiceMock = Pick<
+  GuestUsageService,
+  | 'getGuestStats'
+  | 'canUseFeature'
+  | 'getFeedbackCode'
+  | 'generateFeedbackCode'
+  | 'autoCheckUserStatus'
+>;
+type RouterMock = jest.Mocked<Pick<Router, 'navigate'>>;
 
 describe('CampaignComponent', () => {
   let component: CampaignComponent;
   let fixture: ComponentFixture<CampaignComponent>;
-  let mockGuestUsageService: jest.Mocked<GuestUsageService>;
-  let mockRouter: jest.Mocked<Router>;
+  let mockGuestUsageService: jest.Mocked<GuestUsageServiceMock>;
+  let mockRouter: RouterMock;
 
   beforeEach(async () => {
     // 创建spy对象
@@ -24,11 +33,11 @@ describe('CampaignComponent', () => {
       getFeedbackCode: jest.fn(),
       generateFeedbackCode: jest.fn(),
       autoCheckUserStatus: jest.fn().mockResolvedValue(undefined),
-    } as any;
+    };
 
     mockRouter = {
       navigate: jest.fn(),
-    } as any;
+    };
 
     await TestBed.configureTestingModule({
       imports: [CampaignComponent],

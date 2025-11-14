@@ -1,17 +1,27 @@
 {
   "name": "app-gateway-e2e",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "implicitDependencies": ["app-gateway"],
+  "implicitDependencies": [
+    "app-gateway"
+  ],
   "projectType": "application",
   "targets": {
     "e2e": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{e2eProjectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{e2eProjectRoot}"
+      ],
       "options": {
         "jestConfig": "apps/app-gateway-e2e/jest.config.ts",
         "passWithNoTests": true
       },
-      "dependsOn": ["app-gateway:build", "app-gateway:serve"]
+      "dependsOn": [
+        "app-gateway:build",
+        "app-gateway:serve"
+      ]
     }
-  }
+  },
+  "tags": [
+    "owner:platform-governance"
+  ]
 }

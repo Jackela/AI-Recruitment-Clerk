@@ -16,9 +16,28 @@ export interface LogEntry {
   level: LogLevel;
   message: string;
   context?: string;
-  data?: any;
+  data?: unknown;
   timestamp: Date;
   error?: Error;
+}
+
+export interface ContextualLogger {
+  log: (message: string, data?: unknown) => void;
+  warn: (message: string, data?: unknown) => void;
+  error: (message: string, error?: Error | unknown) => void;
+  debug: (message: string, data?: unknown) => void;
+  performance: (
+    operation: string,
+    duration: number,
+    data?: Record<string, unknown>,
+  ) => void;
+  userAction: (action: string, data?: Record<string, unknown>) => void;
+  api: (
+    method: string,
+    url: string,
+    status: number,
+    duration?: number,
+  ) => void;
 }
 
 /**
@@ -38,28 +57,28 @@ export class LoggerService {
   /**
    * Log an informational message
    */
-  log(message: string, context?: string, data?: any): void {
+  log(message: string, context?: string, data?: unknown): void {
     this.writeLog(LogLevel.LOG, message, context, data);
   }
 
   /**
    * Log a warning message
    */
-  warn(message: string, context?: string, data?: any): void {
+  warn(message: string, context?: string, data?: unknown): void {
     this.writeLog(LogLevel.WARN, message, context, data);
   }
 
   /**
    * Log an error message
    */
-  error(message: string, context?: string, error?: Error | any): void {
+  error(message: string, context?: string, error?: Error | unknown): void {
     this.writeLog(LogLevel.ERROR, message, context, undefined, error);
   }
 
   /**
    * Log a debug message (development only)
    */
-  debug(message: string, context?: string, data?: any): void {
+  debug(message: string, context?: string, data?: unknown): void {
     this.writeLog(LogLevel.DEBUG, message, context, data);
   }
 
@@ -70,22 +89,26 @@ export class LoggerService {
     operation: string,
     duration: number,
     context?: string,
-    data?: any,
+    data?: Record<string, unknown>,
   ): void {
     const message = `⚡ ${operation} completed in ${duration}ms`;
     this.writeLog(LogLevel.LOG, message, context, {
       operation,
       duration,
-      ...data,
+      ...(data ?? {}),
     });
   }
 
   /**
    * Log user actions for analytics
    */
-  userAction(action: string, context?: string, data?: any): void {
+  userAction(
+    action: string,
+    context?: string,
+    data?: Record<string, unknown>,
+  ): void {
     const message = `👤 User action: ${action}`;
-    this.writeLog(LogLevel.LOG, message, context, { action, ...data });
+    this.writeLog(LogLevel.LOG, message, context, { action, ...(data ?? {}) });
   }
 
   /**
@@ -128,7 +151,7 @@ export class LoggerService {
     level: LogLevel,
     message: string,
     context?: string,
-    data?: any,
+    data?: unknown,
     error?: Error,
   ): void {
     // Check if we should log at this level
@@ -207,7 +230,7 @@ export class LoggerService {
         // Example: Send to analytics or error tracking service
         // analytics.track('error_logged', { message: entry.message, context: entry.context });
       }
-    } catch (err) {
+    } catch {
       // Silently fail to avoid logging loops
     }
   }
@@ -215,17 +238,21 @@ export class LoggerService {
   /**
    * Create a logger instance for a specific component/service
    */
-  createLogger(context: string) {
+  createLogger(context: string): ContextualLogger {
     return {
-      log: (message: string, data?: any) => this.log(message, context, data),
-      warn: (message: string, data?: any) => this.warn(message, context, data),
-      error: (message: string, error?: Error | any) =>
+      log: (message: string, data?: unknown) => this.log(message, context, data),
+      warn: (message: string, data?: unknown) =>
+        this.warn(message, context, data),
+      error: (message: string, error?: Error | unknown) =>
         this.error(message, context, error),
-      debug: (message: string, data?: any) =>
+      debug: (message: string, data?: unknown) =>
         this.debug(message, context, data),
-      performance: (operation: string, duration: number, data?: any) =>
-        this.performance(operation, duration, context, data),
-      userAction: (action: string, data?: any) =>
+      performance: (
+        operation: string,
+        duration: number,
+        data?: Record<string, unknown>,
+      ) => this.performance(operation, duration, context, data),
+      userAction: (action: string, data?: Record<string, unknown>) =>
         this.userAction(action, context, data),
       api: (method: string, url: string, status: number, duration?: number) =>
         this.api(method, url, status, duration, context),
@@ -237,11 +264,15 @@ export class LoggerService {
  * Logger decorator for automatic context injection
  */
 export function Logger(context?: string) {
-  return function (target: any, propertyKey: string) {
+  return function (target: object, propertyKey: string | symbol): void {
     const loggerContext = context || target.constructor.name;
 
+    type LoggerHost = {
+      _logger?: ContextualLogger;
+    };
+
     Object.defineProperty(target, propertyKey, {
-      get: function () {
+      get: function (this: LoggerHost) {
         if (!this._logger) {
           const loggerService = new LoggerService();
           this._logger = loggerService.createLogger(loggerContext);

@@ -51,11 +51,11 @@ export type ConsentRecordDocument = ConsentRecord & Document;
   versionKey: false,
 })
 export class ConsentRecord {
-  @Prop({ required: true, unique: true, index: true })
-  id: string = '';
+  @Prop({ type: String, required: true, unique: true, index: true })
+  id = '';
 
-  @Prop({ required: true })
-  userId: string = '';
+  @Prop({ type: String, required: true })
+  userid = '';
 
   @Prop({
     type: String,
@@ -86,37 +86,37 @@ export class ConsentRecord {
   })
   dataCategories: DataCategory[] = [];
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   legalBasis?: string = undefined; // GDPR Article 6 legal basis
 
-  @Prop({ required: true })
+  @Prop({ type: Date, required: true })
   consentDate: Date = new Date();
 
-  @Prop({ required: false })
+  @Prop({ type: Date, required: false })
   withdrawalDate?: Date = undefined;
 
-  @Prop({ required: false })
+  @Prop({ type: Date, required: false })
   expiryDate?: Date = undefined; // For time-limited consent
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   consentText?: string = undefined; // Text presented to user
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   withdrawalReason?: string = undefined;
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   ipAddress?: string = undefined; // Proof of consent
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   userAgent?: string = undefined; // Technical consent context
 
   @Prop({ type: Object, default: {} })
   metadata?: Record<string, any> = {};
 
-  @Prop({ default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   createdAt: Date = new Date();
 
-  @Prop({ default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   updatedAt: Date = new Date();
 }
 
@@ -162,43 +162,43 @@ export type CookieConsentDocument = CookieConsent & Document;
   versionKey: false,
 })
 export class CookieConsent {
-  @Prop({ required: true, unique: true })
-  deviceId: string = '';
+  @Prop({ type: String, required: true, unique: true })
+  deviceid = '';
 
-  @Prop({ required: true, default: true })
-  essential: boolean = true; // Always true, cannot be denied
+  @Prop({ type: Boolean, required: true, default: true })
+  essential = true; // Always true, cannot be denied
 
-  @Prop({ required: true, default: false })
-  functional: boolean = false;
+  @Prop({ type: Boolean, required: true, default: false })
+  functional = false;
 
-  @Prop({ required: true, default: false })
-  analytics: boolean = false;
+  @Prop({ type: Boolean, required: true, default: false })
+  analytics = false;
 
-  @Prop({ required: true, default: false })
-  marketing: boolean = false;
+  @Prop({ type: Boolean, required: true, default: false })
+  marketing = false;
 
-  @Prop({ required: true })
+  @Prop({ type: Date, required: true })
   consentDate: Date = new Date();
 
-  @Prop({ required: false })
+  @Prop({ type: Date, required: false })
   expiryDate?: Date = undefined;
 
-  @Prop({ required: false, default: '1.0' })
-  consentVersion?: string = '1.0';
+  @Prop({ type: String, required: false, default: '1.0' })
+  consentVersion?: string;
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   ipAddress?: string = undefined;
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   userAgent?: string = undefined;
 
   @Prop({ type: Object, default: {} })
   metadata?: Record<string, any> = {};
 
-  @Prop({ default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   createdAt: Date = new Date();
 
-  @Prop({ default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   updatedAt: Date = new Date();
 }
 
@@ -238,14 +238,14 @@ export type ConsentAuditLogDocument = ConsentAuditLog & Document;
   versionKey: false,
 })
 export class ConsentAuditLog {
-  @Prop({ required: true, unique: true, index: true })
-  id: string = '';
+  @Prop({ type: String, required: true, unique: true, index: true })
+  id = '';
 
-  @Prop({ required: true })
-  userId: string = '';
+  @Prop({ type: String, required: true })
+  userid = '';
 
-  @Prop({ required: true })
-  action: string = ''; // 'grant', 'withdraw', 'renew', 'expire'
+  @Prop({ type: String, required: true })
+  action = ''; // 'grant', 'withdraw', 'renew', 'expire'
 
   @Prop({
     type: String,
@@ -269,22 +269,22 @@ export class ConsentAuditLog {
   })
   newStatus: ConsentStatus = ConsentStatus.PENDING;
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   reason?: string = undefined;
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   ipAddress?: string = undefined;
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   userAgent?: string = undefined;
 
   @Prop({ type: Object, default: {} })
   metadata?: Record<string, any> = {};
 
-  @Prop({ required: true })
+  @Prop({ type: Date, required: true })
   timestamp: Date = new Date();
 
-  @Prop({ default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   createdAt: Date = new Date();
 }
 
@@ -304,3 +304,4 @@ ConsentAuditLogSchema.pre('save', function (next) {
   }
   next();
 });
+

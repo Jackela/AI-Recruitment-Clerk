@@ -2,7 +2,9 @@
   "name": "@app/shared-nats-client",
   "version": "1.0.0",
   "description": "Shared NATS client library for AI Recruitment Clerk microservices",
-  "main": "src/index.ts",
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "jest"

@@ -5,6 +5,7 @@ import {
   NgZone,
   ChangeDetectionStrategy,
   signal,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, interval, takeUntil } from 'rxjs';
@@ -41,6 +42,33 @@ export interface PerformanceMetrics {
   // Performance status
   overall: 'excellent' | 'good' | 'needs-improvement' | 'poor';
 }
+
+type PerformanceMemory = {
+  usedJSHeapSize: number;
+  totalJSHeapSize: number;
+  jsHeapSizeLimit: number;
+};
+
+type PerformanceWithMemory = Performance & {
+  memory?: PerformanceMemory;
+};
+
+type NavigatorConnection = {
+  type?: string;
+  effectiveType?: string;
+  downlink?: number;
+  rtt?: number;
+};
+
+type NavigatorWithDeviceInfo = Navigator & {
+  connection?: NavigatorConnection;
+  deviceMemory?: number;
+};
+
+type LayoutShiftEntry = PerformanceEntry & {
+  value: number;
+  hadRecentInput: boolean;
+};
 
 /**
  * Represents the mobile performance component.
@@ -459,11 +487,7 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
   private performanceObserver?: PerformanceObserver;
   private layoutShiftScore = 0;
 
-  /**
-   * Initializes a new instance of the Mobile Performance Component.
-   * @param ngZone - The ng zone.
-   */
-  constructor(private ngZone: NgZone) {}
+  private readonly ngZone = inject(NgZone);
 
   /**
    * Performs the ng on init operation.
@@ -522,8 +546,8 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
     }
 
     // Get memory info
-    if ('memory' in performance) {
-      const memory = (performance as any).memory;
+    const memory = (performance as PerformanceWithMemory).memory;
+    if (memory) {
       this.updateMetrics({
         usedJSHeapSize: memory.usedJSHeapSize,
         totalJSHeapSize: memory.totalJSHeapSize,
@@ -564,36 +588,40 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
         this.updateMetric('lcp', entry.startTime);
         break;
 
-      case 'first-input':
+      case 'first-input': {
         const fidEntry = entry as PerformanceEventTiming;
         this.updateMetric('fid', fidEntry.processingStart - fidEntry.startTime);
         break;
+      }
 
       case 'layout-shift':
-        const clsEntry = entry as any;
-        if (!clsEntry.hadRecentInput) {
-          this.layoutShiftScore += clsEntry.value;
-          this.updateMetric('cls', this.layoutShiftScore);
-        }
+        this.handleLayoutShiftEntry(entry as LayoutShiftEntry);
         break;
     }
   }
 
-  private collectNetworkInfo() {
-    if ('connection' in navigator) {
-      const connection = (navigator as any).connection;
-      this.updateMetrics({
-        connectionType: connection.type || 'unknown',
-        effectiveType: connection.effectiveType || 'unknown',
-        downlink: connection.downlink || 0,
-        rtt: connection.rtt || 0,
-      });
+  private handleLayoutShiftEntry(entry: LayoutShiftEntry) {
+    if (entry.hadRecentInput) {
+      return;
     }
+
+    this.layoutShiftScore += entry.value;
+    this.updateMetric('cls', this.layoutShiftScore);
+  }
+
+  private collectNetworkInfo() {
+    const { connection } = navigator as NavigatorWithDeviceInfo;
+    this.updateMetrics({
+      connectionType: connection?.type ?? 'unknown',
+      effectiveType: connection?.effectiveType ?? 'unknown',
+      downlink: connection?.downlink ?? 0,
+      rtt: connection?.rtt ?? 0,
+    });
   }
 
   private collectDeviceInfo() {
     this.updateMetrics({
-      deviceMemory: (navigator as any).deviceMemory || 0,
+      deviceMemory: (navigator as NavigatorWithDeviceInfo).deviceMemory ?? 0,
       hardwareConcurrency: navigator.hardwareConcurrency || 0,
     });
   }
@@ -603,8 +631,8 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
     interval(5000)
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        if ('memory' in performance) {
-          const memory = (performance as any).memory;
+        const memory = (performance as PerformanceWithMemory).memory;
+        if (memory) {
           this.updateMetrics({
             usedJSHeapSize: memory.usedJSHeapSize,
             totalJSHeapSize: memory.totalJSHeapSize,
@@ -615,7 +643,10 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
       });
   }
 
-  private updateMetric(key: keyof PerformanceMetrics, value: any) {
+  private updateMetric<K extends keyof PerformanceMetrics>(
+    key: K,
+    value: PerformanceMetrics[K],
+  ) {
     this.metrics.update((current) => ({ ...current, [key]: value }));
   }
 

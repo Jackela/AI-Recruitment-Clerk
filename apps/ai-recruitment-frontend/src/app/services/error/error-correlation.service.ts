@@ -27,7 +27,7 @@ export interface StructuredError {
   category: 'network' | 'validation' | 'runtime' | 'security' | 'business';
   context: ErrorCorrelationContext;
   stack?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   userAction?: string;
   recoverable: boolean;
 }
@@ -87,7 +87,7 @@ export class ErrorCorrelationService {
    * Create structured error with correlation
    */
   createStructuredError(
-    error: Error | any,
+    error: unknown,
     category: StructuredError['category'] = 'runtime',
     severity: StructuredError['severity'] = 'medium',
     userAction?: string,
@@ -102,7 +102,7 @@ export class ErrorCorrelationService {
       severity,
       category,
       context,
-      stack: error?.stack,
+      stack: error instanceof Error ? error.stack : undefined,
       metadata: this.extractMetadata(error),
       userAction,
       recoverable: this.isRecoverable(error, category),
@@ -237,7 +237,7 @@ export class ErrorCorrelationService {
       try {
         const parsedHistory = JSON.parse(stored);
         this.errorHistory.push(...parsedHistory.slice(-this.maxHistorySize));
-      } catch (e) {
+      } catch {
         // Invalid stored data
         sessionStorage.removeItem('error-correlation-history');
       }
@@ -270,42 +270,84 @@ export class ErrorCorrelationService {
     return sessionId;
   }
 
-  private generateErrorCode(error: any, category: string): string {
-    if (error?.name) {
+  private generateErrorCode(
+    error: unknown,
+    category: StructuredError['category'],
+  ): string {
+    if (error instanceof Error && error.name) {
       return `${category.toUpperCase()}_${error.name.toUpperCase()}`;
     }
-    if (error?.status) {
-      return `HTTP_${error.status}`;
+    const errorRecord = this.asRecord(error);
+    const name =
+      typeof errorRecord?.name === 'string' ? errorRecord.name : undefined;
+    if (name) {
+      return `${category.toUpperCase()}_${name.toUpperCase()}`;
+    }
+
+    const status =
+      typeof errorRecord?.status === 'number' ? errorRecord.status : undefined;
+    if (status) {
+      return `HTTP_${status}`;
     }
     return `${category.toUpperCase()}_UNKNOWN`;
   }
 
-  private extractErrorMessage(error: any): string {
+  private extractErrorMessage(error: unknown): string {
     if (typeof error === 'string') return error;
-    if (error?.message) return error.message;
-    if (error?.error?.message) return error.error.message;
+    if (error instanceof Error && error.message) return error.message;
+
+    const errorRecord = this.asRecord(error);
+    const message =
+      typeof errorRecord?.message === 'string' ? errorRecord.message : undefined;
+    if (message) return message;
+
+    const nestedError = this.asRecord(errorRecord?.error);
+    const nestedMessage =
+      typeof nestedError?.message === 'string' ? nestedError.message : undefined;
+    if (nestedMessage) return nestedMessage;
+
     return 'Unknown error occurred';
   }
 
-  private extractMetadata(error: any): Record<string, any> {
-    const metadata: Record<string, any> = {};
+  private extractMetadata(error: unknown): Record<string, unknown> {
+    const metadata: Record<string, unknown> = {};
+    const errorRecord = this.asRecord(error);
 
-    if (error?.status) metadata.httpStatus = error.status;
-    if (error?.url) metadata.requestUrl = error.url;
-    if (error?.name) metadata.errorName = error.name;
-    if (error?.code) metadata.errorCode = error.code;
+    const status =
+      typeof errorRecord?.status === 'number' ? errorRecord.status : undefined;
+    if (status !== undefined) metadata.httpStatus = status;
+
+    const url =
+      typeof errorRecord?.url === 'string' ? errorRecord.url : undefined;
+    if (url) metadata.requestUrl = url;
+
+    const name =
+      typeof errorRecord?.name === 'string' ? errorRecord.name : undefined;
+    if (name) metadata.errorName = name;
+
+    const code = errorRecord?.code;
+    if (typeof code === 'string' || typeof code === 'number') {
+      metadata.errorCode = code;
+    }
 
     return metadata;
   }
 
-  private isRecoverable(error: any, category: string): boolean {
+  private isRecoverable(
+    error: unknown,
+    category: StructuredError['category'],
+  ): boolean {
     // Network errors are usually recoverable
     if (category === 'network') return true;
 
     // HTTP errors - most are recoverable except 4xx client errors
-    if (error?.status) {
+    const errorRecord = this.asRecord(error);
+    const status =
+      typeof errorRecord?.status === 'number' ? errorRecord.status : undefined;
+
+    if (status) {
       return (
-        error.status >= 500 || error.status === 408 || error.status === 429
+        status >= 500 || status === 408 || status === 429
       );
     }
 
@@ -338,7 +380,7 @@ export class ErrorCorrelationService {
         'error-correlation-history',
         JSON.stringify(this.errorHistory),
       );
-    } catch (e) {
+    } catch {
       // Storage full, clear old errors
       this.errorHistory.splice(0, 10);
       try {
@@ -346,7 +388,7 @@ export class ErrorCorrelationService {
           'error-correlation-history',
           JSON.stringify(this.errorHistory),
         );
-      } catch (e) {
+      } catch {
         // Still can't store, disable storage
       }
     }
@@ -383,7 +425,7 @@ export class ErrorCorrelationService {
       }
 
       localStorage.setItem('pending-error-reports', JSON.stringify(pending));
-    } catch (e) {
+    } catch {
       // Failed to store
     }
   }
@@ -392,7 +434,7 @@ export class ErrorCorrelationService {
     return '1.0.0'; // Get from environment or package.json
   }
 
-  private getBrowserInfo(): Record<string, any> {
+  private getBrowserInfo(): Record<string, string | number | boolean> {
     return {
       userAgent: navigator.userAgent,
       language: navigator.language,
@@ -404,7 +446,7 @@ export class ErrorCorrelationService {
     };
   }
 
-  private getPerformanceMetrics(): Record<string, any> {
+  private getPerformanceMetrics(): Record<string, number | undefined> {
     if (!window.performance) return {};
 
     const navigation = performance.getEntriesByType(
@@ -433,12 +475,22 @@ export class ErrorCorrelationService {
     return firstPaint ? Math.round(firstPaint.startTime) : undefined;
   }
 
-  private getMemoryUsage(): {
-    usedJSHeapSize?: number;
-    totalJSHeapSize?: number;
-    jsHeapSizeLimit?: number;
-  } | null {
-    const performanceWithMemory = (window as any)?.performance?.memory;
+  private getMemoryUsage():
+    | {
+        usedJSHeapSize?: number;
+        totalJSHeapSize?: number;
+        jsHeapSizeLimit?: number;
+      }
+    | null {
+    type MemoryStats = {
+      usedJSHeapSize: number;
+      totalJSHeapSize: number;
+      jsHeapSizeLimit: number;
+    };
+    type PerformanceWithMemory = Performance & { memory?: MemoryStats };
+
+    const performanceWithMemory = (window.performance as PerformanceWithMemory)
+      ?.memory;
 
     return performanceWithMemory
       ? {
@@ -449,18 +501,32 @@ export class ErrorCorrelationService {
       : null;
   }
 
-  private groupBy<T extends Record<string, any>>(
+  private groupBy<T extends Record<string, unknown>>(
     array: T[],
     key: keyof T,
   ): Record<string, number> {
     return array.reduce(
       (acc, item) => {
-        const value = String(item[key]);
+        const rawValue = item[key];
+        const value = String(
+          typeof rawValue === 'undefined' || rawValue === null
+            ? 'undefined'
+            : rawValue,
+        );
         acc[value] = (acc[value] || 0) + 1;
         return acc;
       },
       {} as Record<string, number>,
     );
+  }
+
+  private asRecord(
+    value: unknown,
+  ): Record<string, unknown> | null {
+    if (typeof value === 'object' && value !== null) {
+      return value as Record<string, unknown>;
+    }
+    return null;
   }
 
   private isDevelopment(): boolean {

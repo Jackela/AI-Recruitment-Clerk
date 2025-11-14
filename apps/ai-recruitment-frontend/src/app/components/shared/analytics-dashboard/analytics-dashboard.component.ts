@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -18,10 +18,18 @@ import { ReportListItem } from '../../../store/reports/report.model';
 import * as ResumeSelectors from '../../../store/resumes/resume.selectors';
 import { ResumeListItem } from '../../../store/resumes/resume.model';
 
+interface AnalyticsStatsSummary {
+  total: number;
+  activePercentage?: number;
+  completionRate?: number;
+  averageScore?: number;
+  processingTime?: number;
+}
+
 interface AnalyticsDashboardData {
-  jobsStatistics: any;
-  reportsStatistics: any;
-  resumeStatistics: any;
+  jobsStatistics: AnalyticsStatsSummary;
+  reportsStatistics: AnalyticsStatsSummary;
+  resumeStatistics: AnalyticsStatsSummary;
   recentJobs: JobListItem[];
   recentReports: ReportListItem[];
   recentResumes: ResumeListItem[];
@@ -575,14 +583,15 @@ interface AnalyticsDashboardData {
     `,
   ],
 })
-export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
+export class AnalyticsDashboardComponent {
+  private readonly store = inject<Store<AppState>>(Store);
   dashboardData$: Observable<AnalyticsDashboardData>;
 
   /**
    * Initializes a new instance of the Analytics Dashboard Component.
    * @param store - The store.
    */
-  constructor(private store: Store<AppState>) {
+  constructor() {
     // Demonstrate usage of selectors from all three feature stores
     this.dashboardData$ = combineLatest([
       // Job selectors
@@ -627,18 +636,4 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
     );
   }
 
-  /**
-   * Performs the ng on init operation.
-   */
-  ngOnInit(): void {
-    // Component initialization
-    console.log('Analytics Dashboard initialized with NgRx selectors');
-  }
-
-  /**
-   * Performs the ng on destroy operation.
-   */
-  ngOnDestroy(): void {
-    // Cleanup if needed
-  }
 }

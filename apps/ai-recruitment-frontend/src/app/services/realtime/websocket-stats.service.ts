@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 /**
@@ -115,6 +116,9 @@ export class WebSocketStatsService {
   // Mock data for development
   private mockMode = false;
   private mockInterval: ReturnType<typeof setInterval> | null = null;
+  private readonly webSocketDisabled = Boolean(
+    (environment as { disableWebSocket?: boolean }).disableWebSocket,
+  );
 
   /**
    * Initializes a new instance of the Web Socket Stats Service.
@@ -124,16 +128,22 @@ export class WebSocketStatsService {
     this.stats$.subscribe((stats) => this.stats.set(stats));
     this.isConnected$.subscribe((connected) => this.isConnected.set(connected));
 
-    // Start connection
-    this.connect();
+    // 在 E2E/测试环境下禁用真实 WebSocket，直接使用 mock 数据，避免对外部服务依赖
+    if (this.webSocketDisabled) {
+      console.warn('WebSocket disabled by environment; using mock mode for stats');
+      this.enableMockMode();
+    } else {
+      // Start connection
+      this.connect();
 
-    // Setup fallback to mock data if connection fails
-    setTimeout(() => {
-      if (!this.isConnected()) {
-        console.warn('WebSocket connection failed, using mock data');
-        this.enableMockMode();
-      }
-    }, 5000);
+      // Setup fallback to mock data if connection fails
+      setTimeout(() => {
+        if (!this.isConnected()) {
+          console.warn('WebSocket connection failed, using mock data');
+          this.enableMockMode();
+        }
+      }, 5000);
+    }
   }
 
   private connect(): void {
@@ -228,20 +238,11 @@ export class WebSocketStatsService {
         this.updateStats((data.payload as Partial<RealtimeStats>) || {});
         break;
       case 'event':
-        this.handleAnalysisEvent(
-          (data.payload as any as Omit<AnalysisEvent, 'timestamp'> & {
-            timestamp: string | Date;
-          }) ||
-            ({
-              timestamp: new Date().toISOString(),
-              type: 'progress',
-              analysisId: '',
-            } as any),
-        );
+        this.handleAnalysisEvent(this.toAnalysisEvent(data.payload));
         break;
       case 'metrics':
         this.updateMetrics(
-          (data.payload as Omit<SystemMetrics, 'timestamp'>) || ({} as any),
+          this.asRecord<Omit<SystemMetrics, 'timestamp'>>(data.payload),
         );
         break;
       case 'error':
@@ -253,23 +254,16 @@ export class WebSocketStatsService {
   }
 
   private updateStats(payload: Partial<RealtimeStats>): void {
-    const base = this.stats$.value;
     const newStats: RealtimeStats = {
-      ...base,
-      ...(payload as any),
+      ...this.stats$.value,
+      ...payload,
       lastUpdated: new Date(),
     };
     this.stats$.next(newStats);
   }
 
-  private handleAnalysisEvent(
-    payload: Omit<AnalysisEvent, 'timestamp'> & { timestamp: string | Date },
-  ): void {
-    const event: AnalysisEvent = {
-      ...payload,
-      timestamp: new Date(payload.timestamp),
-    };
-    this.events$.next(event);
+  private handleAnalysisEvent(payload: AnalysisEvent): void {
+    this.events$.next(payload);
 
     // Update relevant stats
     const currentStats = this.stats$.value;
@@ -297,8 +291,11 @@ export class WebSocketStatsService {
     this.stats$.next(updatedStats);
   }
 
-  private updateMetrics(payload: Omit<SystemMetrics, 'timestamp'>): void {
+  private updateMetrics(
+    payload: Partial<Omit<SystemMetrics, 'timestamp'>>,
+  ): void {
     const metrics: SystemMetrics = {
+      ...this.metrics$.value,
       ...payload,
       timestamp: new Date(),
     };
@@ -412,6 +409,46 @@ export class WebSocketStatsService {
     };
 
     this.metrics$.next(mockMetrics);
+  }
+
+  private toAnalysisEvent(payload: unknown): AnalysisEvent {
+    const raw = this.asRecord<
+      Partial<Omit<AnalysisEvent, 'timestamp'>> & { timestamp?: string | Date }
+    >(payload);
+
+    return {
+      type: this.isEventType(raw.type) ? raw.type : 'progress',
+      analysisId: typeof raw.analysisId === 'string' ? raw.analysisId : '',
+      progress: typeof raw.progress === 'number' ? raw.progress : undefined,
+      stage: typeof raw.stage === 'string' ? raw.stage : undefined,
+      message: typeof raw.message === 'string' ? raw.message : undefined,
+      metadata: this.normalizeMetadata(raw.metadata),
+      timestamp: raw.timestamp ? new Date(raw.timestamp) : new Date(),
+    };
+  }
+
+  private normalizeMetadata(
+    metadata: unknown,
+  ): AnalysisEvent['metadata'] | undefined {
+    if (metadata && typeof metadata === 'object' && !Array.isArray(metadata)) {
+      return metadata as AnalysisEvent['metadata'];
+    }
+    return undefined;
+  }
+
+  private isEventType(value: unknown): value is AnalysisEvent['type'] {
+    return (
+      value === 'started' ||
+      value === 'progress' ||
+      value === 'completed' ||
+      value === 'failed'
+    );
+  }
+
+  private asRecord<T extends Record<string, unknown>>(
+    value: unknown,
+  ): Partial<T> {
+    return typeof value === 'object' && value !== null ? (value as Partial<T>) : {};
   }
 
   // Public API

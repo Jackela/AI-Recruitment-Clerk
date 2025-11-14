@@ -1,46 +1,41 @@
 /**
  * AI Recruitment Clerk - Gateway Bootstrap
  */
+import 'reflect-metadata';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app/app.module';
 import { ProductionSecurityValidator } from './common/security/production-security-validator';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 async function bootstrap() {
-  // Fail-fast env validation
-  Logger.log('🔍 [FAIL-FAST] Validating critical environment variables...');
-  const requiredVars = ['MONGO_URL'];
-  const missingVars = requiredVars.filter((v) => !process.env[v]);
-  if (process.env.NODE_ENV !== 'test' && missingVars.length > 0) {
-    Logger.warn(
-      '⚠️ [FAIL-FAST] Some env vars missing at bootstrap (will rely on ConfigModule .env):',
-    );
-    for (const v of missingVars)
-      Logger.warn(`   • ${v} is not set at process.env yet`);
-    Logger.warn(
-      '   If .env exists at repo root, Nest ConfigModule will load it shortly.',
-    );
-  }
-  Logger.log('✅ [FAIL-FAST] All critical environment variables validated');
+  const config = getConfig({
+    forceReload: true,
+  });
 
-  // Startup logging
+  Logger.log('🔍 [FAIL-FAST] Validating critical configuration...');
+  if (!config.database.url && !config.env.isTest) {
+    Logger.error('❌ Database URL missing from configuration. Aborting bootstrap.');
+    process.exit(1);
+  }
+  Logger.log('✅ [FAIL-FAST] Configuration validated');
+
   Logger.log('🚀 [bootstrap] Starting AI Recruitment Clerk Gateway...');
-  Logger.log(`- Node environment: ${process.env.NODE_ENV || 'not set'}`);
-  Logger.log(`- Port: ${process.env.PORT || 3000}`);
-  Logger.log(`- API Prefix: ${process.env.API_PREFIX || 'api'}`);
+  Logger.log(`- Node environment: ${config.env.mode}`);
+  Logger.log(`- Port: ${config.server.port}`);
+  Logger.log(`- API Prefix: ${config.server.apiPrefix}`);
+  Logger.log(`- MongoDB: ${config.database.url ? '✅ Configured' : '❌ Not set'}`);
   Logger.log(
-    `- MongoDB: ${process.env.MONGO_URL ? '✅ Configured' : '❌ Not set'}`,
-  );
-  Logger.log(
-    `- Redis: ${process.env.REDIS_URL ? '✅ Configured' : '⚠️ Optional'}`,
+    `- Redis: ${
+      config.cache.redis.url || config.cache.redis.host ? '✅ Configured' : '⚠️ Optional'
+    }`,
   );
 
   const app = await NestFactory.create(AppModule, {
-    logger:
-      process.env.NODE_ENV === 'production'
-        ? ['error', 'warn', 'log']
-        : ['error', 'warn', 'log', 'debug', 'verbose'],
+    logger: config.env.isProduction
+      ? ['error', 'warn', 'log']
+      : ['error', 'warn', 'log', 'debug', 'verbose'],
     bodyParser: true,
     cors: false,
   });
@@ -51,8 +46,8 @@ async function bootstrap() {
   // Security validation
   const securityValidator = app.get(ProductionSecurityValidator);
   const securityResult = securityValidator.validateSecurityConfiguration();
-  if (process.env.NODE_ENV === 'production' && !securityResult.isValid) {
-    if (process.env.ALLOW_INSECURE_LOCAL === 'true') {
+  if (config.env.isProduction && !securityResult.isValid) {
+    if (config.security.allowInsecureLocal) {
       Logger.warn('⚠️ Bypassing security validation for local run');
       securityResult.issues.forEach((i) => Logger.warn(`   • ${i}`));
       Logger.warn(`Security score: ${securityResult.score}/100`);
@@ -73,13 +68,13 @@ async function bootstrap() {
   }
 
   // CORS
+  const allowedOrigins =
+    config.env.isProduction && config.cors.origins.length > 0
+      ? config.cors.origins
+      : ['http://localhost:4200', 'http://localhost:4202'];
+
   app.enableCors({
-    origin:
-      process.env.NODE_ENV === 'production'
-        ? process.env.ALLOWED_ORIGINS?.split(',') || [
-            'https://ai-recruitment-clerk-production.up.railway.app',
-          ]
-        : ['http://localhost:4200', 'http://localhost:4202'],
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: [
       'Content-Type',
@@ -91,7 +86,7 @@ async function bootstrap() {
       'Access-Control-Request-Method',
       'Access-Control-Request-Headers',
     ],
-    credentials: true,
+    credentials: config.cors.allowCredentials,
     optionsSuccessStatus: 200,
     maxAge: 3600,
   });
@@ -100,7 +95,7 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       transform: true,
-      disableErrorMessages: process.env.NODE_ENV === 'production',
+      disableErrorMessages: config.env.isProduction,
     }),
   );
 
@@ -118,7 +113,7 @@ async function bootstrap() {
     req.connection.setTimeout(60000);
     next();
   });
-  if (process.env.ENABLE_COMPRESSION === 'true') {
+  if (config.features.enableCompression) {
     const compression = require('compression');
     server.use(
       compression({
@@ -133,7 +128,7 @@ async function bootstrap() {
   }
 
   // Swagger
-  const config = new DocumentBuilder()
+  const swaggerConfig = new DocumentBuilder()
     .setTitle('AI Recruitment Clerk API')
     .setDescription('智能招聘管理系统 - 完整的API文档')
     .setVersion('1.0.0')
@@ -150,7 +145,7 @@ async function bootstrap() {
       'Railway生产环境',
     )
     .build();
-  const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/docs', app, document, {
     swaggerOptions: {
       persistAuthorization: true,
@@ -159,7 +154,7 @@ async function bootstrap() {
     },
   });
 
-  const port = process.env.PORT || 3000;
+  const port = config.server.port;
   await app.listen(port);
   Logger.log(
     `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`,

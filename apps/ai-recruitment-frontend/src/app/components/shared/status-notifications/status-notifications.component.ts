@@ -1,4 +1,4 @@
-import { Component, computed, OnInit, OnDestroy } from '@angular/core';
+import { Component, computed, OnInit, OnDestroy, inject } from '@angular/core';
 // import { signal } from '@angular/core'; // Reserved for future use
 import { CommonModule } from '@angular/common';
 import {
@@ -41,6 +41,10 @@ import { Subject } from 'rxjs';
             *ngIf="notification.action"
             (click)="handleAction(notification)"
             type="button"
+            role="button"
+            tabindex="0"
+            (keydown.enter)="handleAction(notification)"
+            (keydown.space)="handleAction(notification)"
           >
             {{ notification.action.label }}
           </button>
@@ -101,18 +105,13 @@ import { Subject } from 'rxjs';
 })
 export class StatusNotificationsComponent implements OnInit, OnDestroy {
   // Service state
+  private readonly feedbackService = inject(ProgressFeedbackService);
   notifications = computed(() => this.feedbackService.notifications());
   globalLoading = computed(() => this.feedbackService.globalLoading());
 
   // Local state
   private destroy$ = new Subject<void>();
   private notificationTimers = new Map<string, number>();
-
-  /**
-   * Initializes a new instance of the Status Notifications Component.
-   * @param feedbackService - The feedback service.
-   */
-  constructor(private feedbackService: ProgressFeedbackService) {}
 
   /**
    * Performs the ng on init operation.

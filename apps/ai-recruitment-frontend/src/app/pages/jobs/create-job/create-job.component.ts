@@ -15,6 +15,8 @@ import * as JobSelectors from '../../../store/jobs/job.selectors';
 import { Router } from '@angular/router';
 import { I18nService } from '../../../services/i18n/i18n.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
+import { JobState } from '../../../store/jobs/job.state';
+import { JobListItem } from '../../../store/jobs/job.model';
 
 type TranslationDescriptor = {
   key: string;
@@ -41,7 +43,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
   webSocketStatus$: Observable<
     'connecting' | 'connected' | 'disconnected' | 'error'
   >;
-  currentJobProgress$: Observable<any>;
+  currentJobProgress$: Observable<JobState['jobProgress']>;
 
   // Job creation progress tracking
   createdJobId: string | null = null;
@@ -338,7 +340,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * Handles job completion.
    * @param job - The completed job
    */
-  private onJobCompleted(job: any): void {
+  private onJobCompleted(job: JobListItem): void {
     console.log(`✅ Job ${job.id} completed successfully`);
     this.showProgressTracking = false;
 
@@ -352,7 +354,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * Handles job failure.
    * @param job - The failed job
    */
-  private onJobFailed(job: any): void {
+  private onJobFailed(job: JobListItem): void {
     console.log(`❌ Job ${job.id} failed`);
     this.showProgressTracking = false;
     // Keep user on create page to potentially retry

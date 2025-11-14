@@ -6,7 +6,9 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/shared-nats-client",
         "tsConfig": "libs/shared-nats-client/tsconfig.lib.json",
@@ -16,14 +18,20 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["libs/shared-nats-client/**/*.ts"]
+        "lintFilePatterns": [
+          "libs/shared-nats-client/**/*.ts"
+        ]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "libs/shared-nats-client/jest.config.ts",
         "passWithNoTests": true
@@ -36,5 +44,9 @@
       }
     }
   },
-  "tags": ["scope:shared", "type:lib"]
+  "tags": [
+    "scope:shared",
+    "type:lib",
+    "owner:platform-governance"
+  ]
 }

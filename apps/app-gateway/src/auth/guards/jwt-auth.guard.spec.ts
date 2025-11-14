@@ -6,6 +6,7 @@ import {
   HttpStatus,
   UnauthorizedException,
 } from '@nestjs/common';
+import { resetConfigCache } from '@ai-recruitment-clerk/configuration';
 
 const createExecutionContext = (
   requestOverrides: Record<string, any> = {},
@@ -46,6 +47,7 @@ describe('JwtAuthGuard', () => {
     jest.clearAllMocks();
     process.env.NODE_ENV = 'test';
     delete process.env.FORCE_RATE_LIMIT;
+    resetConfigCache();
   });
 
   describe('canActivate', () => {
@@ -103,6 +105,7 @@ describe('JwtAuthGuard', () => {
       (global as any).setInterval = jest.fn().mockReturnValue(1);
       process.env.NODE_ENV = 'development';
       process.env.FORCE_RATE_LIMIT = 'true';
+      resetConfigCache();
 
       try {
         reflectorMock.getAllAndOverride.mockReturnValue(false);
@@ -132,6 +135,7 @@ describe('JwtAuthGuard', () => {
         } else {
           delete process.env.FORCE_RATE_LIMIT;
         }
+        resetConfigCache();
         (global as any).setInterval = originalSetInterval;
       }
     });

@@ -11,7 +11,12 @@ import {
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { WebSocketService } from '../../../services/websocket.service';
+import {
+  CompletionData,
+  ErrorData,
+  WebSocketMessage,
+  WebSocketService,
+} from '../../../services/websocket.service';
 import { ProgressTrackerComponent } from '../../../components/shared/progress-tracker/progress-tracker.component';
 
 /**
@@ -226,8 +231,8 @@ export class AnalysisProgressComponent implements OnChanges, OnDestroy {
 
   @Output() progressUpdate = new EventEmitter<ProgressUpdate>();
   @Output() stepChange = new EventEmitter<string>();
-  @Output() analysisCompleted = new EventEmitter<any>();
-  @Output() analysisError = new EventEmitter<any>();
+  @Output() analysisCompleted = new EventEmitter<CompletionData>();
+  @Output() analysisError = new EventEmitter<ErrorData>();
   @Output() cancelRequested = new EventEmitter<void>();
 
   isCancelling = false;
@@ -273,7 +278,7 @@ export class AnalysisProgressComponent implements OnChanges, OnDestroy {
     this.webSocketService
       .onProgress(sessionId)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((progress) => {
+      .subscribe((progress: ProgressUpdate) => {
         this.progressUpdate.emit({
           currentStep: progress.currentStep || '',
           progress: progress.progress || 0,
@@ -284,12 +289,11 @@ export class AnalysisProgressComponent implements OnChanges, OnDestroy {
     this.webSocketService
       .connect(sessionId)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((message) => {
+      .subscribe((message: WebSocketMessage) => {
         if (message.type === 'step_change') {
-          const stepVal =
-            (message.data as any)?.['step'] ??
-            (message.data as any)?.['currentStep'] ??
-            '';
+          type StepChangePayload = { step?: string; currentStep?: string };
+          const stepPayload = message.data as StepChangePayload;
+          const stepVal = stepPayload.step ?? stepPayload.currentStep ?? '';
           this.stepChange.emit(String(stepVal));
         }
       });
@@ -298,7 +302,7 @@ export class AnalysisProgressComponent implements OnChanges, OnDestroy {
     this.webSocketService
       .onCompletion(sessionId)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((completion) => {
+      .subscribe((completion: CompletionData) => {
         this.analysisCompleted.emit(completion);
       });
 
@@ -306,7 +310,7 @@ export class AnalysisProgressComponent implements OnChanges, OnDestroy {
     this.webSocketService
       .onError(sessionId)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((error) => {
+      .subscribe((error: ErrorData) => {
         this.analysisError.emit(error);
       });
   }

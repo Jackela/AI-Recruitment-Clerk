@@ -27,6 +27,7 @@ import {
   ComponentScores,
   ScoreReliabilityReport,
 } from './services/scoring-confidence.service';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Defines the shape of the jd dto.
@@ -100,6 +101,7 @@ export interface ScoreDTO {
 @Injectable()
 export class ScoringEngineService {
   private readonly jdCache = new Map<string, JdDTO>();
+  private readonly config = getConfig();
 
   /**
    * Initializes a new instance of the Scoring Engine Service.
@@ -117,7 +119,7 @@ export class ScoringEngineService {
     private readonly confidenceService: ScoringConfidenceService,
   ) {
     // 🔒 SECURITY: Validate configuration before service initialization (skip in tests)
-    if (process.env.NODE_ENV !== 'test') {
+    if (!this.config.env.isTest) {
       SecureConfigValidator.validateServiceConfig('ScoringEngineService', [
         'GEMINI_API_KEY',
       ]);

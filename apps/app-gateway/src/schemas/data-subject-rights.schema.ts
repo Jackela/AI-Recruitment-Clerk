@@ -20,11 +20,11 @@ export type DataSubjectRightsRequestDocument = DataSubjectRightsRequest &
   versionKey: false,
 })
 export class DataSubjectRightsRequest {
-  @Prop({ required: true, unique: true, index: true })
-  id: string = '';
+  @Prop({ type: String, required: true, unique: true, index: true })
+  id = '';
 
-  @Prop({ required: true })
-  userId: string = '';
+  @Prop({ type: String, required: true })
+  userId = '';
 
   @Prop({
     type: String,
@@ -52,28 +52,28 @@ export class DataSubjectRightsRequest {
   identityVerificationStatus: IdentityVerificationStatus =
     IdentityVerificationStatus.PENDING;
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   description?: string = undefined;
 
-  @Prop({ required: true })
+  @Prop({ type: Date, required: true })
   requestDate: Date = new Date();
 
-  @Prop({ required: false })
+  @Prop({ type: Date, required: false })
   completionDate?: Date = undefined;
 
-  @Prop({ required: true })
+  @Prop({ type: Date, required: true })
   dueDate: Date = new Date(); // 30 days from request per GDPR
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   processorNotes?: string = undefined;
 
   @Prop({ type: Object, default: {} })
   metadata?: Record<string, any> = {};
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   ipAddress?: string = undefined;
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   userAgent?: string = undefined;
 
   // Request-specific fields
@@ -87,10 +87,10 @@ export class DataSubjectRightsRequest {
   })
   preferredFormat?: DataExportFormat = undefined; // For access/portability requests
 
-  @Prop({ required: false })
+  @Prop({ type: Boolean, required: false })
   includeThirdPartyData?: boolean = undefined; // For access requests
 
-  @Prop({ required: false })
+  @Prop({ type: Boolean, required: false })
   includeProcessingHistory?: boolean = undefined; // For access requests
 
   // Rectification request fields
@@ -98,39 +98,39 @@ export class DataSubjectRightsRequest {
   correctionData?: any = undefined; // Field corrections for rectification
 
   // Erasure request fields
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   erasureGround?: string = undefined; // Legal ground for erasure
 
-  @Prop({ required: false })
+  @Prop({ type: Boolean, required: false })
   retainForLegalReasons?: boolean = undefined;
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   legalRetentionReason?: string = undefined;
 
   // Objection request fields
   @Prop({ type: [String], required: false })
   processingPurposes?: string[] = undefined; // Purposes being objected to
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   objectionReason?: string = undefined;
 
   // Processing results
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   downloadUrl?: string = undefined; // For data export requests
 
-  @Prop({ required: false })
+  @Prop({ type: Date, required: false })
   downloadExpiry?: Date = undefined;
 
-  @Prop({ required: false })
+  @Prop({ type: Number, required: false })
   exportFileSize?: number = undefined; // In bytes
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   rejectionReason?: string = undefined;
 
-  @Prop({ default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   createdAt: Date = new Date();
 
-  @Prop({ default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   updatedAt: Date = new Date();
 }
 
@@ -189,16 +189,16 @@ export type RightsRequestActivityDocument = RightsRequestActivity & Document;
   versionKey: false,
 })
 export class RightsRequestActivity {
-  @Prop({ required: true })
-  requestId: string = '';
+  @Prop({ type: String, required: true })
+  requestId = '';
 
-  @Prop({ required: true })
-  action: string = ''; // 'created', 'status_changed', 'verified', 'processed', etc.
+  @Prop({ type: String, required: true })
+  action = ''; // 'created', 'status_changed', 'verified', 'processed', etc.
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   performedBy?: string = undefined; // User ID or 'system'
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   notes?: string = undefined;
 
   @Prop({
@@ -218,10 +218,10 @@ export class RightsRequestActivity {
   @Prop({ type: Object, default: {} })
   metadata?: Record<string, any> = {};
 
-  @Prop({ required: true })
+  @Prop({ type: Date, required: true })
   timestamp: Date = new Date();
 
-  @Prop({ default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   createdAt: Date = new Date();
 }
 
@@ -249,11 +249,11 @@ export type DataExportPackageDocument = DataExportPackage & Document;
   versionKey: false,
 })
 export class DataExportPackage {
-  @Prop({ required: true, unique: true, index: true })
-  requestId: string = '';
+  @Prop({ type: String, required: true, unique: true, index: true })
+  requestId = '';
 
-  @Prop({ required: true })
-  userId: string = '';
+  @Prop({ type: String, required: true })
+  userId = '';
 
   @Prop({
     type: String,
@@ -286,31 +286,31 @@ export class DataExportPackage {
     thirdPartyProcessors: [],
   };
 
-  @Prop({ required: true })
-  downloadUrl: string = '';
+  @Prop({ type: String, required: true })
+  downloadUrl = '';
 
-  @Prop({ required: true })
+  @Prop({ type: Date, required: true })
   urlExpiry: Date = new Date();
 
-  @Prop({ required: true })
-  fileSizeBytes: number = 0;
+  @Prop({ type: Number, required: true })
+  fileSizeBytes = 0;
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   checksumMD5?: string = undefined; // File integrity verification
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   encryptionKey?: string = undefined; // If file is encrypted
 
-  @Prop({ required: false, default: 0 })
-  downloadCount: number = 0;
+  @Prop({ type: Number, required: false, default: 0 })
+  downloadCount = 0;
 
-  @Prop({ required: false })
+  @Prop({ type: Date, required: false })
   lastDownloadAt?: Date = undefined;
 
-  @Prop({ default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   createdAt: Date = new Date();
 
-  @Prop({ default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   updatedAt: Date = new Date();
 }
 
@@ -344,17 +344,17 @@ export type IdentityVerificationDocument = IdentityVerification & Document;
   versionKey: false,
 })
 export class IdentityVerification {
-  @Prop({ required: true, unique: true, index: true })
-  id: string = '';
+  @Prop({ type: String, required: true, unique: true, index: true })
+  id = '';
 
-  @Prop({ required: true })
-  requestId: string = '';
+  @Prop({ type: String, required: true })
+  requestId = '';
 
-  @Prop({ required: true })
-  userId: string = '';
+  @Prop({ type: String, required: true })
+  userId = '';
 
-  @Prop({ required: true })
-  verificationType: string = ''; // 'email', 'phone', 'document', 'security_questions'
+  @Prop({ type: String, required: true })
+  verificationType = ''; // 'email', 'phone', 'document', 'security_questions'
 
   @Prop({
     type: String,
@@ -367,31 +367,31 @@ export class IdentityVerification {
   @Prop({ type: Object, default: {} })
   verificationData?: any = {}; // Method-specific verification data
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   verificationCode?: string = undefined; // For email/SMS verification
 
-  @Prop({ required: false })
+  @Prop({ type: Date, required: false })
   verificationExpiry?: Date = undefined;
 
-  @Prop({ required: false })
+  @Prop({ type: Number, required: false })
   verificationAttempts?: number = undefined;
 
-  @Prop({ required: false })
+  @Prop({ type: Number, required: false })
   maxAttempts?: number = undefined;
 
-  @Prop({ required: false })
+  @Prop({ type: Date, required: false })
   verifiedAt?: Date = undefined;
 
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   failureReason?: string = undefined;
 
   @Prop({ type: Object, default: {} })
   metadata?: Record<string, any> = {};
 
-  @Prop({ default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   createdAt: Date = new Date();
 
-  @Prop({ default: Date.now })
+  @Prop({ type: Date, default: Date.now })
   updatedAt: Date = new Date();
 }
 

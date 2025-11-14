@@ -1,10 +1,10 @@
 import * as JobSelectors from './job.selectors';
-import { JobState, initialJobState } from './job.state';
+import { JobState } from './job.state';
 import { JobListItem, Job } from './job.model';
 import { AppState } from '../app.state';
 
 describe('Job Selectors', () => {
-  const mockJobListItems: JobListItem[] = [
+  const jobListItems: JobListItem[] = [
     {
       id: 'job1',
       title: '软件工程师',
@@ -39,6 +39,9 @@ describe('Job Selectors', () => {
     },
   ];
 
+  const coerceJobList = (items: Array<Partial<JobListItem>>): JobListItem[] =>
+    items as JobListItem[];
+
   const mockSelectedJob: Job = {
     id: 'job1',
     title: '软件工程师',
@@ -52,7 +55,7 @@ describe('Job Selectors', () => {
   };
 
   const mockJobState: JobState = {
-    jobs: mockJobListItems,
+    jobs: jobListItems,
     selectedJob: mockSelectedJob,
     loading: false,
     error: null,
@@ -100,7 +103,7 @@ describe('Job Selectors', () => {
   describe('Basic State Selectors', () => {
     it('should select all jobs', () => {
       const result = JobSelectors.selectAllJobs.projector(mockJobState);
-      expect(result).toEqual(mockJobListItems);
+      expect(result).toEqual(jobListItems);
       expect(result).toHaveLength(4);
     });
 
@@ -144,12 +147,12 @@ describe('Job Selectors', () => {
 
   describe('Derived Selectors', () => {
     it('should select jobs count', () => {
-      const result = JobSelectors.selectJobsCount.projector(mockJobListItems);
+      const result = JobSelectors.selectJobsCount.projector(jobListItems);
       expect(result).toBe(4);
     });
 
     it('should select active jobs', () => {
-      const result = JobSelectors.selectActiveJobs.projector(mockJobListItems);
+      const result = JobSelectors.selectActiveJobs.projector(jobListItems);
       expect(result).toHaveLength(2);
       expect(result.every((job) => job.status === 'active')).toBe(true);
       expect(result.map((job) => job.id)).toEqual(['job1', 'job4']);
@@ -157,20 +160,20 @@ describe('Job Selectors', () => {
 
     it('should select job by ID', () => {
       const selectorFunction = JobSelectors.selectJobById('job2');
-      const result = selectorFunction.projector(mockJobListItems);
-      expect(result).toEqual(mockJobListItems[1]);
-      expect(result!.title).toBe('产品经理');
+      const result = selectorFunction.projector(jobListItems);
+      expect(result).toEqual(jobListItems[1]);
+      expect(result?.title).toBe('产品经理');
     });
 
     it('should return undefined for non-existent job ID', () => {
       const selectorFunction = JobSelectors.selectJobById('nonexistent');
-      const result = selectorFunction.projector(mockJobListItems);
+      const result = selectorFunction.projector(jobListItems);
       expect(result).toBeUndefined();
     });
 
     it('should select jobs by status', () => {
       const draftJobsSelector = JobSelectors.selectJobsByStatus('draft');
-      const result = draftJobsSelector.projector(mockJobListItems);
+      const result = draftJobsSelector.projector(jobListItems);
       expect(result).toHaveLength(1);
       expect(result[0].status).toBe('draft');
       expect(result[0].title).toBe('产品经理');
@@ -179,7 +182,7 @@ describe('Job Selectors', () => {
     it('should return empty array for non-existent status', () => {
       const nonExistentStatusSelector =
         JobSelectors.selectJobsByStatus('archived');
-      const result = nonExistentStatusSelector.projector(mockJobListItems);
+      const result = nonExistentStatusSelector.projector(jobListItems);
       expect(result).toEqual([]);
     });
   });
@@ -253,7 +256,7 @@ describe('Job Selectors', () => {
   describe('Complex Derived Selectors', () => {
     it('should calculate jobs statistics correctly', () => {
       const result =
-        JobSelectors.selectJobsStatistics.projector(mockJobListItems);
+        JobSelectors.selectJobsStatistics.projector(jobListItems);
 
       expect(result.total).toBe(4);
       expect(result.active).toBe(2);
@@ -273,7 +276,7 @@ describe('Job Selectors', () => {
     });
 
     it('should calculate 100% active when all jobs are active', () => {
-      const allActiveJobs = mockJobListItems.map((job) => ({
+      const allActiveJobs = jobListItems.map((job) => ({
         ...job,
         status: 'active' as const,
       }));
@@ -285,14 +288,14 @@ describe('Job Selectors', () => {
 
     it('should handle jobs with various statuses', () => {
       const mixedJobs: JobListItem[] = [
-        { ...mockJobListItems[0], status: 'active' },
-        { ...mockJobListItems[1], status: 'active' },
-        { ...mockJobListItems[2], status: 'draft' },
-        { ...mockJobListItems[3], status: 'closed' },
+        { ...jobListItems[0], status: 'active' },
+        { ...jobListItems[1], status: 'active' },
+        { ...jobListItems[2], status: 'draft' },
+        { ...jobListItems[3], status: 'closed' },
         {
           id: 'job5',
           title: 'Test Job',
-          status: 'paused' as any,
+          status: 'paused' as unknown as JobListItem['status'],
           createdAt: new Date(),
           resumeCount: 0,
         },
@@ -313,7 +316,7 @@ describe('Job Selectors', () => {
       const result =
         JobSelectors.selectJobManagementState.projector(mockJobState);
 
-      expect(result.jobs).toEqual(mockJobListItems);
+      expect(result.jobs).toEqual(jobListItems);
       expect(result.selectedJob).toEqual(mockSelectedJob);
       expect(result.loading).toBe(false);
       expect(result.creating).toBe(false);
@@ -359,7 +362,7 @@ describe('Job Selectors', () => {
       const modifiedState = {
         ...mockJobState,
         jobs: [
-          ...mockJobListItems,
+          ...jobListItems,
           {
             id: 'job5',
             title: 'New Job',
@@ -383,38 +386,47 @@ describe('Job Selectors', () => {
         .mockImplementation(JobSelectors.selectJobsStatistics.projector);
 
       // First call
-      spy(mockJobListItems);
+      spy(jobListItems);
       expect(spy).toHaveBeenCalledTimes(1);
 
       // Second call with same input should use memoized result
-      spy(mockJobListItems);
+      spy(jobListItems);
       expect(spy).toHaveBeenCalledTimes(2);
     });
   });
 
   describe('Edge Cases and Error Handling', () => {
     it('should handle state with undefined jobs gracefully', () => {
-      const invalidState = { ...mockJobState, jobs: undefined as any };
+      const invalidState = {
+        ...mockJobState,
+        jobs: undefined as unknown as JobListItem[],
+      };
       const result = JobSelectors.selectAllJobs.projector(invalidState);
       expect(result).toBeUndefined();
     });
 
     it('should handle jobs with missing required fields', () => {
-      const invalidJobs = [
-        { id: 'job1' } as any,
-        { title: 'Job without ID' } as any,
-      ];
+      const invalidJobs = coerceJobList([
+        { id: 'job1' } as Partial<JobListItem>,
+        { title: 'Job without ID' } as Partial<JobListItem>,
+      ]);
 
       const result = JobSelectors.selectJobsCount.projector(invalidJobs);
       expect(result).toBe(2);
     });
 
     it('should handle filter operations on malformed data', () => {
-      const malformedJobs = [
-        { ...mockJobListItems[0], status: null as any },
-        { ...mockJobListItems[1], status: undefined as any },
-        mockJobListItems[2],
-      ];
+      const malformedJobs = coerceJobList([
+        {
+          ...jobListItems[0],
+          status: null as unknown as JobListItem['status'],
+        },
+        {
+          ...jobListItems[1],
+          status: undefined as unknown as JobListItem['status'],
+        },
+        jobListItems[2],
+      ]);
 
       const activeSelector = JobSelectors.selectJobsByStatus('active');
       const result = activeSelector.projector(malformedJobs);

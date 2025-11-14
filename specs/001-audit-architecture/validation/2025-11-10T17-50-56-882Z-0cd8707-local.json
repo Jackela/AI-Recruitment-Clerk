@@ -1,0 +1,96 @@
+{
+  "runId": "2025-11-10T17-50-56-882Z-0cd8707",
+  "branch": "001-audit-architecture",
+  "commit": "0cd870755ffa70367ff9a8ccfbe7498aca6bb96a",
+  "trigger": "remediation",
+  "generatedAt": "2025-11-10T17:50:56.882Z",
+  "components": [
+    "ai-recruitment-frontend-e2e",
+    "candidate-scoring-domain",
+    "report-generation-domain",
+    "resume-processing-domain",
+    "ai-recruitment-frontend",
+    "incentive-system-domain",
+    "usage-management-domain",
+    "user-management-domain",
+    "infrastructure-shared",
+    "job-management-domain",
+    "report-generator-svc",
+    "ai-services-shared",
+    "scoring-engine-svc",
+    "shared-nats-client",
+    "resume-parser-svc",
+    "jd-extractor-svc",
+    "marketing-domain",
+    "app-gateway-e2e",
+    "api-contracts",
+    "configuration",
+    "app-gateway",
+    "shared-dtos",
+    "ai-recruitment-clerk"
+  ],
+  "tests": {
+    "lint": {
+      "status": "pass",
+      "startedAt": "2025-11-10T17:38:18.393Z",
+      "completedAt": "2025-11-10T17:41:40.782Z",
+      "command": "bash scripts/ci/run-phase.sh lint"
+    },
+    "unit": {
+      "status": "pass",
+      "startedAt": "2025-11-10T17:41:40.782Z",
+      "completedAt": "2025-11-10T17:49:22.253Z",
+      "command": "bash scripts/ci/run-phase.sh test"
+    },
+    "integration": {
+      "status": "skipped",
+      "startedAt": "2025-11-10T17:49:22.253Z",
+      "completedAt": "2025-11-10T17:49:22.254Z",
+      "command": "npm",
+      "notes": "skipped"
+    },
+    "typecheck": {
+      "status": "pass",
+      "startedAt": "2025-11-10T17:49:22.254Z",
+      "completedAt": "2025-11-10T17:50:54.952Z",
+      "command": "bash scripts/ci/run-phase.sh typecheck"
+    },
+    "e2e": {
+      "status": "skipped",
+      "startedAt": "2025-11-10T17:50:54.952Z",
+      "completedAt": "2025-11-10T17:50:54.952Z",
+      "command": "bash",
+      "notes": "skipped"
+    }
+  },
+  "validation": {
+    "remediationSchema": {
+      "status": "pass",
+      "startedAt": "2025-11-10T17:50:54.952Z",
+      "completedAt": "2025-11-10T17:50:56.635Z",
+      "command": "node tools/ci/governance/validate-remediation.mjs"
+    },
+    "remediationCoverage": {
+      "status": "pass",
+      "startedAt": "2025-11-10T17:50:56.635Z",
+      "completedAt": "2025-11-10T17:50:56.733Z",
+      "command": "node tools/ci/governance/report-remediation-coverage.mjs"
+    }
+  },
+  "actSimulation": {
+    "workflow": ".github/workflows/ci.yml",
+    "image": "ghcr.io/catthehacker/ubuntu:act-latest",
+    "status": "pending",
+    "logPath": ""
+  },
+  "githubActions": {
+    "workflowUrl": "",
+    "conclusion": "pending",
+    "jobMatrix": {}
+  },
+  "parity": {
+    "status": "pending",
+    "notes": "Run compare-ci-results.mjs after GitHub Actions completes."
+  },
+  "result": "pass"
+}

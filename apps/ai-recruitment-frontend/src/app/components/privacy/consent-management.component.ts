@@ -5,6 +5,7 @@ import {
   Input,
   Output,
   EventEmitter,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -196,17 +197,14 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
 
   readonly ConsentPurpose = ConsentPurpose;
 
+  private readonly fb = inject(FormBuilder);
+  private readonly privacyApi = inject(PrivacyApiService);
+  private readonly toast = inject(ToastService);
+
   /**
    * Initializes a new instance of the Consent Management Component.
-   * @param fb - The fb.
-   * @param privacyApi - The privacy api.
-   * @param toast - The toast.
    */
-  constructor(
-    private fb: FormBuilder,
-    private privacyApi: PrivacyApiService,
-    private toast: ToastService,
-  ) {
+  constructor() {
     this.initializeForm();
   }
 
@@ -328,16 +326,13 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
 
       const captureConsentDto: CaptureConsentDto = {
         userId: this.userId,
-        consents: formValue.consents.map(
-          (consent: any) =>
-            ({
-              purpose: consent.purpose,
-              granted: consent.granted,
-              method: consent.method,
-              dataCategories: this.getDataCategoriesForPurpose(consent.purpose),
-              consentText: consent.consentText,
-            }) as ConsentGrantDto,
-        ),
+        consents: formValue.consents.map((consent) => ({
+          purpose: consent.purpose,
+          granted: consent.granted,
+          method: consent.method,
+          dataCategories: this.getDataCategoriesForPurpose(consent.purpose),
+          consentText: consent.consentText,
+        })),
         consentVersion: formValue.consentVersion,
       };
 

@@ -1,0 +1,9 @@
+{
+  "localResult": "pass",
+  "remoteStatus": "success",
+  "workflowUrl": "https://github.com/local/actions/runs/local",
+  "missingSecrets": [],
+  "status": "match",
+  "notes": "",
+  "checkedAt": "2025-11-10T18:22:05.052Z"
+}

@@ -8,6 +8,7 @@ import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { GridFSBucket, ObjectId } from 'mongodb';
 import { GridFsFileInfo } from '../dto/resume-parsing.dto';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Provides grid fs functionality.
@@ -21,6 +22,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
     string,
     { buffer: Buffer; info: GridFsFileInfo & { metadata?: Record<string, any> } }
   >();
+  private readonly config = getConfig();
 
   /**
    * Initializes a new instance of the Grid FS Service.
@@ -170,7 +172,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
     }
 
     // In test mode or when GridFS is not connected, store files in-memory
-    if (process.env.NODE_ENV === 'test' || !this.gridFSBucket) {
+    if (this.config.env.isTest || !this.gridFSBucket) {
       const objectId = new ObjectId().toHexString();
       const gridFsUrl = `gridfs://${this.bucketName}/${objectId}`;
       const info: GridFsFileInfo & { metadata?: Record<string, any> } = {
@@ -302,7 +304,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
   async connect(): Promise<void> {
     try {
       // Skip actual connection in test environment
-      if (process.env.NODE_ENV === 'test') {
+      if (this.config.env.isTest) {
         this.logger.log('GridFS service connected (test mode)');
         return;
       }
@@ -346,7 +348,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
    * @returns The extracted file ID.
    */
   private extractFileIdFromUrl(gridFsUrl: string): string {
-    const urlPattern = /^gridfs:\/\/[^\/]+\/(.+)$/;
+    const urlPattern = /^gridfs:\/\/[^/]+\/(.+)$/;
     const match = gridFsUrl.match(urlPattern);
 
     if (!match) {
@@ -388,3 +390,4 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
     }
   }
 }
+

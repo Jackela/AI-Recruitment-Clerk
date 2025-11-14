@@ -1,5 +1,6 @@
 import { Redis } from 'ioredis';
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Redis客户端封装 - 支持连接管理和缓存策略
@@ -10,16 +11,19 @@ export class RedisClient implements OnModuleDestroy {
   private isConnected = false;
   private useInMemoryStore = false;
   private memoryStore = new Map<string, { value: string; expireAt?: number }>();
+  private readonly appConfig = getConfig();
 
   /**
    * Initializes a new instance of the Redis Client.
    */
   constructor() {
     // 配置开关：仅当明确启用并且存在连接信息时才连接Redis
-    const disableRedis = process.env.DISABLE_REDIS === 'true';
-    const useRedis = process.env.USE_REDIS_CACHE === 'true';
-    const redisUrl = process.env.REDIS_URL;
-    const redisHost = process.env.REDISHOST || process.env.REDIS_HOST;
+    const redisConfig = this.appConfig.cache.redis;
+    const disableRedis = redisConfig.disabled;
+    const useRedis = redisConfig.enabled;
+    const redisUrl = redisConfig.url ?? redisConfig.privateUrl;
+    const redisHost = redisConfig.host;
+    const redisPort = redisConfig.port;
 
     if (disableRedis || !useRedis || (!redisUrl && !redisHost)) {
       // 降级为内存存储，避免 ioredis 连接到 127.0.0.1:6379
@@ -51,19 +55,16 @@ export class RedisClient implements OnModuleDestroy {
         connectTimeout: 10000,
       });
     } else {
+      if (!redisHost || !redisPort) {
+        throw new Error(
+          'Redis configuration incomplete: host and port are required when REDIS_URL is not provided',
+        );
+      }
       this.redis = new Redis({
-        host: redisHost!,
-        port: parseInt(
-          process.env.REDISPORT ||
-            process.env.REDIS_PORT ||
-            (() => {
-              throw new Error(
-                'Redis configuration incomplete: REDISHOST found but REDISPORT/REDIS_PORT is missing',
-              );
-            })(),
-        ),
-        password: process.env.REDIS_PASSWORD,
-        db: parseInt(process.env.REDIS_DB || '0'),
+        host: redisHost,
+        port: redisPort,
+        password: redisConfig.password,
+        db: redisConfig.db ?? 0,
         maxRetriesPerRequest: 3,
         lazyConnect: true,
         connectTimeout: 10000,

@@ -617,7 +617,7 @@ export class CulturalFitAnalyzerService {
         error,
       );
       return {
-        strengths: ['Strong technical background', 'Professional experience'],
+        strengths: ['Strong technical background', 'Professional background'],
         concerns: ['Limited cultural fit data'],
         developmentAreas: ['Communication skills', 'Leadership development'],
       };

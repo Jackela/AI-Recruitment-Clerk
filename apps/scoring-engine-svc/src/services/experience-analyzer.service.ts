@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 interface AIExperienceAnalysis {
   relevantYears: number;
@@ -107,6 +108,7 @@ export interface JobRequirements {
 @Injectable()
 export class ExperienceAnalyzerService {
   private readonly logger = new Logger(ExperienceAnalyzerService.name);
+  private readonly config = getConfig();
 
   /**
    * Initializes a new instance of the Experience Analyzer Service.
@@ -115,9 +117,10 @@ export class ExperienceAnalyzerService {
   constructor(private readonly geminiClient: GeminiClient) {}
 
   private getNow(): Date {
-    if (process.env.NODE_ENV === 'test') {
-      // Freeze time to stabilize calculations in tests (approx end of 2023)
-      return new Date(process.env.TEST_NOW || '2023-12-31T00:00:00Z');
+    if (this.config.env.isTest) {
+      return new Date(
+        this.config.env.testNowTimestamp || '2023-12-31T00:00:00Z',
+      );
     }
     return new Date();
   }

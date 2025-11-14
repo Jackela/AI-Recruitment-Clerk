@@ -23,6 +23,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Exposes endpoints for system.
@@ -31,6 +32,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 @ApiBearerAuth()
 @Controller('system')
 export class SystemController {
+  private readonly config = getConfig();
   /**
    * Retrieves system health.
    * @returns A promise that resolves to { success: boolean; data: any }.
@@ -67,8 +69,8 @@ export class SystemController {
             },
           ],
           uptime: Math.floor(startTime),
-          version: '1.0.0',
-          environment: process.env.NODE_ENV || 'development',
+          version: this.config.metadata.version,
+          environment: this.config.env.mode,
           memory: {
             rss: `${Math.round(memoryUsage.rss / 1024 / 1024)}MB`,
             heapUsed: `${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB`,
@@ -140,8 +142,8 @@ export class SystemController {
         success: true,
         data: {
           status: 'operational',
-          version: '1.0.0',
-          environment: process.env.NODE_ENV || 'development',
+          version: this.config.metadata.version,
+          environment: this.config.env.mode,
           uptime: Math.floor(process.uptime()),
           services: {
             total: 1,

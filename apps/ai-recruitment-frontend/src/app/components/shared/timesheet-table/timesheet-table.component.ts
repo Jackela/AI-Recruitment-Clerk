@@ -145,16 +145,19 @@ export type TimesheetViewType = keyof typeof TIMESHEET_VIEW_CONFIGS;
           </button>
 
           <!-- Bulk action buttons for bulk edit view -->
-          <div class="bulk-actions" *ngIf="currentViewType === 'bulkEdit' && selectedEntries().length > 0">
+          <div
+            class="bulk-actions"
+            *ngIf="currentViewType === 'bulkEdit' && selectedEntries().length > 0"
+          >
             <button
-              (click)="onBulkEdit.emit(selectedEntries())"
+              (click)="bulkEdit.emit(selectedEntries())"
               class="bulk-btn edit-bulk-btn"
               type="button"
             >
               批量编辑 ({{ selectedEntries().length }})
             </button>
             <button
-              (click)="onBulkDelete.emit(selectedEntries())"
+              (click)="bulkDelete.emit(selectedEntries())"
               class="bulk-btn delete-bulk-btn"
               type="button"
             >
@@ -330,7 +333,7 @@ export type TimesheetViewType = keyof typeof TIMESHEET_VIEW_CONFIGS;
               <td *ngIf="showActions" class="actions-column">
                 <div class="action-buttons">
                   <button
-                    (click)="onView.emit(entry)"
+                    (click)="viewEntry.emit(entry)"
                     class="action-btn view-btn"
                     title="查看详情"
                     type="button"
@@ -341,7 +344,7 @@ export type TimesheetViewType = keyof typeof TIMESHEET_VIEW_CONFIGS;
                     </svg>
                   </button>
                   <button
-                    (click)="onEdit.emit(entry)"
+                    (click)="editEntry.emit(entry)"
                     class="action-btn edit-btn"
                     title="编辑"
                     type="button"
@@ -353,7 +356,7 @@ export type TimesheetViewType = keyof typeof TIMESHEET_VIEW_CONFIGS;
                     </svg>
                   </button>
                   <button
-                    (click)="onDelete.emit(entry)"
+                    (click)="deleteEntry.emit(entry)"
                     class="action-btn delete-btn"
                     title="删除"
                     type="button"
@@ -464,16 +467,16 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
   @Input() customColumns?: TimesheetColumn[];
 
   // Outputs - timesheet-specific events
-  @Output() onSort = new EventEmitter<SortEvent>();
-  @Output() onPageChange = new EventEmitter<PageEvent>();
-  @Output() onSelectionChange = new EventEmitter<TimesheetEntry[]>();
-  @Output() onView = new EventEmitter<TimesheetEntry>();
-  @Output() onEdit = new EventEmitter<TimesheetEntry>();
-  @Output() onDelete = new EventEmitter<TimesheetEntry>();
-  @Output() onExport = new EventEmitter<void>();
-  @Output() onBulkEdit = new EventEmitter<TimesheetEntry[]>();
-  @Output() onBulkDelete = new EventEmitter<TimesheetEntry[]>();
-  @Output() onViewChange = new EventEmitter<TimesheetViewType>();
+  @Output() sortChange = new EventEmitter<SortEvent>();
+  @Output() pageChange = new EventEmitter<PageEvent>();
+  @Output() selectionChange = new EventEmitter<TimesheetEntry[]>();
+  @Output() viewEntry = new EventEmitter<TimesheetEntry>();
+  @Output() editEntry = new EventEmitter<TimesheetEntry>();
+  @Output() deleteEntry = new EventEmitter<TimesheetEntry>();
+  @Output() exportRequested = new EventEmitter<void>();
+  @Output() bulkEdit = new EventEmitter<TimesheetEntry[]>();
+  @Output() bulkDelete = new EventEmitter<TimesheetEntry[]>();
+  @Output() viewChange = new EventEmitter<TimesheetViewType>();
 
   // State management
   searchTerm = '';
@@ -526,20 +529,20 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     }
 
     // Apply sorting based on sortable configuration
-    if (this.sortColumn() && this.sortDirection()) {
-      const col = this.sortColumn()!;
-      const dir = this.sortDirection()!;
+    const activeColumn = this.sortColumn();
+    const activeDirection = this.sortDirection();
 
+    if (activeColumn && activeDirection) {
       filtered.sort((a, b) => {
-        const aVal = this.getCellValue(a, col);
-        const bVal = this.getCellValue(b, col);
+        const aVal = this.getCellValue(a, activeColumn);
+        const bVal = this.getCellValue(b, activeColumn);
 
         if (aVal === bVal) return 0;
         if (aVal === null || aVal === undefined) return 1;
         if (bVal === null || bVal === undefined) return -1;
 
         const comparison = aVal < bVal ? -1 : 1;
-        return dir === 'asc' ? comparison : -comparison;
+        return activeDirection === 'asc' ? comparison : -comparison;
       });
     }
 
@@ -706,7 +709,7 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
   }
 
   onViewTypeChange() {
-    this.onViewChange.emit(this.currentViewType);
+    this.viewChange.emit(this.currentViewType);
     this.pageSize = this.tableOptions().pageSize || 25;
     this.currentPage.set(0);
   }
@@ -731,8 +734,8 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
       this.sortDirection.set('asc');
     }
 
-    this.onSort.emit({
-      column: this.sortColumn()!,
+    this.sortChange.emit({
+      column: this.sortColumn() ?? column,
       direction: this.sortDirection(),
     });
   }
@@ -770,7 +773,7 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     }
 
     this.selectedEntries.set(selected);
-    this.onSelectionChange.emit(selected);
+    this.selectionChange.emit(selected);
   }
 
   toggleSelectAll() {

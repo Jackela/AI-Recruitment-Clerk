@@ -21,6 +21,7 @@ import * as bcrypt from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
 import { RedisTokenBlacklistService } from '../security/redis-token-blacklist.service';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Provides auth functionality.
@@ -28,6 +29,7 @@ import { RedisTokenBlacklistService } from '../security/redis-token-blacklist.se
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  private readonly appConfig = getConfig();
   private readonly blacklistedTokens = new Map<string, number>();
   private readonly failedLoginAttempts = new Map<
     string,
@@ -70,7 +72,7 @@ export class AuthService {
     }
 
     // Start periodic cleanup of expired blacklisted tokens - skip in test environment
-    if (process.env.NODE_ENV !== 'test') {
+    if (!this.appConfig.env.isTest) {
       setInterval(
         () => this.cleanupBlacklistedTokens(),
         this.TOKEN_BLACKLIST_CLEANUP_INTERVAL,
@@ -103,9 +105,9 @@ export class AuthService {
 
     // Hash password
     // Use lower bcrypt rounds in test to meet performance thresholds
-    const saltEnv = this.configService.get<string>('BCRYPT_ROUNDS');
-    const saltRounds =
-      process.env.NODE_ENV === 'test' ? parseInt(saltEnv || '4') : 12;
+    const saltRounds = this.appConfig.env.isTest
+      ? this.appConfig.auth.bcrypt.testRounds
+      : this.appConfig.auth.bcrypt.rounds;
     const hashedPassword = await bcrypt.hash(normalized.password, saltRounds);
 
     // Create user

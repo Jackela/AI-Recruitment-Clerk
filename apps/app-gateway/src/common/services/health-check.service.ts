@@ -1,5 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Defines the shape of the service health.
@@ -45,6 +46,7 @@ export class HealthCheckService implements OnModuleInit {
   private readonly startTime = Date.now();
   private serviceHealths = new Map<string, ServiceHealth>();
   private healthCheckConfigs: HealthCheckConfig[] = [];
+  private readonly config = getConfig();
 
   /**
    * Performs the on module init operation.
@@ -88,7 +90,7 @@ export class HealthCheckService implements OnModuleInit {
       services,
       timestamp: new Date(),
       uptime: Date.now() - this.startTime,
-      version: process.env.npm_package_version || '1.0.0',
+      version: this.config.metadata.version,
     };
   }
 
@@ -288,9 +290,15 @@ export class HealthCheckService implements OnModuleInit {
       healthCheck: async () => {
         try {
           // 如果没有Redis URL或被禁用，返回内存缓存模式
-          const redisUrl = process.env.REDIS_URL;
-          const useRedis = process.env.USE_REDIS_CACHE !== 'false';
-          const disableRedis = process.env.DISABLE_REDIS === 'true';
+          const redisConfig = this.config.cache.redis;
+          const redisUrl =
+            redisConfig.url ||
+            redisConfig.privateUrl ||
+            (redisConfig.host && redisConfig.port
+              ? `redis://${redisConfig.host}:${redisConfig.port}`
+              : undefined);
+          const useRedis = redisConfig.enabled;
+          const disableRedis = redisConfig.disabled;
 
           if (!useRedis || disableRedis || !redisUrl) {
             return {
@@ -383,17 +391,30 @@ export class HealthCheckService implements OnModuleInit {
     });
 
     // External services health checks
+    const normalize = (url: string) => url.replace(/\/$/, '');
     const externalServices = [
-      'resume-parser-svc',
-      'jd-extractor-svc',
-      'scoring-engine-svc',
-      'report-generator-svc',
+      {
+        name: 'resume-parser-svc',
+        url: `${normalize(this.config.integrations.resumeParser.baseUrl)}/health`,
+      },
+      {
+        name: 'jd-extractor-svc',
+        url: `${normalize(this.config.integrations.jdExtractor.baseUrl)}/health`,
+      },
+      {
+        name: 'scoring-engine-svc',
+        url: `${normalize(this.config.integrations.scoring.baseUrl || 'http://scoring-engine-svc:3000')}/health`,
+      },
+      {
+        name: 'report-generator-svc',
+        url: `${normalize(this.config.integrations.reportGenerator.baseUrl)}/health`,
+      },
     ];
 
     externalServices.forEach((service) => {
       this.registerHealthCheck({
-        name: service,
-        url: `http://${service}:3000/health`,
+        name: service.name,
+        url: service.url,
         timeout: 5000,
       });
     });

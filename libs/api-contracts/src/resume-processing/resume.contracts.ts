@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-namespace */
+
 /**
  * Resume Processing API Contracts
  * Shared contract definitions for resume data between frontend and backend

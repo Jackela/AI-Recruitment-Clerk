@@ -268,8 +268,7 @@ export const guestReducer = createReducer(
       progress: 100,
     },
     // Update remaining usage count from demo payload when provided
-    remainingCount:
-      (demoResults as any).data?.remainingUsage ?? state.remainingCount,
+    remainingCount: demoResults.data.remainingUsage ?? state.remainingCount,
     showAnalysisResults: true,
     isLoading: false,
     error: null,
@@ -302,7 +301,7 @@ export const guestReducer = createReducer(
           ? {
               ...state.currentAnalysis,
               progress,
-              status: (status as any) || state.currentAnalysis.status,
+              status: status ?? state.currentAnalysis.status,
             }
           : state.currentAnalysis,
       analysisResults: {
@@ -311,8 +310,7 @@ export const guestReducer = createReducer(
           ? {
               ...state.analysisResults[analysisId],
               progress,
-              status:
-                (status as any) || state.analysisResults[analysisId].status,
+              status: status ?? state.analysisResults[analysisId].status,
             }
           : state.analysisResults[analysisId],
       },

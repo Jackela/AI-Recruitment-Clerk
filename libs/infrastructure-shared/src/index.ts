@@ -204,8 +204,8 @@ export interface InterceptorOptions {
  */
 export interface ExecutionContext {
   switchToHttp(): any;
-  getHandler(): Function;
-  getClass(): Function;
+  getHandler(): (...args: unknown[]) => unknown;
+  getClass(): new (...args: unknown[]) => unknown;
 }
 
 /**
@@ -747,8 +747,8 @@ export class RetryUtility {
    */
   static async retry<T>(
     operation: () => Promise<T>,
-    maxAttempts: number = 3,
-    delay: number = 1000,
+    maxAttempts = 3,
+    delay = 1000,
   ): Promise<T> {
     let lastError: Error | undefined;
 

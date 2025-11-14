@@ -19,6 +19,7 @@ import {
   JwtPayload,
 } from '@ai-recruitment-clerk/user-management-domain';
 import * as bcrypt from 'bcryptjs';
+import { resetConfigCache } from '@ai-recruitment-clerk/configuration';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -38,6 +39,8 @@ describe('AuthService', () => {
   };
 
   beforeEach(async () => {
+    process.env.NODE_ENV = 'test';
+    resetConfigCache();
     const userServiceMock = {
       findByEmail: jest.fn(),
       findById: jest.fn(),
@@ -87,6 +90,7 @@ describe('AuthService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    resetConfigCache();
   });
 
   describe('register', () => {

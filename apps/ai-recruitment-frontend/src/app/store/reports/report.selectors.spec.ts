@@ -1,12 +1,13 @@
 import * as ReportSelectors from './report.selectors';
-import { ReportState, initialReportState } from './report.state';
+import { ReportState } from './report.state';
 import { ReportListItem, AnalysisReport } from './report.model';
 import { AppState } from '../app.state';
 
 describe('Report Selectors', () => {
-  const mockReportListItems: ReportListItem[] = [
+  const reportListItems: ReportListItem[] = [
     {
       id: 'report1',
+      jobId: 'job1',
       candidateName: 'John Doe',
       matchScore: 85,
       oneSentenceSummary: 'Strong technical candidate with relevant experience',
@@ -15,6 +16,7 @@ describe('Report Selectors', () => {
     },
     {
       id: 'report2',
+      jobId: 'job1',
       candidateName: 'Jane Smith',
       matchScore: 92,
       oneSentenceSummary: 'Excellent candidate with perfect skill match',
@@ -23,6 +25,7 @@ describe('Report Selectors', () => {
     },
     {
       id: 'report3',
+      jobId: 'job2',
       candidateName: 'Bob Johnson',
       matchScore: 78,
       oneSentenceSummary: 'Good candidate with some experience gaps',
@@ -31,6 +34,7 @@ describe('Report Selectors', () => {
     },
     {
       id: 'report4',
+      jobId: 'job3',
       candidateName: 'Alice Williams',
       matchScore: 88,
       oneSentenceSummary: 'Strong candidate with diverse background',
@@ -56,8 +60,14 @@ describe('Report Selectors', () => {
     generatedAt: new Date('2024-01-01'),
   };
 
+  const coerceReportList = (
+    reports: Array<Partial<ReportListItem>>,
+  ): ReportListItem[] => reports as unknown as ReportListItem[];
+
+  const reportListItems = reportListItems;
+
   const mockReportState: ReportState = {
-    reports: mockReportListItems,
+    reports: reportListItems,
     selectedReport: mockSelectedReport,
     loading: false,
     error: null,
@@ -106,7 +116,7 @@ describe('Report Selectors', () => {
     it('should select all reports', () => {
       const result =
         ReportSelectors.selectAllReports.projector(mockReportState);
-      expect(result).toEqual(mockReportListItems);
+      expect(result).toEqual(reportListItems);
       expect(result).toHaveLength(4);
     });
 
@@ -161,15 +171,15 @@ describe('Report Selectors', () => {
   describe('Derived Selectors', () => {
     it('should select reports count', () => {
       const result =
-        ReportSelectors.selectReportsCount.projector(mockReportListItems);
+        ReportSelectors.selectReportsCount.projector(reportListItems);
       expect(result).toBe(4);
     });
 
     it('should select reports by job ID', () => {
       const jobReports = [
-        { ...mockReportListItems[0], jobId: 'job1' },
-        { ...mockReportListItems[1], jobId: 'job1' },
-        { ...mockReportListItems[2], jobId: 'job2' },
+        { ...reportListItems[0], jobId: 'job1' },
+        { ...reportListItems[1], jobId: 'job1' },
+        { ...reportListItems[2], jobId: 'job2' },
       ];
       const selectorFunction = ReportSelectors.selectReportsByJobId('job1');
       const result = selectorFunction.projector(jobReports);
@@ -179,8 +189,8 @@ describe('Report Selectors', () => {
 
     it('should return empty array for non-existent job ID', () => {
       const jobReports = [
-        { ...mockReportListItems[0], jobId: 'job1' },
-        { ...mockReportListItems[1], jobId: 'job2' },
+        { ...reportListItems[0], jobId: 'job1' },
+        { ...reportListItems[1], jobId: 'job2' },
       ];
       const selectorFunction =
         ReportSelectors.selectReportsByJobId('nonexistent');
@@ -190,21 +200,21 @@ describe('Report Selectors', () => {
 
     it('should select report by ID', () => {
       const selectorFunction = ReportSelectors.selectReportById('report2');
-      const result = selectorFunction.projector(mockReportListItems);
-      expect(result).toEqual(mockReportListItems[1]);
-      expect(result!.candidateName).toBe('Jane Smith');
+      const result = selectorFunction.projector(reportListItems);
+      expect(result).toEqual(reportListItems[1]);
+      expect(result?.candidateName).toBe('Jane Smith');
     });
 
     it('should return undefined for non-existent report ID', () => {
       const selectorFunction = ReportSelectors.selectReportById('nonexistent');
-      const result = selectorFunction.projector(mockReportListItems);
+      const result = selectorFunction.projector(reportListItems);
       expect(result).toBeUndefined();
     });
 
     it('should select reports by status', () => {
       const completedReportsSelector =
         ReportSelectors.selectReportsByStatus('completed');
-      const result = completedReportsSelector.projector(mockReportListItems);
+      const result = completedReportsSelector.projector(reportListItems);
       expect(result).toHaveLength(2);
       expect(result.every((report) => report.status === 'completed')).toBe(
         true,
@@ -218,16 +228,16 @@ describe('Report Selectors', () => {
     it('should return empty array for non-existent status', () => {
       const nonExistentStatusSelector =
         ReportSelectors.selectReportsByStatus('archived');
-      const result = nonExistentStatusSelector.projector(mockReportListItems);
+      const result = nonExistentStatusSelector.projector(reportListItems);
       expect(result).toEqual([]);
     });
 
     it('should select current job reports', () => {
       const reportsWithJobIds = [
-        { ...mockReportListItems[0], jobId: 'job1' },
-        { ...mockReportListItems[1], jobId: 'job1' },
-        { ...mockReportListItems[2], jobId: 'job2' },
-        { ...mockReportListItems[3], jobId: 'job1' },
+        { ...reportListItems[0], jobId: 'job1' },
+        { ...reportListItems[1], jobId: 'job1' },
+        { ...reportListItems[2], jobId: 'job2' },
+        { ...reportListItems[3], jobId: 'job1' },
       ];
       const result = ReportSelectors.selectCurrentJobReports.projector(
         reportsWithJobIds,
@@ -239,7 +249,7 @@ describe('Report Selectors', () => {
 
     it('should return empty array when no current job ID', () => {
       const result = ReportSelectors.selectCurrentJobReports.projector(
-        mockReportListItems,
+        reportListItems,
         null,
       );
       expect(result).toEqual([]);
@@ -249,7 +259,7 @@ describe('Report Selectors', () => {
   describe('Recent Reports Selector', () => {
     it('should select recent reports with default limit', () => {
       const recentReportsSelector = ReportSelectors.selectRecentReports();
-      const result = recentReportsSelector.projector(mockReportListItems);
+      const result = recentReportsSelector.projector(reportListItems);
 
       expect(result).toHaveLength(4); // All reports since we only have 4
       // Should be sorted by most recent first
@@ -261,7 +271,7 @@ describe('Report Selectors', () => {
 
     it('should respect custom limit', () => {
       const recentReportsSelector = ReportSelectors.selectRecentReports(2);
-      const result = recentReportsSelector.projector(mockReportListItems);
+      const result = recentReportsSelector.projector(reportListItems);
 
       expect(result).toHaveLength(2);
       expect(result[0].generatedAt).toEqual(new Date('2024-01-04'));
@@ -275,11 +285,11 @@ describe('Report Selectors', () => {
     });
 
     it('should not mutate original array', () => {
-      const originalReports = [...mockReportListItems];
+      const originalReports = [...reportListItems];
       const recentReportsSelector = ReportSelectors.selectRecentReports();
-      recentReportsSelector.projector(mockReportListItems);
+      recentReportsSelector.projector(reportListItems);
 
-      expect(mockReportListItems).toEqual(originalReports);
+      expect(reportListItems).toEqual(originalReports);
     });
   });
 
@@ -342,10 +352,10 @@ describe('Report Selectors', () => {
   describe('Complex Derived Selectors', () => {
     it('should calculate reports statistics correctly', () => {
       const reportsWithScores = [
-        { ...mockReportListItems[0], status: 'completed', matchScore: 85 },
-        { ...mockReportListItems[1], status: 'processing', matchScore: 92 },
-        { ...mockReportListItems[2], status: 'completed', matchScore: 78 },
-        { ...mockReportListItems[3], status: 'failed', matchScore: 88 },
+        { ...reportListItems[0], status: 'completed', matchScore: 85 },
+        { ...reportListItems[1], status: 'processing', matchScore: 92 },
+        { ...reportListItems[2], status: 'completed', matchScore: 78 },
+        { ...reportListItems[3], status: 'failed', matchScore: 88 },
       ];
 
       const result =
@@ -371,7 +381,7 @@ describe('Report Selectors', () => {
     });
 
     it('should calculate 100% completion when all reports are completed', () => {
-      const allCompletedReports = mockReportListItems.map((report) => ({
+      const allCompletedReports = reportListItems.map((report) => ({
         ...report,
         status: 'completed' as const,
       }));
@@ -383,11 +393,14 @@ describe('Report Selectors', () => {
     });
 
     it('should handle reports with missing scores', () => {
-      const reportsWithMissingScores = [
-        { ...mockReportListItems[0], matchScore: 85 },
-        { ...mockReportListItems[1], matchScore: undefined as any },
-        { ...mockReportListItems[2], matchScore: 78 },
-      ];
+      const reportsWithMissingScores = coerceReportList([
+        { ...reportListItems[0], matchScore: 85 },
+        {
+          ...reportListItems[1],
+          matchScore: undefined as unknown as number,
+        },
+        { ...reportListItems[2], matchScore: 78 },
+      ]);
 
       const result = ReportSelectors.selectReportsStatistics.projector(
         reportsWithMissingScores,
@@ -400,10 +413,10 @@ describe('Report Selectors', () => {
   describe('Job-Specific Report Statistics', () => {
     it('should calculate job reports statistics correctly', () => {
       const jobReports = [
-        { ...mockReportListItems[0], status: 'completed', matchScore: 85 },
-        { ...mockReportListItems[1], status: 'completed', matchScore: 92 },
-        { ...mockReportListItems[2], status: 'processing', matchScore: 78 },
-        { ...mockReportListItems[3], status: 'completed', matchScore: 88 },
+        { ...reportListItems[0], status: 'completed', matchScore: 85 },
+        { ...reportListItems[1], status: 'completed', matchScore: 92 },
+        { ...reportListItems[2], status: 'processing', matchScore: 78 },
+        { ...reportListItems[3], status: 'completed', matchScore: 88 },
       ];
 
       const selectorFunction =
@@ -431,9 +444,9 @@ describe('Report Selectors', () => {
 
     it('should handle reports with scores below threshold', () => {
       const lowScoreReports = [
-        { ...mockReportListItems[0], status: 'completed', matchScore: 70 },
-        { ...mockReportListItems[1], status: 'completed', matchScore: 75 },
-        { ...mockReportListItems[2], status: 'completed', matchScore: 65 },
+        { ...reportListItems[0], status: 'completed', matchScore: 70 },
+        { ...reportListItems[1], status: 'completed', matchScore: 75 },
+        { ...reportListItems[2], status: 'completed', matchScore: 65 },
       ];
 
       const selectorFunction =
@@ -446,10 +459,10 @@ describe('Report Selectors', () => {
 
     it('should handle mixed completion statuses', () => {
       const mixedStatusReports = [
-        { ...mockReportListItems[0], status: 'completed', matchScore: 85 },
-        { ...mockReportListItems[1], status: 'processing', matchScore: 92 },
-        { ...mockReportListItems[2], status: 'failed', matchScore: 78 },
-        { ...mockReportListItems[3], status: 'completed', matchScore: 88 },
+        { ...reportListItems[0], status: 'completed', matchScore: 85 },
+        { ...reportListItems[1], status: 'processing', matchScore: 92 },
+        { ...reportListItems[2], status: 'failed', matchScore: 78 },
+        { ...reportListItems[3], status: 'completed', matchScore: 88 },
       ];
 
       const selectorFunction =
@@ -466,7 +479,7 @@ describe('Report Selectors', () => {
       const result =
         ReportSelectors.selectReportManagementState.projector(mockReportState);
 
-      expect(result.reports).toEqual(mockReportListItems);
+      expect(result.reports).toEqual(reportListItems);
       expect(result.selectedReport).toEqual(mockSelectedReport);
       expect(result.currentJobId).toBe('job1');
       expect(result.loading).toBe(false);
@@ -493,7 +506,7 @@ describe('Report Selectors', () => {
 
     it('should handle all state properties correctly', () => {
       const complexState: ReportState = {
-        reports: mockReportListItems,
+        reports: reportListItems,
         selectedReport: null,
         currentJobId: null,
         loading: true,
@@ -526,7 +539,7 @@ describe('Report Selectors', () => {
       const modifiedState = {
         ...mockReportState,
         reports: [
-          ...mockReportListItems,
+          ...reportListItems,
           {
             id: 'report5',
             candidateName: 'New Candidate',
@@ -552,27 +565,30 @@ describe('Report Selectors', () => {
         .mockImplementation(ReportSelectors.selectReportsStatistics.projector);
 
       // First call
-      spy(mockReportListItems);
+      spy(reportListItems);
       expect(spy).toHaveBeenCalledTimes(1);
 
       // Second call with same input should use memoized result
-      spy(mockReportListItems);
+      spy(reportListItems);
       expect(spy).toHaveBeenCalledTimes(2);
     });
   });
 
   describe('Edge Cases and Error Handling', () => {
     it('should handle state with undefined reports gracefully', () => {
-      const invalidState = { ...mockReportState, reports: undefined as any };
+      const invalidState = {
+        ...mockReportState,
+        reports: undefined as unknown as ReportListItem[],
+      };
       const result = ReportSelectors.selectAllReports.projector(invalidState);
       expect(result).toBeUndefined();
     });
 
     it('should handle reports with missing required fields', () => {
-      const invalidReports = [
-        { id: 'report1' } as any,
-        { candidateName: 'Report without ID' } as any,
-      ];
+      const invalidReports = coerceReportList([
+        { id: 'report1' } as Partial<ReportListItem>,
+        { candidateName: 'Report without ID' } as Partial<ReportListItem>,
+      ]);
 
       const result =
         ReportSelectors.selectReportsCount.projector(invalidReports);
@@ -580,24 +596,36 @@ describe('Report Selectors', () => {
     });
 
     it('should handle filter operations on malformed data', () => {
-      const malformedReports = [
-        { ...mockReportListItems[0], status: null as any },
-        { ...mockReportListItems[1], status: undefined as any },
-        mockReportListItems[2],
-      ];
+      const malformedReports = coerceReportList([
+        {
+          ...reportListItems[0],
+          status: null as unknown as ReportListItem['status'],
+        },
+        {
+          ...reportListItems[1],
+          status: undefined as unknown as ReportListItem['status'],
+        },
+        reportListItems[2],
+      ]);
 
       const completedSelector =
         ReportSelectors.selectReportsByStatus('completed');
       const result = completedSelector.projector(malformedReports);
-      expect(result).toHaveLength(1); // Only mockReportListItems[2] has valid status
+      expect(result).toHaveLength(1); // Only reportListItems[2] has valid status
     });
 
     it('should handle invalid dates in recent reports selector', () => {
-      const reportsWithInvalidDates = [
-        { ...mockReportListItems[0], generatedAt: null as any },
-        { ...mockReportListItems[1], generatedAt: undefined as any },
-        mockReportListItems[2],
-      ];
+      const reportsWithInvalidDates = coerceReportList([
+        {
+          ...reportListItems[0],
+          generatedAt: null as unknown as Date,
+        },
+        {
+          ...reportListItems[1],
+          generatedAt: undefined as unknown as Date,
+        },
+        reportListItems[2],
+      ]);
 
       const recentReportsSelector = ReportSelectors.selectRecentReports();
       const result = recentReportsSelector.projector(reportsWithInvalidDates);

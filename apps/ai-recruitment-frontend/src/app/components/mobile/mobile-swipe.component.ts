@@ -26,7 +26,7 @@ export interface SwipeAction {
  */
 export interface SwipeEvent {
   action: SwipeAction;
-  item: any;
+  item: Record<string, unknown>;
 }
 
 /**
@@ -203,7 +203,7 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
   @Input() actions: SwipeAction[] = [];
   @Input() swipeThreshold = 80;
   @Input() disabled = false;
-  @Input() item: any;
+  @Input() item: Record<string, unknown> = {};
 
   @Output() swipeAction = new EventEmitter<SwipeEvent>();
   @Output() swipeStart = new EventEmitter<void>();

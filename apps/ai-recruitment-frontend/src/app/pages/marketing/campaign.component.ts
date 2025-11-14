@@ -1,7 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { GuestUsageService } from '../../services/marketing/guest-usage.service';
+
+type UserStatusRefreshDetail = {
+  message?: string;
+};
 
 /**
  * Represents the campaign component.
@@ -154,15 +158,8 @@ export class CampaignComponent implements OnInit {
   codeCopied = false;
   questionnaireUrl = 'https://wj.qq.com/s2/14781436/'; // 待替换为实际问卷链接
 
-  /**
-   * Initializes a new instance of the Campaign Component.
-   * @param guestUsageService - The guest usage service.
-   * @param router - The router.
-   */
-  constructor(
-    private guestUsageService: GuestUsageService,
-    public router: Router,
-  ) {}
+  private readonly guestUsageService = inject(GuestUsageService);
+  readonly router = inject(Router);
 
   /**
    * Performs the ng on init operation.
@@ -183,17 +180,18 @@ export class CampaignComponent implements OnInit {
   }
 
   private listenForStatusUpdates(): void {
-    window.addEventListener('userStatusRefreshed', (event: any) => {
+    window.addEventListener('userStatusRefreshed', (event) => {
+      const detail = (event as CustomEvent<UserStatusRefreshDetail>).detail;
       // 用户权限已刷新，更新UI
       this.updateUsageStatus();
 
       // 显示成功消息
-      if (event.detail?.message) {
+      if (detail?.message) {
         // 这里可以集成toast服务显示消息
-        console.log('🎉 ' + event.detail.message);
+        console.log('🎉 ' + detail.message);
 
         // 可选：显示用户友好的提示
-        this.showRefreshNotification(event.detail.message);
+        this.showRefreshNotification(detail.message);
       }
     });
   }

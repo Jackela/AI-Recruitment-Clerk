@@ -29,6 +29,7 @@ import {
   UserProfileDocument,
 } from '../schemas/user-profile.schema';
 import { v4 as uuidv4 } from 'uuid';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * GDPR Privacy Compliance Service
@@ -40,6 +41,7 @@ export class PrivacyComplianceService {
   private readonly natsClient: any; // Temporary fallback until NATS client is properly injected
   private readonly consentRecordModel: any; // Temporary fallback until proper injection
   private readonly dataSubjectRightsModel: any; // Temporary fallback until proper injection
+  private readonly config = getConfig();
 
   /**
    * Initializes a new instance of the Privacy Compliance Service.
@@ -1120,7 +1122,9 @@ export class PrivacyComplianceService {
 
       // Generate encryption key (should be from secure key management)
       const encryptionKey =
-        process.env.GDPR_ENCRYPTION_KEY || crypto.randomBytes(32);
+        this.config.security.gdprEncryptionKey ||
+        this.config.security.encryptionKey ||
+        crypto.randomBytes(32);
       const iv = crypto.randomBytes(16);
 
       const cipher = crypto.createCipher(algorithm, encryptionKey);
@@ -1168,18 +1172,20 @@ export class PrivacyComplianceService {
     try {
       // Generate time-limited, signed URL
       const crypto = require('crypto');
+      const config = getConfig();
       const expirationTime = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60; // 7 days
 
       // Create signature
       const payload = `${fileId}:${expirationTime}`;
-      const secretKey = process.env.DOWNLOAD_URL_SECRET || 'default-secret-key';
+      const secretKey =
+        config.security.downloadUrlSecret || 'default-secret-key';
       const signature = crypto
         .createHmac('sha256', secretKey)
         .update(payload)
         .digest('hex');
 
       // Construct secure download URL
-      const baseUrl = process.env.APP_BASE_URL || 'https://localhost:8080';
+      const baseUrl = config.server.baseUrl || 'https://localhost:8080';
       const downloadUrl = `${baseUrl}/api/privacy/data-export/download/${fileId}?expires=${expirationTime}&signature=${signature}`;
 
       this.logger.log(`Generated secure download URL for file: ${fileId}`);

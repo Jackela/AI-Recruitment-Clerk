@@ -1,28 +1,19 @@
 import { defineConfig, devices } from '@playwright/test';
+import { getTestingEnvironment } from './testing-env';
 
 // Honor E2E_SKIP_WEBSERVER: when true we must NEVER start Playwright webServer
 // Also skip when running against real API to ensure decoupled servers
-const skipWebServer =
-  process.env['E2E_SKIP_WEBSERVER'] === 'true' ||
-  process.env['E2E_USE_REAL_API'] === 'true';
-
-const parsedDevServerPort = process.env['DEV_SERVER_PORT']
-  ? Number.parseInt(process.env['DEV_SERVER_PORT'], 10)
-  : undefined;
-const devServerPort = Number.isFinite(parsedDevServerPort ?? NaN)
-  ? parsedDevServerPort
-  : undefined;
+const testingEnv = getTestingEnvironment();
+const skipWebServer = testingEnv.skipWebServer || testingEnv.useRealApi;
+const devServerPort = testingEnv.devServerPort;
 
 // Support both development (with dev server) and production (containerized) testing.
 // Default to the external stack (Docker) when the dev server is skipped.
 const fallbackBaseURL = skipWebServer
-  ? process.env['E2E_EXTERNAL_BASE_URL'] || 'http://localhost:4200'
-  : `http://localhost:${devServerPort ?? 4202}`;
+  ? testingEnv.externalBaseUrl || 'http://localhost:4200'
+  : `http://${testingEnv.host}:${devServerPort ?? 4202}`;
 
-const baseURL =
-  process.env['PLAYWRIGHT_BASE_URL'] ||
-  process.env['BASE_URL'] ||
-  fallbackBaseURL;
+const baseURL = testingEnv.playwrightBaseUrl || fallbackBaseURL;
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -45,13 +36,13 @@ const projects = [
           '--no-sandbox', // For CI stability
           '--disable-dev-shm-usage', // For CI stability
         ],
-        headless: !process.env.CHROME_HEADED,
+        headless: !testingEnv.chromeHeaded,
       },
     },
   },
 ];
 
-if (process.env.E2E_ENABLE_FIREFOX === 'true') {
+if (testingEnv.enableFirefoxProject) {
   projects.push({
     name: 'firefox',
     use: {
@@ -61,7 +52,7 @@ if (process.env.E2E_ENABLE_FIREFOX === 'true') {
       launchOptions: {
         timeout: 60000,
         args: [],
-        headless: !process.env.FIREFOX_HEADED,
+        headless: !testingEnv.firefoxHeaded,
       },
     },
   });
@@ -75,9 +66,9 @@ export default defineConfig({
   },
   // Enhanced stability configuration for port management
   fullyParallel: false,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 3 : 2, // Increased retries for infrastructure stability
-  workers: process.env.CI ? 1 : 1, // Use single worker to prevent port conflicts
+  forbidOnly: testingEnv.isCi,
+  retries: testingEnv.isCi ? 3 : 2, // Increased retries for infrastructure stability
+  workers: testingEnv.isCi ? 1 : 1, // Use single worker to prevent port conflicts
   // Extended global timeout for comprehensive setup/teardown
   globalTimeout: 900000, // 15 minutes global timeout for robust cleanup and port management
   reporter: 'html',
@@ -114,7 +105,7 @@ export default defineConfig({
             ? `npx nx run ai-recruitment-frontend:serve:test --port ${devServerPort} --host 0.0.0.0`
             : 'npx nx run ai-recruitment-frontend:serve:test --port 4202 --host 0.0.0.0',
           url: baseURL,
-          reuseExistingServer: !process.env.CI,
+          reuseExistingServer: !testingEnv.isCi,
           timeout: 300 * 1000, // Extended for dynamic port allocation
           stderr: 'pipe',
           stdout: 'pipe',

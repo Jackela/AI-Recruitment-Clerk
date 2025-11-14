@@ -208,7 +208,8 @@ export class InputValidator {
 
     // Special characters validation
     if (!options.allowSpecialChars) {
-      const specialCharsPattern = /[<>"\';(){}[\]]/g;
+      // eslint-disable-next-line no-useless-escape -- escaping brackets so they are matched literally
+      const specialCharsPattern = /[<>"';(){}\[\]]/g;
       if (specialCharsPattern.test(sanitizedText)) {
         errors.push('Special characters are not allowed');
         // Remove special characters

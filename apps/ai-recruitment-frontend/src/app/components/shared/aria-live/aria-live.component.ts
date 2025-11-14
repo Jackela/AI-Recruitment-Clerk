@@ -26,9 +26,9 @@ export interface LiveMessage {
       <!-- Polite announcements (don't interrupt) -->
       <div
         class="aria-live-polite"
-        [attr.aria-live]="'polite'"
-        [attr.aria-atomic]="'true'"
-        [attr.aria-relevant]="'additions text'"
+        aria-live="polite"
+        aria-atomic="true"
+        aria-relevant="all"
       >
         <div
           *ngFor="let message of politeMessages; trackBy: trackByMessageId"
@@ -41,9 +41,9 @@ export interface LiveMessage {
       <!-- Assertive announcements (interrupt current reading) -->
       <div
         class="aria-live-assertive"
-        [attr.aria-live]="'assertive'"
-        [attr.aria-atomic]="'true'"
-        [attr.aria-relevant]="'additions text'"
+        aria-live="assertive"
+        aria-atomic="true"
+        aria-relevant="all"
       >
         <div
           *ngFor="let message of assertiveMessages; trackBy: trackByMessageId"
@@ -129,7 +129,8 @@ export class AriaLiveComponent implements OnInit, OnDestroy {
    */
   ngOnInit(): void {
     // Subscribe to accessibility service live messages (test-compatible)
-    const isTestEnvironment = typeof (window as any).__karma__ !== 'undefined';
+    const isTestEnvironment =
+      typeof (window as { __karma__?: unknown }).__karma__ !== 'undefined';
     if (!isTestEnvironment) {
       // Production environment: use effect for reactive updates
       try {

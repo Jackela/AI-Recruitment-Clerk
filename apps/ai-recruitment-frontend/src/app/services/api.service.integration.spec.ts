@@ -239,7 +239,7 @@ describe('ApiService Integration Tests', () => {
             fileName: 'jane_smith_resume.pdf',
             status: 'processing',
             uploadedAt: new Date('2024-01-02'),
-            matchScore: undefined as any,
+            matchScore: undefined,
           },
         ];
 

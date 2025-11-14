@@ -9,6 +9,11 @@ import { AppState } from '../../../store/app.state';
 import { JobListItem } from '../../../store/jobs/job.model';
 import * as JobActions from '../../../store/jobs/job.actions';
 import * as JobSelectors from '../../../store/jobs/job.selectors';
+import {
+  JobManagementStateWithWebSocket,
+  JobStatistics,
+  JobWithProgress,
+} from '../../../store/jobs/job.selectors';
 
 /**
  * Represents the jobs list component.
@@ -25,16 +30,16 @@ export class JobsListComponent implements OnInit, OnDestroy {
   jobs$: Observable<JobListItem[]>;
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
-  jobsStatistics$: Observable<any>;
+  jobsStatistics$: Observable<JobStatistics>;
   activeJobs$: Observable<JobListItem[]>;
 
   // WebSocket-related observables
-  jobsWithProgress$: Observable<Array<JobListItem & { progress: any }>>;
+  jobsWithProgress$: Observable<JobWithProgress[]>;
   webSocketConnected$: Observable<boolean>;
   webSocketStatus$: Observable<
     'connecting' | 'connected' | 'disconnected' | 'error'
   >;
-  jobManagementStateWithWebSocket$: Observable<any>;
+  jobManagementStateWithWebSocket$: Observable<JobManagementStateWithWebSocket>;
 
   private destroy$ = new Subject<void>();
   private sessionId = `jobs-list-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -186,10 +191,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
    * @param jobWithProgress - Job with progress information
    * @returns Progress percentage (0-100) or null if no progress
    */
-  getJobProgress(
-    jobWithProgress: JobListItem & { progress: any },
-  ): number | null {
-    return jobWithProgress.progress?.progress || null;
+  getJobProgress(jobWithProgress: JobWithProgress): number | null {
+    return jobWithProgress.progress?.progress ?? null;
   }
 
   /**
@@ -197,10 +200,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
    * @param jobWithProgress - Job with progress information
    * @returns Current step description or null
    */
-  getCurrentStep(
-    jobWithProgress: JobListItem & { progress: any },
-  ): string | null {
-    return jobWithProgress.progress?.step || null;
+  getCurrentStep(jobWithProgress: JobWithProgress): string | null {
+    return jobWithProgress.progress?.step ?? null;
   }
 
   /**

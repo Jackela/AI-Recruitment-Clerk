@@ -5,6 +5,7 @@ import {
   StreamConfigFactory,
 } from '@app/shared-nats-client';
 import { connect, NatsConnection } from 'nats';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Test NATS Module for Integration Testing
@@ -21,14 +22,20 @@ export class TestNatsModule {
    * @param useDocker - The use docker.
    * @returns A promise that resolves to DynamicModule.
    */
-  static async forRoot(useDocker = false): Promise<DynamicModule> {
+  static async forRoot(options: {
+    useDocker?: boolean;
+    natsUrl?: string;
+  } = {}): Promise<DynamicModule> {
     let connectionManager: any;
     let streamManager: any;
+    const runtimeConfig = getConfig({ forceReload: true });
+    const useDocker =
+      options.useDocker ?? runtimeConfig.testing?.useDocker ?? false;
 
     if (useDocker) {
       // Use real NATS connection for integration tests
       const natsUrl =
-        process.env.NATS_SERVERS || 'nats://testuser:testpass@localhost:4223';
+        options.natsUrl ?? runtimeConfig.messaging.nats.url ?? 'nats://localhost:4222';
 
       try {
         this.natsConnection = await connect({

@@ -19,8 +19,12 @@ import {
 import { AnalysisReport, ReportsList } from '../store/reports/report.model';
 
 describe('ApiService', () => {
-  let service: any;
-  let httpMock: any;
+  let service: {
+    get: jest.Mock;
+    post: jest.Mock;
+    put: jest.Mock;
+    delete: jest.Mock;
+  };
 
   beforeEach(() => {
     // 跳过复杂的HTTP测试，使用简单mock
@@ -30,7 +34,6 @@ describe('ApiService', () => {
       put: jest.fn(),
       delete: jest.fn(),
     };
-    httpMock = {};
   });
 
   it('should be created', () => {
@@ -528,7 +531,7 @@ describe('ApiService (HTTP Integration Tests)', () => {
         resumeCount: 0,
       }));
 
-      jobIds.forEach((id, index) => {
+      jobIds.forEach((id) => {
         service.getJobById(id).subscribe((job) => {
           expect(job.id).toBe(id);
         });

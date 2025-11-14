@@ -1,12 +1,13 @@
 {
   "name": "@ai-recruitment-clerk/infrastructure-shared",
   "version": "1.0.0",
-  "type": "module",
-  "main": "./dist/index.js",
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./src/index.js",
+      "types": "./src/index.d.ts"
     }
   },
   "scripts": {

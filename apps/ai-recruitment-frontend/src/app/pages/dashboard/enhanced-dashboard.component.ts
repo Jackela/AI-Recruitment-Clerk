@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { LoggerService } from '../../services/shared/logger.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -436,28 +436,16 @@ interface GuestStats {
 })
 export class EnhancedDashboardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  private readonly guestApi = inject(GuestApiService);
+  private readonly websocketStats = inject(WebSocketStatsService);
+  private readonly progressFeedback = inject(ProgressFeedbackService);
+  private readonly loggerService = inject(LoggerService);
+  private readonly logger =
+    this.loggerService.createLogger('EnhancedDashboardComponent');
 
   stats$!: Observable<DashboardStats>;
   systemHealth$!: Observable<SystemHealth>;
   bentoItems$!: Observable<BentoGridItem[]>;
-
-  /**
-   * Initializes a new instance of the Enhanced Dashboard Component.
-   * @param guestApi - The guest api.
-   * @param websocketStats - The websocket stats.
-   * @param progressFeedback - The progress feedback.
-   * @param loggerService - The logger service.
-   */
-  constructor(
-    private guestApi: GuestApiService,
-    private websocketStats: WebSocketStatsService,
-    private progressFeedback: ProgressFeedbackService,
-    private loggerService: LoggerService,
-  ) {
-    this.logger = this.loggerService.createLogger('EnhancedDashboardComponent');
-  }
-
-  private logger: ReturnType<LoggerService['createLogger']>;
 
   /**
    * Performs the ng on init operation.

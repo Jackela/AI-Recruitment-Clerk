@@ -1,4 +1,4 @@
-import { Component, signal, OnDestroy } from '@angular/core';
+import { Component, signal, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -413,16 +413,8 @@ export class UploadResumeComponent implements OnDestroy {
   reportUrl = signal('');
 
   private destroy$ = new Subject<void>();
-
-  /**
-   * Initializes a new instance of the Upload Resume Component.
-   * @param guestApi - The guest api.
-   * @param webSocketService - The web socket service.
-   */
-  constructor(
-    private readonly guestApi: GuestApiService,
-    private readonly webSocketService: WebSocketService,
-  ) {}
+  private readonly guestApi = inject(GuestApiService);
+  private readonly webSocketService = inject(WebSocketService);
 
   /**
    * Performs the on file change operation.
@@ -503,9 +495,7 @@ export class UploadResumeComponent implements OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((completion) => {
         this.analysisComplete.set(true);
-        this.reportUrl.set(
-          ((completion as any)?.result?.['reportUrl'] as string) || '',
-        );
+        this.reportUrl.set(completion.result?.reportUrl ?? '');
         this.output.set(JSON.stringify(completion, null, 2));
       });
 

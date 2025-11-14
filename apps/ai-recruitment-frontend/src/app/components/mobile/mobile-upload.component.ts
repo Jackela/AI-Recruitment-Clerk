@@ -51,6 +51,11 @@ export interface UploadFile {
         (dragover)="onDragOver($event)"
         (dragleave)="onDragLeave($event)"
         (drop)="onDrop($event)"
+        role="button"
+        tabindex="0"
+        [attr.aria-disabled]="disabled"
+        (keydown.enter)="handleUploadZoneKeydown($event)"
+        (keydown.space)="handleUploadZoneKeydown($event)"
       >
         <div class="upload-content">
           <div class="upload-icon">
@@ -878,6 +883,15 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     if (!this.disabled) {
       this.fileInput.nativeElement.click();
     }
+  }
+
+  handleUploadZoneKeydown(event: KeyboardEvent) {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    event.preventDefault();
+    this.triggerFileSelect();
   }
 
   /**

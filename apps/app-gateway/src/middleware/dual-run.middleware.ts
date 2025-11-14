@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { featureFlags } from '../config/feature-flags.config';
 import fs from 'fs';
 import path from 'path';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 function ensureDir(dir: string) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -21,8 +22,10 @@ export class DualRunMiddleware implements NestMiddleware {
       return next();
     }
 
-    const primaryBase = process.env.SCORING_ENGINE_URL || 'http://scoring-engine-svc:3000';
-    const altBase = process.env.SCORING_ENGINE_URL_ALT || process.env.MATCH_SVC_URL || '';
+    const config = getConfig();
+    const primaryBase =
+      config.integrations.scoring.baseUrl || 'http://scoring-engine-svc:3000';
+    const altBase = config.integrations.scoring.altBaseUrl || '';
     if (!altBase) {
       return next();
     }

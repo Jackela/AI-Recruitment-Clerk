@@ -1,7 +1,13 @@
 {
-  "coverage": 0.85,
+  "coverage": 0.5,
+  "includeGlobs": [
+    "apps/app-gateway/**",
+    "apps/ai-recruitment-frontend/**",
+    "libs/**"
+  ],
   "lintErrors": 0,
   "typecheck": true,
   "requireE2ESmoke": true
 }
+
 

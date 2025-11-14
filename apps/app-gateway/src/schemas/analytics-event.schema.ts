@@ -18,13 +18,13 @@ export type AnalyticsEventDocument = AnalyticsEvent & Document;
   versionKey: false,
 })
 export class AnalyticsEvent {
-  @Prop({ required: true, unique: true, index: true })
-  eventId: string = '';
+  @Prop({ type: String, required: true, unique: true, index: true })
+  eventId = '';
 
-  @Prop({ required: true })
-  sessionId: string = '';
+  @Prop({ type: String, required: true })
+  sessionId = '';
 
-  @Prop()
+  @Prop({ type: String })
   userId?: string = undefined;
 
   @Prop({ type: String, required: true, enum: Object.values(EventType) })
@@ -42,7 +42,7 @@ export class AnalyticsEvent {
   @Prop({ type: Object })
   context?: any = undefined;
 
-  @Prop({ required: true })
+  @Prop({ type: Date, required: true })
   timestamp: Date = new Date();
 
   @Prop({ type: Object })
@@ -69,17 +69,17 @@ export class AnalyticsEvent {
   })
   consentStatus: ConsentStatus = ConsentStatus.GRANTED;
 
-  @Prop({ default: false })
-  isSystemSession: boolean = false;
+  @Prop({ type: Boolean, default: false })
+  isSystemSession = false;
 
-  @Prop()
+  @Prop({ type: Date })
   processedAt?: Date = undefined;
 
-  @Prop()
+  @Prop({ type: Date })
   retentionExpiry?: Date = undefined;
 
-  @Prop({ default: false })
-  isAnonymized: boolean = false;
+  @Prop({ type: Boolean, default: false })
+  isAnonymized = false;
 
   @Prop({ type: [String] })
   sensitiveDataMask?: string[] = undefined;

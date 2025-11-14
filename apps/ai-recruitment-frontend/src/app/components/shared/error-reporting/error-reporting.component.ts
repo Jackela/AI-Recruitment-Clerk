@@ -1,4 +1,4 @@
-import { Component, signal, Input } from '@angular/core';
+import { Component, signal, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -22,7 +22,15 @@ import { ToastService } from '../../../services/toast.service';
   imports: [CommonModule, ReactiveFormsModule],
   template: `
     <div class="error-reporting-modal" *ngIf="isVisible()">
-      <div class="modal-backdrop" (click)="close()"></div>
+      <div
+        class="modal-backdrop"
+        role="button"
+        tabindex="0"
+        aria-label="Close error reporting modal"
+        (click)="close()"
+        (keydown.enter)="close()"
+        (keydown.space)="close()"
+      ></div>
       <div class="modal-content">
         <div class="modal-header">
           <h2>
@@ -565,6 +573,11 @@ import { ToastService } from '../../../services/toast.service';
   ],
 })
 export class ErrorReportingComponent {
+  private readonly fb = inject(FormBuilder);
+  private readonly errorReporting = inject(ErrorReportingService);
+  private readonly errorCorrelation = inject(ErrorCorrelationService);
+  private readonly toastService = inject(ToastService);
+
   @Input() errors: StructuredError[] = [];
 
   isVisible = signal(false);
@@ -591,12 +604,7 @@ export class ErrorReportingComponent {
    * @param errorCorrelation - The error correlation.
    * @param toastService - The toast service.
    */
-  constructor(
-    private fb: FormBuilder,
-    private errorReporting: ErrorReportingService,
-    private errorCorrelation: ErrorCorrelationService,
-    private toastService: ToastService,
-  ) {
+  constructor() {
     this.reportForm = this.fb.group({
       category: ['', Validators.required],
       feedback: ['', [Validators.required, Validators.maxLength(1000)]],
@@ -677,9 +685,14 @@ export class ErrorReportingComponent {
    * @param index - The index.
    * @param event - The event.
    */
-  updateReproductionStep(index: number, event: any): void {
+  updateReproductionStep(index: number, event: Event): void {
+    const target = event.target as HTMLInputElement | null;
+    if (!target) {
+      return;
+    }
+
     const steps = [...this.reproductionSteps()];
-    steps[index] = event.target.value;
+    steps[index] = target.value;
     this.reproductionSteps.set(steps);
   }
 

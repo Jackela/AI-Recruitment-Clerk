@@ -1,0 +1,7 @@
+# Generated Nx graph exports (regenerate via npm run gov:inventory)
+inventory/graph.json
+inventory/projects.json
+
+# Local validation logs (manifests remain tracked)
+validation/*.log
+validation/*.txt

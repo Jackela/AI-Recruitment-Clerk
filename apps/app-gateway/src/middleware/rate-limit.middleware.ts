@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import Redis from 'ioredis';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 interface UsageRecord {
   count: number;
@@ -27,12 +28,14 @@ export class RateLimitMiddleware implements NestMiddleware {
    * Initializes a new instance of the Rate Limit Middleware.
    */
   constructor() {
-    // 检查是否禁用Redis或使用Redis URL
-    const disableRedis = process.env.DISABLE_REDIS === 'true';
-    const useRedis = process.env.USE_REDIS_CACHE !== 'false';
-    const redisUrl = process.env.REDIS_URL;
+    const config = getConfig();
+    const redisSettings = config.cache.redis;
 
-    if (disableRedis || !useRedis || (!redisUrl && !process.env.REDIS_HOST)) {
+    if (
+      redisSettings.disabled ||
+      !redisSettings.enabled ||
+      (!redisSettings.url && !redisSettings.host)
+    ) {
       this.logger.log('🔒 Redis已禁用或未配置，限流使用内存存储');
       this.redis = null;
       return;
@@ -40,8 +43,8 @@ export class RateLimitMiddleware implements NestMiddleware {
 
     try {
       // 优先使用完整的 REDIS_URL；仅当没有 URL 但提供了 Host/Port 时才使用分离配置
-      if (redisUrl) {
-        this.redis = new Redis(redisUrl, {
+      if (redisSettings.url) {
+        this.redis = new Redis(redisSettings.url, {
           maxRetriesPerRequest: 3,
           lazyConnect: false,
           enableOfflineQueue: true,
@@ -49,9 +52,9 @@ export class RateLimitMiddleware implements NestMiddleware {
         });
       } else {
         this.redis = new Redis({
-          host: process.env.REDIS_HOST!,
-          port: parseInt(process.env.REDIS_PORT || '6379'),
-          password: process.env.REDIS_PASSWORD,
+          host: redisSettings.host!,
+          port: redisSettings.port ?? 6379,
+          password: redisSettings.password,
           maxRetriesPerRequest: 3,
           lazyConnect: false,
           enableOfflineQueue: true,

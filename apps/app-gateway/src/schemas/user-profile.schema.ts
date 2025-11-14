@@ -14,19 +14,19 @@ export type UserProfileDocument = UserProfile & Document;
   versionKey: false,
 })
 export class UserProfile {
-  @Prop({ required: true, unique: true })
-  userId: string = '';
+  @Prop({ type: String, required: true, unique: true })
+  userId = '';
 
-  @Prop({ required: true })
-  email: string = '';
+  @Prop({ type: String, required: true })
+  email = '';
 
-  @Prop({ required: true })
-  hashedPassword: string = '';
+  @Prop({ type: String, required: true })
+  hashedPassword = '';
 
-  @Prop()
+  @Prop({ type: String })
   displayName?: string = undefined;
 
-  @Prop()
+  @Prop({ type: String })
   avatar?: string = undefined;
 
   @Prop({ type: Object })
@@ -53,13 +53,13 @@ export class UserProfile {
   })
   analyticsConsent: ConsentStatus = ConsentStatus.PENDING;
 
-  @Prop({ default: true })
-  isActive: boolean = true;
+  @Prop({ type: Boolean, default: true })
+  isActive = true;
 
-  @Prop()
+  @Prop({ type: Date })
   lastLoginAt?: Date = undefined;
 
-  @Prop()
+  @Prop({ type: Date })
   emailVerifiedAt?: Date = undefined;
 
   @Prop({ type: Object })

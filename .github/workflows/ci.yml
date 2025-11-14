@@ -1,3 +1,7 @@
+defaults:
+  run:
+    shell: bash
+
 name: ci
 
 on:
@@ -8,13 +12,17 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
       - run: npm ci
-      - run: npm run lint
+      - run: bash scripts/ci/run-phase.sh lint
+        env:
+          LINT_TIMEOUT_MS: '420000'
+          LINT_CI_RUNNER: '1'
 
   typecheck:
     runs-on: ubuntu-latest
@@ -24,7 +32,7 @@ jobs:
         with:
           node-version: '20'
       - run: npm ci
-      - run: npm run typecheck
+      - run: bash scripts/ci/run-phase.sh typecheck
 
   build:
     runs-on: ubuntu-latest
@@ -34,7 +42,7 @@ jobs:
         with:
           node-version: '20'
       - run: npm ci
-      - run: npm run build
+      - run: bash scripts/ci/run-phase.sh build
 
   test_coverage:
     runs-on: ubuntu-latest
@@ -44,12 +52,14 @@ jobs:
         with:
           node-version: '20'
       - run: npm ci
-      - run: npm run test:coverage || npm run test -- --coverage
+      - run: bash scripts/ci/run-phase.sh coverage
       - name: Enforce thresholds
         run: node tools/ci/verify-quality-gates.mjs
 
   e2e_smoke:
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-jammy
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -70,11 +80,10 @@ jobs:
           restore-keys: |
             pw-${{ runner.os }}-
       - run: npm ci
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps || npx playwright install
-      - run: npm run test:e2e
+      - run: bash scripts/ci/run-phase.sh e2e
       - name: Upload Playwright report
-        if: always()
+        # Skip artifact upload when running under act (no ACTIONS_RUNTIME_TOKEN)
+        if: ${{ always() && env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
@@ -93,4 +102,27 @@ jobs:
           node-version: '20'
       - run: npm ci
       - name: PII Scan
-        run: node tools/ci/pii-scan.mjs
+        run: bash scripts/ci/run-phase.sh pii
+
+  governance_gates:
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, build, test_coverage, e2e_smoke]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - name: Run governance gates
+        run: bash scripts/ci/run-phase.sh governance
+      - name: Upload governance artifacts
+        if: ${{ always() && env.ACT != 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-validation
+          path: |
+            specs/001-audit-architecture/inventory/components.json
+            specs/001-audit-architecture/validation/latest-local.json
+            specs/001-audit-architecture/validation/${{ github.run_id }}-parity.json
+          if-no-files-found: error
+

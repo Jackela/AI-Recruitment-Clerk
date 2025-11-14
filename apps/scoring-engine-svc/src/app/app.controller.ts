@@ -51,7 +51,7 @@ export class AppController {
       const spaced = (text || '').replace(/([a-z])([A-Z])/g, '$1 $2');
       const base = spaced
         .toLowerCase()
-        .split(/[^a-z0-9+#\.\-]+/)
+        .split(/[^a-z0-9+#.-]+/)
         .filter((t) => t && t.length > 1);
 
       const out = new Set<string>();

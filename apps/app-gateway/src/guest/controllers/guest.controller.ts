@@ -26,6 +26,7 @@ import {
   GuestStatusDto,
   RedeemFeedbackCodeDto,
 } from '../dto/guest.dto';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Exposes endpoints for guest.
@@ -41,6 +42,7 @@ import {
 })
 export class GuestController {
   private readonly logger = new Logger(GuestController.name);
+  private readonly config = getConfig();
 
   /**
    * Initializes a new instance of the Guest Controller.
@@ -94,7 +96,7 @@ export class GuestController {
         await this.guestUsageService.generateFeedbackCode(deviceId);
 
       // Construct survey URL with feedback code
-      const surveyUrl = `${process.env.GUEST_FEEDBACK_URL || 'https://wj.qq.com/s2/default'}?code=${feedbackCode}`;
+      const surveyUrl = `${this.config.guestExperience.feedbackSurveyUrl}?code=${feedbackCode}`;
 
       this.logger.log(
         `Feedback code generated for guest: ${this.maskDeviceId(deviceId)}`,

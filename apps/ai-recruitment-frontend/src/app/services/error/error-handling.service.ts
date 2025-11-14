@@ -3,7 +3,7 @@
  * Provides consistent error handling, user notifications, and error reporting
  */
 
-import { Injectable, ErrorHandler, Injector } from '@angular/core';
+import { Injectable, ErrorHandler, Injector, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
@@ -47,7 +47,7 @@ export interface StandardizedErrorResponse {
     business: string;
     user: string;
   };
-  details?: any;
+  details?: unknown;
 }
 
 /**
@@ -61,7 +61,7 @@ export interface ErrorContext {
   url?: string;
   timestamp: Date;
   userAgent: string;
-  additionalContext?: Record<string, any>;
+  additionalContext?: Record<string, unknown>;
 }
 
 /**
@@ -90,12 +90,13 @@ export class ErrorHandlingService implements ErrorHandler {
   private readonly errors$ = new BehaviorSubject<ErrorNotification[]>([]);
   private router?: Router;
   private toastService?: ToastService;
+  private readonly injector = inject(Injector);
 
   /**
    * Initializes a new instance of the Error Handling Service.
    * @param injector - The injector.
    */
-  constructor(private injector: Injector) {
+  constructor() {
     // Lazy inject to avoid circular dependencies
     setTimeout(() => {
       try {
@@ -110,7 +111,7 @@ export class ErrorHandlingService implements ErrorHandler {
   /**
    * Angular ErrorHandler implementation
    */
-  handleError(error: any): void {
+  handleError(error: unknown): void {
     const errorContext = this.createErrorContext();
 
     if (error instanceof HttpErrorResponse) {
@@ -178,7 +179,7 @@ export class ErrorHandlingService implements ErrorHandler {
   /**
    * Handle unknown errors
    */
-  handleUnknownError(error: any, context?: Partial<ErrorContext>): void {
+  handleUnknownError(error: unknown, context?: Partial<ErrorContext>): void {
     const errorContext = { ...this.createErrorContext(), ...context };
 
     const notification: ErrorNotification = {
@@ -398,13 +399,20 @@ export class ErrorHandlingService implements ErrorHandler {
 
   // Private helper methods
 
-  private isStandardizedError(error: any): error is StandardizedErrorResponse {
+  private isStandardizedError(
+    error: unknown,
+  ): error is StandardizedErrorResponse {
+    if (
+      typeof error !== 'object' ||
+      error === null ||
+      (error as Partial<StandardizedErrorResponse>).success !== false
+    ) {
+      return false;
+    }
+    const response = error as Partial<StandardizedErrorResponse>;
     return (
-      error &&
-      error.success === false &&
-      error.error &&
-      typeof error.error.type === 'string' &&
-      typeof error.error.code === 'string'
+      typeof response.error?.type === 'string' &&
+      typeof response.error.code === 'string'
     );
   }
 
@@ -548,7 +556,7 @@ export class ErrorHandlingService implements ErrorHandler {
     }
   }
 
-  private logError(error: any, context: ErrorContext): void {
+  private logError(error: unknown, context: ErrorContext): void {
     // In production, send to logging service
     if (this.isProduction()) {
       this.sendToLoggingService(error, context);
@@ -557,7 +565,10 @@ export class ErrorHandlingService implements ErrorHandler {
     }
   }
 
-  private sendToLoggingService(_error: any, _context: ErrorContext): void {
+  private sendToLoggingService(
+    _error: unknown,
+    _context: ErrorContext,
+  ): void {
     // Implementation for sending errors to logging service
     // This could be an HTTP call to your logging endpoint
   }

@@ -15,7 +15,7 @@
           [attr.aria-label]="'刷新职位列表'"
         >
           <svg
-            *ngIf="!(loading$ | async)"
+            *ngIf="(loading$ | async) === false"
             width="20"
             height="20"
             viewBox="0 0 24 24"

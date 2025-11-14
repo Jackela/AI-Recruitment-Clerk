@@ -649,7 +649,7 @@ export class FieldMapperService {
     }
 
     // Check if it looks like a name (letters, spaces, common punctuation)
-    if (!/^[a-zA-Z\s\-\'\.]+$/.test(normalized)) {
+    if (!/^[a-zA-Z\s\-'.]+$/.test(normalized)) {
       return null;
     }
 
@@ -680,7 +680,7 @@ export class FieldMapperService {
     }
 
     // Remove all non-digit characters except + and ()
-    let normalized = phone.replace(/[^\d\+\(\)\-\s]/g, '');
+    let normalized = phone.replace(/[^\d+()\-\s]/g, '');
 
     // Remove extra whitespace
     normalized = normalized.trim().replace(/\s+/g, ' ');

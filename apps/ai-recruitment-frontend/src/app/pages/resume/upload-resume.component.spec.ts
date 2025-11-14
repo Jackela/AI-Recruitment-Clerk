@@ -2,6 +2,34 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UploadResumeComponent } from './upload-resume.component';
 import { GuestApiService } from '../../services/guest/guest-api.service';
 import { WebSocketService } from '../../services/websocket.service';
+import { of } from 'rxjs';
+
+class GuestApiServiceStub {
+  analyzeResume = jest.fn().mockReturnValue(of({ data: { analysisId: 'foo' } }));
+  getDemoAnalysis = jest.fn().mockReturnValue(of({}));
+}
+
+class WebSocketServiceStub {
+  onCompletion = jest.fn().mockReturnValue(of({}));
+  onError = jest.fn().mockReturnValue(of({}));
+  disconnect = jest.fn();
+}
+
+type MockFileList = {
+  length: number;
+  item: (index: number) => File | null;
+} & { [index: number]: File };
+
+const createFileChangeEvent = (file: File): Event => {
+  const mockFiles: MockFileList = {
+    0: file,
+    length: 1,
+    item: (index) => (index === 0 ? file : null),
+  };
+
+  const target = { files: mockFiles } as Pick<HTMLInputElement, 'files'>;
+  return { target } as Event;
+};
 
 describe('UploadResumeComponent', () => {
   let component: UploadResumeComponent;
@@ -11,21 +39,8 @@ describe('UploadResumeComponent', () => {
     await TestBed.configureTestingModule({
       imports: [UploadResumeComponent],
       providers: [
-        {
-          provide: GuestApiService,
-          useValue: {
-            analyzeResume: () => ({ subscribe: (_: any) => {} }),
-            getDemoAnalysis: () => ({ subscribe: (_: any) => {} }),
-          },
-        },
-        {
-          provide: WebSocketService,
-          useValue: {
-            onCompletion: () => ({ pipe: () => ({ subscribe: () => ({}) }) }),
-            onError: () => ({ pipe: () => ({ subscribe: () => ({}) }) }),
-            disconnect: () => {},
-          },
-        },
+        { provide: GuestApiService, useClass: GuestApiServiceStub },
+        { provide: WebSocketService, useClass: WebSocketServiceStub },
       ],
     }).compileComponents();
 
@@ -38,8 +53,8 @@ describe('UploadResumeComponent', () => {
     const input: HTMLInputElement | null =
       fixture.nativeElement.querySelector('input[type="file"]');
     expect(input).toBeTruthy();
-    expect(input!.accept).toContain('.pdf');
-    expect(input!.accept).toContain('.txt');
+    expect(input?.accept).toContain('.pdf');
+    expect(input?.accept).toContain('.txt');
   });
 
   it('should set file on onFileChange for .pdf and .txt', () => {
@@ -51,16 +66,12 @@ describe('UploadResumeComponent', () => {
     });
 
     // Simulate PDF selection
-    const evPdf = {
-      target: { files: [pdf] },
-    } as any as Event;
+    const evPdf = createFileChangeEvent(pdf);
     component.onFileChange(evPdf);
     expect(component.file?.name).toBe('resume.pdf');
 
     // Simulate TXT selection
-    const evTxt = {
-      target: { files: [txt] },
-    } as any as Event;
+    const evTxt = createFileChangeEvent(txt);
     component.onFileChange(evTxt);
     expect(component.file?.name).toBe('resume.txt');
   });

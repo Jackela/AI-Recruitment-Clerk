@@ -37,6 +37,7 @@ import {
   StructuredErrorLogger,
   StructuredLoggerFactory,
 } from './structured-logging';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Configuration interface for the global exception filter
@@ -66,17 +67,19 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
   private readonly logger: Logger;
   private readonly structuredLogger: StructuredErrorLogger;
   private readonly config: Required<GlobalExceptionFilterConfig>;
+  private readonly metricsEnabled: boolean;
 
   /**
    * Initializes a new instance of the Standardized Global Exception Filter.
    * @param config - The config.
    */
   constructor(config: GlobalExceptionFilterConfig) {
+    const runtimeConfig = getConfig();
     this.config = {
       enableCorrelation: true,
       enableStructuredLogging: true,
       enablePerformanceTracking: true,
-      includeStackTrace: process.env.NODE_ENV !== 'production',
+      includeStackTrace: !runtimeConfig.env.isProduction,
       enableErrorRecovery: true,
       customErrorMapping: {},
       ...config,
@@ -88,6 +91,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
     this.structuredLogger = StructuredLoggerFactory.getLogger(
       this.config.serviceName,
     );
+    this.metricsEnabled = runtimeConfig.monitoring.enableMetrics;
   }
 
   /**
@@ -374,7 +378,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
    */
   private sendMetrics(_metrics: Record<string, any>): void {
     // Implementation would depend on your monitoring infrastructure
-    if (process.env.METRICS_ENABLED === 'true') {
+    if (this.metricsEnabled) {
       // Example: Send to monitoring system
       // await this.metricsCollector.increment('error_count', 1, metrics);
     }

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -124,6 +124,7 @@ export interface AnalysisResultsResponse {
     analysisId: string;
     status: 'processing' | 'completed' | 'failed';
     progress: number;
+    remainingUsage?: number;
     results?: {
       personalInfo: PersonalInfo;
       skills: Skill[];
@@ -143,16 +144,8 @@ export interface AnalysisResultsResponse {
 })
 export class GuestApiService {
   private readonly baseUrl = '/api/guest';
-
-  /**
-   * Initializes a new instance of the Guest API Service.
-   * @param http - The http.
-   * @param deviceIdService - The device id service.
-   */
-  constructor(
-    private http: HttpClient,
-    private deviceIdService: DeviceIdService,
-  ) {}
+  private readonly http = inject(HttpClient);
+  private readonly deviceIdService = inject(DeviceIdService);
 
   /**
    * Get headers with device ID for guest API calls

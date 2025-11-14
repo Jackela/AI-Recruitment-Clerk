@@ -2,6 +2,7 @@ import { Module, DynamicModule, Global } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Connection } from 'mongoose';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 let mongod: MongoMemoryServer;
 
@@ -12,29 +13,32 @@ let mongod: MongoMemoryServer;
 @Global()
 @Module({})
 export class TestDatabaseModule {
-  /**
-   * Performs the for root operation.
-   * @param useDocker - The use docker.
-   * @returns A promise that resolves to DynamicModule.
-   */
-  static async forRoot(useDocker = false): Promise<DynamicModule> {
-    let mongoUri: string;
+  static async forRoot(options: {
+    useDocker?: boolean;
+    mongoUri?: string;
+  } = {}): Promise<DynamicModule> {
+    const runtimeConfig = getConfig({ forceReload: true });
+    const useDocker =
+      options.useDocker ?? runtimeConfig.testing?.useDocker ?? false;
+    let mongoUri = options.mongoUri;
 
-    if (useDocker) {
-      // Use Docker MongoDB for integration tests
-      mongoUri =
-        process.env.MONGODB_URI ||
-        'mongodb://testuser:testpass@localhost:27018/resume-parser-test?authSource=admin';
-    } else {
-      // Use in-memory MongoDB for unit tests
-      if (!mongod) {
-        mongod = await MongoMemoryServer.create({
-          instance: {
-            dbName: 'resume-parser-test',
-          },
-        });
+    if (!mongoUri) {
+      if (useDocker) {
+        mongoUri = runtimeConfig.database.url;
+      } else {
+        if (!mongod) {
+          mongod = await MongoMemoryServer.create({
+            instance: {
+              dbName: 'resume-parser-test',
+            },
+          });
+        }
+        mongoUri = mongod.getUri();
       }
-      mongoUri = mongod.getUri();
+    }
+
+    if (!mongoUri) {
+      throw new Error('Failed to resolve Mongo URI for tests');
     }
 
     return {

@@ -415,15 +415,16 @@ export class DateParser {
         case 'MM.YYYY':
           return new Date(parseInt(match[2]), parseInt(match[1]) - 1, 1);
 
-        case 'Month YYYY':
+        case 'Month YYYY': {
           const monthName = match[1].toLowerCase();
           const monthNum = this.MONTH_MAP[monthName];
           if (monthNum) {
             return new Date(parseInt(match[2]), monthNum - 1, 1);
           }
           break;
+        }
 
-        case 'Month DD, YYYY':
+        case 'Month DD, YYYY': {
           const fullMonthName = match[1].toLowerCase();
           const fullMonthNum = this.MONTH_MAP[fullMonthName];
           if (fullMonthNum) {
@@ -434,8 +435,9 @@ export class DateParser {
             );
           }
           break;
+        }
 
-        case 'Mon DD, YYYY':
+        case 'Mon DD, YYYY': {
           const abbrevMonth = match[1].toLowerCase();
           const abbrevMonthNum = this.MONTH_MAP[abbrevMonth];
           if (abbrevMonthNum) {
@@ -446,16 +448,19 @@ export class DateParser {
             );
           }
           break;
+        }
 
-        case 'Q# YYYY':
+        case 'Q# YYYY': {
           const quarter = parseInt(match[1]);
           const year = parseInt(match[2]);
           return new Date(year, (quarter - 1) * 3, 1);
+        }
 
-        case 'YYYY Q#':
+        case 'YYYY Q#': {
           const yearQ = parseInt(match[1]);
           const quarterQ = parseInt(match[2]);
           return new Date(yearQ, (quarterQ - 1) * 3, 1);
+        }
       }
     } catch (error) {
       // Parsing failed

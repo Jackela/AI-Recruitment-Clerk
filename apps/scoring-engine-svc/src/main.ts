@@ -2,16 +2,19 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { Logger } from '@nestjs/common';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 const logger = new Logger('ScoringEngineSvc');
 
 async function bootstrap() {
+  const appConfig = getConfig({ forceReload: true });
+
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {
       transport: Transport.NATS,
       options: {
-        servers: process.env.NATS_URL || 'nats://localhost:4222',
+        servers: appConfig.messaging.nats.url,
         // NATS JetStream configuration for reliable message delivery
         jetstream: true,
         name: 'scoring-engine-svc',

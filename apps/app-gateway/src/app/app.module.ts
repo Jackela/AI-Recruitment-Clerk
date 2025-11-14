@@ -49,8 +49,13 @@ import { AuditController } from '../ops/audit.controller';
 import { MetricsService } from '../ops/metrics.service';
 import { ObservabilityController } from '../ops/observability.controller';
 import { ImpactController } from '../ops/impact.controller';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
-const isTestEnv = process.env.NODE_ENV === 'test';
+const runtimeConfig = getConfig({
+  forceReload: true,
+});
+const isServeCheck = process.env.GATEWAY_SERVE_CHECK === 'true';
+const isTestEnv = runtimeConfig.env.isTest && !isServeCheck;
 
 @Module({
   imports: [
@@ -58,6 +63,7 @@ const isTestEnv = process.env.NODE_ENV === 'test';
       isGlobal: true,
       envFilePath: ['.env', '.env.local', '.env.production'],
       cache: true,
+      load: [() => ({ sharedConfig: runtimeConfig })],
     }),
     ThrottlerModule.forRootAsync({
       useFactory: () => ({
@@ -122,7 +128,7 @@ const isTestEnv = process.env.NODE_ENV === 'test';
       : [
           { provide: APP_GUARD, useClass: JwtAuthGuard },
         ]),
-    ...(process.env.NODE_ENV === 'test'
+    ...(isTestEnv
       ? [
           { provide: APP_FILTER, useClass: TestRateLimitBypassFilter },
           { provide: APP_INTERCEPTOR, useClass: ResponseTransformInterceptor },

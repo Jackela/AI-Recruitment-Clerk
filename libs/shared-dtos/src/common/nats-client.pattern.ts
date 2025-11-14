@@ -177,7 +177,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   async request<T>(
     subject: string,
     data: any,
-    timeout: number = 5000,
+    timeout = 5000,
   ): Promise<T> {
     if (!this.connection) {
       throw new Error('NATS connection not established');

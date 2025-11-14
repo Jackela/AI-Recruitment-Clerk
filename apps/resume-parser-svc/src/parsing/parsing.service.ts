@@ -14,6 +14,7 @@ import {
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import { createHash } from 'crypto';
 import pdfParse from 'pdf-parse-fork';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Provides parsing functionality.
@@ -21,6 +22,7 @@ import pdfParse from 'pdf-parse-fork';
 @Injectable()
 export class ParsingService {
   private readonly logger = new Logger(ParsingService.name);
+  private readonly config = getConfig();
   private readonly processingFiles = new Map<
     string,
     { timestamp: number; hash: string; attempts: number }
@@ -49,7 +51,7 @@ export class ParsingService {
     private readonly natsService: ResumeParserNatsService,
   ) {
     // Periodic cleanup of expired processing records (skip in test to avoid open handles)
-    if (process.env.NODE_ENV !== 'test') {
+    if (!this.config.env.isTest) {
       setInterval(() => this.cleanupExpiredProcessing(), 5 * 60 * 1000);
     }
   }
@@ -324,7 +326,7 @@ export class ParsingService {
         securityMetadata: {
           encrypted: true,
           encryptionVersion: '1.0',
-          processingNode: process.env.NODE_NAME || 'unknown',
+          processingNode: this.config.env.nodeName || 'unknown',
         },
       };
 
@@ -476,7 +478,7 @@ export class ParsingService {
         securityMetadata: {
           encrypted: true,
           encryptionVersion: '1.0',
-          processingNode: process.env.NODE_NAME || 'unknown',
+          processingNode: this.config.env.nodeName || 'unknown',
           dataClassification: 'sensitive-pii',
         },
       };

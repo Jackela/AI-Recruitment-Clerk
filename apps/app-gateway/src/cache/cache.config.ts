@@ -4,8 +4,8 @@
  */
 
 import { CacheModuleAsyncOptions } from '@nestjs/cache-manager';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 const logger = new Logger('CacheConfig');
 
@@ -36,19 +36,17 @@ async function testRedisConnection(redisUrl: string): Promise<boolean> {
 
 export const cacheConfig: CacheModuleAsyncOptions = {
   isGlobal: true,
-  imports: [ConfigModule],
-  useFactory: async (configService: ConfigService) => {
-    // Check for Redis configuration - Railway provides REDISHOST/REDISPORT (no underscore)
-    const redisUrl = configService.get('REDIS_URL');
-    const redisPrivateUrl = configService.get('REDIS_PRIVATE_URL');
-    const redisHost =
-      configService.get('REDISHOST') || configService.get('REDIS_HOST');
-    const redisPort =
-      configService.get('REDISPORT') || configService.get('REDIS_PORT');
-    const redisPassword = configService.get('REDIS_PASSWORD');
-    const useRedis = configService.get('USE_REDIS_CACHE', 'true') === 'true';
-    const disableRedis = configService.get('DISABLE_REDIS', 'false') === 'true';
-    const isProduction = configService.get('NODE_ENV') === 'production';
+  useFactory: async () => {
+    const { cache, env } = getConfig();
+    const { redis } = cache;
+    const isProduction = env.isProduction;
+    const useRedis = redis.enabled;
+    const disableRedis = redis.disabled;
+    const redisUrl = redis.url;
+    const redisPrivateUrl = redis.privateUrl;
+    const redisHost = redis.host;
+    const redisPort = redis.port;
+    const redisPassword = redis.password;
 
     // 调试Redis配置信息
     logger.log('🔍 Redis配置调试信息:');
@@ -64,21 +62,11 @@ export const cacheConfig: CacheModuleAsyncOptions = {
     logger.log(`- USE_REDIS_CACHE: ${useRedis}`);
     logger.log(`- DISABLE_REDIS: ${disableRedis}`);
 
-    // 基础内存缓存配置 - 安全的类型转换
-    const cacheTtl = Math.max(
-      0,
-      parseInt(configService.get('CACHE_TTL', '300')) || 300,
-    );
-    const cacheMaxItems = Math.max(
-      1,
-      parseInt(configService.get('CACHE_MAX_ITEMS', '1000')) || 1000,
-    );
-
-    logger.log(`📋 缓存配置: TTL=${cacheTtl}s, Max=${cacheMaxItems}项`);
+    logger.log(`📋 缓存配置: TTL=${cache.ttlSeconds}s, Max=${cache.maxItems}项`);
 
     const memoryConfig = {
-      ttl: cacheTtl * 1000, // 转换为毫秒
-      max: cacheMaxItems, // 确保是正整数
+      ttl: cache.ttlSeconds * 1000, // 转换为毫秒
+      max: cache.maxItems, // 确保是正整数
       isGlobal: true,
     };
 
@@ -161,8 +149,8 @@ export const cacheConfig: CacheModuleAsyncOptions = {
       const redisConfig = {
         store: redisStore,
         url: connectionUrl,
-        ttl: cacheTtl * 1000,
-        max: cacheMaxItems,
+        ttl: cache.ttlSeconds * 1000,
+        max: cache.maxItems,
         isGlobal: true,
         keyPrefix: 'ai-recruitment:',
         serialize: JSON.stringify,
@@ -189,5 +177,4 @@ export const cacheConfig: CacheModuleAsyncOptions = {
       return memoryConfig;
     }
   },
-  inject: [ConfigService],
 };

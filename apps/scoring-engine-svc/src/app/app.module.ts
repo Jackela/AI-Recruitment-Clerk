@@ -20,17 +20,29 @@ import {
   ErrorInterceptorFactory,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import { SecureConfigValidator } from '@app/shared-dtos';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Configures the app module.
  */
+const runtimeConfig = getConfig({ forceReload: true });
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      cache: true,
+      envFilePath: ['.env', '.env.local', '.env.production'],
+      load: [() => ({ sharedConfig: runtimeConfig })],
     }),
     NatsClientModule.forRoot({
       serviceName: 'scoring-engine-svc',
+      connectionOptions: {
+        url: runtimeConfig.messaging.nats.url,
+        timeout: 5000,
+        maxReconnectAttempts: 10,
+        reconnectTimeWait: 2000,
+      },
     }),
   ],
   controllers: [AppController, ScoringEventsController, HealthController],
@@ -50,14 +62,12 @@ import { SecureConfigValidator } from '@app/shared-dtos';
     {
       provide: GeminiClient,
       useFactory: () => {
-        // 🔒 SECURITY: Validate configuration before client creation
-        SecureConfigValidator.validateServiceConfig('GeminiClient', [
-          'GEMINI_API_KEY',
-        ]);
-
+        const apiKey =
+          runtimeConfig.integrations.gemini.apiKey ??
+          SecureConfigValidator.requireEnv('GEMINI_API_KEY');
         return new GeminiClient({
-          apiKey: SecureConfigValidator.requireEnv('GEMINI_API_KEY'),
-          model: 'gemini-1.5-flash',
+          apiKey,
+          model: runtimeConfig.integrations.gemini.model ?? 'gemini-1.5-flash',
           temperature: 0.3,
           maxOutputTokens: 8192,
         });

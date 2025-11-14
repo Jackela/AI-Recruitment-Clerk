@@ -15,7 +15,6 @@ import {
   SwipeAction,
   SwipeEvent,
 } from './mobile-swipe.component';
-import { TouchGestureService } from '../../services/mobile/touch-gesture.service';
 
 /**
  * Defines the shape of the candidate result.
@@ -60,6 +59,13 @@ export interface ResultsFilter {
   location: string[];
   status: string[];
 }
+
+type QuickActionItem = {
+  id: string;
+  label: string;
+  icon: string;
+  color: 'primary' | 'success' | 'danger';
+};
 
 /**
  * Represents the mobile results component.
@@ -133,9 +139,10 @@ export interface ResultsFilter {
         <div class="filter-sections">
           <!-- Score Range -->
           <div class="filter-section">
-            <label class="filter-label">Minimum Score</label>
+            <label class="filter-label" for="filter-score-min">Minimum Score</label>
             <div class="score-filter">
               <input
+                id="filter-score-min"
                 type="range"
                 min="0"
                 max="100"
@@ -149,13 +156,19 @@ export interface ResultsFilter {
 
           <!-- Status Filter -->
           <div class="filter-section">
-            <label class="filter-label">Status</label>
+            <p class="filter-label" id="filter-status-label">Status</p>
             <div class="filter-chips">
               <button
                 *ngFor="let status of availableStatuses"
                 class="filter-chip"
                 [class.active]="filters.status.includes(status)"
                 (click)="toggleStatusFilter(status)"
+                role="switch"
+                [attr.aria-checked]="filters.status.includes(status)"
+                tabindex="0"
+                (keydown.enter)="toggleStatusFilter(status)"
+                (keydown.space)="toggleStatusFilter(status)"
+                [attr.aria-labelledby]="'filter-status-label'"
               >
                 {{ status | titlecase }}
               </button>
@@ -164,13 +177,19 @@ export interface ResultsFilter {
 
           <!-- Experience Filter -->
           <div class="filter-section">
-            <label class="filter-label">Experience Level</label>
+            <p class="filter-label" id="filter-exp-label">Experience Level</p>
             <div class="filter-chips">
               <button
                 *ngFor="let exp of availableExperience"
                 class="filter-chip"
                 [class.active]="filters.experience.includes(exp)"
                 (click)="toggleExperienceFilter(exp)"
+                role="switch"
+                [attr.aria-checked]="filters.experience.includes(exp)"
+                tabindex="0"
+                (keydown.enter)="toggleExperienceFilter(exp)"
+                (keydown.space)="toggleExperienceFilter(exp)"
+                [attr.aria-labelledby]="'filter-exp-label'"
               >
                 {{ exp }}
               </button>
@@ -238,7 +257,7 @@ export interface ResultsFilter {
           *ngFor="let candidate of filteredResults; trackBy: trackByCandidate"
           class="result-item-wrapper"
         >
-          <app-mobile-swipe
+          <arc-mobile-swipe
             [actions]="getSwipeActions(candidate)"
             [item]="candidate"
             (swipeAction)="onSwipeAction($event)"
@@ -249,6 +268,10 @@ export interface ResultsFilter {
               [class]="'match-' + candidate.match"
               (click)="onCandidateClick(candidate)"
               (longpress)="onCandidateLongPress(candidate)"
+              role="button"
+              tabindex="0"
+              (keydown.enter)="onCandidateKeydown($event, candidate)"
+              (keydown.space)="onCandidateKeydown($event, candidate)"
             >
               <!-- Candidate Avatar -->
               <div class="candidate-avatar">
@@ -357,7 +380,7 @@ export interface ResultsFilter {
                 </button>
               </div>
             </div>
-          </app-mobile-swipe>
+          </arc-mobile-swipe>
         </div>
       </div>
 
@@ -1148,7 +1171,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
   }
 
   // Quick actions menu
-  quickActions = [
+  quickActions: QuickActionItem[] = [
     {
       id: 'view',
       label: 'View Details',
@@ -1168,16 +1191,6 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
       color: 'primary',
     },
   ];
-
-  /**
-   * Initializes a new instance of the Mobile Results Component.
-   * @param _touchGesture - The touch gesture.
-   */
-  constructor(private readonly _touchGesture: TouchGestureService) {
-    // TouchGesture service will be used for future gesture implementations
-    // Prevent unused warning
-    void this._touchGesture;
-  }
 
   /**
    * Performs the ng on init operation.
@@ -1458,9 +1471,10 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * @returns The result of the operation.
    */
   onSwipeAction(event: SwipeEvent) {
+    const candidate = event.item as CandidateResult;
     this.candidateAction.emit({
       action: event.action.id,
-      candidate: event.item,
+      candidate,
     });
   }
 
@@ -1471,7 +1485,11 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * @param event - The event.
    * @returns The result of the operation.
    */
-  onQuickAction(action: any, candidate: CandidateResult, event: Event) {
+  onQuickAction(
+    action: QuickActionItem,
+    candidate: CandidateResult,
+    event: Event,
+  ) {
     event.stopPropagation();
     this.candidateAction.emit({
       action: action.id,
@@ -1489,5 +1507,14 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    */
   trackByCandidate(_index: number, candidate: CandidateResult): string {
     return candidate.id;
+  }
+
+  onCandidateKeydown(event: KeyboardEvent, candidate: CandidateResult): void {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    event.preventDefault();
+    this.onCandidateClick(candidate);
   }
 }

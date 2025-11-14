@@ -2,6 +2,38 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { JobState } from './job.state';
 import { JobListItem, Job } from './job.model';
 
+export interface JobStatistics {
+  total: number;
+  active: number;
+  draft: number;
+  closed: number;
+  activePercentage: number;
+  totalJobs: number;
+  activeJobs: number;
+  draftJobs: number;
+  closedJobs: number;
+  processingJobs: number;
+  totalApplicants: number;
+  avgTimeToHire: number;
+}
+
+export type JobProgressInfo = JobState['jobProgress'][string] | null;
+
+export type JobWithProgress = JobListItem & { progress: JobProgressInfo };
+
+export interface JobManagementStateWithWebSocket {
+  jobs: JobListItem[];
+  selectedJob: Job | null;
+  loading: boolean;
+  creating: boolean;
+  error: string | null;
+  canCreateJob: boolean;
+  hasJobs: boolean;
+  webSocketConnected: boolean;
+  webSocketStatus: JobState['webSocketStatus'];
+  jobProgress: JobState['jobProgress'];
+}
+
 // Feature selector for the job state
 export const selectJobState = createFeatureSelector<JobState>('jobs');
 
@@ -78,7 +110,7 @@ export const selectJobsWithError = createSelector(
 // Complex derived selectors
 export const selectJobsStatistics = createSelector(
   selectAllJobs,
-  (jobs: JobListItem[]) => {
+  (jobs: JobListItem[]): JobStatistics => {
     const total = jobs.length;
     const active = jobs.filter((job) => job.status === 'active').length;
     const draft = jobs.filter((job) => job.status === 'draft').length;
@@ -152,13 +184,13 @@ export const selectJobProgress = createSelector(
 export const selectJobProgressById = (jobId: string) =>
   createSelector(
     selectJobProgress,
-    (jobProgress) => jobProgress[jobId] || null,
+    (jobProgress): JobProgressInfo => jobProgress[jobId] || null,
   );
 
 // Enhanced job management state with WebSocket info
 export const selectJobManagementStateWithWebSocket = createSelector(
   selectJobState,
-  (state: JobState) => ({
+  (state: JobState): JobManagementStateWithWebSocket => ({
     jobs: state.jobs,
     selectedJob: state.selectedJob,
     loading: state.loading,
@@ -176,7 +208,7 @@ export const selectJobManagementStateWithWebSocket = createSelector(
 export const selectJobsWithProgress = createSelector(
   selectAllJobs,
   selectJobProgress,
-  (jobs, jobProgress) =>
+  (jobs: JobListItem[], jobProgress: JobState['jobProgress']): JobWithProgress[] =>
     jobs.map((job) => ({
       ...job,
       progress: jobProgress[job.id] || null,

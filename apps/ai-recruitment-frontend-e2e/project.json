@@ -27,5 +27,8 @@
         "forwardAllArgs": true
       }
     }
-  }
+  },
+  "tags": [
+    "owner:platform-governance"
+  ]
 }

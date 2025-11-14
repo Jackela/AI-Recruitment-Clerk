@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, signal, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -9,6 +9,12 @@ import {
   RadarChartData,
   SkillTagStyle,
 } from '../../interfaces/detailed-analysis.interface';
+
+type DetailedResultError = {
+  status?: number;
+  message?: string;
+  name?: string;
+};
 
 /**
  * Represents the detailed results component.
@@ -304,18 +310,9 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
   // Cleanup
   private destroy$ = new Subject<void>();
   private lastLoadedSessionId = '';
-
-  /**
-   * Initializes a new instance of the Detailed Results Component.
-   * @param route - The route.
-   * @param router - The router.
-   * @param guestApi - The guest api.
-   */
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private guestApi: GuestApiService,
-  ) {}
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly guestApi = inject(GuestApiService);
 
   /**
    * Performs the ng on init operation.
@@ -380,17 +377,19 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private handleLoadError(error: any): void {
+  private handleLoadError(error: unknown): void {
     this.isLoading.set(false);
     this.hasError.set(true);
 
-    if (error?.name === 'TimeoutError') {
+    const typedError = error as DetailedResultError;
+
+    if (typedError?.name === 'TimeoutError') {
       this.errorMessage.set('请求超时，请检查网络连接后重试');
-    } else if (error?.status === 404) {
+    } else if (typedError?.status === 404) {
       this.errorMessage.set('未找到分析结果，请检查会话ID是否正确');
-    } else if (error?.status === 500) {
+    } else if (typedError?.status === 500) {
       this.errorMessage.set('服务器错误，请稍后重试');
-    } else if (error?.message?.includes('Network')) {
+    } else if (typedError?.message?.includes('Network')) {
       this.errorMessage.set('网络连接失败，请检查网络设置');
     } else {
       this.errorMessage.set('加载失败，请稍后重试');

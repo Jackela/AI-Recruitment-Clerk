@@ -23,7 +23,7 @@ describe('Resume Reducer', () => {
       fileName: 'resume2.pdf',
       status: 'processing',
       uploadedAt: new Date('2024-01-02'),
-      matchScore: undefined as any,
+      matchScore: undefined,
     },
   ];
 
@@ -50,7 +50,7 @@ describe('Resume Reducer', () => {
 
   describe('Initial State', () => {
     it('should return the initial state', () => {
-      const result = resumeReducer(undefined, { type: 'Unknown' } as any);
+      const result = resumeReducer(undefined, { type: 'Unknown' } as Action);
       expect(result).toBe(initialResumeState);
     });
 

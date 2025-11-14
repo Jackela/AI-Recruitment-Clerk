@@ -1,4 +1,11 @@
-import { Component, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  signal,
+  computed,
+  OnInit,
+  OnDestroy,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationGuideService } from '../../../services/navigation/navigation-guide.service';
 // import { GuideStep } from '../../../services/navigation/navigation-guide.service'; // Reserved for future use
@@ -30,7 +37,15 @@ interface HighlightPosition extends Position {
   template: `
     <div class="guide-overlay-container" *ngIf="isVisible()">
       <!-- Backdrop -->
-      <div class="guide-backdrop" (click)="skipGuide()"></div>
+      <div
+        class="guide-backdrop"
+        role="button"
+        tabindex="0"
+        aria-label="跳过引导"
+        (click)="skipGuide()"
+        (keydown.enter)="skipGuide()"
+        (keydown.space)="skipGuide()"
+      ></div>
 
       <!-- Guide Tooltip -->
       <div
@@ -111,6 +126,7 @@ interface HighlightPosition extends Position {
   styleUrls: ['./guide-overlay.component.css'],
 })
 export class GuideOverlayComponent implements OnInit, OnDestroy {
+  private readonly guideService = inject(NavigationGuideService);
   // Service state
   isVisible = computed(() => this.guideService.isGuideActive());
   currentStep = computed(() => this.guideService.currentStep());
@@ -139,9 +155,8 @@ export class GuideOverlayComponent implements OnInit, OnDestroy {
 
   /**
    * Initializes a new instance of the Guide Overlay Component.
-   * @param guideService - The guide service.
+   * The guide service is injected for usage throughout the component.
    */
-  constructor(private guideService: NavigationGuideService) {}
 
   /**
    * Performs the ng on init operation.

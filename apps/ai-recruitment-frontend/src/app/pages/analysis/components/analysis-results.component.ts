@@ -20,7 +20,7 @@ export interface AnalysisResult {
  */
 export interface ResultAction {
   type: 'view-detailed' | 'download-report' | 'start-new';
-  payload?: any;
+  payload?: unknown;
 }
 
 /**
