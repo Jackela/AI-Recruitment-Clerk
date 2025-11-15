@@ -10,6 +10,7 @@ import {
   OnModuleDestroy,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import type { RedisClientType } from 'redis';
 
 /**
  * Provides redis connection functionality.
@@ -17,7 +18,7 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(RedisConnectionService.name);
-  private redisClient: any = null;
+  private redisClient: RedisClientType | null = null;
   private connectionState:
     | 'disconnected'
     | 'connecting'

@@ -58,7 +58,9 @@ describe('CacheService.wrapSemantic', () => {
     );
 
     expect(result).toMatchObject({ foo: 'bar' });
-    expect((result as any).semanticSimilarity).toBeCloseTo(0.95);
+    expect((result as { semanticSimilarity: number }).semanticSimilarity).toBeCloseTo(
+      0.95,
+    );
     expect(fallback).not.toHaveBeenCalled();
     expect(vectorStoreService.addVector).not.toHaveBeenCalled();
   });
@@ -256,8 +258,9 @@ describe('CacheService.wrapSemantic', () => {
         specific: 'data',
         semanticSimilarity: expect.any(Number),
       });
-      expect((result as any).semanticSimilarity).toBeCloseTo(0.92, 2);
-      expect((result as any).semanticSimilarity).toBeGreaterThanOrEqual(options.similarityThreshold);
+      const similarity = (result as { semanticSimilarity: number }).semanticSimilarity;
+      expect(similarity).toBeCloseTo(0.92, 2);
+      expect(similarity).toBeGreaterThanOrEqual(options.similarityThreshold);
     });
 
     it('should store complete result structure with metadata', async () => {

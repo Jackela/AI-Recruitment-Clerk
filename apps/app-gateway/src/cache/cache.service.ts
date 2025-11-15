@@ -10,6 +10,10 @@ import * as crypto from 'crypto';
 import { EmbeddingService } from '../embedding/embedding.service';
 import { VectorStoreService } from './vector-store.service';
 
+type RedisLikeClient = {
+  on: (event: string, listener: (...args: unknown[]) => void) => void;
+};
+
 /**
  * Defines the shape of the cache options.
  */
@@ -80,8 +84,14 @@ export class CacheService {
   private setupErrorHandling(): void {
     try {
       // 如果是Redis缓存，设置错误处理器
-      if (this.cacheManager.store && (this.cacheManager.store as any).client) {
-        const redisClient = (this.cacheManager.store as any).client;
+      if (this.cacheManager.store) {
+        const storeWithClient = this.cacheManager.store as {
+          client?: RedisLikeClient;
+        };
+        const redisClient = storeWithClient.client;
+        if (!redisClient) {
+          return;
+        }
 
         redisClient.on('error', (err: Error) => {
           this.logger.warn(`Redis连接错误: ${err.message}`);
@@ -105,7 +115,8 @@ export class CacheService {
         });
       }
     } catch (error) {
-      this.logger.warn('缓存错误处理器设置失败:', error.message);
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.warn('缓存错误处理器设置失败:', message);
     }
   }
 
@@ -379,9 +390,9 @@ export class CacheService {
   /**
    * 职位查询缓存键
    */
-  getJobQueryKey(query: any): string {
+  getJobQueryKey(query: Record<string, unknown>): string {
     // 确保对象属性顺序一致，避免因属性顺序不同导致JSON字符串不同
-    const orderedQuery = {};
+    const orderedQuery: Record<string, unknown> = {};
     Object.keys(query)
       .sort()
       .forEach((key) => {
@@ -460,8 +471,13 @@ export class CacheService {
 
     try {
       // 检测缓存类型
-      if (this.cacheManager.store && (this.cacheManager.store as any).client) {
-        cacheType = 'redis';
+      if (this.cacheManager.store) {
+        const storeWithClient = this.cacheManager.store as {
+          client?: RedisLikeClient;
+        };
+        if (storeWithClient.client) {
+          cacheType = 'redis';
+        }
       }
 
       // 测试缓存连接（带超时）
@@ -485,7 +501,8 @@ export class CacheService {
         metrics: this.getMetrics(),
       };
     } catch (error) {
-      this.logger.warn(`Cache health check failed: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`Cache health check failed: ${message}`);
 
       // 尝试清理测试键
       try {
@@ -502,7 +519,7 @@ export class CacheService {
         connected: false,
         type: cacheType,
         metrics: this.getMetrics(),
-        details: error.message,
+        details: message,
       };
     }
   }
