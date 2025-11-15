@@ -2,6 +2,24 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Twilio } from 'twilio';
 
+interface SmsSecurityAlertDetails {
+  timestamp?: string;
+}
+
+type DeliveryStatusResult = {
+  status: string;
+  errorCode?: number | null;
+  errorMessage?: string | null;
+  dateCreated?: Date | null;
+  dateSent?: Date | null;
+  dateUpdated?: Date | null;
+  message?: string;
+};
+
+type TwilioError = Error & {
+  code?: number;
+};
+
 /**
  * Provides sms functionality.
  */
@@ -75,13 +93,13 @@ export class SmsService {
     } catch (error) {
       this.logger.error(`Failed to send SMS to ${phoneNumber}:`, error);
 
-      // Check for specific Twilio errors
-      if (error && typeof error === 'object' && 'code' in error) {
-        if (error.code === 21211) {
+      const twilioError = error as TwilioError;
+      if (typeof twilioError.code === 'number') {
+        if (twilioError.code === 21211) {
           throw new Error('Invalid phone number');
-        } else if (error.code === 21608) {
+        } else if (twilioError.code === 21608) {
           throw new Error('Phone number is not verified for trial account');
-        } else if (error.code === 20003) {
+        } else if (twilioError.code === 20003) {
           throw new Error('Authentication failed - check Twilio credentials');
         }
       }
@@ -100,12 +118,12 @@ export class SmsService {
   async sendSecurityAlert(
     phoneNumber: string,
     event: string,
-    details: any,
+    details: SmsSecurityAlertDetails,
   ): Promise<void> {
     const issuer =
       this.configService.get<string>('MFA_ISSUER_NAME') ||
       'AI-Recruitment-Clerk';
-    const message = `${issuer} Security Alert: ${event}. Time: ${details.timestamp}. If this was not you, contact support immediately.`;
+    const message = `${issuer} Security Alert: ${event}. Time: ${details.timestamp ?? 'N/A'}. If this was not you, contact support immediately.`;
 
     try {
       await this.sendSms(phoneNumber, message);
@@ -145,7 +163,7 @@ export class SmsService {
    * @param messageSid - The message sid.
    * @returns A promise that resolves to any.
    */
-  async getDeliveryStatus(messageSid: string): Promise<any> {
+  async getDeliveryStatus(messageSid: string): Promise<DeliveryStatusResult> {
     if (!this.twilioClient) {
       return { status: 'not_configured', message: 'Twilio not configured' };
     }

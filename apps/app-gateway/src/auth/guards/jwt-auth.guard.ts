@@ -20,7 +20,7 @@ import {
 // import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { createHash } from 'crypto';
 import { getConfig } from '@ai-recruitment-clerk/configuration';
 
@@ -152,14 +152,8 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     // Add security headers
-    const response = context.switchToHttp().getResponse();
-    if (user?.id) response.setHeader('X-Auth-User-Id', String(user.id));
-    if (user?.role) {
-      response.setHeader('X-Auth-Role', this.normalizeRole(user) ?? '');
-    }
-    if (user?.organizationId) {
-      response.setHeader('X-Auth-Organization', String(user.organizationId));
-    }
+    const response = context.switchToHttp().getResponse<Response>();
+    this.setAuthenticatedHeaders(response, user);
 
     return user;
   }

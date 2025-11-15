@@ -115,7 +115,6 @@ describe('JwtAuthGuard', () => {
     it('enforces rate limiting when enabled', async () => {
       const originalEnv = process.env.NODE_ENV;
       const originalForce = process.env.FORCE_RATE_LIMIT;
-      const originalSetInterval = global.setInterval;
       const globalContext = globalThis as typeof globalThis & {
         setInterval: typeof setInterval;
       };
@@ -294,7 +293,7 @@ describe('JwtAuthGuard', () => {
         headers: { authorization: '   ' },
       });
 
-      const result = await guard.canActivate(ctx);
+      await guard.canActivate(ctx);
       const request = ctx.switchToHttp().getRequest();
 
       expect(request.user.id).toBe('guest');

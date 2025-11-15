@@ -116,7 +116,10 @@ export class MfaService {
           secretKey = secret.base32;
 
           // Generate QR code
-          qrCode = await QRCode.toDataURL(secret.otpauth_url!);
+          if (!secret.otpauth_url) {
+            throw new BadRequestException('Unable to generate TOTP QR code');
+          }
+          qrCode = await QRCode.toDataURL(secret.otpauth_url);
           break;
         }
 
@@ -173,32 +176,49 @@ export class MfaService {
     }
   }
 
-  private normalizeMfaSettings(rawSettings: any): MfaSettings {
+  private normalizeMfaSettings(
+    rawSettings?: Partial<MfaSettings> | null,
+  ): MfaSettings {
     if (!rawSettings) {
       return {
         enabled: false,
-        methods: [] as MfaMethod[],
+        methods: [],
         backupCodes: [],
         trustedDevices: [],
         failedAttempts: 0,
       };
     }
 
+    const normalizedMethods = Array.isArray(rawSettings.methods)
+      ? rawSettings.methods.map((method) => {
+          switch (method) {
+            case MfaMethod.SMS:
+            case MfaMethod.EMAIL:
+            case MfaMethod.TOTP:
+              return method;
+            case 'sms':
+              return MfaMethod.SMS;
+            case 'email':
+              return MfaMethod.EMAIL;
+            case 'totp':
+              return MfaMethod.TOTP;
+            default:
+              return method as MfaMethod;
+          }
+        })
+      : [];
+
     return {
-      ...rawSettings,
-      methods: (rawSettings.methods || []).map((method: string) => {
-        // Convert string to MfaMethod enum
-        switch (method) {
-          case 'sms':
-            return MfaMethod.SMS;
-          case 'email':
-            return MfaMethod.EMAIL;
-          case 'totp':
-            return MfaMethod.TOTP;
-          default:
-            return method as MfaMethod;
-        }
-      }),
+      enabled: rawSettings.enabled ?? false,
+      methods: normalizedMethods,
+      totpSecret: rawSettings.totpSecret,
+      phoneNumber: rawSettings.phoneNumber,
+      email: rawSettings.email,
+      backupCodes: rawSettings.backupCodes ?? [],
+      trustedDevices: rawSettings.trustedDevices ?? [],
+      lastUsedAt: rawSettings.lastUsedAt,
+      failedAttempts: rawSettings.failedAttempts ?? 0,
+      lockedUntil: rawSettings.lockedUntil,
     };
   }
 
@@ -431,7 +451,10 @@ export class MfaService {
     );
 
     // Update user with new backup codes
-    const mfaSettings = user.mfaSettings!;
+    if (!user.mfaSettings) {
+      throw new UnauthorizedException('MFA is not configured for this user');
+    }
+    const mfaSettings = this.normalizeMfaSettings(user.mfaSettings);
     mfaSettings.backupCodes = hashedBackupCodes;
 
     await this.userModel.findByIdAndUpdate(userId, { mfaSettings });
