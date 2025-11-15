@@ -196,10 +196,10 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
    * 获取连接状态
    */
   getConnectionStatus(): {
-    state: string;
+    state: typeof this.connectionState;
     connected: boolean;
     attempts: number;
-    client: any;
+    client: RedisClientType | null;
   } {
     return {
       state: this.connectionState,
@@ -266,7 +266,7 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
   /**
    * 获取Redis客户端（如果可用）
    */
-  getRedisClient(): any {
+  getRedisClient(): RedisClientType | null {
     if (this.connectionState === 'connected') {
       return this.redisClient;
     }
