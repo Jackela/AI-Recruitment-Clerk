@@ -10,6 +10,19 @@ import {
 import { Response } from 'express';
 import { Public } from '../auth/decorators/public.decorator';
 
+type AnalyticsEventPayload = Record<string, unknown>;
+type MetricPayload = Record<string, unknown>;
+type ReportRequest = {
+  reportType?: string;
+};
+type DashboardSummary = {
+  summary: {
+    events: number;
+    metrics: number;
+  };
+  charts: unknown[];
+};
+
 function id(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
 }
@@ -28,7 +41,7 @@ export class AnalyticsController {
   @Public()
   @Post('events')
   @HttpCode(HttpStatus.NO_CONTENT)
-  event(@Body() _body: any, @Res() res: Response) {
+  event(@Body() _body: AnalyticsEventPayload, @Res() res: Response) {
     // Bypass global interceptors for maximum performance in tests
     return res.status(HttpStatus.NO_CONTENT).send();
   }
@@ -41,7 +54,7 @@ export class AnalyticsController {
   @Public()
   @Post('metrics/performance')
   @HttpCode(HttpStatus.CREATED)
-  perf(@Body() _body: any) {
+  perf(@Body() _body: MetricPayload) {
     return { metricId: id('met') };
   }
 
@@ -53,7 +66,7 @@ export class AnalyticsController {
   @Public()
   @Post('metrics/business')
   @HttpCode(HttpStatus.CREATED)
-  biz(@Body() _body: any) {
+  biz(@Body() _body: MetricPayload) {
     return { metricId: id('met') };
   }
 
@@ -65,7 +78,7 @@ export class AnalyticsController {
   @Public()
   @Post('reports/generate')
   @HttpCode(HttpStatus.CREATED)
-  report(@Body() body: any) {
+  report(@Body() body: ReportRequest) {
     return {
       reportId: id('rep'),
       reportType: body?.reportType || 'comprehensive',
@@ -96,10 +109,10 @@ export class AnalyticsController {
   @Public()
   @Get('dashboard')
   @HttpCode(HttpStatus.OK)
-  dashboard() {
+  dashboard(): DashboardSummary {
     return {
       summary: { events: 10, metrics: 5 },
       charts: [],
-    } as any;
+    };
   }
 }

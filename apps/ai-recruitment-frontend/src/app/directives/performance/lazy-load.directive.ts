@@ -32,7 +32,13 @@ export interface LazyLoadConfig {
   standalone: true,
 })
 export class LazyLoadDirective implements OnInit, OnDestroy {
-  @Input('arcLazyLoad') imageSrc!: string;
+  private imageSrcValue = '';
+  @Input('arcLazyLoad') set imageSrc(source: string | null | undefined) {
+    this.imageSrcValue = source ?? '';
+  }
+  private get imageSrc(): string {
+    return this.imageSrcValue;
+  }
   @Input() lazyLoadConfig: LazyLoadConfig = {};
   @Output() lazyLoaded = new EventEmitter<void>();
   @Output() lazyError = new EventEmitter<Error>();
@@ -200,6 +206,10 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
   }
 
   private loadImage(): void {
+    if (!this.imageSrc) {
+      return;
+    }
+
     const element = this.host.nativeElement;
     const config = this.getConfig();
 
@@ -312,6 +322,10 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
   }
 
   private preloadImage(): void {
+    if (!this.imageSrc) {
+      return;
+    }
+
     const link = this.renderer.createElement('link');
     this.renderer.setAttribute(link, 'rel', 'preload');
     this.renderer.setAttribute(link, 'as', 'image');

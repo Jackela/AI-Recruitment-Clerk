@@ -7,7 +7,6 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { HttpStatus } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UserService } from './user.service';
@@ -18,7 +17,6 @@ import {
   AuthResponseDto,
   UserDto,
   UserRole,
-  Permission,
   AuthenticatedRequest,
 } from '@ai-recruitment-clerk/user-management-domain';
 

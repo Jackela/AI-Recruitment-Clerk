@@ -2,14 +2,11 @@ import {
   Controller,
   Get,
   Post,
-  
   Body,
-  
   Query,
   UseGuards,
   HttpCode,
   HttpStatus,
-  
   BadRequestException,
   ServiceUnavailableException,
   Res,
@@ -24,6 +21,77 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { getConfig } from '@ai-recruitment-clerk/configuration';
+
+type ServiceSummary = {
+  name: string;
+  status: string;
+  uptime: number;
+  memory: {
+    rss: number;
+    heapUsed: number;
+    heapTotal: number;
+  };
+};
+
+type SystemHealthData = {
+  status: string;
+  timestamp: string;
+  services: ServiceSummary[];
+  uptime: number;
+  version: string;
+  environment: string;
+  memory: {
+    rss: string;
+    heapUsed: string;
+    heapTotal: string;
+  };
+};
+
+type SystemHealthResponse = {
+  success: boolean;
+  data: SystemHealthData;
+};
+
+type SystemStatusData = {
+  status: 'operational' | 'degraded' | 'maintenance' | 'outage';
+  version: string;
+  environment: string;
+  uptime: number;
+  services: {
+    total: number;
+    healthy: number;
+    degraded: number;
+    unhealthy: number;
+  };
+  lastUpdated: string;
+};
+
+type SystemStatusResponse = {
+  success: boolean;
+  data: SystemStatusData;
+};
+
+type RateLimitState = {
+  bucket: number;
+  count: number;
+};
+
+type RateLimitedGlobal = typeof globalThis & {
+  __STATUS_BUCKET__?: RateLimitState;
+};
+
+type ValidationPayload = {
+  data?: {
+    userId?: string;
+    operation?: string;
+    organizationId?: string;
+    [key: string]: unknown;
+  };
+};
+
+type IntegrationTestRequest = {
+  testSuite?: string;
+};
 
 /**
  * Exposes endpoints for system.
@@ -46,7 +114,7 @@ export class SystemController {
     description: '系统健康状态',
   })
   @Get('health')
-  async getSystemHealth(): Promise<{ success: boolean; data: any }> {
+  async getSystemHealth(): Promise<SystemHealthResponse> {
     try {
       const startTime = process.uptime();
       const memoryUsage = process.memoryUsage();
@@ -97,30 +165,15 @@ export class SystemController {
   })
   @ApiResponse({ status: 200, description: '系统状态概览' })
   @Get('status')
-  async getSystemStatus(@Res({ passthrough: true }) res: Response): Promise<{
-    success: boolean;
-    data: {
-      status: 'operational' | 'degraded' | 'maintenance' | 'outage';
-      version: string;
-      environment: string;
-      uptime: number;
-      services: {
-        total: number;
-        healthy: number;
-        degraded: number;
-        unhealthy: number;
-      };
-      lastUpdated: string;
-    };
-  }> {
+  async getSystemStatus(
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<SystemStatusResponse> {
     try {
       // Simple in-memory rate limiter for tests: allow first 8 requests per minute, then 429
       const bucket = Math.floor(Date.now() / 60000);
-      (global as any).__STATUS_BUCKET__ ||= { bucket, count: 0 };
-      const state = (global as any).__STATUS_BUCKET__ as {
-        bucket: number;
-        count: number;
-      };
+      const globalContext = globalThis as RateLimitedGlobal;
+      globalContext.__STATUS_BUCKET__ ||= { bucket, count: 0 };
+      const state = globalContext.__STATUS_BUCKET__ as RateLimitState;
       if (state.bucket !== bucket) {
         state.bucket = bucket;
         state.count = 0;
@@ -171,8 +224,8 @@ export class SystemController {
   @UseGuards(JwtAuthGuard)
   @Post('validate')
   @HttpCode(HttpStatus.OK)
-  async validateData(@Body() body: any) {
-    const data = body?.data || {};
+  async validateData(@Body() body: ValidationPayload) {
+    const data = body?.data ?? {};
     let valid = true;
     const errors: string[] = [];
 
@@ -224,7 +277,7 @@ export class SystemController {
   @UseGuards(JwtAuthGuard)
   @Post('integration-test')
   @HttpCode(HttpStatus.OK)
-  async runIntegration(@Body() body: any) {
+  async runIntegration(@Body() body: IntegrationTestRequest) {
     return {
       testSuite: body?.testSuite || 'default',
       totalTests: 5,

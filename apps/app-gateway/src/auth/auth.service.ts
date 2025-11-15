@@ -23,6 +23,40 @@ import { createHash } from 'crypto';
 import { RedisTokenBlacklistService } from '../security/redis-token-blacklist.service';
 import { getConfig } from '@ai-recruitment-clerk/configuration';
 
+type LegacyTokenBlacklistService = RedisTokenBlacklistService & {
+  addToken?: (
+    token: string,
+    userId: string,
+    exp: number,
+    reason: string,
+  ) => Promise<void>;
+  isTokenBlacklisted?: (token: string) => Promise<boolean>;
+  blacklistToken?: (
+    token: string,
+    userId: string,
+    exp: number,
+    reason: string,
+  ) => Promise<void>;
+  isBlacklisted?: (token: string) => Promise<boolean>;
+};
+
+type ExtendedCreateUserDto = CreateUserDto & {
+  organizationName?: string;
+  name?: string;
+};
+
+type DecodedJwtPayload = (JwtPayload & { exp?: number }) | null;
+
+type UserWithRawRole = UserDto & { rawRole?: string; username?: string };
+
+type TokenBlacklistMetrics = ReturnType<
+  RedisTokenBlacklistService['getMetrics']
+>;
+
+type TokenBlacklistHealth = Awaited<
+  ReturnType<RedisTokenBlacklistService['healthCheck']>
+>;
+
 /**
  * Provides auth functionality.
  */
@@ -53,22 +87,23 @@ export class AuthService {
     private readonly tokenBlacklistService: RedisTokenBlacklistService,
   ) {
     // Ensure backward compatibility with mocks that provide older method names
+    const legacyBlacklistService =
+      this.tokenBlacklistService as LegacyTokenBlacklistService;
     if (
-      typeof (this.tokenBlacklistService as any).blacklistToken !== 'function' &&
-      typeof (this.tokenBlacklistService as any).addToken === 'function'
+      typeof legacyBlacklistService.blacklistToken !== 'function' &&
+      typeof legacyBlacklistService.addToken === 'function'
     ) {
-      (this.tokenBlacklistService as any).blacklistToken = (
-        this.tokenBlacklistService as any
-      ).addToken;
+      legacyBlacklistService.blacklistToken = legacyBlacklistService.addToken;
     }
 
     if (
-      typeof (this.tokenBlacklistService as any).isBlacklisted !== 'function' &&
-      typeof (this.tokenBlacklistService as any).isTokenBlacklisted === 'function'
+      typeof legacyBlacklistService.isBlacklisted !== 'function' &&
+      typeof legacyBlacklistService.isTokenBlacklisted === 'function'
     ) {
-      (this.tokenBlacklistService as any).isBlacklisted = (
-        this.tokenBlacklistService as any
-      ).isTokenBlacklisted.bind(this.tokenBlacklistService);
+      legacyBlacklistService.isBlacklisted =
+        legacyBlacklistService.isTokenBlacklisted.bind(
+          this.tokenBlacklistService,
+        );
     }
 
     // Start periodic cleanup of expired blacklisted tokens - skip in test environment
@@ -87,7 +122,7 @@ export class AuthService {
    */
   async register(createUserDto: CreateUserDto): Promise<AuthResponseDto> {
     // Normalize input for tests: generate orgId if missing; split name
-    const normalized: any = { ...createUserDto };
+    const normalized: ExtendedCreateUserDto = { ...createUserDto };
     if (!normalized.organizationId && (normalized.organizationName || true)) {
       normalized.organizationId = `org-${Math.random().toString(36).slice(2, 10)}`;
     }
@@ -153,6 +188,19 @@ export class AuthService {
     this.logger.log(`Successful login for user: ${user.id}`);
 
     return this.generateAuthResponse(user);
+  }
+
+  private decodeToken(token: string): DecodedJwtPayload {
+    const decoded =
+      typeof this.jwtService.decode === 'function'
+        ? this.jwtService.decode(token)
+        : null;
+
+    if (decoded && typeof decoded === 'object') {
+      return decoded as JwtPayload & { exp?: number };
+    }
+
+    return null;
   }
 
   /**
@@ -372,10 +420,7 @@ export class AuthService {
 
       if (tokenOnlyMode) {
         accessToken = userIdOrToken;
-        const decoded =
-          typeof this.jwtService.decode === 'function'
-            ? (this.jwtService.decode(accessToken) as any)
-            : null;
+        const decoded = this.decodeToken(accessToken);
         if (decoded?.sub) {
           userId = decoded.sub;
         }
@@ -384,10 +429,7 @@ export class AuthService {
       // Blacklist tokens using Redis-based service
       if (accessToken) {
         try {
-          const payload =
-            typeof this.jwtService.decode === 'function'
-              ? (this.jwtService.decode(accessToken) as any)
-              : null;
+          const payload = this.decodeToken(accessToken);
           const exp =
             payload && typeof payload.exp === 'number'
               ? payload.exp
@@ -408,10 +450,7 @@ export class AuthService {
 
       if (refreshToken) {
         try {
-          const payload =
-            typeof this.jwtService.decode === 'function'
-              ? (this.jwtService.decode(refreshToken) as any)
-              : null;
+          const payload = this.decodeToken(refreshToken);
           const exp =
             payload && typeof payload.exp === 'number'
               ? payload.exp
@@ -430,10 +469,7 @@ export class AuthService {
         }
       }
 
-      if (
-        !tokenOnlyMode &&
-        typeof (this.userService as any).updateLastActivity === 'function'
-      ) {
+      if (!tokenOnlyMode) {
         await this.userService.updateLastActivity(userId);
       }
       this.logger.log(`User logged out successfully: ${userId}`);
@@ -569,10 +605,9 @@ export class AuthService {
   }
 
   private normalizeRole(user: UserDto): string | undefined {
+    const extendedUser = user as UserWithRawRole;
     const rawRole =
-      (user as any)?.rawRole !== undefined
-        ? (user as any).rawRole
-        : user.role;
+      extendedUser.rawRole !== undefined ? extendedUser.rawRole : user.role;
 
     if (typeof rawRole === 'string') {
       return rawRole.toLowerCase();
@@ -582,11 +617,12 @@ export class AuthService {
   }
 
   private prepareUserForResponse(user: UserDto): UserDto {
+    const extendedUser = user as UserWithRawRole;
     const normalizedRole = this.normalizeRole(user);
     const safeUser: UserDto = {
       id: user.id,
       email: user.email,
-      username: (user as any)?.username,
+      username: extendedUser.username,
       firstName: user.firstName,
       lastName: user.lastName,
       name: user.name ?? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim(),
@@ -635,7 +671,7 @@ export class AuthService {
     blacklistedTokensCount: number;
     failedLoginAttemptsCount: number;
     lockedAccountsCount: number;
-    tokenBlacklistMetrics: any;
+    tokenBlacklistMetrics: TokenBlacklistMetrics;
   }> {
     const now = Date.now();
     const lockedAccountsCount = Array.from(
@@ -662,7 +698,7 @@ export class AuthService {
   async authHealthCheck(): Promise<{
     status: string;
     authService: string;
-    tokenBlacklist: any;
+    tokenBlacklist: TokenBlacklistHealth;
     memoryUsage: {
       blacklistedTokens: number;
       failedAttempts: number;
