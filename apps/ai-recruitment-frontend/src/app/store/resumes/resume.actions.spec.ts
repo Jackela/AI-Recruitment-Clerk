@@ -348,7 +348,7 @@ describe('Resume Actions', () => {
           recommendations: ['Consider for senior role', 'Strong culture fit'],
         },
         extractedData: {
-          ...mockResumeDetail.extractedData ?? null,
+          ...(mockResumeDetail.extractedData ?? {}),
           workHistory: [
             {
               company: 'Tech Startup',
@@ -377,8 +377,8 @@ describe('Resume Actions', () => {
       const action = ResumeActions.loadResumeSuccess({ resume: complexResume });
 
       expect(action.resume.analysis.skills).toHaveLength(6);
-      expect(action.resume.extractedData ?? null.workHistory).toHaveLength(2);
-      expect(action.resume.extractedData ?? null.projects).toHaveLength(1);
+      expect(action.resume.extractedData?.workHistory ?? []).toHaveLength(2);
+      expect(action.resume.extractedData?.projects ?? []).toHaveLength(1);
       expect(action.resume.analysis.strengths).toHaveLength(3);
     });
 
@@ -408,10 +408,10 @@ describe('Resume Actions', () => {
 
       expect(action.response.processedIds).toHaveLength(3);
       expect(action.response.failedUploads).toHaveLength(1);
-      expect(action.response.failedUploads ?? [][0].fileName).toBe(
+      expect(action.response.failedUploads?.[0]?.fileName).toBe(
         'invalid_resume.txt',
       );
-      expect(action.response.processingStatus ?? { completed: 0, failed: 0, inProgress: 0 }.completed).toBe(3);
+      expect(action.response.processingStatus?.completed ?? 0).toBe(3);
     });
   });
 

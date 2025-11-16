@@ -13,20 +13,36 @@ describe('GuestGuard', () => {
     getAllAndOverride: jest.fn(),
   } as unknown as Reflector;
 
-  const createMockExecutionContext = (headers: any = {}): ExecutionContext => {
+  const createMockExecutionContext = (
+    headers: Record<string, string> = {},
+  ): ExecutionContext => {
     const mockRequest = {
       headers,
       ip: '127.0.0.1',
       connection: { remoteAddress: '127.0.0.1' },
     };
 
+    const httpArgumentsHost = {
+      getRequest: () => mockRequest,
+      getResponse: jest.fn(),
+      getNext: jest.fn(),
+    };
+
     return {
-      switchToHttp: () => ({
-        getRequest: () => mockRequest,
-      }),
+      switchToHttp: () => httpArgumentsHost,
+      switchToRpc: () => httpArgumentsHost,
+      switchToWs: () => httpArgumentsHost,
       getHandler: jest.fn(),
       getClass: jest.fn(),
-    } as any;
+      getArgs: jest.fn(),
+      getArgByIndex: jest.fn(),
+      getType: jest.fn(),
+    } as unknown as ExecutionContext;
+  };
+
+  type GuardInternals = {
+    rateLimitMap: Map<string, { count: number; resetTime: number }>;
+    RATE_LIMIT_WINDOW: number;
   };
 
   const originalSetInterval = global.setInterval;
@@ -34,19 +50,21 @@ describe('GuestGuard', () => {
   const createGuard = () => new GuestGuard(mockReflector);
 
   beforeEach(() => {
-    (global as any).setInterval = jest.fn().mockReturnValue(1);
+    global.setInterval = jest
+      .fn()
+      .mockReturnValue(1) as unknown as typeof global.setInterval;
     guard = createGuard();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-    (global as any).setInterval = originalSetInterval;
+    global.setInterval = originalSetInterval;
     // Clear rate limit map to prevent test interference
-    (guard as any).rateLimitMap.clear();
+    (guard as unknown as GuardInternals).rateLimitMap.clear();
   });
 
   afterAll(() => {
-    (global as any).setInterval = originalSetInterval;
+    global.setInterval = originalSetInterval;
   });
 
   it('should be defined', () => {
@@ -158,7 +176,7 @@ describe('GuestGuard', () => {
       const deviceId = 'test-device-12345678';
 
       // Mock the rate limit window to be very short for testing
-      (guard as any).RATE_LIMIT_WINDOW = 100; // 100ms
+        (guard as unknown as GuardInternals).RATE_LIMIT_WINDOW = 100; // 100ms
 
       const context = createMockExecutionContext({
         'x-device-id': deviceId,
@@ -412,17 +430,15 @@ describe('GuestGuard', () => {
 
   describe('Edge Cases - IP Address Handling', () => {
     it('should handle missing IP address gracefully', async () => {
-      const context = {
-        switchToHttp: () => ({
-          getRequest: () => ({
-            headers: { 'x-device-id': 'valid-device-12345678' },
-            ip: undefined,
-            connection: {},
-          }),
-        }),
-        getHandler: jest.fn(),
-        getClass: jest.fn(),
-      } as any;
+      const context = createMockExecutionContext({
+        'x-device-id': 'valid-device-12345678',
+      });
+      const request = context.switchToHttp().getRequest() as {
+        ip?: string;
+        connection: Record<string, unknown>;
+      };
+      request.ip = undefined;
+      request.connection = {};
 
       const result = await guard.canActivate(context);
 
@@ -433,7 +449,10 @@ describe('GuestGuard', () => {
       const context = createMockExecutionContext({
         'x-device-id': 'ipv6-device-12345678',
       });
-      const request = context.switchToHttp().getRequest();
+      const request = context.switchToHttp().getRequest() as {
+        ip?: string;
+        connection: { remoteAddress?: string };
+      };
       request.ip = '2001:0db8:85a3:0000:0000:8a2e:0370:7334';
       request.connection.remoteAddress = '2001:0db8:85a3:0000:0000:8a2e:0370:7334';
 

@@ -25,6 +25,7 @@ export interface AnalysisEvent {
   analysisId: string;
   progress?: number;
   stage?: string;
+  message?: string;
   timestamp: Date;
   metadata?: {
     fileSize?: number;
@@ -269,7 +270,7 @@ export class WebSocketStatsService {
     const currentStats = this.stats$.value;
     const updatedStats = { ...currentStats };
 
-    switch (event.type) {
+    switch (payload.type) {
       case 'started':
         updatedStats.activeAnalyses++;
         break;

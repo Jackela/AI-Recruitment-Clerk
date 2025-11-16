@@ -111,7 +111,7 @@ export class ConsentRecord {
   userAgent?: string = undefined; // Technical consent context
 
   @Prop({ type: Object, default: {} })
-  metadata?: Record<string, any> = {};
+  metadata?: Record<string, unknown> = {};
 
   @Prop({ type: Date, default: Date.now })
   createdAt: Date = new Date();
@@ -193,7 +193,7 @@ export class CookieConsent {
   userAgent?: string = undefined;
 
   @Prop({ type: Object, default: {} })
-  metadata?: Record<string, any> = {};
+  metadata?: Record<string, unknown> = {};
 
   @Prop({ type: Date, default: Date.now })
   createdAt: Date = new Date();
@@ -279,7 +279,7 @@ export class ConsentAuditLog {
   userAgent?: string = undefined;
 
   @Prop({ type: Object, default: {} })
-  metadata?: Record<string, any> = {};
+  metadata?: Record<string, unknown> = {};
 
   @Prop({ type: Date, required: true })
   timestamp: Date = new Date();

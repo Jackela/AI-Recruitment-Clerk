@@ -1,8 +1,25 @@
 import { NotFoundException } from '@nestjs/common';
 import { UserManagementService } from './user-management.service';
-import { UserStatus } from '@ai-recruitment-clerk/user-management-domain';
+import type { UserService } from '../../auth/user.service';
+import {
+  UserStatus,
+  UserDto,
+  UpdateUserDto,
+} from '@ai-recruitment-clerk/user-management-domain';
 
-const createUserServiceMock = () => ({
+type UserRecord = UserDto & { password?: string };
+type UserServiceMock = {
+  updateUser: jest.Mock<Promise<UserRecord | null>, [string, UpdateUserDto]>;
+  findById: jest.Mock<Promise<UserRecord | null>, [string]>;
+  deleteUser: jest.Mock<Promise<void>, [string]>;
+  findByOrganizationId: jest.Mock<Promise<UserRecord[]>, [string]>;
+  getStats: jest.Mock<
+    Promise<{ totalUsers: number; activeUsers: number }>,
+    []
+  >;
+};
+
+const createUserServiceMock = (): UserServiceMock => ({
   updateUser: jest.fn(),
   findById: jest.fn(),
   deleteUser: jest.fn(),
@@ -11,42 +28,45 @@ const createUserServiceMock = () => ({
     totalUsers: 10,
     activeUsers: 8,
   }),
-}) as any;
+});
 
 describe('UserManagementService (mocked dependencies)', () => {
-  const baseUser = {
+  const baseUser: UserRecord = {
     id: 'user-1',
     email: 'test@example.com',
     password: 'secret',
+    organizationId: 'org-1',
     status: UserStatus.ACTIVE,
-  } as any;
+  };
 
-  let userService: ReturnType<typeof createUserServiceMock>;
+  let userService: UserServiceMock;
   let service: UserManagementService;
 
   beforeEach(() => {
     jest.clearAllMocks();
     userService = createUserServiceMock();
-    service = new UserManagementService(userService);
+    service = new UserManagementService(userService as unknown as UserService);
   });
 
   it('updates user and strips password', async () => {
     userService.updateUser.mockResolvedValue({ ...baseUser, password: 'hashed' });
 
-    const result = await service.updateUser('user-1', { firstName: 'Test' } as any);
+    const result = await service.updateUser('user-1', { firstName: 'Test' });
 
-    expect(userService.updateUser).toHaveBeenCalledWith('user-1', { firstName: 'Test' });
+    expect(userService.updateUser).toHaveBeenCalledWith('user-1', {
+      firstName: 'Test',
+    });
     expect(result).toEqual(
       expect.objectContaining({ id: 'user-1', email: 'test@example.com' }),
     );
-    expect((result as any).password).toBeUndefined();
+    expect(result).not.toHaveProperty('password');
   });
 
   it('throws when updating non-existent user', async () => {
     userService.updateUser.mockResolvedValue(null);
 
     await expect(
-      service.updateUser('missing', { firstName: 'Test' } as any),
+      service.updateUser('missing', { firstName: 'Test' }),
     ).rejects.toThrow(NotFoundException);
   });
 
@@ -57,7 +77,7 @@ describe('UserManagementService (mocked dependencies)', () => {
       userId: 'user-1',
       language: 'zh',
       notifications: { email: true, push: false, sms: false },
-    } as any);
+    });
 
     expect(userService.findById).toHaveBeenCalledWith('user-1');
     expect(prefs.language).toBe('zh');
@@ -98,7 +118,7 @@ describe('UserManagementService (mocked dependencies)', () => {
   describe('Negative Tests - User Update Validation', () => {
     it('should reject update with empty user ID', async () => {
       await expect(
-        service.updateUser('', { firstName: 'Test' } as any),
+        service.updateUser('', { firstName: 'Test' }),
       ).rejects.toThrow();
     });
 
@@ -108,7 +128,7 @@ describe('UserManagementService (mocked dependencies)', () => {
       );
 
       await expect(
-        service.updateUser('user-1', { firstName: 'Test' } as any),
+        service.updateUser('user-1', { firstName: 'Test' }),
       ).rejects.toThrow('Database connection lost');
     });
 
@@ -118,7 +138,7 @@ describe('UserManagementService (mocked dependencies)', () => {
       );
 
       await expect(
-        service.updateUser('user-1', { status: 'INVALID' } as any),
+        service.updateUser('user-1', { status: UserStatus.INACTIVE }),
       ).rejects.toThrow('Invalid status transition');
     });
   });
@@ -131,7 +151,7 @@ describe('UserManagementService (mocked dependencies)', () => {
         service.updateUserPreferences('nonexistent', {
           userId: 'nonexistent',
           language: 'zh',
-        } as any),
+        }),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -141,7 +161,7 @@ describe('UserManagementService (mocked dependencies)', () => {
       const prefs = await service.updateUserPreferences('user-1', {
         userId: 'user-1',
         language: 'invalid-lang',
-      } as any);
+      });
 
       expect(prefs.language).toBe('invalid-lang');
     });
@@ -155,7 +175,7 @@ describe('UserManagementService (mocked dependencies)', () => {
         service.updateUserPreferences('user-1', {
           userId: 'user-1',
           language: 'en',
-        } as any),
+        }),
       ).rejects.toThrow('Database query timeout');
     });
   });
@@ -203,16 +223,16 @@ describe('UserManagementService (mocked dependencies)', () => {
       userService.updateUser.mockResolvedValue({ ...baseUser, firstName: 'Updated' });
 
       const promises = [
-        service.updateUser('user-1', { firstName: 'Test1' } as any),
-        service.updateUser('user-1', { firstName: 'Test2' } as any),
-        service.updateUser('user-1', { firstName: 'Test3' } as any),
+        service.updateUser('user-1', { firstName: 'Test1' }),
+        service.updateUser('user-1', { firstName: 'Test2' }),
+        service.updateUser('user-1', { firstName: 'Test3' }),
       ];
 
       const results = await Promise.all(promises);
 
       results.forEach((result) => {
         expect(result.id).toBe('user-1');
-        expect((result as any).password).toBeUndefined();
+        expect(result).not.toHaveProperty('password');
       });
       expect(userService.updateUser).toHaveBeenCalledTimes(3);
     });
@@ -221,9 +241,18 @@ describe('UserManagementService (mocked dependencies)', () => {
       userService.findById.mockResolvedValue(baseUser);
 
       const promises = [
-        service.updateUserPreferences('user-1', { userId: 'user-1', language: 'en' } as any),
-        service.updateUserPreferences('user-2', { userId: 'user-2', language: 'zh' } as any),
-        service.updateUserPreferences('user-3', { userId: 'user-3', language: 'es' } as any),
+        service.updateUserPreferences('user-1', {
+          userId: 'user-1',
+          language: 'en',
+        }),
+        service.updateUserPreferences('user-2', {
+          userId: 'user-2',
+          language: 'zh',
+        }),
+        service.updateUserPreferences('user-3', {
+          userId: 'user-3',
+          language: 'es',
+        }),
       ];
 
       const results = await Promise.all(promises);
@@ -240,10 +269,11 @@ describe('UserManagementService (mocked dependencies)', () => {
         password: 'should-be-stripped',
       });
 
-      const result = await service.updateUser('user-1', { email: 'new@example.com' } as any);
+      const result = await service.updateUser('user-1', {
+        email: 'new@example.com',
+      });
 
       expect(result).not.toHaveProperty('password');
-      expect((result as any).password).toBeUndefined();
     });
 
     it('should verify password even with special characters', async () => {
@@ -267,7 +297,7 @@ describe('UserManagementService (mocked dependencies)', () => {
         updatedAt: new Date(),
       });
 
-      const result = await service.updateUser('user-1', { firstName: 'John' } as any);
+      const result = await service.updateUser('user-1', { firstName: 'John' });
 
       expect(result).toMatchObject({
         id: expect.any(String),

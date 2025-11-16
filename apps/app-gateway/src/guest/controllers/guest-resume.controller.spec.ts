@@ -1,9 +1,11 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException } from '@nestjs/common';
 import { GuestResumeController } from './guest-resume.controller';
 import { GuestUsageService } from '../services/guest-usage.service';
 import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
 import { GridFsService } from '../../services/gridfs.service';
 import type { RequestWithDeviceId } from '../guards/guest.guard';
+import type { GuestUsageResponseDto } from '../dto/guest.dto';
+import { Readable } from 'stream';
 
 describe('GuestResumeController (lightweight)', () => {
   const usageService = {
@@ -20,6 +22,7 @@ describe('GuestResumeController (lightweight)', () => {
     storeResumeFile: jest.fn().mockResolvedValue(
       'gridfs://bucket/file-id',
     ),
+    deleteResumeFile: jest.fn().mockResolvedValue(undefined),
   } as unknown as jest.Mocked<GridFsService>;
 
   const deviceRequest = (overrides: Partial<RequestWithDeviceId> = {}) =>
@@ -30,12 +33,28 @@ describe('GuestResumeController (lightweight)', () => {
       ...overrides,
     } as RequestWithDeviceId);
 
-  const file = {
+  const createUsageStatus = (
+    overrides: Partial<GuestUsageResponseDto> = {},
+  ): GuestUsageResponseDto => ({
+    canUse: true,
+    remainingCount: 2,
+    needsFeedbackCode: false,
+    feedbackCode: undefined,
+    ...overrides,
+  });
+
+  const buildFile = () => ({
+    fieldname: 'resume',
     originalname: 'resume.pdf',
+    encoding: '7bit',
     mimetype: 'application/pdf',
     size: 1024,
+    destination: '',
+    filename: 'resume.pdf',
+    path: '',
     buffer: Buffer.from('pdf'),
-  } as any;
+    stream: Readable.from(Buffer.from('pdf')),
+  });
 
   const buildController = () =>
     new GuestResumeController(usageService, natsClient, gridFsService);
@@ -47,16 +66,12 @@ describe('GuestResumeController (lightweight)', () => {
   describe('analyzeResume', () => {
     it('allows guest analysis when usage available', async () => {
       usageService.canUse.mockResolvedValue(true);
-      usageService.getUsageStatus.mockResolvedValue({
-        canUse: true,
-        remainingCount: 2,
-        needsFeedbackCode: false,
-      } as any);
+      usageService.getUsageStatus.mockResolvedValue(createUsageStatus());
 
       const controller = buildController();
       const result = await controller.analyzeResume(
         deviceRequest(),
-        file,
+        buildFile(),
         { candidateName: 'Alice' },
       );
 
@@ -68,16 +83,14 @@ describe('GuestResumeController (lightweight)', () => {
 
     it('throws 429 when guest limit exceeded', async () => {
       usageService.canUse.mockResolvedValue(false);
-      usageService.getUsageStatus.mockResolvedValue({
-        canUse: false,
-        remainingCount: 0,
-        needsFeedbackCode: true,
-      } as any);
+      usageService.getUsageStatus.mockResolvedValue(
+        createUsageStatus({ canUse: false, remainingCount: 0, needsFeedbackCode: true }),
+      );
 
       const controller = buildController();
 
       await expect(
-        controller.analyzeResume(deviceRequest(), file, {}),
+        controller.analyzeResume(deviceRequest(), buildFile(), {}),
       ).rejects.toThrow(HttpException);
     });
   });
@@ -85,11 +98,9 @@ describe('GuestResumeController (lightweight)', () => {
   describe('getDemoAnalysis', () => {
     it('returns demo data for guest users', async () => {
       usageService.canUse.mockResolvedValue(true);
-      usageService.getUsageStatus.mockResolvedValue({
-        canUse: true,
-        remainingCount: 1,
-        needsFeedbackCode: false,
-      } as any);
+      usageService.getUsageStatus.mockResolvedValue(
+        createUsageStatus({ remainingCount: 1 }),
+      );
 
       const controller = buildController();
       const result = await controller.getDemoAnalysis(deviceRequest());

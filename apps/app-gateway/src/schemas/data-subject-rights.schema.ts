@@ -68,7 +68,7 @@ export class DataSubjectRightsRequest {
   processorNotes?: string = undefined;
 
   @Prop({ type: Object, default: {} })
-  metadata?: Record<string, any> = {};
+  metadata?: Record<string, unknown> = {};
 
   @Prop({ type: String, required: false })
   ipAddress?: string = undefined;
@@ -95,7 +95,7 @@ export class DataSubjectRightsRequest {
 
   // Rectification request fields
   @Prop({ type: Object, required: false })
-  correctionData?: any = undefined; // Field corrections for rectification
+  correctionData?: Record<string, unknown> = undefined; // Field corrections for rectification
 
   // Erasure request fields
   @Prop({ type: String, required: false })
@@ -216,7 +216,7 @@ export class RightsRequestActivity {
   newStatus?: RequestStatus = undefined;
 
   @Prop({ type: Object, default: {} })
-  metadata?: Record<string, any> = {};
+  metadata?: Record<string, unknown> = {};
 
   @Prop({ type: Date, required: true })
   timestamp: Date = new Date();
@@ -365,7 +365,7 @@ export class IdentityVerification {
   status: IdentityVerificationStatus = IdentityVerificationStatus.PENDING;
 
   @Prop({ type: Object, default: {} })
-  verificationData?: any = {}; // Method-specific verification data
+  verificationData?: Record<string, unknown> = {}; // Method-specific verification data
 
   @Prop({ type: String, required: false })
   verificationCode?: string = undefined; // For email/SMS verification
@@ -386,7 +386,7 @@ export class IdentityVerification {
   failureReason?: string = undefined;
 
   @Prop({ type: Object, default: {} })
-  metadata?: Record<string, any> = {};
+  metadata?: Record<string, unknown> = {};
 
   @Prop({ type: Date, default: Date.now })
   createdAt: Date = new Date();

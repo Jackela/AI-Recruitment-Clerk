@@ -25,7 +25,10 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
 import { QuestionnaireStatus } from '@ai-recruitment-clerk/shared-dtos';
-import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
+import {
+  AuthenticatedRequest,
+  Permission,
+} from '@ai-recruitment-clerk/user-management-domain';
 import { QuestionnaireIntegrationService } from './questionnaire-integration.service';
 
 // Use imported interface instead of local definition
@@ -76,12 +79,18 @@ export class QuestionnaireController {
   })
   @ApiResponse({ status: 400, description: '请求参数错误' })
   @UseGuards(RolesGuard)
-  @Permissions('create_questionnaire' as any)
+  @Permissions(Permission.CREATE_JOB)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createQuestionnaire(
     @Request() req: AuthenticatedRequest,
-    @Body() createDto: Record<string, any>,
+    @Body()
+    createDto: {
+      title: string;
+      description?: string;
+      questions?: unknown[];
+      metadata?: Record<string, unknown>;
+    },
   ) {
     try {
       const questionnaire = await this.questionnaireService.createQuestionnaire(
@@ -92,6 +101,10 @@ export class QuestionnaireController {
         },
       );
 
+      const questionCount = Array.isArray(questionnaire.questions)
+        ? questionnaire.questions.length
+        : 0;
+
       return {
         success: true,
         message: 'Questionnaire created successfully',
@@ -99,7 +112,7 @@ export class QuestionnaireController {
           questionnaireId: questionnaire.id,
           title: questionnaire.title,
           status: questionnaire.status,
-          totalQuestions: questionnaire.questions?.length || 0,
+          totalQuestions: questionCount,
           createdAt: questionnaire.createdAt,
         },
       };
@@ -236,13 +249,19 @@ export class QuestionnaireController {
   @ApiResponse({ status: 404, description: '问卷未找到' })
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @UseGuards(RolesGuard)
-  @Permissions('update_questionnaire' as any)
+  @Permissions(Permission.UPDATE_JOB)
   @Put(':questionnaireId')
   @HttpCode(HttpStatus.OK)
   async updateQuestionnaire(
     @Request() req: AuthenticatedRequest,
     @Param('questionnaireId') questionnaireId: string,
-    @Body() updateDto: Record<string, any>,
+    @Body()
+    updateDto: {
+      title?: string;
+      description?: string;
+      status?: QuestionnaireStatus;
+      questions?: unknown[];
+    },
   ) {
     try {
       const updatedQuestionnaire =
@@ -285,7 +304,7 @@ export class QuestionnaireController {
   @ApiResponse({ status: 200, description: '问卷发布成功' })
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @UseGuards(RolesGuard)
-  @Permissions('publish_questionnaire' as any)
+  @Permissions(Permission.CREATE_JOB)
   @Post(':questionnaireId/publish')
   @HttpCode(HttpStatus.OK)
   async publishQuestionnaire(
@@ -300,11 +319,22 @@ export class QuestionnaireController {
     },
   ) {
     try {
+      const normalizedOptions = publishOptions
+        ? {
+            ...publishOptions,
+            publishDate: publishOptions.publishDate
+              ? new Date(publishOptions.publishDate)
+              : undefined,
+            expirationDate: publishOptions.expirationDate
+              ? new Date(publishOptions.expirationDate)
+              : undefined,
+          }
+        : undefined;
       const publishResult =
         await this.questionnaireService.publishQuestionnaire(
           questionnaireId,
           req.user.id,
-          publishOptions,
+          normalizedOptions,
         );
 
       return {
@@ -363,7 +393,17 @@ export class QuestionnaireController {
   async submitQuestionnaire(
     @Request() req: AuthenticatedRequest,
     @Param('questionnaireId') questionnaireId: string,
-    @Body() submission: Record<string, any>,
+    @Body()
+    submission: {
+      answers: Array<{
+        questionId: string;
+        answer?: string | number | boolean | string[];
+        additionalData?: Record<string, unknown>;
+      }>;
+      timeSpentSeconds?: number;
+      incentiveOptIn?: boolean;
+      metadata?: Record<string, unknown>;
+    },
   ) {
     try {
       const submissionResult =
@@ -422,7 +462,7 @@ export class QuestionnaireController {
   @ApiQuery({ name: 'startDate', required: false, description: '开始日期' })
   @ApiQuery({ name: 'endDate', required: false, description: '结束日期' })
   @UseGuards(RolesGuard)
-  @Permissions('read_questionnaire_responses' as any)
+  @Permissions(Permission.READ_JOB)
   @Get(':questionnaireId/submissions')
   async getQuestionnaireSubmissions(
     @Request() req: AuthenticatedRequest,
@@ -481,7 +521,7 @@ export class QuestionnaireController {
   })
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @UseGuards(RolesGuard)
-  @Permissions('read_questionnaire_analytics' as any)
+  @Permissions(Permission.READ_ANALYSIS)
   @Get(':questionnaireId/analytics')
   async getQuestionnaireAnalytics(
     @Request() req: AuthenticatedRequest,
@@ -521,7 +561,7 @@ export class QuestionnaireController {
   @ApiResponse({ status: 201, description: '问卷复制成功' })
   @ApiParam({ name: 'questionnaireId', description: '原问卷ID' })
   @UseGuards(RolesGuard)
-  @Permissions('create_questionnaire' as any)
+  @Permissions(Permission.CREATE_JOB)
   @Post(':questionnaireId/duplicate')
   @HttpCode(HttpStatus.CREATED)
   async duplicateQuestionnaire(
@@ -531,7 +571,10 @@ export class QuestionnaireController {
     duplicateOptions: {
       title?: string;
       includeSubmissions?: boolean;
-      modifyQuestions?: any;
+      modifyQuestions?: Array<{
+        questionId: string;
+        modifications?: Record<string, unknown>;
+      }>;
     },
   ) {
     try {
@@ -575,7 +618,7 @@ export class QuestionnaireController {
   @ApiResponse({ status: 200, description: '问卷删除成功' })
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @UseGuards(RolesGuard)
-  @Permissions('delete_questionnaire' as any)
+  @Permissions(Permission.DELETE_JOB)
   @Delete(':questionnaireId')
   @HttpCode(HttpStatus.OK)
   async deleteQuestionnaire(
@@ -664,7 +707,7 @@ export class QuestionnaireController {
   @ApiResponse({ status: 201, description: '从模板创建成功' })
   @ApiParam({ name: 'templateId', description: '模板ID' })
   @UseGuards(RolesGuard)
-  @Permissions('create_questionnaire' as any)
+  @Permissions(Permission.CREATE_JOB)
   @Post('templates/:templateId/create')
   @HttpCode(HttpStatus.CREATED)
   async createFromTemplate(
@@ -673,7 +716,7 @@ export class QuestionnaireController {
     @Body()
     createOptions: {
       title: string;
-      customizations?: any;
+      customizations?: Record<string, unknown>;
       organizationId?: string;
     },
   ) {
@@ -686,6 +729,9 @@ export class QuestionnaireController {
           organizationId: req.user.organizationId,
         },
       );
+      const questionCount = Array.isArray(questionnaire.questions)
+        ? questionnaire.questions.length
+        : 0;
 
       return {
         success: true,
@@ -694,7 +740,7 @@ export class QuestionnaireController {
           questionnaireId: questionnaire.id,
           templateId,
           title: questionnaire.title,
-          totalQuestions: questionnaire.questions?.length || 0,
+          totalQuestions: questionCount,
         },
       };
     } catch (error) {
@@ -727,7 +773,7 @@ export class QuestionnaireController {
     description: '导出格式',
   })
   @UseGuards(RolesGuard)
-  @Permissions('export_questionnaire_data' as any)
+  @Permissions(Permission.GENERATE_REPORT)
   @Post(':questionnaireId/export')
   @HttpCode(HttpStatus.OK)
   async exportQuestionnaireData(
@@ -742,12 +788,23 @@ export class QuestionnaireController {
     },
   ) {
     try {
+      const normalizedExportOptions = exportOptions
+        ? {
+            ...exportOptions,
+            dateRange: exportOptions.dateRange
+              ? {
+                  startDate: new Date(exportOptions.dateRange.startDate),
+                  endDate: new Date(exportOptions.dateRange.endDate),
+                }
+              : undefined,
+          }
+        : undefined;
       const exportResult =
         await this.questionnaireService.exportQuestionnaireData(
           questionnaireId,
           format,
           req.user.id,
-          exportOptions,
+          normalizedExportOptions,
         );
 
       return {

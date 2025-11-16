@@ -11,6 +11,7 @@ import {
 import { Observable, throwError, of } from 'rxjs';
 import { catchError, timeout, retry, tap } from 'rxjs/operators';
 import { Cache } from 'cache-manager';
+import type { Request } from 'express';
 
 /**
  * Defines the shape of the service integration options.
@@ -30,6 +31,14 @@ export interface ServiceIntegrationOptions {
     resetTimeout?: number;
   };
 }
+
+type FallbackResponse = {
+  success: false;
+  error: string;
+  message: string;
+  fallback: true;
+  originalError?: string;
+};
 
 /**
  * Represents the service integration interceptor.
@@ -60,13 +69,13 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
    * Performs the intercept operation.
    * @param context - The context.
    * @param next - The next.
-   * @returns A promise that resolves to Observable<any>.
+   * @returns A promise that resolves to Observable<unknown>.
    */
   async intercept(
     context: ExecutionContext,
     next: CallHandler,
-  ): Promise<Observable<any>> {
-    const request = context.switchToHttp().getRequest();
+  ): Promise<Observable<unknown>> {
+    const request = context.switchToHttp().getRequest<Request>();
     const handler = context.getHandler();
     const className = context.getClass().name;
     const methodName = handler.name;
@@ -82,8 +91,8 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
     // Check cache if enabled
     if (this.options.cacheable && this.cacheManager) {
       const cacheKey = this.generateCacheKey(request, operationId);
-      const cachedResult = await this.cacheManager.get(cacheKey);
-      if (cachedResult) {
+      const cachedResult = await this.cacheManager.get<unknown>(cacheKey);
+      if (cachedResult !== undefined) {
         this.logger.debug(`Cache hit for ${operationId}`);
         return of(cachedResult);
       }
@@ -100,7 +109,7 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
     return next.handle().pipe(
       timeout(timeoutMs),
       retry(maxRetries),
-      tap(async (result) => {
+      tap(async (result: unknown) => {
         // Cache successful result
         if (this.options.cacheable && this.cacheManager && result) {
           const cacheKey = this.generateCacheKey(request, operationId);
@@ -113,10 +122,12 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
           this.resetCircuitBreaker(operationId);
         }
       }),
-      catchError((error) => {
+      catchError((error: unknown) => {
+        const errorMessage = this.getErrorMessage(error);
+        const errorStack = error instanceof Error ? error.stack : undefined;
         this.logger.error(
-          `Service integration error in ${operationId}: ${error.message}`,
-          error.stack,
+          `Service integration error in ${operationId}: ${errorMessage}`,
+          errorStack,
         );
 
         // Update circuit breaker on failure
@@ -125,7 +136,7 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
         }
 
         // Handle specific error types
-        if (error.name === 'TimeoutError') {
+        if (this.isTimeoutError(error)) {
           return throwError(
             () =>
               new RequestTimeoutException(
@@ -139,12 +150,12 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
           return this.handleFallback(operationId, error);
         }
 
-        return throwError(() => error);
+        return throwError(() => this.ensureError(error));
       }),
     );
   }
 
-  private generateCacheKey(request: any, operationId: string): string {
+  private generateCacheKey(request: Request, operationId: string): string {
     if (this.options.cacheKey) {
       return this.options.cacheKey;
     }
@@ -167,7 +178,7 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
         return { service, healthy: true };
       } catch (error) {
         this.logger.warn(
-          `Service ${service} is not available: ${error.message}`,
+          `Service ${service} is not available: ${this.getErrorMessage(error)}`,
         );
         return { service, healthy: false };
       }
@@ -233,7 +244,10 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
     }
   }
 
-  private handleFallback(operationId: string, error: any): Observable<any> {
+  private handleFallback(
+    operationId: string,
+    error: unknown,
+  ): Observable<FallbackResponse> {
     this.logger.warn(`Using fallback for ${operationId}`);
 
     // Return a default fallback response
@@ -242,7 +256,37 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
       error: 'Service temporarily unavailable',
       message: 'Using fallback response due to service issues',
       fallback: true,
-      originalError: error.message,
+      originalError: this.getErrorMessage(error),
     });
+  }
+
+  private getErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+    if (typeof error === 'string') {
+      return error;
+    }
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return String(error);
+    }
+  }
+
+  private ensureError(error: unknown): Error {
+    if (error instanceof Error) {
+      return error;
+    }
+    return new Error(this.getErrorMessage(error));
+  }
+
+  private isTimeoutError(error: unknown): boolean {
+    return (
+      !!error &&
+      typeof error === 'object' &&
+      'name' in error &&
+      (error as { name?: string }).name === 'TimeoutError'
+    );
   }
 }

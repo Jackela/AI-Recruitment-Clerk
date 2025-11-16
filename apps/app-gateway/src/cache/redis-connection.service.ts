@@ -12,6 +12,12 @@ import {
 import { ConfigService } from '@nestjs/config';
 import type { RedisClientType } from 'redis';
 
+type RedisConnectionState =
+  | 'disconnected'
+  | 'connecting'
+  | 'connected'
+  | 'error';
+
 /**
  * Provides redis connection functionality.
  */
@@ -19,11 +25,7 @@ import type { RedisClientType } from 'redis';
 export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(RedisConnectionService.name);
   private redisClient: RedisClientType | null = null;
-  private connectionState:
-    | 'disconnected'
-    | 'connecting'
-    | 'connected'
-    | 'error' = 'disconnected';
+  private connectionState: RedisConnectionState = 'disconnected';
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 10;
   private reconnectInterval: NodeJS.Timeout | null = null;
@@ -196,7 +198,7 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
    * 获取连接状态
    */
   getConnectionStatus(): {
-    state: typeof this.connectionState;
+    state: RedisConnectionState;
     connected: boolean;
     attempts: number;
     client: RedisClientType | null;

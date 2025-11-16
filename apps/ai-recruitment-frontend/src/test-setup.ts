@@ -122,8 +122,17 @@ interface JasmineInterface {
     methods: string[],
     props?: Record<string, unknown>,
   ) => Record<string, JasmineSpy>;
-  createSpy: (name?: string) => JasmineSpy;
+  createSpy: (name?: string, originalFn?: AnyFn) => JasmineSpy;
+  spyOn?: JasmineSpyFunction;
 }
+
+type JasmineSpyFunction = <
+  T extends Record<string, unknown>,
+  K extends keyof T,
+>(
+  object: T,
+  method: K,
+) => JasmineSpy;
 
 const attachJasmineMethods = (
   jestSpy: MockFn,
@@ -164,11 +173,8 @@ const attachJasmineMethods = (
 };
 
 const globalWithJasmine = globalThis as typeof globalThis & {
-  jasmine?: JasmineInterface;
-  spyOn?: <T extends Record<string, unknown>, K extends Extract<keyof T, string>>(
-    object: T,
-    method: K,
-  ) => JasmineSpy;
+  jasmine?: any;
+  spyOn?: any;
 };
 
 globalWithJasmine.jasmine = {
@@ -187,11 +193,11 @@ globalWithJasmine.jasmine = {
     }
     return spy;
   },
-  createSpy: (_name?: string) => {
-    const jestSpy = jest.fn() as MockFn;
+  createSpy: (_name?: string, originalFn?: AnyFn) => {
+    const jestSpy = jest.fn(originalFn as AnyFn | undefined) as MockFn;
     return attachJasmineMethods(jestSpy);
   },
-};
+} as any;
 
 const jasmineSpyOn = <
   T extends Record<string, unknown>,
@@ -200,10 +206,11 @@ const jasmineSpyOn = <
   object: T,
   method: K,
 ): JasmineSpy => {
+  const target = object as Record<string, AnyFn | unknown>;
   const originalImpl = (object[method] as AnyFn | undefined)?.bind(object);
   const jestSpy = jest.spyOn(
-    object,
-    method,
+    object as Record<string, AnyFn>,
+    method as keyof Record<string, AnyFn>,
   ) as unknown as MockFn;
   return attachJasmineMethods(jestSpy, originalImpl);
 };

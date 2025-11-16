@@ -22,6 +22,7 @@ import {
   ApiQuery,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PrivacyComplianceService } from './privacy-compliance.service';
 import {
@@ -34,9 +35,106 @@ import {
 import type {
   CaptureConsentDto,
   CreateRightsRequestDto,
-  ProcessRightsRequestDto,
   WithdrawConsentDto,
 } from '@ai-recruitment-clerk/shared-dtos';
+
+interface RequestMetadata {
+  ipAddress?: string;
+  userAgent?: string;
+}
+
+interface ProcessingRecord {
+  id: string;
+  name: string;
+  purposes: string[];
+  legalBasis: string;
+  dataCategories: string[];
+  retentionPeriod: string;
+  thirdPartyProcessors?: string[];
+}
+
+interface ConsentManagementMetrics {
+  score: number;
+  activeConsents: number;
+  withdrawnConsents: number;
+  pendingRenewals: number;
+}
+
+interface RightsProcessingMetrics {
+  score: number;
+  activeRequests: number;
+  completedRequests: number;
+  averageCompletionDays: number;
+}
+
+interface DataRetentionMetrics {
+  score: number;
+  policiesImplemented: number;
+  recordsPendingDeletion: number;
+  overdueRetentions: number;
+}
+
+interface BreachManagementMetrics {
+  score: number;
+  breachesYTD: number;
+  incidentResponseTime: string;
+  notificationCompliance: string;
+}
+
+interface ComplianceStatusOverview {
+  overallScore: number;
+  consentManagement: ConsentManagementMetrics;
+  dataSubjectRights: RightsProcessingMetrics;
+  dataRetention: DataRetentionMetrics;
+  breachManagement: BreachManagementMetrics;
+}
+
+interface PrivacySubsystemStatus {
+  status: string;
+  responseTime: string;
+}
+
+interface PrivacyHealthCheckResult {
+  timestamp: string;
+  status: string;
+  checks: {
+    consentStorage: PrivacySubsystemStatus;
+    rightsProcessing: PrivacySubsystemStatus;
+    dataRetention: PrivacySubsystemStatus;
+    encryption: PrivacySubsystemStatus;
+  };
+  gdprCompliance: {
+    consentFramework: string;
+    rightsAutomation: string;
+    retentionPolicies: string;
+    breachNotification: string;
+  };
+}
+
+interface CookieConsentPreferences {
+  essential: boolean;
+  functional: boolean;
+  analytics: boolean;
+  marketing: boolean;
+}
+
+interface CookieConsentRequestPayload {
+  deviceId: string;
+  preferences: CookieConsentPreferences;
+}
+
+interface CookieConsentPreferencesRecord {
+  deviceId: string;
+  preferences: CookieConsentPreferences;
+  consentDate: Date;
+  expiryDate: Date;
+}
+
+interface CookieConsentStatus extends CookieConsentPreferences {
+  deviceId: string;
+  consentDate: Date;
+  needsUpdate: boolean;
+}
 
 /**
  * GDPR Privacy Compliance Controller
@@ -72,15 +170,16 @@ export class PrivacyComplianceController {
   @ApiResponse({ status: 404, description: 'User not found' })
   async captureConsent(
     @Body(ValidationPipe) captureConsentDto: CaptureConsentDto,
-    @Req() req: any,
+    @Req() req: Request,
   ): Promise<UserConsentProfile> {
     this.logger.log(`Capturing consent for user: ${captureConsentDto.userId}`);
 
     // Add request context
-    captureConsentDto.ipAddress = req.ip || req.connection.remoteAddress;
-    captureConsentDto.userAgent = req.headers['user-agent'];
+    const { ipAddress, userAgent } = this.getRequestMetadata(req);
+    captureConsentDto.ipAddress = ipAddress;
+    captureConsentDto.userAgent = userAgent;
 
-    return (await this.privacyService.captureConsent(captureConsentDto)) as any;
+    return await this.privacyService.captureConsent(captureConsentDto);
   }
 
   /**
@@ -160,19 +259,18 @@ export class PrivacyComplianceController {
   @ApiResponse({ status: 400, description: 'Invalid request data' })
   async createRightsRequest(
     @Body(ValidationPipe) createRequestDto: CreateRightsRequestDto,
-    @Req() req: any,
+    @Req() req: Request,
   ): Promise<DataSubjectRightsRequest> {
     this.logger.log(
       `Creating rights request: ${createRequestDto.requestType} for user: ${createRequestDto.userId}`,
     );
 
     // Add request context
-    createRequestDto.ipAddress = req.ip || req.connection.remoteAddress;
-    createRequestDto.userAgent = req.headers['user-agent'];
+    const { ipAddress, userAgent } = this.getRequestMetadata(req);
+    createRequestDto.ipAddress = ipAddress;
+    createRequestDto.userAgent = userAgent;
 
-    return (await this.privacyService.createRightsRequest(
-      createRequestDto,
-    )) as any;
+    return await this.privacyService.createRightsRequest(createRequestDto);
   }
 
   /**
@@ -208,10 +306,10 @@ export class PrivacyComplianceController {
     this.logger.log(
       `Exporting data for user: ${userId}, format: ${format || 'JSON'}`,
     );
-    return (await this.privacyService.processDataAccessRequest(
+    return await this.privacyService.processDataAccessRequest(
       userId,
       format || DataExportFormat.JSON,
-    )) as any;
+    );
   }
 
   /**
@@ -268,10 +366,10 @@ export class PrivacyComplianceController {
     description: 'Administrative endpoint to view data processing activities',
   })
   @ApiResponse({ status: 200, description: 'Processing records retrieved' })
-  async getProcessingRecords(): Promise<any[]> {
+  async getProcessingRecords(): Promise<ProcessingRecord[]> {
     this.logger.log('Getting data processing records');
     // TODO: Implement processing records retrieval
-    return [
+    const records: ProcessingRecord[] = [
       {
         id: '1',
         name: 'User Authentication Processing',
@@ -290,6 +388,7 @@ export class PrivacyComplianceController {
         thirdPartyProcessors: ['Google Gemini AI'],
       },
     ];
+    return records;
   }
 
   /**
@@ -304,10 +403,10 @@ export class PrivacyComplianceController {
     description: 'Administrative overview of privacy compliance metrics',
   })
   @ApiResponse({ status: 200, description: 'Compliance status retrieved' })
-  async getComplianceStatus(): Promise<any> {
+  async getComplianceStatus(): Promise<ComplianceStatusOverview> {
     this.logger.log('Getting compliance status');
     // TODO: Implement compliance status calculation
-    return {
+    const complianceStatus: ComplianceStatusOverview = {
       overallScore: 85,
       consentManagement: {
         score: 90,
@@ -334,6 +433,7 @@ export class PrivacyComplianceController {
         notificationCompliance: '100%',
       },
     };
+    return complianceStatus;
   }
 
   /**
@@ -347,10 +447,10 @@ export class PrivacyComplianceController {
     description: 'Verify GDPR compliance infrastructure is functioning',
   })
   @ApiResponse({ status: 200, description: 'Health check completed' })
-  async privacyHealthCheck(): Promise<any> {
+  async privacyHealthCheck(): Promise<PrivacyHealthCheckResult> {
     this.logger.log('Performing privacy health check');
 
-    const healthStatus = {
+    const healthStatus: PrivacyHealthCheckResult = {
       timestamp: new Date().toISOString(),
       status: 'healthy',
       checks: {
@@ -382,9 +482,8 @@ export class PrivacyComplianceController {
   })
   @ApiResponse({ status: 201, description: 'Cookie consent saved' })
   async setCookieConsent(
-    @Body() cookieConsent: any,
-    @Req() req: any,
-  ): Promise<any> {
+    @Body() cookieConsent: CookieConsentRequestPayload,
+  ): Promise<CookieConsentPreferencesRecord> {
     this.logger.log('Setting cookie consent preferences');
 
     // TODO: Implement cookie consent management
@@ -408,11 +507,13 @@ export class PrivacyComplianceController {
   })
   @ApiParam({ name: 'deviceId', description: 'Device identifier' })
   @ApiResponse({ status: 200, description: 'Cookie consent retrieved' })
-  async getCookieConsent(@Param('deviceId') deviceId: string): Promise<any> {
+  async getCookieConsent(
+    @Param('deviceId') deviceId: string,
+  ): Promise<CookieConsentStatus> {
     this.logger.log(`Getting cookie consent for device: ${deviceId}`);
 
     // TODO: Implement cookie consent retrieval
-    return {
+    const consentStatus: CookieConsentStatus = {
       deviceId,
       essential: true,
       functional: false,
@@ -420,6 +521,19 @@ export class PrivacyComplianceController {
       marketing: false,
       consentDate: new Date(),
       needsUpdate: false,
+    };
+    return consentStatus;
+  }
+
+  private getRequestMetadata(req: Request): RequestMetadata {
+    const userAgentHeader = req.headers['user-agent'];
+    const userAgent = Array.isArray(userAgentHeader)
+      ? userAgentHeader[0]
+      : userAgentHeader;
+
+    return {
+      ipAddress: req.ip || req.socket?.remoteAddress || undefined,
+      userAgent,
     };
   }
 }

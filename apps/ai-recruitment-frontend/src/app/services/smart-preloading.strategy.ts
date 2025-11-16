@@ -4,6 +4,11 @@ import { Observable, of, timer } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { LoggerService } from './shared/logger.service';
 
+type NetworkInformationLike = {
+  effectiveType: string;
+  addEventListener: (type: 'change', listener: () => void) => void;
+};
+
 /**
  * Represents the smart preloading strategy.
  */
@@ -134,9 +139,9 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
   private detectNetworkCondition(): void {
     // Use Navigator.connection API if available
     type NavigatorConnection = Navigator & {
-      connection?: NetworkInformation;
-      mozConnection?: NetworkInformation;
-      webkitConnection?: NetworkInformation;
+      connection?: NetworkInformationLike;
+      mozConnection?: NetworkInformationLike;
+      webkitConnection?: NetworkInformationLike;
     };
 
     const connection =

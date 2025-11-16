@@ -28,8 +28,6 @@ export class SecretsManagerService implements OnModuleInit {
   // Reserved for caching implementation
   // private secretsCache: Map<string, { value: string; lastRotated: Date }> = new Map();
 
-  constructor() {}
-
   /**
    * Performs the on module init operation.
    * @returns The result of the operation.

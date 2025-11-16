@@ -89,4 +89,50 @@ describe('MfaService (focused unit tests)', () => {
     expect(response.success).toBe(true);
     expect(response.message).toMatch(/EMAIL/i);
   });
+
+  it('requires valid password when enabling MFA', async () => {
+    const user = {
+      email: 'user@test.com',
+      hashedPassword: 'hash',
+      mfaSettings: null,
+    };
+    userModel.findById.mockResolvedValue(user);
+    jest
+      .spyOn(require('bcryptjs'), 'compare')
+      .mockResolvedValueOnce(false as never);
+
+    await expect(
+      service.enableMfa('user-1', {
+        method: MfaMethod.SMS,
+        currentPassword: 'wrong',
+        phoneNumber: '+1234567890',
+      } as never),
+    ).rejects.toThrow(UnauthorizedException);
+  });
+
+  it('enables SMS MFA when password matches', async () => {
+    const user = {
+      _id: 'user-1',
+      email: 'user@test.com',
+      hashedPassword: 'hash',
+      mfaSettings: { enabled: false, methods: [] },
+    };
+    userModel.findById.mockResolvedValue(user);
+    jest
+      .spyOn(require('bcryptjs'), 'compare')
+      .mockResolvedValueOnce(true as never);
+    jest
+      .spyOn(require('bcryptjs'), 'hash')
+      .mockResolvedValue('hashed-code' as never);
+
+    const result = await service.enableMfa('user-1', {
+      method: MfaMethod.SMS,
+      currentPassword: 'pw',
+      phoneNumber: '+1234567890',
+    } as never);
+
+    expect(userModel.findByIdAndUpdate).toHaveBeenCalled();
+    expect(result.success).toBe(true);
+    expect(result.message).toContain('SMS');
+  });
 });

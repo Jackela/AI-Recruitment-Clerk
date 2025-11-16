@@ -8,7 +8,7 @@ import {
 import { randomUUID } from 'crypto';
 import { CreateJobDto } from './dto/create-job.dto';
 import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
-import { MulterFile } from './types/multer.types';
+import type { MulterFile } from './types/multer.types';
 import { JobListDto, JobDetailDto } from './dto/job-response.dto';
 import { ResumeListItemDto, ResumeDetailDto } from './dto/resume-response.dto';
 import { AnalysisReportDto, ReportsListDto } from './dto/report-response.dto';
@@ -19,7 +19,11 @@ import {
 } from '@ai-recruitment-clerk/user-management-domain';
 import { JobJdSubmittedEvent } from '@ai-recruitment-clerk/job-management-domain';
 import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
-import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
+import {
+  AppGatewayNatsService,
+  AnalysisJdExtractedEvent,
+  AnalysisFailedEvent,
+} from '../nats/app-gateway-nats.service';
 import {
   CacheService,
   SemanticCacheOptions,
@@ -27,6 +31,7 @@ import {
 import { Job, JobDocument } from '../schemas/job.schema';
 import { WebSocketGateway } from '../websocket/websocket.gateway';
 import { ConfigService } from '@nestjs/config';
+import type { MessageMetadata } from '@ai-recruitment-clerk/shared-nats-client';
 
 type JobUpdateStatus =
   | 'processing'
@@ -49,6 +54,16 @@ interface SemanticJobCacheEntry {
   semanticSimilarity?: number;
   lastUsedAt?: string;
 }
+
+type UserWithRawRole = UserDto & { rawRole?: string };
+
+type KeywordSource = {
+  skills?: unknown[];
+  requirements?: Array<{ skill?: string } | string | null | undefined>;
+  keywords?: unknown[];
+  extractedKeywords?: unknown[];
+};
+
 
 /**
  * Provides jobs functionality.
@@ -129,7 +144,7 @@ export class JobsService implements OnModuleInit {
   ): boolean {
     // Admins have access to all resources
     const normalizedRole = String(
-      (user as any)?.rawRole ?? user.role ?? '',
+      (user as UserWithRawRole)?.rawRole ?? user.role ?? '',
     ).toLowerCase();
 
     if (normalizedRole === UserRole.ADMIN) {
@@ -216,7 +231,7 @@ export class JobsService implements OnModuleInit {
 
     try {
       const savedJob = await this.jobRepository.create(jobData);
-      const actualJobId = (savedJob as any)._id.toString();
+      const actualJobId = this.getJobId(savedJob);
 
       this.logger.log(
         `♻️ Reused semantic analysis from job ${cacheEntry.jobId} for new job ${actualJobId} (similarity ${(cacheEntry.semanticSimilarity ?? 0).toFixed(3)})`,
@@ -321,7 +336,7 @@ export class JobsService implements OnModuleInit {
       cacheKey,
       jobId,
       jobTitle: job.title,
-      organizationId: (job as any).organizationId,
+      organizationId: job.organizationId,
       status: 'completed',
       extractedKeywords,
       jdExtractionConfidence: confidence,
@@ -350,8 +365,12 @@ export class JobsService implements OnModuleInit {
     if (!job) {
       return '';
     }
-    const rawId = (job as any)._id ?? (job as any).id;
-    if (rawId && typeof rawId === 'object' && typeof rawId.toString === 'function') {
+    const rawId = job._id ?? (job as unknown as { id?: string }).id;
+    if (
+      rawId &&
+      typeof rawId === 'object' &&
+      typeof rawId.toString === 'function'
+    ) {
       return rawId.toString();
     }
     return typeof rawId === 'string' ? rawId : '';
@@ -364,7 +383,7 @@ export class JobsService implements OnModuleInit {
   ): Promise<string> {
     try {
       const savedJob = await this.jobRepository.create(jobData);
-      const actualJobId = (savedJob as any)._id.toString();
+      const actualJobId = this.getJobId(savedJob);
 
       this.logger.log(
         `Created job ${actualJobId} for user ${user.id} in organization ${user.organizationId}`,
@@ -421,7 +440,7 @@ export class JobsService implements OnModuleInit {
     status: JobUpdateStatus;
     organizationId?: string;
     updatedBy?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): Promise<void> {
     try {
       this.webSocketGateway.emitJobUpdated({
@@ -463,13 +482,18 @@ export class JobsService implements OnModuleInit {
 
     try {
       // Validate job exists and user has access
-      const job = await this.jobRepository.findById(jobId);
+    const job = await this.jobRepository.findById(jobId);
       if (!job) {
         throw new NotFoundException(`Job with ID ${jobId} not found`);
       }
 
       // Check if user has access to this job
-      if (!this.hasAccessToResource(user, (job as any).organizationId)) {
+    if (
+      !this.hasAccessToResource(
+        user,
+        (job as JobDocument & { organizationId?: string }).organizationId,
+      )
+    ) {
         throw new ForbiddenException('Access denied to this job');
       }
 
@@ -538,17 +562,17 @@ export class JobsService implements OnModuleInit {
       cacheKey,
       async () => {
         try {
-          const jobDocuments = await this.jobRepository.findAll({ limit: 100 });
-          return jobDocuments.map(
-            (job) =>
-              new JobListDto(
-                (job as any)._id.toString(),
-                job.title,
-                job.status as 'processing' | 'completed',
-                job.createdAt,
-                0, // Resume count will be handled by resume service
-              ),
-          );
+      const jobDocuments = await this.jobRepository.findAll({ limit: 100 });
+      return jobDocuments.map((job) => {
+        const jobId = this.getJobId(job);
+        return new JobListDto(
+          jobId,
+          job.title,
+          job.status as JobUpdateStatus,
+          job.createdAt,
+          0, // Resume count will be handled by resume service
+        );
+      });
         } catch (error) {
           this.logger.error('Error retrieving all jobs:', error);
           throw error;
@@ -571,11 +595,12 @@ export class JobsService implements OnModuleInit {
       }
 
       // Convert JobDocument to JobDetailDto
+      const resolvedJobId = this.getJobId(job);
       return new JobDetailDto(
-        (job as any)._id.toString(),
+        resolvedJobId,
         job.title,
         job.description,
-        job.status as 'processing' | 'completed',
+        job.status as JobUpdateStatus,
         job.createdAt,
         0, // Resume count will be handled by resume service
       );
@@ -728,26 +753,8 @@ export class JobsService implements OnModuleInit {
    * @param metadata - Message metadata from NATS
    */
   private async handleJdAnalysisCompleted(
-    event: {
-      jobId: string;
-      extractedData: any;
-      processingTimeMs: number;
-      confidence: number;
-      extractionMethod: string;
-      eventType: 'AnalysisJdExtractedEvent';
-      timestamp: string;
-      version: string;
-      service: string;
-      performance: {
-        processingTimeMs: number;
-        extractionMethod: string;
-      };
-      quality: {
-        confidence: number;
-        extractedFields: number;
-      };
-    },
-    _metadata?: any,
+    event: AnalysisJdExtractedEvent,
+    _metadata?: MessageMetadata,
   ): Promise<void> {
     const startTime = Date.now();
 
@@ -775,9 +782,15 @@ export class JobsService implements OnModuleInit {
 
       // Extract keywords from the analysis data
       const extractedKeywords: string[] = this.extractKeywordsFromAnalysis(
-        event.extractedData,
+        event.extractedData as KeywordSource,
       );
-      const confidence = event.quality?.confidence || event.confidence || 0.85;
+      const qualityConfidence =
+        typeof event.quality?.confidence === 'number'
+          ? event.quality.confidence
+          : undefined;
+      const extractedConfidence =
+        typeof event.confidence === 'number' ? event.confidence : undefined;
+      const confidence = qualityConfidence ?? extractedConfidence ?? 0.85;
 
       // Update job with analysis results and set status to completed
       await Promise.all([
@@ -807,12 +820,14 @@ export class JobsService implements OnModuleInit {
           title: job.title,
           status: 'completed',
           timestamp: new Date(),
-          organizationId: (job as any).organizationId,
+          organizationId: job.organizationId,
           metadata: {
             confidence,
             extractedKeywords,
             processingTime:
-              event.performance?.processingTimeMs || event.processingTimeMs,
+              (typeof event.performance?.processingTimeMs === 'number'
+                ? event.performance.processingTimeMs
+                : undefined) ?? event.processingTimeMs,
           },
         });
 
@@ -861,26 +876,8 @@ export class JobsService implements OnModuleInit {
    * @param metadata - Message metadata from NATS
    */
   private async handleJdAnalysisFailed(
-    event: {
-      jobId: string;
-      error: {
-        message: string;
-        stack?: string;
-        name: string;
-        type: string;
-      };
-      context: {
-        service: string;
-        stage: string;
-        inputSize?: number;
-        retryAttempt: number;
-      };
-      timestamp: string;
-      eventType: 'JobJdFailedEvent';
-      version: string;
-      severity: 'low' | 'medium' | 'high' | 'critical';
-    },
-    _metadata?: any,
+    event: AnalysisFailedEvent,
+    _metadata?: MessageMetadata,
   ): Promise<void> {
     const startTime = Date.now();
 
@@ -919,7 +916,7 @@ export class JobsService implements OnModuleInit {
           title: job.title,
           status: 'failed',
           timestamp: new Date(),
-          organizationId: (job as any).organizationId,
+          organizationId: job.organizationId,
           metadata: {
             errorMessage: event.error.message,
           },
@@ -1013,56 +1010,55 @@ export class JobsService implements OnModuleInit {
    * @param analysisData - The extracted data from JD analysis
    * @returns Array of extracted keywords
    */
-  private extractKeywordsFromAnalysis(analysisData: any): string[] {
+  private extractKeywordsFromAnalysis(
+    analysisData: KeywordSource | null | undefined,
+  ): string[] {
     try {
       if (!analysisData || typeof analysisData !== 'object') {
         return [];
       }
 
-      const keywords: string[] = [];
+      const keywordSet = new Set<string>();
 
-      // Extract skills if available
-      if (Array.isArray(analysisData.skills)) {
-        keywords.push(
-          ...analysisData.skills.filter(
-            (skill: any) => typeof skill === 'string',
-          ),
-        );
-      }
+      const appendStrings = (values?: unknown[]): void => {
+        if (!Array.isArray(values)) {
+          return;
+        }
+        values.forEach((value) => {
+          if (typeof value === 'string') {
+            const trimmed = value.trim();
+            if (trimmed.length > 0) {
+              keywordSet.add(trimmed);
+            }
+          }
+        });
+      };
 
-      // Extract requirements/keywords if available
+      appendStrings(analysisData.skills as unknown[]);
+      appendStrings(analysisData.keywords);
+      appendStrings(analysisData.extractedKeywords);
+
       if (Array.isArray(analysisData.requirements)) {
-        analysisData.requirements.forEach((req: any) => {
-          if (req.skill && typeof req.skill === 'string') {
-            keywords.push(req.skill);
+        analysisData.requirements.forEach((requirement) => {
+          if (typeof requirement === 'string') {
+            const trimmed = requirement.trim();
+            if (trimmed.length > 0) {
+              keywordSet.add(trimmed);
+            }
+          } else if (
+            requirement &&
+            typeof requirement === 'object' &&
+            typeof requirement.skill === 'string'
+          ) {
+            const trimmed = requirement.skill.trim();
+            if (trimmed.length > 0) {
+              keywordSet.add(trimmed);
+            }
           }
         });
       }
 
-      // Extract other keyword fields if available
-      if (Array.isArray(analysisData.keywords)) {
-        keywords.push(
-          ...analysisData.keywords.filter(
-            (keyword: any) => typeof keyword === 'string',
-          ),
-        );
-      }
-
-      if (Array.isArray(analysisData.extractedKeywords)) {
-        keywords.push(
-          ...analysisData.extractedKeywords.filter(
-            (keyword: any) => typeof keyword === 'string',
-          ),
-        );
-      }
-
-      // Deduplicate and clean keywords
-      const uniqueKeywords = [...new Set(keywords)]
-        .map((keyword) => keyword.trim())
-        .filter((keyword) => keyword.length > 0)
-        .slice(0, 20); // Limit to top 20 keywords
-
-      return uniqueKeywords;
+      return Array.from(keywordSet).slice(0, 20);
     } catch (error) {
       this.logger.warn('Error extracting keywords from analysis data:', error);
       return [];

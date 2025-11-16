@@ -177,7 +177,11 @@ export class MfaService {
   }
 
   private normalizeMfaSettings(
-    rawSettings?: Partial<MfaSettings> | null,
+    rawSettings?:
+      | (Partial<Omit<MfaSettings, 'methods'>> & {
+          methods?: Array<MfaMethod | string>;
+        })
+      | null,
   ): MfaSettings {
     if (!rawSettings) {
       return {

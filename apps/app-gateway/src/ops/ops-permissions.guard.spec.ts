@@ -4,7 +4,9 @@ import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Permission } from '@ai-recruitment-clerk/user-management-domain';
 import { resetConfigCache } from '@ai-recruitment-clerk/configuration';
 
-const createContext = (user?: any): ExecutionContext =>
+const createContext = (
+  user?: { permissions?: Permission[] },
+): ExecutionContext =>
   ({
     switchToHttp: () => ({
       getRequest: () => ({
@@ -13,7 +15,7 @@ const createContext = (user?: any): ExecutionContext =>
     }),
     getHandler: () => ({}),
     getClass: () => ({}),
-  }) as unknown as ExecutionContext;
+  }) as ExecutionContext;
 
 describe('OpsPermissionsGuard', () => {
   const requiredPermission = 'ops.manage' as Permission;

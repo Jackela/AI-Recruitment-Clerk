@@ -64,8 +64,6 @@ describe('Report Selectors', () => {
     reports: Array<Partial<ReportListItem>>,
   ): ReportListItem[] => reports as unknown as ReportListItem[];
 
-  const reportListItems = reportListItems;
-
   const mockReportState: ReportState = {
     reports: reportListItems,
     selectedReport: mockSelectedReport,

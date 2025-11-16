@@ -12,6 +12,8 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import type { Request } from 'express';
+import type { AuthenticatedRequest } from '@ai-recruitment-clerk/user-management-domain';
 import { CacheService } from '../../cache/cache.service';
 
 /**
@@ -28,6 +30,55 @@ export interface PerformanceMetrics {
   dbQueryTime?: number;
   redisQueryTime?: number;
 }
+
+type PerformanceRequest = AuthenticatedRequest &
+  Request & {
+  cacheHit?: boolean;
+  dbQueryTime?: number;
+  redisQueryTime?: number;
+};
+
+type RealtimeEndpointStat = {
+  count: number;
+  averageTime: number;
+  minTime: number;
+  maxTime: number;
+  errors: number;
+};
+
+export type RealtimePerformanceStats = {
+  totalRequests: number;
+  averageResponseTime: number;
+  slowRequests: number;
+  cacheHitRate: number;
+  errorRate: number;
+  lastUpdated: number;
+  endpointStats: Record<string, RealtimeEndpointStat>;
+};
+
+type SlowEndpointReport = {
+  endpoint: string;
+  averageTime: number;
+  maxTime: number;
+  count: number;
+  errorRate: number;
+};
+
+type PerformanceReportSummary = {
+  totalRequests: number;
+  averageResponseTime: number;
+  slowRequestPercentage: number;
+  cacheHitRate: number;
+  errorRate: number;
+  lastUpdated: string;
+  note?: string;
+};
+
+export type PerformanceReport = {
+  summary: PerformanceReportSummary;
+  slowestEndpoints: SlowEndpointReport[];
+  recommendations: string[];
+};
 
 /**
  * Represents the performance monitoring interceptor.
@@ -50,11 +101,14 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
    * Performs the intercept operation.
    * @param context - The context.
    * @param next - The next.
-   * @returns The Observable<any>.
+   * @returns The Observable<unknown>.
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<unknown> {
     const startTime = Date.now();
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<PerformanceRequest>();
     const response = context.switchToHttp().getResponse();
 
     const endpoint = `${request.method} ${request.route?.path || request.url}`;
@@ -63,7 +117,7 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       tap({
-        next: (data) => {
+        next: () => {
           this.recordPerformanceMetric(
             startTime,
             endpoint,
@@ -71,18 +125,17 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
             response.statusCode,
             userId,
             request,
-            data,
           );
         },
         error: (error) => {
+          const statusCode = this.resolveStatusCode(error);
           this.recordPerformanceMetric(
             startTime,
             endpoint,
             method,
-            error.status || 500,
+            statusCode,
             userId,
             request,
-            null,
             error,
           );
         },
@@ -96,17 +149,15 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
     method: string,
     statusCode: number,
     userId?: string,
-    request?: any,
-    _data?: any,
-    error?: any,
+    request?: PerformanceRequest,
+    error?: unknown,
   ) {
     const responseTime = Date.now() - startTime;
     const timestamp = Date.now();
 
-    // 提取缓存命中信息
-    const cacheHit = request?.cacheHit || false;
-    const dbQueryTime = request?.dbQueryTime || 0;
-    const redisQueryTime = request?.redisQueryTime || 0;
+    const cacheHit = request?.cacheHit ?? false;
+    const dbQueryTime = request?.dbQueryTime ?? 0;
+    const redisQueryTime = request?.redisQueryTime ?? 0;
 
     const metrics: PerformanceMetrics = {
       endpoint,
@@ -120,13 +171,8 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
       redisQueryTime,
     };
 
-    // 记录性能指标
     await this.storeMetrics(metrics);
-
-    // 性能警告检查
     this.checkPerformanceThresholds(metrics, error);
-
-    // 实时性能日志
     this.logPerformance(metrics, error);
   }
 
@@ -158,7 +204,9 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
       // 更新实时统计
       await this.updateRealtimeStats(metrics);
     } catch (error) {
-      this.logger.warn('Failed to store performance metrics:', error.message);
+      this.logger.warn(
+        `Failed to store performance metrics: ${this.getErrorMessage(error)}`,
+      );
     }
   }
 
@@ -169,54 +217,34 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
         'stats',
         'realtime',
       );
-      const stats = (await this.cacheService.get<any>(statsKey)) || {
-        totalRequests: 0,
-        averageResponseTime: 0,
-        slowRequests: 0,
-        cacheHitRate: 0,
-        errorRate: 0,
-        lastUpdated: Date.now(),
-        endpointStats: {},
-      };
+      const stats =
+        (await this.cacheService.get<RealtimePerformanceStats>(statsKey)) ||
+        this.createInitialStats();
 
-      // 更新总体统计
-      stats.totalRequests += 1;
+      const previousTotal = stats.totalRequests;
+      const newTotal = previousTotal + 1;
+      stats.totalRequests = newTotal;
       stats.averageResponseTime =
-        (stats.averageResponseTime * (stats.totalRequests - 1) +
-          metrics.responseTime) /
-        stats.totalRequests;
+        (stats.averageResponseTime * previousTotal + metrics.responseTime) /
+        newTotal;
 
       if (metrics.responseTime > this.performanceThresholds.warning) {
         stats.slowRequests += 1;
       }
 
-      if (metrics.statusCode >= 400) {
-        stats.errorRate =
-          (stats.errorRate * (stats.totalRequests - 1) + 1) /
-          stats.totalRequests;
-      } else {
-        stats.errorRate =
-          (stats.errorRate * (stats.totalRequests - 1)) / stats.totalRequests;
-      }
+      const currentErrors = stats.errorRate * previousTotal;
+      const errorIncrement = metrics.statusCode >= 400 ? 1 : 0;
+      stats.errorRate = (currentErrors + errorIncrement) / newTotal;
 
       if (metrics.cacheHit !== undefined) {
-        const currentHits = stats.cacheHitRate * (stats.totalRequests - 1);
+        const currentHits = stats.cacheHitRate * previousTotal;
         stats.cacheHitRate =
-          (currentHits + (metrics.cacheHit ? 1 : 0)) / stats.totalRequests;
+          (currentHits + (metrics.cacheHit ? 1 : 0)) / newTotal;
       }
 
-      // 更新端点特定统计
-      if (!stats.endpointStats[metrics.endpoint]) {
-        stats.endpointStats[metrics.endpoint] = {
-          count: 0,
-          averageTime: 0,
-          minTime: metrics.responseTime,
-          maxTime: metrics.responseTime,
-          errors: 0,
-        };
-      }
-
-      const endpointStat = stats.endpointStats[metrics.endpoint];
+      const endpointStat =
+        stats.endpointStats[metrics.endpoint] ??
+        this.createInitialEndpointStat(metrics.responseTime);
       endpointStat.count += 1;
       endpointStat.averageTime =
         (endpointStat.averageTime * (endpointStat.count - 1) +
@@ -230,27 +258,28 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
         endpointStat.maxTime,
         metrics.responseTime,
       );
-
       if (metrics.statusCode >= 400) {
         endpointStat.errors += 1;
       }
+      stats.endpointStats[metrics.endpoint] = endpointStat;
 
       stats.lastUpdated = Date.now();
 
-      // 存储统计信息（10分钟TTL）
       await this.cacheService.set(statsKey, stats, { ttl: 600000 });
     } catch (error) {
-      this.logger.warn('Failed to update realtime stats:', error.message);
+      this.logger.warn(
+        `Failed to update realtime stats: ${this.getErrorMessage(error)}`,
+      );
     }
   }
 
-  private checkPerformanceThresholds(metrics: PerformanceMetrics, error?: any) {
+  private checkPerformanceThresholds(metrics: PerformanceMetrics, error?: unknown) {
     const { responseTime, endpoint } = metrics;
 
     if (responseTime > this.performanceThresholds.critical) {
       this.logger.error(
         `🚨 CRITICAL: Slow response detected - ${endpoint} took ${responseTime}ms`,
-        { metrics, error: error?.message },
+        { metrics, error: this.getErrorMessage(error) },
       );
     } else if (responseTime > this.performanceThresholds.warning) {
       this.logger.warn(
@@ -260,7 +289,7 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
     }
   }
 
-  private logPerformance(metrics: PerformanceMetrics, error?: any) {
+  private logPerformance(metrics: PerformanceMetrics, error?: unknown) {
     const {
       endpoint,
       responseTime,
@@ -279,9 +308,11 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
       .filter(Boolean)
       .join(' ');
 
-    if (error) {
+    const errorMessage = this.getErrorMessage(error);
+
+    if (errorMessage) {
       this.logger.error(
-        `❌ ${endpoint} | ${statusCode} | ${performanceInfo} | ERROR: ${error.message}`,
+        `❌ ${endpoint} | ${statusCode} | ${performanceInfo} | ERROR: ${errorMessage}`,
       );
     } else if (responseTime > this.performanceThresholds.warning) {
       this.logger.warn(
@@ -297,7 +328,7 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
    * Retrieves performance stats.
    * @returns A promise that resolves to any.
    */
-  async getPerformanceStats(): Promise<any> {
+  async getPerformanceStats(): Promise<RealtimePerformanceStats | null> {
     try {
       const statsKey = this.cacheService.generateKey(
         'performance',
@@ -305,18 +336,13 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
         'realtime',
       );
       return (
-        (await this.cacheService.get(statsKey)) || {
-          totalRequests: 0,
-          averageResponseTime: 0,
-          slowRequests: 0,
-          cacheHitRate: 0,
-          errorRate: 0,
-          lastUpdated: Date.now(),
-          endpointStats: {},
-        }
+        (await this.cacheService.get<RealtimePerformanceStats>(statsKey)) ||
+        this.createInitialStats()
       );
     } catch (error) {
-      this.logger.error('Failed to get performance stats:', error);
+      this.logger.error(
+        `Failed to get performance stats: ${this.getErrorMessage(error)}`,
+      );
       return null;
     }
   }
@@ -347,7 +373,9 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
         (await this.cacheService.get<PerformanceMetrics[]>(metricsKey)) || []
       );
     } catch (error) {
-      this.logger.error('Failed to get historical metrics:', error);
+      this.logger.error(
+        `Failed to get historical metrics: ${this.getErrorMessage(error)}`,
+      );
       return [];
     }
   }
@@ -357,63 +385,41 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
    * Generates performance report.
    * @returns The Promise<{ summary: any; slowestEndpoints: any[]; recommendations: string[]; }>.
    */
-  async generatePerformanceReport(): Promise<{
-    summary: any;
-    slowestEndpoints: any[];
-    recommendations: string[];
-  }> {
+  async generatePerformanceReport(): Promise<PerformanceReport> {
     try {
       const stats = await this.getPerformanceStats();
 
       if (!stats || stats.totalRequests === 0) {
         return {
-          summary: { message: 'No performance data available' },
+          summary: this.buildSummary(this.createInitialStats(), 'No performance data available'),
           slowestEndpoints: [],
           recommendations: [],
         };
       }
 
-      // 找出最慢的端点
-      const slowestEndpoints = Object.entries(stats.endpointStats)
-        .map(([endpoint, stat]: [string, any]) => ({
-          endpoint,
-          averageTime: stat.averageTime,
-          maxTime: stat.maxTime,
-          count: stat.count,
-          errorRate: stat.errors / stat.count,
-        }))
-        .sort((a, b) => b.averageTime - a.averageTime)
-        .slice(0, 10);
+      const slowestEndpoints = this.buildSlowestEndpoints(stats);
 
-      // 生成性能建议
       const recommendations = this.generateRecommendations(
         stats,
         slowestEndpoints,
       );
 
       return {
-        summary: {
-          totalRequests: stats.totalRequests,
-          averageResponseTime: Math.round(stats.averageResponseTime),
-          slowRequestPercentage: Math.round(
-            (stats.slowRequests / stats.totalRequests) * 100,
-          ),
-          cacheHitRate: Math.round(stats.cacheHitRate * 100),
-          errorRate: Math.round(stats.errorRate * 100),
-          lastUpdated: new Date(stats.lastUpdated).toISOString(),
-        },
+        summary: this.buildSummary(stats),
         slowestEndpoints,
         recommendations,
       };
     } catch (error) {
-      this.logger.error('Failed to generate performance report:', error);
+      this.logger.error(
+        `Failed to generate performance report: ${this.getErrorMessage(error)}`,
+      );
       throw error;
     }
   }
 
   private generateRecommendations(
-    stats: any,
-    slowestEndpoints: any[],
+    stats: RealtimePerformanceStats,
+    slowestEndpoints: SlowEndpointReport[],
   ): string[] {
     const recommendations: string[] = [];
 
@@ -436,7 +442,9 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
     }
 
     const slowRequestPercentage =
-      (stats.slowRequests / stats.totalRequests) * 100;
+      stats.totalRequests === 0
+        ? 0
+        : (stats.slowRequests / stats.totalRequests) * 100;
     if (slowRequestPercentage > 10) {
       recommendations.push('超过10%的请求响应缓慢，建议进行系统性能调优');
     }
@@ -446,5 +454,92 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
     }
 
     return recommendations;
+  }
+
+  private buildSlowestEndpoints(
+    stats: RealtimePerformanceStats,
+  ): SlowEndpointReport[] {
+    return Object.entries(stats.endpointStats)
+      .map(([endpoint, stat]) => ({
+        endpoint,
+        averageTime: stat.averageTime,
+        maxTime: stat.maxTime,
+        count: stat.count,
+        errorRate: stat.count > 0 ? stat.errors / stat.count : 0,
+      }))
+      .sort((a, b) => b.averageTime - a.averageTime)
+      .slice(0, 10);
+  }
+
+  private buildSummary(
+    stats: RealtimePerformanceStats,
+    note?: string,
+  ): PerformanceReportSummary {
+    const slowRequestPercentage =
+      stats.totalRequests === 0
+        ? 0
+        : (stats.slowRequests / stats.totalRequests) * 100;
+    return {
+      totalRequests: stats.totalRequests,
+      averageResponseTime: Math.round(stats.averageResponseTime),
+      slowRequestPercentage: Math.round(slowRequestPercentage),
+      cacheHitRate: Math.round(stats.cacheHitRate * 100),
+      errorRate: Math.round(stats.errorRate * 100),
+      lastUpdated: new Date(stats.lastUpdated).toISOString(),
+      note,
+    };
+  }
+
+  private createInitialStats(): RealtimePerformanceStats {
+    return {
+      totalRequests: 0,
+      averageResponseTime: 0,
+      slowRequests: 0,
+      cacheHitRate: 0,
+      errorRate: 0,
+      lastUpdated: Date.now(),
+      endpointStats: {},
+    };
+  }
+
+  private createInitialEndpointStat(
+    responseTime: number,
+  ): RealtimeEndpointStat {
+    return {
+      count: 0,
+      averageTime: responseTime,
+      minTime: responseTime,
+      maxTime: responseTime,
+      errors: 0,
+    };
+  }
+
+  private getErrorMessage(error?: unknown): string | undefined {
+    if (!error) {
+      return undefined;
+    }
+    if (error instanceof Error) {
+      return error.message;
+    }
+    if (typeof error === 'string') {
+      return error;
+    }
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return String(error);
+    }
+  }
+
+  private resolveStatusCode(error: unknown): number {
+    if (
+      error &&
+      typeof error === 'object' &&
+      'status' in error &&
+      typeof (error as { status: unknown }).status === 'number'
+    ) {
+      return (error as { status: number }).status;
+    }
+    return 500;
   }
 }

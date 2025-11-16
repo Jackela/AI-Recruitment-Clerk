@@ -37,10 +37,8 @@ export class TestRateLimitBypassFilter implements ExceptionFilter {
     }
 
     // Default behavior: pass through the original exception response
-    const status = (exception as any).getStatus?.() ?? 500;
-    const payload = (exception as any).getResponse?.() ?? {
-      statusCode: status,
-    };
+    const status = exception.getStatus();
+    const payload = exception.getResponse();
     response.status(status).json(payload);
   }
 }

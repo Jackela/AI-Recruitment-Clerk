@@ -331,8 +331,9 @@ export class ErrorHandlingService implements ErrorHandler {
     errorResponse: StandardizedErrorResponse,
     _context: ErrorContext,
   ): void {
-    const resetTime = errorResponse.details?.resetTime;
-    if (resetTime) {
+    const details = this.asRecord(errorResponse.details);
+    const resetTime = details?.resetTime;
+    if (typeof resetTime === 'string' || typeof resetTime === 'number') {
       this.showRateLimitMessage(new Date(resetTime));
     }
   }
@@ -349,6 +350,15 @@ export class ErrorHandlingService implements ErrorHandler {
     if (this.toastService) {
       this.toastService.error(errorResponse.error.userMessage);
     }
+  }
+
+  private asRecord(
+    value: unknown,
+  ): Record<string, unknown> | null {
+    if (typeof value === 'object' && value !== null) {
+      return value as Record<string, unknown>;
+    }
+    return null;
   }
 
   /**

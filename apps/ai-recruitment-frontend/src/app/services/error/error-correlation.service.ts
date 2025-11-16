@@ -454,6 +454,8 @@ export class ErrorCorrelationService {
     )[0] as PerformanceNavigationTiming;
     if (!navigation) return {};
 
+    const memoryUsage = this.getMemoryUsage();
+
     return {
       domContentLoaded: Math.round(
         navigation.domContentLoadedEventEnd -
@@ -463,7 +465,9 @@ export class ErrorCorrelationService {
         navigation.loadEventEnd - navigation.loadEventStart,
       ),
       firstPaint: this.getFirstPaintTime(),
-      memoryUsage: this.getMemoryUsage(),
+      memoryUsed: memoryUsage?.usedJSHeapSize,
+      memoryTotal: memoryUsage?.totalJSHeapSize,
+      memoryLimit: memoryUsage?.jsHeapSizeLimit,
     };
   }
 
@@ -501,7 +505,7 @@ export class ErrorCorrelationService {
       : null;
   }
 
-  private groupBy<T extends Record<string, unknown>>(
+  private groupBy<T>(
     array: T[],
     key: keyof T,
   ): Record<string, number> {

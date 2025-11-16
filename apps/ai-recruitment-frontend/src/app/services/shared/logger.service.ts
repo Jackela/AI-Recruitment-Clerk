@@ -72,7 +72,13 @@ export class LoggerService {
    * Log an error message
    */
   error(message: string, context?: string, error?: Error | unknown): void {
-    this.writeLog(LogLevel.ERROR, message, context, undefined, error);
+    this.writeLog(
+      LogLevel.ERROR,
+      message,
+      context,
+      undefined,
+      error instanceof Error ? error : undefined,
+    );
   }
 
   /**

@@ -1,4 +1,5 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import type { Request } from 'express';
 import { FeedbackCodeController } from './feedback-code.controller';
 import { FeedbackCodeService } from './feedback-code.service';
 import {
@@ -6,15 +7,10 @@ import {
   MarkFeedbackCodeUsedDto,
 } from './feedback-code.service';
 
-interface MockRequest {
-  get: jest.Mock;
-  connection: { remoteAddress: string };
-  socket: { remoteAddress: string };
-  [key: string]: unknown;
-}
-
-const createRequest = (overrides: Record<string, unknown> = {}): MockRequest =>
+const createRequest = (overrides: Partial<Request> = {}): Request =>
   ({
+    ip: '192.0.2.1',
+    headers: {},
     get: jest.fn().mockImplementation((header: string) => {
       if (header === 'User-Agent') {
         return 'jest-agent';
@@ -27,7 +23,7 @@ const createRequest = (overrides: Record<string, unknown> = {}): MockRequest =>
     connection: { remoteAddress: '192.0.2.1' },
     socket: { remoteAddress: '192.0.2.1' },
     ...overrides,
-  });
+  } as Request);
 
 const createService = (): jest.Mocked<FeedbackCodeService> =>
   ({
@@ -37,7 +33,10 @@ const createService = (): jest.Mocked<FeedbackCodeService> =>
     markAsUsed: jest.fn(),
     getFeedbackCodeDetails: jest.fn(),
     getMarketingStats: jest.fn(),
-    handleFeedbackWebhook: jest.fn(),
+    getPendingPayments: jest.fn(),
+    updatePaymentStatus: jest.fn(),
+    cleanupExpiredCodes: jest.fn(),
+    batchUpdatePaymentStatus: jest.fn(),
   } as unknown as jest.Mocked<FeedbackCodeService>);
 
 describe('FeedbackCodeController (lightweight)', () => {
@@ -61,22 +60,15 @@ describe('FeedbackCodeController (lightweight)', () => {
             header === 'User-Agent' ? 'jest-agent' : '198.51.100.5',
           ),
       });
-      interface FeedbackCodeRecord {
-        id: string;
-        code: string;
-        generatedAt: Date;
-        isUsed: boolean;
-        paymentStatus: string;
-      }
       service.recordFeedbackCode.mockResolvedValue({
         id: 'doc-1',
         code: dto.code,
         generatedAt: new Date('2024-01-01T00:00:00Z'),
         isUsed: false,
         paymentStatus: 'pending',
-      } as any);
+      });
 
-      const result = await controller.recordFeedbackCode(dto, request as any);
+      const result = await controller.recordFeedbackCode(dto, request);
 
       expect(result.success).toBe(true);
       expect(result.data.code).toBe(dto.code);
@@ -91,10 +83,7 @@ describe('FeedbackCodeController (lightweight)', () => {
 
     it('rejects invalid request payloads', async () => {
       await expect(
-        controller.recordFeedbackCode(
-          { code: '123' },
-          createRequest() as any,
-        ),
+        controller.recordFeedbackCode({ code: '123' }, createRequest()),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -102,7 +91,7 @@ describe('FeedbackCodeController (lightweight)', () => {
       service.recordFeedbackCode.mockRejectedValue(new Error('db error'));
 
       await expect(
-        controller.recordFeedbackCode(dto, createRequest() as any),
+        controller.recordFeedbackCode(dto, createRequest()),
       ).rejects.toThrow('db error');
     });
   });
@@ -135,18 +124,13 @@ describe('FeedbackCodeController (lightweight)', () => {
     };
 
     it('marks a code as used and returns summary', async () => {
-      interface MarkUsedResult {
-        code: string;
-        paymentStatus: string;
-        qualityScore: number;
-      }
       service.markFeedbackCodeAsUsed.mockResolvedValue({
         code: dto.code,
         paymentStatus: 'pending',
         qualityScore: 0.9,
         generatedAt: new Date('2024-01-01T00:00:00Z'),
         isUsed: true,
-      } as any);
+      });
 
       const result = await controller.markFeedbackCodeAsUsed(dto);
 
@@ -173,10 +157,12 @@ describe('FeedbackCodeController (lightweight)', () => {
     };
 
     it('uses simplified alias handler', async () => {
-      (service.markAsUsed as any).mockResolvedValue({
+      service.markAsUsed.mockResolvedValue({
         code: dto.code,
         qualityScore: 0.6,
         paymentStatus: 'pending',
+        generatedAt: new Date('2024-01-01T00:00:00Z'),
+        isUsed: true,
       });
 
       const result = await controller.markAsUsed(dto);
@@ -211,21 +197,22 @@ describe('FeedbackCodeController (lightweight)', () => {
   });
 
   describe('helpers', () => {
+    const getUtils = () =>
+      controller as unknown as {
+        extractSessionId: (code: string) => string;
+        isValidAlipayAccount: (account: string) => boolean;
+      };
+
     it('derives session id from code suffix', () => {
-      const sessionId = (controller as any).extractSessionId('FB123456');
+      const sessionId = getUtils().extractSessionId('FB123456');
       expect(sessionId).toBe('3456');
     });
 
     it('validates simple alipay patterns', () => {
-      expect((controller as any).isValidAlipayAccount('user@example.com')).toBe(
-        true,
-      );
-      expect((controller as any).isValidAlipayAccount('13800138000')).toBe(
-        true,
-      );
-      expect((controller as any).isValidAlipayAccount('bad-account')).toBe(
-        false,
-      );
+      const utils = getUtils();
+      expect(utils.isValidAlipayAccount('user@example.com')).toBe(true);
+      expect(utils.isValidAlipayAccount('13800138000')).toBe(true);
+      expect(utils.isValidAlipayAccount('bad-account')).toBe(false);
     });
   });
 });

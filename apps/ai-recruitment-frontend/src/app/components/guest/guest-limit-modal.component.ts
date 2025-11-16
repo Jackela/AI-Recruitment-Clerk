@@ -125,12 +125,10 @@ import * as GuestActions from '../../store/guest/guest.actions';
               [disabled]="isLoading$ | async"
               class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <ng-container *ngIf="(isLoading$ | async) as loading">
-                <span *ngIf="!loading">获取反馈码参与活动</span>
-                <span
-                  *ngIf="loading"
-                  class="flex items-center justify-center"
-                >
+              <ng-container
+                *ngIf="(isLoading$ | async) as loading; else idleButtonLabel"
+              >
+                <span class="flex items-center justify-center">
                   <svg
                     class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
                     fill="none"
@@ -153,6 +151,9 @@ import * as GuestActions from '../../store/guest/guest.actions';
                   生成中...
                 </span>
               </ng-container>
+              <ng-template #idleButtonLabel>
+                <span>获取反馈码参与活动</span>
+              </ng-template>
             </button>
 
             <button

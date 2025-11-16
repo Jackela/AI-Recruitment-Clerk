@@ -800,7 +800,7 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     }
 
     this.selectedEntries.set(selected);
-    this.onSelectionChange.emit(selected);
+    this.selectionChange.emit(selected);
   }
 
   // Pagination methods
@@ -829,7 +829,7 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
   }
 
   emitPageChange() {
-    this.onPageChange.emit({
+    this.pageChange.emit({
       pageIndex: this.currentPage(),
       pageSize: this.pageSize,
     });
@@ -857,7 +857,7 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
 
   // Export functionality
   exportData() {
-    this.onExport.emit();
+    this.exportRequested.emit();
     // Default CSV export implementation for timesheet data
     const csv = this.convertToCSV(this.filteredData());
     this.downloadCSV(csv, `timesheet-export-${new Date().toISOString().split('T')[0]}.csv`);

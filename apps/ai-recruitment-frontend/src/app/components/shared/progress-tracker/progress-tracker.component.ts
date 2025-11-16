@@ -6,6 +6,8 @@ import { takeUntil } from 'rxjs/operators';
 import {
   WebSocketService,
   ProgressUpdate,
+  WebSocketMessage,
+  WebSocketMessageData,
 } from '../../../services/websocket.service';
 import { ToastService } from '../../../services/toast.service';
 
@@ -601,30 +603,40 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
       });
   }
 
-  private handleWebSocketMessage(message: WebSocketProgressMessage): void {
-    const t = isProgressMessageType(message.type) ? message.type : 'info';
-    this.addMessage(t, message.data?.message || '状态更新');
+  private handleWebSocketMessage(message: WebSocketMessage): void {
+    const payload = this.asProgressPayload(message.data);
+    const messageType = isProgressMessageType(message.type)
+      ? message.type
+      : 'info';
+    this.addMessage(messageType, payload?.message || '状态更新');
 
     switch (message.type) {
       case 'step_change':
-        if (message.data?.currentStep) {
+        if (payload?.currentStep) {
           this.handleStepChange({
-            currentStep: message.data.currentStep,
+            currentStep: payload.currentStep,
             message:
-              typeof message.data.message === 'string'
-                ? message.data.message
-                : undefined,
+              typeof payload.message === 'string' ? payload.message : undefined,
             progress:
-              typeof message.data.progress === 'number'
-                ? message.data.progress
+              typeof payload.progress === 'number'
+                ? payload.progress
                 : undefined,
           });
         }
         break;
       case 'status_update':
-        this.addMessage('info', message.data?.message || '状态更新');
+        this.addMessage('info', payload?.message || '状态更新');
         break;
     }
+  }
+
+  private asProgressPayload(
+    data: WebSocketMessageData,
+  ): WebSocketProgressMessage['data'] {
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      return data as WebSocketProgressMessage['data'];
+    }
+    return undefined;
   }
 
   private handleProgressUpdate(progress: ProgressUpdate): void {

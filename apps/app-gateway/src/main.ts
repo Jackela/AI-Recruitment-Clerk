@@ -103,23 +103,32 @@ async function bootstrap() {
   const server = app.getHttpAdapter().getInstance();
   server.set('trust proxy', 1);
   server.disable('x-powered-by');
-  server.use((req: any, res: any, next: any) => {
-    req.setTimeout(30000, () => {
-      res.status(408).json({
-        error: 'Request timeout',
-        message: 'Request took too long to process',
+  server.use(
+    (
+      req: { setTimeout: (ms: number, cb: () => void) => void; connection: { setTimeout: (ms: number) => void } },
+      res: { status: (code: number) => { json: (body: Record<string, string>) => void } },
+      next: () => void,
+    ) => {
+      req.setTimeout(30000, () => {
+        res.status(408).json({
+          error: 'Request timeout',
+          message: 'Request took too long to process',
+        });
       });
-    });
-    req.connection.setTimeout(60000);
-    next();
-  });
+      req.connection.setTimeout(60000);
+      next();
+    },
+  );
   if (config.features.enableCompression) {
     const compression = require('compression');
     server.use(
       compression({
         level: 6,
         threshold: 1024,
-        filter: (req: any, res: any) => {
+        filter: (
+          req: { headers: Record<string, string | string[] | undefined> },
+          res: { setHeader: (name: string, value: string) => void },
+        ) => {
           if (req.headers['x-no-compression']) return false;
           return compression.filter(req, res);
         },

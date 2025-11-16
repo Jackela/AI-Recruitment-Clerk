@@ -9,29 +9,12 @@ import {
   IsArray,
   Min,
 } from 'class-validator';
-// Fallback enums for analytics
-enum EventType {
-  USER_INTERACTION = 'user_interaction',
-  SYSTEM_EVENT = 'system_event',
-  ERROR_EVENT = 'error_event',
-}
+import { EventType } from '@ai-recruitment-clerk/shared-dtos';
 
 enum MetricUnit {
   COUNT = 'count',
   PERCENTAGE = 'percentage',
   MILLISECONDS = 'milliseconds',
-}
-
-enum ReportType {
-  SUMMARY = 'summary',
-  DETAILED = 'detailed',
-  TREND = 'trend',
-}
-
-enum DataScope {
-  USER = 'user',
-  ORGANIZATION = 'organization',
-  SYSTEM = 'system',
 }
 
 /**
@@ -56,7 +39,7 @@ export class TrackEventDto {
     example: { action: 'click', target: 'submit_button' },
   })
   @IsObject()
-  eventData: any;
+  eventData: Record<string, unknown> = {};
 
   @ApiProperty({
     description: '事件上下文（可选）',
@@ -65,7 +48,7 @@ export class TrackEventDto {
   })
   @IsOptional()
   @IsObject()
-  context?: any;
+  context?: Record<string, unknown>;
 }
 
 /**
@@ -237,10 +220,10 @@ export class DataRetentionReportDto {
   eventsToAnonymize = 0;
 
   @ApiProperty({ description: '按事件类型统计' })
-  eventTypeStatistics: Record<string, any> = {};
+  eventTypeStatistics: Record<string, unknown> = {};
 
   @ApiProperty({ description: '保留策略列表' })
-  retentionPolicies: any[] = [];
+  retentionPolicies: Array<Record<string, unknown>> = [];
 }
 
 /**

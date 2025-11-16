@@ -304,16 +304,16 @@ export const guestReducer = createReducer(
               status: status ?? state.currentAnalysis.status,
             }
           : state.currentAnalysis,
-      analysisResults: {
-        ...state.analysisResults,
-        [analysisId]: state.analysisResults[analysisId]
-          ? {
+      analysisResults: state.analysisResults[analysisId]
+        ? {
+            ...state.analysisResults,
+            [analysisId]: {
               ...state.analysisResults[analysisId],
               progress,
               status: status ?? state.analysisResults[analysisId].status,
-            }
-          : state.analysisResults[analysisId],
-      },
+            },
+          }
+        : state.analysisResults,
     }),
   ),
 

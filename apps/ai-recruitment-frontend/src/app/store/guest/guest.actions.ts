@@ -6,6 +6,7 @@ import {
   AnalysisResultsResponse,
   ResumeAnalysisResponse,
 } from '../../services/guest/guest-api.service';
+import { GuestState } from './guest.state';
 
 /**
  * Defines the shape of the analysis data.
@@ -68,6 +69,9 @@ export interface DemoAnalysisResults {
   recommendations: string[];
   isDemo: true;
 }
+
+type GuestAnalysisStatus =
+  GuestState['analysisResults'][string]['status'];
 
 // Device and initialization actions
 export const initializeGuest = createAction(
@@ -222,7 +226,11 @@ export const hideAnalysisResults = createAction(
 
 export const updateAnalysisProgress = createAction(
   '[Guest] Update Analysis Progress',
-  props<{ analysisId: string; progress: number; status?: string }>(),
+  props<{
+    analysisId: string;
+    progress: number;
+    status?: GuestAnalysisStatus;
+  }>(),
 );
 
 // Data management actions

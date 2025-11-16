@@ -22,6 +22,24 @@ type MockResponse = {
   setHeader: jest.Mock;
 };
 
+const createAuthenticatedUser = (
+  overrides: Partial<{
+    id: string;
+    sub: string;
+    email: string;
+    organizationId?: string;
+    role: string;
+    rawRole?: string;
+  }> = {},
+) => ({
+  id: 'user-1',
+  sub: 'user-1',
+  email: 'user@example.com',
+  organizationId: 'org-1',
+  role: 'admin',
+  ...overrides,
+});
+
 const createExecutionContext = (
   requestOverrides: Partial<MockRequest> = {},
   responseOverrides: Partial<MockResponse> = {},
@@ -184,7 +202,7 @@ describe('JwtAuthGuard', () => {
         { setHeader: jest.fn() },
       );
 
-      const user = { id: 'user-1', role: 'admin', organizationId: 'org-1' };
+      const user = createAuthenticatedUser();
       const result = guard.handleRequest(null, user, null, ctx);
 
       expect(result).toBe(user);
@@ -427,12 +445,13 @@ describe('JwtAuthGuard', () => {
         { setHeader: mockSetHeader },
       );
 
-      const user = {
+      const user = createAuthenticatedUser({
         id: 'user-123',
+        sub: 'user-123',
         role: 'hr_manager',
         organizationId: 'org-456',
         email: 'test@example.com',
-      };
+      });
       guard.handleRequest(null, user, null, ctx);
 
       expect(mockSetHeader).toHaveBeenCalledWith('X-Auth-User-Id', 'user-123');
@@ -449,7 +468,9 @@ describe('JwtAuthGuard', () => {
         { setHeader: mockSetHeader },
       );
 
-      const user = { id: 'user-1', role: 'admin' };
+      const user = createAuthenticatedUser({
+        organizationId: undefined,
+      });
       guard.handleRequest(null, user, null, ctx);
 
       expect(mockSetHeader).toHaveBeenCalledWith('X-Auth-User-Id', 'user-1');

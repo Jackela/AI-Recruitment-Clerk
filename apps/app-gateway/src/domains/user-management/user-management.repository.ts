@@ -4,7 +4,14 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, FilterQuery, UpdateQuery } from 'mongoose';
+import {
+  Model,
+  FilterQuery,
+  UpdateQuery,
+  ProjectionType,
+  SortOrder,
+  HydratedDocument,
+} from 'mongoose';
 import {
   CreateUserDto,
   UserRole,
@@ -267,14 +274,19 @@ export class UserManagementRepository {
     value: boolean,
   ): Promise<void> {
     try {
-      const updateData: any = {
-        updatedAt: new Date(),
+      const updateData: UpdateQuery<UserEntity> = {
+        $set: {
+          updatedAt: new Date(),
+          [`securityFlags.${flag}`]: value,
+        },
       };
-      updateData[`securityFlags.${flag}`] = value;
 
       // Special handling for account locking
       if (flag === 'account_locked') {
-        updateData.status = value ? UserStatus.SUSPENDED : UserStatus.ACTIVE;
+        updateData.$set = {
+          ...updateData.$set,
+          status: value ? UserStatus.SUSPENDED : UserStatus.ACTIVE,
+        };
       }
 
       const result = await this.userModel
@@ -331,8 +343,8 @@ export class UserManagementRepository {
     options: {
       limit?: number;
       skip?: number;
-      sort?: any;
-      projection?: any;
+      sort?: Record<string, SortOrder>;
+      projection?: ProjectionType<UserEntity>;
     } = {},
   ): Promise<{ users: UserEntity[]; totalCount: number }> {
     try {
@@ -499,7 +511,9 @@ export class UserManagementRepository {
   /**
    * Map MongoDB document to UserEntity
    */
-  private mapToEntity(doc: any): UserEntity {
+  private mapToEntity(
+    doc: HydratedDocument<UserEntity> | UserEntity,
+  ): UserEntity {
     return {
       _id: doc._id?.toString(),
       id: doc.id,

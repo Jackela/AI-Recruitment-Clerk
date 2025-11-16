@@ -1,6 +1,7 @@
 import { Module, Logger } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import type { Connection } from 'mongoose';
 import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 @Module({
@@ -49,7 +50,7 @@ import { getConfig } from '@ai-recruitment-clerk/configuration';
             uri: mongoUri,
             retryAttempts: 3,
             retryDelay: 3000,
-            connectionFactory: (connection: any) => {
+            connectionFactory: (connection: Connection) => {
               connection.on('connected', () => {
                 logger.log('MongoDB connected successfully');
               });

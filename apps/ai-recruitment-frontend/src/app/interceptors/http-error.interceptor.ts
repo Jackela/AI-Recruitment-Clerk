@@ -44,7 +44,10 @@ export class HttpErrorInterceptor implements HttpInterceptor {
         return value ? [key, value] : null;
       })
       .filter(
-        (entry): entry is [string, string] => Array.isArray(entry) && entry[1],
+        (entry): entry is [string, string] =>
+          Array.isArray(entry) &&
+          typeof entry[1] === 'string' &&
+          entry[1].length > 0,
       );
 
     const correlatedRequest = request.clone({

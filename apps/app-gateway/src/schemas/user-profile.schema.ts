@@ -91,7 +91,7 @@ export class UserProfile {
   } = undefined;
 
   @Prop({ type: Object })
-  metadata?: Record<string, any> = undefined;
+  metadata?: Record<string, unknown> = undefined;
 }
 
 export const UserProfileSchema = SchemaFactory.createForClass(UserProfile);

@@ -28,92 +28,8 @@ interface ProgressUpdate {
 interface CompletionData {
   sessionId: string;
   analysisId: string;
-  result: any;
+  result: Record<string, unknown>;
   processingTime: number;
-}
-
-interface UserPresence {
-  userId: string;
-  username: string;
-  role: string;
-  status: 'online' | 'away' | 'busy' | 'offline';
-  currentPage?: string;
-  cursor?: { x: number; y: number };
-  lastActivity: Date;
-}
-
-interface CollaborationMessage {
-  id: string;
-  type: 'chat' | 'comment' | 'annotation' | 'mention' | 'vote' | 'decision';
-  content: string;
-  authorId: string;
-  authorName: string;
-  contextId?: string; // e.g., candidateId, jobId
-  contextType?: 'candidate' | 'job' | 'document' | 'decision';
-  timestamp: Date;
-  threadId?: string;
-  mentions?: string[];
-  attachments?: any[];
-}
-
-interface DocumentEdit {
-  documentId: string;
-  userId: string;
-  operation: 'insert' | 'delete' | 'format' | 'annotate';
-  position: number;
-  content?: string;
-  length?: number;
-  metadata?: any;
-  timestamp: Date;
-}
-
-interface VotingSession {
-  id: string;
-  title: string;
-  description: string;
-  options: VotingOption[];
-  createdBy: string;
-  contextId: string;
-  contextType: string;
-  deadline?: Date;
-  status: 'active' | 'closed' | 'draft';
-  settings: {
-    anonymous: boolean;
-    allowComments: boolean;
-    requireJustification: boolean;
-  };
-}
-
-interface VotingOption {
-  id: string;
-  text: string;
-  votes: Vote[];
-}
-
-interface Vote {
-  userId: string;
-  timestamp: Date;
-  comment?: string;
-  weight?: number;
-}
-
-interface ActivityFeedItem {
-  id: string;
-  type:
-    | 'user_join'
-    | 'user_leave'
-    | 'document_edit'
-    | 'comment'
-    | 'vote'
-    | 'decision'
-    | 'status_change';
-  userId: string;
-  userName: string;
-  action: string;
-  contextId?: string;
-  contextType?: string;
-  timestamp: Date;
-  metadata?: any;
 }
 
 // Job-related WebSocket event interfaces
@@ -190,7 +106,7 @@ export class WebSocketGateway
    * @param args - The args.
    * @returns The result of the operation.
    */
-  handleConnection(client: Socket, ..._args: any[]) {
+  handleConnection(client: Socket, ..._args: unknown[]) {
     const sessionId = client.handshake.query.sessionId as string;
     this.logger.log(`Client connected: ${client.id}, SessionId: ${sessionId}`);
 
@@ -279,7 +195,7 @@ export class WebSocketGateway
   /**
    * 发送状态更新
    */
-  sendStatusUpdate(sessionId: string, status: any): void {
+  sendStatusUpdate(sessionId: string, status: StatusUpdatePayload): void {
     this.server.to(`session_${sessionId}`).emit('message', {
       type: 'status_update',
       sessionId,
@@ -356,7 +272,7 @@ export class WebSocketGateway
   /**
    * 广播系统状态更新
    */
-  broadcastSystemStatus(status: any): void {
+  broadcastSystemStatus(status: SystemStatusPayload): void {
     this.server.emit('system_status', {
       type: 'system_status',
       data: status,
@@ -552,3 +468,10 @@ export class WebSocketGateway
     }
   }
 }
+interface StatusUpdatePayload {
+  status: string;
+  message?: string;
+  [key: string]: unknown;
+}
+
+type SystemStatusPayload = Record<string, unknown>;

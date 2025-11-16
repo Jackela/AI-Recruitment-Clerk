@@ -36,7 +36,7 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
   @Input('arcLazyLoad') set imageSrc(source: string | null | undefined) {
     this.imageSrcValue = source ?? '';
   }
-  private get imageSrc(): string {
+  get imageSrc(): string {
     return this.imageSrcValue;
   }
   @Input() lazyLoadConfig: LazyLoadConfig = {};

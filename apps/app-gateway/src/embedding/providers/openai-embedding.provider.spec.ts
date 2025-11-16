@@ -2,12 +2,14 @@ import { of, throwError } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { AxiosError, AxiosResponse } from 'axios';
+import type { InternalAxiosRequestConfig } from 'axios';
 import { OpenAIEmbeddingProvider } from './openai-embedding.provider';
 
 describe('OpenAIEmbeddingProvider', () => {
   let provider: OpenAIEmbeddingProvider;
   let httpService: jest.Mocked<HttpService>;
   let configService: jest.Mocked<ConfigService>;
+  let configValues: Map<string, string | number>;
 
   const buildProvider = () => {
     provider = new OpenAIEmbeddingProvider(httpService, configService);
@@ -18,7 +20,7 @@ describe('OpenAIEmbeddingProvider', () => {
       post: jest.fn(),
     } as unknown as jest.Mocked<HttpService>;
 
-    const configMap = new Map<string, string | number>([
+    configValues = new Map<string, string | number>([
       ['OPENAI_API_KEY', 'test-key'],
       ['OPENAI_EMBEDDING_MODEL', 'text-embedding-3-small'],
       ['OPENAI_EMBEDDING_API_URL', 'https://api.openai.com/v1/embeddings'],
@@ -28,7 +30,7 @@ describe('OpenAIEmbeddingProvider', () => {
     ]);
 
     configService = {
-      get: jest.fn((key: string) => configMap.get(key)),
+      get: jest.fn((key: string) => configValues.get(key)),
     } as unknown as jest.Mocked<ConfigService>;
 
     buildProvider();
@@ -79,12 +81,9 @@ describe('OpenAIEmbeddingProvider', () => {
   });
 
   it('should throw when API key is missing', async () => {
-    configService.get.mockImplementation((key: string) => {
-      if (key === 'OPENAI_API_KEY') {
-        return undefined as any;
-      }
-      return undefined as any;
-    });
+    configService.get.mockImplementation((key: string) =>
+      key === 'OPENAI_API_KEY' ? undefined : configValues.get(key),
+    );
 
     buildProvider();
 
@@ -138,7 +137,7 @@ describe('OpenAIEmbeddingProvider', () => {
   describe('Negative Tests - API Errors', () => {
     it('should handle 429 rate limiting error', async () => {
       const rateLimitError = new AxiosError('Rate limit exceeded', '429');
-      rateLimitError.response = { status: 429 } as any;
+      rateLimitError.response = createResponseWithStatus(429);
 
       httpService.post.mockReturnValue(throwError(() => rateLimitError));
 
@@ -147,7 +146,7 @@ describe('OpenAIEmbeddingProvider', () => {
 
     it('should handle 401 unauthorized error', async () => {
       const authError = new AxiosError('Unauthorized', '401');
-      authError.response = { status: 401 } as any;
+      authError.response = createResponseWithStatus(401);
 
       httpService.post.mockReturnValue(throwError(() => authError));
 
@@ -156,7 +155,7 @@ describe('OpenAIEmbeddingProvider', () => {
 
     it('should handle 500 server error', async () => {
       const serverError = new AxiosError('Internal server error', '500');
-      serverError.response = { status: 500 } as any;
+      serverError.response = createResponseWithStatus(500);
 
       httpService.post.mockReturnValue(throwError(() => serverError));
 
@@ -261,7 +260,7 @@ describe('OpenAIEmbeddingProvider', () => {
         if (key === 'OPENAI_EMBEDDING_MODEL') {
           return undefined;
         }
-        return configMap.get(key) as any;
+        return GLOBAL_CONFIG_MAP.get(key);
       });
 
       buildProvider();
@@ -274,11 +273,11 @@ describe('OpenAIEmbeddingProvider', () => {
         if (key === 'OPENAI_EMBEDDING_API_URL') {
           return undefined;
         }
-        const configMap = new Map<string, string | number>([
+        const partialConfig = new Map<string, string | number>([
           ['OPENAI_API_KEY', 'test-key'],
           ['OPENAI_EMBEDDING_MODEL', 'text-embedding-3-small'],
         ]);
-        return configMap.get(key) as any;
+        return partialConfig.get(key);
       });
 
       buildProvider();
@@ -326,7 +325,7 @@ describe('OpenAIEmbeddingProvider', () => {
   });
 });
 
-const configMap = new Map<string, string | number>([
+const GLOBAL_CONFIG_MAP = new Map<string, string | number>([
   ['OPENAI_API_KEY', 'test-key'],
   ['OPENAI_EMBEDDING_MODEL', 'text-embedding-3-small'],
   ['OPENAI_EMBEDDING_API_URL', 'https://api.openai.com/v1/embeddings'],
@@ -334,3 +333,13 @@ const configMap = new Map<string, string | number>([
   ['OPENAI_EMBEDDING_MAX_RETRIES', 3],
   ['OPENAI_EMBEDDING_RETRY_DELAY_MS', 0],
 ]);
+
+const createResponseWithStatus = (status: number): AxiosResponse => ({
+  data: {},
+  status,
+  statusText: '',
+  headers: {},
+  config: {
+    headers: {},
+  } as InternalAxiosRequestConfig,
+});

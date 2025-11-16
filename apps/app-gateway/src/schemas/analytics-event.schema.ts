@@ -37,10 +37,10 @@ export class AnalyticsEvent {
   status: EventStatus = EventStatus.PENDING_PROCESSING;
 
   @Prop({ type: Object, required: true })
-  eventData: any = {};
+  eventData: Record<string, unknown> = {};
 
   @Prop({ type: Object })
-  context?: any = undefined;
+  context?: Record<string, unknown> = undefined;
 
   @Prop({ type: Date, required: true })
   timestamp: Date = new Date();
@@ -85,7 +85,7 @@ export class AnalyticsEvent {
   sensitiveDataMask?: string[] = undefined;
 
   @Prop({ type: Object })
-  metadata?: Record<string, any> = undefined;
+  metadata?: Record<string, unknown> = undefined;
 }
 
 export const AnalyticsEventSchema =

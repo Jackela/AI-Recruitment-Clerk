@@ -1,4 +1,48 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { QuestionnaireStatus } from '@ai-recruitment-clerk/shared-dtos';
+
+type QuestionnaireRecord = {
+  id: string;
+  title: string;
+  description?: string;
+  status: string;
+  questions?: unknown[];
+  createdBy?: string;
+  organizationId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  templateId?: string;
+  [key: string]: unknown;
+};
+
+type QuestionnaireListResult = {
+  items: QuestionnaireRecord[];
+  totalCount: number;
+  page: number;
+  totalPages: number;
+};
+
+type SubmissionListResult = {
+  items: unknown[];
+  totalCount: number;
+  averageQualityScore: number;
+  averageCompletionTime: number;
+  page: number;
+  totalPages: number;
+};
+
+type QuestionnaireExportOptions = {
+  includeResponses?: boolean;
+  includeAnalytics?: boolean;
+  dateRange?: { startDate: Date; endDate: Date };
+};
+
+type QuestionnairePublishOptions = {
+  publishDate?: Date;
+  expirationDate?: Date;
+  targetAudience?: string[];
+  notifyUsers?: boolean;
+};
 
 /**
  * Provides questionnaire integration functionality.
@@ -24,7 +68,12 @@ export class QuestionnaireIntegrationService {
   /**
    * 保存问卷提交 - EMERGENCY IMPLEMENTATION
    */
-  async saveSubmission(submission: any): Promise<string> {
+  async saveSubmission(
+    submission: {
+      answers?: unknown[];
+      metadata?: Record<string, unknown>;
+    },
+  ): Promise<string> {
     try {
       this.logger.log('Saving questionnaire submission', {
         ip: submission.metadata?.ip,
@@ -42,7 +91,11 @@ export class QuestionnaireIntegrationService {
   /**
    * 跟踪事件 - EMERGENCY IMPLEMENTATION
    */
-  async trackEvent(eventData: any): Promise<void> {
+  async trackEvent(eventData: {
+    ip?: string;
+    event: string;
+    data?: Record<string, unknown>;
+  }): Promise<void> {
     try {
       this.logger.log('Tracking event', {
         ip: eventData.ip,
@@ -58,7 +111,14 @@ export class QuestionnaireIntegrationService {
   /**
    * 获取基础统计 - EMERGENCY IMPLEMENTATION
    */
-  async getBasicStats(): Promise<any> {
+  async getBasicStats(): Promise<{
+    totalSubmissions: number;
+    todaySubmissions: number;
+    avgQualityScore: number;
+    activeUsers: number;
+    completionRate: number;
+    lastUpdated: Date;
+  }> {
     try {
       return {
         totalSubmissions: 0,
@@ -77,7 +137,13 @@ export class QuestionnaireIntegrationService {
   /**
    * 创建问卷 - EMERGENCY IMPLEMENTATION
    */
-  async createQuestionnaire(data: any): Promise<any> {
+  async createQuestionnaire(data: {
+    title: string;
+    description?: string;
+    questions?: unknown[];
+    createdBy?: string;
+    organizationId?: string;
+  }): Promise<QuestionnaireRecord> {
     try {
       this.logger.log('Creating questionnaire', { title: data.title });
       return {
@@ -100,7 +166,16 @@ export class QuestionnaireIntegrationService {
   /**
    * 获取问卷列表 - EMERGENCY IMPLEMENTATION
    */
-  async getQuestionnaires(_organizationId: string, options: any): Promise<any> {
+  async getQuestionnaires(
+    _organizationId: string,
+    options: {
+      page?: number;
+      limit?: number;
+      status?: QuestionnaireStatus;
+      search?: string;
+      includeStats?: boolean;
+    },
+  ): Promise<QuestionnaireListResult> {
     try {
       return {
         items: [],
@@ -120,7 +195,7 @@ export class QuestionnaireIntegrationService {
   async getQuestionnaire(
     questionnaireId: string,
     organizationId: string,
-  ): Promise<any> {
+  ): Promise<QuestionnaireRecord> {
     try {
       return {
         id: questionnaireId,
@@ -143,17 +218,30 @@ export class QuestionnaireIntegrationService {
    */
   async updateQuestionnaire(
     questionnaireId: string,
-    updateData: any,
+    updateData: Record<string, unknown>,
     userId: string,
-  ): Promise<any> {
+  ): Promise<QuestionnaireRecord> {
     try {
       this.logger.log('Updating questionnaire', { questionnaireId, userId });
+      const updatedTitle =
+        typeof updateData.title === 'string'
+          ? (updateData.title as string)
+          : 'Updated Questionnaire';
+      const updatedStatus =
+        typeof updateData.status === 'string'
+          ? (updateData.status as string)
+          : 'draft';
       return {
         id: questionnaireId,
-        title: updateData.title || 'Updated Questionnaire',
-        status: updateData.status || 'draft',
+        title: updatedTitle,
+        status: updatedStatus,
         updatedAt: new Date(),
         updatedBy: userId,
+        createdAt: new Date(),
+        organizationId: updateData.organizationId as string | undefined,
+        questions: Array.isArray(updateData.questions)
+          ? (updateData.questions as unknown[])
+          : [],
       };
     } catch (error) {
       this.logger.error('Error updating questionnaire', error);
@@ -167,8 +255,17 @@ export class QuestionnaireIntegrationService {
   async publishQuestionnaire(
     questionnaireId: string,
     userId: string,
-    options: any,
-  ): Promise<any> {
+    options?: QuestionnairePublishOptions,
+  ): Promise<{
+    id: string;
+    status: string;
+    publishedAt: Date;
+    publishedBy: string;
+    accessUrl: string;
+    expirationDate: Date;
+    targetAudience?: string[];
+    notifyUsers?: boolean;
+  }> {
     try {
       this.logger.log('Publishing questionnaire', { questionnaireId, userId });
       return {
@@ -180,7 +277,8 @@ export class QuestionnaireIntegrationService {
         expirationDate:
           options?.expirationDate ||
           new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-        success: true,
+        targetAudience: options?.targetAudience,
+        notifyUsers: options?.notifyUsers,
       };
     } catch (error) {
       this.logger.error('Error publishing questionnaire', error);
@@ -193,8 +291,8 @@ export class QuestionnaireIntegrationService {
    */
   async submitQuestionnaire(
     questionnaireId: string,
-    submissionData: any,
-  ): Promise<any> {
+    submissionData: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     try {
       this.logger.log('Submitting questionnaire', { questionnaireId });
       return {
@@ -219,8 +317,13 @@ export class QuestionnaireIntegrationService {
   async getQuestionnaireSubmissions(
     _questionnaireId: string,
     _organizationId: string,
-    options: any,
-  ): Promise<any> {
+    options: {
+      page?: number;
+      limit?: number;
+      startDate?: Date;
+      endDate?: Date;
+    },
+  ): Promise<SubmissionListResult> {
     try {
       return {
         items: [],
@@ -242,7 +345,13 @@ export class QuestionnaireIntegrationService {
   async getQuestionnaireAnalytics(
     questionnaireId: string,
     _organizationId: string,
-  ): Promise<any> {
+  ): Promise<{
+    questionnaireId: string;
+    totalSubmissions: number;
+    averageCompletionTime: number;
+    responseRate: number;
+    analytics: Record<string, unknown>;
+  }> {
     try {
       return {
         questionnaireId,
@@ -263,8 +372,8 @@ export class QuestionnaireIntegrationService {
   async duplicateQuestionnaire(
     questionnaireId: string,
     userId: string,
-    _options: any,
-  ): Promise<any> {
+    _options: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     try {
       this.logger.log('Duplicating questionnaire', { questionnaireId, userId });
       return {
@@ -288,7 +397,7 @@ export class QuestionnaireIntegrationService {
     userId: string,
     _reason?: string,
     _hardDelete?: boolean,
-  ): Promise<any> {
+  ): Promise<Record<string, unknown>> {
     try {
       this.logger.log('Deleting questionnaire', { questionnaireId, userId });
       return {
@@ -309,8 +418,13 @@ export class QuestionnaireIntegrationService {
   async getQuestionnaireTemplates(
     _category: string,
     _organizationId: string,
-    options: any = {},
-  ): Promise<any> {
+    options: { page?: number } = {},
+  ): Promise<{
+    templates: Array<Record<string, unknown>>;
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
     try {
       return {
         templates: [
@@ -342,9 +456,9 @@ export class QuestionnaireIntegrationService {
    */
   async createFromTemplate(
     templateId: string,
-    customizations: any,
+    customizations: Record<string, unknown>,
     userId?: string,
-  ): Promise<any> {
+  ): Promise<Record<string, unknown>> {
     try {
       this.logger.log('Creating questionnaire from template', {
         templateId,
@@ -372,8 +486,8 @@ export class QuestionnaireIntegrationService {
     questionnaireId: string,
     format: string,
     _userId: string,
-    _options: any,
-  ): Promise<any> {
+    options?: QuestionnaireExportOptions,
+  ): Promise<Record<string, unknown>> {
     try {
       this.logger.log('Exporting questionnaire data', {
         questionnaireId,
@@ -387,6 +501,8 @@ export class QuestionnaireIntegrationService {
         estimatedTime: '2-5 minutes',
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
         status: 'ready',
+        includeResponses: options?.includeResponses ?? false,
+        includeAnalytics: options?.includeAnalytics ?? false,
       };
     } catch (error) {
       this.logger.error('Error exporting questionnaire data', error);
@@ -397,7 +513,16 @@ export class QuestionnaireIntegrationService {
   /**
    * 获取健康状态 - EMERGENCY IMPLEMENTATION
    */
-  async getHealthStatus(): Promise<any> {
+  async getHealthStatus(): Promise<{
+    overall: string;
+    timestamp: Date;
+    service: string;
+    database: string;
+    templates: string;
+    submissions: string;
+    dependencies: string;
+    error?: string;
+  }> {
     try {
       return {
         overall: 'healthy',
@@ -413,6 +538,11 @@ export class QuestionnaireIntegrationService {
       return {
         overall: 'unhealthy',
         timestamp: new Date(),
+        service: 'questionnaire-service',
+        database: 'unknown',
+        templates: 'unknown',
+        submissions: 'unknown',
+        dependencies: 'unknown',
         error: error instanceof Error ? error.message : String(error),
       };
     }

@@ -1,4 +1,26 @@
 import { Injectable, Logger } from '@nestjs/common';
+import {
+  ContactInfo,
+  IncentiveStatus,
+  RewardType,
+} from '@ai-recruitment-clerk/shared-dtos';
+
+type PaymentResult =
+  | {
+      success: true;
+      transactionId: string;
+      amount: number;
+      currency: string;
+      paymentMethod: string;
+      processedBy: string;
+      organizationId: string;
+      processedAt: Date;
+      [key: string]: unknown;
+    }
+  | {
+    success: false;
+    error: string;
+  };
 
 /**
  * Provides incentive integration functionality.
@@ -14,10 +36,10 @@ export class IncentiveIntegrationService {
     userIP: string,
     questionnaireId: string,
     qualityScore: number,
-    contactInfo: any,
-    businessValue: any,
+    contactInfo: ContactInfo,
+    businessValue: Record<string, unknown>,
     incentiveType: string,
-    metadata?: any,
+    metadata?: Record<string, unknown>,
   ) {
     try {
       this.logger.log('Creating questionnaire incentive', {
@@ -52,10 +74,10 @@ export class IncentiveIntegrationService {
   async createReferralIncentive(
     referrerIP: string,
     referredIP: string,
-    contactInfo: any,
+    contactInfo: ContactInfo,
     referralType: string,
     expectedValue: number,
-    metadata?: any,
+    metadata?: Record<string, unknown>,
   ) {
     try {
       this.logger.log('Creating referral incentive', {
@@ -154,7 +176,15 @@ export class IncentiveIntegrationService {
   /**
    * 批准激励 - EMERGENCY IMPLEMENTATION
    */
-  async approveIncentive(incentiveId: string, approvalData: any) {
+  async approveIncentive(
+    incentiveId: string,
+    approvalData: {
+      approverId: string;
+      reason?: string;
+      notes?: string;
+      organizationId: string;
+    },
+  ) {
     try {
       return {
         incentiveId,
@@ -210,8 +240,8 @@ export class IncentiveIntegrationService {
     paymentMethod: string,
     processedBy: string,
     organizationId: string,
-    options?: any,
-  ) {
+    options?: Record<string, unknown>,
+  ): Promise<PaymentResult> {
     try {
       this.logger.log('Processing payment', {
         incentiveId,
@@ -246,7 +276,7 @@ export class IncentiveIntegrationService {
     action: string,
     processedBy: string,
     organizationId: string,
-    options?: any,
+    options?: Record<string, unknown>,
   ) {
     try {
       this.logger.log('Batch processing incentives', {
@@ -308,7 +338,18 @@ export class IncentiveIntegrationService {
   /**
    * 导出激励数据 - EMERGENCY IMPLEMENTATION
    */
-  async exportIncentiveData(organizationId: string, exportOptions: any) {
+  async exportIncentiveData(
+    organizationId: string,
+    exportOptions: {
+      format?: 'csv' | 'json' | 'excel';
+      filters?: Record<string, unknown>;
+      requestedBy?: string;
+      dateRange?: { startDate: Date; endDate: Date };
+      status?: IncentiveStatus[];
+      rewardTypes?: RewardType[];
+      includeContactInfo?: boolean;
+    },
+  ) {
     try {
       return {
         exportId: `export_${Date.now()}`,
@@ -330,7 +371,7 @@ export class IncentiveIntegrationService {
    */
   async configureIncentiveRules(
     organizationId: string,
-    rulesConfig: any,
+    rulesConfig: Record<string, unknown>,
     configuredBy: string,
   ) {
     try {

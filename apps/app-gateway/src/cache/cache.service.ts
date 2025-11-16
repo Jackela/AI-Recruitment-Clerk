@@ -93,7 +93,11 @@ export class CacheService {
           return;
         }
 
-        redisClient.on('error', (err: Error) => {
+        redisClient.on('error', (...args: unknown[]) => {
+          const err =
+            args[0] instanceof Error
+              ? args[0]
+              : new Error(String(args[0] ?? 'unknown error'));
           this.logger.warn(`Redis连接错误: ${err.message}`);
           this.metrics.errors++;
         });

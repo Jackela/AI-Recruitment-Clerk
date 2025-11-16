@@ -49,6 +49,13 @@ type PerformanceStats = {
   lastOptimization: number;
 };
 
+type OptimizationReport = {
+  performance: PerformanceStats;
+  config: CacheOptimizationConfig;
+  recommendations: string[];
+  health: Awaited<ReturnType<CacheService['healthCheck']>>;
+};
+
 @Injectable()
 export class CacheOptimizationService implements OnModuleInit {
   private readonly logger = new Logger(CacheOptimizationService.name);
@@ -80,7 +87,7 @@ export class CacheOptimizationService implements OnModuleInit {
   };
 
   // 缓存性能统计
-  private performanceStats = {
+  private performanceStats: PerformanceStats = {
     hitRate: 0,
     missRate: 0,
     evictionCount: 0,
@@ -424,7 +431,7 @@ export class CacheOptimizationService implements OnModuleInit {
   /**
    * 获取缓存优化报告
    */
-  async getOptimizationReport(): Promise<any> {
+  async getOptimizationReport(): Promise<OptimizationReport> {
     const cacheHealth = await this.cacheService.healthCheck();
     const recommendations = this.generateOptimizationRecommendations();
 

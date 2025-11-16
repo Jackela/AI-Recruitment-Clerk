@@ -10,7 +10,14 @@ export interface ResumeListItem {
    */
   filename?: string;
   fileName?: string;
-  status: 'pending' | 'parsing' | 'scoring' | 'completed' | 'failed';
+  status:
+    | 'pending'
+    | 'parsing'
+    | 'scoring'
+    | 'completed'
+    | 'failed'
+    | 'processed'
+    | 'processing';
   matchScore?: number;
   candidateName?: string;
   createdAt: Date;
@@ -33,7 +40,14 @@ export interface ResumeDetail {
   originalFilename: string;
   filename?: string;
   fileName?: string;
-  status: 'pending' | 'parsing' | 'scoring' | 'completed' | 'failed';
+  status:
+    | 'pending'
+    | 'parsing'
+    | 'scoring'
+    | 'completed'
+    | 'failed'
+    | 'processed'
+    | 'processing';
   candidateName?: string;
   contactInfo?: {
     name: string | null;

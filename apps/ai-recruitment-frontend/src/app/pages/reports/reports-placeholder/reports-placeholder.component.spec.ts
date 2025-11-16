@@ -7,7 +7,7 @@ describe('ReportsPlaceholderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ReportsPlaceholderComponent],
+      imports: [ReportsPlaceholderComponent],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ReportsPlaceholderComponent);

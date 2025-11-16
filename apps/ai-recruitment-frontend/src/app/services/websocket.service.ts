@@ -8,9 +8,7 @@ import { ToastService } from './toast.service';
 /**
  * Defines the shape of the web socket message data.
  */
-export interface WebSocketMessageData {
-  [key: string]: unknown;
-}
+export type WebSocketMessageData = unknown;
 
 /**
  * Defines the shape of the web socket message.
@@ -179,10 +177,12 @@ export class WebSocketService implements OnDestroy {
    */
   onProgress(sessionId: string): Observable<ProgressUpdate> {
     return this.onMessage('progress', sessionId).pipe(
-      filter((msg) => !!msg.data),
-      map((msg) => msg.data as ProgressUpdate),
+      filter((msg): msg is WebSocketMessage & { data: ProgressUpdate } =>
+        this.isProgressUpdate(msg.data),
+      ),
+      map((msg) => msg.data),
       takeUntil(this.destroy$),
-    ) as Observable<ProgressUpdate>;
+    );
   }
 
   /**
@@ -190,10 +190,12 @@ export class WebSocketService implements OnDestroy {
    */
   onCompletion(sessionId: string): Observable<CompletionData> {
     return this.onMessage('completed', sessionId).pipe(
-      filter((msg) => !!msg.data),
-      map((msg) => msg.data as CompletionData),
+      filter((msg): msg is WebSocketMessage & { data: CompletionData } =>
+        this.isCompletionData(msg.data),
+      ),
+      map((msg) => msg.data),
       takeUntil(this.destroy$),
-    ) as Observable<CompletionData>;
+    );
   }
 
   /**
@@ -201,10 +203,12 @@ export class WebSocketService implements OnDestroy {
    */
   onError(sessionId: string): Observable<ErrorData> {
     return this.onMessage('error', sessionId).pipe(
-      filter((msg) => !!msg.data),
-      map((msg) => msg.data as ErrorData),
+      filter((msg): msg is WebSocketMessage & { data: ErrorData } =>
+        this.isErrorData(msg.data),
+      ),
+      map((msg) => msg.data),
       takeUntil(this.destroy$),
-    ) as Observable<ErrorData>;
+    );
   }
 
   /**
@@ -426,6 +430,34 @@ export class WebSocketService implements OnDestroy {
     }
 
     return connection$;
+  }
+
+  private isProgressUpdate(data: unknown): data is ProgressUpdate {
+    return (
+      typeof data === 'object' &&
+      data !== null &&
+      typeof (data as Record<string, unknown>).progress === 'number' &&
+      typeof (data as Record<string, unknown>).currentStep === 'string'
+    );
+  }
+
+  private isCompletionData(data: unknown): data is CompletionData {
+    return (
+      typeof data === 'object' &&
+      data !== null &&
+      typeof (data as Record<string, unknown>).analysisId === 'string' &&
+      typeof (data as Record<string, unknown>).processingTime === 'number' &&
+      typeof (data as Record<string, unknown>).result === 'object' &&
+      (data as Record<string, unknown>).result !== null
+    );
+  }
+
+  private isErrorData(data: unknown): data is ErrorData {
+    return (
+      typeof data === 'object' &&
+      data !== null &&
+      typeof (data as Record<string, unknown>).error === 'string'
+    );
   }
 
   /**

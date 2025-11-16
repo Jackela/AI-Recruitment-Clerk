@@ -11,6 +11,14 @@ export interface IGuestUsage {
   updatedAt: Date;
 }
 
+export type GuestUsageDocument = Partial<IGuestUsage> & {
+  deviceId: string;
+  usageCount: number;
+  lastUsed?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+};
+
 /**
  * Represents the guest usage entity.
  */
@@ -40,15 +48,15 @@ export class GuestUsageEntity implements IGuestUsage {
    * @param doc - The doc.
    * @returns The GuestUsageEntity.
    */
-  static fromDocument(doc: any): GuestUsageEntity {
+  static fromDocument(doc: GuestUsageDocument): GuestUsageEntity {
     return new GuestUsageEntity(
       doc.deviceId,
       doc.usageCount,
       doc.feedbackCode,
       doc.feedbackCodeStatus,
-      doc.lastUsed,
-      doc.createdAt,
-      doc.updatedAt,
+      doc.lastUsed ?? new Date(),
+      doc.createdAt ?? new Date(),
+      doc.updatedAt ?? new Date(),
     );
   }
 

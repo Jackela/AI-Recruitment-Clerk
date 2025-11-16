@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express';
 import { RateLimitMiddleware } from './rate-limit.middleware';
 import { HttpException } from '@nestjs/common';
 
@@ -22,19 +23,27 @@ jest.mock('@ai-recruitment-clerk/configuration', () => {
 
 const { getConfig } = jest.requireMock('@ai-recruitment-clerk/configuration');
 
-const createReqRes = () => {
-  const req: any = {
+const createReqRes = (): { req: Request; res: Response; next: jest.Mock } => {
+  const req = {
     method: 'POST',
     path: '/api/guest/demo',
     headers: {},
     ip: '1.1.1.1',
     connection: { remoteAddress: '1.1.1.1' },
     socket: { remoteAddress: '1.1.1.1' },
-  };
-  const res: any = {
+    get: jest.fn().mockReturnValue(undefined),
+  } as unknown as Request;
+  const res = {
     setHeader: jest.fn(),
+  } as unknown as Response;
+  return { req, res, next: jest.fn() };
+};
+
+type MiddlewareInternals = {
+  redis: null | {
+    get: jest.Mock<Promise<string | null>, [string]>;
+    setex: jest.Mock<Promise<void>, [string, number, string]>;
   };
-  return { req, res };
 };
 
 describe('RateLimitMiddleware', () => {
@@ -44,7 +53,7 @@ describe('RateLimitMiddleware', () => {
 
   it('falls back to in-memory when Redis is disabled in config', () => {
     const middleware = new RateLimitMiddleware();
-    expect((middleware as any).redis).toBeNull();
+    expect((middleware as unknown as MiddlewareInternals).redis).toBeNull();
   });
 
   it('allows requests when usage is below limit', async () => {
@@ -60,7 +69,7 @@ describe('RateLimitMiddleware', () => {
     });
 
     const middleware = new RateLimitMiddleware();
-    (middleware as any).redis = {
+    const redisStub = {
       get: jest
         .fn()
         .mockResolvedValue(
@@ -68,12 +77,12 @@ describe('RateLimitMiddleware', () => {
         ),
       setex: jest.fn(),
     };
-    const next = jest.fn();
-    const { req, res } = createReqRes();
+    (middleware as unknown as MiddlewareInternals).redis = redisStub;
+    const { req, res, next } = createReqRes();
 
     await middleware.use(req, res, next);
 
-    expect((middleware as any).redis.setex).toHaveBeenCalled();
+    expect(redisStub.setex).toHaveBeenCalled();
     expect(next).toHaveBeenCalled();
   });
 
@@ -90,7 +99,7 @@ describe('RateLimitMiddleware', () => {
     });
     const middleware = new RateLimitMiddleware();
     const today = new Date().toISOString().split('T')[0];
-    (middleware as any).redis = {
+    const redisStub = {
       get: jest
         .fn()
         .mockResolvedValue(
@@ -98,6 +107,7 @@ describe('RateLimitMiddleware', () => {
         ),
       setex: jest.fn(),
     };
+    (middleware as unknown as MiddlewareInternals).redis = redisStub;
 
     const { req, res } = createReqRes();
 

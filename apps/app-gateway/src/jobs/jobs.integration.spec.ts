@@ -11,27 +11,62 @@ import { JobRepository } from '../repositories/job.repository';
 import { WebSocketGateway } from '../websocket/websocket.gateway';
 import { ConfigService } from '@nestjs/config';
 import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
+import type { MulterFile } from './types/multer.types';
+
+type StoredJob = {
+  _id: string;
+  id: string;
+  jobTitle: string;
+  jdText: string;
+  organizationId?: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  [key: string]: unknown;
+};
+
+const createStoredJob = (
+  job: Record<string, unknown>,
+  id: string,
+): StoredJob => ({
+  _id: id,
+  id,
+  jobTitle: String(job.jobTitle ?? job.title ?? 'Untitled'),
+  jdText: String(job.jdText ?? ''),
+  organizationId: job.organizationId as string | undefined,
+  status: String(job.status ?? 'processing'),
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  ...job,
+});
 
 const createJobsServiceForTest = () => {
-  const jobs = new Map<string, any>();
+  const jobs = new Map<string, StoredJob>();
 
-  const jobRepository = {
+  const jobRepository: jest.Mocked<JobRepository> = {
     create: jest.fn(async (job) => {
       const id = `job-${randomUUID()}`;
-      const document = { ...job, _id: id, id };
+      const document = createStoredJob(job, id);
       jobs.set(id, document);
-      return document as any;
+      return document;
     }),
     findById: jest.fn(async (id: string) => jobs.get(id) ?? null),
-    findAll: jest.fn(async () => Array.from(jobs.values()) as any[]),
+    findAll: jest.fn(async () => Array.from(jobs.values())),
     updateStatus: jest.fn(async (id: string, status: string) => {
       const job = jobs.get(id);
       if (job) {
         job.status = status;
+        job.updatedAt = new Date();
+        jobs.set(id, job);
       }
       return job ?? null;
     }),
     updateJdAnalysis: jest.fn(async () => null),
+    deleteOne: jest.fn(),
+    softDeleteOne: jest.fn(),
+    findResumesByJobId: jest.fn(),
+    findReportsByJobId: jest.fn(),
+    findResumeById: jest.fn(),
   } as unknown as jest.Mocked<JobRepository>;
 
   const natsClient: jest.Mocked<AppGatewayNatsService> = {
@@ -50,7 +85,7 @@ const createJobsServiceForTest = () => {
     getHealthStatus: jest.fn(),
     subscribeToAnalysisCompleted: jest.fn(),
     subscribeToAnalysisFailed: jest.fn(),
-  } as any;
+  } as unknown as jest.Mocked<AppGatewayNatsService>;
 
   const cacheService: jest.Mocked<CacheService> = {
     generateKey: jest.fn((prefix: string, ...parts: string[]) =>
@@ -61,7 +96,7 @@ const createJobsServiceForTest = () => {
     wrapSemanticBatch: jest.fn(async (_items, fn) => fn()),
     set: jest.fn(),
     get: jest.fn(),
-  } as any;
+  } as unknown as jest.Mocked<CacheService>;
 
   const webSocketGateway: jest.Mocked<WebSocketGateway> = {
     emitJobUpdated: jest.fn(),
@@ -70,11 +105,11 @@ const createJobsServiceForTest = () => {
     emitJobDeleted: jest.fn(),
     emitJobCreated: jest.fn(),
     emitHealthStatus: jest.fn(),
-  } as any;
+  } as unknown as jest.Mocked<WebSocketGateway>;
 
   const configService: jest.Mocked<ConfigService> = {
     get: jest.fn(() => undefined),
-  } as any;
+  } as unknown as jest.Mocked<ConfigService>;
 
   const service = new JobsService(
     jobRepository as JobRepository,
@@ -93,6 +128,15 @@ const createJobsServiceForTest = () => {
     reset: () => jobs.clear(),
   };
 };
+
+const buildFile = (overrides: Partial<MulterFile> = {}): MulterFile => ({
+  fieldname: 'resumes',
+  originalname: 'resume.pdf',
+  mimetype: 'application/pdf',
+  size: 1024,
+  buffer: Buffer.from(''),
+  ...overrides,
+});
 
 describe('JobsService integration-style behaviour', () => {
   const mockUser: UserDto = {
@@ -179,22 +223,18 @@ describe('JobsService integration-style behaviour', () => {
         mockUser,
       );
 
-      const files = [
-        {
-          fieldname: 'resumes',
+      const files: MulterFile[] = [
+        buildFile({
           originalname: 'john_doe_resume.pdf',
-          mimetype: 'application/pdf',
           size: 12345,
           buffer: Buffer.from('resume 1'),
-        },
-        {
-          fieldname: 'resumes',
+        }),
+        buildFile({
           originalname: 'jane_smith_cv.pdf',
-          mimetype: 'application/pdf',
           size: 23456,
           buffer: Buffer.from('resume 2'),
-        },
-      ] as any;
+        }),
+      ];
 
       const result = await service.uploadResumes(jobId, files, mockUser);
 
@@ -212,15 +252,9 @@ describe('JobsService integration-style behaviour', () => {
     });
 
     it('throws when uploading resumes for missing job', async () => {
-      const files = [
-        {
-          fieldname: 'resumes',
-          originalname: 'resume.pdf',
-          mimetype: 'application/pdf',
-          size: 123,
-          buffer: Buffer.from('content'),
-        },
-      ] as any;
+      const files: MulterFile[] = [
+        buildFile({ originalname: 'resume.pdf', size: 123, buffer: Buffer.from('content') }),
+      ];
 
       await expect(
         service.uploadResumes('missing-job', files, mockUser),

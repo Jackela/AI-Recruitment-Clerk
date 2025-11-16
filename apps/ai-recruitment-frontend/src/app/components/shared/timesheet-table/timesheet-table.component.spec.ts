@@ -109,7 +109,7 @@ describe('TimesheetTableComponent (lightweight regression)', () => {
   it('should emit sort events when sortable column header is clicked', () => {
     fixture.detectChanges();
 
-    const sortSpy = jest.spyOn(component.onSort, 'emit');
+    const sortSpy = jest.spyOn(component.sortChange, 'emit');
     component.handleSort('project');
     expect(sortSpy).toHaveBeenCalledWith({ column: 'project', direction: 'asc' });
 
@@ -120,7 +120,7 @@ describe('TimesheetTableComponent (lightweight regression)', () => {
   it('should export data and invoke download helper', () => {
     fixture.detectChanges();
 
-    const exportSpy = jest.spyOn(component.onExport, 'emit');
+    const exportSpy = jest.spyOn(component.exportRequested, 'emit');
     type DownloadHost = { downloadCSV: () => void };
     const downloadTarget = component as unknown as DownloadHost;
     const downloadSpy = jest.spyOn(downloadTarget, 'downloadCSV');

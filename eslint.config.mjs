@@ -22,6 +22,7 @@ export default [
       '**/*.min.js',
       'e2e/**/results',
       'e2e/**',
+      'apps/app-gateway/test-results/**',
     ],
   },
   {

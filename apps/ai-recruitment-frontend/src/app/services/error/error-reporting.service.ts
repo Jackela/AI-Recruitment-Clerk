@@ -326,35 +326,41 @@ export class ErrorReportingService {
   }
 
   private getBrowserInfo(): Record<string, string | number | boolean | undefined> {
-    const navigatorConnection = (navigator as Navigator & {
+    type NavigatorWithConnection = Navigator & {
       connection?: {
         effectiveType?: string;
         downlink?: number;
         rtt?: number;
       };
+      mozConnection?: NavigatorWithConnection['connection'];
+      webkitConnection?: NavigatorWithConnection['connection'];
       deviceMemory?: number;
-    }).connection;
+    };
+
+    const extendedNavigator = navigator as NavigatorWithConnection;
+    const connection =
+      extendedNavigator.connection ||
+      extendedNavigator.mozConnection ||
+      extendedNavigator.webkitConnection;
 
     return {
       userAgent: navigator.userAgent,
       language: navigator.language,
-      languages: navigator.languages,
+      languages: Array.isArray(navigator.languages)
+        ? navigator.languages.join(',')
+        : undefined,
       platform: navigator.platform,
       cookieEnabled: navigator.cookieEnabled,
       onLine: navigator.onLine,
       maxTouchPoints: navigator.maxTouchPoints,
       hardwareConcurrency: navigator.hardwareConcurrency,
       deviceMemory:
-        typeof navigator.deviceMemory === 'number'
-          ? navigator.deviceMemory
+        typeof extendedNavigator.deviceMemory === 'number'
+          ? extendedNavigator.deviceMemory
           : undefined,
-      connection: navigatorConnection
-        ? {
-            effectiveType: navigatorConnection.effectiveType,
-            downlink: navigatorConnection.downlink,
-            rtt: navigatorConnection.rtt,
-          }
-        : undefined,
+      connectionEffectiveType: connection?.effectiveType,
+      connectionDownlink: connection?.downlink,
+      connectionRtt: connection?.rtt,
     };
   }
 

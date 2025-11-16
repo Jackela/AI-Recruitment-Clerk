@@ -1,5 +1,4 @@
-import type { Express } from 'express';
-import 'multer';
+import type { MulterFile } from '../jobs/types/multer.types';
 import {
   Body,
   Controller,
@@ -13,6 +12,19 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import pdf from 'pdf-parse-fork';
 import { MetricsService } from '../ops/metrics.service';
 import { getConfig } from '@ai-recruitment-clerk/configuration';
+
+type GapAnalysisRequest = Record<string, unknown>;
+type GapAnalysisResponse = Record<string, unknown>;
+
+interface GapAnalysisFileRequest {
+  jdText?: string;
+}
+
+interface LocalGapAnalysisResult {
+  matchedSkills: string[];
+  missingSkills: string[];
+  suggestedSkills: string[];
+}
 
 /**
  * Exposes endpoints for scoring proxy.
@@ -28,7 +40,7 @@ export class ScoringProxyController {
    * @returns The result of the operation.
    */
   @Post('gap-analysis')
-  async gapAnalysis(@Body() body: any) {
+  async gapAnalysis(@Body() body: GapAnalysisRequest): Promise<GapAnalysisResponse> {
     this.metrics.incExposure();
     const base = this.config.integrations.scoring.baseUrl;
     const url = `${base.replace(/\/$/, '')}/gap-analysis`;
@@ -38,7 +50,7 @@ export class ScoringProxyController {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body ?? {}),
       });
-      const data = await res.json().catch(() => ({}));
+      const data = (await res.json().catch(() => ({}))) as GapAnalysisResponse;
       if (!res.ok) {
         throw new HttpException(
           data || { message: 'Gap analysis failed' },
@@ -68,9 +80,9 @@ export class ScoringProxyController {
   @Post('gap-analysis-file')
   @UseInterceptors(FileInterceptor('resume'))
   async gapAnalysisFile(
-    @UploadedFile() file: Express.Multer.File,
-    @Body() body: { jdText?: string },
-  ) {
+    @UploadedFile() file: MulterFile,
+    @Body() body: GapAnalysisFileRequest,
+  ): Promise<GapAnalysisResponse | LocalGapAnalysisResult> {
     if (!file) {
       throw new HttpException(
         { message: 'No file uploaded' },
@@ -119,7 +131,7 @@ export class ScoringProxyController {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const data = await res.json().catch(() => ({}));
+      const data = (await res.json().catch(() => ({}))) as GapAnalysisResponse;
       if (!res.ok) {
         throw new HttpException(
           data || { message: 'Gap analysis failed' },
@@ -128,7 +140,7 @@ export class ScoringProxyController {
       }
       this.metrics.incSuccess();
       return data;
-    } catch (error) {
+    } catch {
       // As a fallback, perform improved token matching locally if scoring engine is unreachable
       const jdSkills = tokenize(body?.jdText || '');
       const resumeSkills = tokenize(resumeText || '');

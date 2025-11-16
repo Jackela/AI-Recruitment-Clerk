@@ -1471,10 +1471,13 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * @returns The result of the operation.
    */
   onSwipeAction(event: SwipeEvent) {
-    const candidate = event.item as CandidateResult;
+    if (!this.isCandidateResult(event.item)) {
+      return;
+    }
+
     this.candidateAction.emit({
       action: event.action.id,
-      candidate,
+      candidate: event.item,
     });
   }
 
@@ -1497,6 +1500,20 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     });
     this.showQuickActions = false;
     this.selectedCandidate = null;
+  }
+
+  private isCandidateResult(item: unknown): item is CandidateResult {
+    if (!item || typeof item !== 'object') {
+      return false;
+    }
+
+    const candidate = item as Record<string, unknown>;
+    return (
+      typeof candidate.id === 'string' &&
+      typeof candidate.name === 'string' &&
+      typeof candidate.title === 'string' &&
+      Array.isArray(candidate.tags)
+    );
   }
 
   /**

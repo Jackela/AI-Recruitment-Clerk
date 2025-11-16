@@ -1,21 +1,32 @@
+import type { MulterFile } from '../jobs/types/multer.types';
 import { ScoringProxyController } from './scoring-proxy.controller';
 import { MetricsService } from '../ops/metrics.service';
 import { resetConfigCache } from '@ai-recruitment-clerk/configuration';
 
+type MinimalFile = Pick<
+  MulterFile,
+  'buffer' | 'originalname' | 'mimetype'
+> &
+  Partial<MulterFile>;
+
 describe('ScoringProxyController', () => {
   let controller: ScoringProxyController;
   let metrics: jest.Mocked<MetricsService>;
+  let fetchMock: jest.Mock;
 
   beforeEach(() => {
     resetConfigCache();
     process.env.SCORING_ENGINE_URL = 'http://scoring.test';
-    metrics = {
+    metrics = ({
       incExposure: jest.fn(),
       incSuccess: jest.fn(),
       incError: jest.fn(),
-    } as unknown as jest.Mocked<MetricsService>;
+      incCancel: jest.fn(),
+      getSnapshot: jest.fn(),
+    } as Partial<jest.Mocked<MetricsService>>) as jest.Mocked<MetricsService>;
     controller = new ScoringProxyController(metrics);
-    global.fetch = jest.fn();
+    fetchMock = jest.fn();
+    global.fetch = fetchMock;
   });
 
   afterEach(() => {
@@ -24,7 +35,7 @@ describe('ScoringProxyController', () => {
   });
 
   it('forwards gap analysis requests to the configured scoring engine', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
+    fetchMock.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ score: 88 }),
     });
@@ -33,7 +44,7 @@ describe('ScoringProxyController', () => {
     const result = await controller.gapAnalysis(payload);
 
     expect(result).toEqual({ score: 88 });
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(fetchMock).toHaveBeenCalledWith(
       'http://scoring.test/gap-analysis',
       expect.objectContaining({ method: 'POST' }),
     );
@@ -42,15 +53,16 @@ describe('ScoringProxyController', () => {
   });
 
   it('falls back to local tokenization when scoring engine is unreachable', async () => {
-    (global.fetch as jest.Mock).mockRejectedValue(new Error('network failure'));
+    fetchMock.mockRejectedValue(new Error('network failure'));
 
     const resumeBuffer = Buffer.from('Experienced with AWS, Kubernetes, and Node.js');
+    const mockFile: MinimalFile = {
+      buffer: resumeBuffer,
+      originalname: 'resume.txt',
+      mimetype: 'text/plain',
+    };
     const result = await controller.gapAnalysisFile(
-      {
-        buffer: resumeBuffer,
-        originalname: 'resume.txt',
-        mimetype: 'text/plain',
-      } as any,
+      mockFile as MulterFile,
       { jdText: 'Looking for AWS and Kubernetes engineers' },
     );
 

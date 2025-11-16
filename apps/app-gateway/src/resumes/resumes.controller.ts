@@ -13,16 +13,51 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { NotFoundException } from '@nestjs/common';
+import type { MulterFile } from '../jobs/types/multer.types';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-type ResumeRecord = {
+type ResumeStatus = 'processing' | 'completed' | 'pending' | 'approved';
+
+interface ResumeRecord {
   id: string;
   ownerId?: string;
-  status: 'processing' | 'completed' | 'pending' | 'approved';
+  status: ResumeStatus;
   createdAt: string;
   updatedAt: string;
-};
+}
+
+interface UploadResponse {
+  resumeId: string;
+}
+
+interface ResumeStatusResponse {
+  resumeId: string;
+  status: ResumeStatus;
+}
+
+interface ResumeAnalysisResponse {
+  skills: string[];
+  experience: Array<{ company: string; years: number }>;
+  education: { degree: string };
+}
+
+interface UpdateResumeStatusDto {
+  status?: ResumeStatus;
+}
+
+interface UpdateResumeStatusResponse {
+  resumeId: string;
+  newStatus: ResumeStatus;
+}
+
+interface ResumeSearchResponse {
+  resumes: ResumeStatusResponse[];
+}
+
+interface BatchProcessResponse {
+  batchJobId: string;
+}
 
 const resumeStore = new Map<string, ResumeRecord>();
 
@@ -45,7 +80,10 @@ export class ResumesController {
   @Post('resumes/upload')
   @UseInterceptors(FileInterceptor('resume'))
   @HttpCode(HttpStatus.CREATED)
-  upload(@UploadedFile() file: Express.Multer.File, @Body() _body: any) {
+  upload(
+    @UploadedFile() file: MulterFile,
+    @Body() _body: Record<string, unknown>,
+  ): UploadResponse {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
@@ -75,7 +113,7 @@ export class ResumesController {
   @UseGuards(JwtAuthGuard)
   @Get('resumes/:id')
   @HttpCode(HttpStatus.OK)
-  getResume(@Param('id') id: string) {
+  getResume(@Param('id') id: string): ResumeStatusResponse {
     const rec = resumeStore.get(id);
     if (!rec) {
       throw new NotFoundException('Resume not found');
@@ -100,7 +138,7 @@ export class ResumesController {
   @UseGuards(JwtAuthGuard)
   @Get('resumes/:id/analysis')
   @HttpCode(HttpStatus.OK)
-  getAnalysis(@Param('id') id: string) {
+  getAnalysis(@Param('id') id: string): ResumeAnalysisResponse {
     if (!resumeStore.has(id)) {
       throw new NotFoundException('Resume not found');
     }
@@ -120,13 +158,16 @@ export class ResumesController {
   @UseGuards(JwtAuthGuard)
   @Put('resumes/:id/status')
   @HttpCode(HttpStatus.OK)
-  updateStatus(@Param('id') id: string, @Body() body: any) {
+  updateStatus(
+    @Param('id') id: string,
+    @Body() body: UpdateResumeStatusDto,
+  ): UpdateResumeStatusResponse {
     const rec = resumeStore.get(id);
     if (!rec) {
       throw new NotFoundException('Resume not found');
     }
-    const newStatus = String(body?.status || 'approved');
-    rec.status = newStatus as any;
+    const newStatus: ResumeStatus = body?.status ?? 'approved';
+    rec.status = newStatus;
     rec.updatedAt = new Date().toISOString();
     resumeStore.set(id, rec);
     return { resumeId: id, newStatus };
@@ -139,7 +180,7 @@ export class ResumesController {
   @UseGuards(JwtAuthGuard)
   @Post('resumes/search')
   @HttpCode(HttpStatus.OK)
-  search() {
+  search(): ResumeSearchResponse {
     const items = Array.from(resumeStore.values()).map((r) => ({
       resumeId: r.id,
       status: r.status,
@@ -154,7 +195,7 @@ export class ResumesController {
   @UseGuards(JwtAuthGuard)
   @Post('resumes/batch/process')
   @HttpCode(HttpStatus.ACCEPTED)
-  batch() {
+  batch(): BatchProcessResponse {
     return { batchJobId: genId('batch') };
   }
 }

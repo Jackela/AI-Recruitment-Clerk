@@ -13,14 +13,17 @@ import { AppState } from '../../../store/app.state';
 import * as JobActions from '../../../store/jobs/job.actions';
 import * as JobSelectors from '../../../store/jobs/job.selectors';
 import { Router } from '@angular/router';
-import { I18nService } from '../../../services/i18n/i18n.service';
+import {
+  I18nService,
+  TranslationParams,
+} from '../../../services/i18n/i18n.service';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 import { JobState } from '../../../store/jobs/job.state';
 import { JobListItem } from '../../../store/jobs/job.model';
 
 type TranslationDescriptor = {
   key: string;
-  params?: Record<string, unknown>;
+  params?: TranslationParams;
 };
 
 /**

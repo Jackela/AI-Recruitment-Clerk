@@ -12,8 +12,16 @@ import { plainToClass } from 'class-transformer';
  * Represents the custom validation pipe.
  */
 @Injectable()
-export class CustomValidationPipe implements PipeTransform<any> {
+export class CustomValidationPipe implements PipeTransform<unknown> {
   private readonly logger = new Logger(CustomValidationPipe.name);
+
+  private readonly passthroughTypes: ClassConstructor[] = [
+    String,
+    Boolean,
+    Number,
+    Array,
+    Object,
+  ];
 
   /**
    * Performs the transform operation.
@@ -21,7 +29,7 @@ export class CustomValidationPipe implements PipeTransform<any> {
    * @param { metatype } - The { metatype }.
    * @returns The result of the operation.
    */
-  async transform(value: any, { metatype }: ArgumentMetadata) {
+  async transform(value: unknown, { metatype }: ArgumentMetadata) {
     if (!metatype || !this.toValidate(metatype)) {
       return value;
     }
@@ -51,18 +59,11 @@ export class CustomValidationPipe implements PipeTransform<any> {
     return object;
   }
 
-  private toValidate(metatype: new (...args: any[]) => any): boolean {
-    const types: Array<new (...args: any[]) => any> = [
-      String,
-      Boolean,
-      Number,
-      Array,
-      Object,
-    ];
-    return !types.includes(metatype);
+  private toValidate(metatype: ClassConstructor): boolean {
+    return !this.passthroughTypes.includes(metatype);
   }
 
-  private formatErrors(errors: ValidationError[]): any[] {
+  private formatErrors(errors: ValidationError[]): ValidationErrorDetail[] {
     return errors.map((error) => ({
       property: error.property,
       value: error.value,
@@ -79,7 +80,7 @@ export class CustomValidationPipe implements PipeTransform<any> {
  * Custom validation pipe for cross-service validation
  */
 @Injectable()
-export class CrossServiceValidationPipe implements PipeTransform {
+export class CrossServiceValidationPipe implements PipeTransform<unknown> {
   private readonly logger = new Logger(CrossServiceValidationPipe.name);
 
   /**
@@ -88,12 +89,8 @@ export class CrossServiceValidationPipe implements PipeTransform {
    * @param options - The options.
    */
   constructor(
-    private readonly validationRules?: any[],
-    private readonly _options?: {
-      parallel?: boolean;
-      failFast?: boolean;
-      timeout?: number;
-    },
+    private readonly validationRules?: CrossServiceValidationRule[],
+    private readonly _options?: CrossServiceValidationOptions,
   ) {}
 
   /**
@@ -102,30 +99,33 @@ export class CrossServiceValidationPipe implements PipeTransform {
    * @param metadata - The metadata.
    * @returns The result of the operation.
    */
-  async transform(value: any, metadata: ArgumentMetadata) {
+  async transform(value: unknown, metadata: ArgumentMetadata) {
     // First, apply standard validation
     const standardPipe = new CustomValidationPipe();
     const validatedValue = await standardPipe.transform(value, metadata);
 
     // Then, apply cross-service validation if rules are provided
     if (this.validationRules && this.validationRules.length > 0) {
-      await this.performCrossServiceValidation(validatedValue);
+      await this.performCrossServiceValidation(
+        validatedValue,
+        this.validationRules,
+      );
     }
 
     return validatedValue;
   }
 
-  private async performCrossServiceValidation(_value: any): Promise<void> {
+  private async performCrossServiceValidation(
+    value: unknown,
+    rules: CrossServiceValidationRule[],
+  ): Promise<void> {
     try {
-      // Mock cross-service validation
-      // In real implementation, this would validate against other services
-      const validationPromises = this.validationRules!.map(async (_rule) => {
-        // Simulate service validation
-        return new Promise<boolean>((resolve) => {
-          setTimeout(() => {
-            resolve(Math.random() > 0.1); // 90% success rate
-          }, Math.random() * 100);
-        });
+      const validationPromises = rules.map(async (rule) => {
+        try {
+          return await rule(value);
+        } catch {
+          return false;
+        }
       });
 
       const results = await Promise.all(validationPromises);
@@ -139,8 +139,27 @@ export class CrossServiceValidationPipe implements PipeTransform {
         });
       }
     } catch (error) {
-      this.logger.error('Cross-service validation error:', error);
+      const message =
+        error instanceof Error ? error.message : String(error);
+      this.logger.error(`Cross-service validation error: ${message}`);
       throw error;
     }
   }
 }
+
+type ClassConstructor<T = object> = new (...args: unknown[]) => T;
+
+type ValidationErrorDetail = {
+  property: string;
+  value: unknown;
+  constraints?: Record<string, string>;
+  children?: ValidationErrorDetail[];
+};
+
+type CrossServiceValidationRule = (value: unknown) => Promise<boolean> | boolean;
+
+type CrossServiceValidationOptions = {
+  parallel?: boolean;
+  failFast?: boolean;
+  timeout?: number;
+};

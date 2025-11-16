@@ -19,6 +19,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import type { MulterFile } from '../../jobs/types/multer.types';
 import {
   ApiTags,
   ApiOperation,
@@ -32,28 +33,23 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
 import { ResumeUploadDto } from '../../jobs/dto/resume-upload.dto';
-import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
-import { ResumeService } from './resume.service';
+import {
+  AuthenticatedRequest,
+  Permission,
+} from '@ai-recruitment-clerk/user-management-domain';
+import {
+  ResumeService,
+  type ResumeBatchRequest,
+  type ResumeSearchCriteria,
+  type ResumeReprocessOptions,
+  type ResumeDeleteRequest,
+} from './resume.service';
+import { FileTypeValidator } from '@nestjs/common';
+import type { Express } from 'express';
 
-const resumeFileValidator: {
-  isValid: (file?: any) => boolean;
-  buildErrorMessage: () => string;
-} = {
-  buildErrorMessage: () =>
-    'Invalid file type. Only PDF, DOC, and DOCX files are allowed.',
-  isValid: (file?: any): boolean => {
-    if (!file) return false;
-    const allowedMimeTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    ];
-    const allowedExtensions = /\.(pdf|doc|docx)$/i;
-    const mimeTypeValid = allowedMimeTypes.includes(file.mimetype);
-    const extensionValid = allowedExtensions.test(file.originalname);
-    return mimeTypeValid && extensionValid;
-  },
-};
+const resumeFileValidator = new FileTypeValidator({
+  fileType: /\.(pdf|doc|docx)$/i,
+});
 
 // Use imported interface instead of local definition
 
@@ -106,18 +102,20 @@ export class ResumeController {
   @Post('upload')
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('resume'))
+  @UseGuards(RolesGuard)
+  @Permissions(Permission.UPLOAD_RESUME)
   async uploadResume(
     @Request() req: AuthenticatedRequest,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }), // 10MB limit
-          resumeFileValidator as any,
+          resumeFileValidator,
         ],
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),
     )
-    file: any,
+    file: MulterFile,
     @Body() uploadData: ResumeUploadDto,
   ) {
     try {
@@ -354,17 +352,13 @@ export class ResumeController {
   })
   @ApiResponse({ status: 200, description: '批量处理成功' })
   @UseGuards(RolesGuard)
-  @Permissions('process_resume' as any)
+  @Permissions(Permission.UPLOAD_RESUME)
   @Post('batch')
   @HttpCode(HttpStatus.OK)
   async batchProcessResumes(
     @Request() req: AuthenticatedRequest,
     @Body()
-    batchRequest: {
-      resumeIds: string[];
-      operation: 'analyze' | 'approve' | 'reject' | 'archive';
-      parameters?: any;
-    },
+    batchRequest: ResumeBatchRequest,
   ) {
     try {
       const batchResult = await this.resumeService.batchProcessResumes(
@@ -409,19 +403,13 @@ export class ResumeController {
   @ApiQuery({ name: 'page', required: false, description: '页码' })
   @ApiQuery({ name: 'limit', required: false, description: '每页数量' })
   @UseGuards(RolesGuard)
-  @Permissions('search_resume' as any)
+  @Permissions(Permission.READ_RESUME)
   @Post('search')
   @HttpCode(HttpStatus.OK)
   async searchResumes(
     @Request() req: AuthenticatedRequest,
     @Body()
-    searchCriteria: {
-      keywords?: string;
-      skills?: string[];
-      minYears?: number;
-      maxYears?: number;
-      [key: string]: any;
-    },
+    searchCriteria: ResumeSearchCriteria,
     @Query('page') page = 1,
     @Query('limit') limit = 20,
   ) {
@@ -468,18 +456,14 @@ export class ResumeController {
   @ApiResponse({ status: 200, description: '重新处理已启动' })
   @ApiParam({ name: 'resumeId', description: '简历ID' })
   @UseGuards(RolesGuard)
-  @Permissions('process_resume' as any)
+  @Permissions(Permission.UPLOAD_RESUME)
   @Post(':resumeId/reprocess')
   @HttpCode(HttpStatus.OK)
   async reprocessResume(
     @Request() req: AuthenticatedRequest,
     @Param('resumeId') resumeId: string,
     @Body()
-    reprocessOptions?: {
-      forceReparse?: boolean;
-      updateSkillsOnly?: boolean;
-      analysisOptions?: any;
-    },
+    reprocessOptions?: ResumeReprocessOptions,
   ) {
     try {
       const reprocessResult = await this.resumeService.reprocessResume(
@@ -521,13 +505,13 @@ export class ResumeController {
   @ApiResponse({ status: 200, description: '简历删除成功' })
   @ApiParam({ name: 'resumeId', description: '简历ID' })
   @UseGuards(RolesGuard)
-  @Permissions('delete_resume' as any)
+  @Permissions(Permission.DELETE_RESUME)
   @Delete(':resumeId')
   @HttpCode(HttpStatus.OK)
   async deleteResume(
     @Request() req: AuthenticatedRequest,
     @Param('resumeId') resumeId: string,
-    @Body() deleteRequest: { reason?: string; hardDelete?: boolean },
+    @Body() deleteRequest: ResumeDeleteRequest,
   ) {
     try {
       await this.resumeService.deleteResume(
@@ -567,7 +551,7 @@ export class ResumeController {
   })
   @ApiResponse({ status: 200, description: '统计信息获取成功' })
   @UseGuards(RolesGuard)
-  @Permissions('read_analytics' as any)
+  @Permissions(Permission.READ_ANALYSIS)
   @Get('stats/processing')
   async getProcessingStats(@Request() req: AuthenticatedRequest) {
     try {
