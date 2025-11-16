@@ -135,7 +135,7 @@
     "jest-junit": "^16.0.0",
     "jest-preset-angular": "^15.0.0",
     "jest-util": "^30.0.2",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "4.1.1",
     "jsonc-eslint-parser": "^2.1.0",
     "kafkajs": "^2.2.4",
     "mongodb-memory-server": "^10.2.0",
@@ -234,6 +234,17 @@
     "@module-federation/manifest": "0.21.2",
     "@module-federation/node": "2.7.21",
     "@module-federation/rspack": "0.21.2",
-    "koa": "^3.1.1"
+    "koa": "^3.1.1",
+    "js-yaml": "4.1.1",
+    "front-matter": {
+      "dependencies": {
+        "js-yaml": "4.1.1"
+      }
+    },
+    "@yarnpkg/parsers": {
+      "dependencies": {
+        "js-yaml": "4.1.1"
+      }
+    }
   }
 }
