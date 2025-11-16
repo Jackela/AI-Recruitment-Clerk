@@ -165,6 +165,8 @@ export enum Permission {
   READ_JOB = 'read_job',
   /** Modify existing job postings */
   UPDATE_JOB = 'update_job',
+  /** Remove job postings */
+  DELETE_JOB = 'delete_job',
   /** Upload resume documents for analysis */
   UPLOAD_RESUME = 'upload_resume',
   /** Access resume content and analysis */
@@ -175,6 +177,36 @@ export enum Permission {
   UPDATE_USER = 'update_user',
   /** Full user lifecycle management */
   MANAGE_USER = 'manage_user',
+
+  // Incentive management permissions
+  /** Validate incentive submissions */
+  VALIDATE_INCENTIVE = 'validate_incentive',
+  /** Approve incentive payouts */
+  APPROVE_INCENTIVE = 'approve_incentive',
+  /** Reject incentive requests */
+  REJECT_INCENTIVE = 'reject_incentive',
+  /** Process incentive payments */
+  PROCESS_PAYMENT = 'process_payment',
+  /** Batch process incentive operations */
+  BATCH_PROCESS_INCENTIVE = 'batch_process_incentive',
+  /** View incentive statistics */
+  READ_INCENTIVE_STATS = 'read_incentive_stats',
+  /** Export incentive data sets */
+  EXPORT_INCENTIVE_DATA = 'export_incentive_data',
+  /** Configure incentive rules */
+  MANAGE_INCENTIVE_RULES = 'manage_incentive_rules',
+
+  // Usage and quota management permissions
+  /** Adjust quota allocations and perform batch quota actions */
+  MANAGE_QUOTAS = 'manage_quotas',
+  /** View usage limit summaries across the organization */
+  READ_USAGE_LIMITS = 'read_usage_limits',
+  /** Access detailed usage activity for specific resources */
+  READ_USAGE_DETAILS = 'read_usage_details',
+  /** Configure usage enforcement and rate-limiting policies */
+  MANAGE_USAGE_POLICY = 'manage_usage_policy',
+  /** Access usage analytics dashboards and exports */
+  READ_ANALYTICS = 'read_analytics',
 }
 
 /**

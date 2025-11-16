@@ -10,33 +10,52 @@ import { Cron } from '@nestjs/schedule';
 /**
  * Defines the shape of the cache optimization config.
  */
+type CacheStrategyConfig = {
+  frequency: 'high' | 'medium' | 'low';
+  ttl: number;
+  priority: 'critical' | 'important' | 'normal';
+  invalidationTriggers: string[];
+};
+
+type CachePreloadRule = {
+  pattern: string;
+  schedule: string;
+  dependencies?: string[];
+  priority?: 'high' | 'medium' | 'low';
+  ttl?: number;
+};
+
+type CleanupRules = {
+  maxAge: number;
+  maxSize: number;
+  lowHitRateThreshold: number;
+};
+
 export interface CacheOptimizationConfig {
-  // 缓存策略配置
-  strategies: {
-    frequency: 'high' | 'medium' | 'low';
-    ttl: number;
-    priority: 'critical' | 'important' | 'normal';
-    invalidationTriggers: string[];
-  };
-
-  // 预加载配置
-  preloadRules: {
-    pattern: string;
-    schedule: string;
-    dependencies?: string[];
-  }[];
-
-  // 清理规则
-  cleanupRules: {
-    maxAge: number;
-    maxSize: number;
-    lowHitRateThreshold: number;
-  };
+  strategies: CacheStrategyConfig;
+  preloadRules: CachePreloadRule[];
+  cleanupRules: CleanupRules;
 }
 
 /**
  * Provides cache optimization functionality.
  */
+type PerformanceStats = {
+  hitRate: number;
+  missRate: number;
+  evictionCount: number;
+  preloadCount: number;
+  totalSize: number;
+  lastOptimization: number;
+};
+
+type OptimizationReport = {
+  performance: PerformanceStats;
+  config: CacheOptimizationConfig;
+  recommendations: string[];
+  health: Awaited<ReturnType<CacheService['healthCheck']>>;
+};
+
 @Injectable()
 export class CacheOptimizationService implements OnModuleInit {
   private readonly logger = new Logger(CacheOptimizationService.name);
@@ -68,7 +87,7 @@ export class CacheOptimizationService implements OnModuleInit {
   };
 
   // 缓存性能统计
-  private performanceStats = {
+  private performanceStats: PerformanceStats = {
     hitRate: 0,
     missRate: 0,
     evictionCount: 0,
@@ -115,10 +134,8 @@ export class CacheOptimizationService implements OnModuleInit {
         this.logger.log('📋 Default cache optimization config saved');
       }
     } catch (error) {
-      this.logger.warn(
-        'Failed to load cache optimization config:',
-        error.message,
-      );
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.warn('Failed to load cache optimization config:', message);
     }
   }
 
@@ -202,7 +219,7 @@ export class CacheOptimizationService implements OnModuleInit {
     }
   }
 
-  private async executePreloadRule(rule: any) {
+  private async executePreloadRule(rule: CachePreloadRule) {
     try {
       switch (rule.pattern) {
         case 'jobs:list':
@@ -215,10 +232,8 @@ export class CacheOptimizationService implements OnModuleInit {
           this.logger.debug(`Unknown preload pattern: ${rule.pattern}`);
       }
     } catch (error) {
-      this.logger.warn(
-        `Failed to execute preload rule ${rule.pattern}:`,
-        error.message,
-      );
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`Failed to execute preload rule ${rule.pattern}:`, message);
     }
   }
 
@@ -416,7 +431,7 @@ export class CacheOptimizationService implements OnModuleInit {
   /**
    * 获取缓存优化报告
    */
-  async getOptimizationReport(): Promise<any> {
+  async getOptimizationReport(): Promise<OptimizationReport> {
     const cacheHealth = await this.cacheService.healthCheck();
     const recommendations = this.generateOptimizationRecommendations();
 

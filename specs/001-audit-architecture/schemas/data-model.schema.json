@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-recruitment-clerk/specs/001-audit-architecture/schemas/data-model.schema.json",
+  "title": "Holistic Architecture Governance Data Model",
+  "type": "object",
+  "properties": {
+    "components": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/SystemComponent" }
+    },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/BestPracticeFinding" }
+    },
+    "remediations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/RemediationWorkItem" }
+    },
+    "validationRuns": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ValidationRun" }
+    }
+  },
+  "required": ["components", "findings", "remediations", "validationRuns"],
+  "$defs": {
+    "SystemComponent": {
+      "type": "object",
+      "required": ["componentId", "type", "ownerTeam", "principleScores", "lastAuditedAt"],
+      "properties": {
+        "componentId": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["application", "library", "tooling", "script"]
+        },
+        "ownerTeam": { "type": "string", "minLength": 1 },
+        "principleScores": {
+          "type": "object",
+          "required": ["ssot", "solid", "ddd"],
+          "properties": {
+            "ssot": { "$ref": "#/$defs/PrincipleScore" },
+            "solid": { "$ref": "#/$defs/PrincipleScore" },
+            "ddd": { "$ref": "#/$defs/PrincipleScore" }
+          }
+        },
+        "evidenceLinks": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "dependencies": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "lastAuditedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "PrincipleScore": {
+      "type": "string",
+      "enum": ["pass", "fail", "not-applicable"]
+    },
+    "BestPracticeFinding": {
+      "type": "object",
+      "required": ["findingId", "componentId", "principle", "severity", "description", "evidence", "status"],
+      "properties": {
+        "findingId": { "type": "string" },
+        "componentId": { "type": "string" },
+        "principle": { "type": "string", "enum": ["SSOT", "SOLID", "DDD"] },
+        "severity": { "type": "string", "enum": ["high", "medium", "low"] },
+        "description": { "type": "string" },
+        "evidence": { "type": "string" },
+        "openedAt": { "type": "string", "format": "date-time" },
+        "targetClosure": { "type": "string", "format": "date" },
+        "status": { "type": "string", "enum": ["open", "in-progress", "closed", "waived"] }
+      }
+    },
+    "RemediationWorkItem": {
+      "type": "object",
+      "required": ["remediationId", "findingId", "owner", "verificationSteps", "status"],
+      "properties": {
+        "remediationId": { "type": "string" },
+        "findingId": { "type": "string" },
+        "owner": { "type": "string" },
+        "milestones": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "dueDate", "acceptanceCriteria"],
+            "properties": {
+              "name": { "type": "string" },
+              "dueDate": { "type": "string", "format": "date" },
+              "acceptanceCriteria": { "type": "string" }
+            }
+          }
+        },
+        "dependencies": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "verificationSteps": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": ["planned", "in-progress", "ready-for-validation", "verified", "blocked"]
+        }
+      }
+    },
+    "ValidationRun": {
+      "type": "object",
+      "required": ["runId", "components", "testsExecuted", "actSimulation", "githubActions", "trigger", "result"],
+      "properties": {
+        "runId": { "type": "string" },
+        "components": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "remediationIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "testsExecuted": {
+          "type": "object",
+          "required": ["unit", "integration", "lint", "typecheck", "e2e"],
+          "properties": {
+            "unit": { "$ref": "#/$defs/TestResult" },
+            "integration": { "$ref": "#/$defs/TestResult" },
+            "lint": { "$ref": "#/$defs/TestResult" },
+            "typecheck": { "$ref": "#/$defs/TestResult" },
+            "e2e": { "$ref": "#/$defs/TestResult" }
+          }
+        },
+        "actSimulation": {
+          "type": "object",
+          "required": ["workflow", "image", "status", "logPath"],
+          "properties": {
+            "workflow": { "type": "string" },
+            "image": { "type": "string" },
+            "status": { "type": "string", "enum": ["pass", "fail"] },
+            "logPath": { "type": "string" }
+          }
+        },
+        "githubActions": {
+          "type": "object",
+          "required": ["workflowUrl", "conclusion"],
+          "properties": {
+            "workflowUrl": { "type": "string" },
+            "conclusion": { "type": "string", "enum": ["success", "failure", "cancelled"] },
+            "jobMatrix": { "type": "object" }
+          }
+        },
+        "trigger": {
+          "type": "string",
+          "enum": ["remediation", "scheduled", "pre-merge"]
+        },
+        "result": {
+          "type": "string",
+          "enum": ["pass", "fail", "blocked"]
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "TestResult": {
+      "type": "object",
+      "required": ["status", "startedAt", "completedAt"],
+      "properties": {
+        "status": { "type": "string", "enum": ["pass", "fail", "skipped"] },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "completedAt": { "type": "string", "format": "date-time" },
+        "details": { "type": "string" }
+      }
+    }
+  }
+}

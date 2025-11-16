@@ -10,14 +10,29 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Fetch base branch
+        run: git fetch origin ${GITHUB_BASE_REF:-main}:${GITHUB_BASE_REF:-main}
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
       - run: npm ci
-      - name: Print affected graph
-        run: npx nx print-affected --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }}
+      - name: Show affected projects
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_REF_SHA="${{ github.event.pull_request.base.sha }}"
+            if [ -z "$BASE_REF_SHA" ]; then
+              BASE_REF_SHA="origin/${{ github.base_ref || 'main' }}"
+            fi
+          else
+            BASE_REF_SHA="origin/main"
+          fi
+          echo "Using base: $BASE_REF_SHA; head: ${{ github.sha }}"
+          npx nx show projects --affected --base="$BASE_REF_SHA" --head="${{ github.sha }}"
       - name: Lint affected
-        run: npx nx affected -t lint --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }} --parallel=3
+        env:
+          NX_CACHE_DIRECTORY: /tmp/nxcache
+        run: npx nx affected -t lint --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }} --parallel=1
       - name: Test affected
         run: npx nx affected -t test --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }} --parallel=2
       - name: Build affected

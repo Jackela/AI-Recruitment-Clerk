@@ -17,6 +17,9 @@ export default async function globalTeardown() {
   delete process.env.MONGODB_TEST_URL;
   delete process.env.JWT_SECRET;
   delete process.env.JWT_EXPIRATION;
+  delete process.env.OPS_API_KEY;
+  delete process.env.TEST_API_KEY;
+  delete process.env.TEST_JWT_TOKEN;
 
   console.log('✅ Integration test environment cleanup completed');
 }

@@ -11,7 +11,7 @@ export interface NotificationData {
   type: 'info' | 'success' | 'warning' | 'error' | 'system';
   title: string;
   message: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   createdAt: Date;
   readAt?: Date;
   priority: 'low' | 'normal' | 'high' | 'urgent';
@@ -52,12 +52,23 @@ export interface BroadcastMessage {
   type: 'announcement' | 'update' | 'alert' | 'system';
   title: string;
   message: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   targetUsers?: string[];
   excludeUsers?: string[];
   priority: 'low' | 'normal' | 'high' | 'urgent';
   createdAt: Date;
   expiresAt?: Date;
+}
+
+interface NotificationTemplate {
+  type: NotificationData['type'];
+  title: string;
+  message: string;
+  priority: NotificationData['priority'];
+  persistent: boolean;
+  actionUrl?: string;
+  actionText?: string;
+  expiresIn?: number;
 }
 
 /**
@@ -173,9 +184,11 @@ export class NotificationService {
     // Try to load from cache if not in memory
     if (notifications.length === 0) {
       try {
-        const cached = await this.cacheService.get(`notifications:${userId}`);
+        const cached = await this.cacheService.get<NotificationData[]>(
+          `notifications:${userId}`,
+        );
         if (cached && Array.isArray(cached)) {
-          notifications = cached as NotificationData[];
+          notifications = cached;
           this.userNotifications.set(userId, notifications);
         }
       } catch (error) {
@@ -270,11 +283,11 @@ export class NotificationService {
     if (!prefs) {
       // Try to load from cache
       try {
-        const cached = await this.cacheService.get(
+        const cached = await this.cacheService.get<NotificationPreferences>(
           `notification_prefs:${userId}`,
         );
         if (cached) {
-          prefs = cached as NotificationPreferences;
+          prefs = cached;
           this.userPreferences.set(userId, prefs);
         }
       } catch (error) {
@@ -341,7 +354,7 @@ export class NotificationService {
   async createFromTemplate(
     templateType: string,
     userId: string,
-    templateData: Record<string, any>,
+    templateData: Record<string, unknown>,
   ): Promise<NotificationData> {
     const template = this.getNotificationTemplate(templateType);
     const notification: NotificationData = {
@@ -466,8 +479,8 @@ export class NotificationService {
   /**
    * Get notification template
    */
-  private getNotificationTemplate(templateType: string): any {
-    const templates: Record<string, any> = {
+  private getNotificationTemplate(templateType: string): NotificationTemplate {
+    const templates: Record<string, NotificationTemplate> = {
       analysis_complete: {
         type: 'success',
         title: 'Analysis Complete',
@@ -505,10 +518,17 @@ export class NotificationService {
    */
   private interpolateTemplate(
     template: string,
-    data: Record<string, any>,
+    data: Record<string, unknown>,
   ): string {
     return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-      return data[key] || match;
+      const value = data[key];
+      if (typeof value === 'string') {
+        return value;
+      }
+      if (value !== undefined && value !== null) {
+        return String(value);
+      }
+      return match;
     });
   }
 

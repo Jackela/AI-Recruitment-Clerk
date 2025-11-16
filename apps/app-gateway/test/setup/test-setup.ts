@@ -1,4 +1,10 @@
 
+import { getTestingEnvironment } from '@ai-recruitment-clerk/configuration';
+
+const testingEnv = getTestingEnvironment();
+const integrationTimeout = testingEnv.useDocker ? 120000 : 60000;
+const suppressLogs = testingEnv.suppressTestLogs;
+
 // Global test configuration and utilities
 beforeEach(() => {
   // Reset any global state before each test
@@ -11,10 +17,10 @@ afterEach(() => {
 });
 
 // Configure test timeouts
-jest.setTimeout(60000); // 60 seconds for integration tests
+jest.setTimeout(integrationTimeout);
 
 // Suppress console output during tests (optional)
-if (process.env.SUPPRESS_TEST_LOGS === 'true') {
+if (suppressLogs) {
   console.log = jest.fn();
   console.error = jest.fn();
   console.warn = jest.fn();
@@ -89,6 +95,7 @@ expect.extend({
 // Type declarations for custom matchers - using proper Jest types
 import '@jest/types';
 
+/* eslint-disable @typescript-eslint/no-namespace */
 declare global {
   namespace jest {
     interface Matchers<R> {
@@ -97,5 +104,6 @@ declare global {
     }
   }
 }
+/* eslint-enable @typescript-eslint/no-namespace */
 
 console.log('🔧 Integration test setup completed');

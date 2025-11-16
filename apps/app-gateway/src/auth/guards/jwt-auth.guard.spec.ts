@@ -6,12 +6,45 @@ import {
   HttpStatus,
   UnauthorizedException,
 } from '@nestjs/common';
+import { resetConfigCache } from '@ai-recruitment-clerk/configuration';
+
+type MockRequest = {
+  headers: Record<string, string>;
+  ip?: string;
+  path?: string;
+  get: (name: string) => string | undefined;
+  connection?: { remoteAddress?: string };
+  user?: unknown;
+  __testRateLimit?: boolean;
+};
+
+type MockResponse = {
+  setHeader: jest.Mock;
+};
+
+const createAuthenticatedUser = (
+  overrides: Partial<{
+    id: string;
+    sub: string;
+    email: string;
+    organizationId?: string;
+    role: string;
+    rawRole?: string;
+  }> = {},
+) => ({
+  id: 'user-1',
+  sub: 'user-1',
+  email: 'user@example.com',
+  organizationId: 'org-1',
+  role: 'admin',
+  ...overrides,
+});
 
 const createExecutionContext = (
-  requestOverrides: Record<string, any> = {},
-  responseOverrides: Record<string, any> = {},
+  requestOverrides: Partial<MockRequest> = {},
+  responseOverrides: Partial<MockResponse> = {},
 ): ExecutionContext => {
-  const request = {
+  const request: MockRequest = {
     headers: {},
     ip: '127.0.0.1',
     path: '/api/test',
@@ -19,7 +52,7 @@ const createExecutionContext = (
     ...requestOverrides,
   };
 
-  const response = {
+  const response: MockResponse = {
     setHeader: jest.fn(),
     ...responseOverrides,
   };
@@ -46,6 +79,7 @@ describe('JwtAuthGuard', () => {
     jest.clearAllMocks();
     process.env.NODE_ENV = 'test';
     delete process.env.FORCE_RATE_LIMIT;
+    resetConfigCache();
   });
 
   describe('canActivate', () => {
@@ -99,16 +133,20 @@ describe('JwtAuthGuard', () => {
     it('enforces rate limiting when enabled', async () => {
       const originalEnv = process.env.NODE_ENV;
       const originalForce = process.env.FORCE_RATE_LIMIT;
-      const originalSetInterval = global.setInterval;
-      (global as any).setInterval = jest.fn().mockReturnValue(1);
+      const globalContext = globalThis as typeof globalThis & {
+        setInterval: typeof setInterval;
+      };
+      const originalGlobalSetInterval = globalContext.setInterval;
+      globalContext.setInterval = jest.fn().mockReturnValue(1) as unknown as typeof setInterval;
       process.env.NODE_ENV = 'development';
       process.env.FORCE_RATE_LIMIT = 'true';
+      resetConfigCache();
 
       try {
         reflectorMock.getAllAndOverride.mockReturnValue(false);
         const guard = createGuard();
         // Reduce threshold to keep test light
-        (guard as any).RATE_LIMIT_MAX_REQUESTS = 2;
+        (guard as unknown as { RATE_LIMIT_MAX_REQUESTS: number }).RATE_LIMIT_MAX_REQUESTS = 2;
 
         const ctx = createExecutionContext({
           headers: {},
@@ -132,7 +170,8 @@ describe('JwtAuthGuard', () => {
         } else {
           delete process.env.FORCE_RATE_LIMIT;
         }
-        (global as any).setInterval = originalSetInterval;
+        resetConfigCache();
+        globalContext.setInterval = originalGlobalSetInterval;
       }
     });
   });
@@ -163,7 +202,7 @@ describe('JwtAuthGuard', () => {
         { setHeader: jest.fn() },
       );
 
-      const user = { id: 'user-1', role: 'admin', organizationId: 'org-1' };
+      const user = createAuthenticatedUser();
       const result = guard.handleRequest(null, user, null, ctx);
 
       expect(result).toBe(user);
@@ -190,27 +229,42 @@ describe('JwtAuthGuard', () => {
         ip: '198.51.100.42',
         connection: { remoteAddress: undefined },
         get: jest.fn().mockReturnValue('jest-ua'),
-      } as any;
+      };
 
-      const identifier = (guard as any).getClientIdentifier(request);
+      const identifier = (guard as unknown as { getClientIdentifier: (req: typeof request) => string }).getClientIdentifier(request);
       expect(identifier).toHaveLength(16);
-      expect((guard as any).getClientIdentifier(request)).toBe(identifier);
+      expect(
+        (guard as unknown as { getClientIdentifier: (req: typeof request) => string }).getClientIdentifier(
+          request,
+        ),
+      ).toBe(identifier);
     });
 
     it('reports rate limit status', () => {
       const guard = createGuard();
-      (guard as any).requestCounts.set('client-1', {
+      const guardWithState = guard as unknown as {
+        requestCounts: Map<
+          string,
+          { count: number; resetTime: number; blocked: boolean }
+        >;
+        getRateLimitStatus: () => {
+          activeClients: number;
+          blockedClients: number;
+          totalRequests: number;
+        };
+      };
+      guardWithState.requestCounts.set('client-1', {
         count: 3,
         resetTime: Date.now() + 1000,
         blocked: false,
       });
-      (guard as any).requestCounts.set('client-2', {
+      guardWithState.requestCounts.set('client-2', {
         count: 5,
         resetTime: Date.now() + 1000,
         blocked: true,
       });
 
-      const status = guard.getRateLimitStatus();
+      const status = guardWithState.getRateLimitStatus();
       expect(status).toEqual({
         activeClients: 2,
         blockedClients: 1,
@@ -257,7 +311,7 @@ describe('JwtAuthGuard', () => {
         headers: { authorization: '   ' },
       });
 
-      const result = await guard.canActivate(ctx);
+      await guard.canActivate(ctx);
       const request = ctx.switchToHttp().getRequest();
 
       expect(request.user.id).toBe('guest');
@@ -315,15 +369,18 @@ describe('JwtAuthGuard', () => {
   describe('Boundary Tests - Rate Limiting', () => {
     it('should allow requests up to exact rate limit threshold', async () => {
       const originalEnv = process.env.NODE_ENV;
-      const originalSetInterval = global.setInterval;
-      (global as any).setInterval = jest.fn().mockReturnValue(1);
+      const globalContext = globalThis as typeof globalThis & {
+        setInterval: typeof setInterval;
+      };
+      const originalGlobalSetInterval = globalContext.setInterval;
+      globalContext.setInterval = jest.fn().mockReturnValue(1) as unknown as typeof setInterval;
       process.env.NODE_ENV = 'development';
       process.env.FORCE_RATE_LIMIT = 'true';
 
       try {
         reflectorMock.getAllAndOverride.mockReturnValue(false);
         const guard = createGuard();
-        (guard as any).RATE_LIMIT_MAX_REQUESTS = 5;
+        (guard as unknown as { RATE_LIMIT_MAX_REQUESTS: number }).RATE_LIMIT_MAX_REQUESTS = 5;
 
         const ctx = createExecutionContext({ headers: {}, ip: '203.0.113.5' });
 
@@ -336,7 +393,7 @@ describe('JwtAuthGuard', () => {
       } finally {
         process.env.NODE_ENV = originalEnv;
         delete process.env.FORCE_RATE_LIMIT;
-        (global as any).setInterval = originalSetInterval;
+        globalContext.setInterval = originalGlobalSetInterval;
       }
     });
   });
@@ -388,12 +445,13 @@ describe('JwtAuthGuard', () => {
         { setHeader: mockSetHeader },
       );
 
-      const user = {
+      const user = createAuthenticatedUser({
         id: 'user-123',
+        sub: 'user-123',
         role: 'hr_manager',
         organizationId: 'org-456',
         email: 'test@example.com',
-      };
+      });
       guard.handleRequest(null, user, null, ctx);
 
       expect(mockSetHeader).toHaveBeenCalledWith('X-Auth-User-Id', 'user-123');
@@ -410,7 +468,9 @@ describe('JwtAuthGuard', () => {
         { setHeader: mockSetHeader },
       );
 
-      const user = { id: 'user-1', role: 'admin' };
+      const user = createAuthenticatedUser({
+        organizationId: undefined,
+      });
       guard.handleRequest(null, user, null, ctx);
 
       expect(mockSetHeader).toHaveBeenCalledWith('X-Auth-User-Id', 'user-1');
@@ -429,9 +489,9 @@ describe('JwtAuthGuard', () => {
         ip: '198.51.100.1',
         connection: { remoteAddress: '198.51.100.1' },
         get: jest.fn().mockReturnValue(undefined),
-      } as any;
+      };
 
-      const identifier = (guard as any).getClientIdentifier(request);
+      const identifier = (guard as unknown as { getClientIdentifier: (req: typeof request) => string }).getClientIdentifier(request);
 
       expect(identifier).toBeDefined();
       expect(identifier).toHaveLength(16);
@@ -443,9 +503,9 @@ describe('JwtAuthGuard', () => {
         ip: undefined,
         connection: { remoteAddress: '192.168.1.100' },
         get: jest.fn().mockReturnValue('test-agent'),
-      } as any;
+      };
 
-      const identifier = (guard as any).getClientIdentifier(request);
+      const identifier = (guard as unknown as { getClientIdentifier: (req: typeof request) => string }).getClientIdentifier(request);
 
       expect(identifier).toBeDefined();
       expect(identifier.length).toBeGreaterThan(0);
@@ -457,10 +517,13 @@ describe('JwtAuthGuard', () => {
         ip: '203.0.113.50',
         connection: { remoteAddress: '203.0.113.50' },
         get: jest.fn().mockReturnValue('consistent-agent'),
-      } as any;
+      };
 
-      const id1 = (guard as any).getClientIdentifier(request);
-      const id2 = (guard as any).getClientIdentifier(request);
+      const guardWithHelpers = guard as unknown as {
+        getClientIdentifier: (req: typeof request) => string;
+      };
+      const id1 = guardWithHelpers.getClientIdentifier(request);
+      const id2 = guardWithHelpers.getClientIdentifier(request);
 
       expect(id1).toBe(id2);
     });
@@ -469,13 +532,24 @@ describe('JwtAuthGuard', () => {
   describe('Assertion Specificity Improvements', () => {
     it('should return complete rate limit status structure', () => {
       const guard = createGuard();
-      (guard as any).requestCounts.set('client-test', {
+      const guardWithState = guard as unknown as {
+        requestCounts: Map<
+          string,
+          { count: number; resetTime: number; blocked: boolean }
+        >;
+        getRateLimitStatus: () => {
+          activeClients: number;
+          blockedClients: number;
+          totalRequests: number;
+        };
+      };
+      guardWithState.requestCounts.set('client-test', {
         count: 10,
         resetTime: Date.now() + 5000,
         blocked: false,
       });
 
-      const status = guard.getRateLimitStatus();
+      const status = guardWithState.getRateLimitStatus();
 
       expect(status).toMatchObject({
         activeClients: expect.any(Number),

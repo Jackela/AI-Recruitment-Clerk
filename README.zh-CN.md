@@ -213,6 +213,20 @@ analysis.resume.parsed → Scoring Engine → analysis.match.scored
 4. 遵循NestJS最佳实践
 5. 提交前运行完整测试套件
 
+## 🧪 本地 CI 一致性
+
+使用与 GitHub Actions 完全相同的脚本来验证改动：
+
+```bash
+# 顺序执行 lint → typecheck → build → coverage → e2e → pii → governance
+npm run ci:full
+```
+
+- `scripts/ci/run-all.sh` 会在首次失败时立即停止，并自动设置与远端 CI 相同的环境变量（`CI=true`、`NX_DAEMON=false`、`NX_SKIP_NX_CACHE=true`）。请通过 `nvm`/`volta` 切换到 `.nvmrc` 里的 Node `20.18.0`。
+- 单独调试某个阶段可运行 `npm run ci:phase -- <phase>`（或直接使用快捷命令 `npm run ci:phase:<phase>`），可选值包含 `lint`、`typecheck`、`build`、`test`、`integration`、`coverage`、`e2e`、`pii`、`governance`。
+- 产物与 CI 路径保持一致：Jest 覆盖率在 `coverage/`，Playwright 报告与跟踪在 `playwright-report/` 与 `e2e/results/`，治理/清单输出位于 `specs/001-audit-architecture/validation/`。
+- 需要直接模拟 GitHub 流水线可运行 `npm run act:ci`，`act` 也会调用同一批 phase 脚本，因此日志与结果与正式流水线一致。
+
 ## 📄 许可证
 
 本项目采用 ISC 许可证。

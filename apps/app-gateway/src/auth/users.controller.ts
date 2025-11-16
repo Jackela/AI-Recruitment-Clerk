@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import {
+  CreateUserDto,
   UserDto,
   UserRole,
   AuthenticatedRequest,
@@ -60,8 +61,15 @@ export class UsersController {
   @Post('profile')
   @HttpCode(HttpStatus.OK)
   async updateProfilePost(@Request() req: AuthenticatedRequest) {
-    // Accepts partial fields; persist via UserService
-    const updates: Partial<UserDto> = (req as any).body || {};
+    const body = req.body as Partial<CreateUserDto & UserDto>;
+    const updates: Partial<UserDto> = {
+      firstName: body.firstName,
+      lastName: body.lastName,
+      email: body.email,
+      organizationId: body.organizationId,
+      role: body.role as UserRole | undefined,
+      status: body.status,
+    };
     const updated = await this.userService.updateUser(req.user.id, updates);
     return {
       id: updated.id,
@@ -99,9 +107,10 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   async getOrganizationUsers(@Request() req: AuthenticatedRequest) {
     // Enforce simple RBAC: only admins (and optionally HR managers) can list org users
-    const requesterRole = String(
-      (req.user as any)?.rawRole ?? req.user.role ?? '',
-    ).toLowerCase();
+    const requester = req.user as UserDto & { rawRole?: string };
+    const requesterRole = (
+      requester.rawRole ?? requester.role ?? ''
+    ).toString().toLowerCase();
 
     if (
       requesterRole !== UserRole.ADMIN &&
@@ -121,7 +130,7 @@ export class UsersController {
         userId: u.id,
         email: u.email,
         name: u.name,
-        role: String((u as any)?.rawRole ?? u.role ?? '').toLowerCase(),
+        role: u.role?.toString().toLowerCase(),
         organizationId: u.organizationId,
       })),
     };

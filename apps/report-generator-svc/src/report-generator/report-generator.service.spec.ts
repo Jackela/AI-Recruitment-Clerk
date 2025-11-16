@@ -5,25 +5,13 @@ import {
   ReportGeneratorService,
   MatchScoredEvent,
   ReportGenerationRequest,
-  GeneratedReport,
-  ReportDataItem,
   JobData,
   ResumeData,
   ScoringData,
-  ReportDocument,
-  CandidateComparisonData,
-  InterviewCandidateData,
-  ExtractedJobRequirements,
 } from './report-generator.service';
 import { LlmService } from './llm.service';
-import { GridFsService, ReportFileMetadata } from './gridfs.service';
-import { ReportRepository, ReportCreateData } from './report.repository';
-import {
-  ScoreBreakdown,
-  MatchingSkill,
-  ReportRecommendation,
-  ReportDocument as SchemaReportDocument,
-} from '../schemas/report.schema';
+import { GridFsService } from './gridfs.service';
+import { ReportRepository } from './report.repository';
 import {
   ReportGeneratorException,
   ErrorCorrelationManager,

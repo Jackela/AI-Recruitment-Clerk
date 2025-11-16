@@ -31,14 +31,22 @@ const BASE_ENTRIES: TimesheetEntry[] = [
   },
 ];
 
+type MutableURL = typeof URL & {
+  createObjectURL?: (obj: Blob | MediaSource) => string;
+  revokeObjectURL?: (url?: string) => void;
+};
+
 beforeAll(() => {
-  if (!globalThis.URL.createObjectURL) {
-    (globalThis.URL as any).createObjectURL = jest.fn(() => 'blob:mock-url');
+  const mutableUrl = globalThis.URL as MutableURL;
+
+  if (!mutableUrl.createObjectURL) {
+    mutableUrl.createObjectURL = jest.fn(() => 'blob:mock-url');
   } else {
     jest.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-url');
   }
-  if (!globalThis.URL.revokeObjectURL) {
-    (globalThis.URL as any).revokeObjectURL = jest.fn();
+
+  if (!mutableUrl.revokeObjectURL) {
+    mutableUrl.revokeObjectURL = jest.fn();
   } else {
     jest.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
   }
@@ -101,7 +109,7 @@ describe('TimesheetTableComponent (lightweight regression)', () => {
   it('should emit sort events when sortable column header is clicked', () => {
     fixture.detectChanges();
 
-    const sortSpy = jest.spyOn(component.onSort, 'emit');
+    const sortSpy = jest.spyOn(component.sortChange, 'emit');
     component.handleSort('project');
     expect(sortSpy).toHaveBeenCalledWith({ column: 'project', direction: 'asc' });
 
@@ -112,8 +120,10 @@ describe('TimesheetTableComponent (lightweight regression)', () => {
   it('should export data and invoke download helper', () => {
     fixture.detectChanges();
 
-    const exportSpy = jest.spyOn(component.onExport, 'emit');
-    const downloadSpy = jest.spyOn(component as any, 'downloadCSV');
+    const exportSpy = jest.spyOn(component.exportRequested, 'emit');
+    type DownloadHost = { downloadCSV: () => void };
+    const downloadTarget = component as unknown as DownloadHost;
+    const downloadSpy = jest.spyOn(downloadTarget, 'downloadCSV');
 
     component.exportData();
 

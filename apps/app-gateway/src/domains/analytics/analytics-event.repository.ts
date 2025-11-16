@@ -17,11 +17,23 @@ interface AnalyticsEventEntity {
   sessionId: string;
   userId?: string;
   eventType: string;
-  eventData: any;
+  eventData: Record<string, unknown>;
   timestamp: Date;
   status: EventStatus;
   retentionExpiry?: Date;
 }
+
+type AnalyticsEventDocumentPayload = {
+  eventId: string;
+  sessionId: string;
+  userId?: string;
+  eventType: string;
+  status: EventStatus;
+  timestamp: Date;
+  retentionExpiry?: Date;
+  eventData: Record<string, unknown>;
+  [key: string]: unknown;
+};
 import {
   AnalyticsEvent,
   AnalyticsEventDocument,
@@ -337,7 +349,9 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
     }
   }
 
-  private mapToDocument(event: AnalyticsEventEntity): any {
+  private mapToDocument(
+    event: AnalyticsEventEntity,
+  ): AnalyticsEventDocumentPayload {
     return {
       eventId: event.id,
       sessionId: event.sessionId,
@@ -346,7 +360,6 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
       status: event.status,
       timestamp: new Date(event.timestamp),
       retentionExpiry: event.retentionExpiry,
-      // Map-through fields present on the entity
       eventData: event.eventData ?? {},
       context: {},
       eventCategory: 'user_behavior',
@@ -362,7 +375,7 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
       sessionId: document.sessionId,
       userId: document.userId,
       eventType: document.eventType,
-      eventData: document.eventData,
+      eventData: (document.eventData ?? {}) as Record<string, unknown>,
       timestamp: document.timestamp,
       status: document.status as EventStatus,
       retentionExpiry: document.retentionExpiry,

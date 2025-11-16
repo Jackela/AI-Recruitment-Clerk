@@ -1,25 +1,39 @@
+import type { Model } from 'mongoose';
+import type { Cache } from 'cache-manager';
+import { EventStatus } from '@ai-recruitment-clerk/shared-dtos';
 import { AnalyticsEventRepository } from './analytics/analytics-event.repository';
 import { AnalyticsIntegrationService } from './analytics/analytics-integration.service';
-import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
+import type { AnalyticsEventDocument } from '../schemas/analytics-event.schema';
 
 const createModelStub = () => {
-  const store = new Map<string, any>();
+  type AnalyticsDoc = {
+    eventId: string;
+    sessionId: string;
+    timestamp: Date;
+    eventType: string;
+    status: EventStatus;
+    eventData: Record<string, unknown>;
+  };
 
-  const findOneAndUpdate = jest.fn(async (filter: any, update: any) => {
-    const existing = Array.from(store.values()).find(
-      (doc) => doc.eventId === filter.eventId,
-    );
-    if (existing) {
-      Object.assign(existing, update);
-      return existing;
-    }
-    const doc = { ...update, eventId: filter.eventId };
-    store.set(doc.eventId, doc);
-    return doc;
-  });
+  const store = new Map<string, AnalyticsDoc>();
 
-  const findOne = jest.fn(async (filter: any) => {
+  const findOneAndUpdate = jest.fn(
+    async (filter: { eventId: string }, update: AnalyticsDoc) => {
+      const existing = Array.from(store.values()).find(
+        (doc) => doc.eventId === filter.eventId,
+      );
+      if (existing) {
+        Object.assign(existing, update);
+        return existing;
+      }
+      const doc = { ...update, eventId: filter.eventId };
+      store.set(doc.eventId, doc);
+      return doc;
+    },
+  );
+
+  const findOne = jest.fn(async (filter: { eventId: string }) => {
     const doc = Array.from(store.values()).find(
       (entry) => entry.eventId === filter.eventId,
     );
@@ -34,7 +48,7 @@ const createModelStub = () => {
     findOneAndUpdate,
     findOne,
     countDocuments,
-  };
+  } as unknown as Model<AnalyticsEventDocument>;
 
   return { analyticsModel, store };
 };
@@ -46,14 +60,17 @@ const createAnalyticsService = () => {
   } as unknown as jest.Mocked<AnalyticsEventRepository>;
 
   const natsClient = {
-    publishAnalyticsEvent: jest.fn(),
+    publish: jest.fn(),
   } as unknown as jest.Mocked<AppGatewayNatsService>;
 
   const cacheManager = {
-    wrap: jest.fn(async (_key: string, compute: () => Promise<any>) =>
+    wrap: jest.fn(async (_key: string, compute: () => Promise<unknown>) =>
       compute(),
     ),
-  } as any;
+    set: jest.fn(),
+    get: jest.fn(),
+    del: jest.fn(),
+  } as unknown as Cache;
 
   const service = new AnalyticsIntegrationService(
     repository,
@@ -68,14 +85,15 @@ describe('Domains module lightweight coverage', () => {
   describe('AnalyticsEventRepository', () => {
     it('counts session events using mocked model', async () => {
       const { analyticsModel, store } = createModelStub();
-      const repository = new AnalyticsEventRepository(
-        analyticsModel as any,
-      );
+      const repository = new AnalyticsEventRepository(analyticsModel);
 
       store.set('evt-1', {
         eventId: 'evt-1',
         sessionId: 'session-1',
         timestamp: new Date(),
+        eventType: 'USER_INTERACTION',
+        status: EventStatus.PROCESSED,
+        eventData: {},
       });
 
       const count = await repository.countSessionEvents('session-1');
@@ -90,7 +108,11 @@ describe('Domains module lightweight coverage', () => {
   describe('AnalyticsIntegrationService', () => {
     it('returns processed event metadata when tracking event succeeds', async () => {
       const { service } = createAnalyticsService();
-      (service as any).domainService = {
+      (service as unknown as {
+        domainService: {
+          createUserInteractionEvent: jest.Mock;
+        };
+      }).domainService = {
         createUserInteractionEvent: jest.fn().mockResolvedValue({
           success: true,
           data: {
@@ -118,7 +140,11 @@ describe('Domains module lightweight coverage', () => {
     it('bubbles up errors from domain service', async () => {
       const { service } = createAnalyticsService();
       const failure = new Error('domain failure');
-      (service as any).domainService = {
+      (service as unknown as {
+        domainService: {
+          createUserInteractionEvent: jest.Mock;
+        };
+      }).domainService = {
         createUserInteractionEvent: jest.fn().mockRejectedValue(failure),
       };
 

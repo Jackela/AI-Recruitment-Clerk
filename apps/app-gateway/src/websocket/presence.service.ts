@@ -12,7 +12,7 @@ export interface PresenceInfo {
   _sessionId: string;
   location?: string;
   device?: DeviceInfo;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -33,7 +33,7 @@ export interface UserActivity {
   action: string;
   timestamp: Date;
   location?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -62,7 +62,7 @@ export class PresenceService {
     userId: string,
     status: 'online' | 'away' | 'offline',
     _sessionId?: string,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ): Promise<void> {
     this.logger.debug(`Updating status for user ${userId}: ${status}`);
 
@@ -86,10 +86,9 @@ export class PresenceService {
     if (_sessionId) {
       this.sessionToUser.set(_sessionId, userId);
 
-      if (!this.userSessions.has(userId)) {
-        this.userSessions.set(userId, new Set());
-      }
-      this.userSessions.get(userId)!.add(_sessionId);
+      const sessionSet = this.userSessions.get(userId) ?? new Set<string>();
+      sessionSet.add(_sessionId);
+      this.userSessions.set(userId, sessionSet);
     }
 
     // Cache presence info
@@ -125,10 +124,9 @@ export class PresenceService {
     this.userPresence.set(userId, presence);
     this.sessionToUser.set(_sessionId, userId);
 
-    if (!this.userSessions.has(userId)) {
-      this.userSessions.set(userId, new Set());
-    }
-    this.userSessions.get(userId)!.add(_sessionId);
+    const sessionSet = this.userSessions.get(userId) ?? new Set<string>();
+    sessionSet.add(_sessionId);
+    this.userSessions.set(userId, sessionSet);
 
     await this.cachePresenceInfo(presence);
   }
@@ -161,9 +159,11 @@ export class PresenceService {
 
     // Try to load from cache
     try {
-      const cached = await this.cacheService.get(`presence:${userId}`);
+      const cached = await this.cacheService.get<PresenceInfo>(
+        `presence:${userId}`,
+      );
       if (cached) {
-        const presenceInfo = cached as PresenceInfo;
+        const presenceInfo = cached;
         this.userPresence.set(userId, presenceInfo);
         return presenceInfo;
       }

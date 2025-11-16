@@ -30,7 +30,7 @@ import {
   Permission,
   UserDto,
 } from '@ai-recruitment-clerk/user-management-domain';
-import { AnalyticsIntegrationService } from './analytics-integration.service';
+import { AnalyticsIntegrationService, MetricUnit } from './analytics-integration.service';
 
 interface AuthenticatedRequest extends ExpressRequest {
   user: UserDto;
@@ -150,7 +150,7 @@ export class AnalyticsController {
     metricData: {
       metricName: string;
       value: number;
-      unit: string;
+      unit: MetricUnit;
       operation: string;
       service: string;
       status: 'success' | 'error' | 'timeout';
@@ -211,9 +211,9 @@ export class AnalyticsController {
     metricData: {
       metricName: string;
       value: number;
-      unit: string;
+      unit: MetricUnit;
       category: string;
-      dimensions?: Record<string, any>;
+      dimensions?: Record<string, unknown>;
       tags?: string[];
     },
   ) {
@@ -471,7 +471,7 @@ export class AnalyticsController {
         | 'comprehensive';
       format: 'pdf' | 'excel' | 'csv' | 'json';
       dateRange: { startDate: string; endDate: string };
-      filters?: Record<string, any>;
+      filters?: Record<string, unknown>;
       sections?: string[];
       recipients?: string[];
     },
@@ -804,7 +804,7 @@ export class AnalyticsController {
     exportRequest: {
       dataTypes: string[];
       dateRange: { startDate: string; endDate: string };
-      filters?: Record<string, any>;
+      filters?: Record<string, unknown>;
       includeMetadata?: boolean;
     },
   ) {

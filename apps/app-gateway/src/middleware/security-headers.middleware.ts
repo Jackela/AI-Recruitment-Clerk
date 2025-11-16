@@ -139,10 +139,14 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     const allowedOrigins = corsOrigin.split(',').map((origin) => origin.trim());
     const requestOrigin = req.get('Origin');
 
-    if (allowedOrigins.includes(requestOrigin || '')) {
-      res.setHeader('Access-Control-Allow-Origin', requestOrigin!);
-    } else if (!isProduction && allowedOrigins[0]) {
-      res.setHeader('Access-Control-Allow-Origin', allowedOrigins[0]);
+    const matchedOrigin =
+      requestOrigin && allowedOrigins.includes(requestOrigin)
+        ? requestOrigin
+        : !isProduction
+        ? allowedOrigins[0]
+        : undefined;
+    if (matchedOrigin) {
+      res.setHeader('Access-Control-Allow-Origin', matchedOrigin);
     }
 
     res.setHeader('Access-Control-Allow-Credentials', 'true');

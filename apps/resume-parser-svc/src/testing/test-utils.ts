@@ -8,6 +8,8 @@ import {
 } from '@app/shared-nats-client';
 import { getModelToken } from '@nestjs/mongoose';
 import { Logger } from '@nestjs/common';
+import { getTestingEnvironment } from '@ai-recruitment-clerk/configuration';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Defines the shape of the test module options.
@@ -26,12 +28,13 @@ export interface TestModuleOptions {
 export async function createTestModule(
   options: TestModuleOptions = {},
 ): Promise<TestingModule> {
-  const {
-    useDocker = process.env.USE_DOCKER === 'true',
-    imports = [],
-    providers = [],
-    controllers = [],
-  } = options;
+  const runtimeConfig = getConfig({ forceReload: true });
+  const testingEnv = getTestingEnvironment({
+    useDocker: options.useDocker,
+    serviceName: 'resume-parser-svc-test',
+  });
+  const resolvedUseDocker = testingEnv.useDocker;
+  const { imports = [], providers = [], controllers = [] } = options;
 
   const moduleBuilder = Test.createTestingModule({
     imports: [
@@ -39,8 +42,14 @@ export async function createTestModule(
         envFilePath: '.env.test',
         isGlobal: true,
       }),
-      await TestDatabaseModule.forRoot(useDocker),
-      await TestNatsModule.forRoot(useDocker),
+      await TestDatabaseModule.forRoot({
+        useDocker: resolvedUseDocker,
+        mongoUri: testingEnv.mongoUri,
+      }),
+      await TestNatsModule.forRoot({
+        useDocker: resolvedUseDocker,
+        natsUrl: testingEnv.natsUrl,
+      }),
       ...imports,
     ],
     providers: [...providers],
@@ -64,50 +73,53 @@ export async function createTestModule(
 /**
  * Create mock providers for common services
  */
-export const createMockProviders = () => ({
-  configService: {
-    provide: ConfigService,
-    useValue: {
-      get: jest.fn((key: string) => {
-        const config: Record<string, any> = {
-          MONGODB_URI:
-            'mongodb://testuser:testpass@localhost:27018/resume-parser-test',
-          NATS_SERVERS: 'nats://testuser:testpass@localhost:4223',
-          SERVICE_NAME: 'resume-parser-svc-test',
-          GRIDFS_BUCKET_NAME: 'test-resumes',
-          GRIDFS_CHUNK_SIZE: 261120,
-        };
-        return config[key];
-      }),
-    },
-  },
+export const createMockProviders = () => {
+  const testingEnv = getTestingEnvironment({
+    serviceName: 'resume-parser-svc-test',
+  });
+  const configMap: Record<string, any> = {
+    MONGODB_URI: testingEnv.mongoUri,
+    NATS_SERVERS: testingEnv.natsUrl,
+    SERVICE_NAME: testingEnv.serviceName,
+    GRIDFS_BUCKET_NAME: testingEnv.gridFsBucket,
+    GRIDFS_CHUNK_SIZE: testingEnv.gridFsChunkSize,
+  };
 
-  natsConnectionManager: {
-    provide: NatsConnectionManager,
-    useValue: {
-      getConnection: jest.fn().mockResolvedValue({
-        jetstream: jest.fn().mockReturnValue({
-          publish: jest.fn().mockResolvedValue({ success: true }),
-          subscribe: jest.fn().mockResolvedValue({}),
+  return {
+    configService: {
+      provide: ConfigService,
+      useValue: {
+        get: jest.fn((key: string) => configMap[key]),
+      },
+    },
+
+    natsConnectionManager: {
+      provide: NatsConnectionManager,
+      useValue: {
+        getConnection: jest.fn().mockResolvedValue({
+          jetstream: jest.fn().mockReturnValue({
+            publish: jest.fn().mockResolvedValue({ success: true }),
+            subscribe: jest.fn().mockResolvedValue({}),
+          }),
+          close: jest.fn(),
         }),
-        close: jest.fn(),
-      }),
-      connect: jest.fn().mockResolvedValue(undefined),
-      disconnect: jest.fn().mockResolvedValue(undefined),
-      isConnected: jest.fn().mockReturnValue(true),
+        connect: jest.fn().mockResolvedValue(undefined),
+        disconnect: jest.fn().mockResolvedValue(undefined),
+        isConnected: jest.fn().mockReturnValue(true),
+      },
     },
-  },
 
-  natsStreamManager: {
-    provide: NatsStreamManager,
-    useValue: {
-      ensureStream: jest.fn().mockResolvedValue(undefined),
-      createConsumer: jest.fn().mockResolvedValue(undefined),
-      getStreamInfo: jest.fn().mockResolvedValue({}),
-      deleteStream: jest.fn().mockResolvedValue(undefined),
+    natsStreamManager: {
+      provide: NatsStreamManager,
+      useValue: {
+        ensureStream: jest.fn().mockResolvedValue(undefined),
+        createConsumer: jest.fn().mockResolvedValue(undefined),
+        getStreamInfo: jest.fn().mockResolvedValue({}),
+        deleteStream: jest.fn().mockResolvedValue(undefined),
+      },
     },
-  },
-});
+  };
+};
 
 /**
  * Create a mock MongoDB model

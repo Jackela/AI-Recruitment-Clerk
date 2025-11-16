@@ -1,4 +1,6 @@
 import { GuestUsageService } from './guest-usage.service';
+import type { Model } from 'mongoose';
+import type { GuestUsageDocument } from '../schemas/guest-usage.schema';
 
 type StoreRecord = {
   deviceId: string;
@@ -9,10 +11,28 @@ type StoreRecord = {
   createdAt: Date;
 };
 
+type FindQuery = {
+  deviceId?: string;
+  feedbackCode?: string;
+  feedbackCodeStatus?: string;
+};
+
+type UpdateOperations = {
+  $inc?: {
+    usageCount?: number;
+  };
+  $set?: Partial<StoreRecord>;
+  $unset?: Record<string, unknown>;
+};
+
+type CleanupQuery = {
+  lastUsed?: { $lt: Date };
+};
+
 const createModelMock = () => {
   const store = new Map<string, StoreRecord>();
 
-  const findOne = jest.fn(async (query: Record<string, any>) => {
+  const findOne = jest.fn(async (query: FindQuery) => {
     if (query.deviceId) {
       return store.get(query.deviceId) ?? null;
     }
@@ -27,8 +47,9 @@ const createModelMock = () => {
   });
 
   const create = jest.fn(async (doc: Partial<StoreRecord>) => {
+    const deviceId = doc.deviceId ?? '';
     const record: StoreRecord = {
-      deviceId: doc.deviceId!,
+      deviceId,
       usageCount: doc.usageCount ?? 1,
       feedbackCode: doc.feedbackCode ?? null,
       feedbackCodeStatus: doc.feedbackCodeStatus ?? null,
@@ -39,9 +60,9 @@ const createModelMock = () => {
     return record;
   });
 
-  const updateOne = jest.fn(async (query: Record<string, any>, update: any) => {
+  const updateOne = jest.fn(async (query: FindQuery, update: UpdateOperations) => {
     const target =
-      store.get(query.deviceId) ??
+      (query.deviceId && store.get(query.deviceId)) ??
       Array.from(store.values()).find(
         (entry) => entry.feedbackCode === query.feedbackCode,
       );
@@ -56,17 +77,18 @@ const createModelMock = () => {
       Object.assign(target, update.$set);
     }
     if (update.$unset) {
+      const targetRecord = target as Record<string, unknown>;
       Object.keys(update.$unset).forEach((key) => {
-        (target as any)[key] = null;
+        targetRecord[key] = null;
       });
     }
     store.set(target.deviceId, target);
     return { acknowledged: true, modifiedCount: 1 };
   });
 
-  const deleteMany = jest.fn(async (query: Record<string, any>) => {
+  const deleteMany = jest.fn(async (query: CleanupQuery) => {
     const before = store.size;
-    const cutoff: Date = query.lastUsed?.$lt;
+    const cutoff = query.lastUsed?.$lt;
     Array.from(store.entries()).forEach(([deviceId, record]) => {
       if (
         cutoff &&
@@ -82,7 +104,13 @@ const createModelMock = () => {
   const countDocuments = jest.fn(async () => store.size);
 
   const aggregate = jest.fn(async () => [
-    { _id: 'totalUsage', value: Array.from(store.values()).reduce((acc, r) => acc + r.usageCount, 0) },
+    {
+      _id: 'totalUsage',
+      value: Array.from(store.values()).reduce(
+        (acc, r) => acc + r.usageCount,
+        0,
+      ),
+    },
   ]);
 
   return {
@@ -102,12 +130,23 @@ describe('GuestUsageService (mocked model)', () => {
   let service: GuestUsageService;
   let model: ReturnType<typeof createModelMock>['model'];
   let store: ReturnType<typeof createModelMock>['store'];
+  const setUsageCount = (deviceId: string, usageCount: number) => {
+    const record = store.get(deviceId);
+    if (!record) {
+      throw new Error(`Record not found for ${deviceId}`);
+    }
+    record.usageCount = usageCount;
+    store.set(deviceId, record);
+    return record;
+  };
 
   beforeEach(() => {
     const factory = createModelMock();
     model = factory.model;
     store = factory.store;
-    service = new GuestUsageService(model as any);
+    service = new GuestUsageService(
+      model as unknown as Model<GuestUsageDocument>,
+    );
   });
 
   describe('canUse', () => {
@@ -121,7 +160,7 @@ describe('GuestUsageService (mocked model)', () => {
 
     it('enforces usage limit of five', async () => {
       await service.canUse('device-limit');
-      store.get('device-limit')!.usageCount = 5;
+      setUsageCount('device-limit', 5);
 
       const result = await service.canUse('device-limit');
 
@@ -187,7 +226,7 @@ describe('GuestUsageService (mocked model)', () => {
     it('should handle usage count at exactly limit boundary (5)', async () => {
       const deviceId = 'device-at-limit';
       await service.canUse(deviceId);
-      store.get(deviceId)!.usageCount = 5;
+      setUsageCount(deviceId, 5);
 
       const result = await service.canUse(deviceId);
       
@@ -198,7 +237,7 @@ describe('GuestUsageService (mocked model)', () => {
     it('should handle usage count just below limit (4)', async () => {
       const deviceId = 'device-below-limit';
       await service.canUse(deviceId);
-      store.get(deviceId)!.usageCount = 4;
+      setUsageCount(deviceId, 4);
 
       const result = await service.canUse(deviceId);
       
@@ -209,7 +248,7 @@ describe('GuestUsageService (mocked model)', () => {
     it('should handle zero usage count (boundary: min)', async () => {
       const deviceId = 'device-zero';
       await service.canUse(deviceId);
-      store.get(deviceId)!.usageCount = 0;
+      setUsageCount(deviceId, 0);
 
       const result = await service.canUse(deviceId);
       
@@ -251,7 +290,7 @@ describe('GuestUsageService (mocked model)', () => {
 
     it('should successfully redeem valid feedback code and reset usage', async () => {
       await service.canUse('device-redeem-test');
-      store.get('device-redeem-test')!.usageCount = 5;
+      setUsageCount('device-redeem-test', 5);
       const code = await service.generateFeedbackCode('device-redeem-test');
       
       const redeemed = await service.redeemFeedbackCode(code);
@@ -303,7 +342,7 @@ describe('GuestUsageService (mocked model)', () => {
       const deviceId = 'device-no-count';
       store.set(deviceId, {
         deviceId,
-        usageCount: undefined as any,
+        usageCount: undefined as unknown as number,
         lastUsed: new Date(),
         createdAt: new Date(),
       });
@@ -314,7 +353,7 @@ describe('GuestUsageService (mocked model)', () => {
     it('should handle device with negative usage count (data corruption)', async () => {
       const deviceId = 'device-negative';
       await service.canUse(deviceId);
-      store.get(deviceId)!.usageCount = -1;
+      setUsageCount(deviceId, -1);
 
       const result = await service.canUse(deviceId);
       
@@ -325,7 +364,7 @@ describe('GuestUsageService (mocked model)', () => {
     it('should handle device with very large usage count', async () => {
       const deviceId = 'device-large';
       await service.canUse(deviceId);
-      store.get(deviceId)!.usageCount = Number.MAX_SAFE_INTEGER;
+      setUsageCount(deviceId, Number.MAX_SAFE_INTEGER);
 
       const result = await service.canUse(deviceId);
       
@@ -357,7 +396,7 @@ describe('GuestUsageService (mocked model)', () => {
 
     it('should generate feedback code with correct format when usage limit reached', async () => {
       await service.canUse('device-code-format');
-      store.get('device-code-format')!.usageCount = 5;
+      setUsageCount('device-code-format', 5);
       
       const code = await service.generateFeedbackCode('device-code-format');
       

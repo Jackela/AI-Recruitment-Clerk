@@ -104,7 +104,7 @@ export class DatabasePerformanceMonitor {
   async executeWithTimeout<T>(
     operation: () => Promise<T>,
     queryName: string,
-    timeoutMs: number = 10000,
+    timeoutMs = 10000,
   ): Promise<T> {
     return this.executeWithMonitoring(
       () => this.withTimeout(operation(), timeoutMs),

@@ -11,7 +11,7 @@ import {
   NotFoundException,
   Logger,
 } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { FeedbackCodeService } from './feedback-code.service';
 import {
   CreateFeedbackCodeDto,
@@ -162,17 +162,17 @@ export class FeedbackCodeController {
       throw new BadRequestException('支付宝账号格式不正确');
     }
 
-    const result = await (this.feedbackCodeService as any).markAsUsed(
-      markUsedDto,
-    );
+    const result = await this.feedbackCodeService.markAsUsed(markUsedDto);
+
+    const qualityScore = result.qualityScore ?? 0;
 
     return {
       success: true,
       data: {
         code: result.code,
-        qualityScore: result.qualityScore,
+        qualityScore,
         paymentStatus: result.paymentStatus,
-        eligible: result.qualityScore >= 3,
+        eligible: qualityScore >= 3,
       },
     };
   }
@@ -206,7 +206,16 @@ export class FeedbackCodeController {
    */
   @Post('webhook/questionnaire')
   @HttpCode(HttpStatus.OK)
-  async handleQuestionnaireWebhook(@Body() webhookData: any) {
+  async handleQuestionnaireWebhook(
+    @Body()
+    webhookData: {
+      answers?: Record<string, unknown> & {
+        feedback_code?: string;
+        alipay_account?: string;
+      };
+      code?: string;
+    },
+  ) {
     try {
       // 处理腾讯问卷的webhook数据
       this.logger.log('收到问卷webhook数据', webhookData);
@@ -224,7 +233,7 @@ export class FeedbackCodeController {
         };
 
         // 调用与测试期望一致的方法名
-        await (this.feedbackCodeService as any).markAsUsed(markUsedDto);
+        await this.feedbackCodeService.markAsUsed(markUsedDto);
         this.logger.log(`Webhook处理成功: ${feedbackCode}`);
       }
 

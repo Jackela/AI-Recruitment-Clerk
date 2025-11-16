@@ -14,6 +14,7 @@ import {
   Req,
   Logger,
   HttpException,
+  FileTypeValidator,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -28,6 +29,7 @@ import {
   ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
 import { Public } from '../../auth/decorators/public.decorator';
+import type { MulterFile } from '../../jobs/types/multer.types';
 import { GuestGuard } from '../guards/guest.guard';
 import type { RequestWithDeviceId } from '../guards/guest.guard';
 import { OptionalJwtAuthGuard } from '../guards/optional-jwt-auth.guard';
@@ -38,6 +40,7 @@ import {
   GridFsService,
   ResumeFileMetadata,
 } from '../../services/gridfs.service';
+import type { Express } from 'express';
 
 interface GuestResumeUploadDto {
   candidateName?: string;
@@ -45,25 +48,12 @@ interface GuestResumeUploadDto {
   notes?: string;
 }
 
-// Lightweight file validator compatible with ParseFilePipe expectations
-const resumeFileValidator: {
-  isValid: (file?: any) => boolean;
-  buildErrorMessage: () => string;
-} = {
-  buildErrorMessage: () =>
-    'Invalid file type. Only PDF, DOC, and DOCX files are allowed.',
-  isValid: (file?: any): boolean => {
-    if (!file) return false;
-    const allowedMimeTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    ];
-    const allowedExtensions = /\.(pdf|doc|docx)$/i;
-    const mimeTypeValid = allowedMimeTypes.includes(file.mimetype);
-    const extensionValid = allowedExtensions.test(file.originalname);
-    return mimeTypeValid && extensionValid;
-  },
+const resumeFileValidator = new FileTypeValidator({
+  fileType: /\.(pdf|doc|docx)$/i,
+});
+
+type RequestWithGuestContext = RequestWithDeviceId & {
+  user?: { id?: string } | null;
 };
 
 /**
@@ -141,22 +131,23 @@ export class GuestResumeController {
     description: 'Guest usage limit exceeded - feedback code required',
   })
   async analyzeResume(
-    @Req() req: RequestWithDeviceId,
+    @Req() req: RequestWithGuestContext,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB limit for guests
-          resumeFileValidator as any,
+          resumeFileValidator,
         ],
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),
     )
-    file: any, // Express.Multer.File type fix
+    file: MulterFile,
     @Body() uploadData: GuestResumeUploadDto,
   ) {
     try {
-      const deviceId = req.deviceId!;
-      const isAuthenticated = !!req.user;
+      const deviceId = this.ensureDeviceId(req);
+      const userId = this.extractUserId(req);
+      const isAuthenticated = Boolean(userId);
 
       // For guest users, check usage limit first
       if (!isAuthenticated) {
@@ -185,7 +176,7 @@ export class GuestResumeController {
       const analysisRequest = {
         analysisId,
         deviceId: isAuthenticated ? undefined : deviceId,
-        userId: isAuthenticated ? (req.user as any)?.id : undefined,
+        userId,
         filename: file.originalname,
         fileSize: file.size,
         fileType: file.mimetype,
@@ -201,7 +192,7 @@ export class GuestResumeController {
       try {
         const resumeId = analysisId; // reuse analysisId as resumeId for correlation
         const jobId = isAuthenticated
-          ? `user-job-${(req.user as any)?.id || 'unknown'}`
+          ? `user-job-${userId ?? 'unknown'}`
           : `guest-job-${deviceId}`;
 
         // ✅ PRIORITY 1 FIX: Store file in GridFS first
@@ -213,7 +204,7 @@ export class GuestResumeController {
           fileType: 'resume',
           analysisId,
           deviceId: isAuthenticated ? undefined : deviceId,
-          userId: isAuthenticated ? (req.user as any)?.id : undefined,
+          userId,
           originalFilename: file.originalname,
           mimeType: file.mimetype,
           fileSize: file.size,
@@ -225,6 +216,13 @@ export class GuestResumeController {
         };
 
         // Store file buffer in GridFS and get the URL
+        if (!file.buffer) {
+          throw new HttpException(
+            'Invalid resume file buffer',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+
         tempGridFsUrl = await this.gridFsService.storeResumeFile(
           file.buffer,
           file.originalname,
@@ -625,10 +623,10 @@ export class GuestResumeController {
     status: 200,
     description: 'Demo analysis returned successfully',
   })
-  async getDemoAnalysis(@Req() req: RequestWithDeviceId) {
+  async getDemoAnalysis(@Req() req: RequestWithGuestContext) {
     try {
-      const deviceId = req.deviceId!;
-      const isAuthenticated = !!req.user;
+      const deviceId = this.ensureDeviceId(req);
+      const isAuthenticated = Boolean(this.extractUserId(req));
 
       // For guest users, check usage limit
       if (!isAuthenticated) {
@@ -768,5 +766,29 @@ export class GuestResumeController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  private ensureDeviceId(req: RequestWithDeviceId): string {
+    const deviceId = req.deviceId?.trim();
+    if (!deviceId) {
+      throw new HttpException(
+        'Device ID is required for guest operations',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    return deviceId;
+  }
+
+  private extractUserId(req: RequestWithGuestContext): string | undefined {
+    const possibleUser = req.user;
+    if (
+      possibleUser &&
+      typeof possibleUser === 'object' &&
+      'id' in possibleUser &&
+      typeof possibleUser.id === 'string'
+    ) {
+      return possibleUser.id;
+    }
+    return undefined;
   }
 }

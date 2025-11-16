@@ -1,0 +1,53 @@
+remediations:
+  - id: APP-GW-SSOT-001
+    findingId: app-gateway#1
+    componentId: app-gateway
+    severity: high
+    owner: platform-governance
+    dueDate: '2025-12-01'
+    status: in-progress
+    milestones:
+      - name: Consolidate job persistence via GridFS abstraction
+        dueDate: '2025-11-15'
+        acceptanceCriteria: "Mongo + Redis duplication removed; single repository pattern in place"
+      - name: Update analytics pipeline to consume new repository
+        dueDate: '2025-11-25'
+        acceptanceCriteria: "Analytics DTOs read from unified repository without branching logic"
+    verification:
+      - npm run gov:validate
+      - npm run test:integration:api
+    dependencies: []
+    notes: "Requires coordination with analytics domain owners"
+
+  - id: RESUME-PARSER-SSOT-001
+    findingId: resume-parser-svc#1
+    componentId: resume-parser-svc
+    severity: high
+    owner: data-ingestion
+    dueDate: '2025-11-20'
+    status: planned
+    milestones:
+      - name: Normalize date parsing utilities
+        dueDate: '2025-11-10'
+        acceptanceCriteria: "Single date helper consumed by mapper and sanitation services"
+    verification:
+      - npm run gov:validate
+      - npm run test:integration:e2e
+    dependencies: []
+
+  - id: FRONTEND-DDD-001
+    findingId: ai-recruitment-frontend#1
+    componentId: ai-recruitment-frontend
+    severity: medium
+    owner: experience-team
+    dueDate: '2025-12-05'
+    status: planned
+    milestones:
+      - name: Refactor mobile performance component to use bounded-context service
+        dueDate: '2025-11-30'
+        acceptanceCriteria: "Component fetches analytics through dedicated facade"
+    verification:
+      - npm run gov:validate
+      - npm run test:e2e
+    dependencies:
+      - APP-GW-SSOT-001

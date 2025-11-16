@@ -1,6 +1,23 @@
-import { AnalyticsIntegrationService } from './analytics-integration.service';
+import type { Cache } from 'cache-manager';
+import {
+  AnalyticsIntegrationService,
+  MetricUnit,
+} from './analytics-integration.service';
 import { AnalyticsEventRepository } from './analytics-event.repository';
 import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
+
+type DomainServiceMock = {
+  createUserInteractionEvent?: jest.Mock;
+  createBusinessMetricEvent?: jest.Mock;
+};
+
+const attachDomainService = (
+  service: AnalyticsIntegrationService,
+  stub: DomainServiceMock,
+) => {
+  (service as unknown as { domainService: DomainServiceMock }).domainService =
+    stub;
+};
 
 const createService = () => {
   const repository = {
@@ -8,19 +25,22 @@ const createService = () => {
   } as unknown as jest.Mocked<AnalyticsEventRepository>;
 
   const natsClient = {
-    publishAnalyticsEvent: jest.fn(),
+    publish: jest.fn(),
   } as unknown as jest.Mocked<AppGatewayNatsService>;
 
   const cacheManager = {
-    wrap: jest.fn(async (_key: string, compute: () => Promise<any>) =>
-      compute(),
+    wrap: jest.fn(
+      async <T>(_key: string, compute: () => Promise<T>) => compute(),
     ),
-  } as any;
+    set: jest.fn(),
+    get: jest.fn(),
+    del: jest.fn(),
+  };
 
   const service = new AnalyticsIntegrationService(
     repository,
     natsClient,
-    cacheManager,
+    cacheManager as unknown as Cache,
   );
 
   return { service, repository, natsClient, cacheManager };
@@ -33,7 +53,7 @@ describe('AnalyticsIntegrationService (mock-based)', () => {
 
   it('tracks events via domain service bridge', async () => {
     const { service } = createService();
-    const domainSpy = {
+    const domainSpy: DomainServiceMock = {
       createUserInteractionEvent: jest.fn().mockResolvedValue({
         success: true,
         data: {
@@ -44,15 +64,19 @@ describe('AnalyticsIntegrationService (mock-based)', () => {
         },
       }),
     };
-    (service as any).domainService = domainSpy;
+    attachDomainService(service, domainSpy);
 
-    const output = await service.trackEvent({
+    const trackPayload: Parameters<
+      AnalyticsIntegrationService['trackEvent']
+    >[0] = {
       category: 'ui',
       action: 'click',
       userId: 'user-1',
       organizationId: 'org-1',
       timestamp: new Date('2024-01-01T00:00:00Z'),
-    } as any);
+    };
+
+    const output = await service.trackEvent(trackPayload);
 
     expect(domainSpy.createUserInteractionEvent).toHaveBeenCalled();
     expect(output.eventId).toBe('evt-1');
@@ -61,7 +85,7 @@ describe('AnalyticsIntegrationService (mock-based)', () => {
 
   it('records metrics through domain service and returns summary', async () => {
     const { service } = createService();
-    const domainSpy = {
+    const domainSpy: DomainServiceMock = {
       createBusinessMetricEvent: jest.fn().mockResolvedValue({
         success: true,
         data: {
@@ -71,17 +95,21 @@ describe('AnalyticsIntegrationService (mock-based)', () => {
         },
       }),
     };
-    (service as any).domainService = domainSpy;
+    attachDomainService(service, domainSpy);
 
-    const result = await service.recordMetric({
+    const metricPayload: Parameters<
+      AnalyticsIntegrationService['recordMetric']
+    >[0] = {
       metricName: 'latency',
       value: 150,
-      unit: 'ms',
+      unit: MetricUnit.MILLISECONDS,
       organizationId: 'org-1',
       recordedBy: 'user-1',
       timestamp: new Date(),
       category: 'performance',
-    } as any);
+    };
+
+    const result = await service.recordMetric(metricPayload);
 
     expect(domainSpy.createBusinessMetricEvent).toHaveBeenCalled();
     expect(result.metricId).toBe('metric-1');
@@ -103,12 +131,12 @@ describe('AnalyticsIntegrationService (mock-based)', () => {
   describe('Negative Tests - Event Tracking Failures', () => {
     it('should handle domain service failure during event tracking', async () => {
       const { service } = createService();
-      const domainSpy = {
+      const domainSpy: DomainServiceMock = {
         createUserInteractionEvent: jest
           .fn()
           .mockRejectedValue(new Error('Domain service unavailable')),
       };
-      (service as any).domainService = domainSpy;
+      attachDomainService(service, domainSpy);
 
       await expect(
         service.trackEvent({
@@ -117,7 +145,7 @@ describe('AnalyticsIntegrationService (mock-based)', () => {
           userId: 'user-1',
           organizationId: 'org-1',
           timestamp: new Date(),
-        } as any),
+        }),
       ).rejects.toThrow('Domain service unavailable');
     });
 
@@ -129,7 +157,7 @@ describe('AnalyticsIntegrationService (mock-based)', () => {
           data: { id: 'evt-1', status: 'PROCESSED', props: { timestamp: new Date() } },
         }),
       };
-      (service as any).domainService = domainSpy;
+      attachDomainService(service, domainSpy);
 
       const result = await service.trackEvent({
         category: 'ui',
@@ -137,7 +165,7 @@ describe('AnalyticsIntegrationService (mock-based)', () => {
         userId: 'user-1',
         organizationId: 'org-1',
         timestamp: new Date(),
-      } as any);
+      });
 
       expect(result.eventId).toBe('evt-1');
       expect(result.processed).toBe(true);
@@ -150,7 +178,7 @@ describe('AnalyticsIntegrationService (mock-based)', () => {
           .fn()
           .mockRejectedValue(new Error('Missing required field: userId')),
       };
-      (service as any).domainService = domainSpy;
+      attachDomainService(service, domainSpy);
 
       await expect(
         service.trackEvent({
@@ -158,7 +186,7 @@ describe('AnalyticsIntegrationService (mock-based)', () => {
           action: 'click',
           organizationId: 'org-1',
           timestamp: new Date(),
-        } as any),
+        } as Parameters<AnalyticsIntegrationService['trackEvent']>[0]),
       ).rejects.toThrow('Missing required field: userId');
     });
   });
@@ -171,64 +199,76 @@ describe('AnalyticsIntegrationService (mock-based)', () => {
           .fn()
           .mockRejectedValue(new Error('Metric value must be non-negative')),
       };
-      (service as any).domainService = domainSpy;
+      attachDomainService(service, domainSpy);
 
-      await expect(
-        service.recordMetric({
-          metricName: 'latency',
-          value: -100,
-          unit: 'ms',
-          organizationId: 'org-1',
-          recordedBy: 'user-1',
-          timestamp: new Date(),
-          category: 'performance',
-        } as any),
-      ).rejects.toThrow('Metric value must be non-negative');
+      const payload: Parameters<
+        AnalyticsIntegrationService['recordMetric']
+      >[0] = {
+        metricName: 'latency',
+        value: -100,
+        unit: MetricUnit.MILLISECONDS,
+        organizationId: 'org-1',
+        recordedBy: 'user-1',
+        timestamp: new Date(),
+        category: 'performance',
+      };
+
+      await expect(service.recordMetric(payload)).rejects.toThrow(
+        'Metric value must be non-negative',
+      );
     });
 
     it('should handle database failure during metric recording', async () => {
       const { service } = createService();
-      const domainSpy = {
+      const domainSpy: DomainServiceMock = {
         createBusinessMetricEvent: jest
           .fn()
           .mockRejectedValue(new Error('Database write failed')),
       };
-      (service as any).domainService = domainSpy;
+      attachDomainService(service, domainSpy);
 
-      await expect(
-        service.recordMetric({
-          metricName: 'requests',
-          value: 1000,
-          unit: 'count',
-          organizationId: 'org-1',
-          recordedBy: 'user-1',
-          timestamp: new Date(),
-          category: 'usage',
-        } as any),
-      ).rejects.toThrow('Database write failed');
+      const payload: Parameters<
+        AnalyticsIntegrationService['recordMetric']
+      >[0] = {
+        metricName: 'requests',
+        value: 1000,
+        unit: MetricUnit.COUNT,
+        organizationId: 'org-1',
+        recordedBy: 'user-1',
+        timestamp: new Date(),
+        category: 'usage',
+      };
+
+      await expect(service.recordMetric(payload)).rejects.toThrow(
+        'Database write failed',
+      );
     });
   });
 
   describe('Boundary Tests - Metric Value Limits', () => {
     it('should accept metric value at exactly 0 (minimum boundary)', async () => {
       const { service } = createService();
-      const domainSpy = {
+      const domainSpy: DomainServiceMock = {
         createBusinessMetricEvent: jest.fn().mockResolvedValue({
           success: true,
-          data: { id: 'metric-zero', status: 'PROCESSED', props: { timestamp: new Date() } },
+          data: {
+            id: 'metric-zero',
+            status: 'PROCESSED',
+            props: { timestamp: new Date() },
+          },
         }),
       };
-      (service as any).domainService = domainSpy;
+      attachDomainService(service, domainSpy);
 
       const result = await service.recordMetric({
         metricName: 'errors',
         value: 0,
-        unit: 'count',
+        unit: MetricUnit.COUNT,
         organizationId: 'org-1',
         recordedBy: 'user-1',
         timestamp: new Date(),
         category: 'reliability',
-      } as any);
+      });
 
       expect(result.metricId).toBe('metric-zero');
       expect(result.status).toBe('PROCESSED');
@@ -236,46 +276,54 @@ describe('AnalyticsIntegrationService (mock-based)', () => {
 
     it('should accept very large metric values (>1 million)', async () => {
       const { service } = createService();
-      const domainSpy = {
+      const domainSpy: DomainServiceMock = {
         createBusinessMetricEvent: jest.fn().mockResolvedValue({
           success: true,
-          data: { id: 'metric-large', status: 'PROCESSED', props: { timestamp: new Date() } },
+          data: {
+            id: 'metric-large',
+            status: 'PROCESSED',
+            props: { timestamp: new Date() },
+          },
         }),
       };
-      (service as any).domainService = domainSpy;
+      attachDomainService(service, domainSpy);
 
       const result = await service.recordMetric({
         metricName: 'total_requests',
-        value: 5000000,
-        unit: 'count',
+        value: 5_000_000,
+        unit: MetricUnit.COUNT,
         organizationId: 'org-1',
         recordedBy: 'user-1',
         timestamp: new Date(),
         category: 'usage',
-      } as any);
+      });
 
       expect(result.metricId).toBe('metric-large');
     });
 
     it('should accept decimal metric values with high precision', async () => {
       const { service } = createService();
-      const domainSpy = {
+      const domainSpy: DomainServiceMock = {
         createBusinessMetricEvent: jest.fn().mockResolvedValue({
           success: true,
-          data: { id: 'metric-decimal', status: 'PROCESSED', props: { timestamp: new Date() } },
+          data: {
+            id: 'metric-decimal',
+            status: 'PROCESSED',
+            props: { timestamp: new Date() },
+          },
         }),
       };
-      (service as any).domainService = domainSpy;
+      attachDomainService(service, domainSpy);
 
       const result = await service.recordMetric({
         metricName: 'response_time',
         value: 123.456789,
-        unit: 'ms',
+        unit: MetricUnit.MILLISECONDS,
         organizationId: 'org-1',
         recordedBy: 'user-1',
         timestamp: new Date(),
         category: 'performance',
-      } as any);
+      });
 
       expect(result.status).toBe('PROCESSED');
     });
@@ -284,25 +332,27 @@ describe('AnalyticsIntegrationService (mock-based)', () => {
   describe('Edge Cases - Concurrent Event Tracking', () => {
     it('should handle concurrent event tracking from multiple users', async () => {
       const { service } = createService();
-      const domainSpy = {
+      const domainSpy: DomainServiceMock = {
         createUserInteractionEvent: jest.fn().mockResolvedValue({
           success: true,
-          data: { id: 'evt-concurrent', status: 'PROCESSED', props: { timestamp: new Date() } },
+          data: {
+            id: 'evt-concurrent',
+            status: 'PROCESSED',
+            props: { timestamp: new Date() },
+          },
         }),
       };
-      (service as any).domainService = domainSpy;
+      attachDomainService(service, domainSpy);
 
-      const promises = Array(10)
-        .fill(null)
-        .map((_, i) =>
-          service.trackEvent({
-            category: 'ui',
-            action: 'click',
-            userId: `user-${i}`,
-            organizationId: 'org-1',
-            timestamp: new Date(),
-          } as any),
-        );
+      const promises = Array.from({ length: 10 }, (_, i) =>
+        service.trackEvent({
+          category: 'ui',
+          action: 'click',
+          userId: `user-${i}`,
+          organizationId: 'org-1',
+          timestamp: new Date(),
+        }),
+      );
 
       const results = await Promise.all(promises);
 
@@ -313,47 +363,53 @@ describe('AnalyticsIntegrationService (mock-based)', () => {
       expect(domainSpy.createUserInteractionEvent).toHaveBeenCalledTimes(10);
     });
 
-    it('should handle concurrent metric recording', async () => {
+  it('should handle concurrent metric recording', async () => {
       const { service } = createService();
-      const domainSpy = {
+      const domainSpy: DomainServiceMock = {
         createBusinessMetricEvent: jest.fn().mockResolvedValue({
           success: true,
-          data: { id: 'metric-concurrent', status: 'PROCESSED', props: { timestamp: new Date() } },
+          data: {
+            id: 'metric-concurrent',
+            status: 'PROCESSED',
+            props: { timestamp: new Date() },
+          },
         }),
       };
-      (service as any).domainService = domainSpy;
+      attachDomainService(service, domainSpy);
 
-      const promises = [
-        service.recordMetric({
+      const payloads: Array<
+        Parameters<AnalyticsIntegrationService['recordMetric']>[0]
+      > = [
+        {
           metricName: 'cpu_usage',
           value: 45,
-          unit: 'percent',
+          unit: MetricUnit.PERCENTAGE,
           organizationId: 'org-1',
           recordedBy: 'system',
           timestamp: new Date(),
           category: 'performance',
-        } as any),
-        service.recordMetric({
+        },
+        {
           metricName: 'memory_usage',
           value: 2048,
-          unit: 'MB',
+          unit: MetricUnit.COUNT,
           organizationId: 'org-1',
           recordedBy: 'system',
           timestamp: new Date(),
           category: 'performance',
-        } as any),
-        service.recordMetric({
+        },
+        {
           metricName: 'disk_usage',
           value: 75,
-          unit: 'percent',
+          unit: MetricUnit.PERCENTAGE,
           organizationId: 'org-1',
           recordedBy: 'system',
           timestamp: new Date(),
           category: 'performance',
-        } as any),
+        },
       ];
 
-      const results = await Promise.all(promises);
+      const results = await Promise.all(payloads.map((payload) => service.recordMetric(payload)));
 
       results.forEach((result) => {
         expect(result.metricId).toBe('metric-concurrent');
@@ -364,22 +420,26 @@ describe('AnalyticsIntegrationService (mock-based)', () => {
   describe('Edge Cases - Cache Behavior', () => {
     it('should bypass cache on cache manager failure', async () => {
       const { service, cacheManager } = createService();
-      const domainSpy = {
+      const domainSpy: DomainServiceMock = {
         createUserInteractionEvent: jest.fn().mockResolvedValue({
           success: true,
           data: { id: 'evt-no-cache', status: 'PROCESSED', props: { timestamp: new Date() } },
         }),
       };
-      (service as any).domainService = domainSpy;
+      attachDomainService(service, domainSpy);
       cacheManager.wrap.mockRejectedValue(new Error('Cache unavailable'));
 
-      const result = await service.trackEvent({
+      const cacheBypassPayload: Parameters<
+        AnalyticsIntegrationService['trackEvent']
+      >[0] = {
         category: 'ui',
         action: 'click',
         userId: 'user-1',
         organizationId: 'org-1',
         timestamp: new Date(),
-      } as any);
+      };
+
+      const result = await service.trackEvent(cacheBypassPayload);
 
       expect(result.eventId).toBe('evt-no-cache');
     });
@@ -388,7 +448,7 @@ describe('AnalyticsIntegrationService (mock-based)', () => {
   describe('Assertion Specificity Improvements', () => {
     it('should return complete event tracking response structure', async () => {
       const { service } = createService();
-      const domainSpy = {
+      const domainSpy: DomainServiceMock = {
         createUserInteractionEvent: jest.fn().mockResolvedValue({
           success: true,
           data: {
@@ -399,15 +459,19 @@ describe('AnalyticsIntegrationService (mock-based)', () => {
           },
         }),
       };
-      (service as any).domainService = domainSpy;
+      attachDomainService(service, domainSpy);
 
-      const result = await service.trackEvent({
+      const completePayload: Parameters<
+        AnalyticsIntegrationService['trackEvent']
+      >[0] = {
         category: 'ui',
         action: 'click',
         userId: 'user-1',
         organizationId: 'org-1',
         timestamp: new Date('2024-01-01T00:00:00Z'),
-      } as any);
+      };
+
+      const result = await service.trackEvent(completePayload);
 
       expect(result).toMatchObject({
         eventId: expect.stringMatching(/^evt-/),

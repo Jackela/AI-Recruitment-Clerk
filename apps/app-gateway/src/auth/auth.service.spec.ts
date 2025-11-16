@@ -18,14 +18,13 @@ import {
   UserRole,
   JwtPayload,
 } from '@ai-recruitment-clerk/user-management-domain';
-import * as bcrypt from 'bcryptjs';
+import { resetConfigCache } from '@ai-recruitment-clerk/configuration';
 
 describe('AuthService', () => {
   let service: AuthService;
   let userService: jest.Mocked<UserService>;
   let jwtService: jest.Mocked<JwtService>;
   let redisBlacklist: jest.Mocked<RedisTokenBlacklistService>;
-  let configService: jest.Mocked<ConfigService>;
 
   const mockUser: UserDto = {
     id: 'user-1',
@@ -38,6 +37,8 @@ describe('AuthService', () => {
   };
 
   beforeEach(async () => {
+    process.env.NODE_ENV = 'test';
+    resetConfigCache();
     const userServiceMock = {
       findByEmail: jest.fn(),
       findById: jest.fn(),
@@ -58,7 +59,7 @@ describe('AuthService', () => {
 
     const configServiceMock = {
       get: jest.fn((key: string) => {
-        const config: Record<string, any> = {
+        const config: Record<string, string> = {
           JWT_SECRET: 'test-secret',
           JWT_EXPIRES_IN: '15m',
           JWT_REFRESH_SECRET: 'test-refresh-secret',
@@ -82,11 +83,11 @@ describe('AuthService', () => {
     userService = module.get(UserService) as jest.Mocked<UserService>;
     jwtService = module.get(JwtService) as jest.Mocked<JwtService>;
     redisBlacklist = module.get(RedisTokenBlacklistService) as jest.Mocked<RedisTokenBlacklistService>;
-    configService = module.get(ConfigService) as jest.Mocked<ConfigService>;
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    resetConfigCache();
   });
 
   describe('register', () => {

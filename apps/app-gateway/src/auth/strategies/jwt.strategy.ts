@@ -20,13 +20,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    */
   constructor(
     private readonly authService: AuthService,
-    private readonly _configService: ConfigService,
+    private readonly configService: ConfigService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey:
-        _configService.get<string>('JWT_SECRET') ||
+        configService.get<string>('JWT_SECRET') ||
         'ai-recruitment-secret-key-change-in-production',
       issuer: 'ai-recruitment-clerk',
       audience: 'ai-recruitment-users',
@@ -46,7 +46,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       }
       return user;
     } catch (error) {
-      throw new UnauthorizedException('Token validation failed');
+      const message =
+        error instanceof Error ? error.message : 'Token validation failed';
+      throw new UnauthorizedException(message);
     }
   }
 }

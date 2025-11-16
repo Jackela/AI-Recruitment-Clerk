@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-namespace */
+
 /**
  * Report Generation API Contracts
  * Shared contract definitions for analysis reports between frontend and backend

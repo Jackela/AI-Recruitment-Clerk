@@ -350,26 +350,27 @@ export class AuthController {
   @Permissions(Permission.READ_USER)
   @Get('users')
   async getUsers(@Request() req: AuthenticatedRequest): Promise<UserDto[]> {
-    // HR Managers and Recruiters can only see users in their organization
-    const requesterRole = String(
-      (req.user as any)?.rawRole ?? req.user.role ?? '',
-    ).toLowerCase();
+    type ExtendedUser = UserDto & { rawRole?: string; password?: string };
+    const requester = req.user as ExtendedUser;
+    const requesterRole = (
+      requester.rawRole ?? requester.role ?? ''
+    ).toString().toLowerCase();
 
     const organizationId =
-      requesterRole === UserRole.ADMIN ? undefined : req.user.organizationId;
+      requesterRole === UserRole.ADMIN.toLowerCase()
+        ? undefined
+        : req.user.organizationId;
     const users = await this.userService.listUsers(organizationId);
 
-    // Remove password field from response
     return users.map((user) => {
-      const { password: _password, ...userWithoutPassword } = user as any;
+      const extendedUser = user as ExtendedUser;
+      const { password: _password, rawRole, ...userWithoutPassword } =
+        extendedUser;
 
       return {
         ...userWithoutPassword,
-        role: String(
-          (userWithoutPassword as any)?.rawRole ??
-            userWithoutPassword.role ?? '',
-        ).toLowerCase(),
-      } as UserDto;
+        role: (rawRole as UserRole) ?? userWithoutPassword.role,
+      };
     });
   }
 

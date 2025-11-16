@@ -1,4 +1,7 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
+/* eslint-enable @typescript-eslint/ban-ts-comment */
+
 /**
  * @fileoverview ScoringEngineService Design by Contract Enhancement
  * @author AI Recruitment Team

@@ -1,0 +1,35 @@
+{
+  "runId": "2025-11-08-abc1234",
+  "branch": "feature/001-audit-architecture",
+  "commit": "abcdef1234567890",
+  "trigger": "remediation",
+  "generatedAt": "2025-11-08T12:34:56.000Z",
+  "components": ["app-gateway", "ai-recruitment-frontend"],
+  "tests": {
+    "lint": { "status": "pass", "startedAt": "...", "completedAt": "...", "command": "npm run lint" },
+    "unit": { "status": "pass", "startedAt": "...", "completedAt": "...", "command": "npm run test" },
+    "integration": { "status": "skipped" },
+    "typecheck": { "status": "pass", "startedAt": "...", "completedAt": "...", "command": "npm run typecheck" },
+    "e2e": { "status": "skipped" }
+  },
+  "validation": {
+    "remediationSchema": { "status": "pass", "startedAt": "...", "completedAt": "..." },
+    "remediationCoverage": { "status": "pass", "startedAt": "...", "completedAt": "..." }
+  },
+  "actSimulation": {
+    "workflow": ".github/workflows/ci.yml",
+    "image": "ghcr.io/catthehacker/ubuntu:act-latest",
+    "status": "pending",
+    "logPath": "specs/001-audit-architecture/validation/logs/2025-11-08-act.log"
+  },
+  "githubActions": {
+    "workflowUrl": "https://github.com/org/repo/actions/runs/123456789",
+    "conclusion": "pending",
+    "jobMatrix": {}
+  },
+  "parity": {
+    "status": "pending",
+    "notes": "Run compare-ci-results.mjs after remote workflow"
+  },
+  "result": "pass"
+}

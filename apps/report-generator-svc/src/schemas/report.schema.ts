@@ -8,17 +8,17 @@ export type ReportDocument = Report & Document;
  */
 @Schema()
 export class ScoreBreakdown {
-  @Prop({ required: true, min: 0, max: 100 })
-  skillsMatch: number = 0;
+  @Prop({ required: true, min: 0, max: 100, default: 0 })
+  skillsMatch!: number;
 
-  @Prop({ required: true, min: 0, max: 100 })
-  experienceMatch: number = 0;
+  @Prop({ required: true, min: 0, max: 100, default: 0 })
+  experienceMatch!: number;
 
-  @Prop({ required: true, min: 0, max: 100 })
-  educationMatch: number = 0;
+  @Prop({ required: true, min: 0, max: 100, default: 0 })
+  educationMatch!: number;
 
-  @Prop({ required: true, min: 0, max: 100 })
-  overallFit: number = 0;
+  @Prop({ required: true, min: 0, max: 100, default: 0 })
+  overallFit!: number;
 }
 
 /**
@@ -26,18 +26,18 @@ export class ScoreBreakdown {
  */
 @Schema()
 export class MatchingSkill {
-  @Prop({ required: true })
-  skill: string = '';
+  @Prop({ required: true, default: '' })
+  skill!: string;
 
-  @Prop({ required: true, min: 0, max: 100 })
-  matchScore: number = 0;
+  @Prop({ required: true, min: 0, max: 100, default: 0 })
+  matchScore!: number;
 
   @Prop({
     type: String,
     enum: ['exact', 'partial', 'related', 'missing'],
     default: 'missing',
   })
-  matchType: string = 'missing';
+  matchType: 'exact' | 'partial' | 'related' | 'missing' = 'missing';
 
   @Prop()
   explanation?: string;
@@ -53,10 +53,10 @@ export class ReportRecommendation {
     enum: ['hire', 'consider', 'interview', 'reject'],
     required: true,
   })
-  decision: string = 'reject';
+  decision: 'hire' | 'consider' | 'interview' | 'reject' = 'reject';
 
   @Prop({ required: true })
-  reasoning: string = '';
+  reasoning!: string;
 
   @Prop({ type: [String], default: [] })
   strengths: string[] = [];
@@ -77,10 +77,10 @@ export class ReportRecommendation {
 })
 export class Report {
   @Prop({ required: true })
-  jobId: string = '';
+  jobId!: string;
 
   @Prop({ required: true })
-  resumeId: string = '';
+  resumeId!: string;
 
   @Prop({ type: ScoreBreakdown, required: true })
   scoreBreakdown: ScoreBreakdown = new ScoreBreakdown();
@@ -92,33 +92,33 @@ export class Report {
   recommendation: ReportRecommendation = new ReportRecommendation();
 
   @Prop({ required: true })
-  summary: string = '';
+  summary!: string;
 
   @Prop({ type: Number, min: 0, max: 1, default: 0 })
-  analysisConfidence: number = 0;
+  analysisConfidence!: number;
 
   @Prop({ type: Number, min: 0, default: 0 })
-  processingTimeMs: number = 0;
+  processingTimeMs!: number;
 
   @Prop({
     type: String,
     enum: ['pending', 'processing', 'completed', 'failed'],
     default: 'pending',
   })
-  status: string = 'pending';
+  status: 'pending' | 'processing' | 'completed' | 'failed' = 'pending';
 
   @Prop()
   errorMessage?: string;
 
   // Metadata for tracking and auditing
-  @Prop({ required: true })
-  generatedBy: string = ''; // Service identifier
+  @Prop({ required: true, default: '' })
+  generatedBy!: string; // Service identifier
 
-  @Prop({ required: true })
-  llmModel: string = '';
+  @Prop({ required: true, default: '' })
+  llmModel!: string;
 
   @Prop({ type: Date, default: Date.now })
-  generatedAt: Date = new Date();
+  generatedAt!: Date;
 
   @Prop()
   requestedBy?: string; // User ID if applicable

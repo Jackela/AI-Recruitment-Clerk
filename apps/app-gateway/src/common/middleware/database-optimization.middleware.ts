@@ -25,6 +25,12 @@ interface QueryOptimizationConfig {
   queryPlanCache: boolean; // 查询计划缓存
 }
 
+type QueryCacheEntry = {
+  hitCount: number;
+  lastUsed: number;
+  avgExecutionTime: number;
+};
+
 /**
  * Represents the database optimization middleware.
  */
@@ -49,15 +55,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     queryPlanCache: true,
   };
 
-  private queryCache = new Map<
-    string,
-    {
-      plan: any;
-      hitCount: number;
-      lastUsed: number;
-      avgExecutionTime: number;
-    }
-  >();
+  private queryCache = new Map<string, QueryCacheEntry>();
 
   /**
    * Initializes a new instance of the Database Optimization Middleware.
@@ -142,10 +140,14 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     // 由于Mongoose的限制，我们主要监控请求级别的查询
     const queryKey = this.generateQueryKey(req);
 
-    if (this.config.queryPlanCache && this.queryCache.has(queryKey)) {
-      const cached = this.queryCache.get(queryKey)!;
-      cached.hitCount++;
-      cached.lastUsed = Date.now();
+    if (!this.config.queryPlanCache) {
+      return;
+    }
+
+    const cachedEntry = this.queryCache.get(queryKey);
+    if (cachedEntry) {
+      cachedEntry.hitCount += 1;
+      cachedEntry.lastUsed = Date.now();
       req['queryPlanCached'] = true;
     }
   }
@@ -160,10 +162,10 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
       if (this.connection.readyState === 1) {
         // Connected
         // 更新连接池指标
-        this.metrics.activeConnections = (this.connection.db as any)
-          ?.listCollections
-          ? 1
-          : 0;
+        const database = this.connection.db;
+        const hasCollections =
+          database && typeof database.listCollections === 'function';
+        this.metrics.activeConnections = hasCollections ? 1 : 0;
         this.metrics.connectionPoolSize = this.config.connectionPoolSize;
       } else {
         this.logger.warn('⚠️ Database connection not ready');

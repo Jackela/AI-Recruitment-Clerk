@@ -9,6 +9,17 @@ import {
 } from '@nestjs/common';
 import { testUsers, makeToken } from './test-users.store';
 
+type RegisterRequest = {
+  email: string;
+  name?: string;
+  role?: string;
+  organizationId?: string;
+};
+
+type LoginRequest = {
+  email: string;
+};
+
 /**
  * Exposes endpoints for test auth.
  */
@@ -21,7 +32,7 @@ export class TestAuthController {
    */
   @Post('auth/register')
   @HttpCode(HttpStatus.CREATED)
-  register(@Body() body: any) {
+  register(@Body() body: RegisterRequest) {
     const orgId =
       body.organizationId || 'org-' + Math.random().toString(36).slice(2, 8);
     const userId = 'user-' + Math.random().toString(36).slice(2, 8);
@@ -54,7 +65,7 @@ export class TestAuthController {
    */
   @Post('auth/login')
   @HttpCode(HttpStatus.OK)
-  login(@Body() body: any) {
+  login(@Body() body: LoginRequest) {
     const token = makeToken(String(body.email || 'user@test'));
     return {
       success: true,

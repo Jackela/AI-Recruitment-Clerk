@@ -4,6 +4,7 @@
  */
 
 import { Logger } from '@nestjs/common';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 import { EnhancedAppException } from './enhanced-error-types';
 import {
   ErrorCorrelationContext,
@@ -78,6 +79,7 @@ export interface PerformanceMetrics {
 export class StructuredErrorLogger {
   private readonly logger: Logger;
   private readonly serviceName: string;
+  private readonly shouldIncludeStackTraces: boolean;
 
   /**
    * Initializes a new instance of the Structured Error Logger.
@@ -86,6 +88,8 @@ export class StructuredErrorLogger {
   constructor(serviceName: string) {
     this.serviceName = serviceName;
     this.logger = new Logger(`${serviceName}-ErrorLogger`);
+    const config = getConfig();
+    this.shouldIncludeStackTraces = !config.env.isProduction;
   }
 
   /**
@@ -113,7 +117,7 @@ export class StructuredErrorLogger {
           businessImpact: error.enhancedDetails.businessImpact,
           userImpact: error.enhancedDetails.userImpact,
           stack:
-            process.env.NODE_ENV !== 'production' ? error.stack : undefined,
+            this.shouldIncludeStackTraces ? error.stack : undefined,
         },
         context: {
           executionTime: correlationContext?.executionTime,
@@ -227,7 +231,7 @@ export class StructuredErrorLogger {
   logOperationComplete(
     operation: string,
     startMetrics: PerformanceMetrics,
-    success: boolean = true,
+    success = true,
     metadata?: Record<string, any>,
   ): PerformanceMetrics {
     const endTime = Date.now();
@@ -462,7 +466,7 @@ export class StructuredErrorLogger {
     // Implementation would depend on your logging infrastructure
     // Examples: Send to ELK stack, Datadog, CloudWatch, etc.
 
-    if (process.env.EXTERNAL_LOGGING_ENABLED === 'true') {
+    if (StructuredLoggerFactory.isExternalLoggingEnabled()) {
       // Example: Send to external system
       // await this.externalLogger.send(entry);
     }
@@ -517,6 +521,7 @@ export class StructuredErrorLogger {
  */
 export class StructuredLoggerFactory {
   private static loggers = new Map<string, StructuredErrorLogger>();
+  private static externalLoggingEnabled = false;
 
   /**
    * Get or create logger for service
@@ -539,11 +544,14 @@ export class StructuredLoggerFactory {
   }): void {
     // Apply global configuration
     if (config.enableExternalLogging !== undefined) {
-      process.env.EXTERNAL_LOGGING_ENABLED =
-        config.enableExternalLogging.toString();
+      this.externalLoggingEnabled = config.enableExternalLogging;
     }
 
     // Additional configuration logic here
+  }
+
+  static isExternalLoggingEnabled(): boolean {
+    return this.externalLoggingEnabled;
   }
 
   /**

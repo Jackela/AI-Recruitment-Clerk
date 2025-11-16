@@ -119,7 +119,9 @@ export class UserService {
     const name = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
     const uppercaseRole = options.uppercaseRole !== false;
     const roleValue = user.role
-      ? (uppercaseRole ? String(user.role).toUpperCase() : user.role)
+      ? uppercaseRole
+        ? String(user.role).toUpperCase()
+        : user.role
       : undefined;
 
     const sanitized: UserDto = {
@@ -135,27 +137,6 @@ export class UserService {
       updatedAt: user.updatedAt,
       isActive: user.status === UserStatus.ACTIVE,
     };
-
-    Object.defineProperty(sanitized, 'rawRole', {
-      value: user.role,
-      enumerable: false,
-      configurable: false,
-      writable: false,
-    });
-
-    Object.defineProperty(sanitized, 'password', {
-      value: user.password,
-      enumerable: false,
-      configurable: false,
-      writable: false,
-    });
-
-    Object.defineProperty(sanitized, 'securityFlags', {
-      value: user.securityFlags ? { ...user.securityFlags } : {},
-      enumerable: false,
-      configurable: false,
-      writable: true,
-    });
 
     return sanitized;
   }
@@ -218,12 +199,13 @@ export class UserService {
     // Derive names when only a single name is provided
     let firstName = createUserDto.firstName;
     let lastName = createUserDto.lastName;
-    if ((!firstName || !lastName) && (createUserDto as any).name) {
-      const parts = String((createUserDto as any).name)
-        .trim()
-        .split(/\s+/);
-      firstName = firstName || parts[0] || '';
-      lastName = lastName || parts.slice(1).join(' ') || '';
+    if ((!firstName || !lastName) && 'name' in createUserDto) {
+      const rawName = (createUserDto as CreateUserDto & { name?: string }).name;
+      if (rawName) {
+        const parts = rawName.trim().split(/\s+/);
+        firstName = firstName || parts[0] || '';
+        lastName = lastName || parts.slice(1).join(' ') || '';
+      }
     }
     // Fallback from email
     if (!firstName && !lastName) {

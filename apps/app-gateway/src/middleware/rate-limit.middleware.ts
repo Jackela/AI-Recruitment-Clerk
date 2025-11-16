@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import Redis from 'ioredis';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 interface UsageRecord {
   count: number;
@@ -14,6 +15,15 @@ interface UsageRecord {
   payments: number;
   lastReset: string;
 }
+
+type RequestWithUsage = Request & {
+  usageInfo?: {
+    ip: string;
+    currentUsage: number;
+    totalLimit: number;
+    remaining: number;
+  };
+};
 
 /**
  * Represents the rate limit middleware.
@@ -27,12 +37,14 @@ export class RateLimitMiddleware implements NestMiddleware {
    * Initializes a new instance of the Rate Limit Middleware.
    */
   constructor() {
-    // 检查是否禁用Redis或使用Redis URL
-    const disableRedis = process.env.DISABLE_REDIS === 'true';
-    const useRedis = process.env.USE_REDIS_CACHE !== 'false';
-    const redisUrl = process.env.REDIS_URL;
+    const config = getConfig();
+    const redisSettings = config.cache.redis;
 
-    if (disableRedis || !useRedis || (!redisUrl && !process.env.REDIS_HOST)) {
+    if (
+      redisSettings.disabled ||
+      !redisSettings.enabled ||
+      (!redisSettings.url && !redisSettings.host)
+    ) {
       this.logger.log('🔒 Redis已禁用或未配置，限流使用内存存储');
       this.redis = null;
       return;
@@ -40,18 +52,26 @@ export class RateLimitMiddleware implements NestMiddleware {
 
     try {
       // 优先使用完整的 REDIS_URL；仅当没有 URL 但提供了 Host/Port 时才使用分离配置
-      if (redisUrl) {
-        this.redis = new Redis(redisUrl, {
+      if (redisSettings.url) {
+        this.redis = new Redis(redisSettings.url, {
           maxRetriesPerRequest: 3,
           lazyConnect: false,
           enableOfflineQueue: true,
           connectTimeout: 10000,
         });
       } else {
+        const host = redisSettings.host;
+        if (!host) {
+          this.logger.warn(
+            'Redis host not configured; disabling rate-limit redis integration',
+          );
+          this.redis = null;
+          return;
+        }
         this.redis = new Redis({
-          host: process.env.REDIS_HOST!,
-          port: parseInt(process.env.REDIS_PORT || '6379'),
-          password: process.env.REDIS_PASSWORD,
+          host,
+          port: redisSettings.port ?? 6379,
+          password: redisSettings.password,
           maxRetriesPerRequest: 3,
           lazyConnect: false,
           enableOfflineQueue: true,
@@ -73,7 +93,8 @@ export class RateLimitMiddleware implements NestMiddleware {
    */
   async use(req: Request, res: Response, next: NextFunction) {
     // 如果Redis不可用，跳过限流检查
-    if (!this.redis) {
+    const redis = this.redis;
+    if (!redis) {
       return next();
     }
 
@@ -83,7 +104,7 @@ export class RateLimitMiddleware implements NestMiddleware {
 
     try {
       // 获取当前IP的使用记录
-      const recordStr = await this.redis!.get(key);
+      const recordStr = await redis.get(key);
       let record: UsageRecord = recordStr
         ? JSON.parse(recordStr)
         : { count: 0, questionnaires: 0, payments: 0, lastReset: today };
@@ -134,7 +155,7 @@ export class RateLimitMiddleware implements NestMiddleware {
 
       // 记录本次使用
       record.count += 1;
-      await this.redis!.setex(key, 86400, JSON.stringify(record)); // 24小时过期
+      await redis.setex(key, 86400, JSON.stringify(record)); // 24小时过期
 
       // 设置响应头
       res.setHeader('X-RateLimit-Limit', totalLimit.toString());
@@ -148,7 +169,8 @@ export class RateLimitMiddleware implements NestMiddleware {
       );
 
       // 添加使用信息到请求对象
-      (req as any).usageInfo = {
+      const requestWithUsage = req as RequestWithUsage;
+      requestWithUsage.usageInfo = {
         ip,
         currentUsage: record.count,
         totalLimit,
@@ -177,7 +199,8 @@ export class RateLimitMiddleware implements NestMiddleware {
     remaining: number;
   }> {
     // 如果Redis不可用，返回默认值
-    if (!this.redis) {
+    const redis = this.redis;
+    if (!redis) {
       return { success: true, newLimit: 10, remaining: 10 };
     }
 
@@ -185,13 +208,13 @@ export class RateLimitMiddleware implements NestMiddleware {
     const key = `rate_limit:${ip}:${today}`;
 
     try {
-      const recordStr = await this.redis!.get(key);
+      const recordStr = await redis.get(key);
       const record: UsageRecord = recordStr
         ? JSON.parse(recordStr)
         : { count: 0, questionnaires: 0, payments: 0, lastReset: today };
 
       record.questionnaires += 1;
-      await this.redis!.setex(key, 86400, JSON.stringify(record));
+      await redis.setex(key, 86400, JSON.stringify(record));
 
       const newLimit = 5 + record.questionnaires * 5 + record.payments * 5;
       const remaining = newLimit - record.count;
@@ -225,7 +248,8 @@ export class RateLimitMiddleware implements NestMiddleware {
     newLimit: number;
     remaining: number;
   }> {
-    if (!this.redis) {
+    const redis = this.redis;
+    if (!redis) {
       return { success: true, newLimit: 10, remaining: 10 };
     }
     const today = new Date().toISOString().split('T')[0];
@@ -234,19 +258,19 @@ export class RateLimitMiddleware implements NestMiddleware {
 
     try {
       // 检查支付是否已经使用过
-      const paymentUsed = await this.redis!.get(paymentKey);
+      const paymentUsed = await redis.get(paymentKey);
       if (paymentUsed) {
         return { success: false, newLimit: 5, remaining: 0 };
       }
 
-      const recordStr = await this.redis!.get(key);
+      const recordStr = await redis.get(key);
       const record: UsageRecord = recordStr
         ? JSON.parse(recordStr)
         : { count: 0, questionnaires: 0, payments: 0, lastReset: today };
 
       record.payments += 1;
-      await this.redis!.setex(key, 86400, JSON.stringify(record));
-      await this.redis!.setex(paymentKey, 86400, 'used'); // 标记支付已使用
+      await redis.setex(key, 86400, JSON.stringify(record));
+      await redis.setex(paymentKey, 86400, 'used'); // 标记支付已使用
 
       const newLimit = 5 + record.questionnaires * 5 + record.payments * 5;
       const remaining = newLimit - record.count;
@@ -280,9 +304,21 @@ export class RateLimitMiddleware implements NestMiddleware {
   }> {
     const today = new Date().toISOString().split('T')[0];
     const key = `rate_limit:${ip}:${today}`;
+    const redis = this.redis;
+
+    if (!redis) {
+      const totalLimit = 5;
+      return {
+        currentUsage: 0,
+        totalLimit,
+        remaining: totalLimit,
+        resetTime: this.getTomorrowTimestamp(),
+        upgrades: { questionnaires: 0, payments: 0 },
+      };
+    }
 
     try {
-      const recordStr = await this.redis!.get(key);
+      const recordStr = await redis.get(key);
       const record: UsageRecord = recordStr
         ? JSON.parse(recordStr)
         : { count: 0, questionnaires: 0, payments: 0, lastReset: today };
@@ -344,15 +380,27 @@ export class RateLimitMiddleware implements NestMiddleware {
   }> {
     const targetDate = date || new Date().toISOString().split('T')[0];
     const pattern = `rate_limit:*:${targetDate}`;
+    const redis = this.redis;
+
+    if (!redis) {
+      return {
+        date: targetDate,
+        totalIPs: 0,
+        totalRequests: 0,
+        questionnairesCompleted: 0,
+        paymentsCompleted: 0,
+        averageUsagePerIP: 0,
+      };
+    }
 
     try {
-      const keys = await this.redis!.keys(pattern);
+      const keys = await redis.keys(pattern);
       let totalRequests = 0;
       let totalQuestionnaires = 0;
       let totalPayments = 0;
 
       for (const key of keys) {
-        const recordStr = await this.redis!.get(key);
+        const recordStr = await redis.get(key);
         if (recordStr) {
           const record: UsageRecord = JSON.parse(recordStr);
           totalRequests += record.count;

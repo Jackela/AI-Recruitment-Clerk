@@ -8,7 +8,7 @@ export default {
   moduleNameMapper: {
     '^\\./services/jd-extractor-nats.service$':
       '<rootDir>/src/services/jd-extractor-nats.service.stub.ts',
-    '^\.\./services/jd-extractor-nats.service$':
+    '^\\.\\./services/jd-extractor-nats.service$':
       '<rootDir>/src/services/jd-extractor-nats.service.stub.ts',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],

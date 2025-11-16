@@ -56,7 +56,10 @@ export class AnalysisService {
         try {
           JSON.parse(options);
         } catch (error) {
-          this.logger.warn('Invalid options JSON provided, using defaults');
+          this.logger.warn(
+            'Invalid options JSON provided, using defaults',
+            error instanceof Error ? error.stack : String(error),
+          );
         }
       }
 
@@ -132,11 +135,13 @@ export class AnalysisService {
       );
       return response;
     } catch (error) {
+      const message =
+        error instanceof Error ? error.message : String(error ?? 'unknown');
       this.logger.error(
         `❌ Failed to initiate analysis pipeline: ${analysisId}`,
         error,
       );
-      throw new Error(`Analysis pipeline failed: ${error.message}`);
+      throw new Error(`Analysis pipeline failed: ${message}`);
     }
   }
 

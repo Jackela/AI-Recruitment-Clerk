@@ -4,6 +4,11 @@ import { Observable, of, timer } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { LoggerService } from './shared/logger.service';
 
+type NetworkInformationLike = {
+  effectiveType: string;
+  addEventListener: (type: 'change', listener: () => void) => void;
+};
+
 /**
  * Represents the smart preloading strategy.
  */
@@ -40,7 +45,10 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
    * @param load - The load.
    * @returns The Observable<any>.
    */
-  preload(route: Route, load: () => Observable<any>): Observable<any> {
+  preload<T>(
+    route: Route,
+    load: () => Observable<T>,
+  ): Observable<T | null> {
     const routePath = route.path || 'unknown';
 
     // Skip if already preloaded
@@ -130,10 +138,16 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
 
   private detectNetworkCondition(): void {
     // Use Navigator.connection API if available
+    type NavigatorConnection = Navigator & {
+      connection?: NetworkInformationLike;
+      mozConnection?: NetworkInformationLike;
+      webkitConnection?: NetworkInformationLike;
+    };
+
     const connection =
-      (navigator as any).connection ||
-      (navigator as any).mozConnection ||
-      (navigator as any).webkitConnection;
+      (navigator as NavigatorConnection).connection ||
+      (navigator as NavigatorConnection).mozConnection ||
+      (navigator as NavigatorConnection).webkitConnection;
 
     if (connection) {
       // Consider effective connection type
@@ -180,7 +194,7 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
   }
 
   private trackUserEngagement(): void {
-    let idleTimer: any;
+    let idleTimer: ReturnType<typeof setTimeout>;
 
     const resetIdleTimer = () => {
       clearTimeout(idleTimer);

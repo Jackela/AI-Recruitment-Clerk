@@ -1,4 +1,5 @@
 import { Logger } from '@nestjs/common';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Defines the shape of the security validation result.
@@ -125,7 +126,8 @@ export class SecureConfigValidator {
    * Production readiness check - validates all critical security configurations
    */
   static validateProductionReadiness(): SecurityValidationResult {
-    const isProduction = process.env.NODE_ENV === 'production';
+    const appConfig = getConfig();
+    const isProduction = appConfig.env.isProduction;
     const errors: string[] = [];
 
     if (isProduction) {
@@ -133,7 +135,20 @@ export class SecureConfigValidator {
       const criticalVars = ['GEMINI_API_KEY', 'MONGO_URL', 'JWT_SECRET'];
 
       for (const varName of criticalVars) {
-        const value = process.env[varName];
+        let value: string | undefined;
+        switch (varName) {
+          case 'GEMINI_API_KEY':
+            value = appConfig.integrations.gemini.apiKey;
+            break;
+          case 'MONGO_URL':
+            value = appConfig.database.url;
+            break;
+          case 'JWT_SECRET':
+            value = appConfig.auth.jwt.secret;
+            break;
+          default:
+            value = process.env[varName];
+        }
         if (!value) {
           errors.push(
             `Production environment missing critical variable: ${varName}`,

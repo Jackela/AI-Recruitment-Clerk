@@ -3,6 +3,8 @@ export default {
   preset: '../../jest.preset.cjs',
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
+  // Exclude non-test config file that matches default test pattern
+  testPathIgnorePatterns: ['<rootDir>/src/environments/environment.test.ts'],
   // Re-enabled full test suite for frontend
   coverageDirectory: '../../coverage/apps/ai-recruitment-frontend',
   transform: {

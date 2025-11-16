@@ -6,6 +6,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../../auth/decorators/public.decorator';
+import type { Request } from 'express';
 
 /**
  * Implements the optional jwt auth guard logic.
@@ -13,6 +14,7 @@ import { IS_PUBLIC_KEY } from '../../auth/decorators/public.decorator';
 @Injectable()
 export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
   private readonly logger = new Logger(OptionalJwtAuthGuard.name);
+  private readonly defaultLogContext = 'optional-jwt-guard';
 
   /**
    * Initializes a new instance of the Optional Jwt Auth Guard.
@@ -44,8 +46,11 @@ export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
     } catch (error) {
       // If JWT validation fails, allow the request to continue
       // The guest guard or service will handle guest-specific logic
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       this.logger.debug(
-        'JWT validation failed, proceeding without authentication',
+        `JWT validation failed, proceeding without authentication: ${errorMessage}`,
+        this.defaultLogContext,
       );
       return true;
     }
@@ -59,24 +64,31 @@ export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
    * @param context - The context.
    * @returns The result of the operation.
    */
-  handleRequest(err: any, user: any, _info: any, context: ExecutionContext) {
-    const request = context.switchToHttp().getRequest();
+  handleRequest<TUser extends Record<string, unknown> | null>(
+    err: Error | null,
+    user: TUser,
+    _info: unknown,
+    context: ExecutionContext,
+  ): TUser | null {
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { authStatus?: 'authenticated' | 'guest' }>();
 
     if (err) {
       // Log the error but don't throw - let guest mode handle it
-      this.logger.debug(`JWT error: ${err.message}`);
+      this.logger.debug(`JWT error: ${err.message}`, this.defaultLogContext);
       return null;
     }
 
     if (user) {
       // Authenticated user found
       request.user = user;
-      request.isAuthenticated = true;
+      request.authStatus = 'authenticated';
       return user;
     }
 
     // No authenticated user, but that's okay for optional auth
-    request.isAuthenticated = false;
+    request.authStatus = 'guest';
     return null;
   }
 }

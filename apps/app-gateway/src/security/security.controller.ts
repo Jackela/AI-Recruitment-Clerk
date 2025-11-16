@@ -27,6 +27,82 @@ import {
 import { EnhancedRateLimitMiddleware } from '../middleware/enhanced-rate-limit.middleware';
 import { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
+interface SecurityEventsMetadata {
+  requestedBy: string;
+  requestedAt: string;
+  filters: SecurityEventsQuery;
+}
+
+interface SecurityEventsResponse {
+  events: SecurityEvent[];
+  total: number;
+  metadata: SecurityEventsMetadata;
+}
+
+type SecurityEventsQuery = {
+  limit: number;
+  offset: number;
+  severity?: string[];
+  type?: string[];
+  resolved?: boolean;
+  ip?: string;
+  userId?: string;
+  startDate?: Date;
+  endDate?: Date;
+};
+
+interface SecurityMetricsResponse extends SecurityMetrics {
+  metadata: {
+    period: 'hour' | 'day' | 'week';
+    requestedBy: string;
+    requestedAt: string;
+  };
+}
+
+type RateLimitStats = Awaited<
+  ReturnType<EnhancedRateLimitMiddleware['getSecurityStats']>
+>;
+
+interface RateLimitStatsResponse extends RateLimitStats {
+  metadata: {
+    period: 'hour' | 'day' | 'week';
+    requestedBy: string;
+    requestedAt: string;
+  };
+}
+
+type LockedIpRecord = Awaited<
+  ReturnType<EnhancedRateLimitMiddleware['getLockedIPs']>
+>[number];
+
+interface LockedIpsResponse {
+  lockedIPs: LockedIpRecord[];
+  metadata: {
+    requestedBy: string;
+    requestedAt: string;
+  };
+}
+
+interface UnlockIpRequestDto {
+  ip: string;
+  reason?: string;
+}
+
+interface UnlockIpResponse {
+  success: boolean;
+  message: string;
+}
+
+interface ResolveSecurityEventDto {
+  resolution: string;
+}
+
+interface TestAlertResponse {
+  success: boolean;
+  message: string;
+  eventId: string;
+}
+
 /**
  * Exposes endpoints for security.
  */
@@ -86,7 +162,7 @@ export class SecurityController {
     @Query('userId') userId?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-  ): Promise<{ events: SecurityEvent[]; total: number; metadata: any }> {
+  ): Promise<SecurityEventsResponse> {
     // Check if user has admin role
     if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
@@ -100,7 +176,7 @@ export class SecurityController {
           : undefined;
       const typeArray = Array.isArray(type) ? type : type ? [type] : undefined;
 
-      const options = {
+      const options: SecurityEventsQuery = {
         limit: limit || 50,
         offset: offset || 0,
         severity: severityArray,
@@ -152,7 +228,7 @@ export class SecurityController {
   async getSecurityMetrics(
     @Request() req: AuthenticatedRequest,
     @Query('period') period: 'hour' | 'day' | 'week' = 'day',
-  ): Promise<SecurityMetrics & { metadata: any }> {
+  ): Promise<SecurityMetricsResponse> {
     // Check if user has admin role
     if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
@@ -200,8 +276,8 @@ export class SecurityController {
   async resolveSecurityEvent(
     @Request() req: AuthenticatedRequest,
     @Param('eventId') eventId: string,
-    @Body() body: { resolution: string },
-  ): Promise<{ success: boolean; message: string }> {
+    @Body() body: ResolveSecurityEventDto,
+  ): Promise<UnlockIpResponse> {
     // Check if user has admin role
     if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
@@ -261,7 +337,7 @@ export class SecurityController {
   async getRateLimitStats(
     @Request() req: AuthenticatedRequest,
     @Query('period') period: 'hour' | 'day' | 'week' = 'day',
-  ) {
+  ): Promise<RateLimitStatsResponse> {
     // Check if user has admin role
     if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
@@ -302,7 +378,7 @@ export class SecurityController {
     description: 'Locked IPs retrieved successfully',
   })
   @ApiResponse({ status: 403, description: 'Admin access required' })
-  async getLockedIPs(@Request() req: AuthenticatedRequest) {
+  async getLockedIPs(@Request() req: AuthenticatedRequest): Promise<LockedIpsResponse> {
     // Check if user has admin role
     if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
@@ -346,8 +422,8 @@ export class SecurityController {
   })
   async unlockIP(
     @Request() req: AuthenticatedRequest,
-    @Body() body: { ip: string; reason?: string },
-  ): Promise<{ success: boolean; message: string }> {
+    @Body() body: UnlockIpRequestDto,
+  ): Promise<UnlockIpResponse> {
     // Check if user has admin role
     if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
@@ -456,7 +532,9 @@ export class SecurityController {
   @ApiOperation({ summary: 'Test security alert system (Admin only)' })
   @ApiResponse({ status: 200, description: 'Test alert sent successfully' })
   @ApiResponse({ status: 403, description: 'Admin access required' })
-  async testSecurityAlert(@Request() req: AuthenticatedRequest) {
+  async testSecurityAlert(
+    @Request() req: AuthenticatedRequest,
+  ): Promise<TestAlertResponse> {
     // Check if user has admin role
     if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
@@ -497,7 +575,7 @@ export class SecurityController {
     }
   }
 
-  private isAdmin(user: any): boolean {
+  private isAdmin(user: AuthenticatedRequest['user'] | undefined): boolean {
     const role = String(user?.rawRole ?? user?.role ?? '').toLowerCase();
     return role === 'admin';
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -18,7 +18,11 @@ import { ToastService } from '../../services/toast.service';
     <div
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       *ngIf="showModal$ | async"
-      (click)="onBackdropClick($event)"
+      role="button"
+      tabindex="0"
+      (click)="handleBackdropInteraction($event)"
+      (keydown.enter)="handleBackdropInteraction($event)"
+      (keydown.space)="handleBackdropInteraction($event)"
     >
       <div class="bg-white rounded-lg p-6 max-w-lg mx-4 relative">
         <button
@@ -76,11 +80,14 @@ import { ToastService } from '../../services/toast.service';
             class="bg-gray-50 p-4 rounded-lg mb-4"
             *ngIf="guestState$ | async as state"
           >
-            <label class="block text-sm font-medium text-gray-700 mb-2"
+            <label
+              class="block text-sm font-medium text-gray-700 mb-2"
+              for="feedback-code-value"
               >您的反馈码：</label
             >
             <div class="flex items-center space-x-2">
               <input
+                id="feedback-code-value"
                 type="text"
                 [value]="state.feedbackCode"
                 readonly
@@ -242,30 +249,24 @@ import { ToastService } from '../../services/toast.service';
   ],
 })
 export class FeedbackCodeModalComponent implements OnInit {
-  showModal$: Observable<boolean>;
-  guestState$: Observable<GuestState>;
-  isLoading$: Observable<boolean>;
-  error$: Observable<string | null>;
+  private readonly store = inject(Store<{ guest: GuestState }>);
+  private readonly toastService = inject(ToastService);
+
+  readonly showModal$: Observable<boolean> = this.store.select(
+    (state) => state.guest.showFeedbackModal,
+  );
+  readonly guestState$: Observable<GuestState> = this.store.select(
+    (state) => state.guest,
+  );
+  readonly isLoading$: Observable<boolean> = this.store.select(
+    (state) => state.guest.isLoading,
+  );
+  readonly error$: Observable<string | null> = this.store.select(
+    (state) => state.guest.error,
+  );
 
   copied = false;
   redemptionCode = '';
-
-  /**
-   * Initializes a new instance of the Feedback Code Modal Component.
-   * @param store - The store.
-   * @param toastService - The toast service.
-   */
-  constructor(
-    private store: Store<{ guest: GuestState }>,
-    private toastService: ToastService,
-  ) {
-    this.showModal$ = this.store.select(
-      (state) => state.guest.showFeedbackModal,
-    );
-    this.guestState$ = this.store.select((state) => state.guest);
-    this.isLoading$ = this.store.select((state) => state.guest.isLoading);
-    this.error$ = this.store.select((state) => state.guest.error);
-  }
 
   /**
    * Performs the ng on init operation.
@@ -297,10 +298,17 @@ export class FeedbackCodeModalComponent implements OnInit {
   }
 
   /**
-   * Performs the on backdrop click operation.
+   * Performs the on backdrop interaction operation.
    * @param event - The event.
    */
-  onBackdropClick(event: Event): void {
+  handleBackdropInteraction(event: Event): void {
+    if (event instanceof KeyboardEvent) {
+      if (event.key !== 'Enter' && event.key !== ' ') {
+        return;
+      }
+      event.preventDefault();
+    }
+
     if (event.target === event.currentTarget) {
       this.closeModal();
     }

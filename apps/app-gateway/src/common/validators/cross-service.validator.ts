@@ -8,13 +8,16 @@ import {
 /**
  * Defines the shape of the validation rule.
  */
+type TransformFn = (value: unknown) => unknown;
+type ValidationFn = (value: unknown) => boolean | Promise<boolean>;
+
 export interface ValidationRule {
   field: string;
   service: string;
   endpoint: string;
   required?: boolean;
-  transform?: (value: any) => any;
-  validate?: (value: any) => boolean | Promise<boolean>;
+  transform?: TransformFn;
+  validate?: ValidationFn;
   message?: string;
 }
 
@@ -39,15 +42,15 @@ export class CrossServiceValidator {
    * Validates the data.
    * @param data - The data.
    * @param options - The options.
-   * @returns The Promise<{ valid: boolean; errors: string[]; transformedData: any; }>.
+   * @returns The Promise<{ valid: boolean; errors: string[]; transformedData: Record<string, unknown>; }>.
    */
   async validate(
-    data: any,
+    data: Record<string, unknown>,
     options: CrossServiceValidationOptions,
   ): Promise<{
     valid: boolean;
     errors: string[];
-    transformedData: any;
+    transformedData: Record<string, unknown>;
   }> {
     const errors: string[] = [];
     const transformedData = { ...data };
@@ -78,7 +81,7 @@ export class CrossServiceValidator {
           } catch (error) {
             const errorMessage =
               rule.message ||
-              `Validation failed for field '${rule.field}': ${error.message}`;
+              `Validation failed for field '${rule.field}': ${this.formatError(error)}`;
             errors.push(errorMessage);
 
             if (options.failFast) {
@@ -88,7 +91,9 @@ export class CrossServiceValidator {
         }
       }
     } catch (error) {
-      this.logger.error('Cross-service validation error:', error);
+      this.logger.error(
+        `Cross-service validation error: ${this.formatError(error)}`,
+      );
       errors.push('Validation process failed due to service error');
     }
 
@@ -101,8 +106,8 @@ export class CrossServiceValidator {
 
   private async validateRule(
     rule: ValidationRule,
-    value: any,
-    transformedData: any,
+    value: unknown,
+    transformedData: Record<string, unknown>,
   ): Promise<void> {
     // Check required fields
     if (
@@ -123,7 +128,7 @@ export class CrossServiceValidator {
         transformedData[rule.field] = rule.transform(value);
       } catch (error) {
         throw new BadRequestException(
-          `Transformation failed for field '${rule.field}': ${error.message}`,
+          `Transformation failed for field '${rule.field}': ${this.formatError(error)}`,
         );
       }
     }
@@ -144,7 +149,7 @@ export class CrossServiceValidator {
           throw error;
         }
         throw new BadRequestException(
-          `Validation error for field '${rule.field}': ${error.message}`,
+          `Validation error for field '${rule.field}': ${this.formatError(error)}`,
         );
       }
     }
@@ -163,7 +168,7 @@ export class CrossServiceValidator {
   private async performCrossServiceValidation(
     service: string,
     endpoint: string,
-    value: any,
+    value: unknown,
     fieldName: string,
   ): Promise<void> {
     try {
@@ -203,8 +208,7 @@ export class CrossServiceValidator {
       }
 
       this.logger.error(
-        `Cross-service validation failed for ${service}/${endpoint}:`,
-        error,
+        `Cross-service validation failed for ${service}/${endpoint}: ${this.formatError(error)}`,
       );
 
       throw new BadRequestException(
@@ -217,7 +221,7 @@ export class CrossServiceValidator {
   private async mockServiceValidation(
     service: string,
     endpoint: string,
-    value: any,
+    value: unknown,
   ): Promise<boolean> {
     // Simulate validation logic based on service and endpoint
     switch (service) {
@@ -246,7 +250,7 @@ export class CrossServiceValidator {
    */
   async validateField(
     fieldName: string,
-    value: any,
+    value: unknown,
     service: string,
     endpoint: string,
     required = false,
@@ -338,11 +342,28 @@ export class CrossServiceValidator {
       service: 'notification-service',
       endpoint: 'validate-email',
       required,
-      validate: (value: string) => {
+      validate: (value: unknown) => {
+        if (typeof value !== 'string') {
+          return false;
+        }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(value);
       },
       message: `Invalid email format in field '${fieldName}'`,
     };
+  }
+
+  private formatError(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+    if (typeof error === 'string') {
+      return error;
+    }
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return String(error);
+    }
   }
 }

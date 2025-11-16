@@ -6,6 +6,7 @@
 import { ErrorResponseFormatter } from '../common/error-handling.patterns';
 import { EnhancedAppException } from './enhanced-error-types';
 import { ErrorCorrelationManager } from './error-correlation';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Standardized error response interface
@@ -133,6 +134,7 @@ export class StandardizedErrorResponseFormatter extends ErrorResponseFormatter {
       ip?: string;
     },
   ): StandardizedErrorResponse {
+    const isProduction = getConfig().env.isProduction;
     const { enhancedDetails } = error;
     const correlationContext =
       enhancedDetails.correlationContext ||
@@ -210,7 +212,7 @@ export class StandardizedErrorResponseFormatter extends ErrorResponseFormatter {
     }
 
     // Add development-only information
-    if (process.env.NODE_ENV !== 'production') {
+    if (!isProduction) {
       response.details = enhancedDetails.details;
       response.stack = error.stack;
     }
@@ -323,6 +325,7 @@ export class StandardizedErrorResponseFormatter extends ErrorResponseFormatter {
     error: EnhancedAppException,
     requestContext?: any,
   ): Record<string, any> {
+    const isProduction = getConfig().env.isProduction;
     const correlationContext =
       error.enhancedDetails.correlationContext ||
       ErrorCorrelationManager.getContext();
@@ -337,7 +340,7 @@ export class StandardizedErrorResponseFormatter extends ErrorResponseFormatter {
         severity: error.enhancedDetails.severity,
         businessImpact: error.enhancedDetails.businessImpact,
         userImpact: error.enhancedDetails.userImpact,
-        stack: process.env.NODE_ENV !== 'production' ? error.stack : undefined,
+        stack: !isProduction ? error.stack : undefined,
       },
       correlation: correlationContext
         ? {

@@ -179,7 +179,7 @@ export interface PageEvent {
                 [class]="getColumnClasses(column)"
                 (click)="
                   column.sortable
-                    ? onSort.emit({
+                    ? sortChange.emit({
                         column: column.key,
                         direction: getNextSortDirection(column.key),
                       })
@@ -274,7 +274,7 @@ export interface PageEvent {
               <td *ngIf="showActions" class="actions-column">
                 <div class="action-buttons">
                   <button
-                    (click)="onView.emit(row)"
+                    (click)="viewRow.emit(row)"
                     class="action-btn view-btn"
                     title="查看"
                     type="button"
@@ -294,7 +294,7 @@ export interface PageEvent {
                     </svg>
                   </button>
                   <button
-                    (click)="onEdit.emit(row)"
+                    (click)="editRow.emit(row)"
                     class="action-btn edit-btn"
                     title="编辑"
                     type="button"
@@ -316,7 +316,7 @@ export interface PageEvent {
                     </svg>
                   </button>
                   <button
-                    (click)="onDelete.emit(row)"
+                    (click)="deleteRow.emit(row)"
                     class="action-btn delete-btn"
                     title="删除"
                     type="button"
@@ -484,7 +484,7 @@ export class DataTableComponent<T = Record<string, unknown>>
   implements OnInit, AfterViewInit, OnDestroy
 {
   @ViewChild('tableWrapper', { static: false })
-  tableWrapper!: ElementRef<HTMLDivElement>;
+  tableWrapper?: ElementRef<HTMLDivElement>;
 
   private destroy$ = new Subject<void>();
   private resizeObserver?: ResizeObserver;
@@ -493,13 +493,13 @@ export class DataTableComponent<T = Record<string, unknown>>
   @Input() options: TableOptions = {};
   @Input() showActions = false;
 
-  @Output() onSort = new EventEmitter<SortEvent>();
-  @Output() onPageChange = new EventEmitter<PageEvent>();
-  @Output() onSelectionChange = new EventEmitter<T[]>();
-  @Output() onView = new EventEmitter<T>();
-  @Output() onEdit = new EventEmitter<T>();
-  @Output() onDelete = new EventEmitter<T>();
-  @Output() onExport = new EventEmitter<void>();
+  @Output() sortChange = new EventEmitter<SortEvent>();
+  @Output() pageChange = new EventEmitter<PageEvent>();
+  @Output() selectionChange = new EventEmitter<T[]>();
+  @Output() viewRow = new EventEmitter<T>();
+  @Output() editRow = new EventEmitter<T>();
+  @Output() deleteRow = new EventEmitter<T>();
+  @Output() exportRequested = new EventEmitter<void>();
 
   // State
   searchTerm = '';
@@ -529,20 +529,19 @@ export class DataTableComponent<T = Record<string, unknown>>
     }
 
     // Apply sorting
-    if (this.sortColumn() && this.sortDirection()) {
-      const col = this.sortColumn()!;
-      const dir = this.sortDirection()!;
-
+    const activeSortColumn = this.sortColumn();
+    const activeSortDirection = this.sortDirection();
+    if (activeSortColumn && activeSortDirection) {
       filtered.sort((a, b) => {
-        const aVal = this.getCellValue(a, col);
-        const bVal = this.getCellValue(b, col);
+        const aVal = this.getCellValue(a, activeSortColumn);
+        const bVal = this.getCellValue(b, activeSortColumn);
 
         if (aVal === bVal) return 0;
         if (aVal === null || aVal === undefined) return 1;
         if (bVal === null || bVal === undefined) return -1;
 
         const comparison = aVal < bVal ? -1 : 1;
-        return dir === 'asc' ? comparison : -comparison;
+        return activeSortDirection === 'asc' ? comparison : -comparison;
       });
     }
 
@@ -671,8 +670,8 @@ export class DataTableComponent<T = Record<string, unknown>>
       this.sortDirection.set('asc');
     }
 
-    this.onSort.emit({
-      column: this.sortColumn()!,
+    this.sortChange.emit({
+      column: this.sortColumn() ?? column,
       direction: this.sortDirection(),
     });
   }
@@ -723,7 +722,7 @@ export class DataTableComponent<T = Record<string, unknown>>
    * @returns The result of the operation.
    */
   emitPageChange() {
-    this.onPageChange.emit({
+    this.pageChange.emit({
       pageIndex: this.currentPage(),
       pageSize: this.pageSize,
     });
@@ -803,7 +802,7 @@ export class DataTableComponent<T = Record<string, unknown>>
     }
 
     this.selectedRows.set(selected);
-    this.onSelectionChange.emit(selected);
+    this.selectionChange.emit(selected);
   }
 
   /**
@@ -832,7 +831,7 @@ export class DataTableComponent<T = Record<string, unknown>>
     }
 
     this.selectedRows.set(selected);
-    this.onSelectionChange.emit(selected);
+    this.selectionChange.emit(selected);
   }
 
   /**
@@ -840,7 +839,7 @@ export class DataTableComponent<T = Record<string, unknown>>
    * @returns The result of the operation.
    */
   exportData() {
-    this.onExport.emit();
+    this.exportRequested.emit();
     // Default CSV export implementation
     const csv = this.convertToCSV(this.filteredData());
     this.downloadCSV(csv, 'data-export.csv');
@@ -978,9 +977,10 @@ export class DataTableComponent<T = Record<string, unknown>>
   hasHorizontalScroll = false;
 
   private setupScrollDetection(): void {
-    if (!this.tableWrapper) return;
-
-    const scrollElement = this.tableWrapper.nativeElement;
+    const scrollElement = this.tableWrapper?.nativeElement;
+    if (!scrollElement) {
+      return;
+    }
 
     fromEvent(scrollElement, 'scroll')
       .pipe(debounceTime(50), takeUntil(this.destroy$))
@@ -990,23 +990,31 @@ export class DataTableComponent<T = Record<string, unknown>>
   }
 
   private setupResizeObserver(): void {
-    if (!this.tableWrapper || !('ResizeObserver' in window)) return;
+    const wrapperElement = this.tableWrapper?.nativeElement;
+    if (!wrapperElement || !('ResizeObserver' in window)) {
+      return;
+    }
 
     this.resizeObserver = new ResizeObserver(() => {
       this.updateScrollIndicator();
     });
 
-    this.resizeObserver.observe(this.tableWrapper.nativeElement);
+    this.resizeObserver.observe(wrapperElement);
   }
 
   private updateScrollIndicator(): void {
-    if (!this.tableWrapper) return;
-
-    const element = this.tableWrapper.nativeElement;
-    const table = element.querySelector('.data-table') as HTMLElement;
-
-    if (table) {
-      this.hasHorizontalScroll = table.scrollWidth > element.clientWidth;
+    const element = this.tableWrapper?.nativeElement;
+    if (!element) {
+      this.hasHorizontalScroll = false;
+      return;
     }
+
+    const table = element.querySelector('.data-table');
+    if (!(table instanceof HTMLElement)) {
+      this.hasHorizontalScroll = false;
+      return;
+    }
+
+    this.hasHorizontalScroll = table.scrollWidth > element.clientWidth;
   }
 }

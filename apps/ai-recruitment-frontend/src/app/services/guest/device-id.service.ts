@@ -24,7 +24,12 @@ export class DeviceIdService {
     if (!this.deviceId) {
       this.initializeDeviceId();
     }
-    return this.deviceId!;
+
+    if (!this.deviceId) {
+      throw new Error('Unable to initialize device ID');
+    }
+
+    return this.deviceId;
   }
 
   /**

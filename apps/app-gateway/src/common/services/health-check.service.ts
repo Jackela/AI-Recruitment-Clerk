@@ -1,5 +1,13 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
+
+type HealthMetadata = Record<string, unknown>;
+
+type HealthCheckResult = {
+  healthy: boolean;
+  metadata?: HealthMetadata;
+};
 
 /**
  * Defines the shape of the service health.
@@ -10,7 +18,7 @@ export interface ServiceHealth {
   lastCheck: Date;
   responseTime?: number;
   error?: string;
-  metadata?: any;
+  metadata?: HealthMetadata;
 }
 
 /**
@@ -33,7 +41,7 @@ export interface HealthCheckConfig {
   timeout?: number;
   interval?: number;
   enabled?: boolean;
-  healthCheck?: () => Promise<{ healthy: boolean; metadata?: any }>;
+  healthCheck?: () => Promise<HealthCheckResult>;
 }
 
 /**
@@ -45,6 +53,7 @@ export class HealthCheckService implements OnModuleInit {
   private readonly startTime = Date.now();
   private serviceHealths = new Map<string, ServiceHealth>();
   private healthCheckConfigs: HealthCheckConfig[] = [];
+  private readonly config = getConfig();
 
   /**
    * Performs the on module init operation.
@@ -88,7 +97,7 @@ export class HealthCheckService implements OnModuleInit {
       services,
       timestamp: new Date(),
       uptime: Date.now() - this.startTime,
-      version: process.env.npm_package_version || '1.0.0',
+      version: this.config.metadata.version,
     };
   }
 
@@ -127,7 +136,9 @@ export class HealthCheckService implements OnModuleInit {
     try {
       await this.performAllHealthChecks();
     } catch (error) {
-      this.logger.error('Error during scheduled health checks:', error);
+      this.logger.error(
+        `Error during scheduled health checks: ${this.formatError(error)}`,
+      );
     }
   }
 
@@ -136,12 +147,14 @@ export class HealthCheckService implements OnModuleInit {
 
     const healthCheckPromises = enabledConfigs.map((config) =>
       this.performHealthCheck(config).catch((error) => {
-        this.logger.error(`Health check failed for ${config.name}:`, error);
+        this.logger.error(
+          `Health check failed for ${config.name}: ${this.formatError(error)}`,
+        );
         return {
           name: config.name,
           status: 'unhealthy' as const,
           lastCheck: new Date(),
-          error: error.message,
+          error: this.formatError(error),
         };
       }),
     );
@@ -159,17 +172,18 @@ export class HealthCheckService implements OnModuleInit {
     const startTime = Date.now();
 
     try {
-      let result: { healthy: boolean; metadata?: any };
+      let result: HealthCheckResult;
+      const timeoutMs = config.timeout ?? 5000;
 
       if (config.healthCheck) {
         // Custom health check function
         result = await Promise.race([
           config.healthCheck(),
-          this.createTimeoutPromise(config.timeout!),
+          this.createTimeoutPromise(timeoutMs),
         ]);
       } else if (config.url) {
         // HTTP health check
-        result = await this.performHttpHealthCheck(config.url, config.timeout!);
+        result = await this.performHttpHealthCheck(config.url, timeoutMs);
       } else {
         throw new Error('No health check method configured');
       }
@@ -191,7 +205,7 @@ export class HealthCheckService implements OnModuleInit {
         status: 'unhealthy',
         lastCheck: new Date(),
         responseTime,
-        error: error.message,
+        error: this.formatError(error),
       };
     }
   }
@@ -199,7 +213,7 @@ export class HealthCheckService implements OnModuleInit {
   private async performHttpHealthCheck(
     url: string,
     _timeout: number,
-  ): Promise<{ healthy: boolean; metadata?: any }> {
+  ): Promise<HealthCheckResult> {
     try {
       // Mock HTTP health check - replace with actual HTTP client
       // const response = await fetch(url, { timeout });
@@ -220,7 +234,7 @@ export class HealthCheckService implements OnModuleInit {
         healthy: false,
         metadata: {
           url,
-          error: error.message,
+          error: this.formatError(error),
         },
       };
     }
@@ -277,7 +291,13 @@ export class HealthCheckService implements OnModuleInit {
             },
           };
         } catch (error) {
-          return { healthy: false };
+          this.logger.warn(
+            `Database health check failed: ${this.formatError(error)}`,
+          );
+          return {
+            healthy: false,
+            metadata: { error: this.formatError(error) },
+          };
         }
       },
     });
@@ -288,9 +308,15 @@ export class HealthCheckService implements OnModuleInit {
       healthCheck: async () => {
         try {
           // 如果没有Redis URL或被禁用，返回内存缓存模式
-          const redisUrl = process.env.REDIS_URL;
-          const useRedis = process.env.USE_REDIS_CACHE !== 'false';
-          const disableRedis = process.env.DISABLE_REDIS === 'true';
+          const redisConfig = this.config.cache.redis;
+          const redisUrl =
+            redisConfig.url ||
+            redisConfig.privateUrl ||
+            (redisConfig.host && redisConfig.port
+              ? `redis://${redisConfig.host}:${redisConfig.port}`
+              : undefined);
+          const useRedis = redisConfig.enabled;
+          const disableRedis = redisConfig.disabled;
 
           if (!useRedis || disableRedis || !redisUrl) {
             return {
@@ -354,7 +380,7 @@ export class HealthCheckService implements OnModuleInit {
             healthy: false,
             metadata: {
               mode: 'memory-cache-fallback',
-              error: error.message,
+              error: this.formatError(error),
               fallback_active: true,
             },
           };
@@ -377,25 +403,58 @@ export class HealthCheckService implements OnModuleInit {
             },
           };
         } catch (error) {
-          return { healthy: false };
+          this.logger.warn(
+            `NATS health check failed: ${this.formatError(error)}`,
+          );
+          return {
+            healthy: false,
+            metadata: { error: this.formatError(error) },
+          };
         }
       },
     });
 
     // External services health checks
+    const normalize = (url: string) => url.replace(/\/$/, '');
     const externalServices = [
-      'resume-parser-svc',
-      'jd-extractor-svc',
-      'scoring-engine-svc',
-      'report-generator-svc',
+      {
+        name: 'resume-parser-svc',
+        url: `${normalize(this.config.integrations.resumeParser.baseUrl)}/health`,
+      },
+      {
+        name: 'jd-extractor-svc',
+        url: `${normalize(this.config.integrations.jdExtractor.baseUrl)}/health`,
+      },
+      {
+        name: 'scoring-engine-svc',
+        url: `${normalize(this.config.integrations.scoring.baseUrl || 'http://scoring-engine-svc:3000')}/health`,
+      },
+      {
+        name: 'report-generator-svc',
+        url: `${normalize(this.config.integrations.reportGenerator.baseUrl)}/health`,
+      },
     ];
 
     externalServices.forEach((service) => {
       this.registerHealthCheck({
-        name: service,
-        url: `http://${service}:3000/health`,
+        name: service.name,
+        url: service.url,
         timeout: 5000,
       });
     });
+  }
+
+  private formatError(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+    if (typeof error === 'string') {
+      return error;
+    }
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return String(error);
+    }
   }
 }

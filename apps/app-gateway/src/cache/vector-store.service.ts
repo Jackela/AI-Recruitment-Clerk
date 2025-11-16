@@ -1,9 +1,46 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RedisConnectionService } from './redis-connection.service';
-import { SchemaFieldTypes, VectorAlgorithms } from 'redis';
+import {
+  SchemaFieldTypes,
+  VectorAlgorithms,
+  type RedisClientType,
+} from 'redis';
 
 type VectorSearchResult = { cacheKey: string; similarity: number };
+
+type RedisVectorSchemaField =
+  | {
+      type: SchemaFieldTypes.TAG;
+    }
+  | {
+      type: SchemaFieldTypes.VECTOR;
+      ALGORITHM: VectorAlgorithms;
+      TYPE: 'FLOAT32' | 'FLOAT64';
+      DIM: number;
+      DISTANCE_METRIC: string;
+      INITIAL_CAP?: number;
+    };
+
+type RedisVectorSchema = Record<string, RedisVectorSchemaField>;
+
+type RedisVectorIndexOptions = {
+  ON: 'HASH' | 'JSON';
+  PREFIX: string[];
+};
+
+type RedisCommandArgs = Parameters<RedisClientType['sendCommand']>[0];
+
+type RedisVectorClient = RedisClientType & {
+  ft: {
+    info: (indexName: string) => Promise<unknown>;
+    create: (
+      indexName: string,
+      schema: RedisVectorSchema,
+      options: RedisVectorIndexOptions,
+    ) => Promise<'OK'>;
+  };
+};
 
 /**
  * Encapsulates Redis vector operations backed by RediSearch.
@@ -71,26 +108,24 @@ export class VectorStoreService {
     }
 
     try {
-      await client.ft.create(
-        this.indexName,
-        {
-          cacheKey: {
-            type: SchemaFieldTypes.TAG,
-          },
-          [this.vectorField]: {
-            type: SchemaFieldTypes.VECTOR,
-            ALGORITHM: VectorAlgorithms.HNSW,
-            TYPE: 'FLOAT32',
-            DIM: this.vectorDimensions,
-            DISTANCE_METRIC: this.distanceMetric,
-            INITIAL_CAP: 1000,
-          } as any,
+      const schema: RedisVectorSchema = {
+        cacheKey: {
+          type: SchemaFieldTypes.TAG,
         },
-        {
-          ON: 'HASH',
-          PREFIX: [this.keyPrefix],
-        } as any,
-      );
+        [this.vectorField]: {
+          type: SchemaFieldTypes.VECTOR,
+          ALGORITHM: VectorAlgorithms.HNSW,
+          TYPE: 'FLOAT32',
+          DIM: this.vectorDimensions,
+          DISTANCE_METRIC: this.distanceMetric,
+          INITIAL_CAP: 1000,
+        },
+      };
+      const options: RedisVectorIndexOptions = {
+        ON: 'HASH',
+        PREFIX: [this.keyPrefix],
+      };
+      await client.ft.create(this.indexName, schema, options);
       this.indexEnsured = true;
       this.logger.log(`Redis vector index ${this.indexName} created.`);
     } catch (error) {
@@ -161,7 +196,7 @@ export class VectorStoreService {
     const vectorBlob = this.vectorToBuffer(vector);
 
     const knnQuery = `*=>[KNN ${Math.max(count, 1)} @${this.vectorField} $vector_param AS vector_score]`;
-    const args: (string | number | Buffer)[] = [
+    const args: RedisCommandArgs = [
       'FT.SEARCH',
       this.indexName,
       knnQuery,
@@ -189,9 +224,24 @@ export class VectorStoreService {
     }
   }
 
-  private async getClient(): Promise<any | null> {
+  private async getClient(): Promise<RedisVectorClient | null> {
     const client = this.redisConnectionService.getRedisClient();
-    return client ?? null;
+    if (!client || !this.hasSearchSupport(client)) {
+      return null;
+    }
+    return client;
+  }
+
+  private hasSearchSupport(
+    client: RedisClientType,
+  ): client is RedisVectorClient {
+    const candidate = client as Partial<RedisVectorClient>;
+    return (
+      typeof candidate.ft?.info === 'function' &&
+      typeof candidate.ft?.create === 'function' &&
+      typeof candidate.sendCommand === 'function' &&
+      typeof candidate.hSet === 'function'
+    );
   }
 
   private parseVectorSearch(

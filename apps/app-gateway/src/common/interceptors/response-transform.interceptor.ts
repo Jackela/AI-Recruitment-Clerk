@@ -16,11 +16,14 @@ export class ResponseTransformInterceptor implements NestInterceptor {
    * Performs the intercept operation.
    * @param context - The context.
    * @param next - The next.
-   * @returns The Observable<any>.
+   * @returns The Observable<unknown>.
    */
-  intercept(_context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(
+    _context: ExecutionContext,
+    next: CallHandler,
+  ): Observable<unknown> {
     return next.handle().pipe(
-      map((data: any) => {
+      map((data: unknown) => {
         // If controller already returns a standardized shape, pass through
         if (
           data &&

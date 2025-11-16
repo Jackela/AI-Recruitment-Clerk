@@ -40,14 +40,15 @@ const createDeps = (): ControllerDeps => {
       healthCheck: jest.fn().mockResolvedValue({ status: 'healthy' }),
       getMetrics: jest.fn().mockReturnValue(cacheMetrics),
       getHealthCacheKey: jest.fn().mockReturnValue('health-cache-key'),
-      wrap: jest.fn(async (_key: string, compute: () => Promise<any>) =>
-        compute(),
+      wrap: jest.fn(
+        async (_key: string, compute: () => Promise<unknown>) => compute(),
       ),
     } as unknown as jest.Mocked<CacheService>,
     cacheWarmupService: {
       getRefreshStatus: jest.fn().mockReturnValue({
-        status: 'idle',
-        lastRun: new Date('2024-01-01T00:00:00Z'),
+        isActive: false,
+        lastRefresh: new Date('2024-01-01T00:00:00Z'),
+        nextDeepWarmup: new Date('2024-01-01T01:00:00Z'),
       }),
       triggerWarmup: jest.fn().mockResolvedValue({
         status: 'started',
@@ -119,7 +120,7 @@ describe('AppController (mocked)', () => {
       deps.jobRepository.healthCheck.mockRejectedValue(
         new Error('db unavailable'),
       );
-      deps.cacheService.wrap.mockImplementation(async (_key, compute) => {
+      deps.cacheService.wrap.mockImplementation(async (_key, _compute) => {
         throw new Error('cache offline');
       });
 
@@ -172,7 +173,7 @@ describe('AppController (mocked)', () => {
       const result = await controller.getCacheWarmupStatus();
 
       expect(deps.cacheWarmupService.getRefreshStatus).toHaveBeenCalled();
-      expect((result.warmupStatus as any).status).toBe('idle');
+      expect(result.warmupStatus.isActive).toBe(false);
     });
 
     it('handles warmup trigger success and failure', async () => {

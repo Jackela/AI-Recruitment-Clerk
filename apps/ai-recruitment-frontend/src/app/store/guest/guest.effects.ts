@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
@@ -20,17 +20,9 @@ import { selectGuestState } from './guest.selectors';
  */
 @Injectable()
 export class GuestEffects {
-  /**
-   * Initializes a new instance of the Guest Effects.
-   * @param actions$ - The actions$.
-   * @param guestApiService - The guest api service.
-   * @param store - The store.
-   */
-  constructor(
-    private actions$: Actions,
-    private guestApiService: GuestApiService,
-    private store: Store<{ guest: GuestState }>,
-  ) {}
+  private readonly actions$ = inject(Actions);
+  private readonly guestApiService = inject(GuestApiService);
+  private readonly store: Store<{ guest: GuestState }> = inject(Store);
 
   // Load usage status
   loadUsageStatus$ = createEffect(() =>

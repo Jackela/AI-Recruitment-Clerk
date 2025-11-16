@@ -4,6 +4,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 // Filters
 import { GlobalExceptionFilter } from './filters/global-exception.filter';
@@ -105,43 +106,46 @@ export class CommonModule {}
     // Service integration configuration
     {
       provide: 'SERVICE_INTEGRATION_CONFIG',
-      useValue: {
-        defaultTimeout: 30000,
-        defaultRetries: 3,
-        enableCircuitBreaker: true,
-        circuitBreakerThreshold: 5,
-        circuitBreakerResetTimeout: 60000,
-        enableCaching: true,
-        defaultCacheTTL: 300,
-        enableFallback: true,
-        services: {
-          'resume-parser-svc': {
-            baseUrl:
-              process.env.RESUME_PARSER_URL || 'http://resume-parser-svc:3000',
-            timeout: 45000,
-            retries: 2,
+      useFactory: () => {
+        const config = getConfig();
+        const normalize = (url: string) => url.replace(/\/$/, '');
+        return {
+          defaultTimeout: 30000,
+          defaultRetries: 3,
+          enableCircuitBreaker: true,
+          circuitBreakerThreshold: 5,
+          circuitBreakerResetTimeout: 60000,
+          enableCaching: true,
+          defaultCacheTTL: 300,
+          enableFallback: true,
+          services: {
+            'resume-parser-svc': {
+              baseUrl: normalize(config.integrations.resumeParser.baseUrl),
+              timeout: 45000,
+              retries: 2,
+            },
+            'jd-extractor-svc': {
+              baseUrl: normalize(config.integrations.jdExtractor.baseUrl),
+              timeout: 30000,
+              retries: 3,
+            },
+            'scoring-engine-svc': {
+              baseUrl: normalize(
+                config.integrations.scoring.baseUrl ||
+                  'http://scoring-engine-svc:3000',
+              ),
+              timeout: 20000,
+              retries: 2,
+            },
+            'report-generator-svc': {
+              baseUrl: normalize(
+                config.integrations.reportGenerator.baseUrl,
+              ),
+              timeout: 60000,
+              retries: 1,
+            },
           },
-          'jd-extractor-svc': {
-            baseUrl:
-              process.env.JD_EXTRACTOR_URL || 'http://jd-extractor-svc:3000',
-            timeout: 30000,
-            retries: 3,
-          },
-          'scoring-engine-svc': {
-            baseUrl:
-              process.env.SCORING_ENGINE_URL ||
-              'http://scoring-engine-svc:3000',
-            timeout: 20000,
-            retries: 2,
-          },
-          'report-generator-svc': {
-            baseUrl:
-              process.env.REPORT_GENERATOR_URL ||
-              'http://report-generator-svc:3000',
-            timeout: 60000,
-            retries: 1,
-          },
-        },
+        };
       },
     },
 

@@ -2,6 +2,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
+interface SecurityAlertDetails {
+  timestamp?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  location?: string;
+  [key: string]: unknown;
+}
+
 /**
  * Provides email functionality.
  */
@@ -42,7 +50,7 @@ export class EmailService {
     this.transporter = nodemailer.createTransport(smtpConfig);
 
     // Verify connection configuration
-    this.transporter.verify((error, _success) => {
+    this.transporter.verify((error) => {
       if (error) {
         this.logger.error('SMTP connection failed:', error);
       } else {
@@ -102,7 +110,7 @@ export class EmailService {
   async sendAccountSecurityAlert(
     email: string,
     event: string,
-    details: any,
+    details: SecurityAlertDetails,
   ): Promise<void> {
     const fromEmail =
       this.configService.get<string>('SMTP_FROM') ||
@@ -116,7 +124,7 @@ export class EmailService {
       to: email,
       subject: `${issuer} - Security Alert: ${event}`,
       html: this.generateSecurityAlertTemplate(event, details, issuer),
-      text: `Security Alert: ${event}\n\nTime: ${details.timestamp}\nIP Address: ${details.ipAddress}\nUser Agent: ${details.userAgent}\n\nIf this was not you, please contact support immediately.`,
+      text: `Security Alert: ${event}\n\nTime: ${details.timestamp ?? 'N/A'}\nIP Address: ${details.ipAddress ?? 'N/A'}\nUser Agent: ${details.userAgent ?? 'N/A'}\n\nIf this was not you, please contact support immediately.`,
     };
 
     try {
@@ -179,7 +187,7 @@ export class EmailService {
 
   private generateSecurityAlertTemplate(
     event: string,
-    details: any,
+    details: SecurityAlertDetails,
     issuer: string,
   ): string {
     return `
@@ -212,10 +220,10 @@ export class EmailService {
         <div class="details">
           <h4>Event Details:</h4>
           <ul>
-            <li><strong>Time:</strong> ${details.timestamp}</li>
-            <li><strong>IP Address:</strong> ${details.ipAddress}</li>
-            <li><strong>User Agent:</strong> ${details.userAgent}</li>
-            <li><strong>Location:</strong> ${details.location || 'Unknown'}</li>
+            <li><strong>Time:</strong> ${details.timestamp ?? 'Unknown'}</li>
+            <li><strong>IP Address:</strong> ${details.ipAddress ?? 'Unknown'}</li>
+            <li><strong>User Agent:</strong> ${details.userAgent ?? 'Unknown'}</li>
+            <li><strong>Location:</strong> ${details.location ?? 'Unknown'}</li>
           </ul>
         </div>
         

@@ -141,8 +141,9 @@ export class AccessibilityService {
     }
 
     // Store previous focus for restoration
-    if (this.currentFocus() && reason !== 'restoration') {
-      this.focusHistory.push(this.currentFocus()!);
+    const existingFocus = this.currentFocus();
+    if (existingFocus && reason !== 'restoration') {
+      this.focusHistory.push(existingFocus);
     }
 
     // Set focus
@@ -465,10 +466,22 @@ export class AccessibilityService {
    * Handle focus trap keyboard navigation
    */
   private handleFocusTrapKeydown(event: KeyboardEvent): void {
-    if (event.key !== 'Tab' || !this.focusWithin()) return;
+    if (event.key !== 'Tab') {
+      return;
+    }
 
-    const focusableElements = this.getFocusableElements(this.focusWithin()!);
-    const currentIndex = focusableElements.indexOf(this.currentFocus()!);
+    const container = this.focusWithin();
+    if (!container) {
+      return;
+    }
+
+    const focusableElements = this.getFocusableElements(container);
+    const activeElement = this.currentFocus();
+    if (!activeElement) {
+      return;
+    }
+
+    const currentIndex = focusableElements.indexOf(activeElement);
 
     if (event.shiftKey) {
       // Shift+Tab: Previous element

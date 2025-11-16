@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-namespace */
+
 /**
  * @fileoverview Design by Contract implementation for AI Recruitment System
  * @author AI Recruitment Team
@@ -153,7 +155,7 @@ export function Invariant(
   condition: (instance: any) => boolean,
   message: string,
 ) {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
+  return function <T extends new (...args: any[]) => object>(constructor: T) {
     return class extends constructor {
       constructor(...args: any[]) {
         super(...args);
@@ -529,7 +531,7 @@ export namespace ContractTestUtils {
    * @since 1.0.0
    */
   export function expectContractViolation(
-    fn: Function,
+    fn: () => unknown,
     expectedType: 'PRE' | 'POST' | 'INV',
     expectedMessage?: string,
   ): void {
@@ -575,7 +577,7 @@ export namespace ContractTestUtils {
    * @since 1.0.0
    */
   export async function expectAsyncContractViolation(
-    fn: Function,
+    fn: () => Promise<unknown>,
     expectedType: 'PRE' | 'POST' | 'INV',
     expectedMessage?: string,
   ): Promise<void> {

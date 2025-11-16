@@ -1,4 +1,5 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import { getTestingEnvironment } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Performs the global setup operation.
@@ -6,14 +7,17 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
  */
 export default async function globalSetup() {
   console.log('🚀 Starting Integration Test Suite Global Setup');
+  const testingEnv = getTestingEnvironment({
+    serviceName: 'app-gateway-integration',
+  });
 
   // Start in-memory MongoDB for testing (skip if SKIP_DB=true)
-  if (process.env.SKIP_DB === 'true') {
+  if (testingEnv.skipDb) {
     console.log('⏭️  SKIP_DB is true — skipping MongoMemoryServer startup');
     process.env.NODE_ENV = 'test';
     return;
   }
-  const version = process.env.MONGOMS_VERSION || '7.0.5';
+  const version = testingEnv.mongoVersion;
   const mongod = await MongoMemoryServer.create({
     binary: {
       version,
@@ -29,8 +33,11 @@ export default async function globalSetup() {
   process.env.MONGODB_TEST_URL = uri;
   process.env.MONGO_URL = uri; // keep AppModule and helpers consistent
   process.env.NODE_ENV = 'test';
-  process.env.JWT_SECRET = 'integration-test-jwt-secret';
+  process.env.JWT_SECRET = testingEnv.jwtSecret;
   process.env.JWT_EXPIRATION = '1h';
+  process.env.OPS_API_KEY = testingEnv.opsApiKey;
+  process.env.TEST_API_KEY = testingEnv.testApiKey;
+  process.env.TEST_JWT_TOKEN = testingEnv.testJwtToken;
 
   // Store MongoDB instance for teardown
   (global as any).__MONGOD__ = mongod;

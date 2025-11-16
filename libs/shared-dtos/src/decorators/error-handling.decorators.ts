@@ -86,7 +86,7 @@ export function HandleErrors(config: ErrorHandlingConfig = {}) {
  * Sets default error handling behavior for all methods in the class
  */
 export function DefaultErrorHandling(config: ErrorHandlingConfig) {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
+  return function <T extends new (...args: any[]) => object>(constructor: T) {
     const className = constructor.name;
     const logger = config.logger || new Logger(className);
 

@@ -38,11 +38,17 @@ export interface CursorPosition {
 /**
  * Defines the shape of the collaboration action.
  */
+type CollaborationActionData =
+  | CursorPosition
+  | DocumentEdit
+  | { comment?: string; message?: string; [key: string]: unknown }
+  | undefined;
+
 export interface CollaborationAction {
   type: 'join' | 'leave' | '_edit' | 'comment' | 'cursor_move';
   userId: string;
   roomId: string;
-  data?: any;
+  data?: CollaborationActionData;
   timestamp: Date;
 }
 

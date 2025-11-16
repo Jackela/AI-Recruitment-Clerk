@@ -2,11 +2,25 @@ import { ConfigService } from '@nestjs/config';
 import { RedisConnectionService } from './redis-connection.service';
 import { VectorStoreService } from './vector-store.service';
 
+type RedisClientMock = {
+  ft: {
+    info: jest.Mock<Promise<unknown>, []>;
+    create: jest.Mock<Promise<void>, []>;
+  };
+  hSet: jest.Mock<Promise<number>, [string, Record<string, unknown>]>;
+  sendCommand: jest.Mock<
+    Promise<unknown>,
+    [(string | number | Buffer)[]]
+  >;
+};
+
 describe('VectorStoreService', () => {
   let service: VectorStoreService;
-  let redisConnectionService: jest.Mocked<RedisConnectionService>;
-  let configService: jest.Mocked<ConfigService>;
-  let redisClient: any;
+  let redisConnectionService: jest.Mocked<
+    Pick<RedisConnectionService, 'getRedisClient'>
+  >;
+  let configService: jest.Mocked<Pick<ConfigService, 'get'>>;
+  let redisClient: RedisClientMock;
 
   beforeEach(() => {
     redisClient = {
@@ -20,13 +34,16 @@ describe('VectorStoreService', () => {
 
     redisConnectionService = {
       getRedisClient: jest.fn().mockReturnValue(redisClient),
-    } as unknown as jest.Mocked<RedisConnectionService>;
+    };
 
     configService = {
       get: jest.fn(),
-    } as unknown as jest.Mocked<ConfigService>;
+    };
 
-    service = new VectorStoreService(redisConnectionService, configService);
+    service = new VectorStoreService(
+      redisConnectionService as unknown as RedisConnectionService,
+      configService as unknown as ConfigService,
+    );
   });
 
   it('creates index when missing', async () => {

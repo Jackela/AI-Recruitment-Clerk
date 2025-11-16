@@ -16,7 +16,7 @@ export interface CreateFeedbackCodeDto {
 export interface MarkFeedbackCodeUsedDto {
   code: string;
   alipayAccount: string;
-  questionnaireData?: any;
+  questionnaireData?: Record<string, unknown>;
 }
 
 /**
@@ -29,7 +29,7 @@ export interface FeedbackCodeDto {
   isUsed: boolean;
   usedAt?: Date;
   alipayAccount?: string;
-  questionnaireData?: any;
+  questionnaireData?: Record<string, unknown>;
   paymentStatus: 'pending' | 'paid' | 'rejected';
   qualityScore?: number;
   paymentAmount?: number;
@@ -57,7 +57,7 @@ export interface FeedbackCodeDocument {
   isUsed: boolean;
   usedAt?: Date;
   alipayAccount?: string;
-  questionnaireData?: any;
+  questionnaireData?: Record<string, unknown>;
   paymentStatus: 'pending' | 'paid' | 'rejected';
   qualityScore?: number;
   paymentAmount?: number;
@@ -65,6 +65,8 @@ export interface FeedbackCodeDocument {
   ipAddress?: string;
   userAgent?: string;
   sessionId?: string;
+  paymentProcessedAt?: Date;
+  paymentNote?: string;
 }
 
 /**
@@ -91,7 +93,7 @@ export class FeedbackCodeService {
    */
   async recordFeedbackCode(
     createDto: CreateFeedbackCodeDto,
-    metadata?: any,
+    metadata?: Record<string, string | undefined>,
   ): Promise<FeedbackCodeDto> {
     try {
       // 检查反馈码是否已存在
@@ -315,7 +317,9 @@ export class FeedbackCodeService {
     }
   }
 
-  private assessFeedbackQuality(questionnaireData: any): number {
+  private assessFeedbackQuality(
+    questionnaireData: Record<string, unknown> | undefined,
+  ): number {
     if (!questionnaireData) return 0;
 
     let score = 1; // 基础分
@@ -326,7 +330,7 @@ export class FeedbackCodeService {
       questionnaireData.favorite_features,
       questionnaireData.improvements,
       questionnaireData.additional_features,
-    ].filter((field) => field && typeof field === 'string');
+    ].filter((field): field is string => typeof field === 'string' && field.length > 0);
 
     // 每个有效的文本字段加分
     textFields.forEach((text) => {

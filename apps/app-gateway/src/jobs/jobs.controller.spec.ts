@@ -3,11 +3,9 @@ import { JobsController } from './jobs.controller';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
-import {
-  Permission,
-  UserDto,
-  UserRole,
-} from '@ai-recruitment-clerk/user-management-domain';
+import { UserDto, UserRole } from '@ai-recruitment-clerk/user-management-domain';
+import type { MulterFile } from './types/multer.types';
+import { JobDetailDto } from './dto/job-response.dto';
 
 const mockUser: UserDto = {
   id: 'user-1',
@@ -19,10 +17,24 @@ const mockUser: UserDto = {
   createdAt: new Date(),
 };
 
-const makeRequest = (overrides: Partial<{ user: UserDto; permissions: Permission[] }> = {}) =>
+type ControllerRequest = Parameters<JobsController['createJob']>[0];
+
+const makeRequest = (
+  overrides: Partial<ControllerRequest> = {},
+): ControllerRequest =>
   ({
     user: overrides.user ?? mockUser,
-  } as any);
+    headers: {},
+    ip: '127.0.0.1',
+    ...overrides,
+  } as ControllerRequest);
+
+const createFile = (overrides: Partial<MulterFile> = {}): MulterFile => ({
+  originalname: 'resume.pdf',
+  mimetype: 'application/pdf',
+  size: 1024,
+  ...overrides,
+});
 
 describe('JobsController', () => {
   let controller: JobsController;
@@ -67,8 +79,8 @@ describe('JobsController', () => {
     it('accepts files and forwards to service', async () => {
       const response = new ResumeUploadResponseDto('job-1', 2);
       jobsService.uploadResumes.mockResolvedValue(response);
-      const files: any[] = [
-        { originalname: 'resume1.pdf', mimetype: 'application/pdf', size: 1024 },
+      const files: MulterFile[] = [
+        createFile({ originalname: 'resume1.pdf' }),
       ];
 
       const result = await controller.uploadResumes(
@@ -91,7 +103,7 @@ describe('JobsController', () => {
       );
 
       await expect(
-        controller.uploadResumes(makeRequest(), { jobId: 'job-2' }, [] as any),
+        controller.uploadResumes(makeRequest(), { jobId: 'job-2' }, []),
       ).rejects.toThrow(ForbiddenException);
     });
   });
@@ -104,9 +116,16 @@ describe('JobsController', () => {
     });
 
     it('getJobById propagates service result', async () => {
-      jobsService.getJobById.mockResolvedValue({ id: 'job-1' } as any);
+      const jobDetail = new JobDetailDto(
+        'job-1',
+        'Backend Engineer',
+        'JD text',
+        'draft',
+        new Date(),
+      );
+      jobsService.getJobById.mockResolvedValue(jobDetail);
       const result = await controller.getJobById(makeRequest(), 'job-1');
-      expect(result).toEqual({ id: 'job-1' });
+      expect(result).toEqual(jobDetail);
     });
 
     it('getResumesByJobId propagates service error', async () => {
@@ -155,8 +174,11 @@ describe('JobsController', () => {
     });
 
     it('should reject uploadResumes with invalid file types', async () => {
-      const invalidFiles: any[] = [
-        { originalname: 'malicious.exe', mimetype: 'application/x-msdownload', size: 1024 },
+      const invalidFiles: MulterFile[] = [
+        createFile({
+          originalname: 'malicious.exe',
+          mimetype: 'application/x-msdownload',
+        }),
       ];
       jobsService.uploadResumes.mockRejectedValue(
         new Error('Invalid file type'),
@@ -168,8 +190,11 @@ describe('JobsController', () => {
     });
 
     it('should reject uploadResumes with oversized files', async () => {
-      const oversizedFiles: any[] = [
-        { originalname: 'huge.pdf', mimetype: 'application/pdf', size: 20 * 1024 * 1024 },
+      const oversizedFiles: MulterFile[] = [
+        createFile({
+          originalname: 'huge.pdf',
+          size: 20 * 1024 * 1024,
+        }),
       ];
       jobsService.uploadResumes.mockRejectedValue(
         new Error('File size exceeds limit'),
@@ -243,11 +268,9 @@ describe('JobsController', () => {
 
   describe('Boundary Tests - File Upload Limits', () => {
     it('should handle exactly maximum allowed files', async () => {
-      const maxFiles: any[] = Array.from({ length: 50 }, (_, i) => ({
-        originalname: `resume${i}.pdf`,
-        mimetype: 'application/pdf',
-        size: 1024,
-      }));
+      const maxFiles: MulterFile[] = Array.from({ length: 50 }, (_, i) =>
+        createFile({ originalname: `resume${i}.pdf` }),
+      );
       const response = new ResumeUploadResponseDto('job-1', 50);
       jobsService.uploadResumes.mockResolvedValue(response);
 
@@ -261,11 +284,9 @@ describe('JobsController', () => {
     });
 
     it('should reject files exceeding maximum count', async () => {
-      const tooManyFiles: any[] = Array.from({ length: 51 }, (_, i) => ({
-        originalname: `resume${i}.pdf`,
-        mimetype: 'application/pdf',
-        size: 1024,
-      }));
+      const tooManyFiles: MulterFile[] = Array.from({ length: 51 }, (_, i) =>
+        createFile({ originalname: `resume${i}.pdf` }),
+      );
       jobsService.uploadResumes.mockRejectedValue(
         new Error('Too many files'),
       );
@@ -276,8 +297,8 @@ describe('JobsController', () => {
     });
 
     it('should handle file at exactly maximum size (10MB)', async () => {
-      const maxSizeFile: any[] = [
-        { originalname: 'resume.pdf', mimetype: 'application/pdf', size: 10 * 1024 * 1024 },
+      const maxSizeFile: MulterFile[] = [
+        createFile({ size: 10 * 1024 * 1024 }),
       ];
       const response = new ResumeUploadResponseDto('job-1', 1);
       jobsService.uploadResumes.mockResolvedValue(response);
@@ -326,7 +347,7 @@ describe('JobsController', () => {
         controller.uploadResumes(
           makeRequest(),
           { jobId: 'job-1' },
-          [{ originalname: 'resume.pdf', mimetype: 'application/pdf', size: 1024 }],
+          [createFile()],
         ),
       ).rejects.toThrow('Transaction rollback failed');
     });
@@ -334,9 +355,7 @@ describe('JobsController', () => {
 
   describe('Edge Cases - Concurrent Operations', () => {
     it('should handle concurrent resume uploads for same job', async () => {
-      const files: any[] = [
-        { originalname: 'resume1.pdf', mimetype: 'application/pdf', size: 1024 },
-      ];
+      const files: MulterFile[] = [createFile({ originalname: 'resume1.pdf' })];
       const response = new ResumeUploadResponseDto('job-concurrent', 1);
       jobsService.uploadResumes.mockResolvedValue(response);
 
@@ -377,9 +396,9 @@ describe('JobsController', () => {
     it('should return complete response structure from uploadResumes', async () => {
       const response = new ResumeUploadResponseDto('job-1', 2);
       jobsService.uploadResumes.mockResolvedValue(response);
-      const files: any[] = [
-        { originalname: 'resume1.pdf', mimetype: 'application/pdf', size: 1024 },
-        { originalname: 'resume2.pdf', mimetype: 'application/pdf', size: 2048 },
+      const files: MulterFile[] = [
+        createFile({ originalname: 'resume1.pdf', size: 1024 }),
+        createFile({ originalname: 'resume2.pdf', size: 2048 }),
       ];
 
       const result = await controller.uploadResumes(
