@@ -4,6 +4,7 @@ import {
   OnDestroy,
   computed,
   AfterViewInit,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
@@ -250,7 +251,6 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     }
 
     try {
-      // eslint-disable-next-line no-new
       new URL(trimmed);
       return trimmed;
     } catch {
@@ -264,20 +264,10 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
   averageScore = computed(() => 76);
 
   private destroy$ = new Subject<void>();
-
-  /**
-   * Initializes a new instance of the Unified Analysis Component.
-   * @param guestApi - The guest api.
-   * @param webSocketService - The web socket service.
-   * @param router - The router.
-   * @param toastService - The toast service.
-   */
-  constructor(
-    private readonly guestApi: GuestApiService,
-    private readonly webSocketService: WebSocketService,
-    private readonly router: Router,
-    private readonly toastService: ToastService,
-  ) {}
+  private readonly guestApi = inject(GuestApiService);
+  private readonly webSocketService = inject(WebSocketService);
+  private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
 
   /**
    * Performs the ng after view init operation.
@@ -745,7 +735,7 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
       this.todayAnalyses.set(42);
       this.totalAnalyses.set(1247);
     } catch (error) {
-      // Silent fail - statistics are not critical
+      console.debug('UnifiedAnalysisComponent.loadStatistics failed', error);
     }
   }
 

@@ -2,12 +2,13 @@
   "name": "@ai-recruitment-clerk/ai-services-shared",
   "version": "1.0.0",
   "description": "Shared AI services and integrations for AI Recruitment Clerk",
-  "type": "module",
-  "main": "./dist/index.js",
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./src/index.js",
+      "types": "./src/index.d.ts"
     }
   },
   "scripts": {

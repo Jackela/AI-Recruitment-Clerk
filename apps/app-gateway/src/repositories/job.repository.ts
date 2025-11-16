@@ -98,7 +98,7 @@ export class JobRepository {
       cacheKey,
       async () => {
         try {
-          const query: any = {};
+          const query: Record<string, unknown> = {};
           if (status) query.status = status;
           if (company) query.company = new RegExp(company, 'i');
           if (employmentType) query.employmentType = employmentType;
@@ -289,7 +289,7 @@ export class JobRepository {
     limit = 50,
   ): Promise<JobDocument[]> {
     try {
-      const searchQuery = {
+      const searchQuery: Record<string, unknown> = {
         $text: { $search: keywords.join(' ') },
         status: 'active',
       };
@@ -343,16 +343,17 @@ export class JobRepository {
       cacheKey,
       async () => {
         try {
-          const counts = await this.jobModel
-            .aggregate([
-              {
-                $group: {
-                  _id: '$status',
-                  count: { $sum: 1 },
+          const counts: Array<{ _id: string; count: number }> =
+            await this.jobModel
+              .aggregate([
+                {
+                  $group: {
+                    _id: '$status',
+                    count: { $sum: 1 },
+                  },
                 },
-              },
-            ])
-            .exec();
+              ])
+              .exec();
 
           const result: Record<string, number> = {};
           counts.forEach((item) => {
@@ -522,7 +523,9 @@ export class JobRepository {
       if (job) {
         // 清除特定职位的缓存
         const jobId =
-          (job as any)._id?.toString() || job.id?.toString() || 'unknown';
+          typeof job.id === 'string'
+            ? job.id
+            : job._id?.toString() ?? 'unknown';
         await this.cacheService.del(
           this.cacheService.generateKey('db', 'job', 'id', jobId),
         );

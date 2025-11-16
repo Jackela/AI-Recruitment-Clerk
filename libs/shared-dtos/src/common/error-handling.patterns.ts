@@ -4,6 +4,7 @@
  */
 
 import { HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * 错误类型枚举
@@ -527,6 +528,7 @@ export class ErrorResponseFormatter {
    * 格式化错误响应
    */
   static format(error: AppException): any {
+    const isProduction = getConfig().env.isProduction;
     const { errorDetails } = error;
 
     return {
@@ -539,7 +541,7 @@ export class ErrorResponseFormatter {
         traceId: errorDetails.traceId,
       },
       // 在生产环境中可能需要隐藏详细信息
-      ...(process.env.NODE_ENV !== 'production' && {
+      ...(!isProduction && {
         details: errorDetails.details,
         context: errorDetails.context,
       }),

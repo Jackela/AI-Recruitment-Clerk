@@ -1,4 +1,5 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
+import type { Model } from 'mongoose';
 import {
   UserManagementRepository,
   UserEntity,
@@ -10,31 +11,73 @@ import {
 } from '@ai-recruitment-clerk/user-management-domain';
 
 type StoredUser = UserEntity & { _id: string };
+type QueryObject = Record<string, unknown>;
+type UpdateObject = Record<string, unknown>;
+
+const isNotEqualClause = (value: unknown): value is { $ne: unknown } => {
+  return Boolean(
+    value &&
+      typeof value === 'object' &&
+      '$ne' in (value as Record<string, unknown>),
+  );
+};
 
 const createRepository = () => {
   const store = new Map<string, StoredUser>();
 
-  const clone = (doc: StoredUser | null) =>
-    doc ? ({ ...doc, securityFlags: { ...doc.securityFlags } } as StoredUser) : null;
+  const clone = (doc: StoredUser | null): StoredUser | null => {
+    if (!doc) {
+      return null;
+    }
 
-  const matchQuery = (doc: StoredUser, query: Record<string, any>): boolean => {
+    return {
+      ...doc,
+      securityFlags: doc.securityFlags
+        ? { ...doc.securityFlags }
+        : undefined,
+      preferences: doc.preferences
+        ? {
+            ...doc.preferences,
+            notifications: doc.preferences.notifications
+              ? { ...doc.preferences.notifications }
+              : undefined,
+          }
+        : undefined,
+    };
+  };
+
+  const matchQuery = (doc: StoredUser, query: QueryObject): boolean => {
+    const docRecord = doc as unknown as Record<string, unknown>;
     return Object.entries(query).every(([key, value]) => {
-      if (value && typeof value === 'object' && '$ne' in value) {
-        return (doc as any)[key] !== value.$ne;
+      if (isNotEqualClause(value)) {
+        return docRecord[key] !== value.$ne;
       }
-      return (doc as any)[key] === value;
+      return docRecord[key] === value;
     });
   };
 
-  const applyUpdate = (target: any, update: Record<string, any>) => {
-    for (const [key, value] of Object.entries(update)) {
-      if (key.includes('.')) {
-        const [parent, child] = key.split('.');
-        target[parent] = target[parent] ?? {};
-        target[parent][child] = value;
+  const applyUpdate = (target: StoredUser, update: UpdateObject): void => {
+    const targetRecord = target as unknown as Record<string, unknown>;
+    const assignValue = (path: string, value: unknown) => {
+      if (path.includes('.')) {
+        const [parent, child] = path.split('.');
+        const parentValue = (targetRecord[parent] ??
+          (targetRecord[parent] = {})) as Record<string, unknown>;
+        parentValue[child] = value;
       } else {
-        target[key] = value;
+        targetRecord[path] = value;
       }
+    };
+
+    for (const [key, value] of Object.entries(update)) {
+      if (key === '$set' && value && typeof value === 'object') {
+        Object.entries(value as Record<string, unknown>).forEach(
+          ([nestedKey, nestedValue]) => assignValue(nestedKey, nestedValue),
+        );
+        continue;
+      }
+
+      assignValue(key, value);
     }
   };
 
@@ -59,7 +102,7 @@ const createRepository = () => {
       return clone(this.document);
     }
 
-    static findOne(query: Record<string, any>) {
+    static findOne(query: QueryObject) {
       return {
         exec: async () => {
           for (const doc of store.values()) {
@@ -72,7 +115,7 @@ const createRepository = () => {
       };
     }
 
-    static find(query: Record<string, any>) {
+    static find(query: QueryObject) {
       return {
         exec: async () =>
           Array.from(store.values())
@@ -82,8 +125,8 @@ const createRepository = () => {
     }
 
     static findOneAndUpdate(
-      filter: Record<string, any>,
-      update: Record<string, any>,
+      filter: QueryObject,
+      update: UpdateObject,
       options?: { new?: boolean },
     ) {
       return {
@@ -101,7 +144,7 @@ const createRepository = () => {
       };
     }
 
-    static updateOne(filter: Record<string, any>, update: Record<string, any>) {
+    static updateOne(filter: QueryObject, update: UpdateObject) {
       return {
         exec: async () => {
           for (const [id, doc] of store.entries()) {
@@ -117,7 +160,7 @@ const createRepository = () => {
       };
     }
 
-    static deleteOne(filter: Record<string, any>) {
+    static deleteOne(filter: QueryObject) {
       return {
         exec: async () => {
           for (const [id, doc] of store.entries()) {
@@ -144,7 +187,9 @@ const createRepository = () => {
     }
   }
 
-  const repository = new UserManagementRepository(MockUserModel as any);
+  const repository = new UserManagementRepository(
+    MockUserModel as unknown as Model<UserEntity>,
+  );
   return { repository, store };
 };
 
@@ -219,7 +264,11 @@ describe('UserManagementRepository (lightweight)', () => {
 
     await repository.updateSecurityFlag(user.id, 'account_locked', true);
 
-    const stored = store.get(user.id)!;
+    const stored = store.get(user.id);
+    expect(stored).toBeDefined();
+    if (!stored) {
+      return;
+    }
     expect(stored.securityFlags?.account_locked).toBe(true);
     expect(stored.status).toBe(UserStatus.SUSPENDED);
   });

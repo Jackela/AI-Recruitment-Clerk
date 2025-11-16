@@ -3,15 +3,21 @@
  * Uses centralized error handling system with correlation and structured logging
  */
 
+type ExceptionFilterConfig = {
+  serviceName?: string;
+  enableLogging: boolean;
+  enableCorrelation: boolean;
+};
+
 // Fallback implementations for missing infrastructure-shared components
 class StandardizedGlobalExceptionFilter {
-  constructor(_config: any) {
+  constructor(_config: ExceptionFilterConfig) {
     // Basic exception filter implementation
   }
 }
 
 class ExceptionFilterConfigHelper {
-  static forApiGateway() {
+  static forApiGateway(): ExceptionFilterConfig {
     return {
       enableLogging: true,
       enableCorrelation: true,

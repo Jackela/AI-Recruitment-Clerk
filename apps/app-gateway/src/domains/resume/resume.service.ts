@@ -1,16 +1,54 @@
 import { Injectable, Logger } from '@nestjs/common';
+import type { MulterFile } from '../../jobs/types/multer.types';
 
-/**
- * Provides resume functionality.
- */
+export type ResumeUploadPayload = {
+  file?: MulterFile;
+  fileName?: string;
+  uploadedBy: string;
+  jobId?: string;
+  candidateName?: string;
+  candidateEmail?: string;
+  notes?: string;
+  tags?: string[];
+};
+
+export type ResumeSearchOptions = {
+  page?: number;
+  limit?: number;
+};
+
+export type ResumeSearchCriteria = {
+  keywords?: string;
+  skills?: string[];
+  minYears?: number;
+  maxYears?: number;
+  filters?: Record<string, unknown>;
+};
+
+export type ResumeBatchOperation = 'analyze' | 'approve' | 'reject' | 'archive';
+
+export type ResumeBatchRequest = {
+  resumeIds: string[];
+  operation: ResumeBatchOperation;
+  parameters?: Record<string, unknown>;
+};
+
+export type ResumeReprocessOptions = {
+  forceReparse?: boolean;
+  updateSkillsOnly?: boolean;
+  analysisOptions?: Record<string, unknown>;
+};
+
+export type ResumeDeleteRequest = {
+  reason?: string;
+  hardDelete?: boolean;
+};
+
 @Injectable()
 export class ResumeService {
   private readonly logger = new Logger(ResumeService.name);
 
-  /**
-   * 上传简历 - EMERGENCY IMPLEMENTATION
-   */
-  async uploadResume(uploadData: any): Promise<any> {
+  async uploadResume(uploadData: ResumeUploadPayload): Promise<Record<string, unknown>> {
     try {
       this.logger.log('Uploading resume', {
         fileName: uploadData.file?.originalname || uploadData.fileName,
@@ -39,7 +77,7 @@ export class ResumeService {
     resumeId: string,
     jobId?: string,
     _userId?: string,
-  ): Promise<any> {
+  ): Promise<Record<string, unknown>> {
     try {
       return {
         resumeId,
@@ -63,7 +101,7 @@ export class ResumeService {
   async getResumeSkillsAnalysis(
     resumeId: string,
     _userId?: string,
-  ): Promise<any> {
+  ): Promise<Record<string, unknown>> {
     try {
       return {
         resumeId,
@@ -81,10 +119,15 @@ export class ResumeService {
    * 搜索简历 - EMERGENCY IMPLEMENTATION
    */
   async searchResumes(
-    _searchDto: any,
+    _searchDto: ResumeSearchCriteria,
     _organizationId: string,
-    options?: any,
-  ): Promise<any> {
+    options?: ResumeSearchOptions,
+  ): Promise<{
+    resumes: unknown[];
+    totalCount: number;
+    page: number;
+    totalPages: number;
+  }> {
     try {
       return {
         resumes: [],
@@ -106,7 +149,7 @@ export class ResumeService {
     status: string,
     updatedBy: string,
     reason?: string,
-  ): Promise<any> {
+  ): Promise<Record<string, unknown>> {
     try {
       this.logger.log('Updating resume status', {
         resumeId,
@@ -134,7 +177,7 @@ export class ResumeService {
     deletedBy: string,
     reason?: string,
     hardDelete?: boolean,
-  ): Promise<any> {
+  ): Promise<Record<string, unknown>> {
     try {
       this.logger.log('Deleting resume', { resumeId, deletedBy });
       return {
@@ -154,13 +197,23 @@ export class ResumeService {
   /**
    * 获取简历列表 - EMERGENCY IMPLEMENTATION
    */
-  async getResumes(_organizationId: string, filters: any): Promise<any> {
+  async getResumes(
+    _organizationId: string,
+    filters: Record<string, unknown>,
+  ): Promise<{
+    resumes: unknown[];
+    totalCount: number;
+    page: number;
+    totalPages: number;
+    filters: Record<string, unknown>;
+  }> {
     try {
       return {
         resumes: [],
-        total: 0,
-        page: filters.page || 1,
+        totalCount: 0,
+        page: Number(filters.page) || 1,
         totalPages: 0,
+        filters,
       };
     } catch (error) {
       this.logger.error('Error getting resumes', error);
@@ -171,7 +224,7 @@ export class ResumeService {
   /**
    * 获取简历详情 - EMERGENCY IMPLEMENTATION
    */
-  async getResume(resumeId: string): Promise<any> {
+  async getResume(resumeId: string): Promise<Record<string, unknown>> {
     try {
       return {
         id: resumeId,
@@ -213,10 +266,15 @@ export class ResumeService {
    */
   async batchProcessResumes(
     resumeIds: string[],
-    operation: string,
+    operation: ResumeBatchOperation,
     userId: string,
-    _parameters?: any,
-  ): Promise<any> {
+    _parameters?: Record<string, unknown>,
+  ): Promise<{
+    totalProcessed: number;
+    successful: number;
+    failed: number;
+    results: Array<{ resumeId: string; success: boolean }>;
+  }> {
     try {
       this.logger.log('Batch processing resumes', {
         count: resumeIds.length,
@@ -241,8 +299,8 @@ export class ResumeService {
   async reprocessResume(
     resumeId: string,
     userId: string,
-    _options?: any,
-  ): Promise<any> {
+    _options?: ResumeReprocessOptions,
+  ): Promise<{ jobId: string; estimatedTime: string; status: string }> {
     try {
       this.logger.log('Reprocessing resume', { resumeId, userId });
       return {
@@ -259,7 +317,9 @@ export class ResumeService {
   /**
    * 获取处理统计 - EMERGENCY IMPLEMENTATION
    */
-  async getProcessingStats(_organizationId: string): Promise<any> {
+  async getProcessingStats(
+    _organizationId: string,
+  ): Promise<Record<string, unknown>> {
     try {
       return {
         totalResumes: 0,
@@ -283,7 +343,7 @@ export class ResumeService {
   /**
    * 获取健康状态 - EMERGENCY IMPLEMENTATION
    */
-  async getHealthStatus(): Promise<any> {
+  async getHealthStatus(): Promise<Record<string, unknown>> {
     try {
       return {
         overall: 'healthy',

@@ -27,15 +27,74 @@ import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import {
-  UserDto,
+  AuthenticatedRequest,
+  Permission,
 } from '@ai-recruitment-clerk/user-management-domain';
 import {
   BonusType,
 } from '@ai-recruitment-clerk/usage-management-domain';
 import { UsageLimitIntegrationService } from './usage-limit-integration.service';
 
-interface AuthenticatedRequest extends Request {
-  user: UserDto & { id: string; organizationId: string };
+type UsageRecordMetadata = Record<string, unknown>;
+
+interface UsageRecordRequestBody {
+  operation?: string;
+  metadata?: UsageRecordMetadata;
+  userIP?: string;
+}
+
+interface BonusQuotaRequestBody {
+  ip?: string;
+  bonusType: BonusType;
+  amount: number;
+  reason: string;
+  metadata?: UsageRecordMetadata;
+}
+
+interface UsageLimitPolicyBody {
+  dailyLimit: number;
+  bonusEnabled: boolean;
+  maxBonusQuota: number;
+  resetTimeUTC: number;
+  rateLimitingEnabled: boolean;
+  rateLimitRpm: number;
+}
+
+interface ResetUsageBody {
+  reason: string;
+  resetQuota?: boolean;
+  newQuotaAmount?: number;
+}
+
+type BatchAction = 'reset' | 'add_bonus' | 'update_quota';
+
+interface BatchUsageParameters {
+  reason?: string;
+  bonusType?: BonusType;
+  bonusAmount?: number;
+  newQuotaAmount?: number;
+}
+
+interface BatchUsageRequestBody {
+  ips: string[];
+  action: BatchAction;
+  parameters?: BatchUsageParameters;
+}
+
+interface UsageExportRequestBody {
+  dateRange?: { startDate: string; endDate: string };
+  includeUsageHistory?: boolean;
+  includeBonusHistory?: boolean;
+  filterByExceededLimits?: boolean;
+}
+
+interface RateLimitConfigBody {
+  enabled: boolean;
+  requestsPerMinute: number;
+  requestsPerHour: number;
+  burstLimit: number;
+  windowSizeMinutes: number;
+  blockDurationMinutes: number;
 }
 
 /**
@@ -53,6 +112,46 @@ export class UsageLimitController {
   constructor(
     private readonly usageLimitService: UsageLimitIntegrationService,
   ) {}
+
+  private resolveIpAddress(
+    req: AuthenticatedRequest,
+    overrideIp?: string,
+  ): string {
+    if (overrideIp?.trim()) {
+      return overrideIp.trim();
+    }
+
+    const forwarded = req.headers['x-forwarded-for'];
+    if (Array.isArray(forwarded) && forwarded.length > 0) {
+      const [first] = forwarded;
+      if (first?.trim()) {
+        return first.trim();
+      }
+    }
+
+    if (typeof forwarded === 'string') {
+      const [first] = forwarded.split(',').map((value) => value.trim());
+      if (first) {
+        return first;
+      }
+    }
+
+    return req.socket?.remoteAddress || 'unknown';
+  }
+
+  private calculateUsagePercentage(
+    currentUsage?: number,
+    remainingQuota?: number,
+  ): number {
+    const current = currentUsage ?? 0;
+    const remaining = remainingQuota ?? 0;
+    const total = current + remaining;
+    if (total === 0) {
+      return 0;
+    }
+
+    return Math.round((current / total) * 100);
+  }
 
   /**
    * Performs the check usage limit operation.
@@ -97,12 +196,7 @@ export class UsageLimitController {
     @Query('ip') ip?: string,
   ) {
     try {
-      const targetIP =
-        ip && (req.user as any).permissions?.includes('admin')
-          ? ip
-          : (req as any).socket?.remoteAddress ||
-            req.headers['x-forwarded-for'] ||
-            'unknown';
+      const targetIP = this.resolveIpAddress(req, ip);
 
       const checkResult = await this.usageLimitService.checkUsageLimit(
         targetIP,
@@ -166,24 +260,16 @@ export class UsageLimitController {
   @HttpCode(HttpStatus.CREATED)
   async recordUsage(
     @Request() req: AuthenticatedRequest,
-    @Body()
-    usageData?: {
-      operation?: string;
-      metadata?: any;
-      userIP?: string; // For admin override
-    },
+    @Body() usageData: UsageRecordRequestBody = {},
   ) {
     try {
-      const targetIP =
-        usageData?.userIP && (req.user as any).permissions?.includes('admin')
-          ? usageData.userIP
-          : (req as any).socket?.remoteAddress ||
-            req.headers['x-forwarded-for'] ||
-            'unknown';
+      const canOverrideIP = req.user.permissions?.includes(Permission.ADMIN);
+      const overrideIP = canOverrideIP ? usageData.userIP : undefined;
+      const targetIP = this.resolveIpAddress(req, overrideIP);
 
       const recordResult = await this.usageLimitService.recordUsage(
         targetIP,
-        usageData?.operation || 'api_call',
+        usageData.operation || 'api_call',
         1,
       );
 
@@ -197,18 +283,17 @@ export class UsageLimitController {
       }
 
       return {
-        success: true,
-        message: 'Usage recorded successfully',
-        data: {
-          currentUsage: recordResult.currentUsage,
-          remainingQuota: recordResult.remainingQuota,
-          usagePercentage: Math.round(
-            (recordResult.currentUsage! /
-              (recordResult.currentUsage! + recordResult.remainingQuota!)) *
-              100,
-          ),
-          recordedAt: new Date().toISOString(),
-        },
+          success: true,
+          message: 'Usage recorded successfully',
+          data: {
+            currentUsage: recordResult.currentUsage,
+            remainingQuota: recordResult.remainingQuota,
+            usagePercentage: this.calculateUsagePercentage(
+              recordResult.currentUsage,
+              recordResult.remainingQuota,
+            ),
+            recordedAt: new Date().toISOString(),
+          },
       };
     } catch (error) {
       return {
@@ -231,26 +316,15 @@ export class UsageLimitController {
   })
   @ApiResponse({ status: 201, description: '奖励配额添加成功' })
   @UseGuards(RolesGuard)
-  @Permissions('manage_quotas' as any)
+  @Permissions(Permission.MANAGE_QUOTAS)
   @Post('bonus')
   @HttpCode(HttpStatus.CREATED)
   async addBonusQuota(
     @Request() req: AuthenticatedRequest,
-    @Body()
-    bonusData: {
-      ip?: string;
-      bonusType: BonusType;
-      amount: number;
-      reason: string;
-      metadata?: any;
-    },
+    @Body() bonusData: BonusQuotaRequestBody,
   ) {
     try {
-      const targetIP =
-        bonusData.ip ||
-        (req as any).socket?.remoteAddress ||
-        req.headers['x-forwarded-for'] ||
-        'unknown';
+      const targetIP = this.resolveIpAddress(req, bonusData.ip);
 
       // Validate bonus amount
       if (bonusData.amount <= 0 || bonusData.amount > 50) {
@@ -314,7 +388,7 @@ export class UsageLimitController {
     description: '筛选条件',
   })
   @UseGuards(RolesGuard)
-  @Permissions('read_usage_limits' as any)
+  @Permissions(Permission.READ_USAGE_LIMITS)
   @Get()
   async getUsageLimits(
     @Request() req: AuthenticatedRequest,
@@ -373,7 +447,7 @@ export class UsageLimitController {
   @ApiResponse({ status: 404, description: '使用记录未找到' })
   @ApiParam({ name: 'ip', description: 'IP地址' })
   @UseGuards(RolesGuard)
-  @Permissions('read_usage_details' as any)
+  @Permissions(Permission.READ_USAGE_DETAILS)
   @Get(':ip')
   async getUsageLimitDetail(
     @Request() req: AuthenticatedRequest,
@@ -414,20 +488,12 @@ export class UsageLimitController {
   })
   @ApiResponse({ status: 200, description: '使用限制策略更新成功' })
   @UseGuards(RolesGuard)
-  @Permissions('manage_usage_policy' as any)
+  @Permissions(Permission.MANAGE_USAGE_POLICY)
   @Put('policy')
   @HttpCode(HttpStatus.OK)
   async updateUsageLimitPolicy(
     @Request() req: AuthenticatedRequest,
-    @Body()
-    policyData: {
-      dailyLimit: number;
-      bonusEnabled: boolean;
-      maxBonusQuota: number;
-      resetTimeUTC: number;
-      rateLimitingEnabled: boolean;
-      rateLimitRpm: number; // Requests per minute
-    },
+    @Body() policyData: UsageLimitPolicyBody,
   ) {
     try {
       // Validate policy data
@@ -480,18 +546,13 @@ export class UsageLimitController {
   @ApiResponse({ status: 200, description: '使用记录重置成功' })
   @ApiParam({ name: 'ip', description: 'IP地址' })
   @UseGuards(RolesGuard)
-  @Permissions('admin' as any)
+  @Permissions(Permission.ADMIN)
   @Post(':ip/reset')
   @HttpCode(HttpStatus.OK)
   async resetUsageLimit(
     @Request() req: AuthenticatedRequest,
     @Param('ip') ip: string,
-    @Body()
-    resetData: {
-      reason: string;
-      resetQuota?: boolean;
-      newQuotaAmount?: number;
-    },
+    @Body() resetData: ResetUsageBody,
   ) {
     try {
       const resetResult = await this.usageLimitService.resetUsageLimit(
@@ -540,30 +601,21 @@ export class UsageLimitController {
   })
   @ApiResponse({ status: 200, description: '批量操作完成' })
   @UseGuards(RolesGuard)
-  @Permissions('manage_quotas' as any)
+  @Permissions(Permission.MANAGE_QUOTAS)
   @Post('batch')
   @HttpCode(HttpStatus.OK)
   async batchManageUsageLimits(
     @Request() req: AuthenticatedRequest,
-    @Body()
-    batchRequest: {
-      ips: string[];
-      action: 'reset' | 'add_bonus' | 'update_quota';
-      parameters: {
-        reason?: string;
-        bonusType?: BonusType;
-        bonusAmount?: number;
-        newQuotaAmount?: number;
-      };
-    },
+    @Body() batchRequest: BatchUsageRequestBody,
   ) {
     try {
+      const parameters = batchRequest.parameters ?? {};
       const batchResult = await this.usageLimitService.batchManageUsageLimits(
         batchRequest.ips,
         batchRequest.action,
         req.user.organizationId,
         {
-          ...batchRequest.parameters,
+          ...parameters,
           operatedBy: req.user.id,
         },
       );
@@ -614,7 +666,7 @@ export class UsageLimitController {
     description: '分组方式',
   })
   @UseGuards(RolesGuard)
-  @Permissions('read_analytics' as any)
+  @Permissions(Permission.READ_ANALYTICS)
   @Get('stats/overview')
   async getUsageStatistics(
     @Request() req: AuthenticatedRequest,
@@ -672,19 +724,13 @@ export class UsageLimitController {
     description: '导出格式',
   })
   @UseGuards(RolesGuard)
-  @Permissions('read_analytics' as any)
+  @Permissions(Permission.READ_ANALYTICS)
   @Post('export')
   @HttpCode(HttpStatus.OK)
   async exportUsageData(
     @Request() req: AuthenticatedRequest,
     @Query('format') format: 'csv' | 'excel' = 'csv',
-    @Body()
-    exportRequest: {
-      dateRange?: { startDate: string; endDate: string };
-      includeUsageHistory?: boolean;
-      includeBonusHistory?: boolean;
-      filterByExceededLimits?: boolean;
-    },
+    @Body() exportRequest: UsageExportRequestBody,
   ) {
     try {
       const exportResult = await this.usageLimitService.exportUsageData(
@@ -734,20 +780,12 @@ export class UsageLimitController {
   })
   @ApiResponse({ status: 200, description: '速率限制配置成功' })
   @UseGuards(RolesGuard)
-  @Permissions('admin' as any)
+  @Permissions(Permission.ADMIN)
   @Put('rate-limiting')
   @HttpCode(HttpStatus.OK)
   async configureRateLimiting(
     @Request() req: AuthenticatedRequest,
-    @Body()
-    rateLimitConfig: {
-      enabled: boolean;
-      requestsPerMinute: number;
-      requestsPerHour: number;
-      burstLimit: number;
-      windowSizeMinutes: number;
-      blockDurationMinutes: number;
-    },
+    @Body() rateLimitConfig: RateLimitConfigBody,
   ) {
     try {
       const config = await this.usageLimitService.configureRateLimiting(

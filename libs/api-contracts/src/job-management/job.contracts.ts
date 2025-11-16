@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-namespace */
+
 /**
  * Job Management API Contracts
  * Shared contract definitions between frontend and backend
@@ -36,7 +38,7 @@ export namespace JobContracts {
   /**
    * Job list item for table/grid displays
    */
-  export interface JobListItem extends JobBase {}
+  export type JobListItem = JobBase;
 
   /**
    * Request payload for creating new jobs

@@ -18,13 +18,13 @@ export type AnalyticsEventDocument = AnalyticsEvent & Document;
   versionKey: false,
 })
 export class AnalyticsEvent {
-  @Prop({ required: true, unique: true, index: true })
-  eventId: string = '';
+  @Prop({ type: String, required: true, unique: true, index: true })
+  eventId = '';
 
-  @Prop({ required: true })
-  sessionId: string = '';
+  @Prop({ type: String, required: true })
+  sessionId = '';
 
-  @Prop()
+  @Prop({ type: String })
   userId?: string = undefined;
 
   @Prop({ type: String, required: true, enum: Object.values(EventType) })
@@ -37,12 +37,12 @@ export class AnalyticsEvent {
   status: EventStatus = EventStatus.PENDING_PROCESSING;
 
   @Prop({ type: Object, required: true })
-  eventData: any = {};
+  eventData: Record<string, unknown> = {};
 
   @Prop({ type: Object })
-  context?: any = undefined;
+  context?: Record<string, unknown> = undefined;
 
-  @Prop({ required: true })
+  @Prop({ type: Date, required: true })
   timestamp: Date = new Date();
 
   @Prop({ type: Object })
@@ -69,23 +69,23 @@ export class AnalyticsEvent {
   })
   consentStatus: ConsentStatus = ConsentStatus.GRANTED;
 
-  @Prop({ default: false })
-  isSystemSession: boolean = false;
+  @Prop({ type: Boolean, default: false })
+  isSystemSession = false;
 
-  @Prop()
+  @Prop({ type: Date })
   processedAt?: Date = undefined;
 
-  @Prop()
+  @Prop({ type: Date })
   retentionExpiry?: Date = undefined;
 
-  @Prop({ default: false })
-  isAnonymized: boolean = false;
+  @Prop({ type: Boolean, default: false })
+  isAnonymized = false;
 
   @Prop({ type: [String] })
   sensitiveDataMask?: string[] = undefined;
 
   @Prop({ type: Object })
-  metadata?: Record<string, any> = undefined;
+  metadata?: Record<string, unknown> = undefined;
 }
 
 export const AnalyticsEventSchema =

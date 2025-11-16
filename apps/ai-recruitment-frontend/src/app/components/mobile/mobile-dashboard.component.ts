@@ -17,7 +17,6 @@ import {
   SwipeAction,
   SwipeEvent,
 } from './mobile-swipe.component';
-import { TouchGestureService } from '../../services/mobile/touch-gesture.service';
 
 /**
  * Defines the shape of the dashboard card.
@@ -50,6 +49,15 @@ export interface QuickAction {
   route: string;
   color: 'primary' | 'success' | 'warning' | 'danger';
   badge?: number;
+}
+
+interface RecentActivityItem {
+  id: string;
+  title: string;
+  subtitle: string;
+  timeAgo: string;
+  type: string;
+  icon: string;
 }
 
 /**
@@ -159,7 +167,7 @@ export interface QuickAction {
       <div class="dashboard-cards" *ngIf="dashboardCards.length > 0">
         <h2 class="section-title">Dashboard</h2>
         <div class="cards-container" #dashboardContainer>
-          <app-mobile-swipe
+          <arc-mobile-swipe
             *ngFor="let card of dashboardCards"
             [actions]="card.actions || []"
             [item]="card"
@@ -174,8 +182,12 @@ export interface QuickAction {
                 card.color
               "
               [class.interactive]="!!card.route"
-              [routerLink]="card.route"
+              [routerLink]="card.route || null"
               (click)="onCardClick(card)"
+              role="button"
+              tabindex="0"
+              (keydown.enter)="onCardKeydown($event, card)"
+              (keydown.space)="onCardKeydown($event, card)"
             >
               <div class="card-header">
                 <div class="card-icon">
@@ -212,7 +224,7 @@ export interface QuickAction {
                 </div>
               </div>
             </div>
-          </app-mobile-swipe>
+          </arc-mobile-swipe>
         </div>
       </div>
 
@@ -224,6 +236,10 @@ export interface QuickAction {
             *ngFor="let activity of recentActivity"
             class="activity-item"
             (click)="onActivityClick(activity)"
+            role="button"
+            tabindex="0"
+            (keydown.enter)="onActivityKeydown($event, activity)"
+            (keydown.space)="onActivityKeydown($event, activity)"
           >
             <div
               class="activity-icon"
@@ -1023,7 +1039,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
   ];
 
   // Recent Activity
-  recentActivity = [
+  recentActivity: RecentActivityItem[] = [
     {
       id: '1',
       title: 'New resume uploaded',
@@ -1064,16 +1080,6 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
   dashboardContainer!: ElementRef;
   @ViewChild('quickActionsContainer', { read: ElementRef })
   quickActionsContainer!: ElementRef;
-
-  /**
-   * Initializes a new instance of the Mobile Dashboard Component.
-   * @param _touchGesture - The touch gesture.
-   */
-  constructor(private readonly _touchGesture: TouchGestureService) {
-    // TouchGesture service will be used for future gesture implementations
-    // Prevent unused warning
-    void this._touchGesture;
-  }
 
   /**
    * Performs the ng on init operation.
@@ -1313,14 +1319,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
    * @param activity - The activity.
    * @returns The result of the operation.
    */
-  onActivityClick(activity: {
-    id: string;
-    title: string;
-    subtitle: string;
-    timeAgo: string;
-    type: string;
-    icon: string;
-  }) {
+  onActivityClick(activity: RecentActivityItem) {
     // Navigate to activity details based on activity type
     switch (activity.type) {
       case 'success':
@@ -1341,5 +1340,25 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
   onFabClick() {
     // Navigate to upload page
     // This could use Router.navigate() for programmatic navigation
+  }
+
+  onCardKeydown(event: KeyboardEvent, card: DashboardCard): void {
+    this.handleKeyboardActivation(event, () => this.onCardClick(card));
+  }
+
+  onActivityKeydown(event: KeyboardEvent, activity: RecentActivityItem): void {
+    this.handleKeyboardActivation(event, () => this.onActivityClick(activity));
+  }
+
+  private handleKeyboardActivation(
+    event: KeyboardEvent,
+    handler: () => void,
+  ): void {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    event.preventDefault();
+    handler();
   }
 }

@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
  */
 export interface ErrorAction {
   type: 'retry' | 'start-new' | 'contact-support';
-  payload?: any;
+  payload?: unknown;
 }
 
 /**

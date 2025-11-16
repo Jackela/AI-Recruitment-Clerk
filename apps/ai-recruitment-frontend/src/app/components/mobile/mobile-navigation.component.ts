@@ -87,10 +87,14 @@ export interface MobileNavItem {
     <div
       class="mobile-menu-overlay"
       [class.open]="isMenuOpen"
-      (click)="closeMenu()"
+      role="button"
+      tabindex="0"
+      (click)="handleOverlayInteraction($event)"
+      (keydown.enter)="handleOverlayInteraction($event)"
+      (keydown.space)="handleOverlayInteraction($event)"
       [attr.aria-hidden]="!isMenuOpen"
     >
-      <nav class="mobile-menu" (click)="$event.stopPropagation()">
+      <nav class="mobile-menu">
         <div class="menu-header">
           <h2>Menu</h2>
           <button
@@ -963,7 +967,12 @@ export class MobileNavigationComponent implements OnInit, OnDestroy {
    * @param action - The action.
    * @returns The result of the operation.
    */
-  onActionClick(action: any) {
+  onActionClick(action: {
+    id: string;
+    label: string;
+    icon?: string;
+    action: () => void;
+  }) {
     this.actionClick.emit(action);
   }
 
@@ -972,7 +981,12 @@ export class MobileNavigationComponent implements OnInit, OnDestroy {
    * @param action - The action.
    * @returns The result of the operation.
    */
-  onMenuActionClick(action: any) {
+  onMenuActionClick(action: {
+    id: string;
+    label: string;
+    icon?: string;
+    action: () => void;
+  }) {
     this.menuActionClick.emit(action);
     this.closeMenu();
   }
@@ -999,6 +1013,19 @@ export class MobileNavigationComponent implements OnInit, OnDestroy {
   closeMenu() {
     this.isMenuOpen = false;
     document.body.style.overflow = '';
+  }
+
+  handleOverlayInteraction(event: Event) {
+    if (event instanceof KeyboardEvent) {
+      if (event.key !== 'Enter' && event.key !== ' ') {
+        return;
+      }
+      event.preventDefault();
+    }
+
+    if (event.target === event.currentTarget) {
+      this.closeMenu();
+    }
   }
 
   /**

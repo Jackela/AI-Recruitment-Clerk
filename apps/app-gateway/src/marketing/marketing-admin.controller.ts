@@ -116,6 +116,9 @@ export class MarketingAdminController {
       const sorted = pendingPayments.sort((a, b) => {
         const aValue = a[sortBy as keyof typeof a];
         const bValue = b[sortBy as keyof typeof b];
+        if (aValue === undefined || bValue === undefined) {
+          return 0;
+        }
 
         if (sortOrder === 'desc') {
           return aValue > bValue ? -1 : 1;

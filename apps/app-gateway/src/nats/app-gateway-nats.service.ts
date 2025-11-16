@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   NatsClientService,
   NatsPublishResult,
+  MessageMetadata,
 } from '@ai-recruitment-clerk/shared-nats-client';
 
 // Local event interfaces to maintain compatibility
@@ -18,6 +19,43 @@ interface ResumeSubmittedEvent {
   originalFilename: string;
   tempGridFsUrl: string;
 }
+
+interface AnalysisResumeParsedEvent {
+  jobId: string;
+  resumeId: string;
+  resumeDto: unknown;
+  timestamp?: string;
+  processingTimeMs?: number;
+}
+
+export type AnalysisJdExtractedEvent = {
+  jobId: string;
+  extractedData: Record<string, unknown>;
+  processingTimeMs: number;
+  confidence: number;
+  extractionMethod: string;
+  eventType: string;
+  timestamp: string;
+  version: string;
+  service: string;
+  performance?: Record<string, unknown>;
+  quality?: Record<string, unknown>;
+};
+
+export type AnalysisFailedEvent = {
+  jobId: string;
+  error: {
+    message: string;
+    stack?: string;
+    name?: string;
+    type?: string;
+  };
+  context: Record<string, unknown>;
+  timestamp: string;
+  eventType: string;
+  version: string;
+  severity: string;
+};
 
 /**
  * App Gateway NATS Service
@@ -123,9 +161,9 @@ export class AppGatewayNatsService {
    * This is a simplified implementation that will work for basic use cases.
    * For production, consider implementing proper subscription management.
    */
-  async waitForEvent<T = any>(
+  async waitForEvent<T>(
     subject: string,
-    _predicate: (data: any) => boolean,
+    predicate: (data: T) => boolean,
     timeoutMs = 20000,
   ): Promise<T> {
     // For now, we'll implement a basic timeout-based response
@@ -137,16 +175,21 @@ export class AppGatewayNatsService {
 
       // For now, we'll simulate the wait behavior
       // This should be replaced with actual NATS subscription logic when needed
-      if (this.natsClient.isConnected) {
-        // Simulate successful response for testing compatibility
-        setTimeout(() => {
-          clearTimeout(timer);
-          resolve({} as T);
-        }, 100);
-      } else {
+      if (!this.natsClient.isConnected) {
         clearTimeout(timer);
         reject(new Error('NATS connection not available'));
+        return;
       }
+      // Simulate successful response for testing compatibility
+      setTimeout(() => {
+        clearTimeout(timer);
+        const simulatedEvent = {} as T;
+        if (predicate(simulatedEvent)) {
+          resolve(simulatedEvent);
+        } else {
+          reject(new Error('Simulated event did not match predicate'));
+        }
+      }, 100);
     });
   }
 
@@ -156,16 +199,10 @@ export class AppGatewayNatsService {
   async waitForAnalysisParsed(
     resumeId: string,
     timeoutMs = 20000,
-  ): Promise<{
-    jobId: string;
-    resumeId: string;
-    resumeDto: any;
-    timestamp?: string;
-    processingTimeMs?: number;
-  }> {
+  ): Promise<AnalysisResumeParsedEvent> {
     return this.waitForEvent(
       'analysis.resume.parsed',
-      (e) => e && e.resumeId === resumeId,
+      (e) => Boolean(e && e.resumeId === resumeId),
       timeoutMs,
     );
   }
@@ -195,7 +232,10 @@ export class AppGatewayNatsService {
    * Subscribe to analysis.jd.extracted events
    */
   async subscribeToAnalysisCompleted(
-    handler: (event: any, metadata?: any) => Promise<void>,
+    handler: (
+      event: AnalysisJdExtractedEvent,
+      metadata?: MessageMetadata,
+    ) => Promise<void>,
   ): Promise<void> {
     return this.natsClient.subscribe('analysis.jd.extracted', handler, {
       durableName: 'app-gateway-jd-analysis-completed',
@@ -207,7 +247,10 @@ export class AppGatewayNatsService {
    * Subscribe to job.jd.failed events
    */
   async subscribeToAnalysisFailed(
-    handler: (event: any, metadata?: any) => Promise<void>,
+    handler: (
+      event: AnalysisFailedEvent,
+      metadata?: MessageMetadata,
+    ) => Promise<void>,
   ): Promise<void> {
     return this.natsClient.subscribe('job.jd.failed', handler, {
       durableName: 'app-gateway-jd-analysis-failed',

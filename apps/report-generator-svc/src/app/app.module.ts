@@ -20,31 +20,33 @@ import {
   ExceptionFilterConfigHelper,
   ErrorInterceptorFactory,
 } from '@ai-recruitment-clerk/infrastructure-shared';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Configures the app module.
  */
+const runtimeConfig = getConfig({ forceReload: true });
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env', '.env.local', '.env.production'],
+      cache: true,
+      load: [() => ({ sharedConfig: runtimeConfig })],
     }),
     NatsClientModule.forRoot({
       serviceName: 'report-generator-svc',
-    }),
-    MongooseModule.forRoot(
-      process.env.MONGODB_URL ||
-        process.env.MONGO_URL ||
-        (() => {
-          throw new Error(
-            'MONGODB_URL or MONGO_URL environment variable is required',
-          );
-        })(),
-      {
-        connectionName: 'report-generator',
+      connectionOptions: {
+        url: runtimeConfig.messaging.nats.url,
+        timeout: 5000,
+        maxReconnectAttempts: 10,
+        reconnectTimeWait: 2000,
       },
-    ),
+    }),
+    MongooseModule.forRoot(runtimeConfig.database.url, {
+      connectionName: 'report-generator',
+    }),
     MongooseModule.forFeature(
       [{ name: Report.name, schema: ReportSchema }],
       'report-generator',

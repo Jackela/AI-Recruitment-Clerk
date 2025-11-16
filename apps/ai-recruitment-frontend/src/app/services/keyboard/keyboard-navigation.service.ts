@@ -20,7 +20,12 @@ export interface KeyboardShortcut {
 export interface NavigationState {
   currentPage: string;
   previousPage?: string;
-  preservedState?: any;
+  preservedState?: {
+    scrollTop: number;
+    scrollLeft: number;
+    formData: Record<string, string>;
+    timestamp: number;
+  };
 }
 
 /**
@@ -249,10 +254,9 @@ export class KeyboardNavigationService {
    * @param shortcut - The shortcut.
    */
   registerContextShortcut(context: string, shortcut: KeyboardShortcut): void {
-    if (!this.contextShortcuts.has(context)) {
-      this.contextShortcuts.set(context, []);
-    }
-    this.contextShortcuts.get(context)!.push(shortcut);
+    const shortcuts = this.contextShortcuts.get(context) ?? [];
+    shortcuts.push(shortcut);
+    this.contextShortcuts.set(context, shortcuts);
   }
 
   /**
@@ -303,8 +307,9 @@ export class KeyboardNavigationService {
     });
 
     // Use Angular Router if available
-    if ((window as any).ngRouter) {
-      (window as any).ngRouter.navigate([path]);
+    const router = (window as unknown as { ngRouter?: { navigate: (args: string[]) => void } }).ngRouter;
+    if (router) {
+      router.navigate([path]);
     } else {
       window.location.href = path;
     }
@@ -325,14 +330,16 @@ export class KeyboardNavigationService {
     };
   }
 
-  private extractFormData(): Record<string, any> {
-    const formData: Record<string, any> = {};
-    const inputs = document.querySelectorAll('input, textarea, select');
+  private extractFormData(): Record<string, string> {
+    const formData: Record<string, string> = {};
+    const inputs = document.querySelectorAll<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >('input, textarea, select');
 
-    inputs.forEach((input: any) => {
+    inputs.forEach((input) => {
       if (input.name || input.id) {
         const key = input.name || input.id;
-        formData[key] = input.value;
+        formData[key] = input.value ?? '';
       }
     });
 

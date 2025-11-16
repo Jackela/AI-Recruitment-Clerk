@@ -5,8 +5,8 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Defines the shape of the security validation result.
@@ -23,12 +23,7 @@ export interface SecurityValidationResult {
 @Injectable()
 export class ProductionSecurityValidator {
   private readonly logger = new Logger(ProductionSecurityValidator.name);
-
-  /**
-   * Initializes a new instance of the Production Security Validator.
-   * @param configService - The config service.
-   */
-  constructor(private readonly configService: ConfigService) {}
+  private readonly config = getConfig();
 
   /**
    * Validates all security-critical configuration
@@ -72,9 +67,8 @@ export class ProductionSecurityValidator {
     this.logValidationResults(result);
 
     // In production, exit if critical issues found (unless explicitly bypassed for local UAT)
-    const nodeEnv = this.configService.get<string>('NODE_ENV');
-    const allowInsecure =
-      this.configService.get<string>('ALLOW_INSECURE_LOCAL') === 'true';
+    const nodeEnv = this.config.env.mode;
+    const allowInsecure = this.config.security.allowInsecureLocal;
     if (nodeEnv === 'production' && !result.isValid) {
       if (allowInsecure) {
         this.logger.warn(
@@ -97,8 +91,8 @@ export class ProductionSecurityValidator {
     const issues: string[] = [];
     let penalty = 0;
 
-    const jwtSecret = this.configService.get<string>('JWT_SECRET');
-    const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
+    const jwtSecret = this.config.auth.jwt.secret;
+    const refreshSecret = this.config.auth.jwt.refreshSecret;
 
     // Check for default/weak JWT secret
     if (!jwtSecret || jwtSecret.length < 32) {
@@ -145,9 +139,7 @@ export class ProductionSecurityValidator {
     const issues: string[] = [];
     let penalty = 0;
 
-    const encryptionKey = this.configService.get<string>(
-      'ENCRYPTION_MASTER_KEY',
-    );
+    const encryptionKey = this.config.security.encryptionKey;
 
     if (!encryptionKey) {
       issues.push('ENCRYPTION_MASTER_KEY is not configured');
@@ -188,7 +180,7 @@ export class ProductionSecurityValidator {
     const issues: string[] = [];
     let penalty = 0;
 
-    const mongoUrl = this.configService.get<string>('MONGO_URL');
+    const mongoUrl = this.config.database.url;
 
     if (!mongoUrl) {
       issues.push('Database connection URL is not configured');
@@ -203,10 +195,7 @@ export class ProductionSecurityValidator {
     }
 
     // Check for localhost in production
-    if (
-      process.env.NODE_ENV === 'production' &&
-      mongoUrl.includes('localhost')
-    ) {
+    if (this.config.env.isProduction && mongoUrl.includes('localhost')) {
       issues.push('Database URL points to localhost in production environment');
       penalty += 20;
     }
@@ -227,7 +216,7 @@ export class ProductionSecurityValidator {
     const issues: string[] = [];
     let penalty = 0;
 
-    const geminiKey = this.configService.get<string>('GEMINI_API_KEY');
+    const geminiKey = this.config.integrations.gemini.apiKey;
 
     if (!geminiKey) {
       issues.push(
@@ -255,36 +244,30 @@ export class ProductionSecurityValidator {
     const issues: string[] = [];
     let penalty = 0;
 
-    const nodeEnv = this.configService.get<string>('NODE_ENV');
+    const nodeEnv = this.config.env.mode;
 
     // Check for debug settings in production
     if (nodeEnv === 'production') {
-      const debugRoutes = this.configService.get<string>('ENABLE_DEBUG_ROUTES');
-      if (debugRoutes === 'true') {
+      if (this.config.features.debugRoutes) {
         issues.push('Debug routes are enabled in production environment');
         penalty += 30;
       }
 
-      const swagger = this.configService.get<string>('ENABLE_SWAGGER');
-      if (swagger === 'true') {
+      if (this.config.features.swagger) {
         issues.push(
           'Swagger documentation is enabled in production (consider disabling)',
         );
         penalty += 10;
       }
 
-      const mockServices = this.configService.get<string>(
-        'MOCK_EXTERNAL_SERVICES',
-      );
-      if (mockServices === 'true') {
+      if (this.config.features.mockExternalServices) {
         issues.push('External services are mocked in production environment');
         penalty += 20;
       }
     }
 
-    // Check CORS configuration
-    const corsOrigin = this.configService.get<string>('CORS_ORIGIN');
-    if (corsOrigin === '*') {
+    const corsOrigins = this.config.cors.origins;
+    if (corsOrigins.includes('*')) {
       issues.push('CORS is configured to allow all origins (security risk)');
       penalty += 25;
     }

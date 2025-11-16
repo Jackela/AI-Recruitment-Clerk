@@ -2,8 +2,9 @@
   "name": "@app/incentive-system-domain",
   "version": "0.0.1",
   "description": "Incentive System Bounded Context - Domain Layer",
-  "main": "src/index.ts",
-  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "type": "commonjs",
   "scripts": {
     "build": "tsc",
     "test": "jest"

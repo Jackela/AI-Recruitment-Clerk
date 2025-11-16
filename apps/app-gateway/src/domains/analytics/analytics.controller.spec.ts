@@ -1,28 +1,49 @@
+import type { Request } from 'express';
 import { AnalyticsController } from './analytics.controller';
-import { AnalyticsIntegrationService } from './analytics-integration.service';
+import {
+  AnalyticsIntegrationService,
+  MetricUnit,
+} from './analytics-integration.service';
 import { Permission } from '@ai-recruitment-clerk/user-management-domain';
 
-const createServiceMock = () => ({
-  trackEvent: jest.fn(),
-  recordMetric: jest.fn(),
-  getDashboard: jest.fn(),
-  getReports: jest.fn(),
-  getReport: jest.fn(),
-  deleteReport: jest.fn(),
-  getRealtimeData: jest.fn(),
-}) as unknown as jest.Mocked<AnalyticsIntegrationService>;
+const createServiceMock = (): jest.Mocked<AnalyticsIntegrationService> =>
+  ({
+    trackEvent: jest.fn(),
+    recordMetric: jest.fn(),
+    getDashboard: jest.fn(),
+    getReports: jest.fn(),
+    getReport: jest.fn(),
+    deleteReport: jest.fn(),
+    getRealtimeData: jest.fn(),
+  } as Partial<jest.Mocked<AnalyticsIntegrationService>>) as jest.Mocked<AnalyticsIntegrationService>;
 
-const createRequest = (overrides: Record<string, unknown> = {}) =>
+type MockRequest = Request & {
+  user: {
+    id: string;
+    sub: string;
+    email: string;
+    organizationId: string;
+    permissions: Permission[];
+  };
+};
+
+const createRequest = (overrides: Partial<MockRequest> = {}): MockRequest =>
   ({
     user: {
       id: 'user-1',
+      sub: 'user-1',
+      email: 'user1@example.com',
       organizationId: 'org-1',
       permissions: [Permission.READ_ANALYSIS, Permission.TRACK_METRICS],
+      ...(overrides.user ?? {}),
     },
-    headers: { 'user-agent': 'jest-agent' },
-    ip: '203.0.113.10',
+    headers: {
+      'user-agent': 'jest-agent',
+      ...(overrides.headers ?? {}),
+    },
+    ip: overrides.ip ?? '203.0.113.10',
     ...overrides,
-  } as any);
+  }) as MockRequest;
 
 describe('AnalyticsController (mocked service)', () => {
   let controller: AnalyticsController;
@@ -76,15 +97,20 @@ describe('AnalyticsController (mocked service)', () => {
     it('delegates metric recording to service', async () => {
       service.recordMetric.mockResolvedValue({
         metricId: 'metric-1',
+        metricName: 'latency',
+        value: 120,
+        unit: MetricUnit.MILLISECONDS,
+        category: 'performance',
+        timestamp: new Date('2024-01-01T00:00:00Z'),
         status: 'PROCESSED',
-      } as any);
+      });
 
       const response = await controller.recordPerformanceMetric(
         createRequest(),
         {
           metricName: 'latency',
           value: 120,
-          unit: 'ms',
+          unit: MetricUnit.MILLISECONDS,
           operation: 'GET /jobs',
           service: 'app-gateway',
           status: 'success',
@@ -99,14 +125,22 @@ describe('AnalyticsController (mocked service)', () => {
   describe('getDashboard', () => {
     it('returns dashboard data from service', async () => {
       service.getDashboard.mockResolvedValue({
-        summary: { events: 5 },
-      } as any);
+        organizationId: 'org-1',
+        timeRange: '7d',
+        metrics: ['events'],
+        data: {
+          totalEvents: 5,
+          uniqueUsers: 2,
+          avgPerformance: 95,
+          lastUpdated: new Date(),
+        },
+      });
 
       const result = await controller.getDashboard(createRequest());
 
       expect(service.getDashboard).toHaveBeenCalledWith('org-1', '7d', undefined);
       expect(result.success).toBe(true);
-      expect((result.data as any).summary.events).toBe(5);
+      expect(result.data?.data.totalEvents).toBe(5);
     });
   });
 });

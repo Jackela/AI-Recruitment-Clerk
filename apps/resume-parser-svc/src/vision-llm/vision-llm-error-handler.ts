@@ -22,8 +22,8 @@ export class CircuitBreaker {
   private state: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
 
   constructor(
-    private readonly threshold: number = 5,
-    private readonly resetTimeoutMs: number = 60000,
+    private readonly threshold = 5,
+    private readonly resetTimeoutMs = 60000,
     private readonly logger: Logger,
   ) {}
 

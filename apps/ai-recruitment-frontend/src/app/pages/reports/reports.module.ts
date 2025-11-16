@@ -7,9 +7,9 @@ import { ReportsPlaceholderComponent } from './reports-placeholder/reports-place
  * Configures the reports module.
  */
 @NgModule({
-  declarations: [ReportsPlaceholderComponent],
   imports: [
     CommonModule,
+    ReportsPlaceholderComponent,
     RouterModule.forChild([
       {
         path: '',

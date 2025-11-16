@@ -546,6 +546,20 @@ npx nx build app-gateway --verbose
 6. Read [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines
 7. Follow [Code of Conduct](./CODE_OF_CONDUCT.md)
 
+## 🧪 Local CI Parity
+
+Keep \"works locally\" in lockstep with GitHub Actions by running the same scripts:
+
+```bash
+# Runs lint → typecheck → build → coverage → e2e → pii → governance
+npm run ci:full
+```
+
+- `scripts/ci/run-all.sh` stops on the first failure and exports the same env flags (`CI=true`, `NX_DAEMON=false`, `NX_SKIP_NX_CACHE=true`) that the workflow uses. Node `20.18.0` from `.nvmrc` is enforced, so load that version via `nvm`/`volta` before running.
+- Target a single gate with `npm run ci:phase -- <phase>` where `<phase>` is one of `lint`, `typecheck`, `build`, `test`, `integration`, `coverage`, `e2e`, `pii`, `governance` (or use the shortcuts `npm run ci:phase:<phase>`).
+- Artifacts land exactly where CI expects them: Jest coverage under `coverage/`, Playwright HTML + traces under `playwright-report/` and `e2e/results/`, governance manifests under `specs/001-audit-architecture/validation/`.
+- Need to rehearse the full workflow matrix? Run `npm run act:ci` to execute `.github/workflows/ci.yml` inside the `act` runner; it calls the same phase scripts, so outputs match the official pipeline.
+
 ## 📄 License
 
 This project is licensed under the ISC License.

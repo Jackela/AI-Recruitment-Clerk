@@ -17,6 +17,35 @@ import {
   UserDto,
   UserRole,
 } from '@ai-recruitment-clerk/user-management-domain';
+import { getTestingEnvironment } from '@ai-recruitment-clerk/configuration';
+
+const semanticCacheEnv = getTestingEnvironment({
+  redisCacheEnabled: false,
+  redisCacheDisabled: true,
+  semanticCacheEnabled: true,
+  semanticCacheSimilarityThreshold: 0.9,
+  semanticCacheTtlMs: 86_400_000,
+  semanticCacheMaxResults: 5,
+});
+
+const configureSemanticCacheEnvironment = () => {
+  process.env.NODE_ENV = 'test';
+  process.env.USE_REDIS_CACHE = semanticCacheEnv.redisCacheEnabled
+    ? 'true'
+    : 'false';
+  process.env.DISABLE_REDIS = semanticCacheEnv.redisCacheDisabled
+    ? 'true'
+    : 'false';
+  process.env.SEMANTIC_CACHE_ENABLED = semanticCacheEnv.semanticCacheEnabled
+    ? 'true'
+    : 'false';
+  process.env.SEMANTIC_CACHE_SIMILARITY_THRESHOLD =
+    semanticCacheEnv.semanticCacheSimilarityThreshold.toString();
+  process.env.SEMANTIC_CACHE_TTL_MS =
+    semanticCacheEnv.semanticCacheTtlMs.toString();
+  process.env.SEMANTIC_CACHE_MAX_RESULTS =
+    semanticCacheEnv.semanticCacheMaxResults.toString();
+};
 
 class InMemoryVectorStoreService {
   private readonly entries = new Map<string, number[]>();
@@ -98,13 +127,7 @@ describe('Semantic cache job creation (e2e)', () => {
   const cachedKeywords = ['Node.js', 'TypeScript', 'Scalable APIs'];
 
   beforeAll(async () => {
-    process.env.NODE_ENV = 'test';
-    process.env.USE_REDIS_CACHE = 'false';
-    process.env.DISABLE_REDIS = 'true';
-    process.env.SEMANTIC_CACHE_ENABLED = 'true';
-    process.env.SEMANTIC_CACHE_SIMILARITY_THRESHOLD = '0.9';
-    process.env.SEMANTIC_CACHE_TTL_MS = '86400000';
-    process.env.SEMANTIC_CACHE_MAX_RESULTS = '5';
+    configureSemanticCacheEnvironment();
 
     mongoServer = await MongoMemoryServer.create();
     vectorStore = new InMemoryVectorStoreService();

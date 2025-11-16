@@ -1,3 +1,12 @@
+type AuthenticatedUser = {
+  id: string;
+  sub: string;
+  email: string;
+  organizationId?: string;
+  role: string;
+  rawRole?: string;
+};
+
 import {
   Injectable,
   ExecutionContext,
@@ -11,8 +20,9 @@ import {
 // import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { createHash } from 'crypto';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Implements the jwt auth guard logic.
@@ -20,6 +30,7 @@ import { createHash } from 'crypto';
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   private readonly logger = new Logger(JwtAuthGuard.name);
+  private readonly appConfig = getConfig();
   private readonly requestCounts = new Map<
     string,
     { count: number; resetTime: number; blocked: boolean }
@@ -34,7 +45,7 @@ export class JwtAuthGuard implements CanActivate {
    */
   constructor(private reflector: Reflector) {
     // Cleanup expired rate limit entries - skip in test environment to prevent worker issues
-    if (process.env.NODE_ENV !== 'test') {
+    if (!this.appConfig.env.isTest) {
       setInterval(
         () => this.cleanupRateLimits(),
         this.RATE_LIMIT_CLEANUP_INTERVAL,
@@ -60,10 +71,14 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     // Strictly disable per-request rate limiting in tests to avoid flakiness
-    if (process.env.NODE_ENV !== 'test') {
-      const force = process.env.FORCE_RATE_LIMIT === 'true';
+    if (!this.appConfig.env.isTest) {
+      const force = this.appConfig.rateLimiting.forceEnabled;
+      const requestWithOverride = request as Request & {
+        __testRateLimit?: boolean;
+      };
+      const testOverride = requestWithOverride.__testRateLimit;
       // Only enforce rate limit when explicitly requested or forced by env
-      if (force || (request as any).__testRateLimit === true) {
+      if (force || testOverride === true) {
         const clientId = this.getClientIdentifier(request);
         if (!this.checkRateLimit(clientId, request.path)) {
           this.logger.warn(
@@ -80,36 +95,18 @@ export class JwtAuthGuard implements CanActivate {
     // For simplified UAT and to avoid class transpile issues with AuthGuard mixins,
     // treat requests as authenticated if a bearer exists; otherwise allow as guest.
     const authHeader = request.headers['authorization'] || '';
+    const requestWithUser = request as Request & { user?: unknown };
     if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
       const tokenValue = authHeader.slice('Bearer '.length).trim();
 
       if (tokenValue.length > 0) {
-        // Minimal token presence check; in real prod, passport-jwt validates this
-        (request as any).user = ((request as any).user || {
-          id: 'user-uat',
-          sub: 'user-uat',
-          email: 'uat@example.com',
-          organizationId: 'org-uat',
-          role: 'user',
-        });
-      } else if (!(request as any).user) {
-        (request as any).user = {
-          id: 'guest',
-          sub: 'guest',
-          email: 'guest@local',
-          organizationId: 'guest-org',
-          role: 'user',
-        };
+        this.attachAuthenticatedUser(requestWithUser);
+      } else if (!requestWithUser.user) {
+        this.attachGuestUser(requestWithUser);
       }
-    } else if (!(request as any).user) {
+    } else if (!requestWithUser.user) {
       // Attach a benign guest identity to satisfy downstream typings
-      (request as any).user = {
-        id: 'guest',
-        sub: 'guest',
-        email: 'guest@local',
-        organizationId: 'guest-org',
-        role: 'user',
-      };
+      this.attachGuestUser(requestWithUser);
     }
     return true;
   }
@@ -122,7 +119,12 @@ export class JwtAuthGuard implements CanActivate {
    * @param context - The context.
    * @returns The result of the operation.
    */
-  handleRequest(err: any, user: any, _info: any, context: ExecutionContext) {
+  handleRequest(
+    err: Error | null,
+    user: AuthenticatedUser | null,
+    _info: unknown,
+    context: ExecutionContext,
+  ) {
     const request = context.switchToHttp().getRequest<Request>();
 
     if (err) {
@@ -150,16 +152,8 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     // Add security headers
-    const response = context.switchToHttp().getResponse();
-    if (user?.id) response.setHeader('X-Auth-User-Id', String(user.id));
-    if (user?.role) {
-      const normalizedRole = String(
-        (user as any)?.rawRole ?? user.role ?? '',
-      ).toLowerCase();
-      response.setHeader('X-Auth-Role', normalizedRole);
-    }
-    if (user?.organizationId)
-      response.setHeader('X-Auth-Organization', String(user.organizationId));
+    const response = context.switchToHttp().getResponse<Response>();
+    this.setAuthenticatedHeaders(response, user);
 
     return user;
   }
@@ -173,6 +167,56 @@ export class JwtAuthGuard implements CanActivate {
       .update(`${ip}-${userAgent}`)
       .digest('hex')
       .substring(0, 16);
+  }
+
+  private attachGuestUser(request: Request): void {
+    type GuestUser = {
+      id: string;
+      sub: string;
+      email: string;
+      organizationId: string;
+      role: string;
+    };
+
+    (request as { user?: GuestUser }).user = {
+      id: 'guest',
+      sub: 'guest',
+      email: 'guest@local',
+      organizationId: 'guest-org',
+      role: 'user',
+    };
+  }
+
+  private attachAuthenticatedUser(request: Request): void {
+    type AuthenticatedUser = {
+      id: string;
+      sub: string;
+      email: string;
+      organizationId: string;
+      role: string;
+    };
+
+    const existingUser = (request as { user?: AuthenticatedUser }).user;
+    (request as { user?: AuthenticatedUser }).user = existingUser || {
+      id: 'user-uat',
+      sub: 'user-uat',
+      email: 'uat@example.com',
+      organizationId: 'org-uat',
+      role: 'user',
+    };
+  }
+
+  private setAuthenticatedHeaders(response: Response, user: AuthenticatedUser): void {
+    response.setHeader('X-Auth-User-Id', String(user.id));
+    response.setHeader('X-Auth-Role', String(user.role));
+    if (user.organizationId) {
+      response.setHeader('X-Auth-Organization', String(user.organizationId));
+    }
+  }
+
+  private normalizeRole(user: AuthenticatedUser): string | undefined {
+    const normalizedRole = String(user.role ?? '').toLowerCase();
+    return normalizedRole || undefined;
   }
 
   private checkRateLimit(clientId: string, path: string): boolean {

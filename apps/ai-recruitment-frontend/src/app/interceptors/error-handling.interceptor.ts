@@ -3,7 +3,7 @@
  * Integrates with ErrorHandlingService for consistent error management
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   HttpRequest,
   HttpHandler,
@@ -20,11 +20,7 @@ import { ErrorHandlingService } from '../services/error/error-handling.service';
  */
 @Injectable()
 export class ErrorHandlingInterceptor implements HttpInterceptor {
-  /**
-   * Initializes a new instance of the Error Handling Interceptor.
-   * @param errorHandlingService - The error handling service.
-   */
-  constructor(private errorHandlingService: ErrorHandlingService) {}
+  private readonly errorHandlingService = inject(ErrorHandlingService);
 
   /**
    * Performs the intercept operation.

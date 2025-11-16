@@ -74,7 +74,8 @@ export class PWAService {
     // Check if running in standalone mode (PWA installed)
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone ||
+      (window.navigator as unknown as { standalone?: boolean }).standalone ===
+        true ||
       document.referrer.includes('android-app://');
 
     this.isInstalledSubject.next(isStandalone);
@@ -297,7 +298,7 @@ export class PWAService {
   /**
    * Add to background sync queue
    */
-  async addToSyncQueue(tag: string, data: any): Promise<void> {
+  async addToSyncQueue(tag: string, data: unknown): Promise<void> {
     if (
       !('serviceWorker' in navigator) ||
       !('sync' in window.ServiceWorkerRegistration.prototype)
@@ -323,7 +324,7 @@ export class PWAService {
   /**
    * Store data for background sync
    */
-  private async storeForSync(tag: string, data: any): Promise<void> {
+  private async storeForSync(tag: string, data: unknown): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open('arc-mobile-db', 1);
 
@@ -345,7 +346,7 @@ export class PWAService {
       };
 
       request.onupgradeneeded = (event) => {
-        const db = (event.target as any).result;
+        const db = (event.target as IDBOpenDBRequest).result;
         if (!db.objectStoreNames.contains(tag)) {
           db.createObjectStore(tag, { keyPath: 'id' });
         }
@@ -420,12 +421,18 @@ export class PWAService {
     }
 
     try {
-      await (navigator as any).share(data);
+      await (
+        navigator as Navigator & { share: (data: ShareData) => Promise<void> }
+      ).share(data);
       return true;
     } catch (error) {
-      if ((error as any)?.name !== 'AbortError') {
-        console.error('Error sharing content:', error);
+      if (
+        error instanceof DOMException &&
+        error.name === 'AbortError'
+      ) {
+        return false;
       }
+      console.error('Error sharing content:', error);
       return false;
     }
   }

@@ -1,4 +1,12 @@
 -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest
+-W .github/workflows/ci.yml
+--secret-file .act.secrets
 # Uncomment and adjust if you need more disk space or rootless mode
 # -b
+
+# Recommended options for E2E/browser stability when running act locally
+# (Pass explicitly on the CLI for E2E jobs only; disabled globally to avoid
+# parsing issues on non-container jobs.)
+# --container-options "--privileged --shm-size 2g"
+
 

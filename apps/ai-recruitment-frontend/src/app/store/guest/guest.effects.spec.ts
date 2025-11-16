@@ -1,14 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Action, Store } from '@ngrx/store';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { GuestEffects } from './guest.effects';
-import { GuestApiService } from '../../services/guest/guest-api.service';
+import { GuestApiService, GuestUsageResponse } from '../../services/guest/guest-api.service';
 import * as GuestActions from './guest.actions';
 import { tap } from 'rxjs/operators';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
-import { GuestState } from './guest.state';
+import { GuestState, initialGuestState } from './guest.state';
 import { selectGuestState } from './guest.selectors';
 
 describe('GuestEffects', () => {
@@ -201,7 +201,10 @@ describe('GuestEffects', () => {
         const action = GuestActions.setLimited({ isLimited: true });
         actions$ = hot('--a', { a: action });
 
-        store.overrideSelector(selectGuestState, { feedbackCode: null } as any);
+        store.overrideSelector(selectGuestState, {
+          ...initialGuestState,
+          feedbackCode: null,
+        });
 
         const expected = '--b';
         expectObservable(effects.handleUsageLimitExceeded$).toBe(expected, {
@@ -216,8 +219,9 @@ describe('GuestEffects', () => {
         actions$ = hot('--a', { a: action });
 
         store.overrideSelector(selectGuestState, {
+          ...initialGuestState,
           feedbackCode: 'fb-test-123',
-        } as any);
+        });
 
         const expected = '--b';
         expectObservable(effects.handleUsageLimitExceeded$).toBe(expected, {
@@ -273,8 +277,12 @@ describe('GuestEffects', () => {
     it('should handle malformed API response during usage status check', () => {
       testScheduler.run(({ hot, cold, expectObservable }) => {
         const action = GuestActions.loadUsageStatus();
-        const malformedResponse = { invalid: 'structure' };
-        const completion = GuestActions.loadUsageStatusSuccess({ usageStatus: malformedResponse } as any);
+        const malformedResponse: GuestUsageResponse = {
+          canUse: true,
+          remainingCount: Number.NaN,
+          needsFeedbackCode: true,
+        };
+        const completion = GuestActions.loadUsageStatusSuccess({ usageStatus: malformedResponse });
 
         actions$ = hot('-a', { a: action });
         guestApiService.getUsageStatus.mockReturnValue(cold('-a|', { a: malformedResponse }));
@@ -407,7 +415,10 @@ describe('GuestEffects', () => {
         const action = GuestActions.setLimited({ isLimited: true, message: 'Limit reached' });
         actions$ = hot('--a', { a: action });
 
-        store.overrideSelector(selectGuestState, { feedbackCode: null } as any);
+        store.overrideSelector(selectGuestState, {
+          ...initialGuestState,
+          feedbackCode: null,
+        });
 
         expectObservable(effects.handleUsageLimitExceeded$).toBe('--b', {
           b: GuestActions.showLimitModal(),

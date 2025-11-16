@@ -19,9 +19,10 @@ import {
   Ensures,
   ContractValidators,
 } from '@ai-recruitment-clerk/shared-dtos';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 import { CreateJobDto } from './dto/create-job.dto';
 import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
-import { MulterFile } from './types/multer.types';
+import type { MulterFile } from './types/multer.types';
 import { JobListDto, JobDetailDto } from './dto/job-response.dto';
 import {  ResumeDetailDto } from './dto/resume-response.dto';
 import { AnalysisReportDto } from './dto/report-response.dto';
@@ -35,6 +36,13 @@ import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processi
 import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
 import { CacheService } from '../cache/cache.service';
 
+type EnrichedJobDetail = JobDetailDto & {
+  organizationId?: string;
+  createdBy?: string;
+};
+
+type UserWithRawRole = UserDto & { rawRole?: string };
+
 /**
  * Enhanced JobsService with Design by Contract protections
  *
@@ -46,6 +54,7 @@ import { CacheService } from '../cache/cache.service';
 @Injectable()
 export class JobsServiceContracts {
   private readonly logger = new Logger(JobsServiceContracts.name);
+  private readonly config = getConfig();
 
   private assertPrecondition(
     condition: boolean,
@@ -86,7 +95,7 @@ export class JobsServiceContracts {
    *
    * @since 1.0.0
    */
-  @Requires((...args: any[]) => {
+  @Requires((...args: unknown[]) => {
     const dto = args[0] as CreateJobDto;
     const user = args[1] as UserDto;
     return (
@@ -97,7 +106,7 @@ export class JobsServiceContracts {
       ContractValidators.isNonEmptyString(user.organizationId)
     );
   }, 'Job creation requires valid title, JD text, and authenticated user with organization')
-  @Ensures((...args: any[]) => {
+  @Ensures((...args: unknown[]) => {
     const result = args[0] as { jobId: string };
     return (
       ContractValidators.isNonEmptyString(result.jobId) &&
@@ -121,7 +130,7 @@ export class JobsServiceContracts {
     );
 
     const jobId = randomUUID();
-    const job = new JobDetailDto(
+    const job: EnrichedJobDetail = new JobDetailDto(
       jobId,
       dto.jobTitle,
       dto.jdText,
@@ -131,8 +140,8 @@ export class JobsServiceContracts {
     );
 
     // Add organization context to job
-    (job as any).organizationId = user.organizationId;
-    (job as any).createdBy = user.id;
+    job.organizationId = user.organizationId;
+    job.createdBy = user.id;
 
     this.storageService.createJob(job);
 
@@ -170,7 +179,7 @@ export class JobsServiceContracts {
     }
 
     // Keep the simulation for now to maintain existing behavior until real processing is implemented
-    if (process.env.NODE_ENV !== 'test') {
+    if (!this.config.env.isTest) {
       setTimeout(() => {
         const existingJob = this.storageService.getJob(jobId);
         if (existingJob && existingJob.status === 'processing') {
@@ -200,7 +209,7 @@ export class JobsServiceContracts {
    *
    * @since 1.0.0
    */
-  @Requires((...args: any[]) => {
+  @Requires((...args: unknown[]) => {
     const jobId = args[0] as string;
     const files = args[1] as MulterFile[];
     const user = args[2] as UserDto;
@@ -213,7 +222,7 @@ export class JobsServiceContracts {
       ContractValidators.isNonEmptyString(user.id)
     );
   }, 'Resume upload requires valid job ID, non-empty file array within size limits, and authenticated user')
-  @Ensures((...args: any[]) => {
+  @Ensures((...args: unknown[]) => {
     const result = args[0] as ResumeUploadResponseDto;
     return (
       ContractValidators.isNonEmptyString(result.jobId) &&
@@ -244,7 +253,12 @@ export class JobsServiceContracts {
     }
 
     // Check if user has access to this job
-    if (!this.hasAccessToResource(user, (job as any).organizationId)) {
+    if (
+      !this.hasAccessToResource(
+        user,
+        (job as EnrichedJobDetail).organizationId,
+      )
+    ) {
       throw new ForbiddenException('Access denied to this job');
     }
 
@@ -294,7 +308,7 @@ export class JobsServiceContracts {
       }
 
       // Keep the simulation for now
-      if (process.env.NODE_ENV !== 'test') {
+      if (!this.config.env.isTest) {
         setTimeout(
           () => {
             this.simulateResumeProcessing(resumeId, jobId, file.originalname);
@@ -318,7 +332,7 @@ export class JobsServiceContracts {
    *
    * @since 1.0.0
    */
-  @Ensures((...args: any[]) => {
+  @Ensures((...args: unknown[]) => {
     const result = args[0] as JobListDto[];
     return (
       Array.isArray(result) &&
@@ -367,10 +381,10 @@ export class JobsServiceContracts {
    * @since 1.0.0
    */
   @Requires(
-    (...args: any[]) => ContractValidators.isNonEmptyString(args[0]),
+    (...args: unknown[]) => ContractValidators.isNonEmptyString(args[0]),
     'Job ID must be non-empty string',
   )
-  @Ensures((...args: any[]) => {
+  @Ensures((...args: unknown[]) => {
     const result = args[0] as JobDetailDto;
     return (
       !!result &&
@@ -409,7 +423,7 @@ export class JobsServiceContracts {
     resourceOrganizationId?: string,
   ): boolean {
     const normalizedRole = String(
-      (user as any)?.rawRole ?? user.role ?? '',
+      (user as UserWithRawRole)?.rawRole ?? user.role ?? '',
     ).toLowerCase();
 
     if (normalizedRole === UserRole.ADMIN) {

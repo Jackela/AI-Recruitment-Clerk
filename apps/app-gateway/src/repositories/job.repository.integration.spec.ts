@@ -1,21 +1,26 @@
+import type { Model } from 'mongoose';
 import { JobRepository } from './job.repository';
 import { CacheService } from '../cache/cache.service';
+import type { JobDocument } from '../schemas/job.schema';
+
+interface QueryMock<T> {
+  exec: jest.Mock<Promise<T>, []>;
+}
+
+const createQueryMock = <T,>(value: T): QueryMock<T> => ({
+  exec: jest.fn().mockResolvedValue(value),
+});
+
+const sampleJob = {
+  _id: 'job-1',
+  title: 'Backend Engineer',
+  company: 'Test Corp',
+  status: 'active',
+} as unknown as JobDocument;
 
 const createJobModelMock = () => {
-  const doc = {
-    _id: 'job-1',
-    title: 'Backend Engineer',
-    company: 'Test Corp',
-    status: 'active',
-  };
-
-  const findById = jest.fn(() => ({
-    exec: jest.fn().mockResolvedValue(doc),
-  }));
-
-  const countDocuments = jest.fn(() => ({
-    exec: jest.fn().mockResolvedValue(5),
-  }));
+  const findById = jest.fn(() => createQueryMock(sampleJob));
+  const countDocuments = jest.fn(() => createQueryMock(5));
 
   return {
     findById,
@@ -23,22 +28,30 @@ const createJobModelMock = () => {
   };
 };
 
-const createCacheServiceMock = () =>
+type CacheServiceSubset = Pick<
+  CacheService,
+  'generateKey' | 'getJobQueryKey' | 'wrap'
+>;
+
+const createCacheServiceMock = (): jest.Mocked<CacheServiceSubset> =>
   ({
     generateKey: jest.fn((...parts: string[]) => parts.join(':')),
-    getJobQueryKey: jest.fn((query: Record<string, unknown>) =>
-      JSON.stringify(query),
-    ),
-    wrap: jest.fn(async (_key: string, compute: () => Promise<any>) =>
-      compute(),
-    ),
-  } as unknown as jest.Mocked<CacheService>);
+    getJobQueryKey: jest
+      .fn()
+      .mockImplementation((query: Record<string, unknown>) =>
+        JSON.stringify(query),
+      ),
+    wrap: jest.fn(async (_key, compute) => compute()),
+  } as unknown as jest.Mocked<CacheServiceSubset>);
 
 describe('JobRepository lightweight smoke tests', () => {
   it('reports healthy status via healthCheck', async () => {
     const jobModel = createJobModelMock();
     const cacheService = createCacheServiceMock();
-    const repository = new JobRepository(jobModel as any, cacheService);
+    const repository = new JobRepository(
+      jobModel as unknown as Model<JobDocument>,
+      cacheService as unknown as CacheService,
+    );
 
     const result = await repository.healthCheck();
 
@@ -53,7 +66,10 @@ describe('JobRepository lightweight smoke tests', () => {
   it('returns job from cache-wrapped findById', async () => {
     const jobModel = createJobModelMock();
     const cacheService = createCacheServiceMock();
-    const repository = new JobRepository(jobModel as any, cacheService);
+    const repository = new JobRepository(
+      jobModel as unknown as Model<JobDocument>,
+      cacheService as unknown as CacheService,
+    );
 
     const job = await repository.findById('job-1');
 
@@ -71,7 +87,10 @@ describe('JobRepository lightweight smoke tests', () => {
       exec: jest.fn().mockRejectedValue(new Error('db unavailable')),
     }));
     const cacheService = createCacheServiceMock();
-    const repository = new JobRepository(jobModel as any, cacheService);
+    const repository = new JobRepository(
+      jobModel as unknown as Model<JobDocument>,
+      cacheService as unknown as CacheService,
+    );
 
     const result = await repository.healthCheck();
 

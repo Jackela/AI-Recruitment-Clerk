@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, BehaviorSubject } from 'rxjs';
 // import { Observable } from 'rxjs'; // Reserved for future use
@@ -6,6 +6,8 @@ import { takeUntil } from 'rxjs/operators';
 import {
   WebSocketService,
   ProgressUpdate,
+  WebSocketMessage,
+  WebSocketMessageData,
 } from '../../../services/websocket.service';
 import { ToastService } from '../../../services/toast.service';
 
@@ -26,6 +28,7 @@ export interface WebSocketProgressMessage {
   data?: {
     message?: string;
     currentStep?: string;
+    progress?: number;
     [key: string]: unknown;
   };
 }
@@ -504,6 +507,9 @@ export interface ProgressStep {
   ],
 })
 export class ProgressTrackerComponent implements OnInit, OnDestroy {
+  private readonly webSocketService = inject(WebSocketService);
+  private readonly toastService = inject(ToastService);
+
   @Input() sessionId = '';
   @Input() steps: ProgressStep[] = [];
   @Input() showMessageLog = true;
@@ -519,16 +525,6 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
   private messages: ProgressMessage[] = [];
-
-  /**
-   * Initializes a new instance of the Progress Tracker Component.
-   * @param webSocketService - The web socket service.
-   * @param toastService - The toast service.
-   */
-  constructor(
-    private webSocketService: WebSocketService,
-    private toastService: ToastService,
-  ) {}
 
   /**
    * Performs the ng on init operation.
@@ -607,35 +603,40 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
       });
   }
 
-  private handleWebSocketMessage(message: WebSocketProgressMessage): void {
-    const allowed: ProgressMessage['type'][] = [
-      'info',
-      'success',
-      'error',
-      'progress',
-    ];
-    const t = (
-      allowed.includes(message.type as any) ? (message.type as any) : 'info'
-    ) as ProgressMessage['type'];
-    this.addMessage(t, message.data?.message || '状态更新');
+  private handleWebSocketMessage(message: WebSocketMessage): void {
+    const payload = this.asProgressPayload(message.data);
+    const messageType = isProgressMessageType(message.type)
+      ? message.type
+      : 'info';
+    this.addMessage(messageType, payload?.message || '状态更新');
 
     switch (message.type) {
       case 'step_change':
-        if (message.data?.currentStep) {
+        if (payload?.currentStep) {
           this.handleStepChange({
-            currentStep: message.data.currentStep,
-            message: message.data?.message as string | undefined,
+            currentStep: payload.currentStep,
+            message:
+              typeof payload.message === 'string' ? payload.message : undefined,
             progress:
-              typeof (message.data as any)['progress'] === 'number'
-                ? ((message.data as any)['progress'] as number)
+              typeof payload.progress === 'number'
+                ? payload.progress
                 : undefined,
           });
         }
         break;
       case 'status_update':
-        this.addMessage('info', message.data?.message || '状态更新');
+        this.addMessage('info', payload?.message || '状态更新');
         break;
     }
+  }
+
+  private asProgressPayload(
+    data: WebSocketMessageData,
+  ): WebSocketProgressMessage['data'] {
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      return data as WebSocketProgressMessage['data'];
+    }
+    return undefined;
   }
 
   private handleProgressUpdate(progress: ProgressUpdate): void {
@@ -802,3 +803,5 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
     return `${message.timestamp.getTime()}_${index}`;
   }
 }
+const isProgressMessageType = (value: string): value is ProgressMessage['type'] =>
+  ['info', 'success', 'error', 'progress'].includes(value as ProgressMessage['type']);

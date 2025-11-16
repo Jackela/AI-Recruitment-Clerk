@@ -6,6 +6,7 @@ import {
   UserPreferencesDto,
   UserActivityDto,
   UserStatus,
+  UserRole,
 } from '@ai-recruitment-clerk/user-management-domain';
 
 interface UserActivityResponse {
@@ -30,6 +31,17 @@ interface OrganizationUsersResponse {
   total: number;
   page: number;
   pageSize: number;
+}
+
+interface UserActivitySummary {
+  userId: string;
+  totalSessions: number;
+  lastLoginDate: Date;
+  totalActions: number;
+  profileCompleteness: number;
+  averageSessionDuration: number;
+  mostActiveHour: number;
+  lastActivity: Date;
 }
 
 /**
@@ -77,7 +89,7 @@ export class UserManagementService {
         push: true,
         sms: false,
       },
-    } as any;
+    };
   }
 
   /**
@@ -99,7 +111,7 @@ export class UserManagementService {
     return {
       ...preferences,
       userId,
-    } as any;
+    };
   }
 
   /**
@@ -123,7 +135,7 @@ export class UserManagementService {
     }
 
     // Mock activity data
-    const mockActivities: any[] = [
+    const mockActivities: UserActivityDto[] = [
       {
         id: 'activity-1',
         userId,
@@ -168,9 +180,9 @@ export class UserManagementService {
   /**
    * Retrieves user activity summary.
    * @param userId - The user id.
-   * @returns A promise that resolves to any.
+   * @returns A promise that resolves to UserActivitySummary.
    */
-  async getUserActivitySummary(userId: string): Promise<any> {
+  async getUserActivitySummary(userId: string): Promise<UserActivitySummary> {
     const user = await this.userService.findById(userId);
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
@@ -178,10 +190,11 @@ export class UserManagementService {
 
     return {
       userId,
-      totalLogins: 1,
+      totalSessions: 1,
       lastLoginDate:
         (user as InternalUser).lastActivity || new Date(),
-      totalActivities: 1,
+      totalActions: 1,
+      profileCompleteness: 85,
       averageSessionDuration: 30,
       mostActiveHour: 14,
       lastActivity:
@@ -235,7 +248,7 @@ export class UserManagementService {
     options?: {
       page?: number;
       limit?: number;
-      role?: any;
+      role?: UserRole;
       status?: UserStatus;
     },
   ): Promise<OrganizationUsersResponse> {

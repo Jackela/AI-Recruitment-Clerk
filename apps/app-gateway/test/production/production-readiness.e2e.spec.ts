@@ -4,6 +4,13 @@ import request from 'supertest';
 import { AppModule } from '../../src/app/app.module';
 import * as fs from 'fs';
 import * as path from 'path';
+import {
+  getConfig,
+  getTestingEnvironment,
+} from '@ai-recruitment-clerk/configuration';
+
+const testingEnv = getTestingEnvironment();
+const runtimeConfig = getConfig({ forceReload: true });
 
 /**
  * 🚀 PRODUCTION READINESS VALIDATION TESTS
@@ -97,25 +104,37 @@ describe('🚀 Production Readiness Validation Tests', () => {
 
   describe('🔧 Environment Configuration Validation', () => {
     it('should validate all required environment variables are set', async () => {
-      const requiredEnvVars = [
-        'NODE_ENV',
-        'PORT',
-        'MONGO_URL',
-        'JWT_SECRET',
-        'RESUME_PARSER_URL',
-        'JD_EXTRACTOR_URL',
-        'SCORING_ENGINE_URL',
-        'REPORT_GENERATOR_URL',
+      const requiredEnvVars: Array<{ name: string; value?: unknown }> = [
+        { name: 'NODE_ENV', value: runtimeConfig.env.mode },
+        { name: 'PORT', value: testingEnv.port },
+        { name: 'MONGO_URL', value: runtimeConfig.database.url },
+        { name: 'JWT_SECRET', value: runtimeConfig.auth.jwt.secret },
+        {
+          name: 'RESUME_PARSER_URL',
+          value: runtimeConfig.integrations.resumeParser.baseUrl,
+        },
+        {
+          name: 'JD_EXTRACTOR_URL',
+          value: runtimeConfig.integrations.jdExtractor.baseUrl,
+        },
+        {
+          name: 'SCORING_ENGINE_URL',
+          value: runtimeConfig.integrations.scoring.baseUrl,
+        },
+        {
+          name: 'REPORT_GENERATOR_URL',
+          value: runtimeConfig.integrations.reportGenerator.baseUrl,
+        },
       ];
 
       const missingEnvVars = [];
       const presentEnvVars = [];
 
-      requiredEnvVars.forEach((envVar) => {
-        if (process.env[envVar]) {
-          presentEnvVars.push(envVar);
+      requiredEnvVars.forEach(({ name, value }) => {
+        if (value !== undefined && value !== null && `${value}`.length > 0) {
+          presentEnvVars.push(name);
         } else {
-          missingEnvVars.push(envVar);
+          missingEnvVars.push(name);
         }
       });
 
@@ -134,13 +153,13 @@ describe('🚀 Production Readiness Validation Tests', () => {
 
     it('should validate production-specific configurations', async () => {
       const productionConfigs = {
-        nodeEnv: process.env.NODE_ENV,
-        logLevel: process.env.LOG_LEVEL || 'info',
-        enableCors: process.env.ENABLE_CORS,
-        sessionTimeout: process.env.SESSION_TIMEOUT || '3600',
-        maxFileSize: process.env.MAX_FILE_SIZE || '10485760',
-        rateLimitWindowMs: process.env.RATE_LIMIT_WINDOW_MS || '900000',
-        rateLimitMax: process.env.RATE_LIMIT_MAX || '100',
+        nodeEnv: runtimeConfig.env.mode,
+        logLevel: testingEnv.logLevel,
+        enableCors: testingEnv.enableCors,
+        sessionTimeout: testingEnv.sessionTimeoutSeconds.toString(),
+        maxFileSize: testingEnv.maxFileSize.toString(),
+        rateLimitWindowMs: testingEnv.rateLimitWindowMs.toString(),
+        rateLimitMaxRequests: testingEnv.rateLimitMaxRequests.toString(),
       };
 
       console.log('\n📋 PRODUCTION CONFIGURATION SUMMARY');
@@ -152,8 +171,12 @@ describe('🚀 Production Readiness Validation Tests', () => {
       // Validate production values
       if (productionConfigs.nodeEnv === 'production') {
         expect(productionConfigs.logLevel).toMatch(/^(error|warn|info)$/);
-        expect(parseInt(productionConfigs.sessionTimeout)).toBeGreaterThan(0);
-        expect(parseInt(productionConfigs.maxFileSize)).toBeGreaterThan(0);
+        expect(Number.parseInt(productionConfigs.sessionTimeout, 10)).toBeGreaterThan(
+          0,
+        );
+        expect(Number.parseInt(productionConfigs.maxFileSize, 10)).toBeGreaterThan(
+          0,
+        );
       }
     });
 

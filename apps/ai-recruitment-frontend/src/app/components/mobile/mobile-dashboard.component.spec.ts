@@ -4,29 +4,27 @@ import {
   fakeAsync,
   tick,
 } from '@angular/core/testing';
-import { DebugElement, ElementRef, Component } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { Subject, of } from 'rxjs';
-import { Location, CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 import { MobileDashboardComponent } from './mobile-dashboard.component';
 import {
   TouchGestureService,
   GestureEvent,
   TouchPoint,
-  GestureConfig,
 } from '../../services/mobile/touch-gesture.service';
-import {
-  MobileNavigationComponent,
-  MobileNavItem,
-} from './mobile-navigation.component';
-import {
-  MobileSwipeComponent,
-  SwipeEvent,
-  SwipeAction,
-} from './mobile-swipe.component';
+import { MobileNavItem } from './mobile-navigation.component';
+import { SwipeEvent, SwipeAction } from './mobile-swipe.component';
 
 // Mock classes for standalone components
 @Component({
@@ -34,36 +32,26 @@ import {
   standalone: true,
   imports: [CommonModule],
   template: '<div class="mock-mobile-navigation"></div>',
-  inputs: [
-    'pageTitle',
-    'pageSubtitle',
-    'navItems',
-    'menuItems',
-    'headerActions',
-  ],
-  outputs: ['actionClick'],
 })
 class MockMobileNavigationComponent {
-  pageTitle = '';
-  pageSubtitle = '';
-  navItems: MobileNavItem[] = [];
-  menuItems: MobileNavItem[] = [];
-  headerActions: any[] = [];
-  actionClick = new Subject<any>();
+  @Input() pageTitle = '';
+  @Input() pageSubtitle = '';
+  @Input() navItems: MobileNavItem[] = [];
+  @Input() menuItems: MobileNavItem[] = [];
+  @Input() headerActions: Array<{ label: string; action: string }> = [];
+  @Output() actionClick = new EventEmitter<string>();
 }
 
 @Component({
-  selector: 'app-mobile-swipe',
+  selector: 'arc-mobile-swipe',
   standalone: true,
   imports: [CommonModule],
   template: '<div class="mock-mobile-swipe"><ng-content></ng-content></div>',
-  inputs: ['actions', 'item'],
-  outputs: ['swipeAction'],
 })
 class MockMobileSwipeComponent {
-  actions: SwipeAction[] = [];
-  item: any = {};
-  swipeAction = new Subject<SwipeEvent>();
+  @Input() actions: SwipeAction[] = [];
+  @Input() item: Record<string, unknown> = {};
+  @Output() swipeAction = new EventEmitter<SwipeEvent>();
 }
 
 // Mock TouchGestureService
@@ -129,9 +117,13 @@ describe('MobileDashboardComponent', () => {
   let component: MobileDashboardComponent;
   let fixture: ComponentFixture<MobileDashboardComponent>;
   let mockTouchGestureService: MockTouchGestureService;
-  let router: Router;
-  let location: Location;
   let mockElement: HTMLElement;
+  type MobileDashboardInternals = {
+    setupPullToRefresh(): void;
+    triggerRefresh(): void;
+  };
+  const getDashboardInternals = () =>
+    component as unknown as MobileDashboardInternals;
 
   // Helper functions for creating test data
   const createTouchEvent = (
@@ -153,7 +145,7 @@ describe('MobileDashboardComponent', () => {
       pageY: touch.clientY,
       screenX: touch.clientX,
       screenY: touch.clientY,
-    })) as any;
+    })) as unknown as Touch[];
 
     return new TouchEvent(type, {
       bubbles: true,
@@ -195,9 +187,6 @@ describe('MobileDashboardComponent', () => {
 
     fixture = TestBed.createComponent(MobileDashboardComponent);
     component = fixture.componentInstance;
-    router = TestBed.inject(Router);
-    location = TestBed.inject(Location);
-
     // Create mock DOM element for ViewChild references
     mockElement = document.createElement('div');
     Object.defineProperty(component, 'dashboardContainer', {
@@ -302,7 +291,10 @@ describe('MobileDashboardComponent', () => {
 
   describe('Component Lifecycle', () => {
     it('should call setupPullToRefresh on ngOnInit', () => {
-      const setupSpy = jest.spyOn(component as any, 'setupPullToRefresh');
+      const setupSpy = jest.spyOn(
+        getDashboardInternals(),
+        'setupPullToRefresh',
+      );
       component.ngOnInit();
       expect(setupSpy).toHaveBeenCalled();
     });
@@ -332,27 +324,28 @@ describe('MobileDashboardComponent', () => {
 
     beforeEach(() => {
       // Capture event handlers added by setupPullToRefresh
-      const originalAddEventListener = document.addEventListener;
-      const handlers: { [key: string]: any } = {};
+      const originalAddEventListener = document.addEventListener.bind(document);
+      const handlers: Record<string, EventListenerOrEventListenerObject> = {};
 
       jest
         .spyOn(document, 'addEventListener')
-        .mockImplementation((event: string, handler: any, options?: any) => {
-          handlers[event] = handler;
-          return originalAddEventListener.call(
-            document,
-            event,
-            handler,
-            options,
-          );
-        });
+        .mockImplementation(
+          (
+            event: string,
+            handler: EventListenerOrEventListenerObject,
+            options?: boolean | AddEventListenerOptions,
+          ) => {
+            handlers[event] = handler;
+            return originalAddEventListener(event, handler, options);
+          },
+        );
 
       component.ngOnInit();
 
-      touchStartHandler = handlers['touchstart'];
-      touchMoveHandler = handlers['touchmove'];
-      touchEndHandler = handlers['touchend'];
-      touchCancelHandler = handlers['touchcancel'];
+      touchStartHandler = handlers['touchstart'] as (e: TouchEvent) => void;
+      touchMoveHandler = handlers['touchmove'] as (e: TouchEvent) => void;
+      touchEndHandler = handlers['touchend'] as (e: TouchEvent) => void;
+      touchCancelHandler = handlers['touchcancel'] as (e: TouchEvent) => void;
     });
 
     it('should setup touch event listeners on initialization', () => {
@@ -509,7 +502,10 @@ describe('MobileDashboardComponent', () => {
     it('should prevent multiple simultaneous refreshes', fakeAsync(() => {
       component.isRefreshing = true;
 
-      const triggerRefreshSpy = jest.spyOn(component as any, 'triggerRefresh');
+      const triggerRefreshSpy = jest.spyOn(
+        getDashboardInternals(),
+        'triggerRefresh',
+      );
       component['triggerRefresh']();
 
       expect(triggerRefreshSpy).toHaveBeenCalledTimes(1);
@@ -864,7 +860,7 @@ describe('MobileDashboardComponent', () => {
       );
       expect(dashboardCards).toBeTruthy();
 
-      const cards = fixture.debugElement.queryAll(By.css('app-mobile-swipe'));
+      const cards = fixture.debugElement.queryAll(By.css('arc-mobile-swipe'));
       expect(cards.length).toBe(component.dashboardCards.length);
     });
 
@@ -937,16 +933,16 @@ describe('MobileDashboardComponent', () => {
   });
 
   describe('TouchGestureService Integration', () => {
-    it('should inject TouchGestureService', () => {
-      expect(component['_touchGesture']).toBeDefined();
-      expect(component['_touchGesture']).toBe(mockTouchGestureService);
+    it('should provide TouchGestureService via dependency injection', () => {
+      const injectedService = TestBed.inject(TouchGestureService);
+      expect(injectedService).toBe(mockTouchGestureService);
     });
 
-    it('should not throw when accessing TouchGestureService', () => {
-      expect(() => {
-        const service = component['_touchGesture'];
-        void service; // Use the service to prevent unused warning
-      }).not.toThrow();
+    it('should allow gesture initialization through the injected service', () => {
+      const injectedService = TestBed.inject(TouchGestureService);
+      const elementRef = new ElementRef(document.createElement('div'));
+
+      expect(() => injectedService.initializeGestures(elementRef)).not.toThrow();
     });
   });
 
@@ -1065,14 +1061,31 @@ describe('MobileDashboardComponent', () => {
         preventDefault: jest.fn(),
       } as unknown as TouchEvent;
 
+      const originalAddEventListener = document.addEventListener.bind(document);
+      const handlerMap: Record<string, EventListenerOrEventListenerObject> = {};
+      const addEventListenerSpy = jest
+        .spyOn(document, 'addEventListener')
+        .mockImplementation(
+          (
+            event: string,
+            handler: EventListenerOrEventListenerObject,
+            options?: boolean | AddEventListenerOptions,
+          ) => {
+            handlerMap[event] = handler;
+            return originalAddEventListener(event, handler, options);
+          },
+        );
+
+      component['setupPullToRefresh']();
+      const startHandler = handlerMap['touchstart'] as
+        | ((event: TouchEvent) => void)
+        | undefined;
+
       expect(() => {
-        component['setupPullToRefresh']();
-        // Call event handlers directly with malformed event to test error handling
-        const startHandler = (component as any).touchStartHandler;
-        if (startHandler) {
-          startHandler(partialTouchEvent);
-        }
+        startHandler?.(partialTouchEvent);
       }).not.toThrow();
+
+      addEventListenerSpy.mockRestore();
     });
 
     it('should prevent memory leaks with proper subscription cleanup', () => {
@@ -1133,7 +1146,6 @@ describe('MobileDashboardComponent', () => {
       expect(component.isRefreshing).toBe(true);
 
       // Try to trigger refresh again while already refreshing
-      const refreshingSpy = jest.spyOn(component as any, 'triggerRefresh');
       component['triggerRefresh']();
 
       // Should still be refreshing (not trigger multiple refreshes)

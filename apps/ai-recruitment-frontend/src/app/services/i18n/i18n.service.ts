@@ -1,4 +1,4 @@
-import { Injectable, signal, effect } from '@angular/core';
+import { Injectable, signal, effect, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { of, BehaviorSubject } from 'rxjs';
 import { catchError, finalize, tap } from 'rxjs/operators';
@@ -12,6 +12,15 @@ export type Language = 'zh-CN' | 'en-US' | 'zh-TW' | 'ja-JP' | 'ko-KR';
 export interface TranslationStrings {
   [key: string]: string | TranslationStrings;
 }
+
+export type TranslationParamValue =
+  | string
+  | number
+  | boolean
+  | Date
+  | null
+  | undefined;
+export type TranslationParams = Record<string, TranslationParamValue>;
 
 /**
  * Defines the shape of the language config.
@@ -122,10 +131,10 @@ export class I18nService {
    * @param http - The http.
    * @param toastService - The toast service.
    */
-  constructor(
-    private http: HttpClient,
-    private toastService: ToastService,
-  ) {
+  private readonly http = inject(HttpClient);
+  private readonly toastService = inject(ToastService);
+
+  constructor() {
     this.initializeLanguage();
 
     // Apply language changes reactively
@@ -168,8 +177,9 @@ export class I18nService {
 
   private loadTranslations(language: Language): void {
     // Check cache first
-    if (this.translationCache.has(language)) {
-      this.translations.next(this.translationCache.get(language)!);
+    const cachedTranslations = this.translationCache.get(language);
+    if (cachedTranslations) {
+      this.translations.next(cachedTranslations);
       return;
     }
 
@@ -279,14 +289,21 @@ export class I18nService {
    * @param params - The params.
    * @returns The string value.
    */
-  translate(key: string, params?: Record<string, any>): string {
+  translate(key: string, params?: TranslationParams): string {
     const translations = this.translations.value;
     const keys = key.split('.');
-    let value: any = translations;
+    let value: string | TranslationStrings | undefined = translations;
 
-    for (const k of keys) {
-      value = value?.[k];
-      if (value === undefined) break;
+    for (const segment of keys) {
+      if (typeof value === 'string') {
+        break;
+      }
+
+      value = value?.[segment] as string | TranslationStrings | undefined;
+
+      if (value === undefined) {
+        break;
+      }
     }
 
     if (typeof value !== 'string') {
@@ -294,17 +311,13 @@ export class I18nService {
       return key;
     }
 
-    // Replace parameters
-    if (params) {
-      Object.entries(params).forEach(([param, val]) => {
-        value = (value as string).replace(
-          new RegExp(`{{${param}}}`, 'g'),
-          String(val),
-        );
-      });
+    if (!params) {
+      return value;
     }
 
-    return value;
+    return Object.entries(params).reduce((acc, [param, paramValue]) => {
+      return acc.replace(new RegExp(`{{${param}}}`, 'g'), String(paramValue));
+    }, value);
   }
 
   // Shorthand
@@ -314,7 +327,7 @@ export class I18nService {
    * @param params - The params.
    * @returns The string value.
    */
-  t(key: string, params?: Record<string, any>): string {
+  t(key: string, params?: TranslationParams): string {
     return this.translate(key, params);
   }
 

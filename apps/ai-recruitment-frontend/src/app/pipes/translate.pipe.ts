@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform, inject } from '@angular/core';
-import { I18nService } from '../services/i18n/i18n.service';
+import { I18nService, TranslationParams } from '../services/i18n/i18n.service';
 
 /**
  * Translate pipe for template usage.
@@ -19,7 +19,7 @@ export class TranslatePipe implements PipeTransform {
    * @param params - Optional parameters for interpolation
    * @returns The translated string
    */
-  transform(key: string, params?: Record<string, any>): string {
+  transform(key: string, params?: TranslationParams): string {
     return this.i18nService.translate(key, params);
   }
 }

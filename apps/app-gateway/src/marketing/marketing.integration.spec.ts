@@ -1,8 +1,10 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import type { Request } from 'express';
 import { FeedbackCodeController } from './feedback-code.controller';
 import {
   CreateFeedbackCodeDto,
   MarkFeedbackCodeUsedDto,
+  FeedbackCodeService,
 } from './feedback-code.service';
 
 type StoredCode = {
@@ -73,7 +75,7 @@ const createStubService = () => {
   };
 };
 
-const createRequest = () =>
+const createRequest = (): Request =>
   ({
     get: jest.fn().mockImplementation((header: string) => {
       if (header === 'User-Agent') {
@@ -86,7 +88,7 @@ const createRequest = () =>
     }),
     connection: { remoteAddress: '198.51.100.24' },
     socket: { remoteAddress: '198.51.100.24' },
-  } as any);
+  } as unknown as Request);
 
 describe('Marketing integration smoke tests (mocked)', () => {
   let controller: FeedbackCodeController;
@@ -94,7 +96,9 @@ describe('Marketing integration smoke tests (mocked)', () => {
 
   beforeEach(() => {
     service = createStubService();
-    controller = new FeedbackCodeController(service as any);
+    controller = new FeedbackCodeController(
+      service as unknown as FeedbackCodeService,
+    );
   });
 
   it('completes record → validate → mark flow using stub service', async () => {

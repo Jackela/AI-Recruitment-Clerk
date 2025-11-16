@@ -8,6 +8,19 @@ interface TokenRecord {
   reason: string;
 }
 
+interface BlacklistMetrics {
+  blacklistedTokensCount: number;
+  blacklistedUsersCount: number;
+  lastCleanup: number;
+}
+
+interface BlacklistHealth {
+  status: string;
+  tokenStore: string;
+  blacklistedTokens: number;
+  blacklistedUsers: number;
+}
+
 /**
  * Provides redis token blacklist functionality.
  */
@@ -115,7 +128,7 @@ export class RedisTokenBlacklistService {
 
     // Count tokens for this user
     let count = 0;
-    for (const [_token, record] of this.blacklistedTokens.entries()) {
+    for (const record of this.blacklistedTokens.values()) {
       if (record.userId === userId) {
         count++;
       }
@@ -129,9 +142,9 @@ export class RedisTokenBlacklistService {
 
   /**
    * Retrieves metrics.
-   * @returns The any.
+   * @returns Current blacklist metrics.
    */
-  getMetrics(): any {
+  getMetrics(): BlacklistMetrics {
     return {
       blacklistedTokensCount: this.blacklistedTokens.size,
       blacklistedUsersCount: this.blacklistedUsers.size,
@@ -141,9 +154,9 @@ export class RedisTokenBlacklistService {
 
   /**
    * Performs the health check operation.
-   * @returns A promise that resolves to any.
+   * @returns The current blacklist health snapshot.
    */
-  async healthCheck(): Promise<any> {
+  async healthCheck(): Promise<BlacklistHealth> {
     return {
       status: 'healthy',
       tokenStore: 'in-memory',

@@ -2,14 +2,13 @@ import { Injectable, OnDestroy, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, takeUntil, map } from 'rxjs/operators';
 import { io, Socket } from 'socket.io-client';
+import { environment } from '../../environments/environment';
 import { ToastService } from './toast.service';
 
 /**
  * Defines the shape of the web socket message data.
  */
-export interface WebSocketMessageData {
-  [key: string]: unknown;
-}
+export type WebSocketMessageData = unknown;
 
 /**
  * Defines the shape of the web socket message.
@@ -50,6 +49,7 @@ export interface AnalysisResult {
   strengths: string[];
   recommendations: string[];
   generatedAt: string;
+  reportUrl?: string;
 }
 
 /**
@@ -122,8 +122,16 @@ export class WebSocketService implements OnDestroy {
 
   /**
    * 连接到WebSocket服务器
-   */
+  */
   connect(sessionId: string): Observable<WebSocketMessage> {
+    // 在 E2E/测试环境下禁用真实 WebSocket 连接，避免控制台报错影响用例
+    const environmentFlags = environment as Partial<{ disableWebSocket: boolean }>;
+    if (environmentFlags.disableWebSocket) {
+      // 显式标记为断开状态，且不建立连接
+      this.connectionStatus$.next('disconnected');
+      return this.messages$.asObservable();
+    }
+
     this.disconnect(); // 确保没有现有连接
 
     this.connectionStatus$.next('connecting');
@@ -140,6 +148,7 @@ export class WebSocketService implements OnDestroy {
 
       this.setupSocketHandlers(sessionId);
     } catch (error) {
+      console.error('WebSocket connection error:', error);
       this.toastService.error('网络连接失败，请检查您的网络');
       this.connectionStatus$.next('error');
     }
@@ -168,10 +177,12 @@ export class WebSocketService implements OnDestroy {
    */
   onProgress(sessionId: string): Observable<ProgressUpdate> {
     return this.onMessage('progress', sessionId).pipe(
-      filter((msg) => !!msg.data),
-      map((msg: any) => msg.data as ProgressUpdate),
+      filter((msg): msg is WebSocketMessage & { data: ProgressUpdate } =>
+        this.isProgressUpdate(msg.data),
+      ),
+      map((msg) => msg.data),
       takeUntil(this.destroy$),
-    ) as Observable<ProgressUpdate>;
+    );
   }
 
   /**
@@ -179,10 +190,12 @@ export class WebSocketService implements OnDestroy {
    */
   onCompletion(sessionId: string): Observable<CompletionData> {
     return this.onMessage('completed', sessionId).pipe(
-      filter((msg) => !!msg.data),
-      map((msg: any) => msg.data as CompletionData),
+      filter((msg): msg is WebSocketMessage & { data: CompletionData } =>
+        this.isCompletionData(msg.data),
+      ),
+      map((msg) => msg.data),
       takeUntil(this.destroy$),
-    ) as Observable<CompletionData>;
+    );
   }
 
   /**
@@ -190,10 +203,12 @@ export class WebSocketService implements OnDestroy {
    */
   onError(sessionId: string): Observable<ErrorData> {
     return this.onMessage('error', sessionId).pipe(
-      filter((msg) => !!msg.data),
-      map((msg: any) => msg.data as ErrorData),
+      filter((msg): msg is WebSocketMessage & { data: ErrorData } =>
+        this.isErrorData(msg.data),
+      ),
+      map((msg) => msg.data),
       takeUntil(this.destroy$),
-    ) as Observable<ErrorData>;
+    );
   }
 
   /**
@@ -243,14 +258,14 @@ export class WebSocketService implements OnDestroy {
       this.socket?.emit('subscribe_session', { sessionId });
     });
 
-    this.socket.on('message', (message: WebSocketMessage) => {
-      try {
-        message.timestamp = new Date(message.timestamp);
-        this.messages$.next(message);
-      } catch (error) {
-        // Silent fail - message parsing error
-      }
-    });
+      this.socket.on('message', (message: WebSocketMessage) => {
+        try {
+          message.timestamp = new Date(message.timestamp);
+          this.messages$.next(message);
+        } catch (error) {
+          console.warn('Failed to process socket message:', error);
+        }
+      });
 
     // Listen for job-specific events
     this.socket.on(
@@ -415,6 +430,34 @@ export class WebSocketService implements OnDestroy {
     }
 
     return connection$;
+  }
+
+  private isProgressUpdate(data: unknown): data is ProgressUpdate {
+    return (
+      typeof data === 'object' &&
+      data !== null &&
+      typeof (data as Record<string, unknown>).progress === 'number' &&
+      typeof (data as Record<string, unknown>).currentStep === 'string'
+    );
+  }
+
+  private isCompletionData(data: unknown): data is CompletionData {
+    return (
+      typeof data === 'object' &&
+      data !== null &&
+      typeof (data as Record<string, unknown>).analysisId === 'string' &&
+      typeof (data as Record<string, unknown>).processingTime === 'number' &&
+      typeof (data as Record<string, unknown>).result === 'object' &&
+      (data as Record<string, unknown>).result !== null
+    );
+  }
+
+  private isErrorData(data: unknown): data is ErrorData {
+    return (
+      typeof data === 'object' &&
+      data !== null &&
+      typeof (data as Record<string, unknown>).error === 'string'
+    );
   }
 
   /**

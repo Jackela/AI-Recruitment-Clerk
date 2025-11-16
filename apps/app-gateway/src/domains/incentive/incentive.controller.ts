@@ -29,10 +29,50 @@ import {
   PaymentMethod,
   ContactInfo,
 } from '@ai-recruitment-clerk/shared-dtos';
-import { AuthenticatedRequest } from '@ai-recruitment-clerk/user-management-domain';
+import {
+  AuthenticatedRequest,
+  Permission,
+} from '@ai-recruitment-clerk/user-management-domain';
 import { IncentiveIntegrationService } from './incentive-integration.service';
 
 // Use shared AuthenticatedRequest type with required user.id and user.organizationId
+
+type QuestionnaireIncentiveBody = {
+  questionnaireId: string;
+  qualityScore: number;
+  contactInfo: {
+    email?: string;
+    phone?: string;
+    wechat?: string;
+    alipay?: string;
+  };
+  userIP?: string;
+  businessValue?: Record<string, unknown>;
+  incentiveType?: string;
+  metadata?: Record<string, unknown>;
+};
+
+type ReferralIncentiveBody = {
+  referrerIP: string;
+  referredIP: string;
+  contactInfo: {
+    email?: string;
+    phone?: string;
+    wechat?: string;
+    alipay?: string;
+  };
+  referralType?: string;
+  expectedValue?: number;
+  metadata?: Record<string, unknown>;
+};
+
+type IncentiveListResult = Awaited<
+  ReturnType<IncentiveIntegrationService['getIncentives']>
+> & {
+  statusDistribution?: Record<string, number>;
+  rewardTypeDistribution?: Record<string, number>;
+  avgRewardAmount?: number;
+};
 
 /**
  * Exposes endpoints for incentive.
@@ -79,36 +119,23 @@ export class IncentiveController {
   })
   @ApiResponse({ status: 400, description: '请求参数错误' })
   @UseGuards(RolesGuard)
-  @Permissions('create_job' as any)
+  @Permissions(Permission.CREATE_JOB)
   @Post('questionnaire')
   @HttpCode(HttpStatus.CREATED)
   async createQuestionnaireIncentive(
     @Request() req: AuthenticatedRequest,
     @Body()
-    incentiveData: {
-      questionnaireId: string;
-      qualityScore: number;
-      contactInfo: {
-        email?: string;
-        phone?: string;
-        wechat?: string;
-        alipay?: string;
-      };
-      userIP?: string;
-      businessValue?: any;
-      incentiveType?: string;
-      metadata?: any;
-    },
+    incentiveData: QuestionnaireIncentiveBody,
   ) {
     try {
       const fwd = req.headers['x-forwarded-for'];
       const normalizedIP = Array.isArray(fwd) ? fwd[0] : fwd;
-      const userIP = String(
+      const socketAddress = req.socket?.remoteAddress;
+      const userIP =
         incentiveData.userIP ||
-          normalizedIP ||
-          (req.socket as any)?.remoteAddress ||
-          'unknown',
-      );
+        normalizedIP ||
+        socketAddress ||
+        'unknown';
       const contactInfo = new ContactInfo(incentiveData.contactInfo);
 
       const incentive =
@@ -168,25 +195,13 @@ export class IncentiveController {
   })
   @ApiResponse({ status: 201, description: '推荐激励创建成功' })
   @UseGuards(RolesGuard)
-  @Permissions('create_job' as any)
+  @Permissions(Permission.CREATE_JOB)
   @Post('referral')
   @HttpCode(HttpStatus.CREATED)
   async createReferralIncentive(
     @Request() req: AuthenticatedRequest,
     @Body()
-    referralData: {
-      referrerIP: string;
-      referredIP: string;
-      contactInfo: {
-        email?: string;
-        phone?: string;
-        wechat?: string;
-        alipay?: string;
-      };
-      referralType?: string;
-      expectedValue?: number;
-      metadata?: any;
-    },
+    referralData: ReferralIncentiveBody,
   ) {
     try {
       const contactInfo = new ContactInfo(referralData.contactInfo);
@@ -263,7 +278,7 @@ export class IncentiveController {
   @ApiQuery({ name: 'startDate', required: false, description: '开始日期' })
   @ApiQuery({ name: 'endDate', required: false, description: '结束日期' })
   @UseGuards(RolesGuard)
-  @Permissions('read_job' as any)
+  @Permissions(Permission.READ_JOB)
   @Get()
   async getIncentives(
     @Request() req: AuthenticatedRequest,
@@ -275,7 +290,7 @@ export class IncentiveController {
     @Query('endDate') endDate?: string,
   ) {
     try {
-      const incentives = await this.incentiveService.getIncentives(
+      const incentives = (await this.incentiveService.getIncentives(
         req.user.organizationId,
         {
           status,
@@ -285,7 +300,7 @@ export class IncentiveController {
           limit: Math.min(limit, 100),
           offset: (Math.max(page, 1) - 1) * Math.min(limit, 100),
         },
-      );
+      )) as IncentiveListResult;
 
       return {
         success: true,
@@ -297,11 +312,11 @@ export class IncentiveController {
           totalPages: Math.ceil(incentives.totalCount / limit),
           hasNext: page * limit < incentives.totalCount,
           summary: {
-            byStatus: (incentives as any).statusDistribution || {},
-            byRewardType: (incentives as any).rewardTypeDistribution || {},
+            byStatus: incentives.statusDistribution ?? {},
+            byRewardType: incentives.rewardTypeDistribution ?? {},
             avgRewardAmount:
-              (incentives as any).avgRewardAmount ||
-              incentives.totalRewardAmount / (incentives.totalCount || 1),
+              incentives.avgRewardAmount ??
+              incentives.totalRewardAmount / Math.max(incentives.totalCount, 1),
           },
         },
       };
@@ -328,7 +343,7 @@ export class IncentiveController {
   @ApiResponse({ status: 404, description: '激励未找到' })
   @ApiParam({ name: 'incentiveId', description: '激励ID' })
   @UseGuards(RolesGuard)
-  @Permissions('read_job' as any)
+  @Permissions(Permission.READ_JOB)
   @Get(':incentiveId')
   async getIncentive(
     @Request() req: AuthenticatedRequest,
@@ -370,7 +385,7 @@ export class IncentiveController {
   @ApiResponse({ status: 200, description: '激励验证成功' })
   @ApiParam({ name: 'incentiveId', description: '激励ID' })
   @UseGuards(RolesGuard)
-  @Permissions('validate_incentive' as any)
+  @Permissions(Permission.VALIDATE_INCENTIVE)
   @Post(':incentiveId/validate')
   @HttpCode(HttpStatus.OK)
   async validateIncentive(
@@ -417,7 +432,7 @@ export class IncentiveController {
   @ApiResponse({ status: 200, description: '激励批准成功' })
   @ApiParam({ name: 'incentiveId', description: '激励ID' })
   @UseGuards(RolesGuard)
-  @Permissions('approve_incentive' as any)
+  @Permissions(Permission.APPROVE_INCENTIVE)
   @Put(':incentiveId/approve')
   @HttpCode(HttpStatus.OK)
   async approveIncentive(
@@ -470,7 +485,7 @@ export class IncentiveController {
   @ApiResponse({ status: 200, description: '激励拒绝成功' })
   @ApiParam({ name: 'incentiveId', description: '激励ID' })
   @UseGuards(RolesGuard)
-  @Permissions('reject_incentive' as any)
+  @Permissions(Permission.REJECT_INCENTIVE)
   @Put(':incentiveId/reject')
   @HttpCode(HttpStatus.OK)
   async rejectIncentive(
@@ -543,7 +558,7 @@ export class IncentiveController {
   })
   @ApiParam({ name: 'incentiveId', description: '激励ID' })
   @UseGuards(RolesGuard)
-  @Permissions('process_payment' as any)
+  @Permissions(Permission.PROCESS_PAYMENT)
   @Post(':incentiveId/pay')
   @HttpCode(HttpStatus.OK)
   async processPayment(
@@ -568,23 +583,26 @@ export class IncentiveController {
         },
       );
 
+      if (!paymentResult.success) {
+        return {
+          success: false,
+          error: paymentResult.error ?? 'Payment processing failed',
+          message: 'Payment processing failed',
+        };
+      }
+
       return {
-        success: paymentResult.success,
-        message: paymentResult.success
-          ? 'Payment processed successfully'
-          : 'Payment processing failed',
-        data: paymentResult.success
-          ? {
-              incentiveId,
-              transactionId: paymentResult.transactionId,
-              amount: paymentResult.amount,
-              currency: paymentResult.currency,
-              paymentMethod: paymentData.paymentMethod,
-              paidAt: new Date().toISOString(),
-              processedBy: req.user.id,
-            }
-          : undefined,
-        error: paymentResult.success ? undefined : paymentResult.error,
+        success: true,
+        message: 'Payment processed successfully',
+        data: {
+          incentiveId,
+          transactionId: paymentResult.transactionId,
+          amount: paymentResult.amount,
+          currency: paymentResult.currency,
+          paymentMethod: paymentData.paymentMethod,
+          paidAt: paymentResult.processedAt?.toISOString() ?? new Date().toISOString(),
+          processedBy: paymentResult.processedBy,
+        },
       };
     } catch (error) {
       return {
@@ -607,7 +625,7 @@ export class IncentiveController {
   })
   @ApiResponse({ status: 200, description: '批量处理完成' })
   @UseGuards(RolesGuard)
-  @Permissions('batch_process_incentive' as any)
+  @Permissions(Permission.BATCH_PROCESS_INCENTIVE)
   @Post('batch')
   @HttpCode(HttpStatus.OK)
   async batchProcessIncentives(
@@ -680,7 +698,7 @@ export class IncentiveController {
     description: '分组方式',
   })
   @UseGuards(RolesGuard)
-  @Permissions('read_incentive_stats' as any)
+  @Permissions(Permission.READ_INCENTIVE_STATS)
   @Get('stats/overview')
   async getIncentiveStatistics(
     @Request() req: AuthenticatedRequest,
@@ -738,7 +756,7 @@ export class IncentiveController {
     description: '导出格式',
   })
   @UseGuards(RolesGuard)
-  @Permissions('export_incentive_data' as any)
+  @Permissions(Permission.EXPORT_INCENTIVE_DATA)
   @Post('export')
   @HttpCode(HttpStatus.OK)
   async exportIncentiveData(
@@ -800,7 +818,7 @@ export class IncentiveController {
   })
   @ApiResponse({ status: 200, description: '激励规则配置成功' })
   @UseGuards(RolesGuard)
-  @Permissions('manage_incentive_rules' as any)
+  @Permissions(Permission.MANAGE_INCENTIVE_RULES)
   @Put('rules')
   @HttpCode(HttpStatus.OK)
   async configureIncentiveRules(

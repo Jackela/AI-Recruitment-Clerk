@@ -28,8 +28,8 @@ export class AccessibilityTester {
   /**
    * Run comprehensive accessibility tests on a component
    */
-  static testComponent(
-    fixture: ComponentFixture<any>,
+  static testComponent<T = unknown>(
+    fixture: ComponentFixture<T>,
   ): AccessibilityTestResult {
     const element = fixture.nativeElement as HTMLElement;
     const issues: AccessibilityIssue[] = [];
@@ -459,7 +459,7 @@ export class AccessibilityTester {
   } {
     const issues = this.testComponent({
       nativeElement: element,
-    } as ComponentFixture<any>).issues;
+    } as ComponentFixture<unknown>).issues;
     const errors = issues.filter((i) => i.type === 'error');
 
     // Simplified WCAG compliance check

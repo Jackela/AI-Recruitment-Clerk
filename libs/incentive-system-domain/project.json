@@ -6,7 +6,9 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/incentive-system-domain",
         "tsConfig": "libs/incentive-system-domain/tsconfig.json",
@@ -16,14 +18,20 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["libs/incentive-system-domain/**/*.ts"]
+        "lintFilePatterns": [
+          "libs/incentive-system-domain/**/*.ts"
+        ]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "libs/incentive-system-domain/jest.config.ts",
         "passWithNoTests": true
@@ -36,5 +44,10 @@
       }
     }
   },
-  "tags": ["domain:incentive-system", "scope:domain", "type:lib"]
+  "tags": [
+    "domain:incentive-system",
+    "scope:domain",
+    "type:lib",
+    "owner:platform-governance"
+  ]
 }

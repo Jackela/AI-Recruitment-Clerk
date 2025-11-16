@@ -2,13 +2,15 @@ import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@
 import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from '../auth/decorators/permissions.decorator';
 import { Permission, hasAllPermissions } from '@ai-recruitment-clerk/user-management-domain';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 @Injectable()
 export class OpsPermissionsGuard implements CanActivate {
+  private readonly config = getConfig();
   constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    if (process.env.NODE_ENV === 'test') return true;
+    if (this.config.env.isTest) return true;
 
     const requiredPermissions = this.reflector.getAllAndOverride<Permission[]>(
       PERMISSIONS_KEY,

@@ -1,3 +1,4 @@
+import { Action } from '@ngrx/store';
 import { guestReducer } from './guest.reducer';
 import { initialGuestState, GuestState } from './guest.state';
 import * as GuestActions from './guest.actions';
@@ -10,7 +11,7 @@ describe('Guest Reducer', () => {
   });
 
   it('should return the initial state', () => {
-    const action = { type: 'UNKNOWN' } as any;
+    const action: Action = { type: 'UNKNOWN' };
     const result = guestReducer(undefined, action);
 
     expect(result).toEqual(initialGuestState);
@@ -389,10 +390,13 @@ describe('Guest Reducer', () => {
       const action = GuestActions.updateLastActivity();
       const result = guestReducer(state, action);
 
-      expect(result.lastUpdated).toBeTruthy();
-      expect(new Date(result.lastUpdated!).getTime()).toBeGreaterThan(
-        new Date().getTime() - 1000,
-      );
+      const lastUpdated = result.lastUpdated;
+      expect(lastUpdated).toBeTruthy();
+      if (lastUpdated) {
+        expect(new Date(lastUpdated).getTime()).toBeGreaterThan(
+          new Date().getTime() - 1000,
+        );
+      }
     });
   });
 

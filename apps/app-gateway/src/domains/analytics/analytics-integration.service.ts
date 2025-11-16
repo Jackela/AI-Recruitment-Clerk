@@ -1,17 +1,71 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
+import { AnalyticsEventRepository } from './analytics-event.repository';
+import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
+import { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { EventType, EventStatus, ConsentStatus } from '@ai-recruitment-clerk/shared-dtos';
+type DomainEventPayload = Record<string, unknown>;
+type InteractionPayload = Record<string, unknown>;
+type AnalyticsContext = Record<string, unknown>;
+type MetricMetadata = Record<string, unknown>;
+type PerformanceMetadata = Record<string, unknown>;
+type TimeRange = { startDate: Date; endDate: Date };
+type ReportConfig = Record<string, unknown>;
+type RetentionConfig = Record<string, unknown>;
+type ExportConfig = Record<string, unknown>;
+type SessionCacheEntry = {
+  sessionId: string;
+  userId?: string;
+  startTime?: Date;
+  lastActivity?: Date;
+  isActive?: boolean;
+};
+type DomainServiceResponse<T> = {
+  success: boolean;
+  data?: T;
+  errors?: string[];
+};
+type InteractionEventRecord = {
+  id: string;
+  eventType: EventType | string;
+  status?: string;
+  props: Record<string, unknown>;
+};
+type MetricEventRecord = {
+  id: string;
+  status?: string;
+  props?: Record<string, unknown>;
+};
+type PerformanceEventRecord = { id: string; status?: string };
+type AnalyticsDomainDependencies = {
+  repository: AnalyticsEventRepository;
+  eventBus: IDomainEventBus;
+  auditLogger: IAuditLogger;
+  privacyService: IPrivacyService;
+  sessionTracker: ISessionTracker;
+};
+
 // Fallback implementations for analytics domain service
 class AnalyticsDomainService {
-  constructor(_deps: any) {}
-  async trackEvent(_event: any): Promise<void> {}
-  async recordMetric(_metric: any): Promise<void> {}
-  async generateReport(_type: any): Promise<any> {}
+  constructor(_deps: AnalyticsDomainDependencies) {
+    void _deps;
+  }
+  async trackEvent(_event: DomainEventPayload): Promise<void> {
+    return;
+  }
+  async recordMetric(_metric: MetricMetadata): Promise<void> {
+    return;
+  }
+  async generateReport(_type: ReportConfig): Promise<DomainServiceResponse<Record<string, unknown>>> {
+    return { success: true, data: {} };
+  }
   async createUserInteractionEvent(
     _sessionId: string,
     _userId: string,
-    eventType: any,
-    _eventData: any,
-    _context?: any,
-  ): Promise<any> {
+    eventType: EventType,
+    _eventData: InteractionPayload,
+    _context?: AnalyticsContext,
+  ): Promise<DomainServiceResponse<InteractionEventRecord>> {
     return {
       success: true,
       data: {
@@ -25,9 +79,9 @@ class AnalyticsDomainService {
   async createBusinessMetricEvent(
     _metricName: string,
     _value: number,
-    _unit: any,
-    _metadata?: any,
-  ): Promise<any> {
+    _unit: MetricUnit | string,
+    _metadata?: MetricMetadata,
+  ): Promise<DomainServiceResponse<MetricEventRecord>> {
     return {
       success: true,
       data: {
@@ -41,55 +95,62 @@ class AnalyticsDomainService {
     _operation: string,
     _duration: number,
     _success: boolean,
-    _metadata?: any,
-  ): Promise<any> {
+    _metadata?: PerformanceMetadata,
+  ): Promise<DomainServiceResponse<PerformanceEventRecord>> {
     return { success: true, data: { id: 'test-perf', status: 'PROCESSED' } };
   }
-  async processBatchEvents(_eventIds: string[]): Promise<any> {
+  async processBatchEvents(_eventIds: string[]): Promise<{ success: boolean; processedCount: number }> {
     return { success: true, processedCount: _eventIds.length };
   }
-  async performPrivacyComplianceCheck(_eventId: string): Promise<any> {
+  async performPrivacyComplianceCheck(_eventId: string): Promise<{ success: boolean; compliant: boolean }> {
     return { success: true, compliant: true };
   }
   async generateDataRetentionReport(
     _startDate: Date,
     _endDate: Date,
-  ): Promise<any> {
+  ): Promise<{ success: boolean; report: Record<string, unknown> }> {
     return { success: true, report: {} };
   }
-  async getSessionAnalytics(_sessionId: string, _timeRange?: any): Promise<any> {
+  async getSessionAnalytics(
+    _sessionId: string,
+    _timeRange?: TimeRange,
+  ): Promise<{ success: boolean; analytics: Record<string, unknown> }> {
     return { success: true, analytics: {} };
   }
-  async getEventProcessingMetrics(_timeRange: any): Promise<any> {
+  async getEventProcessingMetrics(
+    _timeRange: TimeRange,
+  ): Promise<{ success: boolean; metrics: Record<string, unknown> }> {
     return { success: true, metrics: {} };
   }
-  async getDataPrivacyMetrics(_timeRange: any): Promise<any> {
+  async getDataPrivacyMetrics(
+    _timeRange: TimeRange,
+  ): Promise<{ success: boolean; metrics: Record<string, unknown> }> {
     return { success: true, metrics: {} };
   }
   async validateReportingAccess(
     _userRole: string,
-    _reportType: any,
-    _dataScope: any,
-  ): Promise<any> {
+    _reportType: ReportType,
+    _dataScope: DataScope,
+  ): Promise<{ success: boolean; hasAccess: boolean }> {
     return { success: true, hasAccess: true };
   }
 }
 
 // Fallback interfaces
 interface IDomainEventBus {
-  publish(event: any): Promise<void>;
+  publish(event: DomainEventPayload): Promise<void>;
 }
 
 interface IAuditLogger {
-  log(action: string, details: any): Promise<void>;
-  logBusinessEvent(eventType: string, data: any): Promise<void>;
-  logSecurityEvent(eventType: string, data: any): Promise<void>;
-  logError(eventType: string, data: any): Promise<void>;
+  log(action: string, details: Record<string, unknown>): Promise<void>;
+  logBusinessEvent(eventType: string, data: Record<string, unknown>): Promise<void>;
+  logSecurityEvent(eventType: string, data: Record<string, unknown>): Promise<void>;
+  logError(eventType: string, data: Record<string, unknown>): Promise<void>;
 }
 
 interface IPrivacyService {
   checkConsent(userId: string): Promise<boolean>;
-  getUserConsentStatus(userId: string): Promise<any>;
+  getUserConsentStatus(userId: string): Promise<{ status: ConsentStatus; lastUpdated: Date }>;
   anonymizeUserData(userId: string): Promise<void>;
   deleteUserData(userId: string): Promise<void>;
 }
@@ -109,9 +170,7 @@ interface UserSession {
 }
 
 // Import enums from shared DTOs package
-import { EventType, EventStatus, ConsentStatus } from '@ai-recruitment-clerk/shared-dtos';
-
-enum MetricUnit {
+export enum MetricUnit {
   COUNT = 'count',
   PERCENTAGE = 'percentage',
   MILLISECONDS = 'milliseconds',
@@ -128,12 +187,6 @@ enum DataScope {
   ORGANIZATION = 'organization',
   SYSTEM = 'system',
 }
-import { AnalyticsEventRepository } from './analytics-event.repository';
-import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
-import { Cache } from 'cache-manager';
-import { Inject } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-
 /**
  * Analytics集成服务
  * 封装AnalyticsDomainService并提供基础设施实现
@@ -171,9 +224,9 @@ export class AnalyticsIntegrationService {
     sessionId: string,
     userId: string,
     eventType: EventType,
-    eventData: any,
-    context?: any,
-  ) {
+    eventData: InteractionPayload,
+    context?: AnalyticsContext,
+  ): Promise<DomainServiceResponse<InteractionEventRecord>> {
     try {
       const result = await this.domainService.createUserInteractionEvent(
         sessionId,
@@ -207,7 +260,7 @@ export class AnalyticsIntegrationService {
     action: string;
     label?: string;
     value?: number;
-    metadata?: any;
+    metadata?: Record<string, unknown>;
     userId: string;
     organizationId: string;
     timestamp: Date;
@@ -240,14 +293,16 @@ export class AnalyticsIntegrationService {
       );
 
       if (result.success && result.data) {
+        const timestampValue = result.data.props?.timestamp;
+        const eventTimestamp =
+          timestampValue instanceof Date ? timestampValue : new Date();
         return {
           eventId: result.data.id,
-          timestamp: (result.data as any).props.timestamp,
+          timestamp: eventTimestamp,
           eventType: result.data.eventType,
           processed:
-            String((result.data as any).status || '')
-              .toLowerCase()
-              .trim() === EventStatus.PROCESSED,
+            String(result.data.status ?? '').toLowerCase().trim() ===
+            EventStatus.PROCESSED,
         };
       } else {
         throw new Error(result.errors?.join(', ') || 'Failed to create event');
@@ -264,7 +319,7 @@ export class AnalyticsIntegrationService {
   async recordMetric(metricData: {
     metricName: string;
     value: number;
-    unit: string;
+    unit: MetricUnit;
     organizationId: string;
     recordedBy: string;
     timestamp: Date;
@@ -273,15 +328,15 @@ export class AnalyticsIntegrationService {
     service?: string;
     status?: 'success' | 'error' | 'timeout';
     duration?: number;
-    dimensions?: Record<string, any>;
+    dimensions?: Record<string, unknown>;
     tags?: string[];
-    metadata?: any;
+    metadata?: MetricMetadata;
   }) {
     try {
       const result = await this.domainService.createBusinessMetricEvent(
         metricData.metricName,
         metricData.value,
-        metricData.unit as any, // MetricUnit enum
+        metricData.unit,
         {
           operation: metricData.operation,
           service: metricData.service,
@@ -298,13 +353,15 @@ export class AnalyticsIntegrationService {
       );
 
       if (result.success && result.data) {
+        const timestampValue = result.data.props?.timestamp;
         return {
           metricId: result.data.id,
           metricName: metricData.metricName,
           value: metricData.value,
           unit: metricData.unit,
           category: metricData.category,
-          timestamp: (result.data as any).props.timestamp,
+          timestamp:
+            timestampValue instanceof Date ? timestampValue : metricData.timestamp,
           status: result.data.status,
         };
       } else {
@@ -323,7 +380,7 @@ export class AnalyticsIntegrationService {
     operation: string,
     duration: number,
     success: boolean,
-    metadata?: any,
+    metadata?: PerformanceMetadata,
   ) {
     try {
       return await this.domainService.createSystemPerformanceEvent(
@@ -422,7 +479,7 @@ export class AnalyticsIntegrationService {
 
       // 缓存结果5分钟
       if (result.success) {
-        await this.cacheManager.set(cacheKey, result, 5 * 60 * 1000);
+        await this.cacheManager.set(cacheKey, result, 5 * 60);
       }
 
       return result;
@@ -484,7 +541,7 @@ export class AnalyticsIntegrationService {
    */
   private createEventBus(): IDomainEventBus {
     return {
-      publish: async (event: any) => {
+      publish: async (event: DomainEventPayload) => {
         try {
           await this.natsClient.publish('analytics.events', event);
         } catch (error) {
@@ -499,18 +556,18 @@ export class AnalyticsIntegrationService {
    */
   private createAuditLogger(): IAuditLogger {
     return {
-      log: async (action: string, details: any) => {
+      log: async (action: string, details: Record<string, unknown>) => {
         this.logger.log(`Audit: ${action}`, details);
       },
-      logBusinessEvent: async (eventType: string, data: any) => {
+      logBusinessEvent: async (eventType: string, data: Record<string, unknown>) => {
         this.logger.log(`Business Event: ${eventType}`, data);
         // 可以集成到专门的审计系统
       },
-      logSecurityEvent: async (eventType: string, data: any) => {
+      logSecurityEvent: async (eventType: string, data: Record<string, unknown>) => {
         this.logger.warn(`Security Event: ${eventType}`, data);
         // 安全事件需要特殊处理
       },
-      logError: async (eventType: string, data: any) => {
+      logError: async (eventType: string, data: Record<string, unknown>) => {
         this.logger.error(`Error Event: ${eventType}`, data);
       },
     };
@@ -525,10 +582,12 @@ export class AnalyticsIntegrationService {
         // 简化实现 - 检查用户同意状态
         return true;
       },
-      getUserConsentStatus: async (_userId: string): Promise<ConsentStatus> => {
+      getUserConsentStatus: async (
+        _userId: string,
+      ): Promise<{ status: ConsentStatus; lastUpdated: Date }> => {
         // 从用户配置或数据库获取同意状态
         // 这里简化实现，实际应从用户管理模块获取
-        return ConsentStatus.GRANTED;
+        return { status: ConsentStatus.GRANTED, lastUpdated: new Date() };
       },
       anonymizeUserData: async (userId: string) => {
         this.logger.log(`Anonymizing data for user: ${userId}`);
@@ -629,7 +688,7 @@ export class AnalyticsIntegrationService {
   /**
    * 生成报告 - EMERGENCY IMPLEMENTATION
    */
-  async generateReport(reportConfig: any) {
+  async generateReport(reportConfig: ReportConfig) {
     try {
       return {
         reportId: `report_${Date.now()}`,
@@ -649,7 +708,7 @@ export class AnalyticsIntegrationService {
   /**
    * 获取报告列表 - EMERGENCY IMPLEMENTATION
    */
-  async getReports(organizationId: string, filters?: any) {
+  async getReports(organizationId: string, filters?: Record<string, unknown>) {
     try {
       return {
         organizationId,
@@ -729,7 +788,7 @@ export class AnalyticsIntegrationService {
    */
   async configureDataRetention(
     organizationId: string,
-    retentionConfig: any,
+    retentionConfig: RetentionConfig,
     _userId?: string,
   ) {
     try {
@@ -748,7 +807,7 @@ export class AnalyticsIntegrationService {
   /**
    * 导出数据 - EMERGENCY IMPLEMENTATION
    */
-  async exportData(organizationId: string, exportConfig: any) {
+  async exportData(organizationId: string, exportConfig: ExportConfig) {
     try {
       return {
         organizationId,
@@ -815,7 +874,7 @@ export class AnalyticsIntegrationService {
             startTime: new Date(),
             isActive: true,
           },
-          30 * 60 * 1000,
+          30 * 60,
         );
       },
       updateSessionActivity: async (sessionId: string, userId: string) => {
@@ -827,12 +886,13 @@ export class AnalyticsIntegrationService {
             userId,
             lastActivity: new Date(),
           },
-          30 * 60 * 1000,
+          30 * 60,
         ); // 30分钟过期
       },
       getSession: async (sessionId: string): Promise<UserSession | null> => {
         const cacheKey = `session:${sessionId}`;
-        const sessionData = (await this.cacheManager.get(cacheKey)) as any;
+        const sessionData =
+          await this.cacheManager.get<SessionCacheEntry>(cacheKey);
 
         if (!sessionData) {
           return null;
@@ -841,10 +901,9 @@ export class AnalyticsIntegrationService {
         return {
           sessionId: sessionData.sessionId,
           userId: sessionData.userId,
-          startTime: sessionData.startTime,
-          lastActivity: sessionData.lastActivity,
-          isActive: true,
-        } as UserSession;
+          startTime: sessionData.startTime ?? new Date(0),
+          isActive: sessionData.isActive ?? true,
+        };
       },
       endSession: async (sessionId: string) => {
         const cacheKey = `session:${sessionId}`;

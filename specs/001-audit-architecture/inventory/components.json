@@ -1,0 +1,297 @@
+{
+  "generatedAt": "2025-11-10T18:12:08.934Z",
+  "projects": [
+    {
+      "name": "ai-recruitment-frontend-e2e",
+      "root": "apps/ai-recruitment-frontend-e2e",
+      "sourceRoot": "apps/ai-recruitment-frontend-e2e/src",
+      "projectType": "application",
+      "tags": [
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "candidate-scoring-domain",
+      "root": "libs/candidate-scoring-domain",
+      "sourceRoot": "libs/candidate-scoring-domain/src",
+      "projectType": "library",
+      "tags": [
+        "npm:public",
+        "domain:candidate-scoring",
+        "scope:domain",
+        "type:lib",
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "report-generation-domain",
+      "root": "libs/report-generation-domain",
+      "sourceRoot": "libs/report-generation-domain/src",
+      "projectType": "library",
+      "tags": [
+        "npm:public",
+        "domain:report-generation",
+        "scope:domain",
+        "type:lib",
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "resume-processing-domain",
+      "root": "libs/resume-processing-domain",
+      "sourceRoot": "libs/resume-processing-domain/src",
+      "projectType": "library",
+      "tags": [
+        "npm:public",
+        "domain:resume-processing",
+        "scope:domain",
+        "type:lib",
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "ai-recruitment-frontend",
+      "root": "apps/ai-recruitment-frontend",
+      "sourceRoot": "apps/ai-recruitment-frontend/src",
+      "projectType": "application",
+      "tags": [
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "incentive-system-domain",
+      "root": "libs/incentive-system-domain",
+      "sourceRoot": "libs/incentive-system-domain/src",
+      "projectType": "library",
+      "tags": [
+        "npm:public",
+        "domain:incentive-system",
+        "scope:domain",
+        "type:lib",
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "usage-management-domain",
+      "root": "libs/usage-management-domain",
+      "sourceRoot": "libs/usage-management-domain/src",
+      "projectType": "library",
+      "tags": [
+        "npm:public",
+        "domain:usage-management",
+        "scope:domain",
+        "type:lib",
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "user-management-domain",
+      "root": "libs/user-management-domain",
+      "sourceRoot": "libs/user-management-domain/src",
+      "projectType": "library",
+      "tags": [
+        "npm:public",
+        "domain:user-management",
+        "scope:domain",
+        "type:lib",
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "infrastructure-shared",
+      "root": "libs/infrastructure-shared",
+      "sourceRoot": "libs/infrastructure-shared/src",
+      "projectType": "library",
+      "tags": [
+        "npm:public",
+        "scope:shared",
+        "type:lib",
+        "layer:infrastructure",
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "job-management-domain",
+      "root": "libs/job-management-domain",
+      "sourceRoot": "libs/job-management-domain/src",
+      "projectType": "library",
+      "tags": [
+        "npm:public",
+        "domain:job-management",
+        "scope:domain",
+        "type:lib",
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "report-generator-svc",
+      "root": "apps/report-generator-svc",
+      "sourceRoot": "apps/report-generator-svc/src",
+      "projectType": "application",
+      "tags": [
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "ai-services-shared",
+      "root": "libs/ai-services-shared",
+      "sourceRoot": "libs/ai-services-shared/src",
+      "projectType": "library",
+      "tags": [
+        "npm:public",
+        "scope:shared",
+        "type:lib",
+        "layer:ai-services",
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "scoring-engine-svc",
+      "root": "apps/scoring-engine-svc",
+      "sourceRoot": "apps/scoring-engine-svc/src",
+      "projectType": "application",
+      "tags": [
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "shared-nats-client",
+      "root": "libs/shared-nats-client",
+      "sourceRoot": "libs/shared-nats-client/src",
+      "projectType": "library",
+      "tags": [
+        "npm:public",
+        "npm:nats",
+        "npm:microservices",
+        "npm:messaging",
+        "npm:jetstream",
+        "npm:nestjs",
+        "scope:shared",
+        "type:lib",
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "resume-parser-svc",
+      "root": "apps/resume-parser-svc",
+      "sourceRoot": "apps/resume-parser-svc/src",
+      "projectType": "application",
+      "tags": [
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "jd-extractor-svc",
+      "root": "apps/jd-extractor-svc",
+      "sourceRoot": "apps/jd-extractor-svc/src",
+      "projectType": "application",
+      "tags": [
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "marketing-domain",
+      "root": "libs/marketing-domain",
+      "sourceRoot": "libs/marketing-domain/src",
+      "projectType": "library",
+      "tags": [
+        "npm:public",
+        "domain:marketing",
+        "scope:domain",
+        "type:lib",
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "app-gateway-e2e",
+      "root": "apps/app-gateway-e2e",
+      "sourceRoot": "",
+      "projectType": "application",
+      "tags": [
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "api-contracts",
+      "root": "libs/api-contracts",
+      "sourceRoot": "libs/api-contracts/src",
+      "projectType": "library",
+      "tags": [
+        "npm:public",
+        "scope:shared",
+        "type:lib",
+        "layer:contracts",
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "configuration",
+      "root": "libs/configuration",
+      "sourceRoot": "libs/configuration/src",
+      "projectType": "library",
+      "tags": [
+        "npm:private",
+        "scope:shared",
+        "layer:configuration",
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "app-gateway",
+      "root": "apps/app-gateway",
+      "sourceRoot": "apps/app-gateway/src",
+      "projectType": "application",
+      "tags": [
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "shared-dtos",
+      "root": "libs/shared-dtos",
+      "sourceRoot": "libs/shared-dtos/src",
+      "projectType": "library",
+      "tags": [
+        "npm:public",
+        "npm:dtos",
+        "npm:events",
+        "npm:typescript",
+        "npm:microservices",
+        "scope:shared",
+        "type:utils",
+        "owner:platform-governance"
+      ],
+      "ownerTeam": "platform-governance"
+    },
+    {
+      "name": "ai-recruitment-clerk",
+      "root": ".",
+      "sourceRoot": "",
+      "projectType": "app",
+      "tags": [
+        "npm:private"
+      ],
+      "ownerTeam": "platform-governance"
+    }
+  ]
+}

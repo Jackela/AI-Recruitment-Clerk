@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { Observable, Subject, from, of } from 'rxjs';
 import {
   map,
@@ -18,11 +18,11 @@ import { ProgressFeedbackService } from '../feedback/progress-feedback.service';
 /**
  * Defines the shape of the batch operation.
  */
-export interface BatchOperation<T = any> {
+export interface BatchOperation<T = unknown> {
   id: string;
   type: 'create' | 'update' | 'delete' | 'process';
   items: T[];
-  action: (item: T) => Observable<any>;
+  action: (item: T) => Observable<unknown>;
   config?: BatchConfig;
 }
 
@@ -39,6 +39,8 @@ export interface BatchConfig {
   showProgress?: boolean;
   progressMessage?: string;
 }
+
+type NormalizedBatchConfig = Required<BatchConfig>;
 
 /**
  * Defines the shape of the batch result.
@@ -75,6 +77,8 @@ export interface BatchProgress {
 export class BatchOperationsService {
   private activeOperations = new Map<string, Subject<void>>();
   private operationProgress = new Map<string, BatchProgress>();
+  private readonly toastService = inject(ToastService);
+  private readonly progressFeedback = inject(ProgressFeedbackService);
 
   // Reactive state
   currentOperations = signal<BatchProgress[]>([]);
@@ -95,16 +99,6 @@ export class BatchOperationsService {
       this.currentOperations().filter((op) => op.status === 'failed').length,
   );
 
-  /**
-   * Initializes a new instance of the Batch Operations Service.
-   * @param toastService - The toast service.
-   * @param progressFeedback - The progress feedback.
-   */
-  constructor(
-    private toastService: ToastService,
-    private progressFeedback: ProgressFeedbackService,
-  ) {}
-
   // Main batch operation execution
   /**
    * Performs the execute batch operation.
@@ -112,7 +106,7 @@ export class BatchOperationsService {
    * @returns The Observable<BatchResult<T>>.
    */
   executeBatch<T>(operation: BatchOperation<T>): Observable<BatchResult<T>> {
-    const config: BatchConfig = {
+    const config: NormalizedBatchConfig = {
       concurrent: 3,
       chunkSize: 10,
       retryCount: 2,
@@ -223,12 +217,12 @@ export class BatchOperationsService {
   // Process items concurrently
   private processConcurrent<T>(
     operation: BatchOperation<T>,
-    config: BatchConfig,
+    config: NormalizedBatchConfig,
     result: BatchResult<T>,
     progress: BatchProgress,
     cancelSignal: Subject<void>,
   ): Observable<BatchResult<T>> {
-    const chunks = this.chunkArray(operation.items, config.chunkSize!);
+    const chunks = this.chunkArray(operation.items, config.chunkSize);
 
     return from(chunks).pipe(
       mergeMap((chunk) =>
@@ -271,7 +265,7 @@ export class BatchOperationsService {
   // Process items sequentially
   private processSequential<T>(
     operation: BatchOperation<T>,
-    config: BatchConfig,
+    config: NormalizedBatchConfig,
     result: BatchResult<T>,
     progress: BatchProgress,
     cancelSignal: Subject<void>,
@@ -317,7 +311,7 @@ export class BatchOperationsService {
   private processItem<T>(
     item: T,
     action: (item: T) => Observable<unknown>,
-    config: BatchConfig,
+    config: NormalizedBatchConfig,
   ): Observable<{
     item: T;
     success: boolean;
@@ -325,10 +319,10 @@ export class BatchOperationsService {
     error?: Error | unknown;
   }> {
     return action(item).pipe(
-      timeout(config.timeout!),
+      timeout(config.timeout),
       retry({
-        count: config.retryCount!,
-        delay: config.retryDelay!,
+        count: config.retryCount,
+        delay: config.retryDelay,
       }),
       map((result) => ({ item, success: true, result })),
       catchError((error) => {
@@ -418,7 +412,7 @@ export class BatchOperationsService {
    */
   batchCreate<T>(
     items: T[],
-    createFn: (item: T) => Observable<any>,
+    createFn: (item: T) => Observable<unknown>,
     config?: BatchConfig,
   ): Observable<BatchResult<T>> {
     const operation: BatchOperation<T> = {
@@ -444,7 +438,7 @@ export class BatchOperationsService {
    */
   batchUpdate<T>(
     items: T[],
-    updateFn: (item: T) => Observable<any>,
+    updateFn: (item: T) => Observable<unknown>,
     config?: BatchConfig,
   ): Observable<BatchResult<T>> {
     const operation: BatchOperation<T> = {
@@ -470,7 +464,7 @@ export class BatchOperationsService {
    */
   batchDelete<T>(
     items: T[],
-    deleteFn: (item: T) => Observable<any>,
+    deleteFn: (item: T) => Observable<unknown>,
     config?: BatchConfig,
   ): Observable<BatchResult<T>> {
     const operation: BatchOperation<T> = {
@@ -497,7 +491,7 @@ export class BatchOperationsService {
    */
   batchProcess<T>(
     items: T[],
-    processFn: (item: T) => Observable<any>,
+    processFn: (item: T) => Observable<unknown>,
     config?: BatchConfig,
   ): Observable<BatchResult<T>> {
     const operation: BatchOperation<T> = {

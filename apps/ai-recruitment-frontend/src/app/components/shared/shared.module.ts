@@ -9,7 +9,7 @@ import { DashboardCardComponent } from './dashboard-card/dashboard-card.componen
 import { BentoGridComponent } from './bento-grid/bento-grid.component';
 import { BentoCardComponent } from './bento-grid/bento-card.component';
 
-const MODULE_COMPONENTS: Type<any>[] = [];
+const MODULE_COMPONENTS: Type<unknown>[] = [];
 
 const STANDALONE_COMPONENTS = [
   LoadingComponent,

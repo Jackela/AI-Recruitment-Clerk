@@ -2,8 +2,9 @@
   "name": "@app/marketing-domain",
   "version": "0.0.1",
   "description": "Marketing Research Bounded Context - Domain Layer",
-  "main": "src/index.ts",
-  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "type": "commonjs",
   "scripts": {
     "build": "tsc",
     "test": "jest"

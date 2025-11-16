@@ -2,11 +2,10 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, FilterQuery } from 'mongoose';
 import { ConsentStatus } from '../schemas/consent-record.schema';
 import {
   ConsentRecord,
@@ -18,18 +17,60 @@ import {
   DataSubjectRightsRequest,
   CreateRightsRequestDto,
   DataExportPackage,
-  
   RequestStatus,
   DataExportFormat,
   IdentityVerificationStatus,
-  
   ConsentPurpose,
+  DataCategory,
 } from '@ai-recruitment-clerk/shared-dtos';
 import {
   UserProfile,
   UserProfileDocument,
 } from '../schemas/user-profile.schema';
 import { v4 as uuidv4 } from 'uuid';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
+
+type TimestampedUserProfileDocument = UserProfileDocument & {
+  createdAt?: Date;
+  updatedAt?: Date;
+};
+
+type LeanQueryResult<T> = {
+  lean(): Promise<T[]>;
+};
+
+interface MinimalLeanModel<T> {
+  find(filter?: FilterQuery<T>): LeanQueryResult<T>;
+}
+
+interface NatsClientLike {
+  publish(subject: string, data: Record<string, unknown>): Promise<void>;
+  request<TResult>(
+    subject: string,
+    data: Record<string, unknown>,
+    timeout: number,
+  ): Promise<TResult | null>;
+}
+
+interface CollectedDataItem {
+  service: string;
+  dataType: string;
+  data: unknown;
+  collectedAt: string;
+}
+
+interface ExportDataItem {
+  service: string;
+  dataType: string;
+  data: unknown;
+}
+
+interface ExportDataSummary {
+  totalRecords: number;
+  dataByService: Record<string, number>;
+  dataByType: Record<string, number>;
+  recordTypes: string[];
+}
 
 /**
  * GDPR Privacy Compliance Service
@@ -38,9 +79,10 @@ import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class PrivacyComplianceService {
   private readonly logger = new Logger(PrivacyComplianceService.name);
-  private readonly natsClient: any; // Temporary fallback until NATS client is properly injected
-  private readonly consentRecordModel: any; // Temporary fallback until proper injection
-  private readonly dataSubjectRightsModel: any; // Temporary fallback until proper injection
+  private readonly natsClient: NatsClientLike; // Temporary fallback until NATS client is properly injected
+  private readonly consentRecordModel: MinimalLeanModel<ConsentRecord>; // Temporary fallback until proper injection
+  private readonly dataSubjectRightsModel: MinimalLeanModel<DataSubjectRightsRequest>; // Temporary fallback until proper injection
+  private readonly config = getConfig();
 
   /**
    * Initializes a new instance of the Privacy Compliance Service.
@@ -48,15 +90,19 @@ export class PrivacyComplianceService {
    */
   constructor(
     @InjectModel(UserProfile.name)
-    private userProfileModel: Model<UserProfileDocument>,
+    private readonly userProfileModel: Model<TimestampedUserProfileDocument>,
     // We'll inject additional models as we create them
   ) {
     // Temporary fallback for NATS client until proper injection is implemented
     this.natsClient = {
-      publish: async (subject: string, data: any) => {
+      publish: async (subject: string, data: Record<string, unknown>) => {
         this.logger.warn(`NATS publish fallback: ${subject}`, data);
       },
-      request: async (subject: string, data: any, timeout: number) => {
+      request: async <TResult>(
+        subject: string,
+        data: Record<string, unknown>,
+        timeout: number,
+      ): Promise<TResult | null> => {
         this.logger.warn(`NATS request fallback: ${subject}`, {
           data,
           timeout,
@@ -67,12 +113,16 @@ export class PrivacyComplianceService {
 
     // Temporary fallback models until proper injection is implemented
     this.consentRecordModel = {
-      find: () => ({ lean: () => Promise.resolve([]) }),
-    } as any;
+      find: () => ({
+        lean: async () => [] as ConsentRecord[],
+      }),
+    };
 
     this.dataSubjectRightsModel = {
-      find: () => ({ lean: () => Promise.resolve([]) }),
-    } as any;
+      find: () => ({
+        lean: async () => [] as DataSubjectRightsRequest[],
+      }),
+    };
   }
 
   /**
@@ -213,7 +263,7 @@ export class PrivacyComplianceService {
       // TODO: Implement consent withdrawal cascade - stop processing activities
       await this.cascadeConsentWithdrawal(
         withdrawConsentDto.userId,
-        withdrawConsentDto.purpose as any,
+        withdrawConsentDto.purpose,
       );
 
       this.logger.log(
@@ -243,30 +293,33 @@ export class PrivacyComplianceService {
         );
       }
 
+      const createdAt = userProfile.createdAt ?? new Date();
+      const lastUpdated = userProfile.updatedAt ?? new Date();
+
       const consentStatus: ConsentStatusDto = {
         userId,
         purposes: [
           {
             purpose: ConsentPurpose.ESSENTIAL_SERVICES,
             status: userProfile.dataProcessingConsent,
-            grantedAt: (userProfile as any).createdAt || new Date(),
+            grantedAt: createdAt,
             canWithdraw: false, // Essential services cannot be withdrawn
           },
           {
             purpose: ConsentPurpose.MARKETING_COMMUNICATIONS,
             status: userProfile.marketingConsent,
-            grantedAt: (userProfile as any).createdAt || new Date(),
+            grantedAt: createdAt,
             canWithdraw: true,
           },
           {
             purpose: ConsentPurpose.BEHAVIORAL_ANALYTICS,
             status: userProfile.analyticsConsent,
-            grantedAt: (userProfile as any).createdAt || new Date(),
+            grantedAt: createdAt,
             canWithdraw: true,
           },
         ],
         needsRenewal: this.checkConsentRenewalNeeded(userProfile),
-        lastUpdated: (userProfile as any).updatedAt || new Date(),
+        lastUpdated,
       };
 
       return consentStatus;
@@ -301,14 +354,20 @@ export class PrivacyComplianceService {
       const rightsRequest: DataSubjectRightsRequest = {
         id: requestId,
         userId: createRequestDto.userId,
-        type: createRequestDto.requestType as any,
-        requestType: createRequestDto.requestType as any,
+        requestType: createRequestDto.requestType,
         status: RequestStatus.PENDING,
         identityVerificationStatus: IdentityVerificationStatus.PENDING,
+        description: createRequestDto.description,
         requestDate: new Date(),
+        dueDate,
+        metadata: createRequestDto.requestDetails
+          ? (createRequestDto.requestDetails as Record<string, unknown>)
+          : undefined,
+        ipAddress: createRequestDto.ipAddress,
+        userAgent: createRequestDto.userAgent,
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as any;
+      };
 
       // TODO: Store in database (implement rights request schema)
       // await this.rightsRequestModel.create(rightsRequest);
@@ -340,12 +399,19 @@ export class PrivacyComplianceService {
       // Collect all personal data for the user
       const userData = await this.collectUserData(userId);
 
+      // Transform to DataCategoryExport[]
+      const dataCategories = userData.map((item) => ({
+        category: item.dataType || 'unknown',
+        description: `Collected from ${item.service || 'unknown'}`,
+        data: item.data,
+        sources: item.service ? [item.service] : [],
+      }));
+
       const exportPackage: DataExportPackage = {
         requestId: uuidv4(),
         userId,
-        data: userData,
         format,
-        dataCategories: userData,
+        dataCategories,
         metadata: {
           exportDate: new Date(),
           dataController: 'AI Recruitment Clerk',
@@ -404,36 +470,36 @@ export class PrivacyComplianceService {
    * PRIVATE HELPER METHODS
    */
 
-  private getDefaultDataCategories(purpose: ConsentPurpose): string[] {
-    const categoryMap = {
+  private getDefaultDataCategories(purpose: ConsentPurpose): DataCategory[] {
+    const categoryMap: Partial<Record<ConsentPurpose, DataCategory[]>> = {
       [ConsentPurpose.ESSENTIAL_SERVICES]: [
-        'authentication',
-        'profile_information',
+        DataCategory.AUTHENTICATION,
+        DataCategory.PROFILE_INFORMATION,
       ],
       [ConsentPurpose.BEHAVIORAL_ANALYTICS]: [
-        'behavioral_data',
-        'device_information',
+        DataCategory.BEHAVIORAL_DATA,
+        DataCategory.DEVICE_INFORMATION,
       ],
       [ConsentPurpose.MARKETING_COMMUNICATIONS]: [
-        'communication_preferences',
-        'profile_information',
+        DataCategory.COMMUNICATION_PREFERENCES,
+        DataCategory.PROFILE_INFORMATION,
       ],
       [ConsentPurpose.FUNCTIONAL_ANALYTICS]: [
-        'system_logs',
-        'performance_data',
+        DataCategory.SYSTEM_LOGS,
+        DataCategory.DEVICE_INFORMATION,
       ],
       [ConsentPurpose.THIRD_PARTY_SHARING]: [
-        'resume_content',
-        'job_preferences',
+        DataCategory.RESUME_CONTENT,
+        DataCategory.JOB_PREFERENCES,
       ],
       [ConsentPurpose.PERSONALIZATION]: [
-        'profile_information',
-        'job_preferences',
+        DataCategory.PROFILE_INFORMATION,
+        DataCategory.JOB_PREFERENCES,
       ],
-      [ConsentPurpose.PERFORMANCE_MONITORING]: ['system_logs'],
+      [ConsentPurpose.PERFORMANCE_MONITORING]: [DataCategory.SYSTEM_LOGS],
     };
 
-    return categoryMap[purpose] || ['general'];
+    return categoryMap[purpose] ?? [DataCategory.SYSTEM_LOGS];
   }
 
   private getLegalBasisForPurpose(purpose: ConsentPurpose): string {
@@ -475,10 +541,13 @@ export class PrivacyComplianceService {
     return analytics?.status === ConsentStatus.GRANTED;
   }
 
-  private checkConsentRenewalNeeded(userProfile: UserProfileDocument): boolean {
+  private checkConsentRenewalNeeded(
+    userProfile: TimestampedUserProfileDocument,
+  ): boolean {
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-    return ((userProfile as any).updatedAt || new Date()) < oneYearAgo;
+    const lastUpdated = userProfile.updatedAt ?? new Date();
+    return lastUpdated < oneYearAgo;
   }
 
   private async cascadeConsentWithdrawal(
@@ -492,22 +561,22 @@ export class PrivacyComplianceService {
 
       // Stop all related processing activities based on purpose
       switch (purpose) {
-        case ConsentPurpose.RESUME_PROCESSING:
+        case ConsentPurpose.ESSENTIAL_SERVICES:
           await this.stopResumeProcessing(userId);
           await this.stopJobMatchingActivities(userId);
           break;
 
-        case ConsentPurpose.MARKETING:
+        case ConsentPurpose.MARKETING_COMMUNICATIONS:
           await this.stopMarketingActivities(userId);
           await this.removeFromMarketingLists(userId);
           break;
 
-        case ConsentPurpose.ANALYTICS:
+        case ConsentPurpose.BEHAVIORAL_ANALYTICS:
           await this.stopAnalyticsCollection(userId);
           await this.anonymizeAnalyticsData(userId);
           break;
 
-        case ConsentPurpose.COMMUNICATION:
+        case ConsentPurpose.PERSONALIZATION:
           await this.stopCommunicationActivities(userId);
           await this.unsubscribeFromNotifications(userId);
           break;
@@ -759,8 +828,8 @@ export class PrivacyComplianceService {
     }
   }
 
-  private async collectUserData(userId: string): Promise<any[]> {
-    const collectedData: any[] = [];
+  private async collectUserData(userId: string): Promise<CollectedDataItem[]> {
+    const collectedData: CollectedDataItem[] = [];
 
     try {
       this.logger.log(
@@ -768,7 +837,7 @@ export class PrivacyComplianceService {
       );
 
       // Collect data from all services in parallel
-      const dataCollectionPromises = [
+      const dataCollectionPromises: Promise<CollectedDataItem[]>[] = [
         this.collectGatewayData(userId),
         this.collectResumeParserData(userId),
         this.collectScoringEngineData(userId),
@@ -779,11 +848,14 @@ export class PrivacyComplianceService {
         this.collectUserManagementData(userId),
       ];
 
-      const results = await Promise.allSettled(dataCollectionPromises);
+      const results =
+        await Promise.allSettled<CollectedDataItem[]>(
+          dataCollectionPromises,
+        );
 
       // Process results and collect successful data
       results.forEach((result, index) => {
-        if (result.status === 'fulfilled' && result.value) {
+        if (result.status === 'fulfilled' && result.value?.length) {
           collectedData.push(...result.value);
         } else if (result.status === 'rejected') {
           this.logger.error(
@@ -803,14 +875,14 @@ export class PrivacyComplianceService {
     }
   }
 
-  private async collectGatewayData(userId: string): Promise<any[]> {
+  private async collectGatewayData(userId: string): Promise<CollectedDataItem[]> {
     try {
-      const data: any[] = [];
+      const data: CollectedDataItem[] = [];
 
       // Collect user profile data
       const userProfile = await this.userProfileModel
         .findOne({ userId })
-        .lean();
+        .lean<UserProfile>();
       if (userProfile) {
         data.push({
           service: 'app-gateway',
@@ -856,123 +928,88 @@ export class PrivacyComplianceService {
     }
   }
 
-  private async collectResumeParserData(userId: string): Promise<any[]> {
+  private async fetchServiceData(
+    subject: string,
+    userId: string,
+    contextLabel: string,
+  ): Promise<CollectedDataItem[]> {
     try {
-      // Request data from resume parser service via NATS
-      const response = await this.natsClient.request(
-        'resume-parser.data.collect',
-        { userId },
-        5000,
-      );
-      return response ? [response] : [];
+      const response = await this.natsClient.request<
+        CollectedDataItem | CollectedDataItem[]
+      >(subject, { userId }, 5000);
+      return this.normalizeCollectedData(response);
     } catch (error) {
       this.logger.error(
-        `Failed to collect resume parser data for user ${userId}:`,
+        `Failed to collect ${contextLabel} data for user ${userId}:`,
         error,
       );
       return [];
     }
   }
 
-  private async collectScoringEngineData(userId: string): Promise<any[]> {
-    try {
-      // Request data from scoring engine service via NATS
-      const response = await this.natsClient.request(
-        'scoring-engine.data.collect',
-        { userId },
-        5000,
-      );
-      return response ? [response] : [];
-    } catch (error) {
-      this.logger.error(
-        `Failed to collect scoring engine data for user ${userId}:`,
-        error,
-      );
+  private normalizeCollectedData(
+    payload: CollectedDataItem | CollectedDataItem[] | null,
+  ): CollectedDataItem[] {
+    if (!payload) {
       return [];
     }
+    return Array.isArray(payload) ? payload : [payload];
   }
 
-  private async collectReportGeneratorData(userId: string): Promise<any[]> {
+  private collectResumeParserData(userId: string): Promise<CollectedDataItem[]> {
+    return this.fetchServiceData(
+      'resume-parser.data.collect',
+      userId,
+      'resume parser',
+    );
+  }
+
+  private collectScoringEngineData(userId: string): Promise<CollectedDataItem[]> {
+    return this.fetchServiceData(
+      'scoring-engine.data.collect',
+      userId,
+      'scoring engine',
+    );
+  }
+
+  private collectReportGeneratorData(
+    userId: string,
+  ): Promise<CollectedDataItem[]> {
+    return this.fetchServiceData(
+      'report-generator.data.collect',
+      userId,
+      'report generator',
+    );
+  }
+
+  private collectJdExtractorData(userId: string): Promise<CollectedDataItem[]> {
+    return this.fetchServiceData(
+      'jd-extractor.data.collect',
+      userId,
+      'JD extractor',
+    );
+  }
+
+  private collectAnalyticsData(userId: string): Promise<CollectedDataItem[]> {
+    return this.fetchServiceData('analytics.data.collect', userId, 'analytics');
+  }
+
+  private collectMarketingData(userId: string): Promise<CollectedDataItem[]> {
+    return this.fetchServiceData('marketing.data.collect', userId, 'marketing');
+  }
+
+  private async collectUserManagementData(
+    userId: string,
+  ): Promise<CollectedDataItem[]> {
     try {
-      // Request data from report generator service via NATS
-      const response = await this.natsClient.request(
-        'report-generator.data.collect',
-        { userId },
-        5000,
-      );
-      return response ? [response] : [];
-    } catch (error) {
-      this.logger.error(
-        `Failed to collect report generator data for user ${userId}:`,
-        error,
-      );
+      const response = await this.natsClient.request<
+        CollectedDataItem | CollectedDataItem[]
+      >('user-management.data.collect', { userId }, 5000);
+      if (response) {
+        return this.normalizeCollectedData(response);
+      }
+
       return [];
-    }
-  }
-
-  private async collectJdExtractorData(userId: string): Promise<any[]> {
-    try {
-      // Request data from JD extractor service via NATS
-      const response = await this.natsClient.request(
-        'jd-extractor.data.collect',
-        { userId },
-        5000,
-      );
-      return response ? [response] : [];
-    } catch (error) {
-      this.logger.error(
-        `Failed to collect JD extractor data for user ${userId}:`,
-        error,
-      );
-      return [];
-    }
-  }
-
-  private async collectAnalyticsData(userId: string): Promise<any[]> {
-    try {
-      // Request analytics data via NATS
-      const response = await this.natsClient.request(
-        'analytics.data.collect',
-        { userId },
-        5000,
-      );
-      return response ? [response] : [];
-    } catch (error) {
-      this.logger.error(
-        `Failed to collect analytics data for user ${userId}:`,
-        error,
-      );
-      return [];
-    }
-  }
-
-  private async collectMarketingData(userId: string): Promise<any[]> {
-    try {
-      // Request marketing data via NATS
-      const response = await this.natsClient.request(
-        'marketing.data.collect',
-        { userId },
-        5000,
-      );
-      return response ? [response] : [];
-    } catch (error) {
-      this.logger.error(
-        `Failed to collect marketing data for user ${userId}:`,
-        error,
-      );
-      return [];
-    }
-  }
-
-  private async collectUserManagementData(userId: string): Promise<any[]> {
-    try {
-      // Request user management data via NATS
-      // const response = await this.natsClient.request('user-management.data.collect', { userId }, 5000);
-      // return response ? [response] : [];
-
-      // Fallback implementation until NATS client is properly injected
-      const userData: any[] = [];
-      return userData;
     } catch (error) {
       this.logger.error(
         `Failed to collect user management data for user ${userId}:`,
@@ -989,17 +1026,24 @@ export class PrivacyComplianceService {
       this.logger.log(`Generating secure download URL for export package`);
 
       // Create comprehensive data export
+      const flatData: ExportDataItem[] = (
+        exportPackage.dataCategories || []
+      ).map((dc) => ({
+        service: dc.sources?.[0] ?? 'unknown',
+        dataType: dc.category ?? 'unknown',
+        data: dc.data as unknown,
+      }));
       const exportData = {
         metadata: {
           exportedAt: new Date().toISOString(),
           dataSubject: exportPackage.userId,
-          totalRecords: exportPackage.data?.length || 0,
+          totalRecords: flatData.length,
           exportFormat: 'JSON',
           gdprCompliant: true,
-          packageId: exportPackage.id,
+          packageId: exportPackage.requestId,
         },
-        data: exportPackage.data || [],
-        summary: this.generateDataSummary(exportPackage.data || []),
+        data: flatData,
+        summary: this.generateDataSummary(flatData),
       };
 
       // Convert to JSON with proper formatting
@@ -1037,13 +1081,8 @@ export class PrivacyComplianceService {
     }
   }
 
-  private generateDataSummary(userData: any[]): any {
-    const summary: {
-      totalRecords: number;
-      dataByService: Record<string, number>;
-      dataByType: Record<string, number>;
-      recordTypes: string[];
-    } = {
+  private generateDataSummary(userData: ExportDataItem[]): ExportDataSummary {
+    const summary: ExportDataSummary = {
       totalRecords: userData.length,
       dataByService: {},
       dataByType: {},
@@ -1051,14 +1090,13 @@ export class PrivacyComplianceService {
     };
 
     userData.forEach((item) => {
-      // Count by service
       const service = item.service || 'unknown';
       summary.dataByService[service] =
         (summary.dataByService[service] || 0) + 1;
 
-      // Count by data type
       const dataType = item.dataType || 'unknown';
-      summary.dataByType[dataType] = (summary.dataByType[dataType] || 0) + 1;
+      summary.dataByType[dataType] =
+        (summary.dataByType[dataType] || 0) + 1;
     });
 
     summary.recordTypes = Object.keys(summary.dataByType);
@@ -1109,7 +1147,9 @@ export class PrivacyComplianceService {
 
       // Generate encryption key (should be from secure key management)
       const encryptionKey =
-        process.env.GDPR_ENCRYPTION_KEY || crypto.randomBytes(32);
+        this.config.security.gdprEncryptionKey ||
+        this.config.security.encryptionKey ||
+        crypto.randomBytes(32);
       const iv = crypto.randomBytes(16);
 
       const cipher = crypto.createCipher(algorithm, encryptionKey);
@@ -1157,21 +1197,25 @@ export class PrivacyComplianceService {
     try {
       // Generate time-limited, signed URL
       const crypto = require('crypto');
+      const config = getConfig();
       const expirationTime = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60; // 7 days
 
       // Create signature
       const payload = `${fileId}:${expirationTime}`;
-      const secretKey = process.env.DOWNLOAD_URL_SECRET || 'default-secret-key';
+      const secretKey =
+        config.security.downloadUrlSecret || 'default-secret-key';
       const signature = crypto
         .createHmac('sha256', secretKey)
         .update(payload)
         .digest('hex');
 
       // Construct secure download URL
-      const baseUrl = process.env.APP_BASE_URL || 'https://localhost:8080';
+      const baseUrl = config.server.baseUrl || 'https://localhost:8080';
       const downloadUrl = `${baseUrl}/api/privacy/data-export/download/${fileId}?expires=${expirationTime}&signature=${signature}`;
 
-      this.logger.log(`Generated secure download URL for file: ${fileId}`);
+      this.logger.log(
+        `Generated secure download URL for file: ${fileId} (${filename})`,
+      );
       return downloadUrl;
     } catch (error) {
       this.logger.error('Failed to generate secure download URL:', error);
@@ -1185,6 +1229,10 @@ export class PrivacyComplianceService {
     downloadUrl: string,
   ): Promise<void> {
     try {
+      const sanitizedUrl = downloadUrl.replace(
+        /signature=[^&]*/u,
+        'signature=***',
+      );
       // Record download information for audit purposes
       // Note: In production, this should be stored in an audit collection
       // const downloadRecord = {
@@ -1200,7 +1248,10 @@ export class PrivacyComplianceService {
       // Store in audit collection or database
       // await this.auditModel.create(downloadRecord);
 
-      this.logger.log(`Recorded data export download for user: ${userId}`);
+      this.logger.log(
+        `Recorded data export download for user: ${userId} and file: ${fileId}`,
+      );
+      this.logger.debug(`Sanitized download URL for audit: ${sanitizedUrl}`);
     } catch (error) {
       this.logger.error('Failed to record data export download:', error);
       // Don't throw here as this is audit logging
@@ -1218,7 +1269,7 @@ export class PrivacyComplianceService {
   }
 
   private async checkErasureEligibility(
-    userId: string,
+    _userId: string,
   ): Promise<{ eligible: boolean; reason?: string }> {
     // TODO: Implement erasure eligibility checks
     // - Active job applications

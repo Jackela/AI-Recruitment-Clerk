@@ -11,6 +11,7 @@ import {
   PromptTemplates,
   PromptBuilder,
 } from '@ai-recruitment-clerk/shared-dtos';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Provides llm functionality.
@@ -19,13 +20,14 @@ import {
 export class LlmService {
   private readonly logger = new Logger(LlmService.name);
   private readonly geminiClient: GeminiClient;
+  private readonly config = getConfig();
 
   /**
    * Initializes a new instance of the LLM Service.
    */
   constructor() {
     // 🔒 SECURITY: Validate configuration before service initialization (skip in tests)
-    if (process.env.NODE_ENV !== 'test') {
+    if (!this.config.env.isTest) {
       SecureConfigValidator.validateServiceConfig('JdExtractorLlmService', [
         'GEMINI_API_KEY',
       ]);
@@ -33,16 +35,17 @@ export class LlmService {
 
     const config: GeminiConfig = {
       apiKey:
-        process.env.NODE_ENV === 'test'
+        this.config.env.isTest
           ? 'test-api-key'
-          : SecureConfigValidator.requireEnv('GEMINI_API_KEY'),
+          : this.config.integrations.gemini.apiKey ||
+            SecureConfigValidator.requireEnv('GEMINI_API_KEY'),
       model: 'gemini-1.5-flash',
       temperature: 0.2, // Lower temperature for more consistent extraction
     };
 
     // In tests, avoid initializing the real client; use a deterministic stub
     this.geminiClient =
-      process.env.NODE_ENV === 'test'
+      this.config.env.isTest
         ? (this.createTestGeminiStub() as unknown as GeminiClient)
         : new GeminiClient(config);
   }
@@ -233,7 +236,7 @@ export class LlmService {
                 s
                   .trim()
                   .toLowerCase()
-                  .replace(/[\.;:,]+$/, ''),
+                  .replace(/[.;:,]+$/, ''),
               )
               .filter(Boolean)
               .forEach((b) => benefits.push(b));
@@ -249,7 +252,7 @@ export class LlmService {
               .replace(/^[-•]\s*/, '')
               .trim()
               .toLowerCase()
-              .replace(/[\.;:,]+$/, ''),
+              .replace(/[.;:,]+$/, ''),
           );
       }
 

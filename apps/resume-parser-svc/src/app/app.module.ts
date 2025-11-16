@@ -14,6 +14,7 @@ import { NatsClientModule } from '@app/shared-nats-client';
 import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
 import { Resume, ResumeSchema } from '../schemas/resume.schema';
 import { ResumeRepository } from '../repositories/resume.repository';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 import {
   StandardizedGlobalExceptionFilter,
   ExceptionFilterConfigHelper,
@@ -23,27 +24,28 @@ import {
 /**
  * Configures the app module.
  */
+const runtimeConfig = getConfig({ forceReload: true });
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env', '.env.local', '.env.production'],
+      cache: true,
+      load: [() => ({ sharedConfig: runtimeConfig })],
     }),
     NatsClientModule.forRoot({
       serviceName: 'resume-parser-svc',
-    }),
-    MongooseModule.forRoot(
-      process.env.MONGODB_URL ||
-        process.env.MONGO_URL ||
-        (() => {
-          throw new Error(
-            'MONGODB_URL or MONGO_URL environment variable is required',
-          );
-        })(),
-      {
-        connectionName: 'resume-parser',
+      connectionOptions: {
+        url: runtimeConfig.messaging.nats.url,
+        timeout: 5000,
+        maxReconnectAttempts: 10,
+        reconnectTimeWait: 2000,
       },
-    ),
+    }),
+    MongooseModule.forRoot(runtimeConfig.database.url, {
+      connectionName: 'resume-parser',
+    }),
     MongooseModule.forFeature(
       [{ name: Resume.name, schema: ResumeSchema }],
       'resume-parser',

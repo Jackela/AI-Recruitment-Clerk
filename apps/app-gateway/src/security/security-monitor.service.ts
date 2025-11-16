@@ -22,7 +22,7 @@ export interface SecurityEvent {
   ip: string;
   userAgent: string;
   timestamp: Date;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   resolved: boolean;
   resolvedAt?: Date;
   resolvedBy?: string;
@@ -99,17 +99,18 @@ export class SecurityMonitorService {
           connectTimeout: 10000,
         });
       } else {
+        const resolvedHost = redisHost;
+        const portValue =
+          this.configService.get<string>('REDISPORT') ||
+          this.configService.get<string>('REDIS_PORT');
+        if (!resolvedHost || !portValue) {
+          throw new Error(
+            'Redis configuration incomplete: REDISHOST found but REDISPORT/REDIS_PORT is missing',
+          );
+        }
         const redisOptions: RedisOptions = {
-          host: redisHost!,
-          port: parseInt(
-            this.configService.get<string>('REDISPORT') ||
-              this.configService.get<string>('REDIS_PORT') ||
-              (() => {
-                throw new Error(
-                  'Redis configuration incomplete: REDISHOST found but REDISPORT/REDIS_PORT is missing',
-                );
-              })(),
-          ),
+          host: resolvedHost,
+          port: parseInt(portValue, 10),
           password: this.configService.get<string>('REDIS_PASSWORD'),
           maxRetriesPerRequest: 3,
           lazyConnect: true,
@@ -671,7 +672,7 @@ export class SecurityMonitorService {
     ip: string,
     userAgent: string,
     activity: string,
-    details?: any,
+    details?: Record<string, unknown>,
   ) {
     return this.recordSecurityEvent({
       type: 'SUSPICIOUS_ACTIVITY',

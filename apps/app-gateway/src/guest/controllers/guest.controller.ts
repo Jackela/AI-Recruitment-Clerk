@@ -26,6 +26,7 @@ import {
   GuestStatusDto,
   RedeemFeedbackCodeDto,
 } from '../dto/guest.dto';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
 /**
  * Exposes endpoints for guest.
@@ -41,6 +42,7 @@ import {
 })
 export class GuestController {
   private readonly logger = new Logger(GuestController.name);
+  private readonly config = getConfig();
 
   /**
    * Initializes a new instance of the Guest Controller.
@@ -89,12 +91,12 @@ export class GuestController {
   })
   async generateFeedbackCode(@Req() req: RequestWithDeviceId) {
     try {
-      const deviceId = req.deviceId!;
+      const deviceId = this.ensureDeviceId(req);
       const feedbackCode =
         await this.guestUsageService.generateFeedbackCode(deviceId);
 
       // Construct survey URL with feedback code
-      const surveyUrl = `${process.env.GUEST_FEEDBACK_URL || 'https://wj.qq.com/s2/default'}?code=${feedbackCode}`;
+      const surveyUrl = `${this.config.guestExperience.feedbackSurveyUrl}?code=${feedbackCode}`;
 
       this.logger.log(
         `Feedback code generated for guest: ${this.maskDeviceId(deviceId)}`,
@@ -138,7 +140,7 @@ export class GuestController {
     @Req() req: RequestWithDeviceId,
   ): Promise<GuestUsageResponseDto> {
     try {
-      const deviceId = req.deviceId!;
+      const deviceId = this.ensureDeviceId(req);
       const status = await this.guestUsageService.getUsageStatus(deviceId);
 
       this.logger.debug(
@@ -177,7 +179,7 @@ export class GuestController {
     @Req() req: RequestWithDeviceId,
   ): Promise<GuestStatusDto> {
     try {
-      const deviceId = req.deviceId!;
+      const deviceId = this.ensureDeviceId(req);
       const details = await this.guestUsageService.getGuestStatus(deviceId);
 
       this.logger.debug(
@@ -318,7 +320,7 @@ export class GuestController {
   })
   async checkUsage(@Req() req: RequestWithDeviceId) {
     try {
-      const deviceId = req.deviceId!;
+      const deviceId = this.ensureDeviceId(req);
       const canUse = await this.guestUsageService.canUse(deviceId);
 
       if (!canUse) {
@@ -359,5 +361,16 @@ export class GuestController {
     return (
       deviceId.substring(0, 4) + '***' + deviceId.substring(deviceId.length - 4)
     );
+  }
+
+  private ensureDeviceId(req: RequestWithDeviceId): string {
+    const deviceId = req.deviceId?.trim();
+    if (!deviceId) {
+      throw new HttpException(
+        'Missing device identifier',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    return deviceId;
   }
 }

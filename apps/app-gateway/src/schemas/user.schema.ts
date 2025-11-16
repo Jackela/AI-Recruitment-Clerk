@@ -12,20 +12,20 @@ export type UserDocument = User & Document;
  */
 @Schema({ timestamps: true, collection: 'users' })
 export class User {
-  @Prop({ required: true, unique: true })
-  id: string = '';
+  @Prop({ type: String, required: true, unique: true })
+  id = '';
 
-  @Prop({ required: true, unique: true, lowercase: true })
-  email: string = '';
+  @Prop({ type: String, required: true, unique: true, lowercase: true })
+  email = '';
 
-  @Prop({ required: true })
-  password: string = '';
+  @Prop({ type: String, required: true })
+  password = '';
 
-  @Prop({ required: false, default: '' })
-  firstName: string = '';
+  @Prop({ type: String, required: false, default: '' })
+  firstName = '';
 
-  @Prop({ required: false, default: '' })
-  lastName: string = '';
+  @Prop({ type: String, required: false, default: '' })
+  lastName = '';
 
   @Prop({
     type: String,
@@ -35,7 +35,7 @@ export class User {
   })
   role: UserRole = UserRole.USER;
 
-  @Prop()
+  @Prop({ type: String })
   organizationId?: string;
 
   @Prop({
@@ -46,7 +46,7 @@ export class User {
   })
   status: UserStatus = UserStatus.ACTIVE;
 
-  @Prop()
+  @Prop({ type: Date })
   lastActivity?: Date;
 
   @Prop({

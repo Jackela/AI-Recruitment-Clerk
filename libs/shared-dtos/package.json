@@ -2,8 +2,9 @@
   "name": "@ai-recruitment-clerk/shared-dtos",
   "version": "1.0.0",
   "description": "Shared DTOs and event interfaces for AI Recruitment Clerk microservices",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

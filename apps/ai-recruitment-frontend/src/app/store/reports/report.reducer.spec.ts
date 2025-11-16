@@ -1,3 +1,4 @@
+import { Action } from '@ngrx/store';
 import { reportReducer } from './report.reducer';
 import { initialReportState, ReportState } from './report.state';
 import * as ReportActions from './report.actions';
@@ -44,7 +45,8 @@ describe('Report Reducer', () => {
 
   describe('Initial State', () => {
     it('should return the initial state', () => {
-      const result = reportReducer(undefined, { type: 'Unknown' } as any);
+      const unknownAction: Action = { type: 'Unknown' };
+      const result = reportReducer(undefined, unknownAction);
       expect(result).toBe(initialReportState);
     });
 

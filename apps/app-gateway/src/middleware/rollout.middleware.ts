@@ -11,6 +11,8 @@ function hashToPct(input: string): number {
   return Math.abs(h % 100);
 }
 
+type RequestWithRollout = Request & { rolloutAllowed?: boolean };
+
 @Injectable()
 export class RolloutMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
@@ -18,9 +20,15 @@ export class RolloutMiddleware implements NestMiddleware {
       res.status(403).json({ message: 'Feature disabled by kill switch' });
       return;
     }
-    const id = (req.headers['x-user-id'] as string) || (req.headers['x-forwarded-for'] as string) || req.ip || 'anon';
+    const requestWithRollout = req as RequestWithRollout;
+    const id =
+      (req.headers['x-user-id'] as string) ||
+      (req.headers['x-forwarded-for'] as string) ||
+      req.ip ||
+      'anon';
     const bucket = hashToPct(id);
-    (req as any).rolloutAllowed = bucket < featureFlags.rolloutPercentage;
+    requestWithRollout.rolloutAllowed =
+      bucket < featureFlags.rolloutPercentage;
     next();
   }
 }

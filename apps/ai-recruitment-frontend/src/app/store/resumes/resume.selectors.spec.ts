@@ -1,5 +1,5 @@
 import * as ResumeSelectors from './resume.selectors';
-import { ResumeState, initialResumeState } from './resume.state';
+import { ResumeState } from './resume.state';
 import { ResumeListItem, ResumeDetail } from './resume.model';
 import { AppState } from '../app.state';
 
@@ -119,8 +119,14 @@ describe('Resume Selectors', () => {
     createdAt: new Date('2024-01-01'),
   };
 
+  const coerceResumeList = (
+    items: ExtendedResumeListItem[],
+  ): ResumeListItem[] => items as unknown as ResumeListItem[];
+
+  const resumeListItems = coerceResumeList(mockResumeListItems);
+
   const mockResumeState: ResumeState = {
-    resumes: mockResumeListItems as ResumeListItem[],
+    resumes: resumeListItems,
     selectedResume: mockSelectedResume,
     loading: false,
     error: null,
@@ -228,27 +234,27 @@ describe('Resume Selectors', () => {
   describe('Derived Selectors', () => {
     it('should select resumes count', () => {
       const result =
-        ResumeSelectors.selectResumesCount.projector(mockResumeListItems as unknown as ResumeListItem[]);
+        ResumeSelectors.selectResumesCount.projector(resumeListItems);
       expect(result).toBe(4);
     });
 
     it('should select resume by ID', () => {
       const selectorFunction = ResumeSelectors.selectResumeById('resume2');
-      const result = selectorFunction.projector(mockResumeListItems as unknown as ResumeListItem[]);
-      expect(result).toEqual(mockResumeListItems[1]);
-      expect(result!.candidateName).toBe('Jane Smith');
+      const result = selectorFunction.projector(resumeListItems);
+      expect(result).toEqual(resumeListItems[1]);
+      expect(result?.candidateName).toBe('Jane Smith');
     });
 
     it('should return undefined for non-existent resume ID', () => {
       const selectorFunction = ResumeSelectors.selectResumeById('nonexistent');
-      const result = selectorFunction.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = selectorFunction.projector(resumeListItems);
       expect(result).toBeUndefined();
     });
 
     it('should select resumes by status', () => {
       const processedResumesSelector =
         ResumeSelectors.selectResumesByStatus('processed');
-      const result = processedResumesSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = processedResumesSelector.projector(resumeListItems);
       expect(result).toHaveLength(2);
       expect(result.every((resume) => resume.status === 'processed')).toBe(
         true,
@@ -262,13 +268,13 @@ describe('Resume Selectors', () => {
     it('should return empty array for non-existent status', () => {
       const nonExistentStatusSelector =
         ResumeSelectors.selectResumesByStatus('archived');
-      const result = nonExistentStatusSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = nonExistentStatusSelector.projector(resumeListItems);
       expect(result).toEqual([]);
     });
 
     it('should select processed resumes', () => {
       const result =
-        ResumeSelectors.selectProcessedResumes.projector(mockResumeListItems as unknown as ResumeListItem[]);
+        ResumeSelectors.selectProcessedResumes.projector(resumeListItems);
       expect(result).toHaveLength(2);
       expect(result.every((resume) => resume.status === 'processed')).toBe(
         true,
@@ -276,14 +282,14 @@ describe('Resume Selectors', () => {
     });
 
     it('should select pending resumes', () => {
-      const resumesWithPending = [
+      const resumesWithPendingList = coerceResumeList([
         { ...mockResumeListItems[0], status: 'pending' as const },
         { ...mockResumeListItems[1], status: 'processing' as const },
         mockResumeListItems[2],
         mockResumeListItems[3],
-      ];
+      ]);
       const result =
-        ResumeSelectors.selectPendingResumes.projector(resumesWithPending);
+        ResumeSelectors.selectPendingResumes.projector(resumesWithPendingList);
       expect(result).toHaveLength(2);
       expect(
         result.every(
@@ -297,7 +303,7 @@ describe('Resume Selectors', () => {
   describe('Recent Resumes Selector', () => {
     it('should select recent resumes with default limit', () => {
       const recentResumesSelector = ResumeSelectors.selectRecentResumes();
-      const result = recentResumesSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = recentResumesSelector.projector(resumeListItems);
 
       expect(result).toHaveLength(4); // All resumes since we only have 4
       // Should be sorted by most recent first
@@ -309,7 +315,7 @@ describe('Resume Selectors', () => {
 
     it('should respect custom limit', () => {
       const recentResumesSelector = ResumeSelectors.selectRecentResumes(2);
-      const result = recentResumesSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = recentResumesSelector.projector(resumeListItems);
 
       expect(result).toHaveLength(2);
       expect(result[0].uploadedAt).toEqual(new Date('2024-01-04'));
@@ -325,7 +331,7 @@ describe('Resume Selectors', () => {
     it('should not mutate original array', () => {
       const originalResumes = [...mockResumeListItems];
       const recentResumesSelector = ResumeSelectors.selectRecentResumes();
-      recentResumesSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      recentResumesSelector.projector(resumeListItems);
 
       expect(mockResumeListItems).toEqual(originalResumes);
     });
@@ -334,7 +340,7 @@ describe('Resume Selectors', () => {
   describe('High-Scoring Resumes Selector', () => {
     it('should select high-scoring resumes with default threshold', () => {
       const highScoringSelector = ResumeSelectors.selectHighScoringResumes();
-      const result = highScoringSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = highScoringSelector.projector(resumeListItems);
 
       expect(result).toHaveLength(3); // 85, 92, 88 are >= 75
       expect(
@@ -346,19 +352,19 @@ describe('Resume Selectors', () => {
 
     it('should respect custom threshold', () => {
       const highScoringSelector = ResumeSelectors.selectHighScoringResumes(90);
-      const result = highScoringSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = highScoringSelector.projector(resumeListItems);
 
       expect(result).toHaveLength(1); // Only 92 is >= 90
       expect(result[0].candidateName).toBe('Jane Smith');
     });
 
     it('should handle resumes without analysis', () => {
-      const resumesWithoutAnalysis = [
+      const resumesWithoutAnalysis = coerceResumeList([
         { ...mockResumeListItems[0], analysis: undefined },
         mockResumeListItems[1],
         { ...mockResumeListItems[2], analysis: undefined },
         mockResumeListItems[3],
-      ];
+      ]);
 
       const highScoringSelector = ResumeSelectors.selectHighScoringResumes();
       const result = highScoringSelector.projector(resumesWithoutAnalysis);
@@ -368,7 +374,7 @@ describe('Resume Selectors', () => {
 
     it('should return empty array when no resumes meet threshold', () => {
       const highScoringSelector = ResumeSelectors.selectHighScoringResumes(95);
-      const result = highScoringSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = highScoringSelector.projector(resumeListItems);
 
       expect(result).toEqual([]);
     });
@@ -471,7 +477,7 @@ describe('Resume Selectors', () => {
   describe('Complex Derived Selectors', () => {
     it('should calculate resume statistics correctly', () => {
       const result =
-        ResumeSelectors.selectResumeStatistics.projector(mockResumeListItems as unknown as ResumeListItem[]);
+        ResumeSelectors.selectResumeStatistics.projector(resumeListItems);
 
       expect(result.total).toBe(4);
       expect(result.processed).toBe(2);
@@ -484,7 +490,7 @@ describe('Resume Selectors', () => {
 
     it('should calculate top skills correctly', () => {
       const result =
-        ResumeSelectors.selectResumeStatistics.projector(mockResumeListItems as unknown as ResumeListItem[]);
+        ResumeSelectors.selectResumeStatistics.projector(resumeListItems);
 
       expect(result.topSkills).toHaveLength(6); // Unique skills from processed resumes
       expect(result.topSkills[0]).toEqual({ skill: 'JavaScript', count: 1 });
@@ -504,7 +510,7 @@ describe('Resume Selectors', () => {
     });
 
     it('should handle resumes without analysis in statistics', () => {
-      const resumesWithoutAnalysis = [
+      const resumesWithoutAnalysis = coerceResumeList([
         { ...mockResumeListItems[0], analysis: undefined },
         { ...mockResumeListItems[1], analysis: undefined },
         {
@@ -512,7 +518,7 @@ describe('Resume Selectors', () => {
           status: 'processed' as const,
           analysis: undefined,
         },
-      ];
+      ]);
 
       const result = ResumeSelectors.selectResumeStatistics.projector(
         resumesWithoutAnalysis,
@@ -529,7 +535,7 @@ describe('Resume Selectors', () => {
         80,
         90,
       );
-      const result = scoreRangeSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = scoreRangeSelector.projector(resumeListItems);
 
       expect(result).toHaveLength(2); // 85 and 88 are in range 80-90
       expect(result.map((resume) => resume.candidateName)).toEqual([
@@ -543,7 +549,7 @@ describe('Resume Selectors', () => {
         78,
         85,
       );
-      const result = scoreRangeSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = scoreRangeSelector.projector(resumeListItems);
 
       expect(result).toHaveLength(2); // 78 and 85 (inclusive)
       expect(
@@ -559,17 +565,17 @@ describe('Resume Selectors', () => {
         95,
         100,
       );
-      const result = scoreRangeSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = scoreRangeSelector.projector(resumeListItems);
 
       expect(result).toEqual([]);
     });
 
     it('should handle resumes without scores', () => {
-      const resumesWithoutScores = [
+      const resumesWithoutScores = coerceResumeList([
         { ...mockResumeListItems[0], analysis: undefined },
         mockResumeListItems[1],
         mockResumeListItems[2],
-      ];
+      ]);
 
       const scoreRangeSelector = ResumeSelectors.selectResumesByScoreRange(
         80,
@@ -585,7 +591,7 @@ describe('Resume Selectors', () => {
     it('should select resumes by skill query', () => {
       const skillSearchSelector =
         ResumeSelectors.selectResumesBySkill('JavaScript');
-      const result = skillSearchSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = skillSearchSelector.projector(resumeListItems);
 
       expect(result).toHaveLength(1);
       expect(result[0].candidateName).toBe('John Doe');
@@ -594,7 +600,7 @@ describe('Resume Selectors', () => {
     it('should handle case-insensitive search', () => {
       const skillSearchSelector =
         ResumeSelectors.selectResumesBySkill('typescript');
-      const result = skillSearchSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = skillSearchSelector.projector(resumeListItems);
 
       expect(result).toHaveLength(2); // John Doe and Alice Williams have TypeScript
     });
@@ -602,30 +608,30 @@ describe('Resume Selectors', () => {
     it('should handle partial skill matching', () => {
       const skillSearchSelector =
         ResumeSelectors.selectResumesBySkill('Script');
-      const result = skillSearchSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = skillSearchSelector.projector(resumeListItems);
 
       expect(result).toHaveLength(2); // JavaScript and TypeScript contain 'Script'
     });
 
     it('should return empty array for empty query', () => {
       const skillSearchSelector = ResumeSelectors.selectResumesBySkill('');
-      const result = skillSearchSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = skillSearchSelector.projector(resumeListItems);
 
       expect(result).toEqual([]);
     });
 
     it('should return empty array for whitespace-only query', () => {
       const skillSearchSelector = ResumeSelectors.selectResumesBySkill('   ');
-      const result = skillSearchSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = skillSearchSelector.projector(resumeListItems);
 
       expect(result).toEqual([]);
     });
 
     it('should handle resumes without skills', () => {
-      const resumesWithoutSkills = [
+      const resumesWithoutSkills = coerceResumeList([
         { ...mockResumeListItems[0], analysis: undefined },
         mockResumeListItems[1],
-      ];
+      ]);
 
       const skillSearchSelector = ResumeSelectors.selectResumesBySkill('React');
       const result = skillSearchSelector.projector(resumesWithoutSkills);
@@ -635,7 +641,7 @@ describe('Resume Selectors', () => {
 
     it('should return empty array when no skills match', () => {
       const skillSearchSelector = ResumeSelectors.selectResumesBySkill('Rust');
-      const result = skillSearchSelector.projector(mockResumeListItems as unknown as ResumeListItem[]);
+      const result = skillSearchSelector.projector(resumeListItems);
 
       expect(result).toEqual([]);
     });
@@ -754,15 +760,18 @@ describe('Resume Selectors', () => {
 
   describe('Edge Cases and Error Handling', () => {
     it('should handle state with undefined resumes gracefully', () => {
-      const invalidState = { ...mockResumeState, resumes: undefined as any };
+      const invalidState = {
+        ...mockResumeState,
+        resumes: undefined as unknown as ResumeListItem[],
+      };
       const result = ResumeSelectors.selectAllResumes.projector(invalidState);
       expect(result).toBeUndefined();
     });
 
     it('should handle resumes with missing required fields', () => {
       const invalidResumes = [
-        { id: 'resume1' } as any,
-        { candidateName: 'Resume without ID' } as any,
+        { id: 'resume1' } as unknown as ResumeListItem,
+        { candidateName: 'Resume without ID' } as unknown as ResumeListItem,
       ];
 
       const result =
@@ -771,11 +780,11 @@ describe('Resume Selectors', () => {
     });
 
     it('should handle filter operations on malformed data', () => {
-      const malformedResumes = [
-        { ...mockResumeListItems[0], status: null as any },
-        { ...mockResumeListItems[1], status: undefined as any },
+      const malformedResumes = coerceResumeList([
+        { ...mockResumeListItems[0], status: null as never },
+        { ...mockResumeListItems[1], status: undefined as never },
         mockResumeListItems[2],
-      ];
+      ]);
 
       const processedSelector =
         ResumeSelectors.selectResumesByStatus('processed');
@@ -784,11 +793,11 @@ describe('Resume Selectors', () => {
     });
 
     it('should handle invalid dates in recent resumes selector', () => {
-      const resumesWithInvalidDates = [
-        { ...mockResumeListItems[0], uploadedAt: null as any },
-        { ...mockResumeListItems[1], uploadedAt: undefined as any },
+      const resumesWithInvalidDates = coerceResumeList([
+        { ...mockResumeListItems[0], uploadedAt: null as unknown as Date },
+        { ...mockResumeListItems[1], uploadedAt: undefined as unknown as Date },
         mockResumeListItems[2],
-      ];
+      ]);
 
       const recentResumesSelector = ResumeSelectors.selectRecentResumes();
       const result = recentResumesSelector.projector(resumesWithInvalidDates);
@@ -806,11 +815,17 @@ describe('Resume Selectors', () => {
     });
 
     it('should handle skill search with malformed analysis data', () => {
-      const resumesWithMalformedAnalysis = [
-        { ...mockResumeListItems[0], analysis: { skills: null } as any },
-        { ...mockResumeListItems[1], analysis: { skills: undefined } as any },
+      const resumesWithMalformedAnalysis = coerceResumeList([
+        {
+          ...mockResumeListItems[0],
+          analysis: { skills: null } as unknown as ResumeListItem['analysis'],
+        },
+        {
+          ...mockResumeListItems[1],
+          analysis: { skills: undefined } as unknown as ResumeListItem['analysis'],
+        },
         mockResumeListItems[2],
-      ];
+      ]);
 
       const skillSearchSelector = ResumeSelectors.selectResumesBySkill('Java');
       const result = skillSearchSelector.projector(

@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
+import { getTestingEnvironment } from './testing-env';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function globalTeardown() {
@@ -19,7 +20,8 @@ async function globalTeardown() {
   }, 30000); // 30 second timeout for teardown
 
   try {
-    const useRealAPI = process.env.E2E_USE_REAL_API === 'true';
+    const testingEnv = getTestingEnvironment();
+    const useRealAPI = testingEnv.useRealApi;
     const e2eDir = __dirname;
     const pidFile = path.join(e2eDir, '.gateway.pid');
 

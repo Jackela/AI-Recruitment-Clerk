@@ -4,7 +4,6 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { GuestUsageService } from './guest-usage.service';
-import { environment } from '../../../environments/environment';
 
 // Mock localStorage globally before any imports
 const mockLocalStorage = (() => {
@@ -48,8 +47,6 @@ describe('GuestUsageService', () => {
   let httpMock: HttpTestingController;
   let getItemSpy: jest.SpyInstance;
   let setItemSpy: jest.SpyInstance;
-  let removeItemSpy: jest.SpyInstance;
-  const recordUrl = `${environment.apiUrl}/marketing/feedback-codes/record`;
 
   beforeEach(() => {
     // Reset mock localStorage state
@@ -58,7 +55,6 @@ describe('GuestUsageService', () => {
     // Create comprehensive localStorage spies
     getItemSpy = jest.spyOn(mockLocalStorage, 'getItem');
     setItemSpy = jest.spyOn(mockLocalStorage, 'setItem');
-    removeItemSpy = jest.spyOn(mockLocalStorage, 'removeItem');
 
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],

@@ -12,6 +12,7 @@ import {
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { CacheService } from './cache.service';
+import { Response } from 'express';
 
 /**
  * Represents the swagger cache interceptor.
@@ -33,9 +34,10 @@ export class SwaggerCacheInterceptor implements NestInterceptor {
   async intercept(
     context: ExecutionContext,
     next: CallHandler,
-  ): Promise<Observable<any>> {
-    const request = context.switchToHttp().getRequest();
-    const response = context.switchToHttp().getResponse();
+  ): Promise<Observable<unknown>> {
+    const httpContext = context.switchToHttp();
+    const request = httpContext.getRequest();
+    const response: Response = httpContext.getResponse();
 
     // 只对 API 文档路径进行缓存
     if (!request.url.includes('/api/docs')) {
@@ -45,7 +47,7 @@ export class SwaggerCacheInterceptor implements NestInterceptor {
     const cacheKey = this.cacheService.getApiDocsCacheKey();
 
     // 尝试从缓存获取
-    const cachedData = await this.cacheService.get(cacheKey);
+    const cachedData = await this.cacheService.get<unknown>(cacheKey);
     if (cachedData) {
       // 设置响应头，表明来自缓存
       response.set('X-Cache', 'HIT');

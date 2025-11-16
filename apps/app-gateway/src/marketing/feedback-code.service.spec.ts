@@ -1,95 +1,121 @@
-import { FeedbackCodeService } from './feedback-code.service';
+import type { Model } from 'mongoose';
+import { FeedbackCodeService, FeedbackCodeDocument } from './feedback-code.service';
+
+type StoredCode = FeedbackCodeDocument & { _id: string };
+
+type MockedFeedbackModel = Model<FeedbackCodeDocument> & {
+  findOne: jest.Mock;
+  findOneAndUpdate: jest.Mock;
+  updateMany: jest.Mock;
+  deleteMany: jest.Mock;
+  create: jest.Mock;
+};
 
 const createModelMock = () => {
-  const store = new Map<
-    string,
-    {
-      _id: string;
-      code: string;
-      generatedAt: Date;
-      isUsed: boolean;
-      paymentStatus: 'pending' | 'paid' | 'rejected';
-      paymentAmount: number;
-      alipayAccount?: string;
-      questionnaireData?: Record<string, unknown>;
-      usedAt?: Date;
-      createdAt?: Date;
-    }
-  >();
+  const store = new Map<string, StoredCode>();
 
-  const ctor: any = function (this: any, doc: Record<string, unknown>) {
-    Object.assign(this, doc);
-  };
-
-  ctor.prototype.save = jest.fn(async function (this: any) {
-    const entity = {
-      _id: this._id ?? `${this.code}-id`,
-      ...this,
-    };
-    store.set(entity.code, entity);
-    return entity;
-  });
-
-  ctor.findOne = jest.fn(async (query: Record<string, any>) => {
-    const code = query.code;
-    return code ? store.get(code) ?? null : null;
-  });
-
-  ctor.findOneAndUpdate = jest.fn(
-    async (
-      query: Record<string, any>,
-      update: Record<string, any>,
-      options?: Record<string, any>,
-    ) => {
+  class MockFeedbackCodeModel {
+    static findOne = jest.fn(async (query: Partial<FeedbackCodeDocument>) => {
       const code = query.code;
-      const entry = code ? store.get(code) : undefined;
-      if (!entry || entry.isUsed !== false) {
-        return null;
-      }
-      const updated = {
-        ...entry,
-        ...update,
-        usedAt: update.usedAt ?? entry.usedAt,
-      };
-      store.set(code, updated);
-      return options?.new ? updated : entry;
-    },
-  );
-
-  ctor.updateMany = jest.fn(async (query: Record<string, any>) => {
-    const codes: string[] = query.code?.$in ?? [];
-    let modifiedCount = 0;
-    codes.forEach((code) => {
-      const entry = store.get(code);
-      if (entry) {
-        modifiedCount += 1;
-      }
+      return code ? store.get(code) ?? null : null;
     });
-    return { modifiedCount };
-  });
 
-  ctor.deleteMany = jest.fn(async (query: Record<string, any>) => {
-    const cutoff: Date = query.generatedAt?.$lt;
-    let deletedCount = 0;
-    Array.from(store.entries()).forEach(([code, doc]) => {
-      if (!doc.isUsed && cutoff && doc.generatedAt < cutoff) {
-        store.delete(code);
-        deletedCount += 1;
-      }
+    static findOneAndUpdate = jest.fn(
+      async (
+        query: Partial<FeedbackCodeDocument>,
+        update: Partial<FeedbackCodeDocument>,
+        options?: { new?: boolean },
+      ) => {
+        const code = query.code;
+        if (!code) {
+          return null;
+        }
+        const entry = store.get(code);
+        if (!entry || (query.isUsed !== undefined && entry.isUsed !== query.isUsed)) {
+          return null;
+        }
+
+        const updated: StoredCode = {
+          ...entry,
+          ...update,
+          usedAt: update.usedAt ?? entry.usedAt,
+          qualityScore: update.qualityScore ?? entry.qualityScore,
+          questionnaireData:
+            update.questionnaireData ?? entry.questionnaireData,
+        };
+        store.set(code, updated);
+        return options?.new ? updated : entry;
+      },
+    );
+
+    static updateMany = jest.fn(async (query: { code?: { $in?: string[] } }) => {
+      const codes = query.code?.$in ?? [];
+      return { modifiedCount: codes.filter((code) => store.has(code)).length };
     });
-    return { deletedCount };
-  });
 
-  ctor.create = jest.fn(async (doc: Record<string, unknown>) => {
-    const entity = {
-      _id: `${doc.code}-id`,
-      ...doc,
-    } as any;
-    store.set(entity.code, entity);
-    return entity;
-  });
+    static deleteMany = jest.fn(
+      async (query: { generatedAt?: { $lt?: Date }; isUsed?: boolean }) => {
+        const cutoff = query.generatedAt?.$lt;
+        let deletedCount = 0;
+        Array.from(store.entries()).forEach(([code, doc]) => {
+          if (!doc.isUsed && cutoff && doc.generatedAt < cutoff) {
+            store.delete(code);
+            deletedCount += 1;
+          }
+        });
+        return { deletedCount };
+      },
+    );
 
-  return { model: ctor, store };
+    static create = jest.fn(async (doc: FeedbackCodeDocument) => {
+      const entity: StoredCode = {
+        _id: `${doc.code}-id`,
+        paymentStatus: doc.paymentStatus ?? 'pending',
+        paymentAmount: doc.paymentAmount ?? 0,
+        generatedAt: doc.generatedAt ?? new Date(),
+        isUsed: doc.isUsed ?? false,
+        code: doc.code,
+        ...doc,
+      } as StoredCode;
+      store.set(entity.code, entity);
+      return entity;
+    });
+
+    constructor(private readonly doc: Partial<FeedbackCodeDocument>) {}
+
+    async save(): Promise<StoredCode> {
+      const entity: StoredCode = {
+        _id: `${this.doc.code}-id`,
+        code: this.doc.code ?? '',
+        generatedAt: this.doc.generatedAt ?? new Date(),
+        isUsed: this.doc.isUsed ?? false,
+        paymentStatus: (this.doc.paymentStatus as StoredCode['paymentStatus']) ?? 'pending',
+        paymentAmount: this.doc.paymentAmount ?? 0,
+        alipayAccount: this.doc.alipayAccount,
+        questionnaireData: this.doc.questionnaireData as Record<string, unknown> | undefined,
+        usedAt: this.doc.usedAt,
+        paymentProcessedAt: this.doc.paymentProcessedAt,
+        paymentNote: this.doc.paymentNote,
+        createdBy: this.doc.createdBy,
+        ipAddress: (this.doc as StoredCode).ipAddress,
+        userAgent: (this.doc as StoredCode).userAgent,
+        sessionId: (this.doc as StoredCode).sessionId,
+        qualityScore: this.doc.qualityScore,
+      } as StoredCode;
+      store.set(entity.code, entity);
+      return entity;
+    }
+  }
+
+  const originalSave = MockFeedbackCodeModel.prototype.save;
+  MockFeedbackCodeModel.prototype.save = jest
+    .fn(function (this: MockFeedbackCodeModel) {
+      return originalSave.apply(this);
+    });
+
+  const model = MockFeedbackCodeModel as unknown as MockedFeedbackModel;
+
+  return { model, store };
 };
 
 describe('FeedbackCodeService (mocked model)', () => {
@@ -101,7 +127,7 @@ describe('FeedbackCodeService (mocked model)', () => {
     const factory = createModelMock();
     model = factory.model;
     store = factory.store;
-    service = new FeedbackCodeService(model as any);
+    service = new FeedbackCodeService(model as unknown as Model<FeedbackCodeDocument>);
   });
 
   describe('recordFeedbackCode', () => {

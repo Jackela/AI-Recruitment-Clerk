@@ -42,6 +42,16 @@ export interface GestureConfig {
   preventDefaultEvents: boolean;
 }
 
+type TouchState = {
+  touches: Map<number, TouchPoint>;
+  startTime: number;
+  lastTap: number;
+  tapCount: number;
+  pressTimer: ReturnType<typeof setTimeout> | null;
+  initialDistance: number;
+  initialScale: number;
+};
+
 /**
  * Provides touch gesture functionality.
  */
@@ -97,12 +107,12 @@ export class TouchGestureService {
     gestureEvents$: Subject<GestureEvent>,
     destroy$: Subject<void>,
   ): void {
-    const touchState = {
+    const touchState: TouchState = {
       touches: new Map<number, TouchPoint>(),
       startTime: 0,
       lastTap: 0,
       tapCount: 0,
-      pressTimer: null as any,
+      pressTimer: null,
       initialDistance: 0,
       initialScale: 1,
     };

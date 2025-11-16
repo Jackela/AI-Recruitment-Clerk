@@ -16,9 +16,21 @@ import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
 import { Permission } from '@ai-recruitment-clerk/user-management-domain';
 import { PerformanceMonitoringInterceptor } from '../interceptors/performance-monitoring.interceptor';
-import { CacheService } from '../../cache/cache.service';
+import {
+  CacheService,
+  type CacheMetrics,
+} from '../../cache/cache.service';
 import { CacheOptimizationService } from '../../cache/cache-optimization.service';
 import { DatabaseOptimizationMiddleware } from '../middleware/database-optimization.middleware';
+import type { PerformanceReport } from '../interceptors/performance-monitoring.interceptor';
+
+type CacheOptimizationReport = Awaited<
+  ReturnType<CacheOptimizationService['getOptimizationReport']>
+>;
+type DatabaseOptimizationReport = Awaited<
+  ReturnType<DatabaseOptimizationMiddleware['getOptimizationRecommendations']>
+>;
+type CacheHealth = Awaited<ReturnType<CacheService['healthCheck']>>;
 
 /**
  * Exposes endpoints for performance.
@@ -217,7 +229,7 @@ export class PerformanceController {
       return {
         success: false,
         duration,
-        error: error.message,
+        error: this.formatErrorMessage(error),
         message: 'Performance optimization failed',
       };
     }
@@ -308,9 +320,9 @@ export class PerformanceController {
   }
 
   private calculateOverallScore(
-    apiReport: any,
-    cacheReport: any,
-    dbReport: any,
+    apiReport: PerformanceReport,
+    cacheReport: CacheOptimizationReport,
+    dbReport: DatabaseOptimizationReport,
   ): number {
     let score = 100;
 
@@ -336,9 +348,9 @@ export class PerformanceController {
   }
 
   private identifyCriticalIssues(
-    apiReport: any,
-    cacheReport: any,
-    dbReport: any,
+    apiReport: PerformanceReport,
+    cacheReport: CacheOptimizationReport,
+    dbReport: DatabaseOptimizationReport,
   ): string[] {
     const issues: string[] = [];
 
@@ -362,9 +374,9 @@ export class PerformanceController {
   }
 
   private generateConsolidatedRecommendations(
-    apiReport: any,
-    cacheReport: any,
-    dbReport: any,
+    apiReport: PerformanceReport,
+    cacheReport: CacheOptimizationReport,
+    dbReport: DatabaseOptimizationReport,
   ): string[] {
     const recommendations = new Set<string>();
 
@@ -391,7 +403,10 @@ export class PerformanceController {
     return Array.from(recommendations);
   }
 
-  private generateCacheRecommendations(metrics: any, health: any): string[] {
+  private generateCacheRecommendations(
+    metrics: CacheMetrics,
+    health: CacheHealth,
+  ): string[] {
     const recommendations: string[] = [];
 
     if (metrics.hitRate < 50) {
@@ -411,5 +426,19 @@ export class PerformanceController {
     }
 
     return recommendations;
+  }
+
+  private formatErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+    if (typeof error === 'string') {
+      return error;
+    }
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return String(error);
+    }
   }
 }

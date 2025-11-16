@@ -1,3 +1,4 @@
+import type { MulterFile } from '../jobs/types/multer.types';
 import {
   Body,
   Controller,
@@ -10,6 +11,20 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import pdf from 'pdf-parse-fork';
 import { MetricsService } from '../ops/metrics.service';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
+
+type GapAnalysisRequest = Record<string, unknown>;
+type GapAnalysisResponse = Record<string, unknown>;
+
+interface GapAnalysisFileRequest {
+  jdText?: string;
+}
+
+interface LocalGapAnalysisResult {
+  matchedSkills: string[];
+  missingSkills: string[];
+  suggestedSkills: string[];
+}
 
 /**
  * Exposes endpoints for scoring proxy.
@@ -17,16 +32,17 @@ import { MetricsService } from '../ops/metrics.service';
 @Controller('scoring')
 export class ScoringProxyController {
   constructor(private readonly metrics: MetricsService) {}
+  private readonly config = getConfig();
+
   /**
    * Performs the gap analysis operation.
    * @param body - The body.
    * @returns The result of the operation.
    */
   @Post('gap-analysis')
-  async gapAnalysis(@Body() body: any) {
+  async gapAnalysis(@Body() body: GapAnalysisRequest): Promise<GapAnalysisResponse> {
     this.metrics.incExposure();
-    const base =
-      process.env.SCORING_ENGINE_URL || 'http://scoring-engine-svc:3000';
+    const base = this.config.integrations.scoring.baseUrl;
     const url = `${base.replace(/\/$/, '')}/gap-analysis`;
     try {
       const res = await fetch(url, {
@@ -34,7 +50,7 @@ export class ScoringProxyController {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body ?? {}),
       });
-      const data = await res.json().catch(() => ({}));
+      const data = (await res.json().catch(() => ({}))) as GapAnalysisResponse;
       if (!res.ok) {
         throw new HttpException(
           data || { message: 'Gap analysis failed' },
@@ -64,9 +80,9 @@ export class ScoringProxyController {
   @Post('gap-analysis-file')
   @UseInterceptors(FileInterceptor('resume'))
   async gapAnalysisFile(
-    @UploadedFile() file: Express.Multer.File,
-    @Body() body: { jdText?: string },
-  ) {
+    @UploadedFile() file: MulterFile,
+    @Body() body: GapAnalysisFileRequest,
+  ): Promise<GapAnalysisResponse | LocalGapAnalysisResult> {
     if (!file) {
       throw new HttpException(
         { message: 'No file uploaded' },
@@ -80,7 +96,7 @@ export class ScoringProxyController {
     let resumeText = '';
     try {
       if (mimetype.includes('pdf') || filename.endsWith('.pdf')) {
-        const parsed = await pdf(Buffer.from(file.buffer));
+        const parsed = await pdf(file.buffer as Buffer);
         resumeText = parsed.text || '';
       } else if (
         mimetype.startsWith('text/') ||
@@ -88,7 +104,7 @@ export class ScoringProxyController {
         filename.endsWith('.md') ||
         filename.endsWith('.text')
       ) {
-        resumeText = Buffer.from(file.buffer).toString('utf-8');
+        resumeText = (file.buffer as Buffer).toString('utf-8');
       } else {
         throw new HttpException(
           { message: 'Unsupported file type' },
@@ -105,8 +121,7 @@ export class ScoringProxyController {
       );
     }
 
-    const base =
-      process.env.SCORING_ENGINE_URL || 'http://scoring-engine-svc:3000';
+    const base = this.config.integrations.scoring.baseUrl;
     const url = `${base.replace(/\/$/, '')}/gap-analysis`;
     const payload = { jdText: body?.jdText || '', resumeText };
 
@@ -116,7 +131,7 @@ export class ScoringProxyController {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const data = await res.json().catch(() => ({}));
+      const data = (await res.json().catch(() => ({}))) as GapAnalysisResponse;
       if (!res.ok) {
         throw new HttpException(
           data || { message: 'Gap analysis failed' },
@@ -125,7 +140,7 @@ export class ScoringProxyController {
       }
       this.metrics.incSuccess();
       return data;
-    } catch (error) {
+    } catch {
       // As a fallback, perform improved token matching locally if scoring engine is unreachable
       const jdSkills = tokenize(body?.jdText || '');
       const resumeSkills = tokenize(resumeText || '');
@@ -144,7 +159,7 @@ export class ScoringProxyController {
       const spaced = (text || '').replace(/([a-z])([A-Z])/g, '$1 $2');
       const base = spaced
         .toLowerCase()
-        .split(/[^a-z0-9+#\.\-]+/)
+        .split(/[^a-z0-9+#.-]+/)
         .filter((t) => t && t.length > 1);
       const out = new Set<string>();
       for (const t of base) {
@@ -160,4 +175,3 @@ export class ScoringProxyController {
     }
   }
 }
-    this.metrics.incExposure();

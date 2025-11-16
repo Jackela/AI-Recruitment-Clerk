@@ -2,6 +2,8 @@ import { Controller, Get, Headers, HttpCode, HttpStatus } from '@nestjs/common';
 import { Public } from './decorators/public.decorator';
 import { testUsers, decodeEmailFromToken } from './test-users.store';
 
+type TestUser = (typeof testUsers extends Map<string, infer V> ? V : never);
+
 /**
  * Exposes endpoints for test users.
  */
@@ -51,7 +53,7 @@ export class TestUsersController {
     const admin = email ? testUsers.get(email) : null;
     const orgId = admin?.organizationId;
     const users = Array.from(testUsers.values()).filter(
-      (u: any) => !orgId || u.organizationId === orgId,
+      (u: TestUser) => !orgId || u.organizationId === orgId,
     );
     return {
       success: true,

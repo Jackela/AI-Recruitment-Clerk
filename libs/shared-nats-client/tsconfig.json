@@ -5,7 +5,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "target": "ES2022",
-    "module": "ES2022",
+    "module": "CommonJS",
     "moduleResolution": "node",
     "strict": true,
     "esModuleInterop": true,

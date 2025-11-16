@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { catchError, map, mergeMap, switchMap } from 'rxjs/operators';
@@ -15,15 +15,10 @@ export class ResumeEffects {
   uploadResumes$;
   uploadResumesSuccess$;
 
-  /**
-   * Initializes a new instance of the Resume Effects.
-   * @param actions$ - The actions$.
-   * @param apiService - The api service.
-   */
-  constructor(
-    private actions$: Actions,
-    private apiService: ApiService,
-  ) {
+  private readonly actions$ = inject(Actions);
+  private readonly apiService = inject(ApiService);
+
+  constructor() {
     this.loadResumesByJob$ = createEffect(() =>
       this.actions$.pipe(
         ofType(ResumeActions.loadResumesByJob),

@@ -66,6 +66,11 @@
         "{workspaceRoot}/.eslintignore",
         "{workspaceRoot}/eslint.config.mjs"
       ]
+    },
+    "@nx/js:tsc": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["default", "^default"]
     }
   },
   "generators": {
@@ -74,6 +79,11 @@
       "linter": "eslint",
       "style": "scss",
       "unitTestRunner": "jest"
+    }
+  },
+  "projects": {
+    "ai-recruitment-clerk": {
+      "tags": ["owner:platform-governance"]
     }
   }
 }

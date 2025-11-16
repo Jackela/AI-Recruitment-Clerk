@@ -305,6 +305,7 @@ hive-mind-prompt-*.txt
 # AI Assistant Tools
 .codex/
 .specify/
+openspec/
 
 # Temporary development files (root cleanup)
 tmp_*

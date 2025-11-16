@@ -14,17 +14,26 @@ import {
   ExceptionFilterConfigHelper,
   ErrorInterceptorFactory,
 } from '@ai-recruitment-clerk/infrastructure-shared';
+import { getConfig } from '@ai-recruitment-clerk/configuration';
 
-/**
- * Configures the app module.
- */
+const runtimeConfig = getConfig({ forceReload: true });
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      cache: true,
+      envFilePath: ['.env', '.env.local', '.env.production'],
+      load: [() => ({ sharedConfig: runtimeConfig })],
     }),
     NatsClientModule.forRoot({
       serviceName: 'jd-extractor-svc',
+      connectionOptions: {
+        url: runtimeConfig.messaging.nats.url,
+        timeout: 5000,
+        maxReconnectAttempts: 10,
+        reconnectTimeWait: 2000,
+      },
     }),
   ],
   controllers: [AppController, JdEventsController, HealthController],
@@ -33,7 +42,6 @@ import {
     ExtractionService,
     LlmService,
     JdExtractorNatsService,
-    // Enhanced Error Handling System
     {
       provide: APP_FILTER,
       useFactory: () =>
@@ -42,7 +50,6 @@ import {
           ...ExceptionFilterConfigHelper.forProcessingService(),
         }),
     },
-    // Error Handling Interceptors
     {
       provide: APP_INTERCEPTOR,
       useFactory: () =>
@@ -61,7 +68,7 @@ import {
         ErrorInterceptorFactory.createPerformanceInterceptor(
           'jd-extractor-svc',
           {
-            timeout: 30000, // 30 seconds - hard limit for JD extraction
+            timeout: 30000,
             enableMetrics: true,
           },
         ),

@@ -7,6 +7,20 @@ export class ResumeUploadDto {
   @IsString()
   @IsNotEmpty()
   jobId!: string;
+
+  // Optional metadata fields used by controllers
+  @IsString()
+  @IsNotEmpty()
+  candidateName?: string;
+
+  @IsString()
+  candidateEmail?: string;
+
+  @IsString()
+  notes?: string;
+
+  @IsString({ each: true })
+  tags?: string[];
 }
 
 /**
