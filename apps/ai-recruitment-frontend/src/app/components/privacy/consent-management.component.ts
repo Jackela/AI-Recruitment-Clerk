@@ -322,16 +322,24 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
     try {
-      const formValue = this.consentForm.value;
+    const formValue = this.consentForm.value as {
+      consents: Array<{
+        purpose: ConsentPurpose;
+        granted: boolean;
+        method: ConsentMethod;
+        consentText?: string;
+      }>;
+      consentVersion: string;
+    };
 
-      const captureConsentDto: CaptureConsentDto = {
-        userId: this.userId,
-        consents: formValue.consents.map((consent) => ({
-          purpose: consent.purpose,
-          granted: consent.granted,
-          method: consent.method,
-          dataCategories: this.getDataCategoriesForPurpose(consent.purpose),
-          consentText: consent.consentText,
+    const captureConsentDto: CaptureConsentDto = {
+      userId: this.userId,
+      consents: formValue.consents.map((consent) => ({
+        purpose: consent.purpose,
+        granted: consent.granted,
+        method: consent.method,
+        dataCategories: this.getDataCategoriesForPurpose(consent.purpose),
+        consentText: consent.consentText,
         })),
         consentVersion: formValue.consentVersion,
       };
