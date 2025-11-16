@@ -30,7 +30,9 @@ jobs:
           echo "Using base: $BASE_REF_SHA; head: ${{ github.sha }}"
           npx nx show projects --affected --base="$BASE_REF_SHA" --head="${{ github.sha }}"
       - name: Lint affected
-        run: npx nx affected -t lint --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }} --parallel=3
+        env:
+          NX_CACHE_DIRECTORY: /tmp/nxcache
+        run: npx nx affected -t lint --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }} --parallel=1
       - name: Test affected
         run: npx nx affected -t test --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }} --parallel=2
       - name: Build affected
