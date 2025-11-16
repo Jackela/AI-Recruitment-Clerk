@@ -278,7 +278,7 @@ type QuickActionItem = {
                 <img
                   *ngIf="candidate.avatar"
                   [src]="candidate.avatar"
-                  [alt]="candidate.name"
+                  [alt]="candidate.name || 'Candidate avatar'"
                   class="avatar-image"
                 />
                 <div *ngIf="!candidate.avatar" class="avatar-placeholder">
