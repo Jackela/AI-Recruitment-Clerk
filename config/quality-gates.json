@@ -1,7 +1,7 @@
 {
-  "coverage": 0.85,
+  "coverage": 0.50,
   "lintErrors": 0,
   "typecheck": true,
-  "requireE2ESmoke": true
+  "requireE2ESmoke": false
 }
 

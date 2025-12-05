@@ -227,7 +227,7 @@ export class StructuredErrorLogger {
   logOperationComplete(
     operation: string,
     startMetrics: PerformanceMetrics,
-    success: boolean = true,
+    success = true,
     metadata?: Record<string, any>,
   ): PerformanceMetrics {
     const endTime = Date.now();

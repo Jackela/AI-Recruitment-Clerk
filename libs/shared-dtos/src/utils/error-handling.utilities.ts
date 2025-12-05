@@ -48,7 +48,7 @@ export class ErrorUtils {
    * Create an authentication error
    */
   static createAuthenticationError(
-    reason: string = 'Authentication failed',
+    reason = 'Authentication failed',
     context?: Record<string, any>,
   ): EnhancedAppException {
     const error = new EnhancedAppException(
