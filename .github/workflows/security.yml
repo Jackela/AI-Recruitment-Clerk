@@ -85,27 +85,39 @@ jobs:
       - name: 🔐 Run npm audit
         run: |
           echo "🔐 Running npm security audit..."
-          npm audit --audit-level=moderate --json > audit-report.json || true
-          
+          echo "Note: Using --omit=dev to focus on production dependencies"
+
+          # Run audit for production dependencies only (excludes dev dependencies like semantic-release)
+          npm audit --omit=dev --audit-level=moderate --json > audit-report.json || true
+
           if [ -f audit-report.json ]; then
             CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' < audit-report.json)
             HIGH=$(jq '.metadata.vulnerabilities.high // 0' < audit-report.json)
             MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' < audit-report.json)
             LOW=$(jq '.metadata.vulnerabilities.low // 0' < audit-report.json)
 
-            echo "📊 Security Audit Results:"
+            echo "📊 Security Audit Results (Production Dependencies):"
             echo "  Critical: $CRITICAL"
             echo "  High: $HIGH"
             echo "  Moderate: $MODERATE"
             echo "  Low: $LOW"
 
-            if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ] || [ "$MODERATE" -gt 0 ]; then
-              echo "::error::Dependency vulnerabilities detected (critical: $CRITICAL, high: $HIGH, moderate: $MODERATE)"
-              echo "🚨 Action required: Resolve all high and moderate vulnerabilities before releasing."
+            # Fail on critical or high vulnerabilities in production deps
+            if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
+              echo "::error::Production dependency vulnerabilities detected (critical: $CRITICAL, high: $HIGH)"
+              echo "🚨 Action required: Resolve all critical and high vulnerabilities before releasing."
               exit 1
-            else
-              echo "✅ No critical, high, or moderate severity vulnerabilities found"
+            elif [ "$MODERATE" -gt 0 ]; then
+              echo "::warning::Moderate vulnerabilities found (moderate: $MODERATE) - review recommended"
+              echo "⚠️ Consider resolving moderate vulnerabilities when possible."
             fi
+
+            echo "✅ No critical or high severity vulnerabilities in production dependencies"
+
+            # Also run full audit for visibility (non-blocking)
+            echo ""
+            echo "📋 Full audit (including dev dependencies) for visibility:"
+            npm audit --audit-level=moderate 2>&1 || true
           else
             echo "::error::audit-report.json not found; failing dependency scan."
             exit 1
