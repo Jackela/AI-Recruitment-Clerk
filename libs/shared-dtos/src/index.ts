@@ -23,7 +23,14 @@ export * from './utils/retry.utility';
 // Database Performance Monitoring
 export * from './database/performance-monitor';
 
-// Validation
+// Health Check Types (SSOT - Single Source of Truth)
+export * from './health/types';
+
+// File Validation Constants (SSOT - Single Source of Truth)
+export * from './constants/file-validation.constants';
+
+// Validation Types (SSOT - Single Source of Truth)
+export * from './validation/types';
 export * from './validation/input-validator';
 
 // Security Configuration
@@ -168,7 +175,7 @@ export * from './privacy/privacy-simple.dto';
 // Common Patterns - 通用模式
 export * from './common/base-service.pattern';
 export * from './common/nats-client.pattern';
-// export * from './common/validation.patterns'; // Commented out due to ValidationResult duplicate export
+export * from './common/validation.patterns'; // Uses canonical ValidationResult internally (no re-export to avoid conflicts)
 // Note: mobile-component.patterns depends on Angular and breaks Node test envs.
 // It is intentionally not re-exported from the root barrel to keep backend tests working.
 export * from './common/error-handling.patterns';

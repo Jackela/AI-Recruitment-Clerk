@@ -10,9 +10,19 @@ import {
 import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
 import { AppCacheModule } from '../../cache/cache.module';
 
+// Extracted AnalyticsIntegrationService services (SRP refactoring)
+import { EventTrackingService } from './services/event-tracking.service';
+import { MetricsCollectionService } from './services/metrics-collection.service';
+import { SessionAnalyticsService } from './services/session-analytics.service';
+import { PrivacyComplianceService } from './services/privacy-compliance.service';
+import { ReportGenerationService } from './services/report-generation.service';
+import { AnalyticsMetricsService } from './services/analytics-metrics.service';
+import { DataExportService } from './services/data-export.service';
+import { AnalyticsHealthService } from './services/analytics-health.service';
+
 /**
- * Analytics模块 - 用户行为分析和数据收集
- * 集成AnalyticsDomainService与基础设施层
+ * Analytics module - User behavior analysis and data collection.
+ * Integrates AnalyticsDomainService with infrastructure layer.
  */
 @Module({
   imports: [
@@ -23,10 +33,32 @@ import { AppCacheModule } from '../../cache/cache.module';
   ],
   controllers: [AnalyticsController],
   providers: [
+    // Core services
     AnalyticsIntegrationService,
     AnalyticsEventRepository,
     AppGatewayNatsService,
+    // Extracted AnalyticsIntegrationService services (SRP)
+    EventTrackingService,
+    MetricsCollectionService,
+    SessionAnalyticsService,
+    PrivacyComplianceService,
+    ReportGenerationService,
+    AnalyticsMetricsService,
+    DataExportService,
+    AnalyticsHealthService,
   ],
-  exports: [AnalyticsIntegrationService, AnalyticsEventRepository],
+  exports: [
+    AnalyticsIntegrationService,
+    AnalyticsEventRepository,
+    // Export extracted services for use by other modules
+    EventTrackingService,
+    MetricsCollectionService,
+    SessionAnalyticsService,
+    PrivacyComplianceService,
+    ReportGenerationService,
+    AnalyticsMetricsService,
+    DataExportService,
+    AnalyticsHealthService,
+  ],
 })
 export class AnalyticsModule {}

@@ -4,15 +4,14 @@
  */
 
 import { BadRequestException } from '@nestjs/common';
+import type { ValidationResult as BaseValidationResult } from '../validation/types';
 
-/**
- * Defines the shape of the validation result.
- */
-export interface ValidationResult {
-  isValid: boolean;
-  errors: string[];
-  warnings?: string[];
-}
+// Note: ValidationResult is NOT re-exported here to avoid duplicate exports.
+// Consumers should import ValidationResult from '../validation/types' or '@ai-recruitment-clerk/shared-dtos'.
+// This file uses the base ValidationResult from types.ts internally.
+
+// Local type alias for internal use - using the canonical ValidationResult from types.ts
+type ValidationResult = BaseValidationResult;
 
 /**
  * Defines the shape of the file validation config.

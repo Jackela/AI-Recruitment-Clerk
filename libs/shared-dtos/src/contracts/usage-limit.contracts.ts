@@ -406,9 +406,10 @@ export class UsageLimitContracts {
 
 // 辅助类型
 /**
- * Defines the shape of the contract validation result.
+ * Defines the shape of the usage limit contract validation result.
+ * Note: Different from ContractValidationResult in validation/types.ts - this is specific to usage limit contracts.
  */
-export interface ContractValidationResult {
+export interface UsageLimitContractValidationResult {
   isValid: boolean;
   violations: string[];
   executionTimeMs?: number;

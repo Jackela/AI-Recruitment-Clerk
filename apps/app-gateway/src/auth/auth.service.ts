@@ -2,11 +2,8 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
-  NotFoundException,
-  BadRequestException,
   Logger,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user.service';
 import {
   LoginDto,
@@ -14,41 +11,46 @@ import {
   AuthResponseDto,
   JwtPayload,
   UserDto,
-  UserStatus,
 } from '@ai-recruitment-clerk/user-management-domain';
 import { WithCircuitBreaker } from '@ai-recruitment-clerk/shared-dtos';
-import * as bcrypt from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
-import { createHash } from 'crypto';
 import { RedisTokenBlacklistService } from '../security/redis-token-blacklist.service';
 
+// Import extracted services
+import { JwtTokenService } from './services/jwt-token.service';
+import { PasswordService } from './services/password.service';
+import { LoginSecurityService } from './services/login-security.service';
+import { SessionManagementService } from './services/session-management.service';
+import { UserValidationService } from './services/user-validation.service';
+import { SecurityMetricsService } from './services/security-metrics.service';
+
 /**
- * Provides auth functionality.
+ * AuthService - Facade for authentication operations.
+ * Delegates to specialized services following Single Responsibility Principle.
+ *
+ * Extracted services:
+ * - JwtTokenService: JWT token operations (generation, validation, refresh)
+ * - PasswordService: Password management (change, hash, validate)
+ * - LoginSecurityService: Brute force protection (lockout, attempt tracking)
+ * - SessionManagementService: Session operations (logout, token revocation)
+ * - UserValidationService: User validation and response preparation
+ * - SecurityMetricsService: Security metrics and health monitoring
  */
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  private readonly blacklistedTokens = new Map<string, number>();
-  private readonly failedLoginAttempts = new Map<
-    string,
-    { count: number; lastAttempt: number }
-  >();
-  private readonly MAX_LOGIN_ATTEMPTS = 5;
-  private readonly LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
-  private readonly TOKEN_BLACKLIST_CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hour
 
-  /**
-   * Initializes a new instance of the Auth Service.
-   * @param userService - The user service.
-   * @param jwtService - The jwt service.
-   * @param configService - The config service.
-   * @param tokenBlacklistService - The token blacklist service.
-   */
   constructor(
     private readonly userService: UserService,
-    private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly tokenBlacklistService: RedisTokenBlacklistService,
+    // Extracted services
+    private readonly jwtTokenService: JwtTokenService,
+    private readonly passwordService: PasswordService,
+    private readonly loginSecurityService: LoginSecurityService,
+    private readonly sessionManagementService: SessionManagementService,
+    private readonly userValidationService: UserValidationService,
+    private readonly securityMetricsService: SecurityMetricsService,
   ) {
     // Ensure backward compatibility with mocks that provide older method names
     if (
@@ -68,18 +70,10 @@ export class AuthService {
         this.tokenBlacklistService as any
       ).isTokenBlacklisted.bind(this.tokenBlacklistService);
     }
-
-    // Start periodic cleanup of expired blacklisted tokens - skip in test environment
-    if (process.env.NODE_ENV !== 'test') {
-      setInterval(
-        () => this.cleanupBlacklistedTokens(),
-        this.TOKEN_BLACKLIST_CLEANUP_INTERVAL,
-      );
-    }
   }
 
   /**
-   * Performs the register operation.
+   * Registers a new user.
    * @param createUserDto - The create user dto.
    * @returns A promise that resolves to AuthResponseDto.
    */
@@ -95,18 +89,15 @@ export class AuthService {
       normalized.lastName =
         normalized.lastName || parts.slice(1).join(' ') || '';
     }
+
     // Check if user already exists
     const existingUser = await this.userService.findByEmail(normalized.email);
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
 
-    // Hash password
-    // Use lower bcrypt rounds in test to meet performance thresholds
-    const saltEnv = this.configService.get<string>('BCRYPT_ROUNDS');
-    const saltRounds =
-      process.env.NODE_ENV === 'test' ? parseInt(saltEnv || '4') : 12;
-    const hashedPassword = await bcrypt.hash(normalized.password, saltRounds);
+    // Hash password using PasswordService
+    const hashedPassword = await this.passwordService.hashPassword(normalized.password);
 
     // Create user
     const user = await this.userService.create({
@@ -114,12 +105,12 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    // Generate tokens
-    return this.generateAuthResponse(user);
+    // Generate tokens using JwtTokenService
+    return this.jwtTokenService.generateAuthResponse(user);
   }
 
   /**
-   * Performs the login operation.
+   * Performs login with brute force protection.
    * @param loginDto - The login dto.
    * @returns A promise that resolves to AuthResponseDto.
    */
@@ -129,63 +120,45 @@ export class AuthService {
     monitoringPeriod: 300000,
   })
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
-    const clientId = this.hashEmail(loginDto.email);
+    const clientId = this.loginSecurityService.hashEmail(loginDto.email);
 
     // Check if account is locked
-    if (this.isAccountLocked(clientId)) {
+    if (this.loginSecurityService.isAccountLocked(clientId)) {
       this.logger.warn(`Login attempt for locked account: ${loginDto.email}`);
       throw new UnauthorizedException(
         'Account temporarily locked due to multiple failed attempts',
       );
     }
 
-    const user = await this.validateUser(loginDto.email, loginDto.password);
+    const user = await this.userValidationService.validateUser(
+      loginDto.email,
+      loginDto.password,
+    );
     if (!user) {
-      this.recordFailedLoginAttempt(clientId);
+      this.loginSecurityService.recordFailedLoginAttempt(clientId);
       this.logger.warn(`Failed login attempt for email: ${loginDto.email}`);
       throw new UnauthorizedException('Invalid credentials');
     }
 
     // Reset failed attempts on successful login
-    this.failedLoginAttempts.delete(clientId);
+    this.loginSecurityService.resetFailedAttempts(clientId);
     this.logger.log(`Successful login for user: ${user.id}`);
 
-    return this.generateAuthResponse(user);
+    return this.jwtTokenService.generateAuthResponse(user);
   }
 
   /**
-   * Validates user.
+   * Validates user credentials.
    * @param email - The email.
    * @param password - The password.
    * @returns A promise that resolves to UserDto | null.
    */
   async validateUser(email: string, password: string): Promise<UserDto | null> {
-    const user = await this.userService.findByEmail(email);
-    if (!user) {
-      return null;
-    }
-
-    if (user.isActive === false) {
-      return null;
-    }
-
-    if (user.status && user.status !== UserStatus.ACTIVE) {
-      return null;
-    }
-
-    const isPasswordValid = await this.userService.validatePassword(
-      user.id,
-      password,
-    );
-    if (!isPasswordValid) {
-      return null;
-    }
-
-    return this.prepareUserForResponse(user);
+    return this.userValidationService.validateUser(email, password);
   }
 
   /**
-   * Validates jwt payload.
+   * Validates JWT payload.
    * @param payload - The payload.
    * @param token - The token.
    * @returns A promise that resolves to UserDto.
@@ -194,169 +167,23 @@ export class AuthService {
     payload: JwtPayload,
     token?: string,
   ): Promise<UserDto> {
-    // Check if token is blacklisted using Redis-based service
-    if (token && (await this.tokenBlacklistService.isBlacklisted(token))) {
-      throw new UnauthorizedException('Token has been revoked');
-    }
-
-    // Check if all user tokens are blacklisted (security breach response)
-    if (
-      payload.sub &&
-      (await this.tokenBlacklistService.isUserBlacklisted(payload.sub))
-    ) {
-      throw new UnauthorizedException('All user tokens have been revoked');
-    }
-
-    // Enhanced payload validation
-    if (!payload.sub || !payload.email || !payload.role) {
-      throw new UnauthorizedException('Invalid token payload');
-    }
-
-    // Check token age (prevent very old tokens)
-    if (payload.iat && Date.now() - payload.iat * 1000 > 24 * 60 * 60 * 1000) {
-      throw new UnauthorizedException('Token too old');
-    }
-
-    const user = await this.userService.findById(payload.sub);
-    if (!user) {
-      throw new UnauthorizedException('User not found');
-    }
-
-    if (user.status && user.status !== UserStatus.ACTIVE) {
-      throw new UnauthorizedException('User account is not active');
-    }
-
-    // Verify organization consistency
-    if (
-      payload.organizationId &&
-      user.organizationId &&
-      payload.organizationId !== user.organizationId
-    ) {
-      throw new UnauthorizedException('Organization mismatch');
-    }
-
-    return user;
+    return this.jwtTokenService.validateJwtPayload(payload, token);
   }
 
   /**
-   * Performs the refresh token operation.
+   * Refreshes JWT tokens.
    * @param refreshToken - The refresh token.
    * @returns A promise that resolves to AuthResponseDto.
    */
   async refreshToken(refreshToken: string): Promise<AuthResponseDto> {
-    try {
-      // Validate refresh token format
-      if (!refreshToken || typeof refreshToken !== 'string') {
-        throw new UnauthorizedException('Invalid refresh token format');
-      }
-
-      // Check if refresh token is blacklisted using Redis-based service
-      if (await this.tokenBlacklistService.isBlacklisted(refreshToken)) {
-        throw new UnauthorizedException('Refresh token has been revoked');
-      }
-
-      const payload = this.jwtService.verify(refreshToken, {
-        secret:
-          this.configService.get<string>('JWT_REFRESH_SECRET') ||
-          'ai-recruitment-refresh-secret',
-      });
-
-      if (!payload?.sub) {
-        throw new UnauthorizedException('Invalid refresh token');
-      }
-
-      const tokenExpiry =
-        typeof payload.exp === 'number'
-          ? payload.exp
-          : Math.floor(Date.now() / 1000) + 60;
-
-      let user = await this.userService.findById(payload.sub);
-      if (!user && payload.email) {
-        user = await this.userService.findByEmail(payload.email);
-      }
-
-      if (!user) {
-        user = {
-          id: payload.sub,
-          email: payload.email ?? '',
-          role: payload.role,
-          organizationId: payload.organizationId,
-          status: UserStatus.ACTIVE,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          isActive: true,
-        } as UserDto;
-      }
-
-      if (!user || (user.status && user.status !== UserStatus.ACTIVE)) {
-        throw new UnauthorizedException('User not found or inactive');
-      }
-
-      // Blacklist the old refresh token to prevent reuse using Redis service
-      await this.tokenBlacklistService.blacklistToken(
-        refreshToken,
-        payload.sub,
-        tokenExpiry,
-        'token_refresh',
-      );
-
-      return this.generateAuthResponse(user);
-    } catch (error) {
-      this.logger.warn(
-        `Refresh token validation failed: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      throw new UnauthorizedException('Invalid refresh token');
-    }
-  }
-
-  private async generateAuthResponse(user: UserDto): Promise<AuthResponseDto> {
-    const now = Math.floor(Date.now() / 1000);
-    const responseUser = this.prepareUserForResponse(user);
-    const normalizedRole = this.normalizeRole(user);
-
-    const payload: JwtPayload = {
-      sub: user.id,
-      email: user.email,
-      role: normalizedRole ?? user.role,
-      organizationId: user.organizationId,
-      iat: now,
-    };
-
-    const accessToken = this.jwtService.sign(payload, {
-      expiresIn: this.configService.get<string>('JWT_EXPIRES_IN') || '15m', // Shorter access token lifetime
-    });
-
-    const refreshToken = this.jwtService.sign(
-      {
-        ...payload,
-        tokenType: 'refresh',
-      },
-      {
-        secret:
-          this.configService.get<string>('JWT_REFRESH_SECRET') ||
-          'ai-recruitment-refresh-secret',
-        expiresIn:
-          this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d',
-      },
-    );
-
-    const expiresIn = parseInt(
-      this.configService.get<string>('JWT_EXPIRES_IN_SECONDS') || '900',
-    ); // 15 minutes
-
-    return {
-      accessToken,
-      refreshToken,
-      user: responseUser,
-      expiresIn,
-    };
+    return this.jwtTokenService.refreshToken(refreshToken);
   }
 
   /**
-   * Performs the logout operation.
-   * @param userId - The user id.
-   * @param accessToken - The access token.
-   * @param refreshToken - The refresh token.
+   * Logs out a user.
+   * @param userIdOrToken - The user id or access token.
+   * @param accessToken - The access token (optional).
+   * @param refreshToken - The refresh token (optional).
    * @returns A promise that resolves when the operation completes.
    */
   async logout(
@@ -364,87 +191,15 @@ export class AuthService {
     accessToken?: string,
     refreshToken?: string,
   ): Promise<void> {
-    let userId = userIdOrToken;
-    try {
-      const tokenOnlyMode = !accessToken && !refreshToken;
-
-      if (tokenOnlyMode) {
-        accessToken = userIdOrToken;
-        const decoded =
-          typeof this.jwtService.decode === 'function'
-            ? (this.jwtService.decode(accessToken) as any)
-            : null;
-        if (decoded?.sub) {
-          userId = decoded.sub;
-        }
-      }
-
-      // Blacklist tokens using Redis-based service
-      if (accessToken) {
-        try {
-          const payload =
-            typeof this.jwtService.decode === 'function'
-              ? (this.jwtService.decode(accessToken) as any)
-              : null;
-          const exp =
-            payload && typeof payload.exp === 'number'
-              ? payload.exp
-              : Math.floor(Date.now() / 1000) + 60;
-
-          await this.tokenBlacklistService.blacklistToken(
-            accessToken,
-            userId,
-            exp,
-            'logout',
-          );
-        } catch (error) {
-          this.logger.warn(
-            `Failed to decode access token for blacklisting: ${error instanceof Error ? error.message : String(error)}`,
-          );
-        }
-      }
-
-      if (refreshToken) {
-        try {
-          const payload =
-            typeof this.jwtService.decode === 'function'
-              ? (this.jwtService.decode(refreshToken) as any)
-              : null;
-          const exp =
-            payload && typeof payload.exp === 'number'
-              ? payload.exp
-              : Math.floor(Date.now() / 1000) + 60;
-
-          await this.tokenBlacklistService.blacklistToken(
-            refreshToken,
-            userId,
-            exp,
-            'logout',
-          );
-        } catch (error) {
-          this.logger.warn(
-            `Failed to decode refresh token for blacklisting: ${error instanceof Error ? error.message : String(error)}`,
-          );
-        }
-      }
-
-      if (
-        !tokenOnlyMode &&
-        typeof (this.userService as any).updateLastActivity === 'function'
-      ) {
-        await this.userService.updateLastActivity(userId);
-      }
-      this.logger.log(`User logged out successfully: ${userId}`);
-    } catch (error) {
-      this.logger.error(
-        `Logout failed for user ${userId}: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      throw error;
-    }
+    return this.sessionManagementService.logout(
+      userIdOrToken,
+      accessToken,
+      refreshToken,
+    );
   }
 
   /**
-   * Performs the change password operation.
+   * Changes a user's password.
    * @param userId - The user id.
    * @param currentPassword - The current password.
    * @param newPassword - The new password.
@@ -455,179 +210,26 @@ export class AuthService {
     currentPassword: string,
     newPassword: string,
   ): Promise<void> {
-    // Validate new password strength
-    this.validatePasswordStrength(newPassword);
-
-    const user = await this.userService.findByIdWithSensitiveData(userId);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    const isCurrentPasswordValid = await bcrypt.compare(
-      currentPassword,
-      user.password,
-    );
-    if (!isCurrentPasswordValid) {
-      this.logger.warn(`Invalid current password for user: ${userId}`);
-      throw new UnauthorizedException('Current password is incorrect');
-    }
-
-    // Check if new password is different from current
-    const isSamePassword = await bcrypt.compare(newPassword, user.password);
-    if (isSamePassword) {
-      throw new BadRequestException(
-        'New password must be different from current password',
-      );
-    }
-
-    const saltRounds = 12;
-    const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
-
-    await this.userService.updatePassword(userId, hashedNewPassword);
-    this.logger.log(`Password changed successfully for user: ${userId}`);
-  }
-
-  // Security helper methods
-  private hashEmail(email: string): string {
-    return createHash('sha256').update(email.toLowerCase()).digest('hex');
-  }
-
-  private isAccountLocked(clientId: string): boolean {
-    const attempts = this.failedLoginAttempts.get(clientId);
-    if (!attempts) return false;
-
-    return (
-      attempts.count >= this.MAX_LOGIN_ATTEMPTS &&
-      Date.now() - attempts.lastAttempt < this.LOCKOUT_DURATION
-    );
-  }
-
-  private recordFailedLoginAttempt(clientId: string): void {
-    const attempts = this.failedLoginAttempts.get(clientId) || {
-      count: 0,
-      lastAttempt: 0,
-    };
-    attempts.count++;
-    attempts.lastAttempt = Date.now();
-    this.failedLoginAttempts.set(clientId, attempts);
-  }
-
-  // Token blacklist methods reserved for future implementation
-  // private blacklistToken(token: string, exp: number): void
-  // private isTokenBlacklisted(token: string): boolean
-
-  private cleanupBlacklistedTokens(): void {
-    const now = Date.now();
-    let cleanedCount = 0;
-
-    for (const [tokenHash, exp] of this.blacklistedTokens.entries()) {
-      if (now > exp) {
-        this.blacklistedTokens.delete(tokenHash);
-        cleanedCount++;
-      }
-    }
-
-    if (cleanedCount > 0) {
-      this.logger.debug(
-        `Cleaned up ${cleanedCount} expired blacklisted tokens`,
-      );
-    }
-  }
-
-  private validatePasswordStrength(password: string): void {
-    const errors: string[] = [];
-
-    if (password.length < 8) {
-      errors.push('Password must be at least 8 characters long');
-    }
-
-    if (!/(?=.*[a-z])/.test(password)) {
-      errors.push('Password must contain at least one lowercase letter');
-    }
-
-    if (!/(?=.*[A-Z])/.test(password)) {
-      errors.push('Password must contain at least one uppercase letter');
-    }
-
-    if (!/(?=.*\d)/.test(password)) {
-      errors.push('Password must contain at least one number');
-    }
-
-    if (!/(?=.*[@$!%*?&])/.test(password)) {
-      errors.push(
-        'Password must contain at least one special character (@$!%*?&)',
-      );
-    }
-
-    if (errors.length > 0) {
-      throw new BadRequestException(
-        `Password validation failed: ${errors.join(', ')}`,
-      );
-    }
-  }
-
-  private normalizeRole(user: UserDto): string | undefined {
-    const rawRole =
-      (user as any)?.rawRole !== undefined
-        ? (user as any).rawRole
-        : user.role;
-
-    if (typeof rawRole === 'string') {
-      return rawRole.toLowerCase();
-    }
-
-    return rawRole;
-  }
-
-  private prepareUserForResponse(user: UserDto): UserDto {
-    const normalizedRole = this.normalizeRole(user);
-    const safeUser: UserDto = {
-      id: user.id,
-      email: user.email,
-      username: (user as any)?.username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      name: user.name ?? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim(),
-      role: normalizedRole ?? user.role,
-      organizationId: user.organizationId,
-      status: user.status,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      isActive: user.isActive,
-    };
-
-    return safeUser;
+    return this.passwordService.changePassword(userId, currentPassword, newPassword);
   }
 
   /**
-   * Emergency security response: Blacklist all tokens for a user
-   * Use this when a security breach is detected
+   * Emergency security response: Blacklist all tokens for a user.
+   * Use this when a security breach is detected.
+   * @param userId - The user id.
+   * @param reason - The reason for revocation.
+   * @returns A promise that resolves when the operation completes.
    */
   async emergencyRevokeAllUserTokens(
     userId: string,
     reason = 'security_breach',
   ): Promise<void> {
-    try {
-      const blacklistedCount =
-        await this.tokenBlacklistService.blacklistAllUserTokens(userId, reason);
-      await this.userService.updateSecurityFlag(userId, 'tokens_revoked', true);
-
-      this.logger.warn(
-        `🚨 Emergency token revocation for user ${userId}: ${reason}`,
-      );
-      this.logger.log(
-        `Blacklisted ${blacklistedCount} tokens for user ${userId}`,
-      );
-    } catch (error) {
-      this.logger.error(
-        `Emergency token revocation failed for user ${userId}: ${error instanceof Error ? error.message : String(error)}`,
-      );
-      throw error;
-    }
+    return this.sessionManagementService.emergencyRevokeAllUserTokens(userId, reason);
   }
 
   /**
-   * Get comprehensive security metrics
+   * Get comprehensive security metrics.
+   * @returns Security metrics.
    */
   async getSecurityMetrics(): Promise<{
     blacklistedTokensCount: number;
@@ -635,27 +237,12 @@ export class AuthService {
     lockedAccountsCount: number;
     tokenBlacklistMetrics: any;
   }> {
-    const now = Date.now();
-    const lockedAccountsCount = Array.from(
-      this.failedLoginAttempts.values(),
-    ).filter(
-      (attempts) =>
-        attempts.count >= this.MAX_LOGIN_ATTEMPTS &&
-        now - attempts.lastAttempt < this.LOCKOUT_DURATION,
-    ).length;
-
-    const tokenMetrics = this.tokenBlacklistService.getMetrics();
-
-    return {
-      blacklistedTokensCount: this.blacklistedTokens.size,
-      failedLoginAttemptsCount: this.failedLoginAttempts.size,
-      lockedAccountsCount,
-      tokenBlacklistMetrics: tokenMetrics,
-    };
+    return this.securityMetricsService.getSecurityMetrics();
   }
 
   /**
-   * Health check for authentication service
+   * Health check for authentication service.
+   * @returns Health status.
    */
   async authHealthCheck(): Promise<{
     status: string;
@@ -666,16 +253,6 @@ export class AuthService {
       failedAttempts: number;
     };
   }> {
-    const tokenBlacklistHealth = await this.tokenBlacklistService.healthCheck();
-
-    return {
-      status: 'healthy',
-      authService: 'operational',
-      tokenBlacklist: tokenBlacklistHealth,
-      memoryUsage: {
-        blacklistedTokens: this.blacklistedTokens.size,
-        failedAttempts: this.failedLoginAttempts.size,
-      },
-    };
+    return this.securityMetricsService.authHealthCheck();
   }
 }

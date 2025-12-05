@@ -1,27 +1,10 @@
 // import { BadRequestException } from '@nestjs/common';
 import { createHash } from 'crypto';
 import * as path from 'path';
+import type { FileValidationOptions, ValidationResult } from './types';
 
-/**
- * Defines the shape of the file validation options.
- */
-export interface FileValidationOptions {
-  maxSize: number; // in bytes
-  allowedMimeTypes: string[];
-  allowedExtensions: string[];
-  scanForMalware?: boolean;
-  requireVirusFreeCertificate?: boolean;
-}
-
-/**
- * Defines the shape of the validation result.
- */
-export interface ValidationResult {
-  isValid: boolean;
-  errors: string[];
-  sanitizedValue?: unknown;
-  metadata?: Record<string, unknown>;
-}
+// Re-export types for backwards compatibility
+export type { FileValidationOptions, ValidationResult } from './types';
 
 /**
  * Represents the input validator.

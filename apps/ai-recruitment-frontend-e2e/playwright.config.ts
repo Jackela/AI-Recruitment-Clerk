@@ -60,6 +60,7 @@ if (process.env.E2E_ENABLE_FIREFOX === 'true') {
       actionTimeout: 30000,
       launchOptions: {
         timeout: 60000,
+        // Firefox user preferences for E2E stability
         firefoxUserPrefs: {
           'network.http.connection-retry-timeout': 30,
           'network.http.connection-timeout': 90,
@@ -77,7 +78,7 @@ if (process.env.E2E_ENABLE_FIREFOX === 'true') {
         headless: !process.env.FIREFOX_HEADED,
       },
     },
-  });
+  } as unknown as (typeof projects)[number]);
 }
 
 export default defineConfig({

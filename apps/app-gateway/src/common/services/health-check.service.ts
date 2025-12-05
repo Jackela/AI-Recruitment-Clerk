@@ -1,40 +1,14 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import type {
+  ServiceHealth,
+  SystemHealth,
+  HealthCheckConfig,
+  HealthCheckResult,
+} from '@ai-recruitment-clerk/shared-dtos';
 
-/**
- * Defines the shape of the service health.
- */
-export interface ServiceHealth {
-  name: string;
-  status: 'healthy' | 'degraded' | 'unhealthy';
-  lastCheck: Date;
-  responseTime?: number;
-  error?: string;
-  metadata?: any;
-}
-
-/**
- * Defines the shape of the system health.
- */
-export interface SystemHealth {
-  overall: 'healthy' | 'degraded' | 'unhealthy';
-  services: ServiceHealth[];
-  timestamp: Date;
-  uptime: number;
-  version: string;
-}
-
-/**
- * Defines the shape of the health check config.
- */
-export interface HealthCheckConfig {
-  name: string;
-  url?: string;
-  timeout?: number;
-  interval?: number;
-  enabled?: boolean;
-  healthCheck?: () => Promise<{ healthy: boolean; metadata?: any }>;
-}
+// Re-export types for backwards compatibility (consumers importing from this file)
+export type { ServiceHealth, SystemHealth, HealthCheckConfig, HealthCheckResult } from '@ai-recruitment-clerk/shared-dtos';
 
 /**
  * Provides health check functionality.

@@ -1,0 +1,5139 @@
+{
+  "graph": {
+    "nodes": {
+      "ai-recruitment-frontend-e2e": {
+        "name": "ai-recruitment-frontend-e2e",
+        "type": "e2e",
+        "data": {
+          "root": "apps/ai-recruitment-frontend-e2e",
+          "metadata": {
+            "targetGroups": {
+              "E2E (CI)": [
+                "e2e-ci--src/browser-compatibility-test.spec.ts",
+                "e2e-ci--src/console-errors.spec.ts",
+                "e2e-ci--src/core-user-flow.spec.ts",
+                "e2e-ci--src/debug-selectors.spec.ts",
+                "e2e-ci--src/debug-user-flow.spec.ts",
+                "e2e-ci--src/deep-console-debug.spec.ts",
+                "e2e-ci--src/detailed-job-creation.spec.ts",
+                "e2e-ci--src/diagnostic.spec.ts",
+                "e2e-ci--src/error-scenarios.spec.ts",
+                "e2e-ci--src/essential-compatibility.spec.ts",
+                "e2e-ci--src/example.spec.ts",
+                "e2e-ci--src/firefox-stability-test.spec.ts",
+                "e2e-ci--src/jobs-list-debug.spec.ts",
+                "e2e-ci--src/mock-server-test.spec.ts",
+                "e2e-ci--src/pdf-real-file-uat.spec.ts",
+                "e2e-ci--src/pdf-variety-uat.spec.ts",
+                "e2e-ci--src/real-data-expansion.spec.ts",
+                "e2e-ci--src/simple-firefox-test.spec.ts",
+                "e2e-ci--src/simple-jobs-page.spec.ts",
+                "e2e-ci--src/simple-test.spec.ts",
+                "e2e-ci--src/unified-analysis-regression.spec.ts",
+                "e2e-ci--src/webkit-final-test.spec.ts",
+                "e2e-ci--src/webkit-stability-test.spec.ts",
+                "e2e-ci--src/webkit-static-test.spec.ts",
+                "e2e-ci"
+              ]
+            }
+          },
+          "targets": {
+            "e2e": {
+              "executor": "nx:run-commands",
+              "outputs": [
+                "{projectRoot}/test-results",
+                "{workspaceRoot}/playwright-report"
+              ],
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "command": "npx playwright test",
+                "env": {
+                  "E2E_SKIP_WEBSERVER": "false",
+                  "DEV_SERVER_PORT": "4202",
+                  "PLAYWRIGHT_BASE_URL": "http://localhost:4202",
+                  "E2E_PROTECTED_PORTS": "3000,4200,4202",
+                  "E2E_USE_REAL_API": "false"
+                },
+                "forwardAllArgs": true
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "e2e-ci--src/browser-compatibility-test.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-browser-compatibility-test-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-browser-compatibility-test-spec-ts"
+                },
+                "command": "playwright test src/browser-compatibility-test.spec.ts --output=test-results/src-browser-compatibility-test-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/browser-compatibility-test.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-browser-compatibility-test-spec-ts",
+                "{projectRoot}/playwright-report/src-browser-compatibility-test-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/console-errors.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-console-errors-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-console-errors-spec-ts"
+                },
+                "command": "playwright test src/console-errors.spec.ts --output=test-results/src-console-errors-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/console-errors.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-console-errors-spec-ts",
+                "{projectRoot}/playwright-report/src-console-errors-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/core-user-flow.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-core-user-flow-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-core-user-flow-spec-ts"
+                },
+                "command": "playwright test src/core-user-flow.spec.ts --output=test-results/src-core-user-flow-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/core-user-flow.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-core-user-flow-spec-ts",
+                "{projectRoot}/playwright-report/src-core-user-flow-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/debug-selectors.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-debug-selectors-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-debug-selectors-spec-ts"
+                },
+                "command": "playwright test src/debug-selectors.spec.ts --output=test-results/src-debug-selectors-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/debug-selectors.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-debug-selectors-spec-ts",
+                "{projectRoot}/playwright-report/src-debug-selectors-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/debug-user-flow.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-debug-user-flow-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-debug-user-flow-spec-ts"
+                },
+                "command": "playwright test src/debug-user-flow.spec.ts --output=test-results/src-debug-user-flow-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/debug-user-flow.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-debug-user-flow-spec-ts",
+                "{projectRoot}/playwright-report/src-debug-user-flow-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/deep-console-debug.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-deep-console-debug-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-deep-console-debug-spec-ts"
+                },
+                "command": "playwright test src/deep-console-debug.spec.ts --output=test-results/src-deep-console-debug-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/deep-console-debug.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-deep-console-debug-spec-ts",
+                "{projectRoot}/playwright-report/src-deep-console-debug-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/detailed-job-creation.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-detailed-job-creation-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-detailed-job-creation-spec-ts"
+                },
+                "command": "playwright test src/detailed-job-creation.spec.ts --output=test-results/src-detailed-job-creation-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/detailed-job-creation.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-detailed-job-creation-spec-ts",
+                "{projectRoot}/playwright-report/src-detailed-job-creation-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/diagnostic.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-diagnostic-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-diagnostic-spec-ts"
+                },
+                "command": "playwright test src/diagnostic.spec.ts --output=test-results/src-diagnostic-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/diagnostic.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-diagnostic-spec-ts",
+                "{projectRoot}/playwright-report/src-diagnostic-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/error-scenarios.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-error-scenarios-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-error-scenarios-spec-ts"
+                },
+                "command": "playwright test src/error-scenarios.spec.ts --output=test-results/src-error-scenarios-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/error-scenarios.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-error-scenarios-spec-ts",
+                "{projectRoot}/playwright-report/src-error-scenarios-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/essential-compatibility.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-essential-compatibility-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-essential-compatibility-spec-ts"
+                },
+                "command": "playwright test src/essential-compatibility.spec.ts --output=test-results/src-essential-compatibility-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/essential-compatibility.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-essential-compatibility-spec-ts",
+                "{projectRoot}/playwright-report/src-essential-compatibility-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/example.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-example-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-example-spec-ts"
+                },
+                "command": "playwright test src/example.spec.ts --output=test-results/src-example-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/example.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-example-spec-ts",
+                "{projectRoot}/playwright-report/src-example-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/firefox-stability-test.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-firefox-stability-test-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-firefox-stability-test-spec-ts"
+                },
+                "command": "playwright test src/firefox-stability-test.spec.ts --output=test-results/src-firefox-stability-test-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/firefox-stability-test.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-firefox-stability-test-spec-ts",
+                "{projectRoot}/playwright-report/src-firefox-stability-test-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/jobs-list-debug.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-jobs-list-debug-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-jobs-list-debug-spec-ts"
+                },
+                "command": "playwright test src/jobs-list-debug.spec.ts --output=test-results/src-jobs-list-debug-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/jobs-list-debug.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-jobs-list-debug-spec-ts",
+                "{projectRoot}/playwright-report/src-jobs-list-debug-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/mock-server-test.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-mock-server-test-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-mock-server-test-spec-ts"
+                },
+                "command": "playwright test src/mock-server-test.spec.ts --output=test-results/src-mock-server-test-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/mock-server-test.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-mock-server-test-spec-ts",
+                "{projectRoot}/playwright-report/src-mock-server-test-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/pdf-real-file-uat.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-pdf-real-file-uat-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-pdf-real-file-uat-spec-ts"
+                },
+                "command": "playwright test src/pdf-real-file-uat.spec.ts --output=test-results/src-pdf-real-file-uat-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/pdf-real-file-uat.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-pdf-real-file-uat-spec-ts",
+                "{projectRoot}/playwright-report/src-pdf-real-file-uat-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/pdf-variety-uat.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-pdf-variety-uat-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-pdf-variety-uat-spec-ts"
+                },
+                "command": "playwright test src/pdf-variety-uat.spec.ts --output=test-results/src-pdf-variety-uat-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/pdf-variety-uat.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-pdf-variety-uat-spec-ts",
+                "{projectRoot}/playwright-report/src-pdf-variety-uat-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/real-data-expansion.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-real-data-expansion-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-real-data-expansion-spec-ts"
+                },
+                "command": "playwright test src/real-data-expansion.spec.ts --output=test-results/src-real-data-expansion-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/real-data-expansion.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-real-data-expansion-spec-ts",
+                "{projectRoot}/playwright-report/src-real-data-expansion-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/simple-firefox-test.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-simple-firefox-test-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-simple-firefox-test-spec-ts"
+                },
+                "command": "playwright test src/simple-firefox-test.spec.ts --output=test-results/src-simple-firefox-test-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/simple-firefox-test.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-simple-firefox-test-spec-ts",
+                "{projectRoot}/playwright-report/src-simple-firefox-test-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/simple-jobs-page.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-simple-jobs-page-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-simple-jobs-page-spec-ts"
+                },
+                "command": "playwright test src/simple-jobs-page.spec.ts --output=test-results/src-simple-jobs-page-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/simple-jobs-page.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-simple-jobs-page-spec-ts",
+                "{projectRoot}/playwright-report/src-simple-jobs-page-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/simple-test.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-simple-test-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-simple-test-spec-ts"
+                },
+                "command": "playwright test src/simple-test.spec.ts --output=test-results/src-simple-test-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/simple-test.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-simple-test-spec-ts",
+                "{projectRoot}/playwright-report/src-simple-test-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/unified-analysis-regression.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-unified-analysis-regression-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-unified-analysis-regression-spec-ts"
+                },
+                "command": "playwright test src/unified-analysis-regression.spec.ts --output=test-results/src-unified-analysis-regression-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/unified-analysis-regression.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-unified-analysis-regression-spec-ts",
+                "{projectRoot}/playwright-report/src-unified-analysis-regression-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/webkit-final-test.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-webkit-final-test-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-webkit-final-test-spec-ts"
+                },
+                "command": "playwright test src/webkit-final-test.spec.ts --output=test-results/src-webkit-final-test-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/webkit-final-test.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-webkit-final-test-spec-ts",
+                "{projectRoot}/playwright-report/src-webkit-final-test-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/webkit-stability-test.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-webkit-stability-test-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-webkit-stability-test-spec-ts"
+                },
+                "command": "playwright test src/webkit-stability-test.spec.ts --output=test-results/src-webkit-stability-test-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/webkit-stability-test.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-webkit-stability-test-spec-ts",
+                "{projectRoot}/playwright-report/src-webkit-stability-test-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci--src/webkit-static-test.spec.ts": {
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "env": {
+                  "PLAYWRIGHT_HTML_OUTPUT_DIR": "playwright-report/src-webkit-static-test-spec-ts",
+                  "PLAYWRIGHT_HTML_REPORT": "playwright-report/src-webkit-static-test-spec-ts"
+                },
+                "command": "playwright test src/webkit-static-test.spec.ts --output=test-results/src-webkit-static-test-spec-ts"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in src/webkit-static-test.spec.ts in CI",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results/src-webkit-static-test-spec-ts",
+                "{projectRoot}/playwright-report/src-webkit-static-test-spec-ts"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci": {
+              "executor": "nx:noop",
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results",
+                "{projectRoot}/playwright-report"
+              ],
+              "dependsOn": [
+                {
+                  "target": "e2e-ci--src/browser-compatibility-test.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/console-errors.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/core-user-flow.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/debug-selectors.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/debug-user-flow.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/deep-console-debug.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/detailed-job-creation.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/diagnostic.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/error-scenarios.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/essential-compatibility.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/example.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/firefox-stability-test.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/jobs-list-debug.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/mock-server-test.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/pdf-real-file-uat.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/pdf-variety-uat.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/real-data-expansion.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/simple-firefox-test.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/simple-jobs-page.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/simple-test.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/unified-analysis-regression.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/webkit-final-test.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/webkit-stability-test.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                },
+                {
+                  "target": "e2e-ci--src/webkit-static-test.spec.ts",
+                  "projects": "self",
+                  "params": "forward"
+                }
+              ],
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in CI",
+                "nonAtomizedTarget": "e2e",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "configurations": {},
+              "options": {}
+            },
+            "lint": {
+              "cache": true,
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend-e2e",
+                "command": "eslint ."
+              },
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/eslint.config.mjs",
+                "{workspaceRoot}/apps/ai-recruitment-frontend-e2e/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "npx eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "ai-recruitment-frontend-e2e",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "projectType": "application",
+          "sourceRoot": "apps/ai-recruitment-frontend-e2e/src",
+          "tags": [
+            "owner:platform-governance"
+          ],
+          "implicitDependencies": [
+            "ai-recruitment-frontend"
+          ]
+        }
+      },
+      "candidate-scoring-domain": {
+        "name": "candidate-scoring-domain",
+        "type": "lib",
+        "data": {
+          "root": "libs/candidate-scoring-domain",
+          "targets": {
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/candidate-scoring-domain/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "libs/candidate-scoring-domain/**/*.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore",
+                "{workspaceRoot}/eslint.config.mjs"
+              ]
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:tsc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/candidate-scoring-domain",
+                "tsConfig": "libs/candidate-scoring-domain/tsconfig.json",
+                "packageJson": "libs/candidate-scoring-domain/package.json",
+                "main": "libs/candidate-scoring-domain/src/index.ts"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "default",
+                "^default"
+              ]
+            }
+          },
+          "name": "candidate-scoring-domain",
+          "tags": [
+            "npm:public",
+            "domain:candidate-scoring",
+            "scope:domain",
+            "type:lib",
+            "owner:platform-governance"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "description": "Candidate Scoring Bounded Context - Domain Layer",
+            "js": {
+              "packageName": "@app/candidate-scoring-domain",
+              "packageMain": "./src/index.js",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/candidate-scoring-domain/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "report-generation-domain": {
+        "name": "report-generation-domain",
+        "type": "lib",
+        "data": {
+          "root": "libs/report-generation-domain",
+          "targets": {
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/report-generation-domain/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "libs/report-generation-domain/**/*.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore",
+                "{workspaceRoot}/eslint.config.mjs"
+              ]
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:tsc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/report-generation-domain",
+                "tsConfig": "libs/report-generation-domain/tsconfig.json",
+                "packageJson": "libs/report-generation-domain/package.json",
+                "main": "libs/report-generation-domain/src/index.ts"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "default",
+                "^default"
+              ]
+            }
+          },
+          "name": "report-generation-domain",
+          "tags": [
+            "npm:public",
+            "domain:report-generation",
+            "scope:domain",
+            "type:lib",
+            "owner:platform-governance"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "description": "Report Generation Bounded Context - Domain Layer",
+            "js": {
+              "packageName": "@app/report-generation-domain",
+              "packageMain": "./src/index.js",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/report-generation-domain/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "resume-processing-domain": {
+        "name": "resume-processing-domain",
+        "type": "lib",
+        "data": {
+          "root": "libs/resume-processing-domain",
+          "targets": {
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/resume-processing-domain/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "libs/resume-processing-domain/**/*.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore",
+                "{workspaceRoot}/eslint.config.mjs"
+              ]
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:tsc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/resume-processing-domain",
+                "tsConfig": "libs/resume-processing-domain/tsconfig.json",
+                "packageJson": "libs/resume-processing-domain/package.json",
+                "main": "libs/resume-processing-domain/src/index.ts"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "default",
+                "^default"
+              ]
+            }
+          },
+          "name": "resume-processing-domain",
+          "tags": [
+            "npm:public",
+            "domain:resume-processing",
+            "scope:domain",
+            "type:lib",
+            "owner:platform-governance"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "description": "Resume Processing Bounded Context - Domain Layer",
+            "js": {
+              "packageName": "@app/resume-processing-domain",
+              "packageMain": "./src/index.js",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/resume-processing-domain/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "ai-recruitment-frontend": {
+        "name": "ai-recruitment-frontend",
+        "type": "app",
+        "data": {
+          "root": "apps/ai-recruitment-frontend",
+          "projectType": "application",
+          "metadata": {},
+          "targets": {
+            "build": {
+              "executor": "@angular/build:application",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/apps/ai-recruitment-frontend",
+                "browser": "apps/ai-recruitment-frontend/src/main.ts",
+                "polyfills": [
+                  "zone.js"
+                ],
+                "tsConfig": "apps/ai-recruitment-frontend/tsconfig.app.json",
+                "inlineStyleLanguage": "scss",
+                "assets": [
+                  {
+                    "glob": "**/*",
+                    "input": "apps/ai-recruitment-frontend/public"
+                  },
+                  {
+                    "glob": "**/*",
+                    "input": "apps/ai-recruitment-frontend/src/assets",
+                    "output": "assets"
+                  }
+                ],
+                "styles": [
+                  "apps/ai-recruitment-frontend/src/styles.scss"
+                ]
+              },
+              "configurations": {
+                "webkit-test": {
+                  "budgets": [
+                    {
+                      "type": "initial",
+                      "maximumWarning": "2mb",
+                      "maximumError": "3mb"
+                    },
+                    {
+                      "type": "anyComponentStyle",
+                      "maximumWarning": "50kb",
+                      "maximumError": "100kb"
+                    }
+                  ],
+                  "outputHashing": "all",
+                  "optimization": {
+                    "scripts": true,
+                    "styles": {
+                      "minify": true,
+                      "inlineCritical": true
+                    },
+                    "fonts": true
+                  },
+                  "sourceMap": false,
+                  "namedChunks": false,
+                  "extractLicenses": true,
+                  "subresourceIntegrity": true
+                },
+                "production": {
+                  "budgets": [
+                    {
+                      "type": "initial",
+                      "maximumWarning": "800kb",
+                      "maximumError": "1200kb"
+                    },
+                    {
+                      "type": "anyComponentStyle",
+                      "maximumWarning": "20kb",
+                      "maximumError": "30kb"
+                    },
+                    {
+                      "type": "bundle",
+                      "name": "angular-vendor",
+                      "maximumWarning": "600kb",
+                      "maximumError": "900kb"
+                    },
+                    {
+                      "type": "bundle",
+                      "name": "ngrx-vendor",
+                      "maximumWarning": "300kb",
+                      "maximumError": "500kb"
+                    }
+                  ],
+                  "outputHashing": "all",
+                  "optimization": {
+                    "scripts": true,
+                    "styles": {
+                      "minify": true,
+                      "inlineCritical": true
+                    },
+                    "fonts": true
+                  },
+                  "sourceMap": false,
+                  "namedChunks": false,
+                  "extractLicenses": true,
+                  "subresourceIntegrity": true
+                },
+                "development": {
+                  "optimization": false,
+                  "extractLicenses": false,
+                  "sourceMap": true
+                },
+                "test": {
+                  "optimization": false,
+                  "extractLicenses": false,
+                  "sourceMap": true,
+                  "tsConfig": "apps/ai-recruitment-frontend/tsconfig.e2e.json",
+                  "fileReplacements": [
+                    {
+                      "replace": "apps/ai-recruitment-frontend/src/environments/environment.ts",
+                      "with": "apps/ai-recruitment-frontend/src/environments/environment.test.ts"
+                    }
+                  ]
+                }
+              },
+              "defaultConfiguration": "production",
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "default",
+                "^default"
+              ]
+            },
+            "serve": {
+              "continuous": true,
+              "executor": "@angular/build:dev-server",
+              "options": {
+                "proxyConfig": "apps/ai-recruitment-frontend/proxy.conf.json"
+              },
+              "configurations": {
+                "production": {
+                  "buildTarget": "ai-recruitment-frontend:build:production"
+                },
+                "development": {
+                  "buildTarget": "ai-recruitment-frontend:build:development"
+                },
+                "test": {
+                  "buildTarget": "ai-recruitment-frontend:build:test"
+                }
+              },
+              "defaultConfiguration": "development",
+              "parallelism": true
+            },
+            "preview": {
+              "continuous": true,
+              "options": {
+                "cwd": "apps/ai-recruitment-frontend",
+                "args": [
+                  "--node-env=production"
+                ],
+                "command": "webpack-cli serve"
+              },
+              "metadata": {
+                "technologies": [
+                  "webpack"
+                ],
+                "description": "Starts Webpack dev server in production mode",
+                "help": {
+                  "command": "npx webpack-cli serve --help",
+                  "example": {
+                    "options": {
+                      "args": [
+                        "--client-progress",
+                        "--history-api-fallback "
+                      ]
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "serve-static": {
+              "continuous": true,
+              "dependsOn": [
+                "build"
+              ],
+              "executor": "@nx/web:file-server",
+              "options": {
+                "buildTarget": "ai-recruitment-frontend:build:webkit-test",
+                "spa": true,
+                "port": 4200,
+                "staticFilePath": "dist/apps/ai-recruitment-frontend/browser"
+              },
+              "configurations": {
+                "webkit-test": {
+                  "buildTarget": "ai-recruitment-frontend:build:webkit-test",
+                  "port": 4204,
+                  "staticFilePath": "dist/apps/ai-recruitment-frontend/browser",
+                  "spa": true
+                }
+              },
+              "parallelism": true
+            },
+            "build-deps": {
+              "dependsOn": [
+                "^build"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "executor": "nx:noop"
+            },
+            "watch-deps": {
+              "continuous": true,
+              "dependsOn": [
+                "build-deps"
+              ],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "npx nx watch --projects ai-recruitment-frontend --includeDependentProjects -- npx nx build-deps ai-recruitment-frontend"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "apps/ai-recruitment-frontend/jest.config.ts",
+                "passWithNoTests": false
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "options": {},
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore",
+                "{workspaceRoot}/eslint.config.mjs"
+              ]
+            },
+            "extract-i18n": {
+              "executor": "@angular/build:extract-i18n",
+              "options": {
+                "buildTarget": "ai-recruitment-frontend:build"
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "ai-recruitment-frontend",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "prefix": "arc",
+          "sourceRoot": "apps/ai-recruitment-frontend/src",
+          "tags": [
+            "owner:platform-governance"
+          ],
+          "implicitDependencies": []
+        }
+      },
+      "incentive-system-domain": {
+        "name": "incentive-system-domain",
+        "type": "lib",
+        "data": {
+          "root": "libs/incentive-system-domain",
+          "targets": {
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/incentive-system-domain/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "libs/incentive-system-domain/**/*.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore",
+                "{workspaceRoot}/eslint.config.mjs"
+              ]
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:tsc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/incentive-system-domain",
+                "tsConfig": "libs/incentive-system-domain/tsconfig.json",
+                "packageJson": "libs/incentive-system-domain/package.json",
+                "main": "libs/incentive-system-domain/src/index.ts"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "default",
+                "^default"
+              ]
+            }
+          },
+          "name": "incentive-system-domain",
+          "tags": [
+            "npm:public",
+            "domain:incentive-system",
+            "scope:domain",
+            "type:lib",
+            "owner:platform-governance"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "description": "Incentive System Bounded Context - Domain Layer",
+            "js": {
+              "packageName": "@app/incentive-system-domain",
+              "packageMain": "./src/index.js",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/incentive-system-domain/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "usage-management-domain": {
+        "name": "usage-management-domain",
+        "type": "lib",
+        "data": {
+          "root": "libs/usage-management-domain",
+          "targets": {
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/usage-management-domain/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "libs/usage-management-domain/**/*.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore",
+                "{workspaceRoot}/eslint.config.mjs"
+              ]
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:tsc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/usage-management-domain",
+                "tsConfig": "libs/usage-management-domain/tsconfig.json",
+                "packageJson": "libs/usage-management-domain/package.json",
+                "main": "libs/usage-management-domain/src/index.ts"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "default",
+                "^default"
+              ]
+            }
+          },
+          "name": "usage-management-domain",
+          "tags": [
+            "npm:public",
+            "domain:usage-management",
+            "scope:domain",
+            "type:lib",
+            "owner:platform-governance"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "description": "Usage Management Bounded Context - Domain Layer",
+            "js": {
+              "packageName": "@app/usage-management-domain",
+              "packageMain": "./src/index.js",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/usage-management-domain/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "user-management-domain": {
+        "name": "user-management-domain",
+        "type": "lib",
+        "data": {
+          "root": "libs/user-management-domain",
+          "targets": {
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/user-management-domain/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "libs/user-management-domain/**/*.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore",
+                "{workspaceRoot}/eslint.config.mjs"
+              ]
+            },
+            "typecheck": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "typecheck"
+              },
+              "metadata": {
+                "scriptContent": "tsc --noEmit",
+                "runCommand": "npm run typecheck"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:tsc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/user-management-domain",
+                "tsConfig": "libs/user-management-domain/tsconfig.json",
+                "packageJson": "libs/user-management-domain/package.json",
+                "main": "libs/user-management-domain/src/index.ts"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "default",
+                "^default"
+              ]
+            }
+          },
+          "name": "user-management-domain",
+          "tags": [
+            "npm:public",
+            "domain:user-management",
+            "scope:domain",
+            "type:lib",
+            "owner:platform-governance"
+          ],
+          "metadata": {
+            "targetGroups": {
+              "NPM Scripts": [
+                "typecheck"
+              ]
+            },
+            "description": "User management domain layer for AI Recruitment Clerk",
+            "js": {
+              "packageName": "@ai-recruitment-clerk/user-management-domain",
+              "packageExports": {
+                ".": {
+                  "require": "./src/index.js",
+                  "types": "./src/index.d.ts"
+                }
+              },
+              "packageMain": "./src/index.js",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/user-management-domain/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "infrastructure-shared": {
+        "name": "infrastructure-shared",
+        "type": "lib",
+        "data": {
+          "root": "libs/infrastructure-shared",
+          "targets": {
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/infrastructure-shared/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "libs/infrastructure-shared/**/*.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore",
+                "{workspaceRoot}/eslint.config.mjs"
+              ]
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:tsc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/infrastructure-shared",
+                "tsConfig": "libs/infrastructure-shared/tsconfig.json",
+                "packageJson": "libs/infrastructure-shared/package.json",
+                "main": "libs/infrastructure-shared/src/index.ts"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "default",
+                "^default"
+              ]
+            }
+          },
+          "name": "infrastructure-shared",
+          "tags": [
+            "npm:public",
+            "scope:shared",
+            "type:lib",
+            "layer:infrastructure",
+            "owner:platform-governance"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@ai-recruitment-clerk/infrastructure-shared",
+              "packageExports": {
+                ".": {
+                  "require": "./src/index.js",
+                  "types": "./src/index.d.ts"
+                }
+              },
+              "packageMain": "./src/index.js",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/infrastructure-shared/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "job-management-domain": {
+        "name": "job-management-domain",
+        "type": "lib",
+        "data": {
+          "root": "libs/job-management-domain",
+          "targets": {
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/job-management-domain/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "libs/job-management-domain/**/*.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore",
+                "{workspaceRoot}/eslint.config.mjs"
+              ]
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:tsc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/job-management-domain",
+                "tsConfig": "libs/job-management-domain/tsconfig.json",
+                "packageJson": "libs/job-management-domain/package.json",
+                "main": "libs/job-management-domain/src/index.ts"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "default",
+                "^default"
+              ]
+            }
+          },
+          "name": "job-management-domain",
+          "tags": [
+            "npm:public",
+            "domain:job-management",
+            "scope:domain",
+            "type:lib",
+            "owner:platform-governance"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "description": "Job Management Bounded Context - Domain Layer",
+            "js": {
+              "packageName": "@app/job-management-domain",
+              "packageMain": "./src/index.js",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/job-management-domain/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "report-generator-svc": {
+        "name": "report-generator-svc",
+        "type": "app",
+        "data": {
+          "root": "apps/report-generator-svc",
+          "projectType": "application",
+          "metadata": {},
+          "targets": {
+            "build": {
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "webpack-cli build --config apps/report-generator-svc/webpack.config.cjs",
+                "args": [
+                  "--node-env=production"
+                ]
+              },
+              "configurations": {
+                "development": {
+                  "args": [
+                    "--node-env=development"
+                  ]
+                }
+              },
+              "parallelism": true
+            },
+            "serve": {
+              "continuous": true,
+              "executor": "@nx/js:node",
+              "defaultConfiguration": "development",
+              "dependsOn": [
+                "build"
+              ],
+              "options": {
+                "buildTarget": "report-generator-svc:build",
+                "runBuildTargetDependencies": false
+              },
+              "configurations": {
+                "development": {
+                  "buildTarget": "report-generator-svc:build:development"
+                },
+                "production": {
+                  "buildTarget": "report-generator-svc:build:production"
+                }
+              },
+              "parallelism": true
+            },
+            "preview": {
+              "continuous": true,
+              "options": {
+                "cwd": "apps/report-generator-svc",
+                "args": [
+                  "--node-env=production"
+                ],
+                "command": "webpack-cli serve"
+              },
+              "metadata": {
+                "technologies": [
+                  "webpack"
+                ],
+                "description": "Starts Webpack dev server in production mode",
+                "help": {
+                  "command": "npx webpack-cli serve --help",
+                  "example": {
+                    "options": {
+                      "args": [
+                        "--client-progress",
+                        "--history-api-fallback "
+                      ]
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "serve-static": {
+              "continuous": true,
+              "dependsOn": [
+                "build"
+              ],
+              "executor": "@nx/web:file-server",
+              "options": {
+                "buildTarget": "build",
+                "spa": true
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "build-deps": {
+              "dependsOn": [
+                "^build"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "executor": "nx:noop"
+            },
+            "watch-deps": {
+              "continuous": true,
+              "dependsOn": [
+                "build-deps"
+              ],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "npx nx watch --projects report-generator-svc --includeDependentProjects -- npx nx build-deps report-generator-svc"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "apps/report-generator-svc/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "cache": true,
+              "options": {
+                "cwd": "apps/report-generator-svc",
+                "command": "eslint ."
+              },
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "npx eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "report-generator-svc",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/report-generator-svc/src",
+          "tags": [
+            "owner:platform-governance"
+          ],
+          "implicitDependencies": []
+        }
+      },
+      "ai-services-shared": {
+        "name": "ai-services-shared",
+        "type": "lib",
+        "data": {
+          "root": "libs/ai-services-shared",
+          "targets": {
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/ai-services-shared/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "libs/ai-services-shared/**/*.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore",
+                "{workspaceRoot}/eslint.config.mjs"
+              ]
+            },
+            "typecheck": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "typecheck"
+              },
+              "metadata": {
+                "scriptContent": "tsc --noEmit",
+                "runCommand": "npm run typecheck"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:tsc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/ai-services-shared",
+                "tsConfig": "libs/ai-services-shared/tsconfig.json",
+                "packageJson": "libs/ai-services-shared/package.json",
+                "main": "libs/ai-services-shared/src/index.ts"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "default",
+                "^default"
+              ]
+            }
+          },
+          "name": "ai-services-shared",
+          "tags": [
+            "npm:public",
+            "scope:shared",
+            "type:lib",
+            "layer:ai-services",
+            "owner:platform-governance"
+          ],
+          "metadata": {
+            "targetGroups": {
+              "NPM Scripts": [
+                "typecheck"
+              ]
+            },
+            "description": "Shared AI services and integrations for AI Recruitment Clerk",
+            "js": {
+              "packageName": "@ai-recruitment-clerk/ai-services-shared",
+              "packageExports": {
+                ".": {
+                  "require": "./src/index.js",
+                  "types": "./src/index.d.ts"
+                }
+              },
+              "packageMain": "./src/index.js",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/ai-services-shared/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "scoring-engine-svc": {
+        "name": "scoring-engine-svc",
+        "type": "app",
+        "data": {
+          "root": "apps/scoring-engine-svc",
+          "projectType": "application",
+          "metadata": {},
+          "targets": {
+            "build": {
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "webpack-cli build --config apps/scoring-engine-svc/webpack.config.cjs",
+                "args": [
+                  "--node-env=production"
+                ]
+              },
+              "configurations": {
+                "development": {
+                  "args": [
+                    "--node-env=development"
+                  ]
+                }
+              },
+              "parallelism": true
+            },
+            "serve": {
+              "continuous": true,
+              "executor": "@nx/js:node",
+              "defaultConfiguration": "development",
+              "dependsOn": [
+                "build"
+              ],
+              "options": {
+                "buildTarget": "scoring-engine-svc:build",
+                "runBuildTargetDependencies": false
+              },
+              "configurations": {
+                "development": {
+                  "buildTarget": "scoring-engine-svc:build:development"
+                },
+                "production": {
+                  "buildTarget": "scoring-engine-svc:build:production"
+                }
+              },
+              "parallelism": true
+            },
+            "preview": {
+              "continuous": true,
+              "options": {
+                "cwd": "apps/scoring-engine-svc",
+                "args": [
+                  "--node-env=production"
+                ],
+                "command": "webpack-cli serve"
+              },
+              "metadata": {
+                "technologies": [
+                  "webpack"
+                ],
+                "description": "Starts Webpack dev server in production mode",
+                "help": {
+                  "command": "npx webpack-cli serve --help",
+                  "example": {
+                    "options": {
+                      "args": [
+                        "--client-progress",
+                        "--history-api-fallback "
+                      ]
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "serve-static": {
+              "continuous": true,
+              "dependsOn": [
+                "build"
+              ],
+              "executor": "@nx/web:file-server",
+              "options": {
+                "buildTarget": "build",
+                "spa": true
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "build-deps": {
+              "dependsOn": [
+                "^build"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "executor": "nx:noop"
+            },
+            "watch-deps": {
+              "continuous": true,
+              "dependsOn": [
+                "build-deps"
+              ],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "npx nx watch --projects scoring-engine-svc --includeDependentProjects -- npx nx build-deps scoring-engine-svc"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "apps/scoring-engine-svc/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "cache": true,
+              "options": {
+                "cwd": "apps/scoring-engine-svc",
+                "command": "eslint ."
+              },
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "npx eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "scoring-engine-svc",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/scoring-engine-svc/src",
+          "tags": [
+            "owner:platform-governance"
+          ],
+          "implicitDependencies": []
+        }
+      },
+      "shared-nats-client": {
+        "name": "shared-nats-client",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared-nats-client",
+          "targets": {
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/shared-nats-client/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "libs/shared-nats-client/**/*.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore",
+                "{workspaceRoot}/eslint.config.mjs"
+              ]
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:tsc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared-nats-client",
+                "tsConfig": "libs/shared-nats-client/tsconfig.lib.json",
+                "packageJson": "libs/shared-nats-client/package.json",
+                "main": "libs/shared-nats-client/src/index.ts"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "default",
+                "^default"
+              ]
+            }
+          },
+          "name": "shared-nats-client",
+          "tags": [
+            "npm:public",
+            "npm:nats",
+            "npm:microservices",
+            "npm:messaging",
+            "npm:jetstream",
+            "npm:nestjs",
+            "scope:shared",
+            "type:lib",
+            "owner:platform-governance"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "description": "Shared NATS client library for AI Recruitment Clerk microservices",
+            "js": {
+              "packageName": "@app/shared-nats-client",
+              "packageMain": "./src/index.js",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared-nats-client/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "resume-parser-svc": {
+        "name": "resume-parser-svc",
+        "type": "app",
+        "data": {
+          "root": "apps/resume-parser-svc",
+          "projectType": "application",
+          "metadata": {},
+          "targets": {
+            "build": {
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "webpack-cli build --config apps/resume-parser-svc/webpack.config.cjs",
+                "args": [
+                  "--node-env=production"
+                ]
+              },
+              "configurations": {
+                "development": {
+                  "args": [
+                    "--node-env=development"
+                  ]
+                }
+              },
+              "parallelism": true
+            },
+            "serve": {
+              "continuous": true,
+              "executor": "@nx/js:node",
+              "defaultConfiguration": "development",
+              "dependsOn": [
+                "build"
+              ],
+              "options": {
+                "buildTarget": "resume-parser-svc:build",
+                "runBuildTargetDependencies": false
+              },
+              "configurations": {
+                "development": {
+                  "buildTarget": "resume-parser-svc:build:development"
+                },
+                "production": {
+                  "buildTarget": "resume-parser-svc:build:production"
+                }
+              },
+              "parallelism": true
+            },
+            "preview": {
+              "continuous": true,
+              "options": {
+                "cwd": "apps/resume-parser-svc",
+                "args": [
+                  "--node-env=production"
+                ],
+                "command": "webpack-cli serve"
+              },
+              "metadata": {
+                "technologies": [
+                  "webpack"
+                ],
+                "description": "Starts Webpack dev server in production mode",
+                "help": {
+                  "command": "npx webpack-cli serve --help",
+                  "example": {
+                    "options": {
+                      "args": [
+                        "--client-progress",
+                        "--history-api-fallback "
+                      ]
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "serve-static": {
+              "continuous": true,
+              "dependsOn": [
+                "build"
+              ],
+              "executor": "@nx/web:file-server",
+              "options": {
+                "buildTarget": "build",
+                "spa": true
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "build-deps": {
+              "dependsOn": [
+                "^build"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "executor": "nx:noop"
+            },
+            "watch-deps": {
+              "continuous": true,
+              "dependsOn": [
+                "build-deps"
+              ],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "npx nx watch --projects resume-parser-svc --includeDependentProjects -- npx nx build-deps resume-parser-svc"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "apps/resume-parser-svc/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "cache": true,
+              "options": {
+                "cwd": "apps/resume-parser-svc",
+                "command": "eslint ."
+              },
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "npx eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "resume-parser-svc",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/resume-parser-svc/src",
+          "tags": [
+            "owner:platform-governance"
+          ],
+          "implicitDependencies": []
+        }
+      },
+      "jd-extractor-svc": {
+        "name": "jd-extractor-svc",
+        "type": "app",
+        "data": {
+          "root": "apps/jd-extractor-svc",
+          "projectType": "application",
+          "metadata": {},
+          "targets": {
+            "build": {
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "webpack-cli build --config apps/jd-extractor-svc/webpack.config.cjs",
+                "args": [
+                  "--node-env=production"
+                ]
+              },
+              "configurations": {
+                "development": {
+                  "args": [
+                    "--node-env=development"
+                  ]
+                }
+              },
+              "parallelism": true
+            },
+            "serve": {
+              "continuous": true,
+              "executor": "@nx/js:node",
+              "defaultConfiguration": "development",
+              "dependsOn": [
+                "build"
+              ],
+              "options": {
+                "buildTarget": "jd-extractor-svc:build",
+                "runBuildTargetDependencies": false
+              },
+              "configurations": {
+                "development": {
+                  "buildTarget": "jd-extractor-svc:build:development"
+                },
+                "production": {
+                  "buildTarget": "jd-extractor-svc:build:production"
+                }
+              },
+              "parallelism": true
+            },
+            "preview": {
+              "continuous": true,
+              "options": {
+                "cwd": "apps/jd-extractor-svc",
+                "args": [
+                  "--node-env=production"
+                ],
+                "command": "webpack-cli serve"
+              },
+              "metadata": {
+                "technologies": [
+                  "webpack"
+                ],
+                "description": "Starts Webpack dev server in production mode",
+                "help": {
+                  "command": "npx webpack-cli serve --help",
+                  "example": {
+                    "options": {
+                      "args": [
+                        "--client-progress",
+                        "--history-api-fallback "
+                      ]
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "serve-static": {
+              "continuous": true,
+              "dependsOn": [
+                "build"
+              ],
+              "executor": "@nx/web:file-server",
+              "options": {
+                "buildTarget": "build",
+                "spa": true
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "build-deps": {
+              "dependsOn": [
+                "^build"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "executor": "nx:noop"
+            },
+            "watch-deps": {
+              "continuous": true,
+              "dependsOn": [
+                "build-deps"
+              ],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "npx nx watch --projects jd-extractor-svc --includeDependentProjects -- npx nx build-deps jd-extractor-svc"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "apps/jd-extractor-svc/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "cache": true,
+              "options": {
+                "cwd": "apps/jd-extractor-svc",
+                "command": "eslint ."
+              },
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "npx eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "jd-extractor-svc",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/jd-extractor-svc/src",
+          "tags": [
+            "owner:platform-governance"
+          ],
+          "implicitDependencies": []
+        }
+      },
+      "marketing-domain": {
+        "name": "marketing-domain",
+        "type": "lib",
+        "data": {
+          "root": "libs/marketing-domain",
+          "targets": {
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/marketing-domain/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "libs/marketing-domain/**/*.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore",
+                "{workspaceRoot}/eslint.config.mjs"
+              ]
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:tsc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/marketing-domain",
+                "tsConfig": "libs/marketing-domain/tsconfig.json",
+                "packageJson": "libs/marketing-domain/package.json",
+                "main": "libs/marketing-domain/src/index.ts"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "default",
+                "^default"
+              ]
+            }
+          },
+          "name": "marketing-domain",
+          "tags": [
+            "npm:public",
+            "domain:marketing",
+            "scope:domain",
+            "type:lib",
+            "owner:platform-governance"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "description": "Marketing Research Bounded Context - Domain Layer",
+            "js": {
+              "packageName": "@app/marketing-domain",
+              "packageMain": "./src/index.js",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/marketing-domain/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "app-gateway-e2e": {
+        "name": "app-gateway-e2e",
+        "type": "e2e",
+        "data": {
+          "root": "apps/app-gateway-e2e",
+          "targets": {
+            "lint": {
+              "cache": true,
+              "options": {
+                "cwd": "apps/app-gateway-e2e",
+                "command": "eslint ."
+              },
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "npx eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "e2e": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{e2eProjectRoot}"
+              ],
+              "options": {
+                "jestConfig": "apps/app-gateway-e2e/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "dependsOn": [
+                "app-gateway:build",
+                "app-gateway:serve"
+              ],
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            }
+          },
+          "name": "app-gateway-e2e",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "projectType": "application",
+          "tags": [
+            "owner:platform-governance"
+          ],
+          "implicitDependencies": [
+            "app-gateway"
+          ]
+        }
+      },
+      "api-contracts": {
+        "name": "api-contracts",
+        "type": "lib",
+        "data": {
+          "root": "libs/api-contracts",
+          "targets": {
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/api-contracts/jest.config.cjs",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "libs/api-contracts/**/*.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore",
+                "{workspaceRoot}/eslint.config.mjs"
+              ]
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:tsc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/api-contracts",
+                "tsConfig": "libs/api-contracts/tsconfig.json",
+                "packageJson": "libs/api-contracts/package.json",
+                "main": "libs/api-contracts/src/index.ts"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "default",
+                "^default"
+              ]
+            }
+          },
+          "name": "api-contracts",
+          "tags": [
+            "npm:public",
+            "scope:shared",
+            "type:lib",
+            "layer:contracts",
+            "owner:platform-governance"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@ai-recruitment-clerk/api-contracts",
+              "packageMain": "./src/index.js",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/api-contracts/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "configuration": {
+        "name": "configuration",
+        "type": "lib",
+        "data": {
+          "root": "libs/configuration",
+          "targets": {
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/configuration/jest.config.ts",
+                "passWithNoTests": false
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "libs/configuration/**/*.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore",
+                "{workspaceRoot}/eslint.config.mjs"
+              ]
+            },
+            "build": {
+              "executor": "@nx/js:tsc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/configuration",
+                "main": "libs/configuration/src/index.ts",
+                "tsConfig": "libs/configuration/tsconfig.lib.json",
+                "assets": [
+                  "libs/configuration/*.md"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "default",
+                "^default"
+              ]
+            }
+          },
+          "name": "configuration",
+          "tags": [
+            "npm:private",
+            "scope:shared",
+            "layer:configuration",
+            "owner:platform-governance"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@ai-recruitment-clerk/configuration",
+              "packageMain": "./src/index.js",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/configuration/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "app-gateway": {
+        "name": "app-gateway",
+        "type": "app",
+        "data": {
+          "root": "apps/app-gateway",
+          "projectType": "application",
+          "metadata": {},
+          "targets": {
+            "build": {
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "webpack-cli build --config apps/app-gateway/webpack.config.js",
+                "args": [
+                  "--node-env=production"
+                ]
+              },
+              "configurations": {
+                "development": {
+                  "args": [
+                    "--node-env=development"
+                  ]
+                }
+              },
+              "parallelism": true
+            },
+            "serve": {
+              "continuous": true,
+              "executor": "@nx/js:node",
+              "defaultConfiguration": "development",
+              "dependsOn": [
+                "build"
+              ],
+              "options": {
+                "buildTarget": "app-gateway:build",
+                "runBuildTargetDependencies": false
+              },
+              "configurations": {
+                "development": {
+                  "buildTarget": "app-gateway:build:development"
+                },
+                "production": {
+                  "buildTarget": "app-gateway:build:production"
+                }
+              },
+              "parallelism": true
+            },
+            "preview": {
+              "continuous": true,
+              "options": {
+                "cwd": "apps/app-gateway",
+                "args": [
+                  "--node-env=production"
+                ],
+                "command": "webpack-cli serve"
+              },
+              "metadata": {
+                "technologies": [
+                  "webpack"
+                ],
+                "description": "Starts Webpack dev server in production mode",
+                "help": {
+                  "command": "npx webpack-cli serve --help",
+                  "example": {
+                    "options": {
+                      "args": [
+                        "--client-progress",
+                        "--history-api-fallback "
+                      ]
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "serve-static": {
+              "continuous": true,
+              "dependsOn": [
+                "build"
+              ],
+              "executor": "@nx/web:file-server",
+              "options": {
+                "buildTarget": "build",
+                "spa": true
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "build-deps": {
+              "dependsOn": [
+                "^build"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "executor": "nx:noop"
+            },
+            "watch-deps": {
+              "continuous": true,
+              "dependsOn": [
+                "build-deps"
+              ],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "npx nx watch --projects app-gateway --includeDependentProjects -- npx nx build-deps app-gateway"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "apps/app-gateway/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "cache": true,
+              "options": {
+                "cwd": "apps/app-gateway",
+                "command": "eslint ."
+              },
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "npx eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "app-gateway",
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "apps/app-gateway/src",
+          "tags": [
+            "owner:platform-governance"
+          ],
+          "implicitDependencies": []
+        }
+      },
+      "shared-dtos": {
+        "name": "shared-dtos",
+        "type": "lib",
+        "data": {
+          "root": "libs/shared-dtos",
+          "targets": {
+            "test": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/{projectRoot}"
+              ],
+              "options": {
+                "jestConfig": "libs/shared-dtos/jest.config.js",
+                "passWithNoTests": true
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/jest.config.cjs",
+                "{projectRoot}/jest.config.ts",
+                "{workspaceRoot}/tsconfig.base.json"
+              ]
+            },
+            "lint": {
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "options": {
+                "lintFilePatterns": [
+                  "libs/shared-dtos/**/*.ts"
+                ]
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json",
+                "{workspaceRoot}/.eslintignore",
+                "{workspaceRoot}/eslint.config.mjs"
+              ]
+            },
+            "dev": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "dev"
+              },
+              "metadata": {
+                "scriptContent": "tsc --watch",
+                "runCommand": "npm run dev"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "executor": "@nx/js:tsc",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/shared-dtos",
+                "tsConfig": "libs/shared-dtos/tsconfig.json",
+                "packageJson": "libs/shared-dtos/package.json",
+                "main": "libs/shared-dtos/src/index.ts"
+              },
+              "configurations": {},
+              "parallelism": true,
+              "cache": true,
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "default",
+                "^default"
+              ]
+            }
+          },
+          "name": "shared-dtos",
+          "tags": [
+            "npm:public",
+            "npm:dtos",
+            "npm:events",
+            "npm:typescript",
+            "npm:microservices",
+            "scope:shared",
+            "type:utils",
+            "owner:platform-governance"
+          ],
+          "metadata": {
+            "targetGroups": {
+              "NPM Scripts": [
+                "dev"
+              ]
+            },
+            "description": "Shared DTOs and event interfaces for AI Recruitment Clerk microservices",
+            "js": {
+              "packageName": "@ai-recruitment-clerk/shared-dtos",
+              "packageMain": "./src/index.js",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "$schema": "../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/shared-dtos/src",
+          "projectType": "library",
+          "implicitDependencies": []
+        }
+      },
+      "ai-recruitment-clerk": {
+        "name": "ai-recruitment-clerk",
+        "type": "app",
+        "data": {
+          "root": ".",
+          "targets": {
+            "test": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test"
+              },
+              "metadata": {
+                "technologies": [
+                  "jest"
+                ],
+                "description": "Run Jest Tests",
+                "help": {
+                  "command": "npx jest --help",
+                  "example": {
+                    "options": {
+                      "coverage": true
+                    }
+                  }
+                },
+                "scriptContent": "jest --config jest.config.cjs --passWithNoTests",
+                "runCommand": "npm run test"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "e2e": {
+              "options": {
+                "cwd": ".",
+                "command": "playwright test"
+              },
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results",
+                "{projectRoot}/playwright-report"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {}
+            },
+            "e2e-ci": {
+              "executor": "nx:noop",
+              "cache": true,
+              "inputs": [
+                "default",
+                "^default",
+                {
+                  "externalDependencies": [
+                    "@playwright/test"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-results",
+                "{projectRoot}/playwright-report"
+              ],
+              "dependsOn": [],
+              "metadata": {
+                "technologies": [
+                  "playwright"
+                ],
+                "description": "Runs Playwright Tests in CI",
+                "nonAtomizedTarget": "e2e",
+                "help": {
+                  "command": "npx playwright test --help",
+                  "example": {
+                    "options": {
+                      "workers": 1
+                    }
+                  }
+                }
+              },
+              "parallelism": false,
+              "configurations": {},
+              "options": {}
+            },
+            "build": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "build"
+              },
+              "metadata": {
+                "scriptContent": "npx nx build app-gateway --prod --parallel=1",
+                "runCommand": "npm run build"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "start": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "start"
+              },
+              "metadata": {
+                "scriptContent": "node dist/apps/app-gateway/main.cjs",
+                "runCommand": "npm run start"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "start:prod": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "start:prod"
+              },
+              "metadata": {
+                "scriptContent": "NODE_ENV=production node dist/apps/app-gateway/main.cjs",
+                "runCommand": "npm run start:prod"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "postinstall": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "postinstall"
+              },
+              "metadata": {
+                "scriptContent": "echo 'Skipping build in postinstall'",
+                "runCommand": "npm run postinstall"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "ci:phase": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "ci:phase"
+              },
+              "metadata": {
+                "scriptContent": "bash scripts/ci/run-phase.sh",
+                "runCommand": "npm run ci:phase"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "ci:phase:lint": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "ci:phase:lint"
+              },
+              "metadata": {
+                "scriptContent": "npm run ci:phase -- lint",
+                "runCommand": "npm run ci:phase:lint"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "ci:phase:typecheck": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "ci:phase:typecheck"
+              },
+              "metadata": {
+                "scriptContent": "npm run ci:phase -- typecheck",
+                "runCommand": "npm run ci:phase:typecheck"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "ci:phase:build": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "ci:phase:build"
+              },
+              "metadata": {
+                "scriptContent": "npm run ci:phase -- build",
+                "runCommand": "npm run ci:phase:build"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "ci:phase:test": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "ci:phase:test"
+              },
+              "metadata": {
+                "scriptContent": "npm run ci:phase -- test",
+                "runCommand": "npm run ci:phase:test"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "ci:phase:integration": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "ci:phase:integration"
+              },
+              "metadata": {
+                "scriptContent": "npm run ci:phase -- integration",
+                "runCommand": "npm run ci:phase:integration"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "ci:phase:coverage": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "ci:phase:coverage"
+              },
+              "metadata": {
+                "scriptContent": "npm run ci:phase -- coverage",
+                "runCommand": "npm run ci:phase:coverage"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "ci:phase:e2e": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "ci:phase:e2e"
+              },
+              "metadata": {
+                "scriptContent": "npm run ci:phase -- e2e",
+                "runCommand": "npm run ci:phase:e2e"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "ci:phase:pii": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "ci:phase:pii"
+              },
+              "metadata": {
+                "scriptContent": "npm run ci:phase -- pii",
+                "runCommand": "npm run ci:phase:pii"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "ci:phase:governance": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "ci:phase:governance"
+              },
+              "metadata": {
+                "scriptContent": "npm run ci:phase -- governance",
+                "runCommand": "npm run ci:phase:governance"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "ci:full": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "ci:full"
+              },
+              "metadata": {
+                "scriptContent": "bash scripts/ci/run-all.sh",
+                "runCommand": "npm run ci:full"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "format": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "format"
+              },
+              "metadata": {
+                "scriptContent": "prettier --write \"{apps,libs}/**/*.{ts,html,scss,js,json,md}\"",
+                "runCommand": "npm run format"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:app-gateway": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:app-gateway"
+              },
+              "metadata": {
+                "scriptContent": "jest --config jest.config.cjs --passWithNoTests apps/app-gateway",
+                "runCommand": "npm run test:app-gateway"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:ci": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:ci"
+              },
+              "metadata": {
+                "scriptContent": "jest --config jest.config.cjs --ci --coverage --passWithNoTests",
+                "runCommand": "npm run test:ci"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:coverage": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:coverage"
+              },
+              "metadata": {
+                "scriptContent": "jest --config jest.config.cjs --coverage --passWithNoTests",
+                "runCommand": "npm run test:coverage"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "lint"
+              },
+              "metadata": {
+                "scriptContent": "npx nx run-many -t lint --all --parallel=1 --output-style=static",
+                "runCommand": "npm run lint"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint:ci": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "lint:ci"
+              },
+              "metadata": {
+                "scriptContent": "node tools/ci/exec-with-timeout.mjs --timeout 480000 -- node tools/ci/run-eslint.mjs",
+                "runCommand": "npm run lint:ci"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "typecheck": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "typecheck"
+              },
+              "metadata": {
+                "scriptContent": "tsc --noEmit --project tsconfig.ci.json",
+                "runCommand": "npm run typecheck"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "audit": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "audit"
+              },
+              "metadata": {
+                "scriptContent": "nx audit",
+                "runCommand": "npm run audit"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "dependency-scan": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "dependency-scan"
+              },
+              "metadata": {
+                "scriptContent": "act -j dependency-scan -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest",
+                "runCommand": "npm run dependency-scan"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:e2e": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:e2e"
+              },
+              "metadata": {
+                "scriptContent": "npx nx run ai-recruitment-frontend-e2e:e2e",
+                "runCommand": "npm run test:e2e"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:e2e:setup": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:e2e:setup"
+              },
+              "metadata": {
+                "scriptContent": "cd e2e && npm run setup",
+                "runCommand": "npm run test:e2e:setup"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:e2e:cleanup": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:e2e:cleanup"
+              },
+              "metadata": {
+                "scriptContent": "cd e2e && npm run cleanup",
+                "runCommand": "npm run test:e2e:cleanup"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:e2e:phase1": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:e2e:phase1"
+              },
+              "metadata": {
+                "scriptContent": "cd e2e && npm run test:phase1",
+                "runCommand": "npm run test:e2e:phase1"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:e2e:phase2": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:e2e:phase2"
+              },
+              "metadata": {
+                "scriptContent": "cd e2e && npm run test:phase2",
+                "runCommand": "npm run test:e2e:phase2"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:e2e:infrastructure": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:e2e:infrastructure"
+              },
+              "metadata": {
+                "scriptContent": "cd e2e && npm run test:infrastructure",
+                "runCommand": "npm run test:e2e:infrastructure"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:e2e:coverage": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:e2e:coverage"
+              },
+              "metadata": {
+                "scriptContent": "cd e2e && npm run test:coverage",
+                "runCommand": "npm run test:e2e:coverage"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:integration": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:integration"
+              },
+              "metadata": {
+                "scriptContent": "cd apps/app-gateway && ./test/run-integration-tests.sh",
+                "runCommand": "npm run test:integration"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:integration:api": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:integration:api"
+              },
+              "metadata": {
+                "scriptContent": "cd apps/app-gateway && npx jest --config=test/jest-integration.config.js test/api/",
+                "runCommand": "npm run test:integration:api"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:integration:e2e": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:integration:e2e"
+              },
+              "metadata": {
+                "scriptContent": "cd apps/app-gateway && npx jest --config=test/jest-integration.config.js test/integration/",
+                "runCommand": "npm run test:integration:e2e"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:integration:performance": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:integration:performance"
+              },
+              "metadata": {
+                "scriptContent": "cd apps/app-gateway && npx jest --config=test/jest-integration.config.js test/performance/",
+                "runCommand": "npm run test:integration:performance"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:integration:all": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:integration:all"
+              },
+              "metadata": {
+                "scriptContent": "npm run test:integration:api && npm run test:integration:e2e && npm run test:integration:performance",
+                "runCommand": "npm run test:integration:all"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:unit": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:unit"
+              },
+              "metadata": {
+                "scriptContent": "jest --config jest.config.cjs --passWithNoTests",
+                "runCommand": "npm run test:unit"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:unit:clean": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:unit:clean"
+              },
+              "metadata": {
+                "scriptContent": "bash scripts/test-cleanup.sh && npm run test:unit",
+                "runCommand": "npm run test:unit:clean"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:clean": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:clean"
+              },
+              "metadata": {
+                "scriptContent": "bash scripts/test-cleanup.sh",
+                "runCommand": "npm run test:clean"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "test:handles": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "test:handles"
+              },
+              "metadata": {
+                "scriptContent": "DETECT_HANDLES=true npm run test:unit",
+                "runCommand": "npm run test:handles"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "build:check": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "build:check"
+              },
+              "metadata": {
+                "scriptContent": "nx run-many --target=build --all --parallel=false",
+                "runCommand": "npm run build:check"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "validate:contracts": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "validate:contracts"
+              },
+              "metadata": {
+                "scriptContent": "node tools/contract-validation/validate-contracts.js",
+                "runCommand": "npm run validate:contracts"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "validate:contracts:ci": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "validate:contracts:ci"
+              },
+              "metadata": {
+                "scriptContent": "npm run validate:contracts",
+                "runCommand": "npm run validate:contracts:ci"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "build:with-contracts": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "build:with-contracts"
+              },
+              "metadata": {
+                "scriptContent": "npm run validate:contracts && npm run build",
+                "runCommand": "npm run build:with-contracts"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "gov:inventory": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "gov:inventory"
+              },
+              "metadata": {
+                "scriptContent": "node tools/ci/governance/collect-inventory.mjs",
+                "runCommand": "npm run gov:inventory"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "gov:validate": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "gov:validate"
+              },
+              "metadata": {
+                "scriptContent": "node tools/ci/governance/run-quality-gates.mjs",
+                "runCommand": "npm run gov:validate"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "acceptance:status": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "acceptance:status"
+              },
+              "metadata": {
+                "scriptContent": "pwsh -NoLogo -NoProfile -File scripts/acceptance-status.ps1",
+                "runCommand": "npm run acceptance:status"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "acceptance:signoff": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "acceptance:signoff"
+              },
+              "metadata": {
+                "scriptContent": "pwsh -NoLogo -NoProfile -File scripts/generate-signoff.ps1",
+                "runCommand": "npm run acceptance:signoff"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "act:ci": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "act:ci"
+              },
+              "metadata": {
+                "scriptContent": "act -W .github/workflows/ci.yml -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest",
+                "runCommand": "npm run act:ci"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "act:ci-affected": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "act:ci-affected"
+              },
+              "metadata": {
+                "scriptContent": "act -W .github/workflows/ci-affected.yml -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest",
+                "runCommand": "npm run act:ci-affected"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "act:cd:pre": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "act:cd:pre"
+              },
+              "metadata": {
+                "scriptContent": "act -W .github/workflows/cd.yml -e .github/workflows/events/cd-pre.json -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest",
+                "runCommand": "npm run act:cd:pre"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "act:cd:prod": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "act:cd:prod"
+              },
+              "metadata": {
+                "scriptContent": "act -W .github/workflows/cd.yml -e .github/workflows/events/cd-prod.json -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest",
+                "runCommand": "npm run act:cd:prod"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "act:e2e-nightly": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "act:e2e-nightly"
+              },
+              "metadata": {
+                "scriptContent": "act -W .github/workflows/e2e-nightly.yml -e .github/workflows/events/dispatch.json -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest",
+                "runCommand": "npm run act:e2e-nightly"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "act:migration-rehearsal": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "act:migration-rehearsal"
+              },
+              "metadata": {
+                "scriptContent": "act -W .github/workflows/migration-rehearsal.yml -e .github/workflows/events/dispatch.json -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest",
+                "runCommand": "npm run act:migration-rehearsal"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "act:cd:local": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "act:cd:local"
+              },
+              "metadata": {
+                "scriptContent": "act -W .github/workflows/cd-local.yml -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest",
+                "runCommand": "npm run act:cd:local"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "check:gateway:serve": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "check:gateway:serve"
+              },
+              "metadata": {
+                "scriptContent": "node scripts/check-gateway-serve.mjs",
+                "runCommand": "npm run check:gateway:serve"
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "metadata": {
+            "targetGroups": {
+              "E2E (CI)": [
+                "e2e-ci"
+              ],
+              "NPM Scripts": [
+                "build",
+                "start",
+                "start:prod",
+                "postinstall",
+                "ci:phase",
+                "ci:phase:lint",
+                "ci:phase:typecheck",
+                "ci:phase:build",
+                "ci:phase:test",
+                "ci:phase:integration",
+                "ci:phase:coverage",
+                "ci:phase:e2e",
+                "ci:phase:pii",
+                "ci:phase:governance",
+                "ci:full",
+                "format",
+                "test",
+                "test:app-gateway",
+                "test:ci",
+                "test:coverage",
+                "lint",
+                "lint:ci",
+                "typecheck",
+                "audit",
+                "dependency-scan",
+                "test:e2e",
+                "test:e2e:setup",
+                "test:e2e:cleanup",
+                "test:e2e:phase1",
+                "test:e2e:phase2",
+                "test:e2e:infrastructure",
+                "test:e2e:coverage",
+                "test:integration",
+                "test:integration:api",
+                "test:integration:e2e",
+                "test:integration:performance",
+                "test:integration:all",
+                "test:unit",
+                "test:unit:clean",
+                "test:clean",
+                "test:handles",
+                "build:check",
+                "validate:contracts",
+                "validate:contracts:ci",
+                "build:with-contracts",
+                "gov:inventory",
+                "gov:validate",
+                "acceptance:status",
+                "acceptance:signoff",
+                "act:ci",
+                "act:ci-affected",
+                "act:cd:pre",
+                "act:cd:prod",
+                "act:e2e-nightly",
+                "act:migration-rehearsal",
+                "act:cd:local",
+                "check:gateway:serve"
+              ]
+            },
+            "description": "AI Recruitment Clerk - Intelligent Resume Screening System",
+            "js": {
+              "packageName": "ai-recruitment-clerk",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "name": "ai-recruitment-clerk",
+          "tags": [
+            "npm:private"
+          ],
+          "implicitDependencies": []
+        }
+      }
+    },
+    "dependencies": {
+      "ai-recruitment-frontend-e2e": [
+        {
+          "source": "ai-recruitment-frontend-e2e",
+          "target": "ai-recruitment-frontend",
+          "type": "implicit"
+        },
+        {
+          "source": "ai-recruitment-frontend-e2e",
+          "target": "configuration",
+          "type": "static"
+        }
+      ],
+      "candidate-scoring-domain": [],
+      "report-generation-domain": [],
+      "resume-processing-domain": [],
+      "ai-recruitment-frontend": [
+        {
+          "source": "ai-recruitment-frontend",
+          "target": "api-contracts",
+          "type": "static"
+        }
+      ],
+      "incentive-system-domain": [],
+      "usage-management-domain": [],
+      "user-management-domain": [],
+      "infrastructure-shared": [
+        {
+          "source": "infrastructure-shared",
+          "target": "shared-dtos",
+          "type": "static"
+        },
+        {
+          "source": "infrastructure-shared",
+          "target": "api-contracts",
+          "type": "static"
+        }
+      ],
+      "job-management-domain": [],
+      "report-generator-svc": [
+        {
+          "source": "report-generator-svc",
+          "target": "shared-nats-client",
+          "type": "static"
+        },
+        {
+          "source": "report-generator-svc",
+          "target": "infrastructure-shared",
+          "type": "static"
+        },
+        {
+          "source": "report-generator-svc",
+          "target": "configuration",
+          "type": "static"
+        },
+        {
+          "source": "report-generator-svc",
+          "target": "shared-dtos",
+          "type": "static"
+        }
+      ],
+      "ai-services-shared": [],
+      "scoring-engine-svc": [
+        {
+          "source": "scoring-engine-svc",
+          "target": "shared-nats-client",
+          "type": "static"
+        },
+        {
+          "source": "scoring-engine-svc",
+          "target": "shared-dtos",
+          "type": "static"
+        },
+        {
+          "source": "scoring-engine-svc",
+          "target": "infrastructure-shared",
+          "type": "static"
+        },
+        {
+          "source": "scoring-engine-svc",
+          "target": "configuration",
+          "type": "static"
+        },
+        {
+          "source": "scoring-engine-svc",
+          "target": "job-management-domain",
+          "type": "static"
+        },
+        {
+          "source": "scoring-engine-svc",
+          "target": "resume-processing-domain",
+          "type": "static"
+        },
+        {
+          "source": "scoring-engine-svc",
+          "target": "candidate-scoring-domain",
+          "type": "static"
+        }
+      ],
+      "shared-nats-client": [],
+      "resume-parser-svc": [
+        {
+          "source": "resume-parser-svc",
+          "target": "configuration",
+          "type": "static"
+        },
+        {
+          "source": "resume-parser-svc",
+          "target": "shared-nats-client",
+          "type": "static"
+        },
+        {
+          "source": "resume-parser-svc",
+          "target": "infrastructure-shared",
+          "type": "static"
+        },
+        {
+          "source": "resume-parser-svc",
+          "target": "resume-processing-domain",
+          "type": "static"
+        },
+        {
+          "source": "resume-parser-svc",
+          "target": "candidate-scoring-domain",
+          "type": "static"
+        },
+        {
+          "source": "resume-parser-svc",
+          "target": "shared-dtos",
+          "type": "static"
+        }
+      ],
+      "jd-extractor-svc": [
+        {
+          "source": "jd-extractor-svc",
+          "target": "shared-nats-client",
+          "type": "static"
+        },
+        {
+          "source": "jd-extractor-svc",
+          "target": "infrastructure-shared",
+          "type": "static"
+        },
+        {
+          "source": "jd-extractor-svc",
+          "target": "configuration",
+          "type": "static"
+        },
+        {
+          "source": "jd-extractor-svc",
+          "target": "job-management-domain",
+          "type": "static"
+        },
+        {
+          "source": "jd-extractor-svc",
+          "target": "shared-dtos",
+          "type": "static"
+        }
+      ],
+      "marketing-domain": [],
+      "app-gateway-e2e": [
+        {
+          "source": "app-gateway-e2e",
+          "target": "app-gateway",
+          "type": "implicit"
+        }
+      ],
+      "api-contracts": [],
+      "configuration": [],
+      "app-gateway": [
+        {
+          "source": "app-gateway",
+          "target": "shared-dtos",
+          "type": "static"
+        },
+        {
+          "source": "app-gateway",
+          "target": "shared-nats-client",
+          "type": "static"
+        },
+        {
+          "source": "app-gateway",
+          "target": "configuration",
+          "type": "static"
+        },
+        {
+          "source": "app-gateway",
+          "target": "user-management-domain",
+          "type": "static"
+        },
+        {
+          "source": "app-gateway",
+          "target": "usage-management-domain",
+          "type": "static"
+        },
+        {
+          "source": "app-gateway",
+          "target": "resume-processing-domain",
+          "type": "static"
+        },
+        {
+          "source": "app-gateway",
+          "target": "api-contracts",
+          "type": "static"
+        },
+        {
+          "source": "app-gateway",
+          "target": "job-management-domain",
+          "type": "static"
+        }
+      ],
+      "shared-dtos": [
+        {
+          "source": "shared-dtos",
+          "target": "configuration",
+          "type": "static"
+        }
+      ],
+      "ai-recruitment-clerk": [
+        {
+          "source": "ai-recruitment-clerk",
+          "target": "user-management-domain",
+          "type": "static"
+        },
+        {
+          "source": "ai-recruitment-clerk",
+          "target": "app-gateway",
+          "type": "static"
+        },
+        {
+          "source": "ai-recruitment-clerk",
+          "target": "api-contracts",
+          "type": "static"
+        }
+      ]
+    }
+  }
+}

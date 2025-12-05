@@ -160,4 +160,3 @@ export class ScoringProxyController {
     }
   }
 }
-    this.metrics.incExposure();

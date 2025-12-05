@@ -16,6 +16,14 @@ import { UserProfile, UserProfileSchema } from '../schemas/user-profile.schema';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SecurityModule } from '../security/security.module';
 
+// Extracted AuthService services (SRP refactoring)
+import { JwtTokenService } from './services/jwt-token.service';
+import { PasswordService } from './services/password.service';
+import { LoginSecurityService } from './services/login-security.service';
+import { SessionManagementService } from './services/session-management.service';
+import { UserValidationService } from './services/user-validation.service';
+import { SecurityMetricsService } from './services/security-metrics.service';
+
 /**
  * Configures the auth module.
  */
@@ -66,15 +74,37 @@ import { SecurityModule } from '../security/security.module';
     }),
   ],
   providers: [
+    // Core services
     AuthService,
     UserService,
     MfaService,
     EmailService,
     SmsService,
+    // Strategies
     JwtStrategy,
     LocalStrategy,
+    // Extracted AuthService services (SRP)
+    JwtTokenService,
+    PasswordService,
+    LoginSecurityService,
+    SessionManagementService,
+    UserValidationService,
+    SecurityMetricsService,
   ],
   controllers: [AuthController, MfaController, UsersController],
-  exports: [AuthService, UserService, MfaService, JwtModule, PassportModule],
+  exports: [
+    AuthService,
+    UserService,
+    MfaService,
+    JwtModule,
+    PassportModule,
+    // Export extracted services for use by other modules
+    JwtTokenService,
+    PasswordService,
+    LoginSecurityService,
+    SessionManagementService,
+    UserValidationService,
+    SecurityMetricsService,
+  ],
 })
 export class AuthModule {}

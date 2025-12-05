@@ -18,7 +18,7 @@ let clientPromise: Promise<MongoClient>
 
 if (process.env.NODE_ENV === 'development') {
   // 在开发环境中使用全局变量，这样不会在HMR时重新连接
-  let globalWithMongo = global as typeof globalThis & {
+  const globalWithMongo = global as typeof globalThis & {
     _mongoClientPromise?: Promise<MongoClient>
   }
 

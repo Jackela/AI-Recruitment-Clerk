@@ -25,15 +25,55 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
 import {
-  QuestionnaireDto,
-  CreateQuestionnaireDto,
-  UpdateQuestionnaireDto,
-  QuestionnaireResponseDto,
-  QuestionnaireAnalyticsDto,
-  QuestionnaireTemplateDto,
+  Questionnaire,
+  QuestionnaireTemplate,
   QuestionnaireStatus,
 } from '@ai-recruitment-clerk/shared-dtos';
-import type { QuestionnaireSubmissionDto } from '@ai-recruitment-clerk/shared-dtos';
+
+// Local class definitions for DTOs not exported from shared-dtos
+// Classes (not interfaces) are needed for @ApiResponse type property
+class QuestionnaireDto {
+  id!: string;
+  title!: string;
+  description?: string;
+  status!: QuestionnaireStatus;
+  questions!: any[];
+  createdAt!: Date;
+}
+
+class CreateQuestionnaireDto {
+  title!: string;
+  description?: string;
+  questions!: any[];
+  templateId?: string;
+}
+
+class UpdateQuestionnaireDto {
+  title?: string;
+  description?: string;
+  questions?: any[];
+  status?: QuestionnaireStatus;
+}
+
+class QuestionnaireResponseDto {
+  questionnaireId!: string;
+  respondentId!: string;
+  answers!: Record<string, any>;
+  completedAt?: Date;
+}
+
+class QuestionnaireAnalyticsDto {
+  questionnaireId!: string;
+  totalResponses!: number;
+  analytics!: Record<string, any>;
+}
+
+// QuestionnaireSubmissionDto type - inline definition since not exported from shared-dtos
+interface QuestionnaireSubmissionDto {
+  answers: Record<string, any>;
+  startTime?: Date;
+  metadata?: Record<string, any>;
+}
 import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import { QuestionnaireIntegrationService } from './questionnaire-integration.service';
 
@@ -636,7 +676,7 @@ export class QuestionnaireController {
   @ApiResponse({
     status: 200,
     description: '模板列表获取成功',
-    type: [QuestionnaireTemplateDto],
+    type: [QuestionnaireTemplate],
   })
   @ApiQuery({ name: 'category', required: false, description: '模板分类' })
   @Get('templates/list')

@@ -31,14 +31,46 @@ import {
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
-import {
-  ResumeDto,
-  ResumeAnalysisDto,
-  ResumeUploadDto,
-  ResumeStatusUpdateDto,
-  ResumeSearchDto,
-  ResumeSkillsAnalysisDto,
-} from '@ai-recruitment-clerk/shared-dtos';
+import { ResumeDTO } from '@ai-recruitment-clerk/shared-dtos';
+
+// Local class definitions for DTOs not exported from shared-dtos
+// Classes (not interfaces) are needed for @ApiResponse type property
+class ResumeDto {
+  id!: string;
+  candidateName!: string;
+  candidateEmail?: string;
+  content?: any;
+  status!: string;
+  uploadedAt!: Date;
+}
+class ResumeAnalysisDto {
+  resumeId!: string;
+  analysis!: any;
+}
+class ResumeUploadDto {
+  file?: any;
+  jobId?: string;
+  candidateName?: string;
+  candidateEmail?: string;
+  notes?: string;
+  tags?: string[];
+}
+class ResumeStatusUpdateDto {
+  status!: string;
+  notes?: string;
+  reason?: string;
+}
+class ResumeSearchDto {
+  query?: string;
+  filters?: any;
+  page?: number;
+  limit?: number;
+}
+class ResumeSkillsAnalysisDto {
+  resumeId!: string;
+  skills?: string[];
+  recommendations?: string[];
+}
 import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import { ResumeService } from './resume.service';
 

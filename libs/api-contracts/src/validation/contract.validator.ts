@@ -3,12 +3,13 @@
  * Provides runtime and build-time validation for API contracts
  */
 
-export interface ValidationResult {
-  isValid: boolean;
-  errors: string[];
-  warnings: string[];
-  contractName: string;
-}
+import type { ContractValidationResult } from '@ai-recruitment-clerk/shared-dtos';
+
+// Use canonical type from shared-dtos, re-export for backwards compatibility
+export type { ContractValidationResult as ValidationResult } from '@ai-recruitment-clerk/shared-dtos';
+
+// Local type alias for internal use (same as exported ValidationResult)
+type ValidationResult = ContractValidationResult;
 
 /**
  * Defines the shape of the contract comparison result.

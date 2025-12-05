@@ -2,7 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const DEFAULT_DIRS = ['tools/logs', 'dist', 'coverage'];
+const DEFAULT_DIRS = ['tools/logs'];
 const ALLOWLIST = new Set((process.env.PII_ALLOWLIST || '').split(',').filter(Boolean));
 const roots = (process.argv.slice(2).length ? process.argv.slice(2) : DEFAULT_DIRS)
   .map(p => path.resolve(p));

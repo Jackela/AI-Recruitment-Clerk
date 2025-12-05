@@ -18,11 +18,11 @@ import {
   DataSubjectRightsRequest,
   CreateRightsRequestDto,
   DataExportPackage,
-  
+  DataCategory,
   RequestStatus,
   DataExportFormat,
   IdentityVerificationStatus,
-  
+
   ConsentPurpose,
 } from '@ai-recruitment-clerk/shared-dtos';
 import {
@@ -343,7 +343,6 @@ export class PrivacyComplianceService {
       const exportPackage: DataExportPackage = {
         requestId: uuidv4(),
         userId,
-        data: userData,
         format,
         dataCategories: userData,
         metadata: {
@@ -404,36 +403,36 @@ export class PrivacyComplianceService {
    * PRIVATE HELPER METHODS
    */
 
-  private getDefaultDataCategories(purpose: ConsentPurpose): string[] {
-    const categoryMap = {
+  private getDefaultDataCategories(purpose: ConsentPurpose): DataCategory[] {
+    const categoryMap: Record<ConsentPurpose, DataCategory[]> = {
       [ConsentPurpose.ESSENTIAL_SERVICES]: [
-        'authentication',
-        'profile_information',
+        DataCategory.AUTHENTICATION,
+        DataCategory.PROFILE_INFORMATION,
       ],
       [ConsentPurpose.BEHAVIORAL_ANALYTICS]: [
-        'behavioral_data',
-        'device_information',
+        DataCategory.BEHAVIORAL_DATA,
+        DataCategory.DEVICE_INFORMATION,
       ],
       [ConsentPurpose.MARKETING_COMMUNICATIONS]: [
-        'communication_preferences',
-        'profile_information',
+        DataCategory.COMMUNICATION_PREFERENCES,
+        DataCategory.PROFILE_INFORMATION,
       ],
       [ConsentPurpose.FUNCTIONAL_ANALYTICS]: [
-        'system_logs',
-        'performance_data',
+        DataCategory.SYSTEM_LOGS,
+        DataCategory.DEVICE_INFORMATION,
       ],
       [ConsentPurpose.THIRD_PARTY_SHARING]: [
-        'resume_content',
-        'job_preferences',
+        DataCategory.RESUME_CONTENT,
+        DataCategory.JOB_PREFERENCES,
       ],
       [ConsentPurpose.PERSONALIZATION]: [
-        'profile_information',
-        'job_preferences',
+        DataCategory.PROFILE_INFORMATION,
+        DataCategory.JOB_PREFERENCES,
       ],
-      [ConsentPurpose.PERFORMANCE_MONITORING]: ['system_logs'],
+      [ConsentPurpose.PERFORMANCE_MONITORING]: [DataCategory.SYSTEM_LOGS],
     };
 
-    return categoryMap[purpose] || ['general'];
+    return categoryMap[purpose] || [DataCategory.PROFILE_INFORMATION];
   }
 
   private getLegalBasisForPurpose(purpose: ConsentPurpose): string {
@@ -492,24 +491,29 @@ export class PrivacyComplianceService {
 
       // Stop all related processing activities based on purpose
       switch (purpose) {
-        case ConsentPurpose.RESUME_PROCESSING:
+        case ConsentPurpose.ESSENTIAL_SERVICES:
           await this.stopResumeProcessing(userId);
           await this.stopJobMatchingActivities(userId);
           break;
 
-        case ConsentPurpose.MARKETING:
+        case ConsentPurpose.MARKETING_COMMUNICATIONS:
           await this.stopMarketingActivities(userId);
           await this.removeFromMarketingLists(userId);
+          await this.stopCommunicationActivities(userId);
+          await this.unsubscribeFromNotifications(userId);
           break;
 
-        case ConsentPurpose.ANALYTICS:
+        case ConsentPurpose.FUNCTIONAL_ANALYTICS:
+        case ConsentPurpose.BEHAVIORAL_ANALYTICS:
           await this.stopAnalyticsCollection(userId);
           await this.anonymizeAnalyticsData(userId);
           break;
 
-        case ConsentPurpose.COMMUNICATION:
-          await this.stopCommunicationActivities(userId);
-          await this.unsubscribeFromNotifications(userId);
+        case ConsentPurpose.THIRD_PARTY_SHARING:
+        case ConsentPurpose.PERSONALIZATION:
+        case ConsentPurpose.PERFORMANCE_MONITORING:
+          // Handle other consent purposes
+          this.logger.log(`Processing consent withdrawal for purpose: ${purpose}`);
           break;
 
         default:
@@ -993,13 +997,13 @@ export class PrivacyComplianceService {
         metadata: {
           exportedAt: new Date().toISOString(),
           dataSubject: exportPackage.userId,
-          totalRecords: exportPackage.data?.length || 0,
+          totalRecords: exportPackage.dataCategories?.length || 0,
           exportFormat: 'JSON',
           gdprCompliant: true,
-          packageId: exportPackage.id,
+          packageId: exportPackage.requestId,
         },
-        data: exportPackage.data || [],
-        summary: this.generateDataSummary(exportPackage.data || []),
+        data: exportPackage.dataCategories || [],
+        summary: this.generateDataSummary(exportPackage.dataCategories || []),
       };
 
       // Convert to JSON with proper formatting

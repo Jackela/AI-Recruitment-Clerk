@@ -237,7 +237,7 @@ export class ActivationManager {
   }
 
   // 更新使用统计
-  static async updateUsage(userId: string, feature: 'resume' | 'job' | 'report', increment: number = 1): Promise<void> {
+  static async updateUsage(userId: string, feature: 'resume' | 'job' | 'report', increment = 1): Promise<void> {
     const sessionCollection = await getCollection<UserSession>(COLLECTIONS.USER_SESSIONS)
     
     const updateField = feature === 'resume' ? 'usage.resumesProcessed' :

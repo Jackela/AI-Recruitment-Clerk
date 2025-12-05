@@ -1,7 +1,5 @@
 import { AnalyticsEventRepository } from './analytics/analytics-event.repository';
 import { AnalyticsIntegrationService } from './analytics/analytics-integration.service';
-import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 const createModelStub = () => {
   const store = new Map<string, any>();
@@ -39,29 +37,71 @@ const createModelStub = () => {
   return { analyticsModel, store };
 };
 
+// Create mock services for Sprint 4 refactored architecture
+const createMockServices = () => ({
+  eventTrackingService: {
+    trackUserInteraction: jest.fn(),
+    trackEvent: jest.fn(),
+    processBatchEvents: jest.fn(),
+  },
+  metricsCollectionService: {
+    recordMetric: jest.fn(),
+    recordBusinessMetric: jest.fn(),
+    trackSystemPerformance: jest.fn(),
+  },
+  sessionAnalyticsService: {
+    getSessionAnalytics: jest.fn(),
+    createSessionTracker: jest.fn(),
+  },
+  privacyComplianceService: {
+    performPrivacyComplianceCheck: jest.fn(),
+    generateDataRetentionReport: jest.fn(),
+    configureDataRetention: jest.fn(),
+  },
+  reportGenerationService: {
+    generateReport: jest.fn(),
+    getReports: jest.fn(),
+    getReport: jest.fn(),
+    deleteReport: jest.fn(),
+  },
+  analyticsMetricsService: {
+    getEventProcessingMetrics: jest.fn(),
+    getDataPrivacyMetrics: jest.fn(),
+    getUsageStatistics: jest.fn(),
+    getDashboard: jest.fn(),
+  },
+  dataExportService: {
+    exportData: jest.fn(),
+    getRealtimeData: jest.fn(),
+  },
+  analyticsHealthService: {
+    getHealthStatus: jest.fn(),
+    validateReportingAccess: jest.fn(),
+  },
+});
+
 const createAnalyticsService = () => {
-  const repository = {
-    save: jest.fn(),
-    findBySessionId: jest.fn(),
-  } as unknown as jest.Mocked<AnalyticsEventRepository>;
-
-  const natsClient = {
-    publishAnalyticsEvent: jest.fn(),
-  } as unknown as jest.Mocked<AppGatewayNatsService>;
-
   const cacheManager = {
     wrap: jest.fn(async (_key: string, compute: () => Promise<any>) =>
       compute(),
     ),
   } as any;
 
+  const mockServices = createMockServices();
+
   const service = new AnalyticsIntegrationService(
-    repository,
-    natsClient,
     cacheManager,
+    mockServices.eventTrackingService as any,
+    mockServices.metricsCollectionService as any,
+    mockServices.sessionAnalyticsService as any,
+    mockServices.privacyComplianceService as any,
+    mockServices.reportGenerationService as any,
+    mockServices.analyticsMetricsService as any,
+    mockServices.dataExportService as any,
+    mockServices.analyticsHealthService as any,
   );
 
-  return { service, repository, natsClient, cacheManager };
+  return { service, cacheManager, ...mockServices };
 };
 
 describe('Domains module lightweight coverage', () => {
@@ -89,18 +129,13 @@ describe('Domains module lightweight coverage', () => {
 
   describe('AnalyticsIntegrationService', () => {
     it('returns processed event metadata when tracking event succeeds', async () => {
-      const { service } = createAnalyticsService();
-      (service as any).domainService = {
-        createUserInteractionEvent: jest.fn().mockResolvedValue({
-          success: true,
-          data: {
-            id: 'event-123',
-            eventType: 'USER_INTERACTION',
-            status: 'processed',
-            props: { timestamp: new Date('2024-01-01T00:00:00Z') },
-          },
-        }),
-      };
+      const { service, eventTrackingService } = createAnalyticsService();
+      eventTrackingService.trackEvent.mockResolvedValue({
+        eventId: 'event-123',
+        eventType: 'USER_INTERACTION',
+        processed: true,
+        timestamp: new Date('2024-01-01T00:00:00Z'),
+      });
 
       const result = await service.trackEvent({
         category: 'ui',
@@ -115,12 +150,10 @@ describe('Domains module lightweight coverage', () => {
       expect(result.processed).toBe(true);
     });
 
-    it('bubbles up errors from domain service', async () => {
-      const { service } = createAnalyticsService();
+    it('bubbles up errors from event tracking service', async () => {
+      const { service, eventTrackingService } = createAnalyticsService();
       const failure = new Error('domain failure');
-      (service as any).domainService = {
-        createUserInteractionEvent: jest.fn().mockRejectedValue(failure),
-      };
+      eventTrackingService.trackEvent.mockRejectedValue(failure);
 
       await expect(
         service.trackEvent({

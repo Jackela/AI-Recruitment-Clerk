@@ -2,7 +2,7 @@ import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { OpsGuard } from './ops.guard';
 import { OpsPermissionsGuard } from './ops-permissions.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
-import { Permission } from '@ai-recruitment-clerk/shared-dtos';
+import { Permission } from '@ai-recruitment-clerk/user-management-domain';
 import fs from 'fs';
 import path from 'path';
 
@@ -10,7 +10,7 @@ import path from 'path';
 @UseGuards(OpsGuard, OpsPermissionsGuard)
 export class AuditController {
   @Get('export')
-  @Permissions(Permission.VIEW_LOGS)
+  @Permissions(Permission.ADMIN)
   export(@Query('date') date?: string) {
     const d = (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) ? date : new Date().toISOString().slice(0,10);
     const file = path.resolve('tools/logs/audit', `audit-${d}.jsonl`);
