@@ -20,7 +20,7 @@ jobs:
         run: node tools/migration/consistency-metrics.mjs
       - name: Upload migration logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: migration-logs
           path: tools/logs/migration

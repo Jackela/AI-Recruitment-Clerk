@@ -112,7 +112,7 @@ jobs:
           fi
 
       - name: 📦 Upload Audit Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         continue-on-error: true  # Allow failure in local act CLI testing
         with:
