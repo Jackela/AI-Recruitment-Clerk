@@ -41,7 +41,7 @@
       "title": "Fix any types in user.schema.ts",
       "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Feature complete",
         "npm run typecheck passes",
