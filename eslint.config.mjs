@@ -10,7 +10,7 @@ export default [
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
     rules: {
-      // Relax boundaries enforcement to avoid CI lint failures while code is refactored
+      // Module boundaries enforcement
       '@nx/enforce-module-boundaries': [
         'warn',
         {
@@ -24,13 +24,76 @@ export default [
           ],
         },
       ],
-      // Tone down common TypeScript strictness-related lint errors
-      '@typescript-eslint/no-empty-function': 'warn',
+
+      // STRICT TYPESCRIPT RULES (CLAUDE.md RULE 3)
+      // These rules enforce type safety and code quality
+      // Setting as 'warn' initially to allow incremental fixes
+
+      // No 'any' types - all variables must have explicit types
       '@typescript-eslint/no-explicit-any': 'warn',
+
+      // No unused variables/parameters (with underscore prefix exception)
       '@typescript-eslint/no-unused-vars': [
         'warn',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
       ],
+
+      // Prefer const declarations for variables that are never reassigned
+      'prefer-const': 'warn',
+
+      // No empty functions without explicit comment
+      '@typescript-eslint/no-empty-function': 'warn',
+
+      // Require explicit return types on functions and class methods
+      '@typescript-eslint/explicit-function-return-type': [
+        'warn',
+        {
+          allowExpressions: true,
+          allowTypedFunctionExpressions: true,
+          allowHigherOrderFunctions: true,
+          allowDirectConstAssertionInArrowFunctions: true,
+          allowConciseArrowFunctionExpressionsStartingWithVoid: true,
+        },
+      ],
+
+      // Require explicit accessibility modifiers on class properties and methods
+      '@typescript-eslint/explicit-member-accessibility': [
+        'warn',
+        {
+          accessibility: 'explicit',
+          overrides: {
+            constructors: 'no-public',
+          },
+        },
+      ],
+
+      // Disallow non-null assertions using the ! postfix operator
+      '@typescript-eslint/no-non-null-assertion': 'warn',
+
+      // Enforce consistent usage of type imports
+      '@typescript-eslint/consistent-type-imports': [
+        'warn',
+        {
+          prefer: 'type-imports',
+          disallowTypeAnnotations: false,
+        },
+      ],
+
+      // Require Promise-like statements to be handled appropriately
+      '@typescript-eslint/no-floating-promises': 'warn',
+
+      // Disallow async functions which have no await expression
+      '@typescript-eslint/require-await': 'warn',
+
+      // Enforce using concise optional chain expressions instead of chained logical ands
+      '@typescript-eslint/prefer-optional-chain': 'warn',
+
+      // Enforce using nullish coalescing operator instead of logical chaining
+      '@typescript-eslint/prefer-nullish-coalescing': 'warn',
     },
   },
   {
@@ -46,5 +109,25 @@ export default [
     ],
     // Override or add rules here
     rules: {},
+  },
+  // Relaxed rules for test files
+  {
+    files: ['**/*.spec.ts', '**/*.test.ts', '**/test/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/explicit-member-accessibility': 'off',
+    },
+  },
+  // Relaxed rules for E2E test files
+  {
+    files: ['**/*-e2e/**/*.ts', '**/e2e/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/explicit-member-accessibility': 'off',
+    },
   },
 ];
