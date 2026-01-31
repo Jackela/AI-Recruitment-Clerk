@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import type { Document } from 'mongoose';
 import {
   UserRole,
   UserStatus,
@@ -13,19 +13,19 @@ export type UserDocument = User & Document;
 @Schema({ timestamps: true, collection: 'users' })
 export class User {
   @Prop({ required: true, unique: true })
-  id: string = '';
+  public id = '';
 
   @Prop({ required: true, unique: true, lowercase: true })
-  email: string = '';
+  public email = '';
 
   @Prop({ required: true })
-  password: string = '';
+  public password = '';
 
   @Prop({ required: false, default: '' })
-  firstName: string = '';
+  public firstName = '';
 
   @Prop({ required: false, default: '' })
-  lastName: string = '';
+  public lastName = '';
 
   @Prop({
     type: String,
@@ -33,10 +33,10 @@ export class User {
     enum: Object.values(UserRole),
     default: UserRole.USER,
   })
-  role: UserRole = UserRole.USER;
+  public role: UserRole = UserRole.USER;
 
   @Prop()
-  organizationId?: string;
+  public organizationId?: string;
 
   @Prop({
     type: String,
@@ -44,10 +44,10 @@ export class User {
     enum: Object.values(UserStatus),
     default: UserStatus.ACTIVE,
   })
-  status: UserStatus = UserStatus.ACTIVE;
+  public status: UserStatus = UserStatus.ACTIVE;
 
   @Prop()
-  lastActivity?: Date;
+  public lastActivity?: Date;
 
   @Prop({
     type: {
@@ -59,7 +59,7 @@ export class User {
     default: {},
     _id: false,
   })
-  securityFlags: {
+  public securityFlags: {
     tokens_revoked?: boolean;
     account_locked?: boolean;
     password_reset_required?: boolean;
@@ -85,7 +85,7 @@ export class User {
     },
     _id: false,
   })
-  preferences: {
+  public preferences: {
     language?: string;
     notifications?: {
       email?: boolean;
@@ -102,10 +102,10 @@ export class User {
   };
 
   @Prop({ type: Date })
-  createdAt: Date = new Date();
+  public createdAt: Date = new Date();
 
   @Prop({ type: Date })
-  updatedAt: Date = new Date();
+  public updatedAt: Date = new Date();
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
