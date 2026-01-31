@@ -1,0 +1,35 @@
+# Ralph Progress Log
+Started: Sat Jan 31 18:06:08     2026
+---
+
+## Codebase Patterns
+- ESLint rules use 'warn' level to allow incremental fixes without breaking CI
+- Test files (*.spec.ts, *.test.ts, **/test/**) have relaxed TypeScript strictness rules
+- E2E test files (*-e2e/**/*.ts) also have relaxed rules
+- Use `_` prefix for intentionally unused variables/parameters to avoid lint warnings
+- CRITICAL: Main branch has pre-existing typecheck errors (44+ errors related to missing DTO exports, Permission enum issues, Buffer type conflicts) - these must be fixed before quality checks can pass
+---
+
+## 2026-01-31 19:15 - US-001
+- **What was implemented**: Upgraded ESLint configuration to enforce strict TypeScript rules following CLAUDE.md RULE 3
+- **Files changed**:
+  - `eslint.config.mjs` - Added comprehensive TypeScript rules
+- **New rules added**:
+  - @typescript-eslint/no-explicit-any (warn)
+  - @typescript-eslint/no-unused-vars with caughtErrorsIgnorePattern
+  - @typescript-eslint/explicit-function-return-type
+  - @typescript-eslint/explicit-member-accessibility
+  - @typescript-eslint/no-non-null-assertion
+  - @typescript-eslint/consistent-type-imports
+  - @typescript-eslint/no-floating-promises
+  - @typescript-eslint/require-await
+  - @typescript-eslint/prefer-optional-chain
+  - @typescript-eslint/prefer-nullish-coalescing
+  - prefer-const
+- **Learnings for future iterations:**
+  - Main branch already has 44+ typecheck errors - these are NOT introduced by US-001
+  - Errors include: missing DTO exports (QuestionnaireDto, ResumeDto, etc.), Permission enum assignment issues, Buffer type conflicts
+  - New strict rules set to 'warn' level to avoid blocking CI while code is incrementally fixed
+  - Test files have relaxed rules to allow flexibility in test code
+  - Quality gates (typecheck, lint, test) will only fully pass once all pre-existing errors are resolved
+---
