@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import type { Document } from 'mongoose';
 import {
   EventType,
   EventStatus,
@@ -18,35 +18,35 @@ export type AnalyticsEventDocument = AnalyticsEvent & Document;
   versionKey: false,
 })
 export class AnalyticsEvent {
-  @Prop({ required: true, unique: true, index: true })
-  eventId: string = '';
+  @Prop({ required: true, unique: true, index: true, default: '' })
+  public eventId!: string;
 
-  @Prop({ required: true })
-  sessionId: string = '';
+  @Prop({ required: true, default: '' })
+  public sessionId!: string;
 
   @Prop()
-  userId?: string;
+  public userId?: string;
 
-  @Prop({ type: String, required: true, enum: Object.values(EventType) })
-  eventType: EventType = EventType.USER_INTERACTION;
+  @Prop({ type: String, required: true, enum: Object.values(EventType), default: EventType.USER_INTERACTION })
+  public eventType!: EventType;
 
-  @Prop({ type: String, required: true, enum: Object.values(EventCategory) })
-  eventCategory: EventCategory = EventCategory.SYSTEM;
+  @Prop({ type: String, required: true, enum: Object.values(EventCategory), default: EventCategory.SYSTEM })
+  public eventCategory!: EventCategory;
 
-  @Prop({ type: String, required: true, enum: Object.values(EventStatus) })
-  status: EventStatus = EventStatus.PENDING_PROCESSING;
+  @Prop({ type: String, required: true, enum: Object.values(EventStatus), default: EventStatus.PENDING_PROCESSING })
+  public status!: EventStatus;
 
   @Prop({ type: Object, required: true, default: {} })
-  eventData!: Record<string, unknown>;
+  public eventData!: Record<string, unknown>;
 
   @Prop({ type: Object })
-  context?: Record<string, unknown>;
+  public context?: Record<string, unknown>;
 
-  @Prop({ required: true })
-  timestamp: Date = new Date();
+  @Prop({ required: true, default: () => new Date() })
+  public timestamp!: Date;
 
   @Prop({ type: Object })
-  deviceInfo?: {
+  public deviceInfo?: {
     userAgent: string;
     screenResolution: string;
     language: string;
@@ -54,7 +54,7 @@ export class AnalyticsEvent {
   };
 
   @Prop({ type: Object })
-  geoLocation?: {
+  public geoLocation?: {
     country: string;
     region: string;
     city: string;
@@ -67,25 +67,25 @@ export class AnalyticsEvent {
     enum: Object.values(ConsentStatus),
     default: ConsentStatus.GRANTED,
   })
-  consentStatus: ConsentStatus = ConsentStatus.GRANTED;
+  public consentStatus!: ConsentStatus;
 
   @Prop({ default: false })
-  isSystemSession: boolean = false;
+  public isSystemSession!: boolean;
 
   @Prop()
-  processedAt?: Date;
+  public processedAt?: Date;
 
   @Prop()
-  retentionExpiry?: Date;
+  public retentionExpiry?: Date;
 
   @Prop({ default: false })
-  isAnonymized: boolean = false;
+  public isAnonymized!: boolean;
 
   @Prop({ type: [String] })
-  sensitiveDataMask?: string[];
+  public sensitiveDataMask?: string[];
 
   @Prop({ type: Object })
-  metadata?: Record<string, unknown>;
+  public metadata?: Record<string, unknown>;
 }
 
 export const AnalyticsEventSchema =

@@ -83,17 +83,12 @@ export default [
         },
       ],
 
-      // Require Promise-like statements to be handled appropriately
-      '@typescript-eslint/no-floating-promises': 'warn',
-
-      // Disallow async functions which have no await expression
-      '@typescript-eslint/require-await': 'warn',
-
-      // Enforce using concise optional chain expressions instead of chained logical ands
-      '@typescript-eslint/prefer-optional-chain': 'warn',
-
-      // Enforce using nullish coalescing operator instead of logical chaining
-      '@typescript-eslint/prefer-nullish-coalescing': 'warn',
+      // NOTE: The following rules require type information (typed linting)
+      // They are disabled until parserOptions.project is properly configured
+      // '@typescript-eslint/no-floating-promises': 'warn',
+      // '@typescript-eslint/require-await': 'warn',
+      // '@typescript-eslint/prefer-nullish-coalescing': 'warn',
+      // '@typescript-eslint/prefer-optional-chain': 'warn',
     },
   },
   {
