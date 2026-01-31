@@ -25,7 +25,7 @@ export class AnalyticsEvent {
   sessionId: string = '';
 
   @Prop()
-  userId?: string = undefined;
+  userId?: string;
 
   @Prop({ type: String, required: true, enum: Object.values(EventType) })
   eventType: EventType = EventType.USER_INTERACTION;
@@ -36,11 +36,11 @@ export class AnalyticsEvent {
   @Prop({ type: String, required: true, enum: Object.values(EventStatus) })
   status: EventStatus = EventStatus.PENDING_PROCESSING;
 
-  @Prop({ type: Object, required: true })
-  eventData: any = {};
+  @Prop({ type: Object, required: true, default: {} })
+  eventData!: Record<string, unknown>;
 
   @Prop({ type: Object })
-  context?: any = undefined;
+  context?: Record<string, unknown>;
 
   @Prop({ required: true })
   timestamp: Date = new Date();
@@ -51,7 +51,7 @@ export class AnalyticsEvent {
     screenResolution: string;
     language: string;
     timezone: string;
-  } = undefined;
+  };
 
   @Prop({ type: Object })
   geoLocation?: {
@@ -60,7 +60,7 @@ export class AnalyticsEvent {
     city: string;
     latitude?: number;
     longitude?: number;
-  } = undefined;
+  };
 
   @Prop({
     type: String,
@@ -73,19 +73,19 @@ export class AnalyticsEvent {
   isSystemSession: boolean = false;
 
   @Prop()
-  processedAt?: Date = undefined;
+  processedAt?: Date;
 
   @Prop()
-  retentionExpiry?: Date = undefined;
+  retentionExpiry?: Date;
 
   @Prop({ default: false })
   isAnonymized: boolean = false;
 
   @Prop({ type: [String] })
-  sensitiveDataMask?: string[] = undefined;
+  sensitiveDataMask?: string[];
 
   @Prop({ type: Object })
-  metadata?: Record<string, any> = undefined;
+  metadata?: Record<string, unknown>;
 }
 
 export const AnalyticsEventSchema =
