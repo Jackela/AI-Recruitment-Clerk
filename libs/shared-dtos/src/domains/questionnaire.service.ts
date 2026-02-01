@@ -28,7 +28,7 @@ export class QuestionnaireDomainService {
    * @param metadata - The metadata.
    * @returns A promise that resolves to QuestionnaireSubmissionResult.
    */
-  async submitQuestionnaire(
+  public async submitQuestionnaire(
     rawData: RawSubmissionData,
     metadata: SubmissionMetadata,
   ): Promise<QuestionnaireSubmissionResult> {
@@ -87,7 +87,7 @@ export class QuestionnaireDomainService {
    * Performs the analyze submission trends operation.
    * @returns A promise that resolves to SubmissionTrendsAnalysis.
    */
-  async analyzeSubmissionTrends(): Promise<SubmissionTrendsAnalysis> {
+  public async analyzeSubmissionTrends(): Promise<SubmissionTrendsAnalysis> {
     const recentSubmissions = await this.repository.findRecent(30); // 最近30天
 
     if (recentSubmissions.length === 0) {
@@ -110,7 +110,7 @@ export class QuestionnaireDomainService {
    * @param ip - The ip.
    * @returns A promise that resolves to IPSubmissionCheckResult.
    */
-  async validateIPSubmissionLimit(
+  public async validateIPSubmissionLimit(
     ip: string,
   ): Promise<IPSubmissionCheckResult> {
     const today = new Date();
@@ -129,6 +129,7 @@ export class QuestionnaireDomainService {
 
   private async publishValidationFailedEvent(
     _questionnaire: Questionnaire,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     validationResult: any,
     rawData: RawSubmissionData,
     metadata: SubmissionMetadata,
@@ -231,6 +232,7 @@ export class QuestionnaireSubmissionResult {
       questionnaireId: string;
       qualityScore: number;
       bonusEligible: boolean;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       summary: any;
     },
     public readonly errors?: string[],
@@ -241,10 +243,11 @@ export class QuestionnaireSubmissionResult {
    * @param data - The data.
    * @returns The QuestionnaireSubmissionResult.
    */
-  static success(data: {
+  public static success(data: {
     questionnaireId: string;
     qualityScore: number;
     bonusEligible: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     summary: any;
   }): QuestionnaireSubmissionResult {
     return new QuestionnaireSubmissionResult(true, data);
@@ -255,7 +258,7 @@ export class QuestionnaireSubmissionResult {
    * @param errors - The errors.
    * @returns The QuestionnaireSubmissionResult.
    */
-  static failed(errors: string[]): QuestionnaireSubmissionResult {
+  public static failed(errors: string[]): QuestionnaireSubmissionResult {
     return new QuestionnaireSubmissionResult(false, undefined, errors);
   }
 }
@@ -287,7 +290,7 @@ export class SubmissionTrendsAnalysis {
    * @param data - The data.
    * @returns The SubmissionTrendsAnalysis.
    */
-  static create(data: {
+  public static create(data: {
     totalSubmissions: number;
     averageQualityScore: number;
     bonusEligibilityRate: number;
@@ -309,7 +312,7 @@ export class SubmissionTrendsAnalysis {
    * Performs the empty operation.
    * @returns The SubmissionTrendsAnalysis.
    */
-  static empty(): SubmissionTrendsAnalysis {
+  public static empty(): SubmissionTrendsAnalysis {
     return new SubmissionTrendsAnalysis(
       0,
       0,
@@ -339,7 +342,7 @@ export class IPSubmissionCheckResult {
    * Performs the allowed operation.
    * @returns The IPSubmissionCheckResult.
    */
-  static allowed(): IPSubmissionCheckResult {
+  public static allowed(): IPSubmissionCheckResult {
     return new IPSubmissionCheckResult(true, false);
   }
 
@@ -348,7 +351,7 @@ export class IPSubmissionCheckResult {
    * @param reason - The reason.
    * @returns The IPSubmissionCheckResult.
    */
-  static blocked(reason: string): IPSubmissionCheckResult {
+  public static blocked(reason: string): IPSubmissionCheckResult {
     return new IPSubmissionCheckResult(false, true, reason);
   }
 }
@@ -392,5 +395,6 @@ export interface IQuestionnaireTemplateService {
  * Defines the shape of the i domain event bus.
  */
 export interface IDomainEventBus {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   publish(event: any): Promise<void>;
 }

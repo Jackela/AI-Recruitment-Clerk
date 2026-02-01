@@ -25,7 +25,7 @@ export class Questionnaire {
    * @param metadata - The metadata.
    * @returns The Questionnaire.
    */
-  static create(
+  public static create(
     templateId: string,
     submission: RawSubmissionData,
     metadata: SubmissionMetadata,
@@ -76,7 +76,7 @@ export class Questionnaire {
    * @param data - The data.
    * @returns The Questionnaire.
    */
-  static restore(data: QuestionnaireData): Questionnaire {
+  public static restore(data: QuestionnaireData): Questionnaire {
     return new Questionnaire(
       new QuestionnaireId({ value: data.id }),
       QuestionnaireTemplate.restore(data.template),
@@ -92,7 +92,7 @@ export class Questionnaire {
    * Validates submission.
    * @returns The QuestionnaireValidationResult.
    */
-  validateSubmission(): QuestionnaireValidationResult {
+  public validateSubmission(): QuestionnaireValidationResult {
     // Touch template to satisfy TS6138 for private readonly field
     void this._template;
     const errors: string[] = [];
@@ -151,7 +151,7 @@ export class Questionnaire {
    * Calculates quality score.
    * @returns The QualityScore.
    */
-  calculateQualityScore(): QualityScore {
+  public calculateQualityScore(): QualityScore {
     return this.quality.calculateScore();
   }
 
@@ -159,7 +159,7 @@ export class Questionnaire {
    * Performs the is eligible for bonus operation.
    * @returns The boolean value.
    */
-  isEligibleForBonus(): boolean {
+  public isEligibleForBonus(): boolean {
     return this.quality.isBonusEligible();
   }
 
@@ -167,7 +167,7 @@ export class Questionnaire {
    * Retrieves submission summary.
    * @returns The SubmissionSummary.
    */
-  getSubmissionSummary(): SubmissionSummary {
+  public getSubmissionSummary(): SubmissionSummary {
     return this.submission.getSummary();
   }
 
@@ -175,21 +175,21 @@ export class Questionnaire {
   /**
    * Performs the mark as processed operation.
    */
-  markAsProcessed(): void {
+  public markAsProcessed(): void {
     this.status = QuestionnaireStatus.PROCESSED;
   }
 
   /**
    * Performs the mark as rewarded operation.
    */
-  markAsRewarded(): void {
+  public markAsRewarded(): void {
     this.status = QuestionnaireStatus.REWARDED;
   }
 
   /**
    * Performs the flag as low quality operation.
    */
-  flagAsLowQuality(): void {
+  public flagAsLowQuality(): void {
     this.status = QuestionnaireStatus.LOW_QUALITY;
   }
 
@@ -199,7 +199,7 @@ export class Questionnaire {
    * @param questionId - The question id.
    * @returns The Answer | null.
    */
-  getAnswerByQuestionId(questionId: string): Answer | null {
+  public getAnswerByQuestionId(questionId: string): Answer | null {
     return this.submission.getAnswer(questionId);
   }
 
@@ -207,7 +207,7 @@ export class Questionnaire {
    * Retrieves quality metrics.
    * @returns The QualityMetrics.
    */
-  getQualityMetrics(): QualityMetrics {
+  public getQualityMetrics(): QualityMetrics {
     return this.quality.getMetrics();
   }
 
@@ -215,7 +215,7 @@ export class Questionnaire {
    * Retrieves total text length.
    * @returns The number value.
    */
-  getTotalTextLength(): number {
+  public getTotalTextLength(): number {
     return this.quality.getTotalTextLength();
   }
 
@@ -223,7 +223,7 @@ export class Questionnaire {
    * Performs the has detailed feedback operation.
    * @returns The boolean value.
    */
-  hasDetailedFeedback(): boolean {
+  public hasDetailedFeedback(): boolean {
     return this.quality.hasDetailedFeedback();
   }
 
@@ -232,14 +232,14 @@ export class Questionnaire {
    * Retrieves uncommitted events.
    * @returns The an array of DomainEvent.
    */
-  getUncommittedEvents(): DomainEvent[] {
+  public getUncommittedEvents(): DomainEvent[] {
     return [...this.uncommittedEvents];
   }
 
   /**
    * Performs the mark events as committed operation.
    */
-  markEventsAsCommitted(): void {
+  public markEventsAsCommitted(): void {
     this.uncommittedEvents = [];
   }
 
@@ -252,7 +252,7 @@ export class Questionnaire {
    * Retrieves id.
    * @returns The QuestionnaireId.
    */
-  getId(): QuestionnaireId {
+  public getId(): QuestionnaireId {
     return this.id;
   }
 
@@ -260,7 +260,7 @@ export class Questionnaire {
    * Retrieves submitter ip.
    * @returns The string value.
    */
-  getSubmitterIP(): string {
+  public getSubmitterIP(): string {
     return this.metadata.ip;
   }
 
@@ -268,7 +268,7 @@ export class Questionnaire {
    * Retrieves status.
    * @returns The QuestionnaireStatus.
    */
-  getStatus(): QuestionnaireStatus {
+  public getStatus(): QuestionnaireStatus {
     return this.status;
   }
 }
@@ -282,7 +282,7 @@ export class QuestionnaireId extends ValueObject<{ value: string }> {
    * Generates the result.
    * @returns The QuestionnaireId.
    */
-  static generate(): QuestionnaireId {
+  public static generate(): QuestionnaireId {
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substr(2, 9);
     return new QuestionnaireId({ value: `quest_${timestamp}_${random}` });
@@ -292,7 +292,7 @@ export class QuestionnaireId extends ValueObject<{ value: string }> {
    * Retrieves value.
    * @returns The string value.
    */
-  getValue(): string {
+  public getValue(): string {
     return this.props.value;
   }
 }
@@ -312,7 +312,7 @@ export class QuestionnaireTemplate extends ValueObject<{
    * @param templateId - The template id.
    * @returns The QuestionnaireTemplate.
    */
-  static createDefault(templateId: string): QuestionnaireTemplate {
+  public static createDefault(templateId: string): QuestionnaireTemplate {
     return new QuestionnaireTemplate({
       id: templateId,
       version: '1.0',
@@ -343,7 +343,8 @@ export class QuestionnaireTemplate extends ValueObject<{
    * @param data - The data.
    * @returns The QuestionnaireTemplate.
    */
-  static restore(data: any): QuestionnaireTemplate {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): QuestionnaireTemplate {
     return new QuestionnaireTemplate(data);
   }
 }
@@ -364,7 +365,7 @@ export class QuestionnaireSubmission extends ValueObject<{
    * @param data - The data.
    * @returns The QuestionnaireSubmission.
    */
-  static fromRawData(data: RawSubmissionData): QuestionnaireSubmission {
+  public static fromRawData(data: RawSubmissionData): QuestionnaireSubmission {
     return new QuestionnaireSubmission({
       userProfile: new UserProfile({
         role: data.userProfile?.role || 'other',
@@ -408,7 +409,8 @@ export class QuestionnaireSubmission extends ValueObject<{
    * @param data - The data.
    * @returns The QuestionnaireSubmission.
    */
-  static restore(data: any): QuestionnaireSubmission {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): QuestionnaireSubmission {
     return new QuestionnaireSubmission({
       ...data,
       submittedAt: new Date(data.submittedAt),
@@ -419,7 +421,7 @@ export class QuestionnaireSubmission extends ValueObject<{
    * Retrieves user profile.
    * @returns The UserProfile.
    */
-  getUserProfile(): UserProfile {
+  public getUserProfile(): UserProfile {
     return this.props.userProfile;
   }
 
@@ -427,7 +429,7 @@ export class QuestionnaireSubmission extends ValueObject<{
    * Retrieves user experience.
    * @returns The UserExperience.
    */
-  getUserExperience(): UserExperience {
+  public getUserExperience(): UserExperience {
     return this.props.userExperience;
   }
 
@@ -435,7 +437,7 @@ export class QuestionnaireSubmission extends ValueObject<{
    * Retrieves business value.
    * @returns The BusinessValue.
    */
-  getBusinessValue(): BusinessValue {
+  public getBusinessValue(): BusinessValue {
     return this.props.businessValue;
   }
 
@@ -443,7 +445,7 @@ export class QuestionnaireSubmission extends ValueObject<{
    * Retrieves optional info.
    * @returns The OptionalInfo.
    */
-  getOptionalInfo(): OptionalInfo {
+  public getOptionalInfo(): OptionalInfo {
     return this.props.optional;
   }
 
@@ -451,7 +453,7 @@ export class QuestionnaireSubmission extends ValueObject<{
    * Retrieves summary.
    * @returns The SubmissionSummary.
    */
-  getSummary(): SubmissionSummary {
+  public getSummary(): SubmissionSummary {
     return new SubmissionSummary({
       role: this.props.userProfile.role,
       industry: this.props.userProfile.industry,
@@ -467,7 +469,7 @@ export class QuestionnaireSubmission extends ValueObject<{
    * @param questionId - The question id.
    * @returns The Answer | null.
    */
-  getAnswer(questionId: string): Answer | null {
+  public getAnswer(questionId: string): Answer | null {
     // 简化实现，实际应该有更复杂的映射
     const answers = {
       role: this.props.userProfile.role,
@@ -524,7 +526,7 @@ export class SubmissionQuality extends ValueObject<{
    * @param submission - The submission.
    * @returns The SubmissionQuality.
    */
-  static calculate(submission: QuestionnaireSubmission): SubmissionQuality {
+  public static calculate(submission: QuestionnaireSubmission): SubmissionQuality {
     const totalTextLength = submission.getSummary().textLength;
     const completionRate = submission.getSummary().completionRate;
     const detailedAnswers = SubmissionQuality.countDetailedAnswers(submission);
@@ -573,7 +575,8 @@ export class SubmissionQuality extends ValueObject<{
    * @param data - The data.
    * @returns The SubmissionQuality.
    */
-  static restore(data: any): SubmissionQuality {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): SubmissionQuality {
     return new SubmissionQuality(data);
   }
 
@@ -621,7 +624,7 @@ export class SubmissionQuality extends ValueObject<{
    * Calculates score.
    * @returns The QualityScore.
    */
-  calculateScore(): QualityScore {
+  public calculateScore(): QualityScore {
     return new QualityScore({ value: this.props.qualityScore });
   }
 
@@ -629,7 +632,7 @@ export class SubmissionQuality extends ValueObject<{
    * Performs the is bonus eligible operation.
    * @returns The boolean value.
    */
-  isBonusEligible(): boolean {
+  public isBonusEligible(): boolean {
     return this.props.bonusEligible;
   }
 
@@ -637,7 +640,7 @@ export class SubmissionQuality extends ValueObject<{
    * Retrieves quality score.
    * @returns The number value.
    */
-  getQualityScore(): number {
+  public getQualityScore(): number {
     return this.props.qualityScore;
   }
 
@@ -645,7 +648,7 @@ export class SubmissionQuality extends ValueObject<{
    * Retrieves quality reasons.
    * @returns The an array of string value.
    */
-  getQualityReasons(): string[] {
+  public getQualityReasons(): string[] {
     return this.props.qualityReasons;
   }
 
@@ -653,7 +656,7 @@ export class SubmissionQuality extends ValueObject<{
    * Retrieves metrics.
    * @returns The QualityMetrics.
    */
-  getMetrics(): QualityMetrics {
+  public getMetrics(): QualityMetrics {
     return new QualityMetrics(this.props);
   }
 
@@ -661,7 +664,7 @@ export class SubmissionQuality extends ValueObject<{
    * Retrieves total text length.
    * @returns The number value.
    */
-  getTotalTextLength(): number {
+  public getTotalTextLength(): number {
     return this.props.totalTextLength;
   }
 
@@ -669,7 +672,7 @@ export class SubmissionQuality extends ValueObject<{
    * Performs the has detailed feedback operation.
    * @returns The boolean value.
    */
-  hasDetailedFeedback(): boolean {
+  public hasDetailedFeedback(): boolean {
     return this.props.detailedAnswers >= 3;
   }
 }
@@ -688,28 +691,28 @@ export class UserProfile extends ValueObject<{
    * Performs the role operation.
    * @returns The QuestionnaireUserRole.
    */
-  get role(): QuestionnaireUserRole {
+  public get role(): QuestionnaireUserRole {
     return this.props.role;
   }
   /**
    * Performs the industry operation.
    * @returns The string value.
    */
-  get industry(): string {
+  public get industry(): string {
     return this.props.industry;
   }
   /**
    * Performs the company size operation.
    * @returns The CompanySize.
    */
-  get companySize(): CompanySize {
+  public get companySize(): CompanySize {
     return this.props.companySize;
   }
   /**
    * Performs the location operation.
    * @returns The string value.
    */
-  get location(): string {
+  public get location(): string {
     return this.props.location;
   }
 }
@@ -730,49 +733,49 @@ export class UserExperience extends ValueObject<{
    * Performs the overall satisfaction operation.
    * @returns The Rating.
    */
-  get overallSatisfaction(): Rating {
+  public get overallSatisfaction(): Rating {
     return this.props.overallSatisfaction;
   }
   /**
    * Performs the accuracy rating operation.
    * @returns The Rating.
    */
-  get accuracyRating(): Rating {
+  public get accuracyRating(): Rating {
     return this.props.accuracyRating;
   }
   /**
    * Performs the speed rating operation.
    * @returns The Rating.
    */
-  get speedRating(): Rating {
+  public get speedRating(): Rating {
     return this.props.speedRating;
   }
   /**
    * Performs the ui rating operation.
    * @returns The Rating.
    */
-  get uiRating(): Rating {
+  public get uiRating(): Rating {
     return this.props.uiRating;
   }
   /**
    * Performs the most useful feature operation.
    * @returns The string value.
    */
-  get mostUsefulFeature(): string {
+  public get mostUsefulFeature(): string {
     return this.props.mostUsefulFeature;
   }
   /**
    * Performs the main pain point operation.
    * @returns The string | undefined.
    */
-  get mainPainPoint(): string | undefined {
+  public get mainPainPoint(): string | undefined {
     return this.props.mainPainPoint;
   }
   /**
    * Performs the improvement suggestion operation.
    * @returns The string | undefined.
    */
-  get improvementSuggestion(): string | undefined {
+  public get improvementSuggestion(): string | undefined {
     return this.props.improvementSuggestion;
   }
 }
@@ -792,42 +795,42 @@ export class BusinessValue extends ValueObject<{
    * Performs the current screening method operation.
    * @returns The ScreeningMethod.
    */
-  get currentScreeningMethod(): ScreeningMethod {
+  public get currentScreeningMethod(): ScreeningMethod {
     return this.props.currentScreeningMethod;
   }
   /**
    * Performs the time spent per resume operation.
    * @returns The number value.
    */
-  get timeSpentPerResume(): number {
+  public get timeSpentPerResume(): number {
     return this.props.timeSpentPerResume;
   }
   /**
    * Performs the resumes per week operation.
    * @returns The number value.
    */
-  get resumesPerWeek(): number {
+  public get resumesPerWeek(): number {
     return this.props.resumesPerWeek;
   }
   /**
    * Performs the time saving percentage operation.
    * @returns The number value.
    */
-  get timeSavingPercentage(): number {
+  public get timeSavingPercentage(): number {
     return this.props.timeSavingPercentage;
   }
   /**
    * Performs the willingness to pay monthly operation.
    * @returns The number value.
    */
-  get willingnessToPayMonthly(): number {
+  public get willingnessToPayMonthly(): number {
     return this.props.willingnessToPayMonthly;
   }
   /**
    * Performs the recommend likelihood operation.
    * @returns The Rating.
    */
-  get recommendLikelihood(): Rating {
+  public get recommendLikelihood(): Rating {
     return this.props.recommendLikelihood;
   }
 }
@@ -851,14 +854,14 @@ export class OptionalInfo extends ValueObject<{
    * Performs the additional feedback operation.
    * @returns The string | undefined.
    */
-  get additionalFeedback(): string | undefined {
+  public get additionalFeedback(): string | undefined {
     return this.props.additionalFeedback;
   }
   /**
    * Performs the contact preference operation.
    * @returns The string | undefined.
    */
-  get contactPreference(): string | undefined {
+  public get contactPreference(): string | undefined {
     return this.props.contactPreference;
   }
 }
@@ -876,7 +879,8 @@ export class SubmissionMetadata extends ValueObject<{
    * @param data - The data.
    * @returns The SubmissionMetadata.
    */
-  static restore(data: any): SubmissionMetadata {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): SubmissionMetadata {
     return new SubmissionMetadata({
       ...data,
       timestamp: new Date(data.timestamp),
@@ -887,7 +891,7 @@ export class SubmissionMetadata extends ValueObject<{
    * Performs the ip operation.
    * @returns The string value.
    */
-  get ip(): string {
+  public get ip(): string {
     return this.props.ip;
   }
 }
@@ -900,7 +904,7 @@ export class QualityScore extends ValueObject<{ value: number }> {
    * Performs the value operation.
    * @returns The number value.
    */
-  get value(): number {
+  public get value(): number {
     return this.props.value;
   }
 }
@@ -920,42 +924,42 @@ export class SubmissionSummary extends ValueObject<{
    * Performs the role operation.
    * @returns The string value.
    */
-  get role(): string {
+  public get role(): string {
     return this.props.role;
   }
   /**
    * Performs the industry operation.
    * @returns The string value.
    */
-  get industry(): string {
+  public get industry(): string {
     return this.props.industry;
   }
   /**
    * Performs the overall satisfaction operation.
    * @returns The number value.
    */
-  get overallSatisfaction(): number {
+  public get overallSatisfaction(): number {
     return this.props.overallSatisfaction;
   }
   /**
    * Performs the willingness to pay monthly operation.
    * @returns The number value.
    */
-  get willingnessToPayMonthly(): number {
+  public get willingnessToPayMonthly(): number {
     return this.props.willingnessToPayMonthly;
   }
   /**
    * Performs the text length operation.
    * @returns The number value.
    */
-  get textLength(): number {
+  public get textLength(): number {
     return this.props.textLength;
   }
   /**
    * Performs the completion rate operation.
    * @returns The number value.
    */
-  get completionRate(): number {
+  public get completionRate(): number {
     return this.props.completionRate;
   }
 }
@@ -983,42 +987,42 @@ export class QualityMetrics extends ValueObject<{
    * Performs the total text length operation.
    * @returns The number value.
    */
-  get totalTextLength(): number {
+  public get totalTextLength(): number {
     return this.props.totalTextLength;
   }
   /**
    * Performs the detailed answers operation.
    * @returns The number value.
    */
-  get detailedAnswers(): number {
+  public get detailedAnswers(): number {
     return this.props.detailedAnswers;
   }
   /**
    * Performs the completion rate operation.
    * @returns The number value.
    */
-  get completionRate(): number {
+  public get completionRate(): number {
     return this.props.completionRate;
   }
   /**
    * Performs the quality score operation.
    * @returns The number value.
    */
-  get qualityScore(): number {
+  public get qualityScore(): number {
     return this.props.qualityScore;
   }
   /**
    * Performs the bonus eligible operation.
    * @returns The boolean value.
    */
-  get bonusEligible(): boolean {
+  public get bonusEligible(): boolean {
     return this.props.bonusEligible;
   }
   /**
    * Performs the quality reasons operation.
    * @returns The an array of string value.
    */
-  get qualityReasons(): string[] {
+  public get qualityReasons(): string[] {
     return this.props.qualityReasons;
   }
 }
@@ -1121,9 +1125,13 @@ export interface RawSubmissionData {
  */
 export interface QuestionnaireData {
   id: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   template: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   submission: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   quality: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: any;
   status: QuestionnaireStatus;
 }

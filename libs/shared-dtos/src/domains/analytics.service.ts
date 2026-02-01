@@ -45,11 +45,13 @@ export class AnalyticsDomainService {
   /**
    * 创建用户交互事件
    */
-  async createUserInteractionEvent(
+  public async createUserInteractionEvent(
     sessionId: string,
     userId: string,
     eventType: EventType,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     eventData: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context?: any,
   ): Promise<EventCreationResult> {
     try {
@@ -137,10 +139,11 @@ export class AnalyticsDomainService {
   /**
    * 创建系统性能事件
    */
-  async createSystemPerformanceEvent(
+  public async createSystemPerformanceEvent(
     operation: string,
     duration: number,
     success: boolean,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata?: any,
   ): Promise<EventCreationResult> {
     try {
@@ -200,7 +203,7 @@ export class AnalyticsDomainService {
   /**
    * 创建业务指标事件
    */
-  async createBusinessMetricEvent(
+  public async createBusinessMetricEvent(
     metricName: string,
     metricValue: number,
     metricUnit: MetricUnit,
@@ -258,7 +261,7 @@ export class AnalyticsDomainService {
   /**
    * 批量处理事件
    */
-  async processBatchEvents(eventIds: string[]): Promise<BatchProcessingResult> {
+  public async processBatchEvents(eventIds: string[]): Promise<BatchProcessingResult> {
     try {
       // 获取所有事件
       const events = await this.repository.findByIds(eventIds);
@@ -349,7 +352,7 @@ export class AnalyticsDomainService {
   /**
    * 执行数据隐私合规检查
    */
-  async performPrivacyComplianceCheck(
+  public async performPrivacyComplianceCheck(
     eventId: string,
   ): Promise<PrivacyComplianceResult> {
     try {
@@ -425,7 +428,7 @@ export class AnalyticsDomainService {
   /**
    * 生成数据保留策略报告
    */
-  async generateDataRetentionReport(
+  public async generateDataRetentionReport(
     startDate: Date,
     endDate: Date,
   ): Promise<DataRetentionReportResult> {
@@ -469,7 +472,7 @@ export class AnalyticsDomainService {
           });
         }
 
-        const stats = eventTypeStats.get(eventType)!;
+        const stats = eventTypeStats.get(eventType) ?? { total: 0, toDelete: 0, toAnonymize: 0 };
         stats.total++;
 
         if (policy && policy.daysUntilExpiry <= 0) {
@@ -506,7 +509,7 @@ export class AnalyticsDomainService {
   /**
    * 获取会话分析统计
    */
-  async getSessionAnalytics(
+  public async getSessionAnalytics(
     sessionId: string,
     timeRange?: { startDate: Date; endDate: Date },
   ): Promise<SessionAnalyticsResult> {
@@ -572,7 +575,7 @@ export class AnalyticsDomainService {
   /**
    * 获取事件处理性能指标
    */
-  async getEventProcessingMetrics(timeRange: {
+  public async getEventProcessingMetrics(timeRange: {
     startDate: Date;
     endDate: Date;
   }): Promise<EventProcessingMetricsResult> {
@@ -644,7 +647,7 @@ export class AnalyticsDomainService {
   /**
    * 获取数据隐私合规指标
    */
-  async getDataPrivacyMetrics(timeRange: {
+  public async getDataPrivacyMetrics(timeRange: {
     startDate: Date;
     endDate: Date;
   }): Promise<DataPrivacyMetricsResult> {
@@ -728,7 +731,7 @@ export class AnalyticsDomainService {
   /**
    * 验证报告访问权限
    */
-  async validateReportingAccess(
+  public async validateReportingAccess(
     userRole: string,
     reportType: ReportType,
     dataScope: DataScope,
@@ -783,7 +786,7 @@ export class EventCreationResult {
    * @param data - The data.
    * @returns The EventCreationResult.
    */
-  static success(data: AnalyticsEventSummary): EventCreationResult {
+  public static success(data: AnalyticsEventSummary): EventCreationResult {
     return new EventCreationResult(true, data);
   }
 
@@ -792,7 +795,7 @@ export class EventCreationResult {
    * @param errors - The errors.
    * @returns The EventCreationResult.
    */
-  static failed(errors: string[]): EventCreationResult {
+  public static failed(errors: string[]): EventCreationResult {
     return new EventCreationResult(false, undefined, errors);
   }
 }
@@ -817,7 +820,7 @@ export class BatchProcessingResult {
    * @param data - The data.
    * @returns The BatchProcessingResult.
    */
-  static success(data: {
+  public static success(data: {
     totalEvents: number;
     successCount: number;
     failureCount: number;
@@ -831,7 +834,7 @@ export class BatchProcessingResult {
    * @param errors - The errors.
    * @returns The BatchProcessingResult.
    */
-  static failed(errors: string[]): BatchProcessingResult {
+  public static failed(errors: string[]): BatchProcessingResult {
     return new BatchProcessingResult(false, undefined, errors);
   }
 }
@@ -856,7 +859,7 @@ export class PrivacyComplianceResult {
    * @param data - The data.
    * @returns The PrivacyComplianceResult.
    */
-  static success(data: {
+  public static success(data: {
     eventId: string;
     riskAssessment: PrivacyComplianceRiskAssessment;
     anonymizationRequirement: AnonymizationRequirementResult;
@@ -870,7 +873,7 @@ export class PrivacyComplianceResult {
    * @param errors - The errors.
    * @returns The PrivacyComplianceResult.
    */
-  static failed(errors: string[]): PrivacyComplianceResult {
+  public static failed(errors: string[]): PrivacyComplianceResult {
     return new PrivacyComplianceResult(false, undefined, errors);
   }
 }
@@ -886,6 +889,7 @@ export class DataRetentionReportResult {
       totalEvents: number;
       eventsToDelete: number;
       eventsToAnonymize: number;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       eventTypeStatistics: Record<string, any>;
       retentionPolicies: AnalyticsDataRetentionPolicy[];
     },
@@ -897,11 +901,12 @@ export class DataRetentionReportResult {
    * @param data - The data.
    * @returns The DataRetentionReportResult.
    */
-  static success(data: {
+  public static success(data: {
     reportPeriod: { startDate: Date; endDate: Date };
     totalEvents: number;
     eventsToDelete: number;
     eventsToAnonymize: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     eventTypeStatistics: Record<string, any>;
     retentionPolicies: AnalyticsDataRetentionPolicy[];
   }): DataRetentionReportResult {
@@ -913,7 +918,7 @@ export class DataRetentionReportResult {
    * @param errors - The errors.
    * @returns The DataRetentionReportResult.
    */
-  static failed(errors: string[]): DataRetentionReportResult {
+  public static failed(errors: string[]): DataRetentionReportResult {
     return new DataRetentionReportResult(false, undefined, errors);
   }
 }
@@ -933,7 +938,7 @@ export class SessionAnalyticsResult {
    * @param data - The data.
    * @returns The SessionAnalyticsResult.
    */
-  static success(data: SessionAnalytics): SessionAnalyticsResult {
+  public static success(data: SessionAnalytics): SessionAnalyticsResult {
     return new SessionAnalyticsResult(true, data);
   }
 
@@ -942,7 +947,7 @@ export class SessionAnalyticsResult {
    * @param errors - The errors.
    * @returns The SessionAnalyticsResult.
    */
-  static failed(errors: string[]): SessionAnalyticsResult {
+  public static failed(errors: string[]): SessionAnalyticsResult {
     return new SessionAnalyticsResult(false, undefined, errors);
   }
 }
@@ -962,7 +967,7 @@ export class EventProcessingMetricsResult {
    * @param data - The data.
    * @returns The EventProcessingMetricsResult.
    */
-  static success(data: EventProcessingMetrics): EventProcessingMetricsResult {
+  public static success(data: EventProcessingMetrics): EventProcessingMetricsResult {
     return new EventProcessingMetricsResult(true, data);
   }
 
@@ -971,7 +976,7 @@ export class EventProcessingMetricsResult {
    * @param errors - The errors.
    * @returns The EventProcessingMetricsResult.
    */
-  static failed(errors: string[]): EventProcessingMetricsResult {
+  public static failed(errors: string[]): EventProcessingMetricsResult {
     return new EventProcessingMetricsResult(false, undefined, errors);
   }
 }
@@ -991,7 +996,7 @@ export class DataPrivacyMetricsResult {
    * @param data - The data.
    * @returns The DataPrivacyMetricsResult.
    */
-  static success(data: DataPrivacyMetrics): DataPrivacyMetricsResult {
+  public static success(data: DataPrivacyMetrics): DataPrivacyMetricsResult {
     return new DataPrivacyMetricsResult(true, data);
   }
 
@@ -1000,7 +1005,7 @@ export class DataPrivacyMetricsResult {
    * @param errors - The errors.
    * @returns The DataPrivacyMetricsResult.
    */
-  static failed(errors: string[]): DataPrivacyMetricsResult {
+  public static failed(errors: string[]): DataPrivacyMetricsResult {
     return new DataPrivacyMetricsResult(false, undefined, errors);
   }
 }
@@ -1020,7 +1025,7 @@ export class ReportingAccessResult {
    * @param data - The data.
    * @returns The ReportingAccessResult.
    */
-  static success(data: ReportingPermissionsResult): ReportingAccessResult {
+  public static success(data: ReportingPermissionsResult): ReportingAccessResult {
     return new ReportingAccessResult(true, data);
   }
 
@@ -1029,7 +1034,7 @@ export class ReportingAccessResult {
    * @param errors - The errors.
    * @returns The ReportingAccessResult.
    */
-  static failed(errors: string[]): ReportingAccessResult {
+  public static failed(errors: string[]): ReportingAccessResult {
     return new ReportingAccessResult(false, undefined, errors);
   }
 }
@@ -1067,6 +1072,7 @@ export interface IAnalyticsRepository {
  * Defines the shape of the i domain event bus.
  */
 export interface IDomainEventBus {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   publish(event: any): Promise<void>;
 }
 
@@ -1074,8 +1080,11 @@ export interface IDomainEventBus {
  * Defines the shape of the i audit logger.
  */
 export interface IAuditLogger {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logBusinessEvent(eventType: string, data: any): Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logSecurityEvent(eventType: string, data: any): Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logError(eventType: string, data: any): Promise<void>;
 }
 

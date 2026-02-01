@@ -35,7 +35,7 @@ export class IncentiveDomainService {
   /**
    * 创建问卷完成激励
    */
-  async createQuestionnaireIncentive(
+  public async createQuestionnaireIncentive(
     ip: string,
     questionnaireId: string,
     qualityScore: number,
@@ -111,7 +111,7 @@ export class IncentiveDomainService {
   /**
    * 创建推荐激励
    */
-  async createReferralIncentive(
+  public async createReferralIncentive(
     referrerIP: string,
     referredIP: string,
     contactInfo: ContactInfo,
@@ -188,7 +188,7 @@ export class IncentiveDomainService {
   /**
    * 验证激励资格
    */
-  async validateIncentive(
+  public async validateIncentive(
     incentiveId: string,
   ): Promise<IncentiveValidationResult> {
     try {
@@ -239,7 +239,7 @@ export class IncentiveDomainService {
   /**
    * 批准激励处理
    */
-  async approveIncentive(
+  public async approveIncentive(
     incentiveId: string,
     reason: string,
   ): Promise<IncentiveApprovalResult> {
@@ -289,7 +289,7 @@ export class IncentiveDomainService {
   /**
    * 拒绝激励
    */
-  async rejectIncentive(
+  public async rejectIncentive(
     incentiveId: string,
     reason: string,
   ): Promise<IncentiveRejectionResult> {
@@ -338,7 +338,7 @@ export class IncentiveDomainService {
   /**
    * 执行单笔支付
    */
-  async processPayment(
+  public async processPayment(
     incentiveId: string,
     paymentMethod: PaymentMethod,
     contactInfo?: ContactInfo,
@@ -406,8 +406,8 @@ export class IncentiveDomainService {
         return PaymentProcessingResult.success({
           incentiveId,
           transactionId: gatewayResult.transactionId,
-          amount: paymentResult.amount!,
-          currency: paymentResult.currency!,
+          amount: paymentResult.amount ?? 0,
+          currency: paymentResult.currency ?? Currency.CNY,
           paymentMethod,
           status: incentive.getStatus(),
         });
@@ -418,7 +418,7 @@ export class IncentiveDomainService {
           paymentMethod,
         });
 
-        return PaymentProcessingResult.failed([paymentResult.error!]);
+        return PaymentProcessingResult.failed([paymentResult.error ?? 'Unknown error']);
       }
     } catch (error) {
       const errorMessage =
@@ -438,7 +438,7 @@ export class IncentiveDomainService {
   /**
    * 批量支付处理
    */
-  async processBatchPayment(
+  public async processBatchPayment(
     incentiveIds: string[],
     paymentMethod: PaymentMethod,
   ): Promise<BatchPaymentResult> {
@@ -502,16 +502,16 @@ export class IncentiveDomainService {
               incentiveId: incentive.getId().getValue(),
               success: true,
               transactionId: gatewayResult.transactionId,
-              amount: paymentResult.amount!,
+              amount: paymentResult.amount ?? 0,
             });
 
             successCount++;
-            totalPaidAmount += paymentResult.amount!;
+            totalPaidAmount += paymentResult.amount ?? 0;
           } else {
             results.push({
               incentiveId: incentive.getId().getValue(),
               success: false,
-              error: paymentResult.error!,
+              error: paymentResult.error ?? 'Unknown error',
             });
           }
         } catch (paymentError) {
@@ -560,7 +560,7 @@ export class IncentiveDomainService {
   /**
    * 获取激励统计信息
    */
-  async getIncentiveStatistics(
+  public async getIncentiveStatistics(
     ip?: string,
     timeRange?: { startDate: Date; endDate: Date },
   ): Promise<IncentiveStatsResult> {
@@ -598,7 +598,7 @@ export class IncentiveDomainService {
   /**
    * 获取待处理激励列表（按优先级排序）
    */
-  async getPendingIncentives(
+  public async getPendingIncentives(
     status?: IncentiveStatus,
     limit = 50,
   ): Promise<PendingIncentivesResult> {
@@ -777,7 +777,7 @@ export class IncentiveCreationResult {
    * @param data - The data.
    * @returns The IncentiveCreationResult.
    */
-  static success(data: IncentiveSummary): IncentiveCreationResult {
+  public static success(data: IncentiveSummary): IncentiveCreationResult {
     return new IncentiveCreationResult(true, data);
   }
 
@@ -786,7 +786,7 @@ export class IncentiveCreationResult {
    * @param errors - The errors.
    * @returns The IncentiveCreationResult.
    */
-  static failed(errors: string[]): IncentiveCreationResult {
+  public static failed(errors: string[]): IncentiveCreationResult {
     return new IncentiveCreationResult(false, undefined, errors);
   }
 }
@@ -811,7 +811,7 @@ export class IncentiveValidationResult {
    * @param data - The data.
    * @returns The IncentiveValidationResult.
    */
-  static success(data: {
+  public static success(data: {
     incentiveId: string;
     isValid: boolean;
     errors: string[];
@@ -825,7 +825,7 @@ export class IncentiveValidationResult {
    * @param errors - The errors.
    * @returns The IncentiveValidationResult.
    */
-  static failed(errors: string[]): IncentiveValidationResult {
+  public static failed(errors: string[]): IncentiveValidationResult {
     return new IncentiveValidationResult(false, undefined, errors);
   }
 }
@@ -849,7 +849,7 @@ export class IncentiveApprovalResult {
    * @param data - The data.
    * @returns The IncentiveApprovalResult.
    */
-  static success(data: {
+  public static success(data: {
     incentiveId: string;
     status: IncentiveStatus;
     rewardAmount: number;
@@ -862,7 +862,7 @@ export class IncentiveApprovalResult {
    * @param errors - The errors.
    * @returns The IncentiveApprovalResult.
    */
-  static failed(errors: string[]): IncentiveApprovalResult {
+  public static failed(errors: string[]): IncentiveApprovalResult {
     return new IncentiveApprovalResult(false, undefined, errors);
   }
 }
@@ -886,7 +886,7 @@ export class IncentiveRejectionResult {
    * @param data - The data.
    * @returns The IncentiveRejectionResult.
    */
-  static success(data: {
+  public static success(data: {
     incentiveId: string;
     status: IncentiveStatus;
     rejectionReason: string;
@@ -899,7 +899,7 @@ export class IncentiveRejectionResult {
    * @param errors - The errors.
    * @returns The IncentiveRejectionResult.
    */
-  static failed(errors: string[]): IncentiveRejectionResult {
+  public static failed(errors: string[]): IncentiveRejectionResult {
     return new IncentiveRejectionResult(false, undefined, errors);
   }
 }
@@ -926,7 +926,7 @@ export class PaymentProcessingResult {
    * @param data - The data.
    * @returns The PaymentProcessingResult.
    */
-  static success(data: {
+  public static success(data: {
     incentiveId: string;
     transactionId: string;
     amount: number;
@@ -942,7 +942,7 @@ export class PaymentProcessingResult {
    * @param errors - The errors.
    * @returns The PaymentProcessingResult.
    */
-  static failed(errors: string[]): PaymentProcessingResult {
+  public static failed(errors: string[]): PaymentProcessingResult {
     return new PaymentProcessingResult(false, undefined, errors);
   }
 }
@@ -968,7 +968,7 @@ export class BatchPaymentResult {
    * @param data - The data.
    * @returns The BatchPaymentResult.
    */
-  static success(data: {
+  public static success(data: {
     totalIncentives: number;
     successCount: number;
     failureCount: number;
@@ -983,7 +983,7 @@ export class BatchPaymentResult {
    * @param errors - The errors.
    * @returns The BatchPaymentResult.
    */
-  static failed(errors: string[]): BatchPaymentResult {
+  public static failed(errors: string[]): BatchPaymentResult {
     return new BatchPaymentResult(false, undefined, errors);
   }
 }
@@ -1006,7 +1006,7 @@ export class IncentiveStatsResult {
    * @param data - The data.
    * @returns The IncentiveStatsResult.
    */
-  static success(data: {
+  public static success(data: {
     individual?: IPIncentiveStatistics;
     system?: SystemIncentiveStatistics;
   }): IncentiveStatsResult {
@@ -1018,7 +1018,7 @@ export class IncentiveStatsResult {
    * @param errors - The errors.
    * @returns The IncentiveStatsResult.
    */
-  static failed(errors: string[]): IncentiveStatsResult {
+  public static failed(errors: string[]): IncentiveStatsResult {
     return new IncentiveStatsResult(false, undefined, errors);
   }
 }
@@ -1041,7 +1041,7 @@ export class PendingIncentivesResult {
    * @param data - The data.
    * @returns The PendingIncentivesResult.
    */
-  static success(
+  public static success(
     data: Array<{
       incentive: IncentiveSummary;
       priority: IncentivePriority;
@@ -1055,7 +1055,7 @@ export class PendingIncentivesResult {
    * @param errors - The errors.
    * @returns The PendingIncentivesResult.
    */
-  static failed(errors: string[]): PendingIncentivesResult {
+  public static failed(errors: string[]): PendingIncentivesResult {
     return new PendingIncentivesResult(false, undefined, errors);
   }
 }
@@ -1160,6 +1160,7 @@ export interface IIncentiveRepository {
  * Defines the shape of the i domain event bus.
  */
 export interface IDomainEventBus {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   publish(event: any): Promise<void>;
 }
 
@@ -1167,8 +1168,11 @@ export interface IDomainEventBus {
  * Defines the shape of the i audit logger.
  */
 export interface IAuditLogger {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logBusinessEvent(eventType: string, data: any): Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logSecurityEvent(eventType: string, data: any): Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logError(eventType: string, data: any): Promise<void>;
 }
 
