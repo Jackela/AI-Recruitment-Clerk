@@ -87,3 +87,19 @@ Started: Sat Jan 31 18:06:08     2026
   - CRITICAL: When removing `: string` type annotations from Mongoose schema properties, you MUST ensure the @Prop decorator has `type: String` explicitly set, otherwise Mongoose reflection fails with "Cannot determine a type" error
   - Pre-existing test failures (incentive.service.spec.ts, environment.test.ts) are unrelated to schema changes
 ---
+
+## 2026-02-01 - US-005
+- **What was implemented**: Fixed any types and lint issues in consent-record.schema.ts
+- **Files changed**:
+  - `apps/app-gateway/src/schemas/consent-record.schema.ts`
+- **Changes made**:
+  - Changed `Record<string, any>` to `Record<string, unknown>` for metadata fields in 3 classes (ConsentRecord, CookieConsent, ConsentAuditLog)
+  - Changed `import { Document }` to `import type { Document }` for type-only import
+  - Added `public` accessibility modifiers to all class properties in all 3 classes
+  - Removed unnecessary `= undefined` initializations for optional properties
+  - Added explicit `type: String/Date/Boolean` to @Prop decorators
+- **Learnings for future iterations:**
+  - consent-record.schema.ts contains 3 separate schema classes (ConsentRecord, CookieConsent, ConsentAuditLog)
+  - Same patterns apply: use `Record<string, unknown>` instead of `Record<string, any>`, add `public` modifier, use type-only imports
+  - Pre-existing test failures (11 tests) are unrelated to schema changes - they are in incentive.service.spec.ts, questionnaire.rules.spec.ts, environment.test.ts
+---
