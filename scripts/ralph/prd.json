@@ -240,7 +240,7 @@
       "title": "Fix shared-dtos errors/error-correlation.ts",
       "description": "Fix lint issues in error-correlation.ts",
       "priority": 20,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in error-correlation.ts",
         "npm run typecheck passes"
@@ -252,7 +252,7 @@
       "title": "Fix shared-dtos errors/error-interceptors.ts",
       "description": "Fix lint issues in error-interceptors.ts",
       "priority": 21,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in error-interceptors.ts",
         "npm run typecheck passes"
@@ -264,7 +264,7 @@
       "title": "Fix shared-dtos errors/error-response-formatter.ts",
       "description": "Fix lint issues in error-response-formatter.ts",
       "priority": 22,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in error-response-formatter.ts",
         "npm run typecheck passes"
@@ -276,7 +276,7 @@
       "title": "Fix shared-dtos errors/global-exception.filter.ts",
       "description": "Fix lint issues in global-exception.filter.ts",
       "priority": 23,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in global-exception.filter.ts",
         "npm run typecheck passes"
@@ -288,7 +288,7 @@
       "title": "Fix shared-dtos errors/structured-logging.ts",
       "description": "Fix lint and typecheck issues in structured-logging.ts",
       "priority": 24,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in structured-logging.ts",
         "npm run typecheck passes (fix TS2698 spread error)"
