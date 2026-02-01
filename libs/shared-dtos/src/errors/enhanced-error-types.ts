@@ -82,7 +82,9 @@ export class EnhancedAppException extends AppException {
     code: string,
     message: string,
     httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details?: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context?: Record<string, any>,
   ) {
     super(type as ErrorType, code, message, httpStatus, details, context);
@@ -105,7 +107,7 @@ export class EnhancedAppException extends AppException {
   /**
    * Add correlation context to error
    */
-  withCorrelation(context: ErrorCorrelationContext): this {
+  public withCorrelation(context: ErrorCorrelationContext): this {
     this.enhancedDetails.correlationContext = context;
     return this;
   }
@@ -113,7 +115,7 @@ export class EnhancedAppException extends AppException {
   /**
    * Add recovery strategies
    */
-  withRecoveryStrategies(strategies: string[]): this {
+  public withRecoveryStrategies(strategies: string[]): this {
     this.enhancedDetails.recoveryStrategies = strategies;
     return this;
   }
@@ -121,7 +123,7 @@ export class EnhancedAppException extends AppException {
   /**
    * Add affected operations
    */
-  withAffectedOperations(operations: string[]): this {
+  public withAffectedOperations(operations: string[]): this {
     this.enhancedDetails.affectedOperations = operations;
     return this;
   }
@@ -129,7 +131,7 @@ export class EnhancedAppException extends AppException {
   /**
    * Add related errors for correlation
    */
-  withRelatedErrors(errorIds: string[]): this {
+  public withRelatedErrors(errorIds: string[]): this {
     this.enhancedDetails.relatedErrors = errorIds;
     return this;
   }
@@ -137,7 +139,7 @@ export class EnhancedAppException extends AppException {
   /**
    * Set business impact level
    */
-  withBusinessImpact(impact: 'low' | 'medium' | 'high' | 'critical'): this {
+  public withBusinessImpact(impact: 'low' | 'medium' | 'high' | 'critical'): this {
     this.enhancedDetails.businessImpact = impact;
     return this;
   }
@@ -145,7 +147,7 @@ export class EnhancedAppException extends AppException {
   /**
    * Set user impact level
    */
-  withUserImpact(impact: 'none' | 'minimal' | 'moderate' | 'severe'): this {
+  public withUserImpact(impact: 'none' | 'minimal' | 'moderate' | 'severe'): this {
     this.enhancedDetails.userImpact = impact;
     return this;
   }
@@ -153,7 +155,7 @@ export class EnhancedAppException extends AppException {
   /**
    * Add monitoring tags for observability
    */
-  withMonitoringTags(tags: Record<string, string>): this {
+  public withMonitoringTags(tags: Record<string, string>): this {
     this.enhancedDetails.monitoringTags = {
       ...this.enhancedDetails.monitoringTags,
       ...tags,
@@ -164,7 +166,8 @@ export class EnhancedAppException extends AppException {
   /**
    * Get comprehensive error context for logging/monitoring
    */
-  getEnhancedContext(): Record<string, any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public getEnhancedContext(): Record<string, any> {
     return {
       error: {
         type: this.enhancedDetails.type,
@@ -441,6 +444,7 @@ export class TemplateException extends EnhancedAppException {
     templateName: string,
     operation: string,
     message: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     templateData?: Record<string, any>,
   ) {
     super(
@@ -479,7 +483,7 @@ export class ErrorFactory {
   /**
    * Create NATS messaging error
    */
-  static natsError(
+  public static natsError(
     operation: string,
     subject: string,
     message: string,
@@ -493,7 +497,7 @@ export class ErrorFactory {
   /**
    * Create ML model error
    */
-  static mlModelError(
+  public static mlModelError(
     modelName: string,
     operation: string,
     message: string,
@@ -505,7 +509,7 @@ export class ErrorFactory {
   /**
    * Create file parsing error
    */
-  static parsingError(
+  public static parsingError(
     fileType: string,
     fileName: string,
     parserType: string,
@@ -524,7 +528,7 @@ export class ErrorFactory {
   /**
    * Create cache error
    */
-  static cacheError(
+  public static cacheError(
     operation: string,
     key: string,
     cacheType: string,
@@ -536,7 +540,7 @@ export class ErrorFactory {
   /**
    * Create queue error
    */
-  static queueError(
+  public static queueError(
     operation: string,
     queueName: string,
     message: string,
@@ -548,10 +552,11 @@ export class ErrorFactory {
   /**
    * Create template error
    */
-  static templateError(
+  public static templateError(
     templateName: string,
     operation: string,
     message: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     templateData?: Record<string, any>,
   ): TemplateException {
     return new TemplateException(

@@ -120,7 +120,10 @@ export class StructuredErrorLogger {
           executionTime: correlationContext?.executionTime,
         },
         metadata: {
-          ...error.enhancedDetails.details,
+          ...(typeof error.enhancedDetails.details === 'object' &&
+          error.enhancedDetails.details !== null
+            ? (error.enhancedDetails.details as Record<string, unknown>)
+            : {}),
           recoveryStrategies: error.enhancedDetails.recoveryStrategies,
           affectedOperations: error.enhancedDetails.affectedOperations,
           ...additionalContext,
