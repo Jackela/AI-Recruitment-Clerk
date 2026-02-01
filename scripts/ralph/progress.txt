@@ -72,3 +72,18 @@ Started: Sat Jan 31 18:06:08     2026
     3. @typescript-eslint/explicit-member-accessibility - add `public` modifier to properties
   - Pre-existing test failures (11 tests) are unrelated to schema changes
 ---
+
+## 2026-02-01 - US-004
+- **What was implemented**: Fixed lint issues in job.schema.ts (no `any` types existed)
+- **Files changed**:
+  - `apps/app-gateway/src/schemas/job.schema.ts`
+- **Changes made**:
+  - Changed `import { Document }` to `import type { Document }` for type-only import
+  - Added `public` accessibility modifiers to all class properties
+  - Removed redundant type annotations for string/number literals
+  - Added explicit `type: String` to @Prop decorators that were missing it (skill, title, description, company, location)
+- **Learnings for future iterations:**
+  - job.schema.ts had NO `any` types - already compliant with CLAUDE.md RULE 3
+  - CRITICAL: When removing `: string` type annotations from Mongoose schema properties, you MUST ensure the @Prop decorator has `type: String` explicitly set, otherwise Mongoose reflection fails with "Cannot determine a type" error
+  - Pre-existing test failures (incentive.service.spec.ts, environment.test.ts) are unrelated to schema changes
+---
