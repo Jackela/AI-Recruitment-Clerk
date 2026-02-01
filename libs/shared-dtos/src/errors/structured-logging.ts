@@ -55,7 +55,7 @@ export interface StructuredLogEntry {
     userAgent?: string;
     executionTime?: number;
   };
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   monitoring?: {
     tags: Record<string, string>;
     metrics: Record<string, number>;
@@ -92,10 +92,10 @@ export class StructuredErrorLogger {
   /**
    * Log enhanced error with full context
    */
-  logError(
+  public logError(
     error: EnhancedAppException,
     operation?: string,
-    additionalContext?: Record<string, any>,
+    additionalContext?: Record<string, unknown>,
   ): void {
     const correlationContext =
       error.enhancedDetails.correlationContext ||
@@ -144,10 +144,10 @@ export class StructuredErrorLogger {
   /**
    * Log performance metrics
    */
-  logPerformance(
+  public logPerformance(
     operation: string,
     metrics: PerformanceMetrics,
-    additionalMetadata?: Record<string, any>,
+    additionalMetadata?: Record<string, unknown>,
   ): void {
     const correlationContext = ErrorCorrelationManager.getContext();
 
@@ -184,9 +184,9 @@ export class StructuredErrorLogger {
   /**
    * Log operation start with correlation
    */
-  logOperationStart(
+  public logOperationStart(
     operation: string,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ): PerformanceMetrics {
     const correlationContext = ErrorCorrelationManager.getContext();
     const startTime = Date.now();
@@ -228,11 +228,11 @@ export class StructuredErrorLogger {
   /**
    * Log operation completion with metrics
    */
-  logOperationComplete(
+  public logOperationComplete(
     operation: string,
     startMetrics: PerformanceMetrics,
     success = true,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ): PerformanceMetrics {
     const endTime = Date.now();
     const memoryEnd = process.memoryUsage();
@@ -273,7 +273,7 @@ export class StructuredErrorLogger {
           metrics: {
             duration,
             memoryDelta:
-              memoryEnd.heapUsed - startMetrics.memoryUsage!.heapUsed,
+              memoryEnd.heapUsed - (startMetrics.memoryUsage?.heapUsed ?? 0),
             cpuUser: cpuEnd.user / 1000, // Convert to milliseconds
             cpuSystem: cpuEnd.system / 1000,
             timestamp: endTime,
@@ -290,10 +290,10 @@ export class StructuredErrorLogger {
   /**
    * Log with operation wrapper
    */
-  async withLogging<T>(
+  public async withLogging<T>(
     operation: string,
     fn: () => Promise<T>,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ): Promise<T> {
     const startMetrics = this.logOperationStart(operation, metadata);
 
@@ -322,11 +322,11 @@ export class StructuredErrorLogger {
   /**
    * Log correlation boundary (service-to-service calls)
    */
-  logCorrelationBoundary(
+  public logCorrelationBoundary(
     direction: 'outbound' | 'inbound',
     targetService: string,
     operation: string,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ): void {
     const correlationContext = ErrorCorrelationManager.getContext();
 
@@ -489,11 +489,12 @@ export class StructuredErrorLogger {
   /**
    * Create operation logger decorator
    */
-  static createOperationLogger(serviceName: string) {
+  public static createOperationLogger(serviceName: string) {
     const logger = new StructuredErrorLogger(serviceName);
 
     return function LogOperation(operationName?: string) {
       return function (
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         target: any,
         propertyName: string,
         descriptor: PropertyDescriptor,
@@ -502,6 +503,7 @@ export class StructuredErrorLogger {
         const operation =
           operationName || `${target.constructor.name}.${propertyName}`;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         descriptor.value = async function (...args: any[]) {
           return logger.withLogging(operation, () => method.apply(this, args), {
             className: target.constructor.name,
@@ -525,17 +527,18 @@ export class StructuredLoggerFactory {
   /**
    * Get or create logger for service
    */
-  static getLogger(serviceName: string): StructuredErrorLogger {
+  public static getLogger(serviceName: string): StructuredErrorLogger {
     if (!this.loggers.has(serviceName)) {
       this.loggers.set(serviceName, new StructuredErrorLogger(serviceName));
     }
-    return this.loggers.get(serviceName)!;
+    // The Map always has the key at this point due to the if check above
+    return this.loggers.get(serviceName) as StructuredErrorLogger;
   }
 
   /**
    * Configure global logging settings
    */
-  static configure(config: {
+  public static configure(config: {
     enableExternalLogging?: boolean;
     logLevel?: LogLevel;
     enablePerformanceLogging?: boolean;
@@ -553,7 +556,7 @@ export class StructuredLoggerFactory {
   /**
    * Clear all logger instances (useful for testing)
    */
-  static clearLoggers(): void {
+  public static clearLoggers(): void {
     this.loggers.clear();
   }
 }
