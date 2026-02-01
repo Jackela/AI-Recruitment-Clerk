@@ -6,7 +6,8 @@
  * @module DBCMonitoringTests
  */
 
-import { DBCMonitor, ContractMetrics, withMonitoring } from './dbc.monitoring';
+import type { ContractMetrics} from './dbc.monitoring';
+import { DBCMonitor, withMonitoring } from './dbc.monitoring';
 import { ContractViolationError } from './dbc.decorators';
 
 describe('DBC Production Monitoring', () => {

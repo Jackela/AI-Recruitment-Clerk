@@ -1,11 +1,12 @@
-import {
-  IncentiveDomainService,
-  IncentiveCreationResult,
-  PaymentProcessingResult,
+import type {
   IIncentiveRepository,
   IDomainEventBus,
   IAuditLogger,
-  IPaymentGateway,
+  IPaymentGateway} from './incentive.service';
+import {
+  IncentiveDomainService,
+  IncentiveCreationResult,
+  PaymentProcessingResult
 } from './incentive.service';
 import {
   Incentive,

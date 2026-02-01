@@ -1,11 +1,12 @@
+import type {
+  IUsageLimitRepository,
+  IDomainEventBus,
+  IAuditLogger} from './usage-limit.service';
 import {
   UsageLimitDomainService,
   UsageLimitResult,
   UsageTrackingResult,
-  UsageAnalysisResult,
-  IUsageLimitRepository,
-  IDomainEventBus,
-  IAuditLogger,
+  UsageAnalysisResult
 } from './usage-limit.service';
 import {
   UsageLimit,
