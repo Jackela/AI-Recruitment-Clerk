@@ -60,3 +60,14 @@ Started: 2026-02-01
   - SkillsTaxonomy class has 9 public static methods that needed accessibility modifiers
   - 18 warnings fixed: 15 accessibility modifiers, 3 `any` type replacements
 ---
+
+## 2026-02-01 - US-005
+- What was implemented: Fixed all 6 lint warnings in report-generation-domain library
+- Files changed:
+  - libs/report-generation-domain/src/application/dtos/report-templates.dto.ts
+- **Learnings for future iterations:**
+  - ReportPromptTemplates class has 4 static methods for generating prompt templates
+  - ReportPromptBuilder class has 2 static methods for building prompts with options
+  - All 6 warnings were accessibility modifiers on static methods
+  - This is a small, focused domain library with minimal lint issues
+---

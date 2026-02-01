@@ -57,7 +57,7 @@
       "title": "Run eslint --fix on report-generation-domain",
       "description": "Auto-fix lint issues in report-generation-domain library",
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Run npx nx lint report-generation-domain --fix",
         "npm run typecheck passes"
