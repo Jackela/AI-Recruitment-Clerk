@@ -12,9 +12,7 @@
         "Run npx nx lint api-contracts --fix",
         "npm run typecheck passes"
       ],
-      "technicalNotes": [
-        "This will auto-fix many issues like consistent-type-imports"
-      ]
+      "technicalNotes": []
     },
     {
       "id": "US-002",
@@ -114,7 +112,7 @@
     },
     {
       "id": "US-010",
-      "title": "Run eslint --fix on shared-dtos (batch 1)",
+      "title": "Run eslint --fix on shared-dtos",
       "description": "Auto-fix lint issues in shared-dtos library",
       "priority": 10,
       "passes": true,
@@ -122,126 +120,296 @@
         "Run npx nx lint shared-dtos --fix",
         "npm run typecheck passes"
       ],
-      "technicalNotes": [
-        "This project has 1591 warnings - auto-fix first"
-      ]
+      "technicalNotes": []
     },
     {
       "id": "US-011",
-      "title": "Fix remaining shared-dtos issues in models/",
-      "description": "Manually fix remaining lint issues in libs/shared-dtos/src/models/",
+      "title": "Fix shared-dtos models/",
+      "description": "Fix lint issues in libs/shared-dtos/src/models/",
       "priority": 11,
       "passes": true,
       "acceptanceCriteria": [
-        "No lint warnings in libs/shared-dtos/src/models/",
+        "No lint warnings in models/",
         "npm run typecheck passes"
       ],
-      "technicalNotes": [
-        "Add public modifiers to class properties",
-        "Use import type for type-only imports"
-      ]
+      "technicalNotes": []
     },
     {
       "id": "US-012",
-      "title": "Fix remaining shared-dtos issues in domains/",
-      "description": "Manually fix remaining lint issues in libs/shared-dtos/src/domains/",
+      "title": "Fix shared-dtos domains/",
+      "description": "Fix lint issues in libs/shared-dtos/src/domains/",
       "priority": 12,
       "passes": true,
       "acceptanceCriteria": [
-        "No lint warnings in libs/shared-dtos/src/domains/",
+        "No lint warnings in domains/",
         "npm run typecheck passes"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-013",
-      "title": "Fix remaining shared-dtos issues in privacy/",
-      "description": "Manually fix remaining lint issues in libs/shared-dtos/src/privacy/",
+      "title": "Fix shared-dtos privacy/",
+      "description": "Fix lint issues in libs/shared-dtos/src/privacy/",
       "priority": 13,
       "passes": true,
       "acceptanceCriteria": [
-        "No lint warnings in libs/shared-dtos/src/privacy/",
+        "No lint warnings in privacy/",
         "npm run typecheck passes"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-014",
-      "title": "Fix remaining shared-dtos issues in common/",
-      "description": "Manually fix remaining lint issues in libs/shared-dtos/src/common/",
+      "title": "Fix shared-dtos common/",
+      "description": "Fix lint issues in libs/shared-dtos/src/common/",
       "priority": 14,
       "passes": true,
       "acceptanceCriteria": [
-        "No lint warnings in libs/shared-dtos/src/common/",
+        "No lint warnings in common/",
         "npm run typecheck passes"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-015",
-      "title": "Fix remaining shared-dtos issues in contracts/",
-      "description": "Manually fix remaining lint issues in libs/shared-dtos/src/contracts/",
+      "title": "Fix shared-dtos contracts/",
+      "description": "Fix lint issues in libs/shared-dtos/src/contracts/",
       "priority": 15,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
-        "No lint warnings in libs/shared-dtos/src/contracts/",
+        "No lint warnings in contracts/",
         "npm run typecheck passes"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-016",
-      "title": "Fix remaining shared-dtos issues in decorators/",
-      "description": "Manually fix remaining lint issues in libs/shared-dtos/src/decorators/",
+      "title": "Fix shared-dtos decorators/error-handling.decorators.ts",
+      "description": "Fix lint issues in this single file (10 warnings)",
       "priority": 16,
       "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in libs/shared-dtos/src/decorators/",
+        "No lint warnings in error-handling.decorators.ts",
         "npm run typecheck passes"
       ],
-      "technicalNotes": []
+      "technicalNotes": [
+        "Fix any types in decorator functions",
+        "Fix non-null assertion"
+      ]
     },
     {
       "id": "US-017",
-      "title": "Fix remaining shared-dtos issues in database/",
-      "description": "Manually fix remaining lint issues in libs/shared-dtos/src/database/",
+      "title": "Fix shared-dtos database/performance-monitor.ts",
+      "description": "Fix lint issues in this single file",
       "priority": 17,
       "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in libs/shared-dtos/src/database/",
+        "No lint warnings in performance-monitor.ts",
         "npm run typecheck passes"
       ],
-      "technicalNotes": []
+      "technicalNotes": [
+        "Add public modifiers to class methods"
+      ]
     },
     {
       "id": "US-018",
-      "title": "Fix remaining shared-dtos issues in errors/",
-      "description": "Manually fix remaining lint issues in libs/shared-dtos/src/errors/",
+      "title": "Fix shared-dtos errors/domain-errors.ts",
+      "description": "Fix lint issues in domain-errors.ts",
       "priority": 18,
       "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in libs/shared-dtos/src/errors/",
+        "No lint warnings in domain-errors.ts",
         "npm run typecheck passes"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-019",
-      "title": "Fix remaining shared-dtos issues in utils/",
-      "description": "Manually fix remaining lint issues in libs/shared-dtos/src/utils/",
+      "title": "Fix shared-dtos errors/enhanced-error-types.ts",
+      "description": "Fix lint issues in enhanced-error-types.ts",
       "priority": 19,
       "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in libs/shared-dtos/src/utils/",
+        "No lint warnings in enhanced-error-types.ts",
         "npm run typecheck passes"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-020",
+      "title": "Fix shared-dtos errors/error-correlation.ts",
+      "description": "Fix lint issues in error-correlation.ts",
+      "priority": 20,
+      "passes": false,
+      "acceptanceCriteria": [
+        "No lint warnings in error-correlation.ts",
+        "npm run typecheck passes"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-021",
+      "title": "Fix shared-dtos errors/error-interceptors.ts",
+      "description": "Fix lint issues in error-interceptors.ts",
+      "priority": 21,
+      "passes": false,
+      "acceptanceCriteria": [
+        "No lint warnings in error-interceptors.ts",
+        "npm run typecheck passes"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-022",
+      "title": "Fix shared-dtos errors/error-response-formatter.ts",
+      "description": "Fix lint issues in error-response-formatter.ts",
+      "priority": 22,
+      "passes": false,
+      "acceptanceCriteria": [
+        "No lint warnings in error-response-formatter.ts",
+        "npm run typecheck passes"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-023",
+      "title": "Fix shared-dtos errors/global-exception.filter.ts",
+      "description": "Fix lint issues in global-exception.filter.ts",
+      "priority": 23,
+      "passes": false,
+      "acceptanceCriteria": [
+        "No lint warnings in global-exception.filter.ts",
+        "npm run typecheck passes"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-024",
+      "title": "Fix shared-dtos errors/structured-logging.ts",
+      "description": "Fix lint and typecheck issues in structured-logging.ts",
+      "priority": 24,
+      "passes": false,
+      "acceptanceCriteria": [
+        "No lint warnings in structured-logging.ts",
+        "npm run typecheck passes (fix TS2698 spread error)"
+      ],
+      "technicalNotes": [
+        "Has pre-existing typecheck error at line 123"
+      ]
+    },
+    {
+      "id": "US-025",
+      "title": "Fix shared-dtos encryption/encryption.service.ts",
+      "description": "Fix lint issues in encryption.service.ts",
+      "priority": 25,
+      "passes": false,
+      "acceptanceCriteria": [
+        "No lint warnings in encryption.service.ts",
+        "npm run typecheck passes"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-026",
+      "title": "Fix shared-dtos gemini/gemini.client.ts",
+      "description": "Fix lint issues in gemini.client.ts",
+      "priority": 26,
+      "passes": false,
+      "acceptanceCriteria": [
+        "No lint warnings in gemini.client.ts",
+        "npm run typecheck passes"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-027",
+      "title": "Fix shared-dtos infrastructure/redis/*.ts",
+      "description": "Fix lint issues in redis infrastructure (4 files)",
+      "priority": 27,
+      "passes": false,
+      "acceptanceCriteria": [
+        "No lint warnings in infrastructure/redis/",
+        "npm run typecheck passes"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-028",
+      "title": "Fix shared-dtos interceptors/*.ts",
+      "description": "Fix lint issues in interceptors (3 files)",
+      "priority": 28,
+      "passes": false,
+      "acceptanceCriteria": [
+        "No lint warnings in interceptors/",
+        "npm run typecheck passes"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-029",
+      "title": "Fix shared-dtos prompts/prompt-templates.ts",
+      "description": "Fix lint issues in prompt-templates.ts",
+      "priority": 29,
+      "passes": false,
+      "acceptanceCriteria": [
+        "No lint warnings in prompt-templates.ts",
+        "npm run typecheck passes"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-030",
+      "title": "Fix shared-dtos skills/skills-taxonomy.ts",
+      "description": "Fix lint issues in skills-taxonomy.ts",
+      "priority": 30,
+      "passes": false,
+      "acceptanceCriteria": [
+        "No lint warnings in skills-taxonomy.ts",
+        "npm run typecheck passes"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-031",
+      "title": "Fix shared-dtos utils/*.ts",
+      "description": "Fix lint issues in utils (2 files)",
+      "priority": 31,
+      "passes": false,
+      "acceptanceCriteria": [
+        "No lint warnings in utils/",
+        "npm run typecheck passes"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-032",
+      "title": "Fix shared-dtos validation/input-validator.ts",
+      "description": "Fix lint issues in input-validator.ts",
+      "priority": 32,
+      "passes": false,
+      "acceptanceCriteria": [
+        "No lint warnings in input-validator.ts",
+        "npm run typecheck passes"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-033",
+      "title": "Fix shared-dtos config/secure-config.validator.ts",
+      "description": "Fix lint issues in secure-config.validator.ts",
+      "priority": 33,
+      "passes": false,
+      "acceptanceCriteria": [
+        "No lint warnings in secure-config.validator.ts",
+        "npm run typecheck passes"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-034",
       "title": "Verify shared-dtos has 0 warnings",
       "description": "Run lint on shared-dtos and verify 0 warnings",
-      "priority": 20,
+      "priority": 34,
       "passes": false,
       "acceptanceCriteria": [
         "npx nx lint shared-dtos returns 0 warnings",
@@ -250,108 +418,94 @@
       "technicalNotes": []
     },
     {
-      "id": "US-021",
+      "id": "US-035",
       "title": "Run eslint --fix on ai-recruitment-frontend",
-      "description": "Auto-fix lint issues in ai-recruitment-frontend app",
-      "priority": 21,
+      "description": "Auto-fix lint issues in frontend app",
+      "priority": 35,
       "passes": false,
       "acceptanceCriteria": [
         "Run npx nx lint ai-recruitment-frontend --fix",
         "npm run typecheck passes"
       ],
-      "technicalNotes": [
-        "This project has 1722 warnings - auto-fix first"
-      ]
+      "technicalNotes": []
     },
     {
-      "id": "US-022",
-      "title": "Fix frontend issues in app/components/",
-      "description": "Fix remaining lint issues in apps/ai-recruitment-frontend/src/app/components/",
-      "priority": 22,
+      "id": "US-036",
+      "title": "Fix frontend components/",
+      "description": "Fix lint issues in frontend components",
+      "priority": 36,
       "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in components directory",
+        "No lint warnings in components/",
         "npm run typecheck passes"
       ],
       "technicalNotes": []
     },
     {
-      "id": "US-023",
-      "title": "Fix frontend issues in app/services/",
-      "description": "Fix remaining lint issues in apps/ai-recruitment-frontend/src/app/services/",
-      "priority": 23,
+      "id": "US-037",
+      "title": "Fix frontend services/",
+      "description": "Fix lint issues in frontend services",
+      "priority": 37,
       "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in services directory",
+        "No lint warnings in services/",
         "npm run typecheck passes"
       ],
       "technicalNotes": []
     },
     {
-      "id": "US-024",
-      "title": "Fix frontend issues in app/store/",
-      "description": "Fix remaining lint issues in apps/ai-recruitment-frontend/src/app/store/",
-      "priority": 24,
+      "id": "US-038",
+      "title": "Fix frontend store/",
+      "description": "Fix lint issues in frontend store",
+      "priority": 38,
       "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in store directory",
+        "No lint warnings in store/",
         "npm run typecheck passes"
       ],
       "technicalNotes": []
     },
     {
-      "id": "US-025",
-      "title": "Fix frontend issues in app/pages/",
-      "description": "Fix remaining lint issues in apps/ai-recruitment-frontend/src/app/pages/",
-      "priority": 25,
+      "id": "US-039",
+      "title": "Fix frontend pages/",
+      "description": "Fix lint issues in frontend pages",
+      "priority": 39,
       "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in pages directory",
+        "No lint warnings in pages/",
         "npm run typecheck passes"
       ],
       "technicalNotes": []
     },
     {
-      "id": "US-026",
-      "title": "Fix frontend issues in app/guards/",
-      "description": "Fix remaining lint issues in apps/ai-recruitment-frontend/src/app/guards/",
-      "priority": 26,
+      "id": "US-040",
+      "title": "Fix frontend guards/",
+      "description": "Fix lint issues in frontend guards",
+      "priority": 40,
       "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in guards directory",
+        "No lint warnings in guards/",
         "npm run typecheck passes"
       ],
       "technicalNotes": []
     },
     {
-      "id": "US-027",
-      "title": "Fix frontend issues in app/interceptors/",
-      "description": "Fix remaining lint issues in apps/ai-recruitment-frontend/src/app/interceptors/",
-      "priority": 27,
+      "id": "US-041",
+      "title": "Fix frontend interceptors/",
+      "description": "Fix lint issues in frontend interceptors",
+      "priority": 41,
       "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in interceptors directory",
+        "No lint warnings in interceptors/",
         "npm run typecheck passes"
       ],
       "technicalNotes": []
     },
     {
-      "id": "US-028",
-      "title": "Fix remaining frontend issues",
-      "description": "Fix any remaining lint issues in ai-recruitment-frontend",
-      "priority": 28,
-      "passes": false,
-      "acceptanceCriteria": [
-        "No lint warnings in ai-recruitment-frontend",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-029",
-      "title": "Verify ai-recruitment-frontend has 0 warnings",
-      "description": "Run lint on ai-recruitment-frontend and verify 0 warnings",
-      "priority": 29,
+      "id": "US-042",
+      "title": "Verify frontend has 0 warnings",
+      "description": "Verify ai-recruitment-frontend has 0 lint warnings",
+      "priority": 42,
       "passes": false,
       "acceptanceCriteria": [
         "npx nx lint ai-recruitment-frontend returns 0 warnings",
@@ -360,10 +514,10 @@
       "technicalNotes": []
     },
     {
-      "id": "US-030",
+      "id": "US-043",
       "title": "Run eslint --fix on app-gateway",
-      "description": "Auto-fix lint issues in app-gateway service",
-      "priority": 30,
+      "description": "Auto-fix lint issues in app-gateway",
+      "priority": 43,
       "passes": false,
       "acceptanceCriteria": [
         "Run npx nx lint app-gateway --fix",
@@ -372,46 +526,46 @@
       "technicalNotes": []
     },
     {
-      "id": "US-031",
-      "title": "Fix app-gateway controllers",
-      "description": "Fix remaining lint issues in app-gateway controllers",
-      "priority": 31,
+      "id": "US-044",
+      "title": "Fix app-gateway controllers/",
+      "description": "Fix lint issues in app-gateway controllers",
+      "priority": 44,
       "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in apps/app-gateway/src/**/controllers/",
+        "No lint warnings in controllers/",
         "npm run typecheck passes"
       ],
       "technicalNotes": []
     },
     {
-      "id": "US-032",
-      "title": "Fix app-gateway services",
-      "description": "Fix remaining lint issues in app-gateway services",
-      "priority": 32,
+      "id": "US-045",
+      "title": "Fix app-gateway services/",
+      "description": "Fix lint issues in app-gateway services",
+      "priority": 45,
       "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in apps/app-gateway/src/**/services/",
+        "No lint warnings in services/",
         "npm run typecheck passes"
       ],
       "technicalNotes": []
     },
     {
-      "id": "US-033",
-      "title": "Fix app-gateway schemas",
-      "description": "Fix remaining lint issues in app-gateway schemas",
-      "priority": 33,
+      "id": "US-046",
+      "title": "Fix app-gateway schemas/",
+      "description": "Fix lint issues in app-gateway schemas",
+      "priority": 46,
       "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in apps/app-gateway/src/schemas/",
+        "No lint warnings in schemas/",
         "npm run typecheck passes"
       ],
       "technicalNotes": []
     },
     {
-      "id": "US-034",
-      "title": "Fix remaining app-gateway issues",
-      "description": "Fix any remaining lint issues in app-gateway",
-      "priority": 34,
+      "id": "US-047",
+      "title": "Verify app-gateway has 0 warnings",
+      "description": "Verify app-gateway has 0 lint warnings",
+      "priority": 47,
       "passes": false,
       "acceptanceCriteria": [
         "npx nx lint app-gateway returns 0 warnings",
@@ -420,106 +574,25 @@
       "technicalNotes": []
     },
     {
-      "id": "US-035",
-      "title": "Run eslint --fix on resume-parser-svc",
-      "description": "Auto-fix lint issues in resume-parser-svc",
-      "priority": 35,
+      "id": "US-048",
+      "title": "Fix microservices lint issues",
+      "description": "Run eslint --fix on all microservices",
+      "priority": 48,
       "passes": false,
       "acceptanceCriteria": [
-        "Run npx nx lint resume-parser-svc --fix",
+        "npx nx lint resume-parser-svc --fix",
+        "npx nx lint jd-extractor-svc --fix",
+        "npx nx lint scoring-engine-svc --fix",
+        "npx nx lint report-generator-svc --fix",
         "npm run typecheck passes"
       ],
       "technicalNotes": []
     },
     {
-      "id": "US-036",
-      "title": "Fix remaining resume-parser-svc issues",
-      "description": "Fix any remaining lint issues in resume-parser-svc",
-      "priority": 36,
-      "passes": false,
-      "acceptanceCriteria": [
-        "npx nx lint resume-parser-svc returns 0 warnings",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-037",
-      "title": "Run eslint --fix on jd-extractor-svc",
-      "description": "Auto-fix lint issues in jd-extractor-svc",
-      "priority": 37,
-      "passes": false,
-      "acceptanceCriteria": [
-        "Run npx nx lint jd-extractor-svc --fix",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-038",
-      "title": "Fix remaining jd-extractor-svc issues",
-      "description": "Fix any remaining lint issues in jd-extractor-svc",
-      "priority": 38,
-      "passes": false,
-      "acceptanceCriteria": [
-        "npx nx lint jd-extractor-svc returns 0 warnings",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-039",
-      "title": "Run eslint --fix on scoring-engine-svc",
-      "description": "Auto-fix lint issues in scoring-engine-svc",
-      "priority": 39,
-      "passes": false,
-      "acceptanceCriteria": [
-        "Run npx nx lint scoring-engine-svc --fix",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-040",
-      "title": "Fix remaining scoring-engine-svc issues",
-      "description": "Fix any remaining lint issues in scoring-engine-svc",
-      "priority": 40,
-      "passes": false,
-      "acceptanceCriteria": [
-        "npx nx lint scoring-engine-svc returns 0 warnings",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-041",
-      "title": "Run eslint --fix on report-generator-svc",
-      "description": "Auto-fix lint issues in report-generator-svc",
-      "priority": 41,
-      "passes": false,
-      "acceptanceCriteria": [
-        "Run npx nx lint report-generator-svc --fix",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-042",
-      "title": "Fix remaining report-generator-svc issues",
-      "description": "Fix any remaining lint issues in report-generator-svc",
-      "priority": 42,
-      "passes": false,
-      "acceptanceCriteria": [
-        "npx nx lint report-generator-svc returns 0 warnings",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-043",
-      "title": "Fix e2e test projects lint issues",
+      "id": "US-049",
+      "title": "Fix e2e tests lint issues",
       "description": "Fix lint issues in e2e test projects",
-      "priority": 43,
+      "priority": 49,
       "passes": false,
       "acceptanceCriteria": [
         "npx nx lint app-gateway-e2e --fix passes",
@@ -529,92 +602,16 @@
       "technicalNotes": []
     },
     {
-      "id": "US-044",
-      "title": "Fix remaining library lint issues",
-      "description": "Fix any remaining lint issues in all libraries",
-      "priority": 44,
-      "passes": false,
-      "acceptanceCriteria": [
-        "All libs/* projects pass lint with 0 warnings",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-045",
-      "title": "Fix remaining app lint issues",
-      "description": "Fix any remaining lint issues in all apps",
-      "priority": 45,
-      "passes": false,
-      "acceptanceCriteria": [
-        "All apps/* projects pass lint with 0 warnings",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-046",
-      "title": "Run full lint check - batch 1",
-      "description": "Run npm run lint and fix any remaining issues",
-      "priority": 46,
-      "passes": false,
-      "acceptanceCriteria": [
-        "npm run lint shows progress toward 0 warnings",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-047",
-      "title": "Run full lint check - batch 2",
-      "description": "Continue fixing remaining lint issues",
-      "priority": 47,
-      "passes": false,
-      "acceptanceCriteria": [
-        "npm run lint shows continued progress",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-048",
-      "title": "Run full lint check - batch 3",
-      "description": "Continue fixing remaining lint issues",
-      "priority": 48,
-      "passes": false,
-      "acceptanceCriteria": [
-        "npm run lint shows continued progress",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-049",
-      "title": "Final lint cleanup",
-      "description": "Fix all remaining lint warnings",
-      "priority": 49,
-      "passes": false,
-      "acceptanceCriteria": [
-        "npm run lint returns 0 errors AND 0 warnings",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
       "id": "US-050",
       "title": "Final validation - all quality checks pass",
-      "description": "Verify npm run typecheck && npm run lint both pass with 0 issues",
+      "description": "Verify npm run typecheck && npm run lint both pass",
       "priority": 50,
       "passes": false,
       "acceptanceCriteria": [
         "npm run typecheck passes with 0 errors",
-        "npm run lint passes with 0 errors AND 0 warnings",
-        "All 24 projects verified"
+        "npm run lint passes with 0 errors AND 0 warnings"
       ],
-      "technicalNotes": [
-        "Run full quality checks",
-        "Document completion"
-      ]
+      "technicalNotes": []
     }
   ]
 }

@@ -248,3 +248,20 @@ Started: 2026-02-01
   - Use `let lastError: Error | undefined` pattern to avoid TypeScript "used before assigned" errors
   - getFromCache/setCache generic methods need explicit type parameter `<T>` when called
 ---
+
+## 2026-02-01 - US-015
+- What was implemented: Fixed all lint warnings in libs/shared-dtos/src/contracts/
+- Files changed:
+  - libs/shared-dtos/src/contracts/analytics.contracts.ts
+  - libs/shared-dtos/src/contracts/incentive.contracts.ts
+  - libs/shared-dtos/src/contracts/usage-limit.contracts.ts
+  - libs/shared-dtos/src/contracts/dbc.decorators.ts
+  - libs/shared-dtos/src/contracts/dbc.monitoring.ts
+- **Learnings for future iterations:**
+  - Decorator functions need explicit `: void` return types (e.g., `export function requireValidEvent(...): void {`)
+  - When a function returns complex object types, create proper TypeScript interfaces (e.g., `PerformanceStats`, `OptimizationResult`)
+  - Replace `Record<string, unknown>` return types with specific interfaces when the structure is known
+  - `eslint-disable-next-line` for `any` types must be placed on the line directly before the `any` usage
+  - Contracts directory follows Design by Contract (DbC) pattern with preconditions, postconditions, and invariants
+  - PRD was restructured with 50 fine-grained user stories to prevent timeout issues
+---
