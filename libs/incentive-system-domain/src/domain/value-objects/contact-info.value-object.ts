@@ -14,7 +14,8 @@ export class ContactInfo extends ValueObject<{
    * @param data - The data.
    * @returns The ContactInfo.
    */
-  static restore(data: any): ContactInfo {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): ContactInfo {
     return new ContactInfo(data);
   }
 
@@ -22,7 +23,7 @@ export class ContactInfo extends ValueObject<{
    * Performs the is valid operation.
    * @returns The boolean value.
    */
-  isValid(): boolean {
+  public isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
@@ -31,7 +32,7 @@ export class ContactInfo extends ValueObject<{
    * Retrieves validation errors.
    * @returns The an array of string value.
    */
-  getValidationErrors(): string[] {
+  public getValidationErrors(): string[] {
     const errors: string[] = [];
     const { email, phone, wechat, alipay } = this.props;
 
@@ -63,7 +64,7 @@ export class ContactInfo extends ValueObject<{
    * Retrieves primary contact.
    * @returns The string value.
    */
-  getPrimaryContact(): string {
+  public getPrimaryContact(): string {
     if (this.props.wechat) return `WeChat: ${this.props.wechat}`;
     if (this.props.alipay) return `Alipay: ${this.props.alipay}`;
     if (this.props.phone) return `Phone: ${this.props.phone}`;
@@ -75,28 +76,28 @@ export class ContactInfo extends ValueObject<{
    * Performs the email operation.
    * @returns The string | undefined.
    */
-  get email(): string | undefined {
+  public get email(): string | undefined {
     return this.props.email;
   }
   /**
    * Performs the phone operation.
    * @returns The string | undefined.
    */
-  get phone(): string | undefined {
+  public get phone(): string | undefined {
     return this.props.phone;
   }
   /**
    * Performs the wechat operation.
    * @returns The string | undefined.
    */
-  get wechat(): string | undefined {
+  public get wechat(): string | undefined {
     return this.props.wechat;
   }
   /**
    * Performs the alipay operation.
    * @returns The string | undefined.
    */
-  get alipay(): string | undefined {
+  public get alipay(): string | undefined {
     return this.props.alipay;
   }
 }

@@ -16,7 +16,7 @@ export class IncentiveRecipient extends ValueObject<{
    * @param contactInfo - The contact info.
    * @returns The IncentiveRecipient.
    */
-  static create(ip: string, contactInfo: ContactInfo): IncentiveRecipient {
+  public static create(ip: string, contactInfo: ContactInfo): IncentiveRecipient {
     return new IncentiveRecipient({
       ip,
       contactInfo,
@@ -29,7 +29,8 @@ export class IncentiveRecipient extends ValueObject<{
    * @param data - The data.
    * @returns The IncentiveRecipient.
    */
-  static restore(data: any): IncentiveRecipient {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): IncentiveRecipient {
     return new IncentiveRecipient({
       ip: data.ip,
       contactInfo: ContactInfo.restore(data.contactInfo),
@@ -41,7 +42,7 @@ export class IncentiveRecipient extends ValueObject<{
    * Retrieves ip.
    * @returns The string value.
    */
-  getIP(): string {
+  public getIP(): string {
     return this.props.ip;
   }
 
@@ -49,7 +50,7 @@ export class IncentiveRecipient extends ValueObject<{
    * Performs the has valid contact info operation.
    * @returns The boolean value.
    */
-  hasValidContactInfo(): boolean {
+  public hasValidContactInfo(): boolean {
     return this.props.contactInfo.isValid();
   }
 
@@ -57,7 +58,7 @@ export class IncentiveRecipient extends ValueObject<{
    * Performs the is valid operation.
    * @returns The boolean value.
    */
-  isValid(): boolean {
+  public isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
@@ -66,7 +67,7 @@ export class IncentiveRecipient extends ValueObject<{
    * Retrieves validation errors.
    * @returns The an array of string value.
    */
-  getValidationErrors(): string[] {
+  public getValidationErrors(): string[] {
     const errors: string[] = [];
 
     if (

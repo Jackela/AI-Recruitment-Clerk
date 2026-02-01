@@ -17,7 +17,7 @@ export abstract class ValueObject<T> {
    * @param other - The other value object.
    * @returns The boolean value.
    */
-  equals(other?: ValueObject<T>): boolean {
+  public equals(other?: ValueObject<T>): boolean {
     if (!other) {
       return false;
     }

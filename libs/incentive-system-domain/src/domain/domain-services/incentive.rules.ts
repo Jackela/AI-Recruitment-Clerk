@@ -11,22 +11,23 @@ import {
  */
 export class IncentiveRules {
   // 业务规则常量
-  static readonly MAX_DAILY_INCENTIVES = 3;
-  static readonly MIN_QUALITY_SCORE = 50;
-  static readonly HIGH_QUALITY_THRESHOLD = 70;
-  static readonly EXCELLENT_QUALITY_THRESHOLD = 90;
+  public static readonly MAX_DAILY_INCENTIVES = 3;
+  public static readonly MIN_QUALITY_SCORE = 50;
+  public static readonly HIGH_QUALITY_THRESHOLD = 70;
+  public static readonly EXCELLENT_QUALITY_THRESHOLD = 90;
 
   // 支付相关常量
-  static readonly MIN_PAYMENT_AMOUNT = 0.01;
-  static readonly MAX_PAYMENT_AMOUNT = 100;
-  static readonly PAYMENT_EXPIRY_DAYS = 30;
+  public static readonly MIN_PAYMENT_AMOUNT = 0.01;
+  public static readonly MAX_PAYMENT_AMOUNT = 100;
+  public static readonly PAYMENT_EXPIRY_DAYS = 30;
 
   /**
    * 检查是否可以创建激励
    */
-  static canCreateIncentive(
+  public static canCreateIncentive(
     ip: string,
     triggerType: TriggerType,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     triggerData: any,
     todayIncentiveCount: number,
   ): IncentiveEligibilityResult {
@@ -82,7 +83,7 @@ export class IncentiveRules {
   /**
    * 检查激励是否可以支付
    */
-  static canPayIncentive(incentive: Incentive): PaymentEligibilityResult {
+  public static canPayIncentive(incentive: Incentive): PaymentEligibilityResult {
     const errors: string[] = [];
 
     // 检查激励状态
@@ -114,7 +115,7 @@ export class IncentiveRules {
   /**
    * 验证支付方式与联系信息的兼容性
    */
-  static validatePaymentMethodCompatibility(
+  public static validatePaymentMethodCompatibility(
     paymentMethod: PaymentMethod,
     contactInfo: ContactInfo,
   ): PaymentMethodValidationResult {
@@ -157,7 +158,7 @@ export class IncentiveRules {
   /**
    * 验证批量支付
    */
-  static validateBatchPayment(
+  public static validateBatchPayment(
     incentives: Incentive[],
   ): BatchPaymentValidationResult {
     const errors: string[] = [];
@@ -210,7 +211,7 @@ export class IncentiveRules {
   /**
    * 计算激励处理优先级
    */
-  static calculateProcessingPriority(incentive: Incentive): IncentivePriority {
+  public static calculateProcessingPriority(incentive: Incentive): IncentivePriority {
     let score = 0;
     const factors: string[] = [];
 
@@ -259,7 +260,7 @@ export class IncentiveRules {
   /**
    * 执行风险评估
    */
-  static assessIncentiveRisk(
+  public static assessIncentiveRisk(
     ip: string,
     todayIncentiveCount: number,
     recentIncentiveHistory: number[],
@@ -302,7 +303,7 @@ export class IncentiveRules {
   /**
    * 验证IP地址格式
    */
-  static isValidIPAddress(ip: string): boolean {
+  public static isValidIPAddress(ip: string): boolean {
     if (!ip || typeof ip !== 'string') return false;
     const ipRegex =
       /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
@@ -312,7 +313,7 @@ export class IncentiveRules {
   /**
    * 获取使用历史统计
    */
-  static analyzeUsageHistory(incentives: Incentive[]): IncentiveUsageHistory {
+  public static analyzeUsageHistory(incentives: Incentive[]): IncentiveUsageHistory {
     const statusCounts = {
       pending: 0,
       approved: 0,
@@ -478,28 +479,28 @@ export class IncentiveUsageHistory {
    * Performs the total incentives operation.
    * @returns The number value.
    */
-  get totalIncentives(): number {
+  public get totalIncentives(): number {
     return this.data.totalIncentives;
   }
   /**
    * Performs the conversion rate operation.
    * @returns The number value.
    */
-  get conversionRate(): number {
+  public get conversionRate(): number {
     return this.data.conversionRate;
   }
   /**
    * Performs the total amount operation.
    * @returns The number value.
    */
-  get totalAmount(): number {
+  public get totalAmount(): number {
     return this.data.totalAmount;
   }
   /**
    * Performs the paid amount operation.
    * @returns The number value.
    */
-  get paidAmount(): number {
+  public get paidAmount(): number {
     return this.data.paidAmount;
   }
 }
