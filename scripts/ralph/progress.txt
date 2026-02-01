@@ -103,3 +103,21 @@ Started: Sat Jan 31 18:06:08     2026
   - Same patterns apply: use `Record<string, unknown>` instead of `Record<string, any>`, add `public` modifier, use type-only imports
   - Pre-existing test failures (11 tests) are unrelated to schema changes - they are in incentive.service.spec.ts, questionnaire.rules.spec.ts, environment.test.ts
 ---
+
+## 2026-02-01 - US-006
+- **What was implemented**: Fixed any types and lint issues in data-subject-rights.schema.ts
+- **Files changed**:
+  - `apps/app-gateway/src/schemas/data-subject-rights.schema.ts`
+- **Changes made**:
+  - Changed `Record<string, any>` to `Record<string, unknown>` for metadata fields in 4 classes (DataSubjectRightsRequest, RightsRequestActivity, DataExportPackage, IdentityVerification)
+  - Changed `correctionData?: any` to `correctionData?: Record<string, unknown>` for rectification data
+  - Changed `verificationData?: any` to `verificationData?: Record<string, unknown>` for identity verification data
+  - Changed `import { Document }` to `import type { Document }` for type-only import
+  - Added `public` accessibility modifiers to all class properties in all 4 classes
+  - Removed unnecessary `= undefined` initializations for optional properties
+  - Added explicit `type: String/Date/Boolean/Number` to @Prop decorators
+- **Learnings for future iterations:**
+  - data-subject-rights.schema.ts contains 4 separate schema classes for GDPR compliance
+  - Same patterns apply: use `Record<string, unknown>` instead of `Record<string, any>` or direct `any` types
+  - Pre-existing test failures (11 tests) are unrelated to schema changes
+---
