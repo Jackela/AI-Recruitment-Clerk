@@ -170,7 +170,7 @@
       "title": "Fix remaining shared-dtos issues in common/",
       "description": "Manually fix remaining lint issues in libs/shared-dtos/src/common/",
       "priority": 14,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in libs/shared-dtos/src/common/",
         "npm run typecheck passes"

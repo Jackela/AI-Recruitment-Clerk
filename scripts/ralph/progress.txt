@@ -231,3 +231,20 @@ Started: 2026-02-01
   - ~95% of warnings were accessibility modifiers (`public` keyword on class properties and methods)
   - ~5% of warnings were `any` type replacements
 ---
+
+## 2026-02-01 - US-014
+- What was implemented: Fixed all ~90 lint warnings in libs/shared-dtos/src/common/
+- Files changed:
+  - libs/shared-dtos/src/common/base-service.pattern.ts (~10 warnings)
+  - libs/shared-dtos/src/common/error-handling.patterns.ts (~25 warnings)
+  - libs/shared-dtos/src/common/validation.patterns.ts (~15 warnings)
+  - libs/shared-dtos/src/common/mobile-component.patterns.ts (~35 warnings)
+  - libs/shared-dtos/src/common/nats-client.pattern.ts (~8 warnings)
+- **Learnings for future iterations:**
+  - Common directory contains reusable patterns (base services, error handling, validation, mobile components, NATS client)
+  - Replace `any` with `unknown` for generic parameters, use `Record<string, unknown>` for object-like data
+  - Add `ValidationRuleSet` interface when using typed form validation rules
+  - Angular @Input/@Output decorators need `public` modifier before the decorator
+  - Use `let lastError: Error | undefined` pattern to avoid TypeScript "used before assigned" errors
+  - getFromCache/setCache generic methods need explicit type parameter `<T>` when called
+---
