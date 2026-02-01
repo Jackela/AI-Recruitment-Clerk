@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import type { Document } from 'mongoose';
 import type { UserPreferencesDto } from '@ai-recruitment-clerk/shared-dtos';
 import { ConsentStatus } from './consent-record.schema';
 
@@ -14,56 +14,56 @@ export type UserProfileDocument = UserProfile & Document;
   versionKey: false,
 })
 export class UserProfile {
-  @Prop({ required: true, unique: true })
-  userId: string = '';
+  @Prop({ required: true, unique: true, type: String })
+  public userId!: string;
 
-  @Prop({ required: true })
-  email: string = '';
+  @Prop({ required: true, type: String })
+  public email!: string;
 
-  @Prop({ required: true })
-  hashedPassword: string = '';
+  @Prop({ required: true, type: String })
+  public hashedPassword!: string;
 
-  @Prop()
-  displayName?: string = undefined;
+  @Prop({ type: String })
+  public displayName?: string;
 
-  @Prop()
-  avatar?: string = undefined;
-
-  @Prop({ type: Object })
-  preferences?: UserPreferencesDto = undefined;
-
-  @Prop({
-    type: String,
-    enum: Object.values(ConsentStatus),
-    default: ConsentStatus.PENDING,
-  })
-  dataProcessingConsent: ConsentStatus = ConsentStatus.PENDING;
-
-  @Prop({
-    type: String,
-    enum: Object.values(ConsentStatus),
-    default: ConsentStatus.PENDING,
-  })
-  marketingConsent: ConsentStatus = ConsentStatus.PENDING;
-
-  @Prop({
-    type: String,
-    enum: Object.values(ConsentStatus),
-    default: ConsentStatus.PENDING,
-  })
-  analyticsConsent: ConsentStatus = ConsentStatus.PENDING;
-
-  @Prop({ default: true })
-  isActive: boolean = true;
-
-  @Prop()
-  lastLoginAt?: Date = undefined;
-
-  @Prop()
-  emailVerifiedAt?: Date = undefined;
+  @Prop({ type: String })
+  public avatar?: string;
 
   @Prop({ type: Object })
-  sessionInfo?: {
+  public preferences?: UserPreferencesDto;
+
+  @Prop({
+    type: String,
+    enum: Object.values(ConsentStatus),
+    default: ConsentStatus.PENDING,
+  })
+  public dataProcessingConsent!: ConsentStatus;
+
+  @Prop({
+    type: String,
+    enum: Object.values(ConsentStatus),
+    default: ConsentStatus.PENDING,
+  })
+  public marketingConsent!: ConsentStatus;
+
+  @Prop({
+    type: String,
+    enum: Object.values(ConsentStatus),
+    default: ConsentStatus.PENDING,
+  })
+  public analyticsConsent!: ConsentStatus;
+
+  @Prop({ default: true, type: Boolean })
+  public isActive!: boolean;
+
+  @Prop({ type: Date })
+  public lastLoginAt?: Date;
+
+  @Prop({ type: Date })
+  public emailVerifiedAt?: Date;
+
+  @Prop({ type: Object })
+  public sessionInfo?: {
     currentSessionId?: string;
     lastActivity?: Date;
     deviceInfo?: {
@@ -71,13 +71,13 @@ export class UserProfile {
       ipAddress: string;
       location?: string;
     };
-  } = undefined;
+  };
 
   @Prop({ type: [String], default: [] })
-  tags: string[] = [];
+  public tags!: string[];
 
   @Prop({ type: Object })
-  mfaSettings?: {
+  public mfaSettings?: {
     enabled: boolean;
     methods: string[];
     totpSecret?: string;
@@ -88,10 +88,10 @@ export class UserProfile {
     lastUsedAt?: Date;
     failedAttempts: number;
     lockedUntil?: Date;
-  } = undefined;
+  };
 
   @Prop({ type: Object })
-  metadata?: Record<string, any> = undefined;
+  public metadata?: Record<string, unknown>;
 }
 
 export const UserProfileSchema = SchemaFactory.createForClass(UserProfile);
