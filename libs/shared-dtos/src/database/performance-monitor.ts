@@ -60,7 +60,7 @@ export class DatabasePerformanceMonitor {
    * @param expectedPerformanceMs Expected query time for comparison (optional)
    * @returns Promise resolving to the operation result
    */
-  async executeWithMonitoring<T>(
+  public async executeWithMonitoring<T>(
     operation: () => Promise<T>,
     queryName: string,
     expectedPerformanceMs?: number,
@@ -101,7 +101,7 @@ export class DatabasePerformanceMonitor {
   /**
    * Execute with timeout and performance monitoring
    */
-  async executeWithTimeout<T>(
+  public async executeWithTimeout<T>(
     operation: () => Promise<T>,
     queryName: string,
     timeoutMs = 10000,
@@ -244,7 +244,7 @@ export class DatabasePerformanceMonitor {
   /**
    * Get comprehensive performance report for all monitored queries
    */
-  getPerformanceReport(): Record<string, QueryPerformanceMetrics> {
+  public getPerformanceReport(): Record<string, QueryPerformanceMetrics> {
     const report: Record<string, QueryPerformanceMetrics> = {};
 
     for (const [queryName, rawMetrics] of this.queryMetrics.entries()) {
@@ -283,7 +283,7 @@ export class DatabasePerformanceMonitor {
   /**
    * Get performance metrics for a specific query
    */
-  getQueryMetrics(queryName: string): QueryPerformanceMetrics | null {
+  public getQueryMetrics(queryName: string): QueryPerformanceMetrics | null {
     const report = this.getPerformanceReport();
     return report[queryName] || null;
   }
@@ -291,7 +291,7 @@ export class DatabasePerformanceMonitor {
   /**
    * Get top slowest queries
    */
-  getSlowestQueries(limit = 10): QueryPerformanceMetrics[] {
+  public getSlowestQueries(limit = 10): QueryPerformanceMetrics[] {
     const report = this.getPerformanceReport();
     return Object.values(report)
       .sort((a, b) => b.avgDuration - a.avgDuration)
@@ -301,7 +301,7 @@ export class DatabasePerformanceMonitor {
   /**
    * Get queries with lowest success rates
    */
-  getProblematicQueries(minExecutions = 5): QueryPerformanceMetrics[] {
+  public getProblematicQueries(minExecutions = 5): QueryPerformanceMetrics[] {
     const report = this.getPerformanceReport();
     return Object.values(report)
       .filter((m) => m.totalExecutions >= minExecutions)
@@ -312,7 +312,7 @@ export class DatabasePerformanceMonitor {
   /**
    * Reset metrics for a specific query or all queries
    */
-  resetMetrics(queryName?: string): void {
+  public resetMetrics(queryName?: string): void {
     if (queryName) {
       this.queryMetrics.delete(queryName);
       this.logger.log(`Reset metrics for query: ${queryName}`);
@@ -325,7 +325,7 @@ export class DatabasePerformanceMonitor {
   /**
    * Get real-time performance summary
    */
-  getRealTimeStats(): {
+  public getRealTimeStats(): {
     totalQueries: number;
     avgResponseTime: number;
     successRate: number;
@@ -374,7 +374,7 @@ export class DatabasePerformanceMonitor {
   /**
    * Export metrics for external monitoring systems
    */
-  exportMetrics(): {
+  public exportMetrics(): {
     timestamp: Date;
     metrics: Record<string, QueryPerformanceMetrics>;
     summary: ReturnType<
