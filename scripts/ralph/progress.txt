@@ -178,3 +178,15 @@ Started: 2026-02-01
   - Subsequent user stories (US-011 to US-019) will handle manual fixes by directory
   - Test files (.test.ts, .spec.ts) also need accessibility modifiers for mock classes
 ---
+
+## 2026-02-01 - US-011
+- What was implemented: Fixed all lint warnings in libs/shared-dtos/src/models/
+- Files changed:
+  - libs/shared-dtos/src/models/feedback-code.dto.ts
+- **Learnings for future iterations:**
+  - The models directory only has 2 files: feedback-code.dto.ts and resume.dto.ts
+  - resume.dto.ts uses only interfaces with primitive types (no `any` types), no fixes needed
+  - feedback-code.dto.ts had 2 `any` types for questionnaireData properties
+  - Replace `any` with `Record<string, unknown>` for questionnaire data objects
+  - 2 warnings fixed: both were `any` type replacements in interface properties
+---

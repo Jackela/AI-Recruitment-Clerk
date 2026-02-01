@@ -131,7 +131,7 @@
       "title": "Fix remaining shared-dtos issues in models/",
       "description": "Manually fix remaining lint issues in libs/shared-dtos/src/models/",
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in libs/shared-dtos/src/models/",
         "npm run typecheck passes"
