@@ -100,7 +100,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
    * @param exception - The exception.
    * @param host - The host.
    */
-  catch(exception: unknown, host: ArgumentsHost): void {
+  public catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
@@ -250,6 +250,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
       let message: string;
 
       if (typeof response === 'object' && response !== null) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const responseObj = response as any;
         message = responseObj.message || exception.message;
         errorCode = responseObj.error || this.mapStatusToErrorCode(status);
@@ -377,6 +378,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
   /**
    * Send metrics to monitoring system (placeholder)
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private sendMetrics(_metrics: Record<string, any>): void {
     // Implementation would depend on your monitoring infrastructure
     if (process.env.METRICS_ENABLED === 'true') {
@@ -420,6 +422,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
   /**
    * Format validation errors
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private formatValidationErrors(errors: ValidationError[]): any {
     return errors.map((error) => ({
       property: error.property,
