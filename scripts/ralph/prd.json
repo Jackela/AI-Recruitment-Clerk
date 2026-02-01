@@ -33,7 +33,7 @@
       "title": "Run eslint --fix on infrastructure-shared",
       "description": "Auto-fix lint issues in infrastructure-shared library",
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Run npx nx lint infrastructure-shared --fix",
         "npm run typecheck passes"

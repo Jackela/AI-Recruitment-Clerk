@@ -35,3 +35,15 @@ Started: 2026-02-01
   - NestJS lifecycle hooks like `onModuleInit` and `onModuleDestroy` need explicit `Promise<void>` return types
   - 36 accessibility modifier warnings were fixed across 5 files
 ---
+
+## 2026-02-01 - US-003
+- What was implemented: Fixed all 49 lint warnings in infrastructure-shared library
+- Files changed:
+  - libs/infrastructure-shared/src/index.ts
+- **Learnings for future iterations:**
+  - The PredicateFunction type uses `any[]` and must keep it - changing to `unknown[]` breaks many service contracts that depend on it
+  - Use `eslint-disable-next-line @typescript-eslint/no-explicit-any` to preserve backward compatibility when `any` is intentional
+  - Interface methods like `switchToHttp()`, `handle()` should return `Record<string, unknown>` or `unknown` instead of `any`
+  - Function types: `getHandler()` -> `(...args: unknown[]) => unknown`, `getClass()` -> `new (...args: unknown[]) => unknown`
+  - 49 warnings fixed: 26 accessibility modifiers, 8 return types, 6 `any` type replacements
+---
