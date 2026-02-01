@@ -48,7 +48,7 @@ export abstract class BaseValidator {
   /**
    * 验证字符串长度
    */
-  static validateStringLength(
+  public static validateStringLength(
     value: string,
     fieldName: string,
     min?: number,
@@ -69,7 +69,7 @@ export abstract class BaseValidator {
   /**
    * 验证邮箱格式
    */
-  static validateEmail(
+  public static validateEmail(
     email: string,
     config?: EmailValidationConfig,
   ): ValidationResult {
@@ -142,7 +142,7 @@ export abstract class BaseValidator {
   /**
    * 验证URL格式
    */
-  static validateUrl(url: string): ValidationResult {
+  public static validateUrl(url: string): ValidationResult {
     const result: ValidationResult = { isValid: true, errors: [] };
 
     try {
@@ -158,7 +158,7 @@ export abstract class BaseValidator {
   /**
    * 验证日期范围
    */
-  static validateDateRange(startDate: Date, endDate: Date): ValidationResult {
+  public static validateDateRange(startDate: Date, endDate: Date): ValidationResult {
     const result: ValidationResult = { isValid: true, errors: [] };
 
     if (startDate >= endDate) {
@@ -172,7 +172,7 @@ export abstract class BaseValidator {
   /**
    * 验证数值范围
    */
-  static validateNumberRange(
+  public static validateNumberRange(
     value: number,
     fieldName: string,
     min?: number,
@@ -189,8 +189,8 @@ export abstract class BaseValidator {
   /**
    * 验证数组长度
    */
-  static validateArrayLength(
-    array: any[],
+  public static validateArrayLength(
+    array: unknown[],
     fieldName: string,
     min?: number,
     max?: number,
@@ -245,7 +245,7 @@ export class ResumeValidator extends BaseValidator {
    * Validates experience.
    * @param years - The years.
    */
-  static validateExperience(years: number): void {
+  public static validateExperience(years: number): void {
     this.validateNumberRange(years, 'Experience', 0, 50);
   }
 
@@ -253,7 +253,7 @@ export class ResumeValidator extends BaseValidator {
    * Validates skills.
    * @param skills - The skills.
    */
-  static validateSkills(skills: string[]): void {
+  public static validateSkills(skills: string[]): void {
     this.validateArrayLength(skills, 'Skills', 1, 20);
 
     skills.forEach((skill, index) => {
@@ -270,7 +270,7 @@ export class JobDescriptionValidator extends BaseValidator {
    * Validates job title.
    * @param title - The title.
    */
-  static validateJobTitle(title: string): void {
+  public static validateJobTitle(title: string): void {
     this.validateRequired(title, 'Job title');
     this.validateStringLength(title, 'Job title', 5, 100);
   }
@@ -281,7 +281,7 @@ export class JobDescriptionValidator extends BaseValidator {
    * @param max - The max.
    * @returns The ValidationResult.
    */
-  static validateSalaryRange(min: number, max: number): ValidationResult {
+  public static validateSalaryRange(min: number, max: number): ValidationResult {
     const result: ValidationResult = { isValid: true, errors: [] };
 
     if (min >= max) {
@@ -301,7 +301,7 @@ export class JobDescriptionValidator extends BaseValidator {
    * Validates requirements.
    * @param requirements - The requirements.
    */
-  static validateRequirements(requirements: string[]): void {
+  public static validateRequirements(requirements: string[]): void {
     this.validateArrayLength(requirements, 'Requirements', 1, 10);
 
     requirements.forEach((req, index) => {
@@ -343,7 +343,7 @@ export class BusinessRuleValidator extends BaseValidator {
   /**
    * 验证用户权限
    */
-  static validateUserPermissions(
+  public static validateUserPermissions(
     userRole: string,
     requiredPermissions: string[],
   ): ValidationResult {
@@ -382,7 +382,7 @@ export class BusinessRuleValidator extends BaseValidator {
   /**
    * 验证业务限制
    */
-  static validateBusinessLimits(data: {
+  public static validateBusinessLimits(data: {
     dailyUploads: number;
     monthlyJobs: number;
     userTier: string;

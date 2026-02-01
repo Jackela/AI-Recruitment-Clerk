@@ -66,7 +66,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   /**
    * 建立NATS连接
    */
-  async connect(): Promise<void> {
+  public async connect(): Promise<void> {
     try {
       this.logger.log('Connecting to NATS servers...');
 
@@ -97,7 +97,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   /**
    * 发布消息到JetStream
    */
-  async publish(pattern: MessagePattern): Promise<void> {
+  public async publish(pattern: MessagePattern): Promise<void> {
     if (!this.jetstream) {
       throw new Error('NATS JetStream not initialized');
     }
@@ -129,7 +129,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   /**
    * 创建消费者
    */
-  async createConsumer(config: ConsumerConfig): Promise<void> {
+  public async createConsumer(config: ConsumerConfig): Promise<void> {
     if (!this.jetstream || !this.jsm) {
       throw new Error('NATS JetStream not initialized');
     }
@@ -243,7 +243,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
     try {
       await this.jsm.streams.info(streamName);
       this.logger.debug(`Stream ${streamName} already exists`);
-    } catch (error) {
+    } catch (_error) {
       // 流不存在，创建它
       await this.jsm.streams.add({
         name: streamName,
@@ -263,13 +263,15 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   private setupConnectionHandlers(): void {
     if (!this.connection) return;
 
-    this.connection.closed().then(() => {
+    const connection = this.connection;
+
+    connection.closed().then(() => {
       this.logger.warn('NATS connection closed');
     });
 
     // 处理重连事件
     (async () => {
-      for await (const status of this.connection!.status()) {
+      for await (const status of connection.status()) {
         this.logger.log(`NATS connection status: ${status.type}`);
 
         if (status.type === 'reconnect') {
@@ -291,7 +293,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   /**
    * 关闭连接
    */
-  async onModuleDestroy(): Promise<void> {
+  public async onModuleDestroy(): Promise<void> {
     if (this.connection) {
       await this.connection.close();
       this.logger.log('NATS connection closed');
@@ -301,7 +303,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   /**
    * 健康检查
    */
-  isConnected(): boolean {
+  public isConnected(): boolean {
     return this.connection !== null && !this.connection.isClosed();
   }
 

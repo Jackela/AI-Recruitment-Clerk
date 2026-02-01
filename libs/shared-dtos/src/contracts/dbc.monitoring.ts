@@ -47,6 +47,30 @@ export interface AlertThreshold {
 }
 
 /**
+ * Defines the shape of the performance stats.
+ */
+export interface PerformanceStats {
+  totalContracts: number;
+  contractViolations: number;
+  violationRate: number;
+  averageExecutionTime: number;
+  servicePerformance: PerformanceProfile[];
+  lastUpdated: Date;
+  memoryUsage: NodeJS.MemoryUsage;
+  uptime: number;
+}
+
+/**
+ * Defines the shape of optimization results.
+ */
+export interface OptimizationResult {
+  optimizations: Record<string, unknown>[];
+  totalIssues: number;
+  priority: 'critical' | 'high' | 'low';
+  generatedAt: Date;
+}
+
+/**
  * Production monitoring system for Design by Contract framework
  *
  * @class DBCMonitor
@@ -75,7 +99,7 @@ export class DBCMonitor {
    * @method recordContractExecution
    * @param {ContractMetrics} metric - Contract execution metrics
    */
-  recordContractExecution(metric: ContractMetrics): void {
+  public recordContractExecution(metric: ContractMetrics): void {
     // Add to metrics history
     this.metrics.push(metric);
 
@@ -108,9 +132,9 @@ export class DBCMonitor {
    * Gets current performance statistics
    *
    * @method getPerformanceStats
-   * @returns {Object} Current performance statistics
+   * @returns {PerformanceStats} Current performance statistics
    */
-  getPerformanceStats(): any {
+  public getPerformanceStats(): PerformanceStats {
     const totalContracts = this.metrics.length;
     const violations = this.metrics.filter((m) => !m.success).length;
     const avgExecutionTime =
@@ -139,9 +163,9 @@ export class DBCMonitor {
    * @method getActiveAlerts
    * @returns {Array} Active alerts based on current metrics
    */
-  getActiveAlerts(): any[] {
+  public getActiveAlerts(): Record<string, unknown>[] {
     const currentStats = this.getPerformanceStats();
-    const alerts: any[] = [];
+    const alerts: Record<string, unknown>[] = [];
 
     this.alertThresholds.forEach((threshold) => {
       const metricValue = this.extractMetricValue(
@@ -177,10 +201,10 @@ export class DBCMonitor {
    * Optimizes contract validation performance
    *
    * @method optimizePerformance
-   * @returns {Object} Performance optimization results
+   * @returns {OptimizationResult} Performance optimization results
    */
-  optimizePerformance(): any {
-    const optimizations: any[] = [];
+  public optimizePerformance(): OptimizationResult {
+    const optimizations: Record<string, unknown>[] = [];
     const stats = this.getPerformanceStats();
 
     // Identify slow operations
@@ -258,7 +282,7 @@ export class DBCMonitor {
    * @method generateHealthReport
    * @returns {Object} Comprehensive health report
    */
-  generateHealthReport(): any {
+  public generateHealthReport(): Record<string, unknown> {
     const stats = this.getPerformanceStats();
     const alerts = this.getActiveAlerts();
     const optimizations = this.optimizePerformance();
@@ -429,6 +453,7 @@ export class DBCMonitor {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private extractMetricValue(stats: any, metricName: string): number {
     switch (metricName) {
       case 'violationRate':
@@ -496,9 +521,9 @@ export class DBCMonitor {
 
   private generateHealthRecommendations(
     healthScore: number,
-    stats: any,
-    alerts: any[],
-    optimizations: any,
+    stats: PerformanceStats,
+    alerts: Record<string, unknown>[],
+    optimizations: OptimizationResult,
   ): string[] {
     const recommendations: string[] = [];
 
@@ -574,6 +599,7 @@ export const dbcMonitor = new DBCMonitor();
  */
 export function withMonitoring(serviceContext: string) {
   return function (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     target: any,
     propertyKey: string,
     descriptor: PropertyDescriptor,
@@ -582,6 +608,7 @@ export function withMonitoring(serviceContext: string) {
     void target;
     const originalMethod = descriptor.value;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     descriptor.value = async function (...args: any[]) {
       const startTime = Date.now();
       const initialMemory = process.memoryUsage().heapUsed;

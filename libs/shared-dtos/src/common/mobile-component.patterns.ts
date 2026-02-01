@@ -176,13 +176,13 @@ export abstract class BaseMobileComponent implements OnInit, OnDestroy {
  * 移动端列表组件基类
  */
 export abstract class BaseMobileListComponent<T> extends BaseMobileComponent {
-  @Input() items: T[] = [];
-  @Input() enableVirtualScroll = false;
-  @Input() itemHeight = 80;
-  @Input() loadMoreThreshold = 200;
+  @Input() public items: T[] = [];
+  @Input() public enableVirtualScroll = false;
+  @Input() public itemHeight = 80;
+  @Input() public loadMoreThreshold = 200;
 
-  @Output() itemClick = new EventEmitter<T>();
-  @Output() itemLongPress = new EventEmitter<T>();
+  @Output() public itemClick = new EventEmitter<T>();
+  @Output() public itemLongPress = new EventEmitter<T>();
 
   protected currentPage = 1;
   protected pageSize = 20;
@@ -399,13 +399,13 @@ export interface CardAction {
  * 移动端卡片组件基类
  */
 export abstract class BaseMobileCardComponent extends BaseMobileComponent {
-  @Input() cardData: CardData = { id: '', title: '' };
-  @Input() showActions = true;
-  @Input() showImage = true;
-  @Input() cardStyle: 'flat' | 'elevated' | 'outlined' = 'elevated';
+  @Input() public cardData: CardData = { id: '', title: '' };
+  @Input() public showActions = true;
+  @Input() public showImage = true;
+  @Input() public cardStyle: 'flat' | 'elevated' | 'outlined' = 'elevated';
 
-  @Output() cardClick = new EventEmitter<CardData>();
-  @Output() actionClick = new EventEmitter<{
+  @Output() public cardClick = new EventEmitter<CardData>();
+  @Output() public actionClick = new EventEmitter<{
     action: CardAction;
     card: CardData;
   }>();
@@ -445,8 +445,8 @@ export abstract class BaseMobileCardComponent extends BaseMobileComponent {
  * 触摸手势工具类
  */
 export class TouchGestureUtil {
-  static readonly SWIPE_THRESHOLD = 50;
-  static readonly SWIPE_VELOCITY = 0.3;
+  public static readonly SWIPE_THRESHOLD = 50;
+  public static readonly SWIPE_VELOCITY = 0.3;
 
   /**
    * Performs the detect swipe operation.
@@ -457,7 +457,7 @@ export class TouchGestureUtil {
    * @param timeElapsed - The time elapsed.
    * @returns The 'left' | 'right' | 'up' | 'down' | null.
    */
-  static detectSwipe(
+  public static detectSwipe(
     startX: number,
     startY: number,
     endX: number,
@@ -486,10 +486,10 @@ export class TouchGestureUtil {
    * @param callbacks - The callbacks.
    * @returns The () => void.
    */
-  static addTouchListeners(
+  public static addTouchListeners(
     element: HTMLElement,
     callbacks: {
-      onSwipe?: (direction: string, data?: any) => void;
+      onSwipe?: (direction: string, data?: unknown) => void;
       onTap?: (event: TouchEvent) => void;
       onLongPress?: (event: TouchEvent) => void;
     },
@@ -499,7 +499,7 @@ export class TouchGestureUtil {
     let startTime = 0;
     let longPressTimer: number | null = null;
 
-    const onTouchStart = (event: TouchEvent) => {
+    const onTouchStart = (event: TouchEvent): void => {
       const touch = event.touches[0];
       startX = touch.clientX;
       startY = touch.clientY;
@@ -507,12 +507,12 @@ export class TouchGestureUtil {
 
       if (callbacks.onLongPress) {
         longPressTimer = window.setTimeout(() => {
-          callbacks.onLongPress!(event);
+          callbacks.onLongPress?.(event);
         }, 500);
       }
     };
 
-    const onTouchEnd = (event: TouchEvent) => {
+    const onTouchEnd = (event: TouchEvent): void => {
       if (longPressTimer) {
         clearTimeout(longPressTimer);
         longPressTimer = null;

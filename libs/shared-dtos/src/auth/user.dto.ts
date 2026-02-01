@@ -26,34 +26,34 @@ export enum UserStatus {
 export class CreateUserDto {
   @IsEmail()
   @IsNotEmpty()
-  email!: string;
+  public email!: string;
 
   @IsString()
   @MinLength(8)
-  password!: string;
+  public password!: string;
 
   @IsString()
   @IsOptional()
-  username?: string;
+  public username?: string;
 
   @IsString()
   @IsNotEmpty()
-  firstName!: string;
+  public firstName!: string;
 
   @IsString()
   @IsNotEmpty()
-  lastName!: string;
+  public lastName!: string;
 
   @IsEnum(UserRole)
-  role!: UserRole;
+  public role!: UserRole;
 
   @IsString()
   @IsOptional()
-  organizationId?: string;
+  public organizationId?: string;
 
   @IsEnum(UserStatus)
   @IsOptional()
-  status?: UserStatus = UserStatus.ACTIVE;
+  public status?: UserStatus = UserStatus.ACTIVE;
 }
 
 /**
@@ -62,33 +62,33 @@ export class CreateUserDto {
 export class LoginDto {
   @IsEmail()
   @IsNotEmpty()
-  email!: string;
+  public email!: string;
 
   @IsString()
   @IsNotEmpty()
-  password!: string;
+  public password!: string;
 }
 
 /**
  * Describes the user data transfer object.
  */
 export class UserDto {
-  id!: string;
-  email!: string;
-  firstName!: string;
-  lastName!: string;
-  role!: UserRole;
-  organizationId?: string;
-  status!: UserStatus;
-  createdAt!: Date;
-  updatedAt!: Date;
+  public id!: string;
+  public email!: string;
+  public firstName!: string;
+  public lastName!: string;
+  public role!: UserRole;
+  public organizationId?: string;
+  public status!: UserStatus;
+  public createdAt!: Date;
+  public updatedAt!: Date;
 
   // Computed property
   /**
    * Performs the name operation.
    * @returns The string value.
    */
-  get name(): string {
+  public get name(): string {
     return `${this.firstName} ${this.lastName}`;
   }
 }
@@ -97,24 +97,24 @@ export class UserDto {
  * Represents the jwt payload.
  */
 export class JwtPayload {
-  sub!: string; // user id
-  email!: string;
-  role!: UserRole;
-  organizationId?: string;
-  iat?: number;
-  exp?: number;
-  aud?: string; // audience
-  iss?: string; // issuer
+  public sub!: string; // user id
+  public email!: string;
+  public role!: UserRole;
+  public organizationId?: string;
+  public iat?: number;
+  public exp?: number;
+  public aud?: string; // audience
+  public iss?: string; // issuer
 }
 
 /**
  * Describes the auth response data transfer object.
  */
 export class AuthResponseDto {
-  accessToken!: string;
-  refreshToken!: string;
-  user!: UserDto;
-  expiresIn!: number;
+  public accessToken!: string;
+  public refreshToken!: string;
+  public user!: UserDto;
+  public expiresIn!: number;
 }
 
 /**
@@ -123,7 +123,7 @@ export class AuthResponseDto {
 export class RefreshTokenDto {
   @IsString()
   @IsNotEmpty()
-  refreshToken!: string;
+  public refreshToken!: string;
 }
 
 /**
@@ -132,27 +132,27 @@ export class RefreshTokenDto {
 export class UpdateUserDto {
   @IsString()
   @IsOptional()
-  firstName?: string;
+  public firstName?: string;
 
   @IsString()
   @IsOptional()
-  lastName?: string;
+  public lastName?: string;
 
   @IsEmail()
   @IsOptional()
-  email?: string;
+  public email?: string;
 
   @IsEnum(UserRole)
   @IsOptional()
-  role?: UserRole;
+  public role?: UserRole;
 
   @IsEnum(UserStatus)
   @IsOptional()
-  status?: UserStatus;
+  public status?: UserStatus;
 
   @IsString()
   @IsOptional()
-  organizationId?: string;
+  public organizationId?: string;
 }
 
 /**
@@ -161,18 +161,18 @@ export class UpdateUserDto {
 export class UserPreferencesDto {
   @IsString()
   @IsOptional()
-  language?: string;
+  public language?: string;
 
   @IsString()
   @IsOptional()
-  timezone?: string;
+  public timezone?: string;
 
   @IsString()
   @IsOptional()
-  theme?: string;
+  public theme?: string;
 
   @IsOptional()
-  notifications?: {
+  public notifications?: {
     email?: boolean;
     browser?: boolean;
     mobile?: boolean;
@@ -183,12 +183,12 @@ export class UserPreferencesDto {
  * Describes the user activity data transfer object.
  */
 export class UserActivityDto {
-  id!: string;
-  userId!: string;
-  action!: string;
-  resource?: string;
-  metadata?: Record<string, any>;
-  ipAddress?: string;
-  userAgent?: string;
-  timestamp!: Date;
+  public id!: string;
+  public userId!: string;
+  public action!: string;
+  public resource?: string;
+  public metadata?: Record<string, unknown>;
+  public ipAddress?: string;
+  public userAgent?: string;
+  public timestamp!: Date;
 }

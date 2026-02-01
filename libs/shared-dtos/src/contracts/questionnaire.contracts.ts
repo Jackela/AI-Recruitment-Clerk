@@ -17,7 +17,7 @@ export class QuestionnaireContracts {
    * @param metadata - The metadata.
    * @returns The QuestionnaireSubmissionResult.
    */
-  static submitQuestionnaire(
+  public static submitQuestionnaire(
     rawData: RawSubmissionData,
     metadata: SubmissionMetadata,
   ): QuestionnaireSubmissionResult {
@@ -75,7 +75,7 @@ export class QuestionnaireContracts {
    * @param ip - The ip.
    * @returns The IPSubmissionCheckResult.
    */
-  static validateIPSubmissionLimit(ip: string): IPSubmissionCheckResult {
+  public static validateIPSubmissionLimit(ip: string): IPSubmissionCheckResult {
     // 前置条件验证
     if (!ip || !/^\d+\.\d+\.\d+\.\d+$/.test(ip)) {
       throw new Error('IP address must be valid IPv4 format');

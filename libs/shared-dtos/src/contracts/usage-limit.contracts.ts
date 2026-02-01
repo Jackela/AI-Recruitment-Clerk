@@ -17,7 +17,7 @@ export class UsageLimitContracts {
    * 前置条件: IP地址格式有效
    * 后置条件: 返回结果包含正确的配额信息和状态
    */
-  static checkUsageLimit(
+  public static checkUsageLimit(
     ip: string,
     usageLimit: UsageLimit,
   ): UsageLimitCheckResult {
@@ -66,7 +66,7 @@ export class UsageLimitContracts {
    * 前置条件: IP有效且有可用配额
    * 后置条件: 使用计数正确递增，剩余配额正确递减
    */
-  static recordUsage(ip: string, usageLimit: UsageLimit): UsageRecordResult {
+  public static recordUsage(ip: string, usageLimit: UsageLimit): UsageRecordResult {
     // 前置条件验证
     if (!UsageLimitRules.isValidIPAddress(ip)) {
       throw new Error('IP address must be valid IPv4 format');
@@ -136,7 +136,7 @@ export class UsageLimitContracts {
    * 前置条件: 奖励类型有效，数量为正数
    * 后置条件: 配额正确增加，事件正确发布
    */
-  static addBonusQuota(
+  public static addBonusQuota(
     ip: string,
     usageLimit: UsageLimit,
     bonusType: BonusType,
@@ -211,7 +211,7 @@ export class UsageLimitContracts {
    * 前置条件: IP有效，策略有效
    * 后置条件: 创建的对象具有正确的初始状态
    */
-  static createUsageLimit(ip: string, policy: UsageLimitPolicy): UsageLimit {
+  public static createUsageLimit(ip: string, policy: UsageLimitPolicy): UsageLimit {
     // 前置条件验证
     if (!UsageLimitRules.isValidIPAddress(ip)) {
       throw new Error('IP address must be valid IPv4 format');
@@ -269,7 +269,7 @@ export class UsageLimitContracts {
    * 前置条件: 使用限制实例有效
    * 后置条件: 重置后状态正确
    */
-  static validateDailyReset(usageLimit: UsageLimit): boolean {
+  public static validateDailyReset(usageLimit: UsageLimit): boolean {
     // 前置条件验证
     if (!usageLimit) {
       throw new Error('UsageLimit instance is required');
@@ -315,7 +315,7 @@ export class UsageLimitContracts {
   /**
    * 不变性验证 - 使用限制核心不变性
    */
-  static validateInvariants(usageLimit: UsageLimit): void {
+  public static validateInvariants(usageLimit: UsageLimit): void {
     if (!usageLimit) {
       throw new Error(
         'UsageLimit instance is required for invariant validation',
@@ -375,7 +375,7 @@ export class UsageLimitContracts {
   /**
    * 性能合约 - 验证操作在可接受时间内完成
    */
-  static performanceContract<T>(
+  public static performanceContract<T>(
     operation: () => T,
     maxExecutionTimeMs = 100,
     operationName = 'Operation',
