@@ -228,7 +228,7 @@
       "title": "Fix shared-dtos errors/enhanced-error-types.ts",
       "description": "Fix lint issues in enhanced-error-types.ts",
       "priority": 19,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in enhanced-error-types.ts",
         "npm run typecheck passes"

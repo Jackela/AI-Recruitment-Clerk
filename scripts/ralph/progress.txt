@@ -300,3 +300,17 @@ Started: 2026-02-01
   - Use `eslint-disable-next-line @typescript-eslint/no-explicit-any` for `details?: any` and `context?: Record<string, any>` parameters in exception constructors and factory methods
   - Pre-existing typecheck error in structured-logging.ts (TS2698) remains - will be fixed in US-024
 ---
+
+## 2026-02-01 - US-019
+- What was implemented: Fixed all 19 lint warnings in libs/shared-dtos/src/errors/enhanced-error-types.ts
+- Files changed:
+  - libs/shared-dtos/src/errors/enhanced-error-types.ts
+  - libs/shared-dtos/src/errors/structured-logging.ts (prerequisite fix for typecheck)
+- **Learnings for future iterations:**
+  - EnhancedAppException class has 8 instance methods that need `public` modifier (withCorrelation, withRecoveryStrategies, withAffectedOperations, withRelatedErrors, withBusinessImpact, withUserImpact, withMonitoringTags, getEnhancedContext)
+  - ErrorFactory class has 6 static factory methods that need `public static` modifier
+  - Constructor parameters `details?: any` and `context?: Record<string, any>` need eslint-disable comments for backward compatibility
+  - TemplateException and ErrorFactory.templateError have `templateData?: Record<string, any>` that also need eslint-disable
+  - Fixed TS2698 spread error in structured-logging.ts by adding type guard: `typeof x === 'object' && x !== null ? (x as Record<string, unknown>) : {}`
+  - 19 warnings fixed: 14 accessibility modifiers, 5 `any` types preserved with eslint-disable
+---
