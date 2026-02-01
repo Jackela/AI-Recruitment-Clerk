@@ -1,5 +1,5 @@
 import { RetentionPolicy, DiscardPolicy } from 'nats';
-import { StreamConfig } from '../interfaces/nats-config.interface';
+import type { StreamConfig } from '../interfaces/nats-config.interface';
 
 /**
  * Standard JOB_EVENTS stream configuration used across all services
@@ -56,7 +56,7 @@ export class StreamConfigFactory {
   /**
    * Create a custom stream configuration
    */
-  static create(
+  public static create(
     name: string,
     subjects: string[],
     options: Partial<Omit<StreamConfig, 'name' | 'subjects'>> = {},
@@ -76,7 +76,7 @@ export class StreamConfigFactory {
   /**
    * Create development-friendly stream configuration
    */
-  static createDev(
+  public static createDev(
     name: string,
     subjects: string[],
     options: Partial<Omit<StreamConfig, 'name' | 'subjects'>> = {},
@@ -92,7 +92,7 @@ export class StreamConfigFactory {
   /**
    * Create production-optimized stream configuration
    */
-  static createProd(
+  public static createProd(
     name: string,
     subjects: string[],
     options: Partial<Omit<StreamConfig, 'name' | 'subjects'>> = {},

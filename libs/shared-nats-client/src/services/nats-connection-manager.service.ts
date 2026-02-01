@@ -1,12 +1,14 @@
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
-import {
-  connect,
+import type { OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import type {
   NatsConnection,
   JetStreamClient,
-  StringCodec,
-  ConnectionOptions,
+  ConnectionOptions} from 'nats';
+import {
+  connect,
+  StringCodec
 } from 'nats';
-import { NatsConnectionConfig, NatsHealthResult } from '../interfaces';
+import type { NatsConnectionConfig, NatsHealthResult } from '../interfaces';
 
 /**
  * NATS Connection Manager Service
@@ -25,14 +27,14 @@ export class NatsConnectionManager implements OnModuleDestroy {
    * Performs the on module destroy operation.
    * @returns The result of the operation.
    */
-  async onModuleDestroy() {
+  public async onModuleDestroy(): Promise<void> {
     await this.disconnect();
   }
 
   /**
    * Establish connection to NATS server with JetStream enabled
    */
-  async connect(config: NatsConnectionConfig): Promise<void> {
+  public async connect(config: NatsConnectionConfig): Promise<void> {
     try {
       if (this.isConnected) {
         this.logger.log('Already connected to NATS');
@@ -80,7 +82,7 @@ export class NatsConnectionManager implements OnModuleDestroy {
   /**
    * Disconnect from NATS server
    */
-  async disconnect(): Promise<void> {
+  public async disconnect(): Promise<void> {
     try {
       if (this.connection && !this.connection.isClosed()) {
         this.logger.log('Disconnecting from NATS...');
@@ -98,35 +100,35 @@ export class NatsConnectionManager implements OnModuleDestroy {
   /**
    * Get NATS connection instance
    */
-  getConnection(): NatsConnection | null {
+  public getConnection(): NatsConnection | null {
     return this.connection;
   }
 
   /**
    * Get JetStream client instance
    */
-  getJetStream(): JetStreamClient | null {
+  public getJetStream(): JetStreamClient | null {
     return this.jetstream;
   }
 
   /**
    * Get string codec for message encoding/decoding
    */
-  getCodec(): ReturnType<typeof StringCodec> {
+  public getCodec(): ReturnType<typeof StringCodec> {
     return this.codec;
   }
 
   /**
    * Check if connected to NATS
    */
-  get isConnected(): boolean {
+  public get isConnected(): boolean {
     return this.connection !== null && !this.connection.isClosed();
   }
 
   /**
    * Get connection health status
    */
-  async getHealthStatus(): Promise<NatsHealthResult> {
+  public async getHealthStatus(): Promise<NatsHealthResult> {
     const connected = this.isConnected;
     const jetstreamAvailable = this.jetstream !== null;
 
@@ -167,7 +169,7 @@ export class NatsConnectionManager implements OnModuleDestroy {
   /**
    * Generate unique message ID
    */
-  generateMessageId(prefix = 'msg'): string {
+  public generateMessageId(prefix = 'msg'): string {
     return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
