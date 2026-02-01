@@ -123,3 +123,31 @@ Started: 2026-02-01
   - Replace non-null assertions (`!`) with nullish coalescing (`??`) for optional properties like `paymentResult.amount!` → `paymentResult.amount ?? 0`
   - 113 warnings fixed across 12 files: ~80 accessibility modifiers, ~25 getters, 4 non-null assertions, 4 `any` types preserved with eslint-disable
 ---
+
+## 2026-02-01 - US-008
+- What was implemented: Fixed all 106 lint warnings in marketing-domain library
+- Files changed:
+  - libs/marketing-domain/src/application/contracts/questionnaire.contracts.ts
+  - libs/marketing-domain/src/domain/aggregates/questionnaire.aggregate.ts
+  - libs/marketing-domain/src/domain/domain-services/questionnaire.domain-service.ts
+  - libs/marketing-domain/src/domain/domain-services/questionnaire.rules.ts
+  - libs/marketing-domain/src/domain/value-objects/business-value.value-object.ts
+  - libs/marketing-domain/src/domain/value-objects/optional-info.value-object.ts
+  - libs/marketing-domain/src/domain/value-objects/quality-metrics.value-object.ts
+  - libs/marketing-domain/src/domain/value-objects/quality-score.value-object.ts
+  - libs/marketing-domain/src/domain/value-objects/questionnaire-id.value-object.ts
+  - libs/marketing-domain/src/domain/value-objects/questionnaire-submission.value-object.ts
+  - libs/marketing-domain/src/domain/value-objects/questionnaire-template.value-object.ts
+  - libs/marketing-domain/src/domain/value-objects/submission-metadata.value-object.ts
+  - libs/marketing-domain/src/domain/value-objects/submission-quality.value-object.ts
+  - libs/marketing-domain/src/domain/value-objects/submission-summary.value-object.ts
+  - libs/marketing-domain/src/domain/value-objects/user-experience.value-object.ts
+  - libs/marketing-domain/src/domain/value-objects/user-profile.value-object.ts
+- **Learnings for future iterations:**
+  - Marketing-domain follows similar structure to other domain libraries with aggregates, value objects, domain services, and contracts
+  - QuestionnaireData interface uses `any` for template, submission, quality, metadata properties - keep with eslint-disable
+  - QuestionnaireSubmissionResult class has nested `any` in data.summary property - needs eslint-disable on the line with `any`
+  - IDomainEventBus interface publish method needs `any` for generic event types
+  - Value object restore methods commonly use `any` parameter type - add eslint-disable-next-line directly above the parameter line
+  - 106 warnings fixed across 16 files: ~85 accessibility modifiers (static methods & getters), 12 `any` types preserved with eslint-disable
+---

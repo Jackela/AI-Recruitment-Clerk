@@ -93,7 +93,7 @@
       "title": "Run eslint --fix on marketing-domain",
       "description": "Auto-fix lint issues in marketing-domain library",
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Run npx nx lint marketing-domain --fix",
         "npm run typecheck passes"
