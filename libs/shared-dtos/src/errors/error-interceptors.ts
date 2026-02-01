@@ -26,6 +26,7 @@ import {
   StructuredLoggerFactory
 } from './structured-logging';
 import { EnhancedAppException } from './enhanced-error-types';
+import { ErrorType } from '../common/error-handling.patterns';
 
 /**
  * Error correlation interceptor
@@ -45,9 +46,10 @@ export class ErrorCorrelationInterceptor implements NestInterceptor {
    * Performs the intercept operation.
    * @param context - The context.
    * @param next - The next.
-   * @returns The Observable<any>.
+   * @returns The Observable<unknown>.
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const ctx = context.switchToHttp();
     const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
@@ -121,9 +123,10 @@ export class ErrorLoggingInterceptor implements NestInterceptor {
    * Performs the intercept operation.
    * @param context - The context.
    * @param next - The next.
-   * @returns The Observable<any>.
+   * @returns The Observable<unknown>.
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const operationName = this.getOperationName(context);
     const startMetrics = this.structuredLogger.logOperationStart(operationName);
 
@@ -206,9 +209,10 @@ export class PerformanceTrackingInterceptor implements NestInterceptor {
    * Performs the intercept operation.
    * @param context - The context.
    * @param next - The next.
-   * @returns The Observable<any>.
+   * @returns The Observable<unknown>.
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const operationName = this.getOperationName(context);
     const startTime = Date.now();
     const startMemory = process.memoryUsage();
@@ -340,9 +344,10 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
    * Performs the intercept operation.
    * @param context - The context.
    * @param next - The next.
-   * @returns The Observable<any>.
+   * @returns The Observable<unknown>.
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     // Touch the injected service name to satisfy TS6138 (no-op read)
     void this._serviceName;
     const operationName = this.getOperationName(context);
@@ -353,7 +358,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
       this.isCircuitOpen(operationName)
     ) {
       const circuitBreakerError = new EnhancedAppException(
-        'EXTERNAL_SERVICE_ERROR' as any,
+        ErrorType.EXTERNAL_SERVICE,
         'CIRCUIT_BREAKER_OPEN',
         `Circuit breaker is open for operation: ${operationName}`,
         503,
@@ -418,7 +423,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
 
     if (circuit.state === 'open') {
       // Check if recovery timeout has passed
-      if (now - circuit.lastFailure > this.recoveryConfig.recoveryTimeout!) {
+      if (now - circuit.lastFailure > (this.recoveryConfig.recoveryTimeout ?? 60000)) {
         circuit.state = 'half-open';
         this.logger.log(`Circuit breaker half-open for ${operationName}`);
         return false;
@@ -442,7 +447,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
     circuit.failures++;
     circuit.lastFailure = Date.now();
 
-    if (circuit.failures >= this.recoveryConfig.failureThreshold!) {
+    if (circuit.failures >= (this.recoveryConfig.failureThreshold ?? 5)) {
       circuit.state = 'open';
       this.logger.error(
         `Circuit breaker opened for ${operationName} after ${circuit.failures} failures`,
@@ -478,7 +483,7 @@ export class ErrorRecoveryInterceptor implements NestInterceptor {
       const circuit = this.circuitBreakers.get(operationName);
       if (circuit && circuit.state === 'open') {
         contextStrategies.push(
-          `Wait ${Math.round(this.recoveryConfig.recoveryTimeout! / 1000)}s for circuit breaker reset`,
+          `Wait ${Math.round((this.recoveryConfig.recoveryTimeout ?? 60000) / 1000)}s for circuit breaker reset`,
         );
       }
     }
@@ -511,7 +516,7 @@ export class ErrorInterceptorFactory {
   /**
    * Create correlation interceptor
    */
-  static createCorrelationInterceptor(
+  public static createCorrelationInterceptor(
     serviceName: string,
   ): ErrorCorrelationInterceptor {
     return new ErrorCorrelationInterceptor(serviceName);
@@ -520,7 +525,7 @@ export class ErrorInterceptorFactory {
   /**
    * Create logging interceptor
    */
-  static createLoggingInterceptor(
+  public static createLoggingInterceptor(
     serviceName: string,
   ): ErrorLoggingInterceptor {
     return new ErrorLoggingInterceptor(serviceName);
@@ -529,7 +534,7 @@ export class ErrorInterceptorFactory {
   /**
    * Create performance tracking interceptor
    */
-  static createPerformanceInterceptor(
+  public static createPerformanceInterceptor(
     serviceName: string,
     thresholds?: { warnThreshold?: number; errorThreshold?: number },
   ): PerformanceTrackingInterceptor {
@@ -539,7 +544,7 @@ export class ErrorInterceptorFactory {
   /**
    * Create error recovery interceptor
    */
-  static createRecoveryInterceptor(
+  public static createRecoveryInterceptor(
     serviceName: string,
     config?: {
       enableCircuitBreaker?: boolean;
@@ -553,7 +558,7 @@ export class ErrorInterceptorFactory {
   /**
    * Create complete set of error handling interceptors
    */
-  static createCompleteSet(
+  public static createCompleteSet(
     serviceName: string,
     options: {
       enableCorrelation?: boolean;
@@ -570,7 +575,7 @@ export class ErrorInterceptorFactory {
         recoveryTimeout?: number;
       };
     } = {},
-  ): any[] {
+  ): NestInterceptor[] {
     const {
       enableCorrelation = true,
       enableLogging = true,
@@ -578,7 +583,7 @@ export class ErrorInterceptorFactory {
       enableRecovery = false, // Disabled by default to avoid complexity
     } = options;
 
-    const interceptors: any[] = [];
+    const interceptors: NestInterceptor[] = [];
 
     if (enableCorrelation) {
       interceptors.push(this.createCorrelationInterceptor(serviceName));
