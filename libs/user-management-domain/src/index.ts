@@ -47,6 +47,7 @@ export interface AuthenticatedRequest extends Request {
     /** Optional array of user permissions for fine-grained access */
     permissions?: string[];
     /** Additional user claims from JWT token */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   };
   /** Optional device fingerprint for security tracking */
