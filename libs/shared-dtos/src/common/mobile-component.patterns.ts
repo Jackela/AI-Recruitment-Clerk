@@ -36,18 +36,28 @@ export interface LoadingState {
 }
 
 /**
+ * Defines the shape of the validation rule set.
+ */
+export interface ValidationRuleSet {
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: RegExp;
+}
+
+/**
  * 移动端基础组件抽象类
  */
 export abstract class BaseMobileComponent implements OnInit, OnDestroy {
-  @Input() config: MobileComponentConfig = {};
-  @Input() loadingState: LoadingState = { isLoading: false };
+  @Input() public config: MobileComponentConfig = {};
+  @Input() public loadingState: LoadingState = { isLoading: false };
 
-  @Output() swipeLeft = new EventEmitter<any>();
-  @Output() swipeRight = new EventEmitter<any>();
-  @Output() swipeUp = new EventEmitter<any>();
-  @Output() swipeDown = new EventEmitter<any>();
-  @Output() pullToRefresh = new EventEmitter<void>();
-  @Output() loadMore = new EventEmitter<void>();
+  @Output() public swipeLeft = new EventEmitter<unknown>();
+  @Output() public swipeRight = new EventEmitter<unknown>();
+  @Output() public swipeUp = new EventEmitter<unknown>();
+  @Output() public swipeDown = new EventEmitter<unknown>();
+  @Output() public pullToRefresh = new EventEmitter<void>();
+  @Output() public loadMore = new EventEmitter<void>();
 
   protected destroy$ = new Subject<void>();
   protected isDestroyed = false;
@@ -63,7 +73,7 @@ export abstract class BaseMobileComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.config = { ...this.defaultConfig, ...this.config };
     this.setupComponent();
     this.onMobileInit();
@@ -72,7 +82,7 @@ export abstract class BaseMobileComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.isDestroyed = true;
     this.destroy$.next();
     this.destroy$.complete();
@@ -111,7 +121,7 @@ export abstract class BaseMobileComponent implements OnInit, OnDestroy {
    */
   protected handleSwipe(
     direction: 'left' | 'right' | 'up' | 'down',
-    data?: any,
+    data?: unknown,
   ): void {
     switch (direction) {
       case 'left':
@@ -241,13 +251,13 @@ export abstract class BaseMobileListComponent<T> extends BaseMobileComponent {
  * 移动端表单组件基类
  */
 export abstract class BaseMobileFormComponent extends BaseMobileComponent {
-  @Input() formData: any = {};
-  @Input() validationRules: any = {};
-  @Input() showValidationErrors = true;
+  @Input() public formData: Record<string, unknown> = {};
+  @Input() public validationRules: Record<string, unknown> = {};
+  @Input() public showValidationErrors = true;
 
-  @Output() formSubmit = new EventEmitter<any>();
-  @Output() formReset = new EventEmitter<void>();
-  @Output() fieldChange = new EventEmitter<{ field: string; value: any }>();
+  @Output() public formSubmit = new EventEmitter<Record<string, unknown>>();
+  @Output() public formReset = new EventEmitter<void>();
+  @Output() public fieldChange = new EventEmitter<{ field: string; value: unknown }>();
 
   protected formErrors: Record<string, string[]> = {};
   protected isFormValid = false;
@@ -271,7 +281,7 @@ export abstract class BaseMobileFormComponent extends BaseMobileComponent {
     // 实现表单验证逻辑
     for (const [field, rules] of Object.entries(this.validationRules)) {
       const value = this.formData[field];
-      const errors = this.validateField(field, value, rules as any);
+      const errors = this.validateField(field, value, rules as ValidationRuleSet);
 
       if (errors.length > 0) {
         this.formErrors[field] = errors;
@@ -285,22 +295,23 @@ export abstract class BaseMobileFormComponent extends BaseMobileComponent {
   /**
    * 验证单个字段
    */
-  protected validateField(field: string, value: any, rules: any): string[] {
+  protected validateField(field: string, value: unknown, rules: ValidationRuleSet): string[] {
     const errors: string[] = [];
+    const strValue = typeof value === 'string' ? value : '';
 
-    if (rules.required && (!value || value.trim() === '')) {
+    if (rules.required && (!value || strValue.trim() === '')) {
       errors.push(`${field} 是必填项`);
     }
 
-    if (rules.minLength && value && value.length < rules.minLength) {
+    if (rules.minLength && strValue && strValue.length < rules.minLength) {
       errors.push(`${field} 最少需要 ${rules.minLength} 个字符`);
     }
 
-    if (rules.maxLength && value && value.length > rules.maxLength) {
+    if (rules.maxLength && strValue && strValue.length > rules.maxLength) {
       errors.push(`${field} 最多允许 ${rules.maxLength} 个字符`);
     }
 
-    if (rules.pattern && value && !rules.pattern.test(value)) {
+    if (rules.pattern && strValue && !rules.pattern.test(strValue)) {
       errors.push(`${field} 格式不正确`);
     }
 
@@ -310,7 +321,7 @@ export abstract class BaseMobileFormComponent extends BaseMobileComponent {
   /**
    * 处理字段变化
    */
-  protected onFieldChange(field: string, value: any): void {
+  protected onFieldChange(field: string, value: unknown): void {
     this.formData[field] = value;
     this.fieldChange.emit({ field, value });
 
@@ -370,7 +381,7 @@ export interface CardData {
   content?: string;
   imageUrl?: string;
   actions?: CardAction[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**

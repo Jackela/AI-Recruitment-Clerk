@@ -31,7 +31,7 @@ export interface NatsConfig {
  */
 export interface MessagePattern {
   subject: string;
-  data: any;
+  data: unknown;
   headers?: Record<string, string>;
 }
 
@@ -42,7 +42,7 @@ export interface ConsumerConfig {
   stream: string;
   consumer: string;
   subject: string;
-  handler: (data: any) => Promise<void>;
+  handler: (data: unknown) => Promise<void>;
 }
 
 /**
@@ -176,9 +176,9 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   /**
    * 请求-响应模式
    */
-  async request<T>(
+  public async request<T>(
     subject: string,
-    data: any,
+    data: unknown,
     timeout = 5000,
   ): Promise<T> {
     if (!this.connection) {
@@ -202,9 +202,9 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   /**
    * 订阅主题
    */
-  async subscribe(
+  public async subscribe(
     subject: string,
-    handler: (data: any) => Promise<void>,
+    handler: (data: unknown) => Promise<void>,
   ): Promise<void> {
     if (!this.connection) {
       throw new Error('NATS connection not established');
@@ -308,7 +308,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   /**
    * 获取连接统计信息
    */
-  getStats(): any {
+  public getStats(): Record<string, unknown> {
     if (!this.connection) {
       return { connected: false };
     }
@@ -342,5 +342,5 @@ export abstract class ServiceNatsClient extends BaseNatsClient {
     }
   }
 
-  protected abstract handleMessage(data: any): Promise<void>;
+  protected abstract handleMessage(data: unknown): Promise<void>;
 }

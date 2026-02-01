@@ -39,7 +39,7 @@ export abstract class BaseValidator {
   /**
    * 验证必填字段
    */
-  static validateRequired(value: any, fieldName: string): void {
+  public static validateRequired(value: unknown, fieldName: string): void {
     if (value === null || value === undefined || value === '') {
       throw new BadRequestException(`${fieldName} is required`);
     }
@@ -105,8 +105,8 @@ export abstract class BaseValidator {
   /**
    * 验证文件
    */
-  static validateFile(
-    file: any,
+  public static validateFile(
+    file: { size: number; mimetype: string; originalname: string } | null,
     config: FileValidationConfig,
   ): ValidationResult {
     const result: ValidationResult = { isValid: true, errors: [] };
@@ -210,7 +210,7 @@ export abstract class BaseValidator {
   /**
    * 验证枚举值
    */
-  static validateEnum(value: any, enumObject: any, fieldName: string): void {
+  public static validateEnum(value: unknown, enumObject: Record<string, unknown>, fieldName: string): void {
     const validValues = Object.values(enumObject);
     if (!validValues.includes(value)) {
       throw new BadRequestException(
@@ -229,7 +229,7 @@ export class ResumeValidator extends BaseValidator {
    * @param file - The file.
    * @returns The ValidationResult.
    */
-  static validateResumeFile(file: any): ValidationResult {
+  public static validateResumeFile(file: { size: number; mimetype: string; originalname: string } | null): ValidationResult {
     return this.validateFile(file, {
       maxSize: 10 * 1024 * 1024, // 10MB
       allowedTypes: [
@@ -314,16 +314,16 @@ export class JobDescriptionValidator extends BaseValidator {
  * 验证管道装饰器
  */
 export function ValidateAndTransform(
-  validationFn: (data: any) => ValidationResult,
+  validationFn: (data: unknown) => ValidationResult,
 ) {
   return function (
-    _target: any,
+    _target: unknown,
     _propertyName: string,
     descriptor: PropertyDescriptor,
   ) {
     const method = descriptor.value;
 
-    descriptor.value = function (...args: any[]) {
+    descriptor.value = function (...args: unknown[]) {
       const data = args[0];
       const validation = validationFn(data);
 
