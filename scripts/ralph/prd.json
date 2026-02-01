@@ -69,7 +69,7 @@
       "title": "Run eslint --fix on usage-management-domain",
       "description": "Auto-fix lint issues in usage-management-domain library",
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Run npx nx lint usage-management-domain --fix",
         "npm run typecheck passes"
