@@ -81,7 +81,7 @@
       "title": "Run eslint --fix on incentive-system-domain",
       "description": "Auto-fix lint issues in incentive-system-domain library",
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Run npx nx lint incentive-system-domain --fix",
         "npm run typecheck passes"
