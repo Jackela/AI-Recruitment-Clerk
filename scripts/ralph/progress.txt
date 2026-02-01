@@ -151,3 +151,14 @@ Started: 2026-02-01
   - Value object restore methods commonly use `any` parameter type - add eslint-disable-next-line directly above the parameter line
   - 106 warnings fixed across 16 files: ~85 accessibility modifiers (static methods & getters), 12 `any` types preserved with eslint-disable
 ---
+
+## 2026-02-01 - US-009
+- What was implemented: Fixed 1 lint warning in user-management-domain library
+- Files changed:
+  - libs/user-management-domain/src/index.ts
+- **Learnings for future iterations:**
+  - user-management-domain is a simple library with core auth types (AuthenticatedRequest, UserDto, Permission, etc.)
+  - Index signature `[key: string]: any` in AuthenticatedRequest interface is required for JWT claims compatibility
+  - Use eslint-disable-next-line for index signatures that need `any` type for dynamic keys
+  - After eslint --fix, only 1 warning remained (the index signature any type)
+---
