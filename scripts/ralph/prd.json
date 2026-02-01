@@ -202,7 +202,7 @@
       "title": "Fix shared-dtos database/performance-monitor.ts",
       "description": "Fix lint issues in this single file",
       "priority": 17,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in performance-monitor.ts",
         "npm run typecheck passes"
@@ -216,7 +216,7 @@
       "title": "Fix shared-dtos errors/domain-errors.ts",
       "description": "Fix lint issues in domain-errors.ts",
       "priority": 18,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in domain-errors.ts",
         "npm run typecheck passes"

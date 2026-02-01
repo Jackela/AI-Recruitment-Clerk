@@ -278,3 +278,25 @@ Started: 2026-02-01
   - `as any` type assertions in decorator configs need individual eslint-disable comments
   - 12 warnings fixed: 11 `any` types preserved with eslint-disable, 1 non-null assertion replaced with type assertion
 ---
+
+## 2026-02-01 - US-017
+- What was implemented: Fixed all 9 lint warnings in libs/shared-dtos/src/database/performance-monitor.ts
+- Files changed:
+  - libs/shared-dtos/src/database/performance-monitor.ts
+- **Learnings for future iterations:**
+  - DatabasePerformanceMonitor class has 9 public methods that needed `public` accessibility modifiers
+  - All warnings were for public methods: executeWithMonitoring, executeWithTimeout, getPerformanceReport, getQueryMetrics, getSlowestQueries, getProblematicQueries, resetMetrics, getRealTimeStats, exportMetrics
+  - No `any` type issues in this file - clean code with proper TypeScript types
+  - Pre-existing typecheck error in structured-logging.ts (TS2698) is a known issue to be fixed in US-024
+---
+
+## 2026-02-01 - US-018
+- What was implemented: Fixed all 30 lint warnings in libs/shared-dtos/src/errors/domain-errors.ts
+- Files changed:
+  - libs/shared-dtos/src/errors/domain-errors.ts
+- **Learnings for future iterations:**
+  - domain-errors.ts contains 6 exception classes (ResumeParserException, ReportGeneratorException, JDExtractorException, ScoringEngineException, AppGatewayException, DatabaseException) and 1 factory class (DomainErrorFactory)
+  - All 30 warnings: 6 accessibility modifiers (static factory methods), 24 `any` types (details and context parameters)
+  - Use `eslint-disable-next-line @typescript-eslint/no-explicit-any` for `details?: any` and `context?: Record<string, any>` parameters in exception constructors and factory methods
+  - Pre-existing typecheck error in structured-logging.ts (TS2698) remains - will be fixed in US-024
+---
