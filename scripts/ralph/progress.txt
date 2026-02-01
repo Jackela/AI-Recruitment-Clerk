@@ -265,3 +265,16 @@ Started: 2026-02-01
   - Contracts directory follows Design by Contract (DbC) pattern with preconditions, postconditions, and invariants
   - PRD was restructured with 50 fine-grained user stories to prevent timeout issues
 ---
+
+## 2026-02-01 - US-016
+- What was implemented: Fixed all 12 lint warnings in libs/shared-dtos/src/decorators/error-handling.decorators.ts
+- Files changed:
+  - libs/shared-dtos/src/decorators/error-handling.decorators.ts
+- **Learnings for future iterations:**
+  - TypeScript decorator parameters require `any` type for `target` parameter - use eslint-disable
+  - Method descriptor replacement functions need `any[]` for spread args - use eslint-disable
+  - Class constructor types `{ new (...args: any[]): {} }` need eslint-disable on the same line as the type
+  - Non-null assertions can be replaced with `Type | undefined` declaration + type assertion (`as Type`)
+  - `as any` type assertions in decorator configs need individual eslint-disable comments
+  - 12 warnings fixed: 11 `any` types preserved with eslint-disable, 1 non-null assertion replaced with type assertion
+---

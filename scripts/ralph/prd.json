@@ -187,7 +187,7 @@
       "title": "Fix shared-dtos decorators/error-handling.decorators.ts",
       "description": "Fix lint issues in this single file (10 warnings)",
       "priority": 16,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in error-handling.decorators.ts",
         "npm run typecheck passes"
