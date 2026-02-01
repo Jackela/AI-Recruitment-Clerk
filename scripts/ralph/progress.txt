@@ -47,3 +47,16 @@ Started: 2026-02-01
   - Function types: `getHandler()` -> `(...args: unknown[]) => unknown`, `getClass()` -> `new (...args: unknown[]) => unknown`
   - 49 warnings fixed: 26 accessibility modifiers, 8 return types, 6 `any` type replacements
 ---
+
+## 2026-02-01 - US-004
+- What was implemented: Fixed all 18 lint warnings in candidate-scoring-domain library
+- Files changed:
+  - libs/candidate-scoring-domain/src/application/dtos/feedback-scoring.dto.ts
+  - libs/candidate-scoring-domain/src/application/dtos/scoring-templates.dto.ts
+  - libs/candidate-scoring-domain/src/domain/domain-services/skills-taxonomy.ts
+- **Learnings for future iterations:**
+  - Domain libraries have DTOs in `application/dtos/` and services in `domain/domain-services/`
+  - Replace `any` with `Record<string, unknown>` for questionnaire data and scoring breakdowns
+  - SkillsTaxonomy class has 9 public static methods that needed accessibility modifiers
+  - 18 warnings fixed: 15 accessibility modifiers, 3 `any` type replacements
+---
