@@ -11,14 +11,14 @@ export class OptionalInfo extends ValueObject<{
    * Performs the additional feedback operation.
    * @returns The string | undefined.
    */
-  get additionalFeedback(): string | undefined {
+  public get additionalFeedback(): string | undefined {
     return this.props.additionalFeedback;
   }
   /**
    * Performs the contact preference operation.
    * @returns The string | undefined.
    */
-  get contactPreference(): string | undefined {
+  public get contactPreference(): string | undefined {
     return this.props.contactPreference;
   }
 }

@@ -19,7 +19,7 @@ export class SubmissionQuality extends ValueObject<{
    * @param submission - The submission.
    * @returns The SubmissionQuality.
    */
-  static calculate(submission: QuestionnaireSubmission): SubmissionQuality {
+  public static calculate(submission: QuestionnaireSubmission): SubmissionQuality {
     const totalTextLength = submission.getSummary().textLength;
     const completionRate = submission.getSummary().completionRate;
     const detailedAnswers = SubmissionQuality.countDetailedAnswers(submission);
@@ -68,7 +68,8 @@ export class SubmissionQuality extends ValueObject<{
    * @param data - The data.
    * @returns The SubmissionQuality.
    */
-  static restore(data: any): SubmissionQuality {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): SubmissionQuality {
     return new SubmissionQuality(data);
   }
 
@@ -116,7 +117,7 @@ export class SubmissionQuality extends ValueObject<{
    * Calculates score.
    * @returns The QualityScore.
    */
-  calculateScore(): QualityScore {
+  public calculateScore(): QualityScore {
     return new QualityScore({ value: this.props.qualityScore });
   }
 
@@ -124,7 +125,7 @@ export class SubmissionQuality extends ValueObject<{
    * Performs the is bonus eligible operation.
    * @returns The boolean value.
    */
-  isBonusEligible(): boolean {
+  public isBonusEligible(): boolean {
     return this.props.bonusEligible;
   }
 
@@ -132,7 +133,7 @@ export class SubmissionQuality extends ValueObject<{
    * Retrieves quality score.
    * @returns The number value.
    */
-  getQualityScore(): number {
+  public getQualityScore(): number {
     return this.props.qualityScore;
   }
 
@@ -140,7 +141,7 @@ export class SubmissionQuality extends ValueObject<{
    * Retrieves quality reasons.
    * @returns The an array of string value.
    */
-  getQualityReasons(): string[] {
+  public getQualityReasons(): string[] {
     return this.props.qualityReasons;
   }
 
@@ -148,7 +149,7 @@ export class SubmissionQuality extends ValueObject<{
    * Retrieves metrics.
    * @returns The QualityMetrics.
    */
-  getMetrics(): QualityMetrics {
+  public getMetrics(): QualityMetrics {
     return new QualityMetrics(this.props);
   }
 
@@ -156,7 +157,7 @@ export class SubmissionQuality extends ValueObject<{
    * Retrieves total text length.
    * @returns The number value.
    */
-  getTotalTextLength(): number {
+  public getTotalTextLength(): number {
     return this.props.totalTextLength;
   }
 
@@ -164,7 +165,7 @@ export class SubmissionQuality extends ValueObject<{
    * Performs the has detailed feedback operation.
    * @returns The boolean value.
    */
-  hasDetailedFeedback(): boolean {
+  public hasDetailedFeedback(): boolean {
     return this.props.detailedAnswers >= 3;
   }
 }
