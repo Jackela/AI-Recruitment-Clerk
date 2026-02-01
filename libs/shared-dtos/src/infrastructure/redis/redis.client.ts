@@ -53,7 +53,7 @@ export class RedisClient implements OnModuleDestroy {
       });
     } else {
       this.redis = new Redis({
-        host: redisHost!,
+        host: redisHost,
         port: parseInt(
           process.env.REDISPORT ||
             process.env.REDIS_PORT ||
@@ -78,7 +78,7 @@ export class RedisClient implements OnModuleDestroy {
    * Performs the on module destroy operation.
    * @returns The result of the operation.
    */
-  async onModuleDestroy() {
+  public async onModuleDestroy(): Promise<void> {
     if (this.redis) {
       await this.redis.disconnect();
     }
@@ -87,7 +87,7 @@ export class RedisClient implements OnModuleDestroy {
   /**
    * 获取Redis实例
    */
-  getClient(): Redis {
+  public getClient(): Redis {
     if (!this.redis) {
       throw new Error('Redis client is not available in in-memory mode');
     }
@@ -97,7 +97,7 @@ export class RedisClient implements OnModuleDestroy {
   /**
    * 检查连接状态
    */
-  isRedisConnected(): boolean {
+  public isRedisConnected(): boolean {
     return (
       this.isConnected && this.redis !== null && this.redis.status === 'ready'
     );
@@ -106,7 +106,7 @@ export class RedisClient implements OnModuleDestroy {
   /**
    * 手动连接Redis
    */
-  async connect(): Promise<void> {
+  public async connect(): Promise<void> {
     if (this.useInMemoryStore) {
       this.isConnected = true;
       return;
@@ -119,7 +119,7 @@ export class RedisClient implements OnModuleDestroy {
   /**
    * 设置键值对
    */
-  async set(key: string, value: string, ttl?: number): Promise<'OK'> {
+  public async set(key: string, value: string, ttl?: number): Promise<'OK'> {
     await this.ensureConnection();
     const normalizedValue = String(value);
     if (this.useInMemoryStore) {
@@ -128,17 +128,17 @@ export class RedisClient implements OnModuleDestroy {
       return 'OK';
     }
     if (ttl) {
-      await this.redis!.setex(key, ttl, normalizedValue);
+      await this.redis?.setex(key, ttl, normalizedValue);
       return 'OK';
     }
-    await this.redis!.set(key, normalizedValue);
+    await this.redis?.set(key, normalizedValue);
     return 'OK';
   }
 
   /**
    * 获取值
    */
-  async get(key: string): Promise<string | null> {
+  public async get(key: string): Promise<string | null> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
       const entry = this.memoryStore.get(key);
@@ -149,38 +149,38 @@ export class RedisClient implements OnModuleDestroy {
       }
       return entry.value;
     }
-    return this.redis!.get(key);
+    return this.redis?.get(key) ?? null;
   }
 
   /**
    * 删除键
    */
-  async del(key: string): Promise<number> {
+  public async del(key: string): Promise<number> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
       const existed = this.memoryStore.delete(key);
       return existed ? 1 : 0;
     }
-    return this.redis!.del(key);
+    return this.redis?.del(key) ?? 0;
   }
 
   /**
    * 检查键是否存在
    */
-  async exists(key: string): Promise<boolean> {
+  public async exists(key: string): Promise<boolean> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
       const val = await this.get(key);
       return val !== null;
     }
-    const result = await this.redis!.exists(key);
+    const result = (await this.redis?.exists(key)) ?? 0;
     return result === 1;
   }
 
   /**
    * 设置过期时间
    */
-  async expire(key: string, seconds: number): Promise<boolean> {
+  public async expire(key: string, seconds: number): Promise<boolean> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
       const entry = this.memoryStore.get(key);
@@ -189,14 +189,14 @@ export class RedisClient implements OnModuleDestroy {
       this.memoryStore.set(key, entry);
       return true;
     }
-    const result = await this.redis!.expire(key, seconds);
+    const result = (await this.redis?.expire(key, seconds)) ?? 0;
     return result === 1;
   }
 
   /**
    * 获取TTL
    */
-  async ttl(key: string): Promise<number> {
+  public async ttl(key: string): Promise<number> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
       const entry = this.memoryStore.get(key);
@@ -205,13 +205,13 @@ export class RedisClient implements OnModuleDestroy {
       const remainingMs = entry.expireAt - Date.now();
       return remainingMs > 0 ? Math.ceil(remainingMs / 1000) : -2;
     }
-    return this.redis!.ttl(key);
+    return this.redis?.ttl(key) ?? -2;
   }
 
   /**
    * 原子递增
    */
-  async incr(key: string): Promise<number> {
+  public async incr(key: string): Promise<number> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
       const now = Date.now();
@@ -224,13 +224,13 @@ export class RedisClient implements OnModuleDestroy {
       this.memoryStore.set(key, { value: String(next), expireAt });
       return next;
     }
-    return this.redis!.incr(key);
+    return this.redis?.incr(key) ?? 0;
   }
 
   /**
    * 原子递减
    */
-  async decr(key: string): Promise<number> {
+  public async decr(key: string): Promise<number> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
       const now = Date.now();
@@ -243,13 +243,13 @@ export class RedisClient implements OnModuleDestroy {
       this.memoryStore.set(key, { value: String(next), expireAt });
       return next;
     }
-    return this.redis!.decr(key);
+    return this.redis?.decr(key) ?? 0;
   }
 
   /**
    * 批量设置
    */
-  async mset(keyValues: Record<string, string>): Promise<void> {
+  public async mset(keyValues: Record<string, string>): Promise<void> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
       for (const [k, v] of Object.entries(keyValues)) {
@@ -258,13 +258,13 @@ export class RedisClient implements OnModuleDestroy {
       return;
     }
     const args = Object.entries(keyValues).flat();
-    await this.redis!.mset(...args);
+    await this.redis?.mset(...args);
   }
 
   /**
    * 批量获取
    */
-  async mget(keys: string[]): Promise<Array<string | null>> {
+  public async mget(keys: string[]): Promise<Array<string | null>> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
       const results: Array<string | null> = [];
@@ -273,13 +273,13 @@ export class RedisClient implements OnModuleDestroy {
       }
       return results;
     }
-    return this.redis!.mget(...keys);
+    return this.redis?.mget(...keys) ?? [];
   }
 
   /**
    * Hash操作 - 设置字段
    */
-  async hset(key: string, field: string, value: string): Promise<number> {
+  public async hset(key: string, field: string, value: string): Promise<number> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
       const now = Date.now();
@@ -302,13 +302,13 @@ export class RedisClient implements OnModuleDestroy {
       });
       return isNew;
     }
-    return this.redis!.hset(key, field, value);
+    return this.redis?.hset(key, field, value) ?? 0;
   }
 
   /**
    * Hash操作 - 获取字段
    */
-  async hget(key: string, field: string): Promise<string | null> {
+  public async hget(key: string, field: string): Promise<string | null> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
       const now = Date.now();
@@ -325,13 +325,13 @@ export class RedisClient implements OnModuleDestroy {
         return null;
       }
     }
-    return this.redis!.hget(key, field);
+    return this.redis?.hget(key, field) ?? null;
   }
 
   /**
    * Hash操作 - 获取所有字段
    */
-  async hgetall(key: string): Promise<Record<string, string>> {
+  public async hgetall(key: string): Promise<Record<string, string>> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
       const now = Date.now();
@@ -347,13 +347,13 @@ export class RedisClient implements OnModuleDestroy {
         return {};
       }
     }
-    return this.redis!.hgetall(key);
+    return this.redis?.hgetall(key) ?? {};
   }
 
   /**
    * Hash操作 - 删除字段
    */
-  async hdel(key: string, field: string): Promise<number> {
+  public async hdel(key: string, field: string): Promise<number> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
       const now = Date.now();
@@ -377,13 +377,13 @@ export class RedisClient implements OnModuleDestroy {
       });
       return existed;
     }
-    return this.redis!.hdel(key, field);
+    return this.redis?.hdel(key, field) ?? 0;
   }
 
   /**
    * 获取匹配的键
    */
-  async keys(pattern: string): Promise<string[]> {
+  public async keys(pattern: string): Promise<string[]> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
       const regex = new RegExp(
@@ -402,19 +402,20 @@ export class RedisClient implements OnModuleDestroy {
       }
       return keys;
     }
-    return this.redis!.keys(pattern);
+    return this.redis?.keys(pattern) ?? [];
   }
 
   /**
    * 执行Lua脚本
    */
-  async eval(script: string, keys: string[], args: string[]): Promise<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async eval(script: string, keys: string[], args: string[]): Promise<any> {
     await this.ensureConnection();
     if (this.useInMemoryStore) {
       // Not implemented for in-memory mode
       return null;
     }
-    return this.redis!.eval(script, keys.length, ...keys, ...args);
+    return this.redis?.eval(script, keys.length, ...keys, ...args) ?? null;
   }
 
   private async ensureConnection(): Promise<void> {

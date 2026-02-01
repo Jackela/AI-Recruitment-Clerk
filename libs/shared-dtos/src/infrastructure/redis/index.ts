@@ -18,10 +18,10 @@ export interface ICacheService {
 /**
  * Defines the shape of the i session cache.
  */
-export interface ISessionCache {
-  cacheSession(session: any): Promise<void>;
-  getSessionById(sessionId: string): Promise<any | null>;
-  getSessionByIP(ip: string): Promise<any | null>;
+export interface ISessionCache<T = unknown> {
+  cacheSession(session: T): Promise<void>;
+  getSessionById(sessionId: string): Promise<T | null>;
+  getSessionByIP(ip: string): Promise<T | null>;
   removeSession(sessionId: string, ip: string): Promise<void>;
 }
 

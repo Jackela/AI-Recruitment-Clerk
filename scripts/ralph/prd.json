@@ -302,7 +302,7 @@
       "title": "Fix shared-dtos encryption/encryption.service.ts",
       "description": "Fix lint issues in encryption.service.ts",
       "priority": 25,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in encryption.service.ts",
         "npm run typecheck passes"
@@ -314,7 +314,7 @@
       "title": "Fix shared-dtos gemini/gemini.client.ts",
       "description": "Fix lint issues in gemini.client.ts",
       "priority": 26,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in gemini.client.ts",
         "npm run typecheck passes"
@@ -326,7 +326,7 @@
       "title": "Fix shared-dtos infrastructure/redis/*.ts",
       "description": "Fix lint issues in redis infrastructure (4 files)",
       "priority": 27,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in infrastructure/redis/",
         "npm run typecheck passes"
