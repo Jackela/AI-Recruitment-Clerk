@@ -40,6 +40,7 @@ interface ErrorHandlingConfig {
  */
 export function HandleErrors(config: ErrorHandlingConfig = {}) {
   return function (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     target: any,
     propertyName: string,
     descriptor: PropertyDescriptor,
@@ -49,6 +50,7 @@ export function HandleErrors(config: ErrorHandlingConfig = {}) {
     const methodName = propertyName;
     const logger = config.logger || new Logger(`${className}.${methodName}`);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     descriptor.value = async function (...args: any[]) {
       const operationContext =
         config.operationContext || `${className}.${methodName}`;
@@ -86,7 +88,7 @@ export function HandleErrors(config: ErrorHandlingConfig = {}) {
  * Sets default error handling behavior for all methods in the class
  */
 export function DefaultErrorHandling(config: ErrorHandlingConfig) {
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-explicit-any
   return function <T extends { new (...args: any[]): {} }>(constructor: T) {
     const className = constructor.name;
     const logger = config.logger || new Logger(className);
@@ -105,6 +107,7 @@ export function DefaultErrorHandling(config: ErrorHandlingConfig) {
  */
 export function ErrorContext() {
   return function (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     target: any,
     propertyName: string | symbol | undefined,
     parameterIndex: number,
@@ -154,6 +157,7 @@ export function RetryWithErrorHandling(options: {
   } = options;
 
   return function (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     target: any,
     propertyName: string,
     descriptor: PropertyDescriptor,
@@ -163,8 +167,9 @@ export function RetryWithErrorHandling(options: {
     const logger =
       errorConfig.logger || new Logger(`${className}.${propertyName}`);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     descriptor.value = async function (...args: any[]) {
-      let lastError: Error;
+      let lastError: Error | undefined;
       let delay = baseDelay;
 
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -195,9 +200,9 @@ export function RetryWithErrorHandling(options: {
         }
       }
 
-      // Transform final error
+      // Transform final error (lastError is guaranteed to be defined here since we only reach this point after catching an error)
       const enhancedError = transformError(
-        lastError!,
+        lastError as Error,
         errorConfig,
         `${className}.${propertyName}`,
       );
@@ -228,6 +233,7 @@ export function MonitorPerformance(
   } = config;
 
   return function (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     target: any,
     propertyName: string,
     descriptor: PropertyDescriptor,
@@ -237,6 +243,7 @@ export function MonitorPerformance(
     const logger =
       errorConfig.logger || new Logger(`${className}.${propertyName}`);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     descriptor.value = async function (...args: any[]) {
       const startTime = Date.now();
       const operationContext = `${className}.${propertyName}`;
@@ -270,6 +277,7 @@ export function MonitorPerformance(
               500,
               { executionTime, threshold: slowThreshold },
             );
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             performanceError.withSeverity('medium' as any);
             throw performanceError;
           } else {
@@ -323,6 +331,7 @@ function transformError(
 
   // Create new enhanced exception
   const enhancedError = new EnhancedAppException(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (config.defaultErrorType as any) || 'SYSTEM_ERROR',
     config.defaultErrorCode || 'OPERATION_FAILED',
     error.message || 'An unexpected error occurred',
@@ -333,6 +342,7 @@ function transformError(
 
   // Apply configuration
   if (config.defaultSeverity) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     enhancedError.withSeverity(config.defaultSeverity as any);
   }
   if (config.recoveryStrategies) {
