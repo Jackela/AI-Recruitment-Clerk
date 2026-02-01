@@ -158,7 +158,7 @@
       "title": "Fix remaining shared-dtos issues in privacy/",
       "description": "Manually fix remaining lint issues in libs/shared-dtos/src/privacy/",
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in libs/shared-dtos/src/privacy/",
         "npm run typecheck passes"

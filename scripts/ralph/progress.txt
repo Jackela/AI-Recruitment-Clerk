@@ -216,3 +216,18 @@ Started: 2026-02-01
   - Non-null assertions should be replaced with nullish coalescing (`??`) with appropriate default values
   - Interface methods for external services (IDomainEventBus, IAuditLogger) commonly need `any` for backward compatibility
 ---
+
+## 2026-02-01 - US-013
+- What was implemented: Fixed all ~285 lint warnings in libs/shared-dtos/src/privacy/
+- Files changed:
+  - libs/shared-dtos/src/privacy/consent.dto.ts (~100 warnings)
+  - libs/shared-dtos/src/privacy/data-subject-rights.dto.ts (~122 warnings)
+  - libs/shared-dtos/src/privacy/privacy-infrastructure.dto.ts (~135 warnings)
+  - libs/shared-dtos/src/privacy/privacy-simple.dto.ts (~54 warnings)
+- **Learnings for future iterations:**
+  - Privacy DTOs follow GDPR compliance patterns (Articles 15-21, 30)
+  - Replace `any` with `unknown` for generic data fields (currentValue, newValue, data)
+  - Replace `any` with `Record<string, unknown>` for metadata, requestDetails, completionData, verificationData
+  - ~95% of warnings were accessibility modifiers (`public` keyword on class properties and methods)
+  - ~5% of warnings were `any` type replacements
+---
