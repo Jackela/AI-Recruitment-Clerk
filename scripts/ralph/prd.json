@@ -117,7 +117,7 @@
       "title": "Run eslint --fix on shared-dtos (batch 1)",
       "description": "Auto-fix lint issues in shared-dtos library",
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Run npx nx lint shared-dtos --fix",
         "npm run typecheck passes"

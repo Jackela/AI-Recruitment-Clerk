@@ -162,3 +162,19 @@ Started: 2026-02-01
   - Use eslint-disable-next-line for index signatures that need `any` type for dynamic keys
   - After eslint --fix, only 1 warning remained (the index signature any type)
 ---
+
+## 2026-02-01 - US-010
+- What was implemented: Ran eslint --fix on shared-dtos library
+- Files changed:
+  - libs/shared-dtos/src/contracts/dbc.monitoring.test.ts
+  - libs/shared-dtos/src/domains/incentive.service.spec.ts
+  - libs/shared-dtos/src/domains/questionnaire.test.ts
+  - libs/shared-dtos/src/domains/usage-limit.service.spec.ts
+  - libs/shared-dtos/src/infrastructure/redis/__tests__/redis-infrastructure.test.ts
+- **Learnings for future iterations:**
+  - shared-dtos is a massive library with 1586 remaining warnings after eslint --fix
+  - eslint --fix mainly fixed import ordering issues in test files
+  - Most warnings are accessibility modifiers (~900+) and `any` type usage (~300+)
+  - Subsequent user stories (US-011 to US-019) will handle manual fixes by directory
+  - Test files (.test.ts, .spec.ts) also need accessibility modifiers for mock classes
+---
