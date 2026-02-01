@@ -65,90 +65,90 @@ export enum BreachStatus {
  */
 export class DataProcessingRecord {
   @IsUUID()
-  id!: string;
+  public id!: string;
 
   @IsString()
   @IsNotEmpty()
-  name!: string;
+  public name!: string;
 
   @IsString()
   @IsNotEmpty()
-  description!: string;
+  public description!: string;
 
   @IsString()
   @IsNotEmpty()
-  dataController!: string; // Organization name
+  public dataController!: string; // Organization name
 
   @IsString()
   @IsNotEmpty()
-  dataProcessorService!: string; // Which microservice
+  public dataProcessorService!: string; // Which microservice
 
   @IsArray()
   @IsString({ each: true })
-  purposesOfProcessing!: string[];
+  public purposesOfProcessing!: string[];
 
   @IsArray()
   @IsString({ each: true })
-  categoriesOfDataSubjects!: string[]; // e.g., "job applicants", "employees", "users"
+  public categoriesOfDataSubjects!: string[]; // e.g., "job applicants", "employees", "users"
 
   @IsArray()
   @IsString({ each: true })
-  categoriesOfPersonalData!: string[]; // e.g., "contact details", "employment history"
+  public categoriesOfPersonalData!: string[]; // e.g., "contact details", "employment history"
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  categoriesOfRecipients?: string[]; // Who receives the data
+  public categoriesOfRecipients?: string[]; // Who receives the data
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ThirdPartyTransfer)
   @IsOptional()
-  thirdPartyTransfers?: ThirdPartyTransfer[];
+  public thirdPartyTransfers?: ThirdPartyTransfer[];
 
   @IsString()
   @IsOptional()
-  retentionPeriod?: string; // e.g., "2 years", "until consent withdrawal"
+  public retentionPeriod?: string; // e.g., "2 years", "until consent withdrawal"
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => SecurityMeasure)
   @IsOptional()
-  technicalSafeguards?: SecurityMeasure[];
+  public technicalSafeguards?: SecurityMeasure[];
 
   @IsEnum(ProcessingLegalBasis)
-  legalBasis!: ProcessingLegalBasis;
+  public legalBasis!: ProcessingLegalBasis;
 
   @IsString()
   @IsOptional()
-  legitimateInterestsAssessment?: string; // For Article 6(1)(f)
+  public legitimateInterestsAssessment?: string; // For Article 6(1)(f)
 
   @IsBoolean()
   @IsOptional()
-  involvesSpecialCategories?: boolean; // Article 9 data
+  public involvesSpecialCategories?: boolean; // Article 9 data
 
   @IsString()
   @IsOptional()
-  specialCategoriesLegalBasis?: string;
+  public specialCategoriesLegalBasis?: string;
 
   @IsBoolean()
   @IsOptional()
-  involvesAutomatedDecisionMaking?: boolean;
+  public involvesAutomatedDecisionMaking?: boolean;
 
   @IsString()
   @IsOptional()
-  automatedDecisionMakingLogic?: string;
+  public automatedDecisionMakingLogic?: string;
 
   @IsDateString()
   @IsOptional()
-  lastReview?: Date;
+  public lastReview?: Date;
 
   @IsString()
   @IsOptional()
-  reviewedBy?: string;
+  public reviewedBy?: string;
 
-  createdAt!: Date;
-  updatedAt!: Date;
+  public createdAt!: Date;
+  public updatedAt!: Date;
 }
 
 /**
@@ -157,29 +157,29 @@ export class DataProcessingRecord {
 export class ThirdPartyTransfer {
   @IsString()
   @IsNotEmpty()
-  recipient!: string;
+  public recipient!: string;
 
   @IsString()
   @IsNotEmpty()
-  country!: string;
+  public country!: string;
 
   @IsString()
   @IsOptional()
-  adequacyDecision?: string; // EU Commission adequacy decision
+  public adequacyDecision?: string; // EU Commission adequacy decision
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  safeguards?: string[]; // SCCs, BCRs, etc.
+  public safeguards?: string[]; // SCCs, BCRs, etc.
 
   @IsString()
   @IsOptional()
-  purpose?: string;
+  public purpose?: string;
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  dataCategories?: string[];
+  public dataCategories?: string[];
 }
 
 /**
@@ -188,19 +188,19 @@ export class ThirdPartyTransfer {
 export class SecurityMeasure {
   @IsString()
   @IsNotEmpty()
-  measure!: string;
+  public measure!: string;
 
   @IsString()
   @IsOptional()
-  description?: string;
+  public description?: string;
 
   @IsString()
   @IsOptional()
-  implementation?: string;
+  public implementation?: string;
 
   @IsDateString()
   @IsOptional()
-  lastAssessed?: Date;
+  public lastAssessed?: Date;
 }
 
 /**
@@ -208,44 +208,44 @@ export class SecurityMeasure {
  */
 export class DataRetentionPolicy {
   @IsUUID()
-  id!: string;
+  public id!: string;
 
   @IsString()
   @IsNotEmpty()
-  name!: string;
+  public name!: string;
 
   @IsString()
   @IsNotEmpty()
-  dataCategory!: string;
+  public dataCategory!: string;
 
   @IsString()
   @IsOptional()
-  description?: string;
+  public description?: string;
 
   @IsNumber()
-  retentionPeriodDays!: number;
+  public retentionPeriodDays!: number;
 
   @IsString()
   @IsOptional()
-  retentionBasis?: string; // Legal requirement, business need, etc.
+  public retentionBasis?: string; // Legal requirement, business need, etc.
 
   @IsEnum(DataRetentionStatus)
   @IsOptional()
-  defaultAction?: DataRetentionStatus; // What happens when retention expires
+  public defaultAction?: DataRetentionStatus; // What happens when retention expires
 
   @IsBoolean()
-  allowUserDeletion!: boolean;
+  public allowUserDeletion!: boolean;
 
   @IsBoolean()
-  hasLegalHoldExemption!: boolean;
+  public hasLegalHoldExemption!: boolean;
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  applicableServices?: string[]; // Which microservices this applies to
+  public applicableServices?: string[]; // Which microservices this applies to
 
   @IsOptional()
-  automationRules?: {
+  public automationRules?: {
     enableAutoDeletion: boolean;
     notificationDaysBefore: number;
     requireApproval: boolean;
@@ -253,10 +253,10 @@ export class DataRetentionPolicy {
   };
 
   @IsBoolean()
-  isActive!: boolean;
+  public isActive!: boolean;
 
-  createdAt!: Date;
-  updatedAt!: Date;
+  public createdAt!: Date;
+  public updatedAt!: Date;
 }
 
 /**
@@ -264,46 +264,46 @@ export class DataRetentionPolicy {
  */
 export class DataRetentionRecord {
   @IsUUID()
-  id!: string;
+  public id!: string;
 
   @IsString()
   @IsNotEmpty()
-  dataIdentifier!: string; // User ID, document ID, etc.
+  public dataIdentifier!: string; // User ID, document ID, etc.
 
   @IsString()
   @IsNotEmpty()
-  dataCategory!: string;
+  public dataCategory!: string;
 
   @IsUUID()
-  retentionPolicyId!: string;
+  public retentionPolicyId!: string;
 
   @IsDateString()
-  dataCreated!: Date;
+  public dataCreated!: Date;
 
   @IsDateString()
-  retentionExpiry!: Date;
+  public retentionExpiry!: Date;
 
   @IsEnum(DataRetentionStatus)
-  status!: DataRetentionStatus;
+  public status!: DataRetentionStatus;
 
   @IsDateString()
   @IsOptional()
-  deletionScheduled?: Date;
+  public deletionScheduled?: Date;
 
   @IsDateString()
   @IsOptional()
-  deletionCompleted?: Date;
+  public deletionCompleted?: Date;
 
   @IsString()
   @IsOptional()
-  legalHoldReason?: string;
+  public legalHoldReason?: string;
 
   @IsString()
   @IsOptional()
-  notes?: string;
+  public notes?: string;
 
-  createdAt!: Date;
-  updatedAt!: Date;
+  public createdAt!: Date;
+  public updatedAt!: Date;
 }
 
 /**
@@ -311,38 +311,38 @@ export class DataRetentionRecord {
  */
 export class PrivacyImpactAssessment {
   @IsUUID()
-  id!: string;
+  public id!: string;
 
   @IsString()
   @IsNotEmpty()
-  name!: string;
+  public name!: string;
 
   @IsString()
   @IsNotEmpty()
-  description!: string;
+  public description!: string;
 
   @IsString()
   @IsNotEmpty()
-  projectOwner!: string;
+  public projectOwner!: string;
 
   @IsString()
   @IsNotEmpty()
-  dataController!: string;
+  public dataController!: string;
 
   @IsArray()
   @IsString({ each: true })
-  processingPurposes!: string[];
+  public processingPurposes!: string[];
 
   @IsArray()
   @IsString({ each: true })
-  dataCategories!: string[];
+  public dataCategories!: string[];
 
   @IsArray()
   @IsString({ each: true })
-  dataSubjects!: string[];
+  public dataSubjects!: string[];
 
   @IsOptional()
-  riskAssessment?: {
+  public riskAssessment?: {
     identifiedRisks: RiskAssessment[];
     residualRiskLevel: 'low' | 'medium' | 'high' | 'very_high';
     mitigationMeasures: string[];
@@ -350,7 +350,7 @@ export class PrivacyImpactAssessment {
   };
 
   @IsOptional()
-  stakeholderConsultation?: {
+  public stakeholderConsultation?: {
     dpoConducted: boolean;
     dataSubjectsConsulted: boolean;
     externalConsultantsUsed: boolean;
@@ -364,22 +364,22 @@ export class PrivacyImpactAssessment {
     'rejected',
     'requires_revision',
   ])
-  status!: string;
+  public status!: string;
 
   @IsString()
   @IsOptional()
-  reviewedBy?: string;
+  public reviewedBy?: string;
 
   @IsDateString()
   @IsOptional()
-  approvalDate?: Date;
+  public approvalDate?: Date;
 
   @IsDateString()
   @IsOptional()
-  nextReviewDate?: Date;
+  public nextReviewDate?: Date;
 
-  createdAt!: Date;
-  updatedAt!: Date;
+  public createdAt!: Date;
+  public updatedAt!: Date;
 }
 
 /**
@@ -388,23 +388,23 @@ export class PrivacyImpactAssessment {
 export class RiskAssessment {
   @IsString()
   @IsNotEmpty()
-  riskDescription!: string;
+  public riskDescription!: string;
 
   @IsEnum(['low', 'medium', 'high', 'very_high'])
-  likelihood!: string;
+  public likelihood!: string;
 
   @IsEnum(['low', 'medium', 'high', 'very_high'])
-  impact!: string;
+  public impact!: string;
 
   @IsEnum(['low', 'medium', 'high', 'very_high'])
-  overallRisk!: string;
+  public overallRisk!: string;
 
   @IsArray()
   @IsString({ each: true })
-  mitigations!: string[];
+  public mitigations!: string[];
 
   @IsEnum(['low', 'medium', 'high', 'very_high'])
-  residualRisk!: string;
+  public residualRisk!: string;
 }
 
 /**
@@ -412,52 +412,52 @@ export class RiskAssessment {
  */
 export class DataBreachRecord {
   @IsUUID()
-  id!: string;
+  public id!: string;
 
   @IsString()
   @IsNotEmpty()
-  title!: string;
+  public title!: string;
 
   @IsString()
   @IsNotEmpty()
-  description!: string;
+  public description!: string;
 
   @IsEnum(BreachType)
-  breachType!: BreachType;
+  public breachType!: BreachType;
 
   @IsEnum(BreachSeverity)
-  severity!: BreachSeverity;
+  public severity!: BreachSeverity;
 
   @IsEnum(BreachStatus)
-  status!: BreachStatus;
+  public status!: BreachStatus;
 
   @IsDateString()
-  discoveryDate!: Date;
-
-  @IsDateString()
-  @IsOptional()
-  estimatedOccurrenceDate?: Date;
+  public discoveryDate!: Date;
 
   @IsDateString()
   @IsOptional()
-  containmentDate?: Date;
+  public estimatedOccurrenceDate?: Date;
+
+  @IsDateString()
+  @IsOptional()
+  public containmentDate?: Date;
 
   @IsNumber()
   @IsOptional()
-  affectedRecordsCount?: number;
+  public affectedRecordsCount?: number;
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  affectedDataCategories?: string[];
+  public affectedDataCategories?: string[];
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  affectedDataSubjects?: string[];
+  public affectedDataSubjects?: string[];
 
   @IsOptional()
-  rootCause?: {
+  public rootCause?: {
     category:
       | 'human_error'
       | 'system_failure'
@@ -469,7 +469,7 @@ export class DataBreachRecord {
   };
 
   @IsOptional()
-  riskAssessment?: {
+  public riskAssessment?: {
     likelihoodOfHarm: 'low' | 'medium' | 'high';
     potentialConsequences: string[];
     requiresNotification: boolean;
@@ -481,28 +481,28 @@ export class DataBreachRecord {
   @ValidateNested({ each: true })
   @Type(() => BreachNotification)
   @IsOptional()
-  notifications?: BreachNotification[];
+  public notifications?: BreachNotification[];
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  immediateMitigation?: string[];
+  public immediateMitigation?: string[];
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  longTermPreventionMeasures?: string[];
+  public longTermPreventionMeasures?: string[];
 
   @IsString()
   @IsOptional()
-  reportedBy?: string;
+  public reportedBy?: string;
 
   @IsString()
   @IsOptional()
-  investigatedBy?: string;
+  public investigatedBy?: string;
 
-  createdAt!: Date;
-  updatedAt!: Date;
+  public createdAt!: Date;
+  public updatedAt!: Date;
 }
 
 /**
@@ -510,26 +510,26 @@ export class DataBreachRecord {
  */
 export class BreachNotification {
   @IsEnum(['supervisory_authority', 'data_subjects', 'internal', 'third_party'])
-  type!: string;
+  public type!: string;
 
   @IsDateString()
-  sentDate!: Date;
+  public sentDate!: Date;
 
   @IsString()
   @IsOptional()
-  recipient?: string;
+  public recipient?: string;
 
   @IsString()
   @IsOptional()
-  method?: string; // email, phone, postal, website notice, etc.
+  public method?: string; // email, phone, postal, website notice, etc.
 
   @IsString()
   @IsOptional()
-  confirmationReference?: string;
+  public confirmationReference?: string;
 
   @IsString()
   @IsOptional()
-  responseReceived?: string;
+  public responseReceived?: string;
 }
 
 /**
@@ -537,31 +537,31 @@ export class BreachNotification {
  */
 export class CrossBorderTransfer {
   @IsUUID()
-  id!: string;
+  public id!: string;
 
   @IsString()
   @IsNotEmpty()
-  transferName!: string;
+  public transferName!: string;
 
   @IsString()
   @IsNotEmpty()
-  dataExporter!: string; // EU entity
+  public dataExporter!: string; // EU entity
 
   @IsString()
   @IsNotEmpty()
-  dataImporter!: string; // Non-EU entity
+  public dataImporter!: string; // Non-EU entity
 
   @IsString()
   @IsNotEmpty()
-  destinationCountry!: string;
+  public destinationCountry!: string;
 
   @IsArray()
   @IsString({ each: true })
-  dataCategories!: string[];
+  public dataCategories!: string[];
 
   @IsArray()
   @IsString({ each: true })
-  purposesOfTransfer!: string[];
+  public purposesOfTransfer!: string[];
 
   @IsEnum([
     'adequacy_decision',
@@ -571,26 +571,26 @@ export class CrossBorderTransfer {
     'contract_necessity',
     'derogation',
   ])
-  legalMechanism!: string;
+  public legalMechanism!: string;
 
   @IsString()
   @IsOptional()
-  adequacyDecisionReference?: string;
+  public adequacyDecisionReference?: string;
 
   @IsUrl()
   @IsOptional()
-  sccDocumentUrl?: string;
+  public sccDocumentUrl?: string;
 
   @IsDateString()
   @IsOptional()
-  agreementDate?: Date;
+  public agreementDate?: Date;
 
   @IsDateString()
   @IsOptional()
-  reviewDate?: Date;
+  public reviewDate?: Date;
 
   @IsOptional()
-  riskAssessment?: {
+  public riskAssessment?: {
     countryRiskLevel: 'low' | 'medium' | 'high';
     additionalSafeguards: string[];
     monitoringMeasures: string[];
@@ -598,10 +598,10 @@ export class CrossBorderTransfer {
   };
 
   @IsBoolean()
-  isActive!: boolean;
+  public isActive!: boolean;
 
-  createdAt!: Date;
-  updatedAt!: Date;
+  public createdAt!: Date;
+  public updatedAt!: Date;
 }
 
 /**
@@ -609,44 +609,44 @@ export class CrossBorderTransfer {
  */
 export class PrivacyComplianceCheck {
   @IsUUID()
-  id!: string;
+  public id!: string;
 
   @IsString()
   @IsNotEmpty()
-  checkType!: string; // 'consent_validation', 'retention_compliance', 'transfer_monitoring', etc.
+  public checkType!: string; // 'consent_validation', 'retention_compliance', 'transfer_monitoring', etc.
 
   @IsString()
   @IsNotEmpty()
-  systemComponent!: string; // Which service/component was checked
+  public systemComponent!: string; // Which service/component was checked
 
   @IsEnum(['passed', 'failed', 'warning', 'not_applicable'])
-  result!: string;
+  public result!: string;
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  findings?: string[];
+  public findings?: string[];
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  recommendations?: string[];
+  public recommendations?: string[];
 
   @IsDateString()
-  checkDate!: Date;
+  public checkDate!: Date;
 
   @IsString()
   @IsOptional()
-  performedBy?: string;
+  public performedBy?: string;
 
   @IsDateString()
   @IsOptional()
-  nextCheckDate?: Date;
+  public nextCheckDate?: Date;
 
   @IsOptional()
-  metadata?: Record<string, any>;
+  public metadata?: Record<string, unknown>;
 
-  createdAt!: Date;
+  public createdAt!: Date;
 }
 
 /**
@@ -655,26 +655,26 @@ export class PrivacyComplianceCheck {
 export class CreateDataProcessingRecordDto {
   @IsString()
   @IsNotEmpty()
-  name!: string;
+  public name!: string;
 
   @IsString()
   @IsNotEmpty()
-  description!: string;
+  public description!: string;
 
   @IsString()
   @IsNotEmpty()
-  dataProcessorService!: string;
+  public dataProcessorService!: string;
 
   @IsArray()
   @IsString({ each: true })
-  purposesOfProcessing!: string[];
+  public purposesOfProcessing!: string[];
 
   @IsArray()
   @IsString({ each: true })
-  categoriesOfPersonalData!: string[];
+  public categoriesOfPersonalData!: string[];
 
   @IsEnum(ProcessingLegalBasis)
-  legalBasis!: ProcessingLegalBasis;
+  public legalBasis!: ProcessingLegalBasis;
 
   // ... other fields as optional for creation
 }
@@ -685,25 +685,25 @@ export class CreateDataProcessingRecordDto {
 export class CreateBreachRecordDto {
   @IsString()
   @IsNotEmpty()
-  title!: string;
+  public title!: string;
 
   @IsString()
   @IsNotEmpty()
-  description!: string;
+  public description!: string;
 
   @IsEnum(BreachType)
-  breachType!: BreachType;
+  public breachType!: BreachType;
 
   @IsEnum(BreachSeverity)
-  severity!: BreachSeverity;
+  public severity!: BreachSeverity;
 
   @IsDateString()
   @IsOptional()
-  discoveryDate?: Date;
+  public discoveryDate?: Date;
 
   @IsString()
   @IsOptional()
-  reportedBy?: string;
+  public reportedBy?: string;
 }
 
 /**
@@ -711,16 +711,16 @@ export class CreateBreachRecordDto {
  */
 export class UpdateRetentionStatusDto {
   @IsUUID()
-  recordId!: string;
+  public recordId!: string;
 
   @IsEnum(DataRetentionStatus)
-  status!: DataRetentionStatus;
+  public status!: DataRetentionStatus;
 
   @IsString()
   @IsOptional()
-  notes?: string;
+  public notes?: string;
 
   @IsString()
   @IsOptional()
-  performedBy?: string;
+  public performedBy?: string;
 }
