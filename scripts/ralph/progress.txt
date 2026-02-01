@@ -20,3 +20,18 @@ Started: 2026-02-01
   - Static methods need `public static` not just `static`
   - Typecheck passes after these fixes
 ---
+
+## 2026-02-01 - US-002
+- What was implemented: Added public accessibility modifiers and return types to shared-nats-client library
+- Files changed:
+  - libs/shared-nats-client/src/config/stream-configs.ts
+  - libs/shared-nats-client/src/nats-client.module.ts
+  - libs/shared-nats-client/src/services/nats-client.service.ts
+  - libs/shared-nats-client/src/services/nats-connection-manager.service.ts
+  - libs/shared-nats-client/src/services/nats-stream-manager.service.ts
+- **Learnings for future iterations:**
+  - NestJS modules need `DynamicModule` return type for static `forRoot()` methods (not generic object types)
+  - Use `import type { DynamicModule }` to avoid circular dependency issues
+  - NestJS lifecycle hooks like `onModuleInit` and `onModuleDestroy` need explicit `Promise<void>` return types
+  - 36 accessibility modifier warnings were fixed across 5 files
+---
