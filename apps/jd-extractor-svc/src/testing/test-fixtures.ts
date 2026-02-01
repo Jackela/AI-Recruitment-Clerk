@@ -3,16 +3,16 @@
  * Based on Resume Parser Service patterns for consistency
  */
 
-import {
+import type {
   JobJdSubmittedEvent,
   AnalysisJdExtractedEvent,
 } from '../dto/events.dto';
-import {
+import type {
   JdDTO,
   LlmExtractionRequest,
   LlmExtractionResponse,
 } from '@ai-recruitment-clerk/job-management-domain';
-import { NatsPublishResult } from '../nats/nats.client';
+import type { NatsPublishResult } from '../nats/nats.client';
 
 /**
  * Mock factory for JobJdSubmittedEvent

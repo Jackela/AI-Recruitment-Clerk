@@ -1,5 +1,5 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { GuestState } from './guest.state';
+import type { GuestState } from './guest.state';
 
 // Feature selector for the guest state
 export const selectGuestState = createFeatureSelector<GuestState>('guest');

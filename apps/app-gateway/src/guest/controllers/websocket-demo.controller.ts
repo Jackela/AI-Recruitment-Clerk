@@ -1,5 +1,5 @@
 import { Controller, Post, Body, Logger } from '@nestjs/common';
-import { WebSocketGateway } from '../../websocket/websocket.gateway';
+import type { WebSocketGateway } from '../../websocket/websocket.gateway';
 
 /**
  * Exposes endpoints for web socket demo.

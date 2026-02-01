@@ -4,13 +4,15 @@
  */
 
 import { HttpStatus } from '@nestjs/common';
-import {
-  AppException,
+import type {
   ErrorType,
-  ErrorDetails,
-} from '../common/error-handling.patterns';
+  ErrorDetails} from '../common/error-handling.patterns';
 import {
-  ErrorCorrelationContext,
+  AppException
+} from '../common/error-handling.patterns';
+import type {
+  ErrorCorrelationContext} from './error-correlation';
+import {
   ErrorCorrelationManager,
 } from './error-correlation';
 

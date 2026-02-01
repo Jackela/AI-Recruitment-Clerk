@@ -1,5 +1,5 @@
-import { DomainEvent } from './base/domain-event.js';
-import { SubmissionSummary } from '../value-objects/submission-summary.value-object.js';
+import type { DomainEvent } from './base/domain-event.js';
+import type { SubmissionSummary } from '../value-objects/submission-summary.value-object.js';
 
 /**
  * Represents the questionnaire submitted event event.

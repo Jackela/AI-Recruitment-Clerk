@@ -1,14 +1,16 @@
+import type {
+  CanActivate,
+  ExecutionContext} from '@nestjs/common';
 import {
   Injectable,
-  CanActivate,
-  ExecutionContext,
   ForbiddenException,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import type { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
-import {
+import type {
   Permission,
-  UserDto,
+  UserDto} from '@ai-recruitment-clerk/user-management-domain';
+import {
   hasAllPermissions,
 } from '@ai-recruitment-clerk/user-management-domain';
 

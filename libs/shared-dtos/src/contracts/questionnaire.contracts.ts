@@ -1,4 +1,4 @@
-import {
+import type {
   RawSubmissionData,
   SubmissionMetadata,
 } from '../domains/questionnaire.dto';

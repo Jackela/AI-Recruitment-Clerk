@@ -1,11 +1,11 @@
-import {
+import type {
   Incentive,
   IncentiveStatus,
   Currency,
   PaymentMethod,
 } from '../../domain/aggregates/incentive.aggregate.js';
-import { IncentiveSummary } from '../../domain/value-objects/index.js';
-import { IncentivePriority } from '../../domain/domain-services/incentive.rules.js';
+import type { IncentiveSummary } from '../../domain/value-objects/index.js';
+import type { IncentivePriority } from '../../domain/domain-services/incentive.rules.js';
 
 // Application layer DTOs and result classes
 

@@ -1,6 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { JobState } from './job.state';
-import { JobListItem, Job } from './job.model';
+import type { JobState } from './job.state';
+import type { JobListItem, Job } from './job.model';
 
 // Feature selector for the job state
 export const selectJobState = createFeatureSelector<JobState>('jobs');

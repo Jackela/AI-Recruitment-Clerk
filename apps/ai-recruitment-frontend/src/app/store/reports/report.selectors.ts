@@ -1,6 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { ReportState } from './report.state';
-import { ReportListItem, AnalysisReport } from './report.model';
+import type { ReportState } from './report.state';
+import type { ReportListItem, AnalysisReport } from './report.model';
 
 // Feature selector for the report state
 export const selectReportState = createFeatureSelector<ReportState>('reports');

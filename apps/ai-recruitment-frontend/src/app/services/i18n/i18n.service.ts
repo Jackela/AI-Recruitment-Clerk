@@ -1,8 +1,8 @@
 import { Injectable, signal, effect } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import type { HttpClient } from '@angular/common/http';
 import { of, BehaviorSubject } from 'rxjs';
 import { catchError, finalize, tap } from 'rxjs/operators';
-import { ToastService } from '../toast.service';
+import type { ToastService } from '../toast.service';
 
 export type Language = 'zh-CN' | 'en-US' | 'zh-TW' | 'ja-JP' | 'ko-KR';
 

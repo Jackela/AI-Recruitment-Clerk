@@ -14,16 +14,16 @@ import {
   Invariant,
   ContractValidators,
 } from '@ai-recruitment-clerk/infrastructure-shared';
-import { LlmService } from './llm.service';
+import type { LlmService } from './llm.service';
 import type {
   ExtractedResumeData as LlmExtractedResumeData,
   JobRequirements as LlmJobRequirements,
   ScoringBreakdown as LlmScoringBreakdown,
 } from './llm.service';
 import type { ReportEvent } from './report-generator.service';
-import { GridFsService, ReportFileMetadata } from './gridfs.service';
-import { ReportRepository, ReportCreateData } from './report.repository';
-import {
+import type { GridFsService, ReportFileMetadata } from './gridfs.service';
+import type { ReportRepository, ReportCreateData } from './report.repository';
+import type {
   ScoreBreakdown,
   MatchingSkill,
   ReportRecommendation,

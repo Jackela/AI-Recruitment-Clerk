@@ -11,9 +11,9 @@ import {
   NotFoundException,
   Logger,
 } from '@nestjs/common';
-import { Request } from 'express';
-import { FeedbackCodeService } from './feedback-code.service';
-import {
+import type { Request } from 'express';
+import type { FeedbackCodeService } from './feedback-code.service';
+import type {
   CreateFeedbackCodeDto,
   MarkFeedbackCodeUsedDto,
 } from './feedback-code.service';

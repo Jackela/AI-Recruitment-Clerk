@@ -1,5 +1,5 @@
 import { ValueObject } from '../base/value-object.js';
-import {
+import type {
   Currency,
   TriggerType,
   IncentiveStatus,

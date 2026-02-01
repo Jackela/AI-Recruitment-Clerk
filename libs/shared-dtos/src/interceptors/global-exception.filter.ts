@@ -3,17 +3,18 @@
  * Ensures all exceptions are properly formatted and logged
  */
 
-import {
+import type {
   ExceptionFilter,
+  ArgumentsHost} from '@nestjs/common';
+import {
   Catch,
-  ArgumentsHost,
   HttpException,
   HttpStatus,
   Logger,
   Inject,
   Optional,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { EnhancedAppException } from '../errors/enhanced-error-types';
 import { StandardizedErrorResponseFormatter } from '../errors/error-response-formatter';
 import { ErrorHandler } from '../common/error-handling.patterns';

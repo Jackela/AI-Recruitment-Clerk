@@ -1,5 +1,5 @@
-import { Incentive } from '../aggregates/incentive.aggregate.js';
-import { ContactInfo } from '../value-objects/contact-info.value-object.js';
+import type { Incentive } from '../aggregates/incentive.aggregate.js';
+import type { ContactInfo } from '../value-objects/contact-info.value-object.js';
 import {
   TriggerType,
   PaymentMethod,

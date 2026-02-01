@@ -1,12 +1,13 @@
+import type {
+  ElementRef,
+  OnInit,
+  OnDestroy} from '@angular/core';
 import {
   Component,
   Input,
   Output,
   EventEmitter,
-  ViewChild,
-  ElementRef,
-  OnInit,
-  OnDestroy,
+  ViewChild
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';

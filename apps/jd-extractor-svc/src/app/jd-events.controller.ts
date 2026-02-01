@@ -1,11 +1,12 @@
-import { Controller, Logger, OnModuleInit } from '@nestjs/common';
+import type { OnModuleInit } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { EventPattern } from '@nestjs/microservices';
-import { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
+import type { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
 import { ErrorCorrelationManager } from '@app/shared-dtos';
 import { JDExtractorException } from '@app/shared-dtos';
 import { JDExtractorErrorCode } from '@app/shared-dtos';
-import { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
-import { LlmService } from '../extraction/llm.service';
+import type { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
+import type { LlmService } from '../extraction/llm.service';
 
 /**
  * Exposes endpoints for jd events.

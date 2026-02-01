@@ -1,4 +1,5 @@
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import type { NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 // Use in-memory Mongo for tests
 import { DatabaseModule } from '../database/database.module';
 import { ConfigModule } from '@nestjs/config';

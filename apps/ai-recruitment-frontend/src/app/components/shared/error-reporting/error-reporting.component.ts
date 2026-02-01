@@ -1,17 +1,18 @@
 import { Component, signal, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import type {
+  FormBuilder,
+  FormGroup} from '@angular/forms';
 import {
   ReactiveFormsModule,
-  FormBuilder,
-  FormGroup,
   Validators,
 } from '@angular/forms';
-import { ErrorReportingService } from '../../../services/error/error-reporting.service';
-import {
+import type { ErrorReportingService } from '../../../services/error/error-reporting.service';
+import type {
   ErrorCorrelationService,
   StructuredError,
 } from '../../../services/error/error-correlation.service';
-import { ToastService } from '../../../services/toast.service';
+import type { ToastService } from '../../../services/toast.service';
 
 /**
  * Represents the error reporting component.

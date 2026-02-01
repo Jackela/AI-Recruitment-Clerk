@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GeminiClient, GeminiConfig } from '@ai-recruitment-clerk/shared-dtos';
+import type { GeminiConfig } from '@ai-recruitment-clerk/shared-dtos';
+import { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
 import { SecureConfigValidator } from '@app/shared-dtos';
 
 // Enhanced type definitions for LLM service

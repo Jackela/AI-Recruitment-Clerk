@@ -19,13 +19,13 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import {
+import type {
   SecurityMonitorService,
   SecurityEvent,
   SecurityMetrics,
 } from './security-monitor.service';
-import { EnhancedRateLimitMiddleware } from '../middleware/enhanced-rate-limit.middleware';
-import { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
+import type { EnhancedRateLimitMiddleware } from '../middleware/enhanced-rate-limit.middleware';
+import type { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
 /**
  * Exposes endpoints for security.

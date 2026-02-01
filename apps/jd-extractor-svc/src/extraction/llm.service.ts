@@ -1,13 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
+import type {
   JdDTO,
   LlmExtractionRequest,
   LlmExtractionResponse,
 } from '@ai-recruitment-clerk/job-management-domain';
 import { RetryUtility, SecureConfigValidator } from '@app/shared-dtos';
+import type {
+  GeminiConfig} from '@ai-recruitment-clerk/shared-dtos';
 import {
   GeminiClient,
-  GeminiConfig,
   PromptTemplates,
   PromptBuilder,
 } from '@ai-recruitment-clerk/shared-dtos';
@@ -233,7 +234,7 @@ export class LlmService {
                 s
                   .trim()
                   .toLowerCase()
-                  .replace(/[\.;:,]+$/, ''),
+                  .replace(/[.;:,]+$/, ''),
               )
               .filter(Boolean)
               .forEach((b) => benefits.push(b));
@@ -249,7 +250,7 @@ export class LlmService {
               .replace(/^[-•]\s*/, '')
               .trim()
               .toLowerCase()
-              .replace(/[\.;:,]+$/, ''),
+              .replace(/[.;:,]+$/, ''),
           );
       }
 

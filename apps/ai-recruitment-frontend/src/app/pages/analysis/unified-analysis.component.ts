@@ -1,41 +1,47 @@
+import type {
+  OnDestroy,
+  AfterViewInit} from '@angular/core';
 import {
   Component,
   signal,
-  OnDestroy,
-  computed,
-  AfterViewInit,
+  computed
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
-import { Router } from '@angular/router';
+import type { Router } from '@angular/router';
 // Child Components
+import type {
+  FileUploadData} from './components/resume-file-upload.component';
 import {
-  ResumeFileUploadComponent,
-  FileUploadData,
+  ResumeFileUploadComponent
 } from './components/resume-file-upload.component';
-import {
-  AnalysisProgressComponent,
+import type {
   AnalysisStep,
-  ProgressUpdate,
+  ProgressUpdate} from './components/analysis-progress.component';
+import {
+  AnalysisProgressComponent
 } from './components/analysis-progress.component';
-import {
-  AnalysisResultsComponent,
+import type {
   AnalysisResult,
-  ResultAction,
+  ResultAction} from './components/analysis-results.component';
+import {
+  AnalysisResultsComponent
 } from './components/analysis-results.component';
-import {
-  AnalysisErrorComponent,
+import type {
   ErrorAction,
-  ErrorInfo,
-} from './components/analysis-error.component';
+  ErrorInfo} from './components/analysis-error.component';
 import {
-  StatisticsPanelComponent,
-  UsageStatistics,
+  AnalysisErrorComponent
+} from './components/analysis-error.component';
+import type {
+  UsageStatistics} from './components/statistics-panel.component';
+import {
+  StatisticsPanelComponent
 } from './components/statistics-panel.component';
 // Services
-import { GuestApiService } from '../../services/guest/guest-api.service';
-import { WebSocketService } from '../../services/websocket.service';
-import { ToastService } from '../../services/toast.service';
+import type { GuestApiService } from '../../services/guest/guest-api.service';
+import type { WebSocketService } from '../../services/websocket.service';
+import type { ToastService } from '../../services/toast.service';
 
 // Re-export types for backwards compatibility
 export type { AnalysisStep } from './components/analysis-progress.component';
@@ -250,7 +256,7 @@ export class UnifiedAnalysisComponent implements OnDestroy, AfterViewInit {
     }
 
     try {
-      // eslint-disable-next-line no-new
+       
       new URL(trimmed);
       return trimmed;
     } catch {

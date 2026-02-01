@@ -4,9 +4,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import {
+import type {
   CreateUserDto,
-  UserDto,
+  UserDto} from '@ai-recruitment-clerk/user-management-domain';
+import {
   UserRole,
   UserStatus,
 } from '@ai-recruitment-clerk/user-management-domain';

@@ -1,11 +1,12 @@
+import type {
+  NestMiddleware} from '@nestjs/common';
 import {
   Injectable,
-  NestMiddleware,
   ForbiddenException,
   Logger,
 } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
-import { ConfigService } from '@nestjs/config';
+import type { Request, Response, NextFunction } from 'express';
+import type { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 
 interface CsrfRequest extends Request {

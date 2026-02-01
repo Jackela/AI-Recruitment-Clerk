@@ -24,16 +24,17 @@ import {
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
-import {
+import type {
   UserDto,
-  Permission,
-  UserRole,
   UserStatus,
   UpdateUserDto,
   UserPreferencesDto,
-  AuthenticatedRequest,
+  AuthenticatedRequest} from '@ai-recruitment-clerk/user-management-domain';
+import {
+  Permission,
+  UserRole
 } from '@ai-recruitment-clerk/user-management-domain';
-import { UserManagementService } from './user-management.service';
+import type { UserManagementService } from './user-management.service';
 
 interface UserProfileResponse extends UserDto {
   preferences?: any;

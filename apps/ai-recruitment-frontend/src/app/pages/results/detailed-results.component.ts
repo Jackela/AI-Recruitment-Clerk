@@ -1,10 +1,11 @@
-import { Component, signal, OnInit, OnDestroy } from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import type { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { GuestApiService } from '../../services/guest/guest-api.service';
-import {
+import type { GuestApiService } from '../../services/guest/guest-api.service';
+import type {
   DetailedAnalysisResult,
   RadarChartData,
   SkillTagStyle,

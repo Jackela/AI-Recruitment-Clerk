@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import type { Document } from 'mongoose';
 
 export type ReportDocument = Report & Document;
 
@@ -9,16 +9,16 @@ export type ReportDocument = Report & Document;
 @Schema()
 export class ScoreBreakdown {
   @Prop({ required: true, min: 0, max: 100 })
-  skillsMatch: number = 0;
+  skillsMatch = 0;
 
   @Prop({ required: true, min: 0, max: 100 })
-  experienceMatch: number = 0;
+  experienceMatch = 0;
 
   @Prop({ required: true, min: 0, max: 100 })
-  educationMatch: number = 0;
+  educationMatch = 0;
 
   @Prop({ required: true, min: 0, max: 100 })
-  overallFit: number = 0;
+  overallFit = 0;
 }
 
 /**
@@ -27,17 +27,17 @@ export class ScoreBreakdown {
 @Schema()
 export class MatchingSkill {
   @Prop({ required: true })
-  skill: string = '';
+  skill = '';
 
   @Prop({ required: true, min: 0, max: 100 })
-  matchScore: number = 0;
+  matchScore = 0;
 
   @Prop({
     type: String,
     enum: ['exact', 'partial', 'related', 'missing'],
     default: 'missing',
   })
-  matchType: string = 'missing';
+  matchType = 'missing';
 
   @Prop()
   explanation?: string;
@@ -53,10 +53,10 @@ export class ReportRecommendation {
     enum: ['hire', 'consider', 'interview', 'reject'],
     required: true,
   })
-  decision: string = 'reject';
+  decision = 'reject';
 
   @Prop({ required: true })
-  reasoning: string = '';
+  reasoning = '';
 
   @Prop({ type: [String], default: [] })
   strengths: string[] = [];
@@ -77,10 +77,10 @@ export class ReportRecommendation {
 })
 export class Report {
   @Prop({ required: true })
-  jobId: string = '';
+  jobId = '';
 
   @Prop({ required: true })
-  resumeId: string = '';
+  resumeId = '';
 
   @Prop({ type: ScoreBreakdown, required: true })
   scoreBreakdown: ScoreBreakdown = new ScoreBreakdown();
@@ -92,30 +92,30 @@ export class Report {
   recommendation: ReportRecommendation = new ReportRecommendation();
 
   @Prop({ required: true })
-  summary: string = '';
+  summary = '';
 
   @Prop({ type: Number, min: 0, max: 1, default: 0 })
-  analysisConfidence: number = 0;
+  analysisConfidence = 0;
 
   @Prop({ type: Number, min: 0, default: 0 })
-  processingTimeMs: number = 0;
+  processingTimeMs = 0;
 
   @Prop({
     type: String,
     enum: ['pending', 'processing', 'completed', 'failed'],
     default: 'pending',
   })
-  status: string = 'pending';
+  status = 'pending';
 
   @Prop()
   errorMessage?: string;
 
   // Metadata for tracking and auditing
   @Prop({ required: true })
-  generatedBy: string = ''; // Service identifier
+  generatedBy = ''; // Service identifier
 
   @Prop({ required: true })
-  llmModel: string = '';
+  llmModel = '';
 
   @Prop({ type: Date, default: Date.now })
   generatedAt: Date = new Date();

@@ -1,5 +1,5 @@
 import { ValueObject } from '../base/value-object';
-import { DomainEvent } from '../base/domain-event';
+import type { DomainEvent } from '../base/domain-event';
 
 // Incentive聚合根 - 管理红包激励系统的核心业务逻辑
 /**

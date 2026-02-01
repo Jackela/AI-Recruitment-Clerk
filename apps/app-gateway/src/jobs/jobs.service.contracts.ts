@@ -19,21 +19,22 @@ import {
   Ensures,
   ContractValidators,
 } from '@ai-recruitment-clerk/shared-dtos';
-import { CreateJobDto } from './dto/create-job.dto';
+import type { CreateJobDto } from './dto/create-job.dto';
 import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
-import { MulterFile } from './types/multer.types';
+import type { MulterFile } from './types/multer.types';
 import { JobListDto, JobDetailDto } from './dto/job-response.dto';
 import {  ResumeDetailDto } from './dto/resume-response.dto';
 import { AnalysisReportDto } from './dto/report-response.dto';
-import { InMemoryStorageService } from './storage/in-memory-storage.service';
+import type { InMemoryStorageService } from './storage/in-memory-storage.service';
+import type {
+  UserDto} from '@ai-recruitment-clerk/user-management-domain';
 import {
-  UserDto,
   UserRole,
 } from '@ai-recruitment-clerk/user-management-domain';
-import { JobJdSubmittedEvent } from '@ai-recruitment-clerk/job-management-domain';
+import type { JobJdSubmittedEvent } from '@ai-recruitment-clerk/job-management-domain';
 import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
-import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
-import { CacheService } from '../cache/cache.service';
+import type { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
+import type { CacheService } from '../cache/cache.service';
 
 /**
  * Enhanced JobsService with Design by Contract protections

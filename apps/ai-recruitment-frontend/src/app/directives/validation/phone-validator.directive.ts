@@ -1,9 +1,10 @@
 import { Directive, forwardRef } from '@angular/core';
-import {
-  NG_VALIDATORS,
+import type {
   Validator,
   AbstractControl,
-  ValidationErrors,
+  ValidationErrors} from '@angular/forms';
+import {
+  NG_VALIDATORS
 } from '@angular/forms';
 
 /**

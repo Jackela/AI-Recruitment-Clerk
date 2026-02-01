@@ -31,10 +31,10 @@ import { Public } from '../../auth/decorators/public.decorator';
 import { GuestGuard } from '../guards/guest.guard';
 import type { RequestWithDeviceId } from '../guards/guest.guard';
 import { OptionalJwtAuthGuard } from '../guards/optional-jwt-auth.guard';
-import { GuestUsageService } from '../services/guest-usage.service';
-import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
+import type { GuestUsageService } from '../services/guest-usage.service';
+import type { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
 import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
-import {
+import type {
   GridFsService,
   ResumeFileMetadata,
 } from '../../services/gridfs.service';

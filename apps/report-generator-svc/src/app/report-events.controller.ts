@@ -1,15 +1,16 @@
+import type {
+  OnModuleInit,
+  OnModuleDestroy} from '@nestjs/common';
 import {
   Controller,
   Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
+  Logger
 } from '@nestjs/common';
-import {
+import type {
   ReportGeneratorService,
   MatchScoredEvent,
 } from '../report-generator/report-generator.service';
-import {
+import type {
   ReportGeneratorNatsService,
   ReportGenerationRequestedEvent,
   ReportGeneratedEvent,

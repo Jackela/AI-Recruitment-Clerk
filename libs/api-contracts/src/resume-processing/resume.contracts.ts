@@ -3,6 +3,7 @@
  * Shared contract definitions for resume data between frontend and backend
  */
 
+/* eslint-disable @typescript-eslint/no-namespace */
 export namespace ResumeContracts {
   /**
    * Resume processing status

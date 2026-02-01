@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import type { OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import type { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { GuestUsageService } from '../../services/marketing/guest-usage.service';
+import type { GuestUsageService } from '../../services/marketing/guest-usage.service';
 
 /**
  * Represents the campaign component.

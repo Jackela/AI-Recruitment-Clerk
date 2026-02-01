@@ -1,5 +1,5 @@
 import { ValueObject } from './base/value-object.js';
-import { QuestionnaireSubmission } from './questionnaire-submission.value-object.js';
+import type { QuestionnaireSubmission } from './questionnaire-submission.value-object.js';
 import { QualityScore } from './quality-score.value-object.js';
 import { QualityMetrics } from './quality-metrics.value-object.js';
 

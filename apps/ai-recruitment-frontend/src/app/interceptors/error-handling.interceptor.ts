@@ -4,7 +4,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import {
+import type {
   HttpRequest,
   HttpHandler,
   HttpEvent,
@@ -13,7 +13,7 @@ import {
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
-import { ErrorHandlingService } from '../services/error/error-handling.service';
+import type { ErrorHandlingService } from '../services/error/error-handling.service';
 
 /**
  * Represents the error handling interceptor.

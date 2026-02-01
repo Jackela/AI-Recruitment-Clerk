@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, throwError, from } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { of, throwError, from } from 'rxjs';
 import { tap, switchMap, catchError, shareReplay } from 'rxjs/operators';
 
 /**

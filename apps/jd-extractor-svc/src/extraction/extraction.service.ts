@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { LlmService } from './llm.service';
-import { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
-import {
+import type { LlmService } from './llm.service';
+import type { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
+import type {
   JobJdSubmittedEvent,
   AnalysisJdExtractedEvent,
 } from '../dto/events.dto';
-import { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
+import type { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
 import {
   RetryUtility,
   WithCircuitBreaker,

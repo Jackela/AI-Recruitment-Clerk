@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { RedisClient } from './redis.client';
-import { UserSession, SessionData } from '../../domains/user-management.dto';
+import type { RedisClient } from './redis.client';
+import type { SessionData } from '../../domains/user-management.dto';
+import { UserSession } from '../../domains/user-management.dto';
 
 /**
  * 会话缓存服务 - 专门管理UserSession的缓存

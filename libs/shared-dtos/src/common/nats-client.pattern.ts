@@ -3,12 +3,14 @@
  * Unified NATS Client Pattern - Eliminate Code Duplication
  */
 
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
-import {
-  connect,
+import type { OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import type {
   NatsConnection,
   JetStreamManager,
-  JetStreamClient,
+  JetStreamClient} from 'nats';
+import {
+  connect,
   RetentionPolicy,
   headers as natsHeaders,
 } from 'nats';
@@ -177,7 +179,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   async request<T>(
     subject: string,
     data: any,
-    timeout: number = 5000,
+    timeout = 5000,
   ): Promise<T> {
     if (!this.connection) {
       throw new Error('NATS connection not established');

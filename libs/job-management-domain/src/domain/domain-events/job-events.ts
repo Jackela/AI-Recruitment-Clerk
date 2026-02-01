@@ -3,7 +3,7 @@
  * Moved from libs/shared-dtos/src/events/job-events.dto.ts
  */
 
-import { JdDTO } from '../../application/dtos/job-description.dto.js';
+import type { JdDTO } from '../../application/dtos/job-description.dto.js';
 
 /**
  * @description NATS Event: job.jd.submitted

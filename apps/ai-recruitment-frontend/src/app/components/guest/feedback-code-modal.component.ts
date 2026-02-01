@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import type { OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { GuestState } from '../../store/guest/guest.state';
+import type { Store } from '@ngrx/store';
+import type { Observable } from 'rxjs';
+import type { GuestState } from '../../store/guest/guest.state';
 import * as GuestActions from '../../store/guest/guest.actions';
-import { ToastService } from '../../services/toast.service';
+import type { ToastService } from '../../services/toast.service';
 
 /**
  * Represents the feedback code modal component.

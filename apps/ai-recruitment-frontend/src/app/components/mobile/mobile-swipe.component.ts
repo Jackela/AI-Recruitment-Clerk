@@ -1,11 +1,12 @@
+import type {
+  ElementRef,
+  OnInit,
+  OnDestroy} from '@angular/core';
 import {
   Component,
   Input,
   Output,
   EventEmitter,
-  ElementRef,
-  OnInit,
-  OnDestroy,
   ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';

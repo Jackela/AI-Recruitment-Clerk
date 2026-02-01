@@ -1,11 +1,13 @@
-import {
+import type {
   PipeTransform,
+  ArgumentMetadata} from '@nestjs/common';
+import {
   Injectable,
-  ArgumentMetadata,
   BadRequestException,
   Logger,
 } from '@nestjs/common';
-import { validate, ValidationError } from 'class-validator';
+import type { ValidationError } from 'class-validator';
+import { validate } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 
 /**

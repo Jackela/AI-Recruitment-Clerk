@@ -8,8 +8,8 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { JobsService } from './jobs.service';
-import { CreateJobDto } from './dto/create-job.dto';
+import type { JobsService } from './jobs.service';
+import type { CreateJobDto } from './dto/create-job.dto';
 
 /**
  * Exposes endpoints for simple jobs.

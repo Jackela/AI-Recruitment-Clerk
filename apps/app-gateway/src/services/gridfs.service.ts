@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
-import { GridFSBucket, GridFSBucketWriteStream, ObjectId } from 'mongodb';
+import type { Connection } from 'mongoose';
+import type { GridFSBucketWriteStream} from 'mongodb';
+import { GridFSBucket, ObjectId } from 'mongodb';
 import * as stream from 'stream';
 import * as crypto from 'crypto';
 
@@ -328,7 +329,7 @@ export class GridFsService {
    * @returns The file ID.
    */
   private extractFileIdFromUrl(gridFsUrl: string): string {
-    const urlPattern = /^gridfs:\/\/[^\/]+\/(.+)$/;
+    const urlPattern = /^gridfs:\/\/[^/]+\/(.+)$/;
     const match = gridFsUrl.match(urlPattern);
 
     if (!match) {

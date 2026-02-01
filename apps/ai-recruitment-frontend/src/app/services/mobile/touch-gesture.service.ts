@@ -1,5 +1,7 @@
-import { Injectable, ElementRef, NgZone, inject } from '@angular/core';
-import { Observable, Subject, fromEvent, merge } from 'rxjs';
+import type { ElementRef} from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
+import type { Observable} from 'rxjs';
+import { Subject, fromEvent, merge } from 'rxjs';
 import { takeUntil, map, filter } from 'rxjs/operators';
 
 /**

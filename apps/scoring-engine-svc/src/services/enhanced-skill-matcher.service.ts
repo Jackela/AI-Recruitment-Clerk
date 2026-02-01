@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
+import type { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
 import { SkillsTaxonomy } from '@ai-recruitment-clerk/candidate-scoring-domain';
 
 /**

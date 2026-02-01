@@ -1,5 +1,5 @@
-import { Request } from 'express';
-import { UserDto } from './user.dto';
+import type { Request } from 'express';
+import type { UserDto } from './user.dto';
 
 /**
  * Defines the shape of the authenticated request.

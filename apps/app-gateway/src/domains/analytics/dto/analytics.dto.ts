@@ -41,7 +41,7 @@ export class TrackEventDto {
   @ApiProperty({ description: '会话ID', example: 'session_12345' })
   @IsString()
   @IsNotEmpty()
-  sessionId: string = '';
+  sessionId = '';
 
   @ApiProperty({
     description: '事件类型',
@@ -78,12 +78,12 @@ export class RecordMetricDto {
   })
   @IsString()
   @IsNotEmpty()
-  metricName: string = '';
+  metricName = '';
 
   @ApiProperty({ description: '指标值', example: 85.5 })
   @IsNumber()
   @Min(0)
-  metricValue: number = 0;
+  metricValue = 0;
 
   @ApiProperty({
     description: '指标单位',
@@ -121,7 +121,7 @@ export class BatchProcessDto {
  */
 export class SessionAnalyticsDto {
   @ApiProperty({ description: '会话ID' })
-  sessionId: string = '';
+  sessionId = '';
 
   @ApiProperty({ description: '用户ID' })
   userId?: string;
@@ -133,16 +133,16 @@ export class SessionAnalyticsDto {
   endTime: Date = new Date();
 
   @ApiProperty({ description: '事件数量' })
-  eventCount: number = 0;
+  eventCount = 0;
 
   @ApiProperty({ description: '最后活动时间' })
   lastActivityTime: Date = new Date();
 
   @ApiProperty({ description: '是否活跃中' })
-  isActive: boolean = false;
+  isActive = false;
 
   @ApiProperty({ description: '平均事件间隔（毫秒）' })
-  averageEventInterval: number = 0;
+  averageEventInterval = 0;
 }
 
 /**
@@ -150,22 +150,22 @@ export class SessionAnalyticsDto {
  */
 export class ProcessingMetricsDto {
   @ApiProperty({ description: '总事件数' })
-  totalEvents: number = 0;
+  totalEvents = 0;
 
   @ApiProperty({ description: '已处理事件数' })
-  processedEvents: number = 0;
+  processedEvents = 0;
 
   @ApiProperty({ description: '失败事件数' })
-  failedEvents: number = 0;
+  failedEvents = 0;
 
   @ApiProperty({ description: '平均处理时间（毫秒）' })
-  averageProcessingTime: number = 0;
+  averageProcessingTime = 0;
 
   @ApiProperty({ description: '每秒吞吐量' })
-  throughputPerSecond: number = 0;
+  throughputPerSecond = 0;
 
   @ApiProperty({ description: '错误率（百分比）' })
-  errorRate: number = 0;
+  errorRate = 0;
 }
 
 /**
@@ -173,19 +173,19 @@ export class ProcessingMetricsDto {
  */
 export class PrivacyMetricsDto {
   @ApiProperty({ description: '总事件数' })
-  totalEvents: number = 0;
+  totalEvents = 0;
 
   @ApiProperty({ description: '已匿名化事件数' })
-  anonymizedEvents: number = 0;
+  anonymizedEvents = 0;
 
   @ApiProperty({ description: '已过期事件数' })
-  expiredEvents: number = 0;
+  expiredEvents = 0;
 
   @ApiProperty({ description: '待匿名化事件数' })
-  pendingAnonymization: number = 0;
+  pendingAnonymization = 0;
 
   @ApiProperty({ description: '合规分数（0-100）' })
-  complianceScore: number = 0;
+  complianceScore = 0;
 
   @ApiProperty({
     description: '风险等级',
@@ -199,7 +199,7 @@ export class PrivacyMetricsDto {
  */
 export class ReportingAccessDto {
   @ApiProperty({ description: '是否有访问权限' })
-  hasAccess: boolean = false;
+  hasAccess = false;
 
   @ApiProperty({ description: '权限列表' })
   permissions: string[] = [];
@@ -208,7 +208,7 @@ export class ReportingAccessDto {
   restrictions: string[] = [];
 
   @ApiProperty({ description: '数据范围限制' })
-  dataScope: string = '';
+  dataScope = '';
 
   @ApiProperty({ description: '过期时间' })
   expiresAt?: Date;
@@ -228,13 +228,13 @@ export class DataRetentionReportDto {
   };
 
   @ApiProperty({ description: '总事件数' })
-  totalEvents: number = 0;
+  totalEvents = 0;
 
   @ApiProperty({ description: '待删除事件数' })
-  eventsToDelete: number = 0;
+  eventsToDelete = 0;
 
   @ApiProperty({ description: '待匿名化事件数' })
-  eventsToAnonymize: number = 0;
+  eventsToAnonymize = 0;
 
   @ApiProperty({ description: '按事件类型统计' })
   eventTypeStatistics: Record<string, any> = {};
@@ -248,7 +248,7 @@ export class DataRetentionReportDto {
  */
 export class EventCreationResultDto {
   @ApiProperty({ description: '是否成功' })
-  success: boolean = false;
+  success = false;
 
   @ApiProperty({ description: '事件摘要', required: false })
   data?: {
@@ -269,7 +269,7 @@ export class EventCreationResultDto {
  */
 export class BatchProcessingResultDto {
   @ApiProperty({ description: '是否成功' })
-  success: boolean = false;
+  success = false;
 
   @ApiProperty({ description: '处理结果', required: false })
   data?: {

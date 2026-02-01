@@ -1,5 +1,5 @@
 import { ValueObject } from './base/value-object.js';
-import { Rating } from '../../application/dtos/questionnaire.dto.js';
+import type { Rating } from '../../application/dtos/questionnaire.dto.js';
 
 /**
  * Represents the user experience.

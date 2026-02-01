@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import type { Actions} from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
+import type { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import {
   map,
@@ -10,8 +11,8 @@ import {
   filter,
   delay,
 } from 'rxjs/operators';
-import { GuestApiService } from '../../services/guest/guest-api.service';
-import { GuestState } from './guest.state';
+import type { GuestApiService } from '../../services/guest/guest-api.service';
+import type { GuestState } from './guest.state';
 import * as GuestActions from './guest.actions';
 import { selectGuestState } from './guest.selectors';
 

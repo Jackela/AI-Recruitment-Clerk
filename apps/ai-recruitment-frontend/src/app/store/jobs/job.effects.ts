@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import type { Actions} from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
 import { of, EMPTY } from 'rxjs';
 import {
   catchError,
@@ -8,8 +9,8 @@ import {
   tap,
   switchMap,
 } from 'rxjs/operators';
-import { ApiService } from '../../services/api.service';
-import { WebSocketService } from '../../services/websocket.service';
+import type { ApiService } from '../../services/api.service';
+import type { WebSocketService } from '../../services/websocket.service';
 import * as JobActions from './job.actions';
 
 /**

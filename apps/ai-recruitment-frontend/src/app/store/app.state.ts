@@ -1,6 +1,6 @@
-import { JobState } from './jobs/job.state';
-import { ResumeState } from './resumes/resume.state';
-import { ReportState } from './reports/report.state';
+import type { JobState } from './jobs/job.state';
+import type { ResumeState } from './resumes/resume.state';
+import type { ReportState } from './reports/report.state';
 
 /**
  * Defines the shape of the app state.

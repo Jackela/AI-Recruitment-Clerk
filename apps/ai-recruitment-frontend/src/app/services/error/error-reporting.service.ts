@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import type { HttpClient } from '@angular/common/http';
+import type { Observable} from 'rxjs';
+import { of } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
-import {
+import type {
   ErrorCorrelationService,
   StructuredError,
 } from './error-correlation.service';

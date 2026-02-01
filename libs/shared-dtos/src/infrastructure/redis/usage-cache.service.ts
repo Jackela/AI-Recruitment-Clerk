@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RedisClient } from './redis.client';
+import type { RedisClient } from './redis.client';
 
 /**
  * 使用限制缓存服务 - 管理IP使用限制和配额

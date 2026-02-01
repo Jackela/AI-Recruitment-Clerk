@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import type { Model } from 'mongoose';
 import { EventStatus } from '@ai-recruitment-clerk/shared-dtos';
 // Fallback interfaces and types
 interface IAnalyticsRepository {
@@ -22,9 +22,10 @@ interface AnalyticsEventEntity {
   status: EventStatus;
   retentionExpiry?: Date;
 }
+import type {
+  AnalyticsEventDocument} from '../../schemas/analytics-event.schema';
 import {
-  AnalyticsEvent,
-  AnalyticsEventDocument,
+  AnalyticsEvent
 } from '../../schemas/analytics-event.schema';
 
 /**

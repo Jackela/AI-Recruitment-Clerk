@@ -1,14 +1,14 @@
+import type {
+  EventType,
+  MetricUnit,
+  AnalyticsEventSummary} from './analytics.dto';
 import {
   AnalyticsEvent,
   EventStatus,
-  EventType,
   ConsentStatus,
-  MetricUnit,
-  AnalyticsEventSummary,
   UserSession,
 } from './analytics.dto';
-import {
-  AnalyticsRules,
+import type {
   AnalyticsDataRetentionPolicy,
   PrivacyComplianceRiskAssessment,
   AnonymizationRequirementResult,
@@ -17,7 +17,9 @@ import {
   DataScope,
   SessionAnalytics,
   EventProcessingMetrics,
-  DataPrivacyMetrics,
+  DataPrivacyMetrics} from './analytics.rules';
+import {
+  AnalyticsRules
 } from './analytics.rules';
 
 /**

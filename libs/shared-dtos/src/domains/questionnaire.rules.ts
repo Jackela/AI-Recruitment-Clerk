@@ -1,5 +1,6 @@
+import type {
+  QuestionnaireSubmission} from './questionnaire.dto';
 import {
-  QuestionnaireSubmission,
   QuestionnaireValidationResult,
 } from './questionnaire.dto';
 

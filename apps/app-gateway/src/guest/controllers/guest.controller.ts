@@ -18,13 +18,14 @@ import {
   ApiUnauthorizedResponse,
   ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
-import { GuestUsageService } from '../services/guest-usage.service';
+import type { GuestUsageService } from '../services/guest-usage.service';
 import { GuestGuard } from '../guards/guest.guard';
 import type { RequestWithDeviceId } from '../guards/guest.guard';
+import type {
+  RedeemFeedbackCodeDto} from '../dto/guest.dto';
 import {
   GuestUsageResponseDto,
-  GuestStatusDto,
-  RedeemFeedbackCodeDto,
+  GuestStatusDto
 } from '../dto/guest.dto';
 
 /**

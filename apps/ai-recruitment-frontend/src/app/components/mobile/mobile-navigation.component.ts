@@ -1,10 +1,11 @@
+import type {
+  OnInit,
+  OnDestroy} from '@angular/core';
 import {
   Component,
   Input,
   Output,
   EventEmitter,
-  OnInit,
-  OnDestroy,
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';

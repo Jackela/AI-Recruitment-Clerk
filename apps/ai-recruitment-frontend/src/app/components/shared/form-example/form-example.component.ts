@@ -1,14 +1,15 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import type {
+  FormBuilder,
+  FormGroup} from '@angular/forms';
 import {
   FormsModule,
   ReactiveFormsModule,
-  FormBuilder,
-  FormGroup,
   Validators,
 } from '@angular/forms';
 import { VALIDATION_DIRECTIVES } from '../../../directives/validation';
-import { ToastService } from '../../../services/toast.service';
+import type { ToastService } from '../../../services/toast.service';
 
 /**
  * Represents the form example component.

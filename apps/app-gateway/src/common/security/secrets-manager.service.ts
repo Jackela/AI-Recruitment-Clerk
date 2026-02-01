@@ -4,8 +4,9 @@
  * 功能: 统一密钥管理、验证、轮换
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import type { OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import type { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 
 /**

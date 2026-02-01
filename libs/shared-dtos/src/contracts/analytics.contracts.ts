@@ -1,10 +1,11 @@
+import type {
+  UserSession,
+  EventValidationResult} from '../domains/analytics.dto';
 import {
   AnalyticsEvent,
   EventStatus,
   EventType,
-  MetricUnit,
-  UserSession,
-  EventValidationResult,
+  MetricUnit
 } from '../domains/analytics.dto';
 import { AnalyticsRules } from '../domains/analytics.rules';
 

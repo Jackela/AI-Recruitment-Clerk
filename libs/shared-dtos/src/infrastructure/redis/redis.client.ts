@@ -1,5 +1,6 @@
 import { Redis } from 'ioredis';
-import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import type { OnModuleDestroy } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 /**
  * Redis客户端封装 - 支持连接管理和缓存策略

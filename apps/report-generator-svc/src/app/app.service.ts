@@ -1,8 +1,9 @@
+import type {
+  OnApplicationBootstrap,
+  OnApplicationShutdown} from '@nestjs/common';
 import {
   Injectable,
-  Logger,
-  OnApplicationBootstrap,
-  OnApplicationShutdown,
+  Logger
 } from '@nestjs/common';
 
 /**

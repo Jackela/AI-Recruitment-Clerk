@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Job, JobDocument } from '../schemas/job.schema';
-import { CacheService } from '../cache/cache.service';
+import type { Model } from 'mongoose';
+import type { JobDocument } from '../schemas/job.schema';
+import { Job } from '../schemas/job.schema';
+import type { CacheService } from '../cache/cache.service';
 
 /**
  * Manages persistence for job.

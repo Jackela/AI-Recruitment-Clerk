@@ -1,16 +1,17 @@
+import type {
+  OnInit,
+  ElementRef,
+  AfterViewInit,
+  OnDestroy,
+  TrackByFunction,
+  TemplateRef} from '@angular/core';
 import {
   Component,
   Input,
-  OnInit,
   ViewChild,
-  ElementRef,
-  AfterViewInit,
   inject,
   ChangeDetectionStrategy,
-  OnDestroy,
-  TrackByFunction,
-  HostListener,
-  TemplateRef,
+  HostListener
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AccessibleCardDirective } from '../../../directives/accessibility/accessible-card.directive';

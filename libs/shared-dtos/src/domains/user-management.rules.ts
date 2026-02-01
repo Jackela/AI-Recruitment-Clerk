@@ -1,4 +1,4 @@
-import { UserSession } from './user-management.dto';
+import type { UserSession } from './user-management.dto';
 
 /**
  * Represents the user session rules.

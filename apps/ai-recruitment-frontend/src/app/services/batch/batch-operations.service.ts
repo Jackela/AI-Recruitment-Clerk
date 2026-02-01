@@ -1,5 +1,6 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { Observable, Subject, from, of } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { Subject, from, of } from 'rxjs';
 import {
   map,
   catchError,
@@ -12,8 +13,8 @@ import {
   retry,
   timeout,
 } from 'rxjs/operators';
-import { ToastService } from '../toast.service';
-import { ProgressFeedbackService } from '../feedback/progress-feedback.service';
+import type { ToastService } from '../toast.service';
+import type { ProgressFeedbackService } from '../feedback/progress-feedback.service';
 
 /**
  * Defines the shape of the batch operation.

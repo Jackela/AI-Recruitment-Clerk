@@ -1,6 +1,6 @@
 import { Questionnaire } from '../aggregates/questionnaire.aggregate.js';
-import { RawSubmissionData } from '../../application/dtos/questionnaire.dto.js';
-import { SubmissionMetadata } from '../value-objects/submission-metadata.value-object.js';
+import type { RawSubmissionData } from '../../application/dtos/questionnaire.dto.js';
+import type { SubmissionMetadata } from '../value-objects/submission-metadata.value-object.js';
 import { QuestionnaireValidationFailedEvent } from '../domain-events/questionnaire-validation-failed.event.js';
 
 /**

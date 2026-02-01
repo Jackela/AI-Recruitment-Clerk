@@ -1,9 +1,10 @@
+import type {
+  OnInit,
+  OnDestroy} from '@angular/core';
 import {
   Directive,
   ElementRef,
   Input,
-  OnInit,
-  OnDestroy,
   inject,
 } from '@angular/core';
 import { AccessibilityService } from '../../services/accessibility/accessibility.service';

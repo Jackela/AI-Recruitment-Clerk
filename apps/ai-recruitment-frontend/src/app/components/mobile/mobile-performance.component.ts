@@ -1,13 +1,22 @@
-import {
-  Component,
+import type {
   OnInit,
   OnDestroy,
-  NgZone,
+  NgZone} from '@angular/core';
+import {
+  Component,
   ChangeDetectionStrategy,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, interval, takeUntil } from 'rxjs';
+
+/**
+ * Defines the shape of layout shift entry.
+ */
+interface LayoutShift extends PerformanceEntry {
+  value: number;
+  hadRecentInput: boolean;
+}
 
 /**
  * Defines the shape of the performance metrics.
@@ -564,18 +573,20 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
         this.updateMetric('lcp', entry.startTime);
         break;
 
-      case 'first-input':
+      case 'first-input': {
         const fidEntry = entry as PerformanceEventTiming;
         this.updateMetric('fid', fidEntry.processingStart - fidEntry.startTime);
         break;
+      }
 
-      case 'layout-shift':
-        const clsEntry = entry as any;
+      case 'layout-shift': {
+        const clsEntry = entry as LayoutShift;
         if (!clsEntry.hadRecentInput) {
           this.layoutShiftScore += clsEntry.value;
           this.updateMetric('cls', this.layoutShiftScore);
         }
         break;
+      }
     }
   }
 

@@ -8,9 +8,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { UsageLimitsService } from './usage-limits.service';
-import { RecordUsageDto } from './dto/record-usage.dto';
-import { GrantBonusDto } from './dto/grant-bonus.dto';
+import type { UsageLimitsService } from './usage-limits.service';
+import type { RecordUsageDto } from './dto/record-usage.dto';
+import type { GrantBonusDto } from './dto/grant-bonus.dto';
 
 /**
  * Exposes endpoints for usage limits.

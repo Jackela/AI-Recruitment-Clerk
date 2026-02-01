@@ -11,12 +11,13 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 // Standardized Error Handling
 import { HandleErrors, ErrorUtils } from '@ai-recruitment-clerk/shared-dtos';
+import type {
+  QuestionnairesService} from './questionnaires.service';
 import {
-  QuestionnairesService,
   QuestionnaireNotFoundError,
   QuestionnaireNotPublishedError,
 } from './questionnaires.service';
-import { SubmitQuestionnaireDto } from './dto/submit-questionnaire.dto';
+import type { SubmitQuestionnaireDto } from './dto/submit-questionnaire.dto';
 
 /**
  * Exposes endpoints for questionnaires.

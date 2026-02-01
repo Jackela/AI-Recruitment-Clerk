@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { VisionLlmService } from '../vision-llm/vision-llm.service';
-import { FieldMapperService } from '../field-mapper/field-mapper.service';
-import {
+import type { VisionLlmService } from '../vision-llm/vision-llm.service';
+import type { FieldMapperService } from '../field-mapper/field-mapper.service';
+import type {
   FieldMappingResult,
   VisionLlmResponse,
 } from '../dto/resume-parsing.dto';

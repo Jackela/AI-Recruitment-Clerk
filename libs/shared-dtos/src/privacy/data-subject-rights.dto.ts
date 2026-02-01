@@ -343,6 +343,10 @@ export class ProcessRightsRequestDto {
  */
 export class DataExportPackage {
   @IsUUID()
+  @IsOptional()
+  id?: string;
+
+  @IsUUID()
   requestId!: string;
 
   @IsString()
@@ -356,6 +360,12 @@ export class DataExportPackage {
   @ValidateNested({ each: true })
   @Type(() => DataCategoryExport)
   dataCategories!: DataCategoryExport[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => DataCategoryExport)
+  @IsOptional()
+  data?: DataCategoryExport[];
 
   @IsOptional()
   metadata?: {

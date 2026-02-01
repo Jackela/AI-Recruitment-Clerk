@@ -14,18 +14,18 @@ import {
   UseGuards,
   HttpStatus,
 } from '@nestjs/common';
-import { Response } from 'express';
-import {
+import type { Response } from 'express';
+import type {
   ReportGeneratorService,
   ReportGenerationRequest,
 } from '../report-generator/report-generator.service';
-import {
+import type {
   ReportRepository,
   ReportQuery,
   ReportListOptions,
 } from '../report-generator/report.repository';
-import { GridFsService } from '../report-generator/gridfs.service';
-import { ReportTemplatesService } from '../report-generator/report-templates.service';
+import type { GridFsService } from '../report-generator/gridfs.service';
+import type { ReportTemplatesService } from '../report-generator/report-templates.service';
 
 /**
  * Defines the shape of the report generation request dto.

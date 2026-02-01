@@ -4,9 +4,10 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, FilterQuery, UpdateQuery } from 'mongoose';
+import type { Model, FilterQuery, UpdateQuery } from 'mongoose';
+import type {
+  CreateUserDto} from '@ai-recruitment-clerk/user-management-domain';
 import {
-  CreateUserDto,
   UserRole,
   UserStatus,
 } from '@ai-recruitment-clerk/user-management-domain';

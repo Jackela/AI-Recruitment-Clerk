@@ -1,12 +1,21 @@
+import type {
+  PaymentMethod} from '../aggregates/incentive.aggregate.js';
 import {
   Incentive,
   IncentiveStatus,
-  PaymentMethod,
   TriggerType,
   Currency,
 } from '../aggregates/incentive.aggregate.js';
 import { ContactInfo } from '../value-objects/index.js';
 import { IncentiveRules } from './incentive.rules.js';
+import type {
+  BatchPaymentItem,
+  IPIncentiveStatistics,
+  SystemIncentiveStatistics,
+  IIncentiveRepository,
+  IDomainEventBus,
+  IAuditLogger,
+  IPaymentGateway} from '../../application/dtos/incentive.dto.js';
 import {
   IncentiveCreationResult,
   IncentiveValidationResult,
@@ -15,14 +24,7 @@ import {
   PaymentProcessingResult,
   BatchPaymentResult,
   IncentiveStatsResult,
-  PendingIncentivesResult,
-  BatchPaymentItem,
-  IPIncentiveStatistics,
-  SystemIncentiveStatistics,
-  IIncentiveRepository,
-  IDomainEventBus,
-  IAuditLogger,
-  IPaymentGateway,
+  PendingIncentivesResult
 } from '../../application/dtos/incentive.dto.js';
 
 /**

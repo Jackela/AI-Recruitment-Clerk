@@ -8,7 +8,7 @@ export interface JobJdSubmittedEvent {
   timestamp: string;
 }
 
-import { JdDTO } from '../dto/jd.dto';
+import type { JdDTO } from '../dto/jd.dto';
 
 /**
  * @description NATS 事件: analysis.jd.extracted

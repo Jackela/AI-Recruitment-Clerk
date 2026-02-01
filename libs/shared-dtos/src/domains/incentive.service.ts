@@ -1,15 +1,17 @@
+import type {
+  IncentiveSummary,
+  PaymentMethod} from './incentive.dto';
 import {
   Incentive,
   IncentiveStatus,
-  IncentiveSummary,
-  PaymentMethod,
   ContactInfo,
   TriggerType,
   Currency,
 } from './incentive.dto';
+import type {
+  IncentivePriority} from './incentive.rules';
 import {
-  IncentiveRules,
-  IncentivePriority,
+  IncentiveRules
 } from './incentive.rules';
 
 /**

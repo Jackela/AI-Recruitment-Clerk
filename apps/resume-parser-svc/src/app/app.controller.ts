@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
-import { ResumeRepository } from '../repositories/resume.repository';
-import { GridFsService } from '../gridfs/gridfs.service';
+import type { AppService } from './app.service';
+import type { ResumeRepository } from '../repositories/resume.repository';
+import type { GridFsService } from '../gridfs/gridfs.service';
 
 /**
  * Exposes endpoints for app.

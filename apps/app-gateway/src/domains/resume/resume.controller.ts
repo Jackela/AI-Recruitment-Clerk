@@ -31,16 +31,17 @@ import {
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
+import type {
+  ResumeUploadDto,
+  ResumeStatusUpdateDto,
+  ResumeSearchDto} from '@ai-recruitment-clerk/shared-dtos';
 import {
   ResumeDto,
   ResumeAnalysisDto,
-  ResumeUploadDto,
-  ResumeStatusUpdateDto,
-  ResumeSearchDto,
   ResumeSkillsAnalysisDto,
 } from '@ai-recruitment-clerk/shared-dtos';
-import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
-import { ResumeService } from './resume.service';
+import type { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
+import type { ResumeService } from './resume.service';
 
 const resumeFileValidator: {
   isValid: (file?: any) => boolean;
@@ -173,7 +174,6 @@ export class ResumeController {
   @ApiResponse({
     status: 200,
     description: '简历数据获取成功',
-    type: ResumeDto,
   })
   @ApiResponse({ status: 404, description: '简历未找到' })
   @ApiParam({ name: 'resumeId', description: '简历ID' })
@@ -227,7 +227,6 @@ export class ResumeController {
   @ApiResponse({
     status: 200,
     description: '分析结果获取成功',
-    type: ResumeAnalysisDto,
   })
   @ApiParam({ name: 'resumeId', description: '简历ID' })
   @ApiQuery({
@@ -278,7 +277,6 @@ export class ResumeController {
   @ApiResponse({
     status: 200,
     description: '技能分析获取成功',
-    type: ResumeSkillsAnalysisDto,
   })
   @ApiParam({ name: 'resumeId', description: '简历ID' })
   @Get(':resumeId/skills')

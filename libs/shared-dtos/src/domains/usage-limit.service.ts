@@ -1,12 +1,14 @@
+import type {
+  BonusType} from './usage-limit.dto';
 import {
   UsageLimit,
-  UsageLimitPolicy,
-  BonusType,
+  UsageLimitPolicy
 } from './usage-limit.dto';
-import {
-  UsageLimitRules,
+import type {
   UsageViolationReport,
-  UsageEfficiency,
+  UsageEfficiency} from './usage-limit.rules';
+import {
+  UsageLimitRules
 } from './usage-limit.rules';
 
 /**

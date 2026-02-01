@@ -1,5 +1,5 @@
 import { ValueObject } from './base/value-object.js';
-import {
+import type {
   QuestionnaireUserRole,
   CompanySize,
 } from '../../application/dtos/questionnaire.dto.js';

@@ -26,13 +26,13 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import {
+import type {
   UserDto,
 } from '@ai-recruitment-clerk/user-management-domain';
-import {
+import type {
   BonusType,
 } from '@ai-recruitment-clerk/usage-management-domain';
-import { UsageLimitIntegrationService } from './usage-limit-integration.service';
+import type { UsageLimitIntegrationService } from './usage-limit-integration.service';
 
 interface AuthenticatedRequest extends Request {
   user: UserDto & { id: string; organizationId: string };

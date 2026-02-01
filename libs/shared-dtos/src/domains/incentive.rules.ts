@@ -1,9 +1,10 @@
-import {
+import type {
   Incentive,
+  ContactInfo} from './incentive.dto';
+import {
   IncentiveStatus,
   TriggerType,
-  PaymentMethod,
-  ContactInfo,
+  PaymentMethod
 } from './incentive.dto';
 
 /**

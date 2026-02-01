@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import type { Actions} from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { catchError, map, mergeMap, switchMap } from 'rxjs/operators';
-import { ApiService } from '../../services/api.service';
+import type { ApiService } from '../../services/api.service';
 import * as ResumeActions from './resume.actions';
 
 /**

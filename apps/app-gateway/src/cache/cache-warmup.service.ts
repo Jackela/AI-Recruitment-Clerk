@@ -3,9 +3,10 @@
  * AI Recruitment Clerk - 启动时缓存预加载
  */
 
-import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
-import { JobRepository } from '../repositories/job.repository';
-import { CacheService } from './cache.service';
+import type { OnApplicationBootstrap } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import type { JobRepository } from '../repositories/job.repository';
+import type { CacheService } from './cache.service';
 
 /**
  * Provides cache warmup functionality.

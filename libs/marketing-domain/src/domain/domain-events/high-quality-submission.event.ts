@@ -1,4 +1,4 @@
-import { DomainEvent } from './base/domain-event.js';
+import type { DomainEvent } from './base/domain-event.js';
 
 /**
  * Represents the high quality submission event event.

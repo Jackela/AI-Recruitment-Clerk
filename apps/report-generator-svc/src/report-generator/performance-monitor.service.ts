@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ReportRepository } from './report.repository';
+import type { ReportRepository } from './report.repository';
 
 /**
  * Defines the shape of the performance metrics.

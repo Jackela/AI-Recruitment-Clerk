@@ -1,7 +1,8 @@
+import type {
+  RawSubmissionData,
+  SubmissionMetadata} from './questionnaire.dto';
 import {
   Questionnaire,
-  RawSubmissionData,
-  SubmissionMetadata,
   QuestionnaireValidationFailedEvent,
 } from './questionnaire.dto';
 

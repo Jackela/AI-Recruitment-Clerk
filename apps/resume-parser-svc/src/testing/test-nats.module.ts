@@ -1,10 +1,12 @@
-import { Module, DynamicModule, Global, Logger } from '@nestjs/common';
+import type { DynamicModule} from '@nestjs/common';
+import { Module, Global, Logger } from '@nestjs/common';
 import {
   NatsConnectionManager,
   NatsStreamManager,
   StreamConfigFactory,
 } from '@app/shared-nats-client';
-import { connect, NatsConnection } from 'nats';
+import type { NatsConnection } from 'nats';
+import { connect } from 'nats';
 
 /**
  * Test NATS Module for Integration Testing

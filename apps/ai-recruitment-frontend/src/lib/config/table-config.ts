@@ -1,4 +1,4 @@
-import { TableColumn } from '../../app/components/shared/data-table/data-table.component';
+import type { TableColumn } from '../../app/components/shared/data-table/data-table.component';
 
 /**
  * Timesheet-specific table column configuration interface

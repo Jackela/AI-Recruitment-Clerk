@@ -31,6 +31,11 @@ export enum ConsentPurpose {
   THIRD_PARTY_SHARING = 'third_party_sharing', // Consent required
   PERSONALIZATION = 'personalization', // Legitimate interest/Consent
   PERFORMANCE_MONITORING = 'performance_monitoring', // Legitimate interest
+  // Additional purposes for privacy compliance service
+  RESUME_PROCESSING = 'resume_processing', // Resume analysis and matching
+  MARKETING = 'marketing', // General marketing activities
+  ANALYTICS = 'analytics', // General analytics collection
+  COMMUNICATION = 'communication', // Communication preferences
 }
 
 export enum ConsentMethod {
@@ -50,6 +55,8 @@ export enum DataCategory {
   DEVICE_INFORMATION = 'device_information',
   COMMUNICATION_PREFERENCES = 'communication_preferences',
   SYSTEM_LOGS = 'system_logs',
+  PERFORMANCE_DATA = 'performance_data',
+  GENERAL = 'general',
 }
 
 /**

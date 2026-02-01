@@ -1,4 +1,4 @@
-import { Provider } from '@nestjs/common';
+import type { Provider } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
 import { Resume } from '../schemas/resume.schema';
 

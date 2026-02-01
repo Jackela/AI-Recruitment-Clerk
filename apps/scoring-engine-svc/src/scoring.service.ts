@@ -1,28 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
-import { ScoringEngineNatsService } from './services/scoring-engine-nats.service';
+import type { ScoringEngineNatsService } from './services/scoring-engine-nats.service';
 import {
   SecureConfigValidator,
   ScoringEngineException,
   ScoringEngineErrorCode,
   ErrorCorrelationManager,
 } from '@app/shared-dtos';
-import {
+import type {
   EnhancedSkillMatcherService,
   JobSkillRequirement,
   EnhancedSkillScore,
 } from './services/enhanced-skill-matcher.service';
-import {
+import type {
   ExperienceAnalyzerService,
   JobRequirements,
   ExperienceScore,
 } from './services/experience-analyzer.service';
-import {
+import type {
   CulturalFitAnalyzerService,
   CulturalFitScore,
 } from './services/cultural-fit-analyzer.service';
-import { CompanyProfile } from './services/cultural-fit-analyzer.service';
-import {
+import type { CompanyProfile } from './services/cultural-fit-analyzer.service';
+import type {
   ScoringConfidenceService,
   ComponentScores,
   ScoreReliabilityReport,

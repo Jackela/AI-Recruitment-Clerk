@@ -26,16 +26,16 @@ import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
 import {
   QuestionnaireDto,
-  CreateQuestionnaireDto,
-  UpdateQuestionnaireDto,
   QuestionnaireResponseDto,
   QuestionnaireAnalyticsDto,
   QuestionnaireTemplateDto,
   QuestionnaireStatus,
 } from '@ai-recruitment-clerk/shared-dtos';
-import type { QuestionnaireSubmissionDto } from '@ai-recruitment-clerk/shared-dtos';
-import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
-import { QuestionnaireIntegrationService } from './questionnaire-integration.service';
+import type { QuestionnaireSubmissionDto ,
+  CreateQuestionnaireDto,
+  UpdateQuestionnaireDto} from '@ai-recruitment-clerk/shared-dtos';
+import type { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
+import type { QuestionnaireIntegrationService } from './questionnaire-integration.service';
 
 // Use imported interface instead of local definition
 
@@ -426,7 +426,6 @@ export class QuestionnaireController {
   @ApiResponse({
     status: 200,
     description: '提交记录获取成功',
-    type: [QuestionnaireResponseDto],
   })
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @ApiQuery({ name: 'page', required: false, description: '页码' })
@@ -490,7 +489,6 @@ export class QuestionnaireController {
   @ApiResponse({
     status: 200,
     description: '分析报告获取成功',
-    type: QuestionnaireAnalyticsDto,
   })
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @UseGuards(RolesGuard)

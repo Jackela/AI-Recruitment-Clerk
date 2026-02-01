@@ -3,15 +3,16 @@
  * Provides consistent error handling across all NestJS microservices
  */
 
-import {
+import type {
   ExceptionFilter,
+  ArgumentsHost} from '@nestjs/common';
+import {
   Catch,
-  ArgumentsHost,
   HttpException,
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { ThrottlerException } from '@nestjs/throttler';
 import { ValidationError } from 'class-validator';
 
@@ -21,20 +22,24 @@ import {
   ErrorType,
   ErrorSeverity,
 } from '../common/error-handling.patterns';
+import type {
+  CombinedErrorType} from './enhanced-error-types';
 import {
-  EnhancedAppException,
-  CombinedErrorType,
+  EnhancedAppException
 } from './enhanced-error-types';
+import type {
+  ErrorCorrelationContext} from './error-correlation';
 import {
-  ErrorCorrelationManager,
-  ErrorCorrelationContext,
+  ErrorCorrelationManager
 } from './error-correlation';
+import type {
+  StandardizedErrorResponse} from './error-response-formatter';
 import {
-  StandardizedErrorResponseFormatter,
-  StandardizedErrorResponse,
+  StandardizedErrorResponseFormatter
 } from './error-response-formatter';
+import type {
+  StructuredErrorLogger} from './structured-logging';
 import {
-  StructuredErrorLogger,
   StructuredLoggerFactory,
 } from './structured-logging';
 

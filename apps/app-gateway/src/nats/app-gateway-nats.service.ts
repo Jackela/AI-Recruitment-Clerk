@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
+import type {
   NatsClientService,
   NatsPublishResult,
 } from '@ai-recruitment-clerk/shared-nats-client';

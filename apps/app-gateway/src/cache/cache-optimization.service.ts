@@ -3,8 +3,9 @@
  * AI Recruitment Clerk - 智能缓存管理与性能优化
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { CacheService } from './cache.service';
+import type { OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import type { CacheService } from './cache.service';
 import { Cron } from '@nestjs/schedule';
 
 /**

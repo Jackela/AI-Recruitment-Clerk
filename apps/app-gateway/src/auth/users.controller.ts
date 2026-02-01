@@ -9,12 +9,13 @@ import {
   Put,
 } from '@nestjs/common';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import {
+import type {
   UserDto,
-  UserRole,
-  AuthenticatedRequest,
+  AuthenticatedRequest} from '@ai-recruitment-clerk/user-management-domain';
+import {
+  UserRole
 } from '@ai-recruitment-clerk/user-management-domain';
-import { UserService } from './user.service';
+import type { UserService } from './user.service';
 
 // Use shared AuthenticatedRequest type
 

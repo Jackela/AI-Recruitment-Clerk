@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import type { HttpClient} from '@angular/common/http';
+import { HttpHeaders } from '@angular/common/http';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { DeviceIdService } from './device-id.service';
-import { DetailedAnalysisResult } from '../../interfaces/detailed-analysis.interface';
+import type { DeviceIdService } from './device-id.service';
+import type { DetailedAnalysisResult } from '../../interfaces/detailed-analysis.interface';
 
 /**
  * Defines the shape of the guest usage response.

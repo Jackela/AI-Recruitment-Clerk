@@ -1,16 +1,17 @@
+import type {
+  CanActivate,
+  ExecutionContext} from '@nestjs/common';
 import {
   Injectable,
-  CanActivate,
-  ExecutionContext,
   UnauthorizedException,
   BadRequestException,
   Logger,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { createHash } from 'crypto';
-import { Reflector } from '@nestjs/core';
+import type { Reflector } from '@nestjs/core';
 
 /**
  * Defines the shape of the request with device id.

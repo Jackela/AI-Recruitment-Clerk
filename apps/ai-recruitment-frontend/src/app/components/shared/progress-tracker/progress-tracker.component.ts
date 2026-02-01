@@ -1,13 +1,14 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, BehaviorSubject } from 'rxjs';
 // import { Observable } from 'rxjs'; // Reserved for future use
 import { takeUntil } from 'rxjs/operators';
-import {
+import type {
   WebSocketService,
   ProgressUpdate,
 } from '../../../services/websocket.service';
-import { ToastService } from '../../../services/toast.service';
+import type { ToastService } from '../../../services/toast.service';
 
 /**
  * Defines the shape of the progress message.

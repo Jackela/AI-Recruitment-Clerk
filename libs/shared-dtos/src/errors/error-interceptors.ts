@@ -3,24 +3,27 @@
  * Provides correlation, logging, and performance tracking interceptors
  */
 
-import {
-  Injectable,
+import type {
   NestInterceptor,
   ExecutionContext,
-  CallHandler,
+  CallHandler} from '@nestjs/common';
+import {
+  Injectable,
   Logger,
 } from '@nestjs/common';
-import { Observable, throwError } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { throwError } from 'rxjs';
 import { tap, catchError, finalize } from 'rxjs/operators';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 
 import {
   ErrorCorrelationManager,
 } from './error-correlation';
-import {
+import type {
   StructuredErrorLogger,
-  StructuredLoggerFactory,
-  PerformanceMetrics,
+  PerformanceMetrics} from './structured-logging';
+import {
+  StructuredLoggerFactory
 } from './structured-logging';
 import { EnhancedAppException } from './enhanced-error-types';
 

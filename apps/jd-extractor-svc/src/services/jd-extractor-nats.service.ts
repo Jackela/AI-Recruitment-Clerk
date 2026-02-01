@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { NatsClientService, NatsPublishResult } from '@app/shared-nats-client';
+import type { NatsPublishResult } from '@app/shared-nats-client';
+import { NatsClientService } from '@app/shared-nats-client';
 
 /**
  * JD Extractor NATS Service

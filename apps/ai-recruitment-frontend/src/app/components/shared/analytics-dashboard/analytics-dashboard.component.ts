@@ -1,22 +1,24 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { Observable, combineLatest } from 'rxjs';
+import type { OnInit, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
+import type { Store } from '@ngrx/store';
+import type { Observable} from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 
-import { AppState } from '../../../store/app.state';
+import type { AppState } from '../../../store/app.state';
 
 // Job selectors and models
 import * as JobSelectors from '../../../store/jobs/job.selectors';
-import { JobListItem } from '../../../store/jobs/job.model';
+import type { JobListItem } from '../../../store/jobs/job.model';
 
 // Report selectors and models
 import * as ReportSelectors from '../../../store/reports/report.selectors';
-import { ReportListItem } from '../../../store/reports/report.model';
+import type { ReportListItem } from '../../../store/reports/report.model';
 
 // Resume selectors and models
 import * as ResumeSelectors from '../../../store/resumes/resume.selectors';
-import { ResumeListItem } from '../../../store/resumes/resume.model';
+import type { ResumeListItem } from '../../../store/resumes/resume.model';
 
 interface AnalyticsDashboardData {
   jobsStatistics: any;

@@ -1,24 +1,27 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { LoggerService } from '../../services/shared/logger.service';
+import type { OnInit, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
+import type { LoggerService } from '../../services/shared/logger.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Observable, of, interval, Subject, combineLatest } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { of, interval, Subject, combineLatest } from 'rxjs';
 import { map, takeUntil, catchError, shareReplay } from 'rxjs/operators';
 import { SharedModule } from '../../components/shared/shared.module';
+import type {
+  BentoGridItem} from '../../components/shared/bento-grid/bento-grid.component';
 import {
-  BentoGridComponent,
-  BentoGridItem,
+  BentoGridComponent
 } from '../../components/shared/bento-grid/bento-grid.component';
-import {
+import type {
   DashboardStats,
   SystemHealth,
 } from '../../services/dashboard-api.service';
-import { GuestApiService } from '../../services/guest/guest-api.service';
-import {
+import type { GuestApiService } from '../../services/guest/guest-api.service';
+import type {
   WebSocketStatsService,
   RealtimeStats,
 } from '../../services/realtime/websocket-stats.service';
-import { ProgressFeedbackService } from '../../services/feedback/progress-feedback.service';
+import type { ProgressFeedbackService } from '../../services/feedback/progress-feedback.service';
 
 interface SystemMetrics {
   cpuUsage: number;

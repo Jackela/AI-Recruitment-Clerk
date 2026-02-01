@@ -128,9 +128,9 @@ enum DataScope {
   ORGANIZATION = 'organization',
   SYSTEM = 'system',
 }
-import { AnalyticsEventRepository } from './analytics-event.repository';
-import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
-import { Cache } from 'cache-manager';
+import type { AnalyticsEventRepository } from './analytics-event.repository';
+import type { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
+import type { Cache } from 'cache-manager';
 import { Inject } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 

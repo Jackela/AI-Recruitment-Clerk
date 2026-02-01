@@ -1,7 +1,8 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
-import { ModuleMetadata } from '@nestjs/common';
+import type { MongooseModuleOptions } from '@nestjs/mongoose';
+import { MongooseModule } from '@nestjs/mongoose';
+import type { Connection } from 'mongoose';
+import type { ModuleMetadata } from '@nestjs/common';
 
 /**
  * MongoDB test setup utilities for integration tests
@@ -41,7 +42,7 @@ export class MongodbTestSetup {
    * Get Mongoose module for testing with proper connection name
    */
   static async getMongooseTestModule(
-    connectionName: string = 'resume-parser',
+    connectionName = 'resume-parser',
     options: MongooseModuleOptions = {},
   ) {
     const uri = await this.startMongoMemoryServer();
@@ -56,7 +57,7 @@ export class MongodbTestSetup {
    */
   static getMongooseFeatureModule(
     models: Array<{ name: string; schema: any }>,
-    connectionName: string = 'resume-parser',
+    connectionName = 'resume-parser',
   ) {
     return MongooseModule.forFeature(models, connectionName);
   }
@@ -64,7 +65,7 @@ export class MongodbTestSetup {
   /**
    * Create mock connection provider for dependency injection
    */
-  static getMockConnectionProvider(connectionName: string = 'resume-parser') {
+  static getMockConnectionProvider(connectionName = 'resume-parser') {
     const mockConnection = {
       readyState: 1,
       db: {
@@ -102,7 +103,7 @@ export class MongodbTestSetup {
   static async getTestModuleMetadata(
     additionalProviders: any[] = [],
     additionalImports: any[] = [],
-    connectionName: string = 'resume-parser',
+    connectionName = 'resume-parser',
   ): Promise<ModuleMetadata> {
     const mongooseModule = await this.getMongooseTestModule(connectionName);
 
@@ -122,7 +123,7 @@ export class MongodbTestSetup {
 
     const collections = connection.collections;
     for (const key in collections) {
-      if (collections.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(collections, key)) {
         await collections[key].deleteMany({});
       }
     }

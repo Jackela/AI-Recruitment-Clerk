@@ -5,7 +5,14 @@ export default [
   ...nx.configs['flat/typescript'],
   ...nx.configs['flat/javascript'],
   {
-    ignores: ['**/dist'],
+    ignores: [
+      '**/dist',
+      '**/node_modules',
+      '**/coverage',
+      '**/test-results',
+      '**/.nx',
+      '**/jest-html-reporters-attach',
+    ],
   },
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
@@ -113,6 +120,7 @@ export default [
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-member-accessibility': 'off',
+      '@typescript-eslint/no-namespace': 'off', // Allow namespace for Jest type declarations
     },
   },
   // Relaxed rules for E2E test files
@@ -123,6 +131,7 @@ export default [
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-member-accessibility': 'off',
+      '@typescript-eslint/no-namespace': 'off', // Allow namespace for Jest type declarations
     },
   },
 ];

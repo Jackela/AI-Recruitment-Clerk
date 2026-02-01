@@ -3,17 +3,19 @@
  * Automatically catches and formats all exceptions across the application
  */
 
-import {
-  Injectable,
+import type {
   NestInterceptor,
   ExecutionContext,
-  CallHandler,
+  CallHandler} from '@nestjs/common';
+import {
+  Injectable,
   HttpException,
   Logger,
 } from '@nestjs/common';
-import { Observable, throwError } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { EnhancedAppException } from '../errors/enhanced-error-types';
 import { StandardizedErrorResponseFormatter } from '../errors/error-response-formatter';
 import { ErrorHandler } from '../common/error-handling.patterns';

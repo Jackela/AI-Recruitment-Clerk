@@ -12,7 +12,7 @@ export * from './application/index';
 export * from './infrastructure/index';
 
 // Core authentication and user types
-import { Request } from 'express';
+import type { Request } from 'express';
 
 /**
  * Authenticated HTTP request interface extending Express Request with user context.
@@ -157,6 +157,10 @@ export enum Permission {
   GENERATE_REPORT = 'generate:report',
   /** Configure system-wide settings */
   SYSTEM_CONFIG = 'system:config',
+  /** View system and audit logs */
+  VIEW_LOGS = 'view:logs',
+  /** Manage third-party integrations */
+  MANAGE_INTEGRATIONS = 'manage:integrations',
 
   // Business operations permissions (snake_case style)
   /** Create job postings and descriptions */

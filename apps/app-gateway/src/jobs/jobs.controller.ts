@@ -20,21 +20,23 @@ import {
   
   
 } from '@nestjs/swagger';
-import { JobsService } from './jobs.service';
-import { CreateJobDto } from './dto/create-job.dto';
-import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
+import type { JobsService } from './jobs.service';
+import type { CreateJobDto } from './dto/create-job.dto';
+import type { ResumeUploadResponseDto } from './dto/resume-upload.dto';
 import { FileValidationPipe } from './pipes/file-validation.pipe';
-import { JobParamsDto } from './dto/job-params.dto';
-import { MulterFile } from './types/multer.types';
-import { JobListDto, JobDetailDto } from './dto/job-response.dto';
-import { ResumeListItemDto, ResumeDetailDto } from './dto/resume-response.dto';
-import { AnalysisReportDto, ReportsListDto } from './dto/report-response.dto';
+import type { JobParamsDto } from './dto/job-params.dto';
+import type { MulterFile } from './types/multer.types';
+import type { JobListDto} from './dto/job-response.dto';
+import { JobDetailDto } from './dto/job-response.dto';
+import type { ResumeListItemDto, ResumeDetailDto } from './dto/resume-response.dto';
+import type { AnalysisReportDto, ReportsListDto } from './dto/report-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
+import type {
+  UserDto} from '@ai-recruitment-clerk/user-management-domain';
 import {
-  Permission,
-  UserDto,
+  Permission
 } from '@ai-recruitment-clerk/user-management-domain';
 
 interface AuthenticatedRequest extends Request {

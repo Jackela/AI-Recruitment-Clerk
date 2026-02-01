@@ -17,17 +17,18 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { UserService } from './user.service';
-import {
+import type { AuthService } from './auth.service';
+import type { UserService } from './user.service';
+import type {
   LoginDto,
   CreateUserDto,
   AuthResponseDto,
   RefreshTokenDto,
   UserDto,
+  AuthenticatedRequest} from '@ai-recruitment-clerk/user-management-domain';
+import {
   Permission,
-  UserRole,
-  AuthenticatedRequest,
+  UserRole
 } from '@ai-recruitment-clerk/user-management-domain';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';

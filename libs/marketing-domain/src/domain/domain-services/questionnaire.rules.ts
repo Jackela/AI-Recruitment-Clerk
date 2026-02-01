@@ -1,4 +1,4 @@
-import { QuestionnaireSubmission } from '../value-objects/questionnaire-submission.value-object.js';
+import type { QuestionnaireSubmission } from '../value-objects/questionnaire-submission.value-object.js';
 import { QuestionnaireValidationResult } from '../value-objects/questionnaire-validation-result.value-object.js';
 
 /**

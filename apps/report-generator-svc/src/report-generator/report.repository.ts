@@ -1,12 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, FilterQuery } from 'mongoose';
-import {
-  Report,
+import type { Model, FilterQuery } from 'mongoose';
+import type {
   ReportDocument,
   ScoreBreakdown,
   MatchingSkill,
-  ReportRecommendation,
+  ReportRecommendation} from '../schemas/report.schema';
+import {
+  Report
 } from '../schemas/report.schema';
 import { DatabasePerformanceMonitor } from '@ai-recruitment-clerk/infrastructure-shared';
 

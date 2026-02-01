@@ -1,7 +1,7 @@
 /**
  * Defines the shape of the multer file.
  */
-export interface MulterFile {
+export interface IMulterFile {
   fieldname?: string;
   originalname: string;
   encoding?: string;
@@ -16,12 +16,12 @@ export interface MulterFile {
 /**
  * Represents the multer file.
  */
-export class MulterFile implements MulterFile {
+export class MulterFile implements IMulterFile {
   fieldname?: string;
-  originalname: string = '';
+  originalname = '';
   encoding?: string;
-  mimetype: string = '';
-  size: number = 0;
+  mimetype = '';
+  size = 0;
   destination?: string;
   filename?: string;
   path?: string;

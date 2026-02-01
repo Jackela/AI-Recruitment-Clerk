@@ -15,7 +15,7 @@ const flags = new Map<string, FeatureFlag>();
 
 function audit(event: { action: string; key: string; detail?: unknown }) {
   // Placeholder audit hook; integrate with audit middleware/service when available (T027)
-  // eslint-disable-next-line no-console
+   
   console.log(`[audit] feature-flag`, event);
 }
 

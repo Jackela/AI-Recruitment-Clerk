@@ -4,11 +4,12 @@ import {
   RetryHandler,
   DEFAULT_RETRY_CONFIG,
 } from './vision-llm-error-handler';
-import { VisionLlmRequest, VisionLlmResponse } from '../dto/resume-parsing.dto';
+import type { VisionLlmRequest, VisionLlmResponse } from '../dto/resume-parsing.dto';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import type {
+  GeminiConfig} from '@ai-recruitment-clerk/shared-dtos';
 import {
   GeminiClient,
-  GeminiConfig,
   PromptTemplates,
   PromptBuilder,
 } from '@ai-recruitment-clerk/shared-dtos';
@@ -201,25 +202,21 @@ export class VisionLlmService {
     }
     const startTime = Date.now();
 
-    try {
-      const resumeData = await this.parseResumePdf(
-        request.pdfBuffer,
-        request.filename,
-      );
+    const resumeData = await this.parseResumePdf(
+      request.pdfBuffer,
+      request.filename,
+    );
 
-      const processingTimeMs = Date.now() - startTime;
+    const processingTimeMs = Date.now() - startTime;
 
-      // Calculate confidence based on data completeness
-      const confidence = this.calculateConfidence(resumeData);
+    // Calculate confidence based on data completeness
+    const confidence = this.calculateConfidence(resumeData);
 
-      return {
-        extractedData: resumeData,
-        confidence,
-        processingTimeMs,
-      };
-    } catch (error) {
-      throw error;
-    }
+    return {
+      extractedData: resumeData,
+      confidence,
+      processingTimeMs,
+    };
   }
 
   /**
@@ -279,7 +276,7 @@ export class VisionLlmService {
     return Math.round(estimatedMs);
   }
 
-  // @ts-ignore - Method reserved for future use
+  // Reserved for future use
   private _buildResumeExtractionPrompt(extractedText: string): string {
     return `
 Extract structured information from this resume text. Focus on identifying:
@@ -301,7 +298,7 @@ Extraction Guidelines:
 - Be thorough but accurate - only extract clearly visible information`;
   }
 
-  // @ts-ignore - Method reserved for future use
+  // Reserved for future use
   private _buildVisionPrompt(): string {
     return `
 Analyze this resume document and extract structured information. Focus on:

@@ -1,12 +1,13 @@
+import type {
+  OnApplicationBootstrap,
+  OnApplicationShutdown} from '@nestjs/common';
 import {
   Injectable,
-  Logger,
-  OnApplicationBootstrap,
-  OnApplicationShutdown,
+  Logger
 } from '@nestjs/common';
-import { GridFsService } from '../gridfs/gridfs.service';
-import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
-import { ParsingService } from '../parsing/parsing.service';
+import type { GridFsService } from '../gridfs/gridfs.service';
+import type { ResumeParserNatsService } from '../services/resume-parser-nats.service';
+import type { ParsingService } from '../parsing/parsing.service';
 
 /**
  * Provides app functionality.

@@ -1,4 +1,4 @@
-import { Currency } from '../aggregates/incentive.aggregate.js';
+import type { Currency } from '../aggregates/incentive.aggregate.js';
 
 /**
  * Represents the payment result.

@@ -4,7 +4,7 @@
  */
 
 import { ErrorResponseFormatter } from '../common/error-handling.patterns';
-import { EnhancedAppException } from './enhanced-error-types';
+import type { EnhancedAppException } from './enhanced-error-types';
 import { ErrorCorrelationManager } from './error-correlation';
 
 /**

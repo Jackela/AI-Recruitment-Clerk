@@ -5,10 +5,10 @@
 
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import type { Cache } from 'cache-manager';
 import * as crypto from 'crypto';
-import { EmbeddingService } from '../embedding/embedding.service';
-import { VectorStoreService } from './vector-store.service';
+import type { EmbeddingService } from '../embedding/embedding.service';
+import type { VectorStoreService } from './vector-store.service';
 
 /**
  * Defines the shape of the cache options.

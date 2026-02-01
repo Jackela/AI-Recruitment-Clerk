@@ -3,7 +3,8 @@
  * Mobile Component Common Patterns - Reduce Code Duplication
  */
 
-import { Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
+import { Input, Output, EventEmitter } from '@angular/core';
 import { Subject } from 'rxjs';
 
 /**

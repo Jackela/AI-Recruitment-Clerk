@@ -3,13 +3,14 @@
  * 专门处理Railway生产环境Redis连接问题
  */
 
+import type {
+  OnModuleInit,
+  OnModuleDestroy} from '@nestjs/common';
 import {
   Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
+  Logger
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigService } from '@nestjs/config';
 
 /**
  * Provides redis connection functionality.

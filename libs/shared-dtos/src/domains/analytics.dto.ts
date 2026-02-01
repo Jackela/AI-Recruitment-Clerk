@@ -1,5 +1,5 @@
 import { ValueObject } from '../base/value-object';
-import { DomainEvent } from '../base/domain-event';
+import type { DomainEvent } from '../base/domain-event';
 
 // Analytics聚合根 - 管理用户行为数据收集和分析的核心业务逻辑
 /**

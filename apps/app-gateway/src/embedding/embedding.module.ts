@@ -3,9 +3,10 @@ import { HttpModule, HttpService } from '@nestjs/axios';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EmbeddingService } from './embedding.service';
 import { EmbeddingController } from './embedding.controller';
+import type {
+  IEmbeddingProvider} from './interfaces/embedding-provider.interface';
 import {
-  EMBEDDING_PROVIDER,
-  IEmbeddingProvider,
+  EMBEDDING_PROVIDER
 } from './interfaces/embedding-provider.interface';
 import { OpenAIEmbeddingProvider } from './providers/openai-embedding.provider';
 

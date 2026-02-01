@@ -1,10 +1,11 @@
-import {
-  Directive,
+import type {
   ElementRef,
-  Input,
   OnInit,
   OnDestroy,
-  Renderer2,
+  Renderer2} from '@angular/core';
+import {
+  Directive,
+  Input,
   Output,
   EventEmitter,
 } from '@angular/core';

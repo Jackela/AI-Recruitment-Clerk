@@ -1,17 +1,18 @@
+import type {
+  ExecutionContext,
+  CanActivate} from '@nestjs/common';
 import {
   Injectable,
-  ExecutionContext,
   UnauthorizedException,
   Logger,
   HttpException,
-  HttpStatus,
-  CanActivate,
+  HttpStatus
 } from '@nestjs/common';
 // Avoid extending passport's AuthGuard to prevent CJS class transpile issues
 // import { AuthGuard } from '@nestjs/passport';
-import { Reflector } from '@nestjs/core';
+import type { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { createHash } from 'crypto';
 
 /**

@@ -1,18 +1,19 @@
-import { DomainEvent } from '../domain-events/base/domain-event.js';
+import type { DomainEvent } from '../domain-events/base/domain-event.js';
 import { QuestionnaireId } from '../value-objects/questionnaire-id.value-object.js';
 import { QuestionnaireTemplate } from '../value-objects/questionnaire-template.value-object.js';
 import { QuestionnaireSubmission } from '../value-objects/questionnaire-submission.value-object.js';
 import { SubmissionQuality } from '../value-objects/submission-quality.value-object.js';
 import { SubmissionMetadata } from '../value-objects/submission-metadata.value-object.js';
 import { QuestionnaireValidationResult } from '../value-objects/questionnaire-validation-result.value-object.js';
-import { QualityScore } from '../value-objects/quality-score.value-object.js';
-import { SubmissionSummary } from '../value-objects/submission-summary.value-object.js';
-import { Answer } from '../value-objects/answer.value-object.js';
-import { QualityMetrics } from '../value-objects/quality-metrics.value-object.js';
+import type { QualityScore } from '../value-objects/quality-score.value-object.js';
+import type { SubmissionSummary } from '../value-objects/submission-summary.value-object.js';
+import type { Answer } from '../value-objects/answer.value-object.js';
+import type { QualityMetrics } from '../value-objects/quality-metrics.value-object.js';
 import { QuestionnaireSubmittedEvent } from '../domain-events/questionnaire-submitted.event.js';
 import { HighQualitySubmissionEvent } from '../domain-events/high-quality-submission.event.js';
+import type {
+  RawSubmissionData} from '../../application/dtos/questionnaire.dto.js';
 import {
-  RawSubmissionData,
   QuestionnaireStatus,
 } from '../../application/dtos/questionnaire.dto.js';
 

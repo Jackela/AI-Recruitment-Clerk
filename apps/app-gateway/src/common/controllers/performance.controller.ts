@@ -15,10 +15,10 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
 import { Permission } from '@ai-recruitment-clerk/user-management-domain';
-import { PerformanceMonitoringInterceptor } from '../interceptors/performance-monitoring.interceptor';
-import { CacheService } from '../../cache/cache.service';
-import { CacheOptimizationService } from '../../cache/cache-optimization.service';
-import { DatabaseOptimizationMiddleware } from '../middleware/database-optimization.middleware';
+import type { PerformanceMonitoringInterceptor } from '../interceptors/performance-monitoring.interceptor';
+import type { CacheService } from '../../cache/cache.service';
+import type { CacheOptimizationService } from '../../cache/cache-optimization.service';
+import type { DatabaseOptimizationMiddleware } from '../middleware/database-optimization.middleware';
 
 /**
  * Exposes endpoints for performance.

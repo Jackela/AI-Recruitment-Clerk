@@ -1,7 +1,8 @@
-import { Module, DynamicModule, Global } from '@nestjs/common';
+import type { DynamicModule} from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { Connection } from 'mongoose';
+import type { Connection } from 'mongoose';
 
 let mongod: MongoMemoryServer;
 

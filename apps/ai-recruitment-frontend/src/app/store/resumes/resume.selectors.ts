@@ -1,6 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { ResumeState } from './resume.state';
-import { ResumeListItem, ResumeDetail } from './resume.model';
+import type { ResumeState } from './resume.state';
+import type { ResumeListItem, ResumeDetail } from './resume.model';
 
 // Feature selector for the resume state
 export const selectResumeState = createFeatureSelector<ResumeState>('resumes');

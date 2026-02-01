@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import pdf from 'pdf-parse-fork';
-import { MetricsService } from '../ops/metrics.service';
+import type { MetricsService } from '../ops/metrics.service';
 
 /**
  * Exposes endpoints for scoring proxy.
@@ -144,7 +144,7 @@ export class ScoringProxyController {
       const spaced = (text || '').replace(/([a-z])([A-Z])/g, '$1 $2');
       const base = spaced
         .toLowerCase()
-        .split(/[^a-z0-9+#\.\-]+/)
+        .split(/[^a-z0-9+#.-]+/)
         .filter((t) => t && t.length > 1);
       const out = new Set<string>();
       for (const t of base) {
@@ -160,4 +160,3 @@ export class ScoringProxyController {
     }
   }
 }
-    this.metrics.incExposure();

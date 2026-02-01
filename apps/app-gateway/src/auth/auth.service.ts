@@ -6,21 +6,22 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { UserService } from './user.service';
-import {
+import type { JwtService } from '@nestjs/jwt';
+import type { UserService } from './user.service';
+import type {
   LoginDto,
   CreateUserDto,
   AuthResponseDto,
   JwtPayload,
-  UserDto,
+  UserDto} from '@ai-recruitment-clerk/user-management-domain';
+import {
   UserStatus,
 } from '@ai-recruitment-clerk/user-management-domain';
 import { WithCircuitBreaker } from '@ai-recruitment-clerk/shared-dtos';
 import * as bcrypt from 'bcryptjs';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
-import { RedisTokenBlacklistService } from '../security/redis-token-blacklist.service';
+import type { RedisTokenBlacklistService } from '../security/redis-token-blacklist.service';
 
 /**
  * Provides auth functionality.

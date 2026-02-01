@@ -4,25 +4,26 @@ import {
   UnauthorizedException,
   Logger,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import type { Model } from 'mongoose';
 import * as speakeasy from 'speakeasy';
 import * as QRCode from 'qrcode';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcryptjs';
-import {
-  MfaMethod,
+import type {
   EnableMfaDto,
   VerifyMfaDto,
   DisableMfaDto,
   GenerateBackupCodesDto,
   MfaStatusDto,
-  MfaSetupResponseDto,
+  MfaSetupResponseDto} from '../dto/mfa.dto';
+import {
+  MfaMethod
 } from '../dto/mfa.dto';
 import { UserProfile } from '../../schemas/user-profile.schema';
-import { EmailService } from './email.service';
-import { SmsService } from './sms.service';
+import type { EmailService } from './email.service';
+import type { SmsService } from './sms.service';
 
 interface MfaSettings {
   enabled: boolean;

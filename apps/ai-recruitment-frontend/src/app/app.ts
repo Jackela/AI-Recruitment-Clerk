@@ -1,7 +1,8 @@
+import type {
+  OnInit,
+  OnDestroy} from '@angular/core';
 import {
   Component,
-  OnInit,
-  OnDestroy,
   inject,
   signal,
   effect,

@@ -1,4 +1,5 @@
-import { Controller, Logger, OnModuleInit, Optional } from '@nestjs/common';
+import type { OnModuleInit} from '@nestjs/common';
+import { Controller, Logger, Optional } from '@nestjs/common';
 import { EventPattern } from '@nestjs/microservices';
 import type {
   AnalysisJdExtractedEvent,
@@ -13,8 +14,8 @@ import {
   ScoringEngineErrorCode,
   ErrorCorrelationManager,
 } from '@app/shared-dtos';
-import { ScoringEngineNatsService } from '../services/scoring-engine-nats.service';
-import { ScoringEngineService, JdDTO } from '../scoring.service';
+import type { ScoringEngineNatsService } from '../services/scoring-engine-nats.service';
+import type { ScoringEngineService, JdDTO } from '../scoring.service';
 
 /**
  * Exposes endpoints for scoring events.

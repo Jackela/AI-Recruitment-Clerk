@@ -3,7 +3,7 @@
  * Moved from libs/shared-dtos/src/events/resume-events.dto.ts
  */
 
-import { ResumeDTO } from '../../application/dtos/resume.dto';
+import type { ResumeDTO } from '../../application/dtos/resume.dto';
 
 /**
  * @description NATS Event: job.resume.submitted

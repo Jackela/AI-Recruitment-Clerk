@@ -50,7 +50,7 @@ export class EnableMfaDto {
   @ApiProperty({ description: 'Current password for verification' })
   @IsString()
   @IsNotEmpty()
-  currentPassword: string = '';
+  currentPassword = '';
 }
 
 /**
@@ -62,7 +62,7 @@ export class VerifyMfaDto {
   @IsNotEmpty()
   @Length(4, 8)
   @Matches(/^[0-9]+$/, { message: 'Token must contain only numbers' })
-  token: string = '';
+  token = '';
 
   @ApiPropertyOptional({ description: 'MFA method used' })
   @IsEnum(MfaMethod)
@@ -82,14 +82,14 @@ export class DisableMfaDto {
   @ApiProperty({ description: 'Current password for verification' })
   @IsString()
   @IsNotEmpty()
-  currentPassword: string = '';
+  currentPassword = '';
 
   @ApiProperty({ description: 'MFA token for verification' })
   @IsString()
   @IsNotEmpty()
   @Length(4, 8)
   @Matches(/^[0-9]+$/, { message: 'Token must contain only numbers' })
-  mfaToken: string = '';
+  mfaToken = '';
 }
 
 /**
@@ -99,14 +99,14 @@ export class GenerateBackupCodesDto {
   @ApiProperty({ description: 'Current password for verification' })
   @IsString()
   @IsNotEmpty()
-  currentPassword: string = '';
+  currentPassword = '';
 
   @ApiProperty({ description: 'MFA token for verification' })
   @IsString()
   @IsNotEmpty()
   @Length(4, 8)
   @Matches(/^[0-9]+$/, { message: 'Token must contain only numbers' })
-  mfaToken: string = '';
+  mfaToken = '';
 }
 
 /**
@@ -118,7 +118,7 @@ export class UseBackupCodeDto {
   @IsNotEmpty()
   @Length(8, 12)
   @Matches(/^[A-Z0-9-]+$/, { message: 'Invalid backup code format' })
-  backupCode: string = '';
+  backupCode = '';
 }
 
 /**
@@ -127,7 +127,7 @@ export class UseBackupCodeDto {
 export class MfaStatusDto {
   @ApiProperty({ description: 'Whether MFA is enabled' })
   @IsBoolean()
-  enabled: boolean = false;
+  enabled = false;
 
   @ApiProperty({ description: 'List of enabled MFA methods', type: [String] })
   @IsArray()
@@ -136,15 +136,15 @@ export class MfaStatusDto {
   methods: MfaMethod[] = [];
 
   @ApiProperty({ description: 'Number of remaining backup codes' })
-  remainingBackupCodes: number = 0;
+  remainingBackupCodes = 0;
 
   @ApiProperty({ description: 'Whether device is trusted (MFA not required)' })
   @IsBoolean()
-  deviceTrusted: boolean = false;
+  deviceTrusted = false;
 
   @ApiProperty({ description: 'Backup codes available' })
   @IsBoolean()
-  hasBackupCodes: boolean = false;
+  hasBackupCodes = false;
 }
 
 /**
@@ -152,7 +152,7 @@ export class MfaStatusDto {
  */
 export class MfaSetupResponseDto {
   @ApiProperty({ description: 'Whether setup was successful' })
-  success: boolean = false;
+  success = false;
 
   @ApiProperty({
     description: 'QR code for TOTP setup (base64 encoded)',
@@ -174,5 +174,5 @@ export class MfaSetupResponseDto {
   backupCodes?: string[];
 
   @ApiProperty({ description: 'Setup message or instructions' })
-  message: string = '';
+  message = '';
 }

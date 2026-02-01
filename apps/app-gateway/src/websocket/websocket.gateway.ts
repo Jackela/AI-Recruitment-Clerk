@@ -1,20 +1,21 @@
+import type {
+  OnGatewayInit,
+  OnGatewayConnection,
+  OnGatewayDisconnect} from '@nestjs/websockets';
 import {
   WebSocketGateway as WSGateway,
   WebSocketServer,
-  OnGatewayInit,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
   SubscribeMessage,
   MessageBody,
   ConnectedSocket,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import type { Server, Socket } from 'socket.io';
 import { Logger, Injectable } from '@nestjs/common';
-import { GuestUsageService } from '../guest/services/guest-usage.service';
-import { CollaborationService } from './collaboration.service';
-import { PresenceService } from './presence.service';
-import { NotificationService } from './notification.service';
-import { CacheService } from '../cache/cache.service';
+import type { GuestUsageService } from '../guest/services/guest-usage.service';
+import type { CollaborationService } from './collaboration.service';
+import type { PresenceService } from './presence.service';
+import type { NotificationService } from './notification.service';
+import type { CacheService } from '../cache/cache.service';
 
 // Enhanced types for real-time collaboration
 interface ProgressUpdate {

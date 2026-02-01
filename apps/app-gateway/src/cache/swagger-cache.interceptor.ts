@@ -3,15 +3,16 @@
  * AI Recruitment Clerk - API文档缓存优化
  */
 
-import {
-  Injectable,
+import type {
   NestInterceptor,
   ExecutionContext,
-  CallHandler,
+  CallHandler} from '@nestjs/common';
+import {
+  Injectable
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { CacheService } from './cache.service';
+import type { CacheService } from './cache.service';
 
 /**
  * Represents the swagger cache interceptor.

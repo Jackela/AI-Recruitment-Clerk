@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { NatsClientService, NatsPublishResult } from '@app/shared-nats-client';
+import type { NatsPublishResult } from '@app/shared-nats-client';
+import { NatsClientService } from '@app/shared-nats-client';
 import type { AnalysisJdExtractedEvent } from '@ai-recruitment-clerk/job-management-domain';
 import type { AnalysisResumeParsedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
 import { DeliverPolicy } from 'nats';

@@ -1,18 +1,19 @@
+import type {
+  OnInit,
+  OnDestroy,
+  ElementRef} from '@angular/core';
 import {
   Component,
   Input,
   Output,
   EventEmitter,
-  OnInit,
-  OnDestroy,
-  ElementRef,
   ViewChild,
   signal,
   computed,
   effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TemplateRef } from '@angular/core';
+import type { TemplateRef } from '@angular/core';
 import { Subject, fromEvent, animationFrameScheduler } from 'rxjs';
 import { takeUntil, throttleTime, distinctUntilChanged } from 'rxjs/operators';
 // import { debounceTime } from 'rxjs/operators'; // Reserved for future use

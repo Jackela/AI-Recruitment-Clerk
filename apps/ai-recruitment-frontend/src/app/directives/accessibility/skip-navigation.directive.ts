@@ -1,4 +1,5 @@
-import { Directive, OnInit, inject } from '@angular/core';
+import type { OnInit} from '@angular/core';
+import { Directive, inject } from '@angular/core';
 import { AccessibilityService } from '../../services/accessibility/accessibility.service';
 
 /**

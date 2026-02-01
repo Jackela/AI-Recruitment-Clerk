@@ -13,13 +13,13 @@ import {
   Ensures,
   ContractValidators,
 } from '@ai-recruitment-clerk/infrastructure-shared';
-import { LlmService } from '../llm/llm.service';
-import { NatsClient } from '../nats/nats.client';
-import {
+import type { LlmService } from '../llm/llm.service';
+import type { NatsClient } from '../nats/nats.client';
+import type {
   JobJdSubmittedEvent,
   AnalysisJdExtractedEvent,
 } from '../dto/events.dto';
-import { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
+import type { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
 import {
   RetryUtility,
 } from '@ai-recruitment-clerk/infrastructure-shared';
@@ -311,7 +311,7 @@ export class ExtractionServiceContracts {
     // Remove excessive whitespace and normalize
     return jdText
       .replace(/\s+/g, ' ')
-      .replace(/[^\w\s.,;:()\-\/]/g, ' ')
+      .replace(/[^\w\s.,;:()/-]/g, ' ')
       .trim()
       .substring(0, 50000); // Ensure max length
   }

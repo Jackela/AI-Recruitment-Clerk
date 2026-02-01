@@ -1,22 +1,24 @@
+import type {
+  OnInit,
+  OnDestroy} from '@angular/core';
 import {
   Component,
-  OnInit,
-  OnDestroy,
   Input,
   Output,
   EventEmitter,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import type {
+  FormBuilder} from '@angular/forms';
 import {
   ReactiveFormsModule,
-  FormBuilder,
   FormGroup,
   FormArray,
   Validators,
 } from '@angular/forms';
 import { Subject } from 'rxjs';
 // import { takeUntil } from 'rxjs'; // Reserved for future use
-import {
+import type {
   PrivacyApiService,
   CaptureConsentDto,
   ConsentStatusDto,
@@ -85,7 +87,7 @@ export interface ProcessingPurposeInfo {
   dataCategories: DataCategory[];
   thirdParties: string[];
 }
-import { ToastService } from '../../services/toast.service';
+import type { ToastService } from '../../services/toast.service';
 
 /**
  * GDPR Consent Management Component

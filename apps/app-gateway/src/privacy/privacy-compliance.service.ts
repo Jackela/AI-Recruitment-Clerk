@@ -6,28 +6,29 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import type { Model } from 'mongoose';
 import { ConsentStatus } from '../schemas/consent-record.schema';
-import {
+import type {
   ConsentRecord,
   UserConsentProfile,
   CaptureConsentDto,
   WithdrawConsentDto,
   ConsentStatusDto,
-  DataSubjectRightType,
   DataSubjectRightsRequest,
   CreateRightsRequestDto,
-  DataExportPackage,
-  
+  DataExportPackage} from '@ai-recruitment-clerk/shared-dtos';
+import {
+  DataSubjectRightType,
   RequestStatus,
   DataExportFormat,
   IdentityVerificationStatus,
-  
   ConsentPurpose,
+  DataCategory,
 } from '@ai-recruitment-clerk/shared-dtos';
+import type {
+  UserProfileDocument} from '../schemas/user-profile.schema';
 import {
-  UserProfile,
-  UserProfileDocument,
+  UserProfile
 } from '../schemas/user-profile.schema';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -404,36 +405,51 @@ export class PrivacyComplianceService {
    * PRIVATE HELPER METHODS
    */
 
-  private getDefaultDataCategories(purpose: ConsentPurpose): string[] {
-    const categoryMap = {
+  private getDefaultDataCategories(purpose: ConsentPurpose): DataCategory[] {
+    const categoryMap: Record<ConsentPurpose, DataCategory[]> = {
       [ConsentPurpose.ESSENTIAL_SERVICES]: [
-        'authentication',
-        'profile_information',
+        DataCategory.AUTHENTICATION,
+        DataCategory.PROFILE_INFORMATION,
       ],
       [ConsentPurpose.BEHAVIORAL_ANALYTICS]: [
-        'behavioral_data',
-        'device_information',
+        DataCategory.BEHAVIORAL_DATA,
+        DataCategory.DEVICE_INFORMATION,
       ],
       [ConsentPurpose.MARKETING_COMMUNICATIONS]: [
-        'communication_preferences',
-        'profile_information',
+        DataCategory.COMMUNICATION_PREFERENCES,
+        DataCategory.PROFILE_INFORMATION,
       ],
       [ConsentPurpose.FUNCTIONAL_ANALYTICS]: [
-        'system_logs',
-        'performance_data',
+        DataCategory.SYSTEM_LOGS,
+        DataCategory.PERFORMANCE_DATA,
       ],
       [ConsentPurpose.THIRD_PARTY_SHARING]: [
-        'resume_content',
-        'job_preferences',
+        DataCategory.RESUME_CONTENT,
+        DataCategory.JOB_PREFERENCES,
       ],
       [ConsentPurpose.PERSONALIZATION]: [
-        'profile_information',
-        'job_preferences',
+        DataCategory.PROFILE_INFORMATION,
+        DataCategory.JOB_PREFERENCES,
       ],
-      [ConsentPurpose.PERFORMANCE_MONITORING]: ['system_logs'],
+      [ConsentPurpose.PERFORMANCE_MONITORING]: [DataCategory.SYSTEM_LOGS],
+      [ConsentPurpose.RESUME_PROCESSING]: [
+        DataCategory.RESUME_CONTENT,
+        DataCategory.PROFILE_INFORMATION,
+      ],
+      [ConsentPurpose.MARKETING]: [
+        DataCategory.COMMUNICATION_PREFERENCES,
+        DataCategory.PROFILE_INFORMATION,
+      ],
+      [ConsentPurpose.ANALYTICS]: [
+        DataCategory.BEHAVIORAL_DATA,
+        DataCategory.SYSTEM_LOGS,
+      ],
+      [ConsentPurpose.COMMUNICATION]: [
+        DataCategory.COMMUNICATION_PREFERENCES,
+      ],
     };
 
-    return categoryMap[purpose] || ['general'];
+    return categoryMap[purpose] || [DataCategory.GENERAL];
   }
 
   private getLegalBasisForPurpose(purpose: ConsentPurpose): string {

@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import type { MicroserviceOptions} from '@nestjs/microservices';
+import { Transport } from '@nestjs/microservices';
 import { Logger } from '@nestjs/common';
 
 const logger = new Logger('ReportGeneratorSvc');

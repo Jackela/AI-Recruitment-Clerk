@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
-import { GridFSBucket, GridFSBucketWriteStream, ObjectId } from 'mongodb';
+import type { Connection } from 'mongoose';
+import type { GridFSBucketWriteStream} from 'mongodb';
+import { GridFSBucket, ObjectId } from 'mongodb';
 import * as stream from 'stream';
 import * as crypto from 'crypto';
 

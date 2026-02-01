@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
-import { AnalysisInitiatedResponseDto } from './dto/analysis-response.dto';
-import { MulterFile } from '../jobs/types/multer.types';
+import type { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
+import type { AnalysisInitiatedResponseDto } from './dto/analysis-response.dto';
+import type { MulterFile } from '../jobs/types/multer.types';
 
 // Define event interfaces locally to avoid module resolution issues
 interface JobJdSubmittedEvent {

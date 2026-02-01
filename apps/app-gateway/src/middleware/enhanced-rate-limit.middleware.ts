@@ -1,13 +1,15 @@
+import type {
+  NestMiddleware} from '@nestjs/common';
 import {
   Injectable,
-  NestMiddleware,
   HttpException,
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Request, Response, NextFunction } from 'express';
-import Redis, { RedisOptions } from 'ioredis';
+import type { ConfigService } from '@nestjs/config';
+import type { Request, Response, NextFunction } from 'express';
+import type { RedisOptions } from 'ioredis';
+import Redis from 'ioredis';
 
 interface SecurityRateLimitRecord {
   requests: number;

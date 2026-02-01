@@ -1,21 +1,23 @@
+import type {
+  OnInit,
+  OnDestroy} from '@angular/core';
 import {
   Component,
   Input,
   Output,
-  EventEmitter,
-  OnInit,
-  OnDestroy,
+  EventEmitter
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
-import {
-  MobileSwipeComponent,
+import type {
   SwipeAction,
-  SwipeEvent,
+  SwipeEvent} from './mobile-swipe.component';
+import {
+  MobileSwipeComponent
 } from './mobile-swipe.component';
-import { TouchGestureService } from '../../services/mobile/touch-gesture.service';
+import type { TouchGestureService } from '../../services/mobile/touch-gesture.service';
 
 /**
  * Defines the shape of the candidate result.

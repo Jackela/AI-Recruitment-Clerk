@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { CreateQuestionnaireIncentiveDto } from './dto/create-questionnaire-incentive.dto';
-import { ApproveIncentiveDto } from './dto/approve-incentive.dto';
+import type { CreateQuestionnaireIncentiveDto } from './dto/create-questionnaire-incentive.dto';
+import type { ApproveIncentiveDto } from './dto/approve-incentive.dto';
 
 type IncentiveStatus = 'pending' | 'approved';
 

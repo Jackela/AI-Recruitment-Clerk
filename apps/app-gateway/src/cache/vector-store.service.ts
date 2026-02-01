@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { RedisConnectionService } from './redis-connection.service';
+import type { ConfigService } from '@nestjs/config';
+import type { RedisConnectionService } from './redis-connection.service';
 import { SchemaFieldTypes, VectorAlgorithms } from 'redis';
 
 type VectorSearchResult = { cacheKey: string; similarity: number };

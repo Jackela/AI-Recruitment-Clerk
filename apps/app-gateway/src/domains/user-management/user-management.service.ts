@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { UserService } from '../../auth/user.service';
-import {
+import type { UserService } from '../../auth/user.service';
+import type {
   UserDto,
   UpdateUserDto,
   UserPreferencesDto,
-  UserActivityDto,
+  UserActivityDto} from '@ai-recruitment-clerk/user-management-domain';
+import {
   UserStatus,
 } from '@ai-recruitment-clerk/user-management-domain';
 

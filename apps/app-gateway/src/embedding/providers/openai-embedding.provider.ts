@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { ConfigService } from '@nestjs/config';
-import { AxiosError } from 'axios';
+import type { HttpService } from '@nestjs/axios';
+import type { ConfigService } from '@nestjs/config';
+import type { AxiosError } from 'axios';
 import { firstValueFrom } from 'rxjs';
-import { IEmbeddingProvider } from '../interfaces/embedding-provider.interface';
+import type { IEmbeddingProvider } from '../interfaces/embedding-provider.interface';
 
 /**
  * Provider that delegates embedding generation to an external API (OpenAI by default).

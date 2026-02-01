@@ -23,7 +23,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { PrivacyComplianceService } from './privacy-compliance.service';
+import type { PrivacyComplianceService } from './privacy-compliance.service';
 import {
   
   ConsentStatusResponseDto,

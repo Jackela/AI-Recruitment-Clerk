@@ -11,7 +11,7 @@ import {
   Logger,
   BadRequestException,
 } from '@nestjs/common';
-import { FeedbackCodeService } from './feedback-code.service';
+import type { FeedbackCodeService } from './feedback-code.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 interface BatchPaymentDto {

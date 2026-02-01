@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy, inject, effect } from '@angular/core';
+import type { OnInit, OnDestroy} from '@angular/core';
+import { Component, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AccessibilityService } from '../../../services/accessibility/accessibility.service';
 import { Subscription } from 'rxjs';

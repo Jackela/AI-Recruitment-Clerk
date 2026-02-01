@@ -4,8 +4,8 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { CacheService } from '../../cache/cache.service';
+import type { ConfigService } from '@nestjs/config';
+import type { CacheService } from '../../cache/cache.service';
 
 /**
  * Defines the shape of the load test config.

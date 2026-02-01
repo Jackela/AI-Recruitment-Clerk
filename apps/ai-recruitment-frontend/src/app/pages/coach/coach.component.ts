@@ -1,13 +1,14 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import type {
+  FormGroup} from '@angular/forms';
 import {
   ReactiveFormsModule,
   FormBuilder,
-  Validators,
-  FormGroup,
+  Validators
 } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
-import {
+import type {
   GapAnalysisResult,
 } from '../../interfaces/gap-analysis.interface';
 import { GapAnalysisReportComponent } from './gap-analysis-report.component';

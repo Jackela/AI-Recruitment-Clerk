@@ -3,9 +3,10 @@
  * AI Recruitment Clerk - 数据库连接池与查询性能优化
  */
 
-import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
-import { Connection } from 'mongoose';
+import type { NestMiddleware} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import type { Request, Response, NextFunction } from 'express';
+import type { Connection } from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
 
 interface DatabaseMetrics {

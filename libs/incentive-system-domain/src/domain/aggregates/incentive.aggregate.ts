@@ -1,9 +1,10 @@
-import { DomainEvent } from '../domain-events/base/domain-event.js';
+import type { DomainEvent } from '../domain-events/base/domain-event.js';
 
+import type {
+  ContactInfo} from '../value-objects/index.js';
 import {
   IncentiveId,
   IncentiveRecipient,
-  ContactInfo,
   IncentiveReward,
   IncentiveTrigger,
   IncentiveValidationResult,

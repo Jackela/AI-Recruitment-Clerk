@@ -1,8 +1,9 @@
+import type {
+  UsageLimitCheckResult,
+  UsageRecordResult} from '../domains/usage-limit.dto';
 import {
   UsageLimit,
   BonusType,
-  UsageLimitCheckResult,
-  UsageRecordResult,
   UsageLimitPolicy,
 } from '../domains/usage-limit.dto';
 import { UsageLimitRules } from '../domains/usage-limit.rules';

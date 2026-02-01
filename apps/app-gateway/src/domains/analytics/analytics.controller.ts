@@ -14,7 +14,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { Request as ExpressRequest } from 'express';
+import type { Request as ExpressRequest } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -26,11 +26,12 @@ import {
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
+import type {
+  UserDto} from '@ai-recruitment-clerk/user-management-domain';
 import {
-  Permission,
-  UserDto,
+  Permission
 } from '@ai-recruitment-clerk/user-management-domain';
-import { AnalyticsIntegrationService } from './analytics-integration.service';
+import type { AnalyticsIntegrationService } from './analytics-integration.service';
 
 interface AuthenticatedRequest extends ExpressRequest {
   user: UserDto;

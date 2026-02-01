@@ -1,7 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import type { CanActivate, ExecutionContext} from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
+import type { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from '../auth/decorators/permissions.decorator';
-import { Permission, hasAllPermissions } from '@ai-recruitment-clerk/user-management-domain';
+import type { Permission} from '@ai-recruitment-clerk/user-management-domain';
+import { hasAllPermissions } from '@ai-recruitment-clerk/user-management-domain';
 
 @Injectable()
 export class OpsPermissionsGuard implements CanActivate {

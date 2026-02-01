@@ -1,13 +1,14 @@
+import type {
+  OnModuleInit,
+  OnModuleDestroy} from '@nestjs/common';
 import {
   Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
+  Logger
 } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
+import type { Connection } from 'mongoose';
 import { GridFSBucket, ObjectId } from 'mongodb';
-import { GridFsFileInfo } from '../dto/resume-parsing.dto';
+import type { GridFsFileInfo } from '../dto/resume-parsing.dto';
 
 /**
  * Provides grid fs functionality.
@@ -346,7 +347,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
    * @returns The extracted file ID.
    */
   private extractFileIdFromUrl(gridFsUrl: string): string {
-    const urlPattern = /^gridfs:\/\/[^\/]+\/(.+)$/;
+    const urlPattern = /^gridfs:\/\/[^/]+\/(.+)$/;
     const match = gridFsUrl.match(urlPattern);
 
     if (!match) {

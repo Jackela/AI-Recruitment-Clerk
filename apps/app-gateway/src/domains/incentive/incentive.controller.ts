@@ -23,14 +23,15 @@ import {
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
+import type {
+  PaymentMethod} from '@ai-recruitment-clerk/shared-dtos';
 import {
   IncentiveStatus,
   RewardType,
-  PaymentMethod,
   ContactInfo,
 } from '@ai-recruitment-clerk/shared-dtos';
-import { AuthenticatedRequest } from '@ai-recruitment-clerk/user-management-domain';
-import { IncentiveIntegrationService } from './incentive-integration.service';
+import type { AuthenticatedRequest } from '@ai-recruitment-clerk/user-management-domain';
+import type { IncentiveIntegrationService } from './incentive-integration.service';
 
 // Use shared AuthenticatedRequest type with required user.id and user.organizationId
 

@@ -1,5 +1,5 @@
-import { DomainEvent } from './base/domain-event.js';
-import { RawSubmissionData } from '../../application/dtos/questionnaire.dto.js';
+import type { DomainEvent } from './base/domain-event.js';
+import type { RawSubmissionData } from '../../application/dtos/questionnaire.dto.js';
 
 /**
  * Represents the questionnaire validation failed event event.

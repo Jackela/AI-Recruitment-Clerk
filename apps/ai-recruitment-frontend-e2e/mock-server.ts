@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { Server } from 'http';
+import type { Server } from 'http';
 import cors from 'cors';
 import { portManager } from './port-manager.js';
 

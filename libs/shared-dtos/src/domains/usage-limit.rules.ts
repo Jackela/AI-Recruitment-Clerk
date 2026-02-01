@@ -1,8 +1,9 @@
-import {
+import type {
   UsageLimit,
-  BonusType,
   UsageLimitPolicy,
-  UsageStatistics,
+  UsageStatistics} from './usage-limit.dto';
+import {
+  BonusType
 } from './usage-limit.dto';
 
 /**

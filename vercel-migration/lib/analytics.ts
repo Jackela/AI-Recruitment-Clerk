@@ -164,7 +164,7 @@ export class Analytics {
   static async trackConversionFunnel(
     userId: string,
     step: string,
-    funnelId: string = 'main',
+    funnelId = 'main',
     data?: Record<string, any>
   ): Promise<void> {
     const collection = await getCollection<ConversionFunnel>('conversion_funnels')
@@ -289,7 +289,7 @@ export class Analytics {
   }
 
   // 获取转化率数据
-  static async getConversionRates(funnelId: string = 'main'): Promise<{
+  static async getConversionRates(funnelId = 'main'): Promise<{
     step: string
     users: number
     conversionRate: number

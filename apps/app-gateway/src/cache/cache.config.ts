@@ -3,7 +3,7 @@
  * AI Recruitment Clerk - 性能优化缓存层
  */
 
-import { CacheModuleAsyncOptions } from '@nestjs/cache-manager';
+import type { CacheModuleAsyncOptions } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 

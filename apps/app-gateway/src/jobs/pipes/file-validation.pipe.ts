@@ -1,5 +1,6 @@
-import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
-import { MulterFile } from '../types/multer.types';
+import type { PipeTransform} from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
+import type { MulterFile } from '../types/multer.types';
 
 /**
  * Represents the file validation pipe.

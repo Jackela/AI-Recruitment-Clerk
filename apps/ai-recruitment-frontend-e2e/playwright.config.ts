@@ -60,6 +60,8 @@ if (process.env.E2E_ENABLE_FIREFOX === 'true') {
       actionTimeout: 30000,
       launchOptions: {
         timeout: 60000,
+        // Firefox-specific preferences for CI stability
+        // @ts-expect-error firefoxUserPrefs is valid for Firefox but not in base type
         firefoxUserPrefs: {
           'network.http.connection-retry-timeout': 30,
           'network.http.connection-timeout': 90,

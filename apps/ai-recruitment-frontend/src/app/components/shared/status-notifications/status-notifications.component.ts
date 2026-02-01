@@ -1,7 +1,8 @@
-import { Component, computed, OnInit, OnDestroy } from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
+import { Component, computed } from '@angular/core';
 // import { signal } from '@angular/core'; // Reserved for future use
 import { CommonModule } from '@angular/common';
-import {
+import type {
   ProgressFeedbackService,
   StatusNotification,
 } from '../../../services/feedback/progress-feedback.service';

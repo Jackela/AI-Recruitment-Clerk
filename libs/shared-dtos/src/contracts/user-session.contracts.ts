@@ -1,4 +1,5 @@
-import { UserSession, UsageResult } from '../domains/user-management.dto';
+import type { UsageResult } from '../domains/user-management.dto';
+import { UserSession } from '../domains/user-management.dto';
 
 /**
  * Represents the user session contracts.

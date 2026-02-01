@@ -1,9 +1,9 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { MetricsService } from './metrics.service';
+import type { MetricsService } from './metrics.service';
 import { OpsGuard } from './ops.guard';
 import { OpsPermissionsGuard } from './ops-permissions.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
-import { Permission } from '@ai-recruitment-clerk/shared-dtos';
+import { Permission } from '@ai-recruitment-clerk/user-management-domain';
 
 @Controller('ops/observability')
 @UseGuards(OpsGuard, OpsPermissionsGuard)

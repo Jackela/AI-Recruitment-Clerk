@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { PreloadingStrategy, Route } from '@angular/router';
-import { Observable, of, timer } from 'rxjs';
+import type { PreloadingStrategy, Route } from '@angular/router';
+import type { Observable} from 'rxjs';
+import { of, timer } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { LoggerService } from './shared/logger.service';
 

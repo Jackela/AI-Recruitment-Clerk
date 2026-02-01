@@ -1,6 +1,7 @@
+import type {
+  GenerativeModel} from '@google/generative-ai';
 import {
   GoogleGenerativeAI,
-  GenerativeModel,
   HarmCategory,
   HarmBlockThreshold,
 } from '@google/generative-ai';

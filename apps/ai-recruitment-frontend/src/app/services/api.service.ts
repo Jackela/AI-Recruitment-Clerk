@@ -1,20 +1,20 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import {
+import type {
   Job,
   JobListItem,
   CreateJobRequest,
   CreateJobResponse,
 } from '../store/jobs/job.model';
-import {
+import type {
   ResumeListItem,
   ResumeDetail,
   ResumeUploadResponse,
 } from '../store/resumes/resume.model';
-import { AnalysisReport, ReportsList } from '../store/reports/report.model';
-import {
+import type { AnalysisReport, ReportsList } from '../store/reports/report.model';
+import type {
   GapAnalysisRequest,
   GapAnalysisResult,
 } from '../interfaces/gap-analysis.interface';

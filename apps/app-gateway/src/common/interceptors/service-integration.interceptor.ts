@@ -1,16 +1,18 @@
-import {
-  Injectable,
+import type {
   NestInterceptor,
   ExecutionContext,
-  CallHandler,
+  CallHandler} from '@nestjs/common';
+import {
+  Injectable,
   ServiceUnavailableException,
   RequestTimeoutException,
   Logger,
   Inject,
 } from '@nestjs/common';
-import { Observable, throwError, of } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { throwError, of } from 'rxjs';
 import { catchError, timeout, retry, tap } from 'rxjs/operators';
-import { Cache } from 'cache-manager';
+import type { Cache } from 'cache-manager';
 
 /**
  * Defines the shape of the service integration options.

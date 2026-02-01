@@ -1,11 +1,12 @@
-import { Component, signal, OnDestroy } from '@angular/core';
+import type { OnDestroy } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
+import type { HttpErrorResponse } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { GuestApiService } from '../../services/guest/guest-api.service';
-import { WebSocketService } from '../../services/websocket.service';
+import type { GuestApiService } from '../../services/guest/guest-api.service';
+import type { WebSocketService } from '../../services/websocket.service';
 import { ProgressTrackerComponent } from '../../components/shared/progress-tracker/progress-tracker.component';
 
 /**

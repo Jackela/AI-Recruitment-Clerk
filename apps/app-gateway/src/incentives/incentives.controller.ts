@@ -11,9 +11,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { IncentivesService } from './incentives.service';
-import { CreateQuestionnaireIncentiveDto } from './dto/create-questionnaire-incentive.dto';
-import { ApproveIncentiveDto } from './dto/approve-incentive.dto';
+import type { IncentivesService } from './incentives.service';
+import type { CreateQuestionnaireIncentiveDto } from './dto/create-questionnaire-incentive.dto';
+import type { ApproveIncentiveDto } from './dto/approve-incentive.dto';
 
 /**
  * Exposes endpoints for incentives.

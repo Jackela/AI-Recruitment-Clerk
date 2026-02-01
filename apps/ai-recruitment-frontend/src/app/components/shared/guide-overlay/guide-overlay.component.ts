@@ -1,6 +1,7 @@
-import { Component, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
+import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NavigationGuideService } from '../../../services/navigation/navigation-guide.service';
+import type { NavigationGuideService } from '../../../services/navigation/navigation-guide.service';
 // import { GuideStep } from '../../../services/navigation/navigation-guide.service'; // Reserved for future use
 import { Subject } from 'rxjs';
 // import { takeUntil } from 'rxjs/operators'; // Reserved for future use

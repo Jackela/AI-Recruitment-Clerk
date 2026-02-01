@@ -1,15 +1,18 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import type { OnInit, OnDestroy} from '@angular/core';
+import { Component, inject } from '@angular/core';
+import type {
+  FormGroup} from '@angular/forms';
 import {
   FormBuilder,
-  FormGroup,
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable, Subject } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
-import { AppState } from '../../../store/app.state';
+import type { AppState } from '../../../store/app.state';
 import * as JobActions from '../../../store/jobs/job.actions';
 import * as JobSelectors from '../../../store/jobs/job.selectors';
 import { Router } from '@angular/router';

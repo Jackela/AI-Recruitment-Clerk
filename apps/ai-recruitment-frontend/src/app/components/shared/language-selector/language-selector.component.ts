@@ -1,9 +1,10 @@
 import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  I18nService,
+import type {
   Language,
-  LanguageConfig,
+  LanguageConfig} from '../../../services/i18n/i18n.service';
+import {
+  I18nService
 } from '../../../services/i18n/i18n.service';
 
 /**

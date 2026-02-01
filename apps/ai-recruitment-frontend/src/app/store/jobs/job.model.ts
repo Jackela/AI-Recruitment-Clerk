@@ -1,4 +1,4 @@
-import { JobContracts } from '@ai-recruitment-clerk/api-contracts';
+import type { JobContracts } from '@ai-recruitment-clerk/api-contracts';
 
 /**
  * Defines the shape of the job.

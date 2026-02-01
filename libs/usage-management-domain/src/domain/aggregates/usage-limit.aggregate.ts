@@ -1,4 +1,4 @@
-import { DomainEvent } from '../domain-events/base/domain-event.js';
+import type { DomainEvent } from '../domain-events/base/domain-event.js';
 import { UsageLimitId } from '../value-objects/usage-limit-id.value-object.js';
 import { IPAddress } from '../value-objects/ip-address.value-object.js';
 import { UsageLimitPolicy } from '../value-objects/usage-limit-policy.value-object.js';
@@ -12,7 +12,7 @@ import { UsageLimitExceededEvent } from '../domain-events/usage-limit-exceeded.e
 import { UsageRecordedEvent } from '../domain-events/usage-recorded.event.js';
 import { BonusQuotaAddedEvent } from '../domain-events/bonus-quota-added.event.js';
 import { DailyUsageResetEvent } from '../domain-events/daily-usage-reset.event.js';
-import {
+import type {
   BonusType,
   UsageLimitData,
 } from '../../application/dtos/usage-limit.dto.js';
@@ -40,7 +40,7 @@ export class UsageLimit {
    * @param policy - The policy.
    * @returns The UsageLimit.
    */
-  static create(ip: string, policy: UsageLimitPolicy): UsageLimit {
+  public static create(ip: string, policy: UsageLimitPolicy): UsageLimit {
     const limitId = UsageLimitId.generate();
     const ipAddress = new IPAddress({ value: ip });
     const quotaAllocation = QuotaAllocation.createDefault(policy.dailyLimit);
@@ -74,7 +74,7 @@ export class UsageLimit {
    * @param data - The data.
    * @returns The UsageLimit.
    */
-  static restore(data: UsageLimitData): UsageLimit {
+  public static restore(data: UsageLimitData): UsageLimit {
     return new UsageLimit(
       new UsageLimitId({ value: data.id }),
       new IPAddress({ value: data.ip }),
@@ -90,7 +90,7 @@ export class UsageLimit {
    * Performs the can use operation.
    * @returns The UsageLimitCheckResult.
    */
-  canUse(): UsageLimitCheckResult {
+  public canUse(): UsageLimitCheckResult {
     this.resetIfNeeded();
 
     const currentUsage = this.usageTracking.getCurrentCount();
@@ -120,12 +120,13 @@ export class UsageLimit {
    * Performs the record usage operation.
    * @returns The UsageRecordResult.
    */
-  recordUsage(): UsageRecordResult {
+  public recordUsage(): UsageRecordResult {
     this.resetIfNeeded();
 
     const checkResult = this.canUse();
     if (!checkResult.isAllowed()) {
-      return UsageRecordResult.failed(checkResult.getBlockReason()!);
+      const blockReason = checkResult.getBlockReason();
+      return UsageRecordResult.failed(blockReason ?? 'Usage limit exceeded');
     }
 
     const previousCount = this.usageTracking.getCurrentCount();
@@ -154,7 +155,7 @@ export class UsageLimit {
    * @param bonusType - The bonus type.
    * @param amount - The amount.
    */
-  addBonusQuota(bonusType: BonusType, amount: number): void {
+  public addBonusQuota(bonusType: BonusType, amount: number): void {
     if (amount <= 0) {
       throw new Error('Bonus quota amount must be positive');
     }
@@ -231,7 +232,7 @@ export class UsageLimit {
    * Retrieves usage statistics.
    * @returns The UsageStatistics.
    */
-  getUsageStatistics(): UsageStatistics {
+  public getUsageStatistics(): UsageStatistics {
     return new UsageStatistics({
       ip: this.ip.getValue(),
       currentUsage: this.usageTracking.getCurrentCount(),
@@ -255,14 +256,14 @@ export class UsageLimit {
    * Retrieves uncommitted events.
    * @returns The an array of DomainEvent.
    */
-  getUncommittedEvents(): DomainEvent[] {
+  public getUncommittedEvents(): DomainEvent[] {
     return [...this.uncommittedEvents];
   }
 
   /**
    * Performs the mark events as committed operation.
    */
-  markEventsAsCommitted(): void {
+  public markEventsAsCommitted(): void {
     this.uncommittedEvents = [];
   }
 
@@ -275,7 +276,7 @@ export class UsageLimit {
    * Retrieves id.
    * @returns The UsageLimitId.
    */
-  getId(): UsageLimitId {
+  public getId(): UsageLimitId {
     return this.id;
   }
 
@@ -283,7 +284,7 @@ export class UsageLimit {
    * Retrieves ip.
    * @returns The string value.
    */
-  getIP(): string {
+  public getIP(): string {
     return this.ip.getValue();
   }
 
@@ -291,7 +292,7 @@ export class UsageLimit {
    * Retrieves current usage.
    * @returns The number value.
    */
-  getCurrentUsage(): number {
+  public getCurrentUsage(): number {
     return this.usageTracking.getCurrentCount();
   }
 
@@ -299,7 +300,7 @@ export class UsageLimit {
    * Retrieves available quota.
    * @returns The number value.
    */
-  getAvailableQuota(): number {
+  public getAvailableQuota(): number {
     return (
       this.quotaAllocation.getAvailableQuota() -
       this.usageTracking.getCurrentCount()

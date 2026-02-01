@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Logger } from '@nestjs/common';
-import { AppService } from './app.service';
+import type { AppService } from './app.service';
 import { Public } from '../auth/decorators/public.decorator';
-import { JobRepository } from '../repositories/job.repository';
-import { NatsClientService } from '@ai-recruitment-clerk/shared-nats-client';
-import { CacheService } from '../cache/cache.service';
-import { CacheWarmupService } from '../cache/cache-warmup.service';
+import type { JobRepository } from '../repositories/job.repository';
+import type { NatsClientService } from '@ai-recruitment-clerk/shared-nats-client';
+import type { CacheService } from '../cache/cache.service';
+import type { CacheWarmupService } from '../cache/cache-warmup.service';
 
 /**
  * Exposes endpoints for app.

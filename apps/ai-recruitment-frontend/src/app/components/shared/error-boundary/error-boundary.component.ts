@@ -1,14 +1,15 @@
+import type {
+  ErrorHandler,
+  OnInit} from '@angular/core';
 import {
   Component,
-  ErrorHandler,
   Injectable,
-  OnInit,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { ToastService } from '../../../services/toast.service';
-import {
+import type { Router } from '@angular/router';
+import type { ToastService } from '../../../services/toast.service';
+import type {
   ErrorCorrelationService,
   StructuredError,
 } from '../../../services/error/error-correlation.service';

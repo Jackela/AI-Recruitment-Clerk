@@ -1,9 +1,10 @@
 import { Body, Controller, Delete, Get, HttpCode, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
-import { FlagsStore, FeatureFlag } from './flags.store';
+import type { FeatureFlag } from './flags.store';
+import { FlagsStore } from './flags.store';
 import { OpsGuard } from './ops.guard';
 import { OpsPermissionsGuard } from './ops-permissions.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
-import { Permission } from '@ai-recruitment-clerk/shared-dtos';
+import { Permission } from '@ai-recruitment-clerk/user-management-domain';
 
 @Controller('ops/flags')
 @UseGuards(OpsGuard, OpsPermissionsGuard)

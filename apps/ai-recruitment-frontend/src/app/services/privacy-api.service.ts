@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, firstValueFrom } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 // Temporary local types until shared-dtos compilation is fixed
 /**
  * Defines the shape of the capture consent dto.

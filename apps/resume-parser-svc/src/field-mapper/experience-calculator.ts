@@ -2,7 +2,8 @@
  * Experience calculation and analysis utilities for resume processing
  */
 
-import { DateParser, DateRange } from './date-parser';
+import type { DateRange } from './date-parser';
+import { DateParser } from './date-parser';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
 /**

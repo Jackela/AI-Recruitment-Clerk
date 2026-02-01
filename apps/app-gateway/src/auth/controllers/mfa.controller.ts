@@ -18,13 +18,14 @@ import {
   ApiSecurity,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { MfaService } from '../services/mfa.service';
-import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
-import {
+import type { MfaService } from '../services/mfa.service';
+import type { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
+import type {
   EnableMfaDto,
   VerifyMfaDto,
   DisableMfaDto,
-  GenerateBackupCodesDto,
+  GenerateBackupCodesDto} from '../dto/mfa.dto';
+import {
   MfaStatusDto,
   MfaSetupResponseDto,
   MfaMethod,

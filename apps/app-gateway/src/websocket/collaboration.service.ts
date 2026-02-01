@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { CacheService } from '../cache/cache.service';
+import type { CacheService } from '../cache/cache.service';
 
 // Collaboration interfaces
 /**

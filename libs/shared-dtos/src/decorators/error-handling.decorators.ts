@@ -86,6 +86,7 @@ export function HandleErrors(config: ErrorHandlingConfig = {}) {
  * Sets default error handling behavior for all methods in the class
  */
 export function DefaultErrorHandling(config: ErrorHandlingConfig) {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   return function <T extends { new (...args: any[]): {} }>(constructor: T) {
     const className = constructor.name;
     const logger = config.logger || new Logger(className);

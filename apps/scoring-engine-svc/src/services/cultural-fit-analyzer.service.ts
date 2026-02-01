@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
+import type { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
-import { JobRequirements } from './experience-analyzer.service';
+import type { JobRequirements } from './experience-analyzer.service';
 
 interface CulturalRecommendations {
   strengths: string[];

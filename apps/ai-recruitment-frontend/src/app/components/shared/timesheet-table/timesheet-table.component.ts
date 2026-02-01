@@ -1,10 +1,11 @@
+import type {
+  OnInit,
+  OnDestroy} from '@angular/core';
 import {
   Component,
   Input,
   Output,
   EventEmitter,
-  OnInit,
-  OnDestroy,
   HostListener,
   signal,
   computed,
@@ -14,16 +15,17 @@ import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 
 // Import configuration
+import type {
+  TimesheetColumn} from '../../../../lib/config/table-config';
 import {
   TIMESHEET_VIEW_CONFIGS,
   TIMESHEET_BREAKPOINTS,
-  TimesheetColumn,
   getResponsiveColumns,
   getViewConfig,
 } from '../../../../lib/config/table-config';
 
 // Import base table interfaces
-import {
+import type {
   SortEvent,
   PageEvent,
 } from '../data-table/data-table.component';

@@ -1,10 +1,11 @@
-import {
+import type {
   AnalyticsEvent,
+  UserSession} from './analytics.dto';
+import {
   EventType,
   EventStatus,
   ConsentStatus,
-  MetricUnit,
-  UserSession,
+  MetricUnit
 } from './analytics.dto';
 
 /**

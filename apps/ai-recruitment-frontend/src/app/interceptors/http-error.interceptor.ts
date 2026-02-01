@@ -1,16 +1,17 @@
 import { Injectable } from '@angular/core';
-import {
+import type {
   HttpInterceptor,
   HttpRequest,
   HttpHandler,
   HttpEvent,
   HttpErrorResponse,
 } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { throwError } from 'rxjs';
 import { catchError, retry, timeout } from 'rxjs/operators';
-import { ToastService } from '../services/toast.service';
-import { Router } from '@angular/router';
-import { ErrorCorrelationService } from '../services/error/error-correlation.service';
+import type { ToastService } from '../services/toast.service';
+import type { Router } from '@angular/router';
+import type { ErrorCorrelationService } from '../services/error/error-correlation.service';
 import { APP_CONFIG } from '../../config/app.config';
 
 /**

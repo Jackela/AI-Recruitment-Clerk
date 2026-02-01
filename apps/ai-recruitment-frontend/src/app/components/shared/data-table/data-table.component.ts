@@ -1,13 +1,14 @@
+import type {
+  OnInit,
+  AfterViewInit,
+  OnDestroy,
+  ElementRef} from '@angular/core';
 import {
   Component,
   Input,
   Output,
   EventEmitter,
-  OnInit,
-  AfterViewInit,
-  OnDestroy,
   ViewChild,
-  ElementRef,
   signal,
   computed,
 } from '@angular/core';

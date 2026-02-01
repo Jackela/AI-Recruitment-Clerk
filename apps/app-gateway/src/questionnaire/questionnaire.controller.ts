@@ -8,9 +8,9 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { Request } from 'express';
-import { RateLimitMiddleware } from '../middleware/rate-limit.middleware';
-import { QuestionnaireIntegrationService } from '../domains/questionnaire/questionnaire-integration.service';
+import type { Request } from 'express';
+import type { RateLimitMiddleware } from '../middleware/rate-limit.middleware';
+import type { QuestionnaireIntegrationService } from '../domains/questionnaire/questionnaire-integration.service';
 
 interface QuestionnaireSubmission {
   // 基础用户信息

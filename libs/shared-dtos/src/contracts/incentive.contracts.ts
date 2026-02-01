@@ -1,10 +1,11 @@
+import type {
+  ContactInfo,
+  IncentiveValidationResult,
+  PaymentResult} from '../domains/incentive.dto';
 import {
   Incentive,
   IncentiveStatus,
-  PaymentMethod,
-  ContactInfo,
-  IncentiveValidationResult,
-  PaymentResult,
+  PaymentMethod
 } from '../domains/incentive.dto';
 import { IncentiveRules } from '../domains/incentive.rules';
 

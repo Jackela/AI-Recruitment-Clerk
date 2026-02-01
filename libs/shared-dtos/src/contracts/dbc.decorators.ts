@@ -153,6 +153,7 @@ export function Invariant(
   condition: (instance: any) => boolean,
   message: string,
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   return function <T extends { new (...args: any[]): {} }>(constructor: T) {
     return class extends constructor {
       constructor(...args: any[]) {
@@ -175,6 +176,7 @@ export function Invariant(
  * @namespace ContractValidators
  * @since 1.0.0
  */
+/* eslint-disable @typescript-eslint/no-namespace */
 export namespace ContractValidators {
   /**
    * Validates email format
@@ -506,6 +508,7 @@ export namespace ContractValidators {
  * @namespace ContractTestUtils
  * @since 1.0.0
  */
+/* eslint-disable @typescript-eslint/no-namespace, @typescript-eslint/no-unsafe-function-type */
 export namespace ContractTestUtils {
   /**
    * Expects a function to throw specific contract violation

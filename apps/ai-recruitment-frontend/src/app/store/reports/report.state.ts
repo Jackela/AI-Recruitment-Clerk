@@ -1,4 +1,4 @@
-import { AnalysisReport, ReportListItem } from './report.model';
+import type { AnalysisReport, ReportListItem } from './report.model';
 
 /**
  * Defines the shape of the report state.

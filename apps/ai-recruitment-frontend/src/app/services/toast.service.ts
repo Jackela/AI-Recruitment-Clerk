@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { ProgressFeedbackService } from './feedback/progress-feedback.service';
-import { Observable, BehaviorSubject } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 /**
  * Defines the shape of the toast message.

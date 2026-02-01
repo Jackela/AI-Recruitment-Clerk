@@ -4,7 +4,8 @@
  * Unified connection retry and stability utilities for all browsers
  */
 
-import { Page, expect } from '@playwright/test';
+import type { Page} from '@playwright/test';
+import { expect } from '@playwright/test';
 
 /**
  * Defines the shape of the retry options.
@@ -53,7 +54,7 @@ export async function stableNavigation(
   page: Page,
   url: string,
   options: NavigationOptions = {},
-  browserName: string = 'chromium',
+  browserName = 'chromium',
 ): Promise<void> {
   const config =
     BROWSER_CONFIGS[browserName as keyof typeof BROWSER_CONFIGS] ||
@@ -105,7 +106,7 @@ export async function stableElementCheck(
   page: Page,
   selector: string,
   options: RetryOptions = {},
-  browserName: string = 'chromium',
+  browserName = 'chromium',
 ): Promise<boolean> {
   const config =
     BROWSER_CONFIGS[browserName as keyof typeof BROWSER_CONFIGS] ||
@@ -145,7 +146,7 @@ export async function stableEvaluate<T>(
   page: Page,
   evaluateFunction: () => T,
   options: RetryOptions = {},
-  browserName: string = 'chromium',
+  browserName = 'chromium',
 ): Promise<T> {
   const config =
     BROWSER_CONFIGS[browserName as keyof typeof BROWSER_CONFIGS] ||
@@ -189,7 +190,7 @@ export async function stableEvaluate<T>(
 export async function checkConnectionHealth(
   page: Page,
   baseUrl: string,
-  browserName: string = 'chromium',
+  browserName = 'chromium',
 ): Promise<boolean> {
   try {
     console.log(`🏥 Connection health check for ${baseUrl} [${browserName}]`);
@@ -240,7 +241,7 @@ export async function checkConnectionHealth(
 export async function measurePerformance(
   page: Page,
   operationName: string,
-  browserName: string = 'chromium',
+  browserName = 'chromium',
 ): Promise<{ duration: number; success: boolean }> {
   const startTime = Date.now();
   let success = false;
@@ -257,12 +258,12 @@ export async function measurePerformance(
     console.log(
       `📊 Performance measurement failed: ${(error as Error).message} [${browserName}]`,
     );
-  } finally {
-    const duration = Date.now() - startTime;
-    console.log(
-      `📊 Performance measurement complete: ${operationName} took ${duration}ms [${browserName}]`,
-    );
-
-    return { duration, success };
   }
+
+  const duration = Date.now() - startTime;
+  console.log(
+    `📊 Performance measurement complete: ${operationName} took ${duration}ms [${browserName}]`,
+  );
+
+  return { duration, success };
 }

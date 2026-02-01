@@ -4,11 +4,12 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import type { Model } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
-import { GuestUsage, GuestUsageDocument } from '../schemas/guest-usage.schema';
+import type { GuestUsageDocument } from '../schemas/guest-usage.schema';
+import { GuestUsage } from '../schemas/guest-usage.schema';
 import { GuestUsageEntity } from '../entities/guest-usage.entity';
-import { GuestUsageResponseDto, GuestStatusDto } from '../dto/guest.dto';
+import type { GuestUsageResponseDto, GuestStatusDto } from '../dto/guest.dto';
 
 /**
  * Provides guest usage functionality.

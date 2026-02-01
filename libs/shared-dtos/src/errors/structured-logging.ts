@@ -5,8 +5,9 @@
 
 import { Logger } from '@nestjs/common';
 import { EnhancedAppException } from './enhanced-error-types';
+import type {
+  ErrorCorrelationContext} from './error-correlation';
 import {
-  ErrorCorrelationContext,
   ErrorCorrelationManager,
 } from './error-correlation';
 // import { StandardizedErrorResponseFormatter } from './error-response-formatter';
@@ -227,7 +228,7 @@ export class StructuredErrorLogger {
   logOperationComplete(
     operation: string,
     startMetrics: PerformanceMetrics,
-    success: boolean = true,
+    success = true,
     metadata?: Record<string, any>,
   ): PerformanceMetrics {
     const endTime = Date.now();

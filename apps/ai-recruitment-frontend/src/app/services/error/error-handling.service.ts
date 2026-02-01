@@ -3,10 +3,12 @@
  * Provides consistent error handling, user notifications, and error reporting
  */
 
-import { Injectable, ErrorHandler, Injector } from '@angular/core';
+import type { ErrorHandler, Injector } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, throwError, BehaviorSubject } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { throwError, BehaviorSubject } from 'rxjs';
 import { ToastService } from '../toast.service';
 
 // Interfaces for standardized error responses from backend

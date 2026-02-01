@@ -1,5 +1,5 @@
-import { RawSubmissionData } from '../dtos/questionnaire.dto.js';
-import { SubmissionMetadata } from '../../domain/value-objects/submission-metadata.value-object.js';
+import type { RawSubmissionData } from '../dtos/questionnaire.dto.js';
+import type { SubmissionMetadata } from '../../domain/value-objects/submission-metadata.value-object.js';
 import {
   QuestionnaireSubmissionResult,
   IPSubmissionCheckResult,

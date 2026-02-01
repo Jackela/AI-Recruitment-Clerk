@@ -1,23 +1,26 @@
+import type {
+  OnInit,
+  OnDestroy} from '@angular/core';
 import {
   Component,
-  OnInit,
-  OnDestroy,
   ViewChild,
   ElementRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
+import type {
+  MobileNavItem} from './mobile-navigation.component';
 import {
-  MobileNavigationComponent,
-  MobileNavItem,
+  MobileNavigationComponent
 } from './mobile-navigation.component';
-import {
-  MobileSwipeComponent,
+import type {
   SwipeAction,
-  SwipeEvent,
+  SwipeEvent} from './mobile-swipe.component';
+import {
+  MobileSwipeComponent
 } from './mobile-swipe.component';
-import { TouchGestureService } from '../../services/mobile/touch-gesture.service';
+import type { TouchGestureService } from '../../services/mobile/touch-gesture.service';
 
 /**
  * Defines the shape of the dashboard card.

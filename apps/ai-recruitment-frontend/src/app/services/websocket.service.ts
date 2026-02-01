@@ -1,7 +1,10 @@
-import { Injectable, OnDestroy, inject } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import type { OnDestroy} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import type { Observable} from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { filter, takeUntil, map } from 'rxjs/operators';
-import { io, Socket } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 import { ToastService } from './toast.service';
 
 /**
