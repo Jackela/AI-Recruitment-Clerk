@@ -22,6 +22,7 @@ export interface ErrorCorrelationContext {
   operationName: string; // Specific operation
   startTime?: number; // Operation start time
   executionTime?: number; // Operation execution time
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>; // Additional context metadata
 }
 
@@ -32,8 +33,10 @@ export interface RequestContext {
   method: string;
   url: string;
   path: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   query?: Record<string, any>;
   headers?: Record<string, string>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: any;
   ip?: string;
   userAgent?: string;
@@ -56,28 +59,29 @@ export class ErrorCorrelationManager {
   /**
    * Generate unique request identifier
    */
-  static generateRequestId(): string {
+  public static generateRequestId(): string {
     return `req_${Date.now()}_${randomBytes(8).toString('hex')}`;
   }
 
   /**
    * Generate distributed trace identifier
    */
-  static generateTraceId(): string {
+  public static generateTraceId(): string {
     return `trace_${Date.now()}_${randomBytes(12).toString('hex')}`;
   }
 
   /**
    * Generate service span identifier
    */
-  static generateSpanId(): string {
+  public static generateSpanId(): string {
     return `span_${randomBytes(8).toString('hex')}`;
   }
 
   /**
    * Create correlation context from HTTP request
    */
-  static createContextFromRequest(
+  public static createContextFromRequest(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     request: any,
     serviceName: string,
     operationName: string,
@@ -118,7 +122,7 @@ export class ErrorCorrelationManager {
   /**
    * Create context for internal operations
    */
-  static createInternalContext(
+  public static createInternalContext(
     serviceName: string,
     operationName: string,
     parentContext?: ErrorCorrelationContext,
@@ -142,7 +146,7 @@ export class ErrorCorrelationManager {
   /**
    * Set current correlation context
    */
-  static setContext(context: ErrorCorrelationContext): void {
+  public static setContext(context: ErrorCorrelationContext): void {
     // Store previous context in stack
     if (this.currentContext) {
       this.contextStack.push(this.currentContext);
@@ -153,14 +157,14 @@ export class ErrorCorrelationManager {
   /**
    * Get current correlation context
    */
-  static getContext(): ErrorCorrelationContext | undefined {
+  public static getContext(): ErrorCorrelationContext | undefined {
     return this.currentContext || undefined;
   }
 
   /**
    * Update current correlation context
    */
-  static updateContext(updates: Partial<ErrorCorrelationContext>): void {
+  public static updateContext(updates: Partial<ErrorCorrelationContext>): void {
     if (this.currentContext) {
       this.currentContext = {
         ...this.currentContext,
@@ -176,14 +180,14 @@ export class ErrorCorrelationManager {
   /**
    * Clear current context and restore previous
    */
-  static clearContext(): void {
+  public static clearContext(): void {
     this.currentContext = this.contextStack.pop() || undefined;
   }
 
   /**
    * Execute function with correlation context
    */
-  static async withContext<T>(
+  public static async withContext<T>(
     context: ErrorCorrelationContext,
     operation: () => Promise<T>,
   ): Promise<T> {
@@ -201,7 +205,7 @@ export class ErrorCorrelationManager {
   /**
    * Create correlation headers for outbound requests
    */
-  static createCorrelationHeaders(
+  public static createCorrelationHeaders(
     context?: ErrorCorrelationContext,
   ): Record<string, string> {
     const ctx = context || this.getContext();
@@ -224,8 +228,9 @@ export class ErrorCorrelationManager {
   /**
    * Enrich context with additional metadata
    */
-  static enrichContext(
+  public static enrichContext(
     context: ErrorCorrelationContext,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata: Record<string, any>,
   ): ErrorCorrelationContext {
     return {
@@ -240,7 +245,7 @@ export class ErrorCorrelationManager {
   /**
    * Create child context for nested operations
    */
-  static createChildContext(
+  public static createChildContext(
     parentContext: ErrorCorrelationContext,
     serviceName: string,
     operationName: string,
@@ -259,6 +264,7 @@ export class ErrorCorrelationManager {
   /**
    * Extract client IP address from request
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private static extractClientIp(request: any): string | undefined {
     return (
       request.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
@@ -273,8 +279,9 @@ export class ErrorCorrelationManager {
   /**
    * Generate correlation summary for logging
    */
-  static getCorrelationSummary(
+  public static getCorrelationSummary(
     context?: ErrorCorrelationContext,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Record<string, any> {
     const ctx = context || this.getContext();
     if (!ctx) {
@@ -298,7 +305,7 @@ export class ErrorCorrelationManager {
   /**
    * Validate correlation context completeness
    */
-  static validateContext(context: ErrorCorrelationContext): {
+  public static validateContext(context: ErrorCorrelationContext): {
     isValid: boolean;
     missingFields: string[];
   } {
@@ -311,6 +318,7 @@ export class ErrorCorrelationManager {
       'timestamp',
     ];
     const missingFields = requiredFields.filter(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (field) => !(context as any)[field],
     );
 
@@ -326,12 +334,14 @@ export class ErrorCorrelationManager {
  */
 export function WithCorrelation(serviceName: string, operationName: string) {
   return function (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _target: any,
     _propertyName: string,
     descriptor: PropertyDescriptor,
   ) {
     const method = descriptor.value;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     descriptor.value = async function (...args: any[]) {
       // Try to extract context from first argument (often a request object)
       let context = ErrorCorrelationManager.getContext();
@@ -372,18 +382,19 @@ export function WithCorrelation(serviceName: string, operationName: string) {
  * This would replace the simple static storage in production environments
  */
 export class AsyncCorrelationManager {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private static asyncLocalStorage: any; // AsyncLocalStorage from 'async_hooks'
 
   /**
    * Performs the initialize operation.
    * @returns The result of the operation.
    */
-  static initialize() {
+  public static initialize(): void {
     if (typeof require !== 'undefined') {
       try {
         const { AsyncLocalStorage } = require('async_hooks');
         this.asyncLocalStorage = new AsyncLocalStorage();
-      } catch (error) {
+      } catch (_error) {
         console.warn(
           'AsyncLocalStorage not available, falling back to basic correlation manager',
         );
@@ -397,7 +408,7 @@ export class AsyncCorrelationManager {
    * @param callback - The callback.
    * @returns The T.
    */
-  static run<T>(context: ErrorCorrelationContext, callback: () => T): T {
+  public static run<T>(context: ErrorCorrelationContext, callback: () => T): T {
     if (this.asyncLocalStorage) {
       return this.asyncLocalStorage.run(context, callback);
     }
@@ -411,7 +422,7 @@ export class AsyncCorrelationManager {
    * Retrieves store.
    * @returns The ErrorCorrelationContext | undefined.
    */
-  static getStore(): ErrorCorrelationContext | undefined {
+  public static getStore(): ErrorCorrelationContext | undefined {
     if (this.asyncLocalStorage) {
       return this.asyncLocalStorage.getStore();
     }
