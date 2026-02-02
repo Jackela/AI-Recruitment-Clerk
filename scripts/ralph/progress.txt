@@ -497,3 +497,31 @@ Started: 2026-02-01
   - For complex type casts like `demoResults as Record<string, unknown>`, use `as unknown as Record<string, unknown>` pattern
   - ~45 warnings fixed: 30 accessibility modifiers, 8 return types, 4 unused imports renamed, 3 any types fixed
 ---
+
+## 2026-02-02 - US-039
+- What was implemented: Fixed all lint warnings in apps/ai-recruitment-frontend/src/app/pages/
+- Files changed (16 files):
+  - pages/analysis/components/analysis-error.component.ts (accessibility modifiers)
+  - pages/analysis/components/analysis-progress.component.ts (accessibility modifiers)
+  - pages/analysis/components/analysis-results.component.ts (accessibility, inject() pattern)
+  - pages/analysis/components/resume-file-upload.component.ts (accessibility, inject() pattern)
+  - pages/analysis/components/score-visualization.component.ts (accessibility modifiers)
+  - pages/analysis/components/statistics-panel.component.ts (accessibility modifiers)
+  - pages/analysis/unified-analysis.component.ts (accessibility, inject() pattern)
+  - pages/coach/coach.component.ts (accessibility modifiers)
+  - pages/coach/gap-analysis-report.component.ts (accessibility modifiers)
+  - pages/dashboard/dashboard.component.ts (accessibility modifiers)
+  - pages/dashboard/enhanced-dashboard.component.ts (accessibility, inject() pattern)
+  - pages/jobs/create-job/create-job.component.ts (accessibility, eslint-disable for any)
+  - pages/jobs/jobs-list/jobs-list.component.ts (accessibility, eslint-disable for any)
+  - pages/marketing/campaign.component.ts (accessibility, inject() pattern)
+  - pages/results/detailed-results.component.ts (accessibility, inject() pattern)
+  - pages/resume/upload-resume.component.ts (accessibility, inject() pattern)
+- **Learnings for future iterations:**
+  - Angular @Input, @Output, signals, and class members need `public` accessibility modifier
+  - Constructor injection should be converted to `inject()` function pattern for modern Angular
+  - When using inject(), change `import type { Service }` to regular `import { Service }`
+  - Unused catch variables should use empty catch block `} catch {` instead of `} catch (error) {`
+  - Add explicit return types like `: void` or `: Observable<T>` to methods
+  - ~50 warnings fixed: 45 accessibility modifiers, 5 any types preserved with eslint-disable
+---
