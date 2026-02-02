@@ -566,7 +566,7 @@
       "title": "Verify app-gateway has 0 warnings",
       "description": "Verify app-gateway has 0 lint warnings",
       "priority": 47,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "npx nx lint app-gateway returns 0 warnings",
         "npm run typecheck passes"
