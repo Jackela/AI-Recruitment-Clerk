@@ -221,14 +221,15 @@ export class IncentiveIntegrationService {
   /**
    * 处理付款 - EMERGENCY IMPLEMENTATION
    */
-   
   public async processPayment(
     incentiveId: string,
     paymentMethod: string,
     processedBy: string,
     organizationId: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     options?: any,
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       this.logger.log('Processing payment', {
         incentiveId,
@@ -258,13 +259,15 @@ export class IncentiveIntegrationService {
   /**
    * 批量处理激励 - EMERGENCY IMPLEMENTATION
    */
-  async batchProcessIncentives(
+  public async batchProcessIncentives(
     incentiveIds: string[],
     action: string,
     processedBy: string,
     organizationId: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     options?: any,
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       this.logger.log('Batch processing incentives', {
         count: incentiveIds.length,
@@ -296,11 +299,12 @@ export class IncentiveIntegrationService {
   /**
    * 获取激励统计数据 - EMERGENCY IMPLEMENTATION
    */
-  async getIncentiveStatistics(
+  public async getIncentiveStatistics(
     organizationId: string,
     timeRange: string,
     groupBy: string,
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       return {
         totalIncentives: 0,
@@ -325,7 +329,8 @@ export class IncentiveIntegrationService {
   /**
    * 导出激励数据 - EMERGENCY IMPLEMENTATION
    */
-  async exportIncentiveData(organizationId: string, exportOptions: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async exportIncentiveData(organizationId: string, exportOptions: any): Promise<any> {
     try {
       return {
         exportId: `export_${Date.now()}`,
@@ -345,11 +350,13 @@ export class IncentiveIntegrationService {
   /**
    * 配置激励规则 - EMERGENCY IMPLEMENTATION
    */
-  async configureIncentiveRules(
+  public async configureIncentiveRules(
     organizationId: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rulesConfig: any,
     configuredBy: string,
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       return {
         configId: `config_${Date.now()}`,
@@ -367,7 +374,8 @@ export class IncentiveIntegrationService {
   /**
    * 获取健康状态 - EMERGENCY IMPLEMENTATION
    */
-  async getHealthStatus() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async getHealthStatus(): Promise<any> {
     try {
       return {
         overall: 'healthy',

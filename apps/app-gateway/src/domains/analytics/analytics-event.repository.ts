@@ -17,6 +17,7 @@ interface AnalyticsEventEntity {
   sessionId: string;
   userId?: string;
   eventType: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   eventData: any;
   timestamp: Date;
   status: EventStatus;
@@ -49,7 +50,7 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
    * @param event - The event.
    * @returns A promise that resolves when the operation completes.
    */
-  async save(event: AnalyticsEventEntity): Promise<void> {
+  public async save(event: AnalyticsEventEntity): Promise<void> {
     try {
       const eventData = this.mapToDocument(event);
 
@@ -72,7 +73,7 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
    * @param id - The id.
    * @returns A promise that resolves to AnalyticsEventEntity | null.
    */
-  async findById(id: string): Promise<AnalyticsEventEntity | null> {
+  public async findById(id: string): Promise<AnalyticsEventEntity | null> {
     try {
       const document = await this.analyticsEventModel
         .findOne({ eventId: id })
@@ -92,7 +93,7 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
    * @param sessionId - The session id.
    * @returns A promise that resolves to an array of AnalyticsEventEntity.
    */
-  async findBySessionId(sessionId: string): Promise<AnalyticsEventEntity[]> {
+  public async findBySessionId(sessionId: string): Promise<AnalyticsEventEntity[]> {
     try {
       const documents = await this.analyticsEventModel
         .find({ sessionId })
@@ -113,7 +114,7 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
    * @param userId - The user id.
    * @returns A promise that resolves to an array of AnalyticsEventEntity.
    */
-  async findByUserId(userId: string): Promise<AnalyticsEventEntity[]> {
+  public async findByUserId(userId: string): Promise<AnalyticsEventEntity[]> {
     try {
       const documents = await this.analyticsEventModel
         .find({ userId })
@@ -135,7 +136,7 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
    * @param status - The status.
    * @returns A promise that resolves when the operation completes.
    */
-  async updateStatus(id: string, status: EventStatus): Promise<void> {
+  public async updateStatus(id: string, status: EventStatus): Promise<void> {
     try {
       await this.analyticsEventModel
         .updateOne({ eventId: id }, { $set: { status } })
@@ -154,7 +155,7 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
    * @param id - The id.
    * @returns A promise that resolves when the operation completes.
    */
-  async delete(id: string): Promise<void> {
+  public async delete(id: string): Promise<void> {
     try {
       await this.analyticsEventModel.deleteOne({ eventId: id }).exec();
     } catch (error) {
@@ -171,7 +172,7 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
    * @param ids - The ids.
    * @returns A promise that resolves to an array of AnalyticsEventEntity.
    */
-  async findByIds(ids: string[]): Promise<AnalyticsEventEntity[]> {
+  public async findByIds(ids: string[]): Promise<AnalyticsEventEntity[]> {
     try {
       const documents = await this.analyticsEventModel
         .find({ eventId: { $in: ids } })
@@ -193,7 +194,7 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
    * @param timeRange - The time range.
    * @returns A promise that resolves to an array of AnalyticsEventEntity.
    */
-  async findBySession(
+  public async findBySession(
     sessionId: string,
     timeRange?: { startDate: Date; endDate: Date },
   ): Promise<AnalyticsEventEntity[]> {
@@ -224,7 +225,7 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
    * @param endDate - The end date.
    * @returns A promise that resolves to an array of AnalyticsEventEntity.
    */
-  async findByDateRange(
+  public async findByDateRange(
     startDate: Date,
     endDate: Date,
   ): Promise<AnalyticsEventEntity[]> {
@@ -254,7 +255,7 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
    * @param sessionId - The session id.
    * @returns A promise that resolves to number value.
    */
-  async countSessionEvents(sessionId: string): Promise<number> {
+  public async countSessionEvents(sessionId: string): Promise<number> {
     try {
       return await this.analyticsEventModel
         .countDocuments({ sessionId })
@@ -273,7 +274,7 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
    * @param olderThanDays - The older than days.
    * @returns A promise that resolves to number value.
    */
-  async deleteExpired(olderThanDays: number): Promise<number> {
+  public async deleteExpired(olderThanDays: number): Promise<number> {
     try {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
@@ -302,7 +303,7 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
    * @param olderThanDays - The older than days.
    * @returns A promise that resolves to number value.
    */
-  async anonymizeOldEvents(olderThanDays: number): Promise<number> {
+  public async anonymizeOldEvents(olderThanDays: number): Promise<number> {
     try {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
@@ -338,6 +339,7 @@ export class AnalyticsEventRepository implements IAnalyticsRepository {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private mapToDocument(event: AnalyticsEventEntity): any {
     return {
       eventId: event.id,

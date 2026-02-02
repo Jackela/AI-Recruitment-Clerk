@@ -14,8 +14,8 @@ import { plainToClass } from 'class-transformer';
  * Represents the custom validation pipe.
  */
 @Injectable()
-export class CustomValidationPipe implements PipeTransform<any> {
-  private readonly logger = new Logger(CustomValidationPipe.name);
+export class CustomValidationPipe implements PipeTransform<unknown> {
+  private readonly logger: Logger = new Logger(CustomValidationPipe.name);
 
   /**
    * Performs the transform operation.
@@ -23,7 +23,7 @@ export class CustomValidationPipe implements PipeTransform<any> {
    * @param { metatype } - The { metatype }.
    * @returns The result of the operation.
    */
-  async transform(value: any, { metatype }: ArgumentMetadata) {
+  public async transform(value: unknown, { metatype }: ArgumentMetadata): Promise<unknown> {
     if (!metatype || !this.toValidate(metatype)) {
       return value;
     }
@@ -53,8 +53,9 @@ export class CustomValidationPipe implements PipeTransform<any> {
     return object;
   }
 
-  private toValidate(metatype: new (...args: any[]) => any): boolean {
-    const types: Array<new (...args: any[]) => any> = [
+  private toValidate(metatype: new (...args: unknown[]) => unknown): boolean {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const types: Array<new (...args: any[]) => unknown> = [
       String,
       Boolean,
       Number,
@@ -64,7 +65,7 @@ export class CustomValidationPipe implements PipeTransform<any> {
     return !types.includes(metatype);
   }
 
-  private formatErrors(errors: ValidationError[]): any[] {
+  private formatErrors(errors: ValidationError[]): Array<{ property: string; value: unknown; constraints: Record<string, string> | undefined; children: unknown[] | undefined }> {
     return errors.map((error) => ({
       property: error.property,
       value: error.value,
@@ -82,7 +83,7 @@ export class CustomValidationPipe implements PipeTransform<any> {
  */
 @Injectable()
 export class CrossServiceValidationPipe implements PipeTransform {
-  private readonly logger = new Logger(CrossServiceValidationPipe.name);
+  private readonly logger: Logger = new Logger(CrossServiceValidationPipe.name);
 
   /**
    * Initializes a new instance of the Cross Service Validation Pipe.
@@ -90,7 +91,7 @@ export class CrossServiceValidationPipe implements PipeTransform {
    * @param options - The options.
    */
   constructor(
-    private readonly validationRules?: any[],
+    private readonly validationRules?: unknown[],
     private readonly _options?: {
       parallel?: boolean;
       failFast?: boolean;
@@ -104,7 +105,7 @@ export class CrossServiceValidationPipe implements PipeTransform {
    * @param metadata - The metadata.
    * @returns The result of the operation.
    */
-  async transform(value: any, metadata: ArgumentMetadata) {
+  public async transform(value: unknown, metadata: ArgumentMetadata): Promise<unknown> {
     // First, apply standard validation
     const standardPipe = new CustomValidationPipe();
     const validatedValue = await standardPipe.transform(value, metadata);
@@ -117,11 +118,11 @@ export class CrossServiceValidationPipe implements PipeTransform {
     return validatedValue;
   }
 
-  private async performCrossServiceValidation(_value: any): Promise<void> {
+  private async performCrossServiceValidation(_value: unknown): Promise<void> {
     try {
       // Mock cross-service validation
       // In real implementation, this would validate against other services
-      const validationPromises = this.validationRules!.map(async (_rule) => {
+      const validationPromises = (this.validationRules ?? []).map(async (_rule) => {
         // Simulate service validation
         return new Promise<boolean>((resolve) => {
           setTimeout(() => {

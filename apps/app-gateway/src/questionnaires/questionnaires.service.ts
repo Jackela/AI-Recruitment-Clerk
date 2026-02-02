@@ -46,7 +46,7 @@ function createId(prefix: string): string {
 export class QuestionnairesService {
   private readonly questionnaires = new Map<string, QuestionnaireRecord>();
 
-  createQuestionnaire(): { questionnaireId: string } {
+  public createQuestionnaire(): { questionnaireId: string } {
     const id = createId('q');
     const now = new Date().toISOString();
     this.questionnaires.set(id, {
@@ -60,7 +60,7 @@ export class QuestionnairesService {
     return { questionnaireId: id };
   }
 
-  publishQuestionnaire(qid: string): { accessUrl: string; publicId: string } {
+  public publishQuestionnaire(qid: string): { accessUrl: string; publicId: string } {
     const record = this.questionnaires.get(qid);
     if (!record) {
       throw new QuestionnaireNotFoundError(qid);
@@ -72,7 +72,7 @@ export class QuestionnairesService {
     return { accessUrl: `/q/${qid}`, publicId: createId('pub') };
   }
 
-  submitQuestionnaire(
+  public submitQuestionnaire(
     qid: string,
   ): { submissionId: string; qualityScore: number } {
     const record = this.questionnaires.get(qid);
@@ -95,7 +95,7 @@ export class QuestionnairesService {
     };
   }
 
-  getAnalytics(qid: string): QuestionnaireAnalytics {
+  public getAnalytics(qid: string): QuestionnaireAnalytics {
     const record = this.questionnaires.get(qid);
     if (!record) {
       throw new QuestionnaireNotFoundError(qid);
@@ -114,7 +114,7 @@ export class QuestionnairesService {
     };
   }
 
-  exportQuestionnaireData(): {
+  public exportQuestionnaireData(): {
     exportUrl: string;
     expiresAt: string;
   } {
@@ -124,7 +124,7 @@ export class QuestionnairesService {
     };
   }
 
-  listQuestionnaires(): {
+  public listQuestionnaires(): {
     items: QuestionnaireListItem[];
     total: number;
     page: number;

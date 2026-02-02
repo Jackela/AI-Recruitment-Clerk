@@ -23,7 +23,8 @@ export class ScoringProxyController {
    * @returns The result of the operation.
    */
   @Post('gap-analysis')
-  async gapAnalysis(@Body() body: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type
+  public async gapAnalysis(@Body() body: any) {
     this.metrics.incExposure();
     const base =
       process.env.SCORING_ENGINE_URL || 'http://scoring-engine-svc:3000';
@@ -63,7 +64,8 @@ export class ScoringProxyController {
    */
   @Post('gap-analysis-file')
   @UseInterceptors(FileInterceptor('resume'))
-  async gapAnalysisFile(
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  public async gapAnalysisFile(
     @UploadedFile() file: Express.Multer.File,
     @Body() body: { jdText?: string },
   ) {
@@ -125,7 +127,7 @@ export class ScoringProxyController {
       }
       this.metrics.incSuccess();
       return data;
-    } catch (error) {
+    } catch (_error) {
       // As a fallback, perform improved token matching locally if scoring engine is unreachable
       const jdSkills = tokenize(body?.jdText || '');
       const resumeSkills = tokenize(resumeText || '');
@@ -139,7 +141,7 @@ export class ScoringProxyController {
       };
     }
 
-    function tokenize(text: string) {
+    function tokenize(text: string): string[] {
       // Align with scoring-engine tokenization to ensure consistent results
       const spaced = (text || '').replace(/([a-z])([A-Z])/g, '$1 $2');
       const base = spaced

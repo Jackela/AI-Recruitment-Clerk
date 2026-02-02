@@ -29,12 +29,12 @@ export class SwaggerCacheInterceptor implements NestInterceptor {
    * Performs the intercept operation.
    * @param context - The context.
    * @param next - The next.
-   * @returns A promise that resolves to Observable<any>.
+   * @returns A promise that resolves to Observable<unknown>.
    */
-  async intercept(
+  public async intercept(
     context: ExecutionContext,
     next: CallHandler,
-  ): Promise<Observable<any>> {
+  ): Promise<Observable<unknown>> {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
 

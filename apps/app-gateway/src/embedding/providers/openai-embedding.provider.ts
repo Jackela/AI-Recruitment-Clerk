@@ -38,7 +38,7 @@ export class OpenAIEmbeddingProvider implements IEmbeddingProvider {
    * Generates an embedding for the provided text.
    * @param text - The text to embed.
    */
-  async createEmbedding(text: string): Promise<number[]> {
+  public async createEmbedding(text: string): Promise<number[]> {
     const apiKey = this.configService.get<string>('OPENAI_API_KEY');
 
     if (!apiKey) {

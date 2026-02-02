@@ -12,7 +12,7 @@ export class FileValidationPipe implements PipeTransform {
    * @param files - The files.
    * @returns The an array of MulterFile.
    */
-  transform(files: MulterFile[]): MulterFile[] {
+  public transform(files: MulterFile[]): MulterFile[] {
     if (!files || files.length === 0) {
       throw new BadRequestException('At least one resume file is required');
     }

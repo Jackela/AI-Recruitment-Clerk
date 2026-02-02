@@ -1,5 +1,13 @@
 import { Injectable } from '@nestjs/common';
 
+interface MetricsSnapshot {
+  exposure: number;
+  success: number;
+  error: number;
+  cancel: number;
+  successRate: number;
+}
+
 @Injectable()
 export class MetricsService {
   private exposure = 0;
@@ -7,12 +15,12 @@ export class MetricsService {
   private error = 0;
   private cancel = 0;
 
-  incExposure(n = 1) { this.exposure += n; }
-  incSuccess(n = 1) { this.success += n; }
-  incError(n = 1) { this.error += n; }
-  incCancel(n = 1) { this.cancel += n; }
+  public incExposure(n = 1): void { this.exposure += n; }
+  public incSuccess(n = 1): void { this.success += n; }
+  public incError(n = 1): void { this.error += n; }
+  public incCancel(n = 1): void { this.cancel += n; }
 
-  getSnapshot() {
+  public getSnapshot(): MetricsSnapshot {
     const total = Math.max(1, this.exposure);
     return {
       exposure: this.exposure,

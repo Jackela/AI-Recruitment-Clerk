@@ -9,6 +9,18 @@ import type { CacheService } from './cache.service';
 import { Cron } from '@nestjs/schedule';
 
 /**
+ * Defines the shape of performance stats.
+ */
+export interface PerformanceStats {
+  hitRate: number;
+  missRate: number;
+  evictionCount: number;
+  preloadCount: number;
+  totalSize: number;
+  lastOptimization: number;
+}
+
+/**
  * Defines the shape of the cache optimization config.
  */
 export interface CacheOptimizationConfig {
@@ -40,7 +52,7 @@ export interface CacheOptimizationConfig {
  */
 @Injectable()
 export class CacheOptimizationService implements OnModuleInit {
-  private readonly logger = new Logger(CacheOptimizationService.name);
+  private readonly logger: Logger = new Logger(CacheOptimizationService.name);
 
   // 优化配置
   private config: CacheOptimizationConfig = {
@@ -69,7 +81,7 @@ export class CacheOptimizationService implements OnModuleInit {
   };
 
   // 缓存性能统计
-  private performanceStats = {
+  private performanceStats: PerformanceStats = {
     hitRate: 0,
     missRate: 0,
     evictionCount: 0,
@@ -202,8 +214,11 @@ export class CacheOptimizationService implements OnModuleInit {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async executePreloadRule(rule: any): Promise<void> {
+  private async executePreloadRule(rule: {
+    pattern: string;
+    schedule: string;
+    dependencies?: string[];
+  }): Promise<void> {
     try {
       switch (rule.pattern) {
         case 'jobs:list':
@@ -334,7 +349,7 @@ export class CacheOptimizationService implements OnModuleInit {
    * 开始性能监控
    */
   private startPerformanceMonitoring(): void {
-    setInterval(async () => {
+    setInterval(async (): Promise<void> => {
       try {
         const metrics = this.cacheService.getMetrics();
 
@@ -416,8 +431,12 @@ export class CacheOptimizationService implements OnModuleInit {
   /**
    * 获取缓存优化报告
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getOptimizationReport(): Promise<any> {
+  public async getOptimizationReport(): Promise<{
+    performance: PerformanceStats;
+    config: CacheOptimizationConfig;
+    recommendations: string[];
+    health: Awaited<ReturnType<CacheService['healthCheck']>>;
+  }> {
     const cacheHealth = await this.cacheService.healthCheck();
     const recommendations = this.generateOptimizationRecommendations();
 
@@ -457,7 +476,7 @@ export class CacheOptimizationService implements OnModuleInit {
   /**
    * 手动触发缓存优化
    */
-  async triggerOptimization(): Promise<{
+  public async triggerOptimization(): Promise<{
     success: boolean;
     actions: string[];
     duration: number;

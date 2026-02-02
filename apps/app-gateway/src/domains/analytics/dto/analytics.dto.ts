@@ -22,13 +22,13 @@ enum MetricUnit {
   MILLISECONDS = 'milliseconds',
 }
 
-enum ReportType {
+enum _ReportType {
   SUMMARY = 'summary',
   DETAILED = 'detailed',
   TREND = 'trend',
 }
 
-enum DataScope {
+enum _DataScope {
   USER = 'user',
   ORGANIZATION = 'organization',
   SYSTEM = 'system',
@@ -41,7 +41,7 @@ export class TrackEventDto {
   @ApiProperty({ description: '会话ID', example: 'session_12345' })
   @IsString()
   @IsNotEmpty()
-  sessionId = '';
+  public sessionId = '';
 
   @ApiProperty({
     description: '事件类型',
@@ -49,14 +49,15 @@ export class TrackEventDto {
     example: EventType.USER_INTERACTION,
   })
   @IsEnum(EventType)
-  eventType: EventType = EventType.USER_INTERACTION;
+  public eventType: EventType = EventType.USER_INTERACTION;
 
   @ApiProperty({
     description: '事件数据',
     example: { action: 'click', target: 'submit_button' },
   })
   @IsObject()
-  eventData: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public eventData: any;
 
   @ApiProperty({
     description: '事件上下文（可选）',
@@ -65,7 +66,8 @@ export class TrackEventDto {
   })
   @IsOptional()
   @IsObject()
-  context?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public context?: any;
 }
 
 /**
@@ -78,12 +80,12 @@ export class RecordMetricDto {
   })
   @IsString()
   @IsNotEmpty()
-  metricName = '';
+  public metricName = '';
 
   @ApiProperty({ description: '指标值', example: 85.5 })
   @IsNumber()
   @Min(0)
-  metricValue = 0;
+  public metricValue = 0;
 
   @ApiProperty({
     description: '指标单位',
@@ -91,7 +93,7 @@ export class RecordMetricDto {
     example: MetricUnit.PERCENTAGE,
   })
   @IsEnum(MetricUnit)
-  metricUnit: MetricUnit = MetricUnit.COUNT;
+  public metricUnit: MetricUnit = MetricUnit.COUNT;
 
   @ApiProperty({
     description: '指标维度（可选）',
@@ -100,7 +102,7 @@ export class RecordMetricDto {
   })
   @IsOptional()
   @IsObject()
-  dimensions?: Record<string, string>;
+  public dimensions?: Record<string, string>;
 }
 
 /**
@@ -113,7 +115,7 @@ export class BatchProcessDto {
   })
   @IsArray()
   @IsString({ each: true })
-  eventIds: string[] = [];
+  public eventIds: string[] = [];
 }
 
 /**
@@ -121,28 +123,28 @@ export class BatchProcessDto {
  */
 export class SessionAnalyticsDto {
   @ApiProperty({ description: '会话ID' })
-  sessionId = '';
+  public sessionId = '';
 
   @ApiProperty({ description: '用户ID' })
-  userId?: string;
+  public userId?: string;
 
   @ApiProperty({ description: '会话开始时间' })
-  startTime: Date = new Date();
+  public startTime: Date = new Date();
 
   @ApiProperty({ description: '会话结束时间' })
-  endTime: Date = new Date();
+  public endTime: Date = new Date();
 
   @ApiProperty({ description: '事件数量' })
-  eventCount = 0;
+  public eventCount = 0;
 
   @ApiProperty({ description: '最后活动时间' })
-  lastActivityTime: Date = new Date();
+  public lastActivityTime: Date = new Date();
 
   @ApiProperty({ description: '是否活跃中' })
-  isActive = false;
+  public isActive = false;
 
   @ApiProperty({ description: '平均事件间隔（毫秒）' })
-  averageEventInterval = 0;
+  public averageEventInterval = 0;
 }
 
 /**
@@ -150,22 +152,22 @@ export class SessionAnalyticsDto {
  */
 export class ProcessingMetricsDto {
   @ApiProperty({ description: '总事件数' })
-  totalEvents = 0;
+  public totalEvents = 0;
 
   @ApiProperty({ description: '已处理事件数' })
-  processedEvents = 0;
+  public processedEvents = 0;
 
   @ApiProperty({ description: '失败事件数' })
-  failedEvents = 0;
+  public failedEvents = 0;
 
   @ApiProperty({ description: '平均处理时间（毫秒）' })
-  averageProcessingTime = 0;
+  public averageProcessingTime = 0;
 
   @ApiProperty({ description: '每秒吞吐量' })
-  throughputPerSecond = 0;
+  public throughputPerSecond = 0;
 
   @ApiProperty({ description: '错误率（百分比）' })
-  errorRate = 0;
+  public errorRate = 0;
 }
 
 /**
@@ -173,25 +175,25 @@ export class ProcessingMetricsDto {
  */
 export class PrivacyMetricsDto {
   @ApiProperty({ description: '总事件数' })
-  totalEvents = 0;
+  public totalEvents = 0;
 
   @ApiProperty({ description: '已匿名化事件数' })
-  anonymizedEvents = 0;
+  public anonymizedEvents = 0;
 
   @ApiProperty({ description: '已过期事件数' })
-  expiredEvents = 0;
+  public expiredEvents = 0;
 
   @ApiProperty({ description: '待匿名化事件数' })
-  pendingAnonymization = 0;
+  public pendingAnonymization = 0;
 
   @ApiProperty({ description: '合规分数（0-100）' })
-  complianceScore = 0;
+  public complianceScore = 0;
 
   @ApiProperty({
     description: '风险等级',
     enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'],
   })
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';
+  public riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';
 }
 
 /**
@@ -199,19 +201,19 @@ export class PrivacyMetricsDto {
  */
 export class ReportingAccessDto {
   @ApiProperty({ description: '是否有访问权限' })
-  hasAccess = false;
+  public hasAccess = false;
 
   @ApiProperty({ description: '权限列表' })
-  permissions: string[] = [];
+  public permissions: string[] = [];
 
   @ApiProperty({ description: '访问限制' })
-  restrictions: string[] = [];
+  public restrictions: string[] = [];
 
   @ApiProperty({ description: '数据范围限制' })
-  dataScope = '';
+  public dataScope = '';
 
   @ApiProperty({ description: '过期时间' })
-  expiresAt?: Date;
+  public expiresAt?: Date;
 }
 
 /**
@@ -219,7 +221,7 @@ export class ReportingAccessDto {
  */
 export class DataRetentionReportDto {
   @ApiProperty({ description: '报告周期' })
-  reportPeriod: {
+  public reportPeriod: {
     startDate: Date;
     endDate: Date;
   } = {
@@ -228,19 +230,21 @@ export class DataRetentionReportDto {
   };
 
   @ApiProperty({ description: '总事件数' })
-  totalEvents = 0;
+  public totalEvents = 0;
 
   @ApiProperty({ description: '待删除事件数' })
-  eventsToDelete = 0;
+  public eventsToDelete = 0;
 
   @ApiProperty({ description: '待匿名化事件数' })
-  eventsToAnonymize = 0;
+  public eventsToAnonymize = 0;
 
   @ApiProperty({ description: '按事件类型统计' })
-  eventTypeStatistics: Record<string, any> = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public eventTypeStatistics: Record<string, any> = {};
 
   @ApiProperty({ description: '保留策略列表' })
-  retentionPolicies: any[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public retentionPolicies: any[] = [];
 }
 
 /**
@@ -248,10 +252,10 @@ export class DataRetentionReportDto {
  */
 export class EventCreationResultDto {
   @ApiProperty({ description: '是否成功' })
-  success = false;
+  public success = false;
 
   @ApiProperty({ description: '事件摘要', required: false })
-  data?: {
+  public data?: {
     id: string;
     sessionId: string;
     userId?: string;
@@ -261,7 +265,7 @@ export class EventCreationResultDto {
   };
 
   @ApiProperty({ description: '错误信息', required: false })
-  errors?: string[];
+  public errors?: string[];
 }
 
 /**
@@ -269,10 +273,10 @@ export class EventCreationResultDto {
  */
 export class BatchProcessingResultDto {
   @ApiProperty({ description: '是否成功' })
-  success = false;
+  public success = false;
 
   @ApiProperty({ description: '处理结果', required: false })
-  data?: {
+  public data?: {
     totalEvents: number;
     successCount: number;
     failureCount: number;
@@ -285,5 +289,5 @@ export class BatchProcessingResultDto {
   };
 
   @ApiProperty({ description: '错误信息', required: false })
-  errors?: string[];
+  public errors?: string[];
 }

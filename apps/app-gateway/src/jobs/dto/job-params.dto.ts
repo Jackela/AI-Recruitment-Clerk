@@ -5,5 +5,5 @@ import { IsUUID } from 'class-validator';
  */
 export class JobParamsDto {
   @IsUUID()
-  jobId!: string;
+  public jobId!: string;
 }

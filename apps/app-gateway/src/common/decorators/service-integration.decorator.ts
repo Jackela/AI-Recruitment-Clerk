@@ -12,7 +12,7 @@ export function ServiceIntegration(options?: {
   cacheable?: boolean;
   cacheKey?: string;
   cacheTTL?: number;
-}) {
+}): ReturnType<typeof applyDecorators> {
   return applyDecorators(
     UseInterceptors(new ServiceIntegrationInterceptor(options)),
   );
@@ -21,7 +21,7 @@ export function ServiceIntegration(options?: {
 /**
  * Decorator for operations that require cross-service validation
  */
-export function CrossServiceValidation(services: string[]) {
+export function CrossServiceValidation(services: string[]): ReturnType<typeof applyDecorators> {
   return applyDecorators(
     UseInterceptors(
       new ServiceIntegrationInterceptor({
@@ -39,7 +39,7 @@ export function CircuitBreaker(options: {
   threshold?: number;
   timeout?: number;
   resetTimeout?: number;
-}) {
+}): ReturnType<typeof applyDecorators> {
   return applyDecorators(
     UseInterceptors(
       new ServiceIntegrationInterceptor({

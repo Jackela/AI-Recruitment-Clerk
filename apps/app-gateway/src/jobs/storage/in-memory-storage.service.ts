@@ -17,7 +17,7 @@ export class InMemoryStorageService {
    * Creates job.
    * @param job - The job.
    */
-  createJob(job: JobDetailDto): void {
+  public createJob(job: JobDetailDto): void {
     this.jobs.set(job.id, job);
   }
 
@@ -26,7 +26,7 @@ export class InMemoryStorageService {
    * @param jobId - The job id.
    * @returns The JobDetailDto | undefined.
    */
-  getJob(jobId: string): JobDetailDto | undefined {
+  public getJob(jobId: string): JobDetailDto | undefined {
     return this.jobs.get(jobId);
   }
 
@@ -34,7 +34,7 @@ export class InMemoryStorageService {
    * Retrieves all jobs.
    * @returns The an array of JobDetailDto.
    */
-  getAllJobs(): JobDetailDto[] {
+  public getAllJobs(): JobDetailDto[] {
     return Array.from(this.jobs.values()).sort(
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
     );
@@ -44,7 +44,7 @@ export class InMemoryStorageService {
    * Updates job resume count.
    * @param jobId - The job id.
    */
-  updateJobResumeCount(jobId: string): void {
+  public updateJobResumeCount(jobId: string): void {
     const job = this.jobs.get(jobId);
     if (job) {
       const resumeCount = Array.from(this.resumes.values()).filter(
@@ -59,7 +59,7 @@ export class InMemoryStorageService {
    * Creates resume.
    * @param resume - The resume.
    */
-  createResume(resume: ResumeDetailDto): void {
+  public createResume(resume: ResumeDetailDto): void {
     this.resumes.set(resume.id, resume);
     this.updateJobResumeCount(resume.jobId);
   }
@@ -69,7 +69,7 @@ export class InMemoryStorageService {
    * @param resumeId - The resume id.
    * @returns The ResumeDetailDto | undefined.
    */
-  getResume(resumeId: string): ResumeDetailDto | undefined {
+  public getResume(resumeId: string): ResumeDetailDto | undefined {
     return this.resumes.get(resumeId);
   }
 
@@ -78,10 +78,10 @@ export class InMemoryStorageService {
    * @param jobId - The job id.
    * @returns The an array of ResumeDetailDto.
    */
-  getResumesByJobId(jobId: string): ResumeDetailDto[] {
+  public getResumesByJobId(jobId: string): ResumeDetailDto[] {
     return Array.from(this.resumes.values())
       .filter((resume) => resume.jobId === jobId)
-      .sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+      .sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0));
   }
 
   /**
@@ -90,7 +90,7 @@ export class InMemoryStorageService {
    * @param matchScore - The match score.
    * @param reportId - The report id.
    */
-  updateResumeWithReport(
+  public updateResumeWithReport(
     resumeId: string,
     matchScore: number,
     reportId: string,
@@ -108,7 +108,7 @@ export class InMemoryStorageService {
    * Creates report.
    * @param report - The report.
    */
-  createReport(report: AnalysisReportDto): void {
+  public createReport(report: AnalysisReportDto): void {
     this.reports.set(report.id, report);
     // Update the related resume with the report info
     this.updateResumeWithReport(report.resumeId, report.matchScore, report.id);
@@ -119,7 +119,7 @@ export class InMemoryStorageService {
    * @param reportId - The report id.
    * @returns The AnalysisReportDto | undefined.
    */
-  getReport(reportId: string): AnalysisReportDto | undefined {
+  public getReport(reportId: string): AnalysisReportDto | undefined {
     return this.reports.get(reportId);
   }
 
@@ -128,7 +128,7 @@ export class InMemoryStorageService {
    * @param jobId - The job id.
    * @returns The an array of AnalysisReportDto.
    */
-  getReportsByJobId(jobId: string): AnalysisReportDto[] {
+  public getReportsByJobId(jobId: string): AnalysisReportDto[] {
     return Array.from(this.reports.values())
       .filter((report) => report.jobId === jobId)
       .sort((a, b) => b.matchScore - a.matchScore);
@@ -138,7 +138,7 @@ export class InMemoryStorageService {
   /**
    * Performs the seed mock data operation.
    */
-  seedMockData(): void {
+  public seedMockData(): void {
     // Create a sample job
     const sampleJob = new JobDetailDto(
       'job-1',

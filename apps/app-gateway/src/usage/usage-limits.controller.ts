@@ -25,7 +25,7 @@ export class UsageLimitsController {
   @UseGuards(JwtAuthGuard)
   @Get('check')
   @HttpCode(HttpStatus.OK)
-  check() {
+  public check(): { currentUsage: number; availableQuota: number; canUse: boolean } {
     return this.usageLimitsService.getUsageStatus();
   }
 
@@ -37,7 +37,7 @@ export class UsageLimitsController {
   @UseGuards(JwtAuthGuard)
   @Post('record')
   @HttpCode(HttpStatus.CREATED)
-  record(@Body() _body: RecordUsageDto) {
+  public record(@Body() _body: RecordUsageDto): { currentUsage: number; remainingQuota: number } {
     return this.usageLimitsService.recordUsage();
   }
 
@@ -49,7 +49,7 @@ export class UsageLimitsController {
   @UseGuards(JwtAuthGuard)
   @Post('bonus')
   @HttpCode(HttpStatus.CREATED)
-  bonus(@Body() body: GrantBonusDto) {
+  public bonus(@Body() body: GrantBonusDto): { newTotalQuota: number } {
     const amount = Number(body?.amount ?? 0);
     return this.usageLimitsService.addBonusQuota(amount);
   }

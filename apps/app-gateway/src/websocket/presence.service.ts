@@ -12,7 +12,7 @@ export interface PresenceInfo {
   _sessionId: string;
   location?: string;
   device?: DeviceInfo;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -33,7 +33,7 @@ export interface UserActivity {
   action: string;
   timestamp: Date;
   location?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -42,9 +42,9 @@ export interface UserActivity {
 @Injectable()
 export class PresenceService {
   private readonly logger = new Logger(PresenceService.name);
-  private userPresence = new Map<string, PresenceInfo>();
-  private sessionToUser = new Map<string, string>();
-  private userSessions = new Map<string, Set<string>>();
+  private readonly userPresence = new Map<string, PresenceInfo>();
+  private readonly sessionToUser = new Map<string, string>();
+  private readonly userSessions = new Map<string, Set<string>>();
 
   /**
    * Initializes a new instance of the Presence Service.
@@ -58,11 +58,11 @@ export class PresenceService {
   /**
    * Update user online status
    */
-  async updateUserStatus(
+  public async updateUserStatus(
     userId: string,
     status: 'online' | 'away' | 'offline',
     _sessionId?: string,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ): Promise<void> {
     this.logger.debug(`Updating status for user ${userId}: ${status}`);
 
@@ -89,7 +89,7 @@ export class PresenceService {
       if (!this.userSessions.has(userId)) {
         this.userSessions.set(userId, new Set());
       }
-      this.userSessions.get(userId)!.add(_sessionId);
+      this.userSessions.get(userId)?.add(_sessionId);
     }
 
     // Cache presence info
@@ -101,7 +101,7 @@ export class PresenceService {
   /**
    * Track user session
    */
-  async trackUserSession(
+  public async trackUserSession(
     userId: string,
     _sessionId: string,
     device?: DeviceInfo,
@@ -125,10 +125,9 @@ export class PresenceService {
     this.userPresence.set(userId, presence);
     this.sessionToUser.set(_sessionId, userId);
 
-    if (!this.userSessions.has(userId)) {
-      this.userSessions.set(userId, new Set());
-    }
-    this.userSessions.get(userId)!.add(_sessionId);
+    const sessionsSet = this.userSessions.get(userId) ?? new Set<string>();
+    sessionsSet.add(_sessionId);
+    this.userSessions.set(userId, sessionsSet);
 
     await this.cachePresenceInfo(presence);
   }
@@ -136,7 +135,7 @@ export class PresenceService {
   /**
    * Get users in a specific session/room
    */
-  async getUsersInSession(_sessionId: string): Promise<PresenceInfo[]> {
+  public async getUsersInSession(_sessionId: string): Promise<PresenceInfo[]> {
     // For room-based presence, we'd need to track room memberships
     // For now, return all online users as a simplified implementation
     const onlineUsers: PresenceInfo[] = [];
@@ -153,7 +152,7 @@ export class PresenceService {
   /**
    * Get user presence information
    */
-  async getUserPresence(userId: string): Promise<PresenceInfo | null> {
+  public async getUserPresence(userId: string): Promise<PresenceInfo | null> {
     const presence = this.userPresence.get(userId);
     if (presence) {
       return presence;
@@ -177,7 +176,7 @@ export class PresenceService {
   /**
    * Get all online users
    */
-  async getOnlineUsers(): Promise<PresenceInfo[]> {
+  public async getOnlineUsers(): Promise<PresenceInfo[]> {
     const onlineUsers: PresenceInfo[] = [];
 
     for (const presence of this.userPresence.values()) {
@@ -192,7 +191,7 @@ export class PresenceService {
   /**
    * Track user activity
    */
-  async trackActivity(activity: UserActivity): Promise<void> {
+  public async trackActivity(activity: UserActivity): Promise<void> {
     this.logger.debug(
       `Tracking activity for user ${activity.userId}: ${activity.action}`,
     );
@@ -218,7 +217,7 @@ export class PresenceService {
   /**
    * Set user as away
    */
-  async setUserAway(userId: string): Promise<void> {
+  public async setUserAway(userId: string): Promise<void> {
     const presence = this.userPresence.get(userId);
     if (presence && presence.status === 'online') {
       presence.status = 'away';
@@ -231,7 +230,7 @@ export class PresenceService {
   /**
    * Set user as offline and cleanup session
    */
-  async setUserOffline(userId: string, _sessionId?: string): Promise<void> {
+  public async setUserOffline(userId: string, _sessionId?: string): Promise<void> {
     this.logger.debug(
       `Setting user ${userId} offline${_sessionId ? ` (session: ${_sessionId})` : ''}`,
     );
@@ -264,7 +263,7 @@ export class PresenceService {
   /**
    * Get user count by status
    */
-  async getUserCountByStatus(): Promise<Record<string, number>> {
+  public async getUserCountByStatus(): Promise<Record<string, number>> {
     const counts = { online: 0, away: 0, offline: 0 };
 
     for (const presence of this.userPresence.values()) {
@@ -277,7 +276,7 @@ export class PresenceService {
   /**
    * Check if user is online
    */
-  async isUserOnline(userId: string): Promise<boolean> {
+  public async isUserOnline(userId: string): Promise<boolean> {
     const presence = await this.getUserPresence(userId);
     return presence?.status === 'online' || false;
   }
@@ -285,7 +284,7 @@ export class PresenceService {
   /**
    * Get user's active sessions
    */
-  async getUserSessions(userId: string): Promise<string[]> {
+  public async getUserSessions(userId: string): Promise<string[]> {
     const sessions = this.userSessions.get(userId);
     return sessions ? Array.from(sessions) : [];
   }
@@ -293,14 +292,14 @@ export class PresenceService {
   /**
    * Get user by session ID
    */
-  async getUserBySession(_sessionId: string): Promise<string | null> {
+  public async getUserBySession(_sessionId: string): Promise<string | null> {
     return this.sessionToUser.get(_sessionId) || null;
   }
 
   /**
    * Update user location
    */
-  async updateUserLocation(userId: string, location: string): Promise<void> {
+  public async updateUserLocation(userId: string, location: string): Promise<void> {
     const presence = this.userPresence.get(userId);
     if (presence) {
       presence.location = location;
@@ -362,7 +361,7 @@ export class PresenceService {
   /**
    * Get presence statistics
    */
-  async getPresenceStats(): Promise<{
+  public async getPresenceStats(): Promise<{
     totalUsers: number;
     onlineUsers: number;
     awayUsers: number;

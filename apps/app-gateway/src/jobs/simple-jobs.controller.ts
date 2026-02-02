@@ -31,7 +31,7 @@ export class SimpleJobsController {
   @ApiOperation({ summary: '获取所有职位' })
   @ApiResponse({ status: 200, description: '职位列表获取成功' })
   @Get()
-  async getAllJobs() {
+  public async getAllJobs(): Promise<Record<string, unknown>> {
     return {
       success: true,
       data: [
@@ -95,10 +95,10 @@ export class SimpleJobsController {
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async createJob(@Body() body: CreateJobDto) {
+  public async createJob(@Body() body: CreateJobDto): Promise<{ jobId: string }> {
     this.logger.log('Simple jobs controller: createSimpleJob called');
     // ✅ FIXED: Use real JobsService with NATS publishing for E2E tests
-    const mockUser = {
+    const mockUser: Record<string, unknown> = {
       id: 'e2e-test-user',
       organizationId: 'e2e-test-org',
       role: 'user',
@@ -106,7 +106,8 @@ export class SimpleJobsController {
     };
 
     this.logger.debug('Calling jobs service with create job DTO');
-    const result = await this.jobsService.createJob(body, mockUser);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await this.jobsService.createJob(body, mockUser as any);
     this.logger.debug(`Jobs service result: ${JSON.stringify(result)}` );
     return result;
   }

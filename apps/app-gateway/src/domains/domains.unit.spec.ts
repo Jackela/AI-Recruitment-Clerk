@@ -1,6 +1,7 @@
 import { AnalyticsEventRepository } from './analytics/analytics-event.repository';
 import { AnalyticsIntegrationService } from './analytics/analytics-integration.service';
 import type { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 const createModelStub = () => {

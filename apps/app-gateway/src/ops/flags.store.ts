@@ -13,9 +13,9 @@ export interface FeatureFlag {
 
 const flags = new Map<string, FeatureFlag>();
 
-function audit(event: { action: string; key: string; detail?: unknown }) {
+function audit(event: { action: string; key: string; detail?: unknown }): void {
   // Placeholder audit hook; integrate with audit middleware/service when available (T027)
-   
+
   console.log(`[audit] feature-flag`, event);
 }
 

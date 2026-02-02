@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app/app.module';
-import * as crypto from 'crypto';
+import * as _crypto from 'crypto';
 
 /**
  * 🔐 DATA SECURITY & ENCRYPTION TESTS
@@ -25,7 +25,7 @@ describe('🔐 Data Security & Encryption Tests', () => {
   let app: INestApplication;
   let adminToken: string;
   let userToken: string;
-  let testUserId: string;
+  let _testUserId: string;
   let testOrganizationId: string;
 
   const testAdmin = {
@@ -109,7 +109,7 @@ describe('🔐 Data Security & Encryption Tests', () => {
   }
 
   // Utility function to detect if data might be encrypted
-  function appearencrypted(data: string): boolean {
+  function _appearencrypted(data: string): boolean {
     if (!data || typeof data !== 'string') return false;
 
     // Check for common encryption patterns

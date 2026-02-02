@@ -30,7 +30,6 @@ describe('GuestResumeController (lightweight)', () => {
       ...overrides,
     } as RequestWithDeviceId);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const file = {
     originalname: 'resume.pdf',
     mimetype: 'application/pdf',

@@ -23,7 +23,7 @@ import type {
  */
 @Controller('marketing/feedback-codes')
 export class FeedbackCodeController {
-  private readonly logger = new Logger(FeedbackCodeController.name);
+  private readonly logger: Logger = new Logger(FeedbackCodeController.name);
 
   /**
    * Initializes a new instance of the Feedback Code Controller.
@@ -39,10 +39,10 @@ export class FeedbackCodeController {
    */
   @Post('record')
   @HttpCode(HttpStatus.CREATED)
-  async recordFeedbackCode(
+  public async recordFeedbackCode(
     @Body() createDto: CreateFeedbackCodeDto,
     @Req() request: Request,
-  ) {
+  ): Promise<{ success: boolean; data: { id: string | undefined; code: string; generatedAt: Date } }> {
     try {
       if (!createDto.code || createDto.code.length < 5) {
         throw new BadRequestException('反馈码格式无效');
@@ -82,7 +82,7 @@ export class FeedbackCodeController {
    * @returns The result of the operation.
    */
   @Get('validate/:code')
-  async validateFeedbackCode(@Param('code') code: string) {
+  public async validateFeedbackCode(@Param('code') code: string): Promise<{ valid: boolean; code: string; timestamp: string }> {
     try {
       if (!code || code.length < 5) {
         throw new BadRequestException('反馈码格式无效');
@@ -109,7 +109,7 @@ export class FeedbackCodeController {
    */
   @Post('mark-used')
   @HttpCode(HttpStatus.OK)
-  async markFeedbackCodeAsUsed(@Body() markUsedDto: MarkFeedbackCodeUsedDto) {
+  public async markFeedbackCodeAsUsed(@Body() markUsedDto: MarkFeedbackCodeUsedDto): Promise<{ success: boolean; data: { code: string; qualityScore: number | undefined; paymentStatus: string; eligible: boolean } }> {
     try {
       // 验证输入数据
       if (!markUsedDto.code || !markUsedDto.alipayAccount) {
@@ -135,10 +135,10 @@ export class FeedbackCodeController {
           eligible: Number(result.qualityScore ?? 0) >= 3,
         },
       };
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error(`标记反馈码使用失败: ${markUsedDto.code}`, error);
 
-      if (error.message.includes('无效或已使用')) {
+      if (error instanceof Error && error.message.includes('无效或已使用')) {
         throw new NotFoundException('反馈码无效或已使用');
       }
 
@@ -154,7 +154,7 @@ export class FeedbackCodeController {
    */
   @Post('mark-used/alias')
   @HttpCode(HttpStatus.OK)
-  async markAsUsed(@Body() markUsedDto: MarkFeedbackCodeUsedDto) {
+  public async markAsUsed(@Body() markUsedDto: MarkFeedbackCodeUsedDto): Promise<{ success: boolean; data: { code: string; qualityScore: number; paymentStatus: string; eligible: boolean } }> {
     if (!markUsedDto.code || !markUsedDto.alipayAccount) {
       throw new BadRequestException('反馈码和支付宝账号不能为空');
     }
@@ -162,9 +162,8 @@ export class FeedbackCodeController {
       throw new BadRequestException('支付宝账号格式不正确');
     }
 
-    const result = await (this.feedbackCodeService as any).markAsUsed(
-      markUsedDto,
-    );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await (this.feedbackCodeService as any).markAsUsed(markUsedDto) as { code: string; qualityScore: number; paymentStatus: string };
 
     return {
       success: true,
@@ -182,7 +181,7 @@ export class FeedbackCodeController {
    * @returns The result of the operation.
    */
   @Get('stats')
-  async getPublicStats() {
+  public async getPublicStats(): Promise<{ totalParticipants: number; totalRewards: number; averageRating: number; lastUpdated: string }> {
     try {
       const stats = await this.feedbackCodeService.getMarketingStats();
 
@@ -206,7 +205,8 @@ export class FeedbackCodeController {
    */
   @Post('webhook/questionnaire')
   @HttpCode(HttpStatus.OK)
-  async handleQuestionnaireWebhook(@Body() webhookData: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async handleQuestionnaireWebhook(@Body() webhookData: any): Promise<{ success: boolean; error?: string }> {
     try {
       // 处理腾讯问卷的webhook数据
       this.logger.log('收到问卷webhook数据', webhookData);
@@ -224,24 +224,25 @@ export class FeedbackCodeController {
         };
 
         // 调用与测试期望一致的方法名
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (this.feedbackCodeService as any).markAsUsed(markUsedDto);
         this.logger.log(`Webhook处理成功: ${feedbackCode}`);
       }
 
       return { success: true };
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error('处理问卷webhook失败', error);
-      return { success: false, error: error.message };
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
   // 辅助方法
   private getClientIp(request: Request): string {
     return (
-      request.get('X-Forwarded-For') ||
-      request.get('X-Real-IP') ||
-      request.connection.remoteAddress ||
-      request.socket.remoteAddress ||
+      request.get('X-Forwarded-For') ??
+      request.get('X-Real-IP') ??
+      request.connection.remoteAddress ??
+      request.socket.remoteAddress ??
       'unknown'
     );
   }

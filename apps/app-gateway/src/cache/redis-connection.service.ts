@@ -17,7 +17,8 @@ import type { ConfigService } from '@nestjs/config';
  */
 @Injectable()
 export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(RedisConnectionService.name);
+  private readonly logger: Logger = new Logger(RedisConnectionService.name);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private redisClient: any = null;
   private connectionState:
     | 'disconnected'
@@ -38,7 +39,7 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
    * Performs the on module init operation.
    * @returns The result of the operation.
    */
-  async onModuleInit() {
+  public async onModuleInit(): Promise<void> {
     await this.initializeConnection();
   }
 
@@ -46,7 +47,7 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
    * Performs the on module destroy operation.
    * @returns The result of the operation.
    */
-  async onModuleDestroy() {
+  public async onModuleDestroy(): Promise<void> {
     await this.cleanup();
   }
 
@@ -122,10 +123,11 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
       this.connectionState = 'connected';
       this.reconnectAttempts = 0;
       this.logger.log('✅ Redis连接成功建立');
-    } catch (error) {
+    } catch (error: unknown) {
       this.connectionState = 'error';
       this.reconnectAttempts++;
-      this.logger.error(`❌ Redis连接失败: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`❌ Redis连接失败: ${errorMessage}`);
 
       // 如果重连次数未超限，启动重连
       if (this.reconnectAttempts <= this.maxReconnectAttempts) {
@@ -195,10 +197,11 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
   /**
    * 获取连接状态
    */
-  getConnectionStatus(): {
+  public getConnectionStatus(): {
     state: string;
     connected: boolean;
     attempts: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     client: any;
   } {
     return {
@@ -212,7 +215,7 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
   /**
    * 手动重连
    */
-  async reconnect(): Promise<void> {
+  public async reconnect(): Promise<void> {
     const redisUrl = this.configService.get('REDIS_URL');
     if (redisUrl) {
       this.reconnectAttempts = 0; // 重置重连计数
@@ -233,8 +236,9 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
       try {
         await this.redisClient.quit();
         this.logger.log('🧹 Redis连接已清理');
-      } catch (error) {
-        this.logger.warn(`Redis清理失败: ${error.message}`);
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        this.logger.warn(`Redis清理失败: ${errorMessage}`);
       }
       this.redisClient = null;
     }
@@ -250,7 +254,7 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
   /**
    * 检查Redis是否可用
    */
-  async isRedisAvailable(): Promise<boolean> {
+  public async isRedisAvailable(): Promise<boolean> {
     try {
       if (!this.redisClient || this.connectionState !== 'connected') {
         return false;
@@ -266,7 +270,8 @@ export class RedisConnectionService implements OnModuleInit, OnModuleDestroy {
   /**
    * 获取Redis客户端（如果可用）
    */
-  getRedisClient(): any {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public getRedisClient(): any {
     if (this.connectionState === 'connected') {
       return this.redisClient;
     }

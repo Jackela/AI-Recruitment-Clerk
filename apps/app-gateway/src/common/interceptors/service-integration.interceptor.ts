@@ -38,15 +38,15 @@ export interface ServiceIntegrationOptions {
  */
 @Injectable()
 export class ServiceIntegrationInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(ServiceIntegrationInterceptor.name);
-  private circuitBreakerStates = new Map<
+  private readonly logger: Logger = new Logger(ServiceIntegrationInterceptor.name);
+  private circuitBreakerStates: Map<
     string,
     {
       failures: number;
       isOpen: boolean;
       lastFailure: number;
     }
-  >();
+  > = new Map();
 
   /**
    * Initializes a new instance of the Service Integration Interceptor.
@@ -62,11 +62,12 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
    * Performs the intercept operation.
    * @param context - The context.
    * @param next - The next.
-   * @returns A promise that resolves to Observable<any>.
+   * @returns A promise that resolves to Observable<unknown>.
    */
-  async intercept(
+  public async intercept(
     context: ExecutionContext,
     next: CallHandler,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
     const handler = context.getHandler();
@@ -146,7 +147,7 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
     );
   }
 
-  private generateCacheKey(request: any, operationId: string): string {
+  private generateCacheKey(request: { url?: string; query?: Record<string, unknown>; body?: unknown }, operationId: string): string {
     if (this.options.cacheKey) {
       return this.options.cacheKey;
     }
@@ -167,9 +168,10 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
         // Implement health check for each service
         // This is a placeholder - implement actual service health checks
         return { service, healthy: true };
-      } catch (error) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         this.logger.warn(
-          `Service ${service} is not available: ${error.message}`,
+          `Service ${service} is not available: ${errorMessage}`,
         );
         return { service, healthy: false };
       }
@@ -235,7 +237,8 @@ export class ServiceIntegrationInterceptor implements NestInterceptor {
     }
   }
 
-  private handleFallback(operationId: string, error: any): Observable<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private handleFallback(operationId: string, error: { message?: string }): Observable<any> {
     this.logger.warn(`Using fallback for ${operationId}`);
 
     // Return a default fallback response

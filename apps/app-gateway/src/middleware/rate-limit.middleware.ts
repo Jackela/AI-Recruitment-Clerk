@@ -21,7 +21,7 @@ interface UsageRecord {
  */
 @Injectable()
 export class RateLimitMiddleware implements NestMiddleware {
-  private readonly logger = new Logger(RateLimitMiddleware.name);
+  private readonly logger: Logger = new Logger(RateLimitMiddleware.name);
   private redis: Redis | null;
 
   /**
@@ -50,7 +50,7 @@ export class RateLimitMiddleware implements NestMiddleware {
         });
       } else {
         this.redis = new Redis({
-          host: process.env.REDIS_HOST!,
+          host: process.env.REDIS_HOST ?? '',
           port: parseInt(process.env.REDIS_PORT || '6379'),
           password: process.env.REDIS_PASSWORD,
           maxRetriesPerRequest: 3,
@@ -59,8 +59,9 @@ export class RateLimitMiddleware implements NestMiddleware {
           connectTimeout: 10000,
         });
       }
-    } catch (error) {
-      this.logger.warn(`Redis初始化失败，限流降级到内存存储: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.warn(`Redis初始化失败，限流降级到内存存储: ${errorMessage}`);
       this.redis = null;
     }
   }
@@ -72,7 +73,7 @@ export class RateLimitMiddleware implements NestMiddleware {
    * @param next - The next.
    * @returns The result of the operation.
    */
-  async use(req: Request, res: Response, next: NextFunction) {
+  public async use(req: Request, res: Response, next: NextFunction): Promise<void> {
     // 如果Redis不可用，跳过限流检查
     if (!this.redis) {
       return next();
@@ -84,7 +85,7 @@ export class RateLimitMiddleware implements NestMiddleware {
 
     try {
       // 获取当前IP的使用记录
-      const recordStr = await this.redis!.get(key);
+      const recordStr = await this.redis?.get(key);
       let record: UsageRecord = recordStr
         ? JSON.parse(recordStr)
         : { count: 0, questionnaires: 0, payments: 0, lastReset: today };
@@ -135,7 +136,7 @@ export class RateLimitMiddleware implements NestMiddleware {
 
       // 记录本次使用
       record.count += 1;
-      await this.redis!.setex(key, 86400, JSON.stringify(record)); // 24小时过期
+      await this.redis?.setex(key, 86400, JSON.stringify(record)); // 24小时过期
 
       // 设置响应头
       res.setHeader('X-RateLimit-Limit', totalLimit.toString());
@@ -149,6 +150,7 @@ export class RateLimitMiddleware implements NestMiddleware {
       );
 
       // 添加使用信息到请求对象
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (req as any).usageInfo = {
         ip,
         currentUsage: record.count,
@@ -157,11 +159,12 @@ export class RateLimitMiddleware implements NestMiddleware {
       };
 
       next();
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof HttpException) {
         throw error;
       }
-      this.logger.error('Rate limit error', error.stack || error.message);
+      const errorDetails = error instanceof Error ? (error.stack ?? error.message) : 'Unknown error';
+      this.logger.error('Rate limit error', errorDetails);
       next(); // 出错时不阻塞请求
     }
   }
@@ -172,7 +175,7 @@ export class RateLimitMiddleware implements NestMiddleware {
    * @param ip - The ip.
    * @returns The Promise<{ success: boolean; newLimit: number; remaining: number; }>.
    */
-  async completeQuestionnaire(ip: string): Promise<{
+  public async completeQuestionnaire(ip: string): Promise<{
     success: boolean;
     newLimit: number;
     remaining: number;
@@ -186,13 +189,13 @@ export class RateLimitMiddleware implements NestMiddleware {
     const key = `rate_limit:${ip}:${today}`;
 
     try {
-      const recordStr = await this.redis!.get(key);
+      const recordStr = await this.redis?.get(key);
       const record: UsageRecord = recordStr
         ? JSON.parse(recordStr)
         : { count: 0, questionnaires: 0, payments: 0, lastReset: today };
 
       record.questionnaires += 1;
-      await this.redis!.setex(key, 86400, JSON.stringify(record));
+      await this.redis?.setex(key, 86400, JSON.stringify(record));
 
       const newLimit = 5 + record.questionnaires * 5 + record.payments * 5;
       const remaining = newLimit - record.count;
@@ -202,10 +205,11 @@ export class RateLimitMiddleware implements NestMiddleware {
         newLimit,
         remaining: Math.max(0, remaining),
       };
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorDetails = error instanceof Error ? (error.stack ?? error.message) : 'Unknown error';
       this.logger.error(
         'Complete questionnaire error',
-        error.stack || error.message,
+        errorDetails,
       );
       return { success: false, newLimit: 5, remaining: 0 };
     }
@@ -218,7 +222,7 @@ export class RateLimitMiddleware implements NestMiddleware {
    * @param paymentId - The payment id.
    * @returns The Promise<{ success: boolean; newLimit: number; remaining: number; }>.
    */
-  async completePayment(
+  public async completePayment(
     ip: string,
     paymentId: string,
   ): Promise<{
@@ -235,19 +239,19 @@ export class RateLimitMiddleware implements NestMiddleware {
 
     try {
       // 检查支付是否已经使用过
-      const paymentUsed = await this.redis!.get(paymentKey);
+      const paymentUsed = await this.redis?.get(paymentKey);
       if (paymentUsed) {
         return { success: false, newLimit: 5, remaining: 0 };
       }
 
-      const recordStr = await this.redis!.get(key);
+      const recordStr = await this.redis?.get(key);
       const record: UsageRecord = recordStr
         ? JSON.parse(recordStr)
         : { count: 0, questionnaires: 0, payments: 0, lastReset: today };
 
       record.payments += 1;
-      await this.redis!.setex(key, 86400, JSON.stringify(record));
-      await this.redis!.setex(paymentKey, 86400, 'used'); // 标记支付已使用
+      await this.redis?.setex(key, 86400, JSON.stringify(record));
+      await this.redis?.setex(paymentKey, 86400, 'used'); // 标记支付已使用
 
       const newLimit = 5 + record.questionnaires * 5 + record.payments * 5;
       const remaining = newLimit - record.count;
@@ -257,8 +261,9 @@ export class RateLimitMiddleware implements NestMiddleware {
         newLimit,
         remaining: Math.max(0, remaining),
       };
-    } catch (error) {
-      this.logger.error('Complete payment error', error.stack || error.message);
+    } catch (error: unknown) {
+      const errorDetails = error instanceof Error ? (error.stack ?? error.message) : 'Unknown error';
+      this.logger.error('Complete payment error', errorDetails);
       return { success: false, newLimit: 5, remaining: 0 };
     }
   }
@@ -269,7 +274,7 @@ export class RateLimitMiddleware implements NestMiddleware {
    * @param ip - The ip.
    * @returns The Promise<{ currentUsage: number; totalLimit: number; remaining: number; resetTime: number; upgrades: { questionnaires: number; payments: number; }; }>.
    */
-  async getUsageStatus(ip: string): Promise<{
+  public async getUsageStatus(ip: string): Promise<{
     currentUsage: number;
     totalLimit: number;
     remaining: number;
@@ -283,7 +288,7 @@ export class RateLimitMiddleware implements NestMiddleware {
     const key = `rate_limit:${ip}:${today}`;
 
     try {
-      const recordStr = await this.redis!.get(key);
+      const recordStr = await this.redis?.get(key);
       const record: UsageRecord = recordStr
         ? JSON.parse(recordStr)
         : { count: 0, questionnaires: 0, payments: 0, lastReset: today };
@@ -300,8 +305,9 @@ export class RateLimitMiddleware implements NestMiddleware {
           payments: record.payments,
         },
       };
-    } catch (error) {
-      this.logger.error('Get usage status error', error.stack || error.message);
+    } catch (error: unknown) {
+      const errorDetails = error instanceof Error ? (error.stack ?? error.message) : 'Unknown error';
+      this.logger.error('Get usage status error', errorDetails);
       return {
         currentUsage: 0,
         totalLimit: 5,
@@ -314,10 +320,10 @@ export class RateLimitMiddleware implements NestMiddleware {
 
   private getClientIP(req: Request): string {
     return (
-      (req.headers['x-forwarded-for'] as string)?.split(',')[0] ||
-      (req.headers['x-real-ip'] as string) ||
-      req.connection.remoteAddress ||
-      req.ip ||
+      (req.headers['x-forwarded-for'] as string)?.split(',')[0] ??
+      (req.headers['x-real-ip'] as string) ??
+      req.connection?.remoteAddress ??
+      req.ip ??
       'unknown'
     );
   }
@@ -335,7 +341,7 @@ export class RateLimitMiddleware implements NestMiddleware {
    * @param date - The date.
    * @returns The Promise<{ date: string; totalIPs: number; totalRequests: number; questionnairesCompleted: number; paymentsCompleted: number; averageUsagePerIP: number; }>.
    */
-  async getDailyStats(date?: string): Promise<{
+  public async getDailyStats(date?: string): Promise<{
     date: string;
     totalIPs: number;
     totalRequests: number;
@@ -347,13 +353,13 @@ export class RateLimitMiddleware implements NestMiddleware {
     const pattern = `rate_limit:*:${targetDate}`;
 
     try {
-      const keys = await this.redis!.keys(pattern);
+      const keys = await this.redis?.keys(pattern) ?? [];
       let totalRequests = 0;
       let totalQuestionnaires = 0;
       let totalPayments = 0;
 
       for (const key of keys) {
-        const recordStr = await this.redis!.get(key);
+        const recordStr = await this.redis?.get(key);
         if (recordStr) {
           const record: UsageRecord = JSON.parse(recordStr);
           totalRequests += record.count;
@@ -373,8 +379,9 @@ export class RateLimitMiddleware implements NestMiddleware {
             ? Math.round((totalRequests / keys.length) * 100) / 100
             : 0,
       };
-    } catch (error) {
-      this.logger.error('Get daily stats error', error.stack || error.message);
+    } catch (error: unknown) {
+      const errorDetails = error instanceof Error ? (error.stack ?? error.message) : 'Unknown error';
+      this.logger.error('Get daily stats error', errorDetails);
       return {
         date: targetDate,
         totalIPs: 0,

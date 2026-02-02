@@ -21,7 +21,7 @@ import { ConfigModule } from '@nestjs/config';
 
 describe('🚀 Comprehensive API Integration Tests', () => {
   let app: INestApplication;
-  let jwtService: JwtService;
+  let _jwtService: JwtService;
   let adminToken: string;
   let userToken: string;
   let hrManagerToken: string;
@@ -31,7 +31,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
   // Test entities for cross-service integration
   let testResumeId: string;
   let testQuestionnaireId: string;
-  let testJobId: string;
+  let _testJobId: string;
   let testReportId: string;
   let testIncentiveId: string;
 
@@ -111,7 +111,7 @@ describe('🚀 Comprehensive API Integration Tests', () => {
     adminToken = adminLoginResponse.body.data.accessToken;
 
     // Create HR manager
-    const hrResponse = await request(app.getHttpServer())
+    const _hrResponse = await request(app.getHttpServer())
       .post('/auth/register')
       .send({
         ...testHrManager,
@@ -534,8 +534,8 @@ describe('🚀 Comprehensive API Integration Tests', () => {
   });
 
   describe('📈 Analytics and Reporting Integration', () => {
-    let testEventId: string;
-    let testMetricId: string;
+    let _testEventId: string;
+    let _testMetricId: string;
 
     it('should track events across complete user workflow', async () => {
       // Track user registration event

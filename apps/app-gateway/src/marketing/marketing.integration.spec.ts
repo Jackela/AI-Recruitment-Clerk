@@ -12,7 +12,13 @@ type StoredCode = {
   isUsed: boolean;
 };
 
-const createStubService = () => {
+const createStubService = (): {
+  recordFeedbackCode: (createDto: CreateFeedbackCodeDto, metadata?: Record<string, unknown>) => Promise<StoredCode & { id: string }>;
+  validateFeedbackCode: (code: string) => Promise<boolean>;
+  markFeedbackCodeAsUsed: (dto: MarkFeedbackCodeUsedDto) => Promise<{ code: string; paymentStatus: string; qualityScore: number; alipayAccount: string }>;
+  markAsUsed: (dto: MarkFeedbackCodeUsedDto) => Promise<{ code: string; paymentStatus: string; qualityScore: number; alipayAccount: string }>;
+  getMarketingStats: () => Promise<{ totalCodes: number; usedCodes: number; pendingPayments: number; totalPaid: number; averageQualityScore: number }>;
+} => {
   const store = new Map<string, StoredCode>();
   let paidCount = 0;
 
@@ -20,7 +26,7 @@ const createStubService = () => {
     async recordFeedbackCode(
       createDto: CreateFeedbackCodeDto,
       metadata?: Record<string, unknown>,
-    ) {
+    ): Promise<StoredCode & { id: string }> {
       const existing = store.get(createDto.code);
       if (existing) {
         return { ...existing, id: existing.code };
@@ -35,12 +41,12 @@ const createStubService = () => {
       return { ...entry, id: createDto.code };
     },
 
-    async validateFeedbackCode(code: string) {
+    async validateFeedbackCode(code: string): Promise<boolean> {
       const entry = store.get(code);
       return !!entry && !entry.isUsed;
     },
 
-    async markFeedbackCodeAsUsed(dto: MarkFeedbackCodeUsedDto) {
+    async markFeedbackCodeAsUsed(dto: MarkFeedbackCodeUsedDto): Promise<{ code: string; paymentStatus: string; qualityScore: number; alipayAccount: string }> {
       const entry = store.get(dto.code);
       if (!entry || entry.isUsed) {
         throw new Error('无效或已使用');
@@ -55,11 +61,11 @@ const createStubService = () => {
       };
     },
 
-    async markAsUsed(dto: MarkFeedbackCodeUsedDto) {
+    async markAsUsed(dto: MarkFeedbackCodeUsedDto): Promise<{ code: string; paymentStatus: string; qualityScore: number; alipayAccount: string }> {
       return this.markFeedbackCodeAsUsed(dto);
     },
 
-    async getMarketingStats() {
+    async getMarketingStats(): Promise<{ totalCodes: number; usedCodes: number; pendingPayments: number; totalPaid: number; averageQualityScore: number }> {
       const totalCodes = store.size;
       const usedCodes = Array.from(store.values()).filter((c) => c.isUsed).length;
       return {
@@ -73,27 +79,28 @@ const createStubService = () => {
   };
 };
 
-const createRequest = () =>
-  ({
-    get: jest.fn().mockImplementation((header: string) => {
-      if (header === 'User-Agent') {
-        return 'jest-agent';
-      }
-      if (header === 'X-Forwarded-For') {
-        return '198.51.100.24';
-      }
-      return undefined;
-    }),
-    connection: { remoteAddress: '198.51.100.24' },
-    socket: { remoteAddress: '198.51.100.24' },
-  } as any);
+ 
+const createRequest = (): any => ({
+  get: jest.fn().mockImplementation((header: string): string | undefined => {
+    if (header === 'User-Agent') {
+      return 'jest-agent';
+    }
+    if (header === 'X-Forwarded-For') {
+      return '198.51.100.24';
+    }
+    return undefined;
+  }),
+  connection: { remoteAddress: '198.51.100.24' },
+  socket: { remoteAddress: '198.51.100.24' },
+});
 
 describe('Marketing integration smoke tests (mocked)', () => {
   let controller: FeedbackCodeController;
   let service: ReturnType<typeof createStubService>;
 
-  beforeEach(() => {
+  beforeEach((): void => {
     service = createStubService();
+     
     controller = new FeedbackCodeController(service as any);
   });
 

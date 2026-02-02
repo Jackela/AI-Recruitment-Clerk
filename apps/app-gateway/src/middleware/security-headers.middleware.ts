@@ -16,13 +16,13 @@ interface SecurityRequest extends Request {
  */
 @Injectable()
 export class SecurityHeadersMiddleware implements NestMiddleware {
-  private readonly logger = new Logger(SecurityHeadersMiddleware.name);
+  private readonly logger: Logger = new Logger(SecurityHeadersMiddleware.name);
 
   /**
    * Initializes a new instance of the Security Headers Middleware.
    * @param configService - The config service.
    */
-  constructor(private configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) {}
 
   /**
    * Performs the use operation.
@@ -31,7 +31,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
    * @param next - The next.
    * @returns The result of the operation.
    */
-  use(req: SecurityRequest, res: Response, next: NextFunction) {
+  public use(req: SecurityRequest, res: Response, next: NextFunction): void {
     const isProduction =
       this.configService.get<string>('NODE_ENV') === 'production';
     const corsOrigin =
@@ -140,8 +140,8 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     const allowedOrigins = corsOrigin.split(',').map((origin) => origin.trim());
     const requestOrigin = req.get('Origin');
 
-    if (allowedOrigins.includes(requestOrigin || '')) {
-      res.setHeader('Access-Control-Allow-Origin', requestOrigin!);
+    if (allowedOrigins.includes(requestOrigin ?? '')) {
+      res.setHeader('Access-Control-Allow-Origin', requestOrigin ?? '');
     } else if (!isProduction && allowedOrigins[0]) {
       res.setHeader('Access-Control-Allow-Origin', allowedOrigins[0]);
     }
@@ -196,7 +196,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     const securityFlags: string[] = [];
 
     // Check for suspicious patterns
-    const userAgent = req.get('User-Agent') || '';
+    const userAgent = req.get('User-Agent') ?? '';
 
     // Bot detection
     if (/bot|crawler|spider|scraper/i.test(userAgent)) {
@@ -249,7 +249,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     };
   }
 
-  private isSensitiveEndpoint(path: string): boolean {
+  private isSensitiveEndpoint(requestPath: string): boolean {
     const sensitivePatterns = [
       '/api/auth/',
       '/api/admin/',
@@ -258,7 +258,7 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
       '/api/config/',
     ];
 
-    return sensitivePatterns.some((pattern) => path.startsWith(pattern));
+    return sensitivePatterns.some((pattern) => requestPath.startsWith(pattern));
   }
 
 

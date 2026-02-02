@@ -28,7 +28,7 @@ export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
    * @param context - The context.
    * @returns A promise that resolves to boolean value.
    */
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  public async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -42,7 +42,7 @@ export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
       // Try to validate JWT token
       const result = await super.canActivate(context);
       return result as boolean;
-    } catch (error) {
+    } catch (_error) {
       // If JWT validation fails, allow the request to continue
       // The guest guard or service will handle guest-specific logic
       this.logger.debug(
@@ -60,7 +60,8 @@ export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
    * @param context - The context.
    * @returns The result of the operation.
    */
-  handleRequest(err: any, user: any, _info: any, context: ExecutionContext) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type
+  public handleRequest(err: any, user: any, _info: any, context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
 
     if (err) {

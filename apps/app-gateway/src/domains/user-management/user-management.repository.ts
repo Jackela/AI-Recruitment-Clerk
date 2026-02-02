@@ -65,7 +65,7 @@ export class UserManagementRepository {
   /**
    * Create a new user in the database
    */
-  async create(
+  public async create(
     createUserData: CreateUserDto & { password: string },
   ): Promise<UserEntity> {
     try {
@@ -116,7 +116,7 @@ export class UserManagementRepository {
   /**
    * Find user by ID
    */
-  async findById(id: string): Promise<UserEntity | null> {
+  public async findById(id: string): Promise<UserEntity | null> {
     try {
       const user = await this.userModel.findOne({ id }).exec();
       return user ? this.mapToEntity(user) : null;
@@ -128,7 +128,7 @@ export class UserManagementRepository {
   /**
    * Find user by email
    */
-  async findByEmail(email: string): Promise<UserEntity | null> {
+  public async findByEmail(email: string): Promise<UserEntity | null> {
     try {
       if (!email) {
         return null;
@@ -145,7 +145,7 @@ export class UserManagementRepository {
   /**
    * Find users by organization ID
    */
-  async findByOrganizationId(organizationId: string): Promise<UserEntity[]> {
+  public async findByOrganizationId(organizationId: string): Promise<UserEntity[]> {
     try {
       if (!organizationId) {
         return [];
@@ -162,7 +162,7 @@ export class UserManagementRepository {
   /**
    * Update user by ID
    */
-  async updateById(
+  public async updateById(
     id: string,
     updateData: Partial<Omit<UserEntity, 'id' | 'createdAt' | '_id'>>,
   ): Promise<UserEntity> {
@@ -217,7 +217,7 @@ export class UserManagementRepository {
   /**
    * Update user password
    */
-  async updatePassword(id: string, hashedPassword: string): Promise<void> {
+  public async updatePassword(id: string, hashedPassword: string): Promise<void> {
     try {
       const result = await this.userModel
         .updateOne(
@@ -243,7 +243,7 @@ export class UserManagementRepository {
   /**
    * Update user's last activity timestamp
    */
-  async updateLastActivity(id: string): Promise<void> {
+  public async updateLastActivity(id: string): Promise<void> {
     try {
       await this.userModel
         .updateOne(
@@ -262,12 +262,13 @@ export class UserManagementRepository {
   /**
    * Update security flag for user
    */
-  async updateSecurityFlag(
+  public async updateSecurityFlag(
     userId: string,
     flag: keyof NonNullable<UserEntity['securityFlags']>,
     value: boolean,
   ): Promise<void> {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const updateData: any = {
         updatedAt: new Date(),
       };
@@ -296,7 +297,7 @@ export class UserManagementRepository {
   /**
    * Delete user by ID
    */
-  async deleteById(id: string): Promise<void> {
+  public async deleteById(id: string): Promise<void> {
     try {
       const result = await this.userModel.deleteOne({ id }).exec();
       if (result.deletedCount === 0) {
@@ -313,7 +314,7 @@ export class UserManagementRepository {
   /**
    * Soft delete user (mark as inactive)
    */
-  async softDeleteById(id: string, _reason?: string): Promise<void> {
+  public async softDeleteById(id: string, _reason?: string): Promise<void> {
     try {
       await this.updateById(id, {
         status: UserStatus.INACTIVE,
@@ -327,12 +328,14 @@ export class UserManagementRepository {
   /**
    * Find users with filtering and pagination
    */
-  async findMany(
+  public async findMany(
     filter: FilterQuery<UserEntity> = {},
     options: {
       limit?: number;
       skip?: number;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sort?: any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       projection?: any;
     } = {},
   ): Promise<{ users: UserEntity[]; totalCount: number }> {
@@ -372,7 +375,7 @@ export class UserManagementRepository {
   /**
    * Check if user exists by ID
    */
-  async existsById(id: string): Promise<boolean> {
+  public async existsById(id: string): Promise<boolean> {
     try {
       const count = await this.userModel.countDocuments({ id }).exec();
       return count > 0;
@@ -384,7 +387,7 @@ export class UserManagementRepository {
   /**
    * Check if user exists by email
    */
-  async existsByEmail(email: string): Promise<boolean> {
+  public async existsByEmail(email: string): Promise<boolean> {
     try {
       if (!email) {
         return false;
@@ -403,7 +406,7 @@ export class UserManagementRepository {
   /**
    * Get user statistics
    */
-  async getStats(): Promise<{
+  public async getStats(): Promise<{
     totalUsers: number;
     activeUsers: number;
     usersByStatus: Record<UserStatus, number>;
@@ -454,7 +457,7 @@ export class UserManagementRepository {
   /**
    * Bulk create users
    */
-  async bulkCreate(
+  public async bulkCreate(
     usersData: (CreateUserDto & { password: string })[],
   ): Promise<UserEntity[]> {
     try {
@@ -500,6 +503,7 @@ export class UserManagementRepository {
   /**
    * Map MongoDB document to UserEntity
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private mapToEntity(doc: any): UserEntity {
     return {
       _id: doc._id?.toString(),

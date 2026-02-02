@@ -48,7 +48,7 @@ export class GuestGuard implements CanActivate {
    * @param context - The context.
    * @returns A promise that resolves to boolean value.
    */
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  public async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<RequestWithDeviceId>();
     const deviceId = this.extractDeviceId(request);
 
@@ -180,7 +180,7 @@ export class GuestGuard implements CanActivate {
    * Retrieves rate limit status.
    * @returns The { activeGuests: number; totalRequests: number; }.
    */
-  getRateLimitStatus(): {
+  public getRateLimitStatus(): {
     activeGuests: number;
     totalRequests: number;
   } {

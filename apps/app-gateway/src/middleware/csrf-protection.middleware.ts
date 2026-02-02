@@ -22,16 +22,16 @@ interface CsrfRequest extends Request {
  */
 @Injectable()
 export class CsrfProtectionMiddleware implements NestMiddleware {
-  private readonly logger = new Logger(CsrfProtectionMiddleware.name);
+  private readonly logger: Logger = new Logger(CsrfProtectionMiddleware.name);
   private readonly csrfSecret: string;
   private readonly excludedPaths: string[];
-  private readonly safeMethods = ['GET', 'HEAD', 'OPTIONS'];
+  private readonly safeMethods: string[] = ['GET', 'HEAD', 'OPTIONS'];
 
   /**
    * Initializes a new instance of the Csrf Protection Middleware.
    * @param configService - The config service.
    */
-  constructor(private configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     this.csrfSecret =
       this.configService.get<string>('CSRF_SECRET') ||
       'fallback-csrf-secret-change-in-production';
@@ -52,7 +52,7 @@ export class CsrfProtectionMiddleware implements NestMiddleware {
    * @param next - The next.
    * @returns The result of the operation.
    */
-  use(req: CsrfRequest, res: Response, next: NextFunction) {
+  public use(req: CsrfRequest, res: Response, next: NextFunction): void {
     // Skip CSRF protection for safe HTTP methods
     if (this.safeMethods.includes(req.method)) {
       // For GET requests, generate and provide CSRF token
@@ -85,9 +85,10 @@ export class CsrfProtectionMiddleware implements NestMiddleware {
       // Validate CSRF token for state-changing operations
       this.validateCsrfToken(req);
       next();
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.warn(
-        `CSRF validation failed for ${req.method} ${req.path}: ${error.message}`,
+        `CSRF validation failed for ${req.method} ${req.path}: ${errorMessage}`,
         {
           ip: req.ip,
           userAgent: req.get('User-Agent'),
@@ -100,10 +101,10 @@ export class CsrfProtectionMiddleware implements NestMiddleware {
     }
   }
 
-  private shouldExcludePath(path: string): boolean {
+  private shouldExcludePath(requestPath: string): boolean {
     return this.excludedPaths.some(
       (excludedPath) =>
-        path.startsWith(excludedPath) || path.includes(excludedPath),
+        requestPath.startsWith(excludedPath) || requestPath.includes(excludedPath),
     );
   }
 

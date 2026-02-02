@@ -59,7 +59,7 @@ export class SecurityController {
    * @param userId - The user id.
    * @param startDate - The start date.
    * @param endDate - The end date.
-   * @returns A promise that resolves to { events: SecurityEvent[]; total: number; metadata: any }.
+   * @returns A promise that resolves to { events: SecurityEvent[]; total: number; metadata: Record<string, unknown> }.
    */
   @Get('events')
   @ApiOperation({ summary: 'Get security events (Admin only)' })
@@ -75,7 +75,7 @@ export class SecurityController {
     description: 'Security events retrieved successfully',
   })
   @ApiResponse({ status: 403, description: 'Admin access required' })
-  async getSecurityEvents(
+  public async getSecurityEvents(
     @Request() req: AuthenticatedRequest,
     @Query('limit') limit?: number,
     @Query('offset') offset?: number,
@@ -86,7 +86,7 @@ export class SecurityController {
     @Query('userId') userId?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-  ): Promise<{ events: SecurityEvent[]; total: number; metadata: any }> {
+  ): Promise<{ events: SecurityEvent[]; total: number; metadata: Record<string, unknown> }> {
     // Check if user has admin role
     if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
@@ -139,7 +139,7 @@ export class SecurityController {
    * Retrieves security metrics.
    * @param req - The req.
    * @param period - The period.
-   * @returns A promise that resolves to SecurityMetrics & { metadata: any }.
+   * @returns A promise that resolves to SecurityMetrics & { metadata: Record<string, unknown> }.
    */
   @Get('metrics')
   @ApiOperation({ summary: 'Get security metrics dashboard (Admin only)' })
@@ -149,10 +149,10 @@ export class SecurityController {
     description: 'Security metrics retrieved successfully',
   })
   @ApiResponse({ status: 403, description: 'Admin access required' })
-  async getSecurityMetrics(
+  public async getSecurityMetrics(
     @Request() req: AuthenticatedRequest,
     @Query('period') period: 'hour' | 'day' | 'week' = 'day',
-  ): Promise<SecurityMetrics & { metadata: any }> {
+  ): Promise<SecurityMetrics & { metadata: Record<string, unknown> }> {
     // Check if user has admin role
     if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
@@ -197,7 +197,7 @@ export class SecurityController {
   })
   @ApiResponse({ status: 403, description: 'Admin access required' })
   @ApiResponse({ status: 404, description: 'Security event not found' })
-  async resolveSecurityEvent(
+  public async resolveSecurityEvent(
     @Request() req: AuthenticatedRequest,
     @Param('eventId') eventId: string,
     @Body() body: { resolution: string },
@@ -248,7 +248,7 @@ export class SecurityController {
    * Retrieves rate limit stats.
    * @param req - The req.
    * @param period - The period.
-   * @returns The result of the operation.
+   * @returns A promise with rate limit stats.
    */
   @Get('rate-limit/stats')
   @ApiOperation({ summary: 'Get rate limiting statistics (Admin only)' })
@@ -258,10 +258,10 @@ export class SecurityController {
     description: 'Rate limiting stats retrieved successfully',
   })
   @ApiResponse({ status: 403, description: 'Admin access required' })
-  async getRateLimitStats(
+  public async getRateLimitStats(
     @Request() req: AuthenticatedRequest,
     @Query('period') period: 'hour' | 'day' | 'week' = 'day',
-  ) {
+  ): Promise<Record<string, unknown>> {
     // Check if user has admin role
     if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
@@ -293,7 +293,7 @@ export class SecurityController {
   /**
    * Retrieves locked i ps.
    * @param req - The req.
-   * @returns The result of the operation.
+   * @returns A promise with locked IPs.
    */
   @Get('rate-limit/locked-ips')
   @ApiOperation({ summary: 'Get currently locked IP addresses (Admin only)' })
@@ -302,7 +302,7 @@ export class SecurityController {
     description: 'Locked IPs retrieved successfully',
   })
   @ApiResponse({ status: 403, description: 'Admin access required' })
-  async getLockedIPs(@Request() req: AuthenticatedRequest) {
+  public async getLockedIPs(@Request() req: AuthenticatedRequest): Promise<{ lockedIPs: unknown; metadata: Record<string, unknown> }> {
     // Check if user has admin role
     if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
@@ -344,7 +344,7 @@ export class SecurityController {
     status: 404,
     description: 'IP address not found or not locked',
   })
-  async unlockIP(
+  public async unlockIP(
     @Request() req: AuthenticatedRequest,
     @Body() body: { ip: string; reason?: string },
   ): Promise<{ success: boolean; message: string }> {
@@ -403,12 +403,12 @@ export class SecurityController {
   /**
    * Retrieves security health.
    * @param req - The req.
-   * @returns The result of the operation.
+   * @returns A promise with security health status.
    */
   @Get('health')
   @ApiOperation({ summary: 'Security system health check' })
   @ApiResponse({ status: 200, description: 'Security system status' })
-  async getSecurityHealth(@Request() _req: AuthenticatedRequest) {
+  public async getSecurityHealth(@Request() _req: AuthenticatedRequest): Promise<Record<string, unknown>> {
     try {
       const metrics =
         await this.securityMonitorService.getSecurityMetrics('hour');
@@ -450,13 +450,13 @@ export class SecurityController {
   /**
    * Performs the test security alert operation.
    * @param req - The req.
-   * @returns The result of the operation.
+   * @returns A promise with test alert result.
    */
   @Post('test-alert')
   @ApiOperation({ summary: 'Test security alert system (Admin only)' })
   @ApiResponse({ status: 200, description: 'Test alert sent successfully' })
   @ApiResponse({ status: 403, description: 'Admin access required' })
-  async testSecurityAlert(@Request() req: AuthenticatedRequest) {
+  public async testSecurityAlert(@Request() req: AuthenticatedRequest): Promise<{ success: boolean; message: string; eventId: string }> {
     // Check if user has admin role
     if (!this.isAdmin(req.user)) {
       throw new HttpException('Admin access required', HttpStatus.FORBIDDEN);
@@ -497,6 +497,7 @@ export class SecurityController {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private isAdmin(user: any): boolean {
     const role = String(user?.rawRole ?? user?.role ?? '').toLowerCase();
     return role === 'admin';

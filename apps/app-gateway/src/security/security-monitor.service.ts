@@ -23,7 +23,7 @@ export interface SecurityEvent {
   ip: string;
   userAgent: string;
   timestamp: Date;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   resolved: boolean;
   resolvedAt?: Date;
   resolvedBy?: string;
@@ -72,7 +72,7 @@ export class SecurityMonitorService {
     }
   }
 
-  private initializeRedis() {
+  private initializeRedis(): void {
     // 检查是否禁用Redis或Redis配置是否可用
     const disableRedis =
       this.configService.get('DISABLE_REDIS', 'false') === 'true';
@@ -101,7 +101,7 @@ export class SecurityMonitorService {
         });
       } else {
         const redisOptions: RedisOptions = {
-          host: redisHost!,
+          host: redisHost ?? 'localhost',
           port: parseInt(
             this.configService.get<string>('REDISPORT') ||
               this.configService.get<string>('REDIS_PORT') ||
@@ -143,7 +143,7 @@ export class SecurityMonitorService {
    * @param event - The event.
    * @returns A promise that resolves to string value.
    */
-  async recordSecurityEvent(
+  public async recordSecurityEvent(
     event: Omit<SecurityEvent, 'id' | 'timestamp' | 'resolved'>,
   ): Promise<string> {
     const eventId = `security_event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -206,7 +206,7 @@ export class SecurityMonitorService {
    * @param options - The options.
    * @returns A promise that resolves to { events: SecurityEvent[]; total: number }.
    */
-  async getSecurityEvents(
+  public async getSecurityEvents(
     options: {
       limit?: number;
       offset?: number;
@@ -289,7 +289,7 @@ export class SecurityMonitorService {
    * @param period - The period.
    * @returns A promise that resolves to SecurityMetrics.
    */
-  async getSecurityMetrics(
+  public async getSecurityMetrics(
     period: 'hour' | 'day' | 'week' = 'day',
   ): Promise<SecurityMetrics> {
     try {
@@ -423,7 +423,7 @@ export class SecurityMonitorService {
    * @param resolution - The resolution.
    * @returns A promise that resolves to boolean value.
    */
-  async resolveSecurityEvent(
+  public async resolveSecurityEvent(
     eventId: string,
     resolvedBy: string,
     resolution: string,
@@ -456,7 +456,7 @@ export class SecurityMonitorService {
     }
   }
 
-  private async updateSecurityMetrics(event: SecurityEvent) {
+  private async updateSecurityMetrics(event: SecurityEvent): Promise<void> {
     if (!this.redis) return;
     const date = new Date().toISOString().split('T')[0];
     const hour = new Date().getHours();
@@ -489,7 +489,7 @@ export class SecurityMonitorService {
     );
   }
 
-  private async triggerSecurityAlert(event: SecurityEvent) {
+  private async triggerSecurityAlert(event: SecurityEvent): Promise<void> {
     try {
       if (!this.redis) return;
       const webhookUrl = this.configService.get<string>('SECURITY_WEBHOOK_URL');
@@ -525,7 +525,7 @@ export class SecurityMonitorService {
     }
   }
 
-  private startPeriodicAnalysis() {
+  private startPeriodicAnalysis(): void {
     // Run security analysis every hour
     setInterval(async () => {
       try {
@@ -538,7 +538,7 @@ export class SecurityMonitorService {
     this.logger.log('Periodic security analysis started');
   }
 
-  private async performSecurityAnalysis() {
+  private async performSecurityAnalysis(): Promise<void> {
     this.logger.debug('Starting periodic security analysis');
 
     try {
@@ -587,12 +587,12 @@ export class SecurityMonitorService {
    * @param userId - The user id.
    * @returns The result of the operation.
    */
-  async recordLoginFailure(
+  public async recordLoginFailure(
     ip: string,
     userAgent: string,
     attemptedEmail?: string,
     userId?: string,
-  ) {
+  ): Promise<string> {
     return this.recordSecurityEvent({
       type: 'LOGIN_FAILURE',
       severity: 'MEDIUM',
@@ -614,12 +614,12 @@ export class SecurityMonitorService {
    * @param reason - The reason.
    * @returns The result of the operation.
    */
-  async recordAccountLockout(
+  public async recordAccountLockout(
     ip: string,
     userAgent: string,
     userId: string,
     reason: string,
-  ) {
+  ): Promise<string> {
     return this.recordSecurityEvent({
       type: 'ACCOUNT_LOCKOUT',
       severity: 'HIGH',
@@ -641,12 +641,12 @@ export class SecurityMonitorService {
    * @param method - The method.
    * @returns The result of the operation.
    */
-  async recordMfaFailure(
+  public async recordMfaFailure(
     ip: string,
     userAgent: string,
     userId: string,
     method: string,
-  ) {
+  ): Promise<string> {
     return this.recordSecurityEvent({
       type: 'MFA_FAILURE',
       severity: 'HIGH',
@@ -668,12 +668,12 @@ export class SecurityMonitorService {
    * @param details - The details.
    * @returns The result of the operation.
    */
-  async recordSuspiciousActivity(
+  public async recordSuspiciousActivity(
     ip: string,
     userAgent: string,
     activity: string,
-    details?: any,
-  ) {
+    details?: Record<string, unknown>,
+  ): Promise<string> {
     return this.recordSecurityEvent({
       type: 'SUSPICIOUS_ACTIVITY',
       severity: 'HIGH',

@@ -22,7 +22,7 @@ describe('🛡️ Rate Limiting & DDoS Protection Security Tests', () => {
   let app: INestApplication;
   let adminToken: string;
   let userToken: string;
-  let testUserId: string;
+  let _testUserId: string;
   let testOrganizationId: string;
 
   const testAdmin = {

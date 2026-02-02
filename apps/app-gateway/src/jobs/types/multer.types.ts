@@ -17,15 +17,15 @@ export interface IMulterFile {
  * Represents the multer file.
  */
 export class MulterFile implements IMulterFile {
-  fieldname?: string;
-  originalname = '';
-  encoding?: string;
-  mimetype = '';
-  size = 0;
-  destination?: string;
-  filename?: string;
-  path?: string;
-  buffer?: Buffer;
+  public fieldname?: string;
+  public originalname = '';
+  public encoding?: string;
+  public mimetype = '';
+  public size = 0;
+  public destination?: string;
+  public filename?: string;
+  public path?: string;
+  public buffer?: Buffer;
 
   /**
    * Initializes a new instance of the Multer File.

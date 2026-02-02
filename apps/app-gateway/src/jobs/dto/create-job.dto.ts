@@ -6,9 +6,9 @@ import { IsString, IsNotEmpty } from 'class-validator';
 export class CreateJobDto {
   @IsString()
   @IsNotEmpty()
-  jobTitle!: string;
+  public jobTitle!: string;
 
   @IsString()
   @IsNotEmpty()
-  jdText!: string;
+  public jdText!: string;
 }

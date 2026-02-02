@@ -386,7 +386,7 @@ export class GuestResumeController {
         {
           success: false,
           error: 'Resume processing failed',
-          message: error.message || 'An unexpected error occurred',
+          message: (error as Error).message || 'An unexpected error occurred',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -611,7 +611,7 @@ export class GuestResumeController {
         {
           success: false,
           error: 'Failed to retrieve analysis results',
-          message: error.message || 'An unexpected error occurred',
+          message: (error as Error).message || 'An unexpected error occurred',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -773,7 +773,7 @@ export class GuestResumeController {
         {
           success: false,
           error: 'Failed to generate demo analysis',
-          message: error.message || 'An unexpected error occurred',
+          message: (error as Error).message || 'An unexpected error occurred',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );

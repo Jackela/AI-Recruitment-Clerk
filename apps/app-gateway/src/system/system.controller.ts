@@ -44,7 +44,8 @@ export class SystemController {
     description: '系统健康状态',
   })
   @Get('health')
-  async getSystemHealth(): Promise<{ success: boolean; data: any }> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async getSystemHealth(): Promise<{ success: boolean; data: any }> {
     try {
       const startTime = process.uptime();
       const memoryUsage = process.memoryUsage();
@@ -79,7 +80,7 @@ export class SystemController {
     } catch (error) {
       throw new ServiceUnavailableException({
         message: 'Unable to retrieve system health',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   }
@@ -95,7 +96,7 @@ export class SystemController {
   })
   @ApiResponse({ status: 200, description: '系统状态概览' })
   @Get('status')
-  async getSystemStatus(@Res({ passthrough: true }) res: Response): Promise<{
+  public async getSystemStatus(@Res({ passthrough: true }) res: Response): Promise<{
     success: boolean;
     data: {
       status: 'operational' | 'degraded' | 'maintenance' | 'outage';
@@ -114,7 +115,9 @@ export class SystemController {
     try {
       // Simple in-memory rate limiter for tests: allow first 8 requests per minute, then 429
       const bucket = Math.floor(Date.now() / 60000);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (global as any).__STATUS_BUCKET__ ||= { bucket, count: 0 };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const state = (global as any).__STATUS_BUCKET__ as {
         bucket: number;
         count: number;
@@ -155,7 +158,7 @@ export class SystemController {
     } catch (error) {
       throw new BadRequestException({
         message: 'Failed to retrieve system status',
-        error: error.message,
+        error: (error as Error).message,
       });
     }
   }
@@ -169,7 +172,8 @@ export class SystemController {
   @UseGuards(JwtAuthGuard)
   @Post('validate')
   @HttpCode(HttpStatus.OK)
-  async validateData(@Body() body: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type
+  public async validateData(@Body() body: any) {
     const data = body?.data || {};
     let valid = true;
     const errors: string[] = [];
@@ -204,7 +208,8 @@ export class SystemController {
   @UseGuards(JwtAuthGuard)
   @Get('metrics')
   @HttpCode(HttpStatus.OK)
-  async getMetrics(@Query('timeRange') _timeRange?: string) {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  public async getMetrics(@Query('timeRange') _timeRange?: string) {
     return {
       performance: { averageResponseTime: 123 },
       resources: { cpuUsage: 12.3, memoryUsage: 456 },
@@ -222,7 +227,8 @@ export class SystemController {
   @UseGuards(JwtAuthGuard)
   @Post('integration-test')
   @HttpCode(HttpStatus.OK)
-  async runIntegration(@Body() body: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type
+  public async runIntegration(@Body() body: any) {
     return {
       testSuite: body?.testSuite || 'default',
       totalTests: 5,

@@ -13,38 +13,36 @@ interface MockRequest {
   [key: string]: unknown;
 }
 
-const createRequest = (overrides: Record<string, unknown> = {}): MockRequest =>
-  ({
-    get: jest.fn().mockImplementation((header: string) => {
-      if (header === 'User-Agent') {
-        return 'jest-agent';
-      }
-      if (header === 'X-Forwarded-For') {
-        return undefined;
-      }
-      return null;
-    }),
-    connection: { remoteAddress: '192.0.2.1' },
-    socket: { remoteAddress: '192.0.2.1' },
-    ...overrides,
-  });
+const createRequest = (overrides: Record<string, unknown> = {}): MockRequest => ({
+  get: jest.fn().mockImplementation((header: string): string | null | undefined => {
+    if (header === 'User-Agent') {
+      return 'jest-agent';
+    }
+    if (header === 'X-Forwarded-For') {
+      return undefined;
+    }
+    return null;
+  }),
+  connection: { remoteAddress: '192.0.2.1' },
+  socket: { remoteAddress: '192.0.2.1' },
+  ...overrides,
+});
 
-const createService = (): jest.Mocked<FeedbackCodeService> =>
-  ({
-    recordFeedbackCode: jest.fn(),
-    validateFeedbackCode: jest.fn(),
-    markFeedbackCodeAsUsed: jest.fn(),
-    markAsUsed: jest.fn(),
-    getFeedbackCodeDetails: jest.fn(),
-    getMarketingStats: jest.fn(),
-    handleFeedbackWebhook: jest.fn(),
-  } as unknown as jest.Mocked<FeedbackCodeService>);
+const createService = (): jest.Mocked<FeedbackCodeService> => ({
+  recordFeedbackCode: jest.fn(),
+  validateFeedbackCode: jest.fn(),
+  markFeedbackCodeAsUsed: jest.fn(),
+  markAsUsed: jest.fn(),
+  getFeedbackCodeDetails: jest.fn(),
+  getMarketingStats: jest.fn(),
+  handleFeedbackWebhook: jest.fn(),
+} as unknown as jest.Mocked<FeedbackCodeService>);
 
 describe('FeedbackCodeController (lightweight)', () => {
   let controller: FeedbackCodeController;
   let service: jest.Mocked<FeedbackCodeService>;
 
-  beforeEach(() => {
+  beforeEach((): void => {
     jest.clearAllMocks();
     service = createService();
     controller = new FeedbackCodeController(service);
@@ -57,24 +55,17 @@ describe('FeedbackCodeController (lightweight)', () => {
       const request = createRequest({
         get: jest
           .fn()
-          .mockImplementation((header: string) =>
+          .mockImplementation((header: string): string =>
             header === 'User-Agent' ? 'jest-agent' : '198.51.100.5',
           ),
       });
-      interface FeedbackCodeRecord {
-        id: string;
-        code: string;
-        generatedAt: Date;
-        isUsed: boolean;
-        paymentStatus: string;
-      }
       service.recordFeedbackCode.mockResolvedValue({
         id: 'doc-1',
         code: dto.code,
         generatedAt: new Date('2024-01-01T00:00:00Z'),
         isUsed: false,
         paymentStatus: 'pending',
-      } as any);
+      } as ReturnType<FeedbackCodeService['recordFeedbackCode']> extends Promise<infer T> ? T : never);
 
       const result = await controller.recordFeedbackCode(dto, request as any);
 
@@ -135,18 +126,13 @@ describe('FeedbackCodeController (lightweight)', () => {
     };
 
     it('marks a code as used and returns summary', async () => {
-      interface MarkUsedResult {
-        code: string;
-        paymentStatus: string;
-        qualityScore: number;
-      }
       service.markFeedbackCodeAsUsed.mockResolvedValue({
         code: dto.code,
         paymentStatus: 'pending',
         qualityScore: 0.9,
         generatedAt: new Date('2024-01-01T00:00:00Z'),
         isUsed: true,
-      } as any);
+      } as ReturnType<FeedbackCodeService['markFeedbackCodeAsUsed']> extends Promise<infer T> ? T : never);
 
       const result = await controller.markFeedbackCodeAsUsed(dto);
 
@@ -173,7 +159,7 @@ describe('FeedbackCodeController (lightweight)', () => {
     };
 
     it('uses simplified alias handler', async () => {
-      (service.markAsUsed as any).mockResolvedValue({
+      (service.markAsUsed as jest.Mock).mockResolvedValue({
         code: dto.code,
         qualityScore: 0.6,
         paymentStatus: 'pending',

@@ -43,7 +43,7 @@ export class RedPacketService {
    * @param data - The data.
    * @returns The Promise<{ success: boolean; amount: number; message: string; redPacketId?: string; error?: string; }>.
    */
-  async processQuestionnaireReward(data: {
+  public async processQuestionnaireReward(data: {
     ip: string;
     questionnaireId: string;
     userContact: {
@@ -132,9 +132,10 @@ export class RedPacketService {
         };
       }
     } catch (error) {
+      const err = error as Error;
       this.logger.error(
         'Red packet processing error',
-        error.stack || error.message,
+        err.stack ?? err.message,
       );
       return {
         success: false,
@@ -151,7 +152,7 @@ export class RedPacketService {
    * @param data - The data.
    * @returns The Promise<{ success: boolean; rewards: { referrer: { amount: number; sent: boolean }; referee: { amount: number; sent: boolean }; }; message: string; }>.
    */
-  async processReferralReward(data: {
+  public async processReferralReward(data: {
     referrerIP: string;
     refereeIP: string;
     refereeQuestionnaireId: string;
@@ -213,7 +214,8 @@ export class RedPacketService {
             : '推荐奖励发送部分失败，请联系客服',
       };
     } catch (error) {
-      this.logger.error('Referral reward error', error.stack || error.message);
+      const err = error as Error;
+      this.logger.error('Referral reward error', err.stack ?? err.message);
       return {
         success: false,
         rewards: {
@@ -231,7 +233,7 @@ export class RedPacketService {
    * @param date - The date.
    * @returns The Promise<{ date: string; totalSent: number; totalAmount: number; successRate: number; breakdown: { questionnaire: { count: number; amount: number }; qualityBonus: { count: number; amount: number }; referral: { count: number; amount: number }; }; budgetUsage: { used: number; remaining: number; percentage: number; }; }>.
    */
-  async getRedPacketStats(date?: string): Promise<{
+  public async getRedPacketStats(date?: string): Promise<{
     date: string;
     totalSent: number;
     totalAmount: number;
@@ -305,9 +307,10 @@ export class RedPacketService {
         budgetUsage,
       };
     } catch (error) {
+      const err = error as Error;
       this.logger.error(
         'Get red packet stats error',
-        error.stack || error.message,
+        err.stack ?? err.message,
       );
       return {
         date: targetDate,
@@ -348,7 +351,7 @@ export class RedPacketService {
     } catch (error) {
       return {
         success: false,
-        error: error.message || 'SEND_FAILED',
+        error: (error as Error).message || 'SEND_FAILED',
       };
     }
   }

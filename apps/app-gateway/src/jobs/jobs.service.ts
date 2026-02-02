@@ -106,7 +106,7 @@ export class JobsService implements OnModuleInit {
   /**
    * Initializes NATS event subscriptions for job processing workflow.
    */
-  async onModuleInit() {
+  public async onModuleInit(): Promise<void> {
     try {
       // Subscribe to analysis.jd.extracted events (successful JD extraction)
       await this.subscribeToAnalysisCompleted();
@@ -132,6 +132,7 @@ export class JobsService implements OnModuleInit {
   ): boolean {
     // Admins have access to all resources
     const normalizedRole = String(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (user as any)?.rawRole ?? user.role ?? '',
     ).toLowerCase();
 
@@ -150,7 +151,7 @@ export class JobsService implements OnModuleInit {
    * @param user - The user.
    * @returns A promise that resolves to { jobId: string }.
    */
-  async createJob(
+  public async createJob(
     dto: CreateJobDto,
     user: UserDto,
   ): Promise<{ jobId: string }> {
@@ -159,7 +160,7 @@ export class JobsService implements OnModuleInit {
       description: dto.jdText,
       status: 'processing',
       createdBy: user.id,
-      company: user.organizationId || 'Unknown', // Use organizationId as company for now
+      company: user.organizationId ?? 'Unknown', // Use organizationId as company for now
       // Set organization context for multi-tenant access control
       organizationId: user.organizationId,
     };
@@ -219,6 +220,7 @@ export class JobsService implements OnModuleInit {
 
     try {
       const savedJob = await this.jobRepository.create(jobData);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const actualJobId = (savedJob as any)._id.toString();
 
       this.logger.log(
@@ -324,6 +326,7 @@ export class JobsService implements OnModuleInit {
       cacheKey,
       jobId,
       jobTitle: job.title,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       organizationId: (job as any).organizationId,
       status: 'completed',
       extractedKeywords,
@@ -353,6 +356,7 @@ export class JobsService implements OnModuleInit {
     if (!job) {
       return '';
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rawId = (job as any)._id ?? (job as any).id;
     if (rawId && typeof rawId === 'object' && typeof rawId.toString === 'function') {
       return rawId.toString();
@@ -367,6 +371,7 @@ export class JobsService implements OnModuleInit {
   ): Promise<string> {
     try {
       const savedJob = await this.jobRepository.create(jobData);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const actualJobId = (savedJob as any)._id.toString();
 
       this.logger.log(
@@ -424,7 +429,7 @@ export class JobsService implements OnModuleInit {
     status: JobUpdateStatus;
     organizationId?: string;
     updatedBy?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): Promise<void> {
     try {
       this.webSocketGateway.emitJobUpdated({
@@ -455,7 +460,7 @@ export class JobsService implements OnModuleInit {
    * @param user - The user.
    * @returns A promise that resolves to ResumeUploadResponseDto.
    */
-  async uploadResumes(
+  public async uploadResumes(
     jobId: string,
     files: MulterFile[],
     user: UserDto,
@@ -472,6 +477,7 @@ export class JobsService implements OnModuleInit {
       }
 
       // Check if user has access to this job
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (!this.hasAccessToResource(user, (job as any).organizationId)) {
         throw new ForbiddenException('Access denied to this job');
       }
@@ -534,7 +540,7 @@ export class JobsService implements OnModuleInit {
    * Retrieves all jobs.
    * @returns A promise that resolves to an array of JobListDto.
    */
-  async getAllJobs(): Promise<JobListDto[]> {
+  public async getAllJobs(): Promise<JobListDto[]> {
     const cacheKey = this.cacheService.generateKey('jobs', 'list');
 
     return this.cacheService.wrap(
@@ -545,6 +551,7 @@ export class JobsService implements OnModuleInit {
           return jobDocuments.map(
             (job) =>
               new JobListDto(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 (job as any)._id.toString(),
                 job.title,
                 job.status as 'processing' | 'completed',
@@ -566,7 +573,7 @@ export class JobsService implements OnModuleInit {
    * @param jobId - The job id.
    * @returns A promise that resolves to JobDetailDto.
    */
-  async getJobById(jobId: string): Promise<JobDetailDto> {
+  public async getJobById(jobId: string): Promise<JobDetailDto> {
     try {
       const job = await this.jobRepository.findById(jobId);
       if (!job) {
@@ -575,6 +582,7 @@ export class JobsService implements OnModuleInit {
 
       // Convert JobDocument to JobDetailDto
       return new JobDetailDto(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (job as any)._id.toString(),
         job.title,
         job.description,
@@ -597,7 +605,7 @@ export class JobsService implements OnModuleInit {
    * @param jobId - The job id.
    * @returns A promise that resolves to an array of ResumeListItemDto.
    */
-  async getResumesByJobId(jobId: string): Promise<ResumeListItemDto[]> {
+  public async getResumesByJobId(jobId: string): Promise<ResumeListItemDto[]> {
     try {
       // Validate job exists
       const job = await this.jobRepository.findById(jobId);
@@ -629,7 +637,7 @@ export class JobsService implements OnModuleInit {
    * @param resumeId - The resume id.
    * @returns A promise that resolves to ResumeDetailDto.
    */
-  async getResumeById(resumeId: string): Promise<ResumeDetailDto> {
+  public async getResumeById(resumeId: string): Promise<ResumeDetailDto> {
     // TODO: Delegate to ResumeService once implemented
     this.logger.warn(
       `Resume retrieval for resumeId ${resumeId} should be handled by ResumeService`,
@@ -645,7 +653,7 @@ export class JobsService implements OnModuleInit {
    * @param jobId - The job id.
    * @returns A promise that resolves to ReportsListDto.
    */
-  async getReportsByJobId(jobId: string): Promise<ReportsListDto> {
+  public async getReportsByJobId(jobId: string): Promise<ReportsListDto> {
     try {
       // Validate job exists
       const job = await this.jobRepository.findById(jobId);
@@ -677,7 +685,7 @@ export class JobsService implements OnModuleInit {
    * @param reportId - The report id.
    * @returns A promise that resolves to AnalysisReportDto.
    */
-  async getReportById(reportId: string): Promise<AnalysisReportDto> {
+  public async getReportById(reportId: string): Promise<AnalysisReportDto> {
     // TODO: Delegate to ReportService once implemented
     this.logger.warn(
       `Report retrieval for reportId ${reportId} should be handled by ReportService`,
@@ -733,7 +741,7 @@ export class JobsService implements OnModuleInit {
   private async handleJdAnalysisCompleted(
     event: {
       jobId: string;
-      extractedData: any;
+      extractedData: Record<string, unknown>;
       processingTimeMs: number;
       confidence: number;
       extractionMethod: string;
@@ -750,13 +758,13 @@ export class JobsService implements OnModuleInit {
         extractedFields: number;
       };
     },
-    _metadata?: any,
+    _metadata?: unknown,
   ): Promise<void> {
     const startTime = Date.now();
 
     try {
       this.logger.log(
-        `📨 Processing analysis.jd.extracted event for jobId: ${event.jobId}, confidence: ${event.quality?.confidence || event.confidence}, fields: ${event.quality?.extractedFields}`,
+        `📨 Processing analysis.jd.extracted event for jobId: ${event.jobId}, confidence: ${event.quality?.confidence ?? event.confidence}, fields: ${event.quality?.extractedFields}`,
       );
 
       // Validate event payload
@@ -780,7 +788,7 @@ export class JobsService implements OnModuleInit {
       const extractedKeywords: string[] = this.extractKeywordsFromAnalysis(
         event.extractedData,
       );
-      const confidence = event.quality?.confidence || event.confidence || 0.85;
+      const confidence = event.quality?.confidence ?? event.confidence ?? 0.85;
 
       // Update job with analysis results and set status to completed
       await Promise.all([
@@ -810,12 +818,13 @@ export class JobsService implements OnModuleInit {
           title: job.title,
           status: 'completed',
           timestamp: new Date(),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           organizationId: (job as any).organizationId,
           metadata: {
             confidence,
             extractedKeywords,
             processingTime:
-              event.performance?.processingTimeMs || event.processingTimeMs,
+              event.performance?.processingTimeMs ?? event.processingTimeMs,
           },
         });
 
@@ -883,7 +892,7 @@ export class JobsService implements OnModuleInit {
       version: string;
       severity: 'low' | 'medium' | 'high' | 'critical';
     },
-    _metadata?: any,
+    _metadata?: unknown,
   ): Promise<void> {
     const startTime = Date.now();
 
@@ -922,6 +931,7 @@ export class JobsService implements OnModuleInit {
           title: job.title,
           status: 'failed',
           timestamp: new Date(),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           organizationId: (job as any).organizationId,
           metadata: {
             errorMessage: event.error.message,
@@ -1016,7 +1026,7 @@ export class JobsService implements OnModuleInit {
    * @param analysisData - The extracted data from JD analysis
    * @returns Array of extracted keywords
    */
-  private extractKeywordsFromAnalysis(analysisData: any): string[] {
+  private extractKeywordsFromAnalysis(analysisData: Record<string, unknown>): string[] {
     try {
       if (!analysisData || typeof analysisData !== 'object') {
         return [];
@@ -1028,16 +1038,16 @@ export class JobsService implements OnModuleInit {
       if (Array.isArray(analysisData.skills)) {
         keywords.push(
           ...analysisData.skills.filter(
-            (skill: any) => typeof skill === 'string',
+            (skill: unknown) => typeof skill === 'string',
           ),
         );
       }
 
       // Extract requirements/keywords if available
       if (Array.isArray(analysisData.requirements)) {
-        analysisData.requirements.forEach((req: any) => {
-          if (req.skill && typeof req.skill === 'string') {
-            keywords.push(req.skill);
+        analysisData.requirements.forEach((req: unknown) => {
+          if (req && typeof req === 'object' && 'skill' in req && typeof (req as Record<string, unknown>).skill === 'string') {
+            keywords.push((req as Record<string, unknown>).skill as string);
           }
         });
       }
@@ -1046,7 +1056,7 @@ export class JobsService implements OnModuleInit {
       if (Array.isArray(analysisData.keywords)) {
         keywords.push(
           ...analysisData.keywords.filter(
-            (keyword: any) => typeof keyword === 'string',
+            (keyword: unknown) => typeof keyword === 'string',
           ),
         );
       }
@@ -1054,7 +1064,7 @@ export class JobsService implements OnModuleInit {
       if (Array.isArray(analysisData.extractedKeywords)) {
         keywords.push(
           ...analysisData.extractedKeywords.filter(
-            (keyword: any) => typeof keyword === 'string',
+            (keyword: unknown) => typeof keyword === 'string',
           ),
         );
       }

@@ -32,7 +32,7 @@ describe('Ops endpoints (e2e)', () => {
   });
 
   it('should upsert and list feature flags', async () => {
-    const up = await request(app.getHttpServer())
+    const _up = await request(app.getHttpServer())
       .post('/ops/flags').set('x-ops-key', process.env.OPS_API_KEY||'')
       .set('x-user-id', 'tester')
       .send({ key: 'ff_test', enabled: true, rolloutPercentage: 10 })
@@ -52,7 +52,7 @@ describe('Ops endpoints (e2e)', () => {
   });
 
   it('should deploy to pre-release and set gray rollout', async () => {
-    const dep = await request(app.getHttpServer())
+    const _dep = await request(app.getHttpServer())
       .post('/ops/release/deploy').set('x-ops-key', process.env.OPS_API_KEY||'')
       .set('x-user-id', 'deployer')
       .send({ channel: 'pre-release', artifactId: 'artifact_123' })
@@ -64,7 +64,7 @@ describe('Ops endpoints (e2e)', () => {
           .expect((res) => expect([200, 202].includes(res.status)).toBe(true));
       });
 
-    const gray = await request(app.getHttpServer())
+    const _gray = await request(app.getHttpServer())
       .post('/ops/release/gray').set('x-ops-key', process.env.OPS_API_KEY||'')
       .set('x-user-id', 'deployer')
       .send({ percentage: 5 })

@@ -33,7 +33,7 @@ export class QuestionnairesController {
   @UseGuards(JwtAuthGuard)
   @Post('questionnaires')
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() _body: Record<string, unknown>) {
+  public create(@Body() _body: Record<string, unknown>): { questionnaireId: string } {
     return this.questionnairesService.createQuestionnaire();
   }
 
@@ -46,7 +46,7 @@ export class QuestionnairesController {
   @UseGuards(JwtAuthGuard)
   @Post('questionnaire')
   @HttpCode(HttpStatus.CREATED)
-  createSingular(@Body() _body: Record<string, unknown>) {
+  public createSingular(@Body() _body: Record<string, unknown>): { questionnaireId: string } {
     return this.questionnairesService.createQuestionnaire();
   }
 
@@ -70,7 +70,7 @@ export class QuestionnairesController {
       'Create a new questionnaire if needed',
     ],
   })
-  publish(@Param('id') qid: string) {
+  public publish(@Param('id') qid: string): { accessUrl: string; publicId: string } {
     try {
       return this.questionnairesService.publishQuestionnaire(qid);
     } catch (error) {
@@ -91,7 +91,7 @@ export class QuestionnairesController {
   @UseGuards(JwtAuthGuard)
   @Post('questionnaire/:id/publish')
   @HttpCode(HttpStatus.OK)
-  publishSingular(@Param('id') qid: string) {
+  public publishSingular(@Param('id') qid: string): { accessUrl: string; publicId: string } {
     return this.publish(qid);
   }
 
@@ -104,10 +104,10 @@ export class QuestionnairesController {
   @UseGuards(JwtAuthGuard)
   @Post('questionnaire/:id/submit')
   @HttpCode(HttpStatus.CREATED)
-  submitSingular(
+  public submitSingular(
     @Param('id') qid: string,
     @Body() body: SubmitQuestionnaireDto,
-  ) {
+  ): { submissionId: string; qualityScore: number } {
     return this.submitInternal(qid, body);
   }
 
@@ -120,10 +120,10 @@ export class QuestionnairesController {
   @UseGuards(JwtAuthGuard)
   @Post('questionnaires/:id/submit')
   @HttpCode(HttpStatus.CREATED)
-  submitPlural(
+  public submitPlural(
     @Param('id') qid: string,
     @Body() body: SubmitQuestionnaireDto,
-  ) {
+  ): { submissionId: string; qualityScore: number } {
     return this.submitInternal(qid, body);
   }
 
@@ -142,7 +142,7 @@ export class QuestionnairesController {
     businessImpact: 'low',
     userImpact: 'minimal',
   })
-  analytics(@Param('id') qid: string) {
+  public analytics(@Param('id') qid: string): { totalSubmissions: number; averageQualityScore: number; completionRate: number } {
     try {
       return this.questionnairesService.getAnalytics(qid);
     } catch (error) {
@@ -162,7 +162,7 @@ export class QuestionnairesController {
   @UseGuards(JwtAuthGuard)
   @Get('questionnaires/export')
   @HttpCode(HttpStatus.OK)
-  exportData() {
+  public exportData(): { exportUrl: string; expiresAt: string } {
     return this.questionnairesService.exportQuestionnaireData();
   }
 
@@ -173,11 +173,11 @@ export class QuestionnairesController {
   @UseGuards(JwtAuthGuard)
   @Get('questionnaire')
   @HttpCode(HttpStatus.OK)
-  list() {
+  public list(): { items: { questionnaireId: string; published: boolean; submissions: number }[]; total: number; page: number; limit: number } {
     return this.questionnairesService.listQuestionnaires();
   }
 
-  private submitInternal(qid: string, _body: SubmitQuestionnaireDto) {
+  private submitInternal(qid: string, _body: SubmitQuestionnaireDto): { submissionId: string; qualityScore: number } {
     try {
       return this.questionnairesService.submitQuestionnaire(qid);
     } catch (error) {

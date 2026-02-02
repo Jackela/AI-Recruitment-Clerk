@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class RollbackService {
-  startRollback() {
+  public startRollback(): { status: string } {
     return { status: 'started' };
   }
 }

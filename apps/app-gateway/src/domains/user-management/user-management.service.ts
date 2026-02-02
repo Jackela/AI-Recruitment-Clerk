@@ -49,7 +49,7 @@ export class UserManagementService {
    * @param updateData - The update data.
    * @returns A promise that resolves to UserDto.
    */
-  async updateUser(
+  public async updateUser(
     userId: string,
     updateData: UpdateUserDto,
   ): Promise<UserDto> {
@@ -68,7 +68,7 @@ export class UserManagementService {
    * @param userId - The user id.
    * @returns A promise that resolves to UserPreferencesDto.
    */
-  async getUserPreferences(userId: string): Promise<UserPreferencesDto> {
+  public async getUserPreferences(userId: string): Promise<UserPreferencesDto> {
     // Mock implementation - in real app this would be in a separate preferences service
     return {
       userId,
@@ -78,6 +78,7 @@ export class UserManagementService {
         push: true,
         sms: false,
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
   }
 
@@ -87,7 +88,7 @@ export class UserManagementService {
    * @param preferences - The preferences.
    * @returns A promise that resolves to UserPreferencesDto.
    */
-  async updateUserPreferences(
+  public async updateUserPreferences(
     userId: string,
     preferences: UserPreferencesDto,
   ): Promise<UserPreferencesDto> {
@@ -100,6 +101,7 @@ export class UserManagementService {
     return {
       ...preferences,
       userId,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
   }
 
@@ -109,7 +111,7 @@ export class UserManagementService {
    * @param options - The options.
    * @returns A promise that resolves to UserActivityResponse.
    */
-  async getUserActivity(
+  public async getUserActivity(
     userId: string,
     _options?: {
       startDate?: Date;
@@ -124,6 +126,7 @@ export class UserManagementService {
     }
 
     // Mock activity data
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mockActivities: any[] = [
       {
         id: 'activity-1',
@@ -154,7 +157,7 @@ export class UserManagementService {
    * @param userId - The user id.
    * @returns A promise that resolves to UserDto.
    */
-  async getUserProfile(userId: string): Promise<UserDto> {
+  public async getUserProfile(userId: string): Promise<UserDto> {
     const user = await this.userService.findById(userId);
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
@@ -171,7 +174,8 @@ export class UserManagementService {
    * @param userId - The user id.
    * @returns A promise that resolves to any.
    */
-  async getUserActivitySummary(userId: string): Promise<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async getUserActivitySummary(userId: string): Promise<any> {
     const user = await this.userService.findById(userId);
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
@@ -196,7 +200,7 @@ export class UserManagementService {
    * @param updateData - The update data.
    * @returns A promise that resolves to UserDto.
    */
-  async updateUserProfile(
+  public async updateUserProfile(
     userId: string,
     updateData: UpdateUserDto,
   ): Promise<UserDto> {
@@ -208,7 +212,7 @@ export class UserManagementService {
    * @param userId - The user id.
    * @returns A promise that resolves when the operation completes.
    */
-  async deleteUser(userId: string): Promise<void> {
+  public async deleteUser(userId: string): Promise<void> {
     await this.userService.deleteUser(userId);
   }
 
@@ -218,7 +222,7 @@ export class UserManagementService {
    * @param reason - The reason.
    * @returns A promise that resolves when the operation completes.
    */
-  async softDeleteUser(userId: string, _reason?: string): Promise<void> {
+  public async softDeleteUser(userId: string, _reason?: string): Promise<void> {
     await this.userService.updateUser(userId, {
       status: UserStatus.INACTIVE,
       updatedAt: new Date(),
@@ -231,11 +235,12 @@ export class UserManagementService {
    * @param options - The options.
    * @returns A promise that resolves to { users: UserDto[]; totalCount: number }.
    */
-  async getOrganizationUsers(
+  public async getOrganizationUsers(
     organizationId: string,
     options?: {
       page?: number;
       limit?: number;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       role?: any;
       status?: UserStatus;
     },
@@ -273,7 +278,7 @@ export class UserManagementService {
    * @param password - The password.
    * @returns A promise that resolves to boolean value.
    */
-  async verifyUserPassword(userId: string, password: string): Promise<boolean> {
+  public async verifyUserPassword(userId: string, password: string): Promise<boolean> {
     // This would typically use bcrypt to compare hashed passwords
     // For testing purposes, we'll do a simple check
     const user = await this.userService.findById(userId);
@@ -297,7 +302,7 @@ export class UserManagementService {
    * @param reason - The reason.
    * @returns A promise that resolves to UserDto.
    */
-  async updateUserStatus(
+  public async updateUserStatus(
     userId: string,
     status: UserStatus,
     _reason?: string,
@@ -321,7 +326,7 @@ export class UserManagementService {
    * Retrieves health status.
    * @returns The Promise<{ status: string; totalUsers: number; activeUsers: number; recentActivity: number; }>.
    */
-  async getHealthStatus(): Promise<{
+  public async getHealthStatus(): Promise<{
     status: string;
     totalUsers: number;
     activeUsers: number;

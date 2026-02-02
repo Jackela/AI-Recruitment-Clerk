@@ -92,14 +92,17 @@ export class UsageLimitController {
     description: 'IP地址（管理员可查询任意IP）',
   })
   @Get('check')
-  async checkUsageLimit(
+  public async checkUsageLimit(
     @Request() req: AuthenticatedRequest,
     @Query('ip') ip?: string,
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       const targetIP =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ip && (req.user as any).permissions?.includes('admin')
           ? ip
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           : (req as any).socket?.remoteAddress ||
             req.headers['x-forwarded-for'] ||
             'unknown';
@@ -164,19 +167,23 @@ export class UsageLimitController {
   @UseInterceptors(ThrottlerGuard) // Rate limiting protection
   @Post('record')
   @HttpCode(HttpStatus.CREATED)
-  async recordUsage(
+  public async recordUsage(
     @Request() req: AuthenticatedRequest,
     @Body()
     usageData?: {
       operation?: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       metadata?: any;
       userIP?: string; // For admin override
     },
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       const targetIP =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         usageData?.userIP && (req.user as any).permissions?.includes('admin')
           ? usageData.userIP
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           : (req as any).socket?.remoteAddress ||
             req.headers['x-forwarded-for'] ||
             'unknown';
@@ -203,8 +210,8 @@ export class UsageLimitController {
           currentUsage: recordResult.currentUsage,
           remainingQuota: recordResult.remainingQuota,
           usagePercentage: Math.round(
-            (recordResult.currentUsage! /
-              (recordResult.currentUsage! + recordResult.remainingQuota!)) *
+            ((recordResult.currentUsage ?? 0) /
+              ((recordResult.currentUsage ?? 0) + (recordResult.remainingQuota ?? 1))) *
               100,
           ),
           recordedAt: new Date().toISOString(),
@@ -231,10 +238,11 @@ export class UsageLimitController {
   })
   @ApiResponse({ status: 201, description: '奖励配额添加成功' })
   @UseGuards(RolesGuard)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Permissions('manage_quotas' as any)
   @Post('bonus')
   @HttpCode(HttpStatus.CREATED)
-  async addBonusQuota(
+  public async addBonusQuota(
     @Request() req: AuthenticatedRequest,
     @Body()
     bonusData: {
@@ -242,12 +250,15 @@ export class UsageLimitController {
       bonusType: BonusType;
       amount: number;
       reason: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       metadata?: any;
     },
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       const targetIP =
         bonusData.ip ||
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (req as any).socket?.remoteAddress ||
         req.headers['x-forwarded-for'] ||
         'unknown';
@@ -314,15 +325,17 @@ export class UsageLimitController {
     description: '筛选条件',
   })
   @UseGuards(RolesGuard)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Permissions('read_usage_limits' as any)
   @Get()
-  async getUsageLimits(
+  public async getUsageLimits(
     @Request() req: AuthenticatedRequest,
     @Query('page') page = 1,
     @Query('limit') limit = 20,
     @Query('sortBy') sortBy = 'lastActivity',
     @Query('filterBy') filterBy?: string,
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       const usageLimits = await this.usageLimitService.getUsageLimits(
         req.user.organizationId,
@@ -373,12 +386,14 @@ export class UsageLimitController {
   @ApiResponse({ status: 404, description: '使用记录未找到' })
   @ApiParam({ name: 'ip', description: 'IP地址' })
   @UseGuards(RolesGuard)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Permissions('read_usage_details' as any)
   @Get(':ip')
-  async getUsageLimitDetail(
+  public async getUsageLimitDetail(
     @Request() req: AuthenticatedRequest,
     @Param('ip') ip: string,
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       const usageDetail = await this.usageLimitService.getUsageLimitDetail(
         ip,
@@ -414,10 +429,11 @@ export class UsageLimitController {
   })
   @ApiResponse({ status: 200, description: '使用限制策略更新成功' })
   @UseGuards(RolesGuard)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Permissions('manage_usage_policy' as any)
   @Put('policy')
   @HttpCode(HttpStatus.OK)
-  async updateUsageLimitPolicy(
+  public async updateUsageLimitPolicy(
     @Request() req: AuthenticatedRequest,
     @Body()
     policyData: {
@@ -428,7 +444,8 @@ export class UsageLimitController {
       rateLimitingEnabled: boolean;
       rateLimitRpm: number; // Requests per minute
     },
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       // Validate policy data
       if (policyData.dailyLimit < 1 || policyData.dailyLimit > 100) {
@@ -480,10 +497,11 @@ export class UsageLimitController {
   @ApiResponse({ status: 200, description: '使用记录重置成功' })
   @ApiParam({ name: 'ip', description: 'IP地址' })
   @UseGuards(RolesGuard)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Permissions('admin' as any)
   @Post(':ip/reset')
   @HttpCode(HttpStatus.OK)
-  async resetUsageLimit(
+  public async resetUsageLimit(
     @Request() req: AuthenticatedRequest,
     @Param('ip') ip: string,
     @Body()
@@ -492,7 +510,8 @@ export class UsageLimitController {
       resetQuota?: boolean;
       newQuotaAmount?: number;
     },
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       const resetResult = await this.usageLimitService.resetUsageLimit(
         ip,
@@ -540,10 +559,11 @@ export class UsageLimitController {
   })
   @ApiResponse({ status: 200, description: '批量操作完成' })
   @UseGuards(RolesGuard)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Permissions('manage_quotas' as any)
   @Post('batch')
   @HttpCode(HttpStatus.OK)
-  async batchManageUsageLimits(
+  public async batchManageUsageLimits(
     @Request() req: AuthenticatedRequest,
     @Body()
     batchRequest: {
@@ -556,7 +576,8 @@ export class UsageLimitController {
         newQuotaAmount?: number;
       };
     },
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       const batchResult = await this.usageLimitService.batchManageUsageLimits(
         batchRequest.ips,
@@ -614,13 +635,15 @@ export class UsageLimitController {
     description: '分组方式',
   })
   @UseGuards(RolesGuard)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Permissions('read_analytics' as any)
   @Get('stats/overview')
-  async getUsageStatistics(
+  public async getUsageStatistics(
     @Request() req: AuthenticatedRequest,
     @Query('timeRange') timeRange = '7d',
     @Query('groupBy') groupBy = 'day',
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       const statistics = await this.usageLimitService.getUsageStatistics(
         req.user.organizationId,
@@ -672,10 +695,11 @@ export class UsageLimitController {
     description: '导出格式',
   })
   @UseGuards(RolesGuard)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Permissions('read_analytics' as any)
   @Post('export')
   @HttpCode(HttpStatus.OK)
-  async exportUsageData(
+  public async exportUsageData(
     @Request() req: AuthenticatedRequest,
     @Query('format') format: 'csv' | 'excel' = 'csv',
     @Body()
@@ -685,7 +709,8 @@ export class UsageLimitController {
       includeBonusHistory?: boolean;
       filterByExceededLimits?: boolean;
     },
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       const exportResult = await this.usageLimitService.exportUsageData(
         req.user.organizationId,
@@ -734,10 +759,11 @@ export class UsageLimitController {
   })
   @ApiResponse({ status: 200, description: '速率限制配置成功' })
   @UseGuards(RolesGuard)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Permissions('admin' as any)
   @Put('rate-limiting')
   @HttpCode(HttpStatus.OK)
-  async configureRateLimiting(
+  public async configureRateLimiting(
     @Request() req: AuthenticatedRequest,
     @Body()
     rateLimitConfig: {
@@ -748,7 +774,8 @@ export class UsageLimitController {
       windowSizeMinutes: number;
       blockDurationMinutes: number;
     },
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       const config = await this.usageLimitService.configureRateLimiting(
         req.user.organizationId,
@@ -786,7 +813,8 @@ export class UsageLimitController {
   })
   @ApiResponse({ status: 200, description: '服务状态' })
   @Get('health')
-  async healthCheck() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async healthCheck(): Promise<any> {
     try {
       const health = await this.usageLimitService.getHealthStatus();
 

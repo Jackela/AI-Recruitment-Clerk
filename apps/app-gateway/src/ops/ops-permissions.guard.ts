@@ -9,7 +9,7 @@ import { hasAllPermissions } from '@ai-recruitment-clerk/user-management-domain'
 export class OpsPermissionsGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  public canActivate(context: ExecutionContext): boolean {
     if (process.env.NODE_ENV === 'test') return true;
 
     const requiredPermissions = this.reflector.getAllAndOverride<Permission[]>(
@@ -19,14 +19,14 @@ export class OpsPermissionsGuard implements CanActivate {
 
     if (!requiredPermissions || requiredPermissions.length === 0) return true;
 
-    const req = context.switchToHttp().getRequest();
-    const user = req.user as { permissions?: Permission[] } | undefined;
+    const req = context.switchToHttp().getRequest<{ user?: { permissions?: Permission[] } }>();
+    const user = req.user;
 
     if (!user || !Array.isArray(user.permissions)) {
       throw new ForbiddenException('User not authenticated');
     }
 
-    const ok = hasAllPermissions(user.permissions as Permission[], requiredPermissions);
+    const ok = hasAllPermissions(user.permissions, requiredPermissions);
     if (!ok) {
       throw new ForbiddenException('Insufficient permissions');
     }

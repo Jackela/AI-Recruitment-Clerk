@@ -113,9 +113,10 @@ export class GuestController {
       };
     } catch (error) {
       this.logger.error('Error generating feedback code:', error);
+      const err = error as Error & { status?: number };
       throw new HttpException(
-        error.message || 'Failed to generate feedback code',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        err.message || 'Failed to generate feedback code',
+        err.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -152,9 +153,10 @@ export class GuestController {
       return status;
     } catch (error) {
       this.logger.error('Error getting usage status:', error);
+      const err = error as Error & { status?: number };
       throw new HttpException(
-        error.message || 'Failed to get usage status',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        err.message || 'Failed to get usage status',
+        err.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -191,9 +193,10 @@ export class GuestController {
       return details;
     } catch (error) {
       this.logger.error('Error getting guest details:', error);
+      const err = error as Error & { status?: number };
       throw new HttpException(
-        error.message || 'Failed to get guest details',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        err.message || 'Failed to get guest details',
+        err.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -246,9 +249,10 @@ export class GuestController {
       };
     } catch (error) {
       this.logger.error('Error redeeming feedback code:', error);
+      const err = error as Error & { status?: number };
       throw new HttpException(
-        error.message || 'Failed to redeem feedback code',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        err.message || 'Failed to redeem feedback code',
+        err.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -329,6 +333,7 @@ export class GuestController {
       },
     },
   })
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   public async checkUsage(@Req() req: RequestWithDeviceId) {
     try {
       const deviceId = req.deviceId ?? '';

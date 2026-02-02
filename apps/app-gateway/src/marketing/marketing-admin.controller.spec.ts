@@ -2,23 +2,22 @@ import { BadRequestException } from '@nestjs/common';
 import { MarketingAdminController } from './marketing-admin.controller';
 import type { FeedbackCodeService } from './feedback-code.service';
 
-const createService = (): jest.Mocked<FeedbackCodeService> =>
-  ({
-    getMarketingStats: jest.fn(),
-    getPendingPayments: jest.fn(),
-    batchUpdatePaymentStatus: jest.fn(),
-    updatePaymentStatus: jest.fn(),
-    cleanupExpiredCodes: jest.fn(),
-    exportPaymentData: jest.fn(),
-    getAnalyticsTrends: jest.fn(),
-    getAuditLogs: jest.fn(),
-  } as unknown as jest.Mocked<FeedbackCodeService>);
+const createService = (): jest.Mocked<FeedbackCodeService> => ({
+  getMarketingStats: jest.fn(),
+  getPendingPayments: jest.fn(),
+  batchUpdatePaymentStatus: jest.fn(),
+  updatePaymentStatus: jest.fn(),
+  cleanupExpiredCodes: jest.fn(),
+  exportPaymentData: jest.fn(),
+  getAnalyticsTrends: jest.fn(),
+  getAuditLogs: jest.fn(),
+} as unknown as jest.Mocked<FeedbackCodeService>);
 
 describe('MarketingAdminController (mocked)', () => {
   let controller: MarketingAdminController;
   let service: jest.Mocked<FeedbackCodeService>;
 
-  beforeEach(() => {
+  beforeEach((): void => {
     jest.clearAllMocks();
     service = createService();
     controller = new MarketingAdminController(service);
@@ -49,6 +48,7 @@ describe('MarketingAdminController (mocked)', () => {
         { code: 'B', usedAt: new Date('2024-01-02'), paymentStatus: 'pending' },
         { code: 'A', usedAt: new Date('2024-01-03'), paymentStatus: 'pending' },
         { code: 'C', usedAt: new Date('2024-01-01'), paymentStatus: 'pending' },
+         
       ] as any);
 
       const result = await controller.getPendingPayments('1', '2', 'usedAt', 'desc');
@@ -63,7 +63,7 @@ describe('MarketingAdminController (mocked)', () => {
 
   describe('processBatchPayment', () => {
     it('delegates batch update to service', async () => {
-      service.batchUpdatePaymentStatus.mockResolvedValue(2 as any);
+      service.batchUpdatePaymentStatus.mockResolvedValue(2);
 
       const response = await controller.processBatchPayment({
         codes: ['FB1', 'FB2'],
@@ -80,8 +80,10 @@ describe('MarketingAdminController (mocked)', () => {
     });
 
     it('validates action payload', async () => {
+       
+      const invalidAction = 'invalid' as any;
       await expect(
-        controller.processBatchPayment({ codes: [], action: 'invalid' as any }),
+        controller.processBatchPayment({ codes: [], action: invalidAction }),
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -91,6 +93,7 @@ describe('MarketingAdminController (mocked)', () => {
       service.updatePaymentStatus.mockResolvedValue({
         code: 'FB1',
         paymentStatus: 'paid',
+         
       } as any);
 
       const result = await controller.processSinglePayment('FB1', 'approve', 'ok');
@@ -102,7 +105,7 @@ describe('MarketingAdminController (mocked)', () => {
 
   describe('performMaintenance', () => {
     it('invokes cleanup with parsed days', async () => {
-      service.cleanupExpiredCodes.mockResolvedValue(5 as any);
+      service.cleanupExpiredCodes.mockResolvedValue(5);
 
       const result = await controller.performMaintenance(7);
 

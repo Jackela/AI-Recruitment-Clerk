@@ -13,7 +13,7 @@ export class ConditionalThrottlerGuard implements CanActivate {
     private readonly throttlerGuard: ThrottlerGuard,
   ) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  public async canActivate(context: ExecutionContext): Promise<boolean> {
     const enabled =
       this.configService.get<string>('ENABLE_THROTTLE') === 'true';
     if (!enabled) {

@@ -40,7 +40,8 @@ export class GuestUsageEntity implements IGuestUsage {
    * @param doc - The doc.
    * @returns The GuestUsageEntity.
    */
-  static fromDocument(doc: any): GuestUsageEntity {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static fromDocument(doc: any): GuestUsageEntity {
     return new GuestUsageEntity(
       doc.deviceId,
       doc.usageCount,
@@ -56,7 +57,7 @@ export class GuestUsageEntity implements IGuestUsage {
    * Performs the can use service operation.
    * @returns The boolean value.
    */
-  canUseService(): boolean {
+  public canUseService(): boolean {
     const MAX_FREE_USAGE = 5;
 
     if (this.usageCount < MAX_FREE_USAGE) {
@@ -70,7 +71,7 @@ export class GuestUsageEntity implements IGuestUsage {
    * Performs the needs feedback code operation.
    * @returns The boolean value.
    */
-  needsFeedbackCode(): boolean {
+  public needsFeedbackCode(): boolean {
     const MAX_FREE_USAGE = 5;
     return (
       this.usageCount >= MAX_FREE_USAGE &&
@@ -82,7 +83,7 @@ export class GuestUsageEntity implements IGuestUsage {
    * Retrieves remaining count.
    * @returns The number value.
    */
-  getRemainingCount(): number {
+  public getRemainingCount(): number {
     const MAX_FREE_USAGE = 5;
 
     if (this.feedbackCodeStatus === 'redeemed') {

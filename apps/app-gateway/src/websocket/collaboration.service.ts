@@ -42,6 +42,7 @@ export interface CollaborationAction {
   type: 'join' | 'leave' | '_edit' | 'comment' | 'cursor_move';
   userId: string;
   roomId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- action data can be any shape
   data?: any;
   timestamp: Date;
 }
@@ -74,8 +75,8 @@ export interface EditConflict {
 @Injectable()
 export class CollaborationService {
   private readonly logger = new Logger(CollaborationService.name);
-  private rooms = new Map<string, CollaborationRoom>();
-  private userToRoom = new Map<string, string>();
+  private readonly rooms = new Map<string, CollaborationRoom>();
+  private readonly userToRoom = new Map<string, string>();
 
   /**
    * Initializes a new instance of the Collaboration Service.
@@ -86,7 +87,7 @@ export class CollaborationService {
   /**
    * Create or join a collaboration room
    */
-  async joinRoom(
+  public async joinRoom(
     roomId: string,
     participant: Participant,
   ): Promise<CollaborationRoom> {
@@ -132,7 +133,7 @@ export class CollaborationService {
   /**
    * Leave a collaboration room
    */
-  async leaveRoom(roomId: string, userId: string): Promise<void> {
+  public async leaveRoom(roomId: string, userId: string): Promise<void> {
     this.logger.log(`User ${userId} leaving room ${roomId}`);
 
     const room = this.rooms.get(roomId);
@@ -154,7 +155,7 @@ export class CollaborationService {
   /**
    * Track user action in collaboration
    */
-  async trackUserAction(action: CollaborationAction): Promise<void> {
+  public async trackUserAction(action: CollaborationAction): Promise<void> {
     this.logger.debug(
       `Tracking action: ${action.type} by ${action.userId} in ${action.roomId}`,
     );
@@ -185,7 +186,7 @@ export class CollaborationService {
   /**
    * Handle document _edit operations
    */
-  async handleDocumentEdit(_edit: DocumentEdit): Promise<void> {
+  public async handleDocumentEdit(_edit: DocumentEdit): Promise<void> {
     this.logger.debug(`Processing document _edit in room ${_edit.roomId}`);
 
     const room = this.rooms.get(_edit.roomId);
@@ -211,7 +212,7 @@ export class CollaborationService {
   /**
    * Resolve _edit conflicts
    */
-  async resolveConflicts(conflicts: EditConflict[]): Promise<EditConflict[]> {
+  public async resolveConflicts(conflicts: EditConflict[]): Promise<EditConflict[]> {
     this.logger.log(`Resolving ${conflicts.length} _edit conflicts`);
 
     const resolved: EditConflict[] = [];
@@ -228,28 +229,28 @@ export class CollaborationService {
   /**
    * Get room information
    */
-  async getRoom(roomId: string): Promise<CollaborationRoom | null> {
+  public async getRoom(roomId: string): Promise<CollaborationRoom | null> {
     return this.rooms.get(roomId) || null;
   }
 
   /**
    * Get user's current room
    */
-  async getUserRoom(userId: string): Promise<string | null> {
+  public async getUserRoom(userId: string): Promise<string | null> {
     return this.userToRoom.get(userId) || null;
   }
 
   /**
    * Get all active rooms
    */
-  async getActiveRooms(): Promise<CollaborationRoom[]> {
+  public async getActiveRooms(): Promise<CollaborationRoom[]> {
     return Array.from(this.rooms.values());
   }
 
   /**
    * Update participant cursor position
    */
-  async updateCursorPosition(
+  public async updateCursorPosition(
     roomId: string,
     userId: string,
     position: CursorPosition,
@@ -289,7 +290,7 @@ export class CollaborationService {
   /**
    * Cleanup inactive rooms
    */
-  async cleanupInactiveRooms(maxInactiveMinutes = 60): Promise<void> {
+  public async cleanupInactiveRooms(maxInactiveMinutes = 60): Promise<void> {
     const cutoff = new Date(Date.now() - maxInactiveMinutes * 60 * 1000);
     const roomsToDelete: string[] = [];
 

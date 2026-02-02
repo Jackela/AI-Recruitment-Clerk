@@ -32,7 +32,7 @@ interface PaymentExportDto {
 @Controller('admin/marketing')
 @UseGuards(JwtAuthGuard) // 确保只有管理员可以访问
 export class MarketingAdminController {
-  private readonly logger = new Logger(MarketingAdminController.name);
+  private readonly logger: Logger = new Logger(MarketingAdminController.name);
 
   /**
    * Initializes a new instance of the Marketing Admin Controller.
@@ -45,7 +45,12 @@ export class MarketingAdminController {
    * @returns The result of the operation.
    */
   @Get('dashboard')
-  async getDashboardStats() {
+  public async getDashboardStats(): Promise<{
+    overview: { totalCodes: number; usedCodes: number; pendingPayments: number; totalPaid: number; averageQualityScore: number };
+    conversion: { usageRate: number; qualityRate: number };
+    financial: { pendingAmount: number; averageReward: number; costPerUser: number };
+    lastUpdated: string;
+  }> {
     try {
       const stats = await this.feedbackCodeService.getMarketingStats();
 
@@ -97,12 +102,15 @@ export class MarketingAdminController {
    * @returns The result of the operation.
    */
   @Get('pending-payments')
-  async getPendingPayments(
+  public async getPendingPayments(
     @Query('page') page = '1',
     @Query('limit') limit = '20',
     @Query('sortBy') sortBy = 'usedAt',
     @Query('sortOrder') sortOrder = 'desc',
-  ) {
+  ): Promise<{
+    data: unknown[];
+    pagination: { page: number; limit: number; total: number; totalPages: number };
+  }> {
     try {
       const pendingPayments =
         await this.feedbackCodeService.getPendingPayments();
@@ -114,8 +122,8 @@ export class MarketingAdminController {
 
       // 排序
       const sorted = pendingPayments.sort((a, b) => {
-        const aValue = a[sortBy as keyof typeof a];
-        const bValue = b[sortBy as keyof typeof b];
+        const aValue = a[sortBy as keyof typeof a] ?? '';
+        const bValue = b[sortBy as keyof typeof b] ?? '';
 
         if (sortOrder === 'desc') {
           return aValue > bValue ? -1 : 1;
@@ -148,7 +156,12 @@ export class MarketingAdminController {
    */
   @Post('batch-payment')
   @HttpCode(HttpStatus.OK)
-  async processBatchPayment(@Body() batchDto: BatchPaymentDto) {
+  public async processBatchPayment(@Body() batchDto: BatchPaymentDto): Promise<{
+    success: boolean;
+    processedCount: number;
+    action: string;
+    codes: string[];
+  }> {
     try {
       if (!batchDto.codes || batchDto.codes.length === 0) {
         throw new BadRequestException('反馈码列表不能为空');
@@ -191,11 +204,11 @@ export class MarketingAdminController {
    */
   @Post('payment/:code/:action')
   @HttpCode(HttpStatus.OK)
-  async processSinglePayment(
+  public async processSinglePayment(
     @Param('code') code: string,
     @Param('action') action: string,
     @Body('reason') reason?: string,
-  ) {
+  ): Promise<{ success: boolean; data: unknown; action: string }> {
     try {
       if (!['approve', 'reject'].includes(action)) {
         throw new BadRequestException('操作类型无效');
@@ -227,7 +240,12 @@ export class MarketingAdminController {
    * @returns The result of the operation.
    */
   @Get('export/payments')
-  async exportPaymentData(@Query() exportDto: PaymentExportDto) {
+  public async exportPaymentData(@Query() exportDto: PaymentExportDto): Promise<{
+    exportTime: string;
+    criteria: PaymentExportDto;
+    summary: { totalRecords: number; pendingAmount: number; paidAmount: number };
+    downloadUrl: string;
+  }> {
     try {
       // 这里可以根据条件导出支付数据
       // 实际实现中可能需要生成Excel文件
@@ -259,7 +277,13 @@ export class MarketingAdminController {
    * @returns The result of the operation.
    */
   @Get('analytics/trends')
-  async getAnalyticsTrends(@Query('days') days = '30') {
+  public async getAnalyticsTrends(@Query('days') days = '30'): Promise<{
+    period: string;
+    dailyStats: unknown[];
+    qualityDistribution: { score1: number; score2: number; score3: number; score4: number; score5: number };
+    paymentFlow: { pending: number; approved: number; rejected: number };
+    userBehavior: { averageCompletionTime: string; dropoffRate: string; satisfactionScore: number };
+  }> {
     try {
       const daysNum = parseInt(days);
 
@@ -300,7 +324,11 @@ export class MarketingAdminController {
    */
   @Post('maintenance/cleanup')
   @HttpCode(HttpStatus.OK)
-  async performMaintenance(@Body('days') days = 30) {
+  public async performMaintenance(@Body('days') days = 30): Promise<{
+    success: boolean;
+    deletedCount: number;
+    cleanupDate: string;
+  }> {
     try {
       const deletedCount =
         await this.feedbackCodeService.cleanupExpiredCodes(days);
@@ -325,10 +353,13 @@ export class MarketingAdminController {
    * @returns The result of the operation.
    */
   @Get('audit/logs')
-  async getAuditLogs(
+  public async getAuditLogs(
     @Query('page') page: string,
     @Query('limit') limit: string,
-  ) {
+  ): Promise<{
+    data: { id: string; action: string; feedbackCode: string; userId: string; timestamp: string; details: { amount: number; reason: string } }[];
+    pagination: { page: number; limit: number; total: number };
+  }> {
     const pageNum = page || '1';
     const limitNum = limit || '50';
     try {

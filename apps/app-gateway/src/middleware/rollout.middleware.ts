@@ -14,13 +14,14 @@ function hashToPct(input: string): number {
 
 @Injectable()
 export class RolloutMiddleware implements NestMiddleware {
-  use(req: Request, res: Response, next: NextFunction) {
+  public use(req: Request, res: Response, next: NextFunction): void {
     if (featureFlags.killSwitch) {
       res.status(403).json({ message: 'Feature disabled by kill switch' });
       return;
     }
-    const id = (req.headers['x-user-id'] as string) || (req.headers['x-forwarded-for'] as string) || req.ip || 'anon';
+    const id = (req.headers['x-user-id'] as string) ?? (req.headers['x-forwarded-for'] as string) ?? req.ip ?? 'anon';
     const bucket = hashToPct(id);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (req as any).rolloutAllowed = bucket < featureFlags.rolloutPercentage;
     next();
   }

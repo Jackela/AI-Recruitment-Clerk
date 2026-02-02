@@ -82,9 +82,9 @@ describe('OpenAIEmbeddingProvider', () => {
   it('should throw when API key is missing', async () => {
     configService.get.mockImplementation((key: string) => {
       if (key === 'OPENAI_API_KEY') {
-        return undefined as any;
+        return undefined;
       }
-      return undefined as any;
+      return undefined;
     });
 
     buildProvider();
@@ -262,7 +262,7 @@ describe('OpenAIEmbeddingProvider', () => {
         if (key === 'OPENAI_EMBEDDING_MODEL') {
           return undefined;
         }
-        return configMap.get(key) as any;
+        return configMap.get(key);
       });
 
       buildProvider();
@@ -279,7 +279,7 @@ describe('OpenAIEmbeddingProvider', () => {
           ['OPENAI_API_KEY', 'test-key'],
           ['OPENAI_EMBEDDING_MODEL', 'text-embedding-3-small'],
         ]);
-        return configMap.get(key) as any;
+        return configMap.get(key);
       });
 
       buildProvider();
