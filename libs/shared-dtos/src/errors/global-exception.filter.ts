@@ -582,7 +582,7 @@ export class ExceptionFilterConfigHelper {
   /**
    * Configuration for API Gateway service
    */
-  static forApiGateway(): Partial<GlobalExceptionFilterConfig> {
+  public static forApiGateway(): Partial<GlobalExceptionFilterConfig> {
     return {
       enableCorrelation: true,
       enableStructuredLogging: true,
@@ -601,7 +601,7 @@ export class ExceptionFilterConfigHelper {
   /**
    * Configuration for processing services
    */
-  static forProcessingService(): Partial<GlobalExceptionFilterConfig> {
+  public static forProcessingService(): Partial<GlobalExceptionFilterConfig> {
     return {
       enableCorrelation: true,
       enableStructuredLogging: true,
@@ -613,7 +613,7 @@ export class ExceptionFilterConfigHelper {
   /**
    * Configuration for production deployment
    */
-  static forProduction(): Partial<GlobalExceptionFilterConfig> {
+  public static forProduction(): Partial<GlobalExceptionFilterConfig> {
     return {
       includeStackTrace: false,
       enableErrorRecovery: true,
