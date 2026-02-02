@@ -621,3 +621,20 @@ Started: 2026-02-01
   - Non-null assertions should be replaced with nullish coalescing (`??`) with default values
   - ~50 warnings fixed: 35 accessibility modifiers, 10 any types (5 replaced with interfaces, 5 preserved with eslint-disable), 5 non-null assertions replaced
 ---
+
+## 2026-02-02 - US-046
+- What was implemented: Fixed all lint warnings in app-gateway schemas/ directories
+- Files changed (3 files):
+  - apps/app-gateway/src/guest/schemas/guest-usage.schema.ts (7 accessibility modifiers added)
+  - apps/app-gateway/src/guest/services/guest-usage.service.spec.ts (removed 5 unused eslint-disable directives, replaced `any` with proper types)
+  - apps/app-gateway/src/auth/services/mfa.service.spec.ts (removed 4 unused eslint-disable directives, replaced `as any` with `as unknown as` pattern)
+- **Learnings for future iterations:**
+  - The `@typescript-eslint/no-explicit-any` rule may be disabled for test files in some ESLint configs - check config before adding eslint-disable comments
+  - When eslint-disable comments become unused, the linter will report "Unused eslint-disable directive" warnings
+  - Replace `as any` with `as unknown as SpecificType` pattern to avoid `any` type usage
+  - Test mocks for constructor parameters can use: `model as unknown as Parameters<typeof Service.prototype.constructor>[0]`
+  - Mongoose schemas with @nestjs/mongoose need `public` modifier on class properties with @Prop() decorator
+  - src/schemas/ directory files (job.schema.ts, user.schema.ts, etc.) already had proper accessibility modifiers
+  - marketing/schemas/feedback-code.schema.ts uses plain Mongoose Schema object (not class), so no accessibility modifiers needed
+  - ~20 warnings fixed: 7 accessibility modifiers in guest-usage.schema.ts, 9 unused eslint-disable removals, 4 type improvements
+---
