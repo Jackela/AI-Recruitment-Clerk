@@ -42,7 +42,7 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
    * @returns The Observable<any>.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  preload(route: Route, load: () => Observable<any>): Observable<any> {
+  public preload(route: Route, load: () => Observable<any>): Observable<any> {
     const routePath = route.path || 'unknown';
 
     // Skip if already preloaded
@@ -132,14 +132,12 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
 
   private detectNetworkCondition(): void {
     // Use Navigator.connection API if available
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     const connection =
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (navigator as any).connection ||
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (navigator as any).mozConnection ||
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (navigator as any).webkitConnection;
+    /* eslint-enable @typescript-eslint/no-explicit-any */
 
     if (connection) {
       // Consider effective connection type
@@ -189,7 +187,7 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let idleTimer: any;
 
-    const resetIdleTimer = () => {
+    const resetIdleTimer = (): void => {
       clearTimeout(idleTimer);
       this.userEngagement.isIdle = false;
       this.userEngagement.lastInteraction = Date.now();
@@ -224,7 +222,7 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
    * Retrieves preloaded modules.
    * @returns The Set<string>.
    */
-  getPreloadedModules(): Set<string> {
+  public getPreloadedModules(): Set<string> {
     return new Set(this.preloadedModules);
   }
 
@@ -232,7 +230,7 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
    * Retrieves network condition.
    * @returns The string value.
    */
-  getNetworkCondition(): string {
+  public getNetworkCondition(): string {
     return this.networkCondition;
   }
 
@@ -240,7 +238,7 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
    * Retrieves user engagement.
    * @returns The {clicks: number; prefetches: number; routeFrequency: Record<string, number>; connectionInfo: Record<string, unknown>}.
    */
-  getUserEngagement(): {
+  public getUserEngagement(): {
     clicks: number;
     prefetches: number;
     routeFrequency: Record<string, number>;

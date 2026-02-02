@@ -179,7 +179,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * Performs the job title operation.
    * @returns The result of the operation.
    */
-  public get jobTitle() {
+  public get jobTitle(): import('@angular/forms').AbstractControl<string> | null {
     return this.createJobForm.get('jobTitle');
   }
 
@@ -187,7 +187,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * Performs the jd text operation.
    * @returns The result of the operation.
    */
-  public get jdText() {
+  public get jdText(): import('@angular/forms').AbstractControl<string> | null {
     return this.createJobForm.get('jdText');
   }
 

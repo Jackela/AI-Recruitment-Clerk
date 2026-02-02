@@ -1,6 +1,5 @@
-import type { OnInit, OnDestroy } from '@angular/core';
-import { Component } from '@angular/core';
-import type { Store } from '@ngrx/store';
+import { Component, inject } from '@angular/core';
+import { Store } from '@ngrx/store';
 import type { Observable} from 'rxjs';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -593,14 +592,14 @@ interface AnalyticsDashboardData {
     `,
   ],
 })
-export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
+export class AnalyticsDashboardComponent {
+  private readonly store = inject(Store<AppState>);
   public dashboardData$: Observable<AnalyticsDashboardData>;
 
   /**
    * Initializes a new instance of the Analytics Dashboard Component.
-   * @param store - The store.
    */
-  constructor(private store: Store<AppState>) {
+  constructor() {
     // Demonstrate usage of selectors from all three feature stores
     this.dashboardData$ = combineLatest([
       // Job selectors
@@ -643,20 +642,5 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
         }),
       ),
     );
-  }
-
-  /**
-   * Performs the ng on init operation.
-   */
-  public ngOnInit(): void {
-    // Component initialization
-    console.log('Analytics Dashboard initialized with NgRx selectors');
-  }
-
-  /**
-   * Performs the ng on destroy operation.
-   */
-  public ngOnDestroy(): void {
-    // Cleanup if needed
   }
 }

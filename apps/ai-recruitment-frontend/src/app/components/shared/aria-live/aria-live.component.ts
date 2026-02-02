@@ -29,7 +29,7 @@ export interface LiveMessage {
         class="aria-live-polite"
         [attr.aria-live]="'polite'"
         [attr.aria-atomic]="'true'"
-        [attr.aria-relevant]="'additions text'"
+        aria-relevant="all"
       >
         <div
           *ngFor="let message of politeMessages; trackBy: trackByMessageId"
@@ -44,7 +44,7 @@ export interface LiveMessage {
         class="aria-live-assertive"
         [attr.aria-live]="'assertive'"
         [attr.aria-atomic]="'true'"
-        [attr.aria-relevant]="'additions text'"
+        aria-relevant="all"
       >
         <div
           *ngFor="let message of assertiveMessages; trackBy: trackByMessageId"

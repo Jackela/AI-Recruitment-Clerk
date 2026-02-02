@@ -1,11 +1,11 @@
-import { Injectable } from '@angular/core';
-import type { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import type { Observable} from 'rxjs';
 import { of } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
-import type {
+import {
   ErrorCorrelationService,
-  StructuredError,
+  type StructuredError,
 } from './error-correlation.service';
 
 /**
@@ -45,15 +45,13 @@ export class ErrorReportingService {
   private readonly maxRetryAttempts = 3;
   private readonly retryDelay = 2000;
 
+  private readonly http = inject(HttpClient);
+  private readonly errorCorrelation = inject(ErrorCorrelationService);
+
   /**
    * Initializes a new instance of the Error Reporting Service.
-   * @param http - The http.
-   * @param errorCorrelation - The error correlation.
    */
-  constructor(
-    private http: HttpClient,
-    private errorCorrelation: ErrorCorrelationService,
-  ) {
+  constructor() {
     // Initialize pending reports from storage
     this.loadPendingReports();
 
@@ -67,7 +65,7 @@ export class ErrorReportingService {
   /**
    * Submit user error report
    */
-  submitErrorReport(
+  public submitErrorReport(
     errors: StructuredError[],
     userFeedback?: string,
     reproductionSteps?: string[],
@@ -113,7 +111,7 @@ export class ErrorReportingService {
   /**
    * Get error report for display
    */
-  generateErrorReportSummary(errors: StructuredError[]): {
+  public generateErrorReportSummary(errors: StructuredError[]): {
     summary: string;
     technicalDetails: string;
     userGuidance: string;
@@ -150,7 +148,7 @@ export class ErrorReportingService {
   /**
    * Get user-friendly error categories for reporting UI
    */
-  getUserFriendlyCategories(): Array<{
+  public getUserFriendlyCategories(): Array<{
     key: string;
     label: string;
     description: string;
@@ -199,21 +197,21 @@ export class ErrorReportingService {
   /**
    * Get error report status
    */
-  getReportStatus(reportId: string): ErrorReportSubmission | null {
+  public getReportStatus(reportId: string): ErrorReportSubmission | null {
     return this.pendingReports.find((r) => r.reportId === reportId) || null;
   }
 
   /**
    * Get all pending reports
    */
-  getPendingReports(): readonly ErrorReportSubmission[] {
+  public getPendingReports(): readonly ErrorReportSubmission[] {
     return [...this.pendingReports];
   }
 
   /**
    * Clear all pending reports (for testing/debugging)
    */
-  clearPendingReports(): void {
+  public clearPendingReports(): void {
     this.pendingReports.length = 0;
     localStorage.removeItem('pending_error_reports');
     localStorage.removeItem('error_report_data');
@@ -471,7 +469,7 @@ export class ErrorReportingService {
       localStorage.setItem(test, 'test');
       localStorage.removeItem(test);
       return true;
-    } catch (e) {
+    } catch (_e) {
       return false;
     }
   }
@@ -482,7 +480,7 @@ export class ErrorReportingService {
       sessionStorage.setItem(test, 'test');
       sessionStorage.removeItem(test);
       return true;
-    } catch (e) {
+    } catch (_e) {
       return false;
     }
   }

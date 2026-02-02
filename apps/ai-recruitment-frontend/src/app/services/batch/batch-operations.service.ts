@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import type { Observable} from 'rxjs';
 import { Subject, from, of } from 'rxjs';
 import {
@@ -13,8 +13,8 @@ import {
   retry,
   timeout,
 } from 'rxjs/operators';
-import type { ToastService } from '../toast.service';
-import type { ProgressFeedbackService } from '../feedback/progress-feedback.service';
+import { ToastService } from '../toast.service';
+import { ProgressFeedbackService } from '../feedback/progress-feedback.service';
 
 /**
  * Defines the shape of the batch operation.
@@ -80,33 +80,26 @@ export class BatchOperationsService {
   private operationProgress = new Map<string, BatchProgress>();
 
   // Reactive state
-  currentOperations = signal<BatchProgress[]>([]);
-  isProcessing = signal(false);
+  public currentOperations = signal<BatchProgress[]>([]);
+  public isProcessing = signal(false);
 
   // Computed values
-  activeOperationCount = computed(
+  public activeOperationCount = computed(
     () =>
       this.currentOperations().filter((op) => op.status === 'processing')
         .length,
   );
-  completedOperationCount = computed(
+  public completedOperationCount = computed(
     () =>
       this.currentOperations().filter((op) => op.status === 'completed').length,
   );
-  failedOperationCount = computed(
+  public failedOperationCount = computed(
     () =>
       this.currentOperations().filter((op) => op.status === 'failed').length,
   );
 
-  /**
-   * Initializes a new instance of the Batch Operations Service.
-   * @param toastService - The toast service.
-   * @param progressFeedback - The progress feedback.
-   */
-  constructor(
-    private toastService: ToastService,
-    private progressFeedback: ProgressFeedbackService,
-  ) {}
+  private readonly toastService = inject(ToastService);
+  private readonly progressFeedback = inject(ProgressFeedbackService);
 
   // Main batch operation execution
   /**
@@ -114,7 +107,7 @@ export class BatchOperationsService {
    * @param operation - The operation.
    * @returns The Observable<BatchResult<T>>.
    */
-  executeBatch<T>(operation: BatchOperation<T>): Observable<BatchResult<T>> {
+  public executeBatch<T>(operation: BatchOperation<T>): Observable<BatchResult<T>> {
     const config: BatchConfig = {
       concurrent: 3,
       chunkSize: 10,
@@ -231,7 +224,8 @@ export class BatchOperationsService {
     progress: BatchProgress,
     cancelSignal: Subject<void>,
   ): Observable<BatchResult<T>> {
-    const chunks = this.chunkArray(operation.items, config.chunkSize!);
+    const chunkSize = config.chunkSize ?? 10;
+    const chunks = this.chunkArray(operation.items, chunkSize);
 
     return from(chunks).pipe(
       mergeMap((chunk) =>
@@ -327,11 +321,14 @@ export class BatchOperationsService {
     result?: unknown;
     error?: Error | unknown;
   }> {
+    const timeoutValue = config.timeout ?? 30000;
+    const retryCount = config.retryCount ?? 2;
+    const retryDelay = config.retryDelay ?? 1000;
     return action(item).pipe(
-      timeout(config.timeout!),
+      timeout(timeoutValue),
       retry({
-        count: config.retryCount!,
-        delay: config.retryDelay!,
+        count: retryCount,
+        delay: retryDelay,
       }),
       map((result) => ({ item, success: true, result })),
       catchError((error) => {
@@ -378,7 +375,7 @@ export class BatchOperationsService {
    * Performs the cancel operation operation.
    * @param operationId - The operation id.
    */
-  cancelOperation(operationId: string): void {
+  public cancelOperation(operationId: string): void {
     const cancelSignal = this.activeOperations.get(operationId);
     if (cancelSignal) {
       cancelSignal.next();
@@ -397,7 +394,7 @@ export class BatchOperationsService {
   /**
    * Performs the cancel all operations operation.
    */
-  cancelAllOperations(): void {
+  public cancelAllOperations(): void {
     this.activeOperations.forEach((_, id) => this.cancelOperation(id));
   }
 
@@ -406,7 +403,7 @@ export class BatchOperationsService {
    * @param operationId - The operation id.
    * @returns The BatchProgress | undefined.
    */
-  getProgress(operationId: string): BatchProgress | undefined {
+  public getProgress(operationId: string): BatchProgress | undefined {
     return this.operationProgress.get(operationId);
   }
 
@@ -419,7 +416,7 @@ export class BatchOperationsService {
    * @param config - The config.
    * @returns The Observable<BatchResult<T>>.
    */
-  batchCreate<T>(
+  public batchCreate<T>(
     items: T[],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     createFn: (item: T) => Observable<any>,
@@ -446,7 +443,7 @@ export class BatchOperationsService {
    * @param config - The config.
    * @returns The Observable<BatchResult<T>>.
    */
-  batchUpdate<T>(
+  public batchUpdate<T>(
     items: T[],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     updateFn: (item: T) => Observable<any>,
@@ -473,7 +470,7 @@ export class BatchOperationsService {
    * @param config - The config.
    * @returns The Observable<BatchResult<T>>.
    */
-  batchDelete<T>(
+  public batchDelete<T>(
     items: T[],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     deleteFn: (item: T) => Observable<any>,
@@ -501,7 +498,7 @@ export class BatchOperationsService {
    * @param config - The config.
    * @returns The Observable<BatchResult<T>>.
    */
-  batchProcess<T>(
+  public batchProcess<T>(
     items: T[],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     processFn: (item: T) => Observable<any>,

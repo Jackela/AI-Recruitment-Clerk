@@ -66,9 +66,9 @@ export const selectResumesByStatus = (status: string): MemoizedSelector<object, 
       resumes.filter((resume) => resume.status === status),
   );
 
-const isProcessedStatus = (status: string | undefined) =>
+const isProcessedStatus = (status: string | undefined): boolean =>
   status === 'completed' || status === 'processed';
-const isProcessingStatus = (status: string | undefined) =>
+const isProcessingStatus = (status: string | undefined): boolean =>
   status === 'pending' ||
   status === 'parsing' ||
   status === 'scoring' ||

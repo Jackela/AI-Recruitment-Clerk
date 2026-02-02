@@ -28,8 +28,8 @@ export class AccessibilityTester {
   /**
    * Run comprehensive accessibility tests on a component
    */
-  static testComponent(
-    fixture: ComponentFixture<any>,
+  public static testComponent(
+    fixture: ComponentFixture<unknown>,
   ): AccessibilityTestResult {
     const element = fixture.nativeElement as HTMLElement;
     const issues: AccessibilityIssue[] = [];
@@ -396,7 +396,7 @@ export class AccessibilityTester {
   /**
    * Generate accessibility report
    */
-  static generateReport(result: AccessibilityTestResult): string {
+  public static generateReport(result: AccessibilityTestResult): string {
     const { issues, score, passed } = result;
 
     let report = `\n=== ACCESSIBILITY TEST REPORT ===\n`;
@@ -450,7 +450,7 @@ export class AccessibilityTester {
   /**
    * Test specific WCAG criteria
    */
-  static testWCAG2_1_AA(element: HTMLElement): {
+  public static testWCAG2_1_AA(element: HTMLElement): {
     principle1: boolean; // Perceivable
     principle2: boolean; // Operable
     principle3: boolean; // Understandable
@@ -459,7 +459,7 @@ export class AccessibilityTester {
   } {
     const issues = this.testComponent({
       nativeElement: element,
-    } as ComponentFixture<any>).issues;
+    } as ComponentFixture<unknown>).issues;
     const errors = issues.filter((i) => i.type === 'error');
 
     // Simplified WCAG compliance check

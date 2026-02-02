@@ -95,7 +95,7 @@ export interface MobileNavItem {
       tabindex="0"
       role="button"
     >
-      <nav class="mobile-menu" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
+      <nav class="mobile-menu" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()" role="navigation">
         <div class="menu-header">
           <h2>Menu</h2>
           <button

@@ -60,21 +60,21 @@ export class ErrorCorrelationService {
   /**
    * Get current correlation context
    */
-  getContext(): ErrorCorrelationContext {
+  public getContext(): ErrorCorrelationContext {
     return this.currentContext.value;
   }
 
   /**
    * Get correlation context as observable
    */
-  getContext$(): Observable<ErrorCorrelationContext> {
+  public getContext$(): Observable<ErrorCorrelationContext> {
     return this.currentContext.asObservable();
   }
 
   /**
    * Generate HTTP headers with correlation information
    */
-  getCorrelationHeaders(): HttpHeaders {
+  public getCorrelationHeaders(): HttpHeaders {
     const context = this.getContext();
     return new HttpHeaders({
       'X-Correlation-ID': context.traceId,
@@ -88,7 +88,7 @@ export class ErrorCorrelationService {
   /**
    * Create structured error with correlation
    */
-  createStructuredError(
+  public createStructuredError(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     error: Error | any,
     category: StructuredError['category'] = 'runtime',
@@ -120,7 +120,7 @@ export class ErrorCorrelationService {
   /**
    * Report error to backend (with correlation)
    */
-  async reportError(error: StructuredError): Promise<void> {
+  public async reportError(error: StructuredError): Promise<void> {
     if (!this.shouldReport(error)) {
       return;
     }
@@ -156,14 +156,14 @@ export class ErrorCorrelationService {
   /**
    * Get error history
    */
-  getErrorHistory(): readonly StructuredError[] {
+  public getErrorHistory(): readonly StructuredError[] {
     return [...this.errorHistory];
   }
 
   /**
    * Clear error history
    */
-  clearHistory(): void {
+  public clearHistory(): void {
     this.errorHistory.length = 0;
     sessionStorage.removeItem('error-correlation-history');
   }
@@ -171,7 +171,7 @@ export class ErrorCorrelationService {
   /**
    * Get error statistics
    */
-  getErrorStatistics(): {
+  public getErrorStatistics(): {
     total: number;
     bySeverity: Record<StructuredError['severity'], number>;
     byCategory: Record<StructuredError['category'], number>;
@@ -214,7 +214,7 @@ export class ErrorCorrelationService {
     const originalPushState = history.pushState;
     const originalReplaceState = history.replaceState;
 
-    const updateContext = () => {
+    const updateContext = (): void => {
       const newContext = this.generateContext();
       newContext.sessionId = this.currentContext.value.sessionId; // Keep session ID
       this.currentContext.next(newContext);
@@ -240,7 +240,7 @@ export class ErrorCorrelationService {
       try {
         const parsedHistory = JSON.parse(stored);
         this.errorHistory.push(...parsedHistory.slice(-this.maxHistorySize));
-      } catch (e) {
+      } catch (_e) {
         // Invalid stored data
         sessionStorage.removeItem('error-correlation-history');
       }
@@ -346,7 +346,7 @@ export class ErrorCorrelationService {
         'error-correlation-history',
         JSON.stringify(this.errorHistory),
       );
-    } catch (e) {
+    } catch (_e) {
       // Storage full, clear old errors
       this.errorHistory.splice(0, 10);
       try {
@@ -354,7 +354,7 @@ export class ErrorCorrelationService {
           'error-correlation-history',
           JSON.stringify(this.errorHistory),
         );
-      } catch (e) {
+      } catch (_e2) {
         // Still can't store, disable storage
       }
     }
@@ -391,7 +391,7 @@ export class ErrorCorrelationService {
       }
 
       localStorage.setItem('pending-error-reports', JSON.stringify(pending));
-    } catch (e) {
+    } catch (_e) {
       // Failed to store
     }
   }
@@ -460,6 +460,7 @@ export class ErrorCorrelationService {
       : null;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private groupBy<T extends Record<string, any>>(
     array: T[],
     key: keyof T,

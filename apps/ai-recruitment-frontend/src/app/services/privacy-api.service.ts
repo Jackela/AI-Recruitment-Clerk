@@ -108,7 +108,7 @@ export class PrivacyApiService {
   /**
    * Capture user consent for various processing purposes
    */
-  async captureConsent(
+  public async captureConsent(
     captureConsentDto: CaptureConsentDto,
   ): Promise<UserConsentProfile> {
     return firstValueFrom(
@@ -122,7 +122,9 @@ export class PrivacyApiService {
   /**
    * Withdraw consent for a specific purpose
    */
-  async withdrawConsent(withdrawConsentDto: WithdrawConsentDto): Promise<void> {
+  public async withdrawConsent(
+    withdrawConsentDto: WithdrawConsentDto,
+  ): Promise<void> {
     return firstValueFrom(
       this.http.put<void>(
         `${this.baseUrl}/consent/withdraw`,
@@ -134,7 +136,7 @@ export class PrivacyApiService {
   /**
    * Get current consent status for a user
    */
-  async getConsentStatus(userId: string): Promise<ConsentStatusDto> {
+  public async getConsentStatus(userId: string): Promise<ConsentStatusDto> {
     return firstValueFrom(
       this.http.get<ConsentStatusDto>(`${this.baseUrl}/consent/${userId}`),
     );
@@ -147,7 +149,7 @@ export class PrivacyApiService {
   /**
    * Create a data subject rights request
    */
-  async createRightsRequest(
+  public async createRightsRequest(
     createRequestDto: CreateRightsRequestDto,
   ): Promise<DataSubjectRightsRequest> {
     return firstValueFrom(
@@ -161,7 +163,7 @@ export class PrivacyApiService {
   /**
    * Get status of a rights request
    */
-  async getRightsRequestStatus(
+  public async getRightsRequestStatus(
     requestId: string,
   ): Promise<RightsRequestStatusDto> {
     return firstValueFrom(
@@ -174,7 +176,7 @@ export class PrivacyApiService {
   /**
    * Export user data (Article 15 - Right to Access)
    */
-  async exportUserData(
+  public async exportUserData(
     userId: string,
     format: DataExportFormat = DataExportFormat.JSON,
   ): Promise<DataExportPackage> {
@@ -190,7 +192,7 @@ export class PrivacyApiService {
   /**
    * Request data erasure (Article 17 - Right to be Forgotten)
    */
-  async requestDataErasure(
+  public async requestDataErasure(
     userId: string,
     categories?: string[],
   ): Promise<void> {
@@ -212,7 +214,7 @@ export class PrivacyApiService {
    * Set cookie consent preferences
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async setCookieConsent(cookieConsent: any): Promise<any> {
+  public async setCookieConsent(cookieConsent: any): Promise<any> {
     return firstValueFrom(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.http.post<any>(`${this.baseUrl}/cookie-consent`, cookieConsent),
@@ -223,7 +225,7 @@ export class PrivacyApiService {
    * Get cookie consent preferences
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async getCookieConsent(deviceId: string): Promise<any> {
+  public async getCookieConsent(deviceId: string): Promise<any> {
     return firstValueFrom(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.http.get<any>(`${this.baseUrl}/cookie-consent/${deviceId}`),
@@ -237,7 +239,7 @@ export class PrivacyApiService {
   /**
    * Get data processing records (Article 30)
    */
-  getProcessingRecords(): Observable<
+  public getProcessingRecords(): Observable<
     Array<{ id: string; date: string; purpose: string; dataTypes: string[] }>
   > {
     return this.http.get<
@@ -249,7 +251,7 @@ export class PrivacyApiService {
    * Get GDPR compliance status
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getComplianceStatus(): Observable<any> {
+  public getComplianceStatus(): Observable<any> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return this.http.get<any>(`${this.baseUrl}/compliance-status`);
   }
@@ -258,7 +260,7 @@ export class PrivacyApiService {
    * Privacy infrastructure health check
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  privacyHealthCheck(): Observable<any> {
+  public privacyHealthCheck(): Observable<any> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return this.http.post<any>(`${this.baseUrl}/privacy-health-check`, {});
   }
@@ -270,14 +272,14 @@ export class PrivacyApiService {
   /**
    * Download data export file
    */
-  async downloadDataExport(downloadUrl: string): Promise<Blob> {
+  public async downloadDataExport(downloadUrl: string): Promise<Blob> {
     return firstValueFrom(this.http.get(downloadUrl, { responseType: 'blob' }));
   }
 
   /**
    * Check if user has valid consent for a specific purpose
    */
-  async hasValidConsentForPurpose(
+  public async hasValidConsentForPurpose(
     userId: string,
     purpose: string,
   ): Promise<boolean> {
@@ -308,7 +310,7 @@ export class PrivacyApiService {
   /**
    * Get user-friendly display name for processing purpose
    */
-  getPurposeDisplayName(purpose: string): string {
+  public getPurposeDisplayName(purpose: string): string {
     const purposeNames: Record<string, string> = {
       essential_services: 'Essential Services',
       functional_analytics: 'Functional Analytics',
@@ -328,7 +330,7 @@ export class PrivacyApiService {
   /**
    * Get GDPR-compliant retention period description
    */
-  getRetentionPeriodDescription(purpose: string): string {
+  public getRetentionPeriodDescription(purpose: string): string {
     const retentionPeriods: Record<string, string> = {
       essential_services:
         'Until account deletion or 7 years after last activity',
@@ -347,7 +349,7 @@ export class PrivacyApiService {
   /**
    * Validate consent request before submission
    */
-  validateConsentRequest(captureConsentDto: CaptureConsentDto): {
+  public validateConsentRequest(captureConsentDto: CaptureConsentDto): {
     valid: boolean;
     errors: string[];
   } {
@@ -398,7 +400,7 @@ export class PrivacyApiService {
   /**
    * Generate consent summary for display
    */
-  generateConsentSummary(consentStatus: ConsentStatusDto): {
+  public generateConsentSummary(consentStatus: ConsentStatusDto): {
     granted: number;
     denied: number;
     total: number;
@@ -417,7 +419,7 @@ export class PrivacyApiService {
   /**
    * Check if privacy policy acceptance is required
    */
-  isPrivacyPolicyAcceptanceRequired(): boolean {
+  public isPrivacyPolicyAcceptanceRequired(): boolean {
     // Check if user has previously accepted privacy policy
     const lastAcceptance = localStorage.getItem('privacy_policy_accepted_date');
     if (!lastAcceptance) return true;
@@ -433,7 +435,7 @@ export class PrivacyApiService {
   /**
    * Mark privacy policy as accepted
    */
-  markPrivacyPolicyAccepted(): void {
+  public markPrivacyPolicyAccepted(): void {
     localStorage.setItem(
       'privacy_policy_accepted_date',
       new Date().toISOString(),

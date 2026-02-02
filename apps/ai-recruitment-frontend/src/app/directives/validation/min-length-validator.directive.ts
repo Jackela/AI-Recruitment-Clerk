@@ -22,15 +22,15 @@ import {
   ],
 })
 export class MinLengthValidatorDirective implements Validator {
-  @Input() arcMinLength!: number;
-  @Input() minLengthMessage?: string;
+  @Input() public arcMinLength!: number;
+  @Input() public minLengthMessage?: string;
 
   /**
    * Validates the data.
    * @param control - The control.
    * @returns The ValidationErrors | null.
    */
-  validate(control: AbstractControl): ValidationErrors | null {
+  public validate(control: AbstractControl): ValidationErrors | null {
     if (!control.value || !this.arcMinLength) {
       return null;
     }

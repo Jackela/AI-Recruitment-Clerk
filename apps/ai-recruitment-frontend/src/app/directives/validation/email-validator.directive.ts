@@ -27,7 +27,7 @@ export class EmailValidatorDirective implements Validator {
    * @param control - The control.
    * @returns The ValidationErrors | null.
    */
-  validate(control: AbstractControl): ValidationErrors | null {
+  public validate(control: AbstractControl): ValidationErrors | null {
     if (!control.value) {
       return null; // Don't validate empty values
     }

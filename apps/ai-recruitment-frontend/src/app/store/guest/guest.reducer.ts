@@ -253,31 +253,31 @@ export const guestReducer = createReducer(
     error: null,
   })),
 
-  on(GuestActions.loadDemoAnalysisSuccess, (state, { demoResults }) => ({
-    ...state,
-    analysisResults: {
-      ...state.analysisResults,
-      [demoResults.data.analysisId]: demoResults.data,
-    },
-    currentAnalysis: {
-      analysisId: demoResults.data.analysisId,
-      status: 'completed' as const,
-      filename: state.currentAnalysis.filename,
-      uploadedAt: demoResults.data.completedAt || null,
-      estimatedCompletionTime: 'Demo',
-      progress: 100,
-    },
-    // Update remaining usage count from demo payload when provided
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    remainingCount:
-      (demoResults as unknown as Record<string, unknown>).data !== undefined
-        ? ((demoResults as unknown as Record<string, unknown>).data as Record<string, unknown>).remainingUsage as number ?? state.remainingCount
-        : state.remainingCount,
-    showAnalysisResults: true,
-    isLoading: false,
-    error: null,
-    lastUpdated: new Date().toISOString(),
-  })),
+  on(GuestActions.loadDemoAnalysisSuccess, (state, { demoResults }) => {
+    const dataRecord = demoResults as unknown as { data?: { remainingUsage?: number } };
+    const remainingUsage = dataRecord?.data?.remainingUsage;
+    return {
+      ...state,
+      analysisResults: {
+        ...state.analysisResults,
+        [demoResults.data.analysisId]: demoResults.data,
+      },
+      currentAnalysis: {
+        analysisId: demoResults.data.analysisId,
+        status: 'completed' as const,
+        filename: state.currentAnalysis.filename,
+        uploadedAt: demoResults.data.completedAt || null,
+        estimatedCompletionTime: 'Demo',
+        progress: 100,
+      },
+      // Update remaining usage count from demo payload when provided
+      remainingCount: remainingUsage ?? state.remainingCount,
+      showAnalysisResults: true,
+      isLoading: false,
+      error: null,
+      lastUpdated: new Date().toISOString(),
+    };
+  }),
 
   on(GuestActions.loadDemoAnalysisFailure, (state, { error }) => ({
     ...state,

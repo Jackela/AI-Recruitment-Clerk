@@ -1,11 +1,11 @@
 import type { OnInit, OnDestroy } from '@angular/core';
-import { Component, computed } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 // import { signal } from '@angular/core'; // Reserved for future use
 import { CommonModule } from '@angular/common';
-import type {
+import {
   ProgressFeedbackService,
-  StatusNotification,
 } from '../../../services/feedback/progress-feedback.service';
+import type { StatusNotification } from '../../../services/feedback/progress-feedback.service';
 import { Subject } from 'rxjs';
 // import { takeUntil } from 'rxjs/operators'; // Reserved for future use
 
@@ -101,6 +101,8 @@ import { Subject } from 'rxjs';
   animations: [],
 })
 export class StatusNotificationsComponent implements OnInit, OnDestroy {
+  private readonly feedbackService = inject(ProgressFeedbackService);
+
   // Service state
   public notifications = computed(() => this.feedbackService.notifications());
   public globalLoading = computed(() => this.feedbackService.globalLoading());
@@ -108,12 +110,6 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
   // Local state
   private destroy$ = new Subject<void>();
   private notificationTimers = new Map<string, number>();
-
-  /**
-   * Initializes a new instance of the Status Notifications Component.
-   * @param feedbackService - The feedback service.
-   */
-  constructor(private feedbackService: ProgressFeedbackService) {}
 
   /**
    * Performs the ng on init operation.

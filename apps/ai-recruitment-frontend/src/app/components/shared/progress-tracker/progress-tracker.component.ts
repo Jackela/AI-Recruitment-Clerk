@@ -1,14 +1,14 @@
 import type { OnInit, OnDestroy } from '@angular/core';
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, BehaviorSubject } from 'rxjs';
 // import { Observable } from 'rxjs'; // Reserved for future use
 import { takeUntil } from 'rxjs/operators';
-import type {
+import {
   WebSocketService,
-  ProgressUpdate,
 } from '../../../services/websocket.service';
-import type { ToastService } from '../../../services/toast.service';
+import type { ProgressUpdate } from '../../../services/websocket.service';
+import { ToastService } from '../../../services/toast.service';
 
 /**
  * Defines the shape of the progress message.
@@ -505,6 +505,9 @@ export interface ProgressStep {
   ],
 })
 export class ProgressTrackerComponent implements OnInit, OnDestroy {
+  private readonly webSocketService = inject(WebSocketService);
+  private readonly toastService = inject(ToastService);
+
   @Input() public sessionId = '';
   @Input() public steps: ProgressStep[] = [];
   @Input() public showMessageLog = true;
@@ -520,16 +523,6 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
   private messages: ProgressMessage[] = [];
-
-  /**
-   * Initializes a new instance of the Progress Tracker Component.
-   * @param webSocketService - The web socket service.
-   * @param toastService - The toast service.
-   */
-  constructor(
-    private webSocketService: WebSocketService,
-    private toastService: ToastService,
-  ) {}
 
   /**
    * Performs the ng on init operation.

@@ -118,7 +118,7 @@ export class CacheService {
    * @param config - The config.
    * @returns The Observable<T>.
    */
-  cache<T>(
+  public cache<T>(
     key: string,
     factory: () => Observable<T>,
     config?: CacheConfig,
@@ -169,7 +169,7 @@ export class CacheService {
    * @param config - The config.
    * @returns A promise that resolves to T | null.
    */
-  async get<T>(key: string, config?: CacheConfig): Promise<T | null> {
+  public async get<T>(key: string, config?: CacheConfig): Promise<T | null> {
     const mergedConfig = { ...this.defaultConfig, ...config };
 
     switch (mergedConfig.storage) {
@@ -194,7 +194,7 @@ export class CacheService {
    * @param config - The config.
    * @returns A promise that resolves when the operation completes.
    */
-  async set<T>(key: string, value: T, config?: CacheConfig): Promise<void> {
+  public async set<T>(key: string, value: T, config?: CacheConfig): Promise<void> {
     const mergedConfig = { ...this.defaultConfig, ...config };
     const entry: CacheEntry<T> = {
       key,
@@ -237,7 +237,7 @@ export class CacheService {
    * @param config - The config.
    * @returns A promise that resolves when the operation completes.
    */
-  async remove(key: string, config?: CacheConfig): Promise<void> {
+  public async remove(key: string, config?: CacheConfig): Promise<void> {
     const mergedConfig = { ...this.defaultConfig, ...config };
 
     switch (mergedConfig.storage) {
@@ -264,7 +264,7 @@ export class CacheService {
    * @param config - The config.
    * @returns A promise that resolves when the operation completes.
    */
-  async clear(config?: CacheConfig): Promise<void> {
+  public async clear(config?: CacheConfig): Promise<void> {
     const mergedConfig = { ...this.defaultConfig, ...config };
 
     switch (mergedConfig.storage) {
@@ -368,10 +368,11 @@ export class CacheService {
 
   // IndexedDB operations
   private async getFromIndexedDB<T>(key: string): Promise<T | null> {
-    if (!this.db) return null;
+    const db = this.db;
+    if (!db) return null;
 
     return new Promise((resolve) => {
-      const transaction = this.db!.transaction([this.storeName], 'readonly');
+      const transaction = db.transaction([this.storeName], 'readonly');
       const store = transaction.objectStore(this.storeName);
       const request = store.get(key);
 
@@ -399,10 +400,11 @@ export class CacheService {
   }
 
   private async setInIndexedDB<T>(entry: CacheEntry<T>): Promise<void> {
-    if (!this.db) return;
+    const db = this.db;
+    if (!db) return;
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readwrite');
+      const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
       const request = store.put(entry);
 
@@ -412,10 +414,11 @@ export class CacheService {
   }
 
   private async removeFromIndexedDB(key: string): Promise<void> {
-    if (!this.db) return;
+    const db = this.db;
+    if (!db) return;
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readwrite');
+      const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
       const request = store.delete(key);
 
@@ -425,10 +428,11 @@ export class CacheService {
   }
 
   private async clearIndexedDB(): Promise<void> {
-    if (!this.db) return;
+    const db = this.db;
+    if (!db) return;
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.storeName], 'readwrite');
+      const transaction = db.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
       const request = store.clear();
 
@@ -570,7 +574,7 @@ export class CacheService {
    * Retrieves stats.
    * @returns The CacheStats.
    */
-  getStats(): CacheStats {
+  public getStats(): CacheStats {
     return { ...this.cacheStats };
   }
 
@@ -580,7 +584,7 @@ export class CacheService {
    * @param factory - The factory.
    * @param config - The config.
    */
-  preload<T>(
+  public preload<T>(
     keys: string[],
     factory: (key: string) => Observable<T>,
     config?: CacheConfig,
@@ -594,7 +598,7 @@ export class CacheService {
    * Performs the invalidate operation.
    * @param pattern - The pattern.
    */
-  invalidate(pattern: string | RegExp): void {
+  public invalidate(pattern: string | RegExp): void {
     const regex = typeof pattern === 'string' ? new RegExp(pattern) : pattern;
 
     this.memoryCache.forEach((_, key) => {

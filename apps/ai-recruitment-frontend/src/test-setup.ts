@@ -22,23 +22,31 @@ Object.defineProperty(window, 'matchMedia', {
 
 // Mock window.ResizeObserver for responsive tests
 global.ResizeObserver = class ResizeObserver {
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor(_callback: ResizeObserverCallback) {}
-  observe() {}
-  unobserve() {}
-  disconnect() {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  public observe(): void {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  public unobserve(): void {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  public disconnect(): void {}
 };
 
 // Mock IntersectionObserver for lazy loading tests
 global.IntersectionObserver = class IntersectionObserver {
-  root: Element | null = null;
-  rootMargin = '0px';
-  thresholds: ReadonlyArray<number> = [];
+  public root: Element | null = null;
+  public rootMargin = '0px';
+  public thresholds: ReadonlyArray<number> = [];
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor(_callback: IntersectionObserverCallback) {}
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-  takeRecords(): IntersectionObserverEntry[] {
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  public observe(): void {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  public unobserve(): void {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  public disconnect(): void {}
+  public takeRecords(): IntersectionObserverEntry[] {
     return [];
   }
 } as unknown as typeof IntersectionObserver;
@@ -60,20 +68,29 @@ Object.defineProperty(window, 'alert', {
 });
 
 // Global Jest/Jasmine compatibility bridge
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MockFn = jest.Mock<any, any>;
+
 interface JasmineAndMethods {
-  returnValue: (value: unknown) => jest.MockedFunction<any>;
-  returnValues: (...values: unknown[]) => jest.MockedFunction<any>;
-  callFake: (fn: (...args: unknown[]) => unknown) => jest.MockedFunction<any>;
-  callThrough: () => jest.MockedFunction<any>;
-  stub: () => jest.MockedFunction<any>;
-  throwError: (error: Error | unknown) => jest.MockedFunction<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  returnValue: (value: unknown) => any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  returnValues: (...values: unknown[]) => any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  callFake: (fn: (...args: unknown[]) => unknown) => any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  callThrough: () => any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  stub: () => any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  throwError: (error: unknown) => any;
 }
 
-interface JasmineSpy extends jest.MockedFunction<any> {
+interface JasmineSpy extends MockFn {
   and: JasmineAndMethods;
 }
 
-interface JasmineInterface {
+interface _JasmineInterface {
   createSpyObj: (
     name: string,
     methods: string[],
@@ -82,7 +99,8 @@ interface JasmineInterface {
   createSpy: (name?: string) => JasmineSpy;
 }
 
-(global as { jasmine?: JasmineInterface }).jasmine = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(global as any).jasmine = {
   createSpyObj: (
     _name: string,
     methods: string[],
@@ -102,6 +120,7 @@ interface JasmineInterface {
         callFake: (fn: (...args: unknown[]) => unknown) =>
           jestSpy.mockImplementation(fn),
         callThrough: () => jestSpy.mockImplementation(),
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         stub: () => jestSpy.mockImplementation(() => {}),
         throwError: (error: Error | unknown) =>
           jestSpy.mockImplementation(() => {
@@ -127,6 +146,7 @@ interface JasmineInterface {
       callFake: (fn: (...args: unknown[]) => unknown) =>
         jestSpy.mockImplementation(fn),
       callThrough: () => jestSpy.mockImplementation(),
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       stub: () => jestSpy.mockImplementation(() => {}),
       throwError: (error: Error | unknown) =>
         jestSpy.mockImplementation(() => {
@@ -138,24 +158,26 @@ interface JasmineInterface {
 };
 
 // Global spyOn function for Jasmine compatibility
-(
-  global as {
-    spyOn?: (object: Record<string, unknown>, method: string) => JasmineSpy;
-  }
-).spyOn = (object: Record<string, unknown>, method: string) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(global as any).spyOn = (object: object, method: string): JasmineSpy => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const jestSpy = jest.spyOn(object as any, method as any);
   const spyWithMethods = jestSpy as unknown as JasmineSpy;
   spyWithMethods.and = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     returnValue: (value: unknown) => jestSpy.mockReturnValue(value as any),
     returnValues: (...values: unknown[]) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       values.forEach((value) => jestSpy.mockReturnValueOnce(value as any));
       return jestSpy;
     },
-    callFake: (fn: (...args: unknown[]) => unknown) =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    callFake: (fn: (...args: any[]) => any) =>
       jestSpy.mockImplementation(fn),
     callThrough: () => jestSpy.mockImplementation(),
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     stub: () => jestSpy.mockImplementation(() => {}),
-    throwError: (error: Error | unknown) =>
+    throwError: (error: unknown) =>
       jestSpy.mockImplementation(() => {
         throw error;
       }),

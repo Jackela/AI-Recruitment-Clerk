@@ -69,7 +69,7 @@ export class TouchGestureService {
   /**
    * Initialize touch gestures on an element
    */
-  initializeGestures(
+  public initializeGestures(
     elementRef: ElementRef<HTMLElement>,
     config: Partial<GestureConfig> = {},
   ): Observable<GestureEvent> {
@@ -104,6 +104,7 @@ export class TouchGestureService {
       startTime: 0,
       lastTap: 0,
       tapCount: 0,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       pressTimer: null as any,
       initialDistance: 0,
       initialScale: 1,
@@ -403,7 +404,7 @@ export class TouchGestureService {
   /**
    * Create a simple tap handler
    */
-  onTap(elementRef: ElementRef<HTMLElement>): Observable<GestureEvent> {
+  public onTap(elementRef: ElementRef<HTMLElement>): Observable<GestureEvent> {
     return this.initializeGestures(elementRef).pipe(
       filter((event) => event.type === 'tap'),
     );
@@ -412,7 +413,9 @@ export class TouchGestureService {
   /**
    * Create a simple swipe handler
    */
-  onSwipe(elementRef: ElementRef<HTMLElement>): Observable<GestureEvent> {
+  public onSwipe(
+    elementRef: ElementRef<HTMLElement>,
+  ): Observable<GestureEvent> {
     return this.initializeGestures(elementRef).pipe(
       filter((event) => event.type === 'swipe'),
     );
@@ -421,7 +424,9 @@ export class TouchGestureService {
   /**
    * Create a simple press handler
    */
-  onPress(elementRef: ElementRef<HTMLElement>): Observable<GestureEvent> {
+  public onPress(
+    elementRef: ElementRef<HTMLElement>,
+  ): Observable<GestureEvent> {
     return this.initializeGestures(elementRef).pipe(
       filter((event) => event.type === 'press'),
     );
@@ -430,7 +435,9 @@ export class TouchGestureService {
   /**
    * Create a simple pinch handler
    */
-  onPinch(elementRef: ElementRef<HTMLElement>): Observable<GestureEvent> {
+  public onPinch(
+    elementRef: ElementRef<HTMLElement>,
+  ): Observable<GestureEvent> {
     return this.initializeGestures(elementRef).pipe(
       filter((event) => event.type === 'pinch'),
     );
@@ -439,7 +446,7 @@ export class TouchGestureService {
   /**
    * Cleanup method
    */
-  destroy(): void {
+  public destroy(): void {
     this.gestureSubject.complete();
   }
 }

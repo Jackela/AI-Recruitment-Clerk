@@ -5,6 +5,7 @@ import {
   Component,
   ViewChild,
   ElementRef,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -20,7 +21,7 @@ import type {
 import {
   MobileSwipeComponent
 } from './mobile-swipe.component';
-import type { TouchGestureService } from '../../services/mobile/touch-gesture.service';
+import { TouchGestureService } from '../../services/mobile/touch-gesture.service';
 
 /**
  * Defines the shape of the dashboard card.
@@ -1077,11 +1078,12 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
   @ViewChild('quickActionsContainer', { read: ElementRef })
   public quickActionsContainer!: ElementRef;
 
+  private readonly _touchGesture = inject(TouchGestureService);
+
   /**
    * Initializes a new instance of the Mobile Dashboard Component.
-   * @param _touchGesture - The touch gesture.
    */
-  constructor(private readonly _touchGesture: TouchGestureService) {
+  constructor() {
     // TouchGesture service will be used for future gesture implementations
     // Prevent unused warning
     void this._touchGesture;

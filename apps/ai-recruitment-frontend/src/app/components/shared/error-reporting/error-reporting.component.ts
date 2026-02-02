@@ -1,18 +1,17 @@
-import { Component, signal, Input } from '@angular/core';
+import { Component, signal, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import type {
-  FormBuilder,
-  FormGroup} from '@angular/forms';
+import type { FormGroup} from '@angular/forms';
 import {
+  FormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import type { ErrorReportingService } from '../../../services/error/error-reporting.service';
-import type {
+import { ErrorReportingService } from '../../../services/error/error-reporting.service';
+import {
   ErrorCorrelationService,
-  StructuredError,
 } from '../../../services/error/error-correlation.service';
-import type { ToastService } from '../../../services/toast.service';
+import type { StructuredError } from '../../../services/error/error-correlation.service';
+import { ToastService } from '../../../services/toast.service';
 
 /**
  * Represents the error reporting component.
@@ -23,7 +22,7 @@ import type { ToastService } from '../../../services/toast.service';
   imports: [CommonModule, ReactiveFormsModule],
   template: `
     <div class="error-reporting-modal" *ngIf="isVisible()">
-      <div class="modal-backdrop" (click)="close()"></div>
+      <div class="modal-backdrop" (click)="close()" (keydown.enter)="close()" (keydown.space)="close()" tabindex="0" role="button" aria-label="Close modal"></div>
       <div class="modal-content">
         <div class="modal-header">
           <h2>
@@ -566,6 +565,11 @@ import type { ToastService } from '../../../services/toast.service';
   ],
 })
 export class ErrorReportingComponent {
+  private readonly fb = inject(FormBuilder);
+  private readonly errorReporting = inject(ErrorReportingService);
+  private readonly errorCorrelation = inject(ErrorCorrelationService);
+  private readonly toastService = inject(ToastService);
+
   @Input() public errors: StructuredError[] = [];
 
   public isVisible = signal(false);
@@ -587,17 +591,8 @@ export class ErrorReportingComponent {
 
   /**
    * Initializes a new instance of the Error Reporting Component.
-   * @param fb - The fb.
-   * @param errorReporting - The error reporting.
-   * @param errorCorrelation - The error correlation.
-   * @param toastService - The toast service.
    */
-  constructor(
-    private fb: FormBuilder,
-    private errorReporting: ErrorReportingService,
-    private errorCorrelation: ErrorCorrelationService,
-    private toastService: ToastService,
-  ) {
+  constructor() {
     this.reportForm = this.fb.group({
       category: ['', Validators.required],
       feedback: ['', [Validators.required, Validators.maxLength(1000)]],

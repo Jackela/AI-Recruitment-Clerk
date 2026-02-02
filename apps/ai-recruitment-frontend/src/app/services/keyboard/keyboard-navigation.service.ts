@@ -42,7 +42,7 @@ export class KeyboardNavigationService {
   });
 
   // Help overlay
-  showKeyboardHelp = signal(false);
+  public showKeyboardHelp = signal(false);
 
   // Events
   private shortcutTriggered$ = new Subject<{
@@ -183,7 +183,7 @@ export class KeyboardNavigationService {
       target.classList.add('keyboard-focused');
 
       // Remove indicator on mouse interaction
-      const removeIndicator = () => {
+      const removeIndicator = (): void => {
         target.classList.remove('keyboard-focused');
         target.removeEventListener('mousedown', removeIndicator);
         target.removeEventListener('mouseup', removeIndicator);
@@ -240,7 +240,7 @@ export class KeyboardNavigationService {
    * Performs the register global shortcut operation.
    * @param shortcut - The shortcut.
    */
-  registerGlobalShortcut(shortcut: KeyboardShortcut): void {
+  public registerGlobalShortcut(shortcut: KeyboardShortcut): void {
     this.globalShortcuts.push(shortcut);
   }
 
@@ -249,10 +249,14 @@ export class KeyboardNavigationService {
    * @param context - The context.
    * @param shortcut - The shortcut.
    */
-  registerContextShortcut(context: string, shortcut: KeyboardShortcut): void {
+  public registerContextShortcut(
+    context: string,
+    shortcut: KeyboardShortcut,
+  ): void {
     if (!this.contextShortcuts.has(context)) {
       this.contextShortcuts.set(context, []);
     }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.contextShortcuts.get(context)!.push(shortcut);
   }
 
@@ -261,7 +265,7 @@ export class KeyboardNavigationService {
    * @param key - The key.
    * @param context - The context.
    */
-  unregisterShortcut(key: string, context?: string): void {
+  public unregisterShortcut(key: string, context?: string): void {
     if (context) {
       const shortcuts = this.contextShortcuts.get(context);
       if (shortcuts) {
@@ -435,7 +439,7 @@ export class KeyboardNavigationService {
    * Retrieves all shortcuts.
    * @returns The { global: KeyboardShortcut[]; contexts: Record<string, KeyboardShortcut[]>; }.
    */
-  getAllShortcuts(): {
+  public getAllShortcuts(): {
     global: KeyboardShortcut[];
     contexts: Record<string, KeyboardShortcut[]>;
   } {
@@ -455,7 +459,7 @@ export class KeyboardNavigationService {
    * @param context - The context.
    * @returns The an array of KeyboardShortcut.
    */
-  getShortcutsForContext(context: string): KeyboardShortcut[] {
+  public getShortcutsForContext(context: string): KeyboardShortcut[] {
     return this.contextShortcuts.get(context) || [];
   }
 
@@ -464,7 +468,7 @@ export class KeyboardNavigationService {
    * Performs the announce shortcut operation.
    * @param shortcut - The shortcut.
    */
-  announceShortcut(shortcut: KeyboardShortcut): void {
+  public announceShortcut(shortcut: KeyboardShortcut): void {
     const announcement = `快捷键: ${this.formatShortcutKey(shortcut)}, ${shortcut.description}`;
     this.announceToScreenReader(announcement);
   }
@@ -500,7 +504,7 @@ export class KeyboardNavigationService {
   /**
    * Performs the destroy operation.
    */
-  destroy(): void {
+  public destroy(): void {
     // Remove event listeners if needed
     this._shortcuts.clear();
     this.globalShortcuts.length = 0;

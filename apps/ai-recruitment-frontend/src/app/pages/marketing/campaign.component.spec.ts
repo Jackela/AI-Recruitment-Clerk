@@ -7,7 +7,6 @@ import {
 } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { By } from '@angular/platform-browser';
-import { DebugElement } from '@angular/core';
 import { CampaignComponent } from './campaign.component';
 import { GuestUsageService } from '../../services/marketing/guest-usage.service';
 

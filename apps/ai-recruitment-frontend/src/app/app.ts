@@ -62,19 +62,19 @@ export class App implements OnInit, OnDestroy {
   private websocketStats: WebSocketStatsService | null = null;
   private websocketStatsSubscription: Subscription | null = null;
 
-  keyboardHelpVisible = signal(false);
-  isLoading = signal(false);
-  guideOverlayVisible = signal(false);
+  public keyboardHelpVisible = signal(false);
+  public isLoading = signal(false);
+  public guideOverlayVisible = signal(false);
 
   // Accessibility preferences
-  highContrastEnabled = signal(false);
-  reducedMotionEnabled = signal(false);
-  currentFontSize = signal<'normal' | 'large' | 'larger'>('normal');
+  public highContrastEnabled = signal(false);
+  public reducedMotionEnabled = signal(false);
+  public currentFontSize = signal<'normal' | 'large' | 'larger'>('normal');
 
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     // Initialize theme service (will auto-apply saved theme)
     // Theme service initializes automatically in constructor
 
@@ -95,7 +95,7 @@ export class App implements OnInit, OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     // Cleanup services
     this.websocketStatsSubscription?.unsubscribe();
     this.websocketStats?.destroy();
@@ -141,7 +141,7 @@ export class App implements OnInit, OnDestroy {
   }
 
   private scheduleKeyboardNavigationInit(): void {
-    const load = () => {
+    const load = (): void => {
       void this.ensureKeyboardNavigation();
     };
 
@@ -261,7 +261,7 @@ export class App implements OnInit, OnDestroy {
   /**
    * Performs the show keyboard help operation.
    */
-  showKeyboardHelp(): void {
+  public showKeyboardHelp(): void {
     this.keyboardHelpVisible.set(true);
     this.accessibilityService.announce(
       'Keyboard shortcuts help opened',
@@ -280,7 +280,7 @@ export class App implements OnInit, OnDestroy {
   /**
    * Performs the hide keyboard help operation.
    */
-  hideKeyboardHelp(): void {
+  public hideKeyboardHelp(): void {
     this.keyboardHelpVisible.set(false);
     this.accessibilityService.releaseFocusTrap();
     this.accessibilityService.announce(
@@ -292,7 +292,7 @@ export class App implements OnInit, OnDestroy {
   /**
    * Performs the toggle settings menu operation.
    */
-  toggleSettingsMenu(): void {
+  public toggleSettingsMenu(): void {
     const isOpen = !this.settingsMenuOpen();
     this.settingsMenuOpen.set(isOpen);
 
@@ -322,7 +322,7 @@ export class App implements OnInit, OnDestroy {
   /**
    * Performs the toggle high contrast operation.
    */
-  toggleHighContrast(): void {
+  public toggleHighContrast(): void {
     const enabled = !this.highContrastEnabled();
     this.accessibilityService.setHighContrast(enabled);
     this.settingsMenuOpen.set(false);
@@ -331,7 +331,7 @@ export class App implements OnInit, OnDestroy {
   /**
    * Performs the toggle reduced motion operation.
    */
-  toggleReducedMotion(): void {
+  public toggleReducedMotion(): void {
     const enabled = !this.reducedMotionEnabled();
     this.accessibilityService.setReducedMotion(enabled);
     this.settingsMenuOpen.set(false);
@@ -340,7 +340,7 @@ export class App implements OnInit, OnDestroy {
   /**
    * Performs the increase font size operation.
    */
-  increaseFontSize(): void {
+  public increaseFontSize(): void {
     const currentSize = this.currentFontSize();
     const nextSize =
       currentSize === 'normal'

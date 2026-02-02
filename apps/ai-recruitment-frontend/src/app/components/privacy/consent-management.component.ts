@@ -6,11 +6,11 @@ import {
   Input,
   Output,
   EventEmitter,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import type {
-  FormBuilder} from '@angular/forms';
 import {
+  FormBuilder,
   ReactiveFormsModule,
   FormGroup,
   FormArray,
@@ -18,11 +18,10 @@ import {
 } from '@angular/forms';
 import { Subject } from 'rxjs';
 // import { takeUntil } from 'rxjs'; // Reserved for future use
-import type {
+import {
   PrivacyApiService,
-  CaptureConsentDto,
-  ConsentStatusDto,
 } from '../../services/privacy-api.service';
+import type { CaptureConsentDto, ConsentStatusDto } from '../../services/privacy-api.service';
 
 // Temporary local types until shared-dtos compilation is fixed
 export enum ConsentPurpose {
@@ -87,7 +86,7 @@ export interface ProcessingPurposeInfo {
   dataCategories: DataCategory[];
   thirdParties: string[];
 }
-import type { ToastService } from '../../services/toast.service';
+import { ToastService } from '../../services/toast.service';
 
 /**
  * GDPR Consent Management Component
@@ -101,6 +100,10 @@ import type { ToastService } from '../../services/toast.service';
   styleUrls: ['./consent-management.component.scss'],
 })
 export class ConsentManagementComponent implements OnInit, OnDestroy {
+  private readonly fb = inject(FormBuilder);
+  private readonly privacyApi = inject(PrivacyApiService);
+  private readonly toast = inject(ToastService);
+
   @Input() public userId?: string;
   @Input() public mode: 'initial' | 'update' | 'review' = 'initial';
   @Input() public showAllPurposes = true;
@@ -200,15 +203,8 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
 
   /**
    * Initializes a new instance of the Consent Management Component.
-   * @param fb - The fb.
-   * @param privacyApi - The privacy api.
-   * @param toast - The toast.
    */
-  constructor(
-    private fb: FormBuilder,
-    private privacyApi: PrivacyApiService,
-    private toast: ToastService,
-  ) {
+  constructor() {
     this.initializeForm();
   }
 

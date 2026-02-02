@@ -74,7 +74,7 @@ export class AccessibilityService {
   private screenReaderActive = signal<boolean>(false);
 
   // Computed accessibility state
-  readonly accessibilityState = computed(() => ({
+  public readonly accessibilityState = computed(() => ({
     currentFocus: this.currentFocus(),
     trapFocus: this.trapFocus(),
     focusWithin: this.focusWithin(),
@@ -101,7 +101,7 @@ export class AccessibilityService {
   /**
    * Announce message to screen readers
    */
-  announce(
+  public announce(
     message: string,
     priority: 'polite' | 'assertive' = 'polite',
     duration = 5000,
@@ -129,7 +129,7 @@ export class AccessibilityService {
   /**
    * Set focus to element with tracking
    */
-  setFocus(
+  public setFocus(
     element: HTMLElement | ElementRef,
     reason: FocusTarget['reason'] = 'navigation',
   ): void {
@@ -141,8 +141,9 @@ export class AccessibilityService {
     }
 
     // Store previous focus for restoration
-    if (this.currentFocus() && reason !== 'restoration') {
-      this.focusHistory.push(this.currentFocus()!);
+    const currentFocusElement = this.currentFocus();
+    if (currentFocusElement && reason !== 'restoration') {
+      this.focusHistory.push(currentFocusElement);
     }
 
     // Set focus
@@ -159,7 +160,7 @@ export class AccessibilityService {
   /**
    * Restore focus to previous element
    */
-  restoreFocus(): void {
+  public restoreFocus(): void {
     const previousElement = this.focusHistory.pop();
     if (previousElement && document.contains(previousElement)) {
       this.setFocus(previousElement, 'restoration');
@@ -169,7 +170,7 @@ export class AccessibilityService {
   /**
    * Set focus trap within container
    */
-  setFocusTrap(container: HTMLElement | ElementRef): void {
+  public setFocusTrap(container: HTMLElement | ElementRef): void {
     const containerElement =
       container instanceof ElementRef ? container.nativeElement : container;
 
@@ -186,7 +187,7 @@ export class AccessibilityService {
   /**
    * Release focus trap
    */
-  releaseFocusTrap(): void {
+  public releaseFocusTrap(): void {
     this.trapFocus.set(false);
     this.focusWithin.set(null);
     this.restoreFocus();
@@ -195,14 +196,14 @@ export class AccessibilityService {
   /**
    * Register keyboard shortcut
    */
-  registerShortcut(shortcut: KeyboardShortcut): void {
+  public registerShortcut(shortcut: KeyboardShortcut): void {
     this.shortcuts.update((shortcuts) => [...shortcuts, shortcut]);
   }
 
   /**
    * Unregister keyboard shortcut
    */
-  unregisterShortcut(key: string, context?: string): void {
+  public unregisterShortcut(key: string, context?: string): void {
     this.shortcuts.update((shortcuts) =>
       shortcuts.filter(
         (s) => !(s.key === key && (!context || s.context === context)),
@@ -213,14 +214,14 @@ export class AccessibilityService {
   /**
    * Set keyboard shortcut context
    */
-  setShortcutContext(context: string): void {
+  public setShortcutContext(context: string): void {
     this.shortcutContext.set(context);
   }
 
   /**
    * Generate ARIA label for complex elements
    */
-  generateAriaLabel(element: {
+  public generateAriaLabel(element: {
     type?: string;
     title?: string;
     description?: string;
@@ -243,7 +244,7 @@ export class AccessibilityService {
   /**
    * Generate ARIA description
    */
-  generateAriaDescription(element: {
+  public generateAriaDescription(element: {
     instructions?: string;
     shortcuts?: string[];
     context?: string;
@@ -264,7 +265,7 @@ export class AccessibilityService {
   /**
    * Validate WCAG color contrast
    */
-  checkColorContrast(
+  public checkColorContrast(
     foreground: string,
     background: string,
   ): {
@@ -284,7 +285,7 @@ export class AccessibilityService {
   /**
    * Get accessible color variant
    */
-  getAccessibleColor(baseColor: string, background = '#ffffff'): string {
+  public getAccessibleColor(baseColor: string, background = '#ffffff'): string {
     const contrast = this.checkColorContrast(baseColor, background);
 
     if (contrast.valid) {
@@ -298,7 +299,7 @@ export class AccessibilityService {
   /**
    * Set high contrast mode
    */
-  setHighContrast(enabled: boolean): void {
+  public setHighContrast(enabled: boolean): void {
     this.highContrast.set(enabled);
     this.saveUserPreferences();
 
@@ -314,7 +315,7 @@ export class AccessibilityService {
   /**
    * Set reduced motion preference
    */
-  setReducedMotion(enabled: boolean): void {
+  public setReducedMotion(enabled: boolean): void {
     this.reducedMotion.set(enabled);
     this.saveUserPreferences();
 
@@ -330,7 +331,7 @@ export class AccessibilityService {
   /**
    * Set font size preference
    */
-  setFontSize(size: 'normal' | 'large' | 'larger'): void {
+  public setFontSize(size: 'normal' | 'large' | 'larger'): void {
     this.fontSize.set(size);
     this.saveUserPreferences();
 
@@ -347,7 +348,7 @@ export class AccessibilityService {
   /**
    * Get focusable elements within container
    */
-  getFocusableElements(container: HTMLElement): HTMLElement[] {
+  public getFocusableElements(container: HTMLElement): HTMLElement[] {
     const focusableSelectors = [
       'a[href]',
       'button:not([disabled])',
@@ -465,10 +466,14 @@ export class AccessibilityService {
    * Handle focus trap keyboard navigation
    */
   private handleFocusTrapKeydown(event: KeyboardEvent): void {
-    if (event.key !== 'Tab' || !this.focusWithin()) return;
+    const focusWithinElement = this.focusWithin();
+    if (event.key !== 'Tab' || !focusWithinElement) return;
 
-    const focusableElements = this.getFocusableElements(this.focusWithin()!);
-    const currentIndex = focusableElements.indexOf(this.currentFocus()!);
+    const focusableElements = this.getFocusableElements(focusWithinElement);
+    const currentFocusElement = this.currentFocus();
+    const currentIndex = currentFocusElement
+      ? focusableElements.indexOf(currentFocusElement)
+      : -1;
 
     if (event.shiftKey) {
       // Shift+Tab: Previous element

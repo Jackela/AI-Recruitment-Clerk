@@ -1,8 +1,8 @@
-import { Injectable, signal, effect } from '@angular/core';
-import type { HttpClient } from '@angular/common/http';
+import { Injectable, signal, effect, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { of, BehaviorSubject } from 'rxjs';
 import { catchError, finalize, tap } from 'rxjs/operators';
-import type { ToastService } from '../toast.service';
+import { ToastService } from '../toast.service';
 
 export type Language = 'zh-CN' | 'en-US' | 'zh-TW' | 'ja-JP' | 'ko-KR';
 
@@ -110,22 +110,17 @@ export class I18nService {
   };
 
   // Reactive state
-  currentLanguage = signal<Language>(this.DEFAULT_LANGUAGE);
-  isLoading = signal(false);
+  public currentLanguage = signal<Language>(this.DEFAULT_LANGUAGE);
+  public isLoading = signal(false);
   private translations = new BehaviorSubject<TranslationStrings>({});
 
   // Translation cache
   private translationCache = new Map<Language, TranslationStrings>();
 
-  /**
-   * Initializes a new instance of the I18n Service.
-   * @param http - The http.
-   * @param toastService - The toast service.
-   */
-  constructor(
-    private http: HttpClient,
-    private toastService: ToastService,
-  ) {
+  private http = inject(HttpClient);
+  private toastService = inject(ToastService);
+
+  constructor() {
     this.initializeLanguage();
 
     // Apply language changes reactively
@@ -169,6 +164,7 @@ export class I18nService {
   private loadTranslations(language: Language): void {
     // Check cache first
     if (this.translationCache.has(language)) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.translations.next(this.translationCache.get(language)!);
       return;
     }
@@ -243,7 +239,7 @@ export class I18nService {
    * Sets language.
    * @param language - The language.
    */
-  setLanguage(language: Language): void {
+  public setLanguage(language: Language): void {
     if (!this.languages[language]) {
       console.error(`Unsupported language: ${language}`);
       return;
@@ -261,7 +257,7 @@ export class I18nService {
    * Retrieves available languages.
    * @returns The an array of LanguageConfig.
    */
-  getAvailableLanguages(): LanguageConfig[] {
+  public getAvailableLanguages(): LanguageConfig[] {
     return Object.values(this.languages);
   }
 
@@ -269,7 +265,7 @@ export class I18nService {
    * Retrieves current language config.
    * @returns The LanguageConfig.
    */
-  getCurrentLanguageConfig(): LanguageConfig {
+  public getCurrentLanguageConfig(): LanguageConfig {
     return this.languages[this.currentLanguage()];
   }
 
@@ -279,8 +275,7 @@ export class I18nService {
    * @param params - The params.
    * @returns The string value.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  translate(key: string, params?: Record<string, any>): string {
+  public translate(key: string, params?: Record<string, unknown>): string {
     const translations = this.translations.value;
     const keys = key.split('.');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -316,8 +311,7 @@ export class I18nService {
    * @param params - The params.
    * @returns The string value.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  t(key: string, params?: Record<string, any>): string {
+  public t(key: string, params?: Record<string, unknown>): string {
     return this.translate(key, params);
   }
 
@@ -329,7 +323,7 @@ export class I18nService {
    * @param _format - The format.
    * @returns The string value.
    */
-  formatDate(date: Date | string, _format?: string): string {
+  public formatDate(date: Date | string, _format?: string): string {
     const config = this.getCurrentLanguageConfig();
     const dateObj = typeof date === 'string' ? new Date(date) : date;
 
@@ -344,7 +338,7 @@ export class I18nService {
    * @param date - The date.
    * @returns The string value.
    */
-  formatTime(date: Date | string): string {
+  public formatTime(date: Date | string): string {
     const config = this.getCurrentLanguageConfig();
     const dateObj = typeof date === 'string' ? new Date(date) : date;
 
@@ -358,7 +352,7 @@ export class I18nService {
    * @param date - The date.
    * @returns The string value.
    */
-  formatDateTime(date: Date | string): string {
+  public formatDateTime(date: Date | string): string {
     const config = this.getCurrentLanguageConfig();
     const dateObj = typeof date === 'string' ? new Date(date) : date;
 
@@ -374,7 +368,7 @@ export class I18nService {
    * @param decimals - The decimals.
    * @returns The string value.
    */
-  formatNumber(value: number, decimals?: number): string {
+  public formatNumber(value: number, decimals?: number): string {
     const config = this.getCurrentLanguageConfig();
 
     return new Intl.NumberFormat(config.code, {
@@ -388,7 +382,7 @@ export class I18nService {
    * @param value - The value.
    * @returns The string value.
    */
-  formatCurrency(value: number): string {
+  public formatCurrency(value: number): string {
     const config = this.getCurrentLanguageConfig();
 
     return new Intl.NumberFormat(config.code, {
@@ -414,7 +408,7 @@ export class I18nService {
    * @param decimals - The decimals.
    * @returns The string value.
    */
-  formatPercent(value: number, decimals = 0): string {
+  public formatPercent(value: number, decimals = 0): string {
     const config = this.getCurrentLanguageConfig();
 
     return new Intl.NumberFormat(config.code, {

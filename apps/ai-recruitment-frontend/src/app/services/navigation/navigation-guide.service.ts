@@ -34,11 +34,11 @@ export interface OnboardingFlow {
 })
 export class NavigationGuideService {
   // State management
-  isGuideActive = signal(false);
-  currentStep = signal<GuideStep | null>(null);
-  currentFlow = signal<OnboardingFlow | null>(null);
-  stepIndex = signal(0);
-  isFirstTimeUser = signal(false);
+  public isGuideActive = signal(false);
+  public currentStep = signal<GuideStep | null>(null);
+  public currentFlow = signal<OnboardingFlow | null>(null);
+  public stepIndex = signal(0);
+  public isFirstTimeUser = signal(false);
 
   // Available flows
   private readonly flows: Record<string, OnboardingFlow> = {
@@ -193,7 +193,7 @@ export class NavigationGuideService {
    * Performs the start flow operation.
    * @param flowId - The flow id.
    */
-  startFlow(flowId: string): void {
+  public startFlow(flowId: string): void {
     const flow = this.flows[flowId];
     if (!flow || this.hasCompletedFlow(flowId)) return;
 
@@ -206,7 +206,7 @@ export class NavigationGuideService {
   /**
    * Performs the next step operation.
    */
-  nextStep(): void {
+  public nextStep(): void {
     const flow = this.currentFlow();
     if (!flow) return;
 
@@ -222,7 +222,7 @@ export class NavigationGuideService {
   /**
    * Performs the previous step operation.
    */
-  previousStep(): void {
+  public previousStep(): void {
     const currentIndex = this.stepIndex();
     if (currentIndex > 0) {
       this.stepIndex.set(currentIndex - 1);
@@ -233,7 +233,7 @@ export class NavigationGuideService {
   /**
    * Performs the skip flow operation.
    */
-  skipFlow(): void {
+  public skipFlow(): void {
     this.completeFlow();
   }
 
@@ -295,7 +295,7 @@ export class NavigationGuideService {
    * @param target - The target.
    * @param content - The content.
    */
-  showContextualHelp(target: string, content: string): void {
+  public showContextualHelp(target: string, content: string): void {
     const helpStep: GuideStep = {
       id: 'contextual-help',
       target,
@@ -319,7 +319,7 @@ export class NavigationGuideService {
   /**
    * Performs the hide contextual help operation.
    */
-  hideContextualHelp(): void {
+  public hideContextualHelp(): void {
     this.isGuideActive.set(false);
     this.currentStep.set(null);
     document.querySelectorAll('.guide-highlight').forEach((el) => {
@@ -331,7 +331,7 @@ export class NavigationGuideService {
   /**
    * Performs the reset onboarding operation.
    */
-  resetOnboarding(): void {
+  public resetOnboarding(): void {
     Object.values(this.flows).forEach((flow) => {
       localStorage.removeItem(flow.completedKey);
     });
@@ -343,7 +343,7 @@ export class NavigationGuideService {
    * Retrieves available flows.
    * @returns The an array of OnboardingFlow.
    */
-  getAvailableFlows(): OnboardingFlow[] {
+  public getAvailableFlows(): OnboardingFlow[] {
     return Object.values(this.flows);
   }
 
@@ -352,7 +352,7 @@ export class NavigationGuideService {
    * Performs the has completed all onboarding operation.
    * @returns The boolean value.
    */
-  hasCompletedAllOnboarding(): boolean {
+  public hasCompletedAllOnboarding(): boolean {
     return Object.values(this.flows).every((flow) =>
       this.hasCompletedFlow(flow.id),
     );

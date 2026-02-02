@@ -191,9 +191,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
    * @param jobWithProgress - Job with progress information
    * @returns Progress percentage (0-100) or null if no progress
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public getJobProgress(
-    jobWithProgress: JobListItem & { progress: any },
+    jobWithProgress: JobListItem & { progress: { progress?: number; step?: string } | null },
   ): number | null {
     return jobWithProgress.progress?.progress || null;
   }
@@ -203,9 +202,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
    * @param jobWithProgress - Job with progress information
    * @returns Current step description or null
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public getCurrentStep(
-    jobWithProgress: JobListItem & { progress: any },
+    jobWithProgress: JobListItem & { progress: { progress?: number; step?: string } | null },
   ): string | null {
     return jobWithProgress.progress?.step || null;
   }

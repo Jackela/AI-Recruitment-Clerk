@@ -4,15 +4,16 @@ import type {
 import {
   Component,
   Injectable,
+  inject,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import type { Router } from '@angular/router';
-import type { ToastService } from '../../../services/toast.service';
-import type {
+import { Router } from '@angular/router';
+import { ToastService } from '../../../services/toast.service';
+import {
   ErrorCorrelationService,
-  StructuredError,
 } from '../../../services/error/error-correlation.service';
+import type { StructuredError } from '../../../services/error/error-correlation.service';
 
 /**
  * Defines the shape of the error info.
@@ -34,17 +35,9 @@ export interface ErrorInfo {
  */
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
-  /**
-   * Initializes a new instance of the Global Error Handler.
-   * @param toastService - The toast service.
-   * @param router - The router.
-   * @param errorCorrelation - The error correlation.
-   */
-  constructor(
-    private toastService: ToastService,
-    private router: Router,
-    private errorCorrelation: ErrorCorrelationService,
-  ) {}
+  private readonly toastService = inject(ToastService);
+  private readonly router = inject(Router);
+  private readonly errorCorrelation = inject(ErrorCorrelationService);
 
   /**
    * Handles error.
@@ -676,6 +669,9 @@ export class GlobalErrorHandler implements ErrorHandler {
   ],
 })
 export class ErrorBoundaryComponent implements OnInit {
+  private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
+
   // Error state
   public hasError = signal(false);
   public errorMessage = signal('页面遇到了一个意外错误。请刷新页面重试。');
@@ -687,16 +683,6 @@ export class ErrorBoundaryComponent implements OnInit {
   // UI state
   public showDetails = signal(false);
   public errorHistory = signal<ErrorInfo[]>([]);
-
-  /**
-   * Initializes a new instance of the Error Boundary Component.
-   * @param router - The router.
-   * @param toastService - The toast service.
-   */
-  constructor(
-    private router: Router,
-    private toastService: ToastService,
-  ) {}
 
   /**
    * Performs the ng on init operation.

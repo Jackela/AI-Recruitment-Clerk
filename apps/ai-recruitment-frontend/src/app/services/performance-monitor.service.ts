@@ -247,7 +247,7 @@ export class PerformanceMonitorService {
    * Retrieves metrics.
    * @returns The Partial<PerformanceMetrics>.
    */
-  getMetrics(): Partial<PerformanceMetrics> {
+  public getMetrics(): Partial<PerformanceMetrics> {
     return { ...this.metrics };
   }
 
@@ -255,7 +255,7 @@ export class PerformanceMonitorService {
    * Retrieves core web vitals.
    * @returns The Partial<PerformanceMetrics['coreWebVitals']>.
    */
-  getCoreWebVitals(): Partial<PerformanceMetrics['coreWebVitals']> {
+  public getCoreWebVitals(): Partial<PerformanceMetrics['coreWebVitals']> {
     return { ...this.metrics.coreWebVitals };
   }
 
@@ -264,7 +264,7 @@ export class PerformanceMonitorService {
    * @param _componentName - The component name.
    * @returns The () => void.
    */
-  measureComponentRender(_componentName: string): () => void {
+  public measureComponentRender(_componentName: string): () => void {
     const startTime = performance.now();
 
     return () => {
@@ -283,7 +283,7 @@ export class PerformanceMonitorService {
    * @param _actionName - The action name.
    * @returns The () => void.
    */
-  measureUserInteraction(_actionName: string): () => void {
+  public measureUserInteraction(_actionName: string): () => void {
     const startTime = performance.now();
 
     return () => {
@@ -304,7 +304,7 @@ export class PerformanceMonitorService {
    * @param _value - The value.
    * @param _unit - The unit.
    */
-  reportCustomMetric(_name: string, _value: number, _unit = 'ms'): void {
+  public reportCustomMetric(_name: string, _value: number, _unit = 'ms'): void {
     // Custom metric reported: ${name} (${value}${unit})
     // Store in metrics for potential reporting
     // Store custom metric for reporting
@@ -313,7 +313,7 @@ export class PerformanceMonitorService {
   /**
    * Performs the destroy operation.
    */
-  destroy(): void {
+  public destroy(): void {
     // Clean up observers
     this.observers.forEach((observer) => observer.disconnect());
     this.observers.clear();
@@ -324,7 +324,7 @@ export class PerformanceMonitorService {
    * Performs the estimate lighthouse score operation.
    * @returns The number value.
    */
-  estimateLighthouseScore(): number {
+  public estimateLighthouseScore(): number {
     let score = 100;
 
     // FCP (First Contentful Paint) - estimated from load time

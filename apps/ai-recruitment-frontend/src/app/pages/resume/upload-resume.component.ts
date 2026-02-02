@@ -497,9 +497,8 @@ export class UploadResumeComponent implements OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((completion) => {
         this.analysisComplete.set(true);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.reportUrl.set(
-          ((completion as any)?.result?.['reportUrl'] as string) || '',
+          ((completion as { result?: { reportUrl?: string } })?.result?.reportUrl as string) || '',
         );
         this.output.set(JSON.stringify(completion, null, 2));
       });

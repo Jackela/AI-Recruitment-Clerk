@@ -37,7 +37,7 @@ export class ApiService {
    * Retrieves all jobs.
    * @returns The Observable<JobListItem[]>.
    */
-  getAllJobs(): Observable<JobListItem[]> {
+  public getAllJobs(): Observable<JobListItem[]> {
     return this.http.get<JobListItem[]>(`${this.baseUrl}/jobs`);
   }
 
@@ -46,7 +46,7 @@ export class ApiService {
    * @param jobId - The job id.
    * @returns The Observable<Job>.
    */
-  getJobById(jobId: string): Observable<Job> {
+  public getJobById(jobId: string): Observable<Job> {
     return this.http.get<Job>(`${this.baseUrl}/jobs/${jobId}`);
   }
 
@@ -55,7 +55,7 @@ export class ApiService {
    * @param request - The request.
    * @returns The Observable<CreateJobResponse>.
    */
-  createJob(request: CreateJobRequest): Observable<CreateJobResponse> {
+  public createJob(request: CreateJobRequest): Observable<CreateJobResponse> {
     return this.http.post<CreateJobResponse>(`${this.baseUrl}/jobs`, request);
   }
 
@@ -65,7 +65,7 @@ export class ApiService {
    * @param jobId - The job id.
    * @returns The Observable<ResumeListItem[]>.
    */
-  getResumesByJobId(jobId: string): Observable<ResumeListItem[]> {
+  public getResumesByJobId(jobId: string): Observable<ResumeListItem[]> {
     return this.http.get<ResumeListItem[]>(
       `${this.baseUrl}/jobs/${jobId}/resumes`,
     );
@@ -76,7 +76,7 @@ export class ApiService {
    * @param resumeId - The resume id.
    * @returns The Observable<ResumeDetail>.
    */
-  getResumeById(resumeId: string): Observable<ResumeDetail> {
+  public getResumeById(resumeId: string): Observable<ResumeDetail> {
     return this.http.get<ResumeDetail>(`${this.baseUrl}/resumes/${resumeId}`);
   }
 
@@ -86,7 +86,7 @@ export class ApiService {
    * @param files - The files.
    * @returns The Observable<ResumeUploadResponse>.
    */
-  uploadResumes(
+  public uploadResumes(
     jobId: string,
     files: File[],
   ): Observable<ResumeUploadResponse> {
@@ -107,7 +107,7 @@ export class ApiService {
    * @param jobId - The job id.
    * @returns The Observable<ReportsList>.
    */
-  getReportsByJobId(jobId: string): Observable<ReportsList> {
+  public getReportsByJobId(jobId: string): Observable<ReportsList> {
     return this.http.get<ReportsList>(`${this.baseUrl}/jobs/${jobId}/reports`);
   }
 
@@ -116,7 +116,7 @@ export class ApiService {
    * @param reportId - The report id.
    * @returns The Observable<AnalysisReport>.
    */
-  getReportById(reportId: string): Observable<AnalysisReport> {
+  public getReportById(reportId: string): Observable<AnalysisReport> {
     return this.http.get<AnalysisReport>(`${this.baseUrl}/reports/${reportId}`);
   }
 
@@ -126,7 +126,7 @@ export class ApiService {
    * @param req - The req.
    * @returns The Observable<GapAnalysisResult>.
    */
-  submitGapAnalysis(req: GapAnalysisRequest): Observable<GapAnalysisResult> {
+  public submitGapAnalysis(req: GapAnalysisRequest): Observable<GapAnalysisResult> {
     // Route through API gateway if available; otherwise proxy path should map to scoring service
     return this.http.post<GapAnalysisResult>(
       `${this.baseUrl}/scoring/gap-analysis`,
@@ -140,7 +140,7 @@ export class ApiService {
    * @param file - The file.
    * @returns The Observable<GapAnalysisResult>.
    */
-  submitGapAnalysisWithFile(
+  public submitGapAnalysisWithFile(
     jdText: string,
     file: File,
   ): Observable<GapAnalysisResult> {

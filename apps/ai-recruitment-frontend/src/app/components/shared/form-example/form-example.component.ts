@@ -1,15 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import type {
-  FormBuilder,
-  FormGroup} from '@angular/forms';
+import type { FormGroup} from '@angular/forms';
 import {
+  FormBuilder,
   FormsModule,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
 import { VALIDATION_DIRECTIVES } from '../../../directives/validation';
-import type { ToastService } from '../../../services/toast.service';
+import { ToastService } from '../../../services/toast.service';
 
 /**
  * Represents the form example component.
@@ -325,6 +324,9 @@ import type { ToastService } from '../../../services/toast.service';
   ],
 })
 export class FormExampleComponent {
+  private readonly fb = inject(FormBuilder);
+  private readonly toastService = inject(ToastService);
+
   // Template-driven form model
   public templateModel = {
     name: '',
@@ -337,13 +339,8 @@ export class FormExampleComponent {
 
   /**
    * Initializes a new instance of the Form Example Component.
-   * @param fb - The fb.
-   * @param toastService - The toast service.
    */
-  constructor(
-    private fb: FormBuilder,
-    private toastService: ToastService,
-  ) {
+  constructor() {
     this.reactiveForm = this.fb.group({
       company: ['', [Validators.required, Validators.minLength(2)]],
       position: ['', [Validators.required, Validators.minLength(2)]],

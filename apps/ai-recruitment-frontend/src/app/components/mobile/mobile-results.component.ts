@@ -5,7 +5,8 @@ import {
   Component,
   Input,
   Output,
-  EventEmitter
+  EventEmitter,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -17,7 +18,7 @@ import type {
 import {
   MobileSwipeComponent
 } from './mobile-swipe.component';
-import type { TouchGestureService } from '../../services/mobile/touch-gesture.service';
+import { TouchGestureService } from '../../services/mobile/touch-gesture.service';
 
 /**
  * Defines the shape of the candidate result.
@@ -135,9 +136,10 @@ export interface ResultsFilter {
         <div class="filter-sections">
           <!-- Score Range -->
           <div class="filter-section">
-            <label class="filter-label">Minimum Score</label>
+            <label class="filter-label" for="score-min-slider">Minimum Score</label>
             <div class="score-filter">
               <input
+                id="score-min-slider"
                 type="range"
                 min="0"
                 max="100"
@@ -151,8 +153,8 @@ export interface ResultsFilter {
 
           <!-- Status Filter -->
           <div class="filter-section">
-            <label class="filter-label">Status</label>
-            <div class="filter-chips">
+            <span class="filter-label" id="status-filter-label">Status</span>
+            <div class="filter-chips" role="group" aria-labelledby="status-filter-label">
               <button
                 *ngFor="let status of availableStatuses"
                 class="filter-chip"
@@ -166,8 +168,8 @@ export interface ResultsFilter {
 
           <!-- Experience Filter -->
           <div class="filter-section">
-            <label class="filter-label">Experience Level</label>
-            <div class="filter-chips">
+            <span class="filter-label" id="experience-filter-label">Experience Level</span>
+            <div class="filter-chips" role="group" aria-labelledby="experience-filter-label">
               <button
                 *ngFor="let exp of availableExperience"
                 class="filter-chip"
@@ -250,7 +252,12 @@ export interface ResultsFilter {
               [class.selected]="isSelected(candidate)"
               [class]="'match-' + candidate.match"
               (click)="onCandidateClick(candidate)"
+              (keydown.enter)="onCandidateClick(candidate)"
+              (keydown.space)="onCandidateClick(candidate)"
               (longpress)="onCandidateLongPress(candidate)"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="'View candidate ' + candidate.name"
             >
               <!-- Candidate Avatar -->
               <div class="candidate-avatar">
@@ -1171,11 +1178,12 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     },
   ];
 
+  private readonly _touchGesture = inject(TouchGestureService);
+
   /**
    * Initializes a new instance of the Mobile Results Component.
-   * @param _touchGesture - The touch gesture.
    */
-  constructor(private readonly _touchGesture: TouchGestureService) {
+  constructor() {
     // TouchGesture service will be used for future gesture implementations
     // Prevent unused warning
     void this._touchGesture;

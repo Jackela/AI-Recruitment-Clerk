@@ -1,13 +1,14 @@
 import type {
-  ElementRef,
   OnInit,
-  OnDestroy,
-  Renderer2} from '@angular/core';
+  OnDestroy} from '@angular/core';
 import {
   Directive,
   Input,
   Output,
   EventEmitter,
+  ElementRef,
+  Renderer2,
+  inject,
 } from '@angular/core';
 
 /**
@@ -32,10 +33,11 @@ export interface LazyLoadConfig {
   standalone: true,
 })
 export class LazyLoadDirective implements OnInit, OnDestroy {
-  @Input('arcLazyLoad') imageSrc!: string;
-  @Input() lazyLoadConfig: LazyLoadConfig = {};
-  @Output() loaded = new EventEmitter<void>();
-  @Output() error = new EventEmitter<Error>();
+  @Input('arcLazyLoad') public imageSrc!: string;
+  @Input() public lazyLoadConfig: LazyLoadConfig = {};
+  @Output() public loaded = new EventEmitter<void>();
+  // eslint-disable-next-line @angular-eslint/no-output-native
+  @Output() public error = new EventEmitter<Error>();
 
   private observer: IntersectionObserver | null = null;
   private retryCount = 0;
@@ -55,20 +57,13 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
     preload: false,
   };
 
-  /**
-   * Initializes a new instance of the Lazy Load Directive.
-   * @param el - The el.
-   * @param renderer - The renderer.
-   */
-  constructor(
-    private el: ElementRef<HTMLImageElement | HTMLDivElement>,
-    private renderer: Renderer2,
-  ) {}
+  private el = inject<ElementRef<HTMLImageElement | HTMLDivElement>>(ElementRef);
+  private renderer = inject(Renderer2);
 
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     const config = { ...this.defaultConfig, ...this.lazyLoadConfig };
 
     // Set up placeholder
@@ -91,7 +86,7 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     if (this.observer) {
       this.observer.disconnect();
       this.observer = null;
@@ -110,7 +105,7 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
 
     if (element instanceof HTMLImageElement) {
       // For img elements, set placeholder as src
-      this.renderer.setAttribute(element, 'src', config.placeholder!);
+      this.renderer.setAttribute(element, 'src', config.placeholder ?? '');
       this.renderer.setAttribute(element, 'data-src', this.imageSrc);
 
       // Add loading styles
@@ -272,15 +267,17 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
   }
 
   private handleLoadError(element: HTMLElement, config: LazyLoadConfig): void {
-    if (this.retryCount < config.retryCount!) {
+    const retryLimit = config.retryCount ?? 3;
+    const retryDelay = config.retryDelay ?? 1000;
+    if (this.retryCount < retryLimit) {
       this.retryCount++;
       setTimeout(() => {
         this.loadImage();
-      }, config.retryDelay! * this.retryCount);
+      }, retryDelay * this.retryCount);
     } else {
       // Load error image
       if (element instanceof HTMLImageElement) {
-        this.renderer.setAttribute(element, 'src', config.errorImage!);
+        this.renderer.setAttribute(element, 'src', config.errorImage ?? '');
       } else {
         this.renderer.setStyle(
           element,

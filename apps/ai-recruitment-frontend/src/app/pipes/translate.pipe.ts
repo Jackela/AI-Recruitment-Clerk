@@ -20,7 +20,7 @@ export class TranslatePipe implements PipeTransform {
    * @param params - Optional parameters for interpolation
    * @returns The translated string
    */
-  transform(key: string, params?: Record<string, any>): string {
+  public transform(key: string, params?: Record<string, unknown>): string {
     return this.i18nService.translate(key, params);
   }
 }

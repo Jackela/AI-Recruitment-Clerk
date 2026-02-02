@@ -49,9 +49,14 @@ export interface UploadFile {
         [class.dragover]="isDragOver"
         [class.disabled]="disabled"
         (click)="triggerFileSelect()"
+        (keydown.enter)="triggerFileSelect()"
+        (keydown.space)="triggerFileSelect()"
         (dragover)="onDragOver($event)"
         (dragleave)="onDragLeave($event)"
         (drop)="onDrop($event)"
+        tabindex="0"
+        role="button"
+        [attr.aria-label]="'Upload zone. Press enter or space to select files'"
       >
         <div class="upload-content">
           <div class="upload-icon">

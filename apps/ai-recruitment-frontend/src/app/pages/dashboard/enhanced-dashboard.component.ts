@@ -632,7 +632,7 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
     const getServiceStatus = (
       metric: number,
       thresholds: { warning: number; error: number },
-    ) => {
+    ): 'error' | 'warning' | 'healthy' => {
       if (metric > thresholds.error) return 'error';
       if (metric > thresholds.warning) return 'warning';
       return 'healthy';

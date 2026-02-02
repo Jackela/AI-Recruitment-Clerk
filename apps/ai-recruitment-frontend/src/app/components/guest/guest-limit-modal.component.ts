@@ -127,7 +127,7 @@ import * as GuestActions from '../../store/guest/guest.actions';
               [disabled]="isLoading$ | async"
               class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span *ngIf="!(isLoading$ | async)">获取反馈码参与活动</span>
+              <span *ngIf="(isLoading$ | async) === false">获取反馈码参与活动</span>
               <span
                 *ngIf="isLoading$ | async"
                 class="flex items-center justify-center"

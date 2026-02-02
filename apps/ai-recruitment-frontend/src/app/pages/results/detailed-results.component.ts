@@ -576,7 +576,7 @@ export class DetailedResultsComponent implements OnInit, OnDestroy {
       hour12: false,
     });
     const parts = formatter.formatToParts(date);
-    const get = (type: Intl.DateTimeFormatPartTypes) =>
+    const get = (type: Intl.DateTimeFormatPartTypes): string =>
       parts.find((p) => p.type === type)?.value || '';
     const year = get('year');
     const month = get('month');

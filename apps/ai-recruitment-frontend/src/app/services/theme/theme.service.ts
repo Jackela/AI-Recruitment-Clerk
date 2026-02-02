@@ -31,8 +31,8 @@ export class ThemeService {
   private readonly THEME_ATTRIBUTE = 'data-theme';
 
   // Reactive state
-  currentTheme = signal<Theme>('light');
-  isDarkMode = signal(false);
+  public currentTheme = signal<Theme>('light');
+  public isDarkMode = signal(false);
 
   // Theme color palettes
   private readonly themes: Record<'light' | 'dark', ThemeColors> = {
@@ -193,7 +193,7 @@ export class ThemeService {
    * Sets theme.
    * @param theme - The theme.
    */
-  setTheme(theme: Theme): void {
+  public setTheme(theme: Theme): void {
     this.currentTheme.set(theme);
     localStorage.setItem(this.STORAGE_KEY, theme);
 
@@ -211,7 +211,7 @@ export class ThemeService {
   /**
    * Performs the toggle theme operation.
    */
-  toggleTheme(): void {
+  public toggleTheme(): void {
     if (this.currentTheme() === 'auto') {
       // If auto, switch to opposite of current
       this.setTheme(this.isDarkMode() ? 'light' : 'dark');
@@ -225,7 +225,7 @@ export class ThemeService {
    * Retrieves theme colors.
    * @returns The ThemeColors.
    */
-  getThemeColors(): ThemeColors {
+  public getThemeColors(): ThemeColors {
     return this.themes[this.isDarkMode() ? 'dark' : 'light'];
   }
 
@@ -234,7 +234,7 @@ export class ThemeService {
    * Retrieves theme class.
    * @returns The string value.
    */
-  getThemeClass(): string {
+  public getThemeClass(): string {
     return this.isDarkMode() ? 'theme-dark' : 'theme-light';
   }
 
@@ -243,7 +243,7 @@ export class ThemeService {
    * Performs the apply theme to element operation.
    * @param element - The element.
    */
-  applyThemeToElement(element: HTMLElement): void {
+  public applyThemeToElement(element: HTMLElement): void {
     element.classList.remove('theme-light', 'theme-dark');
     element.classList.add(this.getThemeClass());
   }
@@ -253,7 +253,7 @@ export class ThemeService {
    * Performs the prefers reduced motion operation.
    * @returns The boolean value.
    */
-  prefersReducedMotion(): boolean {
+  public prefersReducedMotion(): boolean {
     return (
       window.matchMedia &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -265,7 +265,7 @@ export class ThemeService {
    * Performs the prefers high contrast operation.
    * @returns The boolean value.
    */
-  prefersHighContrast(): boolean {
+  public prefersHighContrast(): boolean {
     return (
       window.matchMedia &&
       (window.matchMedia('(prefers-contrast: high)').matches ||

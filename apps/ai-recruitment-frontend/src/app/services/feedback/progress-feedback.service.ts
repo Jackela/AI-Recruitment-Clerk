@@ -64,9 +64,9 @@ export class ProgressFeedbackService {
   });
 
   // Signals for reactive access
-  progressUpdates = signal<ProgressUpdate[]>([]);
-  notifications = signal<StatusNotification[]>([]);
-  globalLoading = signal<LoadingState>({
+  public progressUpdates = signal<ProgressUpdate[]>([]);
+  public notifications = signal<StatusNotification[]>([]);
+  public globalLoading = signal<LoadingState>({
     isLoading: false,
     message: '',
   });
@@ -95,7 +95,7 @@ export class ProgressFeedbackService {
    * @param id - The id.
    * @param initialMessage - The initial message.
    */
-  startProgress(id: string, initialMessage: string): void {
+  public startProgress(id: string, initialMessage: string): void {
     const update: ProgressUpdate = {
       id,
       stage: 'initializing',
@@ -117,7 +117,7 @@ export class ProgressFeedbackService {
    * @param stage - The stage.
    * @param type - The type.
    */
-  updateProgress(
+  public updateProgress(
     id: string,
     progress: number,
     message: string,
@@ -150,7 +150,7 @@ export class ProgressFeedbackService {
    * @param id - The id.
    * @param finalMessage - The final message.
    */
-  completeProgress(id: string, finalMessage?: string): void {
+  public completeProgress(id: string, finalMessage?: string): void {
     const existing = this.activeOperations.get(id);
     if (!existing) return;
 
@@ -177,7 +177,7 @@ export class ProgressFeedbackService {
    * @param id - The id.
    * @param errorMessage - The error message.
    */
-  errorProgress(id: string, errorMessage: string): void {
+  public errorProgress(id: string, errorMessage: string): void {
     const existing = this.activeOperations.get(id);
     if (!existing) return;
 
@@ -216,7 +216,7 @@ export class ProgressFeedbackService {
    * @param persistent - The persistent.
    * @returns The string value.
    */
-  showNotification(
+  public showNotification(
     title: string,
     message: string,
     type: 'info' | 'success' | 'warning' | 'error' = 'info',
@@ -252,7 +252,7 @@ export class ProgressFeedbackService {
    * Removes notification.
    * @param id - The id.
    */
-  removeNotification(id: string): void {
+  public removeNotification(id: string): void {
     const current = this.notifications$.value;
     const filtered = current.filter((n) => n.id !== id);
     this.notifications$.next(filtered);
@@ -261,7 +261,7 @@ export class ProgressFeedbackService {
   /**
    * Performs the clear all notifications operation.
    */
-  clearAllNotifications(): void {
+  public clearAllNotifications(): void {
     this.notifications$.next([]);
   }
 
@@ -273,7 +273,7 @@ export class ProgressFeedbackService {
    * @param duration - The duration.
    * @returns The string value.
    */
-  showSuccess(title: string, message: string, duration = 4000): string {
+  public showSuccess(title: string, message: string, duration = 4000): string {
     return this.showNotification(title, message, 'success', duration);
   }
 
@@ -284,7 +284,7 @@ export class ProgressFeedbackService {
    * @param persistent - The persistent.
    * @returns The string value.
    */
-  showError(title: string, message: string, persistent = true): string {
+  public showError(title: string, message: string, persistent = true): string {
     return this.showNotification(
       title,
       message,
@@ -302,7 +302,7 @@ export class ProgressFeedbackService {
    * @param duration - The duration.
    * @returns The string value.
    */
-  showWarning(title: string, message: string, duration = 6000): string {
+  public showWarning(title: string, message: string, duration = 6000): string {
     return this.showNotification(title, message, 'warning', duration);
   }
 
@@ -313,7 +313,7 @@ export class ProgressFeedbackService {
    * @param duration - The duration.
    * @returns The string value.
    */
-  showInfo(title: string, message: string, duration = 5000): string {
+  public showInfo(title: string, message: string, duration = 5000): string {
     return this.showNotification(title, message, 'info', duration);
   }
 
@@ -324,7 +324,7 @@ export class ProgressFeedbackService {
    * @param message - The message.
    * @param progress - The progress.
    */
-  startLoading(key: string, message: string, progress?: number): void {
+  public startLoading(key: string, message: string, progress?: number): void {
     const state: LoadingState = {
       isLoading: true,
       message,
@@ -342,7 +342,7 @@ export class ProgressFeedbackService {
    * @param progress - The progress.
    * @param stage - The stage.
    */
-  updateLoading(
+  public updateLoading(
     key: string,
     message?: string,
     progress?: number,
@@ -366,7 +366,7 @@ export class ProgressFeedbackService {
    * Performs the stop loading operation.
    * @param key - The key.
    */
-  stopLoading(key: string): void {
+  public stopLoading(key: string): void {
     this.loadingStates.delete(key);
     this.updateGlobalLoading();
   }
@@ -393,7 +393,7 @@ export class ProgressFeedbackService {
    * @param id - The id.
    * @returns The boolean value.
    */
-  isOperationActive(id: string): boolean {
+  public isOperationActive(id: string): boolean {
     return this.activeOperations.has(id);
   }
 
@@ -402,7 +402,7 @@ export class ProgressFeedbackService {
    * @param id - The id.
    * @returns The number value.
    */
-  getOperationProgress(id: string): number {
+  public getOperationProgress(id: string): number {
     const operation = this.activeOperations.get(id);
     return operation?.progress || 0;
   }
@@ -411,7 +411,7 @@ export class ProgressFeedbackService {
    * Performs the has active operations operation.
    * @returns The boolean value.
    */
-  hasActiveOperations(): boolean {
+  public hasActiveOperations(): boolean {
     return this.activeOperations.size > 0;
   }
 
@@ -419,7 +419,7 @@ export class ProgressFeedbackService {
    * Performs the has notifications operation.
    * @returns The boolean value.
    */
-  hasNotifications(): boolean {
+  public hasNotifications(): boolean {
     return this.notifications$.value.length > 0;
   }
 
@@ -428,7 +428,7 @@ export class ProgressFeedbackService {
    * Performs the show batch progress operation.
    * @param operations - The operations.
    */
-  showBatchProgress(operations: Array<{ id: string; message: string }>): void {
+  public showBatchProgress(operations: Array<{ id: string; message: string }>): void {
     operations.forEach((op) => {
       this.startProgress(op.id, op.message);
     });
@@ -438,7 +438,7 @@ export class ProgressFeedbackService {
    * Updates batch progress.
    * @param updates - The updates.
    */
-  updateBatchProgress(
+  public updateBatchProgress(
     updates: Array<{ id: string; progress: number; message?: string }>,
   ): void {
     updates.forEach((update) => {
@@ -455,7 +455,7 @@ export class ProgressFeedbackService {
    * Retrieves progress summary.
    * @returns The { active: number; completed: number; averageProgress: number; }.
    */
-  getProgressSummary(): {
+  public getProgressSummary(): {
     active: number;
     completed: number;
     averageProgress: number;
@@ -476,7 +476,7 @@ export class ProgressFeedbackService {
   /**
    * Performs the reset operation.
    */
-  reset(): void {
+  public reset(): void {
     this.activeOperations.clear();
     this.loadingStates.clear();
     this.progressUpdates$.next([]);

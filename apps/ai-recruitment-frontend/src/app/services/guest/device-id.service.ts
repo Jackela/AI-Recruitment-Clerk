@@ -20,17 +20,18 @@ export class DeviceIdService {
   /**
    * Get the current device ID, generating one if needed
    */
-  getDeviceId(): string {
+  public getDeviceId(): string {
     if (!this.deviceId) {
       this.initializeDeviceId();
     }
-    return this.deviceId!;
+    // After initializeDeviceId, deviceId is guaranteed to be set
+    return this.deviceId as string;
   }
 
   /**
    * Generate a new device ID and store it
    */
-  regenerateDeviceId(): string {
+  public regenerateDeviceId(): string {
     const newDeviceId = this.generateUUID();
     this.deviceId = newDeviceId;
     this.storeDeviceId(newDeviceId);
@@ -40,7 +41,7 @@ export class DeviceIdService {
   /**
    * Clear the device ID (for testing or reset purposes)
    */
-  clearDeviceId(): void {
+  public clearDeviceId(): void {
     this.deviceId = null;
     localStorage.removeItem(this.STORAGE_KEY);
   }
@@ -48,7 +49,7 @@ export class DeviceIdService {
   /**
    * Check if device ID exists
    */
-  hasDeviceId(): boolean {
+  public hasDeviceId(): boolean {
     return !!this.deviceId || !!this.getStoredDeviceId();
   }
 
@@ -109,7 +110,7 @@ export class DeviceIdService {
   /**
    * Get device fingerprint information for enhanced tracking
    */
-  getDeviceFingerprint(): {
+  public getDeviceFingerprint(): {
     deviceId: string;
     userAgent: string;
     screenResolution: string;

@@ -15,7 +15,7 @@ export class SkipNavigationDirective implements OnInit {
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.createSkipLinks();
   }
 
