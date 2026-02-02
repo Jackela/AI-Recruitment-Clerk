@@ -578,7 +578,7 @@
       "title": "Fix microservices lint issues",
       "description": "Run eslint --fix on all microservices",
       "priority": 48,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "npx nx lint resume-parser-svc --fix",
         "npx nx lint jd-extractor-svc --fix",
