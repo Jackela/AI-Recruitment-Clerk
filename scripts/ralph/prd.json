@@ -506,7 +506,7 @@
       "title": "Verify frontend has 0 warnings",
       "description": "Verify ai-recruitment-frontend has 0 lint warnings",
       "priority": 42,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "npx nx lint ai-recruitment-frontend returns 0 warnings",
         "npm run typecheck passes"
@@ -518,7 +518,7 @@
       "title": "Run eslint --fix on app-gateway",
       "description": "Auto-fix lint issues in app-gateway",
       "priority": 43,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Run npx nx lint app-gateway --fix",
         "npm run typecheck passes"
