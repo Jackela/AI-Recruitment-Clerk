@@ -24,20 +24,21 @@ describe('MfaService (focused unit tests)', () => {
   let service: MfaService;
   let userModel: ReturnType<typeof createUserModel>;
   let configService: jest.Mocked<ConfigService>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const emailService = { sendMfaToken: jest.fn() } as any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const smsService = { sendSms: jest.fn() } as any;
+  const emailService = { sendMfaToken: jest.fn() } as unknown as { sendMfaToken: jest.Mock };
+  const smsService = { sendSms: jest.fn() } as unknown as { sendSms: jest.Mock };
 
   beforeEach(() => {
     jest.clearAllMocks();
     userModel = createUserModel();
     configService = createConfigService();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    service = new MfaService(userModel as any, configService, emailService, smsService);
+    service = new MfaService(
+      userModel as unknown as Parameters<typeof MfaService.prototype.constructor>[0],
+      configService,
+      emailService as unknown as Parameters<typeof MfaService.prototype.constructor>[2],
+      smsService as unknown as Parameters<typeof MfaService.prototype.constructor>[3],
+    );
     // Avoid timers in tests
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (service as any).storeTemporaryToken = jest.fn();
+    (service as unknown as Record<string, jest.Mock>).storeTemporaryToken = jest.fn();
   });
 
   it('returns MFA status when user exists', async () => {

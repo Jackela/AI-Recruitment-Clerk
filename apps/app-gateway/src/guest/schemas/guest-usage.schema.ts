@@ -13,29 +13,29 @@ export type GuestUsageDocument = HydratedDocument<GuestUsage>;
 })
 export class GuestUsage extends Document {
   @Prop({ required: true, unique: true })
-  deviceId!: string;
+  public deviceId!: string;
 
   @Prop({ required: true, default: 0, min: 0 })
-  usageCount!: number;
+  public usageCount!: number;
 
   @Prop({ required: false, default: null })
-  feedbackCode?: string;
+  public feedbackCode?: string;
 
   @Prop({
     required: false,
     enum: ['generated', 'redeemed'],
     default: null,
   })
-  feedbackCodeStatus?: 'generated' | 'redeemed';
+  public feedbackCodeStatus?: 'generated' | 'redeemed';
 
   @Prop({ required: true, default: Date.now })
-  lastUsed!: Date;
+  public lastUsed!: Date;
 
   @Prop({ required: true, default: Date.now })
-  createdAt!: Date;
+  public createdAt!: Date;
 
   @Prop({ required: true, default: Date.now })
-  updatedAt!: Date;
+  public updatedAt!: Date;
 }
 
 export const GuestUsageSchema = SchemaFactory.createForClass(GuestUsage);

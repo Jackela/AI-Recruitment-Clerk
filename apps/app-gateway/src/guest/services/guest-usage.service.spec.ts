@@ -9,12 +9,10 @@ type StoreRecord = {
   createdAt: Date;
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const createModelMock = () => {
   const store = new Map<string, StoreRecord>();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const findOne = jest.fn(async (query: Record<string, any>) => {
+  const findOne = jest.fn(async (query: Record<string, unknown>) => {
     if (query.deviceId) {
       return store.get(query.deviceId) ?? null;
     }
@@ -41,8 +39,7 @@ const createModelMock = () => {
     return record;
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateOne = jest.fn(async (query: Record<string, any>, update: any) => {
+  const updateOne = jest.fn(async (query: Record<string, unknown>, update: Record<string, unknown>) => {
     const target =
       store.get(query.deviceId) ??
       Array.from(store.values()).find(
@@ -59,17 +56,15 @@ const createModelMock = () => {
       Object.assign(target, update.$set);
     }
     if (update.$unset) {
-      Object.keys(update.$unset).forEach((key) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (target as any)[key] = null;
+      Object.keys(update.$unset as Record<string, unknown>).forEach((key) => {
+        (target as unknown as Record<string, unknown>)[key] = null;
       });
     }
     store.set(target.deviceId, target);
     return { acknowledged: true, modifiedCount: 1 };
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const deleteMany = jest.fn(async (query: Record<string, any>) => {
+  const deleteMany = jest.fn(async (query: Record<string, unknown>) => {
     const before = store.size;
     const cutoff: Date = query.lastUsed?.$lt;
     Array.from(store.entries()).forEach(([deviceId, record]) => {
@@ -112,8 +107,7 @@ describe('GuestUsageService (mocked model)', () => {
     const factory = createModelMock();
     model = factory.model;
     store = factory.store;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    service = new GuestUsageService(model as any);
+    service = new GuestUsageService(model as unknown as Parameters<typeof GuestUsageService.prototype.constructor>[0]);
   });
 
   describe('canUse', () => {
@@ -309,8 +303,7 @@ describe('GuestUsageService (mocked model)', () => {
       const deviceId = 'device-no-count';
       store.set(deviceId, {
         deviceId,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        usageCount: undefined as any,
+        usageCount: undefined as unknown as number,
         lastUsed: new Date(),
         createdAt: new Date(),
       });
