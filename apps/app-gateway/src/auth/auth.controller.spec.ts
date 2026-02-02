@@ -6,20 +6,22 @@
  * @module AuthControllerTests
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { HttpStatus } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import { HttpStatus as _HttpStatus } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UserService } from './user.service';
-import {
+import type {
   LoginDto,
   CreateUserDto,
   RefreshTokenDto,
   AuthResponseDto,
   UserDto,
+  AuthenticatedRequest} from '@ai-recruitment-clerk/user-management-domain';
+import {
   UserRole,
-  Permission,
-  AuthenticatedRequest,
+  Permission as _Permission
 } from '@ai-recruitment-clerk/user-management-domain';
 
 type SecurityFlagKey =

@@ -1,7 +1,8 @@
 import { of, throwError } from 'rxjs';
-import { HttpService } from '@nestjs/axios';
-import { ConfigService } from '@nestjs/config';
-import { AxiosError, AxiosResponse } from 'axios';
+import type { HttpService } from '@nestjs/axios';
+import type { ConfigService } from '@nestjs/config';
+import type { AxiosResponse } from 'axios';
+import { AxiosError } from 'axios';
 import { OpenAIEmbeddingProvider } from './openai-embedding.provider';
 
 describe('OpenAIEmbeddingProvider', () => {

@@ -1,5 +1,5 @@
 import { JobRepository } from './job.repository';
-import { CacheService } from '../cache/cache.service';
+import type { CacheService } from '../cache/cache.service';
 
 const createJobModelMock = () => {
   const doc = {

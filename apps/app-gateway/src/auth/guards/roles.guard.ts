@@ -30,7 +30,7 @@ export class RolesGuard implements CanActivate {
    * @param context - The context.
    * @returns The boolean value.
    */
-  canActivate(context: ExecutionContext): boolean {
+  public canActivate(context: ExecutionContext): boolean {
     const requiredPermissions = this.reflector.getAllAndOverride<Permission[]>(
       PERMISSIONS_KEY,
       [context.getHandler(), context.getClass()],

@@ -38,14 +38,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * @param payload - The payload.
    * @returns A promise that resolves to UserDto.
    */
-  async validate(payload: JwtPayload): Promise<UserDto> {
+  public async validate(payload: JwtPayload): Promise<UserDto> {
     try {
       const user = await this.authService.validateJwtPayload(payload);
       if (!user) {
         throw new UnauthorizedException('Invalid token payload');
       }
       return user;
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Token validation failed');
     }
   }

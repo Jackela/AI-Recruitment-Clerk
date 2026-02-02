@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { MarketingAdminController } from './marketing-admin.controller';
-import { FeedbackCodeService } from './feedback-code.service';
+import type { FeedbackCodeService } from './feedback-code.service';
 
 const createService = (): jest.Mocked<FeedbackCodeService> =>
   ({

@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { GuestResumeController } from './guest-resume.controller';
-import { GuestUsageService } from '../services/guest-usage.service';
-import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
-import { GridFsService } from '../../services/gridfs.service';
+import type { GuestUsageService } from '../services/guest-usage.service';
+import type { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
+import type { GridFsService } from '../../services/gridfs.service';
 import type { RequestWithDeviceId } from '../guards/guest.guard';
 
 describe('GuestResumeController (lightweight)', () => {

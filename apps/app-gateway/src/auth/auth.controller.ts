@@ -143,7 +143,7 @@ export class AuthController {
   @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() createUserDto: CreateUserDto): Promise<{
+  public async register(@Body() createUserDto: CreateUserDto): Promise<{
     organizationId: string;
     userId: string;
     accessToken: string;
@@ -212,7 +212,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(
+  public async login(
     @Request() _req: AuthenticatedRequest,
     @Body() loginDto: LoginDto,
   ): Promise<AuthResponseDto> {
@@ -261,7 +261,7 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refreshToken(
+  public async refreshToken(
     @Body() refreshTokenDto: RefreshTokenDto,
   ): Promise<AuthResponseDto> {
     return this.authService.refreshToken(refreshTokenDto.refreshToken);
@@ -303,7 +303,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(
+  public async logout(
     @Request() req: AuthenticatedRequest,
   ): Promise<{ message: string }> {
     await this.authService.logout(req.user.id);
@@ -317,7 +317,7 @@ export class AuthController {
    */
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  async getProfile(@Request() req: AuthenticatedRequest): Promise<UserDto> {
+  public async getProfile(@Request() req: AuthenticatedRequest): Promise<UserDto> {
     return req.user;
   }
 
@@ -330,7 +330,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Patch('change-password')
   @HttpCode(HttpStatus.OK)
-  async changePassword(
+  public async changePassword(
     @Request() req: AuthenticatedRequest,
     @Body() body: { currentPassword: string; newPassword: string },
   ): Promise<{ message: string }> {
@@ -350,9 +350,10 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Permissions(Permission.READ_USER)
   @Get('users')
-  async getUsers(@Request() req: AuthenticatedRequest): Promise<UserDto[]> {
+  public async getUsers(@Request() req: AuthenticatedRequest): Promise<UserDto[]> {
     // HR Managers and Recruiters can only see users in their organization
     const requesterRole = String(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (req.user as any)?.rawRole ?? req.user.role ?? '',
     ).toLowerCase();
 
@@ -362,11 +363,13 @@ export class AuthController {
 
     // Remove password field from response
     return users.map((user) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { password: _password, ...userWithoutPassword } = user as any;
 
       return {
         ...userWithoutPassword,
         role: String(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (userWithoutPassword as any)?.rawRole ??
             userWithoutPassword.role ?? '',
         ).toLowerCase(),
@@ -381,7 +384,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Permissions(Permission.READ_USER)
   @Get('users/stats')
-  async getUserStats(): Promise<{
+  public async getUserStats(): Promise<{
     totalUsers: number;
     activeUsers: number;
     organizations: string[];
@@ -395,7 +398,7 @@ export class AuthController {
    */
   @Public()
   @Get('health')
-  async healthCheck(): Promise<{ status: string; timestamp: string }> {
+  public async healthCheck(): Promise<{ status: string; timestamp: string }> {
     return {
       status: 'healthy',
       timestamp: new Date().toISOString(),

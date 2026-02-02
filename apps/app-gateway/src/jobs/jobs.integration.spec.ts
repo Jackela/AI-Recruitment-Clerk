@@ -1,15 +1,16 @@
 import { randomUUID } from 'crypto';
 import { JobsService } from './jobs.service';
-import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
-import { CreateJobDto } from './dto/create-job.dto';
+import type { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
+import type { CreateJobDto } from './dto/create-job.dto';
+import type {
+  UserDto} from '@ai-recruitment-clerk/user-management-domain';
 import {
-  UserDto,
   UserRole,
 } from '@ai-recruitment-clerk/user-management-domain';
-import { CacheService } from '../cache/cache.service';
-import { JobRepository } from '../repositories/job.repository';
-import { WebSocketGateway } from '../websocket/websocket.gateway';
-import { ConfigService } from '@nestjs/config';
+import type { CacheService } from '../cache/cache.service';
+import type { JobRepository } from '../repositories/job.repository';
+import type { WebSocketGateway } from '../websocket/websocket.gateway';
+import type { ConfigService } from '@nestjs/config';
 import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
 
 const createJobsServiceForTest = () => {

@@ -5,13 +5,14 @@
 
 // Fallback implementations for missing infrastructure-shared components
 class StandardizedGlobalExceptionFilter {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(_config: any) {
     // Basic exception filter implementation
   }
 }
 
 class ExceptionFilterConfigHelper {
-  static forApiGateway() {
+  public static forApiGateway(): { enableLogging: boolean; enableCorrelation: boolean } {
     return {
       enableLogging: true,
       enableCorrelation: true,

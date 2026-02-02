@@ -19,7 +19,7 @@ export class SmsService {
     this.initializeTwilio();
   }
 
-  private initializeTwilio() {
+  private initializeTwilio(): void {
     const accountSid = this.configService.get<string>('TWILIO_ACCOUNT_SID');
     const authToken = this.configService.get<string>('TWILIO_AUTH_TOKEN');
     this.fromPhone = this.configService.get<string>('TWILIO_FROM_PHONE') || '';
@@ -45,7 +45,7 @@ export class SmsService {
    * @param message - The message.
    * @returns A promise that resolves when the operation completes.
    */
-  async sendSms(phoneNumber: string, message: string): Promise<void> {
+  public async sendSms(phoneNumber: string, message: string): Promise<void> {
     // Validate phone number format
     if (!this.isValidPhoneNumber(phoneNumber)) {
       throw new Error('Invalid phone number format');
@@ -97,9 +97,10 @@ export class SmsService {
    * @param details - The details.
    * @returns A promise that resolves when the operation completes.
    */
-  async sendSecurityAlert(
+  public async sendSecurityAlert(
     phoneNumber: string,
     event: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details: any,
   ): Promise<void> {
     const issuer =
@@ -145,7 +146,8 @@ export class SmsService {
    * @param messageSid - The message sid.
    * @returns A promise that resolves to any.
    */
-  async getDeliveryStatus(messageSid: string): Promise<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async getDeliveryStatus(messageSid: string): Promise<any> {
     if (!this.twilioClient) {
       return { status: 'not_configured', message: 'Twilio not configured' };
     }
@@ -177,7 +179,7 @@ export class SmsService {
    * @param phoneNumber - The phone number.
    * @returns The { isValid: boolean; formatted?: string; error?: string; }.
    */
-  validatePhoneNumber(phoneNumber: string): {
+  public validatePhoneNumber(phoneNumber: string): {
     isValid: boolean;
     formatted?: string;
     error?: string;
@@ -210,7 +212,7 @@ export class SmsService {
    * Performs the test connection operation.
    * @returns A promise that resolves to { success: boolean; message: string }.
    */
-  async testConnection(): Promise<{ success: boolean; message: string }> {
+  public async testConnection(): Promise<{ success: boolean; message: string }> {
     if (!this.twilioClient) {
       return { success: false, message: 'Twilio client not initialized' };
     }

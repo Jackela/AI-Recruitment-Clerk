@@ -49,7 +49,7 @@ export class UserService {
     this.initializeDefaultUsers();
   }
 
-  private initializeDefaultUsers() {
+  private initializeDefaultUsers(): void {
     const defaultUsers: UserEntity[] = [
       {
         id: 'admin-001',
@@ -200,7 +200,7 @@ export class UserService {
    * @param createUserDto - The create user dto.
    * @returns A promise that resolves to UserEntity.
    */
-  async create(
+  public async create(
     createUserDto: CreateUserDto & { password: string },
   ): Promise<UserDto> {
     const email = this.normalizeEmail(createUserDto.email || '');
@@ -219,8 +219,10 @@ export class UserService {
     // Derive names when only a single name is provided
     let firstName = createUserDto.firstName;
     let lastName = createUserDto.lastName;
-    if ((!firstName || !lastName) && (createUserDto as any).name) {
-      const parts = String((createUserDto as any).name)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const createUserDtoWithName = createUserDto as any;
+    if ((!firstName || !lastName) && createUserDtoWithName.name) {
+      const parts = String(createUserDtoWithName.name)
         .trim()
         .split(/\s+/);
       firstName = firstName || parts[0] || '';
@@ -264,7 +266,7 @@ export class UserService {
    * @param id - The id.
    * @returns A promise that resolves to UserEntity | null.
    */
-  async findById(id: string): Promise<UserDto | null> {
+  public async findById(id: string): Promise<UserDto | null> {
     const user = this.users.get(id);
     return user ? this.sanitizeUser(user) : null;
   }
@@ -275,7 +277,7 @@ export class UserService {
    * @param id - The id.
    * @returns A promise that resolves to UserEntity | null.
    */
-  async findByIdWithSensitiveData(id: string): Promise<UserEntity | null> {
+  public async findByIdWithSensitiveData(id: string): Promise<UserEntity | null> {
     const user = this.users.get(id);
     if (!user) {
       return null;
@@ -292,7 +294,7 @@ export class UserService {
    * @param email - The email.
    * @returns A promise that resolves to UserEntity | null.
    */
-  async findByEmail(email: string): Promise<UserDto | null> {
+  public async findByEmail(email: string): Promise<UserDto | null> {
     if (!email || typeof email !== 'string') {
       return null;
     }
@@ -312,7 +314,7 @@ export class UserService {
    * @param organizationId - The organization id.
    * @returns A promise that resolves to an array of UserEntity.
    */
-  async findByOrganizationId(organizationId: string): Promise<UserDto[]> {
+  public async findByOrganizationId(organizationId: string): Promise<UserDto[]> {
     return Array.from(this.users.values())
       .filter((user) => user.organizationId === organizationId)
       .map((user) => this.sanitizeUser(user));
@@ -324,7 +326,7 @@ export class UserService {
    * @param hashedPassword - The hashed password.
    * @returns A promise that resolves when the operation completes.
    */
-  async updatePassword(id: string, hashedPassword: string): Promise<void> {
+  public async updatePassword(id: string, hashedPassword: string): Promise<void> {
     const user = this.users.get(id);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -341,7 +343,7 @@ export class UserService {
    * @param plainPassword - The plain password to validate.
    * @returns A promise that resolves to boolean value.
    */
-  async validatePassword(
+  public async validatePassword(
     userId: string,
     plainPassword: string,
   ): Promise<boolean> {
@@ -371,7 +373,7 @@ export class UserService {
    * @param id - The id.
    * @returns A promise that resolves when the operation completes.
    */
-  async updateLastActivity(id: string): Promise<void> {
+  public async updateLastActivity(id: string): Promise<void> {
     const user = this.users.get(id);
     if (user) {
       user.lastActivity = new Date();
@@ -385,7 +387,7 @@ export class UserService {
    * @param updates - The updates.
    * @returns A promise that resolves to UserEntity.
    */
-  async updateUser(
+  public async updateUser(
     id: string,
     updates: Partial<Omit<UserDto, 'id' | 'createdAt'>>,
   ): Promise<UserDto> {
@@ -454,7 +456,7 @@ export class UserService {
    * @param id - The id.
    * @returns A promise that resolves when the operation completes.
    */
-  async deleteUser(id: string): Promise<void> {
+  public async deleteUser(id: string): Promise<void> {
     const user = this.users.get(id);
     if (user) {
       this.emailToIdMap.delete(user.email);
@@ -467,7 +469,7 @@ export class UserService {
    * @param organizationId - The organization id.
    * @returns A promise that resolves to an array of UserEntity.
    */
-  async listUsers(organizationId?: string): Promise<UserDto[]> {
+  public async listUsers(organizationId?: string): Promise<UserDto[]> {
     const users = Array.from(this.users.values());
 
     const filtered = organizationId
@@ -480,7 +482,7 @@ export class UserService {
   /**
    * Update security flag for user (used for token revocation, account locking, etc.)
    */
-  async updateSecurityFlag(
+  public async updateSecurityFlag(
     userId: string,
     flag: SecurityFlagKey,
     value: boolean,
@@ -519,7 +521,7 @@ export class UserService {
   /**
    * Get security flags for user
    */
-  async getSecurityFlags(
+  public async getSecurityFlags(
     userId: string,
   ): Promise<UserEntity['securityFlags'] | null> {
     const user = this.users.get(userId);
@@ -533,7 +535,7 @@ export class UserService {
   /**
    * Check if user has specific security flag
    */
-  async hasSecurityFlag(
+  public async hasSecurityFlag(
     userId: string,
     flag: SecurityFlagKey,
   ): Promise<boolean> {
@@ -544,7 +546,7 @@ export class UserService {
   /**
    * Clear all security flags for user
    */
-  async clearSecurityFlags(userId: string): Promise<void> {
+  public async clearSecurityFlags(userId: string): Promise<void> {
     const user = this.users.get(userId);
     if (!user) {
       throw new NotFoundException(`User ${userId} not found`);
@@ -562,7 +564,7 @@ export class UserService {
    * Retrieves stats.
    * @returns The Promise<{ totalUsers: number; activeUsers: number; organizations: string[]; }>.
    */
-  async getStats(): Promise<{
+  public async getStats(): Promise<{
     totalUsers: number;
     activeUsers: number;
     organizations: string[];

@@ -27,30 +27,30 @@ export class EnableMfaDto {
   @ApiProperty({ enum: MfaMethod, description: 'MFA method to enable' })
   @IsEnum(MfaMethod)
   @IsNotEmpty()
-  method: MfaMethod = MfaMethod.TOTP;
+  public method: MfaMethod = MfaMethod.TOTP;
 
   @ApiPropertyOptional({ description: 'Phone number for SMS MFA' })
   @ValidateIf((o) => o.method === MfaMethod.SMS)
   @IsPhoneNumber()
   @IsNotEmpty()
-  phoneNumber?: string;
+  public phoneNumber?: string;
 
   @ApiPropertyOptional({ description: 'Email address for email MFA' })
   @ValidateIf((o) => o.method === MfaMethod.EMAIL)
   @IsEmail()
   @IsNotEmpty()
-  email?: string;
+  public email?: string;
 
   @ApiPropertyOptional({ description: 'TOTP secret for authenticator app' })
   @ValidateIf((o) => o.method === MfaMethod.TOTP)
   @IsString()
   @IsOptional()
-  totpSecret?: string;
+  public totpSecret?: string;
 
   @ApiProperty({ description: 'Current password for verification' })
   @IsString()
   @IsNotEmpty()
-  currentPassword = '';
+  public currentPassword = '';
 }
 
 /**
@@ -62,17 +62,17 @@ export class VerifyMfaDto {
   @IsNotEmpty()
   @Length(4, 8)
   @Matches(/^[0-9]+$/, { message: 'Token must contain only numbers' })
-  token = '';
+  public token = '';
 
   @ApiPropertyOptional({ description: 'MFA method used' })
   @IsEnum(MfaMethod)
   @IsOptional()
-  method?: MfaMethod;
+  public method?: MfaMethod;
 
   @ApiPropertyOptional({ description: 'Remember this device for 30 days' })
   @IsBoolean()
   @IsOptional()
-  rememberDevice?: boolean = false;
+  public rememberDevice?: boolean = false;
 }
 
 /**
@@ -82,14 +82,14 @@ export class DisableMfaDto {
   @ApiProperty({ description: 'Current password for verification' })
   @IsString()
   @IsNotEmpty()
-  currentPassword = '';
+  public currentPassword = '';
 
   @ApiProperty({ description: 'MFA token for verification' })
   @IsString()
   @IsNotEmpty()
   @Length(4, 8)
   @Matches(/^[0-9]+$/, { message: 'Token must contain only numbers' })
-  mfaToken = '';
+  public mfaToken = '';
 }
 
 /**
@@ -99,14 +99,14 @@ export class GenerateBackupCodesDto {
   @ApiProperty({ description: 'Current password for verification' })
   @IsString()
   @IsNotEmpty()
-  currentPassword = '';
+  public currentPassword = '';
 
   @ApiProperty({ description: 'MFA token for verification' })
   @IsString()
   @IsNotEmpty()
   @Length(4, 8)
   @Matches(/^[0-9]+$/, { message: 'Token must contain only numbers' })
-  mfaToken = '';
+  public mfaToken = '';
 }
 
 /**
@@ -118,7 +118,7 @@ export class UseBackupCodeDto {
   @IsNotEmpty()
   @Length(8, 12)
   @Matches(/^[A-Z0-9-]+$/, { message: 'Invalid backup code format' })
-  backupCode = '';
+  public backupCode = '';
 }
 
 /**
@@ -127,24 +127,24 @@ export class UseBackupCodeDto {
 export class MfaStatusDto {
   @ApiProperty({ description: 'Whether MFA is enabled' })
   @IsBoolean()
-  enabled = false;
+  public enabled = false;
 
   @ApiProperty({ description: 'List of enabled MFA methods', type: [String] })
   @IsArray()
   @IsEnum(MfaMethod, { each: true })
   @ArrayMaxSize(3)
-  methods: MfaMethod[] = [];
+  public methods: MfaMethod[] = [];
 
   @ApiProperty({ description: 'Number of remaining backup codes' })
-  remainingBackupCodes = 0;
+  public remainingBackupCodes = 0;
 
   @ApiProperty({ description: 'Whether device is trusted (MFA not required)' })
   @IsBoolean()
-  deviceTrusted = false;
+  public deviceTrusted = false;
 
   @ApiProperty({ description: 'Backup codes available' })
   @IsBoolean()
-  hasBackupCodes = false;
+  public hasBackupCodes = false;
 }
 
 /**
@@ -152,27 +152,27 @@ export class MfaStatusDto {
  */
 export class MfaSetupResponseDto {
   @ApiProperty({ description: 'Whether setup was successful' })
-  success = false;
+  public success = false;
 
   @ApiProperty({
     description: 'QR code for TOTP setup (base64 encoded)',
     required: false,
   })
-  qrCode?: string;
+  public qrCode?: string;
 
   @ApiProperty({
     description: 'Secret key for manual TOTP setup',
     required: false,
   })
-  secretKey?: string;
+  public secretKey?: string;
 
   @ApiProperty({
     description: 'Backup codes for recovery',
     type: [String],
     required: false,
   })
-  backupCodes?: string[];
+  public backupCodes?: string[];
 
   @ApiProperty({ description: 'Setup message or instructions' })
-  message = '';
+  public message = '';
 }

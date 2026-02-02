@@ -1,6 +1,6 @@
 import { AnalyticsIntegrationService } from './analytics-integration.service';
-import { AnalyticsEventRepository } from './analytics-event.repository';
-import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
+import type { AnalyticsEventRepository } from './analytics-event.repository';
+import type { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
 
 const createService = () => {
   const repository = {

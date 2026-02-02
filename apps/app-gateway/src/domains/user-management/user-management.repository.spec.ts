@@ -1,10 +1,12 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
+import type {
+  UserEntity} from './user-management.repository';
 import {
-  UserManagementRepository,
-  UserEntity,
+  UserManagementRepository
 } from './user-management.repository';
+import type {
+  CreateUserDto} from '@ai-recruitment-clerk/user-management-domain';
 import {
-  CreateUserDto,
   UserRole,
   UserStatus,
 } from '@ai-recruitment-clerk/user-management-domain';

@@ -1,10 +1,10 @@
 import { Logger } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { JobRepository } from '../repositories/job.repository';
-import { NatsClientService } from '@ai-recruitment-clerk/shared-nats-client';
-import { CacheService } from '../cache/cache.service';
-import { CacheWarmupService } from '../cache/cache-warmup.service';
+import type { AppService } from './app.service';
+import type { JobRepository } from '../repositories/job.repository';
+import type { NatsClientService } from '@ai-recruitment-clerk/shared-nats-client';
+import type { CacheService } from '../cache/cache.service';
+import type { CacheWarmupService } from '../cache/cache-warmup.service';
 
 type ControllerDeps = {
   appService: jest.Mocked<AppService>;
@@ -40,7 +40,7 @@ const createDeps = (): ControllerDeps => {
       healthCheck: jest.fn().mockResolvedValue({ status: 'healthy' }),
       getMetrics: jest.fn().mockReturnValue(cacheMetrics),
       getHealthCacheKey: jest.fn().mockReturnValue('health-cache-key'),
-      wrap: jest.fn(async (_key: string, compute: () => Promise<any>) =>
+      wrap: jest.fn(async (_key: string, compute: () => Promise<unknown>) =>
         compute(),
       ),
     } as unknown as jest.Mocked<CacheService>,
@@ -119,7 +119,7 @@ describe('AppController (mocked)', () => {
       deps.jobRepository.healthCheck.mockRejectedValue(
         new Error('db unavailable'),
       );
-      deps.cacheService.wrap.mockImplementation(async (_key, compute) => {
+      deps.cacheService.wrap.mockImplementation(async (_key, _compute) => {
         throw new Error('cache offline');
       });
 

@@ -1,5 +1,5 @@
-import { ConfigService } from '@nestjs/config';
-import { RedisConnectionService } from './redis-connection.service';
+import type { ConfigService } from '@nestjs/config';
+import type { RedisConnectionService } from './redis-connection.service';
 import { VectorStoreService } from './vector-store.service';
 
 describe('VectorStoreService', () => {

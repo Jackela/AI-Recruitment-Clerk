@@ -1,7 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { FeedbackCodeController } from './feedback-code.controller';
-import { FeedbackCodeService } from './feedback-code.service';
-import {
+import type { FeedbackCodeService } from './feedback-code.service';
+import type {
   CreateFeedbackCodeDto,
   MarkFeedbackCodeUsedDto,
 } from './feedback-code.service';

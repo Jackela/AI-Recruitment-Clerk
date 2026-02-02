@@ -1,5 +1,5 @@
 import { UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigService } from '@nestjs/config';
 import { MfaService } from './mfa.service';
 import { MfaMethod } from '../dto/mfa.dto';
 

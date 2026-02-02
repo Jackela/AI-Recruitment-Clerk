@@ -52,22 +52,20 @@ export class AuthService {
     private readonly tokenBlacklistService: RedisTokenBlacklistService,
   ) {
     // Ensure backward compatibility with mocks that provide older method names
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const tokenService = this.tokenBlacklistService as any;
     if (
-      typeof (this.tokenBlacklistService as any).blacklistToken !== 'function' &&
-      typeof (this.tokenBlacklistService as any).addToken === 'function'
+      typeof tokenService.blacklistToken !== 'function' &&
+      typeof tokenService.addToken === 'function'
     ) {
-      (this.tokenBlacklistService as any).blacklistToken = (
-        this.tokenBlacklistService as any
-      ).addToken;
+      tokenService.blacklistToken = tokenService.addToken;
     }
 
     if (
-      typeof (this.tokenBlacklistService as any).isBlacklisted !== 'function' &&
-      typeof (this.tokenBlacklistService as any).isTokenBlacklisted === 'function'
+      typeof tokenService.isBlacklisted !== 'function' &&
+      typeof tokenService.isTokenBlacklisted === 'function'
     ) {
-      (this.tokenBlacklistService as any).isBlacklisted = (
-        this.tokenBlacklistService as any
-      ).isTokenBlacklisted.bind(this.tokenBlacklistService);
+      tokenService.isBlacklisted = tokenService.isTokenBlacklisted.bind(this.tokenBlacklistService);
     }
 
     // Start periodic cleanup of expired blacklisted tokens - skip in test environment
@@ -84,8 +82,9 @@ export class AuthService {
    * @param createUserDto - The create user dto.
    * @returns A promise that resolves to AuthResponseDto.
    */
-  async register(createUserDto: CreateUserDto): Promise<AuthResponseDto> {
+  public async register(createUserDto: CreateUserDto): Promise<AuthResponseDto> {
     // Normalize input for tests: generate orgId if missing; split name
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const normalized: any = { ...createUserDto };
     if (!normalized.organizationId && (normalized.organizationName || true)) {
       normalized.organizationId = `org-${Math.random().toString(36).slice(2, 10)}`;
@@ -129,7 +128,7 @@ export class AuthService {
     recoveryTimeout: 60000,
     monitoringPeriod: 300000,
   })
-  async login(loginDto: LoginDto): Promise<AuthResponseDto> {
+  public async login(loginDto: LoginDto): Promise<AuthResponseDto> {
     const clientId = this.hashEmail(loginDto.email);
 
     // Check if account is locked
@@ -160,7 +159,7 @@ export class AuthService {
    * @param password - The password.
    * @returns A promise that resolves to UserDto | null.
    */
-  async validateUser(email: string, password: string): Promise<UserDto | null> {
+  public async validateUser(email: string, password: string): Promise<UserDto | null> {
     const user = await this.userService.findByEmail(email);
     if (!user) {
       return null;
@@ -191,7 +190,7 @@ export class AuthService {
    * @param token - The token.
    * @returns A promise that resolves to UserDto.
    */
-  async validateJwtPayload(
+  public async validateJwtPayload(
     payload: JwtPayload,
     token?: string,
   ): Promise<UserDto> {
@@ -244,7 +243,7 @@ export class AuthService {
    * @param refreshToken - The refresh token.
    * @returns A promise that resolves to AuthResponseDto.
    */
-  async refreshToken(refreshToken: string): Promise<AuthResponseDto> {
+  public async refreshToken(refreshToken: string): Promise<AuthResponseDto> {
     try {
       // Validate refresh token format
       if (!refreshToken || typeof refreshToken !== 'string') {
@@ -360,7 +359,7 @@ export class AuthService {
    * @param refreshToken - The refresh token.
    * @returns A promise that resolves when the operation completes.
    */
-  async logout(
+  public async logout(
     userIdOrToken: string,
     accessToken?: string,
     refreshToken?: string,
@@ -373,6 +372,7 @@ export class AuthService {
         accessToken = userIdOrToken;
         const decoded =
           typeof this.jwtService.decode === 'function'
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ? (this.jwtService.decode(accessToken) as any)
             : null;
         if (decoded?.sub) {
@@ -385,6 +385,7 @@ export class AuthService {
         try {
           const payload =
             typeof this.jwtService.decode === 'function'
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               ? (this.jwtService.decode(accessToken) as any)
               : null;
           const exp =
@@ -409,6 +410,7 @@ export class AuthService {
         try {
           const payload =
             typeof this.jwtService.decode === 'function'
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               ? (this.jwtService.decode(refreshToken) as any)
               : null;
           const exp =
@@ -431,6 +433,7 @@ export class AuthService {
 
       if (
         !tokenOnlyMode &&
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         typeof (this.userService as any).updateLastActivity === 'function'
       ) {
         await this.userService.updateLastActivity(userId);
@@ -451,7 +454,7 @@ export class AuthService {
    * @param newPassword - The new password.
    * @returns A promise that resolves when the operation completes.
    */
-  async changePassword(
+  public async changePassword(
     userId: string,
     currentPassword: string,
     newPassword: string,
@@ -568,9 +571,11 @@ export class AuthService {
   }
 
   private normalizeRole(user: UserDto): string | undefined {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userWithRawRole = user as any;
     const rawRole =
-      (user as any)?.rawRole !== undefined
-        ? (user as any).rawRole
+      userWithRawRole?.rawRole !== undefined
+        ? userWithRawRole.rawRole
         : user.role;
 
     if (typeof rawRole === 'string') {
@@ -582,10 +587,12 @@ export class AuthService {
 
   private prepareUserForResponse(user: UserDto): UserDto {
     const normalizedRole = this.normalizeRole(user);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userWithUsername = user as any;
     const safeUser: UserDto = {
       id: user.id,
       email: user.email,
-      username: (user as any)?.username,
+      username: userWithUsername?.username,
       firstName: user.firstName,
       lastName: user.lastName,
       name: user.name ?? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim(),
@@ -604,7 +611,7 @@ export class AuthService {
    * Emergency security response: Blacklist all tokens for a user
    * Use this when a security breach is detected
    */
-  async emergencyRevokeAllUserTokens(
+  public async emergencyRevokeAllUserTokens(
     userId: string,
     reason = 'security_breach',
   ): Promise<void> {
@@ -630,10 +637,11 @@ export class AuthService {
   /**
    * Get comprehensive security metrics
    */
-  async getSecurityMetrics(): Promise<{
+  public async getSecurityMetrics(): Promise<{
     blacklistedTokensCount: number;
     failedLoginAttemptsCount: number;
     lockedAccountsCount: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     tokenBlacklistMetrics: any;
   }> {
     const now = Date.now();
@@ -658,9 +666,10 @@ export class AuthService {
   /**
    * Health check for authentication service
    */
-  async authHealthCheck(): Promise<{
+  public async authHealthCheck(): Promise<{
     status: string;
     authService: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     tokenBlacklist: any;
     memoryUsage: {
       blacklistedTokens: number;

@@ -106,7 +106,7 @@ export class AnalysisController {
     ],
     operationContext: 'Analysis.startAnalysis',
   })
-  async startAnalysis(
+  public async startAnalysis(
     @Body() analysisRequest: AnalysisRequestDto,
     @UploadedFile() resumeFile: MulterFile,
   ): Promise<AnalysisInitiatedResponseDto> {

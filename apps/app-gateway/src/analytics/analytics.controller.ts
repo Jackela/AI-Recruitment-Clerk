@@ -10,7 +10,7 @@ import {
 import type { Response } from 'express';
 import { Public } from '../auth/decorators/public.decorator';
 
-function id(prefix: string) {
+function id(prefix: string): string {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
@@ -28,7 +28,8 @@ export class AnalyticsController {
   @Public()
   @Post('events')
   @HttpCode(HttpStatus.NO_CONTENT)
-  event(@Body() _body: any, @Res() res: Response) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public event(@Body() _body: any, @Res() res: Response): Response {
     // Bypass global interceptors for maximum performance in tests
     return res.status(HttpStatus.NO_CONTENT).send();
   }
@@ -41,7 +42,8 @@ export class AnalyticsController {
   @Public()
   @Post('metrics/performance')
   @HttpCode(HttpStatus.CREATED)
-  perf(@Body() _body: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public perf(@Body() _body: any): { metricId: string } {
     return { metricId: id('met') };
   }
 
@@ -53,7 +55,8 @@ export class AnalyticsController {
   @Public()
   @Post('metrics/business')
   @HttpCode(HttpStatus.CREATED)
-  biz(@Body() _body: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public biz(@Body() _body: any): { metricId: string } {
     return { metricId: id('met') };
   }
 
@@ -65,10 +68,11 @@ export class AnalyticsController {
   @Public()
   @Post('reports/generate')
   @HttpCode(HttpStatus.CREATED)
-  report(@Body() body: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public report(@Body() body: any): { reportId: string; reportType: string; status: string } {
     return {
       reportId: id('rep'),
-      reportType: body?.reportType || 'comprehensive',
+      reportType: (body?.reportType as string) || 'comprehensive',
       status: 'processing',
     };
   }
@@ -81,7 +85,7 @@ export class AnalyticsController {
   @Public()
   @Post('export')
   @HttpCode(HttpStatus.OK)
-  export() {
+  public export(): { exportId: string; status: string; url: string } {
     return {
       exportId: id('exp'),
       status: 'completed',
@@ -96,10 +100,10 @@ export class AnalyticsController {
   @Public()
   @Get('dashboard')
   @HttpCode(HttpStatus.OK)
-  dashboard() {
+  public dashboard(): { summary: { events: number; metrics: number }; charts: unknown[] } {
     return {
       summary: { events: 10, metrics: 5 },
       charts: [],
-    } as any;
+    };
   }
 }

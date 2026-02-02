@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { GuestController } from './guest.controller';
-import { GuestUsageService } from '../services/guest-usage.service';
-import { RequestWithDeviceId } from '../guards/guest.guard';
+import type { GuestUsageService } from '../services/guest-usage.service';
+import type { RequestWithDeviceId } from '../guards/guest.guard';
 
 describe('GuestController', () => {
   let controller: GuestController;

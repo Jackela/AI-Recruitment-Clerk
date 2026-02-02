@@ -21,7 +21,8 @@ export class TestAuthController {
    */
   @Post('auth/register')
   @HttpCode(HttpStatus.CREATED)
-  register(@Body() body: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public register(@Body() body: any): { success: boolean; data: { organizationId: string; userId: string; accessToken: string } } {
     const orgId =
       body.organizationId || 'org-' + Math.random().toString(36).slice(2, 8);
     const userId = 'user-' + Math.random().toString(36).slice(2, 8);
@@ -54,7 +55,8 @@ export class TestAuthController {
    */
   @Post('auth/login')
   @HttpCode(HttpStatus.OK)
-  login(@Body() body: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public login(@Body() body: any): { success: boolean; data: { accessToken: string } } {
     const token = makeToken(String(body.email || 'user@test'));
     return {
       success: true,
@@ -72,7 +74,8 @@ export class TestAuthController {
    */
   @Get('auth/test-profile')
   @HttpCode(HttpStatus.OK)
-  getTestProfile(@Headers('authorization') auth?: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public getTestProfile(@Headers('authorization') auth?: string): { success: boolean; data?: any; error?: string } {
     const token = auth?.split(' ')[1] || '';
     if (!token.startsWith('test-token-')) {
       return { success: false, error: 'Invalid test token' };

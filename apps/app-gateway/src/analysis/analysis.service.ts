@@ -39,7 +39,7 @@ export class AnalysisService {
    * @param options - The options.
    * @returns A promise that resolves to AnalysisInitiatedResponseDto.
    */
-  async initiateAnalysis(
+  public async initiateAnalysis(
     jdText: string,
     resumeFile: MulterFile,
     _sessionId?: string,
@@ -55,7 +55,7 @@ export class AnalysisService {
       if (options) {
         try {
           JSON.parse(options);
-        } catch (error) {
+        } catch {
           this.logger.warn('Invalid options JSON provided, using defaults');
         }
       }
@@ -131,12 +131,13 @@ export class AnalysisService {
         `🎯 Analysis pipeline initiated successfully: ${analysisId}`,
       );
       return response;
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error(
         `❌ Failed to initiate analysis pipeline: ${analysisId}`,
         error,
       );
-      throw new Error(`Analysis pipeline failed: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Analysis pipeline failed: ${message}`);
     }
   }
 

@@ -1,7 +1,8 @@
-import { Cache } from 'cache-manager';
-import { CacheService, SemanticCacheOptions } from './cache.service';
-import { EmbeddingService } from '../embedding/embedding.service';
-import { VectorStoreService } from './vector-store.service';
+import type { Cache } from 'cache-manager';
+import type { SemanticCacheOptions } from './cache.service';
+import { CacheService } from './cache.service';
+import type { EmbeddingService } from '../embedding/embedding.service';
+import type { VectorStoreService } from './vector-store.service';
 
 describe('CacheService.wrapSemantic', () => {
   let cacheManager: jest.Mocked<Cache>;

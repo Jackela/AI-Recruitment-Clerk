@@ -1,7 +1,8 @@
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { Reflector } from '@nestjs/core';
+import type { Reflector } from '@nestjs/core';
+import type {
+  ExecutionContext} from '@nestjs/common';
 import {
-  ExecutionContext,
   HttpException,
   HttpStatus,
   UnauthorizedException,
@@ -257,7 +258,7 @@ describe('JwtAuthGuard', () => {
         headers: { authorization: '   ' },
       });
 
-      const result = await guard.canActivate(ctx);
+      const _result = await guard.canActivate(ctx);
       const request = ctx.switchToHttp().getRequest();
 
       expect(request.user.id).toBe('guest');

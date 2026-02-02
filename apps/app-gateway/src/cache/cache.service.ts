@@ -80,7 +80,9 @@ export class CacheService {
   private setupErrorHandling(): void {
     try {
       // 如果是Redis缓存，设置错误处理器
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (this.cacheManager.store && (this.cacheManager.store as any).client) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const redisClient = (this.cacheManager.store as any).client;
 
         redisClient.on('error', (err: Error) => {
@@ -104,15 +106,15 @@ export class CacheService {
           this.logger.warn('⚠️ Redis连接已断开');
         });
       }
-    } catch (error) {
-      this.logger.warn('缓存错误处理器设置失败:', error.message);
+    } catch {
+      this.logger.warn('缓存错误处理器设置失败');
     }
   }
 
   /**
    * 获取缓存值 - 带指标收集和错误处理
    */
-  async get<T>(key: string): Promise<T | null> {
+  public async get<T>(key: string): Promise<T | null> {
     try {
       const result = await Promise.race([
         this.cacheManager.get<T>(key),
@@ -130,9 +132,9 @@ export class CacheService {
       }
       this.updateTotalOperations();
       return (result ?? null) as T | null;
-    } catch (error) {
+    } catch {
       this.metrics.errors++;
-      this.logger.warn(`缓存获取失败 [${key}]: ${error.message}`);
+      this.logger.warn(`缓存获取失败 [${key}]`);
       return null;
     }
   }
@@ -140,7 +142,7 @@ export class CacheService {
   /**
    * 设置缓存值 - 带指标收集和错误处理
    */
-  async set<T>(key: string, value: T, options?: CacheOptions): Promise<void> {
+  public async set<T>(key: string, value: T, options?: CacheOptions): Promise<void> {
     try {
       const ttl = options?.ttl;
       await Promise.race([

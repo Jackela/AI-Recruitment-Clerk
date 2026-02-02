@@ -13,7 +13,9 @@ export interface ValidationRule {
   service: string;
   endpoint: string;
   required?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   transform?: (value: any) => any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   validate?: (value: any) => boolean | Promise<boolean>;
   message?: string;
 }
@@ -41,12 +43,15 @@ export class CrossServiceValidator {
    * @param options - The options.
    * @returns The Promise<{ valid: boolean; errors: string[]; transformedData: any; }>.
    */
-  async validate(
+   
+  public async validate(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any,
     options: CrossServiceValidationOptions,
   ): Promise<{
     valid: boolean;
     errors: string[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     transformedData: any;
   }> {
     const errors: string[] = [];
@@ -75,10 +80,10 @@ export class CrossServiceValidator {
         for (const rule of options.rules) {
           try {
             await this.validateRule(rule, data[rule.field], transformedData);
-          } catch (error) {
+          } catch (error: unknown) {
             const errorMessage =
               rule.message ||
-              `Validation failed for field '${rule.field}': ${error.message}`;
+              `Validation failed for field '${rule.field}': ${(error as Error).message}`;
             errors.push(errorMessage);
 
             if (options.failFast) {
@@ -99,9 +104,12 @@ export class CrossServiceValidator {
     };
   }
 
+   
   private async validateRule(
     rule: ValidationRule,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     transformedData: any,
   ): Promise<void> {
     // Check required fields
@@ -121,9 +129,9 @@ export class CrossServiceValidator {
     if (rule.transform) {
       try {
         transformedData[rule.field] = rule.transform(value);
-      } catch (error) {
+      } catch (error: unknown) {
         throw new BadRequestException(
-          `Transformation failed for field '${rule.field}': ${error.message}`,
+          `Transformation failed for field '${rule.field}': ${(error as Error).message}`,
         );
       }
     }
@@ -139,12 +147,12 @@ export class CrossServiceValidator {
             `Custom validation failed for field '${rule.field}'`,
           );
         }
-      } catch (error) {
+      } catch (error: unknown) {
         if (error instanceof BadRequestException) {
           throw error;
         }
         throw new BadRequestException(
-          `Validation error for field '${rule.field}': ${error.message}`,
+          `Validation error for field '${rule.field}': ${(error as Error).message}`,
         );
       }
     }
@@ -163,6 +171,7 @@ export class CrossServiceValidator {
   private async performCrossServiceValidation(
     service: string,
     endpoint: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any,
     fieldName: string,
   ): Promise<void> {
@@ -217,6 +226,7 @@ export class CrossServiceValidator {
   private async mockServiceValidation(
     service: string,
     endpoint: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any,
   ): Promise<boolean> {
     // Simulate validation logic based on service and endpoint
@@ -244,8 +254,9 @@ export class CrossServiceValidator {
   /**
    * Convenience method for validating single field against a service
    */
-  async validateField(
+  public async validateField(
     fieldName: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any,
     service: string,
     endpoint: string,
@@ -272,7 +283,7 @@ export class CrossServiceValidator {
   /**
    * Create validation rules for common scenarios
    */
-  static createUserValidationRule(
+  public static createUserValidationRule(
     fieldName: string,
     required = true,
   ): ValidationRule {
@@ -291,7 +302,7 @@ export class CrossServiceValidator {
    * @param required - The required.
    * @returns The ValidationRule.
    */
-  static createJobValidationRule(
+  public static createJobValidationRule(
     fieldName: string,
     required = true,
   ): ValidationRule {
@@ -310,7 +321,7 @@ export class CrossServiceValidator {
    * @param required - The required.
    * @returns The ValidationRule.
    */
-  static createResumeValidationRule(
+  public static createResumeValidationRule(
     fieldName: string,
     required = true,
   ): ValidationRule {
@@ -329,7 +340,7 @@ export class CrossServiceValidator {
    * @param required - The required.
    * @returns The ValidationRule.
    */
-  static createEmailValidationRule(
+  public static createEmailValidationRule(
     fieldName: string,
     required = true,
   ): ValidationRule {

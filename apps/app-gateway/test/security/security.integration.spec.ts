@@ -1,5 +1,5 @@
 import { JwtAuthGuard } from '../../src/auth/guards/jwt-auth.guard';
-import { Reflector } from '@nestjs/core';
+import type { Reflector } from '@nestjs/core';
 
 describe('Security lightweight checks', () => {
   const reflector = {

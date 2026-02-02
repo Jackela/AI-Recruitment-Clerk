@@ -4,28 +4,30 @@
  * @since v1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { UserService } from './user.service';
 import { RedisTokenBlacklistService } from '../security/redis-token-blacklist.service';
-import {
+import type {
   LoginDto,
   CreateUserDto,
   UserDto,
-  UserRole,
-  JwtPayload,
+  JwtPayload} from '@ai-recruitment-clerk/user-management-domain';
+import {
+  UserRole
 } from '@ai-recruitment-clerk/user-management-domain';
-import * as bcrypt from 'bcryptjs';
+import * as _bcrypt from 'bcryptjs';
 
 describe('AuthService', () => {
   let service: AuthService;
   let userService: jest.Mocked<UserService>;
   let jwtService: jest.Mocked<JwtService>;
   let redisBlacklist: jest.Mocked<RedisTokenBlacklistService>;
-  let configService: jest.Mocked<ConfigService>;
+  let _configService: jest.Mocked<ConfigService>;
 
   const mockUser: UserDto = {
     id: 'user-1',
@@ -82,7 +84,7 @@ describe('AuthService', () => {
     userService = module.get(UserService) as jest.Mocked<UserService>;
     jwtService = module.get(JwtService) as jest.Mocked<JwtService>;
     redisBlacklist = module.get(RedisTokenBlacklistService) as jest.Mocked<RedisTokenBlacklistService>;
-    configService = module.get(ConfigService) as jest.Mocked<ConfigService>;
+    _configService = module.get(ConfigService) as jest.Mocked<ConfigService>;
   });
 
   afterEach(() => {

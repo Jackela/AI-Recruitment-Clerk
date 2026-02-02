@@ -22,7 +22,7 @@ export class LocalStrategy {
    * @param password - The password.
    * @returns A promise that resolves to UserDto.
    */
-  async validate(email: string, password: string): Promise<UserDto> {
+  public async validate(email: string, password: string): Promise<UserDto> {
     const user = await this.authService.validateUser(email, password);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');

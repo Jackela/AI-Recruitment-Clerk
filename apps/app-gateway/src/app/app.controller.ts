@@ -35,7 +35,7 @@ export class AppController {
    */
   @Public()
   @Get('/')
-  getWelcome() {
+  public getWelcome(): Record<string, unknown> {
     return {
       message: 'Welcome to the AI Recruitment Clerk API Gateway!',
       status: 'ok',
@@ -50,7 +50,7 @@ export class AppController {
    */
   @Public()
   @Get('status')
-  getData() {
+  public getData(): { message: string } {
     return this.appService.getData();
   }
 
@@ -60,7 +60,7 @@ export class AppController {
    */
   @Public()
   @Get('cache/metrics')
-  async getCacheMetrics() {
+  public async getCacheMetrics(): Promise<Record<string, unknown>> {
     try {
       const cacheHealth = await this.cacheService.healthCheck();
       return {
@@ -88,7 +88,7 @@ export class AppController {
    */
   @Public()
   @Get('health')
-  async getHealth() {
+  public async getHealth(): Promise<Record<string, unknown>> {
     try {
       // 测试缓存服务是否可用
       if (!this.cacheService) {
@@ -204,7 +204,7 @@ export class AppController {
    */
   @Public()
   @Get('cache/warmup/status')
-  async getCacheWarmupStatus() {
+  public async getCacheWarmupStatus(): Promise<Record<string, unknown>> {
     try {
       return {
         timestamp: new Date().toISOString(),
@@ -231,7 +231,7 @@ export class AppController {
    */
   @Public()
   @Post('cache/warmup/trigger')
-  async triggerCacheWarmup() {
+  public async triggerCacheWarmup(): Promise<Record<string, unknown>> {
     try {
       const result = await this.cacheWarmupService.triggerWarmup();
       return {
