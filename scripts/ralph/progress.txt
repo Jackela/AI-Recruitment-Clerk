@@ -427,3 +427,73 @@ Started: 2026-02-01
   - Use `eslint-disable-next-line @typescript-eslint/no-explicit-any` for Lua script eval() return type which is inherently dynamic
   - 41 warnings fixed: 38 accessibility modifiers, 18 non-null assertions replaced with optional chaining, 1 any type preserved with eslint-disable, 3 any types refactored to generic type parameter
 ---
+
+## 2026-02-02 - US-036
+- What was implemented: Fixed all lint warnings in apps/ai-recruitment-frontend/src/app/components/
+- Files changed (30 files):
+  - components/guest/feedback-code-modal.component.ts (accessibility, inject(), template a11y)
+  - components/guest/guest-limit-modal.component.ts (accessibility, template a11y)
+  - components/guest/guest-limit-modal.component.spec.ts (any types fixed)
+  - components/mobile/*.ts (7 files - accessibility, return types, any types)
+  - components/privacy/consent-management.component.ts (accessibility, any types)
+  - components/shared/*.ts (18 files - accessibility, no-output-on-prefix fixes)
+- **Learnings for future iterations:**
+  - Angular @Output() with `onXxx` naming violates `@angular-eslint/no-output-on-prefix` - rename to `xxxChange` or similar
+  - For backwards compatibility, use eslint-disable comment + @deprecated JSDoc annotation to keep old names as aliases
+  - Template a11y: click events need `(keydown.enter)` + `(keydown.space)` or `(keydown.escape)` handlers and `tabindex="0"`
+  - Template a11y: labels need `for="id"` attribute matching input `id="id"` attribute
+  - Use `inject()` function instead of constructor parameter injection for modern Angular (preferred by @angular-eslint/prefer-inject)
+  - Dialog overlays should have `role="dialog" aria-modal="true" tabindex="0"` for accessibility
+  - ~600 warnings fixed across 30 component files
+---
+
+## 2026-02-02 - US-037
+- What was implemented: Fixed all lint warnings in apps/ai-recruitment-frontend/src/app/services/
+- Files changed (12 files):
+  - services/websocket.service.ts (3 any types for message data casting)
+  - services/privacy-api.service.ts (8 any types for cookie consent and compliance methods)
+  - services/smart-preloading.strategy.ts (6 any types for navigator.connection and idle timer)
+  - services/batch/batch-operations.service.ts (6 any types for generic batch operation types)
+  - services/error/error-handling.service.ts (7 any types for error handler parameters)
+  - services/error/error-correlation.service.ts (10 any types for error metadata and browser info)
+  - services/error/error-reporting.service.ts (10 any types for browser/system info)
+  - services/feedback/progress-feedback.service.ts (1 any type for details property)
+  - services/i18n/i18n.service.ts (3 any types for translate params)
+  - services/keyboard/keyboard-navigation.service.ts (6 any types for preserved state and form data)
+  - services/marketing/guest-usage.service.ts (2 any types for API response)
+  - services/guest/guest-api.service.ts (1 accessibility modifier for getServiceStats)
+- **Learnings for future iterations:**
+  - Services use `any` for browser APIs that TypeScript doesn't have types for (navigator.connection, performance.memory)
+  - WebSocket message data uses `any` for generic message parsing before type assertion
+  - Error handling services need `any` for catch-all error types
+  - i18n translation params use `any` because translation values can be strings, numbers, or nested objects
+  - Timer IDs (setTimeout/setInterval return) use `any` due to Node/browser differences
+  - ~65 warnings fixed: 1 accessibility modifier, 64 any types preserved with eslint-disable comments
+---
+
+## 2026-02-02 - US-038
+- What was implemented: Fixed all lint warnings in apps/ai-recruitment-frontend/src/app/store/
+- Files changed (13 files):
+  - store/guest/guest.effects.spec.ts (renamed unused `of` import to `_of`)
+  - store/guest/guest.effects.ts (converted to inject() pattern, added public modifiers to 14 effects)
+  - store/guest/guest.reducer.ts (fixed `as any` to `as unknown as Record<string, unknown>` pattern)
+  - store/jobs/job.effects.ts (converted to inject() pattern, added public modifiers to 10 effects)
+  - store/jobs/job.reducer.spec.ts (renamed unused CreateJobRequest import to _CreateJobRequest)
+  - store/jobs/job.selectors.spec.ts (renamed unused initialJobState to _initialJobState)
+  - store/jobs/job.selectors.ts (added MemoizedSelector return types to 3 factory functions)
+  - store/reports/report.effects.ts (converted to inject() pattern, added public modifiers)
+  - store/reports/report.selectors.spec.ts (renamed unused initialReportState to _initialReportState)
+  - store/reports/report.selectors.ts (added MemoizedSelector return types, added JobReportsStats interface)
+  - store/resumes/resume.effects.ts (converted to inject() pattern, added public modifiers)
+  - store/resumes/resume.selectors.spec.ts (renamed unused initialResumeState to _initialResumeState)
+  - store/resumes/resume.selectors.ts (added MemoizedSelector return types, ExtendedAnalysis interface for skills)
+- **Learnings for future iterations:**
+  - NgRx effects should use inject() function instead of constructor parameter injection
+  - All effect properties need `public` accessibility modifier (e.g., `public loadJobs$`)
+  - Selector factory functions need explicit return type: `MemoizedSelector<object, ReturnType>`
+  - Unused imports can be renamed with `_` prefix (e.g., `import { of as _of }`)
+  - When model types don't include all runtime properties (e.g., ResumeListItem.analysis missing skills), create ExtendedAnalysis interface
+  - Replace `resume.status as any` with just `resume.status` when the status type already matches function parameter type
+  - For complex type casts like `demoResults as Record<string, unknown>`, use `as unknown as Record<string, unknown>` pattern
+  - ~45 warnings fixed: 30 accessibility modifiers, 8 return types, 4 unused imports renamed, 3 any types fixed
+---

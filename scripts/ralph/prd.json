@@ -338,7 +338,7 @@
       "title": "Fix shared-dtos interceptors/*.ts",
       "description": "Fix lint issues in interceptors (3 files)",
       "priority": 28,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in interceptors/",
         "npm run typecheck passes"
@@ -350,7 +350,7 @@
       "title": "Fix shared-dtos prompts/prompt-templates.ts",
       "description": "Fix lint issues in prompt-templates.ts",
       "priority": 29,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in prompt-templates.ts",
         "npm run typecheck passes"
@@ -362,7 +362,7 @@
       "title": "Fix shared-dtos skills/skills-taxonomy.ts",
       "description": "Fix lint issues in skills-taxonomy.ts",
       "priority": 30,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in skills-taxonomy.ts",
         "npm run typecheck passes"
@@ -374,7 +374,7 @@
       "title": "Fix shared-dtos utils/*.ts",
       "description": "Fix lint issues in utils (2 files)",
       "priority": 31,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in utils/",
         "npm run typecheck passes"
@@ -386,7 +386,7 @@
       "title": "Fix shared-dtos validation/input-validator.ts",
       "description": "Fix lint issues in input-validator.ts",
       "priority": 32,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in input-validator.ts",
         "npm run typecheck passes"
@@ -398,7 +398,7 @@
       "title": "Fix shared-dtos config/secure-config.validator.ts",
       "description": "Fix lint issues in secure-config.validator.ts",
       "priority": 33,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in secure-config.validator.ts",
         "npm run typecheck passes"
@@ -410,7 +410,7 @@
       "title": "Verify shared-dtos has 0 warnings",
       "description": "Run lint on shared-dtos and verify 0 warnings",
       "priority": 34,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "npx nx lint shared-dtos returns 0 warnings",
         "npm run typecheck passes"
@@ -422,7 +422,7 @@
       "title": "Run eslint --fix on ai-recruitment-frontend",
       "description": "Auto-fix lint issues in frontend app",
       "priority": 35,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Run npx nx lint ai-recruitment-frontend --fix",
         "npm run typecheck passes"
@@ -434,7 +434,7 @@
       "title": "Fix frontend components/",
       "description": "Fix lint issues in frontend components",
       "priority": 36,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in components/",
         "npm run typecheck passes"
@@ -446,7 +446,7 @@
       "title": "Fix frontend services/",
       "description": "Fix lint issues in frontend services",
       "priority": 37,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in services/",
         "npm run typecheck passes"
@@ -458,7 +458,7 @@
       "title": "Fix frontend store/",
       "description": "Fix lint issues in frontend store",
       "priority": 38,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in store/",
         "npm run typecheck passes"
