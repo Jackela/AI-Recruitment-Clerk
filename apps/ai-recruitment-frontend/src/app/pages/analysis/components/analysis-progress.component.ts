@@ -221,17 +221,19 @@ export interface ProgressUpdate {
   styleUrls: ['./analysis-progress.component.scss'],
 })
 export class AnalysisProgressComponent implements OnChanges, OnDestroy {
-  @Input() sessionId = '';
-  @Input() showMessageLog = true;
-  @Input() steps: AnalysisStep[] = [];
+  @Input() public sessionId = '';
+  @Input() public showMessageLog = true;
+  @Input() public steps: AnalysisStep[] = [];
 
-  @Output() progressUpdate = new EventEmitter<ProgressUpdate>();
-  @Output() stepChange = new EventEmitter<string>();
-  @Output() analysisCompleted = new EventEmitter<any>();
-  @Output() analysisError = new EventEmitter<any>();
-  @Output() cancelRequested = new EventEmitter<void>();
+  @Output() public progressUpdate = new EventEmitter<ProgressUpdate>();
+  @Output() public stepChange = new EventEmitter<string>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  @Output() public analysisCompleted = new EventEmitter<any>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  @Output() public analysisError = new EventEmitter<any>();
+  @Output() public cancelRequested = new EventEmitter<void>();
 
-  isCancelling = false;
+  public isCancelling = false;
   private destroy$ = new Subject<void>();
 
   private readonly webSocketService = inject(WebSocketService);
@@ -240,7 +242,7 @@ export class AnalysisProgressComponent implements OnChanges, OnDestroy {
    * Reacts to session id changes to wire or tear down WebSocket listeners.
    * @param changes - The changed inputs.
    */
-  ngOnChanges(changes: SimpleChanges): void {
+  public ngOnChanges(changes: SimpleChanges): void {
     const sessionIdChange = changes['sessionId'];
     if (!sessionIdChange) {
       return;
@@ -264,7 +266,7 @@ export class AnalysisProgressComponent implements OnChanges, OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -287,9 +289,11 @@ export class AnalysisProgressComponent implements OnChanges, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((message) => {
         if (message.type === 'step_change') {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const data = message.data as any;
           const stepVal =
-            (message.data as any)?.['step'] ??
-            (message.data as any)?.['currentStep'] ??
+            data?.['step'] ??
+            data?.['currentStep'] ??
             '';
           this.stepChange.emit(String(stepVal));
         }
@@ -315,7 +319,7 @@ export class AnalysisProgressComponent implements OnChanges, OnDestroy {
   /**
    * Performs the on cancel click operation.
    */
-  onCancelClick(): void {
+  public onCancelClick(): void {
     this.isCancelling = true;
     this.webSocketService.disconnect();
     setTimeout(() => {
@@ -330,7 +334,7 @@ export class AnalysisProgressComponent implements OnChanges, OnDestroy {
    * @param step - The step.
    * @returns The string value.
    */
-  trackByStepId(_index: number, step: AnalysisStep): string {
+  public trackByStepId(_index: number, step: AnalysisStep): string {
     return step.id;
   }
 

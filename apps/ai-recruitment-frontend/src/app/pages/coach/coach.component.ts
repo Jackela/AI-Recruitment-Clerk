@@ -81,15 +81,15 @@ import { LoggerService } from '../../services/shared/logger.service';
   `,
 })
 export class CoachComponent {
-  form: FormGroup;
+  public form: FormGroup;
 
-  loading = false;
-  result: GapAnalysisResult | null = null;
+  public loading = false;
+  public result: GapAnalysisResult | null = null;
   private selectedFile: File | null = null;
 
-  private fb = inject(FormBuilder);
-  private api = inject(ApiService);
-  private logger = inject(LoggerService).createLogger('CoachComponent');
+  private readonly fb = inject(FormBuilder);
+  private readonly api = inject(ApiService);
+  private readonly logger = inject(LoggerService).createLogger('CoachComponent');
 
   /**
    * Initializes a new instance of the Coach Component.
@@ -105,7 +105,7 @@ export class CoachComponent {
    * @param evt - The evt.
    * @returns The result of the operation.
    */
-  onFileSelected(evt: Event) {
+  public onFileSelected(evt: Event): void {
     const input = evt.target as HTMLInputElement;
     const file = input.files && input.files[0];
     if (!file) return;
@@ -116,7 +116,7 @@ export class CoachComponent {
    * Performs the on submit operation.
    * @returns The result of the operation.
    */
-  onSubmit() {
+  public onSubmit(): void {
     if (this.form.invalid) return;
     const jdText = this.form.value.jdText || '';
     const file = this.selectedFile;

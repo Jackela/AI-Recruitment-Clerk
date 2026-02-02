@@ -31,5 +31,5 @@ import type { GapAnalysisResult } from '../../interfaces/gap-analysis.interface'
   `,
 })
 export class GapAnalysisReportComponent {
-  @Input() result: GapAnalysisResult | null = null;
+  @Input() public result: GapAnalysisResult | null = null;
 }

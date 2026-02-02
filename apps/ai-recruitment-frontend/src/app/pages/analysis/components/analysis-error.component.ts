@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
  */
 export interface ErrorAction {
   type: 'retry' | 'start-new' | 'contact-support';
-  payload?: any;
+  payload?: unknown;
 }
 
 /**
@@ -438,22 +438,22 @@ export interface ErrorInfo {
   styleUrls: ['../unified-analysis.component.css'],
 })
 export class AnalysisErrorComponent {
-  @Input() errorInfo: ErrorInfo | null = null;
-  @Input() showDetails = true;
-  @Input() showTroubleshooting = true;
-  @Input() enableErrorReporting = true;
-  @Input() isRetrying = false;
+  @Input() public errorInfo: ErrorInfo | null = null;
+  @Input() public showDetails = true;
+  @Input() public showTroubleshooting = true;
+  @Input() public enableErrorReporting = true;
+  @Input() public isRetrying = false;
 
-  @Output() actionRequested = new EventEmitter<ErrorAction>();
-  @Output() errorReported = new EventEmitter<ErrorInfo>();
+  @Output() public actionRequested = new EventEmitter<ErrorAction>();
+  @Output() public errorReported = new EventEmitter<ErrorInfo>();
 
-  isReporting = false;
+  public isReporting = false;
 
   /**
    * Performs the on action operation.
    * @param type - The type.
    */
-  onAction(type: ErrorAction['type']): void {
+  public onAction(type: ErrorAction['type']): void {
     this.actionRequested.emit({ type });
   }
 
@@ -461,7 +461,7 @@ export class AnalysisErrorComponent {
    * Performs the send error report operation.
    * @returns A promise that resolves when the operation completes.
    */
-  async sendErrorReport(): Promise<void> {
+  public async sendErrorReport(): Promise<void> {
     if (!this.errorInfo) return;
 
     this.isReporting = true;
@@ -477,7 +477,7 @@ export class AnalysisErrorComponent {
    * Retrieves header description.
    * @returns The string value.
    */
-  getHeaderDescription(): string {
+  public getHeaderDescription(): string {
     if (this.isNetworkError()) {
       return '网络连接或服务器响应异常';
     }
@@ -491,7 +491,7 @@ export class AnalysisErrorComponent {
    * Retrieves icon class.
    * @returns The string value.
    */
-  getIconClass(): string {
+  public getIconClass(): string {
     if (this.isNetworkError()) return 'network';
     if (this.isServerError()) return 'server';
     return '';
@@ -501,7 +501,7 @@ export class AnalysisErrorComponent {
    * Performs the is network error operation.
    * @returns The boolean value.
    */
-  isNetworkError(): boolean {
+  public isNetworkError(): boolean {
     const code = this.errorInfo?.code?.toLowerCase();
     return code?.includes('network') || code?.includes('timeout') || false;
   }
@@ -510,7 +510,7 @@ export class AnalysisErrorComponent {
    * Performs the is file error operation.
    * @returns The boolean value.
    */
-  isFileError(): boolean {
+  public isFileError(): boolean {
     const code = this.errorInfo?.code?.toLowerCase();
     return code?.includes('file') || code?.includes('parse') || false;
   }
@@ -519,7 +519,7 @@ export class AnalysisErrorComponent {
    * Performs the is server error operation.
    * @returns The boolean value.
    */
-  isServerError(): boolean {
+  public isServerError(): boolean {
     const code = this.errorInfo?.code?.toLowerCase();
     return code?.includes('server') || code?.includes('internal') || false;
   }
@@ -528,7 +528,7 @@ export class AnalysisErrorComponent {
    * Performs the is recoverable operation.
    * @returns The boolean value.
    */
-  isRecoverable(): boolean {
+  public isRecoverable(): boolean {
     return this.errorInfo?.recoverable !== false;
   }
 
@@ -536,7 +536,7 @@ export class AnalysisErrorComponent {
    * Performs the should show support operation.
    * @returns The boolean value.
    */
-  shouldShowSupport(): boolean {
+  public shouldShowSupport(): boolean {
     return !this.isRecoverable() || this.isServerError();
   }
 
@@ -544,7 +544,7 @@ export class AnalysisErrorComponent {
    * Retrieves suggestions.
    * @returns The an array of string value.
    */
-  getSuggestions(): string[] {
+  public getSuggestions(): string[] {
     if (this.isNetworkError()) {
       return [
         '检查您的网络连接是否正常',
@@ -581,7 +581,7 @@ export class AnalysisErrorComponent {
    * Retrieves troubleshooting tips.
    * @returns The Array<{ title: string; description: string }>.
    */
-  getTroubleshootingTips(): Array<{ title: string; description: string }> {
+  public getTroubleshootingTips(): Array<{ title: string; description: string }> {
     return [
       {
         title: '检查文件格式',
@@ -609,7 +609,7 @@ export class AnalysisErrorComponent {
    * @param timestamp - The timestamp.
    * @returns The string value.
    */
-  formatTimestamp(timestamp: Date | undefined): string {
+  public formatTimestamp(timestamp: Date | undefined): string {
     if (!timestamp) return 'N/A';
     return new Intl.DateTimeFormat('zh-CN', {
       year: 'numeric',

@@ -285,17 +285,17 @@ interface ActivityItem {
   styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent implements OnInit {
-  stats$!: Observable<DashboardStats>;
+  public stats$!: Observable<DashboardStats>;
 
   /**
    * Performs the ng on init operation.
    * @returns The result of the operation.
    */
-  ngOnInit() {
+  public ngOnInit(): void {
     this.loadDashboardData();
   }
 
-  private loadDashboardData() {
+  private loadDashboardData(): void {
     // Mock data - replace with real API calls
     const mockStats: DashboardStats = {
       totalJobs: 12,
@@ -347,7 +347,7 @@ export class DashboardComponent implements OnInit {
    * @param activity - The activity.
    * @returns The string value.
    */
-  trackByActivityId(_index: number, activity: ActivityItem): string {
+  public trackByActivityId(_index: number, activity: ActivityItem): string {
     return activity.id;
   }
 
@@ -356,7 +356,7 @@ export class DashboardComponent implements OnInit {
    * @param status - The status.
    * @returns The string value.
    */
-  getStatusText(status: string): string {
+  public getStatusText(status: string): string {
     switch (status) {
       case 'processing':
         return '处理中';

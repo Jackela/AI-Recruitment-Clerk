@@ -1,12 +1,12 @@
 import type { OnDestroy } from '@angular/core';
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import type { HttpErrorResponse } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import type { GuestApiService } from '../../services/guest/guest-api.service';
-import type { WebSocketService } from '../../services/websocket.service';
+import { GuestApiService } from '../../services/guest/guest-api.service';
+import { WebSocketService } from '../../services/websocket.service';
 import { ProgressTrackerComponent } from '../../components/shared/progress-tracker/progress-tracker.component';
 
 /**
@@ -402,35 +402,28 @@ import { ProgressTrackerComponent } from '../../components/shared/progress-track
   ],
 })
 export class UploadResumeComponent implements OnDestroy {
-  file?: File;
-  candidateName = '';
-  candidateEmail = '';
-  notes = '';
+  public file?: File;
+  public candidateName = '';
+  public candidateEmail = '';
+  public notes = '';
 
-  analysisId = signal('');
-  output = signal('');
-  analysisComplete = signal(false);
-  errorMessage = signal('');
-  reportUrl = signal('');
+  public analysisId = signal('');
+  public output = signal('');
+  public analysisComplete = signal(false);
+  public errorMessage = signal('');
+  public reportUrl = signal('');
 
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
 
-  /**
-   * Initializes a new instance of the Upload Resume Component.
-   * @param guestApi - The guest api.
-   * @param webSocketService - The web socket service.
-   */
-  constructor(
-    private readonly guestApi: GuestApiService,
-    private readonly webSocketService: WebSocketService,
-  ) {}
+  private readonly guestApi = inject(GuestApiService);
+  private readonly webSocketService = inject(WebSocketService);
 
   /**
    * Performs the on file change operation.
    * @param ev - The ev.
    * @returns The result of the operation.
    */
-  onFileChange(ev: Event) {
+  public onFileChange(ev: Event): void {
     const input = ev.target as HTMLInputElement;
     this.file = input.files?.[0] || undefined;
   }
@@ -440,7 +433,7 @@ export class UploadResumeComponent implements OnDestroy {
    * @param ev - The ev.
    * @returns The result of the operation.
    */
-  async onSubmit(ev: Event) {
+  public onSubmit(ev: Event): void {
     ev.preventDefault();
     if (!this.file) {
       this.errorMessage.set('请选择一个简历文件');
@@ -482,7 +475,7 @@ export class UploadResumeComponent implements OnDestroy {
    * Retrieves demo.
    * @returns The result of the operation.
    */
-  getDemo() {
+  public getDemo(): void {
     this.output.set('Fetching demo...');
     this.guestApi.getDemoAnalysis().subscribe({
       next: (res) => this.output.set(JSON.stringify(res, null, 2)),
@@ -497,13 +490,14 @@ export class UploadResumeComponent implements OnDestroy {
    * Performs the setup web socket listeners operation.
    * @param sessionId - The session id.
    */
-  setupWebSocketListeners(sessionId: string): void {
+  public setupWebSocketListeners(sessionId: string): void {
     // 监听完成事件
     this.webSocketService
       .onCompletion(sessionId)
       .pipe(takeUntil(this.destroy$))
       .subscribe((completion) => {
         this.analysisComplete.set(true);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.reportUrl.set(
           ((completion as any)?.result?.['reportUrl'] as string) || '',
         );
@@ -523,7 +517,7 @@ export class UploadResumeComponent implements OnDestroy {
   /**
    * Performs the reset state operation.
    */
-  resetState(): void {
+  public resetState(): void {
     this.analysisId.set('');
     this.analysisComplete.set(false);
     this.errorMessage.set('');
@@ -534,7 +528,7 @@ export class UploadResumeComponent implements OnDestroy {
   /**
    * Performs the reset analysis operation.
    */
-  resetAnalysis(): void {
+  public resetAnalysis(): void {
     this.resetState();
     this.webSocketService.disconnect();
   }
@@ -542,7 +536,7 @@ export class UploadResumeComponent implements OnDestroy {
   /**
    * Performs the view detailed results operation.
    */
-  viewDetailedResults(): void {
+  public viewDetailedResults(): void {
     // 导航到详细结果页面
     const sessionId = this.analysisId();
     if (sessionId) {
@@ -554,7 +548,7 @@ export class UploadResumeComponent implements OnDestroy {
   /**
    * Performs the download report operation.
    */
-  downloadReport(): void {
+  public downloadReport(): void {
     const url = this.reportUrl();
     if (url) {
       window.open(url, '_blank');
@@ -566,7 +560,7 @@ export class UploadResumeComponent implements OnDestroy {
    * Performs the poll operation.
    * @returns The result of the operation.
    */
-  poll() {
+  public poll(): void {
     const id = this.analysisId();
     if (!id) {
       this.output.set('Missing analysisId');
@@ -585,7 +579,7 @@ export class UploadResumeComponent implements OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
     this.webSocketService.disconnect();

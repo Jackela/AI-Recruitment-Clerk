@@ -35,34 +35,35 @@ type TranslationDescriptor = {
   styleUrl: './create-job.component.scss',
 })
 export class CreateJobComponent implements OnInit, OnDestroy {
-  createJobForm: FormGroup;
-  creating$: Observable<boolean>;
-  error$: Observable<string | null>;
+  public createJobForm: FormGroup;
+  public creating$: Observable<boolean>;
+  public error$: Observable<string | null>;
 
   // WebSocket-related observables for real-time progress
-  webSocketConnected$: Observable<boolean>;
-  webSocketStatus$: Observable<
+  public webSocketConnected$: Observable<boolean>;
+  public webSocketStatus$: Observable<
     'connecting' | 'connected' | 'disconnected' | 'error'
   >;
-  currentJobProgress$: Observable<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public currentJobProgress$: Observable<any>;
 
   // Job creation progress tracking
-  createdJobId: string | null = null;
-  showProgressTracking = false;
-  progressData: {
+  public createdJobId: string | null = null;
+  public showProgressTracking = false;
+  public progressData: {
     step: string;
     progress: number;
     message?: string;
     estimatedTimeRemaining?: number;
   } | null = null;
 
-  private destroy$ = new Subject<void>();
-  private sessionId = `create-job-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  private readonly destroy$ = new Subject<void>();
+  private readonly sessionId = `create-job-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-  private fb = inject(FormBuilder);
-  private store = inject(Store<AppState>);
-  private router = inject(Router);
-  private i18nService = inject(I18nService);
+  private readonly fb = inject(FormBuilder);
+  private readonly store = inject(Store<AppState>);
+  private readonly router = inject(Router);
+  private readonly i18nService = inject(I18nService);
 
   /**
    * Initializes a new instance of the Create Job Component.
@@ -106,7 +107,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     // Clear any previous errors
     this.store.dispatch(JobActions.clearJobError());
 
@@ -120,7 +121,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     // Unsubscribe from job updates if we were tracking a job
     if (this.createdJobId) {
       this.store.dispatch(
@@ -137,7 +138,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
   /**
    * Performs the on submit operation.
    */
-  onSubmit(): void {
+  public onSubmit(): void {
     if (this.createJobForm.valid) {
       const formValue = this.createJobForm.value;
 
@@ -162,14 +163,14 @@ export class CreateJobComponent implements OnInit, OnDestroy {
   /**
    * Performs the on cancel operation.
    */
-  onCancel(): void {
+  public onCancel(): void {
     this.router.navigate(['/jobs']);
   }
 
   /**
    * Performs the on clear error operation.
    */
-  onClearError(): void {
+  public onClearError(): void {
     this.store.dispatch(JobActions.clearJobError());
   }
 
@@ -178,7 +179,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * Performs the job title operation.
    * @returns The result of the operation.
    */
-  get jobTitle() {
+  public get jobTitle() {
     return this.createJobForm.get('jobTitle');
   }
 
@@ -186,7 +187,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * Performs the jd text operation.
    * @returns The result of the operation.
    */
-  get jdText() {
+  public get jdText() {
     return this.createJobForm.get('jdText');
   }
 
@@ -201,7 +202,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * @param fieldName - The field name.
    * @returns The translation descriptor or null.
    */
-  getFieldError(fieldName: string): TranslationDescriptor | null {
+  public getFieldError(fieldName: string): TranslationDescriptor | null {
     const control = this.createJobForm.get(fieldName);
     if (control && control.errors && control.touched) {
       if (control.errors['required']) {
@@ -232,7 +233,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * @param fieldName - The field name.
    * @returns True when the control has a touched validation error.
    */
-  hasFieldError(fieldName: string): boolean {
+  public hasFieldError(fieldName: string): boolean {
     const control = this.createJobForm.get(fieldName);
     return !!(control && control.errors && control.touched);
   }
@@ -243,7 +244,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * @param descriptor - The translation descriptor.
    * @returns The translated message or empty string when descriptor is null.
    */
-  getFieldErrorMessage(descriptor: TranslationDescriptor | null): string {
+  public getFieldErrorMessage(descriptor: TranslationDescriptor | null): string {
     if (!descriptor) {
       return '';
     }
@@ -341,6 +342,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * Handles job completion.
    * @param job - The completed job
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private onJobCompleted(job: any): void {
     console.log(`✅ Job ${job.id} completed successfully`);
     this.showProgressTracking = false;
@@ -355,6 +357,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * Handles job failure.
    * @param job - The failed job
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private onJobFailed(job: any): void {
     console.log(`❌ Job ${job.id} failed`);
     this.showProgressTracking = false;
@@ -365,7 +368,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * Gets the progress percentage for display.
    * @returns Progress percentage (0-100)
    */
-  getProgressPercentage(): number {
+  public getProgressPercentage(): number {
     return this.progressData?.progress || 0;
   }
 
@@ -373,7 +376,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * Gets the current processing step.
    * @returns Current step description
    */
-  getCurrentStep(): string {
+  public getCurrentStep(): string {
     return (
       this.progressData?.step ||
       this.i18nService.translate('jobs.createJob.progress.initializing')
@@ -384,7 +387,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * Gets the progress message.
    * @returns Progress message
    */
-  getProgressMessage(): string {
+  public getProgressMessage(): string {
     return (
       this.progressData?.message ||
       this.i18nService.translate('jobs.createJob.progress.processing')
@@ -395,7 +398,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * Gets the estimated time remaining.
    * @returns Time remaining in minutes
    */
-  getEstimatedTimeRemaining(): number | null {
+  public getEstimatedTimeRemaining(): number | null {
     return this.progressData?.estimatedTimeRemaining || null;
   }
 
@@ -403,7 +406,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * Checks if progress tracking should be shown.
    * @returns True if progress should be displayed
    */
-  shouldShowProgress(): boolean {
+  public shouldShowProgress(): boolean {
     return this.showProgressTracking && !!this.createdJobId;
   }
 
@@ -411,7 +414,7 @@ export class CreateJobComponent implements OnInit, OnDestroy {
    * Gets the progress steps for the UI indicator.
    * @returns Array of progress steps
    */
-  getProgressSteps(): Array<{
+  public getProgressSteps(): Array<{
     label: string;
     completed: boolean;
     active: boolean;

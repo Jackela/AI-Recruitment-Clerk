@@ -285,20 +285,20 @@ export interface FileUploadData {
   styleUrls: ['./resume-file-upload.component.scss'],
 })
 export class ResumeFileUploadComponent {
-  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('fileInput') public fileInput!: ElementRef<HTMLInputElement>;
 
-  @Input() isSubmitting = false;
+  @Input() public isSubmitting = false;
 
-  @Output() fileSubmitted = new EventEmitter<FileUploadData>();
-  @Output() demoRequested = new EventEmitter<void>();
-  @Output() fileValidationError = new EventEmitter<string>();
+  @Output() public fileSubmitted = new EventEmitter<FileUploadData>();
+  @Output() public demoRequested = new EventEmitter<void>();
+  @Output() public fileValidationError = new EventEmitter<string>();
 
   // Component State
-  selectedFile = signal<File | null>(null);
-  isDragOver = signal(false);
+  public selectedFile = signal<File | null>(null);
+  public isDragOver = signal(false);
 
   // Form Data
-  candidateInfo: CandidateInfo = {
+  public candidateInfo: CandidateInfo = {
     name: '',
     email: '',
     targetPosition: '',
@@ -310,7 +310,7 @@ export class ResumeFileUploadComponent {
    * Performs the on drag over operation.
    * @param event - The event.
    */
-  onDragOver(event: DragEvent): void {
+  public onDragOver(event: DragEvent): void {
     event.preventDefault();
     this.isDragOver.set(true);
   }
@@ -319,7 +319,7 @@ export class ResumeFileUploadComponent {
    * Performs the on drag leave operation.
    * @param event - The event.
    */
-  onDragLeave(event: DragEvent): void {
+  public onDragLeave(event: DragEvent): void {
     event.preventDefault();
     this.isDragOver.set(false);
   }
@@ -328,7 +328,7 @@ export class ResumeFileUploadComponent {
    * Performs the on drop operation.
    * @param event - The event.
    */
-  onDrop(event: DragEvent): void {
+  public onDrop(event: DragEvent): void {
     event.preventDefault();
     this.isDragOver.set(false);
 
@@ -342,7 +342,7 @@ export class ResumeFileUploadComponent {
    * Performs the on file select operation.
    * @param event - The event.
    */
-  onFileSelect(event: Event): void {
+  public onFileSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.handleFileSelection(input.files[0]);
@@ -377,7 +377,7 @@ export class ResumeFileUploadComponent {
    * Removes file.
    * @param event - The event.
    */
-  removeFile(event: Event): void {
+  public removeFile(event: Event): void {
     event.stopPropagation();
     this.selectedFile.set(null);
     if (this.fileInput) {
@@ -390,7 +390,7 @@ export class ResumeFileUploadComponent {
    * @param bytes - The bytes.
    * @returns The string value.
    */
-  formatFileSize(bytes: number): string {
+  public formatFileSize(bytes: number): string {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -400,7 +400,7 @@ export class ResumeFileUploadComponent {
    * Performs the on submit operation.
    * @param event - The event.
    */
-  onSubmit(event: Event): void {
+  public onSubmit(event: Event): void {
     event.preventDefault();
 
     const file = this.selectedFile();
@@ -418,14 +418,14 @@ export class ResumeFileUploadComponent {
   /**
    * Performs the on demo click operation.
    */
-  onDemoClick(): void {
+  public onDemoClick(): void {
     this.demoRequested.emit();
   }
 
   /**
    * Performs the reset form operation.
    */
-  resetForm(): void {
+  public resetForm(): void {
     this.selectedFile.set(null);
     this.candidateInfo = {
       name: '',
