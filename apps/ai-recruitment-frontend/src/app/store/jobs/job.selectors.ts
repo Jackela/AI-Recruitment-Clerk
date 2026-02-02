@@ -1,6 +1,9 @@
+import type { MemoizedSelector } from '@ngrx/store';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import type { JobState } from './job.state';
 import type { JobListItem, Job } from './job.model';
+
+type JobProgressValue = JobState['jobProgress'][string] | null;
 
 // Feature selector for the job state
 export const selectJobState = createFeatureSelector<JobState>('jobs');
@@ -43,14 +46,14 @@ export const selectActiveJobs = createSelector(
     jobs.filter((job) => job.status === 'active'),
 );
 
-export const selectJobById = (jobId: string) =>
+export const selectJobById = (jobId: string): MemoizedSelector<object, JobListItem | undefined> =>
   createSelector(
     selectAllJobs,
     (jobs: JobListItem[]): JobListItem | undefined =>
       jobs.find((job) => job.id === jobId),
   );
 
-export const selectJobsByStatus = (status: string) =>
+export const selectJobsByStatus = (status: string): MemoizedSelector<object, JobListItem[]> =>
   createSelector(selectAllJobs, (jobs: JobListItem[]): JobListItem[] =>
     jobs.filter((job) => job.status === status),
   );
@@ -149,10 +152,10 @@ export const selectJobProgress = createSelector(
   (state: JobState) => state.jobProgress,
 );
 
-export const selectJobProgressById = (jobId: string) =>
+export const selectJobProgressById = (jobId: string): MemoizedSelector<object, JobProgressValue> =>
   createSelector(
     selectJobProgress,
-    (jobProgress) => jobProgress[jobId] || null,
+    (jobProgress: JobState['jobProgress']): JobProgressValue => jobProgress[jobId] || null,
   );
 
 // Enhanced job management state with WebSocket info

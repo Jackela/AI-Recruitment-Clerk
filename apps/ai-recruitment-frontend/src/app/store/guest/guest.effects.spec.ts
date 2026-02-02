@@ -3,7 +3,7 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import type { Action} from '@ngrx/store';
 import { Store } from '@ngrx/store';
 import type { Observable} from 'rxjs';
-import { of } from 'rxjs';
+import { of as _of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { GuestEffects } from './guest.effects';
 import { GuestApiService } from '../../services/guest/guest-api.service';

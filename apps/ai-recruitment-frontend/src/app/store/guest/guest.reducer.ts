@@ -268,8 +268,11 @@ export const guestReducer = createReducer(
       progress: 100,
     },
     // Update remaining usage count from demo payload when provided
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     remainingCount:
-      (demoResults as any).data?.remainingUsage ?? state.remainingCount,
+      (demoResults as unknown as Record<string, unknown>).data !== undefined
+        ? ((demoResults as unknown as Record<string, unknown>).data as Record<string, unknown>).remainingUsage as number ?? state.remainingCount
+        : state.remainingCount,
     showAnalysisResults: true,
     isLoading: false,
     error: null,
@@ -302,7 +305,7 @@ export const guestReducer = createReducer(
           ? {
               ...state.currentAnalysis,
               progress,
-              status: (status as any) || state.currentAnalysis.status,
+              status: (status as typeof state.currentAnalysis.status) || state.currentAnalysis.status,
             }
           : state.currentAnalysis,
       analysisResults: {
@@ -312,7 +315,7 @@ export const guestReducer = createReducer(
               ...state.analysisResults[analysisId],
               progress,
               status:
-                (status as any) || state.analysisResults[analysisId].status,
+                (status as typeof state.analysisResults[typeof analysisId]['status']) || state.analysisResults[analysisId].status,
             }
           : state.analysisResults[analysisId],
       },

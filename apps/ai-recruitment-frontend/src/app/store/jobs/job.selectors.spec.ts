@@ -1,6 +1,6 @@
 import * as JobSelectors from './job.selectors';
 import type { JobState} from './job.state';
-import { initialJobState } from './job.state';
+import { initialJobState as _initialJobState } from './job.state';
 import type { JobListItem, Job } from './job.model';
 import type { AppState } from '../app.state';
 

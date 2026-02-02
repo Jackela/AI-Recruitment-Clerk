@@ -1,6 +1,6 @@
 import * as ReportSelectors from './report.selectors';
 import type { ReportState} from './report.state';
-import { initialReportState } from './report.state';
+import { initialReportState as _initialReportState } from './report.state';
 import type { ReportListItem, AnalysisReport } from './report.model';
 import type { AppState } from '../app.state';
 

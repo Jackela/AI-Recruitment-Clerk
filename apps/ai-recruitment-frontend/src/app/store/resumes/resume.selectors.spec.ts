@@ -1,6 +1,6 @@
 import * as ResumeSelectors from './resume.selectors';
 import type { ResumeState} from './resume.state';
-import { initialResumeState } from './resume.state';
+import { initialResumeState as _initialResumeState } from './resume.state';
 import type { ResumeListItem, ResumeDetail } from './resume.model';
 import type { AppState } from '../app.state';
 

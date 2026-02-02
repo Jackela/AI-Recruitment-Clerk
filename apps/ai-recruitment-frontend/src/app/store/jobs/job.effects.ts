@@ -1,6 +1,5 @@
-import { Injectable } from '@angular/core';
-import type { Actions} from '@ngrx/effects';
-import { createEffect, ofType } from '@ngrx/effects';
+import { inject, Injectable } from '@angular/core';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of, EMPTY } from 'rxjs';
 import {
   catchError,
@@ -9,8 +8,8 @@ import {
   tap,
   switchMap,
 } from 'rxjs/operators';
-import type { ApiService } from '../../services/api.service';
-import type { WebSocketService } from '../../services/websocket.service';
+import { ApiService } from '../../services/api.service';
+import { WebSocketService } from '../../services/websocket.service';
 import * as JobActions from './job.actions';
 
 /**
@@ -18,28 +17,22 @@ import * as JobActions from './job.actions';
  */
 @Injectable()
 export class JobEffects {
-  loadJobs$;
-  loadJob$;
-  createJob$;
-  createJobSuccess$;
-  initializeWebSocketConnection$;
-  subscribeToJobUpdates$;
-  unsubscribeFromJobUpdates$;
-  listenToJobUpdates$;
-  listenToJobProgress$;
-  webSocketConnectionStatus$;
+  private readonly actions$ = inject(Actions);
+  private readonly apiService = inject(ApiService);
+  private readonly webSocketService = inject(WebSocketService);
 
-  /**
-   * Initializes a new instance of the Job Effects.
-   * @param actions$ - The actions$.
-   * @param apiService - The api service.
-   * @param webSocketService - The WebSocket service.
-   */
-  constructor(
-    private actions$: Actions,
-    private apiService: ApiService,
-    private webSocketService: WebSocketService,
-  ) {
+  public loadJobs$;
+  public loadJob$;
+  public createJob$;
+  public createJobSuccess$;
+  public initializeWebSocketConnection$;
+  public subscribeToJobUpdates$;
+  public unsubscribeFromJobUpdates$;
+  public listenToJobUpdates$;
+  public listenToJobProgress$;
+  public webSocketConnectionStatus$;
+
+  constructor() {
     this.loadJobs$ = createEffect(() =>
       this.actions$.pipe(
         ofType(JobActions.loadJobs),

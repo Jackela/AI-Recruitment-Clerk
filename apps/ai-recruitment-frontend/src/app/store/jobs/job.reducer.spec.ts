@@ -5,10 +5,8 @@ import * as JobActions from './job.actions';
 import type {
   Job,
   JobListItem,
-  CreateJobResponse} from './job.model';
-import {
-  CreateJobRequest
-} from './job.model';
+  CreateJobResponse,
+  CreateJobRequest as _CreateJobRequest} from './job.model';
 
 describe('Job Reducer', () => {
   const mockJobListItems: JobListItem[] = [
