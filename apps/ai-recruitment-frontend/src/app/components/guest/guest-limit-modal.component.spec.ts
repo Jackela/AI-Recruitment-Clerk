@@ -44,9 +44,15 @@ describe('GuestLimitModalComponent', () => {
     store = TestBed.inject(Store) as jest.Mocked<Store<{ guest: GuestState }>>;
 
     // Setup store selectors - provide observables for each property
-    store.select.mockImplementation((selector: any) => {
+    store.select.mockImplementation((selector: unknown) => {
       if (typeof selector === 'function') {
-        return mockState.pipe(map((state) => selector({ guest: state })));
+        return mockState.pipe(
+          map((state) =>
+            (selector as (state: { guest: GuestState }) => unknown)({
+              guest: state,
+            }),
+          ),
+        );
       }
       // Handle string-based selectors
       return mockState.asObservable();
