@@ -530,7 +530,7 @@
       "title": "Fix app-gateway controllers/",
       "description": "Fix lint issues in app-gateway controllers",
       "priority": 44,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in controllers/",
         "npm run typecheck passes"

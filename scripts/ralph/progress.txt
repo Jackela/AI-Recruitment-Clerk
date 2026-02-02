@@ -586,3 +586,20 @@ Started: 2026-02-01
   - Test files (.spec.ts, .e2e.spec.ts) also need accessibility modifiers for mock classes
   - Subsequent user stories (US-044 to US-046) will handle manual fixes by directory
 ---
+
+## 2026-02-02 - US-044
+- What was implemented: Fixed all lint warnings in app-gateway controllers/ directories
+- Files changed (5 files):
+  - apps/app-gateway/src/common/controllers/performance.controller.ts (eslint-disable for any types, private method modifiers)
+  - apps/app-gateway/src/guest/controllers/guest-resume.controller.ts (public modifiers, non-null assertions replaced with nullish coalescing)
+  - apps/app-gateway/src/guest/controllers/guest-resume.controller.spec.ts (removed unused import, fixed test mocking)
+  - apps/app-gateway/src/guest/controllers/guest.controller.ts (public modifiers, return types, non-null assertions replaced)
+  - apps/app-gateway/src/guest/controllers/websocket-demo.controller.ts (public/private modifiers)
+- **Learnings for future iterations:**
+  - Controllers have 3 directories: auth/controllers, common/controllers, guest/controllers
+  - mfa.controller.ts already had proper accessibility modifiers (no changes needed)
+  - Return types for async methods can use inline type definitions: `Promise<{ field: type; }>`
+  - Replace `req.deviceId!` with `req.deviceId ?? ''` for non-null assertion warnings
+  - Remove `as any` from test mocks when the mock already matches the expected type
+  - ~37 warnings fixed: 20 accessibility modifiers, 10 return types, 7 non-null assertions replaced
+---
