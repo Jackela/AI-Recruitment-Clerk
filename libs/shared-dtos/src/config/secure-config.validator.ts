@@ -19,7 +19,7 @@ export class SecureConfigValidator {
    * Validates required environment variables with fail-fast behavior
    * Prevents service startup if any critical configuration is missing
    */
-  static validateRequiredEnvironment(
+  public static validateRequiredEnvironment(
     requiredVars: string[],
   ): SecurityValidationResult {
     const missing: string[] = [];
@@ -64,7 +64,7 @@ export class SecureConfigValidator {
    * Validates and returns a required environment variable
    * Throws error immediately if not found or insecure
    */
-  static requireEnv(varName: string): string {
+  public static requireEnv(varName: string): string {
     const value = process.env[varName];
 
     if (!value || value.trim() === '') {
@@ -85,7 +85,7 @@ export class SecureConfigValidator {
   /**
    * Validates configuration for a specific service with detailed logging
    */
-  static validateServiceConfig(
+  public static validateServiceConfig(
     serviceName: string,
     requiredVars: string[],
   ): void {
@@ -105,7 +105,7 @@ export class SecureConfigValidator {
   /**
    * Detects insecure fallback values that should never be used in production
    */
-  static isInsecureFallbackValue(value: string): boolean {
+  public static isInsecureFallbackValue(value: string): boolean {
     const insecurePatterns = [
       'your_',
       '_api_key_here',
@@ -124,7 +124,7 @@ export class SecureConfigValidator {
   /**
    * Production readiness check - validates all critical security configurations
    */
-  static validateProductionReadiness(): SecurityValidationResult {
+  public static validateProductionReadiness(): SecurityValidationResult {
     const isProduction = process.env.NODE_ENV === 'production';
     const errors: string[] = [];
 
@@ -166,6 +166,7 @@ export class SecureConfigValidator {
  */
 export function RequireEnv(_varName: string) {
   return function (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _target: any,
     _propertyKey: string | symbol | undefined,
     _parameterIndex: number,
