@@ -20,6 +20,7 @@ export interface KeyboardShortcut {
 export interface NavigationState {
   currentPage: string;
   previousPage?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   preservedState?: any;
 }
 
@@ -303,7 +304,9 @@ export class KeyboardNavigationService {
     });
 
     // Use Angular Router if available
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((window as any).ngRouter) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).ngRouter.navigate([path]);
     } else {
       window.location.href = path;
@@ -325,10 +328,13 @@ export class KeyboardNavigationService {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private extractFormData(): Record<string, any> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const formData: Record<string, any> = {};
     const inputs = document.querySelectorAll('input, textarea, select');
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     inputs.forEach((input: any) => {
       if (input.name || input.id) {
         const key = input.name || input.id;

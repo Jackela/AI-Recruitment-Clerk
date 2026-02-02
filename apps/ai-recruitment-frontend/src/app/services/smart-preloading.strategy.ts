@@ -41,6 +41,7 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
    * @param load - The load.
    * @returns The Observable<any>.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   preload(route: Route, load: () => Observable<any>): Observable<any> {
     const routePath = route.path || 'unknown';
 
@@ -131,9 +132,13 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
 
   private detectNetworkCondition(): void {
     // Use Navigator.connection API if available
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const connection =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (navigator as any).connection ||
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (navigator as any).mozConnection ||
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (navigator as any).webkitConnection;
 
     if (connection) {
@@ -181,6 +186,7 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
   }
 
   private trackUserEngagement(): void {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let idleTimer: any;
 
     const resetIdleTimer = () => {

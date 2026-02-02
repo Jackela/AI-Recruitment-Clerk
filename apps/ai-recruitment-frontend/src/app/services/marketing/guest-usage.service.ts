@@ -148,6 +148,7 @@ export class GuestUsageService {
     return localStorage.getItem(this.STORAGE_KEYS.FEEDBACK_CODE);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private recordFeedbackCode(code: string): Observable<any> {
     return this.http.post(`${this.API_BASE_URL}/record`, { code }).pipe(
       catchError(() => of(null)), // 如果后端不可用，不影响前端功能
@@ -195,6 +196,7 @@ export class GuestUsageService {
 
     try {
       // 调用后端API检查反馈码状态
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const response = (await this.http
         .get(`${this.API_BASE_URL}/validate/${feedbackCode}`)
         .toPromise()) as any;

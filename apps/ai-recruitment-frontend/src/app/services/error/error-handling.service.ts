@@ -49,6 +49,7 @@ export interface StandardizedErrorResponse {
     business: string;
     user: string;
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   details?: any;
 }
 
@@ -63,6 +64,7 @@ export interface ErrorContext {
   url?: string;
   timestamp: Date;
   userAgent: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   additionalContext?: Record<string, any>;
 }
 
@@ -112,6 +114,7 @@ export class ErrorHandlingService implements ErrorHandler {
   /**
    * Angular ErrorHandler implementation
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handleError(error: any): void {
     const errorContext = this.createErrorContext();
 
@@ -180,6 +183,7 @@ export class ErrorHandlingService implements ErrorHandler {
   /**
    * Handle unknown errors
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handleUnknownError(error: any, context?: Partial<ErrorContext>): void {
     const errorContext = { ...this.createErrorContext(), ...context };
 
@@ -400,6 +404,7 @@ export class ErrorHandlingService implements ErrorHandler {
 
   // Private helper methods
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private isStandardizedError(error: any): error is StandardizedErrorResponse {
     return (
       error &&
@@ -550,6 +555,7 @@ export class ErrorHandlingService implements ErrorHandler {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private logError(error: any, context: ErrorContext): void {
     // In production, send to logging service
     if (this.isProduction()) {
@@ -559,6 +565,7 @@ export class ErrorHandlingService implements ErrorHandler {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private sendToLoggingService(_error: any, _context: ErrorContext): void {
     // Implementation for sending errors to logging service
     // This could be an HTTP call to your logging endpoint

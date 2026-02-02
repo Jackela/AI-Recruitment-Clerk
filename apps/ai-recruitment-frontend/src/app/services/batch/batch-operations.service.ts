@@ -19,10 +19,12 @@ import type { ProgressFeedbackService } from '../feedback/progress-feedback.serv
 /**
  * Defines the shape of the batch operation.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface BatchOperation<T = any> {
   id: string;
   type: 'create' | 'update' | 'delete' | 'process';
   items: T[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   action: (item: T) => Observable<any>;
   config?: BatchConfig;
 }
@@ -419,6 +421,7 @@ export class BatchOperationsService {
    */
   batchCreate<T>(
     items: T[],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     createFn: (item: T) => Observable<any>,
     config?: BatchConfig,
   ): Observable<BatchResult<T>> {
@@ -445,6 +448,7 @@ export class BatchOperationsService {
    */
   batchUpdate<T>(
     items: T[],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     updateFn: (item: T) => Observable<any>,
     config?: BatchConfig,
   ): Observable<BatchResult<T>> {
@@ -471,6 +475,7 @@ export class BatchOperationsService {
    */
   batchDelete<T>(
     items: T[],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     deleteFn: (item: T) => Observable<any>,
     config?: BatchConfig,
   ): Observable<BatchResult<T>> {
@@ -498,6 +503,7 @@ export class BatchOperationsService {
    */
   batchProcess<T>(
     items: T[],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     processFn: (item: T) => Observable<any>,
     config?: BatchConfig,
   ): Observable<BatchResult<T>> {

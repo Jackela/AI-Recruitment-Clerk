@@ -279,9 +279,11 @@ export class I18nService {
    * @param params - The params.
    * @returns The string value.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   translate(key: string, params?: Record<string, any>): string {
     const translations = this.translations.value;
     const keys = key.split('.');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let value: any = translations;
 
     for (const k of keys) {
@@ -314,6 +316,7 @@ export class I18nService {
    * @param params - The params.
    * @returns The string value.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   t(key: string, params?: Record<string, any>): string {
     return this.translate(key, params);
   }

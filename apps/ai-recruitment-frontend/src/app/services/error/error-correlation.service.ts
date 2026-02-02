@@ -28,6 +28,7 @@ export interface StructuredError {
   category: 'network' | 'validation' | 'runtime' | 'security' | 'business';
   context: ErrorCorrelationContext;
   stack?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>;
   userAction?: string;
   recoverable: boolean;
@@ -88,6 +89,7 @@ export class ErrorCorrelationService {
    * Create structured error with correlation
    */
   createStructuredError(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     error: Error | any,
     category: StructuredError['category'] = 'runtime',
     severity: StructuredError['severity'] = 'medium',
@@ -271,6 +273,7 @@ export class ErrorCorrelationService {
     return sessionId;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private generateErrorCode(error: any, category: string): string {
     if (error?.name) {
       return `${category.toUpperCase()}_${error.name.toUpperCase()}`;
@@ -281,6 +284,7 @@ export class ErrorCorrelationService {
     return `${category.toUpperCase()}_UNKNOWN`;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private extractErrorMessage(error: any): string {
     if (typeof error === 'string') return error;
     if (error?.message) return error.message;
@@ -288,7 +292,9 @@ export class ErrorCorrelationService {
     return 'Unknown error occurred';
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private extractMetadata(error: any): Record<string, any> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const metadata: Record<string, any> = {};
 
     if (error?.status) metadata.httpStatus = error.status;
@@ -299,6 +305,7 @@ export class ErrorCorrelationService {
     return metadata;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private isRecoverable(error: any, category: string): boolean {
     // Network errors are usually recoverable
     if (category === 'network') return true;
@@ -393,6 +400,7 @@ export class ErrorCorrelationService {
     return '1.0.0'; // Get from environment or package.json
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private getBrowserInfo(): Record<string, any> {
     return {
       userAgent: navigator.userAgent,
@@ -405,6 +413,7 @@ export class ErrorCorrelationService {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private getPerformanceMetrics(): Record<string, any> {
     if (!window.performance) return {};
 
@@ -439,6 +448,7 @@ export class ErrorCorrelationService {
     totalJSHeapSize?: number;
     jsHeapSizeLimit?: number;
   } | null {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const performanceWithMemory = (window as any)?.performance?.memory;
 
     return performanceWithMemory

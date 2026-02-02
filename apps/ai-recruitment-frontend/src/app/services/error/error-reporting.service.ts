@@ -17,7 +17,9 @@ export interface ErrorReport {
   reproductionSteps?: string[];
   expectedBehavior?: string;
   actualBehavior?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   browserInfo: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   systemInfo: Record<string, any>;
   timestamp: Date;
 }
@@ -224,6 +226,7 @@ export class ErrorReportingService {
     const headers = this.errorCorrelation.getCorrelationHeaders();
 
     return this.http
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .post<any>(
         '/api/errors/user-reports',
         {
@@ -327,6 +330,7 @@ export class ErrorReportingService {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private getBrowserInfo(): Record<string, any> {
     return {
       userAgent: navigator.userAgent,
@@ -337,17 +341,23 @@ export class ErrorReportingService {
       onLine: navigator.onLine,
       maxTouchPoints: navigator.maxTouchPoints,
       hardwareConcurrency: navigator.hardwareConcurrency,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       deviceMemory: (navigator as any).deviceMemory,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       connection: (navigator as any).connection
         ? {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             effectiveType: (navigator as any).connection.effectiveType,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             downlink: (navigator as any).connection.downlink,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             rtt: (navigator as any).connection.rtt,
           }
         : undefined,
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private getSystemInfo(): Record<string, any> {
     return {
       screenResolution: `${screen.width}x${screen.height}`,

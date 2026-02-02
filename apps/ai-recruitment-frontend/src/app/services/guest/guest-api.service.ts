@@ -273,7 +273,7 @@ export class GuestApiService {
   /**
    * Get service statistics (public endpoint)
    */
-  getServiceStats(): Observable<{
+  public getServiceStats(): Observable<{
     totalGuests: number;
     activeGuests: number;
     pendingFeedbackCodes: number;
