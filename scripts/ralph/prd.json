@@ -482,7 +482,7 @@
       "title": "Fix frontend guards/",
       "description": "Fix lint issues in frontend guards",
       "priority": 40,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in guards/",
         "npm run typecheck passes"
@@ -494,7 +494,7 @@
       "title": "Fix frontend interceptors/",
       "description": "Fix lint issues in frontend interceptors",
       "priority": 41,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in interceptors/",
         "npm run typecheck passes"

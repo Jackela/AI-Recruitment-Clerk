@@ -525,3 +525,27 @@ Started: 2026-02-01
   - Add explicit return types like `: void` or `: Observable<T>` to methods
   - ~50 warnings fixed: 45 accessibility modifiers, 5 any types preserved with eslint-disable
 ---
+
+## 2026-02-02 - US-040
+- What was implemented: Verified frontend has no guards/ directory - no fixes needed
+- Files changed: None
+- **Learnings for future iterations:**
+  - Frontend app does not have a guards/ directory
+  - Angular guards would be in apps/ai-recruitment-frontend/src/app/guards/ if they existed
+  - Backend app-gateway has guards in apps/app-gateway/src/auth/guards/ and apps/app-gateway/src/guest/guards/
+---
+
+## 2026-02-02 - US-041
+- What was implemented: Fixed all lint warnings in apps/ai-recruitment-frontend/src/app/interceptors/
+- Files changed (2 files):
+  - interceptors/error-handling.interceptor.ts (2 warnings: inject() pattern, accessibility modifier)
+  - interceptors/http-error.interceptor.ts (18 warnings: inject() pattern x3, accessibility modifier, 10 any types, non-null assertion, empty arrow function, return type)
+- **Learnings for future iterations:**
+  - Create StructuredError interface to replace `any` type for error objects with correlationId, errorCode, message
+  - Replace `Promise resolve` with `Promise<void>` for typed promises
+  - Empty catch blocks can use `() => { /* intentionally ignored */ }` instead of empty arrow function
+  - Replace non-null assertions with nullish coalescing `??` (e.g., `.get(key)!` -> `.get(key) ?? ''`)
+  - Remove `as any` type casts from retry operator by using proper Promise<void> type
+  - Export function return types should be explicit (e.g., `{ provide: string; useClass: typeof Class; multi: boolean }`)
+  - ~20 warnings fixed: 4 accessibility modifiers, 3 inject() conversions, 10 any types replaced with StructuredError interface, 1 non-null assertion, 1 empty function, 1 return type
+---
