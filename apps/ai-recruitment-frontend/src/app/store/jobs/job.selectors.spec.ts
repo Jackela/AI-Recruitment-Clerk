@@ -1,7 +1,8 @@
 import * as JobSelectors from './job.selectors';
-import { JobState, initialJobState } from './job.state';
-import { JobListItem, Job } from './job.model';
-import { AppState } from '../app.state';
+import type { JobState} from './job.state';
+import { initialJobState } from './job.state';
+import type { JobListItem, Job } from './job.model';
+import type { AppState } from '../app.state';
 
 describe('Job Selectors', () => {
   const mockJobListItems: JobListItem[] = [

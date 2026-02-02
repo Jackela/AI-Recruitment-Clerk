@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 // import { StoreModule } from '@ngrx/store'; // Removed unused import
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
@@ -6,8 +7,8 @@ import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { By } from '@angular/platform-browser';
 import { RouterLinkWithHref } from '@angular/router';
 import { JobsListComponent } from './jobs-list.component';
-import { AppState } from '../../../store/app.state';
-import { JobListItem } from '../../../store/jobs/job.model';
+import type { AppState } from '../../../store/app.state';
+import type { JobListItem } from '../../../store/jobs/job.model';
 import * as JobActions from '../../../store/jobs/job.actions';
 import { initialJobState } from '../../../store/jobs/job.state';
 

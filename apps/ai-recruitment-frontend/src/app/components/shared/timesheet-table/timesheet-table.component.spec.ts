@@ -1,6 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TimesheetTableComponent, TimesheetEntry } from './timesheet-table.component';
-import { TimesheetColumn } from '../../../../lib/config/table-config';
+import type { ComponentFixture} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import type { TimesheetEntry } from './timesheet-table.component';
+import { TimesheetTableComponent } from './timesheet-table.component';
+import type { TimesheetColumn } from '../../../../lib/config/table-config';
 
 const BASE_ENTRIES: TimesheetEntry[] = [
   {

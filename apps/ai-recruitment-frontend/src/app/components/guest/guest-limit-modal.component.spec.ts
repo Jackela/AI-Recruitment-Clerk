@@ -1,9 +1,11 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { GuestLimitModalComponent } from './guest-limit-modal.component';
-import { GuestState, initialGuestState } from '../../store/guest/guest.state';
+import type { GuestState} from '../../store/guest/guest.state';
+import { initialGuestState } from '../../store/guest/guest.state';
 import * as GuestActions from '../../store/guest/guest.actions';
 
 describe('GuestLimitModalComponent', () => {

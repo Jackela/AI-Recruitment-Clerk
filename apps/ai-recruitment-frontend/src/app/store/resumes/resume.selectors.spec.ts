@@ -1,7 +1,8 @@
 import * as ResumeSelectors from './resume.selectors';
-import { ResumeState, initialResumeState } from './resume.state';
-import { ResumeListItem, ResumeDetail } from './resume.model';
-import { AppState } from '../app.state';
+import type { ResumeState} from './resume.state';
+import { initialResumeState } from './resume.state';
+import type { ResumeListItem, ResumeDetail } from './resume.model';
+import type { AppState } from '../app.state';
 
 describe('Resume Selectors', () => {
   type BaseResumeStatus = ResumeListItem['status'];

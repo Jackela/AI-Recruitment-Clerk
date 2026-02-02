@@ -1,5 +1,6 @@
+import type {
+  ComponentFixture} from '@angular/core/testing';
 import {
-  ComponentFixture,
   TestBed,
   fakeAsync,
   tick,
@@ -12,20 +13,23 @@ import { Subject, of } from 'rxjs';
 import { Location, CommonModule } from '@angular/common';
 
 import { MobileDashboardComponent } from './mobile-dashboard.component';
+import type {
+  GestureEvent,
+  TouchPoint} from '../../services/mobile/touch-gesture.service';
 import {
   TouchGestureService,
-  GestureEvent,
-  TouchPoint,
   GestureConfig,
 } from '../../services/mobile/touch-gesture.service';
+import type {
+  MobileNavItem} from './mobile-navigation.component';
 import {
-  MobileNavigationComponent,
-  MobileNavItem,
+  MobileNavigationComponent
 } from './mobile-navigation.component';
-import {
-  MobileSwipeComponent,
+import type {
   SwipeEvent,
-  SwipeAction,
+  SwipeAction} from './mobile-swipe.component';
+import {
+  MobileSwipeComponent
 } from './mobile-swipe.component';
 
 // Mock classes for standalone components

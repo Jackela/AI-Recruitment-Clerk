@@ -1,5 +1,6 @@
+import type {
+  ComponentFixture} from '@angular/core/testing';
 import {
-  ComponentFixture,
   TestBed,
   fakeAsync,
   tick,

@@ -1,5 +1,5 @@
 import * as JobActions from './job.actions';
-import {
+import type {
   Job,
   JobListItem,
   CreateJobRequest,

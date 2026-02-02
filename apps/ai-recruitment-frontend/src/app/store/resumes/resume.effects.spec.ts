@@ -1,11 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { Observable, of, throwError } from 'rxjs';
-import { Action } from '@ngrx/store';
+import type { Observable} from 'rxjs';
+import { of, throwError } from 'rxjs';
+import type { Action } from '@ngrx/store';
 import { ResumeEffects } from './resume.effects';
 import { ApiService } from '../../services/api.service';
 import * as ResumeActions from './resume.actions';
-import {
+import type {
   ResumeDetail,
   ResumeListItem,
   ResumeUploadResponse,

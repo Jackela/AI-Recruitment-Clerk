@@ -1,12 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Router } from '@angular/router';
-import { firstValueFrom, Observable, of, throwError } from 'rxjs';
-import { Action } from '@ngrx/store';
+import type { Observable} from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
+import type { Action } from '@ngrx/store';
 import { JobEffects } from './job.effects';
 import { ApiService } from '../../services/api.service';
 import * as JobActions from './job.actions';
-import {
+import type {
   Job,
   JobListItem,
   CreateJobRequest,

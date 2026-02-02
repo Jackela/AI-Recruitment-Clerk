@@ -1,5 +1,6 @@
 import { guestReducer } from './guest.reducer';
-import { initialGuestState, GuestState } from './guest.state';
+import type { GuestState } from './guest.state';
+import { initialGuestState } from './guest.state';
 import * as GuestActions from './guest.actions';
 
 describe('Guest Reducer', () => {

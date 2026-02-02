@@ -1,11 +1,13 @@
 import { jobReducer } from './job.reducer';
-import { initialJobState, JobState } from './job.state';
+import type { JobState } from './job.state';
+import { initialJobState } from './job.state';
 import * as JobActions from './job.actions';
-import {
+import type {
   Job,
   JobListItem,
-  CreateJobRequest,
-  CreateJobResponse,
+  CreateJobResponse} from './job.model';
+import {
+  CreateJobRequest
 } from './job.model';
 
 describe('Job Reducer', () => {

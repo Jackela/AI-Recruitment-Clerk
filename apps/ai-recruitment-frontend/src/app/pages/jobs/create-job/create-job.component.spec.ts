@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
@@ -6,7 +7,7 @@ import { Router } from '@angular/router';
 // import { DebugElement } from '@angular/core'; // Removed unused import
 import { By } from '@angular/platform-browser';
 import { CreateJobComponent } from './create-job.component';
-import { AppState } from '../../../store/app.state';
+import type { AppState } from '../../../store/app.state';
 import * as JobActions from '../../../store/jobs/job.actions';
 import { initialJobState } from '../../../store/jobs/job.state';
 import { I18nService } from '../../../services/i18n/i18n.service';

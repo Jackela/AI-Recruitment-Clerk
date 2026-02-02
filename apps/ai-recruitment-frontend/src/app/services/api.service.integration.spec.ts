@@ -4,18 +4,18 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { ApiService } from './api.service';
-import {
+import type {
   Job,
   JobListItem,
   CreateJobRequest,
   CreateJobResponse,
 } from '../store/jobs/job.model';
-import {
+import type {
   ResumeListItem,
   ResumeDetail,
   ResumeUploadResponse,
 } from '../store/resumes/resume.model';
-import { AnalysisReport, ReportsList } from '../store/reports/report.model';
+import type { AnalysisReport, ReportsList } from '../store/reports/report.model';
 import { environment } from '../../environments/environment';
 
 describe('ApiService Integration Tests', () => {

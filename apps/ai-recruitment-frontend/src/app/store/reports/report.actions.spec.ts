@@ -1,5 +1,5 @@
 import * as ReportActions from './report.actions';
-import { AnalysisReport, ReportsList, ReportListItem } from './report.model';
+import type { AnalysisReport, ReportsList, ReportListItem } from './report.model';
 
 describe('Report Actions', () => {
   const mockReportListItem: ReportListItem = {

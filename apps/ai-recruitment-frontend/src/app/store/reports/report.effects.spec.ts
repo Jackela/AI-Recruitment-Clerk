@@ -1,11 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { Observable, of, throwError } from 'rxjs';
-import { Action } from '@ngrx/store';
+import type { Observable} from 'rxjs';
+import { of, throwError } from 'rxjs';
+import type { Action } from '@ngrx/store';
 import { ReportEffects } from './report.effects';
 import { ApiService } from '../../services/api.service';
 import * as ReportActions from './report.actions';
-import { AnalysisReport, ReportsList, ReportListItem } from './report.model';
+import type { AnalysisReport, ReportsList, ReportListItem } from './report.model';
 
 describe('ReportEffects', () => {
   let actions$: Observable<Action>;

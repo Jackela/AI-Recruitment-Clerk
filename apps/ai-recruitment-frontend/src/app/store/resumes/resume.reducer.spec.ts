@@ -1,7 +1,8 @@
 import { resumeReducer } from './resume.reducer';
-import { initialResumeState, ResumeState } from './resume.state';
+import type { ResumeState } from './resume.state';
+import { initialResumeState } from './resume.state';
 import * as ResumeActions from './resume.actions';
-import {
+import type {
   ResumeDetail,
   ResumeListItem,
   ResumeUploadResponse,
