@@ -497,7 +497,7 @@ export class SkillsTaxonomy {
   /**
    * Normalize a skill name to its canonical form
    */
-  static normalizeSkill(skillName: string): string {
+  public static normalizeSkill(skillName: string): string {
     if (!skillName || typeof skillName !== 'string') {
       return '';
     }
@@ -535,7 +535,7 @@ export class SkillsTaxonomy {
   /**
    * Get skill category and weight
    */
-  static getSkillInfo(
+  public static getSkillInfo(
     skillName: string,
   ): { category: string; subcategory?: string; weight: number } | null {
     const normalized = this.normalizeSkill(skillName);
@@ -555,7 +555,7 @@ export class SkillsTaxonomy {
   /**
    * Get related skills for a given skill
    */
-  static getRelatedSkills(skillName: string): string[] {
+  public static getRelatedSkills(skillName: string): string[] {
     const normalized = this.normalizeSkill(skillName);
     const mapping = this.SKILL_MAPPINGS.find((m) => m.canonical === normalized);
 
@@ -565,7 +565,7 @@ export class SkillsTaxonomy {
   /**
    * Calculate skill score based on category weights and importance
    */
-  static calculateSkillScore(skills: string[]): number {
+  public static calculateSkillScore(skills: string[]): number {
     if (!skills || skills.length === 0) return 0;
 
     let totalScore = 0;
@@ -592,7 +592,7 @@ export class SkillsTaxonomy {
   /**
    * Group skills by category
    */
-  static groupSkillsByCategory(skills: string[]): Record<string, string[]> {
+  public static groupSkillsByCategory(skills: string[]): Record<string, string[]> {
     const groups: Record<string, string[]> = {};
 
     for (const skill of skills) {
@@ -615,7 +615,7 @@ export class SkillsTaxonomy {
   /**
    * Suggest missing skills based on existing skills
    */
-  static suggestRelatedSkills(skills: string[], maxSuggestions = 5): string[] {
+  public static suggestRelatedSkills(skills: string[], maxSuggestions = 5): string[] {
     const suggestions = new Set<string>();
     const existingSkills = new Set(skills.map((s) => this.normalizeSkill(s)));
 
@@ -634,7 +634,7 @@ export class SkillsTaxonomy {
   /**
    * Perform fuzzy matching for skill names
    */
-  static fuzzyMatchSkill(input: string, threshold = 0.8): string | null {
+  public static fuzzyMatchSkill(input: string, threshold = 0.8): string | null {
     if (!input || typeof input !== 'string') return null;
 
     const cleanInput = input.trim().toLowerCase();
@@ -740,14 +740,14 @@ export class SkillsTaxonomy {
   /**
    * Get all available skill categories
    */
-  static getCategories(): SkillCategory[] {
+  public static getCategories(): SkillCategory[] {
     return [...this.SKILL_CATEGORIES];
   }
 
   /**
    * Get skills by category
    */
-  static getSkillsByCategory(categoryName: string): string[] {
+  public static getSkillsByCategory(categoryName: string): string[] {
     return this.SKILL_MAPPINGS.filter(
       (mapping) => mapping.category === categoryName,
     ).map((mapping) => mapping.canonical);
