@@ -13,7 +13,7 @@ export class PdfTextExtractorService {
    * @param buffer - The buffer.
    * @returns A promise that resolves to string value.
    */
-  async extractText(buffer: Buffer): Promise<string> {
+  public async extractText(buffer: Buffer): Promise<string> {
     try {
       // Validate input buffer
       if (!buffer || buffer.length === 0) {
@@ -50,12 +50,13 @@ export class PdfTextExtractorService {
 
       // Clean up the extracted text
       return this.cleanExtractedText(extractedText);
-    } catch (error) {
+    } catch (error: unknown) {
+      const err = error as Error;
       this.logger.error(
-        `Failed to extract text from PDF: ${error.message}`,
-        error.stack,
+        `Failed to extract text from PDF: ${err.message}`,
+        err.stack,
       );
-      throw new Error(`PDF text extraction failed: ${error.message}`);
+      throw new Error(`PDF text extraction failed: ${err.message}`);
     }
   }
 

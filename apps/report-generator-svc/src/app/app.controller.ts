@@ -17,7 +17,7 @@ export class AppController {
    * @returns The result of the operation.
    */
   @Get()
-  getData() {
+  public getData(): { message: string; status: string } {
     return this.appService.getData();
   }
 
@@ -26,7 +26,11 @@ export class AppController {
    * @returns The result of the operation.
    */
   @Get('health')
-  healthCheck() {
+  public healthCheck(): {
+    status: string;
+    service: string;
+    timestamp: string;
+  } {
     return {
       status: 'ok',
       service: 'report-generator-svc',

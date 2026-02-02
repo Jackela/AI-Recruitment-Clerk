@@ -140,7 +140,7 @@ export class ReportRepository {
    * 🚀 MONITORED REPORT CREATION
    * Tracks creation performance and validates data integrity
    */
-  async createReport(reportData: ReportCreateData): Promise<ReportDocument> {
+  public async createReport(reportData: ReportCreateData): Promise<ReportDocument> {
     return this.performanceMonitor.executeWithMonitoring(
       async () => {
         this.logger.debug(
@@ -171,7 +171,7 @@ export class ReportRepository {
    * @param updateData - The update data.
    * @returns A promise that resolves to ReportDocument | null.
    */
-  async updateResumeRecord(
+  public async updateResumeRecord(
     resumeId: string,
     updateData: ReportUpdateData,
   ): Promise<ReportDocument | null> {
@@ -209,7 +209,7 @@ export class ReportRepository {
    * 🚀 MONITORED REPORT UPDATE
    * Tracks update performance and validates modifications
    */
-  async updateReport(
+  public async updateReport(
     reportId: string,
     updateData: Partial<ReportCreateData>,
   ): Promise<ReportDocument | null> {
@@ -244,7 +244,7 @@ export class ReportRepository {
    * @param query - The query.
    * @returns A promise that resolves to ReportDocument | null.
    */
-  async findReport(query: ReportQuery): Promise<ReportDocument | null> {
+  public async findReport(query: ReportQuery): Promise<ReportDocument | null> {
     try {
       this.logger.debug('Finding single report', { query });
 
@@ -265,7 +265,7 @@ export class ReportRepository {
    * 🚀 OPTIMIZED REPORT LOOKUP BY ID
    * Leverages MongoDB's built-in _id index for optimal performance
    */
-  async findReportById(reportId: string): Promise<ReportDocument | null> {
+  public async findReportById(reportId: string): Promise<ReportDocument | null> {
     return this.performanceMonitor.executeWithMonitoring(
       async () => {
         this.logger.debug(`Finding report by ID: ${reportId}`);
@@ -281,7 +281,7 @@ export class ReportRepository {
    * 🚀 OPTIMIZED PAGINATED REPORT SEARCH
    * Leverages composite indexes based on query patterns
    */
-  async findReports(
+  public async findReports(
     query: ReportQuery = {},
     options: ReportListOptions = {},
   ): Promise<PaginatedReports> {
@@ -375,7 +375,7 @@ export class ReportRepository {
    * @param options - The options.
    * @returns A promise that resolves to PaginatedReports.
    */
-  async findReportsByJobId(
+  public async findReportsByJobId(
     jobId: string,
     options: ReportListOptions = {},
   ): Promise<PaginatedReports> {
@@ -388,7 +388,7 @@ export class ReportRepository {
    * @param options - The options.
    * @returns A promise that resolves to PaginatedReports.
    */
-  async findReportsByResumeId(
+  public async findReportsByResumeId(
     resumeId: string,
     options: ReportListOptions = {},
   ): Promise<PaginatedReports> {
@@ -400,7 +400,7 @@ export class ReportRepository {
    * @param reportId - The report id.
    * @returns A promise that resolves to boolean value.
    */
-  async deleteReport(reportId: string): Promise<boolean> {
+  public async deleteReport(reportId: string): Promise<boolean> {
     try {
       this.logger.debug(`Deleting report with ID: ${reportId}`);
 
@@ -427,7 +427,7 @@ export class ReportRepository {
    * Leverages composite indexes for 85-90% performance improvement
    * Expected performance: 300-800ms (from 2-8 seconds)
    */
-  async getReportAnalytics(
+  public async getReportAnalytics(
     filters: ReportQuery = {},
   ): Promise<ReportAnalytics> {
     return this.performanceMonitor.executeWithMonitoring(
@@ -624,7 +624,7 @@ export class ReportRepository {
    * 🚀 OPTIMIZED JOB PERFORMANCE ANALYTICS
    * Leverages job_status_performance composite index for job-specific metrics
    */
-  async getJobAnalytics(jobId: string): Promise<{
+  public async getJobAnalytics(jobId: string): Promise<{
     totalApplications: number;
     statusDistribution: Record<string, number>;
     averageScore: number;
@@ -728,7 +728,7 @@ export class ReportRepository {
    * 🚀 OPTIMIZED TIME-SERIES ANALYTICS
    * Leverages time_score_status_analytics for trend analysis
    */
-  async getTimeSeriesAnalytics(
+  public async getTimeSeriesAnalytics(
     dateRange: { from: Date; to: Date },
     granularity: 'day' | 'week' | 'month' = 'day',
   ): Promise<
@@ -826,7 +826,7 @@ export class ReportRepository {
   /**
    * Health check with performance monitoring
    */
-  async healthCheck(): Promise<{
+  public async healthCheck(): Promise<{
     status: string;
     count: number;
     performance: PerformanceMetrics | null;
@@ -869,7 +869,14 @@ export class ReportRepository {
   /**
    * Get performance metrics for monitoring
    */
-  getPerformanceMetrics() {
+  public getPerformanceMetrics(): {
+    totalQueries: number;
+    averageResponseTime: number;
+    slowQueries: number;
+    errorRate: number;
+    peakQueryTime: number;
+    uptime: string;
+  } {
     return this.performanceMonitor.getPerformanceReport();
   }
 

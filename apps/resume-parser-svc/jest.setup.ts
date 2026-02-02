@@ -7,14 +7,14 @@ import { join } from 'path';
 config({ path: join(__dirname, '.env.test') });
 
 // Mock Logger to prevent console output during tests
-jest.spyOn(Logger, 'log').mockImplementation(() => {});
-jest.spyOn(Logger, 'error').mockImplementation(() => {});
-jest.spyOn(Logger, 'warn').mockImplementation(() => {});
-jest.spyOn(Logger, 'debug').mockImplementation(() => {});
-jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {});
-jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
-jest.spyOn(Logger.prototype, 'warn').mockImplementation(() => {});
-jest.spyOn(Logger.prototype, 'debug').mockImplementation(() => {});
+jest.spyOn(Logger, 'log').mockImplementation((): void => { /* no-op */ });
+jest.spyOn(Logger, 'error').mockImplementation((): void => { /* no-op */ });
+jest.spyOn(Logger, 'warn').mockImplementation((): void => { /* no-op */ });
+jest.spyOn(Logger, 'debug').mockImplementation((): void => { /* no-op */ });
+jest.spyOn(Logger.prototype, 'log').mockImplementation((): void => { /* no-op */ });
+jest.spyOn(Logger.prototype, 'error').mockImplementation((): void => { /* no-op */ });
+jest.spyOn(Logger.prototype, 'warn').mockImplementation((): void => { /* no-op */ });
+jest.spyOn(Logger.prototype, 'debug').mockImplementation((): void => { /* no-op */ });
 
 // Mock console methods to prevent output during tests
 global.console = {
@@ -78,11 +78,11 @@ jest.mock('@ai-recruitment-clerk/shared-dtos', () => ({
 // Cleanup function registry
 const cleanupFunctions: (() => Promise<void> | void)[] = [];
 
-export const registerCleanup = (fn: () => Promise<void> | void) => {
+export const registerCleanup = (fn: () => Promise<void> | void): void => {
   cleanupFunctions.push(fn);
 };
 
-export const runCleanups = async () => {
+export const runCleanups = async (): Promise<void> => {
   for (const fn of cleanupFunctions.splice(0)) {
     await fn();
   }

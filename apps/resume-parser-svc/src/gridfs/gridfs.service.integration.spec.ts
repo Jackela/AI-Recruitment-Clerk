@@ -1,4 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
 import { GridFsService } from './gridfs.service';
 import { MongodbTestSetup } from '../testing/mongodb-test-setup';

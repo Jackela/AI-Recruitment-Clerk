@@ -130,7 +130,7 @@ export class ScoringEngineService {
    * Handles jd extracted event.
    * @param event - The event.
    */
-  handleJdExtractedEvent(event: { jobId: string; jdDto: JdDTO }): void {
+  public handleJdExtractedEvent(event: { jobId: string; jdDto: JdDTO }): void {
     this.jdCache.set(event.jobId, event.jdDto);
   }
 
@@ -139,7 +139,7 @@ export class ScoringEngineService {
    * @param event - The event.
    * @returns A promise that resolves when the operation completes.
    */
-  async handleResumeParsedEvent(event: {
+  public async handleResumeParsedEvent(event: {
     jobId: string;
     resumeId: string;
     resumeDto: ResumeDTO;
@@ -432,7 +432,7 @@ export class ScoringEngineService {
     jdDto: JdDTO,
     _skillAnalysis: EnhancedSkillScore,
     _experienceAnalysis: ExperienceScore,
-  ) {
+  ): { skills: number; experience: number; education: number; culturalFit: number } {
     // Base weights
     let skillsWeight = 0.5;
     let experienceWeight = 0.3;
@@ -527,7 +527,7 @@ export class ScoringEngineService {
     const hasRelevantMajor = resumeDto.education.some((edu) => {
       if (!edu.major) return false;
       const found = relevantMajors.find((relevant) =>
-        edu.major!.toLowerCase().includes(relevant.toLowerCase()),
+        edu.major?.toLowerCase().includes(relevant.toLowerCase()),
       );
       if (found && !matchedMajor) matchedMajor = found;
       return !!found;

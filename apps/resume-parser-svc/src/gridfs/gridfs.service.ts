@@ -20,7 +20,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
   private bucketName = 'resume-files';
   private readonly inMemoryStore = new Map<
     string,
-    { buffer: Buffer; info: GridFsFileInfo & { metadata?: Record<string, any> } }
+    { buffer: Buffer; info: GridFsFileInfo & { metadata?: Record<string, unknown> } }
   >();
 
   /**
@@ -35,7 +35,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
    * Performs the on module init operation.
    * @returns The result of the operation.
    */
-  async onModuleInit() {
+  public async onModuleInit(): Promise<void> {
     await this.connect();
   }
 
@@ -43,7 +43,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
    * Performs the on module destroy operation.
    * @returns The result of the operation.
    */
-  async onModuleDestroy() {
+  public async onModuleDestroy(): Promise<void> {
     await this.disconnect();
   }
 
@@ -52,7 +52,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
    * @param gridFsUrl - The GridFS URL (format: gridfs://bucket-name/fileId).
    * @returns A promise that resolves to Buffer.
    */
-  async downloadFile(gridFsUrl: string): Promise<Buffer> {
+  public async downloadFile(gridFsUrl: string): Promise<Buffer> {
     try {
       this.logger.debug(`Downloading file from GridFS: ${gridFsUrl}`);
 
@@ -74,7 +74,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
       let objectId: ObjectId;
       try {
         objectId = new ObjectId(fileId);
-      } catch (error) {
+      } catch (_error) {
         throw new Error(`Invalid file ID format: ${fileId}`);
       }
 
@@ -133,18 +133,18 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
       });
     } catch (error) {
       this.logger.error('Error in downloadFile', {
-        error: error.message,
+        error: (error as Error).message,
         gridFsUrl,
       });
 
       // Re-throw with more specific error context
-      if (error.message.includes('File not found')) {
+      if ((error as Error).message.includes('File not found')) {
         throw new Error(`File not found: ${gridFsUrl}`);
-      } else if (error.message.includes('Invalid')) {
+      } else if ((error as Error).message.includes('Invalid')) {
         throw new Error(`Invalid GridFS URL or file ID: ${gridFsUrl}`);
       } else {
         throw new Error(
-          `Failed to download file from GridFS: ${error.message}`,
+          `Failed to download file from GridFS: ${(error as Error).message}`,
         );
       }
     }
@@ -157,10 +157,10 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
    * @param _metadata - The metadata.
    * @returns A promise that resolves to string value.
    */
-  async uploadFile(
+  public async uploadFile(
     _buffer: Buffer,
     _filename: string,
-    _metadata?: any,
+    _metadata?: Record<string, unknown>,
   ): Promise<string> {
     if (!_buffer || !Buffer.isBuffer(_buffer) || _buffer.length === 0) {
       throw new Error('File buffer must be a non-empty Buffer');
@@ -174,11 +174,11 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
     if (process.env.NODE_ENV === 'test' || !this.gridFSBucket) {
       const objectId = new ObjectId().toHexString();
       const gridFsUrl = `gridfs://${this.bucketName}/${objectId}`;
-      const info: GridFsFileInfo & { metadata?: Record<string, any> } = {
+      const info: GridFsFileInfo & { metadata?: Record<string, unknown> } = {
         id: objectId,
         filename: _filename,
         contentType:
-          (_metadata && _metadata.contentType) || 'application/octet-stream',
+          (_metadata && (_metadata.contentType as string)) || 'application/octet-stream',
         length: _buffer.length,
         uploadDate: new Date(),
         metadata: _metadata ?? {},
@@ -199,7 +199,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
    * @param _gridFsUrl - The grid fs url.
    * @returns A promise that resolves to boolean value.
    */
-  async fileExists(_gridFsUrl: string): Promise<boolean> {
+  public async fileExists(_gridFsUrl: string): Promise<boolean> {
     const fileId = this.extractFileIdFromUrl(_gridFsUrl);
 
     if (this.inMemoryStore.has(fileId)) {
@@ -214,9 +214,9 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
       const objectId = new ObjectId(fileId);
       const files = await this.gridFSBucket.find({ _id: objectId }).toArray();
       return files.length > 0;
-    } catch (error) {
+    } catch (_error) {
       this.logger.warn('Error while checking GridFS file existence', {
-        error: (error as Error).message,
+        error: (_error as Error).message,
         gridFsUrl: _gridFsUrl,
       });
       return false;
@@ -228,12 +228,12 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
    * @param _gridFsUrl - The grid fs url.
    * @returns A promise that resolves to GridFsFileInfo.
    */
-  async getFileInfo(_gridFsUrl: string): Promise<GridFsFileInfo> {
+  public async getFileInfo(_gridFsUrl: string): Promise<GridFsFileInfo> {
     const fileId = this.extractFileIdFromUrl(_gridFsUrl);
 
     const inMemory = this.inMemoryStore.get(fileId);
     if (inMemory) {
-      const { metadata, ...info } = inMemory.info;
+      const { metadata: _metadata, ...info } = inMemory.info;
       return info as GridFsFileInfo;
     }
 
@@ -270,7 +270,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
    * @param _gridFsUrl - The grid fs url.
    * @returns A promise that resolves when the operation completes.
    */
-  async deleteFile(_gridFsUrl: string): Promise<void> {
+  public async deleteFile(_gridFsUrl: string): Promise<void> {
     const fileId = this.extractFileIdFromUrl(_gridFsUrl);
 
     if (this.inMemoryStore.delete(fileId)) {
@@ -288,9 +288,9 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
     try {
       const objectId = new ObjectId(fileId);
       await this.gridFSBucket.delete(objectId);
-    } catch (error) {
+    } catch (_error) {
       this.logger.warn('Error deleting GridFS file', {
-        error: (error as Error).message,
+        error: (_error as Error).message,
         gridFsUrl: _gridFsUrl,
       });
     }
@@ -300,7 +300,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
    * Performs the connect operation.
    * @returns A promise that resolves when the operation completes.
    */
-  async connect(): Promise<void> {
+  public async connect(): Promise<void> {
     try {
       // Skip actual connection in test environment
       if (process.env.NODE_ENV === 'test') {
@@ -321,7 +321,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
       this.logger.log(`GridFS service connected - bucket: ${this.bucketName}`);
     } catch (error) {
       this.logger.error('Failed to connect to GridFS:', error);
-      throw new Error(`GridFS connection failed: ${error.message}`);
+      throw new Error(`GridFS connection failed: ${(error as Error).message}`);
     }
   }
 
@@ -329,7 +329,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
    * Performs the disconnect operation.
    * @returns A promise that resolves when the operation completes.
    */
-  async disconnect(): Promise<void> {
+  public async disconnect(): Promise<void> {
     try {
       // GridFS bucket doesn't need explicit cleanup
       // Connection cleanup is handled by Mongoose
@@ -367,7 +367,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
   /**
    * Health check method for service monitoring
    */
-  async healthCheck(): Promise<{
+  public async healthCheck(): Promise<{
     status: string;
     bucket: string;
     connected: boolean;

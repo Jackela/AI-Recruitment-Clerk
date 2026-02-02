@@ -125,7 +125,7 @@ export class ExperienceAnalyzerService {
   /**
    * Comprehensive experience analysis and scoring
    */
-  async analyzeExperience(
+  public async analyzeExperience(
     workExperience: ResumeDTO['workExperience'],
     jobRequirements: JobRequirements,
     industryContext?: string,
@@ -237,17 +237,17 @@ export class ExperienceAnalyzerService {
 
     const prompt = `
       Analyze the following work experience for a ${jobRequirements.seniority} position in ${industryContext || 'general'} industry:
-      
+
       WORK EXPERIENCE:
       ${experienceText}
-      
+
       JOB REQUIREMENTS:
       - Experience: ${jobRequirements.experienceYears.min}-${jobRequirements.experienceYears.max} years
       - Seniority: ${jobRequirements.seniority}
       - Leadership Required: ${jobRequirements.leadershipRequired || false}
       - Required Industries: ${jobRequirements.requiredIndustries?.join(', ') || 'Any'}
       - Required Technologies: ${jobRequirements.requiredTechnologies?.join(', ') || 'N/A'}
-      
+
       Provide detailed analysis in JSON format:
       {
         "relevantYears": number,
@@ -266,11 +266,11 @@ export class ExperienceAnalyzerService {
         "relevanceFactors": {
           "skillAlignmentScore": number (0-100),
           "industryRelevance": number (0-100),
-          "roleSimilarityScore": number (0-100), 
+          "roleSimilarityScore": number (0-100),
           "technologyRelevance": number (0-100)
         }
       }
-      
+
       Consider:
       1. Relevant experience based on role similarity and industry alignment
       2. Leadership indicators (team sizes, management responsibilities, projects led)
@@ -456,9 +456,9 @@ export class ExperienceAnalyzerService {
         Classify the industry for this company/role:
         Company: ${company}
         Role Summary: ${summary}
-        
-        Return one of these industries: Technology, Finance, Healthcare, Education, 
-        Retail, Manufacturing, Consulting, Government, Non-Profit, Media, Real Estate, 
+
+        Return one of these industries: Technology, Finance, Healthcare, Education,
+        Retail, Manufacturing, Consulting, Government, Non-Profit, Media, Real Estate,
         Transportation, Energy, Telecommunications, Other
       `;
 
@@ -475,7 +475,7 @@ export class ExperienceAnalyzerService {
   private calculateWeightingFactors(
     analysis: ExperienceAnalysis,
     jobRequirements: JobRequirements,
-  ) {
+  ): WeightingFactors {
     // Recency weight increases for senior positions
     const recencyWeight =
       jobRequirements.seniority === 'senior' ||
@@ -521,7 +521,7 @@ export class ExperienceAnalyzerService {
     analysis: ExperienceAnalysis,
     jobRequirements: JobRequirements,
     weightingFactors: WeightingFactors,
-  ) {
+  ): ExperienceScore['breakdown'] {
     // Base experience score (0-100)
     const experienceRatio =
       analysis.totalYears / Math.max(jobRequirements.experienceYears.min, 1);

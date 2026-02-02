@@ -21,7 +21,7 @@ export class AppService
    * Retrieves data.
    * @returns The { message: string; status: string }.
    */
-  getData(): { message: string; status: string } {
+  public getData(): { message: string; status: string } {
     return {
       message: 'Report Generator Service API',
       status: this.isInitialized ? 'ready' : 'initializing',
@@ -32,7 +32,7 @@ export class AppService
    * Performs the on application bootstrap operation.
    * @returns A promise that resolves when the operation completes.
    */
-  async onApplicationBootstrap(): Promise<void> {
+  public async onApplicationBootstrap(): Promise<void> {
     this.logger.log('Report Generator Service starting...');
 
     try {
@@ -71,7 +71,7 @@ export class AppService
    * Performs the on application shutdown operation.
    * @returns A promise that resolves when the operation completes.
    */
-  async onApplicationShutdown(): Promise<void> {
+  public async onApplicationShutdown(): Promise<void> {
     this.logger.log('Report Generator Service shutting down...');
 
     try {

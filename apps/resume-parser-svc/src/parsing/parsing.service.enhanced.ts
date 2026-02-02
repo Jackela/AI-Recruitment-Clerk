@@ -34,6 +34,7 @@ export interface ParsingResult {
   /** Processing status */
   status: 'processing' | 'completed' | 'failed' | 'partial';
   /** Extracted resume data */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   parsedData?: any;
   /** File storage URL */
   fileUrl?: string;
@@ -449,6 +450,7 @@ export class ParsingService {
     fileBuffer: Buffer,
     fileName: string,
     maxRetries: number,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<any> {
     return await RetryUtility.withExponentialBackoff(
       async () => {
@@ -474,6 +476,7 @@ export class ParsingService {
    *
    * @since 1.1.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private calculateConfidence(parsedData: any, rawData: any): number {
     let score = 0.5; // Base score
 

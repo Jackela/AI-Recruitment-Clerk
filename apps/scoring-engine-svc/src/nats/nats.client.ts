@@ -8,7 +8,7 @@ export class NatsClient {
    * @param _data - The data.
    * @returns A promise that resolves when the operation completes.
    */
-  async publish(_subject: string, _data: unknown): Promise<void> {
+  public async publish(_subject: string, _data: unknown): Promise<void> {
     // no-op stub for tests
   }
   /**
@@ -17,7 +17,7 @@ export class NatsClient {
    * @param _data - The data.
    * @returns A promise that resolves to { success: boolean }.
    */
-  async emit(_subject: string, _data: unknown): Promise<{ success: boolean }> {
+  public async emit(_subject: string, _data: unknown): Promise<{ success: boolean }> {
     return Promise.resolve({ success: true });
   }
   /**
@@ -25,7 +25,7 @@ export class NatsClient {
    * @param _payload - The payload.
    * @returns A promise that resolves to { success: boolean }.
    */
-  async publishScoringCompleted(
+  public async publishScoringCompleted(
     _payload: unknown,
   ): Promise<{ success: boolean }> {
     return Promise.resolve({ success: true });
@@ -37,7 +37,7 @@ export class NatsClient {
    * @param _error - The error.
    * @returns A promise that resolves to { success: boolean }.
    */
-  async publishScoringError(
+  public async publishScoringError(
     _jobId: string,
     _resumeId: string,
     _error: unknown,
@@ -50,7 +50,7 @@ export class NatsClient {
    * @param _data - The data.
    * @returns A promise that resolves to T.
    */
-  async request<T = unknown>(_subject: string, _data?: unknown): Promise<T> {
+  public async request<T = unknown>(_subject: string, _data?: unknown): Promise<T> {
     return Promise.resolve(undefined as unknown as T);
   }
   /**
@@ -59,7 +59,7 @@ export class NatsClient {
    * @param _handler - The handler.
    * @returns The { unsubscribe: () => void }.
    */
-  subscribe(
+  public subscribe(
     _subject: string,
     _handler: (msg: unknown) => void,
   ): { unsubscribe: () => void } {
@@ -68,7 +68,7 @@ export class NatsClient {
   /**
    * Performs the close operation.
    */
-  close(): void {
+  public close(): void {
     // no-op
   }
 }

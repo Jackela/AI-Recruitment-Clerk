@@ -2,7 +2,8 @@
  * Test fixtures and mock data for Resume Parser Service testing
  */
 
-export const createMockResumeSubmittedEvent = (overrides?: any) => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const createMockResumeSubmittedEvent = (overrides?: any): Record<string, unknown> => ({
   jobId: 'job-uuid-123',
   resumeId: 'resume-uuid-456',
   originalFilename: 'john-doe-resume.pdf',
@@ -10,7 +11,8 @@ export const createMockResumeSubmittedEvent = (overrides?: any) => ({
   ...overrides,
 });
 
-export const createMockAnalysisResumeParsedEvent = (overrides?: any) => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const createMockAnalysisResumeParsedEvent = (overrides?: any): Record<string, unknown> => ({
   jobId: 'job-uuid-123',
   resumeId: 'resume-uuid-456',
   resumeDto: {
@@ -42,7 +44,8 @@ export const createMockAnalysisResumeParsedEvent = (overrides?: any) => ({
   ...overrides,
 });
 
-export const createMockJobResumeFailedEvent = (overrides?: any) => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const createMockJobResumeFailedEvent = (overrides?: any): Record<string, unknown> => ({
   jobId: 'job-uuid-123',
   resumeId: 'resume-uuid-456',
   originalFilename: 'john-doe-resume.pdf',
@@ -53,7 +56,8 @@ export const createMockJobResumeFailedEvent = (overrides?: any) => ({
   ...overrides,
 });
 
-export const createMockParsedResumeDto = (overrides?: any) => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const createMockParsedResumeDto = (overrides?: any): Record<string, unknown> => ({
   contactInfo: {
     name: 'Jane Smith',
     email: 'jane.smith@example.com',
@@ -95,7 +99,7 @@ export const createMockNatsPublishResult = (
   success = true,
   messageId?: string,
   error?: string,
-) => ({
+): { success: boolean; messageId: string; error?: string } => ({
   success,
   messageId: messageId || `msg_${Date.now()}_test`,
   error,
@@ -104,7 +108,8 @@ export const createMockNatsPublishResult = (
 /**
  * Test data validation helpers
  */
-export const validateEventStructure = (event: any, expectedType: string) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const validateEventStructure = (event: any, expectedType: string): void => {
   expect(event).toBeDefined();
   expect(event.jobId).toBeDefined();
   expect(event.resumeId).toBeDefined();

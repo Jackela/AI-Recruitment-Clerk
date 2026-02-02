@@ -1,29 +1,19 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { Types } from 'mongoose';
-import {
-  ReportGeneratorService,
+import type {
   MatchScoredEvent,
   ReportGenerationRequest,
-  GeneratedReport,
-  ReportDataItem,
   JobData,
   ResumeData,
-  ScoringData,
-  ReportDocument,
-  CandidateComparisonData,
-  InterviewCandidateData,
-  ExtractedJobRequirements,
-} from './report-generator.service';
-import { LlmService } from './llm.service';
-import { GridFsService, ReportFileMetadata } from './gridfs.service';
-import { ReportRepository, ReportCreateData } from './report.repository';
+  ScoringData} from './report-generator.service';
 import {
-  ScoreBreakdown,
-  MatchingSkill,
-  ReportRecommendation,
-  ReportDocument as SchemaReportDocument,
-} from '../schemas/report.schema';
+  ReportGeneratorService,
+} from './report-generator.service';
+import type { LlmService } from './llm.service';
+import type { GridFsService } from './gridfs.service';
+import type { ReportRepository } from './report.repository';
 import {
   ReportGeneratorException,
   ErrorCorrelationManager,
@@ -34,7 +24,7 @@ jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => ({
   ReportGeneratorException: jest.fn().mockImplementation((message, details) => {
     const error = new Error(message);
     error.name = 'ReportGeneratorException';
-    (error as any).details = details;
+    (error as { details?: unknown }).details = details;
     return error;
   }),
   ErrorCorrelationManager: {
@@ -181,7 +171,7 @@ describe('ReportGeneratorService', () => {
     ...overrides,
   });
 
-  const createMockReportDocument = (overrides: Partial<any> = {}): any => ({
+  const createMockReportDocument = (overrides: Partial<Record<string, unknown>> = {}): Record<string, unknown> => ({
     _id: new Types.ObjectId(),
     jobId: 'test-job-id',
     resumeId: 'test-resume-id',
@@ -227,7 +217,7 @@ describe('ReportGeneratorService', () => {
       providers: [
         ReportGeneratorService,
         {
-          provide: LlmService,
+          provide: 'LlmService',
           useValue: {
             generateReportMarkdown: jest.fn(),
             generateCandidateComparison: jest.fn(),
@@ -236,14 +226,14 @@ describe('ReportGeneratorService', () => {
           },
         },
         {
-          provide: GridFsService,
+          provide: 'GridFsService',
           useValue: {
             saveReport: jest.fn(),
             healthCheck: jest.fn(),
           },
         },
         {
-          provide: ReportRepository,
+          provide: 'ReportRepository',
           useValue: {
             createReport: jest.fn(),
             updateResumeRecord: jest.fn(),
@@ -256,10 +246,9 @@ describe('ReportGeneratorService', () => {
     }).compile();
 
     service = module.get<ReportGeneratorService>(ReportGeneratorService);
-    llmService = module.get<jest.Mocked<LlmService>>(LlmService);
-    gridFsService = module.get<jest.Mocked<GridFsService>>(GridFsService);
-    reportRepository =
-      module.get<jest.Mocked<ReportRepository>>(ReportRepository);
+    llmService = module.get('LlmService') as jest.Mocked<LlmService>;
+    gridFsService = module.get('GridFsService') as jest.Mocked<GridFsService>;
+    reportRepository = module.get('ReportRepository') as jest.Mocked<ReportRepository>;
 
     // Suppress console output during tests
     jest.spyOn(Logger.prototype, 'log').mockImplementation();
@@ -285,9 +274,9 @@ describe('ReportGeneratorService', () => {
       reportRepository.createReport.mockResolvedValue(
         createMockReportDocument({
           _id: mockReportId,
-        }),
+        }) as never,
       );
-      reportRepository.updateResumeRecord.mockResolvedValue(null);
+      reportRepository.updateResumeRecord.mockResolvedValue(null as never);
 
       // Act
       await service.handleMatchScored(event);
@@ -348,7 +337,7 @@ describe('ReportGeneratorService', () => {
         jobId: '',
         resumeId: 'test-resume-id',
         scoreDto: null,
-      } as any;
+      } as unknown as MatchScoredEvent;
 
       // Act & Assert
       await expect(service.handleMatchScored(invalidEvent)).rejects.toThrow();
@@ -371,7 +360,7 @@ describe('ReportGeneratorService', () => {
       const llmError = new Error('LLM service unavailable');
 
       llmService.generateReportMarkdown.mockRejectedValue(llmError);
-      reportRepository.updateResumeRecord.mockResolvedValue(null);
+      reportRepository.updateResumeRecord.mockResolvedValue(null as never);
 
       // Act & Assert
       await expect(service.handleMatchScored(event)).rejects.toThrow(
@@ -396,7 +385,7 @@ describe('ReportGeneratorService', () => {
 
       llmService.generateReportMarkdown.mockResolvedValue(mockMarkdown);
       gridFsService.saveReport.mockRejectedValue(gridFsError);
-      reportRepository.updateResumeRecord.mockResolvedValue(null);
+      reportRepository.updateResumeRecord.mockResolvedValue(null as never);
 
       // Act & Assert
       await expect(service.handleMatchScored(event)).rejects.toThrow(
@@ -422,7 +411,7 @@ describe('ReportGeneratorService', () => {
       llmService.generateReportMarkdown.mockResolvedValue(mockMarkdown);
       gridFsService.saveReport.mockResolvedValue(mockFileId);
       reportRepository.createReport.mockRejectedValue(dbError);
-      reportRepository.updateResumeRecord.mockResolvedValue(null);
+      reportRepository.updateResumeRecord.mockResolvedValue(null as never);
 
       // Act & Assert
       await expect(service.handleMatchScored(event)).rejects.toThrow(
@@ -441,9 +430,9 @@ describe('ReportGeneratorService', () => {
       llmService.generateReportMarkdown.mockResolvedValue('# Minimal Report');
       gridFsService.saveReport.mockResolvedValue('file-id');
       reportRepository.createReport.mockResolvedValue(
-        createMockReportDocument(),
+        createMockReportDocument() as never,
       );
-      reportRepository.updateResumeRecord.mockResolvedValue(null);
+      reportRepository.updateResumeRecord.mockResolvedValue(null as never);
 
       // Act
       await service.handleMatchScored(minimalEvent);
@@ -472,7 +461,7 @@ describe('ReportGeneratorService', () => {
       reportRepository.createReport.mockResolvedValue(
         createMockReportDocument({
           _id: mockReportId,
-        }),
+        }) as never,
       );
 
       // Act
@@ -513,7 +502,7 @@ describe('ReportGeneratorService', () => {
         resumeIds: [],
         reportType: 'invalid',
         outputFormats: ['pdf'],
-      } as any;
+      } as unknown as ReportGenerationRequest;
 
       // Act & Assert
       await expect(service.generateReport(invalidRequest)).rejects.toThrow();
@@ -540,7 +529,7 @@ describe('ReportGeneratorService', () => {
       };
 
       reportRepository.createReport.mockResolvedValue(
-        createMockReportDocument(),
+        createMockReportDocument() as never,
       );
 
       // Act
@@ -561,7 +550,7 @@ describe('ReportGeneratorService', () => {
       };
 
       reportRepository.createReport.mockResolvedValue(
-        createMockReportDocument(),
+        createMockReportDocument() as never,
       );
 
       // Act
@@ -569,7 +558,7 @@ describe('ReportGeneratorService', () => {
 
       // Assert
       expect(result.files).toHaveLength(4);
-      expect(result.files.map((f) => f.format)).toEqual([
+      expect(result.files.map((f: { format: string }) => f.format)).toEqual([
         'markdown',
         'html',
         'pdf',
@@ -599,9 +588,9 @@ describe('ReportGeneratorService', () => {
       );
 
       reportRepository.findReport
-        .mockResolvedValueOnce(mockReports[0])
-        .mockResolvedValueOnce(mockReports[1])
-        .mockResolvedValueOnce(mockReports[2]);
+        .mockResolvedValueOnce(mockReports[0] as never)
+        .mockResolvedValueOnce(mockReports[1] as never)
+        .mockResolvedValueOnce(mockReports[2] as never);
 
       llmService.generateCandidateComparison.mockResolvedValue(mockComparison);
 
@@ -632,7 +621,7 @@ describe('ReportGeneratorService', () => {
       const jobId = 'test-job-id';
       const resumeIds = ['resume-1'];
 
-      reportRepository.findReport.mockResolvedValue(createMockReportDocument());
+      reportRepository.findReport.mockResolvedValue(createMockReportDocument() as never);
 
       // Act & Assert
       await expect(
@@ -654,9 +643,9 @@ describe('ReportGeneratorService', () => {
       const resumeIds = ['resume-1', 'resume-2', 'resume-3'];
 
       reportRepository.findReport
-        .mockResolvedValueOnce(createMockReportDocument())
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(createMockReportDocument());
+        .mockResolvedValueOnce(createMockReportDocument() as never)
+        .mockResolvedValueOnce(null as never)
+        .mockResolvedValueOnce(createMockReportDocument() as never);
 
       llmService.generateCandidateComparison.mockResolvedValue('# Comparison');
 
@@ -683,8 +672,8 @@ describe('ReportGeneratorService', () => {
       const llmError = new Error('LLM comparison failed');
 
       reportRepository.findReport
-        .mockResolvedValueOnce(createMockReportDocument())
-        .mockResolvedValueOnce(createMockReportDocument());
+        .mockResolvedValueOnce(createMockReportDocument() as never)
+        .mockResolvedValueOnce(createMockReportDocument() as never);
 
       llmService.generateCandidateComparison.mockRejectedValue(llmError);
 
@@ -704,7 +693,7 @@ describe('ReportGeneratorService', () => {
         '# Interview Guide\n\n## Technical Questions\n1. Tell me about your JavaScript experience...';
 
       const mockReport = createMockReportDocument();
-      reportRepository.findReport.mockResolvedValue(mockReport);
+      reportRepository.findReport.mockResolvedValue(mockReport as never);
       llmService.generateInterviewGuide.mockResolvedValue(mockGuide);
 
       // Act
@@ -737,7 +726,7 @@ describe('ReportGeneratorService', () => {
       const jobId = 'test-job-id';
       const resumeId = 'test-resume-id';
 
-      reportRepository.findReport.mockResolvedValue(null);
+      reportRepository.findReport.mockResolvedValue(null as never);
 
       // Act & Assert
       await expect(
@@ -759,7 +748,7 @@ describe('ReportGeneratorService', () => {
       const options = { requestedBy: 'hiring-manager' };
       const mockGuide = '# Interview Guide';
 
-      reportRepository.findReport.mockResolvedValue(createMockReportDocument());
+      reportRepository.findReport.mockResolvedValue(createMockReportDocument() as never);
       llmService.generateInterviewGuide.mockResolvedValue(mockGuide);
 
       // Act
@@ -802,7 +791,7 @@ describe('ReportGeneratorService', () => {
         ],
       };
 
-      reportRepository.getReportAnalytics.mockResolvedValue(mockAnalytics);
+      reportRepository.getReportAnalytics.mockResolvedValue(mockAnalytics as never);
 
       // Act
       const result = await service.getReportAnalytics();
@@ -828,7 +817,7 @@ describe('ReportGeneratorService', () => {
         averageConfidenceScore: 0,
         reportsGeneratedToday: 0,
         topPerformingCandidates: [],
-      });
+      } as never);
 
       // Act
       await service.getReportAnalytics(filters);
@@ -847,7 +836,7 @@ describe('ReportGeneratorService', () => {
         status: 'healthy',
         count: 100,
         performance: null,
-      });
+      } as never);
 
       // Act
       const result = await service.healthCheck();
@@ -871,7 +860,7 @@ describe('ReportGeneratorService', () => {
         status: 'healthy',
         count: 100,
         performance: null,
-      });
+      } as never);
 
       // Act
       const result = await service.healthCheck();
@@ -894,7 +883,7 @@ describe('ReportGeneratorService', () => {
       reportRepository.healthCheck.mockResolvedValue({
         connected: true,
         latency: 50,
-      } as any);
+      } as never);
 
       // Act
       const result = await service.healthCheck();
@@ -923,7 +912,7 @@ describe('ReportGeneratorService', () => {
         jobId: '',
         resumeId: 'test-resume-id',
         scoreDto: null,
-      } as any;
+      } as unknown as MatchScoredEvent;
 
       // Act & Assert
       await expect(service.handleMatchScored(invalidEvent)).rejects.toThrow();
@@ -943,7 +932,7 @@ describe('ReportGeneratorService', () => {
         jobId: '',
         resumeId: 'test-resume-id',
         scoreDto: null,
-      } as any;
+      } as unknown as MatchScoredEvent;
 
       // Act & Assert
       await expect(service.handleMatchScored(invalidEvent)).rejects.toThrow();
@@ -974,9 +963,9 @@ describe('ReportGeneratorService', () => {
       llmService.generateReportMarkdown.mockResolvedValue('# Empty Report');
       gridFsService.saveReport.mockResolvedValue('file-id');
       reportRepository.createReport.mockResolvedValue(
-        createMockReportDocument(),
+        createMockReportDocument() as never,
       );
-      reportRepository.updateResumeRecord.mockResolvedValue(null);
+      reportRepository.updateResumeRecord.mockResolvedValue(null as never);
 
       // Act
       await service.handleMatchScored(event);
@@ -998,9 +987,9 @@ describe('ReportGeneratorService', () => {
       );
       gridFsService.saveReport.mockResolvedValue('file-id');
       reportRepository.createReport.mockResolvedValue(
-        createMockReportDocument(),
+        createMockReportDocument() as never,
       );
-      reportRepository.updateResumeRecord.mockResolvedValue(null);
+      reportRepository.updateResumeRecord.mockResolvedValue(null as never);
 
       // Act
       await service.handleMatchScored(event);
@@ -1025,16 +1014,16 @@ describe('ReportGeneratorService', () => {
             workExperience: [],
             education: [],
             skills: [],
-          } as any,
+          } as ResumeData['extractedData'],
         },
       });
 
       llmService.generateReportMarkdown.mockResolvedValue('# Report');
       gridFsService.saveReport.mockResolvedValue('file-id');
       reportRepository.createReport.mockResolvedValue(
-        createMockReportDocument(),
+        createMockReportDocument() as never,
       );
-      reportRepository.updateResumeRecord.mockResolvedValue(null);
+      reportRepository.updateResumeRecord.mockResolvedValue(null as never);
 
       // Act
       await service.handleMatchScored(event);
@@ -1060,7 +1049,7 @@ describe('ReportGeneratorService', () => {
       reportRepository.createReport.mockResolvedValue(
         createMockReportDocument({
           _id: mockReportId,
-        }),
+        }) as never,
       );
 
       // Act
@@ -1083,8 +1072,8 @@ describe('ReportGeneratorService', () => {
       const stringId = 'string-report-id-123';
       reportRepository.createReport.mockResolvedValue(
         createMockReportDocument({
-          _id: stringId as any,
-        }),
+          _id: stringId,
+        }) as never,
       );
 
       // Act
@@ -1103,9 +1092,9 @@ describe('ReportGeneratorService', () => {
       llmService.generateReportMarkdown.mockResolvedValue('# Report');
       gridFsService.saveReport.mockResolvedValue('file-id');
       reportRepository.createReport.mockResolvedValue(
-        createMockReportDocument(),
+        createMockReportDocument() as never,
       );
-      reportRepository.updateResumeRecord.mockResolvedValue(null);
+      reportRepository.updateResumeRecord.mockResolvedValue(null as never);
 
       // Act
       await service.handleMatchScored(event);
@@ -1143,9 +1132,9 @@ describe('ReportGeneratorService', () => {
       llmService.generateReportMarkdown.mockResolvedValue('# Report');
       gridFsService.saveReport.mockResolvedValue('file-id');
       reportRepository.createReport.mockResolvedValue(
-        createMockReportDocument(),
+        createMockReportDocument() as never,
       );
-      reportRepository.updateResumeRecord.mockResolvedValue(null);
+      reportRepository.updateResumeRecord.mockResolvedValue(null as never);
 
       // Act
       await service.handleMatchScored(event);
@@ -1173,9 +1162,9 @@ describe('ReportGeneratorService', () => {
       llmService.generateReportMarkdown.mockResolvedValue('# Report');
       gridFsService.saveReport.mockResolvedValue('file-id');
       reportRepository.createReport.mockResolvedValue(
-        createMockReportDocument(),
+        createMockReportDocument() as never,
       );
-      reportRepository.updateResumeRecord.mockResolvedValue(null);
+      reportRepository.updateResumeRecord.mockResolvedValue(null as never);
 
       // Act
       await service.handleMatchScored(event);

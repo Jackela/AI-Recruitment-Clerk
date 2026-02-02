@@ -1,4 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { ParsingService } from './parsing.service';
 import { VisionLlmService } from '../vision-llm/vision-llm.service';
 import { PdfTextExtractorService } from './pdf-text-extractor.service';

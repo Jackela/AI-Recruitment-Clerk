@@ -1,13 +1,15 @@
 import { Test } from '@nestjs/testing';
 import { ReportEventsController } from '../app/report-events.controller';
+import type {
+  ReportGenerationRequestedEvent} from '../services/report-generator-nats.service';
 import {
-  ReportGeneratorNatsService,
-  ReportGenerationRequestedEvent,
+  ReportGeneratorNatsService
 } from '../services/report-generator-nats.service';
-import {
-  ReportGeneratorService,
+import type {
   MatchScoredEvent,
-  ScoringData,
+  ScoringData} from '../report-generator/report-generator.service';
+import {
+  ReportGeneratorService
 } from '../report-generator/report-generator.service';
 
 class ReportGeneratorNatsServiceStub {

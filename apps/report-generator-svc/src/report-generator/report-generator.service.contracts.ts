@@ -210,9 +210,9 @@ export class ReportGeneratorServiceContracts {
    * @param reportRepository - The report repository.
    */
   constructor(
-    private readonly llmService: LlmService,
-    private readonly gridfsService: GridFsService,
-    private readonly reportRepository: ReportRepository,
+    public readonly llmService: LlmService,
+    public readonly gridfsService: GridFsService,
+    public readonly reportRepository: ReportRepository,
   ) {}
 
   /**
@@ -260,7 +260,7 @@ export class ReportGeneratorServiceContracts {
       result.pageCount <= 20,
     'Must return valid report with appropriate file size (100KB-5MB) and page count (2-20 pages)',
   )
-  async generateAnalysisReport(
+  public async generateAnalysisReport(
     scoringResults: ScoringData[],
     candidateInfo: CandidateInfo,
     jobInfo: JobInfo,
@@ -269,7 +269,7 @@ export class ReportGeneratorServiceContracts {
 
     try {
       // Validate processing time constraint
-      const processingTimeCheck = () => {
+      const processingTimeCheck = (): void => {
         const elapsed = Date.now() - startTime;
         if (!ContractValidators.isValidProcessingTime(elapsed, 30000)) {
           throw new ContractViolationError(
@@ -338,14 +338,14 @@ export class ReportGeneratorServiceContracts {
       const reportCreateData: ReportCreateData = {
         jobId: jobInfo.jobId,
         resumeId: candidateInfo.resumeId,
-        scoreBreakdown: scoringResults[0].scoreBreakdown || {
+        scoreBreakdown: scoringResults[0].scoreBreakdown ?? {
           skillsMatch: 60,
           experienceMatch: 70,
           educationMatch: 80,
-          overallFit: scoringResults[0].overallScore || 0,
+          overallFit: scoringResults[0].overallScore ?? 0,
         },
-        skillsAnalysis: scoringResults[0].matchingSkills || [],
-        recommendation: scoringResults[0].recommendations[0] || {
+        skillsAnalysis: scoringResults[0].matchingSkills ?? [],
+        recommendation: scoringResults[0].recommendations[0] ?? {
           decision: 'consider',
           reasoning: 'Generated automated analysis',
           strengths: [],
@@ -353,7 +353,7 @@ export class ReportGeneratorServiceContracts {
           suggestions: [],
         },
         summary: markdownContent.substring(0, 500), // First 500 chars as summary
-        analysisConfidence: scoringResults[0].overallScore / 100 || 0.8,
+        analysisConfidence: scoringResults[0].overallScore / 100,
         processingTimeMs: Date.now() - startTime,
         generatedBy: 'ReportGeneratorService',
         llmModel: 'gemini-1.5-flash',
@@ -434,7 +434,7 @@ export class ReportGeneratorServiceContracts {
       results.every((result) => ContractValidators.isValidReportResult(result)),
     'Must return array of valid results',
   )
-  async generateBatchReports(
+  public async generateBatchReports(
     requests: ReportGenerationRequest[],
   ): Promise<ReportResult[]> {
     const startTime = Date.now();

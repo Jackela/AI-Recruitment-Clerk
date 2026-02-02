@@ -57,7 +57,7 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
    * Performs the on module init operation.
    * @returns A promise that resolves when the operation completes.
    */
-  async onModuleInit(): Promise<void> {
+  public async onModuleInit(): Promise<void> {
     try {
       this.logger.log('Initializing Report Events Controller...');
 
@@ -75,7 +75,7 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
    * Performs the on module destroy operation.
    * @returns A promise that resolves when the operation completes.
    */
-  async onModuleDestroy(): Promise<void> {
+  public async onModuleDestroy(): Promise<void> {
     try {
       this.logger.log('Shutting down Report Events Controller...');
       // Shared NATS service handles disconnection automatically
@@ -109,7 +109,7 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
    * @param event - The event.
    * @returns A promise that resolves when the operation completes.
    */
-  async handleMatchScored(event: MatchScoredEvent): Promise<void> {
+  public async handleMatchScored(event: MatchScoredEvent): Promise<void> {
     const { jobId, resumeId } = event;
     const reportKey = `${jobId}_${resumeId}`;
 
@@ -179,7 +179,7 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
    * @param event - The event.
    * @returns A promise that resolves when the operation completes.
    */
-  async handleReportGenerationRequested(
+  public async handleReportGenerationRequested(
     event: ReportGenerationRequestedEvent,
   ): Promise<void> {
     const { jobId, resumeId, reportType } = event;
@@ -335,7 +335,7 @@ export class ReportEventsController implements OnModuleInit, OnModuleDestroy {
    * Performs the health check operation.
    * @returns A promise that resolves to { status: string; details: HealthCheckDetails }.
    */
-  async healthCheck(): Promise<{
+  public async healthCheck(): Promise<{
     status: string;
     details: HealthCheckDetails;
   }> {

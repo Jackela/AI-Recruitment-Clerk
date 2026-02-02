@@ -40,7 +40,7 @@ export class ScoringEventsController implements OnModuleInit {
    * Performs the on module init operation.
    * @returns The result of the operation.
    */
-  async onModuleInit() {
+  public async onModuleInit(): Promise<void> {
     // Subscribe to analysis events using the shared NATS service
     if (!this.natsService) return;
     await this.natsService.subscribeToJdExtracted(
@@ -57,7 +57,7 @@ export class ScoringEventsController implements OnModuleInit {
    * @returns A promise that resolves when the operation completes.
    */
   @EventPattern('analysis.jd.extracted')
-  async handleJdExtracted(payload: AnalysisJdExtractedEvent): Promise<void> {
+  public async handleJdExtracted(payload: AnalysisJdExtractedEvent): Promise<void> {
     try {
       this.logger.log(
         `[SCORING-ENGINE] Processing analysis.jd.extracted event for jobId: ${payload.jobId}`,
@@ -106,7 +106,7 @@ export class ScoringEventsController implements OnModuleInit {
    * @returns A promise that resolves when the operation completes.
    */
   @EventPattern('analysis.resume.parsed')
-  async handleResumeParsed(payload: AnalysisResumeParsedEvent): Promise<void> {
+  public async handleResumeParsed(payload: AnalysisResumeParsedEvent): Promise<void> {
     try {
       this.logger.log(
         `[SCORING-ENGINE] Processing analysis.resume.parsed event for resumeId: ${payload.resumeId}`,

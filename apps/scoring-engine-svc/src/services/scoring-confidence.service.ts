@@ -255,7 +255,7 @@ export class ScoringConfidenceService {
    * @see {@link calculateOverallConfidence} for confidence scoring algorithm
    * @since v1.0.0
    */
-  generateConfidenceReport(
+  public generateConfidenceReport(
     componentScores: ComponentScores,
     resume: ResumeDTO,
     processingMetrics: ProcessingMetrics,
@@ -742,7 +742,7 @@ export class ScoringConfidenceService {
     dataQuality: DataQualityAssessment,
     analysisReliability: AnalysisReliabilityAssessment,
     scoreVariance: ScoreVarianceAssessment,
-  ) {
+  ): ConfidenceMetrics['recommendationCertainty'] {
     const scoringConsistency = scoreVariance.stabilityScore;
     const dataCompleteness = dataQuality.score;
     const algorithmMaturity = analysisReliability.score;
@@ -822,7 +822,7 @@ export class ScoringConfidenceService {
   private calculateReliabilityBand(
     componentScores: ComponentScores,
     confidenceMetrics: ConfidenceMetrics,
-  ) {
+  ): ScoreReliabilityReport['reliabilityBand'] {
     const currentScore = Math.round(
       componentScores.skills.score * 0.5 +
         componentScores.experience.score * 0.3 +
@@ -878,7 +878,7 @@ export class ScoringConfidenceService {
   private generateConfidenceRecommendations(
     confidenceMetrics: ConfidenceMetrics,
     qualityIndicators: QualityIndicators,
-  ) {
+  ): ScoreReliabilityReport['recommendations'] {
     const overallConfidence =
       this.calculateOverallConfidence(confidenceMetrics);
 

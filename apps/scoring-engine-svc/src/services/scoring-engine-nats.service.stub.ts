@@ -8,7 +8,7 @@ export class ScoringEngineNatsService {
    * @param _payload - The payload.
    * @returns A promise that resolves to { success: boolean }.
    */
-  async emit(
+  public async emit(
     _subject: string,
     _payload: unknown,
   ): Promise<{ success: boolean }> {
@@ -19,7 +19,7 @@ export class ScoringEngineNatsService {
    * @param _payload - The payload.
    * @returns A promise that resolves to { success: boolean }.
    */
-  async publishScoringCompleted(
+  public async publishScoringCompleted(
     _payload: unknown,
   ): Promise<{ success: boolean }> {
     return { success: true };
@@ -31,7 +31,7 @@ export class ScoringEngineNatsService {
    * @param _error - The error.
    * @returns A promise that resolves to { success: boolean }.
    */
-  async publishScoringError(
+  public async publishScoringError(
     _jobId: string,
     _resumeId: string,
     _error: unknown,

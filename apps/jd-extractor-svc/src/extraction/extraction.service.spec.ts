@@ -36,15 +36,15 @@ jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => ({
   },
 }));
 
-import { Logger } from '@nestjs/common';
+import type { Logger } from '@nestjs/common';
 import { ExtractionService } from './extraction.service';
-import { LlmService } from './llm.service';
-import { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
-import {
+import type { LlmService } from './llm.service';
+import type { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
+import type {
   JobJdSubmittedEvent,
   AnalysisJdExtractedEvent,
 } from '../dto/events.dto';
-import { JdDTO, LlmExtractionResponse } from '@ai-recruitment-clerk/job-management-domain';
+import type { JdDTO, LlmExtractionResponse } from '@ai-recruitment-clerk/job-management-domain';
 import { RetryUtility, ErrorCorrelationManager } from '@ai-recruitment-clerk/infrastructure-shared';
 
 // Get references to the mocked functions

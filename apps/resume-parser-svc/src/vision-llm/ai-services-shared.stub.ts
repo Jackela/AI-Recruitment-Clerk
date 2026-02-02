@@ -16,6 +16,7 @@ export class GeminiClient {
    * Initializes a new instance of the Gemini Client.
    * @param _config - The config.
    */
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor(_config: GeminiConfig) {}
   /**
    * Generates structured response.
@@ -23,8 +24,9 @@ export class GeminiClient {
    * @param _schema - The schema.
    * @returns A promise that resolves to { data: T }.
    */
-  async generateStructuredResponse<T>(
+  public async generateStructuredResponse<T>(
     _prompt: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _schema: any,
   ): Promise<{ data: T }> {
     return { data: {} as T };
@@ -37,10 +39,11 @@ export class GeminiClient {
    * @param _schema - The schema.
    * @returns A promise that resolves to { data: T }.
    */
-  async generateStructuredVisionResponse<T>(
+  public async generateStructuredVisionResponse<T>(
     _prompt: string,
     _buffer: Buffer,
     _mime: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _schema: any,
   ): Promise<{ data: T }> {
     return { data: {} as T };
@@ -49,7 +52,7 @@ export class GeminiClient {
    * Performs the health check operation.
    * @returns A promise that resolves to { status: string }.
    */
-  async healthCheck(): Promise<{ status: string }> {
+  public async healthCheck(): Promise<{ status: string }> {
     return { status: 'ok' };
   }
 }
@@ -63,14 +66,14 @@ export class PromptTemplates {
    * @param _text - The text.
    * @returns The string value.
    */
-  static getResumeParsingPrompt(_text: string): string {
+  public static getResumeParsingPrompt(_text: string): string {
     return 'Parse resume text';
   }
   /**
    * Retrieves resume vision prompt.
    * @returns The string value.
    */
-  static getResumeVisionPrompt(): string {
+  public static getResumeVisionPrompt(): string {
     return 'Parse resume via vision';
   }
 }
@@ -85,7 +88,8 @@ export class PromptBuilder {
    * @param _schema - The schema.
    * @returns The string value.
    */
-  static addJsonSchemaInstruction(prompt: string, _schema: any): string {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static addJsonSchemaInstruction(prompt: string, _schema: any): string {
     return prompt;
   }
 }

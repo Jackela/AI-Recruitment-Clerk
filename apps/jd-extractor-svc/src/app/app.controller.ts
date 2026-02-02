@@ -17,7 +17,7 @@ export class AppController {
    * @returns The result of the operation.
    */
   @Get()
-  getData() {
+  public getData(): { message: string } {
     return this.appService.getData();
   }
 }

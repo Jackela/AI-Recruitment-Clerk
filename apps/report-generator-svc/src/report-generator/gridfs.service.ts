@@ -99,7 +99,7 @@ export class GridFsService {
    * @param metadata - The metadata.
    * @returns A promise that resolves to string value.
    */
-  async saveReport(
+  public async saveReport(
     content: string,
     filename: string,
     metadata: ReportFileMetadata,
@@ -119,7 +119,7 @@ export class GridFsService {
         ...metadata,
         fileSize,
         contentHash,
-        generatedAt: metadata.generatedAt || new Date(),
+        generatedAt: metadata.generatedAt ?? new Date(),
       };
 
       // Create a readable stream from the content
@@ -175,7 +175,7 @@ export class GridFsService {
    * @param metadata - The metadata.
    * @returns A promise that resolves to string value.
    */
-  async saveReportBuffer(
+  public async saveReportBuffer(
     buffer: Buffer,
     filename: string,
     metadata: ReportFileMetadata,
@@ -196,7 +196,7 @@ export class GridFsService {
         ...metadata,
         fileSize: buffer.length,
         contentHash,
-        generatedAt: metadata.generatedAt || new Date(),
+        generatedAt: metadata.generatedAt ?? new Date(),
       };
 
       // Create a readable stream from the buffer
@@ -249,7 +249,7 @@ export class GridFsService {
    * @param fileId - The file id.
    * @returns A promise that resolves to Buffer.
    */
-  async getReport(fileId: string): Promise<Buffer> {
+  public async getReport(fileId: string): Promise<Buffer> {
     try {
       this.logger.debug(`Retrieving report file: ${fileId}`);
 
@@ -293,7 +293,7 @@ export class GridFsService {
    * @param fileId - The file id.
    * @returns A promise that resolves to NodeJS.ReadableStream.
    */
-  async getReportStream(fileId: string): Promise<NodeJS.ReadableStream> {
+  public async getReportStream(fileId: string): Promise<NodeJS.ReadableStream> {
     try {
       this.logger.debug(`Creating stream for report file: ${fileId}`);
 
@@ -323,7 +323,7 @@ export class GridFsService {
    * @param fileId - The file id.
    * @returns A promise that resolves to ReportFileMetadata | null.
    */
-  async getReportMetadata(fileId: string): Promise<ReportFileMetadata | null> {
+  public async getReportMetadata(fileId: string): Promise<ReportFileMetadata | null> {
     try {
       this.logger.debug(`Getting metadata for report file: ${fileId}`);
 
@@ -350,7 +350,7 @@ export class GridFsService {
    * @param query - The query.
    * @returns A promise that resolves to an array of SavedReportFile.
    */
-  async findReportFiles(
+  public async findReportFiles(
     query: ReportFileQuery = {},
   ): Promise<SavedReportFile[]> {
     try {
@@ -392,7 +392,7 @@ export class GridFsService {
       return files.map((file) => ({
         fileId: file._id.toString(),
         filename: file.filename,
-        contentHash: file.metadata?.contentHash || '',
+        contentHash: file.metadata?.contentHash ?? '',
         fileSize: file.length,
         uploadDate: file.uploadDate,
         metadata: file.metadata as ReportFileMetadata,
@@ -411,7 +411,7 @@ export class GridFsService {
    * @param fileId - The file id.
    * @returns A promise that resolves to boolean value.
    */
-  async deleteReport(fileId: string): Promise<boolean> {
+  public async deleteReport(fileId: string): Promise<boolean> {
     try {
       this.logger.debug(`Deleting report file: ${fileId}`);
 
@@ -442,7 +442,7 @@ export class GridFsService {
    * @param fileId - The file id.
    * @returns A promise that resolves to boolean value.
    */
-  async verifyReportIntegrity(fileId: string): Promise<boolean> {
+  public async verifyReportIntegrity(fileId: string): Promise<boolean> {
     try {
       this.logger.debug(`Verifying integrity of report file: ${fileId}`);
 
@@ -487,7 +487,7 @@ export class GridFsService {
    * Retrieves storage stats.
    * @returns The Promise<{ totalFiles: number; totalSize: number; sizeByType: Record<string, { count: number; size: number }>; }>.
    */
-  async getStorageStats(): Promise<{
+  public async getStorageStats(): Promise<{
     totalFiles: number;
     totalSize: number;
     sizeByType: Record<string, { count: number; size: number }>;
@@ -505,7 +505,7 @@ export class GridFsService {
 
       // Group by report type
       files.forEach((file) => {
-        const reportType = file.metadata?.reportType || 'unknown';
+        const reportType = file.metadata?.reportType ?? 'unknown';
         if (!stats.sizeByType[reportType]) {
           stats.sizeByType[reportType] = { count: 0, size: 0 };
         }
@@ -526,7 +526,7 @@ export class GridFsService {
    * Performs the health check operation.
    * @returns A promise that resolves to boolean value.
    */
-  async healthCheck(): Promise<boolean> {
+  public async healthCheck(): Promise<boolean> {
     try {
       // Test connection by listing a small number of files
       await this.gridFSBucket.find({}).limit(1).toArray();

@@ -79,16 +79,16 @@ export class PerformanceMonitorService {
   // Performance thresholds (configurable via environment)
   private readonly thresholds = {
     maxGenerationTime: parseInt(
-      process.env.MAX_REPORT_GENERATION_TIME_MS || '30000',
+      process.env.MAX_REPORT_GENERATION_TIME_MS ?? '30000',
     ), // 30 seconds
-    minSuccessRate: parseFloat(process.env.MIN_SUCCESS_RATE || '0.95'), // 95%
-    minQualityScore: parseFloat(process.env.MIN_QUALITY_SCORE || '4.0'), // 4.0/5.0
-    maxRetentionDays: parseInt(process.env.METRICS_RETENTION_DAYS || '30'), // 30 days
+    minSuccessRate: parseFloat(process.env.MIN_SUCCESS_RATE ?? '0.95'), // 95%
+    minQualityScore: parseFloat(process.env.MIN_QUALITY_SCORE ?? '4.0'), // 4.0/5.0
+    maxRetentionDays: parseInt(process.env.METRICS_RETENTION_DAYS ?? '30'), // 30 days
   };
 
   /**
    * Initializes a new instance of the Performance Monitor Service.
-   * @param reportRepository - The report repository.
+   * @param _reportRepository - The report repository.
    */
   constructor(private readonly _reportRepository: ReportRepository) {
     // Clean up old metrics every hour
@@ -101,7 +101,7 @@ export class PerformanceMonitorService {
    * @param metadata - The metadata.
    * @returns The string value.
    */
-  startOperation(
+  public startOperation(
     operationName: string,
     metadata?: PerformanceMetrics['metadata'],
   ): string {
@@ -128,7 +128,7 @@ export class PerformanceMonitorService {
    * @param additionalMetadata - The additional metadata.
    * @returns The PerformanceMetrics | null.
    */
-  endOperation(
+  public endOperation(
     operationId: string,
     success: boolean,
     errorMessage?: string,
@@ -167,7 +167,7 @@ export class PerformanceMonitorService {
    * Performs the record quality metrics operation.
    * @param qualityMetrics - The quality metrics.
    */
-  recordQualityMetrics(qualityMetrics: QualityMetrics): void {
+  public recordQualityMetrics(qualityMetrics: QualityMetrics): void {
     this.qualityMetrics.push({
       ...qualityMetrics,
       timestamp: new Date(),
@@ -186,7 +186,7 @@ export class PerformanceMonitorService {
    * @param dateRange - The date range.
    * @returns A promise that resolves to PerformanceSummary.
    */
-  async getPerformanceSummary(dateRange?: {
+  public async getPerformanceSummary(dateRange?: {
     startDate: Date;
     endDate: Date;
   }): Promise<PerformanceSummary> {
@@ -194,8 +194,8 @@ export class PerformanceMonitorService {
       this.logger.debug('Generating performance summary');
 
       const startDate =
-        dateRange?.startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
-      const endDate = dateRange?.endDate || new Date();
+        dateRange?.startDate ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
+      const endDate = dateRange?.endDate ?? new Date();
 
       // Filter metrics by date range
       const filteredMetrics = this.performanceHistory.filter(
@@ -217,7 +217,7 @@ export class PerformanceMonitorService {
 
       const generationTimes = filteredMetrics
         .filter((m) => m.duration !== undefined)
-        .map((m) => m.duration!);
+        .map((m) => m.duration as number);
 
       const averageGenerationTime =
         generationTimes.length > 0
@@ -240,16 +240,16 @@ export class PerformanceMonitorService {
       const errorBreakdown: Record<string, number> = {};
 
       filteredMetrics.forEach((metric) => {
-        const reportType = metric.metadata?.reportType || 'unknown';
-        const outputFormat = metric.metadata?.outputFormat || 'unknown';
+        const reportType = metric.metadata?.reportType ?? 'unknown';
+        const outputFormat = metric.metadata?.outputFormat ?? 'unknown';
 
-        reportsByType[reportType] = (reportsByType[reportType] || 0) + 1;
+        reportsByType[reportType] = (reportsByType[reportType] ?? 0) + 1;
         reportsByFormat[outputFormat] =
-          (reportsByFormat[outputFormat] || 0) + 1;
+          (reportsByFormat[outputFormat] ?? 0) + 1;
 
         if (!metric.success && metric.errorMessage) {
           const errorType = this.categorizeError(metric.errorMessage);
-          errorBreakdown[errorType] = (errorBreakdown[errorType] || 0) + 1;
+          errorBreakdown[errorType] = (errorBreakdown[errorType] ?? 0) + 1;
         }
       });
 
@@ -289,7 +289,7 @@ export class PerformanceMonitorService {
    * Retrieves system health.
    * @returns The Promise<{ status: 'healthy' | 'degraded' | 'unhealthy'; metrics: { activeOperations: number; recentSuccessRate: number; averageResponseTime: number; qualityScore: number; }; alerts: string[]; }>.
    */
-  async getSystemHealth(): Promise<{
+  public async getSystemHealth(): Promise<{
     status: 'healthy' | 'degraded' | 'unhealthy';
     metrics: {
       activeOperations: number;
@@ -314,7 +314,7 @@ export class PerformanceMonitorService {
 
       const recentTimes = recentMetrics
         .filter((m) => m.duration !== undefined)
-        .map((m) => m.duration!);
+        .map((m) => m.duration as number);
 
       const averageResponseTime =
         recentTimes.length > 0
@@ -468,9 +468,11 @@ export class PerformanceMonitorService {
       if (!dailyData.has(date)) {
         dailyData.set(date, { scores: [], count: 0 });
       }
-      const dayData = dailyData.get(date)!;
-      dayData.scores.push(metric.qualityScore);
-      dayData.count++;
+      const dayData = dailyData.get(date);
+      if (dayData) {
+        dayData.scores.push(metric.qualityScore);
+        dayData.count++;
+      }
     });
 
     return Array.from(dailyData.entries())
@@ -504,14 +506,16 @@ export class PerformanceMonitorService {
       if (!dailyData.has(date)) {
         dailyData.set(date, { times: [], successes: 0, total: 0 });
       }
-      const dayData = dailyData.get(date)!;
-      if (metric.duration) {
-        dayData.times.push(metric.duration);
+      const dayData = dailyData.get(date);
+      if (dayData) {
+        if (metric.duration) {
+          dayData.times.push(metric.duration);
+        }
+        if (metric.success) {
+          dayData.successes++;
+        }
+        dayData.total++;
       }
-      if (metric.success) {
-        dayData.successes++;
-      }
-      dayData.total++;
     });
 
     return Array.from(dailyData.entries())

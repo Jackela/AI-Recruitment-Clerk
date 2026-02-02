@@ -6,7 +6,7 @@ import { Logger } from '@nestjs/common';
 
 const logger = new Logger('JdExtractorSvc');
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     AppModule,
     {

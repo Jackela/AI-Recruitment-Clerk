@@ -1,5 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ScoringConfidenceService, ComponentScores, ProcessingMetrics } from './scoring-confidence.service';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { ComponentScores, ProcessingMetrics } from './scoring-confidence.service';
+import { ScoringConfidenceService } from './scoring-confidence.service';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
 describe('ScoringConfidenceService', () => {

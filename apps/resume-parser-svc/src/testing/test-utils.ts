@@ -15,9 +15,13 @@ import { Logger } from '@nestjs/common';
  */
 export interface TestModuleOptions {
   useDocker?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   imports?: any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   providers?: any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   controllers?: any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   exports?: any[];
 }
 
@@ -65,11 +69,13 @@ export async function createTestModule(
 /**
  * Create mock providers for common services
  */
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const createMockProviders = () => ({
   configService: {
     provide: ConfigService,
     useValue: {
       get: jest.fn((key: string) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const config: Record<string, any> = {
           MONGODB_URI:
             'mongodb://testuser:testpass@localhost:27018/resume-parser-test',
@@ -113,7 +119,9 @@ export const createMockProviders = () => ({
 /**
  * Create a mock MongoDB model
  */
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const createMockMongoModel = (modelName: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mockModel: any = jest.fn().mockImplementation((data) => ({
     ...data,
     _id: '507f1f77bcf86cd799439011',
@@ -177,6 +185,7 @@ export const createMockMongoModel = (modelName: string) => {
 /**
  * Create a mock GridFS connection
  */
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const createMockGridFSConnection = () => {
   const mockGridFSBucket = {
     openDownloadStream: jest.fn().mockImplementation((_id) => ({
@@ -228,11 +237,12 @@ export const createMockGridFSConnection = () => {
 /**
  * Wait for async operations to complete
  */
-export const flushPromises = () => new Promise(setImmediate);
+export const flushPromises = (): Promise<void> => new Promise(setImmediate);
 
 /**
  * Create a test job object
  */
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const createTestJob = (overrides = {}) => ({
   jobId: 'job-123',
   title: 'Senior Software Engineer',
@@ -246,6 +256,7 @@ export const createTestJob = (overrides = {}) => ({
 /**
  * Create a test resume object
  */
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const createTestResume = (overrides = {}) => ({
   resumeId: 'resume-456',
   contactInfo: {

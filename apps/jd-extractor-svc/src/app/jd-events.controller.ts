@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { OnModuleInit } from '@nestjs/common';
 import { Controller, Logger } from '@nestjs/common';
 import { EventPattern } from '@nestjs/microservices';
@@ -29,7 +30,7 @@ export class JdEventsController implements OnModuleInit {
    * Performs the on module init operation.
    * @returns The result of the operation.
    */
-  async onModuleInit() {
+  public async onModuleInit(): Promise<void> {
     // Subscribe to job.jd.submitted events using the shared NATS client
     await this.natsService.subscribeToJobSubmissions(
       this.handleJobSubmitted.bind(this),
@@ -42,7 +43,7 @@ export class JdEventsController implements OnModuleInit {
    * @returns A promise that resolves when the operation completes.
    */
   @EventPattern('job.jd.submitted')
-  async handleJobSubmitted(payload: any): Promise<void> {
+  public async handleJobSubmitted(payload: any): Promise<void> {
     try {
       this.logger.log(
         `[JD-EXTRACTOR-SVC] Processing job.jd.submitted event for jobId: ${payload.jobId}`,

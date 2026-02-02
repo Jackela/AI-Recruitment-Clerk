@@ -1,5 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ScoringEngineService, JdDTO } from './scoring.service';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { JdDTO } from './scoring.service';
+import { ScoringEngineService } from './scoring.service';
 import { ScoringEngineNatsService } from './services/scoring-engine-nats.service';
 import { EnhancedSkillMatcherService } from './services/enhanced-skill-matcher.service';
 import { ExperienceAnalyzerService } from './services/experience-analyzer.service';

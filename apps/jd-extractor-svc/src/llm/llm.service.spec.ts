@@ -1,6 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { LlmService } from '../extraction/llm.service';
-import { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
+import type { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
 import {
   createMockExtractedJdDTO,
   createMockLlmExtractionRequest,
@@ -12,28 +13,28 @@ describe('LlmService', () => {
 
   const mockJdText = `
     Senior Full Stack Developer
-    
+
     We are seeking a Senior Full Stack Developer to join our growing team at TechCorp Solutions.
-    
+
     Requirements:
     - 5+ years of experience with JavaScript, Node.js, TypeScript
     - Experience with React and modern frontend frameworks
     - Bachelor's degree in Computer Science or related field
     - Strong communication and leadership skills
-    
+
     Responsibilities:
     - Develop and maintain scalable web applications
     - Collaborate with cross-functional teams
     - Mentor junior developers
     - Participate in code reviews and technical discussions
-    
+
     Benefits:
     - Competitive salary
     - Health insurance and dental coverage
     - Remote work flexibility
     - Professional development opportunities
     - 401k matching
-    
+
     Company: TechCorp Solutions is a fast-growing software company specializing in enterprise solutions.
     We have 200+ employees and serve clients worldwide.
   `;
@@ -407,7 +408,7 @@ describe('LlmService', () => {
 
       try {
         await service.extractJobRequirements(mockJdText);
-      } catch (error) {
+      } catch (_error) {
         // Expected to fail - implementation not ready
         const processingTime = Date.now() - startTime;
         expect(processingTime).toBeLessThan(10000); // Should fail fast
@@ -450,7 +451,7 @@ describe('LlmService', () => {
 
   describe('Negative Tests - Invalid Input Handling', () => {
     it('should handle null job description', async () => {
-      const result = await service.extractJobRequirements(null as any);
+      const result = await service.extractJobRequirements(null as unknown as string);
 
       expect(result).toBeDefined();
       expect(result.requirements.technical).toEqual([]);
@@ -458,7 +459,7 @@ describe('LlmService', () => {
     });
 
     it('should handle undefined job description', async () => {
-      const result = await service.extractJobRequirements(undefined as any);
+      const result = await service.extractJobRequirements(undefined as unknown as string);
 
       expect(result).toBeDefined();
       expect(result.requirements.technical).toEqual([]);

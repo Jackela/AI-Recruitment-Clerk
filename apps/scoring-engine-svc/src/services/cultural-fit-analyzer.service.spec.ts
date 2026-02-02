@@ -1,13 +1,15 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import {
-  CulturalFitAnalyzerService,
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type {
   CompanyProfile,
   CulturalFitIndicators,
-  SoftSkillsAssessment,
+  SoftSkillsAssessment} from './cultural-fit-analyzer.service';
+import {
+  CulturalFitAnalyzerService
 } from './cultural-fit-analyzer.service';
 import { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
-import { JobRequirements } from './experience-analyzer.service';
+import type { JobRequirements } from './experience-analyzer.service';
 
 describe('CulturalFitAnalyzerService', () => {
   let service: CulturalFitAnalyzerService;

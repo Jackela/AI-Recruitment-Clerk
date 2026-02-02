@@ -117,7 +117,7 @@ export class ReportTemplatesService {
    * @param additionalData - The additional data.
    * @returns A promise that resolves to GeneratedReportFile.
    */
-  async generateReportInFormat(
+  public async generateReportInFormat(
     reportData: ReportDocument,
     format: 'markdown' | 'html' | 'json' | 'pdf' | 'excel',
     templateType:
@@ -700,7 +700,7 @@ Comparison of {{candidates.length}} candidates for the {{jobTitle}} position.
    * @param generatedReport - The generated report.
    * @returns A promise that resolves to string value.
    */
-  async saveGeneratedReport(
+  public async saveGeneratedReport(
     generatedReport: GeneratedReportFile,
   ): Promise<string> {
     return await this.gridFsService.saveReport(
@@ -717,7 +717,7 @@ Comparison of {{candidates.length}} candidates for the {{jobTitle}} position.
    * @param metadata - The metadata.
    * @returns A promise that resolves to string value.
    */
-  async saveGeneratedReportBuffer(
+  public async saveGeneratedReportBuffer(
     content: Buffer,
     filename: string,
     metadata: ReportFileMetadata,

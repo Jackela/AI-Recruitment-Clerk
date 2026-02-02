@@ -53,7 +53,7 @@ export class HealthController {
       },
     },
   })
-  getHealth(): HealthResponse {
+  public getHealth(): HealthResponse {
     const uptime = Date.now() - this.startTime;
 
     return {

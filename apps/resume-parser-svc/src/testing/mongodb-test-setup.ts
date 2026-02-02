@@ -14,7 +14,7 @@ export class MongodbTestSetup {
   /**
    * Start MongoDB memory server
    */
-  static async startMongoMemoryServer(): Promise<string> {
+  public static async startMongoMemoryServer(): Promise<string> {
     if (!this.mongoServer) {
       this.mongoServer = await MongoMemoryServer.create({
         instance: {
@@ -30,10 +30,12 @@ export class MongodbTestSetup {
   /**
    * Stop MongoDB memory server
    */
-  static async stopMongoMemoryServer(): Promise<void> {
+  public static async stopMongoMemoryServer(): Promise<void> {
     if (this.mongoServer) {
       await this.mongoServer.stop();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.mongoServer = null as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.mongoUri = null as any;
     }
   }
@@ -41,7 +43,8 @@ export class MongodbTestSetup {
   /**
    * Get Mongoose module for testing with proper connection name
    */
-  static async getMongooseTestModule(
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  public static async getMongooseTestModule(
     connectionName = 'resume-parser',
     options: MongooseModuleOptions = {},
   ) {
@@ -55,7 +58,9 @@ export class MongodbTestSetup {
   /**
    * Get Mongoose feature module for schemas
    */
-  static getMongooseFeatureModule(
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  public static getMongooseFeatureModule(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     models: Array<{ name: string; schema: any }>,
     connectionName = 'resume-parser',
   ) {
@@ -65,7 +70,7 @@ export class MongodbTestSetup {
   /**
    * Create mock connection provider for dependency injection
    */
-  static getMockConnectionProvider(connectionName = 'resume-parser') {
+  public static getMockConnectionProvider(connectionName = 'resume-parser'): { provide: string; useValue: unknown } {
     const mockConnection = {
       readyState: 1,
       db: {
@@ -100,8 +105,10 @@ export class MongodbTestSetup {
   /**
    * Get complete test module metadata with MongoDB setup
    */
-  static async getTestModuleMetadata(
+  public static async getTestModuleMetadata(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     additionalProviders: any[] = [],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     additionalImports: any[] = [],
     connectionName = 'resume-parser',
   ): Promise<ModuleMetadata> {
@@ -116,7 +123,7 @@ export class MongodbTestSetup {
   /**
    * Clean up all test collections
    */
-  static async cleanupCollections(connection: Connection): Promise<void> {
+  public static async cleanupCollections(connection: Connection): Promise<void> {
     if (!connection || connection.readyState !== 1) {
       return;
     }

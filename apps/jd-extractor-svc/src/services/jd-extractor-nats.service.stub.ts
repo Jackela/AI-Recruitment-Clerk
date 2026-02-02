@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, Logger } from '@nestjs/common';
 
 interface NatsPublishResult {
@@ -21,7 +22,7 @@ export class JdExtractorNatsService {
    * Performs the on module init operation.
    * @returns The result of the operation.
    */
-  async onModuleInit() {
+  public async onModuleInit(): Promise<void> {
     // no-op in tests
   }
 
@@ -30,7 +31,7 @@ export class JdExtractorNatsService {
    * @param event - The event.
    * @returns A promise that resolves to NatsPublishResult.
    */
-  async publishAnalysisJdExtracted(event: {
+  public async publishAnalysisJdExtracted(event: {
     jobId: string;
     extractedData: unknown;
     processingTimeMs: number;
@@ -52,7 +53,7 @@ export class JdExtractorNatsService {
    * @param _context - The context.
    * @returns A promise that resolves to NatsPublishResult.
    */
-  async publishProcessingError(
+  public async publishProcessingError(
     jobId: string,
     error: Error,
     _context?: { stage?: string; inputSize?: number; retryAttempt?: number },
@@ -72,7 +73,7 @@ export class JdExtractorNatsService {
    * @param event - The event.
    * @returns A promise that resolves to NatsPublishResult.
    */
-  async publishExtractionStarted(event: {
+  public async publishExtractionStarted(event: {
     jobId: string;
   }): Promise<NatsPublishResult> {
     this.logger.debug(`Stub publish job.jd.started for ${event.jobId}`);
@@ -88,7 +89,7 @@ export class JdExtractorNatsService {
    * @param _handler - The handler.
    * @returns A promise that resolves when the operation completes.
    */
-  async subscribeToJobSubmissions(
+  public async subscribeToJobSubmissions(
     _handler: (event: any) => Promise<void>,
   ): Promise<void> {
     // no-op in unit tests

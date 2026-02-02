@@ -25,7 +25,7 @@ export class AppController {
    * @returns The result of the operation.
    */
   @Get()
-  getData() {
+  public getData(): { message: string; status?: string } {
     return this.appService.getData();
   }
 
@@ -34,7 +34,20 @@ export class AppController {
    * @returns The result of the operation.
    */
   @Get('health')
-  async getHealth() {
+  public async getHealth(): Promise<{
+    status: string;
+    timestamp: string;
+    service: string;
+    database: {
+      status: string;
+      resumeCount: number;
+    };
+    gridfs: {
+      status: string;
+      bucket: string;
+      connected: boolean;
+    };
+  }> {
     const dbHealth = await this.resumeRepository.healthCheck();
     const gridFsHealth = await this.gridFsService.healthCheck();
 

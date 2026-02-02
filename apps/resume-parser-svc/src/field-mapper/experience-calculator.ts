@@ -151,7 +151,7 @@ export class ExperienceCalculator {
   /**
    * Calculate comprehensive experience analysis from work experience data
    */
-  static analyzeExperience(
+  public static analyzeExperience(
     workExperience: ResumeDTO['workExperience'],
     targetSkills?: string[],
   ): ExperienceAnalysis {
@@ -253,21 +253,21 @@ export class ExperienceCalculator {
           (pos.dateRange.end.date || pos.dateRange.end.isPresent),
       )
       .sort((a, b) => {
-        const aStart = a.dateRange.start.date!;
-        const bStart = b.dateRange.start.date!;
+        const aStart = a.dateRange.start.date ?? new Date(0);
+        const bStart = b.dateRange.start.date ?? new Date(0);
         return aStart.getTime() - bStart.getTime();
       });
 
     if (sortedPositions.length === 0) return 0;
 
     let totalMonths = 0;
-    let currentEnd = sortedPositions[0].dateRange.start.date!;
+    let currentEnd = sortedPositions[0].dateRange.start.date ?? new Date(0);
 
     for (const position of sortedPositions) {
-      const start = position.dateRange.start.date!;
+      const start = position.dateRange.start.date ?? new Date(0);
       const end = position.dateRange.end.isPresent
         ? new Date()
-        : position.dateRange.end.date!;
+        : (position.dateRange.end.date ?? new Date(0));
 
       if (start > currentEnd) {
         // No overlap, add full duration
@@ -395,16 +395,16 @@ export class ExperienceCalculator {
           (pos.dateRange.end.date || pos.dateRange.end.isPresent),
       )
       .sort((a, b) => {
-        const aStart = a.dateRange.start.date!;
-        const bStart = b.dateRange.start.date!;
+        const aStart = a.dateRange.start.date ?? new Date(0);
+        const bStart = b.dateRange.start.date ?? new Date(0);
         return aStart.getTime() - bStart.getTime();
       });
 
     for (let i = 1; i < sortedPositions.length; i++) {
       const prevEnd = sortedPositions[i - 1].dateRange.end.isPresent
         ? new Date()
-        : sortedPositions[i - 1].dateRange.end.date!;
-      const currentStart = sortedPositions[i].dateRange.start.date!;
+        : (sortedPositions[i - 1].dateRange.end.date ?? new Date(0));
+      const currentStart = sortedPositions[i].dateRange.start.date ?? new Date(0);
 
       // Check for gap (more than 1 month)
       const monthsDiff =
@@ -697,7 +697,7 @@ export class ExperienceCalculator {
   /**
    * Get experience summary text
    */
-  static getExperienceSummary(analysis: ExperienceAnalysis): string {
+  public static getExperienceSummary(analysis: ExperienceAnalysis): string {
     if (analysis.totalExperienceYears === 0) {
       return 'No work experience found';
     }

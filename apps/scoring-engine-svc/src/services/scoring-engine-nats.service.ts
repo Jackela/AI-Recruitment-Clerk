@@ -15,7 +15,7 @@ export class ScoringEngineNatsService extends NatsClientService {
   /**
    * Publish analysis.scoring.completed event when scoring processing is complete
    */
-  async publishScoringCompleted(event: {
+  public async publishScoringCompleted(event: {
     jobId: string;
     resumeId: string;
     matchScore: number;
@@ -104,7 +104,7 @@ export class ScoringEngineNatsService extends NatsClientService {
   /**
    * Publish analysis.scoring.failed event when scoring processing fails
    */
-  async publishScoringError(
+  public async publishScoringError(
     jobId: string,
     resumeId: string,
     error: Error,
@@ -180,7 +180,7 @@ export class ScoringEngineNatsService extends NatsClientService {
   /**
    * Subscribe to analysis.jd.extracted events
    */
-  async subscribeToJdExtracted(
+  public async subscribeToJdExtracted(
     handler: (event: AnalysisJdExtractedEvent) => Promise<void>,
   ): Promise<void> {
     const subject = 'analysis.jd.extracted';
@@ -209,7 +209,7 @@ export class ScoringEngineNatsService extends NatsClientService {
   /**
    * Subscribe to analysis.resume.parsed events
    */
-  async subscribeToResumeParsed(
+  public async subscribeToResumeParsed(
     handler: (event: AnalysisResumeParsedEvent) => Promise<void>,
   ): Promise<void> {
     const subject = 'analysis.resume.parsed';
@@ -238,7 +238,7 @@ export class ScoringEngineNatsService extends NatsClientService {
   /**
    * Publish processing error event for general scoring errors
    */
-  async publishProcessingError(
+  public async publishProcessingError(
     jobId: string,
     resumeId: string,
     error: Error,
@@ -325,7 +325,7 @@ export class ScoringEngineNatsService extends NatsClientService {
   /**
    * Get service-specific health information
    */
-  async getServiceHealthStatus(): Promise<{
+  public async getServiceHealthStatus(): Promise<{
     connected: boolean;
     service: string;
     lastActivity: Date;
@@ -340,7 +340,9 @@ export class ScoringEngineNatsService extends NatsClientService {
       service: 'scoring-engine-svc',
       lastActivity: baseHealth.lastOperationTime || new Date(),
       subscriptions: ['analysis.jd.extracted', 'analysis.resume.parsed'],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       messagesSent: (baseHealth as any).messagesSent ?? 0,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       messagesReceived: (baseHealth as any).messagesReceived ?? 0,
     };
   }

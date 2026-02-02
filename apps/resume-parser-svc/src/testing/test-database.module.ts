@@ -18,7 +18,7 @@ export class TestDatabaseModule {
    * @param useDocker - The use docker.
    * @returns A promise that resolves to DynamicModule.
    */
-  static async forRoot(useDocker = false): Promise<DynamicModule> {
+  public static async forRoot(useDocker = false): Promise<DynamicModule> {
     let mongoUri: string;
 
     if (useDocker) {
@@ -56,12 +56,13 @@ export class TestDatabaseModule {
    * @param connection - The connection.
    * @returns A promise that resolves when the operation completes.
    */
-  static async closeConnection(connection?: Connection): Promise<void> {
+  public static async closeConnection(connection?: Connection): Promise<void> {
     if (connection) {
       await connection.close();
     }
     if (mongod) {
       await mongod.stop();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mongod = undefined as any;
     }
   }
@@ -71,7 +72,7 @@ export class TestDatabaseModule {
    * @param connection - The connection.
    * @returns A promise that resolves when the operation completes.
    */
-  static async clearDatabase(connection: Connection): Promise<void> {
+  public static async clearDatabase(connection: Connection): Promise<void> {
     if (!connection) return;
 
     const collections = connection.collections;

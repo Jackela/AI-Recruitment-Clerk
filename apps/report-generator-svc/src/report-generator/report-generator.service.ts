@@ -291,7 +291,7 @@ export class ReportGeneratorService {
    * @param event - The event.
    * @returns A promise that resolves when the operation completes.
    */
-  async handleMatchScored(event: MatchScoredEvent): Promise<void> {
+  public async handleMatchScored(event: MatchScoredEvent): Promise<void> {
     const startTime = Date.now();
 
     try {
@@ -401,7 +401,7 @@ export class ReportGeneratorService {
    * @param request - The request.
    * @returns A promise that resolves to GeneratedReport.
    */
-  async generateReport(
+  public async generateReport(
     request: ReportGenerationRequest,
   ): Promise<GeneratedReport> {
     const startTime = Date.now();
@@ -498,7 +498,7 @@ export class ReportGeneratorService {
    * @param options - The options.
    * @returns A promise that resolves to string value.
    */
-  async generateCandidateComparison(
+  public async generateCandidateComparison(
     jobId: string,
     resumeIds: string[],
     _options?: { requestedBy?: string },
@@ -554,7 +554,7 @@ export class ReportGeneratorService {
    * @param options - The options.
    * @returns A promise that resolves to string value.
    */
-  async generateInterviewGuide(
+  public async generateInterviewGuide(
     jobId: string,
     resumeId: string,
     _options?: { requestedBy?: string },
@@ -625,7 +625,19 @@ export class ReportGeneratorService {
    * @param filters - The filters.
    * @returns The result of the operation.
    */
-  async getReportAnalytics(filters = {}) {
+  public async getReportAnalytics(filters = {}): Promise<{
+    totalReports: number;
+    reportsByStatus: Record<string, number>;
+    reportsByRecommendation: Record<string, number>;
+    averageProcessingTime: number;
+    averageConfidenceScore: number;
+    reportsGeneratedToday: number;
+    topPerformingCandidates: {
+      resumeId: string;
+      overallScore: number;
+      recommendation: string;
+    }[];
+  }> {
     return this.reportRepo.getReportAnalytics(filters);
   }
 
@@ -633,7 +645,7 @@ export class ReportGeneratorService {
    * Performs the health check operation.
    * @returns The Promise<{ status: string; details: { llmService: boolean; gridFsService: boolean; reportRepository: boolean; }; }>.
    */
-  async healthCheck(): Promise<{
+  public async healthCheck(): Promise<{
     status: string;
     details: {
       llmService: boolean;

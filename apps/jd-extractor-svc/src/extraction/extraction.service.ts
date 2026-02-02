@@ -38,7 +38,7 @@ export class ExtractionService {
     private readonly natsService: JdExtractorNatsService,
     logger?: Logger,
   ) {
-    this.logger = logger || new Logger(ExtractionService.name);
+    this.logger = logger ?? new Logger(ExtractionService.name);
   }
 
   /**
@@ -46,7 +46,7 @@ export class ExtractionService {
    * @param event - The event.
    * @returns A promise that resolves when the operation completes.
    */
-  async handleJobJdSubmitted(event: JobJdSubmittedEvent): Promise<void> {
+  public async handleJobJdSubmitted(event: JobJdSubmittedEvent): Promise<void> {
     const { jobId, jobTitle, jdText } = event;
 
     this.logger.log(
@@ -84,7 +84,7 @@ export class ExtractionService {
         throw new JDExtractorException('INVALID_EVENT_DATA', {
           provided: {
             jobId: !!jobId,
-            jdText: jdText?.length || 0,
+            jdText: jdText?.length ?? 0,
             jobTitle: !!jobTitle,
           },
           correlationId: correlationContext?.traceId,
@@ -108,7 +108,7 @@ export class ExtractionService {
       this.logger.log(`Successfully processed job JD for jobId: ${jobId}`);
     } catch (error) {
       this.logger.error(`Error processing job JD for jobId: ${jobId}`, error);
-      await this.handleProcessingError(error, jobId);
+      await this.handleProcessingError(error as Error, jobId);
     } finally {
       // Remove from processing map
       this.processingJobs.delete(jobId);
@@ -127,7 +127,7 @@ export class ExtractionService {
     resetTimeoutMs: 30000,
     monitorWindow: 60000,
   })
-  async processJobDescription(
+  public async processJobDescription(
     jobId: string,
     jdText: string,
     jobTitle: string,
@@ -146,7 +146,7 @@ export class ExtractionService {
         throw new JDExtractorException('INVALID_PARAMETERS', {
           provided: {
             jobId: !!jobId,
-            jdText: jdText?.length || 0,
+            jdText: jdText?.length ?? 0,
             jobTitle: !!jobTitle,
           },
           correlationId: correlationContext?.traceId,
@@ -222,7 +222,7 @@ export class ExtractionService {
    * @param result - The result.
    * @returns A promise that resolves when the operation completes.
    */
-  async publishAnalysisResult(result: AnalysisJdExtractedEvent): Promise<void> {
+  public async publishAnalysisResult(result: AnalysisJdExtractedEvent): Promise<void> {
     try {
       this.logger.log(`Publishing analysis result for jobId: ${result.jobId}`);
 
@@ -279,7 +279,7 @@ export class ExtractionService {
    * @param jobId - The job id.
    * @returns A promise that resolves when the operation completes.
    */
-  async handleProcessingError(error: Error, jobId: string): Promise<void> {
+  public async handleProcessingError(error: Error, jobId: string): Promise<void> {
     try {
       this.logger.error(`Handling processing error for jobId: ${jobId}`, error);
 
@@ -300,21 +300,21 @@ export class ExtractionService {
       // Publish error event to NATS for other services to handle
       await this.natsService.publishProcessingError(jobId, error, {
         stage: 'llm-extraction',
-        retryAttempt: jobInfo?.attempts || 1,
+        retryAttempt: jobInfo?.attempts ?? 1,
       });
       const shouldRetry =
         this.shouldRetryProcessing(error, jobId) &&
         jobInfo &&
         jobInfo.attempts < 3;
 
-      if (shouldRetry) {
-        jobInfo!.attempts++;
+      if (shouldRetry && jobInfo) {
+        jobInfo.attempts++;
         this.logger.log(
-          `Scheduling retry ${jobInfo!.attempts}/3 for jobId: ${jobId}`,
+          `Scheduling retry ${jobInfo.attempts}/3 for jobId: ${jobId}`,
         );
 
         const delay =
-          1000 * Math.pow(2, jobInfo!.attempts - 1) + Math.random() * 1000;
+          1000 * Math.pow(2, jobInfo.attempts - 1) + Math.random() * 1000;
         const timer = setTimeout(async () => {
           try {
             await this.handleJobJdSubmitted({
@@ -455,7 +455,7 @@ export class ExtractionService {
    * @param jobId - The job id.
    * @returns The boolean value.
    */
-  isProcessing(jobId: string): boolean {
+  public isProcessing(jobId: string): boolean {
     this.cleanupExpiredJobs();
     return this.processingJobs.has(jobId);
   }
@@ -465,7 +465,7 @@ export class ExtractionService {
    * Retrieves processing jobs.
    * @returns The an array of string value.
    */
-  getProcessingJobs(): string[] {
+  public getProcessingJobs(): string[] {
     this.cleanupExpiredJobs();
     return Array.from(this.processingJobs.keys());
   }
@@ -475,7 +475,7 @@ export class ExtractionService {
    * Retrieves processing job details.
    * @returns The Array<{ jobId: string; timestamp: number; attempts: number; age: number; }>.
    */
-  getProcessingJobDetails(): Array<{
+  public getProcessingJobDetails(): Array<{
     jobId: string;
     timestamp: number;
     attempts: number;
@@ -494,9 +494,9 @@ export class ExtractionService {
   // Health check method
   /**
    * Performs the health check operation.
-   * @returns A promise that resolves to { status: string; details: any }.
+   * @returns A promise that resolves to { status: string; details: HealthDetails }.
    */
-  async healthCheck(): Promise<{ status: string; details: any }> {
+  public async healthCheck(): Promise<{ status: string; details: HealthDetails }> {
     try {
       const natsHealth = await this.natsService.getHealthStatus();
       const processingJobsCount = this.processingJobs.size;
@@ -516,7 +516,7 @@ export class ExtractionService {
       return {
         status: 'unhealthy',
         details: {
-          error: error.message,
+          error: (error as Error).message,
         },
       };
     }
@@ -526,11 +526,29 @@ export class ExtractionService {
    * Clears all pending timers to prevent memory leaks.
    * Should be called during shutdown or in tests.
    */
-  clearPendingTimers(): void {
+  public clearPendingTimers(): void {
     this.logger.log(
       `Clearing ${this.pendingTimers.length} pending timers`,
     );
     this.pendingTimers.forEach((timer) => clearTimeout(timer));
     this.pendingTimers.length = 0;
   }
+}
+
+/**
+ * Health details type for the health check response.
+ */
+interface HealthDetails {
+  natsConnected?: boolean;
+  natsConnectionInfo?: { connected: boolean };
+  processingJobsCount?: number;
+  processingJobs?: Array<{
+    jobId: string;
+    timestamp: number;
+    attempts: number;
+    age: number;
+  }>;
+  memoryUsage?: NodeJS.MemoryUsage;
+  uptime?: number;
+  error?: string;
 }

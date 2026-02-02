@@ -18,7 +18,7 @@ export class JdExtractorNatsService extends NatsClientService {
   /**
    * Initialize the JD Extractor NATS service with service-specific configuration
    */
-  async onModuleInit() {
+  public async onModuleInit(): Promise<void> {
     await this.initialize({
       serviceName: 'jd-extractor-svc',
       timeout: 10000,
@@ -33,7 +33,7 @@ export class JdExtractorNatsService extends NatsClientService {
    * @param event JD extraction completion event data
    * @returns Promise<NatsPublishResult>
    */
-  async publishAnalysisJdExtracted(event: {
+  public async publishAnalysisJdExtracted(event: {
     jobId: string;
     extractedData: unknown;
     processingTimeMs: number;
@@ -103,7 +103,7 @@ export class JdExtractorNatsService extends NatsClientService {
    * @param context Additional context for debugging
    * @returns Promise<NatsPublishResult>
    */
-  async publishProcessingError(
+  public async publishProcessingError(
     jobId: string,
     error: Error,
     context?: {
@@ -177,7 +177,7 @@ export class JdExtractorNatsService extends NatsClientService {
    * @param event Job start event data
    * @returns Promise<NatsPublishResult>
    */
-  async publishExtractionStarted(event: {
+  public async publishExtractionStarted(event: {
     jobId: string;
     inputSize?: number;
     expectedProcessingTime?: number;
@@ -235,8 +235,8 @@ export class JdExtractorNatsService extends NatsClientService {
    * @param handler Message handler function
    * @returns Promise<void>
    */
-  async subscribeToJobSubmissions(
-    handler: (event: any) => Promise<void>,
+  public async subscribeToJobSubmissions(
+    handler: (event: unknown) => Promise<void>,
   ): Promise<void> {
     await this.subscribe('job.submitted', handler, {
       durableName: 'jd-extractor-job-submissions',
@@ -250,7 +250,7 @@ export class JdExtractorNatsService extends NatsClientService {
    * @param data Extracted job description data
    * @returns Number of non-null/non-empty fields
    */
-  private countExtractedFields(data: any): number {
+  private countExtractedFields(data: unknown): number {
     if (!data || typeof data !== 'object') {
       return 0;
     }
