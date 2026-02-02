@@ -603,3 +603,21 @@ Started: 2026-02-01
   - Remove `as any` from test mocks when the mock already matches the expected type
   - ~37 warnings fixed: 20 accessibility modifiers, 10 return types, 7 non-null assertions replaced
 ---
+
+## 2026-02-02 - US-045
+- What was implemented: Fixed all lint warnings in app-gateway services/ directories
+- Files changed (6 files):
+  - apps/app-gateway/src/common/services/health-check.service.ts (public modifiers, any types replaced with Record<string, unknown>, non-null assertions replaced with nullish coalescing)
+  - apps/app-gateway/src/common/services/load-testing.service.ts (created LoadTestEndpoint, RequestResult, ErrorResult, EndpointStats, PerformanceData interfaces; public modifiers; proper error typing)
+  - apps/app-gateway/src/services/gridfs.service.ts (public modifiers, error catch blocks with proper typing)
+  - apps/app-gateway/src/guest/services/guest-usage.service.ts (public modifiers for 7 async methods)
+  - apps/app-gateway/src/guest/services/guest-usage.service.spec.ts (eslint-disable for test mock any types)
+  - apps/app-gateway/src/auth/services/mfa.service.spec.ts (eslint-disable for mock service objects)
+- **Learnings for future iterations:**
+  - Create proper interfaces to replace `any` types instead of using eslint-disable when the structure is known
+  - LoadTestEndpoint, RequestResult, ErrorResult, EndpointStats, PerformanceData are good examples of interface refactoring
+  - Test mocks commonly require `any` types - use eslint-disable-next-line comments
+  - Error catch blocks should use `} catch (err) { const error = err as Error; }` pattern for proper typing
+  - Non-null assertions should be replaced with nullish coalescing (`??`) with default values
+  - ~50 warnings fixed: 35 accessibility modifiers, 10 any types (5 replaced with interfaces, 5 preserved with eslint-disable), 5 non-null assertions replaced
+---

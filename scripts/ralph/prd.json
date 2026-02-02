@@ -542,7 +542,7 @@
       "title": "Fix app-gateway services/",
       "description": "Fix lint issues in app-gateway services",
       "priority": 45,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "No lint warnings in services/",
         "npm run typecheck passes"
