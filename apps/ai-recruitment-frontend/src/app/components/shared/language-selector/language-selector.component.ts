@@ -297,14 +297,14 @@ import {
   ],
 })
 export class LanguageSelectorComponent {
-  dropdownOpen = false;
+  public dropdownOpen = false;
 
   // Expose i18n service properties
-  currentLanguage = computed(() => this.i18nService.currentLanguage());
-  currentLanguageConfig = computed(() =>
+  public currentLanguage = computed(() => this.i18nService.currentLanguage());
+  public currentLanguageConfig = computed(() =>
     this.i18nService.getCurrentLanguageConfig(),
   );
-  availableLanguages!: LanguageConfig[];
+  public availableLanguages!: LanguageConfig[];
 
   private i18nService = inject(I18nService);
 
@@ -323,7 +323,7 @@ export class LanguageSelectorComponent {
   /**
    * Performs the toggle dropdown operation.
    */
-  toggleDropdown(): void {
+  public toggleDropdown(): void {
     this.dropdownOpen = !this.dropdownOpen;
 
     if (this.dropdownOpen) {
@@ -341,7 +341,7 @@ export class LanguageSelectorComponent {
    * Performs the select language operation.
    * @param language - The language.
    */
-  selectLanguage(language: Language): void {
+  public selectLanguage(language: Language): void {
     this.i18nService.setLanguage(language);
     this.dropdownOpen = false;
   }
@@ -351,7 +351,7 @@ export class LanguageSelectorComponent {
    * @param language - The language.
    * @returns The string value.
    */
-  getFlagEmoji(language: Language): string {
+  public getFlagEmoji(language: Language): string {
     const flags: Record<Language, string> = {
       'zh-CN': '🇨🇳',
       'en-US': '🇺🇸',

@@ -102,8 +102,8 @@ import { Subject } from 'rxjs';
 })
 export class StatusNotificationsComponent implements OnInit, OnDestroy {
   // Service state
-  notifications = computed(() => this.feedbackService.notifications());
-  globalLoading = computed(() => this.feedbackService.globalLoading());
+  public notifications = computed(() => this.feedbackService.notifications());
+  public globalLoading = computed(() => this.feedbackService.globalLoading());
 
   // Local state
   private destroy$ = new Subject<void>();
@@ -118,7 +118,7 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     // Setup auto-dismiss timers for notifications
     // Note: notifications is a signal, we'll use effect for watching changes
     this.setupNotificationTimers(this.notifications());
@@ -127,7 +127,7 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
     this.clearAllTimers();
@@ -165,7 +165,7 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
    * Performs the has notifications operation.
    * @returns The boolean value.
    */
-  hasNotifications(): boolean {
+  public hasNotifications(): boolean {
     return this.notifications().length > 0;
   }
 
@@ -173,7 +173,7 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
    * Performs the close notification operation.
    * @param id - The id.
    */
-  closeNotification(id: string): void {
+  public closeNotification(id: string): void {
     // Clear timer if exists
     const timer = this.notificationTimers.get(id);
     if (timer) {
@@ -188,7 +188,7 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
    * Handles action.
    * @param notification - The notification.
    */
-  handleAction(notification: StatusNotification): void {
+  public handleAction(notification: StatusNotification): void {
     if (notification.action?.handler) {
       notification.action.handler();
     }
@@ -204,7 +204,7 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
    * @param notification - The notification.
    * @returns The string value.
    */
-  getNotificationClasses(notification: StatusNotification): string {
+  public getNotificationClasses(notification: StatusNotification): string {
     const classes = ['notification'];
     classes.push(`notification-${notification.type}`);
 
@@ -224,7 +224,7 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
    * @param type - The type.
    * @returns The string value.
    */
-  getNotificationIcon(type: string): string {
+  public getNotificationIcon(type: string): string {
     const icons = {
       info: '🔵',
       success: '✅',
@@ -240,7 +240,7 @@ export class StatusNotificationsComponent implements OnInit, OnDestroy {
    * @param notification - The notification.
    * @returns The string value.
    */
-  trackByNotificationId(
+  public trackByNotificationId(
     _index: number,
     notification: StatusNotification,
   ): string {

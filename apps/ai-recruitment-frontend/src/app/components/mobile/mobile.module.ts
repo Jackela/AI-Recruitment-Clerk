@@ -61,7 +61,7 @@ export class MobileModule {
   /**
    * Initialize mobile module with optional configuration
    */
-  static forRoot() {
+  public static forRoot(): { ngModule: typeof MobileModule; providers: (typeof TouchGestureService | typeof PWAService)[] } {
     return {
       ngModule: MobileModule,
       providers: [TouchGestureService, PWAService],

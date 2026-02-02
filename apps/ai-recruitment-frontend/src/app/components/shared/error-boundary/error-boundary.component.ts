@@ -50,7 +50,7 @@ export class GlobalErrorHandler implements ErrorHandler {
    * Handles error.
    * @param error - The error.
    */
-  handleError(error: Error): void {
+  public handleError(error: Error): void {
     try {
       // Create structured error with correlation
       const structuredError = this.errorCorrelation.createStructuredError(
@@ -67,7 +67,7 @@ export class GlobalErrorHandler implements ErrorHandler {
       const errorInfo = this.parseError(error, structuredError);
 
       // Report error to backend (async)
-      this.errorCorrelation.reportError(structuredError).catch(() => {});
+      this.errorCorrelation.reportError(structuredError).catch(() => { /* Swallow error silently */ });
 
       // Show user-friendly error notification
       this.showErrorNotification(errorInfo, structuredError);
@@ -328,7 +328,7 @@ export class GlobalErrorHandler implements ErrorHandler {
         url: window.location.href,
       };
       sessionStorage.setItem('last_error', JSON.stringify(simpleError));
-    } catch (e) {
+    } catch (_e) {
       // Even storage failed, nothing we can do
     }
 
@@ -677,16 +677,16 @@ export class GlobalErrorHandler implements ErrorHandler {
 })
 export class ErrorBoundaryComponent implements OnInit {
   // Error state
-  hasError = signal(false);
-  errorMessage = signal('页面遇到了一个意外错误。请刷新页面重试。');
-  errorStack = signal<string | undefined>(undefined);
-  errorTimestamp = signal<Date>(new Date());
-  errorUrl = signal<string>('');
-  componentName = signal<string | undefined>(undefined);
+  public hasError = signal(false);
+  public errorMessage = signal('页面遇到了一个意外错误。请刷新页面重试。');
+  public errorStack = signal<string | undefined>(undefined);
+  public errorTimestamp = signal<Date>(new Date());
+  public errorUrl = signal<string>('');
+  public componentName = signal<string | undefined>(undefined);
 
   // UI state
-  showDetails = signal(false);
-  errorHistory = signal<ErrorInfo[]>([]);
+  public showDetails = signal(false);
+  public errorHistory = signal<ErrorInfo[]>([]);
 
   /**
    * Initializes a new instance of the Error Boundary Component.
@@ -701,7 +701,7 @@ export class ErrorBoundaryComponent implements OnInit {
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     // Check for stored errors
     this.loadErrorHistory();
 
@@ -726,7 +726,7 @@ export class ErrorBoundaryComponent implements OnInit {
           const latestError = errors[errors.length - 1];
           this.displayError(latestError);
         }
-      } catch (e) {
+      } catch (_e) {
         // Invalid stored data, clear it
         sessionStorage.removeItem('app-errors');
       }
@@ -737,7 +737,7 @@ export class ErrorBoundaryComponent implements OnInit {
    * Performs the display error operation.
    * @param errorInfo - The error info.
    */
-  displayError(errorInfo: ErrorInfo): void {
+  public displayError(errorInfo: ErrorInfo): void {
     this.hasError.set(true);
     this.errorMessage.set(errorInfo.message);
     this.errorStack.set(errorInfo.stack);
@@ -749,7 +749,7 @@ export class ErrorBoundaryComponent implements OnInit {
   /**
    * Performs the reset error operation.
    */
-  resetError(): void {
+  public resetError(): void {
     this.hasError.set(false);
     this.showDetails.set(false);
   }
@@ -757,14 +757,14 @@ export class ErrorBoundaryComponent implements OnInit {
   /**
    * Performs the reload operation.
    */
-  reload(): void {
+  public reload(): void {
     window.location.reload();
   }
 
   /**
    * Performs the go home operation.
    */
-  goHome(): void {
+  public goHome(): void {
     this.resetError();
     this.router.navigate(['/']);
   }
@@ -772,7 +772,7 @@ export class ErrorBoundaryComponent implements OnInit {
   /**
    * Performs the toggle details operation.
    */
-  toggleDetails(): void {
+  public toggleDetails(): void {
     this.showDetails.update((value) => !value);
   }
 
@@ -780,7 +780,7 @@ export class ErrorBoundaryComponent implements OnInit {
    * Performs the is development operation.
    * @returns The boolean value.
    */
-  isDevelopment(): boolean {
+  public isDevelopment(): boolean {
     return (
       window.location.hostname === 'localhost' ||
       window.location.hostname.startsWith('127.') ||
@@ -791,7 +791,7 @@ export class ErrorBoundaryComponent implements OnInit {
   /**
    * Performs the clear history operation.
    */
-  clearHistory(): void {
+  public clearHistory(): void {
     sessionStorage.removeItem('app-errors');
     this.errorHistory.set([]);
     this.toastService.info('错误历史已清除');

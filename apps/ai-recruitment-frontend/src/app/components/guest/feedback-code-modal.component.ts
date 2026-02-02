@@ -81,12 +81,13 @@ import { ToastService } from '../../services/toast.service';
             class="bg-gray-50 p-4 rounded-lg mb-4"
             *ngIf="guestState$ | async as state"
           >
-            <label class="block text-sm font-medium text-gray-700 mb-2"
+            <label for="feedbackCodeInput" class="block text-sm font-medium text-gray-700 mb-2"
               >您的反馈码：</label
             >
             <div class="flex items-center space-x-2">
               <input
                 type="text"
+                id="feedbackCodeInput"
                 [value]="state.feedbackCode"
                 readonly
                 class="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-white font-mono text-sm"

@@ -180,16 +180,15 @@ export type AlertType = 'success' | 'info' | 'warning' | 'danger';
   ],
 })
 export class AlertComponent {
-  @Input() type: AlertType = 'info';
-  @Input() title = '';
-  @Input() dismissible = false;
-  @Output() dismissed = new EventEmitter<void>();
+  @Input() public type: AlertType = 'info';
+  @Input() public title = '';
+  @Input() public dismissible = false;
+  @Output() public dismissed = new EventEmitter<void>();
 
   /**
    * Performs the on dismiss operation.
-   * @returns The result of the operation.
    */
-  onDismiss() {
+  public onDismiss(): void {
     this.dismissed.emit();
   }
 }

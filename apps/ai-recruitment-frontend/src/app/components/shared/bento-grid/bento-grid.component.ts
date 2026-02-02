@@ -906,24 +906,24 @@ export interface BentoGridItem {
   ],
 })
 export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('gridContainer', { static: false }) gridContainer!: ElementRef;
+  @ViewChild('gridContainer', { static: false }) public gridContainer!: ElementRef;
 
   private accessibilityService = inject(AccessibilityService);
   private destroy$ = new Subject<void>();
   private intersectionObserver?: IntersectionObserver;
   private resizeObserver?: ResizeObserver;
 
-  @Input() items: BentoGridItem[] = [];
-  @Input() gridSize: 'compact' | 'default' | 'wide' = 'default';
-  @Input() ariaLabel = 'Dashboard grid';
-  @Input() onItemClickHandler?: (item: BentoGridItem) => void;
-  @Input() autoResize = true; // Enable/disable automatic grid resizing
-  @Input() minColumnWidth = 250; // Minimum width for grid items
-  @Input() maxColumns?: number; // Override maximum columns
+  @Input() public items: BentoGridItem[] = [];
+  @Input() public gridSize: 'compact' | 'default' | 'wide' = 'default';
+  @Input() public ariaLabel = 'Dashboard grid';
+  @Input() public onItemClickHandler?: (item: BentoGridItem) => void;
+  @Input() public autoResize = true; // Enable/disable automatic grid resizing
+  @Input() public minColumnWidth = 250; // Minimum width for grid items
+  @Input() public maxColumns?: number; // Override maximum columns
 
   // Dynamic grid state
   private _currentColumns = 4;
-  dynamicColumns = 'repeat(4, 1fr)';
+  public dynamicColumns = 'repeat(4, 1fr)';
 
   // Optimized trackBy function
   /**
@@ -932,7 +932,7 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param item - The item.
    * @returns The TrackByFunction<BentoGridItem>.
    */
-  readonly trackByItemId: TrackByFunction<BentoGridItem> = (
+  public readonly trackByItemId: TrackByFunction<BentoGridItem> = (
     _index: number,
     item: BentoGridItem,
   ): string => {
@@ -945,7 +945,7 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param item - The item.
    * @returns The string value.
    */
-  getItemClasses(item: BentoGridItem): string {
+  public getItemClasses(item: BentoGridItem): string {
     const classes = [
       `size-${item.size || 'medium'}`,
       `variant-${item.variant || 'default'}`,
@@ -968,18 +968,16 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /**
    * Performs the ng on init operation.
-   * @returns The result of the operation.
    */
-  ngOnInit() {
+  public ngOnInit(): void {
     // Initialize grid calculations
     this.calculateOptimalGridColumns();
   }
 
   /**
    * Performs the ng after view init operation.
-   * @returns The result of the operation.
    */
-  ngAfterViewInit() {
+  public ngAfterViewInit(): void {
     // Setup intersection observer for animations with debouncing
     this.setupIntersectionObserver();
 
@@ -991,9 +989,8 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /**
    * Performs the ng on destroy operation.
-   * @returns The result of the operation.
    */
-  ngOnDestroy() {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
 
@@ -1013,7 +1010,7 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param _event - The event.
    */
   @HostListener('window:resize', ['$event'])
-  onWindowResize(_event: Event): void {
+  public onWindowResize(_event: Event): void {
     if (this.autoResize) {
       this.debouncedCalculateColumns();
     }
@@ -1026,7 +1023,7 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param item - The item.
    * @returns The string value.
    */
-  getItemAriaLabel(item: BentoGridItem): string {
+  public getItemAriaLabel(item: BentoGridItem): string {
     let label = item.title;
 
     if (item.value) {
@@ -1053,7 +1050,7 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param trend - The trend.
    * @returns The string value.
    */
-  getTrendAriaLabel(trend: BentoGridItem['trend']): string {
+  public getTrendAriaLabel(trend: BentoGridItem['trend']): string {
     if (!trend) return '';
 
     const direction =
@@ -1070,7 +1067,7 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
    * Performs the on item click operation.
    * @param item - The item.
    */
-  onItemClick(item: BentoGridItem): void {
+  public onItemClick(item: BentoGridItem): void {
     if (item.clickable && this.onItemClickHandler) {
       this.onItemClickHandler(item);
 
@@ -1087,7 +1084,7 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param item - The item.
    * @param event - The event.
    */
-  onActionClick(item: BentoGridItem, event: Event): void {
+  public onActionClick(item: BentoGridItem, event: Event): void {
     event.stopPropagation();
     if (item.action?.onClick) {
       item.action.onClick();
@@ -1104,7 +1101,7 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
    * Performs the on item focus operation.
    * @param item - The item.
    */
-  onItemFocus(item: BentoGridItem): void {
+  public onItemFocus(item: BentoGridItem): void {
     // Announce focus for complex items
     if (item.trend || item.badge) {
       let announcement = `Focused on ${item.title}`;
@@ -1129,7 +1126,7 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
    * Performs the on item blur operation.
    * @param _item - The item.
    */
-  onItemBlur(_item: BentoGridItem): void {
+  public onItemBlur(_item: BentoGridItem): void {
     // Optional: Handle blur events if needed
   }
 
@@ -1138,7 +1135,7 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param item - The item.
    * @returns The string value.
    */
-  getCardState(item: BentoGridItem): string {
+  public getCardState(item: BentoGridItem): string {
     if (item.badge) return item.badge;
     if (item.trend?.type) return item.trend.type;
     return 'normal';
@@ -1149,7 +1146,7 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param item - The item.
    * @returns The an array of string value.
    */
-  getCardShortcuts(item: BentoGridItem): string[] {
+  public getCardShortcuts(item: BentoGridItem): string[] {
     const shortcuts: string[] = [];
 
     if (item.clickable) {
@@ -1168,7 +1165,7 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param item - The item.
    * @returns The string value.
    */
-  getCardInstructions(item: BentoGridItem): string {
+  public getCardInstructions(item: BentoGridItem): string {
     if (item.clickable && item.action) {
       return `Card is clickable. Press Enter or Space to activate. ${item.action.text} action is available.`;
     } else if (item.clickable) {
@@ -1184,8 +1181,9 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
     if (typeof IntersectionObserver === 'undefined') return;
 
     // Use requestIdleCallback for better performance
-    const scheduleAnimation = (callback: () => void) => {
+    const scheduleAnimation = (callback: () => void): void => {
       if ('requestIdleCallback' in window) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (window as any).requestIdleCallback(callback, { timeout: 100 });
       } else {
         setTimeout(callback, 0);

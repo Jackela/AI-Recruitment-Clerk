@@ -27,6 +27,7 @@ export interface SwipeAction {
  */
 export interface SwipeEvent {
   action: SwipeAction;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   item: any;
 }
 
@@ -201,22 +202,23 @@ export interface SwipeEvent {
   ],
 })
 export class MobileSwipeComponent implements OnInit, OnDestroy {
-  @Input() actions: SwipeAction[] = [];
-  @Input() swipeThreshold = 80;
-  @Input() disabled = false;
-  @Input() item: any;
+  @Input() public actions: SwipeAction[] = [];
+  @Input() public swipeThreshold = 80;
+  @Input() public disabled = false;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  @Input() public item: any;
 
-  @Output() swipeAction = new EventEmitter<SwipeEvent>();
-  @Output() swipeStart = new EventEmitter<void>();
-  @Output() swipeEnd = new EventEmitter<void>();
+  @Output() public swipeAction = new EventEmitter<SwipeEvent>();
+  @Output() public swipeStart = new EventEmitter<void>();
+  @Output() public swipeEnd = new EventEmitter<void>();
 
-  @ViewChild('container') container!: ElementRef<HTMLElement>;
-  @ViewChild('content') content!: ElementRef<HTMLElement>;
-  @ViewChild('actionsContainer') actionsContainer!: ElementRef<HTMLElement>;
+  @ViewChild('container') public container!: ElementRef<HTMLElement>;
+  @ViewChild('content') public content!: ElementRef<HTMLElement>;
+  @ViewChild('actionsContainer') public actionsContainer!: ElementRef<HTMLElement>;
 
-  translateX = 0;
-  isSwiping = false;
-  actionsVisible = false;
+  public translateX = 0;
+  public isSwiping = false;
+  public actionsVisible = false;
 
   private startX = 0;
   private currentX = 0;
@@ -228,7 +230,7 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
    * Performs the ng on init operation.
    * @returns The result of the operation.
    */
-  ngOnInit() {
+  public ngOnInit(): void {
     this.calculateMaxSwipeDistance();
   }
 
@@ -236,12 +238,12 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
    * Performs the ng on destroy operation.
    * @returns The result of the operation.
    */
-  ngOnDestroy() {
+  public ngOnDestroy(): void {
     // Clean up any ongoing interactions
     this.resetSwipe();
   }
 
-  private calculateMaxSwipeDistance() {
+  private calculateMaxSwipeDistance(): void {
     this.maxSwipeDistance = this.actions.reduce((total, action) => {
       return total + (action.width || 80);
     }, 0);
@@ -252,7 +254,7 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
    * @param event - The event.
    * @returns The result of the operation.
    */
-  onTouchStart(event: TouchEvent) {
+  public onTouchStart(event: TouchEvent): void {
     if (this.disabled) return;
 
     this.isMouseEvent = false;
@@ -265,7 +267,7 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
    * @param event - The event.
    * @returns The result of the operation.
    */
-  onTouchMove(event: TouchEvent) {
+  public onTouchMove(event: TouchEvent): void {
     if (this.disabled || !this.isDragging) return;
 
     event.preventDefault();
@@ -278,7 +280,7 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
    * @param _event - The event.
    * @returns The result of the operation.
    */
-  onTouchEnd(_event: TouchEvent) {
+  public onTouchEnd(_event: TouchEvent): void {
     if (this.disabled) return;
 
     this.endSwipe();
@@ -289,7 +291,7 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
    * @param event - The event.
    * @returns The result of the operation.
    */
-  onMouseDown(event: MouseEvent) {
+  public onMouseDown(event: MouseEvent): void {
     if (this.disabled || window.innerWidth >= 768) return; // Disable on desktop
 
     this.isMouseEvent = true;
@@ -302,7 +304,7 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
    * @param event - The event.
    * @returns The result of the operation.
    */
-  onMouseMove(event: MouseEvent) {
+  public onMouseMove(event: MouseEvent): void {
     if (this.disabled || !this.isDragging || !this.isMouseEvent) return;
 
     this.updateSwipe(event.clientX);
@@ -314,7 +316,7 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
    * @param _event - The event.
    * @returns The result of the operation.
    */
-  onMouseUp(_event: MouseEvent) {
+  public onMouseUp(_event: MouseEvent): void {
     if (this.disabled || !this.isMouseEvent) return;
 
     this.endSwipe();
@@ -325,13 +327,13 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
    * @param _event - The event.
    * @returns The result of the operation.
    */
-  onMouseLeave(_event: MouseEvent) {
+  public onMouseLeave(_event: MouseEvent): void {
     if (this.disabled || !this.isMouseEvent) return;
 
     this.endSwipe();
   }
 
-  private startSwipe(clientX: number) {
+  private startSwipe(clientX: number): void {
     this.startX = clientX;
     this.currentX = clientX;
     this.isDragging = true;
@@ -339,7 +341,7 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
     this.swipeStart.emit();
   }
 
-  private updateSwipe(clientX: number) {
+  private updateSwipe(clientX: number): void {
     this.currentX = clientX;
     const deltaX = this.startX - this.currentX;
 
@@ -353,7 +355,7 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
     }
   }
 
-  private endSwipe() {
+  private endSwipe(): void {
     if (!this.isDragging) return;
 
     this.isDragging = false;
@@ -378,7 +380,7 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
    * @param action - The action.
    * @returns The result of the operation.
    */
-  onActionClick(action: SwipeAction) {
+  public onActionClick(action: SwipeAction): void {
     this.swipeAction.emit({ action, item: this.item });
     this.resetSwipe();
   }
@@ -387,7 +389,7 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
    * Performs the reset swipe operation.
    * @returns The result of the operation.
    */
-  resetSwipe() {
+  public resetSwipe(): void {
     this.translateX = 0;
     this.actionsVisible = false;
     this.isDragging = false;
@@ -400,7 +402,7 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
    * Performs the reset operation.
    * @returns The result of the operation.
    */
-  public reset() {
+  public reset(): void {
     this.resetSwipe();
   }
 
@@ -409,7 +411,7 @@ export class MobileSwipeComponent implements OnInit, OnDestroy {
    * Performs the show actions operation.
    * @returns The result of the operation.
    */
-  public showActions() {
+  public showActions(): void {
     this.translateX = -this.maxSwipeDistance;
     this.actionsVisible = true;
   }

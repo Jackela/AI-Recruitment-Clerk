@@ -505,18 +505,18 @@ export interface ProgressStep {
   ],
 })
 export class ProgressTrackerComponent implements OnInit, OnDestroy {
-  @Input() sessionId = '';
-  @Input() steps: ProgressStep[] = [];
-  @Input() showMessageLog = true;
+  @Input() public sessionId = '';
+  @Input() public steps: ProgressStep[] = [];
+  @Input() public showMessageLog = true;
 
-  connectionStatus$ = new BehaviorSubject<
+  public connectionStatus$ = new BehaviorSubject<
     'connecting' | 'connected' | 'disconnected' | 'error'
   >('disconnected');
-  isConnected$ = new BehaviorSubject<boolean>(false);
-  overallProgress$ = new BehaviorSubject<number>(0);
-  currentStep$ = new BehaviorSubject<string>('');
-  estimatedTimeRemaining$ = new BehaviorSubject<number | null>(null);
-  recentMessages$ = new BehaviorSubject<ProgressMessage[]>([]);
+  public isConnected$ = new BehaviorSubject<boolean>(false);
+  public overallProgress$ = new BehaviorSubject<number>(0);
+  public currentStep$ = new BehaviorSubject<string>('');
+  public estimatedTimeRemaining$ = new BehaviorSubject<number | null>(null);
+  public recentMessages$ = new BehaviorSubject<ProgressMessage[]>([]);
 
   private destroy$ = new Subject<void>();
   private messages: ProgressMessage[] = [];
@@ -534,7 +534,7 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     if (!this.sessionId) {
       this.toastService.error('会话ID缺失，无法跟踪进度');
       return;
@@ -547,7 +547,7 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
     this.webSocketService.disconnect();
@@ -615,20 +615,20 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
       'error',
       'progress',
     ];
-    const t = (
-      allowed.includes(message.type as any) ? (message.type as any) : 'info'
-    ) as ProgressMessage['type'];
+    const msgType = message.type as ProgressMessage['type'];
+    const t: ProgressMessage['type'] = allowed.includes(msgType) ? msgType : 'info';
     this.addMessage(t, message.data?.message || '状态更新');
 
     switch (message.type) {
       case 'step_change':
         if (message.data?.currentStep) {
+          const progressValue = message.data['progress'];
           this.handleStepChange({
             currentStep: message.data.currentStep,
             message: message.data?.message as string | undefined,
             progress:
-              typeof (message.data as any)['progress'] === 'number'
-                ? ((message.data as any)['progress'] as number)
+              typeof progressValue === 'number'
+                ? progressValue
                 : undefined,
           });
         }
@@ -734,7 +734,7 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
    * @param status - The status.
    * @returns The string value.
    */
-  getStatusText(status: string | null): string {
+  public getStatusText(status: string | null): string {
     switch (status) {
       case 'connected':
         return '已连接';
@@ -754,7 +754,7 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
    * @param stepId - The step id.
    * @returns The number value.
    */
-  getStepNumber(stepId: string): number {
+  public getStepNumber(stepId: string): number {
     return this.steps.findIndex((s) => s.id === stepId) + 1;
   }
 
@@ -763,7 +763,7 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
    * @param seconds - The seconds.
    * @returns The string value.
    */
-  formatTime(seconds: number): string {
+  public formatTime(seconds: number): string {
     if (seconds < 60) return `${seconds}秒`;
     const minutes = Math.floor(seconds / 60);
     return `${minutes}分${seconds % 60}秒`;
@@ -774,7 +774,7 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
    * @param timestamp - The timestamp.
    * @returns The string value.
    */
-  formatTimestamp(timestamp: Date): string {
+  public formatTimestamp(timestamp: Date): string {
     return timestamp.toLocaleTimeString('zh-CN', {
       hour12: false,
       hour: '2-digit',
@@ -789,7 +789,7 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
    * @param step - The step.
    * @returns The string value.
    */
-  trackByStepId(_index: number, step: ProgressStep): string {
+  public trackByStepId(_index: number, step: ProgressStep): string {
     return step.id;
   }
 
@@ -799,7 +799,7 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
    * @param message - The message.
    * @returns The string value.
    */
-  trackByMessage(index: number, message: ProgressMessage): string {
+  public trackByMessage(index: number, message: ProgressMessage): string {
     return `${message.timestamp.getTime()}_${index}`;
   }
 }

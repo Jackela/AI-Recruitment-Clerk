@@ -20,6 +20,10 @@ import * as GuestActions from '../../store/guest/guest.actions';
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       *ngIf="showModal$ | async"
       (click)="onBackdropClick($event)"
+      (keydown.escape)="closeModal()"
+      tabindex="0"
+      role="dialog"
+      aria-modal="true"
     >
       <div class="bg-white rounded-lg p-6 max-w-md mx-4 relative">
         <button

@@ -326,14 +326,14 @@ import type { ToastService } from '../../../services/toast.service';
 })
 export class FormExampleComponent {
   // Template-driven form model
-  templateModel = {
+  public templateModel = {
     name: '',
     email: '',
     phone: '',
   };
 
   // Reactive form
-  reactiveForm: FormGroup;
+  public reactiveForm: FormGroup;
 
   /**
    * Initializes a new instance of the Form Example Component.
@@ -355,7 +355,7 @@ export class FormExampleComponent {
    * Performs the on template submit operation.
    * @param value - The value.
    */
-  onTemplateSubmit(value: any): void {
+  public onTemplateSubmit(value: { name: string; email: string; phone: string }): void {
     this.toastService.success('模板表单提交成功！');
     console.log('Template form value:', value);
   }
@@ -363,7 +363,7 @@ export class FormExampleComponent {
   /**
    * Performs the on reactive submit operation.
    */
-  onReactiveSubmit(): void {
+  public onReactiveSubmit(): void {
     if (this.reactiveForm.valid) {
       this.toastService.success('响应式表单提交成功！');
       console.log('Reactive form value:', this.reactiveForm.value);

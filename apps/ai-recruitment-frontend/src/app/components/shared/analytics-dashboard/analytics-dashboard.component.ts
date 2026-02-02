@@ -20,10 +20,26 @@ import type { ReportListItem } from '../../../store/reports/report.model';
 import * as ResumeSelectors from '../../../store/resumes/resume.selectors';
 import type { ResumeListItem } from '../../../store/resumes/resume.model';
 
+interface JobsStatistics {
+  total: number;
+  activePercentage: number;
+}
+
+interface ReportsStatistics {
+  total: number;
+  completionRate: number;
+}
+
+interface ResumeStatistics {
+  total: number;
+  averageScore: number;
+  topSkills?: Array<{ skill: string; count: number }>;
+}
+
 interface AnalyticsDashboardData {
-  jobsStatistics: any;
-  reportsStatistics: any;
-  resumeStatistics: any;
+  jobsStatistics: JobsStatistics;
+  reportsStatistics: ReportsStatistics;
+  resumeStatistics: ResumeStatistics;
   recentJobs: JobListItem[];
   recentReports: ReportListItem[];
   recentResumes: ResumeListItem[];
@@ -578,7 +594,7 @@ interface AnalyticsDashboardData {
   ],
 })
 export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
-  dashboardData$: Observable<AnalyticsDashboardData>;
+  public dashboardData$: Observable<AnalyticsDashboardData>;
 
   /**
    * Initializes a new instance of the Analytics Dashboard Component.
@@ -632,7 +648,7 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     // Component initialization
     console.log('Analytics Dashboard initialized with NgRx selectors');
   }
@@ -640,7 +656,7 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     // Cleanup if needed
   }
 }

@@ -1,11 +1,12 @@
 import type {
   OnInit,
-  OnDestroy,
-  NgZone} from '@angular/core';
+  OnDestroy} from '@angular/core';
 import {
   Component,
   ChangeDetectionStrategy,
   signal,
+  NgZone,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, interval, takeUntil } from 'rxjs';
@@ -443,7 +444,7 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   // Signals for reactive state
-  metrics = signal<PerformanceMetrics>({
+  public metrics = signal<PerformanceMetrics>({
     lcp: null,
     fid: null,
     cls: null,
@@ -462,23 +463,19 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
     overall: 'good',
   });
 
-  expanded = signal(false);
-  showMetrics = signal(false);
+  public expanded = signal(false);
+  public showMetrics = signal(false);
 
   private performanceObserver?: PerformanceObserver;
   private layoutShiftScore = 0;
 
-  /**
-   * Initializes a new instance of the Mobile Performance Component.
-   * @param ngZone - The ng zone.
-   */
-  constructor(private ngZone: NgZone) {}
+  private readonly ngZone = inject(NgZone);
 
   /**
    * Performs the ng on init operation.
    * @returns The result of the operation.
    */
-  ngOnInit() {
+  public ngOnInit(): void {
     // Only show in development or when explicitly enabled
     this.showMetrics.set(
       !environment.production ||
@@ -495,7 +492,7 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
    * Performs the ng on destroy operation.
    * @returns The result of the operation.
    */
-  ngOnDestroy() {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
 
@@ -504,14 +501,14 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
     }
   }
 
-  private initializePerformanceMonitoring() {
+  private initializePerformanceMonitoring(): void {
     this.collectInitialMetrics();
     this.setupPerformanceObserver();
     this.collectNetworkInfo();
     this.collectDeviceInfo();
   }
 
-  private collectInitialMetrics() {
+  private collectInitialMetrics(): void {
     // Get navigation timing
     const navigation = performance.getEntriesByType(
       'navigation',
@@ -532,6 +529,7 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
 
     // Get memory info
     if ('memory' in performance) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const memory = (performance as any).memory;
       this.updateMetrics({
         usedJSHeapSize: memory.usedJSHeapSize,
@@ -541,7 +539,7 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
     }
   }
 
-  private setupPerformanceObserver() {
+  private setupPerformanceObserver(): void {
     if ('PerformanceObserver' in window) {
       this.performanceObserver = new PerformanceObserver((list) => {
         this.ngZone.run(() => {
@@ -567,7 +565,7 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
     }
   }
 
-  private handlePerformanceEntry(entry: PerformanceEntry) {
+  private handlePerformanceEntry(entry: PerformanceEntry): void {
     switch (entry.entryType) {
       case 'largest-contentful-paint':
         this.updateMetric('lcp', entry.startTime);
@@ -590,8 +588,9 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
     }
   }
 
-  private collectNetworkInfo() {
+  private collectNetworkInfo(): void {
     if ('connection' in navigator) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const connection = (navigator as any).connection;
       this.updateMetrics({
         connectionType: connection.type || 'unknown',
@@ -602,19 +601,21 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
     }
   }
 
-  private collectDeviceInfo() {
+  private collectDeviceInfo(): void {
     this.updateMetrics({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       deviceMemory: (navigator as any).deviceMemory || 0,
       hardwareConcurrency: navigator.hardwareConcurrency || 0,
     });
   }
 
-  private startPeriodicUpdates() {
+  private startPeriodicUpdates(): void {
     // Update memory usage every 5 seconds
     interval(5000)
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         if ('memory' in performance) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const memory = (performance as any).memory;
           this.updateMetrics({
             usedJSHeapSize: memory.usedJSHeapSize,
@@ -626,15 +627,16 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
       });
   }
 
-  private updateMetric(key: keyof PerformanceMetrics, value: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private updateMetric(key: keyof PerformanceMetrics, value: any): void {
     this.metrics.update((current) => ({ ...current, [key]: value }));
   }
 
-  private updateMetrics(updates: Partial<PerformanceMetrics>) {
+  private updateMetrics(updates: Partial<PerformanceMetrics>): void {
     this.metrics.update((current) => ({ ...current, ...updates }));
   }
 
-  private calculateOverallScore() {
+  private calculateOverallScore(): void {
     const m = this.metrics();
     let score = 100;
 
@@ -678,7 +680,7 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
    * Retrieves overall score.
    * @returns The number value.
    */
-  getOverallScore(): number {
+  public getOverallScore(): number {
     const m = this.metrics();
     let score = 100;
 
@@ -712,7 +714,7 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
    * Retrieves lcp status.
    * @returns The string value.
    */
-  getLCPStatus(): string {
+  public getLCPStatus(): string {
     const lcp = this.metrics().lcp;
     if (lcp === null) return '';
     if (lcp <= 1500) return 'excellent';
@@ -725,7 +727,7 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
    * Retrieves fid status.
    * @returns The string value.
    */
-  getFIDStatus(): string {
+  public getFIDStatus(): string {
     const fid = this.metrics().fid;
     if (fid === null) return '';
     if (fid <= 50) return 'excellent';
@@ -738,7 +740,7 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
    * Retrieves cls status.
    * @returns The string value.
    */
-  getCLSStatus(): string {
+  public getCLSStatus(): string {
     const cls = this.metrics().cls;
     if (cls === null) return '';
     if (cls <= 0.05) return 'excellent';
@@ -751,7 +753,7 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
    * Retrieves memory usage percent.
    * @returns The number value.
    */
-  getMemoryUsagePercent(): number {
+  public getMemoryUsagePercent(): number {
     const m = this.metrics();
     if (m.totalJSHeapSize === 0) return 0;
     return (m.usedJSHeapSize / m.totalJSHeapSize) * 100;
@@ -763,7 +765,7 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
    * @param unit - The unit.
    * @returns The string value.
    */
-  formatMetric(value: number | null, unit: string): string {
+  public formatMetric(value: number | null, unit: string): string {
     if (value === null) return 'N/A';
     if (unit === 'ms') return `${Math.round(value)}ms`;
     if (unit === '') return value.toFixed(3);
@@ -775,7 +777,7 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
    * @param bytes - The bytes.
    * @returns The string value.
    */
-  formatBytes(bytes: number): string {
+  public formatBytes(bytes: number): string {
     if (bytes === 0) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -787,7 +789,7 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
    * Retrieves performance tips.
    * @returns The an array of string value.
    */
-  getPerformanceTips(): string[] {
+  public getPerformanceTips(): string[] {
     const tips: string[] = [];
     const m = this.metrics();
 
@@ -825,7 +827,7 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
    * Performs the toggle expanded operation.
    * @returns The result of the operation.
    */
-  toggleExpanded() {
+  public toggleExpanded(): void {
     this.expanded.update((current) => !current);
   }
 }

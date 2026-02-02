@@ -1065,36 +1065,36 @@ export interface ResultsFilter {
   ],
 })
 export class MobileResultsComponent implements OnInit, OnDestroy {
-  @Input() title = 'Candidates';
-  @Input() subtitle = '';
-  @Input() candidates: CandidateResult[] = [];
-  @Input() isLoading = false;
+  @Input() public title = 'Candidates';
+  @Input() public subtitle = '';
+  @Input() public candidates: CandidateResult[] = [];
+  @Input() public isLoading = false;
 
-  @Output() candidateSelected = new EventEmitter<CandidateResult>();
-  @Output() candidateAction = new EventEmitter<{
+  @Output() public candidateSelected = new EventEmitter<CandidateResult>();
+  @Output() public candidateAction = new EventEmitter<{
     action: string;
     candidate: CandidateResult;
   }>();
-  @Output() bulkActionTriggered = new EventEmitter<{
+  @Output() public bulkActionTriggered = new EventEmitter<{
     action: string;
     candidates: CandidateResult[];
   }>();
-  @Output() filtersChanged = new EventEmitter<ResultsFilter>();
+  @Output() public filtersChanged = new EventEmitter<ResultsFilter>();
 
   private destroy$ = new Subject<void>();
 
   // View state
-  viewMode: 'card' | 'detailed' = 'card';
-  showFilters = false;
-  showSort = false;
-  showQuickActions = false;
-  selectedCandidate: CandidateResult | null = null;
+  public viewMode: 'card' | 'detailed' = 'card';
+  public showFilters = false;
+  public showSort = false;
+  public showQuickActions = false;
+  public selectedCandidate: CandidateResult | null = null;
 
   // Selection
-  selectedCandidates: CandidateResult[] = [];
+  public selectedCandidates: CandidateResult[] = [];
 
   // Filters and sorting
-  filters: ResultsFilter = {
+  public filters: ResultsFilter = {
     score: { min: 0, max: 100 },
     experience: [],
     skills: [],
@@ -1102,14 +1102,14 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     status: [],
   };
 
-  currentSort = 'score-desc';
-  filteredResults: CandidateResult[] = [];
+  public currentSort = 'score-desc';
+  public filteredResults: CandidateResult[] = [];
 
   // Available filter options
-  availableStatuses = ['new', 'reviewed', 'shortlisted', 'interviewed'];
-  availableExperience = ['Junior', 'Mid-level', 'Senior', 'Lead', 'Principal'];
+  public availableStatuses = ['new', 'reviewed', 'shortlisted', 'interviewed'];
+  public availableExperience = ['Junior', 'Mid-level', 'Senior', 'Lead', 'Principal'];
 
-  sortOptions = [
+  public sortOptions = [
     { label: 'Score (High to Low)', value: 'score-desc' },
     { label: 'Score (Low to High)', value: 'score-asc' },
     { label: 'Name (A to Z)', value: 'name-asc' },
@@ -1123,7 +1123,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * @param _candidate - The candidate.
    * @returns The an array of SwipeAction.
    */
-  getSwipeActions(_candidate: CandidateResult): SwipeAction[] {
+  public getSwipeActions(_candidate: CandidateResult): SwipeAction[] {
     return [
       {
         id: 'view',
@@ -1150,7 +1150,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
   }
 
   // Quick actions menu
-  quickActions = [
+  public quickActions = [
     {
       id: 'view',
       label: 'View Details',
@@ -1185,7 +1185,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * Performs the ng on init operation.
    * @returns The result of the operation.
    */
-  ngOnInit() {
+  public ngOnInit(): void {
     this.applyFilters();
     this.setupGestures();
   }
@@ -1194,12 +1194,12 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * Performs the ng on destroy operation.
    * @returns The result of the operation.
    */
-  ngOnDestroy() {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  private setupGestures() {
+  private setupGestures(): void {
     // Setup pull-to-refresh gesture
     // Implementation would go here
   }
@@ -1208,7 +1208,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * Performs the active filters count operation.
    * @returns The number value.
    */
-  get activeFiltersCount(): number {
+  public get activeFiltersCount(): number {
     let count = 0;
     if (this.filters.score.min > 0) count++;
     count += this.filters.status.length;
@@ -1223,7 +1223,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * Performs the toggle filters operation.
    * @returns The result of the operation.
    */
-  toggleFilters() {
+  public toggleFilters(): void {
     this.showFilters = !this.showFilters;
     this.showSort = false;
   }
@@ -1232,7 +1232,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * Performs the toggle sort operation.
    * @returns The result of the operation.
    */
-  toggleSort() {
+  public toggleSort(): void {
     this.showSort = !this.showSort;
     this.showFilters = false;
   }
@@ -1241,7 +1241,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * Performs the toggle view operation.
    * @returns The result of the operation.
    */
-  toggleView() {
+  public toggleView(): void {
     this.viewMode = this.viewMode === 'card' ? 'detailed' : 'card';
   }
 
@@ -1249,7 +1249,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * Performs the on filter change operation.
    * @returns The result of the operation.
    */
-  onFilterChange() {
+  public onFilterChange(): void {
     this.applyFilters();
     this.filtersChanged.emit(this.filters);
   }
@@ -1259,7 +1259,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * @param status - The status.
    * @returns The result of the operation.
    */
-  toggleStatusFilter(status: string) {
+  public toggleStatusFilter(status: string): void {
     const index = this.filters.status.indexOf(status);
     if (index > -1) {
       this.filters.status.splice(index, 1);
@@ -1274,7 +1274,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * @param experience - The experience.
    * @returns The result of the operation.
    */
-  toggleExperienceFilter(experience: string) {
+  public toggleExperienceFilter(experience: string): void {
     const index = this.filters.experience.indexOf(experience);
     if (index > -1) {
       this.filters.experience.splice(index, 1);
@@ -1288,7 +1288,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * Performs the clear filters operation.
    * @returns The result of the operation.
    */
-  clearFilters() {
+  public clearFilters(): void {
     this.filters = {
       score: { min: 0, max: 100 },
       experience: [],
@@ -1304,13 +1304,13 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * @param sortValue - The sort value.
    * @returns The result of the operation.
    */
-  setSortOption(sortValue: string) {
+  public setSortOption(sortValue: string): void {
     this.currentSort = sortValue;
     this.showSort = false;
     this.applySorting();
   }
 
-  private applyFilters() {
+  private applyFilters(): void {
     let filtered = [...this.candidates];
 
     // Apply score filter
@@ -1334,7 +1334,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     this.applySorting();
   }
 
-  private applySorting() {
+  private applySorting(): void {
     const [field, direction] = this.currentSort.split('-');
 
     this.filteredResults.sort((a, b) => {
@@ -1362,7 +1362,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * Retrieves match summary.
    * @returns The string value.
    */
-  getMatchSummary(): string {
+  public getMatchSummary(): string {
     if (this.filteredResults.length === 0) return '';
 
     const excellent = this.filteredResults.filter(
@@ -1385,7 +1385,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * @param candidate - The candidate.
    * @returns The boolean value.
    */
-  isSelected(candidate: CandidateResult): boolean {
+  public isSelected(candidate: CandidateResult): boolean {
     return this.selectedCandidates.some((c) => c.id === candidate.id);
   }
 
@@ -1395,7 +1395,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * @param event - The event.
    * @returns The result of the operation.
    */
-  toggleSelection(candidate: CandidateResult, event: Event) {
+  public toggleSelection(candidate: CandidateResult, event: Event): void {
     event.stopPropagation();
 
     const index = this.selectedCandidates.findIndex(
@@ -1412,7 +1412,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * Performs the select all operation.
    * @returns The result of the operation.
    */
-  selectAll() {
+  public selectAll(): void {
     this.selectedCandidates = [...this.filteredResults];
   }
 
@@ -1421,7 +1421,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * @param action - The action.
    * @returns The result of the operation.
    */
-  bulkAction(action: string) {
+  public bulkAction(action: string): void {
     this.bulkActionTriggered.emit({
       action,
       candidates: this.selectedCandidates,
@@ -1435,7 +1435,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * @param candidate - The candidate.
    * @returns The result of the operation.
    */
-  onCandidateClick(candidate: CandidateResult) {
+  public onCandidateClick(candidate: CandidateResult): void {
     this.candidateSelected.emit(candidate);
   }
 
@@ -1444,7 +1444,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * @param candidate - The candidate.
    * @returns The result of the operation.
    */
-  onCandidateLongPress(candidate: CandidateResult) {
+  public onCandidateLongPress(candidate: CandidateResult): void {
     this.selectedCandidate = candidate;
     this.showQuickActions = true;
 
@@ -1459,7 +1459,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * @param event - The event.
    * @returns The result of the operation.
    */
-  onSwipeAction(event: SwipeEvent) {
+  public onSwipeAction(event: SwipeEvent): void {
     this.candidateAction.emit({
       action: event.action.id,
       candidate: event.item,
@@ -1473,7 +1473,8 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * @param event - The event.
    * @returns The result of the operation.
    */
-  onQuickAction(action: any, candidate: CandidateResult, event: Event) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public onQuickAction(action: any, candidate: CandidateResult, event: Event): void {
     event.stopPropagation();
     this.candidateAction.emit({
       action: action.id,
@@ -1489,7 +1490,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
    * @param candidate - The candidate.
    * @returns The string value.
    */
-  trackByCandidate(_index: number, candidate: CandidateResult): string {
+  public trackByCandidate(_index: number, candidate: CandidateResult): string {
     return candidate.id;
   }
 }
