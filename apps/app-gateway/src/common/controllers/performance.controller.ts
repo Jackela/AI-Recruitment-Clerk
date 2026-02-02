@@ -99,6 +99,7 @@ export class PerformanceController {
   public async getHistoricalMetrics(
     @Query('date') date?: string,
     @Query('window') window?: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<any> {
     const metrics = await this.performanceInterceptor.getHistoricalMetrics(
       date,
@@ -377,8 +378,11 @@ export class PerformanceController {
   }
 
   private generateConsolidatedRecommendations(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     apiReport: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     cacheReport: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     dbReport: any,
   ): string[] {
     const recommendations = new Set<string>();
@@ -406,7 +410,12 @@ export class PerformanceController {
     return Array.from(recommendations);
   }
 
-  private generateCacheRecommendations(metrics: any, health: any): string[] {
+  private generateCacheRecommendations(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    metrics: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    health: any,
+  ): string[] {
     const recommendations: string[] = [];
 
     if (metrics.hitRate < 50) {

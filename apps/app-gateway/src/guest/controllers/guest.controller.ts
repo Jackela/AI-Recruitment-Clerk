@@ -88,9 +88,13 @@ export class GuestController {
   @ApiTooManyRequestsResponse({
     description: 'Too many requests from this device',
   })
-  async generateFeedbackCode(@Req() req: RequestWithDeviceId) {
+  public async generateFeedbackCode(@Req() req: RequestWithDeviceId): Promise<{
+    feedbackCode: string;
+    surveyUrl: string;
+    message: string;
+  }> {
     try {
-      const deviceId = req.deviceId!;
+      const deviceId = req.deviceId ?? '';
       const feedbackCode =
         await this.guestUsageService.generateFeedbackCode(deviceId);
 
@@ -135,11 +139,11 @@ export class GuestController {
   @ApiUnauthorizedResponse({
     description: 'Missing or invalid device ID',
   })
-  async getUsageStatus(
+  public async getUsageStatus(
     @Req() req: RequestWithDeviceId,
   ): Promise<GuestUsageResponseDto> {
     try {
-      const deviceId = req.deviceId!;
+      const deviceId = req.deviceId ?? '';
       const status = await this.guestUsageService.getUsageStatus(deviceId);
 
       this.logger.debug(
@@ -174,11 +178,11 @@ export class GuestController {
   @ApiBadRequestResponse({
     description: 'Guest record not found',
   })
-  async getGuestDetails(
+  public async getGuestDetails(
     @Req() req: RequestWithDeviceId,
   ): Promise<GuestStatusDto> {
     try {
-      const deviceId = req.deviceId!;
+      const deviceId = req.deviceId ?? '';
       const details = await this.guestUsageService.getGuestStatus(deviceId);
 
       this.logger.debug(
@@ -225,7 +229,10 @@ export class GuestController {
   @ApiBadRequestResponse({
     description: 'Invalid or already redeemed feedback code',
   })
-  async redeemFeedbackCode(@Body() redeemDto: RedeemFeedbackCodeDto) {
+  public async redeemFeedbackCode(@Body() redeemDto: RedeemFeedbackCodeDto): Promise<{
+    success: boolean;
+    message: string;
+  }> {
     try {
       const success = await this.guestUsageService.redeemFeedbackCode(
         redeemDto.feedbackCode,
@@ -268,7 +275,12 @@ export class GuestController {
       },
     },
   })
-  async getServiceStats() {
+  public async getServiceStats(): Promise<{
+    totalGuests: number;
+    activeGuests: number;
+    pendingFeedbackCodes: number;
+    redeemedFeedbackCodes: number;
+  }> {
     try {
       const stats = await this.guestUsageService.getServiceStats();
       this.logger.debug('Service statistics retrieved');
@@ -317,9 +329,9 @@ export class GuestController {
       },
     },
   })
-  async checkUsage(@Req() req: RequestWithDeviceId) {
+  public async checkUsage(@Req() req: RequestWithDeviceId) {
     try {
-      const deviceId = req.deviceId!;
+      const deviceId = req.deviceId ?? '';
       const canUse = await this.guestUsageService.canUse(deviceId);
 
       if (!canUse) {

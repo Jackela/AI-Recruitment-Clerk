@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException } from '@nestjs/common';
 import { GuestResumeController } from './guest-resume.controller';
 import type { GuestUsageService } from '../services/guest-usage.service';
 import type { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
@@ -30,12 +30,13 @@ describe('GuestResumeController (lightweight)', () => {
       ...overrides,
     } as RequestWithDeviceId);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const file = {
     originalname: 'resume.pdf',
     mimetype: 'application/pdf',
     size: 1024,
     buffer: Buffer.from('pdf'),
-  } as any;
+  } as unknown as Express.Multer.File;
 
   const buildController = () =>
     new GuestResumeController(usageService, natsClient, gridFsService);
@@ -51,7 +52,7 @@ describe('GuestResumeController (lightweight)', () => {
         canUse: true,
         remainingCount: 2,
         needsFeedbackCode: false,
-      } as any);
+      });
 
       const controller = buildController();
       const result = await controller.analyzeResume(
@@ -72,7 +73,7 @@ describe('GuestResumeController (lightweight)', () => {
         canUse: false,
         remainingCount: 0,
         needsFeedbackCode: true,
-      } as any);
+      });
 
       const controller = buildController();
 
@@ -89,7 +90,7 @@ describe('GuestResumeController (lightweight)', () => {
         canUse: true,
         remainingCount: 1,
         needsFeedbackCode: false,
-      } as any);
+      });
 
       const controller = buildController();
       const result = await controller.getDemoAnalysis(deviceRequest());
