@@ -11,7 +11,7 @@ export interface ServiceHealth {
   lastCheck: Date;
   responseTime?: number;
   error?: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -34,7 +34,7 @@ export interface HealthCheckConfig {
   timeout?: number;
   interval?: number;
   enabled?: boolean;
-  healthCheck?: () => Promise<{ healthy: boolean; metadata?: any }>;
+  healthCheck?: () => Promise<{ healthy: boolean; metadata?: Record<string, unknown> }>;
 }
 
 /**
@@ -51,7 +51,7 @@ export class HealthCheckService implements OnModuleInit {
    * Performs the on module init operation.
    * @returns The result of the operation.
    */
-  async onModuleInit() {
+  public async onModuleInit(): Promise<void> {
     this.logger.log('Initializing health check service');
 
     // Register default health checks
@@ -65,7 +65,7 @@ export class HealthCheckService implements OnModuleInit {
    * Performs the register health check operation.
    * @param config - The config.
    */
-  registerHealthCheck(config: HealthCheckConfig): void {
+  public registerHealthCheck(config: HealthCheckConfig): void {
     this.healthCheckConfigs.push({
       timeout: 5000,
       interval: 30000,
@@ -80,7 +80,7 @@ export class HealthCheckService implements OnModuleInit {
    * Retrieves system health.
    * @returns A promise that resolves to SystemHealth.
    */
-  async getSystemHealth(): Promise<SystemHealth> {
+  public async getSystemHealth(): Promise<SystemHealth> {
     const services = Array.from(this.serviceHealths.values());
     const overall = this.calculateOverallHealth(services);
 
@@ -98,7 +98,7 @@ export class HealthCheckService implements OnModuleInit {
    * @param serviceName - The service name.
    * @returns A promise that resolves to ServiceHealth | null.
    */
-  async getServiceHealth(serviceName: string): Promise<ServiceHealth | null> {
+  public async getServiceHealth(serviceName: string): Promise<ServiceHealth | null> {
     return this.serviceHealths.get(serviceName) || null;
   }
 
@@ -107,7 +107,7 @@ export class HealthCheckService implements OnModuleInit {
    * @param serviceName - The service name.
    * @returns A promise that resolves to ServiceHealth.
    */
-  async checkServiceHealth(serviceName: string): Promise<ServiceHealth> {
+  public async checkServiceHealth(serviceName: string): Promise<ServiceHealth> {
     const config = this.healthCheckConfigs.find((c) => c.name === serviceName);
 
     if (!config) {
@@ -124,7 +124,7 @@ export class HealthCheckService implements OnModuleInit {
    * @returns A promise that resolves when the operation completes.
    */
   @Cron(CronExpression.EVERY_30_SECONDS)
-  async performScheduledHealthChecks(): Promise<void> {
+  public async performScheduledHealthChecks(): Promise<void> {
     try {
       await this.performAllHealthChecks();
     } catch (error) {
@@ -160,17 +160,17 @@ export class HealthCheckService implements OnModuleInit {
     const startTime = Date.now();
 
     try {
-      let result: { healthy: boolean; metadata?: any };
+      let result: { healthy: boolean; metadata?: Record<string, unknown> };
 
       if (config.healthCheck) {
         // Custom health check function
         result = await Promise.race([
           config.healthCheck(),
-          this.createTimeoutPromise(config.timeout!),
+          this.createTimeoutPromise(config.timeout ?? 5000),
         ]);
       } else if (config.url) {
         // HTTP health check
-        result = await this.performHttpHealthCheck(config.url, config.timeout!);
+        result = await this.performHttpHealthCheck(config.url, config.timeout ?? 5000);
       } else {
         throw new Error('No health check method configured');
       }
@@ -200,7 +200,7 @@ export class HealthCheckService implements OnModuleInit {
   private async performHttpHealthCheck(
     url: string,
     _timeout: number,
-  ): Promise<{ healthy: boolean; metadata?: any }> {
+  ): Promise<{ healthy: boolean; metadata?: Record<string, unknown> }> {
     try {
       // Mock HTTP health check - replace with actual HTTP client
       // const response = await fetch(url, { timeout });
@@ -277,7 +277,7 @@ export class HealthCheckService implements OnModuleInit {
               queryTime: Math.random() * 100,
             },
           };
-        } catch (error) {
+        } catch {
           return { healthy: false };
         }
       },
@@ -377,7 +377,7 @@ export class HealthCheckService implements OnModuleInit {
               totalMessages: Math.floor(Math.random() * 1000),
             },
           };
-        } catch (error) {
+        } catch {
           return { healthy: false };
         }
       },

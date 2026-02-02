@@ -31,7 +31,7 @@ export class GuestUsageService {
   /**
    * Check if a guest can use the service and increment usage count
    */
-  async canUse(deviceId: string): Promise<boolean> {
+  public async canUse(deviceId: string): Promise<boolean> {
     try {
       // Find or create guest usage record
       let guestUsage = await this.guestUsageModel.findOne({ deviceId });
@@ -105,7 +105,7 @@ export class GuestUsageService {
   /**
    * Generate a feedback code for a guest user
    */
-  async generateFeedbackCode(deviceId: string): Promise<string> {
+  public async generateFeedbackCode(deviceId: string): Promise<string> {
     try {
       const guestUsage = await this.guestUsageModel.findOne({ deviceId });
 
@@ -161,7 +161,7 @@ export class GuestUsageService {
   /**
    * Redeem a feedback code to reset usage limit
    */
-  async redeemFeedbackCode(feedbackCode: string): Promise<boolean> {
+  public async redeemFeedbackCode(feedbackCode: string): Promise<boolean> {
     try {
       const guestUsage = await this.guestUsageModel.findOne({
         feedbackCode,
@@ -201,7 +201,7 @@ export class GuestUsageService {
   /**
    * Get usage status for a guest user
    */
-  async getUsageStatus(deviceId: string): Promise<GuestUsageResponseDto> {
+  public async getUsageStatus(deviceId: string): Promise<GuestUsageResponseDto> {
     try {
       const guestUsage = await this.guestUsageModel.findOne({ deviceId });
 
@@ -237,7 +237,7 @@ export class GuestUsageService {
   /**
    * Get detailed guest status including usage history
    */
-  async getGuestStatus(deviceId: string): Promise<GuestStatusDto> {
+  public async getGuestStatus(deviceId: string): Promise<GuestStatusDto> {
     try {
       const guestUsage = await this.guestUsageModel.findOne({ deviceId });
 
@@ -267,7 +267,7 @@ export class GuestUsageService {
   /**
    * Clean up old guest records (called by cron job)
    */
-  async cleanupOldRecords(daysOld = 30): Promise<number> {
+  public async cleanupOldRecords(daysOld = 30): Promise<number> {
     try {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - daysOld);
@@ -290,7 +290,7 @@ export class GuestUsageService {
   /**
    * Get service statistics for monitoring
    */
-  async getServiceStats(): Promise<{
+  public async getServiceStats(): Promise<{
     totalGuests: number;
     activeGuests: number;
     pendingFeedbackCodes: number;

@@ -24,15 +24,19 @@ describe('MfaService (focused unit tests)', () => {
   let service: MfaService;
   let userModel: ReturnType<typeof createUserModel>;
   let configService: jest.Mocked<ConfigService>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const emailService = { sendMfaToken: jest.fn() } as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const smsService = { sendSms: jest.fn() } as any;
 
   beforeEach(() => {
     jest.clearAllMocks();
     userModel = createUserModel();
     configService = createConfigService();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     service = new MfaService(userModel as any, configService, emailService, smsService);
     // Avoid timers in tests
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (service as any).storeTemporaryToken = jest.fn();
   });
 

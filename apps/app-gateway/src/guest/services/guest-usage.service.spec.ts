@@ -9,9 +9,11 @@ type StoreRecord = {
   createdAt: Date;
 };
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const createModelMock = () => {
   const store = new Map<string, StoreRecord>();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const findOne = jest.fn(async (query: Record<string, any>) => {
     if (query.deviceId) {
       return store.get(query.deviceId) ?? null;
@@ -39,6 +41,7 @@ const createModelMock = () => {
     return record;
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateOne = jest.fn(async (query: Record<string, any>, update: any) => {
     const target =
       store.get(query.deviceId) ??
@@ -57,6 +60,7 @@ const createModelMock = () => {
     }
     if (update.$unset) {
       Object.keys(update.$unset).forEach((key) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (target as any)[key] = null;
       });
     }
@@ -64,6 +68,7 @@ const createModelMock = () => {
     return { acknowledged: true, modifiedCount: 1 };
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const deleteMany = jest.fn(async (query: Record<string, any>) => {
     const before = store.size;
     const cutoff: Date = query.lastUsed?.$lt;
@@ -107,6 +112,7 @@ describe('GuestUsageService (mocked model)', () => {
     const factory = createModelMock();
     model = factory.model;
     store = factory.store;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     service = new GuestUsageService(model as any);
   });
 
@@ -303,6 +309,7 @@ describe('GuestUsageService (mocked model)', () => {
       const deviceId = 'device-no-count';
       store.set(deviceId, {
         deviceId,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         usageCount: undefined as any,
         lastUsed: new Date(),
         createdAt: new Date(),
