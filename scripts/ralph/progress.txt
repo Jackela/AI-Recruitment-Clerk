@@ -2,15 +2,65 @@
 Started: Tue Feb  3 20:37:56     2026
 
 ## Codebase Patterns
+
+### Build and Test Commands
 - Use `jest --config jest.config.mjs --passWithNoTests` for unit tests
 - Use `jest --config jest.smoke.config.mjs` for smoke tests
 - Use `npx nx` for monorepo operations (lint, build)
 - Use `tsc --noEmit --project tsconfig.ci.json` for type checking
+- Use `npm run dev` to run app-gateway and ai-recruitment-frontend in parallel
+- Use `npm run lint:fix` to auto-fix lint issues across all projects
+- Use `npm run clean` to reset Nx cache and remove build artifacts
+
+### Testing
 - E2E tests require dev server running on localhost:4202 (expect failures if not running)
 - Jest open handles warning is expected - all tests pass but process doesn't exit cleanly
 - Console errors in domain service tests are EXPECTED error path tests
-- **Nx webpack configs MUST use .cjs (CommonJS)**: Nx's @nx/webpack/plugin uses require() to load configs during project graph processing. Even .mjs files don't work because Nx doesn't use dynamic import(). Use webpack.config.cjs with CommonJS syntax (require/module.exports).
-- **Jest root configs use .mjs (ESM)**: Jest 29+ supports ESM configs. Root jest.config.mjs and jest.smoke.config.mjs use export default. Project-level jest.config files in libs/apps remain unchanged.
+- When testing services that extend a base class, mock the lowest-level methods to allow intermediate base class logic to execute
+
+### Module System
+- **ALL projects use ESM**: `"type": "module"` in package.json, `"module": "ES2022"` and `"target": "ES2022"` in tsconfig
+- **Nx webpack configs MUST use .cjs (CommonJS)**: Nx's @nx/webpack/plugin uses require() to load configs during project graph processing. Use webpack.config.cjs with CommonJS syntax.
+- **Jest root configs use .mjs (ESM)**: Root jest.config.mjs and jest.smoke.config.mjs use export default.
+
+### Type Safety
+- **NO 'any' TYPES**: All variables must have explicit types
+- **NO NON-NULL ASSERTIONS**: Use type guards or optional chaining instead of `!`
+- **PUBLIC ACCESSIBILITY**: All public methods must have `public` modifier
+- **EXPORT TYPES**: All interfaces/classes used externally must be exported
+
+### Component Splitting (Mobile)
+- Components over 500 lines should be split: display logic to `*-display.component.ts`, filter logic to `*-filter.component.ts`
+- Business logic extracted to service: `mobile-*.service.ts`
+- Services use BehaviorSubject pattern with combineLatest for reactive state
+- Child components emit events for parent actions (filtersChanged, selectionToggled)
+
+### Service Layering (Domain)
+- Three-layer architecture: Controller → Facade → CRUD/Auth → Repository → Database
+- UserCrudService: Basic CRUD operations (findById, update, delete, softDelete, exists)
+- UserAuthService: User-scoped auth operations (verifyPassword, isUserActive, validateAuthentication)
+- UserManagementService: Facade that delegates to CRUD and auth services
+
+### NATS Microservices
+- BaseMicroserviceService (libs/service-base): Extend for all NATS services
+- Provides: publishEvent(), publishErrorEvent(), subscribeToEvents()
+- Used by: resume-parser-svc, jd-extractor-svc, scoring-engine-svc, report-generator-svc
+
+### Environment Variables
+- Use @ai-recruitment-clerk/configuration for env validation on startup
+- Service schemas: appGateway, resumeParser, jdExtractor, scoringEngine, reportGenerator, frontend
+- Type-safe access: env.getString(), env.getNumber(), env.getBoolean(), env.getArray(), env.getUrl()
+
+### File Organization
+- /config/docker - Docker compose and dockerignore files
+- /config/deployment - Platform deployment configs (railway.json, render.yaml)
+- /scripts - Utility scripts (shell scripts, batch files)
+- /docs - Documentation (deployment/, support/, reports/)
+
+### Imports and Exports
+- Use `import type` for type-only imports
+- Library paths must be added to tsconfig.base.json for @ai-recruitment-clerk/* imports
+- Barrel exports in index.ts for convenient importing
 
 ---
 
@@ -1016,5 +1066,121 @@ Options documented in CI-BLOCKING-ISSUE.md
 - clean script combines nx reset (clears Nx cache) with rm -rf for node_modules/.cache and dist
 - Development scripts follow naming convention: dev:* for serving, lint:fix for fixing, clean for reset
 - npm run (without arguments) lists all available scripts - good for verification
+
+---
+
+## [2026-02-04 14:00] - US-038
+- **COMPLETED**: Create environment variable validation utility
+- Created libs/configuration/env-validator with type-safe environment variable access
+- Implemented EnvValidator class for startup validation
+- Implemented EnvAccess class for type-safe environment variable access
+- Created service-specific schemas for: appGateway, resumeParser, jdExtractor, scoringEngine, reportGenerator, frontend
+- Added EnvValidationError class with clear error messages listing missing/invalid variables
+- Implemented sensitive value masking for SECRET, PASSWORD, KEY, TOKEN in summaries
+- Added helper functions: validateEnv(), createValidator(), createSchema()
+- Added @ai-recruitment-clerk/configuration path to tsconfig.base.json
+- Created CLAUDE.md documenting required env vars by service
+- Quality gates verified: typecheck (pass), lint (pass)
+
+**Files changed:**
+- libs/configuration/src/env-validator/env-validator.util.ts (created - 505 lines)
+- libs/configuration/src/index.ts (created - barrel export)
+- libs/configuration/tsconfig.json (created)
+- libs/configuration/project.json (created)
+- libs/configuration/CLAUDE.md (created - usage documentation)
+- tsconfig.base.json (added @ai-recruitment-clerk/configuration path)
+- scripts/ralph/prd.json (marked US-038 passes: true)
+
+**Learnings for future iterations:**
+- EnvValidator.validate() throws EnvValidationError with detailed missing/invalid vars list
+- EnvAccess provides type-safe access: getString, getNumber, getBoolean, getArray, getUrl, isSet
+- Service schemas in ServiceSchemas object provide predefined env var sets per service
+- Sensitive value masking checks key name for: SECRET, PASSWORD, KEY, TOKEN, ENCRYPTION, PRIVATE
+- Public accessibility modifiers required on all public methods (ESLint @typescript-eslint/explicit-member-accessibility)
+- Non-null assertion (!) is forbidden - use type guards or optional chaining instead
+- All interfaces and classes used externally must be exported (not just declared)
+- Library path must be added to tsconfig.base.json paths for @ai-recruitment-clerk imports
+
+---
+
+## [2026-02-04 15:00] - US-039
+- **COMPLETED**: Update root CLAUDE.md with new patterns and conventions
+- Added Codebase Patterns section to CLAUDE.md with key architectural patterns:
+  - Base class usage (BaseMicroserviceService for NATS services)
+  - Component splitting patterns (display, filter, service extraction)
+  - Service layering pattern (UserCrudService → UserAuthService → UserManagementService)
+  - Environment validation using @ai-recruitment-clerk/configuration
+- Enhanced file organization section with subdirectories:
+  - config/docker/ - Docker compose and dockerignore files
+  - config/deployment/ - Platform deployment configs (railway.json, render.yaml)
+- Enhanced shared libraries organization listing all libs
+- Quality gates verified: typecheck (pass), lint (pass 26 projects)
+- Committed changes to git
+
+**Files changed:**
+- CLAUDE.md (added Codebase Patterns section, enhanced file organization)
+
+**Learnings for future iterations:**
+- CLAUDE.md already contained most required patterns (RULE 2, RULE 3, RULE 6)
+- Module system (ESM with .cjs exceptions) was already documented in RULE 2
+- Type safety (no 'any' policy) was already documented in RULE 3
+- Component size limits (<500 lines) was already documented in RULE 6
+- New Codebase Patterns section consolidates patterns discovered during recent work
+- Documentation should be updated AFTER patterns are established, not before
+
+---
+
+## [2026-02-04 16:00] - US-040
+- **COMPLETED**: Create CLAUDE.md for mobile components directory
+- Created comprehensive documentation at apps/ai-recruitment-frontend/src/app/components/mobile/CLAUDE.md
+- Documented component organization (main, extracted display, services)
+- Documented component splitting patterns (display, filter, business logic to service)
+- Documented service state management pattern (BehaviorSubject with combineLatest)
+- Documented mobile-specific UI patterns (touch gestures, responsive breakpoints, Bento Grid)
+- Documented testing approach (unit tests, TestBed, mocking patterns)
+- Documented service injection pattern using inject() function
+- Quality gates verified: typecheck (pass), lint (pass)
+
+**Files changed:**
+- apps/ai-recruitment-frontend/src/app/components/mobile/CLAUDE.md (created - 195 lines)
+- scripts/ralph/prd.json (marked US-040 passes: true)
+
+**Learnings for future iterations:**
+- Component splitting reduces files from 1500+ lines to ~500 lines each
+- Display components handle rendering, emit events for parent actions
+- Filter components manage their own state, emit filtersChanged events
+- Services use BehaviorSubject pattern for reactive state management
+- inject() function is cleaner than constructor injection for standalone components
+- TouchGestureService provides swipe, tap, long-press gesture events
+- Responsive breakpoints: Mobile (<768px), Tablet (768-1024px), Desktop (>1024px)
+- Bento Grid design uses 16px gaps, 12px border radius, subtle shadows
+
+---
+
+## [2026-02-04 17:00] - US-041
+- **COMPLETED**: Create CLAUDE.md for domain services
+- Created comprehensive documentation at apps/app-gateway/src/domains/CLAUDE.md
+- Documented domain organization (analytics, incentive, questionnaire, resume, usage-limit, user-management)
+- Documented service layering pattern (Controller → Facade → CRUD/Auth → Repository)
+- Documented service facading pattern (UserManagementService example with delegation)
+- Documented CRUD service extraction pattern (UserCrudService with helper methods)
+- Documented auth service separation pattern (UserAuthService vs AuthService distinction)
+- Documented error handling patterns (NestJS exceptions: NotFoundException, BadRequestException, etc.)
+- Documented module configuration (provider order matters)
+- Quality gates verified: typecheck (pass), lint (pass)
+
+**Files changed:**
+- apps/app-gateway/src/domains/CLAUDE.md (created - 290 lines)
+- scripts/ralph/prd.json (marked US-041 passes: true)
+
+**Learnings for future iterations:**
+- Three-layer architecture: Controller (optional) → Facade → CRUD/Auth → Repository → Database
+- Facade service unifies domain API by delegating to specialized services
+- CRUD service extracts basic operations (findById, update, delete, softDelete, exists, etc.)
+- Auth service handles user-scoped operations (verifyPassword, isUserActive, validateAuthentication)
+- UserAuthService is for user operations, AuthService is for global session operations
+- Provider order in module matters - dependencies must be listed before dependents
+- Use import type for type-only imports to reduce bundle size
+- Domain libraries: @ai-recruitment-clerk/*-domain for type definitions
 
 ---
