@@ -91,3 +91,21 @@ Options documented in CI-BLOCKING-ISSUE.md
 - (Other checks failing are unrelated: PR template, coverage thresholds, etc.)
 
 ---
+
+## [2026-02-03 23:00] - US-001, US-002
+- **FIXED**: Angular and MCP SDK high-severity vulnerabilities
+- Upgraded Angular packages from 20.3.15 to 20.3.16
+- Upgraded @modelcontextprotocol/sdk from 1.25.1 to 1.25.2
+- Both `npm audit fix` commands fixed the vulnerabilities automatically
+
+**Files changed:**
+- package-lock.json (dependency updates)
+- node_modules/ (all affected packages updated)
+
+**Learnings for future iterations:**
+- Angular vulnerabilities fixed: GHSA-jrmj-c5cx-3cw6 (XSS via SVG), GHSA-v4hv-rgfq-gp49 (Stored XSS), GHSA-58c5-g7wp-6w37 (XSRF Token Leakage)
+- MCP SDK vulnerabilities fixed: GHSA-w48q-cv73-mx4w (DNS rebinding), GHSA-8r9q-7v3j-jr4g (ReDoS)
+- Remaining vulnerabilities (lodash, tar) are separate user stories (US-003, US-004)
+- `npm audit fix --force` successfully handled both Angular and MCP SDK upgrades without breaking changes
+
+---

@@ -1,78 +1,672 @@
 {
   "project": "AI-Recruitment-Clerk",
   "branchName": "ralph/repo-hygiene-ci",
-  "description": "Finalize repo hygiene and CI stability on the current branch. All work stays in one PR with local verification, CI green, and clear rollback.",
+  "description": "Transform project into AI-coding-friendly codebase with clean structure, type safety, and security fixes. All stories are small and focused for single-iteration completion. Continue on current branch ralph/repo-hygiene-ci.",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Re-verify local quality gates (single source of truth)",
-      "description": "As a maintainer, I need local checks to reflect CI expectations before pushing a PR.",
+      "title": "Fix high-severity npm audit vulnerabilities (Angular)",
+      "description": "As a maintainer, I need to fix high-severity security vulnerabilities in Angular dependencies.",
       "acceptanceCriteria": [
-        "npm run lint passes",
-        "npm run typecheck passes",
+        "Run npm audit to identify affected Angular packages",
+        "Upgrade @angular/core, @angular/common, @angular/compiler to latest secure versions",
+        "npm audit --audit-level=high shows no Angular-related vulnerabilities",
         "npm run build passes",
-        "npm run test passes",
-        "npm run test:smoke passes",
-        "npm run validate:contracts:ci passes",
-        "npm run test:e2e passes",
-        "Record any non-fatal warnings in PR notes"
+        "npm run test passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": "Keep results in a single PR checklist; do not split into multiple PRs."
+      "notes": "Focus on Angular packages only. Use ng update or npm update with specific version ranges."
     },
     {
       "id": "US-002",
-      "title": "Assess and document non-fatal test warnings",
-      "description": "As a reviewer, I need clarity on console warnings/errors that do not fail tests.",
+      "title": "Fix high-severity npm audit vulnerabilities (MCP SDK)",
+      "description": "As a maintainer, I need to fix security vulnerabilities in MCP SDK dependencies.",
       "acceptanceCriteria": [
-        "List known warnings (e.g., websocket connection refused, open handle warnings)",
-        "State impact and whether they are expected in test context",
-        "Add follow-up items if any warning risks real regressions"
+        "Identify affected MCP SDK packages",
+        "Upgrade @modelcontextprotocol/sdk to latest secure version",
+        "npm audit --audit-level=high shows no MCP-related vulnerabilities",
+        "npm run build passes",
+        "npm run test passes"
       ],
       "priority": 2,
       "passes": true,
-      "notes": "Do not change behavior unless needed; document first."
+      "notes": "Check for breaking changes in MCP SDK. Update imports if needed."
     },
     {
       "id": "US-003",
-      "title": "Review workflow changes for applicability",
-      "description": "As a maintainer, I need to remove any repo-hygiene changes that are not applicable.",
+      "title": "Fix high-severity npm audit vulnerabilities (qs, tar, validator)",
+      "description": "As a maintainer, I need to fix security vulnerabilities in common utility libraries.",
       "acceptanceCriteria": [
-        "Review new docs/templates/workflows for relevance",
-        "Remove or adjust any items not fitting repo needs",
-        "Ensure lint and typecheck still pass"
+        "Upgrade qs package to latest secure version",
+        "Upgrade tar package to latest secure version",
+        "Upgrade validator package to latest secure version",
+        "npm audit --audit-level=high shows no related vulnerabilities",
+        "npm run build passes"
       ],
       "priority": 3,
-      "passes": true,
-      "notes": "Prefer minimal changes; avoid churn. All existing workflows are applicable."
+      "passes": false,
+      "notes": "These are transitive dependencies - may need to use overrides or resolutions."
     },
     {
       "id": "US-004",
-      "title": "Prepare a single PR (no branch switching)",
-      "description": "As a maintainer, I need exactly one PR for all changes in this effort.",
+      "title": "Fix remaining moderate npm audit vulnerabilities",
+      "description": "As a maintainer, I need to address remaining moderate-severity security issues.",
       "acceptanceCriteria": [
-        "PR description includes: change list, risks, rollback, tests run",
-        "No additional branches created",
-        "All changes stay on current branch"
+        "Run npm audit --audit-level=moderate to list all moderate issues",
+        "Upgrade or patch all moderate vulnerabilities",
+        "npm audit --audit-level=moderate passes with 0 vulnerabilities",
+        "npm run build passes",
+        "npm run test passes"
       ],
       "priority": 4,
-      "passes": true,
-      "notes": "Single PR only. PR description created in scripts/ralph/PR-DESCRIPTION.md"
+      "passes": false,
+      "notes": "If any vulnerability cannot be fixed, document reason and add to security exceptions."
     },
     {
       "id": "US-005",
-      "title": "Push and verify PR checks",
-      "description": "As a maintainer, I need CI to be green before merge.",
+      "title": "Move shell scripts to /scripts directory (batch 1)",
+      "description": "As a maintainer, I need to organize shell scripts that clutter the root directory.",
       "acceptanceCriteria": [
-        "Push current branch once",
-        "Open a single PR to main",
-        "All GitHub Actions checks pass",
-        "Record CI results in PR"
+        "Move check-consistency.sh to scripts/",
+        "Move QUICK_DEPLOY_SCRIPT.sh to scripts/",
+        "Move run-e2e-tests.sh to scripts/",
+        "Move start-system.sh to scripts/",
+        "Move validate-system.sh to scripts/",
+        "Update any references to these scripts",
+        "Root dir has 5 fewer .sh files"
       ],
       "priority": 5,
-      "passes": true,
-      "notes": "CI issue fixed by renaming webpack.config.js to webpack.config.mjs. Branch pushed, CI verified green."
+      "passes": false,
+      "notes": "Do NOT move Windows .bat files yet (those are US-006). Verify scripts still work after moving."
+    },
+    {
+      "id": "US-006",
+      "title": "Move Windows batch scripts to /scripts directory",
+      "description": "As a maintainer, I need to organize Windows batch scripts that clutter the root directory.",
+      "acceptanceCriteria": [
+        "Move run-e2e-tests.bat to scripts/",
+        "Move start-system.bat to scripts/",
+        "Move validate-system.bat to scripts/",
+        "Update any references to these scripts",
+        "Root dir has 3 fewer .bat files"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Check CI workflows for references. Update paths if scripts are called from CI."
+    },
+    {
+      "id": "US-007",
+      "title": "Move claude-flow scripts to /scripts directory",
+      "description": "As a maintainer, I need to organize claude-flow helper scripts that clutter root.",
+      "acceptanceCriteria": [
+        "Move all claude-flow.* scripts (sh, bat, ps1 variants) to scripts/",
+        "Update any documentation referencing these scripts",
+        "Root dir has no claude-flow.* files"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "There may be multiple platform variants. Move all of them."
+    },
+    {
+      "id": "US-008",
+      "title": "Delete all CI log files from root directory",
+      "description": "As a maintainer, I need to remove accumulated CI log files that clutter root.",
+      "acceptanceCriteria": [
+        "Delete all act-*.log files (12+ files)",
+        "Delete all lint-*.log files",
+        "Delete example-run.log",
+        "Root directory has no .log files except in subdirectories",
+        "Add .gitignore entry for *.log if not present"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "These are generated files, safe to delete. Add to .gitignore to prevent future accumulation."
+    },
+    {
+      "id": "US-009",
+      "title": "Delete temporary directories from root",
+      "description": "As a maintainer, I need to remove temporary directories that don't belong in root.",
+      "acceptanceCriteria": [
+        "Delete tmp/ directory",
+        "Delete tmp-ghlogs/ directory",
+        "Move coverage/ to test/coverage or configure Jest to output elsewhere",
+        "Root has no tmp*, coverage directories",
+        ".gitignore updated to ignore these patterns"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "Check if any important files exist in tmp/ before deleting. Coverage can be configured in jest.config."
+    },
+    {
+      "id": "US-010",
+      "title": "Move environment template files to /config directory",
+      "description": "As a maintainer, I need to organize environment templates that clutter root.",
+      "acceptanceCriteria": [
+        "Move .env.production.template to config/",
+        "Move .env.railway.template to config/",
+        "Move .env.security.template to config/",
+        "Move .envrc to config/",
+        "Update documentation referencing these files",
+        "Root has no .env.*.template files"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": "Update any scripts or CI that reference these files. Document new location in README."
+    },
+    {
+      "id": "US-011",
+      "title": "Move documentation files to /docs directory",
+      "description": "As a maintainer, I need to organize scattered documentation files.",
+      "acceptanceCriteria": [
+        "Move DEPLOYMENT_CHECK.md to docs/deployment/",
+        "Move DEPLOYMENT_GUIDE.md to docs/deployment/",
+        "Move RAILWAY_SETUP.md to docs/deployment/",
+        "Move SUPPORT.md to docs/support/",
+        "Move PROJECT_COMPLETION_REPORT.md to docs/reports/",
+        "Move UAT_Architect_JD.txt to docs/recruitment/",
+        "Root directory has minimal documentation (only README.md, LICENSE)"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "Create subdirectories in docs/ if they don't exist. Update any links to these documents."
+    },
+    {
+      "id": "US-012",
+      "title": "Move Docker configs to /config/docker directory",
+      "description": "As a maintainer, I need to organize Docker configuration files.",
+      "acceptanceCriteria": [
+        "Create config/docker/ directory",
+        "Move Dockerfile* files to config/docker/",
+        "Move docker-compose*.yml files to config/docker/",
+        "Move .dockerignore to config/docker/",
+        "Update references to Docker files",
+        "Root has no Dockerfile* or docker-compose* files"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": "Update CI workflows that reference Docker files. Update README if it mentions Docker."
+    },
+    {
+      "id": "US-013",
+      "title": "Move deployment configs to /config/deployment directory",
+      "description": "As a maintainer, I need to organize platform deployment configuration files.",
+      "acceptanceCriteria": [
+        "Create config/deployment/ directory",
+        "Move railway.json to config/deployment/",
+        "Move render.yaml to config/deployment/",
+        "Move any other platform-specific configs to config/deployment/",
+        "Root has no railway.json, render.yaml files"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": "Update CI workflows that use these configs. Update deployment documentation."
+    },
+    {
+      "id": "US-014",
+      "title": "Delete backup files and clean root completely",
+      "description": "As a maintainer, I need to remove backup files that don't belong in version control.",
+      "acceptanceCriteria": [
+        "Delete package.json.backup",
+        "Search for and delete any *.backup files",
+        "Verify root contains only: package.json, package-lock.json, README.md, LICENSE, .gitignore, tsconfig*, nx.json, .github/, apps/, libs/, scripts/, docs/, config/, test/",
+        "npm run lint passes",
+        "npm run typecheck passes"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": "Final cleanup story. Ensure all critical files remain. Git status should show clean removals."
+    },
+    {
+      "id": "US-015",
+      "title": "Convert main.ts require() to ESM import",
+      "description": "As a developer, I need to eliminate CommonJS require() in favor of ESM imports.",
+      "acceptanceCriteria": [
+        "Replace require('compression') with import compression from 'compression'",
+        "Replace any other require() calls in apps/app-gateway/src/main.ts",
+        "Verify type:module is set in package.json",
+        "npm run build app-gateway passes",
+        "npm run lint passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": "This is the main runtime file. Test thoroughly after changes. Look for other require() patterns in the codebase."
+    },
+    {
+      "id": "US-016",
+      "title": "Convert Jest config to ESM (.mjs)",
+      "description": "As a developer, I need to convert Jest configuration from CommonJS to ESM format.",
+      "acceptanceCriteria": [
+        "Rename jest.config.cjs to jest.config.mjs",
+        "Convert module.exports to export default",
+        "Convert require() calls to import statements",
+        "Update package.json Jest configuration if needed",
+        "npm run test passes",
+        "npm run test:smoke passes"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": "Jest 29+ supports ESM configs. Verify Jest version before converting."
+    },
+    {
+      "id": "US-017",
+      "title": "Document webpack .cjs exception in CLAUDE.md",
+      "description": "As a maintainer, I need to document why webpack configs MUST use .cjs (Nx requirement).",
+      "acceptanceCriteria": [
+        "Add section to CLAUDE.md explaining Nx webpack plugin limitation",
+        "Document that webpack.config.cjs is a KNOWN EXCEPTION, not a violation",
+        "Reference the progress.txt Codebase Patterns entry",
+        "Update scripts/ralph/progress.txt with the pattern",
+        "npm run lint passes"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": "This is documentation only. No code changes needed. The .cjs is required by Nx's @nx/webpack plugin using require()."
+    },
+    {
+      "id": "US-018",
+      "title": "Create shared type definitions library",
+      "description": "As a developer, I need a centralized location for shared TypeScript types.",
+      "acceptanceCriteria": [
+        "Create libs/types/src/ directory",
+        "Create api.types.ts with ApiResponse<T>, RequestWithContext, ServiceError",
+        "Create index.ts exporting all types",
+        "Add tsconfig.lib.json and project.json",
+        "npm run typecheck passes"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": "These types will be used to replace 'any' throughout the codebase."
+    },
+    {
+      "id": "US-019",
+      "title": "Replace 'any' types in app-gateway main.ts",
+      "description": "As a developer, I need proper type definitions instead of 'any' in the gateway entry point.",
+      "acceptanceCriteria": [
+        "Replace req: any, res: any with proper Express types (@types/express)",
+        "Use RequestWithContext from libs/types",
+        "Replace any other 'any' types in main.ts",
+        "npm run typecheck passes on app-gateway",
+        "npm run lint passes"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": "This is the main entry point. Proper types here set the pattern for the rest of the codebase."
+    },
+    {
+      "id": "US-020",
+      "title": "Replace 'any' types in test utilities",
+      "description": "As a developer, I need proper type definitions in test helper files.",
+      "acceptanceCriteria": [
+        "Fix apps/app-gateway/test/utils/schema-validator.ts 'any' types",
+        "Create proper type for YAML parsing results",
+        "Fix any other test utility 'any' types",
+        "npm run typecheck passes",
+        "npm run test passes"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": "Test utilities often use 'any' as shortcut. Proper types improve test reliability."
+    },
+    {
+      "id": "US-021",
+      "title": "Create base NATS service class in libs/service-base",
+      "description": "As a developer, I need a reusable base class for NATS microservice communication.",
+      "acceptanceCriteria": [
+        "Create libs/service-base/src/base-nats.service.ts",
+        "Implement connection management, subscription handling, error handling, retry logic",
+        "Add proper TypeScript types (no 'any')",
+        "Create index.ts and project.json",
+        "npm run typecheck passes",
+        "Add CLAUDE.md documenting usage patterns"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": "This base class will eliminate duplicated NATS code across 4+ microservices. Focus on common patterns only."
+    },
+    {
+      "id": "US-022",
+      "title": "Refactor resume-parser-svc NATS service to use base class",
+      "description": "As a developer, I need to eliminate duplicated NATS code in resume-parser service.",
+      "acceptanceCriteria": [
+        "Refactor apps/resume-parser-svc/src/services/resume-parser-nats.service.ts to extend BaseNatsService",
+        "Remove duplicated connection/subscription/error handling code",
+        "Keep only parser-specific logic",
+        "npm run test passes for resume-parser-svc",
+        "npm run lint passes"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": "After US-021 is complete. Verify service still connects to NATS properly."
+    },
+    {
+      "id": "US-023",
+      "title": "Refactor jd-extractor-svc NATS service to use base class",
+      "description": "As a developer, I need to eliminate duplicated NATS code in jd-extractor service.",
+      "acceptanceCriteria": [
+        "Refactor apps/jd-extractor-svc/src/services/jd-extractor-nats.service.ts to extend BaseNatsService",
+        "Remove duplicated connection/subscription/error handling code",
+        "Keep only extractor-specific logic",
+        "npm run test passes for jd-extractor-svc",
+        "npm run lint passes"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": "After US-021 is complete. Follow same pattern as US-022."
+    },
+    {
+      "id": "US-024",
+      "title": "Refactor scoring-engine-svc NATS service to use base class",
+      "description": "As a developer, I need to eliminate duplicated NATS code in scoring-engine service.",
+      "acceptanceCriteria": [
+        "Refactor apps/scoring-engine-svc/src/services/scoring-engine-nats.service.ts to extend BaseNatsService",
+        "Remove duplicated connection/subscription/error handling code",
+        "Keep only scoring-specific logic",
+        "npm run test passes for scoring-engine-svc",
+        "npm run lint passes"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": "After US-021 is complete. Follow same pattern as US-022."
+    },
+    {
+      "id": "US-025",
+      "title": "Refactor report-generator-svc NATS service to use base class",
+      "description": "As a developer, I need to eliminate duplicated NATS code in report-generator service.",
+      "acceptanceCriteria": [
+        "Refactor apps/report-generator-svc/src/services/report-generator-nats.service.ts to extend BaseNatsService",
+        "Remove duplicated connection/subscription/error handling code",
+        "Keep only generator-specific logic",
+        "npm run test passes for report-generator-svc",
+        "npm run lint passes"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": "After US-021 is complete. Follow same pattern as US-022. Last NATS service to refactor."
+    },
+    {
+      "id": "US-026",
+      "title": "Create shared error handler utility",
+      "description": "As a developer, I need centralized error handling to eliminate duplicated try-catch patterns.",
+      "acceptanceCriteria": [
+        "Create libs/shared-utils/src/error-handler.util.ts",
+        "Implement asyncErrorBoundary wrapper for async functions",
+        "Implement standardized error response format",
+        "Add proper TypeScript types",
+        "npm run typecheck passes",
+        "Add CLAUDE.md documenting usage patterns"
+      ],
+      "priority": 26,
+      "passes": false,
+      "notes": "This utility will be used across all services. Start with common patterns, don't over-engineer."
+    },
+    {
+      "id": "US-027",
+      "title": "Create shared validation utility",
+      "description": "As a developer, I need common validation functions to eliminate duplicated validation code.",
+      "acceptanceCriteria": [
+        "Create libs/shared-utils/src/validation.util.ts",
+        "Implement email validation, phone validation, ID validation",
+        "Implement schema validation helper",
+        "Add proper TypeScript types",
+        "npm run typecheck passes"
+      ],
+      "priority": 27,
+      "passes": false,
+      "notes": "Focus on validations that are used in multiple places. Domain-specific validations stay in domain services."
+    },
+    {
+      "id": "US-028",
+      "title": "Split mobile-results.component.ts - extract display logic",
+      "description": "As a developer, I need to break down the 1504-line mobile-results component.",
+      "acceptanceCriteria": [
+        "Create mobile-results-display.component.ts for result display logic",
+        "Move display-related template and logic to new component",
+        "Update mobile-results.component.ts to use new component",
+        "Original component reduced by ~300 lines",
+        "npm run typecheck passes",
+        "npm run test passes"
+      ],
+      "priority": 28,
+      "passes": false,
+      "notes": "First step in breaking down 1504-line component. Focus on cohesive display functionality."
+    },
+    {
+      "id": "US-029",
+      "title": "Split mobile-results.component.ts - extract filter logic",
+      "description": "As a developer, I need to separate filtering concerns from results component.",
+      "acceptanceCriteria": [
+        "Create mobile-results-filter.component.ts for filtering UI/logic",
+        "Move filter-related template and logic to new component",
+        "Update mobile-results.component.ts to use new component",
+        "Original component reduced by ~200 lines",
+        "npm run typecheck passes",
+        "npm run test passes"
+      ],
+      "priority": 29,
+      "passes": false,
+      "notes": "After US-028. Filters are a separate concern and should be isolated."
+    },
+    {
+      "id": "US-030",
+      "title": "Split mobile-results.component.ts - extract business logic to service",
+      "description": "As a developer, I need to move business logic out of the component into a service.",
+      "acceptanceCriteria": [
+        "Create mobile-results.service.ts",
+        "Move data fetching, transformation, state management logic to service",
+        "Component becomes thin orchestrator",
+        "Original component reduced by ~400 lines",
+        "npm run typecheck passes",
+        "npm run test passes"
+      ],
+      "priority": 30,
+      "passes": false,
+      "notes": "After US-029. Business logic doesn't belong in components. Service should be testable independently."
+    },
+    {
+      "id": "US-031",
+      "title": "Split mobile-dashboard.component.ts - extract stats cards",
+      "description": "As a developer, I need to break down the 1359-line mobile-dashboard component.",
+      "acceptanceCriteria": [
+        "Create dashboard-stats.component.ts for statistics display",
+        "Move stats-related template and logic to new component",
+        "Update mobile-dashboard.component.ts to use new component",
+        "Original component reduced by ~300 lines",
+        "npm run typecheck passes",
+        "npm run test passes"
+      ],
+      "priority": 31,
+      "passes": false,
+      "notes": "First step in breaking down 1359-line component. Stats are a self-contained concern."
+    },
+    {
+      "id": "US-032",
+      "title": "Split mobile-dashboard.component.ts - extract charts",
+      "description": "As a developer, I need to separate chart visualization concerns.",
+      "acceptanceCriteria": [
+        "Create dashboard-charts.component.ts for chart display",
+        "Move chart-related template and logic to new component",
+        "Update mobile-dashboard.component.ts to use new component",
+        "Original component reduced by ~400 lines",
+        "npm run typecheck passes",
+        "npm run test passes"
+      ],
+      "priority": 32,
+      "passes": false,
+      "notes": "After US-031. Charts are complex and deserve their own component."
+    },
+    {
+      "id": "US-033",
+      "title": "Split mobile-dashboard.component.ts - extract business logic to service",
+      "description": "As a developer, I need to move business logic out of the dashboard component.",
+      "acceptanceCriteria": [
+        "Create mobile-dashboard.service.ts",
+        "Move data fetching, aggregation, state management logic to service",
+        "Component becomes thin orchestrator (<200 lines)",
+        "npm run typecheck passes",
+        "npm run test passes"
+      ],
+      "priority": 33,
+      "passes": false,
+      "notes": "After US-032. Component should only handle UI concerns. Final step for dashboard refactoring."
+    },
+    {
+      "id": "US-034",
+      "title": "Split user-management.service.ts - extract CRUD operations",
+      "description": "As a developer, I need to break down the 800+ line user-management service.",
+      "acceptanceCriteria": [
+        "Create user-crud.service.ts for basic CRUD operations",
+        "Move create, read, update, delete methods to new service",
+        "UserManagementService becomes facade, delegating to UserCrudService",
+        "Original service reduced by ~200 lines",
+        "npm run typecheck passes",
+        "npm run test passes"
+      ],
+      "priority": 34,
+      "passes": false,
+      "notes": "First step in breaking down 800+ line service. CRUD is a natural boundary."
+    },
+    {
+      "id": "US-035",
+      "title": "Split user-management.service.ts - extract authentication logic",
+      "description": "As a developer, I need to separate authentication concerns from user management.",
+      "acceptanceCriteria": [
+        "Create user-auth.service.ts for authentication operations",
+        "Move login, logout, token validation methods to new service",
+        "UserManagementService uses UserAuthService for auth operations",
+        "Original service reduced by ~150 lines",
+        "npm run typecheck passes",
+        "npm run test passes"
+      ],
+      "priority": 35,
+      "passes": false,
+      "notes": "After US-034. Authentication is a separate concern and should be isolated."
+    },
+    {
+      "id": "US-036",
+      "title": "Consolidate environment files to standard pattern",
+      "description": "As a maintainer, I need to simplify the confusing array of environment files.",
+      "acceptanceCriteria": [
+        "Keep only .env.example as template",
+        "Document use of NODE_ENV for environment switching",
+        "Remove or consolidate .env.production.example, .env.test, .env.development",
+        "Update documentation on environment configuration",
+        "npm run lint passes"
+      ],
+      "priority": 36,
+      "passes": false,
+      "notes": "Too many env files cause confusion. Use NODE_ENV=development|production|test to switch contexts."
+    },
+    {
+      "id": "US-037",
+      "title": "Add missing development scripts to package.json",
+      "description": "As a developer, I need convenient scripts for common development tasks.",
+      "acceptanceCriteria": [
+        "Add 'dev' script to run all services in parallel",
+        "Add 'dev:gateway' script for API gateway only",
+        "Add 'dev:frontend' script for Angular dev server",
+        "Add 'lint:fix' script for auto-fixing lint issues",
+        "Add 'clean' script to reset build cache",
+        "All scripts work correctly"
+      ],
+      "priority": 37,
+      "passes": false,
+      "notes": "Scripts make development easier. Use nx run-many for parallel execution."
+    },
+    {
+      "id": "US-038",
+      "title": "Create environment variable validation utility",
+      "description": "As a developer, I need clear error messages when required environment variables are missing.",
+      "acceptanceCriteria": [
+        "Create libs/config-validator/src/ with env validator",
+        "Implement validation for required env vars on startup",
+        "Provide clear error messages listing missing vars",
+        "Add type-safe env access functions",
+        "npm run typecheck passes",
+        "Add CLAUDE.md documenting required env vars"
+      ],
+      "priority": 38,
+      "passes": false,
+      "notes": "Prevents silent failures. List all required env vars by service (gateway, frontend, microservices)."
+    },
+    {
+      "id": "US-039",
+      "title": "Update root CLAUDE.md with new patterns and conventions",
+      "description": "As a maintainer, I need to document all new patterns for future AI agents.",
+      "acceptanceCriteria": [
+        "Add section on module system (ESM with documented .cjs exceptions)",
+        "Add section on file organization (scripts/, config/, docs/)",
+        "Add section on type safety requirements (no 'any' policy)",
+        "Add section on component size limits (<500 lines)",
+        "Add section on base class usage (BaseNatsService, etc.)"
+      ],
+      "priority": 39,
+      "passes": false,
+      "notes": "Documentation is critical for AI-coding-friendliness. Update AFTER implementing patterns, not before."
+    },
+    {
+      "id": "US-040",
+      "title": "Create CLAUDE.md for mobile components directory",
+      "description": "As a maintainer, I need to document patterns specific to mobile components.",
+      "acceptanceCriteria": [
+        "Create apps/ai-recruitment-frontend/src/app/components/mobile/CLAUDE.md",
+        "Document component splitting patterns",
+        "Document service patterns for business logic",
+        "Document mobile-specific UI patterns",
+        "Document testing approach for mobile components"
+      ],
+      "priority": 40,
+      "passes": false,
+      "notes": "After US-030, US-033. Document the patterns established during refactoring."
+    },
+    {
+      "id": "US-041",
+      "title": "Create CLAUDE.md for domain services",
+      "description": "As a maintainer, I need to document patterns specific to domain services.",
+      "acceptanceCriteria": [
+        "Create apps/app-gateway/src/domains/CLAUDE.md",
+        "Document service facading pattern",
+        "Document CRUD service extraction pattern",
+        "Document auth service separation pattern",
+        "Document error handling patterns"
+      ],
+      "priority": 41,
+      "passes": false,
+      "notes": "After US-035. Document the patterns established during service refactoring."
+    },
+    {
+      "id": "US-042",
+      "title": "Update progress.txt with consolidated Codebase Patterns",
+      "description": "As a maintainer, I need to consolidate all learnings into progress.txt for future iterations.",
+      "acceptanceCriteria": [
+        "Review scripts/ralph/progress.txt Codebase Patterns section",
+        "Add patterns from module system work",
+        "Add patterns from service base class work",
+        "Add patterns from component splitting work",
+        "Add patterns from type safety work",
+        "All patterns are general and reusable"
+      ],
+      "priority": 42,
+      "passes": false,
+      "notes": "This is the LAST story to complete. Do after all other stories to consolidate learnings."
+    },
+    {
+      "id": "US-043",
+      "title": "Final quality gate verification",
+      "description": "As a maintainer, I need to verify all quality gates pass after all changes.",
+      "acceptanceCriteria": [
+        "npm run lint passes (all 23 projects)",
+        "npm run typecheck passes with zero errors",
+        "npm run build passes (all services)",
+        "npm run test passes (all tests)",
+        "npm run test:smoke passes",
+        "npm run validate:contracts:ci passes",
+        "npm audit --audit-level=moderate passes (0 vulnerabilities)",
+        "npm run test:e2e passes"
+      ],
+      "priority": 43,
+      "passes": false,
+      "notes": "FINAL verification story. Run after all other stories complete. Document any remaining warnings."
     }
   ]
 }
