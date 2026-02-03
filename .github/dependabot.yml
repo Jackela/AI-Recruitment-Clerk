@@ -29,11 +29,18 @@ updates:
     versioning-strategy: "increase"
     # Group minor and patch updates together
     groups:
+      # Security updates grouped for fast remediation
+      security-updates:
+        dependency-type: "all"
+        update-types:
+          - "security"
+      # Development dependencies grouped to reduce noise
       development-dependencies:
         dependency-type: "development"
         update-types:
           - "minor"
           - "patch"
+      # Production patch updates grouped (safer than minors)
       production-dependencies:
         dependency-type: "production"
         update-types:
