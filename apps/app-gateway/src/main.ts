@@ -6,6 +6,8 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app/app.module';
 import { ProductionSecurityValidator } from './common/security/production-security-validator';
+import compression from 'compression';
+import type { Request, Response } from 'express';
 
 async function bootstrap(): Promise<void> {
   // Fail-fast env validation
@@ -108,8 +110,7 @@ async function bootstrap(): Promise<void> {
   const server = app.getHttpAdapter().getInstance();
   server.set('trust proxy', 1);
   server.disable('x-powered-by');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  server.use((req: any, res: any, next: () => void) => {
+  server.use((req: Request, res: Response, next: () => void) => {
     req.setTimeout(30000, () => {
       res.status(408).json({
         error: 'Request timeout',
@@ -120,13 +121,11 @@ async function bootstrap(): Promise<void> {
     next();
   });
   if (process.env.ENABLE_COMPRESSION === 'true') {
-    const compression = require('compression');
     server.use(
       compression({
         level: 6,
         threshold: 1024,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        filter: (req: any, res: any) => {
+        filter: (req: Request, res: Response) => {
           if (req.headers['x-no-compression']) return false;
           return compression.filter(req, res);
         },
