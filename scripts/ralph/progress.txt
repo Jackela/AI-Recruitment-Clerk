@@ -39,3 +39,13 @@ Started: 2026-02-03
   - Initialize error variables with defaults to avoid non-null assertions
 ---
 
+## 2026-02-03 - US-002
+- What was implemented: Fixed TypeScript lint issues in 2 e2e manager files
+- Files changed:
+  - port-manager.ts: Remove 4 unused catch variable names (`error`, `netstatError`, `lsofError`)
+  - robust-cleanup.ts: Remove 2 unused catch variable names (`error`)
+- **Learnings for future iterations:**
+  - For catch blocks that don't use the error variable, use empty catch `catch {` instead of `catch (error)` or `catch (_error)`
+  - This is the simplest approach when the catch is for "silent" error handling
+---
+

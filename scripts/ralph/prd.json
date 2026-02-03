@@ -25,7 +25,7 @@
       "title": "Fix e2e TypeScript issues - manager files",
       "description": "Fix TypeScript lint issues in port-manager.ts and robust-cleanup.ts",
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Fix port-manager.ts (15 issues: accessibility, unused vars)",
         "Fix robust-cleanup.ts (5 issues: accessibility, unused vars)",
