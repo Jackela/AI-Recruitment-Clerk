@@ -230,8 +230,8 @@
         "Rollback plan documented"
       ],
       "priority": 17,
-      "passes": false,
-      "notes": "Must not replace full CI checks."
+      "passes": true,
+      "notes": "Created jest.smoke.config.cjs with 8 critical projects (3 core libs, 3 domain libs, 2 apps). Runtime ~10-15s vs ~30s for full suite. Created comprehensive docs/TESTING_GUIDE.md explaining when to use each test command. Smoke tests are local-only, CI still runs full suite. Rollback plan in docs/ROLLBACK-US-017.md"
     },
     {
       "id": "US-018",

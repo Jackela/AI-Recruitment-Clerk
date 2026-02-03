@@ -18,6 +18,7 @@
     "postinstall": "echo 'Skipping build in postinstall'",
     "format": "prettier --write \"{apps,libs}/**/*.{ts,html,scss,js,json,md}\"",
     "test": "jest --config jest.config.cjs --passWithNoTests",
+    "test:smoke": "jest --config jest.smoke.config.cjs --passWithNoTests",
     "test:app-gateway": "jest --config jest.config.cjs --passWithNoTests apps/app-gateway",
     "test:ci": "jest --config jest.config.cjs --ci --coverage --passWithNoTests",
     "test:coverage": "jest --config jest.config.cjs --coverage --passWithNoTests",
