@@ -4,10 +4,10 @@ import type {
   UserDto,
   UpdateUserDto,
   UserPreferencesDto,
-  UserActivityDto} from '@ai-recruitment-clerk/user-management-domain';
-import {
+  UserActivityDto,
   UserStatus,
 } from '@ai-recruitment-clerk/user-management-domain';
+import type { UserCrudService } from './user-crud.service';
 
 interface UserActivityResponse {
   activities: UserActivityDto[];
@@ -34,17 +34,28 @@ interface OrganizationUsersResponse {
 }
 
 /**
- * Provides user management functionality.
+ * User Management Service.
+ * A facade that delegates CRUD operations to UserCrudService and provides
+ * additional domain-specific functionality (preferences, activity, etc.).
+ *
+ * This service provides a higher-level abstraction over the basic CRUD operations,
+ * adding domain logic and business rules for user management.
  */
 @Injectable()
 export class UserManagementService {
   /**
    * Initializes a new instance of the User Management Service.
-   * @param userService - The user service.
+   * @param userCrudService - The user CRUD service.
+   * @param userService - The user service (kept for direct access to some methods).
    */
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userCrudService: UserCrudService,
+    private readonly userService: UserService,
+  ) {}
+
   /**
    * Updates user.
+   * Delegates to UserCrudService for the actual update operation.
    * @param userId - The user id.
    * @param updateData - The update data.
    * @returns A promise that resolves to UserDto.
@@ -53,14 +64,7 @@ export class UserManagementService {
     userId: string,
     updateData: UpdateUserDto,
   ): Promise<UserDto> {
-    const updatedUser = await this.userService.updateUser(userId, updateData);
-    if (!updatedUser) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
-    }
-    // Convert to UserDto (remove password)
-    const { password, ...userDto } = updatedUser as InternalUser;
-    void password;
-    return userDto;
+    return this.userCrudService.update(userId, updateData);
   }
 
   /**
@@ -69,6 +73,12 @@ export class UserManagementService {
    * @returns A promise that resolves to UserPreferencesDto.
    */
   public async getUserPreferences(userId: string): Promise<UserPreferencesDto> {
+    // Verify user exists first
+    const exists = await this.userCrudService.exists(userId);
+    if (!exists) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
     // Mock implementation - in real app this would be in a separate preferences service
     return {
       userId,
@@ -92,9 +102,9 @@ export class UserManagementService {
     userId: string,
     preferences: UserPreferencesDto,
   ): Promise<UserPreferencesDto> {
-    // Mock implementation - in real app this would update preferences in database
-    const user = await this.userService.findById(userId);
-    if (!user) {
+    // Verify user exists first
+    const exists = await this.userCrudService.exists(userId);
+    if (!exists) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
@@ -120,7 +130,7 @@ export class UserManagementService {
       limit?: number;
     },
   ): Promise<UserActivityResponse> {
-    const user = await this.userService.findById(userId);
+    const user = await this.userCrudService.findById(userId);
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
@@ -146,37 +156,33 @@ export class UserManagementService {
       summary: {
         totalActivities: mockActivities.length,
         recentLogins: 1,
-        lastActivity:
-          (user as InternalUser).lastActivity || new Date(),
+        lastActivity: new Date(),
       },
     };
   }
 
   /**
    * Retrieves user profile.
+   * Delegates to UserCrudService for the actual lookup.
    * @param userId - The user id.
    * @returns A promise that resolves to UserDto.
    */
   public async getUserProfile(userId: string): Promise<UserDto> {
-    const user = await this.userService.findById(userId);
+    const user = await this.userCrudService.findById(userId);
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
-
-    // Convert to UserDto (remove password)
-    const { password, ...userDto } = user as InternalUser;
-    void password;
-    return userDto;
+    return user;
   }
 
   /**
    * Retrieves user activity summary.
    * @param userId - The user id.
-   * @returns A promise that resolves to any.
+   * @returns A promise that resolves to activity summary.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async getUserActivitySummary(userId: string): Promise<any> {
-    const user = await this.userService.findById(userId);
+    const user = await this.userCrudService.findById(userId);
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
@@ -184,18 +190,17 @@ export class UserManagementService {
     return {
       userId,
       totalLogins: 1,
-      lastLoginDate:
-        (user as InternalUser).lastActivity || new Date(),
+      lastLoginDate: new Date(),
       totalActivities: 1,
       averageSessionDuration: 30,
       mostActiveHour: 14,
-      lastActivity:
-        (user as InternalUser).lastActivity || new Date(),
+      lastActivity: new Date(),
     };
   }
 
   /**
    * Updates user profile.
+   * Delegates to UserCrudService for the actual update.
    * @param userId - The user id.
    * @param updateData - The update data.
    * @returns A promise that resolves to UserDto.
@@ -204,36 +209,35 @@ export class UserManagementService {
     userId: string,
     updateData: UpdateUserDto,
   ): Promise<UserDto> {
-    return this.updateUser(userId, updateData);
+    return this.userCrudService.update(userId, updateData);
   }
 
   /**
    * Removes user.
+   * Delegates to UserCrudService for the actual deletion.
    * @param userId - The user id.
    * @returns A promise that resolves when the operation completes.
    */
   public async deleteUser(userId: string): Promise<void> {
-    await this.userService.deleteUser(userId);
+    await this.userCrudService.delete(userId);
   }
 
   /**
    * Performs the soft delete user operation.
+   * Delegates to UserCrudService for the actual soft delete.
    * @param userId - The user id.
    * @param reason - The reason.
    * @returns A promise that resolves when the operation completes.
    */
-  public async softDeleteUser(userId: string, _reason?: string): Promise<void> {
-    await this.userService.updateUser(userId, {
-      status: UserStatus.INACTIVE,
-      updatedAt: new Date(),
-    });
+  public async softDeleteUser(userId: string, reason?: string): Promise<void> {
+    await this.userCrudService.softDelete(userId, reason);
   }
 
   /**
    * Retrieves organization users.
    * @param organizationId - The organization id.
    * @param options - The options.
-   * @returns A promise that resolves to { users: UserDto[]; totalCount: number }.
+   * @returns A promise that resolves to paginated organization users.
    */
   public async getOrganizationUsers(
     organizationId: string,
@@ -245,26 +249,19 @@ export class UserManagementService {
       status?: UserStatus;
     },
   ): Promise<OrganizationUsersResponse> {
-    let users = await this.userService.findByOrganizationId(organizationId);
+    let users = await this.userCrudService.listByOrganization(organizationId);
 
     // Filter by status if provided
     if (options?.status) {
       users = users.filter((user) => user.status === options.status);
     }
 
-    // Convert to UserDto (remove passwords)
-    const userDtos = users.map((user) => {
-      const { password, ...userDto } = user as InternalUser;
-      void password;
-      return userDto;
-    });
-
-    const totalCount = userDtos.length;
+    const totalCount = users.length;
     const pageSize = options?.limit ?? totalCount;
     const page = options?.page ?? 1;
 
     return {
-      users: userDtos,
+      users,
       totalCount,
       total: totalCount,
       page,
@@ -280,7 +277,7 @@ export class UserManagementService {
    */
   public async verifyUserPassword(userId: string, password: string): Promise<boolean> {
     // This would typically use bcrypt to compare hashed passwords
-    // For testing purposes, we'll do a simple check
+    // For testing purposes, we'll do a simple check via UserService
     const user = await this.userService.findById(userId);
     if (!user) {
       return false;
@@ -297,6 +294,7 @@ export class UserManagementService {
 
   /**
    * Updates user status.
+   * Delegates to UserCrudService for the actual status update.
    * @param userId - The user id.
    * @param status - The status.
    * @param reason - The reason.
@@ -305,26 +303,14 @@ export class UserManagementService {
   public async updateUserStatus(
     userId: string,
     status: UserStatus,
-    _reason?: string,
+    reason?: string,
   ): Promise<UserDto> {
-    const updatedUser = await this.userService.updateUser(userId, {
-      status,
-      updatedAt: new Date(),
-    });
-
-    if (!updatedUser) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
-    }
-
-    // Convert to UserDto (remove password)
-    const { password, ...userDto } = updatedUser as InternalUser;
-    void password;
-    return userDto;
+    return this.userCrudService.updateStatus(userId, status, reason);
   }
 
   /**
    * Retrieves health status.
-   * @returns The Promise<{ status: string; totalUsers: number; activeUsers: number; recentActivity: number; }>.
+   * @returns Health status information.
    */
   public async getHealthStatus(): Promise<{
     status: string;
