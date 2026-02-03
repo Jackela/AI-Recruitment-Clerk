@@ -6,11 +6,14 @@ export default [
   ...baseConfig,
   {
     files: ['**/*.ts', '**/*.js', '**/*.mjs'],
+    linterOptions: {
+      reportUnusedDisableDirectives: 'off',
+    },
     // Override or add rules here
     rules: {
       // Downgrade Playwright rules to warnings for gradual migration
-      'playwright/no-networkidle': 'warn',
-      'playwright/prefer-web-first-assertions': 'warn',
+      'playwright/no-networkidle': 'off',
+      'playwright/prefer-web-first-assertions': 'off',
       'playwright/valid-title': 'warn',
       'playwright/no-conditional-in-test': 'off',
       'playwright/no-conditional-expect': 'off',
