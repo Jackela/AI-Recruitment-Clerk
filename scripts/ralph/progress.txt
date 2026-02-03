@@ -398,3 +398,24 @@ Options documented in CI-BLOCKING-ISSUE.md
 - The root directory is now clean with only essential project files
 
 ---
+
+## [2026-02-04 01:05] - US-015
+- **CONVERTED**: main.ts require() to ESM import
+- Replaced `require('compression')` with `import compression from 'compression'`
+- Added `import type { Request, Response } from 'express'`
+- Fixed 'any' types in Express middleware (req: any → Request, res: any → Response)
+- Verified `type: module` is set in package.json (line 5)
+- Quality gates verified: build (pass), lint (pass)
+
+**Files changed:**
+- apps/app-gateway/src/main.ts (converted require to ESM import, fixed types)
+- scripts/ralph/prd.json (marked US-015 passes: true)
+
+**Learnings for future iterations:**
+- The main.ts file had only one require() call for compression package
+- Converting to ESM also allowed fixing the 'any' types with proper Express types
+- compression package is a CommonJS module but can be imported via ESM (Node handles this)
+- type:module was already set in package.json, so no changes needed there
+- Using import type for type-only imports keeps the bundle size smaller
+
+---
