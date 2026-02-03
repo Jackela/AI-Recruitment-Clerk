@@ -9,6 +9,8 @@ Started: Tue Feb  3 19:15:59     2026
 - **Batch Verification**: Run lint + typecheck + build together before committing to ensure all quality gates pass.
 - **GitHub Actions SHA Pinning**: Always pin actions to commit SHAs, not version tags. Use GitHub API to get SHAs: `curl -s https://api.github.com/repos/{owner}/{repo}/git/refs/tags/{tag} | jq -r '.object.sha'`
 - **YAML Validation**: Use Python to validate workflow YAML syntax: `python -c "import yaml; [yaml.safe_load(open(f)) for f in sys.argv[1:]]" .github/workflows/*.yml`
+- **ESLint Flat Config**: Project uses eslint.config.mjs (flat config) instead of .eslintrc.json. All ignore patterns should go in the `ignores` array, not in .eslintignore.
+- **Nx Module Tags**: Libraries use tags like `scope:shared`, `scope:domain`, `type:lib`, `type:utils`, `layer:contracts`, `layer:infrastructure`. Applications typically have empty tag arrays. Module boundary rules should use these tags for enforcement.
 
 ## 2026-02-03 - US-001
 - What was implemented: Verified existing ESM webpack.config.js works correctly; no code changes needed
@@ -165,4 +167,55 @@ Started: Tue Feb  3 19:15:59     2026
   - No runtime impact - only affects how Dependabot creates PRs, not application behavior
   - Rollback plan includes 3 options: git revert, manual patch removal, configuration-only rollback
   - Alternative solution documented: Renovate bot if Dependabot doesn't meet requirements
+---
+
+## 2026-02-03 - US-013
+- What was implemented: Added repository health metadata including LICENSE fix and SUPPORT.md creation
+- Files changed:
+  - Updated: README.md (fixed license reference from ISC to MIT)
+  - Created: SUPPORT.md (comprehensive support documentation)
+  - Created: docs/ROLLBACK-US-013.md (comprehensive rollback plan)
+  - Updated: scripts/ralph/prd.json (marked US-013 as passing)
+- **Learnings for future iterations:**
+  - SECURITY.md already had comprehensive disclosure guidance - no changes needed
+  - LICENSE file is MIT, but README.md incorrectly referenced ISC - this was a documentation bug
+  - SUPPORT.md should include: documentation links, support channels, issue reporting guidelines, community guidelines, development support, enterprise support, troubleshooting, and service health endpoints
+  - GitHub standard metadata files include: README.md, LICENSE, SECURITY.md, SUPPORT.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md
+  - SUPPORT.md is important for open source projects to provide clear guidance on how to get help
+  - Documentation-only changes don't require lint/typecheck since they're Markdown files
+  - Use relative links with .md extension for local file references: [MIT License](./LICENSE)
+  - Support documentation should list response times for different support channels
+  - Include troubleshooting common issues with copy-pasteable commands
+  - Reference existing templates and documentation to maintain consistency
+  - Keep documentation concise and linkable - avoid duplication
+  - Rollback plans for documentation changes are straightforward (git revert or manual file deletion)
+
+## 2026-02-03 - US-014
+- What was implemented: Migrated .eslintignore patterns to eslint.config.mjs and enhanced module boundaries
+- Files changed:
+  - Updated: eslint.config.mjs (added ignore patterns, enhanced module boundary constraints)
+  - Deleted: .eslintignore (all patterns migrated to eslint.config.mjs)
+  - Created: docs/ROLLBACK-US-014.md (comprehensive rollback plan)
+  - Updated: scripts/ralph/prd.json (marked US-014 as passing)
+- **Learnings for future iterations:**
+  - ESLint flat config (eslint.config.mjs) is the modern standard that replaces both .eslintrc and .eslintignore
+  - All ignore patterns from .eslintignore were: node_modules/, dist/, build/, coverage/, *.min.js, e2e/, .nx/, tmp/, temp/, out/
+  - eslint.config.mjs already had: **/dist, **/node_modules, **/coverage, **/test-results, **/.nx, **/jest-html-reporters-attach
+  - Added missing patterns: **/build, **/*.min.js, **/e2e, **/tmp, **/temp, **/out
+  - Module boundaries rule @nx/enforce-module-boundaries was present but too permissive ('*' can depend on '*')
+  - Enhanced with tag-based constraints to prevent unsafe cross-module imports
+  - Libraries use tags: scope:shared, scope:domain, type:app, type:lib, type:utils, layer:contracts, layer:infrastructure
+  - Applications have empty tag arrays or no tags at all
+  - New constraints:
+    - type:app can depend on any library (applications need flexibility)
+    - scope:shared can only depend on scope:shared or type:utils (shared libs should be lightweight)
+    - scope:domain can depend on scope:shared, type:utils, scope:domain, layer:contracts (domains can use shared + other domains)
+    - layer:contracts can only depend on type:utils (contracts should have minimal dependencies)
+    - type:utils can depend on anything (utility functions are standalone)
+  - All constraints are set to 'warn' level, not 'error', to avoid breaking builds
+  - Catch-all rule (sourceTag: '*') ensures untagged projects don't get unexpected errors
+  - Lint passes for all 23 projects: 8 apps, 14 libs, 1 e2e
+  - Module boundaries help prevent circular dependencies and enforce clean architecture
+  - Tag-based constraints are more maintainable than path-based constraints
+  - When adding new libraries, remember to add appropriate tags in project.json
 ---
