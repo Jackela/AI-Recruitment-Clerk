@@ -16,6 +16,7 @@ Started: 2026-02-03
 - Playwright tests: Replace `networkidle` with `domcontentloaded` or `load` wait states
 - Playwright tests: Replace conditionals in tests with proper test structure or `test.skip()` for conditional skip
 - Playwright tests: Replace conditional expects with proper assertions using `toBeVisible()`, `toHaveCount()`, etc.
+- Playwright tests: For conditionals that check count before accessing elements, use `.catch(() => 'N/A')` pattern for graceful handling
 - For empty function methods (no-ops), add a comment inside the function body instead of using eslint-disable
 - Use `import type { X }` for type-only imports to satisfy @typescript-eslint/consistent-type-imports
 - Initialize variables with default values instead of using non-null assertions (e.g., `let lastError: Error = new Error('default')` instead of `let lastError: Error` with `throw lastError!`)
@@ -77,5 +78,15 @@ Started: 2026-02-03
   - Ternary operators also trigger `no-conditional-in-test` rule - avoid them in test code
   - For diagnostic logging, use unconditional console.log with the computed value (e.g., `console.log('status:', hasValue)`) instead of conditional if/else blocks
   - Each spec file needs its own `delay()` helper function since it's file-scoped
+---
+
+## 2026-02-03 - US-006
+- What was implemented: Fixed Playwright lint issues in debug-selectors.spec.ts
+- Files changed:
+  - debug-selectors.spec.ts: Added `delay()` helper, replaced `networkidle` with `domcontentloaded`, replaced `page.waitForTimeout()` with `delay()`, replaced conditional with `.catch()` pattern
+- **Learnings for future iterations:**
+  - For conditionals that check element count before accessing, use `.catch(() => 'N/A')` pattern to handle empty results gracefully
+  - This avoids both `if` conditionals and ternary operators in tests while still handling missing elements
+  - Cast caught errors to Error type: `(error as Error).message`
 ---
 
