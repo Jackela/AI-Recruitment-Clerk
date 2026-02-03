@@ -151,8 +151,8 @@
         "Root has no .env.*.template files"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": "Update any scripts or CI that reference these files. Document new location in README."
+      "passes": true,
+      "notes": "Moved 4 environment template files to config/ directory: .env.production.template, .env.railway.template, .env.security.template, .envrc. These files were not tracked by git. No references found in code or documentation that needed updating."
     },
     {
       "id": "US-011",

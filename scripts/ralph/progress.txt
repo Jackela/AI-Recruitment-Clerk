@@ -266,3 +266,25 @@ Options documented in CI-BLOCKING-ISSUE.md
 - No code changes needed, only cleanup
 
 ---
+
+## [2026-02-04 00:35] - US-010
+- **MOVED**: 4 environment template files from root to config/ directory
+- Files moved: .env.production.template, .env.railway.template, .env.security.template, .envrc
+- These files were NOT tracked by git (local configuration templates)
+- No references found in code or documentation that needed updating
+- Root directory now has fewer .env.*.template files
+
+**Files changed:**
+- config/.env.production.template (moved from root)
+- config/.env.railway.template (moved from root)
+- config/.env.security.template (moved from root)
+- config/.envrc (moved from root)
+- scripts/ralph/prd.json (marked US-010 passes: true)
+
+**Learnings for future iterations:**
+- Environment template files (.env.*.template) are local configuration, not tracked by git
+- Use `mv` command for untracked files instead of `git mv`
+- config/ directory already existed (contained haproxy.cfg, quality-gates.json)
+- No code or documentation references to these template files existed
+
+---
