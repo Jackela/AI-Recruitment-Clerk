@@ -10,7 +10,7 @@ test.describe('PDF UAT - Real File', () => {
     page,
   }) => {
     const root = process.cwd();
-    const jdPath = path.resolve(root, 'UAT_Architect_JD.txt');
+    const jdPath = path.resolve(root, 'docs', 'recruitment', 'UAT_Architect_JD.txt');
     const pdfPath = path.resolve(root, '简历.pdf');
 
     expect(fs.existsSync(jdPath)).toBeTruthy();

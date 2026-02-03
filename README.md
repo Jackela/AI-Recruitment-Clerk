@@ -589,7 +589,7 @@ scripts\run-e2e-tests.bat     # Windows
 
 ## 📖 Deployment Documentation
 
-- [**🚀 Deployment Guide**](./DEPLOYMENT_GUIDE.md) - Complete deployment instructions
+- [**🚀 Deployment Guide**](./docs/deployment/DEPLOYMENT_GUIDE.md) - Complete deployment instructions
 - [**📚 Documentation Hub**](./docs/DOCUMENTATION_INDEX.md) - Comprehensive documentation navigation
 
 ## 🎉 System Integration Status

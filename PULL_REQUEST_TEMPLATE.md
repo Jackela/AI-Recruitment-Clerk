@@ -137,7 +137,7 @@ All services use multi-stage builds with security hardening:
 - `scripts/start-system.*` - Cross-platform startup scripts
 - `scripts/validate-system.*` - System health validation scripts
 - `scripts/run-e2e-tests.*` - E2E testing automation scripts
-- `DEPLOYMENT_GUIDE.md` - Comprehensive deployment documentation
+- `docs/deployment/DEPLOYMENT_GUIDE.md` - Comprehensive deployment documentation
 - `SYSTEM_INTEGRATION_REPORT.md` - Technical implementation report
 
 ### Modified Files

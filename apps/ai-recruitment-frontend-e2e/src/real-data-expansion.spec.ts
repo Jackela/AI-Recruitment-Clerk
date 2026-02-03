@@ -47,7 +47,7 @@ const PERFORMANCE_THRESHOLDS = {
 // Paths configuration
 const PATHS = {
   resumesDir: path.resolve(__dirname, 'test-data', 'resumes'),
-  jdFile: path.resolve(__dirname, '..', 'UAT_Architect_JD.txt'),
+  jdFile: path.resolve(__dirname, '..', '..', '..', 'docs', 'recruitment', 'UAT_Architect_JD.txt'),
   coachPath: '/coach',
 };
 

@@ -56,7 +56,7 @@ test.describe('PDF Processing Variety Tests', () => {
     page,
   }) => {
     // Fix path resolution - tests run from e2e directory context
-    const jdPath = path.resolve('UAT_Architect_JD.txt');
+    const jdPath = path.resolve('..', '..', '..', 'docs', 'recruitment', 'UAT_Architect_JD.txt');
     const multiPagePdfPath = path.resolve('multi-page-resume.pdf');
 
     // Verify test artifacts exist
@@ -181,7 +181,7 @@ test.describe('PDF Processing Variety Tests', () => {
     page,
   }) => {
     // Fix path resolution - tests run from e2e directory context
-    const jdPath = path.resolve('UAT_Architect_JD.txt');
+    const jdPath = path.resolve('..', '..', '..', 'docs', 'recruitment', 'UAT_Architect_JD.txt');
     const imagePdfPath = path.resolve('image-only-resume.pdf');
 
     // Verify test artifacts exist
