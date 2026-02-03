@@ -507,8 +507,8 @@
         "npm run test passes"
       ],
       "priority": 33,
-      "passes": false,
-      "notes": "After US-032. Component should only handle UI concerns. Final step for dashboard refactoring."
+      "passes": true,
+      "notes": "Completed. Created MobileDashboardService with BehaviorSubject-based state management. Component now thin orchestrator (~200 lines for class logic, templates/styles kept). Service handles data aggregation, refresh logic, state management. Uses same RxJS pattern as MobileResultsService from US-030."
     },
     {
       "id": "US-034",
@@ -523,8 +523,8 @@
         "npm run test passes"
       ],
       "priority": 34,
-      "passes": false,
-      "notes": "First step in breaking down 800+ line service. CRUD is a natural boundary."
+      "passes": true,
+      "notes": "Completed. Created UserCrudService for basic CRUD operations (findById, findByEmail, update, delete, softDelete, updateStatus, list, listByOrganization). UserManagementService now facade that delegates to UserCrudService. Original service was already well-structured (~344 lines), so reduction was modest. CRUD operations are now isolated for reuse."
     },
     {
       "id": "US-035",
@@ -539,8 +539,8 @@
         "npm run test passes"
       ],
       "priority": 35,
-      "passes": false,
-      "notes": "After US-034. Authentication is a separate concern and should be isolated."
+      "passes": true,
+      "notes": "Completed. Created UserAuthService for user-scoped authentication operations. Moved verifyUserPassword from UserManagementService to UserAuthService. Added new methods: isUserActive, validateAuthentication, requiresPasswordChange, recordSuccessfulAuth, recordFailedAuth, getLastAuthActivity. Authentication is now isolated from CRUD and general user management. Service layering: UserCrudService (CRUD) → UserAuthService (Auth) → UserManagementService (Facade)."
     },
     {
       "id": "US-036",
@@ -554,8 +554,8 @@
         "npm run lint passes"
       ],
       "priority": 36,
-      "passes": false,
-      "notes": "Too many env files cause confusion. Use NODE_ENV=development|production|test to switch contexts."
+      "passes": true,
+      "notes": "Completed. Enhanced .env.example with NODE_ENV documentation. Added missing variables from other env files. Moved .railway.env.example to config/deployment/ (platform-specific). Removed redundant .env.production.example. Updated CONTRIBUTING.md to use .env.local instead of .env.development. Use NODE_ENV=development|production|test to switch contexts."
     },
     {
       "id": "US-037",
