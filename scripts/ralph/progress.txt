@@ -72,4 +72,22 @@ Started: Tue Feb  3 19:15:59     2026
   - SECURITY.md is the right place for vulnerability documentation and risk acceptance
   - `npm audit fix --force` is risky - can introduce breaking changes
   - Always test with `npm run ci:local` after any dependency changes
+
+## 2026-02-03 - US-005
+- What was implemented: Aligned local pre-push checks with CI by updating ci:local script
+- Files changed:
+  - Created: docs/ROLLBACK-US-005.md (comprehensive rollback plan)
+  - Updated: package.json (changed ci:local script)
+  - Updated: scripts/ralph/prd.json (marked US-005 as passing)
+- **Learnings for future iterations:**
+  - Previous ci:local was: `npm run build && node tools/ci/verify-quality-gates.mjs && node tools/ci/pii-scan.mjs`
+  - New ci:local is: `npm run test && npm run lint && npm run typecheck && npm run build`
+  - Husky pre-push hook at `.husky/pre-push` was already correctly configured
+  - Pre-push hook correctly skips delete-only pushes (checks if SHA is all zeros)
+  - CONTRIBUTING.md lines 64-72 already documented the pre-push behavior
+  - New sequence matches CI job order: test → lint → typecheck → build
+  - Benefits: CI parity, explicit commands, easier debugging, AI-friendly, fail fast
+  - Runtime: ~2 minutes total (test 30s + lint 20s + typecheck 15s + build 45s)
+  - Can bypass pre-push with `HUSKY=0 git push` for emergencies
+  - Custom scripts (verify-quality-gates.mjs, pii-scan.mjs) removed from ci:local for clarity
 ---
