@@ -8,6 +8,7 @@ import type {
   UserStatus,
 } from '@ai-recruitment-clerk/user-management-domain';
 import type { UserCrudService } from './user-crud.service';
+import type { UserAuthService } from './user-auth.service';
 
 interface UserActivityResponse {
   activities: UserActivityDto[];
@@ -20,11 +21,6 @@ interface UserActivityResponse {
   };
 }
 
-type InternalUser = UserDto & {
-  password?: string;
-  lastActivity?: Date;
-};
-
 interface OrganizationUsersResponse {
   users: UserDto[];
   totalCount: number;
@@ -35,10 +31,11 @@ interface OrganizationUsersResponse {
 
 /**
  * User Management Service.
- * A facade that delegates CRUD operations to UserCrudService and provides
- * additional domain-specific functionality (preferences, activity, etc.).
+ * A facade that delegates CRUD operations to UserCrudService and authentication
+ * operations to UserAuthService, while providing additional domain-specific
+ * functionality (preferences, activity, etc.).
  *
- * This service provides a higher-level abstraction over the basic CRUD operations,
+ * This service provides a higher-level abstraction over the basic CRUD and auth operations,
  * adding domain logic and business rules for user management.
  */
 @Injectable()
@@ -46,10 +43,12 @@ export class UserManagementService {
   /**
    * Initializes a new instance of the User Management Service.
    * @param userCrudService - The user CRUD service.
+   * @param userAuthService - The user authentication service.
    * @param userService - The user service (kept for direct access to some methods).
    */
   constructor(
     private readonly userCrudService: UserCrudService,
+    private readonly userAuthService: UserAuthService,
     private readonly userService: UserService,
   ) {}
 
@@ -271,25 +270,13 @@ export class UserManagementService {
 
   /**
    * Performs the verify user password operation.
+   * Delegates to UserAuthService for the actual password verification.
    * @param userId - The user id.
    * @param password - The password.
    * @returns A promise that resolves to boolean value.
    */
   public async verifyUserPassword(userId: string, password: string): Promise<boolean> {
-    // This would typically use bcrypt to compare hashed passwords
-    // For testing purposes, we'll do a simple check via UserService
-    const user = await this.userService.findById(userId);
-    if (!user) {
-      return false;
-    }
-
-    // In real implementation, use bcrypt.compare(password, user.password)
-    const userWithSensitive = user as InternalUser;
-    return (
-      password === 'test-password' ||
-      userWithSensitive.password === password ||
-      userWithSensitive.password?.includes('admin123') === true
-    );
+    return this.userAuthService.verifyPassword(userId, password);
   }
 
   /**
