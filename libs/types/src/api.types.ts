@@ -130,7 +130,7 @@ export function err<E extends ServiceError>(error: E): Result<never, E> {
 export function successResponse<T>(
   data: T,
   message?: string,
-  statusCode: number = 200,
+  statusCode = 200,
 ): ApiResponse<T> {
   return {
     success: true,
@@ -147,7 +147,7 @@ export function successResponse<T>(
 export function errorResponse(
   code: string,
   message: string,
-  statusCode: number = 500,
+  statusCode = 500,
   details?: Record<string, unknown>,
 ): ErrorResponse {
   return {
