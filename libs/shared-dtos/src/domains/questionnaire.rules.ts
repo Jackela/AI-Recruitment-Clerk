@@ -78,7 +78,7 @@ export class QuestionnaireRules {
     const businessValue = submission.getBusinessValue();
 
     // 检查必填字段
-    if (!profile || !profile.role) {
+    if (!profile || !profile.role || profile.role === 'other') {
       errors.push('Required field missing: userProfile.role');
     }
 
@@ -86,11 +86,19 @@ export class QuestionnaireRules {
       errors.push('Required field missing: userProfile.industry');
     }
 
-    if (!experience || !experience.overallSatisfaction) {
+    if (
+      !experience ||
+      !experience.overallSatisfaction ||
+      experience.overallSatisfaction === 1
+    ) {
       errors.push('Required field missing: userExperience.overallSatisfaction');
     }
 
-    if (!businessValue || !businessValue.currentScreeningMethod) {
+    if (
+      !businessValue ||
+      !businessValue.currentScreeningMethod ||
+      businessValue.currentScreeningMethod === 'manual'
+    ) {
       errors.push(
         'Required field missing: businessValue.currentScreeningMethod',
       );

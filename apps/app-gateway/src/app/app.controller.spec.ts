@@ -78,7 +78,12 @@ describe('AppController (mocked)', () => {
   it('returns welcome payload with ISO timestamp', () => {
     const { controller } = createController();
 
-    const result = controller.getWelcome();
+    const result = controller.getWelcome() as {
+      message: string;
+      documentation: string;
+      status: string;
+      timestamp: string;
+    };
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -101,9 +106,13 @@ describe('AppController (mocked)', () => {
 
   describe('health endpoint', () => {
     it('reports ok when dependencies are healthy', async () => {
-      const { controller, deps } = createController();
+    const { controller, deps } = createController();
 
-      const result = await controller.getHealth();
+      const result = (await controller.getHealth()) as {
+        status: string;
+        database: { status: string };
+        features: { cache: string };
+      };
 
       expect(result.status).toBe('ok');
       expect(deps.cacheService.wrap).toHaveBeenCalledWith(
@@ -126,7 +135,10 @@ describe('AppController (mocked)', () => {
       const loggerSpy = jest
         .spyOn(Logger.prototype, 'error')
         .mockImplementation();
-      const result = await controller.getHealth();
+      const result = (await controller.getHealth()) as {
+        status: string;
+        features: { cache: string };
+      };
 
       expect(result.status).toBe('degraded');
       expect(result.features.cache).toContain('cache offline');
@@ -138,7 +150,9 @@ describe('AppController (mocked)', () => {
     it('returns cache health info when available', async () => {
       const { controller, deps } = createController();
 
-      const result = await controller.getCacheMetrics();
+      const result = (await controller.getCacheMetrics()) as {
+        cache: { status?: string; error?: string; metrics?: unknown };
+      };
 
       expect(result.cache).toEqual({ status: 'healthy' });
       expect(deps.cacheService.healthCheck).toHaveBeenCalled();
@@ -152,7 +166,9 @@ describe('AppController (mocked)', () => {
       const loggerSpy = jest
         .spyOn(Logger.prototype, 'error')
         .mockImplementation();
-      const result = await controller.getCacheMetrics();
+      const result = (await controller.getCacheMetrics()) as {
+        cache: { status?: string; error?: string; metrics?: unknown };
+      };
 
       expect(result.cache).toEqual(
         expect.objectContaining({
@@ -169,7 +185,9 @@ describe('AppController (mocked)', () => {
     it('exposes warmup status from service', async () => {
       const { controller, deps } = createController();
 
-      const result = await controller.getCacheWarmupStatus();
+      const result = (await controller.getCacheWarmupStatus()) as {
+        warmupStatus: { status?: string };
+      };
 
       expect(deps.cacheWarmupService.getRefreshStatus).toHaveBeenCalled();
       expect((result.warmupStatus as any).status).toBe('idle');
@@ -178,13 +196,18 @@ describe('AppController (mocked)', () => {
     it('handles warmup trigger success and failure', async () => {
       const { controller, deps } = createController();
 
-      const success = await controller.triggerCacheWarmup();
+      const success = (await controller.triggerCacheWarmup()) as {
+        warmupResult?: { status?: string };
+        error?: string;
+      };
       expect(success.warmupResult?.status).toBe('started');
 
       deps.cacheWarmupService.triggerWarmup.mockRejectedValue(
         new Error('boom'),
       );
-      const failure = await controller.triggerCacheWarmup();
+      const failure = (await controller.triggerCacheWarmup()) as {
+        error?: string;
+      };
       expect(failure.error).toBe('boom');
     });
   });

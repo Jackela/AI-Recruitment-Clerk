@@ -119,7 +119,7 @@ describe('IncentiveDomainService', () => {
       );
 
       expect(result.success).toBe(false);
-      expect(result.errors).toContain(expect.stringContaining('Quality score must be at least'));
+      expect(result.errors?.join(' ')).toContain('Quality score must be at least');
     });
 
     it('should handle repository errors gracefully', async () => {
@@ -382,13 +382,13 @@ describe('IncentiveDomainService', () => {
         '192.168.1.1',
         'quest_1',
         85,
-        new ContactInfo({ wechat: 'test1' }),
+        new ContactInfo({ wechat: 'wechat01' }),
       );
       const incentive2 = Incentive.createQuestionnaireIncentive(
         '192.168.1.2',
         'quest_2',
         85,
-        new ContactInfo({ wechat: 'test2' }),
+        new ContactInfo({ wechat: 'wechat02' }),
       );
 
       mockRepository.findByIds.mockResolvedValue([incentive1, incentive2]);

@@ -1,7 +1,11 @@
 import { UnauthorizedException } from '@nestjs/common';
 import type { ConfigService } from '@nestjs/config';
+import type { Model } from 'mongoose';
 import { MfaService } from './mfa.service';
 import { MfaMethod } from '../dto/mfa.dto';
+import type { EmailService } from './email.service';
+import type { SmsService } from './sms.service';
+import { UserProfile } from '../../schemas/user-profile.schema';
 
 const createConfigService = () =>
   ({
@@ -24,18 +28,18 @@ describe('MfaService (focused unit tests)', () => {
   let service: MfaService;
   let userModel: ReturnType<typeof createUserModel>;
   let configService: jest.Mocked<ConfigService>;
-  const emailService = { sendMfaToken: jest.fn() } as unknown as { sendMfaToken: jest.Mock };
-  const smsService = { sendSms: jest.fn() } as unknown as { sendSms: jest.Mock };
+  const emailService = { sendMfaToken: jest.fn() } as unknown as EmailService;
+  const smsService = { sendSms: jest.fn() } as unknown as SmsService;
 
   beforeEach(() => {
     jest.clearAllMocks();
     userModel = createUserModel();
     configService = createConfigService();
     service = new MfaService(
-      userModel as unknown as Parameters<typeof MfaService.prototype.constructor>[0],
+      userModel as unknown as Model<UserProfile>,
       configService,
-      emailService as unknown as Parameters<typeof MfaService.prototype.constructor>[2],
-      smsService as unknown as Parameters<typeof MfaService.prototype.constructor>[3],
+      emailService,
+      smsService,
     );
     // Avoid timers in tests
     (service as unknown as Record<string, jest.Mock>).storeTemporaryToken = jest.fn();

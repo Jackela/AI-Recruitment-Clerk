@@ -4,6 +4,12 @@ import type { GuestUsageService } from '../services/guest-usage.service';
 import type { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
 import type { GridFsService } from '../../services/gridfs.service';
 import type { RequestWithDeviceId } from '../guards/guest.guard';
+type MulterFile = {
+  originalname: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+};
 
 describe('GuestResumeController (lightweight)', () => {
   const usageService = {
@@ -35,7 +41,7 @@ describe('GuestResumeController (lightweight)', () => {
     mimetype: 'application/pdf',
     size: 1024,
     buffer: Buffer.from('pdf'),
-  } as unknown as Express.Multer.File;
+  } as unknown as MulterFile;
 
   const buildController = () =>
     new GuestResumeController(usageService, natsClient, gridFsService);

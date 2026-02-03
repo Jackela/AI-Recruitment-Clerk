@@ -41,7 +41,24 @@ describe('QuestionnaireRules', () => {
       },
     };
 
-    const mergedData = { ...defaultData, ...overrides };
+    const mergedData = {
+      ...defaultData,
+      ...overrides,
+      userProfile: { ...defaultData.userProfile, ...overrides?.userProfile },
+      userExperience: {
+        ...defaultData.userExperience,
+        ...overrides?.userExperience,
+      },
+      businessValue: {
+        ...defaultData.businessValue,
+        ...overrides?.businessValue,
+      },
+      featureNeeds: {
+        ...defaultData.featureNeeds,
+        ...overrides?.featureNeeds,
+      },
+      optional: { ...defaultData.optional, ...overrides?.optional },
+    };
     return QuestionnaireSubmission.fromRawData(mergedData);
   };
 
@@ -101,9 +118,18 @@ describe('QuestionnaireRules', () => {
     });
 
     it('should return false when completion rate is below 80%', () => {
-      const submission = createMockSubmission({
-        userProfile: { role: undefined },
-        businessValue: { willingnessToPayMonthly: 0 },
+      const submission = QuestionnaireSubmission.fromRawData({
+        userProfile: {
+          role: 'other',
+          industry: '',
+        },
+        userExperience: {
+          overallSatisfaction: 1,
+        },
+        businessValue: {
+          currentScreeningMethod: 'manual',
+          willingnessToPayMonthly: 0,
+        },
       });
       const result = QuestionnaireRules.isHighQualitySubmission(submission);
       expect(result).toBe(false);
