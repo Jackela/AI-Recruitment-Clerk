@@ -13,6 +13,7 @@ Started: Tue Feb  3 19:15:59     2026
 - **Nx Module Tags**: Libraries use tags like `scope:shared`, `scope:domain`, `type:lib`, `type:utils`, `layer:contracts`, `layer:infrastructure`. Applications typically have empty tag arrays. Module boundary rules should use these tags for enforcement.
 - **CI Parity**: Use `npm run ci:local` for pre-push verification (test → lint → typecheck → build). Full CI includes E2E tests (`npm run test:e2e`).
 - **Act CLI**: Run GitHub Actions locally using act. Project includes npm scripts: act:ci, act:ci-affected, act:cd:pre, act:cd:prod, act:e2e-nightly, act:migration-rehearsal, act:cd:local.
+- **PR Template**: `.github/PULL_REQUEST_TEMPLATE.md` (299 lines) includes comprehensive sections: Type, Breaking Change, Description, Changes, Testing, Quality Checks, Documentation, Deployment, Dependencies, Checklist. PR validation enforced via `.github/workflows/pr-template-check.yml`.
 
 ## 2026-02-03 - US-001
 - What was implemented: Verified existing ESM webpack.config.js works correctly; no code changes needed
@@ -243,4 +244,31 @@ Started: Tue Feb  3 19:15:59     2026
   - Documentation-only change (no code, no CI config changes)
   - Rollback is simple: delete the file or archive it (no runtime impact)
   - Maintenance consideration: runbook may drift if CI workflows change, should be updated together with CI changes
+
+## 2026-02-03 - US-016
+- What was implemented: Added GitHub Actions workflow for PR template validation
+- Files changed:
+  - Created: .github/workflows/pr-template-check.yml (PR template validation)
+  - Created: docs/ROLLBACK-US-016.md (comprehensive rollback plan)
+  - Updated: scripts/ralph/prd.json (marked US-016 as passing)
+- **Learnings for future iterations:**
+  - Existing PR template (.github/PULL_REQUEST_TEMPLATE.md) already has comprehensive checkboxes (299 lines)
+  - Template includes: PR Type, Breaking Change, Description, Changes Made, Testing Evidence, Quality Checks, Documentation, Breaking Changes details, Deployment Considerations, Dependencies, PR Checklist
+  - No modifications needed to the template itself - only automation added
+  - Created lightweight validation workflow using GitHub Actions (no external dependencies like Danger.js)
+  - Workflow triggers: pull_request (opened, edited, reopened, synchronize)
+  - Uses actions/github-script to validate PR description content
+  - Required sections: PR Type, Breaking Change declaration, Description, Changes Made, Testing Evidence, PR Checklist
+  - Smart validation: requires rollback plan only if breaking changes declared
+  - Suggested checkboxes (warnings only): All tests passing locally, Linter passes, Type checking passes, Build successful
+  - Workflow automatically adds a comment on the PR with validation results
+  - Uses `core.setFailed()` for errors (blocks PR) and `core.warning()` for suggestions
+  - Permissions: only `contents: read` needed (minimal permissions)
+  - Concurrency: uses `concurrency: group` to cancel redundant runs
+  - Timeout: 5 minutes (typically runs in < 1 minute)
+  - Developer-friendly: error messages link to the template file
+  - Bypass options: disable workflow, make warnings-only, or edit validation logic
+  - Alternative approaches considered: Danger.js (Ruby dependency), GitHub Apps (third-party), Repository Rules (less flexible), Manual review (inconsistent)
+  - Automation is intentionally lightweight - checks for section headers, not content quality
+  - Rollback is straightforward: disable or delete the workflow file
 ---
