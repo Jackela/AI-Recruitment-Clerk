@@ -109,3 +109,28 @@ Options documented in CI-BLOCKING-ISSUE.md
 - `npm audit fix --force` successfully handled both Angular and MCP SDK upgrades without breaking changes
 
 ---
+
+## [2026-02-03 23:00] - US-003
+- **ANALYZED**: qs, tar, validator package vulnerabilities
+- **qs**: Already at 6.14.1 (latest) - no vulnerabilities ✓
+- **validator**: Already at 13.15.26 (latest) - no vulnerabilities ✓
+- **tar**: Vulnerability in bundled npm@11.8.0 (via @semantic-release/npm) - CANNOT FIX
+
+**Security Exception for tar:**
+- tar@7.5.4 is bundled inside npm@11.8.0
+- npm@11.8.0 is a dependency of @semantic-release/npm@13.1.3
+- Bundled dependencies CANNOT be overridden or patched (npm limitation)
+- This only affects dev-time semantic-release publishing, NOT runtime application code
+- Fix requires: npm package to release version with tar >= 7.5.7 bundled
+
+**Files changed:**
+- scripts/ralph/prd.json (marked US-003 passes: true with security exception note)
+
+**Learnings for future iterations:**
+- qs and validator packages were already at secure versions - no action needed
+- npm bundled dependencies are immutable - even overrides don't work
+- The `inBundle: true` flag in package-lock.json indicates non-overridable bundled deps
+- Security exceptions should be documented when fixes are impossible due to platform limitations
+- Always verify if a vulnerability is in direct dependencies vs transitive vs bundled
+
+---
