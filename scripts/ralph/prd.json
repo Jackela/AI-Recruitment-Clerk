@@ -1,337 +1,252 @@
 {
-  "branchName": "feature/production-ready-refactor",
-  "qualityChecks": "npm run typecheck && npm run lint",
+  "project": "AI-Recruitment-Clerk",
+  "branchName": "ralph/repo-hygiene-ci",
+  "description": "Repo-wide CI/E2E stabilization and AI-friendly workflow hardening. Goal: every change is small, verifiable (tests/lint/typecheck), and rollbackable, with CI as the source of truth.",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Fix e2e TypeScript issues - utility files",
-      "description": "Fix TypeScript lint issues in e2e utility files (non-spec)",
+      "title": "Fix Nx project graph failure (ESM webpack config)",
+      "description": "As a developer, I need Nx to load app config reliably so CI lint/build/test jobs do not fail at graph generation.",
+      "acceptanceCriteria": [
+        "Resolve ESM/CJS mismatch in apps/app-gateway/webpack.config.js without breaking runtime",
+        "npm run lint passes",
+        "npm run typecheck passes",
+        "npm run build passes",
+        "Rollback plan documented"
+      ],
       "priority": 1,
       "passes": true,
-      "acceptanceCriteria": [
-        "Fix browser-stability.ts (1 non-null assertion)",
-        "Fix cleanup-ports.mjs (3 unused vars)",
-        "Fix global-setup.ts (1 return type)",
-        "Fix global-teardown.ts (2 issues)",
-        "Fix mock-server.ts (9 issues)",
-        "Fix monitoring-system.mjs (1 unused var)",
-        "Fix optimized-test-runner.mjs (1 unused var)",
-        "Fix test-hooks.ts (4 any types)"
-      ],
-      "technicalNotes": []
+      "notes": "ESM webpack.config.js is working correctly. Rollback plan documented in docs/ROLLBACK-US-001.md"
     },
     {
       "id": "US-002",
-      "title": "Fix e2e TypeScript issues - manager files",
-      "description": "Fix TypeScript lint issues in port-manager.ts and robust-cleanup.ts",
-      "priority": 2,
-      "passes": true,
+      "title": "Restore API contract validation pipeline",
+      "description": "As a team, I need contract validation to run consistently in CI and locally.",
       "acceptanceCriteria": [
-        "Fix port-manager.ts (15 issues: accessibility, unused vars)",
-        "Fix robust-cleanup.ts (5 issues: accessibility, unused vars)",
-        "npm run typecheck passes"
+        "npm run validate:contracts:ci passes locally",
+        "CI workflow 'API Contract Validation' succeeds on main",
+        "Any required env vars documented in .env.example",
+        "Rollback plan documented"
       ],
-      "technicalNotes": []
+      "priority": 2,
+      "passes": false,
+      "notes": "Must remain deterministic and not rely on external services."
     },
     {
       "id": "US-003",
-      "title": "Fix e2e connection-stability.ts Playwright issues",
-      "description": "Fix Playwright no-wait-for-timeout in connection-stability.ts",
-      "priority": 3,
-      "passes": true,
+      "title": "Fix dependency gate inventory for semantic release",
+      "description": "As a release pipeline, I need a stable dependency inventory file and deterministic gate evaluation.",
       "acceptanceCriteria": [
-        "Replace page.waitForTimeout() with proper waiting strategies",
-        "Use expect().toBeVisible() or page.waitForLoadState() instead"
+        "data/security/dependency-inventory.json exists or is generated before gate",
+        "scripts/dependency-gate.mjs runs successfully",
+        "CI workflow 'Semantic Release' passes dependency gate",
+        "Rollback plan documented"
       ],
-      "technicalNotes": []
+      "priority": 3,
+      "passes": false,
+      "notes": "If generated, add a clear, reproducible command in docs."
     },
     {
       "id": "US-004",
-      "title": "Fix e2e hydration.ts Playwright issues",
-      "description": "Fix Playwright no-wait-for-selector in test-utils/hydration.ts",
-      "priority": 4,
-      "passes": true,
+      "title": "Remediate npm audit vulnerabilities or document exceptions",
+      "description": "As a maintainer, I need dependency security scanning to pass or be explicitly risk-accepted.",
       "acceptanceCriteria": [
-        "Replace page.waitForSelector() with locator-based waiting",
-        "Use page.locator().waitFor() instead"
+        "High and moderate vulnerabilities reduced to zero where feasible",
+        "If exceptions are required, document risk and expiry in SECURITY.md",
+        "npm audit (or dependency scan job) passes thresholds in CI",
+        "Rollback plan documented"
       ],
-      "technicalNotes": []
+      "priority": 4,
+      "passes": false,
+      "notes": "Prefer upgrades/overrides over allowlists."
     },
     {
       "id": "US-005",
-      "title": "Fix console-errors.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in console-errors.spec.ts",
-      "priority": 5,
-      "passes": true,
+      "title": "Align local pre-push checks with CI (AI-friendly constraints)",
+      "description": "As a developer using AI, I want local checks to mirror CI to prevent regressions before PR.",
       "acceptanceCriteria": [
-        "Fix no-conditional-in-test (3 issues)",
-        "Fix no-wait-for-timeout (1 issue)"
+        "npm run ci:local includes test → lint → typecheck (and build if required)",
+        "Husky pre-push runs ci:local and skips on delete-only pushes",
+        "README or CONTRIBUTING.md lists exact local verification commands",
+        "Rollback plan documented"
       ],
-      "technicalNotes": []
+      "priority": 5,
+      "passes": false,
+      "notes": "Keep runtime reasonable but non-negotiable for correctness."
     },
     {
       "id": "US-006",
-      "title": "Fix debug-selectors.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in debug-selectors.spec.ts",
-      "priority": 6,
-      "passes": true,
+      "title": "Stabilize E2E execution for local and CI",
+      "description": "As QA, I need E2E to be deterministic with explicit server lifecycle and no hidden flakiness.",
       "acceptanceCriteria": [
-        "Fix no-networkidle (1 issue)",
-        "Fix no-wait-for-timeout (1 issue)",
-        "Fix no-conditional-in-test (1 issue)"
+        "npm run test:e2e passes locally",
+        "CI 'ci' E2E step succeeds",
+        "No reliance on arbitrary timeouts; use explicit waits",
+        "Rollback plan documented"
       ],
-      "technicalNotes": []
+      "priority": 6,
+      "passes": false,
+      "notes": "Prefer explicit wait conditions and controlled server startup/shutdown."
     },
     {
       "id": "US-007",
-      "title": "Fix debug-user-flow.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in debug-user-flow.spec.ts",
-      "priority": 7,
-      "passes": true,
+      "title": "Harden GitHub Actions workflows",
+      "description": "As a repo, I need CI workflows to be secure, fast, and deterministic.",
       "acceptanceCriteria": [
-        "Fix no-networkidle (5 issues)",
-        "Fix no-wait-for-timeout (2 issues)",
-        "Fix no-conditional-in-test (4 issues)"
+        "Minimal permissions on all workflows",
+        "Cache npm where appropriate",
+        "Concurrency cancels redundant runs per branch",
+        "Rollback plan documented"
       ],
-      "technicalNotes": []
+      "priority": 7,
+      "passes": false,
+      "notes": "Do not introduce non-deterministic steps."
     },
     {
       "id": "US-008",
-      "title": "Fix deep-console-debug.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in deep-console-debug.spec.ts",
-      "priority": 8,
-      "passes": true,
+      "title": "AI-coding friendly contribution workflow",
+      "description": "As a maintainer, I want AI-assisted changes to be small, verifiable, and easy to review.",
       "acceptanceCriteria": [
-        "Fix no-networkidle (1 issue)",
-        "Fix no-wait-for-timeout (1 issue)",
-        "Fix no-conditional-in-test (2 issues)"
+        "PR template requires: change list, risks, rollback, tests run",
+        "CONTRIBUTING.md includes: single-issue change policy and local verification",
+        "Document minimal change rule and review checklist"
       ],
-      "technicalNotes": []
+      "priority": 8,
+      "passes": false,
+      "notes": "This encodes strong constraints for stable AI-assisted delivery."
     },
     {
       "id": "US-009",
-      "title": "Fix detailed-job-creation.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in detailed-job-creation.spec.ts",
-      "priority": 9,
-      "passes": true,
+      "title": "Introduce CODEOWNERS and review coverage",
+      "description": "As a maintainer, I want critical areas to require review from the right owners.",
       "acceptanceCriteria": [
-        "Fix no-networkidle (2 issues)",
-        "Fix no-wait-for-timeout (2 issues)"
+        "Add .github/CODEOWNERS with ownership for apps/, libs/, and workflows",
+        "Document review expectations in CONTRIBUTING.md",
+        "Rollback plan documented"
       ],
-      "technicalNotes": []
+      "priority": 9,
+      "passes": false,
+      "notes": "Owners can be placeholders if team map is not final."
     },
     {
       "id": "US-010",
-      "title": "Fix diagnostic.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in diagnostic.spec.ts",
-      "priority": 10,
-      "passes": true,
+      "title": "Add issue templates for bug/feature/ops",
+      "description": "As contributors, we need structured issue intake to reduce ambiguity.",
       "acceptanceCriteria": [
-        "Fix no-networkidle (2 issues)",
-        "Fix no-wait-for-timeout (2 issues)"
+        "Add .github/ISSUE_TEMPLATE/bug_report.yml",
+        "Add .github/ISSUE_TEMPLATE/feature_request.yml",
+        "Add .github/ISSUE_TEMPLATE/ops_task.yml",
+        "Rollback plan documented"
       ],
-      "technicalNotes": []
+      "priority": 10,
+      "passes": false,
+      "notes": "Keep templates short and enforce acceptance criteria and repro steps."
     },
     {
       "id": "US-011",
-      "title": "Fix error-scenarios.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in error-scenarios.spec.ts",
-      "priority": 11,
-      "passes": true,
+      "title": "Pin GitHub Actions to commit SHA",
+      "description": "As a security-conscious repo, I want actions pinned to immutable SHAs.",
       "acceptanceCriteria": [
-        "Fix no-conditional-in-test (5 issues)",
-        "Fix no-conditional-expect (5 issues)"
+        "All actions in .github/workflows are pinned to full SHA",
+        "Document update process in SECURITY.md",
+        "Rollback plan documented"
       ],
-      "technicalNotes": []
+      "priority": 11,
+      "passes": false,
+      "notes": "Use official release SHAs; avoid floating tags."
     },
     {
       "id": "US-012",
-      "title": "Fix essential-compatibility.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in essential-compatibility.spec.ts",
-      "priority": 12,
-      "passes": true,
+      "title": "Add Dependabot or Renovate for dependency hygiene",
+      "description": "As a maintainer, I want automated dependency updates with safe grouping.",
       "acceptanceCriteria": [
-        "Fix no-conditional-in-test (2 issues)",
-        "Fix no-conditional-expect (7 issues)",
-        "Fix prefer-web-first-assertions (2 issues)"
+        "Add .github/dependabot.yml or renovate.json",
+        "Group patch updates and security updates",
+        "Document policy in CONTRIBUTING.md"
       ],
-      "technicalNotes": []
+      "priority": 12,
+      "passes": false,
+      "notes": "Prefer Dependabot unless Renovate is already standard."
     },
     {
       "id": "US-013",
-      "title": "Fix firefox-stability-test.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in firefox-stability-test.spec.ts",
-      "priority": 13,
-      "passes": true,
+      "title": "Add repository health metadata",
+      "description": "As a repo, I want standard metadata to improve discoverability and contribution quality.",
       "acceptanceCriteria": [
-        "Fix no-skipped-test (3 issues)",
-        "Fix no-networkidle (3 issues)",
-        "Fix no-conditional-in-test (2 issues)",
-        "Fix no-wait-for-timeout (1 issue)"
+        "Add SECURITY.md guidance for disclosures (if missing or outdated)",
+        "Add SUPPORT.md or update existing support section",
+        "Ensure LICENSE is correct and referenced in README"
       ],
-      "technicalNotes": []
+      "priority": 13,
+      "passes": false,
+      "notes": "Keep docs concise and linkable from README."
     },
     {
       "id": "US-014",
-      "title": "Fix jobs-list-debug.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in jobs-list-debug.spec.ts",
-      "priority": 14,
-      "passes": true,
+      "title": "Tighten lint/format boundaries and module boundaries",
+      "description": "As a developer, I want lint rules to prevent unsafe cross-module imports.",
       "acceptanceCriteria": [
-        "Fix no-networkidle (2 issues)",
-        "Fix no-wait-for-timeout (2 issues)",
-        "Fix no-conditional-in-test (1 issue)",
-        "Fix unused var win (1 issue)"
+        "@nx/enforce-module-boundaries is configured for libs/apps",
+        "eslint ignores moved from .eslintignore to eslint.config.mjs if needed",
+        "npm run lint passes"
       ],
-      "technicalNotes": []
+      "priority": 14,
+      "passes": false,
+      "notes": "Avoid noisy or non-actionable linting."
     },
     {
       "id": "US-015",
-      "title": "Fix mock-server-test.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in mock-server-test.spec.ts",
-      "priority": 15,
-      "passes": true,
+      "title": "Establish CI parity runbook",
+      "description": "As a developer, I want a single place that maps CI jobs to local commands.",
       "acceptanceCriteria": [
-        "Fix no-networkidle (2 issues)",
-        "Fix no-wait-for-timeout (4 issues)",
-        "Fix no-conditional-in-test (8 issues)",
-        "Fix no-conditional-expect (5 issues)",
-        "Fix unused vars (2 issues)"
+        "Add docs/CI_RUNBOOK.md (or update existing docs) mapping each workflow to local commands",
+        "Include expected runtime and prerequisites",
+        "Rollback plan documented"
       ],
-      "technicalNotes": []
+      "priority": 15,
+      "passes": false,
+      "notes": "Should be AI-friendly and copy-pasteable."
     },
     {
       "id": "US-016",
-      "title": "Fix pdf-variety-uat.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in pdf-variety-uat.spec.ts",
-      "priority": 16,
-      "passes": true,
+      "title": "Add PR checklist automation",
+      "description": "As a maintainer, I want PRs to fail fast if required fields are missing.",
       "acceptanceCriteria": [
-        "Fix no-wait-for-timeout (5 issues)",
-        "Fix no-conditional-in-test (6 issues)",
-        "Fix unused vars (4 issues)"
+        "PR template includes required checkboxes for tests/risks/rollback",
+        "Add a GitHub Action or Danger-style check to enforce PR template sections",
+        "Rollback plan documented"
       ],
-      "technicalNotes": []
+      "priority": 16,
+      "passes": false,
+      "notes": "Keep enforcement lightweight to avoid developer friction."
     },
     {
       "id": "US-017",
-      "title": "Fix real-data-expansion.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in real-data-expansion.spec.ts",
-      "priority": 17,
-      "passes": true,
+      "title": "Add task-level smoke tests for fast feedback",
+      "description": "As a developer, I want a quick smoke test suite for local iteration.",
       "acceptanceCriteria": [
-        "Fix no-networkidle (1 issue)",
-        "Fix no-wait-for-timeout (1 issue)",
-        "Fix valid-title (1 issue)",
-        "Fix unused vars (2 issues)"
+        "Add npm run test:smoke to run a minimal test subset",
+        "Document when to use smoke vs full suite",
+        "Rollback plan documented"
       ],
-      "technicalNotes": []
+      "priority": 17,
+      "passes": false,
+      "notes": "Must not replace full CI checks."
     },
     {
       "id": "US-018",
-      "title": "Fix simple-firefox-test.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in simple-firefox-test.spec.ts",
+      "title": "Finalize green CI on main",
+      "description": "As a maintainer, I need confidence that the repo is fully green after fixes.",
+      "acceptanceCriteria": [
+        "npm run lint passes",
+        "npm run typecheck passes",
+        "npm run test passes",
+        "npm run test:e2e passes",
+        "CI workflows: ci, API Contract Validation, Semantic Release, Security Scan all succeed"
+      ],
       "priority": 18,
-      "passes": true,
-      "acceptanceCriteria": [
-        "Fix no-skipped-test (2 issues)",
-        "Fix no-conditional-in-test (1 issue)",
-        "Fix no-conditional-expect (2 issues)",
-        "Fix prefer-web-first-assertions (1 issue)"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-019",
-      "title": "Fix simple-jobs-page.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in simple-jobs-page.spec.ts",
-      "priority": 19,
       "passes": false,
-      "acceptanceCriteria": [
-        "Fix no-networkidle (2 issues)",
-        "Fix no-wait-for-timeout (2 issues)",
-        "Fix no-conditional-in-test (2 issues)"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-020",
-      "title": "Fix simple-test.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in simple-test.spec.ts",
-      "priority": 20,
-      "passes": false,
-      "acceptanceCriteria": [
-        "Fix no-wait-for-timeout (2 issues)",
-        "Fix no-conditional-in-test (3 issues)",
-        "Fix no-conditional-expect (3 issues)"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-021",
-      "title": "Fix unified-analysis-regression.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in unified-analysis-regression.spec.ts",
-      "priority": 21,
-      "passes": false,
-      "acceptanceCriteria": [
-        "Fix no-conditional-in-test (1 issue)",
-        "Fix no-conditional-expect (1 issue)"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-022",
-      "title": "Fix webkit-final-test.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in webkit-final-test.spec.ts",
-      "priority": 22,
-      "passes": false,
-      "acceptanceCriteria": [
-        "Fix no-skipped-test (5 issues)",
-        "Fix no-conditional-in-test (2 issues)",
-        "Fix no-conditional-expect (5 issues)",
-        "Fix prefer-web-first-assertions (1 issue)",
-        "Fix no-wait-for-timeout (1 issue)"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-023",
-      "title": "Fix webkit-stability-test.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in webkit-stability-test.spec.ts",
-      "priority": 23,
-      "passes": false,
-      "acceptanceCriteria": [
-        "Fix no-skipped-test (3 issues)",
-        "Fix no-conditional-in-test (2 issues)",
-        "Fix no-conditional-expect (4 issues)",
-        "Fix no-wait-for-timeout (1 issue)"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-024",
-      "title": "Fix webkit-static-test.spec.ts lint issues",
-      "description": "Fix Playwright lint issues in webkit-static-test.spec.ts",
-      "priority": 24,
-      "passes": false,
-      "acceptanceCriteria": [
-        "Fix no-skipped-test (4 issues)",
-        "Fix no-conditional-in-test (1 issue)",
-        "Fix no-wait-for-timeout (1 issue)"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-025",
-      "title": "Final validation - all quality checks pass",
-      "description": "Verify npm run typecheck && npm run lint both pass",
-      "priority": 25,
-      "passes": false,
-      "acceptanceCriteria": [
-        "npm run typecheck passes with 0 errors",
-        "npm run lint passes with 0 errors AND 0 warnings"
-      ],
-      "technicalNotes": []
+      "notes": "Run locally first, then verify on GitHub Actions."
     }
   ]
 }
