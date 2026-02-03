@@ -321,8 +321,8 @@
         "Add CLAUDE.md documenting usage patterns"
       ],
       "priority": 21,
-      "passes": false,
-      "notes": "This base class will eliminate duplicated NATS code across 4+ microservices. Focus on common patterns only."
+      "passes": true,
+      "notes": "Created BaseMicroserviceService extending NatsClientService. Connection/subscription management inherited from NatsClientService. Added publishEvent(), publishErrorEvent(), subscribeToEvents(), generateMessageId(), getServiceHealthStatus(), deriveEventType(), categorizeErrorSeverity(). CLAUDE.md documents usage patterns. Connection management already in NatsClientService, so BaseMicroserviceService focuses on domain-service patterns."
     },
     {
       "id": "US-022",

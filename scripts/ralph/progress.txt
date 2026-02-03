@@ -545,3 +545,31 @@ Options documented in CI-BLOCKING-ISSUE.md
 - New libs require tsconfig.base.json path mapping (@ai-recruitment-clerk/library-name)
 - Some 'any' types in tests are appropriate (global as any, test infrastructure, untyped libraries)
 ---
+
+## [2026-02-04 02:00] - US-021
+- **COMPLETED**: Create base NATS service class in libs/service-base
+- Created BaseMicroserviceService abstract class extending NatsClientService
+- Connection/subscription management inherited from existing NatsClientService
+- Added domain-service patterns: publishEvent(), publishErrorEvent(), subscribeToEvents()
+- Added utility methods: generateMessageId(), deriveEventType(), categorizeErrorSeverity()
+- Added getServiceHealthStatus() for consistent health reporting
+- Created CLAUDE.md documenting usage patterns
+- Added @ai-recruitment-clerk/service-base path to tsconfig.base.json
+- Quality gates verified: typecheck (pass), lint (pass)
+
+**Files changed:**
+- libs/service-base/src/base-microservice.service.ts (created - 391 lines)
+- libs/service-base/src/index.ts (created - barrel export)
+- libs/service-base/tsconfig.json (created)
+- libs/service-base/project.json (created)
+- libs/service-base/CLAUDE.md (created - usage documentation)
+- tsconfig.base.json (added service-base path)
+- scripts/ralph/prd.json (marked US-021 passes: true)
+
+**Learnings for future iterations:**
+- NatsClientService in libs/shared-nats-client already handles connection/subscription management
+- BaseMicroserviceService extends it with domain-service patterns (event publishing, error handling)
+- Use microserviceName property instead of serviceName to avoid shadowing base class private property
+- The abstract class pattern ensures services provide domain-specific publish methods
+- serviceLogger provides consistent logging across all microservices
+---
