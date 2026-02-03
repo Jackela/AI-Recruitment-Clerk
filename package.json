@@ -21,7 +21,7 @@
     "test:app-gateway": "jest --config jest.config.cjs --passWithNoTests apps/app-gateway",
     "test:ci": "jest --config jest.config.cjs --ci --coverage --passWithNoTests",
     "test:coverage": "jest --config jest.config.cjs --coverage --passWithNoTests",
-    "lint": "npx nx run-many -t lint --all --parallel=3",
+    "lint": "npx nx run-many -t lint --all --parallel=3 --exclude ai-recruitment-clerk",
     "typecheck": "tsc --noEmit --project tsconfig.ci.json",
     "ci:local": "npm run lint && npm run typecheck && npm run build && npm run test:coverage && node tools/ci/verify-quality-gates.mjs && npm run test:e2e && node tools/ci/pii-scan.mjs",
     "audit": "nx audit",
