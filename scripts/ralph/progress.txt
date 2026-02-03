@@ -11,6 +11,8 @@ Started: Tue Feb  3 19:15:59     2026
 - **YAML Validation**: Use Python to validate workflow YAML syntax: `python -c "import yaml; [yaml.safe_load(open(f)) for f in sys.argv[1:]]" .github/workflows/*.yml`
 - **ESLint Flat Config**: Project uses eslint.config.mjs (flat config) instead of .eslintrc.json. All ignore patterns should go in the `ignores` array, not in .eslintignore.
 - **Nx Module Tags**: Libraries use tags like `scope:shared`, `scope:domain`, `type:lib`, `type:utils`, `layer:contracts`, `layer:infrastructure`. Applications typically have empty tag arrays. Module boundary rules should use these tags for enforcement.
+- **CI Parity**: Use `npm run ci:local` for pre-push verification (test → lint → typecheck → build). Full CI includes E2E tests (`npm run test:e2e`).
+- **Act CLI**: Run GitHub Actions locally using act. Project includes npm scripts: act:ci, act:ci-affected, act:cd:pre, act:cd:prod, act:e2e-nightly, act:migration-rehearsal, act:cd:local.
 
 ## 2026-02-03 - US-001
 - What was implemented: Verified existing ESM webpack.config.js works correctly; no code changes needed
@@ -218,4 +220,27 @@ Started: Tue Feb  3 19:15:59     2026
   - Module boundaries help prevent circular dependencies and enforce clean architecture
   - Tag-based constraints are more maintainable than path-based constraints
   - When adding new libraries, remember to add appropriate tags in project.json
+
+## 2026-02-03 - US-015
+- What was implemented: Created comprehensive CI runbook mapping GitHub Actions workflows to local commands
+- Files changed:
+  - Created: docs/CI_RUNBOOK.md (comprehensive CI-to-local command mapping)
+  - Created: docs/ROLLBACK-US-015.md (comprehensive rollback plan)
+  - Updated: scripts/ralph/prd.json (marked US-015 as passing)
+- **Learnings for future iterations:**
+  - Project has 10 GitHub Actions workflows: ci.yml, ci-affected.yml, contract-validation.yml, security.yml, release.yml, coverage.yml, e2e-nightly.yml, cd.yml, cd-local.yml, migration-rehearsal.yml
+  - Main CI workflow (ci.yml) has 6 jobs: lint, typecheck, build, test_coverage, e2e_smoke, pii_scan
+  - Local equivalent: npm run ci:local (runs test → lint → typecheck → build)
+  - Security workflow has 3 jobs: codeql, dependency-scan, secret-scan (with security-summary)
+  - Contract validation workflow has 3 jobs: validate-contracts, frontend-backend-consistency, security-check
+  - Semantic release workflow includes dependency gate evaluation before release
+  - Runbook structure: Prerequisites → CI Workflows (with tables) → Quick Reference → Debugging → Act CLI → Runtime Expectations → Troubleshooting
+  - Tables format: CI Job | Local Command | Runtime | Description
+  - Act CLI integration allows running GitHub Actions locally (requires installation)
+  - npm run act:ci runs main CI workflow locally using act
+  - Runtime expectations are based on actual CI timeouts and local measurements
+  - Troubleshooting section addresses common issues: MODULE_NOT_FOUND, Nx not found, Playwright errors, TypeScript errors in CI, E2E failures
+  - Documentation-only change (no code, no CI config changes)
+  - Rollback is simple: delete the file or archive it (no runtime impact)
+  - Maintenance consideration: runbook may drift if CI workflows change, should be updated together with CI changes
 ---
