@@ -41,6 +41,7 @@
       "@ai-recruitment-clerk/shared-nats-client": ["libs/shared-nats-client/src/index.ts"],
       "@ai-recruitment-clerk/ai-services-shared": ["libs/ai-services-shared/src/index.ts"],
       "@ai-recruitment-clerk/api-contracts": ["libs/api-contracts/src/index.ts"],
+      "@ai-recruitment-clerk/configuration": ["libs/configuration/src/index.ts"],
       "@ai-recruitment-clerk/candidate-scoring-domain": ["libs/candidate-scoring-domain/src/index.ts"],
       "@ai-recruitment-clerk/incentive-system-domain": ["libs/incentive-system-domain/src/index.ts"],
       "@ai-recruitment-clerk/job-management-domain": ["libs/job-management-domain/src/index.ts"],

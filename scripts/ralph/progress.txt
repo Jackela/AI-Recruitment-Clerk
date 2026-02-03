@@ -992,3 +992,29 @@ Options documented in CI-BLOCKING-ISSUE.md
 - Security flags include: password_reset_required, two_factor_enabled, mfa_enforced
 
 ---
+
+## [2026-02-04 13:00] - US-037
+- **COMPLETED**: Add missing development scripts to package.json
+- Added 5 new development scripts for convenient development:
+  - `dev`: Run app-gateway and ai-recruitment-frontend in parallel using nx run-many
+  - `dev:gateway`: Serve API gateway only (nx serve app-gateway)
+  - `dev:frontend`: Serve Angular frontend only (nx serve ai-recruitment-frontend)
+  - `lint:fix`: Run lint with --fix flag for auto-fixing issues
+  - `clean`: Reset Nx cache and remove build artifacts (nx reset + rm -rf node_modules/.cache dist)
+- Verified all scripts are visible via `npm run`
+- Quality gates verified: typecheck (pass), lint (pass 25 projects)
+- Committed changes to git
+
+**Files changed:**
+- package.json (added 5 new scripts: dev, dev:gateway, dev:frontend, lint:fix, clean)
+- scripts/ralph/prd.json (marked US-037 passes: true)
+
+**Learnings for future iterations:**
+- Use `npx nx run-many -t serve --projects=proj1,proj2 --parallel=N` for running multiple projects
+- The --parallel flag works well for development (3 is a good default for local dev)
+- lint:fix uses --fix flag which applies ESLint auto-fixes across all projects
+- clean script combines nx reset (clears Nx cache) with rm -rf for node_modules/.cache and dist
+- Development scripts follow naming convention: dev:* for serving, lint:fix for fixing, clean for reset
+- npm run (without arguments) lists all available scripts - good for verification
+
+---
