@@ -353,3 +353,30 @@ Options documented in CI-BLOCKING-ISSUE.md
 - When moving docker-compose.yml, update check scripts to use -f flag for new path
 
 ---
+
+## [2026-02-04 00:55] - US-013
+- **MOVED**: 4 deployment configuration files from root to config/deployment/ directory
+- Created config/deployment/ directory
+- Files moved: railway.json, render.yaml, railway-config.json, railway-services.json
+- Updated reference in: docs/PROJECT_STATUS_REPORT.md
+- Root directory now has no railway.json, render.yaml, railway-config.json, or railway-services.json files
+- Railway and Render platforms auto-detect configs in project root or can be configured with custom paths in their dashboards
+
+**Files changed:**
+- config/deployment/railway.json (moved from root)
+- config/deployment/render.yaml (moved from root)
+- config/deployment/railway-config.json (moved from root)
+- config/deployment/railway-services.json (moved from root)
+- docs/PROJECT_STATUS_REPORT.md (updated railway.json reference to config/deployment/railway.json)
+- scripts/ralph/prd.json (marked US-013 passes: true)
+
+**Learnings for future iterations:**
+- Railway and Render platforms typically auto-detect config files (railway.json, render.yaml) in the project root
+- When moving these files to subdirectories, you may need to configure custom paths in the platform dashboard
+- CI workflows (GitHub Actions) don't directly reference these deployment config files
+- The deployment configs are platform-specific (Railway vs Render) - keeping them together makes sense
+- railway.json and railway-config.json are similar (both Railway configs) - can consolidate later if needed
+- railway-services.json defines service architecture for Railway deployment
+- render.yaml defines complete service stack including databases and services for Render
+
+---
