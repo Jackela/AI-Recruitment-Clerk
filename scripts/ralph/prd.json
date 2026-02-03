@@ -120,8 +120,8 @@
         "Add .gitignore entry for *.log if not present"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "These are generated files, safe to delete. Add to .gitignore to prevent future accumulation."
+      "passes": true,
+      "notes": "Deleted 15 log files from root directory: act-ci-summary.log, act-contracts-frontend.log, act-contracts-security.log, act-contracts.log, act-deployment.log, act-security-codeql.log, act-security-deps.log, act-security-secrets.log, act-security-summary.log, act-test-coverage.log, lint-app-gateway.log, lint-clean.log, lint-current.log, lint.log. .gitignore already had *.log entry."
     },
     {
       "id": "US-009",

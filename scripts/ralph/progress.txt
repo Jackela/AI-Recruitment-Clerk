@@ -228,3 +228,23 @@ Options documented in CI-BLOCKING-ISSUE.md
 - Root directory is now cleaner with all scripts organized in scripts/
 
 ---
+
+## [2026-02-04 00:25] - US-008
+- **DELETED**: 15 CI log files from root directory
+- act-*.log files: 10 files (act-ci-summary.log, act-contracts-*.log, act-deployment.log, act-security-*.log, act-test-coverage.log)
+- lint-*.log files: 4 files (lint-app-gateway.log, lint-clean.log, lint-current.log, lint.log)
+- example-run.log: Not found (already deleted)
+- Root directory now has 0 .log files
+- .gitignore already contains *.log entry (no changes needed)
+
+**Files deleted:**
+- 15 log files totaling ~2.4 MB (not tracked by git)
+
+**Learnings for future iterations:**
+- CI log files accumulate over time from act (local GitHub Actions runner)
+- .gitignore already had *.log entry which prevents tracking these files
+- These log files are generated artifacts, safe to delete
+- No code changes needed, only file cleanup
+- Use `rm -f *.log` to delete all log files in a directory
+
+---
