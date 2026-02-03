@@ -753,3 +753,65 @@ Options documented in CI-BLOCKING-ISSUE.md
 - The display component is now reusable in other contexts (e.g., embedded in dashboards)
 
 ---
+
+## [2026-02-04 06:00] - US-029
+- **COMPLETED**: Split mobile-results.component.ts - extracted filter logic
+- Created mobile-results-filter.component.ts (240 lines) for filtering UI/logic
+- Moved filter-related template and logic: score range slider, status chips, experience chips, clear all
+- Updated mobile-results.component.ts to use new filter component via selector
+- Updated mobile.module.ts to import and export MobileResultsFilterComponent
+- Original component reduced from 818 to 595 lines (~27% reduction, 223 lines)
+- Parent now focuses on: sorting, bulk selection, and coordination
+- Child filter component handles: filter state, filter UI, filter changes
+- Fixed export conflict in mobile-results-display.component.ts (removed duplicate export type)
+- Fixed type error in validation.util.ts (schema.items type narrowing)
+- Quality gates verified: typecheck (pass), lint (pass 25 projects)
+
+**Files changed:**
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-filter.component.ts (created - 240 lines)
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results.component.ts (refactored - 595 lines, was 818)
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile.module.ts (added MobileResultsFilterComponent)
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-display.component.ts (removed duplicate export)
+- libs/infrastructure-shared/src/utilities/validation.util.ts (fixed type error)
+- scripts/ralph/prd.json (marked US-029 passes: true)
+
+**Learnings for future iterations:**
+- Filter components should be self-contained with their own state management
+- Use @Input for initial state (@Input isOpen, @Input filters) and @Output for changes
+- Filter component emits filtersChanged event with updated filter object
+- Parent component maintains single source of truth for filters
+- TypeScript type narrowing with `!== undefined` may still require local variable assignment for proper type inference
+- Export conflicts occur when both `export interface` and `export type` are used for the same type
+- The filter component is now reusable in other contexts (e.g., dashboard filters, search results)
+- Component isolation makes testing easier - each component can be tested independently
+---
+
+## [2026-02-04 07:00] - US-030
+- **COMPLETED**: Split mobile-results.component.ts - extracted business logic to service
+- Created MobileResultsService with BehaviorSubject-based reactive state management
+- Moved filtering logic (applyFilters, applySorting) to service
+- Moved selection management (selectAll, clearSelection, toggleSelection) to service
+- Moved match summary calculation to service
+- Component now thin orchestrator using inject() and takeUntil for cleanup
+- Component reduced from 595 to 514 lines (~81 line reduction, ~14%)
+- Service provides observable state$ for reactive updates
+- Quality gates verified: typecheck (pass), lint (pass)
+
+**Files changed:**
+- apps/ai-recruitment-frontend/src/app/services/mobile/mobile-results.service.ts (created - 340 lines)
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results.component.ts (refactored - 514 lines, was 595)
+- scripts/ralph/prd.json (marked US-030 passes: true)
+
+**Learnings for future iterations:**
+- Services with BehaviorSubject pattern provide clean reactive state management
+- Use RxJS takeUntil pattern for cleanup in components
+- inject() function is cleaner than constructor injection for standalone components
+- Component becomes ~514 lines with just UI coordination, all business logic in service
+- Service exports types (ResultsFilter, CandidateResult, MatchSummary, SortOption) for reuse
+- Default filters pattern: getDefaultFilters() returns empty filter state
+- Service methods are pure functions where possible (applyFilters, applySorting, getMatchSummary)
+- State derived from sources via BehaviorSubjects (candidates, filters, selections)
+- State aggregation in private updateState() method keeps single source of truth
+- Business logic in services is independently testable without Angular TestBed
+
+---
