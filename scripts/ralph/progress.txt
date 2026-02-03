@@ -69,3 +69,13 @@ Started: 2026-02-03
   - This pattern also works in Promise.all() with map() for multiple selectors
 ---
 
+## 2026-02-03 - US-005
+- What was implemented: Fixed Playwright lint issues in console-errors.spec.ts
+- Files changed:
+  - console-errors.spec.ts: Added custom `delay()` helper, replaced `page.waitForTimeout()` with `delay()`, replaced conditional blocks with unconditional logging
+- **Learnings for future iterations:**
+  - Ternary operators also trigger `no-conditional-in-test` rule - avoid them in test code
+  - For diagnostic logging, use unconditional console.log with the computed value (e.g., `console.log('status:', hasValue)`) instead of conditional if/else blocks
+  - Each spec file needs its own `delay()` helper function since it's file-scoped
+---
+

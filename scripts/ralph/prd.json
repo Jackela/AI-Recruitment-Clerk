@@ -62,7 +62,7 @@
       "title": "Fix console-errors.spec.ts lint issues",
       "description": "Fix Playwright lint issues in console-errors.spec.ts",
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Fix no-conditional-in-test (3 issues)",
         "Fix no-wait-for-timeout (1 issue)"
