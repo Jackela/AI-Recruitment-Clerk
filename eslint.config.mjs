@@ -12,18 +12,51 @@ export default [
       '**/test-results',
       '**/.nx',
       '**/jest-html-reporters-attach',
+      '**/build',
+      '**/*.min.js',
+      '**/e2e',
+      '**/tmp',
+      '**/temp',
+      '**/out',
     ],
   },
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
     rules: {
       // Module boundaries enforcement
+      // Prevents unsafe cross-module imports between libraries and applications
       '@nx/enforce-module-boundaries': [
         'warn',
         {
           enforceBuildableLibDependency: false,
           allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$'],
           depConstraints: [
+            // Applications can depend on any library
+            {
+              sourceTag: 'type:app',
+              onlyDependOnLibsWithTags: ['*'],
+            },
+            // Shared libraries (scope:shared) can only depend on other shared libraries or type:utils
+            {
+              sourceTag: 'scope:shared',
+              onlyDependOnLibsWithTags: ['scope:shared', 'type:utils'],
+            },
+            // Domain libraries (scope:domain) can depend on shared libraries and other domains
+            {
+              sourceTag: 'scope:domain',
+              onlyDependOnLibsWithTags: ['scope:shared', 'type:utils', 'scope:domain', 'layer:contracts'],
+            },
+            // Contract libraries should have minimal dependencies
+            {
+              sourceTag: 'layer:contracts',
+              onlyDependOnLibsWithTags: ['type:utils'],
+            },
+            // Utility libraries should be standalone
+            {
+              sourceTag: 'type:utils',
+              onlyDependOnLibsWithTags: ['*'],
+            },
+            // Catch-all for untagged projects (allow all to avoid noise)
             {
               sourceTag: '*',
               onlyDependOnLibsWithTags: ['*'],

@@ -178,8 +178,8 @@
         "Ensure LICENSE is correct and referenced in README"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": "Keep docs concise and linkable from README."
+      "passes": true,
+      "notes": "SECURITY.md already had comprehensive disclosure guidance. Created SUPPORT.md. Fixed README.md license reference (ISC → MIT). Rollback plan in docs/ROLLBACK-US-013.md"
     },
     {
       "id": "US-014",
@@ -191,8 +191,8 @@
         "npm run lint passes"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": "Avoid noisy or non-actionable linting."
+      "passes": true,
+      "notes": "Migrated all .eslintignore patterns to eslint.config.mjs. Enhanced module boundaries with tag-based constraints. All 23 projects lint successfully. Rollback plan in docs/ROLLBACK-US-014.md"
     },
     {
       "id": "US-015",
