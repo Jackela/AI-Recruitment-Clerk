@@ -4,6 +4,10 @@ import { test, expect } from './fixtures';
  * Jobs List Debug - Check if component renders correctly
  */
 
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 test.describe('Jobs List Component Debug', () => {
   test.beforeEach(async ({ page }) => {
     // Ensure we have a proper base URL
@@ -44,19 +48,17 @@ test.describe('Jobs List Component Debug', () => {
     console.log('🔍 Testing jobs list page structure...');
 
     await page.goto('/jobs');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Wait for potential async loading
-    await page.waitForTimeout(2000);
+    await delay(2000);
 
     // Check page structure
     console.log('=== PAGE STRUCTURE ===');
 
     // Use safer approach to check for page title elements
     const pageTitleElement = page.locator('h1, h2, .page-title').first();
-    const pageTitle = (await pageTitleElement.isVisible())
-      ? await pageTitleElement.textContent()
-      : 'No title found';
+    const pageTitle = await pageTitleElement.textContent().catch(() => 'No title found');
     console.log('Page title:', pageTitle);
 
     const hasJobsContainer = await page.locator('.jobs-list-container').count();
@@ -123,14 +125,13 @@ test.describe('Jobs List Component Debug', () => {
     });
 
     await page.goto('/jobs');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('domcontentloaded');
+    await delay(2000);
 
     console.log('API calls made:', apiCalls);
 
     // Try to access store state if possible
     const storeAccessible = await page.evaluate(() => {
-      const win = window as any;
       // Check if we can access Angular's debug context
       try {
         const elements = document.querySelectorAll('*[ng-version]');
