@@ -199,11 +199,12 @@ test.describe('Debug User Flow - Step by Step', () => {
     console.log('Current URL:', currentUrl);
 
     // Log status based on page state (unconditional logging)
-    const isOnJobDetailsPage =
-      currentUrl.includes('/jobs/') && angularRootCount > 0;
-    const wasRedirectedToList =
-      currentUrl.includes('/jobs') &&
-      !currentUrl.includes(`/${mockJobResponse.jobId}`);
+    const includesJobs = currentUrl.includes('/jobs/');
+    const hasAngularRoot = angularRootCount > 0;
+    const isOnJobDetailsPage = includesJobs && hasAngularRoot;
+    const includesJobsPath = currentUrl.includes('/jobs');
+    const includesJobId = currentUrl.includes(`/${mockJobResponse.jobId}`);
+    const wasRedirectedToList = includesJobsPath && !includesJobId;
     console.log('Is on job details page:', isOnJobDetailsPage);
     console.log('Was redirected to list:', wasRedirectedToList);
     console.log('Page load status: success');
