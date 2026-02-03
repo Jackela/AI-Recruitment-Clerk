@@ -705,11 +705,12 @@ export class SchemaValidator {
       if (schema.maxLength !== undefined && value.length > schema.maxLength) {
         errors.push(`${path} must not have more than ${schema.maxLength} items`);
       }
-      if (schema.items) {
+      if (schema.items !== undefined) {
+        const itemSchema = schema.items;
         value.forEach((item, index) => {
           const itemResult = this.validateValue(
             item,
-            schema.items,
+            itemSchema,
             `${path}[${index}]`,
           );
           errors.push(...itemResult.errors);

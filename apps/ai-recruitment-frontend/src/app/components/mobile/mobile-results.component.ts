@@ -14,27 +14,21 @@ import {
   MobileResultsDisplayComponent,
   type CandidateResult,
 } from './mobile-results-display.component';
-
-/**
- * Defines the shape of the results filter.
- */
-export interface ResultsFilter {
-  score: { min: number; max: number };
-  experience: string[];
-  skills: string[];
-  location: string[];
-  status: string[];
-}
+import {
+  MobileResultsFilterComponent,
+  type ResultsFilter,
+} from './mobile-results-filter.component';
 
 /**
  * Represents the mobile results component.
- * Manages filtering, sorting, and bulk selection for candidate results.
+ * Manages sorting, bulk selection, and coordination for candidate results.
  * Display is delegated to MobileResultsDisplayComponent.
+ * Filtering is delegated to MobileResultsFilterComponent.
  */
 @Component({
   selector: 'arc-mobile-results',
   standalone: true,
-  imports: [CommonModule, FormsModule, MobileResultsDisplayComponent],
+  imports: [CommonModule, FormsModule, MobileResultsDisplayComponent, MobileResultsFilterComponent],
   template: `
     <div class="mobile-results-container">
       <!-- Results Header -->
@@ -88,64 +82,13 @@ export interface ResultsFilter {
         </div>
       </div>
 
-      <!-- Filters Panel -->
-      <div class="filters-panel" [class.open]="showFilters" *ngIf="showFilters">
-        <div class="filter-header">
-          <h3>Filter Results</h3>
-          <button class="clear-filters" (click)="clearFilters()">
-            Clear All
-          </button>
-        </div>
-
-        <div class="filter-sections">
-          <!-- Score Range -->
-          <div class="filter-section">
-            <label class="filter-label" for="score-min-slider">Minimum Score</label>
-            <div class="score-filter">
-              <input
-                id="score-min-slider"
-                type="range"
-                min="0"
-                max="100"
-                [(ngModel)]="filters.score.min"
-                (input)="onFilterChange()"
-                class="score-slider"
-              />
-              <span class="score-value">{{ filters.score.min }}%</span>
-            </div>
-          </div>
-
-          <!-- Status Filter -->
-          <div class="filter-section">
-            <span class="filter-label" id="status-filter-label">Status</span>
-            <div class="filter-chips" role="group" aria-labelledby="status-filter-label">
-              <button
-                *ngFor="let status of availableStatuses"
-                class="filter-chip"
-                [class.active]="filters.status.includes(status)"
-                (click)="toggleStatusFilter(status)"
-              >
-                {{ status | titlecase }}
-              </button>
-            </div>
-          </div>
-
-          <!-- Experience Filter -->
-          <div class="filter-section">
-            <span class="filter-label" id="experience-filter-label">Experience Level</span>
-            <div class="filter-chips" role="group" aria-labelledby="experience-filter-label">
-              <button
-                *ngFor="let exp of availableExperience"
-                class="filter-chip"
-                [class.active]="filters.experience.includes(exp)"
-                (click)="toggleExperienceFilter(exp)"
-              >
-                {{ exp }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- Filters Panel (Delegated to Filter Component) -->
+      <arc-mobile-results-filter
+        [isOpen]="showFilters"
+        [filters]="filters"
+        (filtersChanged)="onFiltersChanged($event)"
+        (clearFilters)="onClearFilters()"
+      ></arc-mobile-results-filter>
 
       <!-- Sort Panel -->
       <div class="sort-panel" [class.open]="showSort" *ngIf="showSort">
@@ -209,7 +152,6 @@ export interface ResultsFilter {
         (candidateSelected)="onCandidateSelected($event)"
         (candidateAction)="onCandidateAction($event)"
         (selectionToggled)="onSelectionToggled($event)"
-        (clearFilters)="clearFilters()"
       ></arc-mobile-results-display>
     </div>
   `,
@@ -288,7 +230,6 @@ export interface ResultsFilter {
         }
       }
 
-      .filters-panel,
       .sort-panel {
         background: white;
         border-bottom: 1px solid #e9ecef;
@@ -298,117 +239,6 @@ export interface ResultsFilter {
 
         &.open {
           max-height: 500px;
-        }
-
-        .filter-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 16px;
-          border-bottom: 1px solid #f1f3f4;
-
-          h3 {
-            font-size: 16px;
-            font-weight: 600;
-            color: #2c3e50;
-            margin: 0;
-          }
-
-          .clear-filters {
-            background: none;
-            border: none;
-            color: #e74c3c;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            text-decoration: underline;
-          }
-        }
-
-        .filter-sections {
-          padding: 0 16px 16px;
-
-          .filter-section {
-            margin-bottom: 20px;
-
-            .filter-label {
-              display: block;
-              font-size: 14px;
-              font-weight: 500;
-              color: #2c3e50;
-              margin-bottom: 8px;
-            }
-
-            .score-filter {
-              display: flex;
-              align-items: center;
-              gap: 12px;
-
-              .score-slider {
-                flex: 1;
-                -webkit-appearance: none;
-                appearance: none;
-                height: 4px;
-                border-radius: 2px;
-                background: #e9ecef;
-                outline: none;
-
-                &::-webkit-slider-thumb {
-                  -webkit-appearance: none;
-                  appearance: none;
-                  width: 20px;
-                  height: 20px;
-                  border-radius: 50%;
-                  background: #3498db;
-                  cursor: pointer;
-                }
-
-                &::-moz-range-thumb {
-                  width: 20px;
-                  height: 20px;
-                  border-radius: 50%;
-                  background: #3498db;
-                  cursor: pointer;
-                  border: none;
-                }
-              }
-
-              .score-value {
-                font-size: 12px;
-                font-weight: 600;
-                color: #3498db;
-                min-width: 36px;
-              }
-            }
-
-            .filter-chips {
-              display: flex;
-              flex-wrap: wrap;
-              gap: 8px;
-
-              .filter-chip {
-                padding: 6px 12px;
-                border: 1px solid #dee2e6;
-                border-radius: 16px;
-                background: white;
-                color: #495057;
-                font-size: 12px;
-                font-weight: 500;
-                cursor: pointer;
-                transition: all 0.2s ease;
-
-                &:active {
-                  transform: scale(0.96);
-                }
-
-                &.active {
-                  background: #3498db;
-                  color: white;
-                  border-color: #3498db;
-                }
-              }
-            }
-          }
         }
 
         .sort-options {
@@ -537,10 +367,6 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
   public currentSort = 'score-desc';
   public filteredResults: CandidateResult[] = [];
 
-  // Available filter options
-  public availableStatuses = ['new', 'reviewed', 'shortlisted', 'interviewed'];
-  public availableExperience = ['Junior', 'Mid-level', 'Senior', 'Lead', 'Principal'];
-
   public sortOptions = [
     { label: 'Score (High to Low)', value: 'score-desc' },
     { label: 'Score (Low to High)', value: 'score-asc' },
@@ -551,7 +377,6 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
 
   /**
    * Performs the ng on init operation.
-   * @returns The result of the operation.
    */
   public ngOnInit(): void {
     this.applyFilters();
@@ -559,7 +384,6 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
 
   /**
    * Performs the ng on destroy operation.
-   * @returns The result of the operation.
    */
   public ngOnDestroy(): void {
     this.destroy$.next();
@@ -568,7 +392,6 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
 
   /**
    * Performs the active filters count operation.
-   * @returns The number value.
    */
   public get activeFiltersCount(): number {
     let count = 0;
@@ -580,10 +403,9 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     return count;
   }
 
-  // Filter methods
+  // UI state management
   /**
    * Performs the toggle filters operation.
-   * @returns The result of the operation.
    */
   public toggleFilters(): void {
     this.showFilters = !this.showFilters;
@@ -592,7 +414,6 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
 
   /**
    * Performs the toggle sort operation.
-   * @returns The result of the operation.
    */
   public toggleSort(): void {
     this.showSort = !this.showSort;
@@ -601,70 +422,33 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
 
   /**
    * Performs the toggle view operation.
-   * @returns The result of the operation.
    */
   public toggleView(): void {
     this.viewMode = this.viewMode === 'card' ? 'detailed' : 'card';
   }
 
+  // Filter handling
   /**
-   * Performs the on filter change operation.
-   * @returns The result of the operation.
+   * Performs the on filters changed operation.
+   * @param updatedFilters - The updated filters.
    */
-  public onFilterChange(): void {
+  public onFiltersChanged(updatedFilters: ResultsFilter): void {
+    this.filters = updatedFilters;
     this.applyFilters();
     this.filtersChanged.emit(this.filters);
   }
 
   /**
-   * Performs the toggle status filter operation.
-   * @param status - The status.
-   * @returns The result of the operation.
+   * Performs the on clear filters operation.
    */
-  public toggleStatusFilter(status: string): void {
-    const index = this.filters.status.indexOf(status);
-    if (index > -1) {
-      this.filters.status.splice(index, 1);
-    } else {
-      this.filters.status.push(status);
-    }
-    this.onFilterChange();
-  }
-
-  /**
-   * Performs the toggle experience filter operation.
-   * @param experience - The experience.
-   * @returns The result of the operation.
-   */
-  public toggleExperienceFilter(experience: string): void {
-    const index = this.filters.experience.indexOf(experience);
-    if (index > -1) {
-      this.filters.experience.splice(index, 1);
-    } else {
-      this.filters.experience.push(experience);
-    }
-    this.onFilterChange();
-  }
-
-  /**
-   * Performs the clear filters operation.
-   * @returns The result of the operation.
-   */
-  public clearFilters(): void {
-    this.filters = {
-      score: { min: 0, max: 100 },
-      experience: [],
-      skills: [],
-      location: [],
-      status: [],
-    };
-    this.onFilterChange();
+  public onClearFilters(): void {
+    // Filters are already reset by the filter component
+    this.applyFilters();
   }
 
   /**
    * Sets sort option.
    * @param sortValue - The sort value.
-   * @returns The result of the operation.
    */
   public setSortOption(sortValue: string): void {
     this.currentSort = sortValue;
@@ -722,7 +506,6 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
 
   /**
    * Retrieves match summary.
-   * @returns The string value.
    */
   public getMatchSummary(): string {
     if (this.filteredResults.length === 0) return '';
@@ -745,7 +528,6 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
   /**
    * Performs the is selected operation.
    * @param candidate - The candidate.
-   * @returns The boolean value.
    */
   public isSelected(candidate: CandidateResult): boolean {
     return this.selectedCandidates.some((c) => c.id === candidate.id);
@@ -753,7 +535,6 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
 
   /**
    * Performs the select all operation.
-   * @returns The result of the operation.
    */
   public selectAll(): void {
     this.selectedCandidates = [...this.filteredResults];
@@ -762,7 +543,6 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
   /**
    * Performs the bulk action operation.
    * @param action - The action.
-   * @returns The result of the operation.
    */
   public bulkAction(action: string): void {
     this.bulkActionTriggered.emit({
@@ -776,7 +556,6 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
   /**
    * Performs the on candidate selected operation.
    * @param candidate - The candidate.
-   * @returns The result of the operation.
    */
   public onCandidateSelected(candidate: CandidateResult): void {
     this.candidateSelected.emit(candidate);
@@ -785,7 +564,6 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
   /**
    * Performs the on candidate action operation.
    * @param payload - The payload.
-   * @returns The result of the operation.
    */
   public onCandidateAction(payload: {
     action: string;
@@ -797,7 +575,6 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
   /**
    * Performs the on selection toggled operation.
    * @param payload - The payload.
-   * @returns The result of the operation.
    */
   public onSelectionToggled(payload: {
     candidate: CandidateResult;

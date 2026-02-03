@@ -778,6 +778,3 @@ export class MobileResultsDisplayComponent {
     return candidate.id;
   }
 }
-
-// Re-export CandidateResult for use in other components
-export type { CandidateResult };
