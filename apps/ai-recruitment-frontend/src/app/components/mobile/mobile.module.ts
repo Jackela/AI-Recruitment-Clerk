@@ -9,6 +9,7 @@ import { MobileUploadComponent } from './mobile-upload.component';
 import { MobileSwipeComponent } from './mobile-swipe.component';
 import { MobileDashboardComponent } from './mobile-dashboard.component';
 import { MobileResultsComponent } from './mobile-results.component';
+import { MobileResultsDisplayComponent } from './mobile-results-display.component';
 import { MobilePerformanceComponent } from './mobile-performance.component';
 
 // Mobile Services
@@ -40,6 +41,7 @@ import { PWAService } from '../../services/mobile/pwa.service';
     MobileSwipeComponent,
     MobileDashboardComponent,
     MobileResultsComponent,
+    MobileResultsDisplayComponent,
     MobilePerformanceComponent,
   ],
   exports: [
@@ -49,6 +51,7 @@ import { PWAService } from '../../services/mobile/pwa.service';
     MobileSwipeComponent,
     MobileDashboardComponent,
     MobileResultsComponent,
+    MobileResultsDisplayComponent,
     MobilePerformanceComponent,
   ],
   providers: [

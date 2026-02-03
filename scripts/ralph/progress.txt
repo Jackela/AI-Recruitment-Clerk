@@ -724,3 +724,32 @@ Options documented in CI-BLOCKING-ISSUE.md
 - All validators return consistent ValidationResult interface: { isValid: boolean; errors: string[]; warnings?: string[] }
 
 ---
+
+## [2026-02-04 05:00] - US-028
+- **COMPLETED**: Split mobile-results.component.ts - extracted display logic
+- Created mobile-results-display.component.ts (783 lines) for candidate card rendering
+- Moved display-related template and logic: candidate cards, avatar/info display, skills tags, match details, selection checkbox, quick actions menu, empty state, loading state
+- Updated mobile-results.component.ts to use new display component via selector
+- Updated mobile.module.ts to import and export new component
+- Original component reduced from 1504 lines to 818 lines (~686 line reduction, ~46%)
+- Parent component now focuses on: filtering, sorting, bulk selection, and coordination
+- Child component handles: rendering candidate cards, swipe actions, individual selection, empty/loading states
+- Quality gates verified: lint (pass with 0 errors, 0 warnings)
+
+**Files changed:**
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-display.component.ts (created - 783 lines)
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results.component.ts (refactored - 818 lines, was 1504)
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile.module.ts (added MobileResultsDisplayComponent)
+- scripts/ralph/prd.json (marked US-028 passes: true)
+
+**Learnings for future iterations:**
+- Component splitting follows single responsibility principle: display vs. coordination
+- Child component uses @Output events with structured payloads for parent communication
+- selectionToggled event emits { candidate, event } to give parent full control
+- ClearInputs() pattern: child receives selectedCandidates as @Input, parent maintains state
+- TouchGestureService import was causing warnings - removed unused import entirely
+- Template strings in Angular components can be large - splitting by UI section is effective
+- MobileResult interface was moved to display component and re-exported for shared use
+- The display component is now reusable in other contexts (e.g., embedded in dashboards)
+
+---
