@@ -16,5 +16,26 @@ Started: 2026-02-03
 - Playwright tests: Replace `networkidle` with `domcontentloaded` or `load` wait states
 - Playwright tests: Replace conditionals in tests with proper test structure or `test.skip()` for conditional skip
 - Playwright tests: Replace conditional expects with proper assertions using `toBeVisible()`, `toHaveCount()`, etc.
+- For empty function methods (no-ops), add a comment inside the function body instead of using eslint-disable
+- Use `import type { X }` for type-only imports to satisfy @typescript-eslint/consistent-type-imports
+- Initialize variables with default values instead of using non-null assertions (e.g., `let lastError: Error = new Error('default')` instead of `let lastError: Error` with `throw lastError!`)
+---
+
+## 2026-02-03 - US-001
+- What was implemented: Fixed TypeScript lint issues in 8 e2e utility files
+- Files changed:
+  - browser-stability.ts: Initialize lastError with default value to avoid non-null assertion
+  - cleanup-ports.mjs: Remove unused error variables in catch blocks (use empty catch)
+  - global-setup.ts: Add explicit Promise<void> return type
+  - global-teardown.ts: Add return type, remove unused catch variable
+  - mock-server.ts: Replace non-null assertions with proper null checks, add return type, add no-op comments
+  - monitoring-system.mjs: Remove unused currentMetrics parameter
+  - optimized-test-runner.mjs: Remove unused import, use const instead of let
+  - test-hooks.ts: Replace any types with proper Page types, use type imports
+- **Learnings for future iterations:**
+  - Empty functions should use comments inside body, not eslint-disable
+  - Use `const` for variables that aren't reassigned (prefer-const rule)
+  - Use `import type { X }` for type-only imports
+  - Initialize error variables with defaults to avoid non-null assertions
 ---
 

@@ -7,7 +7,7 @@
       "title": "Fix e2e TypeScript issues - utility files",
       "description": "Fix TypeScript lint issues in e2e utility files (non-spec)",
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Fix browser-stability.ts (1 non-null assertion)",
         "Fix cleanup-ports.mjs (3 unused vars)",
