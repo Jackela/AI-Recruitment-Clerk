@@ -24,4 +24,25 @@ Started: Tue Feb  3 20:37:56     2026
 - Console errors in tests are intentional (testing error paths)
 - The branch already contains changes from US-006 through US-018
 - New files added: docs/, CONTRIBUTING.md, SECURITY.md, SUPPORT.md, .github workflows
+
+---
+
+## [2026-02-03 21:30] - US-004, US-005 (Blocked)
+- Created comprehensive PR description in PR-DESCRIPTION.md
+- Pushed branch and opened PR #42
+- **BLOCKER DISCOVERED**: Pre-existing CI issue on main branch
+
+**Critical Finding:**
+GitHub Actions CI fails with Nx webpack error on BOTH main and feature branch:
+- `apps/app-gateway/webpack.config.js` is ES Module (import/export)
+- Nx's webpack plugin tries to require() it using CommonJS
+- Local quality gates all pass (Windows Node handles ESM differently)
+- Main branch CI also failing (runs 21626640430, 21626640429, 21626640434)
+
+**US-005 Status**: BLOCKED - Cannot complete "All GitHub Actions checks pass" due to pre-existing infrastructure issue
+
+**Resolution Required:**
+Fix Nx webpack ESM compatibility separately before any PR can merge
+Options documented in CI-BLOCKING-ISSUE.md
+
 ---

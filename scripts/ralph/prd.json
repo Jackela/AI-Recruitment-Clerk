@@ -72,7 +72,7 @@
       ],
       "priority": 5,
       "passes": false,
-      "notes": "Do not open multiple PRs."
+      "notes": "BLOCKED: Pre-existing CI infrastructure issue (Nx webpack ESM incompatibility) affects both main and this branch. See CI-BLOCKING-ISSUE.md. Local quality gates all pass. PR #42 was created then closed due to this blocker."
     }
   ]
 }
