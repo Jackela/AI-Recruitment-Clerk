@@ -8,7 +8,7 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "webpack-cli build --config apps/app-gateway/webpack.config.js",
+        "command": "webpack-cli build --config apps/app-gateway/webpack.config.mjs",
         "args": ["--node-env=production"]
       },
       "configurations": {
