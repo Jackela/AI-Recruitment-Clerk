@@ -586,8 +586,8 @@
         "Add CLAUDE.md documenting required env vars"
       ],
       "priority": 38,
-      "passes": false,
-      "notes": "Prevents silent failures. List all required env vars by service (gateway, frontend, microservices)."
+      "passes": true,
+      "notes": "Created libs/configuration/env-validator with EnvValidator, EnvAccess classes. Service-specific schemas for appGateway, resumeParser, jdExtractor, scoringEngine, reportGenerator, frontend. Type-safe access: getString, getNumber, getBoolean, getArray, getUrl. Added @ai-recruitment-clerk/configuration path to tsconfig.base.json. Quality gates pass."
     },
     {
       "id": "US-039",
@@ -601,8 +601,8 @@
         "Add section on base class usage (BaseNatsService, etc.)"
       ],
       "priority": 39,
-      "passes": false,
-      "notes": "Documentation is critical for AI-coding-friendliness. Update AFTER implementing patterns, not before."
+      "passes": true,
+      "notes": "Added Codebase Patterns section documenting BaseMicroserviceService, component splitting, service layering, environment validation. Enhanced file organization with config/docker/ and config/deployment/ subdirectories. All existing sections (module system, type safety, component size) were already documented in RULE 2, RULE 3, RULE 6."
     },
     {
       "id": "US-040",
@@ -616,8 +616,8 @@
         "Document testing approach for mobile components"
       ],
       "priority": 40,
-      "passes": false,
-      "notes": "After US-030, US-033. Document the patterns established during refactoring."
+      "passes": true,
+      "notes": "Created comprehensive CLAUDE.md with component organization, splitting patterns (display/filter/service), service state management (BehaviorSubject), mobile UI patterns (touch gestures, responsive breakpoints), testing approach, and injection patterns. Documents patterns from US-028, US-029, US-030, US-031, US-032, US-033."
     },
     {
       "id": "US-041",
@@ -631,8 +631,8 @@
         "Document error handling patterns"
       ],
       "priority": 41,
-      "passes": false,
-      "notes": "After US-035. Document the patterns established during service refactoring."
+      "passes": true,
+      "notes": "Created comprehensive CLAUDE.md with domain organization, service layering (Controller → Facade → CRUD/Auth → Repository), facading pattern (UserManagementService example), CRUD extraction (UserCrudService), auth separation (UserAuthService vs AuthService), error handling, module config, testing patterns. Documents patterns from US-034, US-035."
     },
     {
       "id": "US-042",
@@ -647,8 +647,8 @@
         "All patterns are general and reusable"
       ],
       "priority": 42,
-      "passes": false,
-      "notes": "This is the LAST story to complete. Do after all other stories to consolidate learnings."
+      "passes": true,
+      "notes": "Consolidated and reorganized Codebase Patterns section with 11 categories: Build/Test Commands, Testing, Module System, Type Safety, Component Splitting, Service Layering, NATS Microservices, Environment Variables, File Organization, Imports/Exports. All patterns are general and reusable for future iterations."
     },
     {
       "id": "US-043",

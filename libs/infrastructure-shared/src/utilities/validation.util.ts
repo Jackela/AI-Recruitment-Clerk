@@ -832,7 +832,7 @@ export class Validator {
    * @param fieldName - The field name for error messages
    * @returns ValidationResult
    */
-  public static length(
+  public static validateLength(
     value: string,
     minLength: number | undefined,
     maxLength: number | undefined,

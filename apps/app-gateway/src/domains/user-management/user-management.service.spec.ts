@@ -1,5 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { UserManagementService } from './user-management.service';
+import { UserCrudService } from './user-crud.service';
+import { UserAuthService } from './user-auth.service';
 import { UserStatus } from '@ai-recruitment-clerk/user-management-domain';
 
 const createUserServiceMock = () => ({
@@ -13,6 +15,26 @@ const createUserServiceMock = () => ({
   }),
 }) as any;
 
+const createUserCrudServiceMock = () => ({
+  findById: jest.fn(),
+  findByEmail: jest.fn(),
+  update: jest.fn(),
+  delete: jest.fn(),
+  softDelete: jest.fn(),
+  exists: jest.fn(),
+  existsByEmail: jest.fn(),
+}) as any;
+
+const createUserAuthServiceMock = () => ({
+  verifyPassword: jest.fn(),
+  isUserActive: jest.fn(),
+  validateAuthentication: jest.fn(),
+  requiresPasswordChange: jest.fn(),
+  recordSuccessfulAuth: jest.fn(),
+  recordFailedAuth: jest.fn(),
+  getLastAuthActivity: jest.fn(),
+}) as any;
+
 describe('UserManagementService (mocked dependencies)', () => {
   const baseUser = {
     id: 'user-1',
@@ -22,12 +44,22 @@ describe('UserManagementService (mocked dependencies)', () => {
   } as any;
 
   let userService: ReturnType<typeof createUserServiceMock>;
+  let userCrudService: ReturnType<typeof createUserCrudServiceMock>;
+  let userAuthService: ReturnType<typeof createUserAuthServiceMock>;
   let service: UserManagementService;
 
   beforeEach(() => {
     jest.clearAllMocks();
     userService = createUserServiceMock();
-    service = new UserManagementService(userService);
+    userCrudService = createUserCrudServiceMock();
+    userAuthService = createUserAuthServiceMock();
+
+    // Bypass NestJS DI and create service with mocks
+    service = new UserManagementService(
+      userCrudService,
+      userAuthService,
+      userService,
+    );
   });
 
   it('updates user and strips password', async () => {
@@ -51,7 +83,7 @@ describe('UserManagementService (mocked dependencies)', () => {
   });
 
   it('updates preferences after ensuring user exists', async () => {
-    userService.findById.mockResolvedValue(baseUser);
+    userCrudService.findById.mockResolvedValue(baseUser);
 
     const prefs = await service.updateUserPreferences('user-1', {
       userId: 'user-1',
@@ -59,7 +91,7 @@ describe('UserManagementService (mocked dependencies)', () => {
       notifications: { email: true, push: false, sms: false },
     } as any);
 
-    expect(userService.findById).toHaveBeenCalledWith('user-1');
+    expect(userCrudService.findById).toHaveBeenCalledWith('user-1');
     expect(prefs.language).toBe('zh');
   });
 
@@ -78,12 +110,14 @@ describe('UserManagementService (mocked dependencies)', () => {
     expect(result.users[0].id).toBe('user-1');
   });
 
-  it('verifies password using fallback logic', async () => {
+  it('verifies password using UserAuthService', async () => {
+    userAuthService.verifyPassword.mockResolvedValue(true);
     userService.findById.mockResolvedValue({ ...baseUser, password: 'admin123-hash' });
 
     const pass = await service.verifyUserPassword('user-1', 'anything');
 
     expect(pass).toBe(true);
+    expect(userAuthService.verifyPassword).toHaveBeenCalledWith('user-1', 'anything');
   });
 
   it('returns health status based on stats', async () => {
@@ -125,7 +159,7 @@ describe('UserManagementService (mocked dependencies)', () => {
 
   describe('Negative Tests - Preferences Validation', () => {
     it('should reject preferences for non-existent user', async () => {
-      userService.findById.mockResolvedValue(null);
+      userCrudService.findById.mockResolvedValue(null);
 
       await expect(
         service.updateUserPreferences('nonexistent', {
@@ -136,7 +170,7 @@ describe('UserManagementService (mocked dependencies)', () => {
     });
 
     it('should handle invalid language code', async () => {
-      userService.findById.mockResolvedValue(baseUser);
+      userCrudService.findById.mockResolvedValue(baseUser);
 
       const prefs = await service.updateUserPreferences('user-1', {
         userId: 'user-1',
@@ -147,7 +181,7 @@ describe('UserManagementService (mocked dependencies)', () => {
     });
 
     it('should handle database failure during preferences update', async () => {
-      userService.findById.mockRejectedValue(
+      userCrudService.findById.mockRejectedValue(
         new Error('Database query timeout'),
       );
 
@@ -218,7 +252,7 @@ describe('UserManagementService (mocked dependencies)', () => {
     });
 
     it('should handle concurrent preference updates for different users', async () => {
-      userService.findById.mockResolvedValue(baseUser);
+      userCrudService.findById.mockResolvedValue(baseUser);
 
       const promises = [
         service.updateUserPreferences('user-1', { userId: 'user-1', language: 'en' } as any),
@@ -229,7 +263,7 @@ describe('UserManagementService (mocked dependencies)', () => {
       const results = await Promise.all(promises);
 
       expect(results).toHaveLength(3);
-      expect(userService.findById).toHaveBeenCalledTimes(3);
+      expect(userCrudService.findById).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -247,6 +281,7 @@ describe('UserManagementService (mocked dependencies)', () => {
     });
 
     it('should verify password even with special characters', async () => {
+      userAuthService.verifyPassword.mockResolvedValue(true);
       userService.findById.mockResolvedValue({
         ...baseUser,
         password: 'p@$$w0rd!@#$%^&*()',
@@ -255,6 +290,7 @@ describe('UserManagementService (mocked dependencies)', () => {
       const isValid = await service.verifyUserPassword('user-1', 'p@$$w0rd!@#$%^&*()');
 
       expect(isValid).toBe(true);
+      expect(userAuthService.verifyPassword).toHaveBeenCalledWith('user-1', 'p@$$w0rd!@#$%^&*()');
     });
   });
 

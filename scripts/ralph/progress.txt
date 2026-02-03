@@ -1184,3 +1184,35 @@ Options documented in CI-BLOCKING-ISSUE.md
 - Domain libraries: @ai-recruitment-clerk/*-domain for type definitions
 
 ---
+
+## [2026-02-04 18:00] - US-042
+- **COMPLETED**: Update progress.txt with consolidated Codebase Patterns
+- Consolidated and reorganized Codebase Patterns section at top of progress.txt
+- Added 11 pattern categories:
+  - Build and Test Commands (dev, lint:fix, clean scripts)
+  - Testing patterns (E2E, Jest, base class mocking)
+  - Module System (ESM with .cjs exceptions for Nx webpack)
+  - Type Safety (no 'any', no non-null assertions, public accessibility)
+  - Component Splitting (mobile display/filter/service extraction)
+  - Service Layering (domain facade → CRUD/auth → repository)
+  - NATS Microservices (BaseMicroserviceService usage)
+  - Environment Variables (configuration library usage)
+  - File Organization (config/, scripts/, docs/)
+  - Imports and Exports (type imports, path mappings, barrel exports)
+- All patterns are general and reusable for future AI iterations
+- Quality gates verified: typecheck (pass)
+- Committed changes to git
+
+**Files changed:**
+- scripts/ralph/progress.txt (consolidated Codebase Patterns section)
+- scripts/ralph/prd.json (marked US-042 passes: true)
+
+**Learnings for future iterations:**
+- Codebase Patterns section is the FIRST thing to read before starting work
+- Organize patterns by category for easy lookup
+- Include both "what to do" and "why" (reasoning helps with understanding)
+- Update patterns AFTER implementing, not before (patterns emerge from work)
+- Consolidate duplicated patterns into single entries
+- Keep patterns general and reusable, not story-specific
+
+---

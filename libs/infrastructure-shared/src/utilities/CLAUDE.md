@@ -166,7 +166,7 @@ import { Validator } from '@ai-recruitment-clerk/infrastructure-shared';
 Validator.required(null, 'Username'); // { isValid: false, errors: ['Username is required'] }
 
 // String length validation
-Validator.length('abc', 5, 10, 'Password'); // { isValid: false, errors: ['Password must be at least 5 characters'] }
+Validator.validateLength('abc', 5, 10, 'Password'); // { isValid: false, errors: ['Password must be at least 5 characters'] }
 
 // Numeric range validation
 Validator.range(15, 18, 100, 'Age'); // { isValid: false, errors: ['Age must be at least 18'] }
