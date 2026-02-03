@@ -131,7 +131,7 @@ All services use multi-stage builds with security hardening:
 ## 📋 Files Changed
 
 ### New Files Added
-- `docker-compose.yml` - Complete system orchestration
+- `config/docker/docker-compose.yml` - Complete system orchestration
 - `apps/*/Dockerfile` - Optimized container definitions for all services
 - `scripts/mongo-init.js` - Database initialization script
 - `scripts/start-system.*` - Cross-platform startup scripts

@@ -28,7 +28,7 @@ fi
 # 检查 docker-compose.yml
 echo ""
 echo "🏗️ 检查 Docker Compose 配置..."
-if docker-compose config --quiet 2>/dev/null; then
+if docker-compose -f config/docker/docker-compose.yml config --quiet 2>/dev/null; then
     echo "✅ docker-compose.yml 语法正确"
 else
     echo "❌ docker-compose.yml 语法有问题"

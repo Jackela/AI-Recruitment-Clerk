@@ -80,9 +80,10 @@ AI-Recruitment-Clerk/
 │   └── dependabot.yml                # Automated dependency updates
 │
 ├── 🐳 Docker Configuration
-│   ├── docker-compose.yml            # Full stack orchestration
-│   ├── Dockerfile (per service)      # Optimized builds
-│   └── nixpacks.toml                 # Railway deployment
+│   ├── config/docker/docker-compose.yml  # Full stack orchestration
+│   ├── config/docker/.dockerignore       # Docker build exclusions
+│   ├── Dockerfile (per service)          # Optimized builds
+│   └── nixpacks.toml                     # Railway deployment
 │
 └── 📄 Root Documentation
     ├── README.md                     # Project overview (6 diagrams)

@@ -496,7 +496,7 @@ docker-compose restart nats
 # Check container resource usage
 docker stats
 
-# Limit container memory in docker-compose.yml
+# Limit container memory in config/docker/docker-compose.yml
 services:
   app-gateway:
     deploy:

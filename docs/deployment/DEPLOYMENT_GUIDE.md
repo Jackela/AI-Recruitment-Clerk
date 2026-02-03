@@ -173,12 +173,12 @@ Error: error during connect: Get "http://%2F%2F.%2Fpipe%2FdockerDesktopLinuxEngi
 ```
 Error: bind: address already in use
 ```
-**Solution**: Stop conflicting services or change ports in docker-compose.yml.
+**Solution**: Stop conflicting services or change ports in config/docker/docker-compose.yml.
 
 #### Services Not Ready
 **Solution**: Wait longer for services to start, check logs:
 ```bash
-docker-compose logs -f [service-name]
+docker-compose -f config/docker/docker-compose.yml logs -f [service-name]
 ```
 
 #### E2E Tests Failing
@@ -202,7 +202,7 @@ Each service includes health checks:
 
 For production deployment, update these settings:
 
-1. **Change default passwords** in docker-compose.yml
+1. **Change default passwords** in config/docker/docker-compose.yml
 2. **Set strong MongoDB credentials**
 3. **Use environment-specific API keys**
 4. **Enable HTTPS** with proper certificates
