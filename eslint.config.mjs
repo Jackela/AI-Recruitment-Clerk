@@ -12,7 +12,6 @@ export default [
       '**/test-results',
       '**/.nx',
       '**/jest-html-reporters-attach',
-      '**/vercel-migration/**',
     ],
   },
   {
@@ -112,6 +111,18 @@ export default [
     ],
     // Override or add rules here
     rules: {},
+  },
+  // Relaxed rules for legacy vercel migration code
+  {
+    files: ['vercel-migration/**/*.{ts,tsx,js,jsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/explicit-member-accessibility': 'off',
+      '@typescript-eslint/consistent-type-imports': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+    },
   },
   // Relaxed rules for test files
   {
