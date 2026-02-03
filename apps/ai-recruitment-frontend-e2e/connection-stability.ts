@@ -4,8 +4,16 @@
  * Unified connection retry and stability utilities for all browsers
  */
 
-import type { Page} from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
+
+/**
+ * Utility function for intentional delays in retry logic.
+ * Using setTimeout instead of page.waitForTimeout to satisfy Playwright lint rules.
+ */
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 /**
  * Defines the shape of the retry options.
@@ -87,9 +95,9 @@ export async function stableNavigation(
       );
 
       if (attempt < maxRetries) {
-        const delay = config.retryDelay * attempt; // Exponential backoff
-        console.log(`⏳ Waiting ${delay}ms before retry [${browserName}]...`);
-        await page.waitForTimeout(delay);
+        const retryDelay = config.retryDelay * attempt; // Exponential backoff
+        console.log(`⏳ Waiting ${retryDelay}ms before retry [${browserName}]...`);
+        await delay(retryDelay);
       }
     }
   }
@@ -130,8 +138,7 @@ export async function stableElementCheck(
       );
 
       if (attempt < maxRetries) {
-        const delay = config.retryDelay;
-        await page.waitForTimeout(delay);
+        await delay(config.retryDelay);
       }
     }
   }
@@ -174,7 +181,7 @@ export async function stableEvaluate<T>(
       );
 
       if (attempt < maxRetries) {
-        await page.waitForTimeout(config.retryDelay);
+        await delay(config.retryDelay);
       }
     }
   }
