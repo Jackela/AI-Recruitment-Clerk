@@ -35,12 +35,48 @@
 
 ### RULE 5: FILE ORGANIZATION HIERARCHY
 - **NO ROOT CLUTTER**: Never save working files to project root
-- **STRICT DIRECTORIES**: 
+- **STRICT DIRECTORIES**:
   - `/src` - Source code files only
   - `/tests` - Test files only
   - `/docs` - Documentation only
   - `/config` - Configuration only
-  - `/scripts` - Utility scripts only
+    - `/config/docker` - Docker compose and dockerignore files
+    - `/config/deployment` - Platform deployment configs (railway.json, render.yaml)
+  - `/scripts` - Utility scripts only (shell scripts, batch files, automation)
+
+### RULE 5.1: SHARED LIBRARIES ORGANIZATION
+- **libs/configuration** - Environment variable validation utility
+- **libs/infrastructure-shared** - Error handling, validation, utilities
+- **libs/service-base** - BaseMicroserviceService for NATS services
+- **libs/shared-nats-client** - NATS client connection management
+- **libs/types** - Shared TypeScript type definitions
+- **libs/*-domain** - Domain-specific business logic
+
+## Codebase Patterns
+
+### Base Class Usage
+- **BaseMicroserviceService** (`libs/service-base`): Extend for all NATS microservices
+  - Inherits from NatsClientService for connection/subscription management
+  - Provides: `publishEvent()`, `publishErrorEvent()`, `subscribeToEvents()`
+  - Used by: resume-parser-svc, jd-extractor-svc, scoring-engine-svc, report-generator-svc
+- **Testing pattern**: Mock lowest-level methods (NatsClientService) not intermediate protected methods
+
+### Component Splitting (Mobile)
+- Components over 500 lines should be split into smaller components
+- Extract display logic to separate component (e.g., `*-display.component.ts`)
+- Extract filter logic to separate component (e.g., `*-filter.component.ts`)
+- Extract business logic to service (e.g., `mobile-*.service.ts`)
+- Service uses BehaviorSubject pattern for reactive state management
+
+### Service Layering (Domain Services)
+- **UserCrudService**: Basic CRUD operations (create, read, update, delete, soft delete)
+- **UserAuthService**: Authentication operations (login, password verify, auth activity)
+- **UserManagementService**: Facade that delegates to CRUD and auth services
+
+### Environment Validation
+- Use `@ai-recruitment-clerk/configuration` for env validation on startup
+- Service schemas: `appGateway`, `resumeParser`, `jdExtractor`, `scoringEngine`, `reportGenerator`, `frontend`
+- Type-safe access: `env.getString()`, `env.getNumber()`, `env.getBoolean()`, `env.getArray()`, `env.getUrl()`
 
 ## Project Overview
 
