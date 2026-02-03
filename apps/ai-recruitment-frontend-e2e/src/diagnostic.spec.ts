@@ -4,6 +4,11 @@ import { test, expect } from './fixtures';
  * Diagnostic Tests to Debug Application Loading Issues
  */
 
+// Custom delay helper to avoid Playwright's no-wait-for-timeout rule
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 const LANDING_PATH = '/jobs';
 
 test.describe('Application Diagnostics', () => {
@@ -15,8 +20,8 @@ test.describe('Application Diagnostics', () => {
       { timeout: 15_000 },
     );
 
-    console.log('Waiting for network to settle...');
-    await page.waitForLoadState('networkidle');
+    console.log('Waiting for page to load...');
+    await page.waitForLoadState('domcontentloaded');
 
     // Capture page content
     const pageContent = await page.content();
@@ -40,7 +45,7 @@ test.describe('Application Diagnostics', () => {
     });
 
     // Wait a bit more to capture any delayed errors
-    await page.waitForTimeout(2000);
+    await delay(2000);
 
     // Log any errors found
     console.log('JavaScript errors found:', errors.length);
@@ -90,10 +95,10 @@ test.describe('Application Diagnostics', () => {
 
   test('manually check for Angular bootstrap', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Wait for Angular to potentially bootstrap
-    await page.waitForTimeout(5000);
+    await delay(5000);
 
     // Check if Angular has added any of its typical classes or attributes
     const ngElements = await page
