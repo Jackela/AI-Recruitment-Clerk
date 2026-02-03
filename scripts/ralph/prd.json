@@ -29,8 +29,8 @@
         "Rollback plan documented"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "Must remain deterministic and not rely on external services."
+      "passes": true,
+      "notes": "Contract validation is fully deterministic (file-based only). No env vars needed. Rollback plan in docs/ROLLBACK-US-002.md"
     },
     {
       "id": "US-003",
