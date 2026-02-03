@@ -12,6 +12,7 @@ export default [
       '**/test-results',
       '**/.nx',
       '**/jest-html-reporters-attach',
+      '**/vercel-migration/**',
     ],
   },
   {
