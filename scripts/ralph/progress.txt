@@ -14,6 +14,7 @@ Started: Tue Feb  3 19:15:59     2026
 - **CI Parity**: Use `npm run ci:local` for pre-push verification (test → lint → typecheck → build). Full CI includes E2E tests (`npm run test:e2e`).
 - **Act CLI**: Run GitHub Actions locally using act. Project includes npm scripts: act:ci, act:ci-affected, act:cd:pre, act:cd:prod, act:e2e-nightly, act:migration-rehearsal, act:cd:local.
 - **PR Template**: `.github/PULL_REQUEST_TEMPLATE.md` (299 lines) includes comprehensive sections: Type, Breaking Change, Description, Changes, Testing, Quality Checks, Documentation, Deployment, Dependencies, Checklist. PR validation enforced via `.github/workflows/pr-template-check.yml`.
+- **Testing Levels**: `npm run test:smoke` (10-15s, 8 projects) for TDD and fast feedback. `npm run test` (30s, all projects) for pre-commit. `npm run test:e2e` (2-3m) for pre-merge. See docs/TESTING_GUIDE.md for detailed workflow recommendations.
 
 ## 2026-02-03 - US-001
 - What was implemented: Verified existing ESM webpack.config.js works correctly; no code changes needed
@@ -271,4 +272,36 @@ Started: Tue Feb  3 19:15:59     2026
   - Alternative approaches considered: Danger.js (Ruby dependency), GitHub Apps (third-party), Repository Rules (less flexible), Manual review (inconsistent)
   - Automation is intentionally lightweight - checks for section headers, not content quality
   - Rollback is straightforward: disable or delete the workflow file
+
+## 2026-02-03 - US-017
+- What was implemented: Added smoke test suite for fast local iteration feedback
+- Files changed:
+  - Created: jest.smoke.config.cjs (smoke test Jest configuration)
+  - Updated: package.json (added test:smoke script)
+  - Created: docs/TESTING_GUIDE.md (comprehensive testing guide)
+  - Created: docs/ROLLBACK-US-017.md (comprehensive rollback plan)
+  - Updated: scripts/ralph/prd.json (marked US-017 as passing)
+- **Learnings for future iterations:**
+  - Project has 20+ test projects (14 libs, 6 apps, 2 e2e) in jest.config.cjs
+  - Full test suite runs ~200-300 tests in ~30 seconds
+  - Smoke tests target 8 critical projects: 3 core libs, 3 domain libs, 2 apps
+  - Smoke test runtime: ~10-15 seconds (2-3x faster than full suite)
+  - Smoke test configuration: maxWorkers: 1 (serial), testTimeout: 10000 (10s), bail: true (stop on failure), verbose: false (reduced output)
+  - Smoke tests scope includes:
+    - Core libs: api-contracts, shared-dtos, infrastructure-shared
+    - Domain libs: user-management-domain, job-management-domain, candidate-scoring-domain
+    - Apps: app-gateway, ai-recruitment-frontend
+  - Excluded from smoke: 7 other domain libs, 4 other microservices, all E2E tests, all integration tests
+  - npm run test:smoke is for local development only, not for CI
+  - CI still runs full suite (npm run test:ci), smoke tests don't replace CI checks
+  - docs/TESTING_GUIDE.md includes:
+    - Quick reference table comparing test:smoke, test, test:ci, test:e2e
+    - When to use each test command (TDD, pre-commit, pre-push, pre-PR)
+    - Test workflow recommendations (red-green-refactor cycles)
+    - Troubleshooting guide (smoke passes but full fails, CI fails, tests flaky, too slow)
+    - Customization instructions for modifying smoke test scope
+  - Alternative approaches considered: test tags/groups, monorepo project selection, watch mode with filter, no smoke tests
+  - Performance comparison: test:smoke (10-15s, 8 projects), test (30s, 20+ projects), test:ci (30s + coverage), test:e2e (2-3m)
+  - Rollback options: remove command, keep but disable, revert commit, modify scope
+  - Maintenance consideration: two Jest configs to maintain (jest.config.cjs and jest.smoke.config.cjs)
 ---
