@@ -1,12 +1,27 @@
+import type {
+  OnApplicationBootstrap,
+  OnApplicationShutdown} from '@nestjs/common';
 import {
   Injectable,
-  Logger,
-  OnApplicationBootstrap,
-  OnApplicationShutdown,
+  Logger
 } from '@nestjs/common';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { GridFsService } from '../gridfs/gridfs.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { ParsingService } from '../parsing/parsing.service';
+import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
+
+interface ServiceWithHealthCheck {
+  healthCheck: () => Promise<{ status: string }>;
+}
+
+interface ServiceWithResumeSubscriptions {
+  subscribeToResumeSubmissions: (
+    handler: (event: ResumeSubmittedEvent) => Promise<void>,
+  ) => Promise<void>;
+}
 
 /**
  * Provides app functionality.
@@ -34,7 +49,7 @@ export class AppService
    * Retrieves data.
    * @returns The { message: string; status?: string }.
    */
-  getData(): { message: string; status?: string } {
+  public getData(): { message: string; status?: string } {
     return {
       message: 'Resume Parser Service API',
       status: this.isInitialized ? 'ready' : 'initializing',
@@ -45,16 +60,16 @@ export class AppService
    * Performs the on application bootstrap operation.
    * @returns A promise that resolves when the operation completes.
    */
-  async onApplicationBootstrap(): Promise<void> {
+  public async onApplicationBootstrap(): Promise<void> {
     this.logger.log('Resume Parser Service starting...');
 
     try {
       // Initialize GridFS connections (already handled by GridFsService.onModuleInit)
       if (
         this.gridFsService &&
-        typeof (this.gridFsService as any).healthCheck === 'function'
+        typeof (this.gridFsService as unknown as ServiceWithHealthCheck).healthCheck === 'function'
       ) {
-        const gridFsHealth = await (this.gridFsService as any).healthCheck();
+        const gridFsHealth = await (this.gridFsService as unknown as ServiceWithHealthCheck).healthCheck();
         this.logger.log(`GridFS service initialized: ${gridFsHealth.status}`);
       } else {
         this.logger.log(
@@ -83,7 +98,7 @@ export class AppService
    * Performs the on application shutdown operation.
    * @returns A promise that resolves when the operation completes.
    */
-  async onApplicationShutdown(): Promise<void> {
+  public async onApplicationShutdown(): Promise<void> {
     this.logger.log('Resume Parser Service shutting down...');
 
     try {
@@ -103,11 +118,11 @@ export class AppService
       // Using ResumeParserNatsService to handle resume submitted events
       if (
         this.natsService &&
-        typeof (this.natsService as any).subscribeToResumeSubmissions ===
+        typeof (this.natsService as unknown as ServiceWithResumeSubscriptions).subscribeToResumeSubmissions ===
           'function'
       ) {
-        await (this.natsService as any).subscribeToResumeSubmissions(
-          async (event: any) => {
+        await (this.natsService as unknown as ServiceWithResumeSubscriptions).subscribeToResumeSubmissions(
+          async (event: ResumeSubmittedEvent): Promise<void> => {
             // Handle resume submission through parsing service
             if (this.parsingService && event) {
               await this.parsingService.handleResumeSubmitted(event);

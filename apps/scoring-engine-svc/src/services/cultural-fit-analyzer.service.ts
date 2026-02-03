@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
-import { JobRequirements } from './experience-analyzer.service';
+import type { JobRequirements } from './experience-analyzer.service';
 
 interface CulturalRecommendations {
   strengths: string[];
@@ -137,7 +138,7 @@ export class CulturalFitAnalyzerService {
   /**
    * Comprehensive cultural fit and soft skills analysis
    */
-  async analyzeCulturalFit(
+  public async analyzeCulturalFit(
     resume: ResumeDTO,
     companyProfile: CompanyProfile,
     jobRequirements: JobRequirements,
@@ -145,6 +146,10 @@ export class CulturalFitAnalyzerService {
     const startTime = Date.now();
 
     try {
+      if (!resume?.workExperience || resume.workExperience.length === 0) {
+        return this.fallbackCulturalFitAnalysis(resume, companyProfile);
+      }
+
       // Analyze cultural fit indicators
       const indicators = await this.analyzeCulturalIndicators(
         resume,
@@ -214,18 +219,18 @@ export class CulturalFitAnalyzerService {
 
     const prompt = `
       Analyze this professional background for cultural fit indicators:
-      
+
       WORK EXPERIENCE:
       ${experienceText}
-      
+
       SKILLS:
       ${resume.skills.join(', ')}
-      
+
       TARGET COMPANY PROFILE:
       - Size: ${companyProfile.size}
       - Culture: ${JSON.stringify(companyProfile.culture)}
       - Team Structure: ${JSON.stringify(companyProfile.teamStructure)}
-      
+
       Analyze the following cultural fit dimensions:
 
       1. Company Size Preference (based on work history pattern)
@@ -338,18 +343,18 @@ export class CulturalFitAnalyzerService {
 
     const prompt = `
       Assess soft skills based on this professional background:
-      
+
       EXPERIENCE:
       ${experienceText}
-      
+
       SKILLS MENTIONED:
       ${resume.skills.join(', ')}
-      
+
       EDUCATION:
       ${resume.education.map((edu) => `${edu.degree} in ${edu.major || 'N/A'} from ${edu.school}`).join(', ')}
-      
+
       Rate the following soft skills (0-100) based on evidence in the background:
-      
+
       1. Technical Communication - ability to explain complex concepts
       2. Problem Solving - analytical and creative problem-solving abilities
       3. Adaptability - flexibility in changing environments
@@ -358,9 +363,9 @@ export class CulturalFitAnalyzerService {
       6. Time Management - project delivery and organizational skills
       7. Critical Thinking - analytical reasoning and decision-making
       8. Emotional Intelligence - interpersonal skills and self-awareness
-      
+
       Provide evidence for each assessment from the resume content.
-      
+
       Return in JSON format:
       {
         "technicalCommunication": number (0-100),
@@ -425,7 +430,7 @@ export class CulturalFitAnalyzerService {
   private calculateAlignmentScores(
     indicators: CulturalFitIndicators,
     companyProfile: CompanyProfile,
-  ) {
+  ): AlignmentScores {
     // Company size alignment
     const companySizeAlignment = this.calculateCompanySizeAlignment(
       indicators.companySize.preference,
@@ -571,28 +576,28 @@ export class CulturalFitAnalyzerService {
     softSkills: SoftSkillsAssessment,
     companyProfile: CompanyProfile,
     alignmentScores: AlignmentScores,
-  ) {
+  ): Promise<CulturalRecommendations> {
     try {
       const prompt = `
         Generate hiring recommendations based on cultural fit analysis:
-        
+
         ALIGNMENT SCORES:
         - Company Size: ${alignmentScores.companySizeAlignment}%
         - Work Style: ${alignmentScores.workStyleAlignment}%
         - Leadership: ${alignmentScores.leadershipAlignment}%
         - Innovation: ${alignmentScores.innovationAlignment}%
         - Communication: ${alignmentScores.communicationAlignment}%
-        
+
         SOFT SKILLS SCORES:
         - Technical Communication: ${softSkills.technicalCommunication}%
         - Problem Solving: ${softSkills.problemSolving}%
         - Adaptability: ${softSkills.adaptability}%
         - Teamwork: ${softSkills.teamwork}%
         - Leadership: ${softSkills.leadership}%
-        
+
         COMPANY PROFILE:
         ${JSON.stringify(companyProfile, null, 2)}
-        
+
         Provide recommendations in JSON format:
         {
           "strengths": ["3-5 key strengths for this role"],
@@ -679,10 +684,14 @@ export class CulturalFitAnalyzerService {
     if (resume.workExperience.length < 2) confidence -= 0.15;
 
     // Reduce confidence for missing job descriptions
-    const emptyDescriptions = resume.workExperience.filter(
-      (exp) => !exp.summary || exp.summary.trim().length < 20,
-    ).length;
-    confidence -= (emptyDescriptions / resume.workExperience.length) * 0.2;
+    if (resume.workExperience.length > 0) {
+      const emptyDescriptions = resume.workExperience.filter(
+        (exp) => !exp.summary || exp.summary.trim().length < 20,
+      ).length;
+      confidence -= (emptyDescriptions / resume.workExperience.length) * 0.2;
+    } else {
+      confidence -= 0.2;
+    }
 
     // Increase confidence for strong evidence base
     const totalEvidence = Object.values(softSkills.evidence).flat().length;

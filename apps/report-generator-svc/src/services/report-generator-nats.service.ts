@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { NatsClientService, NatsPublishResult } from '@app/shared-nats-client';
+import type { NatsPublishResult } from '@app/shared-nats-client';
+import { NatsClientService } from '@app/shared-nats-client';
 import type { MatchScoredEvent } from '../report-generator/report-generator.service';
 
 // Enhanced type definitions for NATS service
@@ -65,7 +66,7 @@ export class ReportGeneratorNatsService extends NatsClientService {
   /**
    * Publish report generated event
    */
-  async publishReportGenerated(
+  public async publishReportGenerated(
     event: ReportGeneratedEvent,
   ): Promise<NatsPublishResult> {
     const subject = 'report.generated';
@@ -98,7 +99,7 @@ export class ReportGeneratorNatsService extends NatsClientService {
   /**
    * Publish report generation failed event
    */
-  async publishReportGenerationFailed(
+  public async publishReportGenerationFailed(
     event: ReportGenerationFailedEvent,
   ): Promise<NatsPublishResult> {
     const subject = 'report.generation.failed';
@@ -131,7 +132,7 @@ export class ReportGeneratorNatsService extends NatsClientService {
   /**
    * Subscribe to match.scored events from scoring-engine-svc
    */
-  async subscribeToMatchScored(
+  public async subscribeToMatchScored(
     handler: (event: MatchScoredEvent) => Promise<void>,
   ): Promise<void> {
     await this.subscribe('analysis.match.scored', handler, {
@@ -143,7 +144,7 @@ export class ReportGeneratorNatsService extends NatsClientService {
   /**
    * Subscribe to report generation requests
    */
-  async subscribeToReportGenerationRequested(
+  public async subscribeToReportGenerationRequested(
     handler: (event: ReportGenerationRequestedEvent) => Promise<void>,
   ): Promise<void> {
     await this.subscribe('report.generation.requested', handler, {
@@ -155,7 +156,7 @@ export class ReportGeneratorNatsService extends NatsClientService {
   /**
    * Health check for report generator specific NATS functionality
    */
-  async healthCheck(): Promise<{
+  public async healthCheck(): Promise<{
     status: string;
     details: HealthCheckDetails;
   }> {

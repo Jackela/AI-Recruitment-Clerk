@@ -22,7 +22,7 @@ export class RedisTokenBlacklistService {
    * @param token - The token.
    * @returns A promise that resolves to boolean value.
    */
-  async isTokenBlacklisted(token: string): Promise<boolean> {
+  public async isTokenBlacklisted(token: string): Promise<boolean> {
     const record = this.blacklistedTokens.get(token);
     if (!record) {
       return false;
@@ -42,7 +42,7 @@ export class RedisTokenBlacklistService {
    * @param token - The token.
    * @returns A promise that resolves to boolean value.
    */
-  async isBlacklisted(token: string): Promise<boolean> {
+  public async isBlacklisted(token: string): Promise<boolean> {
     return this.isTokenBlacklisted(token);
   }
 
@@ -51,7 +51,7 @@ export class RedisTokenBlacklistService {
    * @param userId - The user id.
    * @returns A promise that resolves to boolean value.
    */
-  async isUserBlacklisted(userId: string): Promise<boolean> {
+  public async isUserBlacklisted(userId: string): Promise<boolean> {
     return this.blacklistedUsers.has(userId);
   }
 
@@ -63,7 +63,7 @@ export class RedisTokenBlacklistService {
    * @param reason - The reason.
    * @returns A promise that resolves when the operation completes.
    */
-  async blacklistToken(
+  public async blacklistToken(
     token: string,
     userId: string,
     exp: number,
@@ -92,7 +92,7 @@ export class RedisTokenBlacklistService {
    * @param reason - The reason.
    * @returns A promise that resolves when the operation completes.
    */
-  async addToken(
+  public async addToken(
     token: string,
     userId: string,
     exp: number,
@@ -107,7 +107,7 @@ export class RedisTokenBlacklistService {
    * @param reason - The reason.
    * @returns A promise that resolves to number value.
    */
-  async blacklistAllUserTokens(
+  public async blacklistAllUserTokens(
     userId: string,
     reason: string,
   ): Promise<number> {
@@ -129,9 +129,9 @@ export class RedisTokenBlacklistService {
 
   /**
    * Retrieves metrics.
-   * @returns The any.
+   * @returns The metrics object.
    */
-  getMetrics(): any {
+  public getMetrics(): { blacklistedTokensCount: number; blacklistedUsersCount: number; lastCleanup: number } {
     return {
       blacklistedTokensCount: this.blacklistedTokens.size,
       blacklistedUsersCount: this.blacklistedUsers.size,
@@ -141,9 +141,9 @@ export class RedisTokenBlacklistService {
 
   /**
    * Performs the health check operation.
-   * @returns A promise that resolves to any.
+   * @returns A promise that resolves to health status.
    */
-  async healthCheck(): Promise<any> {
+  public async healthCheck(): Promise<{ status: string; tokenStore: string; blacklistedTokens: number; blacklistedUsers: number }> {
     return {
       status: 'healthy',
       tokenStore: 'in-memory',
@@ -157,7 +157,7 @@ export class RedisTokenBlacklistService {
    * Performs the cleanup operation.
    * @returns The number value.
    */
-  cleanup(): number {
+  public cleanup(): number {
     const now = Date.now();
     let cleaned = 0;
 

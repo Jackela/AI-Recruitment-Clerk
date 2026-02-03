@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { UploadResumeComponent } from './upload-resume.component';
 import { GuestApiService } from '../../services/guest/guest-api.service';
 import { WebSocketService } from '../../services/websocket.service';
@@ -14,8 +15,10 @@ describe('UploadResumeComponent', () => {
         {
           provide: GuestApiService,
           useValue: {
-            analyzeResume: () => ({ subscribe: (_: any) => {} }),
-            getDemoAnalysis: () => ({ subscribe: (_: any) => {} }),
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            analyzeResume: () => ({ subscribe: () => {} }),
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            getDemoAnalysis: () => ({ subscribe: () => {} }),
           },
         },
         {
@@ -23,6 +26,7 @@ describe('UploadResumeComponent', () => {
           useValue: {
             onCompletion: () => ({ pipe: () => ({ subscribe: () => ({}) }) }),
             onError: () => ({ pipe: () => ({ subscribe: () => ({}) }) }),
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
             disconnect: () => {},
           },
         },

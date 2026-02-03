@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { RedisConnectionService } from './redis-connection.service';
+import type { ConfigService } from '@nestjs/config';
+import type { RedisConnectionService } from './redis-connection.service';
 import { SchemaFieldTypes, VectorAlgorithms } from 'redis';
 
 type VectorSearchResult = { cacheKey: string; similarity: number };
@@ -10,7 +10,7 @@ type VectorSearchResult = { cacheKey: string; similarity: number };
  */
 @Injectable()
 export class VectorStoreService {
-  private readonly logger = new Logger(VectorStoreService.name);
+  private readonly logger: Logger = new Logger(VectorStoreService.name);
   private readonly indexName: string;
   private readonly keyPrefix: string;
   private readonly vectorField: string;
@@ -43,7 +43,7 @@ export class VectorStoreService {
   /**
    * Ensures the RediSearch vector index exists.
    */
-  async createIndex(): Promise<void> {
+  public async createIndex(): Promise<void> {
     const client = await this.getClient();
     if (!client) {
       this.logger.warn(
@@ -84,11 +84,13 @@ export class VectorStoreService {
             DIM: this.vectorDimensions,
             DISTANCE_METRIC: this.distanceMetric,
             INITIAL_CAP: 1000,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any,
         },
         {
           ON: 'HASH',
           PREFIX: [this.keyPrefix],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any,
       );
       this.indexEnsured = true;
@@ -110,7 +112,7 @@ export class VectorStoreService {
   /**
    * Adds or replaces a vector entry associated with a cache key.
    */
-  async addVector(key: string, vector: number[]): Promise<void> {
+  public async addVector(key: string, vector: number[]): Promise<void> {
     const client = await this.getClient();
     if (!client) {
       this.logger.warn('Redis client unavailable — skipping vector upsert.');
@@ -140,7 +142,7 @@ export class VectorStoreService {
    * @param threshold - Minimum similarity (0-1) to consider a match.
    * @param count - Maximum number of results to return.
    */
-  async findSimilar(
+  public async findSimilar(
     vector: number[],
     threshold: number,
     count: number,
@@ -189,6 +191,7 @@ export class VectorStoreService {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async getClient(): Promise<any | null> {
     const client = this.redisConnectionService.getRedisClient();
     return client ?? null;

@@ -1,10 +1,11 @@
+import type {
+  OnInit,
+  OnDestroy} from '@angular/core';
 import {
   Component,
   Input,
   Output,
   EventEmitter,
-  OnInit,
-  OnDestroy,
   HostListener,
   signal,
   computed,
@@ -14,16 +15,17 @@ import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 
 // Import configuration
+import type {
+  TimesheetColumn} from '../../../../lib/config/table-config';
 import {
   TIMESHEET_VIEW_CONFIGS,
   TIMESHEET_BREAKPOINTS,
-  TimesheetColumn,
   getResponsiveColumns,
   getViewConfig,
 } from '../../../../lib/config/table-config';
 
 // Import base table interfaces
-import {
+import type {
   SortEvent,
   PageEvent,
 } from '../data-table/data-table.component';
@@ -125,7 +127,7 @@ export type TimesheetViewType = keyof typeof TIMESHEET_VIEW_CONFIGS;
           <!-- Dynamic export button -->
           <button
             *ngIf="tableOptions().showExport"
-            (click)="exportData()"
+            (click)="exportDataCsv()"
             class="export-btn"
             type="button"
           >
@@ -147,14 +149,14 @@ export type TimesheetViewType = keyof typeof TIMESHEET_VIEW_CONFIGS;
           <!-- Bulk action buttons for bulk edit view -->
           <div class="bulk-actions" *ngIf="currentViewType === 'bulkEdit' && selectedEntries().length > 0">
             <button
-              (click)="onBulkEdit.emit(selectedEntries())"
+              (click)="bulkEdit.emit(selectedEntries())"
               class="bulk-btn edit-bulk-btn"
               type="button"
             >
               批量编辑 ({{ selectedEntries().length }})
             </button>
             <button
-              (click)="onBulkDelete.emit(selectedEntries())"
+              (click)="bulkDelete.emit(selectedEntries())"
               class="bulk-btn delete-bulk-btn"
               type="button"
             >
@@ -330,7 +332,7 @@ export type TimesheetViewType = keyof typeof TIMESHEET_VIEW_CONFIGS;
               <td *ngIf="showActions" class="actions-column">
                 <div class="action-buttons">
                   <button
-                    (click)="onView.emit(entry)"
+                    (click)="viewEntry.emit(entry)"
                     class="action-btn view-btn"
                     title="查看详情"
                     type="button"
@@ -341,7 +343,7 @@ export type TimesheetViewType = keyof typeof TIMESHEET_VIEW_CONFIGS;
                     </svg>
                   </button>
                   <button
-                    (click)="onEdit.emit(entry)"
+                    (click)="editEntry.emit(entry)"
                     class="action-btn edit-btn"
                     title="编辑"
                     type="button"
@@ -353,7 +355,7 @@ export type TimesheetViewType = keyof typeof TIMESHEET_VIEW_CONFIGS;
                     </svg>
                   </button>
                   <button
-                    (click)="onDelete.emit(entry)"
+                    (click)="deleteEntry.emit(entry)"
                     class="action-btn delete-btn"
                     title="删除"
                     type="button"
@@ -458,35 +460,56 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   // Inputs
-  @Input() data: TimesheetEntry[] = [];
-  @Input() viewType: TimesheetViewType = 'full';
-  @Input() showActions = true;
-  @Input() customColumns?: TimesheetColumn[];
+  @Input() public data: TimesheetEntry[] = [];
+  @Input() public viewType: TimesheetViewType = 'full';
+  @Input() public showActions = true;
+  @Input() public customColumns?: TimesheetColumn[];
 
   // Outputs - timesheet-specific events
-  @Output() onSort = new EventEmitter<SortEvent>();
-  @Output() onPageChange = new EventEmitter<PageEvent>();
-  @Output() onSelectionChange = new EventEmitter<TimesheetEntry[]>();
-  @Output() onView = new EventEmitter<TimesheetEntry>();
-  @Output() onEdit = new EventEmitter<TimesheetEntry>();
-  @Output() onDelete = new EventEmitter<TimesheetEntry>();
-  @Output() onExport = new EventEmitter<void>();
-  @Output() onBulkEdit = new EventEmitter<TimesheetEntry[]>();
-  @Output() onBulkDelete = new EventEmitter<TimesheetEntry[]>();
-  @Output() onViewChange = new EventEmitter<TimesheetViewType>();
+  @Output() public sortChange = new EventEmitter<SortEvent>();
+  @Output() public pageChange = new EventEmitter<PageEvent>();
+  @Output() public selectionChange = new EventEmitter<TimesheetEntry[]>();
+  @Output() public viewEntry = new EventEmitter<TimesheetEntry>();
+  @Output() public editEntry = new EventEmitter<TimesheetEntry>();
+  @Output() public deleteEntry = new EventEmitter<TimesheetEntry>();
+  @Output() public exportData = new EventEmitter<void>();
+  @Output() public bulkEdit = new EventEmitter<TimesheetEntry[]>();
+  @Output() public bulkDelete = new EventEmitter<TimesheetEntry[]>();
+  @Output() public viewChange = new EventEmitter<TimesheetViewType>();
+
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
+  /** @deprecated Use sortChange instead */ @Output() public onSort = this.sortChange;
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
+  /** @deprecated Use pageChange instead */ @Output() public onPageChange = this.pageChange;
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
+  /** @deprecated Use selectionChange instead */ @Output() public onSelectionChange = this.selectionChange;
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
+  /** @deprecated Use viewEntry instead */ @Output() public onView = this.viewEntry;
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
+  /** @deprecated Use editEntry instead */ @Output() public onEdit = this.editEntry;
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
+  /** @deprecated Use deleteEntry instead */ @Output() public onDelete = this.deleteEntry;
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
+  /** @deprecated Use exportData instead */ @Output() public onExport = this.exportData;
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
+  /** @deprecated Use bulkEdit instead */ @Output() public onBulkEdit = this.bulkEdit;
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
+  /** @deprecated Use bulkDelete instead */ @Output() public onBulkDelete = this.bulkDelete;
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
+  /** @deprecated Use viewChange instead */ @Output() public onViewChange = this.viewChange;
 
   // State management
-  searchTerm = '';
-  pageSize = 25;
-  currentPage = signal(0);
-  sortColumn = signal<string | null>(null);
-  sortDirection = signal<'asc' | 'desc' | null>(null);
-  selectedEntries = signal<TimesheetEntry[]>([]);
-  screenWidth = signal(window.innerWidth);
-  currentViewType: TimesheetViewType = 'full';
+  public searchTerm = '';
+  public pageSize = 25;
+  public currentPage = signal(0);
+  public sortColumn = signal<string | null>(null);
+  public sortDirection = signal<'asc' | 'desc' | null>(null);
+  public selectedEntries = signal<TimesheetEntry[]>([]);
+  public screenWidth = signal(window.innerWidth);
+  public currentViewType: TimesheetViewType = 'full';
 
   // Configuration-driven computed properties
-  displayedColumns = computed(() => {
+  public displayedColumns = computed(() => {
     // Use custom columns if provided, otherwise use responsive columns from configuration
     if (this.customColumns) {
       return this.customColumns;
@@ -502,13 +525,13 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     return getResponsiveColumns(this.screenWidth());
   });
 
-  tableOptions = computed(() => {
+  public tableOptions = computed(() => {
     const viewConfig = getViewConfig(this.currentViewType);
     return viewConfig ? viewConfig.options : TIMESHEET_VIEW_CONFIGS.full.options;
   });
 
   // Data processing computed properties
-  filteredData = computed(() => {
+  public filteredData = computed(() => {
     let filtered = [...this.data];
 
     // Apply search filter based on filterable columns from configuration
@@ -526,59 +549,58 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     }
 
     // Apply sorting based on sortable configuration
-    if (this.sortColumn() && this.sortDirection()) {
-      const col = this.sortColumn()!;
-      const dir = this.sortDirection()!;
-
+    const sortCol = this.sortColumn();
+    const sortDir = this.sortDirection();
+    if (sortCol && sortDir) {
       filtered.sort((a, b) => {
-        const aVal = this.getCellValue(a, col);
-        const bVal = this.getCellValue(b, col);
+        const aVal = this.getCellValue(a, sortCol);
+        const bVal = this.getCellValue(b, sortCol);
 
         if (aVal === bVal) return 0;
         if (aVal === null || aVal === undefined) return 1;
         if (bVal === null || bVal === undefined) return -1;
 
         const comparison = aVal < bVal ? -1 : 1;
-        return dir === 'asc' ? comparison : -comparison;
+        return sortDir === 'asc' ? comparison : -comparison;
       });
     }
 
     return filtered;
   });
 
-  totalItems = computed(() => this.filteredData().length);
-  totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize));
+  public totalItems = computed(() => this.filteredData().length);
+  public totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize));
 
-  paginatedData = computed(() => {
+  public paginatedData = computed(() => {
     const start = this.currentPage() * this.pageSize;
     const end = start + this.pageSize;
     return this.filteredData().slice(start, end);
   });
 
-  startIndex = computed(() => this.currentPage() * this.pageSize);
-  endIndex = computed(() =>
+  public startIndex = computed(() => this.currentPage() * this.pageSize);
+  public endIndex = computed(() =>
     Math.min(this.startIndex() + this.pageSize, this.totalItems())
   );
 
-  ngOnInit() {
+  public ngOnInit(): void {
     // Set initial view type and configuration
     this.currentViewType = this.viewType;
     this.pageSize = this.tableOptions().pageSize || 25;
   }
 
-  ngOnDestroy() {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
   // Window resize handler for responsive behavior
   @HostListener('window:resize', ['$event'])
-  onResize(event: Event) {
+  public onResize(event: Event): void {
     this.screenWidth.set((event.target as Window).innerWidth);
   }
 
   // Configuration-driven helper methods
-  getCellValue(entry: TimesheetEntry, key: string): unknown {
+  public getCellValue(entry: TimesheetEntry, key: string): unknown {
     const keys = key.split('.');
     let value: unknown = entry;
 
@@ -589,7 +611,7 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     return value;
   }
 
-  getColumnClasses(column: TimesheetColumn): string {
+  public getColumnClasses(column: TimesheetColumn): string {
     const classes: string[] = [];
 
     if (column.priority) {
@@ -611,7 +633,7 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     return classes.join(' ');
   }
 
-  getColumnLabel(column: TimesheetColumn): string {
+  public getColumnLabel(column: TimesheetColumn): string {
     // Use mobile label on small screens if available from configuration
     if (this.isMobileView() && column.mobileLabel) {
       return column.mobileLabel;
@@ -619,7 +641,7 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     return column.label;
   }
 
-  getTruncatedValue(entry: TimesheetEntry, column: TimesheetColumn): string {
+  public getTruncatedValue(entry: TimesheetEntry, column: TimesheetColumn): string {
     const value = this.getCellValue(entry, column.key);
     const text = String(value || '');
 
@@ -631,7 +653,7 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     return text;
   }
 
-  shouldShowTooltip(entry: TimesheetEntry, column: TimesheetColumn): boolean {
+  public shouldShowTooltip(entry: TimesheetEntry, column: TimesheetColumn): boolean {
     if (!column.truncateLength) return false;
 
     const value = this.getCellValue(entry, column.key);
@@ -641,23 +663,23 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
   }
 
   // Responsive helper methods using configuration breakpoints
-  isMobileView(): boolean {
+  public isMobileView(): boolean {
     return this.screenWidth() <= TIMESHEET_BREAKPOINTS.mobile;
   }
 
-  isTabletView(): boolean {
+  public isTabletView(): boolean {
     return (
       this.screenWidth() > TIMESHEET_BREAKPOINTS.mobile &&
       this.screenWidth() <= TIMESHEET_BREAKPOINTS.tablet
     );
   }
 
-  isDesktopView(): boolean {
+  public isDesktopView(): boolean {
     return this.screenWidth() > TIMESHEET_BREAKPOINTS.tablet;
   }
 
   // Timesheet-specific formatting methods
-  formatDuration(duration: unknown): string {
+  public formatDuration(duration: unknown): string {
     const hours = Number(duration || 0);
     const wholeHours = Math.floor(hours);
     const minutes = Math.round((hours - wholeHours) * 60);
@@ -668,7 +690,7 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     return `${wholeHours}小时${minutes}分钟`;
   }
 
-  formatTime(time: unknown, format?: '12h' | '24h' | 'decimal'): string {
+  public formatTime(time: unknown, format?: '12h' | '24h' | 'decimal'): string {
     const timeStr = String(time || '');
     if (!timeStr || timeStr === '') return '';
 
@@ -685,7 +707,7 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     return timeStr; // Default 24h format
   }
 
-  getStatusLabel(status: unknown): string {
+  public getStatusLabel(status: unknown): string {
     const statusLabels: Record<string, string> = {
       draft: '草稿',
       submitted: '已提交',
@@ -696,22 +718,22 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
   }
 
   // Event handlers
-  onSearch() {
+  public onSearch(): void {
     this.currentPage.set(0);
   }
 
-  clearSearch() {
+  public clearSearch(): void {
     this.searchTerm = '';
     this.onSearch();
   }
 
-  onViewTypeChange() {
-    this.onViewChange.emit(this.currentViewType);
+  public onViewTypeChange(): void {
+    this.viewChange.emit(this.currentViewType);
     this.pageSize = this.tableOptions().pageSize || 25;
     this.currentPage.set(0);
   }
 
-  handleSort(column: string) {
+  public handleSort(column: string): void {
     // Find column configuration to check if sortable
     const columnConfig = this.displayedColumns().find(col => col.key === column);
     if (!columnConfig?.sortable) return;
@@ -731,28 +753,31 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
       this.sortDirection.set('asc');
     }
 
-    this.onSort.emit({
-      column: this.sortColumn()!,
-      direction: this.sortDirection(),
-    });
+    const currentSortColumn = this.sortColumn();
+    if (currentSortColumn) {
+      this.sortChange.emit({
+        column: currentSortColumn,
+        direction: this.sortDirection(),
+      });
+    }
   }
 
   // Selection methods
-  isSelected(entry: TimesheetEntry): boolean {
+  public isSelected(entry: TimesheetEntry): boolean {
     return this.selectedEntries().some(selected => selected.id === entry.id);
   }
 
-  isAllSelected(): boolean {
+  public isAllSelected(): boolean {
     const pageData = this.paginatedData();
     return pageData.length > 0 && pageData.every((entry) => this.isSelected(entry));
   }
 
-  isSomeSelected(): boolean {
+  public isSomeSelected(): boolean {
     const pageData = this.paginatedData();
     return pageData.some((entry) => this.isSelected(entry)) && !this.isAllSelected();
   }
 
-  toggleSelect(entry: TimesheetEntry) {
+  public toggleSelect(entry: TimesheetEntry): void {
     if (!this.tableOptions().selectable) return;
 
     const selected = [...this.selectedEntries()];
@@ -770,10 +795,10 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     }
 
     this.selectedEntries.set(selected);
-    this.onSelectionChange.emit(selected);
+    this.selectionChange.emit(selected);
   }
 
-  toggleSelectAll() {
+  public toggleSelectAll(): void {
     if (!this.tableOptions().selectable) return;
 
     const pageData = this.paginatedData();
@@ -797,42 +822,42 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     }
 
     this.selectedEntries.set(selected);
-    this.onSelectionChange.emit(selected);
+    this.selectionChange.emit(selected);
   }
 
   // Pagination methods
-  previousPage() {
+  public previousPage(): void {
     if (this.currentPage() > 0) {
       this.currentPage.update((p) => p - 1);
       this.emitPageChange();
     }
   }
 
-  nextPage() {
+  public nextPage(): void {
     if (this.currentPage() < this.totalPages() - 1) {
       this.currentPage.update((p) => p + 1);
       this.emitPageChange();
     }
   }
 
-  goToPage(page: number) {
+  public goToPage(page: number): void {
     this.currentPage.set(page);
     this.emitPageChange();
   }
 
-  onPageSizeChange() {
+  public onPageSizeChange(): void {
     this.currentPage.set(0);
     this.emitPageChange();
   }
 
-  emitPageChange() {
-    this.onPageChange.emit({
+  public emitPageChange(): void {
+    this.pageChange.emit({
       pageIndex: this.currentPage(),
       pageSize: this.pageSize,
     });
   }
 
-  getPageNumbers(): number[] {
+  public getPageNumbers(): number[] {
     const total = this.totalPages();
     const current = this.currentPage();
     const pages: number[] = [];
@@ -853,8 +878,8 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
   }
 
   // Export functionality
-  exportData() {
-    this.onExport.emit();
+  public exportDataCsv(): void {
+    this.exportData.emit();
     // Default CSV export implementation for timesheet data
     const csv = this.convertToCSV(this.filteredData());
     this.downloadCSV(csv, `timesheet-export-${new Date().toISOString().split('T')[0]}.csv`);
@@ -894,7 +919,7 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     return [csvHeaders, ...csvRows].join('\n');
   }
 
-  private downloadCSV(csv: string, filename: string) {
+  private downloadCSV(csv: string, filename: string): void {
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);

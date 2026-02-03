@@ -1,15 +1,16 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
+import type { NestMiddleware } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import type { Request, Response, NextFunction } from 'express';
 import fs from 'fs';
 import path from 'path';
 
-function ensureDir(dir: string) {
+function ensureDir(dir: string): void {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 
 @Injectable()
 export class AuditMiddleware implements NestMiddleware {
-  use(req: Request, res: Response, next: NextFunction) {
+  public use(req: Request, res: Response, next: NextFunction): void {
     const start = Date.now();
     res.on('finish', () => {
       // Only audit ops endpoints and mutating methods

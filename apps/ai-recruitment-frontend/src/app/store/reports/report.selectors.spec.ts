@@ -1,7 +1,8 @@
 import * as ReportSelectors from './report.selectors';
-import { ReportState, initialReportState } from './report.state';
-import { ReportListItem, AnalysisReport } from './report.model';
-import { AppState } from '../app.state';
+import type { ReportState} from './report.state';
+import { initialReportState as _initialReportState } from './report.state';
+import type { ReportListItem, AnalysisReport } from './report.model';
+import type { AppState } from '../app.state';
 
 describe('Report Selectors', () => {
   const mockReportListItems: ReportListItem[] = [

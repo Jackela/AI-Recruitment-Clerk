@@ -1,11 +1,11 @@
-import {
+import type {
   Incentive,
   IncentiveStatus,
   Currency,
   PaymentMethod,
 } from '../../domain/aggregates/incentive.aggregate.js';
-import { IncentiveSummary } from '../../domain/value-objects/index.js';
-import { IncentivePriority } from '../../domain/domain-services/incentive.rules.js';
+import type { IncentiveSummary } from '../../domain/value-objects/index.js';
+import type { IncentivePriority } from '../../domain/domain-services/incentive.rules.js';
 
 // Application layer DTOs and result classes
 
@@ -25,7 +25,7 @@ export class IncentiveCreationResult {
    * @param data - The data.
    * @returns The IncentiveCreationResult.
    */
-  static success(data: IncentiveSummary): IncentiveCreationResult {
+  public static success(data: IncentiveSummary): IncentiveCreationResult {
     return new IncentiveCreationResult(true, data);
   }
 
@@ -34,7 +34,7 @@ export class IncentiveCreationResult {
    * @param errors - The errors.
    * @returns The IncentiveCreationResult.
    */
-  static failed(errors: string[]): IncentiveCreationResult {
+  public static failed(errors: string[]): IncentiveCreationResult {
     return new IncentiveCreationResult(false, undefined, errors);
   }
 }
@@ -59,7 +59,7 @@ export class IncentiveValidationResult {
    * @param data - The data.
    * @returns The IncentiveValidationResult.
    */
-  static success(data: {
+  public static success(data: {
     incentiveId: string;
     isValid: boolean;
     errors: string[];
@@ -73,7 +73,7 @@ export class IncentiveValidationResult {
    * @param errors - The errors.
    * @returns The IncentiveValidationResult.
    */
-  static failed(errors: string[]): IncentiveValidationResult {
+  public static failed(errors: string[]): IncentiveValidationResult {
     return new IncentiveValidationResult(false, undefined, errors);
   }
 }
@@ -97,7 +97,7 @@ export class IncentiveApprovalResult {
    * @param data - The data.
    * @returns The IncentiveApprovalResult.
    */
-  static success(data: {
+  public static success(data: {
     incentiveId: string;
     status: IncentiveStatus;
     rewardAmount: number;
@@ -110,7 +110,7 @@ export class IncentiveApprovalResult {
    * @param errors - The errors.
    * @returns The IncentiveApprovalResult.
    */
-  static failed(errors: string[]): IncentiveApprovalResult {
+  public static failed(errors: string[]): IncentiveApprovalResult {
     return new IncentiveApprovalResult(false, undefined, errors);
   }
 }
@@ -134,7 +134,7 @@ export class IncentiveRejectionResult {
    * @param data - The data.
    * @returns The IncentiveRejectionResult.
    */
-  static success(data: {
+  public static success(data: {
     incentiveId: string;
     status: IncentiveStatus;
     rejectionReason: string;
@@ -147,7 +147,7 @@ export class IncentiveRejectionResult {
    * @param errors - The errors.
    * @returns The IncentiveRejectionResult.
    */
-  static failed(errors: string[]): IncentiveRejectionResult {
+  public static failed(errors: string[]): IncentiveRejectionResult {
     return new IncentiveRejectionResult(false, undefined, errors);
   }
 }
@@ -174,7 +174,7 @@ export class PaymentProcessingResult {
    * @param data - The data.
    * @returns The PaymentProcessingResult.
    */
-  static success(data: {
+  public static success(data: {
     incentiveId: string;
     transactionId: string;
     amount: number;
@@ -190,7 +190,7 @@ export class PaymentProcessingResult {
    * @param errors - The errors.
    * @returns The PaymentProcessingResult.
    */
-  static failed(errors: string[]): PaymentProcessingResult {
+  public static failed(errors: string[]): PaymentProcessingResult {
     return new PaymentProcessingResult(false, undefined, errors);
   }
 }
@@ -216,7 +216,7 @@ export class BatchPaymentResult {
    * @param data - The data.
    * @returns The BatchPaymentResult.
    */
-  static success(data: {
+  public static success(data: {
     totalIncentives: number;
     successCount: number;
     failureCount: number;
@@ -231,7 +231,7 @@ export class BatchPaymentResult {
    * @param errors - The errors.
    * @returns The BatchPaymentResult.
    */
-  static failed(errors: string[]): BatchPaymentResult {
+  public static failed(errors: string[]): BatchPaymentResult {
     return new BatchPaymentResult(false, undefined, errors);
   }
 }
@@ -254,7 +254,7 @@ export class IncentiveStatsResult {
    * @param data - The data.
    * @returns The IncentiveStatsResult.
    */
-  static success(data: {
+  public static success(data: {
     individual?: IPIncentiveStatistics;
     system?: SystemIncentiveStatistics;
   }): IncentiveStatsResult {
@@ -266,7 +266,7 @@ export class IncentiveStatsResult {
    * @param errors - The errors.
    * @returns The IncentiveStatsResult.
    */
-  static failed(errors: string[]): IncentiveStatsResult {
+  public static failed(errors: string[]): IncentiveStatsResult {
     return new IncentiveStatsResult(false, undefined, errors);
   }
 }
@@ -289,7 +289,7 @@ export class PendingIncentivesResult {
    * @param data - The data.
    * @returns The PendingIncentivesResult.
    */
-  static success(
+  public static success(
     data: Array<{
       incentive: IncentiveSummary;
       priority: IncentivePriority;
@@ -303,7 +303,7 @@ export class PendingIncentivesResult {
    * @param errors - The errors.
    * @returns The PendingIncentivesResult.
    */
-  static failed(errors: string[]): PendingIncentivesResult {
+  public static failed(errors: string[]): PendingIncentivesResult {
     return new PendingIncentivesResult(false, undefined, errors);
   }
 }

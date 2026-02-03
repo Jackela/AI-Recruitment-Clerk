@@ -1,22 +1,25 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { LoggerService } from '../../services/shared/logger.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Observable, of, interval, Subject, combineLatest } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { of, interval, Subject, combineLatest } from 'rxjs';
 import { map, takeUntil, catchError, shareReplay } from 'rxjs/operators';
 import { SharedModule } from '../../components/shared/shared.module';
+import type {
+  BentoGridItem} from '../../components/shared/bento-grid/bento-grid.component';
 import {
-  BentoGridComponent,
-  BentoGridItem,
+  BentoGridComponent
 } from '../../components/shared/bento-grid/bento-grid.component';
-import {
+import type {
   DashboardStats,
   SystemHealth,
 } from '../../services/dashboard-api.service';
 import { GuestApiService } from '../../services/guest/guest-api.service';
 import {
   WebSocketStatsService,
-  RealtimeStats,
+  type RealtimeStats,
 } from '../../services/realtime/websocket-stats.service';
 import { ProgressFeedbackService } from '../../services/feedback/progress-feedback.service';
 
@@ -435,35 +438,23 @@ interface GuestStats {
   ],
 })
 export class EnhancedDashboardComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
 
-  stats$!: Observable<DashboardStats>;
-  systemHealth$!: Observable<SystemHealth>;
-  bentoItems$!: Observable<BentoGridItem[]>;
+  public stats$!: Observable<DashboardStats>;
+  public systemHealth$!: Observable<SystemHealth>;
+  public bentoItems$!: Observable<BentoGridItem[]>;
 
-  /**
-   * Initializes a new instance of the Enhanced Dashboard Component.
-   * @param guestApi - The guest api.
-   * @param websocketStats - The websocket stats.
-   * @param progressFeedback - The progress feedback.
-   * @param loggerService - The logger service.
-   */
-  constructor(
-    private guestApi: GuestApiService,
-    private websocketStats: WebSocketStatsService,
-    private progressFeedback: ProgressFeedbackService,
-    private loggerService: LoggerService,
-  ) {
-    this.logger = this.loggerService.createLogger('EnhancedDashboardComponent');
-  }
-
-  private logger: ReturnType<LoggerService['createLogger']>;
+  private readonly guestApi = inject(GuestApiService);
+  private readonly websocketStats = inject(WebSocketStatsService);
+  private readonly progressFeedback = inject(ProgressFeedbackService);
+  private readonly loggerService = inject(LoggerService);
+  private readonly logger = this.loggerService.createLogger('EnhancedDashboardComponent');
 
   /**
    * Performs the ng on init operation.
    * @returns The result of the operation.
    */
-  ngOnInit() {
+  public ngOnInit(): void {
     this.initializeDataStreams();
   }
 
@@ -471,12 +462,12 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
    * Performs the ng on destroy operation.
    * @returns The result of the operation.
    */
-  ngOnDestroy() {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  private initializeDataStreams() {
+  private initializeDataStreams(): void {
     // Use real-time WebSocket data with fallback to mock data
     const realtimeStats$ = this.websocketStats.subscribeToStats().pipe(
       takeUntil(this.destroy$),
@@ -579,7 +570,7 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
     };
   }
 
-  private createMockMetrics() {
+  private createMockMetrics(): SystemMetrics {
     return {
       cpuUsage: 45,
       memoryUsage: 60,
@@ -641,7 +632,7 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
     const getServiceStatus = (
       metric: number,
       thresholds: { warning: number; error: number },
-    ) => {
+    ): 'error' | 'warning' | 'healthy' => {
       if (metric > thresholds.error) return 'error';
       if (metric > thresholds.warning) return 'warning';
       return 'healthy';
@@ -836,7 +827,7 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
    * @param status - The status.
    * @returns The string value.
    */
-  getSystemStatusText(status?: string): string {
+  public getSystemStatusText(status?: string): string {
     switch (status) {
       case 'healthy':
         return '正常';
@@ -853,7 +844,7 @@ export class EnhancedDashboardComponent implements OnInit, OnDestroy {
    * Performs the on bento item click operation.
    * @param item - The item.
    */
-  onBentoItemClick(item: BentoGridItem): void {
+  public onBentoItemClick(item: BentoGridItem): void {
     this.logger.userAction('Bento grid item clicked', {
       itemId: item.id,
       itemVariant: item.variant,

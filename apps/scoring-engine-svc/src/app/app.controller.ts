@@ -1,5 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { AppService } from './app.service';
 import type {
   GapAnalysisRequestDto,
@@ -23,7 +24,7 @@ export class AppController {
    * @returns The GapAnalysisResultDto.
    */
   @MessagePattern('scoring.gap-analysis')
-  gapAnalysis(body: GapAnalysisRequestDto): GapAnalysisResultDto {
+  public gapAnalysis(body: GapAnalysisRequestDto): GapAnalysisResultDto {
     // Touch injected service to satisfy TS6138 (no-op read)
     void this._appService;
     const jdSkills = body.jdSkills?.length
@@ -41,17 +42,17 @@ export class AppController {
       suggestedSkills: [],
     };
 
-    function normalize(arr: string[]) {
+    function normalize(arr: string[]): string[] {
       return Array.from(
         new Set(arr.map((s) => s.toLowerCase().trim()).filter((s) => !!s)),
       );
     }
-    function tokenize(text: string) {
+    function tokenize(text: string): string[] {
       // Insert spaces at lower-to-upper boundaries to split concatenations like "DevOpsAWS"
       const spaced = (text || '').replace(/([a-z])([A-Z])/g, '$1 $2');
       const base = spaced
         .toLowerCase()
-        .split(/[^a-z0-9+#\.\-]+/)
+        .split(/[^a-z0-9+#.-]+/)
         .filter((t) => t && t.length > 1);
 
       const out = new Set<string>();

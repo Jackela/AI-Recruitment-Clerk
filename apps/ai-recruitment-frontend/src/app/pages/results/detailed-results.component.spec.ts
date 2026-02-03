@@ -1,7 +1,7 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { signal } from '@angular/core';
 import { DetailedResultsComponent } from './detailed-results.component';
 import { GuestApiService } from '../../services/guest/guest-api.service';
 

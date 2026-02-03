@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @fileoverview ExtractionService Design by Contract Enhancement
  * @author AI Recruitment Team
@@ -13,13 +14,13 @@ import {
   Ensures,
   ContractValidators,
 } from '@ai-recruitment-clerk/infrastructure-shared';
-import { LlmService } from '../llm/llm.service';
-import { NatsClient } from '../nats/nats.client';
-import {
+import type { LlmService } from '../llm/llm.service';
+import type { NatsClient } from '../nats/nats.client';
+import type {
   JobJdSubmittedEvent,
   AnalysisJdExtractedEvent,
 } from '../dto/events.dto';
-import { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
+import type { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
 import {
   RetryUtility,
 } from '@ai-recruitment-clerk/infrastructure-shared';
@@ -137,7 +138,7 @@ export class ExtractionServiceContracts {
       ),
     'Must return valid extraction result with confidence, skills, title, experience range, and processing time under 15 seconds',
   )
-  async extractJobRequirements(
+  public async extractJobRequirements(
     jdText: string,
     extractionConfig?: ExtractionRequest['extractionConfig'],
   ): Promise<ExtractionResult> {
@@ -153,7 +154,7 @@ export class ExtractionServiceContracts {
       const extractionRequest: ExtractionRequest = {
         jobTitle: this.extractJobTitle(sanitizedJdText),
         jdText: sanitizedJdText,
-        extractionConfig: extractionConfig || {
+        extractionConfig: extractionConfig ?? {
           includeDetailedAnalysis: true,
           confidenceThreshold: 0.6,
         },
@@ -195,7 +196,7 @@ export class ExtractionServiceContracts {
         ...extractionResult,
         extractionMetadata: {
           processingTime,
-          llmModel: llmResponse.model || 'fallback-rules',
+          llmModel: llmResponse.model ?? 'fallback-rules',
           retryAttempts,
           fallbacksUsed,
         },
@@ -249,7 +250,7 @@ export class ExtractionServiceContracts {
       event.jdText.length >= 50,
     'Job JD submitted event must have valid jobId, jobTitle, and jdText (min 50 chars)',
   )
-  async handleJobJdSubmitted(event: JobJdSubmittedEvent): Promise<void> {
+  public async handleJobJdSubmitted(event: JobJdSubmittedEvent): Promise<void> {
     const { jobId, jobTitle, jdText } = event;
 
     this.logger.log(
@@ -311,7 +312,7 @@ export class ExtractionServiceContracts {
     // Remove excessive whitespace and normalize
     return jdText
       .replace(/\s+/g, ' ')
-      .replace(/[^\w\s.,;:()\-\/]/g, ' ')
+      .replace(/[^\w\s.,;:()/-]/g, ' ')
       .trim()
       .substring(0, 50000); // Ensure max length
   }
@@ -373,17 +374,17 @@ export class ExtractionServiceContracts {
   ): Promise<Omit<ExtractionResult, 'extractionMetadata'>> {
     // Validate required fields and apply defaults if necessary
     const result = {
-      jobTitle: llmResponse.jobTitle || jobTitle,
-      requiredSkills: llmResponse.requiredSkills || [],
-      experienceYears: llmResponse.experienceYears || { min: 0, max: 3 },
-      educationLevel: llmResponse.educationLevel || 'bachelor',
-      seniority: llmResponse.seniority || 'mid',
-      softSkills: llmResponse.softSkills || [],
-      responsibilities: llmResponse.responsibilities || [],
+      jobTitle: llmResponse.jobTitle ?? jobTitle,
+      requiredSkills: llmResponse.requiredSkills ?? [],
+      experienceYears: llmResponse.experienceYears ?? { min: 0, max: 3 },
+      educationLevel: llmResponse.educationLevel ?? 'bachelor',
+      seniority: llmResponse.seniority ?? 'mid',
+      softSkills: llmResponse.softSkills ?? [],
+      responsibilities: llmResponse.responsibilities ?? [],
       benefits: llmResponse.benefits,
       location: llmResponse.location,
-      employmentType: llmResponse.employmentType || 'full-time',
-      confidence: Math.min(1.0, Math.max(0.0, llmResponse.confidence || 0.8)),
+      employmentType: llmResponse.employmentType ?? 'full-time',
+      confidence: Math.min(1.0, Math.max(0.0, llmResponse.confidence ?? 0.8)),
     };
 
     // Enhance with additional validation
@@ -555,10 +556,10 @@ export class ExtractionServiceContracts {
         education: extractionResult.educationLevel,
       },
       responsibilities: extractionResult.responsibilities,
-      benefits: extractionResult.benefits || [],
+      benefits: extractionResult.benefits ?? [],
       company: {
         name: undefined,
-        industry: extractionResult.location || undefined,
+        industry: extractionResult.location ?? undefined,
         size: undefined,
       },
     };

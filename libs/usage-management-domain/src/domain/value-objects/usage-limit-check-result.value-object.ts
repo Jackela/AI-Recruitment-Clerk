@@ -14,7 +14,7 @@ export class UsageLimitCheckResult {
    * @param remainingQuota - The remaining quota.
    * @returns The UsageLimitCheckResult.
    */
-  static allowed(remainingQuota: number): UsageLimitCheckResult {
+  public static allowed(remainingQuota: number): UsageLimitCheckResult {
     return new UsageLimitCheckResult(true, remainingQuota);
   }
 
@@ -23,7 +23,7 @@ export class UsageLimitCheckResult {
    * @param reason - The reason.
    * @returns The UsageLimitCheckResult.
    */
-  static blocked(reason: string): UsageLimitCheckResult {
+  public static blocked(reason: string): UsageLimitCheckResult {
     return new UsageLimitCheckResult(false, undefined, reason);
   }
 
@@ -31,7 +31,7 @@ export class UsageLimitCheckResult {
    * Performs the is allowed operation.
    * @returns The boolean value.
    */
-  isAllowed(): boolean {
+  public isAllowed(): boolean {
     return this.allowed;
   }
 
@@ -39,7 +39,7 @@ export class UsageLimitCheckResult {
    * Retrieves remaining quota.
    * @returns The number | undefined.
    */
-  getRemainingQuota(): number | undefined {
+  public getRemainingQuota(): number | undefined {
     return this.remainingQuota;
   }
 
@@ -47,7 +47,7 @@ export class UsageLimitCheckResult {
    * Retrieves block reason.
    * @returns The string | undefined.
    */
-  getBlockReason(): string | undefined {
+  public getBlockReason(): string | undefined {
     return this.blockReason;
   }
 }

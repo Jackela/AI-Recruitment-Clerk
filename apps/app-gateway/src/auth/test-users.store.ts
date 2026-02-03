@@ -16,7 +16,7 @@ export const testUsers = new Map<
  * @param email - The email.
  * @returns The result of the operation.
  */
-export function makeToken(email: string) {
+export function makeToken(email: string): string {
   return 'test-token-' + Buffer.from(email).toString('base64');
 }
 

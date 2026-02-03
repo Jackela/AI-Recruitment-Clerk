@@ -5,6 +5,7 @@
  */
 
 import { test as base } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import {
   addBrowserLaunchDelay,
   withFirefoxConnectionRetry,
@@ -12,17 +13,17 @@ import {
 
 // Extend the base test with stability enhancements
 export const test = base.extend<{
-  stablePage: any;
+  stablePage: Page;
 }>({
   // Custom page fixture with Firefox stability enhancements
-  stablePage: async ({ page, browserName }: { page: any; browserName: string }, use: (page: any) => Promise<void>) => {
+  stablePage: async ({ page, browserName }: { page: Page; browserName: string }, use: (page: Page) => Promise<void>) => {
     // Add browser-specific launch delays
     await addBrowserLaunchDelay(browserName);
 
     // Wrap Firefox operations with retry logic
     if (browserName === 'firefox') {
       const originalGoto = page.goto.bind(page);
-      page.goto = async (url: string, options?: any) => {
+      page.goto = async (url: string, options?: Parameters<Page['goto']>[1]) => {
         return withFirefoxConnectionRetry(
           () => originalGoto(url, options),
           3, // Max 3 retries for Firefox navigation

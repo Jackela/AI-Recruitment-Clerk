@@ -9,10 +9,22 @@ type StoreRecord = {
   createdAt: Date;
 };
 
+type GuestUsageQuery = {
+  deviceId?: string;
+  feedbackCode?: string;
+  lastUsed?: { $lt?: Date };
+};
+
+type GuestUsageUpdate = {
+  $inc?: { usageCount?: number };
+  $set?: Partial<StoreRecord>;
+  $unset?: Record<string, unknown>;
+};
+
 const createModelMock = () => {
   const store = new Map<string, StoreRecord>();
 
-  const findOne = jest.fn(async (query: Record<string, any>) => {
+  const findOne = jest.fn(async (query: GuestUsageQuery) => {
     if (query.deviceId) {
       return store.get(query.deviceId) ?? null;
     }
@@ -39,9 +51,9 @@ const createModelMock = () => {
     return record;
   });
 
-  const updateOne = jest.fn(async (query: Record<string, any>, update: any) => {
+  const updateOne = jest.fn(async (query: GuestUsageQuery, update: GuestUsageUpdate) => {
     const target =
-      store.get(query.deviceId) ??
+      (query.deviceId ? store.get(query.deviceId) : undefined) ??
       Array.from(store.values()).find(
         (entry) => entry.feedbackCode === query.feedbackCode,
       );
@@ -56,15 +68,15 @@ const createModelMock = () => {
       Object.assign(target, update.$set);
     }
     if (update.$unset) {
-      Object.keys(update.$unset).forEach((key) => {
-        (target as any)[key] = null;
+      Object.keys(update.$unset as Record<string, unknown>).forEach((key) => {
+        (target as unknown as Record<string, unknown>)[key] = null;
       });
     }
     store.set(target.deviceId, target);
     return { acknowledged: true, modifiedCount: 1 };
   });
 
-  const deleteMany = jest.fn(async (query: Record<string, any>) => {
+  const deleteMany = jest.fn(async (query: GuestUsageQuery) => {
     const before = store.size;
     const cutoff: Date = query.lastUsed?.$lt;
     Array.from(store.entries()).forEach(([deviceId, record]) => {
@@ -107,7 +119,7 @@ describe('GuestUsageService (mocked model)', () => {
     const factory = createModelMock();
     model = factory.model;
     store = factory.store;
-    service = new GuestUsageService(model as any);
+    service = new GuestUsageService(model as unknown as ConstructorParameters<typeof GuestUsageService>[0]);
   });
 
   describe('canUse', () => {
@@ -303,7 +315,7 @@ describe('GuestUsageService (mocked model)', () => {
       const deviceId = 'device-no-count';
       store.set(deviceId, {
         deviceId,
-        usageCount: undefined as any,
+        usageCount: undefined as unknown as number,
         lastUsed: new Date(),
         createdAt: new Date(),
       });

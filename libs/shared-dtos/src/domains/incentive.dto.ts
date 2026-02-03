@@ -1,5 +1,5 @@
 import { ValueObject } from '../base/value-object';
-import { DomainEvent } from '../base/domain-event';
+import type { DomainEvent } from '../base/domain-event';
 
 // Incentive聚合根 - 管理红包激励系统的核心业务逻辑
 /**
@@ -28,7 +28,7 @@ export class Incentive {
    * @param contactInfo - The contact info.
    * @returns The Incentive.
    */
-  static createQuestionnaireIncentive(
+  public static createQuestionnaireIncentive(
     ip: string,
     questionnaireId: string,
     qualityScore: number,
@@ -78,7 +78,7 @@ export class Incentive {
    * @param contactInfo - The contact info.
    * @returns The Incentive.
    */
-  static createReferralIncentive(
+  public static createReferralIncentive(
     referrerIP: string,
     referredIP: string,
     contactInfo: ContactInfo,
@@ -117,7 +117,7 @@ export class Incentive {
    * @param data - The data.
    * @returns The Incentive.
    */
-  static restore(data: IncentiveData): Incentive {
+  public static restore(data: IncentiveData): Incentive {
     return new Incentive(
       new IncentiveId({ value: data.id }),
       IncentiveRecipient.restore(data.recipient),
@@ -135,7 +135,7 @@ export class Incentive {
    * Validates eligibility.
    * @returns The IncentiveValidationResult.
    */
-  validateEligibility(): IncentiveValidationResult {
+  public validateEligibility(): IncentiveValidationResult {
     const validationErrors: string[] = [];
 
     // 验证触发条件
@@ -189,7 +189,7 @@ export class Incentive {
    * Performs the approve for processing operation.
    * @param reason - The reason.
    */
-  approveForProcessing(reason: string): void {
+  public approveForProcessing(reason: string): void {
     if (this.status !== IncentiveStatus.PENDING_VALIDATION) {
       throw new Error(`Cannot approve incentive in ${this.status} status`);
     }
@@ -213,7 +213,7 @@ export class Incentive {
    * Performs the reject operation.
    * @param reason - The reason.
    */
-  reject(reason: string): void {
+  public reject(reason: string): void {
     if (this.status === IncentiveStatus.PAID) {
       throw new Error('Cannot reject already paid incentive');
     }
@@ -238,7 +238,7 @@ export class Incentive {
    * @param transactionId - The transaction id.
    * @returns The PaymentResult.
    */
-  executePayment(
+  public executePayment(
     paymentMethod: PaymentMethod,
     transactionId: string,
   ): PaymentResult {
@@ -311,7 +311,7 @@ export class Incentive {
    * Retrieves incentive summary.
    * @returns The IncentiveSummary.
    */
-  getIncentiveSummary(): IncentiveSummary {
+  public getIncentiveSummary(): IncentiveSummary {
     return new IncentiveSummary({
       id: this.id.getValue(),
       recipientIP: this.recipient.getIP(),
@@ -342,14 +342,14 @@ export class Incentive {
    * Retrieves uncommitted events.
    * @returns The an array of DomainEvent.
    */
-  getUncommittedEvents(): DomainEvent[] {
+  public getUncommittedEvents(): DomainEvent[] {
     return [...this.uncommittedEvents];
   }
 
   /**
    * Performs the mark events as committed operation.
    */
-  markEventsAsCommitted(): void {
+  public markEventsAsCommitted(): void {
     this.uncommittedEvents = [];
   }
 
@@ -362,7 +362,7 @@ export class Incentive {
    * Retrieves id.
    * @returns The IncentiveId.
    */
-  getId(): IncentiveId {
+  public getId(): IncentiveId {
     return this.id;
   }
 
@@ -370,7 +370,7 @@ export class Incentive {
    * Retrieves status.
    * @returns The IncentiveStatus.
    */
-  getStatus(): IncentiveStatus {
+  public getStatus(): IncentiveStatus {
     return this.status;
   }
 
@@ -378,7 +378,7 @@ export class Incentive {
    * Retrieves recipient ip.
    * @returns The string value.
    */
-  getRecipientIP(): string {
+  public getRecipientIP(): string {
     return this.recipient.getIP();
   }
 
@@ -386,7 +386,7 @@ export class Incentive {
    * Retrieves reward amount.
    * @returns The number value.
    */
-  getRewardAmount(): number {
+  public getRewardAmount(): number {
     return this.reward.getAmount();
   }
 
@@ -394,7 +394,7 @@ export class Incentive {
    * Retrieves created at.
    * @returns The Date.
    */
-  getCreatedAt(): Date {
+  public getCreatedAt(): Date {
     return this.createdAt;
   }
 }
@@ -408,7 +408,7 @@ export class IncentiveId extends ValueObject<{ value: string }> {
    * Generates the result.
    * @returns The IncentiveId.
    */
-  static generate(): IncentiveId {
+  public static generate(): IncentiveId {
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substr(2, 9);
     return new IncentiveId({ value: `incentive_${timestamp}_${random}` });
@@ -418,7 +418,7 @@ export class IncentiveId extends ValueObject<{ value: string }> {
    * Retrieves value.
    * @returns The string value.
    */
-  getValue(): string {
+  public getValue(): string {
     return this.props.value;
   }
 }
@@ -437,7 +437,7 @@ export class IncentiveRecipient extends ValueObject<{
    * @param contactInfo - The contact info.
    * @returns The IncentiveRecipient.
    */
-  static create(ip: string, contactInfo: ContactInfo): IncentiveRecipient {
+  public static create(ip: string, contactInfo: ContactInfo): IncentiveRecipient {
     return new IncentiveRecipient({
       ip,
       contactInfo,
@@ -450,7 +450,8 @@ export class IncentiveRecipient extends ValueObject<{
    * @param data - The data.
    * @returns The IncentiveRecipient.
    */
-  static restore(data: any): IncentiveRecipient {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): IncentiveRecipient {
     return new IncentiveRecipient({
       ip: data.ip,
       contactInfo: ContactInfo.restore(data.contactInfo),
@@ -462,7 +463,7 @@ export class IncentiveRecipient extends ValueObject<{
    * Retrieves ip.
    * @returns The string value.
    */
-  getIP(): string {
+  public getIP(): string {
     return this.props.ip;
   }
 
@@ -470,7 +471,7 @@ export class IncentiveRecipient extends ValueObject<{
    * Performs the has valid contact info operation.
    * @returns The boolean value.
    */
-  hasValidContactInfo(): boolean {
+  public hasValidContactInfo(): boolean {
     return this.props.contactInfo.isValid();
   }
 
@@ -478,7 +479,7 @@ export class IncentiveRecipient extends ValueObject<{
    * Performs the is valid operation.
    * @returns The boolean value.
    */
-  isValid(): boolean {
+  public isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
@@ -487,7 +488,7 @@ export class IncentiveRecipient extends ValueObject<{
    * Retrieves validation errors.
    * @returns The an array of string value.
    */
-  getValidationErrors(): string[] {
+  public getValidationErrors(): string[] {
     const errors: string[] = [];
 
     if (
@@ -521,7 +522,8 @@ export class ContactInfo extends ValueObject<{
    * @param data - The data.
    * @returns The ContactInfo.
    */
-  static restore(data: any): ContactInfo {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): ContactInfo {
     return new ContactInfo(data);
   }
 
@@ -529,7 +531,7 @@ export class ContactInfo extends ValueObject<{
    * Performs the is valid operation.
    * @returns The boolean value.
    */
-  isValid(): boolean {
+  public isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
@@ -538,7 +540,7 @@ export class ContactInfo extends ValueObject<{
    * Retrieves validation errors.
    * @returns The an array of string value.
    */
-  getValidationErrors(): string[] {
+  public getValidationErrors(): string[] {
     const errors: string[] = [];
     const { email, phone, wechat, alipay } = this.props;
 
@@ -570,7 +572,7 @@ export class ContactInfo extends ValueObject<{
    * Retrieves primary contact.
    * @returns The string value.
    */
-  getPrimaryContact(): string {
+  public getPrimaryContact(): string {
     if (this.props.wechat) return `WeChat: ${this.props.wechat}`;
     if (this.props.alipay) return `Alipay: ${this.props.alipay}`;
     if (this.props.phone) return `Phone: ${this.props.phone}`;
@@ -582,28 +584,28 @@ export class ContactInfo extends ValueObject<{
    * Performs the email operation.
    * @returns The string | undefined.
    */
-  get email(): string | undefined {
+  public get email(): string | undefined {
     return this.props.email;
   }
   /**
    * Performs the phone operation.
    * @returns The string | undefined.
    */
-  get phone(): string | undefined {
+  public get phone(): string | undefined {
     return this.props.phone;
   }
   /**
    * Performs the wechat operation.
    * @returns The string | undefined.
    */
-  get wechat(): string | undefined {
+  public get wechat(): string | undefined {
     return this.props.wechat;
   }
   /**
    * Performs the alipay operation.
    * @returns The string | undefined.
    */
-  get alipay(): string | undefined {
+  public get alipay(): string | undefined {
     return this.props.alipay;
   }
 }
@@ -622,7 +624,7 @@ export class IncentiveReward extends ValueObject<{
    * @param qualityScore - The quality score.
    * @returns The IncentiveReward.
    */
-  static calculateForQuestionnaire(qualityScore: number): IncentiveReward {
+  public static calculateForQuestionnaire(qualityScore: number): IncentiveReward {
     let amount = 0;
     let calculationMethod = '';
 
@@ -652,7 +654,7 @@ export class IncentiveReward extends ValueObject<{
    * Creates referral reward.
    * @returns The IncentiveReward.
    */
-  static createReferralReward(): IncentiveReward {
+  public static createReferralReward(): IncentiveReward {
     return new IncentiveReward({
       amount: 3,
       currency: Currency.CNY,
@@ -666,7 +668,8 @@ export class IncentiveReward extends ValueObject<{
    * @param data - The data.
    * @returns The IncentiveReward.
    */
-  static restore(data: any): IncentiveReward {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): IncentiveReward {
     return new IncentiveReward(data);
   }
 
@@ -674,7 +677,7 @@ export class IncentiveReward extends ValueObject<{
    * Retrieves amount.
    * @returns The number value.
    */
-  getAmount(): number {
+  public getAmount(): number {
     return this.props.amount;
   }
 
@@ -682,7 +685,7 @@ export class IncentiveReward extends ValueObject<{
    * Retrieves currency.
    * @returns The Currency.
    */
-  getCurrency(): Currency {
+  public getCurrency(): Currency {
     return this.props.currency;
   }
 
@@ -690,7 +693,7 @@ export class IncentiveReward extends ValueObject<{
    * Performs the is valid operation.
    * @returns The boolean value.
    */
-  isValid(): boolean {
+  public isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
@@ -699,7 +702,7 @@ export class IncentiveReward extends ValueObject<{
    * Retrieves validation errors.
    * @returns The an array of string value.
    */
-  getValidationErrors(): string[] {
+  public getValidationErrors(): string[] {
     const errors: string[] = [];
 
     if (this.props.amount < 0) {
@@ -723,6 +726,7 @@ export class IncentiveReward extends ValueObject<{
  */
 export class IncentiveTrigger extends ValueObject<{
   triggerType: TriggerType;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   triggerData: any;
   qualifiedAt: Date;
 }> {
@@ -732,7 +736,7 @@ export class IncentiveTrigger extends ValueObject<{
    * @param qualityScore - The quality score.
    * @returns The IncentiveTrigger.
    */
-  static fromQuestionnaire(
+  public static fromQuestionnaire(
     questionnaireId: string,
     qualityScore: number,
   ): IncentiveTrigger {
@@ -748,7 +752,7 @@ export class IncentiveTrigger extends ValueObject<{
    * @param referredIP - The referred ip.
    * @returns The IncentiveTrigger.
    */
-  static fromReferral(referredIP: string): IncentiveTrigger {
+  public static fromReferral(referredIP: string): IncentiveTrigger {
     return new IncentiveTrigger({
       triggerType: TriggerType.REFERRAL,
       triggerData: { referredIP },
@@ -761,7 +765,8 @@ export class IncentiveTrigger extends ValueObject<{
    * @param data - The data.
    * @returns The IncentiveTrigger.
    */
-  static restore(data: any): IncentiveTrigger {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): IncentiveTrigger {
     return new IncentiveTrigger({
       ...data,
       qualifiedAt: new Date(data.qualifiedAt),
@@ -772,7 +777,7 @@ export class IncentiveTrigger extends ValueObject<{
    * Retrieves trigger type.
    * @returns The TriggerType.
    */
-  getTriggerType(): TriggerType {
+  public getTriggerType(): TriggerType {
     return this.props.triggerType;
   }
 
@@ -780,7 +785,7 @@ export class IncentiveTrigger extends ValueObject<{
    * Performs the is valid operation.
    * @returns The boolean value.
    */
-  isValid(): boolean {
+  public isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
@@ -789,7 +794,7 @@ export class IncentiveTrigger extends ValueObject<{
    * Retrieves validation errors.
    * @returns The an array of string value.
    */
-  getValidationErrors(): string[] {
+  public getValidationErrors(): string[] {
     const errors: string[] = [];
 
     if (!Object.values(TriggerType).includes(this.props.triggerType)) {
@@ -861,7 +866,7 @@ export class PaymentResult {
    * @param currency - The currency.
    * @returns The PaymentResult.
    */
-  static success(
+  public static success(
     transactionId: string,
     amount: number,
     currency: Currency,
@@ -874,7 +879,7 @@ export class PaymentResult {
    * @param error - The error.
    * @returns The PaymentResult.
    */
-  static failed(error: string): PaymentResult {
+  public static failed(error: string): PaymentResult {
     return new PaymentResult(false, undefined, undefined, undefined, error);
   }
 }
@@ -899,42 +904,42 @@ export class IncentiveSummary extends ValueObject<{
    * Performs the id operation.
    * @returns The string value.
    */
-  get id(): string {
+  public get id(): string {
     return this.props.id;
   }
   /**
    * Performs the recipient ip operation.
    * @returns The string value.
    */
-  get recipientIP(): string {
+  public get recipientIP(): string {
     return this.props.recipientIP;
   }
   /**
    * Performs the reward amount operation.
    * @returns The number value.
    */
-  get rewardAmount(): number {
+  public get rewardAmount(): number {
     return this.props.rewardAmount;
   }
   /**
    * Performs the status operation.
    * @returns The IncentiveStatus.
    */
-  get status(): IncentiveStatus {
+  public get status(): IncentiveStatus {
     return this.props.status;
   }
   /**
    * Performs the can be paid operation.
    * @returns The boolean value.
    */
-  get canBePaid(): boolean {
+  public get canBePaid(): boolean {
     return this.props.canBePaid;
   }
   /**
    * Performs the days since creation operation.
    * @returns The number value.
    */
-  get daysSinceCreation(): number {
+  public get daysSinceCreation(): number {
     return this.props.daysSinceCreation;
   }
 }
@@ -984,8 +989,11 @@ export enum PaymentMethod {
  */
 export interface IncentiveData {
   id: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   recipient: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   reward: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   trigger: any;
   status: IncentiveStatus;
   createdAt: string;

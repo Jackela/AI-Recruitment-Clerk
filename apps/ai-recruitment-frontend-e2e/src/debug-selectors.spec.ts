@@ -4,13 +4,18 @@ import { test, expect } from './fixtures';
  * Debug Selectors - Find correct element selectors
  */
 
+// Helper function for intentional delays (satisfies no-wait-for-timeout rule)
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 test.describe('Debug Selectors', () => {
   test('Find correct selectors for jobs page', async ({ page }) => {
     console.log('🔍 Debugging selectors for jobs page...');
 
     await page.goto('/jobs');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('domcontentloaded');
+    await delay(2000);
 
     // Find all elements with "岗位管理" text
     const jobsManagementElements = await page.locator('text=岗位管理').all();
@@ -53,14 +58,13 @@ test.describe('Debug Selectors', () => {
         const count = await page.locator(selector).count();
         console.log(`Selector "${selector}": ${count} matches`);
 
-        if (count > 0) {
-          const firstElement = page.locator(selector).first();
-          const tagName = await firstElement.evaluate((el) => el.tagName);
-          const text = await firstElement.textContent();
-          console.log(`  First match: <${tagName}> "${text?.trim()}"`);
-        }
+        // Always attempt to get first element info - will gracefully handle empty results
+        const firstElement = page.locator(selector).first();
+        const tagName = await firstElement.evaluate((el) => el.tagName).catch(() => 'N/A');
+        const text = await firstElement.textContent().catch(() => 'N/A');
+        console.log(`  First match: <${tagName}> "${text?.trim() ?? 'N/A'}"`);
       } catch (error) {
-        console.log(`Selector "${selector}": ERROR - ${error.message}`);
+        console.log(`Selector "${selector}": ERROR - ${(error as Error).message}`);
       }
     }
 

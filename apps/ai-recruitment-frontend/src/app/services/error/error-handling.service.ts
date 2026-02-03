@@ -3,10 +3,12 @@
  * Provides consistent error handling, user notifications, and error reporting
  */
 
-import { Injectable, ErrorHandler, Injector } from '@angular/core';
+import type { ErrorHandler } from '@angular/core';
+import { Injectable, inject, Injector } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, throwError, BehaviorSubject } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { throwError, BehaviorSubject } from 'rxjs';
 import { ToastService } from '../toast.service';
 
 // Interfaces for standardized error responses from backend
@@ -47,6 +49,7 @@ export interface StandardizedErrorResponse {
     business: string;
     user: string;
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   details?: any;
 }
 
@@ -61,6 +64,7 @@ export interface ErrorContext {
   url?: string;
   timestamp: Date;
   userAgent: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   additionalContext?: Record<string, any>;
 }
 
@@ -91,11 +95,12 @@ export class ErrorHandlingService implements ErrorHandler {
   private router?: Router;
   private toastService?: ToastService;
 
+  private readonly injector = inject(Injector);
+
   /**
    * Initializes a new instance of the Error Handling Service.
-   * @param injector - The injector.
    */
-  constructor(private injector: Injector) {
+  constructor() {
     // Lazy inject to avoid circular dependencies
     setTimeout(() => {
       try {
@@ -110,7 +115,8 @@ export class ErrorHandlingService implements ErrorHandler {
   /**
    * Angular ErrorHandler implementation
    */
-  handleError(error: any): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public handleError(error: any): void {
     const errorContext = this.createErrorContext();
 
     if (error instanceof HttpErrorResponse) {
@@ -130,7 +136,7 @@ export class ErrorHandlingService implements ErrorHandler {
   /**
    * Handle HTTP errors from API calls
    */
-  handleHttpError(
+  public handleHttpError(
     httpError: HttpErrorResponse,
     context?: Partial<ErrorContext>,
   ): Observable<never> {
@@ -149,7 +155,7 @@ export class ErrorHandlingService implements ErrorHandler {
   /**
    * Handle JavaScript runtime errors
    */
-  handleJavaScriptError(error: Error, context?: Partial<ErrorContext>): void {
+  public handleJavaScriptError(error: Error, context?: Partial<ErrorContext>): void {
     const errorContext = { ...this.createErrorContext(), ...context };
 
     const notification: ErrorNotification = {
@@ -178,7 +184,8 @@ export class ErrorHandlingService implements ErrorHandler {
   /**
    * Handle unknown errors
    */
-  handleUnknownError(error: any, context?: Partial<ErrorContext>): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public handleUnknownError(error: any, context?: Partial<ErrorContext>): void {
     const errorContext = { ...this.createErrorContext(), ...context };
 
     const notification: ErrorNotification = {
@@ -353,14 +360,14 @@ export class ErrorHandlingService implements ErrorHandler {
   /**
    * Get error notifications observable
    */
-  getErrors(): Observable<ErrorNotification[]> {
+  public getErrors(): Observable<ErrorNotification[]> {
     return this.errors$.asObservable();
   }
 
   /**
    * Acknowledge error notification
    */
-  acknowledgeError(errorId: string): void {
+  public acknowledgeError(errorId: string): void {
     const errors = this.errors$.value;
     const errorIndex = errors.findIndex((e) => e.id === errorId);
 
@@ -373,14 +380,14 @@ export class ErrorHandlingService implements ErrorHandler {
   /**
    * Clear all error notifications
    */
-  clearErrors(): void {
+  public clearErrors(): void {
     this.errors$.next([]);
   }
 
   /**
    * Clear specific error notification
    */
-  clearError(errorId: string): void {
+  public clearError(errorId: string): void {
     const errors = this.errors$.value.filter((e) => e.id !== errorId);
     this.errors$.next(errors);
   }
@@ -388,7 +395,7 @@ export class ErrorHandlingService implements ErrorHandler {
   /**
    * Retry operation with error handling
    */
-  retryOperation<T>(
+  public retryOperation<T>(
     operation: () => Observable<T>,
     errorId: string,
   ): Observable<T> {
@@ -398,6 +405,7 @@ export class ErrorHandlingService implements ErrorHandler {
 
   // Private helper methods
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private isStandardizedError(error: any): error is StandardizedErrorResponse {
     return (
       error &&
@@ -548,6 +556,7 @@ export class ErrorHandlingService implements ErrorHandler {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private logError(error: any, context: ErrorContext): void {
     // In production, send to logging service
     if (this.isProduction()) {
@@ -557,6 +566,7 @@ export class ErrorHandlingService implements ErrorHandler {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private sendToLoggingService(_error: any, _context: ErrorContext): void {
     // Implementation for sending errors to logging service
     // This could be an HTTP call to your logging endpoint

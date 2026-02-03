@@ -18,7 +18,7 @@ export class EmbeddingService {
    * Delegates embedding generation to the configured provider with basic logging.
    * @param text - Arbitrary text content.
    */
-  async createEmbedding(text: string): Promise<number[]> {
+  public async createEmbedding(text: string): Promise<number[]> {
     this.logger.debug('Generating embedding for text payload.');
     return this.embeddingProvider.createEmbedding(text);
   }

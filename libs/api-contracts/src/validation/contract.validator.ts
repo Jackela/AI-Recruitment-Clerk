@@ -79,7 +79,7 @@ export class ContractValidator {
   /**
    * Validate job contract structure and types
    */
-  static validateJobContract(
+  public static validateJobContract(
     data: UnknownJobData,
     contractType: 'JobBase' | 'JobDetail' | 'JobListItem',
   ): ValidationResult {
@@ -129,7 +129,7 @@ export class ContractValidator {
   /**
    * Validate report contract structure and types
    */
-  static validateReportContract(
+  public static validateReportContract(
     data: UnknownReportData,
     contractType: 'AnalysisReport' | 'ReportListItem',
   ): ValidationResult {
@@ -193,7 +193,7 @@ export class ContractValidator {
   /**
    * Compare frontend and backend contract structures
    */
-  static compareContracts(
+  public static compareContracts(
     frontendData: Record<string, unknown>,
     backendData: Record<string, unknown>,
     _contractName: string,
@@ -240,7 +240,7 @@ export class ContractValidator {
   /**
    * Validate all contracts in a data object
    */
-  static validateAllContracts(data: UnknownValidationData): ValidationResult[] {
+  public static validateAllContracts(data: UnknownValidationData): ValidationResult[] {
     const results: ValidationResult[] = [];
 
     // Add specific contract validations based on data type

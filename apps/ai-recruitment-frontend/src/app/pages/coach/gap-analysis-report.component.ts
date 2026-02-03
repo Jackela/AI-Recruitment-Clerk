@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { GapAnalysisResult } from '../../interfaces/gap-analysis.interface';
+import type { GapAnalysisResult } from '../../interfaces/gap-analysis.interface';
 
 /**
  * Represents the gap analysis report component.
@@ -31,5 +31,5 @@ import { GapAnalysisResult } from '../../interfaces/gap-analysis.interface';
   `,
 })
 export class GapAnalysisReportComponent {
-  @Input() result: GapAnalysisResult | null = null;
+  @Input() public result: GapAnalysisResult | null = null;
 }

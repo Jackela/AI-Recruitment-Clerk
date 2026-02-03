@@ -1,5 +1,6 @@
-import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
-import { MulterFile } from '../types/multer.types';
+import type { PipeTransform} from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
+import type { MulterFile } from '../types/multer.types';
 
 /**
  * Represents the file validation pipe.
@@ -11,7 +12,7 @@ export class FileValidationPipe implements PipeTransform {
    * @param files - The files.
    * @returns The an array of MulterFile.
    */
-  transform(files: MulterFile[]): MulterFile[] {
+  public transform(files: MulterFile[]): MulterFile[] {
     if (!files || files.length === 0) {
       throw new BadRequestException('At least one resume file is required');
     }

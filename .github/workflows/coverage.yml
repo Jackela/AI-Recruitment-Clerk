@@ -6,12 +6,15 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+concurrency:
+  group: coverage-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: write
 
 env:
-  NODE_VERSION: '20'
   CI: true
 
 jobs:
@@ -29,7 +32,7 @@ jobs:
       - name: 🏗️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version-file: '.nvmrc'
           cache: 'npm'
 
       - name: 📦 Install Dependencies

@@ -1,9 +1,15 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException } from '@nestjs/common';
 import { GuestResumeController } from './guest-resume.controller';
-import { GuestUsageService } from '../services/guest-usage.service';
-import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
-import { GridFsService } from '../../services/gridfs.service';
+import type { GuestUsageService } from '../services/guest-usage.service';
+import type { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
+import type { GridFsService } from '../../services/gridfs.service';
 import type { RequestWithDeviceId } from '../guards/guest.guard';
+type MulterFile = {
+  originalname: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+};
 
 describe('GuestResumeController (lightweight)', () => {
   const usageService = {
@@ -35,7 +41,7 @@ describe('GuestResumeController (lightweight)', () => {
     mimetype: 'application/pdf',
     size: 1024,
     buffer: Buffer.from('pdf'),
-  } as any;
+  } as unknown as MulterFile;
 
   const buildController = () =>
     new GuestResumeController(usageService, natsClient, gridFsService);
@@ -51,7 +57,7 @@ describe('GuestResumeController (lightweight)', () => {
         canUse: true,
         remainingCount: 2,
         needsFeedbackCode: false,
-      } as any);
+      });
 
       const controller = buildController();
       const result = await controller.analyzeResume(
@@ -72,7 +78,7 @@ describe('GuestResumeController (lightweight)', () => {
         canUse: false,
         remainingCount: 0,
         needsFeedbackCode: true,
-      } as any);
+      });
 
       const controller = buildController();
 
@@ -89,7 +95,7 @@ describe('GuestResumeController (lightweight)', () => {
         canUse: true,
         remainingCount: 1,
         needsFeedbackCode: false,
-      } as any);
+      });
 
       const controller = buildController();
       const result = await controller.getDemoAnalysis(deviceRequest());

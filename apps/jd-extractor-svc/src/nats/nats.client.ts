@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type NatsPublishResult = {
   success: boolean;
   messageId?: string;
@@ -14,7 +15,7 @@ export class NatsClient {
    * @param _payload - The payload.
    * @returns A promise that resolves to NatsPublishResult.
    */
-  async publish(
+  public async publish(
     _subject: string,
     _payload: unknown,
   ): Promise<NatsPublishResult> {
@@ -26,7 +27,7 @@ export class NatsClient {
    * @param _payload - The payload.
    * @returns A promise that resolves to NatsPublishResult.
    */
-  async emit(_subject: string, _payload: unknown): Promise<NatsPublishResult> {
+  public async emit(_subject: string, _payload: unknown): Promise<NatsPublishResult> {
     return { success: true };
   }
   /**
@@ -35,7 +36,7 @@ export class NatsClient {
    * @param _error - The error.
    * @returns A promise that resolves to NatsPublishResult.
    */
-  async publishProcessingError(
+  public async publishProcessingError(
     _jobId: string,
     _error: Error,
   ): Promise<NatsPublishResult> {
@@ -46,7 +47,7 @@ export class NatsClient {
    * @param _event - The event.
    * @returns A promise that resolves to NatsPublishResult.
    */
-  async publishAnalysisExtracted(_event: any): Promise<NatsPublishResult> {
+  public async publishAnalysisExtracted(_event: any): Promise<NatsPublishResult> {
     return { success: true };
   }
 }

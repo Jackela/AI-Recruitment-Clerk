@@ -1,4 +1,5 @@
-import { UserSession, UsageResult } from '../domains/user-management.dto';
+import type { UsageResult } from '../domains/user-management.dto';
+import { UserSession } from '../domains/user-management.dto';
 
 /**
  * Represents the user session contracts.
@@ -9,7 +10,7 @@ export class UserSessionContracts {
    * @param ip - The ip.
    * @returns The UserSession.
    */
-  static createSession(ip: string): UserSession {
+  public static createSession(ip: string): UserSession {
     // Manual contract validation for synchronous method
     if (!ip || ip.length === 0 || !/^\d+\.\d+\.\d+\.\d+$/.test(ip)) {
       throw new Error('IP address must be valid IPv4 format');
@@ -43,7 +44,7 @@ export class UserSessionContracts {
    * @param session - The session.
    * @returns The UsageResult.
    */
-  static recordUsage(session: UserSession): UsageResult {
+  public static recordUsage(session: UserSession): UsageResult {
     // Manual contract validation for synchronous method
     if (!session.isValid() || !session.canUse()) {
       throw new Error(
@@ -67,7 +68,7 @@ export class UserSessionContracts {
    * @param session - The session.
    * @returns The boolean value.
    */
-  static validateSessionState(session: UserSession): boolean {
+  public static validateSessionState(session: UserSession): boolean {
     const result = session.isValid() || session.getStatus() === 'expired';
 
     if (!result) {

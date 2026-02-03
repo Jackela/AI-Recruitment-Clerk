@@ -1,11 +1,12 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { JobsController } from './jobs.controller';
-import { JobsService } from './jobs.service';
-import { CreateJobDto } from './dto/create-job.dto';
+import type { JobsService } from './jobs.service';
+import type { CreateJobDto } from './dto/create-job.dto';
 import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
-import {
+import type {
   Permission,
-  UserDto,
+  UserDto} from '@ai-recruitment-clerk/user-management-domain';
+import {
   UserRole,
 } from '@ai-recruitment-clerk/user-management-domain';
 

@@ -11,7 +11,7 @@ export class ScoringPromptTemplates {
   /**
    * Skills Assessment Template
    */
-  static getSkillsAssessmentPrompt(
+  public static getSkillsAssessmentPrompt(
     requiredSkills: string[],
     candidateSkills: string[],
   ): string {
@@ -50,7 +50,7 @@ Provide actionable insights for both hiring decisions and onboarding planning.`;
   /**
    * Scoring Explanation Template
    */
-  static getScoringExplanationPrompt(score: number, breakdown: any): string {
+  public static getScoringExplanationPrompt(score: number, breakdown: Record<string, unknown>): string {
     return `
 Provide a clear explanation of the candidate scoring methodology and results.
 
@@ -79,7 +79,7 @@ Provide specific, actionable feedback that helps understand the candidate's prof
   /**
    * Candidate Comparison Template
    */
-  static getCandidateComparisonPrompt(candidateCount: number): string {
+  public static getCandidateComparisonPrompt(candidateCount: number): string {
     return `
 Create a detailed side-by-side comparison of ${candidateCount} candidates for this position.
 
@@ -110,7 +110,7 @@ Provide specific, evidence-based comparisons that enable confident hiring decisi
   /**
    * Interview Guide Template
    */
-  static getInterviewGuidePrompt(candidateName: string): string {
+  public static getInterviewGuidePrompt(candidateName: string): string {
     return `
 Create a comprehensive interview guide for ${candidateName} based on their background and the position requirements.
 
@@ -169,7 +169,7 @@ export class ScoringPromptBuilder {
    * @param options - The options.
    * @returns The string value.
    */
-  static buildWithOptions(
+  public static buildWithOptions(
     basePrompt: string,
     options: ScoringPromptOptions = {},
   ): string {
@@ -197,7 +197,7 @@ export class ScoringPromptBuilder {
    * @param schema - The schema.
    * @returns The string value.
    */
-  static addJsonSchemaInstruction(prompt: string, schema: string): string {
+  public static addJsonSchemaInstruction(prompt: string, schema: string): string {
     return `${prompt}
 
 RESPONSE FORMAT:

@@ -1,5 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { ConfigModule } from '@nestjs/config';
@@ -13,8 +14,9 @@ import { AppGatewayNatsService } from '../../src/nats/app-gateway-nats.service';
 import { WebSocketGateway } from '../../src/websocket/websocket.gateway';
 import { JwtAuthGuard } from '../../src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../src/auth/guards/roles.guard';
+import type {
+  UserDto} from '@ai-recruitment-clerk/user-management-domain';
 import {
-  UserDto,
   UserRole,
 } from '@ai-recruitment-clerk/user-management-domain';
 

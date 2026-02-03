@@ -1,7 +1,11 @@
 import { UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigService } from '@nestjs/config';
+import type { Model } from 'mongoose';
 import { MfaService } from './mfa.service';
 import { MfaMethod } from '../dto/mfa.dto';
+import type { EmailService } from './email.service';
+import type { SmsService } from './sms.service';
+import type { UserProfile } from '../../schemas/user-profile.schema';
 
 const createConfigService = () =>
   ({
@@ -24,16 +28,21 @@ describe('MfaService (focused unit tests)', () => {
   let service: MfaService;
   let userModel: ReturnType<typeof createUserModel>;
   let configService: jest.Mocked<ConfigService>;
-  const emailService = { sendMfaToken: jest.fn() } as any;
-  const smsService = { sendSms: jest.fn() } as any;
+  const emailService = { sendMfaToken: jest.fn() } as unknown as EmailService;
+  const smsService = { sendSms: jest.fn() } as unknown as SmsService;
 
   beforeEach(() => {
     jest.clearAllMocks();
     userModel = createUserModel();
     configService = createConfigService();
-    service = new MfaService(userModel as any, configService, emailService, smsService);
+    service = new MfaService(
+      userModel as unknown as Model<UserProfile>,
+      configService,
+      emailService,
+      smsService,
+    );
     // Avoid timers in tests
-    (service as any).storeTemporaryToken = jest.fn();
+    (service as unknown as Record<string, jest.Mock>).storeTemporaryToken = jest.fn();
   });
 
   it('returns MFA status when user exists', async () => {

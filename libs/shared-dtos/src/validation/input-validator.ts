@@ -52,7 +52,7 @@ export class InputValidator {
   /**
    * Validates uploaded resume files
    */
-  static validateResumeFile(file: {
+  public static validateResumeFile(file: {
     buffer: Buffer;
     originalname: string;
     mimetype?: string;
@@ -71,7 +71,7 @@ export class InputValidator {
   /**
    * Comprehensive file validation
    */
-  static validateFile(
+  public static validateFile(
     file: {
       buffer: Buffer;
       originalname: string;
@@ -156,7 +156,7 @@ export class InputValidator {
   /**
    * Validates and sanitizes text input
    */
-  static validateText(
+  public static validateText(
     text: string,
     options: {
       maxLength?: number;
@@ -208,7 +208,7 @@ export class InputValidator {
 
     // Special characters validation
     if (!options.allowSpecialChars) {
-      const specialCharsPattern = /[<>"\';(){}[\]]/g;
+      const specialCharsPattern = /[<>"';(){}[\]]/g;
       if (specialCharsPattern.test(sanitizedText)) {
         errors.push('Special characters are not allowed');
         // Remove special characters
@@ -238,7 +238,7 @@ export class InputValidator {
   /**
    * Validates email address
    */
-  static validateEmail(email: string): ValidationResult {
+  public static validateEmail(email: string): ValidationResult {
     const errors: string[] = [];
 
     if (!email) {
@@ -284,7 +284,7 @@ export class InputValidator {
   /**
    * Validates URL
    */
-  static validateUrl(
+  public static validateUrl(
     url: string,
     options: { allowedProtocols?: string[] } = {},
   ): ValidationResult {
@@ -329,7 +329,7 @@ export class InputValidator {
   /**
    * Validates JSON object structure
    */
-  static validateJsonObject(
+  public static validateJsonObject(
     obj: unknown,
     schema: Record<
       string,
@@ -484,7 +484,7 @@ export class InputValidator {
   /**
    * Comprehensive security validation for API requests
    */
-  static validateApiRequest(request: any): ValidationResult {
+  public static validateApiRequest(request: unknown): ValidationResult {
     const errors: string[] = [];
 
     // Enhanced SQL injection patterns

@@ -1,0 +1,1728 @@
+{
+  "branchName": "feature/production-ready-refactor",
+  "qualityChecks": "npm run typecheck && npm run lint && npm run test",
+  "userStories": [
+    {
+      "id": "US-000",
+      "title": "Fix all ESLint warnings across all 24 projects",
+      "description": "Resolve all lint warnings including: explicit-member-accessibility (add public/private modifiers), consistent-type-imports (use import type), explicit-function-return-type (add return types), no-explicit-any (replace any with proper types). Ralph will strictly validate that npm run lint returns 0 warnings.",
+      "priority": 1,
+      "passes": false,
+      "acceptanceCriteria": [
+        "npm run lint returns 0 errors AND 0 warnings",
+        "All 24 projects pass lint check",
+        "No ESLint rule violations remain",
+        "npm run typecheck passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Use eslint --fix for auto-fixable issues first",
+        "Add public modifier to class methods",
+        "Change import { Type } to import type { Type } for type-only imports",
+        "Add explicit return types to functions",
+        "Replace any with unknown, Record<string, unknown>, or specific interfaces",
+        "Follow CLAUDE.md RULE 3: NO ANY TYPES"
+      ]
+    },
+    {
+      "id": "US-001",
+      "title": "Upgrade ESLint config to enforce strict TypeScript rules",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 2,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-002",
+      "title": "Fix any types in analytics-event.schema.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 3,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-003",
+      "title": "Fix any types in user.schema.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 4,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-004",
+      "title": "Fix any types in job.schema.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 5,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-005",
+      "title": "Fix any types in consent-record.schema.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 6,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-006",
+      "title": "Fix any types in data-subject-rights.schema.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 7,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-007",
+      "title": "Fix any types in user-profile.schema.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 8,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-008",
+      "title": "Fix any types in report.schema.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 9,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-009",
+      "title": "Fix any types in mfa.dto.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 10,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-010",
+      "title": "Fix any types in analytics.dto.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 11,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-011",
+      "title": "Fix any types in multer.types.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 12,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-012",
+      "title": "Fix any types in flags.store.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 13,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-013",
+      "title": "Fix any types in scoring.service.contracts.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 14,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-014",
+      "title": "Fix any types in scoring app.controller.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 15,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-015",
+      "title": "Fix any types in extraction.service.contracts.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 16,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-016",
+      "title": "Fix any types in llm.service.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 17,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-017",
+      "title": "Fix any types in vision-llm.service.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 18,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-018",
+      "title": "Fix any types in vision-llm-error-handler.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 19,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-019",
+      "title": "Fix any types in gridfs.service.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 20,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-020",
+      "title": "Fix any types in scoring-proxy.controller.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 21,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-021",
+      "title": "Fix any types in dbc.decorators.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 22,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-022",
+      "title": "Fix any types in error-handling.decorators.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 23,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-023",
+      "title": "Fix any types in input-validator.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 24,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-024",
+      "title": "Fix any types in job.contracts.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 25,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-025",
+      "title": "Fix any types in report.contracts.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 26,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-026",
+      "title": "Fix any types in resume.contracts.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 27,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-027",
+      "title": "Fix any types in infrastructure-shared",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 28,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-028",
+      "title": "Fix any types in mobile-dashboard.component.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 29,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-029",
+      "title": "Fix any types in mobile-performance and mobile-results",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 30,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-030",
+      "title": "Fix any types in unified-analysis.component.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 31,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-031",
+      "title": "Fix any types in test-setup.ts",
+      "description": "Replace all any types with proper type definitions following CLAUDE.md RULE 3",
+      "priority": 32,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-032",
+      "title": "Complete cultural-fit-analyzer.service.spec.ts tests",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 33,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-033",
+      "title": "Complete scoring-confidence.service.spec.ts tests",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 34,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-034",
+      "title": "Complete analytics.contracts.spec.ts tests",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 35,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-035",
+      "title": "Complete incentive.contracts.spec.ts tests",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 36,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-036",
+      "title": "Complete usage-limit.contracts.spec.ts tests",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 37,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-037",
+      "title": "Complete incentive.service.spec.ts tests",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 38,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-038",
+      "title": "Complete questionnaire.rules.spec.ts tests",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 39,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-039",
+      "title": "Complete usage-limit.service.spec.ts tests",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 40,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-040",
+      "title": "Fix webkit-final-test.spec.ts E2E stability",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 41,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-041",
+      "title": "Fix real-data-expansion.spec.ts E2E stability",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 42,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-042",
+      "title": "Fix simple-firefox-test.spec.ts E2E stability",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 43,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-043",
+      "title": "Fix essential-compatibility.spec.ts E2E stability",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 44,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-044",
+      "title": "Fix browser-stability.ts types",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 45,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-045",
+      "title": "Fix connection-stability.ts types",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 46,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-046",
+      "title": "Fix port-manager.ts types",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 47,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-047",
+      "title": "Fix optimized-test-runner.mjs",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 48,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-048",
+      "title": "Add E2E test retry mechanism",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 49,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-049",
+      "title": "Consolidate debug E2E tests",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 50,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-050",
+      "title": "Fix mobile-dashboard.component.spec.ts",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 51,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-051",
+      "title": "Add mobile-performance.component tests",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 52,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-052",
+      "title": "Add mobile-results.component tests",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 53,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-053",
+      "title": "Add unified-analysis.component tests",
+      "description": "Improve test coverage and fix flaky tests",
+      "priority": 54,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-054",
+      "title": "Configure 70 percent coverage threshold for all projects",
+      "description": "Optimize CI/CD pipeline",
+      "priority": 55,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-055",
+      "title": "Configure 80 percent coverage for app-gateway",
+      "description": "Optimize CI/CD pipeline",
+      "priority": 56,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-056",
+      "title": "Configure 85 percent coverage for shared-dtos",
+      "description": "Optimize CI/CD pipeline",
+      "priority": 57,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-057",
+      "title": "Optimize CI workflow caching",
+      "description": "Optimize CI/CD pipeline",
+      "priority": 58,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-058",
+      "title": "Implement affected-only testing",
+      "description": "Optimize CI/CD pipeline",
+      "priority": 59,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-059",
+      "title": "Parallelize independent CI jobs",
+      "description": "Optimize CI/CD pipeline",
+      "priority": 60,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-060",
+      "title": "Add fast-fail mechanism",
+      "description": "Optimize CI/CD pipeline",
+      "priority": 61,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-061",
+      "title": "Add TypeScript strict check to CI",
+      "description": "Optimize CI/CD pipeline",
+      "priority": 62,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-062",
+      "title": "Add ESLint zero-error check",
+      "description": "Optimize CI/CD pipeline",
+      "priority": 63,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-063",
+      "title": "Add coverage threshold check",
+      "description": "Optimize CI/CD pipeline",
+      "priority": 64,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-064",
+      "title": "Add security dependency scan",
+      "description": "Optimize CI/CD pipeline",
+      "priority": 65,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-065",
+      "title": "Optimize Nx build cache",
+      "description": "Optimize CI/CD pipeline",
+      "priority": 66,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-066",
+      "title": "Add build artifact size check",
+      "description": "Optimize CI/CD pipeline",
+      "priority": 67,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-067",
+      "title": "Remove hardcoded secrets",
+      "description": "Security hardening and code cleanup",
+      "priority": 68,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-068",
+      "title": "Add env var validation",
+      "description": "Security hardening and code cleanup",
+      "priority": 69,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-069",
+      "title": "Secure config management",
+      "description": "Security hardening and code cleanup",
+      "priority": 70,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-070",
+      "title": "Enhance rate limiting",
+      "description": "Security hardening and code cleanup",
+      "priority": 71,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-071",
+      "title": "Fix logging levels",
+      "description": "Security hardening and code cleanup",
+      "priority": 72,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-072",
+      "title": "Unify error handling",
+      "description": "Security hardening and code cleanup",
+      "priority": 73,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-073",
+      "title": "Add structured logging",
+      "description": "Security hardening and code cleanup",
+      "priority": 74,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-074",
+      "title": "Verify health checks",
+      "description": "Security hardening and code cleanup",
+      "priority": 75,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-075",
+      "title": "Validate deployment configs",
+      "description": "Security hardening and code cleanup",
+      "priority": 76,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-076",
+      "title": "Add performance baselines",
+      "description": "Security hardening and code cleanup",
+      "priority": 77,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-077",
+      "title": "Clean TODO comments - app-gateway",
+      "description": "Security hardening and code cleanup",
+      "priority": 78,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-078",
+      "title": "Clean TODO comments - frontend",
+      "description": "Security hardening and code cleanup",
+      "priority": 79,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-079",
+      "title": "Clean TODO comments - libs",
+      "description": "Security hardening and code cleanup",
+      "priority": 80,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-080",
+      "title": "Clean TODO comments - microservices",
+      "description": "Security hardening and code cleanup",
+      "priority": 81,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-081",
+      "title": "Remove unused code - Part 1",
+      "description": "Security hardening and code cleanup",
+      "priority": 82,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-082",
+      "title": "Remove unused code - Part 2",
+      "description": "Security hardening and code cleanup",
+      "priority": 83,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-083",
+      "title": "Unify code style",
+      "description": "Security hardening and code cleanup",
+      "priority": 84,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-084",
+      "title": "Add input sanitization",
+      "description": "Security hardening and code cleanup",
+      "priority": 85,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-085",
+      "title": "Verify CORS configuration",
+      "description": "Security hardening and code cleanup",
+      "priority": 86,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-086",
+      "title": "Add API documentation",
+      "description": "Final production readiness tasks",
+      "priority": 87,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-087",
+      "title": "Update OpenAPI specs",
+      "description": "Final production readiness tasks",
+      "priority": 88,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-088",
+      "title": "Optimize DB queries",
+      "description": "Final production readiness tasks",
+      "priority": 89,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-089",
+      "title": "Implement caching",
+      "description": "Final production readiness tasks",
+      "priority": 90,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-090",
+      "title": "Optimize frontend bundle",
+      "description": "Final production readiness tasks",
+      "priority": 91,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-091",
+      "title": "Add graceful shutdown",
+      "description": "Final production readiness tasks",
+      "priority": 92,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-092",
+      "title": "Add request timeouts",
+      "description": "Final production readiness tasks",
+      "priority": 93,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-093",
+      "title": "Add retry logic",
+      "description": "Final production readiness tasks",
+      "priority": 94,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-094",
+      "title": "Add request validation",
+      "description": "Final production readiness tasks",
+      "priority": 95,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-095",
+      "title": "Add response compression",
+      "description": "Final production readiness tasks",
+      "priority": 96,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-096",
+      "title": "Add security headers",
+      "description": "Final production readiness tasks",
+      "priority": 97,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-097",
+      "title": "Add request logging",
+      "description": "Final production readiness tasks",
+      "priority": 98,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-098",
+      "title": "Optimize DB connection pool",
+      "description": "Final production readiness tasks",
+      "priority": 99,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-099",
+      "title": "Add NgRx store tests",
+      "description": "Final production readiness tasks",
+      "priority": 100,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    },
+    {
+      "id": "US-100",
+      "title": "Final production verification",
+      "description": "Final production readiness tasks",
+      "priority": 101,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Feature complete",
+        "npm run typecheck passes",
+        "npm run lint passes",
+        "npm run test passes"
+      ],
+      "technicalNotes": [
+        "Follow CLAUDE.md rules",
+        "Verify in CI"
+      ]
+    }
+  ]
+}

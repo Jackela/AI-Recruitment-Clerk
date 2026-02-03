@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 /**
  * Defines the shape of the dashboard stats.
@@ -84,21 +84,21 @@ export class DashboardApiService {
   /**
    * Get comprehensive dashboard statistics
    */
-  getDashboardStats(): Observable<DashboardStats> {
+  public getDashboardStats(): Observable<DashboardStats> {
     return this.http.get<DashboardStats>(`${this.baseUrl}/dashboard/stats`);
   }
 
   /**
    * Get system health status
    */
-  getSystemHealth(): Observable<SystemHealth> {
+  public getSystemHealth(): Observable<SystemHealth> {
     return this.http.get<SystemHealth>(`${this.baseUrl}/health`);
   }
 
   /**
    * Get recent activity feed
    */
-  getRecentActivity(limit = 10): Observable<ActivityItem[]> {
+  public getRecentActivity(limit = 10): Observable<ActivityItem[]> {
     return this.http.get<ActivityItem[]>(
       `${this.baseUrl}/dashboard/activity?limit=${limit}`,
     );
@@ -107,7 +107,7 @@ export class DashboardApiService {
   /**
    * Get service statistics for guest users
    */
-  getGuestStats(): Observable<{
+  public getGuestStats(): Observable<{
     totalGuests: number;
     activeGuests: number;
     analysisCompleted: number;
@@ -124,7 +124,7 @@ export class DashboardApiService {
   /**
    * Get processing metrics
    */
-  getProcessingMetrics(): Observable<{
+  public getProcessingMetrics(): Observable<{
     analysisInProgress: number;
     completedToday: number;
     averageProcessingTime: string;

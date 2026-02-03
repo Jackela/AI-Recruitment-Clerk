@@ -1,5 +1,5 @@
-import { DomainEvent } from './base/domain-event.js';
-import { BonusType } from '../../application/dtos/usage-limit.dto.js';
+import type { DomainEvent } from './base/domain-event.js';
+import type { BonusType } from '../../application/dtos/usage-limit.dto.js';
 
 /**
  * Represents the bonus quota added event event.

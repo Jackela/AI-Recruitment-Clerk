@@ -72,7 +72,9 @@ export class ResumeParserException extends EnhancedAppException {
    */
   constructor(
     code: ResumeParserErrorCode,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details?: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context?: Record<string, any>,
   ) {
     super(
@@ -160,7 +162,9 @@ export class ReportGeneratorException extends EnhancedAppException {
    */
   constructor(
     code: ReportGeneratorErrorCode,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details?: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context?: Record<string, any>,
   ) {
     const messages: Record<ReportGeneratorErrorCode, string> = {
@@ -238,7 +242,9 @@ export class JDExtractorException extends EnhancedAppException {
    */
   constructor(
     code: JDExtractorErrorCode,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details?: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context?: Record<string, any>,
   ) {
     const messages: Record<JDExtractorErrorCode, string> = {
@@ -313,7 +319,9 @@ export class ScoringEngineException extends EnhancedAppException {
    */
   constructor(
     code: ScoringEngineErrorCode,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details?: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context?: Record<string, any>,
   ) {
     const messages: Record<ScoringEngineErrorCode, string> = {
@@ -390,7 +398,9 @@ export class AppGatewayException extends EnhancedAppException {
    */
   constructor(
     code: AppGatewayErrorCode,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details?: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context?: Record<string, any>,
   ) {
     const messages: Record<AppGatewayErrorCode, string> = {
@@ -477,7 +487,9 @@ export class DatabaseException extends EnhancedAppException {
     code: DatabaseErrorCode,
     operation: string,
     table?: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details?: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context?: Record<string, any>,
   ) {
     const messages: Record<DatabaseErrorCode, string> = {
@@ -532,9 +544,11 @@ export class DomainErrorFactory {
    * @param context - The context.
    * @returns The ResumeParserException.
    */
-  static resumeParserError(
+  public static resumeParserError(
     code: ResumeParserErrorCode,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details?: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context?: Record<string, any>,
   ): ResumeParserException {
     return new ResumeParserException(code, details, context);
@@ -547,9 +561,11 @@ export class DomainErrorFactory {
    * @param context - The context.
    * @returns The ReportGeneratorException.
    */
-  static reportGeneratorError(
+  public static reportGeneratorError(
     code: ReportGeneratorErrorCode,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details?: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context?: Record<string, any>,
   ): ReportGeneratorException {
     return new ReportGeneratorException(code, details, context);
@@ -562,9 +578,11 @@ export class DomainErrorFactory {
    * @param context - The context.
    * @returns The JDExtractorException.
    */
-  static jdExtractorError(
+  public static jdExtractorError(
     code: JDExtractorErrorCode,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details?: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context?: Record<string, any>,
   ): JDExtractorException {
     return new JDExtractorException(code, details, context);
@@ -577,9 +595,11 @@ export class DomainErrorFactory {
    * @param context - The context.
    * @returns The ScoringEngineException.
    */
-  static scoringEngineError(
+  public static scoringEngineError(
     code: ScoringEngineErrorCode,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details?: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context?: Record<string, any>,
   ): ScoringEngineException {
     return new ScoringEngineException(code, details, context);
@@ -592,9 +612,11 @@ export class DomainErrorFactory {
    * @param context - The context.
    * @returns The AppGatewayException.
    */
-  static appGatewayError(
+  public static appGatewayError(
     code: AppGatewayErrorCode,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details?: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context?: Record<string, any>,
   ): AppGatewayException {
     return new AppGatewayException(code, details, context);
@@ -609,11 +631,13 @@ export class DomainErrorFactory {
    * @param context - The context.
    * @returns The DatabaseException.
    */
-  static databaseError(
+  public static databaseError(
     code: DatabaseErrorCode,
     operation: string,
     table?: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details?: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context?: Record<string, any>,
   ): DatabaseException {
     return new DatabaseException(code, operation, table, details, context);

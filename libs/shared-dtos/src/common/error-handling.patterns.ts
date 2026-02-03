@@ -39,13 +39,13 @@ export interface ErrorDetails {
   type: ErrorType;
   code: string;
   message: string;
-  details?: any;
+  details?: unknown;
   timestamp: string;
   traceId?: string;
   userId?: string;
   sessionId?: string;
   severity: ErrorSeverity;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
 }
 
 /**
@@ -68,8 +68,8 @@ export class AppException extends HttpException {
     code: string,
     message: string,
     httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-    details?: any,
-    context?: Record<string, any>,
+    details?: unknown,
+    context?: Record<string, unknown>,
   ) {
     super(message, httpStatus);
 
@@ -89,7 +89,7 @@ export class AppException extends HttpException {
    * @param traceId - The trace id.
    * @returns The this.
    */
-  withTraceId(traceId: string): this {
+  public withTraceId(traceId: string): this {
     this.errorDetails.traceId = traceId;
     return this;
   }
@@ -99,7 +99,7 @@ export class AppException extends HttpException {
    * @param userId - The user id.
    * @returns The this.
    */
-  withUserId(userId: string): this {
+  public withUserId(userId: string): this {
     this.errorDetails.userId = userId;
     return this;
   }
@@ -109,7 +109,7 @@ export class AppException extends HttpException {
    * @param sessionId - The session id.
    * @returns The this.
    */
-  withSessionId(sessionId: string): this {
+  public withSessionId(sessionId: string): this {
     this.errorDetails.sessionId = sessionId;
     return this;
   }
@@ -119,7 +119,7 @@ export class AppException extends HttpException {
    * @param severity - The severity.
    * @returns The this.
    */
-  withSeverity(severity: ErrorSeverity): this {
+  public withSeverity(severity: ErrorSeverity): this {
     this.errorDetails.severity = severity;
     return this;
   }
@@ -129,7 +129,7 @@ export class AppException extends HttpException {
    * @param context - The context.
    * @returns The this.
    */
-  withContext(context: Record<string, any>): this {
+  public withContext(context: Record<string, unknown>): this {
     this.errorDetails.context = { ...this.errorDetails.context, ...context };
     return this;
   }
@@ -145,7 +145,7 @@ export class BusinessLogicException extends AppException {
    * @param message - The message.
    * @param details - The details.
    */
-  constructor(code: string, message: string, details?: any) {
+  constructor(code: string, message: string, details?: unknown) {
     super(
       ErrorType.BUSINESS_LOGIC,
       code,
@@ -165,7 +165,7 @@ export class ValidationException extends AppException {
    * @param message - The message.
    * @param validationErrors - The validation errors.
    */
-  constructor(message: string, validationErrors?: any) {
+  constructor(message: string, validationErrors?: unknown) {
     super(
       ErrorType.VALIDATION,
       'VALIDATION_FAILED',
@@ -236,7 +236,7 @@ export class ConflictException extends AppException {
    * @param message - The message.
    * @param conflictDetails - The conflict details.
    */
-  constructor(message: string, conflictDetails?: any) {
+  constructor(message: string, conflictDetails?: unknown) {
     super(
       ErrorType.CONFLICT,
       'RESOURCE_CONFLICT',
@@ -277,7 +277,7 @@ export class ErrorHandler {
   /**
    * 处理和记录错误
    */
-  static handleError(error: Error, context?: string): AppException {
+  public static handleError(error: Error, context?: string): AppException {
     const traceId = this.generateTraceId();
 
     // 如果已经是AppException，直接返回
@@ -411,13 +411,13 @@ export class ErrorRecoveryStrategy {
   /**
    * 重试策略
    */
-  static async withRetry<T>(
+  public static async withRetry<T>(
     operation: () => Promise<T>,
     maxRetries = 3,
     baseDelay = 1000,
     exponentialBackoff = true,
   ): Promise<T> {
-    let lastError: Error;
+    let lastError: Error | undefined;
     let delay = baseDelay;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -443,13 +443,13 @@ export class ErrorRecoveryStrategy {
       }
     }
 
-    throw ErrorHandler.handleError(lastError!);
+    throw ErrorHandler.handleError(lastError ?? new Error('Unknown error during retry'));
   }
 
   /**
    * 断路器模式
    */
-  static circuitBreaker<T>(
+  public static circuitBreaker<T>(
     operation: () => Promise<T>,
     failureThreshold = 5,
     timeout = 60000,
@@ -526,7 +526,7 @@ export class ErrorResponseFormatter {
   /**
    * 格式化错误响应
    */
-  static format(error: AppException): any {
+  public static format(error: AppException): Record<string, unknown> {
     const { errorDetails } = error;
 
     return {
@@ -549,7 +549,7 @@ export class ErrorResponseFormatter {
   /**
    * 格式化用户友好的错误消息
    */
-  static formatUserMessage(error: AppException): string {
+  public static formatUserMessage(error: AppException): string {
     const messageMap: Record<ErrorType, string> = {
       [ErrorType.VALIDATION]: '输入信息有误，请检查后重试',
       [ErrorType.AUTHENTICATION]: '身份验证失败，请重新登录',

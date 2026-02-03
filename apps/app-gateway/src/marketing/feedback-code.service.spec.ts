@@ -1,106 +1,113 @@
 import { FeedbackCodeService } from './feedback-code.service';
 
-const createModelMock = () => {
-  const store = new Map<
-    string,
-    {
-      _id: string;
-      code: string;
-      generatedAt: Date;
-      isUsed: boolean;
-      paymentStatus: 'pending' | 'paid' | 'rejected';
-      paymentAmount: number;
-      alipayAccount?: string;
-      questionnaireData?: Record<string, unknown>;
-      usedAt?: Date;
-      createdAt?: Date;
-    }
-  >();
+interface MockCodeEntry {
+  _id: string;
+  code: string;
+  generatedAt: Date;
+  isUsed: boolean;
+  paymentStatus: 'pending' | 'paid' | 'rejected';
+  paymentAmount: number;
+  alipayAccount?: string;
+  questionnaireData?: Record<string, unknown>;
+  usedAt?: Date;
+  createdAt?: Date;
+}
 
-  const ctor: any = function (this: any, doc: Record<string, unknown>) {
-    Object.assign(this, doc);
+const createModelMock = (): { model: ReturnType<typeof createMockConstructor>; store: Map<string, MockCodeEntry> } => {
+  const store = new Map<string, MockCodeEntry>();
+
+  const createMockConstructor = (): unknown => {
+    const ctor = function (this: Record<string, unknown>, doc: Record<string, unknown>): void {
+      Object.assign(this, doc);
+     
+    } as any;
+
+    ctor.prototype.save = jest.fn(async function (this: MockCodeEntry): Promise<MockCodeEntry> {
+      const entity: MockCodeEntry = {
+        _id: this._id ?? `${this.code}-id`,
+        ...this,
+      };
+      store.set(entity.code, entity);
+      return entity;
+    });
+
+    ctor.findOne = jest.fn(async (query: Record<string, string>): Promise<MockCodeEntry | null> => {
+      const code = query.code;
+      return code ? store.get(code) ?? null : null;
+    });
+
+    ctor.findOneAndUpdate = jest.fn(
+      async (
+        query: Record<string, unknown>,
+        update: Record<string, unknown>,
+        options?: Record<string, boolean>,
+      ): Promise<MockCodeEntry | null> => {
+        const code = query.code as string;
+        const entry = code ? store.get(code) : undefined;
+        if (!entry || entry.isUsed !== false) {
+          return null;
+        }
+        const updated: MockCodeEntry = {
+          ...entry,
+          ...update,
+          usedAt: (update.usedAt as Date | undefined) ?? entry.usedAt,
+        } as MockCodeEntry;
+        store.set(code, updated);
+        return options?.new ? updated : entry;
+      },
+    );
+
+    ctor.updateMany = jest.fn(async (query: Record<string, { $in?: string[] }>): Promise<{ modifiedCount: number }> => {
+      const codes: string[] = query.code?.$in ?? [];
+      let modifiedCount = 0;
+      codes.forEach((code) => {
+        const entry = store.get(code);
+        if (entry) {
+          modifiedCount += 1;
+        }
+      });
+      return { modifiedCount };
+    });
+
+    ctor.deleteMany = jest.fn(async (query: { isUsed?: boolean; generatedAt?: { $lt?: Date } }): Promise<{ deletedCount: number }> => {
+      const cutoff: Date | undefined = query.generatedAt?.$lt;
+      let deletedCount = 0;
+      Array.from(store.entries()).forEach(([code, doc]) => {
+        if (!doc.isUsed && cutoff && doc.generatedAt < cutoff) {
+          store.delete(code);
+          deletedCount += 1;
+        }
+      });
+      return { deletedCount };
+    });
+
+    ctor.create = jest.fn(async (doc: Record<string, unknown>): Promise<MockCodeEntry> => {
+      const entity = {
+        _id: `${doc.code}-id`,
+        ...doc,
+      } as MockCodeEntry;
+      store.set(entity.code, entity);
+      return entity;
+    });
+
+    return ctor;
   };
 
-  ctor.prototype.save = jest.fn(async function (this: any) {
-    const entity = {
-      _id: this._id ?? `${this.code}-id`,
-      ...this,
-    };
-    store.set(entity.code, entity);
-    return entity;
-  });
+  return { model: createMockConstructor(), store };
 
-  ctor.findOne = jest.fn(async (query: Record<string, any>) => {
-    const code = query.code;
-    return code ? store.get(code) ?? null : null;
-  });
-
-  ctor.findOneAndUpdate = jest.fn(
-    async (
-      query: Record<string, any>,
-      update: Record<string, any>,
-      options?: Record<string, any>,
-    ) => {
-      const code = query.code;
-      const entry = code ? store.get(code) : undefined;
-      if (!entry || entry.isUsed !== false) {
-        return null;
-      }
-      const updated = {
-        ...entry,
-        ...update,
-        usedAt: update.usedAt ?? entry.usedAt,
-      };
-      store.set(code, updated);
-      return options?.new ? updated : entry;
-    },
-  );
-
-  ctor.updateMany = jest.fn(async (query: Record<string, any>) => {
-    const codes: string[] = query.code?.$in ?? [];
-    let modifiedCount = 0;
-    codes.forEach((code) => {
-      const entry = store.get(code);
-      if (entry) {
-        modifiedCount += 1;
-      }
-    });
-    return { modifiedCount };
-  });
-
-  ctor.deleteMany = jest.fn(async (query: Record<string, any>) => {
-    const cutoff: Date = query.generatedAt?.$lt;
-    let deletedCount = 0;
-    Array.from(store.entries()).forEach(([code, doc]) => {
-      if (!doc.isUsed && cutoff && doc.generatedAt < cutoff) {
-        store.delete(code);
-        deletedCount += 1;
-      }
-    });
-    return { deletedCount };
-  });
-
-  ctor.create = jest.fn(async (doc: Record<string, unknown>) => {
-    const entity = {
-      _id: `${doc.code}-id`,
-      ...doc,
-    } as any;
-    store.set(entity.code, entity);
-    return entity;
-  });
-
-  return { model: ctor, store };
 };
 
 describe('FeedbackCodeService (mocked model)', () => {
   let service: FeedbackCodeService;
-  let model: ReturnType<typeof createModelMock>['model'];
-  let store: ReturnType<typeof createModelMock>['store'];
+   
+  let model: any;
+  let store: Map<string, MockCodeEntry>;
 
-  beforeEach(() => {
+  beforeEach((): void => {
     const factory = createModelMock();
     model = factory.model;
     store = factory.store;
+     
     service = new FeedbackCodeService(model as any);
   });
 

@@ -1,4 +1,4 @@
-import { Currency } from '../aggregates/incentive.aggregate.js';
+import type { Currency } from '../aggregates/incentive.aggregate.js';
 
 /**
  * Represents the payment result.
@@ -19,7 +19,7 @@ export class PaymentResult {
    * @param currency - The currency.
    * @returns The PaymentResult.
    */
-  static success(
+  public static success(
     transactionId: string,
     amount: number,
     currency: Currency,
@@ -32,7 +32,7 @@ export class PaymentResult {
    * @param error - The error.
    * @returns The PaymentResult.
    */
-  static failed(error: string): PaymentResult {
+  public static failed(error: string): PaymentResult {
     return new PaymentResult(false, undefined, undefined, undefined, error);
   }
 }

@@ -18,13 +18,14 @@ import {
   ApiSecurity,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { MfaService } from '../services/mfa.service';
-import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
-import {
+import type { MfaService } from '../services/mfa.service';
+import type { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
+import type {
   EnableMfaDto,
   VerifyMfaDto,
   DisableMfaDto,
-  GenerateBackupCodesDto,
+  GenerateBackupCodesDto} from '../dto/mfa.dto';
+import {
   MfaStatusDto,
   MfaSetupResponseDto,
   MfaMethod,
@@ -59,7 +60,7 @@ export class MfaController {
     description: 'MFA status retrieved successfully',
     type: MfaStatusDto,
   })
-  async getMfaStatus(
+  public async getMfaStatus(
     @Request() req: AuthenticatedRequest,
   ): Promise<MfaStatusDto> {
     try {
@@ -91,7 +92,7 @@ export class MfaController {
   })
   @ApiResponse({ status: 400, description: 'Invalid request data' })
   @ApiResponse({ status: 401, description: 'Invalid password' })
-  async enableMfa(
+  public async enableMfa(
     @Request() req: AuthenticatedRequest,
     @Body() enableMfaDto: EnableMfaDto,
   ): Promise<MfaSetupResponseDto> {
@@ -137,7 +138,7 @@ export class MfaController {
     status: 401,
     description: 'Invalid MFA token or account locked',
   })
-  async verifyMfa(
+  public async verifyMfa(
     @Request() req: AuthenticatedRequest,
     @Body() verifyMfaDto: VerifyMfaDto,
   ): Promise<{ success: boolean; deviceTrusted?: boolean; message: string }> {
@@ -191,7 +192,7 @@ export class MfaController {
   @ApiOperation({ summary: 'Disable MFA for current user' })
   @ApiResponse({ status: 200, description: 'MFA disabled successfully' })
   @ApiResponse({ status: 401, description: 'Invalid password or MFA token' })
-  async disableMfa(
+  public async disableMfa(
     @Request() req: AuthenticatedRequest,
     @Body() disableMfaDto: DisableMfaDto,
   ): Promise<{ success: boolean; message: string }> {
@@ -236,7 +237,7 @@ export class MfaController {
     description: 'Backup codes generated successfully',
   })
   @ApiResponse({ status: 401, description: 'Invalid password or MFA token' })
-  async generateBackupCodes(
+  public async generateBackupCodes(
     @Request() req: AuthenticatedRequest,
     @Body() generateBackupCodesDto: GenerateBackupCodesDto,
   ): Promise<{ success: boolean; backupCodes: string[]; message: string }> {
@@ -283,7 +284,7 @@ export class MfaController {
     status: 400,
     description: 'Invalid MFA method or MFA not enabled',
   })
-  async sendMfaToken(
+  public async sendMfaToken(
     @Request() req: AuthenticatedRequest,
     @Body() body: { method: MfaMethod },
   ): Promise<{ success: boolean; message: string }> {
@@ -340,7 +341,7 @@ export class MfaController {
     status: 200,
     description: 'All trusted devices removed successfully',
   })
-  async removeTrustedDevices(
+  public async removeTrustedDevices(
     @Request() req: AuthenticatedRequest,
   ): Promise<{ success: boolean; message: string }> {
     try {

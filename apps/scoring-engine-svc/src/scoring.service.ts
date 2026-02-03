@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { ScoringEngineNatsService } from './services/scoring-engine-nats.service';
 import {
   SecureConfigValidator,
@@ -7,26 +8,19 @@ import {
   ScoringEngineErrorCode,
   ErrorCorrelationManager,
 } from '@app/shared-dtos';
-import {
-  EnhancedSkillMatcherService,
-  JobSkillRequirement,
-  EnhancedSkillScore,
-} from './services/enhanced-skill-matcher.service';
-import {
-  ExperienceAnalyzerService,
-  JobRequirements,
-  ExperienceScore,
-} from './services/experience-analyzer.service';
-import {
-  CulturalFitAnalyzerService,
-  CulturalFitScore,
-} from './services/cultural-fit-analyzer.service';
-import { CompanyProfile } from './services/cultural-fit-analyzer.service';
-import {
-  ScoringConfidenceService,
-  ComponentScores,
-  ScoreReliabilityReport,
-} from './services/scoring-confidence.service';
+import type { JobSkillRequirement, EnhancedSkillScore } from './services/enhanced-skill-matcher.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { EnhancedSkillMatcherService } from './services/enhanced-skill-matcher.service';
+import type { JobRequirements, ExperienceScore } from './services/experience-analyzer.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { ExperienceAnalyzerService } from './services/experience-analyzer.service';
+import type { CulturalFitScore } from './services/cultural-fit-analyzer.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { CulturalFitAnalyzerService } from './services/cultural-fit-analyzer.service';
+import type { CompanyProfile } from './services/cultural-fit-analyzer.service';
+import type { ComponentScores, ScoreReliabilityReport } from './services/scoring-confidence.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { ScoringConfidenceService } from './services/scoring-confidence.service';
 
 /**
  * Defines the shape of the jd dto.
@@ -130,7 +124,7 @@ export class ScoringEngineService {
    * Handles jd extracted event.
    * @param event - The event.
    */
-  handleJdExtractedEvent(event: { jobId: string; jdDto: JdDTO }): void {
+  public handleJdExtractedEvent(event: { jobId: string; jdDto: JdDTO }): void {
     this.jdCache.set(event.jobId, event.jdDto);
   }
 
@@ -139,7 +133,7 @@ export class ScoringEngineService {
    * @param event - The event.
    * @returns A promise that resolves when the operation completes.
    */
-  async handleResumeParsedEvent(event: {
+  public async handleResumeParsedEvent(event: {
     jobId: string;
     resumeId: string;
     resumeDto: ResumeDTO;
@@ -432,7 +426,7 @@ export class ScoringEngineService {
     jdDto: JdDTO,
     _skillAnalysis: EnhancedSkillScore,
     _experienceAnalysis: ExperienceScore,
-  ) {
+  ): { skills: number; experience: number; education: number; culturalFit: number } {
     // Base weights
     let skillsWeight = 0.5;
     let experienceWeight = 0.3;
@@ -527,7 +521,7 @@ export class ScoringEngineService {
     const hasRelevantMajor = resumeDto.education.some((edu) => {
       if (!edu.major) return false;
       const found = relevantMajors.find((relevant) =>
-        edu.major!.toLowerCase().includes(relevant.toLowerCase()),
+        edu.major?.toLowerCase().includes(relevant.toLowerCase()),
       );
       if (found && !matchedMajor) matchedMajor = found;
       return !!found;

@@ -3,6 +3,7 @@
  * Shared contract definitions between frontend and backend
  */
 
+/* eslint-disable @typescript-eslint/no-namespace */
 export namespace JobContracts {
   /**
    * Standardized job status enum - must be kept in sync between frontend and backend
@@ -36,6 +37,7 @@ export namespace JobContracts {
   /**
    * Job list item for table/grid displays
    */
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-empty-interface
   export interface JobListItem extends JobBase {}
 
   /**

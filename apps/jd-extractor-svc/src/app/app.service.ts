@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type {
+  OnApplicationBootstrap,
+  OnApplicationShutdown} from '@nestjs/common';
 import {
   Injectable,
-  Logger,
-  OnApplicationBootstrap,
-  OnApplicationShutdown,
+  Logger
 } from '@nestjs/common';
 
 /**
@@ -19,7 +21,7 @@ export class AppService
    * Retrieves data.
    * @returns The result of the operation.
    */
-  getData() {
+  public getData(): { message: string } {
     return { message: 'Hello API' };
   }
 
@@ -27,7 +29,7 @@ export class AppService
    * Performs the on application bootstrap operation.
    * @returns A promise that resolves when the operation completes.
    */
-  async onApplicationBootstrap(): Promise<void> {
+  public async onApplicationBootstrap(): Promise<void> {
     this.logger.log('JD Extractor Service starting...');
 
     try {
@@ -57,7 +59,7 @@ export class AppService
    * Performs the on application shutdown operation.
    * @returns A promise that resolves when the operation completes.
    */
-  async onApplicationShutdown(): Promise<void> {
+  public async onApplicationShutdown(): Promise<void> {
     this.logger.log('JD Extractor Service shutting down...');
 
     try {

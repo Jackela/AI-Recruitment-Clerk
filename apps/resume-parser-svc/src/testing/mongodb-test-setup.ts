@@ -1,7 +1,8 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
-import { ModuleMetadata } from '@nestjs/common';
+import type { MongooseModuleOptions } from '@nestjs/mongoose';
+import { MongooseModule } from '@nestjs/mongoose';
+import type { Connection } from 'mongoose';
+import type { ModuleMetadata } from '@nestjs/common';
 
 /**
  * MongoDB test setup utilities for integration tests
@@ -13,7 +14,7 @@ export class MongodbTestSetup {
   /**
    * Start MongoDB memory server
    */
-  static async startMongoMemoryServer(): Promise<string> {
+  public static async startMongoMemoryServer(): Promise<string> {
     if (!this.mongoServer) {
       this.mongoServer = await MongoMemoryServer.create({
         instance: {
@@ -29,10 +30,12 @@ export class MongodbTestSetup {
   /**
    * Stop MongoDB memory server
    */
-  static async stopMongoMemoryServer(): Promise<void> {
+  public static async stopMongoMemoryServer(): Promise<void> {
     if (this.mongoServer) {
       await this.mongoServer.stop();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.mongoServer = null as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.mongoUri = null as any;
     }
   }
@@ -40,8 +43,9 @@ export class MongodbTestSetup {
   /**
    * Get Mongoose module for testing with proper connection name
    */
-  static async getMongooseTestModule(
-    connectionName: string = 'resume-parser',
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  public static async getMongooseTestModule(
+    connectionName = 'resume-parser',
     options: MongooseModuleOptions = {},
   ) {
     const uri = await this.startMongoMemoryServer();
@@ -54,9 +58,11 @@ export class MongodbTestSetup {
   /**
    * Get Mongoose feature module for schemas
    */
-  static getMongooseFeatureModule(
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  public static getMongooseFeatureModule(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     models: Array<{ name: string; schema: any }>,
-    connectionName: string = 'resume-parser',
+    connectionName = 'resume-parser',
   ) {
     return MongooseModule.forFeature(models, connectionName);
   }
@@ -64,7 +70,7 @@ export class MongodbTestSetup {
   /**
    * Create mock connection provider for dependency injection
    */
-  static getMockConnectionProvider(connectionName: string = 'resume-parser') {
+  public static getMockConnectionProvider(connectionName = 'resume-parser'): { provide: string; useValue: unknown } {
     const mockConnection = {
       readyState: 1,
       db: {
@@ -99,10 +105,12 @@ export class MongodbTestSetup {
   /**
    * Get complete test module metadata with MongoDB setup
    */
-  static async getTestModuleMetadata(
+  public static async getTestModuleMetadata(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     additionalProviders: any[] = [],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     additionalImports: any[] = [],
-    connectionName: string = 'resume-parser',
+    connectionName = 'resume-parser',
   ): Promise<ModuleMetadata> {
     const mongooseModule = await this.getMongooseTestModule(connectionName);
 
@@ -115,14 +123,14 @@ export class MongodbTestSetup {
   /**
    * Clean up all test collections
    */
-  static async cleanupCollections(connection: Connection): Promise<void> {
+  public static async cleanupCollections(connection: Connection): Promise<void> {
     if (!connection || connection.readyState !== 1) {
       return;
     }
 
     const collections = connection.collections;
     for (const key in collections) {
-      if (collections.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(collections, key)) {
         await collections[key].deleteMany({});
       }
     }

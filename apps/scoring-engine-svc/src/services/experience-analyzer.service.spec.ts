@@ -1,7 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type {
+  JobRequirements} from './experience-analyzer.service';
 import {
-  ExperienceAnalyzerService,
-  JobRequirements,
+  ExperienceAnalyzerService
 } from './experience-analyzer.service';
 import { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';

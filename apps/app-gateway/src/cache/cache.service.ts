@@ -5,10 +5,10 @@
 
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import type { Cache } from 'cache-manager';
 import * as crypto from 'crypto';
-import { EmbeddingService } from '../embedding/embedding.service';
-import { VectorStoreService } from './vector-store.service';
+import type { EmbeddingService } from '../embedding/embedding.service';
+import type { VectorStoreService } from './vector-store.service';
 
 /**
  * Defines the shape of the cache options.
@@ -47,7 +47,7 @@ export interface CacheMetrics {
  */
 @Injectable()
 export class CacheService {
-  private readonly logger = new Logger(CacheService.name);
+  private readonly logger: Logger = new Logger(CacheService.name);
   private metrics: CacheMetrics = {
     hits: 0,
     misses: 0,
@@ -80,7 +80,9 @@ export class CacheService {
   private setupErrorHandling(): void {
     try {
       // 如果是Redis缓存，设置错误处理器
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (this.cacheManager.store && (this.cacheManager.store as any).client) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const redisClient = (this.cacheManager.store as any).client;
 
         redisClient.on('error', (err: Error) => {
@@ -104,15 +106,15 @@ export class CacheService {
           this.logger.warn('⚠️ Redis连接已断开');
         });
       }
-    } catch (error) {
-      this.logger.warn('缓存错误处理器设置失败:', error.message);
+    } catch {
+      this.logger.warn('缓存错误处理器设置失败');
     }
   }
 
   /**
    * 获取缓存值 - 带指标收集和错误处理
    */
-  async get<T>(key: string): Promise<T | null> {
+  public async get<T>(key: string): Promise<T | null> {
     try {
       const result = await Promise.race([
         this.cacheManager.get<T>(key),
@@ -130,9 +132,9 @@ export class CacheService {
       }
       this.updateTotalOperations();
       return (result ?? null) as T | null;
-    } catch (error) {
+    } catch {
       this.metrics.errors++;
-      this.logger.warn(`缓存获取失败 [${key}]: ${error.message}`);
+      this.logger.warn(`缓存获取失败 [${key}]`);
       return null;
     }
   }
@@ -140,7 +142,7 @@ export class CacheService {
   /**
    * 设置缓存值 - 带指标收集和错误处理
    */
-  async set<T>(key: string, value: T, options?: CacheOptions): Promise<void> {
+  public async set<T>(key: string, value: T, options?: CacheOptions): Promise<void> {
     try {
       const ttl = options?.ttl;
       await Promise.race([
@@ -152,9 +154,10 @@ export class CacheService {
 
       this.metrics.sets++;
       this.logger.debug(`💾 Cache SET [${key}]: TTL=${ttl}ms`);
-    } catch (error) {
+    } catch (error: unknown) {
       this.metrics.errors++;
-      this.logger.warn(`缓存设置失败 [${key}]: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`缓存设置失败 [${key}]: ${errorMessage}`);
       // 缓存设置失败不应该阻塞业务流程
     }
   }
@@ -162,7 +165,7 @@ export class CacheService {
   /**
    * 删除缓存 - 增强错误处理
    */
-  async del(key: string): Promise<void> {
+  public async del(key: string): Promise<void> {
     try {
       await Promise.race([
         this.cacheManager.del(key),
@@ -173,16 +176,17 @@ export class CacheService {
 
       this.metrics.dels++;
       this.logger.debug(`🗑️ Cache DEL [${key}]`);
-    } catch (error) {
+    } catch (error: unknown) {
       this.metrics.errors++;
-      this.logger.warn(`缓存删除失败 [${key}]: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`缓存删除失败 [${key}]: ${errorMessage}`);
     }
   }
 
   /**
    * 重置所有缓存 - 增强错误处理
    */
-  async reset(): Promise<void> {
+  public async reset(): Promise<void> {
     try {
       await Promise.race([
         this.cacheManager.reset(),
@@ -192,16 +196,17 @@ export class CacheService {
       ]);
 
       this.logger.log('🔄 缓存已重置');
-    } catch (error) {
+    } catch (error: unknown) {
       this.metrics.errors++;
-      this.logger.error(`缓存重置失败: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`缓存重置失败: ${errorMessage}`);
     }
   }
 
   /**
    * 缓存包装器 - 智能缓存与指标收集
    */
-  async wrap<T>(
+  public async wrap<T>(
     key: string,
     fn: () => Promise<T>,
     options?: CacheOptions,
@@ -230,16 +235,18 @@ export class CacheService {
       const duration = Date.now() - startTime;
       this.logger.debug(`✅ Cache wrap completed [${key}] in ${duration}ms`);
       return result;
-    } catch (error) {
+    } catch (error: unknown) {
       this.metrics.errors++;
+      const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.warn(
-        `❌ Cache wrapper failed for key [${key}]: ${error.message}`,
+        `❌ Cache wrapper failed for key [${key}]: ${errorMessage}`,
       );
       // 如果缓存失败，直接执行原函数
       try {
         return await fn();
-      } catch (fnError) {
-        this.logger.error(`原函数执行也失败 [${key}]: ${fnError.message}`);
+      } catch (fnError: unknown) {
+        const fnErrorMessage = fnError instanceof Error ? fnError.message : String(fnError);
+        this.logger.error(`原函数执行也失败 [${key}]: ${fnErrorMessage}`);
         throw fnError;
       }
     }
@@ -248,7 +255,7 @@ export class CacheService {
   /**
    * 语义缓存包装器：通过向量相似度提升缓存命中率。
    */
-  async wrapSemantic<T>(
+  public async wrapSemantic<T>(
     semanticText: string,
     fallbackFn: () => Promise<T>,
     options: SemanticCacheOptions,
@@ -341,7 +348,7 @@ export class CacheService {
   /**
    * 生成缓存键 - 改进版本，确保键的唯一性和一致性
    */
-  generateKey(
+  public generateKey(
     prefix: string,
     ...parts: (string | number | undefined | null)[]
   ): string {
@@ -358,30 +365,30 @@ export class CacheService {
   /**
    * 健康检查缓存键
    */
-  getHealthCacheKey(): string {
+  public getHealthCacheKey(): string {
     return this.generateKey('health', 'check');
   }
 
   /**
    * API文档缓存键
    */
-  getApiDocsCacheKey(): string {
+  public getApiDocsCacheKey(): string {
     return this.generateKey('api', 'docs');
   }
 
   /**
    * 用户会话缓存键
    */
-  getUserSessionKey(userId: string): string {
+  public getUserSessionKey(userId: string): string {
     return this.generateKey('session', userId);
   }
 
   /**
    * 职位查询缓存键
    */
-  getJobQueryKey(query: any): string {
+  public getJobQueryKey(query: Record<string, unknown>): string {
     // 确保对象属性顺序一致，避免因属性顺序不同导致JSON字符串不同
-    const orderedQuery = {};
+    const orderedQuery: Record<string, unknown> = {};
     Object.keys(query)
       .sort()
       .forEach((key) => {
@@ -424,7 +431,7 @@ export class CacheService {
   /**
    * 获取当前缓存指标
    */
-  getMetrics(): CacheMetrics {
+  public getMetrics(): CacheMetrics {
     this.updateTotalOperations();
     return { ...this.metrics };
   }
@@ -432,7 +439,7 @@ export class CacheService {
   /**
    * 重置缓存指标
    */
-  resetMetrics(): void {
+  public resetMetrics(): void {
     this.metrics = {
       hits: 0,
       misses: 0,
@@ -448,7 +455,7 @@ export class CacheService {
   /**
    * 缓存健康检查 - 增强版
    */
-  async healthCheck(): Promise<{
+  public async healthCheck(): Promise<{
     status: string;
     connected: boolean;
     type: string;
@@ -460,7 +467,8 @@ export class CacheService {
 
     try {
       // 检测缓存类型
-      if (this.cacheManager.store && (this.cacheManager.store as any).client) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (this.cacheManager.store && (this.cacheManager.store as Record<string, any>).client) {
         cacheType = 'redis';
       }
 
@@ -484,8 +492,9 @@ export class CacheService {
         type: cacheType,
         metrics: this.getMetrics(),
       };
-    } catch (error) {
-      this.logger.warn(`Cache health check failed: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`Cache health check failed: ${errorMessage}`);
 
       // 尝试清理测试键
       try {
@@ -502,7 +511,7 @@ export class CacheService {
         connected: false,
         type: cacheType,
         metrics: this.getMetrics(),
-        details: error.message,
+        details: errorMessage,
       };
     }
   }

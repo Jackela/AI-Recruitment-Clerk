@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import type { Document } from 'mongoose';
 
 // Local fallback enums in case shared DTOs are not available
 export enum ConsentStatus {
@@ -51,11 +51,11 @@ export type ConsentRecordDocument = ConsentRecord & Document;
   versionKey: false,
 })
 export class ConsentRecord {
-  @Prop({ required: true, unique: true, index: true })
-  id: string = '';
+  @Prop({ required: true, unique: true, index: true, type: String })
+  public id = '';
 
-  @Prop({ required: true })
-  userId: string = '';
+  @Prop({ required: true, type: String })
+  public userId = '';
 
   @Prop({
     type: String,
@@ -63,7 +63,7 @@ export class ConsentRecord {
     required: true,
     index: true,
   })
-  purpose: ConsentPurpose = ConsentPurpose.ESSENTIAL_SERVICES;
+  public purpose: ConsentPurpose = ConsentPurpose.ESSENTIAL_SERVICES;
 
   @Prop({
     type: String,
@@ -71,53 +71,53 @@ export class ConsentRecord {
     required: true,
     index: true,
   })
-  status: ConsentStatus = ConsentStatus.PENDING;
+  public status: ConsentStatus = ConsentStatus.PENDING;
 
   @Prop({
     type: String,
     enum: Object.values(ConsentMethod),
     required: false,
   })
-  consentMethod?: ConsentMethod = undefined;
+  public consentMethod?: ConsentMethod;
 
   @Prop({
     type: [{ type: String, enum: Object.values(DataCategory) }],
     default: [],
   })
-  dataCategories: DataCategory[] = [];
+  public dataCategories: DataCategory[] = [];
 
-  @Prop({ required: false })
-  legalBasis?: string = undefined; // GDPR Article 6 legal basis
+  @Prop({ required: false, type: String })
+  public legalBasis?: string; // GDPR Article 6 legal basis
 
-  @Prop({ required: true })
-  consentDate: Date = new Date();
+  @Prop({ required: true, type: Date })
+  public consentDate: Date = new Date();
 
-  @Prop({ required: false })
-  withdrawalDate?: Date = undefined;
+  @Prop({ required: false, type: Date })
+  public withdrawalDate?: Date;
 
-  @Prop({ required: false })
-  expiryDate?: Date = undefined; // For time-limited consent
+  @Prop({ required: false, type: Date })
+  public expiryDate?: Date; // For time-limited consent
 
-  @Prop({ required: false })
-  consentText?: string = undefined; // Text presented to user
+  @Prop({ required: false, type: String })
+  public consentText?: string; // Text presented to user
 
-  @Prop({ required: false })
-  withdrawalReason?: string = undefined;
+  @Prop({ required: false, type: String })
+  public withdrawalReason?: string;
 
-  @Prop({ required: false })
-  ipAddress?: string = undefined; // Proof of consent
+  @Prop({ required: false, type: String })
+  public ipAddress?: string; // Proof of consent
 
-  @Prop({ required: false })
-  userAgent?: string = undefined; // Technical consent context
+  @Prop({ required: false, type: String })
+  public userAgent?: string; // Technical consent context
 
   @Prop({ type: Object, default: {} })
-  metadata?: Record<string, any> = {};
+  public metadata?: Record<string, unknown>;
 
-  @Prop({ default: Date.now })
-  createdAt: Date = new Date();
+  @Prop({ default: Date.now, type: Date })
+  public createdAt: Date = new Date();
 
-  @Prop({ default: Date.now })
-  updatedAt: Date = new Date();
+  @Prop({ default: Date.now, type: Date })
+  public updatedAt: Date = new Date();
 }
 
 export const ConsentRecordSchema = SchemaFactory.createForClass(ConsentRecord);
@@ -162,44 +162,44 @@ export type CookieConsentDocument = CookieConsent & Document;
   versionKey: false,
 })
 export class CookieConsent {
-  @Prop({ required: true, unique: true })
-  deviceId: string = '';
+  @Prop({ required: true, unique: true, type: String })
+  public deviceId = '';
 
-  @Prop({ required: true, default: true })
-  essential: boolean = true; // Always true, cannot be denied
+  @Prop({ required: true, default: true, type: Boolean })
+  public essential = true; // Always true, cannot be denied
 
-  @Prop({ required: true, default: false })
-  functional: boolean = false;
+  @Prop({ required: true, default: false, type: Boolean })
+  public functional = false;
 
-  @Prop({ required: true, default: false })
-  analytics: boolean = false;
+  @Prop({ required: true, default: false, type: Boolean })
+  public analytics = false;
 
-  @Prop({ required: true, default: false })
-  marketing: boolean = false;
+  @Prop({ required: true, default: false, type: Boolean })
+  public marketing = false;
 
-  @Prop({ required: true })
-  consentDate: Date = new Date();
+  @Prop({ required: true, type: Date })
+  public consentDate: Date = new Date();
 
-  @Prop({ required: false })
-  expiryDate?: Date = undefined;
+  @Prop({ required: false, type: Date })
+  public expiryDate?: Date;
 
-  @Prop({ required: false, default: '1.0' })
-  consentVersion?: string = '1.0';
+  @Prop({ required: false, default: '1.0', type: String })
+  public consentVersion = '1.0';
 
-  @Prop({ required: false })
-  ipAddress?: string = undefined;
+  @Prop({ required: false, type: String })
+  public ipAddress?: string;
 
-  @Prop({ required: false })
-  userAgent?: string = undefined;
+  @Prop({ required: false, type: String })
+  public userAgent?: string;
 
   @Prop({ type: Object, default: {} })
-  metadata?: Record<string, any> = {};
+  public metadata?: Record<string, unknown>;
 
-  @Prop({ default: Date.now })
-  createdAt: Date = new Date();
+  @Prop({ default: Date.now, type: Date })
+  public createdAt: Date = new Date();
 
-  @Prop({ default: Date.now })
-  updatedAt: Date = new Date();
+  @Prop({ default: Date.now, type: Date })
+  public updatedAt: Date = new Date();
 }
 
 export const CookieConsentSchema = SchemaFactory.createForClass(CookieConsent);
@@ -238,14 +238,14 @@ export type ConsentAuditLogDocument = ConsentAuditLog & Document;
   versionKey: false,
 })
 export class ConsentAuditLog {
-  @Prop({ required: true, unique: true, index: true })
-  id: string = '';
+  @Prop({ required: true, unique: true, index: true, type: String })
+  public id = '';
 
-  @Prop({ required: true })
-  userId: string = '';
+  @Prop({ required: true, type: String })
+  public userId = '';
 
-  @Prop({ required: true })
-  action: string = ''; // 'grant', 'withdraw', 'renew', 'expire'
+  @Prop({ required: true, type: String })
+  public action = ''; // 'grant', 'withdraw', 'renew', 'expire'
 
   @Prop({
     type: String,
@@ -253,39 +253,39 @@ export class ConsentAuditLog {
     required: true,
     index: true,
   })
-  purpose: ConsentPurpose = ConsentPurpose.ESSENTIAL_SERVICES;
+  public purpose: ConsentPurpose = ConsentPurpose.ESSENTIAL_SERVICES;
 
   @Prop({
     type: String,
     enum: Object.values(ConsentStatus),
     required: true,
   })
-  previousStatus: ConsentStatus = ConsentStatus.PENDING;
+  public previousStatus: ConsentStatus = ConsentStatus.PENDING;
 
   @Prop({
     type: String,
     enum: Object.values(ConsentStatus),
     required: true,
   })
-  newStatus: ConsentStatus = ConsentStatus.PENDING;
+  public newStatus: ConsentStatus = ConsentStatus.PENDING;
 
-  @Prop({ required: false })
-  reason?: string = undefined;
+  @Prop({ required: false, type: String })
+  public reason?: string;
 
-  @Prop({ required: false })
-  ipAddress?: string = undefined;
+  @Prop({ required: false, type: String })
+  public ipAddress?: string;
 
-  @Prop({ required: false })
-  userAgent?: string = undefined;
+  @Prop({ required: false, type: String })
+  public userAgent?: string;
 
   @Prop({ type: Object, default: {} })
-  metadata?: Record<string, any> = {};
+  public metadata?: Record<string, unknown>;
 
-  @Prop({ required: true })
-  timestamp: Date = new Date();
+  @Prop({ required: true, type: Date })
+  public timestamp: Date = new Date();
 
-  @Prop({ default: Date.now })
-  createdAt: Date = new Date();
+  @Prop({ default: Date.now, type: Date })
+  public createdAt: Date = new Date();
 }
 
 export const ConsentAuditLogSchema =

@@ -1,17 +1,19 @@
+import type {
+  ExecutionContext,
+  CanActivate} from '@nestjs/common';
 import {
   Injectable,
-  ExecutionContext,
   UnauthorizedException,
   Logger,
   HttpException,
-  HttpStatus,
-  CanActivate,
+  HttpStatus
 } from '@nestjs/common';
 // Avoid extending passport's AuthGuard to prevent CJS class transpile issues
 // import { AuthGuard } from '@nestjs/passport';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { createHash } from 'crypto';
 
 /**
@@ -47,7 +49,7 @@ export class JwtAuthGuard implements CanActivate {
    * @param context - The context.
    * @returns A promise that resolves to boolean value.
    */
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  public async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
 
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -63,6 +65,7 @@ export class JwtAuthGuard implements CanActivate {
     if (process.env.NODE_ENV !== 'test') {
       const force = process.env.FORCE_RATE_LIMIT === 'true';
       // Only enforce rate limit when explicitly requested or forced by env
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (force || (request as any).__testRateLimit === true) {
         const clientId = this.getClientIdentifier(request);
         if (!this.checkRateLimit(clientId, request.path)) {
@@ -80,20 +83,22 @@ export class JwtAuthGuard implements CanActivate {
     // For simplified UAT and to avoid class transpile issues with AuthGuard mixins,
     // treat requests as authenticated if a bearer exists; otherwise allow as guest.
     const authHeader = request.headers['authorization'] || '';
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const requestWithUser = request as any;
     if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
       const tokenValue = authHeader.slice('Bearer '.length).trim();
 
       if (tokenValue.length > 0) {
         // Minimal token presence check; in real prod, passport-jwt validates this
-        (request as any).user = ((request as any).user || {
+        requestWithUser.user = (requestWithUser.user || {
           id: 'user-uat',
           sub: 'user-uat',
           email: 'uat@example.com',
           organizationId: 'org-uat',
           role: 'user',
         });
-      } else if (!(request as any).user) {
-        (request as any).user = {
+      } else if (!requestWithUser.user) {
+        requestWithUser.user = {
           id: 'guest',
           sub: 'guest',
           email: 'guest@local',
@@ -101,9 +106,9 @@ export class JwtAuthGuard implements CanActivate {
           role: 'user',
         };
       }
-    } else if (!(request as any).user) {
+    } else if (!requestWithUser.user) {
       // Attach a benign guest identity to satisfy downstream typings
-      (request as any).user = {
+      requestWithUser.user = {
         id: 'guest',
         sub: 'guest',
         email: 'guest@local',
@@ -122,7 +127,8 @@ export class JwtAuthGuard implements CanActivate {
    * @param context - The context.
    * @returns The result of the operation.
    */
-  handleRequest(err: any, user: any, _info: any, context: ExecutionContext) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public handleRequest(err: any, user: any, _info: any, context: ExecutionContext): any {
     const request = context.switchToHttp().getRequest<Request>();
 
     if (err) {
@@ -154,6 +160,7 @@ export class JwtAuthGuard implements CanActivate {
     if (user?.id) response.setHeader('X-Auth-User-Id', String(user.id));
     if (user?.role) {
       const normalizedRole = String(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (user as any)?.rawRole ?? user.role ?? '',
       ).toLowerCase();
       response.setHeader('X-Auth-Role', normalizedRole);
@@ -237,7 +244,7 @@ export class JwtAuthGuard implements CanActivate {
    * Retrieves rate limit status.
    * @returns The { activeClients: number; blockedClients: number; totalRequests: number; }.
    */
-  getRateLimitStatus(): {
+  public getRateLimitStatus(): {
     activeClients: number;
     blockedClients: number;
     totalRequests: number;

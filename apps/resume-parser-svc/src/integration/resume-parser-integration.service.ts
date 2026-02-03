@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { VisionLlmService } from '../vision-llm/vision-llm.service';
-import { FieldMapperService } from '../field-mapper/field-mapper.service';
-import {
+import type { VisionLlmService } from '../vision-llm/vision-llm.service';
+import type { FieldMapperService } from '../field-mapper/field-mapper.service';
+import type {
   FieldMappingResult,
   VisionLlmResponse,
 } from '../dto/resume-parsing.dto';
@@ -52,15 +52,13 @@ export class ResumeParserIntegrationService {
   constructor(
     private readonly visionLlmService: VisionLlmService,
     private readonly fieldMapperService: FieldMapperService,
-  ) {
-    // Reference private helper to satisfy TS noUnusedLocals when enabled
-    void (this as any).validateOptions;
-  }
+  ) {}
+  // validateOptions removed - no longer needed
 
   /**
    * Complete resume parsing pipeline: PDF → Vision LLM → Field Mapping → Validation
    */
-  async parseResume(
+  public async parseResume(
     pdfBuffer: Buffer,
     filename: string,
     options: ResumeParsingOptions = {},
@@ -180,7 +178,7 @@ export class ResumeParserIntegrationService {
   /**
    * Batch process multiple resumes
    */
-  async parseResumesBatch(
+  public async parseResumesBatch(
     resumes: { pdfBuffer: Buffer; filename: string }[],
     options: ResumeParsingOptions = {},
   ): Promise<
@@ -229,7 +227,7 @@ export class ResumeParserIntegrationService {
   /**
    * Health check for the integrated pipeline
    */
-  async healthCheck(): Promise<{
+  public async healthCheck(): Promise<{
     status: 'healthy' | 'degraded' | 'unhealthy';
     components: Record<string, boolean>;
     lastChecked: Date;
@@ -280,7 +278,7 @@ export class ResumeParserIntegrationService {
   /**
    * Get processing statistics
    */
-  async getProcessingStats(): Promise<{
+  public async getProcessingStats(): Promise<{
     avgProcessingTime: number;
     avgConfidence: number;
     successRate: number;
@@ -352,7 +350,7 @@ export class ResumeParserIntegrationService {
     }
 
     throw new Error(
-      `Vision LLM extraction failed after ${maxRetries} attempts: ${(lastError as any)?.message}`,
+      `Vision LLM extraction failed after ${maxRetries} attempts: ${lastError?.message}`,
     );
   }
 
@@ -360,6 +358,7 @@ export class ResumeParserIntegrationService {
    * Normalize fields with validation
    */
   private async normalizeFields(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rawData: any,
     options: ResumeParsingOptions,
   ): Promise<FieldMappingResult> {
@@ -382,6 +381,7 @@ export class ResumeParserIntegrationService {
   private calculateQualityMetrics(
     mappingResult: FieldMappingResult,
     visionResult: VisionLlmResponse,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _experienceMetrics?: any,
   ): ResumeParsingResult['qualityMetrics'] {
     const resume = mappingResult.resumeDto;

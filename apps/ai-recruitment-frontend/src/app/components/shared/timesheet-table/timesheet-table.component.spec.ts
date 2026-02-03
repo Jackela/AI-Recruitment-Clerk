@@ -1,6 +1,8 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TimesheetTableComponent, TimesheetEntry } from './timesheet-table.component';
-import { TimesheetColumn } from '../../../../lib/config/table-config';
+import type { ComponentFixture} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import type { TimesheetEntry } from './timesheet-table.component';
+import { TimesheetTableComponent } from './timesheet-table.component';
+import type { TimesheetColumn } from '../../../../lib/config/table-config';
 
 const BASE_ENTRIES: TimesheetEntry[] = [
   {
@@ -115,7 +117,7 @@ describe('TimesheetTableComponent (lightweight regression)', () => {
     const exportSpy = jest.spyOn(component.onExport, 'emit');
     const downloadSpy = jest.spyOn(component as any, 'downloadCSV');
 
-    component.exportData();
+    component.exportDataCsv();
 
     expect(exportSpy).toHaveBeenCalled();
     expect(downloadSpy).toHaveBeenCalled();

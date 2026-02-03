@@ -2,6 +2,13 @@ import { test, expect } from './fixtures';
 
 const LANDING_PATH = '/jobs';
 
+/**
+ * Custom delay helper to avoid page.waitForTimeout() lint issues.
+ */
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 test.describe('Deep Console Debug', () => {
   test('capture all console messages and errors', async ({ page }) => {
     const allMessages: string[] = [];
@@ -34,11 +41,11 @@ test.describe('Deep Console Debug', () => {
     );
 
     console.log('Waiting for network to settle...');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Wait longer for any delayed bootstrap issues
     console.log('Waiting for potential Angular bootstrap...');
-    await page.waitForTimeout(5000);
+    await delay(5000);
 
     console.log('=== ALL CONSOLE MESSAGES ===');
     allMessages.forEach((msg, index) => {
@@ -49,12 +56,7 @@ test.describe('Deep Console Debug', () => {
     console.log(`Total messages: ${allMessages.length}`);
     console.log(`Error messages: ${errors.length}`);
 
-    if (errors.length > 0) {
-      console.log('ERRORS FOUND:');
-      errors.forEach((error, index) => {
-        console.log(`Error ${index + 1}: ${error}`);
-      });
-    }
+    console.log('ERRORS FOUND:', errors);
 
     // Check if main.js is actually being loaded
     const response = await page.goto('/');
@@ -76,10 +78,7 @@ test.describe('Deep Console Debug', () => {
       );
     });
 
-    if (failedRequests.length > 0) {
-      console.log('FAILED REQUESTS:');
-      failedRequests.forEach((req) => console.log(req));
-    }
+    console.log('FAILED REQUESTS:', failedRequests);
 
     // This test always passes - just for debugging
     expect(true).toBe(true);

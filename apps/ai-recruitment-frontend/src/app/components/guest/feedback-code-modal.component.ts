@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import type { OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { GuestState } from '../../store/guest/guest.state';
+import type { Observable } from 'rxjs';
+import type { GuestState } from '../../store/guest/guest.state';
 import * as GuestActions from '../../store/guest/guest.actions';
 import { ToastService } from '../../services/toast.service';
 
@@ -19,6 +20,10 @@ import { ToastService } from '../../services/toast.service';
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       *ngIf="showModal$ | async"
       (click)="onBackdropClick($event)"
+      (keydown.escape)="closeModal()"
+      tabindex="0"
+      role="dialog"
+      aria-modal="true"
     >
       <div class="bg-white rounded-lg p-6 max-w-lg mx-4 relative">
         <button
@@ -76,12 +81,13 @@ import { ToastService } from '../../services/toast.service';
             class="bg-gray-50 p-4 rounded-lg mb-4"
             *ngIf="guestState$ | async as state"
           >
-            <label class="block text-sm font-medium text-gray-700 mb-2"
+            <label for="feedbackCodeInput" class="block text-sm font-medium text-gray-700 mb-2"
               >您的反馈码：</label
             >
             <div class="flex items-center space-x-2">
               <input
                 type="text"
+                id="feedbackCodeInput"
                 [value]="state.feedbackCode"
                 readonly
                 class="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-white font-mono text-sm"
@@ -242,23 +248,21 @@ import { ToastService } from '../../services/toast.service';
   ],
 })
 export class FeedbackCodeModalComponent implements OnInit {
-  showModal$: Observable<boolean>;
-  guestState$: Observable<GuestState>;
-  isLoading$: Observable<boolean>;
-  error$: Observable<string | null>;
+  public showModal$: Observable<boolean>;
+  public guestState$: Observable<GuestState>;
+  public isLoading$: Observable<boolean>;
+  public error$: Observable<string | null>;
 
-  copied = false;
-  redemptionCode = '';
+  public copied = false;
+  public redemptionCode = '';
+
+  private readonly store = inject(Store<{ guest: GuestState }>);
+  private readonly toastService = inject(ToastService);
 
   /**
    * Initializes a new instance of the Feedback Code Modal Component.
-   * @param store - The store.
-   * @param toastService - The toast service.
    */
-  constructor(
-    private store: Store<{ guest: GuestState }>,
-    private toastService: ToastService,
-  ) {
+  constructor() {
     this.showModal$ = this.store.select(
       (state) => state.guest.showFeedbackModal,
     );
@@ -270,7 +274,7 @@ export class FeedbackCodeModalComponent implements OnInit {
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     // Pre-populate redemption code with generated feedback code
     this.guestState$.subscribe((state) => {
       if (state.feedbackCode && !this.redemptionCode) {
@@ -283,7 +287,7 @@ export class FeedbackCodeModalComponent implements OnInit {
    * Performs the copied class operation.
    * @returns The string value.
    */
-  get copiedClass(): string {
+  public get copiedClass(): string {
     return this.copied
       ? 'bg-green-100 text-green-700 border border-green-200'
       : 'bg-gray-100 text-gray-700 border border-gray-200';
@@ -292,7 +296,7 @@ export class FeedbackCodeModalComponent implements OnInit {
   /**
    * Performs the close modal operation.
    */
-  closeModal(): void {
+  public closeModal(): void {
     this.store.dispatch(GuestActions.hideFeedbackModal());
   }
 
@@ -300,7 +304,7 @@ export class FeedbackCodeModalComponent implements OnInit {
    * Performs the on backdrop click operation.
    * @param event - The event.
    */
-  onBackdropClick(event: Event): void {
+  public onBackdropClick(event: Event): void {
     if (event.target === event.currentTarget) {
       this.closeModal();
     }
@@ -310,7 +314,7 @@ export class FeedbackCodeModalComponent implements OnInit {
    * Performs the copy feedback code operation.
    * @param input - The input.
    */
-  copyFeedbackCode(input: HTMLInputElement): void {
+  public copyFeedbackCode(input: HTMLInputElement): void {
     input.select();
     input.setSelectionRange(0, 99999); // For mobile devices
 
@@ -330,7 +334,7 @@ export class FeedbackCodeModalComponent implements OnInit {
   /**
    * Performs the track survey click operation.
    */
-  trackSurveyClick(): void {
+  public trackSurveyClick(): void {
     // Track survey click for analytics
     this.store.dispatch(GuestActions.updateLastActivity());
   }
@@ -338,7 +342,7 @@ export class FeedbackCodeModalComponent implements OnInit {
   /**
    * Performs the redeem code operation.
    */
-  redeemCode(): void {
+  public redeemCode(): void {
     if (this.redemptionCode.trim()) {
       this.store.dispatch(
         GuestActions.redeemFeedbackCode({

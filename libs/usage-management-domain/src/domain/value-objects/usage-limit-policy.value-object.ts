@@ -13,7 +13,7 @@ export class UsageLimitPolicy extends ValueObject<{
    * Creates default.
    * @returns The UsageLimitPolicy.
    */
-  static createDefault(): UsageLimitPolicy {
+  public static createDefault(): UsageLimitPolicy {
     return new UsageLimitPolicy({
       dailyLimit: 5,
       bonusEnabled: true,
@@ -27,7 +27,8 @@ export class UsageLimitPolicy extends ValueObject<{
    * @param data - The data.
    * @returns The UsageLimitPolicy.
    */
-  static restore(data: any): UsageLimitPolicy {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): UsageLimitPolicy {
     return new UsageLimitPolicy(data);
   }
 
@@ -35,28 +36,28 @@ export class UsageLimitPolicy extends ValueObject<{
    * Performs the daily limit operation.
    * @returns The number value.
    */
-  get dailyLimit(): number {
+  public get dailyLimit(): number {
     return this.props.dailyLimit;
   }
   /**
    * Performs the bonus enabled operation.
    * @returns The boolean value.
    */
-  get bonusEnabled(): boolean {
+  public get bonusEnabled(): boolean {
     return this.props.bonusEnabled;
   }
   /**
    * Performs the max bonus quota operation.
    * @returns The number value.
    */
-  get maxBonusQuota(): number {
+  public get maxBonusQuota(): number {
     return this.props.maxBonusQuota;
   }
   /**
    * Performs the reset time utc operation.
    * @returns The number value.
    */
-  get resetTimeUTC(): number {
+  public get resetTimeUTC(): number {
     return this.props.resetTimeUTC;
   }
 }

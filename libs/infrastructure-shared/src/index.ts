@@ -123,8 +123,8 @@ export interface ExceptionFilterConfig {
  * Defines the shape of the execution host.
  */
 export interface ExecutionHost {
-  switchToHttp(): any;
-  getArgs(): any[];
+  switchToHttp(): Record<string, unknown>;
+  getArgs(): unknown[];
 }
 
 // Global Exception Filter - Basic implementation for infrastructure
@@ -147,7 +147,7 @@ export class StandardizedGlobalExceptionFilter {
    * @param _host - The host.
    * @returns The result of the operation.
    */
-  catch(exception: Error | unknown, _host: ExecutionHost) {
+  public catch(exception: Error | unknown, _host: ExecutionHost): void {
     // Basic error handling
     // Touch config to satisfy TS6133/TS6138 when not used by minimal impl
     void this._config;
@@ -163,14 +163,14 @@ export class ExceptionFilterConfigHelper {
    * Performs the for api gateway operation.
    * @returns The result of the operation.
    */
-  static forApiGateway() {
+  public static forApiGateway(): { enableCorrelation: boolean } {
     return { enableCorrelation: true };
   }
   /**
    * Performs the for processing service operation.
    * @returns The result of the operation.
    */
-  static forProcessingService() {
+  public static forProcessingService(): { enableLogging: boolean } {
     return { enableLogging: true };
   }
 }
@@ -184,7 +184,7 @@ export class ExceptionFilterConfigHelper {
 export function createGlobalExceptionFilter(
   _serviceName: string,
   _config?: ExceptionFilterConfig,
-) {
+): StandardizedGlobalExceptionFilter {
   return new StandardizedGlobalExceptionFilter(_config);
 }
 
@@ -203,23 +203,23 @@ export interface InterceptorOptions {
  * Defines the shape of the execution context.
  */
 export interface ExecutionContext {
-  switchToHttp(): any;
-  getHandler(): Function;
-  getClass(): Function;
+  switchToHttp(): Record<string, unknown>;
+  getHandler(): (...args: unknown[]) => unknown;
+  getClass(): new (...args: unknown[]) => unknown;
 }
 
 /**
  * Defines the shape of the call handler.
  */
 export interface CallHandler {
-  handle(): any;
+  handle(): unknown;
 }
 
 /**
  * Defines the shape of the interceptor.
  */
 export interface Interceptor {
-  intercept(context: ExecutionContext, next: CallHandler): any;
+  intercept(context: ExecutionContext, next: CallHandler): unknown;
 }
 
 // Error Interceptor Factory
@@ -233,7 +233,7 @@ export class ErrorInterceptorFactory {
    * @param _options - The options.
    * @returns The Interceptor.
    */
-  static createCorrelationInterceptor(
+  public static createCorrelationInterceptor(
     _serviceName: string,
     _options?: InterceptorOptions,
   ): Interceptor {
@@ -248,7 +248,7 @@ export class ErrorInterceptorFactory {
    * @param _options - The options.
    * @returns The Interceptor.
    */
-  static createLoggingInterceptor(
+  public static createLoggingInterceptor(
     _serviceName: string,
     _options?: InterceptorOptions,
   ): Interceptor {
@@ -263,7 +263,7 @@ export class ErrorInterceptorFactory {
    * @param _options - The options.
    * @returns The Interceptor.
    */
-  static createPerformanceInterceptor(
+  public static createPerformanceInterceptor(
     _serviceName: string,
     _options?: InterceptorOptions,
   ): Interceptor {
@@ -278,7 +278,7 @@ export class ErrorInterceptorFactory {
    * @param _options - The options.
    * @returns The Interceptor.
    */
-  static createRecoveryInterceptor(
+  public static createRecoveryInterceptor(
     _serviceName: string,
     _options?: InterceptorOptions,
   ): Interceptor {
@@ -307,7 +307,7 @@ export class InputValidator {
    * @param input - The input.
    * @returns The ValidationInput.
    */
-  static validate(input: ValidationInput): ValidationInput {
+  public static validate(input: ValidationInput): ValidationInput {
     return input;
   }
 
@@ -316,7 +316,7 @@ export class InputValidator {
    * @param file - The file.
    * @returns The { isValid: boolean; errors?: string[] }.
    */
-  static validateResumeFile(file: {
+  public static validateResumeFile(file: {
     buffer: Buffer;
     originalname: string;
     mimetype?: string;
@@ -385,7 +385,7 @@ export class EncryptionService {
    * @param data - The data.
    * @returns The EncryptableData.
    */
-  static encrypt(data: EncryptableData): EncryptableData {
+  public static encrypt(data: EncryptableData): EncryptableData {
     return data;
   }
   /**
@@ -393,7 +393,7 @@ export class EncryptionService {
    * @param data - The data.
    * @returns The EncryptableData.
    */
-  static decrypt(data: EncryptableData): EncryptableData {
+  public static decrypt(data: EncryptableData): EncryptableData {
     return data;
   }
 
@@ -402,7 +402,7 @@ export class EncryptionService {
    * @param data - The data.
    * @returns The UserPIIData.
    */
-  static encryptUserPII(data: UserPIIData): UserPIIData {
+  public static encryptUserPII(data: UserPIIData): UserPIIData {
     // Mock implementation - in production this would use real encryption
     if (!data) return data;
 
@@ -430,6 +430,7 @@ export class EncryptionService {
 }
 
 // Type definitions for Design-by-Contract decorators
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type PredicateFunction = (...args: any[]) => boolean;
 export type DecoratorTarget = object;
 
@@ -542,7 +543,7 @@ export class ContractValidators {
    * @param _contract - The contract.
    * @returns The boolean value.
    */
-  static validate(_contract: ContractValidationTarget): boolean {
+  public static validate(_contract: ContractValidationTarget): boolean {
     return true;
   }
 
@@ -551,7 +552,7 @@ export class ContractValidators {
    * @param value - The value.
    * @returns The boolean value.
    */
-  static isNonEmptyString(value: unknown): boolean {
+  public static isNonEmptyString(value: unknown): boolean {
     return typeof value === 'string' && value.trim().length > 0;
   }
 
@@ -560,7 +561,7 @@ export class ContractValidators {
    * @param arr - The arr.
    * @returns The boolean value.
    */
-  static hasElements(arr: unknown): boolean {
+  public static hasElements(arr: unknown): boolean {
     return Array.isArray(arr) && arr.length > 0;
   }
 
@@ -570,7 +571,7 @@ export class ContractValidators {
    * @param jd - The jd.
    * @returns The jd is JobDescriptionContract.
    */
-  static isValidJD(jd: unknown): jd is JobDescriptionContract {
+  public static isValidJD(jd: unknown): jd is JobDescriptionContract {
     return (
       !!jd &&
       typeof jd === 'object' &&
@@ -583,7 +584,7 @@ export class ContractValidators {
    * @param resume - The resume.
    * @returns The resume is ResumeContract.
    */
-  static isValidResume(resume: unknown): resume is ResumeContract {
+  public static isValidResume(resume: unknown): resume is ResumeContract {
     const resumeObj = resume as ResumeContract;
     return (
       !!resume &&
@@ -597,7 +598,7 @@ export class ContractValidators {
    * @param score - The score.
    * @returns The score is ScoreContract.
    */
-  static isValidScoreDTO(score: unknown): score is ScoreContract {
+  public static isValidScoreDTO(score: unknown): score is ScoreContract {
     if (!score || typeof score !== 'object') return false;
     const scoreObj = score as ScoreContract;
     // Basic shape checks
@@ -614,7 +615,7 @@ export class ContractValidators {
    * @param result - The result.
    * @returns The result is ExtractionResultContract.
    */
-  static isValidExtractionResult(
+  public static isValidExtractionResult(
     result: unknown,
   ): result is ExtractionResultContract {
     return (
@@ -629,7 +630,7 @@ export class ContractValidators {
    * @param confidence - The confidence.
    * @returns The confidence is number.
    */
-  static isValidConfidenceLevel(confidence: unknown): confidence is number {
+  public static isValidConfidenceLevel(confidence: unknown): confidence is number {
     return typeof confidence === 'number' && confidence >= 0 && confidence <= 1;
   }
 
@@ -639,7 +640,7 @@ export class ContractValidators {
    * @param maxTime - The max time.
    * @returns The time is number.
    */
-  static isValidProcessingTime(
+  public static isValidProcessingTime(
     time: unknown,
     maxTime?: number,
   ): time is number {
@@ -652,7 +653,7 @@ export class ContractValidators {
    * @param result - The result.
    * @returns The result is { reportId: string; [key: string]: unknown }.
    */
-  static isValidReportResult(
+  public static isValidReportResult(
     result: unknown,
   ): result is { reportId: string; [key: string]: unknown } {
     const resultObj = result as { reportId?: string };
@@ -670,7 +671,7 @@ export class ContractValidators {
    * @param maxSizeBytes - The max size bytes.
    * @returns The size is number.
    */
-  static isValidFileSize(size: unknown, maxSizeBytes?: number): size is number {
+  public static isValidFileSize(size: unknown, maxSizeBytes?: number): size is number {
     if (typeof size !== 'number' || size < 0) return false;
     const defaultMaxSize = 10 * 1024 * 1024; // 10MB
     const maxSize = maxSizeBytes || defaultMaxSize;
@@ -682,7 +683,7 @@ export class ContractValidators {
    * @param jobInfo - The job info.
    * @returns The jobInfo is { jobId: string; [key: string]: unknown }.
    */
-  static isValidJobInfo(
+  public static isValidJobInfo(
     jobInfo: unknown,
   ): jobInfo is { jobId: string; [key: string]: unknown } {
     const jobObj = jobInfo as { jobId?: string };
@@ -699,7 +700,7 @@ export class ContractValidators {
    * @param candidateInfo - The candidate info.
    * @returns The candidateInfo is { resumeId: string; [key: string]: unknown }.
    */
-  static isValidCandidateInfo(
+  public static isValidCandidateInfo(
     candidateInfo: unknown,
   ): candidateInfo is { resumeId: string; [key: string]: unknown } {
     const candidateObj = candidateInfo as { resumeId?: string };
@@ -716,7 +717,7 @@ export class ContractValidators {
    * @param score - The score.
    * @returns The score is number.
    */
-  static isValidScoreRange(score: unknown): score is number {
+  public static isValidScoreRange(score: unknown): score is number {
     return typeof score === 'number' && score >= 0 && score <= 100;
   }
 }
@@ -745,10 +746,10 @@ export class RetryUtility {
    * @param delay - The delay.
    * @returns A promise that resolves to T.
    */
-  static async retry<T>(
+  public static async retry<T>(
     operation: () => Promise<T>,
-    maxAttempts: number = 3,
-    delay: number = 1000,
+    maxAttempts = 3,
+    delay = 1000,
   ): Promise<T> {
     let lastError: Error | undefined;
 
@@ -771,7 +772,7 @@ export class RetryUtility {
    * @param options - The options.
    * @returns A promise that resolves to T.
    */
-  static async withExponentialBackoff<T>(
+  public static async withExponentialBackoff<T>(
     operation: () => Promise<T>,
     options: {
       maxAttempts?: number;
@@ -908,7 +909,7 @@ export class ReportGeneratorException extends Error {
    */
   constructor(
     public readonly code: string,
-    public readonly context?: any,
+    public readonly context?: ErrorContext,
   ) {
     super(`Report generator error: ${code}`);
     this.name = 'ReportGeneratorException';
@@ -927,7 +928,7 @@ export class ErrorCorrelationManager {
    * @param context - The context.
    * @returns The result of the operation.
    */
-  static setContext(context: { traceId?: string; requestId?: string }) {
+  public static setContext(context: { traceId?: string; requestId?: string }): void {
     this.context = context;
   }
 
@@ -935,7 +936,7 @@ export class ErrorCorrelationManager {
    * Retrieves context.
    * @returns The result of the operation.
    */
-  static getContext() {
+  public static getContext(): { traceId?: string; requestId?: string } {
     return this.context;
   }
 
@@ -943,7 +944,7 @@ export class ErrorCorrelationManager {
    * Generates trace id.
    * @returns The string value.
    */
-  static generateTraceId(): string {
+  public static generateTraceId(): string {
     return `trace-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 }
@@ -960,7 +961,7 @@ export class DatabasePerformanceMonitor {
    * @param expectedMs - The expected ms.
    * @returns A promise that resolves to T.
    */
-  async executeWithMonitoring<T>(
+  public async executeWithMonitoring<T>(
     fn: () => Promise<T>,
     operationName?: string,
     expectedMs?: number,
@@ -988,7 +989,12 @@ export class DatabasePerformanceMonitor {
    * Retrieves real time stats.
    * @returns The result of the operation.
    */
-  getRealTimeStats() {
+  public getRealTimeStats(): {
+    queriesPerSecond: number;
+    averageQueryTime: number;
+    connectionCount: number;
+    memoryUsage: string;
+  } {
     return {
       queriesPerSecond: 50,
       averageQueryTime: 120,
@@ -1001,7 +1007,14 @@ export class DatabasePerformanceMonitor {
    * Retrieves performance report.
    * @returns The result of the operation.
    */
-  getPerformanceReport() {
+  public getPerformanceReport(): {
+    totalQueries: number;
+    averageResponseTime: number;
+    slowQueries: number;
+    errorRate: number;
+    peakQueryTime: number;
+    uptime: string;
+  } {
     return {
       totalQueries: 1234,
       averageResponseTime: 145,

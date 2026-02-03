@@ -1,6 +1,7 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ThrottlerGuard } from '@nestjs/throttler';
+import type { CanActivate, ExecutionContext} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import type { ConfigService } from '@nestjs/config';
+import type { ThrottlerGuard } from '@nestjs/throttler';
 
 /**
  * Wraps the framework throttler guard so we can toggle rate limiting centrally.
@@ -12,7 +13,7 @@ export class ConditionalThrottlerGuard implements CanActivate {
     private readonly throttlerGuard: ThrottlerGuard,
   ) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  public async canActivate(context: ExecutionContext): Promise<boolean> {
     const enabled =
       this.configService.get<string>('ENABLE_THROTTLE') === 'true';
     if (!enabled) {

@@ -3,7 +3,7 @@
  * AI Recruitment Clerk - 性能优化缓存层
  */
 
-import { CacheModuleAsyncOptions } from '@nestjs/cache-manager';
+import type { CacheModuleAsyncOptions } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 
@@ -28,8 +28,8 @@ async function testRedisConnection(redisUrl: string): Promise<boolean> {
 
     logger.log('✅ Redis连接测试成功');
     return true;
-  } catch (error) {
-    logger.warn(`❌ Redis连接测试失败: ${error.message}`);
+  } catch {
+    logger.warn('❌ Redis连接测试失败');
     return false;
   }
 }
@@ -184,8 +184,8 @@ export const cacheConfig: CacheModuleAsyncOptions = {
 
       logger.log('✅ Redis缓存配置初始化成功');
       return redisConfig;
-    } catch (error) {
-      logger.error(`❌ Redis缓存初始化失败，降级到内存缓存: ${error.message}`);
+    } catch {
+      logger.error('❌ Redis缓存初始化失败，降级到内存缓存');
       return memoryConfig;
     }
   },

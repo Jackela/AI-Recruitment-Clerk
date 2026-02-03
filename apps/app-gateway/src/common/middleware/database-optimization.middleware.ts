@@ -3,9 +3,10 @@
  * AI Recruitment Clerk - 数据库连接池与查询性能优化
  */
 
-import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
-import { Connection } from 'mongoose';
+import type { NestMiddleware} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import type { Request, Response, NextFunction } from 'express';
+import type { Connection } from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
 
 interface DatabaseMetrics {
@@ -30,7 +31,7 @@ interface QueryOptimizationConfig {
  */
 @Injectable()
 export class DatabaseOptimizationMiddleware implements NestMiddleware {
-  private readonly logger = new Logger(DatabaseOptimizationMiddleware.name);
+  private readonly logger: Logger = new Logger(DatabaseOptimizationMiddleware.name);
 
   private metrics: DatabaseMetrics = {
     activeConnections: 0,
@@ -49,15 +50,15 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     queryPlanCache: true,
   };
 
-  private queryCache = new Map<
+  private queryCache: Map<
     string,
     {
-      plan: any;
+      plan: unknown;
       hitCount: number;
       lastUsed: number;
       avgExecutionTime: number;
     }
-  >();
+  > = new Map();
 
   /**
    * Initializes a new instance of the Database Optimization Middleware.
@@ -74,7 +75,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
    * @param next - The next.
    * @returns The result of the operation.
    */
-  async use(req: Request, res: Response, next: NextFunction) {
+  public async use(req: Request, res: Response, next: NextFunction): Promise<void> {
     const queryStartTime = Date.now();
 
     // 设置数据库查询监控
@@ -99,7 +100,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     next();
   }
 
-  private initializeOptimization() {
+  private initializeOptimization(): void {
     this.logger.log('🔧 Initializing database optimization...');
 
     // 配置连接池
@@ -116,7 +117,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     this.logger.log('✅ Database optimization initialized');
   }
 
-  private configureConnectionPool() {
+  private configureConnectionPool(): void {
     try {
       // MongoDB连接池配置
       if (this.connection.db) {
@@ -138,15 +139,17 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     }
   }
 
-  private setupQueryMonitoring(req: Request) {
+  private setupQueryMonitoring(req: Request): void {
     // 由于Mongoose的限制，我们主要监控请求级别的查询
     const queryKey = this.generateQueryKey(req);
 
     if (this.config.queryPlanCache && this.queryCache.has(queryKey)) {
-      const cached = this.queryCache.get(queryKey)!;
-      cached.hitCount++;
-      cached.lastUsed = Date.now();
-      req['queryPlanCached'] = true;
+      const cached = this.queryCache.get(queryKey);
+      if (cached) {
+        cached.hitCount++;
+        cached.lastUsed = Date.now();
+        req['queryPlanCached'] = true;
+      }
     }
   }
 
@@ -160,6 +163,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
       if (this.connection.readyState === 1) {
         // Connected
         // 更新连接池指标
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.metrics.activeConnections = (this.connection.db as any)
           ?.listCollections
           ? 1
@@ -173,7 +177,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     }
   }
 
-  private updateMetrics(req: Request, totalQueryTime: number) {
+  private updateMetrics(req: Request, totalQueryTime: number): void {
     this.metrics.queryExecutionTime =
       (this.metrics.queryExecutionTime + totalQueryTime) / 2;
 
@@ -185,7 +189,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     req['dbQueryCount'] = (req['dbQueryCount'] || 0) + 1;
   }
 
-  private logQueryPerformance(req: Request, totalQueryTime: number) {
+  private logQueryPerformance(req: Request, totalQueryTime: number): void {
     const { method, path } = req;
     const queryCount = req['dbQueryCount'] || 0;
     const slowQueries = req['dbSlowQueries'] || 0;
@@ -202,7 +206,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     }
   }
 
-  private startPerformanceMonitoring() {
+  private startPerformanceMonitoring(): void {
     setInterval(async () => {
       try {
         await this.collectDatabaseMetrics();
@@ -213,7 +217,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     }, 60000); // 每分钟
   }
 
-  private async collectDatabaseMetrics() {
+  private async collectDatabaseMetrics(): Promise<void> {
     try {
       if (this.connection.readyState === 1) {
         // 收集数据库统计信息
@@ -226,12 +230,13 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
           );
         }
       }
-    } catch (error) {
-      this.logger.warn('Failed to collect database metrics:', error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.warn('Failed to collect database metrics:', errorMessage);
     }
   }
 
-  private analyzePerformanceTrends() {
+  private analyzePerformanceTrends(): void {
     const avgQueryTime = this.metrics.queryExecutionTime;
 
     // 性能趋势分析
@@ -250,7 +255,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     }
   }
 
-  private async triggerOptimization(reason: string) {
+  private async triggerOptimization(reason: string): Promise<void> {
     this.logger.log(`🚀 Triggering database optimization: ${reason}`);
 
     switch (reason) {
@@ -267,7 +272,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     this.metrics.lastOptimization = Date.now();
   }
 
-  private async optimizeQueryPerformance() {
+  private async optimizeQueryPerformance(): Promise<void> {
     try {
       this.logger.log('🔍 Optimizing query performance...');
 
@@ -287,7 +292,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     }
   }
 
-  private async optimizeConnectionPool() {
+  private async optimizeConnectionPool(): Promise<void> {
     try {
       this.logger.log('🏊 Optimizing connection pool...');
 
@@ -304,7 +309,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     }
   }
 
-  private async performGeneralOptimization() {
+  private async performGeneralOptimization(): Promise<void> {
     this.logger.log('🔧 Performing general database optimization...');
 
     // 执行多个优化策略
@@ -317,7 +322,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     this.logger.log('✅ General database optimization completed');
   }
 
-  private cleanupQueryPlanCache() {
+  private cleanupQueryPlanCache(): void {
     const now = Date.now();
     const staleThreshold = 3600000; // 1小时
 
@@ -349,26 +354,28 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
 
       // 这里应该实现真实的索引分析逻辑
       // 例如：分析查询日志，识别缺失索引
-    } catch (error) {
-      this.logger.warn('Index analysis failed:', error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.warn('Index analysis failed:', errorMessage);
     }
 
     return suggestions;
   }
 
-  private async cleanupStaleSessions() {
+  private async cleanupStaleSessions(): Promise<void> {
     try {
       // 清理过期会话和连接
       this.logger.debug('🧹 Cleaning up stale database sessions...');
 
       // 这里应该实现会话清理逻辑
       // 例如：关闭空闲连接，清理过期会话
-    } catch (error) {
-      this.logger.warn('Session cleanup failed:', error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.warn('Session cleanup failed:', errorMessage);
     }
   }
 
-  private async performPeriodicOptimization() {
+  private async performPeriodicOptimization(): Promise<void> {
     const timeSinceLastOptimization =
       Date.now() - this.metrics.lastOptimization;
 
@@ -383,7 +390,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
    * Retrieves performance metrics.
    * @returns The DatabaseMetrics.
    */
-  getPerformanceMetrics(): DatabaseMetrics {
+  public getPerformanceMetrics(): DatabaseMetrics {
     return { ...this.metrics };
   }
 
@@ -392,7 +399,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
    * Retrieves optimization recommendations.
    * @returns The Promise<{ performance: DatabaseMetrics; recommendations: string[]; health: string; }>.
    */
-  async getOptimizationRecommendations(): Promise<{
+  public async getOptimizationRecommendations(): Promise<{
     performance: DatabaseMetrics;
     recommendations: string[];
     health: string;
@@ -431,7 +438,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
    * Performs the trigger manual optimization operation.
    * @returns The Promise<{ success: boolean; duration: number; optimizations: string[]; }>.
    */
-  async triggerManualOptimization(): Promise<{
+  public async triggerManualOptimization(): Promise<{
     success: boolean;
     duration: number;
     optimizations: string[];

@@ -1,4 +1,5 @@
-const { pathsToModuleNameMapper } = require('ts-jest');
+// ts-jest reserved for future use (pathsToModuleNameMapper)
+require('ts-jest');
 
 module.exports = {
   displayName: 'Integration Tests',

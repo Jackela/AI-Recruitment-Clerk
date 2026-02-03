@@ -15,7 +15,7 @@ export class UsageRecordResult {
    * @param remainingQuota - The remaining quota.
    * @returns The UsageRecordResult.
    */
-  static success(
+  public static success(
     currentUsage: number,
     remainingQuota: number,
   ): UsageRecordResult {
@@ -27,7 +27,7 @@ export class UsageRecordResult {
    * @param error - The error.
    * @returns The UsageRecordResult.
    */
-  static failed(error: string): UsageRecordResult {
+  public static failed(error: string): UsageRecordResult {
     return new UsageRecordResult(false, undefined, undefined, error);
   }
 
@@ -35,7 +35,7 @@ export class UsageRecordResult {
    * Performs the is success operation.
    * @returns The boolean value.
    */
-  isSuccess(): boolean {
+  public isSuccess(): boolean {
     return this.success;
   }
 
@@ -43,7 +43,7 @@ export class UsageRecordResult {
    * Retrieves current usage.
    * @returns The number | undefined.
    */
-  getCurrentUsage(): number | undefined {
+  public getCurrentUsage(): number | undefined {
     return this.currentUsage;
   }
 
@@ -51,7 +51,7 @@ export class UsageRecordResult {
    * Retrieves remaining quota.
    * @returns The number | undefined.
    */
-  getRemainingQuota(): number | undefined {
+  public getRemainingQuota(): number | undefined {
     return this.remainingQuota;
   }
 
@@ -59,7 +59,7 @@ export class UsageRecordResult {
    * Retrieves error.
    * @returns The string | undefined.
    */
-  getError(): string | undefined {
+  public getError(): string | undefined {
     return this.error;
   }
 }

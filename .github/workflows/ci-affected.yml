@@ -3,16 +3,28 @@ name: ci-affected
 on:
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-affected-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+
 jobs:
   affected:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: '.nvmrc'
+          cache: 'npm'
       - run: npm ci
       - name: Print affected graph
         run: npx nx print-affected --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }}

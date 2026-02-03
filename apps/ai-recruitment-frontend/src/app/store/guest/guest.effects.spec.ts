@@ -1,14 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { Action, Store } from '@ngrx/store';
-import { Observable, of } from 'rxjs';
+import type { Action} from '@ngrx/store';
+import { Store } from '@ngrx/store';
+import type { Observable} from 'rxjs';
+import { of as _of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { GuestEffects } from './guest.effects';
 import { GuestApiService } from '../../services/guest/guest-api.service';
 import * as GuestActions from './guest.actions';
 import { tap } from 'rxjs/operators';
-import { provideMockStore, MockStore } from '@ngrx/store/testing';
-import { GuestState } from './guest.state';
+import type { MockStore } from '@ngrx/store/testing';
+import { provideMockStore } from '@ngrx/store/testing';
+import type { GuestState } from './guest.state';
 import { selectGuestState } from './guest.selectors';
 
 describe('GuestEffects', () => {

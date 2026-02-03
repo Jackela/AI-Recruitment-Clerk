@@ -1,19 +1,17 @@
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import type { OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { ConfigService } from '@nestjs/config';
+import type {
+  PubAck,
+  MsgHdrs,
+  ConsumerMessages} from 'nats';
 import {
   DeliverPolicy,
   AckPolicy,
-  PubAck,
-  MsgHdrs,
-  headers,
-  ConsumerMessages,
+  headers
 } from 'nats';
-import {
+import type {
   NatsConnectionConfig,
   StreamConfig,
   ConsumerConfig,
@@ -23,7 +21,9 @@ import {
   NatsPublishResult,
   NatsHealthResult,
 } from '../interfaces';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { NatsConnectionManager } from './nats-connection-manager.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { NatsStreamManager } from './nats-stream-manager.service';
 import { DEFAULT_STREAMS } from '../config/stream-configs';
 
@@ -53,7 +53,7 @@ export class NatsClientService implements OnModuleInit, OnModuleDestroy {
    * Performs the on module init operation.
    * @returns The result of the operation.
    */
-  async onModuleInit() {
+  public async onModuleInit(): Promise<void> {
     await this.initialize();
   }
 
@@ -61,14 +61,14 @@ export class NatsClientService implements OnModuleInit, OnModuleDestroy {
    * Performs the on module destroy operation.
    * @returns The result of the operation.
    */
-  async onModuleDestroy() {
+  public async onModuleDestroy(): Promise<void> {
     await this.shutdown();
   }
 
   /**
    * Initialize the NATS client with connection and streams
    */
-  async initialize(
+  public async initialize(
     customConfig?: Partial<NatsConnectionConfig>,
     customStreams?: StreamConfig[],
   ): Promise<void> {
@@ -120,7 +120,7 @@ export class NatsClientService implements OnModuleInit, OnModuleDestroy {
   /**
    * Shutdown the NATS client and clean up resources
    */
-  async shutdown(): Promise<void> {
+  public async shutdown(): Promise<void> {
     try {
       // Close all active subscriptions
       for (const [subject, subscription] of this.activeSubscriptions) {
@@ -155,7 +155,7 @@ export class NatsClientService implements OnModuleInit, OnModuleDestroy {
   /**
    * Publish a message to a NATS subject
    */
-  async publish(
+  public async publish(
     subject: string,
     payload: unknown,
     options?: {
@@ -246,7 +246,7 @@ export class NatsClientService implements OnModuleInit, OnModuleDestroy {
   /**
    * Subscribe to messages from a NATS subject
    */
-  async subscribe<T = unknown>(
+  public async subscribe<T = unknown>(
     subject: string,
     handler: MessageHandler<T>,
     options?: SubscriptionOptions,
@@ -303,28 +303,28 @@ export class NatsClientService implements OnModuleInit, OnModuleDestroy {
   /**
    * Emit alias for publish (for compatibility)
    */
-  async emit(subject: string, payload: unknown): Promise<NatsPublishResult> {
+  public async emit(subject: string, payload: unknown): Promise<NatsPublishResult> {
     return this.publish(subject, payload);
   }
 
   /**
    * Check if NATS is connected
    */
-  get isConnected(): boolean {
+  public get isConnected(): boolean {
     return this.connectionManager.isConnected;
   }
 
   /**
    * Get comprehensive health status
    */
-  async getHealthStatus(): Promise<NatsHealthResult> {
+  public async getHealthStatus(): Promise<NatsHealthResult> {
     return this.connectionManager.getHealthStatus();
   }
 
   /**
    * Get service name
    */
-  getServiceName(): string {
+  public getServiceName(): string {
     return this.serviceName;
   }
 

@@ -3,16 +3,16 @@
  * Based on Resume Parser Service patterns for consistency
  */
 
-import {
+import type {
   JobJdSubmittedEvent,
   AnalysisJdExtractedEvent,
 } from '../dto/events.dto';
-import {
+import type {
   JdDTO,
   LlmExtractionRequest,
   LlmExtractionResponse,
 } from '@ai-recruitment-clerk/job-management-domain';
-import { NatsPublishResult } from '../nats/nats.client';
+import type { NatsPublishResult } from '../nats/nats.client';
 
 /**
  * Mock factory for JobJdSubmittedEvent
@@ -24,26 +24,26 @@ export const createMockJobJdSubmittedEvent = (
   jobTitle: 'Senior Full Stack Developer',
   jdText: `
     We are seeking a Senior Full Stack Developer to join our dynamic technology team.
-    
+
     Responsibilities:
     - Design and develop scalable web applications using React and Node.js
     - Collaborate with cross-functional teams to define and implement new features
     - Ensure high-quality code through testing and code reviews
     - Mentor junior developers and contribute to technical decisions
-    
+
     Requirements:
     - 5+ years of experience in full-stack development
     - Proficiency in JavaScript, TypeScript, React, and Node.js
     - Experience with Docker, Kubernetes, and cloud platforms (AWS/Azure)
     - Strong problem-solving and communication skills
     - Bachelor's degree in Computer Science or related field
-    
+
     Benefits:
     - Health insurance and dental coverage
     - Flexible remote work arrangements
     - Stock options and 401k matching
     - Professional development opportunities
-    
+
     TechCorp Solutions is a fast-growing technology company in the software industry.
   `,
   timestamp: '2024-01-01T12:00:00.000Z',
@@ -179,7 +179,7 @@ export const createMockNatsFailureResult = (
 /**
  * Mock factory for processing error event
  */
-export const createMockProcessingErrorEvent = (overrides?: any) => ({
+export const createMockProcessingErrorEvent = (overrides?: Record<string, unknown>): Record<string, unknown> => ({
   jobId: 'job-uuid-123',
   error: {
     message: 'LLM processing failed after 3 retries',
@@ -199,89 +199,107 @@ export const createMockProcessingErrorEvent = (overrides?: any) => ({
 
 // Type guard functions for runtime validation (production-safe)
 export const isValidJobJdSubmittedEvent = (
-  event: any,
+  event: unknown,
 ): event is JobJdSubmittedEvent => {
+  const e = event as Record<string, unknown>;
   return (
-    event &&
-    typeof event.jobId === 'string' &&
-    typeof event.jobTitle === 'string' &&
-    typeof event.jdText === 'string' &&
-    event.jdText.length > 50 &&
-    typeof event.timestamp === 'string'
+    e !== null &&
+    typeof e === 'object' &&
+    typeof e.jobId === 'string' &&
+    typeof e.jobTitle === 'string' &&
+    typeof e.jdText === 'string' &&
+    (e.jdText as string).length > 50 &&
+    typeof e.timestamp === 'string'
   );
 };
 
 export const isValidAnalysisJdExtractedEvent = (
-  event: any,
+  event: unknown,
 ): event is AnalysisJdExtractedEvent => {
+  const e = event as Record<string, unknown>;
   return (
-    event &&
-    typeof event.jobId === 'string' &&
-    event.extractedData &&
-    isValidExtractedJdDTO(event.extractedData) &&
-    typeof event.timestamp === 'string' &&
-    typeof event.processingTimeMs === 'number' &&
-    event.processingTimeMs > 0
+    e !== null &&
+    typeof e === 'object' &&
+    typeof e.jobId === 'string' &&
+    e.extractedData !== null &&
+    e.extractedData !== undefined &&
+    isValidExtractedJdDTO(e.extractedData) &&
+    typeof e.timestamp === 'string' &&
+    typeof e.processingTimeMs === 'number' &&
+    (e.processingTimeMs as number) > 0
   );
 };
 
-export const isValidExtractedJdDTO = (dto: any): dto is JdDTO => {
+export const isValidExtractedJdDTO = (dto: unknown): dto is JdDTO => {
+  const d = dto as Record<string, unknown>;
+  const requirements = d?.requirements as Record<string, unknown> | undefined;
   return (
-    dto &&
-    dto.requirements &&
-    Array.isArray(dto.requirements.technical) &&
-    Array.isArray(dto.requirements.soft) &&
-    typeof dto.requirements.experience === 'string' &&
-    typeof dto.requirements.education === 'string' &&
-    Array.isArray(dto.responsibilities) &&
-    dto.responsibilities.length > 0 &&
-    (!dto.benefits || Array.isArray(dto.benefits)) &&
-    (!dto.company || typeof dto.company === 'object')
+    d !== null &&
+    typeof d === 'object' &&
+    requirements !== null &&
+    requirements !== undefined &&
+    Array.isArray(requirements.technical) &&
+    Array.isArray(requirements.soft) &&
+    typeof requirements.experience === 'string' &&
+    typeof requirements.education === 'string' &&
+    Array.isArray(d.responsibilities) &&
+    (d.responsibilities as unknown[]).length > 0 &&
+    (!d.benefits || Array.isArray(d.benefits)) &&
+    (!d.company || typeof d.company === 'object')
   );
 };
 
 export const isValidLlmExtractionRequest = (
-  request: any,
+  request: unknown,
 ): request is LlmExtractionRequest => {
+  const r = request as Record<string, unknown>;
   return (
-    request &&
-    typeof request.jobTitle === 'string' &&
-    typeof request.jdText === 'string' &&
-    request.jdText.length > 50
+    r !== null &&
+    typeof r === 'object' &&
+    typeof r.jobTitle === 'string' &&
+    typeof r.jdText === 'string' &&
+    (r.jdText as string).length > 50
   );
 };
 
 export const isValidLlmExtractionResponse = (
-  response: any,
+  response: unknown,
 ): response is LlmExtractionResponse => {
+  const r = response as Record<string, unknown>;
   return (
-    response &&
-    response.extractedData &&
-    isValidExtractedJdDTO(response.extractedData) &&
-    typeof response.confidence === 'number' &&
-    response.confidence >= 0 &&
-    response.confidence <= 1 &&
-    typeof response.processingTimeMs === 'number' &&
-    response.processingTimeMs > 0
+    r !== null &&
+    typeof r === 'object' &&
+    r.extractedData !== null &&
+    r.extractedData !== undefined &&
+    isValidExtractedJdDTO(r.extractedData) &&
+    typeof r.confidence === 'number' &&
+    (r.confidence as number) >= 0 &&
+    (r.confidence as number) <= 1 &&
+    typeof r.processingTimeMs === 'number' &&
+    (r.processingTimeMs as number) > 0
   );
 };
 
 export const isValidNatsPublishResult = (
-  result: any,
+  result: unknown,
 ): result is NatsPublishResult => {
+  const r = result as Record<string, unknown>;
   return (
-    result &&
-    typeof result.success === 'boolean' &&
-    (result.success
-      ? typeof result.messageId === 'string'
-      : typeof result.error === 'string')
+    r !== null &&
+    typeof r === 'object' &&
+    typeof r.success === 'boolean' &&
+    (r.success
+      ? typeof r.messageId === 'string'
+      : typeof r.error === 'string')
   );
 };
 
 // Jest assertion helpers - only use in test files
-declare const expect: any;
+declare const expect: {
+  (value: unknown): { toBe(expected: unknown): void };
+};
 
-export const validateJobJdSubmittedEvent = (event: any): void => {
+export const validateJobJdSubmittedEvent = (event: unknown): void => {
   if (typeof expect === 'undefined') {
     throw new Error(
       'This validation helper can only be used in Jest test environment',
@@ -290,7 +308,7 @@ export const validateJobJdSubmittedEvent = (event: any): void => {
   expect(isValidJobJdSubmittedEvent(event)).toBe(true);
 };
 
-export const validateAnalysisJdExtractedEvent = (event: any): void => {
+export const validateAnalysisJdExtractedEvent = (event: unknown): void => {
   if (typeof expect === 'undefined') {
     throw new Error(
       'This validation helper can only be used in Jest test environment',
@@ -299,7 +317,7 @@ export const validateAnalysisJdExtractedEvent = (event: any): void => {
   expect(isValidAnalysisJdExtractedEvent(event)).toBe(true);
 };
 
-export const validateExtractedJdDTO = (dto: any): void => {
+export const validateExtractedJdDTO = (dto: unknown): void => {
   if (typeof expect === 'undefined') {
     throw new Error(
       'This validation helper can only be used in Jest test environment',
@@ -308,7 +326,7 @@ export const validateExtractedJdDTO = (dto: any): void => {
   expect(isValidExtractedJdDTO(dto)).toBe(true);
 };
 
-export const validateLlmExtractionRequest = (request: any): void => {
+export const validateLlmExtractionRequest = (request: unknown): void => {
   if (typeof expect === 'undefined') {
     throw new Error(
       'This validation helper can only be used in Jest test environment',
@@ -317,7 +335,7 @@ export const validateLlmExtractionRequest = (request: any): void => {
   expect(isValidLlmExtractionRequest(request)).toBe(true);
 };
 
-export const validateLlmExtractionResponse = (response: any): void => {
+export const validateLlmExtractionResponse = (response: unknown): void => {
   if (typeof expect === 'undefined') {
     throw new Error(
       'This validation helper can only be used in Jest test environment',
@@ -326,7 +344,7 @@ export const validateLlmExtractionResponse = (response: any): void => {
   expect(isValidLlmExtractionResponse(response)).toBe(true);
 };
 
-export const validateNatsPublishResult = (result: any): void => {
+export const validateNatsPublishResult = (result: unknown): void => {
   if (typeof expect === 'undefined') {
     throw new Error(
       'This validation helper can only be used in Jest test environment',

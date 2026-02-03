@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import type { OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { GuestUsageService } from '../../services/marketing/guest-usage.service';
@@ -147,27 +148,20 @@ import { GuestUsageService } from '../../services/marketing/guest-usage.service'
   styleUrls: ['./campaign.component.scss'],
 })
 export class CampaignComponent implements OnInit {
-  remainingUsage = 0;
-  usageCount = 0;
-  isUsageExhausted = false;
-  feedbackCode = '';
-  codeCopied = false;
-  questionnaireUrl = 'https://wj.qq.com/s2/14781436/'; // 待替换为实际问卷链接
+  public remainingUsage = 0;
+  public usageCount = 0;
+  public isUsageExhausted = false;
+  public feedbackCode = '';
+  public codeCopied = false;
+  public questionnaireUrl = 'https://wj.qq.com/s2/14781436/'; // 待替换为实际问卷链接
 
-  /**
-   * Initializes a new instance of the Campaign Component.
-   * @param guestUsageService - The guest usage service.
-   * @param router - The router.
-   */
-  constructor(
-    private guestUsageService: GuestUsageService,
-    public router: Router,
-  ) {}
+  private readonly guestUsageService = inject(GuestUsageService);
+  public readonly router = inject(Router);
 
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.initializeComponent();
   }
 
@@ -183,6 +177,7 @@ export class CampaignComponent implements OnInit {
   }
 
   private listenForStatusUpdates(): void {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     window.addEventListener('userStatusRefreshed', (event: any) => {
       // 用户权限已刷新，更新UI
       this.updateUsageStatus();
@@ -244,14 +239,14 @@ export class CampaignComponent implements OnInit {
    * Performs the usage progress operation.
    * @returns The number value.
    */
-  get usageProgress(): number {
+  public get usageProgress(): number {
     return (this.usageCount / 5) * 100;
   }
 
   /**
    * Performs the start experience operation.
    */
-  startExperience(): void {
+  public startExperience(): void {
     if (this.guestUsageService.canUseFeature()) {
       this.router.navigate(['/dashboard']);
     }
@@ -260,7 +255,7 @@ export class CampaignComponent implements OnInit {
   /**
    * Performs the copy feedback code operation.
    */
-  copyFeedbackCode(): void {
+  public copyFeedbackCode(): void {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(this.feedbackCode).then(() => {
         this.codeCopied = true;
@@ -282,7 +277,7 @@ export class CampaignComponent implements OnInit {
   /**
    * Performs the track questionnaire click operation.
    */
-  trackQuestionnaireClick(): void {
+  public trackQuestionnaireClick(): void {
     // 记录问卷点击事件，用于后续数据分析
     console.log('用户点击问卷链接', {
       feedbackCode: this.feedbackCode,
@@ -293,7 +288,7 @@ export class CampaignComponent implements OnInit {
   /**
    * Performs the show guest stats operation.
    */
-  showGuestStats(): void {
+  public showGuestStats(): void {
     const stats = this.guestUsageService.getGuestStats();
     alert(
       `您的使用统计：\n已使用：${stats.usageCount}/5 次\n首次访问：${stats.firstVisit}\n会话ID：${stats.sessionId}`,

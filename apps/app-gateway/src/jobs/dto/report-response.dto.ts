@@ -2,17 +2,17 @@
  * Describes the analysis report data transfer object.
  */
 export class AnalysisReportDto {
-  id: string;
-  resumeId: string;
-  jobId: string;
-  candidateName: string;
-  matchScore: number; // 0-100
-  oneSentenceSummary: string;
-  strengths: string[];
-  potentialGaps: string[];
-  redFlags: string[];
-  suggestedInterviewQuestions: string[];
-  generatedAt: Date;
+  public id: string;
+  public resumeId: string;
+  public jobId: string;
+  public candidateName: string;
+  public matchScore: number; // 0-100
+  public oneSentenceSummary: string;
+  public strengths: string[];
+  public potentialGaps: string[];
+  public redFlags: string[];
+  public suggestedInterviewQuestions: string[];
+  public generatedAt: Date;
 
   /**
    * Initializes a new instance of the Analysis Report DTO.
@@ -59,8 +59,8 @@ export class AnalysisReportDto {
  * Describes the reports list data transfer object.
  */
 export class ReportsListDto {
-  jobId: string;
-  reports: {
+  public jobId: string;
+  public reports: {
     id: string;
     candidateName: string;
     matchScore: number;

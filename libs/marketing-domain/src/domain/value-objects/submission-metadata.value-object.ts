@@ -13,7 +13,8 @@ export class SubmissionMetadata extends ValueObject<{
    * @param data - The data.
    * @returns The SubmissionMetadata.
    */
-  static restore(data: any): SubmissionMetadata {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): SubmissionMetadata {
     return new SubmissionMetadata({
       ...data,
       timestamp: new Date(data.timestamp),
@@ -24,7 +25,7 @@ export class SubmissionMetadata extends ValueObject<{
    * Performs the ip operation.
    * @returns The string value.
    */
-  get ip(): string {
+  public get ip(): string {
     return this.props.ip;
   }
 }

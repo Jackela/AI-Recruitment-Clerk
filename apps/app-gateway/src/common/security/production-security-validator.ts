@@ -5,7 +5,7 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 
 /**
@@ -22,7 +22,7 @@ export interface SecurityValidationResult {
  */
 @Injectable()
 export class ProductionSecurityValidator {
-  private readonly logger = new Logger(ProductionSecurityValidator.name);
+  private readonly logger: Logger = new Logger(ProductionSecurityValidator.name);
 
   /**
    * Initializes a new instance of the Production Security Validator.
@@ -34,7 +34,7 @@ export class ProductionSecurityValidator {
    * Validates all security-critical configuration
    * Exits process if critical issues found in production
    */
-  validateSecurityConfiguration(): SecurityValidationResult {
+  public validateSecurityConfiguration(): SecurityValidationResult {
     const issues: string[] = [];
     let score = 100;
 
@@ -346,7 +346,7 @@ export class ProductionSecurityValidator {
   /**
    * Generates secure random secrets for development/testing
    */
-  generateSecureSecrets(): { [key: string]: string } {
+  public generateSecureSecrets(): Record<string, string> {
     return {
       JWT_SECRET: crypto.randomBytes(64).toString('hex'),
       JWT_REFRESH_SECRET: crypto.randomBytes(64).toString('hex'),

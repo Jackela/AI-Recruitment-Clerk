@@ -1,8 +1,9 @@
-import {
+import type {
   UsageLimit,
-  BonusType,
   UsageLimitPolicy,
-  UsageStatistics,
+  UsageStatistics} from './usage-limit.dto';
+import {
+  BonusType
 } from './usage-limit.dto';
 
 /**
@@ -10,20 +11,20 @@ import {
  */
 export class UsageLimitRules {
   // 核心业务规则常量
-  static readonly DEFAULT_DAILY_LIMIT = 5;
-  static readonly MAX_BONUS_QUOTA = 20;
-  static readonly QUESTIONNAIRE_BONUS = 5;
-  static readonly PAYMENT_BONUS = 10;
-  static readonly REFERRAL_BONUS = 3;
-  static readonly PROMOTION_BONUS = 2;
+  public static readonly DEFAULT_DAILY_LIMIT = 5;
+  public static readonly MAX_BONUS_QUOTA = 20;
+  public static readonly QUESTIONNAIRE_BONUS = 5;
+  public static readonly PAYMENT_BONUS = 10;
+  public static readonly REFERRAL_BONUS = 3;
+  public static readonly PROMOTION_BONUS = 2;
 
   // 时间相关常量
-  static readonly RESET_HOUR_UTC = 0; // Midnight UTC
-  static readonly RATE_LIMIT_WINDOW_MINUTES = 1;
-  static readonly MAX_REQUESTS_PER_MINUTE = 10;
+  public static readonly RESET_HOUR_UTC = 0; // Midnight UTC
+  public static readonly RATE_LIMIT_WINDOW_MINUTES = 1;
+  public static readonly MAX_REQUESTS_PER_MINUTE = 10;
 
   // 验证规则
-  static readonly IP_VALIDATION_REGEX =
+  public static readonly IP_VALIDATION_REGEX =
     /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
   // 核心业务规则方法
@@ -31,7 +32,7 @@ export class UsageLimitRules {
   /**
    * 检查IP地址是否可以使用服务
    */
-  static canIPUseService(ip: string, usageLimit: UsageLimit): boolean {
+  public static canIPUseService(ip: string, usageLimit: UsageLimit): boolean {
     if (!this.isValidIPAddress(ip)) {
       return false;
     }
@@ -43,7 +44,7 @@ export class UsageLimitRules {
   /**
    * 计算奖励配额数量
    */
-  static calculateBonusQuota(bonusType: BonusType): number {
+  public static calculateBonusQuota(bonusType: BonusType): number {
     switch (bonusType) {
       case BonusType.QUESTIONNAIRE:
         return this.QUESTIONNAIRE_BONUS;
@@ -61,7 +62,7 @@ export class UsageLimitRules {
   /**
    * 验证奖励配额是否超过限制
    */
-  static isValidBonusQuota(
+  public static isValidBonusQuota(
     currentBonusQuota: number,
     additionalBonus: number,
   ): boolean {
@@ -71,7 +72,7 @@ export class UsageLimitRules {
   /**
    * 检查是否应该重置使用计数（基于时间）
    */
-  static shouldResetUsage(
+  public static shouldResetUsage(
     lastResetAt: Date,
     currentTime: Date = new Date(),
   ): boolean {
@@ -92,7 +93,7 @@ export class UsageLimitRules {
   /**
    * 计算下次重置时间
    */
-  static getNextResetTime(currentTime: Date = new Date()): Date {
+  public static getNextResetTime(currentTime: Date = new Date()): Date {
     const nextReset = new Date(currentTime);
     nextReset.setDate(nextReset.getDate() + 1);
     nextReset.setHours(this.RESET_HOUR_UTC, 0, 0, 0);
@@ -102,7 +103,7 @@ export class UsageLimitRules {
   /**
    * 验证IP地址格式
    */
-  static isValidIPAddress(ip: string): boolean {
+  public static isValidIPAddress(ip: string): boolean {
     if (!ip || typeof ip !== 'string') {
       return false;
     }
@@ -113,7 +114,7 @@ export class UsageLimitRules {
   /**
    * 检查使用频率是否过高（防止滥用）
    */
-  static isRateLimited(
+  public static isRateLimited(
     usageHistory: Array<{ timestamp: Date; count: number }>,
   ): boolean {
     const now = new Date();
@@ -130,7 +131,7 @@ export class UsageLimitRules {
   /**
    * 计算使用统计的风险评分
    */
-  static calculateRiskScore(statistics: UsageStatistics): RiskScore {
+  public static calculateRiskScore(statistics: UsageStatistics): RiskScore {
     let score = 0;
     const factors: string[] = [];
 
@@ -166,7 +167,7 @@ export class UsageLimitRules {
   /**
    * 验证使用限制策略的有效性
    */
-  static isValidUsagePolicy(policy: UsageLimitPolicy): boolean {
+  public static isValidUsagePolicy(policy: UsageLimitPolicy): boolean {
     return (
       policy.dailyLimit > 0 &&
       policy.dailyLimit <= 50 &&
@@ -180,7 +181,7 @@ export class UsageLimitRules {
   /**
    * 生成使用限制违规报告
    */
-  static generateViolationReport(
+  public static generateViolationReport(
     ip: string,
     usageLimit: UsageLimit,
   ): UsageViolationReport {
@@ -229,7 +230,7 @@ export class UsageLimitRules {
   /**
    * 检查奖励配额申请的合法性
    */
-  static validateBonusQuotaRequest(
+  public static validateBonusQuotaRequest(
     bonusType: BonusType,
     requestedAmount: number,
     currentBonusQuota: number,
@@ -276,7 +277,7 @@ export class UsageLimitRules {
   /**
    * 计算使用效率指标
    */
-  static calculateUsageEfficiency(
+  public static calculateUsageEfficiency(
     statistics: UsageStatistics,
   ): UsageEfficiency {
     const utilizationRate = statistics.currentUsage / statistics.dailyLimit;
@@ -352,42 +353,42 @@ export class UsageViolationReport {
    * Performs the ip operation.
    * @returns The string value.
    */
-  get ip(): string {
+  public get ip(): string {
     return this.data.ip;
   }
   /**
    * Performs the violation type operation.
    * @returns The ViolationType.
    */
-  get violationType(): ViolationType {
+  public get violationType(): ViolationType {
     return this.data.violationType;
   }
   /**
    * Performs the current usage operation.
    * @returns The number value.
    */
-  get currentUsage(): number {
+  public get currentUsage(): number {
     return this.data.currentUsage;
   }
   /**
    * Performs the allowed quota operation.
    * @returns The number value.
    */
-  get allowedQuota(): number {
+  public get allowedQuota(): number {
     return this.data.allowedQuota;
   }
   /**
    * Performs the risk score operation.
    * @returns The number value.
    */
-  get riskScore(): number {
+  public get riskScore(): number {
     return this.data.riskScore;
   }
   /**
    * Performs the recommended action operation.
    * @returns The RecommendedAction.
    */
-  get recommendedAction(): RecommendedAction {
+  public get recommendedAction(): RecommendedAction {
     return this.data.recommendedAction;
   }
 }
@@ -430,28 +431,28 @@ export class UsageEfficiency {
    * Performs the base utilization operation.
    * @returns The number value.
    */
-  get baseUtilization(): number {
+  public get baseUtilization(): number {
     return this.data.baseUtilization;
   }
   /**
    * Performs the bonus utilization operation.
    * @returns The number value.
    */
-  get bonusUtilization(): number {
+  public get bonusUtilization(): number {
     return this.data.bonusUtilization;
   }
   /**
    * Performs the overall efficiency operation.
    * @returns The number value.
    */
-  get overallEfficiency(): number {
+  public get overallEfficiency(): number {
     return this.data.overallEfficiency;
   }
   /**
    * Performs the wasteage score operation.
    * @returns The number value.
    */
-  get wasteageScore(): number {
+  public get wasteageScore(): number {
     return this.data.wasteageScore;
   }
 }

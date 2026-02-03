@@ -1,6 +1,7 @@
+import type {
+  GenerativeModel} from '@google/generative-ai';
 import {
   GoogleGenerativeAI,
-  GenerativeModel,
   HarmCategory,
   HarmBlockThreshold,
 } from '@google/generative-ai';
@@ -139,7 +140,7 @@ export class GeminiClient {
    * @param retries - The retries.
    * @returns A promise that resolves to GeminiResponse<string>.
    */
-  async generateText(
+  public async generateText(
     prompt: string,
     retries = 3,
   ): Promise<GeminiResponse<string>> {
@@ -233,7 +234,7 @@ export class GeminiClient {
    * @param retries - The retries.
    * @returns A promise that resolves to GeminiResponse<T>.
    */
-  async generateStructuredResponse<T>(
+  public async generateStructuredResponse<T>(
     prompt: string,
     schema: string,
     retries = 3,
@@ -290,7 +291,7 @@ Important guidelines:
    * @param retries - The retries.
    * @returns A promise that resolves to GeminiResponse<string>.
    */
-  async generateWithVision(
+  public async generateWithVision(
     prompt: string,
     imageData: Buffer | string,
     mimeType: string,
@@ -360,7 +361,7 @@ Important guidelines:
    * @param retries - The retries.
    * @returns A promise that resolves to GeminiResponse<T>.
    */
-  async generateStructuredVisionResponse<T>(
+  public async generateStructuredVisionResponse<T>(
     prompt: string,
     imageData: Buffer | string,
     mimeType: string,
@@ -419,7 +420,7 @@ Important guidelines:
    * Performs the health check operation.
    * @returns A promise that resolves to boolean value.
    */
-  async healthCheck(): Promise<boolean> {
+  public async healthCheck(): Promise<boolean> {
     try {
       const response = await this.generateText(
         'Respond with "OK" to confirm API connectivity.',

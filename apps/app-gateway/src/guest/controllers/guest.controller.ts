@@ -18,13 +18,14 @@ import {
   ApiUnauthorizedResponse,
   ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
-import { GuestUsageService } from '../services/guest-usage.service';
+import type { GuestUsageService } from '../services/guest-usage.service';
 import { GuestGuard } from '../guards/guest.guard';
 import type { RequestWithDeviceId } from '../guards/guest.guard';
+import type {
+  RedeemFeedbackCodeDto} from '../dto/guest.dto';
 import {
   GuestUsageResponseDto,
-  GuestStatusDto,
-  RedeemFeedbackCodeDto,
+  GuestStatusDto
 } from '../dto/guest.dto';
 
 /**
@@ -87,9 +88,13 @@ export class GuestController {
   @ApiTooManyRequestsResponse({
     description: 'Too many requests from this device',
   })
-  async generateFeedbackCode(@Req() req: RequestWithDeviceId) {
+  public async generateFeedbackCode(@Req() req: RequestWithDeviceId): Promise<{
+    feedbackCode: string;
+    surveyUrl: string;
+    message: string;
+  }> {
     try {
-      const deviceId = req.deviceId!;
+      const deviceId = req.deviceId ?? '';
       const feedbackCode =
         await this.guestUsageService.generateFeedbackCode(deviceId);
 
@@ -108,9 +113,10 @@ export class GuestController {
       };
     } catch (error) {
       this.logger.error('Error generating feedback code:', error);
+      const err = error as Error & { status?: number };
       throw new HttpException(
-        error.message || 'Failed to generate feedback code',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        err.message || 'Failed to generate feedback code',
+        err.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -134,11 +140,11 @@ export class GuestController {
   @ApiUnauthorizedResponse({
     description: 'Missing or invalid device ID',
   })
-  async getUsageStatus(
+  public async getUsageStatus(
     @Req() req: RequestWithDeviceId,
   ): Promise<GuestUsageResponseDto> {
     try {
-      const deviceId = req.deviceId!;
+      const deviceId = req.deviceId ?? '';
       const status = await this.guestUsageService.getUsageStatus(deviceId);
 
       this.logger.debug(
@@ -147,9 +153,10 @@ export class GuestController {
       return status;
     } catch (error) {
       this.logger.error('Error getting usage status:', error);
+      const err = error as Error & { status?: number };
       throw new HttpException(
-        error.message || 'Failed to get usage status',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        err.message || 'Failed to get usage status',
+        err.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -173,11 +180,11 @@ export class GuestController {
   @ApiBadRequestResponse({
     description: 'Guest record not found',
   })
-  async getGuestDetails(
+  public async getGuestDetails(
     @Req() req: RequestWithDeviceId,
   ): Promise<GuestStatusDto> {
     try {
-      const deviceId = req.deviceId!;
+      const deviceId = req.deviceId ?? '';
       const details = await this.guestUsageService.getGuestStatus(deviceId);
 
       this.logger.debug(
@@ -186,9 +193,10 @@ export class GuestController {
       return details;
     } catch (error) {
       this.logger.error('Error getting guest details:', error);
+      const err = error as Error & { status?: number };
       throw new HttpException(
-        error.message || 'Failed to get guest details',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        err.message || 'Failed to get guest details',
+        err.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -224,7 +232,10 @@ export class GuestController {
   @ApiBadRequestResponse({
     description: 'Invalid or already redeemed feedback code',
   })
-  async redeemFeedbackCode(@Body() redeemDto: RedeemFeedbackCodeDto) {
+  public async redeemFeedbackCode(@Body() redeemDto: RedeemFeedbackCodeDto): Promise<{
+    success: boolean;
+    message: string;
+  }> {
     try {
       const success = await this.guestUsageService.redeemFeedbackCode(
         redeemDto.feedbackCode,
@@ -238,9 +249,10 @@ export class GuestController {
       };
     } catch (error) {
       this.logger.error('Error redeeming feedback code:', error);
+      const err = error as Error & { status?: number };
       throw new HttpException(
-        error.message || 'Failed to redeem feedback code',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        err.message || 'Failed to redeem feedback code',
+        err.status ?? HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -267,7 +279,12 @@ export class GuestController {
       },
     },
   })
-  async getServiceStats() {
+  public async getServiceStats(): Promise<{
+    totalGuests: number;
+    activeGuests: number;
+    pendingFeedbackCodes: number;
+    redeemedFeedbackCodes: number;
+  }> {
     try {
       const stats = await this.guestUsageService.getServiceStats();
       this.logger.debug('Service statistics retrieved');
@@ -316,9 +333,10 @@ export class GuestController {
       },
     },
   })
-  async checkUsage(@Req() req: RequestWithDeviceId) {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  public async checkUsage(@Req() req: RequestWithDeviceId) {
     try {
-      const deviceId = req.deviceId!;
+      const deviceId = req.deviceId ?? '';
       const canUse = await this.guestUsageService.canUse(deviceId);
 
       if (!canUse) {

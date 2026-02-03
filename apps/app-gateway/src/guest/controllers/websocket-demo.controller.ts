@@ -1,5 +1,5 @@
 import { Controller, Post, Body, Logger } from '@nestjs/common';
-import { WebSocketGateway } from '../../websocket/websocket.gateway';
+import type { WebSocketGateway } from '../../websocket/websocket.gateway';
 
 /**
  * Exposes endpoints for web socket demo.
@@ -20,7 +20,7 @@ export class WebSocketDemoController {
    * @returns A promise that resolves to { message: string }.
    */
   @Post('demo-progress')
-  async simulateProgress(
+  public async simulateProgress(
     @Body() body: { sessionId: string },
   ): Promise<{ message: string }> {
     const { sessionId } = body;
@@ -123,7 +123,7 @@ export class WebSocketDemoController {
    * @returns A promise that resolves to { message: string }.
    */
   @Post('demo-error')
-  async simulateError(
+  public async simulateError(
     @Body() body: { sessionId: string },
   ): Promise<{ message: string }> {
     const { sessionId } = body;

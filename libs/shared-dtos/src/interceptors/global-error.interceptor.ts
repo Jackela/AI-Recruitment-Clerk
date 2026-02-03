@@ -3,17 +3,19 @@
  * Automatically catches and formats all exceptions across the application
  */
 
-import {
-  Injectable,
+import type {
   NestInterceptor,
   ExecutionContext,
-  CallHandler,
+  CallHandler} from '@nestjs/common';
+import {
+  Injectable,
   HttpException,
   Logger,
 } from '@nestjs/common';
-import { Observable, throwError } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { EnhancedAppException } from '../errors/enhanced-error-types';
 import { StandardizedErrorResponseFormatter } from '../errors/error-response-formatter';
 import { ErrorHandler } from '../common/error-handling.patterns';
@@ -32,7 +34,8 @@ export class GlobalErrorInterceptor implements NestInterceptor {
    * @param next - The next.
    * @returns The Observable<any>.
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
 
@@ -85,6 +88,7 @@ export class GlobalErrorInterceptor implements NestInterceptor {
   }
 
   private convertAppExceptionToEnhanced(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     appError: any,
     context: string,
   ): EnhancedAppException {
@@ -93,6 +97,7 @@ export class GlobalErrorInterceptor implements NestInterceptor {
     }
 
     const enhancedError = new EnhancedAppException(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (appError.errorDetails?.type as any) || 'SYSTEM_ERROR',
       appError.errorDetails?.code || 'UNKNOWN_ERROR',
       appError.message,
@@ -103,6 +108,7 @@ export class GlobalErrorInterceptor implements NestInterceptor {
 
     // Set appropriate severity
     const severity = appError.errorDetails?.severity || 'high';
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     enhancedError.withSeverity(severity as any);
 
     return enhancedError;
@@ -115,6 +121,7 @@ export class GlobalErrorInterceptor implements NestInterceptor {
     const errorResponse = httpError.getResponse();
     const httpStatus = httpError.getStatus();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let errorDetails: any = {};
     if (typeof errorResponse === 'object') {
       errorDetails = errorResponse;
@@ -123,6 +130,7 @@ export class GlobalErrorInterceptor implements NestInterceptor {
     }
 
     const enhancedError = new EnhancedAppException(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.mapHttpStatusToErrorType(httpStatus) as any,
       errorDetails.code || 'HTTP_EXCEPTION',
       errorDetails.message || httpError.message,
@@ -133,6 +141,7 @@ export class GlobalErrorInterceptor implements NestInterceptor {
 
     // Set appropriate severity based on HTTP status
     const severity = this.mapHttpStatusToSeverity(httpStatus);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     enhancedError.withSeverity(severity as any);
 
     return enhancedError;
@@ -180,7 +189,9 @@ export class GlobalErrorInterceptor implements NestInterceptor {
       `trace_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     const requestId = (request.headers['x-request-id'] as string) || traceId;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userId = (request as any).user?.id;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sessionId = (request as any).sessionId;
 
     ErrorCorrelationManager.setContext({
@@ -242,6 +253,7 @@ export class GlobalErrorInterceptor implements NestInterceptor {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private sanitizeHeaders(headers: any): Record<string, string> {
     const sensitiveHeaders = [
       'authorization',

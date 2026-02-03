@@ -1,4 +1,5 @@
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import type { NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 // Use in-memory Mongo for tests
 import { DatabaseModule } from '../database/database.module';
 import { ConfigModule } from '@nestjs/config';
@@ -131,7 +132,7 @@ const isTestEnv = process.env.NODE_ENV === 'test';
   ],
 })
 export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
+  public configure(consumer: MiddlewareConsumer): void {
     consumer.apply(SecurityHeadersMiddleware).forRoutes('*');
     consumer.apply(AuditMiddleware).forRoutes('/ops/*');
     if (!isTestEnv) {

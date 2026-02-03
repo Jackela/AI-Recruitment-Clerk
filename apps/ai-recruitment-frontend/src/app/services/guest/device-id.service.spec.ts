@@ -176,9 +176,11 @@ describe('DeviceIdService', () => {
       // Mock console methods before creating service
       const consoleSpy = jest
         .spyOn(console, 'warn')
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         .mockImplementation(() => {});
       const errorSpy = jest
         .spyOn(console, 'error')
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         .mockImplementation(() => {});
 
       // Override the global localStorage mock to throw errors

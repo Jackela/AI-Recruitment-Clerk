@@ -1,13 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, Logger } from '@nestjs/common';
-import {
+import type {
   JdDTO,
   LlmExtractionRequest,
   LlmExtractionResponse,
 } from '@ai-recruitment-clerk/job-management-domain';
 import { RetryUtility, SecureConfigValidator } from '@app/shared-dtos';
+import type {
+  GeminiConfig} from '@ai-recruitment-clerk/shared-dtos';
 import {
   GeminiClient,
-  GeminiConfig,
   PromptTemplates,
   PromptBuilder,
 } from '@ai-recruitment-clerk/shared-dtos';
@@ -52,7 +54,7 @@ export class LlmService {
    * @param jdText - The jd text.
    * @returns A promise that resolves to JdDTO.
    */
-  async extractJobRequirements(jdText: string): Promise<JdDTO> {
+  public async extractJobRequirements(jdText: string): Promise<JdDTO> {
     this.logger.log(
       'Extracting job requirements from JD text using Gemini API',
     );
@@ -91,7 +93,10 @@ export class LlmService {
     }
   }
 
-  private createTestGeminiStub() {
+  private createTestGeminiStub(): {
+    generateStructuredResponse: (_prompt: string, _schema: string) => Promise<{ data: any; processingTimeMs: number }>;
+    healthCheck: () => Promise<boolean>;
+  } {
     const extractFromPrompt = (prompt: string): string => {
       const startMarker = 'JOB DESCRIPTION:';
       const endMarker = 'EXTRACTION REQUIREMENTS:';
@@ -106,8 +111,13 @@ export class LlmService {
       return body.trim();
     };
 
-    const parseJd = (jdText: string) => {
-      const text = jdText || '';
+    const parseJd = (jdText: string): {
+      requirements: { technical: string[]; soft: string[]; experience: string; education: string };
+      responsibilities: string[];
+      benefits: string[];
+      company: { name: string | undefined; industry: string | undefined; size: string | undefined };
+    } => {
+      const text = jdText ?? '';
       const lower = text.toLowerCase();
       const lines = text
         .split(/\r?\n/)
@@ -127,7 +137,7 @@ export class LlmService {
         'docker',
         'kubernetes',
       ];
-      const hasWord = (w: string) => lower.includes(w);
+      const hasWord = (w: string): boolean => lower.includes(w);
       const tech: string[] = [];
       if (hasWord('javascript')) tech.push('JavaScript');
       if (hasWord('node.js') || hasWord('nodejs')) tech.push('Node.js');
@@ -233,7 +243,7 @@ export class LlmService {
                 s
                   .trim()
                   .toLowerCase()
-                  .replace(/[\.;:,]+$/, ''),
+                  .replace(/[.;:,]+$/, ''),
               )
               .filter(Boolean)
               .forEach((b) => benefits.push(b));
@@ -249,7 +259,7 @@ export class LlmService {
               .replace(/^[-•]\s*/, '')
               .trim()
               .toLowerCase()
-              .replace(/[\.;:,]+$/, ''),
+              .replace(/[.;:,]+$/, ''),
           );
       }
 
@@ -259,7 +269,7 @@ export class LlmService {
       let companySize: string | undefined;
       const companyLine = lines.find((l) => /^company[:：]/i.test(l));
       if (companyLine) {
-        const after = companyLine.split(/[:：]/)[1] || '';
+        const after = companyLine.split(/[:：]/)[1] ?? '';
         const sentence = after.split(/\bis\b/i)[0].trim();
         companyName = sentence || undefined;
         if (lower.includes('software')) companyIndustry = 'Software Technology';
@@ -269,7 +279,7 @@ export class LlmService {
         if (sizeMatch) companySize = sizeMatch[0].replace(/\s+/g, ' ').trim();
       }
       if (!companyName) {
-        companyName = lines[0] || undefined;
+        companyName = lines[0] ?? undefined;
       }
 
       return {
@@ -286,17 +296,17 @@ export class LlmService {
           industry: companyIndustry,
           size: companySize,
         },
-      } as const;
+      };
     };
 
     return {
-      generateStructuredResponse: async (_prompt: string, _schema: string) => {
+      generateStructuredResponse: async (_prompt: string, _schema: string): Promise<{ data: any; processingTimeMs: number }> => {
         const start = Date.now();
         const jd = extractFromPrompt(_prompt);
         const data = parseJd(jd);
-        return { data, processingTimeMs: Date.now() - start } as any;
+        return { data, processingTimeMs: Date.now() - start };
       },
-      healthCheck: async () => true,
+      healthCheck: async (): Promise<boolean> => true,
     };
   }
 
@@ -305,7 +315,7 @@ export class LlmService {
    * @param request - The request.
    * @returns A promise that resolves to LlmExtractionResponse.
    */
-  async extractStructuredData(
+  public async extractStructuredData(
     request: LlmExtractionRequest,
   ): Promise<LlmExtractionResponse> {
     const startTime = Date.now();
@@ -343,7 +353,7 @@ export class LlmService {
    * @param data - The data.
    * @returns A promise that resolves to boolean value.
    */
-  async validateExtractedData(data: JdDTO): Promise<boolean> {
+  public async validateExtractedData(data: JdDTO): Promise<boolean> {
     // Comprehensive validation logic for production use
     if (!data.requirements || !data.responsibilities) {
       return false;
@@ -467,20 +477,20 @@ export class LlmService {
         technical: Array.isArray(rawData.requiredSkills)
           ? rawData.requiredSkills
               .map((skill: any) =>
-                typeof skill === 'string' ? skill : skill.name || '',
+                typeof skill === 'string' ? skill : skill.name ?? '',
               )
               .filter(Boolean)
-          : rawData.technical || [],
+          : rawData.technical ?? [],
         soft: Array.isArray(rawData.softSkills)
           ? rawData.softSkills.filter(Boolean)
-          : rawData.soft || [],
+          : rawData.soft ?? [],
         experience:
-          rawData.experience ||
-          this.formatExperienceYears(rawData.experienceYears) ||
+          rawData.experience ??
+          this.formatExperienceYears(rawData.experienceYears) ??
           'Not specified',
         education:
-          rawData.education ||
-          this.formatEducationLevel(rawData.educationLevel) ||
+          rawData.education ??
+          this.formatEducationLevel(rawData.educationLevel) ??
           'Not specified',
       },
       responsibilities: Array.isArray(rawData.responsibilities)
@@ -490,9 +500,9 @@ export class LlmService {
         ? rawData.benefits.filter(Boolean)
         : [],
       company: {
-        name: rawData.company?.name || rawData.jobTitle || undefined,
-        industry: rawData.company?.industry || rawData.department || undefined,
-        size: rawData.company?.size || undefined,
+        name: rawData.company?.name ?? rawData.jobTitle ?? undefined,
+        industry: rawData.company?.industry ?? rawData.department ?? undefined,
+        size: rawData.company?.size ?? undefined,
       },
     };
 
@@ -504,8 +514,8 @@ export class LlmService {
       return 'Not specified';
     }
 
-    const min = experienceYears.min || 0;
-    const max = experienceYears.max || min;
+    const min = experienceYears.min ?? 0;
+    const max = experienceYears.max ?? min;
 
     if (min === 0 && max === 0) {
       return 'Entry level';
@@ -524,7 +534,7 @@ export class LlmService {
       any: 'Any education level',
     };
 
-    return educationMap[educationLevel] || educationLevel || 'Not specified';
+    return educationMap[educationLevel] ?? educationLevel ?? 'Not specified';
   }
 
   private validateAndCleanJdData(data: any): JdDTO {
@@ -583,7 +593,7 @@ export class LlmService {
    * Performs the health check operation.
    * @returns A promise that resolves to boolean value.
    */
-  async healthCheck(): Promise<boolean> {
+  public async healthCheck(): Promise<boolean> {
     try {
       return await this.geminiClient.healthCheck();
     } catch {

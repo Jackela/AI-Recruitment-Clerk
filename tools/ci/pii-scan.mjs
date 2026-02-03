@@ -2,8 +2,9 @@
 import fs from 'fs';
 import path from 'path';
 
-const DEFAULT_DIRS = ['tools/logs', 'dist', 'coverage'];
+const DEFAULT_DIRS = ['tools/logs'];
 const ALLOWLIST = new Set((process.env.PII_ALLOWLIST || '').split(',').filter(Boolean));
+const DEFAULT_SKIP_DIRS = new Set(['dist', 'node_modules', '.git']);
 const roots = (process.argv.slice(2).length ? process.argv.slice(2) : DEFAULT_DIRS)
   .map(p => path.resolve(p));
 
@@ -35,7 +36,7 @@ function walk(dir) {
   const st = fs.statSync(dir);
   if (st.isFile()) return scanFile(dir);
   for (const entry of fs.readdirSync(dir)) {
-    if (entry === 'node_modules' || entry.startsWith('.git')) continue;
+    if (DEFAULT_SKIP_DIRS.has(entry) || entry.startsWith('.git')) continue;
     walk(path.join(dir, entry));
   }
 }

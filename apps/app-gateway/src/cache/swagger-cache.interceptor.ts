@@ -3,15 +3,16 @@
  * AI Recruitment Clerk - API文档缓存优化
  */
 
-import {
-  Injectable,
+import type {
   NestInterceptor,
   ExecutionContext,
-  CallHandler,
+  CallHandler} from '@nestjs/common';
+import {
+  Injectable
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { CacheService } from './cache.service';
+import type { CacheService } from './cache.service';
 
 /**
  * Represents the swagger cache interceptor.
@@ -28,12 +29,12 @@ export class SwaggerCacheInterceptor implements NestInterceptor {
    * Performs the intercept operation.
    * @param context - The context.
    * @param next - The next.
-   * @returns A promise that resolves to Observable<any>.
+   * @returns A promise that resolves to Observable<unknown>.
    */
-  async intercept(
+  public async intercept(
     context: ExecutionContext,
     next: CallHandler,
-  ): Promise<Observable<any>> {
+  ): Promise<Observable<unknown>> {
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
 

@@ -1,4 +1,4 @@
-import { RedisClient } from '../redis.client';
+import type { RedisClient } from '../redis.client';
 import { SessionCacheService } from '../session-cache.service';
 import { UsageCacheService } from '../usage-cache.service';
 import { UserSession } from '../../../domains/user-management.dto';

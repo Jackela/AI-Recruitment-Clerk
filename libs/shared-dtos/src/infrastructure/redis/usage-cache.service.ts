@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RedisClient } from './redis.client';
+import type { RedisClient } from './redis.client';
 
 /**
  * 使用限制缓存服务 - 管理IP使用限制和配额
@@ -19,7 +19,7 @@ export class UsageCacheService {
   /**
    * 获取IP今日使用次数
    */
-  async getDailyUsage(ip: string): Promise<number> {
+  public async getDailyUsage(ip: string): Promise<number> {
     const key = this.getDailyUsageKey(ip);
     const usage = await this.redis.get(key);
     return usage ? parseInt(usage, 10) : 0;
@@ -28,7 +28,7 @@ export class UsageCacheService {
   /**
    * 递增IP使用次数
    */
-  async incrementDailyUsage(ip: string): Promise<number> {
+  public async incrementDailyUsage(ip: string): Promise<number> {
     const key = this.getDailyUsageKey(ip);
     const usage = await this.redis.incr(key);
 
@@ -44,7 +44,7 @@ export class UsageCacheService {
   /**
    * 重置IP日使用次数
    */
-  async resetDailyUsage(ip: string): Promise<void> {
+  public async resetDailyUsage(ip: string): Promise<void> {
     const key = this.getDailyUsageKey(ip);
     await this.redis.del(key);
   }
@@ -52,7 +52,7 @@ export class UsageCacheService {
   /**
    * 获取IP奖励配额
    */
-  async getBonusQuota(
+  public async getBonusQuota(
     ip: string,
     bonusType: 'questionnaire' | 'payment',
   ): Promise<number> {
@@ -64,7 +64,7 @@ export class UsageCacheService {
   /**
    * 增加奖励配额
    */
-  async addBonusQuota(
+  public async addBonusQuota(
     ip: string,
     bonusType: 'questionnaire' | 'payment',
     amount: number,
@@ -86,7 +86,7 @@ export class UsageCacheService {
   /**
    * 获取IP总配额（基础 + 奖励）
    */
-  async getTotalQuota(
+  public async getTotalQuota(
     ip: string,
     baseQuota = 5,
   ): Promise<{
@@ -120,7 +120,7 @@ export class UsageCacheService {
   /**
    * 获取IP使用状态
    */
-  async getUsageStatus(
+  public async getUsageStatus(
     ip: string,
     baseQuota = 5,
   ): Promise<{
@@ -176,7 +176,7 @@ export class UsageCacheService {
   /**
    * 检查IP是否可以使用
    */
-  async canUse(ip: string, baseQuota = 5): Promise<boolean> {
+  public async canUse(ip: string, baseQuota = 5): Promise<boolean> {
     const status = await this.getUsageStatus(ip, baseQuota);
     return status.canUse;
   }
@@ -184,7 +184,7 @@ export class UsageCacheService {
   /**
    * 清理过期的使用记录
    */
-  async cleanExpiredUsage(): Promise<number> {
+  public async cleanExpiredUsage(): Promise<number> {
     const patterns = [
       `${this.USAGE_PREFIX}${this.DAILY_PREFIX}*`,
       `${this.USAGE_PREFIX}${this.BONUS_PREFIX}*`,
@@ -211,7 +211,7 @@ export class UsageCacheService {
   /**
    * 获取系统使用统计
    */
-  async getSystemUsageStats(): Promise<{
+  public async getSystemUsageStats(): Promise<{
     totalActiveIPs: number;
     totalUsageToday: number;
     averageUsagePerIP: number;

@@ -94,7 +94,7 @@ export class WebSocketStatsService {
   });
 
   // Signals for reactive access
-  stats = signal<RealtimeStats>({
+  public stats = signal<RealtimeStats>({
     totalAnalyses: 0,
     activeAnalyses: 0,
     completedToday: 0,
@@ -106,11 +106,11 @@ export class WebSocketStatsService {
     lastUpdated: new Date(),
   });
 
-  isConnected = signal(false);
-  connectionStatus = signal<
+  public isConnected = signal(false);
+  public connectionStatus = signal<
     'connecting' | 'connected' | 'disconnected' | 'error'
   >('disconnected');
-  lastError = signal<string>('');
+  public lastError = signal<string>('');
 
   // Mock data for development
   private mockMode = false;
@@ -229,6 +229,7 @@ export class WebSocketStatsService {
         break;
       case 'event':
         this.handleAnalysisEvent(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (data.payload as any as Omit<AnalysisEvent, 'timestamp'> & {
             timestamp: string | Date;
           }) ||
@@ -236,11 +237,13 @@ export class WebSocketStatsService {
               timestamp: new Date().toISOString(),
               type: 'progress',
               analysisId: '',
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } as any),
         );
         break;
       case 'metrics':
         this.updateMetrics(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (data.payload as Omit<SystemMetrics, 'timestamp'>) || ({} as any),
         );
         break;
@@ -256,6 +259,7 @@ export class WebSocketStatsService {
     const base = this.stats$.value;
     const newStats: RealtimeStats = {
       ...base,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ...(payload as any),
       lastUpdated: new Date(),
     };
@@ -354,7 +358,7 @@ export class WebSocketStatsService {
 
   private generateMockStats(): void {
     const baseTime = Date.now();
-    const randomVariation = () => Math.random() * 0.2 - 0.1; // ±10% variation
+    const randomVariation = (): number => Math.random() * 0.2 - 0.1; // ±10% variation
 
     const mockStats: RealtimeStats = {
       totalAnalyses: 1247 + Math.floor(Math.random() * 10),
@@ -419,7 +423,7 @@ export class WebSocketStatsService {
    * Retrieves stats.
    * @returns The RealtimeStats.
    */
-  getStats(): RealtimeStats {
+  public getStats(): RealtimeStats {
     return this.stats$.value;
   }
 
@@ -427,7 +431,7 @@ export class WebSocketStatsService {
    * Retrieves metrics.
    * @returns The SystemMetrics.
    */
-  getMetrics(): SystemMetrics {
+  public getMetrics(): SystemMetrics {
     return this.metrics$.value;
   }
 
@@ -435,7 +439,7 @@ export class WebSocketStatsService {
    * Performs the subscribe to events operation.
    * @returns The result of the operation.
    */
-  subscribeToEvents() {
+  public subscribeToEvents(): ReturnType<typeof this.events$.asObservable> {
     return this.events$.asObservable();
   }
 
@@ -443,7 +447,7 @@ export class WebSocketStatsService {
    * Performs the subscribe to stats operation.
    * @returns The result of the operation.
    */
-  subscribeToStats() {
+  public subscribeToStats(): ReturnType<typeof this.stats$.asObservable> {
     return this.stats$.asObservable();
   }
 
@@ -451,7 +455,7 @@ export class WebSocketStatsService {
    * Performs the subscribe to metrics operation.
    * @returns The result of the operation.
    */
-  subscribeToMetrics() {
+  public subscribeToMetrics(): ReturnType<typeof this.metrics$.asObservable> {
     return this.metrics$.asObservable();
   }
 
@@ -459,7 +463,7 @@ export class WebSocketStatsService {
   /**
    * Performs the refresh stats operation.
    */
-  refreshStats(): void {
+  public refreshStats(): void {
     if (this.isConnected()) {
       this.send({ type: 'refresh', target: 'stats' });
     } else {
@@ -471,7 +475,7 @@ export class WebSocketStatsService {
   /**
    * Performs the reconnect operation.
    */
-  reconnect(): void {
+  public reconnect(): void {
     if (this.ws) {
       this.ws.close();
     }
@@ -482,7 +486,7 @@ export class WebSocketStatsService {
   /**
    * Performs the disconnect operation.
    */
-  disconnect(): void {
+  public disconnect(): void {
     if (this.mockInterval) {
       clearInterval(this.mockInterval);
       this.mockInterval = null;
@@ -501,7 +505,7 @@ export class WebSocketStatsService {
   /**
    * Performs the destroy operation.
    */
-  destroy(): void {
+  public destroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
     this.disconnect();
@@ -512,7 +516,7 @@ export class WebSocketStatsService {
    * Performs the is mock mode operation.
    * @returns The boolean value.
    */
-  isMockMode(): boolean {
+  public isMockMode(): boolean {
     return this.mockMode;
   }
 
@@ -520,7 +524,7 @@ export class WebSocketStatsService {
    * Retrieves connection info.
    * @returns The { status: string; attempts: number; lastError: string; mockMode: boolean; }.
    */
-  getConnectionInfo(): {
+  public getConnectionInfo(): {
     status: string;
     attempts: number;
     lastError: string;

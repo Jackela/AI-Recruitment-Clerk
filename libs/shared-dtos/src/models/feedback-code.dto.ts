@@ -8,7 +8,7 @@ export interface FeedbackCodeDto {
   isUsed: boolean;
   usedAt?: Date;
   alipayAccount?: string;
-  questionnaireData?: any;
+  questionnaireData?: Record<string, unknown>;
   paymentStatus: 'pending' | 'paid' | 'rejected';
   qualityScore?: number;
   paymentAmount?: number;
@@ -28,7 +28,7 @@ export interface CreateFeedbackCodeDto {
 export interface MarkFeedbackCodeUsedDto {
   code: string;
   alipayAccount: string;
-  questionnaireData: any;
+  questionnaireData: Record<string, unknown>;
 }
 
 /**

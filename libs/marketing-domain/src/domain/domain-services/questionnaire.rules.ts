@@ -1,4 +1,4 @@
-import { QuestionnaireSubmission } from '../value-objects/questionnaire-submission.value-object.js';
+import type { QuestionnaireSubmission } from '../value-objects/questionnaire-submission.value-object.js';
 import { QuestionnaireValidationResult } from '../value-objects/questionnaire-validation-result.value-object.js';
 
 /**
@@ -6,13 +6,13 @@ import { QuestionnaireValidationResult } from '../value-objects/questionnaire-va
  */
 export class QuestionnaireRules {
   // 质量评估规则
-  static readonly MIN_TEXT_LENGTH_FOR_BONUS = 50;
-  static readonly MIN_COMPLETION_RATE = 0.8;
-  static readonly MIN_DETAILED_ANSWERS = 3;
-  static readonly QUALITY_SCORE_THRESHOLD = 70;
+  public static readonly MIN_TEXT_LENGTH_FOR_BONUS = 50;
+  public static readonly MIN_COMPLETION_RATE = 0.8;
+  public static readonly MIN_DETAILED_ANSWERS = 3;
+  public static readonly QUALITY_SCORE_THRESHOLD = 70;
 
   // 验证规则
-  static readonly REQUIRED_FIELDS = [
+  public static readonly REQUIRED_FIELDS = [
     'userProfile.role',
     'userProfile.industry',
     'userExperience.overallSatisfaction',
@@ -26,7 +26,7 @@ export class QuestionnaireRules {
    * @param submission - The submission.
    * @returns The boolean value.
    */
-  static isHighQualitySubmission(submission: QuestionnaireSubmission): boolean {
+  public static isHighQualitySubmission(submission: QuestionnaireSubmission): boolean {
     const summary = submission.getSummary();
     const textLength = summary.textLength;
     const detailedAnswers = this.countDetailedAnswers(submission);
@@ -44,7 +44,7 @@ export class QuestionnaireRules {
    * @param submission - The submission.
    * @returns The number value.
    */
-  static calculateQualityScore(submission: QuestionnaireSubmission): number {
+  public static calculateQualityScore(submission: QuestionnaireSubmission): number {
     const summary = submission.getSummary();
     let score = 0;
 
@@ -65,7 +65,7 @@ export class QuestionnaireRules {
    * @param submission - The submission.
    * @returns The QuestionnaireValidationResult.
    */
-  static isValidSubmission(
+  public static isValidSubmission(
     submission: QuestionnaireSubmission,
   ): QuestionnaireValidationResult {
     const errors: string[] = [];
@@ -124,7 +124,7 @@ export class QuestionnaireRules {
    * @param rating - The rating.
    * @returns The boolean value.
    */
-  static isValidRating(rating: number): boolean {
+  public static isValidRating(rating: number): boolean {
     return rating >= 1 && rating <= 5;
   }
 
@@ -135,7 +135,7 @@ export class QuestionnaireRules {
    * @param detailedAnswers - The detailed answers.
    * @returns The boolean value.
    */
-  static isEligibleForBonus(
+  public static isEligibleForBonus(
     qualityScore: number,
     textLength: number,
     detailedAnswers: number,

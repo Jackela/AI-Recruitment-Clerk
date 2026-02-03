@@ -6,21 +6,21 @@ import { IsString, IsNotEmpty } from 'class-validator';
 export class ResumeUploadDto {
   @IsString()
   @IsNotEmpty()
-  jobId!: string;
+  public jobId!: string;
 }
 
 /**
  * Describes the resume upload response data transfer object.
  */
 export class ResumeUploadResponseDto {
-  jobId: string;
-  submittedResumes: number;
+  public jobId: string;
+  public submittedResumes: number;
   // Backward/compat field used in tests
   /**
    * Performs the uploaded count operation.
    * @returns The number value.
    */
-  get uploadedCount(): number {
+  public get uploadedCount(): number {
     return this.submittedResumes;
   }
 

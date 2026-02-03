@@ -1,16 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
+import type {
   JetStreamManager,
   StreamInfo as NatsStreamInfo,
   ConsumerInfo as NatsConsumerInfo,
 } from 'nats';
-import {
+import type {
   StreamConfig,
   StreamInfo,
   ConsumerInfo,
   ConsumerConfig,
 } from '../interfaces';
-import { NatsConnectionManager } from './nats-connection-manager.service';
+import type { NatsConnectionManager } from './nats-connection-manager.service';
 
 /**
  * NATS Stream Manager Service
@@ -29,7 +29,7 @@ export class NatsStreamManager {
   /**
    * Ensure specified streams exist, creating them if necessary
    */
-  async ensureStreamsExist(streams: StreamConfig[]): Promise<void> {
+  public async ensureStreamsExist(streams: StreamConfig[]): Promise<void> {
     const connection = this.connectionManager.getConnection();
     if (!connection) {
       throw new Error('NATS connection not available');
@@ -54,7 +54,7 @@ export class NatsStreamManager {
   /**
    * Ensure a single stream exists
    */
-  async ensureStreamExists(
+  public async ensureStreamExists(
     jsm: JetStreamManager,
     config: StreamConfig,
   ): Promise<void> {
@@ -91,7 +91,7 @@ export class NatsStreamManager {
   /**
    * Create or update a consumer for a stream
    */
-  async ensureConsumerExists(
+  public async ensureConsumerExists(
     streamName: string,
     consumerConfig: ConsumerConfig,
   ): Promise<void> {
@@ -147,7 +147,7 @@ export class NatsStreamManager {
   /**
    * Get information about a specific stream
    */
-  async getStreamInfo(streamName: string): Promise<StreamInfo | null> {
+  public async getStreamInfo(streamName: string): Promise<StreamInfo | null> {
     const connection = this.connectionManager.getConnection();
     if (!connection) {
       return null;
@@ -176,7 +176,7 @@ export class NatsStreamManager {
   /**
    * Get information about a specific consumer
    */
-  async getConsumerInfo(
+  public async getConsumerInfo(
     streamName: string,
     consumerName: string,
   ): Promise<ConsumerInfo | null> {
@@ -214,7 +214,7 @@ export class NatsStreamManager {
   /**
    * List all streams
    */
-  async listStreams(): Promise<StreamInfo[]> {
+  public async listStreams(): Promise<StreamInfo[]> {
     const connection = this.connectionManager.getConnection();
     if (!connection) {
       return [];
@@ -247,7 +247,7 @@ export class NatsStreamManager {
   /**
    * List consumers for a specific stream
    */
-  async listConsumers(streamName: string): Promise<ConsumerInfo[]> {
+  public async listConsumers(streamName: string): Promise<ConsumerInfo[]> {
     const connection = this.connectionManager.getConnection();
     if (!connection) {
       return [];
@@ -283,7 +283,7 @@ export class NatsStreamManager {
   /**
    * Delete a stream (use with caution)
    */
-  async deleteStream(streamName: string): Promise<void> {
+  public async deleteStream(streamName: string): Promise<void> {
     const connection = this.connectionManager.getConnection();
     if (!connection) {
       throw new Error('NATS connection not available');
@@ -303,7 +303,7 @@ export class NatsStreamManager {
   /**
    * Delete a consumer (use with caution)
    */
-  async deleteConsumer(
+  public async deleteConsumer(
     streamName: string,
     consumerName: string,
   ): Promise<void> {

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { LoggerService } from '../shared/logger.service';
@@ -60,7 +61,7 @@ export class GuestUsageService {
    * Retrieves usage count.
    * @returns The number value.
    */
-  getUsageCount(): number {
+  public getUsageCount(): number {
     try {
       const count = localStorage.getItem(this.STORAGE_KEYS.USAGE_COUNT) || '0';
       const parsed = parseInt(count, 10);
@@ -74,7 +75,7 @@ export class GuestUsageService {
   /**
    * Performs the increment usage operation.
    */
-  incrementUsage(): void {
+  public incrementUsage(): void {
     const current = this.getUsageCount();
     const newCount = current + 1;
     localStorage.setItem(this.STORAGE_KEYS.USAGE_COUNT, newCount.toString());
@@ -99,7 +100,7 @@ export class GuestUsageService {
    * Retrieves remaining usage.
    * @returns The number value.
    */
-  getRemainingUsage(): number {
+  public getRemainingUsage(): number {
     return Math.max(0, this.MAX_GUEST_USAGE - this.getUsageCount());
   }
 
@@ -107,7 +108,7 @@ export class GuestUsageService {
    * Performs the is usage exhausted operation.
    * @returns The boolean value.
    */
-  isUsageExhausted(): boolean {
+  public isUsageExhausted(): boolean {
     return this.getUsageCount() >= this.MAX_GUEST_USAGE;
   }
 
@@ -115,7 +116,7 @@ export class GuestUsageService {
    * Performs the can use feature operation.
    * @returns The boolean value.
    */
-  canUseFeature(): boolean {
+  public canUseFeature(): boolean {
     return !this.isUsageExhausted();
   }
 
@@ -123,7 +124,7 @@ export class GuestUsageService {
    * Generates feedback code.
    * @returns The string value.
    */
-  generateFeedbackCode(): string {
+  public generateFeedbackCode(): string {
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substr(2, 8);
     const sessionId =
@@ -143,10 +144,11 @@ export class GuestUsageService {
    * Retrieves feedback code.
    * @returns The string | null.
    */
-  getFeedbackCode(): string | null {
+  public getFeedbackCode(): string | null {
     return localStorage.getItem(this.STORAGE_KEYS.FEEDBACK_CODE);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private recordFeedbackCode(code: string): Observable<any> {
     return this.http.post(`${this.API_BASE_URL}/record`, { code }).pipe(
       catchError(() => of(null)), // 如果后端不可用，不影响前端功能
@@ -157,7 +159,7 @@ export class GuestUsageService {
    * Retrieves guest stats.
    * @returns The {usageCount: number; remainingUsage: number; maxUsage: number; isExhausted: boolean; lastUsedDate: string | null; firstVisit: string | null; sessionId: string | null; usageHistory: string[]}.
    */
-  getGuestStats(): {
+  public getGuestStats(): {
     usageCount: number;
     remainingUsage: number;
     maxUsage: number;
@@ -185,7 +187,7 @@ export class GuestUsageService {
    * 检查并刷新用户权限状态
    * 这个方法会检查用户的反馈码是否已被核销，如果是则重置使用权限
    */
-  async checkAndRefreshUserStatus(): Promise<boolean> {
+  public async checkAndRefreshUserStatus(): Promise<boolean> {
     const feedbackCode = this.getFeedbackCode();
 
     if (!feedbackCode) {
@@ -196,6 +198,7 @@ export class GuestUsageService {
       // 调用后端API检查反馈码状态
       const response = (await this.http
         .get(`${this.API_BASE_URL}/validate/${feedbackCode}`)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .toPromise()) as any;
 
       if (response && response.data && response.data.isRedeemed) {
@@ -246,7 +249,7 @@ export class GuestUsageService {
   /**
    * 自动检查用户状态（页面加载时调用）
    */
-  async autoCheckUserStatus(): Promise<void> {
+  public async autoCheckUserStatus(): Promise<void> {
     const refreshed = await this.checkAndRefreshUserStatus();
     if (refreshed) {
       // 触发页面更新事件
@@ -265,7 +268,7 @@ export class GuestUsageService {
   /**
    * Performs the reset usage operation.
    */
-  resetUsage(): void {
+  public resetUsage(): void {
     Object.values(this.STORAGE_KEYS).forEach((key) => {
       localStorage.removeItem(key);
     });

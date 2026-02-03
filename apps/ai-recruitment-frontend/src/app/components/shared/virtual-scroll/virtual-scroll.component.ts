@@ -1,18 +1,19 @@
+import type {
+  OnInit,
+  OnDestroy,
+  ElementRef} from '@angular/core';
 import {
   Component,
   Input,
   Output,
   EventEmitter,
-  OnInit,
-  OnDestroy,
-  ElementRef,
   ViewChild,
   signal,
   computed,
   effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TemplateRef } from '@angular/core';
+import type { TemplateRef } from '@angular/core';
 import { Subject, fromEvent, animationFrameScheduler } from 'rxjs';
 import { takeUntil, throttleTime, distinctUntilChanged } from 'rxjs/operators';
 // import { debounceTime } from 'rxjs/operators'; // Reserved for future use
@@ -267,12 +268,12 @@ interface ScrollState {
 })
 export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
   @ViewChild('scrollContainer', { static: true })
-  scrollContainer!: ElementRef<HTMLDivElement>;
+  public scrollContainer!: ElementRef<HTMLDivElement>;
 
-  @Input() items: T[] = [];
-  @Input() itemTemplate!: TemplateRef<unknown>;
-  @Input() containerHeight = 600;
-  @Input() config: VirtualScrollConfig<T> = {
+  @Input() public items: T[] = [];
+  @Input() public itemTemplate!: TemplateRef<unknown>;
+  @Input() public containerHeight = 600;
+  @Input() public config: VirtualScrollConfig<T> = {
     itemHeight: 50,
     bufferSize: 5,
     enableSmoothScroll: false,
@@ -281,26 +282,26 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
     enableDynamicHeight: false,
     estimatedItemHeight: 50,
   };
-  @Input() ariaLabel = '虚拟滚动列表';
+  @Input() public ariaLabel = '虚拟滚动列表';
 
-  @Output() scrollEnd = new EventEmitter<void>();
-  @Output() scrollToTop = new EventEmitter<void>();
-  @Output() loadMore = new EventEmitter<void>();
+  @Output() public scrollEnd = new EventEmitter<void>();
+  @Output() public scrollToTop = new EventEmitter<void>();
+  @Output() public loadMore = new EventEmitter<void>();
 
   // State
   private destroy$ = new Subject<void>();
   private itemHeightCache = new Map<T, number>();
 
-  scrollState = signal<ScrollState>({
+  public scrollState = signal<ScrollState>({
     scrollTop: 0,
     scrollHeight: 0,
     clientHeight: 0,
   });
 
-  isLoading = signal(false);
+  public isLoading = signal(false);
 
   // Computed values
-  startIndex = computed(() => {
+  public startIndex = computed(() => {
     const scrollTop = this.scrollState().scrollTop;
     const bufferSize = this.config.bufferSize || 5;
     const index =
@@ -308,7 +309,7 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
     return Math.max(0, index);
   });
 
-  endIndex = computed(() => {
+  public endIndex = computed(() => {
     const scrollTop = this.scrollState().scrollTop;
     const clientHeight = this.scrollState().clientHeight;
     const bufferSize = this.config.bufferSize || 5;
@@ -318,13 +319,13 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
     return Math.min(this.items.length, index);
   });
 
-  visibleItems = computed(() => {
+  public visibleItems = computed(() => {
     const start = this.startIndex();
     const end = this.endIndex();
     return this.items.slice(start, end);
   });
 
-  topSpacerHeight = computed(() => {
+  public topSpacerHeight = computed(() => {
     const start = this.startIndex();
     if (this.config.enableDynamicHeight) {
       let height = 0;
@@ -336,7 +337,7 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
     return start * this.config.itemHeight;
   });
 
-  bottomSpacerHeight = computed(() => {
+  public bottomSpacerHeight = computed(() => {
     const end = this.endIndex();
     const total = this.items.length;
     if (this.config.enableDynamicHeight) {
@@ -349,12 +350,12 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
     return (total - end) * this.config.itemHeight;
   });
 
-  contentOffset = computed(() => {
+  public contentOffset = computed(() => {
     // For smooth rendering
     return 0;
   });
 
-  scrollPercentage = computed(() => {
+  public scrollPercentage = computed(() => {
     const { scrollTop, scrollHeight, clientHeight } = this.scrollState();
     if (scrollHeight <= clientHeight) return 0;
     return (scrollTop / (scrollHeight - clientHeight)) * 100;
@@ -363,7 +364,7 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.setupScrollListener();
     this.setupResizeObserver();
 
@@ -379,7 +380,7 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -447,7 +448,7 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
    * Performs the on scroll operation.
    * @param _event - The event.
    */
-  onScroll(_event: Event): void {
+  public onScroll(_event: Event): void {
     // Handled by scroll listener
   }
 
@@ -457,7 +458,7 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
    * @param item - The item.
    * @returns The unknown.
    */
-  trackByFn(index: number, item: T): unknown {
+  public trackByFn(index: number, item: T): unknown {
     if (this.config.trackBy) {
       return this.config.trackBy(this.startIndex() + index, item);
     }
@@ -470,7 +471,7 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
    * @param _index - The index.
    * @returns The number value.
    */
-  getItemHeight(item: T, _index: number): number {
+  public getItemHeight(item: T, _index: number): number {
     if (!this.config.enableDynamicHeight) {
       return this.config.itemHeight;
     }
@@ -508,7 +509,7 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
    * @param index - The index.
    * @param behavior - The behavior.
    */
-  scrollToIndex(index: number, behavior: ScrollBehavior = 'auto'): void {
+  public scrollToIndex(index: number, behavior: ScrollBehavior = 'auto'): void {
     const itemHeight = this.getAverageItemHeight();
     const scrollTop = index * itemHeight;
 
@@ -523,7 +524,7 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
    * @param item - The item.
    * @param behavior - The behavior.
    */
-  scrollToItem(item: T, behavior: ScrollBehavior = 'auto'): void {
+  public scrollToItem(item: T, behavior: ScrollBehavior = 'auto'): void {
     const index = this.items.indexOf(item);
     if (index !== -1) {
       this.scrollToIndex(index, behavior);
@@ -533,7 +534,7 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
   /**
    * Performs the refresh operation.
    */
-  refresh(): void {
+  public refresh(): void {
     this.updateScrollState();
     this.itemHeightCache.clear();
   }
@@ -542,7 +543,7 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
    * Sets loading.
    * @param loading - The loading.
    */
-  setLoading(loading: boolean): void {
+  public setLoading(loading: boolean): void {
     this.isLoading.set(loading);
   }
 }

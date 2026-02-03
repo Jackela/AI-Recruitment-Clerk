@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { RedisClient } from './redis.client';
-import { UserSession, SessionData } from '../../domains/user-management.dto';
+import type { RedisClient } from './redis.client';
+import type { SessionData } from '../../domains/user-management.dto';
+import { UserSession } from '../../domains/user-management.dto';
 
 /**
  * 会话缓存服务 - 专门管理UserSession的缓存
@@ -20,7 +21,7 @@ export class SessionCacheService {
   /**
    * 缓存会话数据
    */
-  async cacheSession(session: UserSession): Promise<void> {
+  public async cacheSession(session: UserSession): Promise<void> {
     const sessionData = this.serializeSession(session);
     const sessionKey = this.getSessionKey(session.getId().getValue());
     const ipKey = this.getIPSessionKey(session.getIP().getValue());
@@ -35,7 +36,7 @@ export class SessionCacheService {
   /**
    * 根据会话 ID 获取会话
    */
-  async getSessionById(sessionId: string): Promise<UserSession | null> {
+  public async getSessionById(sessionId: string): Promise<UserSession | null> {
     const sessionKey = this.getSessionKey(sessionId);
     const sessionDataStr = await this.redis.get(sessionKey);
 
@@ -55,7 +56,7 @@ export class SessionCacheService {
   /**
    * 根据IP获取会话
    */
-  async getSessionByIP(ip: string): Promise<UserSession | null> {
+  public async getSessionByIP(ip: string): Promise<UserSession | null> {
     const ipKey = this.getIPSessionKey(ip);
     const sessionId = await this.redis.get(ipKey);
 
@@ -69,7 +70,7 @@ export class SessionCacheService {
   /**
    * 删除会话缓存
    */
-  async removeSession(sessionId: string, ip: string): Promise<void> {
+  public async removeSession(sessionId: string, ip: string): Promise<void> {
     const sessionKey = this.getSessionKey(sessionId);
     const ipKey = this.getIPSessionKey(ip);
 
@@ -79,7 +80,7 @@ export class SessionCacheService {
   /**
    * 检查会话是否存在
    */
-  async sessionExists(sessionId: string): Promise<boolean> {
+  public async sessionExists(sessionId: string): Promise<boolean> {
     const sessionKey = this.getSessionKey(sessionId);
     return this.redis.exists(sessionKey);
   }
@@ -87,7 +88,7 @@ export class SessionCacheService {
   /**
    * 获取IP的会话统计
    */
-  async getIPSessionStats(ip: string): Promise<{
+  public async getIPSessionStats(ip: string): Promise<{
     hasActiveSession: boolean;
     sessionId?: string;
     remainingTTL?: number;
@@ -111,7 +112,7 @@ export class SessionCacheService {
   /**
    * 清理过期会话
    */
-  async cleanExpiredSessions(): Promise<number> {
+  public async cleanExpiredSessions(): Promise<number> {
     const pattern = `${this.SESSION_PREFIX}*`;
     const keys = await this.redis.keys(pattern);
 
@@ -132,7 +133,7 @@ export class SessionCacheService {
   /**
    * 获取所有活跃会话数量
    */
-  async getActiveSessionCount(): Promise<number> {
+  public async getActiveSessionCount(): Promise<number> {
     const pattern = `${this.SESSION_PREFIX}*`;
     const keys = await this.redis.keys(pattern);
     return keys.length;
@@ -141,7 +142,7 @@ export class SessionCacheService {
   /**
    * 延长会话有效期
    */
-  async extendSessionTTL(
+  public async extendSessionTTL(
     sessionId: string,
     ip: string,
     ttl: number = this.DEFAULT_TTL,

@@ -1,5 +1,5 @@
 import * as ResumeActions from './resume.actions';
-import {
+import type {
   ResumeListItem,
   ResumeDetail,
   ResumeUploadResponse,

@@ -1,5 +1,5 @@
-import { RawSubmissionData } from '../dtos/questionnaire.dto.js';
-import { SubmissionMetadata } from '../../domain/value-objects/submission-metadata.value-object.js';
+import type { RawSubmissionData } from '../dtos/questionnaire.dto.js';
+import type { SubmissionMetadata } from '../../domain/value-objects/submission-metadata.value-object.js';
 import {
   QuestionnaireSubmissionResult,
   IPSubmissionCheckResult,
@@ -15,7 +15,7 @@ export class QuestionnaireContracts {
    * @param metadata - The metadata.
    * @returns The QuestionnaireSubmissionResult.
    */
-  static submitQuestionnaire(
+  public static submitQuestionnaire(
     rawData: RawSubmissionData,
     metadata: SubmissionMetadata,
   ): QuestionnaireSubmissionResult {
@@ -73,7 +73,7 @@ export class QuestionnaireContracts {
    * @param ip - The ip.
    * @returns The IPSubmissionCheckResult.
    */
-  static validateIPSubmissionLimit(ip: string): IPSubmissionCheckResult {
+  public static validateIPSubmissionLimit(ip: string): IPSubmissionCheckResult {
     // 前置条件验证
     if (!ip || !/^\d+\.\d+\.\d+\.\d+$/.test(ip)) {
       throw new Error('IP address must be valid IPv4 format');

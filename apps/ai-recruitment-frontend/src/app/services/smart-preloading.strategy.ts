@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { PreloadingStrategy, Route } from '@angular/router';
-import { Observable, of, timer } from 'rxjs';
+import type { PreloadingStrategy, Route } from '@angular/router';
+import type { Observable} from 'rxjs';
+import { of, timer } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { LoggerService } from './shared/logger.service';
 
@@ -40,7 +41,8 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
    * @param load - The load.
    * @returns The Observable<any>.
    */
-  preload(route: Route, load: () => Observable<any>): Observable<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public preload(route: Route, load: () => Observable<any>): Observable<any> {
     const routePath = route.path || 'unknown';
 
     // Skip if already preloaded
@@ -130,10 +132,12 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
 
   private detectNetworkCondition(): void {
     // Use Navigator.connection API if available
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     const connection =
       (navigator as any).connection ||
       (navigator as any).mozConnection ||
       (navigator as any).webkitConnection;
+    /* eslint-enable @typescript-eslint/no-explicit-any */
 
     if (connection) {
       // Consider effective connection type
@@ -180,9 +184,10 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
   }
 
   private trackUserEngagement(): void {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let idleTimer: any;
 
-    const resetIdleTimer = () => {
+    const resetIdleTimer = (): void => {
       clearTimeout(idleTimer);
       this.userEngagement.isIdle = false;
       this.userEngagement.lastInteraction = Date.now();
@@ -217,7 +222,7 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
    * Retrieves preloaded modules.
    * @returns The Set<string>.
    */
-  getPreloadedModules(): Set<string> {
+  public getPreloadedModules(): Set<string> {
     return new Set(this.preloadedModules);
   }
 
@@ -225,7 +230,7 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
    * Retrieves network condition.
    * @returns The string value.
    */
-  getNetworkCondition(): string {
+  public getNetworkCondition(): string {
     return this.networkCondition;
   }
 
@@ -233,7 +238,7 @@ export class SmartPreloadingStrategy implements PreloadingStrategy {
    * Retrieves user engagement.
    * @returns The {clicks: number; prefetches: number; routeFrequency: Record<string, number>; connectionInfo: Record<string, unknown>}.
    */
-  getUserEngagement(): {
+  public getUserEngagement(): {
     clicks: number;
     prefetches: number;
     routeFrequency: Record<string, number>;

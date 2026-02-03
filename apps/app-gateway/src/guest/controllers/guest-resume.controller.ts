@@ -31,10 +31,10 @@ import { Public } from '../../auth/decorators/public.decorator';
 import { GuestGuard } from '../guards/guest.guard';
 import type { RequestWithDeviceId } from '../guards/guest.guard';
 import { OptionalJwtAuthGuard } from '../guards/optional-jwt-auth.guard';
-import { GuestUsageService } from '../services/guest-usage.service';
-import { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
+import type { GuestUsageService } from '../services/guest-usage.service';
+import type { AppGatewayNatsService } from '../../nats/app-gateway-nats.service';
 import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
-import {
+import type {
   GridFsService,
   ResumeFileMetadata,
 } from '../../services/gridfs.service';
@@ -47,11 +47,13 @@ interface GuestResumeUploadDto {
 
 // Lightweight file validator compatible with ParseFilePipe expectations
 const resumeFileValidator: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   isValid: (file?: any) => boolean;
   buildErrorMessage: () => string;
 } = {
   buildErrorMessage: () =>
     'Invalid file type. Only PDF, DOC, and DOCX files are allowed.',
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   isValid: (file?: any): boolean => {
     if (!file) return false;
     const allowedMimeTypes = [
@@ -140,22 +142,25 @@ export class GuestResumeController {
   @ApiTooManyRequestsResponse({
     description: 'Guest usage limit exceeded - feedback code required',
   })
-  async analyzeResume(
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  public async analyzeResume(
     @Req() req: RequestWithDeviceId,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB limit for guests
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           resumeFileValidator as any,
         ],
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),
     )
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     file: any, // Express.Multer.File type fix
     @Body() uploadData: GuestResumeUploadDto,
   ) {
     try {
-      const deviceId = req.deviceId!;
+      const deviceId = req.deviceId ?? '';
       const isAuthenticated = !!req.user;
 
       // For guest users, check usage limit first
@@ -185,6 +190,7 @@ export class GuestResumeController {
       const analysisRequest = {
         analysisId,
         deviceId: isAuthenticated ? undefined : deviceId,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         userId: isAuthenticated ? (req.user as any)?.id : undefined,
         filename: file.originalname,
         fileSize: file.size,
@@ -201,6 +207,7 @@ export class GuestResumeController {
       try {
         const resumeId = analysisId; // reuse analysisId as resumeId for correlation
         const jobId = isAuthenticated
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ? `user-job-${(req.user as any)?.id || 'unknown'}`
           : `guest-job-${deviceId}`;
 
@@ -213,6 +220,7 @@ export class GuestResumeController {
           fileType: 'resume',
           analysisId,
           deviceId: isAuthenticated ? undefined : deviceId,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           userId: isAuthenticated ? (req.user as any)?.id : undefined,
           originalFilename: file.originalname,
           mimeType: file.mimetype,
@@ -378,7 +386,7 @@ export class GuestResumeController {
         {
           success: false,
           error: 'Resume processing failed',
-          message: error.message || 'An unexpected error occurred',
+          message: (error as Error).message || 'An unexpected error occurred',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -493,7 +501,8 @@ export class GuestResumeController {
     name: 'analysisId',
     description: 'Analysis ID returned from upload',
   })
-  async getAnalysisResults(
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  public async getAnalysisResults(
     @Req() _req: RequestWithDeviceId,
     @Param('analysisId') analysisId: string,
   ) {
@@ -602,7 +611,7 @@ export class GuestResumeController {
         {
           success: false,
           error: 'Failed to retrieve analysis results',
-          message: error.message || 'An unexpected error occurred',
+          message: (error as Error).message || 'An unexpected error occurred',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -625,9 +634,10 @@ export class GuestResumeController {
     status: 200,
     description: 'Demo analysis returned successfully',
   })
-  async getDemoAnalysis(@Req() req: RequestWithDeviceId) {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  public async getDemoAnalysis(@Req() req: RequestWithDeviceId) {
     try {
-      const deviceId = req.deviceId!;
+      const deviceId = req.deviceId ?? '';
       const isAuthenticated = !!req.user;
 
       // For guest users, check usage limit
@@ -763,7 +773,7 @@ export class GuestResumeController {
         {
           success: false,
           error: 'Failed to generate demo analysis',
-          message: error.message || 'An unexpected error occurred',
+          message: (error as Error).message || 'An unexpected error occurred',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );

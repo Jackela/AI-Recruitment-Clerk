@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { ConfigService } from '@nestjs/config';
-import { AxiosError } from 'axios';
+import type { HttpService } from '@nestjs/axios';
+import type { ConfigService } from '@nestjs/config';
+import type { AxiosError } from 'axios';
 import { firstValueFrom } from 'rxjs';
-import { IEmbeddingProvider } from '../interfaces/embedding-provider.interface';
+import type { IEmbeddingProvider } from '../interfaces/embedding-provider.interface';
 
 /**
  * Provider that delegates embedding generation to an external API (OpenAI by default).
@@ -38,7 +38,7 @@ export class OpenAIEmbeddingProvider implements IEmbeddingProvider {
    * Generates an embedding for the provided text.
    * @param text - The text to embed.
    */
-  async createEmbedding(text: string): Promise<number[]> {
+  public async createEmbedding(text: string): Promise<number[]> {
     const apiKey = this.configService.get<string>('OPENAI_API_KEY');
 
     if (!apiKey) {

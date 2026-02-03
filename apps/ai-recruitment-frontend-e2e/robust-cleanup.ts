@@ -165,7 +165,7 @@ export class RobustCleanup {
           }
         }
       }
-    } catch (error) {
+    } catch {
       // No processes found or command failed
     }
   }
@@ -189,7 +189,7 @@ export class RobustCleanup {
           console.warn(`⚠️ Failed to kill Unix process ${pid}:`, killError);
         }
       }
-    } catch (error) {
+    } catch {
       // No processes found or command failed
     }
   }

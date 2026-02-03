@@ -55,7 +55,7 @@ export abstract class BaseService {
   /**
    * 统一成功日志模式
    */
-  protected logSuccess(operation: string, _data?: any): void {
+  protected logSuccess(operation: string, _data?: unknown): void {
     this.logger.log(`[${operation}] Operation completed successfully`);
 
     if (this.config.enableMetrics) {
@@ -77,7 +77,7 @@ export abstract class BaseService {
         retryDelay: 1000,
       };
 
-    let lastError: Error;
+    let lastError: Error | undefined;
     let delay = retryConfig.retryDelay;
 
     for (let attempt = 1; attempt <= retryConfig.maxRetries; attempt++) {
@@ -102,8 +102,8 @@ export abstract class BaseService {
       }
     }
 
-    this.handleError(lastError!, `${context} - All retries exhausted`);
-    throw lastError!;
+    this.handleError(lastError ?? new Error('Unknown error during retries'), `${context} - All retries exhausted`);
+    throw lastError ?? new Error('Unknown error during retries');
   }
 
   /**
@@ -147,8 +147,8 @@ export abstract class BaseService {
 
     // 这里可以集成Redis或其他缓存方案
     // For now, implement in-memory cache as example
-    const cached = this.getFromCache(key);
-    if (cached) {
+    const cached = this.getFromCache<T>(key);
+    if (cached !== null) {
       this.logger.debug(`Cache hit for key: ${key}`);
       return cached;
     }
@@ -164,18 +164,18 @@ export abstract class BaseService {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  private recordMetric(type: string, operation: string, data?: any): void {
+  private recordMetric(type: string, operation: string, data?: Record<string, unknown>): void {
     // 实现指标记录逻辑
     // Implementation for metrics recording
     console.log(`Metric: ${type} - ${operation}`, data);
   }
 
-  private getFromCache(_key: string): any {
+  private getFromCache<T>(_key: string): T | null {
     // 实现缓存获取逻辑
     return null;
   }
 
-  private setCache(_key: string, _value: any, _ttl: number): void {
+  private setCache<T>(_key: string, _value: T, _ttl: number): void {
     // 实现缓存设置逻辑
   }
 }
@@ -202,7 +202,7 @@ export abstract class BaseRepository<T> extends BaseService {
    * @param data - The data.
    * @returns A promise that resolves to T.
    */
-  async create(data: Partial<T>): Promise<T> {
+  public async create(data: Partial<T>): Promise<T> {
     return this.withTiming(() => this.createEntity(data), 'create');
   }
 
@@ -211,7 +211,7 @@ export abstract class BaseRepository<T> extends BaseService {
    * @param id - The id.
    * @returns A promise that resolves to T | null.
    */
-  async findOne(id: string): Promise<T | null> {
+  public async findOne(id: string): Promise<T | null> {
     return this.withCache(`entity:${id}`, () => this.findById(id));
   }
 
@@ -221,7 +221,7 @@ export abstract class BaseRepository<T> extends BaseService {
    * @param data - The data.
    * @returns A promise that resolves to T.
    */
-  async update(id: string, data: Partial<T>): Promise<T> {
+  public async update(id: string, data: Partial<T>): Promise<T> {
     return this.withTiming(() => this.updateEntity(id, data), 'update');
   }
 
@@ -230,7 +230,7 @@ export abstract class BaseRepository<T> extends BaseService {
    * @param id - The id.
    * @returns A promise that resolves to boolean value.
    */
-  async delete(id: string): Promise<boolean> {
+  public async delete(id: string): Promise<boolean> {
     return this.withTiming(() => this.deleteEntity(id), 'delete');
   }
 }

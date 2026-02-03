@@ -1,4 +1,4 @@
-import { ResumeDTO } from '../models/resume.dto';
+import type { ResumeDTO } from '../models/resume.dto';
 
 /**
  * @description NATS 事件: job.resume.submitted

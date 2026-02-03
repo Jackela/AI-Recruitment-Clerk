@@ -1,12 +1,14 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import type { OnInit, OnDestroy} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, Subject } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DashboardCardComponent } from '../../../components/shared/dashboard-card/dashboard-card.component';
-import { AppState } from '../../../store/app.state';
-import { JobListItem } from '../../../store/jobs/job.model';
+import type { AppState } from '../../../store/app.state';
+import type { JobListItem } from '../../../store/jobs/job.model';
 import * as JobActions from '../../../store/jobs/job.actions';
 import * as JobSelectors from '../../../store/jobs/job.selectors';
 
@@ -22,24 +24,27 @@ import * as JobSelectors from '../../../store/jobs/job.selectors';
 })
 export class JobsListComponent implements OnInit, OnDestroy {
   // Using memoized selectors for better performance
-  jobs$: Observable<JobListItem[]>;
-  loading$: Observable<boolean>;
-  error$: Observable<string | null>;
-  jobsStatistics$: Observable<any>;
-  activeJobs$: Observable<JobListItem[]>;
+  public jobs$: Observable<JobListItem[]>;
+  public loading$: Observable<boolean>;
+  public error$: Observable<string | null>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public jobsStatistics$: Observable<any>;
+  public activeJobs$: Observable<JobListItem[]>;
 
   // WebSocket-related observables
-  jobsWithProgress$: Observable<Array<JobListItem & { progress: any }>>;
-  webSocketConnected$: Observable<boolean>;
-  webSocketStatus$: Observable<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public jobsWithProgress$: Observable<Array<JobListItem & { progress: any }>>;
+  public webSocketConnected$: Observable<boolean>;
+  public webSocketStatus$: Observable<
     'connecting' | 'connected' | 'disconnected' | 'error'
   >;
-  jobManagementStateWithWebSocket$: Observable<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public jobManagementStateWithWebSocket$: Observable<any>;
 
-  private destroy$ = new Subject<void>();
-  private sessionId = `jobs-list-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  private readonly destroy$ = new Subject<void>();
+  private readonly sessionId = `jobs-list-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-  private store = inject(Store<AppState>);
+  private readonly store = inject(Store<AppState>);
 
   /**
    * Initializes a new instance of the Jobs List Component.
@@ -70,7 +75,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.loadJobs();
     this.initializeWebSocketConnection();
     this.subscribeToJobUpdates();
@@ -79,7 +84,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     // Clean up subscriptions and WebSocket connections
     this.destroy$.next();
     this.destroy$.complete();
@@ -88,14 +93,14 @@ export class JobsListComponent implements OnInit, OnDestroy {
   /**
    * Loads jobs.
    */
-  loadJobs(): void {
+  public loadJobs(): void {
     this.store.dispatch(JobActions.loadJobs());
   }
 
   /**
    * Performs the on refresh operation.
    */
-  onRefresh(): void {
+  public onRefresh(): void {
     this.loadJobs();
   }
 
@@ -105,7 +110,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
    * @param job - The job.
    * @returns The string value.
    */
-  trackByJobId(_index: number, job: JobListItem): string {
+  public trackByJobId(_index: number, job: JobListItem): string {
     return job.id;
   }
 
@@ -162,7 +167,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
    * @param status - The job status
    * @returns CSS class string
    */
-  getStatusBadgeClass(status: string): string {
+  public getStatusBadgeClass(status: string): string {
     switch (status) {
       case 'completed':
         return 'badge-success';
@@ -186,8 +191,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
    * @param jobWithProgress - Job with progress information
    * @returns Progress percentage (0-100) or null if no progress
    */
-  getJobProgress(
-    jobWithProgress: JobListItem & { progress: any },
+  public getJobProgress(
+    jobWithProgress: JobListItem & { progress: { progress?: number; step?: string } | null },
   ): number | null {
     return jobWithProgress.progress?.progress || null;
   }
@@ -197,8 +202,8 @@ export class JobsListComponent implements OnInit, OnDestroy {
    * @param jobWithProgress - Job with progress information
    * @returns Current step description or null
    */
-  getCurrentStep(
-    jobWithProgress: JobListItem & { progress: any },
+  public getCurrentStep(
+    jobWithProgress: JobListItem & { progress: { progress?: number; step?: string } | null },
   ): string | null {
     return jobWithProgress.progress?.step || null;
   }
@@ -208,7 +213,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
    * @param job - The job to check
    * @returns True if job is in processing state
    */
-  isJobProcessing(job: JobListItem): boolean {
+  public isJobProcessing(job: JobListItem): boolean {
     return job.status === 'processing';
   }
 
@@ -217,7 +222,7 @@ export class JobsListComponent implements OnInit, OnDestroy {
    * @param status - The job status
    * @returns Translated status string
    */
-  getStatusText(status: string): string {
+  public getStatusText(status: string): string {
     const statusMap: Record<string, string> = {
       processing: '处理中',
       completed: '已完成',

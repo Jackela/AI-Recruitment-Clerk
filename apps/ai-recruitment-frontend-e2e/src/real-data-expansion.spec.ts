@@ -1,7 +1,13 @@
 import { test, expect } from './fixtures';
+import type { Page } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+
+// Custom delay helper to replace page.waitForTimeout
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 // ES module compatible __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -117,7 +123,11 @@ function sanitizeTestName(filename: string): string {
 /**
  * Enhanced error logging with context
  */
-function logTestContext(filename: string, stage: string, details?: any) {
+function logTestContext(
+  filename: string,
+  stage: string,
+  details?: Record<string, unknown>,
+) {
   const timestamp = new Date().toISOString();
   console.log(
     `[${timestamp}] 🔍 ${filename} | ${stage}${details ? ` | ${JSON.stringify(details)}` : ''}`,
@@ -128,7 +138,7 @@ function logTestContext(filename: string, stage: string, details?: any) {
  * Comprehensive UAT workflow execution
  */
 async function executeUATWorkflow(
-  page: any,
+  page: Page,
   filename: string,
   jdContent: string,
 ) {
@@ -141,7 +151,7 @@ async function executeUATWorkflow(
     // Step 1: Navigate to coach page with timeout monitoring
     const navigationStart = Date.now();
     await page.goto(PATHS.coachPath);
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
     const navigationTime = Date.now() - navigationStart;
 
     if (navigationTime > PERFORMANCE_THRESHOLDS.maxLoadTime) {
@@ -238,7 +248,7 @@ async function executeUATWorkflow(
       });
 
       expect(response.status()).toBe(200);
-    } catch (error) {
+    } catch {
       logTestContext(
         filename,
         'API response timeout - continuing with UI validation',
@@ -249,7 +259,7 @@ async function executeUATWorkflow(
     }
 
     // Step 6: Wait for analysis completion with progressive checks
-    await page.waitForTimeout(TEST_CONFIG.retryDelay);
+    await delay(TEST_CONFIG.retryDelay);
 
     // Step 7: Comprehensive results validation
     logTestContext(filename, 'Validating diagnostic report display');
@@ -301,7 +311,7 @@ async function executeUATWorkflow(
   } catch (error) {
     const totalTime = Date.now() - startTime;
     logTestContext(filename, 'UAT workflow failed', {
-      error: error.message,
+      error: (error as Error).message,
       totalTime,
     });
     throw error;
@@ -355,9 +365,7 @@ test.describe('Real Data Expansion - Dynamic PDF Resume Testing', () => {
 
   // Dynamically generate test cases for each PDF file
   for (const filename of resumeFiles) {
-    const testName = sanitizeTestName(filename);
-
-    test(`Dynamic UAT: ${testName} (${filename})`, async ({ page }) => {
+    test(`UAT workflow for ${sanitizeTestName(filename)}`, async ({ page }) => {
       console.log(`\n🚀 Starting test for: ${filename}`);
       console.log(
         `📊 File ${resumeFiles.indexOf(filename) + 1} of ${resumeFiles.length}`,
@@ -373,19 +381,16 @@ test.describe('Real Data Expansion - Dynamic PDF Resume Testing', () => {
         expect(result.success).toBe(true);
         expect(result.metrics.totalTime).toBeLessThan(55000); // Under 55 seconds total
       } catch (error) {
-        console.error(`❌ Test failed for ${filename}:`, error.message);
+        console.error(`❌ Test failed for ${filename}:`, (error as Error).message);
 
         // Capture additional debug information
         try {
           await page.screenshot({
-            path: `test-results/real-data-expansion-${testName}-failure.png`,
+            path: `test-results/real-data-expansion-${sanitizeTestName(filename)}-failure.png`,
             fullPage: true,
           });
-        } catch (screenshotError) {
-          console.warn(
-            'Failed to capture failure screenshot:',
-            screenshotError.message,
-          );
+        } catch {
+          console.warn('Failed to capture failure screenshot');
         }
 
         throw error;
@@ -394,7 +399,7 @@ test.describe('Real Data Expansion - Dynamic PDF Resume Testing', () => {
   }
 
   // Summary test to validate overall test suite execution
-  test('Test Suite Summary and Validation', async ({ page }) => {
+  test('Suite summary and data validation', async () => {
     console.log(`\n📋 Test Suite Summary:`);
     console.log(`📁 Total PDF files tested: ${resumeFiles.length}`);
     console.log(`📄 Job description: ${path.basename(PATHS.jdFile)}`);

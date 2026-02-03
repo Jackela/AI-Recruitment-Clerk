@@ -3,17 +3,18 @@
  * Ensures all exceptions are properly formatted and logged
  */
 
-import {
+import type {
   ExceptionFilter,
+  ArgumentsHost} from '@nestjs/common';
+import {
   Catch,
-  ArgumentsHost,
   HttpException,
   HttpStatus,
   Logger,
   Inject,
   Optional,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { EnhancedAppException } from '../errors/enhanced-error-types';
 import { StandardizedErrorResponseFormatter } from '../errors/error-response-formatter';
 import { ErrorHandler } from '../common/error-handling.patterns';
@@ -39,7 +40,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
    * @param exception - The exception.
    * @param host - The host.
    */
-  catch(exception: unknown, host: ArgumentsHost): void {
+  public catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
@@ -94,6 +95,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   }
 
   private convertAppExceptionToEnhanced(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     appError: any,
     context: string,
   ): EnhancedAppException {
@@ -102,6 +104,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     const enhancedError = new EnhancedAppException(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (appError.errorDetails?.type as any) || 'SYSTEM_ERROR',
       appError.errorDetails?.code || 'UNKNOWN_ERROR',
       appError.message,
@@ -112,6 +115,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     // Set appropriate severity
     const severity = appError.errorDetails?.severity || 'high';
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     enhancedError.withSeverity(severity as any);
 
     return enhancedError;
@@ -123,6 +127,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const errorResponse = httpError.getResponse();
     const httpStatus = httpError.getStatus();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let errorDetails: any = {};
     if (typeof errorResponse === 'object') {
       errorDetails = errorResponse;
@@ -131,6 +136,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     const enhancedError = new EnhancedAppException(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.mapHttpStatusToErrorType(httpStatus) as any,
       errorDetails.code || 'HTTP_EXCEPTION',
       errorDetails.message || httpError.message,
@@ -141,6 +147,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     // Set severity based on HTTP status
     const severity = this.mapHttpStatusToSeverity(httpStatus);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     enhancedError.withSeverity(severity as any);
 
     return enhancedError;
@@ -152,6 +159,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const errorMessage = this.extractErrorMessage(exception);
 
     const enhancedError = new EnhancedAppException(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       'SYSTEM_ERROR' as any,
       'UNKNOWN_EXCEPTION',
       `An unexpected error occurred: ${errorMessage}`,
@@ -163,6 +171,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       { source: 'GlobalExceptionFilter' },
     );
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     enhancedError.withSeverity('critical' as any);
 
     return enhancedError;
@@ -174,6 +183,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     if (exception && typeof exception === 'object') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const errorObj = exception as any;
 
       if (errorObj.message) {

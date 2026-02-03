@@ -1,7 +1,10 @@
-import { Injectable, OnDestroy, inject } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import type { OnDestroy} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import type { Observable} from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { filter, takeUntil, map } from 'rxjs/operators';
-import { io, Socket } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 import { ToastService } from './toast.service';
 
 /**
@@ -123,7 +126,7 @@ export class WebSocketService implements OnDestroy {
   /**
    * 连接到WebSocket服务器
    */
-  connect(sessionId: string): Observable<WebSocketMessage> {
+  public connect(sessionId: string): Observable<WebSocketMessage> {
     this.disconnect(); // 确保没有现有连接
 
     this.connectionStatus$.next('connecting');
@@ -139,7 +142,7 @@ export class WebSocketService implements OnDestroy {
       });
 
       this.setupSocketHandlers(sessionId);
-    } catch (error) {
+    } catch (_error) {
       this.toastService.error('网络连接失败，请检查您的网络');
       this.connectionStatus$.next('error');
     }
@@ -153,7 +156,7 @@ export class WebSocketService implements OnDestroy {
   /**
    * 监听特定类型的消息
    */
-  onMessage(
+  public onMessage(
     type: WebSocketMessage['type'],
     sessionId: string,
   ): Observable<WebSocketMessage> {
@@ -166,9 +169,10 @@ export class WebSocketService implements OnDestroy {
   /**
    * 监听进度更新
    */
-  onProgress(sessionId: string): Observable<ProgressUpdate> {
+  public onProgress(sessionId: string): Observable<ProgressUpdate> {
     return this.onMessage('progress', sessionId).pipe(
       filter((msg) => !!msg.data),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       map((msg: any) => msg.data as ProgressUpdate),
       takeUntil(this.destroy$),
     ) as Observable<ProgressUpdate>;
@@ -177,9 +181,10 @@ export class WebSocketService implements OnDestroy {
   /**
    * 监听完成事件
    */
-  onCompletion(sessionId: string): Observable<CompletionData> {
+  public onCompletion(sessionId: string): Observable<CompletionData> {
     return this.onMessage('completed', sessionId).pipe(
       filter((msg) => !!msg.data),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       map((msg: any) => msg.data as CompletionData),
       takeUntil(this.destroy$),
     ) as Observable<CompletionData>;
@@ -188,9 +193,10 @@ export class WebSocketService implements OnDestroy {
   /**
    * 监听错误事件
    */
-  onError(sessionId: string): Observable<ErrorData> {
+  public onError(sessionId: string): Observable<ErrorData> {
     return this.onMessage('error', sessionId).pipe(
       filter((msg) => !!msg.data),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       map((msg: any) => msg.data as ErrorData),
       takeUntil(this.destroy$),
     ) as Observable<ErrorData>;
@@ -199,7 +205,7 @@ export class WebSocketService implements OnDestroy {
   /**
    * 获取连接状态
    */
-  getConnectionStatus(): Observable<
+  public getConnectionStatus(): Observable<
     'connecting' | 'connected' | 'disconnected' | 'error'
   > {
     return this.connectionStatus$.asObservable();
@@ -208,7 +214,7 @@ export class WebSocketService implements OnDestroy {
   /**
    * 发送消息到服务器
    */
-  sendMessage(event: string, data: WebSocketMessageData): void {
+  public sendMessage(event: string, data: WebSocketMessageData): void {
     if (this.socket && this.socket.connected) {
       this.socket.emit(event, data);
     } else {
@@ -219,7 +225,7 @@ export class WebSocketService implements OnDestroy {
   /**
    * 断开连接
    */
-  disconnect(): void {
+  public disconnect(): void {
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
@@ -247,7 +253,7 @@ export class WebSocketService implements OnDestroy {
       try {
         message.timestamp = new Date(message.timestamp);
         this.messages$.next(message);
-      } catch (error) {
+      } catch (_error) {
         // Silent fail - message parsing error
       }
     });
@@ -346,7 +352,7 @@ export class WebSocketService implements OnDestroy {
    * @param jobId - The job ID to subscribe to
    * @param organizationId - The organization ID for multi-tenant security
    */
-  subscribeToJob(jobId: string, organizationId?: string): void {
+  public subscribeToJob(jobId: string, organizationId?: string): void {
     if (this.socket && this.socket.connected) {
       this.socket.emit('subscribe_job', { jobId, organizationId });
     } else {
@@ -358,7 +364,7 @@ export class WebSocketService implements OnDestroy {
    * Unsubscribe from updates for a specific job.
    * @param jobId - The job ID to unsubscribe from
    */
-  unsubscribeFromJob(jobId: string): void {
+  public unsubscribeFromJob(jobId: string): void {
     if (this.socket && this.socket.connected) {
       this.socket.emit('unsubscribe_job', { jobId });
     }
@@ -369,7 +375,7 @@ export class WebSocketService implements OnDestroy {
    * @param jobId - Optional job ID to filter by specific job
    * @returns Observable of job update events
    */
-  onJobUpdated(jobId?: string): Observable<JobUpdateEvent> {
+  public onJobUpdated(jobId?: string): Observable<JobUpdateEvent> {
     return this.jobUpdates$.asObservable().pipe(
       filter((update) => (jobId ? update.jobId === jobId : true)),
       takeUntil(this.destroy$),
@@ -381,7 +387,7 @@ export class WebSocketService implements OnDestroy {
    * @param jobId - Optional job ID to filter by specific job
    * @returns Observable of job progress events
    */
-  onJobProgress(jobId?: string): Observable<JobProgressEvent> {
+  public onJobProgress(jobId?: string): Observable<JobProgressEvent> {
     return this.jobProgress$.asObservable().pipe(
       filter((progress) => (jobId ? progress.jobId === jobId : true)),
       takeUntil(this.destroy$),
@@ -395,7 +401,7 @@ export class WebSocketService implements OnDestroy {
    * @param organizationId - Organization ID for multi-tenant security
    * @returns Observable of WebSocket messages
    */
-  connectWithJobSubscription(
+  public connectWithJobSubscription(
     sessionId: string,
     jobId?: string,
     organizationId?: string,
@@ -420,7 +426,7 @@ export class WebSocketService implements OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
     this.disconnect();

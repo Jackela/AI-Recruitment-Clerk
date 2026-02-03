@@ -1,9 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app/app.module';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as _fs from 'fs';
+import * as _path from 'path';
 
 /**
  * 🚀 PRODUCTION READINESS VALIDATION TESTS
@@ -24,7 +25,7 @@ describe('🚀 Production Readiness Validation Tests', () => {
   let app: INestApplication;
   let adminToken: string;
   let userToken: string;
-  let testUserId: string;
+  let _testUserId: string;
   let testOrganizationId: string;
 
   const testAdmin = {
@@ -363,9 +364,9 @@ describe('🚀 Production Readiness Validation Tests', () => {
         for (let i = 0; i < 5; i++) {
           const startTime = Date.now();
 
-          let response;
+          let _response;
           if (endpoint.method === 'POST') {
-            response = await request(app.getHttpServer())
+            _response = await request(app.getHttpServer())
               .post(endpoint.path)
               .set(
                 'Authorization',
@@ -373,7 +374,7 @@ describe('🚀 Production Readiness Validation Tests', () => {
               )
               .send(endpoint.body || {});
           } else {
-            response = await request(app.getHttpServer())
+            const _response = await request(app.getHttpServer())
               .get(endpoint.path)
               .set(
                 'Authorization',
@@ -763,7 +764,7 @@ describe('🚀 Production Readiness Validation Tests', () => {
           if (result.success) {
             passingServices++;
           }
-        } catch (error) {
+        } catch {
           console.log(`   ${serviceTest.name}: Error occurred ❌`);
         }
       }
@@ -1007,7 +1008,7 @@ describe('🚀 Production Readiness Validation Tests', () => {
         try {
           await scenario.test();
           console.log(`   ${scenario.name}: Executed ✅`);
-        } catch (error) {
+        } catch {
           console.log(`   ${scenario.name}: Error occurred (expected) ⚠️`);
         }
       }

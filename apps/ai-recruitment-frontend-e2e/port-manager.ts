@@ -197,7 +197,7 @@ export class PortManager {
         const processInfo = await this.getProcessOnPort(port);
         status.processId = processInfo.pid;
         status.processName = processInfo.name;
-      } catch (error) {
+      } catch {
         // Process info not available
       }
     }
@@ -343,7 +343,7 @@ export class PortManager {
             }
 
             if (killedAny) break;
-          } catch (netstatError) {
+          } catch {
             if (attempt === 2) {
               console.log(
                 `ℹ️ No process found on port ${port} after ${attempt + 1} attempts`,
@@ -403,7 +403,7 @@ export class PortManager {
             }
 
             if (killedAny) break;
-          } catch (lsofError) {
+          } catch {
             if (attempt === 2) {
               console.log(
                 `ℹ️ No process found on port ${port} after ${attempt + 1} attempts`,
@@ -440,7 +440,7 @@ export class PortManager {
    */
   private async waitForPortRelease(
     port: number,
-    timeoutMs: number = 10000,
+    timeoutMs = 10000,
   ): Promise<boolean> {
     const startTime = Date.now();
 
@@ -593,7 +593,7 @@ export class PortManager {
    */
   async waitForService(
     serviceName: string,
-    timeoutMs: number = 30000,
+    timeoutMs = 30000,
   ): Promise<boolean> {
     const config = this.serverConfigs.get(serviceName);
     const port = this.allocatedPorts.get(serviceName);
@@ -633,7 +633,7 @@ export class PortManager {
           console.log(`✅ ${config.name} is ready after ${attempts} attempts`);
           return true;
         }
-      } catch (error) {
+      } catch {
         // Service not ready yet
       }
 

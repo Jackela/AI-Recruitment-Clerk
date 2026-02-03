@@ -7,7 +7,7 @@ export class ReportPromptTemplates {
   /**
    * Job Description Extraction Template
    */
-  static getJobDescriptionPrompt(jdText: string): string {
+  public static getJobDescriptionPrompt(jdText: string): string {
     return `
 Analyze this job description and extract structured information with high accuracy.
 
@@ -51,7 +51,7 @@ Return only valid JSON matching the specified schema.`;
   /**
    * Resume Parsing Template (Text-based)
    */
-  static getResumeParsingPrompt(resumeText: string): string {
+  public static getResumeParsingPrompt(resumeText: string): string {
     return `
 Extract comprehensive information from this resume with maximum accuracy.
 
@@ -99,7 +99,7 @@ Return only valid JSON matching the specified schema.`;
   /**
    * Resume Vision Parsing Template
    */
-  static getResumeVisionPrompt(): string {
+  public static getResumeVisionPrompt(): string {
     return `
 Carefully analyze this resume document image and extract all visible information with high precision.
 
@@ -134,7 +134,7 @@ Return only valid JSON matching the specified schema.`;
   /**
    * Report Generation Template
    */
-  static getReportGenerationPrompt(context: {
+  public static getReportGenerationPrompt(context: {
     jobTitle: string;
     candidateCount: number;
     hasRequirements: boolean;
@@ -197,7 +197,7 @@ export class ReportPromptBuilder {
    * @param options - The options.
    * @returns The string value.
    */
-  static buildWithOptions(
+  public static buildWithOptions(
     basePrompt: string,
     options: ReportPromptOptions = {},
   ): string {
@@ -225,7 +225,7 @@ export class ReportPromptBuilder {
    * @param schema - The schema.
    * @returns The string value.
    */
-  static addJsonSchemaInstruction(prompt: string, schema: string): string {
+  public static addJsonSchemaInstruction(prompt: string, schema: string): string {
     return `${prompt}
 
 RESPONSE FORMAT:

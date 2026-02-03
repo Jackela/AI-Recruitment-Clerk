@@ -1,4 +1,4 @@
-import { TableColumn } from '../../app/components/shared/data-table/data-table.component';
+import type { TableColumn } from '../../app/components/shared/data-table/data-table.component';
 
 /**
  * Timesheet-specific table column configuration interface
@@ -309,6 +309,6 @@ export function getResponsiveColumns(screenWidth: number): TimesheetColumn[] {
 /**
  * Helper function to get view configuration
  */
-export function getViewConfig(viewType: keyof typeof TIMESHEET_VIEW_CONFIGS) {
+export function getViewConfig(viewType: keyof typeof TIMESHEET_VIEW_CONFIGS): typeof TIMESHEET_VIEW_CONFIGS[keyof typeof TIMESHEET_VIEW_CONFIGS] {
   return TIMESHEET_VIEW_CONFIGS[viewType];
 }

@@ -1,5 +1,5 @@
 import { AnalyticsController } from './analytics.controller';
-import { AnalyticsIntegrationService } from './analytics-integration.service';
+import type { AnalyticsIntegrationService } from './analytics-integration.service';
 import { Permission } from '@ai-recruitment-clerk/user-management-domain';
 
 const createServiceMock = () => ({

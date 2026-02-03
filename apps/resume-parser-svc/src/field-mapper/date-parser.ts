@@ -173,7 +173,7 @@ export class DateParser {
   /**
    * Parse a date string and return structured date information
    */
-  static parseDate(dateString: string): ParsedDate {
+  public static parseDate(dateString: string): ParsedDate {
     if (!dateString || typeof dateString !== 'string') {
       return {
         date: null,
@@ -242,7 +242,7 @@ export class DateParser {
   /**
    * Calculate duration between two dates
    */
-  static calculateDuration(
+  public static calculateDuration(
     startDate: ParsedDate,
     endDate: ParsedDate,
   ): DateRange['duration'] {
@@ -272,7 +272,7 @@ export class DateParser {
   /**
    * Create a date range from start and end date strings
    */
-  static createDateRange(startDateStr: string, endDateStr: string): DateRange {
+  public static createDateRange(startDateStr: string, endDateStr: string): DateRange {
     const start = this.parseDate(startDateStr);
     const end = this.parseDate(endDateStr);
     const duration = this.calculateDuration(start, end);
@@ -287,7 +287,7 @@ export class DateParser {
   /**
    * Normalize a date to ISO 8601 format
    */
-  static normalizeToISO(dateString: string): string {
+  public static normalizeToISO(dateString: string): string {
     const parsed = this.parseDate(dateString);
 
     if (parsed.isPresent) {
@@ -309,7 +309,7 @@ export class DateParser {
   /**
    * Check if two date ranges overlap
    */
-  static checkDateRangeOverlap(range1: DateRange, range2: DateRange): boolean {
+  public static checkDateRangeOverlap(range1: DateRange, range2: DateRange): boolean {
     const start1 = range1.start.date;
     const end1 = range1.end.isPresent ? new Date() : range1.end.date;
     const start2 = range2.start.date;
@@ -325,7 +325,7 @@ export class DateParser {
   /**
    * Validate if a date is reasonable for a resume
    */
-  static isReasonableDate(parsedDate: ParsedDate): boolean {
+  public static isReasonableDate(parsedDate: ParsedDate): boolean {
     if (!parsedDate.date && !parsedDate.isPresent) {
       return false;
     }
@@ -348,7 +348,7 @@ export class DateParser {
   /**
    * Get the earliest and latest dates from a list of date ranges
    */
-  static getDateBounds(ranges: DateRange[]): {
+  public static getDateBounds(ranges: DateRange[]): {
     earliest: Date | null;
     latest: Date | null;
   } {
@@ -415,15 +415,16 @@ export class DateParser {
         case 'MM.YYYY':
           return new Date(parseInt(match[2]), parseInt(match[1]) - 1, 1);
 
-        case 'Month YYYY':
+        case 'Month YYYY': {
           const monthName = match[1].toLowerCase();
           const monthNum = this.MONTH_MAP[monthName];
           if (monthNum) {
             return new Date(parseInt(match[2]), monthNum - 1, 1);
           }
           break;
+        }
 
-        case 'Month DD, YYYY':
+        case 'Month DD, YYYY': {
           const fullMonthName = match[1].toLowerCase();
           const fullMonthNum = this.MONTH_MAP[fullMonthName];
           if (fullMonthNum) {
@@ -434,8 +435,9 @@ export class DateParser {
             );
           }
           break;
+        }
 
-        case 'Mon DD, YYYY':
+        case 'Mon DD, YYYY': {
           const abbrevMonth = match[1].toLowerCase();
           const abbrevMonthNum = this.MONTH_MAP[abbrevMonth];
           if (abbrevMonthNum) {
@@ -446,18 +448,21 @@ export class DateParser {
             );
           }
           break;
+        }
 
-        case 'Q# YYYY':
+        case 'Q# YYYY': {
           const quarter = parseInt(match[1]);
           const year = parseInt(match[2]);
           return new Date(year, (quarter - 1) * 3, 1);
+        }
 
-        case 'YYYY Q#':
+        case 'YYYY Q#': {
           const yearQ = parseInt(match[1]);
           const quarterQ = parseInt(match[2]);
           return new Date(yearQ, (quarterQ - 1) * 3, 1);
+        }
       }
-    } catch (error) {
+    } catch (_error) {
       // Parsing failed
     }
 

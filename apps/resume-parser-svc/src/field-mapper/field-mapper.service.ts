@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { FieldMappingResult } from '../dto/resume-parsing.dto';
+import type { FieldMappingResult } from '../dto/resume-parsing.dto';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 import { SkillsTaxonomy } from '@ai-recruitment-clerk/candidate-scoring-domain';
 import { DateParser } from './date-parser';
@@ -17,7 +17,7 @@ export class FieldMapperService {
    * @param rawLlmOutput - The raw llm output.
    * @returns A promise that resolves to ResumeDTO.
    */
-  async normalizeToResumeDto(rawLlmOutput: any): Promise<ResumeDTO> {
+  public async normalizeToResumeDto(rawLlmOutput: Record<string, unknown>): Promise<ResumeDTO> {
     try {
       this.logger.debug(
         'Starting normalization of raw LLM output to ResumeDTO',
@@ -29,19 +29,23 @@ export class FieldMapperService {
 
       // Normalize contact information
       const contactInfo = await this.mapContactInfo(
-        rawLlmOutput.contactInfo || {},
+        (rawLlmOutput.contactInfo as Record<string, unknown>) || {},
       );
 
       // Normalize skills
-      const skills = await this.normalizeSkills(rawLlmOutput.skills || []);
+      const skills = await this.normalizeSkills(
+        (rawLlmOutput.skills as unknown[]) || [],
+      );
 
       // Normalize work experience
       const workExperience = await this.mapWorkExperience(
-        rawLlmOutput.workExperience || [],
+        (rawLlmOutput.workExperience as Record<string, unknown>[]) || [],
       );
 
       // Normalize education
-      const education = await this.mapEducation(rawLlmOutput.education || []);
+      const education = await this.mapEducation(
+        (rawLlmOutput.education as Record<string, unknown>[]) || [],
+      );
 
       const normalizedResume: ResumeDTO = {
         contactInfo,
@@ -63,8 +67,8 @@ export class FieldMapperService {
    * @param rawLlmOutput - The raw llm output.
    * @returns A promise that resolves to FieldMappingResult.
    */
-  async normalizeWithValidation(
-    rawLlmOutput: any,
+  public async normalizeWithValidation(
+    rawLlmOutput: Record<string, unknown>,
   ): Promise<FieldMappingResult> {
     try {
       this.logger.debug('Starting normalization with validation');
@@ -105,7 +109,7 @@ export class FieldMapperService {
    * @param resumeDto - The resume dto.
    * @returns A promise that resolves to an array of string value.
    */
-  async validateResumeData(resumeDto: ResumeDTO): Promise<string[]> {
+  public async validateResumeData(resumeDto: ResumeDTO): Promise<string[]> {
     const errors: string[] = [];
 
     try {
@@ -213,7 +217,7 @@ export class FieldMapperService {
    * @param rawContactInfo - The raw contact info.
    * @returns A promise that resolves to ResumeDTO['contactInfo'].
    */
-  async mapContactInfo(rawContactInfo: any): Promise<ResumeDTO['contactInfo']> {
+  public async mapContactInfo(rawContactInfo: Record<string, unknown>): Promise<ResumeDTO['contactInfo']> {
     try {
       if (!rawContactInfo || typeof rawContactInfo !== 'object') {
         return { name: null, email: null, phone: null };
@@ -240,8 +244,8 @@ export class FieldMapperService {
    * @param rawWorkExperience - The raw work experience.
    * @returns A promise that resolves to ResumeDTO['workExperience'].
    */
-  async mapWorkExperience(
-    rawWorkExperience: any[],
+  public async mapWorkExperience(
+    rawWorkExperience: Record<string, unknown>[],
   ): Promise<ResumeDTO['workExperience']> {
     try {
       if (!Array.isArray(rawWorkExperience)) {
@@ -266,8 +270,8 @@ export class FieldMapperService {
         );
 
         // Normalize dates
-        const startDate = await this.normalizeDates(rawExp.startDate || '');
-        const endDate = await this.normalizeDates(rawExp.endDate || '');
+        const startDate = await this.normalizeDates(String(rawExp.startDate || ''));
+        const endDate = await this.normalizeDates(String(rawExp.endDate || ''));
 
         // Only include if we have minimum required fields
         if (company && position) {
@@ -305,7 +309,7 @@ export class FieldMapperService {
    * @param rawEducation - The raw education.
    * @returns A promise that resolves to ResumeDTO['education'].
    */
-  async mapEducation(rawEducation: any[]): Promise<ResumeDTO['education']> {
+  public async mapEducation(rawEducation: Record<string, unknown>[]): Promise<ResumeDTO['education']> {
     try {
       if (!Array.isArray(rawEducation)) {
         this.logger.warn(
@@ -325,7 +329,7 @@ export class FieldMapperService {
         const school = this.normalizeString(
           rawEdu.school || rawEdu.institution || rawEdu.university,
         );
-        const degree = this.normalizeDegree(rawEdu.degree || '');
+        const degree = this.normalizeDegree(String(rawEdu.degree || ''));
         const major = this.normalizeString(
           rawEdu.major || rawEdu.field || rawEdu.fieldOfStudy,
         );
@@ -352,14 +356,15 @@ export class FieldMapperService {
    * @param rawSkills - The raw skills.
    * @returns A promise that resolves to an array of string value.
    */
-  async normalizeSkills(rawSkills: any[]): Promise<string[]> {
+  public async normalizeSkills(rawSkills: unknown[]): Promise<string[]> {
     try {
-      if (!Array.isArray(rawSkills)) {
+      let skillsArray = rawSkills;
+      if (!Array.isArray(skillsArray)) {
         this.logger.warn('Raw skills is not an array, attempting to convert');
 
         // Try to handle string input (comma-separated skills)
-        if (typeof rawSkills === 'string') {
-          rawSkills = (rawSkills as string)
+        if (typeof skillsArray === 'string') {
+          skillsArray = (skillsArray as string)
             .split(/[,;\n]/)
             .map((s) => s.trim())
             .filter((s) => s.length > 0);
@@ -371,7 +376,7 @@ export class FieldMapperService {
       const normalizedSkills = new Set<string>();
       const skillGroups = new Set<string>();
 
-      for (const rawSkill of rawSkills) {
+      for (const rawSkill of skillsArray) {
         if (!rawSkill || typeof rawSkill !== 'string') {
           continue;
         }
@@ -395,10 +400,10 @@ export class FieldMapperService {
       }
 
       // Convert to array and sort by importance
-      const skillsArray = Array.from(normalizedSkills);
+      const sortedSkillsArray = Array.from(normalizedSkills);
 
       // Sort skills by category importance and alphabetically within categories
-      skillsArray.sort((a, b) => {
+      sortedSkillsArray.sort((a, b) => {
         const aInfo = SkillsTaxonomy.getSkillInfo(a);
         const bInfo = SkillsTaxonomy.getSkillInfo(b);
 
@@ -416,10 +421,10 @@ export class FieldMapperService {
       });
 
       // Limit to reasonable number of skills (max 50)
-      const limitedSkills = skillsArray.slice(0, 50);
+      const limitedSkills = sortedSkillsArray.slice(0, 50);
 
       this.logger.debug(
-        `Normalized ${rawSkills.length} raw skills to ${limitedSkills.length} normalized skills across ${skillGroups.size} categories`,
+        `Normalized ${skillsArray.length} raw skills to ${limitedSkills.length} normalized skills across ${skillGroups.size} categories`,
       );
       return limitedSkills;
     } catch (error) {
@@ -433,7 +438,7 @@ export class FieldMapperService {
    * @param dateString - The date string.
    * @returns A promise that resolves to string value.
    */
-  async normalizeDates(dateString: string): Promise<string> {
+  public async normalizeDates(dateString: string): Promise<string> {
     try {
       if (!dateString || typeof dateString !== 'string') {
         return '';
@@ -455,7 +460,7 @@ export class FieldMapperService {
   /**
    * Calculate experience from work history
    */
-  async calculateExperience(
+  public async calculateExperience(
     workExperience: ResumeDTO['workExperience'],
     targetSkills?: string[],
   ): Promise<{
@@ -490,7 +495,7 @@ export class FieldMapperService {
   /**
    * Extract dates from various formats
    */
-  async extractDates(
+  public async extractDates(
     text: string,
   ): Promise<{ startDate: string; endDate: string; confidence: number }[]> {
     try {
@@ -625,7 +630,7 @@ export class FieldMapperService {
   /**
    * Normalize string fields
    */
-  private normalizeString(value: any): string {
+  private normalizeString(value: unknown): string {
     if (!value || typeof value !== 'string') {
       return '';
     }
@@ -636,7 +641,7 @@ export class FieldMapperService {
   /**
    * Normalize name field
    */
-  private normalizeName(name: any): string | null {
+  private normalizeName(name: unknown): string | null {
     if (!name || typeof name !== 'string') {
       return null;
     }
@@ -649,7 +654,7 @@ export class FieldMapperService {
     }
 
     // Check if it looks like a name (letters, spaces, common punctuation)
-    if (!/^[a-zA-Z\s\-\'\.]+$/.test(normalized)) {
+    if (!/^[a-zA-Z\s'.-]+$/.test(normalized)) {
       return null;
     }
 
@@ -659,7 +664,7 @@ export class FieldMapperService {
   /**
    * Normalize email field
    */
-  private normalizeEmail(email: any): string | null {
+  private normalizeEmail(email: unknown): string | null {
     if (!email || typeof email !== 'string') {
       return null;
     }
@@ -674,13 +679,13 @@ export class FieldMapperService {
   /**
    * Normalize phone field
    */
-  private normalizePhone(phone: any): string | null {
+  private normalizePhone(phone: unknown): string | null {
     if (!phone || typeof phone !== 'string') {
       return null;
     }
 
     // Remove all non-digit characters except + and ()
-    let normalized = phone.replace(/[^\d\+\(\)\-\s]/g, '');
+    let normalized = phone.replace(/[^\d+()-\s]/g, '');
 
     // Remove extra whitespace
     normalized = normalized.trim().replace(/\s+/g, ' ');
@@ -725,7 +730,7 @@ export class FieldMapperService {
   private calculateMappingConfidence(
     resumeDto: ResumeDTO,
     validationErrors: string[],
-    _rawInput: any,
+    _rawInput: Record<string, unknown>,
   ): number {
     let score = 100; // Start with perfect score
 

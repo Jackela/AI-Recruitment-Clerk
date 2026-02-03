@@ -3,12 +3,14 @@
  * Unified NATS Client Pattern - Eliminate Code Duplication
  */
 
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
-import {
-  connect,
+import type { OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import type {
   NatsConnection,
   JetStreamManager,
-  JetStreamClient,
+  JetStreamClient} from 'nats';
+import {
+  connect,
   RetentionPolicy,
   headers as natsHeaders,
 } from 'nats';
@@ -29,7 +31,7 @@ export interface NatsConfig {
  */
 export interface MessagePattern {
   subject: string;
-  data: any;
+  data: unknown;
   headers?: Record<string, string>;
 }
 
@@ -40,7 +42,7 @@ export interface ConsumerConfig {
   stream: string;
   consumer: string;
   subject: string;
-  handler: (data: any) => Promise<void>;
+  handler: (data: unknown) => Promise<void>;
 }
 
 /**
@@ -64,7 +66,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   /**
    * 建立NATS连接
    */
-  async connect(): Promise<void> {
+  public async connect(): Promise<void> {
     try {
       this.logger.log('Connecting to NATS servers...');
 
@@ -95,7 +97,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   /**
    * 发布消息到JetStream
    */
-  async publish(pattern: MessagePattern): Promise<void> {
+  public async publish(pattern: MessagePattern): Promise<void> {
     if (!this.jetstream) {
       throw new Error('NATS JetStream not initialized');
     }
@@ -127,7 +129,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   /**
    * 创建消费者
    */
-  async createConsumer(config: ConsumerConfig): Promise<void> {
+  public async createConsumer(config: ConsumerConfig): Promise<void> {
     if (!this.jetstream || !this.jsm) {
       throw new Error('NATS JetStream not initialized');
     }
@@ -174,10 +176,10 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   /**
    * 请求-响应模式
    */
-  async request<T>(
+  public async request<T>(
     subject: string,
-    data: any,
-    timeout: number = 5000,
+    data: unknown,
+    timeout = 5000,
   ): Promise<T> {
     if (!this.connection) {
       throw new Error('NATS connection not established');
@@ -200,9 +202,9 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   /**
    * 订阅主题
    */
-  async subscribe(
+  public async subscribe(
     subject: string,
-    handler: (data: any) => Promise<void>,
+    handler: (data: unknown) => Promise<void>,
   ): Promise<void> {
     if (!this.connection) {
       throw new Error('NATS connection not established');
@@ -241,7 +243,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
     try {
       await this.jsm.streams.info(streamName);
       this.logger.debug(`Stream ${streamName} already exists`);
-    } catch (error) {
+    } catch (_error) {
       // 流不存在，创建它
       await this.jsm.streams.add({
         name: streamName,
@@ -261,13 +263,15 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   private setupConnectionHandlers(): void {
     if (!this.connection) return;
 
-    this.connection.closed().then(() => {
+    const connection = this.connection;
+
+    connection.closed().then(() => {
       this.logger.warn('NATS connection closed');
     });
 
     // 处理重连事件
     (async () => {
-      for await (const status of this.connection!.status()) {
+      for await (const status of connection.status()) {
         this.logger.log(`NATS connection status: ${status.type}`);
 
         if (status.type === 'reconnect') {
@@ -289,7 +293,7 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   /**
    * 关闭连接
    */
-  async onModuleDestroy(): Promise<void> {
+  public async onModuleDestroy(): Promise<void> {
     if (this.connection) {
       await this.connection.close();
       this.logger.log('NATS connection closed');
@@ -299,14 +303,14 @@ export abstract class BaseNatsClient implements OnModuleDestroy {
   /**
    * 健康检查
    */
-  isConnected(): boolean {
+  public isConnected(): boolean {
     return this.connection !== null && !this.connection.isClosed();
   }
 
   /**
    * 获取连接统计信息
    */
-  getStats(): any {
+  public getStats(): Record<string, unknown> {
     if (!this.connection) {
       return { connected: false };
     }
@@ -340,5 +344,5 @@ export abstract class ServiceNatsClient extends BaseNatsClient {
     }
   }
 
-  protected abstract handleMessage(data: any): Promise<void>;
+  protected abstract handleMessage(data: unknown): Promise<void>;
 }

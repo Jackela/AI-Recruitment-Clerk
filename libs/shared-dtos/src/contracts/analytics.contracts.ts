@@ -1,10 +1,11 @@
+import type {
+  UserSession,
+  EventValidationResult} from '../domains/analytics.dto';
 import {
   AnalyticsEvent,
   EventStatus,
   EventType,
-  MetricUnit,
-  UserSession,
-  EventValidationResult,
+  MetricUnit
 } from '../domains/analytics.dto';
 import { AnalyticsRules } from '../domains/analytics.rules';
 
@@ -16,12 +17,12 @@ export class AnalyticsContracts {
   /**
    * 创建用户交互事件的契约验证
    */
-  static createUserInteractionEvent(
+  public static createUserInteractionEvent(
     sessionId: string,
     userId: string,
     eventType: EventType,
-    eventData: any,
-    context?: any,
+    eventData: unknown,
+    context?: unknown,
   ): AnalyticsEvent {
     // 前置条件验证
     this.requireValidSessionId(sessionId, 'createUserInteractionEvent');
@@ -88,11 +89,11 @@ export class AnalyticsContracts {
   /**
    * 创建系统性能事件的契约验证
    */
-  static createSystemPerformanceEvent(
+  public static createSystemPerformanceEvent(
     operation: string,
     duration: number,
     success: boolean,
-    metadata?: any,
+    metadata?: unknown,
   ): AnalyticsEvent {
     // 前置条件验证
     this.require(
@@ -152,7 +153,7 @@ export class AnalyticsContracts {
   /**
    * 创建业务指标事件的契约验证
    */
-  static createBusinessMetricEvent(
+  public static createBusinessMetricEvent(
     metricName: string,
     metricValue: number,
     metricUnit: MetricUnit,
@@ -225,7 +226,7 @@ export class AnalyticsContracts {
   /**
    * 事件验证的契约检查
    */
-  static validateEvent(event: AnalyticsEvent): EventValidationResult {
+  public static validateEvent(event: AnalyticsEvent): EventValidationResult {
     // 前置条件验证
     this.require(
       event !== null && event !== undefined,
@@ -282,7 +283,7 @@ export class AnalyticsContracts {
   /**
    * 事件处理的契约检查
    */
-  static processEvent(event: AnalyticsEvent): void {
+  public static processEvent(event: AnalyticsEvent): void {
     // 记录原始状态用于后置条件检查
     const originalStatus = event.getStatus();
 
@@ -328,7 +329,7 @@ export class AnalyticsContracts {
   /**
    * 数据匿名化的契约检查
    */
-  static anonymizeEventData(event: AnalyticsEvent): void {
+  public static anonymizeEventData(event: AnalyticsEvent): void {
     // 记录原始状态
     const originalStatus = event.getStatus();
 
@@ -375,7 +376,7 @@ export class AnalyticsContracts {
   /**
    * 事件过期标记的契约检查
    */
-  static markEventAsExpired(event: AnalyticsEvent): void {
+  public static markEventAsExpired(event: AnalyticsEvent): void {
     // 记录原始状态
     const originalStatus = event.getStatus();
 
@@ -421,7 +422,7 @@ export class AnalyticsContracts {
   /**
    * 分析事件系统不变式验证
    */
-  static validateInvariants(event: AnalyticsEvent): void {
+  public static validateInvariants(event: AnalyticsEvent): void {
     // 基本属性不变式
     this.invariant(
       event.getId() !== null && event.getId() !== undefined,
@@ -511,7 +512,7 @@ export class AnalyticsContracts {
   /**
    * 批量操作的契约验证
    */
-  static validateBatchOperation<T>(
+  public static validateBatchOperation<T>(
     items: T[],
     maxBatchSize: number,
     operationName: string,
@@ -536,7 +537,7 @@ export class AnalyticsContracts {
   /**
    * 隐私合规性验证
    */
-  static validatePrivacyCompliance(
+  public static validatePrivacyCompliance(
     event: AnalyticsEvent,
     userSession: UserSession,
   ): void {
@@ -575,7 +576,7 @@ export class AnalyticsContracts {
   /**
    * 性能契约验证
    */
-  static performanceContract<T>(
+  public static performanceContract<T>(
     operation: () => T,
     maxExecutionTimeMs: number,
     operationName: string,
@@ -603,7 +604,7 @@ export class AnalyticsContracts {
   /**
    * 数据质量契约验证
    */
-  static validateDataQuality(eventType: EventType, eventData: any): void {
+  public static validateDataQuality(eventType: EventType, eventData: unknown): void {
     this.require(
       Object.values(EventType).includes(eventType),
       'Valid event type is required for data quality validation',
@@ -711,12 +712,14 @@ export class AnalyticsContractViolation extends Error {
  * 分析系统设计契约装饰器
  */
 export function requireValidEvent(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _target: any,
   propertyName: string,
   descriptor: PropertyDescriptor,
-) {
+): void {
   const method = descriptor.value;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   descriptor.value = function (...args: any[]) {
     const event = args[0];
     if (!event) {
@@ -734,12 +737,14 @@ export function requireValidEvent(
  * 事件处理契约装饰器
  */
 export function requirePendingEvent(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _target: any,
   propertyName: string,
   descriptor: PropertyDescriptor,
-) {
+): void {
   const method = descriptor.value;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   descriptor.value = function (...args: any[]) {
     const event = args[0];
     if (!event || event.getStatus() !== EventStatus.PENDING_PROCESSING) {
@@ -756,12 +761,14 @@ export function requirePendingEvent(
  * 隐私合规契约装饰器
  */
 export function requirePrivacyCompliance(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _target: any,
   _propertyName: string,
   descriptor: PropertyDescriptor,
-) {
+): void {
   const method = descriptor.value;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   descriptor.value = function (...args: any[]) {
     const event = args[0];
     const userSession = args[1];
@@ -779,12 +786,14 @@ export function requirePrivacyCompliance(
  */
 export function monitorAnalyticsPerformance(maxTimeMs: number) {
   return function (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _target: any,
     propertyName: string,
     descriptor: PropertyDescriptor,
   ) {
     const method = descriptor.value;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     descriptor.value = function (...args: any[]) {
       return AnalyticsContracts.performanceContract(
         () => method.apply(this, args),
@@ -799,12 +808,14 @@ export function monitorAnalyticsPerformance(maxTimeMs: number) {
  * 数据质量验证装饰器
  */
 export function validateEventDataQuality(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _target: any,
   _propertyName: string,
   descriptor: PropertyDescriptor,
-) {
+): void {
   const method = descriptor.value;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   descriptor.value = function (...args: any[]) {
     // 假设第一个参数是eventType，第二个是eventData
     if (args.length >= 2) {

@@ -30,7 +30,7 @@ export class RetryUtility {
   /**
    * Retry an operation with exponential backoff and jitter
    */
-  static async withExponentialBackoff<T>(
+  public static async withExponentialBackoff<T>(
     operation: () => Promise<T>,
     options: Partial<RetryOptions> = {},
   ): Promise<T> {
@@ -56,7 +56,7 @@ export class RetryUtility {
         lastError = error;
 
         // Don't retry on last attempt or if error is not retriable
-        if (attempt === config.maxAttempts || !config.retryIf!(error)) {
+        if (attempt === config.maxAttempts || !(config.retryIf ?? this.isRetriableError)(error)) {
           this.logger.error(
             `Operation failed after ${attempt} attempts: ${error instanceof Error ? error.message : String(error)}`,
             error instanceof Error ? error.stack : undefined,
@@ -171,14 +171,14 @@ export class CircuitBreaker {
    * @param options - The options.
    * @returns The CircuitBreaker.
    */
-  static getInstance(
+  public static getInstance(
     name: string,
     options: CircuitBreakerOptions,
   ): CircuitBreaker {
     if (!this.instances.has(name)) {
       this.instances.set(name, new CircuitBreaker(name, options));
     }
-    return this.instances.get(name)!;
+    return this.instances.get(name) as CircuitBreaker;
   }
 
   /**
@@ -186,7 +186,7 @@ export class CircuitBreaker {
    * @param operation - The operation.
    * @returns A promise that resolves to T.
    */
-  async execute<T>(operation: () => Promise<T>): Promise<T> {
+  public async execute<T>(operation: () => Promise<T>): Promise<T> {
     if (this.state === 'OPEN') {
       if (Date.now() - this.lastFailureTime > this.options.recoveryTimeout) {
         this.state = 'HALF_OPEN';
@@ -230,7 +230,7 @@ export class CircuitBreaker {
    * Retrieves state.
    * @returns The string value.
    */
-  getState(): string {
+  public getState(): string {
     return this.state;
   }
 
@@ -238,7 +238,7 @@ export class CircuitBreaker {
    * Retrieves failures.
    * @returns The number value.
    */
-  getFailures(): number {
+  public getFailures(): number {
     return this.failures;
   }
 }

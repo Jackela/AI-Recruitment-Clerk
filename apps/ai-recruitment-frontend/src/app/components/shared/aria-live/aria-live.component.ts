@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy, inject, effect } from '@angular/core';
+import type { OnInit, OnDestroy} from '@angular/core';
+import { Component, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AccessibilityService } from '../../../services/accessibility/accessibility.service';
 import { Subscription } from 'rxjs';
@@ -28,7 +29,7 @@ export interface LiveMessage {
         class="aria-live-polite"
         [attr.aria-live]="'polite'"
         [attr.aria-atomic]="'true'"
-        [attr.aria-relevant]="'additions text'"
+        aria-relevant="all"
       >
         <div
           *ngFor="let message of politeMessages; trackBy: trackByMessageId"
@@ -43,7 +44,7 @@ export interface LiveMessage {
         class="aria-live-assertive"
         [attr.aria-live]="'assertive'"
         [attr.aria-atomic]="'true'"
-        [attr.aria-relevant]="'additions text'"
+        aria-relevant="all"
       >
         <div
           *ngFor="let message of assertiveMessages; trackBy: trackByMessageId"
@@ -119,16 +120,17 @@ export class AriaLiveComponent implements OnInit, OnDestroy {
   private accessibilityService = inject(AccessibilityService);
   private subscription: Subscription = new Subscription();
 
-  politeMessages: LiveMessage[] = [];
-  assertiveMessages: LiveMessage[] = [];
-  currentStatus = '';
-  currentAlert = '';
+  public politeMessages: LiveMessage[] = [];
+  public assertiveMessages: LiveMessage[] = [];
+  public currentStatus = '';
+  public currentAlert = '';
 
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     // Subscribe to accessibility service live messages (test-compatible)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const isTestEnvironment = typeof (window as any).__karma__ !== 'undefined';
     if (!isTestEnvironment) {
       // Production environment: use effect for reactive updates
@@ -178,7 +180,7 @@ export class AriaLiveComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
 
@@ -188,7 +190,7 @@ export class AriaLiveComponent implements OnInit, OnDestroy {
    * @param message - The message.
    * @returns The string value.
    */
-  trackByMessageId(_index: number, message: LiveMessage): string {
+  public trackByMessageId(_index: number, message: LiveMessage): string {
     return message.id;
   }
 }

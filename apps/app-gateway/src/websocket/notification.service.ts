@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { CacheService } from '../cache/cache.service';
+import type { CacheService } from '../cache/cache.service';
 
 // Notification interfaces
 /**
@@ -11,7 +11,7 @@ export interface NotificationData {
   type: 'info' | 'success' | 'warning' | 'error' | 'system';
   title: string;
   message: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   createdAt: Date;
   readAt?: Date;
   priority: 'low' | 'normal' | 'high' | 'urgent';
@@ -52,7 +52,7 @@ export interface BroadcastMessage {
   type: 'announcement' | 'update' | 'alert' | 'system';
   title: string;
   message: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
   targetUsers?: string[];
   excludeUsers?: string[];
   priority: 'low' | 'normal' | 'high' | 'urgent';
@@ -66,9 +66,9 @@ export interface BroadcastMessage {
 @Injectable()
 export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
-  private userNotifications = new Map<string, NotificationData[]>();
-  private userPreferences = new Map<string, NotificationPreferences>();
-  private broadcastMessages = new Map<string, BroadcastMessage>();
+  private readonly userNotifications = new Map<string, NotificationData[]>();
+  private readonly userPreferences = new Map<string, NotificationPreferences>();
+  private readonly broadcastMessages = new Map<string, BroadcastMessage>();
 
   /**
    * Initializes a new instance of the Notification Service.
@@ -81,7 +81,7 @@ export class NotificationService {
   /**
    * Send notification to a specific user
    */
-  async sendNotification(notification: NotificationData): Promise<void> {
+  public async sendNotification(notification: NotificationData): Promise<void> {
     this.logger.debug(
       `Sending notification to user ${notification.userId}: ${notification.title}`,
     );
@@ -107,7 +107,7 @@ export class NotificationService {
   /**
    * Send notification to multiple users
    */
-  async sendBulkNotifications(
+  public async sendBulkNotifications(
     notifications: NotificationData[],
   ): Promise<void> {
     this.logger.log(`Sending ${notifications.length} bulk notifications`);
@@ -122,7 +122,7 @@ export class NotificationService {
   /**
    * Broadcast message to room or all users
    */
-  async broadcastToRoom(
+  public async broadcastToRoom(
     roomId: string,
     message: BroadcastMessage,
   ): Promise<void> {
@@ -145,7 +145,7 @@ export class NotificationService {
   /**
    * Send system-wide broadcast
    */
-  async systemBroadcast(message: BroadcastMessage): Promise<void> {
+  public async systemBroadcast(message: BroadcastMessage): Promise<void> {
     this.logger.log(`System broadcast: ${message.title}`);
 
     message.type = 'system';
@@ -163,7 +163,7 @@ export class NotificationService {
   /**
    * Get user's notifications
    */
-  async getUserNotifications(
+  public async getUserNotifications(
     userId: string,
     unreadOnly = false,
     limit = 50,
@@ -196,7 +196,7 @@ export class NotificationService {
   /**
    * Mark notification as read
    */
-  async markAsRead(userId: string, notificationId: string): Promise<void> {
+  public async markAsRead(userId: string, notificationId: string): Promise<void> {
     const notifications = this.userNotifications.get(userId) || [];
     const notification = notifications.find((n) => n.id === notificationId);
 
@@ -212,7 +212,7 @@ export class NotificationService {
   /**
    * Mark all notifications as read for user
    */
-  async markAllAsRead(userId: string): Promise<void> {
+  public async markAllAsRead(userId: string): Promise<void> {
     const notifications = this.userNotifications.get(userId) || [];
     const now = new Date();
     let updatedCount = 0;
@@ -235,7 +235,7 @@ export class NotificationService {
   /**
    * Delete notification
    */
-  async deleteNotification(
+  public async deleteNotification(
     userId: string,
     notificationId: string,
   ): Promise<void> {
@@ -256,7 +256,7 @@ export class NotificationService {
   /**
    * Get unread notification count
    */
-  async getUnreadCount(userId: string): Promise<number> {
+  public async getUnreadCount(userId: string): Promise<number> {
     const notifications = await this.getUserNotifications(userId);
     return notifications.filter((n) => !n.readAt).length;
   }
@@ -264,7 +264,7 @@ export class NotificationService {
   /**
    * Get user preferences
    */
-  async getUserPreferences(userId: string): Promise<NotificationPreferences> {
+  public async getUserPreferences(userId: string): Promise<NotificationPreferences> {
     let prefs = this.userPreferences.get(userId);
 
     if (!prefs) {
@@ -294,7 +294,7 @@ export class NotificationService {
   /**
    * Update user preferences
    */
-  async updateUserPreferences(
+  public async updateUserPreferences(
     userId: string,
     preferences: Partial<NotificationPreferences>,
   ): Promise<void> {
@@ -312,7 +312,7 @@ export class NotificationService {
   /**
    * Get active broadcast messages
    */
-  async getActiveBroadcasts(roomId?: string): Promise<BroadcastMessage[]> {
+  public async getActiveBroadcasts(roomId?: string): Promise<BroadcastMessage[]> {
     const now = new Date();
     const activeBroadcasts: BroadcastMessage[] = [];
 
@@ -338,10 +338,10 @@ export class NotificationService {
   /**
    * Create notification from template
    */
-  async createFromTemplate(
+  public async createFromTemplate(
     templateType: string,
     userId: string,
-    templateData: Record<string, any>,
+    templateData: Record<string, unknown>,
   ): Promise<NotificationData> {
     const template = this.getNotificationTemplate(templateType);
     const notification: NotificationData = {
@@ -466,7 +466,9 @@ export class NotificationService {
   /**
    * Get notification template
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- template structure varies
   private getNotificationTemplate(templateType: string): any {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- template structure varies
     const templates: Record<string, any> = {
       analysis_complete: {
         type: 'success',
@@ -505,17 +507,18 @@ export class NotificationService {
    */
   private interpolateTemplate(
     template: string,
-    data: Record<string, any>,
+    data: Record<string, unknown>,
   ): string {
-    return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-      return data[key] || match;
+    return template.replace(/\{\{(\w+)\}\}/g, (match: string, key: string): string => {
+      const value = data[key];
+      return typeof value === 'string' ? value : match;
     });
   }
 
   /**
    * Cleanup expired notifications and broadcasts
    */
-  async cleanupExpiredData(): Promise<void> {
+  public async cleanupExpiredData(): Promise<void> {
     const now = new Date();
     let cleanedCount = 0;
 

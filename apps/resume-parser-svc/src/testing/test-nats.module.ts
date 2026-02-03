@@ -1,10 +1,12 @@
-import { Module, DynamicModule, Global, Logger } from '@nestjs/common';
+import type { DynamicModule} from '@nestjs/common';
+import { Module, Global, Logger } from '@nestjs/common';
 import {
   NatsConnectionManager,
   NatsStreamManager,
   StreamConfigFactory,
 } from '@app/shared-nats-client';
-import { connect, NatsConnection } from 'nats';
+import type { NatsConnection } from 'nats';
+import { connect } from 'nats';
 
 /**
  * Test NATS Module for Integration Testing
@@ -21,8 +23,10 @@ export class TestNatsModule {
    * @param useDocker - The use docker.
    * @returns A promise that resolves to DynamicModule.
    */
-  static async forRoot(useDocker = false): Promise<DynamicModule> {
+  public static async forRoot(useDocker = false): Promise<DynamicModule> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let connectionManager: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let streamManager: any;
 
     if (useDocker) {
@@ -54,11 +58,12 @@ export class TestNatsModule {
             discard: testStreamConfig.discard,
             duplicate_window: testStreamConfig.duplicateWindow,
           });
-        } catch (err: any) {
-          if (!err.message?.includes('stream name already in use')) {
+        } catch (err: unknown) {
+          const errTyped = err as { message?: string; stack?: string };
+          if (!errTyped.message?.includes('stream name already in use')) {
             this.logger.error(
               'Failed to create test stream',
-              err.stack || err.message,
+              errTyped.stack || errTyped.message,
             );
           }
         }
@@ -76,10 +81,11 @@ export class TestNatsModule {
           getStreamInfo: jest.fn().mockResolvedValue({}),
           deleteStream: jest.fn().mockResolvedValue(undefined),
         };
-      } catch (error) {
+      } catch (error: unknown) {
+        const errTyped = error as { message?: string; stack?: string };
         this.logger.error(
           'Failed to connect to NATS',
-          error.stack || error.message,
+          errTyped.stack || errTyped.message,
         );
         // Fall back to mocks if connection fails
         return this.getMockProviders();
@@ -146,10 +152,11 @@ export class TestNatsModule {
    * Performs the close connection operation.
    * @returns A promise that resolves when the operation completes.
    */
-  static async closeConnection(): Promise<void> {
+  public static async closeConnection(): Promise<void> {
     if (this.natsConnection) {
       await this.natsConnection.drain();
       await this.natsConnection.close();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.natsConnection = undefined as any;
     }
   }

@@ -1,5 +1,5 @@
 import { ValueObject } from '../base/value-object';
-import { DomainEvent } from '../base/domain-event';
+import type { DomainEvent } from '../base/domain-event';
 
 // Analytics聚合根 - 管理用户行为数据收集和分析的核心业务逻辑
 /**
@@ -30,11 +30,13 @@ export class AnalyticsEvent {
    * @param context - The context.
    * @returns The AnalyticsEvent.
    */
-  static createUserInteractionEvent(
+  public static createUserInteractionEvent(
     sessionId: string,
     userId: string,
     eventType: EventType,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     eventData: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context?: any,
   ): AnalyticsEvent {
     const eventId = AnalyticsEventId.generate();
@@ -76,10 +78,11 @@ export class AnalyticsEvent {
    * @param metadata - The metadata.
    * @returns The AnalyticsEvent.
    */
-  static createSystemPerformanceEvent(
+  public static createSystemPerformanceEvent(
     operation: string,
     duration: number,
     success: boolean,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata?: any,
   ): AnalyticsEvent {
     const eventId = AnalyticsEventId.generate();
@@ -120,7 +123,7 @@ export class AnalyticsEvent {
    * @param dimensions - The dimensions.
    * @returns The AnalyticsEvent.
    */
-  static createBusinessMetricEvent(
+  public static createBusinessMetricEvent(
     metricName: string,
     metricValue: number,
     metricUnit: MetricUnit,
@@ -166,7 +169,7 @@ export class AnalyticsEvent {
    * @param data - The data.
    * @returns The AnalyticsEvent.
    */
-  static restore(data: AnalyticsEventData): AnalyticsEvent {
+  public static restore(data: AnalyticsEventData): AnalyticsEvent {
     return new AnalyticsEvent(
       new AnalyticsEventId({ value: data.id }),
       UserSession.restore(data.session),
@@ -185,7 +188,7 @@ export class AnalyticsEvent {
    * Validates event.
    * @returns The EventValidationResult.
    */
-  validateEvent(): EventValidationResult {
+  public validateEvent(): EventValidationResult {
     const validationErrors: string[] = [];
 
     // 验证会话信息
@@ -244,7 +247,7 @@ export class AnalyticsEvent {
   /**
    * Performs the process event operation.
    */
-  processEvent(): void {
+  public processEvent(): void {
     if (this.status !== EventStatus.PENDING_PROCESSING) {
       throw new Error(`Cannot process event in ${this.status} status`);
     }
@@ -269,7 +272,7 @@ export class AnalyticsEvent {
   /**
    * Performs the anonymize data operation.
    */
-  anonymizeData(): void {
+  public anonymizeData(): void {
     if (this.status === EventStatus.ANONYMIZED) {
       throw new Error('Event data is already anonymized');
     }
@@ -290,7 +293,7 @@ export class AnalyticsEvent {
   /**
    * Performs the mark as expired operation.
    */
-  markAsExpired(): void {
+  public markAsExpired(): void {
     if (this.status === EventStatus.EXPIRED) {
       return;
     }
@@ -367,7 +370,7 @@ export class AnalyticsEvent {
    * Retrieves event summary.
    * @returns The AnalyticsEventSummary.
    */
-  getEventSummary(): AnalyticsEventSummary {
+  public getEventSummary(): AnalyticsEventSummary {
     return new AnalyticsEventSummary({
       id: this.id.getValue(),
       sessionId: this.session.getSessionId(),
@@ -391,14 +394,14 @@ export class AnalyticsEvent {
    * Retrieves uncommitted events.
    * @returns The an array of DomainEvent.
    */
-  getUncommittedEvents(): DomainEvent[] {
+  public getUncommittedEvents(): DomainEvent[] {
     return [...this.uncommittedEvents];
   }
 
   /**
    * Performs the mark events as committed operation.
    */
-  markEventsAsCommitted(): void {
+  public markEventsAsCommitted(): void {
     this.uncommittedEvents = [];
   }
 
@@ -411,7 +414,7 @@ export class AnalyticsEvent {
    * Retrieves id.
    * @returns The AnalyticsEventId.
    */
-  getId(): AnalyticsEventId {
+  public getId(): AnalyticsEventId {
     return this.id;
   }
 
@@ -419,7 +422,7 @@ export class AnalyticsEvent {
    * Retrieves status.
    * @returns The EventStatus.
    */
-  getStatus(): EventStatus {
+  public getStatus(): EventStatus {
     return this.status;
   }
 
@@ -427,7 +430,7 @@ export class AnalyticsEvent {
    * Retrieves session id.
    * @returns The string value.
    */
-  getSessionId(): string {
+  public getSessionId(): string {
     return this.session.getSessionId();
   }
 
@@ -435,7 +438,7 @@ export class AnalyticsEvent {
    * Retrieves user id.
    * @returns The string | undefined.
    */
-  getUserId(): string | undefined {
+  public getUserId(): string | undefined {
     return this.session.getUserId();
   }
 
@@ -443,7 +446,7 @@ export class AnalyticsEvent {
    * Retrieves event type.
    * @returns The EventType.
    */
-  getEventType(): EventType {
+  public getEventType(): EventType {
     return this.eventData.getEventType();
   }
 
@@ -451,7 +454,7 @@ export class AnalyticsEvent {
    * Retrieves timestamp.
    * @returns The string value.
    */
-  getTimestamp(): string {
+  public getTimestamp(): string {
     return this.timestamp.toISOString();
   }
 
@@ -459,7 +462,7 @@ export class AnalyticsEvent {
    * Retrieves created at.
    * @returns The Date.
    */
-  getCreatedAt(): Date {
+  public getCreatedAt(): Date {
     return this.createdAt;
   }
 
@@ -467,7 +470,7 @@ export class AnalyticsEvent {
    * Retrieves retention expiry.
    * @returns The Date | undefined.
    */
-  getRetentionExpiry(): Date | undefined {
+  public getRetentionExpiry(): Date | undefined {
     return this.retentionExpiry;
   }
 }
@@ -481,7 +484,7 @@ export class AnalyticsEventId extends ValueObject<{ value: string }> {
    * Generates the result.
    * @returns The AnalyticsEventId.
    */
-  static generate(): AnalyticsEventId {
+  public static generate(): AnalyticsEventId {
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substr(2, 9);
     return new AnalyticsEventId({ value: `analytics_${timestamp}_${random}` });
@@ -491,7 +494,7 @@ export class AnalyticsEventId extends ValueObject<{ value: string }> {
    * Retrieves value.
    * @returns The string value.
    */
-  getValue(): string {
+  public getValue(): string {
     return this.props.value;
   }
 }
@@ -515,7 +518,7 @@ export class UserSession extends ValueObject<{
    * @param geoLocation - The geo location.
    * @returns The UserSession.
    */
-  static create(
+  public static create(
     sessionId: string,
     userId?: string,
     deviceInfo?: DeviceInfo,
@@ -535,7 +538,7 @@ export class UserSession extends ValueObject<{
    * Creates system session.
    * @returns The UserSession.
    */
-  static createSystemSession(): UserSession {
+  public static createSystemSession(): UserSession {
     return new UserSession({
       sessionId: `system_${Date.now()}`,
       consentStatus: ConsentStatus.NOT_APPLICABLE,
@@ -548,7 +551,8 @@ export class UserSession extends ValueObject<{
    * @param data - The data.
    * @returns The UserSession.
    */
-  static restore(data: any): UserSession {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): UserSession {
     return new UserSession({
       sessionId: data.sessionId,
       userId: data.userId,
@@ -567,7 +571,7 @@ export class UserSession extends ValueObject<{
    * Retrieves session id.
    * @returns The string value.
    */
-  getSessionId(): string {
+  public getSessionId(): string {
     return this.props.sessionId;
   }
 
@@ -575,7 +579,7 @@ export class UserSession extends ValueObject<{
    * Retrieves user id.
    * @returns The string | undefined.
    */
-  getUserId(): string | undefined {
+  public getUserId(): string | undefined {
     return this.props.userId;
   }
 
@@ -583,7 +587,7 @@ export class UserSession extends ValueObject<{
    * Performs the has valid consent operation.
    * @returns The boolean value.
    */
-  hasValidConsent(): boolean {
+  public hasValidConsent(): boolean {
     return (
       this.props.consentStatus === ConsentStatus.GRANTED ||
       this.props.consentStatus === ConsentStatus.NOT_APPLICABLE
@@ -594,7 +598,7 @@ export class UserSession extends ValueObject<{
    * Performs the is valid operation.
    * @returns The boolean value.
    */
-  isValid(): boolean {
+  public isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
@@ -603,7 +607,7 @@ export class UserSession extends ValueObject<{
    * Retrieves validation errors.
    * @returns The an array of string value.
    */
-  getValidationErrors(): string[] {
+  public getValidationErrors(): string[] {
     const errors: string[] = [];
 
     if (!this.props.sessionId || this.props.sessionId.trim().length === 0) {
@@ -624,7 +628,7 @@ export class UserSession extends ValueObject<{
   /**
    * Performs the anonymize operation.
    */
-  anonymize(): void {
+  public anonymize(): void {
     // 匿名化用户标识信息
     const newProps = { ...this.props };
     newProps.userId = undefined;
@@ -648,7 +652,8 @@ export class DeviceInfo extends ValueObject<{
    * @param data - The data.
    * @returns The DeviceInfo.
    */
-  static restore(data: any): DeviceInfo {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): DeviceInfo {
     return new DeviceInfo(data);
   }
 
@@ -656,7 +661,7 @@ export class DeviceInfo extends ValueObject<{
    * Performs the is valid operation.
    * @returns The boolean value.
    */
-  isValid(): boolean {
+  public isValid(): boolean {
     return !!(this.props.userAgent && this.props.language);
   }
 }
@@ -676,7 +681,8 @@ export class GeoLocation extends ValueObject<{
    * @param data - The data.
    * @returns The GeoLocation.
    */
-  static restore(data: any): GeoLocation {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): GeoLocation {
     return new GeoLocation(data);
   }
 
@@ -684,7 +690,7 @@ export class GeoLocation extends ValueObject<{
    * Performs the is valid operation.
    * @returns The boolean value.
    */
-  isValid(): boolean {
+  public isValid(): boolean {
     return !!(this.props.country && this.props.region);
   }
 }
@@ -695,6 +701,7 @@ export class GeoLocation extends ValueObject<{
 export class EventData extends ValueObject<{
   eventType: EventType;
   eventCategory: EventCategory;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: any;
   sensitiveDataMask: string[];
 }> {
@@ -704,7 +711,8 @@ export class EventData extends ValueObject<{
    * @param payload - The payload.
    * @returns The EventData.
    */
-  static create(eventType: EventType, payload: any): EventData {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static create(eventType: EventType, payload: any): EventData {
     return new EventData({
       eventType,
       eventCategory: EventData.categorizeEvent(eventType),
@@ -720,7 +728,7 @@ export class EventData extends ValueObject<{
    * @param success - The success.
    * @returns The EventData.
    */
-  static createPerformanceEvent(
+  public static createPerformanceEvent(
     operation: string,
     duration: number,
     success: boolean,
@@ -740,7 +748,7 @@ export class EventData extends ValueObject<{
    * @param metricUnit - The metric unit.
    * @returns The EventData.
    */
-  static createMetricEvent(
+  public static createMetricEvent(
     metricName: string,
     metricValue: number,
     metricUnit: MetricUnit,
@@ -758,7 +766,8 @@ export class EventData extends ValueObject<{
    * @param data - The data.
    * @returns The EventData.
    */
-  static restore(data: any): EventData {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): EventData {
     return new EventData(data);
   }
 
@@ -787,7 +796,7 @@ export class EventData extends ValueObject<{
    * Retrieves event type.
    * @returns The EventType.
    */
-  getEventType(): EventType {
+  public getEventType(): EventType {
     return this.props.eventType;
   }
 
@@ -795,7 +804,7 @@ export class EventData extends ValueObject<{
    * Retrieves event category.
    * @returns The EventCategory.
    */
-  getEventCategory(): EventCategory {
+  public getEventCategory(): EventCategory {
     return this.props.eventCategory;
   }
 
@@ -803,7 +812,7 @@ export class EventData extends ValueObject<{
    * Performs the contains sensitive data operation.
    * @returns The boolean value.
    */
-  containsSensitiveData(): boolean {
+  public containsSensitiveData(): boolean {
     // 检查是否包含敏感数据的逻辑
     const sensitiveKeys = ['email', 'phone', 'address', 'ssn', 'creditCard'];
     const payloadStr = JSON.stringify(this.props.payload).toLowerCase();
@@ -815,7 +824,7 @@ export class EventData extends ValueObject<{
    * Performs the is valid operation.
    * @returns The boolean value.
    */
-  isValid(): boolean {
+  public isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
@@ -824,7 +833,7 @@ export class EventData extends ValueObject<{
    * Retrieves validation errors.
    * @returns The an array of string value.
    */
-  getValidationErrors(): string[] {
+  public getValidationErrors(): string[] {
     const errors: string[] = [];
 
     if (!Object.values(EventType).includes(this.props.eventType)) {
@@ -845,7 +854,7 @@ export class EventData extends ValueObject<{
   /**
    * Performs the anonymize operation.
    */
-  anonymize(): void {
+  public anonymize(): void {
     // 匿名化敏感数据
     if (this.containsSensitiveData()) {
       const newProps = { ...this.props };
@@ -870,7 +879,7 @@ export class EventTimestamp extends ValueObject<{
    * @param timezone - The timezone.
    * @returns The EventTimestamp.
    */
-  static now(timezone?: string): EventTimestamp {
+  public static now(timezone?: string): EventTimestamp {
     return new EventTimestamp({
       timestamp: new Date(),
       timezone: timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -882,7 +891,8 @@ export class EventTimestamp extends ValueObject<{
    * @param data - The data.
    * @returns The EventTimestamp.
    */
-  static restore(data: any): EventTimestamp {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): EventTimestamp {
     return new EventTimestamp({
       timestamp: new Date(data.timestamp),
       timezone: data.timezone,
@@ -893,7 +903,7 @@ export class EventTimestamp extends ValueObject<{
    * Performs the to iso string operation.
    * @returns The string value.
    */
-  toISOString(): string {
+  public toISOString(): string {
     return this.props.timestamp.toISOString();
   }
 
@@ -901,7 +911,7 @@ export class EventTimestamp extends ValueObject<{
    * Performs the is valid operation.
    * @returns The boolean value.
    */
-  isValid(): boolean {
+  public isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
@@ -910,7 +920,7 @@ export class EventTimestamp extends ValueObject<{
    * Retrieves validation errors.
    * @returns The an array of string value.
    */
-  getValidationErrors(): string[] {
+  public getValidationErrors(): string[] {
     const errors: string[] = [];
 
     if (!this.props.timestamp || isNaN(this.props.timestamp.getTime())) {
@@ -947,6 +957,7 @@ export class EventContext extends ValueObject<{
   referrer?: string;
   pageUrl?: string;
   dimensions: Record<string, string>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: Record<string, any>;
 }> {
   /**
@@ -954,7 +965,8 @@ export class EventContext extends ValueObject<{
    * @param context - The context.
    * @returns The EventContext.
    */
-  static create(context: any): EventContext {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static create(context: any): EventContext {
     return new EventContext({
       requestId: context.requestId,
       userAgent: context.userAgent,
@@ -970,7 +982,8 @@ export class EventContext extends ValueObject<{
    * @param data - The data.
    * @returns The EventContext.
    */
-  static restore(data: any): EventContext {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): EventContext {
     return new EventContext(data);
   }
 
@@ -978,7 +991,7 @@ export class EventContext extends ValueObject<{
    * Performs the is valid operation.
    * @returns The boolean value.
    */
-  isValid(): boolean {
+  public isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
@@ -987,7 +1000,7 @@ export class EventContext extends ValueObject<{
    * Retrieves validation errors.
    * @returns The an array of string value.
    */
-  getValidationErrors(): string[] {
+  public getValidationErrors(): string[] {
     const errors: string[] = [];
 
     if (typeof this.props.dimensions !== 'object') {
@@ -1004,7 +1017,7 @@ export class EventContext extends ValueObject<{
   /**
    * Performs the anonymize operation.
    */
-  anonymize(): void {
+  public anonymize(): void {
     // 匿名化上下文中的敏感信息
     const newProps = { ...this.props };
     newProps.userAgent = undefined;
@@ -1065,49 +1078,49 @@ export class AnalyticsEventSummary extends ValueObject<{
    * Performs the id operation.
    * @returns The string value.
    */
-  get id(): string {
+  public get id(): string {
     return this.props.id;
   }
   /**
    * Performs the session id operation.
    * @returns The string value.
    */
-  get sessionId(): string {
+  public get sessionId(): string {
     return this.props.sessionId;
   }
   /**
    * Performs the user id operation.
    * @returns The string | undefined.
    */
-  get userId(): string | undefined {
+  public get userId(): string | undefined {
     return this.props.userId;
   }
   /**
    * Performs the event type operation.
    * @returns The EventType.
    */
-  get eventType(): EventType {
+  public get eventType(): EventType {
     return this.props.eventType;
   }
   /**
    * Performs the status operation.
    * @returns The EventStatus.
    */
-  get status(): EventStatus {
+  public get status(): EventStatus {
     return this.props.status;
   }
   /**
    * Performs the is anonymized operation.
    * @returns The boolean value.
    */
-  get isAnonymized(): boolean {
+  public get isAnonymized(): boolean {
     return this.props.isAnonymized;
   }
   /**
    * Performs the days since creation operation.
    * @returns The number value.
    */
-  get daysSinceCreation(): number {
+  public get daysSinceCreation(): number {
     return this.props.daysSinceCreation;
   }
 }
@@ -1160,9 +1173,13 @@ export enum MetricUnit {
  */
 export interface AnalyticsEventData {
   id: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   session: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   eventData: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   timestamp: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   context: any;
   status: EventStatus;
   createdAt: string;

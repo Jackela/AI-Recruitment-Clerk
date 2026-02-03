@@ -1,14 +1,17 @@
+import type {
+  CanActivate,
+  ExecutionContext} from '@nestjs/common';
 import {
   Injectable,
-  CanActivate,
-  ExecutionContext,
   ForbiddenException,
 } from '@nestjs/common';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
-import {
+import type {
   Permission,
-  UserDto,
+  UserDto} from '@ai-recruitment-clerk/user-management-domain';
+import {
   hasAllPermissions,
 } from '@ai-recruitment-clerk/user-management-domain';
 
@@ -28,7 +31,7 @@ export class RolesGuard implements CanActivate {
    * @param context - The context.
    * @returns The boolean value.
    */
-  canActivate(context: ExecutionContext): boolean {
+  public canActivate(context: ExecutionContext): boolean {
     const requiredPermissions = this.reflector.getAllAndOverride<Permission[]>(
       PERMISSIONS_KEY,
       [context.getHandler(), context.getClass()],

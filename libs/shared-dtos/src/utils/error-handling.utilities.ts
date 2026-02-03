@@ -20,9 +20,9 @@ export class ErrorUtils {
   /**
    * Create a validation error with detailed context
    */
-  static createValidationError(
+  public static createValidationError(
     message: string,
-    validationDetails: Record<string, any>,
+    validationDetails: Record<string, unknown>,
     field?: string,
   ): EnhancedAppException {
     const error = new EnhancedAppException(
@@ -34,6 +34,7 @@ export class ErrorUtils {
     );
 
     return error
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .withSeverity('medium' as any)
       .withUserImpact('moderate')
       .withBusinessImpact('low')
@@ -47,9 +48,9 @@ export class ErrorUtils {
   /**
    * Create an authentication error
    */
-  static createAuthenticationError(
-    reason: string = 'Authentication failed',
-    context?: Record<string, any>,
+  public static createAuthenticationError(
+    reason = 'Authentication failed',
+    context?: Record<string, unknown>,
   ): EnhancedAppException {
     const error = new EnhancedAppException(
       ExtendedErrorType.AUTHENTICATION_ERROR,
@@ -60,6 +61,7 @@ export class ErrorUtils {
     );
 
     return error
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .withSeverity('medium' as any)
       .withUserImpact('moderate')
       .withBusinessImpact('medium')
@@ -73,10 +75,10 @@ export class ErrorUtils {
   /**
    * Create an authorization error
    */
-  static createAuthorizationError(
+  public static createAuthorizationError(
     resource: string,
     action: string,
-    context?: Record<string, any>,
+    context?: Record<string, unknown>,
   ): EnhancedAppException {
     const error = new EnhancedAppException(
       ExtendedErrorType.AUTHORIZATION_ERROR,
@@ -87,6 +89,7 @@ export class ErrorUtils {
     );
 
     return error
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .withSeverity('medium' as any)
       .withUserImpact('moderate')
       .withBusinessImpact('medium')
@@ -100,10 +103,10 @@ export class ErrorUtils {
   /**
    * Create a resource not found error
    */
-  static createNotFoundError(
+  public static createNotFoundError(
     resourceType: string,
     identifier: string,
-    searchContext?: Record<string, any>,
+    searchContext?: Record<string, unknown>,
   ): EnhancedAppException {
     const error = new EnhancedAppException(
       ExtendedErrorType.NOT_FOUND_ERROR,
@@ -114,6 +117,7 @@ export class ErrorUtils {
     );
 
     return error
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .withSeverity('low' as any)
       .withUserImpact('minimal')
       .withBusinessImpact('low')
@@ -127,10 +131,10 @@ export class ErrorUtils {
   /**
    * Create a rate limit error
    */
-  static createRateLimitError(
+  public static createRateLimitError(
     limit: number,
     resetTime: Date,
-    context?: Record<string, any>,
+    context?: Record<string, unknown>,
   ): EnhancedAppException {
     const error = new EnhancedAppException(
       ExtendedErrorType.RATE_LIMIT_ERROR,
@@ -141,6 +145,7 @@ export class ErrorUtils {
     );
 
     return error
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .withSeverity('low' as any)
       .withUserImpact('minimal')
       .withBusinessImpact('low')
@@ -154,11 +159,11 @@ export class ErrorUtils {
   /**
    * Create an external service error
    */
-  static createExternalServiceError(
+  public static createExternalServiceError(
     serviceName: string,
     operation: string,
     originalError?: Error,
-    context?: Record<string, any>,
+    context?: Record<string, unknown>,
   ): EnhancedAppException {
     const error = new EnhancedAppException(
       ExtendedErrorType.EXTERNAL_SERVICE_ERROR,
@@ -174,6 +179,7 @@ export class ErrorUtils {
     );
 
     return error
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .withSeverity('high' as any)
       .withUserImpact('moderate')
       .withBusinessImpact('high')
@@ -188,11 +194,11 @@ export class ErrorUtils {
   /**
    * Create a database error
    */
-  static createDatabaseError(
+  public static createDatabaseError(
     operation: string,
     table?: string,
     originalError?: Error,
-    context?: Record<string, any>,
+    context?: Record<string, unknown>,
   ): EnhancedAppException {
     return DomainErrorFactory.databaseError(
       DatabaseErrorCode.OPERATION_FAILED,
@@ -205,7 +211,7 @@ export class ErrorUtils {
   /**
    * Wrap an async operation with standardized error handling
    */
-  static async withErrorHandling<T>(
+  public static async withErrorHandling<T>(
     operation: () => Promise<T>,
     errorContext: {
       operationName: string;
@@ -258,6 +264,7 @@ export class ErrorUtils {
 
       // Create enhanced error from regular error
       const enhancedError = new EnhancedAppException(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (errorContext.defaultErrorType as any) ||
           ExtendedErrorType.SYSTEM_ERROR,
         errorContext.defaultErrorCode || 'OPERATION_FAILED',
@@ -272,6 +279,7 @@ export class ErrorUtils {
 
       // Apply context
       if (errorContext.severity) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         enhancedError.withSeverity(errorContext.severity as any);
       }
       if (errorContext.businessImpact) {
@@ -291,9 +299,9 @@ export class ErrorUtils {
   /**
    * Create correlation context for operations
    */
-  static createCorrelationContext(
+  public static createCorrelationContext(
     operationName: string,
-    additionalContext?: Record<string, any>,
+    additionalContext?: Record<string, unknown>,
   ): void {
     const existingContext = ErrorCorrelationManager.getContext();
 
@@ -322,16 +330,17 @@ export class ErrorUtils {
   /**
    * Assert condition and throw enhanced error if false
    */
-  static assert(
+  public static assert(
     condition: boolean,
     errorType: ExtendedErrorType | string,
     errorCode: string,
     message: string,
     httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-    context?: Record<string, any>,
+    context?: Record<string, unknown>,
   ): asserts condition {
     if (!condition) {
       const error = new EnhancedAppException(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         typeof errorType === 'string' ? (errorType as any) : errorType,
         errorCode,
         message,
@@ -339,6 +348,7 @@ export class ErrorUtils {
         context,
       );
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       error.withSeverity('medium' as any);
       throw error;
     }
@@ -347,11 +357,12 @@ export class ErrorUtils {
   /**
    * Validate and throw detailed validation error
    */
-  static validateAndThrow(
+  public static validateAndThrow(
     validations: Array<{
       condition: boolean;
       field: string;
       message: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       value?: any;
     }>,
   ): void {
@@ -366,7 +377,7 @@ export class ErrorUtils {
           };
           return acc;
         },
-        {} as Record<string, any>,
+        {} as Record<string, unknown>,
       );
 
       throw this.createValidationError(
@@ -379,7 +390,7 @@ export class ErrorUtils {
   /**
    * Execute operation with automatic retry and error handling
    */
-  static async withRetry<T>(
+  public static async withRetry<T>(
     operation: () => Promise<T>,
     options: {
       maxRetries?: number;
@@ -455,6 +466,8 @@ export class ErrorUtils {
         retryAttempts: maxRetries,
         operationName,
       },
-    ).withSeverity('high' as any);
+    )
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .withSeverity('high' as any);
   }
 }

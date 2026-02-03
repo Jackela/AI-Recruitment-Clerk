@@ -1,16 +1,17 @@
+import type {
+  CanActivate,
+  ExecutionContext} from '@nestjs/common';
 import {
   Injectable,
-  CanActivate,
-  ExecutionContext,
   UnauthorizedException,
   BadRequestException,
   Logger,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { createHash } from 'crypto';
-import { Reflector } from '@nestjs/core';
+import type { Reflector } from '@nestjs/core';
 
 /**
  * Defines the shape of the request with device id.
@@ -47,7 +48,7 @@ export class GuestGuard implements CanActivate {
    * @param context - The context.
    * @returns A promise that resolves to boolean value.
    */
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  public async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<RequestWithDeviceId>();
     const deviceId = this.extractDeviceId(request);
 
@@ -179,7 +180,7 @@ export class GuestGuard implements CanActivate {
    * Retrieves rate limit status.
    * @returns The { activeGuests: number; totalRequests: number; }.
    */
-  getRateLimitStatus(): {
+  public getRateLimitStatus(): {
     activeGuests: number;
     totalRequests: number;
   } {

@@ -6,7 +6,7 @@ import { FeatureNeeds } from './feature-needs.value-object.js';
 import { OptionalInfo } from './optional-info.value-object.js';
 import { SubmissionSummary } from './submission-summary.value-object.js';
 import { Answer } from './answer.value-object.js';
-import { RawSubmissionData } from '../../application/dtos/questionnaire.dto.js';
+import type { RawSubmissionData } from '../../application/dtos/questionnaire.dto.js';
 
 /**
  * Represents the questionnaire submission.
@@ -24,7 +24,7 @@ export class QuestionnaireSubmission extends ValueObject<{
    * @param data - The data.
    * @returns The QuestionnaireSubmission.
    */
-  static fromRawData(data: RawSubmissionData): QuestionnaireSubmission {
+  public static fromRawData(data: RawSubmissionData): QuestionnaireSubmission {
     return new QuestionnaireSubmission({
       userProfile: new UserProfile({
         role: data.userProfile?.role || 'other',
@@ -68,7 +68,8 @@ export class QuestionnaireSubmission extends ValueObject<{
    * @param data - The data.
    * @returns The QuestionnaireSubmission.
    */
-  static restore(data: any): QuestionnaireSubmission {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): QuestionnaireSubmission {
     return new QuestionnaireSubmission({
       ...data,
       submittedAt: new Date(data.submittedAt),
@@ -79,7 +80,7 @@ export class QuestionnaireSubmission extends ValueObject<{
    * Retrieves user profile.
    * @returns The UserProfile.
    */
-  getUserProfile(): UserProfile {
+  public getUserProfile(): UserProfile {
     return this.props.userProfile;
   }
 
@@ -87,7 +88,7 @@ export class QuestionnaireSubmission extends ValueObject<{
    * Retrieves user experience.
    * @returns The UserExperience.
    */
-  getUserExperience(): UserExperience {
+  public getUserExperience(): UserExperience {
     return this.props.userExperience;
   }
 
@@ -95,7 +96,7 @@ export class QuestionnaireSubmission extends ValueObject<{
    * Retrieves business value.
    * @returns The BusinessValue.
    */
-  getBusinessValue(): BusinessValue {
+  public getBusinessValue(): BusinessValue {
     return this.props.businessValue;
   }
 
@@ -103,7 +104,7 @@ export class QuestionnaireSubmission extends ValueObject<{
    * Retrieves optional info.
    * @returns The OptionalInfo.
    */
-  getOptionalInfo(): OptionalInfo {
+  public getOptionalInfo(): OptionalInfo {
     return this.props.optional;
   }
 
@@ -111,7 +112,7 @@ export class QuestionnaireSubmission extends ValueObject<{
    * Retrieves summary.
    * @returns The SubmissionSummary.
    */
-  getSummary(): SubmissionSummary {
+  public getSummary(): SubmissionSummary {
     return new SubmissionSummary({
       role: this.props.userProfile.role,
       industry: this.props.userProfile.industry,
@@ -127,7 +128,7 @@ export class QuestionnaireSubmission extends ValueObject<{
    * @param questionId - The question id.
    * @returns The Answer | null.
    */
-  getAnswer(questionId: string): Answer | null {
+  public getAnswer(questionId: string): Answer | null {
     // 简化实现，实际应该有更复杂的映射
     const answers = {
       role: this.props.userProfile.role,

@@ -4,6 +4,11 @@ import { test, expect } from './fixtures';
  * Detailed Job Creation Testing - Step by Step Debugging
  */
 
+// Helper function for intentional delays
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // Mock API responses
 const mockJobResponse = {
   jobId: 'test-job-123',
@@ -57,7 +62,7 @@ test.describe('Detailed Job Creation Analysis', () => {
     await test.step('Navigate to job creation', async () => {
       console.log('Step 1: Navigating to /jobs/create');
       await page.goto('/jobs/create');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Verify form exists
       await expect(page.locator('form')).toBeVisible();
@@ -84,7 +89,7 @@ test.describe('Detailed Job Creation Analysis', () => {
       console.log('✅ Form submitted');
 
       // Wait for potential navigation or state update
-      await page.waitForTimeout(2000);
+      await delay(2000);
     });
 
     // Step 3: Check where we are after form submission
@@ -106,10 +111,10 @@ test.describe('Detailed Job Creation Analysis', () => {
       console.log('Step 4: Navigating to jobs list');
 
       await page.goto('/jobs');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded');
 
       // Wait for any async loading
-      await page.waitForTimeout(1000);
+      await delay(1000);
 
       const jobsPageContent = await page.textContent('body');
       console.log('Jobs page content length:', jobsPageContent?.length || 0);

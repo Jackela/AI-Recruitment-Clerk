@@ -1,9 +1,10 @@
+import type { DynamicModule } from '@nestjs/common';
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { NatsClientService } from './services/nats-client.service';
 import { NatsConnectionManager } from './services/nats-connection-manager.service';
 import { NatsStreamManager } from './services/nats-stream-manager.service';
-import {
+import type {
   StreamConfig,
   NatsConnectionConfig,
 } from './interfaces/nats-config.interface';
@@ -63,11 +64,11 @@ export class NatsClientModule {
    * export class AppModule {}
    * ```
    */
-  static forRoot(options?: {
+  public static forRoot(options?: {
     serviceName?: string;
     streams?: StreamConfig[];
     connectionOptions?: Partial<NatsConnectionConfig>;
-  }) {
+  }): DynamicModule {
     return {
       module: NatsClientModule,
       providers: [

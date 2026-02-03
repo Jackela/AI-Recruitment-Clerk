@@ -1,11 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Resume, ResumeDocument } from '../schemas/resume.schema';
+import type { Model } from 'mongoose';
+import type { ResumeDocument } from '../schemas/resume.schema';
+import { Resume } from '../schemas/resume.schema';
 
 // Mock DatabasePerformanceMonitor since it doesn't exist yet
 class DatabasePerformanceMonitor {
-  async executeWithMonitoring<T>(
+  public async executeWithMonitoring<T>(
     fn: () => Promise<T>,
     _operationName?: string,
     _expectedMs?: number,
@@ -36,7 +37,7 @@ export class ResumeRepository {
    * @param resumeData - The resume data.
    * @returns A promise that resolves to ResumeDocument.
    */
-  async create(resumeData: Partial<Resume>): Promise<ResumeDocument> {
+  public async create(resumeData: Partial<Resume>): Promise<ResumeDocument> {
     try {
       const createdResume = new this.resumeModel(resumeData);
       const savedResume = await createdResume.save();
@@ -53,7 +54,7 @@ export class ResumeRepository {
    * @param id - The id.
    * @returns A promise that resolves to ResumeDocument | null.
    */
-  async findById(id: string): Promise<ResumeDocument | null> {
+  public async findById(id: string): Promise<ResumeDocument | null> {
     try {
       return await this.resumeModel.findById(id).exec();
     } catch (error) {
@@ -67,7 +68,7 @@ export class ResumeRepository {
    * @param email - The email.
    * @returns A promise that resolves to an array of ResumeDocument.
    */
-  async findByEmail(email: string): Promise<ResumeDocument[]> {
+  public async findByEmail(email: string): Promise<ResumeDocument[]> {
     try {
       return await this.resumeModel.find({ 'contactInfo.email': email }).exec();
     } catch (error) {
@@ -81,7 +82,7 @@ export class ResumeRepository {
    * @param gridFsUrl - The grid fs url.
    * @returns A promise that resolves to ResumeDocument | null.
    */
-  async findByGridFsUrl(gridFsUrl: string): Promise<ResumeDocument | null> {
+  public async findByGridFsUrl(gridFsUrl: string): Promise<ResumeDocument | null> {
     try {
       return await this.resumeModel.findOne({ gridFsUrl }).exec();
     } catch (error) {
@@ -99,7 +100,7 @@ export class ResumeRepository {
    * @param updateData - The update data.
    * @returns A promise that resolves to ResumeDocument | null.
    */
-  async updateById(
+  public async updateById(
     id: string,
     updateData: Partial<Resume>,
   ): Promise<ResumeDocument | null> {
@@ -126,12 +127,13 @@ export class ResumeRepository {
    * @param errorMessage - The error message.
    * @returns A promise that resolves to ResumeDocument | null.
    */
-  async updateStatus(
+  public async updateStatus(
     id: string,
     status: string,
     errorMessage?: string,
   ): Promise<ResumeDocument | null> {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const updateData: any = { status, processedAt: new Date() };
       if (errorMessage) {
         updateData.errorMessage = errorMessage;
@@ -149,7 +151,7 @@ export class ResumeRepository {
    * @param id - The id.
    * @returns A promise that resolves to boolean value.
    */
-  async deleteById(id: string): Promise<boolean> {
+  public async deleteById(id: string): Promise<boolean> {
     try {
       const result = await this.resumeModel.findByIdAndDelete(id).exec();
       if (result) {
@@ -169,7 +171,7 @@ export class ResumeRepository {
    * @param limit - The limit.
    * @returns A promise that resolves to an array of ResumeDocument.
    */
-  async findByStatus(status: string, limit = 100): Promise<ResumeDocument[]> {
+  public async findByStatus(status: string, limit = 100): Promise<ResumeDocument[]> {
     try {
       return await this.resumeModel
         .find({ status })
@@ -187,7 +189,7 @@ export class ResumeRepository {
    * @param limit - The limit.
    * @returns A promise that resolves to an array of ResumeDocument.
    */
-  async findPending(limit = 50): Promise<ResumeDocument[]> {
+  public async findPending(limit = 50): Promise<ResumeDocument[]> {
     return this.findByStatus('pending', limit);
   }
 
@@ -196,7 +198,7 @@ export class ResumeRepository {
    * @param limit - The limit.
    * @returns A promise that resolves to an array of ResumeDocument.
    */
-  async findCompleted(limit = 100): Promise<ResumeDocument[]> {
+  public async findCompleted(limit = 100): Promise<ResumeDocument[]> {
     return this.findByStatus('completed', limit);
   }
 
@@ -204,7 +206,7 @@ export class ResumeRepository {
    * Performs the count by status operation.
    * @returns A promise that resolves to Record<string, number>.
    */
-  async countByStatus(): Promise<Record<string, number>> {
+  public async countByStatus(): Promise<Record<string, number>> {
     try {
       const counts = await this.resumeModel
         .aggregate([
@@ -230,11 +232,11 @@ export class ResumeRepository {
   }
 
   /**
-   * 🚀 OPTIMIZED SKILL MATCHING QUERY
+   * OPTIMIZED SKILL MATCHING QUERY
    * Leverages composite index: { skills: 1, status: 1, processingConfidence: -1 }
    * Expected performance: 50-150ms (85-90% improvement from 500-2000ms)
    */
-  async findWithSkills(
+  public async findWithSkills(
     skills: string[],
     options: {
       limit?: number;
@@ -255,6 +257,7 @@ export class ResumeRepository {
     return this.performanceMonitor.executeWithMonitoring(
       async () => {
         // Build optimized query that uses composite index
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const query: any = {
           skills: { $in: skills },
           processingConfidence: { $gte: minConfidence },
@@ -267,6 +270,7 @@ export class ResumeRepository {
         }
 
         // Optimize sort to match index order
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let sortOption: any;
         switch (sortBy) {
           case 'confidence':
@@ -325,6 +329,7 @@ export class ResumeRepository {
    */
   private async findWithSkillsRelevanceRanked(
     skills: string[],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     baseQuery: any,
     limit: number,
     projection?: Record<string, number>,
@@ -369,6 +374,7 @@ export class ResumeRepository {
     ];
 
     if (projection) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       pipeline.push({ $project: projection } as any);
     } else {
       // Default projection for relevance queries
@@ -386,9 +392,11 @@ export class ResumeRepository {
           'workExperience.company': 1,
           'workExperience.position': 1,
         },
-      } as any);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as unknown as any);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return this.resumeModel.aggregate(pipeline as any).exec();
   }
 
@@ -396,7 +404,7 @@ export class ResumeRepository {
    * Optimized batch skill matching for high-throughput scenarios
    * Processes multiple skill sets in parallel with connection pooling optimization
    */
-  async findWithMultipleSkillSets(
+  public async findWithMultipleSkillSets(
     skillSets: string[][],
     options: {
       limit?: number;
@@ -446,7 +454,7 @@ export class ResumeRepository {
   /**
    * Health check method for monitoring
    */
-  async healthCheck(): Promise<{
+  public async healthCheck(): Promise<{
     status: string;
     count: number;
     error?: string;

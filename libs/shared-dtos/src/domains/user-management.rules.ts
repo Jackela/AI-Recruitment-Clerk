@@ -1,20 +1,20 @@
-import { UserSession } from './user-management.dto';
+import type { UserSession } from './user-management.dto';
 
 /**
  * Represents the user session rules.
  */
 export class UserSessionRules {
-  static readonly DAILY_FREE_LIMIT = 5;
-  static readonly QUESTIONNAIRE_BONUS = 5;
-  static readonly PAYMENT_BONUS = 5;
-  static readonly SESSION_TIMEOUT_HOURS = 24;
+  public static readonly DAILY_FREE_LIMIT = 5;
+  public static readonly QUESTIONNAIRE_BONUS = 5;
+  public static readonly PAYMENT_BONUS = 5;
+  public static readonly SESSION_TIMEOUT_HOURS = 24;
 
   /**
    * Performs the can use service operation.
    * @param session - The session.
    * @returns The boolean value.
    */
-  static canUseService(session: UserSession): boolean {
+  public static canUseService(session: UserSession): boolean {
     return session.isValid() && session.canUse();
   }
 
@@ -23,7 +23,7 @@ export class UserSessionRules {
    * @param session - The session.
    * @returns The boolean value.
    */
-  static isSessionExpired(session: UserSession): boolean {
+  public static isSessionExpired(session: UserSession): boolean {
     const createdAt =
       session.getDailyUsage().resetTime.getTime() - 24 * 60 * 60 * 1000;
     const hoursElapsed = (Date.now() - createdAt) / (1000 * 60 * 60);
@@ -35,7 +35,7 @@ export class UserSessionRules {
    * @param session - The session.
    * @returns The number value.
    */
-  static calculateRemainingQuota(session: UserSession): number {
+  public static calculateRemainingQuota(session: UserSession): number {
     const usage = session.getDailyUsage();
     return Math.max(0, usage.total - usage.used);
   }
@@ -45,7 +45,7 @@ export class UserSessionRules {
    * @param usedCount - The used count.
    * @returns The boolean value.
    */
-  static isWithinDailyLimit(usedCount: number): boolean {
+  public static isWithinDailyLimit(usedCount: number): boolean {
     return usedCount < this.DAILY_FREE_LIMIT;
   }
 
@@ -54,7 +54,7 @@ export class UserSessionRules {
    * @param session - The session.
    * @returns The boolean value.
    */
-  static canApplyQuestionnaireBonus(session: UserSession): boolean {
+  public static canApplyQuestionnaireBonus(session: UserSession): boolean {
     // 一个会话最多只能申请一次问卷奖励
     return session.isValid();
   }
@@ -64,7 +64,7 @@ export class UserSessionRules {
    * @param session - The session.
    * @returns The boolean value.
    */
-  static canApplyPaymentBonus(session: UserSession): boolean {
+  public static canApplyPaymentBonus(session: UserSession): boolean {
     // 一个会话最多只能申请一次支付奖励
     return session.isValid();
   }

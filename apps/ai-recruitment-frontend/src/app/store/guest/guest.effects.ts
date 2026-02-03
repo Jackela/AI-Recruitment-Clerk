@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
@@ -11,7 +11,7 @@ import {
   delay,
 } from 'rxjs/operators';
 import { GuestApiService } from '../../services/guest/guest-api.service';
-import { GuestState } from './guest.state';
+import type { GuestState } from './guest.state';
 import * as GuestActions from './guest.actions';
 import { selectGuestState } from './guest.selectors';
 
@@ -20,20 +20,12 @@ import { selectGuestState } from './guest.selectors';
  */
 @Injectable()
 export class GuestEffects {
-  /**
-   * Initializes a new instance of the Guest Effects.
-   * @param actions$ - The actions$.
-   * @param guestApiService - The guest api service.
-   * @param store - The store.
-   */
-  constructor(
-    private actions$: Actions,
-    private guestApiService: GuestApiService,
-    private store: Store<{ guest: GuestState }>,
-  ) {}
+  private readonly actions$ = inject(Actions);
+  private readonly guestApiService = inject(GuestApiService);
+  private readonly store = inject<Store<{ guest: GuestState }>>(Store);
 
   // Load usage status
-  loadUsageStatus$ = createEffect(() =>
+  public loadUsageStatus$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GuestActions.loadUsageStatus),
       switchMap(() =>
@@ -54,7 +46,7 @@ export class GuestEffects {
   );
 
   // Load guest details
-  loadGuestDetails$ = createEffect(() =>
+  public loadGuestDetails$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GuestActions.loadGuestDetails),
       switchMap(() =>
@@ -75,7 +67,7 @@ export class GuestEffects {
   );
 
   // Increment usage
-  incrementUsage$ = createEffect(() =>
+  public incrementUsage$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GuestActions.incrementUsage),
       switchMap(() =>
@@ -112,7 +104,7 @@ export class GuestEffects {
   );
 
   // Refresh usage status after successful increment
-  incrementUsageSuccess$ = createEffect(() =>
+  public incrementUsageSuccess$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GuestActions.incrementUsageSuccess),
       map(() => GuestActions.loadUsageStatus()),
@@ -120,7 +112,7 @@ export class GuestEffects {
   );
 
   // Generate feedback code
-  generateFeedbackCode$ = createEffect(() =>
+  public generateFeedbackCode$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GuestActions.generateFeedbackCode),
       switchMap(() =>
@@ -144,7 +136,7 @@ export class GuestEffects {
   );
 
   // Redeem feedback code
-  redeemFeedbackCode$ = createEffect(() =>
+  public redeemFeedbackCode$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GuestActions.redeemFeedbackCode),
       switchMap(({ feedbackCode }) =>
@@ -174,7 +166,7 @@ export class GuestEffects {
   );
 
   // Upload resume
-  uploadResume$ = createEffect(() =>
+  public uploadResume$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GuestActions.uploadResume),
       switchMap(({ file, candidateName, candidateEmail, notes }) =>
@@ -219,7 +211,7 @@ export class GuestEffects {
   );
 
   // Load analysis results
-  loadAnalysisResults$ = createEffect(() =>
+  public loadAnalysisResults$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GuestActions.loadAnalysisResults),
       switchMap(({ analysisId }) =>
@@ -240,7 +232,7 @@ export class GuestEffects {
   );
 
   // Re-poll for analysis results if still processing
-  pollAnalysisResults$ = createEffect(() =>
+  public pollAnalysisResults$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GuestActions.loadAnalysisResultsSuccess),
       filter(
@@ -256,7 +248,7 @@ export class GuestEffects {
   );
 
   // Load demo analysis
-  loadDemoAnalysis$ = createEffect(() =>
+  public loadDemoAnalysis$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GuestActions.loadDemoAnalysis),
       switchMap(() =>
@@ -289,7 +281,7 @@ export class GuestEffects {
   );
 
   // Auto-refresh usage status after successful operations
-  refreshUsageAfterSuccess$ = createEffect(() =>
+  public refreshUsageAfterSuccess$ = createEffect(() =>
     this.actions$.pipe(
       ofType(
         GuestActions.redeemFeedbackCodeSuccess,
@@ -301,7 +293,7 @@ export class GuestEffects {
   );
 
   // Handle usage limit exceeded scenarios
-  handleUsageLimitExceeded$ = createEffect(() =>
+  public handleUsageLimitExceeded$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GuestActions.setLimited),
       withLatestFrom(this.store.select(selectGuestState)),
@@ -316,7 +308,7 @@ export class GuestEffects {
   );
 
   // Auto-initialization on app start
-  initializeGuestMode$ = createEffect(() =>
+  public initializeGuestMode$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GuestActions.initializeGuest),
       switchMap(() => [

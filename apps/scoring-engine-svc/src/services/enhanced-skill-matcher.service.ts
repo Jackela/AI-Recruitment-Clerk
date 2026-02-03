@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
+import type { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
 import { SkillsTaxonomy } from '@ai-recruitment-clerk/candidate-scoring-domain';
 
 /**
@@ -71,7 +71,7 @@ export class EnhancedSkillMatcherService {
   /**
    * Enhanced skill matching with AI-driven semantic analysis
    */
-  async matchSkills(
+  public async matchSkills(
     resumeSkills: string[],
     jobSkills: JobSkillRequirement[],
     industryContext?: string,
@@ -243,19 +243,19 @@ export class EnhancedSkillMatcherService {
     try {
       const prompt = `
         Analyze if any of these resume skills match the job requirement:
-        
+
         Resume Skills: ${resumeSkills.join(', ')}
-        
+
         Job Skill Requirement: ${jobSkill.name}
         Job Skill Description: ${jobSkill.description || 'N/A'}
         Industry Context: ${industryContext || 'General'}
-        
+
         Consider:
         1. Semantic similarity and conceptual overlap
         2. Industry-specific terminology and variations
         3. Skills that enable or substitute for the required skill
         4. Framework/library relationships (e.g., React knowledge implies JavaScript)
-        
+
         Return the analysis in this JSON format:
         {
           "hasMatch": boolean,
@@ -266,13 +266,14 @@ export class EnhancedSkillMatcherService {
         }
       `;
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const response: any = await this.geminiClient.generateStructuredResponse(
         prompt,
         `{
           "hasMatch": "boolean",
           "matchedSkill": "string or null",
           "matchScore": "number between 0.0 and 1.0",
-          "confidence": "number between 0.0 and 1.0", 
+          "confidence": "number between 0.0 and 1.0",
           "explanation": "string explaining the reasoning"
         }`,
       );
@@ -355,18 +356,18 @@ export class EnhancedSkillMatcherService {
     try {
       const prompt = `
         Based on the candidate's current skills and missing requirements, suggest skill improvement priorities:
-        
+
         Current Skills: ${resumeSkills.join(', ')}
         Missing Critical Skills: ${missingCritical.join(', ')}
         Missing Optional Skills: ${missingOptional.join(', ')}
         Industry: ${industryContext || 'General'}
-        
+
         Provide improvement suggestions considering:
         1. Learning curve and time investment
         2. Career impact and market demand
         3. Synergy with existing skills
         4. Industry relevance and growth trends
-        
+
         Return up to 5 suggestions in JSON format:
         {
           "suggestions": [
@@ -392,6 +393,7 @@ export class EnhancedSkillMatcherService {
         }`,
       );
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return (response.data as any).suggestions || [];
     } catch (error) {
       this.logger.warn('Failed to generate improvement suggestions', error);

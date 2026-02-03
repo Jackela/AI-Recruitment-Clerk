@@ -1,10 +1,10 @@
-import { Controller, Logger, OnModuleInit } from '@nestjs/common';
+import type { OnModuleInit } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { EventPattern } from '@nestjs/microservices';
-import type {
-  ResumeSubmittedEvent,
-  ResumeDTO,
-} from '@ai-recruitment-clerk/resume-processing-domain';
+import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { ParsingService } from '../parsing/parsing.service';
 
 /**
@@ -28,7 +28,7 @@ export class ResumeEventsController implements OnModuleInit {
    * Performs the on module init operation.
    * @returns The result of the operation.
    */
-  async onModuleInit() {
+  public async onModuleInit(): Promise<void> {
     // Subscribe to job.resume.submitted events using the shared NATS service
     await this.natsService.subscribeToResumeSubmissions(
       this.handleResumeSubmitted.bind(this),
@@ -41,8 +41,8 @@ export class ResumeEventsController implements OnModuleInit {
    * @returns A promise that resolves when the operation completes.
    */
   @EventPattern('job.resume.submitted')
-  async handleResumeSubmitted(payload: ResumeSubmittedEvent): Promise<void> {
-    // ✅ FIXED: Use real AI-powered resume parsing service
+  public async handleResumeSubmitted(payload: ResumeSubmittedEvent): Promise<void> {
+    // FIXED: Use real AI-powered resume parsing service
     try {
       this.logger.log(
         `[RESUME-PARSER-SVC] Delegating job.resume.submitted event for resumeId: ${payload.resumeId} on jobId: ${payload.jobId} to ParsingService`,
@@ -64,5 +64,5 @@ export class ResumeEventsController implements OnModuleInit {
     }
   }
 
-  // ✅ REMOVED: All mock methods replaced with real AI-powered ParsingService
+  // REMOVED: All mock methods replaced with real AI-powered ParsingService
 }

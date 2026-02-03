@@ -1,10 +1,11 @@
+import type {
+  ContactInfo,
+  IncentiveValidationResult,
+  PaymentResult} from '../domains/incentive.dto';
 import {
   Incentive,
   IncentiveStatus,
-  PaymentMethod,
-  ContactInfo,
-  IncentiveValidationResult,
-  PaymentResult,
+  PaymentMethod
 } from '../domains/incentive.dto';
 import { IncentiveRules } from '../domains/incentive.rules';
 
@@ -16,7 +17,7 @@ export class IncentiveContracts {
   /**
    * 创建问卷激励的契约验证
    */
-  static createQuestionnaireIncentive(
+  public static createQuestionnaireIncentive(
     ip: string,
     questionnaireId: string,
     qualityScore: number,
@@ -79,7 +80,7 @@ export class IncentiveContracts {
   /**
    * 创建推荐激励的契约验证
    */
-  static createReferralIncentive(
+  public static createReferralIncentive(
     referrerIP: string,
     referredIP: string,
     contactInfo: ContactInfo,
@@ -128,7 +129,7 @@ export class IncentiveContracts {
   /**
    * 激励验证的契约检查
    */
-  static validateIncentive(incentive: Incentive): IncentiveValidationResult {
+  public static validateIncentive(incentive: Incentive): IncentiveValidationResult {
     // 前置条件验证
     this.require(
       incentive !== null && incentive !== undefined,
@@ -185,7 +186,7 @@ export class IncentiveContracts {
   /**
    * 激励批准的契约检查
    */
-  static approveIncentive(incentive: Incentive, reason: string): void {
+  public static approveIncentive(incentive: Incentive, reason: string): void {
     // 记录原始状态用于后置条件检查
     const originalStatus = incentive.getStatus();
 
@@ -228,7 +229,7 @@ export class IncentiveContracts {
   /**
    * 激励拒绝的契约检查
    */
-  static rejectIncentive(incentive: Incentive, reason: string): void {
+  public static rejectIncentive(incentive: Incentive, reason: string): void {
     // 记录原始状态用于后置条件检查
     const originalStatus = incentive.getStatus();
 
@@ -266,7 +267,7 @@ export class IncentiveContracts {
   /**
    * 支付执行的契约检查
    */
-  static executePayment(
+  public static executePayment(
     incentive: Incentive,
     paymentMethod: PaymentMethod,
     transactionId: string,
@@ -363,7 +364,7 @@ export class IncentiveContracts {
   /**
    * 激励系统不变式验证
    */
-  static validateInvariants(incentive: Incentive): void {
+  public static validateInvariants(incentive: Incentive): void {
     // 基本属性不变式
     this.invariant(
       incentive.getId() !== null && incentive.getId() !== undefined,
@@ -435,7 +436,7 @@ export class IncentiveContracts {
   /**
    * 批量操作的契约验证
    */
-  static validateBatchOperation<T>(
+  public static validateBatchOperation<T>(
     items: T[],
     maxBatchSize: number,
     operationName: string,
@@ -460,7 +461,7 @@ export class IncentiveContracts {
   /**
    * 支付方式兼容性验证
    */
-  static validatePaymentCompatibility(
+  public static validatePaymentCompatibility(
     paymentMethod: PaymentMethod,
     contactInfo: ContactInfo,
   ): void {
@@ -489,7 +490,7 @@ export class IncentiveContracts {
   /**
    * 性能契约验证
    */
-  static performanceContract<T>(
+  public static performanceContract<T>(
     operation: () => T,
     maxExecutionTimeMs: number,
     operationName: string,
@@ -590,12 +591,14 @@ export class IncentiveContractViolation extends Error {
  * 激励系统设计契约装饰器
  */
 export function requireValidIncentive(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _target: any,
   propertyName: string,
   descriptor: PropertyDescriptor,
-) {
+): void {
   const method = descriptor.value;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   descriptor.value = function (...args: any[]) {
     const incentive = args[0];
     if (!incentive) {
@@ -613,12 +616,14 @@ export function requireValidIncentive(
  * 支付操作契约装饰器
  */
 export function requireApprovedIncentive(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _target: any,
   propertyName: string,
   descriptor: PropertyDescriptor,
-) {
+): void {
   const method = descriptor.value;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   descriptor.value = function (...args: any[]) {
     const incentive = args[0];
     if (!incentive || incentive.getStatus() !== IncentiveStatus.APPROVED) {
@@ -636,12 +641,14 @@ export function requireApprovedIncentive(
  */
 export function monitorPerformance(maxTimeMs: number) {
   return function (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     target: any,
     propertyName: string,
     descriptor: PropertyDescriptor,
   ) {
     const method = descriptor.value;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     descriptor.value = function (...args: any[]) {
       return IncentiveContracts.performanceContract(
         () => method.apply(this, args),

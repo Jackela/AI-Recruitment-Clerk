@@ -1,4 +1,5 @@
-import { Directive, OnInit, inject } from '@angular/core';
+import type { OnInit} from '@angular/core';
+import { Directive, inject } from '@angular/core';
 import { AccessibilityService } from '../../services/accessibility/accessibility.service';
 
 /**
@@ -14,7 +15,7 @@ export class SkipNavigationDirective implements OnInit {
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.createSkipLinks();
   }
 

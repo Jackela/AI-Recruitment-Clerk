@@ -165,6 +165,34 @@ export * from './privacy/data-subject-rights.dto';
 export * from './privacy/privacy-simple.dto';
 // export * from './privacy/privacy-infrastructure.dto'; // Commented out due to duplicate exports
 
+// DTO Aliases for Controller Compatibility
+// Questionnaire aliases
+export { Questionnaire as QuestionnaireDto } from './domains/questionnaire.dto';
+export { QuestionnaireTemplate as QuestionnaireTemplateDto } from './domains/questionnaire.dto';
+export { QuestionnaireSubmission as QuestionnaireSubmissionDto } from './domains/questionnaire.dto';
+export type {
+  CreateQuestionnaireDto,
+  UpdateQuestionnaireDto,
+  QuestionnaireResponseDto,
+  QuestionnaireAnalyticsDto,
+} from './domains/questionnaire.dto';
+
+// Resume aliases
+export type { ResumeDTO as ResumeDto } from './models/resume.dto';
+export type {
+  ResumeAnalysisDto,
+  ResumeUploadDto,
+  ResumeStatusUpdateDto,
+  ResumeSearchDto,
+  ResumeSkillsAnalysisDto,
+} from './models/resume.dto';
+
+// Privacy/Consent aliases
+export { ConsentStatusDto as ConsentStatusResponseDto } from './privacy/consent.dto';
+export { DataExportPackage as DataExportPackageDto } from './privacy/data-subject-rights.dto';
+export { DataSubjectRightsRequest as DataSubjectRightsRequestDto } from './privacy/data-subject-rights.dto';
+export { UserConsentProfile as UserConsentProfileDto } from './privacy/consent.dto';
+
 // Common Patterns - 通用模式
 export * from './common/base-service.pattern';
 export * from './common/nats-client.pattern';

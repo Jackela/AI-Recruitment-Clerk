@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { ReportsPlaceholderComponent } from './reports-placeholder.component';
 
 describe('ReportsPlaceholderComponent', () => {
@@ -7,7 +8,7 @@ describe('ReportsPlaceholderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ReportsPlaceholderComponent],
+      imports: [ReportsPlaceholderComponent],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ReportsPlaceholderComponent);

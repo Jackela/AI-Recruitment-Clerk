@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AbstractControl, ValidationErrors } from '@angular/forms';
+import type { AbstractControl, ValidationErrors } from '@angular/forms';
 
 /**
  * Represents the validation feedback component.
@@ -161,12 +161,12 @@ import { AbstractControl, ValidationErrors } from '@angular/forms';
   animations: [],
 })
 export class ValidationFeedbackComponent {
-  @Input() control: AbstractControl | null = null;
-  @Input() showHint = true;
-  @Input() showSuccess = false;
-  @Input() hint?: string;
-  @Input() successMessage?: string;
-  @Input() customErrors?: { [key: string]: string };
+  @Input() public control: AbstractControl | null = null;
+  @Input() public showHint = true;
+  @Input() public showSuccess = false;
+  @Input() public hint?: string;
+  @Input() public successMessage?: string;
+  @Input() public customErrors?: { [key: string]: string };
 
   private defaultErrorMessages: { [key: string]: string } = {
     required: '此字段为必填项',
@@ -185,7 +185,7 @@ export class ValidationFeedbackComponent {
    * Performs the should show error operation.
    * @returns The boolean value.
    */
-  shouldShowError(): boolean {
+  public shouldShowError(): boolean {
     if (!this.control) return false;
     return !!(
       this.control.invalid &&
@@ -197,7 +197,7 @@ export class ValidationFeedbackComponent {
    * Performs the is valid operation.
    * @returns The boolean value.
    */
-  isValid(): boolean {
+  public isValid(): boolean {
     return this.control?.valid ?? false;
   }
 
@@ -205,7 +205,7 @@ export class ValidationFeedbackComponent {
    * Performs the was touched operation.
    * @returns The boolean value.
    */
-  wasTouched(): boolean {
+  public wasTouched(): boolean {
     return this.control?.touched ?? false;
   }
 
@@ -213,7 +213,7 @@ export class ValidationFeedbackComponent {
    * Retrieves error message.
    * @returns The string value.
    */
-  getErrorMessage(): string {
+  public getErrorMessage(): string {
     if (!this.control || !this.control.errors) {
       return '';
     }
@@ -239,7 +239,7 @@ export class ValidationFeedbackComponent {
    * Retrieves errors.
    * @returns The ValidationErrors | null.
    */
-  getErrors(): ValidationErrors | null {
+  public getErrors(): ValidationErrors | null {
     return this.control?.errors ?? null;
   }
 }

@@ -2,13 +2,13 @@
  * Describes the resume list item data transfer object.
  */
 export class ResumeListItemDto {
-  id: string;
-  jobId: string;
-  originalFilename: string;
-  status: 'pending' | 'parsing' | 'scoring' | 'completed' | 'failed';
-  matchScore?: number;
-  candidateName?: string;
-  createdAt: Date;
+  public id: string;
+  public jobId: string;
+  public originalFilename: string;
+  public status: 'pending' | 'parsing' | 'scoring' | 'completed' | 'failed';
+  public matchScore?: number;
+  public candidateName?: string;
+  public createdAt: Date;
 
   /**
    * Initializes a new instance of the Resume List Item DTO.
@@ -43,32 +43,32 @@ export class ResumeListItemDto {
  * Describes the resume detail data transfer object.
  */
 export class ResumeDetailDto {
-  id: string;
-  jobId: string;
-  originalFilename: string;
-  status: 'pending' | 'parsing' | 'scoring' | 'completed' | 'failed';
-  candidateName?: string;
-  contactInfo?: {
+  public id: string;
+  public jobId: string;
+  public originalFilename: string;
+  public status: 'pending' | 'parsing' | 'scoring' | 'completed' | 'failed';
+  public candidateName?: string;
+  public contactInfo?: {
     name: string | null;
     email: string | null;
     phone: string | null;
   };
-  skills?: string[];
-  workExperience?: {
+  public skills?: string[];
+  public workExperience?: {
     company: string;
     position: string;
     startDate: string;
     endDate: string;
     summary: string;
   }[];
-  education?: {
+  public education?: {
     school: string;
     degree: string;
     major: string | null;
   }[];
-  matchScore?: number;
-  reportId?: string;
-  createdAt: Date;
+  public matchScore?: number;
+  public reportId?: string;
+  public createdAt: Date;
 
   /**
    * Initializes a new instance of the Resume Detail DTO.

@@ -48,8 +48,8 @@ describe('GuestUsageService', () => {
   let httpMock: HttpTestingController;
   let getItemSpy: jest.SpyInstance;
   let setItemSpy: jest.SpyInstance;
-  let removeItemSpy: jest.SpyInstance;
-  const recordUrl = `${environment.apiUrl}/marketing/feedback-codes/record`;
+  let _removeItemSpy: jest.SpyInstance;
+  const _recordUrl = `${environment.apiUrl}/marketing/feedback-codes/record`;
 
   beforeEach(() => {
     // Reset mock localStorage state
@@ -58,7 +58,7 @@ describe('GuestUsageService', () => {
     // Create comprehensive localStorage spies
     getItemSpy = jest.spyOn(mockLocalStorage, 'getItem');
     setItemSpy = jest.spyOn(mockLocalStorage, 'setItem');
-    removeItemSpy = jest.spyOn(mockLocalStorage, 'removeItem');
+    _removeItemSpy = jest.spyOn(mockLocalStorage, 'removeItem');
 
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],

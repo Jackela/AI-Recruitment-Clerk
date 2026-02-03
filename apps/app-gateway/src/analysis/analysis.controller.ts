@@ -17,10 +17,10 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { Public } from '../auth/decorators/public.decorator';
-import { AnalysisService } from './analysis.service';
-import { AnalysisRequestDto } from './dto/analysis-request.dto';
+import type { AnalysisService } from './analysis.service';
+import type { AnalysisRequestDto } from './dto/analysis-request.dto';
 import { AnalysisInitiatedResponseDto } from './dto/analysis-response.dto';
-import { MulterFile } from '../jobs/types/multer.types';
+import type { MulterFile } from '../jobs/types/multer.types';
 // Standardized Error Handling
 import { HandleErrors, ErrorUtils } from '@ai-recruitment-clerk/shared-dtos';
 
@@ -106,7 +106,7 @@ export class AnalysisController {
     ],
     operationContext: 'Analysis.startAnalysis',
   })
-  async startAnalysis(
+  public async startAnalysis(
     @Body() analysisRequest: AnalysisRequestDto,
     @UploadedFile() resumeFile: MulterFile,
   ): Promise<AnalysisInitiatedResponseDto> {

@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Job, JobDocument } from '../schemas/job.schema';
-import { CacheService } from '../cache/cache.service';
+import type { Model } from 'mongoose';
+import type { JobDocument } from '../schemas/job.schema';
+import { Job } from '../schemas/job.schema';
+import type { CacheService } from '../cache/cache.service';
 
 /**
  * Manages persistence for job.
@@ -26,7 +27,7 @@ export class JobRepository {
    * @param jobData - The job data.
    * @returns A promise that resolves to JobDocument.
    */
-  async create(jobData: Partial<Job>): Promise<JobDocument> {
+  public async create(jobData: Partial<Job>): Promise<JobDocument> {
     try {
       const createdJob = new this.jobModel({
         ...jobData,
@@ -51,7 +52,7 @@ export class JobRepository {
    * @param id - The id.
    * @returns A promise that resolves to JobDocument | null.
    */
-  async findById(id: string): Promise<JobDocument | null> {
+  public async findById(id: string): Promise<JobDocument | null> {
     const cacheKey = this.cacheService.generateKey('db', 'job', 'id', id);
 
     return this.cacheService.wrap(
@@ -75,7 +76,7 @@ export class JobRepository {
    * @param options - The options.
    * @returns A promise that resolves to an array of JobDocument.
    */
-  async findAll(
+  public async findAll(
     options: {
       status?: string;
       company?: string;
@@ -98,6 +99,7 @@ export class JobRepository {
       cacheKey,
       async () => {
         try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const query: any = {};
           if (status) query.status = status;
           if (company) query.company = new RegExp(company, 'i');
@@ -129,7 +131,7 @@ export class JobRepository {
    * @param limit - The limit.
    * @returns A promise that resolves to an array of JobDocument.
    */
-  async findByCompany(company: string, limit = 50): Promise<JobDocument[]> {
+  public async findByCompany(company: string, limit = 50): Promise<JobDocument[]> {
     const cacheKey = this.cacheService.generateKey(
       'db',
       'jobs',
@@ -170,7 +172,7 @@ export class JobRepository {
    * @param limit - The limit.
    * @returns A promise that resolves to an array of JobDocument.
    */
-  async findByCreatedBy(
+  public async findByCreatedBy(
     createdBy: string,
     limit = 100,
   ): Promise<JobDocument[]> {
@@ -192,7 +194,7 @@ export class JobRepository {
    * @param updateData - The update data.
    * @returns A promise that resolves to JobDocument | null.
    */
-  async updateById(
+  public async updateById(
     id: string,
     updateData: Partial<Job>,
   ): Promise<JobDocument | null> {
@@ -224,7 +226,7 @@ export class JobRepository {
    * @param status - The status.
    * @returns A promise that resolves to JobDocument | null.
    */
-  async updateStatus(id: string, status: string): Promise<JobDocument | null> {
+  public async updateStatus(id: string, status: string): Promise<JobDocument | null> {
     try {
       return await this.updateById(id, { status });
     } catch (error) {
@@ -240,7 +242,7 @@ export class JobRepository {
    * @param confidence - The confidence.
    * @returns A promise that resolves to JobDocument | null.
    */
-  async updateJdAnalysis(
+  public async updateJdAnalysis(
     id: string,
     extractedKeywords: string[],
     confidence: number,
@@ -262,7 +264,7 @@ export class JobRepository {
    * @param id - The id.
    * @returns A promise that resolves to boolean value.
    */
-  async deleteById(id: string): Promise<boolean> {
+  public async deleteById(id: string): Promise<boolean> {
     try {
       const result = await this.jobModel.findByIdAndDelete(id).exec();
       if (result) {
@@ -284,7 +286,7 @@ export class JobRepository {
    * @param limit - The limit.
    * @returns A promise that resolves to an array of JobDocument.
    */
-  async searchByKeywords(
+  public async searchByKeywords(
     keywords: string[],
     limit = 50,
   ): Promise<JobDocument[]> {
@@ -311,7 +313,7 @@ export class JobRepository {
    * @param limit - The limit.
    * @returns A promise that resolves to an array of JobDocument.
    */
-  async findBySkills(skills: string[], limit = 50): Promise<JobDocument[]> {
+  public async findBySkills(skills: string[], limit = 50): Promise<JobDocument[]> {
     try {
       return await this.jobModel
         .find({
@@ -331,7 +333,7 @@ export class JobRepository {
    * Performs the count by status operation.
    * @returns A promise that resolves to Record<string, number>.
    */
-  async countByStatus(): Promise<Record<string, number>> {
+  public async countByStatus(): Promise<Record<string, number>> {
     const cacheKey = this.cacheService.generateKey(
       'db',
       'jobs',
@@ -376,7 +378,7 @@ export class JobRepository {
    * Performs the count by company operation.
    * @returns A promise that resolves to Array<{ company: string; count: number }>.
    */
-  async countByCompany(): Promise<Array<{ company: string; count: number }>> {
+  public async countByCompany(): Promise<Array<{ company: string; count: number }>> {
     const cacheKey = this.cacheService.generateKey(
       'db',
       'jobs',
@@ -425,7 +427,7 @@ export class JobRepository {
   /**
    * Health check method for monitoring
    */
-  async healthCheck(): Promise<{ status: string; count: number }> {
+  public async healthCheck(): Promise<{ status: string; count: number }> {
     const cacheKey = this.cacheService.generateKey('db', 'jobs', 'health');
 
     return this.cacheService.wrap(
@@ -453,7 +455,7 @@ export class JobRepository {
   /**
    * Seed method for initial data
    */
-  async seedSampleData(): Promise<void> {
+  public async seedSampleData(): Promise<void> {
     try {
       const existingJobs = await this.jobModel.countDocuments().exec();
       if (existingJobs > 0) {
@@ -522,6 +524,7 @@ export class JobRepository {
       if (job) {
         // 清除特定职位的缓存
         const jobId =
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (job as any)._id?.toString() || job.id?.toString() || 'unknown';
         await this.cacheService.del(
           this.cacheService.generateKey('db', 'job', 'id', jobId),
@@ -550,7 +553,7 @@ export class JobRepository {
   /**
    * 手动清除所有职位相关缓存
    */
-  async clearAllJobCaches(): Promise<void> {
+  public async clearAllJobCaches(): Promise<void> {
     await this.invalidateJobCaches();
   }
 }

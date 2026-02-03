@@ -1,6 +1,6 @@
 import { JdEventsController } from '../app/jd-events.controller';
-import { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
-import { LlmService } from '../extraction/llm.service';
+import type { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
+import type { LlmService } from '../extraction/llm.service';
 
 type JobSubmissionHandler = (event: {
   jobId: string;

@@ -1,9 +1,10 @@
 import { Directive, Input, forwardRef } from '@angular/core';
-import {
-  NG_VALIDATORS,
+import type {
   Validator,
   AbstractControl,
-  ValidationErrors,
+  ValidationErrors} from '@angular/forms';
+import {
+  NG_VALIDATORS
 } from '@angular/forms';
 
 /**
@@ -21,15 +22,15 @@ import {
   ],
 })
 export class PatternValidatorDirective implements Validator {
-  @Input() arcPattern!: string | RegExp;
-  @Input() patternMessage?: string;
+  @Input() public arcPattern!: string | RegExp;
+  @Input() public patternMessage?: string;
 
   /**
    * Validates the data.
    * @param control - The control.
    * @returns The ValidationErrors | null.
    */
-  validate(control: AbstractControl): ValidationErrors | null {
+  public validate(control: AbstractControl): ValidationErrors | null {
     if (!control.value || !this.arcPattern) {
       return null;
     }

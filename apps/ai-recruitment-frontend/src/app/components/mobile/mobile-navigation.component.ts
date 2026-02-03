@@ -1,10 +1,11 @@
+import type {
+  OnInit,
+  OnDestroy} from '@angular/core';
 import {
   Component,
   Input,
   Output,
   EventEmitter,
-  OnInit,
-  OnDestroy,
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -88,9 +89,13 @@ export interface MobileNavItem {
       class="mobile-menu-overlay"
       [class.open]="isMenuOpen"
       (click)="closeMenu()"
+      (keydown.enter)="closeMenu()"
+      (keydown.space)="closeMenu()"
       [attr.aria-hidden]="!isMenuOpen"
+      tabindex="0"
+      role="button"
     >
-      <nav class="mobile-menu" (click)="$event.stopPropagation()">
+      <nav class="mobile-menu" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()" role="navigation">
         <div class="menu-header">
           <h2>Menu</h2>
           <button
@@ -885,31 +890,31 @@ export interface MobileNavItem {
   ],
 })
 export class MobileNavigationComponent implements OnInit, OnDestroy {
-  @Input() pageTitle = '';
-  @Input() pageSubtitle = '';
-  @Input() showBackButton = false;
-  @Input() navItems: MobileNavItem[] = [];
-  @Input() menuItems: MobileNavItem[] = [];
-  @Input() headerActions: Array<{
+  @Input() public pageTitle = '';
+  @Input() public pageSubtitle = '';
+  @Input() public showBackButton = false;
+  @Input() public navItems: MobileNavItem[] = [];
+  @Input() public menuItems: MobileNavItem[] = [];
+  @Input() public headerActions: Array<{
     id: string;
     label: string;
     icon?: string;
     action: () => void;
   }> = [];
-  @Input() menuActions: Array<{
+  @Input() public menuActions: Array<{
     id: string;
     label: string;
     icon?: string;
     action: () => void;
   }> = [];
 
-  @Output() backClick = new EventEmitter<void>();
-  @Output() actionClick = new EventEmitter<{ id: string; label: string }>();
-  @Output() menuActionClick = new EventEmitter<{ id: string; label: string }>();
+  @Output() public backClick = new EventEmitter<void>();
+  @Output() public actionClick = new EventEmitter<{ id: string; label: string }>();
+  @Output() public menuActionClick = new EventEmitter<{ id: string; label: string }>();
 
-  currentRoute = '';
-  isMenuOpen = false;
-  isScrolled = false;
+  public currentRoute = '';
+  public isMenuOpen = false;
+  public isScrolled = false;
   private destroy$ = new Subject<void>();
 
   private router = inject(Router);
@@ -918,7 +923,7 @@ export class MobileNavigationComponent implements OnInit, OnDestroy {
    * Performs the ng on init operation.
    * @returns The result of the operation.
    */
-  ngOnInit() {
+  public ngOnInit(): void {
     // Track current route
     this.router.events
       .pipe(
@@ -940,13 +945,13 @@ export class MobileNavigationComponent implements OnInit, OnDestroy {
    * Performs the ng on destroy operation.
    * @returns The result of the operation.
    */
-  ngOnDestroy() {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
     window.removeEventListener('scroll', this.handleScroll.bind(this));
   }
 
-  private handleScroll() {
+  private handleScroll(): void {
     this.isScrolled = window.scrollY > 10;
   }
 
@@ -954,7 +959,7 @@ export class MobileNavigationComponent implements OnInit, OnDestroy {
    * Performs the on back click operation.
    * @returns The result of the operation.
    */
-  onBackClick() {
+  public onBackClick(): void {
     this.backClick.emit();
   }
 
@@ -963,7 +968,8 @@ export class MobileNavigationComponent implements OnInit, OnDestroy {
    * @param action - The action.
    * @returns The result of the operation.
    */
-  onActionClick(action: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public onActionClick(action: any): void {
     this.actionClick.emit(action);
   }
 
@@ -972,7 +978,8 @@ export class MobileNavigationComponent implements OnInit, OnDestroy {
    * @param action - The action.
    * @returns The result of the operation.
    */
-  onMenuActionClick(action: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public onMenuActionClick(action: any): void {
     this.menuActionClick.emit(action);
     this.closeMenu();
   }
@@ -981,7 +988,7 @@ export class MobileNavigationComponent implements OnInit, OnDestroy {
    * Performs the toggle menu operation.
    * @returns The result of the operation.
    */
-  toggleMenu() {
+  public toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen;
 
     // Prevent body scroll when menu is open
@@ -996,7 +1003,7 @@ export class MobileNavigationComponent implements OnInit, OnDestroy {
    * Performs the close menu operation.
    * @returns The result of the operation.
    */
-  closeMenu() {
+  public closeMenu(): void {
     this.isMenuOpen = false;
     document.body.style.overflow = '';
   }
@@ -1006,7 +1013,7 @@ export class MobileNavigationComponent implements OnInit, OnDestroy {
    * @param item - The item.
    * @returns The result of the operation.
    */
-  onMenuItemClick(item: MobileNavItem) {
+  public onMenuItemClick(item: MobileNavItem): void {
     if (!item.disabled) {
       this.closeMenu();
     }

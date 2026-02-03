@@ -1,4 +1,4 @@
-import { Job, JobListItem } from './job.model';
+import type { Job, JobListItem } from './job.model';
 
 /**
  * Defines the shape of the job state.

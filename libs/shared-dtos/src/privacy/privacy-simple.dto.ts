@@ -58,45 +58,45 @@ export enum BreachStatus {
  */
 export class DataProcessingRecord {
   @IsString()
-  id!: string;
+  public id!: string;
 
   @IsString()
-  name!: string;
+  public name!: string;
 
   @IsString()
-  description!: string;
+  public description!: string;
 
   @IsString()
-  dataController!: string;
+  public dataController!: string;
 
   @IsString()
-  dataProcessorService!: string;
+  public dataProcessorService!: string;
 
   @IsArray()
   @IsString({ each: true })
-  purposesOfProcessing!: string[];
+  public purposesOfProcessing!: string[];
 
   @IsArray()
   @IsString({ each: true })
-  categoriesOfDataSubjects!: string[];
+  public categoriesOfDataSubjects!: string[];
 
   @IsArray()
   @IsString({ each: true })
-  categoriesOfPersonalData!: string[];
+  public categoriesOfPersonalData!: string[];
 
   @IsEnum(ProcessingLegalBasis)
-  legalBasis!: ProcessingLegalBasis;
+  public legalBasis!: ProcessingLegalBasis;
 
   @IsString()
   @IsOptional()
-  retentionPeriod?: string;
+  public retentionPeriod?: string;
 
   @IsBoolean()
   @IsOptional()
-  involvesSpecialCategories?: boolean;
+  public involvesSpecialCategories?: boolean;
 
-  createdAt!: Date;
-  updatedAt!: Date;
+  public createdAt!: Date;
+  public updatedAt!: Date;
 }
 
 /**
@@ -104,32 +104,32 @@ export class DataProcessingRecord {
  */
 export class DataRetentionPolicy {
   @IsString()
-  id!: string;
+  public id!: string;
 
   @IsString()
-  name!: string;
+  public name!: string;
 
   @IsString()
-  dataCategory!: string;
+  public dataCategory!: string;
 
   @IsNumber()
-  retentionPeriodDays!: number;
+  public retentionPeriodDays!: number;
 
   @IsEnum(DataRetentionStatus)
   @IsOptional()
-  defaultAction?: DataRetentionStatus;
+  public defaultAction?: DataRetentionStatus;
 
   @IsBoolean()
-  allowUserDeletion!: boolean;
+  public allowUserDeletion!: boolean;
 
   @IsBoolean()
-  hasLegalHoldExemption!: boolean;
+  public hasLegalHoldExemption!: boolean;
 
   @IsBoolean()
-  isActive!: boolean;
+  public isActive!: boolean;
 
-  createdAt!: Date;
-  updatedAt!: Date;
+  public createdAt!: Date;
+  public updatedAt!: Date;
 }
 
 /**
@@ -137,50 +137,50 @@ export class DataRetentionPolicy {
  */
 export class DataBreachRecord {
   @IsString()
-  id!: string;
+  public id!: string;
 
   @IsString()
-  title!: string;
+  public title!: string;
 
   @IsString()
-  description!: string;
+  public description!: string;
 
   @IsEnum(BreachType)
-  breachType!: BreachType;
+  public breachType!: BreachType;
 
   @IsEnum(BreachSeverity)
-  severity!: BreachSeverity;
+  public severity!: BreachSeverity;
 
   @IsEnum(BreachStatus)
-  status!: BreachStatus;
+  public status!: BreachStatus;
 
-  discoveryDate!: Date;
-
-  @IsOptional()
-  estimatedOccurrenceDate?: Date;
+  public discoveryDate!: Date;
 
   @IsOptional()
-  containmentDate?: Date;
+  public estimatedOccurrenceDate?: Date;
+
+  @IsOptional()
+  public containmentDate?: Date;
 
   @IsNumber()
   @IsOptional()
-  affectedRecordsCount?: number;
+  public affectedRecordsCount?: number;
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  affectedDataCategories?: string[];
+  public affectedDataCategories?: string[];
 
   @IsString()
   @IsOptional()
-  reportedBy?: string;
+  public reportedBy?: string;
 
   @IsString()
   @IsOptional()
-  investigatedBy?: string;
+  public investigatedBy?: string;
 
-  createdAt!: Date;
-  updatedAt!: Date;
+  public createdAt!: Date;
+  public updatedAt!: Date;
 }
 
 /**
@@ -188,24 +188,24 @@ export class DataBreachRecord {
  */
 export class CreateDataProcessingRecordDto {
   @IsString()
-  name!: string;
+  public name!: string;
 
   @IsString()
-  description!: string;
+  public description!: string;
 
   @IsString()
-  dataProcessorService!: string;
+  public dataProcessorService!: string;
 
   @IsArray()
   @IsString({ each: true })
-  purposesOfProcessing!: string[];
+  public purposesOfProcessing!: string[];
 
   @IsArray()
   @IsString({ each: true })
-  categoriesOfPersonalData!: string[];
+  public categoriesOfPersonalData!: string[];
 
   @IsEnum(ProcessingLegalBasis)
-  legalBasis!: ProcessingLegalBasis;
+  public legalBasis!: ProcessingLegalBasis;
 }
 
 /**
@@ -213,23 +213,23 @@ export class CreateDataProcessingRecordDto {
  */
 export class CreateBreachRecordDto {
   @IsString()
-  title!: string;
+  public title!: string;
 
   @IsString()
-  description!: string;
+  public description!: string;
 
   @IsEnum(BreachType)
-  breachType!: BreachType;
+  public breachType!: BreachType;
 
   @IsEnum(BreachSeverity)
-  severity!: BreachSeverity;
+  public severity!: BreachSeverity;
 
   @IsOptional()
-  discoveryDate?: Date;
+  public discoveryDate?: Date;
 
   @IsString()
   @IsOptional()
-  reportedBy?: string;
+  public reportedBy?: string;
 }
 
 /**
@@ -237,16 +237,16 @@ export class CreateBreachRecordDto {
  */
 export class UpdateRetentionStatusDto {
   @IsString()
-  recordId!: string;
+  public recordId!: string;
 
   @IsEnum(DataRetentionStatus)
-  status!: DataRetentionStatus;
+  public status!: DataRetentionStatus;
 
   @IsString()
   @IsOptional()
-  notes?: string;
+  public notes?: string;
 
   @IsString()
   @IsOptional()
-  performedBy?: string;
+  public performedBy?: string;
 }

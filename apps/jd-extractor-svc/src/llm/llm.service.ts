@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
+import type {
   JdDTO,
   LlmExtractionRequest,
   LlmExtractionResponse,
@@ -17,7 +17,7 @@ export class LlmService {
    * @param jdText - The jd text.
    * @returns A promise that resolves to JdDTO.
    */
-  async extractJobRequirements(jdText: string): Promise<JdDTO> {
+  public async extractJobRequirements(jdText: string): Promise<JdDTO> {
     this.logger.log('Extracting job requirements from JD text');
 
     // For now, provide a mock implementation that extracts basic structure
@@ -46,7 +46,7 @@ export class LlmService {
    * @param request - The request.
    * @returns A promise that resolves to LlmExtractionResponse.
    */
-  async extractStructuredData(
+  public async extractStructuredData(
     request: LlmExtractionRequest,
   ): Promise<LlmExtractionResponse> {
     const startTime = Date.now();
@@ -84,7 +84,7 @@ export class LlmService {
    * @param data - The data.
    * @returns A promise that resolves to boolean value.
    */
-  async validateExtractedData(data: JdDTO): Promise<boolean> {
+  public async validateExtractedData(data: JdDTO): Promise<boolean> {
     // Basic validation logic
     if (!data.requirements || !data.responsibilities) {
       return false;

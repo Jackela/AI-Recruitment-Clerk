@@ -4,25 +4,26 @@ import {
   UnauthorizedException,
   Logger,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import type { Model } from 'mongoose';
 import * as speakeasy from 'speakeasy';
 import * as QRCode from 'qrcode';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcryptjs';
-import {
-  MfaMethod,
+import type {
   EnableMfaDto,
   VerifyMfaDto,
   DisableMfaDto,
   GenerateBackupCodesDto,
   MfaStatusDto,
-  MfaSetupResponseDto,
+  MfaSetupResponseDto} from '../dto/mfa.dto';
+import {
+  MfaMethod
 } from '../dto/mfa.dto';
 import { UserProfile } from '../../schemas/user-profile.schema';
-import { EmailService } from './email.service';
-import { SmsService } from './sms.service';
+import type { EmailService } from './email.service';
+import type { SmsService } from './sms.service';
 
 interface MfaSettings {
   enabled: boolean;
@@ -77,7 +78,7 @@ export class MfaService {
    * @param enableMfaDto - The enable mfa dto.
    * @returns A promise that resolves to MfaSetupResponseDto.
    */
-  async enableMfa(
+  public async enableMfa(
     userId: string,
     enableMfaDto: EnableMfaDto,
   ): Promise<MfaSetupResponseDto> {
@@ -116,7 +117,7 @@ export class MfaService {
           secretKey = secret.base32;
 
           // Generate QR code
-          qrCode = await QRCode.toDataURL(secret.otpauth_url!);
+          qrCode = await QRCode.toDataURL(secret.otpauth_url ?? '');
           break;
         }
 
@@ -173,6 +174,7 @@ export class MfaService {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private normalizeMfaSettings(rawSettings: any): MfaSettings {
     if (!rawSettings) {
       return {
@@ -209,7 +211,7 @@ export class MfaService {
    * @param deviceFingerprint - The device fingerprint.
    * @returns A promise that resolves to { success: boolean; deviceTrusted?: boolean }.
    */
-  async verifyMfa(
+  public async verifyMfa(
     userId: string,
     verifyMfaDto: VerifyMfaDto,
     deviceFingerprint?: string,
@@ -319,7 +321,7 @@ export class MfaService {
    * @param disableMfaDto - The disable mfa dto.
    * @returns A promise that resolves to { success: boolean }.
    */
-  async disableMfa(
+  public async disableMfa(
     userId: string,
     disableMfaDto: DisableMfaDto,
   ): Promise<{ success: boolean }> {
@@ -375,7 +377,7 @@ export class MfaService {
    * @param userId - The user id.
    * @returns A promise that resolves to MfaStatusDto.
    */
-  async getMfaStatus(userId: string): Promise<MfaStatusDto> {
+  public async getMfaStatus(userId: string): Promise<MfaStatusDto> {
     const user = await this.userModel.findById(userId);
     if (!user) {
       throw new UnauthorizedException('User not found');
@@ -398,7 +400,7 @@ export class MfaService {
    * @param generateBackupCodesDto - The generate backup codes dto.
    * @returns A promise that resolves to an array of string value.
    */
-  async generateNewBackupCodes(
+  public async generateNewBackupCodes(
     userId: string,
     generateBackupCodesDto: GenerateBackupCodesDto,
   ): Promise<string[]> {
@@ -431,8 +433,10 @@ export class MfaService {
     );
 
     // Update user with new backup codes
-    const mfaSettings = user.mfaSettings!;
-    mfaSettings.backupCodes = hashedBackupCodes;
+    const mfaSettings = user.mfaSettings;
+    if (mfaSettings) {
+      mfaSettings.backupCodes = hashedBackupCodes;
+    }
 
     await this.userModel.findByIdAndUpdate(userId, { mfaSettings });
 
@@ -486,7 +490,7 @@ export class MfaService {
    * @param method - The method.
    * @returns A promise that resolves to { success: boolean; message: string }.
    */
-  async sendMfaToken(
+  public async sendMfaToken(
     userId: string,
     method: MfaMethod,
   ): Promise<{ success: boolean; message: string }> {
@@ -545,7 +549,7 @@ export class MfaService {
     { token: string; expiresAt: Date }
   >();
 
-  private storeTemporaryToken(userId: string, token: string, expiresAt: Date) {
+  private storeTemporaryToken(userId: string, token: string, expiresAt: Date): void {
     // Clean up expired tokens
     this.cleanupExpiredTokens();
 
@@ -561,7 +565,7 @@ export class MfaService {
     );
   }
 
-  private cleanupExpiredTokens() {
+  private cleanupExpiredTokens(): void {
     const now = new Date();
     for (const [userId, tokenData] of this.temporaryTokens.entries()) {
       if (tokenData.expiresAt < now) {

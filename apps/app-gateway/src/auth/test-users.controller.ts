@@ -15,7 +15,8 @@ export class TestUsersController {
   @Public()
   @Get('users/profile')
   @HttpCode(HttpStatus.OK)
-  getProfile(@Headers('authorization') auth?: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public getProfile(@Headers('authorization') auth?: string): { success: boolean; data: any } {
     const email = decodeEmailFromToken(auth);
     const user = email ? testUsers.get(email) : null;
     return {
@@ -31,7 +32,7 @@ export class TestUsersController {
   @Public()
   @Get('users/activity')
   @HttpCode(HttpStatus.OK)
-  getActivity() {
+  public getActivity(): { success: boolean; data: { active: boolean; timestamp: string } } {
     return {
       success: true,
       data: { active: true, timestamp: new Date().toISOString() },
@@ -46,11 +47,13 @@ export class TestUsersController {
   @Public()
   @Get('users/organization/users')
   @HttpCode(HttpStatus.OK)
-  listOrgUsers(@Headers('authorization') auth?: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public listOrgUsers(@Headers('authorization') auth?: string): { success: boolean; data: { users: any[] } } {
     const email = decodeEmailFromToken(auth);
     const admin = email ? testUsers.get(email) : null;
     const orgId = admin?.organizationId;
     const users = Array.from(testUsers.values()).filter(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (u: any) => !orgId || u.organizationId === orgId,
     );
     return {

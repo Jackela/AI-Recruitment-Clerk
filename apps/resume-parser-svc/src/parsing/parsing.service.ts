@@ -1,8 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { VisionLlmService } from '../vision-llm/vision-llm.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { PdfTextExtractorService } from './pdf-text-extractor.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { GridFsService } from '../gridfs/gridfs.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { FieldMapperService } from '../field-mapper/field-mapper.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
 import {
   RetryUtility,
@@ -64,7 +69,7 @@ export class ParsingService {
    * Retrieves processing stats.
    * @returns The { activeJobs: number; totalCapacity: number; isHealthy: boolean }.
    */
-  getProcessingStats(): {
+  public getProcessingStats(): {
     activeJobs: number;
     totalCapacity: number;
     isHealthy: boolean;
@@ -86,10 +91,11 @@ export class ParsingService {
    * @param userId - The user id.
    * @returns A promise that resolves to any.
    */
-  async parseResumeFile(
+  public async parseResumeFile(
     buffer: Buffer,
     filename: string,
     userId: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<any> {
     const started = Date.now();
     const jobId = `${filename}-${Date.now()}`;
@@ -137,17 +143,18 @@ export class ParsingService {
 
       // Pass extracted text to LLM for processing
       const raw = await this.visionLlmService.parseResumeText(extractedText);
-      const resumeDto = await this.fieldMapperService.normalizeToResumeDto(
-        raw as any,
-      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const resumeDto = await this.fieldMapperService.normalizeToResumeDto(raw as any);
 
       // Attempt to upload original file for reference URL (best-effort)
       let fileUrl: string | undefined;
       try {
         if (
           this.gridFsService &&
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           typeof (this.gridFsService as any).uploadFile === 'function'
         ) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           fileUrl = await (this.gridFsService as any).uploadFile(
             buffer,
             filename,
@@ -208,7 +215,8 @@ export class ParsingService {
     resetTimeoutMs: 60000,
     monitorWindow: 300000,
   })
-  async handleResumeSubmitted(event: any): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async handleResumeSubmitted(event: any): Promise<void> {
     const {
       jobId,
       resumeId,
@@ -262,7 +270,7 @@ export class ParsingService {
 
       // Add to processing map
       const fileHash = createHash('sha256')
-        .update(fileBuffer as any)
+        .update(Uint8Array.from(fileBuffer))
         .digest('hex');
       this.processingFiles.set(processingKey, {
         timestamp: Date.now(),
@@ -307,7 +315,7 @@ export class ParsingService {
 
       // Normalize and encrypt sensitive data
       const resumeDto =
-        await this.fieldMapperService.normalizeToResumeDto(rawLlmOutput);
+        await this.fieldMapperService.normalizeToResumeDto(rawLlmOutput as unknown as Record<string, unknown>);
       const encryptedResumeDto = this.encryptSensitiveData(
         resumeDto,
         organizationId,
@@ -363,12 +371,13 @@ export class ParsingService {
    * @param organizationId - The organization id.
    * @returns A promise that resolves to any.
    */
-  async processResumeFile(
+  public async processResumeFile(
     jobId: string,
     resumeId: string,
     gridFsUrl: string,
     filename: string,
     organizationId: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<any> {
     const startTime = Date.now();
 
@@ -402,7 +411,7 @@ export class ParsingService {
 
       // Additional security check: verify file hasn't been tampered with
       const fileHash = createHash('sha256')
-        .update(fileBuffer as any)
+        .update(Uint8Array.from(fileBuffer))
         .digest('hex');
       this.logger.debug(`File integrity hash: ${fileHash}`);
 
@@ -448,7 +457,7 @@ export class ParsingService {
         `Normalizing and securing extracted data for resume: ${resumeId}`,
       );
       const resumeDto =
-        await this.fieldMapperService.normalizeToResumeDto(rawLlmOutput);
+        await this.fieldMapperService.normalizeToResumeDto(rawLlmOutput as unknown as Record<string, unknown>);
       const securedResumeDto = this.encryptSensitiveData(
         resumeDto,
         organizationId,
@@ -500,7 +509,8 @@ export class ParsingService {
    * @param result - The result.
    * @returns A promise that resolves when the operation completes.
    */
-  async publishSuccessEvent(result: any): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async publishSuccessEvent(result: any): Promise<void> {
     try {
       this.logger.log(
         `Publishing success event for resumeId: ${result.resumeId}`,
@@ -569,7 +579,7 @@ export class ParsingService {
    * @param retryCount - The retry count.
    * @returns A promise that resolves when the operation completes.
    */
-  async publishFailureEvent(
+  public async publishFailureEvent(
     jobId: string,
     resumeId: string,
     filename: string,
@@ -639,10 +649,11 @@ export class ParsingService {
    * @param originalData - The original data.
    * @returns A promise that resolves when the operation completes.
    */
-  async handleProcessingError(
+  public async handleProcessingError(
     error: Error,
     jobId: string,
     resumeId: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     originalData?: any,
   ): Promise<void> {
     try {
@@ -730,6 +741,7 @@ export class ParsingService {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private validateResumeDto(resumeDto: any): boolean {
     try {
       // Check required fields
@@ -848,6 +860,7 @@ export class ParsingService {
   private async retryParseOperation(
     jobId: string,
     resumeId: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     originalData: any,
   ): Promise<void> {
     try {
@@ -928,6 +941,7 @@ export class ParsingService {
   private async downloadAndValidateFile(
     gridFsUrl: string,
     filename: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata?: any,
   ): Promise<Buffer> {
     // Download file
@@ -990,6 +1004,7 @@ export class ParsingService {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private encryptSensitiveData(resumeDto: any, organizationId: string): any {
     try {
       // Create a copy to avoid mutating original
@@ -1049,8 +1064,8 @@ export class ParsingService {
       }
       // Assume UTF-8 text as fallback
       return buffer.toString('utf8');
-    } catch (err) {
-      this.logger.warn('Failed to extract text from buffer', err as any);
+    } catch (err: unknown) {
+      this.logger.warn('Failed to extract text from buffer', err as Error);
       return '';
     }
   }
@@ -1079,7 +1094,8 @@ export class ParsingService {
    * Performs the health check operation.
    * @returns A promise that resolves to { status: string; details: any }.
    */
-  async healthCheck(): Promise<{ status: string; details: any }> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async healthCheck(): Promise<{ status: string; details: any }> {
     try {
       const natsHealth = await this.natsService.getHealthStatus();
       const retryQueueSize = this.retryCounts.size;
@@ -1109,11 +1125,11 @@ export class ParsingService {
           uptime: process.uptime(),
         },
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         status: 'unhealthy',
         details: {
-          error: error?.message || 'Unknown error',
+          error: (error as Error)?.message || 'Unknown error',
         },
       };
     }
@@ -1124,7 +1140,7 @@ export class ParsingService {
    * Retrieves security metrics.
    * @returns The { activeProcessingFiles: number; totalProcessedToday: number; encryptionFailures: number; validationFailures: number; }.
    */
-  getSecurityMetrics(): {
+  public getSecurityMetrics(): {
     activeProcessingFiles: number;
     totalProcessedToday: number;
     encryptionFailures: number;

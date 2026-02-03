@@ -1,14 +1,14 @@
 import { ParsingService } from './parsing.service';
-import { VisionLlmService } from '../vision-llm/vision-llm.service';
-import { PdfTextExtractorService } from './pdf-text-extractor.service';
-import { GridFsService } from '../gridfs/gridfs.service';
-import { FieldMapperService } from '../field-mapper/field-mapper.service';
-import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
+import type { VisionLlmService } from '../vision-llm/vision-llm.service';
+import type { PdfTextExtractorService } from './pdf-text-extractor.service';
+import type { GridFsService } from '../gridfs/gridfs.service';
+import type { FieldMapperService } from '../field-mapper/field-mapper.service';
+import type { ResumeParserNatsService } from '../services/resume-parser-nats.service';
 import pdfParse from 'pdf-parse';
 
 jest.mock('pdf-parse', () => jest.fn());
 
-const mockParse = pdfParse as jest.MockedFunction<any>;
+const mockParse = pdfParse as unknown as jest.MockedFunction<(buffer: Buffer) => Promise<{ text: string }>>;
 
 const buildService = () => {
   const vision = { parseResumeText: jest.fn(), parseResumePdf: jest.fn() } as unknown as VisionLlmService;
@@ -32,7 +32,7 @@ describe('ParsingService (isolated)', () => {
   });
 
   it('downloads resume and publishes parsed event', async () => {
-    const { svc, grid, pdf, mapper, nats } = buildService();
+    const { svc, grid, pdf, mapper, nats, vision: _vision } = buildService();
     const event = {
       jobId: 'job-1',
       resumeId: 'resume-1',
@@ -60,7 +60,7 @@ describe('ParsingService (isolated)', () => {
 
   describe('Negative Tests - File Download Failures', () => {
     it('should handle GridFS download failure', async () => {
-      const { svc, grid, nats } = buildService();
+      const { svc, grid, nats, vision: _vision, pdf: _pdf, mapper: _mapper } = buildService();
       const event = {
         jobId: 'job-fail',
         resumeId: 'resume-fail',
@@ -81,7 +81,7 @@ describe('ParsingService (isolated)', () => {
     });
 
     it('should handle network timeout during download', async () => {
-      const { svc, grid, nats } = buildService();
+      const { svc, grid, nats: _nats, vision: _vision, pdf: _pdf, mapper: _mapper } = buildService();
       const event = {
         jobId: 'job-timeout',
         resumeId: 'resume-timeout',
@@ -101,7 +101,7 @@ describe('ParsingService (isolated)', () => {
     });
 
     it('should reject corrupted PDF files', async () => {
-      const { svc, grid, nats } = buildService();
+      const { svc, grid, nats, vision: _vision, pdf: _pdf, mapper: _mapper } = buildService();
       const event = {
         jobId: 'job-corrupt',
         resumeId: 'resume-corrupt',
@@ -123,7 +123,7 @@ describe('ParsingService (isolated)', () => {
 
   describe('Negative Tests - Text Extraction Failures', () => {
     it('should handle empty PDF files', async () => {
-      const { svc, grid, pdf, nats } = buildService();
+      const { svc, grid, pdf, nats: _nats, vision: _vision, mapper: _mapper } = buildService();
       const event = {
         jobId: 'job-empty',
         resumeId: 'resume-empty',
@@ -142,7 +142,7 @@ describe('ParsingService (isolated)', () => {
     });
 
     it('should handle PDF parsing errors', async () => {
-      const { svc, grid, pdf, nats } = buildService();
+      const { svc, grid, pdf, nats, vision: _vision, mapper: _mapper } = buildService();
       const event = {
         jobId: 'job-parse-error',
         resumeId: 'resume-parse-error',

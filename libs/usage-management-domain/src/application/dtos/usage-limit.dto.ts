@@ -12,8 +12,8 @@ export enum BonusType {
 export interface UsageLimitData {
   id: string;
   ip: string;
-  policy: any;
-  quotaAllocation: any;
-  usageTracking: any;
+  policy: Record<string, unknown>;
+  quotaAllocation: Record<string, unknown>;
+  usageTracking: Record<string, unknown>;
   lastResetAt: string;
 }

@@ -22,12 +22,12 @@ export class CircuitBreaker {
   private state: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
 
   constructor(
-    private readonly threshold: number = 5,
-    private readonly resetTimeoutMs: number = 60000,
+    private readonly threshold = 5,
+    private readonly resetTimeoutMs = 60000,
     private readonly logger: Logger,
   ) {}
 
-  async execute<T>(fn: () => Promise<T>): Promise<T> {
+  public async execute<T>(fn: () => Promise<T>): Promise<T> {
     if (this.state === 'OPEN') {
       if (Date.now() - this.lastFailureTime > this.resetTimeoutMs) {
         this.logger.log('Circuit breaker transitioning to HALF_OPEN state');
@@ -60,11 +60,11 @@ export class CircuitBreaker {
     }
   }
 
-  getState(): 'CLOSED' | 'OPEN' | 'HALF_OPEN' {
+  public getState(): 'CLOSED' | 'OPEN' | 'HALF_OPEN' {
     return this.state;
   }
 
-  reset(): void {
+  public reset(): void {
     this.state = 'CLOSED';
     this.failures = 0;
     this.lastFailureTime = 0;
@@ -78,7 +78,7 @@ export class RetryHandler {
     this.logger = new Logger(RetryHandler.name);
   }
 
-  async executeWithRetry<T>(
+  public async executeWithRetry<T>(
     operation: () => Promise<T>,
     operationName: string,
   ): Promise<T> {
@@ -142,6 +142,7 @@ export class RetryHandler {
     try {
       return await Promise.race([promise, timeoutPromise]);
     } finally {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       clearTimeout(timeoutHandle!);
     }
   }

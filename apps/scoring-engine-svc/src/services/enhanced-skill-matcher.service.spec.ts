@@ -1,8 +1,9 @@
+import type {
+  JobSkillRequirement} from './enhanced-skill-matcher.service';
 import {
-  EnhancedSkillMatcherService,
-  JobSkillRequirement,
+  EnhancedSkillMatcherService
 } from './enhanced-skill-matcher.service';
-import { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
+import type { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
 
 describe('EnhancedSkillMatcherService', () => {
   let service: EnhancedSkillMatcherService;

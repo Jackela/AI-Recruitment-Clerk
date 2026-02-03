@@ -4,7 +4,7 @@
  */
 
 import { ErrorResponseFormatter } from '../common/error-handling.patterns';
-import { EnhancedAppException } from './enhanced-error-types';
+import type { EnhancedAppException } from './enhanced-error-types';
 import { ErrorCorrelationManager } from './error-correlation';
 
 /**
@@ -44,6 +44,7 @@ export interface StandardizedErrorResponse {
     business: string;
     user: string;
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   details?: any;
   stack?: string;
   monitoring?: {
@@ -125,7 +126,7 @@ export class StandardizedErrorResponseFormatter extends ErrorResponseFormatter {
   /**
    * Format enhanced error response with correlation context
    */
-  static formatEnhanced(
+  public static formatEnhanced(
     error: EnhancedAppException,
     requestContext?: {
       path?: string;
@@ -241,6 +242,7 @@ export class StandardizedErrorResponseFormatter extends ErrorResponseFormatter {
     // Fall back to type-based message from parent class
     return super.formatUserMessage({
       errorDetails: { type: errorType },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
   }
 
@@ -319,9 +321,11 @@ export class StandardizedErrorResponseFormatter extends ErrorResponseFormatter {
   /**
    * Format error for logging purposes
    */
-  static formatForLogging(
+  public static formatForLogging(
     error: EnhancedAppException,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     requestContext?: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Record<string, any> {
     const correlationContext =
       error.enhancedDetails.correlationContext ||
@@ -383,7 +387,8 @@ export class StandardizedErrorResponseFormatter extends ErrorResponseFormatter {
   /**
    * Create error summary for metrics and monitoring
    */
-  static createErrorSummary(error: EnhancedAppException): Record<string, any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static createErrorSummary(error: EnhancedAppException): Record<string, any> {
     const correlationContext = error.enhancedDetails.correlationContext;
 
     return {
@@ -404,7 +409,7 @@ export class StandardizedErrorResponseFormatter extends ErrorResponseFormatter {
   /**
    * Format minimal error response for health checks
    */
-  static formatMinimal(error: EnhancedAppException): {
+  public static formatMinimal(error: EnhancedAppException): {
     success: false;
     error: string;
     code: string;

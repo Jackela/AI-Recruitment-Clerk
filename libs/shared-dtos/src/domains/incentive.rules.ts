@@ -1,9 +1,10 @@
-import {
+import type {
   Incentive,
+  ContactInfo} from './incentive.dto';
+import {
   IncentiveStatus,
   TriggerType,
-  PaymentMethod,
-  ContactInfo,
+  PaymentMethod
 } from './incentive.dto';
 
 /**
@@ -11,32 +12,33 @@ import {
  */
 export class IncentiveRules {
   // 核心业务规则常量 - 红包激励系统
-  static readonly BASE_QUESTIONNAIRE_REWARD = 5; // 5元基础奖励
-  static readonly HIGH_QUALITY_BONUS = 3; // 高质量额外奖励（8元总计）
-  static readonly BASIC_QUALITY_PENALTY = 2; // 基础质量惩罚（3元总计）
-  static readonly MIN_QUALITY_SCORE = 50; // 最低获得奖励分数
-  static readonly HIGH_QUALITY_THRESHOLD = 90; // 高质量阈值
-  static readonly STANDARD_QUALITY_THRESHOLD = 70; // 标准质量阈值
+  public static readonly BASE_QUESTIONNAIRE_REWARD = 5; // 5元基础奖励
+  public static readonly HIGH_QUALITY_BONUS = 3; // 高质量额外奖励（8元总计）
+  public static readonly BASIC_QUALITY_PENALTY = 2; // 基础质量惩罚（3元总计）
+  public static readonly MIN_QUALITY_SCORE = 50; // 最低获得奖励分数
+  public static readonly HIGH_QUALITY_THRESHOLD = 90; // 高质量阈值
+  public static readonly STANDARD_QUALITY_THRESHOLD = 70; // 标准质量阈值
 
   // 推荐奖励常量
-  static readonly REFERRAL_REWARD_AMOUNT = 3; // 推荐奖励3元
+  public static readonly REFERRAL_REWARD_AMOUNT = 3; // 推荐奖励3元
 
   // 系统限制常量
-  static readonly MAX_REWARD_AMOUNT = 100; // 单笔最大奖励100元
-  static readonly MIN_REWARD_AMOUNT = 1; // 单笔最小奖励1元
-  static readonly INCENTIVE_EXPIRY_DAYS = 30; // 激励过期时间30天
-  static readonly MAX_DAILY_INCENTIVES_PER_IP = 3; // 每IP每日最大激励数量
+  public static readonly MAX_REWARD_AMOUNT = 100; // 单笔最大奖励100元
+  public static readonly MIN_REWARD_AMOUNT = 1; // 单笔最小奖励1元
+  public static readonly INCENTIVE_EXPIRY_DAYS = 30; // 激励过期时间30天
+  public static readonly MAX_DAILY_INCENTIVES_PER_IP = 3; // 每IP每日最大激励数量
 
   // 支付相关常量
-  static readonly MIN_PAYOUT_AMOUNT = 5; // 最小提现金额5元
-  static readonly PAYMENT_PROCESSING_TIMEOUT_MINUTES = 30; // 支付处理超时30分钟
+  public static readonly MIN_PAYOUT_AMOUNT = 5; // 最小提现金额5元
+  public static readonly PAYMENT_PROCESSING_TIMEOUT_MINUTES = 30; // 支付处理超时30分钟
 
   /**
    * 验证激励创建的资格条件
    */
-  static canCreateIncentive(
+  public static canCreateIncentive(
     ip: string,
     triggerType: TriggerType,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     triggerData: any,
     existingIncentivesToday?: number,
   ): IncentiveEligibilityResult {
@@ -103,8 +105,9 @@ export class IncentiveRules {
   /**
    * 计算预期奖励金额
    */
-  static calculateExpectedReward(
+  public static calculateExpectedReward(
     triggerType: TriggerType,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     triggerData: any,
   ): number {
     switch (triggerType) {
@@ -122,7 +125,7 @@ export class IncentiveRules {
   /**
    * 根据质量分数计算问卷完成奖励
    */
-  static calculateQuestionnaireReward(qualityScore: number): number {
+  public static calculateQuestionnaireReward(qualityScore: number): number {
     if (qualityScore >= this.HIGH_QUALITY_THRESHOLD) {
       return this.BASE_QUESTIONNAIRE_REWARD + this.HIGH_QUALITY_BONUS; // 8元
     } else if (qualityScore >= this.STANDARD_QUALITY_THRESHOLD) {
@@ -137,7 +140,7 @@ export class IncentiveRules {
   /**
    * 验证激励是否可以支付
    */
-  static canPayIncentive(incentive: Incentive): PaymentEligibilityResult {
+  public static canPayIncentive(incentive: Incentive): PaymentEligibilityResult {
     const errors: string[] = [];
 
     // 验证状态
@@ -181,7 +184,7 @@ export class IncentiveRules {
   /**
    * 验证支付方式和联系信息匹配
    */
-  static validatePaymentMethodCompatibility(
+  public static validatePaymentMethodCompatibility(
     paymentMethod: PaymentMethod,
     contactInfo: ContactInfo,
   ): PaymentMethodValidationResult {
@@ -231,7 +234,7 @@ export class IncentiveRules {
   /**
    * 计算激励处理优先级
    */
-  static calculateProcessingPriority(incentive: Incentive): IncentivePriority {
+  public static calculateProcessingPriority(incentive: Incentive): IncentivePriority {
     let priority = 0;
     const factors: string[] = [];
 
@@ -300,7 +303,7 @@ export class IncentiveRules {
   /**
    * 生成激励风险评估报告
    */
-  static generateRiskAssessment(
+  public static generateRiskAssessment(
     incentive: Incentive,
     ipUsageHistory?: IncentiveUsageHistory,
   ): IncentiveRiskAssessment {
@@ -361,7 +364,7 @@ export class IncentiveRules {
   /**
    * 验证批量支付操作
    */
-  static validateBatchPayment(
+  public static validateBatchPayment(
     incentives: Incentive[],
   ): BatchPaymentValidationResult {
     const errors: string[] = [];

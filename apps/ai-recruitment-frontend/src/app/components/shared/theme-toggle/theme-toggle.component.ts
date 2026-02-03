@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ThemeService, Theme } from '../../../services/theme/theme.service';
+import type { Theme } from '../../../services/theme/theme.service';
+import { ThemeService } from '../../../services/theme/theme.service';
 
 /**
  * Represents the theme toggle component.
@@ -398,11 +399,11 @@ import { ThemeService, Theme } from '../../../services/theme/theme.service';
   ],
 })
 export class ThemeToggleComponent {
-  dropdownOpen = false;
+  public dropdownOpen = false;
 
   // Expose theme service properties
-  currentTheme = computed(() => this.themeService.currentTheme());
-  isDarkMode = computed(() => this.themeService.isDarkMode());
+  public currentTheme = computed(() => this.themeService.currentTheme());
+  public isDarkMode = computed(() => this.themeService.isDarkMode());
 
   private themeService = inject(ThemeService);
 
@@ -418,14 +419,14 @@ export class ThemeToggleComponent {
    * Sets theme.
    * @param theme - The theme.
    */
-  setTheme(theme: Theme): void {
+  public setTheme(theme: Theme): void {
     this.themeService.setTheme(theme);
   }
 
   /**
    * Performs the toggle dropdown operation.
    */
-  toggleDropdown(): void {
+  public toggleDropdown(): void {
     this.dropdownOpen = !this.dropdownOpen;
   }
 
@@ -433,7 +434,7 @@ export class ThemeToggleComponent {
    * Performs the select theme operation.
    * @param theme - The theme.
    */
-  selectTheme(theme: Theme): void {
+  public selectTheme(theme: Theme): void {
     this.setTheme(theme);
     this.dropdownOpen = false;
   }
@@ -442,7 +443,7 @@ export class ThemeToggleComponent {
    * Retrieves theme label.
    * @returns The string value.
    */
-  getThemeLabel(): string {
+  public getThemeLabel(): string {
     const theme = this.currentTheme();
     switch (theme) {
       case 'light':

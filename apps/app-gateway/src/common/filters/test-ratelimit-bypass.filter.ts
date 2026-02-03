@@ -1,7 +1,8 @@
-import {
+import type {
   ArgumentsHost,
+  ExceptionFilter} from '@nestjs/common';
+import {
   Catch,
-  ExceptionFilter,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
@@ -17,7 +18,7 @@ export class TestRateLimitBypassFilter implements ExceptionFilter {
    * @param host - The host.
    * @returns The result of the operation.
    */
-  catch(exception: HttpException, host: ArgumentsHost) {
+  public catch(exception: HttpException, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
@@ -35,10 +36,11 @@ export class TestRateLimitBypassFilter implements ExceptionFilter {
     }
 
     // Default behavior: pass through the original exception response
-    const status = (exception as any).getStatus?.() ?? 500;
-    const payload = (exception as any).getResponse?.() ?? {
+    const status = exception.getStatus?.() ?? 500;
+    const payload = exception.getResponse?.() ?? {
       statusCode: status,
     };
     response.status(status).json(payload);
+    return;
   }
 }

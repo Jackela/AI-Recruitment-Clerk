@@ -15,42 +15,42 @@ export class SubmissionSummary extends ValueObject<{
    * Performs the role operation.
    * @returns The string value.
    */
-  get role(): string {
+  public get role(): string {
     return this.props.role;
   }
   /**
    * Performs the industry operation.
    * @returns The string value.
    */
-  get industry(): string {
+  public get industry(): string {
     return this.props.industry;
   }
   /**
    * Performs the overall satisfaction operation.
    * @returns The number value.
    */
-  get overallSatisfaction(): number {
+  public get overallSatisfaction(): number {
     return this.props.overallSatisfaction;
   }
   /**
    * Performs the willingness to pay monthly operation.
    * @returns The number value.
    */
-  get willingnessToPayMonthly(): number {
+  public get willingnessToPayMonthly(): number {
     return this.props.willingnessToPayMonthly;
   }
   /**
    * Performs the text length operation.
    * @returns The number value.
    */
-  get textLength(): number {
+  public get textLength(): number {
     return this.props.textLength;
   }
   /**
    * Performs the completion rate operation.
    * @returns The number value.
    */
-  get completionRate(): number {
+  public get completionRate(): number {
     return this.props.completionRate;
   }
 }

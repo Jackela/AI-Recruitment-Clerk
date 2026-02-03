@@ -180,7 +180,7 @@
             [disabled]="!createJobForm.valid || (creating$ | async)"
             [attr.aria-label]="(creating$ | async) ? ('jobs.createJob.actions.creating' | translate) : ('jobs.createJob.actions.create' | translate)"
           >
-            <svg *ngIf="!(creating$ | async)" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <svg *ngIf="(creating$ | async) === false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
               <path d="M12 5v14M5 12h14"></path>
             </svg>
             <span *ngIf="creating$ | async" class="spinner" aria-hidden="true"></span>

@@ -288,11 +288,11 @@ import { CommonModule } from '@angular/common';
   ],
 })
 export class DashboardCardComponent {
-  @Input() title = '';
-  @Input() subtitle = '';
-  @Input() value = '';
-  @Input() icon: 'jobs' | 'resumes' | 'reports' | 'matches' | null = null;
-  @Input() variant: 'default' | 'primary' | 'success' | 'warning' | 'info' =
+  @Input() public title = '';
+  @Input() public subtitle = '';
+  @Input() public value = '';
+  @Input() public icon: 'jobs' | 'resumes' | 'reports' | 'matches' | null = null;
+  @Input() public variant: 'default' | 'primary' | 'success' | 'warning' | 'info' =
     'default';
-  @Input() trend: { type: 'up' | 'down'; value: string } | null = null;
+  @Input() public trend: { type: 'up' | 'down'; value: string } | null = null;
 }

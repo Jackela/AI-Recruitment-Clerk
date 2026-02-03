@@ -1,4 +1,4 @@
-import { UserSession, UsageStats } from '../domains/user-management.dto';
+import type { UserSession, UsageStats } from '../domains/user-management.dto';
 
 // Repository interface for other agents to depend on
 /**

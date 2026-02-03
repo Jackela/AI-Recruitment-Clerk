@@ -560,26 +560,26 @@ export interface UsageTip {
   styleUrls: ['../unified-analysis.component.css'],
 })
 export class StatisticsPanelComponent {
-  @Input() statistics: UsageStatistics = {
+  @Input() public statistics: UsageStatistics = {
     todayAnalyses: 0,
     totalAnalyses: 0,
     averageScore: 0,
   };
 
-  @Input() showDailyLimit = false;
-  @Input() dailyLimit = 10;
-  @Input() showCategories = false;
-  @Input() showInsights = false;
+  @Input() public showDailyLimit = false;
+  @Input() public dailyLimit = 10;
+  @Input() public showCategories = false;
+  @Input() public showInsights = false;
 
-  @Output() tipCategoryChanged = new EventEmitter<string>();
-  @Output() moreTipsRequested = new EventEmitter<void>();
+  @Output() public tipCategoryChanged = new EventEmitter<string>();
+  @Output() public moreTipsRequested = new EventEmitter<void>();
 
-  selectedCategory = 'general';
-  isLoadingTips = false;
+  public selectedCategory = 'general';
+  public isLoadingTips = false;
 
-  tipCategories = ['general', 'file', 'accuracy', 'analysis'];
+  public tipCategories = ['general', 'file', 'accuracy', 'analysis'];
 
-  usageTips: UsageTip[] = [
+  public usageTips: UsageTip[] = [
     {
       icon: '📄',
       title: '文件质量',
@@ -618,7 +618,7 @@ export class StatisticsPanelComponent {
     },
   ];
 
-  performanceInsights = [
+  public performanceInsights = [
     { icon: '🚀', text: '今日分析效率比昨日提升15%' },
     { icon: '📊', text: '本周平均匹配度较上周上升8分' },
     { icon: '⏰', text: '平均分析时间: 2分30秒' },
@@ -629,7 +629,7 @@ export class StatisticsPanelComponent {
    * @param num - The num.
    * @returns The string value.
    */
-  formatNumber(num: number): string {
+  public formatNumber(num: number): string {
     if (num >= 1000000) {
       return (num / 1000000).toFixed(1) + 'M';
     }
@@ -643,7 +643,7 @@ export class StatisticsPanelComponent {
    * Retrieves score class.
    * @returns The string value.
    */
-  getScoreClass(): string {
+  public getScoreClass(): string {
     if (this.statistics.averageScore >= 80) return 'high';
     if (this.statistics.averageScore >= 60) return 'medium';
     return 'low';
@@ -653,7 +653,7 @@ export class StatisticsPanelComponent {
    * Retrieves daily progress percentage.
    * @returns The number value.
    */
-  getDailyProgressPercentage(): number {
+  public getDailyProgressPercentage(): number {
     return Math.min(
       (this.statistics.todayAnalyses / this.dailyLimit) * 100,
       100,
@@ -664,7 +664,7 @@ export class StatisticsPanelComponent {
    * Performs the select category operation.
    * @param category - The category.
    */
-  selectCategory(category: string): void {
+  public selectCategory(category: string): void {
     this.selectedCategory = category;
     this.tipCategoryChanged.emit(category);
   }
@@ -674,7 +674,7 @@ export class StatisticsPanelComponent {
    * @param category - The category.
    * @returns The string value.
    */
-  getCategoryLabel(category: string): string {
+  public getCategoryLabel(category: string): string {
     const labels: Record<string, string> = {
       general: '通用',
       file: '文件',
@@ -688,7 +688,7 @@ export class StatisticsPanelComponent {
    * Retrieves filtered tips.
    * @returns The an array of UsageTip.
    */
-  getFilteredTips(): UsageTip[] {
+  public getFilteredTips(): UsageTip[] {
     if (!this.showCategories) {
       return this.usageTips;
     }
@@ -705,7 +705,7 @@ export class StatisticsPanelComponent {
    * @param tip - The tip.
    * @returns The string value.
    */
-  trackByTip(_index: number, tip: UsageTip): string {
+  public trackByTip(_index: number, tip: UsageTip): string {
     return `${tip.title}-${tip.description.slice(0, 20)}`;
   }
 
@@ -713,7 +713,7 @@ export class StatisticsPanelComponent {
    * Performs the has more tips operation.
    * @returns The boolean value.
    */
-  hasMoreTips(): boolean {
+  public hasMoreTips(): boolean {
     return false; // Placeholder for pagination
   }
 
@@ -721,7 +721,7 @@ export class StatisticsPanelComponent {
    * Performs the show more tips operation.
    * @returns A promise that resolves when the operation completes.
    */
-  async showMoreTips(): Promise<void> {
+  public async showMoreTips(): Promise<void> {
     this.isLoadingTips = true;
     this.moreTipsRequested.emit();
     // Simulate loading

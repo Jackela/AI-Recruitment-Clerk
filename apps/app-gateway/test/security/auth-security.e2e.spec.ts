@@ -1,5 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app/app.module';
 import { JwtService } from '@nestjs/jwt';
@@ -20,10 +21,10 @@ import * as jwt from 'jsonwebtoken';
 
 describe('🔐 Authentication & Authorization Security Tests', () => {
   let app: INestApplication;
-  let jwtService: JwtService;
+  let _jwtService: JwtService;
   let adminToken: string;
   let userToken: string;
-  let hrToken: string;
+  let _hrToken: string;
   let testUserId: string;
   let testOrganizationId: string;
 

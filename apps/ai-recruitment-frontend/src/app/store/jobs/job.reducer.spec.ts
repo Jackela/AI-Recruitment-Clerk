@@ -1,12 +1,12 @@
 import { jobReducer } from './job.reducer';
-import { initialJobState, JobState } from './job.state';
+import type { JobState } from './job.state';
+import { initialJobState } from './job.state';
 import * as JobActions from './job.actions';
-import {
+import type {
   Job,
   JobListItem,
-  CreateJobRequest,
   CreateJobResponse,
-} from './job.model';
+  CreateJobRequest as _CreateJobRequest} from './job.model';
 
 describe('Job Reducer', () => {
   const mockJobListItems: JobListItem[] = [

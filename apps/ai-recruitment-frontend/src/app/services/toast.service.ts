@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { ProgressFeedbackService } from './feedback/progress-feedback.service';
-import { Observable, BehaviorSubject } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 /**
  * Defines the shape of the toast message.
@@ -28,7 +29,7 @@ export class ToastService {
    * @param message - The message.
    * @param duration - The duration.
    */
-  success(message: string, duration = 3000): void {
+  public success(message: string, duration = 3000): void {
     this.show({ message, type: 'success', duration });
   }
 
@@ -37,7 +38,7 @@ export class ToastService {
    * @param message - The message.
    * @param duration - The duration.
    */
-  error(message: string, duration = 5000): void {
+  public error(message: string, duration = 5000): void {
     this.show({ message, type: 'error', duration });
   }
 
@@ -46,7 +47,7 @@ export class ToastService {
    * @param message - The message.
    * @param duration - The duration.
    */
-  warning(message: string, duration = 4000): void {
+  public warning(message: string, duration = 4000): void {
     this.show({ message, type: 'warning', duration });
   }
 
@@ -55,7 +56,7 @@ export class ToastService {
    * @param message - The message.
    * @param duration - The duration.
    */
-  info(message: string, duration = 3000): void {
+  public info(message: string, duration = 3000): void {
     this.show({ message, type: 'info', duration });
   }
 
@@ -114,7 +115,7 @@ export class ToastService {
    * Retrieves toasts.
    * @returns The an array of ToastMessage.
    */
-  getToasts(): ToastMessage[] {
+  public getToasts(): ToastMessage[] {
     return this.toasts$.value;
   }
 
@@ -122,14 +123,14 @@ export class ToastService {
    * Retrieves toasts$.
    * @returns The Observable<ToastMessage[]>.
    */
-  getToasts$(): Observable<ToastMessage[]> {
+  public getToasts$(): Observable<ToastMessage[]> {
     return this.toasts$.asObservable();
   }
 
   /**
    * Performs the clear operation.
    */
-  clear(): void {
+  public clear(): void {
     this.toasts$.next([]);
     // Clear all notifications from ProgressFeedbackService
     this.progressFeedback.clearAllNotifications();

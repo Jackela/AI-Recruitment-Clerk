@@ -26,7 +26,7 @@ type ResumeRecord = {
 
 const resumeStore = new Map<string, ResumeRecord>();
 
-function genId(prefix: string) {
+function genId(prefix: string): string {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
@@ -45,7 +45,8 @@ export class ResumesController {
   @Post('resumes/upload')
   @UseInterceptors(FileInterceptor('resume'))
   @HttpCode(HttpStatus.CREATED)
-  upload(@UploadedFile() file: Express.Multer.File, @Body() _body: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public upload(@UploadedFile() file: Express.Multer.File, @Body() _body: any): { resumeId: string } {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
@@ -75,7 +76,7 @@ export class ResumesController {
   @UseGuards(JwtAuthGuard)
   @Get('resumes/:id')
   @HttpCode(HttpStatus.OK)
-  getResume(@Param('id') id: string) {
+  public getResume(@Param('id') id: string): { resumeId: string; status: string } {
     const rec = resumeStore.get(id);
     if (!rec) {
       throw new NotFoundException('Resume not found');
@@ -100,7 +101,7 @@ export class ResumesController {
   @UseGuards(JwtAuthGuard)
   @Get('resumes/:id/analysis')
   @HttpCode(HttpStatus.OK)
-  getAnalysis(@Param('id') id: string) {
+  public getAnalysis(@Param('id') id: string): { skills: string[]; experience: { company: string; years: number }[]; education: { degree: string } } {
     if (!resumeStore.has(id)) {
       throw new NotFoundException('Resume not found');
     }
@@ -120,12 +121,14 @@ export class ResumesController {
   @UseGuards(JwtAuthGuard)
   @Put('resumes/:id/status')
   @HttpCode(HttpStatus.OK)
-  updateStatus(@Param('id') id: string, @Body() body: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public updateStatus(@Param('id') id: string, @Body() body: any): { resumeId: string; newStatus: string } {
     const rec = resumeStore.get(id);
     if (!rec) {
       throw new NotFoundException('Resume not found');
     }
-    const newStatus = String(body?.status || 'approved');
+    const newStatus = String(body?.status ?? 'approved');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rec.status = newStatus as any;
     rec.updatedAt = new Date().toISOString();
     resumeStore.set(id, rec);
@@ -139,7 +142,7 @@ export class ResumesController {
   @UseGuards(JwtAuthGuard)
   @Post('resumes/search')
   @HttpCode(HttpStatus.OK)
-  search() {
+  public search(): { resumes: { resumeId: string; status: string }[] } {
     const items = Array.from(resumeStore.values()).map((r) => ({
       resumeId: r.id,
       status: r.status,
@@ -154,7 +157,7 @@ export class ResumesController {
   @UseGuards(JwtAuthGuard)
   @Post('resumes/batch/process')
   @HttpCode(HttpStatus.ACCEPTED)
-  batch() {
+  public batch(): { batchJobId: string } {
     return { batchJobId: genId('batch') };
   }
 }

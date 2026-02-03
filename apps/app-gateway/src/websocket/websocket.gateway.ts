@@ -1,20 +1,21 @@
+import type {
+  OnGatewayInit,
+  OnGatewayConnection,
+  OnGatewayDisconnect} from '@nestjs/websockets';
 import {
   WebSocketGateway as WSGateway,
   WebSocketServer,
-  OnGatewayInit,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
   SubscribeMessage,
   MessageBody,
   ConnectedSocket,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import type { Server, Socket } from 'socket.io';
 import { Logger, Injectable } from '@nestjs/common';
-import { GuestUsageService } from '../guest/services/guest-usage.service';
-import { CollaborationService } from './collaboration.service';
-import { PresenceService } from './presence.service';
-import { NotificationService } from './notification.service';
-import { CacheService } from '../cache/cache.service';
+import type { GuestUsageService } from '../guest/services/guest-usage.service';
+import type { CollaborationService } from './collaboration.service';
+import type { PresenceService } from './presence.service';
+import type { NotificationService } from './notification.service';
+import type { CacheService } from '../cache/cache.service';
 
 // Enhanced types for real-time collaboration
 interface ProgressUpdate {
@@ -28,11 +29,12 @@ interface ProgressUpdate {
 interface CompletionData {
   sessionId: string;
   analysisId: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- result can have various shapes
   result: any;
   processingTime: number;
 }
 
-interface UserPresence {
+interface _UserPresence {
   userId: string;
   username: string;
   role: string;
@@ -42,7 +44,7 @@ interface UserPresence {
   lastActivity: Date;
 }
 
-interface CollaborationMessage {
+interface _CollaborationMessage {
   id: string;
   type: 'chat' | 'comment' | 'annotation' | 'mention' | 'vote' | 'decision';
   content: string;
@@ -53,21 +55,21 @@ interface CollaborationMessage {
   timestamp: Date;
   threadId?: string;
   mentions?: string[];
-  attachments?: any[];
+  attachments?: unknown[];
 }
 
-interface DocumentEdit {
+interface _DocumentEdit {
   documentId: string;
   userId: string;
   operation: 'insert' | 'delete' | 'format' | 'annotate';
   position: number;
   content?: string;
   length?: number;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   timestamp: Date;
 }
 
-interface VotingSession {
+interface _VotingSession {
   id: string;
   title: string;
   description: string;
@@ -97,7 +99,7 @@ interface Vote {
   weight?: number;
 }
 
-interface ActivityFeedItem {
+interface _ActivityFeedItem {
   id: string;
   type:
     | 'user_join'
@@ -113,7 +115,7 @@ interface ActivityFeedItem {
   contextId?: string;
   contextType?: string;
   timestamp: Date;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 // Job-related WebSocket event interfaces
@@ -155,9 +157,9 @@ interface JobProgressEvent {
 export class WebSocketGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  @WebSocketServer() server!: Server;
-  private logger: Logger = new Logger('WebSocketGateway');
-  private clientSessions = new Map<string, string>(); // clientId -> sessionId
+  @WebSocketServer() public server!: Server;
+  private readonly logger: Logger = new Logger('WebSocketGateway');
+  private readonly clientSessions = new Map<string, string>(); // clientId -> sessionId
 
   /**
    * Initializes a new instance of the Web Socket Gateway.
@@ -180,7 +182,7 @@ export class WebSocketGateway
    * @param server - The server.
    * @returns The result of the operation.
    */
-  afterInit(_server: Server) {
+  public afterInit(_server: Server): void {
     this.logger.log('WebSocket Gateway initialized');
   }
 
@@ -190,7 +192,7 @@ export class WebSocketGateway
    * @param args - The args.
    * @returns The result of the operation.
    */
-  handleConnection(client: Socket, ..._args: any[]) {
+  public handleConnection(client: Socket, ..._args: unknown[]): void {
     const sessionId = client.handshake.query.sessionId as string;
     this.logger.log(`Client connected: ${client.id}, SessionId: ${sessionId}`);
 
@@ -216,7 +218,7 @@ export class WebSocketGateway
    * @param client - The client.
    * @returns The result of the operation.
    */
-  handleDisconnect(client: Socket) {
+  public handleDisconnect(client: Socket): void {
     const sessionId = this.clientSessions.get(client.id);
     this.logger.log(
       `Client disconnected: ${client.id}, SessionId: ${sessionId}`,
@@ -231,7 +233,7 @@ export class WebSocketGateway
   /**
    * 发送进度更新到特定会话
    */
-  sendProgressUpdate(sessionId: string, update: ProgressUpdate): void {
+  public sendProgressUpdate(sessionId: string, update: ProgressUpdate): void {
     this.server.to(`session_${sessionId}`).emit('message', {
       type: 'progress',
       sessionId,
@@ -243,7 +245,7 @@ export class WebSocketGateway
   /**
    * 发送步骤变更通知
    */
-  sendStepChange(sessionId: string, step: string, message?: string): void {
+  public sendStepChange(sessionId: string, step: string, message?: string): void {
     this.server.to(`session_${sessionId}`).emit('message', {
       type: 'step_change',
       sessionId,
@@ -255,7 +257,7 @@ export class WebSocketGateway
   /**
    * 发送完成通知
    */
-  sendCompletion(sessionId: string, data: CompletionData): void {
+  public sendCompletion(sessionId: string, data: CompletionData): void {
     this.server.to(`session_${sessionId}`).emit('message', {
       type: 'completed',
       sessionId,
@@ -267,7 +269,7 @@ export class WebSocketGateway
   /**
    * 发送错误通知
    */
-  sendError(sessionId: string, error: string, code?: string): void {
+  public sendError(sessionId: string, error: string, code?: string): void {
     this.server.to(`session_${sessionId}`).emit('message', {
       type: 'error',
       sessionId,
@@ -279,7 +281,7 @@ export class WebSocketGateway
   /**
    * 发送状态更新
    */
-  sendStatusUpdate(sessionId: string, status: any): void {
+  public sendStatusUpdate(sessionId: string, status: Record<string, unknown>): void {
     this.server.to(`session_${sessionId}`).emit('message', {
       type: 'status_update',
       sessionId,
@@ -294,7 +296,7 @@ export class WebSocketGateway
    * @param client - The client.
    */
   @SubscribeMessage('subscribe_session')
-  handleSubscribeSession(
+  public handleSubscribeSession(
     @MessageBody() data: { sessionId: string },
     @ConnectedSocket() client: Socket,
   ): void {
@@ -314,7 +316,7 @@ export class WebSocketGateway
    * @param client - The client.
    */
   @SubscribeMessage('unsubscribe_session')
-  handleUnsubscribeSession(
+  public handleUnsubscribeSession(
     @MessageBody() data: { sessionId: string },
     @ConnectedSocket() client: Socket,
   ): void {
@@ -356,7 +358,7 @@ export class WebSocketGateway
   /**
    * 广播系统状态更新
    */
-  broadcastSystemStatus(status: any): void {
+  public broadcastSystemStatus(status: Record<string, unknown>): void {
     this.server.emit('system_status', {
       type: 'system_status',
       data: status,
@@ -372,7 +374,7 @@ export class WebSocketGateway
    *
    * @param jobUpdate - The job update event data
    */
-  emitJobUpdated(jobUpdate: JobUpdateEvent): void {
+  public emitJobUpdated(jobUpdate: JobUpdateEvent): void {
     try {
       const eventData = {
         type: 'job_updated',
@@ -409,7 +411,7 @@ export class WebSocketGateway
    *
    * @param progress - The job progress event data
    */
-  emitJobProgress(progress: JobProgressEvent): void {
+  public emitJobProgress(progress: JobProgressEvent): void {
     try {
       const eventData = {
         type: 'job_progress',
@@ -438,7 +440,7 @@ export class WebSocketGateway
    * @param clientId - Socket client ID
    * @param organizationId - Organization ID for multi-tenant room assignment
    */
-  joinOrganizationRoom(clientId: string, organizationId: string): void {
+  public joinOrganizationRoom(clientId: string, organizationId: string): void {
     try {
       const client = this.server.sockets.sockets.get(clientId);
       if (client) {
@@ -463,7 +465,7 @@ export class WebSocketGateway
    * @param clientId - Socket client ID
    * @param organizationId - Organization ID
    */
-  leaveOrganizationRoom(clientId: string, organizationId: string): void {
+  public leaveOrganizationRoom(clientId: string, organizationId: string): void {
     try {
       const client = this.server.sockets.sockets.get(clientId);
       if (client) {
@@ -487,7 +489,7 @@ export class WebSocketGateway
    * Allows clients to subscribe to updates for jobs they're interested in.
    */
   @SubscribeMessage('subscribe_job')
-  handleSubscribeJob(
+  public handleSubscribeJob(
     @MessageBody() data: { jobId: string; organizationId?: string },
     @ConnectedSocket() client: Socket,
   ): void {
@@ -528,7 +530,7 @@ export class WebSocketGateway
    * Unsubscribe from job updates.
    */
   @SubscribeMessage('unsubscribe_job')
-  handleUnsubscribeJob(
+  public handleUnsubscribeJob(
     @MessageBody() data: { jobId: string },
     @ConnectedSocket() client: Socket,
   ): void {

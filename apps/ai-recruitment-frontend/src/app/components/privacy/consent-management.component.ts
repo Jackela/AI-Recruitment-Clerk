@@ -1,15 +1,17 @@
+import type {
+  OnInit,
+  OnDestroy} from '@angular/core';
 import {
   Component,
-  OnInit,
-  OnDestroy,
   Input,
   Output,
   EventEmitter,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
-  ReactiveFormsModule,
   FormBuilder,
+  ReactiveFormsModule,
   FormGroup,
   FormArray,
   Validators,
@@ -18,9 +20,8 @@ import { Subject } from 'rxjs';
 // import { takeUntil } from 'rxjs'; // Reserved for future use
 import {
   PrivacyApiService,
-  CaptureConsentDto,
-  ConsentStatusDto,
 } from '../../services/privacy-api.service';
+import type { CaptureConsentDto, ConsentStatusDto } from '../../services/privacy-api.service';
 
 // Temporary local types until shared-dtos compilation is fixed
 export enum ConsentPurpose {
@@ -99,20 +100,24 @@ import { ToastService } from '../../services/toast.service';
   styleUrls: ['./consent-management.component.scss'],
 })
 export class ConsentManagementComponent implements OnInit, OnDestroy {
-  @Input() userId?: string;
-  @Input() mode: 'initial' | 'update' | 'review' = 'initial';
-  @Input() showAllPurposes = true;
-  @Output() consentCaptured = new EventEmitter<ConsentStatusDto>();
-  @Output() consentUpdated = new EventEmitter<ConsentStatusDto>();
+  private readonly fb = inject(FormBuilder);
+  private readonly privacyApi = inject(PrivacyApiService);
+  private readonly toast = inject(ToastService);
+
+  @Input() public userId?: string;
+  @Input() public mode: 'initial' | 'update' | 'review' = 'initial';
+  @Input() public showAllPurposes = true;
+  @Output() public consentCaptured = new EventEmitter<ConsentStatusDto>();
+  @Output() public consentUpdated = new EventEmitter<ConsentStatusDto>();
 
   private destroy$ = new Subject<void>();
 
-  consentForm!: FormGroup;
-  isLoading = false;
-  currentConsentStatus?: ConsentStatusDto;
+  public consentForm!: FormGroup;
+  public isLoading = false;
+  public currentConsentStatus?: ConsentStatusDto;
 
   // Processing purpose configurations
-  readonly processingPurposes: ProcessingPurposeInfo[] = [
+  public readonly processingPurposes: ProcessingPurposeInfo[] = [
     {
       purpose: ConsentPurpose.ESSENTIAL_SERVICES,
       displayName: 'Essential Services',
@@ -194,26 +199,19 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
     },
   ];
 
-  readonly ConsentPurpose = ConsentPurpose;
+  public readonly ConsentPurpose = ConsentPurpose;
 
   /**
    * Initializes a new instance of the Consent Management Component.
-   * @param fb - The fb.
-   * @param privacyApi - The privacy api.
-   * @param toast - The toast.
    */
-  constructor(
-    private fb: FormBuilder,
-    private privacyApi: PrivacyApiService,
-    private toast: ToastService,
-  ) {
+  constructor() {
     this.initializeForm();
   }
 
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     if (this.userId && this.mode !== 'initial') {
       this.loadCurrentConsent();
     }
@@ -222,7 +220,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -251,7 +249,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
    * Performs the consents array operation.
    * @returns The FormArray.
    */
-  get consentsArray(): FormArray {
+  public get consentsArray(): FormArray {
     return this.consentForm.get('consents') as FormArray;
   }
 
@@ -260,7 +258,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
    * @param index - The index.
    * @returns The ProcessingPurposeInfo.
    */
-  getPurposeInfo(index: number): ProcessingPurposeInfo {
+  public getPurposeInfo(index: number): ProcessingPurposeInfo {
     return this.processingPurposes[index];
   }
 
@@ -269,7 +267,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
    * @param index - The index.
    * @returns The boolean value.
    */
-  isPurposeRequired(index: number): boolean {
+  public isPurposeRequired(index: number): boolean {
     return this.processingPurposes[index].isRequired;
   }
 
@@ -278,7 +276,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
    * @param index - The index.
    * @returns The boolean value.
    */
-  canWithdrawPurpose(index: number): boolean {
+  public canWithdrawPurpose(index: number): boolean {
     return this.processingPurposes[index].isOptOut;
   }
 
@@ -316,7 +314,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
    * Performs the on submit operation.
    * @returns A promise that resolves when the operation completes.
    */
-  async onSubmit(): Promise<void> {
+  public async onSubmit(): Promise<void> {
     if (this.consentForm.invalid || !this.userId) {
       this.markFormGroupTouched(this.consentForm);
       return;
@@ -329,7 +327,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
       const captureConsentDto: CaptureConsentDto = {
         userId: this.userId,
         consents: formValue.consents.map(
-          (consent: any) =>
+          (consent: { purpose: ConsentPurpose; granted: boolean; method: ConsentMethod; consentText: string }) =>
             ({
               purpose: consent.purpose,
               granted: consent.granted,
@@ -366,7 +364,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
    * @param purpose - The purpose.
    * @returns A promise that resolves when the operation completes.
    */
-  async withdrawConsent(purpose: ConsentPurpose): Promise<void> {
+  public async withdrawConsent(purpose: ConsentPurpose): Promise<void> {
     if (!this.userId) return;
 
     const purposeInfo = this.processingPurposes.find(
@@ -445,7 +443,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
    * @param fieldName - The field name.
    * @returns The boolean value.
    */
-  isFieldInvalid(fieldName: string): boolean {
+  public isFieldInvalid(fieldName: string): boolean {
     const field = this.consentForm.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));
   }
@@ -455,7 +453,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
    * @param fieldName - The field name.
    * @returns The string value.
    */
-  getFieldError(fieldName: string): string {
+  public getFieldError(fieldName: string): string {
     const field = this.consentForm.get(fieldName);
     if (field?.errors) {
       if (field.errors['required'] || field.errors['requiredTrue']) {
@@ -470,7 +468,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
    * @param purpose - The purpose.
    * @returns The ConsentStatus | undefined.
    */
-  getCurrentConsentStatus(purpose: ConsentPurpose): ConsentStatus | undefined {
+  public getCurrentConsentStatus(purpose: ConsentPurpose): ConsentStatus | undefined {
     if (!this.currentConsentStatus) return undefined;
     const purposeStatus = this.currentConsentStatus.purposes.find(
       (p) => p.purpose === purpose,
@@ -483,7 +481,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
    * @param purpose - The purpose.
    * @returns The Date | undefined.
    */
-  getConsentDate(purpose: ConsentPurpose): Date | undefined {
+  public getConsentDate(purpose: ConsentPurpose): Date | undefined {
     if (!this.currentConsentStatus) return undefined;
     const purposeStatus = this.currentConsentStatus.purposes.find(
       (p) => p.purpose === purpose,
@@ -495,7 +493,7 @@ export class ConsentManagementComponent implements OnInit, OnDestroy {
    * Performs the needs renewal operation.
    * @returns The boolean value.
    */
-  needsRenewal(): boolean {
+  public needsRenewal(): boolean {
     return this.currentConsentStatus?.needsRenewal || false;
   }
 }

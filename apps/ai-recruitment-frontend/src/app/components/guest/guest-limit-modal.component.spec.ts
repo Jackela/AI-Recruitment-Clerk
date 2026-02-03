@@ -1,9 +1,11 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { GuestLimitModalComponent } from './guest-limit-modal.component';
-import { GuestState, initialGuestState } from '../../store/guest/guest.state';
+import type { GuestState} from '../../store/guest/guest.state';
+import { initialGuestState } from '../../store/guest/guest.state';
 import * as GuestActions from '../../store/guest/guest.actions';
 
 describe('GuestLimitModalComponent', () => {
@@ -42,9 +44,15 @@ describe('GuestLimitModalComponent', () => {
     store = TestBed.inject(Store) as jest.Mocked<Store<{ guest: GuestState }>>;
 
     // Setup store selectors - provide observables for each property
-    store.select.mockImplementation((selector: any) => {
+    store.select.mockImplementation((selector: unknown) => {
       if (typeof selector === 'function') {
-        return mockState.pipe(map((state) => selector({ guest: state })));
+        return mockState.pipe(
+          map((state) =>
+            (selector as (state: { guest: GuestState }) => unknown)({
+              guest: state,
+            }),
+          ),
+        );
       }
       // Handle string-based selectors
       return mockState.asObservable();

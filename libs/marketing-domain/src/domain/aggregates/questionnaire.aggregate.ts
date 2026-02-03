@@ -1,18 +1,19 @@
-import { DomainEvent } from '../domain-events/base/domain-event.js';
+import type { DomainEvent } from '../domain-events/base/domain-event.js';
 import { QuestionnaireId } from '../value-objects/questionnaire-id.value-object.js';
 import { QuestionnaireTemplate } from '../value-objects/questionnaire-template.value-object.js';
 import { QuestionnaireSubmission } from '../value-objects/questionnaire-submission.value-object.js';
 import { SubmissionQuality } from '../value-objects/submission-quality.value-object.js';
 import { SubmissionMetadata } from '../value-objects/submission-metadata.value-object.js';
 import { QuestionnaireValidationResult } from '../value-objects/questionnaire-validation-result.value-object.js';
-import { QualityScore } from '../value-objects/quality-score.value-object.js';
-import { SubmissionSummary } from '../value-objects/submission-summary.value-object.js';
-import { Answer } from '../value-objects/answer.value-object.js';
-import { QualityMetrics } from '../value-objects/quality-metrics.value-object.js';
+import type { QualityScore } from '../value-objects/quality-score.value-object.js';
+import type { SubmissionSummary } from '../value-objects/submission-summary.value-object.js';
+import type { Answer } from '../value-objects/answer.value-object.js';
+import type { QualityMetrics } from '../value-objects/quality-metrics.value-object.js';
 import { QuestionnaireSubmittedEvent } from '../domain-events/questionnaire-submitted.event.js';
 import { HighQualitySubmissionEvent } from '../domain-events/high-quality-submission.event.js';
+import type {
+  RawSubmissionData} from '../../application/dtos/questionnaire.dto.js';
 import {
-  RawSubmissionData,
   QuestionnaireStatus,
 } from '../../application/dtos/questionnaire.dto.js';
 
@@ -42,7 +43,7 @@ export class Questionnaire {
    * @param metadata - The metadata.
    * @returns The Questionnaire.
    */
-  static create(
+  public static create(
     templateId: string,
     submission: RawSubmissionData,
     metadata: SubmissionMetadata,
@@ -93,7 +94,7 @@ export class Questionnaire {
    * @param data - The data.
    * @returns The Questionnaire.
    */
-  static restore(data: QuestionnaireData): Questionnaire {
+  public static restore(data: QuestionnaireData): Questionnaire {
     return new Questionnaire(
       new QuestionnaireId({ value: data.id }),
       QuestionnaireTemplate.restore(data.template),
@@ -109,7 +110,7 @@ export class Questionnaire {
    * Validates submission.
    * @returns The QuestionnaireValidationResult.
    */
-  validateSubmission(): QuestionnaireValidationResult {
+  public validateSubmission(): QuestionnaireValidationResult {
     const errors: string[] = [];
 
     // 检查必填字段
@@ -166,7 +167,7 @@ export class Questionnaire {
    * Calculates quality score.
    * @returns The QualityScore.
    */
-  calculateQualityScore(): QualityScore {
+  public calculateQualityScore(): QualityScore {
     return this.quality.calculateScore();
   }
 
@@ -174,7 +175,7 @@ export class Questionnaire {
    * Performs the is eligible for bonus operation.
    * @returns The boolean value.
    */
-  isEligibleForBonus(): boolean {
+  public isEligibleForBonus(): boolean {
     return this.quality.isBonusEligible();
   }
 
@@ -182,7 +183,7 @@ export class Questionnaire {
    * Retrieves submission summary.
    * @returns The SubmissionSummary.
    */
-  getSubmissionSummary(): SubmissionSummary {
+  public getSubmissionSummary(): SubmissionSummary {
     return this.submission.getSummary();
   }
 
@@ -190,21 +191,21 @@ export class Questionnaire {
   /**
    * Performs the mark as processed operation.
    */
-  markAsProcessed(): void {
+  public markAsProcessed(): void {
     this.status = QuestionnaireStatus.PROCESSED;
   }
 
   /**
    * Performs the mark as rewarded operation.
    */
-  markAsRewarded(): void {
+  public markAsRewarded(): void {
     this.status = QuestionnaireStatus.REWARDED;
   }
 
   /**
    * Performs the flag as low quality operation.
    */
-  flagAsLowQuality(): void {
+  public flagAsLowQuality(): void {
     this.status = QuestionnaireStatus.LOW_QUALITY;
   }
 
@@ -214,7 +215,7 @@ export class Questionnaire {
    * @param questionId - The question id.
    * @returns The Answer | null.
    */
-  getAnswerByQuestionId(questionId: string): Answer | null {
+  public getAnswerByQuestionId(questionId: string): Answer | null {
     return this.submission.getAnswer(questionId);
   }
 
@@ -222,7 +223,7 @@ export class Questionnaire {
    * Retrieves quality metrics.
    * @returns The QualityMetrics.
    */
-  getQualityMetrics(): QualityMetrics {
+  public getQualityMetrics(): QualityMetrics {
     return this.quality.getMetrics();
   }
 
@@ -230,7 +231,7 @@ export class Questionnaire {
    * Retrieves total text length.
    * @returns The number value.
    */
-  getTotalTextLength(): number {
+  public getTotalTextLength(): number {
     return this.quality.getTotalTextLength();
   }
 
@@ -238,7 +239,7 @@ export class Questionnaire {
    * Performs the has detailed feedback operation.
    * @returns The boolean value.
    */
-  hasDetailedFeedback(): boolean {
+  public hasDetailedFeedback(): boolean {
     return this.quality.hasDetailedFeedback();
   }
 
@@ -247,14 +248,14 @@ export class Questionnaire {
    * Retrieves uncommitted events.
    * @returns The an array of DomainEvent.
    */
-  getUncommittedEvents(): DomainEvent[] {
+  public getUncommittedEvents(): DomainEvent[] {
     return [...this.uncommittedEvents];
   }
 
   /**
    * Performs the mark events as committed operation.
    */
-  markEventsAsCommitted(): void {
+  public markEventsAsCommitted(): void {
     this.uncommittedEvents = [];
   }
 
@@ -267,7 +268,7 @@ export class Questionnaire {
    * Retrieves id.
    * @returns The QuestionnaireId.
    */
-  getId(): QuestionnaireId {
+  public getId(): QuestionnaireId {
     return this.id;
   }
 
@@ -275,7 +276,7 @@ export class Questionnaire {
    * Retrieves submitter ip.
    * @returns The string value.
    */
-  getSubmitterIP(): string {
+  public getSubmitterIP(): string {
     return this.metadata.ip;
   }
 
@@ -283,7 +284,7 @@ export class Questionnaire {
    * Retrieves status.
    * @returns The QuestionnaireStatus.
    */
-  getStatus(): QuestionnaireStatus {
+  public getStatus(): QuestionnaireStatus {
     return this.status;
   }
 }
@@ -293,9 +294,13 @@ export class Questionnaire {
  */
 export interface QuestionnaireData {
   id: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   template: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   submission: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   quality: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata: any;
   status: QuestionnaireStatus;
 }

@@ -1,21 +1,25 @@
+import type {
+  OnInit,
+  OnDestroy} from '@angular/core';
 import {
   Component,
-  OnInit,
-  OnDestroy,
   ViewChild,
   ElementRef,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
+import type {
+  MobileNavItem} from './mobile-navigation.component';
 import {
-  MobileNavigationComponent,
-  MobileNavItem,
+  MobileNavigationComponent
 } from './mobile-navigation.component';
-import {
-  MobileSwipeComponent,
+import type {
   SwipeAction,
-  SwipeEvent,
+  SwipeEvent} from './mobile-swipe.component';
+import {
+  MobileSwipeComponent
 } from './mobile-swipe.component';
 import { TouchGestureService } from '../../services/mobile/touch-gesture.service';
 
@@ -176,6 +180,9 @@ export interface QuickAction {
               [class.interactive]="!!card.route"
               [routerLink]="card.route"
               (click)="onCardClick(card)"
+            (keydown.enter)="onCardClick(card)"
+            (keydown.space)="onCardClick(card)"
+            [attr.tabindex]="card.route ? 0 : null"
             >
               <div class="card-header">
                 <div class="card-icon">
@@ -224,6 +231,10 @@ export interface QuickAction {
             *ngFor="let activity of recentActivity"
             class="activity-item"
             (click)="onActivityClick(activity)"
+            (keydown.enter)="onActivityClick(activity)"
+            (keydown.space)="onActivityClick(activity)"
+            tabindex="0"
+            role="button"
           >
             <div
               class="activity-icon"
@@ -265,6 +276,8 @@ export interface QuickAction {
       class="mobile-fab"
       [attr.aria-label]="fabAction.label"
       (click)="onFabClick()"
+      (keydown.enter)="onFabClick()"
+      (keydown.space)="onFabClick()"
     >
       <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
         <path [attr.d]="fabAction.icon" />
@@ -832,13 +845,13 @@ export interface QuickAction {
 export class MobileDashboardComponent implements OnInit, OnDestroy {
   // 多代理修复: 模板中需要访问Math对象
   protected readonly Math = Math;
-  pageTitle = 'Dashboard';
-  pageSubtitle = 'Recruitment insights at a glance';
+  public pageTitle = 'Dashboard';
+  public pageSubtitle = 'Recruitment insights at a glance';
 
   private destroy$ = new Subject<void>();
 
   // Navigation
-  navItems: MobileNavItem[] = [
+  public navItems: MobileNavItem[] = [
     {
       id: 'dashboard',
       label: 'Dashboard',
@@ -865,7 +878,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
     },
   ];
 
-  menuItems: MobileNavItem[] = [
+  public menuItems: MobileNavItem[] = [
     {
       id: 'settings',
       label: 'Settings',
@@ -880,7 +893,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
     },
   ];
 
-  headerActions = [
+  public headerActions = [
     {
       id: 'notifications',
       label: 'Notifications',
@@ -890,7 +903,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
   ];
 
   // Quick Actions
-  quickActions: QuickAction[] = [
+  public quickActions: QuickAction[] = [
     {
       id: 'upload',
       label: 'Upload Resume',
@@ -923,7 +936,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
   ];
 
   // Overview Stats
-  overviewStats: DashboardCard[] = [
+  public overviewStats: DashboardCard[] = [
     {
       id: 'total-resumes',
       title: 'Total Resumes',
@@ -965,7 +978,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
   ];
 
   // Dashboard Cards
-  dashboardCards: DashboardCard[] = [
+  public dashboardCards: DashboardCard[] = [
     {
       id: 'recent-uploads',
       title: 'Recent Uploads',
@@ -1023,7 +1036,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
   ];
 
   // Recent Activity
-  recentActivity = [
+  public recentActivity = [
     {
       id: '1',
       title: 'New resume uploaded',
@@ -1051,25 +1064,26 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
   ];
 
   // FAB Action
-  fabAction = {
+  public fabAction = {
     label: 'Upload Resume',
     icon: 'M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z',
   };
 
   // Enhanced state management for pull-to-refresh
-  isPullRefreshVisible = false;
-  isRefreshing = false;
+  public isPullRefreshVisible = false;
+  public isRefreshing = false;
 
   @ViewChild('dashboardContainer', { read: ElementRef })
-  dashboardContainer!: ElementRef;
+  public dashboardContainer!: ElementRef;
   @ViewChild('quickActionsContainer', { read: ElementRef })
-  quickActionsContainer!: ElementRef;
+  public quickActionsContainer!: ElementRef;
+
+  private readonly _touchGesture = inject(TouchGestureService);
 
   /**
    * Initializes a new instance of the Mobile Dashboard Component.
-   * @param _touchGesture - The touch gesture.
    */
-  constructor(private readonly _touchGesture: TouchGestureService) {
+  constructor() {
     // TouchGesture service will be used for future gesture implementations
     // Prevent unused warning
     void this._touchGesture;
@@ -1079,7 +1093,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
    * Performs the ng on init operation.
    * @returns The result of the operation.
    */
-  ngOnInit() {
+  public ngOnInit(): void {
     this.setupPullToRefresh();
   }
 
@@ -1087,12 +1101,12 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
    * Performs the ng on destroy operation.
    * @returns The result of the operation.
    */
-  ngOnDestroy() {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  private setupPullToRefresh() {
+  private setupPullToRefresh(): void {
     let startY = 0;
     let startX = 0;
     let currentY = 0;
@@ -1101,7 +1115,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
     let isPulling = false;
     let touchIdentifier: number | null = null;
 
-    const handleTouchStart = (e: TouchEvent) => {
+    const handleTouchStart = (e: TouchEvent): void => {
       // Only handle single touch
       if (e.touches.length !== 1) return;
 
@@ -1115,7 +1129,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
       isPulling = false;
     };
 
-    const handleTouchMove = (e: TouchEvent) => {
+    const handleTouchMove = (e: TouchEvent): void => {
       if (!isScrollAtTop || touchIdentifier === null) return;
 
       // Find the correct touch by identifier
@@ -1165,7 +1179,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
       }
     };
 
-    const handleTouchEnd = (e: TouchEvent) => {
+    const handleTouchEnd = (e: TouchEvent): void => {
       if (!isScrollAtTop || touchIdentifier === null) {
         this.resetPullState();
         return;
@@ -1195,7 +1209,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
       }
     };
 
-    const handleTouchCancel = (_e: TouchEvent) => {
+    const handleTouchCancel = (_e: TouchEvent): void => {
       this.resetPullState();
       touchIdentifier = null;
     };
@@ -1223,7 +1237,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
     this.isPullRefreshVisible = false;
   }
 
-  private triggerRefresh() {
+  private triggerRefresh(): void {
     if (this.isRefreshing) return; // Prevent multiple simultaneous refreshes
 
     this.isRefreshing = true;
@@ -1253,12 +1267,12 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
    * @param action - The action.
    * @returns The result of the operation.
    */
-  onHeaderAction(action: {
+  public onHeaderAction(action: {
     id: string;
     label: string;
     icon: string;
     badge?: number;
-  }) {
+  }): void {
     // Handle header actions (notifications, etc.)
     switch (action.id) {
       case 'notifications':
@@ -1275,7 +1289,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
    * @param card - The card.
    * @returns The result of the operation.
    */
-  onCardClick(card: DashboardCard) {
+  public onCardClick(card: DashboardCard): void {
     if (card.route) {
       // Router navigation handled by routerLink
       // Optional: Analytics tracking here
@@ -1287,7 +1301,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
    * @param event - The event.
    * @returns The result of the operation.
    */
-  onCardSwipe(event: SwipeEvent) {
+  public onCardSwipe(event: SwipeEvent): void {
     // Handle swipe actions based on event.action
     switch (event.action.id) {
       case 'view':
@@ -1313,14 +1327,14 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
    * @param activity - The activity.
    * @returns The result of the operation.
    */
-  onActivityClick(activity: {
+  public onActivityClick(activity: {
     id: string;
     title: string;
     subtitle: string;
     timeAgo: string;
     type: string;
     icon: string;
-  }) {
+  }): void {
     // Navigate to activity details based on activity type
     switch (activity.type) {
       case 'success':
@@ -1338,7 +1352,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
    * Performs the on fab click operation.
    * @returns The result of the operation.
    */
-  onFabClick() {
+  public onFabClick(): void {
     // Navigate to upload page
     // This could use Router.navigate() for programmatic navigation
   }

@@ -1,10 +1,11 @@
-import {
+import type {
   AnalyticsEvent,
+  UserSession} from './analytics.dto';
+import {
   EventType,
   EventStatus,
   ConsentStatus,
-  MetricUnit,
-  UserSession,
+  MetricUnit
 } from './analytics.dto';
 
 /**
@@ -12,33 +13,34 @@ import {
  */
 export class AnalyticsRules {
   // 核心业务规则常量 - 数据分析系统
-  static readonly MAX_EVENTS_PER_SESSION = 1000; // 单会话最大事件数
-  static readonly MAX_SESSION_DURATION_HOURS = 24; // 最大会话时长（小时）
-  static readonly EVENT_PROCESSING_BATCH_SIZE = 100; // 事件处理批次大小
-  static readonly MIN_EVENT_INTERVAL_MS = 100; // 最小事件间隔（毫秒）
+  public static readonly MAX_EVENTS_PER_SESSION = 1000; // 单会话最大事件数
+  public static readonly MAX_SESSION_DURATION_HOURS = 24; // 最大会话时长（小时）
+  public static readonly EVENT_PROCESSING_BATCH_SIZE = 100; // 事件处理批次大小
+  public static readonly MIN_EVENT_INTERVAL_MS = 100; // 最小事件间隔（毫秒）
 
   // 数据保留期限常量
-  static readonly USER_DATA_RETENTION_DAYS = 730; // 用户数据保留期（2年）
-  static readonly SYSTEM_DATA_RETENTION_DAYS = 90; // 系统数据保留期（3个月）
-  static readonly BUSINESS_DATA_RETENTION_DAYS = 1095; // 业务数据保留期（3年）
-  static readonly ERROR_DATA_RETENTION_DAYS = 365; // 错误数据保留期（1年）
+  public static readonly USER_DATA_RETENTION_DAYS = 730; // 用户数据保留期（2年）
+  public static readonly SYSTEM_DATA_RETENTION_DAYS = 90; // 系统数据保留期（3个月）
+  public static readonly BUSINESS_DATA_RETENTION_DAYS = 1095; // 业务数据保留期（3年）
+  public static readonly ERROR_DATA_RETENTION_DAYS = 365; // 错误数据保留期（1年）
 
   // 隐私合规常量
-  static readonly ANONYMIZATION_THRESHOLD_DAYS = 365; // 自动匿名化阈值（1年）
-  static readonly CONSENT_EXPIRY_DAYS = 730; // 用户同意过期时间（2年）
-  static readonly MAX_PERSONAL_DATA_STORAGE_DAYS = 1095; // 个人数据最大存储时间（3年）
+  public static readonly ANONYMIZATION_THRESHOLD_DAYS = 365; // 自动匿名化阈值（1年）
+  public static readonly CONSENT_EXPIRY_DAYS = 730; // 用户同意过期时间（2年）
+  public static readonly MAX_PERSONAL_DATA_STORAGE_DAYS = 1095; // 个人数据最大存储时间（3年）
 
   // 性能监控常量
-  static readonly MAX_EVENT_SIZE_BYTES = 50 * 1024; // 最大事件大小（50KB）
-  static readonly CRITICAL_PERFORMANCE_THRESHOLD_MS = 5000; // 关键性能阈值（5秒）
-  static readonly HIGH_VOLUME_THRESHOLD_EVENTS_PER_MINUTE = 600; // 高流量阈值（每分钟600事件）
+  public static readonly MAX_EVENT_SIZE_BYTES = 50 * 1024; // 最大事件大小（50KB）
+  public static readonly CRITICAL_PERFORMANCE_THRESHOLD_MS = 5000; // 关键性能阈值（5秒）
+  public static readonly HIGH_VOLUME_THRESHOLD_EVENTS_PER_MINUTE = 600; // 高流量阈值（每分钟600事件）
 
   /**
    * 验证事件创建的资格条件
    */
-  static canCreateEvent(
+  public static canCreateEvent(
     sessionId: string,
     eventType: EventType,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     eventData: any,
     consentStatus: ConsentStatus,
     existingEventsInSession?: number,
@@ -95,7 +97,7 @@ export class AnalyticsRules {
   /**
    * 验证用户同意状态是否有效
    */
-  static isConsentValid(
+  public static isConsentValid(
     consentStatus: ConsentStatus,
     eventType: EventType,
   ): boolean {
@@ -111,7 +113,7 @@ export class AnalyticsRules {
   /**
    * 判断是否为系统事件类型
    */
-  static isSystemEventType(eventType: EventType): boolean {
+  public static isSystemEventType(eventType: EventType): boolean {
     const systemEventTypes = [
       EventType.SYSTEM_PERFORMANCE,
       EventType.ERROR_EVENT,
@@ -123,8 +125,9 @@ export class AnalyticsRules {
   /**
    * 验证事件数据结构
    */
-  static validateEventDataStructure(
+  public static validateEventDataStructure(
     eventType: EventType,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     eventData: any,
   ): EventDataValidationResult {
     const errors: string[] = [];
@@ -216,7 +219,7 @@ export class AnalyticsRules {
   /**
    * 计算事件处理优先级
    */
-  static calculateEventPriority(eventType: EventType): EventPriority {
+  public static calculateEventPriority(eventType: EventType): EventPriority {
     let priority = 0;
     const factors: string[] = [];
 
@@ -266,7 +269,7 @@ export class AnalyticsRules {
   /**
    * 验证事件是否可以进行批量处理
    */
-  static canBatchProcessEvents(
+  public static canBatchProcessEvents(
     events: AnalyticsEvent[],
   ): BatchProcessingEligibilityResult {
     const errors: string[] = [];
@@ -319,7 +322,7 @@ export class AnalyticsRules {
   /**
    * 生成数据保留策略建议
    */
-  static generateRetentionPolicy(
+  public static generateRetentionPolicy(
     event: AnalyticsEvent,
   ): AnalyticsDataRetentionPolicy {
     const eventType = event.getEventType();
@@ -355,7 +358,7 @@ export class AnalyticsRules {
   /**
    * 评估隐私合规风险
    */
-  static assessPrivacyComplianceRisk(
+  public static assessPrivacyComplianceRisk(
     event: AnalyticsEvent,
     userSession: UserSession,
   ): PrivacyComplianceRiskAssessment {
@@ -406,7 +409,7 @@ export class AnalyticsRules {
   /**
    * 验证数据匿名化要求
    */
-  static validateAnonymizationRequirement(
+  public static validateAnonymizationRequirement(
     event: AnalyticsEvent,
   ): AnonymizationRequirementResult {
     const daysSinceCreation = Math.floor(
@@ -440,7 +443,7 @@ export class AnalyticsRules {
   /**
    * 计算分析报告权限
    */
-  static calculateReportingPermissions(
+  public static calculateReportingPermissions(
     userRole: string,
     reportType: ReportType,
     dataScope: DataScope,

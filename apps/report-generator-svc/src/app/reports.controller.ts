@@ -14,18 +14,18 @@ import {
   UseGuards,
   HttpStatus,
 } from '@nestjs/common';
-import { Response } from 'express';
-import {
+import type { Response } from 'express';
+import type {
   ReportGeneratorService,
   ReportGenerationRequest,
 } from '../report-generator/report-generator.service';
-import {
+import type {
   ReportRepository,
   ReportQuery,
   ReportListOptions,
 } from '../report-generator/report.repository';
-import { GridFsService } from '../report-generator/gridfs.service';
-import { ReportTemplatesService } from '../report-generator/report-templates.service';
+import type { GridFsService } from '../report-generator/gridfs.service';
+import type { ReportTemplatesService } from '../report-generator/report-templates.service';
 
 /**
  * Defines the shape of the report generation request dto.
@@ -86,9 +86,101 @@ export interface ReportQueryDto {
 // Mock authentication guard for demonstration
 // In production, replace with your actual authentication system
 class AuthGuard {
-  canActivate(): boolean {
+  public canActivate(): boolean {
     return true; // Always allow for demonstration
   }
+}
+
+/**
+ * Response type for report generation
+ */
+interface ReportGenerationResponse {
+  success: boolean;
+  data: unknown;
+  message: string;
+}
+
+/**
+ * Response type for comparison report
+ */
+interface CandidateComparisonResponse {
+  success: boolean;
+  data: {
+    comparisonReport: string;
+    jobId: string;
+    candidateCount: number;
+  };
+  message: string;
+}
+
+/**
+ * Response type for interview guide
+ */
+interface InterviewGuideResponse {
+  success: boolean;
+  data: {
+    interviewGuide: string;
+    jobId: string;
+    resumeId: string;
+  };
+  message: string;
+}
+
+/**
+ * Response type for reports list
+ */
+interface ReportsListResponse {
+  success: boolean;
+  data: unknown;
+  message: string;
+}
+
+/**
+ * Response type for single report
+ */
+interface ReportResponse {
+  success: boolean;
+  data: unknown;
+  message: string;
+}
+
+/**
+ * Response type for delete operation
+ */
+interface DeleteReportResponse {
+  success: boolean;
+  message: string;
+}
+
+/**
+ * Response type for analytics
+ */
+interface AnalyticsResponse {
+  success: boolean;
+  data: unknown;
+  message: string;
+}
+
+/**
+ * Response type for storage stats
+ */
+interface StorageStatsResponse {
+  success: boolean;
+  data: {
+    totalFiles: number;
+    totalSize: number;
+    sizeByType: Record<string, { count: number; size: number }>;
+  };
+  message: string;
+}
+
+/**
+ * Response type for health check
+ */
+interface HealthCheckResponse {
+  success: boolean;
+  data: { status: string; details: Record<string, boolean> };
+  message: string;
 }
 
 /**
@@ -104,7 +196,7 @@ export class ReportsController {
    * @param reportGeneratorService - The report generator service.
    * @param reportRepository - The report repository.
    * @param gridFsService - The grid fs service.
-   * @param reportTemplatesService - The report templates service.
+   * @param _reportTemplatesService - The report templates service.
    */
   constructor(
     private readonly reportGeneratorService: ReportGeneratorService,
@@ -119,7 +211,7 @@ export class ReportsController {
    * @returns The result of the operation.
    */
   @Post('generate')
-  async generateReport(@Body() request: ReportGenerationRequestDto) {
+  public async generateReport(@Body() request: ReportGenerationRequestDto): Promise<ReportGenerationResponse> {
     try {
       this.logger.log(
         `Generating ${request.reportType} report for job ${request.jobId}`,
@@ -182,9 +274,9 @@ export class ReportsController {
    * @returns The result of the operation.
    */
   @Post('compare-candidates')
-  async generateCandidateComparison(
+  public async generateCandidateComparison(
     @Body() request: CandidateComparisonRequestDto,
-  ) {
+  ): Promise<CandidateComparisonResponse> {
     try {
       this.logger.log(
         `Generating candidate comparison for job ${request.jobId} with ${request.resumeIds.length} candidates`,
@@ -239,7 +331,7 @@ export class ReportsController {
    * @returns The result of the operation.
    */
   @Post('interview-guide')
-  async generateInterviewGuide(@Body() request: InterviewGuideRequestDto) {
+  public async generateInterviewGuide(@Body() request: InterviewGuideRequestDto): Promise<InterviewGuideResponse> {
     try {
       this.logger.log(
         `Generating interview guide for job ${request.jobId}, resume ${request.resumeId}`,
@@ -288,7 +380,7 @@ export class ReportsController {
    * @returns The result of the operation.
    */
   @Get()
-  async getReports(@Query() queryDto: ReportQueryDto) {
+  public async getReports(@Query() queryDto: ReportQueryDto): Promise<ReportsListResponse> {
     try {
       this.logger.debug('Retrieving reports', { query: queryDto });
 
@@ -312,11 +404,11 @@ export class ReportsController {
       }
 
       const options: ReportListOptions = {
-        page: queryDto.page || 1,
-        limit: queryDto.limit || 20,
-        sortBy: queryDto.sortBy || 'generatedAt',
-        sortOrder: queryDto.sortOrder || 'desc',
-        includeFailedReports: queryDto.includeFailedReports || false,
+        page: queryDto.page ?? 1,
+        limit: queryDto.limit ?? 20,
+        sortBy: queryDto.sortBy ?? 'generatedAt',
+        sortOrder: queryDto.sortOrder ?? 'desc',
+        includeFailedReports: queryDto.includeFailedReports ?? false,
       };
 
       const result = await this.reportRepository.findReports(query, options);
@@ -344,7 +436,7 @@ export class ReportsController {
    * @returns The result of the operation.
    */
   @Get(':reportId')
-  async getReport(@Param('reportId') reportId: string) {
+  public async getReport(@Param('reportId') reportId: string): Promise<ReportResponse> {
     try {
       this.logger.debug(`Retrieving report: ${reportId}`);
 
@@ -378,16 +470,16 @@ export class ReportsController {
   /**
    * Performs the download report file operation.
    * @param fileId - The file id.
-   * @param format - The format.
+   * @param _format - The format.
    * @param response - The response.
    * @returns The result of the operation.
    */
   @Get('file/:fileId')
-  async downloadReportFile(
+  public async downloadReportFile(
     @Param('fileId') fileId: string,
     @Query('format') _format: string,
     @Res() response: Response,
-  ) {
+  ): Promise<void> {
     try {
       this.logger.debug(`Downloading report file: ${fileId}`);
 
@@ -438,7 +530,7 @@ export class ReportsController {
    * @returns The result of the operation.
    */
   @Delete(':reportId')
-  async deleteReport(@Param('reportId') reportId: string) {
+  public async deleteReport(@Param('reportId') reportId: string): Promise<DeleteReportResponse> {
     try {
       this.logger.log(`Deleting report: ${reportId}`);
 
@@ -475,19 +567,19 @@ export class ReportsController {
    * @returns The result of the operation.
    */
   @Get('job/:jobId')
-  async getReportsByJob(
+  public async getReportsByJob(
     @Param('jobId') jobId: string,
     @Query() queryDto: Omit<ReportQueryDto, 'jobId'>,
-  ) {
+  ): Promise<ReportsListResponse> {
     try {
       this.logger.debug(`Retrieving reports for job: ${jobId}`);
 
       const options: ReportListOptions = {
-        page: queryDto.page || 1,
-        limit: queryDto.limit || 20,
-        sortBy: queryDto.sortBy || 'generatedAt',
-        sortOrder: queryDto.sortOrder || 'desc',
-        includeFailedReports: queryDto.includeFailedReports || false,
+        page: queryDto.page ?? 1,
+        limit: queryDto.limit ?? 20,
+        sortBy: queryDto.sortBy ?? 'generatedAt',
+        sortOrder: queryDto.sortOrder ?? 'desc',
+        includeFailedReports: queryDto.includeFailedReports ?? false,
       };
 
       const result = await this.reportRepository.findReportsByJobId(
@@ -519,19 +611,19 @@ export class ReportsController {
    * @returns The result of the operation.
    */
   @Get('resume/:resumeId')
-  async getReportsByResume(
+  public async getReportsByResume(
     @Param('resumeId') resumeId: string,
     @Query() queryDto: Omit<ReportQueryDto, 'resumeId'>,
-  ) {
+  ): Promise<ReportsListResponse> {
     try {
       this.logger.debug(`Retrieving reports for resume: ${resumeId}`);
 
       const options: ReportListOptions = {
-        page: queryDto.page || 1,
-        limit: queryDto.limit || 20,
-        sortBy: queryDto.sortBy || 'generatedAt',
-        sortOrder: queryDto.sortOrder || 'desc',
-        includeFailedReports: queryDto.includeFailedReports || false,
+        page: queryDto.page ?? 1,
+        limit: queryDto.limit ?? 20,
+        sortBy: queryDto.sortBy ?? 'generatedAt',
+        sortOrder: queryDto.sortOrder ?? 'desc',
+        includeFailedReports: queryDto.includeFailedReports ?? false,
       };
 
       const result = await this.reportRepository.findReportsByResumeId(
@@ -562,7 +654,7 @@ export class ReportsController {
    * @returns The result of the operation.
    */
   @Get('analytics/overview')
-  async getReportAnalytics(@Query() queryDto: ReportQueryDto) {
+  public async getReportAnalytics(@Query() queryDto: ReportQueryDto): Promise<AnalyticsResponse> {
     try {
       this.logger.debug('Retrieving report analytics');
 
@@ -605,7 +697,7 @@ export class ReportsController {
    * @returns The result of the operation.
    */
   @Get('storage/stats')
-  async getStorageStats() {
+  public async getStorageStats(): Promise<StorageStatsResponse> {
     try {
       this.logger.debug('Retrieving storage statistics');
 
@@ -632,7 +724,7 @@ export class ReportsController {
    * @returns The result of the operation.
    */
   @Get('health')
-  async healthCheck() {
+  public async healthCheck(): Promise<HealthCheckResponse> {
     try {
       const health = await this.reportGeneratorService.healthCheck();
 

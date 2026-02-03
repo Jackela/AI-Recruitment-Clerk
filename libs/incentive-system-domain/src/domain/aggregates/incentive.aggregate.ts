@@ -1,9 +1,10 @@
-import { DomainEvent } from '../domain-events/base/domain-event.js';
+import type { DomainEvent } from '../domain-events/base/domain-event.js';
 
+import type {
+  ContactInfo} from '../value-objects/index.js';
 import {
   IncentiveId,
   IncentiveRecipient,
-  ContactInfo,
   IncentiveReward,
   IncentiveTrigger,
   IncentiveValidationResult,
@@ -47,7 +48,7 @@ export class Incentive {
    * @param contactInfo - The contact info.
    * @returns The Incentive.
    */
-  static createQuestionnaireIncentive(
+  public static createQuestionnaireIncentive(
     ip: string,
     questionnaireId: string,
     qualityScore: number,
@@ -97,7 +98,7 @@ export class Incentive {
    * @param contactInfo - The contact info.
    * @returns The Incentive.
    */
-  static createReferralIncentive(
+  public static createReferralIncentive(
     referrerIP: string,
     referredIP: string,
     contactInfo: ContactInfo,
@@ -136,7 +137,7 @@ export class Incentive {
    * @param data - The data.
    * @returns The Incentive.
    */
-  static restore(data: IncentiveData): Incentive {
+  public static restore(data: IncentiveData): Incentive {
     return new Incentive(
       new IncentiveId({ value: data.id }),
       IncentiveRecipient.restore(data.recipient),
@@ -154,7 +155,7 @@ export class Incentive {
    * Validates eligibility.
    * @returns The IncentiveValidationResult.
    */
-  validateEligibility(): IncentiveValidationResult {
+  public validateEligibility(): IncentiveValidationResult {
     const validationErrors: string[] = [];
 
     // 验证触发条件
@@ -208,7 +209,7 @@ export class Incentive {
    * Performs the approve for processing operation.
    * @param reason - The reason.
    */
-  approveForProcessing(reason: string): void {
+  public approveForProcessing(reason: string): void {
     if (this.status !== IncentiveStatus.PENDING_VALIDATION) {
       throw new Error(`Cannot approve incentive in ${this.status} status`);
     }
@@ -232,7 +233,7 @@ export class Incentive {
    * Performs the reject operation.
    * @param reason - The reason.
    */
-  reject(reason: string): void {
+  public reject(reason: string): void {
     if (this.status === IncentiveStatus.PAID) {
       throw new Error('Cannot reject already paid incentive');
     }
@@ -257,7 +258,7 @@ export class Incentive {
    * @param transactionId - The transaction id.
    * @returns The PaymentResult.
    */
-  executePayment(
+  public executePayment(
     paymentMethod: PaymentMethod,
     transactionId: string,
   ): PaymentResult {
@@ -330,7 +331,7 @@ export class Incentive {
    * Retrieves incentive summary.
    * @returns The IncentiveSummary.
    */
-  getIncentiveSummary(): IncentiveSummary {
+  public getIncentiveSummary(): IncentiveSummary {
     return new IncentiveSummary({
       id: this.id.getValue(),
       recipientIP: this.recipient.getIP(),
@@ -361,14 +362,14 @@ export class Incentive {
    * Retrieves uncommitted events.
    * @returns The an array of DomainEvent.
    */
-  getUncommittedEvents(): DomainEvent[] {
+  public getUncommittedEvents(): DomainEvent[] {
     return [...this.uncommittedEvents];
   }
 
   /**
    * Performs the mark events as committed operation.
    */
-  markEventsAsCommitted(): void {
+  public markEventsAsCommitted(): void {
     this.uncommittedEvents = [];
   }
 
@@ -381,7 +382,7 @@ export class Incentive {
    * Retrieves id.
    * @returns The IncentiveId.
    */
-  getId(): IncentiveId {
+  public getId(): IncentiveId {
     return this.id;
   }
 
@@ -389,7 +390,7 @@ export class Incentive {
    * Retrieves status.
    * @returns The IncentiveStatus.
    */
-  getStatus(): IncentiveStatus {
+  public getStatus(): IncentiveStatus {
     return this.status;
   }
 
@@ -397,7 +398,7 @@ export class Incentive {
    * Retrieves recipient ip.
    * @returns The string value.
    */
-  getRecipientIP(): string {
+  public getRecipientIP(): string {
     return this.recipient.getIP();
   }
 
@@ -405,7 +406,7 @@ export class Incentive {
    * Retrieves reward amount.
    * @returns The number value.
    */
-  getRewardAmount(): number {
+  public getRewardAmount(): number {
     return this.reward.getAmount();
   }
 
@@ -413,7 +414,7 @@ export class Incentive {
    * Retrieves created at.
    * @returns The Date.
    */
-  getCreatedAt(): Date {
+  public getCreatedAt(): Date {
     return this.createdAt;
   }
 }
@@ -424,8 +425,11 @@ export class Incentive {
  */
 export interface IncentiveData {
   id: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   recipient: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   reward: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   trigger: any;
   status: IncentiveStatus;
   createdAt: string;

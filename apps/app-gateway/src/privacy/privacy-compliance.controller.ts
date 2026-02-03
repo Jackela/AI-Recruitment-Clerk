@@ -23,7 +23,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { PrivacyComplianceService } from './privacy-compliance.service';
+import type { PrivacyComplianceService } from './privacy-compliance.service';
 import {
   
   ConsentStatusResponseDto,
@@ -41,7 +41,6 @@ import type {
   CreateRightsRequestDto,
   DataExportPackage,
   DataSubjectRightsRequest,
-  ProcessRightsRequestDto,
   UserConsentProfile,
   WithdrawConsentDto,
 } from '@ai-recruitment-clerk/shared-dtos';
@@ -78,8 +77,9 @@ export class PrivacyComplianceController {
   })
   @ApiResponse({ status: 400, description: 'Invalid consent data' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async captureConsent(
+  public async captureConsent(
     @Body(ValidationPipe) captureConsentDto: CaptureConsentDto,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     @Req() req: any,
   ): Promise<UserConsentProfile> {
     this.logger.log(`Capturing consent for user: ${captureConsentDto.userId}`);
@@ -88,6 +88,7 @@ export class PrivacyComplianceController {
     captureConsentDto.ipAddress = req.ip || req.connection.remoteAddress;
     captureConsentDto.userAgent = req.headers['user-agent'];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (await this.privacyService.captureConsent(captureConsentDto)) as any;
   }
 
@@ -112,7 +113,7 @@ export class PrivacyComplianceController {
     description: 'Cannot withdraw consent for essential services',
   })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async withdrawConsent(
+  public async withdrawConsent(
     @Body(ValidationPipe) withdrawConsentDto: WithdrawConsentDto,
   ): Promise<void> {
     this.logger.log(
@@ -140,7 +141,7 @@ export class PrivacyComplianceController {
     type: ConsentStatusResponseDto,
   })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async getConsentStatus(
+  public async getConsentStatus(
     @Param('userId') userId: string,
   ): Promise<ConsentStatusDto> {
     this.logger.log(`Getting consent status for user: ${userId}`);
@@ -166,8 +167,9 @@ export class PrivacyComplianceController {
     type: DataSubjectRightsRequestDto,
   })
   @ApiResponse({ status: 400, description: 'Invalid request data' })
-  async createRightsRequest(
+  public async createRightsRequest(
     @Body(ValidationPipe) createRequestDto: CreateRightsRequestDto,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     @Req() req: any,
   ): Promise<DataSubjectRightsRequest> {
     this.logger.log(
@@ -180,6 +182,7 @@ export class PrivacyComplianceController {
 
     return (await this.privacyService.createRightsRequest(
       createRequestDto,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     )) as any;
   }
 
@@ -209,7 +212,7 @@ export class PrivacyComplianceController {
     type: DataExportPackageDto,
   })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async exportUserData(
+  public async exportUserData(
     @Param('userId') userId: string,
     @Query('format') format?: DataExportFormat,
   ): Promise<DataExportPackage> {
@@ -219,6 +222,7 @@ export class PrivacyComplianceController {
     return (await this.privacyService.processDataAccessRequest(
       userId,
       format || DataExportFormat.JSON,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     )) as any;
   }
 
@@ -248,7 +252,7 @@ export class PrivacyComplianceController {
     description: 'Data deletion not permitted due to legal obligations',
   })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async deleteUserData(
+  public async deleteUserData(
     @Param('userId') userId: string,
     @Query('categories') categories?: string,
   ): Promise<void> {
@@ -276,7 +280,7 @@ export class PrivacyComplianceController {
     description: 'Administrative endpoint to view data processing activities',
   })
   @ApiResponse({ status: 200, description: 'Processing records retrieved' })
-  async getProcessingRecords(): Promise<any[]> {
+  public async getProcessingRecords(): Promise<Record<string, unknown>[]> {
     this.logger.log('Getting data processing records');
     // TODO: Implement processing records retrieval
     return [
@@ -302,7 +306,7 @@ export class PrivacyComplianceController {
 
   /**
    * Retrieves compliance status.
-   * @returns A promise that resolves to any.
+   * @returns A promise that resolves to compliance status.
    */
   @Get('compliance-status')
   @UseGuards(JwtAuthGuard)
@@ -312,7 +316,7 @@ export class PrivacyComplianceController {
     description: 'Administrative overview of privacy compliance metrics',
   })
   @ApiResponse({ status: 200, description: 'Compliance status retrieved' })
-  async getComplianceStatus(): Promise<any> {
+  public async getComplianceStatus(): Promise<Record<string, unknown>> {
     this.logger.log('Getting compliance status');
     // TODO: Implement compliance status calculation
     return {
@@ -346,7 +350,7 @@ export class PrivacyComplianceController {
 
   /**
    * Performs the privacy health check operation.
-   * @returns A promise that resolves to any.
+   * @returns A promise that resolves to health status.
    */
   @Post('privacy-health-check')
   @HttpCode(HttpStatus.OK)
@@ -355,7 +359,7 @@ export class PrivacyComplianceController {
     description: 'Verify GDPR compliance infrastructure is functioning',
   })
   @ApiResponse({ status: 200, description: 'Health check completed' })
-  async privacyHealthCheck(): Promise<any> {
+  public async privacyHealthCheck(): Promise<Record<string, unknown>> {
     this.logger.log('Performing privacy health check');
 
     const healthStatus = {
@@ -389,10 +393,10 @@ export class PrivacyComplianceController {
     description: 'Manage cookie consent for anonymous/guest users',
   })
   @ApiResponse({ status: 201, description: 'Cookie consent saved' })
-  async setCookieConsent(
-    @Body() cookieConsent: any,
-    @Req() req: any,
-  ): Promise<any> {
+  public async setCookieConsent(
+    @Body() cookieConsent: Record<string, unknown>,
+    @Req() _req: Request,
+  ): Promise<Record<string, unknown>> {
     this.logger.log('Setting cookie consent preferences');
 
     // TODO: Implement cookie consent management
@@ -407,7 +411,7 @@ export class PrivacyComplianceController {
   /**
    * Retrieves cookie consent.
    * @param deviceId - The device id.
-   * @returns A promise that resolves to any.
+   * @returns A promise that resolves to cookie consent.
    */
   @Get('cookie-consent/:deviceId')
   @ApiOperation({
@@ -416,7 +420,7 @@ export class PrivacyComplianceController {
   })
   @ApiParam({ name: 'deviceId', description: 'Device identifier' })
   @ApiResponse({ status: 200, description: 'Cookie consent retrieved' })
-  async getCookieConsent(@Param('deviceId') deviceId: string): Promise<any> {
+  public async getCookieConsent(@Param('deviceId') deviceId: string): Promise<Record<string, unknown>> {
     this.logger.log(`Getting cookie consent for device: ${deviceId}`);
 
     // TODO: Implement cookie consent retrieval

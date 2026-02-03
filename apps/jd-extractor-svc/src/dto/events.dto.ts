@@ -1,4 +1,4 @@
-import { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
+import type { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
 
 /**
  * Defines the shape of the job jd submitted event.

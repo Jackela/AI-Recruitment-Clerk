@@ -36,7 +36,7 @@ export class ErrorHandlingModule {
   /**
    * Configure error handling for a specific service
    */
-  static forService(serviceName: string) {
+  public static forService(serviceName: string): { module: typeof ErrorHandlingModule; providers: { provide: string; useValue: string }[] } {
     return {
       module: ErrorHandlingModule,
       providers: [

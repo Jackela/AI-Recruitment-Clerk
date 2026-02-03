@@ -1,9 +1,10 @@
 import { Directive, Input, forwardRef } from '@angular/core';
-import {
-  NG_VALIDATORS,
+import type {
   Validator,
   AbstractControl,
-  ValidationErrors,
+  ValidationErrors} from '@angular/forms';
+import {
+  NG_VALIDATORS
 } from '@angular/forms';
 
 /**
@@ -21,15 +22,15 @@ import {
   ],
 })
 export class RequiredValidatorDirective implements Validator {
-  @Input() arcRequired: boolean | string = true;
-  @Input() customMessage?: string;
+  @Input() public arcRequired: boolean | string = true;
+  @Input() public customMessage?: string;
 
   /**
    * Validates the data.
    * @param control - The control.
    * @returns The ValidationErrors | null.
    */
-  validate(control: AbstractControl): ValidationErrors | null {
+  public validate(control: AbstractControl): ValidationErrors | null {
     // Check if validation is enabled
     const isRequired =
       this.arcRequired === '' ||

@@ -1,3 +1,5 @@
+import type {
+  RawSubmissionData} from './questionnaire.dto';
 import {
   Questionnaire,
   QuestionnaireSubmission,
@@ -6,8 +8,7 @@ import {
   BusinessValue,
   OptionalInfo,
   SubmissionMetadata,
-  QuestionnaireStatus,
-  RawSubmissionData,
+  QuestionnaireStatus
 } from './questionnaire.dto';
 
 import { QuestionnaireRules } from './questionnaire.rules';

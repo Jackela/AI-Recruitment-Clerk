@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { AnalysisReport, ReportsList } from './report.model';
+import type { AnalysisReport, ReportsList } from './report.model';
 
 // Load Reports for Job
 export const loadReportsByJob = createAction(

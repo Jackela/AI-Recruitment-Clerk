@@ -1,15 +1,15 @@
-import { JobContracts } from '@ai-recruitment-clerk/api-contracts';
+import type { JobContracts } from '@ai-recruitment-clerk/api-contracts';
 
 /**
  * Describes the job detail data transfer object.
  */
 export class JobDetailDto {
-  id: string;
-  title: string;
-  jdText: string;
-  status: JobContracts.JobStatus;
-  createdAt: Date;
-  resumeCount: number;
+  public id: string;
+  public title: string;
+  public jdText: string;
+  public status: JobContracts.JobStatus;
+  public createdAt: Date;
+  public resumeCount: number;
 
   /**
    * Initializes a new instance of the Job Detail DTO.
@@ -41,11 +41,11 @@ export class JobDetailDto {
  * Describes the job list data transfer object.
  */
 export class JobListDto {
-  id: string;
-  title: string;
-  status: JobContracts.JobStatus;
-  createdAt: Date;
-  resumeCount: number;
+  public id: string;
+  public title: string;
+  public status: JobContracts.JobStatus;
+  public createdAt: Date;
+  public resumeCount: number;
 
   /**
    * Initializes a new instance of the Job List DTO.

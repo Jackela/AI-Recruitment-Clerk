@@ -1,13 +1,14 @@
+import type {
+  OnInit,
+  AfterViewInit,
+  OnDestroy,
+  ElementRef} from '@angular/core';
 import {
   Component,
   Input,
   Output,
   EventEmitter,
-  OnInit,
-  AfterViewInit,
-  OnDestroy,
   ViewChild,
-  ElementRef,
   signal,
   computed,
 } from '@angular/core';
@@ -484,34 +485,50 @@ export class DataTableComponent<T = Record<string, unknown>>
   implements OnInit, AfterViewInit, OnDestroy
 {
   @ViewChild('tableWrapper', { static: false })
-  tableWrapper!: ElementRef<HTMLDivElement>;
+  public tableWrapper!: ElementRef<HTMLDivElement>;
 
   private destroy$ = new Subject<void>();
   private resizeObserver?: ResizeObserver;
-  @Input() columns: TableColumn[] = [];
-  @Input() data: T[] = [];
-  @Input() options: TableOptions = {};
-  @Input() showActions = false;
+  @Input() public columns: TableColumn[] = [];
+  @Input() public data: T[] = [];
+  @Input() public options: TableOptions = {};
+  @Input() public showActions = false;
 
-  @Output() onSort = new EventEmitter<SortEvent>();
-  @Output() onPageChange = new EventEmitter<PageEvent>();
-  @Output() onSelectionChange = new EventEmitter<T[]>();
-  @Output() onView = new EventEmitter<T>();
-  @Output() onEdit = new EventEmitter<T>();
-  @Output() onDelete = new EventEmitter<T>();
-  @Output() onExport = new EventEmitter<void>();
+  @Output() public sortChange = new EventEmitter<SortEvent>();
+  @Output() public pageChange = new EventEmitter<PageEvent>();
+  @Output() public selectionChange = new EventEmitter<T[]>();
+  @Output() public viewItem = new EventEmitter<T>();
+  @Output() public editItem = new EventEmitter<T>();
+  @Output() public deleteItem = new EventEmitter<T>();
+  @Output() public exportData = new EventEmitter<void>();
+
+  // Deprecated: keep for backwards compatibility
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
+  /** @deprecated Use sortChange instead */ @Output() public onSort = this.sortChange;
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
+  /** @deprecated Use pageChange instead */ @Output() public onPageChange = this.pageChange;
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
+  /** @deprecated Use selectionChange instead */ @Output() public onSelectionChange = this.selectionChange;
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
+  /** @deprecated Use viewItem instead */ @Output() public onView = this.viewItem;
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
+  /** @deprecated Use editItem instead */ @Output() public onEdit = this.editItem;
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
+  /** @deprecated Use deleteItem instead */ @Output() public onDelete = this.deleteItem;
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
+  /** @deprecated Use exportData instead */ @Output() public onExport = this.exportData;
 
   // State
-  searchTerm = '';
-  pageSize = 10;
-  currentPage = signal(0);
-  sortColumn = signal<string | null>(null);
-  sortDirection = signal<'asc' | 'desc' | null>(null);
-  selectedRows = signal<T[]>([]);
+  public searchTerm = '';
+  public pageSize = 10;
+  public currentPage = signal(0);
+  public sortColumn = signal<string | null>(null);
+  public sortDirection = signal<'asc' | 'desc' | null>(null);
+  public selectedRows = signal<T[]>([]);
   // Track horizontal scroll state (moved to private property below)
 
   // Computed values
-  filteredData = computed(() => {
+  public filteredData = computed(() => {
     let filtered = [...this.data];
 
     // Apply search filter
@@ -529,45 +546,43 @@ export class DataTableComponent<T = Record<string, unknown>>
     }
 
     // Apply sorting
-    if (this.sortColumn() && this.sortDirection()) {
-      const col = this.sortColumn()!;
-      const dir = this.sortDirection()!;
-
+    const sortCol = this.sortColumn();
+    const sortDir = this.sortDirection();
+    if (sortCol && sortDir) {
       filtered.sort((a, b) => {
-        const aVal = this.getCellValue(a, col);
-        const bVal = this.getCellValue(b, col);
+        const aVal = this.getCellValue(a, sortCol);
+        const bVal = this.getCellValue(b, sortCol);
 
         if (aVal === bVal) return 0;
         if (aVal === null || aVal === undefined) return 1;
         if (bVal === null || bVal === undefined) return -1;
 
         const comparison = aVal < bVal ? -1 : 1;
-        return dir === 'asc' ? comparison : -comparison;
+        return sortDir === 'asc' ? comparison : -comparison;
       });
     }
 
     return filtered;
   });
 
-  totalItems = computed(() => this.filteredData().length);
-  totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize));
+  public totalItems = computed(() => this.filteredData().length);
+  public totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize));
 
-  paginatedData = computed(() => {
+  public paginatedData = computed(() => {
     const start = this.currentPage() * this.pageSize;
     const end = start + this.pageSize;
     return this.filteredData().slice(start, end);
   });
 
-  startIndex = computed(() => this.currentPage() * this.pageSize);
-  endIndex = computed(() =>
+  public startIndex = computed(() => this.currentPage() * this.pageSize);
+  public endIndex = computed(() =>
     Math.min(this.startIndex() + this.pageSize, this.totalItems()),
   );
 
   /**
    * Performs the ng on init operation.
-   * @returns The result of the operation.
    */
-  ngOnInit() {
+  public ngOnInit(): void {
     // Set default options
     this.options = {
       pageSize: 10,
@@ -596,18 +611,16 @@ export class DataTableComponent<T = Record<string, unknown>>
 
   /**
    * Performs the ng after view init operation.
-   * @returns The result of the operation.
    */
-  ngAfterViewInit() {
+  public ngAfterViewInit(): void {
     this.setupScrollDetection();
     this.setupResizeObserver();
   }
 
   /**
    * Performs the ng on destroy operation.
-   * @returns The result of the operation.
    */
-  ngOnDestroy() {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
 
@@ -622,7 +635,7 @@ export class DataTableComponent<T = Record<string, unknown>>
    * @param key - The key.
    * @returns The unknown.
    */
-  getCellValue(row: T, key: string): unknown {
+  public getCellValue(row: T, key: string): unknown {
     const keys = key.split('.');
     let value: unknown = row;
 
@@ -635,17 +648,15 @@ export class DataTableComponent<T = Record<string, unknown>>
 
   /**
    * Performs the on search operation.
-   * @returns The result of the operation.
    */
-  onSearch() {
+  public onSearch(): void {
     this.currentPage.set(0);
   }
 
   /**
    * Performs the clear search operation.
-   * @returns The result of the operation.
    */
-  clearSearch() {
+  public clearSearch(): void {
     this.searchTerm = '';
     this.onSearch();
   }
@@ -653,9 +664,8 @@ export class DataTableComponent<T = Record<string, unknown>>
   /**
    * Handles sort.
    * @param column - The column.
-   * @returns The result of the operation.
    */
-  handleSort(column: string) {
+  public handleSort(column: string): void {
     if (this.sortColumn() === column) {
       // Toggle direction
       if (this.sortDirection() === 'asc') {
@@ -671,17 +681,19 @@ export class DataTableComponent<T = Record<string, unknown>>
       this.sortDirection.set('asc');
     }
 
-    this.onSort.emit({
-      column: this.sortColumn()!,
-      direction: this.sortDirection(),
-    });
+    const currentSortColumn = this.sortColumn();
+    if (currentSortColumn) {
+      this.onSort.emit({
+        column: currentSortColumn,
+        direction: this.sortDirection(),
+      });
+    }
   }
 
   /**
    * Performs the previous page operation.
-   * @returns The result of the operation.
    */
-  previousPage() {
+  public previousPage(): void {
     if (this.currentPage() > 0) {
       this.currentPage.update((p) => p - 1);
       this.emitPageChange();
@@ -690,9 +702,8 @@ export class DataTableComponent<T = Record<string, unknown>>
 
   /**
    * Performs the next page operation.
-   * @returns The result of the operation.
    */
-  nextPage() {
+  public nextPage(): void {
     if (this.currentPage() < this.totalPages() - 1) {
       this.currentPage.update((p) => p + 1);
       this.emitPageChange();
@@ -702,27 +713,24 @@ export class DataTableComponent<T = Record<string, unknown>>
   /**
    * Performs the go to page operation.
    * @param page - The page.
-   * @returns The result of the operation.
    */
-  goToPage(page: number) {
+  public goToPage(page: number): void {
     this.currentPage.set(page);
     this.emitPageChange();
   }
 
   /**
    * Performs the on page size change operation.
-   * @returns The result of the operation.
    */
-  onPageSizeChange() {
+  public onPageSizeChange(): void {
     this.currentPage.set(0);
     this.emitPageChange();
   }
 
   /**
    * Performs the emit page change operation.
-   * @returns The result of the operation.
    */
-  emitPageChange() {
+  public emitPageChange(): void {
     this.onPageChange.emit({
       pageIndex: this.currentPage(),
       pageSize: this.pageSize,
@@ -733,7 +741,7 @@ export class DataTableComponent<T = Record<string, unknown>>
    * Retrieves page numbers.
    * @returns The an array of number value.
    */
-  getPageNumbers(): number[] {
+  public getPageNumbers(): number[] {
     const total = this.totalPages();
     const current = this.currentPage();
     const pages: number[] = [];
@@ -758,7 +766,7 @@ export class DataTableComponent<T = Record<string, unknown>>
    * @param row - The row.
    * @returns The boolean value.
    */
-  isSelected(row: T): boolean {
+  public isSelected(row: T): boolean {
     return this.selectedRows().includes(row);
   }
 
@@ -766,7 +774,7 @@ export class DataTableComponent<T = Record<string, unknown>>
    * Performs the is all selected operation.
    * @returns The boolean value.
    */
-  isAllSelected(): boolean {
+  public isAllSelected(): boolean {
     const pageData = this.paginatedData();
     return pageData.length > 0 && pageData.every((row) => this.isSelected(row));
   }
@@ -775,7 +783,7 @@ export class DataTableComponent<T = Record<string, unknown>>
    * Performs the is some selected operation.
    * @returns The boolean value.
    */
-  isSomeSelected(): boolean {
+  public isSomeSelected(): boolean {
     const pageData = this.paginatedData();
     return (
       pageData.some((row) => this.isSelected(row)) && !this.isAllSelected()
@@ -785,9 +793,8 @@ export class DataTableComponent<T = Record<string, unknown>>
   /**
    * Performs the toggle select operation.
    * @param row - The row.
-   * @returns The result of the operation.
    */
-  toggleSelect(row: T) {
+  public toggleSelect(row: T): void {
     const selected = [...this.selectedRows()];
     const index = selected.indexOf(row);
 
@@ -808,9 +815,8 @@ export class DataTableComponent<T = Record<string, unknown>>
 
   /**
    * Performs the toggle select all operation.
-   * @returns The result of the operation.
    */
-  toggleSelectAll() {
+  public toggleSelectAll(): void {
     const pageData = this.paginatedData();
     const selected = [...this.selectedRows()];
 
@@ -837,10 +843,9 @@ export class DataTableComponent<T = Record<string, unknown>>
 
   /**
    * Performs the export data operation.
-   * @returns The result of the operation.
    */
-  exportData() {
-    this.onExport.emit();
+  public exportTableData(): void {
+    this.exportData.emit();
     // Default CSV export implementation
     const csv = this.convertToCSV(this.filteredData());
     this.downloadCSV(csv, 'data-export.csv');
@@ -868,7 +873,7 @@ export class DataTableComponent<T = Record<string, unknown>>
     return [csvHeaders, ...csvRows].join('\n');
   }
 
-  private downloadCSV(csv: string, filename: string) {
+  private downloadCSV(csv: string, filename: string): void {
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -887,7 +892,7 @@ export class DataTableComponent<T = Record<string, unknown>>
    * @param column - The column.
    * @returns The 'asc' | 'desc' | null.
    */
-  getNextSortDirection(column: string): 'asc' | 'desc' | null {
+  public getNextSortDirection(column: string): 'asc' | 'desc' | null {
     const currentColumn = this.sortColumn();
     const currentDirection = this.sortDirection();
 
@@ -910,7 +915,7 @@ export class DataTableComponent<T = Record<string, unknown>>
    * @param column - The column.
    * @returns The string value.
    */
-  getColumnClasses(column: TableColumn): string {
+  public getColumnClasses(column: TableColumn): string {
     const classes: string[] = [];
 
     if (column.priority) {
@@ -934,7 +939,7 @@ export class DataTableComponent<T = Record<string, unknown>>
    * @param column - The column.
    * @returns The string value.
    */
-  getColumnLabel(column: TableColumn): string {
+  public getColumnLabel(column: TableColumn): string {
     // Use mobile label on small screens if available
     if (window.innerWidth <= 768 && column.mobileLabel) {
       return column.mobileLabel;
@@ -948,7 +953,7 @@ export class DataTableComponent<T = Record<string, unknown>>
    * @param column - The column.
    * @returns The string value.
    */
-  getTruncatedValue(row: T, column: TableColumn): string {
+  public getTruncatedValue(row: T, column: TableColumn): string {
     const value = this.getCellValue(row, column.key);
     const text = String(value || '');
 
@@ -965,7 +970,7 @@ export class DataTableComponent<T = Record<string, unknown>>
    * @param column - The column.
    * @returns The boolean value.
    */
-  shouldShowTooltip(row: T, column: TableColumn): boolean {
+  public shouldShowTooltip(row: T, column: TableColumn): boolean {
     if (!column.truncateLength) return false;
 
     const value = this.getCellValue(row, column.key);
@@ -975,7 +980,7 @@ export class DataTableComponent<T = Record<string, unknown>>
   }
 
   // Horizontal scroll detection
-  hasHorizontalScroll = false;
+  public hasHorizontalScroll = false;
 
   private setupScrollDetection(): void {
     if (!this.tableWrapper) return;

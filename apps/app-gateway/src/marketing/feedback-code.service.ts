@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import type { Model } from 'mongoose';
 
 // Local DTOs for Marketing features (test-friendly and decoupled from external package)
 /**
@@ -16,7 +16,7 @@ export interface CreateFeedbackCodeDto {
 export interface MarkFeedbackCodeUsedDto {
   code: string;
   alipayAccount: string;
-  questionnaireData?: any;
+  questionnaireData?: Record<string, unknown>;
 }
 
 /**
@@ -29,7 +29,7 @@ export interface FeedbackCodeDto {
   isUsed: boolean;
   usedAt?: Date;
   alipayAccount?: string;
-  questionnaireData?: any;
+  questionnaireData?: Record<string, unknown>;
   paymentStatus: 'pending' | 'paid' | 'rejected';
   qualityScore?: number;
   paymentAmount?: number;
@@ -57,7 +57,7 @@ export interface FeedbackCodeDocument {
   isUsed: boolean;
   usedAt?: Date;
   alipayAccount?: string;
-  questionnaireData?: any;
+  questionnaireData?: Record<string, unknown>;
   paymentStatus: 'pending' | 'paid' | 'rejected';
   qualityScore?: number;
   paymentAmount?: number;
@@ -72,7 +72,7 @@ export interface FeedbackCodeDocument {
  */
 @Injectable()
 export class FeedbackCodeService {
-  private readonly logger = new Logger(FeedbackCodeService.name);
+  private readonly logger: Logger = new Logger(FeedbackCodeService.name);
 
   /**
    * Initializes a new instance of the Feedback Code Service.
@@ -89,9 +89,9 @@ export class FeedbackCodeService {
    * @param metadata - The metadata.
    * @returns A promise that resolves to FeedbackCodeDto.
    */
-  async recordFeedbackCode(
+  public async recordFeedbackCode(
     createDto: CreateFeedbackCodeDto,
-    metadata?: any,
+    metadata?: { ipAddress?: string; userAgent?: string; sessionId?: string },
   ): Promise<FeedbackCodeDto> {
     try {
       // 检查反馈码是否已存在
@@ -129,7 +129,7 @@ export class FeedbackCodeService {
    * @param code - The code.
    * @returns A promise that resolves to boolean value.
    */
-  async validateFeedbackCode(code: string): Promise<boolean> {
+  public async validateFeedbackCode(code: string): Promise<boolean> {
     try {
       const record = await this.feedbackCodeModel.findOne({ code });
       const isValid = !!record && !record.isUsed;
@@ -145,7 +145,7 @@ export class FeedbackCodeService {
   /**
    * 获取反馈码详细信息（包括是否已核销）
    */
-  async getFeedbackCodeDetails(code: string): Promise<{
+  public async getFeedbackCodeDetails(code: string): Promise<{
     valid: boolean;
     isUsed: boolean;
     usedAt?: Date;
@@ -183,7 +183,7 @@ export class FeedbackCodeService {
    * @param markUsedDto - The mark used dto.
    * @returns A promise that resolves to FeedbackCodeDto.
    */
-  async markAsUsed(
+  public async markAsUsed(
     markUsedDto: MarkFeedbackCodeUsedDto,
   ): Promise<FeedbackCodeDto> {
     try {
@@ -221,7 +221,7 @@ export class FeedbackCodeService {
    * Retrieves pending payments.
    * @returns A promise that resolves to an array of FeedbackCodeDto.
    */
-  async getPendingPayments(): Promise<FeedbackCodeDto[]> {
+  public async getPendingPayments(): Promise<FeedbackCodeDto[]> {
     try {
       const pendingCodes = await this.feedbackCodeModel
         .find({
@@ -246,7 +246,7 @@ export class FeedbackCodeService {
    * @param reason - The reason.
    * @returns A promise that resolves to FeedbackCodeDto.
    */
-  async updatePaymentStatus(
+  public async updatePaymentStatus(
     code: string,
     status: 'paid' | 'rejected',
     reason?: string,
@@ -278,7 +278,7 @@ export class FeedbackCodeService {
    * Retrieves marketing stats.
    * @returns A promise that resolves to MarketingStatsDto.
    */
-  async getMarketingStats(): Promise<MarketingStatsDto> {
+  public async getMarketingStats(): Promise<MarketingStatsDto> {
     try {
       const [
         totalCodes,
@@ -315,18 +315,18 @@ export class FeedbackCodeService {
     }
   }
 
-  private assessFeedbackQuality(questionnaireData: any): number {
+  private assessFeedbackQuality(questionnaireData: Record<string, unknown> | undefined): number {
     if (!questionnaireData) return 0;
 
     let score = 1; // 基础分
 
     // 检查文本字段长度和质量
     const textFields = [
-      questionnaireData.problems,
-      questionnaireData.favorite_features,
-      questionnaireData.improvements,
-      questionnaireData.additional_features,
-    ].filter((field) => field && typeof field === 'string');
+      questionnaireData['problems'],
+      questionnaireData['favorite_features'],
+      questionnaireData['improvements'],
+      questionnaireData['additional_features'],
+    ].filter((field): field is string => field != null && typeof field === 'string');
 
     // 每个有效的文本字段加分
     textFields.forEach((text) => {
@@ -379,7 +379,7 @@ export class FeedbackCodeService {
    * @param reason - The reason.
    * @returns A promise that resolves to number value.
    */
-  async batchUpdatePaymentStatus(
+  public async batchUpdatePaymentStatus(
     codes: string[],
     status: 'paid' | 'rejected',
     reason?: string,
@@ -408,7 +408,7 @@ export class FeedbackCodeService {
    * @param markUsedDto - The mark used dto.
    * @returns A promise that resolves to FeedbackCodeDto.
    */
-  async markFeedbackCodeAsUsed(
+  public async markFeedbackCodeAsUsed(
     markUsedDto: MarkFeedbackCodeUsedDto,
   ): Promise<FeedbackCodeDto> {
     try {
@@ -444,7 +444,7 @@ export class FeedbackCodeService {
    * @param daysOld - The days old.
    * @returns A promise that resolves to number value.
    */
-  async cleanupExpiredCodes(daysOld = 30): Promise<number> {
+  public async cleanupExpiredCodes(daysOld = 30): Promise<number> {
     try {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - daysOld);

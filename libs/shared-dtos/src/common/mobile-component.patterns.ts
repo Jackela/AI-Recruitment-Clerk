@@ -3,7 +3,8 @@
  * Mobile Component Common Patterns - Reduce Code Duplication
  */
 
-import { Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
+import { Input, Output, EventEmitter } from '@angular/core';
 import { Subject } from 'rxjs';
 
 /**
@@ -35,18 +36,28 @@ export interface LoadingState {
 }
 
 /**
+ * Defines the shape of the validation rule set.
+ */
+export interface ValidationRuleSet {
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: RegExp;
+}
+
+/**
  * 移动端基础组件抽象类
  */
 export abstract class BaseMobileComponent implements OnInit, OnDestroy {
-  @Input() config: MobileComponentConfig = {};
-  @Input() loadingState: LoadingState = { isLoading: false };
+  @Input() public config: MobileComponentConfig = {};
+  @Input() public loadingState: LoadingState = { isLoading: false };
 
-  @Output() swipeLeft = new EventEmitter<any>();
-  @Output() swipeRight = new EventEmitter<any>();
-  @Output() swipeUp = new EventEmitter<any>();
-  @Output() swipeDown = new EventEmitter<any>();
-  @Output() pullToRefresh = new EventEmitter<void>();
-  @Output() loadMore = new EventEmitter<void>();
+  @Output() public swipeLeft = new EventEmitter<unknown>();
+  @Output() public swipeRight = new EventEmitter<unknown>();
+  @Output() public swipeUp = new EventEmitter<unknown>();
+  @Output() public swipeDown = new EventEmitter<unknown>();
+  @Output() public pullToRefresh = new EventEmitter<void>();
+  @Output() public loadMore = new EventEmitter<void>();
 
   protected destroy$ = new Subject<void>();
   protected isDestroyed = false;
@@ -62,7 +73,7 @@ export abstract class BaseMobileComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.config = { ...this.defaultConfig, ...this.config };
     this.setupComponent();
     this.onMobileInit();
@@ -71,7 +82,7 @@ export abstract class BaseMobileComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.isDestroyed = true;
     this.destroy$.next();
     this.destroy$.complete();
@@ -110,7 +121,7 @@ export abstract class BaseMobileComponent implements OnInit, OnDestroy {
    */
   protected handleSwipe(
     direction: 'left' | 'right' | 'up' | 'down',
-    data?: any,
+    data?: unknown,
   ): void {
     switch (direction) {
       case 'left':
@@ -165,13 +176,13 @@ export abstract class BaseMobileComponent implements OnInit, OnDestroy {
  * 移动端列表组件基类
  */
 export abstract class BaseMobileListComponent<T> extends BaseMobileComponent {
-  @Input() items: T[] = [];
-  @Input() enableVirtualScroll = false;
-  @Input() itemHeight = 80;
-  @Input() loadMoreThreshold = 200;
+  @Input() public items: T[] = [];
+  @Input() public enableVirtualScroll = false;
+  @Input() public itemHeight = 80;
+  @Input() public loadMoreThreshold = 200;
 
-  @Output() itemClick = new EventEmitter<T>();
-  @Output() itemLongPress = new EventEmitter<T>();
+  @Output() public itemClick = new EventEmitter<T>();
+  @Output() public itemLongPress = new EventEmitter<T>();
 
   protected currentPage = 1;
   protected pageSize = 20;
@@ -240,13 +251,13 @@ export abstract class BaseMobileListComponent<T> extends BaseMobileComponent {
  * 移动端表单组件基类
  */
 export abstract class BaseMobileFormComponent extends BaseMobileComponent {
-  @Input() formData: any = {};
-  @Input() validationRules: any = {};
-  @Input() showValidationErrors = true;
+  @Input() public formData: Record<string, unknown> = {};
+  @Input() public validationRules: Record<string, unknown> = {};
+  @Input() public showValidationErrors = true;
 
-  @Output() formSubmit = new EventEmitter<any>();
-  @Output() formReset = new EventEmitter<void>();
-  @Output() fieldChange = new EventEmitter<{ field: string; value: any }>();
+  @Output() public formSubmit = new EventEmitter<Record<string, unknown>>();
+  @Output() public formReset = new EventEmitter<void>();
+  @Output() public fieldChange = new EventEmitter<{ field: string; value: unknown }>();
 
   protected formErrors: Record<string, string[]> = {};
   protected isFormValid = false;
@@ -270,7 +281,7 @@ export abstract class BaseMobileFormComponent extends BaseMobileComponent {
     // 实现表单验证逻辑
     for (const [field, rules] of Object.entries(this.validationRules)) {
       const value = this.formData[field];
-      const errors = this.validateField(field, value, rules as any);
+      const errors = this.validateField(field, value, rules as ValidationRuleSet);
 
       if (errors.length > 0) {
         this.formErrors[field] = errors;
@@ -284,22 +295,23 @@ export abstract class BaseMobileFormComponent extends BaseMobileComponent {
   /**
    * 验证单个字段
    */
-  protected validateField(field: string, value: any, rules: any): string[] {
+  protected validateField(field: string, value: unknown, rules: ValidationRuleSet): string[] {
     const errors: string[] = [];
+    const strValue = typeof value === 'string' ? value : '';
 
-    if (rules.required && (!value || value.trim() === '')) {
+    if (rules.required && (!value || strValue.trim() === '')) {
       errors.push(`${field} 是必填项`);
     }
 
-    if (rules.minLength && value && value.length < rules.minLength) {
+    if (rules.minLength && strValue && strValue.length < rules.minLength) {
       errors.push(`${field} 最少需要 ${rules.minLength} 个字符`);
     }
 
-    if (rules.maxLength && value && value.length > rules.maxLength) {
+    if (rules.maxLength && strValue && strValue.length > rules.maxLength) {
       errors.push(`${field} 最多允许 ${rules.maxLength} 个字符`);
     }
 
-    if (rules.pattern && value && !rules.pattern.test(value)) {
+    if (rules.pattern && strValue && !rules.pattern.test(strValue)) {
       errors.push(`${field} 格式不正确`);
     }
 
@@ -309,7 +321,7 @@ export abstract class BaseMobileFormComponent extends BaseMobileComponent {
   /**
    * 处理字段变化
    */
-  protected onFieldChange(field: string, value: any): void {
+  protected onFieldChange(field: string, value: unknown): void {
     this.formData[field] = value;
     this.fieldChange.emit({ field, value });
 
@@ -369,7 +381,7 @@ export interface CardData {
   content?: string;
   imageUrl?: string;
   actions?: CardAction[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -387,13 +399,13 @@ export interface CardAction {
  * 移动端卡片组件基类
  */
 export abstract class BaseMobileCardComponent extends BaseMobileComponent {
-  @Input() cardData: CardData = { id: '', title: '' };
-  @Input() showActions = true;
-  @Input() showImage = true;
-  @Input() cardStyle: 'flat' | 'elevated' | 'outlined' = 'elevated';
+  @Input() public cardData: CardData = { id: '', title: '' };
+  @Input() public showActions = true;
+  @Input() public showImage = true;
+  @Input() public cardStyle: 'flat' | 'elevated' | 'outlined' = 'elevated';
 
-  @Output() cardClick = new EventEmitter<CardData>();
-  @Output() actionClick = new EventEmitter<{
+  @Output() public cardClick = new EventEmitter<CardData>();
+  @Output() public actionClick = new EventEmitter<{
     action: CardAction;
     card: CardData;
   }>();
@@ -433,8 +445,8 @@ export abstract class BaseMobileCardComponent extends BaseMobileComponent {
  * 触摸手势工具类
  */
 export class TouchGestureUtil {
-  static readonly SWIPE_THRESHOLD = 50;
-  static readonly SWIPE_VELOCITY = 0.3;
+  public static readonly SWIPE_THRESHOLD = 50;
+  public static readonly SWIPE_VELOCITY = 0.3;
 
   /**
    * Performs the detect swipe operation.
@@ -445,7 +457,7 @@ export class TouchGestureUtil {
    * @param timeElapsed - The time elapsed.
    * @returns The 'left' | 'right' | 'up' | 'down' | null.
    */
-  static detectSwipe(
+  public static detectSwipe(
     startX: number,
     startY: number,
     endX: number,
@@ -474,10 +486,10 @@ export class TouchGestureUtil {
    * @param callbacks - The callbacks.
    * @returns The () => void.
    */
-  static addTouchListeners(
+  public static addTouchListeners(
     element: HTMLElement,
     callbacks: {
-      onSwipe?: (direction: string, data?: any) => void;
+      onSwipe?: (direction: string, data?: unknown) => void;
       onTap?: (event: TouchEvent) => void;
       onLongPress?: (event: TouchEvent) => void;
     },
@@ -487,7 +499,7 @@ export class TouchGestureUtil {
     let startTime = 0;
     let longPressTimer: number | null = null;
 
-    const onTouchStart = (event: TouchEvent) => {
+    const onTouchStart = (event: TouchEvent): void => {
       const touch = event.touches[0];
       startX = touch.clientX;
       startY = touch.clientY;
@@ -495,12 +507,12 @@ export class TouchGestureUtil {
 
       if (callbacks.onLongPress) {
         longPressTimer = window.setTimeout(() => {
-          callbacks.onLongPress!(event);
+          callbacks.onLongPress?.(event);
         }, 500);
       }
     };
 
-    const onTouchEnd = (event: TouchEvent) => {
+    const onTouchEnd = (event: TouchEvent): void => {
       if (longPressTimer) {
         clearTimeout(longPressTimer);
         longPressTimer = null;

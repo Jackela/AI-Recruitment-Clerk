@@ -9,12 +9,13 @@ import {
   Put,
 } from '@nestjs/common';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import {
+import type {
   UserDto,
-  UserRole,
-  AuthenticatedRequest,
+  AuthenticatedRequest} from '@ai-recruitment-clerk/user-management-domain';
+import {
+  UserRole
 } from '@ai-recruitment-clerk/user-management-domain';
-import { UserService } from './user.service';
+import type { UserService } from './user.service';
 
 // Use shared AuthenticatedRequest type
 
@@ -36,7 +37,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   @HttpCode(HttpStatus.OK)
-  getProfile(@Request() req: AuthenticatedRequest) {
+  public getProfile(@Request() req: AuthenticatedRequest): UserDto {
     return req.user;
   }
 
@@ -47,7 +48,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Get('activity')
   @HttpCode(HttpStatus.OK)
-  getActivity() {
+  public getActivity(): { active: boolean; timestamp: string } {
     return { active: true, timestamp: new Date().toISOString() };
   }
 
@@ -59,8 +60,9 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Post('profile')
   @HttpCode(HttpStatus.OK)
-  async updateProfilePost(@Request() req: AuthenticatedRequest) {
+  public async updateProfilePost(@Request() req: AuthenticatedRequest): Promise<Partial<UserDto>> {
     // Accepts partial fields; persist via UserService
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updates: Partial<UserDto> = (req as any).body || {};
     const updated = await this.userService.updateUser(req.user.id, updates);
     return {
@@ -85,7 +87,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Put('profile')
   @HttpCode(HttpStatus.OK)
-  async updateProfilePut(@Request() req: AuthenticatedRequest) {
+  public async updateProfilePut(@Request() req: AuthenticatedRequest): Promise<Partial<UserDto>> {
     return this.updateProfilePost(req);
   }
 
@@ -97,9 +99,11 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Get('organization/users')
   @HttpCode(HttpStatus.OK)
-  async getOrganizationUsers(@Request() req: AuthenticatedRequest) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async getOrganizationUsers(@Request() req: AuthenticatedRequest): Promise<any> {
     // Enforce simple RBAC: only admins (and optionally HR managers) can list org users
     const requesterRole = String(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (req.user as any)?.rawRole ?? req.user.role ?? '',
     ).toLowerCase();
 
@@ -121,6 +125,7 @@ export class UsersController {
         userId: u.id,
         email: u.email,
         name: u.name,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         role: String((u as any)?.rawRole ?? u.role ?? '').toLowerCase(),
         organizationId: u.organizationId,
       })),

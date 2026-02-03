@@ -6,7 +6,7 @@
 
 import { spawn } from 'child_process';
 import { cleanup } from './cleanup-ports.mjs';
-import { waitForServerReady } from './browser-stability.ts';
+// waitForServerReady is available from browser-stability.ts if needed
 
 // Test execution configuration
 const TEST_CONFIG = {
@@ -147,7 +147,7 @@ async function runOptimizedTests() {
   console.log('📋 Configuration:', TEST_CONFIG);
   
   const results = [];
-  let totalStartTime = Date.now();
+  const totalStartTime = Date.now();
   
   // Initial cleanup
   console.log('🧹 Performing initial cleanup...');

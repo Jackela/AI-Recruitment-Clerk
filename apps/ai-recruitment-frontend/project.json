@@ -107,7 +107,7 @@
           "fileReplacements": [
             {
               "replace": "apps/ai-recruitment-frontend/src/environments/environment.ts",
-              "with": "apps/ai-recruitment-frontend/src/environments/environment.test.ts"
+              "with": "apps/ai-recruitment-frontend/src/environments/environment.testing.ts"
             }
           ]
         }

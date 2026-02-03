@@ -1,4 +1,5 @@
-import { Component, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import type { OnInit, OnDestroy } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationGuideService } from '../../../services/navigation/navigation-guide.service';
 // import { GuideStep } from '../../../services/navigation/navigation-guide.service'; // Reserved for future use
@@ -30,7 +31,7 @@ interface HighlightPosition extends Position {
   template: `
     <div class="guide-overlay-container" *ngIf="isVisible()">
       <!-- Backdrop -->
-      <div class="guide-backdrop" (click)="skipGuide()"></div>
+      <div class="guide-backdrop" (click)="skipGuide()" (keydown.enter)="skipGuide()" (keydown.space)="skipGuide()" tabindex="0" role="button" aria-label="Skip guide"></div>
 
       <!-- Guide Tooltip -->
       <div
@@ -111,23 +112,25 @@ interface HighlightPosition extends Position {
   styleUrls: ['./guide-overlay.component.css'],
 })
 export class GuideOverlayComponent implements OnInit, OnDestroy {
+  private readonly guideService = inject(NavigationGuideService);
+
   // Service state
-  isVisible = computed(() => this.guideService.isGuideActive());
-  currentStep = computed(() => this.guideService.currentStep());
-  stepIndex = computed(() => this.guideService.stepIndex());
-  currentFlow = computed(() => this.guideService.currentFlow());
+  public isVisible = computed(() => this.guideService.isGuideActive());
+  public currentStep = computed(() => this.guideService.currentStep());
+  public stepIndex = computed(() => this.guideService.stepIndex());
+  public currentFlow = computed(() => this.guideService.currentFlow());
 
   // Computed properties
-  totalSteps = computed(() => this.currentFlow()?.steps.length || 0);
-  progressPercentage = computed(() => {
+  public totalSteps = computed(() => this.currentFlow()?.steps.length || 0);
+  public progressPercentage = computed(() => {
     const total = this.totalSteps();
     return total > 0 ? ((this.stepIndex() + 1) / total) * 100 : 0;
   });
 
   // Local state
-  targetElement = signal<Element | null>(null);
-  tooltipPosition = signal({ top: '0px', left: '0px' });
-  highlightPosition = signal({
+  public targetElement = signal<Element | null>(null);
+  public tooltipPosition = signal({ top: '0px', left: '0px' });
+  public highlightPosition = signal({
     top: '0px',
     left: '0px',
     width: '0px',
@@ -138,15 +141,9 @@ export class GuideOverlayComponent implements OnInit, OnDestroy {
   private resizeObserver?: ResizeObserver;
 
   /**
-   * Initializes a new instance of the Guide Overlay Component.
-   * @param guideService - The guide service.
-   */
-  constructor(private guideService: NavigationGuideService) {}
-
-  /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     // Watch for step changes to update positions
     // Note: currentStep is a signal, we'll use effect for watching changes
     setTimeout(() => this.updatePositions(), 100);
@@ -158,7 +155,7 @@ export class GuideOverlayComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
     this.resizeObserver?.disconnect();
@@ -259,21 +256,21 @@ export class GuideOverlayComponent implements OnInit, OnDestroy {
   /**
    * Performs the next step operation.
    */
-  nextStep(): void {
+  public nextStep(): void {
     this.guideService.nextStep();
   }
 
   /**
    * Performs the previous step operation.
    */
-  previousStep(): void {
+  public previousStep(): void {
     this.guideService.previousStep();
   }
 
   /**
    * Performs the skip guide operation.
    */
-  skipGuide(): void {
+  public skipGuide(): void {
     this.guideService.skipFlow();
   }
 
@@ -282,7 +279,7 @@ export class GuideOverlayComponent implements OnInit, OnDestroy {
    * Performs the can go previous operation.
    * @returns The boolean value.
    */
-  canGoPrevious(): boolean {
+  public canGoPrevious(): boolean {
     return this.stepIndex() > 0;
   }
 
@@ -290,7 +287,7 @@ export class GuideOverlayComponent implements OnInit, OnDestroy {
    * Performs the is last step operation.
    * @returns The boolean value.
    */
-  isLastStep(): boolean {
+  public isLastStep(): boolean {
     return this.stepIndex() === this.totalSteps() - 1;
   }
 
@@ -298,7 +295,7 @@ export class GuideOverlayComponent implements OnInit, OnDestroy {
    * Performs the show progress operation.
    * @returns The boolean value.
    */
-  showProgress(): boolean {
+  public showProgress(): boolean {
     return this.totalSteps() > 1;
   }
 
@@ -306,7 +303,7 @@ export class GuideOverlayComponent implements OnInit, OnDestroy {
    * Retrieves tooltip classes.
    * @returns The string value.
    */
-  getTooltipClasses(): string {
+  public getTooltipClasses(): string {
     const step = this.currentStep();
     const classes = ['guide-tooltip'];
     if (step?.position) {
@@ -319,7 +316,7 @@ export class GuideOverlayComponent implements OnInit, OnDestroy {
    * Retrieves tooltip position.
    * @returns The Position.
    */
-  getTooltipPosition(): Position {
+  public getTooltipPosition(): Position {
     return this.tooltipPosition();
   }
 
@@ -327,7 +324,7 @@ export class GuideOverlayComponent implements OnInit, OnDestroy {
    * Retrieves highlight position.
    * @returns The HighlightPosition.
    */
-  getHighlightPosition(): HighlightPosition {
+  public getHighlightPosition(): HighlightPosition {
     return this.highlightPosition();
   }
 }

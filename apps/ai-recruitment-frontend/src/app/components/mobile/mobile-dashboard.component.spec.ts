@@ -1,32 +1,29 @@
+import type {
+  ComponentFixture} from '@angular/core/testing';
 import {
-  ComponentFixture,
   TestBed,
   fakeAsync,
   tick,
 } from '@angular/core/testing';
-import { DebugElement, ElementRef, Component } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Router, RouterModule } from '@angular/router';
 import { Subject, of } from 'rxjs';
-import { Location, CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 import { MobileDashboardComponent } from './mobile-dashboard.component';
+import type {
+  GestureEvent,
+  TouchPoint} from '../../services/mobile/touch-gesture.service';
 import {
   TouchGestureService,
-  GestureEvent,
-  TouchPoint,
-  GestureConfig,
 } from '../../services/mobile/touch-gesture.service';
-import {
-  MobileNavigationComponent,
-  MobileNavItem,
-} from './mobile-navigation.component';
-import {
-  MobileSwipeComponent,
+import type {
+  MobileNavItem} from './mobile-navigation.component';
+import type {
   SwipeEvent,
-  SwipeAction,
-} from './mobile-swipe.component';
+  SwipeAction} from './mobile-swipe.component';
 
 // Mock classes for standalone components
 @Component({
@@ -34,60 +31,52 @@ import {
   standalone: true,
   imports: [CommonModule],
   template: '<div class="mock-mobile-navigation"></div>',
-  inputs: [
-    'pageTitle',
-    'pageSubtitle',
-    'navItems',
-    'menuItems',
-    'headerActions',
-  ],
-  outputs: ['actionClick'],
 })
 class MockMobileNavigationComponent {
-  pageTitle = '';
-  pageSubtitle = '';
-  navItems: MobileNavItem[] = [];
-  menuItems: MobileNavItem[] = [];
-  headerActions: any[] = [];
-  actionClick = new Subject<any>();
+  @Input() public pageTitle = '';
+  @Input() public pageSubtitle = '';
+  @Input() public navItems: MobileNavItem[] = [];
+  @Input() public menuItems: MobileNavItem[] = [];
+  @Input() public headerActions: { id: string; label: string; icon?: string }[] = [];
+  @Output() public actionClick = new EventEmitter<{ id: string; label: string }>();
 }
 
+/* eslint-disable @angular-eslint/component-selector */
 @Component({
   selector: 'app-mobile-swipe',
   standalone: true,
   imports: [CommonModule],
   template: '<div class="mock-mobile-swipe"><ng-content></ng-content></div>',
-  inputs: ['actions', 'item'],
-  outputs: ['swipeAction'],
 })
 class MockMobileSwipeComponent {
-  actions: SwipeAction[] = [];
-  item: any = {};
-  swipeAction = new Subject<SwipeEvent>();
+  @Input() public actions: SwipeAction[] = [];
+  @Input() public item: Record<string, unknown> = {};
+  @Output() public swipeAction = new EventEmitter<SwipeEvent>();
 }
+/* eslint-enable @angular-eslint/component-selector */
 
 // Mock TouchGestureService
 class MockTouchGestureService {
   private gestureSubject = new Subject<GestureEvent>();
   public gesture$ = this.gestureSubject.asObservable();
 
-  initializeGestures = jest.fn().mockReturnValue(of(null));
-  onTap = jest.fn().mockReturnValue(of(null));
-  onSwipe = jest.fn().mockReturnValue(of(null));
-  onPress = jest.fn().mockReturnValue(of(null));
-  onPinch = jest.fn().mockReturnValue(of(null));
-  destroy = jest.fn();
+  public initializeGestures = jest.fn().mockReturnValue(of(null));
+  public onTap = jest.fn().mockReturnValue(of(null));
+  public onSwipe = jest.fn().mockReturnValue(of(null));
+  public onPress = jest.fn().mockReturnValue(of(null));
+  public onPinch = jest.fn().mockReturnValue(of(null));
+  public destroy = jest.fn();
 
   // Helper methods for testing
-  emitGestureEvent(event: GestureEvent) {
+  public emitGestureEvent(event: GestureEvent): void {
     this.gestureSubject.next(event);
   }
 
-  createTouchPoint(x: number, y: number): TouchPoint {
+  public createTouchPoint(x: number, y: number): TouchPoint {
     return { x, y, timestamp: Date.now() };
   }
 
-  createGestureEvent(
+  public createGestureEvent(
     type: GestureEvent['type'],
     startPoint: TouchPoint,
     endPoint?: TouchPoint,
@@ -129,8 +118,7 @@ describe('MobileDashboardComponent', () => {
   let component: MobileDashboardComponent;
   let fixture: ComponentFixture<MobileDashboardComponent>;
   let mockTouchGestureService: MockTouchGestureService;
-  let router: Router;
-  let location: Location;
+  let _router: Router;
   let mockElement: HTMLElement;
 
   // Helper functions for creating test data
@@ -153,7 +141,7 @@ describe('MobileDashboardComponent', () => {
       pageY: touch.clientY,
       screenX: touch.clientX,
       screenY: touch.clientY,
-    })) as any;
+    })) as unknown as TouchList;
 
     return new TouchEvent(type, {
       bubbles: true,
@@ -195,8 +183,7 @@ describe('MobileDashboardComponent', () => {
 
     fixture = TestBed.createComponent(MobileDashboardComponent);
     component = fixture.componentInstance;
-    router = TestBed.inject(Router);
-    location = TestBed.inject(Location);
+    _router = TestBed.inject(Router);
 
     // Create mock DOM element for ViewChild references
     mockElement = document.createElement('div');
@@ -333,12 +320,12 @@ describe('MobileDashboardComponent', () => {
     beforeEach(() => {
       // Capture event handlers added by setupPullToRefresh
       const originalAddEventListener = document.addEventListener;
-      const handlers: { [key: string]: any } = {};
+      const handlers: Record<string, EventListener> = {};
 
       jest
         .spyOn(document, 'addEventListener')
-        .mockImplementation((event: string, handler: any, options?: any) => {
-          handlers[event] = handler;
+        .mockImplementation((event: string, handler: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean) => {
+          handlers[event] = handler as EventListener;
           return originalAddEventListener.call(
             document,
             event,
@@ -1133,7 +1120,7 @@ describe('MobileDashboardComponent', () => {
       expect(component.isRefreshing).toBe(true);
 
       // Try to trigger refresh again while already refreshing
-      const refreshingSpy = jest.spyOn(component as any, 'triggerRefresh');
+      const _refreshingSpy = jest.spyOn(component as Record<string, unknown>, 'triggerRefresh');
       component['triggerRefresh']();
 
       // Should still be refreshing (not trigger multiple refreshes)

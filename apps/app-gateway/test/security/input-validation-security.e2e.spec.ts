@@ -1,5 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app/app.module';
 
@@ -23,7 +24,7 @@ describe('🛡️ Input Validation & Sanitization Security Tests', () => {
   let app: INestApplication;
   let adminToken: string;
   let userToken: string;
-  let testUserId: string;
+  let _testUserId: string;
   let testOrganizationId: string;
 
   const testAdmin = {

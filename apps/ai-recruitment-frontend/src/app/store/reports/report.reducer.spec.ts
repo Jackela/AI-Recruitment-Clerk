@@ -1,7 +1,8 @@
 import { reportReducer } from './report.reducer';
-import { initialReportState, ReportState } from './report.state';
+import type { ReportState } from './report.state';
+import { initialReportState } from './report.state';
 import * as ReportActions from './report.actions';
-import { AnalysisReport, ReportsList, ReportListItem } from './report.model';
+import type { AnalysisReport, ReportsList, ReportListItem } from './report.model';
 
 describe('Report Reducer', () => {
   const mockReportListItems: ReportListItem[] = [

@@ -3,15 +3,16 @@
  * Provides consistent error handling across all NestJS microservices
  */
 
-import {
+import type {
   ExceptionFilter,
+  ArgumentsHost} from '@nestjs/common';
+import {
   Catch,
-  ArgumentsHost,
   HttpException,
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { ThrottlerException } from '@nestjs/throttler';
 import { ValidationError } from 'class-validator';
 
@@ -21,20 +22,24 @@ import {
   ErrorType,
   ErrorSeverity,
 } from '../common/error-handling.patterns';
+import type {
+  CombinedErrorType} from './enhanced-error-types';
 import {
-  EnhancedAppException,
-  CombinedErrorType,
+  EnhancedAppException
 } from './enhanced-error-types';
+import type {
+  ErrorCorrelationContext} from './error-correlation';
 import {
-  ErrorCorrelationManager,
-  ErrorCorrelationContext,
+  ErrorCorrelationManager
 } from './error-correlation';
+import type {
+  StandardizedErrorResponse} from './error-response-formatter';
 import {
-  StandardizedErrorResponseFormatter,
-  StandardizedErrorResponse,
+  StandardizedErrorResponseFormatter
 } from './error-response-formatter';
+import type {
+  StructuredErrorLogger} from './structured-logging';
 import {
-  StructuredErrorLogger,
   StructuredLoggerFactory,
 } from './structured-logging';
 
@@ -95,7 +100,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
    * @param exception - The exception.
    * @param host - The host.
    */
-  catch(exception: unknown, host: ArgumentsHost): void {
+  public catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
@@ -245,6 +250,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
       let message: string;
 
       if (typeof response === 'object' && response !== null) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const responseObj = response as any;
         message = responseObj.message || exception.message;
         errorCode = responseObj.error || this.mapStatusToErrorCode(status);
@@ -372,6 +378,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
   /**
    * Send metrics to monitoring system (placeholder)
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private sendMetrics(_metrics: Record<string, any>): void {
     // Implementation would depend on your monitoring infrastructure
     if (process.env.METRICS_ENABLED === 'true') {
@@ -415,6 +422,7 @@ export class StandardizedGlobalExceptionFilter implements ExceptionFilter {
   /**
    * Format validation errors
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private formatValidationErrors(errors: ValidationError[]): any {
     return errors.map((error) => ({
       property: error.property,
@@ -574,7 +582,7 @@ export class ExceptionFilterConfigHelper {
   /**
    * Configuration for API Gateway service
    */
-  static forApiGateway(): Partial<GlobalExceptionFilterConfig> {
+  public static forApiGateway(): Partial<GlobalExceptionFilterConfig> {
     return {
       enableCorrelation: true,
       enableStructuredLogging: true,
@@ -593,7 +601,7 @@ export class ExceptionFilterConfigHelper {
   /**
    * Configuration for processing services
    */
-  static forProcessingService(): Partial<GlobalExceptionFilterConfig> {
+  public static forProcessingService(): Partial<GlobalExceptionFilterConfig> {
     return {
       enableCorrelation: true,
       enableStructuredLogging: true,
@@ -605,7 +613,7 @@ export class ExceptionFilterConfigHelper {
   /**
    * Configuration for production deployment
    */
-  static forProduction(): Partial<GlobalExceptionFilterConfig> {
+  public static forProduction(): Partial<GlobalExceptionFilterConfig> {
     return {
       includeStackTrace: false,
       enableErrorRecovery: true,

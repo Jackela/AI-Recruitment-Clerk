@@ -14,7 +14,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { Request as ExpressRequest } from 'express';
+import type { Request as ExpressRequest } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -26,11 +26,12 @@ import {
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
+import type {
+  UserDto} from '@ai-recruitment-clerk/user-management-domain';
 import {
-  Permission,
-  UserDto,
+  Permission
 } from '@ai-recruitment-clerk/user-management-domain';
-import { AnalyticsIntegrationService } from './analytics-integration.service';
+import type { AnalyticsIntegrationService } from './analytics-integration.service';
 
 interface AuthenticatedRequest extends ExpressRequest {
   user: UserDto;
@@ -83,7 +84,7 @@ export class AnalyticsController {
   @Permissions(Permission.READ_ANALYSIS)
   @Post('events')
   @HttpCode(HttpStatus.CREATED)
-  async trackEvent(
+  public async trackEvent(
     @Request() req: AuthenticatedRequest,
     @Body()
     eventData: {
@@ -95,7 +96,8 @@ export class AnalyticsController {
       metadata?: Record<string, unknown>;
       sessionId?: string;
     },
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       if (!req.user.organizationId) {
         throw new BadRequestException('Organization ID is required');
@@ -144,7 +146,7 @@ export class AnalyticsController {
   @Permissions(Permission.TRACK_METRICS)
   @Post('metrics/performance')
   @HttpCode(HttpStatus.CREATED)
-  async recordPerformanceMetric(
+  public async recordPerformanceMetric(
     @Request() req: AuthenticatedRequest,
     @Body()
     metricData: {
@@ -157,7 +159,8 @@ export class AnalyticsController {
       duration?: number;
       metadata?: Record<string, unknown>;
     },
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       if (!req.user.organizationId) {
         throw new BadRequestException('Organization ID is required');
@@ -205,7 +208,7 @@ export class AnalyticsController {
   @Permissions(Permission.TRACK_METRICS)
   @Post('metrics/business')
   @HttpCode(HttpStatus.CREATED)
-  async recordBusinessMetric(
+  public async recordBusinessMetric(
     @Request() req: AuthenticatedRequest,
     @Body()
     metricData: {
@@ -213,10 +216,12 @@ export class AnalyticsController {
       value: number;
       unit: string;
       category: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       dimensions?: Record<string, any>;
       tags?: string[];
     },
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       if (!req.user.organizationId) {
         throw new BadRequestException('Organization ID is required');
@@ -279,11 +284,12 @@ export class AnalyticsController {
   @UseGuards(RolesGuard)
   @Permissions(Permission.VIEW_ANALYTICS)
   @Get('dashboard')
-  async getDashboard(
+  public async getDashboard(
     @Request() req: AuthenticatedRequest,
     @Query('timeRange') timeRange = '7d',
     @Query('metrics') metrics?: string,
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       if (!req.user.organizationId) {
         throw new BadRequestException('Organization ID is required');
@@ -330,13 +336,14 @@ export class AnalyticsController {
   @UseGuards(RolesGuard)
   @Permissions(Permission.VIEW_ANALYTICS)
   @Get('users/behavior')
-  async getUserBehaviorAnalysis(
+  public async getUserBehaviorAnalysis(
     @Request() req: AuthenticatedRequest,
     @Query('userId') userId?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
     @Query('segmentBy') segmentBy?: string,
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       if (!req.user.organizationId) {
         throw new BadRequestException('Organization ID is required');
@@ -391,13 +398,14 @@ export class AnalyticsController {
   @UseGuards(RolesGuard)
   @Permissions(Permission.VIEW_ANALYTICS)
   @Get('usage/statistics')
-  async getUsageStatistics(
+  public async getUsageStatistics(
     @Request() req: AuthenticatedRequest,
     @Query('module') module?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
     @Query('granularity') granularity = 'day',
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       if (!req.user.organizationId) {
         throw new BadRequestException('Organization ID is required');
@@ -459,7 +467,7 @@ export class AnalyticsController {
   @Permissions(Permission.GENERATE_REPORT)
   @Post('reports/generate')
   @HttpCode(HttpStatus.CREATED)
-  async generateReport(
+  public async generateReport(
     @Request() req: AuthenticatedRequest,
     @Body()
     reportRequest: {
@@ -471,11 +479,13 @@ export class AnalyticsController {
         | 'comprehensive';
       format: 'pdf' | 'excel' | 'csv' | 'json';
       dateRange: { startDate: string; endDate: string };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       filters?: Record<string, any>;
       sections?: string[];
       recipients?: string[];
     },
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       if (!req.user.organizationId) {
         throw new BadRequestException('Organization ID is required');
@@ -536,13 +546,14 @@ export class AnalyticsController {
   @UseGuards(RolesGuard)
   @Permissions(Permission.READ_ANALYSIS)
   @Get('reports')
-  async getReports(
+  public async getReports(
     @Request() req: AuthenticatedRequest,
     @Query('page') page = 1,
     @Query('limit') limit = 20,
     @Query('status') status?: string,
     @Query('reportType') reportType?: string,
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       if (!req.user.organizationId) {
         throw new BadRequestException('Organization ID is required');
@@ -594,10 +605,11 @@ export class AnalyticsController {
   @UseGuards(RolesGuard)
   @Permissions(Permission.READ_ANALYSIS)
   @Get('reports/:reportId')
-  async getReport(
+  public async getReport(
     @Request() req: AuthenticatedRequest,
     @Param('reportId') reportId: string,
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       if (!req.user.organizationId) {
         throw new BadRequestException('Organization ID is required');
@@ -643,11 +655,12 @@ export class AnalyticsController {
   @Permissions(Permission.DELETE_RESUME)
   @Delete('reports/:reportId')
   @HttpCode(HttpStatus.OK)
-  async deleteReport(
+  public async deleteReport(
     @Request() req: AuthenticatedRequest,
     @Param('reportId') reportId: string,
     @Body() deleteRequest: { reason?: string; hardDelete?: boolean },
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       if (!req.user.organizationId) {
         throw new BadRequestException('Organization ID is required');
@@ -695,10 +708,11 @@ export class AnalyticsController {
   @UseGuards(RolesGuard)
   @Permissions(Permission.VIEW_ANALYTICS)
   @Get('realtime')
-  async getRealtimeData(
+  public async getRealtimeData(
     @Request() req: AuthenticatedRequest,
     @Query('metrics') metrics?: string,
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       if (!req.user.organizationId) {
         throw new BadRequestException('Organization ID is required');
@@ -739,7 +753,7 @@ export class AnalyticsController {
   @Permissions(Permission.SYSTEM_CONFIG)
   @Put('data-retention')
   @HttpCode(HttpStatus.OK)
-  async configureDataRetention(
+  public async configureDataRetention(
     @Request() req: AuthenticatedRequest,
     @Body()
     retentionConfig: {
@@ -749,7 +763,8 @@ export class AnalyticsController {
       anonymizeAfterDays?: number;
       enableAutoCleanup: boolean;
     },
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       if (!req.user.organizationId) {
         throw new BadRequestException('Organization ID is required');
@@ -797,17 +812,19 @@ export class AnalyticsController {
   @Permissions(Permission.GENERATE_REPORT)
   @Post('export')
   @HttpCode(HttpStatus.OK)
-  async exportAnalyticsData(
+  public async exportAnalyticsData(
     @Request() req: AuthenticatedRequest,
     @Query('format') format: 'csv' | 'json' | 'excel' = 'csv',
     @Body()
     exportRequest: {
       dataTypes: string[];
       dateRange: { startDate: string; endDate: string };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       filters?: Record<string, any>;
       includeMetadata?: boolean;
     },
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       if (!req.user.organizationId) {
         throw new BadRequestException('Organization ID is required');
@@ -856,7 +873,8 @@ export class AnalyticsController {
   })
   @ApiResponse({ status: 200, description: '服务状态' })
   @Get('health')
-  async healthCheck() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async healthCheck(): Promise<any> {
     try {
       const health = await this.analyticsService.getHealthStatus();
 

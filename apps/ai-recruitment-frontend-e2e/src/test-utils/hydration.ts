@@ -26,7 +26,7 @@ async function waitForIdle(page: Page): Promise<void> {
 }
 
 export async function waitForAppHydration(page: Page): Promise<void> {
-  await page.waitForSelector('arc-root', { state: 'attached', timeout: 15000 });
+  await page.locator('arc-root').waitFor({ state: 'attached', timeout: 15000 });
 
   await page.waitForFunction(() => document.readyState === 'complete', null, {
     timeout: 10000,
@@ -35,7 +35,7 @@ export async function waitForAppHydration(page: Page): Promise<void> {
   await waitForIdle(page);
   await waitForIdle(page);
 
-  await page.waitForSelector('body', {
+  await page.locator('body').waitFor({
     state: 'visible',
     timeout: 10000,
   });
@@ -50,7 +50,8 @@ export async function waitForDeferredComponents(
   await Promise.all(
     selectors.map((selector) =>
       page
-        .waitForSelector(selector, { state: 'attached', timeout: 10000 })
+        .locator(selector)
+        .waitFor({ state: 'attached', timeout: 10000 })
         .catch(() => undefined),
     ),
   );

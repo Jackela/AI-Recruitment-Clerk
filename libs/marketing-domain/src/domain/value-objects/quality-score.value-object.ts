@@ -8,7 +8,7 @@ export class QualityScore extends ValueObject<{ value: number }> {
    * Performs the value operation.
    * @returns The number value.
    */
-  get value(): number {
+  public get value(): number {
     return this.props.value;
   }
 }

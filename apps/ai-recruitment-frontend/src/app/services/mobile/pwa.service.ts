@@ -74,6 +74,7 @@ export class PWAService {
     // Check if running in standalone mode (PWA installed)
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window.navigator as any).standalone ||
       document.referrer.includes('android-app://');
 
@@ -197,7 +198,7 @@ export class PWAService {
   /**
    * Trigger install prompt
    */
-  async showInstallPrompt(): Promise<boolean> {
+  public async showInstallPrompt(): Promise<boolean> {
     if (!this.deferredPrompt) {
       console.warn('Install prompt not available');
       return false;
@@ -226,7 +227,7 @@ export class PWAService {
   /**
    * Update service worker
    */
-  async updateServiceWorker(): Promise<void> {
+  public async updateServiceWorker(): Promise<void> {
     if (!this.swRegistration) {
       console.warn('Service worker not registered');
       return;
@@ -243,7 +244,7 @@ export class PWAService {
   /**
    * Request notification permission
    */
-  async requestNotificationPermission(): Promise<NotificationPermission> {
+  public async requestNotificationPermission(): Promise<NotificationPermission> {
     if (!('Notification' in window)) {
       console.warn('This browser does not support notifications');
       return 'denied';
@@ -265,7 +266,7 @@ export class PWAService {
   /**
    * Show local notification
    */
-  async showNotification(payload: NotificationPayload): Promise<void> {
+  public async showNotification(payload: NotificationPayload): Promise<void> {
     const permission = await this.requestNotificationPermission();
 
     if (permission !== 'granted') {
@@ -297,7 +298,8 @@ export class PWAService {
   /**
    * Add to background sync queue
    */
-  async addToSyncQueue(tag: string, data: any): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async addToSyncQueue(tag: string, data: any): Promise<void> {
     if (
       !('serviceWorker' in navigator) ||
       !('sync' in window.ServiceWorkerRegistration.prototype)
@@ -323,6 +325,7 @@ export class PWAService {
   /**
    * Store data for background sync
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async storeForSync(tag: string, data: any): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open('arc-mobile-db', 1);
@@ -345,6 +348,7 @@ export class PWAService {
       };
 
       request.onupgradeneeded = (event) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const db = (event.target as any).result;
         if (!db.objectStoreNames.contains(tag)) {
           db.createObjectStore(tag, { keyPath: 'id' });
@@ -356,7 +360,7 @@ export class PWAService {
   /**
    * Get app info
    */
-  getAppInfo(): {
+  public getAppInfo(): {
     isInstalled: boolean;
     isInstallable: boolean;
     isOnline: boolean;
@@ -379,7 +383,7 @@ export class PWAService {
   /**
    * Clear app cache
    */
-  async clearCache(): Promise<void> {
+  public async clearCache(): Promise<void> {
     if ('caches' in window) {
       const cacheNames = await caches.keys();
       await Promise.all(
@@ -392,7 +396,7 @@ export class PWAService {
   /**
    * Get cache size
    */
-  async getCacheSize(): Promise<number> {
+  public async getCacheSize(): Promise<number> {
     if (!('caches' in window) || !('estimate' in navigator.storage)) {
       return 0;
     }
@@ -409,7 +413,7 @@ export class PWAService {
   /**
    * Share content (Web Share API)
    */
-  async shareContent(data: {
+  public async shareContent(data: {
     title?: string;
     text?: string;
     url?: string;
@@ -420,9 +424,11 @@ export class PWAService {
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (navigator as any).share(data);
       return true;
     } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((error as any)?.name !== 'AbortError') {
         console.error('Error sharing content:', error);
       }
@@ -433,14 +439,14 @@ export class PWAService {
   /**
    * Check if file system access is available
    */
-  hasFileSystemAccess(): boolean {
+  public hasFileSystemAccess(): boolean {
     return 'showOpenFilePicker' in window;
   }
 
   /**
    * Add haptic feedback
    */
-  vibrate(pattern: number | number[]): void {
+  public vibrate(pattern: number | number[]): void {
     if ('vibrate' in navigator) {
       navigator.vibrate(pattern);
     }

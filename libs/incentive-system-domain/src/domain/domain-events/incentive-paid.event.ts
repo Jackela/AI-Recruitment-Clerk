@@ -1,5 +1,5 @@
-import { DomainEvent } from './base/domain-event.js';
-import { Currency, PaymentMethod } from '../aggregates/incentive.aggregate.js';
+import type { DomainEvent } from './base/domain-event.js';
+import type { Currency, PaymentMethod } from '../aggregates/incentive.aggregate.js';
 
 /**
  * Represents the incentive paid event event.

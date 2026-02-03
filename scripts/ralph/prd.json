@@ -1,0 +1,337 @@
+{
+  "branchName": "feature/production-ready-refactor",
+  "qualityChecks": "npm run typecheck && npm run lint",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Fix e2e TypeScript issues - utility files",
+      "description": "Fix TypeScript lint issues in e2e utility files (non-spec)",
+      "priority": 1,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Fix browser-stability.ts (1 non-null assertion)",
+        "Fix cleanup-ports.mjs (3 unused vars)",
+        "Fix global-setup.ts (1 return type)",
+        "Fix global-teardown.ts (2 issues)",
+        "Fix mock-server.ts (9 issues)",
+        "Fix monitoring-system.mjs (1 unused var)",
+        "Fix optimized-test-runner.mjs (1 unused var)",
+        "Fix test-hooks.ts (4 any types)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-002",
+      "title": "Fix e2e TypeScript issues - manager files",
+      "description": "Fix TypeScript lint issues in port-manager.ts and robust-cleanup.ts",
+      "priority": 2,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Fix port-manager.ts (15 issues: accessibility, unused vars)",
+        "Fix robust-cleanup.ts (5 issues: accessibility, unused vars)",
+        "npm run typecheck passes"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-003",
+      "title": "Fix e2e connection-stability.ts Playwright issues",
+      "description": "Fix Playwright no-wait-for-timeout in connection-stability.ts",
+      "priority": 3,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Replace page.waitForTimeout() with proper waiting strategies",
+        "Use expect().toBeVisible() or page.waitForLoadState() instead"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-004",
+      "title": "Fix e2e hydration.ts Playwright issues",
+      "description": "Fix Playwright no-wait-for-selector in test-utils/hydration.ts",
+      "priority": 4,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Replace page.waitForSelector() with locator-based waiting",
+        "Use page.locator().waitFor() instead"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-005",
+      "title": "Fix console-errors.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in console-errors.spec.ts",
+      "priority": 5,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Fix no-conditional-in-test (3 issues)",
+        "Fix no-wait-for-timeout (1 issue)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-006",
+      "title": "Fix debug-selectors.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in debug-selectors.spec.ts",
+      "priority": 6,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Fix no-networkidle (1 issue)",
+        "Fix no-wait-for-timeout (1 issue)",
+        "Fix no-conditional-in-test (1 issue)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-007",
+      "title": "Fix debug-user-flow.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in debug-user-flow.spec.ts",
+      "priority": 7,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Fix no-networkidle (5 issues)",
+        "Fix no-wait-for-timeout (2 issues)",
+        "Fix no-conditional-in-test (4 issues)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-008",
+      "title": "Fix deep-console-debug.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in deep-console-debug.spec.ts",
+      "priority": 8,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Fix no-networkidle (1 issue)",
+        "Fix no-wait-for-timeout (1 issue)",
+        "Fix no-conditional-in-test (2 issues)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-009",
+      "title": "Fix detailed-job-creation.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in detailed-job-creation.spec.ts",
+      "priority": 9,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Fix no-networkidle (2 issues)",
+        "Fix no-wait-for-timeout (2 issues)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-010",
+      "title": "Fix diagnostic.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in diagnostic.spec.ts",
+      "priority": 10,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Fix no-networkidle (2 issues)",
+        "Fix no-wait-for-timeout (2 issues)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-011",
+      "title": "Fix error-scenarios.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in error-scenarios.spec.ts",
+      "priority": 11,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Fix no-conditional-in-test (5 issues)",
+        "Fix no-conditional-expect (5 issues)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-012",
+      "title": "Fix essential-compatibility.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in essential-compatibility.spec.ts",
+      "priority": 12,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Fix no-conditional-in-test (2 issues)",
+        "Fix no-conditional-expect (7 issues)",
+        "Fix prefer-web-first-assertions (2 issues)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-013",
+      "title": "Fix firefox-stability-test.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in firefox-stability-test.spec.ts",
+      "priority": 13,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Fix no-skipped-test (3 issues)",
+        "Fix no-networkidle (3 issues)",
+        "Fix no-conditional-in-test (2 issues)",
+        "Fix no-wait-for-timeout (1 issue)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-014",
+      "title": "Fix jobs-list-debug.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in jobs-list-debug.spec.ts",
+      "priority": 14,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Fix no-networkidle (2 issues)",
+        "Fix no-wait-for-timeout (2 issues)",
+        "Fix no-conditional-in-test (1 issue)",
+        "Fix unused var win (1 issue)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-015",
+      "title": "Fix mock-server-test.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in mock-server-test.spec.ts",
+      "priority": 15,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Fix no-networkidle (2 issues)",
+        "Fix no-wait-for-timeout (4 issues)",
+        "Fix no-conditional-in-test (8 issues)",
+        "Fix no-conditional-expect (5 issues)",
+        "Fix unused vars (2 issues)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-016",
+      "title": "Fix pdf-variety-uat.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in pdf-variety-uat.spec.ts",
+      "priority": 16,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Fix no-wait-for-timeout (5 issues)",
+        "Fix no-conditional-in-test (6 issues)",
+        "Fix unused vars (4 issues)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-017",
+      "title": "Fix real-data-expansion.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in real-data-expansion.spec.ts",
+      "priority": 17,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Fix no-networkidle (1 issue)",
+        "Fix no-wait-for-timeout (1 issue)",
+        "Fix valid-title (1 issue)",
+        "Fix unused vars (2 issues)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-018",
+      "title": "Fix simple-firefox-test.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in simple-firefox-test.spec.ts",
+      "priority": 18,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Fix no-skipped-test (2 issues)",
+        "Fix no-conditional-in-test (1 issue)",
+        "Fix no-conditional-expect (2 issues)",
+        "Fix prefer-web-first-assertions (1 issue)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-019",
+      "title": "Fix simple-jobs-page.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in simple-jobs-page.spec.ts",
+      "priority": 19,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Fix no-networkidle (2 issues)",
+        "Fix no-wait-for-timeout (2 issues)",
+        "Fix no-conditional-in-test (2 issues)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-020",
+      "title": "Fix simple-test.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in simple-test.spec.ts",
+      "priority": 20,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Fix no-wait-for-timeout (2 issues)",
+        "Fix no-conditional-in-test (3 issues)",
+        "Fix no-conditional-expect (3 issues)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-021",
+      "title": "Fix unified-analysis-regression.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in unified-analysis-regression.spec.ts",
+      "priority": 21,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Fix no-conditional-in-test (1 issue)",
+        "Fix no-conditional-expect (1 issue)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-022",
+      "title": "Fix webkit-final-test.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in webkit-final-test.spec.ts",
+      "priority": 22,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Fix no-skipped-test (5 issues)",
+        "Fix no-conditional-in-test (2 issues)",
+        "Fix no-conditional-expect (5 issues)",
+        "Fix prefer-web-first-assertions (1 issue)",
+        "Fix no-wait-for-timeout (1 issue)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-023",
+      "title": "Fix webkit-stability-test.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in webkit-stability-test.spec.ts",
+      "priority": 23,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Fix no-skipped-test (3 issues)",
+        "Fix no-conditional-in-test (2 issues)",
+        "Fix no-conditional-expect (4 issues)",
+        "Fix no-wait-for-timeout (1 issue)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-024",
+      "title": "Fix webkit-static-test.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in webkit-static-test.spec.ts",
+      "priority": 24,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Fix no-skipped-test (4 issues)",
+        "Fix no-conditional-in-test (1 issue)",
+        "Fix no-wait-for-timeout (1 issue)"
+      ],
+      "technicalNotes": []
+    },
+    {
+      "id": "US-025",
+      "title": "Final validation - all quality checks pass",
+      "description": "Verify npm run typecheck && npm run lint both pass",
+      "priority": 25,
+      "passes": false,
+      "acceptanceCriteria": [
+        "npm run typecheck passes with 0 errors",
+        "npm run lint passes with 0 errors AND 0 warnings"
+      ],
+      "technicalNotes": []
+    }
+  ]
+}

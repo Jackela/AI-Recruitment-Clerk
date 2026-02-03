@@ -4,11 +4,12 @@ import {
   RetryHandler,
   DEFAULT_RETRY_CONFIG,
 } from './vision-llm-error-handler';
-import { VisionLlmRequest, VisionLlmResponse } from '../dto/resume-parsing.dto';
+import type { VisionLlmRequest, VisionLlmResponse } from '../dto/resume-parsing.dto';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+import type {
+  GeminiConfig} from '@ai-recruitment-clerk/shared-dtos';
 import {
   GeminiClient,
-  GeminiConfig,
   PromptTemplates,
   PromptBuilder,
 } from '@ai-recruitment-clerk/shared-dtos';
@@ -62,7 +63,7 @@ export class VisionLlmService {
    * @param filename - The filename.
    * @returns A promise that resolves to ResumeDTO.
    */
-  async parseResumePdf(
+  public async parseResumePdf(
     pdfBuffer: Buffer,
     filename: string,
   ): Promise<ResumeDTO> {
@@ -159,7 +160,7 @@ export class VisionLlmService {
    * @param resumeText - The resume text.
    * @returns A promise that resolves to ResumeDTO.
    */
-  async parseResumeText(resumeText: string): Promise<ResumeDTO> {
+  public async parseResumeText(resumeText: string): Promise<ResumeDTO> {
     if (process.env.NODE_ENV === 'test') {
       throw new Error('VisionLlmService.parseResumeText not implemented');
     }
@@ -191,7 +192,7 @@ export class VisionLlmService {
    * @param request - The request.
    * @returns A promise that resolves to VisionLlmResponse.
    */
-  async parseResumePdfAdvanced(
+  public async parseResumePdfAdvanced(
     request: VisionLlmRequest,
   ): Promise<VisionLlmResponse> {
     if (process.env.NODE_ENV === 'test') {
@@ -201,25 +202,21 @@ export class VisionLlmService {
     }
     const startTime = Date.now();
 
-    try {
-      const resumeData = await this.parseResumePdf(
-        request.pdfBuffer,
-        request.filename,
-      );
+    const resumeData = await this.parseResumePdf(
+      request.pdfBuffer,
+      request.filename,
+    );
 
-      const processingTimeMs = Date.now() - startTime;
+    const processingTimeMs = Date.now() - startTime;
 
-      // Calculate confidence based on data completeness
-      const confidence = this.calculateConfidence(resumeData);
+    // Calculate confidence based on data completeness
+    const confidence = this.calculateConfidence(resumeData);
 
-      return {
-        extractedData: resumeData,
-        confidence,
-        processingTimeMs,
-      };
-    } catch (error) {
-      throw error;
-    }
+    return {
+      extractedData: resumeData as unknown as Record<string, unknown>,
+      confidence,
+      processingTimeMs,
+    };
   }
 
   /**
@@ -227,7 +224,7 @@ export class VisionLlmService {
    * @param pdfBuffer - The pdf buffer.
    * @returns A promise that resolves to boolean value.
    */
-  async validatePdfFile(pdfBuffer: Buffer): Promise<boolean> {
+  public async validatePdfFile(pdfBuffer: Buffer): Promise<boolean> {
     // In test mode, return true for valid test PDFs
     if (process.env.NODE_ENV === 'test') {
       return true;
@@ -257,7 +254,7 @@ export class VisionLlmService {
    * @param fileSize - The file size.
    * @returns A promise that resolves to number value.
    */
-  async estimateProcessingTime(fileSize: number): Promise<number> {
+  public async estimateProcessingTime(fileSize: number): Promise<number> {
     if (process.env.NODE_ENV === 'test') {
       throw new Error(
         'VisionLlmService.estimateProcessingTime not implemented',
@@ -279,7 +276,7 @@ export class VisionLlmService {
     return Math.round(estimatedMs);
   }
 
-  // @ts-ignore - Method reserved for future use
+  // Reserved for future use
   private _buildResumeExtractionPrompt(extractedText: string): string {
     return `
 Extract structured information from this resume text. Focus on identifying:
@@ -301,7 +298,7 @@ Extraction Guidelines:
 - Be thorough but accurate - only extract clearly visible information`;
   }
 
-  // @ts-ignore - Method reserved for future use
+  // Reserved for future use
   private _buildVisionPrompt(): string {
     return `
 Analyze this resume document and extract structured information. Focus on:
@@ -396,6 +393,7 @@ Extraction Guidelines:
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private validateAndCleanResumeData(data: any): ResumeDTO {
     // Ensure contact info is properly structured
     const contactInfo = {
@@ -409,6 +407,7 @@ Extraction Guidelines:
     // Clean and validate skills array
     const skills = Array.isArray(data.skills)
       ? data.skills
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .filter((skill: any) => skill && typeof skill === 'string')
           .map((skill: string) => skill.trim())
       : [];
@@ -416,7 +415,9 @@ Extraction Guidelines:
     // Clean and validate work experience
     const workExperience = Array.isArray(data.workExperience)
       ? data.workExperience
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .filter((exp: any) => exp.company && exp.position)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .map((exp: any) => ({
             company: exp.company.trim(),
             position: exp.position.trim(),
@@ -432,7 +433,9 @@ Extraction Guidelines:
     // Clean and validate education
     const education = Array.isArray(data.education)
       ? data.education
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .filter((edu: any) => edu.school && edu.degree)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .map((edu: any) => ({
             school: edu.school.trim(),
             degree: edu.degree.trim(),
@@ -510,7 +513,7 @@ Extraction Guidelines:
    * Performs the health check operation.
    * @returns A promise that resolves to boolean value.
    */
-  async healthCheck(): Promise<boolean> {
+  public async healthCheck(): Promise<boolean> {
     try {
       await this.geminiClient.healthCheck();
       return true;
@@ -520,6 +523,7 @@ Extraction Guidelines:
   }
 
   private createGeminiClient(config: GeminiConfig): GeminiClient {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const GeminiCtor: any = GeminiClient;
 
     try {

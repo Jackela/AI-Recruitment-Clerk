@@ -15,7 +15,7 @@ export class IncentiveReward extends ValueObject<{
    * @param qualityScore - The quality score.
    * @returns The IncentiveReward.
    */
-  static calculateForQuestionnaire(qualityScore: number): IncentiveReward {
+  public static calculateForQuestionnaire(qualityScore: number): IncentiveReward {
     let amount = 0;
     let calculationMethod = '';
 
@@ -45,7 +45,7 @@ export class IncentiveReward extends ValueObject<{
    * Creates referral reward.
    * @returns The IncentiveReward.
    */
-  static createReferralReward(): IncentiveReward {
+  public static createReferralReward(): IncentiveReward {
     return new IncentiveReward({
       amount: 3,
       currency: Currency.CNY,
@@ -59,7 +59,8 @@ export class IncentiveReward extends ValueObject<{
    * @param data - The data.
    * @returns The IncentiveReward.
    */
-  static restore(data: any): IncentiveReward {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): IncentiveReward {
     return new IncentiveReward(data);
   }
 
@@ -67,7 +68,7 @@ export class IncentiveReward extends ValueObject<{
    * Retrieves amount.
    * @returns The number value.
    */
-  getAmount(): number {
+  public getAmount(): number {
     return this.props.amount;
   }
 
@@ -75,7 +76,7 @@ export class IncentiveReward extends ValueObject<{
    * Retrieves currency.
    * @returns The Currency.
    */
-  getCurrency(): Currency {
+  public getCurrency(): Currency {
     return this.props.currency;
   }
 
@@ -83,7 +84,7 @@ export class IncentiveReward extends ValueObject<{
    * Performs the is valid operation.
    * @returns The boolean value.
    */
-  isValid(): boolean {
+  public isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
@@ -92,7 +93,7 @@ export class IncentiveReward extends ValueObject<{
    * Retrieves validation errors.
    * @returns The an array of string value.
    */
-  getValidationErrors(): string[] {
+  public getValidationErrors(): string[] {
     const errors: string[] = [];
 
     if (this.props.amount < 0) {

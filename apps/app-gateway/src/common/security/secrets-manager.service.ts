@@ -4,8 +4,9 @@
  * 功能: 统一密钥管理、验证、轮换
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import type { OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import type { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 
 /**
@@ -23,7 +24,7 @@ export interface SecretValidationResult {
  */
 @Injectable()
 export class SecretsManagerService implements OnModuleInit {
-  private readonly logger = new Logger(SecretsManagerService.name);
+  private readonly logger: Logger = new Logger(SecretsManagerService.name);
   // Reserved for caching implementation
   // private secretsCache: Map<string, { value: string; lastRotated: Date }> = new Map();
 
@@ -37,7 +38,7 @@ export class SecretsManagerService implements OnModuleInit {
    * Performs the on module init operation.
    * @returns The result of the operation.
    */
-  async onModuleInit() {
+  public async onModuleInit(): Promise<void> {
     this.logger.log('🔑 初始化密钥管理服务...');
 
     // 启动时验证所有关键密钥
@@ -62,7 +63,7 @@ export class SecretsManagerService implements OnModuleInit {
   /**
    * 验证所有关键密钥
    */
-  validateAllSecrets(): SecretValidationResult {
+  public validateAllSecrets(): SecretValidationResult {
     const issues: string[] = [];
     const recommendations: string[] = [];
     let score = 100;
@@ -308,14 +309,14 @@ export class SecretsManagerService implements OnModuleInit {
   /**
    * 生成安全的随机密钥
    */
-  generateSecureKey(length = 32): string {
+  public generateSecureKey(length = 32): string {
     return crypto.randomBytes(length).toString('base64').slice(0, length);
   }
 
   /**
    * 加密敏感数据
    */
-  encrypt(text: string): string {
+  public encrypt(text: string): string {
     const encryptionKey = this.configService.get<string>('ENCRYPTION_KEY');
     if (!encryptionKey) {
       throw new Error('ENCRYPTION_KEY not configured');
@@ -336,7 +337,7 @@ export class SecretsManagerService implements OnModuleInit {
   /**
    * 解密敏感数据
    */
-  decrypt(encryptedText: string): string {
+  public decrypt(encryptedText: string): string {
     const encryptionKey = this.configService.get<string>('ENCRYPTION_KEY');
     if (!encryptionKey) {
       throw new Error('ENCRYPTION_KEY not configured');
@@ -359,7 +360,7 @@ export class SecretsManagerService implements OnModuleInit {
   /**
    * 获取密钥轮换建议
    */
-  getKeyRotationRecommendations(): string[] {
+  public getKeyRotationRecommendations(): string[] {
     const recommendations: string[] = [];
 
     recommendations.push('建议每90天轮换JWT密钥');

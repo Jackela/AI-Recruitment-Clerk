@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import type { Document } from 'mongoose';
 
 export type ReportDocument = Report & Document;
 
@@ -9,16 +9,16 @@ export type ReportDocument = Report & Document;
 @Schema()
 export class ScoreBreakdown {
   @Prop({ required: true, min: 0, max: 100 })
-  skillsMatch: number = 0;
+  public skillsMatch = 0;
 
   @Prop({ required: true, min: 0, max: 100 })
-  experienceMatch: number = 0;
+  public experienceMatch = 0;
 
   @Prop({ required: true, min: 0, max: 100 })
-  educationMatch: number = 0;
+  public educationMatch = 0;
 
   @Prop({ required: true, min: 0, max: 100 })
-  overallFit: number = 0;
+  public overallFit = 0;
 }
 
 /**
@@ -27,20 +27,20 @@ export class ScoreBreakdown {
 @Schema()
 export class MatchingSkill {
   @Prop({ required: true })
-  skill: string = '';
+  public skill = '';
 
   @Prop({ required: true, min: 0, max: 100 })
-  matchScore: number = 0;
+  public matchScore = 0;
 
   @Prop({
     type: String,
     enum: ['exact', 'partial', 'related', 'missing'],
     default: 'missing',
   })
-  matchType: string = 'missing';
+  public matchType = 'missing';
 
   @Prop()
-  explanation?: string;
+  public explanation?: string;
 }
 
 /**
@@ -53,19 +53,19 @@ export class ReportRecommendation {
     enum: ['hire', 'consider', 'interview', 'reject'],
     required: true,
   })
-  decision: string = 'reject';
+  public decision = 'reject';
 
   @Prop({ required: true })
-  reasoning: string = '';
+  public reasoning = '';
 
   @Prop({ type: [String], default: [] })
-  strengths: string[] = [];
+  public strengths: string[] = [];
 
   @Prop({ type: [String], default: [] })
-  concerns: string[] = [];
+  public concerns: string[] = [];
 
   @Prop({ type: [String], default: [] })
-  suggestions: string[] = [];
+  public suggestions: string[] = [];
 }
 
 /**
@@ -77,55 +77,55 @@ export class ReportRecommendation {
 })
 export class Report {
   @Prop({ required: true })
-  jobId: string = '';
+  public jobId = '';
 
   @Prop({ required: true })
-  resumeId: string = '';
+  public resumeId = '';
 
   @Prop({ type: ScoreBreakdown, required: true })
-  scoreBreakdown: ScoreBreakdown = new ScoreBreakdown();
+  public scoreBreakdown: ScoreBreakdown = new ScoreBreakdown();
 
   @Prop({ type: [MatchingSkill], default: [] })
-  skillsAnalysis: MatchingSkill[] = [];
+  public skillsAnalysis: MatchingSkill[] = [];
 
   @Prop({ type: ReportRecommendation, required: true })
-  recommendation: ReportRecommendation = new ReportRecommendation();
+  public recommendation: ReportRecommendation = new ReportRecommendation();
 
   @Prop({ required: true })
-  summary: string = '';
+  public summary = '';
 
   @Prop({ type: Number, min: 0, max: 1, default: 0 })
-  analysisConfidence: number = 0;
+  public analysisConfidence = 0;
 
   @Prop({ type: Number, min: 0, default: 0 })
-  processingTimeMs: number = 0;
+  public processingTimeMs = 0;
 
   @Prop({
     type: String,
     enum: ['pending', 'processing', 'completed', 'failed'],
     default: 'pending',
   })
-  status: string = 'pending';
+  public status = 'pending';
 
   @Prop()
-  errorMessage?: string;
+  public errorMessage?: string;
 
   // Metadata for tracking and auditing
   @Prop({ required: true })
-  generatedBy: string = ''; // Service identifier
+  public generatedBy = ''; // Service identifier
 
   @Prop({ required: true })
-  llmModel: string = '';
+  public llmModel = '';
 
   @Prop({ type: Date, default: Date.now })
-  generatedAt: Date = new Date();
+  public generatedAt: Date = new Date();
 
   @Prop()
-  requestedBy?: string; // User ID if applicable
+  public requestedBy?: string; // User ID if applicable
 
   // GridFS URL for detailed report document if generated
   @Prop()
-  detailedReportUrl?: string;
+  public detailedReportUrl?: string;
 }
 
 export const ReportSchema = SchemaFactory.createForClass(Report);

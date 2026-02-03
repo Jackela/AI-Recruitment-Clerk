@@ -7,10 +7,10 @@
  */
 
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
-import { VisionLlmService } from '../vision-llm/vision-llm.service';
-import { GridFsService } from '../gridfs/gridfs.service';
-import { FieldMapperService } from '../field-mapper/field-mapper.service';
-import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
+import type { VisionLlmService } from '../vision-llm/vision-llm.service';
+import type { GridFsService } from '../gridfs/gridfs.service';
+import type { FieldMapperService } from '../field-mapper/field-mapper.service';
+import type { ResumeParserNatsService } from '../services/resume-parser-nats.service';
 import {
   RetryUtility,
   WithCircuitBreaker,
@@ -34,6 +34,7 @@ export interface ParsingResult {
   /** Processing status */
   status: 'processing' | 'completed' | 'failed' | 'partial';
   /** Extracted resume data */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   parsedData?: any;
   /** File storage URL */
   fileUrl?: string;
@@ -449,6 +450,7 @@ export class ParsingService {
     fileBuffer: Buffer,
     fileName: string,
     maxRetries: number,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<any> {
     return await RetryUtility.withExponentialBackoff(
       async () => {
@@ -474,6 +476,7 @@ export class ParsingService {
    *
    * @since 1.1.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private calculateConfidence(parsedData: any, rawData: any): number {
     let score = 0.5; // Base score
 

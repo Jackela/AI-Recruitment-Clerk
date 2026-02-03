@@ -12,7 +12,7 @@ export * from './application/index';
 export * from './infrastructure/index';
 
 // Core authentication and user types
-import { Request } from 'express';
+import type { Request } from 'express';
 
 /**
  * Authenticated HTTP request interface extending Express Request with user context.
@@ -47,6 +47,7 @@ export interface AuthenticatedRequest extends Request {
     /** Optional array of user permissions for fine-grained access */
     permissions?: string[];
     /** Additional user claims from JWT token */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   };
   /** Optional device fingerprint for security tracking */
@@ -157,6 +158,10 @@ export enum Permission {
   GENERATE_REPORT = 'generate:report',
   /** Configure system-wide settings */
   SYSTEM_CONFIG = 'system:config',
+  /** View system and audit logs */
+  VIEW_LOGS = 'view:logs',
+  /** Manage third-party integrations */
+  MANAGE_INTEGRATIONS = 'manage:integrations',
 
   // Business operations permissions (snake_case style)
   /** Create job postings and descriptions */

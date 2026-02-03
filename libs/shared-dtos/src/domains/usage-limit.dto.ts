@@ -1,5 +1,5 @@
 import { ValueObject } from '../base/value-object';
-import { DomainEvent } from '../base/domain-event';
+import type { DomainEvent } from '../base/domain-event';
 
 // UsageLimit聚合根 - 管理IP使用限制和配额分配
 /**
@@ -24,7 +24,7 @@ export class UsageLimit {
    * @param policy - The policy.
    * @returns The UsageLimit.
    */
-  static create(ip: string, policy: UsageLimitPolicy): UsageLimit {
+  public static create(ip: string, policy: UsageLimitPolicy): UsageLimit {
     const limitId = UsageLimitId.generate();
     const ipAddress = new IPAddress({ value: ip });
     const quotaAllocation = QuotaAllocation.createDefault(policy.dailyLimit);
@@ -58,7 +58,7 @@ export class UsageLimit {
    * @param data - The data.
    * @returns The UsageLimit.
    */
-  static restore(data: UsageLimitData): UsageLimit {
+  public static restore(data: UsageLimitData): UsageLimit {
     return new UsageLimit(
       new UsageLimitId({ value: data.id }),
       new IPAddress({ value: data.ip }),
@@ -74,7 +74,7 @@ export class UsageLimit {
    * Performs the can use operation.
    * @returns The UsageLimitCheckResult.
    */
-  canUse(): UsageLimitCheckResult {
+  public canUse(): UsageLimitCheckResult {
     this.resetIfNeeded();
 
     const currentUsage = this.usageTracking.getCurrentCount();
@@ -104,12 +104,12 @@ export class UsageLimit {
    * Performs the record usage operation.
    * @returns The UsageRecordResult.
    */
-  recordUsage(): UsageRecordResult {
+  public recordUsage(): UsageRecordResult {
     this.resetIfNeeded();
 
     const checkResult = this.canUse();
     if (!checkResult.isAllowed()) {
-      return UsageRecordResult.failed(checkResult.getBlockReason()!);
+      return UsageRecordResult.failed(checkResult.getBlockReason() ?? 'Unknown block reason');
     }
 
     const previousCount = this.usageTracking.getCurrentCount();
@@ -138,7 +138,7 @@ export class UsageLimit {
    * @param bonusType - The bonus type.
    * @param amount - The amount.
    */
-  addBonusQuota(bonusType: BonusType, amount: number): void {
+  public addBonusQuota(bonusType: BonusType, amount: number): void {
     if (amount <= 0) {
       throw new Error('Bonus quota amount must be positive');
     }
@@ -215,7 +215,7 @@ export class UsageLimit {
    * Retrieves usage statistics.
    * @returns The UsageStatistics.
    */
-  getUsageStatistics(): UsageStatistics {
+  public getUsageStatistics(): UsageStatistics {
     return new UsageStatistics({
       ip: this.ip.getValue(),
       currentUsage: this.usageTracking.getCurrentCount(),
@@ -239,14 +239,14 @@ export class UsageLimit {
    * Retrieves uncommitted events.
    * @returns The an array of DomainEvent.
    */
-  getUncommittedEvents(): DomainEvent[] {
+  public getUncommittedEvents(): DomainEvent[] {
     return [...this.uncommittedEvents];
   }
 
   /**
    * Performs the mark events as committed operation.
    */
-  markEventsAsCommitted(): void {
+  public markEventsAsCommitted(): void {
     this.uncommittedEvents = [];
   }
 
@@ -259,7 +259,7 @@ export class UsageLimit {
    * Retrieves id.
    * @returns The UsageLimitId.
    */
-  getId(): UsageLimitId {
+  public getId(): UsageLimitId {
     return this.id;
   }
 
@@ -267,7 +267,7 @@ export class UsageLimit {
    * Retrieves ip.
    * @returns The string value.
    */
-  getIP(): string {
+  public getIP(): string {
     return this.ip.getValue();
   }
 
@@ -275,7 +275,7 @@ export class UsageLimit {
    * Retrieves current usage.
    * @returns The number value.
    */
-  getCurrentUsage(): number {
+  public getCurrentUsage(): number {
     return this.usageTracking.getCurrentCount();
   }
 
@@ -283,7 +283,7 @@ export class UsageLimit {
    * Retrieves available quota.
    * @returns The number value.
    */
-  getAvailableQuota(): number {
+  public getAvailableQuota(): number {
     return (
       this.quotaAllocation.getAvailableQuota() -
       this.usageTracking.getCurrentCount()
@@ -300,7 +300,7 @@ export class UsageLimitId extends ValueObject<{ value: string }> {
    * Generates the result.
    * @returns The UsageLimitId.
    */
-  static generate(): UsageLimitId {
+  public static generate(): UsageLimitId {
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substr(2, 9);
     return new UsageLimitId({ value: `usage_${timestamp}_${random}` });
@@ -310,7 +310,7 @@ export class UsageLimitId extends ValueObject<{ value: string }> {
    * Retrieves value.
    * @returns The string value.
    */
-  getValue(): string {
+  public getValue(): string {
     return this.props.value;
   }
 }
@@ -340,7 +340,7 @@ export class IPAddress extends ValueObject<{ value: string }> {
    * Retrieves value.
    * @returns The string value.
    */
-  getValue(): string {
+  public getValue(): string {
     return this.props.value;
   }
 }
@@ -358,7 +358,7 @@ export class UsageLimitPolicy extends ValueObject<{
    * Creates default.
    * @returns The UsageLimitPolicy.
    */
-  static createDefault(): UsageLimitPolicy {
+  public static createDefault(): UsageLimitPolicy {
     return new UsageLimitPolicy({
       dailyLimit: 5,
       bonusEnabled: true,
@@ -372,7 +372,8 @@ export class UsageLimitPolicy extends ValueObject<{
    * @param data - The data.
    * @returns The UsageLimitPolicy.
    */
-  static restore(data: any): UsageLimitPolicy {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): UsageLimitPolicy {
     return new UsageLimitPolicy(data);
   }
 
@@ -380,28 +381,28 @@ export class UsageLimitPolicy extends ValueObject<{
    * Performs the daily limit operation.
    * @returns The number value.
    */
-  get dailyLimit(): number {
+  public get dailyLimit(): number {
     return this.props.dailyLimit;
   }
   /**
    * Performs the bonus enabled operation.
    * @returns The boolean value.
    */
-  get bonusEnabled(): boolean {
+  public get bonusEnabled(): boolean {
     return this.props.bonusEnabled;
   }
   /**
    * Performs the max bonus quota operation.
    * @returns The number value.
    */
-  get maxBonusQuota(): number {
+  public get maxBonusQuota(): number {
     return this.props.maxBonusQuota;
   }
   /**
    * Performs the reset time utc operation.
    * @returns The number value.
    */
-  get resetTimeUTC(): number {
+  public get resetTimeUTC(): number {
     return this.props.resetTimeUTC;
   }
 }
@@ -419,7 +420,7 @@ export class QuotaAllocation extends ValueObject<{
    * @param baseQuota - The base quota.
    * @returns The QuotaAllocation.
    */
-  static createDefault(baseQuota: number): QuotaAllocation {
+  public static createDefault(baseQuota: number): QuotaAllocation {
     return new QuotaAllocation({
       baseQuota,
       bonusQuota: 0,
@@ -432,7 +433,8 @@ export class QuotaAllocation extends ValueObject<{
    * @param data - The data.
    * @returns The QuotaAllocation.
    */
-  static restore(data: any): QuotaAllocation {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): QuotaAllocation {
     return new QuotaAllocation({
       baseQuota: data.baseQuota,
       bonusQuota: data.bonusQuota,
@@ -446,7 +448,7 @@ export class QuotaAllocation extends ValueObject<{
    * @param amount - The amount.
    * @returns The QuotaAllocation.
    */
-  addBonus(bonusType: BonusType, amount: number): QuotaAllocation {
+  public addBonus(bonusType: BonusType, amount: number): QuotaAllocation {
     const currentBonus = this.props.bonusBreakdown.get(bonusType) || 0;
     const newBreakdown = new Map(this.props.bonusBreakdown);
     newBreakdown.set(bonusType, currentBonus + amount);
@@ -462,7 +464,7 @@ export class QuotaAllocation extends ValueObject<{
    * Retrieves available quota.
    * @returns The number value.
    */
-  getAvailableQuota(): number {
+  public getAvailableQuota(): number {
     return this.props.baseQuota + this.props.bonusQuota;
   }
 
@@ -470,7 +472,7 @@ export class QuotaAllocation extends ValueObject<{
    * Retrieves bonus quota.
    * @returns The number value.
    */
-  getBonusQuota(): number {
+  public getBonusQuota(): number {
     return this.props.bonusQuota;
   }
 
@@ -478,7 +480,7 @@ export class QuotaAllocation extends ValueObject<{
    * Retrieves bonus breakdown.
    * @returns The Map<BonusType, number>.
    */
-  getBonusBreakdown(): Map<BonusType, number> {
+  public getBonusBreakdown(): Map<BonusType, number> {
     return new Map(this.props.bonusBreakdown);
   }
 }
@@ -495,7 +497,7 @@ export class UsageTracking extends ValueObject<{
    * Creates empty.
    * @returns The UsageTracking.
    */
-  static createEmpty(): UsageTracking {
+  public static createEmpty(): UsageTracking {
     return new UsageTracking({
       currentCount: 0,
       usageHistory: [],
@@ -508,9 +510,11 @@ export class UsageTracking extends ValueObject<{
    * @param data - The data.
    * @returns The UsageTracking.
    */
-  static restore(data: any): UsageTracking {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): UsageTracking {
     return new UsageTracking({
       currentCount: data.currentCount,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       usageHistory: data.usageHistory.map((r: any) => new UsageRecord(r)),
       lastUsageAt: data.lastUsageAt ? new Date(data.lastUsageAt) : undefined,
     });
@@ -520,7 +524,7 @@ export class UsageTracking extends ValueObject<{
    * Performs the increment usage operation.
    * @returns The UsageTracking.
    */
-  incrementUsage(): UsageTracking {
+  public incrementUsage(): UsageTracking {
     const record = new UsageRecord({
       timestamp: new Date(),
       count: this.props.currentCount + 1,
@@ -537,7 +541,7 @@ export class UsageTracking extends ValueObject<{
    * Retrieves current count.
    * @returns The number value.
    */
-  getCurrentCount(): number {
+  public getCurrentCount(): number {
     return this.props.currentCount;
   }
 
@@ -545,7 +549,7 @@ export class UsageTracking extends ValueObject<{
    * Retrieves last usage at.
    * @returns The Date | undefined.
    */
-  getLastUsageAt(): Date | undefined {
+  public getLastUsageAt(): Date | undefined {
     return this.props.lastUsageAt;
   }
 
@@ -553,7 +557,7 @@ export class UsageTracking extends ValueObject<{
    * Retrieves usage history.
    * @returns The an array of UsageRecord.
    */
-  getUsageHistory(): UsageRecord[] {
+  public getUsageHistory(): UsageRecord[] {
     return [...this.props.usageHistory];
   }
 }
@@ -569,14 +573,14 @@ export class UsageRecord extends ValueObject<{
    * Performs the timestamp operation.
    * @returns The Date.
    */
-  get timestamp(): Date {
+  public get timestamp(): Date {
     return this.props.timestamp;
   }
   /**
    * Performs the count operation.
    * @returns The number value.
    */
-  get count(): number {
+  public get count(): number {
     return this.props.count;
   }
 }
@@ -597,7 +601,7 @@ export class UsageLimitCheckResult {
    * @param remainingQuota - The remaining quota.
    * @returns The UsageLimitCheckResult.
    */
-  static allowed(remainingQuota: number): UsageLimitCheckResult {
+  public static allowed(remainingQuota: number): UsageLimitCheckResult {
     return new UsageLimitCheckResult(true, remainingQuota);
   }
 
@@ -606,7 +610,7 @@ export class UsageLimitCheckResult {
    * @param reason - The reason.
    * @returns The UsageLimitCheckResult.
    */
-  static blocked(reason: string): UsageLimitCheckResult {
+  public static blocked(reason: string): UsageLimitCheckResult {
     return new UsageLimitCheckResult(false, undefined, reason);
   }
 
@@ -614,7 +618,7 @@ export class UsageLimitCheckResult {
    * Performs the is allowed operation.
    * @returns The boolean value.
    */
-  isAllowed(): boolean {
+  public isAllowed(): boolean {
     return this.allowed;
   }
 
@@ -622,7 +626,7 @@ export class UsageLimitCheckResult {
    * Retrieves remaining quota.
    * @returns The number | undefined.
    */
-  getRemainingQuota(): number | undefined {
+  public getRemainingQuota(): number | undefined {
     return this.remainingQuota;
   }
 
@@ -630,7 +634,7 @@ export class UsageLimitCheckResult {
    * Retrieves block reason.
    * @returns The string | undefined.
    */
-  getBlockReason(): string | undefined {
+  public getBlockReason(): string | undefined {
     return this.blockReason;
   }
 }
@@ -652,7 +656,7 @@ export class UsageRecordResult {
    * @param remainingQuota - The remaining quota.
    * @returns The UsageRecordResult.
    */
-  static success(
+  public static success(
     currentUsage: number,
     remainingQuota: number,
   ): UsageRecordResult {
@@ -664,7 +668,7 @@ export class UsageRecordResult {
    * @param error - The error.
    * @returns The UsageRecordResult.
    */
-  static failed(error: string): UsageRecordResult {
+  public static failed(error: string): UsageRecordResult {
     return new UsageRecordResult(false, undefined, undefined, error);
   }
 
@@ -672,7 +676,7 @@ export class UsageRecordResult {
    * Performs the is success operation.
    * @returns The boolean value.
    */
-  isSuccess(): boolean {
+  public isSuccess(): boolean {
     return this.success;
   }
 
@@ -680,7 +684,7 @@ export class UsageRecordResult {
    * Retrieves current usage.
    * @returns The number | undefined.
    */
-  getCurrentUsage(): number | undefined {
+  public getCurrentUsage(): number | undefined {
     return this.currentUsage;
   }
 
@@ -688,7 +692,7 @@ export class UsageRecordResult {
    * Retrieves remaining quota.
    * @returns The number | undefined.
    */
-  getRemainingQuota(): number | undefined {
+  public getRemainingQuota(): number | undefined {
     return this.remainingQuota;
   }
 
@@ -696,7 +700,7 @@ export class UsageRecordResult {
    * Retrieves error.
    * @returns The string | undefined.
    */
-  getError(): string | undefined {
+  public getError(): string | undefined {
     return this.error;
   }
 }
@@ -717,49 +721,49 @@ export class UsageStatistics extends ValueObject<{
    * Performs the ip operation.
    * @returns The string value.
    */
-  get ip(): string {
+  public get ip(): string {
     return this.props.ip;
   }
   /**
    * Performs the current usage operation.
    * @returns The number value.
    */
-  get currentUsage(): number {
+  public get currentUsage(): number {
     return this.props.currentUsage;
   }
   /**
    * Performs the daily limit operation.
    * @returns The number value.
    */
-  get dailyLimit(): number {
+  public get dailyLimit(): number {
     return this.props.dailyLimit;
   }
   /**
    * Performs the available quota operation.
    * @returns The number value.
    */
-  get availableQuota(): number {
+  public get availableQuota(): number {
     return this.props.availableQuota;
   }
   /**
    * Performs the bonus quota operation.
    * @returns The number value.
    */
-  get bonusQuota(): number {
+  public get bonusQuota(): number {
     return this.props.bonusQuota;
   }
   /**
    * Performs the reset at operation.
    * @returns The Date.
    */
-  get resetAt(): Date {
+  public get resetAt(): Date {
     return this.props.resetAt;
   }
   /**
    * Performs the last activity at operation.
    * @returns The Date | undefined.
    */
-  get lastActivityAt(): Date | undefined {
+  public get lastActivityAt(): Date | undefined {
     return this.props.lastActivityAt;
   }
 
@@ -767,7 +771,7 @@ export class UsageStatistics extends ValueObject<{
    * Retrieves usage percentage.
    * @returns The number value.
    */
-  getUsagePercentage(): number {
+  public getUsagePercentage(): number {
     return Math.round(
       (this.props.currentUsage / this.props.availableQuota) * 100,
     );
@@ -788,8 +792,11 @@ export enum BonusType {
 export interface UsageLimitData {
   id: string;
   ip: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   policy: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   quotaAllocation: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   usageTracking: any;
   lastResetAt: string;
 }

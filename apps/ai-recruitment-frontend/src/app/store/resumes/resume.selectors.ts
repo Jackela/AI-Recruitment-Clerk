@@ -1,6 +1,16 @@
+import type { MemoizedSelector } from '@ngrx/store';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { ResumeState } from './resume.state';
-import { ResumeListItem, ResumeDetail } from './resume.model';
+import type { ResumeState } from './resume.state';
+import type { ResumeListItem, ResumeDetail } from './resume.model';
+
+// Extended analysis type for runtime data that may include skills
+interface ExtendedAnalysis {
+  overallScore: number;
+  skillsMatch: number;
+  experienceMatch: number;
+  educationMatch: number;
+  skills?: string[];
+}
 
 // Feature selector for the resume state
 export const selectResumeState = createFeatureSelector<ResumeState>('resumes');
@@ -42,23 +52,23 @@ export const selectResumesCount = createSelector(
   (resumes: ResumeListItem[]): number => resumes.length,
 );
 
-export const selectResumeById = (resumeId: string) =>
+export const selectResumeById = (resumeId: string): MemoizedSelector<object, ResumeListItem | undefined> =>
   createSelector(
     selectAllResumes,
     (resumes: ResumeListItem[]): ResumeListItem | undefined =>
       resumes.find((resume) => resume.id === resumeId),
   );
 
-export const selectResumesByStatus = (status: string) =>
+export const selectResumesByStatus = (status: string): MemoizedSelector<object, ResumeListItem[]> =>
   createSelector(
     selectAllResumes,
     (resumes: ResumeListItem[]): ResumeListItem[] =>
       resumes.filter((resume) => resume.status === status),
   );
 
-const isProcessedStatus = (status: string | undefined) =>
+const isProcessedStatus = (status: string | undefined): boolean =>
   status === 'completed' || status === 'processed';
-const isProcessingStatus = (status: string | undefined) =>
+const isProcessingStatus = (status: string | undefined): boolean =>
   status === 'pending' ||
   status === 'parsing' ||
   status === 'scoring' ||
@@ -67,17 +77,17 @@ const isProcessingStatus = (status: string | undefined) =>
 export const selectProcessedResumes = createSelector(
   selectAllResumes,
   (resumes: ResumeListItem[]): ResumeListItem[] =>
-    resumes.filter((resume) => isProcessedStatus(resume.status as any)),
+    resumes.filter((resume) => isProcessedStatus(resume.status)),
 );
 
 export const selectPendingResumes = createSelector(
   selectAllResumes,
   (resumes: ResumeListItem[]): ResumeListItem[] =>
-    resumes.filter((resume) => isProcessingStatus(resume.status as any)),
+    resumes.filter((resume) => isProcessingStatus(resume.status)),
 );
 
 // Recent resumes selector
-export const selectRecentResumes = (limit = 10) =>
+export const selectRecentResumes = (limit = 10): MemoizedSelector<object, ResumeListItem[]> =>
   createSelector(
     selectAllResumes,
     (resumes: ResumeListItem[]): ResumeListItem[] =>
@@ -92,7 +102,7 @@ export const selectRecentResumes = (limit = 10) =>
   );
 
 // High-scoring resumes selector
-export const selectHighScoringResumes = (threshold = 80) =>
+export const selectHighScoringResumes = (threshold = 80): MemoizedSelector<object, ResumeListItem[]> =>
   createSelector(
     selectAllResumes,
     (resumes: ResumeListItem[]): ResumeListItem[] =>
@@ -141,10 +151,10 @@ export const selectResumeStatistics = createSelector(
   (resumes: ResumeListItem[]) => {
     const total = resumes.length;
     const processed = resumes.filter((r) =>
-      isProcessedStatus(r.status as any),
+      isProcessedStatus(r.status),
     ).length;
     const processing = resumes.filter((r) =>
-      isProcessingStatus(r.status as any),
+      isProcessingStatus(r.status),
     ).length;
     const failed = resumes.filter(
       (resume) => resume.status === 'failed',
@@ -153,7 +163,7 @@ export const selectResumeStatistics = createSelector(
     // Calculate average score for processed resumes only
     const processedWithScores = resumes.filter(
       (resume) =>
-        isProcessedStatus(resume.status as any) &&
+        isProcessedStatus(resume.status) &&
         resume.analysis?.overallScore !== undefined,
     );
     const averageScore =
@@ -168,8 +178,9 @@ export const selectResumeStatistics = createSelector(
     const skillCountMap = new Map<string, number>();
     const orderedSkills: string[] = [];
     for (const resume of resumes) {
-      if (!isProcessedStatus(resume.status as any)) continue;
-      const skills = (resume as any).analysis?.skills as string[] | undefined;
+      if (!isProcessedStatus(resume.status)) continue;
+      const analysis = resume.analysis as ExtendedAnalysis | undefined;
+      const skills = analysis?.skills;
       if (!Array.isArray(skills)) continue;
       for (const raw of skills) {
         const key = String(raw);
@@ -196,7 +207,7 @@ export const selectResumeStatistics = createSelector(
 );
 
 // Resumes by score range
-export const selectResumesByScoreRange = (minScore: number, maxScore: number) =>
+export const selectResumesByScoreRange = (minScore: number, maxScore: number): MemoizedSelector<object, ResumeListItem[]> =>
   createSelector(
     selectAllResumes,
     (resumes: ResumeListItem[]): ResumeListItem[] =>
@@ -207,14 +218,15 @@ export const selectResumesByScoreRange = (minScore: number, maxScore: number) =>
   );
 
 // Resume search functionality
-export const selectResumesBySkill = (skillQuery: string) =>
+export const selectResumesBySkill = (skillQuery: string): MemoizedSelector<object, ResumeListItem[]> =>
   createSelector(
     selectAllResumes,
     (resumes: ResumeListItem[]): ResumeListItem[] => {
       if (!skillQuery || !skillQuery.trim()) return [];
       const q = skillQuery.toLowerCase();
       return resumes.filter((resume) => {
-        const skills = (resume as any).analysis?.skills as string[] | undefined;
+        const analysis = resume.analysis as ExtendedAnalysis | undefined;
+        const skills = analysis?.skills;
         if (!Array.isArray(skills)) return false;
         return skills.some((s) => s?.toLowerCase().includes(q));
       });

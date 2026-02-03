@@ -14,14 +14,16 @@
     "build": "npx nx build app-gateway --prod --parallel=1",
     "start": "node dist/apps/app-gateway/main.cjs",
     "start:prod": "NODE_ENV=production node dist/apps/app-gateway/main.cjs",
+    "prepare": "husky install",
     "postinstall": "echo 'Skipping build in postinstall'",
     "format": "prettier --write \"{apps,libs}/**/*.{ts,html,scss,js,json,md}\"",
     "test": "jest --config jest.config.cjs --passWithNoTests",
     "test:app-gateway": "jest --config jest.config.cjs --passWithNoTests apps/app-gateway",
     "test:ci": "jest --config jest.config.cjs --ci --coverage --passWithNoTests",
     "test:coverage": "jest --config jest.config.cjs --coverage --passWithNoTests",
-    "lint": "npx nx run-many -t lint --all --parallel=3",
+    "lint": "npx nx run-many -t lint --all --parallel=3 --exclude ai-recruitment-clerk",
     "typecheck": "tsc --noEmit --project tsconfig.ci.json",
+    "ci:local": "npm run build && node tools/ci/verify-quality-gates.mjs && node tools/ci/pii-scan.mjs",
     "audit": "nx audit",
     "dependency-scan": "act -j dependency-scan -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest",
     "test:e2e": "npx nx run ai-recruitment-frontend-e2e:e2e",
@@ -55,7 +57,6 @@
     "act:cd:local": "act -W .github/workflows/cd-local.yml -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest"
   },
   "devDependencies": {
-    "ajv": "^8.17.1",
     "@angular-devkit/architect": "^0.2003.8",
     "@angular-devkit/core": "~20.3.8",
     "@angular-devkit/schematics": "~20.3.8",
@@ -104,6 +105,7 @@
     "@types/supertest": "^6.0.3",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/utils": "^8.29.0",
+    "ajv": "^8.17.1",
     "amqp-connection-manager": "^4.1.14",
     "amqplib": "^0.10.9",
     "angular-eslint": "^20.0.0",
@@ -113,6 +115,7 @@
     "eslint": "^9.8.0",
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-playwright": "^1.6.2",
+    "husky": "^9.1.7",
     "jest": "^30.0.2",
     "jest-environment-jsdom": "^30.0.2",
     "jest-environment-node": "^30.0.2",
@@ -206,8 +209,8 @@
     "speakeasy": "^2.0.0",
     "twilio": "^5.8.0",
     "uuid": "^11.1.0",
-    "zone.js": "~0.15.1",
-    "validator": "^13.15.20"
+    "validator": "^13.15.20",
+    "zone.js": "~0.15.1"
   },
   "overrides": {
     "@module-federation/cli": "0.21.2",

@@ -13,7 +13,7 @@ export class UsageTracking extends ValueObject<{
    * Creates empty.
    * @returns The UsageTracking.
    */
-  static createEmpty(): UsageTracking {
+  public static createEmpty(): UsageTracking {
     return new UsageTracking({
       currentCount: 0,
       usageHistory: [],
@@ -26,9 +26,11 @@ export class UsageTracking extends ValueObject<{
    * @param data - The data.
    * @returns The UsageTracking.
    */
-  static restore(data: any): UsageTracking {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): UsageTracking {
     return new UsageTracking({
       currentCount: data.currentCount,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       usageHistory: data.usageHistory.map((r: any) => new UsageRecord(r)),
       lastUsageAt: data.lastUsageAt ? new Date(data.lastUsageAt) : undefined,
     });
@@ -38,7 +40,7 @@ export class UsageTracking extends ValueObject<{
    * Performs the increment usage operation.
    * @returns The UsageTracking.
    */
-  incrementUsage(): UsageTracking {
+  public incrementUsage(): UsageTracking {
     const record = new UsageRecord({
       timestamp: new Date(),
       count: this.props.currentCount + 1,
@@ -55,7 +57,7 @@ export class UsageTracking extends ValueObject<{
    * Retrieves current count.
    * @returns The number value.
    */
-  getCurrentCount(): number {
+  public getCurrentCount(): number {
     return this.props.currentCount;
   }
 
@@ -63,7 +65,7 @@ export class UsageTracking extends ValueObject<{
    * Retrieves last usage at.
    * @returns The Date | undefined.
    */
-  getLastUsageAt(): Date | undefined {
+  public getLastUsageAt(): Date | undefined {
     return this.props.lastUsageAt;
   }
 
@@ -71,7 +73,7 @@ export class UsageTracking extends ValueObject<{
    * Retrieves usage history.
    * @returns The an array of UsageRecord.
    */
-  getUsageHistory(): UsageRecord[] {
+  public getUsageHistory(): UsageRecord[] {
     return [...this.props.usageHistory];
   }
 }

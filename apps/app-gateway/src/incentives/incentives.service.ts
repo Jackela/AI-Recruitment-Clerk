@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { CreateQuestionnaireIncentiveDto } from './dto/create-questionnaire-incentive.dto';
-import { ApproveIncentiveDto } from './dto/approve-incentive.dto';
+import type { CreateQuestionnaireIncentiveDto } from './dto/create-questionnaire-incentive.dto';
+import type { ApproveIncentiveDto } from './dto/approve-incentive.dto';
 
 type IncentiveStatus = 'pending' | 'approved';
 
@@ -44,7 +44,7 @@ export class IncentivesService {
   private readonly logger = new Logger(IncentivesService.name);
   private readonly incentives = new Map<string, IncentiveRecord>();
 
-  createQuestionnaireIncentive(
+  public createQuestionnaireIncentive(
     dto: CreateQuestionnaireIncentiveDto,
   ): IncentiveSummary {
     const incentiveId = generateIncentiveId();
@@ -73,11 +73,11 @@ export class IncentivesService {
     };
   }
 
-  validateIncentive(incentiveId: string): boolean {
+  public validateIncentive(incentiveId: string): boolean {
     return this.incentives.has(incentiveId);
   }
 
-  approveIncentive(
+  public approveIncentive(
     incentiveId: string,
     _dto: ApproveIncentiveDto,
   ): IncentiveApprovalResult {
@@ -99,7 +99,7 @@ export class IncentivesService {
     };
   }
 
-  getOverviewStats(): IncentiveStatsOverview {
+  public getOverviewStats(): IncentiveStatsOverview {
     let totalRewards = 0;
     let approved = 0;
     let pending = 0;

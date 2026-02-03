@@ -7,7 +7,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app/app.module';
 import { ProductionSecurityValidator } from './common/security/production-security-validator';
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   // Fail-fast env validation
   Logger.log('🔍 [FAIL-FAST] Validating critical environment variables...');
   const requiredVars = ['MONGO_URL'];
@@ -108,7 +108,8 @@ async function bootstrap() {
   const server = app.getHttpAdapter().getInstance();
   server.set('trust proxy', 1);
   server.disable('x-powered-by');
-  server.use((req: any, res: any, next: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  server.use((req: any, res: any, next: () => void) => {
     req.setTimeout(30000, () => {
       res.status(408).json({
         error: 'Request timeout',
@@ -124,6 +125,7 @@ async function bootstrap() {
       compression({
         level: 6,
         threshold: 1024,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         filter: (req: any, res: any) => {
           if (req.headers['x-no-compression']) return false;
           return compression.filter(req, res);

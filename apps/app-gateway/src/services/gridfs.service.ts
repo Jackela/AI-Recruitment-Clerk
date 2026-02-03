@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
-import { GridFSBucket, GridFSBucketWriteStream, ObjectId } from 'mongodb';
+import type { Connection } from 'mongoose';
+import type { GridFSBucketWriteStream} from 'mongodb';
+import { GridFSBucket, ObjectId } from 'mongodb';
 import * as stream from 'stream';
 import * as crypto from 'crypto';
 
@@ -73,7 +74,7 @@ export class GridFsService {
    * @param metadata - The file metadata.
    * @returns A promise that resolves to the GridFS URL.
    */
-  async storeResumeFile(
+  public async storeResumeFile(
     buffer: Buffer,
     filename: string,
     metadata: ResumeFileMetadata,
@@ -142,7 +143,8 @@ export class GridFsService {
         // Pipe buffer to GridFS
         readableStream.pipe(uploadStream);
       });
-    } catch (error) {
+    } catch (err) {
+      const error = err as Error;
       this.logger.error('Error in storeResumeFile', {
         error: error.message,
         filename,
@@ -158,7 +160,7 @@ export class GridFsService {
    * @param gridFsUrl - The GridFS URL (format: gridfs://bucket-name/fileId).
    * @returns A promise that resolves to the file buffer.
    */
-  async getResumeFile(gridFsUrl: string): Promise<Buffer> {
+  public async getResumeFile(gridFsUrl: string): Promise<Buffer> {
     try {
       this.logger.debug(`Retrieving resume file: ${gridFsUrl}`);
 
@@ -190,7 +192,8 @@ export class GridFsService {
           resolve(fileBuffer);
         });
       });
-    } catch (error) {
+    } catch (err) {
+      const error = err as Error;
       this.logger.error('Error in getResumeFile', {
         error: error.message,
         gridFsUrl,
@@ -204,7 +207,7 @@ export class GridFsService {
    * @param gridFsUrl - The GridFS URL.
    * @returns A promise that resolves to the file metadata or null if not found.
    */
-  async getResumeFileMetadata(
+  public async getResumeFileMetadata(
     gridFsUrl: string,
   ): Promise<ResumeFileMetadata | null> {
     try {
@@ -220,7 +223,8 @@ export class GridFsService {
       }
 
       return files[0].metadata as ResumeFileMetadata;
-    } catch (error) {
+    } catch (err) {
+      const error = err as Error;
       this.logger.error('Error in getResumeFileMetadata', {
         error: error.message,
         gridFsUrl,
@@ -234,7 +238,7 @@ export class GridFsService {
    * @param gridFsUrl - The GridFS URL.
    * @returns A promise that resolves to true if deleted, false if not found.
    */
-  async deleteResumeFile(gridFsUrl: string): Promise<boolean> {
+  public async deleteResumeFile(gridFsUrl: string): Promise<boolean> {
     try {
       this.logger.debug(`Deleting resume file: ${gridFsUrl}`);
 
@@ -252,7 +256,8 @@ export class GridFsService {
 
       this.logger.debug(`Successfully deleted resume file: ${gridFsUrl}`);
       return true;
-    } catch (error) {
+    } catch (err) {
+      const error = err as Error;
       this.logger.error('Error in deleteResumeFile', {
         error: error.message,
         gridFsUrl,
@@ -266,7 +271,7 @@ export class GridFsService {
    * @param gridFsUrl - The GridFS URL.
    * @returns A promise that resolves to true if integrity is valid.
    */
-  async verifyResumeFileIntegrity(gridFsUrl: string): Promise<boolean> {
+  public async verifyResumeFileIntegrity(gridFsUrl: string): Promise<boolean> {
     try {
       this.logger.debug(`Verifying integrity of resume file: ${gridFsUrl}`);
 
@@ -298,7 +303,8 @@ export class GridFsService {
       }
 
       return isValid;
-    } catch (error) {
+    } catch (err) {
+      const error = err as Error;
       this.logger.error('Error in verifyResumeFileIntegrity', {
         error: error.message,
         gridFsUrl,
@@ -311,12 +317,13 @@ export class GridFsService {
    * Performs a health check on the GridFS service.
    * @returns A promise that resolves to true if healthy.
    */
-  async healthCheck(): Promise<boolean> {
+  public async healthCheck(): Promise<boolean> {
     try {
       // Test connection by listing a small number of files
       await this.gridFSBucket.find({}).limit(1).toArray();
       return true;
-    } catch (error) {
+    } catch (err) {
+      const error = err as Error;
       this.logger.error('GridFS health check failed', { error: error.message });
       return false;
     }
@@ -328,7 +335,7 @@ export class GridFsService {
    * @returns The file ID.
    */
   private extractFileIdFromUrl(gridFsUrl: string): string {
-    const urlPattern = /^gridfs:\/\/[^\/]+\/(.+)$/;
+    const urlPattern = /^gridfs:\/\/[^/]+\/(.+)$/;
     const match = gridFsUrl.match(urlPattern);
 
     if (!match) {

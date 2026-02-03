@@ -1,10 +1,11 @@
-import {
+import type {
   CallHandler,
   ExecutionContext,
-  Injectable,
-  NestInterceptor,
+  NestInterceptor} from '@nestjs/common';
+import {
+  Injectable
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 /**
@@ -16,11 +17,12 @@ export class ResponseTransformInterceptor implements NestInterceptor {
    * Performs the intercept operation.
    * @param context - The context.
    * @param next - The next.
-   * @returns The Observable<any>.
+   * @returns The Observable<unknown>.
    */
-  intercept(_context: ExecutionContext, next: CallHandler): Observable<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public intercept(_context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
-      map((data: any) => {
+      map((data: unknown) => {
         // If controller already returns a standardized shape, pass through
         if (
           data &&

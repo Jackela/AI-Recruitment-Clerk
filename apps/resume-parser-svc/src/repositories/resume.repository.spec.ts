@@ -1,9 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import type { Model } from 'mongoose';
 import { Logger } from '@nestjs/common';
 import { ResumeRepository } from './resume.repository';
-import { Resume, ResumeDocument } from '../schemas/resume.schema';
+import type { ResumeDocument } from '../schemas/resume.schema';
+import { Resume } from '../schemas/resume.schema';
 import { TestProviders } from '../testing/test-providers';
 
 describe('ResumeRepository', () => {

@@ -3,6 +3,7 @@
  * Shared contract definitions for analysis reports between frontend and backend
  */
 
+/* eslint-disable @typescript-eslint/no-namespace */
 export namespace ReportContracts {
   /**
    * Report status enum

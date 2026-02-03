@@ -11,7 +11,7 @@ export class UserManagementIntegrationService {
    * @param userId - The user id.
    * @returns The result of the operation.
    */
-  async getUserProfile(userId: string) {
+  public async getUserProfile(userId: string): Promise<{ userId: string; isActive: boolean }> {
     return {
       userId,
       isActive: true,

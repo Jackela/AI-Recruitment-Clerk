@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
 /**
@@ -18,7 +18,7 @@ export class EmailService {
     this.initializeTransporter();
   }
 
-  private initializeTransporter() {
+  private initializeTransporter(): void {
     const smtpConfig = {
       host: this.configService.get<string>('SMTP_HOST'),
       port: parseInt(this.configService.get<string>('SMTP_PORT') || '587'),
@@ -58,7 +58,7 @@ export class EmailService {
    * @param issuer - The issuer.
    * @returns A promise that resolves when the operation completes.
    */
-  async sendMfaToken(
+  public async sendMfaToken(
     email: string,
     token: string,
     issuer: string,
@@ -99,9 +99,10 @@ export class EmailService {
    * @param details - The details.
    * @returns A promise that resolves when the operation completes.
    */
-  async sendAccountSecurityAlert(
+  public async sendAccountSecurityAlert(
     email: string,
     event: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details: any,
   ): Promise<void> {
     const fromEmail =
@@ -179,6 +180,7 @@ export class EmailService {
 
   private generateSecurityAlertTemplate(
     event: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     details: any,
     issuer: string,
   ): string {

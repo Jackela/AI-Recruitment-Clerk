@@ -1,4 +1,5 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import type { OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -249,10 +250,10 @@ import { CommonModule } from '@angular/common';
   ],
 })
 export class ScoreVisualizationComponent implements OnChanges {
-  @Input() score = 0;
-  @Input() summary = '';
-  @Input() showIndicator = true;
-  @Input() animated = true;
+  @Input() public score = 0;
+  @Input() public summary = '';
+  @Input() public showIndicator = true;
+  @Input() public animated = true;
 
   private animatedScore = 0;
   private animationDuration = 2000; // 2 seconds
@@ -261,7 +262,7 @@ export class ScoreVisualizationComponent implements OnChanges {
    * Performs the ng on changes operation.
    * @param changes - The changes.
    */
-  ngOnChanges(changes: SimpleChanges): void {
+  public ngOnChanges(changes: SimpleChanges): void {
     if (changes['score'] && this.animated) {
       this.animateScore();
     }
@@ -272,7 +273,7 @@ export class ScoreVisualizationComponent implements OnChanges {
     const endScore = this.score;
     const startTime = Date.now();
 
-    const animate = () => {
+    const animate = (): void => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / this.animationDuration, 1);
 
@@ -301,7 +302,7 @@ export class ScoreVisualizationComponent implements OnChanges {
    * Retrieves score circumference.
    * @returns The string value.
    */
-  getScoreCircumference(): string {
+  public getScoreCircumference(): string {
     const radius = 50;
     const circumference = 2 * Math.PI * radius;
     return `${circumference} ${circumference}`;
@@ -311,7 +312,7 @@ export class ScoreVisualizationComponent implements OnChanges {
    * Retrieves score offset.
    * @returns The number value.
    */
-  getScoreOffset(): number {
+  public getScoreOffset(): number {
     const displayScore = this.animated ? this.animatedScore : this.score;
     const radius = 50;
     const circumference = 2 * Math.PI * radius;
@@ -322,7 +323,7 @@ export class ScoreVisualizationComponent implements OnChanges {
    * Retrieves score color.
    * @returns The string value.
    */
-  getScoreColor(): string {
+  public getScoreColor(): string {
     if (this.score >= 80) return '#10b981';
     if (this.score >= 60) return '#f59e0b';
     return '#ef4444';
@@ -332,7 +333,7 @@ export class ScoreVisualizationComponent implements OnChanges {
    * Retrieves score category.
    * @returns The string value.
    */
-  getScoreCategory(): string {
+  public getScoreCategory(): string {
     if (this.score >= 80) return '优秀';
     if (this.score >= 60) return '良好';
     return '待提升';

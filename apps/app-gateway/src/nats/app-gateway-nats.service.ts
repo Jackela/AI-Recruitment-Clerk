@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
+import type {
   NatsClientService,
   NatsPublishResult,
 } from '@ai-recruitment-clerk/shared-nats-client';
@@ -37,7 +37,7 @@ export class AppGatewayNatsService {
   /**
    * Publish a job description submitted event
    */
-  async publishJobJdSubmitted(
+  public async publishJobJdSubmitted(
     event: JobJdSubmittedEvent,
   ): Promise<NatsPublishResult> {
     const subject = 'job.jd.submitted';
@@ -79,7 +79,7 @@ export class AppGatewayNatsService {
   /**
    * Publish a resume submitted event
    */
-  async publishResumeSubmitted(
+  public async publishResumeSubmitted(
     event: ResumeSubmittedEvent,
   ): Promise<NatsPublishResult> {
     const subject = 'job.resume.submitted';
@@ -123,8 +123,10 @@ export class AppGatewayNatsService {
    * This is a simplified implementation that will work for basic use cases.
    * For production, consider implementing proper subscription management.
    */
-  async waitForEvent<T = any>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async waitForEvent<T = any>(
     subject: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _predicate: (data: any) => boolean,
     timeoutMs = 20000,
   ): Promise<T> {
@@ -153,12 +155,13 @@ export class AppGatewayNatsService {
   /**
    * Convenience method: wait for analysis.resume.parsed event for a given resumeId
    */
-  async waitForAnalysisParsed(
+  public async waitForAnalysisParsed(
     resumeId: string,
     timeoutMs = 20000,
   ): Promise<{
     jobId: string;
     resumeId: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resumeDto: any;
     timestamp?: string;
     processingTimeMs?: number;
@@ -173,28 +176,30 @@ export class AppGatewayNatsService {
   /**
    * Delegate basic publish method to shared client
    */
-  async publish(subject: string, payload: unknown): Promise<NatsPublishResult> {
+  public async publish(subject: string, payload: unknown): Promise<NatsPublishResult> {
     return this.natsClient.publish(subject, payload);
   }
 
   /**
    * Check if NATS is connected
    */
-  get isConnected(): boolean {
+  public get isConnected(): boolean {
     return this.natsClient.isConnected;
   }
 
   /**
    * Get health status
    */
-  async getHealthStatus() {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  public async getHealthStatus() {
     return this.natsClient.getHealthStatus();
   }
 
   /**
    * Subscribe to analysis.jd.extracted events
    */
-  async subscribeToAnalysisCompleted(
+  public async subscribeToAnalysisCompleted(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handler: (event: any, metadata?: any) => Promise<void>,
   ): Promise<void> {
     return this.natsClient.subscribe('analysis.jd.extracted', handler, {
@@ -206,7 +211,8 @@ export class AppGatewayNatsService {
   /**
    * Subscribe to job.jd.failed events
    */
-  async subscribeToAnalysisFailed(
+  public async subscribeToAnalysisFailed(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handler: (event: any, metadata?: any) => Promise<void>,
   ): Promise<void> {
     return this.natsClient.subscribe('job.jd.failed', handler, {

@@ -20,7 +20,7 @@ export interface AnalysisResult {
  */
 export interface ResultAction {
   type: 'view-detailed' | 'download-report' | 'start-new';
-  payload?: any;
+  payload?: unknown;
 }
 
 /**
@@ -251,14 +251,14 @@ export interface ResultAction {
   styleUrls: ['./analysis-results.component.scss'],
 })
 export class AnalysisResultsComponent {
-  @Input() result: AnalysisResult | null = null;
-  @Input() showDetailedSummary = false;
-  @Input() totalRequiredSkills = 10;
-  @Input() isProcessing = false;
+  @Input() public result: AnalysisResult | null = null;
+  @Input() public showDetailedSummary = false;
+  @Input() public totalRequiredSkills = 10;
+  @Input() public isProcessing = false;
 
-  @Output() actionRequested = new EventEmitter<ResultAction>();
+  @Output() public actionRequested = new EventEmitter<ResultAction>();
 
-  get keySkills(): string[] {
+  public get keySkills(): string[] {
     const skills = this.result?.keySkills;
     if (!Array.isArray(skills)) {
       return [];
@@ -269,7 +269,7 @@ export class AnalysisResultsComponent {
       .filter((skill) => skill.length > 0);
   }
 
-  get recommendations(): string[] {
+  public get recommendations(): string[] {
     const recs = this.result?.recommendations;
     if (!Array.isArray(recs)) {
       return [];
@@ -280,24 +280,24 @@ export class AnalysisResultsComponent {
       .filter((item) => item.length > 0);
   }
 
-  get experienceText(): string {
+  public get experienceText(): string {
     const experience = this.result?.experience;
     return typeof experience === 'string' ? experience.trim() : '';
   }
 
-  get educationText(): string {
+  public get educationText(): string {
     const education = this.result?.education;
     return typeof education === 'string' ? education.trim() : '';
   }
 
-  get summaryText(): string {
+  public get summaryText(): string {
     const summary = this.result?.summary;
     return typeof summary === 'string' && summary.trim().length > 0
       ? summary.trim()
       : '暂无摘要';
   }
 
-  get scoreValue(): number {
+  public get scoreValue(): number {
     const score = this.result?.score;
     if (typeof score === 'number' && Number.isFinite(score)) {
       return Math.max(0, Math.min(100, score));
@@ -305,7 +305,7 @@ export class AnalysisResultsComponent {
     return 0;
   }
 
-  get hasReport(): boolean {
+  public get hasReport(): boolean {
     const url = this.result?.reportUrl;
     return typeof url === 'string' && url.trim().length > 0;
   }
@@ -314,7 +314,7 @@ export class AnalysisResultsComponent {
    * Performs the on action operation.
    * @param type - The type.
    */
-  onAction(type: ResultAction['type']): void {
+  public onAction(type: ResultAction['type']): void {
     this.actionRequested.emit({ type });
   }
 
@@ -324,7 +324,7 @@ export class AnalysisResultsComponent {
    * @param skill - The skill.
    * @returns The string value.
    */
-  trackBySkill(_index: number, skill: string): string {
+  public trackBySkill(_index: number, skill: string): string {
     return skill;
   }
 
@@ -334,7 +334,7 @@ export class AnalysisResultsComponent {
    * @param recommendation - The recommendation.
    * @returns The string value.
    */
-  trackByRecommendation(_index: number, recommendation: string): string {
+  public trackByRecommendation(_index: number, recommendation: string): string {
     return `${_index}-${recommendation.slice(0, 20)}`;
   }
 
@@ -342,7 +342,7 @@ export class AnalysisResultsComponent {
    * Retrieves score category.
    * @returns The string value.
    */
-  getScoreCategory(): string {
+  public getScoreCategory(): string {
     if (!this.result) return '未知';
     const score = this.scoreValue;
     if (score >= 80) return '优秀';
@@ -354,7 +354,7 @@ export class AnalysisResultsComponent {
    * Retrieves score class.
    * @returns The string value.
    */
-  getScoreClass(): string {
+  public getScoreClass(): string {
     if (!this.result) return '';
     const score = this.scoreValue;
     if (score >= 80) return 'high';
@@ -366,7 +366,7 @@ export class AnalysisResultsComponent {
    * Retrieves priority.
    * @returns The string value.
    */
-  getPriority(): string {
+  public getPriority(): string {
     if (!this.result) return '未知';
     const score = this.scoreValue;
     if (score >= 85) return '高优先级';
@@ -379,7 +379,7 @@ export class AnalysisResultsComponent {
    * Retrieves priority class.
    * @returns The string value.
    */
-  getPriorityClass(): string {
+  public getPriorityClass(): string {
     if (!this.result) return '';
     const score = this.scoreValue;
     if (score >= 85) return 'high';
@@ -388,10 +388,10 @@ export class AnalysisResultsComponent {
   }
 
   // Skills expansion logic
-  skillsExpanded = false;
-  initialSkillCount = 8;
+  public skillsExpanded = false;
+  public initialSkillCount = 8;
 
-  get visibleSkills(): string[] {
+  public get visibleSkills(): string[] {
     return this.skillsExpanded
       ? this.keySkills
       : this.keySkills.slice(0, this.initialSkillCount);
@@ -400,7 +400,7 @@ export class AnalysisResultsComponent {
   /**
    * Toggles skills expanded state.
    */
-  toggleSkillsExpanded(): void {
+  public toggleSkillsExpanded(): void {
     this.skillsExpanded = !this.skillsExpanded;
   }
 }

@@ -1,9 +1,10 @@
 import { Directive, forwardRef } from '@angular/core';
-import {
-  NG_VALIDATORS,
+import type {
   Validator,
   AbstractControl,
-  ValidationErrors,
+  ValidationErrors} from '@angular/forms';
+import {
+  NG_VALIDATORS
 } from '@angular/forms';
 
 /**
@@ -26,7 +27,7 @@ export class EmailValidatorDirective implements Validator {
    * @param control - The control.
    * @returns The ValidationErrors | null.
    */
-  validate(control: AbstractControl): ValidationErrors | null {
+  public validate(control: AbstractControl): ValidationErrors | null {
     if (!control.value) {
       return null; // Don't validate empty values
     }

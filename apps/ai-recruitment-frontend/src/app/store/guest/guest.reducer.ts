@@ -253,28 +253,31 @@ export const guestReducer = createReducer(
     error: null,
   })),
 
-  on(GuestActions.loadDemoAnalysisSuccess, (state, { demoResults }) => ({
-    ...state,
-    analysisResults: {
-      ...state.analysisResults,
-      [demoResults.data.analysisId]: demoResults.data,
-    },
-    currentAnalysis: {
-      analysisId: demoResults.data.analysisId,
-      status: 'completed' as const,
-      filename: state.currentAnalysis.filename,
-      uploadedAt: demoResults.data.completedAt || null,
-      estimatedCompletionTime: 'Demo',
-      progress: 100,
-    },
-    // Update remaining usage count from demo payload when provided
-    remainingCount:
-      (demoResults as any).data?.remainingUsage ?? state.remainingCount,
-    showAnalysisResults: true,
-    isLoading: false,
-    error: null,
-    lastUpdated: new Date().toISOString(),
-  })),
+  on(GuestActions.loadDemoAnalysisSuccess, (state, { demoResults }) => {
+    const dataRecord = demoResults as unknown as { data?: { remainingUsage?: number } };
+    const remainingUsage = dataRecord?.data?.remainingUsage;
+    return {
+      ...state,
+      analysisResults: {
+        ...state.analysisResults,
+        [demoResults.data.analysisId]: demoResults.data,
+      },
+      currentAnalysis: {
+        analysisId: demoResults.data.analysisId,
+        status: 'completed' as const,
+        filename: state.currentAnalysis.filename,
+        uploadedAt: demoResults.data.completedAt || null,
+        estimatedCompletionTime: 'Demo',
+        progress: 100,
+      },
+      // Update remaining usage count from demo payload when provided
+      remainingCount: remainingUsage ?? state.remainingCount,
+      showAnalysisResults: true,
+      isLoading: false,
+      error: null,
+      lastUpdated: new Date().toISOString(),
+    };
+  }),
 
   on(GuestActions.loadDemoAnalysisFailure, (state, { error }) => ({
     ...state,
@@ -302,7 +305,7 @@ export const guestReducer = createReducer(
           ? {
               ...state.currentAnalysis,
               progress,
-              status: (status as any) || state.currentAnalysis.status,
+              status: (status as typeof state.currentAnalysis.status) || state.currentAnalysis.status,
             }
           : state.currentAnalysis,
       analysisResults: {
@@ -312,7 +315,7 @@ export const guestReducer = createReducer(
               ...state.analysisResults[analysisId],
               progress,
               status:
-                (status as any) || state.analysisResults[analysisId].status,
+                (status as typeof state.analysisResults[typeof analysisId]['status']) || state.analysisResults[analysisId].status,
             }
           : state.analysisResults[analysisId],
       },

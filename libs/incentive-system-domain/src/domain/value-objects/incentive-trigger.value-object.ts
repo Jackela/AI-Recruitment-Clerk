@@ -6,6 +6,7 @@ import { TriggerType } from '../aggregates/incentive.aggregate.js';
  */
 export class IncentiveTrigger extends ValueObject<{
   triggerType: TriggerType;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   triggerData: any;
   qualifiedAt: Date;
 }> {
@@ -15,7 +16,7 @@ export class IncentiveTrigger extends ValueObject<{
    * @param qualityScore - The quality score.
    * @returns The IncentiveTrigger.
    */
-  static fromQuestionnaire(
+  public static fromQuestionnaire(
     questionnaireId: string,
     qualityScore: number,
   ): IncentiveTrigger {
@@ -31,7 +32,7 @@ export class IncentiveTrigger extends ValueObject<{
    * @param referredIP - The referred ip.
    * @returns The IncentiveTrigger.
    */
-  static fromReferral(referredIP: string): IncentiveTrigger {
+  public static fromReferral(referredIP: string): IncentiveTrigger {
     return new IncentiveTrigger({
       triggerType: TriggerType.REFERRAL,
       triggerData: { referredIP },
@@ -44,7 +45,8 @@ export class IncentiveTrigger extends ValueObject<{
    * @param data - The data.
    * @returns The IncentiveTrigger.
    */
-  static restore(data: any): IncentiveTrigger {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): IncentiveTrigger {
     return new IncentiveTrigger({
       ...data,
       qualifiedAt: new Date(data.qualifiedAt),
@@ -55,7 +57,7 @@ export class IncentiveTrigger extends ValueObject<{
    * Retrieves trigger type.
    * @returns The TriggerType.
    */
-  getTriggerType(): TriggerType {
+  public getTriggerType(): TriggerType {
     return this.props.triggerType;
   }
 
@@ -63,7 +65,7 @@ export class IncentiveTrigger extends ValueObject<{
    * Performs the is valid operation.
    * @returns The boolean value.
    */
-  isValid(): boolean {
+  public isValid(): boolean {
     const errors = this.getValidationErrors();
     return errors.length === 0;
   }
@@ -72,7 +74,7 @@ export class IncentiveTrigger extends ValueObject<{
    * Retrieves validation errors.
    * @returns The an array of string value.
    */
-  getValidationErrors(): string[] {
+  public getValidationErrors(): string[] {
     const errors: string[] = [];
 
     if (!Object.values(TriggerType).includes(this.props.triggerType)) {

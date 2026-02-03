@@ -1,6 +1,15 @@
+import type { MemoizedSelector } from '@ngrx/store';
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { ReportState } from './report.state';
-import { ReportListItem, AnalysisReport } from './report.model';
+import type { ReportState } from './report.state';
+import type { ReportListItem, AnalysisReport } from './report.model';
+
+interface JobReportsStats {
+  total: number;
+  completed: number;
+  highScoreReports: number;
+  completionRate: number;
+  highScoreRate: number;
+}
 
 // Feature selector for the report state
 export const selectReportState = createFeatureSelector<ReportState>('reports');
@@ -37,21 +46,21 @@ export const selectReportsCount = createSelector(
   (reports: ReportListItem[]): number => reports.length,
 );
 
-export const selectReportsByJobId = (jobId: string) =>
+export const selectReportsByJobId = (jobId: string): MemoizedSelector<object, ReportListItem[]> =>
   createSelector(
     selectAllReports,
     (reports: ReportListItem[]): ReportListItem[] =>
       reports.filter((report) => report.jobId === jobId),
   );
 
-export const selectReportById = (reportId: string) =>
+export const selectReportById = (reportId: string): MemoizedSelector<object, ReportListItem | undefined> =>
   createSelector(
     selectAllReports,
     (reports: ReportListItem[]): ReportListItem | undefined =>
       reports.find((report) => report.id === reportId),
   );
 
-export const selectReportsByStatus = (status: string) =>
+export const selectReportsByStatus = (status: string): MemoizedSelector<object, ReportListItem[]> =>
   createSelector(
     selectAllReports,
     (reports: ReportListItem[]): ReportListItem[] =>
@@ -66,7 +75,7 @@ export const selectCurrentJobReports = createSelector(
 );
 
 // Recent reports selector
-export const selectRecentReports = (limit = 5) =>
+export const selectRecentReports = (limit = 5): MemoizedSelector<object, ReportListItem[]> =>
   createSelector(
     selectAllReports,
     (reports: ReportListItem[]): ReportListItem[] =>
@@ -132,8 +141,8 @@ export const selectReportsStatistics = createSelector(
 );
 
 // Job-specific report statistics
-export const selectJobReportsStatistics = (jobId: string) =>
-  createSelector(selectReportsByJobId(jobId), (reports: ReportListItem[]) => {
+export const selectJobReportsStatistics = (jobId: string): MemoizedSelector<object, JobReportsStats> =>
+  createSelector(selectReportsByJobId(jobId), (reports: ReportListItem[]): JobReportsStats => {
     const total = reports.length;
     const completed = reports.filter(
       (report) => report.status === 'completed',

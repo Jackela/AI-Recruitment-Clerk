@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { catchError, map, mergeMap } from 'rxjs/operators';
@@ -10,18 +10,13 @@ import * as ReportActions from './report.actions';
  */
 @Injectable()
 export class ReportEffects {
-  loadReportsByJob$;
-  loadReport$;
+  private readonly actions$ = inject(Actions);
+  private readonly apiService = inject(ApiService);
 
-  /**
-   * Initializes a new instance of the Report Effects.
-   * @param actions$ - The actions$.
-   * @param apiService - The api service.
-   */
-  constructor(
-    private actions$: Actions,
-    private apiService: ApiService,
-  ) {
+  public loadReportsByJob$;
+  public loadReport$;
+
+  constructor() {
     this.loadReportsByJob$ = createEffect(() =>
       this.actions$.pipe(
         ofType(ReportActions.loadReportsByJob),

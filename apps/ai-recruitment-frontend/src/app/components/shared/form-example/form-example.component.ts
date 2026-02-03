@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import type { FormGroup} from '@angular/forms';
 import {
+  FormBuilder,
   FormsModule,
   ReactiveFormsModule,
-  FormBuilder,
-  FormGroup,
   Validators,
 } from '@angular/forms';
 import { VALIDATION_DIRECTIVES } from '../../../directives/validation';
@@ -324,25 +324,23 @@ import { ToastService } from '../../../services/toast.service';
   ],
 })
 export class FormExampleComponent {
+  private readonly fb = inject(FormBuilder);
+  private readonly toastService = inject(ToastService);
+
   // Template-driven form model
-  templateModel = {
+  public templateModel = {
     name: '',
     email: '',
     phone: '',
   };
 
   // Reactive form
-  reactiveForm: FormGroup;
+  public reactiveForm: FormGroup;
 
   /**
    * Initializes a new instance of the Form Example Component.
-   * @param fb - The fb.
-   * @param toastService - The toast service.
    */
-  constructor(
-    private fb: FormBuilder,
-    private toastService: ToastService,
-  ) {
+  constructor() {
     this.reactiveForm = this.fb.group({
       company: ['', [Validators.required, Validators.minLength(2)]],
       position: ['', [Validators.required, Validators.minLength(2)]],
@@ -354,7 +352,7 @@ export class FormExampleComponent {
    * Performs the on template submit operation.
    * @param value - The value.
    */
-  onTemplateSubmit(value: any): void {
+  public onTemplateSubmit(value: { name: string; email: string; phone: string }): void {
     this.toastService.success('模板表单提交成功！');
     console.log('Template form value:', value);
   }
@@ -362,7 +360,7 @@ export class FormExampleComponent {
   /**
    * Performs the on reactive submit operation.
    */
-  onReactiveSubmit(): void {
+  public onReactiveSubmit(): void {
     if (this.reactiveForm.valid) {
       this.toastService.success('响应式表单提交成功！');
       console.log('Reactive form value:', this.reactiveForm.value);

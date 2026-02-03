@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Patch to ensure instanceof checks pass for mock functions across realms
 const originalToBeInstanceOf = (expect as any).getMatchers?.()?.toBeInstanceOf;
 expect.extend({

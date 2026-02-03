@@ -32,7 +32,7 @@ export class QuestionnaireTemplate extends ValueObject<{
    * @param templateId - The template id.
    * @returns The QuestionnaireTemplate.
    */
-  static createDefault(templateId: string): QuestionnaireTemplate {
+  public static createDefault(templateId: string): QuestionnaireTemplate {
     return new QuestionnaireTemplate({
       id: templateId,
       version: '1.0',
@@ -63,7 +63,8 @@ export class QuestionnaireTemplate extends ValueObject<{
    * @param data - The data.
    * @returns The QuestionnaireTemplate.
    */
-  static restore(data: any): QuestionnaireTemplate {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): QuestionnaireTemplate {
     return new QuestionnaireTemplate(data);
   }
 }

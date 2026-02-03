@@ -24,18 +24,20 @@ import {
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
-import {
+import type {
   UserDto,
-  Permission,
-  UserRole,
   UserStatus,
   UpdateUserDto,
   UserPreferencesDto,
-  AuthenticatedRequest,
+  AuthenticatedRequest} from '@ai-recruitment-clerk/user-management-domain';
+import {
+  Permission,
+  UserRole
 } from '@ai-recruitment-clerk/user-management-domain';
-import { UserManagementService } from './user-management.service';
+import type { UserManagementService } from './user-management.service';
 
 interface UserProfileResponse extends UserDto {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   preferences?: any;
   lastActivity?: Date;
   profileCompleteness?: number;
@@ -87,18 +89,20 @@ export class UserManagementController {
     },
   })
   @Get('profile')
-  async getUserProfile(@Request() req: AuthenticatedRequest) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async getUserProfile(@Request() req: AuthenticatedRequest): Promise<any> {
     try {
+      const userId = req.user.id ?? '';
       const profile = await this.userManagementService.getUserProfile(
-        req.user.id!,
+        userId,
       );
       const activitySummary =
-        await this.userManagementService.getUserActivitySummary(req.user.id!);
+        await this.userManagementService.getUserActivitySummary(userId);
 
       return {
         success: true,
         data: {
-          userId: req.user.id!,
+          userId,
           email: req.user.email,
           name: req.user.name,
           role: req.user.role,
@@ -138,13 +142,15 @@ export class UserManagementController {
   @ApiResponse({ status: 400, description: '请求参数错误' })
   @Put('profile')
   @HttpCode(HttpStatus.OK)
-  async updateUserProfile(
+  public async updateUserProfile(
     @Request() req: AuthenticatedRequest,
     @Body() updateData: UpdateUserDto,
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
+      const userId = req.user.id ?? '';
       const updatedProfile = await this.userManagementService.updateUserProfile(
-        req.user.id!,
+        userId,
         updateData,
       );
 
@@ -152,7 +158,7 @@ export class UserManagementController {
         success: true,
         message: 'User profile updated successfully',
         data: {
-          userId: req.user.id!,
+          userId,
           updatedFields: Object.keys(updateData),
           profileCompleteness: (updatedProfile as UserProfileResponse)
             .profileCompleteness,
@@ -180,13 +186,15 @@ export class UserManagementController {
   @ApiResponse({ status: 200, description: '偏好更新成功' })
   @Post('preferences')
   @HttpCode(HttpStatus.OK)
-  async updateUserPreferences(
+  public async updateUserPreferences(
     @Request() req: AuthenticatedRequest,
     @Body() preferences: UserPreferencesDto,
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
+      const userId = req.user.id ?? '';
       await this.userManagementService.updateUserPreferences(
-        req.user.id!,
+        userId,
         preferences,
       );
 
@@ -194,7 +202,7 @@ export class UserManagementController {
         success: true,
         message: 'User preferences updated successfully',
         data: {
-          userId: req.user.id!,
+          userId,
           updatedPreferences: Object.keys(preferences),
         },
       };
@@ -226,16 +234,18 @@ export class UserManagementController {
   @ApiQuery({ name: 'startDate', required: false, description: '开始日期' })
   @ApiQuery({ name: 'endDate', required: false, description: '结束日期' })
   @Get('activity')
-  async getUserActivity(
+  public async getUserActivity(
     @Request() req: AuthenticatedRequest,
     @Query('limit') limit = 50,
     @Query('offset') offset = 0,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
+      const userId = req.user.id ?? '';
       const activityData = await this.userManagementService.getUserActivity(
-        req.user.id!,
+        userId,
         {
           limit: Math.min(limit, 100), // Cap at 100 records
           page: Math.max(Math.floor(offset / limit) + 1, 1),
@@ -276,15 +286,17 @@ export class UserManagementController {
   @ApiResponse({ status: 403, description: '权限不足' })
   @Delete('account')
   @HttpCode(HttpStatus.OK)
-  async deleteUserAccount(
+  public async deleteUserAccount(
     @Request() req: AuthenticatedRequest,
     @Body() deleteRequest: { confirmationPassword: string; reason?: string },
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
+      const userId = req.user.id ?? '';
       // Verify password for account deletion
       const isValidPassword =
         await this.userManagementService.verifyUserPassword(
-          req.user.id!,
+          userId,
           deleteRequest.confirmationPassword,
         );
 
@@ -293,7 +305,7 @@ export class UserManagementController {
       }
 
       await this.userManagementService.softDeleteUser(
-        req.user.id!,
+        userId,
         deleteRequest.reason,
       );
 
@@ -333,15 +345,17 @@ export class UserManagementController {
   @UseGuards(RolesGuard)
   @Permissions(Permission.READ_USER)
   @Get('organization/users')
-  async getOrganizationUsers(
+  public async getOrganizationUsers(
     @Request() req: AuthenticatedRequest,
     @Query('page') page = 1,
     @Query('limit') limit = 20,
     @Query('role') role?: UserRole,
     @Query('status') status?: string,
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       const requesterRole = String(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (req.user as any)?.rawRole ?? req.user.role ?? '',
       ).toLowerCase();
 
@@ -396,7 +410,7 @@ export class UserManagementController {
   @Permissions(Permission.MANAGE_USER)
   @Put(':userId/status')
   @HttpCode(HttpStatus.OK)
-  async updateUserStatus(
+  public async updateUserStatus(
     @Request() req: AuthenticatedRequest,
     @Param('userId') userId: string,
     @Body()
@@ -404,7 +418,8 @@ export class UserManagementController {
       status: 'active' | 'inactive' | 'suspended';
       reason?: string;
     },
-  ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     try {
       // Prevent self-status modification
       if (userId === req.user.id) {
@@ -446,7 +461,8 @@ export class UserManagementController {
   })
   @ApiResponse({ status: 200, description: '服务健康状态' })
   @Get('health')
-  async healthCheck() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async healthCheck(): Promise<any> {
     try {
       const healthStatus = await this.userManagementService.getHealthStatus();
 

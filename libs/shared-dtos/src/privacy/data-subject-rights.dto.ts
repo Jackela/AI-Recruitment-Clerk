@@ -54,53 +54,53 @@ export enum DataExportFormat {
  */
 export class DataSubjectRightsRequest {
   @IsUUID()
-  id!: string;
+  public id!: string;
 
   @IsString()
   @IsNotEmpty()
-  userId!: string;
+  public userId!: string;
 
   @IsEnum(DataSubjectRightType)
-  requestType!: DataSubjectRightType;
+  public requestType!: DataSubjectRightType;
 
   @IsEnum(RequestStatus)
-  status!: RequestStatus;
+  public status!: RequestStatus;
 
   @IsEnum(IdentityVerificationStatus)
-  identityVerificationStatus!: IdentityVerificationStatus;
+  public identityVerificationStatus!: IdentityVerificationStatus;
 
   @IsString()
   @IsOptional()
-  description?: string;
+  public description?: string;
 
   @IsDateString()
-  requestDate!: Date;
-
-  @IsDateString()
-  @IsOptional()
-  completionDate?: Date;
+  public requestDate!: Date;
 
   @IsDateString()
   @IsOptional()
-  dueDate?: Date; // 30 days from request per GDPR
+  public completionDate?: Date;
+
+  @IsDateString()
+  @IsOptional()
+  public dueDate?: Date; // 30 days from request per GDPR
 
   @IsString()
   @IsOptional()
-  processorNotes?: string;
+  public processorNotes?: string;
 
   @IsOptional()
-  metadata?: Record<string, any>;
+  public metadata?: Record<string, unknown>;
 
   @IsString()
   @IsOptional()
-  ipAddress?: string;
+  public ipAddress?: string;
 
   @IsString()
   @IsOptional()
-  userAgent?: string;
+  public userAgent?: string;
 
-  createdAt!: Date;
-  updatedAt!: Date;
+  public createdAt!: Date;
+  public updatedAt!: Date;
 }
 
 /**
@@ -110,19 +110,19 @@ export class DataAccessRequest extends DataSubjectRightsRequest {
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  specificDataCategories?: string[]; // Specific categories requested
+  public specificDataCategories?: string[]; // Specific categories requested
 
   @IsEnum(DataExportFormat)
   @IsOptional()
-  preferredFormat?: DataExportFormat;
+  public preferredFormat?: DataExportFormat;
 
   @IsBoolean()
   @IsOptional()
-  includeThirdPartyData?: boolean;
+  public includeThirdPartyData?: boolean;
 
   @IsBoolean()
   @IsOptional()
-  includeProcessingHistory?: boolean;
+  public includeProcessingHistory?: boolean;
 }
 
 /**
@@ -132,11 +132,11 @@ export class DataRectificationRequest extends DataSubjectRightsRequest {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => FieldCorrectionDto)
-  corrections!: FieldCorrectionDto[];
+  public corrections!: FieldCorrectionDto[];
 
   @IsString()
   @IsOptional()
-  justification?: string;
+  public justification?: string;
 }
 
 /**
@@ -145,17 +145,17 @@ export class DataRectificationRequest extends DataSubjectRightsRequest {
 export class FieldCorrectionDto {
   @IsString()
   @IsNotEmpty()
-  fieldPath!: string; // e.g., 'profile.firstName', 'resume.contactInfo.email'
+  public fieldPath!: string; // e.g., 'profile.firstName', 'resume.contactInfo.email'
 
   @IsOptional()
-  currentValue?: any;
+  public currentValue?: unknown;
 
   @IsOptional()
-  newValue?: any;
+  public newValue?: unknown;
 
   @IsString()
   @IsOptional()
-  reason?: string;
+  public reason?: string;
 }
 
 /**
@@ -170,24 +170,24 @@ export class DataErasureRequest extends DataSubjectRightsRequest {
     'public_interest',
   ])
   @IsOptional()
-  erasureGround?: string;
+  public erasureGround?: string;
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  specificDataCategories?: string[];
+  public specificDataCategories?: string[];
 
   @IsBoolean()
   @IsOptional()
-  retainForLegalReasons?: boolean;
+  public retainForLegalReasons?: boolean;
 
   @IsString()
   @IsOptional()
-  legalRetentionReason?: string;
+  public legalRetentionReason?: string;
 
   @IsBoolean()
   @IsOptional()
-  anonymizeInsteadOfDelete?: boolean;
+  public anonymizeInsteadOfDelete?: boolean;
 }
 
 /**
@@ -195,28 +195,28 @@ export class DataErasureRequest extends DataSubjectRightsRequest {
  */
 export class DataPortabilityRequest extends DataSubjectRightsRequest {
   @IsEnum(DataExportFormat)
-  format!: DataExportFormat;
+  public format!: DataExportFormat;
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  specificDataCategories?: string[];
+  public specificDataCategories?: string[];
 
   @IsString()
   @IsOptional()
-  targetController?: string; // If transferring to another controller
+  public targetController?: string; // If transferring to another controller
 
   @IsBoolean()
   @IsOptional()
-  machineReadableFormat?: boolean;
+  public machineReadableFormat?: boolean;
 
   @IsString()
   @IsOptional()
-  downloadUrl?: string; // Generated download link
+  public downloadUrl?: string; // Generated download link
 
   @IsDateString()
   @IsOptional()
-  downloadExpiry?: Date;
+  public downloadExpiry?: Date;
 }
 
 /**
@@ -225,19 +225,19 @@ export class DataPortabilityRequest extends DataSubjectRightsRequest {
 export class ProcessingObjectionRequest extends DataSubjectRightsRequest {
   @IsArray()
   @IsString({ each: true })
-  processingPurposes!: string[]; // Purposes being objected to
+  public processingPurposes!: string[]; // Purposes being objected to
 
   @IsString()
   @IsOptional()
-  objectionReason?: string;
+  public objectionReason?: string;
 
   @IsBoolean()
   @IsOptional()
-  objectToDirectMarketing?: boolean;
+  public objectToDirectMarketing?: boolean;
 
   @IsBoolean()
   @IsOptional()
-  objectToAutomatedDecisionMaking?: boolean;
+  public objectToAutomatedDecisionMaking?: boolean;
 }
 
 /**
@@ -250,16 +250,16 @@ export class ProcessingRestrictionRequest extends DataSubjectRightsRequest {
     'no_longer_needed',
     'objection_pending',
   ])
-  restrictionGround!: string;
+  public restrictionGround!: string;
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  specificProcessingActivities?: string[];
+  public specificProcessingActivities?: string[];
 
   @IsDateString()
   @IsOptional()
-  restrictionEndDate?: Date;
+  public restrictionEndDate?: Date;
 }
 
 /**
@@ -268,25 +268,25 @@ export class ProcessingRestrictionRequest extends DataSubjectRightsRequest {
 export class CreateRightsRequestDto {
   @IsString()
   @IsNotEmpty()
-  userId!: string;
+  public userId!: string;
 
   @IsEnum(DataSubjectRightType)
-  requestType!: DataSubjectRightType;
+  public requestType!: DataSubjectRightType;
 
   @IsString()
   @IsOptional()
-  description?: string;
+  public description?: string;
 
   @IsOptional()
-  requestDetails?: any; // Type-specific details
-
-  @IsString()
-  @IsOptional()
-  ipAddress?: string;
+  public requestDetails?: Record<string, unknown>; // Type-specific details
 
   @IsString()
   @IsOptional()
-  userAgent?: string;
+  public ipAddress?: string;
+
+  @IsString()
+  @IsOptional()
+  public userAgent?: string;
 }
 
 /**
@@ -294,7 +294,7 @@ export class CreateRightsRequestDto {
  */
 export class IdentityVerificationDto {
   @IsUUID()
-  requestId!: string;
+  public requestId!: string;
 
   @IsEnum([
     'email_verification',
@@ -302,18 +302,18 @@ export class IdentityVerificationDto {
     'document_upload',
     'security_questions',
   ])
-  verificationType!: string;
+  public verificationType!: string;
 
   @IsOptional()
-  verificationData?: any;
+  public verificationData?: Record<string, unknown>;
 
   @IsString()
   @IsOptional()
-  verificationCode?: string;
+  public verificationCode?: string;
 
   @IsDateString()
   @IsOptional()
-  verificationExpiry?: Date;
+  public verificationExpiry?: Date;
 }
 
 /**
@@ -321,21 +321,21 @@ export class IdentityVerificationDto {
  */
 export class ProcessRightsRequestDto {
   @IsUUID()
-  requestId!: string;
+  public requestId!: string;
 
   @IsEnum(RequestStatus)
-  status!: RequestStatus;
+  public status!: RequestStatus;
 
   @IsString()
   @IsOptional()
-  processorNotes?: string;
+  public processorNotes?: string;
 
   @IsOptional()
-  completionData?: any; // Results of the request processing
+  public completionData?: Record<string, unknown>; // Results of the request processing
 
   @IsString()
   @IsOptional()
-  rejectionReason?: string;
+  public rejectionReason?: string;
 }
 
 /**
@@ -343,22 +343,32 @@ export class ProcessRightsRequestDto {
  */
 export class DataExportPackage {
   @IsUUID()
-  requestId!: string;
+  @IsOptional()
+  public id?: string;
+
+  @IsUUID()
+  public requestId!: string;
 
   @IsString()
   @IsNotEmpty()
-  userId!: string;
+  public userId!: string;
 
   @IsEnum(DataExportFormat)
-  format!: DataExportFormat;
+  public format!: DataExportFormat;
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => DataCategoryExport)
-  dataCategories!: DataCategoryExport[];
+  public dataCategories!: DataCategoryExport[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => DataCategoryExport)
+  @IsOptional()
+  public data?: DataCategoryExport[];
 
   @IsOptional()
-  metadata?: {
+  public metadata?: {
     exportDate: Date;
     dataController: string;
     privacyPolicyVersion: string;
@@ -368,17 +378,17 @@ export class DataExportPackage {
 
   @IsString()
   @IsOptional()
-  downloadUrl?: string;
+  public downloadUrl?: string;
 
   @IsDateString()
   @IsOptional()
-  urlExpiry?: Date;
+  public urlExpiry?: Date;
 
   @IsNumber()
   @IsOptional()
-  fileSizeBytes?: number;
+  public fileSizeBytes?: number;
 
-  createdAt!: Date;
+  public createdAt!: Date;
 }
 
 /**
@@ -387,35 +397,35 @@ export class DataExportPackage {
 export class DataCategoryExport {
   @IsString()
   @IsNotEmpty()
-  category!: string;
+  public category!: string;
 
   @IsString()
   @IsNotEmpty()
-  description!: string;
+  public description!: string;
 
   @IsOptional()
-  data!: any;
+  public data!: unknown;
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  sources?: string[]; // Which services/systems this data came from
+  public sources?: string[]; // Which services/systems this data came from
 
   @IsString()
   @IsOptional()
-  legalBasis?: string;
+  public legalBasis?: string;
 
   @IsString()
   @IsOptional()
-  retentionPeriod?: string;
+  public retentionPeriod?: string;
 
   @IsDateString()
   @IsOptional()
-  collectionDate?: Date;
+  public collectionDate?: Date;
 
   @IsDateString()
   @IsOptional()
-  lastModified?: Date;
+  public lastModified?: Date;
 }
 
 /**
@@ -423,40 +433,40 @@ export class DataCategoryExport {
  */
 export class RightsRequestStatusDto {
   @IsUUID()
-  requestId!: string;
+  public requestId!: string;
 
   @IsEnum(DataSubjectRightType)
-  requestType!: DataSubjectRightType;
+  public requestType!: DataSubjectRightType;
 
   @IsEnum(RequestStatus)
-  status!: RequestStatus;
+  public status!: RequestStatus;
 
   @IsEnum(IdentityVerificationStatus)
-  identityVerificationStatus!: IdentityVerificationStatus;
+  public identityVerificationStatus!: IdentityVerificationStatus;
 
   @IsDateString()
-  requestDate!: Date;
-
-  @IsDateString()
-  @IsOptional()
-  dueDate?: Date;
+  public requestDate!: Date;
 
   @IsDateString()
   @IsOptional()
-  completionDate?: Date;
+  public dueDate?: Date;
+
+  @IsDateString()
+  @IsOptional()
+  public completionDate?: Date;
 
   @IsString()
   @IsOptional()
-  statusMessage?: string;
+  public statusMessage?: string;
 
   @IsOptional()
-  completionData?: any;
+  public completionData?: Record<string, unknown>;
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => RequestActivityLog)
   @IsOptional()
-  activityLog?: RequestActivityLog[];
+  public activityLog?: RequestActivityLog[];
 }
 
 /**
@@ -464,23 +474,23 @@ export class RightsRequestStatusDto {
  */
 export class RequestActivityLog {
   @IsDateString()
-  timestamp!: Date;
+  public timestamp!: Date;
 
   @IsString()
   @IsNotEmpty()
-  action!: string;
+  public action!: string;
 
   @IsString()
   @IsOptional()
-  performedBy?: string;
+  public performedBy?: string;
 
   @IsString()
   @IsOptional()
-  notes?: string;
+  public notes?: string;
 
   @IsEnum(RequestStatus)
   @IsOptional()
-  statusChange?: RequestStatus;
+  public statusChange?: RequestStatus;
 }
 
 /**
@@ -489,18 +499,18 @@ export class RequestActivityLog {
 export class BulkRightsProcessingDto {
   @IsArray()
   @IsUUID(4, { each: true })
-  requestIds!: string[];
+  public requestIds!: string[];
 
   @IsEnum(RequestStatus)
-  action!: RequestStatus;
+  public action!: RequestStatus;
 
   @IsString()
   @IsOptional()
-  notes?: string;
+  public notes?: string;
 
   @IsString()
   @IsOptional()
-  performedBy?: string;
+  public performedBy?: string;
 }
 
 /**
@@ -508,20 +518,20 @@ export class BulkRightsProcessingDto {
  */
 export class RightsFulfillmentMetrics {
   @IsDateString()
-  periodStart!: Date;
+  public periodStart!: Date;
 
   @IsDateString()
-  periodEnd!: Date;
+  public periodEnd!: Date;
 
   @IsOptional()
-  requestCounts?: {
+  public requestCounts?: {
     total: number;
     byType: Record<DataSubjectRightType, number>;
     byStatus: Record<RequestStatus, number>;
   };
 
   @IsOptional()
-  processingTimes?: {
+  public processingTimes?: {
     averageCompletionDays: number;
     medianCompletionDays: number;
     withinLegalDeadline: number;
@@ -529,14 +539,14 @@ export class RightsFulfillmentMetrics {
   };
 
   @IsOptional()
-  identityVerification?: {
+  public identityVerification?: {
     verificationRate: number;
     averageVerificationTime: number;
     failureRate: number;
   };
 
   @IsOptional()
-  dataExports?: {
+  public dataExports?: {
     totalExports: number;
     averageExportSize: number;
     formatBreakdown: Record<DataExportFormat, number>;
@@ -549,21 +559,21 @@ export class RightsFulfillmentMetrics {
 export class AutomatedRightsRule {
   @IsString()
   @IsNotEmpty()
-  id!: string;
+  public id!: string;
 
   @IsEnum(DataSubjectRightType)
-  requestType!: DataSubjectRightType;
+  public requestType!: DataSubjectRightType;
 
   @IsString()
   @IsNotEmpty()
-  name!: string;
+  public name!: string;
 
   @IsString()
   @IsOptional()
-  description?: string;
+  public description?: string;
 
   @IsOptional()
-  conditions?: {
+  public conditions?: {
     userRole?: string[];
     dataCategories?: string[];
     requestReason?: string[];
@@ -571,7 +581,7 @@ export class AutomatedRightsRule {
   };
 
   @IsOptional()
-  actions?: {
+  public actions?: {
     autoApprove?: boolean;
     requireVerification?: boolean;
     notifyAdministrator?: boolean;
@@ -579,12 +589,12 @@ export class AutomatedRightsRule {
   };
 
   @IsBoolean()
-  isActive!: boolean;
+  public isActive!: boolean;
 
   @IsDateString()
-  createdAt!: Date;
+  public createdAt!: Date;
 
   @IsDateString()
   @IsOptional()
-  lastModified?: Date;
+  public lastModified?: Date;
 }

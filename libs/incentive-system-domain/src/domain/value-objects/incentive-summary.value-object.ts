@@ -1,5 +1,5 @@
 import { ValueObject } from '../base/value-object.js';
-import {
+import type {
   Currency,
   TriggerType,
   IncentiveStatus,
@@ -25,42 +25,42 @@ export class IncentiveSummary extends ValueObject<{
    * Performs the id operation.
    * @returns The string value.
    */
-  get id(): string {
+  public get id(): string {
     return this.props.id;
   }
   /**
    * Performs the recipient ip operation.
    * @returns The string value.
    */
-  get recipientIP(): string {
+  public get recipientIP(): string {
     return this.props.recipientIP;
   }
   /**
    * Performs the reward amount operation.
    * @returns The number value.
    */
-  get rewardAmount(): number {
+  public get rewardAmount(): number {
     return this.props.rewardAmount;
   }
   /**
    * Performs the status operation.
    * @returns The IncentiveStatus.
    */
-  get status(): IncentiveStatus {
+  public get status(): IncentiveStatus {
     return this.props.status;
   }
   /**
    * Performs the can be paid operation.
    * @returns The boolean value.
    */
-  get canBePaid(): boolean {
+  public get canBePaid(): boolean {
     return this.props.canBePaid;
   }
   /**
    * Performs the days since creation operation.
    * @returns The number value.
    */
-  get daysSinceCreation(): number {
+  public get daysSinceCreation(): number {
     return this.props.daysSinceCreation;
   }
 }

@@ -1,4 +1,5 @@
-import { NgModule, Type } from '@angular/core';
+import type { Type } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -9,6 +10,7 @@ import { DashboardCardComponent } from './dashboard-card/dashboard-card.componen
 import { BentoGridComponent } from './bento-grid/bento-grid.component';
 import { BentoCardComponent } from './bento-grid/bento-card.component';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const MODULE_COMPONENTS: Type<any>[] = [];
 
 const STANDALONE_COMPONENTS = [

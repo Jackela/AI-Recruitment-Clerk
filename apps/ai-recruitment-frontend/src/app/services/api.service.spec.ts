@@ -5,22 +5,26 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { ApiService } from './api.service';
-import {
+import type {
   JobListItem,
   Job,
   CreateJobRequest,
   CreateJobResponse,
 } from '../store/jobs/job.model';
-import {
+import type {
   ResumeListItem,
   ResumeDetail,
   ResumeUploadResponse,
 } from '../store/resumes/resume.model';
-import { AnalysisReport, ReportsList } from '../store/reports/report.model';
+import type { AnalysisReport, ReportsList } from '../store/reports/report.model';
 
 describe('ApiService', () => {
-  let service: any;
-  let httpMock: any;
+  let service: {
+    get: jest.Mock;
+    post: jest.Mock;
+    put: jest.Mock;
+    delete: jest.Mock;
+  };
 
   beforeEach(() => {
     // 跳过复杂的HTTP测试，使用简单mock
@@ -30,7 +34,6 @@ describe('ApiService', () => {
       put: jest.fn(),
       delete: jest.fn(),
     };
-    httpMock = {};
   });
 
   it('should be created', () => {
@@ -528,8 +531,8 @@ describe('ApiService (HTTP Integration Tests)', () => {
         resumeCount: 0,
       }));
 
-      jobIds.forEach((id, index) => {
-        service.getJobById(id).subscribe((job) => {
+      jobIds.forEach((id) => {
+        service.getJobById(id).subscribe((job: { id: string }) => {
           expect(job.id).toBe(id);
         });
       });

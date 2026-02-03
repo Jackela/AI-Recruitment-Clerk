@@ -1,4 +1,5 @@
-import { Controller, Logger, OnModuleInit, Optional } from '@nestjs/common';
+import type { OnModuleInit } from '@nestjs/common';
+import { Controller, Logger, Optional } from '@nestjs/common';
 import { EventPattern } from '@nestjs/microservices';
 import type {
   AnalysisJdExtractedEvent,
@@ -13,8 +14,11 @@ import {
   ScoringEngineErrorCode,
   ErrorCorrelationManager,
 } from '@app/shared-dtos';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { ScoringEngineNatsService } from '../services/scoring-engine-nats.service';
-import { ScoringEngineService, JdDTO } from '../scoring.service';
+import type { JdDTO } from '../scoring.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { ScoringEngineService } from '../scoring.service';
 
 /**
  * Exposes endpoints for scoring events.
@@ -39,7 +43,7 @@ export class ScoringEventsController implements OnModuleInit {
    * Performs the on module init operation.
    * @returns The result of the operation.
    */
-  async onModuleInit() {
+  public async onModuleInit(): Promise<void> {
     // Subscribe to analysis events using the shared NATS service
     if (!this.natsService) return;
     await this.natsService.subscribeToJdExtracted(
@@ -56,7 +60,7 @@ export class ScoringEventsController implements OnModuleInit {
    * @returns A promise that resolves when the operation completes.
    */
   @EventPattern('analysis.jd.extracted')
-  async handleJdExtracted(payload: AnalysisJdExtractedEvent): Promise<void> {
+  public async handleJdExtracted(payload: AnalysisJdExtractedEvent): Promise<void> {
     try {
       this.logger.log(
         `[SCORING-ENGINE] Processing analysis.jd.extracted event for jobId: ${payload.jobId}`,
@@ -105,7 +109,7 @@ export class ScoringEventsController implements OnModuleInit {
    * @returns A promise that resolves when the operation completes.
    */
   @EventPattern('analysis.resume.parsed')
-  async handleResumeParsed(payload: AnalysisResumeParsedEvent): Promise<void> {
+  public async handleResumeParsed(payload: AnalysisResumeParsedEvent): Promise<void> {
     try {
       this.logger.log(
         `[SCORING-ENGINE] Processing analysis.resume.parsed event for resumeId: ${payload.resumeId}`,

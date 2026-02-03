@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { NatsClientService, NatsPublishResult } from '@app/shared-nats-client';
+import type { NatsPublishResult } from '@app/shared-nats-client';
+import { NatsClientService } from '@app/shared-nats-client';
 import { DeliverPolicy } from 'nats';
 
 /**
@@ -12,7 +13,7 @@ export class ResumeParserNatsService extends NatsClientService {
   /**
    * Publish analysis.resume.parsed event when resume processing is complete
    */
-  async publishAnalysisResumeParsed(event: {
+  public async publishAnalysisResumeParsed(event: {
     jobId: string;
     resumeId: string;
     resumeDto: unknown;
@@ -77,7 +78,7 @@ export class ResumeParserNatsService extends NatsClientService {
   /**
    * Publish job.resume.failed event when resume processing fails
    */
-  async publishJobResumeFailed(event: {
+  public async publishJobResumeFailed(event: {
     jobId: string;
     resumeId: string;
     error: Error;
@@ -145,7 +146,7 @@ export class ResumeParserNatsService extends NatsClientService {
   /**
    * Publish resume.processing.error event for general processing errors
    */
-  async publishProcessingError(
+  public async publishProcessingError(
     jobId: string,
     resumeId: string,
     error: Error,
@@ -222,7 +223,8 @@ export class ResumeParserNatsService extends NatsClientService {
   /**
    * Subscribe to job.resume.submitted events
    */
-  async subscribeToResumeSubmissions(
+  public async subscribeToResumeSubmissions(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handler: (event: any) => Promise<void>,
   ): Promise<void> {
     const subject = 'job.resume.submitted';
@@ -260,7 +262,7 @@ export class ResumeParserNatsService extends NatsClientService {
   /**
    * Get service-specific health information
    */
-  async getServiceHealthStatus(): Promise<{
+  public async getServiceHealthStatus(): Promise<{
     connected: boolean;
     service: string;
     lastActivity: Date;
@@ -270,16 +272,18 @@ export class ResumeParserNatsService extends NatsClientService {
   }> {
     const baseHealth = await this.getHealthStatus();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const healthAny = baseHealth as any;
     return {
       connected: baseHealth.connected,
       service: 'resume-parser-svc',
       lastActivity:
-        (baseHealth as any).lastActivity ||
-        (baseHealth as any).lastOperationTime ||
+        healthAny.lastActivity ||
+        healthAny.lastOperationTime ||
         new Date(),
       subscriptions: ['job.resume.submitted'],
-      messagesSent: (baseHealth as any).messagesSent ?? 0,
-      messagesReceived: (baseHealth as any).messagesReceived ?? 0,
+      messagesSent: healthAny.messagesSent ?? 0,
+      messagesReceived: healthAny.messagesReceived ?? 0,
     };
   }
 }

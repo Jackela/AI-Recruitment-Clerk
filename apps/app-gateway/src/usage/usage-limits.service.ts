@@ -20,7 +20,7 @@ export class UsageLimitsService {
   private currentUsage = 0;
   private quota = 100;
 
-  getUsageStatus(): UsageStatus {
+  public getUsageStatus(): UsageStatus {
     return {
       currentUsage: this.currentUsage,
       availableQuota: Math.max(0, this.quota - this.currentUsage),
@@ -28,7 +28,7 @@ export class UsageLimitsService {
     };
   }
 
-  recordUsage(): UsageRecordResult {
+  public recordUsage(): UsageRecordResult {
     this.currentUsage += 1;
     return {
       currentUsage: this.currentUsage,
@@ -36,7 +36,7 @@ export class UsageLimitsService {
     };
   }
 
-  addBonusQuota(amount: number): UsageBonusResult {
+  public addBonusQuota(amount: number): UsageBonusResult {
     if (Number.isFinite(amount) && amount > 0) {
       this.quota += amount;
     }

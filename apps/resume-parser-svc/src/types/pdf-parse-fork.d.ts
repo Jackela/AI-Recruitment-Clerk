@@ -14,7 +14,9 @@ declare module 'pdf-parse-fork' {
   }
 
   interface PDFMetadata {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _metadata?: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Metadata?: any;
   }
 
@@ -22,12 +24,13 @@ declare module 'pdf-parse-fork' {
     PDFFormatVersion?: string;
   }
 
-  interface PDFPageInfo {
+  interface _PDFPageInfo {
     Width?: number;
     Height?: number;
   }
 
   interface PDFExtractOptions {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     pagerender?: (pageData: any) => Promise<string>;
     max?: number;
     version?: string;

@@ -1,12 +1,13 @@
+import type {
+  ElementRef,
+  OnInit,
+  OnDestroy} from '@angular/core';
 import {
   Component,
   Input,
   Output,
   EventEmitter,
-  ViewChild,
-  ElementRef,
-  OnInit,
-  OnDestroy,
+  ViewChild
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
@@ -48,9 +49,14 @@ export interface UploadFile {
         [class.dragover]="isDragOver"
         [class.disabled]="disabled"
         (click)="triggerFileSelect()"
+        (keydown.enter)="triggerFileSelect()"
+        (keydown.space)="triggerFileSelect()"
         (dragover)="onDragOver($event)"
         (dragleave)="onDragLeave($event)"
         (drop)="onDrop($event)"
+        tabindex="0"
+        role="button"
+        [attr.aria-label]="'Upload zone. Press enter or space to select files'"
       >
         <div class="upload-content">
           <div class="upload-icon">
@@ -691,39 +697,39 @@ export interface UploadFile {
   ],
 })
 export class MobileUploadComponent implements OnInit, OnDestroy {
-  @Input() title = 'Upload Documents';
-  @Input() subtitle = 'Select or drag files to upload';
-  @Input() multiple = true;
-  @Input() maxSizeMB = 10;
-  @Input() allowedTypes: string[] = ['PDF', 'DOC', 'DOCX', 'JPG', 'PNG'];
-  @Input() disabled = false;
-  @Input() autoUpload = false;
+  @Input() public title = 'Upload Documents';
+  @Input() public subtitle = 'Select or drag files to upload';
+  @Input() public multiple = true;
+  @Input() public maxSizeMB = 10;
+  @Input() public allowedTypes: string[] = ['PDF', 'DOC', 'DOCX', 'JPG', 'PNG'];
+  @Input() public disabled = false;
+  @Input() public autoUpload = false;
 
-  @Output() filesAdded = new EventEmitter<UploadFile[]>();
-  @Output() fileRemoved = new EventEmitter<UploadFile>();
-  @Output() uploadStart = new EventEmitter<UploadFile[]>();
-  @Output() uploadProgress = new EventEmitter<{
+  @Output() public filesAdded = new EventEmitter<UploadFile[]>();
+  @Output() public fileRemoved = new EventEmitter<UploadFile>();
+  @Output() public uploadStart = new EventEmitter<UploadFile[]>();
+  @Output() public uploadProgress = new EventEmitter<{
     file: UploadFile;
     progress: number;
   }>();
-  @Output() uploadComplete = new EventEmitter<UploadFile[]>();
-  @Output() uploadError = new EventEmitter<{
+  @Output() public uploadComplete = new EventEmitter<UploadFile[]>();
+  @Output() public uploadError = new EventEmitter<{
     file: UploadFile;
     error: string;
   }>();
 
-  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
-  @ViewChild('cameraInput') cameraInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('fileInput') public fileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('cameraInput') public cameraInput!: ElementRef<HTMLInputElement>;
 
-  files: UploadFile[] = [];
-  isDragOver = false;
+  public files: UploadFile[] = [];
+  public isDragOver = false;
   private destroy$ = new Subject<void>();
 
   /**
    * Performs the accepted mime types operation.
    * @returns The string value.
    */
-  get acceptedMimeTypes(): string {
+  public get acceptedMimeTypes(): string {
     const mimeMap: { [key: string]: string[] } = {
       PDF: ['application/pdf'],
       DOC: ['application/msword'],
@@ -746,7 +752,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * Performs the total size operation.
    * @returns The number value.
    */
-  get totalSize(): number {
+  public get totalSize(): number {
     return this.files.reduce((total, file) => total + file.size, 0);
   }
 
@@ -754,7 +760,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * Performs the has uploading operation.
    * @returns The boolean value.
    */
-  get hasUploading(): boolean {
+  public get hasUploading(): boolean {
     return this.files.some((file) => file.status === 'uploading');
   }
 
@@ -762,7 +768,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * Performs the can submit operation.
    * @returns The boolean value.
    */
-  get canSubmit(): boolean {
+  public get canSubmit(): boolean {
     return (
       this.files.length > 0 &&
       this.files.some(
@@ -775,7 +781,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * Performs the can clear all operation.
    * @returns The boolean value.
    */
-  get canClearAll(): boolean {
+  public get canClearAll(): boolean {
     return this.files.length > 0 && !this.hasUploading;
   }
 
@@ -783,7 +789,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * Performs the overall progress operation.
    * @returns The number value.
    */
-  get overallProgress(): number {
+  public get overallProgress(): number {
     if (this.files.length === 0) return 0;
 
     const totalProgress = this.files.reduce((sum, file) => {
@@ -799,7 +805,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * Performs the ng on init operation.
    * @returns The result of the operation.
    */
-  ngOnInit() {
+  public ngOnInit(): void {
     // Handle drag events on document to prevent default browser behavior
     document.addEventListener('dragover', this.preventDefault);
     document.addEventListener('drop', this.preventDefault);
@@ -809,14 +815,14 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * Performs the ng on destroy operation.
    * @returns The result of the operation.
    */
-  ngOnDestroy() {
+  public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
     document.removeEventListener('dragover', this.preventDefault);
     document.removeEventListener('drop', this.preventDefault);
   }
 
-  private preventDefault = (e: Event) => {
+  private preventDefault = (e: Event): void => {
     e.preventDefault();
   };
 
@@ -825,7 +831,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * @param event - The event.
    * @returns The result of the operation.
    */
-  onDragOver(event: DragEvent) {
+  public onDragOver(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
     this.isDragOver = true;
@@ -836,7 +842,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * @param event - The event.
    * @returns The result of the operation.
    */
-  onDragLeave(event: DragEvent) {
+  public onDragLeave(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
 
@@ -855,7 +861,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * @param event - The event.
    * @returns The result of the operation.
    */
-  onDrop(event: DragEvent) {
+  public onDrop(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();
     this.isDragOver = false;
@@ -871,7 +877,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * @param event - The event.
    * @returns The result of the operation.
    */
-  triggerFileSelect(event?: Event) {
+  public triggerFileSelect(event?: Event): void {
     if (event) {
       event.stopPropagation();
     }
@@ -885,7 +891,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * @param event - The event.
    * @returns The result of the operation.
    */
-  openCamera(event: Event) {
+  public openCamera(event: Event): void {
     event.stopPropagation();
     if (!this.disabled) {
       this.cameraInput.nativeElement.click();
@@ -897,7 +903,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * @param event - The event.
    * @returns The result of the operation.
    */
-  onFileSelect(event: Event) {
+  public onFileSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files) {
       const files = Array.from(input.files);
@@ -911,7 +917,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * @param event - The event.
    * @returns The result of the operation.
    */
-  onCameraCapture(event: Event) {
+  public onCameraCapture(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files) {
       const files = Array.from(input.files);
@@ -920,7 +926,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     }
   }
 
-  private processFiles(files: File[]) {
+  private processFiles(files: File[]): void {
     const validFiles: UploadFile[] = [];
 
     for (const file of files) {
@@ -980,7 +986,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     return { valid: true };
   }
 
-  private generatePreview(file: File, uploadFile: UploadFile) {
+  private generatePreview(file: File, uploadFile: UploadFile): void {
     const reader = new FileReader();
     reader.onload = (e) => {
       uploadFile.preview = e.target?.result as string;
@@ -997,7 +1003,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * @param file - The file.
    * @returns The result of the operation.
    */
-  removeFile(file: UploadFile) {
+  public removeFile(file: UploadFile): void {
     const index = this.files.findIndex((f) => f.id === file.id);
     if (index !== -1) {
       this.files.splice(index, 1);
@@ -1009,7 +1015,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * Performs the clear all operation.
    * @returns The result of the operation.
    */
-  clearAll() {
+  public clearAll(): void {
     if (this.canClearAll) {
       this.files = [];
     }
@@ -1020,7 +1026,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * @param file - The file.
    * @returns The result of the operation.
    */
-  retryUpload(file: UploadFile) {
+  public retryUpload(file: UploadFile): void {
     file.status = 'pending';
     file.progress = 0;
     file.error = undefined;
@@ -1031,7 +1037,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * Performs the submit upload operation.
    * @returns The result of the operation.
    */
-  submitUpload() {
+  public submitUpload(): void {
     const pendingFiles = this.files.filter(
       (f) => f.status === 'pending' || f.status === 'error',
     );
@@ -1040,7 +1046,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     }
   }
 
-  private uploadFiles(files: UploadFile[]) {
+  private uploadFiles(files: UploadFile[]): void {
     this.uploadStart.emit(files);
 
     files.forEach((file) => {
@@ -1052,7 +1058,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
     });
   }
 
-  private simulateUpload(file: UploadFile) {
+  private simulateUpload(file: UploadFile): void {
     const interval = setInterval(() => {
       file.progress += Math.random() * 15;
 
@@ -1093,7 +1099,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * @param bytes - The bytes.
    * @returns The string value.
    */
-  formatFileSize(bytes: number): string {
+  public formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 B';
 
     const k = 1024;
@@ -1109,7 +1115,7 @@ export class MobileUploadComponent implements OnInit, OnDestroy {
    * @param file - The file.
    * @returns The string value.
    */
-  trackByFileId(_index: number, file: UploadFile): string {
+  public trackByFileId(_index: number, file: UploadFile): string {
     return file.id;
   }
 }

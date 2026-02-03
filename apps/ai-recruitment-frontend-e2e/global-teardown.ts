@@ -6,7 +6,7 @@ import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-async function globalTeardown() {
+async function globalTeardown(): Promise<void> {
   console.log('🛑 Starting E2E test environment teardown...');
 
   // Set up timeout for the entire teardown process
@@ -22,6 +22,7 @@ async function globalTeardown() {
     const useRealAPI = process.env.E2E_USE_REAL_API === 'true';
     const e2eDir = __dirname;
     const pidFile = path.join(e2eDir, '.gateway.pid');
+    const devServerPidFile = path.join(e2eDir, '.devserver.pid');
 
     if (!useRealAPI) {
       console.log('🛑 Stopping Enhanced Mock API Server...');
@@ -31,6 +32,30 @@ async function globalTeardown() {
       } catch (error) {
         console.warn('⚠️ Error stopping mock server:', error);
       }
+    }
+    // Stop manually started dev server if present
+    try {
+      if (fs.existsSync(devServerPidFile)) {
+        const devPid = parseInt(fs.readFileSync(devServerPidFile, 'utf-8').trim(), 10);
+        if (!isNaN(devPid)) {
+          console.log(`🛑 Stopping Dev Server (pid ${devPid})...`);
+          if (process.platform === 'win32') {
+            spawnSync('taskkill', ['/PID', String(devPid), '/T', '/F'], {
+              stdio: 'ignore',
+              shell: true,
+            });
+          } else {
+            try {
+              process.kill(devPid);
+            } catch {
+              // ignore
+            }
+          }
+        }
+        fs.rmSync(devServerPidFile, { force: true });
+      }
+    } catch (err) {
+      console.warn('⚠️ Failed to stop Dev Server:', (err as Error).message);
     }
     // Stop real gateway if we started it
     if (useRealAPI) {
@@ -47,7 +72,7 @@ async function globalTeardown() {
             } else {
               try {
                 process.kill(pid);
-              } catch (e) {
+              } catch {
                 // ignore
               }
             }

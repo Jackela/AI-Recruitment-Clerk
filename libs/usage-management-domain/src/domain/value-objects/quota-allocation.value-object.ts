@@ -1,5 +1,5 @@
 import { ValueObject } from './base/value-object.js';
-import { BonusType } from '../../application/dtos/usage-limit.dto.js';
+import type { BonusType } from '../../application/dtos/usage-limit.dto.js';
 
 /**
  * Represents the quota allocation.
@@ -14,7 +14,7 @@ export class QuotaAllocation extends ValueObject<{
    * @param baseQuota - The base quota.
    * @returns The QuotaAllocation.
    */
-  static createDefault(baseQuota: number): QuotaAllocation {
+  public static createDefault(baseQuota: number): QuotaAllocation {
     return new QuotaAllocation({
       baseQuota,
       bonusQuota: 0,
@@ -27,7 +27,8 @@ export class QuotaAllocation extends ValueObject<{
    * @param data - The data.
    * @returns The QuotaAllocation.
    */
-  static restore(data: any): QuotaAllocation {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): QuotaAllocation {
     return new QuotaAllocation({
       baseQuota: data.baseQuota,
       bonusQuota: data.bonusQuota,
@@ -41,7 +42,7 @@ export class QuotaAllocation extends ValueObject<{
    * @param amount - The amount.
    * @returns The QuotaAllocation.
    */
-  addBonus(bonusType: BonusType, amount: number): QuotaAllocation {
+  public addBonus(bonusType: BonusType, amount: number): QuotaAllocation {
     const currentBonus = this.props.bonusBreakdown.get(bonusType) || 0;
     const newBreakdown = new Map(this.props.bonusBreakdown);
     newBreakdown.set(bonusType, currentBonus + amount);
@@ -57,7 +58,7 @@ export class QuotaAllocation extends ValueObject<{
    * Retrieves available quota.
    * @returns The number value.
    */
-  getAvailableQuota(): number {
+  public getAvailableQuota(): number {
     return this.props.baseQuota + this.props.bonusQuota;
   }
 
@@ -65,7 +66,7 @@ export class QuotaAllocation extends ValueObject<{
    * Retrieves bonus quota.
    * @returns The number value.
    */
-  getBonusQuota(): number {
+  public getBonusQuota(): number {
     return this.props.bonusQuota;
   }
 
@@ -73,7 +74,7 @@ export class QuotaAllocation extends ValueObject<{
    * Retrieves bonus breakdown.
    * @returns The Map<BonusType, number>.
    */
-  getBonusBreakdown(): Map<BonusType, number> {
+  public getBonusBreakdown(): Map<BonusType, number> {
     return new Map(this.props.bonusBreakdown);
   }
 }

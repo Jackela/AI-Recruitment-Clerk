@@ -47,6 +47,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
             uri: mongoUri,
             retryAttempts: 3,
             retryDelay: 3000,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             connectionFactory: (connection: any) => {
               connection.on('connected', () => {
                 logger.log('MongoDB connected successfully');

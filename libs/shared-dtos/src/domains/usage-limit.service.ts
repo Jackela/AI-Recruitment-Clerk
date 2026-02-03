@@ -1,12 +1,14 @@
+import type {
+  BonusType} from './usage-limit.dto';
 import {
   UsageLimit,
-  UsageLimitPolicy,
-  BonusType,
+  UsageLimitPolicy
 } from './usage-limit.dto';
-import {
-  UsageLimitRules,
+import type {
   UsageViolationReport,
-  UsageEfficiency,
+  UsageEfficiency} from './usage-limit.rules';
+import {
+  UsageLimitRules
 } from './usage-limit.rules';
 
 /**
@@ -28,7 +30,7 @@ export class UsageLimitDomainService {
   /**
    * 检查IP的使用限制状态
    */
-  async checkUsageLimit(ip: string): Promise<UsageLimitResult> {
+  public async checkUsageLimit(ip: string): Promise<UsageLimitResult> {
     try {
       // 前置条件验证
       if (!UsageLimitRules.isValidIPAddress(ip)) {
@@ -103,7 +105,7 @@ export class UsageLimitDomainService {
   /**
    * 记录服务使用
    */
-  async recordUsage(ip: string): Promise<UsageTrackingResult> {
+  public async recordUsage(ip: string): Promise<UsageTrackingResult> {
     try {
       // 验证IP地址
       if (!UsageLimitRules.isValidIPAddress(ip)) {
@@ -125,7 +127,7 @@ export class UsageLimitDomainService {
           ip,
           error: recordResult.getError(),
         });
-        return UsageTrackingResult.failed(recordResult.getError()!);
+        return UsageTrackingResult.failed(recordResult.getError() ?? 'Unknown error');
       }
 
       // 发布领域事件
@@ -146,8 +148,8 @@ export class UsageLimitDomainService {
       });
 
       return UsageTrackingResult.success({
-        currentUsage: recordResult.getCurrentUsage()!,
-        remainingQuota: recordResult.getRemainingQuota()!,
+        currentUsage: recordResult.getCurrentUsage() ?? 0,
+        remainingQuota: recordResult.getRemainingQuota() ?? 0,
         timestamp: new Date(),
       });
     } catch (error) {
@@ -167,7 +169,7 @@ export class UsageLimitDomainService {
   /**
    * 添加奖励配额
    */
-  async addBonusQuota(
+  public async addBonusQuota(
     ip: string,
     bonusType: BonusType,
     customAmount?: number,
@@ -253,7 +255,7 @@ export class UsageLimitDomainService {
   /**
    * 获取使用统计信息
    */
-  async getUsageStatistics(ip?: string): Promise<UsageStatsResult> {
+  public async getUsageStatistics(ip?: string): Promise<UsageStatsResult> {
     try {
       if (ip) {
         // 获取特定IP的统计
@@ -304,7 +306,7 @@ export class UsageLimitDomainService {
   /**
    * 分析使用模式和趋势
    */
-  async analyzeUsagePatterns(
+  public async analyzeUsagePatterns(
     timeRange: TimeRange,
   ): Promise<UsageAnalysisResult> {
     try {
@@ -343,7 +345,7 @@ export class UsageLimitDomainService {
   /**
    * 获取高风险IP列表
    */
-  async getHighRiskIPs(): Promise<RiskAssessmentResult> {
+  public async getHighRiskIPs(): Promise<RiskAssessmentResult> {
     try {
       const allUsageLimits = await this.repository.findAll();
       const riskAssessments: IPRiskAssessment[] = [];
@@ -505,7 +507,7 @@ export class UsageLimitResult {
    * @param data - The data.
    * @returns The UsageLimitResult.
    */
-  static success(data: {
+  public static success(data: {
     allowed: boolean;
     remainingQuota: number;
     currentUsage: number;
@@ -521,7 +523,7 @@ export class UsageLimitResult {
    * @param errors - The errors.
    * @returns The UsageLimitResult.
    */
-  static failed(errors: string[]): UsageLimitResult {
+  public static failed(errors: string[]): UsageLimitResult {
     return new UsageLimitResult(false, undefined, errors);
   }
 }
@@ -545,7 +547,7 @@ export class UsageTrackingResult {
    * @param data - The data.
    * @returns The UsageTrackingResult.
    */
-  static success(data: {
+  public static success(data: {
     currentUsage: number;
     remainingQuota: number;
     timestamp: Date;
@@ -558,7 +560,7 @@ export class UsageTrackingResult {
    * @param error - The error.
    * @returns The UsageTrackingResult.
    */
-  static failed(error: string): UsageTrackingResult {
+  public static failed(error: string): UsageTrackingResult {
     return new UsageTrackingResult(false, undefined, error);
   }
 }
@@ -582,7 +584,7 @@ export class BonusQuotaResult {
    * @param data - The data.
    * @returns The BonusQuotaResult.
    */
-  static success(data: {
+  public static success(data: {
     addedAmount: number;
     newTotalQuota: number;
     bonusType: BonusType;
@@ -595,7 +597,7 @@ export class BonusQuotaResult {
    * @param errors - The errors.
    * @returns The BonusQuotaResult.
    */
-  static failed(errors: string[]): BonusQuotaResult {
+  public static failed(errors: string[]): BonusQuotaResult {
     return new BonusQuotaResult(false, undefined, errors);
   }
 }
@@ -628,7 +630,7 @@ export class UsageStatsResult {
    * @param data - The data.
    * @returns The UsageStatsResult.
    */
-  static success(data: {
+  public static success(data: {
     individual?: {
       ip: string;
       currentUsage: number;
@@ -650,7 +652,7 @@ export class UsageStatsResult {
    * @param errors - The errors.
    * @returns The UsageStatsResult.
    */
-  static failed(errors: string[]): UsageStatsResult {
+  public static failed(errors: string[]): UsageStatsResult {
     return new UsageStatsResult(false, undefined, errors);
   }
 }
@@ -670,7 +672,7 @@ export class UsageAnalysisResult {
    * @param data - The data.
    * @returns The UsageAnalysisResult.
    */
-  static success(data: UsagePatternAnalysis): UsageAnalysisResult {
+  public static success(data: UsagePatternAnalysis): UsageAnalysisResult {
     return new UsageAnalysisResult(true, data);
   }
 
@@ -679,7 +681,7 @@ export class UsageAnalysisResult {
    * @param errors - The errors.
    * @returns The UsageAnalysisResult.
    */
-  static failed(errors: string[]): UsageAnalysisResult {
+  public static failed(errors: string[]): UsageAnalysisResult {
     return new UsageAnalysisResult(false, undefined, errors);
   }
 
@@ -687,7 +689,7 @@ export class UsageAnalysisResult {
    * Performs the empty operation.
    * @returns The UsageAnalysisResult.
    */
-  static empty(): UsageAnalysisResult {
+  public static empty(): UsageAnalysisResult {
     return new UsageAnalysisResult(true, {
       timeRange: { startDate: new Date(), endDate: new Date() },
       totalAnalyzedIPs: 0,
@@ -715,7 +717,7 @@ export class RiskAssessmentResult {
    * @param data - The data.
    * @returns The RiskAssessmentResult.
    */
-  static success(data: IPRiskAssessment[]): RiskAssessmentResult {
+  public static success(data: IPRiskAssessment[]): RiskAssessmentResult {
     return new RiskAssessmentResult(true, data);
   }
 
@@ -724,7 +726,7 @@ export class RiskAssessmentResult {
    * @param errors - The errors.
    * @returns The RiskAssessmentResult.
    */
-  static failed(errors: string[]): RiskAssessmentResult {
+  public static failed(errors: string[]): RiskAssessmentResult {
     return new RiskAssessmentResult(false, undefined, errors);
   }
 }
@@ -803,6 +805,7 @@ export interface IUsageLimitRepository {
  * Defines the shape of the i domain event bus.
  */
 export interface IDomainEventBus {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   publish(event: any): Promise<void>;
 }
 
@@ -810,8 +813,11 @@ export interface IDomainEventBus {
  * Defines the shape of the i audit logger.
  */
 export interface IAuditLogger {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logBusinessEvent(eventType: string, data: any): Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logSecurityEvent(eventType: string, data: any): Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logError(eventType: string, data: any): Promise<void>;
   logViolation(eventType: string, report: UsageViolationReport): Promise<void>;
 }

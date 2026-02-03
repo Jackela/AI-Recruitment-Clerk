@@ -3,9 +3,22 @@
  * AI Recruitment Clerk - 智能缓存管理与性能优化
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { CacheService } from './cache.service';
+import type { OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import type { CacheService } from './cache.service';
 import { Cron } from '@nestjs/schedule';
+
+/**
+ * Defines the shape of performance stats.
+ */
+export interface PerformanceStats {
+  hitRate: number;
+  missRate: number;
+  evictionCount: number;
+  preloadCount: number;
+  totalSize: number;
+  lastOptimization: number;
+}
 
 /**
  * Defines the shape of the cache optimization config.
@@ -39,7 +52,7 @@ export interface CacheOptimizationConfig {
  */
 @Injectable()
 export class CacheOptimizationService implements OnModuleInit {
-  private readonly logger = new Logger(CacheOptimizationService.name);
+  private readonly logger: Logger = new Logger(CacheOptimizationService.name);
 
   // 优化配置
   private config: CacheOptimizationConfig = {
@@ -68,7 +81,7 @@ export class CacheOptimizationService implements OnModuleInit {
   };
 
   // 缓存性能统计
-  private performanceStats = {
+  private performanceStats: PerformanceStats = {
     hitRate: 0,
     missRate: 0,
     evictionCount: 0,
@@ -87,7 +100,7 @@ export class CacheOptimizationService implements OnModuleInit {
    * Performs the on module init operation.
    * @returns The result of the operation.
    */
-  async onModuleInit() {
+  public async onModuleInit(): Promise<void> {
     this.logger.log('🔧 Cache optimization service initialized');
     await this.loadOptimizationConfig();
     this.startPerformanceMonitoring();
@@ -96,7 +109,7 @@ export class CacheOptimizationService implements OnModuleInit {
   /**
    * 加载缓存优化配置
    */
-  private async loadOptimizationConfig() {
+  private async loadOptimizationConfig(): Promise<void> {
     try {
       const configKey = this.cacheService.generateKey(
         'cache',
@@ -114,10 +127,9 @@ export class CacheOptimizationService implements OnModuleInit {
         await this.cacheService.set(configKey, this.config, { ttl: 86400000 }); // 24小时
         this.logger.log('📋 Default cache optimization config saved');
       }
-    } catch (error) {
+    } catch {
       this.logger.warn(
-        'Failed to load cache optimization config:',
-        error.message,
+        'Failed to load cache optimization config',
       );
     }
   }
@@ -125,7 +137,7 @@ export class CacheOptimizationService implements OnModuleInit {
   /**
    * 智能缓存策略选择
    */
-  async optimizeForDataType(
+  public async optimizeForDataType(
     dataType: string,
     accessPattern: 'read-heavy' | 'write-heavy' | 'mixed',
   ): Promise<{
@@ -187,7 +199,7 @@ export class CacheOptimizationService implements OnModuleInit {
    * 预加载热点数据
    */
   @Cron('0 */5 * * * *') // 每5分钟执行
-  async preloadHotData() {
+  public async preloadHotData(): Promise<void> {
     try {
       this.logger.debug('🔄 Starting cache preload cycle...');
 
@@ -197,12 +209,16 @@ export class CacheOptimizationService implements OnModuleInit {
 
       this.performanceStats.preloadCount++;
       this.logger.debug('✅ Cache preload cycle completed');
-    } catch (error) {
-      this.logger.error('Cache preload error:', error);
+    } catch {
+      this.logger.error('Cache preload error');
     }
   }
 
-  private async executePreloadRule(rule: any) {
+  private async executePreloadRule(rule: {
+    pattern: string;
+    schedule: string;
+    dependencies?: string[];
+  }): Promise<void> {
     try {
       switch (rule.pattern) {
         case 'jobs:list':
@@ -214,15 +230,14 @@ export class CacheOptimizationService implements OnModuleInit {
         default:
           this.logger.debug(`Unknown preload pattern: ${rule.pattern}`);
       }
-    } catch (error) {
+    } catch {
       this.logger.warn(
-        `Failed to execute preload rule ${rule.pattern}:`,
-        error.message,
+        `Failed to execute preload rule ${rule.pattern}`,
       );
     }
   }
 
-  private async preloadJobsList() {
+  private async preloadJobsList(): Promise<void> {
     const cacheKey = this.cacheService.generateKey('jobs', 'list', 'preload');
     const exists = await this.cacheService.get(cacheKey);
 
@@ -240,7 +255,7 @@ export class CacheOptimizationService implements OnModuleInit {
     }
   }
 
-  private async preloadHealthCheck() {
+  private async preloadHealthCheck(): Promise<void> {
     const healthData = await this.cacheService.healthCheck();
     const cacheKey = this.cacheService.getHealthCacheKey();
 
@@ -252,7 +267,7 @@ export class CacheOptimizationService implements OnModuleInit {
    * 智能缓存清理
    */
   @Cron('0 0 */6 * * *') // 每6小时执行
-  async intelligentCleanup() {
+  public async intelligentCleanup(): Promise<void> {
     try {
       this.logger.log('🧹 Starting intelligent cache cleanup...');
 
@@ -281,8 +296,8 @@ export class CacheOptimizationService implements OnModuleInit {
       this.logger.log(
         `✅ Cache cleanup completed: ${cleanupResult.totalCleaned} keys cleaned`,
       );
-    } catch (error) {
-      this.logger.error('Cache cleanup error:', error);
+    } catch {
+      this.logger.error('Cache cleanup error');
     }
   }
 
@@ -291,7 +306,7 @@ export class CacheOptimizationService implements OnModuleInit {
    */
   private async adjustCacheStrategy(
     action: 'increase_ttl' | 'decrease_ttl' | 'add_preload' | 'remove_preload',
-  ) {
+  ): Promise<void> {
     try {
       switch (action) {
         case 'increase_ttl':
@@ -325,16 +340,16 @@ export class CacheOptimizationService implements OnModuleInit {
       this.logger.log(
         `📈 Cache strategy adjusted: ${action}, new TTL: ${this.config.strategies.ttl}ms`,
       );
-    } catch (error) {
-      this.logger.error('Failed to adjust cache strategy:', error);
+    } catch {
+      this.logger.error('Failed to adjust cache strategy');
     }
   }
 
   /**
    * 开始性能监控
    */
-  private startPerformanceMonitoring() {
-    setInterval(async () => {
+  private startPerformanceMonitoring(): void {
+    setInterval(async (): Promise<void> => {
       try {
         const metrics = this.cacheService.getMetrics();
 
@@ -358,8 +373,8 @@ export class CacheOptimizationService implements OnModuleInit {
             `⚠️ Cache hit rate below 50%: ${(this.performanceStats.hitRate * 100).toFixed(1)}%`,
           );
         }
-      } catch (error) {
-        this.logger.error('Performance monitoring error:', error);
+      } catch {
+        this.logger.error('Performance monitoring error');
       }
     }, 60000); // 每分钟更新一次
   }
@@ -367,7 +382,7 @@ export class CacheOptimizationService implements OnModuleInit {
   /**
    * 缓存预热
    */
-  async warmupCache(
+  public async warmupCache(
     patterns: string[] = ['critical', 'frequently-accessed'],
   ): Promise<{
     success: boolean;
@@ -403,8 +418,8 @@ export class CacheOptimizationService implements OnModuleInit {
         preloadedKeys,
         duration,
       };
-    } catch (error) {
-      this.logger.error('Cache warmup failed:', error);
+    } catch {
+      this.logger.error('Cache warmup failed');
       return {
         success: false,
         preloadedKeys,
@@ -416,7 +431,12 @@ export class CacheOptimizationService implements OnModuleInit {
   /**
    * 获取缓存优化报告
    */
-  async getOptimizationReport(): Promise<any> {
+  public async getOptimizationReport(): Promise<{
+    performance: PerformanceStats;
+    config: CacheOptimizationConfig;
+    recommendations: string[];
+    health: Awaited<ReturnType<CacheService['healthCheck']>>;
+  }> {
     const cacheHealth = await this.cacheService.healthCheck();
     const recommendations = this.generateOptimizationRecommendations();
 
@@ -456,7 +476,7 @@ export class CacheOptimizationService implements OnModuleInit {
   /**
    * 手动触发缓存优化
    */
-  async triggerOptimization(): Promise<{
+  public async triggerOptimization(): Promise<{
     success: boolean;
     actions: string[];
     duration: number;

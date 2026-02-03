@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DeviceIdService } from './device-id.service';
-import { DetailedAnalysisResult } from '../../interfaces/detailed-analysis.interface';
+import type { DetailedAnalysisResult } from '../../interfaces/detailed-analysis.interface';
 
 /**
  * Defines the shape of the guest usage response.
@@ -143,16 +143,8 @@ export interface AnalysisResultsResponse {
 })
 export class GuestApiService {
   private readonly baseUrl = '/api/guest';
-
-  /**
-   * Initializes a new instance of the Guest API Service.
-   * @param http - The http.
-   * @param deviceIdService - The device id service.
-   */
-  constructor(
-    private http: HttpClient,
-    private deviceIdService: DeviceIdService,
-  ) {}
+  private readonly http = inject(HttpClient);
+  private readonly deviceIdService = inject(DeviceIdService);
 
   /**
    * Get headers with device ID for guest API calls
@@ -166,7 +158,7 @@ export class GuestApiService {
   /**
    * Check guest usage status
    */
-  getUsageStatus(): Observable<GuestUsageResponse> {
+  public getUsageStatus(): Observable<GuestUsageResponse> {
     return this.http.get<GuestUsageResponse>(`${this.baseUrl}/status`, {
       headers: this.getGuestHeaders(),
     });
@@ -175,7 +167,7 @@ export class GuestApiService {
   /**
    * Get detailed guest status
    */
-  getGuestDetails(): Observable<GuestStatusResponse> {
+  public getGuestDetails(): Observable<GuestStatusResponse> {
     return this.http.get<GuestStatusResponse>(`${this.baseUrl}/details`, {
       headers: this.getGuestHeaders(),
     });
@@ -184,7 +176,7 @@ export class GuestApiService {
   /**
    * Generate feedback code for guest user
    */
-  generateFeedbackCode(): Observable<FeedbackCodeResponse> {
+  public generateFeedbackCode(): Observable<FeedbackCodeResponse> {
     return this.http.post<FeedbackCodeResponse>(
       `${this.baseUrl}/feedback-code`,
       {},
@@ -195,7 +187,7 @@ export class GuestApiService {
   /**
    * Redeem feedback code
    */
-  redeemFeedbackCode(
+  public redeemFeedbackCode(
     feedbackCode: string,
   ): Observable<{ success: boolean; message: string }> {
     return this.http.post<{ success: boolean; message: string }>(
@@ -208,7 +200,7 @@ export class GuestApiService {
   /**
    * Check if guest can use service (and increment usage)
    */
-  checkUsage(): Observable<{ canUse: boolean; message: string }> {
+  public checkUsage(): Observable<{ canUse: boolean; message: string }> {
     return this.http.post<{ canUse: boolean; message: string }>(
       `${this.baseUrl}/check-usage`,
       {},
@@ -219,7 +211,7 @@ export class GuestApiService {
   /**
    * Upload and analyze resume (guest mode)
    */
-  analyzeResume(
+  public analyzeResume(
     file: File,
     candidateName?: string,
     candidateEmail?: string,
@@ -242,7 +234,7 @@ export class GuestApiService {
   /**
    * Get analysis results
    */
-  getAnalysisResults(analysisId: string): Observable<AnalysisResultsResponse> {
+  public getAnalysisResults(analysisId: string): Observable<AnalysisResultsResponse> {
     return this.http.get<AnalysisResultsResponse>(
       `${this.baseUrl}/resume/analysis/${analysisId}`,
       { headers: this.getGuestHeaders() },
@@ -252,7 +244,7 @@ export class GuestApiService {
   /**
    * Get demo analysis (for showcasing)
    */
-  getDemoAnalysis(): Observable<AnalysisResultsResponse> {
+  public getDemoAnalysis(): Observable<AnalysisResultsResponse> {
     return this.http.get<AnalysisResultsResponse>(
       `${this.baseUrl}/resume/demo-analysis`,
       { headers: this.getGuestHeaders() },
@@ -262,7 +254,7 @@ export class GuestApiService {
   /**
    * Get detailed analysis results for the results page
    */
-  getDetailedResults(sessionId: string): Observable<DetailedAnalysisResult> {
+  public getDetailedResults(sessionId: string): Observable<DetailedAnalysisResult> {
     return this.http.get<DetailedAnalysisResult>(
       `${this.baseUrl}/resume/detailed-results/${sessionId}`,
       { headers: this.getGuestHeaders() },
@@ -272,7 +264,7 @@ export class GuestApiService {
   /**
    * Get service statistics (public endpoint)
    */
-  getServiceStats(): Observable<{
+  public getServiceStats(): Observable<{
     totalGuests: number;
     activeGuests: number;
     pendingFeedbackCodes: number;

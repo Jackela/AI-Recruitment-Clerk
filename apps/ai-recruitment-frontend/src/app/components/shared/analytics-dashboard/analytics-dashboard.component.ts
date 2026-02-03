@@ -1,27 +1,44 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, combineLatest } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 
-import { AppState } from '../../../store/app.state';
+import type { AppState } from '../../../store/app.state';
 
 // Job selectors and models
 import * as JobSelectors from '../../../store/jobs/job.selectors';
-import { JobListItem } from '../../../store/jobs/job.model';
+import type { JobListItem } from '../../../store/jobs/job.model';
 
 // Report selectors and models
 import * as ReportSelectors from '../../../store/reports/report.selectors';
-import { ReportListItem } from '../../../store/reports/report.model';
+import type { ReportListItem } from '../../../store/reports/report.model';
 
 // Resume selectors and models
 import * as ResumeSelectors from '../../../store/resumes/resume.selectors';
-import { ResumeListItem } from '../../../store/resumes/resume.model';
+import type { ResumeListItem } from '../../../store/resumes/resume.model';
+
+interface JobsStatistics {
+  total: number;
+  activePercentage: number;
+}
+
+interface ReportsStatistics {
+  total: number;
+  completionRate: number;
+}
+
+interface ResumeStatistics {
+  total: number;
+  averageScore: number;
+  topSkills?: Array<{ skill: string; count: number }>;
+}
 
 interface AnalyticsDashboardData {
-  jobsStatistics: any;
-  reportsStatistics: any;
-  resumeStatistics: any;
+  jobsStatistics: JobsStatistics;
+  reportsStatistics: ReportsStatistics;
+  resumeStatistics: ResumeStatistics;
   recentJobs: JobListItem[];
   recentReports: ReportListItem[];
   recentResumes: ResumeListItem[];
@@ -575,14 +592,14 @@ interface AnalyticsDashboardData {
     `,
   ],
 })
-export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
-  dashboardData$: Observable<AnalyticsDashboardData>;
+export class AnalyticsDashboardComponent {
+  private readonly store = inject(Store<AppState>);
+  public dashboardData$: Observable<AnalyticsDashboardData>;
 
   /**
    * Initializes a new instance of the Analytics Dashboard Component.
-   * @param store - The store.
    */
-  constructor(private store: Store<AppState>) {
+  constructor() {
     // Demonstrate usage of selectors from all three feature stores
     this.dashboardData$ = combineLatest([
       // Job selectors
@@ -625,20 +642,5 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
         }),
       ),
     );
-  }
-
-  /**
-   * Performs the ng on init operation.
-   */
-  ngOnInit(): void {
-    // Component initialization
-    console.log('Analytics Dashboard initialized with NgRx selectors');
-  }
-
-  /**
-   * Performs the ng on destroy operation.
-   */
-  ngOnDestroy(): void {
-    // Cleanup if needed
   }
 }

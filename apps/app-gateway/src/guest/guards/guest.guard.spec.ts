@@ -1,9 +1,10 @@
+import type {
+  ExecutionContext} from '@nestjs/common';
 import {
-  ExecutionContext,
   UnauthorizedException,
   BadRequestException,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import type { Reflector } from '@nestjs/core';
 import { GuestGuard } from './guest.guard';
 
 describe('GuestGuard', () => {

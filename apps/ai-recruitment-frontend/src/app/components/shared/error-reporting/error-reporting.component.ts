@@ -1,16 +1,16 @@
-import { Component, signal, Input } from '@angular/core';
+import { Component, signal, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import type { FormGroup} from '@angular/forms';
 import {
-  ReactiveFormsModule,
   FormBuilder,
-  FormGroup,
+  ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
 import { ErrorReportingService } from '../../../services/error/error-reporting.service';
 import {
   ErrorCorrelationService,
-  StructuredError,
 } from '../../../services/error/error-correlation.service';
+import type { StructuredError } from '../../../services/error/error-correlation.service';
 import { ToastService } from '../../../services/toast.service';
 
 /**
@@ -22,7 +22,7 @@ import { ToastService } from '../../../services/toast.service';
   imports: [CommonModule, ReactiveFormsModule],
   template: `
     <div class="error-reporting-modal" *ngIf="isVisible()">
-      <div class="modal-backdrop" (click)="close()"></div>
+      <div class="modal-backdrop" (click)="close()" (keydown.enter)="close()" (keydown.space)="close()" tabindex="0" role="button" aria-label="Close modal"></div>
       <div class="modal-content">
         <div class="modal-header">
           <h2>
@@ -565,19 +565,24 @@ import { ToastService } from '../../../services/toast.service';
   ],
 })
 export class ErrorReportingComponent {
-  @Input() errors: StructuredError[] = [];
+  private readonly fb = inject(FormBuilder);
+  private readonly errorReporting = inject(ErrorReportingService);
+  private readonly errorCorrelation = inject(ErrorCorrelationService);
+  private readonly toastService = inject(ToastService);
 
-  isVisible = signal(false);
-  isSubmitting = signal(false);
-  reproductionSteps = signal<string[]>(['']);
-  errorSummary = signal<{
+  @Input() public errors: StructuredError[] = [];
+
+  public isVisible = signal(false);
+  public isSubmitting = signal(false);
+  public reproductionSteps = signal<string[]>(['']);
+  public errorSummary = signal<{
     summary: string;
     technicalDetails: string;
     userGuidance: string;
   } | null>(null);
 
-  reportForm: FormGroup;
-  categories: Array<{
+  public reportForm: FormGroup;
+  public categories: Array<{
     key: string;
     label: string;
     description: string;
@@ -586,17 +591,8 @@ export class ErrorReportingComponent {
 
   /**
    * Initializes a new instance of the Error Reporting Component.
-   * @param fb - The fb.
-   * @param errorReporting - The error reporting.
-   * @param errorCorrelation - The error correlation.
-   * @param toastService - The toast service.
    */
-  constructor(
-    private fb: FormBuilder,
-    private errorReporting: ErrorReportingService,
-    private errorCorrelation: ErrorCorrelationService,
-    private toastService: ToastService,
-  ) {
+  constructor() {
     this.reportForm = this.fb.group({
       category: ['', Validators.required],
       feedback: ['', [Validators.required, Validators.maxLength(1000)]],
@@ -612,7 +608,7 @@ export class ErrorReportingComponent {
    * Performs the show operation.
    * @param errors - The errors.
    */
-  show(errors?: StructuredError[]): void {
+  public show(errors?: StructuredError[]): void {
     if (errors && errors.length > 0) {
       this.errors = errors;
       this.errorSummary.set(
@@ -636,7 +632,7 @@ export class ErrorReportingComponent {
   /**
    * Performs the close operation.
    */
-  close(): void {
+  public close(): void {
     this.isVisible.set(false);
     this.resetForm();
   }
@@ -645,7 +641,7 @@ export class ErrorReportingComponent {
    * Performs the selected category operation.
    * @returns The result of the operation.
    */
-  selectedCategory() {
+  public selectedCategory(): { key: string; label: string; description: string; icon: string } | undefined {
     const categoryKey = this.reportForm.get('category')?.value;
     return this.categories.find((cat) => cat.key === categoryKey);
   }
@@ -653,7 +649,7 @@ export class ErrorReportingComponent {
   /**
    * Performs the add reproduction step operation.
    */
-  addReproductionStep(): void {
+  public addReproductionStep(): void {
     const steps = [...this.reproductionSteps()];
     steps.push('');
     this.reproductionSteps.set(steps);
@@ -663,7 +659,7 @@ export class ErrorReportingComponent {
    * Removes reproduction step.
    * @param index - The index.
    */
-  removeReproductionStep(index: number): void {
+  public removeReproductionStep(index: number): void {
     const steps = [...this.reproductionSteps()];
     steps.splice(index, 1);
     if (steps.length === 0) {
@@ -677,9 +673,9 @@ export class ErrorReportingComponent {
    * @param index - The index.
    * @param event - The event.
    */
-  updateReproductionStep(index: number, event: any): void {
+  public updateReproductionStep(index: number, event: Event): void {
     const steps = [...this.reproductionSteps()];
-    steps[index] = event.target.value;
+    steps[index] = (event.target as HTMLInputElement).value;
     this.reproductionSteps.set(steps);
   }
 
@@ -688,7 +684,7 @@ export class ErrorReportingComponent {
    * @param guidance - The guidance.
    * @returns The string value.
    */
-  formatGuidance(guidance: string): string {
+  public formatGuidance(guidance: string): string {
     return guidance.replace(/\n/g, '<br>').replace(/•/g, '&bull;');
   }
 
@@ -696,7 +692,7 @@ export class ErrorReportingComponent {
    * Performs the on submit operation.
    * @returns A promise that resolves when the operation completes.
    */
-  async onSubmit(): Promise<void> {
+  public async onSubmit(): Promise<void> {
     if (!this.reportForm.valid) return;
 
     this.isSubmitting.set(true);

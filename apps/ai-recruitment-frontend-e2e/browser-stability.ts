@@ -32,7 +32,7 @@ export async function addBrowserLaunchDelay(
  */
 export async function waitForServerReady(
   url: string,
-  maxRetries: number = 30,
+  maxRetries = 30,
 ): Promise<boolean> {
   for (let i = 0; i < maxRetries; i++) {
     try {
@@ -85,9 +85,9 @@ export async function waitForServerReady(
  */
 export async function withFirefoxConnectionRetry<T>(
   operation: () => Promise<T>,
-  maxRetries: number = 3,
+  maxRetries = 3,
 ): Promise<T> {
-  let lastError: Error;
+  let lastError: Error = new Error('Operation failed');
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
@@ -118,5 +118,6 @@ export async function withFirefoxConnectionRetry<T>(
     }
   }
 
-  throw lastError!;
+  // lastError is guaranteed to be set here since we entered the loop at least once
+  throw lastError;
 }

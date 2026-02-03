@@ -62,16 +62,19 @@ export class ContractViolationError extends Error {
  * @since 1.0.0
  */
 export function Requires(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   condition: (...args: any[]) => boolean,
   message: string,
 ) {
   return function (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _target: any,
     propertyKey: string,
     descriptor: PropertyDescriptor,
   ) {
     const originalMethod = descriptor.value;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     descriptor.value = async function (...args: any[]) {
       if (!condition.apply(this, args)) {
         throw new ContractViolationError(
@@ -106,14 +109,17 @@ export function Requires(
  *
  * @since 1.0.0
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Ensures(condition: (result: any) => boolean, message: string) {
   return function (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     _target: any,
     propertyKey: string,
     descriptor: PropertyDescriptor,
   ) {
     const originalMethod = descriptor.value;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     descriptor.value = async function (...args: any[]) {
       const result = await originalMethod.apply(this, args);
 
@@ -150,17 +156,20 @@ export function Ensures(condition: (result: any) => boolean, message: string) {
  * @since 1.0.0
  */
 export function Invariant(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   condition: (instance: any) => boolean,
   message: string,
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-explicit-any
   return function <T extends { new (...args: any[]): {} }>(constructor: T) {
     return class extends constructor {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       constructor(...args: any[]) {
         super(...args);
         this.checkInvariant();
       }
 
-      public checkInvariant() {
+      public checkInvariant(): void {
         if (!condition(this)) {
           throw new ContractViolationError(message, 'INV', constructor.name);
         }
@@ -175,6 +184,7 @@ export function Invariant(
  * @namespace ContractValidators
  * @since 1.0.0
  */
+/* eslint-disable @typescript-eslint/no-namespace */
 export namespace ContractValidators {
   /**
    * Validates email format
@@ -190,6 +200,7 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function isValidEmail(email: any): boolean {
     return (
       typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
@@ -210,6 +221,7 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function isNonEmptyString(value: any): boolean {
     return typeof value === 'string' && value.trim().length > 0;
   }
@@ -240,6 +252,7 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function isPdfFile(file: any): boolean {
     return !!(
       file &&
@@ -258,6 +271,7 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function hasElements(array: any): boolean {
     return Array.isArray(array) && array.length > 0;
   }
@@ -276,6 +290,7 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function isValidJD(jd: any): boolean {
     return !!(
       jd &&
@@ -305,6 +320,7 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function isValidResume(resume: any): boolean {
     return !!(
       resume &&
@@ -330,6 +346,7 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function isValidScoreRange(score: any): boolean {
     return typeof score === 'number' && score >= 0 && score <= 100;
   }
@@ -348,6 +365,7 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function isValidScoreDTO(scoreDto: any): boolean {
     return !!(
       scoreDto &&
@@ -371,6 +389,7 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function isValidExperienceRange(experienceYears: any): boolean {
     return !!(
       experienceYears &&
@@ -391,6 +410,7 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function isValidCandidateInfo(candidateInfo: any): boolean {
     return !!(
       candidateInfo &&
@@ -412,6 +432,7 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function isValidReportResult(reportResult: any): boolean {
     return !!(
       reportResult &&
@@ -432,6 +453,7 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function isValidJobInfo(jobInfo: any): boolean {
     return !!(
       jobInfo &&
@@ -452,6 +474,7 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function isValidExtractionResult(extractionResult: any): boolean {
     return !!(
       extractionResult &&
@@ -493,6 +516,7 @@ export namespace ContractValidators {
    *
    * @since 1.0.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function isValidConfidenceLevel(confidence: any): boolean {
     return (
       typeof confidence === 'number' && confidence >= 0.0 && confidence <= 1.0
@@ -506,6 +530,7 @@ export namespace ContractValidators {
  * @namespace ContractTestUtils
  * @since 1.0.0
  */
+/* eslint-disable @typescript-eslint/no-namespace, @typescript-eslint/no-unsafe-function-type */
 export namespace ContractTestUtils {
   /**
    * Expects a function to throw specific contract violation

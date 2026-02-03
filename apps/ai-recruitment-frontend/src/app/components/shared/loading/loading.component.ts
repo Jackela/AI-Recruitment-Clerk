@@ -132,8 +132,8 @@ import { CommonModule } from '@angular/common';
   ],
 })
 export class LoadingComponent {
-  @Input() message = '';
-  @Input() size: 'sm' | 'md' | 'lg' = 'md';
-  @Input() inline = false;
-  @Input() overlay = false;
+  @Input() public message = '';
+  @Input() public size: 'sm' | 'md' | 'lg' = 'md';
+  @Input() public inline = false;
+  @Input() public overlay = false;
 }

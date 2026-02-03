@@ -19,21 +19,22 @@ import {
   Ensures,
   ContractValidators,
 } from '@ai-recruitment-clerk/shared-dtos';
-import { CreateJobDto } from './dto/create-job.dto';
+import type { CreateJobDto } from './dto/create-job.dto';
 import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
-import { MulterFile } from './types/multer.types';
+import type { MulterFile } from './types/multer.types';
 import { JobListDto, JobDetailDto } from './dto/job-response.dto';
 import {  ResumeDetailDto } from './dto/resume-response.dto';
 import { AnalysisReportDto } from './dto/report-response.dto';
-import { InMemoryStorageService } from './storage/in-memory-storage.service';
+import type { InMemoryStorageService } from './storage/in-memory-storage.service';
+import type {
+  UserDto} from '@ai-recruitment-clerk/user-management-domain';
 import {
-  UserDto,
   UserRole,
 } from '@ai-recruitment-clerk/user-management-domain';
-import { JobJdSubmittedEvent } from '@ai-recruitment-clerk/job-management-domain';
+import type { JobJdSubmittedEvent } from '@ai-recruitment-clerk/job-management-domain';
 import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
-import { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
-import { CacheService } from '../cache/cache.service';
+import type { AppGatewayNatsService } from '../nats/app-gateway-nats.service';
+import type { CacheService } from '../cache/cache.service';
 
 /**
  * Enhanced JobsService with Design by Contract protections
@@ -51,7 +52,7 @@ export class JobsServiceContracts {
     condition: boolean,
     message: string,
     context: string,
-  ) {
+  ): void {
     if (!condition) {
       throw new ContractViolationError(message, 'PRE', context);
     }
@@ -86,6 +87,7 @@ export class JobsServiceContracts {
    *
    * @since 1.0.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Requires((...args: any[]) => {
     const dto = args[0] as CreateJobDto;
     const user = args[1] as UserDto;
@@ -97,6 +99,7 @@ export class JobsServiceContracts {
       ContractValidators.isNonEmptyString(user.organizationId)
     );
   }, 'Job creation requires valid title, JD text, and authenticated user with organization')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Ensures((...args: any[]) => {
     const result = args[0] as { jobId: string };
     return (
@@ -106,7 +109,7 @@ export class JobsServiceContracts {
       )
     );
   }, 'Must return valid UUID job ID')
-  async createJob(
+  public async createJob(
     dto: CreateJobDto,
     user: UserDto,
   ): Promise<{ jobId: string }> {
@@ -131,7 +134,9 @@ export class JobsServiceContracts {
     );
 
     // Add organization context to job
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (job as any).organizationId = user.organizationId;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (job as any).createdBy = user.id;
 
     this.storageService.createJob(job);
@@ -200,6 +205,7 @@ export class JobsServiceContracts {
    *
    * @since 1.0.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Requires((...args: any[]) => {
     const jobId = args[0] as string;
     const files = args[1] as MulterFile[];
@@ -213,6 +219,7 @@ export class JobsServiceContracts {
       ContractValidators.isNonEmptyString(user.id)
     );
   }, 'Resume upload requires valid job ID, non-empty file array within size limits, and authenticated user')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Ensures((...args: any[]) => {
     const result = args[0] as ResumeUploadResponseDto;
     return (
@@ -220,7 +227,7 @@ export class JobsServiceContracts {
       result.submittedResumes >= 0
     );
   }, 'Must return valid upload response with job ID and count')
-  uploadResumes(
+  public uploadResumes(
     jobId: string,
     files: MulterFile[],
     user: UserDto,
@@ -244,6 +251,7 @@ export class JobsServiceContracts {
     }
 
     // Check if user has access to this job
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (!this.hasAccessToResource(user, (job as any).organizationId)) {
       throw new ForbiddenException('Access denied to this job');
     }
@@ -318,6 +326,7 @@ export class JobsServiceContracts {
    *
    * @since 1.0.0
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Ensures((...args: any[]) => {
     const result = args[0] as JobListDto[];
     return (
@@ -330,7 +339,7 @@ export class JobsServiceContracts {
       )
     );
   }, 'Must return valid job list with proper structure')
-  async getAllJobs(): Promise<JobListDto[]> {
+  public async getAllJobs(): Promise<JobListDto[]> {
     const cacheKey = this.cacheService.generateKey('jobs', 'list');
 
     return this.cacheService.wrap(
@@ -367,9 +376,11 @@ export class JobsServiceContracts {
    * @since 1.0.0
    */
   @Requires(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (...args: any[]) => ContractValidators.isNonEmptyString(args[0]),
     'Job ID must be non-empty string',
   )
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Ensures((...args: any[]) => {
     const result = args[0] as JobDetailDto;
     return (
@@ -379,7 +390,7 @@ export class JobsServiceContracts {
       ['processing', 'completed', 'failed'].includes(result.status)
     );
   }, 'Must return valid job detail object')
-  async getJobById(jobId: string): Promise<JobDetailDto> {
+  public async getJobById(jobId: string): Promise<JobDetailDto> {
     this.assertPrecondition(
       ContractValidators.isNonEmptyString(jobId),
       'Job ID must be non-empty string',
@@ -408,7 +419,8 @@ export class JobsServiceContracts {
     user: UserDto,
     resourceOrganizationId?: string,
   ): boolean {
-    const normalizedRole = String(
+      const normalizedRole = String(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (user as any)?.rawRole ?? user.role ?? '',
     ).toLowerCase();
 

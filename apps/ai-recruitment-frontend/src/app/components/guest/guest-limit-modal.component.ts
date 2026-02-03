@@ -1,9 +1,11 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import type { OnInit, OnDestroy} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
-import { Observable, Subject } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { GuestState } from '../../store/guest/guest.state';
+import type { GuestState } from '../../store/guest/guest.state';
 import * as GuestActions from '../../store/guest/guest.actions';
 
 /**
@@ -18,6 +20,10 @@ import * as GuestActions from '../../store/guest/guest.actions';
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       *ngIf="showModal$ | async"
       (click)="onBackdropClick($event)"
+      (keydown.escape)="closeModal()"
+      tabindex="0"
+      role="dialog"
+      aria-modal="true"
     >
       <div class="bg-white rounded-lg p-6 max-w-md mx-4 relative">
         <button
@@ -121,7 +127,7 @@ import * as GuestActions from '../../store/guest/guest.actions';
               [disabled]="isLoading$ | async"
               class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <span *ngIf="!(isLoading$ | async)">获取反馈码参与活动</span>
+              <span *ngIf="(isLoading$ | async) === false">获取反馈码参与活动</span>
               <span
                 *ngIf="isLoading$ | async"
                 class="flex items-center justify-center"
@@ -190,15 +196,15 @@ import * as GuestActions from '../../store/guest/guest.actions';
   ],
 })
 export class GuestLimitModalComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
   private autoCloseTimer: ReturnType<typeof setTimeout> | null = null;
 
-  showModal$: Observable<boolean>;
-  guestState$: Observable<GuestState>;
-  isLoading$: Observable<boolean>;
-  error$: Observable<string | null>;
+  public showModal$: Observable<boolean>;
+  public guestState$: Observable<GuestState>;
+  public isLoading$: Observable<boolean>;
+  public error$: Observable<string | null>;
 
-  private store = inject(Store<{ guest: GuestState }>);
+  private readonly store = inject(Store<{ guest: GuestState }>);
 
   /**
    * Initializes a new instance of the Guest Limit Modal Component.
@@ -213,7 +219,7 @@ export class GuestLimitModalComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     // Auto-close modal after 30 seconds if no action taken
     this.showModal$.pipe(takeUntil(this.destroy$)).subscribe((showModal) => {
       if (showModal) {
@@ -238,7 +244,7 @@ export class GuestLimitModalComponent implements OnInit, OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     // Clear any pending timer
     if (this.autoCloseTimer) {
       clearTimeout(this.autoCloseTimer);
@@ -252,7 +258,7 @@ export class GuestLimitModalComponent implements OnInit, OnDestroy {
   /**
    * Performs the close modal operation.
    */
-  closeModal(): void {
+  public closeModal(): void {
     this.store.dispatch(GuestActions.hideLimitModal());
   }
 
@@ -260,7 +266,7 @@ export class GuestLimitModalComponent implements OnInit, OnDestroy {
    * Performs the on backdrop click operation.
    * @param event - The event.
    */
-  onBackdropClick(event: Event): void {
+  public onBackdropClick(event: Event): void {
     if (event.target === event.currentTarget) {
       this.closeModal();
     }
@@ -269,14 +275,14 @@ export class GuestLimitModalComponent implements OnInit, OnDestroy {
   /**
    * Generates feedback code.
    */
-  generateFeedbackCode(): void {
+  public generateFeedbackCode(): void {
     this.store.dispatch(GuestActions.generateFeedbackCode());
   }
 
   /**
    * Performs the try demo operation.
    */
-  tryDemo(): void {
+  public tryDemo(): void {
     this.store.dispatch(GuestActions.loadDemoAnalysis());
     this.closeModal();
   }

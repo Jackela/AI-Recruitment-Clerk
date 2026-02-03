@@ -1,9 +1,22 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { MetricsService } from './metrics.service';
+import type { MetricsService } from './metrics.service';
 import { OpsGuard } from './ops.guard';
 import { OpsPermissionsGuard } from './ops-permissions.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
-import { Permission } from '@ai-recruitment-clerk/shared-dtos';
+import { Permission } from '@ai-recruitment-clerk/user-management-domain';
+
+interface FunnelsResponse {
+  window: string;
+  exposure: number;
+  success: number;
+  error: number;
+  cancel: number;
+  successRate: number;
+}
+
+interface HealthResponse {
+  status: string;
+}
 
 @Controller('ops/observability')
 @UseGuards(OpsGuard, OpsPermissionsGuard)
@@ -12,14 +25,14 @@ export class ObservabilityController {
 
   @Get('funnels')
   @Permissions(Permission.VIEW_ANALYTICS)
-  funnels(@Query('window') _window?: string) {
+  public funnels(@Query('window') _window?: string): FunnelsResponse {
     // Window ignored for in-memory prototype
-    return { window: _window || '24h', ...this.metrics.getSnapshot() };
+    return { window: _window ?? '24h', ...this.metrics.getSnapshot() };
   }
 
   @Get('health')
   @Permissions(Permission.VIEW_ANALYTICS)
-  health() {
+  public health(): HealthResponse {
     return { status: 'ok' };
   }
 }

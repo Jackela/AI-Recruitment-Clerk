@@ -3,16 +3,17 @@
  * AI Recruitment Clerk - 实时性能追踪与优化
  */
 
-import {
-  Injectable,
+import type {
   NestInterceptor,
   ExecutionContext,
-  CallHandler,
+  CallHandler} from '@nestjs/common';
+import {
+  Injectable,
   Logger,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { CacheService } from '../../cache/cache.service';
+import type { CacheService } from '../../cache/cache.service';
 
 /**
  * Defines the shape of the performance metrics.
@@ -34,8 +35,8 @@ export interface PerformanceMetrics {
  */
 @Injectable()
 export class PerformanceMonitoringInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(PerformanceMonitoringInterceptor.name);
-  private readonly performanceThresholds = {
+  private readonly logger: Logger = new Logger(PerformanceMonitoringInterceptor.name);
+  private readonly performanceThresholds: { warning: number; critical: number } = {
     warning: 200, // 200ms
     critical: 500, // 500ms
   };
@@ -50,9 +51,10 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
    * Performs the intercept operation.
    * @param context - The context.
    * @param next - The next.
-   * @returns The Observable<any>.
+   * @returns The Observable<unknown>.
    */
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const startTime = Date.now();
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
@@ -96,17 +98,17 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
     method: string,
     statusCode: number,
     userId?: string,
-    request?: any,
-    _data?: any,
-    error?: any,
-  ) {
+    request?: Record<string, unknown>,
+    _data?: unknown,
+    error?: { status?: number; message?: string },
+  ): Promise<void> {
     const responseTime = Date.now() - startTime;
     const timestamp = Date.now();
 
     // 提取缓存命中信息
-    const cacheHit = request?.cacheHit || false;
-    const dbQueryTime = request?.dbQueryTime || 0;
-    const redisQueryTime = request?.redisQueryTime || 0;
+    const cacheHit = typeof request?.cacheHit === 'boolean' ? request.cacheHit : false;
+    const dbQueryTime = typeof request?.dbQueryTime === 'number' ? request.dbQueryTime : 0;
+    const redisQueryTime = typeof request?.redisQueryTime === 'number' ? request.redisQueryTime : 0;
 
     const metrics: PerformanceMetrics = {
       endpoint,
@@ -130,7 +132,7 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
     this.logPerformance(metrics, error);
   }
 
-  private async storeMetrics(metrics: PerformanceMetrics) {
+  private async storeMetrics(metrics: PerformanceMetrics): Promise<void> {
     try {
       // 存储到Redis进行实时监控
       const metricsKey = this.cacheService.generateKey(
@@ -157,19 +159,21 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
 
       // 更新实时统计
       await this.updateRealtimeStats(metrics);
-    } catch (error) {
-      this.logger.warn('Failed to store performance metrics:', error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.warn('Failed to store performance metrics:', errorMessage);
     }
   }
 
-  private async updateRealtimeStats(metrics: PerformanceMetrics) {
+  private async updateRealtimeStats(metrics: PerformanceMetrics): Promise<void> {
     try {
       const statsKey = this.cacheService.generateKey(
         'performance',
         'stats',
         'realtime',
       );
-      const stats = (await this.cacheService.get<any>(statsKey)) || {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const stats: any = (await this.cacheService.get(statsKey)) ?? {
         totalRequests: 0,
         averageResponseTime: 0,
         slowRequests: 0,
@@ -239,12 +243,13 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
 
       // 存储统计信息（10分钟TTL）
       await this.cacheService.set(statsKey, stats, { ttl: 600000 });
-    } catch (error) {
-      this.logger.warn('Failed to update realtime stats:', error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.warn('Failed to update realtime stats:', errorMessage);
     }
   }
 
-  private checkPerformanceThresholds(metrics: PerformanceMetrics, error?: any) {
+  private checkPerformanceThresholds(metrics: PerformanceMetrics, error?: { message?: string }): void {
     const { responseTime, endpoint } = metrics;
 
     if (responseTime > this.performanceThresholds.critical) {
@@ -260,7 +265,7 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
     }
   }
 
-  private logPerformance(metrics: PerformanceMetrics, error?: any) {
+  private logPerformance(metrics: PerformanceMetrics, error?: { message?: string }): void {
     const {
       endpoint,
       responseTime,
@@ -295,9 +300,10 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
   // 获取性能统计的公共方法
   /**
    * Retrieves performance stats.
-   * @returns A promise that resolves to any.
+   * @returns A promise that resolves to the performance stats.
    */
-  async getPerformanceStats(): Promise<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async getPerformanceStats(): Promise<any> {
     try {
       const statsKey = this.cacheService.generateKey(
         'performance',
@@ -328,7 +334,7 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
    * @param window - The window.
    * @returns A promise that resolves to an array of PerformanceMetrics.
    */
-  async getHistoricalMetrics(
+  public async getHistoricalMetrics(
     date?: string,
     window?: string,
   ): Promise<PerformanceMetrics[]> {
@@ -355,11 +361,11 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
   // 性能报告生成
   /**
    * Generates performance report.
-   * @returns The Promise<{ summary: any; slowestEndpoints: any[]; recommendations: string[]; }>.
+   * @returns The Promise with summary, slowestEndpoints, and recommendations.
    */
-  async generatePerformanceReport(): Promise<{
-    summary: any;
-    slowestEndpoints: any[];
+  public async generatePerformanceReport(): Promise<{
+    summary: Record<string, unknown>;
+    slowestEndpoints: Array<{ endpoint: string; averageTime: number; maxTime: number; count: number; errorRate: number }>;
     recommendations: string[];
   }> {
     try {
@@ -375,6 +381,7 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
 
       // 找出最慢的端点
       const slowestEndpoints = Object.entries(stats.endpointStats)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .map(([endpoint, stat]: [string, any]) => ({
           endpoint,
           averageTime: stat.averageTime,
@@ -412,8 +419,8 @@ export class PerformanceMonitoringInterceptor implements NestInterceptor {
   }
 
   private generateRecommendations(
-    stats: any,
-    slowestEndpoints: any[],
+    stats: Record<string, unknown> & { cacheHitRate: number; errorRate: number; averageResponseTime: number; slowRequests: number; totalRequests: number },
+    slowestEndpoints: Array<{ endpoint: string; averageTime: number }>,
   ): string[] {
     const recommendations: string[] = [];
 

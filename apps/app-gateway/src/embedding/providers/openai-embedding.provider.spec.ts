@@ -1,7 +1,8 @@
 import { of, throwError } from 'rxjs';
-import { HttpService } from '@nestjs/axios';
-import { ConfigService } from '@nestjs/config';
-import { AxiosError, AxiosResponse } from 'axios';
+import type { HttpService } from '@nestjs/axios';
+import type { ConfigService } from '@nestjs/config';
+import type { AxiosResponse } from 'axios';
+import { AxiosError } from 'axios';
 import { OpenAIEmbeddingProvider } from './openai-embedding.provider';
 
 describe('OpenAIEmbeddingProvider', () => {
@@ -81,9 +82,9 @@ describe('OpenAIEmbeddingProvider', () => {
   it('should throw when API key is missing', async () => {
     configService.get.mockImplementation((key: string) => {
       if (key === 'OPENAI_API_KEY') {
-        return undefined as any;
+        return undefined;
       }
-      return undefined as any;
+      return undefined;
     });
 
     buildProvider();
@@ -261,7 +262,7 @@ describe('OpenAIEmbeddingProvider', () => {
         if (key === 'OPENAI_EMBEDDING_MODEL') {
           return undefined;
         }
-        return configMap.get(key) as any;
+        return configMap.get(key);
       });
 
       buildProvider();
@@ -278,7 +279,7 @@ describe('OpenAIEmbeddingProvider', () => {
           ['OPENAI_API_KEY', 'test-key'],
           ['OPENAI_EMBEDDING_MODEL', 'text-embedding-3-small'],
         ]);
-        return configMap.get(key) as any;
+        return configMap.get(key);
       });
 
       buildProvider();

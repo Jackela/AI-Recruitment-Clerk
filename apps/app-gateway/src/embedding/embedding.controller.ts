@@ -6,7 +6,7 @@ import { Controller, Get } from '@nestjs/common';
 @Controller('embedding')
 export class EmbeddingController {
   @Get('health')
-  healthCheck(): { status: string } {
+  public healthCheck(): { status: string } {
     return { status: 'ok' };
   }
 }

@@ -3,9 +3,10 @@
  * AI Recruitment Clerk - 启动时缓存预加载
  */
 
-import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
-import { JobRepository } from '../repositories/job.repository';
-import { CacheService } from './cache.service';
+import type { OnApplicationBootstrap } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import type { JobRepository } from '../repositories/job.repository';
+import type { CacheService } from './cache.service';
 
 /**
  * Provides cache warmup functionality.
@@ -28,7 +29,7 @@ export class CacheWarmupService implements OnApplicationBootstrap {
    * Performs the on application bootstrap operation.
    * @returns The result of the operation.
    */
-  async onApplicationBootstrap() {
+  public async onApplicationBootstrap(): Promise<void> {
     // 延迟5秒启动预热，让应用完全启动
     setTimeout(() => {
       this.startWarmupProcess();
@@ -66,8 +67,8 @@ export class CacheWarmupService implements OnApplicationBootstrap {
       this.logger.log(
         `✅ Cache warmup completed: ${warmedCount} categories warmed in ${duration}ms`,
       );
-    } catch (error) {
-      this.logger.error('❌ Cache warmup failed:', error);
+    } catch {
+      this.logger.error('❌ Cache warmup failed');
     }
   }
 
@@ -82,8 +83,8 @@ export class CacheWarmupService implements OnApplicationBootstrap {
       await this.jobRepository.healthCheck();
 
       this.logger.debug('✓ Health check cache warmed');
-    } catch (error) {
-      this.logger.warn('⚠️ Health check warmup failed:', error);
+    } catch {
+      this.logger.warn('⚠️ Health check warmup failed');
     }
   }
 
@@ -101,8 +102,8 @@ export class CacheWarmupService implements OnApplicationBootstrap {
       await this.jobRepository.countByCompany();
 
       this.logger.debug('✓ Job statistics cache warmed');
-    } catch (error) {
-      this.logger.warn('⚠️ Job statistics warmup failed:', error);
+    } catch {
+      this.logger.warn('⚠️ Job statistics warmup failed');
     }
   }
 
@@ -120,15 +121,15 @@ export class CacheWarmupService implements OnApplicationBootstrap {
       await this.jobRepository.findAll({ status: 'active', limit: 10 });
 
       this.logger.debug('✓ Common queries cache warmed');
-    } catch (error) {
-      this.logger.warn('⚠️ Common queries warmup failed:', error);
+    } catch {
+      this.logger.warn('⚠️ Common queries warmup failed');
     }
   }
 
   /**
    * 手动触发缓存预热（可以通过API调用）
    */
-  async triggerWarmup(): Promise<{
+  public async triggerWarmup(): Promise<{
     status: string;
     warmedCategories: number;
     duration: number;
@@ -153,9 +154,9 @@ export class CacheWarmupService implements OnApplicationBootstrap {
         warmedCategories: warmedCount,
         duration,
       };
-    } catch (error) {
+    } catch {
       const duration = Date.now() - startTime;
-      this.logger.error('Manual warmup failed:', error);
+      this.logger.error('Manual warmup failed');
 
       return {
         status: 'failed',
@@ -168,7 +169,7 @@ export class CacheWarmupService implements OnApplicationBootstrap {
   /**
    * 智能预热 - 基于使用模式预热缓存
    */
-  async intelligentWarmup(): Promise<void> {
+  public async intelligentWarmup(): Promise<void> {
     this.logger.log('🧠 Starting intelligent cache warmup...');
 
     try {
@@ -186,15 +187,15 @@ export class CacheWarmupService implements OnApplicationBootstrap {
       }
 
       this.logger.log('🧠 Intelligent warmup completed');
-    } catch (error) {
-      this.logger.error('Intelligent warmup failed:', error);
+    } catch {
+      this.logger.error('Intelligent warmup failed');
     }
   }
 
   /**
    * 启动智能缓存刷新机制
    */
-  startIntelligentRefreshMechanism(): void {
+  public startIntelligentRefreshMechanism(): void {
     this.logger.log('🔄 Starting intelligent cache refresh mechanism...');
 
     // 每5分钟检查一次缓存状态
@@ -240,8 +241,8 @@ export class CacheWarmupService implements OnApplicationBootstrap {
         this.cacheService.resetMetrics();
         this.logger.log('🔄 Cache metrics reset due to high error count');
       }
-    } catch (error) {
-      this.logger.error('Intelligent refresh failed:', error);
+    } catch {
+      this.logger.error('Intelligent refresh failed');
     }
   }
 
@@ -266,8 +267,8 @@ export class CacheWarmupService implements OnApplicationBootstrap {
 
       const duration = Date.now() - startTime;
       this.logger.log(`✅ Deep warmup completed in ${duration}ms`);
-    } catch (error) {
-      this.logger.error('Deep warmup failed:', error);
+    } catch {
+      this.logger.error('Deep warmup failed');
     }
   }
 
@@ -302,8 +303,8 @@ export class CacheWarmupService implements OnApplicationBootstrap {
       await this.warmupJobStatistics();
 
       this.logger.log('✅ Critical caches refreshed');
-    } catch (error) {
-      this.logger.error('Critical cache refresh failed:', error);
+    } catch {
+      this.logger.error('Critical cache refresh failed');
     }
   }
 
@@ -329,15 +330,15 @@ export class CacheWarmupService implements OnApplicationBootstrap {
       }
 
       this.logger.debug('✅ Predictive refresh completed');
-    } catch (error) {
-      this.logger.warn('Predictive refresh failed:', error);
+    } catch {
+      this.logger.warn('Predictive refresh failed');
     }
   }
 
   /**
    * 获取缓存刷新状态
    */
-  getRefreshStatus(): {
+  public getRefreshStatus(): {
     isActive: boolean;
     lastRefresh: Date | null;
     nextDeepWarmup: Date | null;

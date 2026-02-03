@@ -8,9 +8,9 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { Request } from 'express';
-import { RateLimitMiddleware } from '../middleware/rate-limit.middleware';
-import { QuestionnaireIntegrationService } from '../domains/questionnaire/questionnaire-integration.service';
+import type { Request } from 'express';
+import type { RateLimitMiddleware } from '../middleware/rate-limit.middleware';
+import type { QuestionnaireIntegrationService } from '../domains/questionnaire/questionnaire-integration.service';
 
 interface QuestionnaireSubmission {
   // 基础用户信息
@@ -82,7 +82,8 @@ export class QuestionnaireController {
    * @returns The result of the operation.
    */
   @Get('template')
-  getQuestionnaireTemplate() {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  public getQuestionnaireTemplate() {
     return {
       sections: [
         {
@@ -316,7 +317,8 @@ export class QuestionnaireController {
    * @returns The result of the operation.
    */
   @Post('submit')
-  async submitQuestionnaire(
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  public async submitQuestionnaire(
     @Body() submission: QuestionnaireSubmission,
     @Req() request: Request,
   ) {
@@ -396,9 +398,10 @@ export class QuestionnaireController {
         ],
       };
     } catch (error) {
+      const err = error as Error;
       this.logger.error(
         'Questionnaire submission error',
-        error.stack || error.message,
+        err.stack ?? err.message,
       );
 
       if (error instanceof HttpException) {
@@ -421,7 +424,8 @@ export class QuestionnaireController {
    * @returns The result of the operation.
    */
   @Get('stats')
-  async getQuestionnaireStats(@Req() request: Request) {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  public async getQuestionnaireStats(@Req() request: Request) {
     // 简单的管理接口，实际应该加权限验证
     const clientIP = this.getClientIP(request);
 

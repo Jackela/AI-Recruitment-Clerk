@@ -1,10 +1,11 @@
 import { UsageLimit } from '../aggregates/usage-limit.aggregate.js';
 import { UsageLimitPolicy } from '../value-objects/usage-limit-policy.value-object.js';
-import { BonusType } from '../../application/dtos/usage-limit.dto.js';
-import {
-  UsageLimitRules,
+import type { BonusType } from '../../application/dtos/usage-limit.dto.js';
+import type {
   UsageViolationReport,
-  UsageEfficiency,
+  UsageEfficiency} from './usage-limit.rules.js';
+import {
+  UsageLimitRules
 } from './usage-limit.rules.js';
 
 /**
@@ -26,7 +27,7 @@ export class UsageLimitDomainService {
   /**
    * 检查IP的使用限制状态
    */
-  async checkUsageLimit(ip: string): Promise<UsageLimitResult> {
+  public async checkUsageLimit(ip: string): Promise<UsageLimitResult> {
     try {
       // 前置条件验证
       if (!UsageLimitRules.isValidIPAddress(ip)) {
@@ -101,7 +102,7 @@ export class UsageLimitDomainService {
   /**
    * 记录服务使用
    */
-  async recordUsage(ip: string): Promise<UsageTrackingResult> {
+  public async recordUsage(ip: string): Promise<UsageTrackingResult> {
     try {
       // 验证IP地址
       if (!UsageLimitRules.isValidIPAddress(ip)) {
@@ -123,7 +124,8 @@ export class UsageLimitDomainService {
           ip,
           error: recordResult.getError(),
         });
-        return UsageTrackingResult.failed(recordResult.getError()!);
+        const error = recordResult.getError();
+        return UsageTrackingResult.failed(error ?? 'Unknown error');
       }
 
       // 发布领域事件
@@ -143,9 +145,11 @@ export class UsageLimitDomainService {
         remainingQuota: recordResult.getRemainingQuota(),
       });
 
+      const currentUsage = recordResult.getCurrentUsage();
+      const remainingQuota = recordResult.getRemainingQuota();
       return UsageTrackingResult.success({
-        currentUsage: recordResult.getCurrentUsage()!,
-        remainingQuota: recordResult.getRemainingQuota()!,
+        currentUsage: currentUsage ?? 0,
+        remainingQuota: remainingQuota ?? 0,
         timestamp: new Date(),
       });
     } catch (error) {
@@ -165,7 +169,7 @@ export class UsageLimitDomainService {
   /**
    * 添加奖励配额
    */
-  async addBonusQuota(
+  public async addBonusQuota(
     ip: string,
     bonusType: BonusType,
     customAmount?: number,
@@ -251,7 +255,7 @@ export class UsageLimitDomainService {
   /**
    * 获取使用统计信息
    */
-  async getUsageStatistics(ip?: string): Promise<UsageStatsResult> {
+  public async getUsageStatistics(ip?: string): Promise<UsageStatsResult> {
     try {
       if (ip) {
         // 获取特定IP的统计
@@ -357,7 +361,7 @@ export class UsageLimitResult {
    * @param data - The data.
    * @returns The UsageLimitResult.
    */
-  static success(data: {
+  public static success(data: {
     allowed: boolean;
     remainingQuota: number;
     currentUsage: number;
@@ -373,7 +377,7 @@ export class UsageLimitResult {
    * @param errors - The errors.
    * @returns The UsageLimitResult.
    */
-  static failed(errors: string[]): UsageLimitResult {
+  public static failed(errors: string[]): UsageLimitResult {
     return new UsageLimitResult(false, undefined, errors);
   }
 }
@@ -397,7 +401,7 @@ export class UsageTrackingResult {
    * @param data - The data.
    * @returns The UsageTrackingResult.
    */
-  static success(data: {
+  public static success(data: {
     currentUsage: number;
     remainingQuota: number;
     timestamp: Date;
@@ -410,7 +414,7 @@ export class UsageTrackingResult {
    * @param error - The error.
    * @returns The UsageTrackingResult.
    */
-  static failed(error: string): UsageTrackingResult {
+  public static failed(error: string): UsageTrackingResult {
     return new UsageTrackingResult(false, undefined, error);
   }
 }
@@ -434,7 +438,7 @@ export class BonusQuotaResult {
    * @param data - The data.
    * @returns The BonusQuotaResult.
    */
-  static success(data: {
+  public static success(data: {
     addedAmount: number;
     newTotalQuota: number;
     bonusType: BonusType;
@@ -447,7 +451,7 @@ export class BonusQuotaResult {
    * @param errors - The errors.
    * @returns The BonusQuotaResult.
    */
-  static failed(errors: string[]): BonusQuotaResult {
+  public static failed(errors: string[]): BonusQuotaResult {
     return new BonusQuotaResult(false, undefined, errors);
   }
 }
@@ -480,7 +484,7 @@ export class UsageStatsResult {
    * @param data - The data.
    * @returns The UsageStatsResult.
    */
-  static success(data: {
+  public static success(data: {
     individual?: {
       ip: string;
       currentUsage: number;
@@ -502,7 +506,7 @@ export class UsageStatsResult {
    * @param errors - The errors.
    * @returns The UsageStatsResult.
    */
-  static failed(errors: string[]): UsageStatsResult {
+  public static failed(errors: string[]): UsageStatsResult {
     return new UsageStatsResult(false, undefined, errors);
   }
 }
@@ -537,6 +541,7 @@ export interface IUsageLimitRepository {
  * Defines the shape of the i domain event bus.
  */
 export interface IDomainEventBus {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   publish(event: any): Promise<void>;
 }
 
@@ -544,8 +549,11 @@ export interface IDomainEventBus {
  * Defines the shape of the i audit logger.
  */
 export interface IAuditLogger {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logBusinessEvent(eventType: string, data: any): Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logSecurityEvent(eventType: string, data: any): Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logError(eventType: string, data: any): Promise<void>;
   logViolation(eventType: string, report: UsageViolationReport): Promise<void>;
 }

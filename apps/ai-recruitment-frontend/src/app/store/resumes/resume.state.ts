@@ -1,4 +1,4 @@
-import { ResumeListItem, ResumeDetail } from './resume.model';
+import type { ResumeListItem, ResumeDetail } from './resume.model';
 
 /**
  * Defines the shape of the resume state.

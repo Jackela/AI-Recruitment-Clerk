@@ -1,5 +1,5 @@
 import { ValueObject } from '../base/value-object';
-import { DomainEvent } from '../base/domain-event';
+import type { DomainEvent } from '../base/domain-event';
 
 // 用户会话聚合根
 /**
@@ -13,7 +13,7 @@ export class UserSession {
     private readonly ip: IPAddress,
     private status: SessionStatus,
     private readonly createdAt: Date,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     private _lastActiveAt: Date,
     private readonly dailyQuota: UsageQuota,
   ) {}
@@ -24,7 +24,7 @@ export class UserSession {
    * @param ip - The ip.
    * @returns The UserSession.
    */
-  static create(ip: string): UserSession {
+  public static create(ip: string): UserSession {
     const sessionId = SessionId.generate();
     const ipAddress = new IPAddress({ value: ip });
     const quota = UsageQuota.createDefault();
@@ -50,7 +50,7 @@ export class UserSession {
    * @param data - The data.
    * @returns The UserSession.
    */
-  static restore(data: SessionData): UserSession {
+  public static restore(data: SessionData): UserSession {
     return new UserSession(
       new SessionId({ value: data.id }),
       new IPAddress({ value: data.ip }),
@@ -66,7 +66,7 @@ export class UserSession {
    * Performs the record usage operation.
    * @returns The UsageResult.
    */
-  recordUsage(): UsageResult {
+  public recordUsage(): UsageResult {
     if (!this.canUse()) {
       return UsageResult.failed('Usage quota exceeded');
     }
@@ -77,6 +77,7 @@ export class UserSession {
 
     const newQuota = this.dailyQuota.incrementUsage();
     // Replace the quota object immutably
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this as any).dailyQuota = newQuota;
     this._lastActiveAt = new Date();
     // No-op read to satisfy TS6138 for private field
@@ -102,7 +103,7 @@ export class UserSession {
   /**
    * Performs the expire operation.
    */
-  expire(): void {
+  public expire(): void {
     this.status = SessionStatus.EXPIRED;
     this.addEvent(new SessionExpiredEvent(this.id.getValue(), new Date()));
   }
@@ -111,7 +112,7 @@ export class UserSession {
    * Performs the is valid operation.
    * @returns The boolean value.
    */
-  isValid(): boolean {
+  public isValid(): boolean {
     return this.status === SessionStatus.ACTIVE && !this.isExpired();
   }
 
@@ -119,7 +120,7 @@ export class UserSession {
    * Performs the can use operation.
    * @returns The boolean value.
    */
-  canUse(): boolean {
+  public canUse(): boolean {
     return this.isValid() && this.getRemainingQuota() > 0;
   }
 
@@ -127,7 +128,7 @@ export class UserSession {
    * Retrieves daily usage.
    * @returns The UsageStats.
    */
-  getDailyUsage(): UsageStats {
+  public getDailyUsage(): UsageStats {
     return new UsageStats({
       used: this.dailyQuota.getUsed(),
       remaining: this.getRemainingQuota(),
@@ -160,14 +161,14 @@ export class UserSession {
    * Retrieves uncommitted events.
    * @returns The an array of DomainEvent.
    */
-  getUncommittedEvents(): DomainEvent[] {
+  public getUncommittedEvents(): DomainEvent[] {
     return [...this.uncommittedEvents];
   }
 
   /**
    * Performs the mark events as committed operation.
    */
-  markEventsAsCommitted(): void {
+  public markEventsAsCommitted(): void {
     this.uncommittedEvents = [];
   }
 
@@ -180,7 +181,7 @@ export class UserSession {
    * Retrieves id.
    * @returns The SessionId.
    */
-  getId(): SessionId {
+  public getId(): SessionId {
     return this.id;
   }
 
@@ -188,7 +189,7 @@ export class UserSession {
    * Retrieves ip.
    * @returns The IPAddress.
    */
-  getIP(): IPAddress {
+  public getIP(): IPAddress {
     return this.ip;
   }
 
@@ -196,7 +197,7 @@ export class UserSession {
    * Retrieves status.
    * @returns The SessionStatus.
    */
-  getStatus(): SessionStatus {
+  public getStatus(): SessionStatus {
     return this.status;
   }
 }
@@ -210,7 +211,7 @@ export class SessionId extends ValueObject<{ value: string }> {
    * Generates the result.
    * @returns The SessionId.
    */
-  static generate(): SessionId {
+  public static generate(): SessionId {
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substr(2, 9);
     return new SessionId({ value: `session_${timestamp}_${random}` });
@@ -220,7 +221,7 @@ export class SessionId extends ValueObject<{ value: string }> {
    * Retrieves value.
    * @returns The string value.
    */
-  getValue(): string {
+  public getValue(): string {
     return this.props.value;
   }
 }
@@ -244,7 +245,7 @@ export class IPAddress extends ValueObject<{ value: string }> {
    * Retrieves value.
    * @returns The string value.
    */
-  getValue(): string {
+  public getValue(): string {
     return this.props.value;
   }
 }
@@ -262,7 +263,7 @@ export class UsageQuota extends ValueObject<{
    * Creates default.
    * @returns The UsageQuota.
    */
-  static createDefault(): UsageQuota {
+  public static createDefault(): UsageQuota {
     return new UsageQuota({
       daily: 5,
       used: 0,
@@ -276,7 +277,8 @@ export class UsageQuota extends ValueObject<{
    * @param data - The data.
    * @returns The UsageQuota.
    */
-  static restore(data: any): UsageQuota {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static restore(data: any): UsageQuota {
     return new UsageQuota(data);
   }
 
@@ -284,7 +286,7 @@ export class UsageQuota extends ValueObject<{
    * Performs the increment usage operation.
    * @returns The UsageQuota.
    */
-  incrementUsage(): UsageQuota {
+  public incrementUsage(): UsageQuota {
     return new UsageQuota({
       ...this.props,
       used: this.props.used + 1,
@@ -295,7 +297,7 @@ export class UsageQuota extends ValueObject<{
    * Performs the add questionnaire bonus operation.
    * @returns The UsageQuota.
    */
-  addQuestionnaireBonus(): UsageQuota {
+  public addQuestionnaireBonus(): UsageQuota {
     return new UsageQuota({
       ...this.props,
       questionnaireBonuses: this.props.questionnaireBonuses + 5,
@@ -306,7 +308,7 @@ export class UsageQuota extends ValueObject<{
    * Performs the add payment bonus operation.
    * @returns The UsageQuota.
    */
-  addPaymentBonus(): UsageQuota {
+  public addPaymentBonus(): UsageQuota {
     return new UsageQuota({
       ...this.props,
       paymentBonuses: this.props.paymentBonuses + 5,
@@ -317,7 +319,7 @@ export class UsageQuota extends ValueObject<{
    * Retrieves total limit.
    * @returns The number value.
    */
-  getTotalLimit(): number {
+  public getTotalLimit(): number {
     return (
       this.props.daily +
       this.props.questionnaireBonuses +
@@ -329,7 +331,7 @@ export class UsageQuota extends ValueObject<{
    * Retrieves used.
    * @returns The number value.
    */
-  getUsed(): number {
+  public getUsed(): number {
     return this.props.used;
   }
 }
@@ -353,7 +355,7 @@ export class UsageStats extends ValueObject<{
    * Performs the used operation.
    * @returns The number value.
    */
-  get used(): number {
+  public get used(): number {
     return this.props.used;
   }
 
@@ -361,7 +363,7 @@ export class UsageStats extends ValueObject<{
    * Performs the remaining operation.
    * @returns The number value.
    */
-  get remaining(): number {
+  public get remaining(): number {
     return this.props.remaining;
   }
 
@@ -369,7 +371,7 @@ export class UsageStats extends ValueObject<{
    * Performs the total operation.
    * @returns The number value.
    */
-  get total(): number {
+  public get total(): number {
     return this.props.total;
   }
 
@@ -377,7 +379,7 @@ export class UsageStats extends ValueObject<{
    * Performs the reset time operation.
    * @returns The Date.
    */
-  get resetTime(): Date {
+  public get resetTime(): Date {
     return this.props.resetTime;
   }
 }
@@ -397,7 +399,7 @@ export class UsageResult {
    * @param data - The data.
    * @returns The UsageResult.
    */
-  static success(data: { used: number; remaining: number }): UsageResult {
+  public static success(data: { used: number; remaining: number }): UsageResult {
     return new UsageResult(true, data);
   }
 
@@ -406,7 +408,7 @@ export class UsageResult {
    * @param error - The error.
    * @returns The UsageResult.
    */
-  static failed(error: string): UsageResult {
+  public static failed(error: string): UsageResult {
     return new UsageResult(false, undefined, error);
   }
 
@@ -414,7 +416,7 @@ export class UsageResult {
    * Performs the quota exceeded operation.
    * @returns The boolean value.
    */
-  get quotaExceeded(): boolean {
+  public get quotaExceeded(): boolean {
     return !this.success && this.error === 'Usage quota exceeded';
   }
 }
@@ -428,6 +430,7 @@ export interface SessionData {
   status: SessionStatus;
   createdAt: Date;
   lastActiveAt: Date;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   quota: any;
 }
 
@@ -441,7 +444,7 @@ export class SessionValidationService {
    * @param session - The session.
    * @returns The UserManagementValidationResult.
    */
-  validate(session: UserSession): UserManagementValidationResult {
+  public validate(session: UserSession): UserManagementValidationResult {
     const errors: string[] = [];
 
     if (!session.isValid()) {

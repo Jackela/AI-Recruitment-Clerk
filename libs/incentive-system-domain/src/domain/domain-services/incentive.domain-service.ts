@@ -1,12 +1,21 @@
+import type {
+  PaymentMethod} from '../aggregates/incentive.aggregate.js';
 import {
   Incentive,
   IncentiveStatus,
-  PaymentMethod,
   TriggerType,
   Currency,
 } from '../aggregates/incentive.aggregate.js';
 import { ContactInfo } from '../value-objects/index.js';
 import { IncentiveRules } from './incentive.rules.js';
+import type {
+  BatchPaymentItem,
+  IPIncentiveStatistics,
+  SystemIncentiveStatistics,
+  IIncentiveRepository,
+  IDomainEventBus,
+  IAuditLogger,
+  IPaymentGateway} from '../../application/dtos/incentive.dto.js';
 import {
   IncentiveCreationResult,
   IncentiveValidationResult,
@@ -15,14 +24,7 @@ import {
   PaymentProcessingResult,
   BatchPaymentResult,
   IncentiveStatsResult,
-  PendingIncentivesResult,
-  BatchPaymentItem,
-  IPIncentiveStatistics,
-  SystemIncentiveStatistics,
-  IIncentiveRepository,
-  IDomainEventBus,
-  IAuditLogger,
-  IPaymentGateway,
+  PendingIncentivesResult
 } from '../../application/dtos/incentive.dto.js';
 
 /**
@@ -46,7 +48,7 @@ export class IncentiveDomainService {
   /**
    * 创建问卷完成激励
    */
-  async createQuestionnaireIncentive(
+  public async createQuestionnaireIncentive(
     ip: string,
     questionnaireId: string,
     qualityScore: number,
@@ -122,7 +124,7 @@ export class IncentiveDomainService {
   /**
    * 创建推荐激励
    */
-  async createReferralIncentive(
+  public async createReferralIncentive(
     referrerIP: string,
     referredIP: string,
     contactInfo: ContactInfo,
@@ -199,7 +201,7 @@ export class IncentiveDomainService {
   /**
    * 验证激励资格
    */
-  async validateIncentive(
+  public async validateIncentive(
     incentiveId: string,
   ): Promise<IncentiveValidationResult> {
     try {
@@ -250,7 +252,7 @@ export class IncentiveDomainService {
   /**
    * 批准激励处理
    */
-  async approveIncentive(
+  public async approveIncentive(
     incentiveId: string,
     reason: string,
   ): Promise<IncentiveApprovalResult> {
@@ -300,7 +302,7 @@ export class IncentiveDomainService {
   /**
    * 拒绝激励
    */
-  async rejectIncentive(
+  public async rejectIncentive(
     incentiveId: string,
     reason: string,
   ): Promise<IncentiveRejectionResult> {
@@ -349,7 +351,7 @@ export class IncentiveDomainService {
   /**
    * 执行单笔支付
    */
-  async processPayment(
+  public async processPayment(
     incentiveId: string,
     paymentMethod: PaymentMethod,
     contactInfo?: ContactInfo,
@@ -417,8 +419,8 @@ export class IncentiveDomainService {
         return PaymentProcessingResult.success({
           incentiveId,
           transactionId: gatewayResult.transactionId,
-          amount: paymentResult.amount!,
-          currency: paymentResult.currency!,
+          amount: paymentResult.amount ?? 0,
+          currency: paymentResult.currency ?? Currency.CNY,
           paymentMethod,
           status: incentive.getStatus(),
         });
@@ -429,7 +431,7 @@ export class IncentiveDomainService {
           paymentMethod,
         });
 
-        return PaymentProcessingResult.failed([paymentResult.error!]);
+        return PaymentProcessingResult.failed([paymentResult.error ?? 'Unknown payment error']);
       }
     } catch (error) {
       const errorMessage =
@@ -449,7 +451,7 @@ export class IncentiveDomainService {
   /**
    * 批量支付处理
    */
-  async processBatchPayment(
+  public async processBatchPayment(
     incentiveIds: string[],
     paymentMethod: PaymentMethod,
   ): Promise<BatchPaymentResult> {
@@ -513,16 +515,16 @@ export class IncentiveDomainService {
               incentiveId: incentive.getId().getValue(),
               success: true,
               transactionId: gatewayResult.transactionId,
-              amount: paymentResult.amount!,
+              amount: paymentResult.amount ?? 0,
             });
 
             successCount++;
-            totalPaidAmount += paymentResult.amount!;
+            totalPaidAmount += paymentResult.amount ?? 0;
           } else {
             results.push({
               incentiveId: incentive.getId().getValue(),
               success: false,
-              error: paymentResult.error!,
+              error: paymentResult.error ?? 'Unknown error',
             });
           }
         } catch (paymentError) {
@@ -571,7 +573,7 @@ export class IncentiveDomainService {
   /**
    * 获取激励统计信息
    */
-  async getIncentiveStatistics(
+  public async getIncentiveStatistics(
     ip?: string,
     timeRange?: { startDate: Date; endDate: Date },
   ): Promise<IncentiveStatsResult> {
@@ -609,7 +611,7 @@ export class IncentiveDomainService {
   /**
    * 获取待处理激励列表（按优先级排序）
    */
-  async getPendingIncentives(
+  public async getPendingIncentives(
     status?: IncentiveStatus,
     limit = 50,
   ): Promise<PendingIncentivesResult> {
@@ -641,7 +643,15 @@ export class IncentiveDomainService {
     }
   }
 
-  private buildRecipientInfo(contactInfo: ContactInfo) {
+  private buildRecipientInfo(contactInfo: ContactInfo): {
+    name: string;
+    email: string | undefined;
+    phone: string | undefined;
+    address: undefined;
+    accountNumber: string | undefined;
+    bankCode: undefined;
+    metadata: { wechat: string | undefined; alipay: string | undefined };
+  } {
     return {
       name: contactInfo.email ?? contactInfo.phone ?? 'Incentive Recipient',
       email: contactInfo.email,

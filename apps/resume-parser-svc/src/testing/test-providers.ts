@@ -1,4 +1,4 @@
-import { Provider } from '@nestjs/common';
+import type { Provider } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
 import { Resume } from '../schemas/resume.schema';
 
@@ -9,7 +9,8 @@ export class TestProviders {
   /**
    * Get mock Mongoose model provider
    */
-  static getMockMongooseModel(modelName: string): Provider {
+  public static getMockMongooseModel(modelName: string): Provider {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mockModel: any = jest.fn().mockImplementation((data) => ({
       ...data,
       _id: '507f1f77bcf86cd799439011',
@@ -69,14 +70,14 @@ export class TestProviders {
   /**
    * Get mock Resume model
    */
-  static getMockResumeModel(): Provider {
+  public static getMockResumeModel(): Provider {
     return this.getMockMongooseModel(Resume.name);
   }
 
   /**
    * Get mock GridFS connection
    */
-  static getMockGridFsConnection(): Provider {
+  public static getMockGridFsConnection(): Provider {
     const mockGridFSBucket = {
       openDownloadStream: jest.fn().mockImplementation(() => ({
         on: jest.fn(),
@@ -119,7 +120,7 @@ export class TestProviders {
   /**
    * Get mock NATS client
    */
-  static getMockNatsClient(): Provider {
+  public static getMockNatsClient(): Provider {
     return {
       provide: 'ResumeParserNatsService',
       useValue: {
@@ -154,7 +155,7 @@ export class TestProviders {
   /**
    * Get mock Vision LLM service
    */
-  static getMockVisionLlmService(): Provider {
+  public static getMockVisionLlmService(): Provider {
     return {
       provide: 'VisionLlmService',
       useValue: {
@@ -190,7 +191,7 @@ export class TestProviders {
   /**
    * Get mock Field Mapper service
    */
-  static getMockFieldMapperService(): Provider {
+  public static getMockFieldMapperService(): Provider {
     return {
       provide: 'FieldMapperService',
       useValue: {
@@ -234,7 +235,7 @@ export class TestProviders {
   /**
    * Get mock GridFS service
    */
-  static getMockGridFsService(): Provider {
+  public static getMockGridFsService(): Provider {
     return {
       provide: 'GridFsService',
       useValue: {
@@ -265,7 +266,7 @@ export class TestProviders {
   /**
    * Get all common mock providers
    */
-  static getAllMockProviders(): Provider[] {
+  public static getAllMockProviders(): Provider[] {
     return [
       this.getMockResumeModel(),
       this.getMockGridFsConnection(),

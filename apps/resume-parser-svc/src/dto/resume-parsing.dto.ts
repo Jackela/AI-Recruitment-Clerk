@@ -14,7 +14,7 @@ export interface VisionLlmRequest {
  * Defines the shape of the vision llm response.
  */
 export interface VisionLlmResponse {
-  extractedData: any; // Raw LLM output
+  extractedData: Record<string, unknown>; // Raw LLM output
   confidence: number;
   processingTimeMs: number;
 }
@@ -30,11 +30,13 @@ export interface GridFsFileInfo {
   uploadDate: Date;
 }
 
+import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
+
 /**
  * Defines the shape of the field mapping result.
  */
 export interface FieldMappingResult {
-  resumeDto: any; // Normalized ResumeDTO
+  resumeDto: ResumeDTO;
   validationErrors: string[];
   mappingConfidence: number;
 }

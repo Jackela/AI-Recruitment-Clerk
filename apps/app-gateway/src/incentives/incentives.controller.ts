@@ -11,9 +11,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { IncentivesService } from './incentives.service';
-import { CreateQuestionnaireIncentiveDto } from './dto/create-questionnaire-incentive.dto';
-import { ApproveIncentiveDto } from './dto/approve-incentive.dto';
+import type { IncentivesService } from './incentives.service';
+import type { CreateQuestionnaireIncentiveDto } from './dto/create-questionnaire-incentive.dto';
+import type { ApproveIncentiveDto } from './dto/approve-incentive.dto';
 
 /**
  * Exposes endpoints for incentives.
@@ -30,7 +30,7 @@ export class IncentivesController {
   @UseGuards(JwtAuthGuard)
   @Post('questionnaire')
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() body: CreateQuestionnaireIncentiveDto) {
+  public create(@Body() body: CreateQuestionnaireIncentiveDto): { incentiveId: string; rewardAmount: number; currency: string; status: string; canBePaid: boolean; createdAt: string } {
     const result = this.incentivesService.createQuestionnaireIncentive(body);
     return {
       incentiveId: result.incentiveId,
@@ -50,7 +50,7 @@ export class IncentivesController {
   @UseGuards(JwtAuthGuard)
   @Post(':id/validate')
   @HttpCode(HttpStatus.OK)
-  validate(@Param('id') id: string) {
+  public validate(@Param('id') id: string): { isValid: boolean } {
     return { isValid: this.incentivesService.validateIncentive(id) };
   }
 
@@ -63,7 +63,7 @@ export class IncentivesController {
   @UseGuards(JwtAuthGuard)
   @Put(':id/approve')
   @HttpCode(HttpStatus.OK)
-  approve(@Param('id') id: string, @Body() body: ApproveIncentiveDto) {
+  public approve(@Param('id') id: string, @Body() body: ApproveIncentiveDto): { approvalStatus: string; approvedAt: string } {
     return this.incentivesService.approveIncentive(id, body);
   }
 
@@ -75,7 +75,7 @@ export class IncentivesController {
   @UseGuards(JwtAuthGuard)
   @Get('stats/overview')
   @HttpCode(HttpStatus.OK)
-  stats(@Query('timeRange') _timeRange?: string) {
+  public stats(@Query('timeRange') _timeRange?: string): { overview: { totalRewards: number; totalIncentives: number; approved: number; pending: number } } {
     const overview = this.incentivesService.getOverviewStats();
     return { overview };
   }

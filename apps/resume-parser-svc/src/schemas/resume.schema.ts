@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import type { Document } from 'mongoose';
 
 export type ResumeDocument = Resume & Document;
 
@@ -9,13 +9,13 @@ export type ResumeDocument = Resume & Document;
 @Schema()
 export class ContactInfo {
   @Prop({ type: String, default: null })
-  name!: string | null;
+  public name!: string | null;
 
   @Prop({ type: String, default: null, match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ })
-  email!: string | null;
+  public email!: string | null;
 
   @Prop({ type: String, default: null })
-  phone!: string | null;
+  public phone!: string | null;
 }
 
 /**
@@ -24,19 +24,19 @@ export class ContactInfo {
 @Schema()
 export class WorkExperience {
   @Prop({ required: true })
-  company!: string;
+  public company!: string;
 
   @Prop({ required: true })
-  position!: string;
+  public position!: string;
 
   @Prop({ required: true })
-  startDate!: string;
+  public startDate!: string;
 
   @Prop({ required: true })
-  endDate!: string;
+  public endDate!: string;
 
   @Prop({ required: true })
-  summary!: string;
+  public summary!: string;
 }
 
 /**
@@ -45,13 +45,13 @@ export class WorkExperience {
 @Schema()
 export class Education {
   @Prop({ required: true })
-  school!: string;
+  public school!: string;
 
   @Prop({ required: true })
-  degree!: string;
+  public degree!: string;
 
   @Prop({ type: String, default: null })
-  major!: string | null;
+  public major!: string | null;
 }
 
 /**
@@ -63,39 +63,39 @@ export class Education {
 })
 export class Resume {
   @Prop({ type: ContactInfo, required: true })
-  contactInfo!: ContactInfo;
+  public contactInfo!: ContactInfo;
 
   @Prop({ type: [String], default: [] })
-  skills!: string[];
+  public skills!: string[];
 
   @Prop({ type: [WorkExperience], default: [] })
-  workExperience!: WorkExperience[];
+  public workExperience!: WorkExperience[];
 
   @Prop({ type: [Education], default: [] })
-  education!: Education[];
+  public education!: Education[];
 
   // Additional metadata fields for tracking
   @Prop({ required: true })
-  originalFilename!: string;
+  public originalFilename!: string;
 
   @Prop({ required: true })
-  gridFsUrl!: string;
+  public gridFsUrl!: string;
 
   @Prop({ type: Number, min: 0, max: 1, default: 0 })
-  processingConfidence!: number;
+  public processingConfidence!: number;
 
   @Prop({ type: [String], default: [] })
-  validationErrors!: string[];
+  public validationErrors!: string[];
 
   @Prop({
     type: String,
     enum: ['pending', 'processing', 'completed', 'failed'],
     default: 'pending',
   })
-  status!: string;
+  public status!: string;
 
   @Prop({ type: Date, default: Date.now })
-  processedAt!: Date;
+  public processedAt!: Date;
 }
 
 export const ResumeSchema = SchemaFactory.createForClass(Resume);

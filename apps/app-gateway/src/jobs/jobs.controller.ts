@@ -20,21 +20,23 @@ import {
   
   
 } from '@nestjs/swagger';
-import { JobsService } from './jobs.service';
-import { CreateJobDto } from './dto/create-job.dto';
-import { ResumeUploadResponseDto } from './dto/resume-upload.dto';
+import type { JobsService } from './jobs.service';
+import type { CreateJobDto } from './dto/create-job.dto';
+import type { ResumeUploadResponseDto } from './dto/resume-upload.dto';
 import { FileValidationPipe } from './pipes/file-validation.pipe';
-import { JobParamsDto } from './dto/job-params.dto';
-import { MulterFile } from './types/multer.types';
-import { JobListDto, JobDetailDto } from './dto/job-response.dto';
-import { ResumeListItemDto, ResumeDetailDto } from './dto/resume-response.dto';
-import { AnalysisReportDto, ReportsListDto } from './dto/report-response.dto';
+import type { JobParamsDto } from './dto/job-params.dto';
+import type { MulterFile } from './types/multer.types';
+import type { JobListDto} from './dto/job-response.dto';
+import { JobDetailDto } from './dto/job-response.dto';
+import type { ResumeListItemDto, ResumeDetailDto } from './dto/resume-response.dto';
+import type { AnalysisReportDto, ReportsListDto } from './dto/report-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
+import type {
+  UserDto} from '@ai-recruitment-clerk/user-management-domain';
 import {
-  Permission,
-  UserDto,
+  Permission
 } from '@ai-recruitment-clerk/user-management-domain';
 
 interface AuthenticatedRequest extends Request {
@@ -76,7 +78,7 @@ export class JobsController {
   @Permissions(Permission.CREATE_JOB)
   @Post('jobs')
   @HttpCode(HttpStatus.ACCEPTED)
-  createJob(@Request() req: AuthenticatedRequest, @Body() dto: CreateJobDto) {
+  public createJob(@Request() req: AuthenticatedRequest, @Body() dto: CreateJobDto): Promise<{ jobId: string }> {
     return this.jobsService.createJob(dto, req.user);
   }
 
@@ -91,7 +93,7 @@ export class JobsController {
   @Post('jobs/:jobId/resumes')
   @HttpCode(HttpStatus.ACCEPTED)
   @UseInterceptors(FilesInterceptor('resumes', 10)) // Max 10 files
-  uploadResumes(
+  public uploadResumes(
     @Request() req: AuthenticatedRequest,
     @Param() params: JobParamsDto,
     @UploadedFiles(new FileValidationPipe()) files: MulterFile[],
@@ -107,7 +109,7 @@ export class JobsController {
    */
   @Permissions(Permission.READ_JOB)
   @Get('jobs')
-  getAllJobs(@Request() _req: AuthenticatedRequest): Promise<JobListDto[]> {
+  public getAllJobs(@Request() _req: AuthenticatedRequest): Promise<JobListDto[]> {
     return this.jobsService.getAllJobs();
   }
 
@@ -119,7 +121,7 @@ export class JobsController {
    */
   @Permissions(Permission.READ_JOB)
   @Get('jobs/:jobId')
-  getJobById(
+  public getJobById(
     @Request() _req: AuthenticatedRequest,
     @Param('jobId') jobId: string,
   ): Promise<JobDetailDto> {
@@ -134,7 +136,7 @@ export class JobsController {
    */
   @Permissions(Permission.READ_RESUME)
   @Get('jobs/:jobId/resumes')
-  getResumesByJobId(
+  public getResumesByJobId(
     @Request() _req: AuthenticatedRequest,
     @Param('jobId') jobId: string,
   ): Promise<ResumeListItemDto[]> {
@@ -149,7 +151,7 @@ export class JobsController {
    */
   @Permissions(Permission.GENERATE_REPORT)
   @Get('jobs/:jobId/reports')
-  getReportsByJobId(
+  public getReportsByJobId(
     @Request() _req: AuthenticatedRequest,
     @Param('jobId') jobId: string,
   ): Promise<ReportsListDto> {
@@ -164,7 +166,7 @@ export class JobsController {
    */
   @Permissions(Permission.READ_RESUME)
   @Get('resumes/:resumeId')
-  getResumeById(
+  public getResumeById(
     @Request() _req: AuthenticatedRequest,
     @Param('resumeId') resumeId: string,
   ): Promise<ResumeDetailDto> {
@@ -179,7 +181,7 @@ export class JobsController {
    */
   @Permissions(Permission.READ_ANALYSIS)
   @Get('reports/:reportId')
-  getReportById(
+  public getReportById(
     @Request() _req: AuthenticatedRequest,
     @Param('reportId') reportId: string,
   ): Promise<AnalysisReportDto> {

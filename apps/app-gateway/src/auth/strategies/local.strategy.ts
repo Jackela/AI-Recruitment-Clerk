@@ -2,8 +2,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 // Avoid extending PassportStrategy mixin to prevent CJS transpile issues
 // import { PassportStrategy } from '@nestjs/passport';
 // import { Strategy } from 'passport-local';
-import { AuthService } from '../auth.service';
-import { UserDto } from '@ai-recruitment-clerk/user-management-domain';
+import type { AuthService } from '../auth.service';
+import type { UserDto } from '@ai-recruitment-clerk/user-management-domain';
 
 /**
  * Represents the local strategy.
@@ -22,7 +22,7 @@ export class LocalStrategy {
    * @param password - The password.
    * @returns A promise that resolves to UserDto.
    */
-  async validate(email: string, password: string): Promise<UserDto> {
+  public async validate(email: string, password: string): Promise<UserDto> {
     const user = await this.authService.validateUser(email, password);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');

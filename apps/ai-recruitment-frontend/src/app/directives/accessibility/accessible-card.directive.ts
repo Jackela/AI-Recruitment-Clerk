@@ -1,9 +1,10 @@
+import type {
+  OnInit,
+  OnDestroy} from '@angular/core';
 import {
   Directive,
   ElementRef,
   Input,
-  OnInit,
-  OnDestroy,
   inject,
 } from '@angular/core';
 import { AccessibilityService } from '../../services/accessibility/accessibility.service';
@@ -19,21 +20,21 @@ export class AccessibleCardDirective implements OnInit, OnDestroy {
   private elementRef = inject(ElementRef);
   private accessibilityService = inject(AccessibilityService);
 
-  @Input() cardTitle?: string;
-  @Input() cardDescription?: string;
-  @Input() cardValue?: string | number;
-  @Input() cardType?: string;
-  @Input() cardState?: string;
-  @Input() cardClickable = false;
-  @Input() cardShortcuts?: string[];
-  @Input() cardInstructions?: string;
+  @Input() public cardTitle?: string;
+  @Input() public cardDescription?: string;
+  @Input() public cardValue?: string | number;
+  @Input() public cardType?: string;
+  @Input() public cardState?: string;
+  @Input() public cardClickable = false;
+  @Input() public cardShortcuts?: string[];
+  @Input() public cardInstructions?: string;
 
   private element!: HTMLElement;
 
   /**
    * Performs the ng on init operation.
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.element = this.elementRef.nativeElement;
     this.setupAccessibility();
   }
@@ -41,8 +42,9 @@ export class AccessibleCardDirective implements OnInit, OnDestroy {
   /**
    * Performs the ng on destroy operation.
    */
-  ngOnDestroy(): void {
-    // Cleanup any event listeners if needed
+  // eslint-disable-next-line @angular-eslint/no-empty-lifecycle-method
+  public ngOnDestroy(): void {
+    // Cleanup happens automatically via framework
   }
 
   private setupAccessibility(): void {
