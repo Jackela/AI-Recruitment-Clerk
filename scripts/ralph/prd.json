@@ -50,7 +50,7 @@
       "title": "Fix e2e hydration.ts Playwright issues",
       "description": "Fix Playwright no-wait-for-selector in test-utils/hydration.ts",
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Replace page.waitForSelector() with locator-based waiting",
         "Use page.locator().waitFor() instead"

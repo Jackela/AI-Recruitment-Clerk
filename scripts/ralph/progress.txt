@@ -59,3 +59,13 @@ Started: 2026-02-03
   - Rename local variables that shadow function names (e.g., `delay` variable → `retryDelay`)
 ---
 
+## 2026-02-03 - US-004
+- What was implemented: Fixed Playwright no-wait-for-selector lint issues in test-utils/hydration.ts
+- Files changed:
+  - hydration.ts: Replaced 3 instances of `page.waitForSelector()` with `page.locator().waitFor()` pattern
+- **Learnings for future iterations:**
+  - Replace `page.waitForSelector(selector, options)` with `page.locator(selector).waitFor(options)`
+  - The options like `{ state: 'attached', timeout: 15000 }` work the same way with `.waitFor()`
+  - This pattern also works in Promise.all() with map() for multiple selectors
+---
+
