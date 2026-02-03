@@ -412,8 +412,8 @@
         "npm run typecheck passes"
       ],
       "priority": 27,
-      "passes": false,
-      "notes": "Focus on validations that are used in multiple places. Domain-specific validations stay in domain services."
+      "passes": true,
+      "notes": "Created validation utilities in libs/infrastructure-shared/src/utilities/validation.util.ts (following same pattern as error-handler.util.ts from US-026). Implemented EmailValidator (RFC 5321 compliant with domain restrictions), PhoneValidator (CN/US/INTL formats), IdValidator (UUID/MONGO_ID/NUMERIC/ALPHANUMERIC/CUSTOM), SchemaValidator (object schema with nested support), and generic Validator helpers. Added CLAUDE.md documentation. Quality gates pass: typecheck, lint (25 projects)."
     },
     {
       "id": "US-028",

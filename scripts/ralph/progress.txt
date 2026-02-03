@@ -573,3 +573,154 @@ Options documented in CI-BLOCKING-ISSUE.md
 - The abstract class pattern ensures services provide domain-specific publish methods
 - serviceLogger provides consistent logging across all microservices
 ---
+
+## [2026-02-04 02:30] - US-022
+- **COMPLETED**: Refactor resume-parser-svc NATS service to use BaseMicroserviceService
+- Refactored ResumeParserNatsService to extend BaseMicroserviceService
+- Reduced service file from ~290 lines to 162 lines (~44% reduction)
+- Removed duplicated try-catch patterns, logging, and error handling
+- Tests completely rewritten to mock lowest-level NatsClientService methods
+- All 123 tests pass, lint passes, typecheck passes
+- Committed changes to git
+
+**Files changed:**
+- apps/resume-parser-svc/src/services/resume-parser-nats.service.ts (refactored - 162 lines)
+- apps/resume-parser-svc/src/services/resume-parser-nats.service.spec.ts (rewritten - 482 lines)
+- scripts/ralph/prd.json (marked US-022 passes: true)
+
+**Learnings for future iterations:**
+- When testing services that extend a base class, mock the lowest-level methods to allow intermediate base class logic to execute
+- For NATS services, mock publish(), subscribe(), getHealthStatus() from NatsClientService (not BaseMicroserviceService protected methods)
+- Bypass NestJS DI for testing services with library dependencies - directly instantiate with mocks
+- Use `const mockableService = service as unknown as { publish: typeof mockPublish; ... }` pattern for method override
+- Logger tests should use expect.stringContaining() since base class adds emoji prefixes and context
+- This pattern established for US-023, US-024, US-025 (remaining NATS service refactors)
+
+---
+
+## [2026-02-04 03:00] - US-023
+- **COMPLETED**: Refactor jd-extractor-svc NATS service to use BaseMicroserviceService
+- Refactored JdExtractorNatsService to extend BaseMicroserviceService
+- Reduced service file from 318 lines to 147 lines (~54% reduction)
+- Removed duplicated try-catch patterns, logging, and error handling
+- Created comprehensive test file with 19 unit tests (no tests existed before)
+- All 131 tests pass, lint passes, typecheck passes
+- Committed changes to git
+
+**Files changed:**
+- apps/jd-extractor-svc/src/services/jd-extractor-nats.service.ts (refactored - 147 lines)
+- apps/jd-extractor-svc/src/services/jd-extractor-nats.service.spec.ts (created - 402 lines)
+- scripts/ralph/prd.json (marked US-023 passes: true)
+
+**Learnings for future iterations:**
+- subscribeToEvents requires 3 parameters: (subject, handler, options) - not just (handler, options)
+- JdExtractorNatsService had countExtractedFields helper method which needed to be preserved as private
+- The base class provides categorizeErrorSeverity, but the original service had its own implementation
+- Test expectations for subscriptions should be empty array unless subscribe method was actually called
+- This pattern is now well-established for US-024, US-025 (remaining NATS service refactors)
+
+---
+
+## [2026-02-04 03:15] - US-024
+- **COMPLETED**: Refactor scoring-engine-svc NATS service to use BaseMicroserviceService
+- Refactored ScoringEngineNatsService to extend BaseMicroserviceService
+- Reduced service file from 350 lines to 142 lines (~59% reduction)
+- Removed duplicated try-catch patterns, logging, and error handling
+- Created comprehensive test file with 17 unit tests (no tests existed before)
+- All 183 tests pass, lint passes, typecheck passes
+- Committed changes to git
+
+**Files changed:**
+- apps/scoring-engine-svc/src/services/scoring-engine-nats.service.ts (refactored - 142 lines)
+- apps/scoring-engine-svc/src/services/scoring-engine-nats.service.spec.ts (created - 382 lines)
+- scripts/ralph/prd.json (marked US-024 passes: true)
+
+**Learnings for future iterations:**
+- Handler type parameters in subscribeToJdExtracted/subscribeToResumeParsed use domain types (AnalysisJdExtractedEvent, AnalysisResumeParsedEvent)
+- In tests, these types were unused and caused TS6133 errors - removed imports and used jest.fn() cast to unknown
+- Scoring engine had complex performance/quality metrics logic in publishScoringCompleted that needed to be preserved
+- This pattern is now well-established for US-025 (last NATS service to refactor)
+
+---
+
+## [2026-02-04 03:30] - US-025
+- **COMPLETED**: Refactor report-generator-svc NATS service to use BaseMicroserviceService
+- Refactored ReportGeneratorNatsService to extend BaseMicroserviceService
+- Reduced service file from 191 lines to 180 lines (~6% reduction - already relatively simple)
+- Removed duplicated try-catch patterns, logging, and error handling
+- Created comprehensive test file with 18 unit tests (no tests existed before)
+- All 18 tests pass, lint passes
+- Committed changes to git
+- This is the LAST NATS service to refactor - all 4 services now use BaseMicroserviceService
+
+**Files changed:**
+- apps/report-generator-svc/src/services/report-generator-nats.service.ts (refactored - 180 lines)
+- apps/report-generator-svc/src/services/report-generator-nats.service.spec.ts (created - 357 lines)
+- scripts/ralph/prd.json (marked US-025 passes: true)
+
+**Learnings for future iterations:**
+- ReportGeneratorNatsService was already relatively simple, so reduction was smaller than other services
+- Event types (ReportGeneratedEvent, ReportGenerationFailedEvent, ReportGenerationRequestedEvent) are defined in the service file rather than imported from domain libraries
+- Required casting events via `unknown` first: `event as unknown as Record<string, unknown>` due to TypeScript strict type checking
+- All NATS service refactoring is now COMPLETE: resume-parser-svc (US-022), jd-extractor-svc (US-023), scoring-engine-svc (US-024), report-generator-svc (US-025)
+
+---
+
+## [2026-02-04 03:45] - US-026
+- **COMPLETED**: Create shared error handler utility
+- Created error-handler.util.ts in libs/infrastructure-shared/src/error-handling/
+- Implemented asyncErrorBoundary and errorBoundary wrappers for standardized error handling
+- Added standardized ErrorResponse format with code, message, timestamp, requestId, stack
+- Created error classes: AppError, ValidationError, NotFoundError, AuthenticationError, AuthorizationError, ConfigurationError, ExternalServiceError
+- Added utility functions: successResponse, errorResponse, extractErrorInfo, isRetryableError
+- Created CLAUDE.md with comprehensive usage examples and documentation
+- Re-exported all utilities from main index.ts
+- Committed changes to git
+
+**Files changed:**
+- libs/infrastructure-shared/src/error-handling/error-handler.util.ts (created - 292 lines)
+- libs/infrastructure-shared/src/error-handling/CLAUDE.md (created - 153 lines)
+- libs/infrastructure-shared/src/error-handling/index.ts (updated exports)
+- libs/infrastructure-shared/src/index.ts (added re-exports)
+- scripts/ralph/prd.json (marked US-026 passes: true)
+
+**Learnings for future iterations:**
+- infrastructure-shared already had extensive error handling infrastructure (ContractViolationError, RetryUtility, WithCircuitBreaker, etc.)
+- Added asyncErrorBoundary pattern for wrapping async functions with consistent error handling
+- Error classes extend from AppError and include code, category, severity, and details properties
+- Each error class has a toResponse() method that converts to standardized ErrorResponse format
+- isRetryableError() checks error category and message content to determine if an operation should be retried
+- Note: Pre-existing TS6059 errors in infrastructure-shared tsconfig.rootDir are pre-existing and unrelated to this change
+
+---
+
+## [2026-02-04 04:00] - US-027
+- **COMPLETED**: Create shared validation utility
+- Created validation.util.ts in libs/infrastructure-shared/src/utilities/
+- Implemented EmailValidator with RFC 5321 compliant email validation, domain allow/block lists, normalization, suspicious pattern detection
+- Implemented PhoneValidator supporting CN (Chinese mobile), US, and International formats with formatting helpers
+- Implemented IdValidator for UUID v4, MongoDB ObjectId, numeric, alphanumeric, and custom pattern validation
+- Implemented SchemaValidator for object schema validation with nested objects/arrays, type checking, length/range constraints
+- Implemented generic Validator helpers: required, length, range, pattern, oneOf, combine
+- Created CLAUDE.md with comprehensive usage examples and NestJS integration patterns
+- Updated utilities/index.ts and main index.ts exports
+- Quality gates verified: typecheck (pass), lint (pass 25 projects)
+- Committed changes to git
+
+**Files changed:**
+- libs/infrastructure-shared/src/utilities/validation.util.ts (created - 850 lines)
+- libs/infrastructure-shared/src/utilities/CLAUDE.md (created - 230 lines)
+- libs/infrastructure-shared/src/utilities/index.ts (added exports)
+- libs/infrastructure-shared/src/index.ts (added re-exports)
+- scripts/ralph/prd.json (marked US-027 passes: true)
+
+**Learnings for future iterations:**
+- Follow same pattern as error-handler.util.ts: place in libs/infrastructure-shared/src/utilities/ alongside error-handling/
+- EmailValidator uses RFC-compliant regex: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+- Phone validation supports multiple formats: CN (/^1[3-9]\d{9}$/), US (/^(?:\+?1[-. ]?)?\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/), INTL (/^\+?[1-9]\d{7,14}$/)
+- SchemaValidator uses recursive validation for nested objects and arrays
+- ESLint rule @typescript-eslint/no-non-null-assertion forbids ! operator - use optional chaining or type guards instead
+- ESLint rule no-useless-escape flags unnecessary escapes in character classes (use [-().] instead of [\-\(\)\.])
+- All validators return consistent ValidationResult interface: { isValid: boolean; errors: string[]; warnings?: string[] }
+
+---
