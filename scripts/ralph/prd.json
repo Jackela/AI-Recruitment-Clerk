@@ -38,7 +38,7 @@
       "title": "Fix e2e connection-stability.ts Playwright issues",
       "description": "Fix Playwright no-wait-for-timeout in connection-stability.ts",
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Replace page.waitForTimeout() with proper waiting strategies",
         "Use expect().toBeVisible() or page.waitForLoadState() instead"
