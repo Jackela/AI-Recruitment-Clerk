@@ -6,10 +6,12 @@ import {
   Input,
   Output,
   EventEmitter,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import {
   MobileResultsDisplayComponent,
   type CandidateResult,
@@ -18,12 +20,16 @@ import {
   MobileResultsFilterComponent,
   type ResultsFilter,
 } from './mobile-results-filter.component';
+import {
+  MobileResultsService,
+  type MatchSummary,
+} from '../../services/mobile/mobile-results.service';
 
 /**
  * Represents the mobile results component.
- * Manages sorting, bulk selection, and coordination for candidate results.
- * Display is delegated to MobileResultsDisplayComponent.
- * Filtering is delegated to MobileResultsFilterComponent.
+ * Thin orchestrator that coordinates UI interactions and delegates business logic
+ * to MobileResultsService. Display is delegated to MobileResultsDisplayComponent.
+ * Filtering UI is delegated to MobileResultsFilterComponent.
  */
 @Component({
   selector: 'arc-mobile-results',
@@ -121,8 +127,8 @@ import {
           <span class="results-count"
             >{{ filteredResults.length }} candidates</span
           >
-          <span class="match-summary" *ngIf="getMatchSummary()">{{
-            getMatchSummary()
+          <span class="match-summary" *ngIf="matchSummary.text">{{
+            matchSummary.text
           }}</span>
         </div>
         <div class="quick-actions">
@@ -329,9 +335,14 @@ import {
   ],
 })
 export class MobileResultsComponent implements OnInit, OnDestroy {
+  private readonly resultsService = inject(MobileResultsService);
+  private readonly destroy$ = new Subject<void>();
+
   @Input() public title = 'Candidates';
   @Input() public subtitle = '';
-  @Input() public candidates: CandidateResult[] = [];
+  @Input() public set candidates(value: CandidateResult[]) {
+    this.resultsService.setCandidates(value);
+  }
   @Input() public isLoading = false;
 
   @Output() public candidateSelected = new EventEmitter<CandidateResult>();
@@ -345,41 +356,47 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
   }>();
   @Output() public filtersChanged = new EventEmitter<ResultsFilter>();
 
-  private destroy$ = new Subject<void>();
-
-  // View state
+  // View state (UI-only, managed by component)
   public viewMode: 'card' | 'detailed' = 'card';
   public showFilters = false;
   public showSort = false;
 
-  // Selection
-  public selectedCandidates: CandidateResult[] = [];
+  // Exposed service state for template binding
+  public filters: ResultsFilter = this.resultsService.getDefaultFilters();
+  public currentSort = this.resultsService.getCurrentSort();
+  public readonly sortOptions = this.resultsService.sortOptions;
 
-  // Filters and sorting
-  public filters: ResultsFilter = {
-    score: { min: 0, max: 100 },
-    experience: [],
-    skills: [],
-    location: [],
-    status: [],
-  };
-
-  public currentSort = 'score-desc';
+  // Computed state from service
   public filteredResults: CandidateResult[] = [];
-
-  public sortOptions = [
-    { label: 'Score (High to Low)', value: 'score-desc' },
-    { label: 'Score (Low to High)', value: 'score-asc' },
-    { label: 'Name (A to Z)', value: 'name-asc' },
-    { label: 'Name (Z to A)', value: 'name-desc' },
-    { label: 'Recently Updated', value: 'updated-desc' },
-  ];
+  public selectedCandidates: CandidateResult[] = [];
+  public activeFiltersCount = 0;
+  public matchSummary: MatchSummary = {
+    excellent: 0,
+    good: 0,
+    total: 0,
+    text: '',
+  };
 
   /**
    * Performs the ng on init operation.
    */
   public ngOnInit(): void {
-    this.applyFilters();
+    // Subscribe to service state changes
+    this.resultsService.state$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((state) => {
+        this.filteredResults = state.filtered;
+        this.selectedCandidates = state.selected;
+        this.activeFiltersCount = state.activeFiltersCount;
+        this.matchSummary = state.matchSummary;
+      });
+
+    // Subscribe to filter changes to keep local copy for template
+    this.resultsService.filters$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((filters) => {
+        this.filters = filters;
+      });
   }
 
   /**
@@ -390,20 +407,7 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  /**
-   * Performs the active filters count operation.
-   */
-  public get activeFiltersCount(): number {
-    let count = 0;
-    if (this.filters.score.min > 0) count++;
-    count += this.filters.status.length;
-    count += this.filters.experience.length;
-    count += this.filters.skills.length;
-    count += this.filters.location.length;
-    return count;
-  }
-
-  // UI state management
+  // UI state management (component-only)
   /**
    * Performs the toggle filters operation.
    */
@@ -427,117 +431,40 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
     this.viewMode = this.viewMode === 'card' ? 'detailed' : 'card';
   }
 
-  // Filter handling
+  // Filter handling (delegates to service)
   /**
    * Performs the on filters changed operation.
    * @param updatedFilters - The updated filters.
    */
   public onFiltersChanged(updatedFilters: ResultsFilter): void {
-    this.filters = updatedFilters;
-    this.applyFilters();
-    this.filtersChanged.emit(this.filters);
+    this.resultsService.setFilters(updatedFilters);
+    this.filtersChanged.emit(updatedFilters);
   }
 
   /**
    * Performs the on clear filters operation.
    */
   public onClearFilters(): void {
-    // Filters are already reset by the filter component
-    this.applyFilters();
+    const defaultFilters = this.resultsService.getDefaultFilters();
+    this.resultsService.setFilters(defaultFilters);
   }
 
   /**
-   * Sets sort option.
+   * Sets sort option via service.
    * @param sortValue - The sort value.
    */
   public setSortOption(sortValue: string): void {
+    this.resultsService.setSortOption(sortValue);
     this.currentSort = sortValue;
     this.showSort = false;
-    this.applySorting();
   }
 
-  private applyFilters(): void {
-    let filtered = [...this.candidates];
-
-    // Apply score filter
-    if (this.filters.score.min > 0) {
-      filtered = filtered.filter((c) => c.score >= this.filters.score.min);
-    }
-
-    // Apply status filter
-    if (this.filters.status.length > 0) {
-      filtered = filtered.filter((c) => this.filters.status.includes(c.status));
-    }
-
-    // Apply experience filter
-    if (this.filters.experience.length > 0) {
-      filtered = filtered.filter((c) =>
-        this.filters.experience.some((exp) => c.experience.includes(exp)),
-      );
-    }
-
-    this.filteredResults = filtered;
-    this.applySorting();
-  }
-
-  private applySorting(): void {
-    const [field, direction] = this.currentSort.split('-');
-
-    this.filteredResults.sort((a, b) => {
-      let comparison = 0;
-
-      switch (field) {
-        case 'score':
-          comparison = a.score - b.score;
-          break;
-        case 'name':
-          comparison = a.name.localeCompare(b.name);
-          break;
-        case 'updated':
-          comparison =
-            new Date(a.lastUpdated).getTime() -
-            new Date(b.lastUpdated).getTime();
-          break;
-      }
-
-      return direction === 'desc' ? -comparison : comparison;
-    });
-  }
-
-  /**
-   * Retrieves match summary.
-   */
-  public getMatchSummary(): string {
-    if (this.filteredResults.length === 0) return '';
-
-    const excellent = this.filteredResults.filter(
-      (c) => c.match === 'excellent',
-    ).length;
-    const good = this.filteredResults.filter((c) => c.match === 'good').length;
-
-    if (excellent > 0) {
-      return `${excellent} excellent matches`;
-    } else if (good > 0) {
-      return `${good} good matches`;
-    }
-
-    return 'See all matches';
-  }
-
-  // Selection methods
-  /**
-   * Performs the is selected operation.
-   * @param candidate - The candidate.
-   */
-  public isSelected(candidate: CandidateResult): boolean {
-    return this.selectedCandidates.some((c) => c.id === candidate.id);
-  }
-
+  // Selection methods (delegates to service)
   /**
    * Performs the select all operation.
    */
   public selectAll(): void {
-    this.selectedCandidates = [...this.filteredResults];
+    this.resultsService.selectAll();
   }
 
   /**
@@ -549,10 +476,10 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
       action,
       candidates: this.selectedCandidates,
     });
-    this.selectedCandidates = [];
+    this.resultsService.clearSelection();
   }
 
-  // Event handlers from display component
+  // Event handlers from display component (pass-through)
   /**
    * Performs the on candidate selected operation.
    * @param candidate - The candidate.
@@ -582,14 +509,6 @@ export class MobileResultsComponent implements OnInit, OnDestroy {
   }): void {
     const { candidate, event } = payload;
     event.stopPropagation();
-
-    const index = this.selectedCandidates.findIndex(
-      (c) => c.id === candidate.id,
-    );
-    if (index > -1) {
-      this.selectedCandidates.splice(index, 1);
-    } else {
-      this.selectedCandidates.push(candidate);
-    }
+    this.resultsService.toggleSelection(candidate);
   }
 }

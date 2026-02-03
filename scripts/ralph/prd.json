@@ -444,8 +444,8 @@
         "npm run test passes"
       ],
       "priority": 29,
-      "passes": false,
-      "notes": "After US-028. Filters are a separate concern and should be isolated."
+      "passes": true,
+      "notes": "Completed. Created mobile-results-filter.component.ts (240 lines) with score range slider, status chips, and experience chips. Parent component reduced from 818 to 595 lines (~27% reduction, 223 lines). Filter component handles all filter state and UI, emits changes via @Output events. Fixed export conflict in display component and type error in validation.util.ts as part of quality gates."
     },
     {
       "id": "US-030",
@@ -460,8 +460,8 @@
         "npm run test passes"
       ],
       "priority": 30,
-      "passes": false,
-      "notes": "After US-029. Business logic doesn't belong in components. Service should be testable independently."
+      "passes": true,
+      "notes": "Created MobileResultsService with BehaviorSubject-based state management. Component reduced from 595 to 514 lines (~81 line reduction). Service handles filtering, sorting, selection, and match summary calculation. Uses RxJS observables for reactive state. Component now thin orchestrator using inject() and takeUntil for cleanup."
     },
     {
       "id": "US-031",
