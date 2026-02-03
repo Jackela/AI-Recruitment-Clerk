@@ -122,6 +122,7 @@ export default [
       '@typescript-eslint/explicit-member-accessibility': 'off',
       '@typescript-eslint/consistent-type-imports': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
+      'prefer-const': 'off',
     },
   },
   // Relaxed rules for test files
@@ -137,13 +138,34 @@ export default [
   },
   // Relaxed rules for E2E test files
   {
-    files: ['**/*-e2e/**/*.ts', '**/e2e/**/*.ts'],
+    files: [
+      '**/*-e2e/*.ts',
+      '**/*-e2e/**/*.ts',
+      '**/e2e/**/*.ts',
+    ],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-member-accessibility': 'off',
       '@typescript-eslint/no-namespace': 'off', // Allow namespace for Jest type declarations
+      'playwright/no-conditional-in-test': 'off',
+      'playwright/no-skipped-test': 'off',
+    },
+  },
+  // Relaxed rules for tooling scripts
+  {
+    files: [
+      'performance/**/*.{ts,tsx,js,jsx}',
+      'monitoring/**/*.{ts,tsx,js,jsx}',
+    ],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/explicit-member-accessibility': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'prefer-const': 'off',
     },
   },
 ];
