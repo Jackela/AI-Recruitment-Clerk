@@ -1046,3 +1046,18 @@ export {
   ConfigurationError,
   ExternalServiceError,
 } from './error-handling';
+
+// Re-export validation utilities for convenience
+export {
+  EmailValidator,
+  PhoneValidator,
+  IdValidator,
+  SchemaValidator,
+  Validator,
+  type ValidationResult,
+  type ValidationOptions,
+  type EmailValidationOptions,
+  type PhoneValidationOptions,
+  type IdValidationOptions,
+  type SchemaDefinition,
+} from './utilities';
