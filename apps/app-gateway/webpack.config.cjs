@@ -1,10 +1,7 @@
-import { NxAppWebpackPlugin } from '@nx/webpack/app-plugin.js';
-import { join } from 'path';
-import { fileURLToPath } from 'url';
+const { NxAppWebpackPlugin } = require('@nx/webpack/app-plugin');
+const { join } = require('path');
 
-const __dirname = fileURLToPath(new URL('.', import.meta.url));
-
-export default {
+module.exports = {
   // Build the gateway as CommonJS to avoid `require` in ESM runtime errors
   experiments: {
     outputModule: false,
