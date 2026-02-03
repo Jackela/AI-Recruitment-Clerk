@@ -3,30 +3,25 @@ import type {
   OnDestroy} from '@angular/core';
 import {
   Component,
-  ViewChild,
-  ElementRef,
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import type {
   MobileNavItem} from './mobile-navigation.component';
 import {
   MobileNavigationComponent
 } from './mobile-navigation.component';
 import type {
-  SwipeAction,
   SwipeEvent} from './mobile-swipe.component';
 import {
   MobileSwipeComponent
 } from './mobile-swipe.component';
 import { TouchGestureService } from '../../services/mobile/touch-gesture.service';
-import type {
-  DashboardStat} from './dashboard-stats.component';
-import {
-  DashboardStatsComponent
-} from './dashboard-stats.component';
+import type { DashboardStat } from './dashboard-stats.component';
+import { DashboardStatsComponent } from './dashboard-stats.component';
 import type {
   DashboardChart,
   ChartDataPoint,
@@ -34,42 +29,31 @@ import type {
 import {
   DashboardChartsComponent
 } from './dashboard-charts.component';
+import type {
+  DashboardCard,
+  QuickAction,
+  ActivityItem,
+  FabAction,
+  DashboardState,
+} from '../../services/mobile/mobile-dashboard.service';
+import {
+  MobileDashboardService
+} from '../../services/mobile/mobile-dashboard.service';
 
 /**
- * Defines the shape of the dashboard card.
+ * Defines the shape of the swipe action (re-exported for template).
  */
-export interface DashboardCard {
-  id: string;
-  title: string;
-  subtitle?: string;
-  value: string | number;
-  change?: {
-    value: number;
-    type: 'increase' | 'decrease';
-    period: string;
-  };
-  icon: string;
-  color: 'primary' | 'success' | 'warning' | 'danger';
-  route?: string;
-  actions?: SwipeAction[];
-  priority: 'high' | 'medium' | 'low';
-  size: 'small' | 'medium' | 'large';
-}
-
-/**
- * Defines the shape of the quick action.
- */
-export interface QuickAction {
+export interface SwipeActionExport {
   id: string;
   label: string;
   icon: string;
-  route: string;
   color: 'primary' | 'success' | 'warning' | 'danger';
-  badge?: number;
+  width: number;
 }
 
 /**
  * Represents the mobile dashboard component.
+ * A thin orchestrator that delegates business logic to MobileDashboardService.
  */
 @Component({
   selector: 'arc-mobile-dashboard',
@@ -154,18 +138,13 @@ export interface QuickAction {
           >
             <div
               class="dashboard-card"
-              [class]="
-                'dashboard-card--' +
-                card.size +
-                ' dashboard-card--' +
-                card.color
-              "
+              [class]="'dashboard-card--' + card.size + ' dashboard-card--' + card.color"
               [class.interactive]="!!card.route"
               [routerLink]="card.route"
               (click)="onCardClick(card)"
-            (keydown.enter)="onCardClick(card)"
-            (keydown.space)="onCardClick(card)"
-            [attr.tabindex]="card.route ? 0 : null"
+              (keydown.enter)="onCardClick(card)"
+              (keydown.space)="onCardClick(card)"
+              [attr.tabindex]="card.route ? 0 : null"
             >
               <div class="card-header">
                 <div class="card-icon">
@@ -301,11 +280,10 @@ export interface QuickAction {
           pointer-events: none;
 
           .refresh-spinner {
-            animation-duration: 0.8s; // Slower, more pleasant animation
+            animation-duration: 0.8s;
           }
         }
 
-        // Enhanced mobile safe area support
         @supports (top: env(safe-area-inset-top)) {
           top: calc(56px + env(safe-area-inset-top));
         }
@@ -319,7 +297,6 @@ export interface QuickAction {
           animation: spin 1s linear infinite;
           will-change: transform;
 
-          // Respect reduced motion preferences
           @media (prefers-reduced-motion: reduce) {
             animation-duration: 2s;
           }
@@ -720,7 +697,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
   public pageTitle = 'Dashboard';
   public pageSubtitle = 'Recruitment insights at a glance';
 
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
 
   // Navigation
   public navItems: MobileNavItem[] = [
@@ -774,74 +751,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
     },
   ];
 
-  // Quick Actions
-  public quickActions: QuickAction[] = [
-    {
-      id: 'upload',
-      label: 'Upload Resume',
-      icon: 'M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2Z',
-      route: '/resume/upload',
-      color: 'primary',
-    },
-    {
-      id: 'create-job',
-      label: 'Create Job',
-      icon: 'M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z',
-      route: '/jobs/create',
-      color: 'success',
-    },
-    {
-      id: 'candidates',
-      label: 'Candidates',
-      icon: 'M16,4C18.11,4 19.8,5.69 19.8,7.8C19.8,9.91 18.11,11.6 16,11.6C13.89,11.6 12.2,9.91 12.2,7.8C12.2,5.69 13.89,4 16,4M16,13.4C18.39,13.4 22.2,14.6 22.2,17V19.2H9.8V17C9.8,14.6 13.61,13.4 16,13.4Z',
-      route: '/candidates',
-      color: 'warning',
-      badge: 12,
-    },
-    {
-      id: 'analytics',
-      label: 'Analytics',
-      icon: 'M22,21H2V3H4V19H6V17H10V19H12V16H16V19H18V17H22V21Z',
-      route: '/analytics',
-      color: 'danger',
-    },
-  ];
-
-  // Overview Stats
-  public overviewStats: DashboardStat[] = [
-    {
-      id: 'total-resumes',
-      title: 'Total Resumes',
-      value: 147,
-      icon: 'M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2Z',
-      color: 'primary',
-      change: { value: 12, type: 'increase', period: 'this week' },
-    },
-    {
-      id: 'active-jobs',
-      title: 'Active Jobs',
-      value: 8,
-      icon: 'M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22S19,14.25 19,9A7,7 0 0,0 12,2Z',
-      color: 'success',
-    },
-    {
-      id: 'pending-reviews',
-      title: 'Pending Reviews',
-      value: 23,
-      icon: 'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z',
-      color: 'warning',
-    },
-    {
-      id: 'hired-candidates',
-      title: 'Hired This Month',
-      value: 5,
-      icon: 'M12,2A2,2 0 0,1 14,4C14,4.74 13.6,5.39 13,5.73V7A7,7 0 0,1 20,14V16A1,1 0 0,0 21,17H22V19H2V17H3A1,1 0 0,0 4,16V14A7,7 0 0,1 11,7V5.73C10.4,5.39 10,4.74 10,4A2,2 0 0,1 12,2Z',
-      color: 'success',
-      change: { value: 25, type: 'increase', period: 'vs last month' },
-    },
-  ];
-
-  // Dashboard Charts
+  // Charts data (static for now)
   public dashboardCharts: DashboardChart[] = [
     {
       id: 'weekly-resumes',
@@ -887,146 +797,134 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
     },
   ];
 
-  // Dashboard Cards
-  public dashboardCards: DashboardCard[] = [
-    {
-      id: 'recent-uploads',
-      title: 'Recent Uploads',
-      subtitle: 'Latest resume submissions',
-      value: '12 new',
-      icon: 'M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2Z',
-      color: 'primary',
-      route: '/uploads/recent',
-      priority: 'high',
-      size: 'medium',
-      actions: [
-        {
-          id: 'view',
-          label: 'View',
-          icon: 'M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17Z',
-          color: 'primary',
-          width: 80,
-        },
-        {
-          id: 'process',
-          label: 'Process',
-          icon: 'M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z',
-          color: 'success',
-          width: 80,
-        },
-      ],
-    },
-    {
-      id: 'top-matches',
-      title: 'Top Matches',
-      subtitle: 'Candidates with highest scores',
-      value: '8 candidates',
-      icon: 'M16,4C18.11,4 19.8,5.69 19.8,7.8C19.8,9.91 18.11,11.6 16,11.6C13.89,11.6 12.2,9.91 12.2,7.8C12.2,5.69 13.89,4 16,4Z',
-      color: 'success',
-      route: '/matches/top',
-      priority: 'high',
-      size: 'medium',
-      actions: [
-        {
-          id: 'review',
-          label: 'Review',
-          icon: 'M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z',
-          color: 'primary',
-          width: 80,
-        },
-        {
-          id: 'shortlist',
-          label: 'Shortlist',
-          icon: 'M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z',
-          color: 'success',
-          width: 80,
-        },
-      ],
-    },
-  ];
-
-  // Recent Activity
-  public recentActivity = [
-    {
-      id: '1',
-      title: 'New resume uploaded',
-      subtitle: 'Senior Developer position',
-      timeAgo: '2 minutes ago',
-      type: 'success',
-      icon: 'M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2Z',
-    },
-    {
-      id: '2',
-      title: 'Analysis completed',
-      subtitle: 'Marketing Manager - 3 candidates',
-      timeAgo: '15 minutes ago',
-      type: 'info',
-      icon: 'M9,16.17L4.83,12L3.41,13.41L9,19L21,7L19.59,5.59L9,16.17Z',
-    },
-    {
-      id: '3',
-      title: 'Job posting expires soon',
-      subtitle: 'Frontend Developer - 2 days left',
-      timeAgo: '1 hour ago',
-      type: 'warning',
-      icon: 'M13,14H11V10H13M13,18H11V16H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z',
-    },
-  ];
-
-  // FAB Action
-  public fabAction = {
-    label: 'Upload Resume',
-    icon: 'M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z',
-  };
-
-  // Enhanced state management for pull-to-refresh
-  public isPullRefreshVisible = false;
+  // State from service
+  public overviewStats: DashboardStat[] = [];
+  public dashboardCards: DashboardCard[] = [];
+  public quickActions: QuickAction[] = [];
+  public recentActivity: ActivityItem[] = [];
+  public fabAction: FabAction = { label: '', icon: '' };
   public isRefreshing = false;
 
-  @ViewChild('dashboardContainer', { read: ElementRef })
-  public dashboardContainer!: ElementRef;
-  @ViewChild('quickActionsContainer', { read: ElementRef })
-  public quickActionsContainer!: ElementRef;
+  // Pull-to-refresh state
+  public isPullRefreshVisible = false;
 
   private readonly _touchGesture = inject(TouchGestureService);
+  private readonly _dashboardService = inject(MobileDashboardService);
 
   /**
    * Initializes a new instance of the Mobile Dashboard Component.
    */
   constructor() {
-    // TouchGesture service will be used for future gesture implementations
-    // Prevent unused warning
     void this._touchGesture;
   }
 
   /**
    * Performs the ng on init operation.
-   * @returns The result of the operation.
    */
   public ngOnInit(): void {
+    // Subscribe to dashboard state
+    this._dashboardService.state$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((state: DashboardState) => {
+        this.overviewStats = state.stats;
+        this.dashboardCards = state.cards;
+        this.quickActions = state.quickActions;
+        this.recentActivity = state.activities;
+        this.isRefreshing = state.isRefreshing;
+      });
+
+    // Load dashboard data
+    this._dashboardService.loadDashboardData();
+
+    // Get FAB configuration
+    this.fabAction = this._dashboardService.getFabAction();
+
+    // Setup pull-to-refresh gesture handling
     this.setupPullToRefresh();
   }
 
   /**
    * Performs the ng on destroy operation.
-   * @returns The result of the operation.
    */
   public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
+  /**
+   * Performs the on header action operation.
+   */
+  public onHeaderAction(action: {
+    id: string;
+    label: string;
+    icon: string;
+    badge?: number;
+  }): void {
+    switch (action.id) {
+      case 'notifications':
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Performs the on card click operation.
+   */
+  public onCardClick(card: DashboardCard): void {
+    if (card.route) {
+      // Router navigation handled by routerLink
+    }
+  }
+
+  /**
+   * Performs the on card swipe operation.
+   */
+  public onCardSwipe(event: SwipeEvent): void {
+    switch (event.action.id) {
+      case 'view':
+      case 'process':
+      case 'review':
+      case 'shortlist':
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Performs the on activity click operation.
+   */
+  public onActivityClick(activity: ActivityItem): void {
+    switch (activity.type) {
+      case 'success':
+      case 'info':
+      case 'warning':
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Performs the on fab click operation.
+   */
+  public onFabClick(): void {
+    // Navigate to upload page
+  }
+
+  /**
+   * Sets up pull-to-refresh gesture handling.
+   */
   private setupPullToRefresh(): void {
     let startY = 0;
     let startX = 0;
     let currentY = 0;
     let currentX = 0;
-    let isScrollAtTop = true;
     let isPulling = false;
     let touchIdentifier: number | null = null;
 
     const handleTouchStart = (e: TouchEvent): void => {
-      // Only handle single touch
       if (e.touches.length !== 1) return;
 
       const touch = e.touches[0];
@@ -1035,14 +933,12 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
       startX = touch.clientX;
       currentY = startY;
       currentX = startX;
-      isScrollAtTop = window.scrollY === 0;
       isPulling = false;
     };
 
     const handleTouchMove = (e: TouchEvent): void => {
-      if (!isScrollAtTop || touchIdentifier === null) return;
+      if (touchIdentifier === null) return;
 
-      // Find the correct touch by identifier
       let targetTouch: Touch | null = null;
       for (let i = 0; i < e.touches.length; i++) {
         if (e.touches[i].identifier === touchIdentifier) {
@@ -1057,13 +953,10 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
       currentX = targetTouch.clientX;
       const deltaY = currentY - startY;
       const deltaX = Math.abs(currentX - startX);
-
-      // Enhanced gesture detection
       const isVerticalPull = deltaY > 0;
       const isHorizontalScroll = deltaX > 30;
       const isPrimaryVertical = Math.abs(deltaY) > deltaX * 1.5;
 
-      // Only handle clear downward vertical gestures
       if (isVerticalPull && !isHorizontalScroll && isPrimaryVertical) {
         isPulling = true;
 
@@ -1072,30 +965,26 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
         } else if (deltaY >= 100) {
           this.isPullRefreshVisible = true;
 
-          // Haptic feedback for strong pull
           if ('vibrate' in navigator) {
             navigator.vibrate(50);
           }
 
-          // Only prevent default for confirmed pull-to-refresh gestures
           if (deltaY > deltaX * 2) {
             e.preventDefault();
           }
         }
       } else if (isHorizontalScroll || !isPrimaryVertical) {
-        // Reset pull state for horizontal or diagonal gestures
         this.isPullRefreshVisible = false;
         isPulling = false;
       }
     };
 
     const handleTouchEnd = (e: TouchEvent): void => {
-      if (!isScrollAtTop || touchIdentifier === null) {
+      if (touchIdentifier === null) {
         this.resetPullState();
         return;
       }
 
-      // Check if our tracked touch ended
       let touchEnded = true;
       for (let i = 0; i < e.touches.length; i++) {
         if (e.touches[i].identifier === touchIdentifier) {
@@ -1108,7 +997,6 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
         const deltaY = currentY - startY;
         const deltaX = Math.abs(currentX - startX);
 
-        // Only trigger refresh for clear vertical pulls
         if (isPulling && deltaY >= 100 && deltaX < 50) {
           this.triggerRefresh();
         } else {
@@ -1119,12 +1007,11 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
       }
     };
 
-    const handleTouchCancel = (_e: TouchEvent): void => {
+    const handleTouchCancel = (): void => {
       this.resetPullState();
       touchIdentifier = null;
     };
 
-    // Use passive listeners where possible, non-passive only for touchmove when needed
     document.addEventListener('touchstart', handleTouchStart, {
       passive: true,
     });
@@ -1134,7 +1021,6 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
       passive: true,
     });
 
-    // Cleanup function for proper event listener removal
     this.destroy$.subscribe(() => {
       document.removeEventListener('touchstart', handleTouchStart);
       document.removeEventListener('touchmove', handleTouchMove);
@@ -1143,127 +1029,24 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Resets the pull-to-refresh state.
+   */
   private resetPullState(): void {
     this.isPullRefreshVisible = false;
   }
 
+  /**
+   * Triggers the dashboard refresh.
+   */
   private triggerRefresh(): void {
-    if (this.isRefreshing) return; // Prevent multiple simultaneous refreshes
+    if (this.isRefreshing) return;
 
-    this.isRefreshing = true;
-
-    // Enhanced haptic feedback sequence
     if ('vibrate' in navigator) {
-      navigator.vibrate([30, 30, 30]); // Shorter, more subtle feedback
+      navigator.vibrate([30, 30, 30]);
     }
 
-    // Simulate refresh with realistic timing
-    setTimeout(() => {
-      this.isRefreshing = false;
-      this.resetPullState();
-
-      // Success haptic feedback
-      if ('vibrate' in navigator) {
-        navigator.vibrate([20, 20, 20, 20]); // Success pattern
-      }
-
-      // TODO: Refresh dashboard data
-      // TODO: Show success notification
-    }, 1500); // Reduced from 2000ms for better UX
-  }
-
-  /**
-   * Performs the on header action operation.
-   * @param action - The action.
-   * @returns The result of the operation.
-   */
-  public onHeaderAction(action: {
-    id: string;
-    label: string;
-    icon: string;
-    badge?: number;
-  }): void {
-    // Handle header actions (notifications, etc.)
-    switch (action.id) {
-      case 'notifications':
-        // Handle notifications
-        break;
-      default:
-        // Handle other actions
-        break;
-    }
-  }
-
-  /**
-   * Performs the on card click operation.
-   * @param card - The card.
-   * @returns The result of the operation.
-   */
-  public onCardClick(card: DashboardCard): void {
-    if (card.route) {
-      // Router navigation handled by routerLink
-      // Optional: Analytics tracking here
-    }
-  }
-
-  /**
-   * Performs the on card swipe operation.
-   * @param event - The event.
-   * @returns The result of the operation.
-   */
-  public onCardSwipe(event: SwipeEvent): void {
-    // Handle swipe actions based on event.action
-    switch (event.action.id) {
-      case 'view':
-        // Handle view action
-        break;
-      case 'process':
-        // Handle process action
-        break;
-      case 'review':
-        // Handle review action
-        break;
-      case 'shortlist':
-        // Handle shortlist action
-        break;
-      default:
-        // Handle other actions
-        break;
-    }
-  }
-
-  /**
-   * Performs the on activity click operation.
-   * @param activity - The activity.
-   * @returns The result of the operation.
-   */
-  public onActivityClick(activity: {
-    id: string;
-    title: string;
-    subtitle: string;
-    timeAgo: string;
-    type: string;
-    icon: string;
-  }): void {
-    // Navigate to activity details based on activity type
-    switch (activity.type) {
-      case 'success':
-      case 'info':
-      case 'warning':
-        // Navigate to specific activity detail page
-        break;
-      default:
-        // Handle unknown activity types
-        break;
-    }
-  }
-
-  /**
-   * Performs the on fab click operation.
-   * @returns The result of the operation.
-   */
-  public onFabClick(): void {
-    // Navigate to upload page
-    // This could use Router.navigate() for programmatic navigation
+    this._dashboardService.refreshDashboard();
+    this.resetPullState();
   }
 }
