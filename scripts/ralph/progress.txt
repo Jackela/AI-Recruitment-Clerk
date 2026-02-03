@@ -288,3 +288,37 @@ Options documented in CI-BLOCKING-ISSUE.md
 - No code or documentation references to these template files existed
 
 ---
+
+## [2026-02-04 00:45] - US-011
+- **MOVED**: 6 documentation files from root to docs/ subdirectories
+- Created subdirectories: docs/deployment/, docs/support/, docs/reports/, docs/recruitment/
+- Files moved: DEPLOYMENT_CHECK.md, DEPLOYMENT_GUIDE.md, RAILWAY_SETUP.md → docs/deployment/
+- Files moved: SUPPORT.md → docs/support/
+- Files moved: PROJECT_COMPLETION_REPORT.md → docs/reports/
+- Files moved: UAT_Architect_JD.txt → docs/recruitment/
+- Updated references in: README.md, PULL_REQUEST_TEMPLATE.md
+- Updated E2E test paths in: pdf-variety-uat.spec.ts, real-data-expansion.spec.ts, pdf-real-file-uat.spec.ts
+- Root directory now has fewer documentation files
+
+**Files changed:**
+- docs/deployment/DEPLOYMENT_CHECK.md (moved from root)
+- docs/deployment/DEPLOYMENT_GUIDE.md (moved from root)
+- docs/deployment/RAILWAY_SETUP.md (moved from root)
+- docs/support/SUPPORT.md (moved from root)
+- docs/reports/PROJECT_COMPLETION_REPORT.md (moved from root)
+- docs/recruitment/UAT_Architect_JD.txt (moved from root)
+- README.md (updated DEPLOYMENT_GUIDE.md link)
+- PULL_REQUEST_TEMPLATE.md (updated DEPLOYMENT_GUIDE.md reference)
+- apps/ai-recruitment-frontend-e2e/src/pdf-variety-uat.spec.ts (updated UAT_Architect_JD.txt paths)
+- apps/ai-recruitment-frontend-e2e/src/real-data-expansion.spec.ts (updated UAT_Architect_JD.txt path)
+- apps/ai-recruitment-frontend-e2e/src/pdf-real-file-uat.spec.ts (updated UAT_Architect_JD.txt path)
+- scripts/ralph/prd.json (marked US-011 passes: true)
+
+**Learnings for future iterations:**
+- E2E test files use different path resolution patterns: path.resolve(root, ...), path.resolve(__dirname, ...), relative paths
+- UAT_Architect_JD.txt is referenced from E2E tests - must update test files when moving test data
+- Documentation files may have references in README, PR templates, and other docs
+- Standard docs (README.md, LICENSE, AGENTS.md, CHANGELOG.md, CLAUDE.md, etc.) should stay in root
+- Organizing docs by topic (deployment/, support/, reports/) improves discoverability
+
+---
