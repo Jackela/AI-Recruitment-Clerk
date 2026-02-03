@@ -2,8 +2,8 @@ import type { OnModuleInit } from '@nestjs/common';
 import { Controller, Logger } from '@nestjs/common';
 import { EventPattern } from '@nestjs/microservices';
 import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
-import type { ResumeParserNatsService } from '../services/resume-parser-nats.service';
-import type { ParsingService } from '../parsing/parsing.service';
+import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
+import { ParsingService } from '../parsing/parsing.service';
 
 /**
  * Exposes endpoints for resume events.

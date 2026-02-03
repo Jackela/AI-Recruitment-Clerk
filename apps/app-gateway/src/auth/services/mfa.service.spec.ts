@@ -5,7 +5,7 @@ import { MfaService } from './mfa.service';
 import { MfaMethod } from '../dto/mfa.dto';
 import type { EmailService } from './email.service';
 import type { SmsService } from './sms.service';
-import { UserProfile } from '../../schemas/user-profile.schema';
+import type { UserProfile } from '../../schemas/user-profile.schema';
 
 const createConfigService = () =>
   ({

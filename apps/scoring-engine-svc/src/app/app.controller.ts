@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import type { AppService } from './app.service';
+import { AppService } from './app.service';
 import type {
   GapAnalysisRequestDto,
   GapAnalysisResultDto,

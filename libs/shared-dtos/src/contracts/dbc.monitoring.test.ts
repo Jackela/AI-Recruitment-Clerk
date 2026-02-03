@@ -218,7 +218,14 @@ describe('DBC Production Monitoring', () => {
         serviceContext: 'ValidationService',
       });
 
-      const optimization = monitor.optimizePerformance();
+      const optimization = monitor.optimizePerformance() as {
+        optimizations: Array<{
+          type: string;
+          issue: string;
+          recommendation: string;
+          impact: string;
+        }>;
+      };
       const slowOpOptimization = optimization.optimizations.find(
         (opt: any) =>
           opt.type === 'performance' &&
@@ -226,8 +233,8 @@ describe('DBC Production Monitoring', () => {
       );
 
       expect(slowOpOptimization).toBeDefined();
-      expect(slowOpOptimization.recommendation).toContain('caching');
-      expect(slowOpOptimization.impact).toBe('high');
+      expect(slowOpOptimization!.recommendation).toContain('caching');
+      expect(slowOpOptimization!.impact).toBe('high');
     });
 
     it('should identify high violation rate services', () => {
@@ -245,7 +252,14 @@ describe('DBC Production Monitoring', () => {
         });
       }
 
-      const optimization = monitor.optimizePerformance();
+      const optimization = monitor.optimizePerformance() as {
+        optimizations: Array<{
+          type: string;
+          issue: string;
+          impact: string;
+          affectedServices?: string[];
+        }>;
+      };
       const qualityOptimization = optimization.optimizations.find(
         (opt: any) =>
           opt.type === 'quality' &&
@@ -253,8 +267,8 @@ describe('DBC Production Monitoring', () => {
       );
 
       expect(qualityOptimization).toBeDefined();
-      expect(qualityOptimization.impact).toBe('critical');
-      expect(qualityOptimization.affectedServices).toContain(
+      expect(qualityOptimization!.impact).toBe('critical');
+      expect(qualityOptimization!.affectedServices).toContain(
         'ProblematicService',
       );
     });
@@ -269,14 +283,20 @@ describe('DBC Production Monitoring', () => {
         arrayBuffers: 5 * 1024 * 1024,
       });
 
-      const optimization = monitor.optimizePerformance();
+      const optimization = monitor.optimizePerformance() as {
+        optimizations: Array<{
+          type: string;
+          recommendation: string;
+          currentUsage?: string;
+        }>;
+      };
       const memoryOptimization = optimization.optimizations.find(
         (opt: any) => opt.type === 'memory',
       );
 
       expect(memoryOptimization).toBeDefined();
-      expect(memoryOptimization.recommendation).toContain('metrics history');
-      expect(memoryOptimization.currentUsage).toContain('MB');
+      expect(memoryOptimization!.recommendation).toContain('metrics history');
+      expect(memoryOptimization!.currentUsage).toContain('MB');
 
       jest.restoreAllMocks();
     });
@@ -306,7 +326,15 @@ describe('DBC Production Monitoring', () => {
         });
       });
 
-      const healthReport = monitor.generateHealthReport();
+      const healthReport = monitor.generateHealthReport() as {
+        healthScore: number;
+        healthStatus: string;
+        summary: { totalContracts: number; violations: number };
+        details: unknown;
+        recommendations: string[];
+        generatedAt: Date;
+        nextReviewDate: Date;
+      };
 
       expect(healthReport.healthScore).toBeGreaterThan(0);
       expect(healthReport.healthScore).toBeLessThanOrEqual(100);
@@ -371,7 +399,9 @@ describe('DBC Production Monitoring', () => {
         serviceContext: 'ProblematicService',
       });
 
-      const healthReport = monitor.generateHealthReport();
+      const healthReport = monitor.generateHealthReport() as {
+        recommendations: string[];
+      };
       const recommendations = healthReport.recommendations;
 
       expect(recommendations).toBeInstanceOf(Array);
@@ -529,7 +559,10 @@ describe('DBC Production Monitoring', () => {
       }
 
       const startTime = Date.now();
-      const healthReport = monitor.generateHealthReport();
+      const healthReport = monitor.generateHealthReport() as {
+        healthScore: number;
+        summary: { totalContracts: number };
+      };
       const reportTime = Date.now() - startTime;
 
       expect(reportTime).toBeLessThan(100); // Report generation under 100ms
