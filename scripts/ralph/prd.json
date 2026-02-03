@@ -245,8 +245,8 @@
         "npm run test:smoke passes"
       ],
       "priority": 16,
-      "passes": false,
-      "notes": "Jest 29+ supports ESM configs. Verify Jest version before converting."
+      "passes": true,
+      "notes": "Completed. Converted root jest.config.cjs and jest.smoke.config.cjs to .mjs with ESM syntax. Updated package.json scripts, nx.json cache inputs, and documentation references. Jest 30.0.5 supports ESM configs. All tests pass (2201 full, 1796 smoke)."
     },
     {
       "id": "US-017",

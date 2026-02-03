@@ -419,3 +419,34 @@ Options documented in CI-BLOCKING-ISSUE.md
 - Using import type for type-only imports keeps the bundle size smaller
 
 ---
+
+## [2026-02-04 01:15] - US-016
+- **CONVERTED**: Jest config to ESM (.mjs)
+- Renamed jest.config.cjs to jest.config.mjs
+- Renamed jest.smoke.config.cjs to jest.smoke.config.mjs
+- Converted module.exports to export default (ESM syntax)
+- Updated package.json scripts (test, test:smoke, test:app-gateway, test:ci, test:coverage, test:unit)
+- Updated nx.json cache inputs for @nx/jest:jest
+- Updated documentation references in AGENTS.md, TESTING_GUIDE.md, ROLLBACK-US-017.md
+- Verified Jest version 30.0.5 supports ESM configs
+- Quality gates verified: test (2201 pass), test:smoke (1796 pass)
+
+**Files changed:**
+- jest.config.cjs → jest.config.mjs (renamed, converted to ESM)
+- jest.smoke.config.cjs → jest.smoke.config.mjs (renamed, converted to ESM)
+- package.json (updated jest config references)
+- nx.json (updated cache inputs)
+- AGENTS.md (updated config references)
+- docs/TESTING_GUIDE.md (updated config references)
+- docs/ROLLBACK-US-017.md (updated config references)
+- scripts/ralph/prd.json (marked US-016 passes: true)
+
+**Learnings for future iterations:**
+- Jest 29+ supports ESM configuration files with .mjs extension
+- Using .mjs extension allows Node.js to load the config as ESM module automatically
+- Project-level jest.config files in libs/ and apps/ directories should keep their current format
+- Documentation files contain references to config files that need updating when renaming
+- 'Jest did not exit' warning is expected behavior (test resources not fully cleaned)
+- When converting configs, grep for all references across the codebase
+
+---
