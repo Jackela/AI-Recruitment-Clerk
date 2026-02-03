@@ -523,3 +523,25 @@ Options documented in CI-BLOCKING-ISSUE.md
 - ESLint rule @typescript-eslint/no-inferrable-types flags redundant type annotations
 - Always grep for 'any' types to verify removal, don't just visually inspect
 ---
+
+## [2026-02-04 01:45] - US-020
+- **COMPLETED**: Replace 'any' types in test utilities
+- Created libs/types/src/test.types.ts with comprehensive test utility types
+- Updated apps/app-gateway/test/utils/schema-validator.ts to use proper types
+- Added @ai-recruitment-clerk/types path mapping to tsconfig.base.json
+- Quality gates verified: typecheck (pass), lint (pass)
+
+**Files changed:**
+- libs/types/src/test.types.ts (created - 135 lines)
+- libs/types/src/index.ts (added test types export)
+- apps/app-gateway/test/utils/schema-validator.ts (removed 'any', added proper types)
+- tsconfig.base.json (added @ai-recruitment-clerk/types path)
+- scripts/ralph/prd.json (marked US-020 passes: true)
+
+**Learnings for future iterations:**
+- Test utilities need proper types just like production code
+- OpenAPI schema types: OpenApiComponents, OpenApiDocument, OpenApiSchema cover most YAML parsing needs
+- Ajv's ValidateFunction type is complex - use simplified CompiledSchemaValidator for test utilities
+- New libs require tsconfig.base.json path mapping (@ai-recruitment-clerk/library-name)
+- Some 'any' types in tests are appropriate (global as any, test infrastructure, untyped libraries)
+---

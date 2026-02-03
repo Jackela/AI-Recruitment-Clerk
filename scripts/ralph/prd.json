@@ -305,8 +305,8 @@
         "npm run test passes"
       ],
       "priority": 20,
-      "passes": false,
-      "notes": "Test utilities often use 'any' as shortcut. Proper types improve test reliability."
+      "passes": true,
+      "notes": "Created libs/types/src/test.types.ts with OpenApiComponents, OpenApiDocument, OpenApiSchema, YamlLoadResult, CompiledSchemaValidator. Updated schema-validator.ts to use proper types. Added @ai-recruitment-clerk/types path to tsconfig.base.json. Other 'any' types in test files remain (e.g., global as any, chai/supertest types) as they are for test infrastructure where types are not available or appropriate."
     },
     {
       "id": "US-021",
