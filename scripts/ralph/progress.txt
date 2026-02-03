@@ -248,3 +248,21 @@ Options documented in CI-BLOCKING-ISSUE.md
 - Use `rm -f *.log` to delete all log files in a directory
 
 ---
+
+## [2026-02-04 00:30] - US-009
+- **DELETED**: 3 temporary directories from root directory
+- tmp/ - Contained act logs, eslint results, jest results (~15 MB)
+- tmp-ghlogs/ - Contained GitHub action logs from local testing (~1.3 MB)
+- coverage/ - Contained test coverage reports (~12 MB)
+- Root directory now has 0 tmp*, coverage directories
+- .gitignore already had tmp/, tmp_*, coverage/ entries (no changes needed)
+
+**Learnings for future iterations:**
+- Temporary directories accumulate from CI/CD testing (act, jest, eslint)
+- These are all generated artifacts, safe to delete
+- .gitignore already properly configured for these patterns
+- Coverage reports can be regenerated via npm run test:coverage
+- Use `rm -rf` to delete directories with all contents
+- No code changes needed, only cleanup
+
+---
