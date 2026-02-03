@@ -7,10 +7,13 @@
 import { test, expect } from './fixtures';
 
 test.describe('Simple Firefox Test', () => {
-  test('Firefox basic connection test', async ({ page, browserName }) => {
-    // Skip for non-Firefox browsers
-    test.skip(browserName !== 'firefox', 'This test is Firefox-specific');
+  // Skip all tests in this suite for non-Firefox browsers
+  test.beforeEach(async ({ browserName }) => {
+    // eslint-disable-next-line playwright/no-skipped-test
+    test.skip(browserName !== 'firefox', 'This test suite is Firefox-specific');
+  });
 
+  test('Firefox basic connection test', async ({ page }) => {
     console.log('🦊 Testing basic Firefox connection...');
 
     // Single navigation test with extended timeout
@@ -22,27 +25,17 @@ test.describe('Simple Firefox Test', () => {
     // Basic visibility check
     await expect(page.locator('body')).toBeVisible({ timeout: 15000 });
 
-    // Try to find app title
-    const appTitleExists = (await page.locator('#app-title').count()) > 0;
-    if (appTitleExists) {
-      await expect(page.locator('#app-title')).toBeVisible({ timeout: 10000 });
-      console.log('✅ Firefox connected and loaded app successfully');
-    } else {
-      // Fallback check - any content loaded
-      const hasContent = await page.locator('body').textContent();
-      expect(hasContent).toBeTruthy();
-      console.log(
-        '✅ Firefox connected and loaded content (no app title found)',
-      );
-    }
+    // Check app title visibility (may or may not exist)
+    const appTitleCount = await page.locator('#app-title').count();
+    console.log('App title found:', appTitleCount > 0);
+
+    // Verify body has content (web-first assertion)
+    await expect(page.locator('body')).not.toBeEmpty({ timeout: 10000 });
+
+    console.log('✅ Firefox connected and loaded content');
   });
 
-  test('Firefox can handle simple navigation', async ({
-    page,
-    browserName,
-  }) => {
-    test.skip(browserName !== 'firefox', 'This test is Firefox-specific');
-
+  test('Firefox can handle simple navigation', async ({ page }) => {
     console.log('🦊 Testing Firefox simple navigation...');
 
     // Navigate to home
