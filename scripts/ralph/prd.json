@@ -77,8 +77,8 @@
         "Root dir has 5 fewer .sh files"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "Do NOT move Windows .bat files yet (those are US-006). Verify scripts still work after moving."
+      "passes": true,
+      "notes": "Moved all 5 shell scripts to scripts/ directory. Updated references in check-consistency.sh, run-e2e-tests.sh, validate-system.sh, DEPLOYMENT_GUIDE.md, README.md, PULL_REQUEST_TEMPLATE.md, and docs/PROJECT_STATUS_REPORT.md. Root directory now has 0 .sh files."
     },
     {
       "id": "US-006",

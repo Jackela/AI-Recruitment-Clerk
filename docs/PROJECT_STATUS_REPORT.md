@@ -217,10 +217,10 @@ AI-Recruitment-Clerk/
 start-system.bat
 
 # Linux/macOS
-./start-system.sh
+./scripts/start-system.sh
 
 # Verify deployment
-./validate-system.sh
+./scripts/validate-system.sh
 ```
 
 ---

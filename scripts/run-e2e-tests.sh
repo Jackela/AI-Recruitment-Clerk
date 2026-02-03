@@ -7,7 +7,7 @@ echo "===================================="
 echo ""
 echo "Step 1: Checking if system is running..."
 if ! docker-compose ps | grep -q "Up"; then
-    echo "ERROR: System is not running. Please start with ./start-system.sh first"
+    echo "ERROR: System is not running. Please start with ./scripts/start-system.sh first"
     exit 1
 fi
 

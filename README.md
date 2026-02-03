@@ -565,19 +565,19 @@ start-system.bat
 
 #### Linux/macOS
 ```bash
-./start-system.sh
+./scripts/start-system.sh
 ```
 
 ### System Validation
 ```bash
-./validate-system.sh  # Linux/macOS
-validate-system.bat   # Windows
+./scripts/validate-system.sh  # Linux/macOS
+validate-system.bat           # Windows
 ```
 
 ### Run E2E Tests
 ```bash
-./run-e2e-tests.sh    # Linux/macOS
-run-e2e-tests.bat     # Windows
+./scripts/run-e2e-tests.sh    # Linux/macOS
+run-e2e-tests.bat            # Windows
 ```
 
 ### Service URLs (After Deployment)

@@ -37,7 +37,7 @@ fi
 # 检查启动脚本
 echo ""
 echo "🚀 检查启动脚本..."
-scripts=("start-system.sh" "validate-system.sh" "run-e2e-tests.sh")
+scripts=("scripts/start-system.sh" "scripts/validate-system.sh" "scripts/run-e2e-tests.sh")
 for script in "${scripts[@]}"; do
     if [ -f "$script" ] && [ -x "$script" ]; then
         echo "✅ $script 存在且可执行"

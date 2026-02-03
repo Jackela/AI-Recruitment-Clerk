@@ -152,3 +152,32 @@ Options documented in CI-BLOCKING-ISSUE.md
 - After US-004: 0 moderate vulnerabilities, 4 high-severity (all tar bundled dependency)
 
 ---
+
+## [2026-02-04 00:00] - US-005
+- **MOVED**: 5 shell scripts from root to scripts/ directory
+- Scripts moved: QUICK_DEPLOY_SCRIPT.sh, check-consistency.sh, run-e2e-tests.sh, start-system.sh, validate-system.sh
+- Updated script references in: check-consistency.sh, run-e2e-tests.sh, validate-system.sh
+- Updated documentation: DEPLOYMENT_GUIDE.md, README.md, PULL_REQUEST_TEMPLATE.md, docs/PROJECT_STATUS_REPORT.md
+- Root directory now has 0 .sh files (cleaner)
+
+**Files changed:**
+- scripts/QUICK_DEPLOY_SCRIPT.sh (moved from root)
+- scripts/check-consistency.sh (moved from root, updated paths)
+- scripts/run-e2e-tests.sh (moved from root, updated paths)
+- scripts/start-system.sh (moved from root)
+- scripts/validate-system.sh (moved from root, updated paths)
+- DEPLOYMENT_GUIDE.md (updated script paths)
+- README.md (updated script paths)
+- PULL_REQUEST_TEMPLATE.md (updated script paths)
+- docs/PROJECT_STATUS_REPORT.md (updated script paths)
+- scripts/ralph/prd.json (marked US-005 passes: true)
+
+**Learnings for future iterations:**
+- Use `git mv` to preserve file history when moving files
+- Script paths need to be updated both in code and documentation
+- Grep with glob pattern is effective for finding all references
+- The check-consistency.sh script itself references other scripts - needs cascade updates
+- Documentation files (.md) contain many script references that need updating
+- Windows .bat files are separate (US-006) - handled independently
+
+---

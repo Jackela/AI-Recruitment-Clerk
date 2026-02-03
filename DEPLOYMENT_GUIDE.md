@@ -45,7 +45,7 @@ start-system.bat
 
 #### Linux/Mac
 ```bash
-./start-system.sh
+./scripts/start-system.sh
 ```
 
 ### Step 3: Validate System Health
@@ -57,7 +57,7 @@ validate-system.bat
 
 #### Linux/Mac
 ```bash
-./validate-system.sh
+./scripts/validate-system.sh
 ```
 
 ### Step 4: Run E2E Tests
@@ -69,7 +69,7 @@ run-e2e-tests.bat
 
 #### Linux/Mac
 ```bash
-./run-e2e-tests.sh
+./scripts/run-e2e-tests.sh
 ```
 
 ## 🔧 Manual Deployment
@@ -182,7 +182,7 @@ docker-compose logs -f [service-name]
 ```
 
 #### E2E Tests Failing
-1. Ensure all services are healthy: `./validate-system.sh`
+1. Ensure all services are healthy: `./scripts/validate-system.sh`
 2. Check frontend accessibility: `curl http://localhost:4200`
 3. Check API gateway: `curl http://localhost:3000/api/health`
 4. Review test logs in `test-results/` directory
@@ -239,8 +239,8 @@ docker-compose up --scale jd-extractor-svc=2 --scale resume-parser-svc=2
 ### Starting System
 1. `docker-compose up -d`
 2. Wait for health checks to pass
-3. Validate with `./validate-system.sh`
-4. Run E2E tests with `./run-e2e-tests.sh`
+3. Validate with `./scripts/validate-system.sh`
+4. Run E2E tests with `./scripts/run-e2e-tests.sh`
 
 ### Stopping System
 ```bash
@@ -266,10 +266,10 @@ docker-compose up -d --force-recreate
 Before declaring the system ready for User Acceptance Testing:
 
 - [ ] All Docker containers are running (`docker-compose ps`)
-- [ ] All health checks pass (`./validate-system.sh`)
+- [ ] All health checks pass (`./scripts/validate-system.sh`)
 - [ ] Frontend accessible at http://localhost:4200
 - [ ] API Gateway responding at http://localhost:3000/api/health
-- [ ] All E2E tests pass 100% (`./run-e2e-tests.sh`)
+- [ ] All E2E tests pass 100% (`./scripts/run-e2e-tests.sh`)
 - [ ] No critical errors in logs (`docker-compose logs`)
 - [ ] System handles job creation workflow
 - [ ] System handles resume upload workflow
