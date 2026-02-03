@@ -322,3 +322,34 @@ Options documented in CI-BLOCKING-ISSUE.md
 - Organizing docs by topic (deployment/, support/, reports/) improves discoverability
 
 ---
+
+## [2026-02-04 00:50] - US-012
+- **MOVED**: Docker configuration files from root to config/docker/ directory
+- Created config/docker/ directory
+- Moved docker-compose.yml to config/docker/
+- Moved .dockerignore to config/docker/
+- Updated references in: scripts/check-consistency.sh, docs/deployment/DEPLOYMENT_GUIDE.md (2 locations), README.md, PULL_REQUEST_TEMPLATE.md, docs/PROJECT_STATUS_REPORT.md, performance/optimization-recommendations.md (2 locations)
+- Root directory now has no docker-compose.yml or .dockerignore files
+- Dockerfile files in apps/ directories remain in place (app-specific, not root-level config)
+
+**Files changed:**
+- config/docker/docker-compose.yml (moved from root)
+- config/docker/.dockerignore (moved from root)
+- scripts/check-consistency.sh (updated docker-compose path with -f flag)
+- docs/deployment/DEPLOYMENT_GUIDE.md (updated 2 references)
+- README.md (updated docker-compose reference)
+- PULL_REQUEST_TEMPLATE.md (updated docker-compose reference)
+- docs/PROJECT_STATUS_REPORT.md (updated Docker Configuration section)
+- performance/optimization-recommendations.md (updated 2 references)
+- config/.envrc (moved from root, was in staging area from US-010)
+- scripts/ralph/prd.json (marked US-012 passes: true)
+
+**Learnings for future iterations:**
+- docker-compose.yml syntax validation requires environment variables to be set (or dummy values)
+- Use `docker-compose -f path/to/docker-compose.yml` to specify custom config location
+- App-specific Dockerfiles should stay with their apps, only move shared/orchestration configs
+- Documentation files contain many docker-compose references in examples - grep and update all
+- The .dockerignore file was referenced in a comment within itself (line 51) - self-reference
+- When moving docker-compose.yml, update check scripts to use -f flag for new path
+
+---

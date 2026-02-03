@@ -184,8 +184,8 @@
         "Root has no Dockerfile* or docker-compose* files"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": "Update CI workflows that reference Docker files. Update README if it mentions Docker."
+      "passes": true,
+      "notes": "Completed. Moved docker-compose.yml and .dockerignore to config/docker/. Updated references in scripts/check-consistency.sh, DEPLOYMENT_GUIDE.md (2 locations), README.md, PULL_REQUEST_TEMPLATE.md, PROJECT_STATUS_REPORT.md, and optimization-recommendations.md (2 locations). Note: Dockerfile files in apps/ directories were kept in place as they are app-specific, not root-level config files."
     },
     {
       "id": "US-013",
