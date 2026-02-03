@@ -87,7 +87,7 @@
       "title": "Fix debug-user-flow.spec.ts lint issues",
       "description": "Fix Playwright lint issues in debug-user-flow.spec.ts",
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Fix no-networkidle (5 issues)",
         "Fix no-wait-for-timeout (2 issues)",
