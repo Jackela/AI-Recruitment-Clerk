@@ -7,3 +7,6 @@
 
 // API Types
 export * from './api.types';
+
+// Test Utility Types
+export * from './test.types';
