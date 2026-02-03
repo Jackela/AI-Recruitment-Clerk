@@ -217,8 +217,8 @@
         "Rollback plan documented"
       ],
       "priority": 16,
-      "passes": false,
-      "notes": "Keep enforcement lightweight to avoid developer friction."
+      "passes": true,
+      "notes": "Existing PR template already has all required checkboxes. Added lightweight GitHub Actions validation (.github/workflows/pr-template-check.yml) that checks for required sections (Type, Breaking Change, Description, Changes, Testing, Checklist). Uses warnings for suggested checkboxes to minimize friction. Automatically comments on PR with validation results. Rollback plan in docs/ROLLBACK-US-016.md"
     },
     {
       "id": "US-017",
