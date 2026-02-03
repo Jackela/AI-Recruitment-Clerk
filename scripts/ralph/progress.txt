@@ -380,3 +380,21 @@ Options documented in CI-BLOCKING-ISSUE.md
 - render.yaml defines complete service stack including databases and services for Render
 
 ---
+
+## [2026-02-04 01:00] - US-014
+- **DELETED**: 1 backup file from root directory
+- package.json.backup deleted (not tracked by git, was local backup only)
+- No other *.backup files found in root directory
+- Quality gates verified: lint (pass), typecheck (pass)
+
+**Files changed:**
+- package.json.backup (deleted - not git tracked)
+- scripts/ralph/prd.json (marked US-014 passes: true)
+
+**Learnings for future iterations:**
+- Backup files (*.backup, *.bak, *~) should not be in version control
+- Use `git ls-files` to check if files are tracked before deciding to use `git rm` vs `rm`
+- Local backup files like package.json.backup are created during development but should be cleaned up
+- The root directory is now clean with only essential project files
+
+---
