@@ -71,8 +71,8 @@
         "Record CI results in PR"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "BLOCKED: Pre-existing CI infrastructure issue (Nx webpack ESM incompatibility) affects both main and this branch. See CI-BLOCKING-ISSUE.md. Local quality gates all pass. PR #42 was created then closed due to this blocker."
+      "passes": true,
+      "notes": "CI issue fixed by renaming webpack.config.js to webpack.config.mjs. Branch pushed, CI verified green."
     }
   ]
 }

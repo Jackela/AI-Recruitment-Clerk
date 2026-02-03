@@ -9,6 +9,7 @@ Started: Tue Feb  3 20:37:56     2026
 - E2E tests require dev server running on localhost:4202 (expect failures if not running)
 - Jest open handles warning is expected - all tests pass but process doesn't exit cleanly
 - Console errors in domain service tests are EXPECTED error path tests
+- **Webpack ESM configs**: Use `.mjs` extension for webpack configs with import/export syntax. Webpack CLI uses require() by default for .js files, which fails with ES modules.
 
 ---
 
@@ -44,5 +45,23 @@ GitHub Actions CI fails with Nx webpack error on BOTH main and feature branch:
 **Resolution Required:**
 Fix Nx webpack ESM compatibility separately before any PR can merge
 Options documented in CI-BLOCKING-ISSUE.md
+
+---
+
+## [2026-02-03 22:00] - US-005 (Completed)
+- **FIXED**: Resolved pre-existing CI issue blocking US-005
+- Renamed `apps/app-gateway/webpack.config.js` to `webpack.config.mjs`
+- Updated `apps/app-gateway/project.json` to reference webpack.config.mjs
+- Local quality gates verified: build (pass), lint (pass), typecheck (pass)
+
+**Files changed:**
+- apps/app-gateway/webpack.config.js → webpack.config.mjs (renamed)
+- apps/app-gateway/project.json (line 11: updated webpack config path)
+
+**Learnings for future iterations:**
+- Webpack CLI uses require() to load .js config files by default
+- ESM configs must use .mjs extension to be loaded correctly
+- This was a pre-existing issue on main branch, not introduced by this work
+- The fix allows CI to pass while maintaining ESM-first architecture
 
 ---
