@@ -2,14 +2,15 @@
 Started: Tue Feb  3 20:37:56     2026
 
 ## Codebase Patterns
-- Use `jest --config jest.config.cjs --passWithNoTests` for unit tests
-- Use `jest --config jest.smoke.config.cjs` for smoke tests
+- Use `jest --config jest.config.mjs --passWithNoTests` for unit tests
+- Use `jest --config jest.smoke.config.mjs` for smoke tests
 - Use `npx nx` for monorepo operations (lint, build)
 - Use `tsc --noEmit --project tsconfig.ci.json` for type checking
 - E2E tests require dev server running on localhost:4202 (expect failures if not running)
 - Jest open handles warning is expected - all tests pass but process doesn't exit cleanly
 - Console errors in domain service tests are EXPECTED error path tests
 - **Nx webpack configs MUST use .cjs (CommonJS)**: Nx's @nx/webpack/plugin uses require() to load configs during project graph processing. Even .mjs files don't work because Nx doesn't use dynamic import(). Use webpack.config.cjs with CommonJS syntax (require/module.exports).
+- **Jest root configs use .mjs (ESM)**: Jest 29+ supports ESM configs. Root jest.config.mjs and jest.smoke.config.mjs use export default. Project-level jest.config files in libs/apps remain unchanged.
 
 ---
 

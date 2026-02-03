@@ -14,6 +14,13 @@
 - **NO COMMONJS**: CommonJS imports/exports are strictly prohibited
 - **ANGULAR/NESTJS COMPATIBILITY**: Must maintain ESM compatibility across all services
 
+**KNOWN EXCEPTION: Webpack Configs (.cjs)**
+- Nx's `@nx/webpack` plugin uses `require()` to load webpack configs during project graph processing
+- This is an Nx limitation, not a violation of ESM-first architecture
+- Webpack configs MUST use `.cjs` extension with CommonJS syntax (`require`/`module.exports`)
+- The built output can still be ESM - only the config file needs to be `.cjs`
+- See: `apps/app-gateway/webpack.config.cjs`, `scripts/ralph/progress.txt` (Codebase Patterns)
+
 ### RULE 3: TYPESCRIPT STRICT MODE ENFORCED
 - **NO 'ANY' TYPES**: All variables must have explicit types
 - **STRICT MODE**: All tsconfig files must have `"strict": true`
