@@ -5,7 +5,7 @@ Added smoke test suite (`npm run test:smoke`) that runs a minimal subset of crit
 
 ## Changes Made
 
-### 1. Created `jest.smoke.config.cjs`
+### 1. Created `jest.smoke.config.mjs`
 - **Purpose**: Fast subset of tests for local iteration
 - **Scope**: 8 projects (3 core libs, 3 domain libs, 2 apps)
 - **Configuration**:
@@ -16,7 +16,7 @@ Added smoke test suite (`npm run test:smoke`) that runs a minimal subset of crit
 
 ### 2. Added npm script to `package.json`
 ```json
-"test:smoke": "jest --config jest.smoke.config.cjs --passWithNoTests"
+"test:smoke": "jest --config jest.smoke.config.mjs --passWithNoTests"
 ```
 
 ### 3. Created `docs/TESTING_GUIDE.md`
@@ -51,7 +51,7 @@ Added smoke test suite (`npm run test:smoke`) that runs a minimal subset of crit
 git checkout HEAD~1 -- package.json
 
 # Delete the config and documentation
-git rm jest.smoke.config.cjs docs/TESTING_GUIDE.md
+git rm jest.smoke.config.mjs docs/TESTING_GUIDE.md
 git commit -m "revert: remove smoke test suite"
 ```
 
@@ -60,7 +60,7 @@ Rename the smoke test config to disable it:
 
 ```bash
 # Rename the config file
-git mv jest.smoke.config.cjs jest.smoke.config.cjs.disabled
+git mv jest.smoke.config.mjs jest.smoke.config.mjs.disabled
 
 # Update package.json to remove test:smoke script
 # Edit package.json and remove the "test:smoke" line
@@ -79,7 +79,7 @@ git reset --hard HEAD~1
 If smoke tests are too slow or too minimal, adjust the scope:
 
 ```javascript
-// Edit jest.smoke.config.cjs
+// Edit jest.smoke.config.mjs
 
 // To make it faster (remove some projects):
 const baseProjects = [
@@ -102,7 +102,7 @@ const baseProjects = [
 npm run test:smoke  # Should fail with "unknown script"
 
 # Verify config files are removed
-test -f jest.smoke.config.cjs && echo "Config exists" || echo "Config removed"
+test -f jest.smoke.config.mjs && echo "Config exists" || echo "Config removed"
 test -f docs/TESTING_GUIDE.md && echo "Guide exists" || echo "Guide removed"
 
 # Verify full test suite still works
@@ -144,7 +144,7 @@ Smoke tests don't cover:
 ### Maintenance Overhead
 Two Jest configurations must be maintained:
 - `jest.config.cjs` - Full suite (all projects)
-- `jest.smoke.config.cjs` - Smoke tests (subset of projects)
+- `jest.smoke.config.mjs` - Smoke tests (subset of projects)
 
 **Mitigation**: Smoke test config is simple and stable. Only update when project structure changes significantly.
 
@@ -228,7 +228,7 @@ Rely on full suite for all verification.
 ## Related Documentation
 
 - `jest.config.cjs` - Full test suite configuration
-- `jest.smoke.config.cjs` - Smoke test configuration
+- `jest.smoke.config.mjs` - Smoke test configuration
 - `docs/TESTING_GUIDE.md` - Comprehensive testing guide
 - `docs/CI_RUNBOOK.md` - CI and local development practices
 - `package.json` - All available npm scripts

@@ -39,7 +39,7 @@ const baseProjects = [
   '<rootDir>/apps/ai-recruitment-frontend/jest.config.ts', // Frontend (user interface)
 ];
 
-module.exports = {
+export default {
   projects: baseProjects,
   passWithNoTests: true,
   maxWorkers: 1, // Run tests serially for consistent results

@@ -20,7 +20,7 @@ const baseProjects = [
   '<rootDir>/libs/shared-nats-client/jest.config.ts',
 ];
 
-module.exports = {
+export default {
   projects: baseProjects,
   passWithNoTests: true,
 };

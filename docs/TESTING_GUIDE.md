@@ -34,7 +34,7 @@ Smoke tests cover the most critical parts of the system:
 - `ai-recruitment-frontend` - Angular frontend
 
 ### Configuration
-- **Config file**: `jest.smoke.config.cjs`
+- **Config file**: `jest.smoke.config.mjs`
 - **Test timeout**: 10 seconds per test (fail fast)
 - **Max workers**: 1 (serial execution for consistent results)
 - **Bail on failure**: Stops on first failure (fast feedback)
@@ -67,7 +67,7 @@ All unit tests from:
 - **All test files**: Including integration tests, unit tests, and component tests
 
 ### Configuration
-- **Config file**: `jest.config.cjs`
+- **Config file**: `jest.config.mjs`
 - **Pass with no tests**: Allows projects with no tests
 - **Parallel execution**: Runs tests in parallel for speed
 - **Standard timeout**: Default Jest timeouts
@@ -185,7 +185,7 @@ node tools/ci/verify-quality-gates.mjs
 
 ### Smoke Tests Too Slow
 **Cause**: Too many projects in smoke config
-**Solution**: Edit `jest.smoke.config.cjs` to remove less critical projects
+**Solution**: Edit `jest.smoke.config.mjs` to remove less critical projects
 
 ### Tests Flaky (Inconsistent Results)
 **Cause**: Parallel execution or race conditions
@@ -200,7 +200,7 @@ npm run test:smoke
 
 ## Customizing Smoke Tests
 
-To add or remove projects from smoke tests, edit `jest.smoke.config.cjs`:
+To add or remove projects from smoke tests, edit `jest.smoke.config.mjs`:
 
 ```javascript
 const baseProjects = [
@@ -220,7 +220,7 @@ const baseProjects = [
 
 ## Additional Resources
 
-- `jest.config.cjs` - Full test suite configuration
-- `jest.smoke.config.cjs` - Smoke test configuration
+- `jest.config.mjs` - Full test suite configuration
+- `jest.smoke.config.mjs` - Smoke test configuration
 - `docs/CI_RUNBOOK.md` - CI and local development practices
 - `CONTRIBUTING.md` - Contribution guidelines
