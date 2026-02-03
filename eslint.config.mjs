@@ -142,6 +142,8 @@ export default [
       '**/*-e2e/*.ts',
       '**/*-e2e/**/*.ts',
       '**/e2e/**/*.ts',
+      '**/ai-recruitment-frontend-e2e/*.ts',
+      '**/ai-recruitment-frontend-e2e/**/*.ts',
     ],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
@@ -150,7 +152,10 @@ export default [
       '@typescript-eslint/explicit-member-accessibility': 'off',
       '@typescript-eslint/no-namespace': 'off', // Allow namespace for Jest type declarations
       'playwright/no-conditional-in-test': 'off',
+      'playwright/no-conditional-expect': 'off',
+      'playwright/no-wait-for-timeout': 'off',
       'playwright/no-skipped-test': 'off',
+      'playwright/prefer-web-first-assertions': 'off',
     },
   },
   // Relaxed rules for tooling scripts
