@@ -100,7 +100,7 @@
       "title": "Fix deep-console-debug.spec.ts lint issues",
       "description": "Fix Playwright lint issues in deep-console-debug.spec.ts",
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Fix no-networkidle (1 issue)",
         "Fix no-wait-for-timeout (1 issue)",
