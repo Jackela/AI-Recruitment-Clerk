@@ -21,3 +21,18 @@ Started: Tue Feb  3 19:15:59     2026
   - Rollback plans should include multiple options: git revert, config change, manual patch
   - Always verify with batched commands (lint + typecheck + build) before committing
 ---
+
+## 2026-02-03 - US-002
+- What was implemented: Verified existing contract validation pipeline works correctly; no code changes needed
+- Files changed:
+  - Created: docs/ROLLBACK-US-002.md (comprehensive rollback plan)
+  - Updated: scripts/ralph/prd.json (marked US-002 as passing)
+- **Learnings for future iterations:**
+  - Contract validation script (`tools/contract-validation/validate-contracts.js`) is fully deterministic
+  - Uses only file-based checks (OpenAPI specs, TypeScript compilation, TODO grep, field comparison)
+  - No external services or environment variables required
+  - The CI workflow `.github/workflows/contract-validation.yml` has 3 jobs: validate-contracts, frontend-backend-consistency, security-check
+  - api-contracts library has 14 passing tests in `src/validation/contract.validator.test.ts`
+  - The validation script is designed to not fail the build (exits with 0 even with warnings)
+  - All checks passed: OpenAPI smoke, TS compilation, TODO scan, field naming, status enum sync
+---
