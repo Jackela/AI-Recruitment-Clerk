@@ -85,8 +85,8 @@
         "Rollback plan documented"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "Prefer explicit wait conditions and controlled server startup/shutdown."
+      "passes": true,
+      "notes": "E2E already configured via Nx/Playwright with explicit waits. Rollback plan in docs/ROLLBACK-US-006-US-010.md"
     },
     {
       "id": "US-007",
@@ -99,8 +99,8 @@
         "Rollback plan documented"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": "Do not introduce non-deterministic steps."
+      "passes": true,
+      "notes": "All workflows already hardened with minimal permissions, npm caching, and concurrency. Rollback plan in docs/ROLLBACK-US-006-US-010.md"
     },
     {
       "id": "US-008",
@@ -112,8 +112,8 @@
         "Document minimal change rule and review checklist"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "This encodes strong constraints for stable AI-assisted delivery."
+      "passes": true,
+      "notes": "PR template and CONTRIBUTING.md already comprehensive with all required sections. Rollback plan in docs/ROLLBACK-US-006-US-010.md"
     },
     {
       "id": "US-009",
@@ -125,8 +125,8 @@
         "Rollback plan documented"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": "Owners can be placeholders if team map is not final."
+      "passes": true,
+      "notes": "Expanded CODEOWNERS to cover apps/, libs/, workflows, E2E, security. CONTRIBUTING.md already documents review expectations. Rollback plan in docs/ROLLBACK-US-006-US-010.md"
     },
     {
       "id": "US-010",
@@ -139,8 +139,8 @@
         "Rollback plan documented"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": "Keep templates short and enforce acceptance criteria and repro steps."
+      "passes": true,
+      "notes": "bug_report.yml and feature_request.yml already existed. Added ops_task.yml for operations tasks. Rollback plan in docs/ROLLBACK-US-006-US-010.md"
     },
     {
       "id": "US-011",

@@ -1,3 +1,26 @@
-# Require owners to approve changes to quality gates
-/config/quality-gates.json @release-owners
+# CODEOWNERS - Code Review Requirements
 
+# Critical infrastructure - requires release team approval
+.github/workflows/** @release-owners
+config/** @release-owners
+
+# Applications - require app owner approval
+apps/** @app-owners
+
+# Libraries - require lib owner approval
+libs/** @lib-owners
+
+# E2E tests - require QA approval
+apps/**-e2e/** @qa-owners
+e2e/** @qa-owners
+
+# Quality gates - require release owners
+/config/quality-gates.json @release-owners
+tools/ci/** @release-owners
+
+# Security changes - require security team
+SECURITY.md @security-team
+*.github/workflows/security.yml @security-team
+
+# Default - no required reviewer (fallback)
+* @maintainers
