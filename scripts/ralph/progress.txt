@@ -9,7 +9,7 @@ Started: Tue Feb  3 20:37:56     2026
 - E2E tests require dev server running on localhost:4202 (expect failures if not running)
 - Jest open handles warning is expected - all tests pass but process doesn't exit cleanly
 - Console errors in domain service tests are EXPECTED error path tests
-- **Webpack ESM configs**: Use `.mjs` extension for webpack configs with import/export syntax. Webpack CLI uses require() by default for .js files, which fails with ES modules.
+- **Nx webpack configs MUST use .cjs (CommonJS)**: Nx's @nx/webpack/plugin uses require() to load configs during project graph processing. Even .mjs files don't work because Nx doesn't use dynamic import(). Use webpack.config.cjs with CommonJS syntax (require/module.exports).
 
 ---
 
@@ -63,5 +63,31 @@ Options documented in CI-BLOCKING-ISSUE.md
 - ESM configs must use .mjs extension to be loaded correctly
 - This was a pre-existing issue on main branch, not introduced by this work
 - The fix allows CI to pass while maintaining ESM-first architecture
+
+---
+
+## [2026-02-03 22:30] - US-005 Final Resolution
+- **FINAL FIX**: Converted webpack.config to CommonJS (.cjs)
+- The .mjs approach didn't work - Nx's @nx/webpack/plugin still uses require()
+- Solution: webpack.config.cjs with CommonJS syntax (require/module.exports)
+- CI now passing: build (SUCCESS), lint (SUCCESS), typecheck (SUCCESS)
+
+**Files changed (final):**
+- apps/app-gateway/webpack.config.mjs → webpack.config.cjs (converted to CommonJS)
+- apps/app-gateway/project.json (line 11: updated to webpack.config.cjs)
+
+**Critical Learning:**
+- Nx's webpack plugin processes the project graph using require()
+- This happens BEFORE webpack-cli even runs
+- Even .mjs extension doesn't help because Nx doesn't use dynamic import()
+- Webpack configs in Nx projects MUST use .cjs with CommonJS syntax
+- The output can still be CommonJS (main.cjs) - only the config file needs to be .cjs
+
+**CI Status (PR #43):**
+- build: SUCCESS ✓
+- lint: SUCCESS ✓
+- typecheck: SUCCESS ✓
+- pre-release-deploy: SUCCESS ✓
+- (Other checks failing are unrelated: PR template, coverage thresholds, etc.)
 
 ---
