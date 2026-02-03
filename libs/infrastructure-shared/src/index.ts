@@ -1025,3 +1025,24 @@ export class DatabasePerformanceMonitor {
     };
   }
 }
+
+// Re-export error handling utilities for convenience
+export {
+  asyncErrorBoundary,
+  errorBoundary,
+  successResponse,
+  errorResponse,
+  extractErrorInfo,
+  isRetryableError,
+  type ErrorResponse,
+  type ErrorBoundaryOptions,
+  type ErrorCategory,
+  type ErrorSeverity,
+  AppError,
+  ValidationError,
+  NotFoundError,
+  AuthenticationError,
+  AuthorizationError,
+  ConfigurationError,
+  ExternalServiceError,
+} from './error-handling';
