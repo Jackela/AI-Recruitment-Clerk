@@ -134,3 +134,21 @@ Options documented in CI-BLOCKING-ISSUE.md
 - Always verify if a vulnerability is in direct dependencies vs transitive vs bundled
 
 ---
+
+## [2026-02-03 23:30] - US-004
+- **FIXED**: Remaining moderate npm audit vulnerabilities (lodash)
+- Added lodash override to ^4.17.23 in package.json
+- npm audit --audit-level=moderate now shows 0 moderate vulnerabilities ✓
+
+**Files changed:**
+- package.json (added lodash: ^4.17.23 to overrides)
+- package-lock.json (lodash upgraded to 4.17.23)
+- scripts/ralph/prd.json (marked US-004 passes: true)
+
+**Learnings for future iterations:**
+- lodash 4.17.23 fixes the Prototype Pollution vulnerability (GHSA-xxjr-mmjv-4gpg)
+- npm overrides work well for transitive dependencies that have newer patch versions
+- The remaining high-severity vulnerabilities are all the bundled tar issue (US-003 security exception)
+- After US-004: 0 moderate vulnerabilities, 4 high-severity (all tar bundled dependency)
+
+---

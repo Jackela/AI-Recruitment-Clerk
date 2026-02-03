@@ -220,6 +220,7 @@
     "@module-federation/manifest": "0.21.2",
     "@module-federation/node": "2.7.21",
     "@module-federation/rspack": "0.21.2",
-    "koa": "^3.1.1"
+    "koa": "^3.1.1",
+    "lodash": "^4.17.23"
   }
 }
