@@ -548,7 +548,7 @@ npx nx build app-gateway --verbose
 
 ## 📄 License
 
-This project is licensed under the ISC License.
+This project is licensed under the [MIT License](./LICENSE).
 
 ---
 
