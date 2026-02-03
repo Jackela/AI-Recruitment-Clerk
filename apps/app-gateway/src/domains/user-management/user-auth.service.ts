@@ -5,6 +5,11 @@ import type { UserDto } from '@ai-recruitment-clerk/user-management-domain';
 type InternalUser = UserDto & {
   password?: string;
   lastActivity?: Date;
+  securityFlags?: {
+    password_reset_required?: boolean;
+    two_factor_enabled?: boolean;
+    mfa_enforced?: boolean;
+  };
 };
 
 /**
