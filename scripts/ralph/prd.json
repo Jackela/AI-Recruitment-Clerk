@@ -290,8 +290,8 @@
         "npm run lint passes"
       ],
       "priority": 19,
-      "passes": false,
-      "notes": "This is the main entry point. Proper types here set the pattern for the rest of the codebase."
+      "passes": true,
+      "notes": "Main.ts was already properly typed from US-015 (Request, Response from express). RequestWithContext is for authenticated API routes, not infrastructure middleware (timeout/compression) that runs before authentication. Fixed lint issues in libs/types (removed inferrable type annotations). No 'any' types remain in main.ts."
     },
     {
       "id": "US-020",

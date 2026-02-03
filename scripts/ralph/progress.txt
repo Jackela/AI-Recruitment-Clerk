@@ -505,3 +505,21 @@ Options documented in CI-BLOCKING-ISSUE.md
 - Helper functions make common operations more ergonomic
 
 ---
+
+## [2026-02-04 01:35] - US-019
+- **COMPLETED**: Replace 'any' types in app-gateway main.ts
+- Main.ts was already properly typed from US-015 (Request, Response from express)
+- No 'any' types remain in main.ts (verified via grep)
+- Fixed lint issues in libs/types/src/api.types.ts (removed inferrable type annotations)
+- Quality gates verified: typecheck (pass), lint (pass)
+
+**Files changed:**
+- libs/types/src/api.types.ts (removed inferrable type annotations on lines 133, 150)
+- scripts/ralph/prd.json (marked US-019 passes: true)
+
+**Learnings for future iterations:**
+- RequestWithContext from libs/types is for authenticated API routes, not infrastructure middleware
+- Infrastructure middleware (timeout, compression) runs before authentication - uses Express Request/Response
+- ESLint rule @typescript-eslint/no-inferrable-types flags redundant type annotations
+- Always grep for 'any' types to verify removal, don't just visually inspect
+---
