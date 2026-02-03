@@ -207,7 +207,7 @@ AI-Recruitment-Clerk/
 
 | Platform | Status | Configuration |
 |----------|--------|---------------|
-| **Railway** | ✅ Ready | `nixpacks.toml`, `railway.json` |
+| **Railway** | ✅ Ready | `nixpacks.toml`, `config/deployment/railway.json` |
 | **Docker Compose** | ✅ Ready | `docker-compose.yml` |
 | **Local Development** | ✅ Ready | `npm run` scripts |
 
