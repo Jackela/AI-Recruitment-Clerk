@@ -204,8 +204,8 @@
         "Rollback plan documented"
       ],
       "priority": 15,
-      "passes": false,
-      "notes": "Should be AI-friendly and copy-pasteable."
+      "passes": true,
+      "notes": "Created comprehensive docs/CI_RUNBOOK.md mapping all 10 CI workflows to local commands. Includes runtime expectations, prerequisites, troubleshooting, Act CLI integration, and AI-friendly copy-pasteable commands. Rollback plan in docs/ROLLBACK-US-015.md"
     },
     {
       "id": "US-016",
