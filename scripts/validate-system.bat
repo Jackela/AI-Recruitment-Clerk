@@ -66,6 +66,6 @@ echo.
 echo If all services show ✅ and HTTP 200 responses,
 echo the system is ready for E2E testing!
 echo.
-echo Next step: Run run-e2e-tests.bat
+echo Next step: Run scripts\run-e2e-tests.bat
 echo.
 pause

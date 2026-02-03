@@ -40,7 +40,7 @@ cp .env.example .env
 
 #### Windows
 ```cmd
-start-system.bat
+scripts\start-system.bat
 ```
 
 #### Linux/Mac
@@ -52,7 +52,7 @@ start-system.bat
 
 #### Windows
 ```cmd
-validate-system.bat
+scripts\validate-system.bat
 ```
 
 #### Linux/Mac
@@ -64,7 +64,7 @@ validate-system.bat
 
 #### Windows
 ```cmd
-run-e2e-tests.bat
+scripts\run-e2e-tests.bat
 ```
 
 #### Linux/Mac

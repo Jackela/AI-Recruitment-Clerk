@@ -560,7 +560,7 @@ This project is licensed under the [MIT License](./LICENSE).
 
 #### Windows
 ```cmd
-start-system.bat
+scripts\start-system.bat
 ```
 
 #### Linux/macOS
@@ -571,13 +571,13 @@ start-system.bat
 ### System Validation
 ```bash
 ./scripts/validate-system.sh  # Linux/macOS
-validate-system.bat           # Windows
+scripts\validate-system.bat   # Windows
 ```
 
 ### Run E2E Tests
 ```bash
 ./scripts/run-e2e-tests.sh    # Linux/macOS
-run-e2e-tests.bat            # Windows
+scripts\run-e2e-tests.bat     # Windows
 ```
 
 ### Service URLs (After Deployment)

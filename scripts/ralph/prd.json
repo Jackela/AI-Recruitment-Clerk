@@ -92,8 +92,8 @@
         "Root dir has 3 fewer .bat files"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "Check CI workflows for references. Update paths if scripts are called from CI."
+      "passes": true,
+      "notes": "Moved all 3 Windows batch scripts to scripts/ directory. Updated references in run-e2e-tests.bat, validate-system.bat, DEPLOYMENT_GUIDE.md, README.md, PULL_REQUEST_TEMPLATE.md, and docs/PROJECT_STATUS_REPORT.md. Root directory now has only claude-flow.bat remaining (for US-007)."
     },
     {
       "id": "US-007",

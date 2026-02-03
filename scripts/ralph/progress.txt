@@ -181,3 +181,29 @@ Options documented in CI-BLOCKING-ISSUE.md
 - Windows .bat files are separate (US-006) - handled independently
 
 ---
+
+## [2026-02-04 00:15] - US-006
+- **MOVED**: 3 Windows batch scripts from root to scripts/ directory
+- Scripts moved: run-e2e-tests.bat, start-system.bat, validate-system.bat
+- Updated script references in: run-e2e-tests.bat, validate-system.bat
+- Updated documentation: DEPLOYMENT_GUIDE.md, README.md, PULL_REQUEST_TEMPLATE.md, docs/PROJECT_STATUS_REPORT.md
+- Root directory now has only claude-flow.bat remaining (for US-007)
+
+**Files changed:**
+- scripts/run-e2e-tests.bat (moved from root, updated paths)
+- scripts/start-system.bat (moved from root)
+- scripts/validate-system.bat (moved from root, updated paths)
+- DEPLOYMENT_GUIDE.md (updated script paths for Windows)
+- README.md (updated script paths for Windows)
+- PULL_REQUEST_TEMPLATE.md (updated script paths for Windows)
+- docs/PROJECT_STATUS_REPORT.md (updated script paths for Windows)
+- scripts/ralph/prd.json (marked US-006 passes: true)
+
+**Learnings for future iterations:**
+- Windows batch scripts use backslash paths (scripts\file.bat) vs forward slash for .sh
+- When moving batch scripts, internal references to other scripts need updating too
+- The pattern from US-005 and US-006 is consistent: move files, update references, run quality checks
+- Documentation needs separate updates for Windows and Linux/macOS examples
+- CI workflows don't call these batch scripts directly (they use docker-compose commands)
+
+---

@@ -7,7 +7,7 @@ echo.
 echo Step 1: Checking if system is running...
 docker-compose ps | findstr "Up"
 if %ERRORLEVEL% neq 0 (
-    echo ERROR: System is not running. Please start with start-system.bat first
+    echo ERROR: System is not running. Please start with scripts\start-system.bat first
     pause
     exit /b 1
 )

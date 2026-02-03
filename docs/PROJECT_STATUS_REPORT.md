@@ -214,7 +214,7 @@ AI-Recruitment-Clerk/
 
 ```bash
 # Windows
-start-system.bat
+scripts\start-system.bat
 
 # Linux/macOS
 ./scripts/start-system.sh

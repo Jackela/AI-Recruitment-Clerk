@@ -25,9 +25,9 @@ This Pull Request represents the **final milestone** in the AI Recruitment Clerk
 
 ### ✅ Deployment Automation
 - **Cross-platform scripts**: Windows `.bat` and Linux/macOS `.sh` versions
-- **One-click deployment**: `start-system.bat` / `scripts/start-system.sh`
-- **System validation**: `validate-system.bat` / `scripts/validate-system.sh`
-- **E2E testing**: `run-e2e-tests.bat` / `scripts/run-e2e-tests.sh`
+- **One-click deployment**: `scripts\start-system.bat` / `scripts/start-system.sh`
+- **System validation**: `scripts\validate-system.bat` / `scripts/validate-system.sh`
+- **E2E testing**: `scripts\run-e2e-tests.bat` / `scripts/run-e2e-tests.sh`
 
 ### ✅ Testing Infrastructure
 - **Updated Playwright configuration** for containerized testing
@@ -117,9 +117,9 @@ All services use multi-stage builds with security hardening:
 ### Deployment Steps
 1. **Clone repository** and navigate to project directory
 2. **Configure environment**: Copy and edit `.env` file
-3. **Start system**: Run `./scripts/start-system.sh` or `start-system.bat`
-4. **Validate health**: Run `./scripts/validate-system.sh` or `validate-system.bat`
-5. **Execute tests**: Run `./scripts/run-e2e-tests.sh` or `run-e2e-tests.bat`
+3. **Start system**: Run `./scripts/start-system.sh` or `scripts\start-system.bat`
+4. **Validate health**: Run `./scripts/validate-system.sh` or `scripts\validate-system.bat`
+5. **Execute tests**: Run `./scripts/run-e2e-tests.sh` or `scripts\run-e2e-tests.bat`
 
 ### Expected Results
 - ✅ All Docker containers running successfully
