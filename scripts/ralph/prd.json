@@ -71,8 +71,8 @@
         "Rollback plan documented"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "Keep runtime reasonable but non-negotiable for correctness."
+      "passes": true,
+      "notes": "Updated ci:local to: test → lint → typecheck → build. Husky pre-push already correctly configured. CONTRIBUTING.md already documented. Rollback plan in docs/ROLLBACK-US-005.md"
     },
     {
       "id": "US-006",

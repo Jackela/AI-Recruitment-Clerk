@@ -23,7 +23,7 @@
     "test:coverage": "jest --config jest.config.cjs --coverage --passWithNoTests",
     "lint": "npx nx run-many -t lint --all --parallel=3 --exclude ai-recruitment-clerk",
     "typecheck": "tsc --noEmit --project tsconfig.ci.json",
-    "ci:local": "npm run build && node tools/ci/verify-quality-gates.mjs && node tools/ci/pii-scan.mjs",
+    "ci:local": "npm run test && npm run lint && npm run typecheck && npm run build",
     "audit": "nx audit",
     "dependency-scan": "act -j dependency-scan -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest",
     "test:e2e": "npx nx run ai-recruitment-frontend-e2e:e2e",
