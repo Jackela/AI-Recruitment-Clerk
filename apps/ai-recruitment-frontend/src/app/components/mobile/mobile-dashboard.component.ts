@@ -22,6 +22,11 @@ import {
   MobileSwipeComponent
 } from './mobile-swipe.component';
 import { TouchGestureService } from '../../services/mobile/touch-gesture.service';
+import type {
+  DashboardStat} from './dashboard-stats.component';
+import {
+  DashboardStatsComponent
+} from './dashboard-stats.component';
 
 /**
  * Defines the shape of the dashboard card.
@@ -67,6 +72,7 @@ export interface QuickAction {
     RouterModule,
     MobileNavigationComponent,
     MobileSwipeComponent,
+    DashboardStatsComponent,
   ],
   template: `
     <!-- Mobile Navigation -->
@@ -123,41 +129,7 @@ export interface QuickAction {
       </div>
 
       <!-- Stats Overview -->
-      <div class="stats-overview" *ngIf="overviewStats.length > 0">
-        <h2 class="section-title">Overview</h2>
-        <div class="stats-grid">
-          <div
-            *ngFor="let stat of overviewStats"
-            class="stat-card"
-            [class]="'stat-card--' + stat.color"
-          >
-            <div class="stat-icon">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path [attr.d]="stat.icon" />
-              </svg>
-            </div>
-            <div class="stat-content">
-              <div class="stat-value">{{ stat.value }}</div>
-              <div class="stat-label">{{ stat.title }}</div>
-              <div class="stat-change" *ngIf="stat.change">
-                <span
-                  class="change-indicator"
-                  [class]="'change-' + stat.change.type"
-                >
-                  {{ stat.change.type === 'increase' ? '↗' : '↘' }}
-                  {{ Math.abs(stat.change.value) }}%
-                </span>
-                <span class="change-period">{{ stat.change.period }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <arc-dashboard-stats [stats]="overviewStats"></arc-dashboard-stats>
 
       <!-- Dashboard Cards -->
       <div class="dashboard-cards" *ngIf="dashboardCards.length > 0">
@@ -451,111 +423,6 @@ export interface QuickAction {
         }
       }
 
-      .section-title {
-        font-size: 20px;
-        font-weight: 600;
-        color: #2c3e50;
-        margin: 0 0 16px 0;
-      }
-
-      .stats-overview {
-        margin-bottom: var(--spacing-6, 1.5rem);
-
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: var(--spacing-3, 0.75rem);
-
-          .stat-card {
-            background: var(--color-surface, white);
-            border-radius: var(--border-radius-lg, 12px);
-            padding: var(--spacing-4, 1rem);
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-3, 0.75rem);
-            box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.06));
-
-            .stat-icon {
-              width: var(--spacing-9, 2.25rem);
-              height: var(--spacing-9, 2.25rem);
-              border-radius: var(--border-radius-md, 8px);
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              flex-shrink: 0;
-            }
-
-            .stat-content {
-              flex: 1;
-              min-width: 0;
-
-              .stat-value {
-                font-size: 18px;
-                font-weight: 700;
-                color: #2c3e50;
-                line-height: 1.2;
-              }
-
-              .stat-label {
-                font-size: 12px;
-                color: #6c757d;
-                font-weight: 500;
-                margin-top: 2px;
-              }
-
-              .stat-change {
-                display: flex;
-                align-items: center;
-                gap: var(--spacing-1, 0.25rem);
-                margin-top: var(--spacing-1, 0.25rem);
-
-                .change-indicator {
-                  font-size: 0.6875rem;
-                  font-weight: 600;
-                  padding: var(--spacing-1, 0.25rem) var(--spacing-1, 0.25rem);
-                  border-radius: var(--border-radius-sm, 4px);
-
-                  &.change-increase {
-                    background: rgba(40, 167, 69, 0.1);
-                    color: #28a745;
-                  }
-
-                  &.change-decrease {
-                    background: rgba(231, 76, 60, 0.1);
-                    color: #e74c3c;
-                  }
-                }
-
-                .change-period {
-                  font-size: 10px;
-                  color: #95a5a6;
-                }
-              }
-            }
-
-            &--primary .stat-icon {
-              background: rgba(52, 152, 219, 0.1);
-              color: #3498db;
-            }
-
-            &--success .stat-icon {
-              background: rgba(40, 167, 69, 0.1);
-              color: #28a745;
-            }
-
-            &--warning .stat-icon {
-              background: rgba(255, 193, 7, 0.1);
-              color: #ffc107;
-            }
-
-            &--danger .stat-icon {
-              background: rgba(231, 76, 60, 0.1);
-              color: #e74c3c;
-            }
-          }
-        }
-      }
-
       .dashboard-cards {
         margin-bottom: var(--spacing-6, 1.5rem);
 
@@ -831,10 +698,6 @@ export interface QuickAction {
           gap: 16px;
         }
 
-        .stats-overview .stats-grid {
-          grid-template-columns: repeat(4, 1fr);
-        }
-
         .mobile-fab {
           display: none;
         }
@@ -843,8 +706,6 @@ export interface QuickAction {
   ],
 })
 export class MobileDashboardComponent implements OnInit, OnDestroy {
-  // 多代理修复: 模板中需要访问Math对象
-  protected readonly Math = Math;
   public pageTitle = 'Dashboard';
   public pageSubtitle = 'Recruitment insights at a glance';
 
@@ -936,7 +797,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
   ];
 
   // Overview Stats
-  public overviewStats: DashboardCard[] = [
+  public overviewStats: DashboardStat[] = [
     {
       id: 'total-resumes',
       title: 'Total Resumes',
@@ -944,8 +805,6 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
       icon: 'M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2Z',
       color: 'primary',
       change: { value: 12, type: 'increase', period: 'this week' },
-      priority: 'high',
-      size: 'small',
     },
     {
       id: 'active-jobs',
@@ -953,8 +812,6 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
       value: 8,
       icon: 'M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22S19,14.25 19,9A7,7 0 0,0 12,2Z',
       color: 'success',
-      priority: 'high',
-      size: 'small',
     },
     {
       id: 'pending-reviews',
@@ -962,8 +819,6 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
       value: 23,
       icon: 'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z',
       color: 'warning',
-      priority: 'medium',
-      size: 'small',
     },
     {
       id: 'hired-candidates',
@@ -972,8 +827,6 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
       icon: 'M12,2A2,2 0 0,1 14,4C14,4.74 13.6,5.39 13,5.73V7A7,7 0 0,1 20,14V16A1,1 0 0,0 21,17H22V19H2V17H3A1,1 0 0,0 4,16V14A7,7 0 0,1 11,7V5.73C10.4,5.39 10,4.74 10,4A2,2 0 0,1 12,2Z',
       color: 'success',
       change: { value: 25, type: 'increase', period: 'vs last month' },
-      priority: 'high',
-      size: 'small',
     },
   ];
 

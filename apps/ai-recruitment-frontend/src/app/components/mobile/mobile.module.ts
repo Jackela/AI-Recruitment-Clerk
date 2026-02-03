@@ -8,6 +8,7 @@ import { MobileNavigationComponent } from './mobile-navigation.component';
 import { MobileUploadComponent } from './mobile-upload.component';
 import { MobileSwipeComponent } from './mobile-swipe.component';
 import { MobileDashboardComponent } from './mobile-dashboard.component';
+import { DashboardStatsComponent } from './dashboard-stats.component';
 import { MobileResultsComponent } from './mobile-results.component';
 import { MobileResultsDisplayComponent } from './mobile-results-display.component';
 import { MobileResultsFilterComponent } from './mobile-results-filter.component';
@@ -41,6 +42,7 @@ import { PWAService } from '../../services/mobile/pwa.service';
     MobileUploadComponent,
     MobileSwipeComponent,
     MobileDashboardComponent,
+    DashboardStatsComponent,
     MobileResultsComponent,
     MobileResultsDisplayComponent,
     MobileResultsFilterComponent,
@@ -52,6 +54,7 @@ import { PWAService } from '../../services/mobile/pwa.service';
     MobileUploadComponent,
     MobileSwipeComponent,
     MobileDashboardComponent,
+    DashboardStatsComponent,
     MobileResultsComponent,
     MobileResultsDisplayComponent,
     MobileResultsFilterComponent,

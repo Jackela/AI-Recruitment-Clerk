@@ -815,3 +815,34 @@ Options documented in CI-BLOCKING-ISSUE.md
 - Business logic in services is independently testable without Angular TestBed
 
 ---
+
+## [2026-02-04 08:00] - US-031
+- **COMPLETED**: Split mobile-dashboard.component.ts - extracted stats cards
+- Created dashboard-stats.component.ts (193 lines) for statistics display
+- Moved stats-related template and logic to new component
+- Stats component handles: stat cards display, change indicators (increase/decrease), responsive grid (2 cols mobile, 4 cols desktop)
+- Updated mobile-dashboard.component.ts to use <arc-dashboard-stats> selector
+- Created DashboardStat and StatChange interfaces for typed stats input
+- Original component reduced from 1359 to 1212 lines (~147 line reduction, ~11%)
+- Updated mobile.module.ts to import and export DashboardStatsComponent
+- Removed stats-overview and section-title styles from parent component (now in stats component)
+- Quality gates verified: lint (25 projects), typecheck (pass)
+
+**Files changed:**
+- apps/ai-recruitment-frontend/src/app/components/mobile/dashboard-stats.component.ts (created - 193 lines)
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-dashboard.component.ts (refactored - 1212 lines, was 1359)
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile.module.ts (added DashboardStatsComponent)
+- scripts/ralph/prd.json (marked US-031 passes: true)
+
+**Learnings for future iterations:**
+- Component splitting for dashboard stats follows same pattern as mobile-results display/filter
+- DashboardStat interface is simpler than DashboardCard - only needs id, title, value, icon, color, optional change
+- StatChange interface: { value: number, type: 'increase' | 'decrease', period: string }
+- Stats component is self-contained with its own Math reference for template (Math.abs)
+- Styles moved to child component include: stats-overview container, section-title, stats-grid, stat-card variants
+- Media query for desktop (4 columns) also moved to stats component
+- Parent component now uses <arc-dashboard-stats [stats]="overviewStats"> for clean declarative usage
+- Input decorator requires value import (not type import): import { Component, Input } from '@angular/core'
+- Empty lifecycle methods (ngOnInit, ngOnDestroy) trigger lint warnings - remove if not needed
+
+---
