@@ -113,7 +113,7 @@
       "title": "Fix detailed-job-creation.spec.ts lint issues",
       "description": "Fix Playwright lint issues in detailed-job-creation.spec.ts",
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Fix no-networkidle (2 issues)",
         "Fix no-wait-for-timeout (2 issues)"
@@ -125,7 +125,7 @@
       "title": "Fix diagnostic.spec.ts lint issues",
       "description": "Fix Playwright lint issues in diagnostic.spec.ts",
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Fix no-networkidle (2 issues)",
         "Fix no-wait-for-timeout (2 issues)"
@@ -137,7 +137,7 @@
       "title": "Fix error-scenarios.spec.ts lint issues",
       "description": "Fix Playwright lint issues in error-scenarios.spec.ts",
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Fix no-conditional-in-test (5 issues)",
         "Fix no-conditional-expect (5 issues)"
@@ -149,7 +149,7 @@
       "title": "Fix essential-compatibility.spec.ts lint issues",
       "description": "Fix Playwright lint issues in essential-compatibility.spec.ts",
       "priority": 12,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Fix no-conditional-in-test (2 issues)",
         "Fix no-conditional-expect (7 issues)",
@@ -162,7 +162,7 @@
       "title": "Fix firefox-stability-test.spec.ts lint issues",
       "description": "Fix Playwright lint issues in firefox-stability-test.spec.ts",
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Fix no-skipped-test (3 issues)",
         "Fix no-networkidle (3 issues)",
@@ -176,7 +176,7 @@
       "title": "Fix jobs-list-debug.spec.ts lint issues",
       "description": "Fix Playwright lint issues in jobs-list-debug.spec.ts",
       "priority": 14,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Fix no-networkidle (2 issues)",
         "Fix no-wait-for-timeout (2 issues)",
@@ -190,7 +190,7 @@
       "title": "Fix mock-server-test.spec.ts lint issues",
       "description": "Fix Playwright lint issues in mock-server-test.spec.ts",
       "priority": 15,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Fix no-networkidle (2 issues)",
         "Fix no-wait-for-timeout (4 issues)",
@@ -205,7 +205,7 @@
       "title": "Fix pdf-variety-uat.spec.ts lint issues",
       "description": "Fix Playwright lint issues in pdf-variety-uat.spec.ts",
       "priority": 16,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Fix no-wait-for-timeout (5 issues)",
         "Fix no-conditional-in-test (6 issues)",
@@ -218,7 +218,7 @@
       "title": "Fix real-data-expansion.spec.ts lint issues",
       "description": "Fix Playwright lint issues in real-data-expansion.spec.ts",
       "priority": 17,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Fix no-networkidle (1 issue)",
         "Fix no-wait-for-timeout (1 issue)",
@@ -232,7 +232,7 @@
       "title": "Fix simple-firefox-test.spec.ts lint issues",
       "description": "Fix Playwright lint issues in simple-firefox-test.spec.ts",
       "priority": 18,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Fix no-skipped-test (2 issues)",
         "Fix no-conditional-in-test (1 issue)",

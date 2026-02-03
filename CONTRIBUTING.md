@@ -61,6 +61,16 @@ This project and everyone participating in it is governed by our [Code of Conduc
    npm test
    ```
 
+### Local CI Parity (Pre-push)
+
+This repo enforces CI parity checks locally before pushing. A Husky `pre-push` hook runs the full CI-equivalent suite:
+
+```bash
+npm run ci:local
+```
+
+If you intentionally need to bypass (e.g., emergency hotfix), you may use `HUSKY=0 git push`, but avoid this in normal workflows.
+
 ## 🔄 Development Workflow
 
 We follow **Git Flow** branching model:
