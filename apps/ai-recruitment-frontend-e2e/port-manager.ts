@@ -197,7 +197,7 @@ export class PortManager {
         const processInfo = await this.getProcessOnPort(port);
         status.processId = processInfo.pid;
         status.processName = processInfo.name;
-      } catch (error) {
+      } catch {
         // Process info not available
       }
     }
@@ -343,7 +343,7 @@ export class PortManager {
             }
 
             if (killedAny) break;
-          } catch (netstatError) {
+          } catch {
             if (attempt === 2) {
               console.log(
                 `ℹ️ No process found on port ${port} after ${attempt + 1} attempts`,
@@ -403,7 +403,7 @@ export class PortManager {
             }
 
             if (killedAny) break;
-          } catch (lsofError) {
+          } catch {
             if (attempt === 2) {
               console.log(
                 `ℹ️ No process found on port ${port} after ${attempt + 1} attempts`,
@@ -633,7 +633,7 @@ export class PortManager {
           console.log(`✅ ${config.name} is ready after ${attempts} attempts`);
           return true;
         }
-      } catch (error) {
+      } catch {
         // Service not ready yet
       }
 
