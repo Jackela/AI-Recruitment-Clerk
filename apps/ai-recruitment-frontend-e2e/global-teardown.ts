@@ -6,7 +6,7 @@ import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-async function globalTeardown() {
+async function globalTeardown(): Promise<void> {
   console.log('🛑 Starting E2E test environment teardown...');
 
   // Set up timeout for the entire teardown process
@@ -47,7 +47,7 @@ async function globalTeardown() {
             } else {
               try {
                 process.kill(pid);
-              } catch (e) {
+              } catch {
                 // ignore
               }
             }

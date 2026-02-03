@@ -87,7 +87,7 @@ export async function withFirefoxConnectionRetry<T>(
   operation: () => Promise<T>,
   maxRetries = 3,
 ): Promise<T> {
-  let lastError: Error;
+  let lastError: Error = new Error('Operation failed');
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
@@ -118,5 +118,6 @@ export async function withFirefoxConnectionRetry<T>(
     }
   }
 
-  throw lastError!;
+  // lastError is guaranteed to be set here since we entered the loop at least once
+  throw lastError;
 }

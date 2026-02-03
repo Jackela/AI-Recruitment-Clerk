@@ -207,7 +207,7 @@ class E2EMonitoring {
     }
   }
   
-  checkFailureStreaks(currentMetrics) {
+  checkFailureStreaks() {
     const recentRuns = this.metricsHistory.runs.slice(-MONITORING_CONFIG.alertThresholds.failureStreak);
     
     if (recentRuns.length < MONITORING_CONFIG.alertThresholds.failureStreak) {

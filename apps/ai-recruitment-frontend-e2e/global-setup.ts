@@ -6,7 +6,7 @@ import {
   logTestEnvironment,
 } from './test-environment';
 
-async function globalSetup() {
+async function globalSetup(): Promise<void> {
   console.log('🚀 Starting E2E test environment setup...');
 
   try {

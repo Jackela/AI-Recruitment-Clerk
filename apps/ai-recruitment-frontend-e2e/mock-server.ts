@@ -53,9 +53,9 @@ const mockReports = [
  * @returns A promise that resolves to number value.
  */
 export async function startMockServer(): Promise<number> {
-  if (mockServer) {
+  if (mockServer && serverPort !== null) {
     console.log('🔄 Mock server already running on port', serverPort);
-    return serverPort!;
+    return serverPort;
   }
 
   // Pre-startup cleanup to prevent port conflicts
@@ -180,18 +180,18 @@ export async function startMockServer(): Promise<number> {
       jdText.toLowerCase().includes('aws') &&
       resumeText.toLowerCase().includes('aws')
     ) {
-      (matchedSkills as string[]).push('aws');
+      matchedSkills.push('aws');
     } else if (jdText.toLowerCase().includes('aws')) {
-      (missingSkills as string[]).push('aws');
+      missingSkills.push('aws');
     }
 
     if (
       jdText.toLowerCase().includes('kubernetes') &&
       resumeText.toLowerCase().includes('kubernetes')
     ) {
-      (matchedSkills as string[]).push('kubernetes');
+      matchedSkills.push('kubernetes');
     } else if (jdText.toLowerCase().includes('kubernetes')) {
-      (missingSkills as string[]).push('kubernetes');
+      missingSkills.push('kubernetes');
     }
 
     res.json({
@@ -290,30 +290,31 @@ export async function startMockServer(): Promise<number> {
   });
 
   // Start the server with allocated port and enhanced error handling
+  const currentPort = serverPort as number; // serverPort is guaranteed to be set at this point
   return new Promise((resolve, reject) => {
-    mockServer = app.listen(serverPort!, () => {
+    mockServer = app.listen(currentPort, () => {
       console.log(
-        `🚀 Mock API server started for E2E testing on port ${serverPort}`,
+        `🚀 Mock API server started for E2E testing on port ${currentPort}`,
       );
-      resolve(serverPort!);
+      resolve(currentPort);
     });
 
-    mockServer.on('error', (error: any) => {
+    mockServer.on('error', (error: NodeJS.ErrnoException) => {
       console.error('🚨 Mock server startup error:', error);
       if (error.code === 'EADDRINUSE') {
-        console.error(`🚨 Port ${serverPort} is already in use!`);
+        console.error(`🚨 Port ${currentPort} is already in use!`);
         // Attempt automatic recovery
         portManager
-          .forceKillPort(serverPort!)
+          .forceKillPort(currentPort)
           .then(() => {
             console.log('🔄 Attempting to restart after port cleanup...');
             setTimeout(() => {
               if (mockServer) {
-                mockServer.listen(serverPort!, () => {
+                mockServer.listen(currentPort, () => {
                   console.log(
-                    `🚀 Mock API server restarted on port ${serverPort}`,
+                    `🚀 Mock API server restarted on port ${currentPort}`,
                   );
-                  resolve(serverPort!);
+                  resolve(currentPort);
                 });
               }
             }, 2000);
@@ -321,7 +322,7 @@ export async function startMockServer(): Promise<number> {
           .catch(() => {
             reject(
               new Error(
-                `Failed to start mock server: port ${serverPort} unavailable`,
+                `Failed to start mock server: port ${currentPort} unavailable`,
               ),
             );
           });
@@ -337,7 +338,7 @@ export async function startMockServer(): Promise<number> {
       if (!mockServer?.listening) {
         reject(
           new Error(
-            `Mock server failed to start within timeout on port ${serverPort}`,
+            `Mock server failed to start within timeout on port ${currentPort}`,
           ),
         );
       }
@@ -391,7 +392,7 @@ export async function stopMockServer(): Promise<void> {
  * Performs the reset mock server operation.
  * @returns The result of the operation.
  */
-export function resetMockServer() {
+export function resetMockServer(): void {
   // Reset mock data to initial state
   mockJobs.splice(
     0,
@@ -431,7 +432,7 @@ export function getMockServerStatus(): {
     running: mockServer !== null && mockServer.listening,
     port: serverPort,
     healthy:
-      mockServer !== null && mockServer.listening && !(mockServer as any).destroyed,
+      mockServer !== null && mockServer.listening && !((mockServer as unknown as { destroyed?: boolean }).destroyed),
   };
 }
 
@@ -471,9 +472,15 @@ export function getMockServerPort(): number | null {
 }
 
 // Legacy MSW exports for compatibility (no-ops)
-export const handlers = [];
+export const handlers: unknown[] = [];
 export const mockServer_MSW = {
-  listen: () => {},
-  close: () => {},
-  resetHandlers: () => {},
+  listen: (): void => {
+    // No-op for compatibility
+  },
+  close: (): void => {
+    // No-op for compatibility
+  },
+  resetHandlers: (): void => {
+    // No-op for compatibility
+  },
 };

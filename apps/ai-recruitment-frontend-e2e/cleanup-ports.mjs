@@ -29,7 +29,7 @@ async function killProcessOnPort(port) {
           try {
             await execAsync(`taskkill /PID ${pid} /F`);
             console.log(`✅ Killed process ${pid} on port ${port}`);
-          } catch (error) {
+          } catch {
             // Process might already be dead
             console.log(`ℹ️ Process ${pid} on port ${port} already terminated`);
           }
@@ -45,12 +45,12 @@ async function killProcessOnPort(port) {
           await execAsync(`kill -9 ${pid}`);
           console.log(`✅ Killed process ${pid} on port ${port}`);
         }
-      } catch (error) {
+      } catch {
         // No processes found on port
         console.log(`ℹ️ No processes found on port ${port}`);
       }
     }
-  } catch (error) {
+  } catch {
     console.log(`ℹ️ No processes to kill on port ${port}`);
   }
 }
