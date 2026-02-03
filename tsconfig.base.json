@@ -49,7 +49,8 @@
       "@ai-recruitment-clerk/resume-processing-domain": ["libs/resume-processing-domain/src/index.ts"],
       "@ai-recruitment-clerk/usage-management-domain": ["libs/usage-management-domain/src/index.ts"],
       "@ai-recruitment-clerk/user-management-domain": ["libs/user-management-domain/src/index.ts"],
-      "@ai-recruitment-clerk/types": ["libs/types/src/index.ts"]
+      "@ai-recruitment-clerk/types": ["libs/types/src/index.ts"],
+      "@ai-recruitment-clerk/service-base": ["libs/service-base/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
