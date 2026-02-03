@@ -4,608 +4,328 @@
   "userStories": [
     {
       "id": "US-001",
-      "title": "Run eslint --fix on api-contracts",
-      "description": "Auto-fix lint issues in api-contracts library",
+      "title": "Fix e2e TypeScript issues - utility files",
+      "description": "Fix TypeScript lint issues in e2e utility files (non-spec)",
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "Run npx nx lint api-contracts --fix",
-        "npm run typecheck passes"
+        "Fix browser-stability.ts (1 non-null assertion)",
+        "Fix cleanup-ports.mjs (3 unused vars)",
+        "Fix global-setup.ts (1 return type)",
+        "Fix global-teardown.ts (2 issues)",
+        "Fix mock-server.ts (9 issues)",
+        "Fix monitoring-system.mjs (1 unused var)",
+        "Fix optimized-test-runner.mjs (1 unused var)",
+        "Fix test-hooks.ts (4 any types)"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-002",
-      "title": "Run eslint --fix on shared-nats-client",
-      "description": "Auto-fix lint issues in shared-nats-client library",
+      "title": "Fix e2e TypeScript issues - manager files",
+      "description": "Fix TypeScript lint issues in port-manager.ts and robust-cleanup.ts",
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "Run npx nx lint shared-nats-client --fix",
+        "Fix port-manager.ts (15 issues: accessibility, unused vars)",
+        "Fix robust-cleanup.ts (5 issues: accessibility, unused vars)",
         "npm run typecheck passes"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-003",
-      "title": "Run eslint --fix on infrastructure-shared",
-      "description": "Auto-fix lint issues in infrastructure-shared library",
+      "title": "Fix e2e connection-stability.ts Playwright issues",
+      "description": "Fix Playwright no-wait-for-timeout in connection-stability.ts",
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "Run npx nx lint infrastructure-shared --fix",
-        "npm run typecheck passes"
+        "Replace page.waitForTimeout() with proper waiting strategies",
+        "Use expect().toBeVisible() or page.waitForLoadState() instead"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-004",
-      "title": "Run eslint --fix on candidate-scoring-domain",
-      "description": "Auto-fix lint issues in candidate-scoring-domain library",
+      "title": "Fix e2e hydration.ts Playwright issues",
+      "description": "Fix Playwright no-wait-for-selector in test-utils/hydration.ts",
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "Run npx nx lint candidate-scoring-domain --fix",
-        "npm run typecheck passes"
+        "Replace page.waitForSelector() with locator-based waiting",
+        "Use page.locator().waitFor() instead"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-005",
-      "title": "Run eslint --fix on report-generation-domain",
-      "description": "Auto-fix lint issues in report-generation-domain library",
+      "title": "Fix console-errors.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in console-errors.spec.ts",
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "Run npx nx lint report-generation-domain --fix",
-        "npm run typecheck passes"
+        "Fix no-conditional-in-test (3 issues)",
+        "Fix no-wait-for-timeout (1 issue)"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-006",
-      "title": "Run eslint --fix on usage-management-domain",
-      "description": "Auto-fix lint issues in usage-management-domain library",
+      "title": "Fix debug-selectors.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in debug-selectors.spec.ts",
       "priority": 6,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "Run npx nx lint usage-management-domain --fix",
-        "npm run typecheck passes"
+        "Fix no-networkidle (1 issue)",
+        "Fix no-wait-for-timeout (1 issue)",
+        "Fix no-conditional-in-test (1 issue)"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-007",
-      "title": "Run eslint --fix on incentive-system-domain",
-      "description": "Auto-fix lint issues in incentive-system-domain library",
+      "title": "Fix debug-user-flow.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in debug-user-flow.spec.ts",
       "priority": 7,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "Run npx nx lint incentive-system-domain --fix",
-        "npm run typecheck passes"
+        "Fix no-networkidle (5 issues)",
+        "Fix no-wait-for-timeout (2 issues)",
+        "Fix no-conditional-in-test (4 issues)"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-008",
-      "title": "Run eslint --fix on marketing-domain",
-      "description": "Auto-fix lint issues in marketing-domain library",
+      "title": "Fix deep-console-debug.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in deep-console-debug.spec.ts",
       "priority": 8,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "Run npx nx lint marketing-domain --fix",
-        "npm run typecheck passes"
+        "Fix no-networkidle (1 issue)",
+        "Fix no-wait-for-timeout (1 issue)",
+        "Fix no-conditional-in-test (2 issues)"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-009",
-      "title": "Run eslint --fix on user-management-domain",
-      "description": "Auto-fix lint issues in user-management-domain library",
+      "title": "Fix detailed-job-creation.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in detailed-job-creation.spec.ts",
       "priority": 9,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "Run npx nx lint user-management-domain --fix",
-        "npm run typecheck passes"
+        "Fix no-networkidle (2 issues)",
+        "Fix no-wait-for-timeout (2 issues)"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-010",
-      "title": "Run eslint --fix on shared-dtos",
-      "description": "Auto-fix lint issues in shared-dtos library",
+      "title": "Fix diagnostic.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in diagnostic.spec.ts",
       "priority": 10,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "Run npx nx lint shared-dtos --fix",
-        "npm run typecheck passes"
+        "Fix no-networkidle (2 issues)",
+        "Fix no-wait-for-timeout (2 issues)"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-011",
-      "title": "Fix shared-dtos models/",
-      "description": "Fix lint issues in libs/shared-dtos/src/models/",
+      "title": "Fix error-scenarios.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in error-scenarios.spec.ts",
       "priority": 11,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in models/",
-        "npm run typecheck passes"
+        "Fix no-conditional-in-test (5 issues)",
+        "Fix no-conditional-expect (5 issues)"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-012",
-      "title": "Fix shared-dtos domains/",
-      "description": "Fix lint issues in libs/shared-dtos/src/domains/",
+      "title": "Fix essential-compatibility.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in essential-compatibility.spec.ts",
       "priority": 12,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in domains/",
-        "npm run typecheck passes"
+        "Fix no-conditional-in-test (2 issues)",
+        "Fix no-conditional-expect (7 issues)",
+        "Fix prefer-web-first-assertions (2 issues)"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-013",
-      "title": "Fix shared-dtos privacy/",
-      "description": "Fix lint issues in libs/shared-dtos/src/privacy/",
+      "title": "Fix firefox-stability-test.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in firefox-stability-test.spec.ts",
       "priority": 13,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in privacy/",
-        "npm run typecheck passes"
+        "Fix no-skipped-test (3 issues)",
+        "Fix no-networkidle (3 issues)",
+        "Fix no-conditional-in-test (2 issues)",
+        "Fix no-wait-for-timeout (1 issue)"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-014",
-      "title": "Fix shared-dtos common/",
-      "description": "Fix lint issues in libs/shared-dtos/src/common/",
+      "title": "Fix jobs-list-debug.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in jobs-list-debug.spec.ts",
       "priority": 14,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in common/",
-        "npm run typecheck passes"
+        "Fix no-networkidle (2 issues)",
+        "Fix no-wait-for-timeout (2 issues)",
+        "Fix no-conditional-in-test (1 issue)",
+        "Fix unused var win (1 issue)"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-015",
-      "title": "Fix shared-dtos contracts/",
-      "description": "Fix lint issues in libs/shared-dtos/src/contracts/",
+      "title": "Fix mock-server-test.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in mock-server-test.spec.ts",
       "priority": 15,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in contracts/",
-        "npm run typecheck passes"
+        "Fix no-networkidle (2 issues)",
+        "Fix no-wait-for-timeout (4 issues)",
+        "Fix no-conditional-in-test (8 issues)",
+        "Fix no-conditional-expect (5 issues)",
+        "Fix unused vars (2 issues)"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-016",
-      "title": "Fix shared-dtos decorators/error-handling.decorators.ts",
-      "description": "Fix lint issues in this single file (10 warnings)",
+      "title": "Fix pdf-variety-uat.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in pdf-variety-uat.spec.ts",
       "priority": 16,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in error-handling.decorators.ts",
-        "npm run typecheck passes"
+        "Fix no-wait-for-timeout (5 issues)",
+        "Fix no-conditional-in-test (6 issues)",
+        "Fix unused vars (4 issues)"
       ],
-      "technicalNotes": [
-        "Fix any types in decorator functions",
-        "Fix non-null assertion"
-      ]
+      "technicalNotes": []
     },
     {
       "id": "US-017",
-      "title": "Fix shared-dtos database/performance-monitor.ts",
-      "description": "Fix lint issues in this single file",
+      "title": "Fix real-data-expansion.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in real-data-expansion.spec.ts",
       "priority": 17,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in performance-monitor.ts",
-        "npm run typecheck passes"
+        "Fix no-networkidle (1 issue)",
+        "Fix no-wait-for-timeout (1 issue)",
+        "Fix valid-title (1 issue)",
+        "Fix unused vars (2 issues)"
       ],
-      "technicalNotes": [
-        "Add public modifiers to class methods"
-      ]
+      "technicalNotes": []
     },
     {
       "id": "US-018",
-      "title": "Fix shared-dtos errors/domain-errors.ts",
-      "description": "Fix lint issues in domain-errors.ts",
+      "title": "Fix simple-firefox-test.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in simple-firefox-test.spec.ts",
       "priority": 18,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in domain-errors.ts",
-        "npm run typecheck passes"
+        "Fix no-skipped-test (2 issues)",
+        "Fix no-conditional-in-test (1 issue)",
+        "Fix no-conditional-expect (2 issues)",
+        "Fix prefer-web-first-assertions (1 issue)"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-019",
-      "title": "Fix shared-dtos errors/enhanced-error-types.ts",
-      "description": "Fix lint issues in enhanced-error-types.ts",
+      "title": "Fix simple-jobs-page.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in simple-jobs-page.spec.ts",
       "priority": 19,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in enhanced-error-types.ts",
-        "npm run typecheck passes"
+        "Fix no-networkidle (2 issues)",
+        "Fix no-wait-for-timeout (2 issues)",
+        "Fix no-conditional-in-test (2 issues)"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-020",
-      "title": "Fix shared-dtos errors/error-correlation.ts",
-      "description": "Fix lint issues in error-correlation.ts",
+      "title": "Fix simple-test.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in simple-test.spec.ts",
       "priority": 20,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in error-correlation.ts",
-        "npm run typecheck passes"
+        "Fix no-wait-for-timeout (2 issues)",
+        "Fix no-conditional-in-test (3 issues)",
+        "Fix no-conditional-expect (3 issues)"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-021",
-      "title": "Fix shared-dtos errors/error-interceptors.ts",
-      "description": "Fix lint issues in error-interceptors.ts",
+      "title": "Fix unified-analysis-regression.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in unified-analysis-regression.spec.ts",
       "priority": 21,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in error-interceptors.ts",
-        "npm run typecheck passes"
+        "Fix no-conditional-in-test (1 issue)",
+        "Fix no-conditional-expect (1 issue)"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-022",
-      "title": "Fix shared-dtos errors/error-response-formatter.ts",
-      "description": "Fix lint issues in error-response-formatter.ts",
+      "title": "Fix webkit-final-test.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in webkit-final-test.spec.ts",
       "priority": 22,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in error-response-formatter.ts",
-        "npm run typecheck passes"
+        "Fix no-skipped-test (5 issues)",
+        "Fix no-conditional-in-test (2 issues)",
+        "Fix no-conditional-expect (5 issues)",
+        "Fix prefer-web-first-assertions (1 issue)",
+        "Fix no-wait-for-timeout (1 issue)"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-023",
-      "title": "Fix shared-dtos errors/global-exception.filter.ts",
-      "description": "Fix lint issues in global-exception.filter.ts",
+      "title": "Fix webkit-stability-test.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in webkit-stability-test.spec.ts",
       "priority": 23,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in global-exception.filter.ts",
-        "npm run typecheck passes"
+        "Fix no-skipped-test (3 issues)",
+        "Fix no-conditional-in-test (2 issues)",
+        "Fix no-conditional-expect (4 issues)",
+        "Fix no-wait-for-timeout (1 issue)"
       ],
       "technicalNotes": []
     },
     {
       "id": "US-024",
-      "title": "Fix shared-dtos errors/structured-logging.ts",
-      "description": "Fix lint and typecheck issues in structured-logging.ts",
+      "title": "Fix webkit-static-test.spec.ts lint issues",
+      "description": "Fix Playwright lint issues in webkit-static-test.spec.ts",
       "priority": 24,
-      "passes": true,
+      "passes": false,
       "acceptanceCriteria": [
-        "No lint warnings in structured-logging.ts",
-        "npm run typecheck passes (fix TS2698 spread error)"
+        "Fix no-skipped-test (4 issues)",
+        "Fix no-conditional-in-test (1 issue)",
+        "Fix no-wait-for-timeout (1 issue)"
       ],
-      "technicalNotes": [
-        "Has pre-existing typecheck error at line 123"
-      ]
+      "technicalNotes": []
     },
     {
       "id": "US-025",
-      "title": "Fix shared-dtos encryption/encryption.service.ts",
-      "description": "Fix lint issues in encryption.service.ts",
-      "priority": 25,
-      "passes": true,
-      "acceptanceCriteria": [
-        "No lint warnings in encryption.service.ts",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-026",
-      "title": "Fix shared-dtos gemini/gemini.client.ts",
-      "description": "Fix lint issues in gemini.client.ts",
-      "priority": 26,
-      "passes": true,
-      "acceptanceCriteria": [
-        "No lint warnings in gemini.client.ts",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-027",
-      "title": "Fix shared-dtos infrastructure/redis/*.ts",
-      "description": "Fix lint issues in redis infrastructure (4 files)",
-      "priority": 27,
-      "passes": true,
-      "acceptanceCriteria": [
-        "No lint warnings in infrastructure/redis/",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-028",
-      "title": "Fix shared-dtos interceptors/*.ts",
-      "description": "Fix lint issues in interceptors (3 files)",
-      "priority": 28,
-      "passes": true,
-      "acceptanceCriteria": [
-        "No lint warnings in interceptors/",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-029",
-      "title": "Fix shared-dtos prompts/prompt-templates.ts",
-      "description": "Fix lint issues in prompt-templates.ts",
-      "priority": 29,
-      "passes": true,
-      "acceptanceCriteria": [
-        "No lint warnings in prompt-templates.ts",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-030",
-      "title": "Fix shared-dtos skills/skills-taxonomy.ts",
-      "description": "Fix lint issues in skills-taxonomy.ts",
-      "priority": 30,
-      "passes": true,
-      "acceptanceCriteria": [
-        "No lint warnings in skills-taxonomy.ts",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-031",
-      "title": "Fix shared-dtos utils/*.ts",
-      "description": "Fix lint issues in utils (2 files)",
-      "priority": 31,
-      "passes": true,
-      "acceptanceCriteria": [
-        "No lint warnings in utils/",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-032",
-      "title": "Fix shared-dtos validation/input-validator.ts",
-      "description": "Fix lint issues in input-validator.ts",
-      "priority": 32,
-      "passes": true,
-      "acceptanceCriteria": [
-        "No lint warnings in input-validator.ts",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-033",
-      "title": "Fix shared-dtos config/secure-config.validator.ts",
-      "description": "Fix lint issues in secure-config.validator.ts",
-      "priority": 33,
-      "passes": true,
-      "acceptanceCriteria": [
-        "No lint warnings in secure-config.validator.ts",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-034",
-      "title": "Verify shared-dtos has 0 warnings",
-      "description": "Run lint on shared-dtos and verify 0 warnings",
-      "priority": 34,
-      "passes": true,
-      "acceptanceCriteria": [
-        "npx nx lint shared-dtos returns 0 warnings",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-035",
-      "title": "Run eslint --fix on ai-recruitment-frontend",
-      "description": "Auto-fix lint issues in frontend app",
-      "priority": 35,
-      "passes": true,
-      "acceptanceCriteria": [
-        "Run npx nx lint ai-recruitment-frontend --fix",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-036",
-      "title": "Fix frontend components/",
-      "description": "Fix lint issues in frontend components",
-      "priority": 36,
-      "passes": true,
-      "acceptanceCriteria": [
-        "No lint warnings in components/",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-037",
-      "title": "Fix frontend services/",
-      "description": "Fix lint issues in frontend services",
-      "priority": 37,
-      "passes": true,
-      "acceptanceCriteria": [
-        "No lint warnings in services/",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-038",
-      "title": "Fix frontend store/",
-      "description": "Fix lint issues in frontend store",
-      "priority": 38,
-      "passes": true,
-      "acceptanceCriteria": [
-        "No lint warnings in store/",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-039",
-      "title": "Fix frontend pages/",
-      "description": "Fix lint issues in frontend pages",
-      "priority": 39,
-      "passes": true,
-      "acceptanceCriteria": [
-        "No lint warnings in pages/",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-040",
-      "title": "Fix frontend guards/",
-      "description": "Fix lint issues in frontend guards",
-      "priority": 40,
-      "passes": true,
-      "acceptanceCriteria": [
-        "No lint warnings in guards/",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-041",
-      "title": "Fix frontend interceptors/",
-      "description": "Fix lint issues in frontend interceptors",
-      "priority": 41,
-      "passes": true,
-      "acceptanceCriteria": [
-        "No lint warnings in interceptors/",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-042",
-      "title": "Verify frontend has 0 warnings",
-      "description": "Verify ai-recruitment-frontend has 0 lint warnings",
-      "priority": 42,
-      "passes": true,
-      "acceptanceCriteria": [
-        "npx nx lint ai-recruitment-frontend returns 0 warnings",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-043",
-      "title": "Run eslint --fix on app-gateway",
-      "description": "Auto-fix lint issues in app-gateway",
-      "priority": 43,
-      "passes": true,
-      "acceptanceCriteria": [
-        "Run npx nx lint app-gateway --fix",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-044",
-      "title": "Fix app-gateway controllers/",
-      "description": "Fix lint issues in app-gateway controllers",
-      "priority": 44,
-      "passes": true,
-      "acceptanceCriteria": [
-        "No lint warnings in controllers/",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-045",
-      "title": "Fix app-gateway services/",
-      "description": "Fix lint issues in app-gateway services",
-      "priority": 45,
-      "passes": true,
-      "acceptanceCriteria": [
-        "No lint warnings in services/",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-046",
-      "title": "Fix app-gateway schemas/",
-      "description": "Fix lint issues in app-gateway schemas",
-      "priority": 46,
-      "passes": true,
-      "acceptanceCriteria": [
-        "No lint warnings in schemas/",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-047",
-      "title": "Verify app-gateway has 0 warnings",
-      "description": "Verify app-gateway has 0 lint warnings",
-      "priority": 47,
-      "passes": true,
-      "acceptanceCriteria": [
-        "npx nx lint app-gateway returns 0 warnings",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-048",
-      "title": "Fix microservices lint issues",
-      "description": "Run eslint --fix on all microservices",
-      "priority": 48,
-      "passes": true,
-      "acceptanceCriteria": [
-        "npx nx lint resume-parser-svc --fix",
-        "npx nx lint jd-extractor-svc --fix",
-        "npx nx lint scoring-engine-svc --fix",
-        "npx nx lint report-generator-svc --fix",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-049",
-      "title": "Fix e2e tests lint issues",
-      "description": "Fix lint issues in e2e test projects",
-      "priority": 49,
-      "passes": false,
-      "acceptanceCriteria": [
-        "npx nx lint app-gateway-e2e --fix passes",
-        "npx nx lint ai-recruitment-frontend-e2e --fix passes",
-        "npm run typecheck passes"
-      ],
-      "technicalNotes": []
-    },
-    {
-      "id": "US-050",
       "title": "Final validation - all quality checks pass",
       "description": "Verify npm run typecheck && npm run lint both pass",
-      "priority": 50,
+      "priority": 25,
       "passes": false,
       "acceptanceCriteria": [
         "npm run typecheck passes with 0 errors",
