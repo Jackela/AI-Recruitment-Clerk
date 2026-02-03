@@ -152,8 +152,8 @@
         "Rollback plan documented"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": "Use official release SHAs; avoid floating tags."
+      "passes": true,
+      "notes": "All 10 workflows pinned. Fixed cd.yml and cd-local.yml syntax errors. Rollback plan in docs/ROLLBACK-US-011.md"
     },
     {
       "id": "US-012",
