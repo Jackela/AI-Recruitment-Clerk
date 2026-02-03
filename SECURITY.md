@@ -103,6 +103,97 @@ We believe in recognizing security researchers who help us keep our platform sec
 - **Penetration Testing**: Regular third-party penetration testing
 - **Security Training**: Ongoing security training for all team members
 
+## GitHub Actions Security
+
+### Action Pinning Policy
+
+All GitHub Actions in our workflows are pinned to specific commit SHAs rather than using version tags (e.g., `@v4`). This is a critical security practice that prevents supply chain attacks.
+
+#### Why Pin to Commit SHAs?
+
+- **Prevents MITM Attacks**: Tags can be moved or reassigned by repository maintainers
+- **Immutable References**: Commit SHAs are cryptographically immutable
+- **Prevents Tampering**: Even if a maintainer account is compromised, attackers cannot change the code
+- **Audit Trail**: Commit SHAs provide clear auditability for security reviews
+
+#### Currently Pinned Actions
+
+| Action | Version | Commit SHA | Last Updated |
+|--------|---------|------------|--------------|
+| `actions/checkout` | v4.2.2 | `11bd71901bbe5b1630ceea73d27597364c9af683` | 2026-02-03 |
+| `actions/setup-node` | v4.2.0 | `1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a` | 2026-02-03 |
+| `actions/cache` | v4.2.1 | `0c907a75c2c80ebcb7f088228285e798b750cf8f` | 2026-02-03 |
+| `actions/upload-artifact` | v4.6.0 | `65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08` | 2026-02-03 |
+| `actions/github-script` | v7.0.1 | `60a0d83039c74a4aee543508d2ffcb1c3799cdea` | 2026-02-03 |
+| `github/codeql-action/init` | v3.28.8 | `8ff85221d12737ec1137e6a892722e5130f32d05` | 2026-02-03 |
+| `github/codeql-action/analyze` | v3.28.8 | `8ff85221d12737ec1137e6a892722e5130f32d05` | 2026-02-03 |
+| `trufflesecurity/trufflehog` | v3 | (tag) | 2026-02-03 |
+| `gitleaks/gitleaks-action` | v4.0.0 | `af2c6347526edfe5ff45ad690affad475d77ddb4` | 2026-02-03 |
+| `codecov/codecov-action` | v5.3.1 | `af8c47c964cbed948c4c5f36f3e38e8be9ac1c35` | 2026-02-03 |
+
+### How to Update GitHub Actions
+
+When updating GitHub Actions, follow this process to maintain security:
+
+#### Step 1: Check for Updates
+
+1. Visit the action's GitHub repository (e.g., `https://github.com/actions/checkout`)
+2. Go to the **Releases** page
+3. Find the latest stable release
+4. Review the **release notes** for breaking changes or security fixes
+
+#### Step 2: Get the Commit SHA
+
+**Option A: Using GitHub API**
+```bash
+curl -s https://api.github.com/repos/{owner}/{repo}/git/refs/tags/{tag} | jq -r '.object.sha'
+```
+
+**Example:**
+```bash
+curl -s https://api.github.com/repos/actions/checkout/git/refs/tags/v4.2.2 | jq -r '.object.sha'
+# Output: 11bd71901bbe5b1630ceea73d27597364c9af683
+```
+
+**Option B: Using GitHub Web UI**
+1. Go to the release page (e.g., `https://github.com/actions/checkout/releases/tag/v4.2.2`)
+2. Click on the commit hash link
+3. Copy the full 40-character commit SHA
+
+#### Step 3: Update Workflow Files
+
+1. Find all workflows using the action: `grep -r "actions/checkout@" .github/workflows/`
+2. Replace the old commit SHA with the new one
+3. Add a comment with the version tag for reference:
+   ```yaml
+   - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+   ```
+
+#### Step 4: Test and Verify
+
+1. **Local Testing**: If using [act](https://github.com/nektos/act), test workflows locally
+2. **Create PR**: Create a pull request with the changes
+3. **CI Verification**: Ensure all CI workflows pass
+4. **Review Changes**: Have at least one other reviewer approve
+
+#### Step 5: Document the Update
+
+Update the "Currently Pinned Actions" table in SECURITY.md with:
+- New version
+- New commit SHA
+- Update date
+
+### Rollback Procedure
+
+If an action update causes issues:
+
+1. **Immediate**: Revert the PR updating the action
+2. **Review**: Check the action's release notes for known issues
+3. **Pin to Previous**: Revert to the previous known-good commit SHA
+4. **Report**: Open an issue with the action maintainers if needed
+
+See `docs/ROLLBACK-US-011.md` for detailed rollback steps.
+
 ## Dependency Vulnerability Exceptions
 
 The following dependency vulnerabilities are currently documented and accepted. All are in transitive dependencies (not directly used by the application).

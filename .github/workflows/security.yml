@@ -28,10 +28,10 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: 🔍 Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@8ff85221d12737ec1137e6a892722e5130f32d05 # v3.28.8
         with:
           languages: ${{ matrix.language }}
           queries: security-extended,security-and-quality
@@ -45,7 +45,7 @@ jobs:
               - '**/*.test.ts'
 
       - name: 🏗️ Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version-file: '.nvmrc'
           cache: 'npm'
@@ -61,7 +61,7 @@ jobs:
 
       - name: 🔍 Perform CodeQL Analysis
         if: ${{ env.ACT != 'true' }}
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@8ff85221d12737ec1137e6a892722e5130f32d05 # v3.28.8
         with:
           category: "/language:${{ matrix.language }}"
 
@@ -72,10 +72,10 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: 🏗️ Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version-file: '.nvmrc'
           cache: 'npm'
@@ -113,7 +113,7 @@ jobs:
           fi
 
       - name: 📦 Upload Audit Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         if: always()
         continue-on-error: true  # Allow failure in local act CLI testing
         with:
@@ -128,12 +128,12 @@ jobs:
 
     steps:
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0  # Full history for comprehensive scan
 
       - name: 🔑 Scan for Secrets
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@v3
         continue-on-error: true  # Don't fail on BASE==HEAD after git history rewrites
         with:
           path: ./
@@ -142,7 +142,7 @@ jobs:
           extra_args: --debug --only-verified
 
       - name: 🔍 GitLeaks Scan
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@af2c6347526edfe5ff45ad690affad475d77ddb4 # v4.0.0
         continue-on-error: true  # Don't fail if secrets already committed (historical)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
