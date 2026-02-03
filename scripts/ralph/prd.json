@@ -260,8 +260,8 @@
         "npm run lint passes"
       ],
       "priority": 17,
-      "passes": false,
-      "notes": "This is documentation only. No code changes needed. The .cjs is required by Nx's @nx/webpack plugin using require()."
+      "passes": true,
+      "notes": "Completed. Added KNOWN EXCEPTION section to CLAUDE.md documenting Nx webpack plugin limitation requiring .cjs configs. Updated progress.txt Codebase Patterns with Jest .mjs pattern. Documentation-only change - no code changes needed."
     },
     {
       "id": "US-018",

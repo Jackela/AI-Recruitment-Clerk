@@ -451,3 +451,26 @@ Options documented in CI-BLOCKING-ISSUE.md
 - When converting configs, grep for all references across the codebase
 
 ---
+
+## [2026-02-04 01:25] - US-017
+- **DOCUMENTED**: webpack .cjs exception in CLAUDE.md
+- Added KNOWN EXCEPTION section under RULE 2: ESM MODULE SYSTEM ONLY
+- Documented Nx webpack plugin limitation requiring .cjs configs
+- Explained this is an Nx limitation, not an ESM architecture violation
+- Updated progress.txt Codebase Patterns to include Jest .mjs pattern
+- Quality gates verified: lint (pass)
+
+**Files changed:**
+- CLAUDE.md (added webpack .cjs exception documentation)
+- scripts/ralph/progress.txt (updated Codebase Patterns with Jest .mjs)
+- scripts/ralph/prd.json (marked US-017 passes: true)
+
+**Learnings for future iterations:**
+- Nx's @nx/webpack plugin uses require() to load configs during project graph processing
+- This happens BEFORE webpack-cli runs, so even .mjs extension doesn't work
+- Webpack configs MUST use .cjs with CommonJS syntax (require/module.exports)
+- The built output can still be ESM - only the config file needs to be .cjs
+- Known exceptions should be documented in CLAUDE.md to avoid confusion
+- Progress.txt Codebase Patterns is the right place for technical patterns
+
+---
