@@ -1,5 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { AppService } from './app.service';
 import type {
   GapAnalysisRequestDto,
