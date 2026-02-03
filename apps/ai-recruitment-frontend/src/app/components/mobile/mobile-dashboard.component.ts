@@ -27,6 +27,13 @@ import type {
 import {
   DashboardStatsComponent
 } from './dashboard-stats.component';
+import type {
+  DashboardChart,
+  ChartDataPoint,
+} from './dashboard-charts.component';
+import {
+  DashboardChartsComponent
+} from './dashboard-charts.component';
 
 /**
  * Defines the shape of the dashboard card.
@@ -73,6 +80,7 @@ export interface QuickAction {
     MobileNavigationComponent,
     MobileSwipeComponent,
     DashboardStatsComponent,
+    DashboardChartsComponent,
   ],
   template: `
     <!-- Mobile Navigation -->
@@ -130,6 +138,9 @@ export interface QuickAction {
 
       <!-- Stats Overview -->
       <arc-dashboard-stats [stats]="overviewStats"></arc-dashboard-stats>
+
+      <!-- Charts Section -->
+      <arc-dashboard-charts [charts]="dashboardCharts"></arc-dashboard-charts>
 
       <!-- Dashboard Cards -->
       <div class="dashboard-cards" *ngIf="dashboardCards.length > 0">
@@ -827,6 +838,52 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
       icon: 'M12,2A2,2 0 0,1 14,4C14,4.74 13.6,5.39 13,5.73V7A7,7 0 0,1 20,14V16A1,1 0 0,0 21,17H22V19H2V17H3A1,1 0 0,0 4,16V14A7,7 0 0,1 11,7V5.73C10.4,5.39 10,4.74 10,4A2,2 0 0,1 12,2Z',
       color: 'success',
       change: { value: 25, type: 'increase', period: 'vs last month' },
+    },
+  ];
+
+  // Dashboard Charts
+  public dashboardCharts: DashboardChart[] = [
+    {
+      id: 'weekly-resumes',
+      title: 'Resumes This Week',
+      type: 'sparkline',
+      data: [
+        { label: 'Mon', value: 12 },
+        { label: 'Tue', value: 19 },
+        { label: 'Wed', value: 8 },
+        { label: 'Thu', value: 15 },
+        { label: 'Fri', value: 22 },
+        { label: 'Sat', value: 10 },
+        { label: 'Sun', value: 5 },
+      ] as ChartDataPoint[],
+      height: 120,
+    },
+    {
+      id: 'candidate-sources',
+      title: 'Candidate Sources',
+      type: 'bar',
+      data: [
+        { label: 'LinkedIn', value: 45, color: '#0077b5' },
+        { label: 'Indeed', value: 32, color: '#2557a7' },
+        { label: 'Referral', value: 28, color: '#27ae60' },
+        { label: 'Direct', value: 18, color: '#3498db' },
+      ] as ChartDataPoint[],
+      showLabels: true,
+      height: 180,
+    },
+    {
+      id: 'hiring-status',
+      title: 'Hiring Pipeline',
+      type: 'donut',
+      data: [
+        { label: 'Applied', value: 147, color: '#3498db' },
+        { label: 'Screening', value: 52, color: '#f39c12' },
+        { label: 'Interview', value: 23, color: '#9b59b6' },
+        { label: 'Offer', value: 8, color: '#1abc9c' },
+        { label: 'Hired', value: 5, color: '#27ae60' },
+      ] as ChartDataPoint[],
+      showLegend: true,
+      height: 200,
     },
   ];
 
