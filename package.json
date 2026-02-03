@@ -13,6 +13,11 @@
   "scripts": {
     "build": "npx nx build app-gateway --prod --parallel=1",
     "start": "node dist/apps/app-gateway/main.cjs",
+    "dev": "npx nx run-many -t serve --projects=app-gateway,ai-recruitment-frontend --parallel=3",
+    "dev:gateway": "npx nx serve app-gateway",
+    "dev:frontend": "npx nx serve ai-recruitment-frontend",
+    "lint:fix": "npx nx run-many -t lint --all --parallel=3 --fix",
+    "clean": "npx nx reset && rm -rf node_modules/.cache dist",
     "start:prod": "NODE_ENV=production node dist/apps/app-gateway/main.cjs",
     "prepare": "husky install",
     "postinstall": "echo 'Skipping build in postinstall'",
