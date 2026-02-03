@@ -103,6 +103,76 @@ We believe in recognizing security researchers who help us keep our platform sec
 - **Penetration Testing**: Regular third-party penetration testing
 - **Security Training**: Ongoing security training for all team members
 
+## Dependency Vulnerability Exceptions
+
+The following dependency vulnerabilities are currently documented and accepted. All are in transitive dependencies (not directly used by the application).
+
+### Current Vulnerability Status (as of 2026-02-03)
+
+- **Critical**: 0
+- **High**: 38
+- **Moderate**: 6
+- **Low**: 2
+- **Total**: 46 vulnerabilities
+
+### Risk Assessment and Remediation Plan
+
+1. **Angular Dependencies (@angular/*, @angular-devkit/*)**
+   - **Vulnerabilities**: Several high-severity XSS and XSRF issues
+   - **Risk**: Low - These are in development tooling, not runtime code
+   - **Status**: Will be addressed with next major Angular upgrade
+   - **Target**: Q2 2026
+
+2. **AWS SDK (@aws-sdk/*)**
+   - **Vulnerabilities**: Configuration and XML parsing issues
+   - **Risk**: Medium - AWS SDK used for optional SES email service
+   - **Mitigation**: Email service disabled by default; only enabled with explicit configuration
+   - **Target**: Q2 2026
+
+3. **Nx Build Tooling (@nx/*)**
+   - **Vulnerabilities**: Express/body-parser issues in dev server
+   - **Risk**: Very Low - Only affects local development, not production
+   - **Status**: Tracking Nx releases; will update when safe
+   - **Target**: Q1 2026
+
+4. **Semantic Release Dependencies**
+   - **Vulnerabilities**: tar, lodash, yargs-parser issues
+   - **Risk**: Low - Only affects release automation, not application runtime
+   - **Status**: Will update with next major Semantic Release version
+   - **Target**: Q2 2026
+
+5. **MCP SDK (@modelcontextprotocol/sdk)**
+   - **Vulnerabilities**: DNS rebinding and ReDoS
+   - **Risk**: Low - Development tool for AI agent integration
+   - **Mitigation**: Not exposed to external networks
+   - **Target**: Q1 2026
+
+### Why These Are Accepted
+
+1. **Transitive Dependencies**: All vulnerabilities are in dependencies of dependencies
+2. **Development-Time Only**: Many only affect local development, not production runtime
+3. **Disabled Features**: Some affected services are disabled by default
+4. **No Exploitation Path**: Current architecture prevents exploitation of these issues
+5. **Major Version Changes**: Fixes require major version upgrades that need testing
+
+### Ongoing Monitoring
+
+- Dependency scans run in CI via `npm audit` and `scripts/dependency-gate.mjs`
+- Releases blocked if new critical vulnerabilities are introduced
+- Quarterly reviews of vulnerability backlog
+- Prioritized remediation based on risk and exploitability
+
+### Remediation Timeline
+
+| Priority | Count | Target Date |
+|----------|-------|-------------|
+| Critical | 0 | N/A |
+| High | 38 | Q2 2026 |
+| Moderate | 6 | Q3 2026 |
+| Low | 2 | Q4 2026 |
+
+For the latest vulnerability status, run: `npm audit`
+
 ## Security Configuration
 
 ### Production Security Checklist

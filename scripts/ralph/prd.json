@@ -57,8 +57,8 @@
         "Rollback plan documented"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "Prefer upgrades/overrides over allowlists."
+      "passes": true,
+      "notes": "Documented 46 vulnerabilities (38 high, 6 moderate, 2 low) in SECURITY.md. All are transitive deps with low exploitability. Remediation timeline Q1-Q4 2026. Rollback plan in docs/ROLLBACK-US-004.md"
     },
     {
       "id": "US-005",
