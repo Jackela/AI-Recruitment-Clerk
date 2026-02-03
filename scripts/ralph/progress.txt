@@ -90,4 +90,23 @@ Started: Tue Feb  3 19:15:59     2026
   - Runtime: ~2 minutes total (test 30s + lint 20s + typecheck 15s + build 45s)
   - Can bypass pre-push with `HUSKY=0 git push` for emergencies
   - Custom scripts (verify-quality-gates.mjs, pii-scan.mjs) removed from ci:local for clarity
+
+## 2026-02-03 - US-006 through US-010 (Batch)
+- What was implemented: Verified existing configurations and added missing templates
+- Files changed:
+  - Created: docs/ROLLBACK-US-006-US-010.md (comprehensive rollback plan)
+  - Updated: .github/CODEOWNERS (expanded coverage for apps/, libs/, workflows)
+  - Created: .github/ISSUE_TEMPLATE/ops_task.yml (operations task template)
+  - Updated: scripts/ralph/prd.json (marked US-006 through US-010 as passing)
+- **Learnings for future iterations:**
+  - US-006 (E2E): Already configured via Nx/Playwright with explicit waits, no arbitrary timeouts
+  - US-007 (CI hardening): All workflows already have minimal permissions, caching, concurrency
+  - US-008 (AI workflow): PR template already has all sections (change list, risks, rollback, tests)
+  - US-009 (CODEOWNERS): Expanded to cover apps/** @app-owners, libs/** @lib-owners, workflows/** @release-owners
+  - US-010 (Issue templates): bug_report.yml and feature_request.yml existed; added ops_task.yml
+  - Most stories were verification of existing correct configuration
+  - CODEOWNERS uses placeholder teams (@app-owners, @lib-owners, etc.) that can be mapped to real users later
+  - Batch processing similar stories saves time and creates consistent documentation
+  - GitHub Actions concurrency format: `concurrency: group: ${{ github.workflow }}-${{ github.ref }}`
+  - All workflows follow security best practices with minimal permissions
 ---
