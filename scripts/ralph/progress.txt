@@ -207,3 +207,24 @@ Options documented in CI-BLOCKING-ISSUE.md
 - CI workflows don't call these batch scripts directly (they use docker-compose commands)
 
 ---
+
+## [2026-02-04 00:20] - US-007
+- **MOVED**: 3 claude-flow files from root to scripts/ directory
+- Files moved: claude-flow.bat, claude-flow.ps1, claude-flow.config.json
+- These files were NOT tracked by git (local developer utilities)
+- Root directory now has 0 claude-flow.* files
+
+**Files changed:**
+- scripts/claude-flow.bat (moved from root, not git tracked)
+- scripts/claude-flow.ps1 (moved from root, not git tracked)
+- scripts/claude-flow.config.json (moved from root, not git tracked)
+- scripts/ralph/prd.json (marked US-007 passes: true)
+
+**Learnings for future iterations:**
+- Some files in root may not be tracked by git (local developer utilities)
+- Use `git ls-files` to check if files are tracked before using `git mv`
+- For untracked files, use regular `mv` command instead
+- No documentation updates needed for local developer utility scripts
+- Root directory is now cleaner with all scripts organized in scripts/
+
+---

@@ -105,8 +105,8 @@
         "Root dir has no claude-flow.* files"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": "There may be multiple platform variants. Move all of them."
+      "passes": true,
+      "notes": "Moved 3 claude-flow files to scripts/ directory: claude-flow.bat, claude-flow.ps1, claude-flow.config.json. These files were not tracked by git. Root directory now has no claude-flow.* files. No documentation updates needed as these are developer utility scripts referenced only locally."
     },
     {
       "id": "US-008",
