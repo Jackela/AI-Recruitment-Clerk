@@ -51,4 +51,25 @@ Started: Tue Feb  3 19:15:59     2026
   - Gate can read optional remediation doc: `docs/security/dependency-remediation.md`
   - CI workflow `.github/workflows/release.yml` line 42-47 handles generation and gate
   - Deterministic: same lockfile produces same audit results
+
+## 2026-02-03 - US-004
+- What was implemented: Documented all dependency vulnerabilities with risk assessment in SECURITY.md
+- Files changed:
+  - Created: docs/ROLLBACK-US-004.md (comprehensive rollback plan)
+  - Updated: SECURITY.md (added vulnerability exceptions section)
+  - Updated: scripts/ralph/prd.json (marked US-004 as passing)
+- **Learnings for future iterations:**
+  - 46 vulnerabilities total: 38 high, 6 moderate, 2 low, 0 critical
+  - ALL vulnerabilities are in transitive dependencies (not direct dependencies)
+  - `npm audit fix` caused more issues (increased to 31 vulnerabilities) - had to revert
+  - Best approach for this codebase: document exceptions rather than force-fix
+  - Vulnerability categories: Angular (XSS/XSRF), AWS SDK (config/XML), Nx (dev server), Semantic Release (tar/lodash), MCP SDK (DNS/ReDoS)
+  - Many vulnerabilities only affect development tooling, not production runtime
+  - Some affected services are disabled by default (e.g., AWS SES email)
+  - Fixes require major version upgrades that need thorough testing
+  - Remediation timeline: Q1-Q4 2026 based on priority
+  - CI dependency gate (`scripts/dependency-gate.mjs`) blocks new critical vulnerabilities
+  - SECURITY.md is the right place for vulnerability documentation and risk acceptance
+  - `npm audit fix --force` is risky - can introduce breaking changes
+  - Always test with `npm run ci:local` after any dependency changes
 ---
