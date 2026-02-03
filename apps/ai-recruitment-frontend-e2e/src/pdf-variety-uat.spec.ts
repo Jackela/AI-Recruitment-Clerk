@@ -319,6 +319,14 @@ test.describe('PDF Processing Variety Tests', () => {
       `Analyze button without file: ${isButtonEnabled ? 'enabled' : 'disabled'}`,
     );
 
+    // Track whether the analysis request is sent without a file
+    let submissionRequestSeen = false;
+    page.on('request', (request) => {
+      if (request.url().includes('/gap-analysis-file')) {
+        submissionRequestSeen = true;
+      }
+    });
+
     // Click the button (will either be prevented or show validation)
     await analyzeButton.click().catch(() => {
       // Button click prevented (disabled) - this is expected
@@ -347,8 +355,8 @@ test.describe('PDF Processing Variety Tests', () => {
       .count();
     console.log(`Results visible without file: ${resultsCount > 0}`);
 
-    // Validate that form didn't submit without file (no results should appear)
-    expect(resultsCount).toBe(0);
+    // Validate that form didn't submit without file (no analysis request should be sent)
+    expect(submissionRequestSeen).toBe(false);
     console.log('✅ Form correctly prevented submission without file');
 
     // Test 2: Invalid file type validation

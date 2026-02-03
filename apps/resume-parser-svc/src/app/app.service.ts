@@ -5,9 +5,12 @@ import {
   Injectable,
   Logger
 } from '@nestjs/common';
-import type { GridFsService } from '../gridfs/gridfs.service';
-import type { ResumeParserNatsService } from '../services/resume-parser-nats.service';
-import type { ParsingService } from '../parsing/parsing.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { GridFsService } from '../gridfs/gridfs.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { ParsingService } from '../parsing/parsing.service';
 import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
 
 interface ServiceWithHealthCheck {

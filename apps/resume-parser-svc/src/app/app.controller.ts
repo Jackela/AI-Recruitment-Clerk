@@ -1,7 +1,10 @@
 import { Controller, Get } from '@nestjs/common';
-import type { AppService } from './app.service';
-import type { ResumeRepository } from '../repositories/resume.repository';
-import type { GridFsService } from '../gridfs/gridfs.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { AppService } from './app.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { ResumeRepository } from '../repositories/resume.repository';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { GridFsService } from '../gridfs/gridfs.service';
 
 /**
  * Exposes endpoints for app.

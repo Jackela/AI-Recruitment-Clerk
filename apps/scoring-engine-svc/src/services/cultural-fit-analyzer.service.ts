@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 import type { JobRequirements } from './experience-analyzer.service';
 
@@ -145,6 +146,10 @@ export class CulturalFitAnalyzerService {
     const startTime = Date.now();
 
     try {
+      if (!resume?.workExperience || resume.workExperience.length === 0) {
+        return this.fallbackCulturalFitAnalysis(resume, companyProfile);
+      }
+
       // Analyze cultural fit indicators
       const indicators = await this.analyzeCulturalIndicators(
         resume,
@@ -679,10 +684,14 @@ export class CulturalFitAnalyzerService {
     if (resume.workExperience.length < 2) confidence -= 0.15;
 
     // Reduce confidence for missing job descriptions
-    const emptyDescriptions = resume.workExperience.filter(
-      (exp) => !exp.summary || exp.summary.trim().length < 20,
-    ).length;
-    confidence -= (emptyDescriptions / resume.workExperience.length) * 0.2;
+    if (resume.workExperience.length > 0) {
+      const emptyDescriptions = resume.workExperience.filter(
+        (exp) => !exp.summary || exp.summary.trim().length < 20,
+      ).length;
+      confidence -= (emptyDescriptions / resume.workExperience.length) * 0.2;
+    } else {
+      confidence -= 0.2;
+    }
 
     // Increase confidence for strong evidence base
     const totalEvidence = Object.values(softSkills.evidence).flat().length;

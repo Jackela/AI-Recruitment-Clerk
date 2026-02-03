@@ -8,7 +8,7 @@ import pdfParse from 'pdf-parse';
 
 jest.mock('pdf-parse', () => jest.fn());
 
-const mockParse = pdfParse as jest.MockedFunction<(buffer: Buffer) => Promise<{ text: string }>>;
+const mockParse = pdfParse as unknown as jest.MockedFunction<(buffer: Buffer) => Promise<{ text: string }>>;
 
 const buildService = () => {
   const vision = { parseResumeText: jest.fn(), parseResumePdf: jest.fn() } as unknown as VisionLlmService;

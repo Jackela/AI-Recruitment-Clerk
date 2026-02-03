@@ -101,6 +101,9 @@ describe('DBC Production Monitoring', () => {
       );
 
       expect(extractionProfile).toBeDefined();
+      if (!extractionProfile) {
+        throw new Error('Expected extraction performance profile');
+      }
       expect(extractionProfile.contractViolations).toBe(1);
       expect(extractionProfile.successRate).toBe(0.8);
       expect(extractionProfile.averageExecutionTime).toBeCloseTo(140);
@@ -218,7 +221,7 @@ describe('DBC Production Monitoring', () => {
         serviceContext: 'ValidationService',
       });
 
-      const optimization = monitor.optimizePerformance() as {
+      const optimization = monitor.optimizePerformance() as unknown as {
         optimizations: Array<{
           type: string;
           issue: string;
@@ -252,7 +255,7 @@ describe('DBC Production Monitoring', () => {
         });
       }
 
-      const optimization = monitor.optimizePerformance() as {
+      const optimization = monitor.optimizePerformance() as unknown as {
         optimizations: Array<{
           type: string;
           issue: string;
@@ -283,7 +286,7 @@ describe('DBC Production Monitoring', () => {
         arrayBuffers: 5 * 1024 * 1024,
       });
 
-      const optimization = monitor.optimizePerformance() as {
+      const optimization = monitor.optimizePerformance() as unknown as {
         optimizations: Array<{
           type: string;
           recommendation: string;

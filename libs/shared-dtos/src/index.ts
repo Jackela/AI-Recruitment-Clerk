@@ -178,7 +178,7 @@ export type {
 } from './domains/questionnaire.dto';
 
 // Resume aliases
-export { ResumeDTO as ResumeDto } from './models/resume.dto';
+export type { ResumeDTO as ResumeDto } from './models/resume.dto';
 export type {
   ResumeAnalysisDto,
   ResumeUploadDto,

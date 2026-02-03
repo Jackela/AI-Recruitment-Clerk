@@ -41,8 +41,9 @@ class MockMobileNavigationComponent {
   @Output() public actionClick = new EventEmitter<{ id: string; label: string }>();
 }
 
+/* eslint-disable @angular-eslint/component-selector */
 @Component({
-  selector: 'arc-mobile-swipe',
+  selector: 'app-mobile-swipe',
   standalone: true,
   imports: [CommonModule],
   template: '<div class="mock-mobile-swipe"><ng-content></ng-content></div>',
@@ -52,6 +53,7 @@ class MockMobileSwipeComponent {
   @Input() public item: Record<string, unknown> = {};
   @Output() public swipeAction = new EventEmitter<SwipeEvent>();
 }
+/* eslint-enable @angular-eslint/component-selector */
 
 // Mock TouchGestureService
 class MockTouchGestureService {

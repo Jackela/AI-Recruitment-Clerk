@@ -4,7 +4,8 @@ import { defineConfig, devices } from '@playwright/test';
 // Also skip when running against real API to ensure decoupled servers
 const skipWebServer =
   process.env['E2E_SKIP_WEBSERVER'] === 'true' ||
-  process.env['E2E_USE_REAL_API'] === 'true';
+  process.env['E2E_USE_REAL_API'] === 'true' ||
+  process.env['E2E_MANUAL_DEV_SERVER'] === 'true';
 
 const parsedDevServerPort = process.env['DEV_SERVER_PORT']
   ? Number.parseInt(process.env['DEV_SERVER_PORT'], 10)

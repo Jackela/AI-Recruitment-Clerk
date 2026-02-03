@@ -51,7 +51,15 @@ describe('MarketingAdminController (mocked)', () => {
          
       ] as any);
 
-      const result = await controller.getPendingPayments('1', '2', 'usedAt', 'desc');
+      const result = (await controller.getPendingPayments(
+        '1',
+        '2',
+        'usedAt',
+        'desc',
+      )) as {
+        data: Array<{ code: string }>;
+        pagination: { total: number; page: number; limit: number };
+      };
 
       expect(result.data).toHaveLength(2);
       expect(result.data[0].code).toBe('A');
@@ -96,7 +104,11 @@ describe('MarketingAdminController (mocked)', () => {
          
       } as any);
 
-      const result = await controller.processSinglePayment('FB1', 'approve', 'ok');
+      const result = (await controller.processSinglePayment(
+        'FB1',
+        'approve',
+        'ok',
+      )) as { data: { paymentStatus: string } };
 
       expect(service.updatePaymentStatus).toHaveBeenCalledWith('FB1', 'paid', 'ok');
       expect(result.data.paymentStatus).toBe('paid');

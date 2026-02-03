@@ -5,7 +5,8 @@ import {
   Injectable,
   ForbiddenException,
 } from '@nestjs/common';
-import type { Reflector } from '@nestjs/core';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
 import type {
   Permission,

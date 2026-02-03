@@ -5,13 +5,13 @@
  */
 
 // Job Management Contracts
-export { JobContracts } from './job-management/job.contracts.js';
+export type { JobContracts } from './job-management/job.contracts.js';
 
 // Report Generation Contracts
-export { ReportContracts } from './report-generation/report.contracts.js';
+export type { ReportContracts } from './report-generation/report.contracts.js';
 
 // Resume Processing Contracts
-export { ResumeContracts } from './resume-processing/resume.contracts.js';
+export type { ResumeContracts } from './resume-processing/resume.contracts.js';
 
 // Contract Validation Utilities
 export * from './validation/index.js';

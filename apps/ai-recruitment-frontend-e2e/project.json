@@ -18,7 +18,8 @@
         "cwd": "apps/ai-recruitment-frontend-e2e",
         "command": "npx playwright test",
         "env": {
-          "E2E_SKIP_WEBSERVER": "false",
+          "E2E_SKIP_WEBSERVER": "true",
+          "E2E_MANUAL_DEV_SERVER": "true",
           "DEV_SERVER_PORT": "4202",
           "PLAYWRIGHT_BASE_URL": "http://localhost:4202",
           "E2E_PROTECTED_PORTS": "3000,4200,4202",

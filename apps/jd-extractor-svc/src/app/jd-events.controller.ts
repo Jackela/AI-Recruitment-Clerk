@@ -6,8 +6,10 @@ import type { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
 import { ErrorCorrelationManager } from '@app/shared-dtos';
 import { JDExtractorException } from '@app/shared-dtos';
 import { JDExtractorErrorCode } from '@app/shared-dtos';
-import type { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
-import type { LlmService } from '../extraction/llm.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { JdExtractorNatsService } from '../services/jd-extractor-nats.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { LlmService } from '../extraction/llm.service';
 
 /**
  * Exposes endpoints for jd events.

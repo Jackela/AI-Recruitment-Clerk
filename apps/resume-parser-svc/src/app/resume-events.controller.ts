@@ -2,7 +2,9 @@ import type { OnModuleInit } from '@nestjs/common';
 import { Controller, Logger } from '@nestjs/common';
 import { EventPattern } from '@nestjs/microservices';
 import type { ResumeSubmittedEvent } from '@ai-recruitment-clerk/resume-processing-domain';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { ParsingService } from '../parsing/parsing.service';
 
 /**

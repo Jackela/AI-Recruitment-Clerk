@@ -1,4 +1,4 @@
-import type { OnModuleInit} from '@nestjs/common';
+import type { OnModuleInit } from '@nestjs/common';
 import { Controller, Logger, Optional } from '@nestjs/common';
 import { EventPattern } from '@nestjs/microservices';
 import type {
@@ -14,8 +14,11 @@ import {
   ScoringEngineErrorCode,
   ErrorCorrelationManager,
 } from '@app/shared-dtos';
-import type { ScoringEngineNatsService } from '../services/scoring-engine-nats.service';
-import type { ScoringEngineService, JdDTO } from '../scoring.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { ScoringEngineNatsService } from '../services/scoring-engine-nats.service';
+import type { JdDTO } from '../scoring.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { ScoringEngineService } from '../scoring.service';
 
 /**
  * Exposes endpoints for scoring events.

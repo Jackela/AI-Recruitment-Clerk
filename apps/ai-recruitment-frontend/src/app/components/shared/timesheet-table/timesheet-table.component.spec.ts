@@ -117,7 +117,7 @@ describe('TimesheetTableComponent (lightweight regression)', () => {
     const exportSpy = jest.spyOn(component.onExport, 'emit');
     const downloadSpy = jest.spyOn(component as any, 'downloadCSV');
 
-    component.exportData();
+    component.exportDataCsv();
 
     expect(exportSpy).toHaveBeenCalled();
     expect(downloadSpy).toHaveBeenCalled();

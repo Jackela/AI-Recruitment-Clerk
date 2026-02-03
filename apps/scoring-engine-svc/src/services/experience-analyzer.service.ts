@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { GeminiClient } from '@ai-recruitment-clerk/shared-dtos';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 
 interface AIExperienceAnalysis {

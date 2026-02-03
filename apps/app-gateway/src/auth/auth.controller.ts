@@ -17,8 +17,10 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import type { AuthService } from './auth.service';
-import type { UserService } from './user.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { AuthService } from './auth.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { UserService } from './user.service';
 import type {
   LoginDto,
   CreateUserDto,

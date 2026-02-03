@@ -6,8 +6,10 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
-import type { JwtService } from '@nestjs/jwt';
-import type { UserService } from './user.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { JwtService } from '@nestjs/jwt';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { UserService } from './user.service';
 import type {
   LoginDto,
   CreateUserDto,
@@ -19,9 +21,11 @@ import {
 } from '@ai-recruitment-clerk/user-management-domain';
 import { WithCircuitBreaker } from '@ai-recruitment-clerk/shared-dtos';
 import * as bcrypt from 'bcryptjs';
-import type { ConfigService } from '@nestjs/config';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
-import type { RedisTokenBlacklistService } from '../security/redis-token-blacklist.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { RedisTokenBlacklistService } from '../security/redis-token-blacklist.service';
 
 /**
  * Provides auth functionality.

@@ -1,11 +1,7 @@
-import type {
-  OnModuleInit,
-  OnModuleDestroy} from '@nestjs/common';
-import {
-  Injectable,
-  Logger
-} from '@nestjs/common';
-import type { ConfigService } from '@nestjs/config';
+import type { OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { ConfigService } from '@nestjs/config';
 import type {
   PubAck,
   MsgHdrs,
@@ -25,8 +21,10 @@ import type {
   NatsPublishResult,
   NatsHealthResult,
 } from '../interfaces';
-import type { NatsConnectionManager } from './nats-connection-manager.service';
-import type { NatsStreamManager } from './nats-stream-manager.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { NatsConnectionManager } from './nats-connection-manager.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { NatsStreamManager } from './nats-stream-manager.service';
 import { DEFAULT_STREAMS } from '../config/stream-configs';
 
 /**

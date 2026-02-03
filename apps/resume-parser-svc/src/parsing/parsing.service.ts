@@ -1,9 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { VisionLlmService } from '../vision-llm/vision-llm.service';
-import type { PdfTextExtractorService } from './pdf-text-extractor.service';
-import type { GridFsService } from '../gridfs/gridfs.service';
-import type { FieldMapperService } from '../field-mapper/field-mapper.service';
-import type { ResumeParserNatsService } from '../services/resume-parser-nats.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { VisionLlmService } from '../vision-llm/vision-llm.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { PdfTextExtractorService } from './pdf-text-extractor.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { GridFsService } from '../gridfs/gridfs.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { FieldMapperService } from '../field-mapper/field-mapper.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
 import {
   RetryUtility,
   WithCircuitBreaker,

@@ -1,32 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
-import type { ScoringEngineNatsService } from './services/scoring-engine-nats.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { ScoringEngineNatsService } from './services/scoring-engine-nats.service';
 import {
   SecureConfigValidator,
   ScoringEngineException,
   ScoringEngineErrorCode,
   ErrorCorrelationManager,
 } from '@app/shared-dtos';
-import type {
-  EnhancedSkillMatcherService,
-  JobSkillRequirement,
-  EnhancedSkillScore,
-} from './services/enhanced-skill-matcher.service';
-import type {
-  ExperienceAnalyzerService,
-  JobRequirements,
-  ExperienceScore,
-} from './services/experience-analyzer.service';
-import type {
-  CulturalFitAnalyzerService,
-  CulturalFitScore,
-} from './services/cultural-fit-analyzer.service';
+import type { JobSkillRequirement, EnhancedSkillScore } from './services/enhanced-skill-matcher.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { EnhancedSkillMatcherService } from './services/enhanced-skill-matcher.service';
+import type { JobRequirements, ExperienceScore } from './services/experience-analyzer.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { ExperienceAnalyzerService } from './services/experience-analyzer.service';
+import type { CulturalFitScore } from './services/cultural-fit-analyzer.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { CulturalFitAnalyzerService } from './services/cultural-fit-analyzer.service';
 import type { CompanyProfile } from './services/cultural-fit-analyzer.service';
-import type {
-  ScoringConfidenceService,
-  ComponentScores,
-  ScoreReliabilityReport,
-} from './services/scoring-confidence.service';
+import type { ComponentScores, ScoreReliabilityReport } from './services/scoring-confidence.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { ScoringConfidenceService } from './services/scoring-confidence.service';
 
 /**
  * Defines the shape of the jd dto.

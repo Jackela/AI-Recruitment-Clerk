@@ -6,16 +6,16 @@ import {
   Injectable,
   Logger
 } from '@nestjs/common';
+import type { MatchScoredEvent } from '../report-generator/report-generator.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { ReportGeneratorService } from '../report-generator/report-generator.service';
 import type {
-  ReportGeneratorService,
-  MatchScoredEvent,
-} from '../report-generator/report-generator.service';
-import type {
-  ReportGeneratorNatsService,
   ReportGenerationRequestedEvent,
   ReportGeneratedEvent,
   ReportGenerationFailedEvent,
 } from '../services/report-generator-nats.service';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { ReportGeneratorNatsService } from '../services/report-generator-nats.service';
 
 // Enhanced type definition for health check details
 /**
