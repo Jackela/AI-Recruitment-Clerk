@@ -2,6 +2,17 @@
 Started: 2026-02-04
 ---
 
+## Codebase Patterns
+- Use `sql<number>` template for aggregations
+- Always use `IF NOT EXISTS` for migrations
+- Export types from actions.ts for UI components
+- Component Splitting Pattern: Extract display logic to separate component (e.g., `*-display.component.ts`)
+- Component Splitting Pattern: Extract filter logic to separate component (e.g., `*-filter.component.ts`)
+- Component Splitting Pattern: Extract business logic to service (e.g., `mobile-*.service.ts`)
+- Service uses BehaviorSubject pattern for reactive state management
+- Angular `standalone: true` is a decorator property, not an import
+- Use `import { Component, Input } from '@angular/core'` for decorators (not type-only import)
+
 ## 2026-02-04 - US-001
 - Created docs/ARCHITECTURE_BASELINE.md with architectural layers and dependency rules
 - Documented module boundary tags (type:app, scope:shared, scope:domain, layer:contracts, type:utils)
@@ -70,4 +81,50 @@ Started: 2026-02-04
 - Dynamic import of @nestjs/core NestFactory in bootstrapNestJsGateway avoids conflicts with @nestjs/microservices NestFactory
 - The Angular frontend uses a completely different bootstrap pattern (bootstrapApplication) and should not share NestJS bootstrap helpers
 - App-gateway has application-specific middleware (security validation, Swagger, compression) that should remain in its main.ts - the shared helper only handles common bootstrapping
+---
+
+## 2026-02-04 - US-005
+- Created docs/ERROR_HANDLING.md with comprehensive error handling guide
+- Documented all error types, severity levels, and usage patterns
+- Updated app-gateway global-exception.filter.ts to properly use shared utilities from @ai-recruitment-clerk/shared-dtos
+- The ErrorHandlingModule.forService('app-gateway') was already configured in app.module.ts
+- Replaced fallback implementation in global-exception.filter.ts with proper re-exports
+- Files changed: docs/ERROR_HANDLING.md (new), apps/app-gateway/src/common/filters/global-exception.filter.ts
+
+**Learnings for future iterations:**
+- The project has two error handling libraries:
+  - @ai-recruitment-clerk/infrastructure-shared/src/error-handling - Basic utilities (AppError, ValidationError, errorBoundary)
+  - @ai-recruitment-clerk/shared-dtos/src/errors - Enhanced system with correlation, structured logging, and NestJS integration
+- ErrorHandlingModule is in @ai-recruitment-clerk/shared-dtos/interceptors/error-handling.module
+- The enhanced system provides: StandardizedGlobalExceptionFilter, EnhancedAppException, error correlation, and structured logging
+- Domain-specific errors are available: NatsMessageException, MLModelException, ParsingException, CacheException, QueueException, TemplateException
+- App-gateway already had ErrorHandlingModule.forService('app-gateway') configured - just needed to update the local filter file to use shared exports
+- Base error classes are in @ai-recruitment-clerk/shared-dtos/src/common/error-handling.patterns (AppException, ErrorHandler, ErrorRecoveryStrategy)
+---
+
+## 2026-02-04 - US-006
+- Split 3 largest Angular components (1355 → ~790 lines, 1052 → ~790 lines, 1121 → ~560 lines)
+- Created BentoIconComponent (160 lines) - extracted SVG icons from bento-grid
+- Created MobileQuickActionsComponent (150 lines) - extracted quick actions bar from mobile-dashboard
+- Created MobileActivityListComponent (170 lines) - extracted activity list from mobile-dashboard
+- Created mobile-upload-file-list component (350 lines) - extracted file list display
+- Split dashboard-charts into separate chart components:
+  - SparklineChartComponent (160 lines) - trend line chart
+  - BarChartComponent (180 lines) - vertical bar chart
+  - PieChartComponent (160 lines) - pie/donut chart
+- All new components are under 500 lines each
+- Reduced bento-grid.component.ts from 1355 to ~790 lines
+- Reduced mobile-dashboard.component.ts from 1052 to ~790 lines
+- Reduced dashboard-charts.component.ts from 1001 to ~450 lines
+- Files changed: 8 new components, 3 modified components
+- Overall reduction: ~950 lines removed, improving maintainability
+
+**Learnings for future iterations:**
+- Angular `standalone` is a decorator property, NOT an import - use `@Component({ standalone: true })`
+- When extracting icons, keep their associated styles in the new component
+- Chart components can be separated into individual files for better reusability
+- Mobile components tend to grow large due to embedded SVGs and styles - extract to separate components
+- Presentational components (icons, activity lists, quick actions) are good extraction targets
+- Use type-only imports sparingly with Angular decorators - `Input`, `Output`, `Component` need value imports
+- Barrel files (dashboard-chart-types.ts) help organize re-exports for cleaner imports
 ---

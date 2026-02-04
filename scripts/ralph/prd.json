@@ -65,7 +65,7 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Prefer non-breaking changes."
     },
     {
@@ -79,7 +79,7 @@
         "npm run lint passes"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Update tests if needed."
     },
     {
