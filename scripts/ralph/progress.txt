@@ -127,3 +127,22 @@ Started: 2026-02-04
   - Links to key documentation files (CLAUDE.md, progress.txt, NATS audit)
   - Reminds about fail-fast architecture and ESM compatibility
 ---
+## [2026-02-04] - US-011
+- Consolidated Jest setup files to use shared jest.setup.ts from jest.preset.cjs
+- Moved instanceof matcher patch from jd-extractor-svc/jest.setup.ts to shared jest.setup.ts
+- Removed jd-extractor-svc/jest.setup.ts override, now uses shared setup via jest.preset.cjs
+- Simplified resume-parser-svc/jest.setup.ts to only contain service-specific mocks (pdf-parse-fork, shared-dtos)
+- Removed unused setup-jest.ts file (no references in codebase)
+- Files changed:
+  - `jest.setup.ts` (updated - added instanceof matcher patch)
+  - `apps/jd-extractor-svc/jest.config.ts` (updated - removed setupFilesAfterEnv override)
+  - `apps/jd-extractor-svc/jest.setup.ts` (deleted)
+  - `apps/resume-parser-svc/jest.setup.ts` (simplified - service-specific mocks only)
+  - `setup-jest.ts` (deleted - unused)
+- **Learnings for future iterations:**
+  - Jest preset pattern: jest.preset.cjs specifies `setupFilesAfterEnv: ['<rootDir>/../../jest.setup.ts']` for shared setup
+  - Individual apps can override by specifying their own `setupFilesAfterEnv` in jest.config.ts (REPLACES, not extends)
+  - Service-specific mocks (like pdf-parse-fork for resume-parser-svc) should stay in service-level jest.setup.ts
+  - The shared jest.setup.ts now includes: cleanup registry, NestJS logger silencing, process warning filtering, handle detection, instanceof matcher patch
+  - Test results: jd-extractor-svc (131 passed), resume-parser-svc (153 passed, 2 pre-existing failures)
+---
