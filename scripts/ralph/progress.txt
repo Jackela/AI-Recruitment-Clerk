@@ -6,6 +6,8 @@ Started: 2026-02-04
 - E2E tests using `MongooseModule.forRoot()` need explicit mongoose connection cleanup in `afterAll`
 - `WriteWrap` requests in open-handle warnings are benign (async console writes) - filter them in `isStandardIoHandle`
 - When fixing E2E test teardown, close mongoose connection before `app.close()` to prevent pending operations
+- Negative test error messages can be gated in `jest.setup.ts` using `ignoredConsoleErrorPatterns`
+- Pattern for gating errors: use prefix match like `'Error recording usage:'` to cover variations
 
 ## 2026-02-04 - US-001
 - Created `docs/TECH_DEBT_REGISTER.md` with 20 technical debt items
@@ -41,4 +43,27 @@ Started: 2026-02-04
 - E2E tests using `MongooseModule.forRoot()` must explicitly close connections
 - `WriteWrap` is a Node.js internal for async stream writes (console/stdout) - not a real leak
 - Use `JEST_DEBUG_HANDLES=true` to debug handle types
+
+---
+
+## 2026-02-04 - US-003
+- Identified top 2 sources of noisy console.error:
+  1. `usage-limit.service.spec.ts` - DB error messages from negative tests
+  2. `parsing.service.spec.ts` - Circuit breaker messages from negative tests
+- Added error patterns to `ignoredConsoleErrorPatterns` in jest.setup.ts:
+  - `'Error recording usage:'`
+  - `'Error adding bonus quota:'`
+  - `'Error getting usage statistics:'`
+  - `'Error analyzing usage patterns:'`
+  - `'Error getting high risk IPs:'`
+  - `'Circuit breaker triggered for handleResumeSubmitted:'`
+- Both test suites now pass without noisy console errors
+- Test assertions remain intact - only gating expected error messages
+- Typecheck passes
+- Committed: feat: US-003 - Reduce noisy test console errors
+
+**Learnings for future iterations:**
+- Use prefix-based pattern matching for error gating (e.g., `'Error recording usage:'` covers all DB errors)
+- Only gate errors that are expected from negative tests - don't hide real failures
+- Test each targeted suite individually after adding patterns
 

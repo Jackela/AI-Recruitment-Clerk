@@ -39,7 +39,7 @@
         "npm run test passes"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Do not hide real failures."
     },
     {
