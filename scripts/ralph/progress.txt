@@ -227,3 +227,22 @@ Started: 2026-02-04
   - Barrel export pattern in index.ts kept most imports working without changes
   - All DTOs are now in domain folders: feature-flags/, errors/, domains/, models/, events/, auth/, privacy/, etc.
 ---
+## [2026-02-04] - US-017
+- Created shared Logger class in libs/infrastructure-shared/src/logging
+- Implemented Logger class with error, warn, log, debug, verbose methods
+- Added contextual logging support with LogContext interface (traceId, requestId, userId, operation)
+- Created child logger pattern via child() and setContext() methods
+- Exported Logger, createLogger, and default logger instance from infrastructure-shared
+- Created docs/LOGGING.md with usage examples, best practices, and migration guide
+- Files changed:
+  - `libs/infrastructure-shared/src/logging/logger.service.ts` (new)
+  - `libs/infrastructure-shared/src/logging/index.ts` (new)
+  - `libs/infrastructure-shared/src/index.ts` (updated - added logging re-exports)
+  - `docs/LOGGING.md` (new)
+- **Learnings for future iterations:**
+  - Used NestJS's built-in Logger as the underlying implementation to maintain compatibility
+  - The LoggerWithContext class needed a protected getNestLogger() method to access the parent's nest logger
+  - Log format includes context in message string: "Message [operation] trace:xxx req:yyy user:zzz"
+  - The default logger instance provides quick access without explicit instantiation
+  - Documentation included migration guide from console.log to logger.log
+---
