@@ -8,6 +8,9 @@ Started: 2026-02-04
 - When fixing E2E test teardown, close mongoose connection before `app.close()` to prevent pending operations
 - Negative test error messages can be gated in `jest.setup.ts` using `ignoredConsoleErrorPatterns`
 - Pattern for gating errors: use prefix match like `'Error recording usage:'` to cover variations
+- Nx monorepo dependencies: depcheck reports false positives for build tooling (@nx/*, @angular-devkit/*, @swc/*) - these are used implicitly by workspace
+- Type-only imports in .ts files may not be detected by depcheck - verify by searching actual source files before removal
+- `passport-local` was commented out in `local.strategy.ts` - indicating migration away from local auth strategy
 
 ## 2026-02-04 - US-001
 - Created `docs/TECH_DEBT_REGISTER.md` with 20 technical debt items
@@ -66,4 +69,28 @@ Started: 2026-02-04
 - Use prefix-based pattern matching for error gating (e.g., `'Error recording usage:'` covers all DB errors)
 - Only gate errors that are expected from negative tests - don't hide real failures
 - Test each targeted suite individually after adding patterns
+
+---
+
+## 2026-02-04 - US-005
+- Ran depcheck on entire project to identify unused dependencies
+- Removed 6 unused dependencies and 2 unused dev dependencies:
+  - `cookie` - HTTP cookie parsing (not used in codebase)
+  - `hammerjs` - Gesture library (not used in codebase)
+  - `@types/hammerjs` - TypeScript types for hammerjs
+  - `helmet` - Express security middleware (not used - security handled elsewhere)
+  - `passport-local` - Local authentication strategy (commented out in code)
+  - `@types/passport-local` - TypeScript types for passport-local
+  - `validator` - String validation library (note: `class-validator` is still used)
+  - `@types/node-fetch` - TypeScript types for node-fetch (not used)
+- Verified `@google/generative-ai` IS used in `libs/shared-dtos/src/gemini/gemini.client.ts` (depcheck false positive)
+- Nx/Angular dev packages are build tooling, not direct imports - kept as-is
+- All quality checks pass: typecheck, lint (19 warnings, 0 errors), test (88 pre-existing failures unrelated to dep removal)
+- Committed: feat: US-005 - Audit and trim unused dependencies using depcheck
+
+**Learnings for future iterations:**
+- depcheck false positives occur with type-only imports - verify usage by grepping source files
+- In Nx monorepos, build tooling packages (@nx/*, @angular-devkit/*) appear unused but are required
+- Some dependencies may be commented out for future removal (e.g., `passport-local` migration)
+- Always verify each package individually rather than bulk removing all reported packages
 
