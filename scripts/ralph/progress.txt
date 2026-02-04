@@ -179,3 +179,19 @@ Started: 2026-02-04
   - Repository mocks should use jest.fn() for dynamic mocking in integration tests
   - The testing pattern doc should reference actual examples from the codebase for clarity
 ---
+## [2026-02-04] - US-014
+- Applied integration test pattern to scoring-engine-svc (smallest service with 183 tests)
+- Renamed integration test to follow naming convention: scoring-engine.nats.spec.ts → scoring-engine.integration.spec.ts
+- Verified existing test structure already follows the pattern:
+  - Unit tests co-located with source files
+  - Integration tests in integration/ subfolder
+  - NATS integration tests use stub pattern for testing event handlers
+- All 183 tests pass
+- Files changed:
+  - `apps/scoring-engine-svc/src/integration/scoring-engine.integration.spec.ts` (renamed)
+- **Learnings for future iterations:**
+  - scoring-engine-svc already had good test structure - only needed file rename
+  - The NATS integration test pattern uses a stub class that captures handler functions for direct invocation
+  - Integration tests in integration/ subfolder should use .integration.spec.ts suffix
+  - Test runs: 10 test suites, 183 tests passing in ~20 seconds
+---
