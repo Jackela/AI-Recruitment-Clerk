@@ -195,3 +195,19 @@ Started: 2026-02-04
   - Integration tests in integration/ subfolder should use .integration.spec.ts suffix
   - Test runs: 10 test suites, 183 tests passing in ~20 seconds
 ---
+## [2026-02-04] - US-015
+- Created feature-flags/ domain folder in libs/shared-dtos
+- Moved feature-flag.dto.ts and audit-event.dto.ts to feature-flags/ folder
+- Updated libs/shared-dtos/src/index.ts to export from new location
+- All imports use barrel exports (@ai-recruitment-clerk/shared-dtos), so no direct import updates needed
+- Typecheck passes
+- Files changed:
+  - `libs/shared-dtos/src/feature-flags/feature-flag.dto.ts` (moved)
+  - `libs/shared-dtos/src/feature-flags/audit-event.dto.ts` (moved)
+  - `libs/shared-dtos/src/index.ts` (updated)
+- **Learnings for future iterations:**
+  - The shared-dtos library already has a domains/ folder with domain-specific DTOs (analytics, incentive, questionnaire, usage-limit, user-management)
+  - Barrel export pattern in index.ts means moving files doesn't require import updates as long as exports are re-exported
+  - Feature flags domain was small (2 files) - good candidate for incremental refactor
+  - Documentation (specs/002-cicd-quality-migration/tasks.md) references old paths but those are just comments
+---
