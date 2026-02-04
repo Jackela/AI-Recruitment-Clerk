@@ -515,6 +515,19 @@ export const ServiceSchemas = {
     CommonEnvVars.nodeEnv(),
     CommonEnvVars.natsUrl(),
     { name: 'GEMINI_API_KEY', required: true, description: 'Google Gemini API key for AI processing' },
+    // MongoDB configuration
+    { name: 'MONGODB_URL', required: false, description: 'MongoDB connection URL (primary alias)' },
+    { name: 'MONGO_URL', required: false, description: 'MongoDB connection URL (secondary alias)' },
+    { name: 'MONGODB_URI', required: false, description: 'MongoDB connection URL (test alias)' },
+    { name: 'GRIDFS_BUCKET_NAME', required: false, defaultValue: 'resumes', description: 'GridFS bucket name for resume storage' },
+    // Node identification
+    { name: 'NODE_NAME', required: false, description: 'Node name for distributed processing' },
+    { name: 'SERVICE_NAME', required: false, defaultValue: 'resume-parser-svc', description: 'Service name identification' },
+    // NATS configuration
+    { name: 'NATS_SERVERS', required: false, description: 'NATS server connection string(s)' },
+    // Test configuration
+    { name: 'USE_DOCKER', required: false, defaultValue: 'false', description: 'Use Docker for test infrastructure' },
+    { name: 'JEST_FORCE_EXIT', required: false, defaultValue: 'false', description: 'Force Jest to exit after tests' },
   ],
 
   /** JD Extractor Service required environment variables */

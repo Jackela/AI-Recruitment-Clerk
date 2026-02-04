@@ -26,6 +26,23 @@ import {
 } from '../processing';
 
 /**
+ * Get MongoDB URL from environment with fallback chain
+ * Centralizes environment access for module-level configuration
+ */
+function getMongoUrl(): string {
+  return (
+    process.env.MONGODB_URL ??
+    process.env.MONGO_URL ??
+    process.env.MONGODB_URI ??
+    (() => {
+      throw new Error(
+        'MONGODB_URL, MONGO_URL, or MONGODB_URI environment variable is required',
+      );
+    })()
+  );
+}
+
+/**
  * Configures the app module.
  */
 @Module({
@@ -37,18 +54,9 @@ import {
     NatsClientModule.forRoot({
       serviceName: 'resume-parser-svc',
     }),
-    MongooseModule.forRoot(
-      process.env.MONGODB_URL ||
-        process.env.MONGO_URL ||
-        (() => {
-          throw new Error(
-            'MONGODB_URL or MONGO_URL environment variable is required',
-          );
-        })(),
-      {
-        connectionName: 'resume-parser',
-      },
-    ),
+    MongooseModule.forRoot(getMongoUrl(), {
+      connectionName: 'resume-parser',
+    }),
     MongooseModule.forFeature(
       [{ name: Resume.name, schema: ResumeSchema }],
       'resume-parser',
