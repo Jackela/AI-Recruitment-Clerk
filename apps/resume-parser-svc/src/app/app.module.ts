@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
 import { ResumeEventsController } from './resume-events.controller';
@@ -18,6 +18,7 @@ import {
   StandardizedGlobalExceptionFilter,
   ExceptionFilterConfigHelper,
   ErrorInterceptorFactory,
+  createDtoValidationPipe,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import {
   FileProcessingService,
@@ -65,6 +66,11 @@ import {
     ResumeRepository,
     FileProcessingService,
     ResumeEncryptionService,
+    // Global DTO Validation Pipe
+    {
+      provide: APP_PIPE,
+      useFactory: () => createDtoValidationPipe(),
+    },
     // Enhanced Error Handling System
     {
       provide: APP_FILTER,
