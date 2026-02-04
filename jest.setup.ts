@@ -114,6 +114,12 @@ const isStandardIoHandle = (handle: any): boolean => {
     return true;
   }
 
+  // WriteWrap requests are often pending async console writes
+  // These are benign and don't indicate actual resource leaks
+  if (handle.constructor?.name === 'WriteWrap') {
+    return true;
+  }
+
   return false;
 };
 

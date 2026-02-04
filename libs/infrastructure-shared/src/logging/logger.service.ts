@@ -69,6 +69,7 @@ export class Logger {
   private readonly nestLogger: NestLogger;
   private readonly serviceContext: string;
   private readonly defaultContext: LogContext;
+  protected presetContext: LogContext = {};
 
   constructor(context?: string, options?: LoggerOptions) {
     this.serviceContext = options?.service || context || 'Application';
@@ -131,17 +132,21 @@ export class Logger {
   /**
    * Set the log context for subsequent log calls
    * @param context - Context to set
-   * @returns A new Logger instance with the context merged
+   * @returns The same logger instance (context is merged internally)
    */
   public setContext(context: LogContext): Logger {
-    const mergedContext = { ...this.defaultContext, ...context };
-    return new LoggerWithContext(this.nestLogger, mergedContext);
+    // Store the context for this logger instance
+    (this as unknown as { presetContext: LogContext }).presetContext = {
+      ...this.defaultContext,
+      ...context,
+    };
+    return this;
   }
 
   /**
    * Create a child logger with additional context
    * @param context - Additional context for the child logger
-   * @returns A new Logger instance
+   * @returns The same logger instance (context is merged internally)
    */
   public child(context: LogContext): Logger {
     return this.setContext(context);
@@ -161,7 +166,7 @@ export class Logger {
     context?: LogContext,
     error?: Error | string,
   ): LogEntry {
-    const mergedContext = { ...this.defaultContext, ...context };
+    const mergedContext = { ...this.defaultContext, ...this.presetContext, ...context };
 
     // Build context string for log message
     const contextParts: string[] = [];
@@ -188,39 +193,6 @@ export class Logger {
       context: Object.keys(mergedContext).length > 0 ? mergedContext : undefined,
       error: error instanceof Error ? error : undefined,
     };
-  }
-}
-
-/**
- * Logger instance with pre-configured context
- */
-class LoggerWithContext extends Logger {
-  private readonly nestLoggerInstance: NestLogger;
-
-  constructor(nestLogger: NestLogger, private readonly context: LogContext) {
-    super(context.service as string);
-    // Store the nest logger instance to avoid duplicate service prefix
-    this.nestLoggerInstance = nestLogger;
-  }
-
-  protected getNestLogger(): NestLogger {
-    return this.nestLoggerInstance;
-  }
-
-  public override error(message: string, trace?: string | Error, context?: LogContext): void {
-    this.getNestLogger().error(message, trace);
-  }
-
-  public override warn(message: string, context?: LogContext): void {
-    this.getNestLogger().warn(message);
-  }
-
-  public override log(message: string, context?: LogContext): void {
-    this.getNestLogger().log(message);
-  }
-
-  public override debug(message: string, context?: LogContext): void {
-    this.getNestLogger().debug(message);
   }
 }
 
