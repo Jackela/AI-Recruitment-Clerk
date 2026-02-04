@@ -2,9 +2,6 @@
 export * from './models/resume.dto';
 export * from './models/feedback-code.dto';
 
-// Error Response DTO
-export * from './error-response.dto';
-
 // DTO Interfaces
 export * from './dto/jd.dto';
 
@@ -45,6 +42,7 @@ export * from './skills/skills-taxonomy';
 export * from './prompts/prompt-templates';
 
 // Error Handling - Enhanced System
+export * from './errors/error-response.dto';
 export * from './errors/gemini-errors';
 export * from './errors/error-correlation';
 export * from './errors/enhanced-error-types';

@@ -201,8 +201,8 @@
         "Typecheck passes"
       ],
       "priority": 16,
-      "passes": false,
-      "notes": "Complete the migration."
+      "passes": true,
+      "notes": "Moved error-response.dto.ts to errors/ folder. Updated imports in error-response-formatter.ts. Typecheck passes."
     },
     {
       "id": "US-017",

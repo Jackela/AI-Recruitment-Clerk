@@ -12,7 +12,7 @@ import type {
   ErrorRecovery,
   ErrorImpact,
   ErrorMonitoring,
-} from '../error-response.dto';
+} from './error-response.dto';
 import type { EnhancedAppException } from './enhanced-error-types';
 import { ErrorCorrelationManager } from './error-correlation';
 
