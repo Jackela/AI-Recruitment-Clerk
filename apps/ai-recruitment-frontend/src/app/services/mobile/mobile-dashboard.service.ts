@@ -82,6 +82,57 @@ export interface FabAction {
 }
 
 /**
+ * Defines the shape of the chart data point.
+ */
+export interface ChartDataPoint {
+  label: string;
+  value: number;
+  color?: string;
+}
+
+/**
+ * Defines the shape of the dashboard chart.
+ */
+export interface DashboardChart {
+  id: string;
+  title: string;
+  type: 'sparkline' | 'bar' | 'donut' | 'line';
+  data: ChartDataPoint[];
+  height?: number;
+  showLabels?: boolean;
+  showLegend?: boolean;
+}
+
+/**
+ * Defines the shape of the navigation configuration.
+ */
+export interface NavigationConfig {
+  navItems: NavItem[];
+  menuItems: NavItem[];
+  headerActions: HeaderAction[];
+}
+
+/**
+ * Defines the shape of the navigation item.
+ */
+export interface NavItem {
+  id: string;
+  label: string;
+  icon: string;
+  route: string;
+}
+
+/**
+ * Defines the shape of the header action.
+ */
+export interface HeaderAction {
+  id: string;
+  label: string;
+  icon: string;
+  badge?: number;
+}
+
+/**
  * Dashboard state containing all data for the dashboard view.
  */
 export interface DashboardState {

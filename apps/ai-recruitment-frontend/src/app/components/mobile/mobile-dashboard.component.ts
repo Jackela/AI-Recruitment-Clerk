@@ -19,7 +19,9 @@ import type {
 import {
   MobileSwipeComponent
 } from './mobile-swipe.component';
-import { TouchGestureService } from '../../services/mobile/touch-gesture.service';
+import {
+  PullToRefreshDirective
+} from '../../directives/pull-to-refresh.directive';
 import type { DashboardStat } from './dashboard-stats.component';
 import { DashboardStatsComponent } from './dashboard-stats.component';
 import type {
@@ -47,17 +49,6 @@ import {
 } from '../../services/mobile/mobile-dashboard.service';
 
 /**
- * Defines the shape of the swipe action (re-exported for template).
- */
-export interface SwipeActionExport {
-  id: string;
-  label: string;
-  icon: string;
-  color: 'primary' | 'success' | 'warning' | 'danger';
-  width: number;
-}
-
-/**
  * Represents the mobile dashboard component.
  * A thin orchestrator that delegates business logic to MobileDashboardService.
  */
@@ -69,393 +60,14 @@ export interface SwipeActionExport {
     RouterModule,
     MobileNavigationComponent,
     MobileSwipeComponent,
+    PullToRefreshDirective,
     DashboardStatsComponent,
     DashboardChartsComponent,
     MobileQuickActionsComponent,
     MobileActivityListComponent,
   ],
-  template: `
-    <!-- Mobile Navigation -->
-    <arc-mobile-navigation
-      [pageTitle]="pageTitle"
-      [pageSubtitle]="pageSubtitle"
-      [navItems]="navItems"
-      [menuItems]="menuItems"
-      [headerActions]="headerActions"
-      (actionClick)="onHeaderAction($event)"
-    >
-    </arc-mobile-navigation>
-
-    <!-- Dashboard Content -->
-    <div class="mobile-dashboard-content">
-      <!-- Pull to Refresh Indicator -->
-      <div
-        class="pull-refresh-indicator"
-        [class.visible]="isPullRefreshVisible"
-        [class.loading]="isRefreshing"
-      >
-        <div class="refresh-spinner"></div>
-        <span class="refresh-text">{{
-          isRefreshing ? 'Refreshing...' : 'Pull to refresh'
-        }}</span>
-      </div>
-
-      <!-- Quick Actions Bar -->
-      <arc-mobile-quick-actions
-        [quickActions]="quickActions"
-      ></arc-mobile-quick-actions>
-
-      <!-- Stats Overview -->
-      <arc-dashboard-stats [stats]="overviewStats"></arc-dashboard-stats>
-
-      <!-- Charts Section -->
-      <arc-dashboard-charts [charts]="dashboardCharts"></arc-dashboard-charts>
-
-      <!-- Dashboard Cards -->
-      <div class="dashboard-cards" *ngIf="dashboardCards.length > 0">
-        <h2 class="section-title">Dashboard</h2>
-        <div class="cards-container" #dashboardContainer>
-          <app-mobile-swipe
-            *ngFor="let card of dashboardCards"
-            [actions]="card.actions || []"
-            [item]="card"
-            (swipeAction)="onCardSwipe($event)"
-          >
-            <div
-              class="dashboard-card"
-              [class]="'dashboard-card--' + card.size + ' dashboard-card--' + card.color"
-              [class.interactive]="!!card.route"
-              [routerLink]="card.route"
-              (click)="onCardClick(card)"
-              (keydown.enter)="onCardClick(card)"
-              (keydown.space)="onCardClick(card)"
-              [attr.tabindex]="card.route ? 0 : null"
-            >
-              <div class="card-header">
-                <div class="card-icon">
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path [attr.d]="card.icon" />
-                  </svg>
-                </div>
-                <div
-                  class="card-priority"
-                  [class]="'priority--' + card.priority"
-                ></div>
-              </div>
-
-              <div class="card-content">
-                <h3 class="card-title">{{ card.title }}</h3>
-                <p class="card-subtitle" *ngIf="card.subtitle">
-                  {{ card.subtitle }}
-                </p>
-                <div class="card-value">{{ card.value }}</div>
-                <div class="card-change" *ngIf="card.change">
-                  <span
-                    class="change-indicator"
-                    [class]="'change-' + card.change.type"
-                  >
-                    {{ card.change.type === 'increase' ? '↗' : '↘' }}
-                    {{ Math.abs(card.change.value) }}%
-                  </span>
-                  <span class="change-period">vs {{ card.change.period }}</span>
-                </div>
-              </div>
-            </div>
-          </app-mobile-swipe>
-        </div>
-      </div>
-
-      <!-- Recent Activity -->
-      <arc-mobile-activity-list
-        [activities]="recentActivity"
-        (activityClick)="onActivityClick($event)"
-      ></arc-mobile-activity-list>
-    </div>
-
-    <!-- Floating Action Button -->
-    <button
-      class="mobile-fab"
-      [attr.aria-label]="fabAction.label"
-      (click)="onFabClick()"
-      (keydown.enter)="onFabClick()"
-      (keydown.space)="onFabClick()"
-    >
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-        <path [attr.d]="fabAction.icon" />
-      </svg>
-    </button>
-  `,
-  styles: [
-    `
-      .mobile-dashboard-content {
-        padding: calc(var(--spacing-16, 4rem) + var(--spacing-2, 0.5rem))
-          var(--spacing-4, 1rem) var(--spacing-20, 5rem);
-        min-height: 100vh;
-        background: var(--color-background, #f8f9fa);
-      }
-
-      .pull-refresh-indicator {
-        position: fixed;
-        top: calc(var(--spacing-14, 3.5rem) + var(--spacing-2, 0.5rem));
-        left: 50%;
-        transform: translateX(-50%) translateY(-100%);
-        background: var(--color-surface, white);
-        border-radius: var(--border-radius-xl, 20px);
-        padding: var(--spacing-3, 0.75rem) var(--spacing-5, 1.25rem);
-        box-shadow: var(--shadow-lg, 0 4px 12px rgba(0, 0, 0, 0.15));
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-2, 0.5rem);
-        z-index: 500;
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.8);
-
-        &.visible {
-          transform: translateX(-50%) translateY(10px);
-        }
-
-        &.loading {
-          pointer-events: none;
-
-          .refresh-spinner {
-            animation-duration: 0.8s;
-          }
-        }
-
-        @supports (top: env(safe-area-inset-top)) {
-          top: calc(56px + env(safe-area-inset-top));
-        }
-
-        .refresh-spinner {
-          width: var(--spacing-4, 1rem);
-          height: var(--spacing-4, 1rem);
-          border: 2px solid var(--color-border, #e9ecef);
-          border-top: 2px solid var(--color-primary, #3498db);
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-          will-change: transform;
-
-          @media (prefers-reduced-motion: reduce) {
-            animation-duration: 2s;
-          }
-        }
-
-        .refresh-text {
-          font-size: 12px;
-          color: #6c757d;
-          font-weight: 500;
-          user-select: none;
-          pointer-events: none;
-        }
-      }
-
-      .dashboard-cards {
-        margin-bottom: var(--spacing-6, 1.5rem);
-
-        .cards-container {
-          display: flex;
-          flex-direction: column;
-          gap: var(--spacing-3, 0.75rem);
-
-          .dashboard-card {
-            background: var(--color-surface, white);
-            border-radius: var(--border-radius-lg, 12px);
-            padding: var(--spacing-4, 1rem);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.06));
-            text-decoration: none;
-            color: inherit;
-            position: relative;
-            overflow: hidden;
-
-            &.interactive:active {
-              transform: scale(0.98);
-              box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-            }
-
-            .card-header {
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              margin-bottom: var(--spacing-3, 0.75rem);
-
-              .card-icon {
-                width: var(--spacing-10, 2.5rem);
-                height: var(--spacing-10, 2.5rem);
-                border-radius: var(--border-radius-md, 8px);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: var(--color-background, #f8f9fa);
-                color: var(--color-text-secondary, #6c757d);
-              }
-
-              .card-priority {
-                width: var(--spacing-2, 0.5rem);
-                height: var(--spacing-2, 0.5rem);
-                border-radius: 50%;
-
-                &.priority--high {
-                  background: #e74c3c;
-                }
-
-                &.priority--medium {
-                  background: #f39c12;
-                }
-
-                &.priority--low {
-                  background: #95a5a6;
-                }
-              }
-            }
-
-            .card-content {
-              .card-title {
-                font-size: 16px;
-                font-weight: 600;
-                color: #2c3e50;
-                margin: 0 0 4px 0;
-                line-height: 1.3;
-              }
-
-              .card-subtitle {
-                font-size: 12px;
-                color: #6c757d;
-                margin: 0 0 8px 0;
-                line-height: 1.4;
-              }
-
-              .card-value {
-                font-size: 24px;
-                font-weight: 700;
-                color: #2c3e50;
-                margin-bottom: 8px;
-                line-height: 1.2;
-              }
-
-              .card-change {
-                display: flex;
-                align-items: center;
-                gap: var(--spacing-2, 0.5rem);
-
-                .change-indicator {
-                  font-size: 0.75rem;
-                  font-weight: 600;
-                  padding: var(--spacing-1, 0.25rem) var(--spacing-2, 0.5rem);
-                  border-radius: var(--border-radius-sm, 4px);
-
-                  &.change-increase {
-                    background: rgba(40, 167, 69, 0.1);
-                    color: #28a745;
-                  }
-
-                  &.change-decrease {
-                    background: rgba(231, 76, 60, 0.1);
-                    color: #e74c3c;
-                  }
-                }
-
-                .change-period {
-                  font-size: 11px;
-                  color: #95a5a6;
-                }
-              }
-            }
-
-            &--large {
-              grid-column: span 2;
-            }
-
-            &--primary {
-              .card-header .card-icon {
-                background: rgba(52, 152, 219, 0.1);
-                color: #3498db;
-              }
-            }
-
-            &--success {
-              .card-header .card-icon {
-                background: rgba(40, 167, 69, 0.1);
-                color: #28a745;
-              }
-            }
-
-            &--warning {
-              .card-header .card-icon {
-                background: rgba(255, 193, 7, 0.1);
-                color: #ffc107;
-              }
-            }
-
-            &--danger {
-              .card-header .card-icon {
-                background: rgba(231, 76, 60, 0.1);
-                color: #e74c3c;
-              }
-            }
-          }
-        }
-      }
-
-      .mobile-fab {
-        position: fixed;
-        bottom: 80px;
-        right: 16px;
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        background: #3498db;
-        color: white;
-        border: none;
-        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        z-index: 999;
-
-        &:active {
-          transform: scale(0.9);
-          box-shadow: 0 2px 8px rgba(52, 152, 219, 0.6);
-        }
-      }
-
-      @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-
-      @media (min-width: 768px) {
-        .mobile-dashboard-content {
-          padding: 24px;
-          max-width: 1200px;
-          margin: 0 auto;
-        }
-
-        .dashboard-cards .cards-container {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 16px;
-        }
-
-        .mobile-fab {
-          display: none;
-        }
-      }
-    `,
-  ],
+  templateUrl: './mobile-dashboard.component.html',
+  styleUrl: './mobile-dashboard.component.scss',
 })
 export class MobileDashboardComponent implements OnInit, OnDestroy {
   public pageTitle = 'Dashboard';
@@ -572,15 +184,7 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
   // Pull-to-refresh state
   public isPullRefreshVisible = false;
 
-  private readonly _touchGesture = inject(TouchGestureService);
   private readonly _dashboardService = inject(MobileDashboardService);
-
-  /**
-   * Initializes a new instance of the Mobile Dashboard Component.
-   */
-  constructor() {
-    void this._touchGesture;
-  }
 
   /**
    * Performs the ng on init operation.
@@ -602,9 +206,6 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
 
     // Get FAB configuration
     this.fabAction = this._dashboardService.getFabAction();
-
-    // Setup pull-to-refresh gesture handling
-    this.setupPullToRefresh();
   }
 
   /**
@@ -678,139 +279,17 @@ export class MobileDashboardComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Sets up pull-to-refresh gesture handling.
+   * Handles the refresh event from the pull-to-refresh directive.
    */
-  private setupPullToRefresh(): void {
-    let startY = 0;
-    let startX = 0;
-    let currentY = 0;
-    let currentX = 0;
-    let isPulling = false;
-    let touchIdentifier: number | null = null;
-
-    const handleTouchStart = (e: TouchEvent): void => {
-      if (e.touches.length !== 1) return;
-
-      const touch = e.touches[0];
-      touchIdentifier = touch.identifier;
-      startY = touch.clientY;
-      startX = touch.clientX;
-      currentY = startY;
-      currentX = startX;
-      isPulling = false;
-    };
-
-    const handleTouchMove = (e: TouchEvent): void => {
-      if (touchIdentifier === null) return;
-
-      let targetTouch: Touch | null = null;
-      for (let i = 0; i < e.touches.length; i++) {
-        if (e.touches[i].identifier === touchIdentifier) {
-          targetTouch = e.touches[i];
-          break;
-        }
-      }
-
-      if (!targetTouch) return;
-
-      currentY = targetTouch.clientY;
-      currentX = targetTouch.clientX;
-      const deltaY = currentY - startY;
-      const deltaX = Math.abs(currentX - startX);
-      const isVerticalPull = deltaY > 0;
-      const isHorizontalScroll = deltaX > 30;
-      const isPrimaryVertical = Math.abs(deltaY) > deltaX * 1.5;
-
-      if (isVerticalPull && !isHorizontalScroll && isPrimaryVertical) {
-        isPulling = true;
-
-        if (deltaY > 20 && deltaY < 100) {
-          this.isPullRefreshVisible = true;
-        } else if (deltaY >= 100) {
-          this.isPullRefreshVisible = true;
-
-          if ('vibrate' in navigator) {
-            navigator.vibrate(50);
-          }
-
-          if (deltaY > deltaX * 2) {
-            e.preventDefault();
-          }
-        }
-      } else if (isHorizontalScroll || !isPrimaryVertical) {
-        this.isPullRefreshVisible = false;
-        isPulling = false;
-      }
-    };
-
-    const handleTouchEnd = (e: TouchEvent): void => {
-      if (touchIdentifier === null) {
-        this.resetPullState();
-        return;
-      }
-
-      let touchEnded = true;
-      for (let i = 0; i < e.touches.length; i++) {
-        if (e.touches[i].identifier === touchIdentifier) {
-          touchEnded = false;
-          break;
-        }
-      }
-
-      if (touchEnded) {
-        const deltaY = currentY - startY;
-        const deltaX = Math.abs(currentX - startX);
-
-        if (isPulling && deltaY >= 100 && deltaX < 50) {
-          this.triggerRefresh();
-        } else {
-          this.resetPullState();
-        }
-
-        touchIdentifier = null;
-      }
-    };
-
-    const handleTouchCancel = (): void => {
-      this.resetPullState();
-      touchIdentifier = null;
-    };
-
-    document.addEventListener('touchstart', handleTouchStart, {
-      passive: true,
-    });
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
-    document.addEventListener('touchend', handleTouchEnd, { passive: true });
-    document.addEventListener('touchcancel', handleTouchCancel, {
-      passive: true,
-    });
-
-    this.destroy$.subscribe(() => {
-      document.removeEventListener('touchstart', handleTouchStart);
-      document.removeEventListener('touchmove', handleTouchMove);
-      document.removeEventListener('touchend', handleTouchEnd);
-      document.removeEventListener('touchcancel', handleTouchCancel);
-    });
-  }
-
-  /**
-   * Resets the pull-to-refresh state.
-   */
-  private resetPullState(): void {
-    this.isPullRefreshVisible = false;
-  }
-
-  /**
-   * Triggers the dashboard refresh.
-   */
-  private triggerRefresh(): void {
+  public onRefresh(): void {
     if (this.isRefreshing) return;
-
-    if ('vibrate' in navigator) {
-      navigator.vibrate([30, 30, 30]);
-    }
-
     this._dashboardService.refreshDashboard();
-    this.resetPullState();
+  }
+
+  /**
+   * Handles the indicator visibility event from the pull-to-refresh directive.
+   */
+  public onIndicatorVisible(visible: boolean): void {
+    this.isPullRefreshVisible = visible;
   }
 }
