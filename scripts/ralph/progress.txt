@@ -146,3 +146,20 @@ Started: 2026-02-04
   - The shared jest.setup.ts now includes: cleanup registry, NestJS logger silencing, process warning filtering, handle detection, instanceof matcher patch
   - Test results: jd-extractor-svc (131 passed), resume-parser-svc (153 passed, 2 pre-existing failures)
 ---
+## [2026-02-04] - US-012
+- Verified all config folder references use correct /config paths
+- Searched docs/ and scripts/ for stale paths to docker-compose.yml, railway.json, render.yaml
+- Found all references already correct:
+  - config/docker/docker-compose.yml
+  - config/docker/.dockerignore
+  - config/deployment/railway.json
+  - config/deployment/render.yaml
+- No file changes needed - verification only
+- Files changed:
+  - `scripts/ralph/prd.json` (updated)
+- **Learnings for future iterations:**
+  - The codebase already follows proper config folder organization
+  - All documentation correctly references /config/docker/ and /config/deployment/
+  - No stale paths found in docs or scripts
+  - Verification tasks are important to confirm existing standards before making unnecessary changes
+---
