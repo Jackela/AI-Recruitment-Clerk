@@ -36,3 +36,20 @@ Started: 2026-02-04
 - Domain libraries use three tags: domain:{name}, scope:domain, type:lib (keep these consistent)
 - Shared infrastructure libraries should use: scope:shared, type:utils (minimal, enforceable)
 ---
+
+## 2026-02-04 - US-003
+- Added explicit forbidden dependency rules to eslint.config.mjs using notDependOnLibsWithTags
+- Added 3 forbidden dependency rules:
+  1. scope:shared → not depend on scope:domain, layer:contracts (prevents circular deps)
+  2. scope:domain → not depend on type:app (ensures business logic remains independent)
+  3. layer:contracts → not depend on scope:domain, scope:shared (keeps contracts stable)
+- Fixed boundary violation: removed unused infrastructure-shared/src/contracts/index.ts re-export file
+- Files changed: eslint.config.mjs, libs/infrastructure-shared/src/contracts/index.ts (deleted)
+
+**Learnings for future iterations:**
+- ESLint @nx/enforce-module-boundaries supports both onlyDependOnLibsWithTags (allowlist) and notDependOnLibsWithTags (denylist)
+- Use notDependOnLibsWithTags for explicit architectural violations that should error
+- Re-export files in shared libraries can create hidden dependencies on layers they shouldn't depend on
+- Always verify boundary rules catch real violations - the contracts/index.ts file was unused but violated the rule
+- When adding boundary rules, run lint and fix violations immediately to avoid tech debt accumulation
+---

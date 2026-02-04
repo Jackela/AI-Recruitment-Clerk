@@ -25,6 +25,7 @@ export default [
     rules: {
       // Module boundaries enforcement
       // Prevents unsafe cross-module imports between libraries and applications
+      // See docs/ARCHITECTURE_BASELINE.md for complete dependency rules
       '@nx/enforce-module-boundaries': [
         'warn',
         {
@@ -40,20 +41,34 @@ export default [
             {
               sourceTag: 'scope:shared',
               onlyDependOnLibsWithTags: ['scope:shared', 'type:utils'],
+              // FORBIDDEN: Shared infrastructure must not depend on domain libraries
+              // This prevents circular dependencies and keeps infrastructure reusable
+              notDependOnLibsWithTags: ['scope:domain', 'layer:contracts'],
             },
             // Domain libraries (scope:domain) can depend on shared libraries and other domains
             {
               sourceTag: 'scope:domain',
               onlyDependOnLibsWithTags: ['scope:shared', 'type:utils', 'scope:domain', 'layer:contracts'],
+              // FORBIDDEN: Domain libraries must not import from applications
+              // This ensures business logic remains independent of delivery mechanisms
+              notDependOnLibsWithTags: ['type:app'],
             },
             // Contract libraries should have minimal dependencies
             {
               sourceTag: 'layer:contracts',
               onlyDependOnLibsWithTags: ['type:utils'],
+              // FORBIDDEN: API contracts must not depend on domain or shared implementations
+              // This ensures contracts remain stable and can be consumed independently
+              notDependOnLibsWithTags: ['scope:domain', 'scope:shared'],
             },
             // Utility libraries should be standalone
             {
               sourceTag: 'type:utils',
+              onlyDependOnLibsWithTags: ['*'],
+            },
+            // E2E test projects can depend on anything
+            {
+              sourceTag: 'type:e2e',
               onlyDependOnLibsWithTags: ['*'],
             },
             // Catch-all for untagged projects (allow all to avoid noise)

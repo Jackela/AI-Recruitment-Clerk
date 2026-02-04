@@ -39,7 +39,7 @@
         "npm run lint passes"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Avoid false positives; keep rules minimal."
     },
     {
