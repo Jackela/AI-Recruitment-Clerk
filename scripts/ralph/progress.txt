@@ -72,3 +72,17 @@ Started: 2026-02-04
   - Pattern: When consolidating types, use type alias with @deprecated comment for backward compatibility (e.g., `export type StandardizedErrorResponse = ErrorResponseDto`)
   - This allows gradual migration while maintaining existing code that uses the old type name
 ---
+## [2026-02-04] - US-006, US-007
+- Audited all NATS services for BaseMicroserviceService usage
+- Created docs/NATS_BASE_CLASS_AUDIT.md with comprehensive audit results
+- Found all 4 NATS services already extend BaseMicroserviceService (resume-parser-svc, jd-extractor-svc, scoring-engine-svc, report-generator-svc)
+- Marked US-007 as passing since no refactoring is needed
+- Files changed:
+  - `docs/NATS_BASE_CLASS_AUDIT.md` (new)
+  - `scripts/ralph/prd.json` (updated)
+- **Learnings for future iterations:**
+  - All NATS services follow the same pattern: extend BaseMicroserviceService, inject ConfigService/NatsConnectionManager/NatsStreamManager
+  - Each service uses protected methods: publishEvent(), publishErrorEvent(), subscribeToEvents()
+  - Service names are passed as string to super() constructor: 'resume-parser-svc', 'jd-extractor-svc', 'scoring-engine-svc', 'report-generator-svc'
+  - NATS service files are located in apps/{service}/src/services/{service}-nats.service.ts
+---
