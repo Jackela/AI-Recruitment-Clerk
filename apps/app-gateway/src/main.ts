@@ -2,10 +2,10 @@
  * AI Recruitment Clerk - Gateway Bootstrap
  */
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app/app.module';
 import { ProductionSecurityValidator } from './common/security/production-security-validator';
+import { bootstrapNestJsGateway } from '@ai-recruitment-clerk/infrastructure-shared';
 import compression from 'compression';
 import type { Request, Response } from 'express';
 
@@ -26,29 +26,20 @@ async function bootstrap(): Promise<void> {
   }
   Logger.log('✅ [FAIL-FAST] All critical environment variables validated');
 
-  // Startup logging
-  Logger.log('🚀 [bootstrap] Starting AI Recruitment Clerk Gateway...');
-  Logger.log(`- Node environment: ${process.env.NODE_ENV || 'not set'}`);
-  Logger.log(`- Port: ${process.env.PORT || 3000}`);
-  Logger.log(`- API Prefix: ${process.env.API_PREFIX || 'api'}`);
-  Logger.log(
-    `- MongoDB: ${process.env.MONGO_URL ? '✅ Configured' : '❌ Not set'}`,
-  );
-  Logger.log(
-    `- Redis: ${process.env.REDIS_URL ? '✅ Configured' : '⚠️ Optional'}`,
-  );
-
-  const app = await NestFactory.create(AppModule, {
-    logger:
-      process.env.NODE_ENV === 'production'
-        ? ['error', 'warn', 'log']
-        : ['error', 'warn', 'log', 'debug', 'verbose'],
-    bodyParser: true,
-    cors: false,
+  // Bootstrap the application using shared helper
+  const app = await bootstrapNestJsGateway(AppModule, {
+    serviceName: 'AI Recruitment Clerk Gateway',
+    port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : undefined,
+    globalPrefix: 'api',
+    cors: {
+      origin:
+        process.env.NODE_ENV === 'production'
+          ? process.env.ALLOWED_ORIGINS?.split(',') || [
+              'https://ai-recruitment-clerk-production.up.railway.app',
+            ]
+          : ['http://localhost:4200', 'http://localhost:4202'],
+    },
   });
-
-  const globalPrefix = 'api';
-  app.setGlobalPrefix(globalPrefix);
 
   // Security validation
   const securityValidator = app.get(ProductionSecurityValidator);
@@ -74,30 +65,7 @@ async function bootstrap(): Promise<void> {
     );
   }
 
-  // CORS
-  app.enableCors({
-    origin:
-      process.env.NODE_ENV === 'production'
-        ? process.env.ALLOWED_ORIGINS?.split(',') || [
-            'https://ai-recruitment-clerk-production.up.railway.app',
-          ]
-        : ['http://localhost:4200', 'http://localhost:4202'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'X-Device-ID',
-      'Accept',
-      'Origin',
-      'X-Requested-With',
-      'Access-Control-Request-Method',
-      'Access-Control-Request-Headers',
-    ],
-    credentials: true,
-    optionsSuccessStatus: 200,
-    maxAge: 3600,
-  });
-
+  // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -106,10 +74,8 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  // Express tuning
+  // Express tuning (request timeout and compression)
   const server = app.getHttpAdapter().getInstance();
-  server.set('trust proxy', 1);
-  server.disable('x-powered-by');
   server.use((req: Request, res: Response, next: () => void) => {
     req.setTimeout(30000, () => {
       res.status(408).json({
@@ -133,7 +99,7 @@ async function bootstrap(): Promise<void> {
     );
   }
 
-  // Swagger
+  // Swagger documentation
   const config = new DocumentBuilder()
     .setTitle('AI Recruitment Clerk API')
     .setDescription('智能招聘管理系统 - 完整的API文档')
@@ -160,14 +126,12 @@ async function bootstrap(): Promise<void> {
     },
   });
 
-  const port = process.env.PORT || 3000;
-  await app.listen(port);
   Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`,
-  );
-  Logger.log(
-    `📚 API Documentation available at: http://localhost:${port}/${globalPrefix}/docs`,
+    `📚 API Documentation available at: http://localhost:${process.env.PORT || 3000}/api/docs`,
   );
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  Logger.error('❌ Failed to start AI Recruitment Clerk Gateway', err);
+  process.exit(1);
+});

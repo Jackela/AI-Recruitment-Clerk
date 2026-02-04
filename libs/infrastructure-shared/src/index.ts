@@ -1061,3 +1061,12 @@ export {
   type IdValidationOptions,
   type SchemaDefinition,
 } from './utilities';
+
+// Re-export bootstrap utilities for convenience
+export {
+  bootstrapNestJsMicroservice,
+  bootstrapNestJsGateway,
+  bootstrapWithErrorHandling,
+  type MicroserviceBootstrapOptions,
+  type GatewayBootstrapOptions,
+} from './bootstrap';
