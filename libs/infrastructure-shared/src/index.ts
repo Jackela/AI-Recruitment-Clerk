@@ -1078,3 +1078,13 @@ export {
   type MicroserviceBootstrapOptions,
   type GatewayBootstrapOptions,
 } from './bootstrap';
+
+// Re-export logger for convenience
+export {
+  Logger,
+  createLogger,
+  logger,
+  type LogContext,
+  type LogEntry,
+  type LoggerOptions,
+} from './logging';
