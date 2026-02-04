@@ -195,3 +195,29 @@ Started: 2026-02-04
 - Type re-exports help maintain backward compatibility when moving types to helper modules
 
 ---
+
+## 2026-02-04 - US-010
+- Updated `docs/TESTING_PATTERN.md` with comprehensive NestJS testing patterns
+- Added Mongoose connection cleanup pattern (critical for preventing open-handle warnings)
+- Added NATS testing pattern with mock strategies for NatsClientService
+- Added circuit breaker testing pattern using CircuitBreaker and RetryUtility from shared-dtos
+- Included examples from existing tests:
+  - `comprehensive-api-integration.e2e.spec.ts` - Full E2E workflow test structure
+  - `semantic-cache.e2e.spec.ts` - MongoMemoryServer isolation pattern
+  - `resume-parser-nats.service.spec.ts` - NATS service mocking
+  - `parsing.service.spec.ts` - Isolated service unit testing
+- Documented unit testing patterns with isolated service testing
+- Added mock patterns for repository, NATS, and cache services
+- Included best practices for test organization, setup/teardown, and CI/CD considerations
+- Committed: feat: US-010 - Document integration test pattern in docs/TESTING_PATTERN.md
+
+**Learnings for future iterations:**
+- TESTING_PATTERN.md already existed but needed enhancement with specific patterns from the codebase
+- The Mongoose cleanup pattern is the most critical - `app.close()` doesn't close connections
+- For NATS service testing: mock the lowest-level methods (`publish`, `subscribe`) from NatsClientService, not intermediate protected methods
+- Circuit breaker testing involves testing state transitions (CLOSED -> OPEN -> HALF_OPEN -> CLOSED)
+- The `RetryUtility` class has a built-in `isRetriableError()` method that identifies network, HTTP, and DB errors that should be retried
+- Test file organization: unit tests co-located with source, integration tests in `test/integration/`, E2E tests in `test/` subfolders by category
+- Error message gating in `jest.setup.ts` should use prefix matching to cover variations
+
+---

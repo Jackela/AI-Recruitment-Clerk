@@ -149,8 +149,8 @@
         "Typecheck passes"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": "Base patterns on comprehensive-api-integration.e2e.spec.ts"
+      "passes": true,
+      "notes": "Created comprehensive testing guide with NestJS templates, Mongoose cleanup, NATS patterns, circuit breaker testing, and unit test patterns. Examples from comprehensive-api-integration.e2e.spec.ts, semantic-cache.e2e.spec.ts, resume-parser-nats.service.spec.ts, and parsing.service.spec.ts."
     },
     {
       "id": "US-011",
