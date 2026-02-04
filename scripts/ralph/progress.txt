@@ -86,3 +86,19 @@ Started: 2026-02-04
   - Service names are passed as string to super() constructor: 'resume-parser-svc', 'jd-extractor-svc', 'scoring-engine-svc', 'report-generator-svc'
   - NATS service files are located in apps/{service}/src/services/{service}-nats.service.ts
 ---
+## [2026-02-04] - US-008
+- Expanded appGateway schema in libs/configuration with all env vars used by the service
+- Updated main.ts to use validateEnv('appGateway') for type-safe config access
+- Added getNodeEnv() helper in app.module.ts for centralized environment access
+- Replaced direct process.env usage in main.ts bootstrap logic with env validator methods
+- Files changed:
+  - `libs/configuration/src/env-validator/env-validator.util.ts` (updated)
+  - `apps/app-gateway/src/main.ts` (updated)
+  - `apps/app-gateway/src/app/app.module.ts` (updated)
+- **Learnings for future iterations:**
+  - Pattern: validateEnv() returns EnvAccess with methods like getString(), getNumber(), getBoolean(), getArray()
+  - Module-level config (before NestJS bootstrap) still needs process.env for NODE_ENV detection
+  - Add all env vars to ServiceSchemas to enable type-safe access via the validator
+  - Module-level isTestEnv checks use a helper function instead of direct process.env access
+  - validateEnv() throws if required env vars are missing - enforces fail-fast architecture
+---

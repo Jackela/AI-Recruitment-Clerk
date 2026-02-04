@@ -99,8 +99,8 @@
         "Typecheck passes"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "No new required envs."
+      "passes": true,
+      "notes": "No new required envs. Added all app-gateway env vars to schema."
     },
     {
       "id": "US-009",
