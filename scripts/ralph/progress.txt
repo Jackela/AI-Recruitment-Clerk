@@ -115,3 +115,15 @@ Started: 2026-02-04
   - Helper function pattern (getMongoUrl) centralizes env access and maintains fail-fast behavior
   - Keep test env vars (USE_DOCKER, JEST_FORCE_EXIT) in schema for documentation even if not used in main code
 ---
+## [2026-02-04] - US-010
+- Created docs/REFACTOR_CHECKLIST.md with comprehensive refactoring checklist
+- Included pre-refactor, during refactor, and verification steps
+- Added quick reference for project commands and common patterns
+- Files changed:
+  - `docs/REFACTOR_CHECKLIST.md` (new)
+- **Learnings for future iterations:**
+  - Checklist emphasizes TDD: write tests first, then refactor
+  - Verification includes: typecheck, lint, test, build, e2e, contracts
+  - Links to key documentation files (CLAUDE.md, progress.txt, NATS audit)
+  - Reminds about fail-fast architecture and ESM compatibility
+---
