@@ -29,6 +29,12 @@ import type {
 import {
   DashboardChartsComponent
 } from './dashboard-charts.component';
+import {
+  MobileQuickActionsComponent
+} from './mobile-quick-actions.component';
+import {
+  MobileActivityListComponent
+} from './mobile-activity-list.component';
 import type {
   DashboardCard,
   QuickAction,
@@ -65,6 +71,8 @@ export interface SwipeActionExport {
     MobileSwipeComponent,
     DashboardStatsComponent,
     DashboardChartsComponent,
+    MobileQuickActionsComponent,
+    MobileActivityListComponent,
   ],
   template: `
     <!-- Mobile Navigation -->
@@ -93,32 +101,9 @@ export interface SwipeActionExport {
       </div>
 
       <!-- Quick Actions Bar -->
-      <div class="quick-actions-bar" *ngIf="quickActions.length > 0">
-        <div class="quick-actions-scroll" #quickActionsContainer>
-          <button
-            *ngFor="let action of quickActions"
-            class="quick-action"
-            [class]="'quick-action--' + action.color"
-            [routerLink]="action.route"
-            [attr.aria-label]="action.label"
-          >
-            <div class="action-icon">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path [attr.d]="action.icon" />
-              </svg>
-              <span class="action-badge" *ngIf="action.badge">{{
-                action.badge
-              }}</span>
-            </div>
-            <span class="action-label">{{ action.label }}</span>
-          </button>
-        </div>
-      </div>
+      <arc-mobile-quick-actions
+        [quickActions]="quickActions"
+      ></arc-mobile-quick-actions>
 
       <!-- Stats Overview -->
       <arc-dashboard-stats [stats]="overviewStats"></arc-dashboard-stats>
@@ -186,51 +171,10 @@ export interface SwipeActionExport {
       </div>
 
       <!-- Recent Activity -->
-      <div class="recent-activity" *ngIf="recentActivity.length > 0">
-        <h2 class="section-title">Recent Activity</h2>
-        <div class="activity-list">
-          <div
-            *ngFor="let activity of recentActivity"
-            class="activity-item"
-            (click)="onActivityClick(activity)"
-            (keydown.enter)="onActivityClick(activity)"
-            (keydown.space)="onActivityClick(activity)"
-            tabindex="0"
-            role="button"
-          >
-            <div
-              class="activity-icon"
-              [class]="'activity-icon--' + activity.type"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path [attr.d]="activity.icon" />
-              </svg>
-            </div>
-            <div class="activity-content">
-              <div class="activity-title">{{ activity.title }}</div>
-              <div class="activity-subtitle">{{ activity.subtitle }}</div>
-              <div class="activity-time">{{ activity.timeAgo }}</div>
-            </div>
-            <div class="activity-action">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path
-                  d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"
-                />
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
+      <arc-mobile-activity-list
+        [activities]="recentActivity"
+        (activityClick)="onActivityClick($event)"
+      ></arc-mobile-activity-list>
     </div>
 
     <!-- Floating Action Button -->
@@ -308,106 +252,6 @@ export interface SwipeActionExport {
           font-weight: 500;
           user-select: none;
           pointer-events: none;
-        }
-      }
-
-      .quick-actions-bar {
-        margin-bottom: var(--spacing-6, 1.5rem);
-
-        .quick-actions-scroll {
-          display: flex;
-          gap: var(--spacing-3, 0.75rem);
-          overflow-x: auto;
-          padding: var(--spacing-1, 0.25rem) 0 var(--spacing-2, 0.5rem);
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-
-          &::-webkit-scrollbar {
-            display: none;
-          }
-
-          .quick-action {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: var(--spacing-2, 0.5rem);
-            padding: var(--spacing-3, 0.75rem);
-            border: none;
-            border-radius: var(--border-radius-lg, 12px);
-            background: var(--color-surface, white);
-            color: var(--color-text, #495057);
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            min-width: calc(var(--spacing-16, 4rem) + var(--spacing-2, 0.5rem));
-            flex-shrink: 0;
-            box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.06));
-
-            &:active {
-              transform: scale(0.96);
-              box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-            }
-
-            .action-icon {
-              position: relative;
-              width: var(--spacing-10, 2.5rem);
-              height: var(--spacing-10, 2.5rem);
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-
-              .action-badge {
-                position: absolute;
-                top: calc(-1 * var(--spacing-1, 0.25rem));
-                right: calc(-1 * var(--spacing-1, 0.25rem));
-                background: var(--color-error, #e74c3c);
-                color: white;
-                font-size: 0.625rem;
-                font-weight: 600;
-                padding: var(--spacing-1, 0.25rem) var(--spacing-2, 0.5rem);
-                border-radius: var(--border-radius-full, 10px);
-                min-width: var(--spacing-4, 1rem);
-                text-align: center;
-              }
-            }
-
-            .action-label {
-              font-size: 11px;
-              font-weight: 500;
-              text-align: center;
-              line-height: 1.2;
-            }
-
-            &--primary {
-              .action-icon {
-                background: rgba(52, 152, 219, 0.1);
-                color: #3498db;
-              }
-            }
-
-            &--success {
-              .action-icon {
-                background: rgba(40, 167, 69, 0.1);
-                color: #28a745;
-              }
-            }
-
-            &--warning {
-              .action-icon {
-                background: rgba(255, 193, 7, 0.1);
-                color: #ffc107;
-              }
-            }
-
-            &--danger {
-              .action-icon {
-                background: rgba(231, 76, 60, 0.1);
-                color: #e74c3c;
-              }
-            }
-          }
         }
       }
 
@@ -555,86 +399,6 @@ export interface SwipeActionExport {
                 background: rgba(231, 76, 60, 0.1);
                 color: #e74c3c;
               }
-            }
-          }
-        }
-      }
-
-      .recent-activity {
-        .activity-list {
-          background: var(--color-surface, white);
-          border-radius: var(--border-radius-lg, 12px);
-          overflow: hidden;
-          box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.06));
-
-          .activity-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px;
-            border-bottom: 1px solid #f1f3f4;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-
-            &:last-child {
-              border-bottom: none;
-            }
-
-            &:active {
-              background-color: #f8f9fa;
-            }
-
-            .activity-icon {
-              width: 32px;
-              height: 32px;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              flex-shrink: 0;
-
-              &--success {
-                background: rgba(40, 167, 69, 0.1);
-                color: #28a745;
-              }
-
-              &--info {
-                background: rgba(52, 152, 219, 0.1);
-                color: #3498db;
-              }
-
-              &--warning {
-                background: rgba(255, 193, 7, 0.1);
-                color: #ffc107;
-              }
-            }
-
-            .activity-content {
-              flex: 1;
-              min-width: 0;
-
-              .activity-title {
-                font-size: 14px;
-                font-weight: 500;
-                color: #2c3e50;
-                margin-bottom: 2px;
-              }
-
-              .activity-subtitle {
-                font-size: 12px;
-                color: #6c757d;
-                margin-bottom: 2px;
-              }
-
-              .activity-time {
-                font-size: 11px;
-                color: #95a5a6;
-              }
-            }
-
-            .activity-action {
-              color: #95a5a6;
-              flex-shrink: 0;
             }
           }
         }
