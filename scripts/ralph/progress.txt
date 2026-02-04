@@ -102,3 +102,16 @@ Started: 2026-02-04
   - Module-level isTestEnv checks use a helper function instead of direct process.env access
   - validateEnv() throws if required env vars are missing - enforces fail-fast architecture
 ---
+## [2026-02-04] - US-009
+- Expanded resumeParser schema with MongoDB URL aliases and other env vars
+- Added getMongoUrl() helper in app.module.ts for centralized environment access
+- Replaced inline process.env fallback chain with helper function
+- Files changed:
+  - `libs/configuration/src/env-validator/env-validator.util.ts` (updated)
+  - `apps/resume-parser-svc/src/app/app.module.ts` (updated)
+- **Learnings for future iterations:**
+  - MongoDB URL has multiple aliases: MONGODB_URL, MONGO_URL, MONGODB_URI (for test compatibility)
+  - Microservices use helper functions at module level since they don't have a main.ts bootstrap
+  - Helper function pattern (getMongoUrl) centralizes env access and maintains fail-fast behavior
+  - Keep test env vars (USE_DOCKER, JEST_FORCE_EXIT) in schema for documentation even if not used in main code
+---

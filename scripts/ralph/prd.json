@@ -111,8 +111,8 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": "Prefer minimal change."
+      "passes": true,
+      "notes": "Added getMongoUrl() helper for centralized env access."
     },
     {
       "id": "US-010",
