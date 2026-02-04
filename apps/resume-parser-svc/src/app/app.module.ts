@@ -19,6 +19,10 @@ import {
   ExceptionFilterConfigHelper,
   ErrorInterceptorFactory,
 } from '@ai-recruitment-clerk/infrastructure-shared';
+import {
+  FileProcessingService,
+  ResumeEncryptionService,
+} from '../processing';
 
 /**
  * Configures the app module.
@@ -59,6 +63,8 @@ import {
     PdfTextExtractorService,
     ResumeParserNatsService,
     ResumeRepository,
+    FileProcessingService,
+    ResumeEncryptionService,
     // Enhanced Error Handling System
     {
       provide: APP_FILTER,
@@ -100,6 +106,8 @@ import {
     PdfTextExtractorService,
     ResumeParserNatsService,
     ResumeRepository,
+    FileProcessingService,
+    ResumeEncryptionService,
   ],
 })
 export class AppModule {}

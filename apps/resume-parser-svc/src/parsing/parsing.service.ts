@@ -12,11 +12,14 @@ import { ResumeParserNatsService } from '../services/resume-parser-nats.service'
 import {
   RetryUtility,
   WithCircuitBreaker,
-  InputValidator,
-  EncryptionService,
   ResumeParserException,
   ErrorCorrelationManager,
 } from '@ai-recruitment-clerk/infrastructure-shared';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import {
+  FileProcessingService,
+  ResumeEncryptionService,
+} from '../processing';
 import { createHash } from 'crypto';
 import pdfParse from 'pdf-parse-fork';
 
@@ -45,6 +48,8 @@ export class ParsingService {
    * @param gridFsService - The grid fs service.
    * @param fieldMapperService - The field mapper service.
    * @param natsService - The nats service.
+   * @param fileProcessingService - The file processing service.
+   * @param resumeEncryptionService - The resume encryption service.
    */
   constructor(
     private readonly visionLlmService: VisionLlmService,
@@ -52,6 +57,8 @@ export class ParsingService {
     private readonly gridFsService: GridFsService,
     private readonly fieldMapperService: FieldMapperService,
     private readonly natsService: ResumeParserNatsService,
+    private readonly fileProcessingService: FileProcessingService,
+    private readonly resumeEncryptionService: ResumeEncryptionService,
   ) {
     // Periodic cleanup of expired processing records (skip in test to avoid open handles)
     if (process.env.NODE_ENV !== 'test') {
@@ -944,114 +951,38 @@ export class ParsingService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata?: any,
   ): Promise<Buffer> {
-    // Download file
-    const fileBuffer = await this.gridFsService.downloadFile(gridFsUrl);
-
-    if (!fileBuffer || fileBuffer.length === 0) {
-      throw new ResumeParserException('FILE_DOWNLOAD_FAILED', {
-        filename,
-        gridFsUrl,
-      });
-    }
-
-    // Validate file size
-    if (fileBuffer.length > this.MAX_FILE_SIZE) {
-      throw new ResumeParserException('FILE_SIZE_EXCEEDED', {
-        filename,
-        actualSize: fileBuffer.length,
-        maxAllowed: this.MAX_FILE_SIZE,
-      });
-    }
-
-    // Validate file using InputValidator
-    const validation = InputValidator.validateResumeFile({
-      buffer: fileBuffer,
-      originalname: filename,
-      mimetype: metadata?.mimetype || this.detectMimeType(fileBuffer),
-      size: fileBuffer.length,
-    });
-
-    if (!validation.isValid) {
-      throw new ResumeParserException('FILE_VALIDATION_FAILED', {
-        filename,
-        validationErrors: validation.errors,
-        actualMimeType: metadata?.mimeType || 'unknown',
-      });
-    }
-
-    this.logger.log(`File validation passed for: ${filename}`);
-    return fileBuffer;
+    const result = await this.fileProcessingService.downloadAndValidateFileWithService(
+      (url) => this.gridFsService.downloadFile(url),
+      gridFsUrl,
+      filename,
+      metadata,
+    );
+    return result.buffer;
   }
 
   private validateOrganizationAccess(
     organizationId: string,
     jobId: string,
   ): void {
-    // Basic validation - in production this would check against organization permissions
-    if (!organizationId || organizationId.length < 5) {
-      throw new ResumeParserException('INVALID_ORGANIZATION_ID', {
-        providedId: organizationId,
-        minLength: 5,
-      });
-    }
-
-    // Validate jobId belongs to organization (basic format check)
-    if (!jobId.includes(organizationId.substring(0, 8))) {
-      this.logger.warn(
-        `Potential cross-organization access attempt: org=${organizationId}, job=${jobId}`,
-      );
-      // In production, this would be a strict check against database
-    }
+    // Delegate to ResumeEncryptionService
+    this.resumeEncryptionService.validateOrganizationAccess(
+      organizationId,
+      jobId,
+    );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private encryptSensitiveData(resumeDto: any, organizationId: string): any {
-    try {
-      // Create a copy to avoid mutating original
-      const secureCopy = JSON.parse(JSON.stringify(resumeDto));
-
-      // Encrypt PII fields using organization-specific context
-      if (secureCopy.contactInfo) {
-        secureCopy.contactInfo = EncryptionService.encryptUserPII(
-          secureCopy.contactInfo,
-        );
-      }
-
-      // Add organization context for data isolation
-      secureCopy._organizationId = organizationId;
-      secureCopy._dataClassification = 'sensitive-pii';
-
-      this.logger.debug(
-        `Encrypted sensitive data for organization: ${organizationId}`,
-      );
-      return secureCopy;
-    } catch (error) {
-      const err = error as Error;
-      this.logger.error(`Failed to encrypt sensitive data: ${err.message}`);
-      throw new ResumeParserException('DATA_ENCRYPTION_FAILED', {
-        organizationId,
-        originalError: err.message,
-      });
-    }
+    // Delegate to ResumeEncryptionService
+    return this.resumeEncryptionService.encryptSensitiveData(
+      resumeDto,
+      organizationId,
+    );
   }
 
   private detectMimeType(buffer: Buffer): string {
-    // Basic MIME type detection based on file signatures
-    const signatures: Record<string, string> = {
-      '%PDF': 'application/pdf',
-      PK: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
-      '\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1': 'application/msword', // .doc
-    };
-
-    const header = buffer.toString('ascii', 0, 8);
-
-    for (const [signature, mimeType] of Object.entries(signatures)) {
-      if (header.startsWith(signature)) {
-        return mimeType;
-      }
-    }
-
-    return 'application/octet-stream'; // Unknown type
+    // Delegate to FileProcessingService
+    return this.fileProcessingService.detectMimeType(buffer);
   }
 
   // Helper: extract text from PDF using pdf-parse; for plain text buffers, decode UTF-8

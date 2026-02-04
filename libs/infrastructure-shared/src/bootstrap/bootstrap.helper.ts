@@ -136,7 +136,6 @@ export async function bootstrapNestJsMicroservice<T = unknown>(
     maxReconnectAttempts = 10,
     reconnectTimeWait = 2000,
     enableJetStream = true,
-    logLevels = ['error', 'warn', 'log'],
     logger: customLogger,
   } = options;
 
@@ -196,9 +195,6 @@ export async function bootstrapNestJsGateway<T = unknown>(
     globalPrefix = 'api',
     logLevels,
     cors: corsOptions,
-    enableCompression = false,
-    compressionLevel = 6,
-    requestTimeout = 30000,
   } = options;
 
   const port = explicitPort || Number.parseInt(process.env.PORT || '3000', 10);

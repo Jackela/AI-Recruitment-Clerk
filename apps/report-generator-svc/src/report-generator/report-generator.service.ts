@@ -1,12 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { LlmService } from './llm.service';
-import type {
-  CandidateData as LlmCandidateData,
-  ExtractedResumeData as LlmExtractedResumeData,
-  JobRequirements as LlmJobRequirements,
-  ReportEvent as LlmReportEvent,
-  ScoringBreakdown as LlmScoringBreakdown,
-} from './llm.service';
 import type { GridFsService, ReportFileMetadata } from './gridfs.service';
 import type { ReportRepository, ReportCreateData } from './report.repository';
 import type {
@@ -19,6 +12,17 @@ import {
   ErrorCorrelationManager,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import { Types } from 'mongoose';
+import {
+  ReportDataService,
+  LlmReportMapperService,
+} from '../report-helpers';
+import type {
+  CandidateComparisonData,
+  ReportDocument,
+} from '../report-helpers';
+import type {
+  ReportEvent as LlmReportEvent,
+} from './llm.service';
 
 // Enhanced type definitions for report generation
 /**
@@ -53,65 +57,33 @@ export interface GeneratedReportFile {
 }
 
 /**
- * Defines the shape of the report document.
- */
-export interface ReportDocument {
-  _id: Types.ObjectId | string;
-  jobId: string;
-  resumeId: string;
-  scoreBreakdown: ScoreBreakdown;
-  skillsAnalysis: MatchingSkill[];
-  recommendation: ReportRecommendation;
-  summary: string;
-  analysisConfidence: number;
-  processingTimeMs: number;
-  generatedBy: string;
-  llmModel: string;
-  requestedBy?: string;
-  detailedReportUrl?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-/**
  * Defines the shape of the candidate comparison data.
+ * Re-exported from ReportDataService for backward compatibility.
  */
-export interface CandidateComparisonData {
-  id: string;
-  name: string;
-  score: number;
-  skills: string[];
-  recommendation: string;
-  experience?: number;
-  education?: number;
-  strengths?: string[];
-  concerns?: string[];
-}
+export type { CandidateComparisonData } from '../report-helpers';
 
 /**
  * Defines the shape of the interview candidate data.
+ * Re-exported from ReportDataService for backward compatibility.
  */
-export interface InterviewCandidateData {
-  id: string;
-  name: string;
-  skills: MatchingSkill[];
-  experience: number;
-  education: number;
-  scoreBreakdown?: ScoreBreakdown;
-  recommendation?: ReportRecommendation;
-}
+export type { InterviewCandidateData } from '../report-helpers';
 
 /**
  * Defines the shape of the extracted job requirements.
+ * Re-exported from ReportDataService for backward compatibility.
  */
-export interface ExtractedJobRequirements {
-  requiredSkills: string[];
-  experienceLevel: string;
-  educationLevel: string;
-  department?: string;
-  location?: string;
-  employmentType?: string;
-}
+export type { ExtractedJobRequirements } from '../report-helpers';
+
+/**
+ * Report document type for internal use.
+ * Re-exported from ReportDataService for backward compatibility.
+ */
+export type { ReportDocument } from '../report-helpers';
+
+/**
+ * Re-export types from schemas for helper services
+ */
+export type { ScoreBreakdown, MatchingSkill, ReportRecommendation } from '../schemas/report.schema';
 
 /**
  * Defines the shape of the job data.
@@ -279,11 +251,15 @@ export class ReportGeneratorService {
    * @param llmService - The llm service.
    * @param gridFsService - The grid fs service.
    * @param reportRepo - The report repo.
+   * @param reportDataService - The report data service.
+   * @param llmReportMapperService - The LLM report mapper service.
    */
   constructor(
     private readonly llmService: LlmService,
     private readonly gridFsService: GridFsService,
     private readonly reportRepo: ReportRepository,
+    private readonly reportDataService: ReportDataService,
+    private readonly llmReportMapperService: LlmReportMapperService,
   ) {}
 
   /**
@@ -321,7 +297,7 @@ export class ReportGeneratorService {
         await this.llmService.generateReportMarkdown(reportEvent);
 
       // Generate filename for the report
-      const filename = this.generateReportFilename(
+      const filename = this.llmReportMapperService.generateReportFilename(
         'match-analysis',
         event.jobId,
         event.resumeId,
@@ -349,14 +325,16 @@ export class ReportGeneratorService {
       const reportData: ReportCreateData = {
         jobId: event.jobId,
         resumeId: event.resumeId,
-        scoreBreakdown: this.convertToScoreBreakdown(event.scoreDto),
-        skillsAnalysis: this.convertToMatchingSkills(
+        scoreBreakdown: this.llmReportMapperService.convertToScoreBreakdown(
+          event.scoreDto,
+        ),
+        skillsAnalysis: this.llmReportMapperService.convertToMatchingSkills(
           event.scoreDto.matchingSkills,
         ),
-        recommendation: this.convertToReportRecommendation(
+        recommendation: this.llmReportMapperService.convertToReportRecommendation(
           event.scoreDto.recommendations,
         ),
-        summary: await this.generateExecutiveSummary(event),
+        summary: this.llmReportMapperService.generateExecutiveSummary(event),
         analysisConfidence: event.scoreDto.analysisConfidence,
         processingTimeMs: Date.now() - startTime,
         generatedBy: 'report-generator-service',
@@ -443,11 +421,19 @@ export class ReportGeneratorService {
       const reportMetadata: ReportCreateData = {
         jobId: request.jobId,
         resumeId: request.resumeIds[0], // Primary resume for single reports, first for batch
-        scoreBreakdown: this.aggregateScoreBreakdown(reportData),
-        skillsAnalysis: this.aggregateSkillsAnalysis(reportData),
-        recommendation: this.generateOverallRecommendation(reportData),
-        summary: await this.generateBatchSummary(reportData),
-        analysisConfidence: this.calculateAverageConfidence(reportData),
+        scoreBreakdown: this.reportDataService.aggregateScoreBreakdown(
+          reportData,
+        ),
+        skillsAnalysis: this.reportDataService.aggregateSkillsAnalysis(
+          reportData,
+        ),
+        recommendation: this.reportDataService.generateOverallRecommendation(
+          reportData,
+        ),
+        summary: this.reportDataService.generateBatchSummary(reportData),
+        analysisConfidence: this.reportDataService.calculateAverageConfidence(
+          reportData,
+        ),
         processingTimeMs: Date.now() - startTime,
         generatedBy: 'report-generator-service',
         llmModel: 'gemini-1.5-flash',
@@ -513,7 +499,7 @@ export class ReportGeneratorService {
         resumeIds.map(async (resumeId) => {
           const report = await this.reportRepo.findReport({ jobId, resumeId });
           return report
-            ? this.formatCandidateForComparison(
+            ? this.reportDataService.formatCandidateForComparison(
                 report as unknown as ReportDocument,
               )
             : null;
@@ -533,7 +519,7 @@ export class ReportGeneratorService {
       }
 
       const llmCandidates = validCandidates.map((candidate) =>
-        this.mapCandidateComparisonToLlm(candidate),
+        this.reportDataService.formatCandidateForLlm(candidate),
       );
 
       return await this.llmService.generateCandidateComparison(llmCandidates);
@@ -574,37 +560,23 @@ export class ReportGeneratorService {
       }
 
       // Format data for interview guide generation
-      const candidateData = this.formatCandidateForInterview(
+      const candidateData = this.reportDataService.formatCandidateForInterview(
         report as unknown as ReportDocument,
       );
-      const jobRequirements = this.extractJobRequirements(
+      const jobRequirements = this.reportDataService.extractJobRequirements(
         report as unknown as ReportDocument,
       );
 
-      const llmCandidateData: LlmCandidateData = {
-        id: candidateData.id,
-        name: candidateData.name,
-        score: candidateData.scoreBreakdown
-          ? candidateData.scoreBreakdown.overallFit / 100
-          : undefined,
-        recommendation: this.mapRecommendationDecision(
-          candidateData.recommendation?.decision,
-        ),
-        skills: candidateData.skills.map((skill) => skill.skill),
-        matchingSkills: candidateData.skills.map((skill) => skill.skill),
-        missingSkills: [],
-        strengths: candidateData.recommendation?.strengths ?? [],
-        concerns: candidateData.recommendation?.concerns ?? [],
-        experience: [],
-        education: [],
-      };
-
-      const llmJobRequirements: LlmJobRequirements = {
-        requiredSkills: jobRequirements.requiredSkills.map((skill) => ({
-          name: skill,
-          weight: 1,
-        })),
-      };
+      const { llmCandidateData, llmJobRequirements } =
+        this.llmReportMapperService.formatForInterviewGuide(
+          {
+            ...candidateData,
+            scoreBreakdown: candidateData.scoreBreakdown
+              ? { overallFit: candidateData.scoreBreakdown.experienceMatch }
+              : undefined,
+          },
+          jobRequirements,
+        );
 
       return await this.llmService.generateInterviewGuide(
         llmCandidateData,
@@ -674,290 +646,12 @@ export class ReportGeneratorService {
     };
   }
 
+  // Helper methods - delegated to helper services
+
   private async buildReportEvent(
     event: MatchScoredEvent,
   ): Promise<ReportEvent> {
-    return {
-      jobId: event.jobId,
-      resumeIds: [event.resumeId],
-      jobData: this.mapJobDataForLlm(event.jobData),
-      resumesData: this.mapResumeDataForLlm(event.resumeData, event.scoreDto),
-      scoringResults: this.mapScoringResultsForLlm(event.scoreDto),
-      metadata: {
-        generatedAt: event.metadata?.generatedAt ?? new Date(),
-        reportType: event.metadata?.reportType ?? 'match-analysis',
-        requestedBy: event.metadata?.requestedBy,
-      },
-    };
-  }
-
-  private mapJobDataForLlm(jobData?: JobData): ReportEvent['jobData'] {
-    if (!jobData) {
-      return undefined;
-    }
-
-    return {
-      title: jobData.title,
-      description: jobData.description,
-      requirements: this.mapJobRequirementsForLlm(jobData.requirements),
-    };
-  }
-
-  private mapJobRequirementsForLlm(
-    requirements?: JobData['requirements'],
-  ): LlmJobRequirements | undefined {
-    if (!requirements) {
-      return undefined;
-    }
-
-    const mapped: LlmJobRequirements = {};
-
-    if (requirements.requiredSkills?.length) {
-      mapped.requiredSkills = requirements.requiredSkills.map((skill) => ({
-        name: skill.name,
-        weight: skill.weight,
-      }));
-    }
-
-    if (requirements.experienceYears) {
-      mapped.experienceYears = {
-        min: requirements.experienceYears.min,
-        max: requirements.experienceYears.max,
-      };
-    }
-
-    if (requirements.educationLevel) {
-      mapped.educationLevel = requirements.educationLevel;
-    }
-
-    if (requirements.location) {
-      mapped.locationRequirements = {
-        locations: [requirements.location],
-      };
-    }
-
-    return mapped;
-  }
-
-  private mapResumeDataForLlm(
-    resumeData?: ResumeData,
-    scoringData?: ScoringData,
-  ): ReportEvent['resumesData'] {
-    if (!resumeData) {
-      return undefined;
-    }
-
-    const resumeEntry = {
-      id: resumeData.resumeId,
-      candidateName: resumeData.candidateName,
-      extractedData: this.mapExtractedResumeData(resumeData),
-    } as {
-      id: string;
-      candidateName?: string;
-      extractedData?: LlmExtractedResumeData;
-      score?: number;
-      matchingSkills?: string[];
-      missingSkills?: string[];
-    };
-
-    if (typeof scoringData?.overallScore === 'number') {
-      resumeEntry.score = scoringData.overallScore;
-    }
-
-    const matchingSkills = scoringData?.matchingSkills?.map(
-      (skill) => skill.skill,
-    );
-    if (matchingSkills?.length) {
-      resumeEntry.matchingSkills = matchingSkills;
-    }
-
-    const missingSkills = this.deriveMissingSkills(scoringData);
-    if (missingSkills?.length) {
-      resumeEntry.missingSkills = missingSkills;
-    }
-
-    return [resumeEntry];
-  }
-
-  private mapExtractedResumeData(
-    resumeData: ResumeData,
-  ): LlmExtractedResumeData {
-    const { extractedData } = resumeData;
-
-    return {
-      personalInfo: {
-        name: resumeData.candidateName,
-        email: extractedData.personalInfo.email,
-        phone: extractedData.personalInfo.phone,
-        location: extractedData.personalInfo.location,
-      },
-      workExperience: extractedData.workExperience?.map((experience) => ({
-        company: experience.company,
-        position: experience.position,
-        duration: experience.duration,
-        description: experience.description,
-        skills: experience.skills,
-      })),
-      education: extractedData.education?.map((education) => ({
-        institution: education.school,
-        degree: education.degree,
-        field: education.field,
-        year: this.parseYear(education.year),
-      })),
-      skills: extractedData.skills?.map((skill) => ({
-        name: skill,
-        category: 'general',
-      })),
-      certifications: extractedData.certifications?.map((certification) => ({
-        name: certification.name,
-        issuer: certification.issuer,
-        date: certification.date,
-      })),
-      projects: extractedData.projects?.map((project) => ({
-        name: project.name,
-        description: project.description,
-        technologies: project.technologies,
-      })),
-    };
-  }
-
-  private deriveMissingSkills(scoringData?: ScoringData): string[] | undefined {
-    const missing =
-      scoringData?.matchingSkills
-        ?.filter((skill) => skill.matchType === 'missing')
-        .map((skill) => skill.skill) ?? [];
-
-    return missing.length > 0 ? missing : undefined;
-  }
-
-  private mapScoringResultsForLlm(
-    scoringData?: ScoringData,
-  ): ReportEvent['scoringResults'] {
-    if (!scoringData) {
-      return undefined;
-    }
-
-    const scoringResult = {
-      resumeId: scoringData.resumeId,
-      score: scoringData.overallScore,
-      breakdown: this.mapScoringBreakdownForLlm(scoringData),
-    } as {
-      resumeId: string;
-      score: number;
-      breakdown?: LlmScoringBreakdown;
-      recommendations?: string[];
-    };
-
-    const recommendations = this.mapRecommendationsForLlm(scoringData);
-    if (recommendations?.length) {
-      scoringResult.recommendations = recommendations;
-    }
-
-    return [scoringResult];
-  }
-
-  private mapScoringBreakdownForLlm(
-    scoringData: ScoringData,
-  ): LlmScoringBreakdown {
-    return {
-      skillsMatch: scoringData.breakdown.skillsMatch,
-      experienceMatch: scoringData.breakdown.experienceMatch,
-      educationMatch: scoringData.breakdown.educationMatch,
-      certificationMatch: scoringData.educationScore,
-      overallScore: scoringData.overallScore,
-      weightedFactors: {
-        technical: scoringData.skillsScore,
-        experience: scoringData.experienceScore,
-        cultural: scoringData.culturalFitScore ?? scoringData.experienceScore,
-        potential: scoringData.overallScore,
-      },
-      confidenceScore: scoringData.analysisConfidence,
-    };
-  }
-
-  private mapRecommendationsForLlm(
-    scoringData: ScoringData,
-  ): string[] | undefined {
-    const recommendations = scoringData.recommendations;
-    if (!recommendations) {
-      return undefined;
-    }
-
-    const values = [
-      recommendations.decision,
-      recommendations.reasoning,
-      ...recommendations.strengths,
-      ...recommendations.concerns,
-      ...recommendations.suggestions,
-    ].filter((value): value is string => !!value);
-
-    return values.length > 0 ? values : undefined;
-  }
-
-  private parseYear(value: string): number {
-    const parsed = Number.parseInt(value, 10);
-    return Number.isFinite(parsed) ? parsed : new Date().getFullYear();
-  }
-
-  private convertToScoreBreakdown(scoringData: ScoringData): ScoreBreakdown {
-    return {
-      skillsMatch: scoringData.breakdown.skillsMatch,
-      experienceMatch: scoringData.breakdown.experienceMatch,
-      educationMatch: scoringData.breakdown.educationMatch,
-      overallFit: scoringData.breakdown.overallFit,
-    };
-  }
-
-  private convertToMatchingSkills(
-    skills: ScoringData['matchingSkills'],
-  ): MatchingSkill[] {
-    return skills.map((skill) => ({
-      skill: skill.skill,
-      matchScore: skill.matchScore,
-      matchType: skill.matchType,
-      explanation: skill.explanation,
-    }));
-  }
-
-  private convertToReportRecommendation(
-    recommendations: ScoringData['recommendations'],
-  ): ReportRecommendation {
-    return {
-      decision: recommendations.decision,
-      reasoning: recommendations.reasoning,
-      strengths: recommendations.strengths,
-      concerns: recommendations.concerns,
-      suggestions: recommendations.suggestions,
-    };
-  }
-
-  private async generateExecutiveSummary(
-    event: MatchScoredEvent,
-  ): Promise<string> {
-    const score = Math.round(event.scoreDto.overallScore * 100);
-    const decision = event.scoreDto.recommendations.decision;
-
-    return (
-      `Executive Summary: Candidate scored ${score}% overall match for the position. Recommendation: ${decision.toUpperCase()}. ` +
-      `Key strengths include ${event.scoreDto.recommendations.strengths.slice(0, 2).join(' and ')}. ` +
-      `${
-        event.scoreDto.recommendations.concerns.length > 0
-          ? 'Areas of concern: ' +
-            event.scoreDto.recommendations.concerns.slice(0, 1).join(', ') +
-            '.'
-          : 'No significant concerns identified.'
-      }`
-    );
-  }
-
-  private generateReportFilename(
-    reportType: string,
-    jobId: string,
-    resumeId: string,
-    extension: string,
-  ): string {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    return `${reportType}-${jobId}-${resumeId}-${timestamp}.${extension}`;
+    return this.llmReportMapperService.buildReportEvent(event);
   }
 
   private async gatherReportData(
@@ -982,112 +676,6 @@ export class ReportGeneratorService {
       fileId: `placeholder-${format}`,
       filename: `report.${format}`,
       downloadUrl: `/api/reports/download/placeholder-${format}`,
-    };
-  }
-
-  private aggregateScoreBreakdown(_data: ReportDataItem[]): ScoreBreakdown {
-    // Placeholder aggregation logic
-    return {
-      skillsMatch: 75,
-      experienceMatch: 80,
-      educationMatch: 70,
-      overallFit: 75,
-    };
-  }
-
-  private aggregateSkillsAnalysis(_data: ReportDataItem[]): MatchingSkill[] {
-    // Placeholder skills analysis
-    return [];
-  }
-
-  private generateOverallRecommendation(
-    _data: ReportDataItem[],
-  ): ReportRecommendation {
-    // Placeholder recommendation logic
-    return {
-      decision: 'consider',
-      reasoning: 'Aggregated analysis shows mixed results',
-      strengths: ['Strong technical skills'],
-      concerns: ['Limited experience in some areas'],
-      suggestions: ['Consider for interview'],
-    };
-  }
-
-  private async generateBatchSummary(_data: ReportDataItem[]): Promise<string> {
-    return `Batch report summary for ${_data.length} candidates.`;
-  }
-
-  private calculateAverageConfidence(_data: ReportDataItem[]): number {
-    return 0.85; // Placeholder
-  }
-
-  private mapCandidateComparisonToLlm(
-    candidate: CandidateComparisonData,
-  ): LlmCandidateData {
-    return {
-      id: candidate.id,
-      name: candidate.name,
-      score: candidate.score,
-      recommendation: this.mapRecommendationDecision(candidate.recommendation),
-      skills: candidate.skills,
-      matchingSkills: candidate.skills,
-      strengths: candidate.strengths,
-      concerns: candidate.concerns,
-    };
-  }
-
-  private mapRecommendationDecision(
-    decision?: string,
-  ): LlmCandidateData['recommendation'] {
-    switch (decision) {
-      case 'hire':
-        return 'hire';
-      case 'interview':
-        return 'consider';
-      case 'consider':
-        return 'consider';
-      case 'strong_hire':
-        return 'strong_hire';
-      case 'pass':
-        return 'pass';
-      case 'reject':
-        return 'pass';
-      default:
-        return 'consider';
-    }
-  }
-
-  private formatCandidateForComparison(
-    report: ReportDocument,
-  ): CandidateComparisonData {
-    return {
-      id: report.resumeId,
-      name: `Candidate ${report.resumeId}`,
-      score: report.scoreBreakdown.overallFit / 100,
-      skills: report.skillsAnalysis.map((skill) => skill.skill),
-      recommendation: report.recommendation.decision,
-    };
-  }
-
-  private formatCandidateForInterview(
-    report: ReportDocument,
-  ): InterviewCandidateData {
-    return {
-      id: report.resumeId,
-      name: `Candidate ${report.resumeId}`,
-      skills: report.skillsAnalysis,
-      experience: report.scoreBreakdown.experienceMatch,
-      education: report.scoreBreakdown.educationMatch,
-    };
-  }
-
-  private extractJobRequirements(
-    report: ReportDocument,
-  ): ExtractedJobRequirements {
-    return {
-      requiredSkills: report.skillsAnalysis.map((skill) => skill.skill),
-      experienceLevel: 'mid-level',
-      educationLevel: 'bachelor',
     };
   }
 }

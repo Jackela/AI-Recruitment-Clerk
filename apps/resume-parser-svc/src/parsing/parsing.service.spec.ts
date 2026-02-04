@@ -4,6 +4,7 @@ import type { PdfTextExtractorService } from './pdf-text-extractor.service';
 import type { GridFsService } from '../gridfs/gridfs.service';
 import type { FieldMapperService } from '../field-mapper/field-mapper.service';
 import type { ResumeParserNatsService } from '../services/resume-parser-nats.service';
+import { FileProcessingService, ResumeEncryptionService } from '../processing';
 import pdfParse from 'pdf-parse';
 
 jest.mock('pdf-parse', () => jest.fn());
@@ -21,8 +22,10 @@ const buildService = () => {
     publishProcessingError: jest.fn(),
     isConnected: true,
   } as unknown as ResumeParserNatsService;
+  const fileProcessing = new FileProcessingService();
+  const resumeEncryption = new ResumeEncryptionService();
 
-  const svc = new ParsingService(vision, pdf, grid, mapper, nats);
+  const svc = new ParsingService(vision, pdf, grid, mapper, nats, fileProcessing, resumeEncryption);
   return { svc, vision, pdf, grid, mapper, nats };
 };
 

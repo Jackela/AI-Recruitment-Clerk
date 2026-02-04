@@ -127,4 +127,37 @@ Started: 2026-02-04
 - Presentational components (icons, activity lists, quick actions) are good extraction targets
 - Use type-only imports sparingly with Angular decorators - `Input`, `Output`, `Component` need value imports
 - Barrel files (dashboard-chart-types.ts) help organize re-exports for cleaner imports
+
+## 2026-02-04 - US-007
+- Extracted business logic from 2 heavy backend services into dedicated helper services
+- **Resume Parser Service (apps/resume-parser-svc/src/parsing/parsing.service.ts):**
+  - Created FileProcessingService (~200 lines) - handles file validation, MIME detection, download coordination, hash generation
+  - Created ResumeEncryptionService (~150 lines) - handles PII encryption, organization access validation, security metadata creation
+  - Reduced parsing.service.ts from ~1158 to ~1090 lines by delegating to helpers
+  - Updated app.module.ts to provide new services
+- **Report Generator Service (apps/report-generator-svc/src/report-generator/report-generator.service.ts):**
+  - Created ReportDataService (~350 lines) - handles data aggregation, candidate formatting, job requirements extraction, recommendation generation
+  - Created LlmReportMapperService (~450 lines) - handles LLM data mapping between internal types and LLM input/output formats
+  - Reduced report-generator.service.ts from ~1094 to ~670 lines by delegating to helpers
+  - Updated app.module.ts to provide new services
+- Added unit tests for all 4 new helper services:
+  - file-processing.service.spec.ts (27 tests, all passing)
+  - resume-encryption.service.spec.ts (19 tests, all passing)
+  - report-data.service.spec.ts (17 tests, all passing)
+  - llm-report-mapper.service.spec.ts (5 tests, all passing)
+- Files changed: 8 new service files, 2 updated module files, 4 test files, 2 updated service files
+
+**Learnings for future iterations:**
+- Business logic extraction should focus on separable concerns with clear boundaries
+- File processing (validation, MIME detection, hashing) is a common pattern that can be shared across services
+- Security/encryption logic should be centralized to ensure consistent PII handling
+- Data aggregation and formatting are distinct responsibilities that benefit from separation
+- LLM data transformation/mapping is complex enough to warrant its own service
+- When adding new constructor dependencies to existing services, all unit tests need to be updated to mock the new services
+- Test files in sibling directories need correct relative import paths (e.g., `../report-generator/` vs `../../`)
+- Buffer.equals() method doesn't exist in Node.js - use byte-by-byte comparison or typed array comparison
+- Mocking infrastructure-shared modules requires careful handling of Error class constructors
+- Jest mocks in this project use type imports - need to mock actual classes with proper constructor signatures
+- Unused imports in test files cause TypeScript compilation errors during test runs
+- `noUnusedLocals: true` tsconfig setting enforces that all imports must be used
 ---
