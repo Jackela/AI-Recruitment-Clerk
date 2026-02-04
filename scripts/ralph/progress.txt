@@ -120,3 +120,24 @@ Started: 2026-02-04
 - Test files directly instantiating services (without DI) need mock config passed to constructor
 - The existing schemas (`resumeParser` and `jdExtractor`) in libs/configuration were already defined
 
+---
+
+## 2026-02-04 - US-007
+- Reviewed eslint.config.mjs for boundary exceptions
+- **KEY FINDING**: No 'mobile' project exists in this codebase
+- **KEY FINDING**: No boundary exceptions exist in current eslint config
+- Only `allow` pattern is for eslint config files themselves: `['^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$']`
+- Verified all imports follow module boundary rules:
+  - Shared libs (scope:shared) only depend on other shared/utils libs
+  - Domain libs (scope:domain) have no external monorepo imports
+  - Apps (type:app) can import from any library (as allowed by rules)
+- Ran `npm run lint` - passes with 0 errors, only TypeScript warnings (accessibility modifiers)
+- No refactoring needed - codebase is already clean
+- Committed: feat: US-007 - Review eslint boundary rules (no exceptions found)
+
+**Learnings for future iterations:**
+- The PRD story US-007 was likely a template or written for a different project (references non-existent 'mobile' project)
+- Current module boundary architecture is sound with no violations
+- `shared-dtos` library contains a `domains/` folder with domain logic - this is architecturally questionable but doesn't violate current eslint rules since it doesn't import from domain libraries
+- Consider whether domain logic in `shared-dtos/domains/` should be moved to dedicated domain libraries in future refactors
+
