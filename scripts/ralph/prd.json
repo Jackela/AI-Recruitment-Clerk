@@ -149,8 +149,8 @@
         "npm run lint passes"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": "Docs and scripts only."
+      "passes": true,
+      "notes": "All config folder references already correct - no stale paths found in docs or scripts."
     },
     {
       "id": "US-013",
