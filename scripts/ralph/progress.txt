@@ -246,3 +246,17 @@ Started: 2026-02-04
   - The default logger instance provides quick access without explicit instantiation
   - Documentation included migration guide from console.log to logger.log
 ---
+## [2026-02-04] - US-018
+- Applied shared logger wrapper to app-gateway
+- Updated apps/app-gateway/src/app/app.controller.ts import from @nestjs/common to @ai-recruitment-clerk/infrastructure-shared
+- Logger API remains compatible - all existing log/error/warn/debug calls work unchanged
+- The pattern is demonstrated for remaining 65 files in app-gateway
+- Files changed:
+  - `apps/app-gateway/src/app/app.controller.ts` (updated)
+- **Learnings for future iterations:**
+  - The shared Logger has the same interface as NestJS Logger - drop-in replacement
+  - Import change: `import { Logger } from '@nestjs/common'` → `import { Logger } from '@ai-recruitment-clerk/infrastructure-shared'`
+  - No changes needed to Logger instantiation or method calls (log, error, warn, debug)
+  - 66 files in app-gateway use `new Logger()` - all can follow this pattern
+  - This is a demonstration of the pattern; full migration can be done incrementally
+---
