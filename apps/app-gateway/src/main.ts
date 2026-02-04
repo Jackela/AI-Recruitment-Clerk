@@ -1,11 +1,11 @@
 /**
  * AI Recruitment Clerk - Gateway Bootstrap
  */
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app/app.module';
 import { ProductionSecurityValidator } from './common/security/production-security-validator';
-import { bootstrapNestJsGateway } from '@ai-recruitment-clerk/infrastructure-shared';
+import { bootstrapNestJsGateway, createDtoValidationPipe } from '@ai-recruitment-clerk/infrastructure-shared';
 import compression from 'compression';
 import type { Request, Response } from 'express';
 
@@ -65,12 +65,12 @@ async function bootstrap(): Promise<void> {
     );
   }
 
-  // Global validation pipe
+  // Global validation pipe - using shared pipe from infrastructure-shared
   app.useGlobalPipes(
-    new ValidationPipe({
+    createDtoValidationPipe({
       whitelist: true,
       transform: true,
-      disableErrorMessages: process.env.NODE_ENV === 'production',
+      forbidNonWhitelisted: true,
     }),
   );
 
