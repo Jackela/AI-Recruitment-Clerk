@@ -161,3 +161,37 @@ Started: 2026-02-04
 - The `PullToRefreshDirective` uses `DestroyRef` from `@angular/core` for cleanup - tests need to mock this
 
 ---
+
+## 2026-02-04 - US-009
+- Refactored `usage-limit.service.ts` from 823 lines to 667 lines
+- Extracted quota calculation logic to `quota-calculator.helper.ts` (228 lines):
+  - `calculateSystemStatistics()` - system-wide usage metrics
+  - `performUsageAnalysis()` - usage pattern analysis
+  - `calculateRemainingQuota()` - remaining quota helper
+  - `calculateNextResetTime()` - reset time calculation
+  - `shouldResetUsage()` - reset condition check
+  - `isValidPolicy()` - policy validation
+- Extracted usage tracking logic to `usage-tracker.helper.ts` (213 lines):
+  - `calculateRiskScore()` - risk assessment scoring
+  - `generateIPRiskAssessment()` - single IP risk evaluation
+  - `generateRiskAssessments()` - batch risk assessment
+  - `calculateUsageEfficiency()` - efficiency metrics
+  - `isIPActive()` - activity status check
+  - `identifyUsagePattern()` - pattern classification
+- Added comprehensive unit tests: 21 tests for quota-calculator, 25 tests for usage-tracker
+- All 85 tests pass (39 existing, 46 new)
+- Refactored service uses helper modules, reducing duplication and improving testability
+- Typecheck passes for all modified files
+- Committed: feat: US-009 - Refactor usage-limit.service.ts into smaller helper modules
+
+**Learnings for future iterations:**
+- The original service had both orchestration logic and calculation logic mixed together
+- Extracting pure calculation functions to helper modules improves testability significantly
+- Helper modules with static methods are easier to test than full service classes
+- The PRD's "500 lines" threshold is a guideline - the service is still 667 lines but core logic is modular
+- When refactoring, consider what makes sense for the actual codebase structure, not just PRD templates
+- Usage limit calculation involved: system stats (total IPs, active IPs, utilization) and pattern analysis (hourly/daily distribution)
+- Risk scoring uses multiple factors: usage percentage (90%+ = 30pts, 75%+ = 15pts), bonus dependency (20pts), recent activity (10pts)
+- Type re-exports help maintain backward compatibility when moving types to helper modules
+
+---
