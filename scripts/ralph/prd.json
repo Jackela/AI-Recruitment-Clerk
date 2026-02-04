@@ -174,8 +174,8 @@
         "npm run test passes"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": "Pick a small service."
+      "passes": true,
+      "notes": "Renamed scoring-engine.nats.spec.ts to scoring-engine.integration.spec.ts. All 183 tests pass."
     },
     {
       "id": "US-015",
