@@ -137,8 +137,8 @@
         "npm run test passes"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": "No behavior change."
+      "passes": true,
+      "notes": "Moved instanceof matcher to shared jest.setup.ts. Removed jd-extractor-svc override and unused setup-jest.ts."
     },
     {
       "id": "US-012",
