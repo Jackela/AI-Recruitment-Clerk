@@ -6,37 +6,34 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app/app.module';
 import { ProductionSecurityValidator } from './common/security/production-security-validator';
 import { bootstrapNestJsGateway, createDtoValidationPipe } from '@ai-recruitment-clerk/infrastructure-shared';
+import { validateEnv } from '@ai-recruitment-clerk/configuration';
 import compression from 'compression';
 import type { Request, Response } from 'express';
 
 async function bootstrap(): Promise<void> {
-  // Fail-fast env validation
-  Logger.log('🔍 [FAIL-FAST] Validating critical environment variables...');
-  const requiredVars = ['MONGO_URL'];
-  const missingVars = requiredVars.filter((v) => !process.env[v]);
-  if (process.env.NODE_ENV !== 'test' && missingVars.length > 0) {
-    Logger.warn(
-      '⚠️ [FAIL-FAST] Some env vars missing at bootstrap (will rely on ConfigModule .env):',
-    );
-    for (const v of missingVars)
-      Logger.warn(`   • ${v} is not set at process.env yet`);
-    Logger.warn(
-      '   If .env exists at repo root, Nest ConfigModule will load it shortly.',
-    );
-  }
-  Logger.log('✅ [FAIL-FAST] All critical environment variables validated');
+  // Fail-fast env validation using shared configuration validator
+  Logger.log('🔍 [FAIL-FAST] Validating environment variables...');
+  const env = validateEnv('appGateway');
+
+  const nodeEnv = env.getString('NODE_ENV', false) ?? 'development';
+  const port = env.getNumber('PORT');
+  const allowedOrigins = env.getArray('ALLOWED_ORIGINS');
+  const isInsecureLocalAllowed = env.getBoolean('ALLOW_INSECURE_LOCAL', false);
+  const enableCompression = env.getBoolean('ENABLE_COMPRESSION', false);
+
+  Logger.log(`✅ [FAIL-FAST] Environment validated (NODE_ENV=${nodeEnv})`);
 
   // Bootstrap the application using shared helper
   const app = await bootstrapNestJsGateway(AppModule, {
     serviceName: 'AI Recruitment Clerk Gateway',
-    port: process.env.PORT ? Number.parseInt(process.env.PORT, 10) : undefined,
+    port,
     globalPrefix: 'api',
     cors: {
       origin:
-        process.env.NODE_ENV === 'production'
-          ? process.env.ALLOWED_ORIGINS?.split(',') || [
-              'https://ai-recruitment-clerk-production.up.railway.app',
-            ]
+        nodeEnv === 'production'
+          ? allowedOrigins.length > 0
+            ? allowedOrigins
+            : ['https://ai-recruitment-clerk-production.up.railway.app']
           : ['http://localhost:4200', 'http://localhost:4202'],
     },
   });
@@ -44,8 +41,8 @@ async function bootstrap(): Promise<void> {
   // Security validation
   const securityValidator = app.get(ProductionSecurityValidator);
   const securityResult = securityValidator.validateSecurityConfiguration();
-  if (process.env.NODE_ENV === 'production' && !securityResult.isValid) {
-    if (process.env.ALLOW_INSECURE_LOCAL === 'true') {
+  if (nodeEnv === 'production' && !securityResult.isValid) {
+    if (isInsecureLocalAllowed) {
       Logger.warn('⚠️ Bypassing security validation for local run');
       securityResult.issues.forEach((i) => Logger.warn(`   • ${i}`));
       Logger.warn(`Security score: ${securityResult.score}/100`);
@@ -86,7 +83,7 @@ async function bootstrap(): Promise<void> {
     req.connection.setTimeout(60000);
     next();
   });
-  if (process.env.ENABLE_COMPRESSION === 'true') {
+  if (enableCompression) {
     server.use(
       compression({
         level: 6,
@@ -127,7 +124,7 @@ async function bootstrap(): Promise<void> {
   });
 
   Logger.log(
-    `📚 API Documentation available at: http://localhost:${process.env.PORT || 3000}/api/docs`,
+    `📚 API Documentation available at: http://localhost:${port ?? 3000}/api/docs`,
   );
 }
 
