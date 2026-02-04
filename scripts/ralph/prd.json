@@ -84,8 +84,8 @@
         "Tests pass for both services"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "Check existing schemas in libs/configuration/src/schemas/"
+      "passes": true,
+      "notes": "Created ResumeParserConfigService and JdExtractorConfigService. Removed process.env.NODE_ENV, NODE_NAME, and GEMINI_API_KEY usage. All tests pass."
     },
     {
       "id": "US-007",

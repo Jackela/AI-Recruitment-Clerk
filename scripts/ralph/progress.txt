@@ -11,6 +11,8 @@ Started: 2026-02-04
 - Nx monorepo dependencies: depcheck reports false positives for build tooling (@nx/*, @angular-devkit/*, @swc/*) - these are used implicitly by workspace
 - Type-only imports in .ts files may not be detected by depcheck - verify by searching actual source files before removal
 - `passport-local` was commented out in `local.strategy.ts` - indicating migration away from local auth strategy
+- Config services in NestJS should be injectable providers, not singletons, for proper test mocking
+- When services add new constructor dependencies, update all test files that instantiate them directly
 
 ## 2026-02-04 - US-001
 - Created `docs/TECH_DEBT_REGISTER.md` with 20 technical debt items
@@ -93,4 +95,28 @@ Started: 2026-02-04
 - In Nx monorepos, build tooling packages (@nx/*, @angular-devkit/*) appear unused but are required
 - Some dependencies may be commented out for future removal (e.g., `passport-local` migration)
 - Always verify each package individually rather than bulk removing all reported packages
+
+---
+
+## 2026-02-04 - US-006
+- Migrated `resume-parser-svc` and `jd-extractor-svc` to use `@ai-recruitment-clerk/configuration`
+- Created `ResumeParserConfigService` and `JdExtractorConfigService` in respective apps
+- Removed all `process.env.NODE_ENV`, `process.env.NODE_NAME`, and `process.env.GEMINI_API_KEY` usage
+- Updated all affected services:
+  - `VisionLlmService` - uses `config.isTest` and `config.geminiApiKey`
+  - `GridFsService` - uses `config.isTest`
+  - `ParsingService` - uses `config.isTest` and `config.nodeName`
+  - `ResumeEncryptionService` - uses `config.nodeName`
+  - `LlmService` (jd-extractor) - uses `config.isTest` and `config.geminiApiKey`
+- Updated all test files to provide mock config services
+- Fixed unused `validatedVars` in `libs/configuration/src/env-validator/env-validator.util.ts`
+- All quality checks pass: typecheck, 286 tests passing
+- Committed: feat: US-006 - Migrate resume-parser-svc and jd-extractor-svc to env-validator
+
+**Learnings for future iterations:**
+- Configuration services should use NestJS DI for proper test mocking
+- When adding constructor parameters, must update all test files that directly instantiate services
+- Test files using `TestingModule` need config in providers array
+- Test files directly instantiating services (without DI) need mock config passed to constructor
+- The existing schemas (`resumeParser` and `jdExtractor`) in libs/configuration were already defined
 
