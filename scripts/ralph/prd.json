@@ -52,7 +52,7 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "No behavior changes, only consolidation."
     },
     {

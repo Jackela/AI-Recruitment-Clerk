@@ -53,3 +53,21 @@ Started: 2026-02-04
 - Always verify boundary rules catch real violations - the contracts/index.ts file was unused but violated the rule
 - When adding boundary rules, run lint and fix violations immediately to avoid tech debt accumulation
 ---
+
+## 2026-02-04 - US-004
+- Created shared bootstrap helper in libs/infrastructure-shared/src/bootstrap
+- Implemented bootstrapNestJsMicroservice for NATS microservices with consistent options interface
+- Implemented bootstrapNestJsGateway for HTTP gateway applications with CORS and logging configuration
+- Implemented bootstrapWithErrorHandling for consistent error handling and process exit
+- Refactored 4 microservice main.ts files (resume-parser-svc, jd-extractor-svc, scoring-engine-svc, report-generator-svc)
+- Refactored app-gateway main.ts to use shared helper while preserving security validation, Swagger, and compression features
+- Reduced code duplication: 186 deletions, 79 insertions across main.ts files
+- Files changed: libs/infrastructure-shared/src/bootstrap/ (new), libs/infrastructure-shared/src/index.ts, 5 main.ts files
+
+**Learnings for future iterations:**
+- NestFactory.createMicroservice is from @nestjs/core, not @nestjs/microservices
+- Transport enum is a value import from @nestjs/microservices, not a type import
+- Dynamic import of @nestjs/core NestFactory in bootstrapNestJsGateway avoids conflicts with @nestjs/microservices NestFactory
+- The Angular frontend uses a completely different bootstrap pattern (bootstrapApplication) and should not share NestJS bootstrap helpers
+- App-gateway has application-specific middleware (security validation, Swagger, compression) that should remain in its main.ts - the shared helper only handles common bootstrapping
+---
