@@ -2,6 +2,9 @@
 export * from './models/resume.dto';
 export * from './models/feedback-code.dto';
 
+// Error Response DTO
+export * from './error-response.dto';
+
 // DTO Interfaces
 export * from './dto/jd.dto';
 

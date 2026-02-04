@@ -6,6 +6,8 @@ Started: 2026-02-04
 - Use `libs/infrastructure-shared/src/pipes/` for shared NestJS pipes
 - Export new utilities from both their folder index and the main lib index
 - Use `InternalDtoValidationPipeOptions` pattern to avoid Required<> type issues with optional fields
+- Microservices: Register global pipes via APP_PIPE provider token in app.module.ts
+- HTTP Gateways: Register global pipes via app.useGlobalPipes() in main.ts
 
 ## [2026-02-04] - US-001
 - Introduced shared DTO validation pipe in libs/infrastructure-shared
@@ -31,4 +33,16 @@ Started: 2026-02-04
   - app-gateway was using NestJS's built-in ValidationPipe directly, not a CustomValidationPipe
   - The shared pipe is exported from infrastructure-shared via the pipes index
   - Replacing the built-in pipe is straightforward - just swap the import and factory call
+---
+## [2026-02-04] - US-003
+- Registered shared DtoValidationPipe globally in resume-parser-svc
+- Used APP_PIPE provider token in app.module.ts (microservice pattern)
+- Added import for createDtoValidationPipe from infrastructure-shared
+- Files changed:
+  - `apps/resume-parser-svc/src/app/app.module.ts` (updated)
+- **Learnings for future iterations:**
+  - Pattern: Microservices use APP_PIPE provider token in app.module.ts, whereas HTTP gateways use app.useGlobalPipes() in main.ts
+  - The infrastructure-shared library exports both createDtoValidationPipe and its types
+  - Import APP_PIPE alongside APP_FILTER and APP_INTERCEPTOR from @nestjs/core
+  - Use useFactory with createDtoValidationPipe() for clean instantiation
 ---
