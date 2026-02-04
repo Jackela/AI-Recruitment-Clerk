@@ -20,3 +20,15 @@ Started: 2026-02-04
   - Pattern: When creating options interfaces, separate internal required options from public optional options to avoid TypeScript Required<> type issues
   - The app-gateway already has a `CustomValidationPipe` that can be migrated to the shared pipe in future stories (US-002)
   - Typecheck with tsconfig.ci.json is the project's verification standard
+---
+## [2026-02-04] - US-002
+- Replaced NestJS built-in ValidationPipe with shared DtoValidationPipe in app-gateway
+- Updated imports in main.ts to use createDtoValidationPipe from infrastructure-shared
+- Configured pipe with whitelist=true, transform=true, forbidNonWhitelisted=true
+- Files changed:
+  - `apps/app-gateway/src/main.ts` (updated)
+- **Learnings for future iterations:**
+  - app-gateway was using NestJS's built-in ValidationPipe directly, not a CustomValidationPipe
+  - The shared pipe is exported from infrastructure-shared via the pipes index
+  - Replacing the built-in pipe is straightforward - just swap the import and factory call
+---
