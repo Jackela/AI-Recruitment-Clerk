@@ -211,3 +211,19 @@ Started: 2026-02-04
   - Feature flags domain was small (2 files) - good candidate for incremental refactor
   - Documentation (specs/002-cicd-quality-migration/tasks.md) references old paths but those are just comments
 ---
+## [2026-02-04] - US-016
+- Completed DTO reorganization by moving error-response.dto.ts to errors/ folder
+- Updated relative import in error-response-formatter.ts: '../error-response.dto' → './error-response.dto'
+- Updated libs/shared-dtos/src/index.ts to export from errors/error-response.dto
+- All DTOs now properly grouped by domain folders
+- Files changed:
+  - `libs/shared-dtos/src/errors/error-response.dto.ts` (moved)
+  - `libs/shared-dtos/src/errors/error-response-formatter.ts` (updated import)
+  - `libs/shared-dtos/src/index.ts` (updated)
+- **Learnings for future iterations:**
+  - Phase 1 (US-015) and Phase 2 (US-016) completed the DTO reorganization incrementally
+  - When moving files that have internal imports, need to update relative paths
+  - The error-response.dto.ts had a relative import in error-response-formatter.ts that needed updating
+  - Barrel export pattern in index.ts kept most imports working without changes
+  - All DTOs are now in domain folders: feature-flags/, errors/, domains/, models/, events/, auth/, privacy/, etc.
+---
