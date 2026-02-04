@@ -4,54 +4,34 @@
  */
 
 import { ErrorResponseFormatter } from '../common/error-handling.patterns';
+import type {
+  ErrorResponseDto,
+  ErrorResponse,
+  ErrorResponseContext,
+  ErrorCorrelation,
+  ErrorRecovery,
+  ErrorImpact,
+  ErrorMonitoring,
+} from '../error-response.dto';
 import type { EnhancedAppException } from './enhanced-error-types';
 import { ErrorCorrelationManager } from './error-correlation';
 
+// Re-export the shared DTO types for convenience
+export type {
+  ErrorResponseDto,
+  ErrorResponse,
+  ErrorResponseContext,
+  ErrorCorrelation,
+  ErrorRecovery,
+  ErrorImpact,
+  ErrorMonitoring,
+};
+
 /**
  * Standardized error response interface
+ * @deprecated Use ErrorResponseDto from error-response.dto.ts instead
  */
-export interface StandardizedErrorResponse {
-  success: false;
-  error: {
-    type: string;
-    code: string;
-    message: string;
-    userMessage: string;
-    timestamp: string;
-    traceId?: string;
-    requestId?: string;
-    severity: string;
-  };
-  context: {
-    path?: string;
-    method?: string;
-    serviceName?: string;
-    operationName?: string;
-    ip?: string;
-  };
-  correlation?: {
-    traceId?: string;
-    requestId?: string;
-    spanId?: string;
-    parentSpanId?: string;
-  };
-  recovery?: {
-    strategies: string[];
-    suggestions: string[];
-    retryable: boolean;
-  };
-  impact?: {
-    business: string;
-    user: string;
-  };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  details?: any;
-  stack?: string;
-  monitoring?: {
-    tags: Record<string, string>;
-    metrics: Record<string, number>;
-  };
-}
+export type StandardizedErrorResponse = ErrorResponseDto;
 
 /**
  * User-friendly error message mapping
@@ -133,7 +113,7 @@ export class StandardizedErrorResponseFormatter extends ErrorResponseFormatter {
       method?: string;
       ip?: string;
     },
-  ): StandardizedErrorResponse {
+  ): ErrorResponseDto {
     const { enhancedDetails } = error;
     const correlationContext =
       enhancedDetails.correlationContext ||
@@ -153,7 +133,7 @@ export class StandardizedErrorResponseFormatter extends ErrorResponseFormatter {
     );
 
     // Build standardized response
-    const response: StandardizedErrorResponse = {
+    const response: ErrorResponseDto = {
       success: false,
       error: {
         type: enhancedDetails.type,

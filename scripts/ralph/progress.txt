@@ -46,3 +46,15 @@ Started: 2026-02-04
   - Import APP_PIPE alongside APP_FILTER and APP_INTERCEPTOR from @nestjs/core
   - Use useFactory with createDtoValidationPipe() for clean instantiation
 ---
+## [2026-02-04] - US-004
+- Created shared API error response DTO in libs/shared-dtos
+- Defined interfaces: ErrorResponse, ErrorResponseContext, ErrorCorrelation, ErrorRecovery, ErrorImpact, ErrorMonitoring
+- Exported ErrorResponseDto and MinimalErrorResponseDto from shared-dtos index
+- Files changed:
+  - `libs/shared-dtos/src/error-response.dto.ts` (new)
+  - `libs/shared-dtos/src/index.ts` (updated)
+- **Learnings for future iterations:**
+  - Naming conflict: `ErrorContext` is already used as a decorator in error-handling.decorators.ts, so renamed to `ErrorResponseContext`
+  - The existing `StandardizedErrorResponse` in error-response-formatter.ts has similar structure - this DTO provides the canonical typed interface
+  - Pattern: DTO files should be at the lib root (e.g., error-response.dto.ts) for discoverability, then grouped in subfolders in later refactor stories (US-015/US-016)
+---
