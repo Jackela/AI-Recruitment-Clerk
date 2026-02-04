@@ -58,3 +58,17 @@ Started: 2026-02-04
   - The existing `StandardizedErrorResponse` in error-response-formatter.ts has similar structure - this DTO provides the canonical typed interface
   - Pattern: DTO files should be at the lib root (e.g., error-response.dto.ts) for discoverability, then grouped in subfolders in later refactor stories (US-015/US-016)
 ---
+## [2026-02-04] - US-005
+- Aligned error-response-formatter.ts to use shared ErrorResponseDto from error-response.dto.ts
+- Deprecated StandardizedErrorResponse interface as an alias to ErrorResponseDto
+- Imported and re-exported all related types from error-response.dto.ts
+- Updated formatEnhanced method to return ErrorResponseDto type
+- Files changed:
+  - `libs/shared-dtos/src/errors/error-response-formatter.ts` (updated)
+  - `scripts/ralph/prd.json` (updated)
+  - `scripts/ralph/progress.txt` (updated)
+- **Learnings for future iterations:**
+  - The global-exception.filter.ts in app-gateway re-exports from shared-dtos, so updating error-response-formatter.ts automatically propagates the changes
+  - Pattern: When consolidating types, use type alias with @deprecated comment for backward compatibility (e.g., `export type StandardizedErrorResponse = ErrorResponseDto`)
+  - This allows gradual migration while maintaining existing code that uses the old type name
+---
