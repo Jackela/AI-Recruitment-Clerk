@@ -1,6 +1,7 @@
 import { ResumeEncryptionService } from './resume-encryption.service';
 import { ResumeParserException } from '@ai-recruitment-clerk/infrastructure-shared';
 import { EncryptionService } from '@ai-recruitment-clerk/infrastructure-shared';
+import { ResumeParserConfigService } from '../config';
 
 // Mock EncryptionService
 jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => ({
@@ -23,11 +24,17 @@ jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => ({
   },
 }));
 
+// Mock ResumeParserConfigService
+const mockConfigService = {
+  nodeName: 'unknown',
+  isTest: true,
+} as unknown as ResumeParserConfigService;
+
 describe('ResumeEncryptionService', () => {
   let service: ResumeEncryptionService;
 
   beforeEach(() => {
-    service = new ResumeEncryptionService();
+    service = new ResumeEncryptionService(mockConfigService);
     jest.clearAllMocks();
   });
 
@@ -170,14 +177,10 @@ describe('ResumeEncryptionService', () => {
       expect(metadata.processingNode).toBe('node-5');
     });
 
-    it('should use NODE_NAME env variable when available', () => {
-      const originalNodeName = process.env.NODE_NAME;
-      process.env.NODE_NAME = 'test-node';
-
+    it('should use config nodeName', () => {
+      // The mock config service returns 'unknown' for nodeName
       const metadata = service.createSecurityMetadata('org-123');
-      expect(metadata.processingNode).toBe('test-node');
-
-      process.env.NODE_NAME = originalNodeName;
+      expect(metadata.processingNode).toBe('unknown');
     });
   });
 });

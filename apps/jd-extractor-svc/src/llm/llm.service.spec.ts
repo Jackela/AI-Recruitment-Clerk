@@ -7,6 +7,7 @@ import {
   createMockLlmExtractionRequest,
   createLongJdText,
 } from '../testing/test-fixtures';
+import { JdExtractorConfigService } from '../config';
 
 describe('LlmService', () => {
   let service: LlmService;
@@ -67,19 +68,27 @@ describe('LlmService', () => {
   };
 
   beforeEach(async () => {
-    // Mock environment variables for testing
-    process.env.GEMINI_API_KEY = 'test-api-key-for-integration-testing';
-
     const module: TestingModule = await Test.createTestingModule({
-      providers: [LlmService],
+      providers: [
+        LlmService,
+        {
+          provide: JdExtractorConfigService,
+          useValue: {
+            isTest: true,
+            nodeEnv: 'test',
+            natsUrl: 'nats://localhost:4222',
+            geminiApiKey: 'test-api-key',
+            getConfigSnapshot: () => ({}),
+          },
+        },
+      ],
     }).compile();
 
     service = module.get<LlmService>(LlmService);
   });
 
   afterEach(() => {
-    // Clean up environment variables
-    delete process.env.GEMINI_API_KEY;
+    // No cleanup needed - config is mocked
   });
 
   describe('Service Initialization', () => {

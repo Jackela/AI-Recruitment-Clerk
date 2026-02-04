@@ -3,6 +3,7 @@ import {
   EncryptionService,
   ResumeParserException,
 } from '@ai-recruitment-clerk/infrastructure-shared';
+import { ResumeParserConfigService } from '../config';
 
 /**
  * Resume DTO after PII encryption
@@ -31,6 +32,8 @@ export interface ResumeSecurityOptions {
 @Injectable()
 export class ResumeEncryptionService {
   private readonly logger = new Logger(ResumeEncryptionService.name);
+
+  constructor(private readonly config: ResumeParserConfigService) {}
 
   /**
    * Encrypts sensitive PII data in a resume DTO
@@ -184,7 +187,7 @@ export class ResumeEncryptionService {
     return {
       encrypted: true,
       encryptionVersion: '1.0',
-      processingNode: processingNode || process.env.NODE_NAME || 'unknown',
+      processingNode: processingNode || this.config.nodeName,
       dataClassification: 'sensitive-pii',
     };
   }

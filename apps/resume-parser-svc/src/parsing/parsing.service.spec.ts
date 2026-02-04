@@ -5,11 +5,17 @@ import type { GridFsService } from '../gridfs/gridfs.service';
 import type { FieldMapperService } from '../field-mapper/field-mapper.service';
 import type { ResumeParserNatsService } from '../services/resume-parser-nats.service';
 import { FileProcessingService, ResumeEncryptionService } from '../processing';
+import { ResumeParserConfigService } from '../config';
 import pdfParse from 'pdf-parse';
 
 jest.mock('pdf-parse', () => jest.fn());
 
 const mockParse = pdfParse as unknown as jest.MockedFunction<(buffer: Buffer) => Promise<{ text: string }>>;
+
+const mockConfig = {
+  isTest: true,
+  nodeName: 'unknown',
+} as unknown as ResumeParserConfigService;
 
 const buildService = () => {
   const vision = { parseResumeText: jest.fn(), parseResumePdf: jest.fn() } as unknown as VisionLlmService;
@@ -23,9 +29,9 @@ const buildService = () => {
     isConnected: true,
   } as unknown as ResumeParserNatsService;
   const fileProcessing = new FileProcessingService();
-  const resumeEncryption = new ResumeEncryptionService();
+  const resumeEncryption = new ResumeEncryptionService(mockConfig);
 
-  const svc = new ParsingService(vision, pdf, grid, mapper, nats, fileProcessing, resumeEncryption);
+  const svc = new ParsingService(vision, pdf, grid, mapper, nats, fileProcessing, resumeEncryption, mockConfig);
   return { svc, vision, pdf, grid, mapper, nats };
 };
 

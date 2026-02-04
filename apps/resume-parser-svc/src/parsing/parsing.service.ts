@@ -20,6 +20,7 @@ import {
   FileProcessingService,
   ResumeEncryptionService,
 } from '../processing';
+import { ResumeParserConfigService } from '../config';
 import { createHash } from 'crypto';
 import pdfParse from 'pdf-parse-fork';
 
@@ -50,6 +51,7 @@ export class ParsingService {
    * @param natsService - The nats service.
    * @param fileProcessingService - The file processing service.
    * @param resumeEncryptionService - The resume encryption service.
+   * @param config - The configuration service.
    */
   constructor(
     private readonly visionLlmService: VisionLlmService,
@@ -59,9 +61,10 @@ export class ParsingService {
     private readonly natsService: ResumeParserNatsService,
     private readonly fileProcessingService: FileProcessingService,
     private readonly resumeEncryptionService: ResumeEncryptionService,
+    private readonly config: ResumeParserConfigService,
   ) {
     // Periodic cleanup of expired processing records (skip in test to avoid open handles)
-    if (process.env.NODE_ENV !== 'test') {
+    if (!this.config.isTest) {
       setInterval(() => this.cleanupExpiredProcessing(), 5 * 60 * 1000);
     }
   }
@@ -339,7 +342,7 @@ export class ParsingService {
         securityMetadata: {
           encrypted: true,
           encryptionVersion: '1.0',
-          processingNode: process.env.NODE_NAME || 'unknown',
+          processingNode: this.config.nodeName,
         },
       };
 
@@ -492,7 +495,7 @@ export class ParsingService {
         securityMetadata: {
           encrypted: true,
           encryptionVersion: '1.0',
-          processingNode: process.env.NODE_NAME || 'unknown',
+          processingNode: this.config.nodeName,
           dataClassification: 'sensitive-pii',
         },
       };

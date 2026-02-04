@@ -24,10 +24,15 @@ import {
   FileProcessingService,
   ResumeEncryptionService,
 } from '../processing';
+import { ResumeParserConfigService } from '../config';
 
 /**
  * Get MongoDB URL from environment with fallback chain
  * Centralizes environment access for module-level configuration
+ *
+ * Note: Module-level configuration cannot use dependency injection.
+ * This function is a temporary bridge until the module can be refactored
+ * to use async configuration or dynamic module registration.
  */
 function getMongoUrl(): string {
   return (
@@ -65,6 +70,7 @@ function getMongoUrl(): string {
   controllers: [AppController, ResumeEventsController],
   providers: [
     AppService,
+    ResumeParserConfigService,
     ParsingService,
     VisionLlmService,
     GridFsService,
@@ -122,6 +128,7 @@ function getMongoUrl(): string {
     ResumeRepository,
     FileProcessingService,
     ResumeEncryptionService,
+    ResumeParserConfigService,
   ],
 })
 export class AppModule {}

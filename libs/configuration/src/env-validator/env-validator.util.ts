@@ -88,7 +88,7 @@ export class EnvValidationError extends Error {
  * Environment variable access with type safety
  */
 export class EnvAccess {
-  private validatedVars = new Map<string, string>();
+  // private validatedVars = new Map<string, string>(); // Reserved for future caching
   private schema: EnvValidationSchema;
 
   constructor(schema: EnvValidationSchema) {

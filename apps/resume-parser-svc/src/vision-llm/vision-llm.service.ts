@@ -14,6 +14,7 @@ import {
   PromptBuilder,
 } from '@ai-recruitment-clerk/shared-dtos';
 import { SecureConfigValidator } from '@app/shared-dtos';
+import { ResumeParserConfigService } from '../config';
 import pdfParse from 'pdf-parse-fork';
 
 /**
@@ -29,25 +30,24 @@ export class VisionLlmService {
   /**
    * Initializes a new instance of the Vision LLM Service.
    */
-  constructor() {
+  constructor(private readonly config: ResumeParserConfigService) {
     // 🔒 SECURITY: Validate configuration before service initialization (skip in tests)
-    if (process.env.NODE_ENV !== 'test') {
+    if (!this.config.isTest) {
       SecureConfigValidator.validateServiceConfig('VisionLlmService', [
         'GEMINI_API_KEY',
       ]);
     }
 
-    const config: GeminiConfig = {
-      apiKey:
-        process.env.NODE_ENV === 'test'
-          ? 'test-api-key'
-          : SecureConfigValidator.requireEnv('GEMINI_API_KEY'),
+    const geminiConfig: GeminiConfig = {
+      apiKey: this.config.isTest
+        ? 'test-api-key'
+        : this.config.geminiApiKey,
       model: 'gemini-1.5-pro', // Using Pro model for vision capabilities
       temperature: 0.1, // Very low temperature for consistent extraction
     };
 
     // In tests, use stubbed Gemini client; otherwise real client
-    this.geminiClient = this.createGeminiClient(config);
+    this.geminiClient = this.createGeminiClient(geminiConfig);
 
     // Initialize error handling mechanisms (FAIL-FAST architecture)
     this._circuitBreaker = new CircuitBreaker(5, 60000, this.logger);
@@ -161,7 +161,7 @@ export class VisionLlmService {
    * @returns A promise that resolves to ResumeDTO.
    */
   public async parseResumeText(resumeText: string): Promise<ResumeDTO> {
-    if (process.env.NODE_ENV === 'test') {
+    if (this.config.isTest) {
       throw new Error('VisionLlmService.parseResumeText not implemented');
     }
     this.logger.debug('Starting resume parsing from plain text');
@@ -195,7 +195,7 @@ export class VisionLlmService {
   public async parseResumePdfAdvanced(
     request: VisionLlmRequest,
   ): Promise<VisionLlmResponse> {
-    if (process.env.NODE_ENV === 'test') {
+    if (this.config.isTest) {
       throw new Error(
         'VisionLlmService.parseResumePdfAdvanced not implemented',
       );
@@ -226,7 +226,7 @@ export class VisionLlmService {
    */
   public async validatePdfFile(pdfBuffer: Buffer): Promise<boolean> {
     // In test mode, return true for valid test PDFs
-    if (process.env.NODE_ENV === 'test') {
+    if (this.config.isTest) {
       return true;
     }
     try {
@@ -255,7 +255,7 @@ export class VisionLlmService {
    * @returns A promise that resolves to number value.
    */
   public async estimateProcessingTime(fileSize: number): Promise<number> {
-    if (process.env.NODE_ENV === 'test') {
+    if (this.config.isTest) {
       throw new Error(
         'VisionLlmService.estimateProcessingTime not implemented',
       );

@@ -5,11 +5,16 @@ import type { GridFsService as _GridFsService } from '../gridfs/gridfs.service';
 import type { FieldMapperService as _FieldMapperService } from '../field-mapper/field-mapper.service';
 import type { ResumeParserNatsService as _ResumeParserNatsService } from '../services/resume-parser-nats.service';
 import { FileProcessingService, ResumeEncryptionService } from '../processing';
+import { ResumeParserConfigService } from '../config';
 
 describe('ParsingService Contracts (smoke)', () => {
   it('exposes required contract methods', () => {
     const fileProcessing = new FileProcessingService();
-    const resumeEncryption = new ResumeEncryptionService();
+    const mockConfig = {
+      isTest: true,
+      nodeName: 'unknown',
+    } as unknown as ResumeParserConfigService;
+    const resumeEncryption = new ResumeEncryptionService(mockConfig);
     const service = new ParsingService(
       {} as any,
       {} as any,
@@ -18,6 +23,7 @@ describe('ParsingService Contracts (smoke)', () => {
       {} as any,
       fileProcessing,
       resumeEncryption,
+      mockConfig,
     );
 
     expect(service.handleResumeSubmitted).toBeInstanceOf(Function);

@@ -1,4 +1,11 @@
 import { VisionLlmService } from './vision-llm.service';
+import { ResumeParserConfigService } from '../config';
+
+const mockConfig = {
+  isTest: true,
+  nodeName: 'unknown',
+  geminiApiKey: 'test-key',
+} as unknown as ResumeParserConfigService;
 
 jest.mock('@ai-recruitment-clerk/shared-dtos', () => {
   const clientFactory = () => ({
@@ -52,7 +59,7 @@ describe('VisionLlmService (isolated)', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new VisionLlmService();
+    service = new VisionLlmService(mockConfig);
     geminiInstance = (service as any).geminiClient;
     if (!geminiInstance) {
       throw new Error('Expected VisionLlmService to provide a Gemini client');
