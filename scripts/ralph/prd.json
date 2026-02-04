@@ -188,8 +188,8 @@
         "Typecheck passes"
       ],
       "priority": 15,
-      "passes": false,
-      "notes": "Incremental move only."
+      "passes": true,
+      "notes": "Created feature-flags/ domain folder. Moved feature-flag.dto.ts and audit-event.dto.ts. Typecheck passes."
     },
     {
       "id": "US-016",

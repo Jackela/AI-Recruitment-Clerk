@@ -162,6 +162,10 @@ export type {
 export * from './domains/analytics.rules';
 export * from './contracts/analytics.contracts';
 
+// Feature Flags Domain
+export * from './feature-flags/feature-flag.dto';
+export * from './feature-flags/audit-event.dto';
+
 // Privacy & GDPR Compliance
 export * from './privacy/consent.dto';
 export * from './privacy/data-subject-rights.dto';
