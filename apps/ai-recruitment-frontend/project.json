@@ -4,7 +4,7 @@
   "projectType": "application",
   "prefix": "arc",
   "sourceRoot": "apps/ai-recruitment-frontend/src",
-  "tags": [],
+  "tags": ["type:app"],
   "targets": {
     "build": {
       "executor": "@angular/build:application",

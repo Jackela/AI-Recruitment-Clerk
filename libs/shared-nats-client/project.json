@@ -36,5 +36,5 @@
       }
     }
   },
-  "tags": ["scope:shared", "type:lib"]
+  "tags": ["scope:shared", "type:utils"]
 }
