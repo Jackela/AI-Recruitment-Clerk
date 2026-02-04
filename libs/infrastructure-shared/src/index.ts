@@ -1062,6 +1062,14 @@ export {
   type SchemaDefinition,
 } from './utilities';
 
+// Re-export pipes for convenience
+export {
+  DtoValidationPipe,
+  createDtoValidationPipe,
+  type DtoValidationPipeOptions,
+  type FormattedValidationError,
+} from './pipes';
+
 // Re-export bootstrap utilities for convenience
 export {
   bootstrapNestJsMicroservice,
