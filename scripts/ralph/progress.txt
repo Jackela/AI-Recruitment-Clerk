@@ -18,3 +18,21 @@ Started: 2026-02-04
 - Shared libs (scope:shared) can only depend on other shared libs or type:utils
 - Domain libs (scope:domain) can depend on shared, utils, contracts, and other domains
 ---
+
+## 2026-02-04 - US-002
+- Added consistent tags to all Nx projects in project.json files
+- Tagged 6 microservice apps with type:app (app-gateway, resume-parser-svc, jd-extractor-svc, scoring-engine-svc, report-generator-svc, ai-recruitment-frontend)
+- Tagged 2 e2e projects with type:e2e
+- Standardized shared library tags: type:lib → type:utils, type:util → type:utils, type:base → type:utils, type:types → type:utils
+- Removed non-standard layer tags (layer:infrastructure, layer:ai-services) to match documented convention
+- Domain libs remain tagged as scope:domain, type:lib with domain:{name} specific tags
+- api-contracts keeps layer:contracts tag
+- Files changed: 14 project.json files (apps/ and libs/)
+
+**Learnings for future iterations:**
+- ESLint enforce-module-boundaries rule in eslint.config.mjs expects specific tag patterns: type:app, scope:shared, scope:domain, layer:contracts, type:utils
+- Non-standard tags like type:lib, type:base, type:types, type:util, layer:infrastructure, layer:ai-services don't match the documented convention
+- Always check ARCHITECTURE_BASELINE.md for the authoritative tag reference before making changes
+- Domain libraries use three tags: domain:{name}, scope:domain, type:lib (keep these consistent)
+- Shared infrastructure libraries should use: scope:shared, type:utils (minimal, enforceable)
+---
