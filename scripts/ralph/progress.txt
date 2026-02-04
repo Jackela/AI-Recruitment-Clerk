@@ -141,3 +141,23 @@ Started: 2026-02-04
 - `shared-dtos` library contains a `domains/` folder with domain logic - this is architecturally questionable but doesn't violate current eslint rules since it doesn't import from domain libraries
 - Consider whether domain logic in `shared-dtos/domains/` should be moved to dedicated domain libraries in future refactors
 
+
+## 2026-02-04 - US-008
+- Split mobile-dashboard.component.ts from 817 lines to 295 lines
+- No filter logic existed in the component to extract (PRD template assumption was incorrect)
+- Created `pull-to-refresh.directive.ts` to extract pull-to-refresh gesture handling
+- Extracted inline template to `mobile-dashboard.component.html`
+- Extracted inline styles to `mobile-dashboard.component.scss`
+- Business logic was already in `MobileDashboardService` with BehaviorSubject pattern
+- Typecheck passes, lint passes
+- Committed: feat: US-008 - Split mobile-dashboard.component.ts into smaller units
+
+**Learnings for future iterations:**
+- The PRD story template assumed existence of filter logic that didn't exist
+- When PRD assumptions don't match reality, adapt to what makes sense for the codebase
+- The component had already been partially refactored (business logic in service)
+- Pull-to-refresh directive extraction was the most meaningful refactoring possible
+- External template/style files are the Angular standard for components over ~300 lines
+- The `PullToRefreshDirective` uses `DestroyRef` from `@angular/core` for cleanup - tests need to mock this
+
+---
