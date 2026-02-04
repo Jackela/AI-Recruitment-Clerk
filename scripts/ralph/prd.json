@@ -1,232 +1,236 @@
 {
   "project": "AI-Recruitment-Clerk",
   "branchName": "ralph/repo-hygiene-ci",
-  "description": "Large-scale refactor to align the monorepo with best practices: clear module boundaries, consistent layering, smaller components/services, and predictable configuration/testing.",
+  "description": "Refactor remaining items to align with best practices with smaller, verifiable steps.",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Create architecture baseline doc",
-      "description": "As a maintainer, I need a single source of truth for layers and dependency direction.",
+      "title": "Introduce shared DTO validation pipe",
+      "description": "As a maintainer, I want a single validation pipe used by controllers.",
       "acceptanceCriteria": [
-        "Add docs/ARCHITECTURE_BASELINE.md defining layers and allowed dependencies",
-        "Include a module boundary diagram (text or mermaid)",
+        "Create shared validation pipe in libs/infrastructure-shared",
+        "Pipe supports class-validator and class-transformer",
         "Typecheck passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": "Keep it short and enforceable."
+      "notes": "No behavior change expected."
     },
     {
       "id": "US-002",
-      "title": "Tag all Nx projects for boundary rules",
-      "description": "As a maintainer, I need consistent tags so module-boundary lint rules are enforceable.",
+      "title": "Apply validation pipe to app-gateway",
+      "description": "As a maintainer, I want app-gateway controllers to use the shared pipe.",
       "acceptanceCriteria": [
-        "Add tags to every project in nx.json or project.json files",
-        "Tags follow a documented convention (e.g., type:app, type:lib, layer:domain)",
-        "npm run lint passes"
+        "Register pipe globally in app-gateway",
+        "Typecheck passes"
       ],
       "priority": 2,
-      "passes": true,
-      "notes": "Do not change runtime behavior."
+      "passes": false,
+      "notes": "Do not modify DTOs."
     },
     {
       "id": "US-003",
-      "title": "Enforce module boundaries based on tags",
-      "description": "As a maintainer, I want lint to block invalid layer dependencies.",
+      "title": "Apply validation pipe to one microservice",
+      "description": "As a maintainer, I want at least one microservice to use the shared pipe.",
       "acceptanceCriteria": [
-        "Update eslint.config.mjs enforce-module-boundaries rules using tags",
-        "Add at least 3 explicit forbidden dependency rules",
-        "npm run lint passes"
+        "Register pipe in resume-parser-svc",
+        "Typecheck passes"
       ],
       "priority": 3,
-      "passes": true,
-      "notes": "Avoid false positives; keep rules minimal."
+      "passes": false,
+      "notes": "Choose smallest blast radius."
     },
     {
       "id": "US-004",
-      "title": "Standardize app entrypoints",
-      "description": "As a maintainer, I want consistent bootstrapping and error handling across services.",
+      "title": "Define shared API error DTO",
+      "description": "As a consumer, I need a consistent error response shape.",
       "acceptanceCriteria": [
-        "Refactor all main.ts files to use a shared bootstrap helper",
-        "Add shared bootstrap helper in libs/infrastructure-shared",
+        "Add error-response.dto.ts in libs/shared-dtos",
+        "Export from shared-dtos index",
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": true,
-      "notes": "No behavior changes, only consolidation."
+      "passes": false,
+      "notes": "Keep backward compatible fields."
     },
     {
       "id": "US-005",
-      "title": "Introduce consistent error handling layer",
-      "description": "As a maintainer, I want consistent error mapping and logging across services.",
+      "title": "Align app-gateway error responses with shared DTO",
+      "description": "As a consumer, I need app-gateway to return the shared error shape.",
       "acceptanceCriteria": [
-        "Add shared error-handling utilities and use them in app-gateway",
-        "Document usage in docs/ERROR_HANDLING.md",
+        "Update global-exception.filter.ts to use shared DTO",
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": true,
-      "notes": "Prefer non-breaking changes."
+      "passes": false,
+      "notes": "No change to status codes."
     },
     {
       "id": "US-006",
-      "title": "Split oversized Angular components (phase 1)",
-      "description": "As a frontend maintainer, I need components under size limits for maintainability.",
+      "title": "Audit NATS services for base class usage",
+      "description": "As a maintainer, I need a verified list of NATS services and their base class usage.",
       "acceptanceCriteria": [
-        "Identify top 3 largest components and split into presentational + container",
-        "Each new component under 500 lines",
-        "Typecheck passes",
-        "npm run lint passes"
+        "Create docs/NATS_BASE_CLASS_AUDIT.md",
+        "List each service and whether it uses BaseMicroserviceService"
       ],
       "priority": 6,
-      "passes": true,
-      "notes": "Update tests if needed."
+      "passes": false,
+      "notes": "No code changes."
     },
     {
       "id": "US-007",
-      "title": "Extract service business logic into dedicated services (phase 1)",
-      "description": "As a backend maintainer, I want services to be thin orchestrators.",
+      "title": "Fix first NATS service not using base class",
+      "description": "As a maintainer, I want the first non-compliant service aligned.",
       "acceptanceCriteria": [
-        "Select 2 services with heavy logic and extract into new helper services",
-        "Add unit tests for new helper services",
+        "Refactor one service to BaseMicroserviceService",
+        "Add/update tests",
         "npm run test passes"
       ],
       "priority": 7,
-      "passes": true,
-      "notes": "No external behavior changes."
+      "passes": false,
+      "notes": "Pick the smallest service."
     },
     {
       "id": "US-008",
-      "title": "Standardize DTO validation",
-      "description": "As a maintainer, I want consistent validation across controllers.",
+      "title": "Normalize env access in app-gateway",
+      "description": "As a maintainer, I want app-gateway to use env validator for config.",
       "acceptanceCriteria": [
-        "Introduce shared validation pipe or utility",
-        "Apply to app-gateway controllers",
+        "Replace direct process.env usage in app-gateway config",
         "Typecheck passes"
       ],
       "priority": 8,
       "passes": false,
-      "notes": "Must not break existing endpoints."
+      "notes": "No new required envs."
     },
     {
       "id": "US-009",
-      "title": "Refactor NATS base class usage audit",
-      "description": "As a maintainer, I want all NATS services to follow the base class convention.",
+      "title": "Normalize env access in one microservice",
+      "description": "As a maintainer, I want a microservice to use env validator.",
       "acceptanceCriteria": [
-        "Audit all NATS services and align with BaseMicroserviceService",
-        "Add missing tests if any service lacks coverage",
-        "npm run test passes"
+        "Replace direct process.env usage in resume-parser-svc",
+        "Typecheck passes"
       ],
       "priority": 9,
       "passes": false,
-      "notes": "Document deviations if needed."
+      "notes": "Prefer minimal change."
     },
     {
       "id": "US-010",
-      "title": "Normalize environment variable access",
-      "description": "As a maintainer, I want all services to use shared env accessors.",
+      "title": "Add repository refactor checklist",
+      "description": "As a maintainer, I need a refactor checklist to prevent regressions.",
       "acceptanceCriteria": [
-        "Replace direct process.env access in 2 services with env validator",
-        "Update .env.example accordingly",
+        "Add docs/REFACTOR_CHECKLIST.md",
+        "Include: lint, typecheck, test, build, e2e, contracts",
         "Typecheck passes"
       ],
       "priority": 10,
       "passes": false,
-      "notes": "Incrementally migrate services."
+      "notes": "Keep it short."
     },
     {
       "id": "US-011",
-      "title": "Add repository refactor checklist",
-      "description": "As a maintainer, I need a checklist to prevent refactor regressions.",
+      "title": "Consolidate Jest setup file usage",
+      "description": "As a maintainer, I want consistent jest setup across projects.",
       "acceptanceCriteria": [
-        "Add docs/REFACTOR_CHECKLIST.md",
-        "Include: tests, lint, typecheck, build, e2e, contracts",
-        "Typecheck passes"
+        "Identify duplicate setup files",
+        "Use one shared setup in jest.config.cjs",
+        "npm run test passes"
       ],
       "priority": 11,
       "passes": false,
-      "notes": "Use the same order as ci:local."
+      "notes": "No behavior change."
     },
     {
       "id": "US-012",
-      "title": "Consolidate test configuration",
-      "description": "As a maintainer, I want consistent Jest setup across apps/libs.",
+      "title": "Verify config folder references",
+      "description": "As a maintainer, I want all config references to use /config paths.",
       "acceptanceCriteria": [
-        "Remove duplicate jest setup files if any",
-        "Ensure all projects use jest.config.cjs and shared setup",
-        "npm run test passes"
+        "Search and update stale paths",
+        "npm run lint passes"
       ],
       "priority": 12,
       "passes": false,
-      "notes": "No change to test behavior."
+      "notes": "Docs and scripts only."
     },
     {
       "id": "US-013",
-      "title": "Refactor configuration folders layout",
-      "description": "As a maintainer, I want configs grouped under /config with predictable paths.",
+      "title": "Introduce integration test pattern doc",
+      "description": "As a maintainer, I want a standard integration test pattern.",
       "acceptanceCriteria": [
-        "Ensure docker/deployment/env templates live under /config",
-        "Update all references in docs and scripts",
-        "npm run lint passes"
+        "Add docs/TESTING_PATTERN.md",
+        "Include folder structure and naming",
+        "Typecheck passes"
       ],
       "priority": 13,
       "passes": false,
-      "notes": "Avoid breaking scripts."
+      "notes": "No code changes."
     },
     {
       "id": "US-014",
-      "title": "Define API error response shape",
-      "description": "As a consumer, I need consistent error responses.",
+      "title": "Apply integration test pattern to one service",
+      "description": "As a maintainer, I want one service aligned to the pattern.",
       "acceptanceCriteria": [
-        "Define shared error DTO in libs/shared-dtos",
-        "Update app-gateway to return the shared shape",
-        "Typecheck passes"
+        "Refactor one service's integration tests",
+        "npm run test passes"
       ],
       "priority": 14,
       "passes": false,
-      "notes": "Keep backward compatibility where possible."
+      "notes": "Pick a small service."
     },
     {
       "id": "US-015",
-      "title": "Introduce service-level integration test pattern",
-      "description": "As a maintainer, I want a standard integration test structure.",
+      "title": "Refactor shared DTOs structure (phase 1)",
+      "description": "As a maintainer, I want shared DTOs grouped by domain.",
       "acceptanceCriteria": [
-        "Add docs/TESTING_PATTERN.md",
-        "Refactor one service's integration tests to match the pattern",
-        "npm run test passes"
+        "Create domain folders in libs/shared-dtos",
+        "Move one domain's DTOs",
+        "Update imports",
+        "Typecheck passes"
       ],
       "priority": 15,
       "passes": false,
-      "notes": "Choose a small service first."
+      "notes": "Incremental move only."
     },
     {
       "id": "US-016",
-      "title": "Refactor shared DTOs organization",
-      "description": "As a maintainer, I want shared DTOs grouped by domain.",
+      "title": "Refactor shared DTOs structure (phase 2)",
+      "description": "As a maintainer, I want remaining DTOs grouped by domain.",
       "acceptanceCriteria": [
-        "Reorganize libs/shared-dtos by domain folders",
-        "Update all imports",
+        "Move remaining DTOs",
+        "Update imports",
         "Typecheck passes"
       ],
       "priority": 16,
       "passes": false,
-      "notes": "Avoid breaking public exports."
+      "notes": "Complete the migration."
     },
     {
       "id": "US-017",
-      "title": "Standardize logging format",
-      "description": "As ops, I need consistent logs across services.",
+      "title": "Introduce shared logger wrapper",
+      "description": "As ops, I need a consistent log format.",
       "acceptanceCriteria": [
-        "Introduce a shared logger wrapper",
-        "Apply to 2 services",
+        "Add logger wrapper in libs/infrastructure-shared",
+        "Document usage in docs/LOGGING.md",
         "Typecheck passes"
       ],
       "priority": 17,
       "passes": false,
-      "notes": "Keep current log levels."
+      "notes": "No external logging integration."
     },
     {
       "id": "US-018",
+      "title": "Apply logger wrapper to one service",
+      "description": "As ops, I want one service using the shared logger.",
+      "acceptanceCriteria": [
+        "Update app-gateway to use logger wrapper",
+        "Typecheck passes"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": "Keep log levels unchanged."
+    },
+    {
+      "id": "US-019",
       "title": "Finalize refactor verification",
       "description": "As a maintainer, I need a full green local run before PR.",
       "acceptanceCriteria": [
@@ -235,7 +239,7 @@
         "npm run validate:contracts:ci passes",
         "Document warnings in PR notes"
       ],
-      "priority": 18,
+      "priority": 19,
       "passes": false,
       "notes": "Single PR only."
     }

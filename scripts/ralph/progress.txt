@@ -3,161 +3,20 @@ Started: 2026-02-04
 ---
 
 ## Codebase Patterns
-- Use `sql<number>` template for aggregations
-- Always use `IF NOT EXISTS` for migrations
-- Export types from actions.ts for UI components
-- Component Splitting Pattern: Extract display logic to separate component (e.g., `*-display.component.ts`)
-- Component Splitting Pattern: Extract filter logic to separate component (e.g., `*-filter.component.ts`)
-- Component Splitting Pattern: Extract business logic to service (e.g., `mobile-*.service.ts`)
-- Service uses BehaviorSubject pattern for reactive state management
-- Angular `standalone: true` is a decorator property, not an import
-- Use `import { Component, Input } from '@angular/core'` for decorators (not type-only import)
+- Use `libs/infrastructure-shared/src/pipes/` for shared NestJS pipes
+- Export new utilities from both their folder index and the main lib index
+- Use `InternalDtoValidationPipeOptions` pattern to avoid Required<> type issues with optional fields
 
-## 2026-02-04 - US-001
-- Created docs/ARCHITECTURE_BASELINE.md with architectural layers and dependency rules
-- Documented module boundary tags (type:app, scope:shared, scope:domain, layer:contracts, type:utils)
-- Added ASCII diagram showing layer hierarchy and data flow
-- Defined DDD structure for domain libraries (domain/application/infrastructure)
-- Documented service base class pattern and NATS microservice conventions
-- Files changed: docs/ARCHITECTURE_BASELINE.md (new)
-
-**Learnings for future iterations:**
-- The project uses ESLint `@nx/enforce-module-boundaries` for dependency rules - check eslint.config.mjs for current tag definitions
-- Domain libraries follow DDD structure with /domain (entities, VOs, events), /application (commands, queries, handlers), /infrastructure (persistence, messaging, APIs)
-- All NATS microservices extend BaseMicroserviceService from @ai-recruitment-clerk/service-base
-- Environment validation uses @ai-recruitment-clerk/configuration
-- Shared libs (scope:shared) can only depend on other shared libs or type:utils
-- Domain libs (scope:domain) can depend on shared, utils, contracts, and other domains
----
-
-## 2026-02-04 - US-002
-- Added consistent tags to all Nx projects in project.json files
-- Tagged 6 microservice apps with type:app (app-gateway, resume-parser-svc, jd-extractor-svc, scoring-engine-svc, report-generator-svc, ai-recruitment-frontend)
-- Tagged 2 e2e projects with type:e2e
-- Standardized shared library tags: type:lib → type:utils, type:util → type:utils, type:base → type:utils, type:types → type:utils
-- Removed non-standard layer tags (layer:infrastructure, layer:ai-services) to match documented convention
-- Domain libs remain tagged as scope:domain, type:lib with domain:{name} specific tags
-- api-contracts keeps layer:contracts tag
-- Files changed: 14 project.json files (apps/ and libs/)
-
-**Learnings for future iterations:**
-- ESLint enforce-module-boundaries rule in eslint.config.mjs expects specific tag patterns: type:app, scope:shared, scope:domain, layer:contracts, type:utils
-- Non-standard tags like type:lib, type:base, type:types, type:util, layer:infrastructure, layer:ai-services don't match the documented convention
-- Always check ARCHITECTURE_BASELINE.md for the authoritative tag reference before making changes
-- Domain libraries use three tags: domain:{name}, scope:domain, type:lib (keep these consistent)
-- Shared infrastructure libraries should use: scope:shared, type:utils (minimal, enforceable)
----
-
-## 2026-02-04 - US-003
-- Added explicit forbidden dependency rules to eslint.config.mjs using notDependOnLibsWithTags
-- Added 3 forbidden dependency rules:
-  1. scope:shared → not depend on scope:domain, layer:contracts (prevents circular deps)
-  2. scope:domain → not depend on type:app (ensures business logic remains independent)
-  3. layer:contracts → not depend on scope:domain, scope:shared (keeps contracts stable)
-- Fixed boundary violation: removed unused infrastructure-shared/src/contracts/index.ts re-export file
-- Files changed: eslint.config.mjs, libs/infrastructure-shared/src/contracts/index.ts (deleted)
-
-**Learnings for future iterations:**
-- ESLint @nx/enforce-module-boundaries supports both onlyDependOnLibsWithTags (allowlist) and notDependOnLibsWithTags (denylist)
-- Use notDependOnLibsWithTags for explicit architectural violations that should error
-- Re-export files in shared libraries can create hidden dependencies on layers they shouldn't depend on
-- Always verify boundary rules catch real violations - the contracts/index.ts file was unused but violated the rule
-- When adding boundary rules, run lint and fix violations immediately to avoid tech debt accumulation
----
-
-## 2026-02-04 - US-004
-- Created shared bootstrap helper in libs/infrastructure-shared/src/bootstrap
-- Implemented bootstrapNestJsMicroservice for NATS microservices with consistent options interface
-- Implemented bootstrapNestJsGateway for HTTP gateway applications with CORS and logging configuration
-- Implemented bootstrapWithErrorHandling for consistent error handling and process exit
-- Refactored 4 microservice main.ts files (resume-parser-svc, jd-extractor-svc, scoring-engine-svc, report-generator-svc)
-- Refactored app-gateway main.ts to use shared helper while preserving security validation, Swagger, and compression features
-- Reduced code duplication: 186 deletions, 79 insertions across main.ts files
-- Files changed: libs/infrastructure-shared/src/bootstrap/ (new), libs/infrastructure-shared/src/index.ts, 5 main.ts files
-
-**Learnings for future iterations:**
-- NestFactory.createMicroservice is from @nestjs/core, not @nestjs/microservices
-- Transport enum is a value import from @nestjs/microservices, not a type import
-- Dynamic import of @nestjs/core NestFactory in bootstrapNestJsGateway avoids conflicts with @nestjs/microservices NestFactory
-- The Angular frontend uses a completely different bootstrap pattern (bootstrapApplication) and should not share NestJS bootstrap helpers
-- App-gateway has application-specific middleware (security validation, Swagger, compression) that should remain in its main.ts - the shared helper only handles common bootstrapping
----
-
-## 2026-02-04 - US-005
-- Created docs/ERROR_HANDLING.md with comprehensive error handling guide
-- Documented all error types, severity levels, and usage patterns
-- Updated app-gateway global-exception.filter.ts to properly use shared utilities from @ai-recruitment-clerk/shared-dtos
-- The ErrorHandlingModule.forService('app-gateway') was already configured in app.module.ts
-- Replaced fallback implementation in global-exception.filter.ts with proper re-exports
-- Files changed: docs/ERROR_HANDLING.md (new), apps/app-gateway/src/common/filters/global-exception.filter.ts
-
-**Learnings for future iterations:**
-- The project has two error handling libraries:
-  - @ai-recruitment-clerk/infrastructure-shared/src/error-handling - Basic utilities (AppError, ValidationError, errorBoundary)
-  - @ai-recruitment-clerk/shared-dtos/src/errors - Enhanced system with correlation, structured logging, and NestJS integration
-- ErrorHandlingModule is in @ai-recruitment-clerk/shared-dtos/interceptors/error-handling.module
-- The enhanced system provides: StandardizedGlobalExceptionFilter, EnhancedAppException, error correlation, and structured logging
-- Domain-specific errors are available: NatsMessageException, MLModelException, ParsingException, CacheException, QueueException, TemplateException
-- App-gateway already had ErrorHandlingModule.forService('app-gateway') configured - just needed to update the local filter file to use shared exports
-- Base error classes are in @ai-recruitment-clerk/shared-dtos/src/common/error-handling.patterns (AppException, ErrorHandler, ErrorRecoveryStrategy)
----
-
-## 2026-02-04 - US-006
-- Split 3 largest Angular components (1355 → ~790 lines, 1052 → ~790 lines, 1121 → ~560 lines)
-- Created BentoIconComponent (160 lines) - extracted SVG icons from bento-grid
-- Created MobileQuickActionsComponent (150 lines) - extracted quick actions bar from mobile-dashboard
-- Created MobileActivityListComponent (170 lines) - extracted activity list from mobile-dashboard
-- Created mobile-upload-file-list component (350 lines) - extracted file list display
-- Split dashboard-charts into separate chart components:
-  - SparklineChartComponent (160 lines) - trend line chart
-  - BarChartComponent (180 lines) - vertical bar chart
-  - PieChartComponent (160 lines) - pie/donut chart
-- All new components are under 500 lines each
-- Reduced bento-grid.component.ts from 1355 to ~790 lines
-- Reduced mobile-dashboard.component.ts from 1052 to ~790 lines
-- Reduced dashboard-charts.component.ts from 1001 to ~450 lines
-- Files changed: 8 new components, 3 modified components
-- Overall reduction: ~950 lines removed, improving maintainability
-
-**Learnings for future iterations:**
-- Angular `standalone` is a decorator property, NOT an import - use `@Component({ standalone: true })`
-- When extracting icons, keep their associated styles in the new component
-- Chart components can be separated into individual files for better reusability
-- Mobile components tend to grow large due to embedded SVGs and styles - extract to separate components
-- Presentational components (icons, activity lists, quick actions) are good extraction targets
-- Use type-only imports sparingly with Angular decorators - `Input`, `Output`, `Component` need value imports
-- Barrel files (dashboard-chart-types.ts) help organize re-exports for cleaner imports
-
-## 2026-02-04 - US-007
-- Extracted business logic from 2 heavy backend services into dedicated helper services
-- **Resume Parser Service (apps/resume-parser-svc/src/parsing/parsing.service.ts):**
-  - Created FileProcessingService (~200 lines) - handles file validation, MIME detection, download coordination, hash generation
-  - Created ResumeEncryptionService (~150 lines) - handles PII encryption, organization access validation, security metadata creation
-  - Reduced parsing.service.ts from ~1158 to ~1090 lines by delegating to helpers
-  - Updated app.module.ts to provide new services
-- **Report Generator Service (apps/report-generator-svc/src/report-generator/report-generator.service.ts):**
-  - Created ReportDataService (~350 lines) - handles data aggregation, candidate formatting, job requirements extraction, recommendation generation
-  - Created LlmReportMapperService (~450 lines) - handles LLM data mapping between internal types and LLM input/output formats
-  - Reduced report-generator.service.ts from ~1094 to ~670 lines by delegating to helpers
-  - Updated app.module.ts to provide new services
-- Added unit tests for all 4 new helper services:
-  - file-processing.service.spec.ts (27 tests, all passing)
-  - resume-encryption.service.spec.ts (19 tests, all passing)
-  - report-data.service.spec.ts (17 tests, all passing)
-  - llm-report-mapper.service.spec.ts (5 tests, all passing)
-- Files changed: 8 new service files, 2 updated module files, 4 test files, 2 updated service files
-
-**Learnings for future iterations:**
-- Business logic extraction should focus on separable concerns with clear boundaries
-- File processing (validation, MIME detection, hashing) is a common pattern that can be shared across services
-- Security/encryption logic should be centralized to ensure consistent PII handling
-- Data aggregation and formatting are distinct responsibilities that benefit from separation
-- LLM data transformation/mapping is complex enough to warrant its own service
-- When adding new constructor dependencies to existing services, all unit tests need to be updated to mock the new services
-- Test files in sibling directories need correct relative import paths (e.g., `../report-generator/` vs `../../`)
-- Buffer.equals() method doesn't exist in Node.js - use byte-by-byte comparison or typed array comparison
-- Mocking infrastructure-shared modules requires careful handling of Error class constructors
-- Jest mocks in this project use type imports - need to mock actual classes with proper constructor signatures
-- Unused imports in test files cause TypeScript compilation errors during test runs
-- `noUnusedLocals: true` tsconfig setting enforces that all imports must be used
----
+## [2026-02-04] - US-001
+- Introduced shared DTO validation pipe in libs/infrastructure-shared
+- Created `DtoValidationPipe` class using class-validator and class-transformer
+- Added factory function `createDtoValidationPipe` for convenient instantiation
+- Exported from infrastructure-shared index for cross-service usage
+- Files changed:
+  - `libs/infrastructure-shared/src/pipes/dto-validation.pipe.ts` (new)
+  - `libs/infrastructure-shared/src/pipes/index.ts` (new)
+  - `libs/infrastructure-shared/src/index.ts` (updated)
+- **Learnings for future iterations:**
+  - Pattern: When creating options interfaces, separate internal required options from public optional options to avoid TypeScript Required<> type issues
+  - The app-gateway already has a `CustomValidationPipe` that can be migrated to the shared pipe in future stories (US-002)
+  - Typecheck with tsconfig.ci.json is the project's verification standard
