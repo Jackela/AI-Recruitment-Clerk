@@ -163,3 +163,19 @@ Started: 2026-02-04
   - No stale paths found in docs or scripts
   - Verification tasks are important to confirm existing standards before making unnecessary changes
 ---
+## [2026-02-04] - US-013
+- Created docs/TESTING_PATTERN.md with standard integration test patterns
+- Documented folder structure for unit, integration, and E2E tests
+- Defined naming conventions: .spec.ts, .integration.spec.ts, .e2e.spec.ts
+- Included examples from existing codebase (jobs.service.spec.ts, jd-extractor.nats.spec.ts, comprehensive-api-integration.e2e.spec.ts)
+- Added mock patterns for repositories, NATS services, and cache services
+- Files changed:
+  - `docs/TESTING_PATTERN.md` (new)
+- **Learnings for future iterations:**
+  - Unit tests are co-located with source files (.spec.ts next to .ts)
+  - Integration tests use .integration.spec.ts suffix in feature folders or integration/ subfolder
+  - E2E tests are in test/ subfolder organized by category (integration/, security/, performance/, production/)
+  - NATS integration tests follow a pattern: stub the NATS service, test event subscription and publishing
+  - Repository mocks should use jest.fn() for dynamic mocking in integration tests
+  - The testing pattern doc should reference actual examples from the codebase for clarity
+---
