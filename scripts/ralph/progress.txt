@@ -2,6 +2,11 @@
 Started: 2026-02-04
 ---
 
+## Codebase Patterns
+- E2E tests using `MongooseModule.forRoot()` need explicit mongoose connection cleanup in `afterAll`
+- `WriteWrap` requests in open-handle warnings are benign (async console writes) - filter them in `isStandardIoHandle`
+- When fixing E2E test teardown, close mongoose connection before `app.close()` to prevent pending operations
+
 ## 2026-02-04 - US-001
 - Created `docs/TECH_DEBT_REGISTER.md` with 20 technical debt items
 - Each item includes impact level, owner, description, and suggested fix
@@ -17,4 +22,23 @@ Started: 2026-02-04
 - TODO comments scattered across 97+ files should be tracked as tickets
 - Hard-coded configuration values in 190+ files need centralization via libs/configuration
 - Logging patterns are inconsistent (console.log vs structured logging)
+
+---
+
+## 2026-02-04 - US-002
+- Identified top 2 sources of open-handle warnings:
+  1. `WriteWrap` requests (benign async console writes)
+  2. Mongoose connections not explicitly closed in E2E tests
+- Fixed `jest.setup.ts` to filter WriteWrap in `isStandardIoHandle`
+- Added mongoose connection cleanup to `comprehensive-api-integration.e2e.spec.ts`
+- Added mongoose connection cleanup to `semantic-cache.e2e.spec.ts`
+- Tests now pass without open-handle warnings
+- Typecheck passes
+- Committed: feat: US-002 - Eliminate jest open-handle warnings
+
+**Learnings for future iterations:**
+- NestJS `app.close()` does NOT automatically close Mongoose connections
+- E2E tests using `MongooseModule.forRoot()` must explicitly close connections
+- `WriteWrap` is a Node.js internal for async stream writes (console/stdout) - not a real leak
+- Use `JEST_DEBUG_HANDLES=true` to debug handle types
 

@@ -200,6 +200,14 @@ const ignoredConsoleErrorPatterns = [
   'Circuit breaker triggered for auth-login',
   '[GridFsService]',
   '[ReportEventsController]',
+  // Usage limit service negative test errors
+  'Error recording usage:',
+  'Error adding bonus quota:',
+  'Error getting usage statistics:',
+  'Error analyzing usage patterns:',
+  'Error getting high risk IPs:',
+  // Resume parser service negative test errors
+  'Circuit breaker triggered for handleResumeSubmitted:',
 ];
 console.error = (...args: any[]) => {
   const message = args.join(' ');
