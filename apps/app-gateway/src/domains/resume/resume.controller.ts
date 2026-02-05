@@ -34,9 +34,11 @@ import { Permissions } from '../../auth/decorators/permissions.decorator';
 import type {
   ResumeUploadDto,
   ResumeStatusUpdateDto,
-  ResumeSearchDto} from '@ai-recruitment-clerk/shared-dtos';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { ResumeDto, ResumeAnalysisDto, ResumeSkillsAnalysisDto } from '@ai-recruitment-clerk/shared-dtos';
+  ResumeSearchDto,
+  ResumeDto,
+  ResumeAnalysisDto,
+  ResumeSkillsAnalysisDto,
+} from '@ai-recruitment-clerk/resume-dto';
 import type { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import type { ResumeService } from './resume.service';
 

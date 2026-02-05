@@ -221,3 +221,30 @@ Started: 2026-02-04
 - Error message gating in `jest.setup.ts` should use prefix matching to cover variations
 
 ---
+
+## 2026-02-04 - US-011
+- Refactored `parsing.service.spec.ts` to follow TESTING_PATTERN.md guidelines
+- Added test data factory (`createTestEventData`) following factory pattern best practices
+- Improved mock type safety: replaced `as unknown as` casts with `jest.Mocked<T>` types
+- Removed all `(service as any)` casts in favor of properly typed mocks
+- Added AAA (Arrange-Act-Assert) pattern comments to all tests
+- Organized tests with clear section headers following documented pattern:
+  - Happy Path Tests
+  - Negative Tests (File Download Failures, Text Extraction Failures, NATS Publishing Failures)
+  - Boundary Tests (File Size Limits)
+  - Edge Cases (Concurrent Processing, Special Characters)
+  - Assertion Specificity Improvements
+- Added JSDoc documentation for `buildService` factory
+- Fixed TypeScript errors in mock data (added required `phone` field to `contactInfo`)
+- All 12 tests pass
+- Committed: feat: US-011 - Apply documented test pattern to parsing.service.spec.ts
+
+**Learnings for future iterations:**
+- The `contactInfo` type requires all three fields: `name`, `email`, and `phone` (all can be null)
+- When using jest.Mocked<T>, the mock methods retain full type information
+- Test data factories with override pattern (`createTestEventData(overrides)`) reduce boilerplate and ensure consistent defaults
+- AAA pattern comments make test intent clearer even for simple tests
+- Section headers with `// ========` pattern improve test file navigation
+- Using `Array.from({ length: n }, ...)` instead of `Array(n).fill(null).map(...)` is more idiomatic
+
+---

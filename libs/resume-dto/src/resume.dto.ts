@@ -1,4 +1,16 @@
 /**
+ * @description Resume DTOs - Consolidated from shared-dtos and resume-processing-domain
+ *
+ * This library contains all Resume-related DTOs organized by domain:
+ * - Core Resume DTO (parsed resume structure)
+ * - Resume Analysis DTO (analysis results)
+ * - Resume Upload DTO (upload metadata)
+ * - Resume Status Update DTO (status transitions)
+ * - Resume Search DTO (search criteria)
+ * - Resume Skills Analysis DTO (detailed skills breakdown)
+ */
+
+/**
  * @description 从简历中解析出的结构化数据
  */
 export interface ResumeDTO {
@@ -111,3 +123,6 @@ export interface ResumeSkillsAnalysisDto {
     proficiency: 'basic' | 'conversational' | 'professional' | 'native';
   }[];
 }
+
+// Type aliases for backward compatibility
+export type ResumeDto = ResumeDTO;

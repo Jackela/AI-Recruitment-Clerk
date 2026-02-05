@@ -1,7 +1,13 @@
-import type { ResumeDTO } from '../models/resume.dto';
+/**
+ * Resume Event DTOs - NATS event contracts
+ *
+ * Contains all Resume-related NATS event DTOs.
+ */
+
+import type { ResumeDTO } from './resume.dto';
 
 /**
- * @description NATS 事件: job.resume.submitted
+ * @description NATS Event: job.resume.submitted
  */
 export interface ResumeSubmittedEvent {
   jobId: string;
@@ -11,7 +17,7 @@ export interface ResumeSubmittedEvent {
 }
 
 /**
- * @description NATS 事件: analysis.resume.parsed
+ * @description NATS Event: analysis.resume.parsed
  */
 export interface AnalysisResumeParsedEvent {
   jobId: string;
@@ -22,7 +28,7 @@ export interface AnalysisResumeParsedEvent {
 }
 
 /**
- * @description NATS 事件: job.resume.failed
+ * @description NATS Event: job.resume.failed
  */
 export interface JobResumeFailedEvent {
   jobId: string;
