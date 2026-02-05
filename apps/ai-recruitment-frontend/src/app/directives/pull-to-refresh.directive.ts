@@ -1,14 +1,12 @@
-import type {
-  DestroyRef,
-  OnInit} from '@angular/core';
 import {
+  DestroyRef,
   Directive,
   ElementRef,
   inject,
   input,
+  OnInit,
   output,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 /**
  * Pull-to-refresh directive.
@@ -83,7 +81,7 @@ export class PullToRefreshDirective implements OnInit {
     });
 
     // Clean up event listeners on destroy
-    takeUntilDestroyed()(this.destroyRef).subscribe(() => {
+    this.destroyRef.onDestroy(() => {
       document.removeEventListener('touchstart', handleTouchStart);
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleTouchEnd);
