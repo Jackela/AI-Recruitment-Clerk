@@ -13,6 +13,9 @@ Started: 2026-02-04
 - `passport-local` was commented out in `local.strategy.ts` - indicating migration away from local auth strategy
 - Config services in NestJS should be injectable providers, not singletons, for proper test mocking
 - When services add new constructor dependencies, update all test files that instantiate them directly
+- Nx library project references with `composite: true` enable cross-library type imports - needed when libraries import from each other
+- Use `export type` (not `export *`) for type-only re-exports between libraries to avoid circular dependency issues in TypeScript
+- When consolidating DTOs from shared-dtos to domain-specific libraries, maintain backward compatibility via type-only re-exports
 
 ## 2026-02-04 - US-001
 - Created `docs/TECH_DEBT_REGISTER.md` with 20 technical debt items
@@ -246,5 +249,33 @@ Started: 2026-02-04
 - AAA pattern comments make test intent clearer even for simple tests
 - Section headers with `// ========` pattern improve test file navigation
 - Using `Array.from({ length: n }, ...)` instead of `Array(n).fill(null).map(...)` is more idiomatic
+
+---
+
+## 2026-02-05 - US-012
+- Created `libs/resume-dto` library using `npx nx g @nx/js:lib` generator
+- Consolidated all Resume-related DTOs into new library:
+  - Core DTOs: `ResumeDTO`, `ResumeAnalysisDto`, `ResumeUploadDto`, `ResumeStatusUpdateDto`, `ResumeSearchDto`, `ResumeSkillsAnalysisDto`
+  - Event DTOs: `ResumeSubmittedEvent`, `AnalysisResumeParsedEvent`, `JobResumeFailedEvent`
+- Moved files from `libs/shared-dtos/src/models/resume.dto.ts` → `libs/resume-dto/src/resume.dto.ts`
+- Moved files from `libs/shared-dtos/src/events/resume-events.dto.ts` → `libs/resume-dto/src/resume-events.dto.ts`
+- Updated `libs/resume-processing-domain` to re-export from `@ai-recruitment-clerk/resume-dto`:
+  - `libs/resume-processing-domain/src/application/dtos/resume.dto.ts`
+  - `libs/resume-processing-domain/src/domain/domain-events/resume-events.ts`
+- Updated `libs/shared-dtos/src/index.ts` to provide backward-compatible type-only re-exports
+- Updated `apps/app-gateway/src/domains/resume/resume.controller.ts` to import from new library
+- Configured TypeScript project references with `composite: true` for cross-library type checking
+- Typecheck passes (2 pre-existing frontend errors from US-008)
+- Tests pass (23 pre-existing failures from US-008, no new failures)
+- Committed: feat: US-012 - Consolidate Resume DTOs under libs/resume-dto
+
+**Learnings for future iterations:**
+- When creating new libraries in Nx monorepos, the generator creates `tsconfig.json`, `tsconfig.lib.json`, `tsconfig.spec.json` with project references structure
+- Cross-library type imports require `composite: true` in both importing and exporting library tsconfigs
+- Use `export type { ... }` (not `export * from`) for type-only re-exports between libraries to avoid TypeScript project reference errors
+- The `outDir` in tsconfig.lib.json must match the `outputPath` in project.json for proper build output
+- Type-only re-exports in shared-dtos maintain backward compatibility while allowing gradual migration
+- The Resume DTOs were already partially moved to `resume-processing-domain` in previous work - this consolidation brings them all together
+- Import path `@ai-recruitment-clerk/resume-dto` was automatically added to `tsconfig.base.json` by the Nx generator
 
 ---

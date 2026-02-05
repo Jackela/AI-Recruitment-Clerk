@@ -180,8 +180,8 @@
         "npm run test passes"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": "Check for DTOs: ParsedResumeDto, ResumeAnalysisDto, etc."
+      "passes": true,
+      "notes": "Created libs/resume-dto with all Resume DTOs. Moved ResumeDTO, ResumeAnalysisDto, ResumeUploadDto, ResumeStatusUpdateDto, ResumeSearchDto, ResumeSkillsAnalysisDto, and event types (ResumeSubmittedEvent, AnalysisResumeParsedEvent, JobResumeFailedEvent). Resume-processing-domain now re-exports from resume-dto. Shared-dtos provides backward-compatible re-exports."
     },
     {
       "id": "US-013",
