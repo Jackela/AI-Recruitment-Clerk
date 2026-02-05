@@ -279,3 +279,27 @@ Started: 2026-02-04
 - Import path `@ai-recruitment-clerk/resume-dto` was automatically added to `tsconfig.base.json` by the Nx generator
 
 ---
+
+## 2026-02-05 - US-013
+- Created `libs/infrastructure-shared/src/logging/shared-logger.ts` as re-export module
+- Discovered existing `Logger` class in `libs/infrastructure-shared/src/logging/logger.service.ts` already had full feature support:
+  - Log levels: log (info), warn, error, debug, verbose
+  - LogContext metadata: requestId, service name, traceId, userId, operation, and custom fields
+- Applied shared logger to `apps/scoring-engine-svc/src/scoring.service.ts`:
+  - Added `private readonly logger = new Logger(ScoringEngineService.name)`
+  - Replaced console.error with structured logging including operation context and correlation data
+- Applied shared logger to `apps/scoring-engine-svc/src/scoring.service.contracts.ts`:
+  - Added `private readonly logger = new Logger(ScoringEngineServiceContracts.name)`
+  - Replaced console.error with structured logging
+- Updated exports in `libs/infrastructure-shared/src/index.ts` and `src/logging/index.ts`
+- All 183 scoring-engine-svc tests pass
+- Typecheck passes (2 pre-existing frontend errors from US-008)
+- Committed: feat: US-013 - Standardize logging in scoring-engine-svc with shared logger
+
+**Learnings for future iterations:**
+- The existing Logger class in infrastructure-shared was already comprehensive and met all requirements
+- The shared-logger.ts file serves as a semantic entry point for services to import from
+- When using Logger.error(), the second parameter can be an Error object, and the third parameter is LogContext for metadata
+- LogContext supports arbitrary key-value pairs for extensibility beyond predefined fields
+- ScoringConfidenceService already used the Logger (since US-010), showing consistent adoption pattern
+---
