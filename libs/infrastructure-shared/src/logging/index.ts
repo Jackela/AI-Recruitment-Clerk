@@ -6,3 +6,5 @@ export {
   type LogEntry,
   type LoggerOptions,
 } from './logger.service';
+
+export { sharedLogger } from './shared-logger';

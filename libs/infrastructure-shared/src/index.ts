@@ -1084,6 +1084,7 @@ export {
   Logger,
   createLogger,
   logger,
+  sharedLogger,
   type LogContext,
   type LogEntry,
   type LoggerOptions,
