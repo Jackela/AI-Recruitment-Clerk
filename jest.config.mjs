@@ -23,4 +23,9 @@ const baseProjects = [
 export default {
   projects: baseProjects,
   passWithNoTests: true,
+  // Coverage aggregation configuration
+  coverageDirectory: '<rootDir>/coverage',
+  collectCoverage: false, // Set to false by default, enable via --coverage flag
+  coverageReporters: ['json-summary', 'json', 'lcov', 'text'],
+  reporters: ['default'],
 };
