@@ -403,3 +403,31 @@ Started: Thu Feb  5 20:36:11 CST 2026
   - Contextual help can be triggered on-demand with showContextualHelp(target, content)
   - Zone.js intercepts setTimeout in Angular tests - avoid async done callbacks when possible
 ---
+
+## [2026-02-06] - US-008b
+- Added comprehensive tests for redis-token-blacklist.service.ts
+- Created redis-token-blacklist.service.spec.ts with 36 tests covering:
+  - Token blacklisting (5 tests): blacklist token, backwards compatible addToken, store record with data, multiple tokens for same user, different expiration times
+  - Token checking (7 tests): non-blacklisted token, blacklisted token, expired token, auto cleanup on check, remove expired token, backwards compatible isBlacklisted, empty token, special characters
+  - Token expiration (4 tests): auto cleanup on check, manual cleanup, clean only expired not valid, multiple expired tokens, return 0 when no expired
+  - User blacklisting (4 tests): blacklist all user tokens, check if user blacklisted, non-blacklisted user, count only user's tokens, return 0 for user with no tokens
+  - Metrics and health check (4 tests): return correct metrics, healthy status, accurate counts, track last cleanup time
+  - Edge cases and error handling (7 tests): empty token/userId, negative expiration, very long token strings, special characters in reason, concurrent blacklist operations, unicode characters
+  - Coverage verification (3 tests): all public methods, main scenarios workflow, backwards compatibility methods
+- All 36 tests passing, coverage exceeds 60% requirement
+- Files changed:
+  - apps/app-gateway/src/security/redis-token-blacklist.service.spec.ts (created, 513 lines)
+- **Learnings for future iterations:**
+  - RedisTokenBlacklistService uses in-memory storage (Map) for blacklisted tokens, not actual Redis
+  - TokenRecord includes: token, userId, blacklistedAt, expiresAt, reason
+  - Expiration is stored as milliseconds (exp * 1000 conversion happens in blacklistToken)
+  - Expired tokens are automatically removed when checking via isTokenBlacklisted
+  - The service has backwards compatible aliases: isBlacklisted() for isTokenBlacklisted(), addToken() for blacklistToken()
+  - User blacklisting uses a Set to track blacklisted users (blacklistedUsers)
+  - blacklistAllUserTokens() counts existing tokens for the user and adds to blacklistedUsers set
+  - healthCheck() returns status, tokenStore type ('in-memory'), and counts
+  - getMetrics() returns blacklistedTokensCount, blacklistedUsersCount, and lastCleanup timestamp
+  - cleanup() method iterates through all tokens to remove expired ones
+  - The service is a simplified implementation - real Redis would have different persistence
+  - Concurrent operations are safe since Map and Set operations are synchronous
+---
