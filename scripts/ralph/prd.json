@@ -161,8 +161,8 @@
         "npm run test passes"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created report-templates.service.spec.ts with 30 tests covering generatePdfReport, PDF layout validation, and PDF generation with charts. Fixed GridFsService import issue in report-templates.service.ts."
     },
     {
       "id": "US-008a",
