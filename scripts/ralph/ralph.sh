@@ -101,8 +101,8 @@ for i in $(seq 1 $MAX_ITERATIONS); do
     OUTPUT=$({ cd "$PROJECT_ROOT" && { echo "Execute Ralph workflow - check scripts/ralph/prd.json for pending stories"; echo "/exit"; } | claude --dangerously-skip-permissions --print 2>&1 | tee /dev/stderr; } ) || true
   fi
   
-  # Check for completion signal
-  if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
+  # Check for completion signal - must be on its own line (not embedded in other text)
+  if echo "$OUTPUT" | grep -q "^<promise>COMPLETE</promise>$"; then
     echo ""
     echo "Ralph completed all tasks!"
     echo "Completed at iteration $i of $MAX_ITERATIONS"

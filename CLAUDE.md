@@ -204,6 +204,8 @@ If ALL stories are complete and passing, reply with:
 
 If there are still stories with `passes: false`, end your response normally (another iteration will pick up the next story).
 
+**CRITICAL:** The string `<promise>COMPLETE</promise>` is a termination signal for the Ralph script. NEVER output this string unless you are absolutely certain ALL stories are complete. Do NOT mention it in summaries, explanations, jokes, or self-referential comments. The script uses regex matching and will terminate immediately upon seeing this text.
+
 ## Important
 
 - Work on ONE story per iteration
