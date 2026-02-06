@@ -174,3 +174,18 @@ Started: Thu Feb  5 20:36:11 CST 2026
   - The 10+ years threshold for Expert and 5+ years threshold for Senior override title indicators
   - Entry level condition is `hasEntryIndicators || totalYears <= 2` (2 years or less triggers Entry)
 ---
+
+## [2026-02-06] - Ralph Script False-Positive Fix (Bugfix)
+- Fixed Ralph script exiting early when Claude output "<promise>COMPLETE</promise>" in a joke
+- Root cause: Claude said "COMPLETE - Just kidding" and grep matched it anywhere in output
+- Fix 1 (ralph.sh): Changed grep from loose match to strict line match: `^<promise>COMPLETE</promise>$`
+- Fix 2 (CLAUDE.md): Added CRITICAL warning about not mentioning COMPLETE in jokes/comments
+- Files changed:
+  - scripts/ralph/ralph.sh
+  - CLAUDE.md
+- **Learnings for future iterations:**
+  - Signal strings for automation must be on their own line, not embedded in other text
+  - AI models may "joke" about termination signals, triggering false positives
+  - Use `^...$` anchors in grep to match whole lines only
+  - Claude needs explicit warnings NOT to mention signal strings in any context
+---
