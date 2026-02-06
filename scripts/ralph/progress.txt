@@ -500,3 +500,25 @@ Started: Thu Feb  5 20:36:11 CST 2026
   - Port 4200 is used for static server, 4202 was the old dev server port
   - The mock API server still starts in global-setup.ts for test data
 ---
+
+## [2026-02-06] - US-010
+- Fixed dependency security scan issues
+- Ran npm audit fix which updated 37 packages with security fixes
+- Production dependencies: 0 vulnerabilities
+- All dependencies: 2 high-severity dev-only vulnerabilities (accepted risks)
+- Documented accepted risks in scripts/ralph/PR-DESCRIPTION.md
+- Files changed:
+  - package-lock.json (37 packages updated with security fixes)
+  - scripts/ralph/PR-DESCRIPTION.md (added security scan section)
+  - scripts/ralph/prd.json (set US-010 passes: true)
+- **Learnings for future iterations:**
+  - npm audit must use official npmjs.org registry when npmmirror.com doesn't support audit endpoint
+  - Use `npm audit --omit=dev` to check only production dependencies (0 vulnerabilities found)
+  - Use `npm audit --registry=https://registry.npmjs.org/` to bypass mirror registry limitations
+  - @modelcontextprotocol/sdk vulnerability is dev-only (via Angular CLI), not used in application code
+  - npm bundled dependencies (@isaacs/brace-expansion, tar) cannot be fixed by npm audit fix
+  - `npm audit fix` updates packages without breaking changes (37 packages updated)
+  - `npm audit fix --force` would upgrade @angular/cli to 21.1.3 (breaking change)
+  - Always run typecheck and test after npm audit fix to verify no regressions
+  - Security vulnerabilities in dev-only dependencies are acceptable if not used in production code
+---
