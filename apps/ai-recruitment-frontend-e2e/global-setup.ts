@@ -7,52 +7,9 @@ import {
 } from './test-environment';
 import fs from 'fs';
 import path from 'path';
-import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-function startDevServer(port: number): void {
-  const repoRoot = path.resolve(__dirname, '..', '..');
-  const pidFile = path.join(__dirname, '.devserver.pid');
-
-  if (fs.existsSync(pidFile)) {
-    const existingPid = Number.parseInt(
-      fs.readFileSync(pidFile, 'utf-8').trim(),
-      10,
-    );
-    if (!Number.isNaN(existingPid)) {
-      try {
-        process.kill(existingPid, 0);
-        console.log(`ℹ️ Dev server already running (pid ${existingPid}).`);
-        return;
-      } catch {
-        fs.rmSync(pidFile, { force: true });
-      }
-    } else {
-      fs.rmSync(pidFile, { force: true });
-    }
-  }
-
-  const command = `npx nx run ai-recruitment-frontend:serve:test --port ${port} --host 0.0.0.0`;
-  const child =
-    process.platform === 'win32'
-      ? spawn('cmd', ['/c', command], {
-          cwd: repoRoot,
-          detached: true,
-          stdio: 'ignore',
-        })
-      : spawn('sh', ['-c', command], {
-          cwd: repoRoot,
-          detached: true,
-          stdio: 'ignore',
-        });
-
-  if (child.pid) {
-    fs.writeFileSync(pidFile, String(child.pid));
-  }
-  child.unref();
-}
 
 async function globalSetup(): Promise<void> {
   console.log('🚀 Starting E2E test environment setup...');
@@ -71,13 +28,9 @@ async function globalSetup(): Promise<void> {
   }
 
   const useRealAPI = process.env.E2E_USE_REAL_API === 'true';
-  const manualDevServer = process.env.E2E_MANUAL_DEV_SERVER === 'true';
-  const skipWebServer =
-    process.env.E2E_SKIP_WEBSERVER === 'true' ||
-    process.env.E2E_USE_REAL_API === 'true' ||
-    manualDevServer;
+  const skipWebServer = process.env.E2E_SKIP_WEBSERVER === 'true' || useRealAPI;
+
   let mockServerPort: number | null = null;
-  let devServerPort: number | null = null;
 
   if (!useRealAPI) {
     console.log('🚀 Starting Mock API Server with dynamic port allocation...');
@@ -166,107 +119,21 @@ async function globalSetup(): Promise<void> {
     }
   }
 
-  // Handle dev server with dynamic port allocation
-  if (!skipWebServer || manualDevServer) {
-    console.log('🎯 Configuring development server...');
-
-    try {
-      if (process.env.DEV_SERVER_PORT) {
-        devServerPort = Number.parseInt(process.env.DEV_SERVER_PORT, 10);
-        console.log(
-          `📝 Dev server port preconfigured via env: ${devServerPort}`,
-        );
-      } else {
-        // Try to allocate dev server port dynamically
-        devServerPort = await portManager.allocatePort('dev-server');
-        process.env.DEV_SERVER_PORT = devServerPort.toString();
-      }
-
-      process.env.PLAYWRIGHT_BASE_URL = `http://localhost:${devServerPort}`;
-
-      console.log(`📝 Dev server will use port ${devServerPort}`);
-    } catch (error) {
-      console.warn(
-        '⚠️ Could not allocate dev server port, using default:',
-        error,
-      );
-
-      // Fall back to checking if the default port is available
-      const defaultPort = 4202;
-      const isDefaultAvailable = await portManager.isPortAvailable(defaultPort);
-
-      if (!isDefaultAvailable) {
-        console.warn(
-          `⚠️ Default dev server port ${defaultPort} is occupied, attempting cleanup...`,
-        );
-        await portManager.forceKillPort(defaultPort);
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-      }
-
-      devServerPort = Number.parseInt(
-        process.env.DEV_SERVER_PORT ?? defaultPort.toString(),
-        10,
-      );
-      process.env.DEV_SERVER_PORT = devServerPort.toString();
-      process.env.PLAYWRIGHT_BASE_URL = `http://localhost:${devServerPort}`;
-    }
-
-    // Manual dev server startup if Playwright webServer is disabled.
-    if (manualDevServer) {
-      const devServerUrl =
-        process.env.PLAYWRIGHT_BASE_URL || `http://localhost:${devServerPort}`;
-
-      console.log(
-        '🧭 Manual dev server mode enabled; starting dev server process...',
-      );
-      startDevServer(devServerPort);
-
-      console.log(`⏳ Waiting for dev server at ${devServerUrl} to be ready...`);
-      const isServerReady = await waitForServerReady(devServerUrl, 120);
-      if (!isServerReady) {
-        throw new Error(
-          `Dev server at ${devServerUrl} did not become ready in time`,
-        );
-      }
-
-      console.log('✅ Dev server is ready and responsive');
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-    } else if (!skipWebServer) {
-      console.log(
-        '✅ Playwright webServer will manage dev server readiness checks.',
-      );
-    }
-  } else {
+  // Dev server is now managed by Playwright's webServer configuration
+  // No need for manual startup anymore
+  if (skipWebServer) {
     // External server mode
-    delete process.env.DEV_SERVER_PORT;
     const externalBaseUrl =
       process.env.PLAYWRIGHT_BASE_URL ||
       process.env.E2E_EXTERNAL_BASE_URL ||
       'http://localhost:4200';
-    process.env.PLAYWRIGHT_BASE_URL = externalBaseUrl;
     console.log(
       `🎯 Skipping dev server startup. Using external base URL: ${externalBaseUrl}`,
     );
-  }
-
-  if (!skipWebServer && !manualDevServer) {
-    // Optional readiness check if using external or pre-started server
-    const devServerUrl =
-      process.env.PLAYWRIGHT_BASE_URL || `http://localhost:${devServerPort}`;
-    console.log(`⏳ Waiting for dev server at ${devServerUrl} to be ready...`);
-
-    const isServerReady = await waitForServerReady(devServerUrl, 60);
-    if (!isServerReady) {
-      console.error(
-        `❌ Dev server at ${devServerUrl} is not responding after 60 seconds`,
-      );
-      console.error(
-        '   This may cause Firefox connection issues during parallel test execution',
-      );
-    } else {
-      console.log(`✅ Dev server is ready and responsive`);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-    }
+  } else {
+    console.log(
+      '✅ Playwright webServer will manage dev server startup and readiness checks.',
+    );
   }
 
   // Final health check for all services

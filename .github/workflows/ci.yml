@@ -83,6 +83,8 @@ jobs:
           restore-keys: |
             pw-${{ runner.os }}-
       - run: npm ci
+      - name: Build frontend for E2E tests
+        run: npx nx build ai-recruitment-frontend --configuration=production
       - name: Install Playwright browsers
         run: npx playwright install --with-deps || npx playwright install
       - run: npm run test:e2e
