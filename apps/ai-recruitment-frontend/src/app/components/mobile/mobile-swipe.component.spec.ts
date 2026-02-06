@@ -1435,4 +1435,431 @@ describe('MobileSwipeComponent', () => {
       });
     });
   });
+
+  describe('Action Trigger Tests', () => {
+    beforeEach(() => {
+      component.ngOnInit();
+    });
+
+    describe('Left Swipe Action Reveal', () => {
+      it('should reveal actions when left swipe exceeds threshold', () => {
+        component.swipeThreshold = 80;
+        const startX = 200;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Swipe left beyond threshold (100 pixels)
+        const moveTouch = createMockTouch(1, 100, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        const endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+
+        // Actions should be revealed
+        expect(component.actionsVisible).toBe(true);
+        expect(component.translateX).toBe(-component['maxSwipeDistance']);
+      });
+
+      it('should not reveal actions when left swipe is below threshold', () => {
+        component.swipeThreshold = 80;
+        const startX = 200;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Swipe left but below threshold (50 pixels)
+        const moveTouch = createMockTouch(1, 150, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        const endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+
+        // Actions should not be revealed
+        expect(component.actionsVisible).toBe(false);
+        expect(component.translateX).toBe(0);
+      });
+
+      it('should reveal actions at exactly threshold + 1 pixel', () => {
+        component.swipeThreshold = 80;
+        const startX = 200;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Swipe exactly threshold + 1 (81 pixels)
+        const moveTouch = createMockTouch(1, 119, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        const endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+
+        expect(component.actionsVisible).toBe(true);
+      });
+
+      it('should support left swipe with mouse events on mobile', () => {
+        component.swipeThreshold = 80;
+        Object.defineProperty(window, 'innerWidth', {
+          writable: true,
+          configurable: true,
+          value: 375,
+        });
+
+        const mouseDown = createMockMouseEvent('mousedown', 200, 100);
+        component.onMouseDown(mouseDown);
+
+        const mouseMove = createMockMouseEvent('mousemove', 100, 100);
+        component.onMouseMove(mouseMove);
+
+        const mouseUp = createMockMouseEvent('mouseup', 100, 100);
+        component.onMouseUp(mouseUp);
+
+        expect(component.actionsVisible).toBe(true);
+        expect(component.translateX).toBe(-component['maxSwipeDistance']);
+      });
+    });
+
+    describe('Right Swipe Action Handling', () => {
+      it('should not reveal actions on right swipe', () => {
+        component.swipeThreshold = 80;
+        const startX = 200;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Swipe right (negative deltaX)
+        const moveTouch = createMockTouch(1, 300, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        const endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+
+        // Right swipe should not reveal actions
+        expect(component.actionsVisible).toBe(false);
+        expect(component.translateX).toBe(0);
+      });
+
+      it('should reset to zero on right swipe after left swipe', () => {
+        component.swipeThreshold = 80;
+        const startX = 200;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // First swipe left
+        let moveTouch = createMockTouch(1, 150, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+        expect(component.translateX).toBeLessThan(0);
+
+        // Then swipe right past start
+        moveTouch = createMockTouch(1, 250, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        // Should reset to zero
+        expect(component.translateX).toBe(0);
+        expect(component.actionsVisible).toBe(false);
+      });
+
+      it('should ignore right swipe regardless of distance', () => {
+        const startX = 200;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Swipe right a large distance
+        const moveTouch = createMockTouch(1, 500, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        const endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+
+        expect(component.translateX).toBe(0);
+        expect(component.actionsVisible).toBe(false);
+      });
+    });
+
+    describe('Action Emission via EventEmitter', () => {
+      it('should emit swipeAction event when action button is clicked', () => {
+        const action: SwipeAction = {
+          id: 'archive',
+          label: 'Archive',
+          icon: 'test-icon',
+          color: 'primary',
+        };
+        const testItem = { id: 'item-123', name: 'Test Item' };
+        component.item = testItem;
+
+        const swipeActionSpy = jest.spyOn(component.swipeAction, 'emit');
+
+        component.onActionClick(action);
+
+        expect(swipeActionSpy).toHaveBeenCalledTimes(1);
+        expect(swipeActionSpy).toHaveBeenCalledWith({
+          action,
+          item: testItem,
+        });
+      });
+
+      it('should include correct action data in emitted event', () => {
+        const action: SwipeAction = {
+          id: 'delete',
+          label: 'Delete',
+          icon: 'M1,2V4H3V2',
+          color: 'danger',
+          width: 100,
+        };
+
+        const swipeActionSpy = jest.spyOn(component.swipeAction, 'emit');
+        let emittedEvent: SwipeEvent | undefined;
+
+        component.swipeAction.subscribe((event: SwipeEvent) => {
+          emittedEvent = event;
+        });
+
+        component.onActionClick(action);
+
+        expect(emittedEvent).toBeDefined();
+        expect(emittedEvent?.action).toEqual(action);
+        expect(emittedEvent?.action.id).toBe('delete');
+        expect(emittedEvent?.action.label).toBe('Delete');
+        expect(emittedEvent?.action.color).toBe('danger');
+        expect(emittedEvent?.action.width).toBe(100);
+      });
+
+      it('should include item data in emitted event', () => {
+        const action: SwipeAction = {
+          id: 'edit',
+          label: 'Edit',
+          icon: 'test',
+          color: 'warning',
+        };
+        const testItem = { id: 'abc-123', title: 'Test', value: 42 };
+        component.item = testItem;
+
+        const swipeActionSpy = jest.spyOn(component.swipeAction, 'emit');
+        let emittedEvent: SwipeEvent | undefined;
+
+        component.swipeAction.subscribe((event: SwipeEvent) => {
+          emittedEvent = event;
+        });
+
+        component.onActionClick(action);
+
+        expect(emittedEvent?.item).toBe(testItem);
+        expect(emittedEvent?.item).toEqual({ id: 'abc-123', title: 'Test', value: 42 });
+      });
+
+      it('should allow multiple subscribers to swipeAction event', () => {
+        const action: SwipeAction = {
+          id: 'share',
+          label: 'Share',
+          icon: 'test',
+          color: 'success',
+        };
+
+        const subscriber1Spy = jest.fn();
+        const subscriber2Spy = jest.fn();
+
+        component.swipeAction.subscribe(subscriber1Spy);
+        component.swipeAction.subscribe(subscriber2Spy);
+
+        component.onActionClick(action);
+
+        expect(subscriber1Spy).toHaveBeenCalled();
+        expect(subscriber2Spy).toHaveBeenCalled();
+      });
+    });
+
+    describe('Threshold-Based Triggering', () => {
+      it('should require swipe distance greater than threshold to reveal actions', () => {
+        component.swipeThreshold = 100;
+
+        const startTouch = createMockTouch(1, 200, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Swipe exactly 100 pixels (not greater than threshold)
+        const moveTouch = createMockTouch(1, 100, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        const endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+
+        // Should not reveal actions (needs > threshold, not >=)
+        expect(component.actionsVisible).toBe(false);
+        expect(component.translateX).toBe(0);
+      });
+
+      it('should reveal actions when swipe is just above threshold', () => {
+        component.swipeThreshold = 100;
+
+        const startTouch = createMockTouch(1, 200, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Swipe 101 pixels (just above threshold)
+        const moveTouch = createMockTouch(1, 99, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        const endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+
+        expect(component.actionsVisible).toBe(true);
+        expect(component.translateX).toBe(-component['maxSwipeDistance']);
+      });
+
+      it('should show partial visibility when above half threshold', () => {
+        component.swipeThreshold = 100;
+
+        const startTouch = createMockTouch(1, 200, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Swipe 51 pixels (above half threshold of 50)
+        const moveTouch = createMockTouch(1, 149, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        // During swipe, actionsVisible should be true above half threshold
+        expect(component.actionsVisible).toBe(true);
+      });
+
+      it('should not show partial visibility when below half threshold', () => {
+        component.swipeThreshold = 100;
+
+        const startTouch = createMockTouch(1, 200, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Swipe 49 pixels (below half threshold of 50)
+        const moveTouch = createMockTouch(1, 151, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        expect(component.actionsVisible).toBe(false);
+      });
+
+      it('should respect custom threshold values', () => {
+        const thresholds = [40, 60, 100, 150];
+
+        thresholds.forEach((threshold) => {
+          component.resetSwipe();
+          component.swipeThreshold = threshold;
+
+          const startTouch = createMockTouch(1, 300, 100);
+          component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+          // Swipe just above threshold
+          const moveTouch = createMockTouch(1, 300 - threshold - 1, 100);
+          component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+          const endEvent = createMockTouchEvent('touchend', []);
+          component.onTouchEnd(endEvent);
+
+          expect(component.actionsVisible).toBe(true);
+        });
+      });
+
+      it('should snap back to zero when swipe is below threshold', () => {
+        component.swipeThreshold = 80;
+
+        const startTouch = createMockTouch(1, 200, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Swipe below threshold
+        const moveTouch = createMockTouch(1, 130, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        const endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+
+        // Should snap back to original position
+        expect(component.translateX).toBe(0);
+        expect(component.actionsVisible).toBe(false);
+      });
+
+      it('should snap to max distance when swipe exceeds threshold', () => {
+        component.swipeThreshold = 80;
+
+        const startTouch = createMockTouch(1, 200, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Swipe beyond threshold
+        const moveTouch = createMockTouch(1, 100, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        const endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+
+        // Should snap to full reveal position
+        expect(component.translateX).toBe(-component['maxSwipeDistance']);
+        expect(component.actionsVisible).toBe(true);
+      });
+    });
+
+    describe('Action Click After Swipe', () => {
+      it('should reset swipe state after action click', () => {
+        const action: SwipeAction = {
+          id: 'archive',
+          label: 'Archive',
+          icon: 'test',
+          color: 'primary',
+        };
+
+        // Simulate a successful swipe
+        component.translateX = -160;
+        component.actionsVisible = true;
+
+        component.onActionClick(action);
+
+        expect(component.translateX).toBe(0);
+        expect(component.actionsVisible).toBe(false);
+      });
+
+      it('should emit action event after successful swipe', () => {
+        const action: SwipeAction = {
+          id: 'delete',
+          label: 'Delete',
+          icon: 'test',
+          color: 'danger',
+        };
+        const testItem = { id: 'test-id' };
+        component.item = testItem;
+
+        // First do a successful swipe
+        component.swipeThreshold = 80;
+        const startTouch = createMockTouch(1, 200, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+        const moveTouch = createMockTouch(1, 100, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+        const endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+
+        expect(component.actionsVisible).toBe(true);
+
+        // Then click the action
+        const swipeActionSpy = jest.spyOn(component.swipeAction, 'emit');
+        component.onActionClick(action);
+
+        expect(swipeActionSpy).toHaveBeenCalledWith({
+          action,
+          item: testItem,
+        });
+      });
+
+      it('should work with programmatic showActions', () => {
+        const action: SwipeAction = {
+          id: 'edit',
+          label: 'Edit',
+          icon: 'test',
+          color: 'warning',
+        };
+
+        // Show actions programmatically
+        component.showActions();
+        expect(component.actionsVisible).toBe(true);
+
+        // Click action
+        const swipeActionSpy = jest.spyOn(component.swipeAction, 'emit');
+        component.onActionClick(action);
+
+        expect(swipeActionSpy).toHaveBeenCalled();
+        expect(component.actionsVisible).toBe(false);
+      });
+    });
+  });
 });
