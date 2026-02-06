@@ -291,3 +291,26 @@ Started: Thu Feb  5 20:36:11 CST 2026
   - When non-Error exceptions are thrown (like strings), the error message becomes 'undefined' due to the error handling
   - For batch error handling, failed parsing results in error field set to first validation error or 'Processing failed'
 ---
+
+## [2026-02-06] - US-006b
+- Added comprehensive tests for JD parsing flow in jd-events.controller.ts
+- Created 31 tests covering all acceptance criteria:
+  - Successful JD parsing (9 tests): valid payload processing, logging, processing time, extraction method, confidence score, complete/minimal data, special characters, long text
+  - Error handling (10 tests): missing jobId/jdText, LLM service failures, network errors, malformed JD text, publish failures, input size context, non-Error exceptions, null/undefined payloads
+  - Edge cases and validation (7 tests): empty/whitespace jdText, special characters in jobId, very long jobId, unicode characters, concurrent submissions, retry attempt
+  - Integration scenarios (4 tests): standard tech job posting, executive level, entry-level, remote-first job postings
+- All 31 tests passing, typecheck and lint passing
+- Files changed:
+  - apps/jd-extractor-svc/src/app/jd-events.controller.spec.ts (extended with 777 new lines, total 801 lines)
+- **Learnings for future iterations:**
+  - JD parsing is handled by JdEventsController.handleJobSubmitted which is the equivalent of "handleJDParsed" for JDs
+  - The controller uses JdExtractorNatsService for publishing events and LlmService for extraction
+  - LLM service uses Gemini AI with confidence 0.95 and extractionMethod 'gemini-ai'
+  - The controller validates payload for jobId and jdText presence before processing
+  - Error events are published with context: stage (jd-extraction), inputSize, retryAttempt (always 1)
+  - Processing time is measured and included in published events
+  - The controller has a bug where it tries to access payload.jobId in error logging without checking if payload exists first (throws for null/undefined)
+  - JdDTO structure includes: requirements (technical, soft, experience, education), responsibilities, benefits, company (name, industry, size)
+  - Test mock setup uses jest.Mocked<T> for proper typing of mocked services
+  - Logger.prototype.log and Logger.prototype.error need to be mocked to prevent console output during tests
+---
