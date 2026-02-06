@@ -314,3 +314,32 @@ Started: Thu Feb  5 20:36:11 CST 2026
   - Test mock setup uses jest.Mocked<T> for proper typing of mocked services
   - Logger.prototype.log and Logger.prototype.error need to be mocked to prevent console output during tests
 ---
+
+## [2026-02-06] - US-007a
+- Enabled and fixed existing test suite for report-generator.service.ts
+- The test file existed but was being ignored by jest.config.ts testPathIgnorePatterns
+- Fixed import statements in report-generator.service.ts: changed `import type` to value imports for LlmService, GridFsService, ReportRepository (required for NestJS dependency injection)
+- Fixed schema type annotations in report.schema.ts: added explicit `type` property to all @Prop decorators for ScoreBreakdown, MatchingSkill, ReportRecommendation, and Report classes
+- Fixed test setup to properly mock ReportDataService and LlmReportMapperService dependencies
+- Created dynamic mock implementations that respond to input data rather than returning static values
+- Fixed type issues in related test files (report-data.service.spec.ts, llm-report-mapper.service.spec.ts) by adding `as const` assertions for literal types
+- All 86 tests in report-generator-svc now passing (32 existing + 54 from other test files)
+- Tests cover: handleMatchScored (6 tests), generateReport (4 tests), generateCandidateComparison (4 tests), generateInterviewGuide (3 tests), getReportAnalytics (2 tests), healthCheck (3 tests), error handling (10 tests)
+- Files changed:
+  - apps/report-generator-svc/jest.config.ts (removed testPathIgnorePatterns)
+  - apps/report-generator-svc/src/report-generator/report-generator.service.spec.ts (updated with proper DI mocks)
+  - apps/report-generator-svc/src/report-generator/report-generator.service.ts (changed imports from type-only to value imports)
+  - apps/report-generator-svc/src/schemas/report.schema.ts (added explicit type annotations to @Prop decorators)
+  - apps/report-generator-svc/src/report-helpers/report-data.service.spec.ts (added `as const` for literal types)
+  - apps/report-generator-svc/src/report-helpers/llm-report-mapper.service.spec.ts (added `as const` for literal types)
+- **Learnings for future iterations:**
+  - NestJS dependency injection requires services to be imported as values (not `import type`) when used as constructor parameters
+  - Mongoose @Prop decorators need explicit `type` property for TypeScript to infer correct types (e.g., `@Prop({ type: Number })` instead of `@Prop()`)
+  - The report-generator.service has dependencies: LlmService, GridFsService, ReportRepository, ReportDataService, LlmReportMapperService
+  - Mock functions in beforeEach should be dynamic (using jest.fn().mockImplementation()) to properly simulate different inputs
+  - The formatCandidateForComparison mock should return data based on the input report's resumeId, skills, and recommendation
+  - The formatForInterviewGuide mock needs to handle optional fields like scoreBreakdown, recommendation, strengths, concerns
+  - Test helpers like createMockReportDocument support overrides via spread operator for customizing mock data
+  - The service uses ErrorCorrelationManager.getContext() for error tracing correlation
+  - ReportGeneratorException is used with structured error details including correlationId
+---
