@@ -993,4 +993,446 @@ describe('MobileSwipeComponent', () => {
       expect(component.translateX).toBe(-160);
     });
   });
+
+  describe('Swipe Detection Logic', () => {
+    beforeEach(() => {
+      component.ngOnInit();
+    });
+
+    describe('Horizontal Swipe Detection (Left/Right)', () => {
+      it('should detect left swipe (moving content left)', () => {
+        const startTouch = createMockTouch(1, 200, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Move left (currentX < startX, deltaX positive)
+        const moveTouch = createMockTouch(1, 100, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        expect(component.translateX).toBeLessThan(0); // Content moves left
+      });
+
+      it('should detect right swipe attempt (moving content right)', () => {
+        const startTouch = createMockTouch(1, 100, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Move right (currentX > startX, deltaX negative)
+        const moveTouch = createMockTouch(1, 200, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        // Right swipe is ignored, content stays at 0
+        expect(component.translateX).toBe(0);
+      });
+
+      it('should only allow left swipe direction', () => {
+        const startTouch = createMockTouch(1, 200, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Try moving right first
+        let moveTouch = createMockTouch(1, 250, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+        expect(component.translateX).toBe(0);
+
+        // Then move left
+        moveTouch = createMockTouch(1, 100, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+        expect(component.translateX).toBeLessThan(0);
+      });
+
+      it('should handle left swipe with varying distances', () => {
+        const testDistances = [10, 30, 50, 80, 100, 150];
+        const startX = 300;
+
+        testDistances.forEach((distance) => {
+          component.resetSwipe();
+
+          const startTouch = createMockTouch(1, startX, 100);
+          component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+          const moveTouch = createMockTouch(1, startX - distance, 100);
+          component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+          // translateX should be negative of distance (capped at maxSwipeDistance)
+          const expectedTranslateX = -Math.min(distance, component['maxSwipeDistance']);
+          expect(component.translateX).toBe(expectedTranslateX);
+        });
+      });
+
+      it('should handle swipe at different screen positions', () => {
+        const startXPositions = [50, 200, 350, 500];
+        const swipeDistance = 100;
+
+        startXPositions.forEach((startX) => {
+          component.resetSwipe();
+
+          const startTouch = createMockTouch(1, startX, 100);
+          component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+          const moveTouch = createMockTouch(1, startX - swipeDistance, 100);
+          component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+          expect(component.translateX).toBe(-swipeDistance);
+        });
+      });
+
+      it('should reject right swipe regardless of position', () => {
+        const startXPositions = [50, 200, 350, 500];
+
+        startXPositions.forEach((startX) => {
+          component.resetSwipe();
+
+          const startTouch = createMockTouch(1, startX, 100);
+          component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+          // Try to swipe right
+          const moveTouch = createMockTouch(1, startX + 100, 100);
+          component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+          expect(component.translateX).toBe(0);
+        });
+      });
+    });
+
+    describe('Swipe Threshold Calculation', () => {
+      it('should require swipe distance > threshold to trigger action reveal', () => {
+        component.swipeThreshold = 80;
+        const startX = 200;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Move exactly threshold distance (80)
+        const moveTouch = createMockTouch(1, startX - 80, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        const endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+
+        // Exactly threshold is NOT > threshold, should snap back
+        expect(component.translateX).toBe(0);
+        expect(component.actionsVisible).toBe(false);
+      });
+
+      it('should trigger action reveal when swipe exceeds threshold', () => {
+        component.swipeThreshold = 80;
+        const startX = 200;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Move more than threshold (81 pixels)
+        const moveTouch = createMockTouch(1, startX - 81, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        const endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+
+        // deltaX > threshold, should reveal actions
+        expect(component.translateX).toBe(-component['maxSwipeDistance']);
+        expect(component.actionsVisible).toBe(true);
+      });
+
+      it('should show partial action visibility above half threshold', () => {
+        component.swipeThreshold = 100;
+        const startX = 200;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Move just above half threshold (51 pixels, where 51 > 50)
+        const moveTouch = createMockTouch(1, startX - 51, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        expect(component.actionsVisible).toBe(true);
+      });
+
+      it('should not show partial action visibility below half threshold', () => {
+        component.swipeThreshold = 100;
+        const startX = 200;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Move just below half threshold (49 pixels)
+        const moveTouch = createMockTouch(1, startX - 49, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        expect(component.actionsVisible).toBe(false);
+      });
+
+      it('should work with custom threshold values', () => {
+        const thresholds = [40, 60, 80, 100, 150, 200];
+
+        thresholds.forEach((threshold) => {
+          component.resetSwipe();
+          component.swipeThreshold = threshold;
+
+          const startTouch = createMockTouch(1, 300, 100);
+          component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+          // Move just above half threshold
+          const aboveHalfThresholdTouch = createMockTouch(1, 300 - Math.ceil(threshold / 2) - 1, 100);
+          component.onTouchMove(createMockTouchEvent('touchmove', [aboveHalfThresholdTouch]));
+
+          expect(component.actionsVisible).toBe(true);
+
+          // Reset and try below half
+          component.resetSwipe();
+          component.swipeThreshold = threshold;
+          component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+          const belowHalfTouch = createMockTouch(1, 300 - Math.floor(threshold / 2) + 1, 100);
+          component.onTouchMove(createMockTouchEvent('touchmove', [belowHalfTouch]));
+
+          expect(component.actionsVisible).toBe(false);
+        });
+      });
+
+      it('should cap translateX at maxSwipeDistance regardless of threshold', () => {
+        component.swipeThreshold = 50;
+        component.actions = [
+          { id: 'a', label: 'A', icon: 'test', color: 'primary', width: 60 },
+          { id: 'b', label: 'B', icon: 'test', color: 'danger', width: 60 },
+        ];
+        component.ngOnInit(); // maxSwipeDistance = 120
+
+        const startTouch = createMockTouch(1, 400, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Try to swipe way beyond maxSwipeDistance
+        const moveTouch = createMockTouch(1, 100, 100); // 300 pixels
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        expect(component.translateX).toBe(-120); // Capped at maxSwipeDistance
+      });
+
+      it('should handle threshold larger than maxSwipeDistance', () => {
+        component.actions = [
+          { id: 'a', label: 'A', icon: 'test', color: 'primary', width: 40 },
+        ];
+        component.swipeThreshold = 100; // Larger than maxSwipeDistance (40)
+        component.ngOnInit();
+
+        const startTouch = createMockTouch(1, 200, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Swipe to max distance (40 pixels)
+        const moveTouch = createMockTouch(1, 160, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        const endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+
+        // Even though we capped at maxSwipeDistance, we didn't exceed threshold
+        expect(component.translateX).toBe(0);
+      });
+    });
+
+    describe('isSwipe判定 (Swipe Detection Logic)', () => {
+      it('should identify valid swipe when deltaX > threshold', () => {
+        component.swipeThreshold = 80;
+        const startX = 200;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Swipe 90 pixels (exceeds threshold)
+        const moveTouch = createMockTouch(1, 110, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        const endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+
+        // Valid swipe - actions revealed
+        expect(component.actionsVisible).toBe(true);
+        expect(component.translateX).toBe(-component['maxSwipeDistance']);
+      });
+
+      it('should reject gesture as swipe when deltaX <= threshold', () => {
+        component.swipeThreshold = 80;
+        const startX = 200;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Swipe 70 pixels (below threshold)
+        const moveTouch = createMockTouch(1, 130, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        const endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+
+        // Not a valid swipe - snaps back
+        expect(component.actionsVisible).toBe(false);
+        expect(component.translateX).toBe(0);
+      });
+
+      it('should handle exact threshold boundary (deltaX === threshold)', () => {
+        component.swipeThreshold = 75;
+        const startX = 200;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Swipe exactly 75 pixels
+        const moveTouch = createMockTouch(1, 125, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        const endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+
+        // deltaX === threshold is NOT > threshold, so not a swipe
+        expect(component.actionsVisible).toBe(false);
+        expect(component.translateX).toBe(0);
+      });
+
+      it('should only recognize left swipes (positive deltaX)', () => {
+        const startX = 200;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Swipe right (negative deltaX)
+        const moveTouch = createMockTouch(1, 280, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        const endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+
+        // Right swipes are never valid
+        expect(component.actionsVisible).toBe(false);
+        expect(component.translateX).toBe(0);
+      });
+
+      it('should require left direction AND exceed threshold for valid swipe', () => {
+        component.swipeThreshold = 60;
+
+        // Test case 1: Left direction, below threshold
+        component.resetSwipe();
+        let startTouch = createMockTouch(1, 200, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+        let moveTouch = createMockTouch(1, 150, 100); // deltaX = 50, below threshold
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+        let endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+        expect(component.actionsVisible).toBe(false);
+
+        // Test case 2: Right direction, exceed distance threshold
+        component.resetSwipe();
+        startTouch = createMockTouch(1, 200, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+        moveTouch = createMockTouch(1, 280, 100); // deltaX negative (right)
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+        endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+        expect(component.actionsVisible).toBe(false);
+
+        // Test case 3: Left direction, exceed threshold (valid swipe)
+        component.resetSwipe();
+        startTouch = createMockTouch(1, 200, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+        moveTouch = createMockTouch(1, 120, 100); // deltaX = 80, exceeds threshold
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+        endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+        expect(component.actionsVisible).toBe(true);
+      });
+
+      it('should handle rapid back-and-forth movements correctly', () => {
+        component.swipeThreshold = 80;
+        const startX = 200;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Move left
+        let moveTouch = createMockTouch(1, 150, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+        expect(component.translateX).toBe(-50);
+
+        // Move right past start
+        moveTouch = createMockTouch(1, 250, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+        expect(component.translateX).toBe(0); // Reset on right swipe
+
+        // Move left again beyond threshold
+        moveTouch = createMockTouch(1, 100, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+        expect(component.translateX).toBe(-100);
+
+        const endEvent = createMockTouchEvent('touchend', []);
+        component.onTouchEnd(endEvent);
+
+        // Final position exceeded threshold, should be valid swipe
+        expect(component.actionsVisible).toBe(true);
+      });
+    });
+
+    describe('Swipe Distance and DeltaX Calculation', () => {
+      it('should calculate deltaX as startX - currentX', () => {
+        const startX = 300;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        const testCases = [
+          { currentX: 250, expectedDeltaX: 50 },
+          { currentX: 200, expectedDeltaX: 100 },
+          { currentX: 150, expectedDeltaX: 150 },
+          { currentX: 100, expectedDeltaX: 200 },
+        ];
+
+        testCases.forEach((testCase) => {
+          component.resetSwipe();
+
+          component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+          component.onTouchMove(createMockTouchEvent('touchmove', [createMockTouch(1, testCase.currentX, 100)]));
+
+          const expectedTranslateX = -Math.min(testCase.expectedDeltaX, component['maxSwipeDistance']);
+          expect(component.translateX).toBe(expectedTranslateX);
+        });
+      });
+
+      it('should handle deltaX of zero (no movement)', () => {
+        const startX = 200;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // No movement
+        const moveTouch = createMockTouch(1, startX, 100);
+        component.onTouchMove(createMockTouchEvent('touchmove', [moveTouch]));
+
+        expect(component.translateX).toBe(0);
+      });
+
+      it('should clamp translateX to range [-maxSwipeDistance, 0]', () => {
+        const startX = 300;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        // Extreme left movement
+        component.onTouchMove(createMockTouchEvent('touchmove', [createMockTouch(1, 0, 100)]));
+        expect(component.translateX).toBe(-component['maxSwipeDistance']); // Clamped to max
+
+        // Extreme right movement (negative deltaX)
+        component.onTouchMove(createMockTouchEvent('touchmove', [createMockTouch(1, 500, 100)]));
+        expect(component.translateX).toBe(0); // Clamped to min
+      });
+
+      it('should track currentX accurately during swipe', () => {
+        const startX = 200;
+
+        const startTouch = createMockTouch(1, startX, 100);
+        component.onTouchStart(createMockTouchEvent('touchstart', [startTouch]));
+
+        const positions = [180, 160, 140, 120, 100];
+
+        positions.forEach((pos) => {
+          component.onTouchMove(createMockTouchEvent('touchmove', [createMockTouch(1, pos, 100)]));
+          expect(component['currentX']).toBe(pos);
+        });
+      });
+    });
+  });
 });
