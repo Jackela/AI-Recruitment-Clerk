@@ -14,7 +14,7 @@ describe('ExperienceCalculator - calculateTotalExperience', () => {
     position: string,
     startDate: string,
     endDate: string,
-    summary: string = 'Work summary',
+    summary = 'Work summary',
   ): ResumeDTO['workExperience'][0] {
     return {
       company,
@@ -514,6 +514,497 @@ describe('ExperienceCalculator - calculateTotalExperience', () => {
 
       // Same month should result in 0 months
       expect(result.totalExperienceMonths).toBe(0);
+    });
+  });
+
+  describe('Overlap detection tests (calculateOverlap/detectOverlappingPositions)', () => {
+    describe('Overlapping positions with same dates', () => {
+      it('should detect overlap when positions have identical dates', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2020-01-01',
+            '2022-01-01',
+            'Full-time role',
+          ),
+          createWorkExperience(
+            'Company B',
+            'Consultant',
+            '2020-01-01',
+            '2022-01-01',
+            'Consulting role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // Should detect overlapping positions
+        expect(result.overlappingPositions.length).toBe(2);
+        expect(result.overlappingPositions[0].start.date).toEqual(
+          result.overlappingPositions[1].start.date,
+        );
+      });
+
+      it('should detect overlap when one position starts during another', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2020-01-01',
+            '2023-01-01',
+            'Main role',
+          ),
+          createWorkExperience(
+            'Company B',
+            'Consultant',
+            '2021-06-01',
+            '2022-06-01',
+            'Mid-term consulting',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // Should detect overlapping positions
+        expect(result.overlappingPositions.length).toBe(2);
+      });
+
+      it('should detect overlap when one position ends during another', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2019-01-01',
+            '2022-01-01',
+            'Long-term role',
+          ),
+          createWorkExperience(
+            'Company B',
+            'Freelancer',
+            '2018-01-01',
+            '2020-06-01',
+            'Early freelance work',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // Should detect overlapping positions (2019-2020 period)
+        expect(result.overlappingPositions.length).toBe(2);
+      });
+
+      it('should detect overlap with "present" end date', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2020-01-01',
+            '2022-01-01',
+            'Past role',
+          ),
+          createWorkExperience(
+            'Company B',
+            'Senior Developer',
+            '2021-01-01',
+            'present',
+            'Current role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // Should detect overlap (2021-2022 period)
+        expect(result.overlappingPositions.length).toBe(2);
+      });
+
+      it('should detect overlap when both positions have "present" end date', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2020-01-01',
+            'present',
+            'Current full-time',
+          ),
+          createWorkExperience(
+            'Company B',
+            'Consultant',
+            '2021-01-01',
+            'present',
+            'Current side gig',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // Should detect overlap (2021 to present)
+        expect(result.overlappingPositions.length).toBe(2);
+      });
+    });
+
+    describe('Non-overlapping and boundary-adjacent positions', () => {
+      it('should detect overlap for sequential positions with same boundary date', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2018-01-01',
+            '2020-01-01',
+            'First role',
+          ),
+          createWorkExperience(
+            'Company B',
+            'Senior Developer',
+            '2020-01-01',
+            '2022-01-01',
+            'Second role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // The implementation uses `start1 <= end2 && start2 <= end1`
+        // which returns true for boundary-adjacent positions
+        expect(result.overlappingPositions.length).toBe(2);
+      });
+
+      it('should not detect overlap for positions with gaps', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2018-01-01',
+            '2019-01-01',
+            'First role',
+          ),
+          createWorkExperience(
+            'Company B',
+            'Senior Developer',
+            '2020-01-01',
+            '2022-01-01',
+            'Second role after gap',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // No overlap - there's a gap
+        expect(result.overlappingPositions.length).toBe(0);
+        expect(result.experienceGaps.length).toBeGreaterThan(0);
+      });
+
+      it('should not detect overlap when one position ends before another starts', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2020-01-01',
+            '2021-01-01',
+            'Earlier role',
+          ),
+          createWorkExperience(
+            'Company B',
+            'Senior Developer',
+            '2022-01-01',
+            '2023-01-01',
+            'Later role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // No overlap - clear separation
+        expect(result.overlappingPositions.length).toBe(0);
+      });
+
+      it('should handle single position without overlap detection', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2020-01-01',
+            '2022-01-01',
+            'Only role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // No overlap possible with single position
+        expect(result.overlappingPositions.length).toBe(0);
+      });
+    });
+
+    describe('Partial overlap scenarios', () => {
+      it('should detect partial overlap at start of position', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2020-01-01',
+            '2023-01-01',
+            'Long role',
+          ),
+          createWorkExperience(
+            'Company B',
+            'Consultant',
+            '2019-01-01',
+            '2020-06-01',
+            'Overlaps first 6 months',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.overlappingPositions.length).toBe(2);
+      });
+
+      it('should detect partial overlap at end of position', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2019-01-01',
+            '2022-01-01',
+            'Role ending earlier',
+          ),
+          createWorkExperience(
+            'Company B',
+            'Consultant',
+            '2021-06-01',
+            '2023-01-01',
+            'Overlaps last 6 months',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.overlappingPositions.length).toBe(2);
+      });
+
+      it('should detect overlap when one position contains another', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2018-01-01',
+            '2024-01-01',
+            'Long-term role',
+          ),
+          createWorkExperience(
+            'Company B',
+            'Freelancer',
+            '2020-01-01',
+            '2022-01-01',
+            'Short-term gig within main role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.overlappingPositions.length).toBe(2);
+      });
+
+      it('should detect multiple overlapping positions among three positions', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2020-01-01',
+            '2023-01-01',
+            'Main role',
+          ),
+          createWorkExperience(
+            'Company B',
+            'Consultant',
+            '2021-01-01',
+            '2022-01-01',
+            'First overlap',
+          ),
+          createWorkExperience(
+            'Company C',
+            'Freelancer',
+            '2021-06-01',
+            '2022-06-01',
+            'Second overlap',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // All three positions overlap at some point
+        expect(result.overlappingPositions.length).toBeGreaterThanOrEqual(2);
+      });
+
+      it('should handle complex overlap chain (position overlaps with B, B overlaps with C)', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Role A',
+            '2020-01-01',
+            '2021-06-01',
+            'First role',
+          ),
+          createWorkExperience(
+            'Company B',
+            'Role B',
+            '2021-01-01',
+            '2022-06-01',
+            'Overlaps A',
+          ),
+          createWorkExperience(
+            'Company C',
+            'Role C',
+            '2022-01-01',
+            '2023-06-01',
+            'Overlaps B',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // A overlaps with B, B overlaps with C
+        expect(result.overlappingPositions.length).toBeGreaterThanOrEqual(2);
+      });
+    });
+
+    describe('Edge cases with null dates', () => {
+      it('should not detect overlap when start date is null', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2020-01-01',
+            '2022-01-01',
+            'Valid role',
+          ),
+          createWorkExperience('Company B', 'Consultant', '', '2022-01-01', 'Invalid start'),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // Position with null start should be filtered out, no overlap detection
+        expect(result.overlappingPositions.length).toBe(0);
+      });
+
+      it('should not detect overlap when end date is null (non-present)', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2020-01-01',
+            '2022-01-01',
+            'Valid role',
+          ),
+          createWorkExperience('Company B', 'Consultant', '2021-01-01', '', 'Invalid end'),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // Position with null end (not "present") cannot determine overlap
+        expect(result.overlappingPositions.length).toBe(0);
+      });
+
+      it('should handle positions with both dates null', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2020-01-01',
+            '2022-01-01',
+            'Valid role',
+          ),
+          createWorkExperience('Company B', 'Consultant', '', '', 'Invalid dates'),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // Position with invalid dates should be filtered
+        expect(result.overlappingPositions.length).toBe(0);
+      });
+
+      it('should not detect overlap with invalid date format', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2020-01-01',
+            '2022-01-01',
+            'Valid role',
+          ),
+          createWorkExperience(
+            'Company B',
+            'Consultant',
+            'invalid-date',
+            '2022-01-01',
+            'Invalid start format',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.overlappingPositions.length).toBe(0);
+      });
+
+      it('should handle present keyword correctly in overlap detection', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2020-01-01',
+            'present',
+            'Current role',
+          ),
+          createWorkExperience(
+            'Company B',
+            'Consultant',
+            '2022-01-01',
+            'present',
+            'Also current',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // Both present should overlap
+        expect(result.overlappingPositions.length).toBe(2);
+      });
+    });
+
+    describe('Overlap with different date formats', () => {
+      it('should detect overlap with year-month format dates', () => {
+        const workExperience = [
+          createWorkExperience('Company A', 'Dev', '2020-01', '2023-01', 'Main role'),
+          createWorkExperience('Company B', 'Consultant', '2022-01', '2024-01', 'Overlap'),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.overlappingPositions.length).toBe(2);
+      });
+
+      it('should detect overlap with year-only format dates', () => {
+        const workExperience = [
+          createWorkExperience('Company A', 'Dev', '2020', '2023', 'Main role'),
+          createWorkExperience('Company B', 'Consultant', '2022', '2024', 'Overlap'),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.overlappingPositions.length).toBe(2);
+      });
+
+      it('should detect overlap with mixed date formats', () => {
+        const workExperience = [
+          createWorkExperience('Company A', 'Dev', '2020-01-01', '2023-01-01', 'Full date'),
+          createWorkExperience('Company B', 'Consultant', '2022', '2024', 'Year only'),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.overlappingPositions.length).toBe(2);
+      });
     });
   });
 });

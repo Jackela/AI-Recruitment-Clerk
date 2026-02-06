@@ -110,3 +110,23 @@ Started: Thu Feb  5 20:36:11 CST 2026
   - /exit is a built-in Claude Code CLI command for clean shutdown
   - Clearing .claude prevents context compression artifacts across iterations
 ---
+
+## [2026-02-06] - US-004b
+- Added comprehensive tests for overlap detection (detectOverlappingPositions) in experience-calculator.ts
+- Created 22 tests covering all acceptance criteria:
+  - Overlapping positions with same dates (5 tests): identical dates, start during another, end during another, present end date, both present
+  - Non-overlapping and boundary-adjacent positions (4 tests): sequential with boundary, gaps, clear separation, single position
+  - Partial overlap scenarios (5 tests): start overlap, end overlap, containment, multiple overlapping, complex chain
+  - Edge cases with null dates (5 tests): null start, null end, both null, invalid format, present keyword handling
+  - Different date formats (3 tests): year-month, year-only, mixed formats
+- All 50 tests passing (28 existing + 22 new), typecheck and lint passing
+- Files changed:
+  - apps/resume-parser-svc/src/field-mapper/experience-calculator.spec.ts (extended with 22 new tests)
+- **Learnings for future iterations:**
+  - The `checkDateRangeOverlap` function uses inclusive bounds: `start1 <= end2 && start2 <= end1`
+  - This means boundary-adjacent positions (e.g., A ends 2020-01-01, B starts 2020-01-01) are considered overlapping
+  - The overlap detection compares each position pair (nested loop), adding both to the result when overlap detected
+  - "present" keyword is handled by using `new Date()` for the end date during comparison
+  - Positions with null dates are filtered out before overlap detection (return 0 overlaps)
+  - The test helper function `createWorkExperience` uses inferred types - remove explicit type annotation for default parameters
+---
