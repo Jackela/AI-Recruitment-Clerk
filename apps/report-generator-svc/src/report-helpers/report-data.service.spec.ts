@@ -112,14 +112,14 @@ describe('ReportDataService', () => {
       const items = [
         {
           skillsAnalysis: [
-            { skill: 'JavaScript', matchScore: 90, matchType: 'exact', explanation: 'Match' },
-            { skill: 'Python', matchScore: 60, matchType: 'partial', explanation: 'Partial' },
+            { skill: 'JavaScript', matchScore: 90, matchType: 'exact' as const, explanation: 'Match' },
+            { skill: 'Python', matchScore: 60, matchType: 'partial' as const, explanation: 'Partial' },
           ],
         },
         {
           skillsAnalysis: [
-            { skill: 'JavaScript', matchScore: 85, matchType: 'exact', explanation: 'Match' },
-            { skill: 'TypeScript', matchScore: 80, matchType: 'exact', explanation: 'Match' },
+            { skill: 'JavaScript', matchScore: 85, matchType: 'exact' as const, explanation: 'Match' },
+            { skill: 'TypeScript', matchScore: 80, matchType: 'exact' as const, explanation: 'Match' },
           ],
         },
       ];
@@ -142,7 +142,7 @@ describe('ReportDataService', () => {
       const items = [
         {
           recommendation: {
-            decision: 'hire',
+            decision: 'hire' as const,
             reasoning: 'Good fit',
             strengths: ['Strong skills', 'Good experience'],
             concerns: ['None'],
@@ -151,7 +151,7 @@ describe('ReportDataService', () => {
         },
         {
           recommendation: {
-            decision: 'hire',
+            decision: 'hire' as const,
             reasoning: 'Very good fit',
             strengths: ['Excellent communication'],
             concerns: [],

@@ -171,10 +171,10 @@ describe('LlmReportMapperService', () => {
         id: 'cand-123',
         name: 'John Doe',
         skills: [
-          { skill: 'JavaScript', matchScore: 90, matchType: 'exact', explanation: 'Match' },
+          { skill: 'JavaScript', matchScore: 90, matchType: 'exact' as const, explanation: 'Match' },
         ],
         scoreBreakdown: { overallFit: 85 },
-        recommendation: { decision: 'hire' },
+        recommendation: { decision: 'hire' as const },
         strengths: ['Strong skills'],
         concerns: [],
       };

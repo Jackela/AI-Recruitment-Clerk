@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { LlmService } from './llm.service';
-import type { GridFsService, ReportFileMetadata } from './gridfs.service';
-import type { ReportRepository, ReportCreateData } from './report.repository';
+import { LlmService } from './llm.service';
+import { GridFsService, type ReportFileMetadata } from './gridfs.service';
+import { ReportRepository, type ReportCreateData } from './report.repository';
 import type {
   ScoreBreakdown,
   MatchingSkill,

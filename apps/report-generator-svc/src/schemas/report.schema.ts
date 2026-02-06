@@ -8,17 +8,17 @@ export type ReportDocument = Report & Document;
  */
 @Schema()
 export class ScoreBreakdown {
-  @Prop({ required: true, min: 0, max: 100 })
-  public skillsMatch = 0;
+  @Prop({ type: Number, required: true, min: 0, max: 100 })
+  public skillsMatch: number = 0;
 
-  @Prop({ required: true, min: 0, max: 100 })
-  public experienceMatch = 0;
+  @Prop({ type: Number, required: true, min: 0, max: 100 })
+  public experienceMatch: number = 0;
 
-  @Prop({ required: true, min: 0, max: 100 })
-  public educationMatch = 0;
+  @Prop({ type: Number, required: true, min: 0, max: 100 })
+  public educationMatch: number = 0;
 
-  @Prop({ required: true, min: 0, max: 100 })
-  public overallFit = 0;
+  @Prop({ type: Number, required: true, min: 0, max: 100 })
+  public overallFit: number = 0;
 }
 
 /**
@@ -26,20 +26,20 @@ export class ScoreBreakdown {
  */
 @Schema()
 export class MatchingSkill {
-  @Prop({ required: true })
-  public skill = '';
+  @Prop({ type: String, required: true })
+  public skill: string = '';
 
-  @Prop({ required: true, min: 0, max: 100 })
-  public matchScore = 0;
+  @Prop({ type: Number, required: true, min: 0, max: 100 })
+  public matchScore: number = 0;
 
   @Prop({
     type: String,
     enum: ['exact', 'partial', 'related', 'missing'],
     default: 'missing',
   })
-  public matchType = 'missing';
+  public matchType: 'exact' | 'partial' | 'related' | 'missing' = 'missing';
 
-  @Prop()
+  @Prop({ type: String })
   public explanation?: string;
 }
 
@@ -53,10 +53,10 @@ export class ReportRecommendation {
     enum: ['hire', 'consider', 'interview', 'reject'],
     required: true,
   })
-  public decision = 'reject';
+  public decision: 'hire' | 'consider' | 'interview' | 'reject' = 'reject';
 
-  @Prop({ required: true })
-  public reasoning = '';
+  @Prop({ type: String, required: true })
+  public reasoning: string = '';
 
   @Prop({ type: [String], default: [] })
   public strengths: string[] = [];
@@ -76,55 +76,55 @@ export class ReportRecommendation {
   collection: 'reports',
 })
 export class Report {
-  @Prop({ required: true })
-  public jobId = '';
+  @Prop({ type: String, required: true })
+  public jobId: string = '';
 
-  @Prop({ required: true })
-  public resumeId = '';
+  @Prop({ type: String, required: true })
+  public resumeId: string = '';
 
   @Prop({ type: ScoreBreakdown, required: true })
-  public scoreBreakdown: ScoreBreakdown = new ScoreBreakdown();
+  public scoreBreakdown!: ScoreBreakdown;
 
   @Prop({ type: [MatchingSkill], default: [] })
   public skillsAnalysis: MatchingSkill[] = [];
 
   @Prop({ type: ReportRecommendation, required: true })
-  public recommendation: ReportRecommendation = new ReportRecommendation();
+  public recommendation!: ReportRecommendation;
 
-  @Prop({ required: true })
-  public summary = '';
+  @Prop({ type: String, required: true })
+  public summary: string = '';
 
   @Prop({ type: Number, min: 0, max: 1, default: 0 })
-  public analysisConfidence = 0;
+  public analysisConfidence: number = 0;
 
   @Prop({ type: Number, min: 0, default: 0 })
-  public processingTimeMs = 0;
+  public processingTimeMs: number = 0;
 
   @Prop({
     type: String,
     enum: ['pending', 'processing', 'completed', 'failed'],
     default: 'pending',
   })
-  public status = 'pending';
+  public status: 'pending' | 'processing' | 'completed' | 'failed' = 'pending';
 
-  @Prop()
+  @Prop({ type: String })
   public errorMessage?: string;
 
   // Metadata for tracking and auditing
-  @Prop({ required: true })
-  public generatedBy = ''; // Service identifier
+  @Prop({ type: String, required: true })
+  public generatedBy: string = ''; // Service identifier
 
-  @Prop({ required: true })
-  public llmModel = '';
+  @Prop({ type: String, required: true })
+  public llmModel: string = '';
 
   @Prop({ type: Date, default: Date.now })
   public generatedAt: Date = new Date();
 
-  @Prop()
+  @Prop({ type: String })
   public requestedBy?: string; // User ID if applicable
 
   // GridFS URL for detailed report document if generated
-  @Prop()
+  @Prop({ type: String })
   public detailedReportUrl?: string;
 }
 
