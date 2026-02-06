@@ -27,8 +27,8 @@ describe('ResumeParserIntegrationService', () => {
 
   // Mock valid Vision LLM response
   const createMockVisionResponse = (
-    confidence: number = 0.9,
-    processingTimeMs: number = 2000,
+    confidence = 0.9,
+    processingTimeMs = 2000,
   ): VisionLlmResponse => ({
     extractedData: {
       contactInfo: { name: 'John Doe', email: 'john@example.com', phone: '+1234567890' },
@@ -64,7 +64,7 @@ describe('ResumeParserIntegrationService', () => {
   // Mock valid field mapping result
   const createMockMappingResult = (
     validationErrors: string[] = [],
-    mappingConfidence: number = 0.95,
+    mappingConfidence = 0.95,
   ): FieldMappingResult => ({
     resumeDto: {
       contactInfo: { name: 'John Doe', email: 'john@example.com', phone: '+1234567890' },

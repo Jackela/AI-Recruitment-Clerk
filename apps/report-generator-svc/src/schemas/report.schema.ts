@@ -9,16 +9,16 @@ export type ReportDocument = Report & Document;
 @Schema()
 export class ScoreBreakdown {
   @Prop({ type: Number, required: true, min: 0, max: 100 })
-  public skillsMatch: number = 0;
+  public skillsMatch = 0;
 
   @Prop({ type: Number, required: true, min: 0, max: 100 })
-  public experienceMatch: number = 0;
+  public experienceMatch = 0;
 
   @Prop({ type: Number, required: true, min: 0, max: 100 })
-  public educationMatch: number = 0;
+  public educationMatch = 0;
 
   @Prop({ type: Number, required: true, min: 0, max: 100 })
-  public overallFit: number = 0;
+  public overallFit = 0;
 }
 
 /**
@@ -27,10 +27,10 @@ export class ScoreBreakdown {
 @Schema()
 export class MatchingSkill {
   @Prop({ type: String, required: true })
-  public skill: string = '';
+  public skill = '';
 
   @Prop({ type: Number, required: true, min: 0, max: 100 })
-  public matchScore: number = 0;
+  public matchScore = 0;
 
   @Prop({
     type: String,
@@ -56,7 +56,7 @@ export class ReportRecommendation {
   public decision: 'hire' | 'consider' | 'interview' | 'reject' = 'reject';
 
   @Prop({ type: String, required: true })
-  public reasoning: string = '';
+  public reasoning = '';
 
   @Prop({ type: [String], default: [] })
   public strengths: string[] = [];
@@ -77,10 +77,10 @@ export class ReportRecommendation {
 })
 export class Report {
   @Prop({ type: String, required: true })
-  public jobId: string = '';
+  public jobId = '';
 
   @Prop({ type: String, required: true })
-  public resumeId: string = '';
+  public resumeId = '';
 
   @Prop({ type: ScoreBreakdown, required: true })
   public scoreBreakdown!: ScoreBreakdown;
@@ -92,13 +92,13 @@ export class Report {
   public recommendation!: ReportRecommendation;
 
   @Prop({ type: String, required: true })
-  public summary: string = '';
+  public summary = '';
 
   @Prop({ type: Number, min: 0, max: 1, default: 0 })
-  public analysisConfidence: number = 0;
+  public analysisConfidence = 0;
 
   @Prop({ type: Number, min: 0, default: 0 })
-  public processingTimeMs: number = 0;
+  public processingTimeMs = 0;
 
   @Prop({
     type: String,
@@ -112,10 +112,10 @@ export class Report {
 
   // Metadata for tracking and auditing
   @Prop({ type: String, required: true })
-  public generatedBy: string = ''; // Service identifier
+  public generatedBy = ''; // Service identifier
 
   @Prop({ type: String, required: true })
-  public llmModel: string = '';
+  public llmModel = '';
 
   @Prop({ type: Date, default: Date.now })
   public generatedAt: Date = new Date();
