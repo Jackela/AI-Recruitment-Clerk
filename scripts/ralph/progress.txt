@@ -369,3 +369,37 @@ Started: Thu Feb  5 20:36:11 CST 2026
   - GridFsService requires all methods to be mocked even if not directly tested (getReport, getReportStream, getReportMetadata, findReportFiles, deleteReport, updateReportMetadata)
   - ReportFileMetadata type includes: reportType, jobId, resumeId, generatedBy, generatedAt, mimeType, encoding
 ---
+
+## [2026-02-06] - US-008a
+- Added comprehensive tests for navigation-guide.service.ts
+- Created navigation-guide.service.spec.ts with 52 tests covering:
+  - Guide step generation (5 tests): flow structures, step properties, position types, all required properties, onboarding flow structure
+  - Progress tracking (8 tests): step index tracking, active guide state, current flow tracking, first time user status, completion localStorage marking, already completed flow handling, multiple flows progress, specific flow completion check
+  - Guide completion detection (6 tests): flow completion detection, last step completion, all onboarding completion check, partial completion check, state clearing on completion, highlight removal on completion
+  - Navigation and step movement (5 tests): next step movement, previous step movement, boundary handling (step 0), complete after last step, current step updates
+  - Contextual help (4 tests): show contextual help, hide contextual help, custom title, default position
+  - Reset functionality (2 tests): reset all onboarding progress, first time user flag after reset
+  - Available flows (2 tests): return all available flows, valid flow structure
+  - Edge cases and error handling (6 tests): invalid flow id, no active flow operations, invalid target handling
+  - DOM interaction (4 tests): scroll to target element, highlight class management, missing elements graceful handling
+  - Signal state management (4 tests): isGuideActive signal, currentStep signal, stepIndex signal, isFirstTimeUser signal
+  - Integration with router (2 tests): route change tracking setup, flow configuration for routes
+  - Coverage verification (3 tests): all public methods covered, all flow types tested, signal behavior comprehensive
+- Fixed issue: Mocked Element.scrollIntoView for jsdom compatibility (jsdom doesn't support this method by default)
+- All 52 tests passing, coverage exceeds 60% requirement
+- Files changed:
+  - apps/ai-recruitment-frontend/src/app/services/navigation/navigation-guide.service.spec.ts (created, 731 lines)
+- **Learnings for future iterations:**
+  - NavigationGuideService uses Angular signals for state management: isGuideActive, currentStep, currentFlow, stepIndex, isFirstTimeUser
+  - The service has three predefined flows: firstTimeUser (4 steps), uploadGuide (4 steps), resultsGuide (3 steps)
+  - Flows are configured to auto-start based on route: /analysis triggers uploadGuide, /results triggers resultsGuide
+  - Completion status is stored in localStorage with keys like 'onboarding_first_time_completed', 'onboarding_upload_completed', 'onboarding_results_completed'
+  - The service adds/removes 'guide-highlight' CSS class to target elements for visual indication
+  - Target elements use CSS selectors like '.dashboard-container', '.quick-actions', '.stats-grid', etc.
+  - GuideStep supports positions: 'top', 'bottom', 'left', 'right' and optional actions: 'click', 'input', 'wait'
+  - The service initializes first time check in constructor and tracks route changes via Router.events
+  - jsdom doesn't support scrollIntoView - need to mock Element.prototype.scrollIntoView for tests
+  - The resetOnboarding method removes all flow completion keys from localStorage
+  - Contextual help can be triggered on-demand with showContextualHelp(target, content)
+  - Zone.js intercepts setTimeout in Angular tests - avoid async done callbacks when possible
+---
