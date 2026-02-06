@@ -105,8 +105,8 @@
         "npm run test passes"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added 21 action trigger tests covering left swipe reveal (4), right swipe handling (3), EventEmitter emission (4), threshold-based triggering (7), and action click after swipe (3)"
     },
     {
       "id": "US-006a",
@@ -119,8 +119,8 @@
         "npm run test passes"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created 52 tests covering parseResume flow, error handling, quality metrics, retry logic, batch processing, and health checks"
     },
     {
       "id": "US-006b",

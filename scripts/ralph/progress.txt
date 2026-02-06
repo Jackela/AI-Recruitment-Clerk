@@ -236,3 +236,58 @@ Started: Thu Feb  5 20:36:11 CST 2026
   - When testing boundary conditions, use values just above/below the threshold
   - The isSwipe logic is implicit: left direction (deltaX > 0) AND exceeds threshold
 ---
+
+## [2026-02-06] - US-005c
+- Added comprehensive tests for action triggers in mobile-swipe.component.ts
+- Created 21 tests covering all acceptance criteria:
+  - Left swipe action reveal (4 tests): exceed threshold reveal, below threshold no reveal, threshold+1 pixel, mouse events
+  - Right swipe action handling (3 tests): no reveal on right swipe, reset after left swipe, ignore regardless of distance
+  - Action emission via EventEmitter (4 tests): emit on click, correct action data, include item data, multiple subscribers
+  - Threshold-based triggering (7 tests): require > threshold, just above threshold, half threshold visibility, custom thresholds, snap back, snap to max
+  - Action click after swipe (3 tests): reset state after click, emit after successful swipe, work with programmatic showActions
+- All 108 tests passing (87 existing + 21 new), typecheck and lint passing
+- Files changed:
+  - apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.component.spec.ts (extended with 427 lines)
+- **Learnings for future iterations:**
+  - The component doesn't have a `triggerAction` method - action triggering is through `onActionClick` which is called when action buttons are clicked
+  - Swipe gestures only REVEAL actions, they don't automatically trigger them - user must click the revealed action button
+  - The threshold check uses strict greater than (`deltaX > swipeThreshold`) not greater than or equal
+  - Half-threshold visibility uses `Math.abs(translateX) > swipeThreshold / 2` (also strict greater than)
+  - The `swipeAction` EventEmitter emits `{ action: SwipeAction, item: any }` structure
+  - After action click, the swipe state is fully reset (translateX = 0, actionsVisible = false)
+  - Multiple subscribers can listen to the same EventEmitter for action events
+  - The component supports both touch and mouse events for action triggering on mobile viewport
+  - Right swipes are always ignored and reset translateX to 0
+---
+
+## [2026-02-06] - US-006a
+- Added comprehensive tests for resume parsing flow in resume-parser-integration.service.ts
+- Created 52 tests covering all acceptance criteria:
+  - Successful parsing with valid data (13 tests): complete resume, Vision LLM/field mapper calls, experience calculation, quality metrics, total confidence, processing time
+  - Quality metrics calculation (5 tests): high/low completeness, accuracy score with errors, date consistency, reliability score
+  - Total confidence calculation (2 tests): weighted from all sources, clamping for low completeness
+  - Error handling (5 tests): Vision LLM/field mapper failures, error messages, non-Error exceptions, processing time on error
+  - Retry logic (3 tests): retry on failure, default attempts, max retries exhausted
+  - Validation options (4 tests): enableValidation flag, normalizeWithValidation vs normalizeToResumeDto, validation errors returned
+  - Quality threshold (2 tests): default 0.7, custom threshold
+  - Target skills in extraction prompt (2 tests): include in request, not included when not provided
+  - parseResumesBatch (5 tests): multiple resumes, error field for failures, retry reduction, empty batch, processing stats
+  - healthCheck (5 tests): healthy/degraded/unhealthy states, lastChecked timestamp, exception handling
+  - getProcessingStats (2 tests): default statistics, quality distribution
+  - Edge cases (4 tests): empty buffer, special characters, long filename, minimum processing time
+- All 52 tests passing, typecheck and lint passing
+- Files changed:
+  - apps/resume-parser-svc/src/integration/resume-parser-integration.service.spec.ts (created with 705 lines)
+- **Learnings for future iterations:**
+  - ResumeParserIntegrationService orchestrates the complete parsing pipeline: Vision LLM extraction → Field mapping → Validation → Quality metrics → Total confidence
+  - The service uses a fail-fast approach with error handling that returns an error result instead of throwing (all confidence scores set to 0)
+  - Quality metrics include: dataCompleteness (0-1 based on filled fields), accuracyScore (reduced by validation errors), consistencyScore (checks date ordering), reliabilityScore (based on confidence + processing time)
+  - Total confidence is a weighted average: mapping (30%) + extraction (30%) + quality (40%)
+  - When dataCompleteness < 0.6, totalConfidence is clamped to max 0.75
+  - Retry logic is configurable via options.retryAttempts (default: 2)
+  - Batch processing reduces retry attempts to 1 unless explicitly specified
+  - Health check returns three states: healthy (all components), degraded (>= 50%), unhealthy (< 50%)
+  - Vision LLM and FieldMapper services are mocked for isolated testing
+  - When non-Error exceptions are thrown (like strings), the error message becomes 'undefined' due to the error handling
+  - For batch error handling, failed parsing results in error field set to first validation error or 'Processing failed'
+---
