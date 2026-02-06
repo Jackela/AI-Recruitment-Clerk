@@ -149,3 +149,28 @@ Started: Thu Feb  5 20:36:11 CST 2026
   - Gap duration uses month difference: `(currentStart.year - prevEnd.year) * 12 + (currentStart.month - prevEnd.month)`
   - The gap start date is parsed from prevEnd.toISOString(), end date from currentStart.toISOString()
 ---
+
+## [2026-02-06] - US-004d
+- Added comprehensive tests for seniority level determination (determineSeniorityLevel) in experience-calculator.ts
+- Created 56 tests covering all acceptance criteria:
+  - Entry level detection (10 tests): junior, associate, trainee, intern, graduate, assistant, level 1, I, <=2 years experience
+  - Mid level detection (10 tests): 3-4 years experience, developer, engineer, analyst, specialist, consultant, level 2, II, mid level keywords
+  - Senior level detection (9 tests): senior, lead, principal, sr, level 3, III, experienced, 5-6 years experience
+  - Expert level detection (17 tests): architect, director, manager, head of, chief, VP, vice president, CTO, CIO, level 4, IV, staff, distinguished, 10+ years experience
+  - Edge cases (10 tests): indicator priority, recent positions (last 2 years), last 3 positions, case-insensitivity, career progression, empty/null handling
+- All 129 tests passing (73 existing + 56 new), typecheck and lint passing
+- Files changed:
+  - apps/resume-parser-svc/src/field-mapper/experience-calculator.spec.ts (extended with 56 new tests)
+- **Learnings for future iterations:**
+  - The `determineSeniorityLevel` function only looks at indicators from "recent" positions defined as:
+    - Positions with `end.isPresent = true`, OR
+    - Positions that ended within the last 2 years (>= currentYear - 2)
+  - The function considers the last 3 positions from the filtered recent positions
+  - Seniority determination priority: Expert indicators OR 10+ years → Senior indicators OR 5+ years → Entry indicators OR <=2 years → Mid (default)
+  - For tests to properly detect title-based seniority levels, positions must either:
+    - Use "present" as end date, OR
+    - End within the last 2 years (relative to current date)
+  - Position titles and summaries are both checked for seniority keywords (case-insensitive)
+  - The 10+ years threshold for Expert and 5+ years threshold for Senior override title indicators
+  - Entry level condition is `hasEntryIndicators || totalYears <= 2` (2 years or less triggers Entry)
+---
