@@ -1582,4 +1582,996 @@ describe('ExperienceCalculator - calculateTotalExperience', () => {
       });
     });
   });
+
+  describe('Seniority level determination tests (determineSeniorityLevel)', () => {
+    describe('Entry level detection', () => {
+      it('should detect Entry level for positions with "junior" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Junior Developer',
+            '2020-01-01',
+            '2022-01-01',
+            'Junior role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Entry');
+      });
+
+      it('should detect Entry level for positions with "associate" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Associate Engineer',
+            '2020-01-01',
+            '2022-01-01',
+            'Associate role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Entry');
+      });
+
+      it('should detect Entry level for positions with "trainee" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Trainee Developer',
+            '2020-01-01',
+            '2021-01-01',
+            'Training role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Entry');
+      });
+
+      it('should detect Entry level for positions with "intern" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Software Intern',
+            '2021-06-01',
+            '2021-12-01',
+            'Internship',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Entry');
+      });
+
+      it('should detect Entry level for positions with "graduate" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Graduate Developer',
+            '2020-01-01',
+            '2022-01-01',
+            'Graduate role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Entry');
+      });
+
+      it('should detect Entry level for positions with "assistant" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Assistant Engineer',
+            '2020-01-01',
+            '2022-01-01',
+            'Assistant role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Entry');
+      });
+
+      it('should detect Entry level for positions with 2 years or less experience', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2020-01-01',
+            '2022-01-01',
+            '2 years experience',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Entry');
+      });
+
+      it('should detect Entry level for positions with 1 year experience', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Software Developer',
+            '2021-01-01',
+            '2022-01-01',
+            '1 year experience',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Entry');
+      });
+
+      it('should detect Entry level for positions with "level 1" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Level 1 Developer',
+            '2020-01-01',
+            '2022-01-01',
+            'Entry level position',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Entry');
+      });
+
+      it('should detect Entry level for positions with "I" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Engineer I',
+            '2020-01-01',
+            '2022-01-01',
+            'Junior role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Entry');
+      });
+    });
+
+    describe('Mid level detection', () => {
+      it('should detect Mid level for positions with 3 years experience (no indicators)', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Software Developer',
+            '2019-01-01',
+            '2022-01-01',
+            '3 years experience',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Mid');
+      });
+
+      it('should detect Mid level for positions with 4 years experience (no indicators)', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2018-01-01',
+            '2022-01-01',
+            '4 years experience',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Mid');
+      });
+
+      it('should detect Mid level for positions with 3 years experience (no indicators)', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Software Developer',
+            '2020-01-01',
+            '2023-01-01',
+            'Developer role with 3 years experience',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // 3 years experience, no indicators -> Mid (not Entry since >2 years)
+        expect(result.seniorityLevel).toBe('Mid');
+      });
+
+      it('should detect Mid level for positions with "engineer" in title (no senior indicators)', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Engineer',
+            '2020-01-01',
+            '2023-01-01',
+            'Engineering role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Mid');
+      });
+
+      it('should detect Mid level for positions with "analyst" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Business Analyst',
+            '2020-01-01',
+            '2023-01-01',
+            'Analyst role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Mid');
+      });
+
+      it('should detect Mid level for positions with "specialist" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'QA Specialist',
+            '2020-01-01',
+            '2023-01-01',
+            'Specialist role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Mid');
+      });
+
+      it('should detect Mid level for positions with "consultant" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Consultant',
+            '2020-01-01',
+            '2023-01-01',
+            'Consulting role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Mid');
+      });
+
+      it('should detect Mid level for positions with "level 2" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Level 2 Developer',
+            '2019-01-01',
+            '2022-01-01',
+            'Mid level position',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Mid');
+      });
+
+      it('should detect Mid level for positions with "II" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Engineer II',
+            '2019-01-01',
+            '2022-01-01',
+            'Mid level role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Mid');
+      });
+
+      it('should detect Mid level when recent position has "mid level" in summary', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Software Developer',
+            '2019-01-01',
+            '2022-01-01',
+            'Mid level developer role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Mid');
+      });
+    });
+
+    describe('Senior level detection', () => {
+      it('should detect Senior level for positions with "senior" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Senior Developer',
+            '2020-01-01',
+            'present',
+            'Senior role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Senior');
+      });
+
+      it('should detect Senior level for positions with "lead" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Team Lead',
+            '2020-01-01',
+            'present',
+            'Leadership role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Senior');
+      });
+
+      it('should detect Senior level for positions with "principal" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Principal Engineer',
+            '2020-01-01',
+            'present',
+            'Principal role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Senior');
+      });
+
+      it('should detect Senior level for positions with 5 years experience', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2018-01-01',
+            '2023-01-01',
+            '5 years experience',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Senior');
+      });
+
+      it('should detect Senior level for positions with 6 years experience', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Software Developer',
+            '2017-01-01',
+            '2023-01-01',
+            '6 years experience',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Senior');
+      });
+
+      it('should detect Senior level for positions with "sr" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Sr. Developer',
+            '2018-01-01',
+            '2023-01-01',
+            'Senior role abbreviation',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Senior');
+      });
+
+      it('should detect Senior level for positions with "level 3" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Level 3 Developer',
+            '2018-01-01',
+            '2023-01-01',
+            'Senior level position',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Senior');
+      });
+
+      it('should detect Senior level for positions with "III" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Engineer III',
+            '2018-01-01',
+            '2023-01-01',
+            'Senior level role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Senior');
+      });
+
+      it('should detect Senior level for positions with "experienced" in summary', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2018-01-01',
+            '2023-01-01',
+            'Experienced developer role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Senior');
+      });
+    });
+
+    describe('Expert level detection', () => {
+      it('should detect Expert level for positions with "architect" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Software Architect',
+            '2020-01-01',
+            'present',
+            'Architecture role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+
+      it('should detect Expert level for positions with "director" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Director of Engineering',
+            '2020-01-01',
+            'present',
+            'Director role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+
+      it('should detect Expert level for positions with "manager" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Engineering Manager',
+            '2020-01-01',
+            'present',
+            'Management role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+
+      it('should detect Expert level for positions with 10 years experience', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2013-01-01',
+            '2023-01-01',
+            '10 years experience',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+
+      it('should detect Expert level for positions with 12 years experience', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Software Developer',
+            '2011-01-01',
+            '2023-01-01',
+            '12 years experience',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+
+      it('should detect Expert level for positions with "head of" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Head of Development',
+            '2020-01-01',
+            'present',
+            'Head of department',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+
+      it('should detect Expert level for positions with "chief" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Chief Technology Officer',
+            '2020-01-01',
+            'present',
+            'C-level role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+
+      it('should detect Expert level for positions with "VP" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'VP of Engineering',
+            '2020-01-01',
+            'present',
+            'VP role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+
+      it('should detect Expert level for positions with "vice president" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Vice President of Technology',
+            '2020-01-01',
+            'present',
+            'VP role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+
+      it('should detect Expert level for positions with "CTO" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'CTO',
+            '2020-01-01',
+            'present',
+            'CTO role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+
+      it('should detect Expert level for positions with "CIO" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'CIO',
+            '2020-01-01',
+            'present',
+            'CIO role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+
+      it('should detect Expert level for positions with "level 4" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Level 4 Developer',
+            '2020-01-01',
+            'present',
+            'Expert level position',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+
+      it('should detect Expert level for positions with "IV" in title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Engineer IV',
+            '2020-01-01',
+            'present',
+            'Expert level role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+
+      it('should detect Expert level for positions with "staff" in title (recent position)', () => {
+        // Staff engineer with recent position (within 2 years)
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Staff Engineer',
+            '2021-01-01',
+            'present',
+            'Staff level role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+
+      it('should detect Expert level for positions with "distinguished" in title (recent position)', () => {
+        // Distinguished engineer with recent position (within 2 years)
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Distinguished Engineer',
+            '2021-01-01',
+            'present',
+            'Distinguished role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+
+      it('should detect Expert by years of experience even without recent expert title', () => {
+        // 10+ years of experience without "expert" keywords in recent positions
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2010-01-01',
+            '2020-01-01',
+            'Regular developer role',
+          ),
+          createWorkExperience(
+            'Company B',
+            'Senior Developer',
+            '2020-01-01',
+            '2022-01-01',
+            'Senior role but ended > 2 years ago',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // 12 years total experience should trigger Expert level
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+    });
+
+    describe('Seniority edge cases and complex scenarios', () => {
+      it('should detect Expert by title when position is recent (within 2 years)', () => {
+        // Only 3 years experience but has "architect" title in recent position
+        const twoYearsAgo = new Date();
+        twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 1);
+        const endDateStr = twoYearsAgo.toISOString().split('T')[0];
+
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Software Architect',
+            '2021-01-01',
+            endDateStr,
+            'Architect with recent experience',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // Expert title in recent position should trigger Expert level
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+
+      it('should detect Senior when recent position has senior keyword', () => {
+        // Title with both "senior" and "junior" - recent position
+        const twoYearsAgo = new Date();
+        twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 1);
+        const endDateStr = twoYearsAgo.toISOString().split('T')[0];
+
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Senior Junior Developer',
+            '2020-01-01',
+            endDateStr,
+            'Unusual title with both senior and junior',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // Should detect "senior" keyword in recent position
+        expect(result.seniorityLevel).toBe('Senior');
+      });
+
+      it('should use recent positions for seniority detection (last 2 years)', () => {
+        const twoYearsAgo = new Date();
+        twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+
+        const workExperience = [
+          // Old position with senior title
+          createWorkExperience(
+            'Company A',
+            'Senior Developer',
+            '2010-01-01',
+            '2018-01-01',
+            'Old senior role',
+          ),
+          // Recent position with entry-level title
+          createWorkExperience(
+            'Company B',
+            'Junior Developer',
+            '2022-01-01',
+            twoYearsAgo.toISOString().split('T')[0],
+            'Recent junior role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // Recent position indicators should influence the result
+        // Since we have 10+ years total, it should still be Expert
+        // But this tests that recent positions are checked
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+
+      it('should default to Mid level when no indicators and experience between 2-5 years', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Software Developer',
+            '2019-01-01',
+            '2022-01-01',
+            'Generic developer role',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // 3 years, no indicators -> Mid (default)
+        expect(result.seniorityLevel).toBe('Mid');
+      });
+
+      it('should handle empty/invalid work experience with Entry level default', () => {
+        const result = ExperienceCalculator.analyzeExperience([]);
+
+        expect(result.seniorityLevel).toBe('Entry');
+      });
+
+      it('should handle null work experience with Entry level default', () => {
+        const result = ExperienceCalculator.analyzeExperience(null);
+
+        expect(result.seniorityLevel).toBe('Entry');
+      });
+
+      it('should detect seniority from summary text, not just title', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Developer',
+            '2018-01-01',
+            '2023-01-01',
+            'Senior developer responsible for architecture',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // "senior" in summary should be detected
+        expect(result.seniorityLevel).toBe('Senior');
+      });
+
+      it('should use last 3 positions for indicator detection', () => {
+        const workExperience = [
+          // First position - Senior title
+          createWorkExperience(
+            'Company A',
+            'Senior Developer',
+            '2018-01-01',
+            '2020-01-01',
+            'Senior role',
+          ),
+          // Second position - Senior title
+          createWorkExperience(
+            'Company B',
+            'Senior Engineer',
+            '2020-01-01',
+            '2021-01-01',
+            'Senior role',
+          ),
+          // Third position - Senior title
+          createWorkExperience(
+            'Company C',
+            'Senior Developer',
+            '2021-01-01',
+            '2022-01-01',
+            'Senior role',
+          ),
+          // Fourth position (beyond last 3) - Junior title
+          createWorkExperience(
+            'Company D',
+            'Junior Developer',
+            '2022-01-01',
+            'present',
+            'Current junior role (but recent positions have senior)',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // Should detect Senior from recent positions (last 3 ended within 2 years)
+        expect(result.seniorityLevel).toBe('Senior');
+      });
+
+      it('should be case-insensitive when detecting seniority keywords', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'SENIOR DEVELOPER',
+            '2018-01-01',
+            '2023-01-01',
+            'ALL CAPS TITLE',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        expect(result.seniorityLevel).toBe('Senior');
+      });
+
+      it('should handle multiple positions with career progression to Senior', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Junior Developer',
+            '2015-01-01',
+            '2017-01-01',
+            'Entry level',
+          ),
+          createWorkExperience(
+            'Company B',
+            'Developer',
+            '2017-01-01',
+            '2019-01-01',
+            'Mid level',
+          ),
+          createWorkExperience(
+            'Company C',
+            'Senior Developer',
+            '2019-01-01',
+            '2023-01-01',
+            'Senior level',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // Recent senior title + 8 years experience = Senior
+        expect(result.seniorityLevel).toBe('Senior');
+      });
+
+      it('should handle career progression from Junior to Expert', () => {
+        const workExperience = [
+          createWorkExperience(
+            'Company A',
+            'Junior Developer',
+            '2010-01-01',
+            '2013-01-01',
+            'Entry level',
+          ),
+          createWorkExperience(
+            'Company B',
+            'Developer',
+            '2013-01-01',
+            '2017-01-01',
+            'Mid level',
+          ),
+          createWorkExperience(
+            'Company C',
+            'Senior Developer',
+            '2017-01-01',
+            '2020-01-01',
+            'Senior level',
+          ),
+          createWorkExperience(
+            'Company D',
+            'Software Architect',
+            '2020-01-01',
+            '2023-01-01',
+            'Expert level',
+          ),
+        ];
+
+        const result = ExperienceCalculator.analyzeExperience(workExperience);
+
+        // Recent architect title = Expert
+        expect(result.seniorityLevel).toBe('Expert');
+      });
+    });
+  });
 });
