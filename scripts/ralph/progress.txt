@@ -343,3 +343,29 @@ Started: Thu Feb  5 20:36:11 CST 2026
   - The service uses ErrorCorrelationManager.getContext() for error tracing correlation
   - ReportGeneratorException is used with structured error details including correlationId
 ---
+
+## [2026-02-06] - US-007b
+- Added comprehensive tests for PDF generation in report-templates.service.ts
+- Created report-templates.service.spec.ts with 30 tests covering:
+  - generatePdfReport method (6 tests): individual, comparison, interview-guide templates, base64 encoding, decoded content validation
+  - PDF layout validation (9 tests): HTML structure, CSS styles, print media query, report title, metadata section, footer, score breakdown, large content, responsive design
+  - PDF generation with charts (8 tests): score visualization, skills analysis, recommendation decision, strengths/concerns, comparison report, interview questions, CSS-based charts, color-coded recommendations
+  - Error handling (5 tests): minimal data, special characters, long content, binary encoding metadata, missing optional fields
+  - GridFS integration (2 tests): saveGeneratedReport, saveGeneratedReportBuffer
+- Fixed import issue in report-templates.service.ts: changed GridFsService from type-only import to value import (required for NestJS dependency injection)
+- All 30 tests passing, typecheck and lint passing
+- Files changed:
+  - apps/report-generator-svc/src/report-generator/report-templates.service.spec.ts (created, 692 lines)
+  - apps/report-generator-svc/src/report-generator/report-templates.service.ts (fixed GridFsService import)
+- **Learnings for future iterations:**
+  - ReportTemplatesService.generatePdfReport() returns base64-encoded HTML content (not actual PDF binary)
+  - The PDF generation uses HTML template with CSS styling that can be converted to PDF by puppeteer or similar in production
+  - Base64 content is decoded using Buffer.from(content, 'base64').toString('utf-8') for validation
+  - The template interpolation is simple and handles basic variable substitution and single-level {{#each}} loops
+  - Nested array interpolation (like recommendation.strengths or interviewQuestions[].questions) has limitations in the current implementation
+  - PDF metadata includes encoding: 'binary' and mimeType: 'application/pdf' for proper file handling
+  - The HTML template includes print media query (@media print) for PDF optimization
+  - CSS classes for chart visualization: .score-card, .score-breakdown, .score-item, .skill-item, .recommendation
+  - GridFsService requires all methods to be mocked even if not directly tested (getReport, getReportStream, getReportMetadata, findReportFiles, deleteReport, updateReportMetadata)
+  - ReportFileMetadata type includes: reportType, jobId, resumeId, generatedBy, generatedAt, mimeType, encoding
+---
