@@ -94,3 +94,19 @@ Started: Thu Feb  5 20:36:11 CST 2026
   - Present keywords (present, current, now, ongoing, today, till date, till now, continuing) use isPresent flag
   - DateRange objects contain start, end ParsedDate objects with duration calculated by DateParser
 ---
+
+## [2026-02-06] - Ralph Script Fix (Infrastructure)
+- Fixed Claude Code CLI hanging issue in ralph.sh
+- Changes made:
+  - Clear .claude directory before each iteration (prevents context buildup)
+  - Changed message delivery from argument to stdin pipe
+  - Appended /exit command to force CLI termination
+- Root cause: Claude Code --print mode doesn't auto-exit after processing
+- Files changed:
+  - scripts/ralph/ralph.sh
+- **Learnings for future iterations:**
+  - CLI tools invoked via command substitution $() must explicitly exit
+  - Use `echo "message" | cli` instead of `cli "message"` when termination control needed
+  - /exit is a built-in Claude Code CLI command for clean shutdown
+  - Clearing .claude prevents context compression artifacts across iterations
+---
