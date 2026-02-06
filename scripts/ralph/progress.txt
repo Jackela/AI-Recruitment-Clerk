@@ -189,3 +189,50 @@ Started: Thu Feb  5 20:36:11 CST 2026
   - Use `^...$` anchors in grep to match whole lines only
   - Claude needs explicit warnings NOT to mention signal strings in any context
 ---
+
+## [2026-02-06] - US-005a
+- Added comprehensive tests for touch event handlers in mobile-swipe.component.ts
+- Created 64 tests covering all acceptance criteria:
+  - Touch event handlers (onTouchStart, onTouchMove, onTouchEnd) - 19 tests
+  - Mouse event handlers for desktop (onMouseDown, onMouseMove, onMouseUp, onMouseLeave) - 24 tests
+  - Action click handler - 2 tests
+  - Public API methods (reset, showActions) - 2 tests
+  - Lifecycle hooks (ngOnDestroy) - 1 test
+  - CSS class bindings - 4 tests
+  - Edge cases (custom threshold, no width, small swipe, zero threshold) - 4 tests
+- All 64 tests passing, typecheck and lint passing
+- Files changed:
+  - apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.component.spec.ts (created, 996 lines)
+- **Learnings for future iterations:**
+  - The mobile-swipe component supports both touch and mouse events for testing
+  - Mouse events are disabled on desktop (window.innerWidth >= 768px) via onMouseDown guard
+  - Swipe gesture is left-only (positive deltaX = startX - currentX > 0)
+  - Threshold-based triggering: actionsVisible at threshold/2, full reveal at threshold
+  - maxSwipeDistance is the sum of all action widths (default 80 each)
+  - jsdom doesn't support Touch/Touch API - need to create mock Touch and TouchEvent objects
+  - For Angular component tests with ViewChild, use TestBed.createComponent() for proper injection context
+  - Mock window.innerWidth with Object.defineProperty for breakpoint testing
+  - Event.preventDefault() is called on touchmove/mousemove to stop scrolling
+---
+
+## [2026-02-06] - US-005b
+- Added comprehensive tests for swipe detection logic in mobile-swipe.component.ts
+- Created 23 tests covering all acceptance criteria:
+  - Horizontal swipe detection (left/right) - 6 tests covering left swipe detection, right swipe rejection, varying distances, and screen positions
+  - Swipe threshold calculation - 7 tests covering threshold boundary, partial visibility, custom thresholds, and clamping
+  - isSwipe判定 (Swipe Detection Logic) - 6 tests covering valid/invalid swipe detection, boundary conditions, and direction requirements
+  - Swipe Distance and DeltaX Calculation - 4 tests covering deltaX calculation, zero movement, clamping, and position tracking
+- All 87 tests passing (64 existing + 23 new), typecheck and lint passing
+- Files changed:
+  - apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.component.spec.ts (extended with 442 lines)
+- **Learnings for future iterations:**
+  - Swipe detection uses `deltaX = startX - currentX` (positive = left swipe)
+  - Only left swipes (positive deltaX) are recognized - right swipes are ignored
+  - Action reveal requires `deltaX > swipeThreshold` (strictly greater than, not >=)
+  - Partial visibility uses `Math.abs(translateX) > swipeThreshold / 2` (strictly greater than)
+  - The component doesn't use velocity calculation - detection is distance-based only
+  - translateX is clamped to range [-maxSwipeDistance, 0]
+  - At exactly threshold or half-threshold boundary, the condition is NOT met (uses > not >=)
+  - When testing boundary conditions, use values just above/below the threshold
+  - The isSwipe logic is implicit: left direction (deltaX > 0) AND exceeds threshold
+---

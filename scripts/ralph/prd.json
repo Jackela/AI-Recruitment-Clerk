@@ -75,8 +75,8 @@
         "npm run test passes"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created mobile-swipe.component.spec.ts with 64 tests covering all touch/mouse event handlers, state management, action clicks, lifecycle, and edge cases"
     },
     {
       "id": "US-005b",
@@ -90,8 +90,8 @@
         "npm run test passes"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added 23 swipe detection tests covering horizontal swipe (6), threshold calculation (7), isSwipe判定 (6), and deltaX calculation (4)"
     },
     {
       "id": "US-005c",
