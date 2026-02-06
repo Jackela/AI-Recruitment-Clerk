@@ -130,3 +130,22 @@ Started: Thu Feb  5 20:36:11 CST 2026
   - Positions with null dates are filtered out before overlap detection (return 0 overlaps)
   - The test helper function `createWorkExperience` uses inferred types - remove explicit type annotation for default parameters
 ---
+
+## [2026-02-06] - US-004c
+- Added comprehensive tests for gap detection (detectExperienceGaps) in experience-calculator.ts
+- Created 23 tests covering all acceptance criteria:
+  - Gaps between positions (6 tests): various gap sizes (2-24 months), different date formats, large gaps
+  - Continuous employment/no gaps (5 tests): continuous jobs, single position, same month transitions, present handling
+  - Multiple gaps (4 tests): multiple gaps detection, three gaps, mix of gaps/continuous periods, chronological ordering
+  - Gap duration calculation (8 tests): 3-month, 6-month, 12-month, multi-year, year boundary, unsorted positions
+- All 73 tests passing (28 existing + 22 overlap + 23 gap), typecheck and lint passing
+- Files changed:
+  - apps/resume-parser-svc/src/field-mapper/experience-calculator.spec.ts (extended with 23 new tests)
+- **Learnings for future iterations:**
+  - Gap threshold is > 1 month - meaning a 1-month difference is NOT considered a gap (monthsDiff > 1)
+  - Gap detection uses sorted positions to ensure chronological order
+  - Gaps are returned as DateRange objects with start, end, and duration
+  - When previous position has isPresent=true, it uses new Date() for gap calculation
+  - Gap duration uses month difference: `(currentStart.year - prevEnd.year) * 12 + (currentStart.month - prevEnd.month)`
+  - The gap start date is parsed from prevEnd.toISOString(), end date from currentStart.toISOString()
+---
