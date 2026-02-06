@@ -1,78 +1,32 @@
 {
   "project": "AI-Recruitment-Clerk",
   "branchName": "ralph/repo-hygiene-ci",
-  "description": "Fix CI failures to achieve green GitHub Actions - coverage, E2E, dependency scan, secret scan, and quality gates.",
+  "description": "Fix CI failures - granular tasks for better iteration and reliability.",
   "userStories": [
     {
-      "id": "US-001",
-      "title": "Sync local CI script with GitHub Actions",
-      "description": "As a developer, I need local CI to catch the same issues as GitHub Actions before pushing.",
+      "id": "US-004a",
+      "title": "Add tests for calculateTotalExperience in experience-calculator.ts",
+      "description": "As a developer, I need tests for total experience calculation function.",
       "acceptanceCriteria": [
-        "Update ci:local script to include test:coverage and audit",
-        "Add ci:full script that includes E2E and quality gates",
-        "npm run ci:local runs test, lint, typecheck, build, coverage, audit",
-        "Verify coverage/coverage-summary.json is generated after test:coverage",
-        "Document what ci:local vs ci:full runs in scripts/ralph/CLAUDE.md"
-      ],
-      "priority": 1,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-002",
-      "title": "Add tests for pull-to-refresh.directive.ts (2.22% coverage)",
-      "description": "As a developer, I need the pull-to-refresh directive to have proper test coverage.",
-      "acceptanceCriteria": [
-        "Create tests for touch gesture handling",
-        "Create tests for refresh state management",
-        "Create tests for onDestroy lifecycle",
-        "Coverage reaches at least 80% for this file",
-        "npm run test passes"
-      ],
-      "priority": 2,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-003",
-      "title": "Add tests for date-parser.ts (3.92% coverage)",
-      "description": "As a developer, I need the date parser to have proper test coverage.",
-      "acceptanceCriteria": [
-        "Create tests for parseDateRange function",
-        "Create tests for parseSingleDate function",
-        "Create tests for normalizeDate function",
-        "Create tests for edge cases (invalid dates, null inputs)",
-        "Coverage reaches at least 80% for this file",
-        "npm run test passes"
-      ],
-      "priority": 3,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-004",
-      "title": "Add tests for experience-calculator.ts (4.16% coverage)",
-      "description": "As a developer, I need the experience calculator to have proper test coverage.",
-      "acceptanceCriteria": [
-        "Create tests for calculateTotalExperience function",
-        "Create tests for calculateOverlap function",
-        "Create tests for detectGaps function",
-        "Coverage reaches at least 80% for this file",
+        "Create tests for calculateTotalExperience with single position",
+        "Create tests for calculateTotalExperience with multiple positions",
+        "Create tests for calculateTotalExperience with no positions",
+        "Create tests for month/year conversions",
         "npm run test passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created experience-calculator.spec.ts with 28 tests covering all scenarios"
     },
     {
-      "id": "US-005",
-      "title": "Add tests for mobile-swipe.component.ts (4.1% coverage)",
-      "description": "As a developer, I need the mobile swipe component to have proper test coverage.",
+      "id": "US-004b",
+      "title": "Add tests for calculateOverlap in experience-calculator.ts",
+      "description": "As a developer, I need tests for overlap detection function.",
       "acceptanceCriteria": [
-        "Create tests for swipe gesture detection",
-        "Create tests for swipe callbacks (left, right)",
-        "Create tests for threshold calculations",
-        "Coverage reaches at least 80% for this file",
+        "Create tests for overlapping positions (same dates)",
+        "Create tests for non-overlapping positions",
+        "Create tests for partial overlap scenarios",
+        "Create tests for edge cases (null dates)",
         "npm run test passes"
       ],
       "priority": 5,
@@ -80,14 +34,14 @@
       "notes": ""
     },
     {
-      "id": "US-006",
-      "title": "Add tests for resume-parser-integration.service.ts (4.54% coverage)",
-      "description": "As a developer, I need the integration service to have proper test coverage.",
+      "id": "US-004c",
+      "title": "Add tests for detectGaps in experience-calculator.ts",
+      "description": "As a developer, I need tests for employment gap detection.",
       "acceptanceCriteria": [
-        "Create integration tests for resume parsing flow",
-        "Create tests for error handling scenarios",
-        "Create tests for JD parsing flow",
-        "Coverage reaches at least 60% for this file (integration tests are complex)",
+        "Create tests for gaps between positions",
+        "Create tests for continuous employment (no gaps)",
+        "Create tests for multiple gaps",
+        "Create tests for gap duration calculation",
         "npm run test passes"
       ],
       "priority": 6,
@@ -95,14 +49,14 @@
       "notes": ""
     },
     {
-      "id": "US-007",
-      "title": "Add tests for report-generator.service.ts (6.49% coverage)",
-      "description": "As a developer, I need the report generator service to have proper test coverage.",
+      "id": "US-004d",
+      "title": "Add tests for seniority level calculation in experience-calculator.ts",
+      "description": "As a developer, I need tests for seniority determination logic.",
       "acceptanceCriteria": [
-        "Create tests for report generation flow",
-        "Create tests for PDF generation scenarios",
-        "Create tests for template rendering",
-        "Coverage reaches at least 70% for this file",
+        "Create tests for Entry level detection",
+        "Create tests for Mid level detection",
+        "Create tests for Senior level detection",
+        "Create tests for Expert level detection",
         "npm run test passes"
       ],
       "priority": 7,
@@ -110,17 +64,148 @@
       "notes": ""
     },
     {
-      "id": "US-008",
-      "title": "Add tests for low-coverage frontend components",
-      "description": "As a developer, I need frontend components to have baseline test coverage.",
+      "id": "US-005a",
+      "title": "Add tests for touch event handlers in mobile-swipe.component.ts",
+      "description": "As a developer, I need tests for touch event handling.",
       "acceptanceCriteria": [
-        "Add tests for navigation-guide.service.ts (4.81%)",
-        "Add tests for redis-token-blacklist.service.ts (5.4%)",
-        "Add tests for i18n.service.ts (5.82%)",
-        "Each file reaches at least 60% coverage",
+        "Create tests for onTouchStart handler",
+        "Create tests for onTouchMove handler",
+        "Create tests for onTouchEnd handler",
+        "Create tests for onMouseDown handler (desktop)",
         "npm run test passes"
       ],
       "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005b",
+      "title": "Add tests for swipe detection in mobile-swipe.component.ts",
+      "description": "As a developer, I need tests for swipe gesture detection logic.",
+      "acceptanceCriteria": [
+        "Create tests for horizontal swipe detection (left/right)",
+        "Create tests for swipe threshold calculation",
+        "Create tests for isSwipe判定",
+        "Create tests for velocity calculation",
+        "npm run test passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005c",
+      "title": "Add tests for action triggers in mobile-swipe.component.ts",
+      "description": "As a developer, I need tests for swipe action triggering.",
+      "acceptanceCriteria": [
+        "Create tests for triggerAction on left swipe",
+        "Create tests for triggerAction on right swipe",
+        "Create tests for action emission via EventEmitter",
+        "Create tests for threshold-based triggering",
+        "npm run test passes"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006a",
+      "title": "Add tests for resume parsing flow in resume-parser-integration.service.ts",
+      "description": "As a developer, I need tests for resume parsing integration.",
+      "acceptanceCriteria": [
+        "Create tests for handleResumeParsed method",
+        "Create tests for error handling when parsing fails",
+        "Create tests for valid resume scenarios",
+        "npm run test passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006b",
+      "title": "Add tests for JD parsing flow in resume-parser-integration.service.ts",
+      "description": "As a developer, I need tests for job description parsing integration.",
+      "acceptanceCriteria": [
+        "Create tests for handleJDParsed method",
+        "Create tests for JD parsing error scenarios",
+        "Create tests for valid JD scenarios",
+        "npm run test passes"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007a",
+      "title": "Add tests for report generation flow in report-generator.service.ts",
+      "description": "As a developer, I need tests for report generation.",
+      "acceptanceCriteria": [
+        "Create tests for generateReport method with valid data",
+        "Create tests for error handling when data is missing",
+        "Create tests for report format validation",
+        "npm run test passes"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007b",
+      "title": "Add tests for PDF generation in report-generator.service.ts",
+      "description": "As a developer, I need tests for PDF generation scenarios.",
+      "acceptanceCriteria": [
+        "Create tests for generatePDF method",
+        "Create tests for PDF layout validation",
+        "Create tests for PDF generation with charts",
+        "npm run test passes"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008a",
+      "title": "Add tests for navigation-guide.service.ts",
+      "description": "As a developer, I need tests for navigation guide service.",
+      "acceptanceCriteria": [
+        "Create tests for guide step generation",
+        "Create tests for progress tracking",
+        "Create tests for guide completion detection",
+        "Coverage reaches at least 60%",
+        "npm run test passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008b",
+      "title": "Add tests for redis-token-blacklist.service.ts",
+      "description": "As a developer, I need tests for token blacklist service.",
+      "acceptanceCriteria": [
+        "Create tests for token blacklisting",
+        "Create tests for token checking",
+        "Create tests for token expiration",
+        "Coverage reaches at least 60%",
+        "npm run test passes"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008c",
+      "title": "Add tests for i18n.service.ts",
+      "description": "As a developer, I need tests for internationalization service.",
+      "acceptanceCriteria": [
+        "Create tests for translate method",
+        "Create tests for language switching",
+        "Create tests for missing translation handling",
+        "Coverage reaches at least 60%",
+        "npm run test passes"
+      ],
+      "priority": 17,
       "passes": false,
       "notes": ""
     },
@@ -133,9 +218,9 @@
         "Fix dev server timeout issues",
         "Ensure test files are in correct location",
         "npm run test:e2e passes locally",
-        "Document E2E setup requirements in scripts/ralph/CLAUDE.md"
+        "Document E2E setup requirements"
       ],
-      "priority": 9,
+      "priority": 18,
       "passes": false,
       "notes": ""
     },
@@ -149,7 +234,7 @@
         "Document any accepted risks in scripts/ralph/PR-DESCRIPTION.md",
         "npm run audit passes or only has moderate/low warnings"
       ],
-      "priority": 10,
+      "priority": 19,
       "passes": false,
       "notes": ""
     },
@@ -164,7 +249,7 @@
         "Add roadmap comment: 'TODO: Increase to 85% after coverage improvements'",
         "npm run test:coverage and quality gates pass with 70% threshold"
       ],
-      "priority": 11,
+      "priority": 20,
       "passes": false,
       "notes": "Long-term goal: 85% coverage. This story sets 70% as an achievable milestone."
     },
@@ -178,7 +263,7 @@
         "Document any remaining warnings in scripts/ralph/PR-DESCRIPTION.md",
         "Create summary of all coverage improvements"
       ],
-      "priority": 12,
+      "priority": 21,
       "passes": false,
       "notes": ""
     }

@@ -73,3 +73,24 @@ Started: Thu Feb  5 20:36:11 CST 2026
   - The normalizeToISO function returns 'present' string for present dates, not an actual ISO date
   - Duration calculation handles "present" end dates by using new Date() at calculation time
 ---
+
+## [2026-02-06] - US-004a
+- Added comprehensive tests for calculateTotalExperience in experience-calculator.ts
+- Created 28 tests covering all acceptance criteria:
+  - Single position tests (6 tests): full dates, year-month, year-only, partial months, present/current keywords
+  - Multiple positions tests (6 tests): sequential, gaps, overlaps, varying durations, unsorted input, min/max/average
+  - No positions/empty input tests (4 tests): null, undefined, empty array, invalid dates
+  - Month/year conversion tests (7 tests): fractional years, rounding, 1 month, 11 months, year boundaries
+  - Edge cases (5 tests): null dates, long duration, same month
+- All tests passing, typecheck and lint passing
+- Files changed:
+  - apps/resume-parser-svc/src/field-mapper/experience-calculator.spec.ts (created, 519 lines)
+- **Learnings for future iterations:**
+  - Month calculation can vary by 1 depending on date boundaries when using YYYY-MM format
+  - Use toBeGreaterThanOrEqual/toBeLessThanOrEqual for tests that may have 1-month variance
+  - ExperienceCalculator is a static class - call methods directly without instantiation
+  - analyzeExperience() is the main entry point, with calculateTotalExperience being a private helper
+  - Total experience calculation handles overlap detection (doesn't double count overlapping periods)
+  - Present keywords (present, current, now, ongoing, today, till date, till now, continuing) use isPresent flag
+  - DateRange objects contain start, end ParsedDate objects with duration calculated by DateParser
+---
