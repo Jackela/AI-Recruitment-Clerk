@@ -475,3 +475,28 @@ Started: Thu Feb  5 20:36:11 CST 2026
   - Zone.js intercepts operations in Angular tests - avoid direct 'new Service()' outside TestBed
   - Translation cache (Map) prevents redundant HTTP calls for the same language
 ---
+
+## [2026-02-06] - US-009
+- Fixed E2E test configuration and infrastructure for CI reliability
+- Simplified global-setup.ts: Removed manual dev server startup with detached processes that caused timeout issues
+- Changed to use Playwright's built-in webServer configuration for better reliability
+- Updated project.json: Set E2E_SKIP_WEBSERVER=false, E2E_MANUAL_DEV_SERVER=false, DEV_SERVER_PORT=4200
+- Updated playwright.config.ts: Use serve-static for faster startup (60s timeout vs 300s for dev server)
+- Updated CI workflow (.github/workflows/ci.yml): Added build step before E2E tests
+- Created README.md in apps/ai-recruitment-frontend-e2e/ with setup requirements and documentation
+- Files changed:
+  - .github/workflows/ci.yml (added build step)
+  - apps/ai-recruitment-frontend-e2e/playwright.config.ts (simplified webServer config)
+  - apps/ai-recruitment-frontend-e2e/project.json (updated env vars)
+  - apps/ai-recruitment-frontend-e2e/global-setup.ts (removed manual dev server startup)
+  - apps/ai-recruitment-frontend-e2e/global-teardown.ts (simplified cleanup)
+  - apps/ai-recruitment-frontend-e2e/README.md (created documentation)
+- **Learnings for future iterations:**
+  - Playwright's built-in webServer is more reliable than manual process spawning
+  - Using `serve-static` with pre-built assets is much faster than starting Angular dev server in CI (60s vs 300s timeout)
+  - The `E2E_SKIP_WEBSERVER` and `E2E_MANUAL_DEV_SERVER` env vars control webServer startup
+  - Detached processes with `child.unref()` can cause issues with process lifecycle management
+  - E2E test files are correctly located in `src/` directory with `*.spec.ts` pattern
+  - Port 4200 is used for static server, 4202 was the old dev server port
+  - The mock API server still starts in global-setup.ts for test data
+---

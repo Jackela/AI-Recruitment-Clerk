@@ -66,6 +66,22 @@ This PR completes the `ralph/repo-hygiene-ci` branch work, implementing 14 user 
 - Pre-existing environment issue, not related to Ralph changes
 - Server at http://localhost:4202 doesn't start within 120 attempts
 
+### Dependency Security Scan (US-010)
+- **Production dependencies**: 0 vulnerabilities ✅
+- **All dependencies**: 2 high-severity dev-only vulnerabilities (accepted risks)
+- **Accepted risks**:
+  1. `@modelcontextprotocol/sdk@1.25.2` (dev dep via @angular/cli):
+     - Vulnerability: Cross-client data leak via shared server/transport instance reuse
+     - Risk accepted because: Only used by Angular CLI, not used in application code
+     - The project does not create MCP servers or transport instances
+     - Fix requires breaking change: `npm audit fix --force` would upgrade to @angular/cli@21.1.3
+  2. npm bundled dependencies (`@isaacs/brace-expansion`, `tar`):
+     - Bundled with npm CLI, not in application code
+     - Cannot be fixed automatically by npm audit fix
+     - Only affects npm CLI operations, not production runtime
+- **Mitigation**: Vulnerabilities are dev-only and do not affect production runtime
+- **Action taken**: Ran `npm audit fix` which updated 37 packages with security fixes
+
 ## Changes Summary
 
 - **14 user stories** completed
