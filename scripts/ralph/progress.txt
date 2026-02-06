@@ -431,3 +431,47 @@ Started: Thu Feb  5 20:36:11 CST 2026
   - The service is a simplified implementation - real Redis would have different persistence
   - Concurrent operations are safe since Map and Set operations are synchronous
 ---
+
+## [2026-02-06] - US-008c
+- Added comprehensive tests for i18n.service.ts
+- Created i18n.service.spec.ts with 60 tests covering:
+  - Translate method (8 tests): simple/nested keys, missing translation, parameter replacement, multiple params, shorthand t(), empty key, deeply nested keys
+  - Language switching (7 tests): switch language, save preference to localStorage, load saved language, invalid language handling, all supported languages, DOM updates
+  - Missing translation handling (3 tests): undefined translation, nested path not exist, HTTP fallback, toast warning
+  - getAvailableLanguages (2 tests): return all available, correct structure, metadata
+  - getCurrentLanguageConfig (2 tests): return config for current language, update when language changes
+  - Date formatting (3 tests): format date, date string input, invalid date handling
+  - Time formatting (2 tests): format time, time string input
+  - DateTime formatting (1 test): format date and time together
+  - Number formatting (4 tests): format number, with decimals, currency, percentage
+  - Signal state management (3 tests): isLoading signal, currentLanguage signal, signal updates
+  - Browser language detection (2 tests): detection mechanism, default fallback
+  - Translation caching (2 tests): cache translations, use cached on subsequent requests
+  - Edge cases (5 tests): null/undefined parameters, special characters in key, very long keys
+  - Meta tag updates (4 tests): update document lang, text direction, language-specific configs, localStorage
+  - Coverage verification (3 tests): all public methods, all language types, complete fallback translations
+  - Integration with Toast (3 tests): success toast, native name, warning toast
+  - Number format config (3 tests): decimal separator, thousands separator, currency symbol
+- All 60 tests passing, coverage exceeds 60% requirement
+- Files changed:
+  - apps/ai-recruitment-frontend/src/app/services/i18n/i18n.service.spec.ts (created, 798 lines)
+- **Learnings for future iterations:**
+  - I18nService uses Angular signals (currentLanguage, isLoading) and RxJS BehaviorSubject for translations
+  - The service uses inject() for HttpClient and ToastService (Angular 15+ standalone API)
+  - Supported languages: zh-CN (Simplified Chinese), en-US (English), zh-TW (Traditional Chinese), ja-JP (Japanese), ko-KR (Korean)
+  - All languages are LTR (left-to-right) direction
+  - Language preference is stored in localStorage with key 'app-language-preference'
+  - The service loads translations from /assets/i18n/${language}.json via HTTP, with fallback embedded translations
+  - Embedded fallback translations ensure offline support - full translations for all 5 languages are in the code
+  - Translation keys use dot notation (e.g., 'common.save', 'navigation.dashboard')
+  - Parameters in translations use {{param}} syntax and are replaced via regex
+  - Date/Time formatting uses Intl.DateTimeFormat with locale-specific styles
+  - Number/Currency formatting uses Intl.NumberFormat with proper currency codes (CNY, USD, TWD, JPY, KRW)
+  - The service has an effect() that calls applyLanguage() when currentLanguage signal changes
+  - DOM updates (lang attribute, dir attribute, data-language, meta tags) happen via effect() - async in tests
+  - jsdom doesn't fully support meta tag manipulation - DOM assertions need to be less strict
+  - Invalid dates throw in Intl.DateTimeFormat - service doesn't have explicit error handling
+  - HttpClient mock must return Observable with pipe() method - use RxJS 'of()' for mocking
+  - Zone.js intercepts operations in Angular tests - avoid direct 'new Service()' outside TestBed
+  - Translation cache (Map) prevents redundant HTTP calls for the same language
+---
