@@ -1,7 +1,6 @@
 import { ResumeEncryptionService } from './resume-encryption.service';
 import { ResumeParserException } from '@ai-recruitment-clerk/infrastructure-shared';
-import { EncryptionService } from '@ai-recruitment-clerk/infrastructure-shared';
-import { ResumeParserConfigService } from '../config';
+import type { ResumeParserConfigService } from '../config';
 
 // Mock EncryptionService
 jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => ({

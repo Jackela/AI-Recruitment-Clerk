@@ -1,4 +1,5 @@
-import { DateParser, ParsedDate, DateRange } from './date-parser';
+import { DateParser } from './date-parser';
+import type { ParsedDate, DateRange } from './date-parser';
 
 describe('DateParser', () => {
   describe('parseDate', () => {

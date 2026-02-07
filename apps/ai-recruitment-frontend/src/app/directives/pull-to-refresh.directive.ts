@@ -1,10 +1,10 @@
+import type { OnInit } from '@angular/core';
 import {
   DestroyRef,
   Directive,
   ElementRef,
   inject,
   input,
-  OnInit,
   output,
 } from '@angular/core';
 

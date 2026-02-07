@@ -6,7 +6,8 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import { validateEnv, EnvAccess } from '@ai-recruitment-clerk/configuration';
+import { validateEnv } from '@ai-recruitment-clerk/configuration';
+import type { EnvAccess } from '@ai-recruitment-clerk/configuration';
 
 /**
  * JD Extractor Configuration Service
@@ -26,28 +27,28 @@ export class JdExtractorConfigService {
   /**
    * Get the Node environment (development, production, test)
    */
-  get nodeEnv(): string {
+  public get nodeEnv(): string {
     return this.env.getString('NODE_ENV', false) || 'development';
   }
 
   /**
    * Check if running in test mode
    */
-  get isTest(): boolean {
+  public get isTest(): boolean {
     return this.nodeEnv === 'test';
   }
 
   /**
    * Get NATS connection URL
    */
-  get natsUrl(): string {
+  public get natsUrl(): string {
     return this.env.getString('NATS_URL', false) || 'nats://localhost:4222';
   }
 
   /**
    * Get Gemini API key for AI processing
    */
-  get geminiApiKey(): string {
+  public get geminiApiKey(): string {
     const key = this.env.getString('GEMINI_API_KEY');
     if (!key) {
       throw new Error('GEMINI_API_KEY is required');
@@ -58,7 +59,7 @@ export class JdExtractorConfigService {
   /**
    * Get all configuration values as an object (useful for debugging)
    */
-  getConfigSnapshot(): Record<string, unknown> {
+  public getConfigSnapshot(): Record<string, unknown> {
     return {
       nodeEnv: this.nodeEnv,
       isTest: this.isTest,

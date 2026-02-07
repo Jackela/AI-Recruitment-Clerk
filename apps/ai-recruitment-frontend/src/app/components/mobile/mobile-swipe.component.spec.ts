@@ -48,10 +48,18 @@ function createMockTouchEvent(type: string, touches: Touch[]): TouchEvent {
     AT_TARGET: 2,
     BUBBLING_PHASE: 3,
     composedPath: () => [],
-    initEvent: () => {},
-    preventDefault: () => {},
-    stopImmediatePropagation: () => {},
-    stopPropagation: () => {},
+    initEvent: () => {
+      // Intentionally empty mock for Event interface
+    },
+    preventDefault: () => {
+      // Intentionally empty mock for Event interface
+    },
+    stopImmediatePropagation: () => {
+      // Intentionally empty mock for Event interface
+    },
+    stopPropagation: () => {
+      // Intentionally empty mock for Event interface
+    },
   } as unknown as TouchEvent;
 }
 
@@ -83,10 +91,18 @@ function createMockMouseEvent(type: string, clientX: number, clientY: number): M
     AT_TARGET: 2,
     BUBBLING_PHASE: 3,
     composedPath: () => [],
-    initEvent: () => {},
-    preventDefault: () => {},
-    stopImmediatePropagation: () => {},
-    stopPropagation: () => {},
+    initEvent: () => {
+      // Intentionally empty mock for Event interface
+    },
+    preventDefault: () => {
+      // Intentionally empty mock for Event interface
+    },
+    stopImmediatePropagation: () => {
+      // Intentionally empty mock for Event interface
+    },
+    stopPropagation: () => {
+      // Intentionally empty mock for Event interface
+    },
     getModifierState: () => false,
     screenX: clientX,
     screenY: clientY,
@@ -828,11 +844,11 @@ describe('MobileSwipeComponent', () => {
       const testItem = { id: 'item-123' };
       component.item = testItem;
 
-      const swipeActionSpy = jest.spyOn(component.swipeAction, 'emit');
+      const _swipeActionSpy = jest.spyOn(component.swipeAction, 'emit');
 
       component.onActionClick(action);
 
-      expect(swipeActionSpy).toHaveBeenCalledWith({
+      expect(_swipeActionSpy).toHaveBeenCalledWith({
         action,
         item: testItem,
       });
@@ -1589,12 +1605,12 @@ describe('MobileSwipeComponent', () => {
         const testItem = { id: 'item-123', name: 'Test Item' };
         component.item = testItem;
 
-        const swipeActionSpy = jest.spyOn(component.swipeAction, 'emit');
+        const _swipeActionSpy = jest.spyOn(component.swipeAction, 'emit');
 
         component.onActionClick(action);
 
-        expect(swipeActionSpy).toHaveBeenCalledTimes(1);
-        expect(swipeActionSpy).toHaveBeenCalledWith({
+        expect(_swipeActionSpy).toHaveBeenCalledTimes(1);
+        expect(_swipeActionSpy).toHaveBeenCalledWith({
           action,
           item: testItem,
         });
@@ -1609,7 +1625,7 @@ describe('MobileSwipeComponent', () => {
           width: 100,
         };
 
-        const swipeActionSpy = jest.spyOn(component.swipeAction, 'emit');
+        const _swipeActionSpy = jest.spyOn(component.swipeAction, 'emit');
         let emittedEvent: SwipeEvent | undefined;
 
         component.swipeAction.subscribe((event: SwipeEvent) => {
@@ -1636,7 +1652,7 @@ describe('MobileSwipeComponent', () => {
         const testItem = { id: 'abc-123', title: 'Test', value: 42 };
         component.item = testItem;
 
-        const swipeActionSpy = jest.spyOn(component.swipeAction, 'emit');
+        const _swipeActionSpy = jest.spyOn(component.swipeAction, 'emit');
         let emittedEvent: SwipeEvent | undefined;
 
         component.swipeAction.subscribe((event: SwipeEvent) => {
@@ -1832,10 +1848,10 @@ describe('MobileSwipeComponent', () => {
         expect(component.actionsVisible).toBe(true);
 
         // Then click the action
-        const swipeActionSpy = jest.spyOn(component.swipeAction, 'emit');
+        const _swipeActionSpy = jest.spyOn(component.swipeAction, 'emit');
         component.onActionClick(action);
 
-        expect(swipeActionSpy).toHaveBeenCalledWith({
+        expect(_swipeActionSpy).toHaveBeenCalledWith({
           action,
           item: testItem,
         });
@@ -1854,10 +1870,10 @@ describe('MobileSwipeComponent', () => {
         expect(component.actionsVisible).toBe(true);
 
         // Click action
-        const swipeActionSpy = jest.spyOn(component.swipeAction, 'emit');
+        const _swipeActionSpy = jest.spyOn(component.swipeAction, 'emit');
         component.onActionClick(action);
 
-        expect(swipeActionSpy).toHaveBeenCalled();
+        expect(_swipeActionSpy).toHaveBeenCalled();
         expect(component.actionsVisible).toBe(false);
       });
     });

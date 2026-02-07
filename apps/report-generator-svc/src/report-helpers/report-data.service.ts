@@ -5,6 +5,7 @@ import type {
   ReportRecommendation,
 } from '../schemas/report.schema';
 import type { Types } from 'mongoose';
+import type { CandidateData } from '../report-generator/llm.service';
 
 /**
  * Report document shape for internal use
@@ -79,7 +80,7 @@ export class ReportDataService {
    * @param report - Source report document
    * @returns Formatted candidate comparison data
    */
-  formatCandidateForComparison(
+  public formatCandidateForComparison(
     report: ReportDocument,
   ): CandidateComparisonData {
     return {
@@ -96,7 +97,7 @@ export class ReportDataService {
    * @param report - Source report document
    * @returns Formatted interview candidate data
    */
-  formatCandidateForInterview(
+  public formatCandidateForInterview(
     report: ReportDocument,
   ): InterviewCandidateData {
     return {
@@ -113,7 +114,7 @@ export class ReportDataService {
    * @param report - Source report document
    * @returns Extracted job requirements
    */
-  extractJobRequirements(
+  public extractJobRequirements(
     report: ReportDocument,
   ): ExtractedJobRequirements {
     return {
@@ -128,7 +129,7 @@ export class ReportDataService {
    * @param dataItems - Array of report data items
    * @returns Aggregated score breakdown
    */
-  aggregateScoreBreakdown(
+  public aggregateScoreBreakdown(
     dataItems: Array<{
       scoreBreakdown?: ScoreBreakdown;
     }>,
@@ -186,7 +187,7 @@ export class ReportDataService {
    * @param dataItems - Array of report data items
    * @returns Aggregated matching skills
    */
-  aggregateSkillsAnalysis(
+  public aggregateSkillsAnalysis(
     dataItems: Array<{
       skillsAnalysis?: MatchingSkill[];
     }>,
@@ -219,7 +220,7 @@ export class ReportDataService {
    * @param dataItems - Array of report data items
    * @returns Aggregated recommendation
    */
-  generateOverallRecommendation(
+  public generateOverallRecommendation(
     dataItems: Array<{
       recommendation?: ReportRecommendation;
     }>,
@@ -277,7 +278,7 @@ export class ReportDataService {
    * @param dataItems - Array of report data items
    * @returns Average confidence score
    */
-  calculateAverageConfidence(
+  public calculateAverageConfidence(
     dataItems: Array<{
       confidence?: number;
     }>,
@@ -303,7 +304,7 @@ export class ReportDataService {
    * @param dataItems - Array of report data items
    * @returns Generated summary text
    */
-  generateBatchSummary(
+  public generateBatchSummary(
     dataItems: Array<{
       resumeId?: string;
     }>,
@@ -328,8 +329,7 @@ export class ReportDataService {
    * @param candidate - Candidate comparison data
    * @returns LLM-compatible candidate data
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  formatCandidateForLlm(candidate: CandidateComparisonData): any {
+  public formatCandidateForLlm(candidate: CandidateComparisonData): CandidateData {
     return {
       id: candidate.id,
       name: candidate.name,
@@ -347,7 +347,7 @@ export class ReportDataService {
    * @param decision - Original decision string
    * @returns LLM-compatible recommendation value
    */
-  mapRecommendationDecision(
+  public mapRecommendationDecision(
     decision?: string,
   ): 'hire' | 'strong_hire' | 'consider' | 'pass' {
     switch (decision) {

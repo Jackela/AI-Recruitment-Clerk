@@ -3,7 +3,6 @@ import type {
   FieldMappingResult,
   VisionLlmResponse,
 } from '../dto/resume-parsing.dto';
-import type { ResumeDTO } from '@ai-recruitment-clerk/resume-dto';
 
 // Mock VisionLlmService
 const mockVisionLlmService = {

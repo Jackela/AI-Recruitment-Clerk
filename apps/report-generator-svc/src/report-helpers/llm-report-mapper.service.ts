@@ -28,7 +28,7 @@ export class LlmReportMapperService {
    * @param event - The match scored event
    * @returns LLM-compatible report event
    */
-  buildReportEvent(event: MatchScoredEvent): LlmReportEvent {
+  public buildReportEvent(event: MatchScoredEvent): LlmReportEvent {
     return {
       jobId: event.jobId,
       resumeIds: [event.resumeId],
@@ -51,7 +51,7 @@ export class LlmReportMapperService {
    * @param jobData - Internal job data
    * @returns LLM-compatible job data
    */
-  mapJobDataForLlm(jobData?: JobData): LlmReportEvent['jobData'] {
+  public mapJobDataForLlm(jobData?: JobData): LlmReportEvent['jobData'] {
     if (!jobData) {
       return undefined;
     }
@@ -68,7 +68,7 @@ export class LlmReportMapperService {
    * @param requirements - Internal job requirements
    * @returns LLM-compatible job requirements
    */
-  mapJobRequirementsForLlm(
+  public mapJobRequirementsForLlm(
     requirements?: JobData['requirements'],
   ): LlmJobRequirements | undefined {
     if (!requirements) {
@@ -110,7 +110,7 @@ export class LlmReportMapperService {
    * @param scoringData - Optional scoring data for enrichment
    * @returns LLM-compatible resume data array
    */
-  mapResumeDataForLlm(
+  public mapResumeDataForLlm(
     resumeData?: ResumeData,
     scoringData?: ScoringData,
   ): LlmReportEvent['resumesData'] {
@@ -155,7 +155,7 @@ export class LlmReportMapperService {
    * @param resumeData - Internal resume data
    * @returns LLM-compatible extracted resume data
    */
-  mapExtractedResumeData(
+  public mapExtractedResumeData(
     resumeData: ResumeData,
   ): LlmExtractedResumeData {
     const { extractedData } = resumeData;
@@ -202,7 +202,7 @@ export class LlmReportMapperService {
    * @param scoringData - Scoring data containing matching skills
    * @returns Array of missing skill names
    */
-  deriveMissingSkills(scoringData?: ScoringData): string[] | undefined {
+  public deriveMissingSkills(scoringData?: ScoringData): string[] | undefined {
     const missing =
       scoringData?.matchingSkills
         ?.filter((skill) => skill.matchType === 'missing')
@@ -216,7 +216,7 @@ export class LlmReportMapperService {
    * @param scoringData - Internal scoring data
    * @returns LLM-compatible scoring results array
    */
-  mapScoringResultsForLlm(
+  public mapScoringResultsForLlm(
     scoringData?: ScoringData,
   ): LlmReportEvent['scoringResults'] {
     if (!scoringData) {
@@ -247,7 +247,7 @@ export class LlmReportMapperService {
    * @param scoringData - Internal scoring data
    * @returns LLM-compatible scoring breakdown
    */
-  mapScoringBreakdownForLlm(scoringData: ScoringData): LlmScoringBreakdown {
+  public mapScoringBreakdownForLlm(scoringData: ScoringData): LlmScoringBreakdown {
     return {
       skillsMatch: scoringData.breakdown.skillsMatch,
       experienceMatch: scoringData.breakdown.experienceMatch,
@@ -269,7 +269,7 @@ export class LlmReportMapperService {
    * @param scoringData - Internal scoring data
    * @returns Array of recommendation strings or undefined
    */
-  mapRecommendationsForLlm(scoringData: ScoringData): string[] | undefined {
+  public mapRecommendationsForLlm(scoringData: ScoringData): string[] | undefined {
     const recommendations = scoringData.recommendations;
     if (!recommendations) {
       return undefined;
@@ -291,7 +291,7 @@ export class LlmReportMapperService {
    * @param value - Year string
    * @returns Parsed year number
    */
-  parseYear(value: string): number {
+  public parseYear(value: string): number {
     const parsed = Number.parseInt(value, 10);
     return Number.isFinite(parsed) ? parsed : new Date().getFullYear();
   }
@@ -301,7 +301,7 @@ export class LlmReportMapperService {
    * @param scoringData - Internal scoring data
    * @returns Score breakdown
    */
-  convertToScoreBreakdown(scoringData: ScoringData): ScoreBreakdown {
+  public convertToScoreBreakdown(scoringData: ScoringData): ScoreBreakdown {
     return {
       skillsMatch: scoringData.breakdown.skillsMatch,
       experienceMatch: scoringData.breakdown.experienceMatch,
@@ -315,7 +315,7 @@ export class LlmReportMapperService {
    * @param skills - Array of matching skills
    * @returns Standardized matching skills
    */
-  convertToMatchingSkills(skills: ScoringData['matchingSkills']): MatchingSkill[] {
+  public convertToMatchingSkills(skills: ScoringData['matchingSkills']): MatchingSkill[] {
     return skills.map((skill) => ({
       skill: skill.skill,
       matchScore: skill.matchScore,
@@ -329,7 +329,7 @@ export class LlmReportMapperService {
    * @param recommendations - Recommendations object
    * @returns Standardized report recommendation
    */
-  convertToReportRecommendation(
+  public convertToReportRecommendation(
     recommendations: ScoringData['recommendations'],
   ): ReportRecommendation {
     return {
@@ -347,7 +347,7 @@ export class LlmReportMapperService {
    * @param jobRequirements - Internal job requirements
    * @returns LLM-compatible candidate and job data
    */
-  formatForInterviewGuide(
+  public formatForInterviewGuide(
     candidateData: {
       id: string;
       name: string;
@@ -397,7 +397,7 @@ export class LlmReportMapperService {
    * @param decision - Original decision string
    * @returns LLM-compatible recommendation
    */
-  mapRecommendationDecision(
+  public mapRecommendationDecision(
     decision?: string,
   ): LlmCandidateData['recommendation'] {
     switch (decision) {
@@ -423,7 +423,7 @@ export class LlmReportMapperService {
    * @param event - The match scored event
    * @returns Generated summary text
    */
-  generateExecutiveSummary(event: MatchScoredEvent): string {
+  public generateExecutiveSummary(event: MatchScoredEvent): string {
     const score = Math.round(event.scoreDto.overallScore * 100);
     const decision = event.scoreDto.recommendations.decision;
 
@@ -448,7 +448,7 @@ export class LlmReportMapperService {
    * @param extension - File extension
    * @returns Generated filename
    */
-  generateReportFilename(
+  public generateReportFilename(
     reportType: string,
     jobId: string,
     resumeId: string,

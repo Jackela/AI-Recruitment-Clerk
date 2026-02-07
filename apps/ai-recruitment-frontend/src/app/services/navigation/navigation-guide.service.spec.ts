@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
-import { NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { of } from 'rxjs';
-import { NavigationGuideService, GuideStep, OnboardingFlow } from './navigation-guide.service';
+import type { GuideStep } from './navigation-guide.service';
+import { NavigationGuideService } from './navigation-guide.service';
 
 describe('NavigationGuideService', () => {
   let service: NavigationGuideService;
-  let router: jest.Mocked<Router>;
+  let _router: jest.Mocked<Router>;
   let localStorageMock: Record<string, string>;
 
   beforeEach(() => {
@@ -37,7 +37,7 @@ describe('NavigationGuideService', () => {
     });
 
     service = TestBed.inject(NavigationGuideService);
-    router = TestBed.inject(Router) as jest.Mocked<Router>;
+    _router = TestBed.inject(Router) as jest.Mocked<Router>;
 
     // Clear DOM
     document.body.innerHTML = '';

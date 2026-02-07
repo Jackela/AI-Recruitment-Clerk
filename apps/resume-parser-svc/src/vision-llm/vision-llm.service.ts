@@ -7,14 +7,15 @@ import {
 import type { VisionLlmRequest, VisionLlmResponse } from '../dto/resume-parsing.dto';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 import type {
-  GeminiConfig} from '@ai-recruitment-clerk/shared-dtos';
+  GeminiConfig,
+} from '@ai-recruitment-clerk/shared-dtos';
 import {
   GeminiClient,
   PromptTemplates,
   PromptBuilder,
 } from '@ai-recruitment-clerk/shared-dtos';
 import { SecureConfigValidator } from '@app/shared-dtos';
-import { ResumeParserConfigService } from '../config';
+import type { ResumeParserConfigService } from '../config';
 import pdfParse from 'pdf-parse-fork';
 
 /**

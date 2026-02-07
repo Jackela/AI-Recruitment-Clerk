@@ -1,4 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { RedisTokenBlacklistService } from './redis-token-blacklist.service';
 
@@ -149,7 +150,7 @@ describe('RedisTokenBlacklistService', () => {
       expect(await service.isTokenBlacklisted(token)).toBe(false); // Cleanup happens here
 
       // Act
-      const health = await service.healthCheck();
+      const _health = await service.healthCheck();
 
       // Assert - Token should have been removed
       expect(await service.isTokenBlacklisted(token)).toBe(false);

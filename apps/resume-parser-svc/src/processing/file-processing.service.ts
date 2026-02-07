@@ -51,10 +51,10 @@ export class FileProcessingService {
    * @returns Validated file buffer with hash
    * @throws ResumeParserException if download or validation fails
    */
-  async downloadAndValidateFile(
-    gridFsUrl: string,
-    filename: string,
-    metadata?: { mimetype?: string; size?: number },
+  public async downloadAndValidateFile(
+    _gridFsUrl: string,
+    _filename: string,
+    _metadata?: { mimetype?: string; size?: number },
   ): Promise<FileProcessingResult> {
     // This would integrate with GridFsService - keeping as placeholder for now
     // since GridFsService has its own downloadFile method
@@ -71,7 +71,7 @@ export class FileProcessingService {
    * @param metadata - Optional file metadata
    * @returns Processing result with buffer, hash, and metadata
    */
-  async downloadAndValidateFileWithService(
+  public async downloadAndValidateFileWithService(
     downloadFn: (url: string) => Promise<Buffer>,
     gridFsUrl: string,
     filename: string,
@@ -98,7 +98,7 @@ export class FileProcessingService {
    * @returns Processing result with buffer, hash, and detected MIME type
    * @throws ResumeParserException if validation fails
    */
-  validateFileBuffer(
+  public validateFileBuffer(
     buffer: Buffer,
     filename: string,
     metadata?: { mimetype?: string; size?: number },
@@ -151,7 +151,7 @@ export class FileProcessingService {
    * @param buffer - File buffer to check
    * @returns True if buffer starts with PDF signature
    */
-  isPdfFile(buffer: Buffer): boolean {
+  public isPdfFile(buffer: Buffer): boolean {
     const header = buffer.toString('ascii', 0, 4);
     return header === '%PDF';
   }
@@ -161,7 +161,7 @@ export class FileProcessingService {
    * @param buffer - File buffer to analyze
    * @returns Detected MIME type or 'application/octet-stream' if unknown
    */
-  detectMimeType(buffer: Buffer): string {
+  public detectMimeType(buffer: Buffer): string {
     // Check PDF signature first
     const pdfHeader = buffer.toString('ascii', 0, 4);
     if (pdfHeader === '%PDF') {
@@ -191,7 +191,7 @@ export class FileProcessingService {
    * @param buffer - File buffer to hash
    * @returns Hexadecimal hash string
    */
-  generateFileHash(buffer: Buffer): string {
+  public generateFileHash(buffer: Buffer): string {
     const crypto = require('crypto');
     return crypto
       .createHash('sha256')
@@ -204,7 +204,7 @@ export class FileProcessingService {
    * @param mimeType - MIME type to check
    * @returns True if MIME type is in allowed list
    */
-  isAllowedMimeType(mimeType: string): boolean {
+  public isAllowedMimeType(mimeType: string): boolean {
     return this.config.allowedMimeTypes.includes(mimeType);
   }
 
@@ -212,7 +212,7 @@ export class FileProcessingService {
    * Gets current file processing configuration
    * @returns Current configuration
    */
-  getConfig(): Readonly<FileProcessingConfig> {
+  public getConfig(): Readonly<FileProcessingConfig> {
     return { ...this.config };
   }
 }

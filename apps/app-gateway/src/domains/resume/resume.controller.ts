@@ -35,9 +35,6 @@ import type {
   ResumeUploadDto,
   ResumeStatusUpdateDto,
   ResumeSearchDto,
-  ResumeDto,
-  ResumeAnalysisDto,
-  ResumeSkillsAnalysisDto,
 } from '@ai-recruitment-clerk/resume-dto';
 import type { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import type { ResumeService } from './resume.service';

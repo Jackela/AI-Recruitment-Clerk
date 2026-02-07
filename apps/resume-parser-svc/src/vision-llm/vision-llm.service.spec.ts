@@ -1,5 +1,5 @@
 import { VisionLlmService } from './vision-llm.service';
-import { ResumeParserConfigService } from '../config';
+import type { ResumeParserConfigService } from '../config';
 
 const mockConfig = {
   isTest: true,

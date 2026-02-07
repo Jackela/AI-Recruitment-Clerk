@@ -1,7 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
 import { UserManagementService } from './user-management.service';
-import { UserCrudService } from './user-crud.service';
-import { UserAuthService } from './user-auth.service';
 import { UserStatus } from '@ai-recruitment-clerk/user-management-domain';
 
 const createUserServiceMock = () => ({
@@ -276,7 +274,7 @@ describe('UserManagementService (mocked dependencies)', () => {
   describe('Edge Cases - Password Security', () => {
     it('should never expose password in any response', async () => {
       // Mock the CRUD service to return data without password
-      const { password, ...userWithoutPassword } = baseUser;
+      const { password: _password, ...userWithoutPassword } = baseUser;
       userCrudService.update.mockResolvedValue(userWithoutPassword);
 
       const result = await service.updateUser('user-1', { email: 'new@example.com' } as any);

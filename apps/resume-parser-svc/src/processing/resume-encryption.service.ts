@@ -1,18 +1,21 @@
 import { Injectable, Logger } from '@nestjs/common';
+import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 import {
-  EncryptionService,
   ResumeParserException,
+  EncryptionService,
 } from '@ai-recruitment-clerk/infrastructure-shared';
-import { ResumeParserConfigService } from '../config';
+import type { ResumeParserConfigService } from '../config';
 
 /**
  * Resume DTO after PII encryption
  */
-export interface SecuredResumeDto {
+export interface SecuredResumeDto extends Omit<ResumeDTO, 'contactInfo'> {
   _organizationId: string;
   _dataClassification: string;
-  contactInfo: any; // Encrypted contact info
-  [key: string]: any; // Other resume fields
+  // Encrypted contact info - using Record to avoid any
+  contactInfo: Record<string, unknown>;
+  // Other resume fields - using index signature with proper type
+  [key: string]: unknown;
 }
 
 /**
@@ -42,9 +45,8 @@ export class ResumeEncryptionService {
    * @returns Resume with encrypted PII fields
    * @throws ResumeParserException if encryption fails
    */
-  encryptSensitiveData(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resumeDto: any,
+  public encryptSensitiveData(
+    resumeDto: Record<string, unknown>,
     organizationId: string,
   ): SecuredResumeDto {
     try {
@@ -82,9 +84,8 @@ export class ResumeEncryptionService {
    * @param options - Security options including organization ID
    * @returns Secured resume DTO with metadata
    */
-  secureResumeData(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resumeDto: any,
+  public secureResumeData(
+    resumeDto: Record<string, unknown>,
     options: ResumeSecurityOptions,
   ): SecuredResumeDto {
     const {
@@ -133,7 +134,7 @@ export class ResumeEncryptionService {
    * @returns True if valid
    * @throws ResumeParserException if invalid
    */
-  validateOrganizationId(
+  public validateOrganizationId(
     organizationId: string,
     minLength = 5,
   ): boolean {
@@ -153,7 +154,7 @@ export class ResumeEncryptionService {
    * @returns True if access is valid
    * @throws ResumeParserException if validation fails
    */
-  validateOrganizationAccess(
+  public validateOrganizationAccess(
     organizationId: string,
     jobId: string,
   ): boolean {
@@ -178,7 +179,7 @@ export class ResumeEncryptionService {
    * @param processingNode - Optional node identifier
    * @returns Security metadata object
    */
-  createSecurityMetadata(organizationId: string, processingNode?: string): {
+  public createSecurityMetadata(organizationId: string, processingNode?: string): {
     encrypted: boolean;
     encryptionVersion: string;
     processingNode: string;

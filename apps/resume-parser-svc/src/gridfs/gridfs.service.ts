@@ -1,6 +1,7 @@
 import type {
   OnModuleInit,
-  OnModuleDestroy} from '@nestjs/common';
+  OnModuleDestroy,
+} from '@nestjs/common';
 import {
   Injectable,
   Logger
@@ -9,6 +10,7 @@ import { InjectConnection } from '@nestjs/mongoose';
 import type { Connection } from 'mongoose';
 import { GridFSBucket, ObjectId } from 'mongodb';
 import type { GridFsFileInfo } from '../dto/resume-parsing.dto';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { ResumeParserConfigService } from '../config';
 
 /**

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type { ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
 import { PullToRefreshDirective } from './pull-to-refresh.directive';
@@ -69,17 +70,25 @@ function createMockTouchEvent(type: string, touches: Touch[]): TouchEvent {
     AT_TARGET: 2,
     BUBBLING_PHASE: 3,
     composedPath: () => [],
-    initEvent: () => {},
-    preventDefault: () => {},
-    stopImmediatePropagation: () => {},
-    stopPropagation: () => {},
+    initEvent: () => {
+      // Intentionally empty mock for Event interface
+    },
+    preventDefault: () => {
+      // Intentionally empty mock for Event interface
+    },
+    stopImmediatePropagation: () => {
+      // Intentionally empty mock for Event interface
+    },
+    stopPropagation: () => {
+      // Intentionally empty mock for Event interface
+    },
   } as unknown as TouchEvent;
 }
 
 describe('PullToRefreshDirective', () => {
   let fixture: ComponentFixture<TestComponent>;
   let component: TestComponent;
-  let directiveEl: HTMLElement;
+  let _directiveEl: HTMLElement;
   let directiveInstance: PullToRefreshDirective;
 
   beforeEach(async () => {
@@ -91,7 +100,7 @@ describe('PullToRefreshDirective', () => {
 
     fixture = TestBed.createComponent(TestComponent);
     component = fixture.componentInstance;
-    directiveEl = fixture.debugElement.query(By.directive(PullToRefreshDirective)).nativeElement;
+    _directiveEl = fixture.debugElement.query(By.directive(PullToRefreshDirective)).nativeElement;
     directiveInstance = fixture.debugElement.query(By.directive(PullToRefreshDirective)).injector.get(PullToRefreshDirective);
     fixture.detectChanges();
   });
@@ -497,7 +506,7 @@ describe('PullToRefreshDirective', () => {
 
     describe('triggerRefresh', () => {
       it('should vibrate with pattern when vibrate is supported', () => {
-        const refreshSpy = jest.spyOn(directiveInstance['refresh'], 'emit');
+        const _refreshSpy = jest.spyOn(directiveInstance['refresh'], 'emit');
 
         directiveInstance['triggerRefresh']();
 
@@ -531,7 +540,7 @@ describe('PullToRefreshDirective', () => {
     });
 
     it('should remove event listeners on destroy', () => {
-      const removeEventListenerSpy = jest.spyOn(document, 'removeEventListener');
+      const _removeEventListenerSpy = jest.spyOn(document, 'removeEventListener');
       directiveInstance.ngOnInit();
 
       // The destroyRef.onDestroy should be called with a cleanup callback

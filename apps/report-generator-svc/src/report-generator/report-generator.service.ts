@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { LlmService } from './llm.service';
-import { GridFsService, type ReportFileMetadata } from './gridfs.service';
-import { ReportRepository, type ReportCreateData } from './report.repository';
+import type { LlmService } from './llm.service';
+import type { GridFsService, ReportFileMetadata } from './gridfs.service';
+import type { ReportRepository, ReportCreateData } from './report.repository';
 import type {
   ScoreBreakdown,
   MatchingSkill,
@@ -12,7 +12,7 @@ import {
   ErrorCorrelationManager,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import { Types } from 'mongoose';
-import {
+import type {
   ReportDataService,
   LlmReportMapperService,
 } from '../report-helpers';

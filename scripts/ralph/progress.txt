@@ -568,3 +568,49 @@ Started: Thu Feb  5 20:36:11 CST 2026
   - Quality gates threshold needs to be kept in sync between local (config/quality-gates.json) and CI (.github/workflows/ci.yml)
   - Local ci:full includes E2E tests which may timeout; for quick verification, use ci:local (lint, typecheck, test:coverage, audit, build)
 ---
+
+## [2026-02-07] - JAVA-PRD-CREATION
+- Created comprehensive PRD for Java DDD/CQRS transformation
+- File: scripts/ralph/java-ddr-cqrs-transformation-prd.json
+- Total user stories: 45 fine-grained stories covering the full transformation
+- **Architecture Overview:**
+  - Modular monolith architecture with clear bounded context boundaries
+  - 6 bounded contexts: candidate-context, job-context, scoring-context, reporting-context, user-context, shared-kernel
+  - DDD patterns: Aggregates, Entities, Value Objects, Domain Events, Domain Services, Repositories
+  - CQRS patterns: Commands, Queries, CommandHandlers, QueryHandlers, ReadModels
+  - SOLID principles enforced through interface segregation and dependency inversion
+  - SSOT through single source aggregates and event sourcing
+- **Key Modules:**
+  1. **JAVA-001 to JAVA-004**: Foundation - Project setup, shared-kernel (domain/app/infrastructure layers)
+  2. **JAVA-005 to JAVA-009**: Candidate Context - Resume aggregate, CQRS handlers, Vision LLM, persistence
+  3. **JAVA-010 to JAVA-012**: Job Context - Job aggregate, CQRS handlers, JD extraction
+  4. **JAVA-013 to JAVA-016**: Scoring Context - Match aggregate, Skills Taxonomy, scoring services
+  5. **JAVA-017 to JAVA-019**: Reporting Context - Report aggregate, PDF generation
+  6. **JAVA-020 to JAVA-022**: User Context - User/Organization aggregates, authentication, security
+  7. **JAVA-023 to JAVA-024**: Cross-cutting - Saga orchestration, event-driven communication
+  8. **JAVA-025 to JAVA-026**: API Layer - Gateway, REST controllers
+  9. **JAVA-027 to JAVA-029**: Infrastructure - Database migrations, observability, testing
+  10. **JAVA-030 to JAVA-045**: Production readiness - CI/CD, config, security, migration, deployment
+- **Tech Stack Decisions:**
+  - Java 21+ with Spring Boot 3.x
+  - PostgreSQL for persistence (with MongoDB migration path)
+  - RabbitMQ for messaging
+  - Redis for caching
+  - Testcontainers for integration testing
+  - Flyway for database migrations
+  - Micrometer/Prometheus for metrics
+  - OpenTelemetry for tracing
+  - Spring Cloud Gateway for API gateway
+  - Spring Cloud Config for configuration
+  - Togglz for feature flags
+  - Resilience4j for circuit breakers
+- **Learnings for future iterations:**
+  - Each story is limited to ~300 tasks maximum as requested
+  - Stories follow dependency order (foundation → contexts → cross-cutting → production)
+  - Each story has clear acceptance criteria with tests
+  - Modular monolith chosen over microservices for simpler deployment while maintaining module boundaries
+  - Event sourcing + read models for CQRS query optimization
+  - Saga pattern for cross-aggregate coordination without distributed transactions
+  - Multi-tenancy handled at tenantId level with data isolation
+  - PII encryption at application layer for compliance
+---

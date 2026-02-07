@@ -5,7 +5,7 @@ import type { GridFsService } from '../gridfs/gridfs.service';
 import type { FieldMapperService } from '../field-mapper/field-mapper.service';
 import type { ResumeParserNatsService } from '../services/resume-parser-nats.service';
 import { FileProcessingService, ResumeEncryptionService } from '../processing';
-import { ResumeParserConfigService } from '../config';
+import type { ResumeParserConfigService } from '../config';
 import pdfParse from 'pdf-parse';
 
 // Mock external modules

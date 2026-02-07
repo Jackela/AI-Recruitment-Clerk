@@ -5,7 +5,6 @@ import {
   validateTestEnvironment,
   logTestEnvironment,
 } from './test-environment';
-import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 

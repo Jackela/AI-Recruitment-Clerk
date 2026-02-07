@@ -1,7 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClient } from '@angular/common/http';
-import { of, throwError, Observable } from 'rxjs';
-import { I18nService, Language, TranslationStrings, LanguageConfig } from './i18n.service';
+import { of, throwError } from 'rxjs';
+import type { Observable } from 'rxjs';
+import type { Language, TranslationStrings } from './i18n.service';
+import { I18nService } from './i18n.service';
 import { ToastService } from '../toast.service';
 
 // Create a mock HTTP response object that has pipe method
@@ -141,7 +143,7 @@ describe('I18nService', () => {
   describe('Language Switching', () => {
     it('should switch language successfully', () => {
       // Arrange
-      const initialLang = service.currentLanguage();
+      const _initialLang = service.currentLanguage();
 
       // Act
       service.setLanguage('en-US');

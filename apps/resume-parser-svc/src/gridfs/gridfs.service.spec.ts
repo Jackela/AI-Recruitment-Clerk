@@ -1,5 +1,5 @@
 import { GridFsService } from './gridfs.service';
-import { ResumeParserConfigService } from '../config';
+import type { ResumeParserConfigService } from '../config';
 
 const mockConfig = {
   isTest: true,

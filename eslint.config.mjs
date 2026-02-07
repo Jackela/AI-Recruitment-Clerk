@@ -18,6 +18,7 @@ export default [
       '**/tmp',
       '**/temp',
       '**/out',
+      '**/*.d.ts', // Generated TypeScript declaration files
     ],
   },
   {

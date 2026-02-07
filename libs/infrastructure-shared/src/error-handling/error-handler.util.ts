@@ -65,7 +65,7 @@ export class AppError extends Error {
   /**
    * Convert to standardized error response
    */
-  toResponse(requestId?: string): ErrorResponse {
+  public toResponse(requestId?: string): ErrorResponse {
     return {
       success: false,
       error: {

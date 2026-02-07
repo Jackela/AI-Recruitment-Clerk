@@ -2,14 +2,11 @@ import type {
   ComponentFixture} from '@angular/core/testing';
 import {
   TestBed,
-  fakeAsync,
-  tick,
 } from '@angular/core/testing';
 import { Component, Input, Output, EventEmitter, Directive } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Router, RouterModule } from '@angular/router';
-import { Subject, of } from 'rxjs';
 import { CommonModule } from '@angular/common';
 
 import { MobileDashboardComponent } from './mobile-dashboard.component';
@@ -24,7 +21,6 @@ import type {
   DashboardChart,
 } from './dashboard-charts.component';
 import type {
-  DashboardCard,
   QuickAction,
   ActivityItem,
 } from '../../services/mobile/mobile-dashboard.service';
