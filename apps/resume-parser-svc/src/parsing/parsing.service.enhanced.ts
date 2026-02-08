@@ -10,7 +10,6 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import type { VisionLlmService } from '../vision-llm/vision-llm.service';
 import type { GridFsService } from '../gridfs/gridfs.service';
 import type { FieldMapperService } from '../field-mapper/field-mapper.service';
-import type { ResumeParserNatsService } from '../services/resume-parser-nats.service';
 import {
   RetryUtility,
   WithCircuitBreaker,
@@ -87,7 +86,6 @@ export class ParsingService {
    * @param {VisionLlmService} visionLlmService - AI vision service for document analysis
    * @param {GridFsService} gridFsService - File storage service
    * @param {FieldMapperService} fieldMapperService - Data field mapping service
-   * @param {NatsClient} natsClient - Message queue client
    *
    * @throws {TypeError} When required dependencies are missing
    *
@@ -97,7 +95,6 @@ export class ParsingService {
     private readonly visionLlmService: VisionLlmService,
     private readonly gridFsService: GridFsService,
     private readonly fieldMapperService: FieldMapperService,
-    private readonly _natsService: ResumeParserNatsService,
   ) {
     // Periodic cleanup of expired processing records
     setInterval(() => this.cleanupExpiredProcessing(), 5 * 60 * 1000); // Every 5 minutes

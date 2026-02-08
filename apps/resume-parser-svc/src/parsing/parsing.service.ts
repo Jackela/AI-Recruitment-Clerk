@@ -974,11 +974,6 @@ export class ParsingService {
     );
   }
 
-  private detectMimeType(buffer: Buffer): string {
-    // Delegate to FileProcessingService
-    return this.fileProcessingService.detectMimeType(buffer);
-  }
-
   // Helper: extract text from PDF using pdf-parse; for plain text buffers, decode UTF-8
   private async extractTextFromMaybeTextFile(buffer: Buffer): Promise<string> {
     try {

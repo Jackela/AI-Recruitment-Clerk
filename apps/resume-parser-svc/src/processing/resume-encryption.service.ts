@@ -179,7 +179,7 @@ export class ResumeEncryptionService {
    * @param processingNode - Optional node identifier
    * @returns Security metadata object
    */
-  public createSecurityMetadata(organizationId: string, processingNode?: string): {
+  public createSecurityMetadata(_organizationId: string, processingNode?: string): {
     encrypted: boolean;
     encryptionVersion: string;
     processingNode: string;

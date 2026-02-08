@@ -1,9 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  CircuitBreaker,
-  RetryHandler,
-  DEFAULT_RETRY_CONFIG,
-} from './vision-llm-error-handler';
 import type { VisionLlmRequest, VisionLlmResponse } from '../dto/resume-parsing.dto';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 import type {
@@ -25,8 +20,6 @@ import pdfParse from 'pdf-parse-fork';
 export class VisionLlmService {
   private readonly logger = new Logger(VisionLlmService.name);
   private readonly geminiClient: GeminiClient;
-  private readonly _circuitBreaker: CircuitBreaker;
-  private readonly _retryHandler: RetryHandler;
 
   /**
    * Initializes a new instance of the Vision LLM Service.
@@ -50,12 +43,7 @@ export class VisionLlmService {
     // In tests, use stubbed Gemini client; otherwise real client
     this.geminiClient = this.createGeminiClient(geminiConfig);
 
-    // Initialize error handling mechanisms (FAIL-FAST architecture)
-    this._circuitBreaker = new CircuitBreaker(5, 60000, this.logger);
-    this._retryHandler = new RetryHandler({
-      ...DEFAULT_RETRY_CONFIG,
-      timeout: 30000, // 30s timeout for LLM API calls
-    });
+    // Circuit breaker and retry handler reserved for future error handling
   }
 
   /**
@@ -277,64 +265,6 @@ export class VisionLlmService {
     return Math.round(estimatedMs);
   }
 
-  // Reserved for future use
-  private _buildResumeExtractionPrompt(extractedText: string): string {
-    return `
-Extract structured information from this resume text. Focus on identifying:
-
-1. Contact information (name, email, phone)
-2. Technical and professional skills
-3. Work experience with details
-4. Education background
-
-${extractedText ? `Resume Text:\n${extractedText}` : 'No text extracted - please analyze the document image.'}
-
-Extraction Guidelines:
-- Extract exact information, avoid assumptions
-- Use null for missing information
-- For dates, use ISO format (YYYY-MM-DD) or "present" for current positions
-- List skills as found, including both technical and soft skills
-- Include complete work experience with company, position, dates, and summary
-- Extract education with school, degree, and major when available
-- Be thorough but accurate - only extract clearly visible information`;
-  }
-
-  // Reserved for future use
-  private _buildVisionPrompt(): string {
-    return `
-Analyze this resume document and extract structured information. Focus on:
-
-1. Contact Information:
-   - Full name
-   - Email address
-   - Phone number
-
-2. Skills:
-   - Technical skills
-   - Programming languages
-   - Tools and technologies
-   - Soft skills and competencies
-
-3. Work Experience:
-   - Company names
-   - Job titles/positions
-   - Employment dates (start and end)
-   - Job responsibilities and achievements
-
-4. Education:
-   - School/University names
-   - Degrees obtained
-   - Majors/Fields of study
-   - Graduation dates if available
-
-Extraction Guidelines:
-- Read the document carefully and extract ALL visible information
-- Use null for any information that is not clearly visible or legible
-- For dates, use YYYY-MM-DD format, or "present" for current positions
-- List skills exactly as they appear
-- Provide complete work experience details
-- Be thorough and accurate - extract only what you can clearly see`;
-  }
 
   private getResumeSchema(): string {
     return JSON.stringify(
