@@ -91,10 +91,19 @@ If no browser tools are available, note in your progress report that manual brow
 
 After completing a user story, check if ALL stories have `passes: true`.
 
-If ALL stories are complete and passing, reply with:
+**CRITICAL: DO NOT output `<promise>COMPLETE</promise>` unless EVERY single story has `passes: true`.**
+
+- If there are ANY stories with `passes: false`, end your response normally (another iteration will pick up the next story)
+- Only when ALL stories are complete and passing, reply with:
 <promise>COMPLETE</promise>
 
-If there are still stories with `passes: false`, end your response normally (another iteration will pick up the next story).
+**VERIFY: Before outputting `<promise>COMPLETE</promise>`, you must:
+1. Read the PRD file
+2. Check EVERY user story's `passes` field
+3. Confirm ALL are `true`
+4. Only then output the completion signal
+
+If even ONE story has `passes: false`, DO NOT output `<promise>COMPLETE</promise>`.
 
 ## CI Scripts
 
