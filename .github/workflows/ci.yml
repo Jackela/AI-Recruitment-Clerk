@@ -85,9 +85,33 @@ jobs:
       - run: npm ci
       - name: Build frontend for E2E tests
         run: npx nx build ai-recruitment-frontend --configuration=production
+      - name: Start static server for E2E
+        run: |
+          npx nx run ai-recruitment-frontend:serve-static --port 4200 &
+          SERVER_PID=$!
+          echo "Server started with PID: $SERVER_PID"
+          echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
+          echo "Waiting for server to be ready..."
+          for i in {1..30}; do
+            if curl -s http://localhost:4200 > /dev/null 2>&1; then
+              echo "Server is ready!"
+              break
+            fi
+            echo "Waiting... ($i/30)"
+            sleep 1
+          done
       - name: Install Playwright browsers
         run: npx playwright install --with-deps || npx playwright install
       - run: npm run test:e2e
+        env:
+          CI: true
+          E2E_SKIP_WEBSERVER: true
+      - name: Stop static server
+        if: always()
+        run: |
+          if [ -n "$SERVER_PID" ]; then
+            kill $SERVER_PID || true
+          fi
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0

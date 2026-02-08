@@ -86,8 +86,8 @@ jobs:
       - name: 🔐 Run npm audit
         run: |
           echo "🔐 Running npm security audit..."
-          npm audit --audit-level=moderate --json > audit-report.json || true
-          
+          npm audit --registry https://registry.npmjs.org/ --audit-level=moderate --json > audit-report.json || true
+
           if [ -f audit-report.json ]; then
             CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' < audit-report.json)
             HIGH=$(jq '.metadata.vulnerabilities.high // 0' < audit-report.json)
@@ -133,7 +133,7 @@ jobs:
           fetch-depth: 0  # Full history for comprehensive scan
 
       - name: 🔑 Scan for Secrets
-        uses: trufflesecurity/trufflehog@v3
+        uses: trufflesecurity/trufflehog@main
         continue-on-error: true  # Don't fail on BASE==HEAD after git history rewrites
         with:
           path: ./
