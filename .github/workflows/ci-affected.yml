@@ -21,18 +21,19 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
+          fetch-all: true
       - uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version-file: '.nvmrc'
           cache: 'npm'
       - run: npm ci
       - name: Print affected graph
-        run: npx nx show projects --affected --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }}
+        run: npx nx show projects --affected --base=origin/main --head=HEAD
       - name: Lint affected
-        run: npx nx affected -t lint --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }} --parallel=3
+        run: npx nx affected -t lint --base=origin/main --head=HEAD --parallel=3
       - name: Test affected
-        run: npx nx affected -t test --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }} --parallel=2
+        run: npx nx affected -t test --base=origin/main --head=HEAD --parallel=2
       - name: Build affected
-        run: npx nx affected -t build --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }} --parallel=2
+        run: npx nx affected -t build --base=origin/main --head=HEAD --parallel=2
       - name: E2E affected
-        run: npx nx affected -t e2e --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }} --parallel=1
+        run: npx nx affected -t e2e --base=origin/main --head=HEAD --parallel=1
