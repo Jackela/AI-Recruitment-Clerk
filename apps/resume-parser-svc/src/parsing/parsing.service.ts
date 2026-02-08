@@ -1,17 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { VisionLlmService } from '../vision-llm/vision-llm.service';
-import { PdfTextExtractorService } from './pdf-text-extractor.service';
-import { GridFsService } from '../gridfs/gridfs.service';
-import { FieldMapperService } from '../field-mapper/field-mapper.service';
-import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
-import {
+import type { VisionLlmService } from '../vision-llm/vision-llm.service';
+import type { PdfTextExtractorService } from './pdf-text-extractor.service';
+import type { GridFsService } from '../gridfs/gridfs.service';
+import type { FieldMapperService } from '../field-mapper/field-mapper.service';
+import type { ResumeParserNatsService } from '../services/resume-parser-nats.service';
+import type {
   RetryUtility,
   WithCircuitBreaker,
   ResumeParserException,
   ErrorCorrelationManager,
 } from '@ai-recruitment-clerk/infrastructure-shared';
-import { FileProcessingService, ResumeEncryptionService } from '../processing';
-import { ResumeParserConfigService } from '../config';
+import type {
+  FileProcessingService,
+  ResumeEncryptionService,
+} from '../processing';
+import type { ResumeParserConfigService } from '../config';
 import { createHash } from 'crypto';
 import pdfParse from 'pdf-parse-fork';
 

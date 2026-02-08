@@ -134,6 +134,7 @@
     "js-yaml": "^4.1.0",
     "jsonc-eslint-parser": "^2.1.0",
     "kafkajs": "^2.2.4",
+    "lint-staged": "^16.2.7",
     "mongodb-memory-server": "^10.2.0",
     "mqtt": "^5.14.1",
     "msw": "^2.10.4",
