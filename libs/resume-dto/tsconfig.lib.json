@@ -4,8 +4,6 @@
     "outDir": "../../dist/libs/resume-dto",
     "declaration": true,
     "types": ["node"],
-    "composite": true,
-    "rootDir": "./src",
     "declarationMap": true
   },
   "include": ["src/**/*.ts"],

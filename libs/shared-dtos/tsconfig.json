@@ -17,11 +17,7 @@
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
-    "composite": true
   },
   "include": ["src/**/*"],
-  "exclude": ["dist", "node_modules", "**/*.spec.ts", "**/*.test.ts"],
-  "references": [
-    { "path": "../resume-dto" }
-  ]
+  "exclude": ["dist", "node_modules", "**/*.spec.ts", "**/*.test.ts"]
 }
