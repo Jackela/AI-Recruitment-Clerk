@@ -14,7 +14,7 @@ import {
   PromptTemplates,
   PromptBuilder,
 } from '@ai-recruitment-clerk/shared-dtos';
-import type { JdExtractorConfigService } from '../config';
+import { JdExtractorConfigService } from '../config';
 
 /**
  * Provides llm functionality.
