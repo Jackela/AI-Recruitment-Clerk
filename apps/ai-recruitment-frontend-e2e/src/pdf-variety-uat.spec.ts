@@ -1,7 +1,14 @@
 import { test, expect } from './fixtures';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { waitForDeferredComponents } from './test-utils/hydration';
+
+// Get the directory of the current file (ESM compatible)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// Workspace root is 3 levels up from the test file directory
+const workspaceRoot = path.resolve(__dirname, '..', '..', '..');
 
 /**
  * Helper function for intentional delays in retry logic.
@@ -55,9 +62,9 @@ test.describe('PDF Processing Variety Tests', () => {
   test('Multi-page PDF Test: Skills from last page are correctly identified', async ({
     page,
   }) => {
-    // Fix path resolution - tests run from e2e directory context
-    const jdPath = path.resolve('..', '..', '..', 'docs', 'recruitment', 'UAT_Architect_JD.txt');
-    const multiPagePdfPath = path.resolve('multi-page-resume.pdf');
+    // Use workspace root for path resolution
+    const jdPath = path.resolve(workspaceRoot, 'docs', 'recruitment', 'UAT_Architect_JD.txt');
+    const multiPagePdfPath = path.resolve(__dirname, 'multi-page-resume.pdf');
 
     // Verify test artifacts exist
     expect(fs.existsSync(jdPath), `JD file not found: ${jdPath}`).toBeTruthy();
@@ -180,9 +187,9 @@ test.describe('PDF Processing Variety Tests', () => {
   test('Image-based PDF Test: Graceful error handling for unreadable content', async ({
     page,
   }) => {
-    // Fix path resolution - tests run from e2e directory context
-    const jdPath = path.resolve('..', '..', '..', 'docs', 'recruitment', 'UAT_Architect_JD.txt');
-    const imagePdfPath = path.resolve('image-only-resume.pdf');
+    // Use workspace root for path resolution
+    const jdPath = path.resolve(workspaceRoot, 'docs', 'recruitment', 'UAT_Architect_JD.txt');
+    const imagePdfPath = path.resolve(__dirname, 'image-only-resume.pdf');
 
     // Verify test artifacts exist
     expect(fs.existsSync(jdPath), `JD file not found: ${jdPath}`).toBeTruthy();

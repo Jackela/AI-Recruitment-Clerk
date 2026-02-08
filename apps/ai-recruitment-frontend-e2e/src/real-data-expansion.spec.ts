@@ -12,6 +12,8 @@ function delay(ms: number): Promise<void> {
 // ES module compatible __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+// Workspace root is 3 levels up from the test file directory
+const workspaceRoot = path.resolve(__dirname, '..', '..', '..');
 
 /**
  * Real Data Expansion E2E Test Suite
@@ -47,7 +49,7 @@ const PERFORMANCE_THRESHOLDS = {
 // Paths configuration
 const PATHS = {
   resumesDir: path.resolve(__dirname, 'test-data', 'resumes'),
-  jdFile: path.resolve(__dirname, '..', '..', '..', 'docs', 'recruitment', 'UAT_Architect_JD.txt'),
+  jdFile: path.resolve(workspaceRoot, 'docs', 'recruitment', 'UAT_Architect_JD.txt'),
   coachPath: '/coach',
 };
 
