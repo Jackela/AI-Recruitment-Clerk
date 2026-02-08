@@ -5,10 +5,6 @@ import {
   validateTestEnvironment,
   logTestEnvironment,
 } from './test-environment';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function globalSetup(): Promise<void> {
   console.log('🚀 Starting E2E test environment setup...');

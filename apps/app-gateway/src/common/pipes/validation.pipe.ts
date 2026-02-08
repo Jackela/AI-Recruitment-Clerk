@@ -97,7 +97,10 @@ export class CrossServiceValidationPipe implements PipeTransform {
       failFast?: boolean;
       timeout?: number;
     },
-  ) {}
+  ) {
+    // Options reserved for future configuration
+    void this._options;
+  }
 
   /**
    * Performs the transform operation.

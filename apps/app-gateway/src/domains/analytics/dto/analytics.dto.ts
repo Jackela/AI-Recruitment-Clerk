@@ -22,18 +22,6 @@ enum MetricUnit {
   MILLISECONDS = 'milliseconds',
 }
 
-enum _ReportType {
-  SUMMARY = 'summary',
-  DETAILED = 'detailed',
-  TREND = 'trend',
-}
-
-enum _DataScope {
-  USER = 'user',
-  ORGANIZATION = 'organization',
-  SYSTEM = 'system',
-}
-
 /**
  * 用户交互事件追踪DTO
  */

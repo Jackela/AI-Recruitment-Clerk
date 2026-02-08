@@ -25,6 +25,15 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'npm'
+      - name: Cache Nx
+        uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+        with:
+          path: |
+            .nx/cache
+            node_modules/.cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('package-lock.json', '**/project.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nx-
       - run: npm ci
       - run: npm run lint
 
@@ -37,6 +46,15 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'npm'
+      - name: Cache Nx
+        uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+        with:
+          path: |
+            .nx/cache
+            node_modules/.cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('package-lock.json', '**/project.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nx-
       - run: npm ci
       - run: npm run typecheck
 
@@ -49,6 +67,15 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'npm'
+      - name: Cache Nx
+        uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+        with:
+          path: |
+            .nx/cache
+            node_modules/.cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('package-lock.json', '**/project.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nx-
       - run: npm ci
       - run: npm run build
 
@@ -61,6 +88,15 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'npm'
+      - name: Cache Nx
+        uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+        with:
+          path: |
+            .nx/cache
+            node_modules/.cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('package-lock.json', '**/project.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nx-
       - run: npm ci
       - run: npm run test:coverage || npm run test -- --coverage
       - name: Enforce thresholds
@@ -75,11 +111,20 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'npm'
+      - name: Cache Nx
+        uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+        with:
+          path: |
+            .nx/cache
+            node_modules/.cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('package-lock.json', '**/project.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nx-
       - name: Cache Playwright browsers
         uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
         with:
           path: ~/.cache/ms-playwright
-          key: pw-${{ runner.os }}-${{ hashFiles('package.json') }}
+          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             pw-${{ runner.os }}-
       - run: npm ci
@@ -101,7 +146,7 @@ jobs:
             sleep 1
           done
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps || npx playwright install
+        run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
         env:
           CI: true
@@ -132,6 +177,15 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'npm'
+      - name: Cache Nx
+        uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+        with:
+          path: |
+            .nx/cache
+            node_modules/.cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('package-lock.json', '**/project.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nx-
       - run: npm ci
       - name: PII Scan
         run: node tools/ci/pii-scan.mjs

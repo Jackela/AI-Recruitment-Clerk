@@ -55,13 +55,15 @@ export class SecurityMonitorService {
 
   /**
    * Initializes a new instance of the Security Monitor Service.
-   * @param userModel - The user model.
+   * @param _userModel - The user model (reserved for future user-based security tracking).
    * @param configService - The config service.
    */
   constructor(
     @InjectModel(UserProfile.name) private _userModel: Model<UserProfile>,
     private configService: ConfigService,
   ) {
+    // Property reserved for future use
+    void this._userModel;
     this.initializeRedis();
     if (this.redis) {
       this.startPeriodicAnalysis();

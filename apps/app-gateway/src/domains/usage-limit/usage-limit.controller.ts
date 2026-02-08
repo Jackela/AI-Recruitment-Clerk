@@ -104,7 +104,7 @@ export class UsageLimitController {
           ? ip
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           : (req as any).socket?.remoteAddress ||
-            req.headers['x-forwarded-for'] ||
+            (req.headers as unknown as Record<string, string | string[] | undefined>)['x-forwarded-for'] ||
             'unknown';
 
       const checkResult = await this.usageLimitService.checkUsageLimit(
@@ -185,7 +185,7 @@ export class UsageLimitController {
           ? usageData.userIP
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           : (req as any).socket?.remoteAddress ||
-            req.headers['x-forwarded-for'] ||
+            (req.headers as unknown as Record<string, string | string[] | undefined>)['x-forwarded-for'] ||
             'unknown';
 
       const recordResult = await this.usageLimitService.recordUsage(
@@ -260,7 +260,7 @@ export class UsageLimitController {
         bonusData.ip ||
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (req as any).socket?.remoteAddress ||
-        req.headers['x-forwarded-for'] ||
+        (req.headers as unknown as Record<string, string | string[] | undefined>)['x-forwarded-for'] ||
         'unknown';
 
       // Validate bonus amount

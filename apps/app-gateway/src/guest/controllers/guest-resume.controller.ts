@@ -751,7 +751,8 @@ export class GuestResumeController {
       if (!isAuthenticated) {
         const usageStatus =
           await this.guestUsageService.getUsageStatus(deviceId);
-        demoAnalysis['remainingUsage'] = usageStatus.remainingCount;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (demoAnalysis as any).remainingUsage = usageStatus.remainingCount;
       }
 
       this.logger.log(

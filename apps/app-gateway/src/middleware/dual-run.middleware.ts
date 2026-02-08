@@ -1,6 +1,6 @@
 import type { NestMiddleware } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, NextFunction } from 'express';
 import { featureFlags } from '../config/feature-flags.config';
 import fs from 'fs';
 import path from 'path';
@@ -16,7 +16,7 @@ function sha1(s: string): string {
 
 @Injectable()
 export class DualRunMiddleware implements NestMiddleware {
-  public async use(req: Request, res: Response, next: NextFunction): Promise<void> {
+  public async use(req: Request, _res: unknown, next: NextFunction): Promise<void> {
     // Only for scoring endpoints and POST JSON requests
     if (!featureFlags.dualRun || req.method !== 'POST' || !req.path.startsWith('/scoring/')) {
       return next();
@@ -31,7 +31,6 @@ export class DualRunMiddleware implements NestMiddleware {
     const target = `${primaryBase.replace(/\/$/, '')}${req.originalUrl.replace(/^\/scoring/, '')}`;
     const alt = `${altBase.replace(/\/$/, '')}${req.originalUrl.replace(/^\/scoring/, '')}`;
 
-    const _start = Date.now();
     // Clone request body if available
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const body = (req as any).body ? JSON.stringify((req as any).body) : undefined;

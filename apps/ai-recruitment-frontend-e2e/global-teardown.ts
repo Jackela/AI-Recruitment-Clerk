@@ -144,8 +144,12 @@ async function globalTeardown(): Promise<void> {
         // Final fallback - try legacy cleanup if available
         try {
           console.log('🔄 Attempting legacy port cleanup fallback...');
-          const { cleanup } = await import('./cleanup-ports.mjs');
-          await cleanup();
+          // @ts-expect-error - cleanup-ports.mjs is an ESM module without type declarations
+           
+          const { cleanup } = await import('./cleanup-ports.mjs') as { cleanup?: () => Promise<void> };
+          if (cleanup) {
+            await cleanup();
+          }
           console.log('✅ Legacy port cleanup completed');
         } catch (fallbackError) {
           console.error(

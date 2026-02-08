@@ -34,90 +34,6 @@ interface CompletionData {
   processingTime: number;
 }
 
-interface _UserPresence {
-  userId: string;
-  username: string;
-  role: string;
-  status: 'online' | 'away' | 'busy' | 'offline';
-  currentPage?: string;
-  cursor?: { x: number; y: number };
-  lastActivity: Date;
-}
-
-interface _CollaborationMessage {
-  id: string;
-  type: 'chat' | 'comment' | 'annotation' | 'mention' | 'vote' | 'decision';
-  content: string;
-  authorId: string;
-  authorName: string;
-  contextId?: string; // e.g., candidateId, jobId
-  contextType?: 'candidate' | 'job' | 'document' | 'decision';
-  timestamp: Date;
-  threadId?: string;
-  mentions?: string[];
-  attachments?: unknown[];
-}
-
-interface _DocumentEdit {
-  documentId: string;
-  userId: string;
-  operation: 'insert' | 'delete' | 'format' | 'annotate';
-  position: number;
-  content?: string;
-  length?: number;
-  metadata?: Record<string, unknown>;
-  timestamp: Date;
-}
-
-interface _VotingSession {
-  id: string;
-  title: string;
-  description: string;
-  options: VotingOption[];
-  createdBy: string;
-  contextId: string;
-  contextType: string;
-  deadline?: Date;
-  status: 'active' | 'closed' | 'draft';
-  settings: {
-    anonymous: boolean;
-    allowComments: boolean;
-    requireJustification: boolean;
-  };
-}
-
-interface VotingOption {
-  id: string;
-  text: string;
-  votes: Vote[];
-}
-
-interface Vote {
-  userId: string;
-  timestamp: Date;
-  comment?: string;
-  weight?: number;
-}
-
-interface _ActivityFeedItem {
-  id: string;
-  type:
-    | 'user_join'
-    | 'user_leave'
-    | 'document_edit'
-    | 'comment'
-    | 'vote'
-    | 'decision'
-    | 'status_change';
-  userId: string;
-  userName: string;
-  action: string;
-  contextId?: string;
-  contextType?: string;
-  timestamp: Date;
-  metadata?: Record<string, unknown>;
-}
-
 // Job-related WebSocket event interfaces
 interface JobUpdateEvent {
   jobId: string;
@@ -163,11 +79,11 @@ export class WebSocketGateway
 
   /**
    * Initializes a new instance of the Web Socket Gateway.
-   * @param guestUsageService - The guest usage service.
-   * @param collaborationService - The collaboration service.
-   * @param presenceService - The presence service.
-   * @param notificationService - The notification service.
-   * @param cacheService - The cache service.
+   * @param _guestUsageService - The guest usage service (reserved for future usage tracking).
+   * @param _collaborationService - The collaboration service (reserved for real-time collaboration).
+   * @param _presenceService - The presence service (reserved for user presence tracking).
+   * @param _notificationService - The notification service (reserved for push notifications).
+   * @param _cacheService - The cache service (reserved for caching socket state).
    */
   constructor(
     private readonly _guestUsageService: GuestUsageService,
@@ -175,7 +91,14 @@ export class WebSocketGateway
     private readonly _presenceService: PresenceService,
     private readonly _notificationService: NotificationService,
     private readonly _cacheService: CacheService,
-  ) {}
+  ) {
+    // Services reserved for future real-time features
+    void this._guestUsageService;
+    void this._collaborationService;
+    void this._presenceService;
+    void this._notificationService;
+    void this._cacheService;
+  }
 
   /**
    * Performs the after init operation.

@@ -36,11 +36,13 @@ export class GuestGuard implements CanActivate {
 
   /**
    * Initializes a new instance of the Guest Guard.
-   * @param reflector - The reflector.
+   * @param _reflector - The reflector (reserved for future permission-based access control).
    */
   constructor(private _reflector: Reflector) {
     // Cleanup rate limit entries every 5 minutes
     setInterval(() => this.cleanupRateLimits(), 5 * 60 * 1000);
+    // Property reserved for future use
+    void this._reflector;
   }
 
   /**

@@ -11,8 +11,13 @@ while read -r local_ref local_sha remote_ref remote_sha; do
 done
 
 if [ "$delete_only" -eq 1 ]; then
-  echo "Skipping ci:local for delete-only push"
+  echo "⏭️  Skipping ci:local for delete-only push"
   exit 0
 fi
 
-npm run ci:local
+echo "🚀 Running pre-push CI checks..."
+
+# Use affected to only test changed projects (faster)
+npx nx affected -t lint typecheck test build --base=origin/main --head=HEAD --parallel=false
+
+echo "✅ Pre-push checks passed!"

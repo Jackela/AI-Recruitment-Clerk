@@ -25,7 +25,25 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'npm'
+      - name: Cache Nx
+        uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+        with:
+          path: |
+            .nx/cache
+            node_modules/.cache
+          key: ${{ runner.os }}-nx-${{ hashFiles('package-lock.json', '**/project.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nx-
+      - name: Cache Playwright browsers
+        uses: actions/cache@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            pw-${{ runner.os }}-
       - run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
       - name: Print affected graph
         run: npx nx show projects --affected --base=origin/main --head=HEAD
       - name: Lint affected
