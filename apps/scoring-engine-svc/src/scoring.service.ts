@@ -8,6 +8,7 @@ import {
   ScoringEngineErrorCode,
   ErrorCorrelationManager,
 } from '@app/shared-dtos';
+import { Logger } from '@ai-recruitment-clerk/infrastructure-shared';
 import type { JobSkillRequirement, EnhancedSkillScore } from './services/enhanced-skill-matcher.service';
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { EnhancedSkillMatcherService } from './services/enhanced-skill-matcher.service';
@@ -94,6 +95,7 @@ export interface ScoreDTO {
 @Injectable()
 export class ScoringEngineService {
   private readonly jdCache = new Map<string, JdDTO>();
+  private readonly logger = new Logger(ScoringEngineService.name);
 
   /**
    * Initializes a new instance of the Scoring Engine Service.
@@ -405,10 +407,12 @@ export class ScoringEngineService {
       processingMetrics.errorRates.push(1);
 
       // Log enhanced error details for debugging
-      console.error(
-        '[SCORING-ENGINE] Enhanced scoring failed, falling back to basic scoring:',
+      this.logger.error(
+        'Enhanced scoring failed, falling back to basic scoring',
+        scoringError,
         {
-          error: scoringError.message,
+          operation: 'enhancedScoring',
+          errorMessage: scoringError.message,
           correlationId: correlationContext?.traceId,
           processingTime: Date.now() - startTime,
         },

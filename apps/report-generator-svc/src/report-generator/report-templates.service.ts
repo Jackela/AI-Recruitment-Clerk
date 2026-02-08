@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { GridFsService, ReportFileMetadata } from './gridfs.service';
+import { GridFsService } from './gridfs.service';
+import type { ReportFileMetadata } from './gridfs.service';
 import type {
   ReportDocument,
   ScoreBreakdown,

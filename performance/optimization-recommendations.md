@@ -93,7 +93,7 @@ export class JobsController {
 
 #### **连接池配置**
 ```yaml
-# docker-compose.yml MongoDB优化
+# config/docker/docker-compose.yml MongoDB优化
 mongodb:
   environment:
     - MONGO_INITDB_ROOT_USERNAME=admin
@@ -202,7 +202,7 @@ CMD ["node", "dist/main.js"]
 
 #### **资源限制**
 ```yaml
-# docker-compose.yml资源限制
+# config/docker/docker-compose.yml资源限制
 services:
   app-gateway:
     deploy:

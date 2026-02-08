@@ -80,9 +80,10 @@ AI-Recruitment-Clerk/
 │   └── dependabot.yml                # Automated dependency updates
 │
 ├── 🐳 Docker Configuration
-│   ├── docker-compose.yml            # Full stack orchestration
-│   ├── Dockerfile (per service)      # Optimized builds
-│   └── nixpacks.toml                 # Railway deployment
+│   ├── config/docker/docker-compose.yml  # Full stack orchestration
+│   ├── config/docker/.dockerignore       # Docker build exclusions
+│   ├── Dockerfile (per service)          # Optimized builds
+│   └── nixpacks.toml                     # Railway deployment
 │
 └── 📄 Root Documentation
     ├── README.md                     # Project overview (6 diagrams)
@@ -206,7 +207,7 @@ AI-Recruitment-Clerk/
 
 | Platform | Status | Configuration |
 |----------|--------|---------------|
-| **Railway** | ✅ Ready | `nixpacks.toml`, `railway.json` |
+| **Railway** | ✅ Ready | `nixpacks.toml`, `config/deployment/railway.json` |
 | **Docker Compose** | ✅ Ready | `docker-compose.yml` |
 | **Local Development** | ✅ Ready | `npm run` scripts |
 
@@ -214,13 +215,13 @@ AI-Recruitment-Clerk/
 
 ```bash
 # Windows
-start-system.bat
+scripts\start-system.bat
 
 # Linux/macOS
-./start-system.sh
+./scripts/start-system.sh
 
 # Verify deployment
-./validate-system.sh
+./scripts/validate-system.sh
 ```
 
 ---

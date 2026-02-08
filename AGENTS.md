@@ -5,7 +5,7 @@
 - `libs/`: Reusable domain and shared libraries (e.g., `user-management-domain`, `infrastructure-shared`, `shared-dtos`).
 - `e2e/`: Playwright end‑to‑end tests and helpers.
 - `tools/` and `scripts/`: Project tooling and maintenance scripts.
-- Config and metadata: `nx.json`, `tsconfig*.json`, `eslint.config.mjs`, `jest.config.cjs`, `.env.example`.
+- Config and metadata: `nx.json`, `tsconfig*.json`, `eslint.config.mjs`, `jest.config.mjs`, `.env.example`.
 
 ## Build, Test, and Development Commands
 - Install deps: `npm ci` (Node >= 20.18). 
@@ -27,7 +27,7 @@
 - Frameworks: Jest (unit/integration), Playwright (E2E).
 - Locations: Backend/Frontend unit tests under `apps/*/src/**/?(*.)spec.ts`; additional integration under `apps/app-gateway/test/**`.
 - Run subsets: examples — `npm run test:integration`, `npm run test:integration:api`.
-- Coverage: collected in CI; see `jest.config.cjs` for thresholds and project roots.
+- Coverage: collected in CI; see `jest.config.mjs` for thresholds and project roots.
 
 ## Commit & Pull Request Guidelines
 - Commits: follow Conventional Commits (e.g., `feat:`, `fix(ci):`, `refactor(frontend):`). See `git log` for patterns.

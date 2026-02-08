@@ -11,13 +11,16 @@ import type {
 import {
   ReportGeneratorService,
 } from './report-generator.service';
-import type { LlmService } from './llm.service';
-import type { GridFsService } from './gridfs.service';
-import type { ReportRepository } from './report.repository';
+import { LlmService } from './llm.service';
+import { GridFsService } from './gridfs.service';
+import { ReportRepository } from './report.repository';
 import {
   ReportGeneratorException,
   ErrorCorrelationManager,
 } from '@ai-recruitment-clerk/infrastructure-shared';
+import { ReportDataService } from '../report-helpers/report-data.service';
+import { LlmReportMapperService } from '../report-helpers/llm-report-mapper.service';
+import type { MatchingSkill, ScoreBreakdown } from '../schemas/report.schema';
 
 // Mock ErrorCorrelationManager
 jest.mock('@ai-recruitment-clerk/infrastructure-shared', () => ({
@@ -213,42 +216,161 @@ describe('ReportGeneratorService', () => {
     // Clear all mocks before each test
     jest.clearAllMocks();
 
+    // Create mock implementations
+    const mockLlmService = {
+      generateReportMarkdown: jest.fn(),
+      generateCandidateComparison: jest.fn(),
+      generateInterviewGuide: jest.fn(),
+      healthCheck: jest.fn(),
+    };
+
+    const mockGridFsService = {
+      saveReport: jest.fn(),
+      healthCheck: jest.fn(),
+    };
+
+    const mockReportRepository = {
+      createReport: jest.fn(),
+      updateResumeRecord: jest.fn(),
+      findReport: jest.fn(),
+      getReportAnalytics: jest.fn(),
+      healthCheck: jest.fn(),
+    };
+
+    const mockReportDataService = {
+      formatCandidateForComparison: jest.fn((report) => ({
+        id: report.resumeId,
+        name: `Candidate ${report.resumeId}`,
+        score: report.scoreBreakdown.overallFit / 100,
+        skills: report.skillsAnalysis.map((s: MatchingSkill) => s.skill),
+        recommendation: report.recommendation.decision,
+      })),
+      formatCandidateForInterview: jest.fn((report) => ({
+        id: report.resumeId,
+        name: `Candidate ${report.resumeId}`,
+        skills: report.skillsAnalysis,
+        experience: report.scoreBreakdown.experienceMatch,
+        education: report.scoreBreakdown.educationMatch,
+        scoreBreakdown: report.scoreBreakdown,
+        recommendation: report.recommendation,
+        strengths: report.recommendation?.strengths,
+        concerns: report.recommendation?.concerns,
+      })),
+      extractJobRequirements: jest.fn((report) => ({
+        requiredSkills: report.skillsAnalysis.map((s: MatchingSkill) => s.skill),
+        experienceLevel: 'mid-level',
+        educationLevel: 'bachelor',
+      })),
+      formatCandidateForLlm: jest.fn((candidate) => ({
+        id: candidate.id,
+        name: candidate.name,
+        score: candidate.score * 100,
+        skills: candidate.skills,
+        recommendation: candidate.recommendation,
+      })),
+      aggregateScoreBreakdown: jest.fn().mockReturnValue({
+        skillsMatch: 80,
+        experienceMatch: 90,
+        educationMatch: 85,
+        overallFit: 85,
+      }),
+      aggregateSkillsAnalysis: jest.fn().mockReturnValue([]),
+      generateOverallRecommendation: jest.fn().mockReturnValue({
+        decision: 'hire',
+        reasoning: 'Test reasoning',
+        strengths: [],
+        concerns: [],
+        suggestions: [],
+      }),
+      generateBatchSummary: jest.fn().mockReturnValue('Test summary'),
+      calculateAverageConfidence: jest.fn().mockReturnValue(0.85),
+    };
+
+    const mockLlmReportMapperService = {
+      buildReportEvent: jest.fn().mockReturnValue({
+        jobId: 'test-job-id',
+        resumeIds: ['test-resume-id'],
+        jobData: { title: 'Test Job', description: 'Test Description' },
+        resumesData: [],
+        scoringResults: [],
+        metadata: {},
+      }),
+      convertToScoreBreakdown: jest.fn().mockReturnValue({
+        skillsMatch: 80,
+        experienceMatch: 90,
+        educationMatch: 85,
+        overallFit: 85,
+      }),
+      convertToMatchingSkills: jest.fn().mockReturnValue([]),
+      convertToReportRecommendation: jest.fn().mockReturnValue({
+        decision: 'hire',
+        reasoning: 'Test',
+        strengths: [],
+        concerns: [],
+        suggestions: [],
+      }),
+      generateExecutiveSummary: jest.fn().mockImplementation((event: MatchScoredEvent) => {
+        const score = event.scoreDto.overallScore;
+        return `${score}% overall match for candidate with ${event.scoreDto.matchingSkills.length} matching skills`;
+      }),
+      generateReportFilename: jest.fn().mockImplementation((reportType: string, jobId: string, resumeId: string, extension: string) => {
+        // Format: match-analysis-test-job-id-test-resume-id-2026-02-06T04-33-55-742Z.md
+        return `${reportType}-${jobId}-${resumeId}-${new Date().toISOString().replace(/[:.]/g, '-')}.${extension}`;
+      }),
+      formatForInterviewGuide: jest.fn().mockImplementation((candidateData, jobRequirements) => {
+        // Build proper candidate data for LLM interview guide
+        const llmCandidateData: Record<string, unknown> = {
+          id: candidateData.id,
+          name: candidateData.name,
+          skills: candidateData.skills,
+          experience: candidateData.experience,
+          education: candidateData.education,
+        };
+
+        // Add optional fields if present
+        if (candidateData.scoreBreakdown) {
+          // Use scoreBreakdown.overallFit as the score
+          llmCandidateData.score = (candidateData.scoreBreakdown as ScoreBreakdown)?.overallFit ?? candidateData.scoreBreakdown;
+        }
+        if (candidateData.recommendation) {
+          // If recommendation is an object with decision, extract it; otherwise use as-is
+          llmCandidateData.recommendation = typeof candidateData.recommendation === 'object' && (candidateData.recommendation as { decision?: string }).decision
+            ? (candidateData.recommendation as { decision: string }).decision
+            : candidateData.recommendation;
+        }
+        if (candidateData.strengths) {
+          llmCandidateData.strengths = candidateData.strengths;
+        }
+        if (candidateData.concerns) {
+          llmCandidateData.concerns = candidateData.concerns;
+        }
+
+        return {
+          llmCandidateData,
+          llmJobRequirements: {
+            requiredSkills: jobRequirements.requiredSkills,
+            experienceLevel: jobRequirements.experienceLevel,
+            educationLevel: jobRequirements.educationLevel,
+          },
+        };
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ReportGeneratorService,
-        {
-          provide: 'LlmService',
-          useValue: {
-            generateReportMarkdown: jest.fn(),
-            generateCandidateComparison: jest.fn(),
-            generateInterviewGuide: jest.fn(),
-            healthCheck: jest.fn(),
-          },
-        },
-        {
-          provide: 'GridFsService',
-          useValue: {
-            saveReport: jest.fn(),
-            healthCheck: jest.fn(),
-          },
-        },
-        {
-          provide: 'ReportRepository',
-          useValue: {
-            createReport: jest.fn(),
-            updateResumeRecord: jest.fn(),
-            findReport: jest.fn(),
-            getReportAnalytics: jest.fn(),
-            healthCheck: jest.fn(),
-          },
-        },
+        { provide: LlmService, useValue: mockLlmService },
+        { provide: GridFsService, useValue: mockGridFsService },
+        { provide: ReportRepository, useValue: mockReportRepository },
+        { provide: ReportDataService, useValue: mockReportDataService },
+        { provide: LlmReportMapperService, useValue: mockLlmReportMapperService },
       ],
     }).compile();
 
     service = module.get<ReportGeneratorService>(ReportGeneratorService);
-    llmService = module.get('LlmService') as jest.Mocked<LlmService>;
-    gridFsService = module.get('GridFsService') as jest.Mocked<GridFsService>;
-    reportRepository = module.get('ReportRepository') as jest.Mocked<ReportRepository>;
+    llmService = module.get(LlmService) as jest.Mocked<LlmService>;
+    gridFsService = module.get(GridFsService) as jest.Mocked<GridFsService>;
+    reportRepository = module.get(ReportRepository) as jest.Mocked<ReportRepository>;
 
     // Suppress console output during tests
     jest.spyOn(Logger.prototype, 'log').mockImplementation();
@@ -642,6 +764,9 @@ describe('ReportGeneratorService', () => {
       const jobId = 'test-job-id';
       const resumeIds = ['resume-1', 'resume-2', 'resume-3'];
 
+      // The findReport calls use the resumeIds from the array, but mock reports
+      // always have resumeId: 'test-resume-id'. The test should verify that
+      // only the non-null reports are processed.
       reportRepository.findReport
         .mockResolvedValueOnce(createMockReportDocument() as never)
         .mockResolvedValueOnce(null as never)
@@ -657,12 +782,15 @@ describe('ReportGeneratorService', () => {
 
       // Assert
       expect(result).toBe('# Comparison');
+      // Both valid reports have 'test-resume-id' since that's the mock default
       expect(llmService.generateCandidateComparison).toHaveBeenCalledWith(
         expect.arrayContaining([
-          expect.objectContaining({ id: 'resume-1' }),
-          expect.objectContaining({ id: 'resume-3' }),
+          expect.objectContaining({ id: 'test-resume-id' }),
         ]),
       );
+      // Should be called with 2 candidates (resume-2 was null)
+      const callArgs = llmService.generateCandidateComparison.mock.calls[0][0] as unknown[];
+      expect(callArgs).toHaveLength(2);
     });
 
     it('should handle LLM service failure in comparison', async () => {

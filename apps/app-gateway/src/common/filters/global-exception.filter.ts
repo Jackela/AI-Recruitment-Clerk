@@ -1,28 +1,35 @@
 /**
- * Enhanced Global Exception Filter for App Gateway
- * Uses centralized error handling system with correlation and structured logging
+ * App Gateway Global Exception Filter
+ *
+ * This filter is now configured via ErrorHandlingModule in app.module.ts.
+ * The ErrorHandlingModule provides a standardized global exception filter
+ * with correlation, structured logging, and performance tracking.
+ *
+ * This file is kept for backwards compatibility and re-exports the shared filter.
+ *
+ * @see {@link https://github.com/anthropics/claude-code/blob/main/docs/ERROR_HANDLING.md}
  */
 
-// Fallback implementations for missing infrastructure-shared components
-class StandardizedGlobalExceptionFilter {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(_config: any) {
-    // Basic exception filter implementation
-  }
-}
+// Re-export the standardized filter from shared-dtos
+export {
+  StandardizedGlobalExceptionFilter,
+  createGlobalExceptionFilter,
+  ExceptionFilterConfigHelper,
+  type GlobalExceptionFilterConfig,
+} from '@ai-recruitment-clerk/shared-dtos';
 
-class ExceptionFilterConfigHelper {
-  public static forApiGateway(): { enableLogging: boolean; enableCorrelation: boolean } {
-    return {
-      enableLogging: true,
-      enableCorrelation: true,
-    };
-  }
-}
+// Legacy export for backwards compatibility
+import {
+  StandardizedGlobalExceptionFilter,
+  ExceptionFilterConfigHelper,
+} from '@ai-recruitment-clerk/shared-dtos';
 
 /**
  * App Gateway specific global exception filter
  * Extends the standardized filter with service-specific configuration
+ *
+ * @deprecated The ErrorHandlingModule automatically provides global error handling.
+ * This class is kept for backwards compatibility only.
  */
 export class AppGatewayGlobalExceptionFilter extends StandardizedGlobalExceptionFilter {
   /**

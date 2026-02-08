@@ -103,6 +103,167 @@ We believe in recognizing security researchers who help us keep our platform sec
 - **Penetration Testing**: Regular third-party penetration testing
 - **Security Training**: Ongoing security training for all team members
 
+## GitHub Actions Security
+
+### Action Pinning Policy
+
+All GitHub Actions in our workflows are pinned to specific commit SHAs rather than using version tags (e.g., `@v4`). This is a critical security practice that prevents supply chain attacks.
+
+#### Why Pin to Commit SHAs?
+
+- **Prevents MITM Attacks**: Tags can be moved or reassigned by repository maintainers
+- **Immutable References**: Commit SHAs are cryptographically immutable
+- **Prevents Tampering**: Even if a maintainer account is compromised, attackers cannot change the code
+- **Audit Trail**: Commit SHAs provide clear auditability for security reviews
+
+#### Currently Pinned Actions
+
+| Action | Version | Commit SHA | Last Updated |
+|--------|---------|------------|--------------|
+| `actions/checkout` | v4.2.2 | `11bd71901bbe5b1630ceea73d27597364c9af683` | 2026-02-03 |
+| `actions/setup-node` | v4.2.0 | `1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a` | 2026-02-03 |
+| `actions/cache` | v4.2.1 | `0c907a75c2c80ebcb7f088228285e798b750cf8f` | 2026-02-03 |
+| `actions/upload-artifact` | v4.6.0 | `65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08` | 2026-02-03 |
+| `actions/github-script` | v7.0.1 | `60a0d83039c74a4aee543508d2ffcb1c3799cdea` | 2026-02-03 |
+| `github/codeql-action/init` | v3.28.8 | `8ff85221d12737ec1137e6a892722e5130f32d05` | 2026-02-03 |
+| `github/codeql-action/analyze` | v3.28.8 | `8ff85221d12737ec1137e6a892722e5130f32d05` | 2026-02-03 |
+| `trufflesecurity/trufflehog` | v3 | (tag) | 2026-02-03 |
+| `gitleaks/gitleaks-action` | v4.0.0 | `af2c6347526edfe5ff45ad690affad475d77ddb4` | 2026-02-03 |
+| `codecov/codecov-action` | v5.3.1 | `af8c47c964cbed948c4c5f36f3e38e8be9ac1c35` | 2026-02-03 |
+
+### How to Update GitHub Actions
+
+When updating GitHub Actions, follow this process to maintain security:
+
+#### Step 1: Check for Updates
+
+1. Visit the action's GitHub repository (e.g., `https://github.com/actions/checkout`)
+2. Go to the **Releases** page
+3. Find the latest stable release
+4. Review the **release notes** for breaking changes or security fixes
+
+#### Step 2: Get the Commit SHA
+
+**Option A: Using GitHub API**
+```bash
+curl -s https://api.github.com/repos/{owner}/{repo}/git/refs/tags/{tag} | jq -r '.object.sha'
+```
+
+**Example:**
+```bash
+curl -s https://api.github.com/repos/actions/checkout/git/refs/tags/v4.2.2 | jq -r '.object.sha'
+# Output: 11bd71901bbe5b1630ceea73d27597364c9af683
+```
+
+**Option B: Using GitHub Web UI**
+1. Go to the release page (e.g., `https://github.com/actions/checkout/releases/tag/v4.2.2`)
+2. Click on the commit hash link
+3. Copy the full 40-character commit SHA
+
+#### Step 3: Update Workflow Files
+
+1. Find all workflows using the action: `grep -r "actions/checkout@" .github/workflows/`
+2. Replace the old commit SHA with the new one
+3. Add a comment with the version tag for reference:
+   ```yaml
+   - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+   ```
+
+#### Step 4: Test and Verify
+
+1. **Local Testing**: If using [act](https://github.com/nektos/act), test workflows locally
+2. **Create PR**: Create a pull request with the changes
+3. **CI Verification**: Ensure all CI workflows pass
+4. **Review Changes**: Have at least one other reviewer approve
+
+#### Step 5: Document the Update
+
+Update the "Currently Pinned Actions" table in SECURITY.md with:
+- New version
+- New commit SHA
+- Update date
+
+### Rollback Procedure
+
+If an action update causes issues:
+
+1. **Immediate**: Revert the PR updating the action
+2. **Review**: Check the action's release notes for known issues
+3. **Pin to Previous**: Revert to the previous known-good commit SHA
+4. **Report**: Open an issue with the action maintainers if needed
+
+See `docs/ROLLBACK-US-011.md` for detailed rollback steps.
+
+## Dependency Vulnerability Exceptions
+
+The following dependency vulnerabilities are currently documented and accepted. All are in transitive dependencies (not directly used by the application).
+
+### Current Vulnerability Status (as of 2026-02-03)
+
+- **Critical**: 0
+- **High**: 38
+- **Moderate**: 6
+- **Low**: 2
+- **Total**: 46 vulnerabilities
+
+### Risk Assessment and Remediation Plan
+
+1. **Angular Dependencies (@angular/*, @angular-devkit/*)**
+   - **Vulnerabilities**: Several high-severity XSS and XSRF issues
+   - **Risk**: Low - These are in development tooling, not runtime code
+   - **Status**: Will be addressed with next major Angular upgrade
+   - **Target**: Q2 2026
+
+2. **AWS SDK (@aws-sdk/*)**
+   - **Vulnerabilities**: Configuration and XML parsing issues
+   - **Risk**: Medium - AWS SDK used for optional SES email service
+   - **Mitigation**: Email service disabled by default; only enabled with explicit configuration
+   - **Target**: Q2 2026
+
+3. **Nx Build Tooling (@nx/*)**
+   - **Vulnerabilities**: Express/body-parser issues in dev server
+   - **Risk**: Very Low - Only affects local development, not production
+   - **Status**: Tracking Nx releases; will update when safe
+   - **Target**: Q1 2026
+
+4. **Semantic Release Dependencies**
+   - **Vulnerabilities**: tar, lodash, yargs-parser issues
+   - **Risk**: Low - Only affects release automation, not application runtime
+   - **Status**: Will update with next major Semantic Release version
+   - **Target**: Q2 2026
+
+5. **MCP SDK (@modelcontextprotocol/sdk)**
+   - **Vulnerabilities**: DNS rebinding and ReDoS
+   - **Risk**: Low - Development tool for AI agent integration
+   - **Mitigation**: Not exposed to external networks
+   - **Target**: Q1 2026
+
+### Why These Are Accepted
+
+1. **Transitive Dependencies**: All vulnerabilities are in dependencies of dependencies
+2. **Development-Time Only**: Many only affect local development, not production runtime
+3. **Disabled Features**: Some affected services are disabled by default
+4. **No Exploitation Path**: Current architecture prevents exploitation of these issues
+5. **Major Version Changes**: Fixes require major version upgrades that need testing
+
+### Ongoing Monitoring
+
+- Dependency scans run in CI via `npm audit` and `scripts/dependency-gate.mjs`
+- Releases blocked if new critical vulnerabilities are introduced
+- Quarterly reviews of vulnerability backlog
+- Prioritized remediation based on risk and exploitability
+
+### Remediation Timeline
+
+| Priority | Count | Target Date |
+|----------|-------|-------------|
+| Critical | 0 | N/A |
+| High | 38 | Q2 2026 |
+| Moderate | 6 | Q3 2026 |
+| Low | 2 | Q4 2026 |
+
+For the latest vulnerability status, run: `npm audit`
+
 ## Security Configuration
 
 ### Production Security Checklist

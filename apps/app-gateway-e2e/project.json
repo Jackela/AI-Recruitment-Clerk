@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "implicitDependencies": ["app-gateway"],
   "projectType": "application",
+  "tags": ["type:e2e"],
   "targets": {
     "e2e": {
       "executor": "@nx/jest:jest",

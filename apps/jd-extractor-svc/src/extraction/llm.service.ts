@@ -7,12 +7,14 @@ import type {
 } from '@ai-recruitment-clerk/job-management-domain';
 import { RetryUtility, SecureConfigValidator } from '@app/shared-dtos';
 import type {
-  GeminiConfig} from '@ai-recruitment-clerk/shared-dtos';
+  GeminiConfig,
+} from '@ai-recruitment-clerk/shared-dtos';
 import {
   GeminiClient,
   PromptTemplates,
   PromptBuilder,
 } from '@ai-recruitment-clerk/shared-dtos';
+import { JdExtractorConfigService } from '../config';
 
 /**
  * Provides llm functionality.
@@ -25,28 +27,25 @@ export class LlmService {
   /**
    * Initializes a new instance of the LLM Service.
    */
-  constructor() {
+  constructor(private readonly config: JdExtractorConfigService) {
     // 🔒 SECURITY: Validate configuration before service initialization (skip in tests)
-    if (process.env.NODE_ENV !== 'test') {
+    if (!this.config.isTest) {
       SecureConfigValidator.validateServiceConfig('JdExtractorLlmService', [
         'GEMINI_API_KEY',
       ]);
     }
 
-    const config: GeminiConfig = {
-      apiKey:
-        process.env.NODE_ENV === 'test'
-          ? 'test-api-key'
-          : SecureConfigValidator.requireEnv('GEMINI_API_KEY'),
+    const geminiConfig: GeminiConfig = {
+      apiKey: this.config.isTest ? 'test-api-key' : this.config.geminiApiKey,
       model: 'gemini-1.5-flash',
       temperature: 0.2, // Lower temperature for more consistent extraction
     };
 
     // In tests, avoid initializing the real client; use a deterministic stub
     this.geminiClient =
-      process.env.NODE_ENV === 'test'
+      this.config.isTest
         ? (this.createTestGeminiStub() as unknown as GeminiClient)
-        : new GeminiClient(config);
+        : new GeminiClient(geminiConfig);
   }
 
   /**

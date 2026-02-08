@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
 import { ResumeEventsController } from './resume-events.controller';
@@ -18,7 +18,34 @@ import {
   StandardizedGlobalExceptionFilter,
   ExceptionFilterConfigHelper,
   ErrorInterceptorFactory,
+  createDtoValidationPipe,
 } from '@ai-recruitment-clerk/infrastructure-shared';
+import {
+  FileProcessingService,
+  ResumeEncryptionService,
+} from '../processing';
+import { ResumeParserConfigService } from '../config';
+
+/**
+ * Get MongoDB URL from environment with fallback chain
+ * Centralizes environment access for module-level configuration
+ *
+ * Note: Module-level configuration cannot use dependency injection.
+ * This function is a temporary bridge until the module can be refactored
+ * to use async configuration or dynamic module registration.
+ */
+function getMongoUrl(): string {
+  return (
+    process.env.MONGODB_URL ??
+    process.env.MONGO_URL ??
+    process.env.MONGODB_URI ??
+    (() => {
+      throw new Error(
+        'MONGODB_URL, MONGO_URL, or MONGODB_URI environment variable is required',
+      );
+    })()
+  );
+}
 
 /**
  * Configures the app module.
@@ -32,18 +59,9 @@ import {
     NatsClientModule.forRoot({
       serviceName: 'resume-parser-svc',
     }),
-    MongooseModule.forRoot(
-      process.env.MONGODB_URL ||
-        process.env.MONGO_URL ||
-        (() => {
-          throw new Error(
-            'MONGODB_URL or MONGO_URL environment variable is required',
-          );
-        })(),
-      {
-        connectionName: 'resume-parser',
-      },
-    ),
+    MongooseModule.forRoot(getMongoUrl(), {
+      connectionName: 'resume-parser',
+    }),
     MongooseModule.forFeature(
       [{ name: Resume.name, schema: ResumeSchema }],
       'resume-parser',
@@ -52,6 +70,7 @@ import {
   controllers: [AppController, ResumeEventsController],
   providers: [
     AppService,
+    ResumeParserConfigService,
     ParsingService,
     VisionLlmService,
     GridFsService,
@@ -59,6 +78,13 @@ import {
     PdfTextExtractorService,
     ResumeParserNatsService,
     ResumeRepository,
+    FileProcessingService,
+    ResumeEncryptionService,
+    // Global DTO Validation Pipe
+    {
+      provide: APP_PIPE,
+      useFactory: () => createDtoValidationPipe(),
+    },
     // Enhanced Error Handling System
     {
       provide: APP_FILTER,
@@ -100,6 +126,9 @@ import {
     PdfTextExtractorService,
     ResumeParserNatsService,
     ResumeRepository,
+    FileProcessingService,
+    ResumeEncryptionService,
+    ResumeParserConfigService,
   ],
 })
 export class AppModule {}

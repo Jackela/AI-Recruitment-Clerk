@@ -265,10 +265,11 @@ describe('EncryptionService', () => {
     it('should handle tampered encrypted data', () => {
       const encrypted = EncryptionService.encrypt(testData);
 
-      // Tamper with the encrypted data
+      // Tamper with the authentication tag - this will definitely cause auth failure
+      const tamperedTag = encrypted.tag.slice(0, -2) + '00';
       const tamperedData = {
         ...encrypted,
-        encryptedData: encrypted.encryptedData.slice(0, -2) + '00',
+        tag: tamperedTag,
       };
 
       expect(() => EncryptionService.decrypt(tamperedData)).toThrow(

@@ -6,6 +6,7 @@ import { AppModule } from '../../src/app/app.module';
 import { JwtService } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
+import { getConnection } from 'mongoose';
 
 /**
  * 📋 COMPREHENSIVE API INTEGRATION TEST SUITE
@@ -82,6 +83,11 @@ describe('🚀 Comprehensive API Integration Tests', () => {
   afterAll(async () => {
     await cleanupIntegrationTestData();
     await app.close();
+    // Explicitly close Mongoose connection to prevent open-handle warnings
+    const connection = getConnection('ai-recruitment-integration-test');
+    if (connection?.readyState === 1) {
+      await connection.close();
+    }
   });
 
   /**

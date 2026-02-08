@@ -1,0 +1,140 @@
+name: PR Template Validation
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-template-check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-pr-template:
+    name: Validate PR Template
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout PR description
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Validate PR Template
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            const body = pr.body || '';
+            const errors = [];
+            const warnings = [];
+
+            // Required sections (must be present)
+            const requiredSections = [
+              '## 🎯 Description',
+              '## 🔬 Changes Made',
+              '## 🧪 Testing Evidence',
+              '## 📋 PR Checklist'
+            ];
+
+            // Check for required sections
+            for (const section of requiredSections) {
+              if (!body.includes(section)) {
+                errors.push(`Missing required section: ${section}`);
+              }
+            }
+
+            // Check for PR Type (required)
+            if (!body.includes('**Type**:')) {
+              errors.push('Missing PR Type (e.g., feat, fix, refactor)');
+            }
+
+            // Check for Breaking Change declaration (required)
+            if (!body.includes('**Breaking Change**:')) {
+              errors.push('Missing Breaking Change declaration (Yes/No)');
+            }
+
+            // Check for test evidence (required)
+            if (!body.includes('### Test Coverage')) {
+              errors.push('Missing Test Coverage section');
+            }
+
+            // Check for quality checks (required)
+            if (!body.includes('### Code Quality')) {
+              errors.push('Missing Code Quality section');
+            }
+
+            // Check for rollback plan (required if breaking changes)
+            const hasBreakingChange = body.toLowerCase().includes('breaking change**: yes') ||
+                                      body.toLowerCase().includes('breaking changes**: yes');
+            if (hasBreakingChange && !body.includes('### Rollback Plan')) {
+              errors.push('Missing Rollback Plan (required for breaking changes)');
+            }
+
+            // Check for key checkboxes in PR Checklist (warnings only)
+            const checklistItems = [
+              '- [ ] All tests passing locally',
+              '- [ ] Linter passes',
+              '- [ ] Type checking passes',
+              '- [ ] Build successful'
+            ];
+
+            for (const item of checklistItems) {
+              if (!body.includes(item)) {
+                warnings.push(`Consider adding checkbox: ${item}`);
+              }
+            }
+
+            // Report results
+            if (errors.length > 0) {
+              let output = '## ❌ PR Template Validation Failed\n\n';
+              output += 'Please complete the following required sections:\n\n';
+              errors.forEach((error, i) => {
+                output += `${i + 1}. ${error}\n`;
+              });
+
+              if (warnings.length > 0) {
+                output += '\n### ⚠️ Warnings\n\n';
+                output += 'Consider adding these items:\n\n';
+                warnings.forEach((warning, i) => {
+                  output += `${i + 1}. ${warning}\n`;
+                });
+              }
+
+              output += '\n---\n';
+              output += '**Tip**: Use the PR template to ensure all required sections are included.\n';
+              output += 'You can copy the template from `.github/PULL_REQUEST_TEMPLATE.md`\n';
+
+              core.setFailed(output);
+
+              // Add comment on PR
+              try {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: output
+                });
+              } catch (error) {
+                // Comment creation might fail, but that's okay
+                console.log('Could not create comment:', error.message);
+              }
+            } else {
+              let output = '## ✅ PR Template Validation Passed\n\n';
+              output += 'All required sections are present.\n';
+
+              if (warnings.length > 0) {
+                output += '\n### ⚠️ Suggestions\n\n';
+                warnings.forEach((warning, i) => {
+                  output += `${i + 1}. ${warning}\n`;
+                });
+              }
+
+              core.notice(output);
+            }

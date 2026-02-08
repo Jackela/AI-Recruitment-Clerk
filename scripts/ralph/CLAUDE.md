@@ -91,10 +91,59 @@ If no browser tools are available, note in your progress report that manual brow
 
 After completing a user story, check if ALL stories have `passes: true`.
 
-If ALL stories are complete and passing, reply with:
+**CRITICAL: DO NOT output `<promise>COMPLETE</promise>` unless EVERY single story has `passes: true`.**
+
+- If there are ANY stories with `passes: false`, end your response normally (another iteration will pick up the next story)
+- Only when ALL stories are complete and passing, reply with:
 <promise>COMPLETE</promise>
 
-If there are still stories with `passes: false`, end your response normally (another iteration will pick up the next story).
+**VERIFY: Before outputting `<promise>COMPLETE</promise>`, you must:
+1. Read the PRD file
+2. Check EVERY user story's `passes` field
+3. Confirm ALL are `true`
+4. Only then output the completion signal
+
+If even ONE story has `passes: false`, DO NOT output `<promise>COMPLETE</promise>`.
+
+## CI Scripts
+
+### Local CI Scripts
+
+This project has two main CI scripts for local development that mirror GitHub Actions:
+
+- **`npm run ci:local`** - Fast local CI that runs the core checks from GitHub Actions CI workflow:
+  - `npm run lint` - ESLint checks
+  - `npm run typecheck` - TypeScript type checking
+  - `npm run test:coverage` - Run tests with coverage reporting (generates `coverage/coverage-summary.json`)
+  - `npm run audit` - Dependency security audit via Nx
+  - `npm run build` - Production build verification
+
+- **`npm run ci:full`** - Complete local CI that includes everything from `ci:local` plus:
+  - `npm run test:e2e` - End-to-end Playwright tests
+
+### What Runs Where
+
+| Check | ci:local | ci:full | GitHub Actions CI |
+|-------|----------|---------|-------------------|
+| lint | ✅ | ✅ | ✅ |
+| typecheck | ✅ | ✅ | ✅ |
+| test:coverage | ✅ | ✅ | ✅ |
+| audit | ✅ | ✅ | ✅ (via security workflow) |
+| build | ✅ | ✅ | ✅ |
+| E2E tests | ❌ | ✅ | ✅ |
+| PII scan | ❌ | ❌ | ✅ |
+| Secret scan | ❌ | ❌ | ✅ (via security workflow) |
+
+### Coverage
+
+Running `npm run test:coverage` generates the following files:
+- `coverage/coverage-summary.json` - Machine-readable summary used by CI tools
+- `coverage/lcov.info` - Standard LCOV format for Codecov
+- `coverage/coverage-final.json` - Full coverage report
+
+### Quality Gates
+
+The project uses quality gate verification in `tools/ci/verify-quality-gates.mjs` which reads from `config/quality-gates.json`. Current threshold is 85% coverage.
 
 ## Important
 

@@ -51,7 +51,15 @@ import { MetricsService } from '../ops/metrics.service';
 import { ObservabilityController } from '../ops/observability.controller';
 import { ImpactController } from '../ops/impact.controller';
 
-const isTestEnv = process.env.NODE_ENV === 'test';
+/**
+ * Get NODE_ENV from process.env with fallback
+ * Centralizes environment access for module-level configuration
+ */
+function getNodeEnv(): string {
+  return process.env.NODE_ENV ?? 'development';
+}
+
+const isTestEnv = getNodeEnv() === 'test';
 
 @Module({
   imports: [
@@ -123,7 +131,7 @@ const isTestEnv = process.env.NODE_ENV === 'test';
       : [
           { provide: APP_GUARD, useClass: JwtAuthGuard },
         ]),
-    ...(process.env.NODE_ENV === 'test'
+    ...(isTestEnv
       ? [
           { provide: APP_FILTER, useClass: TestRateLimitBypassFilter },
           { provide: APP_INTERCEPTOR, useClass: ResponseTransformInterceptor },

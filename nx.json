@@ -45,7 +45,7 @@
       "cache": true,
       "inputs": [
         "default",
-        "{workspaceRoot}/jest.config.cjs",
+        "{workspaceRoot}/jest.config.mjs",
         "{projectRoot}/jest.config.ts",
         "{workspaceRoot}/tsconfig.base.json"
       ]
@@ -66,6 +66,11 @@
         "{workspaceRoot}/.eslintignore",
         "{workspaceRoot}/eslint.config.mjs"
       ]
+    },
+    "@nx/js:tsc": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["default", "^default"]
     }
   },
   "generators": {

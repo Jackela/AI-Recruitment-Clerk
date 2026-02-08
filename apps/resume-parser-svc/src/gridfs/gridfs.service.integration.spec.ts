@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
 import { GridFsService } from './gridfs.service';
 import { MongodbTestSetup } from '../testing/mongodb-test-setup';
+import { ResumeParserConfigService } from '../config';
 
 describe('GridFsService Integration', () => {
   let service: GridFsService;
@@ -85,6 +86,14 @@ describe('GridFsService Integration', () => {
         {
           provide: 'resume-parserConnection',
           useValue: mockConnection,
+        },
+        {
+          provide: ResumeParserConfigService,
+          useValue: {
+            isTest: true,
+            nodeName: 'unknown',
+            gridfsBucketName: 'resumes',
+          },
         },
       ],
     }).compile();

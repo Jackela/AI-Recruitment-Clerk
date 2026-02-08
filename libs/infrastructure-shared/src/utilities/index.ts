@@ -1,3 +1,16 @@
 // Shared Utilities Infrastructure
-// TODO: Move utility functions from shared-dtos
-export {};
+
+// Validation utilities
+export {
+  EmailValidator,
+  PhoneValidator,
+  IdValidator,
+  SchemaValidator,
+  Validator,
+  type ValidationResult,
+  type ValidationOptions,
+  type EmailValidationOptions,
+  type PhoneValidationOptions,
+  type IdValidationOptions,
+  type SchemaDefinition,
+} from './validation.util.js';

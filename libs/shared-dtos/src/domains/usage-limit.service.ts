@@ -10,6 +10,20 @@ import type {
 import {
   UsageLimitRules
 } from './usage-limit.rules';
+import {
+  QuotaCalculatorHelper
+} from './quota-calculator.helper';
+import type {
+  IPRiskAssessment
+} from './usage-tracker.helper';
+import {
+  UsageTrackerHelper
+} from './usage-tracker.helper';
+import type {
+  TimeRange,
+  SystemUsageStatistics,
+  UsagePatternAnalysis
+} from './quota-calculator.helper';
 
 /**
  * Provides usage limit domain functionality.
@@ -286,7 +300,8 @@ export class UsageLimitDomainService {
         });
       } else {
         // 获取系统整体统计
-        const systemStats = await this.calculateSystemStatistics();
+        const allUsageLimits = await this.repository.findAll();
+        const systemStats = QuotaCalculatorHelper.calculateSystemStatistics(allUsageLimits);
         return UsageStatsResult.success({ system: systemStats });
       }
     } catch (error) {
@@ -319,7 +334,7 @@ export class UsageLimitDomainService {
         return UsageAnalysisResult.empty();
       }
 
-      const analysis = this.performUsageAnalysis(allUsageLimits, timeRange);
+      const analysis = QuotaCalculatorHelper.performUsageAnalysis(allUsageLimits, timeRange);
 
       await this.auditLogger.logBusinessEvent('USAGE_ANALYSIS_PERFORMED', {
         timeRange,
@@ -348,33 +363,7 @@ export class UsageLimitDomainService {
   public async getHighRiskIPs(): Promise<RiskAssessmentResult> {
     try {
       const allUsageLimits = await this.repository.findAll();
-      const riskAssessments: IPRiskAssessment[] = [];
-
-      for (const usageLimit of allUsageLimits) {
-        const statistics = usageLimit.getUsageStatistics();
-        const riskScore = UsageLimitRules.calculateRiskScore(statistics);
-
-        if (riskScore.score >= 40) {
-          // Medium risk threshold
-          riskAssessments.push({
-            ip: statistics.ip,
-            riskScore: riskScore.score,
-            riskFactors: riskScore.factors,
-            currentUsage: statistics.currentUsage,
-            availableQuota: statistics.availableQuota,
-            lastActivity: statistics.lastActivityAt,
-            recommendedAction:
-              riskScore.score >= 70
-                ? 'BLOCK'
-                : riskScore.score >= 60
-                  ? 'MONITOR'
-                  : 'WARN',
-          });
-        }
-      }
-
-      // 按风险评分排序
-      riskAssessments.sort((a, b) => b.riskScore - a.riskScore);
+      const riskAssessments = UsageTrackerHelper.generateRiskAssessments(allUsageLimits);
 
       return RiskAssessmentResult.success(riskAssessments);
     } catch (error) {
@@ -388,99 +377,6 @@ export class UsageLimitDomainService {
         'Internal error occurred during risk assessment',
       ]);
     }
-  }
-
-  private async calculateSystemStatistics(): Promise<SystemUsageStatistics> {
-    const allUsageLimits = await this.repository.findAll();
-
-    let totalUsage = 0;
-    let totalQuota = 0;
-    let totalBonusQuota = 0;
-    let activeIPs = 0;
-
-    for (const usageLimit of allUsageLimits) {
-      const stats = usageLimit.getUsageStatistics();
-      totalUsage += stats.currentUsage;
-      totalQuota += stats.availableQuota;
-      totalBonusQuota += stats.bonusQuota;
-
-      if (
-        stats.lastActivityAt &&
-        Date.now() - stats.lastActivityAt.getTime() < 24 * 60 * 60 * 1000
-      ) {
-        activeIPs++;
-      }
-    }
-
-    return {
-      totalIPs: allUsageLimits.length,
-      activeIPs,
-      totalUsage,
-      totalQuota,
-      totalBonusQuota,
-      systemUtilization: totalQuota > 0 ? (totalUsage / totalQuota) * 100 : 0,
-      averageUsagePerIP:
-        allUsageLimits.length > 0 ? totalUsage / allUsageLimits.length : 0,
-    };
-  }
-
-  private performUsageAnalysis(
-    usageLimits: UsageLimit[],
-    timeRange: TimeRange,
-  ): UsagePatternAnalysis {
-    const patterns: UsagePattern[] = [];
-
-    // 分析使用模式
-    const hourlyUsage = new Map<number, number>();
-    const dailyUsage = new Map<string, number>();
-
-    for (const usageLimit of usageLimits) {
-      const stats = usageLimit.getUsageStatistics();
-
-      // 按小时统计
-      if (stats.lastActivityAt) {
-        const hour = stats.lastActivityAt.getHours();
-        hourlyUsage.set(
-          hour,
-          (hourlyUsage.get(hour) || 0) + stats.currentUsage,
-        );
-      }
-
-      // 按日期统计
-      if (stats.lastActivityAt) {
-        const dateStr = stats.lastActivityAt.toISOString().split('T')[0];
-        dailyUsage.set(
-          dateStr,
-          (dailyUsage.get(dateStr) || 0) + stats.currentUsage,
-        );
-      }
-    }
-
-    return {
-      timeRange,
-      totalAnalyzedIPs: usageLimits.length,
-      patterns,
-      hourlyDistribution: Object.fromEntries(hourlyUsage),
-      dailyDistribution: Object.fromEntries(dailyUsage),
-      peakUsageHour: this.findPeakHour(hourlyUsage),
-      averageUsagePerIP:
-        usageLimits.reduce((sum, ul) => sum + ul.getCurrentUsage(), 0) /
-        usageLimits.length,
-    };
-  }
-
-  private findPeakHour(hourlyUsage: Map<number, number>): number {
-    let maxUsage = 0;
-    let peakHour = 0;
-
-    for (const [hour, usage] of hourlyUsage) {
-      if (usage > maxUsage) {
-        maxUsage = usage;
-        peakHour = hour;
-      }
-    }
-
-    return peakHour;
   }
 }
 
@@ -731,63 +627,16 @@ export class RiskAssessmentResult {
   }
 }
 
-// 类型定义
-/**
- * Defines the shape of the time range.
- */
-export interface TimeRange {
-  startDate: Date;
-  endDate: Date;
-}
-
-/**
- * Defines the shape of the system usage statistics.
- */
-export interface SystemUsageStatistics {
-  totalIPs: number;
-  activeIPs: number;
-  totalUsage: number;
-  totalQuota: number;
-  totalBonusQuota: number;
-  systemUtilization: number;
-  averageUsagePerIP: number;
-}
-
-/**
- * Defines the shape of the usage pattern.
- */
-export interface UsagePattern {
-  type: 'peak' | 'low' | 'consistent' | 'sporadic';
-  timeWindow: string;
-  frequency: number;
-  description: string;
-}
-
-/**
- * Defines the shape of the usage pattern analysis.
- */
-export interface UsagePatternAnalysis {
-  timeRange: TimeRange;
-  totalAnalyzedIPs: number;
-  patterns: UsagePattern[];
-  hourlyDistribution: { [hour: string]: number };
-  dailyDistribution: { [date: string]: number };
-  peakUsageHour: number;
-  averageUsagePerIP: number;
-}
-
-/**
- * Defines the shape of the ip risk assessment.
- */
-export interface IPRiskAssessment {
-  ip: string;
-  riskScore: number;
-  riskFactors: string[];
-  currentUsage: number;
-  availableQuota: number;
-  lastActivity?: Date;
-  recommendedAction: 'WARN' | 'MONITOR' | 'BLOCK';
-}
+// Type re-exports for backward compatibility
+export type {
+  TimeRange,
+  SystemUsageStatistics,
+  UsagePatternAnalysis,
+  UsagePattern
+} from './quota-calculator.helper';
+export type {
+  IPRiskAssessment
+} from './usage-tracker.helper';
 
 // 接口定义
 /**

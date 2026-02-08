@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserManagementController } from './user-management.controller';
 import { UserManagementService } from './user-management.service';
+import { UserCrudService } from './user-crud.service';
+import { UserAuthService } from './user-auth.service';
 import { UserManagementIntegrationService } from './user-management-integration.service';
 import { UserManagementRepository } from './user-management.repository';
 import { User, UserSchema } from '../../schemas/user.schema';
@@ -20,12 +22,16 @@ import { AuthModule } from '../../auth/auth.module';
   ],
   controllers: [UserManagementController],
   providers: [
-    UserManagementService, // Add the service that's used by the controller
+    UserCrudService, // CRUD service
+    UserAuthService, // Auth service - must be before UserManagementService for DI
+    UserManagementService, // Facade service that uses UserCrudService and UserAuthService
     UserManagementIntegrationService,
     UserManagementRepository,
   ],
   exports: [
-    UserManagementService, // Export the service
+    UserCrudService, // Export CRUD service for use in other modules
+    UserAuthService, // Export auth service for use in other modules
+    UserManagementService, // Export the facade service
     UserManagementIntegrationService,
     UserManagementRepository,
   ],

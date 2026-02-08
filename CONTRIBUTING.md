@@ -71,6 +71,108 @@ npm run ci:local
 
 If you intentionally need to bypass (e.g., emergency hotfix), you may use `HUSKY=0 git push`, but avoid this in normal workflows.
 
+## 🤖 Dependency Management Policy
+
+### Automated Dependency Updates (Dependabot)
+
+This repository uses **Dependabot** to automate dependency updates and ensure security hygiene.
+
+#### Update Groups
+
+Dependabot creates grouped pull requests to reduce review noise:
+
+1. **Security Updates** (`security-updates`)
+   - All dependencies with vulnerability fixes
+   - Created immediately when vulnerabilities are detected
+   - Labeled: `dependencies`, `security`, `automated`
+   - **Action Required**: Review and merge promptly
+
+2. **Development Dependencies** (`development-dependencies`)
+   - Dev dependencies: minor and patch updates
+   - Created weekly (Mondays 09:00 UTC)
+   - Labeled: `dependencies`, `npm`, `automated`
+   - **Action**: Review and test before merging
+
+3. **Production Dependencies** (`production-dependencies`)
+   - Production dependencies: patch updates only
+   - Created weekly (Mondays 09:00 UTC)
+   - Labeled: `dependencies`, `npm`, `automated`
+   - **Action**: Test thoroughly in staging environment
+
+4. **Major & Minor Updates**
+   - Created as individual PRs (not grouped)
+   - Require manual review and testing
+   - **Action**: Review changelogs, test breaking changes
+
+#### Schedule
+
+- **NPM Dependencies**: Weekly (Mondays-Fridays, spread across services)
+- **GitHub Actions**: Weekly (Mondays 10:00 UTC)
+- **Docker**: Weekly (Tuesdays 09:00 UTC)
+
+#### Review Workflow
+
+1. **Review the PR description**
+   - Check changelinks for breaking changes
+   - Review affected services and libraries
+
+2. **Run local verification**
+   ```bash
+   # Pull the branch locally
+   git fetch origin
+   git checkout chore/deps-XXX
+
+   # Install updated dependencies
+   npm install
+
+   # Run CI checks
+   npm run ci:local
+   ```
+
+3. **Test affected services**
+   - For app-gateway updates: `npx nx test app-gateway`
+   - For frontend updates: `npx nx test ai-recruitment-frontend`
+   - For library updates: `npx nx test <lib-name>`
+
+4. **Merge criteria**
+   - All CI checks pass (lint, typecheck, test, build)
+   - No new security vulnerabilities introduced
+   - Breaking changes documented and tested
+   - Manual testing completed for critical paths
+
+#### Security Updates
+
+- **Priority**: High - merge within 48 hours
+- **Verification**: Run `npm audit` after merge
+- **Documentation**: Update SECURITY.md if accepting risk
+- **Rollback**: Keep commit hash handy for quick reverts
+
+#### Auto-Merge Policy
+
+Currently, **no auto-merge** is enabled. All Dependabot PRs require manual review and approval.
+
+#### Troubleshooting
+
+**Dependabot PR fails CI:**
+```bash
+# Check for breaking changes
+npm ls <package-name>
+
+# Revert to previous version if needed
+npm install <package-name>@<previous-version>
+```
+
+**Conflict with local changes:**
+```bash
+# Rebase Dependabot branch
+git checkout chore/deps-XXX
+git rebase main
+```
+
+**Too many PRs open:**
+- Adjust `open-pull-requests-limit` in `.github/dependabot.yml`
+- Review and merge existing PRs to free up slots
+
 ## 🔄 Development Workflow
 
 We follow **Git Flow** branching model:

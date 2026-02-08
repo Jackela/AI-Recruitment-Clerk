@@ -25,7 +25,6 @@ import type {
   ReportListOptions,
 } from '../report-generator/report.repository';
 import type { GridFsService } from '../report-generator/gridfs.service';
-import type { ReportTemplatesService } from '../report-generator/report-templates.service';
 
 /**
  * Defines the shape of the report generation request dto.
@@ -202,7 +201,6 @@ export class ReportsController {
     private readonly reportGeneratorService: ReportGeneratorService,
     private readonly reportRepository: ReportRepository,
     private readonly gridFsService: GridFsService,
-    private readonly _reportTemplatesService: ReportTemplatesService,
   ) {}
 
   /**

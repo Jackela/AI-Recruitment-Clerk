@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Logger } from '@nestjs/common';
+import { Controller, Get, Post } from '@nestjs/common';
+import { Logger } from '@ai-recruitment-clerk/infrastructure-shared';
 import type { AppService } from './app.service';
 import { Public } from '../auth/decorators/public.decorator';
 import type { JobRepository } from '../repositories/job.repository';

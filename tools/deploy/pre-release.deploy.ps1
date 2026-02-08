@@ -1,7 +1,27 @@
-param()
-$ErrorActionPreference = 'Stop'
-Write-Host "[deploy] Pre-release deploy started"
-# Placeholder: build artifacts and deploy to pre-release environment.
-# Integrate with your platform (e.g., Kubernetes, VM, PaaS) here.
-Write-Host "[deploy] Pre-release deploy completed"
+param(
+    [string]$Environment = "local"
+)
 
+$ErrorActionPreference = 'Stop'
+
+Write-Host "🚀 Starting pre-release deployment to $Environment..."
+
+# Build the app-gateway
+Write-Host "📦 Building app-gateway..."
+npx nx build app-gateway --prod
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ Build failed"
+    exit 1
+}
+
+# Build the frontend for static serving
+Write-Host "📦 Building ai-recruitment-frontend..."
+npx nx build ai-recruitment-frontend --configuration=production
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ Frontend build failed"
+    exit 1
+}
+
+Write-Host "✅ Pre-release deployment completed successfully"

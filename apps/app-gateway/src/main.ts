@@ -1,58 +1,48 @@
 /**
  * AI Recruitment Clerk - Gateway Bootstrap
  */
-import { Logger, ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app/app.module';
 import { ProductionSecurityValidator } from './common/security/production-security-validator';
+import { bootstrapNestJsGateway, createDtoValidationPipe } from '@ai-recruitment-clerk/infrastructure-shared';
+import { validateEnv } from '@ai-recruitment-clerk/configuration';
+import compression from 'compression';
+import type { Request, Response } from 'express';
 
 async function bootstrap(): Promise<void> {
-  // Fail-fast env validation
-  Logger.log('🔍 [FAIL-FAST] Validating critical environment variables...');
-  const requiredVars = ['MONGO_URL'];
-  const missingVars = requiredVars.filter((v) => !process.env[v]);
-  if (process.env.NODE_ENV !== 'test' && missingVars.length > 0) {
-    Logger.warn(
-      '⚠️ [FAIL-FAST] Some env vars missing at bootstrap (will rely on ConfigModule .env):',
-    );
-    for (const v of missingVars)
-      Logger.warn(`   • ${v} is not set at process.env yet`);
-    Logger.warn(
-      '   If .env exists at repo root, Nest ConfigModule will load it shortly.',
-    );
-  }
-  Logger.log('✅ [FAIL-FAST] All critical environment variables validated');
+  // Fail-fast env validation using shared configuration validator
+  Logger.log('🔍 [FAIL-FAST] Validating environment variables...');
+  const env = validateEnv('appGateway');
 
-  // Startup logging
-  Logger.log('🚀 [bootstrap] Starting AI Recruitment Clerk Gateway...');
-  Logger.log(`- Node environment: ${process.env.NODE_ENV || 'not set'}`);
-  Logger.log(`- Port: ${process.env.PORT || 3000}`);
-  Logger.log(`- API Prefix: ${process.env.API_PREFIX || 'api'}`);
-  Logger.log(
-    `- MongoDB: ${process.env.MONGO_URL ? '✅ Configured' : '❌ Not set'}`,
-  );
-  Logger.log(
-    `- Redis: ${process.env.REDIS_URL ? '✅ Configured' : '⚠️ Optional'}`,
-  );
+  const nodeEnv = env.getString('NODE_ENV', false) ?? 'development';
+  const port = env.getNumber('PORT');
+  const allowedOrigins = env.getArray('ALLOWED_ORIGINS');
+  const isInsecureLocalAllowed = env.getBoolean('ALLOW_INSECURE_LOCAL', false);
+  const enableCompression = env.getBoolean('ENABLE_COMPRESSION', false);
 
-  const app = await NestFactory.create(AppModule, {
-    logger:
-      process.env.NODE_ENV === 'production'
-        ? ['error', 'warn', 'log']
-        : ['error', 'warn', 'log', 'debug', 'verbose'],
-    bodyParser: true,
-    cors: false,
+  Logger.log(`✅ [FAIL-FAST] Environment validated (NODE_ENV=${nodeEnv})`);
+
+  // Bootstrap the application using shared helper
+  const app = await bootstrapNestJsGateway(AppModule, {
+    serviceName: 'AI Recruitment Clerk Gateway',
+    port,
+    globalPrefix: 'api',
+    cors: {
+      origin:
+        nodeEnv === 'production'
+          ? allowedOrigins.length > 0
+            ? allowedOrigins
+            : ['https://ai-recruitment-clerk-production.up.railway.app']
+          : ['http://localhost:4200', 'http://localhost:4202'],
+    },
   });
-
-  const globalPrefix = 'api';
-  app.setGlobalPrefix(globalPrefix);
 
   // Security validation
   const securityValidator = app.get(ProductionSecurityValidator);
   const securityResult = securityValidator.validateSecurityConfiguration();
-  if (process.env.NODE_ENV === 'production' && !securityResult.isValid) {
-    if (process.env.ALLOW_INSECURE_LOCAL === 'true') {
+  if (nodeEnv === 'production' && !securityResult.isValid) {
+    if (isInsecureLocalAllowed) {
       Logger.warn('⚠️ Bypassing security validation for local run');
       securityResult.issues.forEach((i) => Logger.warn(`   • ${i}`));
       Logger.warn(`Security score: ${securityResult.score}/100`);
@@ -72,44 +62,18 @@ async function bootstrap(): Promise<void> {
     );
   }
 
-  // CORS
-  app.enableCors({
-    origin:
-      process.env.NODE_ENV === 'production'
-        ? process.env.ALLOWED_ORIGINS?.split(',') || [
-            'https://ai-recruitment-clerk-production.up.railway.app',
-          ]
-        : ['http://localhost:4200', 'http://localhost:4202'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'X-Device-ID',
-      'Accept',
-      'Origin',
-      'X-Requested-With',
-      'Access-Control-Request-Method',
-      'Access-Control-Request-Headers',
-    ],
-    credentials: true,
-    optionsSuccessStatus: 200,
-    maxAge: 3600,
-  });
-
+  // Global validation pipe - using shared pipe from infrastructure-shared
   app.useGlobalPipes(
-    new ValidationPipe({
+    createDtoValidationPipe({
       whitelist: true,
       transform: true,
-      disableErrorMessages: process.env.NODE_ENV === 'production',
+      forbidNonWhitelisted: true,
     }),
   );
 
-  // Express tuning
+  // Express tuning (request timeout and compression)
   const server = app.getHttpAdapter().getInstance();
-  server.set('trust proxy', 1);
-  server.disable('x-powered-by');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  server.use((req: any, res: any, next: () => void) => {
+  server.use((req: Request, res: Response, next: () => void) => {
     req.setTimeout(30000, () => {
       res.status(408).json({
         error: 'Request timeout',
@@ -119,14 +83,12 @@ async function bootstrap(): Promise<void> {
     req.connection.setTimeout(60000);
     next();
   });
-  if (process.env.ENABLE_COMPRESSION === 'true') {
-    const compression = require('compression');
+  if (enableCompression) {
     server.use(
       compression({
         level: 6,
         threshold: 1024,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        filter: (req: any, res: any) => {
+        filter: (req: Request, res: Response) => {
           if (req.headers['x-no-compression']) return false;
           return compression.filter(req, res);
         },
@@ -134,7 +96,7 @@ async function bootstrap(): Promise<void> {
     );
   }
 
-  // Swagger
+  // Swagger documentation
   const config = new DocumentBuilder()
     .setTitle('AI Recruitment Clerk API')
     .setDescription('智能招聘管理系统 - 完整的API文档')
@@ -161,14 +123,12 @@ async function bootstrap(): Promise<void> {
     },
   });
 
-  const port = process.env.PORT || 3000;
-  await app.listen(port);
   Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`,
-  );
-  Logger.log(
-    `📚 API Documentation available at: http://localhost:${port}/${globalPrefix}/docs`,
+    `📚 API Documentation available at: http://localhost:${port ?? 3000}/api/docs`,
   );
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  Logger.error('❌ Failed to start AI Recruitment Clerk Gateway', err);
+  process.exit(1);
+});

@@ -13,5 +13,4 @@ export default {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/apps/jd-extractor-svc',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 };

@@ -6,10 +6,24 @@ import { PdfTextExtractorService } from './pdf-text-extractor.service';
 import { GridFsService } from '../gridfs/gridfs.service';
 import { FieldMapperService } from '../field-mapper/field-mapper.service';
 import { ResumeParserNatsService } from '../services/resume-parser-nats.service';
+import { ResumeParserConfigService } from '../config';
+import { FileProcessingService, ResumeEncryptionService } from '../processing';
 
 jest.mock('pdf-parse-fork', () =>
   jest.fn(async () => ({ text: 'Sample PDF text content' })),
 );
+
+const mockConfig = {
+  isTest: true,
+  nodeName: 'unknown',
+} as unknown as ResumeParserConfigService;
+
+const mockFileProcessing = {
+  downloadAndValidateFileWithService: jest.fn(),
+  detectMimeType: jest.fn(() => 'application/pdf'),
+};
+
+const mockResumeEncryption = new ResumeEncryptionService(mockConfig);
 
 describe('ParsingService - PDF Extraction', () => {
   let service: ParsingService;
@@ -28,6 +42,9 @@ describe('ParsingService - PDF Extraction', () => {
         { provide: GridFsService, useValue: {} },
         { provide: FieldMapperService, useValue: {} },
         { provide: ResumeParserNatsService, useValue: {} },
+        { provide: FileProcessingService, useValue: mockFileProcessing },
+        { provide: ResumeEncryptionService, useValue: mockResumeEncryption },
+        { provide: ResumeParserConfigService, useValue: mockConfig },
       ],
     }).compile();
 

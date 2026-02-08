@@ -1,6 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
-import type { NatsPublishResult } from '@app/shared-nats-client';
-import { NatsClientService } from '@app/shared-nats-client';
+import type { ConfigService } from '@nestjs/config';
+import type { NatsConnectionManager } from '@ai-recruitment-clerk/shared-nats-client';
+import type { NatsStreamManager } from '@ai-recruitment-clerk/shared-nats-client';
+import type { NatsPublishResult } from '@ai-recruitment-clerk/shared-nats-client';
+import { BaseMicroserviceService } from '@ai-recruitment-clerk/service-base';
+import { Injectable } from '@nestjs/common';
 import type { MatchScoredEvent } from '../report-generator/report-generator.service';
 
 // Enhanced type definitions for NATS service
@@ -58,10 +61,20 @@ export interface ReportGenerationFailedEvent {
 /**
  * Report Generator service-specific NATS client extension
  * Provides specialized methods for report generation events
+ *
+ * @author AI Recruitment Team
+ * @since 1.0.0
+ * @version 2.0.0 - Refactored to extend BaseMicroserviceService
  */
 @Injectable()
-export class ReportGeneratorNatsService extends NatsClientService {
-  private readonly serviceLogger = new Logger(ReportGeneratorNatsService.name);
+export class ReportGeneratorNatsService extends BaseMicroserviceService {
+  constructor(
+    configService: ConfigService,
+    connectionManager: NatsConnectionManager,
+    streamManager: NatsStreamManager,
+  ) {
+    super(configService, connectionManager, streamManager, 'report-generator-svc');
+  }
 
   /**
    * Publish report generated event
@@ -69,31 +82,15 @@ export class ReportGeneratorNatsService extends NatsClientService {
   public async publishReportGenerated(
     event: ReportGeneratedEvent,
   ): Promise<NatsPublishResult> {
-    const subject = 'report.generated';
-
-    try {
-      const result = await this.publish(subject, {
-        ...event,
-        eventType: 'ReportGeneratedEvent',
-      });
-
-      if (result.success) {
-        this.serviceLogger.log(
-          `Report generated event published successfully for reportId: ${event.reportId}`,
-        );
-      }
-
-      return result;
-    } catch (error) {
-      this.serviceLogger.error(
-        `Error publishing report generated event`,
-        error,
-      );
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
+    return this.publishEvent('report.generated', event as unknown as Record<string, unknown>, {
+      messageId: this.generateMessageId('report-generated', event.reportId),
+      headers: {
+        'report-id': event.reportId,
+        'job-id': event.jobId,
+        'resume-id': event.resumeId,
+        'report-type': event.reportType,
+      },
+    });
   }
 
   /**
@@ -102,31 +99,14 @@ export class ReportGeneratorNatsService extends NatsClientService {
   public async publishReportGenerationFailed(
     event: ReportGenerationFailedEvent,
   ): Promise<NatsPublishResult> {
-    const subject = 'report.generation.failed';
-
-    try {
-      const result = await this.publish(subject, {
-        ...event,
-        eventType: 'ReportGenerationFailedEvent',
-      });
-
-      if (result.success) {
-        this.serviceLogger.log(
-          `Report generation failed event published for jobId: ${event.jobId}, resumeId: ${event.resumeId}`,
-        );
-      }
-
-      return result;
-    } catch (error) {
-      this.serviceLogger.error(
-        `Error publishing report generation failed event`,
-        error,
-      );
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
+    return this.publishEvent('report.generation.failed', event as unknown as Record<string, unknown>, {
+      messageId: this.generateMessageId('report-failed', `${event.jobId}-${event.resumeId}`),
+      headers: {
+        'job-id': event.jobId,
+        'resume-id': event.resumeId,
+        'report-type': event.reportType,
+      },
+    });
   }
 
   /**
@@ -135,10 +115,14 @@ export class ReportGeneratorNatsService extends NatsClientService {
   public async subscribeToMatchScored(
     handler: (event: MatchScoredEvent) => Promise<void>,
   ): Promise<void> {
-    await this.subscribe('analysis.match.scored', handler, {
-      queueGroup: 'report-generator',
-      durableName: 'report-generator-match-scored',
-    });
+    return this.subscribeToEvents(
+      'analysis.match.scored',
+      handler,
+      {
+        durableName: 'report-generator-match-scored',
+        queueGroup: 'report-generator',
+      },
+    );
   }
 
   /**
@@ -147,10 +131,14 @@ export class ReportGeneratorNatsService extends NatsClientService {
   public async subscribeToReportGenerationRequested(
     handler: (event: ReportGenerationRequestedEvent) => Promise<void>,
   ): Promise<void> {
-    await this.subscribe('report.generation.requested', handler, {
-      queueGroup: 'report-generator',
-      durableName: 'report-generator-generation-requested',
-    });
+    return this.subscribeToEvents(
+      'report.generation.requested',
+      handler,
+      {
+        durableName: 'report-generator-generation-requested',
+        queueGroup: 'report-generator',
+      },
+    );
   }
 
   /**
@@ -161,10 +149,12 @@ export class ReportGeneratorNatsService extends NatsClientService {
     details: HealthCheckDetails;
   }> {
     try {
+      const baseHealth = await this.getHealthStatus();
+
       return {
         status: 'healthy',
         details: {
-          connected: true,
+          connected: baseHealth.connected,
           subscriptions: {
             matchScored: 'subscribed',
             reportGeneration: 'subscribed',
@@ -182,7 +172,7 @@ export class ReportGeneratorNatsService extends NatsClientService {
             reportGeneration: 'failed',
           },
           reportSpecificFeatures: 'unavailable',
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
         },
       };
     }
