@@ -30,10 +30,10 @@ jobs:
       - name: Print affected graph
         run: npx nx show projects --affected --base=origin/main --head=HEAD
       - name: Lint affected
-        run: npx nx affected -t lint --base=origin/main --head=HEAD --parallel=3
+        run: npx nx affected -t lint --base=origin/main --head=HEAD
       - name: Test affected
-        run: npx nx affected -t test --base=origin/main --head=HEAD --parallel=2
+        run: npx nx affected -t test --base=origin/main --head=HEAD
       - name: Build affected
-        run: npx nx affected -t build --base=origin/main --head=HEAD --parallel=2
+        run: npx nx affected -t build --base=origin/main --head=HEAD
       - name: E2E affected
-        run: npx nx affected -t e2e --base=origin/main --head=HEAD --parallel=1
+        run: npx nx affected -t e2e --base=origin/main --head=HEAD
