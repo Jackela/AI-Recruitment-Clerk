@@ -7,6 +7,8 @@ import { waitForDeferredComponents } from './test-utils/hydration';
 // Get the directory of the current file (ESM compatible)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+// E2E project root (where PDF fixtures are) is one level up from src
+const e2eRoot = path.resolve(__dirname, '..');
 // Workspace root is 3 levels up from the test file directory
 const workspaceRoot = path.resolve(__dirname, '..', '..', '..');
 
@@ -62,9 +64,9 @@ test.describe('PDF Processing Variety Tests', () => {
   test('Multi-page PDF Test: Skills from last page are correctly identified', async ({
     page,
   }) => {
-    // Use workspace root for path resolution
+    // Use workspace root for docs, e2eRoot for PDF fixtures
     const jdPath = path.resolve(workspaceRoot, 'docs', 'recruitment', 'UAT_Architect_JD.txt');
-    const multiPagePdfPath = path.resolve(__dirname, 'multi-page-resume.pdf');
+    const multiPagePdfPath = path.resolve(e2eRoot, 'multi-page-resume.pdf');
 
     // Verify test artifacts exist
     expect(fs.existsSync(jdPath), `JD file not found: ${jdPath}`).toBeTruthy();
@@ -187,9 +189,9 @@ test.describe('PDF Processing Variety Tests', () => {
   test('Image-based PDF Test: Graceful error handling for unreadable content', async ({
     page,
   }) => {
-    // Use workspace root for path resolution
+    // Use workspace root for docs, e2eRoot for PDF fixtures
     const jdPath = path.resolve(workspaceRoot, 'docs', 'recruitment', 'UAT_Architect_JD.txt');
-    const imagePdfPath = path.resolve(__dirname, 'image-only-resume.pdf');
+    const imagePdfPath = path.resolve(e2eRoot, 'image-only-resume.pdf');
 
     // Verify test artifacts exist
     expect(fs.existsSync(jdPath), `JD file not found: ${jdPath}`).toBeTruthy();
