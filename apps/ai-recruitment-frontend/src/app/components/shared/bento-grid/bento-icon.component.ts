@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 /**
  * Represents the bento icon component.
@@ -7,6 +8,7 @@ import { Component, Input } from '@angular/core';
 @Component({
   selector: 'arc-bento-icon',
   standalone: true,
+  imports: [CommonModule],
   template: `
     <div class="bento-icon" [attr.aria-hidden]="'true'">
       <ng-container [ngSwitch]="icon">

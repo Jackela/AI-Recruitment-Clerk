@@ -2,7 +2,6 @@ import type { OnInit } from '@angular/core';
 import {
   DestroyRef,
   Directive,
-  ElementRef,
   inject,
   input,
   output,
@@ -24,7 +23,6 @@ import {
   standalone: true,
 })
 export class PullToRefreshDirective implements OnInit {
-  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
 
   /**

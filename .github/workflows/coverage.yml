@@ -70,7 +70,7 @@ jobs:
           fi
 
       - name: 📈 Upload Coverage to Codecov
-        uses: codecov/codecov-action@af8c47c964cbed948c4c5f36f3e38e8be9ac1c35 # v5.3.1
+        uses: codecov/codecov-action@v5
         if: always()
         with:
           files: ./coverage/lcov.info

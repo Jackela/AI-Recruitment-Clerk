@@ -27,7 +27,7 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - name: Print affected graph
-        run: npx nx print-affected --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }}
+        run: npx nx show projects --affected --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }}
       - name: Lint affected
         run: npx nx affected -t lint --base=${{ github.base_ref || 'origin/main' }} --head=${{ github.sha }} --parallel=3
       - name: Test affected

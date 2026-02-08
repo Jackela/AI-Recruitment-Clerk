@@ -55,7 +55,7 @@ export interface ChartDataPoint {
           [class]="'sparkline-change--' + meta.changeType"
         >
           {{ meta.changeType === 'increase' ? '↗' : meta.changeType === 'decrease' ? '↘' : '→' }}
-          {{ Math.abs(meta.change).toFixed(1) }}%
+          {{ absChange }}%
         </span>
       </div>
     </div>
@@ -151,5 +151,9 @@ export class SparklineChartComponent {
       x: i,
       y: 100 - ((d.value - min) / range) * 80 - 10,
     }));
+  }
+
+  public get absChange(): string {
+    return Math.abs(this.meta.change).toFixed(1);
   }
 }
