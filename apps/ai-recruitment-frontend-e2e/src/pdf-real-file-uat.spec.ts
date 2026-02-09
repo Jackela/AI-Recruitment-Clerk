@@ -15,7 +15,7 @@ const workspaceRoot = path.resolve(__dirname, '..', '..', '..');
 const COACH_ROUTE = '/coach';
 
 test.describe('PDF UAT - Real File', () => {
-  test('Coach page accepts JD + real PDF and shows correct skills', async ({
+  test('@pdf-variety Coach page accepts JD + real PDF and shows correct skills', async ({
     page,
   }) => {
     const jdPath = path.resolve(workspaceRoot, 'docs', 'recruitment', 'UAT_Architect_JD.txt');
