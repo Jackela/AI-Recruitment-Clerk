@@ -4,9 +4,7 @@
   "projectType": "application",
   "sourceRoot": "apps/ai-recruitment-frontend-e2e/src",
   "tags": ["type:e2e"],
-  "implicitDependencies": [
-    "ai-recruitment-frontend"
-  ],
+  "implicitDependencies": ["ai-recruitment-frontend"],
   "// targets": "to see all targets run: nx show project ai-recruitment-frontend-e2e --web",
   "targets": {
     "e2e": {
@@ -17,12 +15,10 @@
       ],
       "options": {
         "cwd": "apps/ai-recruitment-frontend-e2e",
-        "commands": [
-          "npx playwright test"
-        ],
+        "commands": ["npx playwright test"],
         "parallel": false,
         "env": {
-          "E2E_SKIP_WEBSERVER": "true",
+          "E2E_SKIP_WEBSERVER": "false",
           "E2E_MANUAL_DEV_SERVER": "false",
           "E2E_USE_REAL_API": "false",
           "PLAYWRIGHT_BASE_URL": "http://localhost:4200",

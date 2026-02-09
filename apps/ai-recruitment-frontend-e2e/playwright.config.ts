@@ -125,10 +125,11 @@ export default defineConfig({
     ? {}
     : {
         webServer: {
-          command: `npx nx run ai-recruitment-frontend:serve-static --port ${devServerPort}`,
+          // Build first, then serve with simple HTTP server (no Nx daemon needed)
+          command: `npx nx run ai-recruitment-frontend:build:production && npx serve dist/apps/ai-recruitment-frontend/browser -l ${devServerPort} -s`,
           url: baseURL,
           reuseExistingServer: !process.env.CI,
-          timeout: 60 * 1000, // 60 seconds for static server startup
+          timeout: 120 * 1000, // 120 seconds for build + server startup
         },
       }),
   projects,

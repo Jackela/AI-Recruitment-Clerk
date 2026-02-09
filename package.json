@@ -143,6 +143,7 @@
     "prettier": "^3.6.2",
     "ralph": "^1.4.0",
     "semantic-release": "^25.0.3",
+    "serve": "^14.2.5",
     "supertest": "^7.1.4",
     "supports-color": "^10.2.2",
     "swagger-ui-express": "^5.0.1",
