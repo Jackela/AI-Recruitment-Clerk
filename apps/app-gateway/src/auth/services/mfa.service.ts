@@ -499,7 +499,7 @@ export class MfaService {
       throw new UnauthorizedException('MFA not enabled');
     }
 
-    const token = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit token
+    const token = crypto.randomInt(100000, 1000000).toString(); // 6-digit token (cryptographically secure)
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
     // Store token temporarily (in production, use Redis or similar)
