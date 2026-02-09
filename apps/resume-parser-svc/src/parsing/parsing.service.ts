@@ -4,7 +4,7 @@ import type { PdfTextExtractorService } from './pdf-text-extractor.service';
 import type { GridFsService } from '../gridfs/gridfs.service';
 import type { FieldMapperService } from '../field-mapper/field-mapper.service';
 import type { ResumeParserNatsService } from '../services/resume-parser-nats.service';
-import type {
+import {
   RetryUtility,
   WithCircuitBreaker,
   ResumeParserException,
