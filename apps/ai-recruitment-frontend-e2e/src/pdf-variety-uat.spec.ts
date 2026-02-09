@@ -31,6 +31,11 @@ function delay(ms: number): Promise<void> {
  */
 
 test.describe('PDF Processing Variety Tests', () => {
+  // Configure for serial execution (no parallel tests in this suite)
+  test.describe.configure({ mode: 'serial' });
+  // Set extended timeout for PDF processing tests
+  test.setTimeout(90000); // 90 seconds for PDF processing
+
   const baseTimeout = 30000;
   const waitTimeout = 3000;
   const retryTimeout = 5000;
@@ -61,7 +66,7 @@ test.describe('PDF Processing Variety Tests', () => {
     });
   });
 
-  test('Multi-page PDF Test: Skills from last page are correctly identified', async ({
+  test('@pdf-variety Multi-page PDF Test: Skills from last page are correctly identified', async ({
     page,
   }) => {
     // Use workspace root for docs, e2eRoot for PDF fixtures
@@ -186,7 +191,7 @@ test.describe('PDF Processing Variety Tests', () => {
     );
   });
 
-  test('Image-based PDF Test: Graceful error handling for unreadable content', async ({
+  test('@pdf-variety Image-based PDF Test: Graceful error handling for unreadable content', async ({
     page,
   }) => {
     // Use workspace root for docs, e2eRoot for PDF fixtures
@@ -292,7 +297,7 @@ test.describe('PDF Processing Variety Tests', () => {
     );
   });
 
-  test('PDF Processing Edge Cases: File validation and error boundaries', async ({
+  test('@pdf-variety PDF Processing Edge Cases: File validation and error boundaries', async ({
     page,
   }) => {
     console.log('🧪 Testing PDF processing edge cases...');

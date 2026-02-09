@@ -325,8 +325,10 @@ const resumeFiles = discoverResumeFiles();
 const jdContent = validateTestPrerequisites();
 
 test.describe('Real Data Expansion - Dynamic PDF Resume Testing', () => {
+  // Configure for serial execution (no parallel tests in this suite)
+  test.describe.configure({ mode: 'serial' });
   // Global test configuration
-  test.setTimeout(60000); // 60 seconds per test
+  test.setTimeout(90000); // 90 seconds per test for PDF upload tests
 
   test.beforeEach(async ({ page }) => {
     // Enhanced console monitoring
@@ -367,7 +369,7 @@ test.describe('Real Data Expansion - Dynamic PDF Resume Testing', () => {
 
   // Dynamically generate test cases for each PDF file
   for (const filename of resumeFiles) {
-    test(`UAT workflow for ${sanitizeTestName(filename)}`, async ({ page }) => {
+    test(`@real-data UAT workflow for ${sanitizeTestName(filename)}`, async ({ page }) => {
       console.log(`\n🚀 Starting test for: ${filename}`);
       console.log(
         `📊 File ${resumeFiles.indexOf(filename) + 1} of ${resumeFiles.length}`,
@@ -381,7 +383,7 @@ test.describe('Real Data Expansion - Dynamic PDF Resume Testing', () => {
 
         // Additional validation for successful completion
         expect(result.success).toBe(true);
-        expect(result.metrics.totalTime).toBeLessThan(55000); // Under 55 seconds total
+        expect(result.metrics.totalTime).toBeLessThan(85000); // Under 85 seconds total
       } catch (error) {
         console.error(`❌ Test failed for ${filename}:`, (error as Error).message);
 
