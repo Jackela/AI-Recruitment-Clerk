@@ -503,7 +503,8 @@ export class ParsingService {
    */
   private generateJobId(userId: string, fileName: string): string {
     const timestamp = Date.now();
-    const hash = createHash('md5')
+    // Use SHA-256 instead of MD5 for cryptographic strength
+    const hash = createHash('sha256')
       .update(`${userId}-${fileName}-${timestamp}`)
       .digest('hex')
       .substring(0, 8);

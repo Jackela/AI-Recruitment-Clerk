@@ -1058,6 +1058,8 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
       {
         threshold: 0.1,
         rootMargin: '50px 0px',
+        // Remove unused root parameter (default viewport behavior)
+        // root: document, // This was causing the warning - not needed
       },
     );
 

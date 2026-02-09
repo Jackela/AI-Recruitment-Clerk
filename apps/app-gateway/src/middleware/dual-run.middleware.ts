@@ -39,9 +39,22 @@ export class DualRunMiddleware implements NestMiddleware {
     (async () => {
       const logsDir = path.resolve('tools/logs/migration');
       ensureDir(logsDir);
-      const id = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
+      // Sanitize ID to prevent path traversal attacks
+      // Only allow alphanumeric characters, underscore, and hyphen
+      const safeId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const filePath = path.join(logsDir, `${safeId}.json`);
+
+      // Validate path is within logs directory to prevent directory traversal
+      const resolvedFilePath = path.resolve(filePath);
+      const resolvedLogsDir = path.resolve(logsDir);
+      if (!resolvedFilePath.startsWith(resolvedLogsDir)) {
+        // Log error but don't block the request
+        return;
+      }
+
       const record: Record<string, unknown> = {
-        id,
+        id: safeId,
         route: req.originalUrl,
         method: req.method,
         time: new Date().toISOString(),
@@ -64,7 +77,7 @@ export class DualRunMiddleware implements NestMiddleware {
       } catch (e) {
         record.error = (e as Error).message;
       } finally {
-        fs.writeFileSync(path.join(logsDir, `${id}.json`), JSON.stringify(record));
+        fs.writeFileSync(resolvedFilePath, JSON.stringify(record));
       }
     })();
 

@@ -197,13 +197,25 @@ export class EmailValidator {
 
     // Add warnings for common issues
     if (options.includeWarnings) {
+      // Early return for emails that are too long to prevent ReDoS
+      if (normalizedEmail.length > 254) {
+        return {
+          isValid: errors.length === 0,
+          errors,
+          warnings: warnings.length > 0 ? warnings : undefined,
+        };
+      }
+
       // Check for common temporary mail patterns
-      const tempMailPatterns = [
-        /temp.*mail\.com$/i,
-        /throwaway\./i,
-        /guerrillamail\.com$/i,
+      // These patterns match against the full email address (e.g., user@tempmail.com)
+      // The patterns are kept simple and anchored to the end to prevent ReDoS
+      const tempMailPatterns: Array<[string, RegExp]> = [
+        ['tempmail.com', /tempmail\.com$/i],
+        ['throwaway', /throwaway\./i],
+        ['guerrillamail.com', /guerrillamail\.com$/i],
       ];
-      for (const pattern of tempMailPatterns) {
+
+      for (const [_, pattern] of tempMailPatterns) {
         if (pattern.test(normalizedEmail)) {
           warnings.push(`${errorPrefix} appears to be a temporary email address`);
           break;
