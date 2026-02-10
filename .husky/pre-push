@@ -78,7 +78,7 @@ echo "🎭 Step 5/6: Running E2E tests (skipping slow PDF integration tests)..."
 export CI=true
 export E2E_SKIP_WEBSERVER=true
 export PLAYWRIGHT_BASE_URL=http://localhost:4200
-cd apps/ai-recruitment-frontend-e2e && npx playwright test --grep-invert "@pdf-variety\|@real-data"
+cd apps/ai-recruitment-frontend-e2e && npx playwright test --grep-invert '@pdf-variety|@real-data'
 E2E_EXIT_CODE=$?
 
 # Stop the server

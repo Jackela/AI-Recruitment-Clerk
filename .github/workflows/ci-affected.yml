@@ -53,4 +53,4 @@ jobs:
       - name: Build affected
         run: npx nx affected -t build --base=origin/main --head=HEAD
       - name: E2E affected
-        run: npx nx affected -t e2e --base=origin/main --head=HEAD -- --grep-invert "@pdf-variety\|@real-data"
+        run: npx nx affected -t e2e --base=origin/main --head=HEAD -- --grep-invert '@pdf-variety|@real-data'

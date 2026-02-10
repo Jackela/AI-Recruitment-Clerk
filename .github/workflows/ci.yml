@@ -154,7 +154,7 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
       - working-directory: apps/ai-recruitment-frontend-e2e
-        run: npx playwright test --grep-invert "@pdf-variety\|@real-data"
+        run: npx playwright test --grep-invert '@pdf-variety|@real-data'
         env:
           CI: true
           E2E_SKIP_WEBSERVER: true
