@@ -53,4 +53,6 @@ jobs:
       - name: Build affected
         run: npx nx affected -t build --base=origin/main --head=HEAD
       - name: E2E affected
-        run: npx nx affected -t e2e --base=origin/main --head=HEAD -- --grep-invert '@pdf-variety|@real-data'
+        run: npx nx affected -t e2e --base=origin/main --head=HEAD -- --grep-invert="$PLAYWRIGHT_GREP_PATTERN"
+        env:
+          PLAYWRIGHT_GREP_PATTERN: '@pdf-variety|@real-data'
