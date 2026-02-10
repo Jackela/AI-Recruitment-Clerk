@@ -153,7 +153,8 @@ jobs:
           fi
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-      - run: npx playwright test --grep-invert "@pdf-variety|@real-data"
+      - working-directory: apps/ai-recruitment-frontend-e2e
+        run: npx playwright test --grep-invert "@pdf-variety|@real-data"
         env:
           CI: true
           E2E_SKIP_WEBSERVER: true
@@ -169,8 +170,8 @@ jobs:
         with:
           name: playwright-report
           path: |
-            playwright-report
-            e2e/results
+            apps/ai-recruitment-frontend-e2e/playwright-report
+            apps/ai-recruitment-frontend-e2e/test-results
           if-no-files-found: ignore
 
   pii_scan:

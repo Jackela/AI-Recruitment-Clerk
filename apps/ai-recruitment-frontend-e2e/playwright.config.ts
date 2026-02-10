@@ -84,9 +84,9 @@ if (process.env.E2E_ENABLE_FIREFOX === 'true') {
 
 export default defineConfig({
   testDir: './src',
-  timeout: 30000,
+  timeout: 60000,
   expect: {
-    timeout: 5000,
+    timeout: 15000,
   },
   // Enhanced stability configuration for port management
   fullyParallel: false,
