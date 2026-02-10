@@ -52,6 +52,25 @@ jobs:
         run: npx nx affected -t test --base=origin/main --head=HEAD
       - name: Build affected
         run: npx nx affected -t build --base=origin/main --head=HEAD
+      - name: Start app-gateway for E2E
+        run: |
+          npx nx run app-gateway:serve > /tmp/gateway.log 2>&1 &
+          GATEWAY_PID=$!
+          echo "GATEWAY_PID=$GATEWAY_PID" >> $GITHUB_ENV
+          echo "Waiting for gateway to be ready..."
+          for i in {1..12}; do
+            if curl -s -f http://localhost:3000 > /dev/null 2>&1; then
+              echo "Gateway is ready after ${i}s!"
+              break
+            fi
+            echo "Waiting... ($i/12)"
+            sleep 5
+          done
+          if ! curl -s -f http://localhost:3000 > /dev/null 2>&1; then
+            echo "Gateway failed to start. Log output:"
+            cat /tmp/gateway.log
+            exit 1
+          fi
       - name: Start static server for E2E
         run: |
           npx nx run ai-recruitment-frontend:serve-static --port 4200 > /tmp/server.log 2>&1 &
@@ -81,4 +100,7 @@ jobs:
         run: |
           if [ -n "$SERVER_PID" ]; then
             kill $SERVER_PID || true
+          fi
+          if [ -n "$GATEWAY_PID" ]; then
+            kill $GATEWAY_PID || true
           fi
