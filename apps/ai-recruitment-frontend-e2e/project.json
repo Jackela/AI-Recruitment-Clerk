@@ -15,7 +15,7 @@
       ],
       "options": {
         "cwd": "apps/ai-recruitment-frontend-e2e",
-        "commands": ["npx playwright test"],
+        "command": "npx playwright test",
         "parallel": false,
         "env": {
           "E2E_SKIP_WEBSERVER": "true",
@@ -24,8 +24,12 @@
           "PLAYWRIGHT_BASE_URL": "http://localhost:4200",
           "DEV_SERVER_PORT": "4200",
           "PLAYWRIGHT_TIMEOUT": "60000"
-        },
-        "forwardAllArgs": true
+        }
+      },
+      "configurations": {
+        "ci": {
+          "command": "sh -c 'npx playwright test --grep-invert \"@pdf-variety|@real-data\"'"
+        }
       }
     }
   }
