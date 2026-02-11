@@ -122,11 +122,11 @@ export class FlagsController {
 
     // basic normalization
     const pct = Math.max(0, Math.min(100, Number(body.rolloutPercentage ?? 0)));
+    // Only store validated fields - do NOT spread body to avoid including unvalidated properties
     return FlagsStore.upsert({
-      ...body,
+      key: body.key,
       rolloutPercentage: pct,
       enabled: !!body.enabled,
-      key: body.key,
       description,
       cohorts,
       updatedBy,

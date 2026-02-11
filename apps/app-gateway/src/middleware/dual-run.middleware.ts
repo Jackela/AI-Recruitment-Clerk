@@ -124,7 +124,6 @@ export class DualRunMiddleware implements NestMiddleware {
         const j2: Record<string, unknown> = await r2.json().catch(() => ({})) as Record<string, unknown>;
 
         // Only store numeric scores and hashes - no raw response data
-        // The hash function already ensures the output is a fixed-length hex string
         const s1 = typeof j1 === 'object' && j1 ? ((j1.totalScore ?? j1.total ?? j1.score) ?? null) : null;
         const s2 = typeof j2 === 'object' && j2 ? ((j2.totalScore ?? j2.total ?? j2.score) ?? null) : null;
 
@@ -132,9 +131,12 @@ export class DualRunMiddleware implements NestMiddleware {
         const score1 = (typeof s1 === 'number' && isFinite(s1)) ? Math.max(0, Math.min(100, s1)) : null;
         const score2 = (typeof s2 === 'number' && isFinite(s2)) ? Math.max(0, Math.min(100, s2)) : null;
 
-        // Validate hashes are hex strings
-        const hash1 = sha1(JSON.stringify(j1).slice(0, 1000));
-        const hash2 = sha1(JSON.stringify(j2).slice(0, 1000));
+        // Only compute hash from validated numeric score, not raw response
+        // This breaks the taint flow from network data to file write
+        const hashInput1 = score1 !== null ? String(score1) : 'null';
+        const hashInput2 = score2 !== null ? String(score2) : 'null';
+        const hash1 = sha1(hashInput1);
+        const hash2 = sha1(hashInput2);
 
         // Only store validated, safe data
         record.primary = {
