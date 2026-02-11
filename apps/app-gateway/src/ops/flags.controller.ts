@@ -15,28 +15,40 @@ interface FlagsListResponse {
 const FLAG_KEY_REGEX = /^[a-zA-Z0-9._-]+$/;
 
 /**
- * Sanitizes string values to prevent XSS attacks in output.
- * Removes HTML tags, script tags, javascript: protocols, and event handlers.
+ * Properly escapes HTML entities to prevent XSS attacks.
+ * This uses OWASP-recommended character-by-character escaping.
+ *
+ * Security: This function escapes the following HTML entities:
+ * - & -> &amp;
+ * - < -> &lt;
+ * - > -> &gt;
+ * - " -> &quot;
+ * - ' -> &#39;
+ *
+ * This prevents HTML injection, script injection, and attribute injection.
  */
-function sanitizeString(value: unknown): string {
-  if (typeof value !== 'string') return String(value);
-  // Remove potential HTML/script tags and dangerous patterns
-  return value
-    .replace(/<script[^>]*>.*?<\/script>/gis, '')
-    .replace(/<[^>]+>/g, '')
-    .replace(/javascript:/gi, '')
-    .replace(/on\w+\s*=/gi, '');
+function escapeHtml(unsafe: unknown): string {
+  if (typeof unsafe !== 'string') {
+    return String(unsafe);
+  }
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 /**
  * Sanitizes feature flag string fields to prevent reflected XSS.
+ * Uses proper HTML entity encoding instead of regex-based sanitization.
  */
 function sanitizeFlag(flag: FeatureFlag): FeatureFlag {
   return {
     ...flag,
-    description: flag.description ? sanitizeString(flag.description) : undefined,
-    cohorts: flag.cohorts?.map(c => sanitizeString(c)),
-    updatedBy: flag.updatedBy ? sanitizeString(flag.updatedBy) : undefined,
+    description: flag.description ? escapeHtml(flag.description) : undefined,
+    cohorts: flag.cohorts?.map(c => escapeHtml(c)),
+    updatedBy: flag.updatedBy ? escapeHtml(flag.updatedBy) : undefined,
   };
 }
 

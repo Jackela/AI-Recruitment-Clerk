@@ -76,12 +76,30 @@ export class DualRunMiddleware implements NestMiddleware {
         record.alternate = { status: r2.status, ms: t2, hash: sha1(JSON.stringify(j2).slice(0, 1000)), score: s2 };
       } catch (e) {
         // Sanitize error message to remove sensitive data before writing to file
-        let errorMsg = (e as Error).message;
-        if (typeof errorMsg === 'string') {
-          errorMsg = errorMsg
-            .replace(/password|secret|token|api[_-]?key|authorization|cookie|credential/gi, '[REDACTED]')
-            .replace(/["'].*["'].*[:=].*["']/gi, '[REDACTED]');
+        // Use comprehensive regex to redact secrets with common patterns
+        const errorObj = e as Error;
+        let errorMsg = errorObj.message || 'Unknown error';
+
+        // Redact common secret patterns (case-insensitive)
+        // Matches: password=xxx, secret: xxx, token=xxx, api-key: xxx, etc.
+        const secretPatterns = [
+          /password\s*[:=]\s*[^\s,}]+/gi,
+          /secret\s*[:=]\s*[^\s,}]+/gi,
+          /token\s*[:=]\s*[^\s,}]+/gi,
+          /api[_-]?key\s*[:=]\s*[^\s,}]+/gi,
+          /authorization\s*[:=]\s*[^\s,}]+/gi,
+          /cookie\s*[:=]\s*[^\s,}]+/gi,
+          /credential\s*[:=]\s*[^\s,}]+/gi,
+          /bearer\s+[a-zA-Z0-9._-]+/gi,
+          // Redact anything that looks like a JWT or API key
+          /eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/g,
+          /[a-zA-Z0-9]{32,}/g, // Long alphanumeric strings (likely keys)
+        ];
+
+        for (const pattern of secretPatterns) {
+          errorMsg = errorMsg.replace(pattern, '[REDACTED]');
         }
+
         record.error = errorMsg;
       } finally {
         fs.writeFileSync(resolvedFilePath, JSON.stringify(record));
