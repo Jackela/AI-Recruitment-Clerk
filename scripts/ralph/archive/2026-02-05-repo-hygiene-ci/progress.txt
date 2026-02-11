@@ -1,0 +1,24 @@
+# Ralph Progress Log
+Started: 2026-02-05 (CI Fixes Sprint)
+---
+
+## Codebase Patterns
+- E2E tests using `MongooseModule.forRoot()` need explicit mongoose connection cleanup in `afterAll`
+- `WriteWrap` requests in open-handle warnings are benign (async console writes) - filter them in `isStandardIoHandle`
+- When fixing E2E test teardown, close mongoose connection before `app.close()` to prevent pending operations
+- Negative test error messages can be gated in `jest.setup.ts` using `ignoredConsoleErrorPatterns`
+- Pattern for gating errors: use prefix match like `'Error recording usage:'` to cover variations
+- Nx monorepo dependencies: depcheck reports false positives for build tooling (@nx/*, @angular-devkit/*, @swc/*) - these are used implicitly by workspace
+- Type-only imports in .ts files may not be detected by depcheck - verify by searching actual source files before removal
+- `passport-local` was commented out in `local.strategy.ts` - indicating migration away from local auth strategy
+- Config services in NestJS should be injectable providers, not singletons, for proper test mocking
+- When services add new constructor dependencies, update all test files that instantiate them directly
+- Nx library project references with `composite: true` enable cross-library type imports - needed when libraries import from each other
+- Use `export type` (not `export *`) for type-only re-exports between libraries to avoid circular dependency issues
+- When consolidating DTOs from shared-dtos to domain-specific libraries, maintain backward compatibility via type-only re-exports
+- Local CI (`npm run ci:local`) must match GitHub Actions checks to catch issues before pushing
+- Coverage files are generated in `coverage/coverage-summary.json` by jest with `coverageReporters: ['json-summary']`
+- `jest.config.mjs` root config needs `coverageDirectory` and `coverageReporters` to generate summary files
+
+---
+

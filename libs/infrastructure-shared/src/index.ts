@@ -1025,3 +1025,67 @@ export class DatabasePerformanceMonitor {
     };
   }
 }
+
+// Re-export error handling utilities for convenience
+export {
+  asyncErrorBoundary,
+  errorBoundary,
+  successResponse,
+  errorResponse,
+  extractErrorInfo,
+  isRetryableError,
+  type ErrorResponse,
+  type ErrorBoundaryOptions,
+  type ErrorCategory,
+  type ErrorSeverity,
+  AppError,
+  ValidationError,
+  NotFoundError,
+  AuthenticationError,
+  AuthorizationError,
+  ConfigurationError,
+  ExternalServiceError,
+} from './error-handling';
+
+// Re-export validation utilities for convenience
+export {
+  EmailValidator,
+  PhoneValidator,
+  IdValidator,
+  SchemaValidator,
+  Validator,
+  type ValidationResult,
+  type ValidationOptions,
+  type EmailValidationOptions,
+  type PhoneValidationOptions,
+  type IdValidationOptions,
+  type SchemaDefinition,
+} from './utilities';
+
+// Re-export pipes for convenience
+export {
+  DtoValidationPipe,
+  createDtoValidationPipe,
+  type DtoValidationPipeOptions,
+  type FormattedValidationError,
+} from './pipes';
+
+// Re-export bootstrap utilities for convenience
+export {
+  bootstrapNestJsMicroservice,
+  bootstrapNestJsGateway,
+  bootstrapWithErrorHandling,
+  type MicroserviceBootstrapOptions,
+  type GatewayBootstrapOptions,
+} from './bootstrap';
+
+// Re-export logger for convenience
+export {
+  Logger,
+  createLogger,
+  logger,
+  sharedLogger,
+  type LogContext,
+  type LogEntry,
+  type LoggerOptions,
+} from './logging';

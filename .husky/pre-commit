@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+set -e
+
+# Fast checks that run in <30 seconds
+echo "🔍 Running pre-commit checks..."
+
+# Lint staged files only (fast)
+npx lint-staged
+
+# Quick typecheck on changed projects
+npx nx affected -t typecheck --base=HEAD --head=HEAD --parallel=false
+
+echo "✅ Pre-commit checks passed!"

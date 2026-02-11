@@ -20,6 +20,10 @@ import {
   ExceptionFilterConfigHelper,
   ErrorInterceptorFactory,
 } from '@ai-recruitment-clerk/infrastructure-shared';
+import {
+  ReportDataService,
+  LlmReportMapperService,
+} from '../report-helpers';
 
 /**
  * Configures the app module.
@@ -60,6 +64,8 @@ import {
     ReportRepository,
     ReportTemplatesService,
     PerformanceMonitorService,
+    ReportDataService,
+    LlmReportMapperService,
     // Enhanced Error Handling System
     {
       provide: APP_FILTER,
@@ -99,6 +105,8 @@ import {
     ReportGeneratorService,
     ReportTemplatesService,
     PerformanceMonitorService,
+    ReportDataService,
+    LlmReportMapperService,
   ],
 })
 export class AppModule {}

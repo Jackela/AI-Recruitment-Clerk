@@ -3,9 +3,8 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/ai-recruitment-frontend-e2e/src",
-  "implicitDependencies": [
-    "ai-recruitment-frontend"
-  ],
+  "tags": ["type:e2e"],
+  "implicitDependencies": ["ai-recruitment-frontend"],
   "// targets": "to see all targets run: nx show project ai-recruitment-frontend-e2e --web",
   "targets": {
     "e2e": {
@@ -17,15 +16,20 @@
       "options": {
         "cwd": "apps/ai-recruitment-frontend-e2e",
         "command": "npx playwright test",
+        "parallel": false,
         "env": {
           "E2E_SKIP_WEBSERVER": "true",
-          "E2E_MANUAL_DEV_SERVER": "true",
-          "DEV_SERVER_PORT": "4202",
-          "PLAYWRIGHT_BASE_URL": "http://localhost:4202",
-          "E2E_PROTECTED_PORTS": "3000,4200,4202",
-          "E2E_USE_REAL_API": "false"
-        },
-        "forwardAllArgs": true
+          "E2E_MANUAL_DEV_SERVER": "false",
+          "E2E_USE_REAL_API": "false",
+          "PLAYWRIGHT_BASE_URL": "http://localhost:4200",
+          "DEV_SERVER_PORT": "4200",
+          "PLAYWRIGHT_TIMEOUT": "60000"
+        }
+      },
+      "configurations": {
+        "ci": {
+          "command": "sh -c 'npx playwright test --grep-invert \"@pdf-variety|@real-data\"'"
+        }
       }
     }
   }

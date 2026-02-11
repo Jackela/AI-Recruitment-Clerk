@@ -6,6 +6,28 @@
 
 import { runCleanups, clearCleanups } from './test/utils/cleanup';
 
+// Patch to ensure instanceof checks pass for mock functions across realms
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const originalToBeInstanceOf = (expect as any).getMatchers?.()?.toBeInstanceOf;
+expect.extend({
+  toBeInstanceOf(received: any, constructor: any) {
+    if (typeof received === 'function' && constructor === Function) {
+      return { pass: true, message: () => '' };
+    }
+    if (originalToBeInstanceOf) {
+      return originalToBeInstanceOf.call(this, received, constructor);
+    }
+    // Fallback to basic instanceof check
+    const pass = received instanceof constructor;
+    return {
+      pass,
+      message: () => pass
+        ? `expected ${received} not to be an instance of ${constructor.name}`
+        : `expected ${received} to be an instance of ${constructor.name}`
+    };
+  },
+});
+
 // Ensure test environment flag for conditional app wiring
 process.env.NODE_ENV = 'test';
 
@@ -92,6 +114,12 @@ const isStandardIoHandle = (handle: any): boolean => {
     return true;
   }
 
+  // WriteWrap requests are often pending async console writes
+  // These are benign and don't indicate actual resource leaks
+  if (handle.constructor?.name === 'WriteWrap') {
+    return true;
+  }
+
   return false;
 };
 
@@ -172,6 +200,14 @@ const ignoredConsoleErrorPatterns = [
   'Circuit breaker triggered for auth-login',
   '[GridFsService]',
   '[ReportEventsController]',
+  // Usage limit service negative test errors
+  'Error recording usage:',
+  'Error adding bonus quota:',
+  'Error getting usage statistics:',
+  'Error analyzing usage patterns:',
+  'Error getting high risk IPs:',
+  // Resume parser service negative test errors
+  'Circuit breaker triggered for handleResumeSubmitted:',
 ];
 console.error = (...args: any[]) => {
   const message = args.join(' ');

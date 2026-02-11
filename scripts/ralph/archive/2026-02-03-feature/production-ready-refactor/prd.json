@@ -1,0 +1,78 @@
+{
+  "project": "AI-Recruitment-Clerk",
+  "branchName": "ralph/repo-hygiene-ci",
+  "description": "Finalize repo hygiene and CI stability on the current branch. All work stays in one PR with local verification, CI green, and clear rollback.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Re-verify local quality gates (single source of truth)",
+      "description": "As a maintainer, I need local checks to reflect CI expectations before pushing a PR.",
+      "acceptanceCriteria": [
+        "npm run lint passes",
+        "npm run typecheck passes",
+        "npm run build passes",
+        "npm run test passes",
+        "npm run test:smoke passes",
+        "npm run validate:contracts:ci passes",
+        "npm run test:e2e passes",
+        "Record any non-fatal warnings in PR notes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Keep results in a single PR checklist; do not split into multiple PRs."
+    },
+    {
+      "id": "US-002",
+      "title": "Assess and document non-fatal test warnings",
+      "description": "As a reviewer, I need clarity on console warnings/errors that do not fail tests.",
+      "acceptanceCriteria": [
+        "List known warnings (e.g., websocket connection refused, open handle warnings)",
+        "State impact and whether they are expected in test context",
+        "Add follow-up items if any warning risks real regressions"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Do not change behavior unless needed; document first."
+    },
+    {
+      "id": "US-003",
+      "title": "Review workflow changes for applicability",
+      "description": "As a maintainer, I need to remove any repo-hygiene changes that are not applicable.",
+      "acceptanceCriteria": [
+        "Review new docs/templates/workflows for relevance",
+        "Remove or adjust any items not fitting repo needs",
+        "Ensure lint and typecheck still pass"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Prefer minimal changes; avoid churn."
+    },
+    {
+      "id": "US-004",
+      "title": "Prepare a single PR (no branch switching)",
+      "description": "As a maintainer, I need exactly one PR for all changes in this effort.",
+      "acceptanceCriteria": [
+        "PR description includes: change list, risks, rollback, tests run",
+        "No additional branches created",
+        "All changes stay on current branch"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Single PR only."
+    },
+    {
+      "id": "US-005",
+      "title": "Push and verify PR checks",
+      "description": "As a maintainer, I need CI to be green before merge.",
+      "acceptanceCriteria": [
+        "Push current branch once",
+        "Open a single PR to main",
+        "All GitHub Actions checks pass",
+        "Record CI results in PR"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Do not open multiple PRs."
+    }
+  ]
+}

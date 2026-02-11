@@ -14,6 +14,7 @@ import {
   ExceptionFilterConfigHelper,
   ErrorInterceptorFactory,
 } from '@ai-recruitment-clerk/infrastructure-shared';
+import { JdExtractorConfigService } from '../config';
 
 /**
  * Configures the app module.
@@ -30,6 +31,7 @@ import {
   controllers: [AppController, JdEventsController, HealthController],
   providers: [
     AppService,
+    JdExtractorConfigService,
     ExtractionService,
     LlmService,
     JdExtractorNatsService,

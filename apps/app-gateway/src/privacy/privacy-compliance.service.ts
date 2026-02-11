@@ -480,7 +480,7 @@ export class PrivacyComplianceService {
         'Article 6(1)(f) - Legitimate interests',
     };
 
-    return legalBasisMap[purpose] || 'Article 6(1)(f) - Legitimate interests';
+    return legalBasisMap[purpose as keyof typeof legalBasisMap] || 'Article 6(1)(f) - Legitimate interests';
   }
 
   private hasConsentForEssentialProcessing(records: ConsentRecord[]): boolean {

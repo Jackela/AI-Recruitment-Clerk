@@ -1,17 +1,25 @@
 import { test, expect } from './fixtures';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { waitForDeferredComponents } from './test-utils/hydration';
+
+// Get the directory of the current file (ESM compatible)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// E2E project root (where PDF fixtures are) is one level up from src
+const e2eRoot = path.resolve(__dirname, '..');
+// Workspace root is 3 levels up from the test file directory
+const workspaceRoot = path.resolve(__dirname, '..', '..', '..');
 
 const COACH_ROUTE = '/coach';
 
 test.describe('PDF UAT - Real File', () => {
-  test('Coach page accepts JD + real PDF and shows correct skills', async ({
+  test('@pdf-variety Coach page accepts JD + real PDF and shows correct skills', async ({
     page,
   }) => {
-    const root = process.cwd();
-    const jdPath = path.resolve(root, 'UAT_Architect_JD.txt');
-    const pdfPath = path.resolve(root, '简历.pdf');
+    const jdPath = path.resolve(workspaceRoot, 'docs', 'recruitment', 'UAT_Architect_JD.txt');
+    const pdfPath = path.resolve(e2eRoot, '简历.pdf');
 
     expect(fs.existsSync(jdPath)).toBeTruthy();
     expect(fs.existsSync(pdfPath)).toBeTruthy();

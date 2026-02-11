@@ -1,0 +1,145 @@
+name: 🔧 Operations Task
+description: Create a task for operations, maintenance, or infrastructure work
+title: "[Ops]: "
+labels: ["operations", "needs-triage"]
+assignees:
+  - Jackela
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for operational tasks, maintenance work, or infrastructure improvements.
+
+  - type: dropdown
+    id: task-type
+    attributes:
+      label: Task Type
+      description: What type of operations task is this?
+      options:
+        - Infrastructure Update
+        - Performance Optimization
+        - Security Hardening
+        - Monitoring/Alerting
+        - Backup/Recovery
+        - Deployment/Release
+        - Documentation Update
+        - Technical Debt
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How urgent is this task?
+      options:
+        - Critical - Production issue, immediate attention required
+        - High - Important but not blocking
+        - Medium - Normal priority
+        - Low - Nice to have
+    validations:
+      required: true
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact Area
+      description: What area does this affect?
+      options:
+        - CI/CD Pipeline
+        - Deployment Infrastructure
+        - Monitoring/Logging
+        - Security
+        - Performance
+        - Cost Optimization
+        - Documentation
+        - Development Workflow
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Task Description
+      description: Clear description of what needs to be done
+      placeholder: Describe the operational task...
+    validations:
+      required: true
+
+  - type: textarea
+    id: background
+    attributes:
+      label: Background/Context
+      description: Why is this task needed? What problem does it solve?
+      placeholder: Provide context about why this task is important...
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Implementation Plan
+      description: Steps to complete this task
+      placeholder: |
+        1. Step one
+        2. Step two
+        3. Step three
+
+  - type: textarea
+    id: testing
+    attributes:
+      label: Testing/Validation Plan
+      description: How will this be tested or validated?
+      placeholder: |
+        - Test in staging environment
+        - Monitor metrics for X hours
+        - Verify backup integrity
+        - etc.
+
+  - type: textarea
+    id: rollback
+    attributes:
+      label: Rollback Plan
+      description: How to rollback if something goes wrong?
+      placeholder: |
+        - Revert deployment
+        - Restore from backup
+        - Disable feature flag
+        - etc.
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks and Mitigations
+      description: What could go wrong? How to mitigate?
+      placeholder: |
+        - Risk: Description
+          Mitigation: How to prevent or handle
+
+  - type: textarea
+    id: timeline
+    attributes:
+      label: Estimated Timeline
+      description: When should this be done? How long will it take?
+      placeholder: |
+        - Estimated effort: X hours
+        - Target completion: YYYY-MM-DD
+        - Maintenance window: If applicable
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Are there any dependencies or blocking issues?
+      placeholder: |
+        - Depends on: Issue/PR #123
+        - Blocks: Issue/PR #456
+        - Requires coordination with: Team X
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Information
+      description: Any other relevant information
+      placeholder: Add notes, links, references...

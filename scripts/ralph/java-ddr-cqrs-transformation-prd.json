@@ -1,0 +1,901 @@
+{
+  "project": "AI-Recruitment-Clerk-Java",
+  "branchName": "ralph/repo-hygiene-ci",
+  "description": "Transform the TypeScript/Node.js AI Recruitment Clerk into a best practices Java application with DDD, CQRS, SOLID, and SSOT patterns using modular monolithic architecture.",
+  "userStories": [
+    {
+      "id": "JAVA-001",
+      "title": "Set up Java project structure with modular monolith architecture",
+      "description": "Create the foundational Java project structure following modular monolith principles with Maven/Gradle multi-module setup, clear bounded context boundaries, and dependency inversion between modules.",
+      "acceptanceCriteria": [
+        "Create multi-module Maven/Gradle project structure",
+        "Define bounded context modules: candidate-context, job-context, scoring-context, reporting-context, user-context, shared-kernel",
+        "Set up Java 21+ with Spring Boot 3.x as base framework",
+        "Configure module dependencies enforcing dependency direction (shared-kernel at bottom)",
+        "Create README documenting module structure and dependency rules",
+        "mvn clean install succeeds with all modules"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Foundation for entire Java transformation"
+    },
+    {
+      "id": "JAVA-002",
+      "title": "Implement shared-kernel domain foundation module",
+      "description": "Create the shared-kernel module with common DDD building blocks: DomainEvent base class, ValueObject base class, Entity base class, AggregateRoot base class, Repository interfaces, Result type for operations, and common value objects (Id, Email, PhoneNumber).",
+      "acceptanceCriteria": [
+        "Create base AggregateRoot class with domain event collection",
+        "Create base Entity class with ID equality",
+        "Create base ValueObject class with structural equality",
+        "Create DomainEvent marker interface and base classes",
+        "Create Result<T> type for operation results (success/failure)",
+        "Create common value objects: EntityId, Email, PhoneNumber, Money, DateRange",
+        "Create Repository<T, ID> marker interface",
+        "Unit tests for all base classes with >80% coverage"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "SSOT for all domain building blocks"
+    },
+    {
+      "id": "JAVA-003",
+      "title": "Implement shared-kernel application layer foundation",
+      "description": "Create CQRS foundation in shared-kernel: Command, Query, CommandHandler, QueryHandler interfaces, CommandBus, QueryBus, EventBus interfaces, and in-memory implementations for testing.",
+      "acceptanceCriteria": [
+        "Create Command marker interface",
+        "Create Query<R> marker interface with result type",
+        "Create CommandHandler<C> functional interface",
+        "Create QueryHandler<Q,R> functional interface",
+        "Create CommandBus interface with register/dispatch methods",
+        "Create QueryBus interface with execute method",
+        "Create EventBus interface for domain events",
+        "Create InMemoryCommandBus for testing",
+        "Create InMemoryQueryBus for testing",
+        "Create InMemoryEventBus for testing",
+        "Unit tests for all bus implementations"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "CQRS pattern foundation"
+    },
+    {
+      "id": "JAVA-004",
+      "title": "Implement shared-kernel infrastructure layer foundation",
+      "description": "Create infrastructure abstractions: persistence repository implementations (Spring Data JPA), event serialization (JSON), message publishing (RabbitMQ/Kafka adapter), and configuration management.",
+      "acceptanceCriteria": [
+        "Create AbstractJpaRepository<T,ID extends UUID> extending JpaRepository",
+        "Create DomainEventStore interface and Spring Data implementation",
+        "Create EventSerializer for JSON serialization",
+        "Create MessagePublisher adapter interface",
+        "Create RabbitMQMessagePublisher implementation",
+        "Create properties-based configuration loader",
+        "Integration tests for repository layer with testcontainers",
+        "Integration tests for message publishing"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Infrastructure abstractions for all bounded contexts"
+    },
+    {
+      "id": "JAVA-005",
+      "title": "Implement candidate-context domain layer - Resume Aggregate",
+      "description": "Create the Resume aggregate in candidate-context with Resume entity, ContactInfo value object, WorkExperience entity, Education entity, Skills value object, and resume-related domain events.",
+      "acceptanceCriteria": [
+        "Create Resume aggregate root extending AggregateRoot",
+        "Create ContactInfo value object (name, email, phone)",
+        "Create WorkExperience entity with DateRange value object",
+        "Create Education entity with Degree value object",
+        "Create Skills value object with technical/soft categories",
+        "Create ResumeParsed domain event",
+        "Create ResumeUpdated domain event",
+        "Create ResumeDeleted domain event",
+        "Implement aggregate invariants (no duplicate work experiences, valid date ranges)",
+        "Unit tests for all aggregate behaviors"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Core candidate bounded context aggregate"
+    },
+    {
+      "id": "JAVA-006",
+      "title": "Implement candidate-context application layer - Resume Commands",
+      "description": "Create CQRS commands for resume operations: ParseResumeCommand, UpdateResumeCommand, DeleteResumeCommand, UploadResumeCommand with corresponding handlers.",
+      "acceptanceCriteria": [
+        "Create ParseResumeCommand with resume data",
+        "Create ParseResumeCommandHandler that calls VisionLlmService",
+        "Create UpdateResumeCommand with updated data",
+        "Create UpdateResumeCommandHandler that invokes aggregate",
+        "Create DeleteResumeCommand with resume ID",
+        "Create DeleteResumeCommandHandler",
+        "Create UploadResumeCommand for file upload",
+        "Create UploadResumeCommandHandler with file validation",
+        "Implement command validation using Bean Validation",
+        "Unit tests for all command handlers",
+        "Integration tests with mocked services"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "CQRS command handling for resumes"
+    },
+    {
+      "id": "JAVA-007",
+      "title": "Implement candidate-context application layer - Resume Queries",
+      "description": "Create CQRS queries for resume operations: GetResumeQuery, ListResumesQuery, SearchResumesQuery with corresponding handlers using read-optimized projection.",
+      "acceptanceCriteria": [
+        "Create ResumeReadModel projection",
+        "Create GetResumeQuery returning ResumeReadModel",
+        "Create GetResumeQueryHandler",
+        "Create ListResumesQuery with pagination",
+        "Create ListResumesQueryHandler",
+        "Create SearchResumesQuery with filters",
+        "Create SearchResumesQueryHandler",
+        "Create ResumeReadModelRepository for queries",
+        "Implement pagination support",
+        "Implement filter/specification pattern",
+        "Unit tests for all query handlers",
+        "Integration tests with database"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "CQRS query handling with read models"
+    },
+    {
+      "id": "JAVA-008",
+      "title": "Implement candidate-context infrastructure - Vision LLM Service",
+      "description": "Create the Vision LLM Service adapter for resume parsing using Gemini API, with circuit breaker, retry logic, and fallback strategies.",
+      "acceptanceCriteria": [
+        "Create VisionLlmService interface",
+        "Create GeminiVisionLlmService implementation",
+        "Create ResumeParsingPrompt builder",
+        "Create ResumeResponseMapper to domain model",
+        "Implement circuit breaker pattern using Resilience4j",
+        "Implement exponential backoff retry",
+        "Create health check endpoint",
+        "Create metrics for parsing success/failure",
+        "Integration tests with mocked Gemini API",
+        "Contract tests for API compatibility"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "External service integration with resilience"
+    },
+    {
+      "id": "JAVA-009",
+      "title": "Implement candidate-context infrastructure - Resume Persistence",
+      "description": "Create Spring Data JPA repositories for Resume aggregate with event sourcing support for audit trail and temporal queries.",
+      "acceptanceCriteria": [
+        "Create ResumeEntity JPA entity",
+        "Create WorkExperienceEntity JPA entity",
+        "Create EducationEntity JPA entity",
+        "Create ResumeRepository interface extending JpaRepository",
+        "Create ResumeJpaRepository implementing domain repository",
+        "Create ResumeEventLog table for event sourcing",
+        "Create ResumeEventLogRepository",
+        "Implement event replay functionality",
+        "Create database migrations (Flyway/Liquibase)",
+        "Integration tests with testcontainers (PostgreSQL)"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "Persistence with event sourcing support"
+    },
+    {
+      "id": "JAVA-010",
+      "title": "Implement job-context domain layer - Job Aggregate",
+      "description": "Create the Job aggregate in job-context with Job entity, Requirements value object, Responsibilities value object, Company value object, and job-related domain events.",
+      "acceptanceCriteria": [
+        "Create Job aggregate root extending AggregateRoot",
+        "Create Requirements value object (technical, soft, experience, education)",
+        "Create Responsibilities value object",
+        "Create Benefits value object",
+        "Create Company value object (name, industry, size)",
+        "Create JobCreated domain event",
+        "Create JobUpdated domain event",
+        "Create JobPublished domain event",
+        "Create JobClosed domain event",
+        "Implement aggregate invariants (valid requirements, non-empty responsibilities)",
+        "Unit tests for all aggregate behaviors"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": "Core job bounded context aggregate"
+    },
+    {
+      "id": "JAVA-011",
+      "title": "Implement job-context application layer - Job Commands and Queries",
+      "description": "Create CQRS commands/queries for job operations: CreateJob, UpdateJob, PublishJob, CloseJob commands and GetJob, ListJobs, SearchJobs queries.",
+      "acceptanceCriteria": [
+        "Create CreateJobCommand with job data",
+        "Create CreateJobCommandHandler",
+        "Create UpdateJobCommand",
+        "Create UpdateJobCommandHandler",
+        "Create PublishJobCommand",
+        "Create PublishJobCommandHandler",
+        "Create CloseJobCommand",
+        "Create CloseJobCommandHandler",
+        "Create GetJobQuery",
+        "Create GetJobQueryHandler",
+        "Create ListJobsQuery with pagination/filters",
+        "Create ListJobsQueryHandler",
+        "Create JobReadModel projection",
+        "Unit tests for all handlers",
+        "Integration tests with database"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "CQRS for job management"
+    },
+    {
+      "id": "JAVA-012",
+      "title": "Implement job-context infrastructure - JD Extraction Service",
+      "description": "Create the JD Extraction Service adapter using LLM to extract structured data from job description text.",
+      "acceptanceCriteria": [
+        "Create JdExtractionService interface",
+        "Create GeminiJdExtractionService implementation",
+        "Create JdParsingPrompt builder",
+        "Create JdResponseMapper to domain model",
+        "Implement circuit breaker and retry",
+        "Create validation for extracted data",
+        "Create health check endpoint",
+        "Integration tests with mocked LLM",
+        "Unit tests for mappers and validators"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": "LLM-based JD extraction"
+    },
+    {
+      "id": "JAVA-013",
+      "title": "Implement scoring-context domain layer - Candidate Match Aggregate",
+      "description": "Create the CandidateMatch aggregate in scoring-context with ScoreBreakdown value object, MatchingSkill value object, Recommendation value object, and scoring domain events.",
+      "acceptanceCriteria": [
+        "Create CandidateMatch aggregate root",
+        "Create ScoreBreakdown value object (skills, experience, education, overall)",
+        "Create MatchingSkill value object (skill, matchScore, matchType)",
+        "Create Recommendation value object (decision, reasoning, strengths, concerns)",
+        "Create MatchCalculated domain event",
+        "Create MatchUpdated domain event",
+        "Implement scoring algorithm invariants (0-100 range, weighted averages)",
+        "Create ScoringRules domain service",
+        "Unit tests for all scoring calculations"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": "Core scoring bounded context"
+    },
+    {
+      "id": "JAVA-014",
+      "title": "Implement scoring-context domain layer - Skills Taxonomy",
+      "description": "Create the Skills Taxonomy for semantic skill matching with skill hierarchy, synonyms, and related skills.",
+      "acceptanceCriteria": [
+        "Create Skill value object with name and category",
+        "Create SkillHierarchy value object for parent-child relationships",
+        "Create SkillSynonym value object",
+        "Create SkillsTaxonomy aggregate",
+        "Create AddSkillCommand",
+        "Create AddSkillSynonymCommand",
+        "Implement skill lookup with semantic matching",
+        "Create skill relationship mapping",
+        "Unit tests for taxonomy operations"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": "Domain service for skill matching"
+    },
+    {
+      "id": "JAVA-015",
+      "title": "Implement scoring-context application layer - Scoring Commands and Queries",
+      "description": "Create CQRS commands/queries for scoring: CalculateMatch, UpdateMatch, BatchCalculateScore commands and GetMatch, ListMatches queries.",
+      "acceptanceCriteria": [
+        "Create CalculateMatchCommand with resumeId and jobId",
+        "Create CalculateMatchCommandHandler with orchestration",
+        "Create UpdateMatchCommand for manual adjustments",
+        "Create UpdateMatchCommandHandler",
+        "Create BatchCalculateScoreCommand",
+        "Create BatchCalculateScoreCommandHandler",
+        "Create GetMatchQuery",
+        "Create GetMatchQueryHandler",
+        "Create ListMatchesQuery with filters",
+        "Create CandidateMatchReadModel",
+        "Unit tests for all handlers",
+        "Integration tests"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": "CQRS for candidate scoring"
+    },
+    {
+      "id": "JAVA-016",
+      "title": "Implement scoring-context infrastructure - Scoring Service Integration",
+      "description": "Create the scoring service infrastructure with LLM-based analysis, experience calculator, and seniority determination.",
+      "acceptanceCriteria": [
+        "Create ScoringService interface",
+        "Create LlmBasedScoringService implementation",
+        "Create ExperienceCalculator domain service",
+        "Create SeniorityDeterminer domain service",
+        "Create DateParser utility for date range parsing",
+        "Create GapDetector service",
+        "Implement scoring quality metrics",
+        "Unit tests for calculators",
+        "Integration tests with scoring service"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": "Complex scoring logic implementation"
+    },
+    {
+      "id": "JAVA-017",
+      "title": "Implement reporting-context domain layer - Report Aggregate",
+      "description": "Create the Report aggregate in reporting-context with Report entity, ReportMetadata value object, and report-related domain events.",
+      "acceptanceCriteria": [
+        "Create Report aggregate root",
+        "Create ReportMetadata value object",
+        "Create ReportContent value object",
+        "Create ReportFormat enum (PDF, HTML, JSON)",
+        "Create ReportGenerated domain event",
+        "Create ReportDownloaded domain event",
+        "Create ReportDeleted domain event",
+        "Implement report generation invariants",
+        "Unit tests for all aggregate behaviors"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": "Core reporting bounded context"
+    },
+    {
+      "id": "JAVA-018",
+      "title": "Implement reporting-context application layer - Report Commands and Queries",
+      "description": "Create CQRS commands/queries for reporting: GenerateReport, DownloadReport, DeleteReport commands and GetReport, ListReports queries.",
+      "acceptanceCriteria": [
+        "Create GenerateReportCommand with matchId and format",
+        "Create GenerateReportCommandHandler",
+        "Create DownloadReportCommand",
+        "Create DownloadReportCommandHandler",
+        "Create DeleteReportCommand",
+        "Create DeleteReportCommandHandler",
+        "Create GetReportQuery",
+        "Create GetReportQueryHandler",
+        "Create ListReportsQuery",
+        "Create ListReportsQueryHandler",
+        "Create ReportReadModel",
+        "Unit tests for all handlers"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": "CQRS for reporting"
+    },
+    {
+      "id": "JAVA-019",
+      "title": "Implement reporting-context infrastructure - PDF Generation Service",
+      "description": "Create the PDF Generation Service using a Java PDF library with template support and chart generation.",
+      "acceptanceCriteria": [
+        "Create PdfGenerationService interface",
+        "Create ITextPdfGenerationService or Apache PDFBox implementation",
+        "Create ReportTemplate engine",
+        "Create ChartGenerationService for score visualization",
+        "Create GridFS adapter for PDF storage",
+        "Implement PDF metadata handling",
+        "Unit tests for service",
+        "Integration tests for PDF generation"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": "PDF generation infrastructure"
+    },
+    {
+      "id": "JAVA-020",
+      "title": "Implement user-context domain layer - User and Organization Aggregates",
+      "description": "Create User and Organization aggregates in user-context with authentication, authorization, and multi-tenancy support.",
+      "acceptanceCriteria": [
+        "Create User aggregate with credentials",
+        "Create Organization aggregate",
+        "Create TenantId value object for multi-tenancy",
+        "Create UserRegistered domain event",
+        "Create UserActivated domain event",
+        "Create UserDeactivated domain event",
+        "Create OrganizationCreated domain event",
+        "Implement user-organization association invariants",
+        "Create Password value object with hashing",
+        "Unit tests for all aggregates"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": "User management bounded context"
+    },
+    {
+      "id": "JAVA-021",
+      "title": "Implement user-context application layer - Auth Commands and Queries",
+      "description": "Create CQRS commands/queries for authentication: RegisterUser, LoginUser, RefreshToken commands and GetUser, ListUsers queries.",
+      "acceptanceCriteria": [
+        "Create RegisterUserCommand",
+        "Create RegisterUserCommandHandler",
+        "Create LoginUserCommand",
+        "Create LoginUserCommandHandler with JWT generation",
+        "Create RefreshTokenCommand",
+        "Create RefreshTokenCommandHandler",
+        "Create GetUserQuery",
+        "Create GetUserQueryHandler",
+        "Create UserReadModel with security fields filtered",
+        "Create TokenBlacklist service for logout",
+        "Unit tests for all handlers"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": "Authentication with JWT"
+    },
+    {
+      "id": "JAVA-022",
+      "title": "Implement user-context infrastructure - Security and Persistence",
+      "description": "Create security infrastructure with password hashing, JWT token service, and user persistence with data isolation per tenant.",
+      "acceptanceCriteria": [
+        "Create PasswordHasher service (BCrypt)",
+        "Create JwtTokenService for token generation/validation",
+        "Create UserRepository with tenant filtering",
+        "Create OrganizationRepository",
+        "Create TokenBlacklistRepository",
+        "Implement data isolation filter (tenantId)",
+        "Create Spring Security configuration",
+        "Create authentication filter",
+        "Create authorization filter with roles",
+        "Integration tests with security context"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": "Security infrastructure"
+    },
+    {
+      "id": "JAVA-023",
+      "title": "Implement cross-context saga orchestration - Candidate to Match flow",
+      "description": "Create saga orchestrator for the candidate-to-match flow: ResumeParsed → ExtractJD → CalculateMatch → GenerateReport.",
+      "acceptanceCriteria": [
+        "Create CandidateMatchSaga orchestrator",
+        "Create SagaManager for saga lifecycle",
+        "Create SagaStep interface",
+        "Implement ResumeParsed step",
+        "Implement JobExtracted step",
+        "Implement MatchCalculated step",
+        "Implement ReportGenerated step",
+        "Implement compensation logic for failures",
+        "Create saga persistence for recovery",
+        "Unit tests for saga orchestration",
+        "Integration tests for full flow"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": "Saga pattern for cross-aggregate coordination"
+    },
+    {
+      "id": "JAVA-024",
+      "title": "Implement event-driven communication between bounded contexts",
+      "description": "Create event-driven communication using domain events published to message broker and consumed by other bounded contexts.",
+      "acceptanceCriteria": [
+        "Create DomainEventPublisher adapter",
+        "Create DomainEventSubscriber interface",
+        "Create @DomainEventHandler annotation",
+        "Create ResumeParsedEvent published to candidate exchange",
+        "Create JobExtractedEvent published to job exchange",
+        "Create MatchCalculatedEvent published to scoring exchange",
+        "Create event consumer in each context",
+        "Implement dead letter queue for failed events",
+        "Create event replay mechanism",
+        "Integration tests for event flow"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": "Event-driven architecture between contexts"
+    },
+    {
+      "id": "JAVA-025",
+      "title": "Implement API Gateway layer with Spring Cloud Gateway",
+      "description": "Create the API Gateway using Spring Cloud Gateway for routing, rate limiting, and security to all bounded context services.",
+      "acceptanceCriteria": [
+        "Create API Gateway module with Spring Cloud Gateway",
+        "Configure routes to each bounded context",
+        "Implement rate limiting per tenant",
+        "Implement JWT validation filter",
+        "Implement CORS configuration",
+        "Configure circuit breaker for downstream services",
+        "Create global exception handler",
+        "Create API documentation aggregation (SpringDoc OpenAPI)",
+        "Integration tests for gateway routing"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": "API Gateway for modular monolith"
+    },
+    {
+      "id": "JAVA-026",
+      "title": "Implement REST API controllers for all bounded contexts",
+      "description": "Create REST controllers following RESTful principles with proper HTTP semantics, validation, and error handling.",
+      "acceptanceCriteria": [
+        "Create ResumeController with POST/GET/PUT/DELETE endpoints",
+        "Create JobController with POST/GET/PUT/DELETE endpoints",
+        "Create CandidateMatchController with POST/GET endpoints",
+        "Create ReportController with POST/GET endpoints",
+        "Create UserController with auth endpoints",
+        "Implement Bean Validation for all requests",
+        "Create GlobalExceptionHandler with proper error codes",
+        "Implement pagination for list endpoints",
+        "Implement HATEOAS links for responses",
+        "API tests with MockMvc"
+      ],
+      "priority": 26,
+      "passes": false,
+      "notes": "REST API layer"
+    },
+    {
+      "id": "JAVA-027",
+      "title": "Implement database schema with Flyway migrations",
+      "description": "Create database migrations for all bounded contexts with proper indexing, foreign keys, and constraints.",
+      "acceptanceCriteria": [
+        "Create Flyway migration for candidate schema",
+        "Create Flyway migration for job schema",
+        "Create Flyway migration for scoring schema",
+        "Create Flyway migration for reporting schema",
+        "Create Flyway migration for user schema",
+        "Create domain event log tables",
+        "Create read model tables for queries",
+        "Add indexes for frequently queried fields",
+        "Add foreign key constraints",
+        "Create seed data migration",
+        "Test migrations up and down"
+      ],
+      "priority": 27,
+      "passes": false,
+      "notes": "Database schema as code"
+    },
+    {
+      "id": "JAVA-028",
+      "title": "Implement observability - logging, metrics, tracing",
+      "description": "Add comprehensive observability using Micrometer, OpenTelemetry, and structured logging.",
+      "acceptanceCriteria": [
+        "Configure Micrometer with Prometheus metrics",
+        "Create custom metrics for business operations",
+        "Configure OpenTelemetry for distributed tracing",
+        "Create trace propagation across bounded contexts",
+        "Configure structured logging with Logback",
+        "Add correlation ID to all logs",
+        "Create health check endpoints (Liveness/Readiness)",
+        "Create metrics dashboard configuration",
+        "Test observability in integration environment"
+      ],
+      "priority": 28,
+      "passes": false,
+      "notes": "Observability for production"
+    },
+    {
+      "id": "JAVA-029",
+      "title": "Implement testing strategy - unit, integration, contract tests",
+      "description": "Create comprehensive test suite with unit tests (JUnit 5), integration tests (testcontainers), and contract tests (Spring Cloud Contract).",
+      "acceptanceCriteria": [
+        "Configure JUnit 5 with JaCoCo for coverage",
+        "Set target coverage >80% for domain layer",
+        "Create testcontainers configuration",
+        "Create integration test base class",
+        "Create repository integration tests",
+        "Create service integration tests",
+        "Configure Spring Cloud Contract",
+        "Create contract tests for API boundaries",
+        "Create test data builders",
+        "Ensure all tests pass"
+      ],
+      "priority": 29,
+      "passes": false,
+      "notes": "Testing infrastructure"
+    },
+    {
+      "id": "JAVA-030",
+      "title": "Implement CI/CD pipeline with GitHub Actions",
+      "description": "Create CI/CD pipeline for Java application with build, test, security scan, and deployment stages.",
+      "acceptanceCriteria": [
+        "Create GitHub Actions workflow for CI",
+        "Configure Maven build with caching",
+        "Run tests on every push",
+        "Run coverage checks",
+        "Run OWASP dependency check",
+        "Run SpotBugs/PMD for code quality",
+        "Create Dockerfile for each module",
+        "Create Docker Compose for local development",
+        "Configure deployment workflow",
+        "Test CI/CD pipeline end-to-end"
+      ],
+      "priority": 30,
+      "passes": false,
+      "notes": "CI/CD automation"
+    },
+    {
+      "id": "JAVA-031",
+      "title": "Implement configuration management with Spring Cloud Config",
+      "description": "Externalize configuration using Spring Cloud Config with environment-specific configs and secrets management.",
+      "acceptanceCriteria": [
+        "Create Spring Cloud Config server",
+        "Create configuration files per environment (dev, test, prod)",
+        "Configure client modules to use config server",
+        "Implement configuration refresh without restart",
+        "Integrate with HashiCorp Vault for secrets",
+        "Create configuration validation",
+        "Document all configuration properties",
+        "Test configuration changes"
+      ],
+      "priority": 31,
+      "passes": false,
+      "notes": "Centralized configuration"
+    },
+    {
+      "id": "JAVA-032",
+      "title": "Implement data encryption for PII",
+      "description": "Implement encryption for personally identifiable information (PII) in candidates using application-level encryption.",
+      "acceptanceCriteria": [
+        "Create EncryptionService interface",
+        "Implement AesGcmEncryptionService",
+        "Create PiiAttribute annotation",
+        "Create PiiEncryptor converter for JPA",
+        "Encrypt contact info at rest",
+        "Create tenant-specific encryption keys",
+        "Implement key rotation support",
+        "Unit tests for encryption/decryption",
+        "Integration tests for encrypted data"
+      ],
+      "priority": 32,
+      "passes": false,
+      "notes": "Security - data at rest encryption"
+    },
+    {
+      "id": "JAVA-033",
+      "title": "Implement audit logging for all mutations",
+      "description": "Create audit logging for all state changes with who, when, what, and why information.",
+      "acceptanceCriteria": [
+        "Create AuditLog entity",
+        "Create AuditLogRepository",
+        "Create @Audited annotation",
+        "Create AuditLogAspect using AOP",
+        "Log all command executions",
+        "Log all domain events",
+        "Create audit log query API",
+        "Implement audit log retention policy",
+        "Unit tests for audit aspect",
+        "Integration tests for audit logging"
+      ],
+      "priority": 33,
+      "passes": false,
+      "notes": "Audit trail for compliance"
+    },
+    {
+      "id": "JAVA-034",
+      "title": "Implement usage tracking and quotas",
+      "description": "Create usage tracking system per tenant with quota management and overage handling.",
+      "acceptanceCriteria": [
+        "Create UsageTracking aggregate",
+        "Create UsageLimit value object",
+        "Create UsageRecorded domain event",
+        "Create UsageLimitExceeded domain event",
+        "Create TrackUsageCommand and handler",
+        "Create CheckQuotaQuery and handler",
+        "Create quota enforcement aspect",
+        "Create usage reports query",
+        "Unit tests for quota calculations",
+        "Integration tests for quota enforcement"
+      ],
+      "priority": 34,
+      "passes": false,
+      "notes": "Usage management bounded context"
+    },
+    {
+      "id": "JAVA-035",
+      "title": "Implement feature flags with Togglz",
+      "description": "Add feature flag support using Togglz for gradual rollout and A/B testing.",
+      "acceptanceCriteria": [
+        "Configure Togglz integration",
+        "Create feature flags for new features",
+        "Create @FeatureGuard annotation",
+        "Create FeatureToggleService",
+        "Implement admin UI for feature flags",
+        "Create feature flag audit logging",
+        "Document feature flag naming convention",
+        "Unit tests for feature guard",
+        "Integration tests for feature toggles"
+      ],
+      "priority": 35,
+      "passes": false,
+      "notes": "Feature management"
+    },
+    {
+      "id": "JAVA-036",
+      "title": "Implement API versioning and backward compatibility",
+      "description": "Add API versioning support with backward compatibility for breaking changes.",
+      "acceptanceCriteria": [
+        "Configure URI-based versioning (/v1, /v2)",
+        "Create version-specific controllers",
+        "Implement request/response version mappers",
+        "Create deprecation headers for old versions",
+        "Document API versioning strategy",
+        "Create version compatibility tests",
+        "Implement sunset policy for old versions",
+        "Unit tests for version mappers"
+      ],
+      "priority": 36,
+      "passes": false,
+      "notes": "API evolution"
+    },
+    {
+      "id": "JAVA-037",
+      "title": "Implement asynchronous processing with Spring Task Execution",
+      "description": "Create async processing for long-running operations like PDF generation and batch scoring.",
+      "acceptanceCriteria": [
+        "Configure Spring @Async with ThreadPoolExecutor",
+        "Create AsyncTaskExecutor beans",
+        "Create @Async annotated service methods",
+        "Implement async command handlers",
+        "Create task status tracking",
+        "Create GetTaskStatusQuery",
+        "Implement task cancellation",
+        "Add timeout handling",
+        "Unit tests for async operations",
+        "Integration tests for task execution"
+      ],
+      "priority": 37,
+      "passes": false,
+      "notes": "Async processing"
+    },
+    {
+      "id": "JAVA-038",
+      "title": "Implement scheduled jobs for maintenance tasks",
+      "description": "Create scheduled jobs for cleanup, aggregation, and maintenance tasks using Spring Scheduling.",
+      "acceptanceCriteria": [
+        "Configure @EnableScheduling",
+        "Create expired token cleanup job",
+        "Create audit log archival job",
+        "Create usage quota reset job",
+        "Create metrics aggregation job",
+        "Create job execution logging",
+        "Implement job locking for distributed execution",
+        "Create health check for scheduled jobs",
+        "Unit tests for job logic",
+        "Integration tests for scheduling"
+      ],
+      "priority": 38,
+      "passes": false,
+      "notes": "Scheduled maintenance"
+    },
+    {
+      "id": "JAVA-039",
+      "title": "Implement caching strategy with Redis",
+      "description": "Add caching layer using Spring Cache abstraction with Redis for frequently accessed data.",
+      "acceptanceCriteria": [
+        "Configure Redis with Spring Boot",
+        "Create @Cacheable annotations for queries",
+        "Create cache eviction on mutations",
+        "Implement cache key generation strategy",
+        "Configure TTL per cache type",
+        "Create cache warming on startup",
+        "Create cache statistics metrics",
+        "Create cache invalidation strategy",
+        "Integration tests for cache behavior",
+        "Performance tests for cache hits"
+      ],
+      "priority": 39,
+      "passes": false,
+      "notes": "Caching layer"
+    },
+    {
+      "id": "JAVA-040",
+      "title": "Implement documentation - architecture, API, and operations",
+      "description": "Create comprehensive documentation covering architecture decisions, API reference, and operational procedures.",
+      "acceptanceCriteria": [
+        "Create Architecture Decision Records (ADRs)",
+        "Create API documentation with SpringDoc",
+        "Create operations runbook",
+        "Create troubleshooting guide",
+        "Create deployment guide",
+        "Create developer onboarding guide",
+        "Create domain model documentation",
+        "Create sequence diagrams for key flows",
+        "Create data dictionary",
+        "Review and approve documentation"
+      ],
+      "priority": 40,
+      "passes": false,
+      "notes": "Knowledge documentation"
+    },
+    {
+      "id": "JAVA-041",
+      "title": "Performance testing and optimization",
+      "description": "Create performance tests, identify bottlenecks, and optimize critical paths.",
+      "acceptanceCriteria": [
+        "Create JMeter load test scripts",
+        "Define performance SLAs (response time, throughput)",
+        "Run performance tests on all APIs",
+        "Identify bottlenecks with profiling",
+        "Optimize database queries",
+        "Add database query result caching",
+        "Optimize serialization for events",
+        "Implement lazy loading for large entities",
+        "Verify SLAs are met",
+        "Document performance characteristics"
+      ],
+      "priority": 41,
+      "passes": false,
+      "notes": "Performance optimization"
+    },
+    {
+      "id": "JAVA-042",
+      "title": "Security hardening and penetration testing preparation",
+      "description": "Implement security best practices and prepare for security audits.",
+      "acceptanceCriteria": [
+        "Enable Spring Security CSRF protection",
+        "Configure security headers (CSP, X-Frame-Options)",
+        "Implement SQL injection prevention",
+        "Configure XSS protection",
+        "Run OWASP ZAP security scan",
+        "Fix all high/critical security findings",
+        "Create security incident response procedure",
+        "Implement secrets scanning in CI",
+        "Document security architecture",
+        "Conduct security code review"
+      ],
+      "priority": 42,
+      "passes": false,
+      "notes": "Security hardening"
+    },
+    {
+      "id": "JAVA-043",
+      "title": "Create migration script from TypeScript to Java data",
+      "description": "Create data migration scripts to migrate existing MongoDB data to PostgreSQL Java schema.",
+      "acceptanceCriteria": [
+        "Analyze existing MongoDB schema",
+        "Create mapping from MongoDB to PostgreSQL",
+        "Create data extraction script from MongoDB",
+        "Create data transformation logic",
+        "Create data loading script for PostgreSQL",
+        "Create data validation script",
+        "Create rollback procedure",
+        "Test migration with sample data",
+        "Document migration process",
+        "Create migration execution plan"
+      ],
+      "priority": 43,
+      "passes": false,
+      "notes": "Data migration"
+    },
+    {
+      "id": "JAVA-044",
+      "title": "Implement blue-green deployment strategy",
+      "description": "Set up blue-green deployment capability for zero-downtime deployments.",
+      "acceptanceCriteria": [
+        "Configure application for external config",
+        "Create database migration compatibility",
+        "Implement health check for readiness",
+        "Create deployment automation scripts",
+        "Configure load balancer switching",
+        "Create rollback procedure",
+        "Test deployment cycle",
+        "Document deployment procedure",
+        "Create smoke test suite",
+        "Verify zero-downtime deployment"
+      ],
+      "priority": 44,
+      "passes": false,
+      "notes": "Deployment strategy"
+    },
+    {
+      "id": "JAVA-045",
+      "title": "Final integration testing and Go-Live preparation",
+      "description": "Conduct end-to-end testing and prepare for production launch.",
+      "acceptanceCriteria": [
+        "Create end-to-end test scenarios",
+        "Set up staging environment",
+        "Conduct full system integration test",
+        "Conduct performance test in staging",
+        "Conduct security test in staging",
+        "Create production build",
+        "Create production deployment checklist",
+        "Create rollback plan",
+        "Conduct Go-Live rehearsal",
+        "Document lessons learned"
+      ],
+      "priority": 45,
+      "passes": false,
+      "notes": "Production readiness"
+    }
+  ]
+}

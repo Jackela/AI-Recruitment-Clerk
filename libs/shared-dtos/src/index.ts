@@ -1,13 +1,26 @@
 // Models
-export * from './models/resume.dto';
 export * from './models/feedback-code.dto';
 
 // DTO Interfaces
 export * from './dto/jd.dto';
 
 // Events
-export * from './events/resume-events.dto';
 export * from './events/job-events.dto';
+
+// Resume DTOs - Re-exported from @ai-recruitment-clerk/resume-dto for backward compatibility
+// TODO: Migrate imports to use @ai-recruitment-clerk/resume-dto directly
+export type {
+  ResumeDTO,
+  ResumeDto,
+  ResumeAnalysisDto,
+  ResumeUploadDto,
+  ResumeStatusUpdateDto,
+  ResumeSearchDto,
+  ResumeSkillsAnalysisDto,
+  ResumeSubmittedEvent,
+  AnalysisResumeParsedEvent,
+  JobResumeFailedEvent,
+} from '@ai-recruitment-clerk/resume-dto';
 
 // Authentication & Authorization
 export * from './auth/user.dto';
@@ -42,6 +55,7 @@ export * from './skills/skills-taxonomy';
 export * from './prompts/prompt-templates';
 
 // Error Handling - Enhanced System
+export * from './errors/error-response.dto';
 export * from './errors/gemini-errors';
 export * from './errors/error-correlation';
 export * from './errors/enhanced-error-types';
@@ -159,6 +173,10 @@ export type {
 export * from './domains/analytics.rules';
 export * from './contracts/analytics.contracts';
 
+// Feature Flags Domain
+export * from './feature-flags/feature-flag.dto';
+export * from './feature-flags/audit-event.dto';
+
 // Privacy & GDPR Compliance
 export * from './privacy/consent.dto';
 export * from './privacy/data-subject-rights.dto';
@@ -176,16 +194,6 @@ export type {
   QuestionnaireResponseDto,
   QuestionnaireAnalyticsDto,
 } from './domains/questionnaire.dto';
-
-// Resume aliases
-export type { ResumeDTO as ResumeDto } from './models/resume.dto';
-export type {
-  ResumeAnalysisDto,
-  ResumeUploadDto,
-  ResumeStatusUpdateDto,
-  ResumeSearchDto,
-  ResumeSkillsAnalysisDto,
-} from './models/resume.dto';
 
 // Privacy/Consent aliases
 export { ConsentStatusDto as ConsentStatusResponseDto } from './privacy/consent.dto';

@@ -148,8 +148,8 @@ cd AI-Recruitment-Clerk
 npm install
 
 # Set up environment
-cp .env.example .env.development
-# Configure environment variables
+cp .env.example .env.local
+# Configure environment variables in .env.local
 
 # Start development services
 docker-compose up -d mongodb nats

@@ -1,33 +1,19 @@
+/**
+ * @file Resume Parser Service Jest Setup
+ * @description Service-specific test setup. Extends shared jest.setup.ts from root.
+ *
+ * Note: This setup REPLACES the shared jest.setup.ts (not extends) due to Jest limitations.
+ * Duplicated patterns here should match the shared setup in jest.setup.ts.
+ */
+
 import 'reflect-metadata';
-import { Logger } from '@nestjs/common';
 import { config } from 'dotenv';
 import { join } from 'path';
 
-// Load test environment variables
+// Load test environment variables for this service
 config({ path: join(__dirname, '.env.test') });
 
-// Mock Logger to prevent console output during tests
-jest.spyOn(Logger, 'log').mockImplementation((): void => { /* no-op */ });
-jest.spyOn(Logger, 'error').mockImplementation((): void => { /* no-op */ });
-jest.spyOn(Logger, 'warn').mockImplementation((): void => { /* no-op */ });
-jest.spyOn(Logger, 'debug').mockImplementation((): void => { /* no-op */ });
-jest.spyOn(Logger.prototype, 'log').mockImplementation((): void => { /* no-op */ });
-jest.spyOn(Logger.prototype, 'error').mockImplementation((): void => { /* no-op */ });
-jest.spyOn(Logger.prototype, 'warn').mockImplementation((): void => { /* no-op */ });
-jest.spyOn(Logger.prototype, 'debug').mockImplementation((): void => { /* no-op */ });
-
-// Mock console methods to prevent output during tests
-global.console = {
-  ...global.console,
-  log: jest.fn(),
-  error: jest.fn(),
-  warn: jest.fn(),
-  info: jest.fn(),
-  debug: jest.fn(),
-};
-
-// Set test environment variables (override with .env.test if exists)
-process.env.NODE_ENV = process.env.NODE_ENV || 'test';
+// Service-specific environment overrides
 process.env.MONGODB_URI =
   process.env.MONGODB_URI ||
   'mongodb://testuser:testpass@localhost:27018/resume-parser-test?authSource=admin';
@@ -37,10 +23,7 @@ process.env.SERVICE_NAME = process.env.SERVICE_NAME || 'resume-parser-svc-test';
 process.env.GRIDFS_BUCKET_NAME =
   process.env.GRIDFS_BUCKET_NAME || 'test-resumes';
 
-// Increase test timeout for integration tests
-jest.setTimeout(30000);
-
-// Mock pdf-parse-fork module
+// Mock pdf-parse-fork module (service-specific dependency)
 jest.mock('pdf-parse-fork', () => {
   return jest.fn().mockImplementation(() => ({
     text: 'Mock PDF text content',
@@ -52,7 +35,7 @@ jest.mock('pdf-parse-fork', () => {
   }));
 });
 
-// Mock @ai-recruitment-clerk/shared-dtos module
+// Mock @ai-recruitment-clerk/shared-dtos module (service-specific mocks)
 jest.mock('@ai-recruitment-clerk/shared-dtos', () => ({
   ContractTestUtils: {
     validateContract: jest.fn().mockReturnValue(true),
@@ -72,43 +55,4 @@ jest.mock('@ai-recruitment-clerk/shared-dtos', () => ({
       confidence: 0.95,
     }),
   })),
-  // Add any other exports that are needed
 }));
-
-// Cleanup function registry
-const cleanupFunctions: (() => Promise<void> | void)[] = [];
-
-export const registerCleanup = (fn: () => Promise<void> | void): void => {
-  cleanupFunctions.push(fn);
-};
-
-export const runCleanups = async (): Promise<void> => {
-  for (const fn of cleanupFunctions.splice(0)) {
-    await fn();
-  }
-};
-
-// Global test utilities
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
-afterEach(async () => {
-  await runCleanups();
-});
-
-afterAll(async () => {
-  jest.restoreAllMocks();
-  await runCleanups();
-  if (process.env.JEST_FORCE_EXIT === 'true') {
-    // Allow opt-in force exit for legacy CI pipelines
-    setTimeout(() => {
-      process.exit(0);
-    }, 5000);
-  }
-});
-
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (error) => {
-  console.error('Unhandled Promise Rejection:', error);
-});

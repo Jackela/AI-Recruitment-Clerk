@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { ReportRepository } from './report.repository';
 
 /**
  * Defines the shape of the performance metrics.
@@ -88,9 +87,8 @@ export class PerformanceMonitorService {
 
   /**
    * Initializes a new instance of the Performance Monitor Service.
-   * @param _reportRepository - The report repository.
    */
-  constructor(private readonly _reportRepository: ReportRepository) {
+  constructor() {
     // Clean up old metrics every hour
     setInterval(() => this.cleanupOldMetrics(), 60 * 60 * 1000);
   }

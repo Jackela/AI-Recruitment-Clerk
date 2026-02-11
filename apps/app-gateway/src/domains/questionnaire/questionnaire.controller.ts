@@ -29,9 +29,7 @@ import {
   QuestionnaireTemplateDto,
   QuestionnaireStatus,
 } from '@ai-recruitment-clerk/shared-dtos';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { QuestionnaireResponseDto, QuestionnaireAnalyticsDto } from '@ai-recruitment-clerk/shared-dtos';
-import type { QuestionnaireSubmissionDto ,
+import type { QuestionnaireSubmissionDto,
   CreateQuestionnaireDto,
   UpdateQuestionnaireDto} from '@ai-recruitment-clerk/shared-dtos';
 import type { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';

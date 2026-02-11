@@ -183,6 +183,11 @@ describe('Semantic cache job creation (e2e)', () => {
   });
 
   afterAll(async () => {
+    // Close mongoose connection first to prevent open-handle warnings
+    const connection = app.get<any>('MongooseModule').getConnection?.();
+    if (connection?.readyState === 1) {
+      await connection.close();
+    }
     await app.close();
     await mongoServer.stop();
   });

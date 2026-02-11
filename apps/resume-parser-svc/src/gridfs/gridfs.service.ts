@@ -1,6 +1,7 @@
 import type {
   OnModuleInit,
-  OnModuleDestroy} from '@nestjs/common';
+  OnModuleDestroy,
+} from '@nestjs/common';
 import {
   Injectable,
   Logger
@@ -9,6 +10,8 @@ import { InjectConnection } from '@nestjs/mongoose';
 import type { Connection } from 'mongoose';
 import { GridFSBucket, ObjectId } from 'mongodb';
 import type { GridFsFileInfo } from '../dto/resume-parsing.dto';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { ResumeParserConfigService } from '../config';
 
 /**
  * Provides grid fs functionality.
@@ -26,9 +29,11 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
   /**
    * Initializes a new instance of the Grid FS Service.
    * @param connection - The connection.
+   * @param config - The configuration service.
    */
   constructor(
     @InjectConnection('resume-parser') private readonly connection: Connection,
+    private readonly config: ResumeParserConfigService,
   ) {}
 
   /**
@@ -171,7 +176,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
     }
 
     // In test mode or when GridFS is not connected, store files in-memory
-    if (process.env.NODE_ENV === 'test' || !this.gridFSBucket) {
+    if (this.config.isTest || !this.gridFSBucket) {
       const objectId = new ObjectId().toHexString();
       const gridFsUrl = `gridfs://${this.bucketName}/${objectId}`;
       const info: GridFsFileInfo & { metadata?: Record<string, unknown> } = {
@@ -303,7 +308,7 @@ export class GridFsService implements OnModuleInit, OnModuleDestroy {
   public async connect(): Promise<void> {
     try {
       // Skip actual connection in test environment
-      if (process.env.NODE_ENV === 'test') {
+      if (this.config.isTest) {
         this.logger.log('GridFS service connected (test mode)');
         return;
       }

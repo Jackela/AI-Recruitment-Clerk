@@ -26,6 +26,14 @@ interface QueryOptimizationConfig {
   queryPlanCache: boolean; // 查询计划缓存
 }
 
+interface DatabaseRequest extends Request {
+  dbQueryStart?: number;
+  dbQueryCount?: number;
+  dbSlowQueries?: number;
+  dbQueryTime?: number;
+  queryPlanCached?: boolean;
+}
+
 /**
  * Represents the database optimization middleware.
  */
@@ -75,13 +83,13 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
    * @param next - The next.
    * @returns The result of the operation.
    */
-  public async use(req: Request, res: Response, next: NextFunction): Promise<void> {
+  public async use(req: DatabaseRequest, res: Response, next: NextFunction): Promise<void> {
     const queryStartTime = Date.now();
 
     // 设置数据库查询监控
-    req['dbQueryStart'] = queryStartTime;
-    req['dbQueryCount'] = 0;
-    req['dbSlowQueries'] = 0;
+    req.dbQueryStart = queryStartTime;
+    req.dbQueryCount = 0;
+    req.dbSlowQueries = 0;
 
     // 监听查询事件（如果支持）
     this.setupQueryMonitoring(req);
@@ -91,7 +99,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
 
     res.on('finish', () => {
       const totalQueryTime = Date.now() - queryStartTime;
-      req['dbQueryTime'] = totalQueryTime;
+      req.dbQueryTime = totalQueryTime;
 
       this.updateMetrics(req, totalQueryTime);
       this.logQueryPerformance(req, totalQueryTime);
@@ -139,7 +147,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     }
   }
 
-  private setupQueryMonitoring(req: Request): void {
+  private setupQueryMonitoring(req: DatabaseRequest): void {
     // 由于Mongoose的限制，我们主要监控请求级别的查询
     const queryKey = this.generateQueryKey(req);
 
@@ -148,7 +156,7 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
       if (cached) {
         cached.hitCount++;
         cached.lastUsed = Date.now();
-        req['queryPlanCached'] = true;
+        req.queryPlanCached = true;
       }
     }
   }
@@ -177,23 +185,23 @@ export class DatabaseOptimizationMiddleware implements NestMiddleware {
     }
   }
 
-  private updateMetrics(req: Request, totalQueryTime: number): void {
+  private updateMetrics(req: DatabaseRequest, totalQueryTime: number): void {
     this.metrics.queryExecutionTime =
       (this.metrics.queryExecutionTime + totalQueryTime) / 2;
 
     if (totalQueryTime > this.config.slowQueryThreshold) {
       this.metrics.slowQueries++;
-      req['dbSlowQueries'] = (req['dbSlowQueries'] || 0) + 1;
+      req.dbSlowQueries = (req.dbSlowQueries || 0) + 1;
     }
 
-    req['dbQueryCount'] = (req['dbQueryCount'] || 0) + 1;
+    req.dbQueryCount = (req.dbQueryCount || 0) + 1;
   }
 
-  private logQueryPerformance(req: Request, totalQueryTime: number): void {
+  private logQueryPerformance(req: DatabaseRequest, totalQueryTime: number): void {
     const { method, path } = req;
-    const queryCount = req['dbQueryCount'] || 0;
-    const slowQueries = req['dbSlowQueries'] || 0;
-    const cached = req['queryPlanCached'] ? '📊' : '🔍';
+    const queryCount = req.dbQueryCount || 0;
+    const slowQueries = req.dbSlowQueries || 0;
+    const cached = req.queryPlanCached ? '📊' : '🔍';
 
     if (totalQueryTime > this.config.slowQueryThreshold) {
       this.logger.warn(

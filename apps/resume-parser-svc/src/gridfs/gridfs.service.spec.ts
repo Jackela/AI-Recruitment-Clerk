@@ -1,10 +1,17 @@
 import { GridFsService } from './gridfs.service';
+import type { ResumeParserConfigService } from '../config';
+
+const mockConfig = {
+  isTest: true,
+  nodeName: 'unknown',
+  gridfsBucketName: 'resumes',
+} as unknown as ResumeParserConfigService;
 
 describe('GridFsService (isolated)', () => {
   let service: GridFsService;
 
   beforeEach(() => {
-    service = new GridFsService({} as any);
+    service = new GridFsService({} as any, mockConfig);
     (service as any).gridFSBucket = {
       find: jest
         .fn()

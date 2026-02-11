@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { Model, FilterQuery } from 'mongoose';
 import type {
@@ -10,6 +10,31 @@ import {
   Report
 } from '../schemas/report.schema';
 import { DatabasePerformanceMonitor } from '@ai-recruitment-clerk/infrastructure-shared';
+
+/**
+ * Allowed sort fields for report queries to prevent property injection.
+ * Only these fields can be used in the sortBy parameter.
+ */
+const ALLOWED_SORT_FIELDS = new Set([
+  'createdAt',
+  'updatedAt',
+  'generatedAt',
+  'jobId',
+  'resumeId',
+  'status',
+  'overallFit',
+  'skillsMatch',
+  'experienceMatch',
+  'educationMatch',
+  'processingTimeMs',
+  'analysisConfidence',
+  // Nested fields
+  'scoreBreakdown.overallFit',
+  'scoreBreakdown.skillsMatch',
+  'scoreBreakdown.experienceMatch',
+  'scoreBreakdown.educationMatch',
+  'recommendation.decision',
+]);
 
 // Enhanced type definitions for report repository
 /**
@@ -299,6 +324,13 @@ export class ReportRepository {
           query,
           options,
         });
+
+        // Validate sortBy against allowed fields to prevent property injection
+        if (!ALLOWED_SORT_FIELDS.has(sortBy)) {
+          throw new BadRequestException(
+            `Invalid sort field: "${sortBy}". Allowed fields: ${Array.from(ALLOWED_SORT_FIELDS).join(', ')}`,
+          );
+        }
 
         const filter = this.buildQueryFilter(query);
 

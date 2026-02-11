@@ -33,30 +33,35 @@ async function globalTeardown(): Promise<void> {
         console.warn('⚠️ Error stopping mock server:', error);
       }
     }
-    // Stop manually started dev server if present
+
+    // Clean up any orphaned dev server PID file
     try {
       if (fs.existsSync(devServerPidFile)) {
         const devPid = parseInt(fs.readFileSync(devServerPidFile, 'utf-8').trim(), 10);
         if (!isNaN(devPid)) {
-          console.log(`🛑 Stopping Dev Server (pid ${devPid})...`);
-          if (process.platform === 'win32') {
-            spawnSync('taskkill', ['/PID', String(devPid), '/T', '/F'], {
-              stdio: 'ignore',
-              shell: true,
-            });
-          } else {
-            try {
+          console.log(`🛑 Cleaning up orphaned Dev Server PID file (pid ${devPid})...`);
+          // Try to kill the process if it's still running
+          try {
+            process.kill(devPid, 0);
+            // Process exists, try to kill it
+            if (process.platform === 'win32') {
+              spawnSync('taskkill', ['/PID', String(devPid), '/T', '/F'], {
+                stdio: 'ignore',
+                shell: true,
+              });
+            } else {
               process.kill(devPid);
-            } catch {
-              // ignore
             }
+          } catch {
+            // Process not running, just clean up the PID file
           }
         }
         fs.rmSync(devServerPidFile, { force: true });
       }
     } catch (err) {
-      console.warn('⚠️ Failed to stop Dev Server:', (err as Error).message);
+      console.warn('⚠️ Failed to clean up Dev Server PID file:', (err as Error).message);
     }
+
     // Stop real gateway if we started it
     if (useRealAPI) {
       try {
@@ -139,8 +144,12 @@ async function globalTeardown(): Promise<void> {
         // Final fallback - try legacy cleanup if available
         try {
           console.log('🔄 Attempting legacy port cleanup fallback...');
-          const { cleanup } = await import('./cleanup-ports.mjs');
-          await cleanup();
+          // @ts-expect-error - cleanup-ports.mjs is an ESM module without type declarations
+           
+          const { cleanup } = await import('./cleanup-ports.mjs') as { cleanup?: () => Promise<void> };
+          if (cleanup) {
+            await cleanup();
+          }
           console.log('✅ Legacy port cleanup completed');
         } catch (fallbackError) {
           console.error(

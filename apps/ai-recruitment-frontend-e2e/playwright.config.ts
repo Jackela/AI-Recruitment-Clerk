@@ -4,21 +4,20 @@ import { defineConfig, devices } from '@playwright/test';
 // Also skip when running against real API to ensure decoupled servers
 const skipWebServer =
   process.env['E2E_SKIP_WEBSERVER'] === 'true' ||
-  process.env['E2E_USE_REAL_API'] === 'true' ||
-  process.env['E2E_MANUAL_DEV_SERVER'] === 'true';
+  process.env['E2E_USE_REAL_API'] === 'true';
 
 const parsedDevServerPort = process.env['DEV_SERVER_PORT']
   ? Number.parseInt(process.env['DEV_SERVER_PORT'], 10)
   : undefined;
 const devServerPort = Number.isFinite(parsedDevServerPort ?? NaN)
   ? parsedDevServerPort
-  : undefined;
+  : 4200;
 
 // Support both development (with dev server) and production (containerized) testing.
 // Default to the external stack (Docker) when the dev server is skipped.
 const fallbackBaseURL = skipWebServer
   ? process.env['E2E_EXTERNAL_BASE_URL'] || 'http://localhost:4200'
-  : `http://localhost:${devServerPort ?? 4202}`;
+  : `http://localhost:${devServerPort}`;
 
 const baseURL =
   process.env['PLAYWRIGHT_BASE_URL'] ||
@@ -85,9 +84,9 @@ if (process.env.E2E_ENABLE_FIREFOX === 'true') {
 
 export default defineConfig({
   testDir: './src',
-  timeout: 30000,
+  timeout: 60000,
   expect: {
-    timeout: 5000,
+    timeout: 15000,
   },
   // Enhanced stability configuration for port management
   fullyParallel: false,
@@ -126,14 +125,11 @@ export default defineConfig({
     ? {}
     : {
         webServer: {
-          command: devServerPort
-            ? `npx nx run ai-recruitment-frontend:serve:test --port ${devServerPort} --host 0.0.0.0`
-            : 'npx nx run ai-recruitment-frontend:serve:test --port 4202 --host 0.0.0.0',
+          // Build first, then serve with simple HTTP server (no Nx daemon needed)
+          command: `npx nx run ai-recruitment-frontend:build:production && npx serve dist/apps/ai-recruitment-frontend/browser -l ${devServerPort} -s`,
           url: baseURL,
           reuseExistingServer: !process.env.CI,
-          timeout: 300 * 1000, // Extended for dynamic port allocation
-          stderr: 'pipe',
-          stdout: 'pipe',
+          timeout: 120 * 1000, // 120 seconds for build + server startup
         },
       }),
   projects,

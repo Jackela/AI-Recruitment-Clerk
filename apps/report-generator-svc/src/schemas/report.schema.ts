@@ -8,16 +8,16 @@ export type ReportDocument = Report & Document;
  */
 @Schema()
 export class ScoreBreakdown {
-  @Prop({ required: true, min: 0, max: 100 })
+  @Prop({ type: Number, required: true, min: 0, max: 100 })
   public skillsMatch = 0;
 
-  @Prop({ required: true, min: 0, max: 100 })
+  @Prop({ type: Number, required: true, min: 0, max: 100 })
   public experienceMatch = 0;
 
-  @Prop({ required: true, min: 0, max: 100 })
+  @Prop({ type: Number, required: true, min: 0, max: 100 })
   public educationMatch = 0;
 
-  @Prop({ required: true, min: 0, max: 100 })
+  @Prop({ type: Number, required: true, min: 0, max: 100 })
   public overallFit = 0;
 }
 
@@ -26,10 +26,10 @@ export class ScoreBreakdown {
  */
 @Schema()
 export class MatchingSkill {
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   public skill = '';
 
-  @Prop({ required: true, min: 0, max: 100 })
+  @Prop({ type: Number, required: true, min: 0, max: 100 })
   public matchScore = 0;
 
   @Prop({
@@ -37,9 +37,9 @@ export class MatchingSkill {
     enum: ['exact', 'partial', 'related', 'missing'],
     default: 'missing',
   })
-  public matchType = 'missing';
+  public matchType: 'exact' | 'partial' | 'related' | 'missing' = 'missing';
 
-  @Prop()
+  @Prop({ type: String })
   public explanation?: string;
 }
 
@@ -53,9 +53,9 @@ export class ReportRecommendation {
     enum: ['hire', 'consider', 'interview', 'reject'],
     required: true,
   })
-  public decision = 'reject';
+  public decision: 'hire' | 'consider' | 'interview' | 'reject' = 'reject';
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   public reasoning = '';
 
   @Prop({ type: [String], default: [] })
@@ -76,22 +76,22 @@ export class ReportRecommendation {
   collection: 'reports',
 })
 export class Report {
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   public jobId = '';
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   public resumeId = '';
 
   @Prop({ type: ScoreBreakdown, required: true })
-  public scoreBreakdown: ScoreBreakdown = new ScoreBreakdown();
+  public scoreBreakdown!: ScoreBreakdown;
 
   @Prop({ type: [MatchingSkill], default: [] })
   public skillsAnalysis: MatchingSkill[] = [];
 
   @Prop({ type: ReportRecommendation, required: true })
-  public recommendation: ReportRecommendation = new ReportRecommendation();
+  public recommendation!: ReportRecommendation;
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   public summary = '';
 
   @Prop({ type: Number, min: 0, max: 1, default: 0 })
@@ -105,26 +105,26 @@ export class Report {
     enum: ['pending', 'processing', 'completed', 'failed'],
     default: 'pending',
   })
-  public status = 'pending';
+  public status: 'pending' | 'processing' | 'completed' | 'failed' = 'pending';
 
-  @Prop()
+  @Prop({ type: String })
   public errorMessage?: string;
 
   // Metadata for tracking and auditing
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   public generatedBy = ''; // Service identifier
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   public llmModel = '';
 
   @Prop({ type: Date, default: Date.now })
   public generatedAt: Date = new Date();
 
-  @Prop()
+  @Prop({ type: String })
   public requestedBy?: string; // User ID if applicable
 
   // GridFS URL for detailed report document if generated
-  @Prop()
+  @Prop({ type: String })
   public detailedReportUrl?: string;
 }
 

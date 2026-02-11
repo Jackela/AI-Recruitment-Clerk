@@ -496,7 +496,7 @@ docker-compose restart nats
 # Check container resource usage
 docker stats
 
-# Limit container memory in docker-compose.yml
+# Limit container memory in config/docker/docker-compose.yml
 services:
   app-gateway:
     deploy:
@@ -548,7 +548,7 @@ npx nx build app-gateway --verbose
 
 ## 📄 License
 
-This project is licensed under the ISC License.
+This project is licensed under the [MIT License](./LICENSE).
 
 ---
 
@@ -560,24 +560,24 @@ This project is licensed under the ISC License.
 
 #### Windows
 ```cmd
-start-system.bat
+scripts\start-system.bat
 ```
 
 #### Linux/macOS
 ```bash
-./start-system.sh
+./scripts/start-system.sh
 ```
 
 ### System Validation
 ```bash
-./validate-system.sh  # Linux/macOS
-validate-system.bat   # Windows
+./scripts/validate-system.sh  # Linux/macOS
+scripts\validate-system.bat   # Windows
 ```
 
 ### Run E2E Tests
 ```bash
-./run-e2e-tests.sh    # Linux/macOS
-run-e2e-tests.bat     # Windows
+./scripts/run-e2e-tests.sh    # Linux/macOS
+scripts\run-e2e-tests.bat     # Windows
 ```
 
 ### Service URLs (After Deployment)
@@ -589,7 +589,7 @@ run-e2e-tests.bat     # Windows
 
 ## 📖 Deployment Documentation
 
-- [**🚀 Deployment Guide**](./DEPLOYMENT_GUIDE.md) - Complete deployment instructions
+- [**🚀 Deployment Guide**](./docs/deployment/DEPLOYMENT_GUIDE.md) - Complete deployment instructions
 - [**📚 Documentation Hub**](./docs/DOCUMENTATION_INDEX.md) - Comprehensive documentation navigation
 
 ## 🎉 System Integration Status

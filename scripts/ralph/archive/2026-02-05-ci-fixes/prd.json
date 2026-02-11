@@ -1,0 +1,186 @@
+{
+  "project": "AI-Recruitment-Clerk",
+  "branchName": "ralph/repo-hygiene-ci",
+  "description": "Fix CI failures to achieve green GitHub Actions - coverage, E2E, dependency scan, secret scan, and quality gates.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Sync local CI script with GitHub Actions",
+      "description": "As a developer, I need local CI to catch the same issues as GitHub Actions before pushing.",
+      "acceptanceCriteria": [
+        "Update ci:local script to include test:coverage and audit",
+        "Add ci:full script that includes E2E and quality gates",
+        "npm run ci:local runs test, lint, typecheck, build, coverage, audit",
+        "Verify coverage/coverage-summary.json is generated after test:coverage",
+        "Document what ci:local vs ci:full runs in scripts/ralph/CLAUDE.md"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Add tests for pull-to-refresh.directive.ts (2.22% coverage)",
+      "description": "As a developer, I need the pull-to-refresh directive to have proper test coverage.",
+      "acceptanceCriteria": [
+        "Create tests for touch gesture handling",
+        "Create tests for refresh state management",
+        "Create tests for onDestroy lifecycle",
+        "Coverage reaches at least 80% for this file",
+        "npm run test passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Add tests for date-parser.ts (3.92% coverage)",
+      "description": "As a developer, I need the date parser to have proper test coverage.",
+      "acceptanceCriteria": [
+        "Create tests for parseDateRange function",
+        "Create tests for parseSingleDate function",
+        "Create tests for normalizeDate function",
+        "Create tests for edge cases (invalid dates, null inputs)",
+        "Coverage reaches at least 80% for this file",
+        "npm run test passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Add tests for experience-calculator.ts (4.16% coverage)",
+      "description": "As a developer, I need the experience calculator to have proper test coverage.",
+      "acceptanceCriteria": [
+        "Create tests for calculateTotalExperience function",
+        "Create tests for calculateOverlap function",
+        "Create tests for detectGaps function",
+        "Coverage reaches at least 80% for this file",
+        "npm run test passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Add tests for mobile-swipe.component.ts (4.1% coverage)",
+      "description": "As a developer, I need the mobile swipe component to have proper test coverage.",
+      "acceptanceCriteria": [
+        "Create tests for swipe gesture detection",
+        "Create tests for swipe callbacks (left, right)",
+        "Create tests for threshold calculations",
+        "Coverage reaches at least 80% for this file",
+        "npm run test passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Add tests for resume-parser-integration.service.ts (4.54% coverage)",
+      "description": "As a developer, I need the integration service to have proper test coverage.",
+      "acceptanceCriteria": [
+        "Create integration tests for resume parsing flow",
+        "Create tests for error handling scenarios",
+        "Create tests for JD parsing flow",
+        "Coverage reaches at least 60% for this file (integration tests are complex)",
+        "npm run test passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Add tests for report-generator.service.ts (6.49% coverage)",
+      "description": "As a developer, I need the report generator service to have proper test coverage.",
+      "acceptanceCriteria": [
+        "Create tests for report generation flow",
+        "Create tests for PDF generation scenarios",
+        "Create tests for template rendering",
+        "Coverage reaches at least 70% for this file",
+        "npm run test passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Add tests for low-coverage frontend components",
+      "description": "As a developer, I need frontend components to have baseline test coverage.",
+      "acceptanceCriteria": [
+        "Add tests for navigation-guide.service.ts (4.81%)",
+        "Add tests for redis-token-blacklist.service.ts (5.4%)",
+        "Add tests for i18n.service.ts (5.82%)",
+        "Each file reaches at least 60% coverage",
+        "npm run test passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Fix E2E test configuration and infrastructure",
+      "description": "As a developer, I need E2E tests to run reliably in CI.",
+      "acceptanceCriteria": [
+        "Check Playwright configuration in apps/ai-recruitment-frontend-e2e/",
+        "Fix dev server timeout issues",
+        "Ensure test files are in correct location",
+        "npm run test:e2e passes locally",
+        "Document E2E setup requirements in scripts/ralph/CLAUDE.md"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Fix dependency security scan issues",
+      "description": "As a developer, I need dependency scan to pass without critical vulnerabilities.",
+      "acceptanceCriteria": [
+        "Run npm audit to identify vulnerabilities",
+        "Update packages with critical/high vulnerabilities",
+        "Document any accepted risks in scripts/ralph/PR-DESCRIPTION.md",
+        "npm run audit passes or only has moderate/low warnings"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Set realistic quality gate threshold",
+      "description": "As a team, we need an achievable coverage target that improves over time toward the 85% goal.",
+      "acceptanceCriteria": [
+        "Analyze current coverage (61.83%) and gap to 85%",
+        "Set intermediate threshold of 70% for this sprint",
+        "Update config/quality-gates.json with threshold: 0.70",
+        "Add roadmap comment: 'TODO: Increase to 85% after coverage improvements'",
+        "npm run test:coverage and quality gates pass with 70% threshold"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "Long-term goal: 85% coverage. This story sets 70% as an achievable milestone."
+    },
+    {
+      "id": "US-012",
+      "title": "Final verification - all CI checks passing",
+      "description": "As a developer, I need all GitHub Actions checks to pass before merging.",
+      "acceptanceCriteria": [
+        "Run npm run ci:full - all checks pass",
+        "Verify GitHub Actions checks pass on PR",
+        "Document any remaining warnings in scripts/ralph/PR-DESCRIPTION.md",
+        "Create summary of all coverage improvements"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

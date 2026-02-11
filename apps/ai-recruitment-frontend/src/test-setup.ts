@@ -90,15 +90,6 @@ interface JasmineSpy extends MockFn {
   and: JasmineAndMethods;
 }
 
-interface _JasmineInterface {
-  createSpyObj: (
-    name: string,
-    methods: string[],
-    props?: Record<string, unknown>,
-  ) => Record<string, JasmineSpy>;
-  createSpy: (name?: string) => JasmineSpy;
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).jasmine = {
   createSpyObj: (

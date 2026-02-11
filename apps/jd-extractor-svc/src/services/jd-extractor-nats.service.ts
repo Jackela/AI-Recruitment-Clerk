@@ -1,30 +1,31 @@
-import { Injectable, Logger } from '@nestjs/common';
-import type { NatsPublishResult } from '@app/shared-nats-client';
-import { NatsClientService } from '@app/shared-nats-client';
+import type { ConfigService } from '@nestjs/config';
+import type { NatsConnectionManager } from '@ai-recruitment-clerk/shared-nats-client';
+import type { NatsStreamManager } from '@ai-recruitment-clerk/shared-nats-client';
+import type { NatsPublishResult } from '@ai-recruitment-clerk/shared-nats-client';
+import { BaseMicroserviceService } from '@ai-recruitment-clerk/service-base';
+import { Injectable } from '@nestjs/common';
 
 /**
  * JD Extractor NATS Service
  *
- * Service-specific extension of the shared NATS client for JD Extractor microservice.
+ * Service-specific extension of the base microservice service for JD Extractor.
  * Provides specialized event publishing methods for job description extraction operations.
  *
  * @author AI Recruitment Team
  * @since 1.0.0
+ * @version 2.0.0 - Refactored to extend BaseMicroserviceService
  */
 @Injectable()
-export class JdExtractorNatsService extends NatsClientService {
-  private readonly serviceLogger = new Logger(JdExtractorNatsService.name);
-
+export class JdExtractorNatsService extends BaseMicroserviceService {
   /**
    * Initialize the JD Extractor NATS service with service-specific configuration
    */
-  public async onModuleInit(): Promise<void> {
-    await this.initialize({
-      serviceName: 'jd-extractor-svc',
-      timeout: 10000,
-      maxReconnectAttempts: 10,
-      reconnectTimeWait: 2000,
-    });
+  constructor(
+    configService: ConfigService,
+    connectionManager: NatsConnectionManager,
+    streamManager: NatsStreamManager,
+  ) {
+    super(configService, connectionManager, streamManager, 'jd-extractor-svc');
   }
 
   /**
@@ -40,59 +41,25 @@ export class JdExtractorNatsService extends NatsClientService {
     confidence?: number;
     extractionMethod?: string;
   }): Promise<NatsPublishResult> {
-    const subject = 'analysis.jd.extracted';
+    const enrichedPayload = {
+      ...event,
+      performance: {
+        processingTimeMs: event.processingTimeMs,
+        extractionMethod: event.extractionMethod || 'llm-structured',
+      },
+      quality: {
+        confidence: event.confidence || 0.85,
+        extractedFields: this.countExtractedFields(event.extractedData),
+      },
+    };
 
-    try {
-      this.serviceLogger.log(
-        `📤 Publishing analysis.jd.extracted event for jobId: ${event.jobId}`,
-      );
-
-      const enrichedEvent = {
-        ...event,
-        eventType: 'AnalysisJdExtractedEvent',
-        timestamp: new Date().toISOString(),
-        version: '2.0',
-        service: 'jd-extractor-svc',
-        performance: {
-          processingTimeMs: event.processingTimeMs,
-          extractionMethod: event.extractionMethod || 'llm-structured',
-        },
-        quality: {
-          confidence: event.confidence || 0.85,
-          extractedFields: this.countExtractedFields(event.extractedData),
-        },
-      };
-
-      const result = await this.publish(subject, enrichedEvent);
-
-      if (result.success) {
-        this.serviceLogger.log(
-          `✅ Analysis JD extracted event published successfully - JobId: ${event.jobId}, MessageId: ${result.messageId}, Confidence: ${enrichedEvent.quality.confidence}`,
-        );
-      } else {
-        this.serviceLogger.error(
-          `❌ Failed to publish analysis JD extracted event - JobId: ${event.jobId}, Error: ${result.error}`,
-        );
-      }
-
-      return result;
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      this.serviceLogger.error(
-        `❌ Error publishing analysis JD extracted event for jobId: ${event.jobId}`,
-        error,
-      );
-
-      return {
-        success: false,
-        error: errorMessage,
-        metadata: {
-          subject,
-          timestamp: new Date(),
-        },
-      };
-    }
+    return this.publishEvent('analysis.jd.extracted', enrichedPayload, {
+      messageId: this.generateMessageId('jd-extracted', event.jobId),
+      headers: {
+        'job-id': event.jobId,
+        'confidence': String(enrichedPayload.quality.confidence),
+      },
+    });
   }
 
   /**
@@ -112,63 +79,10 @@ export class JdExtractorNatsService extends NatsClientService {
       retryAttempt?: number;
     },
   ): Promise<NatsPublishResult> {
-    const subject = 'job.jd.failed';
-
-    try {
-      this.serviceLogger.log(
-        `📤 Publishing processing error event for jobId: ${jobId}`,
-      );
-
-      const errorEvent = {
-        jobId,
-        error: {
-          message: error.message,
-          stack: error.stack,
-          name: error.name,
-          type: error.constructor.name,
-        },
-        context: {
-          service: 'jd-extractor-svc',
-          stage: context?.stage || 'extraction',
-          inputSize: context?.inputSize,
-          retryAttempt: context?.retryAttempt || 1,
-        },
-        timestamp: new Date().toISOString(),
-        eventType: 'JobJdFailedEvent',
-        version: '2.0',
-        severity: this.categorizeErrorSeverity(error),
-      };
-
-      const result = await this.publish(subject, errorEvent);
-
-      if (result.success) {
-        this.serviceLogger.log(
-          `✅ Processing error event published successfully - JobId: ${jobId}, MessageId: ${result.messageId}, Severity: ${errorEvent.severity}`,
-        );
-      } else {
-        this.serviceLogger.error(
-          `❌ Failed to publish processing error event - JobId: ${jobId}, Error: ${result.error}`,
-        );
-      }
-
-      return result;
-    } catch (publishError) {
-      const errorMessage =
-        publishError instanceof Error ? publishError.message : 'Unknown error';
-      this.serviceLogger.error(
-        `❌ Error publishing processing error event for jobId: ${jobId}`,
-        publishError,
-      );
-
-      return {
-        success: false,
-        error: errorMessage,
-        metadata: {
-          subject,
-          timestamp: new Date(),
-        },
-      };
-    }
+    return this.publishErrorEvent('job.jd.failed', jobId, error, {
+      service: 'jd-extractor-svc',
+      ...context,
+    });
   }
 
   /**
@@ -182,51 +96,12 @@ export class JdExtractorNatsService extends NatsClientService {
     inputSize?: number;
     expectedProcessingTime?: number;
   }): Promise<NatsPublishResult> {
-    const subject = 'job.jd.started';
-
-    try {
-      this.serviceLogger.log(
-        `📤 Publishing extraction started event for jobId: ${event.jobId}`,
-      );
-
-      const startedEvent = {
-        ...event,
-        eventType: 'JobJdStartedEvent',
-        timestamp: new Date().toISOString(),
-        service: 'jd-extractor-svc',
-        version: '2.0',
-      };
-
-      const result = await this.publish(subject, startedEvent);
-
-      if (result.success) {
-        this.serviceLogger.log(
-          `✅ Extraction started event published - JobId: ${event.jobId}, MessageId: ${result.messageId}`,
-        );
-      } else {
-        this.serviceLogger.error(
-          `❌ Failed to publish extraction started event - JobId: ${event.jobId}, Error: ${result.error}`,
-        );
-      }
-
-      return result;
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      this.serviceLogger.error(
-        `❌ Error publishing extraction started event for jobId: ${event.jobId}`,
-        error,
-      );
-
-      return {
-        success: false,
-        error: errorMessage,
-        metadata: {
-          subject,
-          timestamp: new Date(),
-        },
-      };
-    }
+    return this.publishEvent('job.jd.started', event, {
+      messageId: this.generateMessageId('jd-started', event.jobId),
+      headers: {
+        'job-id': event.jobId,
+      },
+    });
   }
 
   /**
@@ -238,10 +113,14 @@ export class JdExtractorNatsService extends NatsClientService {
   public async subscribeToJobSubmissions(
     handler: (event: unknown) => Promise<void>,
   ): Promise<void> {
-    await this.subscribe('job.submitted', handler, {
-      durableName: 'jd-extractor-job-submissions',
-      queueGroup: 'jd-extraction',
-    });
+    return this.subscribeToEvents(
+      'job.submitted',
+      handler,
+      {
+        durableName: 'jd-extractor-job-submissions',
+        queueGroup: 'jd-extraction',
+      },
+    );
   }
 
   /**
@@ -267,51 +146,5 @@ export class JdExtractorNatsService extends NatsClientService {
     }
 
     return count;
-  }
-
-  /**
-   * Categorize error severity for monitoring and alerting
-   *
-   * @param error Error object
-   * @returns Severity level
-   */
-  private categorizeErrorSeverity(
-    error: Error,
-  ): 'low' | 'medium' | 'high' | 'critical' {
-    const message = error.message.toLowerCase();
-    const errorName = error.name.toLowerCase();
-
-    // Critical errors that require immediate attention
-    if (
-      message.includes('connection') ||
-      message.includes('timeout') ||
-      errorName.includes('connection') ||
-      message.includes('unauthorized') ||
-      message.includes('forbidden')
-    ) {
-      return 'critical';
-    }
-
-    // High severity errors that affect functionality
-    if (
-      message.includes('parsing') ||
-      message.includes('invalid') ||
-      errorName.includes('validation') ||
-      message.includes('malformed')
-    ) {
-      return 'high';
-    }
-
-    // Medium severity errors that may affect quality
-    if (
-      message.includes('extraction') ||
-      message.includes('incomplete') ||
-      message.includes('warning')
-    ) {
-      return 'medium';
-    }
-
-    // Default to low severity
-    return 'low';
   }
 }

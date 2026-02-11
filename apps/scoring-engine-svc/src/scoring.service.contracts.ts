@@ -15,6 +15,7 @@ import {
   Ensures,
   Invariant,
   ContractValidators,
+  Logger,
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import type { ResumeDTO } from '@ai-recruitment-clerk/resume-processing-domain';
 import type { NatsClient } from './nats/nats.client';
@@ -132,6 +133,7 @@ export interface ScoreDTO {
 export class ScoringEngineServiceContracts {
   private readonly jdCache = new Map<string, JdDTO>();
   private readonly geminiClient: GeminiClient;
+  private readonly logger = new Logger(ScoringEngineServiceContracts.name);
 
   /**
    * Initializes a new instance of the Scoring Engine Service Contracts.
@@ -367,7 +369,7 @@ export class ScoringEngineServiceContracts {
 
       return result;
     } catch (error) {
-      console.error('Enhanced scoring error:', error);
+      this.logger.error('Enhanced scoring error:', error as Error);
 
       // Fallback to basic scoring with contract compliance
       const basicScore = this.calculateBasicMatchScore(jdDto, resumeDto);

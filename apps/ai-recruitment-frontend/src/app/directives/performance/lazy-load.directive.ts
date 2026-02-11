@@ -174,9 +174,12 @@ export class LazyLoadDirective implements OnInit, OnDestroy {
   }
 
   private setupIntersectionObserver(config: LazyLoadConfig): void {
+    // Only include properties that are actually set to avoid warning about superfluous parameters
     const options: IntersectionObserverInit = {
-      threshold: config.threshold,
-      rootMargin: config.rootMargin,
+      threshold: config.threshold ?? 0.1,
+      ...(config.rootMargin && { rootMargin: config.rootMargin }),
+      // Note: 'root' is intentionally omitted when using default viewport
+      // to avoid IntersectionObserver warning about superfluous parameters
     };
 
     this.observer = new IntersectionObserver((entries) => {

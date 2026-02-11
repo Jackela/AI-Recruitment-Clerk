@@ -15,8 +15,7 @@ export let options = {
   ],
   thresholds: {
     // 性能指标阈值
-    http_req_duration: ['p(95)<2000'],          // 95%请求响应时间<2秒
-    http_req_duration: ['p(99)<5000'],          // 99%请求响应时间<5秒
+    http_req_duration: ['p(95)<2000', 'p(99)<5000'], // 95%请求响应时间<2秒, 99%请求响应时间<5秒
     http_req_failed: ['rate<0.1'],              // 错误率<10%
     http_reqs: ['rate>10'],                     // 每秒请求数>10
     // 业务指标阈值

@@ -1,39 +1,8 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ES2022", 
-    "lib": ["ES2020", "DOM"],
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "allowJs": true,
-    "declaration": false,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "sourceMap": false,
-    "outDir": "./dist",
-    "baseUrl": ".",
-    "incremental": true,
-    "resolveJsonModule": true,
-    
-    // CI: Relax strictness to unblock pipeline
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noImplicitAny": false
+    "noEmit": true
   },
-  "include": [
-    "apps/**/*.ts",
-    "libs/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.spec.ts",
-    "**/*.test.ts"
-  ]
+  "include": ["apps/**/*.ts", "libs/**/*.ts"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
 }

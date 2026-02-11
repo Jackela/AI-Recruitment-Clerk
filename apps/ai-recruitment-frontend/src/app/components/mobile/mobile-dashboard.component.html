@@ -1,0 +1,114 @@
+<!-- Mobile Navigation -->
+<arc-mobile-navigation
+  [pageTitle]="pageTitle"
+  [pageSubtitle]="pageSubtitle"
+  [navItems]="navItems"
+  [menuItems]="menuItems"
+  [headerActions]="headerActions"
+  (actionClick)="onHeaderAction($event)"
+>
+</arc-mobile-navigation>
+
+<!-- Dashboard Content -->
+<div class="mobile-dashboard-content" arcPullToRefresh [threshold]="100" [visibleThreshold]="20" (refresh)="onRefresh()" (indicatorVisible)="onIndicatorVisible($event)">
+  <!-- Pull to Refresh Indicator -->
+  <div
+    class="pull-refresh-indicator"
+    [class.visible]="isPullRefreshVisible"
+    [class.loading]="isRefreshing"
+  >
+    <div class="refresh-spinner"></div>
+    <span class="refresh-text">{{
+      isRefreshing ? 'Refreshing...' : 'Pull to refresh'
+    }}</span>
+  </div>
+
+  <!-- Quick Actions Bar -->
+  <arc-mobile-quick-actions
+    [quickActions]="quickActions"
+  ></arc-mobile-quick-actions>
+
+  <!-- Stats Overview -->
+  <arc-dashboard-stats [stats]="overviewStats"></arc-dashboard-stats>
+
+  <!-- Charts Section -->
+  <arc-dashboard-charts [charts]="dashboardCharts"></arc-dashboard-charts>
+
+  <!-- Dashboard Cards -->
+  <div class="dashboard-cards" *ngIf="dashboardCards.length > 0">
+    <h2 class="section-title">Dashboard</h2>
+    <div class="cards-container" #dashboardContainer>
+      <app-mobile-swipe
+        *ngFor="let card of dashboardCards"
+        [actions]="card.actions || []"
+        [item]="card"
+        (swipeAction)="onCardSwipe($event)"
+      >
+        <div
+          class="dashboard-card"
+          [class]="'dashboard-card--' + card.size + ' dashboard-card--' + card.color"
+          [class.interactive]="!!card.route"
+          [routerLink]="card.route"
+          (click)="onCardClick(card)"
+          (keydown.enter)="onCardClick(card)"
+          (keydown.space)="onCardClick(card)"
+          [attr.tabindex]="card.route ? 0 : null"
+        >
+          <div class="card-header">
+            <div class="card-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path [attr.d]="card.icon" />
+              </svg>
+            </div>
+            <div
+              class="card-priority"
+              [class]="'priority--' + card.priority"
+            ></div>
+          </div>
+
+          <div class="card-content">
+            <h3 class="card-title">{{ card.title }}</h3>
+            <p class="card-subtitle" *ngIf="card.subtitle">
+              {{ card.subtitle }}
+            </p>
+            <div class="card-value">{{ card.value }}</div>
+            <div class="card-change" *ngIf="card.change">
+              <span
+                class="change-indicator"
+                [class]="'change-' + card.change.type"
+              >
+                {{ card.change.type === 'increase' ? '↗' : '↘' }}
+                {{ Math.abs(card.change.value) }}%
+              </span>
+              <span class="change-period">vs {{ card.change.period }}</span>
+            </div>
+          </div>
+        </div>
+      </app-mobile-swipe>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <arc-mobile-activity-list
+    [activities]="recentActivity"
+    (activityClick)="onActivityClick($event)"
+  ></arc-mobile-activity-list>
+</div>
+
+<!-- Floating Action Button -->
+<button
+  class="mobile-fab"
+  [attr.aria-label]="fabAction.label"
+  (click)="onFabClick()"
+  (keydown.enter)="onFabClick()"
+  (keydown.space)="onFabClick()"
+>
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path [attr.d]="fabAction.icon" />
+  </svg>
+</button>

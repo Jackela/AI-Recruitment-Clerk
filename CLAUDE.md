@@ -14,6 +14,13 @@
 - **NO COMMONJS**: CommonJS imports/exports are strictly prohibited
 - **ANGULAR/NESTJS COMPATIBILITY**: Must maintain ESM compatibility across all services
 
+**KNOWN EXCEPTION: Webpack Configs (.cjs)**
+- Nx's `@nx/webpack` plugin uses `require()` to load webpack configs during project graph processing
+- This is an Nx limitation, not a violation of ESM-first architecture
+- Webpack configs MUST use `.cjs` extension with CommonJS syntax (`require`/`module.exports`)
+- The built output can still be ESM - only the config file needs to be `.cjs`
+- See: `apps/app-gateway/webpack.config.cjs`, `scripts/ralph/progress.txt` (Codebase Patterns)
+
 ### RULE 3: TYPESCRIPT STRICT MODE ENFORCED
 - **NO 'ANY' TYPES**: All variables must have explicit types
 - **STRICT MODE**: All tsconfig files must have `"strict": true`
@@ -28,12 +35,48 @@
 
 ### RULE 5: FILE ORGANIZATION HIERARCHY
 - **NO ROOT CLUTTER**: Never save working files to project root
-- **STRICT DIRECTORIES**: 
+- **STRICT DIRECTORIES**:
   - `/src` - Source code files only
   - `/tests` - Test files only
   - `/docs` - Documentation only
   - `/config` - Configuration only
-  - `/scripts` - Utility scripts only
+    - `/config/docker` - Docker compose and dockerignore files
+    - `/config/deployment` - Platform deployment configs (railway.json, render.yaml)
+  - `/scripts` - Utility scripts only (shell scripts, batch files, automation)
+
+### RULE 5.1: SHARED LIBRARIES ORGANIZATION
+- **libs/configuration** - Environment variable validation utility
+- **libs/infrastructure-shared** - Error handling, validation, utilities
+- **libs/service-base** - BaseMicroserviceService for NATS services
+- **libs/shared-nats-client** - NATS client connection management
+- **libs/types** - Shared TypeScript type definitions
+- **libs/*-domain** - Domain-specific business logic
+
+## Codebase Patterns
+
+### Base Class Usage
+- **BaseMicroserviceService** (`libs/service-base`): Extend for all NATS microservices
+  - Inherits from NatsClientService for connection/subscription management
+  - Provides: `publishEvent()`, `publishErrorEvent()`, `subscribeToEvents()`
+  - Used by: resume-parser-svc, jd-extractor-svc, scoring-engine-svc, report-generator-svc
+- **Testing pattern**: Mock lowest-level methods (NatsClientService) not intermediate protected methods
+
+### Component Splitting (Mobile)
+- Components over 500 lines should be split into smaller components
+- Extract display logic to separate component (e.g., `*-display.component.ts`)
+- Extract filter logic to separate component (e.g., `*-filter.component.ts`)
+- Extract business logic to service (e.g., `mobile-*.service.ts`)
+- Service uses BehaviorSubject pattern for reactive state management
+
+### Service Layering (Domain Services)
+- **UserCrudService**: Basic CRUD operations (create, read, update, delete, soft delete)
+- **UserAuthService**: Authentication operations (login, password verify, auth activity)
+- **UserManagementService**: Facade that delegates to CRUD and auth services
+
+### Environment Validation
+- Use `@ai-recruitment-clerk/configuration` for env validation on startup
+- Service schemas: `appGateway`, `resumeParser`, `jdExtractor`, `scoringEngine`, `reportGenerator`, `frontend`
+- Type-safe access: `env.getString()`, `env.getNumber()`, `env.getBoolean()`, `env.getArray()`, `env.getUrl()`
 
 ## Project Overview
 
@@ -160,6 +203,8 @@ If ALL stories are complete and passing, reply with:
 <promise>COMPLETE</promise>
 
 If there are still stories with `passes: false`, end your response normally (another iteration will pick up the next story).
+
+**CRITICAL:** The string `<promise>COMPLETE</promise>` is a termination signal for the Ralph script. NEVER output this string unless you are absolutely certain ALL stories are complete. Do NOT mention it in summaries, explanations, jokes, or self-referential comments. The script uses regex matching and will terminate immediately upon seeing this text.
 
 ## Important
 
