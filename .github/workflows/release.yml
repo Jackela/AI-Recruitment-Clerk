@@ -42,6 +42,7 @@ jobs:
       - name: 🔐 Enforce dependency gate
         run: |
           echo "🔐 Generating dependency inventory..."
+          mkdir -p data/security
           npm audit --audit-level=moderate --json > data/security/dependency-inventory.json || true
           echo "🚧 Evaluating release gate..."
           node scripts/dependency-gate.mjs
