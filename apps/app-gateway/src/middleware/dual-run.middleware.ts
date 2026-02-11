@@ -75,7 +75,14 @@ export class DualRunMiddleware implements NestMiddleware {
         record.primary = { status: r1.status, ms: t1, hash: sha1(JSON.stringify(j1).slice(0, 1000)), score: s1 };
         record.alternate = { status: r2.status, ms: t2, hash: sha1(JSON.stringify(j2).slice(0, 1000)), score: s2 };
       } catch (e) {
-        record.error = (e as Error).message;
+        // Sanitize error message to remove sensitive data before writing to file
+        let errorMsg = (e as Error).message;
+        if (typeof errorMsg === 'string') {
+          errorMsg = errorMsg
+            .replace(/password|secret|token|api[_-]?key|authorization|cookie|credential/gi, '[REDACTED]')
+            .replace(/["'].*["'].*[:=].*["']/gi, '[REDACTED]');
+        }
+        record.error = errorMsg;
       } finally {
         fs.writeFileSync(resolvedFilePath, JSON.stringify(record));
       }

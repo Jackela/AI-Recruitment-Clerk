@@ -14,6 +14,32 @@ interface FlagsListResponse {
 // Only allow alphanumeric, hyphen, underscore, and dot characters
 const FLAG_KEY_REGEX = /^[a-zA-Z0-9._-]+$/;
 
+/**
+ * Sanitizes string values to prevent XSS attacks in output.
+ * Removes HTML tags, script tags, javascript: protocols, and event handlers.
+ */
+function sanitizeString(value: unknown): string {
+  if (typeof value !== 'string') return String(value);
+  // Remove potential HTML/script tags and dangerous patterns
+  return value
+    .replace(/<script[^>]*>.*?<\/script>/gis, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '');
+}
+
+/**
+ * Sanitizes feature flag string fields to prevent reflected XSS.
+ */
+function sanitizeFlag(flag: FeatureFlag): FeatureFlag {
+  return {
+    ...flag,
+    description: flag.description ? sanitizeString(flag.description) : undefined,
+    cohorts: flag.cohorts?.map(c => sanitizeString(c)),
+    updatedBy: flag.updatedBy ? sanitizeString(flag.updatedBy) : undefined,
+  };
+}
+
 function validateFlagKey(key: string): void {
   if (!key || typeof key !== 'string') {
     throw new BadRequestException('Flag key must be a non-empty string');
@@ -32,7 +58,7 @@ export class FlagsController {
   @Get()
   @Permissions(Permission.SYSTEM_CONFIG)
   public list(): FlagsListResponse {
-    return { items: FlagsStore.list() };
+    return { items: FlagsStore.list().map(sanitizeFlag) };
   }
 
   @Get(':key')
@@ -41,7 +67,7 @@ export class FlagsController {
     validateFlagKey(key);
     const flag = FlagsStore.get(key);
     if (!flag) throw new NotFoundException('Flag not found');
-    return flag;
+    return sanitizeFlag(flag);
   }
 
   @Post()
