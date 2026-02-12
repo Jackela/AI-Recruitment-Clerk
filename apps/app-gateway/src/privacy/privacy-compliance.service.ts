@@ -2,7 +2,6 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -16,7 +15,15 @@ import type {
   ConsentStatusDto,
   DataSubjectRightsRequest,
   CreateRightsRequestDto,
-  DataExportPackage} from '@ai-recruitment-clerk/shared-dtos';
+  DataExportPackage,
+  DataCategoryExport,
+  NatsClient,
+  MongoModel,
+  UserDataCollectionItem,
+  DataSummary,
+  SecureFileInfo,
+  ErasureEligibilityResult,
+} from '@ai-recruitment-clerk/shared-dtos';
 import {
   DataSubjectRightType,
   RequestStatus,
@@ -25,11 +32,8 @@ import {
   ConsentPurpose,
   DataCategory,
 } from '@ai-recruitment-clerk/shared-dtos';
-import type {
-  UserProfileDocument} from '../schemas/user-profile.schema';
-import {
-  UserProfile
-} from '../schemas/user-profile.schema';
+import type { UserProfileDocument } from '../schemas/user-profile.schema';
+import { UserProfile } from '../schemas/user-profile.schema';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -39,12 +43,9 @@ import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class PrivacyComplianceService {
   private readonly logger = new Logger(PrivacyComplianceService.name);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private readonly natsClient: any; // Temporary fallback until NATS client is properly injected
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private readonly consentRecordModel: any; // Temporary fallback until proper injection
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private readonly dataSubjectRightsModel: any; // Temporary fallback until proper injection
+  private readonly natsClient: NatsClient; // Typed NATS client
+  private readonly consentRecordModel: MongoModel; // Typed model fallback
+  private readonly dataSubjectRightsModel: MongoModel; // Typed model fallback
 
   /**
    * Initializes a new instance of the Privacy Compliance Service.
@@ -57,12 +58,10 @@ export class PrivacyComplianceService {
   ) {
     // Temporary fallback for NATS client until proper injection is implemented
     this.natsClient = {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      publish: async (subject: string, data: any) => {
+      publish: async (subject: string, data: unknown) => {
         this.logger.warn(`NATS publish fallback: ${subject}`, data);
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      request: async (subject: string, data: any, timeout: number) => {
+      request: async (subject: string, data: unknown, timeout: number) => {
         this.logger.warn(`NATS request fallback: ${subject}`, {
           data,
           timeout,
@@ -74,13 +73,11 @@ export class PrivacyComplianceService {
     // Temporary fallback models until proper injection is implemented
     this.consentRecordModel = {
       find: () => ({ lean: () => Promise.resolve([]) }),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any;
+    };
 
     this.dataSubjectRightsModel = {
       find: () => ({ lean: () => Promise.resolve([]) }),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any;
+    };
   }
 
   /**
@@ -183,7 +180,9 @@ export class PrivacyComplianceService {
   /**
    * Withdraw consent for a specific purpose
    */
-  public async withdrawConsent(withdrawConsentDto: WithdrawConsentDto): Promise<void> {
+  public async withdrawConsent(
+    withdrawConsentDto: WithdrawConsentDto,
+  ): Promise<void> {
     this.logger.log(
       `Withdrawing consent for user: ${withdrawConsentDto.userId}, purpose: ${withdrawConsentDto.purpose}`,
     );
@@ -221,8 +220,7 @@ export class PrivacyComplianceService {
       // TODO: Implement consent withdrawal cascade - stop processing activities
       await this.cascadeConsentWithdrawal(
         withdrawConsentDto.userId,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        withdrawConsentDto.purpose as any,
+        withdrawConsentDto.purpose,
       );
 
       this.logger.log(
@@ -252,32 +250,34 @@ export class PrivacyComplianceService {
         );
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const userProfileAny = userProfile as any;
       const consentStatus: ConsentStatusDto = {
         userId,
         purposes: [
           {
             purpose: ConsentPurpose.ESSENTIAL_SERVICES,
             status: userProfile.dataProcessingConsent,
-            grantedAt: userProfileAny.createdAt || new Date(),
+            grantedAt:
+              (userProfile as { createdAt?: Date }).createdAt || new Date(),
             canWithdraw: false, // Essential services cannot be withdrawn
           },
           {
             purpose: ConsentPurpose.MARKETING_COMMUNICATIONS,
             status: userProfile.marketingConsent,
-            grantedAt: userProfileAny.createdAt || new Date(),
+            grantedAt:
+              (userProfile as { createdAt?: Date }).createdAt || new Date(),
             canWithdraw: true,
           },
           {
             purpose: ConsentPurpose.BEHAVIORAL_ANALYTICS,
             status: userProfile.analyticsConsent,
-            grantedAt: userProfileAny.createdAt || new Date(),
+            grantedAt:
+              (userProfile as { createdAt?: Date }).createdAt || new Date(),
             canWithdraw: true,
           },
         ],
         needsRenewal: this.checkConsentRenewalNeeded(userProfile),
-        lastUpdated: userProfileAny.updatedAt || new Date(),
+        lastUpdated:
+          (userProfile as { updatedAt?: Date }).updatedAt || new Date(),
       };
 
       return consentStatus;
@@ -312,17 +312,14 @@ export class PrivacyComplianceService {
       const rightsRequest: DataSubjectRightsRequest = {
         id: requestId,
         userId: createRequestDto.userId,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        type: createRequestDto.requestType as any,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        requestType: createRequestDto.requestType as any,
+        requestType: createRequestDto.requestType,
+        type: createRequestDto.requestType,
         status: RequestStatus.PENDING,
         identityVerificationStatus: IdentityVerificationStatus.PENDING,
         requestDate: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any;
+      } as DataSubjectRightsRequest;
 
       // TODO: Store in database (implement rights request schema)
       // await this.rightsRequestModel.create(rightsRequest);
@@ -354,12 +351,22 @@ export class PrivacyComplianceService {
       // Collect all personal data for the user
       const userData = await this.collectUserData(userId);
 
+      // Convert UserDataCollectionItem[] to DataCategoryExport[]
+      const dataCategories: DataCategoryExport[] = userData.map((item) => ({
+        category: item.dataType,
+        description: `${item.service} - ${item.dataType}`,
+        data: item.data,
+        sources: [item.service],
+        legalBasis: 'Consent',
+        retentionPeriod: 'As per data retention policy',
+        collectionDate: new Date(item.collectedAt),
+      }));
+
       const exportPackage: DataExportPackage = {
         requestId: uuidv4(),
         userId,
-        data: userData,
         format,
-        dataCategories: userData,
+        dataCategories,
         metadata: {
           exportDate: new Date(),
           dataController: 'AI Recruitment Clerk',
@@ -457,9 +464,7 @@ export class PrivacyComplianceService {
         DataCategory.BEHAVIORAL_DATA,
         DataCategory.SYSTEM_LOGS,
       ],
-      [ConsentPurpose.COMMUNICATION]: [
-        DataCategory.COMMUNICATION_PREFERENCES,
-      ],
+      [ConsentPurpose.COMMUNICATION]: [DataCategory.COMMUNICATION_PREFERENCES],
     };
 
     return categoryMap[purpose] || [DataCategory.GENERAL];
@@ -480,7 +485,10 @@ export class PrivacyComplianceService {
         'Article 6(1)(f) - Legitimate interests',
     };
 
-    return legalBasisMap[purpose as keyof typeof legalBasisMap] || 'Article 6(1)(f) - Legitimate interests';
+    return (
+      legalBasisMap[purpose as keyof typeof legalBasisMap] ||
+      'Article 6(1)(f) - Legitimate interests'
+    );
   }
 
   private hasConsentForEssentialProcessing(records: ConsentRecord[]): boolean {
@@ -507,8 +515,10 @@ export class PrivacyComplianceService {
   private checkConsentRenewalNeeded(userProfile: UserProfileDocument): boolean {
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return ((userProfile as any).updatedAt || new Date()) < oneYearAgo;
+    return (
+      ((userProfile as { updatedAt?: Date }).updatedAt || new Date()) <
+      oneYearAgo
+    );
   }
 
   private async cascadeConsentWithdrawal(
@@ -789,10 +799,10 @@ export class PrivacyComplianceService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async collectUserData(userId: string): Promise<any[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const collectedData: any[] = [];
+  private async collectUserData(
+    userId: string,
+  ): Promise<UserDataCollectionItem[]> {
+    const collectedData: UserDataCollectionItem[] = [];
 
     try {
       this.logger.log(
@@ -835,11 +845,11 @@ export class PrivacyComplianceService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async collectGatewayData(userId: string): Promise<any[]> {
+  private async collectGatewayData(
+    userId: string,
+  ): Promise<UserDataCollectionItem[]> {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data: any[] = [];
+      const data: UserDataCollectionItem[] = [];
 
       // Collect user profile data
       const userProfile = await this.userProfileModel
@@ -890,8 +900,9 @@ export class PrivacyComplianceService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async collectResumeParserData(userId: string): Promise<any[]> {
+  private async collectResumeParserData(
+    userId: string,
+  ): Promise<UserDataCollectionItem[]> {
     try {
       // Request data from resume parser service via NATS
       const response = await this.natsClient.request(
@@ -899,7 +910,7 @@ export class PrivacyComplianceService {
         { userId },
         5000,
       );
-      return response ? [response] : [];
+      return response ? [response as UserDataCollectionItem] : [];
     } catch (error) {
       this.logger.error(
         `Failed to collect resume parser data for user ${userId}:`,
@@ -909,8 +920,9 @@ export class PrivacyComplianceService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async collectScoringEngineData(userId: string): Promise<any[]> {
+  private async collectScoringEngineData(
+    userId: string,
+  ): Promise<UserDataCollectionItem[]> {
     try {
       // Request data from scoring engine service via NATS
       const response = await this.natsClient.request(
@@ -918,7 +930,7 @@ export class PrivacyComplianceService {
         { userId },
         5000,
       );
-      return response ? [response] : [];
+      return response ? [response as UserDataCollectionItem] : [];
     } catch (error) {
       this.logger.error(
         `Failed to collect scoring engine data for user ${userId}:`,
@@ -928,8 +940,9 @@ export class PrivacyComplianceService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async collectReportGeneratorData(userId: string): Promise<any[]> {
+  private async collectReportGeneratorData(
+    userId: string,
+  ): Promise<UserDataCollectionItem[]> {
     try {
       // Request data from report generator service via NATS
       const response = await this.natsClient.request(
@@ -937,7 +950,7 @@ export class PrivacyComplianceService {
         { userId },
         5000,
       );
-      return response ? [response] : [];
+      return response ? [response as UserDataCollectionItem] : [];
     } catch (error) {
       this.logger.error(
         `Failed to collect report generator data for user ${userId}:`,
@@ -947,8 +960,9 @@ export class PrivacyComplianceService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async collectJdExtractorData(userId: string): Promise<any[]> {
+  private async collectJdExtractorData(
+    userId: string,
+  ): Promise<UserDataCollectionItem[]> {
     try {
       // Request data from JD extractor service via NATS
       const response = await this.natsClient.request(
@@ -956,7 +970,7 @@ export class PrivacyComplianceService {
         { userId },
         5000,
       );
-      return response ? [response] : [];
+      return response ? [response as UserDataCollectionItem] : [];
     } catch (error) {
       this.logger.error(
         `Failed to collect JD extractor data for user ${userId}:`,
@@ -966,8 +980,9 @@ export class PrivacyComplianceService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async collectAnalyticsData(userId: string): Promise<any[]> {
+  private async collectAnalyticsData(
+    userId: string,
+  ): Promise<UserDataCollectionItem[]> {
     try {
       // Request analytics data via NATS
       const response = await this.natsClient.request(
@@ -975,7 +990,7 @@ export class PrivacyComplianceService {
         { userId },
         5000,
       );
-      return response ? [response] : [];
+      return response ? [response as UserDataCollectionItem] : [];
     } catch (error) {
       this.logger.error(
         `Failed to collect analytics data for user ${userId}:`,
@@ -985,8 +1000,9 @@ export class PrivacyComplianceService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async collectMarketingData(userId: string): Promise<any[]> {
+  private async collectMarketingData(
+    userId: string,
+  ): Promise<UserDataCollectionItem[]> {
     try {
       // Request marketing data via NATS
       const response = await this.natsClient.request(
@@ -994,7 +1010,7 @@ export class PrivacyComplianceService {
         { userId },
         5000,
       );
-      return response ? [response] : [];
+      return response ? [response as UserDataCollectionItem] : [];
     } catch (error) {
       this.logger.error(
         `Failed to collect marketing data for user ${userId}:`,
@@ -1004,16 +1020,16 @@ export class PrivacyComplianceService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async collectUserManagementData(userId: string): Promise<any[]> {
+  private async collectUserManagementData(
+    userId: string,
+  ): Promise<UserDataCollectionItem[]> {
     try {
       // Request user management data via NATS
       // const response = await this.natsClient.request('user-management.data.collect', { userId }, 5000);
-      // return response ? [response] : [];
+      // return response ? [response as UserDataCollectionItem] : [];
 
       // Fallback implementation until NATS client is properly injected
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const userData: any[] = [];
+      const userData: UserDataCollectionItem[] = [];
       return userData;
     } catch (error) {
       this.logger.error(
@@ -1041,7 +1057,15 @@ export class PrivacyComplianceService {
           packageId: exportPackage.id,
         },
         data: exportPackage.data || [],
-        summary: this.generateDataSummary(exportPackage.data || []),
+        summary: this.generateDataSummary(
+          (exportPackage.data || []).map((item) => ({
+            service: item.sources?.[0] || 'unknown',
+            dataType: item.category,
+            data: item.data,
+            collectedAt:
+              item.collectionDate?.toISOString() || new Date().toISOString(),
+          })),
+        ),
       };
 
       // Convert to JSON with proper formatting
@@ -1079,14 +1103,8 @@ export class PrivacyComplianceService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private generateDataSummary(userData: any[]): any {
-    const summary: {
-      totalRecords: number;
-      dataByService: Record<string, number>;
-      dataByType: Record<string, number>;
-      recordTypes: string[];
-    } = {
+  private generateDataSummary(userData: UserDataCollectionItem[]): DataSummary {
+    const summary: DataSummary = {
       totalRecords: userData.length,
       dataByService: {},
       dataByType: {},
@@ -1112,7 +1130,7 @@ export class PrivacyComplianceService {
   private async storeSecureFile(
     fileBuffer: Buffer,
     _filename: string,
-  ): Promise<{ fileId: string; storagePath: string }> {
+  ): Promise<SecureFileInfo> {
     try {
       // Generate unique file ID
       const fileId = this.generateSecureFileId();
@@ -1262,7 +1280,7 @@ export class PrivacyComplianceService {
 
   private async checkErasureEligibility(
     _userId: string,
-  ): Promise<{ eligible: boolean; reason?: string }> {
+  ): Promise<ErasureEligibilityResult> {
     // TODO: Implement erasure eligibility checks
     // - Active job applications
     // - Legal hold requirements

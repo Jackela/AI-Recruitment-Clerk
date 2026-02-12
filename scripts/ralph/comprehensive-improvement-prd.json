@@ -1,0 +1,470 @@
+{
+  "project": "AI-Recruitment-Clerk",
+  "branchName": "ralph/comprehensive-improvement",
+  "description": "Comprehensive improvement plan with granular user stories, dependency mapping, and risk assessment",
+  "userStories": [
+    {
+      "id": "CLEAN-001",
+      "title": "Fix TypeScript type safety in security services",
+      "description": "Replace all `any` types with proper TypeScript types in app-gateway security-critical services (privacy-compliance.service.ts, auth-decorators, mfa.service.ts). This addresses the 157 eslint-disable violations detected in codebase analysis.",
+      "acceptanceCriteria": [
+        "All `any` types in privacy-compliance.service.ts replaced with proper interfaces",
+        "All `any` types in MFA service replaced with specific types",
+        "All `any` types in JWT-related services replaced",
+        "TypeScript compilation passes with strict mode",
+        "Zero eslint-disable any violations in security services"
+      ],
+      "priority": 1,
+      "passes": false,
+      "files": [
+        "apps/app-gateway/src/privacy/privacy-compliance.service.ts",
+        "apps/app-gateway/src/auth/decorators",
+        "apps/app-gateway/src/auth/services/mfa.service.ts",
+        "apps/app-gateway/src/auth/services/jwt-auth.service.ts",
+        "apps/app-gateway/src/auth/services/email.service.ts"
+      ],
+      "estimatedDays": 3,
+      "dependencies": [],
+      "riskLevel": "low",
+      "notes": "157 files affected. Each file needs careful analysis to replace any with proper types without breaking functionality."
+    },
+    {
+      "id": "CLEAN-002",
+      "title": "Fix TypeScript type safety in domain services",
+      "description": "Replace all `any` types with proper TypeScript types in domain services (user-management, usage-limit, incentive, resume) to eliminate type safety violations.",
+      "acceptanceCriteria": [
+        "All `any` types in user-management domain services replaced",
+        "All `any` types in usage-limit services replaced",
+        "All `any` types in incentive system services replaced",
+        "All `any` types in resume-related services replaced",
+        "No eslint-disable any violations in domain layer"
+      ],
+      "priority": 1,
+      "passes": false,
+      "files": [
+        "apps/app-gateway/src/domains/user-management/*.ts",
+        "apps/app-gateway/src/domains/usage-limit/*.ts",
+        "libs/incentive-system-domain/src/**/*.ts"
+        "apps/resume-parser-svc/src/domains/resume/*.ts"
+      ],
+      "estimatedDays": 5,
+      "dependencies": [],
+      "riskLevel": "low",
+      "notes": "Similar to CLE--001 but focused on domain layer. Type checking required before starting."
+    },
+    {
+      "id": "CLEAN-003",
+      "title": "Fix TypeScript type safety in shared libraries",
+      "description": "Replace all `any` types in shared libraries (shared-dtos, infrastructure-shared, service-base, ai-services-shared) to eliminate type safety violations across the entire codebase.",
+      "acceptanceCriteria": [
+        "All `any` types in shared-dtos replaced with proper type definitions",
+        "All `any` types in infrastructure-shared replaced",
+        "All `any` types in service-base replaced",
+        "All `any` types in ai-services-shared replaced",
+        "Zero eslint-disable any violations in shared libraries"
+      ],
+      "priority": 1,
+      "passes": false,
+      "files": [
+        "libs/shared-dtos/**/*.ts",
+        "libs/infrastructure-shared/**/*.ts",
+        "libs/service-base/**/*.ts",
+        "libs/ai-services-shared/**/*.ts"
+      ],
+      "estimatedDays": 7,
+      "dependencies": [],
+      "riskLevel": "low",
+      "notes": "Foundation for all other services. Must be done first to enable type checking in dependent services."
+    },
+    {
+      "id": "CLEAN-004",
+      "title": "Remove duplicate domain model implementations",
+      "description": "Remove duplicate implementations of UserManagement and UsageManagement domains from libs/user-management-domain (which is now empty) and consolidate all domain logic into canonical locations within active service modules.",
+      "acceptanceCriteria": [
+        "libs/user-management-domain removed or marked as deprecated",
+        "User management logic consolidated into app-gateway domain services",
+        "Usage management logic consolidated into app-gateway domain services",
+        "No duplicate domain models remain - single source of truth",
+        "Import paths updated across all affected services"
+      ],
+      "priority": 1,
+      "passes": false,
+      "files": [
+        "libs/user-management-domain/**",
+        "apps/app-gateway/src/domains/user-management/**",
+        "apps/app-gateway/src/domains/usage-limit/**"
+      ],
+      "estimatedDays": 5,
+      "dependencies": [
+        "CLEAN-003"
+      ],
+      "riskLevel": "medium",
+      "notes": "Breaking change: removes old import paths. Services importing these domains must update to new locations. Test user-management.domain imports should fail."
+    },
+    {
+      "id": "CLEAN-005",
+      "title": "Centralize configuration management",
+      "description": "Migrate all hardcoded URLs, ports, and configuration values from individual services to libs/configuration for type-safe environment access with startup validation.",
+      "acceptanceCriteria": [
+        "All hardcoded URLs moved to environment variables",
+        "All hardcoded ports moved to environment variables",
+        "libs/configuration provides ConfigService for type-safe access",
+        "Environment validation added to all services on startup",
+        "No hardcoded values in business logic paths",
+        "Configuration templates provided for dev/staging/prod environments"
+      ],
+      "priority": 2,
+      "passes": false,
+      "files": [
+        "libs/configuration/**",
+        "apps/*/src/config/**",
+        "apps/app-gateway/src/system/system.controller.ts"
+      ],
+      "estimatedDays": 5,
+      "dependencies": [],
+      "riskLevel": "low",
+      "notes": "Safe refactoring - no behavior changes, only moving where configuration is accessed from."
+    },
+    {
+      "id": "CLEAN-006",
+      "title": "Remove TODO and FIXME technical debt markers",
+      "description": "Remove or address all 97 TODO/FIXME/XXX comments found in production code to reduce accumulated technical debt and improve code maintainability.",
+      "acceptanceCriteria": [
+        "Zero TODO comments in production TypeScript files",
+        "All actionable items implemented or properly documented",
+        "Documentation tracker created for long-term technical decisions",
+        "Automated script to detect TODO markers in future PRs",
+        "Each TODO replaced with either implementation or documented decision"
+      ],
+      "priority": 2,
+      "passes": false,
+      "files": [
+        "apps/**/*.ts"
+      ],
+      "estimatedDays": 7,
+      "dependencies": [],
+      "riskLevel": "low",
+      "notes": "Non-breaking cleanup. Each TODO should be evaluated: implement feature, fix bug, or document intentional limitation. Track in documentation tracker."
+    },
+    {
+      "id": "CLEAN-007",
+      "title": "Consolidate authentication and security patterns",
+      "description": "Consolidate multiple authentication services (MFA, JWT, Email, SMS) and security patterns in app-gateway to use consistent patterns from libs/infrastructure-shared. Implement unified auth service using shared security decorators and guards.",
+      "acceptanceCriteria": [
+        "Single AuthService interface replacing multiple auth implementations",
+        "Consistent permission decorators from libs/infrastructure-shared",
+        "Unified security middleware for all critical endpoints",
+        "Input validation at all entry points",
+        "MFA service integrated with JWT auth flow",
+        "Shared error handling and correlation"
+      ],
+      "priority": 2,
+      "passes": false,
+      "files": [
+        "apps/app-gateway/src/auth/**/*.ts",
+        "apps/app-gateway/src/security/**/*.ts",
+        "libs/infrastructure-shared/**"
+      ],
+      "estimatedDays": 7,
+      "dependencies": [],
+      "riskLevel": "medium",
+      "notes": "Medium risk due to multiple auth service consolidation. Test thoroughly after implementation."
+    },
+    {
+      "id": "CLEAN-008",
+      "title": "Add /api/health endpoints to all services",
+      "description": "Implement /api/health endpoints for all microservices that verify database connectivity, Redis cache, NATS messaging, and return liveness/readiness status for proper observability.",
+      "acceptanceCriteria": [
+        "All services expose /api/health endpoint",
+        "Database health check (MongoDB connectivity)",
+        "Redis health check (cache availability)",
+        "NATS connection health check",
+        "Liveness probe returns 200 if healthy",
+        "Readiness probe returns 200 if ready to accept traffic",
+        "Health dashboard integration for monitoring"
+      ],
+      "priority": 2,
+      "passes": false,
+      "files": [
+        "apps/*/src/**/health.controller.ts",
+        "apps/*/src/**/health.service.ts"
+      ],
+      "estimatedDays": 5,
+      "dependencies": [],
+      "riskLevel": "low",
+      "notes": "Standard pattern - each service needs health check. Consider Spring Boot Actuator for consistent implementation."
+    },
+    {
+      "id": "CLEAN-009",
+      "title": "Implement comprehensive Redis caching strategy",
+      "description": "Implement proper Redis caching with TTL strategies, cache invalidation on data mutations, query optimization with proper indexing, and performance metrics for cache hit/miss rates.",
+      "acceptanceCriteria": [
+        "Redis caching with TTL strategies for different data types",
+        "Cache invalidation on data mutations (create, update, delete)",
+        "Query result caching with proper indexing",
+        "Performance metrics collection (hit/miss rates, eviction stats)",
+        "Cache keys follow consistent naming pattern",
+        "No stale cache data after mutations"
+      ],
+      "priority": 2,
+      "passes": false,
+      "files": [
+        "apps/app-gateway/src/cache/**/*.ts",
+        "libs/infrastructure-shared/src/infrastructure/redis/**"
+      ],
+      "estimatedDays": 5,
+      "dependencies": [],
+      "riskLevel": "low",
+      "notes": "Current caching exists (redis-cache.service.ts, vector-store.service.ts) but lacks comprehensive strategy. Need unified cache manager."
+    },
+    {
+      "id": "CLEAN-010",
+      "title": "Implement structured logging with correlation IDs",
+      "description": "Replace all console.log usage across services with structured logging using shared Logger.service with correlation IDs for request tracing and debugging.",
+      "acceptanceCriteria": [
+        "All logging goes through Logger.service from libs/infrastructure-shared",
+        "Correlation IDs included in all log entries",
+        "Structured log format with consistent metadata",
+        "Log levels properly implemented (debug, info, warn, error)",
+        "Request tracking end-to-end across service boundaries"
+      ],
+      "priority": 2,
+      "passes": false,
+      "files": [
+        "apps/**/!(spec|test|e2e).ts"
+      ],
+      "estimatedDays": 7,
+      "dependencies": [
+        "CLEAN-009"
+      ],
+      "riskLevel": "low",
+      "notes": "Logger.service already exists in libs/infrastructure-shared. Need to ensure all services use it consistently instead of console.log."
+    },
+    {
+      "id": "QUALITY-001",
+      "title": "Improve test coverage from 65% to 85%",
+      "description": "Increase test coverage from current 65.82% to target 85% by adding tests for uncovered critical paths and business logic. Focus on low-coverage files identified in codebase analysis.",
+      "acceptanceCriteria": [
+        "Test coverage reaches 85% overall",
+        "Critical business logic paths fully covered (scoring, matching, report generation)",
+        "Integration tests added for all services",
+        "E2E tests for user journeys maintained",
+        "Coverage report shows 85%+ with no gaps in critical paths"
+      ],
+      "priority": 1,
+      "passes": false,
+      "files": [
+        "apps/scoring-engine-svc/src/**/*.ts",
+        "apps/resume-parser-svc/src/**/*.ts",
+        "apps/report-generator-svc/src/**/*.ts"
+      ],
+      "estimatedDays": 10,
+      "dependencies": [],
+      "riskLevel": "low",
+      "notes": "Low coverage files: scoring.service.ts, parsing.service.ts, various controllers. Target these first for biggest impact."
+    },
+    {
+      "id": "QUALITY-002",
+      "title": "Add integration tests for service layer",
+      "description": "Add comprehensive integration tests for all microservices covering NATS message handling, database operations, external API integrations, and error scenarios.",
+      "acceptanceCriteria": [
+        "Service integration tests complete for all services",
+        "Mock external dependencies properly using test fixtures",
+        "Test data management strategy with proper seeding",
+        "Performance baseline tests included",
+        "Error scenario coverage (connection failures, timeouts, data corruption)"
+      ],
+      "priority": 2,
+      "passes": false,
+      "files": [
+        "apps/**/integration/*.spec.ts",
+        "apps/**/testing/*.spec.ts"
+      ],
+      "estimatedDays": 10,
+      "dependencies": [],
+      "riskLevel": "medium",
+      "notes": "Some nats.spec.ts exist but are basic. Need comprehensive integration test coverage matching production complexity."
+    },
+    {
+      "id": "QUALITY-003",
+      "title": "Add security and compliance tests",
+      "description": "Add tests for security-critical features including authentication and authorization flows, input validation to prevent XSS and injection attacks, and PII handling compliance.",
+      "acceptanceCriteria": [
+        "Authentication and authorization tests complete",
+        "Input validation tests for all endpoints",
+        "XSS and injection attack prevention verified",
+        "PII data handling compliance tests pass",
+        "Security headers properly validated"
+      ],
+      "priority": 1,
+      "passes": false,
+      "files": [
+        "apps/app-gateway/src/auth/**/*.spec.ts",
+        "apps/app-gateway/src/security/**/*.spec.ts",
+        "apps/app-gateway/src/**/*.validation.spec.ts"
+      ],
+      "estimatedDays": 7,
+      "dependencies": [],
+      "riskLevel": "low",
+      "notes": "Auth tests exist but need expansion. JWT validation, input sanitization, and PII redaction tests need coverage."
+    },
+    {
+      "id": "PERF-001",
+      "title": "Add database indexes for query optimization",
+      "description": "Optimize database queries by adding proper indexes for frequently queried fields (candidate searches, resume lookups, job matching), implement slow query detection (queries >100ms), and add query result caching where appropriate.",
+      "acceptanceCriteria": [
+        "Indexes added for commonly queried fields",
+        "Query execution time under 100ms for p95",
+        "Cached query results for repeated access patterns",
+        "Database query analysis report generated",
+        "No full table scans in hot paths"
+      ],
+      "priority": 3,
+      "passes": false,
+      "files": [
+        "apps/app-gateway/src/repositories/**/*.ts",
+        "apps/resume-parser-svc/src/repositories/**/*.ts",
+        "apps/jd-extractor-svc/src/repositories/**/*.ts"
+      ],
+      "estimatedDays": 5,
+      "dependencies": [],
+      "riskLevel": "low",
+      "notes": "Current MongoDB queries lack optimization. Analyze slow queries using MongoDB profiler before adding indexes."
+    },
+    {
+      "id": "PERF-002",
+      "title": "Optimize frontend bundle size and loading performance",
+      "description": "Optimize frontend bundle size through route-based code splitting, lazy loading for heavy components, optimized image/asset delivery, and static asset optimization to improve initial page load time under 2 seconds.",
+      "acceptanceCriteria": [
+        "Route-based code splitting implemented",
+        "Lazy loading directive applied to heavy components (dashboard, results)",
+        "Images optimized and delivered via CDN/optimized path",
+        "Static assets gzipped for faster delivery",
+        "Initial page load time under 2 seconds",
+        "Bundle size under 500KB gzipped"
+      ],
+      "priority": 3,
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/pages/**/*.ts",
+        "apps/ai-recruitment-frontend/src/app/components/**/*.{ts,html}",
+        "apps/ai-recruitment-frontend/src/app/directives/**/*.ts",
+        "angular.json"
+      ],
+      "estimatedDays": 7,
+      "dependencies": [],
+      "riskLevel": "low",
+      "notes": "lazy-load.directive.ts exists but can be enhanced. Current TTI is high - analyze and optimize critical loading path first."
+    },
+    {
+      "id": "PERF-003",
+      "title": "Implement performance monitoring and baselines",
+      "description": "Implement performance monitoring with metrics collection (response times, throughput), enforce performance budgets in CI, detect performance regressions automatically, and create performance dashboard for monitoring.",
+      "acceptanceCriteria": [
+        "Performance metrics collected (API response times, throughput)",
+        "Performance budgets enforced in CI pipelines",
+        "Automated regression detection on deploys",
+        "Performance dashboard for monitoring",
+        "Baseline metrics established for comparison"
+      ],
+      "priority": 3,
+      "passes": false,
+      "files": [
+        "apps/app-gateway/src/common/interceptors/performance-monitoring.interceptor.ts",
+        "apps/app-gateway/src/common/controllers/performance.controller.ts",
+        "tools/ci/performance-budget.json"
+      ],
+      "estimatedDays": 7,
+      "dependencies": [],
+      "riskLevel": "medium",
+      "notes": "performance-monitoring.interceptor.ts exists but needs expansion. Need baseline metrics and regression detection algorithm."
+    },
+    {
+      "id": "PERF-004",
+      "title": "Optimize memory usage in large components",
+      "description": "Optimize memory usage in large frontend components (mobile-dashboard.component.ts at 1208 lines) through OnPush change detection, virtual scrolling, efficient data structures, and proper RxJS cleanup to prevent memory leaks.",
+      "acceptanceCriteria": [
+        "Component split into smaller sub-components (<500 lines each)",
+        "OnPush change detection implemented",
+        "Virtual scrolling for large lists (100+ items)",
+        "RxJS subscriptions properly cleaned up in ngOnDestroy",
+        "Memory usage reduced by 50% or more",
+        "No memory leaks in detached components"
+      ],
+      "priority": 3,
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-dashboard.component.ts",
+        "apps/ai-recruitment-frontend/src/app/pages/results/**/*.ts"
+      ],
+      "estimatedDays": 5,
+      "dependencies": [],
+      "riskLevel": "low",
+      "notes": "mobile-dashboard.component.ts is the largest file needing split. Current memory issues likely from this component."
+    }
+  ],
+  "implementationPhases": [
+    {
+      "phase": 1,
+      "name": "Critical Infrastructure",
+      "duration": "3-4 weeks",
+      "stories": [
+        "CLEAN-001",
+        "CLEAN-002",
+        "CLEAN-003"
+      ],
+      "description": "Fix type safety violations and remove duplicate domain models. This establishes foundation for all subsequent work."
+    },
+    {
+      "phase": 2,
+      "name": "Code Quality & Configuration",
+      "duration": "3-4 weeks",
+      "stories": [
+        "CLEAN-004",
+        "CLEAN-005",
+        "CLEAN-006",
+        "CLEAN-007",
+        "CLEAN-008",
+        "CLEAN-009",
+        "CLEAN-010"
+      ],
+      "description": "Centralize configuration, consolidate authentication, implement caching, logging, and health checks."
+    },
+    {
+      "phase": 3,
+      "name": "Testing & Performance",
+      "duration": "4-6 weeks",
+      "stories": [
+        "QUALITY-001",
+        "QUALITY-002",
+        "QUALITY-003",
+        "PERF-001",
+        "PERF-002",
+        "PERF-003"
+      ],
+      "description": "Improve test coverage to 85%, add integration tests, implement security tests, optimize database queries and frontend performance."
+    },
+    {
+      "phase": 4,
+      "name": "Frontend Optimization",
+      "duration": "3-4 weeks",
+      "stories": [
+        "PERF-004"
+      ],
+      "description": "Optimize frontend bundle size, reduce memory usage in large components, and implement performance monitoring."
+    }
+  ],
+  "riskMitigation": {
+    "breakingChanges": "All type safety changes are non-breaking (additions only). CLE--004 removes deprecated domain - test with feature flag first.",
+    "dataMigration": "No data migration required. Configuration moving only.",
+    "performanceImpact": "PERF stories may temporarily increase build time but significantly improve user experience.",
+    "rollbackPlan": "Each phase can be independently rolled back. Use feature flags for new capabilities."
+  },
+  "successMetrics": {
+    "typeSafetyViolations": "157 → 0",
+    "testCoverage": "65.82% → 85%",
+    "largeComponents": "6 → 0",
+    "unusedDependencies": "Identify and remove 10+ packages",
+    "buildTime": "Reduce by 15% through optimization"
+  }
+}

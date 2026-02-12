@@ -181,6 +181,7 @@ export * from './feature-flags/audit-event.dto';
 export * from './privacy/consent.dto';
 export * from './privacy/data-subject-rights.dto';
 export * from './privacy/privacy-simple.dto';
+export * from './privacy/privacy-types';
 // export * from './privacy/privacy-infrastructure.dto'; // Commented out due to duplicate exports
 
 // DTO Aliases for Controller Compatibility
