@@ -1,6 +1,9 @@
 import type {
   UserSession,
-  EventValidationResult} from '../domains/analytics.dto';
+  EventValidationResult,
+  EventPayload,
+  EventContextData
+} from '../domains/analytics.dto';
 import {
   AnalyticsEvent,
   EventStatus,
@@ -52,8 +55,8 @@ export class AnalyticsContracts {
       sessionId,
       userId,
       eventType,
-      eventData,
-      context,
+      eventData as EventPayload,
+      context as EventContextData | undefined,
     );
 
     // 后置条件验证
@@ -122,7 +125,7 @@ export class AnalyticsContracts {
       operation,
       duration,
       success,
-      metadata,
+      metadata as Record<string, unknown> | undefined,
     );
 
     // 后置条件验证

@@ -1,6 +1,77 @@
 import { ValueObject } from '../base/value-object';
 import type { DomainEvent } from '../base/domain-event';
 
+// Type definitions for analytics data structures
+/**
+ * Represents user session data for storage/restore.
+ */
+export interface UserSessionData {
+  sessionId: string;
+  userId?: string;
+  deviceInfo?: DeviceInfoData;
+  geoLocation?: GeoLocationData;
+  consentStatus: ConsentStatus;
+  isSystemSession: boolean;
+}
+
+/**
+ * Represents device info data for storage/restore.
+ */
+export interface DeviceInfoData {
+  userAgent: string;
+  screenResolution: string;
+  language: string;
+  timezone: string;
+}
+
+/**
+ * Represents geolocation data for storage/restore.
+ */
+export interface GeoLocationData {
+  country: string;
+  region: string;
+  city: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+/**
+ * Represents event data payload structure.
+ */
+export interface EventPayload {
+  [key: string]: string | number | boolean | undefined | null | EventPayload | EventPayload[];
+}
+
+/**
+ * Represents event context data for storage/restore.
+ */
+export interface EventContextData {
+  requestId?: string;
+  userAgent?: string;
+  referrer?: string;
+  pageUrl?: string;
+  dimensions?: Record<string, string>;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Represents event timestamp data for storage/restore.
+ */
+export interface EventTimestampData {
+  timestamp: string | Date;
+  timezone: string;
+}
+
+/**
+ * Represents event data structure for storage/restore.
+ */
+export interface EventDataStructure {
+  eventType: EventType;
+  eventCategory: EventCategory;
+  payload: EventPayload;
+  sensitiveDataMask?: string[];
+}
+
 // Analytics聚合根 - 管理用户行为数据收集和分析的核心业务逻辑
 /**
  * Represents the analytics event event.
@@ -34,10 +105,8 @@ export class AnalyticsEvent {
     sessionId: string,
     userId: string,
     eventType: EventType,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    eventData: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    context?: any,
+    eventData: EventPayload,
+    context?: EventContextData,
   ): AnalyticsEvent {
     const eventId = AnalyticsEventId.generate();
     const session = UserSession.create(sessionId, userId);
@@ -82,8 +151,7 @@ export class AnalyticsEvent {
     operation: string,
     duration: number,
     success: boolean,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata?: any,
+    metadata?: Record<string, unknown>,
   ): AnalyticsEvent {
     const eventId = AnalyticsEventId.generate();
     const session = UserSession.createSystemSession();
@@ -551,8 +619,7 @@ export class UserSession extends ValueObject<{
    * @param data - The data.
    * @returns The UserSession.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): UserSession {
+  public static restore(data: UserSessionData): UserSession {
     return new UserSession({
       sessionId: data.sessionId,
       userId: data.userId,
@@ -652,8 +719,7 @@ export class DeviceInfo extends ValueObject<{
    * @param data - The data.
    * @returns The DeviceInfo.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): DeviceInfo {
+  public static restore(data: DeviceInfoData): DeviceInfo {
     return new DeviceInfo(data);
   }
 
@@ -681,8 +747,7 @@ export class GeoLocation extends ValueObject<{
    * @param data - The data.
    * @returns The GeoLocation.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): GeoLocation {
+  public static restore(data: GeoLocationData): GeoLocation {
     return new GeoLocation(data);
   }
 
@@ -701,8 +766,7 @@ export class GeoLocation extends ValueObject<{
 export class EventData extends ValueObject<{
   eventType: EventType;
   eventCategory: EventCategory;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  payload: any;
+  payload: EventPayload;
   sensitiveDataMask: string[];
 }> {
   /**
@@ -711,8 +775,7 @@ export class EventData extends ValueObject<{
    * @param payload - The payload.
    * @returns The EventData.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static create(eventType: EventType, payload: any): EventData {
+  public static create(eventType: EventType, payload: EventPayload): EventData {
     return new EventData({
       eventType,
       eventCategory: EventData.categorizeEvent(eventType),
@@ -766,9 +829,13 @@ export class EventData extends ValueObject<{
    * @param data - The data.
    * @returns The EventData.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): EventData {
-    return new EventData(data);
+  public static restore(data: EventDataStructure): EventData {
+    return new EventData({
+      eventType: data.eventType,
+      eventCategory: data.eventCategory,
+      payload: data.payload,
+      sensitiveDataMask: data.sensitiveDataMask ?? [],
+    });
   }
 
   private static categorizeEvent(eventType: EventType): EventCategory {
@@ -891,8 +958,7 @@ export class EventTimestamp extends ValueObject<{
    * @param data - The data.
    * @returns The EventTimestamp.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): EventTimestamp {
+  public static restore(data: EventTimestampData): EventTimestamp {
     return new EventTimestamp({
       timestamp: new Date(data.timestamp),
       timezone: data.timezone,
@@ -957,16 +1023,14 @@ export class EventContext extends ValueObject<{
   referrer?: string;
   pageUrl?: string;
   dimensions: Record<string, string>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }> {
   /**
    * Creates the entity.
    * @param context - The context.
    * @returns The EventContext.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static create(context: any): EventContext {
+  public static create(context: EventContextData): EventContext {
     return new EventContext({
       requestId: context.requestId,
       userAgent: context.userAgent,
@@ -982,9 +1046,15 @@ export class EventContext extends ValueObject<{
    * @param data - The data.
    * @returns The EventContext.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): EventContext {
-    return new EventContext(data);
+  public static restore(data: EventContextData): EventContext {
+    return new EventContext({
+      requestId: data.requestId,
+      userAgent: data.userAgent,
+      referrer: data.referrer,
+      pageUrl: data.pageUrl,
+      dimensions: data.dimensions || {},
+      metadata: data.metadata || {},
+    });
   }
 
   /**
@@ -1173,14 +1243,10 @@ export enum MetricUnit {
  */
 export interface AnalyticsEventData {
   id: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  session: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  eventData: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  timestamp: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  context: any;
+  session: UserSessionData;
+  eventData: EventDataStructure;
+  timestamp: EventTimestampData;
+  context: EventContextData;
   status: EventStatus;
   createdAt: string;
   processedAt?: string;

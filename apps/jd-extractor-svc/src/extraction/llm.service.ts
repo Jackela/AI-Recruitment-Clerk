@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, Logger } from '@nestjs/common';
 import type {
   JdDTO,
@@ -14,7 +13,39 @@ import {
   PromptTemplates,
   PromptBuilder,
 } from '@ai-recruitment-clerk/shared-dtos';
-import { JdExtractorConfigService } from '../config';
+import type { JdExtractorConfigService } from '../config';
+
+/**
+ * Represents raw LLM response data that needs validation.
+ */
+interface RawJdData {
+  requirements?: {
+    technical?: unknown;
+    soft?: unknown;
+    experience?: string | null;
+    education?: string | null;
+  };
+  responsibilities?: unknown;
+  benefits?: unknown;
+  company?: {
+    name?: string | null;
+    industry?: string | null;
+    size?: string | null;
+  };
+  requiredSkills?: unknown;
+  softSkills?: unknown;
+  technical?: unknown;
+  soft?: unknown;
+  experienceYears?: {
+    min?: number;
+    max?: number;
+  } | null;
+  educationLevel?: string | null;
+  experience?: string | null;
+  education?: string | null;
+  jobTitle?: string | null;
+  department?: string | null;
+}
 
 /**
  * Provides llm functionality.
@@ -93,7 +124,7 @@ export class LlmService {
   }
 
   private createTestGeminiStub(): {
-    generateStructuredResponse: (_prompt: string, _schema: string) => Promise<{ data: any; processingTimeMs: number }>;
+    generateStructuredResponse: (_prompt: string, _schema: string) => Promise<{ data: RawJdData; processingTimeMs: number }>;
     healthCheck: () => Promise<boolean>;
   } {
     const extractFromPrompt = (prompt: string): string => {
@@ -299,7 +330,7 @@ export class LlmService {
     };
 
     return {
-      generateStructuredResponse: async (_prompt: string, _schema: string): Promise<{ data: any; processingTimeMs: number }> => {
+      generateStructuredResponse: async (_prompt: string, _schema: string): Promise<{ data: RawJdData; processingTimeMs: number }> => {
         const start = Date.now();
         const jd = extractFromPrompt(_prompt);
         const data = parseJd(jd);
@@ -462,7 +493,7 @@ export class LlmService {
     );
   }
 
-  private convertToJdDTO(rawData: any): JdDTO {
+  private convertToJdDTO(rawData: RawJdData): JdDTO {
     this.logger.debug('Converting Gemini response to JdDTO format');
 
     // Handle direct JdDTO format response
@@ -475,28 +506,28 @@ export class LlmService {
       requirements: {
         technical: Array.isArray(rawData.requiredSkills)
           ? rawData.requiredSkills
-              .map((skill: any) =>
-                typeof skill === 'string' ? skill : skill.name ?? '',
+              .map((skill: unknown) =>
+                typeof skill === 'string' ? skill : (skill as { name?: string })?.name ?? '',
               )
               .filter(Boolean)
-          : rawData.technical ?? [],
+          : (Array.isArray(rawData.technical) ? rawData.technical as string[] : []),
         soft: Array.isArray(rawData.softSkills)
-          ? rawData.softSkills.filter(Boolean)
-          : rawData.soft ?? [],
+          ? rawData.softSkills.filter(Boolean) as string[]
+          : (Array.isArray(rawData.soft) ? rawData.soft as string[] : []),
         experience:
           rawData.experience ??
           this.formatExperienceYears(rawData.experienceYears) ??
           'Not specified',
         education:
           rawData.education ??
-          this.formatEducationLevel(rawData.educationLevel) ??
+          this.formatEducationLevel(rawData.educationLevel ?? undefined) ??
           'Not specified',
       },
       responsibilities: Array.isArray(rawData.responsibilities)
-        ? rawData.responsibilities.filter(Boolean)
+        ? rawData.responsibilities.filter(Boolean) as string[]
         : ['Key responsibilities to be defined'],
       benefits: Array.isArray(rawData.benefits)
-        ? rawData.benefits.filter(Boolean)
+        ? rawData.benefits.filter(Boolean) as string[]
         : [],
       company: {
         name: rawData.company?.name ?? rawData.jobTitle ?? undefined,
@@ -508,7 +539,7 @@ export class LlmService {
     return this.validateAndCleanJdData(convertedData);
   }
 
-  private formatExperienceYears(experienceYears: any): string {
+  private formatExperienceYears(experienceYears: { min?: number; max?: number } | null | undefined): string {
     if (!experienceYears || typeof experienceYears !== 'object') {
       return 'Not specified';
     }
@@ -525,7 +556,7 @@ export class LlmService {
     }
   }
 
-  private formatEducationLevel(educationLevel: string): string {
+  private formatEducationLevel(educationLevel: string | undefined): string {
     const educationMap: { [key: string]: string } = {
       bachelor: "Bachelor's degree",
       master: "Master's degree",
@@ -533,21 +564,21 @@ export class LlmService {
       any: 'Any education level',
     };
 
-    return educationMap[educationLevel] ?? educationLevel ?? 'Not specified';
+    return educationMap[educationLevel ?? ''] ?? educationLevel ?? 'Not specified';
   }
 
-  private validateAndCleanJdData(data: any): JdDTO {
+  private validateAndCleanJdData(data: RawJdData): JdDTO {
     // Ensure required fields are present and valid
     const cleanedData: JdDTO = {
       requirements: {
         technical: Array.isArray(data.requirements?.technical)
           ? data.requirements.technical
-              .filter((skill: any) => skill && typeof skill === 'string')
+              .filter((skill: unknown) => skill && typeof skill === 'string')
               .map((skill: string) => skill.trim())
           : [],
         soft: Array.isArray(data.requirements?.soft)
           ? data.requirements.soft
-              .filter((skill: any) => skill && typeof skill === 'string')
+              .filter((skill: unknown) => skill && typeof skill === 'string')
               .map((skill: string) => skill.trim())
           : [],
         experience:
@@ -561,12 +592,12 @@ export class LlmService {
       },
       responsibilities: Array.isArray(data.responsibilities)
         ? data.responsibilities
-            .filter((resp: any) => resp && typeof resp === 'string')
+            .filter((resp: unknown) => resp && typeof resp === 'string')
             .map((resp: string) => resp.trim())
         : [],
       benefits: Array.isArray(data.benefits)
         ? data.benefits
-            .filter((benefit: any) => benefit && typeof benefit === 'string')
+            .filter((benefit: unknown) => benefit && typeof benefit === 'string')
             .map((benefit: string) => benefit.trim())
         : [],
       company: {
