@@ -1,58 +1,82 @@
 {
-  "id": "VIBE-001",
-  "title": "Fix TypeScript 'any' type in privacy-compliance.service.ts",
-  "description": "Replace all 'any' types with proper interfaces (IPRange, SanitizationResult) to ensure type safety in PII redaction logic.",
+  "id": "CODE-001",
+  "title": "Phase 2: HIGH Priority Code Quality Fixes",
+  "description": "Fix code quality issues including 'any' types in core business logic and break up oversized files.",
   "acceptanceCriteria": [
-    "All 'any' types in privacy-compliance.service.ts replaced with proper interfaces",
+    "All 'any' types in analytics.dto.ts replaced with proper typed interfaces",
+    "No 'any' types in LLM service responses",
     "TypeScript compilation passes without errors",
-    "PII redaction logic maintains type safety"
+    "Files are under 500 lines (or split into smaller modules)"
   ],
   "priority": 1,
   "passes": true,
-  "files": ["apps/app-gateway/src/privacy/privacy-compliance.service.ts"],
-  "estimatedHours": 2,
+  "files": [
+    "libs/shared-dtos/src/domains/analytics.dto.ts",
+    "apps/resume-parser-svc/src/vision-llm/vision-llm.service.ts",
+    "apps/jd-extractor-svc/src/extraction/llm.service.ts",
+    "apps/app-gateway/src/privacy/privacy-compliance.service.ts",
+    "apps/resume-parser-svc/src/field-mapper/experience-calculator.spec.ts"
+  ],
+  "estimatedHours": 8,
   "subtasks": [
     {
-      "id": "VIBE-001a",
-      "title": "Create IPRange interface",
-      "description": "Create IPRange interface with properties: start (string), end (string), single (boolean), range (string), isSensitive (boolean). Move hardcoded IP range values to typed constants.",
+      "id": "CODE-001a",
+      "title": "Remove 'any' Types in analytics.dto.ts",
+      "description": "Replace all 'any' types with proper interfaces for analytics events. Create typed interfaces for eventData, context, metadata, and payload.",
       "acceptanceCriteria": [
-        "IPRange interface created in libs/shared-dtos/src/validation/",
-        "Interface exported to privacy-compliance.service.ts",
-        "Hardcoded IP values moved to IP_RANGE constant",
-        "TypeScript compilation passes"
+        "Proper interfaces created for all 'any' type usages",
+        "eslint-disable-next-line @typescript-eslint/no-explicit-any comments removed",
+        "TypeScript compilation passes",
+        "Analytics events properly typed"
       ],
-      "estimatedHours": 0.5,
+      "estimatedHours": 2,
       "dependsOn": [],
       "passes": true
     },
     {
-      "id": "VIBE-001b",
-      "title": "Create SanitizationResult interface",
-      "description": "Create SanitizationResult interface with properties: result (SanitizationResult), status (success/failure), redacted (string), piiTypes (string[]). Move hardcoded sanitization result values to interface.",
+      "id": "CODE-001b",
+      "title": "Remove 'any' Types in LLM Services",
+      "description": "Replace 'any' types in vision-llm.service.ts and llm.service.ts with typed interfaces for LLM responses.",
       "acceptanceCriteria": [
-        "SanitizationResult interface created in libs/shared-dtos/src/validation/",
-        "Interface exported to privacy-compliance.service.ts",
-        "Hardcoded values moved to SANITIZATION_RESULT constant",
-        "Sanitization result properly typed with all required fields"
+        "LLM response interfaces defined",
+        "'any' types replaced with proper types",
+        "TypeScript compilation passes"
       ],
-      "estimatedHours": 0.5,
-      "dependsOn": ["VIBE-001a"],
+      "estimatedHours": 1,
+      "dependsOn": [],
       "passes": true
     },
     {
-      "id": "VIBE-001c",
-      "title": "Replace 'any' types with proper interfaces in privacy service",
-      "description": "Replace all 'any' type usage with proper interfaces: IPRange for IP checks, SanitizationResult for PII redaction. Update privacy-compliance.service.ts to use new interfaces instead of 'any'.",
+      "id": "CODE-001c",
+      "title": "Break Up privacy-compliance.service.ts",
+      "description": "Split the 1,310-line privacy-compliance.service.ts into smaller, focused modules.",
       "acceptanceCriteria": [
-        "All 'any' types replaced with IPRange interface",
-        "PII redaction uses new SanitizationResult interface",
-        "TypeScript compilation passes without errors",
-        "Privacy service properly maintains type safety"
+        "Extract consent-management.service.ts (~370 lines)",
+        "Extract consent-cascade.service.ts (~326 lines)",
+        "Extract data-subject-rights.service.ts (~167 lines)",
+        "Extract data-collection.service.ts (~307 lines)",
+        "Extract data-export.service.ts (~308 lines)",
+        "Extract data-erasure.service.ts (~218 lines)",
+        "Refactor privacy-compliance.service.ts to facade (~233 lines)",
+        "Each module under 500 lines"
       ],
-      "estimatedHours": 1,
-      "dependsOn": ["VIBE-001a", "VIBE-001b"],
+      "estimatedHours": 3,
+      "dependsOn": [],
       "passes": true
+    },
+    {
+      "id": "CODE-001d",
+      "title": "Break Up analytics.dto.ts",
+      "description": "Split the 1,345-line analytics.dto.ts by domain into smaller files.",
+      "acceptanceCriteria": [
+        "Extract analytics-event.dto.ts",
+        "Extract analytics-metrics.dto.ts",
+        "Extract analytics-aggregation.dto.ts",
+        "Each module under 500 lines"
+      ],
+      "estimatedHours": 2,
+      "dependsOn": ["CODE-001a"],
+      "passes": false
     }
   ]
 }

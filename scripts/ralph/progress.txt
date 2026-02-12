@@ -1,5 +1,12 @@
 # Ralph Progress Log
 Started: Thu Feb 12 15:02:05 CST 2026
+
+## Codebase Patterns
+- The codebase uses `validateEnv()` from `@ai-recruitment-clerk/configuration` for environment variable validation
+- CORS is configured in both main.ts (via allowedOrigins array) and .env (via CORS_ORIGIN string)
+- Security headers middleware handles CSP, HSTS, and other security headers
+- Production security validator (`ProductionSecurityValidator`) checks configuration at startup
+- `.env` is already gitignored (line 76-78 in .gitignore), keeping secrets out of version control
 ---
 ## [Date/Time] - VIBE-001
 - What was implemented:
@@ -19,3 +26,83 @@ Started: Thu Feb 12 15:02:05 CST 2026
   - Husky pre-commit hooks may fail - use --no-verify to bypass if needed
 
 ---
+## [Thu Feb 12 2026] - SEC-001
+- What was implemented:
+  - Added missing `_generateNonce()` method to SecurityHeadersMiddleware (generates base64-encoded random nonce)
+  - Fixed CSP nonce generation - now properly generates nonce per-request in production
+  - Replaced all hardcoded weak secrets in .env with secure placeholders:
+    - ENCRYPTION_KEY: weak predictable key → placeholder
+    - ENCRYPTION_MASTER_KEY: hex pattern → placeholder
+    - JWT_SECRET/REFRESH_SECRET: placeholder values → secure placeholder
+    - Database passwords: devpassword123 → change_this_password
+    - GEMINI_API_KEY: mock key → placeholder
+  - Enabled CSRF protection (ENABLE_CSRF=true in .env and .env.example)
+  - Disabled Swagger in production by default (respects ENABLE_SWAGGER env var)
+  - Updated .env.example with security documentation
+- Files changed:
+  - apps/app-gateway/src/middleware/security-headers.middleware.ts (added _generateNonce method, fixed CSP nonce usage)
+  - apps/app-gateway/src/main.ts (added production check for Swagger)
+  - .env (replaced all hardcoded secrets with placeholders, enabled CSRF)
+  - .env.example (updated with security comments, enabled CSRF)
+  - scripts/ralph/prd.json (new PRD for SEC-001)
+- **Learnings for future iterations:**
+  - The CSP nonce was incorrectly placed in a single-quoted string literal: `'nonce-${this._generateNonce()}'` - the `${}` wasn't being evaluated
+  - Must generate nonce per-request and use template literals with backticks or string concatenation
+  - .env is already in .gitignore (line 76), but verify with `git status` that no secrets are staged
+  - The codebase has `ProductionSecurityValidator` that warns about Swagger in production
+  - CORS is configured in two places: main.ts for runtime and .env for documentation
+  - Always run `npm run typecheck` and `npm run lint` before committing
+---
+## [Thu Feb 12 2026] - CODE-001a/b
+- What was implemented:
+  - Created proper TypeScript interfaces for analytics data structures:
+    - UserSessionData, DeviceInfoData, GeoLocationData (for storage/restore)
+    - EventPayload, EventContextData, EventTimestampData, EventDataStructure
+  - Replaced all 'any' types in analytics.dto.ts with proper interfaces
+  - Updated AnalyticsEventData interface to use typed fields
+  - Updated factory methods (createUserInteractionEvent, createSystemPerformanceEvent)
+  - Fixed analytics.contracts.ts to cast unknown to proper types
+  - Created RawResumeData, RawWorkExperience, RawEducation interfaces for vision-llm.service.ts
+  - Created RawJdData interface for llm.service.ts (JD extractor)
+  - Fixed createGeminiClient to avoid 'any' type (used type assertions and unknown)
+  - Removed eslint-disable-next-line @typescript-eslint/no-explicit-any comments
+- Files changed:
+  - libs/shared-dtos/src/domains/analytics.dto.ts (added interfaces, replaced 'any' types)
+  - libs/shared-dtos/src/contracts/analytics.contracts.ts (added type casts)
+  - apps/resume-parser-svc/src/vision-llm/vision-llm.service.ts (added RawResumeData interface)
+  - apps/jd-extractor-svc/src/extraction/llm.service.ts (added RawJdData interface)
+  - scripts/ralph/prd.json (updated for CODE-001)
+- **Learnings for future iterations:**
+  - When creating data transfer objects, define parallel interfaces for "raw/external" vs "cleaned/internal" data
+  - EventPayload type uses recursive definition: [key: string]: string | number | boolean | undefined | null | EventPayload | EventPayload[]
+  - For optional object properties, use nullish coalescing (??) instead of logical OR (||) to avoid type issues
+  - Type assertions should use 'unknown' as intermediate step when casting complex types
+  - The file pre-commit hook runs eslint which may format imports and other code style issues
+---
+## [Date/Time] - CODE-001c
+- What was implemented:
+  - Refactored 1,310-line privacy-compliance.service.ts into 6 focused modules
+  - Created services directory under privacy/
+  - consent-management.service.ts (~370 lines) - Core consent record operations
+  - consent-cascade.service.ts (~326 lines) - Consent withdrawal propagation
+  - data-subject-rights.service.ts (~167 lines) - GDPR rights requests
+  - data-collection.service.ts (~307 lines) - Data gathering from all services
+  - data-export.service.ts (~308 lines) - Secure export generation
+  - data-erasure.service.ts (~218 lines) - Data deletion operations
+  - Refactored privacy-compliance.service.ts to facade pattern (~233 lines)
+  - Updated privacy-compliance.module.ts with new providers
+  - Fixed ConsentStatus enum conflict in shared-dtos index.ts (renamed analytics export to AnalyticsConsentStatus)
+  - All files under 500 lines per project standards
+- Files changed:
+  - apps/app-gateway/src/privacy/services/ (new directory, 6 files)
+  - apps/app-gateway/src/privacy/privacy-compliance.service.ts (refactored to facade)
+  - apps/app-gateway/src/privacy/privacy-compliance.module.ts (added new providers)
+  - libs/shared-dtos/src/index.ts (fixed enum export conflict)
+  - scripts/ralph/prd.json (updated CODE-001c to passes: true)
+- **Learnings for future iterations:**
+  - Service layering pattern: Each service should have a single responsibility
+  - Enum naming conflicts can occur when barrel exports (index.ts) export multiple enums with the same name - use unique names or avoid re-exporting conflicting types
+  - The facade pattern maintains backward compatibility while allowing modular structure
+  - Constructor injection in NestJS requires all dependencies to be in module providers
+  - When using class instances from DTOs (new ConsentRecord()), ensure proper type casting for enum properties
+  - The consentMethod property type mismatch required casting due to class-transformer vs enum differences
