@@ -602,7 +602,7 @@
       ],
       "estimatedHours": 0.5,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": ["apps/jd-extractor-svc/src/extraction/llm.service.ts"]
     }
   ]

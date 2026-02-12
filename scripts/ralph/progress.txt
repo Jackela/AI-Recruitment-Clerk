@@ -129,3 +129,21 @@ Fix type import lint warnings in report-generator-svc
 - ESLint rule `@typescript-eslint/consistent-type-imports` enforces using `import type` for imports only used as types
 - When services only use dependencies as constructor-injected dependencies (not runtime values), they should be type imports
 - NestJS services often have dependencies that are only used as type annotations in constructors
+
+## [2026-02-13] - CODE-002f-1
+
+### Task Summary
+Fix llm.service.ts type imports
+
+### Work Done
+- Consolidated separate import statements from @ai-recruitment-clerk/shared-dtos
+- Changed from multi-line format (8 lines) to compact single-line format (3 lines)
+- Import statements now consistent with codebase style
+
+### Files Changed
+- apps/jd-extractor-svc/src/extraction/llm.service.ts - Consolidated import statements
+
+### Learnings for future iterations:
+- ESLint prefers compact single-line imports over multi-line format for consistency
+- When a module has both type-only and runtime imports, keep them on separate import lines but use single-line format
+- The pre-commit hooks run eslint --fix automatically, which validates the import formatting
