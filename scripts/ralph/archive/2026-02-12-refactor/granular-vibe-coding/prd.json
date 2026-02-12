@@ -1,0 +1,608 @@
+{
+  "id": "CODE-002",
+  "title": "Phase 3: Comprehensive Codebase Cleanup & Refactoring",
+  "description": "Fix all remaining code quality issues, split large files, and fix test failures across the entire codebase.",
+  "acceptanceCriteria": [
+    "All 'any' types removed from TypeScript files",
+    "All files under 500 lines (or split into smaller modules)",
+    "TypeScript compilation passes without errors",
+    "All lint warnings resolved",
+    "All tests passing"
+  ],
+  "priority": 1,
+  "branchName": "refactor/code-cleanup",
+  "subtasks": [
+    {
+      "id": "CODE-002a-1",
+      "title": "Fix vision-llm.service.spec.ts Mock Setup",
+      "description": "Fix undefined mock object errors in test setup. The mock client object is not properly initialized causing TypeError: Cannot read properties of undefined.",
+      "acceptanceCriteria": [
+        "All vision-llm tests pass without mock errors",
+        "clientLike.mock properly initialized with results array"
+      ],
+      "estimatedHours": 0.5,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/resume-parser-svc/src/vision-llm/vision-llm.service.spec.ts"
+      ]
+    },
+    {
+      "id": "CODE-002a-2",
+      "title": "Fix llm.service.spec.ts NestJS Dependency",
+      "description": "Fix 'Nest can't resolve dependencies of LlmService' error in test module. The LlmService is not properly imported or provided in test module.",
+      "acceptanceCriteria": [
+        "All llm.service tests pass",
+        "LlmService resolves in RootTestModule"
+      ],
+      "estimatedHours": 0.5,
+      "dependsOn": ["CODE-002a-1"],
+      "passes": false,
+      "files": ["apps/jd-extractor-svc/src/llm/llm.service.spec.ts"]
+    },
+    {
+      "id": "CODE-002a-3",
+      "title": "Fix llm.service.spec.ts Input Validation",
+      "description": "Fix 7 failing tests for null/undefined/whitespace input handling. Tests for invalid job descriptions need proper validation.",
+      "acceptanceCriteria": [
+        "All negative input tests pass",
+        "Null inputs return appropriate errors",
+        "Whitespace-only inputs handled correctly",
+        "Empty string inputs handled correctly"
+      ],
+      "estimatedHours": 1,
+      "dependsOn": ["CODE-002a-2"],
+      "passes": false,
+      "files": ["apps/jd-extractor-svc/src/llm/llm.service.spec.ts"]
+    },
+    {
+      "id": "CODE-002a-4",
+      "title": "Fix llm.service.spec.ts Boundary Tests",
+      "description": "Fix 6 failing boundary limit tests. Job description size limits (min/max/typical) are not being enforced.",
+      "acceptanceCriteria": [
+        "All boundary tests pass",
+        "Minimum word limit (1) enforced",
+        "Maximum character limit (10000) enforced",
+        "Typical length limit (500-1000 words) enforced"
+      ],
+      "estimatedHours": 1,
+      "dependsOn": ["CODE-002a-3"],
+      "passes": false,
+      "files": ["apps/jd-extractor-svc/src/llm/llm.service.spec.ts"]
+    },
+    {
+      "id": "CODE-002a-5",
+      "title": "Fix llm.service.spec.ts LLM Error Handling",
+      "description": "Fix 4 LLM timeout/rate limiting tests. Database errors and API failures need proper error handling.",
+      "acceptanceCriteria": [
+        "LLM timeout handled gracefully",
+        "Rate limit errors handled gracefully",
+        "Database errors (ML_MODEL_PREDICTION_FAILED) properly handled"
+      ],
+      "estimatedHours": 1,
+      "dependsOn": ["CODE-002a-4"],
+      "passes": false,
+      "files": ["apps/jd-extractor-svc/src/llm/llm.service.spec.ts"]
+    },
+    {
+      "id": "CODE-002a-6",
+      "title": "Fix llm.service.spec.ts Edge Case Tests",
+      "description": "Fix 2 failing edge case tests for skill extraction - minimal job descriptions and 100+ skills.",
+      "acceptanceCriteria": [
+        "Minimal job descriptions handled correctly",
+        "Large skill counts (100+) handled correctly",
+        "Version numbers in skills handled correctly"
+      ],
+      "estimatedHours": 0.5,
+      "dependsOn": ["CODE-002a-5"],
+      "passes": false,
+      "files": ["apps/jd-extractor-svc/src/llm/llm.service.spec.ts"]
+    },
+    {
+      "id": "CODE-002b-1",
+      "title": "Remove 'any' from analytics.dto.ts",
+      "description": "Replace 'any' type at line 48 in analytics.dto.ts with proper 'unknown' type for event data.",
+      "acceptanceCriteria": [
+        "No 'any' type in apps/app-gateway/src/domains/analytics/analytics.dto.ts"
+      ],
+      "estimatedHours": 0.25,
+      "dependsOn": [],
+      "passes": false,
+      "files": ["apps/app-gateway/src/domains/analytics/analytics.dto.ts"]
+    },
+    {
+      "id": "CODE-002b-2",
+      "title": "Remove 'any' from user-management.service.ts",
+      "description": "Replace 'any' types in user-management service methods with proper typed interfaces.",
+      "acceptanceCriteria": [
+        "No 'any' types in apps/app-gateway/src/domains/user-management/user-management.service.ts"
+      ],
+      "estimatedHours": 0.25,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/app-gateway/src/domains/user-management/user-management.service.ts"
+      ]
+    },
+    {
+      "id": "CODE-002b-3",
+      "title": "Remove 'any' from usage-limit.controller.ts",
+      "description": "Replace 'any' type in usage limit controller.",
+      "acceptanceCriteria": [
+        "No 'any' types in apps/app-gateway/src/domains/usage-limit/usage-limit.controller.ts"
+      ],
+      "estimatedHours": 0.25,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/app-gateway/src/domains/usage-limit/usage-limit.controller.ts"
+      ]
+    },
+    {
+      "id": "CODE-002b-4",
+      "title": "Remove 'any' from resume.controller.ts",
+      "description": "Replace 'any' type in resume controller.",
+      "acceptanceCriteria": [
+        "No 'any' types in apps/app-gateway/src/domains/resume/resume.controller.ts"
+      ],
+      "estimatedHours": 0.25,
+      "dependsOn": [],
+      "passes": false,
+      "files": ["apps/app-gateway/src/domains/resume/resume.controller.ts"]
+    },
+    {
+      "id": "CODE-002b-5",
+      "title": "Remove 'any' from questionnaire.controller.ts",
+      "description": "Replace 'any' type in questionnaire controller.",
+      "acceptanceCriteria": [
+        "No 'any' types in apps/app-gateway/src/domains/questionnaire/questionnaire.controller.ts"
+      ],
+      "estimatedHours": 0.25,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/app-gateway/src/domains/questionnaire/questionnaire.controller.ts"
+      ]
+    },
+    {
+      "id": "CODE-002b-6",
+      "title": "Remove 'any' from analytics.contracts.ts",
+      "description": "Replace 'any' type in analytics contracts.",
+      "acceptanceCriteria": [
+        "No 'any' types in libs/shared-dtos/src/domains/analytics.contracts.ts"
+      ],
+      "estimatedHours": 0.25,
+      "dependsOn": [],
+      "passes": false,
+      "files": ["libs/shared-dtos/src/domains/analytics.contracts.ts"]
+    },
+    {
+      "id": "CODE-002b-7",
+      "title": "Remove 'any' from analytics.service.ts",
+      "description": "Replace 'any' types in analytics service.",
+      "acceptanceCriteria": [
+        "No 'any' types in libs/shared-dtos/src/domains/analytics.service.ts"
+      ],
+      "estimatedHours": 0.25,
+      "dependsOn": [],
+      "passes": false,
+      "files": ["libs/shared-dtos/src/domains/analytics.service.ts"]
+    },
+    {
+      "id": "CODE-002b-8",
+      "title": "Remove 'any' from service-base",
+      "description": "Replace 'any' type in base microservice.",
+      "acceptanceCriteria": [
+        "No 'any' types in libs/service-base/src/base-microservice.service.ts"
+      ],
+      "estimatedHours": 0.25,
+      "dependsOn": [],
+      "passes": false,
+      "files": ["libs/service-base/src/base-microservice.service.ts"]
+    },
+    {
+      "id": "CODE-002b-9",
+      "title": "Remove 'any' from infrastructure-shared",
+      "description": "Replace 'any' types in infrastructure shared index.",
+      "acceptanceCriteria": [
+        "No 'any' types in libs/infrastructure-shared/src/index.ts"
+      ],
+      "estimatedHours": 0.25,
+      "dependsOn": [],
+      "passes": false,
+      "files": ["libs/infrastructure-shared/src/index.ts"]
+    },
+    {
+      "id": "CODE-002c-1",
+      "title": "Split mobile-dashboard.component.ts",
+      "description": "Split 1037-line mobile dashboard component into smaller components: display, filter, and logic sections.",
+      "acceptanceCriteria": [
+        "mobile-dashboard.component.ts < 500 lines",
+        "Display component extracted",
+        "Filter component extracted",
+        "Logic component extracted"
+      ],
+      "estimatedHours": 3,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-dashboard.component.ts"
+      ]
+    },
+    {
+      "id": "CODE-002c-2",
+      "title": "Split mobile-navigation.component.ts",
+      "description": "Split 1021-line mobile navigation component into smaller pieces.",
+      "acceptanceCriteria": [
+        "mobile-navigation.component.ts < 500 lines",
+        "Navigation logic extracted",
+        "Route handling extracted"
+      ],
+      "estimatedHours": 2,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-navigation.component.ts"
+      ]
+    },
+    {
+      "id": "CODE-002c-3",
+      "title": "Split mobile-upload.component.ts",
+      "description": "Split 1121-line mobile upload component into file upload, validation, and UI sections.",
+      "acceptanceCriteria": [
+        "mobile-upload.component.ts < 500 lines",
+        "File upload service extracted",
+        "Validation logic extracted",
+        "Upload UI component separated"
+      ],
+      "estimatedHours": 3,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-upload.component.ts"
+      ]
+    },
+    {
+      "id": "CODE-002c-4",
+      "title": "Split mobile-performance.component.ts",
+      "description": "Split 836-line mobile performance component into chart display and data processing sections.",
+      "acceptanceCriteria": [
+        "mobile-performance.component.ts < 500 lines",
+        "Chart component extracted",
+        "Performance metrics processing separated"
+      ],
+      "estimatedHours": 2.5,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-performance.component.ts"
+      ]
+    },
+    {
+      "id": "CODE-002c-5",
+      "title": "Split mobile-results-display.component.ts (780 lines)",
+      "description": "Split 780-line results display component into results list, detail view, and empty state sections.",
+      "acceptanceCriteria": [
+        "mobile-results-display.component.ts < 500 lines",
+        "Results list extracted",
+        "Detail view extracted",
+        "Empty state handled"
+      ],
+      "estimatedHours": 2,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-display.component.ts"
+      ]
+    },
+    {
+      "id": "CODE-002c-6",
+      "title": "Split mobile-results-display.component.ts (514 lines)",
+      "description": "Split the 514-line variant of results display component.",
+      "acceptanceCriteria": [
+        "mobile-results-display.component.ts (variant) < 500 lines"
+      ],
+      "estimatedHours": 1.5,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-display.component.ts"
+      ]
+    },
+    {
+      "id": "CODE-002c-7",
+      "title": "Split analytics-dashboard.component.ts",
+      "description": "Split 646-line analytics dashboard into chart components, metrics cards, and data aggregators.",
+      "acceptanceCriteria": [
+        "analytics-dashboard.component.ts < 500 lines",
+        "Chart components extracted",
+        "Metrics cards separated",
+        "Data aggregators isolated"
+      ],
+      "estimatedHours": 4,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/components/shared/analytics-dashboard/analytics-dashboard.component.ts"
+      ]
+    },
+    {
+      "id": "CODE-002c-8",
+      "title": "Split bento-grid.component.ts",
+      "description": "Split 1210-line bento grid into grid item, grid cell, and layout components.",
+      "acceptanceCriteria": [
+        "bento-grid.component.ts < 500 lines",
+        "Grid item component extracted",
+        "Grid cell rendering separated",
+        "Layout logic isolated"
+      ],
+      "estimatedHours": 4,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/components/shared/bento-grid/bento-grid.component.ts"
+      ]
+    },
+    {
+      "id": "CODE-002c-9",
+      "title": "Split bento-grid.component.spec.ts",
+      "description": "Split 1037-line bento grid spec file into focused test suites.",
+      "acceptanceCriteria": [
+        "bento-grid.component.spec.ts < 500 lines",
+        "Unit tests separated by feature",
+        "Test utilities extracted"
+      ],
+      "estimatedHours": 2,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/components/shared/bento-grid/bento-grid.component.spec.ts"
+      ]
+    },
+    {
+      "id": "CODE-002c-10",
+      "title": "Split data-table.component.ts",
+      "description": "Split 1017-line data table into table core, sorting, and pagination components.",
+      "acceptanceCriteria": [
+        "data-table.component.ts < 500 lines",
+        "Table core extracted",
+        "Sort logic separated",
+        "Pagination extracted"
+      ],
+      "estimatedHours": 3,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table.component.ts"
+      ]
+    },
+    {
+      "id": "CODE-002c-11",
+      "title": "Split error-boundary.component.ts",
+      "description": "Split 785-line error boundary component into error types, display logic, and retry handlers.",
+      "acceptanceCriteria": [
+        "error-boundary.component.ts < 500 lines",
+        "Error type components separated",
+        "Display logic extracted",
+        "Retry handlers isolated"
+      ],
+      "estimatedHours": 3,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/components/shared/error-boundary/error-boundary.component.ts"
+      ]
+    },
+    {
+      "id": "CODE-002c-12",
+      "title": "Split error-reporting.component.ts",
+      "description": "Split 735-line error reporting component into report list, detail view, and submission form.",
+      "acceptanceCriteria": [
+        "error-reporting.component.ts < 500 lines",
+        "Report list extracted",
+        "Detail view separated",
+        "Submission form isolated"
+      ],
+      "estimatedHours": 2.5,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/components/shared/error-reporting/error-reporting.component.ts"
+      ]
+    },
+    {
+      "id": "CODE-002c-13",
+      "title": "Split progress-tracker.component.ts",
+      "description": "Split 798-line progress tracker into timeline, status, and milestone components.",
+      "acceptanceCriteria": [
+        "progress-tracker.component.ts < 500 lines",
+        "Timeline component extracted",
+        "Status tracking separated",
+        "Milestone logic isolated"
+      ],
+      "estimatedHours": 3,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/components/shared/progress-tracker/progress-tracker.component.ts"
+      ]
+    },
+    {
+      "id": "CODE-002c-14",
+      "title": "Split timesheet-table.component.ts",
+      "description": "Split 934-line timesheet table into table core, time cell, and row components.",
+      "acceptanceCriteria": [
+        "timesheet-table.component.ts < 500 lines",
+        "Table core extracted",
+        "Time cell component extracted",
+        "Row rendering separated"
+      ],
+      "estimatedHours": 3,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-table.component.ts"
+      ]
+    },
+    {
+      "id": "CODE-002c-15",
+      "title": "Split virtual-scroll.component.ts",
+      "description": "Split 549-line virtual scroll component into scroll container, viewport, and content components.",
+      "acceptanceCriteria": [
+        "virtual-scroll.component.ts < 500 lines",
+        "Scroll container extracted",
+        "Viewport logic separated",
+        "Content handling isolated"
+      ],
+      "estimatedHours": 2,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/components/shared/virtual-scroll/virtual-scroll.component.ts"
+      ]
+    },
+    {
+      "id": "CODE-002c-16",
+      "title": "Split mobile-swipe.component.spec.ts",
+      "description": "Split 1881-line mobile swipe spec file into focused test suites.",
+      "acceptanceCriteria": [
+        "mobile-swipe.component.spec.ts < 500 lines",
+        "Unit tests separated by feature",
+        "Test utilities extracted"
+      ],
+      "estimatedHours": 2,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.component.spec.ts"
+      ]
+    },
+    {
+      "id": "CODE-002d-1",
+      "title": "Split analytics.dto.ts into events file",
+      "description": "Extract analytics event definitions into separate analytics-event.dto.ts file (~300-400 lines).",
+      "acceptanceCriteria": [
+        "analytics.dto.ts < 500 lines after split",
+        "analytics-event.dto.ts created with proper interfaces"
+      ],
+      "estimatedHours": 2,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "libs/shared-dtos/src/domains/analytics.dto.ts",
+        "libs/shared-dtos/src/domains/analytics-event.dto.ts (new)"
+      ]
+    },
+    {
+      "id": "CODE-002d-2",
+      "title": "Split questionnaire.dto.ts into interfaces",
+      "description": "Split 1287-line questionnaire DTO into domain interfaces (~400 lines each).",
+      "acceptanceCriteria": [
+        "questionnaire.dto.ts < 500 lines after split",
+        "Domain interfaces created"
+      ],
+      "estimatedHours": 3,
+      "dependsOn": [],
+      "passes": false,
+      "files": ["libs/shared-dtos/src/domains/questionnaire.dto.ts"]
+    },
+    {
+      "id": "CODE-002d-3",
+      "title": "Split incentive.service.ts",
+      "description": "Split 1186-line incentive service into incentive CRUD, validation, and calculation modules.",
+      "acceptanceCriteria": [
+        "incentive.service.ts < 500 lines after split",
+        "CRUD operations extracted",
+        "Validation logic isolated",
+        "Calculation modules separated"
+      ],
+      "estimatedHours": 3,
+      "dependsOn": [],
+      "passes": false,
+      "files": ["libs/shared-dtos/src/domains/incentive.service.ts"]
+    },
+    {
+      "id": "CODE-002d-4",
+      "title": "Split analytics.service.ts",
+      "description": "Split 1107-line analytics service into event collection, aggregation, and metrics modules.",
+      "acceptanceCriteria": [
+        "analytics.service.ts < 500 lines after split",
+        "Event collection separated",
+        "Aggregation logic isolated"
+      ],
+      "estimatedHours": 3,
+      "dependsOn": [],
+      "passes": false,
+      "files": ["libs/shared-dtos/src/domains/analytics.service.ts"]
+    },
+    {
+      "id": "CODE-002d-5",
+      "title": "Split usage-limit.dto.ts",
+      "description": "Split 912-line usage limit DTO into limit definition, quota allocation, and tracking types.",
+      "acceptanceCriteria": [
+        "usage-limit.dto.ts < 500 lines after split",
+        "Limit types properly organized"
+      ],
+      "estimatedHours": 2,
+      "dependsOn": [],
+      "passes": false,
+      "files": ["libs/shared-dtos/src/domains/usage-limit.dto.ts"]
+    },
+    {
+      "id": "CODE-002d-6",
+      "title": "Split analytics.test.ts",
+      "description": "Split 1028-line analytics test file into unit test suites by feature.",
+      "acceptanceCriteria": [
+        "analytics.test.ts < 500 lines after split",
+        "Unit tests organized by feature"
+      ],
+      "estimatedHours": 2,
+      "dependsOn": [],
+      "passes": false,
+      "files": ["libs/shared-dtos/src/domains/analytics.test.ts"]
+    },
+    {
+      "id": "CODE-002e-1",
+      "title": "Fix report-generator.service lint warnings",
+      "description": "Fix inconsistent type imports causing ESLint warnings in report generator service.",
+      "acceptanceCriteria": [
+        "report-generator.service.ts - No lint warnings",
+        "Type imports organized consistently"
+      ],
+      "estimatedHours": 0.5,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/report-generator-svc/src/report-generator/report-generator.service.ts"
+      ]
+    },
+    {
+      "id": "CODE-002e-2",
+      "title": "Fix report-templates.service lint warnings",
+      "description": "Fix inconsistent type imports causing ESLint warning in report templates service.",
+      "acceptanceCriteria": [
+        "report-templates.service.ts - No lint warnings",
+        "Type imports organized consistently"
+      ],
+      "estimatedHours": 0.5,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/report-generator-svc/src/report-generator/report-templates.service.ts"
+      ]
+    },
+    {
+      "id": "CODE-002f-1",
+      "title": "Fix llm.service.ts type imports",
+      "description": "Fix inconsistent type import causing ESLint warning in JD extractor LLM service.",
+      "acceptanceCriteria": [
+        "llm.service.ts - No lint warnings",
+        "Type imports use proper barrel exports"
+      ],
+      "estimatedHours": 0.5,
+      "dependsOn": [],
+      "passes": false,
+      "files": ["apps/jd-extractor-svc/src/extraction/llm.service.ts"]
+    }
+  ]
+}

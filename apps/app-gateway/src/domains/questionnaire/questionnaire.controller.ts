@@ -83,15 +83,25 @@ export class QuestionnaireController {
   })
   @ApiResponse({ status: 400, description: '请求参数错误' })
   @UseGuards(RolesGuard)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Permissions('create_questionnaire' as any)
+  @Permissions('create_questionnaire')
   @Post()
   @HttpCode(HttpStatus.CREATED)
   public async createQuestionnaire(
     @Request() req: AuthenticatedRequest,
     @Body() createDto: CreateQuestionnaireDto,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      message?: string;
+      data?: {
+        questionnaireId: string;
+        title: string;
+        status: string;
+        totalQuestions: number;
+        createdAt: string;
+      };
+      error?: string;
+      message?: string;
+    }> {
     try {
       const questionnaire = await this.questionnaireService.createQuestionnaire(
         {
@@ -156,7 +166,12 @@ export class QuestionnaireController {
     @Query('status') status?: QuestionnaireStatus,
     @Query('search') search?: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      message?: string;
+      data?: unknown;
+      error?: string;
+    }> {
     try {
       const questionnaires = await this.questionnaireService.getQuestionnaires(
         req.user.organizationId,
@@ -210,7 +225,12 @@ export class QuestionnaireController {
     @Request() req: AuthenticatedRequest,
     @Param('questionnaireId') questionnaireId: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      message?: string;
+      data?: unknown;
+      error?: string;
+    }> {
     try {
       const questionnaire = await this.questionnaireService.getQuestionnaire(
         questionnaireId,
@@ -250,7 +270,7 @@ export class QuestionnaireController {
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @UseGuards(RolesGuard)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Permissions('update_questionnaire' as any)
+  @Permissions('update_questionnaire')
   @Put(':questionnaireId')
   @HttpCode(HttpStatus.OK)
   public async updateQuestionnaire(
@@ -258,7 +278,12 @@ export class QuestionnaireController {
     @Param('questionnaireId') questionnaireId: string,
     @Body() updateDto: UpdateQuestionnaireDto,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      message?: string;
+      data?: unknown;
+      error?: string;
+    }> {
     try {
       const updatedQuestionnaire =
         await this.questionnaireService.updateQuestionnaire(
@@ -301,7 +326,7 @@ export class QuestionnaireController {
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @UseGuards(RolesGuard)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Permissions('publish_questionnaire' as any)
+  @Permissions('publish_questionnaire')
   @Post(':questionnaireId/publish')
   @HttpCode(HttpStatus.OK)
   public async publishQuestionnaire(
@@ -315,7 +340,12 @@ export class QuestionnaireController {
       notifyUsers?: boolean;
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      message?: string;
+      data?: unknown;
+      error?: string;
+    }> {
     try {
       const publishResult =
         await this.questionnaireService.publishQuestionnaire(
@@ -382,7 +412,12 @@ export class QuestionnaireController {
     @Param('questionnaireId') questionnaireId: string,
     @Body() submission: QuestionnaireSubmissionDto,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      message?: string;
+      data?: unknown;
+      error?: string;
+    }> {
     try {
       const submissionResult =
         await this.questionnaireService.submitQuestionnaire(questionnaireId, {
@@ -441,7 +476,7 @@ export class QuestionnaireController {
   @ApiQuery({ name: 'endDate', required: false, description: '结束日期' })
   @UseGuards(RolesGuard)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Permissions('read_questionnaire_responses' as any)
+  @Permissions('read_questionnaire_responses')
   @Get(':questionnaireId/submissions')
   public async getQuestionnaireSubmissions(
     @Request() req: AuthenticatedRequest,
@@ -451,7 +486,12 @@ export class QuestionnaireController {
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      message?: string;
+      data?: unknown;
+      error?: string;
+    }> {
     try {
       const submissions =
         await this.questionnaireService.getQuestionnaireSubmissions(
@@ -502,13 +542,18 @@ export class QuestionnaireController {
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @UseGuards(RolesGuard)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Permissions('read_questionnaire_analytics' as any)
+  @Permissions('read_questionnaire_analytics')
   @Get(':questionnaireId/analytics')
   public async getQuestionnaireAnalytics(
     @Request() req: AuthenticatedRequest,
     @Param('questionnaireId') questionnaireId: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      message?: string;
+      data?: unknown;
+      error?: string;
+    }> {
     try {
       const analytics =
         await this.questionnaireService.getQuestionnaireAnalytics(
@@ -544,7 +589,7 @@ export class QuestionnaireController {
   @ApiParam({ name: 'questionnaireId', description: '原问卷ID' })
   @UseGuards(RolesGuard)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Permissions('create_questionnaire' as any)
+  @Permissions('create_questionnaire')
   @Post(':questionnaireId/duplicate')
   @HttpCode(HttpStatus.CREATED)
   public async duplicateQuestionnaire(
@@ -558,7 +603,12 @@ export class QuestionnaireController {
       modifyQuestions?: any;
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      message?: string;
+      data?: unknown;
+      error?: string;
+    }> {
     try {
       const duplicatedQuestionnaire =
         await this.questionnaireService.duplicateQuestionnaire(
@@ -601,7 +651,7 @@ export class QuestionnaireController {
   @ApiParam({ name: 'questionnaireId', description: '问卷ID' })
   @UseGuards(RolesGuard)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Permissions('delete_questionnaire' as any)
+  @Permissions('delete_questionnaire')
   @Delete(':questionnaireId')
   @HttpCode(HttpStatus.OK)
   public async deleteQuestionnaire(
@@ -609,7 +659,12 @@ export class QuestionnaireController {
     @Param('questionnaireId') questionnaireId: string,
     @Body() deleteRequest: { reason?: string; hardDelete?: boolean },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      message?: string;
+      data?: unknown;
+      error?: string;
+    }> {
     try {
       await this.questionnaireService.deleteQuestionnaire(
         questionnaireId,
@@ -658,7 +713,12 @@ export class QuestionnaireController {
     @Request() req: AuthenticatedRequest,
     @Query('category') category?: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      message?: string;
+      data?: unknown;
+      error?: string;
+    }> {
     try {
       const templates =
         await this.questionnaireService.getQuestionnaireTemplates(
@@ -694,7 +754,7 @@ export class QuestionnaireController {
   @ApiParam({ name: 'templateId', description: '模板ID' })
   @UseGuards(RolesGuard)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Permissions('create_questionnaire' as any)
+  @Permissions('create_questionnaire')
   @Post('templates/:templateId/create')
   @HttpCode(HttpStatus.CREATED)
   public async createFromTemplate(
@@ -708,7 +768,12 @@ export class QuestionnaireController {
       organizationId?: string;
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      message?: string;
+      data?: unknown;
+      error?: string;
+    }> {
     try {
       const questionnaire = await this.questionnaireService.createFromTemplate(
         templateId,
@@ -760,7 +825,7 @@ export class QuestionnaireController {
   })
   @UseGuards(RolesGuard)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Permissions('export_questionnaire_data' as any)
+  @Permissions('export_questionnaire_data')
   @Post(':questionnaireId/export')
   @HttpCode(HttpStatus.OK)
   public async exportQuestionnaireData(
@@ -774,7 +839,12 @@ export class QuestionnaireController {
       dateRange?: { startDate: string; endDate: string };
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      message?: string;
+      data?: unknown;
+      error?: string;
+    }> {
     try {
       const exportResult =
         await this.questionnaireService.exportQuestionnaireData(
@@ -814,7 +884,12 @@ export class QuestionnaireController {
   @ApiResponse({ status: 200, description: '服务状态' })
   @Get('health')
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async healthCheck(): Promise<any> {
+  public async healthCheck(): Promise<{
+      success: boolean;
+      message?: string;
+      data?: unknown;
+      error?: string;
+    }> {
     try {
       const health = await this.questionnaireService.getHealthStatus();
 

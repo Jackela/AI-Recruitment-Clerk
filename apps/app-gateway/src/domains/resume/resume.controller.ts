@@ -40,14 +40,22 @@ import type { AuthenticatedRequest } from '../../common/interfaces/authenticated
 import type { ResumeService } from './resume.service';
 
 const resumeFileValidator: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  isValid: (file?: any) => boolean;
+  isValid: (file?: {
+    buffer: Buffer;
+    originalname: string;
+    mimetype?: string;
+    size: number;
+  }) => boolean;
   buildErrorMessage: () => string;
 } = {
   buildErrorMessage: () =>
     'Invalid file type. Only PDF, DOC, and DOCX files are allowed.',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  isValid: (file?: any): boolean => {
+  isValid: (file?: {
+    buffer: Buffer;
+    originalname: string;
+    mimetype?: string;
+    size: number;
+  }) => boolean {
     if (!file) return false;
     const allowedMimeTypes = [
       'application/pdf',
@@ -118,17 +126,28 @@ export class ResumeController {
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }), // 10MB limit
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          resumeFileValidator as any,
+          resumeFileValidator,
         ],
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
       }),
     )
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    file: any,
+    file: Express.Multer.File,
     @Body() uploadData: ResumeUploadDto,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+    ): Promise<{
+      success: boolean;
+      message?: string;
+      data?: {
+        resumeId: string;
+        filename: string;
+        uploadedAt: string;
+        status: string;
+        processingEstimate: string;
+        fileSize: number;
+        fileType: string;
+      };
+      error?: string;
+      message?: string;
+    }> {
     try {
       const uploadResult = await this.resumeService.uploadResume({
         file: file,
@@ -182,8 +201,12 @@ export class ResumeController {
   public async getResume(
     @Request() req: AuthenticatedRequest,
     @Param('resumeId') resumeId: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      data?: unknown;
+      error?: string;
+      message?: string;
+    }> {
     try {
       const resume = await this.resumeService.getResume(resumeId);
 
@@ -241,8 +264,12 @@ export class ResumeController {
     @Request() req: AuthenticatedRequest,
     @Param('resumeId') resumeId: string,
     @Query('jobId') jobId?: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      data?: unknown;
+      error?: string;
+      message?: string;
+    }> {
     try {
       const analysis = await this.resumeService.getResumeAnalysis(
         resumeId,
@@ -286,8 +313,12 @@ export class ResumeController {
   public async getResumeSkills(
     @Request() req: AuthenticatedRequest,
     @Param('resumeId') resumeId: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      data?: unknown;
+      error?: string;
+      message?: string;
+    }> {
     try {
       const skillsAnalysis = await this.resumeService.getResumeSkillsAnalysis(
         resumeId,
@@ -326,8 +357,18 @@ export class ResumeController {
     @Request() req: AuthenticatedRequest,
     @Param('resumeId') resumeId: string,
     @Body() statusUpdate: ResumeStatusUpdateDto,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      message?: string;
+      data?: {
+        resumeId: string;
+        newStatus: string;
+        updatedBy: string;
+        timestamp: string;
+      };
+      error?: string;
+      message?: string;
+    }> {
     try {
       await this.resumeService.updateResumeStatus(
         resumeId,
@@ -367,8 +408,7 @@ export class ResumeController {
   })
   @ApiResponse({ status: 200, description: '批量处理成功' })
   @UseGuards(RolesGuard)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Permissions('process_resume' as any)
+  @Permissions('process_resume')
   @Post('batch')
   @HttpCode(HttpStatus.OK)
   public async batchProcessResumes(
@@ -377,11 +417,27 @@ export class ResumeController {
     batchRequest: {
       resumeIds: string[];
       operation: 'analyze' | 'approve' | 'reject' | 'archive';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      parameters?: any;
+      parameters?: {
+        reason?: string;
+        bonusType?: string;
+        bonusAmount?: number;
+        newQuotaAmount?: number;
+      };
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      message?: string;
+      data?: {
+        totalProcessed: number;
+        successful: number;
+        failed: number;
+        results: unknown[];
+        action: string;
+        operatedBy: string;
+      };
+      error?: string;
+      message?: string;
+    }> {
     try {
       const batchResult = await this.resumeService.batchProcessResumes(
         batchRequest.resumeIds,
@@ -425,8 +481,7 @@ export class ResumeController {
   @ApiQuery({ name: 'page', required: false, description: '页码' })
   @ApiQuery({ name: 'limit', required: false, description: '每页数量' })
   @UseGuards(RolesGuard)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Permissions('search_resume' as any)
+  @Permissions('search_resume')
   @Post('search')
   @HttpCode(HttpStatus.OK)
   public async searchResumes(
@@ -434,8 +489,18 @@ export class ResumeController {
     @Body() searchCriteria: ResumeSearchDto,
     @Query('page') page = 1,
     @Query('limit') limit = 20,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      data?: {
+        resumes: unknown[];
+        totalCount: number;
+        page: number;
+        totalPages: number;
+        hasNext: boolean;
+      };
+      error?: string;
+      message?: string;
+    }> {
     try {
       const searchResults = await this.resumeService.searchResumes(
         searchCriteria,
@@ -479,8 +544,7 @@ export class ResumeController {
   @ApiResponse({ status: 200, description: '重新处理已启动' })
   @ApiParam({ name: 'resumeId', description: '简历ID' })
   @UseGuards(RolesGuard)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Permissions('process_resume' as any)
+  @Permissions('process_resume')
   @Post(':resumeId/reprocess')
   @HttpCode(HttpStatus.OK)
   public async reprocessResume(
@@ -490,11 +554,24 @@ export class ResumeController {
     reprocessOptions?: {
       forceReparse?: boolean;
       updateSkillsOnly?: boolean;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      analysisOptions?: any;
+      analysisOptions?: {
+        includeDetailedSkills?: boolean;
+        includeSoftSkills?: boolean;
+        includeCertifications?: boolean;
+      };
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      message?: string;
+      data?: {
+        resumeId: string;
+        jobId: string;
+        estimatedTime: string;
+        requestedBy: string;
+      };
+      error?: string;
+      message?: string;
+    }> {
     try {
       const reprocessResult = await this.resumeService.reprocessResume(
         resumeId,
@@ -535,16 +612,25 @@ export class ResumeController {
   @ApiResponse({ status: 200, description: '简历删除成功' })
   @ApiParam({ name: 'resumeId', description: '简历ID' })
   @UseGuards(RolesGuard)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Permissions('delete_resume' as any)
+  @Permissions('delete_resume')
   @Delete(':resumeId')
   @HttpCode(HttpStatus.OK)
   public async deleteResume(
     @Request() req: AuthenticatedRequest,
     @Param('resumeId') resumeId: string,
     @Body() deleteRequest: { reason?: string; hardDelete?: boolean },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      message?: string;
+      data?: {
+        resumeId: string;
+        deletedAt: string;
+        deletedBy: string;
+        hardDelete: boolean;
+      };
+      error?: string;
+      message?: string;
+    }> {
     try {
       await this.resumeService.deleteResume(
         resumeId,
@@ -584,10 +670,26 @@ export class ResumeController {
   @ApiResponse({ status: 200, description: '统计信息获取成功' })
   @UseGuards(RolesGuard)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @Permissions('read_analytics' as any)
+  @Permissions('read_analytics')
   @Get('stats/processing')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getProcessingStats(@Request() req: AuthenticatedRequest): Promise<any> {
+  ): Promise<{
+      success: boolean;
+      data?: {
+        totalResumes: number;
+        processingStatus: {
+          pending: number;
+          inProgress: number;
+          completed: number;
+          failed: number;
+        };
+        averageProcessingTime: number;
+        skillsDistribution: unknown;
+        monthlyTrends: unknown;
+        qualityMetrics: unknown;
+      };
+      error?: string;
+      message?: string;
+    }> {
     try {
       const stats = await this.resumeService.getProcessingStats(
         req.user.organizationId,
@@ -623,8 +725,18 @@ export class ResumeController {
   })
   @ApiResponse({ status: 200, description: '服务状态' })
   @Get('health')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async healthCheck(): Promise<any> {
+  public async healthCheck(): Promise<{
+      status: string;
+      timestamp: string;
+      service: string;
+      details?: {
+        database: string;
+        storage: string;
+        parser: string;
+        queue: string;
+      };
+      error?: string;
+    }> {
     try {
       const health = await this.resumeService.getHealthStatus();
 

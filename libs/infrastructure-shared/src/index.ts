@@ -430,8 +430,7 @@ export class EncryptionService {
 }
 
 // Type definitions for Design-by-Contract decorators
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type PredicateFunction = (...args: any[]) => boolean;
+export type PredicateFunction = (...args: unknown[]) => boolean;
 export type DecoratorTarget = object;
 
 // Design-by-Contract helpers (typing-friendly no-ops for tests)

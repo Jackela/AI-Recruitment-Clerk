@@ -49,10 +49,9 @@ export class AnalyticsDomainService {
     sessionId: string,
     userId: string,
     eventType: EventType,
+    eventData: Record<string, unknown>,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    eventData: any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    context?: any,
+    context?: Record<string, unknown>,
   ): Promise<EventCreationResult> {
     try {
       // 获取会话中现有事件数量
@@ -143,8 +142,7 @@ export class AnalyticsDomainService {
     operation: string,
     duration: number,
     success: boolean,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    metadata?: any,
+    metadata?: Record<string, unknown>,
   ): Promise<EventCreationResult> {
     try {
       // 创建系统性能事件
@@ -906,8 +904,11 @@ export class DataRetentionReportResult {
     totalEvents: number;
     eventsToDelete: number;
     eventsToAnonymize: number;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    eventTypeStatistics: Record<string, any>;
+    eventTypeStatistics: Record<string, {
+      total: number;
+      toDelete: number;
+      toAnonymize: number;
+    }>;
     retentionPolicies: AnalyticsDataRetentionPolicy[];
   }): DataRetentionReportResult {
     return new DataRetentionReportResult(true, data);
@@ -1073,7 +1074,12 @@ export interface IAnalyticsRepository {
  */
 export interface IDomainEventBus {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  publish(event: any): Promise<void>;
+  publish(event: {
+    eventType: string;
+    data: Record<string, unknown>;
+    timestamp?: string;
+    metadata?: Record<string, unknown>;
+  }): Promise<void>;
 }
 
 /**
@@ -1081,11 +1087,11 @@ export interface IDomainEventBus {
  */
 export interface IAuditLogger {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  logBusinessEvent(eventType: string, data: any): Promise<void>;
+  logBusinessEvent(eventType: string, data: Record<string, unknown>): Promise<void>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  logSecurityEvent(eventType: string, data: any): Promise<void>;
+  logSecurityEvent(eventType: string, data: Record<string, unknown>): Promise<void>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  logError(eventType: string, data: any): Promise<void>;
+  logError(eventType: string, data: Record<string, unknown>): Promise<void>;
 }
 
 /**
