@@ -145,7 +145,7 @@ export {
   EventStatus,
   EventType,
   EventCategory,
-  ConsentStatus,
+  ConsentStatus as AnalyticsConsentStatus,  // Renamed to avoid conflict with privacy ConsentStatus
   MetricUnit,
   AnalyticsEventSummary,
   DeviceInfo,
