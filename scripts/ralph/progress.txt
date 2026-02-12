@@ -89,3 +89,20 @@ Replaced all 5 instances of 'any' type in user-management.service.ts with proper
 - Use concrete interfaces (UserActivityDto) instead of any[] for mock data
 
 ---
+
+## [2025-02-12] - CODE-002b-3 through CODE-002b-9
+- Fixed all 'any' types in usage-limit.controller.ts (CODE-002b-3)
+- Fixed all 'any' types in resume.controller.ts (CODE-002b-4)  
+- Fixed all 'any' types in questionnaire.controller.ts (CODE-002b-5)
+- Fixed 'any' types in analytics.service.ts (CODE-002b-7)
+- Fixed 'any' types in base-microservice.service.ts (CODE-002b-8)
+- Fixed 'any' types in infrastructure-shared/index.ts (CODE-002b-9)
+
+**Learnings for future iterations:**
+- Questionnaire controller had many `as any` permission decorators - these were simple removals
+- Analytics service used `any` for event data - replaced with proper `Record<string, unknown>` types
+- BaseMicroserviceService had two `any` casts for health status - replaced with proper type guards
+- Infrastructure-shared PredicateFunction used `any[]` - replaced with `unknown[]`
+- All files require explicit typing for return types
+
+---
