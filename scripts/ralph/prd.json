@@ -120,7 +120,7 @@
       ],
       "estimatedHours": 0.25,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
         "apps/app-gateway/src/domains/user-management/user-management.service.ts"
       ]
