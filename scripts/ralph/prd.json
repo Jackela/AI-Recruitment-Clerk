@@ -572,7 +572,7 @@
       ],
       "estimatedHours": 0.5,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
         "apps/report-generator-svc/src/report-generator/report-generator.service.ts"
       ]
@@ -587,7 +587,7 @@
       ],
       "estimatedHours": 0.5,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
         "apps/report-generator-svc/src/report-generator/report-templates.service.ts"
       ]

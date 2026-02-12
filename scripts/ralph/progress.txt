@@ -106,3 +106,26 @@ Replaced all 5 instances of 'any' type in user-management.service.ts with proper
 - All files require explicit typing for return types
 
 ---
+## [2026-02-13] - CODE-002e-1 through CODE-002e-2
+
+### Task Summary
+Fix type import lint warnings in report-generator-svc
+
+### Work Done
+- CODE-002e-1: Fixed 4 ESLint warnings in report-generator.service.ts
+  - Converted `import { LlmService }` to `import type { LlmService }`
+  - Converted `import { GridFsService }` to `import type { GridFsService }`
+  - Converted `import { ReportRepository }` to `import type { ReportRepository }`
+  - Converted `import { ReportDataService, LlmReportMapperService }` to `import type { ... }`
+
+- CODE-002e-2: Fixed 1 ESLint warning in report-templates.service.ts
+  - Converted `import { GridFsService }` to `import type { GridFsService }`
+
+### Files Changed
+- apps/report-generator-svc/src/report-generator/report-generator.service.ts - Changed 4 imports to type-only
+- apps/report-generator-svc/src/report-generator/report-templates.service.ts - Changed 1 import to type-only
+
+### Learnings for future iterations:
+- ESLint rule `@typescript-eslint/consistent-type-imports` enforces using `import type` for imports only used as types
+- When services only use dependencies as constructor-injected dependencies (not runtime values), they should be type imports
+- NestJS services often have dependencies that are only used as type annotations in constructors
