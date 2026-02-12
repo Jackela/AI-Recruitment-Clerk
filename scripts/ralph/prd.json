@@ -1,82 +1,148 @@
 {
-  "id": "CODE-001",
-  "title": "Phase 2: HIGH Priority Code Quality Fixes",
-  "description": "Fix code quality issues including 'any' types in core business logic and break up oversized files.",
+  "id": "CODE-002",
+  "title": "Phase 3: Comprehensive Codebase Cleanup & Refactoring",
+  "description": "Fix all remaining code quality issues, split large files, and fix test failures across the entire codebase.",
   "acceptanceCriteria": [
-    "All 'any' types in analytics.dto.ts replaced with proper typed interfaces",
-    "No 'any' types in LLM service responses",
+    "All 'any' types removed from TypeScript files",
+    "All files under 500 lines (or split into smaller modules)",
     "TypeScript compilation passes without errors",
-    "Files are under 500 lines (or split into smaller modules)"
+    "All lint warnings resolved",
+    "All tests passing"
   ],
   "priority": 1,
-  "passes": true,
-  "files": [
-    "libs/shared-dtos/src/domains/analytics.dto.ts",
-    "apps/resume-parser-svc/src/vision-llm/vision-llm.service.ts",
-    "apps/jd-extractor-svc/src/extraction/llm.service.ts",
-    "apps/app-gateway/src/privacy/privacy-compliance.service.ts",
-    "apps/resume-parser-svc/src/field-mapper/experience-calculator.spec.ts"
-  ],
-  "estimatedHours": 8,
+  "branchName": "refactor/code-cleanup",
   "subtasks": [
     {
-      "id": "CODE-001a",
-      "title": "Remove 'any' Types in analytics.dto.ts",
-      "description": "Replace all 'any' types with proper interfaces for analytics events. Create typed interfaces for eventData, context, metadata, and payload.",
+      "id": "CODE-002a",
+      "title": "Fix Failing Tests in LLM Services",
+      "description": "Fix test failures in resume-parser-svc and jd-extractor-svc related to undefined mock objects in test setup.",
       "acceptanceCriteria": [
-        "Proper interfaces created for all 'any' type usages",
-        "eslint-disable-next-line @typescript-eslint/no-explicit-any comments removed",
-        "TypeScript compilation passes",
-        "Analytics events properly typed"
+        "vision-llm.service.spec.ts - All tests pass",
+        "llm.service.spec.ts - All tests pass",
+        "LlmService resolves properly in test module"
       ],
       "estimatedHours": 2,
       "dependsOn": [],
-      "passes": true
+      "passes": false,
+      "files": [
+        "apps/resume-parser-svc/src/vision-llm/vision-llm.service.spec.ts",
+        "apps/jd-extractor-svc/src/llm/llm.service.spec.ts"
+      ]
     },
     {
-      "id": "CODE-001b",
-      "title": "Remove 'any' Types in LLM Services",
-      "description": "Replace 'any' types in vision-llm.service.ts and llm.service.ts with typed interfaces for LLM responses.",
+      "id": "CODE-002b",
+      "title": "Remove Remaining 'any' Types from Core Services",
+      "description": "Remove all remaining 'any' types from app-gateway services and DTOs that weren't covered in previous iterations.",
       "acceptanceCriteria": [
-        "LLM response interfaces defined",
-        "'any' types replaced with proper types",
-        "TypeScript compilation passes"
+        "No 'any' types in apps/app-gateway/src/domains/",
+        "No 'any' types in core gateway controllers"
+      ],
+      "estimatedHours": 2,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/app-gateway/src/domains/analytics/analytics.dto.ts",
+        "apps/app-gateway/src/domains/user-management/user-management.service.ts",
+        "apps/app-gateway/src/domains/usage-limit/usage-limit.controller.ts",
+        "apps/app-gateway/src/domains/resume/resume.controller.ts",
+        "apps/app-gateway/src/domains/questionnaire/questionnaire.controller.ts",
+        "libs/shared-dtos/src/domains/analytics.contracts.ts",
+        "libs/shared-dtos/src/domains/analytics.service.ts",
+        "libs/service-base/src/base-microservice.service.ts",
+        "libs/infrastructure-shared/src/index.ts"
+      ]
+    },
+    {
+      "id": "CODE-002c",
+      "title": "Split Large Angular Component Files",
+      "description": "Split oversized Angular component files (>500 lines) into smaller, focused components following component splitting patterns.",
+      "acceptanceCriteria": [
+        "mobile-dashboard.component.ts < 500 lines (split display/filter/logic)",
+        "mobile-navigation.component.ts < 500 lines",
+        "mobile-upload.component.ts < 500 lines",
+        "mobile-performance.component.ts < 500 lines",
+        "mobile-results-display.component.ts < 500 lines",
+        "analytics-dashboard.component.ts < 500 lines",
+        "bento-grid.component.ts < 500 lines",
+        "data-table.component.ts < 500 lines",
+        "error-boundary.component.ts < 500 lines",
+        "error-reporting.component.ts < 500 lines",
+        "progress-tracker.component.ts < 500 lines",
+        "timesheet-table.component.ts < 500 lines",
+        "virtual-scroll.component.ts < 500 lines",
+        "mobile-swipe.component.spec.ts < 500 lines"
+      ],
+      "estimatedHours": 12,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-dashboard.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-navigation.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-upload.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-performance.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-display.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-display.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/analytics-dashboard/analytics-dashboard.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/bento-grid/bento-grid.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/bento-grid/bento-grid.component.spec.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/error-boundary/error-boundary.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/error-reporting/error-reporting.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/progress-tracker/progress-tracker.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-table.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/virtual-scroll/virtual-scroll.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.component.spec.ts"
+      ]
+    },
+    {
+      "id": "CODE-002d",
+      "title": "Split Large DTO Files",
+      "description": "Split oversized DTO files (>500 lines) into smaller, focused interface files.",
+      "acceptanceCriteria": [
+        "analytics.dto.ts split into domain files (<500 lines each)",
+        "questionnaire.dto.ts split into <500 lines",
+        "incentive.service.ts split into <500 lines",
+        "analytics.service.ts split into <500 lines",
+        "usage-limit.dto.ts split into <500 lines",
+        "analytics.test.ts split into <500 lines"
+      ],
+      "estimatedHours": 6,
+      "dependsOn": [],
+      "passes": false,
+      "files": [
+        "libs/shared-dtos/src/domains/analytics.dto.ts",
+        "libs/shared-dtos/src/domains/questionnaire.dto.ts",
+        "libs/shared-dtos/src/domains/incentive.service.ts",
+        "libs/shared-dtos/src/domains/analytics.service.ts",
+        "libs/shared-dtos/src/domains/usage-limit.dto.ts",
+        "libs/shared-dtos/src/domains/analytics.test.ts"
+      ]
+    },
+    {
+      "id": "CODE-002e",
+      "title": "Fix Lint Warnings in Report Generator",
+      "description": "Fix inconsistent type import warnings in report-generator-svc services.",
+      "acceptanceCriteria": [
+        "report-generator.service.ts - No lint warnings",
+        "report-templates.service.ts - No lint warnings"
       ],
       "estimatedHours": 1,
       "dependsOn": [],
-      "passes": true
+      "passes": false,
+      "files": [
+        "apps/report-generator-svc/src/report-generator/report-generator.service.ts",
+        "apps/report-generator-svc/src/report-generator/report-templates.service.ts"
+      ]
     },
     {
-      "id": "CODE-001c",
-      "title": "Break Up privacy-compliance.service.ts",
-      "description": "Split the 1,310-line privacy-compliance.service.ts into smaller, focused modules.",
-      "acceptanceCriteria": [
-        "Extract consent-management.service.ts (~370 lines)",
-        "Extract consent-cascade.service.ts (~326 lines)",
-        "Extract data-subject-rights.service.ts (~167 lines)",
-        "Extract data-collection.service.ts (~307 lines)",
-        "Extract data-export.service.ts (~308 lines)",
-        "Extract data-erasure.service.ts (~218 lines)",
-        "Refactor privacy-compliance.service.ts to facade (~233 lines)",
-        "Each module under 500 lines"
-      ],
-      "estimatedHours": 3,
+      "id": "CODE-002f",
+      "title": "Fix Lint Warnings in JD Extractor",
+      "description": "Fix inconsistent type import warning in llm.service.ts.",
+      "acceptanceCriteria": ["llm.service.ts - No lint warnings"],
+      "estimatedHours": 0.5,
       "dependsOn": [],
-      "passes": true
-    },
-    {
-      "id": "CODE-001d",
-      "title": "Break Up analytics.dto.ts",
-      "description": "Split the 1,345-line analytics.dto.ts by domain into smaller files.",
-      "acceptanceCriteria": [
-        "Extract analytics-event.dto.ts",
-        "Extract analytics-metrics.dto.ts",
-        "Extract analytics-aggregation.dto.ts",
-        "Each module under 500 lines"
-      ],
-      "estimatedHours": 2,
-      "dependsOn": ["CODE-001a"],
-      "passes": false
+      "passes": false,
+      "files": ["apps/jd-extractor-svc/src/extraction/llm.service.ts"]
     }
   ]
 }
