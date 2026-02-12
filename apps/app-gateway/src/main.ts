@@ -20,6 +20,7 @@ async function bootstrap(): Promise<void> {
   const allowedOrigins = env.getArray('ALLOWED_ORIGINS');
   const isInsecureLocalAllowed = env.getBoolean('ALLOW_INSECURE_LOCAL', false);
   const enableCompression = env.getBoolean('ENABLE_COMPRESSION', false);
+  const enableSwagger = env.getBoolean('ENABLE_SWAGGER', false) ?? nodeEnv !== 'production';
 
   Logger.log(`✅ [FAIL-FAST] Environment validated (NODE_ENV=${nodeEnv})`);
 
@@ -96,36 +97,41 @@ async function bootstrap(): Promise<void> {
     );
   }
 
-  // Swagger documentation
-  const config = new DocumentBuilder()
-    .setTitle('AI Recruitment Clerk API')
-    .setDescription('智能招聘管理系统 - 完整的API文档')
-    .setVersion('1.0.0')
-    .addTag('jobs', '职位管理')
-    .addTag('auth', '认证授权')
-    .addTag('resume', '简历管理')
-    .addTag('scoring', '评分引擎')
-    .addTag('reports', '报告生成')
-    .addBearerAuth()
-    .addServer('http://localhost:3000', '开发环境')
-    .addServer('http://app-gateway:3000', 'Docker环境')
-    .addServer(
-      'https://ai-recruitment-clerk-production.up.railway.app',
-      'Railway生产环境',
-    )
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document, {
-    swaggerOptions: {
-      persistAuthorization: true,
-      tagsSorter: 'alpha',
-      operationsSorter: 'alpha',
-    },
-  });
+  // Swagger documentation - only enable in non-production or when explicitly enabled
+  // SECURITY: Swagger should be disabled in production to avoid exposing API structure
+  if (enableSwagger) {
+    const config = new DocumentBuilder()
+      .setTitle('AI Recruitment Clerk API')
+      .setDescription('智能招聘管理系统 - 完整的API文档')
+      .setVersion('1.0.0')
+      .addTag('jobs', '职位管理')
+      .addTag('auth', '认证授权')
+      .addTag('resume', '简历管理')
+      .addTag('scoring', '评分引擎')
+      .addTag('reports', '报告生成')
+      .addBearerAuth()
+      .addServer('http://localhost:3000', '开发环境')
+      .addServer('http://app-gateway:3000', 'Docker环境')
+      .addServer(
+        'https://ai-recruitment-clerk-production.up.railway.app',
+        'Railway生产环境',
+      )
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document, {
+      swaggerOptions: {
+        persistAuthorization: true,
+        tagsSorter: 'alpha',
+        operationsSorter: 'alpha',
+      },
+    });
 
-  Logger.log(
-    `📚 API Documentation available at: http://localhost:${port ?? 3000}/api/docs`,
-  );
+    Logger.log(
+      `📚 API Documentation available at: http://localhost:${port ?? 3000}/api/docs`,
+    );
+  } else if (nodeEnv === 'production') {
+    Logger.log('🔒 Swagger documentation is disabled in production');
+  }
 }
 
 bootstrap().catch((err) => {
