@@ -79,7 +79,7 @@ export class UserManagementService {
     }
 
     // Mock implementation - in real app this would be in a separate preferences service
-    return {
+    const preferences: UserPreferencesDto = {
       userId,
       language: 'en',
       notifications: {
@@ -87,8 +87,8 @@ export class UserManagementService {
         push: true,
         sms: false,
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any;
+    };
+    return preferences;
   }
 
   /**
@@ -107,11 +107,11 @@ export class UserManagementService {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
-    return {
+    const updatedPreferences: UserPreferencesDto = {
       ...preferences,
       userId,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any;
+    };
+    return updatedPreferences;
   }
 
   /**
@@ -135,8 +135,7 @@ export class UserManagementService {
     }
 
     // Mock activity data
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mockActivities: any[] = [
+    const mockActivities: UserActivityDto[] = [
       {
         id: 'activity-1',
         userId,
@@ -179,8 +178,13 @@ export class UserManagementService {
    * @param userId - The user id.
    * @returns A promise that resolves to activity summary.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getUserActivitySummary(userId: string): Promise<any> {
+  public async getUserActivitySummary(userId: string): Promise<{
+    userId: string;
+    totalSessions: number;
+    lastLoginDate: Date;
+    profileCompleteness: number;
+    totalActions: number;
+  }> {
     const user = await this.userCrudService.findById(userId);
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
@@ -188,12 +192,10 @@ export class UserManagementService {
 
     return {
       userId,
-      totalLogins: 1,
+      totalSessions: 1,
       lastLoginDate: new Date(),
-      totalActivities: 1,
-      averageSessionDuration: 30,
-      mostActiveHour: 14,
-      lastActivity: new Date(),
+      profileCompleteness: 100,
+      totalActions: 1,
     };
   }
 
@@ -243,8 +245,7 @@ export class UserManagementService {
     options?: {
       page?: number;
       limit?: number;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      role?: any;
+      role?: string;
       status?: UserStatus;
     },
   ): Promise<OrganizationUsersResponse> {
