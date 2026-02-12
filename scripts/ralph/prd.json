@@ -134,7 +134,7 @@
       ],
       "estimatedHours": 0.25,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
         "apps/app-gateway/src/domains/usage-limit/usage-limit.controller.ts"
       ]
@@ -148,7 +148,7 @@
       ],
       "estimatedHours": 0.25,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": ["apps/app-gateway/src/domains/resume/resume.controller.ts"]
     },
     {
@@ -160,7 +160,7 @@
       ],
       "estimatedHours": 0.25,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
         "apps/app-gateway/src/domains/questionnaire/questionnaire.controller.ts"
       ]
@@ -174,7 +174,7 @@
       ],
       "estimatedHours": 0.25,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": ["libs/shared-dtos/src/domains/analytics.contracts.ts"]
     },
     {
@@ -186,7 +186,7 @@
       ],
       "estimatedHours": 0.25,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": ["libs/shared-dtos/src/domains/analytics.service.ts"]
     },
     {
@@ -198,7 +198,7 @@
       ],
       "estimatedHours": 0.25,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": ["libs/service-base/src/base-microservice.service.ts"]
     },
     {
@@ -210,7 +210,7 @@
       ],
       "estimatedHours": 0.25,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": ["libs/infrastructure-shared/src/index.ts"]
     },
     {
