@@ -5,14 +5,8 @@ import type {
   LlmExtractionResponse,
 } from '@ai-recruitment-clerk/job-management-domain';
 import { RetryUtility, SecureConfigValidator } from '@app/shared-dtos';
-import type {
-  GeminiConfig,
-} from '@ai-recruitment-clerk/shared-dtos';
-import {
-  GeminiClient,
-  PromptTemplates,
-  PromptBuilder,
-} from '@ai-recruitment-clerk/shared-dtos';
+import type { GeminiConfig } from '@ai-recruitment-clerk/shared-dtos';
+import { GeminiClient, PromptTemplates, PromptBuilder } from '@ai-recruitment-clerk/shared-dtos';
 import type { JdExtractorConfigService } from '../config';
 
 /**
