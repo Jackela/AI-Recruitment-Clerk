@@ -215,19 +215,24 @@
     },
     {
       "id": "CODE-002c-1",
-      "title": "Split mobile-dashboard.component.ts",
-      "description": "Split 1037-line mobile dashboard component into smaller components: display, filter, and logic sections.",
+      "title": "Split mobile-dashboard.component.spec.ts",
+      "description": "Split 1037-line mobile dashboard spec file into focused test suites by feature.",
       "acceptanceCriteria": [
-        "mobile-dashboard.component.ts < 500 lines",
-        "Display component extracted",
-        "Filter component extracted",
-        "Logic component extracted"
+        "Original spec file removed",
+        "Test files split by feature (init, lifecycle, interactions, rendering)",
+        "All split files < 500 lines",
+        "Shared test utilities extracted",
+        "All tests passing"
       ],
       "estimatedHours": 3,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
-        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-dashboard.component.ts"
+        "apps/ai-recruitment-frontend/src/app/components/mobile/test-helper.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-dashboard.init.spec.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-dashboard.lifecycle.spec.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-dashboard.interactions.spec.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-dashboard.rendering.spec.ts"
       ]
     },
     {

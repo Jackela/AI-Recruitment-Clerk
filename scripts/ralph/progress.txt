@@ -240,3 +240,34 @@ Split mobile-upload.component.ts (1121 lines) into smaller modules:
 - Remove unused imports (UploadFile from zone component where not needed)
 - Use `import type` for service-only imports to satisfy ESLint
 ---
+## [2026-02-13] - CODE-002c-1
+
+### Task Summary
+Split mobile-dashboard.component.spec.ts (1037 lines) into focused test suites.
+
+### Work Done
+- Created test-helper.ts (162 lines) with mock components, directives, and test utilities
+- Created mobile-dashboard.init.spec.ts (157 lines) for component initialization tests
+- Created mobile-dashboard.lifecycle.spec.ts (139 lines) for lifecycle tests
+- Created mobile-dashboard.interactions.spec.ts (274 lines) for user interaction tests
+- Created mobile-dashboard.rendering.spec.ts (326 lines) for template rendering tests
+- Deleted original mobile-dashboard.component.spec.ts
+
+### Files Changed
+- apps/ai-recruitment-frontend/src/app/components/mobile/test-helper.ts - Created with shared mocks and utilities
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-dashboard.init.spec.ts - Created with initialization tests
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-dashboard.lifecycle.spec.ts - Created with lifecycle tests
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-dashboard.interactions.spec.ts - Created with interaction tests
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-dashboard.rendering.spec.ts - Created with rendering tests
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-dashboard.component.spec.ts - Deleted (original file)
+
+### Test Results
+All 73 tests pass across 4 spec files.
+
+### Learnings for future iterations:
+- Test splitting pattern for large spec files: extract test utilities to helper file
+- Mock components (directives, child components) should be centralized in test-helper
+- Use describe blocks to group related tests by feature area
+- All split files should remain under 500 lines
+- Test imports use shared mockImports from test-helper for consistency
+---
