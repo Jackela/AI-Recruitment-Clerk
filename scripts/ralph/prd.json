@@ -67,7 +67,7 @@
       ],
       "estimatedHours": 1,
       "dependsOn": ["CODE-002a-3"],
-      "passes": false,
+      "passes": true,
       "files": ["apps/jd-extractor-svc/src/llm/llm.service.spec.ts"]
     },
     {
@@ -81,7 +81,7 @@
       ],
       "estimatedHours": 1,
       "dependsOn": ["CODE-002a-4"],
-      "passes": false,
+      "passes": true,
       "files": ["apps/jd-extractor-svc/src/llm/llm.service.spec.ts"]
     },
     {
@@ -95,7 +95,7 @@
       ],
       "estimatedHours": 0.5,
       "dependsOn": ["CODE-002a-5"],
-      "passes": false,
+      "passes": true,
       "files": ["apps/jd-extractor-svc/src/llm/llm.service.spec.ts"]
     },
     {

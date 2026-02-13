@@ -1204,3 +1204,35 @@ Fix TypeScript errors across the codebase
 - DTO splitting requires careful attention to import paths and value vs type imports
 
 ---
+
+## [2026-02-13] - CODE-002a-2, CODE-002a-3
+
+### Task Summary
+Fix llm.service.spec.ts NestJS Dependency and Input Validation issues
+
+### Work Done
+- Fixed NestJS test module configuration:
+  - Corrected import path from `../extraction/llm.service` to `./llm.service`
+  - Removed unnecessary JdExtractorConfigService mock (LlmService has no constructor dependencies)
+  - Simplified test setup to just use `providers: [LlmService]`
+- Added input sanitization to handle null/undefined inputs:
+  - Added `sanitizeInput()` method that returns empty string for null/undefined
+  - Handles non-string types by converting to string
+  - All extraction methods now use sanitized text
+- Fixed empty `extraction/llm.service.ts` by making it a re-export file for backward compatibility
+- All 161 tests now pass in jd-extractor-svc
+
+### Files Changed
+- apps/jd-extractor-svc/src/llm/llm.service.spec.ts - Fixed imports and test module setup
+- apps/jd-extractor-svc/src/llm/llm.service.ts - Added sanitizeInput method
+- apps/jd-extractor-svc/src/extraction/llm.service.ts - Re-export LlmService for backward compat
+- scripts/ralph/prd.json - Marked CODE-002a-2 and CODE-002a-3 as passing
+
+### Learnings for future iterations:
+- LlmService doesn't have constructor dependencies - simplified test setup is preferred
+- When service location changes, keep old file as re-export for backward compatibility
+- Always sanitize user input (null/undefined) at service boundaries
+- NestJS Test.createTestingModule can use useClass with no dependencies if service has none
+- Check actual service implementation before adding unnecessary mock providers
+
+---
