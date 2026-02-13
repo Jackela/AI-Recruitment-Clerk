@@ -1,196 +1,39 @@
 import type {
   OnInit,
-  OnDestroy} from '@angular/core';
+  OnDestroy,
+} from '@angular/core';
 import {
   Component,
   ChangeDetectionStrategy,
   signal,
-  NgZone,
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject, interval, takeUntil } from 'rxjs';
+import type { PerformanceMetrics } from '../../types/performance-metrics.type';
+import { MobilePerformanceService } from '../../services/mobile-performance.service';
+import { MobilePerformanceDetailsComponent } from './mobile-performance-details.component';
 
 /**
- * Defines the shape of layout shift entry.
- */
-interface LayoutShift extends PerformanceEntry {
-  value: number;
-  hadRecentInput: boolean;
-}
-
-/**
- * Defines the shape of the performance metrics.
- */
-export interface PerformanceMetrics {
-  // Core Web Vitals
-  lcp: number | null; // Largest Contentful Paint
-  fid: number | null; // First Input Delay
-  cls: number | null; // Cumulative Layout Shift
-
-  // Additional metrics
-  fcp: number | null; // First Contentful Paint
-  ttfb: number | null; // Time to First Byte
-  tbt: number | null; // Total Blocking Time
-
-  // Memory and resources
-  usedJSHeapSize: number;
-  totalJSHeapSize: number;
-  jsHeapSizeLimit: number;
-
-  // Network
-  connectionType: string;
-  effectiveType: string;
-  downlink: number;
-  rtt: number;
-
-  // Device
-  deviceMemory: number;
-  hardwareConcurrency: number;
-
-  // Performance status
-  overall: 'excellent' | 'good' | 'needs-improvement' | 'poor';
-}
-
-/**
- * Represents the mobile performance component.
+ * Represents mobile performance component.
+ * Displays performance badge and toggle-able detailed metrics.
  */
 @Component({
   selector: 'arc-mobile-performance',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MobilePerformanceDetailsComponent],
   template: `
     <div class="performance-monitor" *ngIf="showMetrics()">
       <!-- Performance Badge -->
-      <div class="performance-badge" [class]="'badge-' + metrics().overall">
-        <div class="badge-score">{{ getOverallScore() }}</div>
+      <div class="performance-badge" [class]="'badge-' + performanceService.metrics().overall">
+        <div class="badge-score">{{ performanceService.getOverallScore() }}</div>
         <div class="badge-label">Performance</div>
       </div>
 
       <!-- Detailed Metrics (expandable) -->
-      <div class="performance-details" *ngIf="expanded()">
-        <!-- Core Web Vitals -->
-        <div class="metrics-section">
-          <h4>Core Web Vitals</h4>
-          <div class="metric-grid">
-            <div class="metric-item">
-              <div class="metric-value" [class]="getLCPStatus()">
-                {{ formatMetric(metrics().lcp, 'ms') }}
-              </div>
-              <div class="metric-label">LCP</div>
-              <div class="metric-description">Largest Contentful Paint</div>
-            </div>
-
-            <div class="metric-item">
-              <div class="metric-value" [class]="getFIDStatus()">
-                {{ formatMetric(metrics().fid, 'ms') }}
-              </div>
-              <div class="metric-label">FID</div>
-              <div class="metric-description">First Input Delay</div>
-            </div>
-
-            <div class="metric-item">
-              <div class="metric-value" [class]="getCLSStatus()">
-                {{ formatMetric(metrics().cls, '') }}
-              </div>
-              <div class="metric-label">CLS</div>
-              <div class="metric-description">Cumulative Layout Shift</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Additional Metrics -->
-        <div class="metrics-section">
-          <h4>Loading Performance</h4>
-          <div class="metric-list">
-            <div class="metric-row">
-              <span class="metric-name">First Contentful Paint</span>
-              <span class="metric-value">{{
-                formatMetric(metrics().fcp, 'ms')
-              }}</span>
-            </div>
-            <div class="metric-row">
-              <span class="metric-name">Time to First Byte</span>
-              <span class="metric-value">{{
-                formatMetric(metrics().ttfb, 'ms')
-              }}</span>
-            </div>
-            <div class="metric-row">
-              <span class="metric-name">Total Blocking Time</span>
-              <span class="metric-value">{{
-                formatMetric(metrics().tbt, 'ms')
-              }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Memory Usage -->
-        <div class="metrics-section">
-          <h4>Memory Usage</h4>
-          <div class="memory-chart">
-            <div class="memory-bar">
-              <div
-                class="memory-used"
-                [style.width.%]="getMemoryUsagePercent()"
-              ></div>
-            </div>
-            <div class="memory-stats">
-              <span
-                >{{ formatBytes(metrics().usedJSHeapSize) }} /
-                {{ formatBytes(metrics().totalJSHeapSize) }}</span
-              >
-            </div>
-          </div>
-        </div>
-
-        <!-- Network Info -->
-        <div class="metrics-section">
-          <h4>Network</h4>
-          <div class="metric-list">
-            <div class="metric-row">
-              <span class="metric-name">Connection</span>
-              <span class="metric-value">{{ metrics().connectionType }}</span>
-            </div>
-            <div class="metric-row">
-              <span class="metric-name">Effective Type</span>
-              <span class="metric-value">{{ metrics().effectiveType }}</span>
-            </div>
-            <div class="metric-row">
-              <span class="metric-name">Downlink</span>
-              <span class="metric-value">{{ metrics().downlink }} Mbps</span>
-            </div>
-            <div class="metric-row">
-              <span class="metric-name">RTT</span>
-              <span class="metric-value">{{ metrics().rtt }}ms</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Device Info -->
-        <div class="metrics-section">
-          <h4>Device</h4>
-          <div class="metric-list">
-            <div class="metric-row">
-              <span class="metric-name">Device Memory</span>
-              <span class="metric-value">{{ metrics().deviceMemory }} GB</span>
-            </div>
-            <div class="metric-row">
-              <span class="metric-name">CPU Cores</span>
-              <span class="metric-value">{{
-                metrics().hardwareConcurrency
-              }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Performance Tips -->
-        <div class="metrics-section" *ngIf="getPerformanceTips().length > 0">
-          <h4>Optimization Tips</h4>
-          <ul class="tips-list">
-            <li *ngFor="let tip of getPerformanceTips()">{{ tip }}</li>
-          </ul>
-        </div>
-      </div>
+      <arc-mobile-performance-details
+        *ngIf="expanded()"
+        [metrics]="performanceService.metrics()"
+      />
 
       <!-- Toggle Button -->
       <button
@@ -277,135 +120,6 @@ export interface PerformanceMetrics {
         }
       }
 
-      .performance-details {
-        border-top: 1px solid rgba(0, 0, 0, 0.1);
-        max-height: 400px;
-        overflow-y: auto;
-        background: white;
-      }
-
-      .metrics-section {
-        padding: 12px 16px;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-
-        &:last-child {
-          border-bottom: none;
-        }
-
-        h4 {
-          font-size: 12px;
-          font-weight: 600;
-          color: #2c3e50;
-          margin: 0 0 8px 0;
-        }
-      }
-
-      .metric-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-
-        .metric-item {
-          text-align: center;
-          padding: 8px 4px;
-          background: #f8f9fa;
-          border-radius: 6px;
-
-          .metric-value {
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 2px;
-
-            &.excellent {
-              color: #27ae60;
-            }
-
-            &.good {
-              color: #3498db;
-            }
-
-            &.needs-improvement {
-              color: #f39c12;
-            }
-
-            &.poor {
-              color: #e74c3c;
-            }
-          }
-
-          .metric-label {
-            font-size: 10px;
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 2px;
-          }
-
-          .metric-description {
-            font-size: 9px;
-            color: #6c757d;
-            line-height: 1.2;
-          }
-        }
-      }
-
-      .metric-list {
-        .metric-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 4px 0;
-
-          .metric-name {
-            color: #495057;
-            font-size: 11px;
-          }
-
-          .metric-value {
-            font-weight: 600;
-            color: #2c3e50;
-            font-size: 11px;
-          }
-        }
-      }
-
-      .memory-chart {
-        .memory-bar {
-          height: 8px;
-          background: #e9ecef;
-          border-radius: 4px;
-          overflow: hidden;
-          margin-bottom: 4px;
-
-          .memory-used {
-            height: 100%;
-            background: linear-gradient(90deg, #27ae60, #f39c12, #e74c3c);
-            transition: width 0.3s ease;
-          }
-        }
-
-        .memory-stats {
-          font-size: 10px;
-          color: #6c757d;
-          text-align: center;
-        }
-      }
-
-      .tips-list {
-        margin: 0;
-        padding-left: 16px;
-        font-size: 10px;
-        color: #495057;
-
-        li {
-          margin-bottom: 4px;
-          line-height: 1.3;
-
-          &:last-child {
-            margin-bottom: 0;
-          }
-        }
-      }
-
       .toggle-details {
         width: 100%;
         display: flex;
@@ -441,38 +155,13 @@ export interface PerformanceMetrics {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MobilePerformanceComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
-
-  // Signals for reactive state
-  public metrics = signal<PerformanceMetrics>({
-    lcp: null,
-    fid: null,
-    cls: null,
-    fcp: null,
-    ttfb: null,
-    tbt: null,
-    usedJSHeapSize: 0,
-    totalJSHeapSize: 0,
-    jsHeapSizeLimit: 0,
-    connectionType: 'unknown',
-    effectiveType: 'unknown',
-    downlink: 0,
-    rtt: 0,
-    deviceMemory: 0,
-    hardwareConcurrency: 0,
-    overall: 'good',
-  });
+  protected readonly performanceService = inject(MobilePerformanceService);
 
   public expanded = signal(false);
   public showMetrics = signal(false);
 
-  private performanceObserver?: PerformanceObserver;
-  private layoutShiftScore = 0;
-
-  private readonly ngZone = inject(NgZone);
-
   /**
-   * Performs the ng on init operation.
+   * Performs ng on init operation.
    * @returns The result of the operation.
    */
   public ngOnInit(): void {
@@ -483,349 +172,21 @@ export class MobilePerformanceComponent implements OnInit, OnDestroy {
     );
 
     if (this.showMetrics()) {
-      this.initializePerformanceMonitoring();
-      this.startPeriodicUpdates();
+      this.performanceService.initialize();
     }
   }
 
   /**
-   * Performs the ng on destroy operation.
+   * Performs ng on destroy operation.
    * @returns The result of the operation.
    */
   public ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-
-    if (this.performanceObserver) {
-      this.performanceObserver.disconnect();
-    }
-  }
-
-  private initializePerformanceMonitoring(): void {
-    this.collectInitialMetrics();
-    this.setupPerformanceObserver();
-    this.collectNetworkInfo();
-    this.collectDeviceInfo();
-  }
-
-  private collectInitialMetrics(): void {
-    // Get navigation timing
-    const navigation = performance.getEntriesByType(
-      'navigation',
-    )[0] as PerformanceNavigationTiming;
-    if (navigation) {
-      const ttfb = navigation.responseStart - navigation.requestStart;
-      this.updateMetric('ttfb', ttfb);
-    }
-
-    // Get paint metrics
-    const paintEntries = performance.getEntriesByType('paint');
-    const fcp = paintEntries.find(
-      (entry) => entry.name === 'first-contentful-paint',
-    );
-    if (fcp) {
-      this.updateMetric('fcp', fcp.startTime);
-    }
-
-    // Get memory info
-    if ('memory' in performance) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const memory = (performance as any).memory;
-      this.updateMetrics({
-        usedJSHeapSize: memory.usedJSHeapSize,
-        totalJSHeapSize: memory.totalJSHeapSize,
-        jsHeapSizeLimit: memory.jsHeapSizeLimit,
-      });
-    }
-  }
-
-  private setupPerformanceObserver(): void {
-    if ('PerformanceObserver' in window) {
-      this.performanceObserver = new PerformanceObserver((list) => {
-        this.ngZone.run(() => {
-          for (const entry of list.getEntries()) {
-            this.handlePerformanceEntry(entry);
-          }
-          this.calculateOverallScore();
-        });
-      });
-
-      // Observe different entry types
-      try {
-        this.performanceObserver.observe({
-          entryTypes: [
-            'largest-contentful-paint',
-            'first-input',
-            'layout-shift',
-          ],
-        });
-      } catch (error) {
-        console.warn('Performance observer failed:', error);
-      }
-    }
-  }
-
-  private handlePerformanceEntry(entry: PerformanceEntry): void {
-    switch (entry.entryType) {
-      case 'largest-contentful-paint':
-        this.updateMetric('lcp', entry.startTime);
-        break;
-
-      case 'first-input': {
-        const fidEntry = entry as PerformanceEventTiming;
-        this.updateMetric('fid', fidEntry.processingStart - fidEntry.startTime);
-        break;
-      }
-
-      case 'layout-shift': {
-        const clsEntry = entry as LayoutShift;
-        if (!clsEntry.hadRecentInput) {
-          this.layoutShiftScore += clsEntry.value;
-          this.updateMetric('cls', this.layoutShiftScore);
-        }
-        break;
-      }
-    }
-  }
-
-  private collectNetworkInfo(): void {
-    if ('connection' in navigator) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const connection = (navigator as any).connection;
-      this.updateMetrics({
-        connectionType: connection.type || 'unknown',
-        effectiveType: connection.effectiveType || 'unknown',
-        downlink: connection.downlink || 0,
-        rtt: connection.rtt || 0,
-      });
-    }
-  }
-
-  private collectDeviceInfo(): void {
-    this.updateMetrics({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      deviceMemory: (navigator as any).deviceMemory || 0,
-      hardwareConcurrency: navigator.hardwareConcurrency || 0,
-    });
-  }
-
-  private startPeriodicUpdates(): void {
-    // Update memory usage every 5 seconds
-    interval(5000)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        if ('memory' in performance) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const memory = (performance as any).memory;
-          this.updateMetrics({
-            usedJSHeapSize: memory.usedJSHeapSize,
-            totalJSHeapSize: memory.totalJSHeapSize,
-            jsHeapSizeLimit: memory.jsHeapSizeLimit,
-          });
-        }
-        this.calculateOverallScore();
-      });
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private updateMetric(key: keyof PerformanceMetrics, value: any): void {
-    this.metrics.update((current) => ({ ...current, [key]: value }));
-  }
-
-  private updateMetrics(updates: Partial<PerformanceMetrics>): void {
-    this.metrics.update((current) => ({ ...current, ...updates }));
-  }
-
-  private calculateOverallScore(): void {
-    const m = this.metrics();
-    let score = 100;
-
-    // LCP scoring (weight: 25%)
-    if (m.lcp !== null) {
-      if (m.lcp > 4000) score -= 25;
-      else if (m.lcp > 2500) score -= 15;
-      else if (m.lcp > 1500) score -= 5;
-    }
-
-    // FID scoring (weight: 25%)
-    if (m.fid !== null) {
-      if (m.fid > 300) score -= 25;
-      else if (m.fid > 100) score -= 15;
-      else if (m.fid > 50) score -= 5;
-    }
-
-    // CLS scoring (weight: 25%)
-    if (m.cls !== null) {
-      if (m.cls > 0.25) score -= 25;
-      else if (m.cls > 0.1) score -= 15;
-      else if (m.cls > 0.05) score -= 5;
-    }
-
-    // Memory usage (weight: 25%)
-    const memoryUsage = m.usedJSHeapSize / m.jsHeapSizeLimit;
-    if (memoryUsage > 0.9) score -= 25;
-    else if (memoryUsage > 0.7) score -= 15;
-    else if (memoryUsage > 0.5) score -= 5;
-
-    let overall: PerformanceMetrics['overall'];
-    if (score >= 90) overall = 'excellent';
-    else if (score >= 75) overall = 'good';
-    else if (score >= 50) overall = 'needs-improvement';
-    else overall = 'poor';
-
-    this.updateMetric('overall', overall);
+    this.performanceService.destroy();
   }
 
   /**
-   * Retrieves overall score.
-   * @returns The number value.
-   */
-  public getOverallScore(): number {
-    const m = this.metrics();
-    let score = 100;
-
-    if (m.lcp !== null) {
-      if (m.lcp > 4000) score -= 25;
-      else if (m.lcp > 2500) score -= 15;
-      else if (m.lcp > 1500) score -= 5;
-    }
-
-    if (m.fid !== null) {
-      if (m.fid > 300) score -= 25;
-      else if (m.fid > 100) score -= 15;
-      else if (m.fid > 50) score -= 5;
-    }
-
-    if (m.cls !== null) {
-      if (m.cls > 0.25) score -= 25;
-      else if (m.cls > 0.1) score -= 15;
-      else if (m.cls > 0.05) score -= 5;
-    }
-
-    const memoryUsage = m.usedJSHeapSize / m.jsHeapSizeLimit;
-    if (memoryUsage > 0.9) score -= 25;
-    else if (memoryUsage > 0.7) score -= 15;
-    else if (memoryUsage > 0.5) score -= 5;
-
-    return Math.max(0, Math.round(score));
-  }
-
-  /**
-   * Retrieves lcp status.
-   * @returns The string value.
-   */
-  public getLCPStatus(): string {
-    const lcp = this.metrics().lcp;
-    if (lcp === null) return '';
-    if (lcp <= 1500) return 'excellent';
-    if (lcp <= 2500) return 'good';
-    if (lcp <= 4000) return 'needs-improvement';
-    return 'poor';
-  }
-
-  /**
-   * Retrieves fid status.
-   * @returns The string value.
-   */
-  public getFIDStatus(): string {
-    const fid = this.metrics().fid;
-    if (fid === null) return '';
-    if (fid <= 50) return 'excellent';
-    if (fid <= 100) return 'good';
-    if (fid <= 300) return 'needs-improvement';
-    return 'poor';
-  }
-
-  /**
-   * Retrieves cls status.
-   * @returns The string value.
-   */
-  public getCLSStatus(): string {
-    const cls = this.metrics().cls;
-    if (cls === null) return '';
-    if (cls <= 0.05) return 'excellent';
-    if (cls <= 0.1) return 'good';
-    if (cls <= 0.25) return 'needs-improvement';
-    return 'poor';
-  }
-
-  /**
-   * Retrieves memory usage percent.
-   * @returns The number value.
-   */
-  public getMemoryUsagePercent(): number {
-    const m = this.metrics();
-    if (m.totalJSHeapSize === 0) return 0;
-    return (m.usedJSHeapSize / m.totalJSHeapSize) * 100;
-  }
-
-  /**
-   * Performs the format metric operation.
-   * @param value - The value.
-   * @param unit - The unit.
-   * @returns The string value.
-   */
-  public formatMetric(value: number | null, unit: string): string {
-    if (value === null) return 'N/A';
-    if (unit === 'ms') return `${Math.round(value)}ms`;
-    if (unit === '') return value.toFixed(3);
-    return `${Math.round(value)}${unit}`;
-  }
-
-  /**
-   * Performs the format bytes operation.
-   * @param bytes - The bytes.
-   * @returns The string value.
-   */
-  public formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-  }
-
-  /**
-   * Retrieves performance tips.
-   * @returns The an array of string value.
-   */
-  public getPerformanceTips(): string[] {
-    const tips: string[] = [];
-    const m = this.metrics();
-
-    if (m.lcp && m.lcp > 2500) {
-      tips.push(
-        'Optimize images and remove render-blocking resources to improve LCP',
-      );
-    }
-
-    if (m.fid && m.fid > 100) {
-      tips.push('Reduce JavaScript execution time and break up long tasks');
-    }
-
-    if (m.cls && m.cls > 0.1) {
-      tips.push(
-        'Set size attributes on images and avoid dynamically inserted content',
-      );
-    }
-
-    const memoryUsage = m.usedJSHeapSize / m.jsHeapSizeLimit;
-    if (memoryUsage > 0.7) {
-      tips.push('Consider reducing memory usage by optimizing data structures');
-    }
-
-    if (m.effectiveType === 'slow-2g' || m.effectiveType === '2g') {
-      tips.push(
-        'Optimize for slow connections with better caching and compression',
-      );
-    }
-
-    return tips;
-  }
-
-  /**
-   * Performs the toggle expanded operation.
-   * @returns The result of the operation.
+   * Performs toggle expanded operation.
+   * @returns The result of operation.
    */
   public toggleExpanded(): void {
     this.expanded.update((current) => !current);
