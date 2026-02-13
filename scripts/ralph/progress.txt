@@ -271,3 +271,42 @@ All 73 tests pass across 4 spec files.
 - All split files should remain under 500 lines
 - Test imports use shared mockImports from test-helper for consistency
 ---
+## [2026-02-13] - CODE-002c-4
+
+### Task Summary
+Split mobile-performance.component.ts (836 lines) into smaller modules.
+
+### Work Done
+- Created MobilePerformanceService (412 lines) for performance data collection and calculation logic
+  - initializePerformanceMonitoring() - collects initial metrics
+  - setupPerformanceObserver() - observes Core Web Vitals
+  - collectNetworkInfo() / collectDeviceInfo() - environment data
+  - calculateOverallScore() - performance scoring algorithm
+  - Format methods: formatMetric(), formatBytes()
+  - Status methods: getLCPStatus(), getFIDStatus(), getCLSStatus()
+  - getPerformanceTips() - optimization recommendations
+- Created MobilePerformanceDetailsComponent (279 lines) for detailed metrics display
+  - Core Web Vitals grid with status-colored values
+  - Loading Performance section (FCP, TTFB, TBT)
+  - Memory Usage section with progress bar
+  - Network Info section (connection type, speed, RTT)
+  - Device Info section (memory, CPU cores)
+  - Optimization Tips section
+- Created performance-metrics.type.ts (32 lines) with PerformanceMetrics interface
+- Refactored main mobile-performance.component.ts to 197 lines (down from 836)
+  - Now just displays badge and toggle button
+  - Delegates metrics collection to MobilePerformanceService
+  - Delegates details display to MobilePerformanceDetailsComponent
+
+### Files Changed
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-performance.component.ts - Reduced from 836 to 197 lines
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-performance-details.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/services/mobile-performance.service.ts - Created new service
+- apps/ai-recruitment-frontend/src/app/types/performance-metrics.type.ts - Created shared types
+
+### Learnings for future iterations:
+- Performance monitoring components can be split by: data collection (service), detailed view (child component), main badge/orchestrator (parent)
+- Extracting service with signals (metrics signal) keeps reactive state accessible across components
+- Use inject() for service injection in Angular 15+ standalone components
+- Service holds all business logic - status methods, scoring algorithms, formatting
+- Child component receives metrics as @Input and calls service methods for display logic
