@@ -493,16 +493,12 @@ export class VisionLlmService {
     }
   }
 
-  private createGeminiClient(config: GeminiConfig): GeminiClient {
+  private createGeminiClient(config: GeminiConfig & { isTest?: boolean }): GeminiClient {
     // In test mode, use stub file which provides mock Gemini client
     if (config.isTest) {
       this.logger.log('🧪 Test mode detected, using stub Gemini client');
       // Dynamically import stub module to avoid circular dependency
-      const stubModule = await import('../../../libs/ai-services-shared/src/gemini/gemini.stub.ts');
-      const stubClient = stubModule.GeminiClient as unknown as GeminiClient;
-      if (stubClient && typeof stubClient === 'object') {
-        return stubClient as unknown as GeminiClient;
-      }
+      return this.createNoOpGeminiClient();
     }
 
     try {
@@ -518,11 +514,9 @@ export class VisionLlmService {
         `Using mocked GeminiClient for VisionLlmService: ${reason}`,
       );
 
-      // Fallback - in test mode, stub file should have provided mock
-      if (config.isTest) {
-        this.logger.warn('Falling back to no-op Gemini client implementation');
-        return this.createNoOpGeminiClient();
-      }
+      // Fallback - always return no-op client on error
+      this.logger.warn('Falling back to no-op Gemini client implementation');
+      return this.createNoOpGeminiClient();
     }
   }
 

@@ -1,7 +1,7 @@
 import type { DomainEvent } from '../base/domain-event';
-import type { BonusType ,
-  UsageLimitPolicy} from './usage-limit-types.dto';
+import type { BonusType } from './usage-limit-types.dto';
 import {
+  UsageLimitPolicy,
   QuotaAllocation,
   UsageTracking,
 } from './usage-limit-types.dto';
@@ -81,7 +81,7 @@ export class UsageLimit {
     return new UsageLimit(
       new UsageLimitId({ value: data.id }),
       new IPAddress({ value: data.ip }),
-      data.policy,
+      UsageLimitPolicy.restore(data.policy),
       QuotaAllocation.restore(data.quotaAllocation),
       UsageTracking.restore(data.usageTracking),
       new Date(data.lastResetAt),

@@ -17,6 +17,7 @@ import {
   MaxFileSizeValidator,
   NotFoundException,
   ForbiddenException,
+  FileValidator,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -40,24 +41,14 @@ import { Permission } from '@ai-recruitment-clerk/user-management-domain';
 import type { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import type { ResumeService } from './resume.service';
 
-const resumeFileValidator: {
-  isValid: (file?: {
-    buffer: Buffer;
-    originalname: string;
-    mimetype?: string;
-    size: number;
-  }) => boolean;
-  buildErrorMessage: () => string;
-  validationOptions?: Record<string, unknown>;
-} = {
-  buildErrorMessage: () =>
-    'Invalid file type. Only PDF, DOC, and DOCX files are allowed.',
-  isValid: (file?: {
-    buffer: Buffer;
-    originalname: string;
-    mimetype?: string;
-    size: number;
-  }): boolean => {
+class ResumeFileTypeValidator extends FileValidator<Record<string, unknown>, Express.Multer.File> {
+  protected readonly validationOptions: Record<string, unknown> = {};
+
+  buildErrorMessage(): string {
+    return 'Invalid file type. Only PDF, DOC, and DOCX files are allowed.';
+  }
+
+  isValid(file?: Express.Multer.File): boolean {
     if (!file) return false;
     const allowedMimeTypes = [
       'application/pdf',
@@ -68,10 +59,10 @@ const resumeFileValidator: {
     const mimeTypeValid = file.mimetype ? allowedMimeTypes.includes(file.mimetype) : false;
     const extensionValid = allowedExtensions.test(file.originalname);
     return mimeTypeValid && extensionValid;
-  },
-};
+  }
+}
 
-// Use imported interface instead of local definition
+const resumeFileValidator = new ResumeFileTypeValidator({});
 
 /**
  * Exposes endpoints for resume.

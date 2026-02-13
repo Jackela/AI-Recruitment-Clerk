@@ -1,4 +1,4 @@
-import { Injectable, signal, NgZone, inject, DestroyRef } from '@angular/core';
+import { Injectable, signal, NgZone, inject } from '@angular/core';
 import { Subject, interval, takeUntil } from 'rxjs';
 import type { PerformanceMetrics } from '../types/performance-metrics.type';
 
@@ -24,7 +24,6 @@ export type PerformanceStatus = 'excellent' | 'good' | 'needs-improvement' | 'po
 })
 export class MobilePerformanceService {
   private readonly ngZone = inject(NgZone);
-  private readonly destroyRef = inject(DestroyRef);
   private destroy$ = new Subject<void>();
 
   private performanceObserver?: PerformanceObserver;

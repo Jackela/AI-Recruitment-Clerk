@@ -1,25 +1,27 @@
 import type {
-  IncentiveSummary,
   PaymentMethod,
-  ContactInfo,
 
   Incentive,
   IncentiveStatus} from './incentive.dto';
+import { ContactInfo } from './incentive.dto';
 import {
   Currency,
 } from './incentive.dto';
-import { IncentiveRules } from './incentive.rules';
 import type {
   PaymentGatewayRequest,
   PaymentGatewayResponse,
   BatchPaymentItem,
 } from './incentive-results.types';
+import { PaymentProcessingResult } from './incentive-results.types';
 import type { IIncentiveRepository } from './incentive-service.interfaces';
 import type { IDomainEventBus } from './incentive-service.interfaces';
 import type { IAuditLogger } from './incentive-service.interfaces';
 import type { IPaymentGateway } from './incentive-service.interfaces';
 import type { IncentiveValidationService } from './incentive-validation.service';
-import type { PaymentEligibilityResult, PaymentMethodValidationResult } from './incentive-validation.service';
+import type {
+  PaymentEligibilityResult,
+  PaymentMethodValidationResult,
+} from './incentive.rules';
 
 /**
  * Handles incentive payment processing including single and batch payments.
@@ -55,7 +57,7 @@ export class IncentivePaymentService {
       // Validate payment eligibility
       const eligibility = this.validationService.validatePaymentEligibility(incentive);
       if (!eligibility.isEligible) {
-        return SinglePaymentResult.notEligible(eligibility.errors);
+        return SinglePaymentResult.notEligible(eligibility);
       }
 
       // Validate payment method compatibility
@@ -67,7 +69,7 @@ export class IncentivePaymentService {
           actualContactInfo,
         );
       if (!methodValidation.isValid) {
-        return SinglePaymentResult.methodInvalid(methodValidation.errors);
+        return SinglePaymentResult.methodInvalid(methodValidation);
       }
 
       // Process payment through gateway
@@ -149,7 +151,7 @@ export class IncentivePaymentService {
       const batchValidation =
         this.validationService.validateBatchPayment(incentives);
       if (!batchValidation.isValid) {
-        return BatchPaymentExecutionResult.failed(batchValidation.errors);
+        return BatchPaymentExecutionResult.failed(batchValidation.errors ?? ['Validation failed']);
       }
 
       // Process each incentive's payment
@@ -317,19 +319,14 @@ export class IncentivePaymentService {
    */
   private extractContactInfoFromIncentive(_incentive: Incentive): ContactInfo {
     // Basic implementation for testing purposes
-    return {
+    return ContactInfo.restore({
       email: 'test@example.com',
       wechat: 'test_wechat',
       alipay: 'test_alipay',
-    };
+      phone: '+1234567890',
+    });
   }
 }
-
-// Re-export PaymentProcessingResult and BatchPaymentResult for backward compatibility
-export type { PaymentProcessingResult, BatchPaymentResult } from './incentive-results.types';
-
-// Also export result classes for direct use
-export { SinglePaymentResult, BatchPaymentExecutionResult };
 
 /**
  * Result of a single payment operation.

@@ -26,10 +26,8 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Permissions } from '../../auth/decorators/permissions.decorator';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import type {
-  UserDto,
-  Permission,
-} from '@ai-recruitment-clerk/user-management-domain';
+import type { UserDto } from '@ai-recruitment-clerk/user-management-domain';
+import { Permission } from '@ai-recruitment-clerk/user-management-domain';
 import type {
   BonusType,
 } from '@ai-recruitment-clerk/usage-management-domain';

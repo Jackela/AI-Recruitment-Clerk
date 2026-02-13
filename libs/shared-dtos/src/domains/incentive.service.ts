@@ -1,8 +1,6 @@
 import type {
-  IncentiveSummary,
   PaymentMethod,
   ContactInfo,
-
   IncentiveStatus} from './incentive.dto';
 import {
   Incentive
@@ -18,13 +16,15 @@ import {
   PendingIncentivesResult,
 } from './incentive-results.types';
 import type {
-  IPIncentiveStatistics,
   SystemIncentiveStatistics,
 } from './incentive-results.types';
 import { IncentiveValidationService } from './incentive-validation.service';
-import type { ReferralEligibilityResult } from './incentive-validation.service';
 import { IncentiveCalculationsService } from './incentive-calculations.service';
 import { IncentivePaymentService } from './incentive-payment.service';
+import type {
+  PaymentProcessingResult,
+  BatchPaymentResult,
+} from './incentive-payment.service';
 import type {
   IIncentiveRepository,
   IDomainEventBus,
@@ -354,7 +354,7 @@ export class IncentiveDomainService {
     incentiveId: string,
     paymentMethod: PaymentMethod,
     contactInfo?: ContactInfo,
-  ): Promise<typeof import('./incentive-payment.service').PaymentProcessingResult> {
+  ): Promise<PaymentProcessingResult> {
     return this.paymentService.processPayment(
       incentiveId,
       paymentMethod,
@@ -372,7 +372,7 @@ export class IncentiveDomainService {
   public async processBatchPayment(
     incentiveIds: string[],
     paymentMethod: PaymentMethod,
-  ): Promise<typeof import('./incentive-payment.service').BatchPaymentResult> {
+  ): Promise<BatchPaymentResult> {
     return this.paymentService.processBatchPayment(
       incentiveIds,
       paymentMethod,

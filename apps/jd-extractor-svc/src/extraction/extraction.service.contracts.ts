@@ -8,11 +8,13 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
+import type {
+  PredicateFunction} from '@ai-recruitment-clerk/infrastructure-shared';
 import {
   ContractViolationError,
   Requires,
   Ensures,
-  ContractValidators,
+  ContractValidators
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import type { LlmService } from '../llm/llm.service';
 import type { NatsClient } from '../nats/nats.client';
@@ -252,11 +254,11 @@ export class ExtractionServiceContracts {
    * @since 1.0.0
    */
   @Requires(
-    (event: JobJdSubmittedEvent) =>
-      ContractValidators.isNonEmptyString(event.jobId) &&
-      ContractValidators.isNonEmptyString(event.jobTitle) &&
-      ContractValidators.isNonEmptyString(event.jdText) &&
-      event.jdText.length >= 50,
+    ((event: unknown) =>
+      ContractValidators.isNonEmptyString((event as JobJdSubmittedEvent).jobId) &&
+      ContractValidators.isNonEmptyString((event as JobJdSubmittedEvent).jobTitle) &&
+      ContractValidators.isNonEmptyString((event as JobJdSubmittedEvent).jdText) &&
+      (event as JobJdSubmittedEvent).jdText.length >= 50) as PredicateFunction,
     'Job JD submitted event must have valid jobId, jobTitle, and jdText (min 50 chars)',
   )
   public async handleJobJdSubmitted(event: JobJdSubmittedEvent): Promise<void> {

@@ -75,7 +75,8 @@
       ],
       "@app/microservices-shared": ["libs/shared-nats-client/src/index.ts"],
       "@app/shared-dtos": ["libs/shared-dtos/src/index.ts"],
-      "@app/shared-nats-client": ["libs/shared-nats-client/src/index.ts"]
+      "@app/shared-nats-client": ["libs/shared-nats-client/src/index.ts"],
+      "@app/store": ["apps/ai-recruitment-frontend/src/app/store"]
     }
   },
   "exclude": ["node_modules", "tmp"]

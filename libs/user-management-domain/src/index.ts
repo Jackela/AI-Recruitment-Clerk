@@ -177,7 +177,7 @@ export enum Permission {
   /** Search resumes */
   SEARCH_RESUME = 'search_resume',
   /** Delete resume */
-  DELETE_RESUME = 'delete_resume',
+  DELETE_RESUME_FILE = 'delete_resume',
   /** Access resume content and analysis */
   READ_RESUME = 'read_resume',
   /** Create new user accounts */

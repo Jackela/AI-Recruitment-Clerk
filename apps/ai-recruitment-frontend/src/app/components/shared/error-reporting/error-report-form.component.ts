@@ -306,26 +306,6 @@ export class ErrorReportFormComponent {
   }
 
   /**
-   * Handles form submit.
-   */
-  private onFormSubmit(): void {
-    if (!this.reportForm.valid) return;
-
-    const formData = this.reportForm.value as ErrorReportFormData;
-    const reproductionSteps = this.getFilteredReproductionSteps();
-
-    this.formSubmit.emit({ formData, reproductionSteps });
-  }
-
-  /**
-   * Gets the filtered reproduction steps.
-   * @returns Array of non-empty reproduction steps.
-   */
-  private getFilteredReproductionSteps(): string[] {
-    return this.reproductionSteps.filter((step) => step.trim() !== '');
-  }
-
-  /**
    * Resets the form to its initial state.
    */
   public resetForm(): void {

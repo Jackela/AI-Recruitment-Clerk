@@ -4,10 +4,11 @@ import {
   Input,
   Output,
   EventEmitter,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { UploadFile } from '../../services/mobile/mobile-upload.service';
-import type { MobileUploadService } from '../../services/mobile/mobile-upload.service';
+import { MobileUploadService } from '../../services/mobile/mobile-upload.service';
 
 /**
  * Mobile upload file item component.

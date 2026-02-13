@@ -112,7 +112,7 @@ export {
   UsageLimitExceededEvent,
   BonusQuotaAddedEvent,
   DailyUsageResetEvent,
-  UsageRecordedEvent as UsageLimitUsageRecordedEvent,
+  UsageLimitUsageRecordedEvent,
 } from './domains/usage-limit.dto';
 export {
   UsageLimitDomainService,
@@ -128,12 +128,6 @@ export * from './contracts/usage-limit.contracts';
 export * from './domains/incentive.dto';
 export {
   IncentiveDomainService,
-  IncentiveCreationResult,
-  IncentiveValidationResult,
-  IncentiveApprovalResult,
-  IncentiveRejectionResult,
-  PaymentProcessingResult,
-  BatchPaymentResult,
   IncentiveStatsResult,
   PendingIncentivesResult,
 } from './domains/incentive.service';
@@ -143,16 +137,32 @@ export type {
   IAuditLogger,
   IPaymentGateway,
 } from './domains/incentive.service';
-export * from './domains/incentive.rules';
+// Don't use wildcard for incentive.rules to avoid conflicts with incentive.dto exports
+export { IncentiveRules } from './domains/incentive.rules';
+export type {
+  IncentiveEligibilityResult,
+  PaymentEligibilityResult,
+  PaymentMethodValidationResult,
+} from './domains/incentive.rules';
 export * from './contracts/incentive.contracts';
-export * from './domains/incentive-results.types';
+// Don't export wildcard for incentive-results.types due to ContactInfo conflict
+export type {
+  PaymentProcessingResult,
+  BatchPaymentResult,
+  IncentiveCreationResult,
+  IncentiveStatsResult as IncentiveResultsStatsResult,
+  PendingIncentivesResult as IncentiveResultsPendingResult,
+  IPIncentiveStatistics,
+  SystemIncentiveStatistics,
+  BatchPaymentItem,
+  PaymentGatewayRequest,
+  PaymentGatewayResponse,
+} from './domains/incentive-results.types';
 export * from './domains/incentive-validation.service';
 export * from './domains/incentive-calculations.service';
 export * from './domains/incentive-payment.service';
 export type {
   IIncentiveRepository as IncentiveRepositoryInterface,
-  IDomainEventBus as DomainEventBusInterface,
-  IAuditLogger as AuditLoggerInterface,
   IPaymentGateway as PaymentGatewayInterface,
 } from './domains/incentive-service.interfaces';
 
@@ -198,10 +208,12 @@ export {
 export type {
   BatchProcessingItem,
   IAnalyticsRepository,
-  IDomainEventBus,
-  IAuditLogger,
   IPrivacyService,
   ISessionTracker,
+} from './domains/analytics.service';
+export type {
+  IDomainEventBus as AnalyticsIDomainEventBus,
+  IAuditLogger as AnalyticsIAuditLogger,
 } from './domains/analytics.service';
 export * from './domains/analytics.rules';
 export * from './contracts/analytics.contracts';

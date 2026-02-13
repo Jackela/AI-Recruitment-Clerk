@@ -1,9 +1,9 @@
 import type {
   Incentive,
-  ContactInfo} from './incentive.dto';
+  ContactInfo,
+  PaymentMethod} from './incentive.dto';
 import {
-  IncentiveStatus,
-  TriggerType,
+  TriggerType
 } from './incentive.dto';
 import { IncentiveRules } from './incentive.rules';
 import type { IIncentiveRepository } from './incentive-service.interfaces';
@@ -117,7 +117,7 @@ export class IncentiveValidationService {
    * @returns Validation result with compatibility status.
    */
   public validatePaymentMethodCompatibility(
-    paymentMethod: string,
+    paymentMethod: PaymentMethod,
     contactInfo: ContactInfo,
   ): PaymentMethodValidationResult {
     return IncentiveRules.validatePaymentMethodCompatibility(

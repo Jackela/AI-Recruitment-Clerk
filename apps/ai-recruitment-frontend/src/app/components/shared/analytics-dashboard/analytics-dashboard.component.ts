@@ -4,7 +4,7 @@ import type { Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
 
 import { AnalyticsStatsCardComponent } from './analytics-stats-card.component';
-import { AnalyticsItemsListComponent, type AnalyticsListItem } from './analytics-items-list.component';
+import { AnalyticsItemsListComponent } from './analytics-items-list.component';
 import { AnalyticsSkillsListComponent } from './analytics-skills-list.component';
 import {
   AnalyticsDataService,
@@ -116,27 +116,6 @@ export class AnalyticsDashboardComponent {
 
   constructor() {
     this.dashboardData$ = this.analyticsDataService.getDashboardData$();
-  }
-
-  /**
-   * Converts job list items to analytics list items.
-   */
-  private jobListItems(_jobs: unknown[]): AnalyticsListItem[] {
-    return [];
-  }
-
-  /**
-   * Converts report list items to analytics list items.
-   */
-  private reportListItems(_reports: unknown[]): AnalyticsListItem[] {
-    return [];
-  }
-
-  /**
-   * Converts high-scoring resume items to analytics list items.
-   */
-  private highScoringResumeItems(_resumes: unknown[]): AnalyticsListItem[] {
-    return [];
   }
 }
 
