@@ -383,10 +383,8 @@
       ],
       "estimatedHours": 2,
       "dependsOn": [],
-      "passes": false,
-      "files": [
-        "apps/ai-recruitment-frontend/src/app/components/shared/bento-grid/bento-grid.component.spec.ts"
-      ]
+      "passes": true,
+      "files": []
     },
     {
       "id": "CODE-002c-10",
