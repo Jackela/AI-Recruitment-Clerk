@@ -6,8 +6,13 @@ import type {
 import {
   IncentiveDomainService,
   IncentiveCreationResult,
-  PaymentProcessingResult
-} from './incentive.service';
+  PaymentProcessingResult,
+  BatchPaymentResult,
+  IncentiveStatsResult,
+  PendingIncentivesResult,
+  SinglePaymentResult,
+  BatchPaymentExecutionResult,
+} from './incentive-payment.service';
 import {
   Incentive,
   IncentiveStatus,

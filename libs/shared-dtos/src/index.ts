@@ -131,14 +131,30 @@ export {
   IncentiveCreationResult,
   IncentiveValidationResult,
   IncentiveApprovalResult,
+  IncentiveRejectionResult,
   PaymentProcessingResult,
+  BatchPaymentResult,
+  IncentiveStatsResult,
+  PendingIncentivesResult,
 } from './domains/incentive.service';
 export type {
   IIncentiveRepository,
+  IDomainEventBus,
+  IAuditLogger,
   IPaymentGateway,
 } from './domains/incentive.service';
 export * from './domains/incentive.rules';
 export * from './contracts/incentive.contracts';
+export * from './domains/incentive-results.types';
+export * from './domains/incentive-validation.service';
+export * from './domains/incentive-calculations.service';
+export * from './domains/incentive-payment.service';
+export type {
+  IIncentiveRepository as IncentiveRepositoryInterface,
+  IDomainEventBus as DomainEventBusInterface,
+  IAuditLogger as AuditLoggerInterface,
+  IPaymentGateway as PaymentGatewayInterface,
+} from './domains/incentive-service.interfaces';
 
 // Domain Models - Analytics
 export {
