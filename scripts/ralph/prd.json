@@ -241,9 +241,11 @@
       ],
       "estimatedHours": 2,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
-        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-navigation.component.ts"
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-navigation.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-navigation-menu.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-navigation-route.service.ts"
       ]
     },
     {

@@ -147,3 +147,72 @@ Fix llm.service.ts type imports
 - ESLint prefers compact single-line imports over multi-line format for consistency
 - When a module has both type-only and runtime imports, keep them on separate import lines but use single-line format
 - The pre-commit hooks run eslint --fix automatically, which validates the import formatting
+
+---
+## [2026-02-13] - CODE-002c-8
+
+### Task Summary
+Split bento-grid.component.ts
+
+### Work Done
+- Split 1210-line bento-grid.component.ts into smaller modules
+- Created bento-grid-item.component.ts (266 lines) for individual cell rendering
+  - Contains BentoGridItem interface definition
+  - Renders individual grid items with all styling and accessibility
+  - Uses external SCSS file for styles
+- Created bento-grid-layout.service.ts (156 lines) for layout calculations
+  - calculateColumns() - computes optimal grid columns based on container width
+  - getDefaultLayout() - provides fallback layout configuration
+  - getMaxColumns() - returns max columns for each grid size variant
+  - wouldCauseOverflow() - checks if content would overflow
+  - shouldUseSingleColumn() - determines when to use single column mode
+  - debounce() - utility for debouncing layout calculations
+- Created external SCSS files:
+  - bento-grid.component.scss (85 lines) - grid container styles
+  - bento-grid-item.component.scss (473 lines) - item cell styles
+- Refactored main bento-grid.component.ts to 266 lines
+  - Now uses BentoGridItemComponent for rendering items
+  - Uses BentoGridLayoutService for calculations
+  - Template is much simpler - delegates to child component
+
+### Files Changed
+- apps/ai-recruitment-frontend/src/app/components/shared/bento-grid/bento-grid.component.ts - Reduced from 1210 to 266 lines
+- apps/ai-recruitment-frontend/src/app/components/shared/bento-grid/bento-grid-item.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/shared/bento-grid/bento-grid-layout.service.ts - Created new service
+- apps/ai-recruitment-frontend/src/app/components/shared/bento-grid/bento-grid.component.scss - Created external styles
+- apps/ai-recruitment-frontend/src/app/components/shared/bento-grid/bento-grid-item.component.scss - Created external styles
+
+### Learnings for future iterations:
+- Angular 19+ supports `styleUrl` for external stylesheets in standalone components
+- Large inline template/styles arrays should be extracted to separate files
+- Layout calculation logic is well-suited for extraction to services
+- Component splitting pattern: main orchestrator + item renderer + layout service
+## [2026-02-13] - CODE-002c-2
+
+### Task Summary
+Split mobile-navigation.component.ts (1021 lines) into smaller modules.
+
+### Work Done
+- Created MobileNavigationRouteService (60 lines) for route tracking and scroll state
+  - initialize() - sets up route change listeners and scroll tracking
+  - isRouteActive() - checks if a route is currently active
+  - destroy() - cleans up event listeners and observables
+- Created MobileNavigationMenuComponent (471 lines) for side menu rendering
+  - Delegates route checking to MobileNavigationRouteService
+  - Handles menu item clicks and action button clicks
+  - Emits events for close, itemClick, and actionClick
+- Refactored main MobileNavigationComponent to 634 lines (down from 1021)
+  - Now uses MobileNavigationRouteService for route tracking
+  - Now uses MobileNavigationMenuComponent for menu rendering
+  - Simplified to be a thin orchestrator
+
+### Files Changed
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-navigation.component.ts - Reduced from 1021 to 634 lines
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-navigation-route.service.ts - Created new service
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-navigation-menu.component.ts - Created new component
+
+### Learnings for future iterations:
+- Route tracking logic is well-suited for extraction to services
+- Side menu with overlay works well as separate component with @Input/@Output
+- Mobile navigation components can be split by: route tracking (service), menu UI (child component), main orchestrator (parent component)
+- Main component retains header and bottom nav while delegating the complex menu overlay
