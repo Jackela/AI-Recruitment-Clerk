@@ -43,7 +43,7 @@ export interface ErrorReportFormData {
     ReproductionStepsComponent,
   ],
   template: `
-    <form [formGroup]="reportForm" (ngSubmit)="handleSubmit()">
+    <form [formGroup]="reportForm" (ngSubmit)="onFormSubmit()">
       <!-- Problem Category -->
       <div class="form-group">
         <label for="category">问题类型 *</label>
@@ -259,7 +259,7 @@ export class ErrorReportFormComponent {
   /**
    * Emits when form is submitted with form data and reproduction steps.
    */
-  public readonly handleSubmit = output<{
+  public readonly formSubmit = output<{
     formData: ErrorReportFormData;
     reproductionSteps: string[];
   }>();
@@ -308,13 +308,13 @@ export class ErrorReportFormComponent {
   /**
    * Handles form submit.
    */
-  private handleSubmit(): void {
+  private onFormSubmit(): void {
     if (!this.reportForm.valid) return;
 
     const formData = this.reportForm.value as ErrorReportFormData;
     const reproductionSteps = this.getFilteredReproductionSteps();
 
-    this.handleSubmit.emit({ formData, reproductionSteps });
+    this.formSubmit.emit({ formData, reproductionSteps });
   }
 
   /**

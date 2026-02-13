@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { MobileNavigationMenuComponent } from './mobile-navigation-menu.component';
 import { MobileNavigationRouteService } from './mobile-navigation-route.service';
@@ -606,7 +606,7 @@ export class MobileNavigationComponent implements OnInit, OnDestroy {
   /**
    * Performs on menu item click operation.
    */
-  public onMenuItemClick(item: MobileNavItem): void {
+  public onMenuItemClick(_item: MobileNavItem): void {
     // Menu closing is handled by the child component
   }
 

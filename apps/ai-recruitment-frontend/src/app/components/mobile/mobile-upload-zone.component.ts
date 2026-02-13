@@ -1,14 +1,16 @@
-import type { OnInit, OnDestroy } from '@angular/core';
+import type { OnInit, OnDestroy ,
+  ElementRef} from '@angular/core';
 import {
   Component,
   Input,
   Output,
   EventEmitter,
   inject,
+  ViewChild
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject } from 'rxjs';
-import type { MobileUploadService } from '../../services/mobile/mobile-upload.service';
+import { MobileUploadService } from '../../services/mobile/mobile-upload.service';
 
 /**
  * Mobile upload zone component.

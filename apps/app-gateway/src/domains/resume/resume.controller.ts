@@ -36,6 +36,7 @@ import type {
   ResumeStatusUpdateDto,
   ResumeSearchDto,
 } from '@ai-recruitment-clerk/resume-dto';
+import { Permission } from '@ai-recruitment-clerk/user-management-domain';
 import type { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import type { ResumeService } from './resume.service';
 
@@ -47,6 +48,7 @@ const resumeFileValidator: {
     size: number;
   }) => boolean;
   buildErrorMessage: () => string;
+  validationOptions?: Record<string, unknown>;
 } = {
   buildErrorMessage: () =>
     'Invalid file type. Only PDF, DOC, and DOCX files are allowed.',
@@ -63,7 +65,7 @@ const resumeFileValidator: {
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ];
     const allowedExtensions = /\.(pdf|doc|docx)$/i;
-    const mimeTypeValid = allowedMimeTypes.includes(file.mimetype);
+    const mimeTypeValid = file.mimetype ? allowedMimeTypes.includes(file.mimetype) : false;
     const extensionValid = allowedExtensions.test(file.originalname);
     return mimeTypeValid && extensionValid;
   },
@@ -146,7 +148,6 @@ export class ResumeController {
         fileType: string;
       };
       error?: string;
-      message?: string;
     }> {
     try {
       const uploadResult = await this.resumeService.uploadResume({
@@ -367,7 +368,6 @@ export class ResumeController {
         timestamp: string;
       };
       error?: string;
-      message?: string;
     }> {
     try {
       await this.resumeService.updateResumeStatus(
@@ -408,7 +408,7 @@ export class ResumeController {
   })
   @ApiResponse({ status: 200, description: '批量处理成功' })
   @UseGuards(RolesGuard)
-  @Permissions('process_resume')
+  @Permissions(Permission.PROCESS_RESUME)
   @Post('batch')
   @HttpCode(HttpStatus.OK)
   public async batchProcessResumes(
@@ -436,7 +436,6 @@ export class ResumeController {
         operatedBy: string;
       };
       error?: string;
-      message?: string;
     }> {
     try {
       const batchResult = await this.resumeService.batchProcessResumes(
@@ -454,6 +453,8 @@ export class ResumeController {
           successful: batchResult.successful,
           failed: batchResult.failed,
           results: batchResult.results,
+          action: batchRequest.operation,
+          operatedBy: req.user.id,
         },
       };
     } catch (error) {
@@ -481,7 +482,7 @@ export class ResumeController {
   @ApiQuery({ name: 'page', required: false, description: '页码' })
   @ApiQuery({ name: 'limit', required: false, description: '每页数量' })
   @UseGuards(RolesGuard)
-  @Permissions('search_resume')
+  @Permissions(Permission.SEARCH_RESUME)
   @Post('search')
   @HttpCode(HttpStatus.OK)
   public async searchResumes(
@@ -544,7 +545,7 @@ export class ResumeController {
   @ApiResponse({ status: 200, description: '重新处理已启动' })
   @ApiParam({ name: 'resumeId', description: '简历ID' })
   @UseGuards(RolesGuard)
-  @Permissions('process_resume')
+  @Permissions(Permission.PROCESS_RESUME)
   @Post(':resumeId/reprocess')
   @HttpCode(HttpStatus.OK)
   public async reprocessResume(
@@ -570,7 +571,6 @@ export class ResumeController {
         requestedBy: string;
       };
       error?: string;
-      message?: string;
     }> {
     try {
       const reprocessResult = await this.resumeService.reprocessResume(
@@ -612,7 +612,7 @@ export class ResumeController {
   @ApiResponse({ status: 200, description: '简历删除成功' })
   @ApiParam({ name: 'resumeId', description: '简历ID' })
   @UseGuards(RolesGuard)
-  @Permissions('delete_resume')
+  @Permissions(Permission.DELETE_RESUME)
   @Delete(':resumeId')
   @HttpCode(HttpStatus.OK)
   public async deleteResume(
@@ -629,7 +629,6 @@ export class ResumeController {
         hardDelete: boolean;
       };
       error?: string;
-      message?: string;
     }> {
     try {
       await this.resumeService.deleteResume(
@@ -669,7 +668,7 @@ export class ResumeController {
   })
   @ApiResponse({ status: 200, description: '统计信息获取成功' })
   @UseGuards(RolesGuard)
-  @Permissions('read_analytics')
+  @Permissions(Permission.READ_ANALYTICS)
   @Get('stats/processing')
   public async getProcessingStatistics(
     @Request() req: AuthenticatedRequest,

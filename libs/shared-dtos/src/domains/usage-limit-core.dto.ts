@@ -1,19 +1,24 @@
 import type { DomainEvent } from '../base/domain-event';
-import type { UsageLimitPolicy, QuotaAllocation, UsageTracking, BonusType } from './usage-limit-types';
-import type {
+import type { BonusType ,
+  UsageLimitPolicy} from './usage-limit-types.dto';
+import {
+  QuotaAllocation,
+  UsageTracking,
+} from './usage-limit-types.dto';
+import {
   UsageLimitCreatedEvent,
   UsageLimitExceededEvent,
   UsageRecordedEvent,
   BonusQuotaAddedEvent,
   DailyUsageResetEvent,
-} from './usage-limit-events';
-import type {
+} from './usage-limit-events.dto';
+import {
   UsageLimitCheckResult,
   UsageRecordResult,
   UsageStatistics,
-} from './usage-limit-results';
-import type { UsageLimitData } from './usage-limit-types';
-import { UsageLimitId, IPAddress } from './usage-limit-types';
+} from './usage-limit-results.dto';
+import type { UsageLimitData } from './usage-limit-types.dto';
+import { UsageLimitId, IPAddress } from './usage-limit-types.dto';
 
 /**
  * UsageLimit聚合根 - 管理IP使用限制和配额分配
@@ -26,8 +31,8 @@ export class UsageLimit {
     private readonly id: UsageLimitId,
     private readonly ip: IPAddress,
     private readonly policy: UsageLimitPolicy,
-    private readonly quotaAllocation: QuotaAllocation,
-    private readonly usageTracking: UsageTracking,
+    private quotaAllocation: QuotaAllocation,
+    private usageTracking: UsageTracking,
     private lastResetAt: Date,
   ) {}
 

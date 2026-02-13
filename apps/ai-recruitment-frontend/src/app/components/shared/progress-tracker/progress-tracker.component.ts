@@ -15,7 +15,6 @@ import type {
   ProgressMessage,
   WebSocketProgressMessage,
   StepChangeData,
-  ProgressCompletionData,
   ProgressErrorData,
   ProgressStep,
 } from './progress-tracker.types';

@@ -1,4 +1,4 @@
-import { Injectable, signal, NgZone, inject, DestroyRef, takeUntilDestroyed } from '@angular/core';
+import { Injectable, signal, NgZone, inject, DestroyRef } from '@angular/core';
 import { Subject, interval, takeUntil } from 'rxjs';
 import type { PerformanceMetrics } from '../types/performance-metrics.type';
 

@@ -72,7 +72,7 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
   private intersectionObserver?: IntersectionObserver;
   private resizeObserver?: ResizeObserver;
-  private debouncedCalculateColumns: () => void;
+  private debouncedCalculateColumns!: () => void;
 
   @Input() public items: BentoGridItem[] = [];
   @Input() public gridSize: 'compact' | 'default' | 'wide' = 'default';

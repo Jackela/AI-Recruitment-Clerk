@@ -13,8 +13,8 @@
 export { UsageLimit } from './usage-limit-core.dto';
 
 // Value objects and types
-export { UsageLimitId, IPAddress, UsageLimitPolicy, QuotaAllocation, UsageTracking, UsageRecord, BonusType } from './usage-limit-types';
-export type { UsageLimitData } from './usage-limit-types';
+export { UsageLimitId, IPAddress, UsageLimitPolicy, QuotaAllocation, UsageTracking, UsageRecord, BonusType } from './usage-limit-types.dto';
+export type { UsageLimitData } from './usage-limit-types.dto';
 
 // Domain events
 export {

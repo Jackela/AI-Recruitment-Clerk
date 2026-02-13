@@ -1,4 +1,5 @@
-import type { Touch } from '@angular/core';
+// Touch and TouchEvent are browser APIs, not Angular exports
+// Using type assertions for mock objects
 
 /**
  * Helper to create a mock Touch object for testing touch events.

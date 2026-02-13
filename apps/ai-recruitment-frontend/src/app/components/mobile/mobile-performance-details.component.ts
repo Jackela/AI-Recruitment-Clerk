@@ -1,5 +1,4 @@
-import type { Input } from '@angular/core';
-import { Component, inject } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { PerformanceMetrics } from '../../types/performance-metrics.type';
 import { MobilePerformanceService } from '../../services/mobile-performance.service';

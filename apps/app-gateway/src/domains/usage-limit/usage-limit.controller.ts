@@ -28,6 +28,7 @@ import { Permissions } from '../../auth/decorators/permissions.decorator';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import type {
   UserDto,
+  Permission,
 } from '@ai-recruitment-clerk/user-management-domain';
 import type {
   BonusType,
@@ -118,7 +119,7 @@ export class UsageLimitController {
         (req.user as UserDto & { permissions?: string[] }).permissions?.includes('admin')
           ? ip
           : ((req as Request & { socket?: { remoteAddress?: string } }).socket?.remoteAddress ||
-            (req.headers as Record<string, string | string[] | undefined>)['x-forwarded-for'] ||
+            this.getHeaderValue(req.headers, 'x-forwarded-for') ||
             'unknown');
 
       const checkResult = await this.usageLimitService.checkUsageLimit(
@@ -208,7 +209,7 @@ export class UsageLimitController {
         (req.user as UserDto & { permissions?: string[] }).permissions?.includes('admin')
           ? usageData.userIP
           : ((req as Request & { socket?: { remoteAddress?: string } }).socket?.remoteAddress ||
-            (req.headers as Record<string, string | string[] | undefined>)['x-forwarded-for'] ||
+            this.getHeaderValue(req.headers, 'x-forwarded-for') ||
             'unknown');
 
       const recordResult = await this.usageLimitService.recordUsage(
@@ -261,7 +262,7 @@ export class UsageLimitController {
   })
   @ApiResponse({ status: 201, description: '奖励配额添加成功' })
   @UseGuards(RolesGuard)
-  @Permissions('manage_quotas')
+  @Permissions(Permission.MANAGE_QUOTAS)
   @Post('bonus')
   @HttpCode(HttpStatus.CREATED)
   public async addBonusQuota(
@@ -292,7 +293,7 @@ export class UsageLimitController {
       const targetIP =
         bonusData.ip ||
         ((req as Request & { socket?: { remoteAddress?: string } }).socket?.remoteAddress ||
-          (req.headers as Record<string, string | string[] | undefined>)['x-forwarded-for'] ||
+          this.getHeaderValue(req.headers, 'x-forwarded-for') ||
             'unknown');
 
       // Validate bonus amount
@@ -357,7 +358,7 @@ export class UsageLimitController {
     description: '筛选条件',
   })
   @UseGuards(RolesGuard)
-  @Permissions('read_usage_limits')
+  @Permissions(Permission.READ_USAGE_LIMITS)
   @Get()
   public async getUsageLimits(
     @Request() req: AuthenticatedRequest,
@@ -433,7 +434,7 @@ export class UsageLimitController {
   @ApiResponse({ status: 404, description: '使用记录未找到' })
   @ApiParam({ name: 'ip', description: 'IP地址' })
   @UseGuards(RolesGuard)
-  @Permissions('read_usage_details')
+  @Permissions(Permission.READ_USAGE_DETAILS)
   @Get(':ip')
   public async getUsageLimitDetail(
     @Request() req: AuthenticatedRequest,
@@ -479,7 +480,7 @@ export class UsageLimitController {
   })
   @ApiResponse({ status: 200, description: '使用限制策略更新成功' })
   @UseGuards(RolesGuard)
-  @Permissions('manage_usage_policy')
+  @Permissions(Permission.MANAGE_USAGE_POLICY)
   @Put('policy')
   @HttpCode(HttpStatus.OK)
   public async updateUsageLimitPolicy(
@@ -499,8 +500,10 @@ export class UsageLimitController {
       data?: {
         configId: string;
         configuration: unknown;
+        policy: unknown;
         updatedBy: string;
         updatedAt: string;
+        affectedIPs?: number;
         effectiveFrom: string;
       };
       error?: string;
@@ -527,10 +530,13 @@ export class UsageLimitController {
         success: true,
         message: 'Usage limit policy updated successfully',
         data: {
+          configId: `policy_${req.user.organizationId}`,
+          configuration: policyData,
           policy: updatedPolicy.policy,
           updatedBy: req.user.id,
-          updatedAt: updatedPolicy.updatedAt,
+          updatedAt: updatedPolicy.updatedAt?.toISOString() || new Date().toISOString(),
           affectedIPs: updatedPolicy.affectedIPCount,
+          effectiveFrom: new Date().toISOString(),
         },
       };
     } catch (error) {
@@ -556,7 +562,7 @@ export class UsageLimitController {
   @ApiResponse({ status: 200, description: '使用记录重置成功' })
   @ApiParam({ name: 'ip', description: 'IP地址' })
   @UseGuards(RolesGuard)
-  @Permissions('admin')
+  @Permissions(Permission.ADMIN)
   @Post(':ip/reset')
   @HttpCode(HttpStatus.OK)
   public async resetUsageLimit(
@@ -630,7 +636,7 @@ export class UsageLimitController {
   })
   @ApiResponse({ status: 200, description: '批量操作完成' })
   @UseGuards(RolesGuard)
-  @Permissions('manage_quotas')
+  @Permissions(Permission.MANAGE_QUOTAS)
   @Post('batch')
   @HttpCode(HttpStatus.OK)
   public async batchManageUsageLimits(
@@ -658,7 +664,6 @@ export class UsageLimitController {
         operatedBy: string;
       };
       error?: string;
-      message?: string;
     }> {
     try {
       const batchResult = await this.usageLimitService.batchManageUsageLimits(
@@ -717,7 +722,7 @@ export class UsageLimitController {
     description: '分组方式',
   })
   @UseGuards(RolesGuard)
-  @Permissions('read_analytics')
+  @Permissions(Permission.READ_ANALYTICS)
   @Get('stats/overview')
   public async getUsageStatisticsOverview(
     @Request() req: AuthenticatedRequest,
@@ -792,7 +797,7 @@ export class UsageLimitController {
     description: '导出格式',
   })
   @UseGuards(RolesGuard)
-  @Permissions('export_questionnaire_data')
+  @Permissions(Permission.EXPORT_QUESTIONNAIRE_DATA)
   @Post('export')
   @HttpCode(HttpStatus.OK)
   public async exportUsageData(
@@ -865,7 +870,7 @@ export class UsageLimitController {
   })
   @ApiResponse({ status: 200, description: '速率限制配置成功' })
   @UseGuards(RolesGuard)
-  @Permissions('admin')
+  @Permissions(Permission.ADMIN)
   @Put('rate-limiting')
   @HttpCode(HttpStatus.OK)
   public async configureRateLimiting(
@@ -972,5 +977,26 @@ export class UsageLimitController {
         error: error instanceof Error ? error.message : String(error),
       };
     }
+  }
+
+  /**
+   * Safely gets a header value, handling string | string[] | undefined.
+   * @param headers - The headers object.
+   * @param name - The header name.
+   * @returns The header value as a string or undefined.
+   */
+  private getHeaderValue(
+    headers: Record<string, string | string[] | undefined> | Headers,
+    name: string,
+  ): string | undefined {
+    if (headers instanceof Headers) {
+      const value = headers.get(name);
+      return value ?? undefined;
+    }
+    const value = headers[name];
+    if (Array.isArray(value)) {
+      return value[0];
+    }
+    return value;
   }
 }

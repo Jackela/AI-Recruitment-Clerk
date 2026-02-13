@@ -221,5 +221,4 @@ export class DataTableUtilService {
   }
 }
 
-// Re-export SortEvent for convenience
-export type { SortEvent };
+// SortEvent is exported from the main data-table component file

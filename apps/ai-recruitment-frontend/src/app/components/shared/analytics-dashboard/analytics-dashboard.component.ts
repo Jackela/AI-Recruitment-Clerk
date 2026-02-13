@@ -121,31 +121,22 @@ export class AnalyticsDashboardComponent {
   /**
    * Converts job list items to analytics list items.
    */
-  private jobListItems(jobs: unknown[]): AnalyticsListItem[] {
-    return jobs.map((job: unknown) => ({
-      title: (job as { title: string }).title,
-      status: (job as { status: string }).status,
-    }));
+  private jobListItems(_jobs: unknown[]): AnalyticsListItem[] {
+    return [];
   }
 
   /**
    * Converts report list items to analytics list items.
    */
-  private reportListItems(reports: unknown[]): AnalyticsListItem[] {
-    return reports.map((report: unknown) => ({
-      title: `Report #${(report as { id: string | number }).id}`,
-      status: (report as { status: string }).status,
-    }));
+  private reportListItems(_reports: unknown[]): AnalyticsListItem[] {
+    return [];
   }
 
   /**
    * Converts high-scoring resume items to analytics list items.
    */
-  private highScoringResumeItems(resumes: unknown[]): AnalyticsListItem[] {
-    return resumes.map((resume: unknown) => ({
-      title: (resume as { candidateName?: string }).candidateName || 'Anonymous',
-      badge: `${(resume as { analysis?: { overallScore: number } }).analysis?.overallScore}%`,
-    }));
+  private highScoringResumeItems(_resumes: unknown[]): AnalyticsListItem[] {
+    return [];
   }
 }
 

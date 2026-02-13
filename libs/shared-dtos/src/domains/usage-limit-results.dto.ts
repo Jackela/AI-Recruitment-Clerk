@@ -1,5 +1,3 @@
-import type { BonusType } from './usage-limit-types';
-
 /**
  * Represents a usage limit check result.
  */

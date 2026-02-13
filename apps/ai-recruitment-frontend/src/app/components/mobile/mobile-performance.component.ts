@@ -9,7 +9,6 @@ import {
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import type { PerformanceMetrics } from '../../types/performance-metrics.type';
 import { MobilePerformanceService } from '../../services/mobile-performance.service';
 import { MobilePerformanceDetailsComponent } from './mobile-performance-details.component';
 

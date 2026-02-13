@@ -100,3 +100,4 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
       expect(createdEvent).toBeDefined();
     });
   });
+});

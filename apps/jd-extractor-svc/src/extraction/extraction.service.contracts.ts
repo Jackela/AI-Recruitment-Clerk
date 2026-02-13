@@ -116,26 +116,35 @@ export class ExtractionServiceContracts {
    * @since 1.0.0
    */
   @Requires(
-    (jdText: string, extractionConfig?: any) =>
-      (ContractValidators.isNonEmptyString(jdText) &&
-        jdText.length >= 100 &&
-        jdText.length <= 50000 &&
-        jdText.toLowerCase().includes('job')) ||
-      jdText.toLowerCase().includes('position') ||
-      jdText.toLowerCase().includes('role') ||
-      (jdText.toLowerCase().includes('responsibilities') &&
-        (!extractionConfig || typeof extractionConfig === 'object')),
+    (...args: unknown[]) => {
+      const [jdText, extractionConfig] = args as [string, unknown?];
+      const text = typeof jdText === 'string' ? jdText : '';
+      return (
+        ContractValidators.isNonEmptyString(text) &&
+        text.length >= 100 &&
+        text.length <= 50000 &&
+        (text.toLowerCase().includes('job') ||
+          text.toLowerCase().includes('position') ||
+          text.toLowerCase().includes('role') ||
+          text.toLowerCase().includes('responsibilities')) &&
+        (!extractionConfig || typeof extractionConfig === 'object')
+      );
+    },
     'JD extraction requires valid text (100-50000 chars) with job-related content',
   )
   @Ensures(
-    (result: ExtractionResult) =>
-      ContractValidators.isValidExtractionResult(result) &&
-      ContractValidators.isValidConfidenceLevel(result.confidence) &&
-      result.extractionMetadata &&
-      ContractValidators.isValidProcessingTime(
-        result.extractionMetadata.processingTime,
-        15000,
-      ),
+    (...args: unknown[]) => {
+      const [result] = args as [ExtractionResult];
+      return (
+        ContractValidators.isValidExtractionResult(result) &&
+        ContractValidators.isValidConfidenceLevel(result.confidence) &&
+        result.extractionMetadata &&
+        ContractValidators.isValidProcessingTime(
+          result.extractionMetadata.processingTime,
+          15000,
+        )
+      );
+    },
     'Must return valid extraction result with confidence, skills, title, experience range, and processing time under 15 seconds',
   )
   public async extractJobRequirements(

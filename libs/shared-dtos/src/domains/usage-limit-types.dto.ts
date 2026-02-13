@@ -1,5 +1,4 @@
 import { ValueObject } from '../base/value-object';
-import type { DomainEvent } from '../base/domain-event';
 
 /**
  * Represents a usage limit ID.
@@ -82,7 +81,13 @@ export class UsageLimitPolicy extends ValueObject<{
    * @returns The UsageLimitPolicy.
    */
   public static restore(data: unknown): UsageLimitPolicy {
-    return new UsageLimitPolicy(data as { [key: string]: unknown });
+    const parsed = data as {
+      dailyLimit: number;
+      bonusEnabled: boolean;
+      maxBonusQuota: number;
+      resetTimeUTC: number;
+    };
+    return new UsageLimitPolicy(parsed);
   }
 
   /**
@@ -223,13 +228,18 @@ export class UsageTracking extends ValueObject<{
   public static restore(data: unknown): UsageTracking {
     const dataObj = data as {
       currentCount: number;
-      usageHistory: unknown[];
-      lastUsageAt?: string;
+      usageHistory: { timestamp: Date | string; count: number }[];
+      lastUsageAt?: Date | string;
     };
     return new UsageTracking({
       currentCount: dataObj.currentCount,
-      usageHistory: dataObj.usageHistory.map((r) => new UsageRecord(r as { timestamp: string; count: number })),
-      lastUsageAt: dataObj.lastUsageAt ? new Date(dataObj.lastUsageAt) : undefined,
+      usageHistory: dataObj.usageHistory.map((r) => new UsageRecord({
+        timestamp: typeof r.timestamp === 'string' ? new Date(r.timestamp) : r.timestamp,
+        count: r.count,
+      })),
+      lastUsageAt: dataObj.lastUsageAt
+        ? (typeof dataObj.lastUsageAt === 'string' ? new Date(dataObj.lastUsageAt) : dataObj.lastUsageAt)
+        : undefined,
     });
   }
 

@@ -261,9 +261,7 @@ export class MobileUploadFileItemComponent implements OnInit {
   @Output() public retry = new EventEmitter<UploadFile>();
   @Output() public remove = new EventEmitter<UploadFile>();
 
-  constructor(uploadService: MobileUploadService) {
-    this.uploadService = uploadService;
-  }
+  private readonly uploadService = inject(MobileUploadService);
 
   public ngOnInit(): void {
     // Generate preview for images if not already present
