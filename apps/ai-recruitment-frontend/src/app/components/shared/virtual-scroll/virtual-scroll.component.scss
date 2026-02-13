@@ -1,0 +1,70 @@
+:host {
+  display: block;
+  position: relative;
+  width: 100%;
+}
+
+.virtual-scroll-container {
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+
+  /* Performance optimizations */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.virtual-scroll-container.smooth-scroll {
+  scroll-behavior: smooth;
+}
+
+.virtual-scroll-spacer-top,
+.virtual-scroll-spacer-bottom {
+  position: relative;
+  width: 100%;
+  pointer-events: none;
+}
+
+/* Scrollbar styling */
+.virtual-scroll-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.virtual-scroll-container::-webkit-scrollbar-track {
+  background: var(--color-background, #f9fafb);
+  border-radius: 4px;
+}
+
+.virtual-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--color-border, #d1d5db);
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.virtual-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary, #9ca3af);
+}
+
+/* Dark mode adjustments */
+:host-context([data-theme='dark']) {
+  .virtual-scroll-container::-webkit-scrollbar-track {
+    background: var(--color-surface, #1e293b);
+  }
+
+  .virtual-scroll-container::-webkit-scrollbar-thumb {
+    background: var(--color-border, #475569);
+  }
+
+  .virtual-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-secondary, #64748b);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .virtual-scroll-container.smooth-scroll {
+    scroll-behavior: auto;
+  }
+}

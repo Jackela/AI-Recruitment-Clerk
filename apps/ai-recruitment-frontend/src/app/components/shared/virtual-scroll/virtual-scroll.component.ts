@@ -1,50 +1,43 @@
 import type {
   OnInit,
   OnDestroy,
-  ElementRef} from '@angular/core';
+  ElementRef,
+} from '@angular/core';
 import {
   Component,
   Input,
   Output,
   EventEmitter,
   ViewChild,
-  signal,
-  computed,
   effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { TemplateRef } from '@angular/core';
 import { Subject, fromEvent, animationFrameScheduler } from 'rxjs';
 import { takeUntil, throttleTime, distinctUntilChanged } from 'rxjs/operators';
-// import { debounceTime } from 'rxjs/operators'; // Reserved for future use
+
+import type { VirtualScrollConfig, ScrollState } from './virtual-scroll.types';
+import { DEFAULT_VIRTUAL_SCROLL_CONFIG } from './virtual-scroll.types';
+import { VirtualScrollViewportService } from './virtual-scroll-viewport.service';
+import { VirtualScrollContentComponent } from './virtual-scroll-content.component';
+import { VirtualScrollLoadingComponent } from './virtual-scroll-loading.component';
+import { VirtualScrollEmptyComponent } from './virtual-scroll-empty.component';
 
 /**
- * Defines the shape of the virtual scroll config.
- */
-export interface VirtualScrollConfig<T = unknown> {
-  itemHeight: number;
-  bufferSize?: number;
-  trackBy?: (index: number, item: T) => unknown;
-  enableSmoothScroll?: boolean;
-  enableInfiniteScroll?: boolean;
-  infiniteScrollThreshold?: number;
-  enableDynamicHeight?: boolean;
-  estimatedItemHeight?: number;
-}
-
-interface ScrollState {
-  scrollTop: number;
-  scrollHeight: number;
-  clientHeight: number;
-}
-
-/**
- * Represents the virtual scroll component.
+ * Virtual scroll component for efficient rendering of large lists.
+ * Only renders visible items plus a buffer, improving performance with thousands of items.
+ *
+ * @template T - The type of items in the scroll list.
  */
 @Component({
   selector: 'arc-virtual-scroll',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    VirtualScrollContentComponent,
+    VirtualScrollLoadingComponent,
+    VirtualScrollEmptyComponent,
+  ],
   template: `
     <div
       class="virtual-scroll-container"
@@ -54,217 +47,45 @@ interface ScrollState {
       [class.smooth-scroll]="config.enableSmoothScroll"
       role="region"
       [attr.aria-label]="ariaLabel"
-      [attr.aria-busy]="isLoading()"
+      [attr.aria-busy]="viewport.isLoading()"
     >
       <!-- Top Spacer -->
       <div
         class="virtual-scroll-spacer-top"
-        [style.height.px]="topSpacerHeight()"
+        [style.height.px]="viewport.topSpacerHeight()"
         aria-hidden="true"
       ></div>
 
       <!-- Visible Items -->
-      <div
-        class="virtual-scroll-content"
-        [style.transform]="'translateY(' + contentOffset() + 'px)'"
-        role="list"
-      >
-        <ng-container
-          *ngFor="let item of visibleItems(); let i = index; trackBy: trackByFn"
-        >
-          <div
-            class="virtual-scroll-item"
-            [style.height.px]="getItemHeight(item, i)"
-            [attr.data-index]="startIndex() + i"
-            role="listitem"
-            [attr.aria-posinset]="startIndex() + i + 1"
-            [attr.aria-setsize]="items.length"
-          >
-            <ng-content
-              *ngTemplateOutlet="
-                itemTemplate;
-                context: {
-                  $implicit: item,
-                  index: startIndex() + i,
-                  first: startIndex() + i === 0,
-                  last: startIndex() + i === items.length - 1,
-                  even: (startIndex() + i) % 2 === 0,
-                  odd: (startIndex() + i) % 2 === 1,
-                }
-              "
-            ></ng-content>
-          </div>
-        </ng-container>
-      </div>
+      <arc-virtual-scroll-content
+        [itemTemplate]="itemTemplate"
+        [items]="viewport.visibleItems()"
+        [config]="config"
+        [startIndex]="viewport.startIndex()"
+        [contentOffset]="viewport.contentOffset()"
+        [getItemHeight]="(item) => viewport.getItemHeight(item, 0)"
+        [totalItems]="items.length"
+      />
 
       <!-- Bottom Spacer -->
       <div
         class="virtual-scroll-spacer-bottom"
-        [style.height.px]="bottomSpacerHeight()"
+        [style.height.px]="viewport.bottomSpacerHeight()"
         aria-hidden="true"
       ></div>
 
       <!-- Loading Indicator -->
-      <div
-        class="virtual-scroll-loading"
-        *ngIf="isLoading()"
-        role="status"
-        aria-live="polite"
-      >
-        <div class="loading-spinner"></div>
-        <span>加载中...</span>
-      </div>
+      <arc-virtual-scroll-loading *ngIf="viewport.isLoading()" />
 
       <!-- Empty State -->
-      <div
-        class="virtual-scroll-empty"
-        *ngIf="items.length === 0 && !isLoading()"
-        role="status"
-      >
+      <arc-virtual-scroll-empty *ngIf="items.length === 0 && !viewport.isLoading()">
         <ng-content select="[empty-state]">
           <p>暂无数据</p>
         </ng-content>
-      </div>
+      </arc-virtual-scroll-empty>
     </div>
   `,
-  styles: [
-    `
-      :host {
-        display: block;
-        position: relative;
-        width: 100%;
-      }
-
-      .virtual-scroll-container {
-        position: relative;
-        overflow-y: auto;
-        overflow-x: hidden;
-        width: 100%;
-
-        /* Performance optimizations */
-        transform: translateZ(0);
-        backface-visibility: hidden;
-        -webkit-overflow-scrolling: touch;
-      }
-
-      .virtual-scroll-container.smooth-scroll {
-        scroll-behavior: smooth;
-      }
-
-      .virtual-scroll-content {
-        position: relative;
-        will-change: transform;
-      }
-
-      .virtual-scroll-spacer-top,
-      .virtual-scroll-spacer-bottom {
-        position: relative;
-        width: 100%;
-        pointer-events: none;
-      }
-
-      .virtual-scroll-item {
-        position: relative;
-        width: 100%;
-        overflow: hidden;
-      }
-
-      .virtual-scroll-loading {
-        position: sticky;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        padding: 1rem;
-        background: linear-gradient(
-          to top,
-          var(--color-surface, white) 0%,
-          transparent 100%
-        );
-        color: var(--color-text-secondary, #6b7280);
-        font-size: 0.875rem;
-      }
-
-      .loading-spinner {
-        width: 20px;
-        height: 20px;
-        border: 2px solid var(--color-border, #e5e7eb);
-        border-top-color: var(--color-primary, #667eea);
-        border-radius: 50%;
-        animation: spin 0.6s linear infinite;
-      }
-
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      .virtual-scroll-empty {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 3rem;
-        color: var(--color-text-secondary, #6b7280);
-        text-align: center;
-      }
-
-      /* Scrollbar styling */
-      .virtual-scroll-container::-webkit-scrollbar {
-        width: 8px;
-      }
-
-      .virtual-scroll-container::-webkit-scrollbar-track {
-        background: var(--color-background, #f9fafb);
-        border-radius: 4px;
-      }
-
-      .virtual-scroll-container::-webkit-scrollbar-thumb {
-        background: var(--color-border, #d1d5db);
-        border-radius: 4px;
-        transition: background 0.2s;
-      }
-
-      .virtual-scroll-container::-webkit-scrollbar-thumb:hover {
-        background: var(--color-text-secondary, #9ca3af);
-      }
-
-      /* Dark mode adjustments */
-      :host-context([data-theme='dark']) {
-        .virtual-scroll-container::-webkit-scrollbar-track {
-          background: var(--color-surface, #1e293b);
-        }
-
-        .virtual-scroll-container::-webkit-scrollbar-thumb {
-          background: var(--color-border, #475569);
-        }
-
-        .virtual-scroll-container::-webkit-scrollbar-thumb:hover {
-          background: var(--color-text-secondary, #64748b);
-        }
-      }
-
-      /* Performance hints */
-      .virtual-scroll-item > * {
-        contain: layout style paint;
-      }
-
-      /* Reduced motion */
-      @media (prefers-reduced-motion: reduce) {
-        .virtual-scroll-container.smooth-scroll {
-          scroll-behavior: auto;
-        }
-
-        .loading-spinner {
-          animation: none;
-          opacity: 0.5;
-        }
-      }
-    `,
-  ],
+  styleUrls: ['./virtual-scroll.component.scss'],
 })
 export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
   @ViewChild('scrollContainer', { static: true })
@@ -274,13 +95,7 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
   @Input() public itemTemplate!: TemplateRef<unknown>;
   @Input() public containerHeight = 600;
   @Input() public config: VirtualScrollConfig<T> = {
-    itemHeight: 50,
-    bufferSize: 5,
-    enableSmoothScroll: false,
-    enableInfiniteScroll: false,
-    infiniteScrollThreshold: 80,
-    enableDynamicHeight: false,
-    estimatedItemHeight: 50,
+    ...DEFAULT_VIRTUAL_SCROLL_CONFIG,
   };
   @Input() public ariaLabel = '虚拟滚动列表';
 
@@ -288,98 +103,34 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
   @Output() public scrollToTop = new EventEmitter<void>();
   @Output() public loadMore = new EventEmitter<void>();
 
-  // State
   private destroy$ = new Subject<void>();
-  private itemHeightCache = new Map<T, number>();
 
-  public scrollState = signal<ScrollState>({
-    scrollTop: 0,
-    scrollHeight: 0,
-    clientHeight: 0,
-  });
+  /** Viewport service for calculations. */
+  public viewport = new VirtualScrollViewportService<T>();
 
-  public isLoading = signal(false);
-
-  // Computed values
-  public startIndex = computed(() => {
-    const scrollTop = this.scrollState().scrollTop;
-    const bufferSize = this.config.bufferSize || 5;
-    const index =
-      Math.floor(scrollTop / this.getAverageItemHeight()) - bufferSize;
-    return Math.max(0, index);
-  });
-
-  public endIndex = computed(() => {
-    const scrollTop = this.scrollState().scrollTop;
-    const clientHeight = this.scrollState().clientHeight;
-    const bufferSize = this.config.bufferSize || 5;
-    const itemHeight = this.getAverageItemHeight();
-    const index =
-      Math.ceil((scrollTop + clientHeight) / itemHeight) + bufferSize;
-    return Math.min(this.items.length, index);
-  });
-
-  public visibleItems = computed(() => {
-    const start = this.startIndex();
-    const end = this.endIndex();
-    return this.items.slice(start, end);
-  });
-
-  public topSpacerHeight = computed(() => {
-    const start = this.startIndex();
-    if (this.config.enableDynamicHeight) {
-      let height = 0;
-      for (let i = 0; i < start; i++) {
-        height += this.getItemHeight(this.items[i], i);
+  constructor() {
+    // Setup infinite scroll effect if enabled
+    effect(() => {
+      if (this.config.enableInfiniteScroll && this.viewport.shouldTriggerLoadMore()) {
+        this.loadMore.emit();
       }
-      return height;
-    }
-    return start * this.config.itemHeight;
-  });
+    });
+  }
 
-  public bottomSpacerHeight = computed(() => {
-    const end = this.endIndex();
-    const total = this.items.length;
-    if (this.config.enableDynamicHeight) {
-      let height = 0;
-      for (let i = end; i < total; i++) {
-        height += this.getItemHeight(this.items[i], i);
-      }
-      return height;
-    }
-    return (total - end) * this.config.itemHeight;
-  });
-
-  public contentOffset = computed(() => {
-    // For smooth rendering
-    return 0;
-  });
-
-  public scrollPercentage = computed(() => {
-    const { scrollTop, scrollHeight, clientHeight } = this.scrollState();
-    if (scrollHeight <= clientHeight) return 0;
-    return (scrollTop / (scrollHeight - clientHeight)) * 100;
-  });
-
-  /**
-   * Performs the ng on init operation.
-   */
   public ngOnInit(): void {
+    this.viewport.initialize(this.config, this.items);
     this.setupScrollListener();
     this.setupResizeObserver();
 
     // Initial measurement
     this.updateScrollState();
 
-    // Setup infinite scroll if enabled
-    if (this.config.enableInfiniteScroll) {
-      this.setupInfiniteScroll();
-    }
+    // Sync items changes
+    effect(() => {
+      this.viewport.updateItems(this.items);
+    });
   }
 
-  /**
-   * Performs the ng on destroy operation.
-   */
   public ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -414,24 +165,14 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
     }
   }
 
-  private setupInfiniteScroll(): void {
-    effect(() => {
-      const percentage = this.scrollPercentage();
-      const threshold = this.config.infiniteScrollThreshold || 80;
-
-      if (percentage >= threshold && !this.isLoading()) {
-        this.loadMore.emit();
-      }
-    });
-  }
-
   private updateScrollState(): void {
     const element = this.scrollContainer.nativeElement;
-    this.scrollState.set({
+    const state: ScrollState = {
       scrollTop: element.scrollTop,
       scrollHeight: element.scrollHeight,
       clientHeight: element.clientHeight,
-    });
+    };
+    this.viewport.updateScrollState(state);
 
     // Emit events
     if (element.scrollTop === 0) {
@@ -445,72 +186,19 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
   }
 
   /**
-   * Performs the on scroll operation.
-   * @param _event - The event.
+   * Called on scroll event (handled by listener).
    */
   public onScroll(_event: Event): void {
-    // Handled by scroll listener
-  }
-
-  /**
-   * Performs the track by fn operation.
-   * @param index - The index.
-   * @param item - The item.
-   * @returns The unknown.
-   */
-  public trackByFn(index: number, item: T): unknown {
-    if (this.config.trackBy) {
-      return this.config.trackBy(this.startIndex() + index, item);
-    }
-    return (item as Record<string, unknown>)?.['id'] || index;
-  }
-
-  /**
-   * Retrieves item height.
-   * @param item - The item.
-   * @param _index - The index.
-   * @returns The number value.
-   */
-  public getItemHeight(item: T, _index: number): number {
-    if (!this.config.enableDynamicHeight) {
-      return this.config.itemHeight;
-    }
-
-    // Check cache
-    const cached = this.itemHeightCache.get(item);
-    if (cached) {
-      return cached;
-    }
-
-    // Return estimated height for unmeasured items
-    return this.config.estimatedItemHeight || this.config.itemHeight;
-  }
-
-  private getAverageItemHeight(): number {
-    if (!this.config.enableDynamicHeight) {
-      return this.config.itemHeight;
-    }
-
-    if (this.itemHeightCache.size === 0) {
-      return this.config.estimatedItemHeight || this.config.itemHeight;
-    }
-
-    const total = Array.from(this.itemHeightCache.values()).reduce(
-      (sum, h) => sum + h,
-      0,
-    );
-    return total / this.itemHeightCache.size;
+    // Scroll is handled by the scroll listener subscription
   }
 
   // Public API
 
   /**
-   * Performs the scroll to index operation.
-   * @param index - The index.
-   * @param behavior - The behavior.
+   * Scroll to a specific index.
    */
   public scrollToIndex(index: number, behavior: ScrollBehavior = 'auto'): void {
-    const itemHeight = this.getAverageItemHeight();
+    const itemHeight = this.viewport.getAverageItemHeight();
     const scrollTop = index * itemHeight;
 
     this.scrollContainer.nativeElement.scrollTo({
@@ -520,9 +208,7 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
   }
 
   /**
-   * Performs the scroll to item operation.
-   * @param item - The item.
-   * @param behavior - The behavior.
+   * Scroll to a specific item.
    */
   public scrollToItem(item: T, behavior: ScrollBehavior = 'auto'): void {
     const index = this.items.indexOf(item);
@@ -532,18 +218,17 @@ export class VirtualScrollComponent<T = unknown> implements OnInit, OnDestroy {
   }
 
   /**
-   * Performs the refresh operation.
+   * Refresh the scroll state and clear height cache.
    */
   public refresh(): void {
     this.updateScrollState();
-    this.itemHeightCache.clear();
+    this.viewport.clearHeightCache();
   }
 
   /**
-   * Sets loading.
-   * @param loading - The loading.
+   * Set the loading state.
    */
   public setLoading(loading: boolean): void {
-    this.isLoading.set(loading);
+    this.viewport.isLoading.set(loading);
   }
 }
