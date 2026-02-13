@@ -1,0 +1,135 @@
+<div class="timesheet-table-container" [class.loading]="tableOptions().loading">
+  <!-- Toolbar Component -->
+  <arc-timesheet-toolbar
+    [showFilter]="tableOptions().showFilter"
+    [showExport]="tableOptions().showExport"
+    [(viewType)]="currentViewType"
+    [(searchTerm)]="searchTerm"
+    [selectedCount]="selectedEntries().length"
+    (search)="onSearch()"
+    (viewTypeChange)="onViewTypeChange()"
+    (export)="exportDataCsv()"
+    (bulkEdit)="bulkEdit.emit(selectedEntries())"
+    (bulkDelete)="bulkDelete.emit(selectedEntries())"
+  />
+
+  <!-- Responsive table wrapper -->
+  <div
+    class="table-wrapper"
+    [class.mobile-view]="isMobileView()"
+    [class.tablet-view]="isTabletView()"
+    [class.desktop-view]="isDesktopView()"
+  >
+    <!-- Configuration-driven table -->
+    <table
+      class="timesheet-table"
+      [class.striped]="tableOptions().striped"
+      [class.bordered]="tableOptions().bordered"
+      [class.hoverable]="tableOptions().hoverable"
+    >
+      <!-- Dynamic header generation from TIMESHEET_COLUMNS -->
+      <thead>
+        <tr>
+          <!-- Selection column based on configuration -->
+          <th *ngIf="tableOptions().selectable" class="checkbox-column">
+            <input
+              *ngIf="tableOptions().multiSelect"
+              type="checkbox"
+              [checked]="isAllSelected()"
+              [indeterminate]="isSomeSelected()"
+              (change)="toggleSelectAll()"
+            />
+          </th>
+
+          <!-- Dynamic columns from configuration -->
+          <th
+            *ngFor="let column of displayedColumns()"
+            [style.width]="column.width"
+            [style.text-align]="column.align || 'left'"
+            [class.sortable]="column.sortable"
+            [class]="getColumnHeaderClasses(column)"
+            (click)="column.sortable ? handleSort(column.key) : null"
+          >
+            <div class="th-content">
+              <span>{{ getColumnHeaderLabel(column) }}</span>
+              <!-- Dynamic sort indicator -->
+              <div class="sort-indicator" *ngIf="column.sortable">
+                <svg
+                  class="sort-icon"
+                  [class.active-asc]="sortColumn() === column.key && sortDirection() === 'asc'"
+                  [class.active-desc]="sortColumn() === column.key && sortDirection() === 'desc'"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="m7 15 5 5 5-5"
+                    *ngIf="sortColumn() !== column.key || sortDirection() === 'desc'"
+                  ></path>
+                  <path
+                    d="m7 9 5-5 5 5"
+                    *ngIf="sortColumn() === column.key && sortDirection() === 'asc'"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+          </th>
+
+          <!-- Actions column when needed -->
+          <th *ngIf="showActions" class="actions-column">操作</th>
+        </tr>
+      </thead>
+
+      <!-- Dynamic body generation using row component -->
+      <tbody>
+        <tr
+          *ngFor="let entry of paginatedData()"
+          arc-timesheet-row
+          [entry]="entry"
+          [columns]="displayedColumns()"
+          [selectable]="tableOptions().selectable"
+          [selected]="isSelected(entry)"
+          [showActions]="showActions"
+          (toggleSelect)="toggleSelect(entry)"
+          (view)="viewEntry.emit(entry)"
+          (edit)="editEntry.emit(entry)"
+          (delete)="deleteEntry.emit(entry)"
+        ></tr>
+      </tbody>
+    </table>
+
+    <!-- Empty state -->
+    <div
+      class="empty-state"
+      *ngIf="paginatedData().length === 0 && !tableOptions().loading"
+    >
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+      </svg>
+      <p>{{ tableOptions().emptyMessage || '暂无工时记录' }}</p>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" *ngIf="tableOptions().loading">
+      <div class="spinner"></div>
+      <p>加载中...</p>
+    </div>
+  </div>
+
+  <!-- Pagination Component -->
+  <arc-timesheet-pagination
+    *ngIf="tableOptions().showPagination && totalPages() > 1"
+    [currentPage]="currentPage()"
+    [pageSize]="pageSize"
+    [totalItems]="totalItems()"
+    [pageSizeOptions]="tableOptions().pageSizeOptions"
+    (pageChange)="handlePageChange($event)"
+    (pageSizeChange)="handlePageSizeChange($event)"
+  />
+</div>

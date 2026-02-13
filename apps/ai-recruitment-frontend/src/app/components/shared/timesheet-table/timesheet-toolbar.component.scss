@@ -1,0 +1,150 @@
+@import '../../../../styles/variables';
+
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: $background-light;
+  border-bottom: 1px solid $border-color;
+  gap: 1rem;
+
+  @include respond-to-mobile {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.toolbar-left,
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  @include respond-to-mobile {
+    width: 100%;
+    flex-wrap: wrap;
+
+    &:first-child {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 300px;
+  width: 100%;
+
+  @include respond-to-mobile {
+    max-width: 100%;
+  }
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: $text-secondary;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.5rem 2.5rem 0.5rem 2.5rem;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  font-size: 0.875rem;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+  }
+}
+
+.clear-btn {
+  position: absolute;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  color: $text-secondary;
+
+  &:hover {
+    color: $text-color;
+  }
+}
+
+.view-selector {
+  padding: 0.5rem;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  background-color: $background-white;
+  color: $text-color;
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+  }
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  background-color: $background-white;
+  color: $text-color;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
+    border-color: $primary-color;
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.bulk-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.bulk-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &.edit-bulk-btn {
+    background-color: $primary-color;
+    color: $text-white;
+
+    &:hover {
+      background-color: darken($primary-color, 10%);
+    }
+  }
+
+  &.delete-bulk-btn {
+    background-color: $danger-color;
+    color: $text-white;
+
+    &:hover {
+      background-color: darken($danger-color, 10%);
+    }
+  }
+}
