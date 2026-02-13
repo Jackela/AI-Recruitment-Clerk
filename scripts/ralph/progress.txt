@@ -919,3 +919,188 @@ Split questionnaire.dto.ts (1288 lines) into domain interfaces
 - The QuestionnaireStatus enum should remain in the main DTO file since it's used by both the DTO and the split files
 
 ---
+
+## [2026-02-13] - CODE-002d-4
+
+### Task Summary
+Split analytics.service.ts (1114 lines) into modular components.
+
+### Work Done
+- Created analytics-event-collection.service.ts (245 lines) for event creation methods
+  - createUserInteractionEvent - creates user interaction events with consent checking
+  - createSystemPerformanceEvent - creates system performance events with threshold monitoring
+  - createBusinessMetricEvent - creates business metric events
+- Created analytics-aggregation.service.ts (279 lines) for batch processing and metrics
+  - processBatchEvents - processes multiple events with validation
+  - getEventProcessingMetrics - calculates throughput, error rate, processing time
+  - getDataPrivacyMetrics - calculates compliance score and risk level
+- Created analytics-reporting.service.ts (306 lines) for reporting and compliance
+  - performPrivacyComplianceCheck - evaluates privacy risks and enforces anonymization
+  - generateDataRetentionReport - generates retention policy report
+  - getSessionAnalytics - calculates session statistics and activity tracking
+  - validateReportingAccess - validates user permissions for reports
+- Created analytics-result-classes.ts (294 lines) with all result classes
+  - EventCreationResult, BatchProcessingResult, PrivacyComplianceResult
+  - DataRetentionReportResult, SessionAnalyticsResult
+  - EventProcessingMetricsResult, DataPrivacyMetricsResult, ReportingAccessResult
+  - BatchProcessingItem interface
+- Created analytics-interfaces.ts (158 lines) with interface definitions
+  - IAnalyticsRepository, IDomainEventBus, IAuditLogger
+  - IPrivacyService, ISessionTracker
+- Refactored main analytics.service.ts to 146 lines (down from 1114)
+  - Now acts as barrel file re-exporting all split modules
+  - Contains AnalyticsDomainService facade class for backward compatibility
+  - Facade delegates to specialized services
+
+### Files Changed
+- libs/shared-dtos/src/domains/analytics.service.ts - Reduced from 1114 to 146 lines
+- libs/shared-dtos/src/domains/analytics-event-collection.service.ts - Created new file
+- libs/shared-dtos/src/domains/analytics-aggregation.service.ts - Created new file
+- libs/shared-dtos/src/domains/analytics-reporting.service.ts - Created new file
+- libs/shared-dtos/src/domains/analytics-result-classes.ts - Created new file
+- libs/shared-dtos/src/domains/analytics-interfaces.ts - Created new file
+- libs/shared-dtos/src/index.ts - Added exports for new services and interfaces
+
+### Learnings for future iterations:
+- Service splitting pattern: event collection (CRUD) + aggregation (batch/metrics) + reporting (analytics/compliance)
+- Result classes can be extracted to a separate file to reduce line count
+- Interfaces should be extracted separately from result classes
+- The facade pattern preserves backward compatibility while allowing code to be modular
+- All new files under 500 lines target achieved (max: 306 lines)
+- Typecheck passes for all new files
+- Lint passes for shared-dtos library
+
+## [2026-02-13] - CODE-002d-5
+
+### Task Summary
+Split usage-limit.dto.ts (913 lines) into modular components.
+
+### Work Done
+- Created usage-limit-types.dto.ts (322 lines) for value objects and types
+  - UsageLimitId - generates unique usage limit IDs
+  - IPAddress - validates and stores IPv4 addresses
+  - UsageLimitPolicy - policy configuration with daily limits and bonus settings
+  - QuotaAllocation - manages base quota and bonus quota with breakdown
+  - UsageTracking - tracks current count and usage history
+  - UsageRecord - individual usage record with timestamp and count
+  - BonusType enum - QUESTIONNAIRE, PAYMENT, REFERRAL, PROMOTION
+  - UsageLimitData interface - data persistence shape
+- Created usage-limit-core.dto.ts (306 lines) for main UsageLimit entity
+  - create() - factory method creating new instances with event emission
+  - restore() - factory method restoring from persisted data
+  - canUse() - checks if usage is allowed, emits event if blocked
+  - recordUsage() - records usage with validation, emits usage recorded event
+  - addBonusQuota() - adds bonus quota by type with event emission
+  - getUsageStatistics() - calculates and returns usage statistics
+  - Daily reset logic - checks at midnight and performs reset
+- Created usage-limit-events.dto.ts (110 lines) with all domain events
+  - UsageLimitCreatedEvent - emitted when new limit is created
+  - UsageLimitExceededEvent - emitted when limit is exceeded
+  - UsageRecordedEvent - emitted when usage is recorded
+  - BonusQuotaAddedEvent - emitted when bonus quota is added
+  - DailyUsageResetEvent - emitted when daily reset occurs
+- Created usage-limit-results.dto.ts (202 lines) with all result classes
+  - UsageLimitCheckResult - allowed/blocked with remaining quota and block reason
+  - UsageRecordResult - success/failure with current usage and error
+  - UsageStatistics - comprehensive stats including percentage calculation
+- Updated usage-limit.dto.ts to 33 lines (down from 913)
+  - Now acts as barrel file re-exporting all split modules
+  - Exports UsageLimit, all value objects, events, and result classes
+
+### Files Changed
+- libs/shared-dtos/src/domains/usage-limit.dto.ts - Reduced from 913 to 33 lines
+- libs/shared-dtos/src/domains/usage-limit-core.dto.ts - Created new file
+- libs/shared-dtos/src/domains/usage-limit-events.dto.ts - Created new file
+- libs/shared-dtos/src/domains/usage-limit-results.dto.ts - Created new file
+- libs/shared-dtos/src/domains/usage-limit-types.dto.ts - Created new file
+
+### Learnings for future iterations:
+- DTO splitting pattern: core entity + types + events + results + barrel re-export
+- Value objects should have their own file with factory methods (create, restore)
+- Domain events are clean to extract - each event is simple data class
+- Result classes can be extracted to separate file to reduce core file size
+- The barrel pattern maintains backward compatibility - consumers can still import from usage-limit.dto
+- UsageLimitData interface defines the persistence shape (used in restore method)
+- Bonus quota uses Map for breakdown by BonusType - flexible tracking system
+- All new files under 500 lines target achieved (max: 322 lines)
+- Typecheck passes for all new files
+- Lint passes for shared-dtos library
+
+
+## [2026-02-13] - CODE-002d-6
+
+### Task Summary
+Split analytics.test.ts (1029 lines) into focused test suites.
+
+### Work Done
+- Created analytics-test-helpers.ts - Shared test data and mock implementations
+  - validSessionId, validUserId, validDeviceInfo, validGeoLocation
+  - validUserSession, validEventData
+  - mockRepository, mockEventBus, mockAuditLogger, mockPrivacyService, mockSessionTracker
+  - domainService, clearAllMocks helper function
+
+- Created analytics-value-objects.test.ts (144 lines) - Value object tests
+  - AnalyticsEventId, UserSession, DeviceInfo, GeoLocation
+  - EventData, EventTimestamp, EventContext validation
+
+- Created analytics-event-creation.test.ts (81 lines) - Event creation tests
+  - User interaction, system performance, business metric event creation
+  - Unique ID generation, domain event publishing
+
+- Created analytics-event-validation.test.ts (53 lines) - Event validation tests
+  - Event validation, error detection in event data
+  - Validation event publishing
+
+- Created analytics-event-processing.test.ts (56 lines) - Event processing tests
+  - Event processing, non-pending event error handling
+  - Retention expiry setting
+
+- Created analytics-privacy-compliance.test.ts (67 lines) - Privacy compliance tests
+  - Data anonymization, expiry marking
+  - Already anonymized event protection
+
+- Created analytics-business-rules.test.ts (77 lines) - Business rules tests
+  - Event creation eligibility, session limit enforcement
+  - Consent validation, data structure validation
+  - Event priority calculation, batch processing eligibility
+
+- Created analytics-contracts.test.ts (80 lines) - Contract tests
+  - Preconditions enforcement in event creation
+  - Invariants validation, performance contract validation
+
+- Created analytics-domain-service.test.ts (191 lines) - Domain service integration tests
+  - User interaction event creation through service
+  - System performance and business metric events
+  - Batch processing and privacy compliance checks
+
+- Created analytics-system-integration.test.ts (11 lines) - System integration tests
+  - Extends domain service tests with additional system-level tests
+  - Data retention reports and session analytics
+
+- Updated analytics.test.ts to 34 lines (down from 1029)
+  - Now acts as barrel file re-exporting all test modules
+  - Exports jest globals and all test module files
+
+### Files Changed
+- libs/shared-dtos/src/domains/analytics.test.ts - Reduced from 1029 to 34 lines
+- libs/shared-dtos/src/domains/analytics-test-helpers.ts - Created new file
+- libs/shared-dtos/src/domains/analytics-value-objects.test.ts - Created new file
+- libs/shared-dtos/src/domains/analytics-event-creation.test.ts - Created new file
+- libs/shared-dtos/src/domains/analytics-event-validation.test.ts - Created new file
+- libs/shared-dtos/src/domains/analytics-event-processing.test.ts - Created new file
+- libs/shared-dtos/src/domains/analytics-privacy-compliance.test.ts - Created new file
+- libs/shared-dtos/src/domains/analytics-business-rules.test.ts - Created new file
+- libs/shared-dtos/src/domains/analytics-contracts.test.ts - Created new file
+- libs/shared-dtos/src/domains/analytics-domain-service.test.ts - Created new file
+- libs/shared-dtos/src/domains/analytics-system-integration.test.ts - Created new file
+
+### Learnings for future iterations:
+- Test splitting pattern: extract shared test data/helpers, then split by feature
+- Each test file should import from analytics-test-helpers for consistency
+- System integration tests can extend domain service tests with additional scenarios
+- Barrel pattern (analytics.test.ts) re-exports all modules for backward compatibility
+- All test files under 200 lines target achieved (max: 191 lines)
+- Use `describe as domainServiceDescribe` to re-export test suites without duplication
+- Typecheck passes for all new files
+- Lint passes for shared-dtos library after fixes
+

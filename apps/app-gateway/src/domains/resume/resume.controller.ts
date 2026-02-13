@@ -55,7 +55,7 @@ const resumeFileValidator: {
     originalname: string;
     mimetype?: string;
     size: number;
-  }) => boolean {
+  }): boolean => {
     if (!file) return false;
     const allowedMimeTypes = [
       'application/pdf',
@@ -669,9 +669,10 @@ export class ResumeController {
   })
   @ApiResponse({ status: 200, description: '统计信息获取成功' })
   @UseGuards(RolesGuard)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Permissions('read_analytics')
   @Get('stats/processing')
+  public async getProcessingStatistics(
+    @Request() req: AuthenticatedRequest,
   ): Promise<{
       success: boolean;
       data?: {

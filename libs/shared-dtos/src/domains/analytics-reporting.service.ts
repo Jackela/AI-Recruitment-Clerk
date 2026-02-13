@@ -1,26 +1,19 @@
 import type { EventType } from './analytics.dto';
 import {
-  AnalyticsEvent,
   EventStatus,
 } from './analytics.dto';
-import { AnalyticsRules } from './analytics.rules';
-import type {
-  AnalyticsDataRetentionPolicy,
-  AnonymizationRequirementResult,
-  PrivacyComplianceRiskAssessment,
+import {
+  AnalyticsRules,
+  SessionAnalytics,
   ReportType,
   DataScope,
-  SessionAnalytics,
-  ReportingPermissionsResult,
 } from './analytics.rules';
 import type {
   IAnalyticsRepository,
-  IDomainEventBus,
   IAuditLogger,
-  IPrivacyService,
   ISessionTracker,
 } from './analytics-interfaces';
-import type {
+import {
   PrivacyComplianceResult,
   DataRetentionReportResult,
   SessionAnalyticsResult,
@@ -34,9 +27,7 @@ import type {
 export class AnalyticsReportingService {
   constructor(
     private readonly repository: IAnalyticsRepository,
-    private readonly eventBus: IDomainEventBus,
     private readonly auditLogger: IAuditLogger,
-    private readonly privacyService: IPrivacyService,
     private readonly sessionTracker: ISessionTracker,
   ) {}
 

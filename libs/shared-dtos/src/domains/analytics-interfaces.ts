@@ -1,3 +1,4 @@
+import type { DomainEvent } from '../base/domain-event';
 import type { AnalyticsEvent } from './analytics.dto';
 import type { ConsentStatus, UserSession } from './analytics.dto';
 
@@ -74,7 +75,7 @@ export interface IDomainEventBus {
    * Publish a domain event.
    * @param event - The event to publish.
    */
-  publish(event: {
+  publish(event: DomainEvent | {
     eventType: string;
     data: Record<string, unknown>;
     timestamp?: string;

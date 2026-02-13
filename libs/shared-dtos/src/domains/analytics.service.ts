@@ -66,11 +66,11 @@ export class AnalyticsDomainService {
   private reporting: AnalyticsReportingService;
 
   constructor(
-    private readonly repository: IAnalyticsRepository,
-    private readonly eventBus: IDomainEventBus,
-    private readonly auditLogger: IAuditLogger,
-    private readonly privacyService: IPrivacyService,
-    private readonly sessionTracker: ISessionTracker,
+    repository: IAnalyticsRepository,
+    eventBus: IDomainEventBus,
+    auditLogger: IAuditLogger,
+    privacyService: IPrivacyService,
+    sessionTracker: ISessionTracker,
   ) {
     this.eventCollection = new AnalyticsEventCollectionService(
       repository,
@@ -86,9 +86,7 @@ export class AnalyticsDomainService {
     );
     this.reporting = new AnalyticsReportingService(
       repository,
-      eventBus,
       auditLogger,
-      privacyService,
       sessionTracker,
     );
   }
@@ -98,7 +96,7 @@ export class AnalyticsDomainService {
     sessionId: string,
     userId: string,
     eventType: import('./analytics.dto').EventType,
-    eventData: Record<string, unknown>,
+    eventData: import('./analytics.dto').EventPayload,
     context?: Record<string, unknown>,
   ) => this.eventCollection.createUserInteractionEvent(sessionId, userId, eventType, eventData, context);
 

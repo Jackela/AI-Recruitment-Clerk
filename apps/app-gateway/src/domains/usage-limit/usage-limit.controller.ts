@@ -719,6 +719,7 @@ export class UsageLimitController {
   @UseGuards(RolesGuard)
   @Permissions('read_analytics')
   @Get('stats/overview')
+  public async getUsageStatisticsOverview(
     @Request() req: AuthenticatedRequest,
     @Query('timeRange') timeRange = '7d',
     @Query('groupBy') groupBy = 'day',

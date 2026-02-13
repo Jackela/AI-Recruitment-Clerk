@@ -1,11 +1,9 @@
 import type {
   EventType,
   MetricUnit,
-  AnalyticsEventSummary,
 } from './analytics.dto';
 import {
   AnalyticsEvent,
-  EventStatus,
 } from './analytics.dto';
 import { AnalyticsRules } from './analytics.rules';
 import type {
@@ -15,7 +13,7 @@ import type {
   IPrivacyService,
   ISessionTracker,
 } from './analytics-interfaces';
-import type { EventCreationResult } from './analytics-result-classes';
+import { EventCreationResult } from './analytics-result-classes';
 
 /**
  * Service for collecting analytics events.
@@ -37,7 +35,7 @@ export class AnalyticsEventCollectionService {
     sessionId: string,
     userId: string,
     eventType: EventType,
-    eventData: Record<string, unknown>,
+    eventData: import('./analytics.dto').EventPayload,
     context?: Record<string, unknown>,
   ): Promise<EventCreationResult> {
     try {

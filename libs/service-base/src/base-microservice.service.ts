@@ -324,7 +324,6 @@ export abstract class BaseMicroserviceService extends NatsClientService implemen
     const baseHealth = await this.getHealthStatus();
 
     return {
-    return {
       connected: baseHealth.connected,
       service: this.microserviceName,
       lastActivity: baseHealth.lastOperationTime || new Date(),
@@ -332,7 +331,6 @@ export abstract class BaseMicroserviceService extends NatsClientService implemen
       messagesSent: (baseHealth as { messagesSent: number } | undefined).messagesSent ?? 0,
       messagesReceived: (baseHealth as { messagesReceived: number } | undefined).messagesReceived ?? 0,
     };
-  }
   }
 
   /**

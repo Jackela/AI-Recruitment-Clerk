@@ -592,8 +592,15 @@
       ],
       "estimatedHours": 3,
       "dependsOn": [],
-      "passes": false,
-      "files": ["libs/shared-dtos/src/domains/analytics.service.ts"]
+      "passes": true,
+      "files": [
+        "libs/shared-dtos/src/domains/analytics.service.ts",
+        "libs/shared-dtos/src/domains/analytics-event-collection.service.ts",
+        "libs/shared-dtos/src/domains/analytics-aggregation.service.ts",
+        "libs/shared-dtos/src/domains/analytics-reporting.service.ts",
+        "libs/shared-dtos/src/domains/analytics-result-classes.ts",
+        "libs/shared-dtos/src/domains/analytics-interfaces.ts"
+      ]
     },
     {
       "id": "CODE-002d-5",
@@ -605,8 +612,14 @@
       ],
       "estimatedHours": 2,
       "dependsOn": [],
-      "passes": false,
-      "files": ["libs/shared-dtos/src/domains/usage-limit.dto.ts"]
+      "passes": true,
+      "files": [
+        "libs/shared-dtos/src/domains/usage-limit.dto.ts",
+        "libs/shared-dtos/src/domains/usage-limit-core.dto.ts",
+        "libs/shared-dtos/src/domains/usage-limit-events.dto.ts",
+        "libs/shared-dtos/src/domains/usage-limit-results.dto.ts",
+        "libs/shared-dtos/src/domains/usage-limit-types.dto.ts"
+      ]
     },
     {
       "id": "CODE-002d-6",
@@ -618,8 +631,20 @@
       ],
       "estimatedHours": 2,
       "dependsOn": [],
-      "passes": false,
-      "files": ["libs/shared-dtos/src/domains/analytics.test.ts"]
+      "passes": true,
+      "files": [
+        "libs/shared-dtos/src/domains/analytics.test.ts",
+        "libs/shared-dtos/src/domains/analytics-test-helpers.ts",
+        "libs/shared-dtos/src/domains/analytics-value-objects.test.ts",
+        "libs/shared-dtos/src/domains/analytics-event-creation.test.ts",
+        "libs/shared-dtos/src/domains/analytics-event-validation.test.ts",
+        "libs/shared-dtos/src/domains/analytics-event-processing.test.ts",
+        "libs/shared-dtos/src/domains/analytics-privacy-compliance.test.ts",
+        "libs/shared-dtos/src/domains/analytics-business-rules.test.ts",
+        "libs/shared-dtos/src/domains/analytics-contracts.test.ts",
+        "libs/shared-dtos/src/domains/analytics-domain-service.test.ts",
+        "libs/shared-dtos/src/domains/analytics-system-integration.test.ts"
+      ]
     },
     {
       "id": "CODE-002e-1",

@@ -1,5 +1,4 @@
 import {
-  AnalyticsEvent,
   EventStatus,
   ConsentStatus,
   UserSession,
@@ -10,12 +9,10 @@ import type {
   IDomainEventBus,
   IAuditLogger,
 } from './analytics-interfaces';
-import type {
+import {
   BatchProcessingItem,
   BatchProcessingResult,
-  EventProcessingMetrics,
   EventProcessingMetricsResult,
-  DataPrivacyMetrics,
   DataPrivacyMetricsResult,
 } from './analytics-result-classes';
 
@@ -169,7 +166,7 @@ export class AnalyticsAggregationService {
       const errorRate =
         totalEvents > 0 ? (failedEvents / totalEvents) * 100 : 0;
 
-      const metrics: EventProcessingMetrics = {
+      const metrics = {
         totalEvents,
         processedEvents,
         failedEvents,
@@ -253,7 +250,7 @@ export class AnalyticsAggregationService {
         riskLevel = 'CRITICAL';
       }
 
-      const metrics: DataPrivacyMetrics = {
+      const metrics = {
         totalEvents,
         anonymizedEvents,
         expiredEvents,
