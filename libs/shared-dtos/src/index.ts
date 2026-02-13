@@ -183,6 +183,9 @@ export {
 } from './domains/analytics-event.dto';
 export {
   AnalyticsDomainService,
+  AnalyticsEventCollectionService,
+  AnalyticsAggregationService,
+  AnalyticsReportingService,
   EventCreationResult,
   BatchProcessingResult,
   PrivacyComplianceResult,
@@ -193,6 +196,7 @@ export {
   ReportingAccessResult,
 } from './domains/analytics.service';
 export type {
+  BatchProcessingItem,
   IAnalyticsRepository,
   IDomainEventBus,
   IAuditLogger,
