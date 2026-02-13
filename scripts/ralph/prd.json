@@ -22,11 +22,10 @@
       ],
       "estimatedHours": 2.0,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
         "apps/resume-parser-svc/src/vision-llm/vision-llm.service.spec.ts"
-      ],
-      "status": "blocked"
+      ]
     },
     {
       "id": "CODE-002a-2",
@@ -38,7 +37,7 @@
       ],
       "estimatedHours": 0.5,
       "dependsOn": ["CODE-002a-1"],
-      "passes": false,
+      "passes": true,
       "files": ["apps/jd-extractor-svc/src/llm/llm.service.spec.ts"]
     },
     {
@@ -53,7 +52,7 @@
       ],
       "estimatedHours": 1,
       "dependsOn": ["CODE-002a-2"],
-      "passes": false,
+      "passes": true,
       "files": ["apps/jd-extractor-svc/src/llm/llm.service.spec.ts"]
     },
     {

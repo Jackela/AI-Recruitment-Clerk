@@ -20,25 +20,43 @@ export class LlmService {
   public async extractJobRequirements(jdText: string): Promise<JdDTO> {
     this.logger.log('Extracting job requirements from JD text');
 
+    // Handle null, undefined, or non-string inputs gracefully
+    const sanitizedText = this.sanitizeInput(jdText);
+
     // For now, provide a mock implementation that extracts basic structure
     // In production, this would integrate with actual LLM APIs (Gemini, OpenAI, etc.)
     const extractedData: JdDTO = {
       requirements: {
-        technical: this.extractTechnicalSkills(jdText),
-        soft: this.extractSoftSkills(jdText),
-        experience: this.extractExperienceLevel(jdText),
-        education: this.extractEducationRequirement(jdText),
+        technical: this.extractTechnicalSkills(sanitizedText),
+        soft: this.extractSoftSkills(sanitizedText),
+        experience: this.extractExperienceLevel(sanitizedText),
+        education: this.extractEducationRequirement(sanitizedText),
       },
-      responsibilities: this.extractResponsibilities(jdText),
-      benefits: this.extractBenefits(jdText),
+      responsibilities: this.extractResponsibilities(sanitizedText),
+      benefits: this.extractBenefits(sanitizedText),
       company: {
-        name: this.extractCompanyName(jdText),
-        industry: this.extractIndustry(jdText),
-        size: this.extractCompanySize(jdText),
+        name: this.extractCompanyName(sanitizedText),
+        industry: this.extractIndustry(sanitizedText),
+        size: this.extractCompanySize(sanitizedText),
       },
     };
 
     return extractedData;
+  }
+
+  /**
+   * Sanitizes input text, handling null/undefined/empty values.
+   * @param text - The input text.
+   * @returns Sanitized text string.
+   */
+  private sanitizeInput(text: string): string {
+    if (text === null || text === undefined) {
+      return '';
+    }
+    if (typeof text !== 'string') {
+      return String(text);
+    }
+    return text;
   }
 
   /**

@@ -1,13 +1,12 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { LlmService } from '../extraction/llm.service';
+import { LlmService } from './llm.service';
 import type { JdDTO } from '@ai-recruitment-clerk/job-management-domain';
 import {
   createMockExtractedJdDTO,
   createMockLlmExtractionRequest,
   createLongJdText,
 } from '../testing/test-fixtures';
-import { JdExtractorConfigService } from '../config';
 
 describe('LlmService', () => {
   let service: LlmService;
@@ -69,26 +68,14 @@ describe('LlmService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        LlmService,
-        {
-          provide: JdExtractorConfigService,
-          useValue: {
-            isTest: true,
-            nodeEnv: 'test',
-            natsUrl: 'nats://localhost:4222',
-            geminiApiKey: 'test-api-key',
-            getConfigSnapshot: () => ({}),
-          },
-        },
-      ],
+      providers: [LlmService],
     }).compile();
 
     service = module.get<LlmService>(LlmService);
   });
 
   afterEach(() => {
-    // No cleanup needed - config is mocked
+    // No cleanup needed
   });
 
   describe('Service Initialization', () => {
