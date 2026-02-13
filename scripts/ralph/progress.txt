@@ -1166,3 +1166,41 @@ Split analytics.test.ts (1029 lines) into focused test suites by feature
 
 ---
 
+
+---
+## [2026-02-13] - TypeScript Error Fixes
+
+### Task Summary
+Fix TypeScript errors across the codebase
+
+### Work Done
+- Extended Permission enum in user-management-domain with missing values:
+  - MANAGE_QUOTAS, READ_USAGE_LIMITS, READ_USAGE_DETAILS, MANAGE_USAGE_POLICY
+  - CREATE_QUESTIONNAIRE, UPDATE_QUESTIONNAIRE, DELETE_QUESTIONNAIRE, PUBLISH_QUESTIONNAIRE
+  - READ_QUESTIONNAIRE_RESPONSES, READ_QUESTIONNAIRE_ANALYTICS, EXPORT_QUESTIONNAIRE_DATA
+  - PROCESS_RESUME, SEARCH_RESUME, DELETE_RESUME, READ_ANALYTICS
+
+- Fixed controller imports to use Permission from user-management-domain (matching the decorator)
+- Fixed 13 frontend component TypeScript issues
+- Fixed usage-limit DTO import issues and readonly property issues
+- Fixed service contract predicate function signatures
+
+### Files Changed
+- apps/app-gateway/src/domains/questionnaire/questionnaire.controller.ts
+- apps/app-gateway/src/domains/resume/resume.controller.ts
+- apps/app-gateway/src/domains/usage-limit/usage-limit.controller.ts
+- apps/ai-recruitment-frontend/src/app/components/mobile/*.ts
+- apps/ai-recruitment-frontend/src/app/components/shared/*.ts
+- apps/jd-extractor-svc/src/extraction/extraction.service.contracts.ts
+- libs/shared-dtos/src/auth/permissions.dto.ts
+- libs/shared-dtos/src/domains/usage-limit-*.dto.ts
+- libs/user-management-domain/src/index.ts
+
+### Learnings
+- The @Permissions decorator imports Permission from user-management-domain
+- Controllers must use the same Permission enum source for type compatibility
+- Multiple Permission enums existed causing type conflicts
+- Type-only imports cannot be used when values are needed (e.g., enum values)
+- DTO splitting requires careful attention to import paths and value vs type imports
+
+---
