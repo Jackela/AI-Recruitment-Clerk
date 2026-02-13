@@ -513,15 +513,23 @@
       "title": "Split mobile-swipe.component.spec.ts",
       "description": "Split 1881-line mobile swipe spec file into focused test suites.",
       "acceptanceCriteria": [
-        "mobile-swipe.component.spec.ts < 500 lines",
-        "Unit tests separated by feature",
-        "Test utilities extracted"
+        "Original spec file removed",
+        "Test files split by feature (init, touch, mouse, actions, edge-cases, threshold)",
+        "All split files < 500 lines",
+        "Shared test utilities extracted",
+        "All tests passing"
       ],
       "estimatedHours": 2,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
-        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.component.spec.ts"
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.test-helper.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.init.spec.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.touch.spec.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.mouse.spec.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.actions.spec.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.edge-cases.spec.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.threshold.spec.ts"
       ]
     },
     {
