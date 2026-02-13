@@ -782,3 +782,140 @@ Split virtual-scroll.component.ts (549 lines) into smaller modules.
 - Type definitions can be extracted to a separate file to reduce line count
 - Child components receive data via @Input but use service methods for display logic (getItemHeight)
 - All new files under 500 lines target achieved
+## [2026-02-13] - CODE-002c-16
+
+### Task Summary
+Split mobile-swipe.component.spec.ts (1881 lines) into focused test suites.
+
+### Work Done
+- Created mobile-swipe.test-helper.ts (139 lines) with mock event utilities
+  - createMockTouch() - creates mock Touch objects
+  - createMockTouchEvent() - creates mock TouchEvent objects
+  - createMockMouseEvent() - creates mock MouseEvent objects
+  - mockActions - default mock actions for testing
+- Created mobile-swipe.init.spec.ts (111 lines) for initialization tests
+  - Component creation and default properties
+  - MaxSwipeDistance calculations
+  - CSS class bindings
+  - ngOnDestroy lifecycle
+- Created mobile-swipe.touch.spec.ts (329 lines) for touch event tests
+  - onTouchStart handler tests
+  - onTouchMove handler tests
+  - onTouchEnd handler tests
+- Created mobile-swipe.mouse.spec.ts (364 lines) for mouse event tests
+  - onMouseDown handler tests including desktop breakpoint
+  - onMouseMove handler tests
+  - onMouseUp handler tests
+  - onMouseLeave handler tests
+- Created mobile-swipe.actions.spec.ts (265 lines) for action handler tests
+  - Action click handler tests
+  - Public API methods (reset, showActions)
+  - Action emission via EventEmitter
+  - Action click after swipe tests
+- Created mobile-swipe.edge-cases.spec.ts (346 lines) for edge case tests
+  - Custom threshold handling
+  - Very small swipe distance
+  - Zero threshold
+  - Horizontal swipe detection (left/right)
+  - DeltaX calculation
+  - Rapid back-and-forth movements
+  - Right swipe action handling
+- Created mobile-swipe.threshold.spec.ts (454 lines) for threshold calculation tests
+  - Swipe threshold calculation tests
+  - Swipe detection logic (isSwipe判定)
+  - Threshold-based triggering tests
+  - Left swipe action reveal tests
+- Deleted original mobile-swipe.component.spec.ts (1881 lines)
+
+### Files Changed
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.test-helper.ts - Created new test helper file
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.init.spec.ts - Created new spec file
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.touch.spec.ts - Created new spec file
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.mouse.spec.ts - Created new spec file
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.actions.spec.ts - Created new spec file
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.edge-cases.spec.ts - Created new spec file
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.threshold.spec.ts - Created new spec file
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-swipe.component.spec.ts - Deleted (original file)
+
+### Test Results
+All 108 tests passing across 6 spec files.
+
+### Learnings for future iterations:
+- Test splitting pattern for large spec files: extract test utilities to helper file, then split by feature area
+- Mock event creation helpers (Touch, TouchEvent, MouseEvent) should be centralized in test helper
+- Use consistent mock data across all test files (e.g., mockActions)
+- Import types from main component using explicit `import type { ... }`
+- All split files under 500 lines target achieved (max: 454 lines in threshold.spec.ts)
+---
+
+## [2026-02-13] - CODE-002d-1
+
+### Task Summary
+Split analytics.dto.ts into analytics-event.dto.ts
+
+### Work Done
+- Created analytics-event.dto.ts (158 lines) with extracted domain event definitions
+  - AnalyticsEventCreatedEvent
+  - SystemPerformanceEventCreatedEvent
+  - BusinessMetricEventCreatedEvent
+  - AnalyticsEventValidatedEvent
+  - AnalyticsEventValidationFailedEvent
+  - AnalyticsEventProcessedEvent
+  - AnalyticsEventAnonymizedEvent
+  - AnalyticsEventExpiredEvent
+- Updated analytics.dto.ts to import domain events from new file
+- Added exports in libs/shared-dtos/src/index.ts for all new event classes
+- Reduced analytics.dto.ts from 1412 to 1264 lines (148 lines removed)
+
+### Files Changed
+- libs/shared-dtos/src/domains/analytics.dto.ts - Reduced to 1264 lines
+- libs/shared-dtos/src/domains/analytics-event.dto.ts - Created new file (158 lines)
+- libs/shared-dtos/src/index.ts - Added exports for new event classes
+
+### Learnings for future iterations:
+- Domain event classes that implement DomainEvent interface can be cleanly extracted
+- Use type-only imports for EventType and MetricUnit in the event file to avoid circular dependencies
+- Pre-commit hooks run eslint --fix automatically and modify files
+- Export all new types from the barrel index.ts for clean imports
+
+---
+
+## [2026-02-13] - CODE-002d-2
+
+### Task Summary
+Split questionnaire.dto.ts (1288 lines) into domain interfaces
+
+### Work Done
+- Created questionnaire-events.dto.ts (65 lines) for domain event classes
+  - QuestionnaireSubmittedEvent
+  - HighQualitySubmissionEvent
+  - QuestionnaireValidationFailedEvent
+- Created questionnaire-interfaces.dto.ts (88 lines) for controller DTOs
+  - CreateQuestionnaireDto
+  - UpdateQuestionnaireDto
+  - QuestionnaireResponseDto
+  - QuestionnaireAnalyticsDto
+- Created questionnaire-types.dto.ts (105 lines) for type definitions and enums
+  - QuestionSection, QualityThreshold interfaces
+  - QuestionnaireUserRole, CompanySize, ScreeningMethod, Rating types
+  - RawSubmissionData, QuestionnaireData interfaces
+- Updated questionnaire.dto.ts to import from new files
+- Updated questionnaire.service.ts to import events from events file
+- Reduced questionnaire.dto.ts from 1288 to 1092 lines (196 lines removed, ~15% reduction)
+
+### Files Changed
+- libs/shared-dtos/src/domains/questionnaire.dto.ts - Reduced to 1092 lines
+- libs/shared-dtos/src/domains/questionnaire-events.dto.ts - Created new file
+- libs/shared-dtos/src/domains/questionnaire-interfaces.dto.ts - Created new file
+- libs/shared-dtos/src/domains/questionnaire-types.dto.ts - Created new file
+- libs/shared-dtos/src/domains/questionnaire.service.ts - Updated imports
+- libs/shared-dtos/src/index.ts - Added exports for new files
+
+### Learnings for future iterations:
+- When splitting DTO files, consider separating domain events, interfaces, and types
+- Services that use domain events should import them from the events file directly
+- Use type-only imports (import type) for interfaces used only as type annotations
+- Re-export types from main DTO file for backward compatibility
+- The QuestionnaireStatus enum should remain in the main DTO file since it's used by both the DTO and the split files
+
+---

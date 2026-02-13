@@ -542,10 +542,10 @@
       ],
       "estimatedHours": 2,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
         "libs/shared-dtos/src/domains/analytics.dto.ts",
-        "libs/shared-dtos/src/domains/analytics-event.dto.ts (new)"
+        "libs/shared-dtos/src/domains/analytics-event.dto.ts"
       ]
     },
     {
@@ -558,8 +558,13 @@
       ],
       "estimatedHours": 3,
       "dependsOn": [],
-      "passes": false,
-      "files": ["libs/shared-dtos/src/domains/questionnaire.dto.ts"]
+      "passes": true,
+      "files": [
+        "libs/shared-dtos/src/domains/questionnaire.dto.ts",
+        "libs/shared-dtos/src/domains/questionnaire-events.dto.ts",
+        "libs/shared-dtos/src/domains/questionnaire-interfaces.dto.ts",
+        "libs/shared-dtos/src/domains/questionnaire-types.dto.ts"
+      ]
     },
     {
       "id": "CODE-002d-3",
@@ -573,7 +578,7 @@
       ],
       "estimatedHours": 3,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": ["libs/shared-dtos/src/domains/incentive.service.ts"]
     },
     {
