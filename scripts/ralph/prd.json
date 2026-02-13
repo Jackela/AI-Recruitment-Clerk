@@ -304,9 +304,12 @@
       ],
       "estimatedHours": 2,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
-        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-display.component.ts"
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-display.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-item.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-empty.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-loading.component.ts"
       ]
     },
     {
@@ -318,9 +321,12 @@
       ],
       "estimatedHours": 1.5,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
-        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-display.component.ts"
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-display.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-item.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-empty.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-loading.component.ts"
       ]
     },
     {
