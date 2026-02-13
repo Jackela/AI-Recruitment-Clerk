@@ -1,5 +1,45 @@
 import { ValueObject } from '../base/value-object';
 import type { DomainEvent } from '../base/domain-event';
+import {
+  QuestionnaireSubmittedEvent,
+  HighQualitySubmissionEvent,
+} from './questionnaire-events.dto';
+import type {
+  QuestionSection,
+  QualityThreshold,
+  QuestionnaireUserRole,
+  CompanySize,
+  ScreeningMethod,
+  Rating,
+  RawSubmissionData,
+  QuestionnaireData,
+} from './questionnaire-types.dto';
+
+// Re-export types for backward compatibility
+export type {
+  QuestionSection,
+  QualityThreshold,
+  QuestionnaireUserRole,
+  CompanySize,
+  ScreeningMethod,
+  Rating,
+  RawSubmissionData,
+  QuestionnaireData,
+} from './questionnaire-types.dto';
+
+// Re-export events
+export type {
+  QuestionnaireSubmittedEvent,
+  HighQualitySubmissionEvent,
+} from './questionnaire-events.dto';
+
+// Re-export controller DTOs
+export type {
+  CreateQuestionnaireDto,
+  UpdateQuestionnaireDto,
+  QuestionnaireResponseDto,
+  QuestionnaireAnalyticsDto,
+} from './questionnaire-interfaces.dto';
 
 // 问卷聚合根
 /**
@@ -1042,246 +1082,13 @@ export class QuestionnaireValidationResult {
   ) {}
 }
 
-// 枚举类型
+// ========================
+// Enum Types
+// ========================
+
 export enum QuestionnaireStatus {
   SUBMITTED = 'submitted',
   PROCESSED = 'processed',
   REWARDED = 'rewarded',
   LOW_QUALITY = 'low_quality',
-}
-
-export type QuestionnaireUserRole =
-  | 'hr'
-  | 'recruiter'
-  | 'manager'
-  | 'founder'
-  | 'other';
-export type CompanySize =
-  | 'startup'
-  | 'small'
-  | 'medium'
-  | 'large'
-  | 'enterprise'
-  | 'unknown';
-export type ScreeningMethod = 'manual' | 'ats' | 'hybrid' | 'other';
-export type Rating = 1 | 2 | 3 | 4 | 5;
-
-/**
- * Defines the shape of the question section.
- */
-export interface QuestionSection {
-  id: string;
-  name: string;
-  required: boolean;
-}
-
-/**
- * Defines the shape of the quality threshold.
- */
-export interface QualityThreshold {
-  metric: string;
-  minValue: number;
-}
-
-/**
- * Defines the shape of the raw submission data.
- */
-export interface RawSubmissionData {
-  userProfile?: {
-    role?: QuestionnaireUserRole;
-    industry?: string;
-    companySize?: CompanySize;
-    location?: string;
-  };
-  userExperience?: {
-    overallSatisfaction?: Rating;
-    accuracyRating?: Rating;
-    speedRating?: Rating;
-    uiRating?: Rating;
-    mostUsefulFeature?: string;
-    mainPainPoint?: string;
-    improvementSuggestion?: string;
-  };
-  businessValue?: {
-    currentScreeningMethod?: ScreeningMethod;
-    timeSpentPerResume?: number;
-    resumesPerWeek?: number;
-    timeSavingPercentage?: number;
-    willingnessToPayMonthly?: number;
-    recommendLikelihood?: Rating;
-  };
-  featureNeeds?: {
-    priorityFeatures?: string[];
-    integrationNeeds?: string[];
-  };
-  optional?: {
-    additionalFeedback?: string;
-    contactPreference?: string;
-  };
-}
-
-/**
- * Defines the shape of the questionnaire data.
- */
-export interface QuestionnaireData {
-  id: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  template: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  submission: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  quality: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata: any;
-  status: QuestionnaireStatus;
-}
-
-// 领域事件
-/**
- * Represents the questionnaire submitted event event.
- */
-export class QuestionnaireSubmittedEvent implements DomainEvent {
-  /**
-   * Initializes a new instance of the Questionnaire Submitted Event.
-   * @param questionnaireId - The questionnaire id.
-   * @param submitterIP - The submitter ip.
-   * @param qualityScore - The quality score.
-   * @param bonusEligible - The bonus eligible.
-   * @param submissionData - The submission data.
-   * @param occurredAt - The occurred at.
-   */
-  constructor(
-    public readonly questionnaireId: string,
-    public readonly submitterIP: string,
-    public readonly qualityScore: number,
-    public readonly bonusEligible: boolean,
-    public readonly submissionData: SubmissionSummary,
-    public readonly occurredAt: Date,
-  ) {}
-}
-
-/**
- * Represents the high quality submission event event.
- */
-export class HighQualitySubmissionEvent implements DomainEvent {
-  /**
-   * Initializes a new instance of the High Quality Submission Event.
-   * @param questionnaireId - The questionnaire id.
-   * @param submitterIP - The submitter ip.
-   * @param qualityScore - The quality score.
-   * @param qualityReasons - The quality reasons.
-   * @param occurredAt - The occurred at.
-   */
-  constructor(
-    public readonly questionnaireId: string,
-    public readonly submitterIP: string,
-    public readonly qualityScore: number,
-    public readonly qualityReasons: string[],
-    public readonly occurredAt: Date,
-  ) {}
-}
-
-/**
- * Represents the questionnaire validation failed event event.
- */
-export class QuestionnaireValidationFailedEvent implements DomainEvent {
-  /**
-   * Initializes a new instance of the Questionnaire Validation Failed Event.
-   * @param submitterIP - The submitter ip.
-   * @param validationErrors - The validation errors.
-   * @param submissionData - The submission data.
-   * @param occurredAt - The occurred at.
-   */
-  constructor(
-    public readonly submitterIP: string,
-    public readonly validationErrors: string[],
-    public readonly submissionData: Partial<RawSubmissionData>,
-    public readonly occurredAt: Date,
-  ) {}
-}
-
-// ========================
-// Controller DTOs
-// ========================
-
-/**
- * DTO for creating a new questionnaire
- */
-export interface CreateQuestionnaireDto {
-  title: string;
-  description?: string;
-  sections?: QuestionSection[];
-  qualityThresholds?: QualityThreshold;
-  settings?: {
-    allowAnonymous?: boolean;
-    requireAuthentication?: boolean;
-    maxSubmissionsPerUser?: number;
-    expirationDate?: string;
-  };
-  tags?: string[];
-}
-
-/**
- * DTO for updating an existing questionnaire
- */
-export interface UpdateQuestionnaireDto {
-  title?: string;
-  description?: string;
-  status?: QuestionnaireStatus;
-  sections?: QuestionSection[];
-  qualityThresholds?: QualityThreshold;
-  settings?: {
-    allowAnonymous?: boolean;
-    requireAuthentication?: boolean;
-    maxSubmissionsPerUser?: number;
-    expirationDate?: string;
-  };
-  tags?: string[];
-}
-
-/**
- * DTO for questionnaire response/submission data
- */
-export interface QuestionnaireResponseDto {
-  id: string;
-  questionnaireId: string;
-  submittedBy: string;
-  submittedAt: string;
-  answers: Record<string, unknown>;
-  qualityScore: number;
-  completionTime: number;
-  metadata?: {
-    userAgent?: string;
-    ipAddress?: string;
-    location?: string;
-  };
-}
-
-/**
- * DTO for questionnaire analytics
- */
-export interface QuestionnaireAnalyticsDto {
-  questionnaireId: string;
-  title: string;
-  totalSubmissions: number;
-  averageQualityScore: number;
-  averageCompletionTime: number;
-  completionRate: number;
-  submissionsByDay: {
-    date: string;
-    count: number;
-  }[];
-  qualityDistribution: {
-    excellent: number;
-    good: number;
-    fair: number;
-    poor: number;
-  };
-  questionAnalytics: {
-    questionId: string;
-    questionText: string;
-    responseRate: number;
-    averageScore?: number;
-    commonAnswers?: string[];
-  }[];
 }

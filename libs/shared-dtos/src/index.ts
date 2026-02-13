@@ -80,6 +80,9 @@ export * from './contracts/dbc.decorators';
 // Domain Models - User Management & Questionnaire
 export * from './domains/user-management.dto';
 export * from './domains/questionnaire.dto';
+export * from './domains/questionnaire-events.dto';
+export * from './domains/questionnaire-interfaces.dto';
+export * from './domains/questionnaire-types.dto';
 export {
   QuestionnaireDomainService,
   QuestionnaireSubmissionResult,

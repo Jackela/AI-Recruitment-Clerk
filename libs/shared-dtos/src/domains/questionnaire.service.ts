@@ -3,8 +3,8 @@ import type {
   SubmissionMetadata} from './questionnaire.dto';
 import {
   Questionnaire,
-  QuestionnaireValidationFailedEvent,
 } from './questionnaire.dto';
+import { QuestionnaireValidationFailedEvent } from './questionnaire-events.dto';
 
 /**
  * Provides questionnaire domain functionality.
