@@ -284,9 +284,12 @@
       ],
       "estimatedHours": 2.5,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
-        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-performance.component.ts"
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-performance.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-performance-details.component.ts",
+        "apps/ai-recruitment-frontend/src/app/services/mobile-performance.service.ts",
+        "apps/ai-recruitment-frontend/src/app/types/performance-metrics.type.ts"
       ]
     },
     {
