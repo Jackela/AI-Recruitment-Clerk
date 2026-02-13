@@ -216,3 +216,27 @@ Split mobile-navigation.component.ts (1021 lines) into smaller modules.
 - Side menu with overlay works well as separate component with @Input/@Output
 - Mobile navigation components can be split by: route tracking (service), menu UI (child component), main orchestrator (parent component)
 - Main component retains header and bottom nav while delegating the complex menu overlay
+## [2026-02-13] - CODE-002c-3
+
+### Task Summary
+Split mobile-upload.component.ts (1121 lines) into smaller modules:
+- Created mobile-upload.service.ts (449 lines) for validation, state management, and file processing
+- Created mobile-upload-zone.component.ts (359 lines) for upload zone UI with drag-and-drop
+- Created mobile-upload-file-item.component.ts (304 lines) for individual file display in list
+- Refactored main mobile-upload.component.ts to 436 lines (down from 1121)
+
+### Files Changed
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-upload.component.ts - Reduced from 1121 to 436 lines
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-upload-zone.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-upload-file-item.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/services/mobile-upload.service.ts - Created new service
+
+### Learnings for future iterations:
+- File upload component splitting pattern: main orchestrator + upload zone (child) + file list items (child components) + upload service (business logic)
+- Service extraction follows BehaviorSubject pattern for reactive state management
+- Validation logic (file size, type checking) belongs in service layer
+- Upload progress simulation kept in main component for demo purposes (would be API calls in production)
+- Use inject() for service injection in Angular 15+ standalone components
+- Remove unused imports (UploadFile from zone component where not needed)
+- Use `import type` for service-only imports to satisfy ESLint
+---

@@ -260,9 +260,12 @@
       ],
       "estimatedHours": 3,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
-        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-upload.component.ts"
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-upload.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-upload-zone.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-upload-file-item.component.ts",
+        "apps/ai-recruitment-frontend/src/app/services/mobile/mobile-upload.service.ts"
       ]
     },
     {
