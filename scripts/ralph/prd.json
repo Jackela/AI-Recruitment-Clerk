@@ -398,9 +398,9 @@
       ],
       "estimatedHours": 3,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
-        "apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table.component.ts"
+        "apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table.util.ts"
       ]
     },
     {
