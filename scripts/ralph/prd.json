@@ -433,9 +433,12 @@
       ],
       "estimatedHours": 2.5,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
-        "apps/ai-recruitment-frontend/src/app/components/shared/error-reporting/error-reporting.component.ts"
+        "apps/ai-recruitment-frontend/src/app/components/shared/error-reporting/error-reporting.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/error-reporting/error-report-form.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/error-reporting/error-summary-display.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/error-reporting/reproduction-steps.component.ts"
       ]
     },
     {
@@ -450,9 +453,13 @@
       ],
       "estimatedHours": 3,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
-        "apps/ai-recruitment-frontend/src/app/components/shared/progress-tracker/progress-tracker.component.ts"
+        "apps/ai-recruitment-frontend/src/app/components/shared/progress-tracker/progress-tracker.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/progress-tracker/progress-log.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/progress-tracker/progress-milestone.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/progress-tracker/progress-timeline.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/progress-tracker/progress-tracker.types.ts"
       ]
     },
     {
@@ -467,9 +474,15 @@
       ],
       "estimatedHours": 3,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
-        "apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-table.component.ts"
+        "apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-table.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-cell.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-row.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-toolbar.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-pagination.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-export.util.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-table.component.html"
       ]
     },
     {

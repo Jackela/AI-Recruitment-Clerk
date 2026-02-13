@@ -552,3 +552,170 @@ All CODE-002 stories now marked with "passes": true.
 All CODE-002 and CODE-003 PRD phases complete!
 
 ---
+
+## [2026-02-13] - CODE-002c-12
+
+### Task Summary
+Split error-reporting.component.ts (735 lines) into smaller modules.
+
+### Work Done
+- Created ErrorSummaryDisplayComponent (120 lines) for error summary display
+  - Displays error summary with technical details
+  - Shows user guidance section
+  - Uses computed signal for formatting guidance text
+- Created ErrorReportFormComponent (343 lines) for form handling
+  - Problem category selection
+  - User feedback textarea with character count
+  - Expected vs actual behavior comparison
+  - Contact information input
+  - Submit/cancel actions
+- Created ReproductionStepsComponent (220 lines) for reproduction steps
+  - Dynamic add/remove steps functionality
+  - Step number display
+  - Uses model() for two-way binding
+- Refactored main error-reporting.component.ts to 266 lines (down from 735)
+  - Now acts as modal container with header
+  - Delegates error summary display to child component
+  - Delegates form handling to child component
+  - Manages submission state and error data
+
+### Files Changed
+- apps/ai-recruitment-frontend/src/app/components/shared/error-reporting/error-reporting.component.ts - Reduced from 735 to 266 lines
+- apps/ai-recruitment-frontend/src/app/components/shared/error-reporting/error-summary-display.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/shared/error-reporting/error-report-form.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/shared/error-reporting/reproduction-steps.component.ts - Created new component
+
+### Learnings for future iterations:
+- Error reporting component splitting pattern: modal container + summary display + form component + reproduction steps
+- Use model() for two-way binding of array data (reproduction steps)
+- Use computed signals for derived values in display components
+- Main component retains orchestration logic (modal visibility, submission handling)
+- All new files under 500 lines target achieved
+
+---
+
+## [2026-02-13] - CODE-002c-13
+
+### Task Summary
+Split progress-tracker.component.ts (798 lines) into smaller modules.
+
+### Work Done
+- Created progress-tracker.types.ts (58 lines) for type definitions
+  - ProgressMessage interface
+  - WebSocketProgressMessage interface
+  - StepChangeData interface
+  - ProgressCompletionData interface
+  - ProgressErrorData interface
+  - ProgressStep interface
+- Created ProgressLogComponent (124 lines) for message log display
+  - Displays real-time message log for progress tracking
+  - Timestamp formatting with Chinese locale
+  - Color-coded message types (error, progress, info)
+  - Configurable max messages (default 20)
+- Created ProgressMilestoneComponent (200 lines) for individual step items
+  - Displays individual step with status icons (completed/error/active/pending)
+  - SVG icons for completed checkmark and error states
+  - Spinner animation for active steps
+  - Step number display for pending steps
+  - Mini progress bar for active steps with percentage
+- Created ProgressTimelineComponent (53 lines) for steps container
+  - Wrapper component for step items
+  - Generates step numbers for display
+  - Tracks steps by ID for performance
+- Refactored main ProgressTrackerComponent to 455 lines (down from 798)
+  - Now acts as orchestrator with WebSocket connection management
+  - Delegates step rendering to ProgressTimelineComponent
+  - Delegates message log to ProgressLogComponent
+  - Manages connection status and overall progress
+
+### Files Changed
+- apps/ai-recruitment-frontend/src/app/components/shared/progress-tracker/progress-tracker.component.ts - Reduced from 798 to 455 lines
+- apps/ai-recruitment-frontend/src/app/components/shared/progress-tracker/progress-tracker.types.ts - Created new file with type definitions
+- apps/ai-recruitment-frontend/src/app/components/shared/progress-tracker/progress-log.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/shared/progress-tracker/progress-milestone.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/shared/progress-tracker/progress-timeline.component.ts - Created new component
+
+### Learnings for future iterations:
+- Progress tracker component splitting pattern: main orchestrator + timeline container + milestone items + message log + types file
+- Extracting type definitions to a separate file is effective for reducing component size when there are many interfaces
+- Use Chinese locale (zh-CN) for timestamp formatting in Chinese UIs
+- Status-based CSS classes (active, completed, error, pending) enable conditional styling in child components
+- BehaviorSubject pattern for reactive state (connectionStatus$, overallProgress$, currentStep$) keeps components synchronized
+- WebSocket connection handling stays in main orchestrator - child components are purely presentational
+- All new files under 500 lines target achieved
+
+---
+## [2026-02-13] - CODE-002c-14
+
+### Task Summary
+Split timesheet-table.component.ts (934 lines) into smaller modules.
+
+### Work Done
+- Created TimesheetCellComponent (176 lines) for individual cell rendering
+  - Handles all cell type rendering: boolean, date, number, text
+  - Contains formatting methods: formatDuration(), formatTime()
+  - Status badge rendering with color coding
+  - Uses HostBinding for title attribute and CSS classes
+  - Truncation handling with tooltip support
+
+- Created TimesheetRowComponent (105 lines) for row rendering
+  - Renders individual table rows with status-based CSS classes
+  - Handles selection checkbox and actions (view, edit, delete)
+  - Uses TimesheetCellComponent for cell rendering
+  - Disabled state for approved entries (edit/delete buttons)
+
+- Created TimesheetToolbarComponent (133 lines) for toolbar
+  - Search box with icon and clear button
+  - View type selector (full/summary/mobile/bulkEdit)
+  - Export button for CSV download
+  - Bulk action buttons (edit/delete) shown in bulk edit mode
+
+- Created TimesheetPaginationComponent (137 lines) for pagination
+  - Page size selector
+  - First/previous/next/page buttons
+  - Page numbers with max 5 visible
+  - Outputs pageChange and pageSizeChange events
+
+- Created TimesheetExportUtil (117 lines) for CSV export
+  - Static utility class for CSV generation
+  - convertToCSV() - formats data with escaping
+  - downloadCSV() - triggers blob download
+  - exportData() - main export method
+
+- Created external template (135 lines) and SCSS files
+  - timesheet-table.component.html for template
+  - timesheet-row.component.scss for row styles
+  - timesheet-pagination.component.scss for pagination styles
+  - timesheet-toolbar.component.scss for toolbar styles
+
+- Refactored main timesheet-table.component.ts to 396 lines (down from 934)
+  - Now acts as orchestrator using extracted components
+  - Uses templateUrl instead of inline template
+  - Handles sorting, filtering, selection, pagination
+  - Export functionality delegated to TimesheetExportUtil
+
+### Files Changed
+- apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-table.component.ts - Reduced from 934 to 396 lines
+- apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-cell.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-row.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-toolbar.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-pagination.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-export.util.ts - Created new utility
+- apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-table.component.html - Created external template
+- apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-row.component.scss - Created external styles
+- apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-pagination.component.scss - Created external styles
+- apps/ai-recruitment-frontend/src/app/components/shared/timesheet-table/timesheet-toolbar.component.scss - Created external styles
+
+### Learnings for future iterations:
+- Table component splitting pattern: main orchestrator + row component + cell component + toolbar + pagination + export utility
+- Using templateUrl for large templates reduces component line count significantly
+- HostBinding is useful for applying CSS classes and attributes conditionally on child components
+- Utility classes for complex operations (CSV export) should be static methods, not services
+- Status-based CSS classes (draft/submitted/approved/rejected) can use HostBinding for conditional styling
+- The model() function in Angular 16+ is ideal for two-way binding with parent components
+- Deprecated output aliases (onPageChange) conflict with method names - use different naming for methods
+- Angular's standalone components make importing clean - each component imports exactly what it needs
+- External SCSS files keep component files focused on logic
+- All new files under 500 lines target achieved
+
+---
