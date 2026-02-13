@@ -310,3 +310,86 @@ Split mobile-performance.component.ts (836 lines) into smaller modules.
 - Use inject() for service injection in Angular 15+ standalone components
 - Service holds all business logic - status methods, scoring algorithms, formatting
 - Child component receives metrics as @Input and calls service methods for display logic
+## [2026-02-13] - CODE-002c-5
+
+### Task Summary
+Split mobile-results-display.component.ts (780 lines) into smaller modules.
+
+### Work Done
+- Created mobile-results-item.component.ts (599 lines) for individual candidate card rendering
+  - Contains CandidateResult interface definition
+  - Renders individual candidate cards with avatar, info, skills, and actions
+  - Handles swipe actions, selection, quick actions menu
+  - Uses MobileSwipeComponent for swipe interactions
+- Created mobile-results-empty.component.ts (79 lines) for empty state
+  - Configurable title, message, and action label
+  - Emits clearFilters event
+- Created mobile-results-loading.component.ts (54 lines) for loading state
+  - Configurable loading message
+  - CSS spinner animation
+- Refactored main mobile-results-display.component.ts to 155 lines (down from 780)
+  - Now acts as thin orchestrator using child components
+  - Re-exports CandidateResult type for convenience
+
+### Files Changed
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-display.component.ts - Reduced from 780 to 155 lines
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-item.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-empty.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-loading.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results.component.ts - Updated import path
+
+### Learnings for future iterations:
+- Results display component splitting pattern: main orchestrator + item renderer + empty state + loading state
+- Re-export types from main component for backward compatibility with existing imports
+- Individual item component handles all interaction logic (swipe, selection, quick actions)
+- Main component only manages list-level state (selection tracking, view mode)
+- All new files under 500 lines target achieved
+---
+## [2026-02-13] - CODE-002c-7
+
+### Task Summary
+Split analytics-dashboard.component.ts (646 lines) into smaller modules.
+
+### Work Done
+- Created AnalyticsStatsCardComponent (104 lines) for stat card display
+  - Single stat item with value and label
+  - Gradient styling and hover effects
+  - Responsive design support
+- Created AnalyticsItemsListComponent (242 lines) for items list with status
+  - Generic list component with title
+  - Supports status badges or numeric scores
+  - Includes all status color styles (active, draft, closed, completed, processing, failed, processed, pending)
+  - Responsive design support
+- Created AnalyticsSkillsListComponent (108 lines) for skills display
+  - Displays top skills with occurrence counts
+  - Gradient badge styling for counts
+  - Hover effects
+- Created AnalyticsDataService (107 lines) for data aggregation
+  - getDashboardData$() - combines data from jobs, reports, and resumes stores
+  - Uses combineLatest to merge all selectors
+  - Exports all data types (JobsStatistics, ReportsStatistics, ResumeStatistics, AnalyticsDashboardData)
+- Created analytics-dashboard.component.scss (114 lines) - External styles
+  - Dashboard grid layout
+  - Section styling with gradient effects
+  - Stats grid layout
+  - Responsive design support
+- Refactored main component to 153 lines (down from 646)
+  - Now uses child components for display
+  - Uses service for data aggregation
+  - Delegates rendering to specialized components
+
+### Files Changed
+- apps/ai-recruitment-frontend/src/app/components/shared/analytics-dashboard/analytics-dashboard.component.ts - Reduced from 646 to 153 lines
+- apps/ai-recruitment-frontend/src/app/components/shared/analytics-dashboard/analytics-stats-card.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/shared/analytics-dashboard/analytics-items-list.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/shared/analytics-dashboard/analytics-skills-list.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/shared/analytics-dashboard/analytics-data.service.ts - Created new service
+- apps/ai-recruitment-frontend/src/app/components/shared/analytics-dashboard/analytics-dashboard.component.scss - Created external styles
+
+### Learnings for future iterations:
+- Analytics dashboard splitting pattern: main orchestrator + stats cards + items lists + skills display + data service
+- Extracting data aggregation logic to service simplifies component significantly
+- Angular 20+ supports `styleUrl` for external stylesheets
+- Using child components with @Input for data makes template much cleaner
+- Re-export types from main component for backward compatibility
+---

@@ -341,9 +341,14 @@
       ],
       "estimatedHours": 4,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
-        "apps/ai-recruitment-frontend/src/app/components/shared/analytics-dashboard/analytics-dashboard.component.ts"
+        "apps/ai-recruitment-frontend/src/app/components/shared/analytics-dashboard/analytics-dashboard.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/analytics-dashboard/analytics-stats-card.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/analytics-dashboard/analytics-items-list.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/analytics-dashboard/analytics-skills-list.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/analytics-dashboard/analytics-data.service.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/analytics-dashboard/analytics-dashboard.component.scss"
       ]
     },
     {
