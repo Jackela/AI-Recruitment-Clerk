@@ -719,3 +719,66 @@ Split timesheet-table.component.ts (934 lines) into smaller modules.
 - All new files under 500 lines target achieved
 
 ---
+
+## [2026-02-13] - CODE-002c-15
+
+### Task Summary
+Split virtual-scroll.component.ts (549 lines) into smaller modules.
+
+### Work Done
+- Created virtual-scroll.types.ts (47 lines) for type definitions
+  - VirtualScrollConfig interface with all options
+  - ScrollState interface for tracking scroll position
+  - DEFAULT_VIRTUAL_SCROLL_CONFIG constant
+- Created VirtualScrollViewportService (207 lines) for viewport calculations
+  - initialize() - sets up config and items
+  - updateItems() / updateScrollState() - state management
+  - Computed signals: startIndex, endIndex, visibleItems
+  - Computed signals: topSpacerHeight, bottomSpacerHeight, contentOffset
+  - scrollPercentage / shouldTriggerLoadMore() - infinite scroll support
+  - getItemHeight() / setItemHeight() / getAverageItemHeight() - dynamic height
+  - clearHeightCache() - cache management
+  - trackByFn() - change detection helper
+- Created VirtualScrollContentComponent (89 lines) for item rendering
+  - Renders visible items with template projection
+  - Handles item height styling
+  - Emits itemRendered event for measurement
+- Created VirtualScrollLoadingComponent (66 lines) for loading state
+  - Spinner animation with CSS
+  - Configurable loading message
+  - Reduced motion support
+- Created VirtualScrollEmptyComponent (44 lines) for empty state
+  - Displays when no items available
+  - Configurable message
+  - ng-content support for custom content
+- Created virtual-scroll.component.scss (60 lines) for external styles
+  - Container styles with performance optimizations
+  - Smooth scroll support
+  - Scrollbar styling (dark mode support)
+  - Reduced motion support
+- Refactored main component to 235 lines (down from 549)
+  - Now uses VirtualScrollViewportService for calculations
+  - Uses VirtualScrollContentComponent for rendering
+  - Uses VirtualScrollLoadingComponent for loading
+  - Uses VirtualScrollEmptyComponent for empty state
+  - Delegates all computed logic to viewport service
+  - Simplified template using child components
+
+### Files Changed
+- apps/ai-recruitment-frontend/src/app/components/shared/virtual-scroll/virtual-scroll.component.ts - Reduced from 549 to 235 lines
+- apps/ai-recruitment-frontend/src/app/components/shared/virtual-scroll/virtual-scroll.types.ts - Created new file
+- apps/ai-recruitment-frontend/src/app/components/shared/virtual-scroll/virtual-scroll-viewport.service.ts - Created new service
+- apps/ai-recruitment-frontend/src/app/components/shared/virtual-scroll/virtual-scroll-content.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/shared/virtual-scroll/virtual-scroll-loading.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/shared/virtual-scroll/virtual-scroll-empty.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/shared/virtual-scroll/virtual-scroll.component.scss - Created external styles
+
+### Learnings for future iterations:
+- Virtual scroll component splitting pattern: main orchestrator + viewport service + content renderer + loading state + empty state + types file
+- Extracting calculations to a service works well when there are many computed signals (startIndex, endIndex, visibleItems, spacers, scrollPercentage)
+- Service can be providedIn: 'root' but instantiated per component instance for isolation
+- Using effect() in component constructor to watch service signals is a clean pattern
+- All computed signals for viewport calculations should be in the service, not the component
+- Type definitions can be extracted to a separate file to reduce line count
+- Child components receive data via @Input but use service methods for display logic (getItemHeight)
+- All new files under 500 lines target achieved

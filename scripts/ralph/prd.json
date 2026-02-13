@@ -497,9 +497,15 @@
       ],
       "estimatedHours": 2,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
-        "apps/ai-recruitment-frontend/src/app/components/shared/virtual-scroll/virtual-scroll.component.ts"
+        "apps/ai-recruitment-frontend/src/app/components/shared/virtual-scroll/virtual-scroll.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/virtual-scroll/virtual-scroll.types.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/virtual-scroll/virtual-scroll-viewport.service.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/virtual-scroll/virtual-scroll-content.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/virtual-scroll/virtual-scroll-loading.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/virtual-scroll/virtual-scroll-empty.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/virtual-scroll/virtual-scroll.component.scss"
       ]
     },
     {
