@@ -153,6 +153,16 @@ export {
 } from './domains/analytics.dto';
 export type { AnalyticsEventData } from './domains/analytics.dto';
 export {
+  AnalyticsEventCreatedEvent,
+  SystemPerformanceEventCreatedEvent,
+  BusinessMetricEventCreatedEvent,
+  AnalyticsEventValidatedEvent,
+  AnalyticsEventValidationFailedEvent,
+  AnalyticsEventProcessedEvent,
+  AnalyticsEventAnonymizedEvent,
+  AnalyticsEventExpiredEvent,
+} from './domains/analytics-event.dto';
+export {
   AnalyticsDomainService,
   EventCreationResult,
   BatchProcessingResult,
