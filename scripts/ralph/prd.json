@@ -415,9 +415,10 @@
       ],
       "estimatedHours": 3,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
-        "apps/ai-recruitment-frontend/src/app/components/shared/error-boundary/error-boundary.component.ts"
+        "apps/ai-recruitment-frontend/src/app/components/shared/error-boundary/error-type-display.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/error-boundary/error-stack-trace.component.ts"
       ]
     },
     {

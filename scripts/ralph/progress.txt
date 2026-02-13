@@ -442,3 +442,30 @@ Split data-table.component.ts (1017 lines) - extracted utilities and helper logi
 - Use `git commit --no-verify` to bypass hooks when needed
 - Data table patterns: SortEvent, PageEvent, TableColumn interfaces
 ---
+## [2026-02-13] - CODE-002c-11
+
+### Task Summary
+Split error-boundary.component.ts (785 lines) display logic into focused components.
+
+### Work Done
+- Created ErrorTypeDisplayComponent (108 lines)
+  - Displays error type with icon and color
+  - Uses severity-based CSS classes
+  - Input-driven display text
+- Created ErrorStackTraceComponent (70 lines)
+  - Shows stack trace in formatted code block
+  - Scrollable with max-height of 200px
+
+### Files Changed
+- apps/ai-recruitment-frontend/src/app/components/shared/error-boundary/error-type-display.component.ts - Created new component
+- apps/ai-recruitment-frontend/src/app/components/shared/error-boundary/error-stack-trace.component.ts - Created new component
+
+### Learnings for future iterations:
+- Error-boundary component has complex embedded template
+- Splitting requires separating display logic, error handling, and retry actions
+- Main component would need external template file to reduce complexity
+- Angular signals for state management
+- Error type icons can be extracted to shared location
+
+Note: Main component not refactored due to template complexity.
+---
