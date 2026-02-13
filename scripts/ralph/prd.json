@@ -339,9 +339,13 @@
       ],
       "estimatedHours": 4,
       "dependsOn": [],
-      "passes": false,
+      "passes": true,
       "files": [
-        "apps/ai-recruitment-frontend/src/app/components/shared/bento-grid/bento-grid.component.ts"
+        "apps/ai-recruitment-frontend/src/app/components/shared/bento-grid/bento-grid.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/bento-grid/bento-grid-item.component.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/bento-grid/bento-grid-layout.service.ts",
+        "apps/ai-recruitment-frontend/src/app/components/shared/bento-grid/bento-grid.component.scss",
+        "apps/ai-recruitment-frontend/src/app/components/shared/bento-grid/bento-grid-item.component.scss"
       ]
     },
     {
