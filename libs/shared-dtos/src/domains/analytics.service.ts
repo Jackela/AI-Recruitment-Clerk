@@ -40,7 +40,7 @@ export type {
   IAuditLogger,
   IPrivacyService,
   ISessionTracker,
-} from './analytics-interfaces';
+} from './analytics-interfaces.dto';
 
 // Legacy facade class for backward compatibility
 import { AnalyticsEventCollectionService } from './analytics-event-collection.service';
@@ -52,7 +52,7 @@ import type {
   IAuditLogger,
   IPrivacyService,
   ISessionTracker,
-} from './analytics-interfaces';
+} from './analytics-interfaces.dto';
 
 /**
  * Main analytics domain service.

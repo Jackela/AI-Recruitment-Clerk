@@ -12,7 +12,7 @@ import type {
   IAuditLogger,
   IPrivacyService,
   ISessionTracker,
-} from './analytics-interfaces';
+} from './analytics-interfaces.dto';
 import { EventCreationResult } from './analytics-result-classes';
 
 /**

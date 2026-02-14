@@ -2,17 +2,18 @@ import type { EventType } from './analytics.dto';
 import {
   EventStatus,
 } from './analytics.dto';
-import {
-  AnalyticsRules,
+import type {
   SessionAnalytics,
   ReportType,
-  DataScope,
+  DataScope} from './analytics.rules';
+import {
+  AnalyticsRules
 } from './analytics.rules';
 import type {
   IAnalyticsRepository,
   IAuditLogger,
   ISessionTracker,
-} from './analytics-interfaces';
+} from './analytics-interfaces.dto';
 import {
   PrivacyComplianceResult,
   DataRetentionReportResult,

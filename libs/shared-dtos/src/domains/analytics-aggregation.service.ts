@@ -8,9 +8,10 @@ import type {
   IAnalyticsRepository,
   IDomainEventBus,
   IAuditLogger,
-} from './analytics-interfaces';
+} from './analytics-interfaces.dto';
+import type {
+  BatchProcessingItem} from './analytics-result-classes';
 import {
-  BatchProcessingItem,
   BatchProcessingResult,
   EventProcessingMetricsResult,
   DataPrivacyMetricsResult,
