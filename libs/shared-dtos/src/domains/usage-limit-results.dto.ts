@@ -117,6 +117,9 @@ export class UsageRecordResult {
   }
 }
 
+// ValueObject base import for UsageStatistics
+import { ValueObject } from '../base/value-object';
+
 /**
  * Represents usage statistics.
  */
@@ -195,6 +198,3 @@ export class UsageStatistics extends ValueObject<{
     );
   }
 }
-
-// ValueObject base import for UsageStatistics
-import { ValueObject } from '../base/value-object';

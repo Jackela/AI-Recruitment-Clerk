@@ -63,7 +63,7 @@ import { VirtualScrollEmptyComponent } from './virtual-scroll-empty.component';
         [config]="config"
         [startIndex]="viewport.startIndex()"
         [contentOffset]="viewport.contentOffset()"
-        [getItemHeight]="(item) => viewport.getItemHeight(item, 0)"
+        [getItemHeight]="viewport.getItemHeight.bind(viewport)"
         [totalItems]="items.length"
       />
 

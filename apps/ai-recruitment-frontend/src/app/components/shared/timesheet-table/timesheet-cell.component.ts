@@ -1,4 +1,5 @@
 import { Component, Input, HostBinding } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import type { TimesheetColumn } from '../../../../lib/config/table-config';
 import type { TimesheetEntry } from './timesheet-table.component';
 
@@ -8,6 +9,7 @@ import type { TimesheetEntry } from './timesheet-table.component';
 @Component({
   selector: 'td[arc-timesheet-cell]',
   standalone: true,
+  imports: [CommonModule],
   template: `
     <!-- Dynamic cell content based on column type and timesheet-specific formatting -->
     <span [ngSwitch]="column.type">

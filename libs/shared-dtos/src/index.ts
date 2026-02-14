@@ -126,11 +126,7 @@ export * from './contracts/usage-limit.contracts';
 
 // Domain Models - Incentives
 export * from './domains/incentive.dto';
-export {
-  IncentiveDomainService,
-  IncentiveStatsResult,
-  PendingIncentivesResult,
-} from './domains/incentive.service';
+export { IncentiveDomainService } from './domains/incentive.service';
 export type {
   IIncentiveRepository,
   IDomainEventBus,
@@ -146,12 +142,14 @@ export type {
 } from './domains/incentive.rules';
 export * from './contracts/incentive.contracts';
 // Don't export wildcard for incentive-results.types due to ContactInfo conflict
-export type {
+export {
   PaymentProcessingResult,
   BatchPaymentResult,
   IncentiveCreationResult,
-  IncentiveStatsResult as IncentiveResultsStatsResult,
-  PendingIncentivesResult as IncentiveResultsPendingResult,
+  IncentiveStatsResult,
+  PendingIncentivesResult,
+} from './domains/incentive-results.types';
+export type {
   IPIncentiveStatistics,
   SystemIncentiveStatistics,
   BatchPaymentItem,

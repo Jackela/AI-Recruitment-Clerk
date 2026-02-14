@@ -405,4 +405,4 @@ export class BatchPaymentExecutionResult {
 }
 
 // Re-export PaymentProcessingResult and BatchPaymentResult for backward compatibility
-export type { PaymentProcessingResult, BatchPaymentResult } from './incentive-results.types';
+export { PaymentProcessingResult, BatchPaymentResult } from './incentive-results.types';
