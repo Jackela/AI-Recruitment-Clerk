@@ -2,6 +2,28 @@
 Started: Fri Feb 14 2026
 ---
 
+## [Fri Feb 14 2026] - CODE-003-12
+- Created `questionnaire-responses.dto.ts` re-exporting response DTOs (QuestionnaireResponseDto, QuestionnaireAnalyticsDto) from questionnaire-interfaces.dto.ts
+- Created `questionnaire-submission.dto.ts` with:
+  - `QuestionnaireTemplate` class (template configuration)
+  - `QuestionnaireSubmission` class (submission data and methods)
+  - `SubmissionQuality` class (quality calculation and metrics)
+- Extracted all three classes together to avoid circular dependencies (SubmissionQuality depends on QuestionnaireSubmission)
+- Updated `questionnaire.dto.ts` to import and re-export from new files
+- Reduced `questionnaire.dto.ts` from 724 to 386 lines (target: <600)
+- Quality checks: typecheck passes, all 76 questionnaire tests pass
+- Files changed:
+  - `libs/shared-dtos/src/domains/questionnaire-responses.dto.ts` (new, 12 lines)
+  - `libs/shared-dtos/src/domains/questionnaire-submission.dto.ts` (new, 274 lines)
+  - `libs/shared-dtos/src/domains/questionnaire.dto.ts` (reduced from 724 to 386 lines)
+  - `scripts/ralph/prd.json` (updated passes: true for CODE-003-12)
+- **Learnings for future iterations:**
+  - When classes have circular dependencies (A depends on B, B depends on A), extract them together to the same file
+  - Response DTOs that are interfaces can be re-exported from a more specifically named file
+  - The PRD mentioned "QuestionnaireResponseDto, QuestionnaireAnalyticsDto" - these were already in questionnaire-interfaces.dto.ts, so created questionnaire-responses.dto.ts as a named re-export
+
+---
+
 ## [Fri Feb 14 2026] - CODE-003-11
 - Created `questionnaire-validation.dto.ts` with:
   - `QuestionnaireValidationResult` class (moved from questionnaire.dto.ts)
