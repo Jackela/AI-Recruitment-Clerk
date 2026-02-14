@@ -220,7 +220,7 @@
         "libs/shared-dtos/src/domains/questionnaire.dto.ts",
         "libs/shared-dtos/src/domains/questionnaire-questions.dto.ts"
       ],
-      "passes": false
+      "passes": true
     }
   ]
 }

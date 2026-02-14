@@ -28,11 +28,15 @@ import type {
 
 // Re-export types for backward compatibility
 export type {
-  QuestionSection,
-  QualityThreshold,
   RawSubmissionData,
   QuestionnaireData,
 } from './questionnaire-types.dto';
+
+// Re-export question types
+export type {
+  QuestionSection,
+  QualityThreshold,
+} from './questionnaire-questions.dto';
 
 // Re-export events
 export type {
