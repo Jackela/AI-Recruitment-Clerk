@@ -42,7 +42,7 @@
         "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-navigation.component.ts",
         "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-bottom-nav.component.ts"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CODE-003-3",
