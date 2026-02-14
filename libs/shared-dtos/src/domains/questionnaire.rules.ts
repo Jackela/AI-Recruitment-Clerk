@@ -2,7 +2,7 @@ import type {
   QuestionnaireSubmission} from './questionnaire.dto';
 import {
   QuestionnaireValidationResult,
-} from './questionnaire.dto';
+} from './questionnaire-validation.dto';
 
 /**
  * Represents the questionnaire rules.

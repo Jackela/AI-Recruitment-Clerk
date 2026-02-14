@@ -4,13 +4,25 @@ import {
   QuestionnaireSubmittedEvent,
   HighQualitySubmissionEvent,
 } from './questionnaire-events.dto';
+import {
+  QuestionnaireValidationResult,
+  isValidRating,
+} from './questionnaire-validation.dto';
+import {
+  UserProfile,
+  UserExperience,
+  BusinessValue,
+  FeatureNeeds,
+  OptionalInfo,
+  SubmissionMetadata,
+  QualityScore,
+  SubmissionSummary,
+  Answer,
+  QualityMetrics,
+} from './questionnaire-value-objects.dto';
 import type {
   QuestionSection,
   QualityThreshold,
-  QuestionnaireUserRole,
-  CompanySize,
-  ScreeningMethod,
-  Rating,
   RawSubmissionData,
   QuestionnaireData,
 } from './questionnaire-types.dto';
@@ -19,10 +31,6 @@ import type {
 export type {
   QuestionSection,
   QualityThreshold,
-  QuestionnaireUserRole,
-  CompanySize,
-  ScreeningMethod,
-  Rating,
   RawSubmissionData,
   QuestionnaireData,
 } from './questionnaire-types.dto';
@@ -40,6 +48,36 @@ export type {
   QuestionnaireResponseDto,
   QuestionnaireAnalyticsDto,
 } from './questionnaire-interfaces.dto';
+
+// Re-export validation types
+export {
+  QuestionnaireValidationResult,
+  QuestionnaireValidationConstants,
+  isValidRating,
+  isValidPercentage,
+  isNonNegative,
+  meetsMinLength,
+  isValidSelection,
+  createValidationError,
+} from './questionnaire-validation.dto';
+export type {
+  ValidationRule,
+  FieldValidationConfig,
+} from './questionnaire-validation.dto';
+
+// Re-export value objects
+export {
+  UserProfile,
+  UserExperience,
+  BusinessValue,
+  FeatureNeeds,
+  OptionalInfo,
+  SubmissionMetadata,
+  QualityScore,
+  SubmissionSummary,
+  Answer,
+  QualityMetrics,
+} from './questionnaire-value-objects.dto';
 
 // 问卷聚合根
 /**
@@ -166,10 +204,8 @@ export class Questionnaire {
       errors.push('Industry is required');
     }
 
-    if (
-      !experience.overallSatisfaction ||
-      experience.overallSatisfaction === 1
-    ) {
+    // Use imported validation function
+    if (!isValidRating(experience.overallSatisfaction) || experience.overallSatisfaction === 1) {
       errors.push('Overall satisfaction rating (above 1) is required');
     }
 
@@ -715,371 +751,6 @@ export class SubmissionQuality extends ValueObject<{
   public hasDetailedFeedback(): boolean {
     return this.props.detailedAnswers >= 3;
   }
-}
-
-// 辅助值对象
-/**
- * Represents the user profile.
- */
-export class UserProfile extends ValueObject<{
-  role: QuestionnaireUserRole;
-  industry: string;
-  companySize: CompanySize;
-  location: string;
-}> {
-  /**
-   * Performs the role operation.
-   * @returns The QuestionnaireUserRole.
-   */
-  public get role(): QuestionnaireUserRole {
-    return this.props.role;
-  }
-  /**
-   * Performs the industry operation.
-   * @returns The string value.
-   */
-  public get industry(): string {
-    return this.props.industry;
-  }
-  /**
-   * Performs the company size operation.
-   * @returns The CompanySize.
-   */
-  public get companySize(): CompanySize {
-    return this.props.companySize;
-  }
-  /**
-   * Performs the location operation.
-   * @returns The string value.
-   */
-  public get location(): string {
-    return this.props.location;
-  }
-}
-
-/**
- * Represents the user experience.
- */
-export class UserExperience extends ValueObject<{
-  overallSatisfaction: Rating;
-  accuracyRating: Rating;
-  speedRating: Rating;
-  uiRating: Rating;
-  mostUsefulFeature: string;
-  mainPainPoint?: string;
-  improvementSuggestion?: string;
-}> {
-  /**
-   * Performs the overall satisfaction operation.
-   * @returns The Rating.
-   */
-  public get overallSatisfaction(): Rating {
-    return this.props.overallSatisfaction;
-  }
-  /**
-   * Performs the accuracy rating operation.
-   * @returns The Rating.
-   */
-  public get accuracyRating(): Rating {
-    return this.props.accuracyRating;
-  }
-  /**
-   * Performs the speed rating operation.
-   * @returns The Rating.
-   */
-  public get speedRating(): Rating {
-    return this.props.speedRating;
-  }
-  /**
-   * Performs the ui rating operation.
-   * @returns The Rating.
-   */
-  public get uiRating(): Rating {
-    return this.props.uiRating;
-  }
-  /**
-   * Performs the most useful feature operation.
-   * @returns The string value.
-   */
-  public get mostUsefulFeature(): string {
-    return this.props.mostUsefulFeature;
-  }
-  /**
-   * Performs the main pain point operation.
-   * @returns The string | undefined.
-   */
-  public get mainPainPoint(): string | undefined {
-    return this.props.mainPainPoint;
-  }
-  /**
-   * Performs the improvement suggestion operation.
-   * @returns The string | undefined.
-   */
-  public get improvementSuggestion(): string | undefined {
-    return this.props.improvementSuggestion;
-  }
-}
-
-/**
- * Represents the business value.
- */
-export class BusinessValue extends ValueObject<{
-  currentScreeningMethod: ScreeningMethod;
-  timeSpentPerResume: number;
-  resumesPerWeek: number;
-  timeSavingPercentage: number;
-  willingnessToPayMonthly: number;
-  recommendLikelihood: Rating;
-}> {
-  /**
-   * Performs the current screening method operation.
-   * @returns The ScreeningMethod.
-   */
-  public get currentScreeningMethod(): ScreeningMethod {
-    return this.props.currentScreeningMethod;
-  }
-  /**
-   * Performs the time spent per resume operation.
-   * @returns The number value.
-   */
-  public get timeSpentPerResume(): number {
-    return this.props.timeSpentPerResume;
-  }
-  /**
-   * Performs the resumes per week operation.
-   * @returns The number value.
-   */
-  public get resumesPerWeek(): number {
-    return this.props.resumesPerWeek;
-  }
-  /**
-   * Performs the time saving percentage operation.
-   * @returns The number value.
-   */
-  public get timeSavingPercentage(): number {
-    return this.props.timeSavingPercentage;
-  }
-  /**
-   * Performs the willingness to pay monthly operation.
-   * @returns The number value.
-   */
-  public get willingnessToPayMonthly(): number {
-    return this.props.willingnessToPayMonthly;
-  }
-  /**
-   * Performs the recommend likelihood operation.
-   * @returns The Rating.
-   */
-  public get recommendLikelihood(): Rating {
-    return this.props.recommendLikelihood;
-  }
-}
-
-/**
- * Represents the feature needs.
- */
-export class FeatureNeeds extends ValueObject<{
-  priorityFeatures: string[];
-  integrationNeeds: string[];
-}> {}
-
-/**
- * Represents the optional info.
- */
-export class OptionalInfo extends ValueObject<{
-  additionalFeedback?: string;
-  contactPreference?: string;
-}> {
-  /**
-   * Performs the additional feedback operation.
-   * @returns The string | undefined.
-   */
-  public get additionalFeedback(): string | undefined {
-    return this.props.additionalFeedback;
-  }
-  /**
-   * Performs the contact preference operation.
-   * @returns The string | undefined.
-   */
-  public get contactPreference(): string | undefined {
-    return this.props.contactPreference;
-  }
-}
-
-/**
- * Represents the submission metadata.
- */
-export class SubmissionMetadata extends ValueObject<{
-  ip: string;
-  userAgent: string;
-  timestamp: Date;
-}> {
-  /**
-   * Performs the restore operation.
-   * @param data - The data.
-   * @returns The SubmissionMetadata.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): SubmissionMetadata {
-    return new SubmissionMetadata({
-      ...data,
-      timestamp: new Date(data.timestamp),
-    });
-  }
-
-  /**
-   * Performs the ip operation.
-   * @returns The string value.
-   */
-  public get ip(): string {
-    return this.props.ip;
-  }
-}
-
-/**
- * Represents the quality score.
- */
-export class QualityScore extends ValueObject<{ value: number }> {
-  /**
-   * Performs the value operation.
-   * @returns The number value.
-   */
-  public get value(): number {
-    return this.props.value;
-  }
-}
-
-/**
- * Represents the submission summary.
- */
-export class SubmissionSummary extends ValueObject<{
-  role: string;
-  industry: string;
-  overallSatisfaction: number;
-  willingnessToPayMonthly: number;
-  textLength: number;
-  completionRate: number;
-}> {
-  /**
-   * Performs the role operation.
-   * @returns The string value.
-   */
-  public get role(): string {
-    return this.props.role;
-  }
-  /**
-   * Performs the industry operation.
-   * @returns The string value.
-   */
-  public get industry(): string {
-    return this.props.industry;
-  }
-  /**
-   * Performs the overall satisfaction operation.
-   * @returns The number value.
-   */
-  public get overallSatisfaction(): number {
-    return this.props.overallSatisfaction;
-  }
-  /**
-   * Performs the willingness to pay monthly operation.
-   * @returns The number value.
-   */
-  public get willingnessToPayMonthly(): number {
-    return this.props.willingnessToPayMonthly;
-  }
-  /**
-   * Performs the text length operation.
-   * @returns The number value.
-   */
-  public get textLength(): number {
-    return this.props.textLength;
-  }
-  /**
-   * Performs the completion rate operation.
-   * @returns The number value.
-   */
-  public get completionRate(): number {
-    return this.props.completionRate;
-  }
-}
-
-/**
- * Represents the answer.
- */
-export class Answer extends ValueObject<{
-  questionId: string;
-  value: string;
-}> {}
-
-/**
- * Represents the quality metrics.
- */
-export class QualityMetrics extends ValueObject<{
-  totalTextLength: number;
-  detailedAnswers: number;
-  completionRate: number;
-  qualityScore: number;
-  bonusEligible: boolean;
-  qualityReasons: string[];
-}> {
-  /**
-   * Performs the total text length operation.
-   * @returns The number value.
-   */
-  public get totalTextLength(): number {
-    return this.props.totalTextLength;
-  }
-  /**
-   * Performs the detailed answers operation.
-   * @returns The number value.
-   */
-  public get detailedAnswers(): number {
-    return this.props.detailedAnswers;
-  }
-  /**
-   * Performs the completion rate operation.
-   * @returns The number value.
-   */
-  public get completionRate(): number {
-    return this.props.completionRate;
-  }
-  /**
-   * Performs the quality score operation.
-   * @returns The number value.
-   */
-  public get qualityScore(): number {
-    return this.props.qualityScore;
-  }
-  /**
-   * Performs the bonus eligible operation.
-   * @returns The boolean value.
-   */
-  public get bonusEligible(): boolean {
-    return this.props.bonusEligible;
-  }
-  /**
-   * Performs the quality reasons operation.
-   * @returns The an array of string value.
-   */
-  public get qualityReasons(): string[] {
-    return this.props.qualityReasons;
-  }
-}
-
-/**
- * Represents the questionnaire validation result.
- */
-export class QuestionnaireValidationResult {
-  /**
-   * Initializes a new instance of the Questionnaire Validation Result.
-   * @param isValid - The is valid.
-   * @param errors - The errors.
-   */
-  constructor(
-    public readonly isValid: boolean,
-    public readonly errors: string[],
-  ) {}
 }
 
 // ========================

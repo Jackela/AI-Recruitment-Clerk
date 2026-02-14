@@ -188,7 +188,7 @@
         "libs/shared-dtos/src/domains/questionnaire.dto.ts",
         "libs/shared-dtos/src/domains/questionnaire-validation.dto.ts"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CODE-003-12",
