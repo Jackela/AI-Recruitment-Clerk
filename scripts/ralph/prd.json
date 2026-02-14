@@ -58,7 +58,7 @@
         "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-item.component.ts",
         "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-candidate-card.component.ts"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CODE-003-4",
@@ -74,7 +74,7 @@
         "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-item.component.ts",
         "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-skill-tags.component.ts"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CODE-003-5",

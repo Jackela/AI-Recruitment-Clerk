@@ -14,6 +14,26 @@ Started: Fri Feb 14 2026
 
 ---
 
+## [Fri Feb 14 2026] - CODE-003-3
+- Extracted candidate card display (avatar, name, title, score) into `mobile-candidate-card.component.ts`
+- Created `CandidateCardData` interface with types for status and match level
+- Also extracted skill tags into `mobile-skill-tags.component.ts` to meet <400 line target
+- Also extracted quick actions menu into `mobile-quick-actions-menu.component.ts`
+- Reduced `mobile-results-item.component.ts` from 600 to 353 lines
+- All new components use @Input for data, @Output for events
+- Files changed:
+  - `apps/ai-recruitment-frontend/src/app/components/mobile/mobile-candidate-card.component.ts` (new, 211 lines)
+  - `apps/ai-recruitment-frontend/src/app/components/mobile/mobile-skill-tags.component.ts` (new, 68 lines)
+  - `apps/ai-recruitment-frontend/src/app/components/mobile/mobile-quick-actions-menu.component.ts` (new, 112 lines)
+  - `apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-item.component.ts` (reduced from 600 to 353 lines)
+- **Learnings for future iterations:**
+  - When extracting display components, also extract related UI elements (skill tags, action menus) to meet line targets
+  - Reusable types (CandidateStatus, CandidateMatch, QuickActionMenuItem) should be exported from child components
+  - Component extraction often requires adjusting layout (flex-direction: column) in parent
+  - Already existing `mobile-quick-actions.component.ts` is a horizontal scroll bar, not a dropdown menu - use different naming
+
+---
+
 ## [Fri Feb 14 2026] - CODE-003-1
 - Extracted mobile-navigation header section into separate `mobile-navigation-header.component.ts`
 - Created `HeaderAction` interface for type safety
