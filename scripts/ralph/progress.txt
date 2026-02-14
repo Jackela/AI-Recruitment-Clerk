@@ -103,6 +103,30 @@ Started: Fri Feb 14 2026
 
 ---
 
+## [Fri Feb 14 2026] - CODE-003-8
+- Extracted all value object classes from `analytics.dto.ts` to `analytics-value-objects.dto.ts`
+- Created `analytics-value-objects.dto.ts` with:
+  - `AnalyticsEventId`, `UserSession`, `DeviceInfo`, `GeoLocation`
+  - `EventData`, `EventTimestamp`, `EventContext`, `AnalyticsEventSummary`
+  - `EventValidationResult`, `PrivacyComplianceResult`
+  - All related interfaces: `UserSessionData`, `DeviceInfoData`, `GeoLocationData`, `EventPayload`, etc.
+  - All enums: `EventType`, `EventCategory`, `EventStatus`, `ConsentStatus`, `MetricUnit`
+- Updated `analytics.dto.ts` to re-export from value objects for backward compatibility
+- Reduced `analytics.dto.ts` from 1265 to 548 lines (target: <900)
+- Quality checks: typecheck passes
+- Files changed:
+  - `libs/shared-dtos/src/domains/analytics-value-objects.dto.ts` (new, 770 lines)
+  - `libs/shared-dtos/src/domains/analytics.dto.ts` (reduced from 1265 to 548 lines)
+  - `scripts/ralph/prd.json` (updated passes: true for CODE-003-8)
+- **Learnings for future iterations:**
+  - When extracting to separate files, use re-exports from the original file for backward compatibility
+  - Separate imports for internal use (runtime values) vs re-exports (types only with `type` keyword)
+  - TypeScript's noUnusedLocals will flag imports that are only used in re-exports - keep those in re-export block only
+  - DTO splitting can significantly reduce file size - value objects and enums are good extraction candidates
+  - The barrel file (index.ts) doesn't need changes if re-exports are set up correctly in the original file
+
+---
+
 ## [Fri Feb 14 2026] - CODE-003-2
 - Verified bottom navigation extraction was already complete
 - `mobile-bottom-nav.component.ts` exists (163 lines) with full styling

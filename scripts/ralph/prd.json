@@ -140,7 +140,7 @@
         "libs/shared-dtos/src/domains/analytics-value-objects.dto.ts",
         "libs/shared-dtos/src/index.ts"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CODE-003-9",
