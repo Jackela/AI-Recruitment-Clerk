@@ -2,6 +2,24 @@
 Started: Fri Feb 14 2026
 ---
 
+## [Fri Feb 14 2026] - CODE-003-9
+- Renamed `analytics-interfaces.ts` to `analytics-interfaces.dto.ts` to follow DTO naming convention
+- Updated imports in 4 service files to use new file name
+- The interfaces (IAnalyticsRepository, IDomainEventBus, IAuditLogger, IPrivacyService, ISessionTracker) were already in the correct file
+- Quality checks: typecheck passes
+- Files changed:
+  - `libs/shared-dtos/src/domains/analytics-interfaces.dto.ts` (renamed from analytics-interfaces.ts, 159 lines)
+  - `libs/shared-dtos/src/domains/analytics-aggregation.service.ts` (updated import)
+  - `libs/shared-dtos/src/domains/analytics-event-collection.service.ts` (updated import)
+  - `libs/shared-dtos/src/domains/analytics-reporting.service.ts` (updated import)
+  - `libs/shared-dtos/src/domains/analytics.service.ts` (updated imports)
+- **Learnings for future iterations:**
+  - Sometimes the work is already done, just needs renaming to match PRD naming convention
+  - `analytics.dto.ts` at 549 lines already meets the <700 target from previous value object extraction
+  - Interface files follow `*.dto.ts` naming convention in this codebase
+
+---
+
 ## Codebase Patterns
 
 - **Angular Component Splitting**: Extract display logic to `*-display.component.ts`, filter logic to `*-filter.component.ts`, business logic to `mobile-*.service.ts`
