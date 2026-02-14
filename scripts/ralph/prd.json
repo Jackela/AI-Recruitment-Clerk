@@ -122,7 +122,7 @@
         "apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table.component.ts",
         "apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table-sorting.service.ts"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CODE-003-8",

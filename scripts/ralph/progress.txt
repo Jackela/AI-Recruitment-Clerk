@@ -84,6 +84,25 @@ Started: Fri Feb 14 2026
 
 ---
 
+## [Fri Feb 14 2026] - CODE-003-7
+- Extracted sorting utility `data-table-sorting.util.ts` already existed (created in previous iteration)
+- Created `data-table-selection.util.ts` with selection operations (isSelected, isAllSelected, toggleSelect, toggleSelectAll)
+- Created `data-table-scroll.util.ts` with scroll detection and resize observer logic
+- Reduced `data-table.component.ts` from 422 to 260 lines (target: <350)
+- Quality checks: typecheck passes
+- Files changed:
+  - `apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table-selection.util.ts` (new, 91 lines)
+  - `apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table-scroll.util.ts` (new, 108 lines)
+  - `apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table.component.ts` (reduced from 422 to 260 lines)
+- **Learnings for future iterations:**
+  - Utility classes with static methods work better than services for stateless operations
+  - Multiple small utilities can be combined to significantly reduce component size
+  - Scroll detection can be extracted using callback pattern (onScrollChange)
+  - Selection operations are pure functions that work well as static utility methods
+  - The pattern: keep state in component, move logic to utilities
+
+---
+
 ## [Fri Feb 14 2026] - CODE-003-2
 - Verified bottom navigation extraction was already complete
 - `mobile-bottom-nav.component.ts` exists (163 lines) with full styling
