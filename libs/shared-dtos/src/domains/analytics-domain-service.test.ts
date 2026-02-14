@@ -1,5 +1,6 @@
-import { describe, beforeEach } from '@jest/globals';
+import { describe, beforeEach, expect } from '@jest/globals';
 import {
+  AnalyticsEvent,
   AnalyticsEventId,
   EventType,
   EventStatus,
@@ -12,12 +13,11 @@ import {
   EventTimestamp,
   EventContext,
 } from './analytics.dto';
-import { ReportType, DataScope } from './analytics.rules';
+import { AnalyticsRules, ReportType, DataScope } from './analytics.rules';
 import {
   AnalyticsContracts,
   AnalyticsContractViolation,
 } from '../contracts/analytics.contracts';
-import { AnalyticsDomainService } from './analytics.service';
 import {
   validSessionId,
   validUserId,
@@ -26,6 +26,9 @@ import {
   validUserSession,
   validEventData,
   domainService,
+  mockRepository,
+  mockAuditLogger,
+  mockPrivacyService,
   clearAllMocks,
 } from './analytics-test-helpers';
 

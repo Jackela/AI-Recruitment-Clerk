@@ -358,7 +358,17 @@ describe('ReportGeneratorService', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        ReportGeneratorService,
+        {
+          provide: ReportGeneratorService,
+          useFactory: () =>
+            new ReportGeneratorService(
+              mockLlmService as unknown as LlmService,
+              mockGridFsService as unknown as GridFsService,
+              mockReportRepository as unknown as ReportRepository,
+              mockReportDataService as unknown as ReportDataService,
+              mockLlmReportMapperService as unknown as LlmReportMapperService,
+            ),
+        },
         { provide: LlmService, useValue: mockLlmService },
         { provide: GridFsService, useValue: mockGridFsService },
         { provide: ReportRepository, useValue: mockReportRepository },

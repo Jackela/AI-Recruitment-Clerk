@@ -1,17 +1,14 @@
-import { describe, beforeEach } from '@jest/globals';
+import { describe, beforeEach, expect } from '@jest/globals';
 import {
   AnalyticsEvent,
   EventType,
   EventStatus,
+  MetricUnit,
 } from './analytics.dto';
 import {
   validSessionId,
   validUserId,
-  validDeviceInfo,
-  validGeoLocation,
-  validUserSession,
   validEventData,
-  domainService,
   clearAllMocks,
 } from './analytics-test-helpers';
 
@@ -57,7 +54,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
       const event = AnalyticsEvent.createBusinessMetricEvent(
         'questionnaire_completion_rate',
         85.5,
-        'PERCENTAGE',
+        MetricUnit.PERCENTAGE,
         { source: 'ai_recruitment', period: 'daily' },
       );
 

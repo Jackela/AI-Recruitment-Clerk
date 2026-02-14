@@ -2,7 +2,6 @@ import { describe, beforeEach, expect } from '@jest/globals';
 import {
   AnalyticsEventId,
   EventType,
-  EventStatus,
   UserSession,
   DeviceInfo,
   GeoLocation,
@@ -30,13 +29,6 @@ describe('9. Value Objects', () => {
     latitude: 40.7128,
     longitude: -74.006,
   });
-
-  const validUserSession = UserSession.create(
-    validSessionId,
-    validUserId,
-    validDeviceInfo,
-    validGeoLocation,
-  );
 
   const validEventData = {
     action: 'click',

@@ -1,10 +1,10 @@
-import { describe, beforeEach } from '@jest/globals';
+import { describe, beforeEach, expect } from '@jest/globals';
 import {
   AnalyticsEvent,
   EventType,
   ConsentStatus,
 } from './analytics.dto';
-import { AnalyticsRules, ReportType, DataScope } from './analytics.rules';
+import { AnalyticsRules } from './analytics.rules';
 import {
   validSessionId,
   validUserId,
@@ -42,7 +42,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
       );
 
       expect(result.isEligible).toBe(false);
-      expect(result.errors).toContain('Session event limit exceeded');
+      expect(result.errors).toContain('Session event limit exceeded (1000 events max)');
     });
 
     it('should reject when user consent is missing', () => {

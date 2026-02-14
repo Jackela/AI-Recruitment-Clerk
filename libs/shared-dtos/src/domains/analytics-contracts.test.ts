@@ -47,7 +47,7 @@ describe('Agent-5: Analytics Domain Service Tests', () => {
         AnalyticsContracts.createBusinessMetricEvent(
           'test_metric',
           -50, // Invalid negative value
-          'COUNT',
+          MetricUnit.COUNT,
         );
       }).toThrow(AnalyticsContractViolation);
     });

@@ -1,4 +1,4 @@
-import { describe, beforeEach } from '@jest/globals';
+import { describe, beforeEach, expect } from '@jest/globals';
 import {
   AnalyticsEvent,
   EventType,
@@ -8,7 +8,6 @@ import {
   validSessionId,
   validUserId,
   validEventData,
-  domainService,
   clearAllMocks,
 } from './analytics-test-helpers';
 
