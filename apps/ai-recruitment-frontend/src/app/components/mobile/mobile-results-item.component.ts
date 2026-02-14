@@ -13,16 +13,16 @@ import { FormsModule } from '@angular/forms';
 import {
   MobileSwipeComponent
 } from './mobile-swipe.component';
-
-/**
- * Defines the shape of a quick action.
- */
-interface QuickAction {
-  id: string;
-  label: string;
-  icon: string;
-  color: 'primary' | 'success' | 'danger';
-}
+import {
+  MobileCandidateCardComponent,
+} from './mobile-candidate-card.component';
+import {
+  MobileSkillTagsComponent,
+} from './mobile-skill-tags.component';
+import {
+  MobileQuickActionsMenuComponent,
+  type QuickActionMenuItem,
+} from './mobile-quick-actions-menu.component';
 
 /**
  * Defines the shape of candidate result.
@@ -64,7 +64,14 @@ export interface CandidateResult {
 @Component({
   selector: 'arc-mobile-results-item',
   standalone: true,
-  imports: [CommonModule, FormsModule, MobileSwipeComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MobileSwipeComponent,
+    MobileCandidateCardComponent,
+    MobileSkillTagsComponent,
+    MobileQuickActionsMenuComponent,
+  ],
   template: `
     <app-mobile-swipe
       [actions]="getSwipeActions()"
@@ -83,74 +90,32 @@ export interface CandidateResult {
         role="button"
         [attr.aria-label]="'View candidate ' + candidate.name"
       >
-        <!-- Candidate Avatar -->
-        <div class="candidate-avatar">
-          <img
-            *ngIf="candidate.avatar"
-            [src]="candidate.avatar"
-            [alt]="candidate.name"
-            class="avatar-image"
-          />
-          <div *ngIf="!candidate.avatar" class="avatar-placeholder">
-            {{ candidate.name.charAt(0).toUpperCase() }}
+        <!-- Candidate Card (Avatar + Info) -->
+        <arc-mobile-candidate-card [candidate]="candidate" />
+
+        <!-- Skills Tags -->
+        <arc-mobile-skill-tags [skills]="candidate.skills" />
+
+        <!-- Match Details -->
+        <div class="match-details" *ngIf="showDetailed">
+          <div class="strengths" *ngIf="candidate.strengths.length > 0">
+            <strong>Strengths:</strong>
+            {{ candidate.strengths.join(', ') }}
           </div>
-          <div
-            class="status-indicator"
-            [class]="'status-' + candidate.status"
-          ></div>
+          <div class="summary">{{ candidate.summary }}</div>
         </div>
 
-        <!-- Candidate Info -->
-        <div class="candidate-info">
-          <div class="candidate-header">
-            <h3 class="candidate-name">{{ candidate.name }}</h3>
-            <div class="score-badge" [class]="'score-' + candidate.match">
-              {{ candidate.score }}%
-            </div>
-          </div>
-
-          <div class="candidate-title">{{ candidate.title }}</div>
-          <div class="candidate-experience">
-            {{ candidate.experience }} • {{ candidate.location }}
-          </div>
-
-          <!-- Skills Tags -->
-          <div
-            class="skills-container"
-            *ngIf="candidate.skills.length > 0"
+        <div class="candidate-meta">
+          <span class="last-updated"
+            >Updated {{ candidate.lastUpdated }}</span
           >
+          <div class="candidate-tags" *ngIf="candidate.tags.length > 0">
             <span
-              *ngFor="let skill of candidate.skills.slice(0, 3)"
-              class="skill-tag"
+              *ngFor="let tag of candidate.tags.slice(0, 2)"
+              class="tag"
             >
-              {{ skill }}
+              {{ tag }}
             </span>
-            <span *ngIf="candidate.skills.length > 3" class="skill-more">
-              +{{ candidate.skills.length - 3 }}
-            </span>
-          </div>
-
-          <!-- Match Details -->
-          <div class="match-details" *ngIf="showDetailed">
-            <div class="strengths" *ngIf="candidate.strengths.length > 0">
-              <strong>Strengths:</strong>
-              {{ candidate.strengths.join(', ') }}
-            </div>
-            <div class="summary">{{ candidate.summary }}</div>
-          </div>
-
-          <div class="candidate-meta">
-            <span class="last-updated"
-              >Updated {{ candidate.lastUpdated }}</span
-            >
-            <div class="candidate-tags" *ngIf="candidate.tags.length > 0">
-              <span
-                *ngFor="let tag of candidate.tags.slice(0, 2)"
-                class="tag"
-              >
-                {{ tag }}
-              </span>
-            </div>
           </div>
         </div>
 
@@ -165,28 +130,12 @@ export interface CandidateResult {
           />
         </div>
 
-        <!-- Quick Actions -->
-        <div
-          class="quick-actions-menu"
-          *ngIf="showQuickActions"
-        >
-          <button
-            *ngFor="let action of quickActions"
-            class="quick-action-btn"
-            [class]="'action-' + action.color"
-            (click)="onQuickAction(action, $event)"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path [attr.d]="action.icon" />
-            </svg>
-            {{ action.label }}
-          </button>
-        </div>
+        <!-- Quick Actions Menu -->
+        <arc-mobile-quick-actions-menu
+          [visible]="showQuickActions"
+          [actions]="quickActions"
+          (actionClick)="onQuickAction($event)"
+        />
       </div>
     </app-mobile-swipe>
   `,
@@ -194,8 +143,7 @@ export interface CandidateResult {
     `
       .result-item {
         display: flex;
-        align-items: flex-start;
-        gap: 12px;
+        flex-direction: column;
         padding: 16px;
         cursor: pointer;
         transition: all 0.2s ease;
@@ -227,195 +175,56 @@ export interface CandidateResult {
           border-left: 4px solid #e74c3c;
         }
 
-        .candidate-avatar {
-          position: relative;
-          flex-shrink: 0;
+        arc-mobile-candidate-card {
+          margin-bottom: 8px;
+        }
 
-          .avatar-image {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            object-fit: cover;
+        .match-details {
+          display: none;
+          font-size: 12px;
+          color: #6c757d;
+          margin-bottom: 8px;
+          padding-left: 60px;
+
+          .strengths {
+            margin-bottom: 4px;
           }
 
-          .avatar-placeholder {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: #3498db;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            font-weight: 600;
-          }
-
-          .status-indicator {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 2px solid white;
-
-            &.status-new {
-              background: #3498db;
-            }
-
-            &.status-reviewed {
-              background: #f39c12;
-            }
-
-            &.status-shortlisted {
-              background: #27ae60;
-            }
-
-            &.status-interviewed {
-              background: #9b59b6;
-            }
-
-            &.status-hired {
-              background: #27ae60;
-            }
-
-            &.status-rejected {
-              background: #e74c3c;
-            }
+          .summary {
+            line-height: 1.4;
           }
         }
 
-        .candidate-info {
-          flex: 1;
-          min-width: 0;
+        .candidate-meta {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding-left: 60px;
 
-          .candidate-header {
+          .last-updated {
+            font-size: 11px;
+            color: #95a5a6;
+          }
+
+          .candidate-tags {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 4px;
-
-            .candidate-name {
-              font-size: 16px;
-              font-weight: 600;
-              color: #2c3e50;
-              margin: 0;
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-            }
-
-            .score-badge {
-              padding: 2px 8px;
-              border-radius: 12px;
-              font-size: 12px;
-              font-weight: 600;
-              flex-shrink: 0;
-
-              &.score-excellent {
-                background: rgba(39, 174, 96, 0.1);
-                color: #27ae60;
-              }
-
-              &.score-good {
-                background: rgba(52, 152, 219, 0.1);
-                color: #3498db;
-              }
-
-              &.score-fair {
-                background: rgba(243, 156, 18, 0.1);
-                color: #f39c12;
-              }
-
-              &.score-poor {
-                background: rgba(231, 76, 60, 0.1);
-                color: #e74c3c;
-              }
-            }
-          }
-
-          .candidate-title {
-            font-size: 14px;
-            color: #495057;
-            font-weight: 500;
-            margin-bottom: 2px;
-          }
-
-          .candidate-experience {
-            font-size: 12px;
-            color: #6c757d;
-            margin-bottom: 8px;
-          }
-
-          .skills-container {
-            display: flex;
-            flex-wrap: wrap;
             gap: 4px;
-            margin-bottom: 8px;
 
-            .skill-tag {
+            .tag {
               padding: 2px 6px;
-              background: #f1f3f4;
-              color: #495057;
+              background: rgba(52, 152, 219, 0.1);
+              color: #3498db;
               font-size: 10px;
               font-weight: 500;
               border-radius: 4px;
-            }
-
-            .skill-more {
-              padding: 2px 6px;
-              background: #e9ecef;
-              color: #6c757d;
-              font-size: 10px;
-              font-weight: 500;
-              border-radius: 4px;
-            }
-          }
-
-          .match-details {
-            display: none;
-            font-size: 12px;
-            color: #6c757d;
-            margin-bottom: 8px;
-
-            .strengths {
-              margin-bottom: 4px;
-            }
-
-            .summary {
-              line-height: 1.4;
-            }
-          }
-
-          .candidate-meta {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            .last-updated {
-              font-size: 11px;
-              color: #95a5a6;
-            }
-
-            .candidate-tags {
-              display: flex;
-              gap: 4px;
-
-              .tag {
-                padding: 2px 6px;
-                background: rgba(52, 152, 219, 0.1);
-                color: #3498db;
-                font-size: 10px;
-                font-weight: 500;
-                border-radius: 4px;
-              }
             }
           }
         }
 
         .selection-area {
-          flex-shrink: 0;
+          position: absolute;
+          top: 16px;
+          right: 16px;
           display: flex;
           align-items: center;
 
@@ -423,60 +232,6 @@ export interface CandidateResult {
             width: 18px;
             height: 18px;
             cursor: pointer;
-          }
-        }
-
-        .quick-actions-menu {
-          position: absolute;
-          top: 100%;
-          right: 16px;
-          background: white;
-          border-radius: 8px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          z-index: 10;
-          min-width: 150px;
-
-          .quick-action-btn {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 16px;
-            border: none;
-            background: white;
-            color: #495057;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-
-            &:first-child {
-              border-radius: 8px 8px 0 0;
-            }
-
-            &:last-child {
-              border-radius: 0 0 8px 8px;
-            }
-
-            &:only-child {
-              border-radius: 8px;
-            }
-
-            &:hover {
-              background: #f8f9fa;
-            }
-
-            &.action-primary {
-              color: #3498db;
-            }
-
-            &.action-success {
-              color: #27ae60;
-            }
-
-            &.action-danger {
-              color: #e74c3c;
-            }
           }
         }
       }
@@ -499,7 +254,7 @@ export class MobileResultsItemComponent {
   public showQuickActions = false;
 
   // Quick actions menu
-  public readonly quickActions: QuickAction[] = [
+  public readonly quickActions: QuickActionMenuItem[] = [
     {
       id: 'view',
       label: 'View Details',
@@ -581,8 +336,7 @@ export class MobileResultsItemComponent {
   /**
    * Performs on quick action operation.
    */
-  public onQuickAction(action: QuickAction, event: Event): void {
-    event.stopPropagation();
+  public onQuickAction(action: QuickActionMenuItem): void {
     this.candidateAction.emit({
       action: action.id,
       candidate: this.candidate,
