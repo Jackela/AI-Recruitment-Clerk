@@ -204,7 +204,7 @@
         "libs/shared-dtos/src/domains/questionnaire.dto.ts",
         "libs/shared-dtos/src/domains/questionnaire-responses.dto.ts"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CODE-003-13",
