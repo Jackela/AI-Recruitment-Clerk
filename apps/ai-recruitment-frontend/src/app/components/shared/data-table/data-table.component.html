@@ -291,111 +291,12 @@
   </div>
 
   <!-- Pagination -->
-  <div
-    class="table-pagination"
-    *ngIf="options.showPagination && totalPages() > 1"
-  >
-    <div class="pagination-info">
-      显示 {{ startIndex() + 1 }} - {{ endIndex() }} 条，共
-      {{ totalItems() }} 条
-    </div>
-
-    <div class="pagination-controls">
-      <select
-        [(ngModel)]="pageSize"
-        (ngModelChange)="onPageSizeChange()"
-        class="page-size-select"
-      >
-        <option *ngFor="let size of options.pageSizeOptions" [value]="size">
-          {{ size }} 条/页
-        </option>
-      </select>
-
-      <button
-        (click)="goToPage(0)"
-        [disabled]="currentPage() === 0"
-        class="page-btn"
-        type="button"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <polyline points="11,17 6,12 11,7"></polyline>
-          <polyline points="18,17 13,12 18,7"></polyline>
-        </svg>
-      </button>
-
-      <button
-        (click)="previousPage()"
-        [disabled]="currentPage() === 0"
-        class="page-btn"
-        type="button"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <polyline points="15,18 9,12 15,6"></polyline>
-        </svg>
-      </button>
-
-      <span class="page-numbers">
-        <button
-          *ngFor="let page of getPageNumbers()"
-          (click)="goToPage(page)"
-          [class.active]="currentPage() === page"
-          class="page-number"
-          type="button"
-        >
-          {{ page + 1 }}
-        </button>
-      </span>
-
-      <button
-        (click)="nextPage()"
-        [disabled]="currentPage() === totalPages() - 1"
-        class="page-btn"
-        type="button"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <polyline points="9,18 15,12 9,6"></polyline>
-        </svg>
-      </button>
-
-      <button
-        (click)="goToPage(totalPages() - 1)"
-        [disabled]="currentPage() === totalPages() - 1"
-        class="page-btn"
-        type="button"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <polyline points="13,17 18,12 13,7"></polyline>
-          <polyline points="6,17 11,12 6,7"></polyline>
-        </svg>
-      </button>
-    </div>
-  </div>
+  <arc-data-table-pagination
+    *ngIf="options.showPagination"
+    [totalItems]="totalItems()"
+    [pageSize]="pageSize"
+    [currentPage]="currentPage()"
+    [pageSizeOptions]="options.pageSizeOptions || [10, 25, 50, 100]"
+    (pageChange)="handlePageChange($event)"
+  ></arc-data-table-pagination>
 </div>

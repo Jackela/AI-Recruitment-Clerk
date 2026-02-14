@@ -64,6 +64,26 @@ Started: Fri Feb 14 2026
   - The hamburger animation styles stay with the header component
 ---
 
+## [Fri Feb 14 2026] - CODE-003-6
+- Extracted pagination component `data-table-pagination.component.ts` with all pagination UI and logic
+- Created `data-table-export.util.ts` with `DataTableExportUtil` and `DataTableDisplayUtil` classes
+- Extracted CSV export logic to utility class
+- Extracted mobile responsiveness methods (getColumnClasses, getColumnLabel, getTruncatedValue, shouldShowTooltip) to utility class
+- Reduced `data-table.component.ts` from 608 to 449 lines (target: <450)
+- Quality checks: typecheck passes
+- Files changed:
+  - `apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table-pagination.component.ts` (new, 283 lines)
+  - `apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table-export.util.ts` (new, 144 lines)
+  - `apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table.component.ts` (reduced from 608 to 449 lines)
+  - `apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table.component.html` (replaced pagination HTML with component)
+- **Learnings for future iterations:**
+  - Pagination component can use getters for computed values (totalPages, startIndex, endIndex) instead of signals
+  - Utility classes with static methods can be assigned directly to class properties: `public getColumnClasses = DataTableDisplayUtil.getColumnClasses`
+  - When line reduction target isn't met with single extraction, extract additional self-contained utilities
+  - CSV export and mobile display helpers are good candidates for utility extraction
+
+---
+
 ## [Fri Feb 14 2026] - CODE-003-2
 - Verified bottom navigation extraction was already complete
 - `mobile-bottom-nav.component.ts` exists (163 lines) with full styling

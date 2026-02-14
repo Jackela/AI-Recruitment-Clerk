@@ -16,6 +16,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { fromEvent, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
+import type { PageEvent } from './data-table-pagination.component';
+import { DataTablePaginationComponent } from './data-table-pagination.component';
+import { DataTableExportUtil, DataTableDisplayUtil } from './data-table-export.util';
 
 /**
  * Defines the shape of the table column.
@@ -62,20 +65,12 @@ export interface SortEvent {
 }
 
 /**
- * Defines the shape of the page event.
- */
-export interface PageEvent {
-  pageIndex: number;
-  pageSize: number;
-}
-
-/**
  * Represents the data table component.
  */
 @Component({
   selector: 'arc-data-table',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DataTablePaginationComponent],
   templateUrl: './data-table.component.html',
   styleUrls: ['./data-table.component.scss'],
 })
@@ -157,18 +152,12 @@ export class DataTableComponent<T = Record<string, unknown>>
   });
 
   public totalItems = computed(() => this.filteredData().length);
-  public totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize));
 
   public paginatedData = computed(() => {
     const start = this.currentPage() * this.pageSize;
     const end = start + this.pageSize;
     return this.filteredData().slice(start, end);
   });
-
-  public startIndex = computed(() => this.currentPage() * this.pageSize);
-  public endIndex = computed(() =>
-    Math.min(this.startIndex() + this.pageSize, this.totalItems()),
-  );
 
   /**
    * Performs the ng on init operation.
@@ -282,74 +271,13 @@ export class DataTableComponent<T = Record<string, unknown>>
   }
 
   /**
-   * Performs the previous page operation.
+   * Handles page change from pagination component.
+   * @param event - The page event.
    */
-  public previousPage(): void {
-    if (this.currentPage() > 0) {
-      this.currentPage.update((p) => p - 1);
-      this.emitPageChange();
-    }
-  }
-
-  /**
-   * Performs the next page operation.
-   */
-  public nextPage(): void {
-    if (this.currentPage() < this.totalPages() - 1) {
-      this.currentPage.update((p) => p + 1);
-      this.emitPageChange();
-    }
-  }
-
-  /**
-   * Performs the go to page operation.
-   * @param page - The page.
-   */
-  public goToPage(page: number): void {
-    this.currentPage.set(page);
-    this.emitPageChange();
-  }
-
-  /**
-   * Performs the on page size change operation.
-   */
-  public onPageSizeChange(): void {
-    this.currentPage.set(0);
-    this.emitPageChange();
-  }
-
-  /**
-   * Performs the emit page change operation.
-   */
-  public emitPageChange(): void {
-    this.onPageChange.emit({
-      pageIndex: this.currentPage(),
-      pageSize: this.pageSize,
-    });
-  }
-
-  /**
-   * Retrieves page numbers.
-   * @returns The an array of number value.
-   */
-  public getPageNumbers(): number[] {
-    const total = this.totalPages();
-    const current = this.currentPage();
-    const pages: number[] = [];
-
-    const maxVisible = 5;
-    let start = Math.max(0, current - Math.floor(maxVisible / 2));
-    const end = Math.min(total, start + maxVisible);
-
-    if (end - start < maxVisible) {
-      start = Math.max(0, end - maxVisible);
-    }
-
-    for (let i = start; i < end; i++) {
-      pages.push(i);
-    }
-
-    return pages;
+  public handlePageChange(event: PageEvent): void {
+    this.currentPage.set(event.pageIndex);
+    this.pageSize = event.pageSize;
+    this.pageChange.emit(event);
   }
 
   /**
@@ -437,45 +365,11 @@ export class DataTableComponent<T = Record<string, unknown>>
    */
   public exportTableData(): void {
     this.exportData.emit();
-    // Default CSV export implementation
-    const csv = this.convertToCSV(this.filteredData());
-    this.downloadCSV(csv, 'data-export.csv');
-  }
-
-  private convertToCSV(data: T[]): string {
-    if (data.length === 0) return '';
-
-    // Headers
-    const headers = this.columns.map((col) => col.label);
-    const csvHeaders = headers.join(',');
-
-    // Rows
-    const csvRows = data.map((row) => {
-      return this.columns
-        .map((col) => {
-          const value = this.getCellValue(row, col.key);
-          // Escape commas and quotes
-          const escaped = String(value || '').replace(/"/g, '""');
-          return `"${escaped}"`;
-        })
-        .join(',');
-    });
-
-    return [csvHeaders, ...csvRows].join('\n');
-  }
-
-  private downloadCSV(csv: string, filename: string): void {
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    DataTableExportUtil.exportTableData(
+      this.filteredData(),
+      this.columns,
+      (row, key) => this.getCellValue(row, key),
+    );
   }
 
   /**
@@ -500,74 +394,22 @@ export class DataTableComponent<T = Record<string, unknown>>
     }
   }
 
-  // Mobile responsiveness methods
-  /**
-   * Retrieves column classes.
-   * @param column - The column.
-   * @returns The string value.
-   */
-  public getColumnClasses(column: TableColumn): string {
-    const classes: string[] = [];
+  // Mobile responsiveness methods - delegated to utility class
+  public getColumnClasses = DataTableDisplayUtil.getColumnClasses;
+  public getColumnLabel = DataTableDisplayUtil.getColumnLabel;
 
-    if (column.priority) {
-      classes.push(`priority-${column.priority}`);
-    }
-
-    // Add responsive column classes
-    if (column.priority === 'high') {
-      classes.push('column-primary');
-    } else if (column.priority === 'medium') {
-      classes.push('column-secondary');
-    } else {
-      classes.push('column-secondary');
-    }
-
-    return classes.join(' ');
-  }
-
-  /**
-   * Retrieves column label.
-   * @param column - The column.
-   * @returns The string value.
-   */
-  public getColumnLabel(column: TableColumn): string {
-    // Use mobile label on small screens if available
-    if (window.innerWidth <= 768 && column.mobileLabel) {
-      return column.mobileLabel;
-    }
-    return column.label;
-  }
-
-  /**
-   * Retrieves truncated value.
-   * @param row - The row.
-   * @param column - The column.
-   * @returns The string value.
-   */
   public getTruncatedValue(row: T, column: TableColumn): string {
-    const value = this.getCellValue(row, column.key);
-    const text = String(value || '');
-
-    if (column.truncateLength && text.length > column.truncateLength) {
-      return text.substring(0, column.truncateLength) + '...';
-    }
-
-    return text;
+    return DataTableDisplayUtil.getTruncatedValue(
+      this.getCellValue(row, column.key),
+      column.truncateLength,
+    );
   }
 
-  /**
-   * Performs the should show tooltip operation.
-   * @param row - The row.
-   * @param column - The column.
-   * @returns The boolean value.
-   */
   public shouldShowTooltip(row: T, column: TableColumn): boolean {
-    if (!column.truncateLength) return false;
-
-    const value = this.getCellValue(row, column.key);
-    const text = String(value || '');
-
-    return text.length > column.truncateLength;
+    return DataTableDisplayUtil.shouldShowTooltip(
+      this.getCellValue(row, column.key),
+      column.truncateLength,
+    );
   }
 
   // Horizontal scroll detection
