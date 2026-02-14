@@ -172,7 +172,7 @@
         "libs/shared-dtos/src/domains/analytics.dto.ts",
         "libs/shared-dtos/src/domains/analytics-results.dto.ts"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CODE-003-11",

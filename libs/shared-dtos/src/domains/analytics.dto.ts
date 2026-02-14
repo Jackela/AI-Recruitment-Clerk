@@ -1,6 +1,7 @@
 /**
  * Analytics Domain - Aggregate Root and Domain Events
  * Value objects have been extracted to analytics-value-objects.dto.ts
+ * Result types have been extracted to analytics-results.dto.ts
  */
 import type { DomainEvent } from '../base/domain-event';
 import {
@@ -13,6 +14,24 @@ import {
   AnalyticsEventAnonymizedEvent,
   AnalyticsEventExpiredEvent,
 } from './analytics-event.dto';
+import type { AnalyticsEventData } from './analytics-results.dto';
+import type { MetricUnit, EventPayload, EventContextData ,
+  EventType} from './analytics-value-objects.dto';
+import {
+  AnalyticsEventId,
+  UserSession,
+  EventData,
+  EventTimestamp,
+  EventContext,
+  AnalyticsEventSummary,
+  EventValidationResult,
+  PrivacyComplianceResult,
+  EventStatus,
+} from './analytics-value-objects.dto';
+import {
+  calculateRetentionExpiry,
+  isRetentionPeriodExceeded,
+} from './analytics-retention.util';
 
 // Re-export from value objects for backward compatibility
 export {
@@ -40,26 +59,15 @@ export {
   type EventDataStructure,
 } from './analytics-value-objects.dto';
 
-// Import types for internal use (runtime values only - types come from re-exports)
-import type {
-  MetricUnit} from './analytics-value-objects.dto';
-import {
-  AnalyticsEventId,
-  UserSession,
-  EventData,
-  EventTimestamp,
-  EventContext,
-  AnalyticsEventSummary,
-  EventValidationResult,
-  PrivacyComplianceResult,
-  EventType,
-  EventStatus,
-  type UserSessionData,
-  type EventPayload,
-  type EventContextData,
-  type EventTimestampData,
-  type EventDataStructure,
-} from './analytics-value-objects.dto';
+// Re-export from results for backward compatibility
+export {
+  type AnalyticsEventData,
+  type EventCreationResult,
+  type BatchProcessingResult,
+  type AnalyticsQueryResult,
+  type AnonymizationResult,
+  type RetentionCleanupResult,
+} from './analytics-results.dto';
 
 // Analytics聚合根 - 管理用户行为数据收集和分析的核心业务逻辑
 /**
@@ -313,7 +321,10 @@ export class AnalyticsEvent {
     this.processedAt = new Date();
 
     // 设置数据保留期限
-    this.retentionExpiry = this.calculateRetentionExpiry();
+    this.retentionExpiry = calculateRetentionExpiry(
+      this.eventData.getEventType(),
+      this.createdAt,
+    );
 
     this.addEvent(
       new AnalyticsEventProcessedEvent(
@@ -378,7 +389,7 @@ export class AnalyticsEvent {
     }
 
     // 检查数据保留政策合规性
-    if (this.isRetentionPeriodExceeded()) {
+    if (isRetentionPeriodExceeded(this.retentionExpiry)) {
       errors.push('Event data retention period has been exceeded');
     }
 
@@ -388,38 +399,6 @@ export class AnalyticsEvent {
     }
 
     return new PrivacyComplianceResult(errors.length === 0, errors);
-  }
-
-  // 计算数据保留期限
-  private calculateRetentionExpiry(): Date {
-    const retentionDays = this.getRetentionPeriodDays();
-    const expiry = new Date(this.createdAt);
-    expiry.setDate(expiry.getDate() + retentionDays);
-    return expiry;
-  }
-
-  // 获取保留期限天数
-  private getRetentionPeriodDays(): number {
-    switch (this.eventData.getEventType()) {
-      case EventType.USER_INTERACTION:
-        return 730; // 2年
-      case EventType.SYSTEM_PERFORMANCE:
-        return 90; // 3个月
-      case EventType.BUSINESS_METRIC:
-        return 1095; // 3年
-      case EventType.ERROR_EVENT:
-        return 365; // 1年
-      default:
-        return 365; // 默认1年
-    }
-  }
-
-  // 检查是否超过保留期限
-  private isRetentionPeriodExceeded(): boolean {
-    if (!this.retentionExpiry) {
-      return false;
-    }
-    return new Date() > this.retentionExpiry;
   }
 
   // 查询方法
@@ -467,83 +446,35 @@ export class AnalyticsEvent {
   }
 
   // Getters
-  /**
-   * Retrieves id.
-   * @returns The AnalyticsEventId.
-   */
   public getId(): AnalyticsEventId {
     return this.id;
   }
 
-  /**
-   * Retrieves status.
-   * @returns The EventStatus.
-   */
   public getStatus(): EventStatus {
     return this.status;
   }
 
-  /**
-   * Retrieves session id.
-   * @returns The string value.
-   */
   public getSessionId(): string {
     return this.session.getSessionId();
   }
 
-  /**
-   * Retrieves user id.
-   * @returns The string | undefined.
-   */
   public getUserId(): string | undefined {
     return this.session.getUserId();
   }
 
-  /**
-   * Retrieves event type.
-   * @returns The EventType.
-   */
   public getEventType(): EventType {
     return this.eventData.getEventType();
   }
 
-  /**
-   * Retrieves timestamp.
-   * @returns The string value.
-   */
   public getTimestamp(): string {
     return this.timestamp.toISOString();
   }
 
-  /**
-   * Retrieves created at.
-   * @returns The Date.
-   */
   public getCreatedAt(): Date {
     return this.createdAt;
   }
 
-  /**
-   * Retrieves retention expiry.
-   * @returns The Date | undefined.
-   */
   public getRetentionExpiry(): Date | undefined {
     return this.retentionExpiry;
   }
-}
-
-// Interface for persistence/restore
-/**
- * Defines the shape of the analytics event data.
- */
-export interface AnalyticsEventData {
-  id: string;
-  session: UserSessionData;
-  eventData: EventDataStructure;
-  timestamp: EventTimestampData;
-  context: EventContextData;
-  status: EventStatus;
-  createdAt: string;
-  processedAt?: string;
-  retentionExpiry?: string;
 }

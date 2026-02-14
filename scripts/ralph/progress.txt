@@ -2,6 +2,26 @@
 Started: Fri Feb 14 2026
 ---
 
+## [Fri Feb 14 2026] - CODE-003-10
+- Created `analytics-results.dto.ts` with result interfaces (AnalyticsEventData, EventCreationResult, BatchProcessingResult, AnalyticsQueryResult, AnonymizationResult, RetentionCleanupResult)
+- Created `analytics-retention.util.ts` with retention utility functions (calculateRetentionExpiry, getRetentionPeriodDays, isRetentionPeriodExceeded)
+- Extracted retention logic from AnalyticsEvent class to utility functions
+- Removed redundant JSDoc comments from simple getter methods
+- Reduced `analytics.dto.ts` from 549 to 480 lines (target: <500)
+- Quality checks: typecheck passes
+- Files changed:
+  - `libs/shared-dtos/src/domains/analytics-results.dto.ts` (new, 79 lines)
+  - `libs/shared-dtos/src/domains/analytics-retention.util.ts` (new, 57 lines)
+  - `libs/shared-dtos/src/domains/analytics.dto.ts` (reduced from 549 to 480 lines)
+  - `scripts/ralph/prd.json` (updated passes: true for CODE-003-10)
+- **Learnings for future iterations:**
+  - When line reduction target isn't met with interface extraction, also extract utility functions
+  - Retention logic is a good candidate for utility extraction - it's stateless and doesn't need to be in the aggregate
+  - Redundant JSDoc on simple getters can be removed to save lines without losing clarity
+  - The PRD mentioned "EventCreationResult, BatchProcessingResult" but these didn't exist - added them as new interfaces for completeness
+
+---
+
 ## [Fri Feb 14 2026] - CODE-003-9
 - Renamed `analytics-interfaces.ts` to `analytics-interfaces.dto.ts` to follow DTO naming convention
 - Updated imports in 4 service files to use new file name
