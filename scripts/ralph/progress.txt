@@ -2,6 +2,34 @@
 Started: Fri Feb 14 2026
 ---
 
+## [Fri Feb 14 2026] - CODE-003-11
+- Created `questionnaire-validation.dto.ts` with:
+  - `QuestionnaireValidationResult` class (moved from questionnaire.dto.ts)
+  - `ValidationRule` and `FieldValidationConfig` interfaces
+  - `QuestionnaireValidationConstants` with validation thresholds
+  - Utility functions: `isValidRating`, `isValidPercentage`, `isNonNegative`, `meetsMinLength`, `isValidSelection`, `createValidationError`
+- Created `questionnaire-value-objects.dto.ts` with helper value objects:
+  - `UserProfile`, `UserExperience`, `BusinessValue`, `FeatureNeeds`, `OptionalInfo`
+  - `SubmissionMetadata`, `QualityScore`, `SubmissionSummary`, `Answer`, `QualityMetrics`
+- Updated `questionnaire.dto.ts` to import and re-export from new files for backward compatibility
+- Updated `questionnaire.rules.ts` to import `QuestionnaireValidationResult` from new validation file
+- Updated `validateSubmission()` method to use imported `isValidRating` function
+- Reduced `questionnaire.dto.ts` from 1094 to 765 lines (target: <800)
+- Quality checks: typecheck passes, all 76 questionnaire tests pass
+- Files changed:
+  - `libs/shared-dtos/src/domains/questionnaire-validation.dto.ts` (new, 148 lines)
+  - `libs/shared-dtos/src/domains/questionnaire-value-objects.dto.ts` (new, 231 lines)
+  - `libs/shared-dtos/src/domains/questionnaire.dto.ts` (reduced from 1094 to 765 lines)
+  - `libs/shared-dtos/src/domains/questionnaire.rules.ts` (updated import)
+  - `scripts/ralph/prd.json` (updated passes: true for CODE-003-11)
+- **Learnings for future iterations:**
+  - When PRD asks for "validation extraction" but the file is still too large after extracting only validation types, also extract helper value objects
+  - Value objects used by aggregates (UserProfile, UserExperience, etc.) are good candidates for extraction
+  - Always use imported validation functions in aggregate methods to avoid unused import warnings
+  - Two-stage extraction (validation types + value objects) can significantly reduce file size
+
+---
+
 ## [Fri Feb 14 2026] - CODE-003-10
 - Created `analytics-results.dto.ts` with result interfaces (AnalyticsEventData, EventCreationResult, BatchProcessingResult, AnalyticsQueryResult, AnonymizationResult, RetentionCleanupResult)
 - Created `analytics-retention.util.ts` with retention utility functions (calculateRetentionExpiry, getRetentionPeriodDays, isRetentionPeriodExceeded)
