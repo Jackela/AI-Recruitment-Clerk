@@ -14,6 +14,23 @@ Started: Fri Feb 14 2026
 
 ---
 
+## [Fri Feb 14 2026] - CODE-003-5
+- Extracted inline template from `data-table.component.ts` to external `data-table.component.html`
+- Updated @Component decorator to use `templateUrl` instead of inline `template`
+- Removed invalid eslint-disable comments (referenced `@angular-eslint/no-output-on-prefix` which isn't in root eslint config)
+- Reduced `data-table.component.ts` from 1018 to 608 lines
+- Quality checks: typecheck passes, eslint passes
+- Files changed:
+  - `apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table.component.html` (new, ~300 lines)
+  - `apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table.component.ts` (reduced from 1018 to 608 lines)
+- **Learnings for future iterations:**
+  - Eslint configs are resolved from project root, not subdirectories - the frontend-specific eslint.config.mjs isn't used when running eslint from root
+  - eslint-disable comments for non-existent rules cause "Definition for rule was not found" errors
+  - Template extraction is straightforward: just move template string to .html file and change `template` to `templateUrl`
+  - Line count target <600 not fully met (608 lines) - subsequent stories will extract pagination/sorting to reduce further
+
+---
+
 ## [Fri Feb 14 2026] - CODE-003-3
 - Extracted candidate card display (avatar, name, title, score) into `mobile-candidate-card.component.ts`
 - Created `CandidateCardData` interface with types for status and match level

@@ -90,7 +90,7 @@
         "apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table.component.ts",
         "apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table.component.html"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CODE-003-6",
