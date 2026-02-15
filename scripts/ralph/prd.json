@@ -1,226 +1,380 @@
 {
-  "id": "CODE-003",
-  "title": "Phase 4: File Size Reduction (Atomic Stories)",
-  "description": "Split large files into smaller modules following the <500 line limit. Each story is atomic and verifiable.",
+  "id": "CODE-004",
+  "title": "Comprehensive Code Quality Improvement (Optimized)",
+  "description": "Fix ESLint/type issues, split large files, replace stubs, add tests, and documentation. Based on independent evaluation by 3 subagents.",
   "acceptanceCriteria": [
-    "All targeted files < 500 lines",
-    "npm run typecheck passes",
-    "npm run test passes"
+    "0 ESLint disable comments in production code",
+    "All files < 500 lines",
+    "0 any type usage",
+    "80%+ test coverage for critical services",
+    "All stubs replaced with real implementations",
+    "Complete documentation for all modules",
+    "npm run ci:full passes"
   ],
   "priority": 1,
-  "branchName": "refactor/code-cleanup",
+  "branchName": "refactor/comprehensive-improvement",
   "subtasks": [
     {
-      "id": "CODE-003-1",
-      "title": "Extract mobile-navigation header template",
-      "description": "Extract the header section (logo, title, menu button) from mobile-navigation.component.ts into mobile-navigation-header.component.ts. Use @Input for title, @Output for menuToggle event.",
+      "id": "CLEAN-001",
+      "title": "Fix any types in shared-dtos library",
+      "description": "Remove all @typescript-eslint/no-explicit-any warnings in shared-dtos",
       "acceptanceCriteria": [
-        "mobile-navigation.component.ts line count < 550",
-        "mobile-navigation-header.component.ts exists",
-        "npm run typecheck passes",
-        "npm run test -- --testPathPattern=mobile-navigation passes"
+        "No @typescript-eslint/no-explicit-any in shared-dtos",
+        "npm run lint for shared-dtos passes",
+        "npm test passes"
       ],
-      "pattern": "Component splitting: extract UI section to child component with @Input/@Output",
-      "files": [
-        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-navigation.component.ts",
-        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-navigation-header.component.ts"
-      ],
-      "passes": true
+      "priority": 1,
+      "files": ["libs/shared-dtos/src/**/*.ts"],
+      "passes": false
     },
     {
-      "id": "CODE-003-2",
-      "title": "Extract mobile-navigation bottom nav",
-      "description": "Extract the bottom navigation bar section from mobile-navigation.component.ts into mobile-bottom-nav.component.ts. Include nav items array and active state logic.",
+      "id": "CLEAN-002",
+      "title": "Fix any types in app-gateway services",
+      "description": "Remove all any types in app-gateway",
       "acceptanceCriteria": [
-        "mobile-navigation.component.ts line count < 450",
-        "mobile-bottom-nav.component.ts exists",
-        "npm run typecheck passes",
-        "npm run test -- --testPathPattern=mobile-navigation passes"
+        "No any types in app-gateway",
+        "npm run lint for app-gateway passes",
+        "npm test passes"
       ],
-      "pattern": "Component splitting: extract navigation UI to child component",
-      "files": [
-        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-navigation.component.ts",
-        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-bottom-nav.component.ts"
-      ],
-      "passes": true
+      "priority": 1,
+      "files": ["apps/app-gateway/src/**/*.ts"],
+      "passes": false
     },
     {
-      "id": "CODE-003-3",
-      "title": "Extract candidate card display from results-item",
-      "description": "Extract the candidate info display (avatar, name, title, company) from mobile-results-item.component.ts into mobile-candidate-card.component.ts. Keep swipe logic in original file.",
-      "acceptanceCriteria": [
-        "mobile-results-item.component.ts line count < 400",
-        "mobile-candidate-card.component.ts exists",
-        "npm run typecheck passes"
-      ],
-      "pattern": "Component splitting: extract display-only UI to child component",
-      "files": [
-        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-item.component.ts",
-        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-candidate-card.component.ts"
-      ],
-      "passes": true
+      "id": "CLEAN-003",
+      "title": "Fix any types in resume-parser-svc",
+      "description": "Remove all any types in resume-parser-svc",
+      "acceptanceCriteria": ["No any types in resume-parser-svc", "Tests pass"],
+      "priority": 1,
+      "files": ["apps/resume-parser-svc/src/**/*.ts"],
+      "passes": false
     },
     {
-      "id": "CODE-003-4",
-      "title": "Extract skill tags display from results-item",
-      "description": "Extract the skill tags/chips display from mobile-results-item.component.ts into mobile-skill-tags.component.ts. Use @Input for skills array.",
+      "id": "CLEAN-004",
+      "title": "Fix any types in scoring-engine-svc",
+      "description": "Remove all any types in scoring-engine-svc",
       "acceptanceCriteria": [
-        "mobile-results-item.component.ts line count < 350",
-        "mobile-skill-tags.component.ts exists",
-        "npm run typecheck passes"
+        "No any types in scoring-engine-svc",
+        "Tests pass"
       ],
-      "pattern": "Component splitting: extract repeated UI pattern to reusable component",
-      "files": [
-        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-results-item.component.ts",
-        "apps/ai-recruitment-frontend/src/app/components/mobile/mobile-skill-tags.component.ts"
-      ],
-      "passes": true
+      "priority": 1,
+      "files": ["apps/scoring-engine-svc/src/**/*.ts"],
+      "passes": false
     },
     {
-      "id": "CODE-003-5",
-      "title": "Extract data-table inline template to HTML",
-      "description": "Move the inline template from data-table.component.ts to external data-table.component.html file. Use templateUrl in @Component decorator.",
-      "acceptanceCriteria": [
-        "data-table.component.ts line count < 600",
-        "data-table.component.html exists",
-        "npm run typecheck passes"
-      ],
-      "pattern": "Template extraction: move inline template to external .html file",
-      "files": [
-        "apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table.component.ts",
-        "apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table.component.html"
-      ],
-      "passes": true
+      "id": "CLEAN-005",
+      "title": "Fix any types in frontend",
+      "description": "Remove all any types in frontend",
+      "acceptanceCriteria": ["No any types in frontend", "E2E tests pass"],
+      "priority": 2,
+      "files": ["apps/ai-recruitment-frontend/src/**/*.ts"],
+      "passes": false
     },
     {
-      "id": "CODE-003-6",
-      "title": "Extract data-table pagination component",
-      "description": "Extract pagination controls (page numbers, prev/next buttons, page size selector) from data-table.component.ts to data-table-pagination.component.ts. Use @Input for totalItems/pageSize/pageIndex, @Output for pageChange.",
-      "acceptanceCriteria": [
-        "data-table.component.ts line count < 450",
-        "data-table-pagination.component.ts exists",
-        "npm run typecheck passes"
-      ],
-      "pattern": "Component splitting: extract pagination UI to child component",
-      "files": [
-        "apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table.component.ts",
-        "apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table-pagination.component.ts"
-      ],
-      "passes": true
+      "id": "CLEAN-006",
+      "title": "Fix TypeScript warnings (TS7053, TS6138)",
+      "description": "Fix 42 warnings related to index signatures and unused DI",
+      "acceptanceCriteria": ["No TS7053 warnings", "No TS6138 warnings"],
+      "priority": 2,
+      "passes": false
     },
     {
-      "id": "CODE-003-7",
-      "title": "Extract data-table sorting service",
-      "description": "Extract sorting logic (sort function, sort direction cycling, multi-column sort) from data-table.component.ts to data-table-sorting.service.ts. Use DataTableUtilService pattern already in codebase.",
+      "id": "CLEAN-007",
+      "title": "Remove unused imports and dead code",
+      "description": "Clean up all unused imports and commented-out code blocks",
       "acceptanceCriteria": [
-        "data-table.component.ts line count < 350",
-        "data-table-sorting.service.ts exists",
-        "npm run typecheck passes"
+        "No unused imports warnings",
+        "No commented-out code blocks"
       ],
-      "pattern": "Service extraction: move business logic to service",
-      "files": [
-        "apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table.component.ts",
-        "apps/ai-recruitment-frontend/src/app/components/shared/data-table/data-table-sorting.service.ts"
-      ],
-      "passes": true
+      "priority": 2,
+      "passes": false
     },
     {
-      "id": "CODE-003-8",
-      "title": "Extract analytics value objects",
-      "description": "Extract all value object classes (AnalyticsEventId, UserSession, DeviceInfo, GeoLocation, etc.) from analytics.dto.ts to analytics-value-objects.dto.ts. Re-export from main file for backward compatibility.",
-      "acceptanceCriteria": [
-        "analytics.dto.ts line count < 900",
-        "analytics-value-objects.dto.ts exists",
-        "npm run typecheck passes",
-        "All imports from analytics.dto.ts still work"
-      ],
-      "pattern": "DTO splitting: extract value objects, re-export from barrel file",
-      "files": [
-        "libs/shared-dtos/src/domains/analytics.dto.ts",
-        "libs/shared-dtos/src/domains/analytics-value-objects.dto.ts",
-        "libs/shared-dtos/src/index.ts"
-      ],
-      "passes": true
+      "id": "CLEAN-008",
+      "title": "Fix remaining TypeScript warnings (TS6133, TS6196)",
+      "description": "Fix 19 warnings related to unused variables and unused types",
+      "acceptanceCriteria": ["No TS6133 warnings", "No TS6196 warnings"],
+      "priority": 3,
+      "passes": false
     },
     {
-      "id": "CODE-003-9",
-      "title": "Extract analytics interfaces",
-      "description": "Extract all interface definitions (IAnalyticsRepository, IDomainEventBus, IAuditLogger, etc.) from analytics.dto.ts to analytics-interfaces.dto.ts. Use type-only imports where possible.",
+      "id": "SPLIT-001",
+      "title": "Split incentive.dto.ts (1,152 lines)",
+      "description": "Split incentive.dto.ts into modular files under 500 lines each",
       "acceptanceCriteria": [
-        "analytics.dto.ts line count < 700",
-        "analytics-interfaces.dto.ts exists",
-        "npm run typecheck passes"
+        "All files under 500 lines",
+        "Barrel export maintains backward compatibility",
+        "npm test passes"
       ],
-      "pattern": "DTO splitting: extract interfaces to separate file",
-      "files": [
-        "libs/shared-dtos/src/domains/analytics.dto.ts",
-        "libs/shared-dtos/src/domains/analytics-interfaces.dto.ts"
-      ],
-      "passes": true
+      "priority": 1,
+      "dependsOn": ["CLEAN-001"],
+      "passes": false
     },
     {
-      "id": "CODE-003-10",
-      "title": "Extract analytics result classes",
-      "description": "Extract all result class definitions (EventCreationResult, BatchProcessingResult, etc.) from analytics.dto.ts to analytics-results.dto.ts. Re-export from main file.",
+      "id": "SPLIT-002",
+      "title": "Split jobs.service.ts (1,084 lines)",
+      "description": "Split jobs.service.ts using facade pattern",
       "acceptanceCriteria": [
-        "analytics.dto.ts line count < 500",
-        "analytics-results.dto.ts exists",
-        "npm run typecheck passes"
+        "All files under 500 lines",
+        "Facade pattern implemented",
+        "Tests pass"
       ],
-      "pattern": "DTO splitting: extract result classes, maintain barrel export",
-      "files": [
-        "libs/shared-dtos/src/domains/analytics.dto.ts",
-        "libs/shared-dtos/src/domains/analytics-results.dto.ts"
-      ],
-      "passes": true
+      "priority": 1,
+      "dependsOn": ["CLEAN-002"],
+      "passes": false
     },
     {
-      "id": "CODE-003-11",
-      "title": "Extract questionnaire validation logic",
-      "description": "Extract validation functions and types (validateQuestionnaire, ValidationRule, etc.) from questionnaire.dto.ts to questionnaire-validation.dto.ts.",
+      "id": "SPLIT-003",
+      "title": "Split parsing.service.ts (1,082 lines)",
+      "description": "Split parsing.service.ts using orchestrator pattern",
       "acceptanceCriteria": [
-        "questionnaire.dto.ts line count < 800",
-        "questionnaire-validation.dto.ts exists",
-        "npm run typecheck passes"
+        "All files under 500 lines",
+        "Orchestrator pattern implemented",
+        "Tests pass"
       ],
-      "pattern": "DTO splitting: extract validation logic to separate file",
-      "files": [
-        "libs/shared-dtos/src/domains/questionnaire.dto.ts",
-        "libs/shared-dtos/src/domains/questionnaire-validation.dto.ts"
-      ],
-      "passes": true
+      "priority": 1,
+      "dependsOn": ["CLEAN-003"],
+      "passes": false
     },
     {
-      "id": "CODE-003-12",
-      "title": "Extract questionnaire response DTOs",
-      "description": "Extract response-related DTOs (QuestionnaireResponseDto, QuestionnaireAnalyticsDto, etc.) from questionnaire.dto.ts to questionnaire-responses.dto.ts.",
-      "acceptanceCriteria": [
-        "questionnaire.dto.ts line count < 600",
-        "questionnaire-responses.dto.ts exists",
-        "npm run typecheck passes"
-      ],
-      "pattern": "DTO splitting: extract response DTOs",
-      "files": [
-        "libs/shared-dtos/src/domains/questionnaire.dto.ts",
-        "libs/shared-dtos/src/domains/questionnaire-responses.dto.ts"
-      ],
-      "passes": true
+      "id": "SPLIT-004",
+      "title": "Split scoring-confidence.service.ts (1,013 lines)",
+      "description": "Split scoring-confidence.service.ts using facade pattern",
+      "acceptanceCriteria": ["All files under 500 lines", "Tests pass"],
+      "priority": 1,
+      "dependsOn": ["CLEAN-004"],
+      "passes": false
     },
     {
-      "id": "CODE-003-13",
-      "title": "Extract questionnaire question definitions",
-      "description": "Extract question definition types (QuestionSection, QuestionDefinition, etc.) from questionnaire.dto.ts to questionnaire-questions.dto.ts.",
+      "id": "SPLIT-005",
+      "title": "Split usage-limit.controller.ts (1,000 lines)",
+      "description": "Split usage-limit.controller.ts under 500 lines",
+      "acceptanceCriteria": ["All files under 500 lines", "Tests pass"],
+      "priority": 2,
+      "dependsOn": ["CLEAN-002"],
+      "passes": false
+    },
+    {
+      "id": "SPLIT-006",
+      "title": "Split experience-calculator.spec.ts (2,577 lines)",
+      "description": "Split test files by category under 500 lines each",
       "acceptanceCriteria": [
-        "questionnaire.dto.ts line count < 500",
-        "questionnaire-questions.dto.ts exists",
-        "npm run typecheck passes"
+        "Test files split by category",
+        "All test files under 500 lines",
+        "All tests pass"
       ],
-      "pattern": "DTO splitting: extract domain types",
-      "files": [
-        "libs/shared-dtos/src/domains/questionnaire.dto.ts",
-        "libs/shared-dtos/src/domains/questionnaire-questions.dto.ts"
+      "priority": 2,
+      "dependsOn": ["SPLIT-003"],
+      "passes": false
+    },
+    {
+      "id": "SPLIT-007",
+      "title": "Split infrastructure-shared index.ts (1,090 lines)",
+      "description": "Create modular exports for infrastructure-shared",
+      "acceptanceCriteria": ["Modular exports", "Tests pass"],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "SPLIT-008",
+      "title": "Split report.repository.ts (964 lines)",
+      "description": "Split report.repository.ts under 500 lines",
+      "acceptanceCriteria": ["File under 500 lines", "Tests pass"],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "SPLIT-009",
+      "title": "Split validation.util.ts (979 lines)",
+      "description": "Split into domain-specific validators",
+      "acceptanceCriteria": ["Domain-specific validators", "Tests pass"],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "SPLIT-010",
+      "title": "Split analytics.controller.ts (902 lines)",
+      "description": "Consolidate analytics endpoints",
+      "acceptanceCriteria": ["Consolidated analytics endpoints", "Tests pass"],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "STUB-001",
+      "title": "Replace AI services stub with real implementation",
+      "description": "Implement real Gemini API integration",
+      "acceptanceCriteria": [
+        "Real Gemini API integration",
+        "Environment-based API key configuration",
+        "Error handling implemented",
+        "Integration tests added"
       ],
-      "passes": true
+      "priority": 1,
+      "dependsOn": ["CLEAN-001"],
+      "risk": "HIGH - Requires external API keys",
+      "passes": false
+    },
+    {
+      "id": "STUB-002",
+      "title": "Replace JD extractor stub",
+      "description": "Implement real JD extraction logic with NATS event handling",
+      "acceptanceCriteria": [
+        "Real JD extraction logic",
+        "NATS event handling",
+        "Tests pass"
+      ],
+      "priority": 1,
+      "dependsOn": ["CLEAN-003"],
+      "passes": false
+    },
+    {
+      "id": "STUB-003",
+      "title": "Replace scoring engine stub",
+      "description": "Implement real scoring algorithms with NATS integration",
+      "acceptanceCriteria": [
+        "Real scoring algorithms",
+        "NATS integration",
+        "Tests pass"
+      ],
+      "priority": 1,
+      "dependsOn": ["CLEAN-004", "SPLIT-004"],
+      "passes": false
+    },
+    {
+      "id": "STUB-004",
+      "title": "Replace resume parser NATS stub",
+      "description": "Implement real parsing logic with NATS integration",
+      "acceptanceCriteria": [
+        "Real parsing logic",
+        "NATS integration",
+        "Tests pass"
+      ],
+      "priority": 1,
+      "dependsOn": ["SPLIT-003"],
+      "passes": false
+    },
+    {
+      "id": "TEST-001",
+      "title": "Add tests for field-mapper.service.ts",
+      "description": "Add unit tests for field-mapper.service.ts with 80%+ coverage",
+      "acceptanceCriteria": [
+        "Unit tests added",
+        "80%+ coverage for field-mapper.service.ts",
+        "All tests pass"
+      ],
+      "priority": 1,
+      "dependsOn": ["SPLIT-003"],
+      "passes": false
+    },
+    {
+      "id": "TEST-002",
+      "title": "Add tests for resume.service.ts",
+      "description": "Add unit tests for resume.service.ts with 80%+ coverage",
+      "acceptanceCriteria": ["Unit tests added", "80%+ coverage"],
+      "priority": 1,
+      "dependsOn": ["SPLIT-002"],
+      "passes": false
+    },
+    {
+      "id": "TEST-003",
+      "title": "Add integration tests for NATS communication",
+      "description": "Add cross-service communication tests and event flow tests",
+      "acceptanceCriteria": [
+        "Cross-service communication tests",
+        "Event flow tests",
+        "All tests pass"
+      ],
+      "priority": 2,
+      "dependsOn": ["STUB-001", "STUB-002", "STUB-003", "STUB-004"],
+      "passes": false
+    },
+    {
+      "id": "TEST-004",
+      "title": "Add E2E tests for critical user flows",
+      "description": "Add E2E tests for resume upload and analysis result viewing",
+      "acceptanceCriteria": [
+        "Resume upload flow tested",
+        "Analysis result viewing tested",
+        "All E2E tests pass"
+      ],
+      "priority": 2,
+      "dependsOn": [
+        "CLEAN-001",
+        "CLEAN-002",
+        "CLEAN-003",
+        "CLEAN-004",
+        "CLEAN-005",
+        "SPLIT-001",
+        "SPLIT-002",
+        "SPLIT-003",
+        "SPLIT-004",
+        "STUB-001",
+        "STUB-002",
+        "STUB-003",
+        "STUB-004"
+      ],
+      "passes": false
+    },
+    {
+      "id": "DOC-001",
+      "title": "Add README for all libs directories",
+      "description": "Add README with library overview, usage examples, and API documentation for all 17 libs directories",
+      "acceptanceCriteria": [
+        "Library overview",
+        "Usage examples",
+        "API documentation"
+      ],
+      "priority": 2,
+      "dependsOn": [
+        "SPLIT-001",
+        "SPLIT-002",
+        "SPLIT-003",
+        "SPLIT-004",
+        "SPLIT-005",
+        "SPLIT-006",
+        "SPLIT-007",
+        "SPLIT-008",
+        "SPLIT-009",
+        "SPLIT-010"
+      ],
+      "passes": false
+    },
+    {
+      "id": "DOC-002",
+      "title": "Add README for all apps directories",
+      "description": "Add README with architecture overview, setup instructions, and API documentation for all apps",
+      "acceptanceCriteria": [
+        "Architecture overview",
+        "Setup instructions",
+        "API documentation"
+      ],
+      "priority": 2,
+      "dependsOn": [
+        "CLEAN-001",
+        "CLEAN-002",
+        "CLEAN-003",
+        "CLEAN-004",
+        "CLEAN-005",
+        "SPLIT-001",
+        "SPLIT-002",
+        "SPLIT-003",
+        "SPLIT-004",
+        "SPLIT-005",
+        "SPLIT-006",
+        "SPLIT-007",
+        "SPLIT-008",
+        "SPLIT-009",
+        "SPLIT-010",
+        "STUB-001",
+        "STUB-002",
+        "STUB-003",
+        "STUB-004",
+        "TEST-001",
+        "TEST-002",
+        "TEST-003",
+        "TEST-004"
+      ],
+      "passes": false
     }
   ]
 }

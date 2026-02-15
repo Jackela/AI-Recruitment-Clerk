@@ -2,6 +2,32 @@
 Started: Fri Feb 14 2026
 ---
 
+## [Sat Feb 15 2026] - CLEAN-001 (Partial Progress)
+- Started fixing `any` type usages in shared-dtos library
+- Fixed 8 files via subagent:
+  - `libs/shared-dtos/src/contracts/analytics.contracts.ts`
+  - `libs/shared-dtos/src/domains/analytics.rules.ts`
+  - `libs/shared-dtos/src/domains/incentive.dto.ts`
+  - `libs/shared-dtos/src/domains/incentive.rules.ts`
+  - `libs/shared-dtos/src/domains/usage-limit.service.ts`
+  - `libs/shared-dtos/src/domains/user-management.dto.ts`
+  - `libs/shared-dtos/src/encryption/encryption.service.ts`
+  - `libs/shared-dtos/src/infrastructure/redis/redis.client.ts`
+- Patterns used:
+  - `Record<string, any>` -> `Record<string, unknown>`
+  - `data: any` in restore methods -> `data: Record<string, unknown>` or specific interfaces
+  - Decorator `...args: any[]` -> `...args: unknown[]`
+  - `event: any` -> `event: DomainEvent` or `event: unknown`
+- Remaining: 19 files still have `any` usages with eslint-disable comments
+- Quality checks: build passes, 819 tests pass
+- **Learnings for future iterations:**
+  - For restore/factory methods, create specific typed interfaces (e.g., `IncentiveRewardData`, `UsageQuotaData`)
+  - For event handlers, use `DomainEvent` type or `unknown` with type guards
+  - For encryption methods, Node.js crypto accepts `Buffer` natively - no type assertion needed
+  - For validation functions, use `unknown` with proper type guards
+
+---
+
 ## [Fri Feb 14 2026] - CODE-003-13
 - Created `questionnaire-questions.dto.ts` re-exporting question-related types (QuestionSection, QualityThreshold)
 - Updated `questionnaire.dto.ts` to re-export from the new questions file

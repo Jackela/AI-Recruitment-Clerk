@@ -8,6 +8,26 @@ import {
 } from './incentive.dto';
 
 /**
+ * Defines the shape of the questionnaire trigger data for rules.
+ */
+export interface QuestionnaireTriggerRulesData {
+  questionnaireId: string;
+  qualityScore: number;
+}
+
+/**
+ * Defines the shape of the referral trigger data for rules.
+ */
+export interface ReferralTriggerRulesData {
+  referredIP: string;
+}
+
+/**
+ * Defines the shape of the trigger data for rules.
+ */
+export type TriggerRulesData = QuestionnaireTriggerRulesData | ReferralTriggerRulesData;
+
+/**
  * Represents the incentive rules.
  */
 export class IncentiveRules {
@@ -38,8 +58,7 @@ export class IncentiveRules {
   public static canCreateIncentive(
     ip: string,
     triggerType: TriggerType,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    triggerData: any,
+    triggerData: TriggerRulesData,
     existingIncentivesToday?: number,
   ): IncentiveEligibilityResult {
     const errors: string[] = [];
@@ -59,35 +78,39 @@ export class IncentiveRules {
 
     // 根据触发类型验证特定条件
     switch (triggerType) {
-      case TriggerType.QUESTIONNAIRE_COMPLETION:
-        if (!triggerData.questionnaireId) {
+      case TriggerType.QUESTIONNAIRE_COMPLETION: {
+        const data = triggerData as QuestionnaireTriggerRulesData;
+        if (!data.questionnaireId) {
           errors.push('Questionnaire ID is required');
         }
         if (
-          typeof triggerData.qualityScore !== 'number' ||
-          triggerData.qualityScore < 0 ||
-          triggerData.qualityScore > 100
+          typeof data.qualityScore !== 'number' ||
+          data.qualityScore < 0 ||
+          data.qualityScore > 100
         ) {
           errors.push('Valid quality score (0-100) is required');
         }
-        if (triggerData.qualityScore < this.MIN_QUALITY_SCORE) {
+        if (data.qualityScore < this.MIN_QUALITY_SCORE) {
           errors.push(
             `Quality score must be at least ${this.MIN_QUALITY_SCORE} to qualify for reward`,
           );
         }
         break;
+      }
 
-      case TriggerType.REFERRAL:
-        if (!triggerData.referredIP) {
+      case TriggerType.REFERRAL: {
+        const data = triggerData as ReferralTriggerRulesData;
+        if (!data.referredIP) {
           errors.push('Referred IP address is required');
         }
-        if (!this.isValidIPAddress(triggerData.referredIP)) {
+        if (!this.isValidIPAddress(data.referredIP)) {
           errors.push('Referred IP address must be valid');
         }
-        if (triggerData.referredIP === ip) {
+        if (data.referredIP === ip) {
           errors.push('Cannot refer yourself');
         }
         break;
+      }
 
       default:
         errors.push(`Unsupported trigger type: ${triggerType}`);
@@ -107,12 +130,11 @@ export class IncentiveRules {
    */
   public static calculateExpectedReward(
     triggerType: TriggerType,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    triggerData: any,
+    triggerData: TriggerRulesData,
   ): number {
     switch (triggerType) {
       case TriggerType.QUESTIONNAIRE_COMPLETION:
-        return this.calculateQuestionnaireReward(triggerData.qualityScore);
+        return this.calculateQuestionnaireReward((triggerData as QuestionnaireTriggerRulesData).qualityScore);
 
       case TriggerType.REFERRAL:
         return this.REFERRAL_REWARD_AMOUNT;

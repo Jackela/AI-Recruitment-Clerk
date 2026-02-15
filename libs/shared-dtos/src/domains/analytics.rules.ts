@@ -40,8 +40,7 @@ export class AnalyticsRules {
   public static canCreateEvent(
     sessionId: string,
     eventType: EventType,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    eventData: any,
+    eventData: Record<string, unknown>,
     consentStatus: ConsentStatus,
     existingEventsInSession?: number,
   ): EventCreationEligibilityResult {
@@ -127,8 +126,7 @@ export class AnalyticsRules {
    */
   public static validateEventDataStructure(
     eventType: EventType,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    eventData: any,
+    eventData: Record<string, unknown>,
   ): EventDataValidationResult {
     const errors: string[] = [];
 
@@ -195,7 +193,7 @@ export class AnalyticsRules {
             'Business metric event requires numeric metricValue field',
           );
         }
-        if (!Object.values(MetricUnit).includes(eventData.metricUnit)) {
+        if (!Object.values(MetricUnit).includes(eventData.metricUnit as MetricUnit)) {
           errors.push('Business metric event requires valid metricUnit');
         }
         break;
