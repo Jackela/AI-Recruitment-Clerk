@@ -80,6 +80,9 @@ export * from './contracts/dbc.decorators';
 // Domain Models - User Management & Questionnaire
 export * from './domains/user-management.dto';
 export * from './domains/questionnaire.dto';
+export * from './domains/questionnaire-events.dto';
+export * from './domains/questionnaire-interfaces.dto';
+export * from './domains/questionnaire-types.dto';
 export {
   QuestionnaireDomainService,
   QuestionnaireSubmissionResult,
@@ -109,7 +112,7 @@ export {
   UsageLimitExceededEvent,
   BonusQuotaAddedEvent,
   DailyUsageResetEvent,
-  UsageRecordedEvent as UsageLimitUsageRecordedEvent,
+  UsageLimitUsageRecordedEvent,
 } from './domains/usage-limit.dto';
 export {
   UsageLimitDomainService,
@@ -123,19 +126,43 @@ export * from './contracts/usage-limit.contracts';
 
 // Domain Models - Incentives
 export * from './domains/incentive.dto';
-export {
-  IncentiveDomainService,
-  IncentiveCreationResult,
-  IncentiveValidationResult,
-  IncentiveApprovalResult,
-  PaymentProcessingResult,
-} from './domains/incentive.service';
+export { IncentiveDomainService } from './domains/incentive.service';
 export type {
   IIncentiveRepository,
+  IDomainEventBus,
+  IAuditLogger,
   IPaymentGateway,
 } from './domains/incentive.service';
-export * from './domains/incentive.rules';
+// Don't use wildcard for incentive.rules to avoid conflicts with incentive.dto exports
+export { IncentiveRules } from './domains/incentive.rules';
+export type {
+  IncentiveEligibilityResult,
+  PaymentEligibilityResult,
+  PaymentMethodValidationResult,
+} from './domains/incentive.rules';
 export * from './contracts/incentive.contracts';
+// Don't export wildcard for incentive-results.types due to ContactInfo conflict
+export {
+  PaymentProcessingResult,
+  BatchPaymentResult,
+  IncentiveCreationResult,
+  IncentiveStatsResult,
+  PendingIncentivesResult,
+} from './domains/incentive-results.types';
+export type {
+  IPIncentiveStatistics,
+  SystemIncentiveStatistics,
+  BatchPaymentItem,
+  PaymentGatewayRequest,
+  PaymentGatewayResponse,
+} from './domains/incentive-results.types';
+export * from './domains/incentive-validation.service';
+export * from './domains/incentive-calculations.service';
+export * from './domains/incentive-payment.service';
+export type {
+  IIncentiveRepository as IncentiveRepositoryInterface,
+  IPaymentGateway as PaymentGatewayInterface,
+} from './domains/incentive-service.interfaces';
 
 // Domain Models - Analytics
 export {
@@ -145,7 +172,7 @@ export {
   EventStatus,
   EventType,
   EventCategory,
-  ConsentStatus,
+  ConsentStatus as AnalyticsConsentStatus,  // Renamed to avoid conflict with privacy ConsentStatus
   MetricUnit,
   AnalyticsEventSummary,
   DeviceInfo,
@@ -153,7 +180,20 @@ export {
 } from './domains/analytics.dto';
 export type { AnalyticsEventData } from './domains/analytics.dto';
 export {
+  AnalyticsEventCreatedEvent,
+  SystemPerformanceEventCreatedEvent,
+  BusinessMetricEventCreatedEvent,
+  AnalyticsEventValidatedEvent,
+  AnalyticsEventValidationFailedEvent,
+  AnalyticsEventProcessedEvent,
+  AnalyticsEventAnonymizedEvent,
+  AnalyticsEventExpiredEvent,
+} from './domains/analytics-event.dto';
+export {
   AnalyticsDomainService,
+  AnalyticsEventCollectionService,
+  AnalyticsAggregationService,
+  AnalyticsReportingService,
   EventCreationResult,
   BatchProcessingResult,
   PrivacyComplianceResult,
@@ -164,11 +204,14 @@ export {
   ReportingAccessResult,
 } from './domains/analytics.service';
 export type {
+  BatchProcessingItem,
   IAnalyticsRepository,
-  IDomainEventBus,
-  IAuditLogger,
   IPrivacyService,
   ISessionTracker,
+} from './domains/analytics.service';
+export type {
+  IDomainEventBus as AnalyticsIDomainEventBus,
+  IAuditLogger as AnalyticsIAuditLogger,
 } from './domains/analytics.service';
 export * from './domains/analytics.rules';
 export * from './contracts/analytics.contracts';
@@ -181,6 +224,7 @@ export * from './feature-flags/audit-event.dto';
 export * from './privacy/consent.dto';
 export * from './privacy/data-subject-rights.dto';
 export * from './privacy/privacy-simple.dto';
+export * from './privacy/privacy-types';
 // export * from './privacy/privacy-infrastructure.dto'; // Commented out due to duplicate exports
 
 // DTO Aliases for Controller Compatibility

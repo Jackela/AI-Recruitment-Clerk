@@ -1,0 +1,85 @@
+.bento-grid {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  padding: 0;
+  transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: grid-template-columns;
+
+  /* Default Grid with dynamic columns */
+  &.bento-grid-default {
+    /* Dynamic columns set via [style.grid-template-columns] */
+    /* Fallback responsive behavior */
+    @media (max-width: 1200px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (max-width: 768px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Compact Grid with dynamic columns */
+  &.bento-grid-compact {
+    gap: 0.75rem;
+
+    @media (max-width: 1200px) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    @media (max-width: 768px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (max-width: 480px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Wide Grid with dynamic columns */
+  &.bento-grid-wide {
+    gap: 1.5rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Enhanced overflow protection */
+  ::ng-deep .bento-item {
+    min-width: 0;
+    overflow: hidden;
+    contain: layout style;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    .bento-content {
+      min-width: 0;
+    }
+
+    .bento-title,
+    .bento-subtitle,
+    .bento-text {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+    }
+  }
+
+  /* Performance optimizations for dynamic grids */
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    ::ng-deep .bento-item {
+      transition: none;
+    }
+  }
+}

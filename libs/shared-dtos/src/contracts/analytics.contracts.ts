@@ -1,6 +1,9 @@
 import type {
   UserSession,
-  EventValidationResult} from '../domains/analytics.dto';
+  EventValidationResult,
+  EventPayload,
+  EventContextData
+} from '../domains/analytics.dto';
 import {
   AnalyticsEvent,
   EventStatus,
@@ -52,8 +55,8 @@ export class AnalyticsContracts {
       sessionId,
       userId,
       eventType,
-      eventData,
-      context,
+      eventData as EventPayload,
+      context as EventContextData | undefined,
     );
 
     // 后置条件验证
@@ -122,7 +125,7 @@ export class AnalyticsContracts {
       operation,
       duration,
       success,
-      metadata,
+      metadata as Record<string, unknown> | undefined,
     );
 
     // 后置条件验证
@@ -182,12 +185,7 @@ export class AnalyticsContracts {
     );
 
     // 验证dimensions格式（如果提供）
-    if (dimensions) {
-      this.require(
-        typeof dimensions === 'object' && dimensions !== null,
-        'Dimensions must be an object',
-        'createBusinessMetricEvent',
-      );
+    if (dimensions !== undefined) {
       this.require(
         Object.keys(dimensions).length <= 20,
         'Dimensions cannot have more than 20 keys',

@@ -1,0 +1,107 @@
+@import '../../../../styles/variables';
+
+.table-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: $background-light;
+  border-top: 1px solid $border-color;
+
+  @include respond-to-mobile {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+.pagination-info {
+  font-size: 0.875rem;
+  color: $text-secondary;
+
+  @include respond-to-mobile {
+    font-size: 0.75rem;
+  }
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  @include respond-to-mobile {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+.page-size-select {
+  padding: 0.5rem;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  background-color: $background-white;
+  color: $text-color;
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+  }
+}
+
+.page-btn {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  background-color: $background-white;
+  color: $text-color;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background-color: rgba($primary-color, 0.1);
+    border-color: $primary-color;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.page-numbers {
+  display: flex;
+  gap: 0.25rem;
+
+  @include respond-to-mobile {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+.page-number {
+  min-width: 36px;
+  padding: 0.5rem;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  background-color: $background-white;
+  color: $text-color;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
+    border-color: $primary-color;
+  }
+
+  &.active {
+    background-color: $primary-color;
+    color: $text-white;
+    border-color: $primary-color;
+  }
+}

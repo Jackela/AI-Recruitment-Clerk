@@ -1,0 +1,15 @@
+# Ralph Progress Log
+
+## Codebase Patterns
+- The codebase uses `validateEnv()` from `@ai-recruitment-clerk/configuration` for environment variable validation
+- CORS is configured in both main.ts (via allowedOrigins array) and .env (via CORS_ORIGIN string)
+- Security headers middleware handles CSP, HSTS, and other security headers
+- Production security validator (`ProductionSecurityValidator`) checks configuration at startup
+- `.env` is already gitignored (line 76-78 in .gitignore), keeping secrets out of version control
+- Service layering pattern: Each service should have a single responsibility with clear separation
+- Enum naming conflicts can occur when barrel exports (index.ts) export multiple enums with same name
+- The facade pattern maintains backward compatibility while allowing modular structure
+- When using class instances from DTOs (e.g., `new ConsentRecord()`), ensure proper type casting
+- The consentMethod property type mismatch required casting due to class-transformer vs enum differences
+
+---

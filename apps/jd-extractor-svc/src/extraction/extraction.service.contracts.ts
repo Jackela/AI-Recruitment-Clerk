@@ -8,11 +8,13 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
+import type {
+  PredicateFunction} from '@ai-recruitment-clerk/infrastructure-shared';
 import {
   ContractViolationError,
   Requires,
   Ensures,
-  ContractValidators,
+  ContractValidators
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import type { LlmService } from '../llm/llm.service';
 import type { NatsClient } from '../nats/nats.client';
@@ -116,26 +118,35 @@ export class ExtractionServiceContracts {
    * @since 1.0.0
    */
   @Requires(
-    (jdText: string, extractionConfig?: any) =>
-      (ContractValidators.isNonEmptyString(jdText) &&
-        jdText.length >= 100 &&
-        jdText.length <= 50000 &&
-        jdText.toLowerCase().includes('job')) ||
-      jdText.toLowerCase().includes('position') ||
-      jdText.toLowerCase().includes('role') ||
-      (jdText.toLowerCase().includes('responsibilities') &&
-        (!extractionConfig || typeof extractionConfig === 'object')),
+    (...args: unknown[]) => {
+      const [jdText, extractionConfig] = args as [string, unknown?];
+      const text = typeof jdText === 'string' ? jdText : '';
+      return (
+        ContractValidators.isNonEmptyString(text) &&
+        text.length >= 100 &&
+        text.length <= 50000 &&
+        (text.toLowerCase().includes('job') ||
+          text.toLowerCase().includes('position') ||
+          text.toLowerCase().includes('role') ||
+          text.toLowerCase().includes('responsibilities')) &&
+        (!extractionConfig || typeof extractionConfig === 'object')
+      );
+    },
     'JD extraction requires valid text (100-50000 chars) with job-related content',
   )
   @Ensures(
-    (result: ExtractionResult) =>
-      ContractValidators.isValidExtractionResult(result) &&
-      ContractValidators.isValidConfidenceLevel(result.confidence) &&
-      result.extractionMetadata &&
-      ContractValidators.isValidProcessingTime(
-        result.extractionMetadata.processingTime,
-        15000,
-      ),
+    (...args: unknown[]) => {
+      const [result] = args as [ExtractionResult];
+      return (
+        ContractValidators.isValidExtractionResult(result) &&
+        ContractValidators.isValidConfidenceLevel(result.confidence) &&
+        result.extractionMetadata &&
+        ContractValidators.isValidProcessingTime(
+          result.extractionMetadata.processingTime,
+          15000,
+        )
+      );
+    },
     'Must return valid extraction result with confidence, skills, title, experience range, and processing time under 15 seconds',
   )
   public async extractJobRequirements(
@@ -243,11 +254,11 @@ export class ExtractionServiceContracts {
    * @since 1.0.0
    */
   @Requires(
-    (event: JobJdSubmittedEvent) =>
-      ContractValidators.isNonEmptyString(event.jobId) &&
-      ContractValidators.isNonEmptyString(event.jobTitle) &&
-      ContractValidators.isNonEmptyString(event.jdText) &&
-      event.jdText.length >= 50,
+    ((event: unknown) =>
+      ContractValidators.isNonEmptyString((event as JobJdSubmittedEvent).jobId) &&
+      ContractValidators.isNonEmptyString((event as JobJdSubmittedEvent).jobTitle) &&
+      ContractValidators.isNonEmptyString((event as JobJdSubmittedEvent).jdText) &&
+      (event as JobJdSubmittedEvent).jdText.length >= 50) as PredicateFunction,
     'Job JD submitted event must have valid jobId, jobTitle, and jdText (min 50 chars)',
   )
   public async handleJobJdSubmitted(event: JobJdSubmittedEvent): Promise<void> {

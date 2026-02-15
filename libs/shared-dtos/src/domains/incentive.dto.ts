@@ -551,8 +551,12 @@ export class ContactInfo extends ValueObject<{
     }
 
     // 验证邮箱格式
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errors.push('Invalid email format');
+    if (email) {
+      if (email.length > 254) {
+        errors.push('Email address too long');
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errors.push('Invalid email format');
+      }
     }
 
     // 验证手机号格式（中国大陆）

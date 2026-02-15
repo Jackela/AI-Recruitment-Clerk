@@ -1,27 +1,51 @@
 import type {
-  IncentiveSummary,
-  PaymentMethod} from './incentive.dto';
-import {
-  Incentive,
-  IncentiveStatus,
+  PaymentMethod,
   ContactInfo,
-  TriggerType,
-  Currency,
-} from './incentive.dto';
-import type {
-  IncentivePriority} from './incentive.rules';
+  IncentiveStatus} from './incentive.dto';
 import {
-  IncentiveRules
-} from './incentive.rules';
+  Incentive
+} from './incentive.dto';
+
+// Import extracted modules
+import {
+  IncentiveCreationResult,
+  IncentiveValidationResult,
+  IncentiveApprovalResult,
+  IncentiveRejectionResult,
+  IncentiveStatsResult,
+  PendingIncentivesResult,
+} from './incentive-results.types';
+import type {
+  SystemIncentiveStatistics,
+} from './incentive-results.types';
+import { IncentiveValidationService } from './incentive-validation.service';
+import { IncentiveCalculationsService } from './incentive-calculations.service';
+import { IncentivePaymentService } from './incentive-payment.service';
+import type {
+  PaymentProcessingResult,
+  BatchPaymentResult,
+} from './incentive-payment.service';
+import type {
+  IIncentiveRepository,
+  IDomainEventBus,
+  IAuditLogger,
+  IPaymentGateway,
+} from './incentive-service.interfaces';
+import { IncentiveRules } from './incentive.rules';
 
 /**
  * Provides incentive domain functionality.
+ * Acts as the main orchestrator for incentive operations.
  */
 export class IncentiveDomainService {
+  private readonly validationService: IncentiveValidationService;
+  private readonly calculationsService: IncentiveCalculationsService;
+  private readonly paymentService: IncentivePaymentService;
+
   /**
-   * Initializes a new instance of the Incentive Domain Service.
-   * @param repository - The repository.
-   * @param eventBus - The event bus.
+   * Initializes a new instance of Incentive Domain Service.
+   * @param repository - The incentive repository.
+   * @param eventBus - The domain event bus.
    * @param auditLogger - The audit logger.
    * @param paymentGateway - The payment gateway.
    */
@@ -29,11 +53,29 @@ export class IncentiveDomainService {
     private readonly repository: IIncentiveRepository,
     private readonly eventBus: IDomainEventBus,
     private readonly auditLogger: IAuditLogger,
-    private readonly paymentGateway: IPaymentGateway,
-  ) {}
+    paymentGateway: IPaymentGateway,
+  ) {
+    this.validationService = new IncentiveValidationService(
+      repository,
+      auditLogger,
+    );
+    this.calculationsService = new IncentiveCalculationsService();
+    this.paymentService = new IncentivePaymentService(
+      repository,
+      eventBus,
+      auditLogger,
+      paymentGateway,
+      this.validationService,
+    );
+  }
 
   /**
-   * 创建问卷完成激励
+   * Creates a questionnaire completion incentive.
+   * @param ip - The requester's IP address.
+   * @param questionnaireId - The questionnaire ID.
+   * @param qualityScore - The quality score achieved.
+   * @param contactInfo - Contact information for payment.
+   * @returns Result of the incentive creation.
    */
   public async createQuestionnaireIncentive(
     ip: string,
@@ -42,28 +84,20 @@ export class IncentiveDomainService {
     contactInfo: ContactInfo,
   ): Promise<IncentiveCreationResult> {
     try {
-      // 获取IP今日激励数量
-      const todayIncentives = await this.repository.countTodayIncentives(ip);
-
-      // 验证创建资格
-      const eligibility = IncentiveRules.canCreateIncentive(
-        ip,
-        TriggerType.QUESTIONNAIRE_COMPLETION,
-        { questionnaireId, qualityScore },
-        todayIncentives,
-      );
-
-      if (!eligibility.isEligible) {
-        await this.auditLogger.logBusinessEvent('INCENTIVE_CREATION_DENIED', {
+      // Validate eligibility
+      const eligibility =
+        await this.validationService.validateQuestionnaireIncentiveCreation(
           ip,
           questionnaireId,
           qualityScore,
-          errors: eligibility.errors,
-        });
-        return IncentiveCreationResult.failed(eligibility.errors);
+        );
+
+      if (!eligibility.isEligible) {
+        const errors = eligibility.errors ?? ['Unknown error'];
+        return IncentiveCreationResult.failed(errors);
       }
 
-      // 创建激励
+      // Create and save incentive
       const incentive = Incentive.createQuestionnaireIncentive(
         ip,
         questionnaireId,
@@ -71,17 +105,11 @@ export class IncentiveDomainService {
         contactInfo,
       );
 
-      // 保存到存储
       await this.repository.save(incentive);
 
-      // 发布领域事件
-      const events = incentive.getUncommittedEvents();
-      for (const event of events) {
-        await this.eventBus.publish(event);
-      }
-      incentive.markEventsAsCommitted();
+      // Publish domain events
+      await this.publishDomainEvents(incentive);
 
-      // 记录审计日志
       await this.auditLogger.logBusinessEvent('INCENTIVE_CREATED', {
         incentiveId: incentive.getId().getValue(),
         ip,
@@ -109,7 +137,11 @@ export class IncentiveDomainService {
   }
 
   /**
-   * 创建推荐激励
+   * Creates a referral incentive.
+   * @param referrerIP - The referrer's IP address.
+   * @param referredIP - The referred person's IP address.
+   * @param contactInfo - Contact information for payment.
+   * @returns Result of the incentive creation.
    */
   public async createReferralIncentive(
     referrerIP: string,
@@ -117,50 +149,29 @@ export class IncentiveDomainService {
     contactInfo: ContactInfo,
   ): Promise<IncentiveCreationResult> {
     try {
-      // 验证推荐资格
-      const todayIncentives =
-        await this.repository.countTodayIncentives(referrerIP);
-      const eligibility = IncentiveRules.canCreateIncentive(
-        referrerIP,
-        TriggerType.REFERRAL,
-        { referredIP },
-        todayIncentives,
-      );
-
-      if (!eligibility.isEligible) {
-        await this.auditLogger.logBusinessEvent('REFERRAL_INCENTIVE_DENIED', {
+      // Validate eligibility
+      const eligibility =
+        await this.validationService.validateReferralIncentiveCreation(
           referrerIP,
           referredIP,
-          errors: eligibility.errors,
-        });
-        return IncentiveCreationResult.failed(eligibility.errors);
+        );
+
+      if (!eligibility.isEligible) {
+        const errors = eligibility.errors ?? ['Unknown error'];
+        return IncentiveCreationResult.failed(errors);
       }
 
-      // 验证被推荐IP是否有效且未重复
-      const existingReferral = await this.repository.findReferralIncentive(
-        referrerIP,
-        referredIP,
-      );
-      if (existingReferral) {
-        return IncentiveCreationResult.failed([
-          'Referral incentive already exists for this IP pair',
-        ]);
-      }
-
-      // 创建推荐激励
+      // Create and save incentive
       const incentive = Incentive.createReferralIncentive(
         referrerIP,
         referredIP,
         contactInfo,
       );
+
       await this.repository.save(incentive);
 
-      // 发布领域事件
-      const events = incentive.getUncommittedEvents();
-      for (const event of events) {
-        await this.eventBus.publish(event);
-      }
-      incentive.markEventsAsCommitted();
+      // Publish domain events
+      await this.publishDomainEvents(incentive);
 
       await this.auditLogger.logBusinessEvent('REFERRAL_INCENTIVE_CREATED', {
         incentiveId: incentive.getId().getValue(),
@@ -186,7 +197,9 @@ export class IncentiveDomainService {
   }
 
   /**
-   * 验证激励资格
+   * Validates an incentive.
+   * @param incentiveId - The ID of the incentive to validate.
+   * @returns Result of the validation.
    */
   public async validateIncentive(
     incentiveId: string,
@@ -197,18 +210,14 @@ export class IncentiveDomainService {
         return IncentiveValidationResult.failed(['Incentive not found']);
       }
 
-      // 执行验证
+      // Execute validation
       const validationResult = incentive.validateEligibility();
 
-      // 保存验证结果
+      // Save validation result
       await this.repository.save(incentive);
 
-      // 发布领域事件
-      const events = incentive.getUncommittedEvents();
-      for (const event of events) {
-        await this.eventBus.publish(event);
-      }
-      incentive.markEventsAsCommitted();
+      // Publish domain events
+      await this.publishDomainEvents(incentive);
 
       await this.auditLogger.logBusinessEvent('INCENTIVE_VALIDATED', {
         incentiveId,
@@ -237,7 +246,10 @@ export class IncentiveDomainService {
   }
 
   /**
-   * 批准激励处理
+   * Approves an incentive for processing.
+   * @param incentiveId - The ID of the incentive to approve.
+   * @param reason - The approval reason.
+   * @returns Result of the approval.
    */
   public async approveIncentive(
     incentiveId: string,
@@ -249,16 +261,12 @@ export class IncentiveDomainService {
         return IncentiveApprovalResult.failed(['Incentive not found']);
       }
 
-      // 执行批准
+      // Execute approval
       incentive.approveForProcessing(reason);
       await this.repository.save(incentive);
 
-      // 发布领域事件
-      const events = incentive.getUncommittedEvents();
-      for (const event of events) {
-        await this.eventBus.publish(event);
-      }
-      incentive.markEventsAsCommitted();
+      // Publish domain events
+      await this.publishDomainEvents(incentive);
 
       await this.auditLogger.logBusinessEvent('INCENTIVE_APPROVED', {
         incentiveId,
@@ -287,7 +295,10 @@ export class IncentiveDomainService {
   }
 
   /**
-   * 拒绝激励
+   * Rejects an incentive.
+   * @param incentiveId - The ID of the incentive to reject.
+   * @param reason - The rejection reason.
+   * @returns Result of the rejection.
    */
   public async rejectIncentive(
     incentiveId: string,
@@ -299,16 +310,12 @@ export class IncentiveDomainService {
         return IncentiveRejectionResult.failed(['Incentive not found']);
       }
 
-      // 执行拒绝
+      // Execute rejection
       incentive.reject(reason);
       await this.repository.save(incentive);
 
-      // 发布领域事件
-      const events = incentive.getUncommittedEvents();
-      for (const event of events) {
-        await this.eventBus.publish(event);
-      }
-      incentive.markEventsAsCommitted();
+      // Publish domain events
+      await this.publishDomainEvents(incentive);
 
       await this.auditLogger.logBusinessEvent('INCENTIVE_REJECTED', {
         incentiveId,
@@ -336,229 +343,47 @@ export class IncentiveDomainService {
   }
 
   /**
-   * 执行单笔支付
+   * Processes a single incentive payment.
+   * Delegates to IncentivePaymentService.
+   * @param incentiveId - The ID of the incentive to pay.
+   * @param paymentMethod - The payment method.
+   * @param contactInfo - Optional contact information.
+   * @returns Result of the payment processing.
    */
   public async processPayment(
     incentiveId: string,
     paymentMethod: PaymentMethod,
     contactInfo?: ContactInfo,
   ): Promise<PaymentProcessingResult> {
-    try {
-      const incentive = await this.repository.findById(incentiveId);
-      if (!incentive) {
-        return PaymentProcessingResult.failed(['Incentive not found']);
-      }
-
-      // 验证支付资格
-      const eligibility = IncentiveRules.canPayIncentive(incentive);
-      if (!eligibility.isEligible) {
-        return PaymentProcessingResult.failed(eligibility.errors);
-      }
-
-      // 验证支付方式兼容性
-      const actualContactInfo =
-        contactInfo || this.extractContactInfoFromIncentive(incentive);
-      const methodValidation =
-        IncentiveRules.validatePaymentMethodCompatibility(
-          paymentMethod,
-          actualContactInfo,
-        );
-      if (!methodValidation.isValid) {
-        return PaymentProcessingResult.failed(methodValidation.errors);
-      }
-
-      // 通过支付网关处理支付
-      const paymentRequest = {
-        amount: incentive.getRewardAmount(),
-        currency: Currency.CNY,
-        paymentMethod,
-        recipientInfo: actualContactInfo,
-        reference: incentiveId,
-      };
-
-      const gatewayResult =
-        await this.paymentGateway.processPayment(paymentRequest);
-
-      // 执行激励支付
-      const paymentResult = incentive.executePayment(
-        paymentMethod,
-        gatewayResult.transactionId,
-      );
-
-      if (paymentResult.success) {
-        await this.repository.save(incentive);
-
-        // 发布领域事件
-        const events = incentive.getUncommittedEvents();
-        for (const event of events) {
-          await this.eventBus.publish(event);
-        }
-        incentive.markEventsAsCommitted();
-
-        await this.auditLogger.logBusinessEvent('INCENTIVE_PAID', {
-          incentiveId,
-          amount: paymentResult.amount,
-          currency: paymentResult.currency,
-          paymentMethod,
-          transactionId: gatewayResult.transactionId,
-        });
-
-        return PaymentProcessingResult.success({
-          incentiveId,
-          transactionId: gatewayResult.transactionId,
-          amount: paymentResult.amount ?? 0,
-          currency: paymentResult.currency ?? Currency.CNY,
-          paymentMethod,
-          status: incentive.getStatus(),
-        });
-      } else {
-        await this.auditLogger.logBusinessEvent('INCENTIVE_PAYMENT_FAILED', {
-          incentiveId,
-          error: paymentResult.error,
-          paymentMethod,
-        });
-
-        return PaymentProcessingResult.failed([paymentResult.error ?? 'Unknown error']);
-      }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      await this.auditLogger.logError('PROCESS_PAYMENT_ERROR', {
-        incentiveId,
-        paymentMethod,
-        error: errorMessage,
-      });
-      console.error('Error processing payment:', error);
-      return PaymentProcessingResult.failed([
-        'Internal error occurred while processing payment',
-      ]);
-    }
+    return this.paymentService.processPayment(
+      incentiveId,
+      paymentMethod,
+      contactInfo,
+    );
   }
 
   /**
-   * 批量支付处理
+   * Processes batch payments for multiple incentives.
+   * Delegates to IncentivePaymentService.
+   * @param incentiveIds - Array of incentive IDs to pay.
+   * @param paymentMethod - The payment method to use.
+   * @returns Result of the batch payment.
    */
   public async processBatchPayment(
     incentiveIds: string[],
     paymentMethod: PaymentMethod,
   ): Promise<BatchPaymentResult> {
-    try {
-      // 获取所有激励
-      const incentives = await this.repository.findByIds(incentiveIds);
-      if (incentives.length === 0) {
-        return BatchPaymentResult.failed(['No valid incentives found']);
-      }
-
-      // 验证批量支付
-      const batchValidation = IncentiveRules.validateBatchPayment(incentives);
-      if (!batchValidation.isValid) {
-        return BatchPaymentResult.failed(batchValidation.errors);
-      }
-
-      // 处理每个激励的支付
-      const results: BatchPaymentItem[] = [];
-      let successCount = 0;
-      let totalPaidAmount = 0;
-
-      for (const incentive of incentives) {
-        const eligibility = IncentiveRules.canPayIncentive(incentive);
-        if (!eligibility.isEligible) {
-          results.push({
-            incentiveId: incentive.getId().getValue(),
-            success: false,
-            error: eligibility.errors.join(', '),
-          });
-          continue;
-        }
-
-        try {
-          const contactInfo = this.extractContactInfoFromIncentive(incentive);
-          const paymentRequest = {
-            amount: incentive.getRewardAmount(),
-            currency: Currency.CNY,
-            paymentMethod,
-            recipientInfo: contactInfo,
-            reference: incentive.getId().getValue(),
-          };
-
-          const gatewayResult =
-            await this.paymentGateway.processPayment(paymentRequest);
-          const paymentResult = incentive.executePayment(
-            paymentMethod,
-            gatewayResult.transactionId,
-          );
-
-          if (paymentResult.success) {
-            await this.repository.save(incentive);
-
-            // 发布领域事件
-            const events = incentive.getUncommittedEvents();
-            for (const event of events) {
-              await this.eventBus.publish(event);
-            }
-            incentive.markEventsAsCommitted();
-
-            results.push({
-              incentiveId: incentive.getId().getValue(),
-              success: true,
-              transactionId: gatewayResult.transactionId,
-              amount: paymentResult.amount ?? 0,
-            });
-
-            successCount++;
-            totalPaidAmount += paymentResult.amount ?? 0;
-          } else {
-            results.push({
-              incentiveId: incentive.getId().getValue(),
-              success: false,
-              error: paymentResult.error ?? 'Unknown error',
-            });
-          }
-        } catch (paymentError) {
-          const errorMessage =
-            paymentError instanceof Error
-              ? paymentError.message
-              : 'Payment error';
-          results.push({
-            incentiveId: incentive.getId().getValue(),
-            success: false,
-            error: errorMessage,
-          });
-        }
-      }
-
-      await this.auditLogger.logBusinessEvent('BATCH_PAYMENT_PROCESSED', {
-        totalIncentives: incentiveIds.length,
-        successCount,
-        failureCount: incentiveIds.length - successCount,
-        totalPaidAmount,
-        paymentMethod,
-      });
-
-      return BatchPaymentResult.success({
-        totalIncentives: incentiveIds.length,
-        successCount,
-        failureCount: incentiveIds.length - successCount,
-        totalPaidAmount,
-        results,
-      });
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      await this.auditLogger.logError('PROCESS_BATCH_PAYMENT_ERROR', {
-        incentiveIds,
-        paymentMethod,
-        error: errorMessage,
-      });
-      console.error('Error processing batch payment:', error);
-      return BatchPaymentResult.failed([
-        'Internal error occurred while processing batch payment',
-      ]);
-    }
+    return this.paymentService.processBatchPayment(
+      incentiveIds,
+      paymentMethod,
+    );
   }
 
   /**
-   * 获取激励统计信息
+   * Gets incentive statistics.
+   * @param ip - Optional IP address for individual stats.
+   * @param timeRange - Optional time range for filtering.
+   * @returns Statistics result.
    */
   public async getIncentiveStatistics(
     ip?: string,
@@ -566,18 +391,21 @@ export class IncentiveDomainService {
   ): Promise<IncentiveStatsResult> {
     try {
       if (ip) {
-        // 获取特定IP的统计
-        if (!this.isValidIPAddress(ip)) {
+        // Get specific IP statistics
+        if (!this.validationService.isValidIPAddress(ip)) {
           return IncentiveStatsResult.failed(['Invalid IP address format']);
         }
 
         const incentives = await this.repository.findByIP(ip, timeRange);
-        const stats = this.calculateIPStatistics(ip, incentives);
+        const stats = this.calculationsService.calculateIPStatistics(
+          ip,
+          incentives,
+        );
 
         return IncentiveStatsResult.success({ individual: stats });
       } else {
-        // 获取系统整体统计
-        const systemStats = await this.calculateSystemStatistics(timeRange);
+        // Get system-wide statistics
+        const systemStats = await this.getSystemStatistics(timeRange);
         return IncentiveStatsResult.success({ system: systemStats });
       }
     } catch (error) {
@@ -596,7 +424,10 @@ export class IncentiveDomainService {
   }
 
   /**
-   * 获取待处理激励列表（按优先级排序）
+   * Gets pending incentives sorted by priority.
+   * @param status - Optional status filter.
+   * @param limit - Maximum number of results.
+   * @returns Pending incentives result.
    */
   public async getPendingIncentives(
     status?: IncentiveStatus,
@@ -630,557 +461,47 @@ export class IncentiveDomainService {
     }
   }
 
-  // 私有辅助方法
-  private extractContactInfoFromIncentive(_incentive: Incentive): ContactInfo {
-    // 从激励中提取联系信息的逻辑
-    // 在实际实现中，这应该从激励的接收者中获取联系信息
-    // 这里提供一个基本的实现来满足测试需要
-    return new ContactInfo({
-      email: 'test@example.com',
-      wechat: 'test_wechat',
-      alipay: 'test_alipay',
-    });
-  }
-
-  private calculateIPStatistics(
-    ip: string,
-    incentives: Incentive[],
-  ): IPIncentiveStatistics {
-    let totalAmount = 0;
-    let paidAmount = 0;
-    let pendingAmount = 0;
-
-    const statusCount = {
-      pending: 0,
-      approved: 0,
-      paid: 0,
-      rejected: 0,
-    };
-
-    for (const incentive of incentives) {
-      const amount = incentive.getRewardAmount();
-      totalAmount += amount;
-
-      switch (incentive.getStatus()) {
-        case IncentiveStatus.PENDING_VALIDATION:
-          statusCount.pending++;
-          pendingAmount += amount;
-          break;
-        case IncentiveStatus.APPROVED:
-          statusCount.approved++;
-          pendingAmount += amount;
-          break;
-        case IncentiveStatus.PAID:
-          statusCount.paid++;
-          paidAmount += amount;
-          break;
-        case IncentiveStatus.REJECTED:
-          statusCount.rejected++;
-          break;
-      }
+  /**
+   * Publishes uncommitted domain events for an incentive.
+   * @param incentive - The incentive with events to publish.
+   */
+  private async publishDomainEvents(incentive: Incentive): Promise<void> {
+    const events = incentive.getUncommittedEvents();
+    for (const event of events) {
+      await this.eventBus.publish(event);
     }
-
-    return {
-      ip,
-      totalIncentives: incentives.length,
-      totalAmount,
-      paidAmount,
-      pendingAmount,
-      statusBreakdown: statusCount,
-      averageReward:
-        incentives.length > 0 ? totalAmount / incentives.length : 0,
-      lastIncentiveDate:
-        incentives.length > 0
-          ? Math.max(...incentives.map((i) => i.getCreatedAt().getTime()))
-          : undefined,
-    };
+    incentive.markEventsAsCommitted();
   }
 
-  private async calculateSystemStatistics(timeRange?: {
+  /**
+   * Calculates system-wide statistics.
+   * @param timeRange - Optional time range for filtering.
+   * @returns System statistics.
+   */
+  private async getSystemStatistics(timeRange?: {
     startDate: Date;
     endDate: Date;
   }): Promise<SystemIncentiveStatistics> {
     const allIncentives = await this.repository.findAll(timeRange);
-
-    let totalAmount = 0;
-    let paidAmount = 0;
-    const uniqueIPs = new Set<string>();
-
-    const statusCount = {
-      pending: 0,
-      approved: 0,
-      paid: 0,
-      rejected: 0,
-    };
-
-    // const rewardTypeCount = new Map<string, number>();
-
-    for (const incentive of allIncentives) {
-      totalAmount += incentive.getRewardAmount();
-      uniqueIPs.add(incentive.getRecipientIP());
-
-      switch (incentive.getStatus()) {
-        case IncentiveStatus.PENDING_VALIDATION:
-          statusCount.pending++;
-          break;
-        case IncentiveStatus.APPROVED:
-          statusCount.approved++;
-          break;
-        case IncentiveStatus.PAID:
-          statusCount.paid++;
-          paidAmount += incentive.getRewardAmount();
-          break;
-        case IncentiveStatus.REJECTED:
-          statusCount.rejected++;
-          break;
-      }
-    }
-
-    return {
-      totalIncentives: allIncentives.length,
-      uniqueRecipients: uniqueIPs.size,
-      totalAmount,
-      paidAmount,
-      pendingAmount: totalAmount - paidAmount,
-      statusBreakdown: statusCount,
-      averageRewardPerIncentive:
-        allIncentives.length > 0 ? totalAmount / allIncentives.length : 0,
-      averageRewardPerIP: uniqueIPs.size > 0 ? totalAmount / uniqueIPs.size : 0,
-      conversionRate:
-        allIncentives.length > 0
-          ? (statusCount.paid / allIncentives.length) * 100
-          : 0,
-    };
-  }
-
-  private isValidIPAddress(ip: string): boolean {
-    if (!ip || typeof ip !== 'string') return false;
-    const ipRegex =
-      /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-    return ipRegex.test(ip);
+    return this.calculationsService.calculateSystemStatistics(allIncentives);
   }
 }
 
-// 结果类定义
-/**
- * Represents the incentive creation result.
- */
-export class IncentiveCreationResult {
-  private constructor(
-    public readonly success: boolean,
-    public readonly data?: IncentiveSummary,
-    public readonly errors?: string[],
-  ) {}
+// Re-export result types for backward compatibility
+export type {
+  BatchPaymentItem,
+  PaymentGatewayRequest,
+  PaymentGatewayResponse,
+  IPIncentiveStatistics,
+  SystemIncentiveStatistics,
+  IncentiveStatsResult,
+  PendingIncentivesResult,
+} from './incentive-results.types';
 
-  /**
-   * Performs the success operation.
-   * @param data - The data.
-   * @returns The IncentiveCreationResult.
-   */
-  public static success(data: IncentiveSummary): IncentiveCreationResult {
-    return new IncentiveCreationResult(true, data);
-  }
-
-  /**
-   * Performs the failed operation.
-   * @param errors - The errors.
-   * @returns The IncentiveCreationResult.
-   */
-  public static failed(errors: string[]): IncentiveCreationResult {
-    return new IncentiveCreationResult(false, undefined, errors);
-  }
-}
-
-/**
- * Represents the incentive validation result.
- */
-export class IncentiveValidationResult {
-  private constructor(
-    public readonly success: boolean,
-    public readonly data?: {
-      incentiveId: string;
-      isValid: boolean;
-      errors: string[];
-      status: IncentiveStatus;
-    },
-    public readonly errors?: string[],
-  ) {}
-
-  /**
-   * Performs the success operation.
-   * @param data - The data.
-   * @returns The IncentiveValidationResult.
-   */
-  public static success(data: {
-    incentiveId: string;
-    isValid: boolean;
-    errors: string[];
-    status: IncentiveStatus;
-  }): IncentiveValidationResult {
-    return new IncentiveValidationResult(true, data);
-  }
-
-  /**
-   * Performs the failed operation.
-   * @param errors - The errors.
-   * @returns The IncentiveValidationResult.
-   */
-  public static failed(errors: string[]): IncentiveValidationResult {
-    return new IncentiveValidationResult(false, undefined, errors);
-  }
-}
-
-/**
- * Represents the incentive approval result.
- */
-export class IncentiveApprovalResult {
-  private constructor(
-    public readonly success: boolean,
-    public readonly data?: {
-      incentiveId: string;
-      status: IncentiveStatus;
-      rewardAmount: number;
-    },
-    public readonly errors?: string[],
-  ) {}
-
-  /**
-   * Performs the success operation.
-   * @param data - The data.
-   * @returns The IncentiveApprovalResult.
-   */
-  public static success(data: {
-    incentiveId: string;
-    status: IncentiveStatus;
-    rewardAmount: number;
-  }): IncentiveApprovalResult {
-    return new IncentiveApprovalResult(true, data);
-  }
-
-  /**
-   * Performs the failed operation.
-   * @param errors - The errors.
-   * @returns The IncentiveApprovalResult.
-   */
-  public static failed(errors: string[]): IncentiveApprovalResult {
-    return new IncentiveApprovalResult(false, undefined, errors);
-  }
-}
-
-/**
- * Represents the incentive rejection result.
- */
-export class IncentiveRejectionResult {
-  private constructor(
-    public readonly success: boolean,
-    public readonly data?: {
-      incentiveId: string;
-      status: IncentiveStatus;
-      rejectionReason: string;
-    },
-    public readonly errors?: string[],
-  ) {}
-
-  /**
-   * Performs the success operation.
-   * @param data - The data.
-   * @returns The IncentiveRejectionResult.
-   */
-  public static success(data: {
-    incentiveId: string;
-    status: IncentiveStatus;
-    rejectionReason: string;
-  }): IncentiveRejectionResult {
-    return new IncentiveRejectionResult(true, data);
-  }
-
-  /**
-   * Performs the failed operation.
-   * @param errors - The errors.
-   * @returns The IncentiveRejectionResult.
-   */
-  public static failed(errors: string[]): IncentiveRejectionResult {
-    return new IncentiveRejectionResult(false, undefined, errors);
-  }
-}
-
-/**
- * Represents the payment processing result.
- */
-export class PaymentProcessingResult {
-  private constructor(
-    public readonly success: boolean,
-    public readonly data?: {
-      incentiveId: string;
-      transactionId: string;
-      amount: number;
-      currency: Currency;
-      paymentMethod: PaymentMethod;
-      status: IncentiveStatus;
-    },
-    public readonly errors?: string[],
-  ) {}
-
-  /**
-   * Performs the success operation.
-   * @param data - The data.
-   * @returns The PaymentProcessingResult.
-   */
-  public static success(data: {
-    incentiveId: string;
-    transactionId: string;
-    amount: number;
-    currency: Currency;
-    paymentMethod: PaymentMethod;
-    status: IncentiveStatus;
-  }): PaymentProcessingResult {
-    return new PaymentProcessingResult(true, data);
-  }
-
-  /**
-   * Performs the failed operation.
-   * @param errors - The errors.
-   * @returns The PaymentProcessingResult.
-   */
-  public static failed(errors: string[]): PaymentProcessingResult {
-    return new PaymentProcessingResult(false, undefined, errors);
-  }
-}
-
-/**
- * Represents the batch payment result.
- */
-export class BatchPaymentResult {
-  private constructor(
-    public readonly success: boolean,
-    public readonly data?: {
-      totalIncentives: number;
-      successCount: number;
-      failureCount: number;
-      totalPaidAmount: number;
-      results: BatchPaymentItem[];
-    },
-    public readonly errors?: string[],
-  ) {}
-
-  /**
-   * Performs the success operation.
-   * @param data - The data.
-   * @returns The BatchPaymentResult.
-   */
-  public static success(data: {
-    totalIncentives: number;
-    successCount: number;
-    failureCount: number;
-    totalPaidAmount: number;
-    results: BatchPaymentItem[];
-  }): BatchPaymentResult {
-    return new BatchPaymentResult(true, data);
-  }
-
-  /**
-   * Performs the failed operation.
-   * @param errors - The errors.
-   * @returns The BatchPaymentResult.
-   */
-  public static failed(errors: string[]): BatchPaymentResult {
-    return new BatchPaymentResult(false, undefined, errors);
-  }
-}
-
-/**
- * Represents the incentive stats result.
- */
-export class IncentiveStatsResult {
-  private constructor(
-    public readonly success: boolean,
-    public readonly data?: {
-      individual?: IPIncentiveStatistics;
-      system?: SystemIncentiveStatistics;
-    },
-    public readonly errors?: string[],
-  ) {}
-
-  /**
-   * Performs the success operation.
-   * @param data - The data.
-   * @returns The IncentiveStatsResult.
-   */
-  public static success(data: {
-    individual?: IPIncentiveStatistics;
-    system?: SystemIncentiveStatistics;
-  }): IncentiveStatsResult {
-    return new IncentiveStatsResult(true, data);
-  }
-
-  /**
-   * Performs the failed operation.
-   * @param errors - The errors.
-   * @returns The IncentiveStatsResult.
-   */
-  public static failed(errors: string[]): IncentiveStatsResult {
-    return new IncentiveStatsResult(false, undefined, errors);
-  }
-}
-
-/**
- * Represents the pending incentives result.
- */
-export class PendingIncentivesResult {
-  private constructor(
-    public readonly success: boolean,
-    public readonly data?: Array<{
-      incentive: IncentiveSummary;
-      priority: IncentivePriority;
-    }>,
-    public readonly errors?: string[],
-  ) {}
-
-  /**
-   * Performs the success operation.
-   * @param data - The data.
-   * @returns The PendingIncentivesResult.
-   */
-  public static success(
-    data: Array<{
-      incentive: IncentiveSummary;
-      priority: IncentivePriority;
-    }>,
-  ): PendingIncentivesResult {
-    return new PendingIncentivesResult(true, data);
-  }
-
-  /**
-   * Performs the failed operation.
-   * @param errors - The errors.
-   * @returns The PendingIncentivesResult.
-   */
-  public static failed(errors: string[]): PendingIncentivesResult {
-    return new PendingIncentivesResult(false, undefined, errors);
-  }
-}
-
-// 接口定义
-/**
- * Defines the shape of the batch payment item.
- */
-export interface BatchPaymentItem {
-  incentiveId: string;
-  success: boolean;
-  transactionId?: string;
-  amount?: number;
-  error?: string;
-}
-
-/**
- * Defines the shape of the ip incentive statistics.
- */
-export interface IPIncentiveStatistics {
-  ip: string;
-  totalIncentives: number;
-  totalAmount: number;
-  paidAmount: number;
-  pendingAmount: number;
-  statusBreakdown: {
-    pending: number;
-    approved: number;
-    paid: number;
-    rejected: number;
-  };
-  averageReward: number;
-  lastIncentiveDate?: number;
-}
-
-/**
- * Defines the shape of the system incentive statistics.
- */
-export interface SystemIncentiveStatistics {
-  totalIncentives: number;
-  uniqueRecipients: number;
-  totalAmount: number;
-  paidAmount: number;
-  pendingAmount: number;
-  statusBreakdown: {
-    pending: number;
-    approved: number;
-    paid: number;
-    rejected: number;
-  };
-  averageRewardPerIncentive: number;
-  averageRewardPerIP: number;
-  conversionRate: number;
-}
-
-/**
- * Defines the shape of the payment gateway request.
- */
-export interface PaymentGatewayRequest {
-  amount: number;
-  currency: Currency;
-  paymentMethod: PaymentMethod;
-  recipientInfo: ContactInfo;
-  reference: string;
-}
-
-/**
- * Defines the shape of the payment gateway response.
- */
-export interface PaymentGatewayResponse {
-  success: boolean;
-  transactionId: string;
-  error?: string;
-}
-
-// 仓储接口定义
-/**
- * Defines the shape of the i incentive repository.
- */
-export interface IIncentiveRepository {
-  save(incentive: Incentive): Promise<void>;
-  findById(id: string): Promise<Incentive | null>;
-  findByIds(ids: string[]): Promise<Incentive[]>;
-  findByIP(
-    ip: string,
-    timeRange?: { startDate: Date; endDate: Date },
-  ): Promise<Incentive[]>;
-  findAll(timeRange?: { startDate: Date; endDate: Date }): Promise<Incentive[]>;
-  findPendingIncentives(
-    status?: IncentiveStatus,
-    limit?: number,
-  ): Promise<Incentive[]>;
-  findReferralIncentive(
-    referrerIP: string,
-    referredIP: string,
-  ): Promise<Incentive | null>;
-  countTodayIncentives(ip: string): Promise<number>;
-  deleteExpired(olderThanDays: number): Promise<number>;
-}
-
-/**
- * Defines the shape of the i domain event bus.
- */
-export interface IDomainEventBus {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  publish(event: any): Promise<void>;
-}
-
-/**
- * Defines the shape of the i audit logger.
- */
-export interface IAuditLogger {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  logBusinessEvent(eventType: string, data: any): Promise<void>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  logSecurityEvent(eventType: string, data: any): Promise<void>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  logError(eventType: string, data: any): Promise<void>;
-}
-
-/**
- * Defines the shape of the i payment gateway.
- */
-export interface IPaymentGateway {
-  processPayment(
-    request: PaymentGatewayRequest,
-  ): Promise<PaymentGatewayResponse>;
-}
+// Re-export interfaces for backward compatibility
+export type {
+  IIncentiveRepository,
+  IDomainEventBus,
+  IAuditLogger,
+  IPaymentGateway,
+} from './incentive-service.interfaces';

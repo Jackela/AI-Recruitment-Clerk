@@ -43,11 +43,14 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
     const securityContext = this.assessSecurityRisk(req);
     req.securityContext = securityContext;
 
+    // Generate nonce for this request (for CSP script-src)
+    const nonce = isProduction ? this._generateNonce() : null;
+
     // Enhanced Content Security Policy
     const cspDirectives = [
       "default-src 'self'",
-      isProduction
-        ? "script-src 'self' 'sha256-xyz123' 'nonce-${this._generateNonce()}'"
+      isProduction && nonce
+        ? `script-src 'self' 'sha256-xyz123' 'nonce-${nonce}'`
         : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
@@ -264,5 +267,14 @@ export class SecurityHeadersMiddleware implements NestMiddleware {
 
   private generateRequestId(): string {
     return require('crypto').randomBytes(8).toString('hex');
+  }
+
+  /**
+   * Generates a cryptographic nonce for Content Security Policy.
+   * Nonces are used to allow specific inline scripts while maintaining CSP security.
+   * @returns A base64-encoded random nonce value.
+   */
+  private _generateNonce(): string {
+    return require('crypto').randomBytes(16).toString('base64');
   }
 }

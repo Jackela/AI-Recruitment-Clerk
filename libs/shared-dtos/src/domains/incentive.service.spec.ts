@@ -3,11 +3,9 @@ import type {
   IDomainEventBus,
   IAuditLogger,
   IPaymentGateway} from './incentive.service';
-import {
-  IncentiveDomainService,
-  IncentiveCreationResult,
-  PaymentProcessingResult
-} from './incentive.service';
+import { IncentiveDomainService } from './incentive.service';
+import { PaymentProcessingResult } from './incentive-payment.service';
+import { IncentiveCreationResult } from './incentive-results.types';
 import {
   Incentive,
   IncentiveStatus,

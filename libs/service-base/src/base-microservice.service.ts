@@ -323,15 +323,18 @@ export abstract class BaseMicroserviceService extends NatsClientService implemen
   public async getServiceHealthStatus(): Promise<MicroserviceHealthStatus> {
     const baseHealth = await this.getHealthStatus();
 
+    // Safely extract messagesSent and messagesReceived from baseHealth
+    const healthRecord = baseHealth as unknown as Record<string, unknown>;
+    const messagesSent = typeof healthRecord.messagesSent === 'number' ? healthRecord.messagesSent : 0;
+    const messagesReceived = typeof healthRecord.messagesReceived === 'number' ? healthRecord.messagesReceived : 0;
+
     return {
       connected: baseHealth.connected,
       service: this.microserviceName,
       lastActivity: baseHealth.lastOperationTime || new Date(),
       subscriptions: [],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      messagesSent: (baseHealth as any).messagesSent ?? 0,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      messagesReceived: (baseHealth as any).messagesReceived ?? 0,
+      messagesSent,
+      messagesReceived,
     };
   }
 

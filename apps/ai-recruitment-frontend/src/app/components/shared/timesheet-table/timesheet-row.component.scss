@@ -1,0 +1,159 @@
+@import '../../../../styles/variables';
+
+// Status-based row styling
+tr[arc-timesheet-row] {
+  &.draft {
+    background-color: rgba($warning-color, 0.05);
+  }
+
+  &.submitted {
+    background-color: rgba($info-color, 0.05);
+  }
+
+  &.approved {
+    background-color: rgba($success-color, 0.05);
+  }
+
+  &.rejected {
+    background-color: rgba($danger-color, 0.05);
+  }
+
+  &.selected {
+    background-color: rgba($primary-color, 0.1);
+  }
+
+  &:hover {
+    background-color: rgba($primary-color, 0.05);
+  }
+}
+
+.checkbox-column {
+  width: 40px;
+  text-align: center;
+}
+
+.actions-column {
+  width: 120px;
+  text-align: center;
+
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .action-btn {
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: rgba($primary-color, 0.1);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    &.view-btn {
+      color: $info-color;
+    }
+
+    &.edit-btn {
+      color: $warning-color;
+    }
+
+    &.delete-btn {
+      color: $danger-color;
+    }
+  }
+}
+
+// Status badge styling
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+
+  &.status-draft {
+    background-color: rgba($warning-color, 0.2);
+    color: darken($warning-color, 20%);
+  }
+
+  &.status-submitted {
+    background-color: rgba($info-color, 0.2);
+    color: darken($info-color, 20%);
+  }
+
+  &.status-approved {
+    background-color: rgba($success-color, 0.2);
+    color: darken($success-color, 20%);
+  }
+
+  &.status-rejected {
+    background-color: rgba($danger-color, 0.2);
+    color: darken($danger-color, 20%);
+  }
+}
+
+// Badge styling for boolean values
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+
+  &.badge-success {
+    background-color: rgba($success-color, 0.2);
+    color: darken($success-color, 20%);
+  }
+
+  &.badge-danger {
+    background-color: rgba($danger-color, 0.2);
+    color: darken($danger-color, 20%);
+  }
+}
+
+.duration-display {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.875rem;
+}
+
+// Priority-based column styling
+.priority-high {
+  font-weight: 500;
+}
+
+.priority-medium {
+  font-weight: 400;
+}
+
+.priority-low {
+  font-weight: 300;
+  opacity: 0.8;
+}
+
+.column-primary {
+  color: $text-color;
+}
+
+.column-secondary {
+  color: $text-secondary;
+}
+
+.bulk-editable {
+  cursor: pointer;
+}

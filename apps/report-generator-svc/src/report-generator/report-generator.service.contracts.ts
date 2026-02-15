@@ -7,12 +7,14 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
+import type {
+  PredicateFunction} from '@ai-recruitment-clerk/infrastructure-shared';
 import {
   ContractViolationError,
   Requires,
   Ensures,
   Invariant,
-  ContractValidators,
+  ContractValidators
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import type { LlmService } from './llm.service';
 import type {
@@ -194,10 +196,10 @@ export interface ReportGenerationRequest {
  */
 @Injectable()
 @Invariant(
-  (instance: ReportGeneratorServiceContracts) =>
-    !!instance.llmService &&
-    !!instance.gridfsService &&
-    !!instance.reportRepository,
+  ((instance: unknown) =>
+    !!(instance as ReportGeneratorServiceContracts).llmService &&
+    !!(instance as ReportGeneratorServiceContracts).gridfsService &&
+    !!(instance as ReportGeneratorServiceContracts).reportRepository) as PredicateFunction,
   'Report generation dependencies must be properly injected',
 )
 export class ReportGeneratorServiceContracts {
@@ -238,26 +240,26 @@ export class ReportGeneratorServiceContracts {
    * @since 1.0.0
    */
   @Requires(
-    (
-      scoringResults: ScoringData[],
-      candidateInfo: CandidateInfo,
-      jobInfo: JobInfo,
-    ) =>
-      ContractValidators.hasElements(scoringResults) &&
-      scoringResults.every((s) =>
-        ContractValidators.isValidScoreRange(s.overallScore),
-      ) &&
-      ContractValidators.isValidCandidateInfo(candidateInfo) &&
-      ContractValidators.isValidJobInfo(jobInfo),
+    ((...args: unknown[]) => {
+      const [scoringResults, candidateInfo, jobInfo] = args as [ScoringData[], CandidateInfo, JobInfo];
+      return ContractValidators.hasElements(scoringResults) &&
+        scoringResults.every((s) =>
+          ContractValidators.isValidScoreRange(s.overallScore),
+        ) &&
+        ContractValidators.isValidCandidateInfo(candidateInfo) &&
+        ContractValidators.isValidJobInfo(jobInfo);
+    }) as PredicateFunction,
     'Report generation requires valid scoring results, complete candidate info, and job requirements',
   )
   @Ensures(
-    (result: ReportResult) =>
-      ContractValidators.isValidReportResult(result) &&
-      result.fileSize >= 100000 &&
-      result.fileSize <= 5242880 && // 100KB - 5MB
-      result.pageCount >= 2 &&
-      result.pageCount <= 20,
+    ((result: unknown) => {
+      const r = result as ReportResult;
+      return ContractValidators.isValidReportResult(r) &&
+        r.fileSize >= 100000 &&
+        r.fileSize <= 5242880 && // 100KB - 5MB
+        r.pageCount >= 2 &&
+        r.pageCount <= 20;
+    }) as PredicateFunction,
     'Must return valid report with appropriate file size (100KB-5MB) and page count (2-20 pages)',
   )
   public async generateAnalysisReport(
@@ -418,20 +420,24 @@ export class ReportGeneratorServiceContracts {
    * @since 1.0.0
    */
   @Requires(
-    (requests: ReportGenerationRequest[]) =>
-      ContractValidators.hasElements(requests) &&
-      requests.every(
-        (req) =>
-          ContractValidators.isValidJobInfo(req.jobData) &&
-          ContractValidators.isValidCandidateInfo(req.resumeData) &&
-          ContractValidators.isValidScoreRange(req.scoringData.overallScore),
-      ),
+    ((...args: unknown[]) => {
+      const [requests] = args as [ReportGenerationRequest[]];
+      return ContractValidators.hasElements(requests) &&
+        requests.every(
+          (req) =>
+            ContractValidators.isValidJobInfo(req.jobData) &&
+            ContractValidators.isValidCandidateInfo(req.resumeData) &&
+            ContractValidators.isValidScoreRange(req.scoringData.overallScore),
+        );
+    }) as PredicateFunction,
     'Batch report generation requires non-empty array of valid requests',
   )
   @Ensures(
-    (results: ReportResult[]) =>
-      Array.isArray(results) &&
-      results.every((result) => ContractValidators.isValidReportResult(result)),
+    ((...args: unknown[]) => {
+      const [results] = args as [ReportResult[]];
+      return Array.isArray(results) &&
+        results.every((result) => ContractValidators.isValidReportResult(result));
+    }) as PredicateFunction,
     'Must return array of valid results',
   )
   public async generateBatchReports(

@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import type { TimesheetEntry } from './timesheet-table.component';
 import { TimesheetTableComponent } from './timesheet-table.component';
 import type { TimesheetColumn } from '../../../../lib/config/table-config';
+import { TimesheetExportUtil } from './timesheet-export.util';
 
 const BASE_ENTRIES: TimesheetEntry[] = [
   {
@@ -115,11 +116,11 @@ describe('TimesheetTableComponent (lightweight regression)', () => {
     fixture.detectChanges();
 
     const exportSpy = jest.spyOn(component.onExport, 'emit');
-    const downloadSpy = jest.spyOn(component as any, 'downloadCSV');
+    const exportUtilSpy = jest.spyOn(TimesheetExportUtil, 'exportData').mockImplementation(() => {});
 
     component.exportDataCsv();
 
     expect(exportSpy).toHaveBeenCalled();
-    expect(downloadSpy).toHaveBeenCalled();
+    expect(exportUtilSpy).toHaveBeenCalled();
   });
 });

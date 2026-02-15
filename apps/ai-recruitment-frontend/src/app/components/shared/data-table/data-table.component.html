@@ -1,0 +1,302 @@
+<div class="data-table-container" [class.loading]="options.loading">
+  <!-- Toolbar -->
+  <div
+    class="table-toolbar"
+    *ngIf="options.showFilter || options.showExport"
+  >
+    <div class="toolbar-left">
+      <div class="search-box" *ngIf="options.showFilter">
+        <svg
+          class="search-icon"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearch()"
+          placeholder="搜索..."
+        />
+        <button
+          *ngIf="searchTerm"
+          (click)="clearSearch()"
+          class="clear-btn"
+          type="button"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="toolbar-right">
+      <button
+        *ngIf="options.showExport"
+        (click)="exportData()"
+        class="export-btn"
+        type="button"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7,10 12,15 17,10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        导出
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div
+    class="table-wrapper"
+    #tableWrapper
+    [class.has-horizontal-scroll]="hasHorizontalScroll"
+  >
+    <table
+      class="data-table"
+      [class.striped]="options.striped"
+      [class.bordered]="options.bordered"
+      [class.hoverable]="options.hoverable"
+    >
+      <thead>
+        <tr>
+          <th *ngIf="options.selectable" class="checkbox-column">
+            <input
+              *ngIf="options.multiSelect"
+              type="checkbox"
+              [checked]="isAllSelected()"
+              [indeterminate]="isSomeSelected()"
+              (change)="toggleSelectAll()"
+            />
+          </th>
+          <th
+            *ngFor="let column of columns"
+            [style.width]="column.width"
+            [style.text-align]="column.align || 'left'"
+            [class.sortable]="column.sortable"
+            [class]="getColumnClasses(column)"
+            (click)="
+              column.sortable
+                ? onSort.emit({
+                    column: column.key,
+                    direction: getNextSortDirection(column.key),
+                  })
+                : null
+            "
+          >
+            <div class="th-content">
+              <span>{{ getColumnLabel(column) }}</span>
+              <div class="sort-indicator" *ngIf="column.sortable">
+                <svg
+                  class="sort-icon"
+                  [class.active-asc]="
+                    sortColumn() === column.key && sortDirection() === 'asc'
+                  "
+                  [class.active-desc]="
+                    sortColumn() === column.key &&
+                    sortDirection() === 'desc'
+                  "
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="m7 15 5 5 5-5"
+                    *ngIf="
+                      sortColumn() !== column.key ||
+                      sortDirection() === 'desc'
+                    "
+                  ></path>
+                  <path
+                    d="m7 9 5-5 5 5"
+                    *ngIf="
+                      sortColumn() === column.key &&
+                      sortDirection() === 'asc'
+                    "
+                  ></path>
+                </svg>
+              </div>
+            </div>
+          </th>
+          <th *ngIf="showActions" class="actions-column">操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let row of paginatedData(); let i = index"
+          [class.selected]="isSelected(row)"
+        >
+          <td *ngIf="options.selectable" class="checkbox-column">
+            <input
+              type="checkbox"
+              [checked]="isSelected(row)"
+              (change)="toggleSelect(row)"
+            />
+          </td>
+          <td
+            *ngFor="let column of columns"
+            [style.text-align]="column.align || 'left'"
+            [class]="getColumnClasses(column)"
+            [title]="
+              shouldShowTooltip(row, column)
+                ? getCellValue(row, column.key)
+                : null
+            "
+          >
+            <span [ngSwitch]="column.type">
+              <span *ngSwitchCase="'boolean'">
+                <span
+                  class="badge"
+                  [class.badge-success]="getCellValue(row, column.key)"
+                  [class.badge-danger]="!getCellValue(row, column.key)"
+                >
+                  {{ getCellValue(row, column.key) ? '是' : '否' }}
+                </span>
+              </span>
+              <span *ngSwitchCase="'date'">
+                {{
+                  getCellValue(row, column.key) | date: 'yyyy-MM-dd HH:mm'
+                }}
+              </span>
+              <span *ngSwitchCase="'number'">
+                {{ getCellValue(row, column.key) | number: '1.0-2' }}
+              </span>
+              <span *ngSwitchDefault>
+                {{ getTruncatedValue(row, column) }}
+              </span>
+            </span>
+          </td>
+          <td *ngIf="showActions" class="actions-column">
+            <div class="action-buttons">
+              <button
+                (click)="onView.emit(row)"
+                class="action-btn view-btn"
+                title="查看"
+                type="button"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                  ></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+              <button
+                (click)="onEdit.emit(row)"
+                class="action-btn edit-btn"
+                title="编辑"
+                type="button"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                  ></path>
+                  <path
+                    d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                  ></path>
+                </svg>
+              </button>
+              <button
+                (click)="onDelete.emit(row)"
+                class="action-btn delete-btn"
+                title="删除"
+                type="button"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="3,6 5,6 21,6"></polyline>
+                  <path
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Empty State -->
+    <div
+      class="empty-state"
+      *ngIf="paginatedData().length === 0 && !options.loading"
+    >
+      <svg
+        width="64"
+        height="64"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path d="M3 3h18v18H3z"></path>
+        <path d="M3 9h18"></path>
+        <path d="M9 3v18"></path>
+      </svg>
+      <p>{{ options.emptyMessage || '暂无数据' }}</p>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" *ngIf="options.loading">
+      <div class="spinner"></div>
+      <p>加载中...</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <arc-data-table-pagination
+    *ngIf="options.showPagination"
+    [totalItems]="totalItems()"
+    [pageSize]="pageSize"
+    [currentPage]="currentPage()"
+    [pageSizeOptions]="options.pageSizeOptions || [10, 25, 50, 100]"
+    (pageChange)="handlePageChange($event)"
+  ></arc-data-table-pagination>
+</div>

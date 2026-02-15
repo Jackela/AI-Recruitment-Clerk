@@ -172,6 +172,12 @@ export enum Permission {
   UPDATE_JOB = 'update_job',
   /** Upload resume documents for analysis */
   UPLOAD_RESUME = 'upload_resume',
+  /** Process resume for analysis */
+  PROCESS_RESUME = 'process_resume',
+  /** Search resumes */
+  SEARCH_RESUME = 'search_resume',
+  /** Delete resume */
+  DELETE_RESUME_FILE = 'delete_resume',
   /** Access resume content and analysis */
   READ_RESUME = 'read_resume',
   /** Create new user accounts */
@@ -180,6 +186,30 @@ export enum Permission {
   UPDATE_USER = 'update_user',
   /** Full user lifecycle management */
   MANAGE_USER = 'manage_user',
+  /** Manage usage quotas */
+  MANAGE_QUOTAS = 'manage_quotas',
+  /** Read usage limits */
+  READ_USAGE_LIMITS = 'read_usage_limits',
+  /** Read usage details */
+  READ_USAGE_DETAILS = 'read_usage_details',
+  /** Manage usage policy */
+  MANAGE_USAGE_POLICY = 'manage_usage_policy',
+  /** Read analytics */
+  READ_ANALYTICS = 'read_analytics',
+  /** Create questionnaire */
+  CREATE_QUESTIONNAIRE = 'create_questionnaire',
+  /** Update questionnaire */
+  UPDATE_QUESTIONNAIRE = 'update_questionnaire',
+  /** Delete questionnaire */
+  DELETE_QUESTIONNAIRE = 'delete_questionnaire',
+  /** Publish questionnaire */
+  PUBLISH_QUESTIONNAIRE = 'publish_questionnaire',
+  /** Read questionnaire responses */
+  READ_QUESTIONNAIRE_RESPONSES = 'read_questionnaire_responses',
+  /** Read questionnaire analytics */
+  READ_QUESTIONNAIRE_ANALYTICS = 'read_questionnaire_analytics',
+  /** Export questionnaire data */
+  EXPORT_QUESTIONNAIRE_DATA = 'export_questionnaire_data',
 }
 
 /**

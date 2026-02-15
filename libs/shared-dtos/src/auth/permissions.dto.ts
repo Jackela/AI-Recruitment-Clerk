@@ -9,12 +9,30 @@ export enum Permission {
 
   // Resume Management
   UPLOAD_RESUME = 'upload_resume',
+  PROCESS_RESUME = 'process_resume',
   READ_RESUME = 'read_resume',
   DELETE_RESUME = 'delete_resume',
+  SEARCH_RESUME = 'search_resume',
 
   // Analysis & Reports
   READ_ANALYSIS = 'read_analysis',
   GENERATE_REPORT = 'generate_report',
+
+  // Questionnaire Management
+  CREATE_QUESTIONNAIRE = 'create_questionnaire',
+  READ_QUESTIONNAIRE = 'read_questionnaire',
+  UPDATE_QUESTIONNAIRE = 'update_questionnaire',
+  DELETE_QUESTIONNAIRE = 'delete_questionnaire',
+  PUBLISH_QUESTIONNAIRE = 'publish_questionnaire',
+  READ_QUESTIONNAIRE_RESPONSES = 'read_questionnaire_responses',
+  READ_QUESTIONNAIRE_ANALYTICS = 'read_questionnaire_analytics',
+  EXPORT_QUESTIONNAIRE_DATA = 'export_questionnaire_data',
+
+  // Usage Limit Management
+  MANAGE_QUOTAS = 'manage_quotas',
+  READ_USAGE_LIMITS = 'read_usage_limits',
+  READ_USAGE_DETAILS = 'read_usage_details',
+  MANAGE_USAGE_POLICY = 'manage_usage_policy',
 
   // User Management
   CREATE_USER = 'create_user',
@@ -31,10 +49,12 @@ export enum Permission {
   SYSTEM_CONFIG = 'system_config',
   VIEW_LOGS = 'view_logs',
   MANAGE_INTEGRATIONS = 'manage_integrations',
+  ADMIN = 'admin',
 
   // Analytics & Metrics
   TRACK_METRICS = 'track_metrics',
   VIEW_ANALYTICS = 'view_analytics',
+  READ_ANALYTICS = 'read_analytics',
 
   // Incentive Management
   VALIDATE_INCENTIVE = 'validate_incentive',

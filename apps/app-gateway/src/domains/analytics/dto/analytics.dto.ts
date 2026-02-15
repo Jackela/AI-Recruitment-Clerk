@@ -44,8 +44,7 @@ export class TrackEventDto {
     example: { action: 'click', target: 'submit_button' },
   })
   @IsObject()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public eventData: any;
+  public eventData: unknown;
 
   @ApiProperty({
     description: '事件上下文（可选）',
@@ -54,8 +53,7 @@ export class TrackEventDto {
   })
   @IsOptional()
   @IsObject()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public context?: any;
+  public context?: unknown;
 }
 
 /**
@@ -227,12 +225,10 @@ export class DataRetentionReportDto {
   public eventsToAnonymize = 0;
 
   @ApiProperty({ description: '按事件类型统计' })
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public eventTypeStatistics: Record<string, any> = {};
+  public eventTypeStatistics: Record<string, unknown> = {};
 
   @ApiProperty({ description: '保留策略列表' })
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public retentionPolicies: any[] = [];
+  public retentionPolicies: unknown[] = [];
 }
 
 /**

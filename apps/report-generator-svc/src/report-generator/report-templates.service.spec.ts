@@ -80,7 +80,10 @@ describe('ReportTemplatesService', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        ReportTemplatesService,
+        {
+          provide: ReportTemplatesService,
+          useFactory: () => new ReportTemplatesService(mockGridFsService),
+        },
         { provide: GridFsService, useValue: mockGridFsService },
       ],
     }).compile();

@@ -3,18 +3,21 @@
 ## 🚨 CRITICAL PROJECT RULES
 
 ### RULE 1: STRICT FAIL-FAST ARCHITECTURE
+
 - **NO FALLBACK MECHANISMS**: Applications must start correctly or fail immediately
 - **NO GRACEFUL DEGRADATION**: Fix root causes, not symptoms
 - **NO BACKUP SERVERS**: simple-server.js, enhanced-server.js, hybrid-server.js are FORBIDDEN
 - **IMMEDIATE FAILURE REQUIRED**: Any startup failure must surface the real problem
 
 ### RULE 2: ESM MODULE SYSTEM ONLY
+
 - **ALL PROJECTS**: Must use `"type": "module"` in package.json
 - **ALL TSCONFIG**: Must use `"module": "ES2022"` and `"target": "ES2022"`
 - **NO COMMONJS**: CommonJS imports/exports are strictly prohibited
 - **ANGULAR/NESTJS COMPATIBILITY**: Must maintain ESM compatibility across all services
 
 **KNOWN EXCEPTION: Webpack Configs (.cjs)**
+
 - Nx's `@nx/webpack` plugin uses `require()` to load webpack configs during project graph processing
 - This is an Nx limitation, not a violation of ESM-first architecture
 - Webpack configs MUST use `.cjs` extension with CommonJS syntax (`require`/`module.exports`)
@@ -22,18 +25,21 @@
 - See: `apps/app-gateway/webpack.config.cjs`, `scripts/ralph/progress.txt` (Codebase Patterns)
 
 ### RULE 3: TYPESCRIPT STRICT MODE ENFORCED
+
 - **NO 'ANY' TYPES**: All variables must have explicit types
 - **STRICT MODE**: All tsconfig files must have `"strict": true`
 - **ERROR ON UNUSED**: `"noUnusedLocals": true, "noUnusedParameters": true`
 - **COMPILATION MUST SUCCEED**: Zero tolerance for TypeScript errors
 
 ### RULE 4: CONCURRENT EXECUTION PATTERNS
+
 - **BATCH ALL OPERATIONS**: Never split related operations across multiple messages
 - **TodoWrite**: ALWAYS batch ALL todos in ONE call (5-10+ todos minimum)
 - **File operations**: ALWAYS batch ALL reads/writes/edits in ONE message
 - **Bash commands**: ALWAYS batch ALL terminal operations in ONE message
 
 ### RULE 5: FILE ORGANIZATION HIERARCHY
+
 - **NO ROOT CLUTTER**: Never save working files to project root
 - **STRICT DIRECTORIES**:
   - `/src` - Source code files only
@@ -45,16 +51,18 @@
   - `/scripts` - Utility scripts only (shell scripts, batch files, automation)
 
 ### RULE 5.1: SHARED LIBRARIES ORGANIZATION
+
 - **libs/configuration** - Environment variable validation utility
 - **libs/infrastructure-shared** - Error handling, validation, utilities
 - **libs/service-base** - BaseMicroserviceService for NATS services
 - **libs/shared-nats-client** - NATS client connection management
 - **libs/types** - Shared TypeScript type definitions
-- **libs/*-domain** - Domain-specific business logic
+- **libs/\*-domain** - Domain-specific business logic
 
 ## Codebase Patterns
 
 ### Base Class Usage
+
 - **BaseMicroserviceService** (`libs/service-base`): Extend for all NATS microservices
   - Inherits from NatsClientService for connection/subscription management
   - Provides: `publishEvent()`, `publishErrorEvent()`, `subscribeToEvents()`
@@ -62,6 +70,7 @@
 - **Testing pattern**: Mock lowest-level methods (NatsClientService) not intermediate protected methods
 
 ### Component Splitting (Mobile)
+
 - Components over 500 lines should be split into smaller components
 - Extract display logic to separate component (e.g., `*-display.component.ts`)
 - Extract filter logic to separate component (e.g., `*-filter.component.ts`)
@@ -69,11 +78,13 @@
 - Service uses BehaviorSubject pattern for reactive state management
 
 ### Service Layering (Domain Services)
+
 - **UserCrudService**: Basic CRUD operations (create, read, update, delete, soft delete)
 - **UserAuthService**: Authentication operations (login, password verify, auth activity)
 - **UserManagementService**: Facade that delegates to CRUD and auth services
 
 ### Environment Validation
+
 - Use `@ai-recruitment-clerk/configuration` for env validation on startup
 - Service schemas: `appGateway`, `resumeParser`, `jdExtractor`, `scoringEngine`, `reportGenerator`, `frontend`
 - Type-safe access: `env.getString()`, `env.getNumber()`, `env.getBoolean()`, `env.getArray()`, `env.getUrl()`
@@ -83,6 +94,7 @@
 AI Recruitment Clerk - 智能简历筛选和分析系统，使用Angular + NestJS + 微服务架构。
 
 ## Build Commands
+
 - `npm run build` - Build project
 - `npm run test` - Run tests
 - `npm run lint` - Linting
@@ -91,6 +103,7 @@ AI Recruitment Clerk - 智能简历筛选和分析系统，使用Angular + NestJ
 ## 🏗️ Architecture
 
 ### Microservices
+
 - **app-gateway** - API Gateway (Port 8080)
 - **resume-parser-svc** - 简历解析服务
 - **jd-extractor-svc** - 职位描述提取服务
@@ -98,9 +111,11 @@ AI Recruitment Clerk - 智能简历筛选和分析系统，使用Angular + NestJ
 - **report-generator-svc** - 报告生成服务
 
 ### Frontend
+
 - **ai-recruitment-frontend** - Angular应用 (集成Bento Grid设计)
 
 ### Tech Stack
+
 - **Frontend**: Angular 20.1, NgRx, TypeScript
 - **Backend**: NestJS, TypeScript, MongoDB, Redis
 - **Message Queue**: NATS JetStream
@@ -129,17 +144,27 @@ AI Recruitment Clerk - 智能简历筛选和分析系统，使用Angular + NestJ
 - **NO SWALLOWING EXCEPTIONS**: Every error must be handled or propagated
 
 ### ⚡ ENFORCEMENT PRIORITY
+
 1. **FAIL-FAST** > graceful degradation
 2. **ESM MODULES** > CommonJS compatibility
-3. **TYPE SAFETY** > runtime flexibility  
+3. **TYPE SAFETY** > runtime flexibility
 4. **ROOT CAUSE FIXES** > temporary workarounds
 5. **IMMEDIATE FEEDBACK** > delayed error discovery
 
+## RULE 9: PARALLEL EXECUTION WITH SUBAGENTS
+
+- **USE TASK TOOL PROACTIVELY**: When facing multiple independent tasks, spawn subagents in parallel
+- **PREFER PARALLELISM**: Don't sequence tasks that can run independently
+- **BATCH EXPLORATION**: Use Explore agents to search codebase in parallel (up to 3 at once)
+- **DELEGATE COMPLEX WORK**: Use Plan agents for architecture decisions, code-reviewer for PRs
+- **MAXIMIZE EFFICIENCY**: One message with multiple Task calls > multiple sequential messages
+
 # important-instruction-reminders
+
 Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
-NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+NEVER proactively create documentation files (\*.md) or README files. Only create documentation files if explicitly requested by the User.
 Never save working files, text/mds and tests to the root folder.
 
 # Ralph Agent Instructions
@@ -162,6 +187,7 @@ You are an autonomous coding agent working on a software project.
 ## Progress Report Format
 
 APPEND to scripts/ralph/progress.txt (never replace, always append):
+
 ```
 ## [Date/Time] - [Story ID]
 - What was implemented

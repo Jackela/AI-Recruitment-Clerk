@@ -8,7 +8,7 @@ import { of, interval, Subject, combineLatest } from 'rxjs';
 import { map, takeUntil, catchError, shareReplay } from 'rxjs/operators';
 import { SharedModule } from '../../components/shared/shared.module';
 import type {
-  BentoGridItem} from '../../components/shared/bento-grid/bento-grid.component';
+  BentoGridItem} from '../../components/shared/bento-grid/bento-grid-item.component';
 import {
   BentoGridComponent
 } from '../../components/shared/bento-grid/bento-grid.component';

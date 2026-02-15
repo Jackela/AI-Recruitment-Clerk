@@ -30,6 +30,12 @@ import type {
   PageEvent,
 } from '../data-table/data-table.component';
 
+// Import extracted components
+import { TimesheetRowComponent } from './timesheet-row.component';
+import { TimesheetToolbarComponent } from './timesheet-toolbar.component';
+import { TimesheetPaginationComponent } from './timesheet-pagination.component';
+import { TimesheetExportUtil } from './timesheet-export.util';
+
 /**
  * Timesheet-specific data interface
  */
@@ -54,406 +60,20 @@ export interface TimesheetEntry {
 export type TimesheetViewType = keyof typeof TIMESHEET_VIEW_CONFIGS;
 
 /**
- * TimesheetTable component - fully configuration-driven table component
+ * TimesheetTable component - configuration-driven table component
  * Uses TIMESHEET_COLUMNS from table-config.ts for all rendering decisions
  */
 @Component({
   selector: 'arc-timesheet-table',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
-    <div class="timesheet-table-container" [class.loading]="tableOptions().loading">
-      <!-- Dynamic Toolbar based on configuration -->
-      <div
-        class="table-toolbar"
-        *ngIf="tableOptions().showFilter || tableOptions().showExport"
-      >
-        <div class="toolbar-left">
-          <!-- Dynamic search functionality -->
-          <div class="search-box" *ngIf="tableOptions().showFilter">
-            <svg
-              class="search-icon"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.35-4.35"></path>
-            </svg>
-            <input
-              type="text"
-              class="search-input"
-              [(ngModel)]="searchTerm"
-              (ngModelChange)="onSearch()"
-              placeholder="搜索工时记录..."
-            />
-            <button
-              *ngIf="searchTerm"
-              (click)="clearSearch()"
-              class="clear-btn"
-              type="button"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-          </div>
-
-          <!-- View type selector -->
-          <select
-            [(ngModel)]="currentViewType"
-            (ngModelChange)="onViewTypeChange()"
-            class="view-selector"
-          >
-            <option value="full">完整视图</option>
-            <option value="summary">摘要视图</option>
-            <option value="mobile">移动视图</option>
-            <option value="bulkEdit">批量编辑</option>
-          </select>
-        </div>
-
-        <div class="toolbar-right">
-          <!-- Dynamic export button -->
-          <button
-            *ngIf="tableOptions().showExport"
-            (click)="exportDataCsv()"
-            class="export-btn"
-            type="button"
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7,10 12,15 17,10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            导出工时表
-          </button>
-
-          <!-- Bulk action buttons for bulk edit view -->
-          <div class="bulk-actions" *ngIf="currentViewType === 'bulkEdit' && selectedEntries().length > 0">
-            <button
-              (click)="bulkEdit.emit(selectedEntries())"
-              class="bulk-btn edit-bulk-btn"
-              type="button"
-            >
-              批量编辑 ({{ selectedEntries().length }})
-            </button>
-            <button
-              (click)="bulkDelete.emit(selectedEntries())"
-              class="bulk-btn delete-bulk-btn"
-              type="button"
-            >
-              批量删除
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Responsive table wrapper -->
-      <div
-        class="table-wrapper"
-        [class.mobile-view]="isMobileView()"
-        [class.tablet-view]="isTabletView()"
-        [class.desktop-view]="isDesktopView()"
-      >
-        <!-- Configuration-driven table -->
-        <table
-          class="timesheet-table"
-          [class.striped]="tableOptions().striped"
-          [class.bordered]="tableOptions().bordered"
-          [class.hoverable]="tableOptions().hoverable"
-        >
-          <!-- Dynamic header generation from TIMESHEET_COLUMNS -->
-          <thead>
-            <tr>
-              <!-- Selection column based on configuration -->
-              <th *ngIf="tableOptions().selectable" class="checkbox-column">
-                <input
-                  *ngIf="tableOptions().multiSelect"
-                  type="checkbox"
-                  [checked]="isAllSelected()"
-                  [indeterminate]="isSomeSelected()"
-                  (change)="toggleSelectAll()"
-                />
-              </th>
-              
-              <!-- Dynamic columns from configuration -->
-              <th
-                *ngFor="let column of displayedColumns()"
-                [style.width]="column.width"
-                [style.text-align]="column.align || 'left'"
-                [class.sortable]="column.sortable"
-                [class]="getColumnClasses(column)"
-                (click)="column.sortable ? handleSort(column.key) : null"
-              >
-                <div class="th-content">
-                  <span>{{ getColumnLabel(column) }}</span>
-                  <!-- Dynamic sort indicator -->
-                  <div class="sort-indicator" *ngIf="column.sortable">
-                    <svg
-                      class="sort-icon"
-                      [class.active-asc]="
-                        sortColumn() === column.key && sortDirection() === 'asc'
-                      "
-                      [class.active-desc]="
-                        sortColumn() === column.key && sortDirection() === 'desc'
-                      "
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <path
-                        d="m7 15 5 5 5-5"
-                        *ngIf="
-                          sortColumn() !== column.key || sortDirection() === 'desc'
-                        "
-                      ></path>
-                      <path
-                        d="m7 9 5-5 5 5"
-                        *ngIf="
-                          sortColumn() === column.key && sortDirection() === 'asc'
-                        "
-                      ></path>
-                    </svg>
-                  </div>
-                </div>
-              </th>
-              
-              <!-- Actions column when needed -->
-              <th *ngIf="showActions" class="actions-column">操作</th>
-            </tr>
-          </thead>
-          
-          <!-- Dynamic body generation from configuration -->
-          <tbody>
-            <tr
-              *ngFor="let entry of paginatedData(); let i = index"
-              [class.selected]="isSelected(entry)"
-              [class.draft]="entry.status === 'draft'"
-              [class.submitted]="entry.status === 'submitted'"
-              [class.approved]="entry.status === 'approved'"
-              [class.rejected]="entry.status === 'rejected'"
-            >
-              <!-- Selection cell -->
-              <td *ngIf="tableOptions().selectable" class="checkbox-column">
-                <input
-                  type="checkbox"
-                  [checked]="isSelected(entry)"
-                  (change)="toggleSelect(entry)"
-                />
-              </td>
-              
-              <!-- Dynamic cells based on column configuration -->
-              <td
-                *ngFor="let column of displayedColumns()"
-                [style.text-align]="column.align || 'left'"
-                [class]="getColumnClasses(column)"
-                [title]="shouldShowTooltip(entry, column) ? getCellValue(entry, column.key) : null"
-              >
-                <!-- Dynamic cell content based on column type and timesheet-specific formatting -->
-                <span [ngSwitch]="column.type">
-                  <!-- Boolean display for billable status -->
-                  <span *ngSwitchCase="'boolean'">
-                    <span
-                      class="badge"
-                      [class.badge-success]="getCellValue(entry, column.key)"
-                      [class.badge-danger]="!getCellValue(entry, column.key)"
-                    >
-                      {{ getCellValue(entry, column.key) ? '可计费' : '不计费' }}
-                    </span>
-                  </span>
-                  
-                  <!-- Date formatting -->
-                  <span *ngSwitchCase="'date'">
-                    {{ getCellValue(entry, column.key) | date: 'yyyy-MM-dd' }}
-                  </span>
-                  
-                  <!-- Number formatting for duration -->
-                  <span *ngSwitchCase="'number'">
-                    <span *ngIf="column.key === 'duration'" class="duration-display">
-                      {{ formatDuration(getCellValue(entry, column.key)) }}
-                    </span>
-                    <span *ngIf="column.key !== 'duration'">
-                      {{ getCellValue(entry, column.key) | number: '1.0-2' }}
-                    </span>
-                  </span>
-                  
-                  <!-- Status display with badges -->
-                  <span *ngSwitchCase="'text'" [ngSwitch]="column.key">
-                    <span *ngSwitchCase="'status'">
-                      <span
-                        class="status-badge"
-                        [class.status-draft]="getCellValue(entry, column.key) === 'draft'"
-                        [class.status-submitted]="getCellValue(entry, column.key) === 'submitted'"
-                        [class.status-approved]="getCellValue(entry, column.key) === 'approved'"
-                        [class.status-rejected]="getCellValue(entry, column.key) === 'rejected'"
-                      >
-                        {{ getStatusLabel(getCellValue(entry, column.key)) }}
-                      </span>
-                    </span>
-                    
-                    <!-- Time formatting for start/end times -->
-                    <span *ngSwitchCase="'startTime'">
-                      {{ formatTime(getCellValue(entry, column.key), column.timeFormat) }}
-                    </span>
-                    <span *ngSwitchCase="'endTime'">
-                      {{ formatTime(getCellValue(entry, column.key), column.timeFormat) }}
-                    </span>
-                    
-                    <!-- Default text with truncation -->
-                    <span *ngSwitchDefault>
-                      {{ getTruncatedValue(entry, column) }}
-                    </span>
-                  </span>
-                </span>
-              </td>
-              
-              <!-- Actions cell -->
-              <td *ngIf="showActions" class="actions-column">
-                <div class="action-buttons">
-                  <button
-                    (click)="viewEntry.emit(entry)"
-                    class="action-btn view-btn"
-                    title="查看详情"
-                    type="button"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                  </button>
-                  <button
-                    (click)="editEntry.emit(entry)"
-                    class="action-btn edit-btn"
-                    title="编辑"
-                    type="button"
-                    [disabled]="entry.status === 'approved'"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg>
-                  </button>
-                  <button
-                    (click)="deleteEntry.emit(entry)"
-                    class="action-btn delete-btn"
-                    title="删除"
-                    type="button"
-                    [disabled]="entry.status === 'approved'"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="3,6 5,6 21,6"></polyline>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- Empty state -->
-        <div
-          class="empty-state"
-          *ngIf="paginatedData().length === 0 && !tableOptions().loading"
-        >
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="16" y1="2" x2="16" y2="6"></line>
-            <line x1="8" y1="2" x2="8" y2="6"></line>
-            <line x1="3" y1="10" x2="21" y2="10"></line>
-          </svg>
-          <p>{{ tableOptions().emptyMessage || '暂无工时记录' }}</p>
-        </div>
-
-        <!-- Loading overlay -->
-        <div class="loading-overlay" *ngIf="tableOptions().loading">
-          <div class="spinner"></div>
-          <p>加载中...</p>
-        </div>
-      </div>
-
-      <!-- Dynamic pagination based on configuration -->
-      <div
-        class="table-pagination"
-        *ngIf="tableOptions().showPagination && totalPages() > 1"
-      >
-        <div class="pagination-info">
-          显示 {{ startIndex() + 1 }} - {{ endIndex() }} 条，共 {{ totalItems() }} 条工时记录
-        </div>
-
-        <div class="pagination-controls">
-          <select
-            [(ngModel)]="pageSize"
-            (ngModelChange)="onPageSizeChange()"
-            class="page-size-select"
-          >
-            <option *ngFor="let size of tableOptions().pageSizeOptions" [value]="size">
-              {{ size }} 条/页
-            </option>
-          </select>
-
-          <button (click)="goToPage(0)" [disabled]="currentPage() === 0" class="page-btn" type="button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="11,17 6,12 11,7"></polyline>
-              <polyline points="18,17 13,12 18,7"></polyline>
-            </svg>
-          </button>
-
-          <button (click)="previousPage()" [disabled]="currentPage() === 0" class="page-btn" type="button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="15,18 9,12 15,6"></polyline>
-            </svg>
-          </button>
-
-          <span class="page-numbers">
-            <button
-              *ngFor="let page of getPageNumbers()"
-              (click)="goToPage(page)"
-              [class.active]="currentPage() === page"
-              class="page-number"
-              type="button"
-            >
-              {{ page + 1 }}
-            </button>
-          </span>
-
-          <button (click)="nextPage()" [disabled]="currentPage() === totalPages() - 1" class="page-btn" type="button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9,18 15,12 9,6"></polyline>
-            </svg>
-          </button>
-
-          <button (click)="goToPage(totalPages() - 1)" [disabled]="currentPage() === totalPages() - 1" class="page-btn" type="button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="13,17 18,12 13,7"></polyline>
-              <polyline points="6,17 11,12 6,7"></polyline>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  `,
+  imports: [
+    CommonModule,
+    FormsModule,
+    TimesheetRowComponent,
+    TimesheetToolbarComponent,
+    TimesheetPaginationComponent,
+  ],
+  templateUrl: './timesheet-table.component.html',
   styleUrls: ['./timesheet-table.component.scss'],
 })
 export class TimesheetTableComponent implements OnInit, OnDestroy {
@@ -477,25 +97,15 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
   @Output() public bulkDelete = new EventEmitter<TimesheetEntry[]>();
   @Output() public viewChange = new EventEmitter<TimesheetViewType>();
 
-  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
   /** @deprecated Use sortChange instead */ @Output() public onSort = this.sortChange;
-  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
-  /** @deprecated Use pageChange instead */ @Output() public onPageChange = this.pageChange;
-  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
+  /** @deprecated Use pageChange instead */ @Output() public onPageChangeDeprecated = this.pageChange;
   /** @deprecated Use selectionChange instead */ @Output() public onSelectionChange = this.selectionChange;
-  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
   /** @deprecated Use viewEntry instead */ @Output() public onView = this.viewEntry;
-  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
   /** @deprecated Use editEntry instead */ @Output() public onEdit = this.editEntry;
-  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
   /** @deprecated Use deleteEntry instead */ @Output() public onDelete = this.deleteEntry;
-  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
   /** @deprecated Use exportData instead */ @Output() public onExport = this.exportData;
-  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
   /** @deprecated Use bulkEdit instead */ @Output() public onBulkEdit = this.bulkEdit;
-  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
   /** @deprecated Use bulkDelete instead */ @Output() public onBulkDelete = this.bulkDelete;
-  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
   /** @deprecated Use viewChange instead */ @Output() public onViewChange = this.viewChange;
 
   // State management
@@ -577,11 +187,6 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     return this.filteredData().slice(start, end);
   });
 
-  public startIndex = computed(() => this.currentPage() * this.pageSize);
-  public endIndex = computed(() =>
-    Math.min(this.startIndex() + this.pageSize, this.totalItems())
-  );
-
   public ngOnInit(): void {
     // Set initial view type and configuration
     this.currentViewType = this.viewType;
@@ -611,55 +216,28 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     return value;
   }
 
-  public getColumnClasses(column: TimesheetColumn): string {
+  public getColumnHeaderClasses(column: TimesheetColumn): string {
     const classes: string[] = [];
 
     if (column.priority) {
       classes.push(`priority-${column.priority}`);
     }
 
-    // Add responsive classes based on configuration
     if (column.priority === 'high') {
       classes.push('column-primary');
     } else {
       classes.push('column-secondary');
     }
 
-    // Add timesheet-specific classes
-    if (column.bulkEditable) {
-      classes.push('bulk-editable');
-    }
-
     return classes.join(' ');
   }
 
-  public getColumnLabel(column: TimesheetColumn): string {
+  public getColumnHeaderLabel(column: TimesheetColumn): string {
     // Use mobile label on small screens if available from configuration
     if (this.isMobileView() && column.mobileLabel) {
       return column.mobileLabel;
     }
     return column.label;
-  }
-
-  public getTruncatedValue(entry: TimesheetEntry, column: TimesheetColumn): string {
-    const value = this.getCellValue(entry, column.key);
-    const text = String(value || '');
-
-    // Use truncation settings from configuration
-    if (column.truncateLength && text.length > column.truncateLength) {
-      return text.substring(0, column.truncateLength) + '...';
-    }
-
-    return text;
-  }
-
-  public shouldShowTooltip(entry: TimesheetEntry, column: TimesheetColumn): boolean {
-    if (!column.truncateLength) return false;
-
-    const value = this.getCellValue(entry, column.key);
-    const text = String(value || '');
-
-    return text.length > column.truncateLength;
   }
 
   // Responsive helper methods using configuration breakpoints
@@ -678,53 +256,9 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
     return this.screenWidth() > TIMESHEET_BREAKPOINTS.tablet;
   }
 
-  // Timesheet-specific formatting methods
-  public formatDuration(duration: unknown): string {
-    const hours = Number(duration || 0);
-    const wholeHours = Math.floor(hours);
-    const minutes = Math.round((hours - wholeHours) * 60);
-
-    if (minutes === 0) {
-      return `${wholeHours}小时`;
-    }
-    return `${wholeHours}小时${minutes}分钟`;
-  }
-
-  public formatTime(time: unknown, format?: '12h' | '24h' | 'decimal'): string {
-    const timeStr = String(time || '');
-    if (!timeStr || timeStr === '') return '';
-
-    // Default to 24h format for timesheet
-    if (format === '12h') {
-      // Convert to 12h format if needed
-      const [hours, minutes] = timeStr.split(':');
-      const hour = parseInt(hours, 10);
-      const ampm = hour >= 12 ? 'PM' : 'AM';
-      const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-      return `${displayHour}:${minutes} ${ampm}`;
-    }
-
-    return timeStr; // Default 24h format
-  }
-
-  public getStatusLabel(status: unknown): string {
-    const statusLabels: Record<string, string> = {
-      draft: '草稿',
-      submitted: '已提交',
-      approved: '已批准',
-      rejected: '已拒绝',
-    };
-    return statusLabels[String(status)] || String(status);
-  }
-
   // Event handlers
   public onSearch(): void {
     this.currentPage.set(0);
-  }
-
-  public clearSearch(): void {
-    this.searchTerm = '';
-    this.onSearch();
   }
 
   public onViewTypeChange(): void {
@@ -826,110 +360,27 @@ export class TimesheetTableComponent implements OnInit, OnDestroy {
   }
 
   // Pagination methods
-  public previousPage(): void {
-    if (this.currentPage() > 0) {
-      this.currentPage.update((p) => p - 1);
-      this.emitPageChange();
+  public handlePageChange(event: { pageIndex: number; pageSize: number }): void {
+    this.currentPage.set(event.pageIndex);
+    if (event.pageSize !== this.pageSize) {
+      this.pageSize = event.pageSize;
+      this.currentPage.set(0);
     }
+    this.pageChange.emit(event);
   }
 
-  public nextPage(): void {
-    if (this.currentPage() < this.totalPages() - 1) {
-      this.currentPage.update((p) => p + 1);
-      this.emitPageChange();
-    }
-  }
-
-  public goToPage(page: number): void {
-    this.currentPage.set(page);
-    this.emitPageChange();
-  }
-
-  public onPageSizeChange(): void {
+  public handlePageSizeChange(newSize: number): void {
+    this.pageSize = newSize;
     this.currentPage.set(0);
-    this.emitPageChange();
-  }
-
-  public emitPageChange(): void {
     this.pageChange.emit({
-      pageIndex: this.currentPage(),
+      pageIndex: 0,
       pageSize: this.pageSize,
     });
-  }
-
-  public getPageNumbers(): number[] {
-    const total = this.totalPages();
-    const current = this.currentPage();
-    const pages: number[] = [];
-
-    const maxVisible = 5;
-    let start = Math.max(0, current - Math.floor(maxVisible / 2));
-    const end = Math.min(total, start + maxVisible);
-
-    if (end - start < maxVisible) {
-      start = Math.max(0, end - maxVisible);
-    }
-
-    for (let i = start; i < end; i++) {
-      pages.push(i);
-    }
-
-    return pages;
   }
 
   // Export functionality
   public exportDataCsv(): void {
     this.exportData.emit();
-    // Default CSV export implementation for timesheet data
-    const csv = this.convertToCSV(this.filteredData());
-    this.downloadCSV(csv, `timesheet-export-${new Date().toISOString().split('T')[0]}.csv`);
-  }
-
-  private convertToCSV(data: TimesheetEntry[]): string {
-    if (data.length === 0) return '';
-
-    // Use displayed columns for export
-    const headers = this.displayedColumns().map((col) => col.label);
-    const csvHeaders = headers.join(',');
-
-    // Convert data rows
-    const csvRows = data.map((entry) => {
-      return this.displayedColumns()
-        .map((col) => {
-          let value = this.getCellValue(entry, col.key);
-          
-          // Format values based on column type
-          if (col.type === 'boolean') {
-            value = value ? '是' : '否';
-          } else if (col.type === 'date') {
-            value = new Date(String(value)).toLocaleDateString('zh-CN');
-          } else if (col.key === 'duration') {
-            value = this.formatDuration(value);
-          } else if (col.key === 'status') {
-            value = this.getStatusLabel(value);
-          }
-
-          // Escape commas and quotes
-          const escaped = String(value || '').replace(/"/g, '""');
-          return `"${escaped}"`;
-        })
-        .join(',');
-    });
-
-    return [csvHeaders, ...csvRows].join('\n');
-  }
-
-  private downloadCSV(csv: string, filename: string): void {
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    TimesheetExportUtil.exportData(this.filteredData(), this.displayedColumns());
   }
 }

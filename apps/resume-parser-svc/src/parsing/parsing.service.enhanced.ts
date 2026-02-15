@@ -10,6 +10,8 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import type { VisionLlmService } from '../vision-llm/vision-llm.service';
 import type { GridFsService } from '../gridfs/gridfs.service';
 import type { FieldMapperService } from '../field-mapper/field-mapper.service';
+import type {
+  PredicateFunction} from '@ai-recruitment-clerk/infrastructure-shared';
 import {
   RetryUtility,
   WithCircuitBreaker,
@@ -17,7 +19,7 @@ import {
   Ensures,
   Invariant,
   ContractValidators,
-  ContractViolationError,
+  ContractViolationError
 } from '@ai-recruitment-clerk/infrastructure-shared';
 import { createHash } from 'crypto';
 
@@ -65,10 +67,10 @@ export interface ParsingResult {
  */
 @Injectable()
 @Invariant(
-  (instance) =>
-    instance.visionLlmService &&
-    instance.gridFsService &&
-    instance.fieldMapperService,
+  ((instance: unknown) =>
+    !!((instance as ParsingService).visionLlmService &&
+    (instance as ParsingService).gridFsService &&
+    (instance as ParsingService).fieldMapperService)) as PredicateFunction,
   'ParsingService must have all required dependencies initialized',
 )
 export class ParsingService {
@@ -177,30 +179,30 @@ export class ParsingService {
     'User ID must be non-empty string',
   )
   @Requires(
-    (fileBuffer) => ContractValidators.isValidFileSize(fileBuffer.length),
+    ((...args: unknown[]) => ContractValidators.isValidFileSize((args[0] as Buffer).length)) as PredicateFunction,
     'File size must be within acceptable limits (10MB max)',
   )
   @Ensures(
-    (result) =>
+    ((result: unknown) =>
       result &&
       typeof result === 'object' &&
-      ['processing', 'completed', 'failed', 'partial'].includes(result.status),
+      ['processing', 'completed', 'failed', 'partial'].includes((result as { status: string }).status)) as PredicateFunction,
     'Result must have valid status',
   )
   @Ensures(
-    (result) =>
-      result.jobId && ContractValidators.isNonEmptyString(result.jobId),
+    ((result: unknown) =>
+      (result as { jobId: string }).jobId && ContractValidators.isNonEmptyString((result as { jobId: string }).jobId)) as PredicateFunction,
     'Result must include valid job ID',
   )
   @Ensures(
-    (result) => Array.isArray(result.warnings),
+    ((result: unknown) => Array.isArray((result as { warnings: unknown }).warnings)) as PredicateFunction,
     'Result must include warnings array',
   )
   @Ensures(
-    (result) =>
-      result.metadata &&
-      typeof result.metadata.duration === 'number' &&
-      result.metadata.duration > 0,
+    ((result: unknown) =>
+      (result as { metadata: { duration: number } }).metadata &&
+      typeof (result as { metadata: { duration: number } }).metadata.duration === 'number' &&
+      (result as { metadata: { duration: number } }).metadata.duration > 0) as PredicateFunction,
     'Result must include valid processing duration',
   )
   @WithCircuitBreaker('resume-processing', {

@@ -2,80 +2,35 @@ import type { OnInit, OnDestroy } from '@angular/core';
 import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, BehaviorSubject } from 'rxjs';
-// import { Observable } from 'rxjs'; // Reserved for future use
 import { takeUntil } from 'rxjs/operators';
 import {
   WebSocketService,
 } from '../../../services/websocket.service';
 import type { ProgressUpdate } from '../../../services/websocket.service';
 import { ToastService } from '../../../services/toast.service';
+import { ProgressTimelineComponent } from './progress-timeline.component';
+import { ProgressMilestoneComponent } from './progress-milestone.component';
+import { ProgressLogComponent } from './progress-log.component';
+import type {
+  ProgressMessage,
+  WebSocketProgressMessage,
+  StepChangeData,
+  ProgressErrorData,
+  ProgressStep,
+} from './progress-tracker.types';
 
 /**
- * Defines the shape of the progress message.
- */
-export interface ProgressMessage {
-  type: 'info' | 'success' | 'error' | 'progress';
-  message: string;
-  timestamp: Date;
-}
-
-/**
- * Defines the shape of the web socket progress message.
- */
-export interface WebSocketProgressMessage {
-  type: string;
-  data?: {
-    message?: string;
-    currentStep?: string;
-    [key: string]: unknown;
-  };
-}
-
-/**
- * Defines the shape of the step change data.
- */
-export interface StepChangeData {
-  currentStep: string;
-  message?: string;
-  progress?: number;
-}
-
-/**
- * Defines the shape of the progress completion data.
- */
-export interface ProgressCompletionData {
-  progress?: number;
-  message?: string;
-  finalStep?: string;
-}
-
-/**
- * Defines the shape of the progress error data.
- */
-export interface ProgressErrorData {
-  error?: string;
-  message?: string;
-  code?: string | number;
-}
-
-/**
- * Defines the shape of the progress step.
- */
-export interface ProgressStep {
-  id: string;
-  label: string;
-  description?: string;
-  status: 'pending' | 'active' | 'completed' | 'error';
-  progress?: number;
-}
-
-/**
- * Represents the progress tracker component.
+ * Represents progress tracker component.
  */
 @Component({
   selector: 'arc-progress-tracker',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    ProgressTimelineComponent,
+    ProgressMilestoneComponent,
+    ProgressLogComponent,
+  ],
   template: `
     <div class="progress-tracker" [class.connected]="isConnected$ | async">
       <!-- 连接状态指示器 -->
@@ -111,84 +66,13 @@ export interface ProgressStep {
       </div>
 
       <!-- 步骤详情 -->
-      <div class="steps-container">
-        <div
-          class="step-item"
-          *ngFor="let step of steps; trackBy: trackByStepId"
-          [class]="step.status"
-        >
-          <div class="step-icon">
-            <ng-container [ngSwitch]="step.status">
-              <svg
-                *ngSwitchCase="'completed'"
-                class="icon-completed"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-              <svg
-                *ngSwitchCase="'error'"
-                class="icon-error"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                  clip-rule="evenodd"
-                />
-              </svg>
-              <div *ngSwitchCase="'active'" class="spinner"></div>
-              <div *ngSwitchDefault class="step-number">
-                {{ getStepNumber(step.id) }}
-              </div>
-            </ng-container>
-          </div>
-          <div class="step-content">
-            <div class="step-label">{{ step.label }}</div>
-            <div class="step-description" *ngIf="step.description">
-              {{ step.description }}
-            </div>
-            <div
-              class="step-progress"
-              *ngIf="step.status === 'active' && step.progress !== undefined"
-            >
-              <div class="mini-progress-bar">
-                <div
-                  class="mini-progress-fill"
-                  [style.width.%]="step.progress"
-                ></div>
-              </div>
-              <span class="step-percentage">{{ step.progress }}%</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <arc-progress-timeline [steps]="steps"></arc-progress-timeline>
 
       <!-- 实时消息日志 -->
-      <div class="message-log" *ngIf="showMessageLog">
-        <h4>实时日志</h4>
-        <div class="log-container">
-          <div
-            class="log-entry"
-            *ngFor="
-              let message of recentMessages$ | async;
-              trackBy: trackByMessage
-            "
-            [class]="message.type"
-          >
-            <span class="timestamp">{{
-              formatTimestamp(message.timestamp)
-            }}</span>
-            <span class="message">{{ message.message }}</span>
-          </div>
-        </div>
-      </div>
+      <arc-progress-log
+        *ngIf="showMessageLog"
+        [messages]="messages"
+      ></arc-progress-log>
     </div>
   `,
   styles: [
@@ -298,175 +182,6 @@ export interface ProgressStep {
         color: #059669;
       }
 
-      .steps-container {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-      }
-
-      .step-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 1rem;
-        padding: 1rem;
-        border-radius: 8px;
-        border: 1px solid #e5e7eb;
-        transition: all 0.3s ease;
-      }
-
-      .step-item.active {
-        background: #f0f9ff;
-        border-color: #0ea5e9;
-      }
-
-      .step-item.completed {
-        background: #f0fdf4;
-        border-color: #10b981;
-      }
-
-      .step-item.error {
-        background: #fef2f2;
-        border-color: #ef4444;
-      }
-
-      .step-icon {
-        flex-shrink: 0;
-        width: 24px;
-        height: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .icon-completed,
-      .icon-error {
-        width: 20px;
-        height: 20px;
-      }
-
-      .icon-completed {
-        color: #10b981;
-      }
-      .icon-error {
-        color: #ef4444;
-      }
-
-      .spinner {
-        width: 16px;
-        height: 16px;
-        border: 2px solid #e5e7eb;
-        border-top: 2px solid #0ea5e9;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-
-      .step-number {
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: #e5e7eb;
-        color: #6b7280;
-        font-size: 0.75rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .step-content {
-        flex: 1;
-      }
-
-      .step-label {
-        font-weight: 600;
-        color: #111827;
-        margin-bottom: 0.25rem;
-      }
-
-      .step-description {
-        font-size: 0.875rem;
-        color: #6b7280;
-        margin-bottom: 0.5rem;
-      }
-
-      .step-progress {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .mini-progress-bar {
-        flex: 1;
-        height: 4px;
-        background: #e5e7eb;
-        border-radius: 2px;
-        overflow: hidden;
-      }
-
-      .mini-progress-fill {
-        height: 100%;
-        background: #0ea5e9;
-        border-radius: 2px;
-        transition: width 0.3s ease;
-      }
-
-      .step-percentage {
-        font-size: 0.75rem;
-        color: #0ea5e9;
-        font-weight: 500;
-      }
-
-      .message-log {
-        margin-top: 1.5rem;
-        border-top: 1px solid #e5e7eb;
-        padding-top: 1rem;
-      }
-
-      .message-log h4 {
-        margin: 0 0 0.75rem 0;
-        font-size: 1rem;
-        font-weight: 600;
-        color: #111827;
-      }
-
-      .log-container {
-        max-height: 200px;
-        overflow-y: auto;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
-        padding: 0.75rem;
-        background: #f9fafb;
-      }
-
-      .log-entry {
-        display: flex;
-        gap: 0.5rem;
-        margin-bottom: 0.5rem;
-        font-size: 0.875rem;
-      }
-
-      .log-entry:last-child {
-        margin-bottom: 0;
-      }
-
-      .timestamp {
-        color: #6b7280;
-        font-family: monospace;
-        flex-shrink: 0;
-      }
-
-      .message {
-        color: #111827;
-      }
-
-      .log-entry.error .message {
-        color: #dc2626;
-      }
-
-      .log-entry.progress .message {
-        color: #059669;
-      }
-
       @keyframes pulse {
         0%,
         100% {
@@ -477,22 +192,9 @@ export interface ProgressStep {
         }
       }
 
-      @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-
       @media (max-width: 768px) {
         .progress-tracker {
           padding: 1rem;
-        }
-
-        .step-item {
-          padding: 0.75rem;
         }
 
         .progress-header {
@@ -519,10 +221,9 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
   public overallProgress$ = new BehaviorSubject<number>(0);
   public currentStep$ = new BehaviorSubject<string>('');
   public estimatedTimeRemaining$ = new BehaviorSubject<number | null>(null);
-  public recentMessages$ = new BehaviorSubject<ProgressMessage[]>([]);
+  public messages: ProgressMessage[] = [];
 
   private destroy$ = new Subject<void>();
-  private messages: ProgressMessage[] = [];
 
   /**
    * Performs the ng on init operation.
@@ -680,17 +381,19 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
   }
 
   private markStepAsActive(stepName: string): void {
-    // 先完成之前的步骤
-    let foundActive = false;
-    for (const step of this.steps) {
-      if (step.label.includes(stepName) || step.id === stepName) {
-        step.status = 'active';
-        foundActive = true;
-        break;
-      } else if (!foundActive) {
+    const targetIndex = this.steps.findIndex(
+      (step) => step.label.includes(stepName) || step.id === stepName,
+    );
+
+    if (targetIndex === -1) return;
+
+    this.steps.forEach((step, index) => {
+      if (index < targetIndex) {
         step.status = 'completed';
+      } else if (index === targetIndex) {
+        step.status = 'active';
       }
-    }
+    });
   }
 
   private markAllStepsCompleted(): void {
@@ -718,8 +421,6 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
     if (this.messages.length > 20) {
       this.messages = this.messages.slice(0, 20);
     }
-
-    this.recentMessages$.next([...this.messages]);
   }
 
   /**
@@ -743,16 +444,7 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Retrieves step number.
-   * @param stepId - The step id.
-   * @returns The number value.
-   */
-  public getStepNumber(stepId: string): number {
-    return this.steps.findIndex((s) => s.id === stepId) + 1;
-  }
-
-  /**
-   * Performs the format time operation.
+   * Performs format time operation.
    * @param seconds - The seconds.
    * @returns The string value.
    */
@@ -760,39 +452,5 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
     if (seconds < 60) return `${seconds}秒`;
     const minutes = Math.floor(seconds / 60);
     return `${minutes}分${seconds % 60}秒`;
-  }
-
-  /**
-   * Performs the format timestamp operation.
-   * @param timestamp - The timestamp.
-   * @returns The string value.
-   */
-  public formatTimestamp(timestamp: Date): string {
-    return timestamp.toLocaleTimeString('zh-CN', {
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    });
-  }
-
-  /**
-   * Performs the track by step id operation.
-   * @param _index - The index.
-   * @param step - The step.
-   * @returns The string value.
-   */
-  public trackByStepId(_index: number, step: ProgressStep): string {
-    return step.id;
-  }
-
-  /**
-   * Performs the track by message operation.
-   * @param index - The index.
-   * @param message - The message.
-   * @returns The string value.
-   */
-  public trackByMessage(index: number, message: ProgressMessage): string {
-    return `${message.timestamp.getTime()}_${index}`;
   }
 }
