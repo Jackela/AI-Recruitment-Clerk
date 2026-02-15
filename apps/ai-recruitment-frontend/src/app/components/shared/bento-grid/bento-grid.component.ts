@@ -233,6 +233,10 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     };
 
+    const observerOptions: IntersectionObserverInit = {
+      threshold: 0.1,
+      rootMargin: '50px 0px',
+    };
     this.intersectionObserver = new IntersectionObserver(
       (entries) => {
         scheduleAnimation(() => {
@@ -244,7 +248,7 @@ export class BentoGridComponent implements OnInit, AfterViewInit, OnDestroy {
           });
         });
       },
-      { threshold: 0.1, rootMargin: '50px 0px' },
+      observerOptions,
     );
 
     requestAnimationFrame(() => {

@@ -185,12 +185,7 @@ export class AnalyticsContracts {
     );
 
     // 验证dimensions格式（如果提供）
-    if (dimensions) {
-      this.require(
-        typeof dimensions === 'object' && dimensions !== null,
-        'Dimensions must be an object',
-        'createBusinessMetricEvent',
-      );
+    if (dimensions !== undefined) {
       this.require(
         Object.keys(dimensions).length <= 20,
         'Dimensions cannot have more than 20 keys',

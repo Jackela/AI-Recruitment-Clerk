@@ -381,17 +381,19 @@ export class ProgressTrackerComponent implements OnInit, OnDestroy {
   }
 
   private markStepAsActive(stepName: string): void {
-    // 先完成之前的步骤
-    let foundActive = false;
-    for (const step of this.steps) {
-      if (step.label.includes(stepName) || step.id === stepName) {
-        step.status = 'active';
-        foundActive = true;
-        break;
-      } else if (!foundActive) {
+    const targetIndex = this.steps.findIndex(
+      (step) => step.label.includes(stepName) || step.id === stepName,
+    );
+
+    if (targetIndex === -1) return;
+
+    this.steps.forEach((step, index) => {
+      if (index < targetIndex) {
         step.status = 'completed';
+      } else if (index === targetIndex) {
+        step.status = 'active';
       }
-    }
+    });
   }
 
   private markAllStepsCompleted(): void {
