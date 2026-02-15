@@ -1,20 +1,27 @@
-import type { ElementRef, OnDestroy } from '@angular/core';
 import { fromEvent, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
+
+/**
+ * Generic element reference interface to avoid Angular decorator requirements.
+ */
+export interface GenericElementRef<T extends HTMLElement> {
+  nativeElement: T;
+}
 
 /**
  * Configuration for scroll detection.
  */
 export interface ScrollDetectionConfig {
-  tableWrapper: ElementRef<HTMLDivElement>;
+  tableWrapper: GenericElementRef<HTMLDivElement>;
   destroy$: Subject<void>;
   onScrollChange: (hasScroll: boolean) => void;
 }
 
 /**
  * Utility class for table scroll detection.
+ * Note: This is a plain utility class, not an Angular component.
  */
-export class DataTableScrollUtil implements OnDestroy {
+export class DataTableScrollUtil {
   private resizeObserver?: ResizeObserver;
   private destroy$: Subject<void>;
 
@@ -74,7 +81,7 @@ export class DataTableScrollUtil implements OnDestroy {
    * @param tableWrapper - The table wrapper element reference.
    * @returns Whether horizontal scroll is present.
    */
-  public static checkHorizontalScroll(tableWrapper: ElementRef<HTMLDivElement>): boolean {
+  public static checkHorizontalScroll(tableWrapper: GenericElementRef<HTMLDivElement>): boolean {
     if (!tableWrapper?.nativeElement) {
       return false;
     }
@@ -92,7 +99,7 @@ export class DataTableScrollUtil implements OnDestroy {
   /**
    * Cleans up resources.
    */
-  public ngOnDestroy(): void {
+  public destroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
 

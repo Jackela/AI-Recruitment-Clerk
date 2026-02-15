@@ -320,4 +320,17 @@ export class ErrorReportFormComponent {
   public isFormValid(): boolean {
     return this.reportForm.valid;
   }
+
+  /**
+   * Handles form submission.
+   * Emits the form data and reproduction steps.
+   */
+  public onFormSubmit(): void {
+    if (this.reportForm.valid) {
+      this.formSubmit.emit({
+        formData: this.reportForm.value as ErrorReportFormData,
+        reproductionSteps: this.reproductionSteps,
+      });
+    }
+  }
 }

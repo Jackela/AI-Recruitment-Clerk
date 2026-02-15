@@ -4,13 +4,13 @@ import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 
-import type { AppState } from '../../../../store/app.state';
-import * as JobSelectors from '../../../../store/jobs/job.selectors';
-import type { JobListItem } from '../../../../store/jobs/job.model';
-import * as ReportSelectors from '../../../../store/reports/report.selectors';
-import type { ReportListItem } from '../../../../store/reports/report.model';
-import * as ResumeSelectors from '../../../../store/resumes/resume.selectors';
-import type { ResumeListItem } from '../../../../store/resumes/resume.model';
+import type { AppState } from '../../../store/app.state';
+import * as JobSelectors from '../../../store/jobs/job.selectors';
+import type { JobListItem } from '../../../store/jobs/job.model';
+import * as ReportSelectors from '../../../store/reports/report.selectors';
+import type { ReportListItem } from '../../../store/reports/report.model';
+import * as ResumeSelectors from '../../../store/resumes/resume.selectors';
+import type { ResumeListItem } from '../../../store/resumes/resume.model';
 
 /** Statistics for jobs */
 export interface JobsStatistics {

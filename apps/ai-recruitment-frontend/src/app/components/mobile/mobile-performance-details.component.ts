@@ -268,7 +268,6 @@ import { MobilePerformanceService } from '../../services/mobile-performance.serv
       }
     `,
   ],
-  changeDetection: undefined,
 })
 export class MobilePerformanceDetailsComponent {
   protected readonly performanceService = inject(MobilePerformanceService);

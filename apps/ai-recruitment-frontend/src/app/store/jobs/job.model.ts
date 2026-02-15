@@ -1,4 +1,14 @@
-import type { JobContracts } from '@ai-recruitment-clerk/api-contracts';
+/**
+ * Defines the possible job status values.
+ */
+export type JobStatus =
+  | 'draft'
+  | 'active'
+  | 'processing'
+  | 'completed'
+  | 'failed'
+  | 'archived'
+  | 'closed';
 
 /**
  * Defines the shape of the job.
@@ -7,7 +17,7 @@ export interface Job {
   id: string;
   title: string;
   jdText: string;
-  status: JobContracts.JobStatus;
+  status: JobStatus;
   createdAt: Date;
   resumeCount: number;
 }
@@ -18,7 +28,7 @@ export interface Job {
 export interface JobListItem {
   id: string;
   title: string;
-  status: JobContracts.JobStatus;
+  status: JobStatus;
   createdAt: Date;
   resumeCount: number;
 }

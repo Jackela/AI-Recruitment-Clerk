@@ -10,6 +10,9 @@ import { DataTableSortingUtil, type SortState } from './data-table-sorting.util'
 import { DataTableSelectionUtil } from './data-table-selection.util';
 import { DataTableScrollUtil } from './data-table-scroll.util';
 
+// Re-export PageEvent for consumers
+export type { PageEvent } from './data-table-pagination.component';
+
 /**
  * Defines the shape of the table column.
  */

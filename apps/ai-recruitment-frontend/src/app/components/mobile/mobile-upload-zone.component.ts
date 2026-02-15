@@ -210,7 +210,9 @@ import { MobileUploadService } from '../../services/mobile/mobile-upload.service
       }
 
       @media (min-width: 768px) {
-        padding: 48px 32px;
+        .upload-zone {
+          padding: 48px 32px;
+        }
 
         .upload-actions {
           justify-content: center !important;

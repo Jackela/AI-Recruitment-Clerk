@@ -73,7 +73,7 @@ export interface CandidateResult {
     MobileQuickActionsMenuComponent,
   ],
   template: `
-    <app-mobile-swipe
+    <arc-mobile-swipe
       [actions]="getSwipeActions()"
       [item]="candidate"
       (swipeAction)="onSwipeAction($event)"
@@ -137,7 +137,7 @@ export interface CandidateResult {
           (actionClick)="onQuickAction($event)"
         />
       </div>
-    </app-mobile-swipe>
+    </arc-mobile-swipe>
   `,
   styles: [
     `
