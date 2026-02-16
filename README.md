@@ -16,6 +16,7 @@
 AI Recruitment Clerk is an **event-driven microservices system** that automates the resume screening process using AI technology, aiming to reduce manual screening time by over 70% while achieving 95%+ accuracy in key information extraction.
 
 ### Core Features
+
 - 🤖 **Intelligent Resume Parsing**: Vision LLM-based structured extraction from PDF resumes
 - 📋 **Smart JD Analysis**: Automated extraction of job requirements and key skills
 - ⚡ **Precise Matching Scoring**: AI-driven candidate-position compatibility calculation
@@ -26,26 +27,27 @@ AI Recruitment Clerk is an **event-driven microservices system** that automates 
 ## 📚 Documentation Navigation
 
 ### Project Phoenix (C2C Coach)
+
 - Definitive Architecture: `docs/architecture/PROJECT_PHOENIX_HLD.md`
 - Developer Guides: `docs/guides/`
 
 ### Core Documentation Suite
-| Document Type | File Path | Description |
-|---------------|-----------|-------------|
-| **📋 Product Requirements (PRD)** | [`docs/PRD.md`](./docs/PRD.md) | **Complete product requirements and business objectives** |
-| **🏗️ High-Level Design (HLD)** | [`docs/HLD.md`](./docs/HLD.md) | **System architecture and design specifications** |
-| **📖 Operations Runbook** | [`docs/RUNBOOK.md`](./docs/RUNBOOK.md) | **Production operations and incident response** |
-| **⚙️ Technical Architecture** | [`docs/TECHNICAL_ARCHITECTURE.md`](./docs/TECHNICAL_ARCHITECTURE.md) | **Detailed technical implementation and performance** |
 
-### Additional Documentation
-| Document Type | File Path | Description |
-|---------------|-----------|-------------|
-| 📋 Project Mission | [`specs/PROJECT_MISSION.md`](./specs/PROJECT_MISSION.md) | Project goals and core mission |
-| 🏗 System Context | [`specs/SYSTEM_CONTEXT.mermaid`](./specs/SYSTEM_CONTEXT.mermaid) | System boundary diagram |
-| 🛡 API Specification | [`specs/api_spec.openapi.yml`](./specs/api_spec.openapi.yml) | RESTful API definitions |
-| 👨‍💻 Developer Guide | [`docs/DEVELOPER_GUIDE.md`](./docs/DEVELOPER_GUIDE.md) | Development environment setup |
-| 🔖 Project Documentation | [`docs/PROJECT_OVERVIEW.md`](./docs/PROJECT_OVERVIEW.md) | Comprehensive project documentation |
-| 📚 Documentation Index | [`docs/DOCUMENTATION_INDEX.md`](./docs/DOCUMENTATION_INDEX.md) | Complete documentation navigation |
+| Document Type                | File Path                                                                                | Description                                       |
+| ---------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| **🏗️ Project Phoenix HLD**   | [`docs/architecture/PROJECT_PHOENIX_HLD.md`](./docs/architecture/PROJECT_PHOENIX_HLD.md) | **System architecture and design specifications** |
+| **📖 CI Runbook**            | [`docs/CI_RUNBOOK.md`](./docs/CI_RUNBOOK.md)                                             | **CI/CD operations and incident response**        |
+| **⚙️ Architecture Baseline** | [`docs/ARCHITECTURE_BASELINE.md`](./docs/ARCHITECTURE_BASELINE.md)                       | **Technical architecture documentation**          |
+
+### Guides & References
+
+| Document Type          | File Path                                                            | Description                       |
+| ---------------------- | -------------------------------------------------------------------- | --------------------------------- |
+| 📋 Project Mission     | [`specs/PROJECT_MISSION.md`](./specs/PROJECT_MISSION.md)             | Project goals and core mission    |
+| 🏗 System Context      | [`specs/SYSTEM_CONTEXT.mermaid`](./specs/SYSTEM_CONTEXT.mermaid)     | System boundary diagram           |
+| 🛡 API Specification   | [`specs/api_spec.openapi.yml`](./specs/api_spec.openapi.yml)         | RESTful API definitions           |
+| 👨‍💻 Developer Guide     | [`docs/guides/DEVELOPER_GUIDE.md`](./docs/guides/DEVELOPER_GUIDE.md) | Development environment setup     |
+| 📚 Documentation Index | [`docs/README.md`](./docs/README.md)                                 | Complete documentation navigation |
 
 ## 🏗 System Architecture
 
@@ -56,26 +58,26 @@ graph TD
     subgraph "User Interface Layer"
         U[User SPA]
     end
-    
+
     subgraph "API Gateway Layer"
         GW[API Gateway]
     end
-    
+
     subgraph "Microservices Layer"
         JD[JD Extractor Service]
         RP[Resume Parser Service ⭐]
         SC[Scoring Engine Service]
     end
-    
+
     subgraph "Messaging & Data Layer"
         NATS[(NATS JetStream)]
         DB[(MongoDB + GridFS)]
     end
-    
+
     subgraph "External Services"
         LLM[Vision LLM API]
     end
-    
+
     U -->|HTTPS/JSON| GW
     GW -->|Publish Events| NATS
     NATS -->|Event Distribution| JD & RP & SC
@@ -100,20 +102,20 @@ sequenceDiagram
     Frontend->>Gateway: POST /api/jobs/:id/resume
     Gateway->>MongoDB: Store PDF in GridFS
     Gateway->>NATS: Publish job.resume.submitted
-    
+
     NATS->>ResumeParser: Deliver Event
     ResumeParser->>MongoDB: Download PDF from GridFS
     ResumeParser->>VisionLLM: Extract structured data
     VisionLLM-->>ResumeParser: Parsed JSON data
     ResumeParser->>MongoDB: Save parsed resume
     ResumeParser->>NATS: Publish analysis.resume.parsed
-    
+
     NATS->>ScoringEngine: Deliver Event
     ScoringEngine->>MongoDB: Fetch JD & Resume
     ScoringEngine->>ScoringEngine: Calculate match score
     ScoringEngine->>MongoDB: Save scoring result
     ScoringEngine->>NATS: Publish analysis.match.scored
-    
+
     Gateway->>MongoDB: Poll for results
     Gateway-->>Frontend: Return job status
     Frontend-->>User: Display match results
@@ -130,7 +132,7 @@ graph LR
     E --> F[Store Analysis + Vector]
     F --> G[Redis Vector Store]
     G --> H[NATS Event Publication]
-    
+
     style C fill:#90EE90
     style E fill:#FFB6C1
     style G fill:#87CEEB
@@ -144,29 +146,29 @@ graph TB
         subgraph "Frontend"
             angular[Angular SPA<br/>:4200]
         end
-        
+
         subgraph "Backend Services"
             gateway[API Gateway<br/>:3000]
-            
+
             subgraph "Microservices"
                 resume[Resume Parser<br/>:3001]
                 jd[JD Extractor<br/>:3002]
                 scoring[Scoring Engine<br/>:3003]
             end
         end
-        
+
         subgraph "Infrastructure"
             nats[NATS JetStream<br/>:4222]
             mongo[(MongoDB<br/>:27017)]
             redis[(Redis<br/>:6379)]
         end
     end
-    
+
     subgraph "External Services"
         gemini[Gemini Vision API]
         openai[OpenAI Embeddings]
     end
-    
+
     angular --> gateway
     gateway --> nats
     gateway --> redis
@@ -174,7 +176,7 @@ graph TB
     resume & jd & scoring --> mongo
     resume --> gemini
     gateway --> openai
-    
+
     style angular fill:#DD0031
     style gateway fill:#E0234E
     style nats fill:#27AAE1
@@ -195,12 +197,12 @@ stateDiagram-v2
     Scoring --> Completed: Match scored
     Completed --> [*]
     Failed --> [*]
-    
+
     note right of Parsing
         Resume Parser Service
         Vision LLM integration
     end note
-    
+
     note right of Scoring
         Scoring Engine Service
         AI-powered matching
@@ -209,17 +211,17 @@ stateDiagram-v2
 
 ## 🛠 Technology Stack
 
-| Layer | Technology | Purpose |
-|-------|------------|---------|
-| **Frontend** | Angular 20 + TypeScript 5.8 | Modern standalone components + inject pattern |
-| **Backend** | NestJS 11 + Node.js | Microservices framework |
-| **Database** | MongoDB 7.0 + GridFS | Document database + file storage |
-| **Message Queue** | NATS 2.10 | Event stream processing |
-| **Project Management** | Nx 21.3.2 Monorepo | Multi-service unified management |
-| **Package Manager** | npm | Dependency management |
-| **Testing** | Jest + Playwright | Unit + E2E testing |
-| **AI Services** | Gemini Vision API | PDF parsing and structured extraction |
-| **Containerization** | Docker + Docker Compose | Production deployment |
+| Layer                  | Technology                  | Purpose                                       |
+| ---------------------- | --------------------------- | --------------------------------------------- |
+| **Frontend**           | Angular 20 + TypeScript 5.8 | Modern standalone components + inject pattern |
+| **Backend**            | NestJS 11 + Node.js         | Microservices framework                       |
+| **Database**           | MongoDB 7.0 + GridFS        | Document database + file storage              |
+| **Message Queue**      | NATS 2.10                   | Event stream processing                       |
+| **Project Management** | Nx 21.3.2 Monorepo          | Multi-service unified management              |
+| **Package Manager**    | npm                         | Dependency management                         |
+| **Testing**            | Jest + Playwright           | Unit + E2E testing                            |
+| **AI Services**        | Gemini Vision API           | PDF parsing and structured extraction         |
+| **Containerization**   | Docker + Docker Compose     | Production deployment                         |
 
 ## 🧠 Semantic Caching & Embedding Service
 
@@ -253,16 +255,17 @@ AI-Recruitment-Clerk/
 
 ## ✅ Development Status - **100% COMPLETE**
 
-| Service Name | Architecture | Unit Tests | Business Logic | Integration Tests | Status |
-|-------------|-------------|------------|----------------|------------------|--------|
-| **resume-parser-svc** | ✅ | ✅ **207 tests** | ✅ | ✅ | **✅ PRODUCTION READY** |
-| **jd-extractor-svc** | ✅ | ✅ **72 tests** | ✅ | ✅ | **✅ PRODUCTION READY** |
-| **scoring-engine-svc** | ✅ | ✅ **6 tests** | ✅ | ✅ | **✅ PRODUCTION READY** |
-| **app-gateway** | ✅ | ✅ **8 tests** | ✅ | ✅ | **✅ PRODUCTION READY** |
-| **ai-frontend** | ✅ | ✅ **191 tests** | ✅ | ✅ | **✅ PRODUCTION READY** |
-| **shared-dtos** | ✅ | ✅ **18 tests** | ✅ | ✅ | **✅ PRODUCTION READY** |
+| Service Name           | Architecture | Unit Tests       | Business Logic | Integration Tests | Status                  |
+| ---------------------- | ------------ | ---------------- | -------------- | ----------------- | ----------------------- |
+| **resume-parser-svc**  | ✅           | ✅ **207 tests** | ✅             | ✅                | **✅ PRODUCTION READY** |
+| **jd-extractor-svc**   | ✅           | ✅ **72 tests**  | ✅             | ✅                | **✅ PRODUCTION READY** |
+| **scoring-engine-svc** | ✅           | ✅ **6 tests**   | ✅             | ✅                | **✅ PRODUCTION READY** |
+| **app-gateway**        | ✅           | ✅ **8 tests**   | ✅             | ✅                | **✅ PRODUCTION READY** |
+| **ai-frontend**        | ✅           | ✅ **191 tests** | ✅             | ✅                | **✅ PRODUCTION READY** |
+| **shared-dtos**        | ✅           | ✅ **18 tests**  | ✅             | ✅                | **✅ PRODUCTION READY** |
 
 ### 🎉 **Final System Quality Achievement**
+
 - **✅ Perfect Unit Test Coverage**: 503/503 tests passing (100%)
 - **✅ Modern Technology Stack**: Angular 20 + TypeScript 5.8 + NestJS 11
 - **✅ Code Quality Excellence**: 95%+ lint standards, zero any types
@@ -272,7 +275,8 @@ AI-Recruitment-Clerk/
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+
+
+- Node.js 20.18.0+
 - npm 10+
 - Docker Desktop (for containerized deployment)
 - MongoDB 7.0+ (if running locally)
@@ -317,17 +321,20 @@ npx nx run-many --target=build --all --configuration=production
 ## 🎮 Core Services Overview
 
 ### Resume Parser Service (Primary Focus)
+
 **Responsibility**: PDF resume parsing and structured data extraction
 
 **Processing Flow**:
+
 ```
-job.resume.submitted event → GridFS download → Vision LLM parsing → 
+job.resume.submitted event → GridFS download → Vision LLM parsing →
 Field standardization mapping → analysis.resume.parsed event publication
 ```
 
 **Test Maturity**: ✅ 240+ unit tests completed, covering all boundary conditions
 
 ### Other Services
+
 - **API Gateway**: Unified entry point, routing distribution, file upload processing
 - **JD Extractor**: Job description intelligent analysis and structured extraction
 - **Scoring Engine**: Resume-job matching AI calculation
@@ -337,7 +344,7 @@ Field standardization mapping → analysis.resume.parsed event publication
 The system adopts event-driven architecture with main event flows:
 
 ```
-User uploads resume → job.resume.submitted → Resume Parser → 
+User uploads resume → job.resume.submitted → Resume Parser →
 analysis.resume.parsed → Scoring Engine → analysis.match.scored
 ```
 
@@ -346,7 +353,7 @@ Detailed event definitions are available in the [`libs/shared-dtos`](./libs/shar
 ## 📊 Performance Targets
 
 - ⚡ **Processing Speed**: <30 seconds/resume
-- 🎯 **Accuracy Rate**: >95% information extraction accuracy  
+- 🎯 **Accuracy Rate**: >95% information extraction accuracy
 - 💪 **Concurrent Capability**: 100 resumes/minute
 - 🔄 **Availability**: >99.9% system availability
 - 📈 **Efficiency Improvement**: 70% reduction in manual screening time
@@ -399,6 +406,7 @@ curl http://localhost:3000/api/health
 ```
 
 **Response Example**:
+
 ```json
 {
   "status": "ok",
@@ -420,6 +428,7 @@ curl http://localhost:3000/api/health
 **Symptoms**: `docker-compose up` fails or containers exit immediately
 
 **Solutions**:
+
 ```bash
 # Check Docker daemon status
 docker info
@@ -438,6 +447,7 @@ docker-compose up -d
 **Symptoms**: `MongoNetworkError: connect ECONNREFUSED`
 
 **Solutions**:
+
 ```bash
 # Verify MongoDB is running
 docker ps | grep mongo
@@ -457,6 +467,7 @@ MONGODB_URL=mongodb://admin:devpassword123@localhost:27017/ai-recruitment?authSo
 **Symptoms**: Services can't connect to NATS
 
 **Solutions**:
+
 ```bash
 # Check NATS server status
 curl http://localhost:8222/varz
@@ -473,7 +484,9 @@ docker-compose restart nats
 **Symptoms**: Resume parsing fails with 401/403 errors
 
 **Solutions**:
+
 1. Verify API key in `.env`:
+
    ```bash
    GEMINI_API_KEY=your-actual-api-key-here
    ```
@@ -492,6 +505,7 @@ docker-compose restart nats
 **Symptoms**: Services consuming excessive RAM
 
 **Solutions**:
+
 ```bash
 # Check container resource usage
 docker stats
@@ -513,6 +527,7 @@ NODE_OPTIONS="--max-old-space-size=512"
 **Symptoms**: `npx nx build` fails with type errors
 
 **Solutions**:
+
 ```bash
 # Clean TypeScript cache
 rm -rf node_modules/.cache
@@ -559,28 +574,33 @@ This project is licensed under the [MIT License](./LICENSE).
 ### One-Click Deployment
 
 #### Windows
+
 ```cmd
 scripts\start-system.bat
 ```
 
 #### Linux/macOS
+
 ```bash
 ./scripts/start-system.sh
 ```
 
 ### System Validation
+
 ```bash
 ./scripts/validate-system.sh  # Linux/macOS
 scripts\validate-system.bat   # Windows
 ```
 
 ### Run E2E Tests
+
 ```bash
 ./scripts/run-e2e-tests.sh    # Linux/macOS
 scripts\run-e2e-tests.bat     # Windows
 ```
 
 ### Service URLs (After Deployment)
+
 - **Frontend Application**: http://localhost:4200
 - **API Gateway**: http://localhost:3000/api
 - **API Health Check**: http://localhost:3000/api/health
@@ -606,4 +626,3 @@ scripts\run-e2e-tests.bat     # Windows
 - ✅ **Ready for User Acceptance Testing (UAT)**
 
 > 💡 The system can now be deployed with a single command and provides a complete, functional AI recruitment platform ready for production use.
-
