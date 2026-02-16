@@ -450,8 +450,7 @@ export class IncentiveRecipient extends ValueObject<{
    * @param data - The data.
    * @returns The IncentiveRecipient.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): IncentiveRecipient {
+  public static restore(data: IncentiveRecipientData): IncentiveRecipient {
     return new IncentiveRecipient({
       ip: data.ip,
       contactInfo: ContactInfo.restore(data.contactInfo),
@@ -509,21 +508,25 @@ export class IncentiveRecipient extends ValueObject<{
 }
 
 /**
- * Represents the contact info.
+ * Defines the shape of the contact info data.
  */
-export class ContactInfo extends ValueObject<{
+export interface ContactInfoData {
   email?: string;
   phone?: string;
   wechat?: string;
   alipay?: string;
-}> {
+}
+
+/**
+ * Represents the contact info.
+ */
+export class ContactInfo extends ValueObject<ContactInfoData> {
   /**
    * Performs the restore operation.
    * @param data - The data.
    * @returns The ContactInfo.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): ContactInfo {
+  public static restore(data: ContactInfoData): ContactInfo {
     return new ContactInfo(data);
   }
 
@@ -615,14 +618,19 @@ export class ContactInfo extends ValueObject<{
 }
 
 /**
- * Represents the incentive reward.
+ * Defines the shape of the incentive reward data.
  */
-export class IncentiveReward extends ValueObject<{
+export interface IncentiveRewardData {
   amount: number;
   currency: Currency;
   rewardType: RewardType;
   calculationMethod: string;
-}> {
+}
+
+/**
+ * Represents the incentive reward.
+ */
+export class IncentiveReward extends ValueObject<IncentiveRewardData> {
   /**
    * Calculates for questionnaire.
    * @param qualityScore - The quality score.
@@ -672,8 +680,7 @@ export class IncentiveReward extends ValueObject<{
    * @param data - The data.
    * @returns The IncentiveReward.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): IncentiveReward {
+  public static restore(data: IncentiveRewardData): IncentiveReward {
     return new IncentiveReward(data);
   }
 
@@ -726,12 +733,20 @@ export class IncentiveReward extends ValueObject<{
 }
 
 /**
+ * Defines the shape of the incentive trigger data.
+ */
+export interface IncentiveTriggerData {
+  questionnaireId?: string;
+  qualityScore?: number;
+  referredIP?: string;
+}
+
+/**
  * Represents the incentive trigger.
  */
 export class IncentiveTrigger extends ValueObject<{
   triggerType: TriggerType;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  triggerData: any;
+  triggerData: IncentiveTriggerData;
   qualifiedAt: Date;
 }> {
   /**
@@ -769,10 +784,10 @@ export class IncentiveTrigger extends ValueObject<{
    * @param data - The data.
    * @returns The IncentiveTrigger.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): IncentiveTrigger {
+  public static restore(data: { triggerType: TriggerType; triggerData: IncentiveTriggerData; qualifiedAt: string | Date }): IncentiveTrigger {
     return new IncentiveTrigger({
-      ...data,
+      triggerType: data.triggerType,
+      triggerData: data.triggerData,
       qualifiedAt: new Date(data.qualifiedAt),
     });
   }
@@ -987,18 +1002,33 @@ export enum PaymentMethod {
   MANUAL = 'manual',
 }
 
+/**
+ * Defines the shape of the incentive recipient data.
+ */
+export interface IncentiveRecipientData {
+  ip: string;
+  contactInfo: ContactInfoData;
+  verificationStatus: VerificationStatus;
+}
+
+/**
+ * Defines the shape of the incentive trigger restore data.
+ */
+export interface IncentiveTriggerRestoreData {
+  triggerType: TriggerType;
+  triggerData: IncentiveTriggerData;
+  qualifiedAt: string | Date;
+}
+
 // 接口定义
 /**
  * Defines the shape of the incentive data.
  */
 export interface IncentiveData {
   id: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  recipient: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  reward: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  trigger: any;
+  recipient: IncentiveRecipientData;
+  reward: IncentiveRewardData;
+  trigger: IncentiveTriggerRestoreData;
   status: IncentiveStatus;
   createdAt: string;
   processedAt?: string;

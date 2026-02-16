@@ -24,6 +24,7 @@ import type {
   SystemUsageStatistics,
   UsagePatternAnalysis
 } from './quota-calculator.helper';
+import type { DomainEvent } from '../base/domain-event';
 
 /**
  * Provides usage limit domain functionality.
@@ -654,19 +655,15 @@ export interface IUsageLimitRepository {
  * Defines the shape of the i domain event bus.
  */
 export interface IDomainEventBus {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  publish(event: any): Promise<void>;
+  publish(event: DomainEvent): Promise<void>;
 }
 
 /**
  * Defines the shape of the i audit logger.
  */
 export interface IAuditLogger {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  logBusinessEvent(eventType: string, data: any): Promise<void>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  logSecurityEvent(eventType: string, data: any): Promise<void>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  logError(eventType: string, data: any): Promise<void>;
+  logBusinessEvent(eventType: string, data: Record<string, unknown>): Promise<void>;
+  logSecurityEvent(eventType: string, data: Record<string, unknown>): Promise<void>;
+  logError(eventType: string, data: Record<string, unknown>): Promise<void>;
   logViolation(eventType: string, report: UsageViolationReport): Promise<void>;
 }

@@ -76,9 +76,8 @@ export class UserSession {
     }
 
     const newQuota = this.dailyQuota.incrementUsage();
-    // Replace the quota object immutably
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this as any).dailyQuota = newQuota;
+    // Replace the quota object immutably using Object.defineProperty to bypass readonly
+    Object.defineProperty(this, 'dailyQuota', { value: newQuota, writable: false });
     this._lastActiveAt = new Date();
     // No-op read to satisfy TS6138 for private field
     void this._lastActiveAt;
@@ -277,8 +276,7 @@ export class UsageQuota extends ValueObject<{
    * @param data - The data.
    * @returns The UsageQuota.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static restore(data: any): UsageQuota {
+  public static restore(data: UsageQuotaData): UsageQuota {
     return new UsageQuota(data);
   }
 
@@ -422,6 +420,16 @@ export class UsageResult {
 }
 
 /**
+ * Defines the shape of the usage quota data.
+ */
+export interface UsageQuotaData {
+  daily: number;
+  used: number;
+  questionnaireBonuses: number;
+  paymentBonuses: number;
+}
+
+/**
  * Defines the shape of the session data.
  */
 export interface SessionData {
@@ -430,8 +438,7 @@ export interface SessionData {
   status: SessionStatus;
   createdAt: Date;
   lastActiveAt: Date;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  quota: any;
+  quota: UsageQuotaData;
 }
 
 // 领域服务
