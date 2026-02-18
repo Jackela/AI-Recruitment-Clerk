@@ -25,7 +25,7 @@
       ],
       "priority": 1,
       "files": ["libs/shared-dtos/src/**/*.ts"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CLEAN-002",
