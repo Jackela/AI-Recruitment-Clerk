@@ -9,6 +9,12 @@ import {
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { Public } from '../auth/decorators/public.decorator';
+import type {
+  AnalyticsEventDto,
+  PerformanceMetricDto,
+  BusinessMetricDto,
+  GenerateReportDto,
+} from './analytics.dto';
 
 function id(prefix: string): string {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
@@ -20,66 +26,65 @@ function id(prefix: string): string {
 @Controller('analytics')
 export class AnalyticsController {
   /**
-   * Performs the event operation.
-   * @param _body - The body.
-   * @param res - The res.
+   * Records an analytics event.
+   * @param _body - The analytics event data.
+   * @param res - The response object.
    * @returns The result of the operation.
    */
   @Public()
   @Post('events')
   @HttpCode(HttpStatus.NO_CONTENT)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public event(@Body() _body: any, @Res() res: Response): Response {
+  public event(@Body() _body: AnalyticsEventDto, @Res() res: Response): Response {
     // Bypass global interceptors for maximum performance in tests
     return res.status(HttpStatus.NO_CONTENT).send();
   }
 
   /**
-   * Performs the perf operation.
-   * @param _body - The body.
+   * Records a performance metric.
+   * @param _body - The performance metric data.
    * @returns The result of the operation.
    */
   @Public()
   @Post('metrics/performance')
   @HttpCode(HttpStatus.CREATED)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public perf(@Body() _body: any): { metricId: string } {
+  public perf(@Body() _body: PerformanceMetricDto): { metricId: string } {
     return { metricId: id('met') };
   }
 
   /**
-   * Performs the biz operation.
-   * @param _body - The body.
+   * Records a business metric.
+   * @param _body - The business metric data.
    * @returns The result of the operation.
    */
   @Public()
   @Post('metrics/business')
   @HttpCode(HttpStatus.CREATED)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public biz(@Body() _body: any): { metricId: string } {
+  public biz(@Body() _body: BusinessMetricDto): { metricId: string } {
     return { metricId: id('met') };
   }
 
   /**
-   * Performs the report operation.
-   * @param body - The body.
+   * Generates an analytics report.
+   * @param body - The report generation request.
    * @returns The result of the operation.
    */
   @Public()
   @Post('reports/generate')
   @HttpCode(HttpStatus.CREATED)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public report(@Body() body: any): { reportId: string; reportType: string; status: string } {
+  public report(@Body() body: GenerateReportDto): {
+    reportId: string;
+    reportType: string;
+    status: string;
+  } {
     return {
       reportId: id('rep'),
-      reportType: (body?.reportType as string) || 'comprehensive',
+      reportType: body.reportType,
       status: 'processing',
     };
   }
 
-  // Dashboard
   /**
-   * Performs the export operation.
+   * Exports analytics data.
    * @returns The result of the operation.
    */
   @Public()
@@ -94,7 +99,7 @@ export class AnalyticsController {
   }
 
   /**
-   * Performs the dashboard operation.
+   * Gets dashboard summary data.
    * @returns The result of the operation.
    */
   @Public()

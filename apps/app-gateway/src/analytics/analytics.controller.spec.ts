@@ -28,12 +28,12 @@ describe('AnalyticsController', () => {
 
   describe('event endpoints', () => {
     it('should accept performance metrics', () => {
-      const response = controller.perf({});
+      const response = controller.perf({ metricName: 'test-metric', value: 100 });
       expect(response.metricId).toMatch(/^met-/);
     });
 
     it('should accept business metrics', () => {
-      const response = controller.biz({});
+      const response = controller.biz({ metricName: 'test-biz-metric', value: 50 });
       expect(response.metricId).toMatch(/^met-/);
     });
   });
