@@ -59,7 +59,7 @@
       ],
       "priority": 1,
       "files": ["apps/scoring-engine-svc/src/**/*.ts"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CLEAN-005",

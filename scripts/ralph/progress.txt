@@ -61,6 +61,21 @@ Started: Mon Feb 16 10:45:56 CST 2026
 
 ---
 
+## 2026-02-19 - CLEAN-004
+- Fixed all `any` types in scoring-engine-svc source files:
+  - apps/scoring-engine-svc/src/services/enhanced-skill-matcher.service.ts: Created internal interfaces `SemanticMatchResponse`, `SkillImprovementSuggestion`, and `ImprovementSuggestionsResponse` to replace `any` types in Gemini API calls
+  - Used generic type parameter `generateStructuredResponse<T>()` to properly type the API response data
+- Verified acceptance criteria:
+  - npm run lint for scoring-engine-svc passes (0 errors)
+  - npm test passes (183 tests in 10 suites)
+- Note: Remaining `any` usages are only in test files (.spec.ts) which is acceptable for mocking purposes
+**Learnings for future iterations:**
+  - When using GeminiClient's `generateStructuredResponse`, define the response interface and pass it as a generic type parameter
+  - Creating internal interfaces for API response shapes improves type safety without needing to export types publicly
+  - The `GeminiResponse<T>` generic interface provides `data: T` property for type-safe access to structured responses
+
+---
+
 ## 2026-02-19 - CLEAN-003
 - Fixed all `any` types in resume-parser-svc source files:
   - libs/resume-dto/src/resume-events.dto.ts: Added `FileMetadata` interface and extended `ResumeSubmittedEvent` with `organizationId` and `fileMetadata` fields
